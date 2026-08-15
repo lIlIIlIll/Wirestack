@@ -1,0 +1,8 @@
+.cache/
+.ruff_cache/
+.agents/
+.codex
+build-script-cache/
+target/
+scripts/__pycache__/
+benchmarks/java_fastjson2/build/

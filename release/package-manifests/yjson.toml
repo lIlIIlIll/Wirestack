@@ -1,0 +1,9 @@
+[package]
+cjc-version = "1.1.0"
+name = "yjson"
+description = "High-performance JSON AST, typed codecs, streams, schema, and Compact DOM for Cangjie"
+version = "1.0.0"
+output-type = "static"
+compile-option = "-O2"
+
+[dependencies]

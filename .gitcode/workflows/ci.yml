@@ -1,0 +1,89 @@
+name: yjson-ci
+
+on:
+  push:
+    branches: [main, "release/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  repository: read
+
+jobs:
+  core:
+    runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    steps:
+      - name: Checkout source
+        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+      - name: Run core checks
+        run: cd repo_workspace && scripts/ci_job.sh core
+  examples:
+    runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    steps:
+      - name: Checkout source
+        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+      - name: Run examples
+        run: cd repo_workspace && scripts/ci_job.sh examples
+  macro-consumer:
+    runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    steps:
+      - name: Checkout source
+        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+      - name: Run macro consumer
+        run: cd repo_workspace && scripts/ci_job.sh macro-consumer
+  custom-native:
+    runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    steps:
+      - name: Checkout source
+        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+      - name: Run custom native checks
+        run: cd repo_workspace && scripts/ci_job.sh custom-native
+  yyjson-native:
+    runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    steps:
+      - name: Checkout source
+        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+      - name: Run yyjson native checks
+        run: cd repo_workspace && scripts/ci_job.sh yyjson-native
+  native-clang:
+    runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    steps:
+      - name: Checkout source
+        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+      - name: Run Clang native checks
+        run: cd repo_workspace && scripts/ci_job.sh native-clang
+  native-gcc:
+    runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    steps:
+      - name: Checkout source
+        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+      - name: Run GCC native checks
+        run: cd repo_workspace && scripts/ci_job.sh native-gcc
+  sanitizer:
+    runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    steps:
+      - name: Checkout source
+        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+      - name: Run sanitizer checks
+        run: cd repo_workspace && scripts/ci_job.sh sanitizer
+  fuzz-short:
+    runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    steps:
+      - name: Checkout source
+        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+      - name: Run short fuzz gate
+        run: cd repo_workspace && scripts/ci_job.sh fuzz-short
+  yyjson-symbol-isolation:
+    runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    steps:
+      - name: Checkout source
+        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+      - name: Fetch pinned co-link fixture
+        run: |
+          curl -fL https://github.com/ibireme/yyjson/archive/refs/tags/0.11.1.tar.gz -o /tmp/yyjson-0.11.1.tar.gz
+          echo '610a38a5e59192063f5f581ce0c3c1869971c458ea11b58dfe00d1c8269e255d  /tmp/yyjson-0.11.1.tar.gz' | sha256sum -c -
+          mkdir -p /tmp/yjson-yyjson-second
+          tar -xzf /tmp/yyjson-0.11.1.tar.gz -C /tmp/yjson-yyjson-second
+      - name: Run yyjson symbol-isolation gate
+        run: cd repo_workspace && YJSON_SECOND_YYJSON_ROOT=/tmp/yjson-yyjson-second/yyjson-0.11.1 scripts/ci_job.sh yyjson-colink

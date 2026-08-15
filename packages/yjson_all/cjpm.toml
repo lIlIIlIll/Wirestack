@@ -1,0 +1,17 @@
+[package]
+  cjc-version = "1.1.0"
+  name = "yjson_all"
+  organization = ""
+  description = "Aggregate import for yjson runtime and macros"
+  version = "1.0.0"
+  target-dir = ""
+  script-dir = ""
+  output-type = "static"
+  compile-option = ""
+  override-compile-option = ""
+  link-option = ""
+  package-configuration = {}
+
+[dependencies]
+  yjson = { path = "../.." }
+  yjson_macros = { path = "../yjson_macros" }

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export DISABLE_ZOXIDE="${DISABLE_ZOXIDE:-1}"
+exec cjpm "$@"

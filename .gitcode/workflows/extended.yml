@@ -1,0 +1,20 @@
+name: yjson-extended
+
+on:
+  push:
+    branches: ["release/**"]
+  schedule:
+    - cron: "23 19 * * *"
+  workflow_dispatch:
+
+permissions:
+  repository: read
+
+jobs:
+  fuzz-extended:
+    runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    steps:
+      - name: Checkout source
+        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+      - name: Run extended fuzz gate
+        run: cd repo_workspace && scripts/ci_job.sh fuzz-extended
