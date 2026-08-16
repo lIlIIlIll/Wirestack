@@ -366,6 +366,29 @@ class YJsonRegressionTest {
     }
 
     @TestCase
+    func generatedPersonFieldIdDispatchKeepsFallbackSemanticsForStringAndBytes(): Unit {
+        let escapedAndUnicodeUnknown = "{" +
+            "\"user_\\u0069d\":42," +
+            "\"名字\":{\"nested\":[1,true,null]}," +
+            "\"name\":\"Lin\"," +
+            "\"age\":28," +
+            "\"tags\":[\"cangjie\",\"json\"]," +
+            "\"scores\":{\"math\":95}," +
+            "\"address\":{\"zipcode\":518000,\"street_\\u006eame\":\"Nanshan Road\"}," +
+            "\"nick\":null" +
+            "}"
+
+        let fromString = YJson.decodeStringWith(PersonJson, escapedAndUnicodeUnknown)
+        let fromBytes = YJson.decodeBytesWith(PersonJson, yJsonRegressionBytes(escapedAndUnicodeUnknown))
+        @Expect(fromString.id, 42)
+        @Expect(fromString.address.street, "Nanshan Road")
+        @Expect(fromBytes.id, fromString.id)
+        @Expect(fromBytes.name, fromString.name)
+        @Expect(fromBytes.address.street, fromString.address.street)
+        @Expect(fromBytes.scores["math"], 95)
+    }
+
+    @TestCase
     func fastReaderSkipsUnknownEscapedStringsWithoutAllocatingValues(): Unit {
         let decoded = YJson.decodeStringWith(
             PersonJson,

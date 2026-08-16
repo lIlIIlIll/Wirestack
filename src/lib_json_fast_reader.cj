@@ -349,7 +349,10 @@ public class JsonFastReader {
 
     public func readRawNameIdBytes(first: Bool, candidates: Array<Array<Byte>>): Int64 {
         beforeRawFieldName(first)
-        let id = parseNameIdBytes(candidates)
+        let id = match (tryParseSimpleNameId(candidates)) {
+            case Some(value) => value
+            case None => parseNameIdBytes(candidates)
+        }
         afterRawFieldName()
         id
     }

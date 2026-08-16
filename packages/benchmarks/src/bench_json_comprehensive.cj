@@ -153,6 +153,8 @@ class ComprehensiveJsonCompareBenchmarks {
     let unorderedPersonText = unorderedPersonJsonText()
     let unknownPersonText = unknownPersonJsonText()
     let prettyPersonText = prettyPersonJsonText()
+    let unorderedPersonBytes: Array<Byte>
+    let unknownPersonBytes: Array<Byte>
     let addressBytes: Array<Byte>
     let personBytes: Array<Byte>
     let profileBundleBytes: Array<Byte>
@@ -192,6 +194,8 @@ class ComprehensiveJsonCompareBenchmarks {
         uint64EnvelopeBytes = encodeYjsonReflectBytesWith(UInt64EnvelopeJson, uint64Envelope)
         temporalStatsBytes = encodeYjsonReflectBytesWith(TemporalStatsJson, temporalStats)
         escapedUnicodeBytes = encodeYjsonReflectBytesWith(StringJson, escapedUnicodeText)
+        unorderedPersonBytes = unsafe { unorderedPersonText.rawData() }
+        unknownPersonBytes = unsafe { unknownPersonText.rawData() }
         personAst = YJson.parse(personText)
         stdxPersonAst = stdxjson.JsonValue.fromStr(personText)
 
@@ -582,6 +586,26 @@ class ComprehensiveJsonCompareBenchmarks {
     @Bench
     func stdxStringDecodeUnknownPerson(): Unit {
         intSink = decodeStdxFromUtf8String<StdxPerson>(unknownPersonText).id
+    }
+
+    @Bench
+    func yjsonBytesDecodeUnorderedPerson(): Unit {
+        intSink = decodeYjsonReflectBytesWith(PersonJson, unorderedPersonBytes).id
+    }
+
+    @Bench
+    func stdxBytesDecodeUnorderedPerson(): Unit {
+        intSink = decodeStdxFromUtf8Bytes<StdxPerson>(unorderedPersonBytes).id
+    }
+
+    @Bench
+    func yjsonBytesDecodeUnknownPerson(): Unit {
+        intSink = decodeYjsonReflectBytesWith(PersonJson, unknownPersonBytes).id
+    }
+
+    @Bench
+    func stdxBytesDecodeUnknownPerson(): Unit {
+        intSink = decodeStdxFromUtf8Bytes<StdxPerson>(unknownPersonBytes).id
     }
 
     @Bench

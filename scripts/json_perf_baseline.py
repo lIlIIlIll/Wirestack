@@ -167,6 +167,16 @@ def build_metadata() -> None:
         Meta("未知字段", "decode", "Person", "string", "unknown nested values must be skipped"),
     )
     add_case(
+        "BytesDecodeUnorderedPerson",
+        None,
+        Meta("字段顺序", "decode", "Person", "bytes", "wire fields are intentionally reordered"),
+    )
+    add_case(
+        "BytesDecodeUnknownPerson",
+        None,
+        Meta("未知字段", "decode", "Person", "bytes", "unknown nested values must be skipped"),
+    )
+    add_case(
         "StringDecodePrettyPerson",
         "string-decode-pretty-person",
         Meta("Pretty JSON", "decode", "Person", "string", "pretty input"),

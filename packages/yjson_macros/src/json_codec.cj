@@ -616,6 +616,18 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     for (field in fields) {
         if (!field.codecExpr.isEmpty()) { supportsFastRead = false; break }
     }
+    let fastLabels = ArrayList<(CodecField, String)>()
+    let fastLabelBytes = ArrayList<String>()
+    if (supportsFastRead) {
+        for (field in fields) {
+            fastLabels.add((field, field.jsonNameExpr))
+            fastLabelBytes.add("(${field.jsonNameExpr}).rawData()")
+            for (alias in field.aliases) {
+                fastLabels.add((field, alias))
+                fastLabelBytes.add("(${alias}).rawData()")
+            }
+        }
+    }
 
     let codecInterfaces = if (supportsFastRead) {
         "JsonObjectCodec<${targetType}> & JsonArrayDirectCodec<${targetType}>"
@@ -630,6 +642,10 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         if (field.codecExpr.isEmpty() && !field.staticGenerated && !fullyDirect) {
             appendLine(sb, 1, "private let ${cachedFieldCodecName(field)}: JsonDirectCodec<${field.typeText}> = ${defaultFieldCodec(field.typeText)}")
         }
+    }
+    if (supportsFastRead) {
+        appendLine(sb, 1, "private let __yJsonFastFieldNames: Array<Array<Byte>> = unsafe { [" +
+            joinStrings(fastLabelBytes, ", ") + "] }")
     }
     appendLine(sb, 1, "public func write(value: ${targetType}, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {")
     if (isClass) { appendLine(sb, 2, "context.enterObject(value)") } else { appendLine(sb, 2, "context.enterValue()") }
@@ -767,21 +783,19 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     appendLine(sb, 3, "reader.startRawObject()")
     appendLine(sb, 3, "var __first = true")
     appendLine(sb, 3, "while (reader.hasRawObjectField(__first)) {")
-    appendLine(sb, 4, "let __name = reader.readRawName(__first)")
-    appendLine(sb, 4, "match (__name) {")
-    for (field in fields) {
+    appendLine(sb, 4, "let __nameId = reader.readRawNameIdBytes(__first, __yJsonFastFieldNames)")
+    appendLine(sb, 4, "match (__nameId) {")
+    for (labelIndex in 0..fastLabels.size) {
+        let (field, label) = fastLabels[labelIndex]
         let codec = fieldCodec(field)
         let directRead = directScalarFastRead(field, "reader")
         let readValue = if (field.staticGenerated) {
             "__yJsonReadFast_${field.typeText}(reader, context)"
         } else if (directRead.isEmpty()) { "readJsonFastWith(${codec}, reader, context)" } else { directRead }
-        let labels = ArrayList<String>()
-        labels.add(field.jsonNameExpr)
-        labels.add(all: field.aliases)
-        appendLine(sb, 5, "case " + joinStrings(labels, " | ") + " =>")
+        appendLine(sb, 5, "case ${labelIndex} =>")
         let assignValue = "__value_${field.name} = " + (if (field.isOption) { readValue } else { "Some(${readValue})" })
         if (directRead.isEmpty() || directFieldNeedsContext(field)) {
-            appendLine(sb, 6, "context.pushField(__name)")
+            appendLine(sb, 6, "context.pushField(${label})")
             appendLine(sb, 6, "try { ${assignValue} } finally { context.popPath() }")
         } else {
             appendLine(sb, 6, assignValue)
