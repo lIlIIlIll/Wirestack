@@ -243,6 +243,21 @@ public class JsonDecodeContext {
         }
     }
 
+    func updateLastField(name: String): Unit {
+        let values = pathValues()
+        if (!values.isEmpty()) {
+            values[values.size - 1] = name
+        }
+    }
+
+    func updateLastIndex(index: Int64): Unit {
+        if (let Some(pairs) <- pathIndexPairs) {
+            if (!pairs.isEmpty()) {
+                pairs[pairs.size - 1] = index
+            }
+        }
+    }
+
     public func enterValue(): Unit {
         if (depth >= maxDepth) {
             throw JsonException("Maximum JSON depth ${maxDepth} exceeded", code: "max_depth", path: currentPath())
@@ -398,6 +413,50 @@ public func readJsonFastWith<T>(codec: JsonDirectCodec<T>, reader: JsonFastReade
     }
 }
 
+private class ReifiedFastCodecAdapter<T> <: JsonArrayDirectCodec<T> {
+    private let inner: ReifiedJsonCodec<T>
+
+    public init(inner: ReifiedJsonCodec<T>) { this.inner = inner }
+
+    public func write(value: T, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
+        inner.write(value, writer, context)
+    }
+
+    public func read(reader: JsonDirectReader, context: JsonDecodeContext): T {
+        inner.read(reader, context)
+    }
+
+    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): T {
+        inner.readFast(reader, context)
+    }
+}
+
+private class ContractFastCodecAdapter<T> <: JsonArrayDirectCodec<T> {
+    private let inner: JsonDirectCodec<T>
+
+    public init(inner: JsonDirectCodec<T>) { this.inner = inner }
+
+    public func write(value: T, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
+        inner.write(value, writer, context)
+    }
+
+    public func read(reader: JsonDirectReader, context: JsonDecodeContext): T {
+        inner.read(reader, context)
+    }
+
+    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): T {
+        readJsonFastWith(inner, reader, context)
+    }
+}
+
+private func resolvedJsonFastCodec<T>(codec: JsonDirectCodec<T>): JsonArrayDirectCodec<T> {
+    match (codec) {
+        case reified: ReifiedJsonCodec<T> => ReifiedFastCodecAdapter<T>(reified)
+        case fast: JsonArrayDirectCodec<T> => fast
+        case _ => ContractFastCodecAdapter<T>(codec)
+    }
+}
+
 private class OptionJsonCodec<T> <: JsonArrayDirectCodec<Option<T>> {
     private let inner: JsonDirectCodec<T>
 
@@ -445,8 +504,12 @@ private class StringOptionJsonCodec <: JsonArrayDirectCodec<Option<String>> {
 
 private class ArrayJsonCodec<T> <: JsonArrayDirectCodec<Array<T>> {
     private let inner: JsonDirectCodec<T>
+    private let fastInner: JsonArrayDirectCodec<T>
 
-    public init(inner: JsonDirectCodec<T>) { this.inner = inner }
+    public init(inner: JsonDirectCodec<T>) {
+        this.inner = inner
+        this.fastInner = resolvedJsonFastCodec(inner)
+    }
 
     public func write(value: Array<T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
         context.enterValue()
@@ -484,12 +547,18 @@ private class ArrayJsonCodec<T> <: JsonArrayDirectCodec<Array<T>> {
             reader.startRawArray()
             var first = true
             var index: Int64 = 0
-            while (reader.hasRawArrayItem(first)) {
-                reader.beforeRawArrayItem(first)
+            if (reader.hasRawArrayItem(first)) {
                 context.pushIndex(index)
-                try { result.add(readJsonFastWith(inner, reader, context)) } finally { context.popPath() }
-                first = false
-                index++
+                try {
+                    while (true) {
+                        reader.beforeRawArrayItem(first)
+                        if (!first) { context.updateLastIndex(index) }
+                        result.add(fastInner.readFast(reader, context))
+                        first = false
+                        index++
+                        if (!reader.hasRawArrayItem(first)) { break }
+                    }
+                } finally { context.popPath() }
             }
             reader.endRawArray()
             return result.toArray()
@@ -499,8 +568,12 @@ private class ArrayJsonCodec<T> <: JsonArrayDirectCodec<Array<T>> {
 
 private class ArrayListJsonCodec<T> <: JsonArrayDirectCodec<ArrayList<T>> {
     private let inner: JsonDirectCodec<T>
+    private let fastInner: JsonArrayDirectCodec<T>
 
-    public init(inner: JsonDirectCodec<T>) { this.inner = inner }
+    public init(inner: JsonDirectCodec<T>) {
+        this.inner = inner
+        this.fastInner = resolvedJsonFastCodec(inner)
+    }
 
     public func write(value: ArrayList<T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
         context.enterValue()
@@ -540,12 +613,18 @@ private class ArrayListJsonCodec<T> <: JsonArrayDirectCodec<ArrayList<T>> {
             reader.startRawArray()
             var first = true
             var index: Int64 = 0
-            while (reader.hasRawArrayItem(first)) {
-                reader.beforeRawArrayItem(first)
+            if (reader.hasRawArrayItem(first)) {
                 context.pushIndex(index)
-                try { result.add(readJsonFastWith(inner, reader, context)) } finally { context.popPath() }
-                first = false
-                index++
+                try {
+                    while (true) {
+                        reader.beforeRawArrayItem(first)
+                        if (!first) { context.updateLastIndex(index) }
+                        result.add(fastInner.readFast(reader, context))
+                        first = false
+                        index++
+                        if (!reader.hasRawArrayItem(first)) { break }
+                    }
+                } finally { context.popPath() }
             }
             reader.endRawArray()
             return result
@@ -683,8 +762,12 @@ public func __yJsonReadFastStringOption(reader: JsonFastReader, context: JsonDec
 
 private class HashMapJsonCodec<T> <: JsonArrayDirectCodec<HashMap<String, T>> {
     private let inner: JsonDirectCodec<T>
+    private let fastInner: JsonArrayDirectCodec<T>
 
-    public init(inner: JsonDirectCodec<T>) { this.inner = inner }
+    public init(inner: JsonDirectCodec<T>) {
+        this.inner = inner
+        this.fastInner = resolvedJsonFastCodec(inner)
+    }
 
     public func write(value: HashMap<String, T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
         context.enterValue()
@@ -718,15 +801,24 @@ private class HashMapJsonCodec<T> <: JsonArrayDirectCodec<HashMap<String, T>> {
     public func readFast(reader: JsonFastReader, context: JsonDecodeContext): HashMap<String, T> {
         context.enterValue()
         try {
-            let result = HashMap<String, T>()
             reader.startRawObject()
-            var first = true
-            while (reader.hasRawObjectField(first)) {
-                let name = reader.readRawName(first)
-                context.pushField(name)
-                try { result[name] = readJsonFastWith(inner, reader, context) } finally { context.popPath() }
-                first = false
+            if (!reader.hasRawObjectField(true)) {
+                reader.endRawObject()
+                return HashMap<String, T>()
             }
+            let result = HashMap<String, T>()
+            var first = true
+            let firstName = reader.readRawName(true)
+            context.pushField(firstName)
+            try {
+                result[firstName] = fastInner.readFast(reader, context)
+                first = false
+                while (reader.hasRawObjectField(first)) {
+                    let name = reader.readRawName(first)
+                    context.updateLastField(name)
+                    result[name] = fastInner.readFast(reader, context)
+                }
+            } finally { context.popPath() }
             reader.endRawObject()
             return result
         } finally { context.leaveValue() }

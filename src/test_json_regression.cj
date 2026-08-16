@@ -232,23 +232,84 @@ class YJsonRegressionTest {
 
     @TestCase
     func genericCollectionCodecsPreserveFastReaderPath(): Unit {
+        let profileArrayCodec = YJson.arrayCodec(ProfileRecordJson)
         let profileListCodec = YJson.arrayListCodec(ProfileRecordJson)
         let int64MapCodec = YJson.hashMapCodec(Int64Json)
+        let profileMapCodec = YJson.hashMapCodec(ProfileRecordJson)
         let nestedCodec = nestedProfilesJson()
         let optionCodec = YJson.optionCodec(ProfileRecordJson)
 
+        @Expect(isFastCodec<Array<ProfileRecord>>(profileArrayCodec))
         @Expect(isFastCodec<ArrayList<ProfileRecord>>(profileListCodec))
         @Expect(isFastCodec<HashMap<String, Int64>>(int64MapCodec))
+        @Expect(isFastCodec<HashMap<String, ProfileRecord>>(profileMapCodec))
         @Expect(isFastCodec<ArrayList<HashMap<String, ArrayList<ProfileRecord>>>>(nestedCodec))
         @Expect(isFastCodec<Option<ProfileRecord>>(optionCodec))
 
+        let emptyProfiles = YJson.decodeStringWith(profileListCodec, "[ ]")
+        let emptyProfilesAgain = YJson.decodeBytesWith(profileListCodec, yJsonRegressionBytes("[]"))
+        emptyProfiles.add(makeProfileRecord(1, "fresh", 1))
+        @Expect(emptyProfilesAgain.isEmpty())
+        @Expect(YJson.decodeStringWith(profileArrayCodec, "[ ]").size, 0)
+        @Expect(YJson.decodeBytesWith(profileArrayCodec, yJsonRegressionBytes("[]")).size, 0)
+
+        let emptyProfilesByName = YJson.decodeStringWith(profileMapCodec, "{ }")
+        let emptyProfilesByNameAgain = YJson.decodeBytesWith(profileMapCodec, yJsonRegressionBytes("{}"))
+        emptyProfilesByName["fresh"] = makeProfileRecord(1, "fresh", 1)
+        @Expect(emptyProfilesByNameAgain.isEmpty())
+
         let profiles = sampleLargeProfileRecords(count: 3)
+        let encodedProfiles = YJson.encodeStringWith(profileListCodec, profiles)
         let decodedProfiles = YJson.decodeStringWith(
             profileListCodec,
-            YJson.encodeStringWith(profileListCodec, profiles)
+            encodedProfiles
         )
+        let decodedProfileBytes = YJson.decodeBytesWith(profileListCodec, yJsonRegressionBytes(encodedProfiles))
         @Expect(decodedProfiles.size, 3)
         @Expect(decodedProfiles[2].alias, "alias-2-json-escape")
+        @Expect(decodedProfileBytes[1].id, profiles[1].id)
+
+        let profileArray = profiles.toArray()
+        let encodedProfileArray = YJson.encodeStringWith(profileArrayCodec, profileArray)
+        let decodedProfileArray = YJson.decodeBytesWith(
+            profileArrayCodec,
+            yJsonRegressionBytes(encodedProfileArray)
+        )
+        @Expect(decodedProfileArray.size, 3)
+        @Expect(decodedProfileArray[2].alias, "alias-2-json-escape")
+
+        let profilesByName = HashMap<String, ProfileRecord>()
+        profilesByName["ascii"] = profiles[0]
+        profilesByName["仓颉\"key"] = profiles[1]
+        let encodedProfilesByName = YJson.encodeStringWith(profileMapCodec, profilesByName)
+        let decodedProfilesByName = YJson.decodeBytesWith(
+            profileMapCodec,
+            yJsonRegressionBytes(encodedProfilesByName)
+        )
+        @Expect(decodedProfilesByName["ascii"].id, profiles[0].id)
+        @Expect(decodedProfilesByName["仓颉\"key"].alias, profiles[1].alias)
+
+        try {
+            let _ = YJson.decodeStringWith(
+                profileListCodec,
+                "[{\"profile_id\":1,\"alias\":\"ok\",\"level\":1},{}]"
+            )
+            throw JsonException("expected generic array item failure")
+        } catch (error: JsonException) {
+            @Expect(error.code, "missing_field")
+            @Expect(error.path, "$[1]")
+        }
+
+        try {
+            let _ = YJson.decodeBytesWith(
+                profileMapCodec,
+                yJsonRegressionBytes("{\"ok\":{\"profile_id\":1,\"alias\":\"ok\",\"level\":1},\"broken\":{}}")
+            )
+            throw JsonException("expected generic map value failure")
+        } catch (error: JsonException) {
+            @Expect(error.code, "missing_field")
+            @Expect(error.path, "$.broken")
+        }
 
         let values = sampleLargeInt64Map(count: 3)
         let decodedValues = YJson.decodeStringWith(
@@ -258,11 +319,14 @@ class YJsonRegressionTest {
         @Expect(decodedValues["metric_2"], 37)
 
         let nested = sampleDeepNestedProfiles(groupCount: 2, recordCount: 2)
+        let encodedNested = YJson.encodeStringWith(nestedCodec, nested)
         let decodedNested = YJson.decodeStringWith(
             nestedCodec,
-            YJson.encodeStringWith(nestedCodec, nested)
+            encodedNested
         )
+        let decodedNestedBytes = YJson.decodeBytesWith(nestedCodec, yJsonRegressionBytes(encodedNested))
         @Expect(decodedNested[1]["group_1"][1].id, 101)
+        @Expect(decodedNestedBytes[1]["group_1"][1].id, 101)
     }
 
     @TestCase

@@ -140,6 +140,30 @@ def build_metadata() -> None:
         "BytesDecodeLargeProfileArray",
         Meta("大数组", "decode", "ArrayList<ProfileRecord>[64]", "bytes"),
     )
+    add_cangjie_pair(
+        "StringDecodeLargeProfileArrayValue",
+        Meta("大数组", "decode", "Array<ProfileRecord>[64]", "string"),
+    )
+    add_cangjie_pair(
+        "BytesDecodeLargeProfileArrayValue",
+        Meta("大数组", "decode", "Array<ProfileRecord>[64]", "bytes"),
+    )
+    add_cangjie_pair(
+        "StringDecodeLargeProfileStaticArrayList",
+        Meta("静态容器对照", "decode", "ArrayList<ProfileRecord>[64] static", "string"),
+    )
+    add_cangjie_pair(
+        "BytesDecodeLargeProfileStaticArrayList",
+        Meta("静态容器对照", "decode", "ArrayList<ProfileRecord>[64] static", "bytes"),
+    )
+    add_cangjie_pair(
+        "StringDecodeEmptyProfileArrayList",
+        Meta("空数组", "decode", "ArrayList<ProfileRecord>[0]", "string"),
+    )
+    add_cangjie_pair(
+        "BytesDecodeEmptyProfileArrayList",
+        Meta("空数组", "decode", "ArrayList<ProfileRecord>[0]", "bytes"),
+    )
     add_case(
         "StringEncodeLargeInt64Map",
         "string-encode-large-int64-map",
@@ -162,6 +186,21 @@ def build_metadata() -> None:
         "BytesDecodeEmptyStringArray",
         Meta("空数组", "decode", "ArrayList<String>[0]", "bytes"),
     )
+    CANGJIE_META["yjsonStringDecodePersonBatchGuard"] = Meta(
+        "回归哨兵", "decode", "Person x64", "string", "batched timing guard"
+    )
+    CANGJIE_META["yjsonStringDecodeEmptyStringArrayBatchGuard"] = Meta(
+        "回归哨兵", "decode", "ArrayList<String>[0] x256", "string", "batched timing guard"
+    )
+    CANGJIE_META["yjsonBytesDecodeEmptyStringArrayBatchGuard"] = Meta(
+        "回归哨兵", "decode", "ArrayList<String>[0] x256", "bytes", "batched timing guard"
+    )
+    CANGJIE_META["yjsonStringDecodeEmptyProfileArrayListBatchGuard"] = Meta(
+        "回归哨兵", "decode", "ArrayList<ProfileRecord>[0] x256", "string", "batched timing guard"
+    )
+    CANGJIE_META["yjsonBytesDecodeEmptyProfileArrayListBatchGuard"] = Meta(
+        "回归哨兵", "decode", "ArrayList<ProfileRecord>[0] x256", "bytes", "batched timing guard"
+    )
     add_cangjie_pair(
         "StringDecodeLargeStringArray",
         Meta("大数组", "decode", "ArrayList<String>[64]", "string"),
@@ -169,6 +208,12 @@ def build_metadata() -> None:
     add_cangjie_pair(
         "BytesDecodeLargeStringArray",
         Meta("大数组", "decode", "ArrayList<String>[64]", "bytes"),
+    )
+    CANGJIE_META["yjsonStringDecodeLargeStringArrayBatchGuard"] = Meta(
+        "回归哨兵", "decode", "ArrayList<String>[64] x64", "string", "batched timing guard"
+    )
+    CANGJIE_META["yjsonBytesDecodeLargeStringArrayBatchGuard"] = Meta(
+        "回归哨兵", "decode", "ArrayList<String>[64] x64", "bytes", "batched timing guard"
     )
     add_case(
         "StringEncodeDeepNestedProfiles",
@@ -179,6 +224,10 @@ def build_metadata() -> None:
         "StringDecodeDeepNestedProfiles",
         "string-decode-deep-nested-profiles",
         Meta("深层嵌套", "decode", "ArrayList<HashMap<String, ArrayList<ProfileRecord>>>", "string"),
+    )
+    add_cangjie_pair(
+        "BytesDecodeDeepNestedProfiles",
+        Meta("深层嵌套", "decode", "ArrayList<HashMap<String, ArrayList<ProfileRecord>>>", "bytes"),
     )
     add_case(
         "StringDecodeUnorderedPerson",
