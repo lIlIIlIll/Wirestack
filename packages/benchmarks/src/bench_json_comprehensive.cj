@@ -136,6 +136,7 @@ func prettyPersonJsonText(): String {
 class ComprehensiveJsonCompareBenchmarks {
     let address = samplePerson().address
     let person = samplePerson()
+    let profile = sampleProfileRecord()
     let profileBundle = sampleProfileBundleForBench()
     let uint64Envelope = sampleUInt64Envelope()
     let temporalStats = sampleTemporalStats()
@@ -160,6 +161,7 @@ class ComprehensiveJsonCompareBenchmarks {
     let deepNestedCodec = nestedProfilesJson()
     let addressText: String
     let personText: String
+    let profileText: String
     let profileBundleText: String
     let uint64EnvelopeText: String
     let temporalStatsText: String
@@ -178,6 +180,7 @@ class ComprehensiveJsonCompareBenchmarks {
     let unknownPersonBytes: Array<Byte>
     let addressBytes: Array<Byte>
     let personBytes: Array<Byte>
+    let profileBytes: Array<Byte>
     let profileBundleBytes: Array<Byte>
     let uint64EnvelopeBytes: Array<Byte>
     let temporalStatsBytes: Array<Byte>
@@ -208,6 +211,7 @@ class ComprehensiveJsonCompareBenchmarks {
 
         addressText = YJson.encodeStringWith(AddressJson, address)
         personText = YJson.encodeStringWith(PersonJson, person)
+        profileText = YJson.encodeStringWith(ProfileRecordJson, profile)
         profileBundleText = YJson.encodeStringWith(ProfileBundleJson, profileBundle)
         uint64EnvelopeText = YJson.encodeStringWith(UInt64EnvelopeJson, uint64Envelope)
         temporalStatsText = YJson.encodeStringWith(TemporalStatsJson, temporalStats)
@@ -220,6 +224,7 @@ class ComprehensiveJsonCompareBenchmarks {
 
         addressBytes = encodeYjsonReflectBytesWith(AddressJson, address)
         personBytes = encodeYjsonReflectBytesWith(PersonJson, person)
+        profileBytes = encodeYjsonReflectBytesWith(ProfileRecordJson, profile)
         profileBundleBytes = encodeYjsonReflectBytesWith(ProfileBundleJson, profileBundle)
         uint64EnvelopeBytes = encodeYjsonReflectBytesWith(UInt64EnvelopeJson, uint64Envelope)
         temporalStatsBytes = encodeYjsonReflectBytesWith(TemporalStatsJson, temporalStats)
@@ -315,6 +320,15 @@ class ComprehensiveJsonCompareBenchmarks {
         var value: Int64 = 0
         for (_ in 0..64) {
             value += YJson.decodeStringWith(PersonJson, personText).id
+        }
+        intSink = value
+    }
+
+    @Bench
+    func yjsonStringDecodeProfileRecordBatchGuard(): Unit {
+        var value: Int64 = 0
+        for (_ in 0..128) {
+            value += YJson.decodeStringWith(ProfileRecordJson, profileText).id
         }
         intSink = value
     }
@@ -431,6 +445,24 @@ class ComprehensiveJsonCompareBenchmarks {
     @Bench
     func yjsonBytesDecodePerson(): Unit {
         intSink = decodeYjsonReflectBytesWith(PersonJson, personBytes).id
+    }
+
+    @Bench
+    func yjsonBytesDecodePersonBatchGuard(): Unit {
+        var value: Int64 = 0
+        for (_ in 0..64) {
+            value += decodeYjsonReflectBytesWith(PersonJson, personBytes).id
+        }
+        intSink = value
+    }
+
+    @Bench
+    func yjsonBytesDecodeProfileRecordBatchGuard(): Unit {
+        var value: Int64 = 0
+        for (_ in 0..128) {
+            value += decodeYjsonReflectBytesWith(ProfileRecordJson, profileBytes).id
+        }
+        intSink = value
     }
 
     @Bench
@@ -745,6 +777,15 @@ class ComprehensiveJsonCompareBenchmarks {
     }
 
     @Bench
+    func yjsonStringDecodeUnorderedPersonBatchGuard(): Unit {
+        var value: Int64 = 0
+        for (_ in 0..64) {
+            value += YJson.decodeStringWith(PersonJson, unorderedPersonText).id
+        }
+        intSink = value
+    }
+
+    @Bench
     func stdxStringDecodeUnorderedPerson(): Unit {
         intSink = decodeStdxFromUtf8String<StdxPerson>(unorderedPersonText).id
     }
@@ -752,6 +793,15 @@ class ComprehensiveJsonCompareBenchmarks {
     @Bench
     func yjsonStringDecodeUnknownPerson(): Unit {
         intSink = YJson.decodeStringWith(PersonJson, unknownPersonText).id
+    }
+
+    @Bench
+    func yjsonStringDecodeUnknownPersonBatchGuard(): Unit {
+        var value: Int64 = 0
+        for (_ in 0..64) {
+            value += YJson.decodeStringWith(PersonJson, unknownPersonText).id
+        }
+        intSink = value
     }
 
     @Bench
@@ -782,6 +832,15 @@ class ComprehensiveJsonCompareBenchmarks {
     @Bench
     func yjsonStringDecodePrettyPerson(): Unit {
         intSink = YJson.decodeStringWith(PersonJson, prettyPersonText).id
+    }
+
+    @Bench
+    func yjsonStringDecodePrettyPersonBatchGuard(): Unit {
+        var value: Int64 = 0
+        for (_ in 0..64) {
+            value += YJson.decodeStringWith(PersonJson, prettyPersonText).id
+        }
+        intSink = value
     }
 
     @Bench

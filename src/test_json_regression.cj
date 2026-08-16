@@ -80,8 +80,46 @@ public class ScalarScratchDefaults {
     public init() {}
 }
 
+@JsonCodec
+public class AliasRecord {
+    @JsonAlias["legacy_id"]
+    public let id: Int64
+    public var label: String = ""
+
+    public init(id: Int64) {
+        this.id = id
+    }
+}
+
 @Test
 class YJsonRegressionTest {
+    @TestCase
+    func compactNameProbeMissKeepsGeneralDispatcherCursor(): Unit {
+        let reader = JsonFastReader("{\"first\":1,\"second\":2}")
+        let names = unsafe { ["first".rawData(), "second".rawData()] }
+        let missing = unsafe { "missing".rawData() }
+        reader.startRawObject()
+        @Expect(reader.tryReadRawCompactNameTokenBytes(true, names[0]))
+        @Expect(reader.readRawInt64(), 1)
+        @Expect(!reader.tryReadRawCompactNameTokenBytes(false, missing))
+        @Expect(reader.readRawNameIdBytes(false, names), 1)
+        @Expect(reader.readRawInt64(), 2)
+        reader.endRawObject()
+        reader.expectEnd()
+    }
+
+    @TestCase
+    func generatedOrderedFastReaderFallsBackForAliasesAndEscapedNames(): Unit {
+        let aliasText = "{\"legacy_id\":7,\"label\":\"legacy\"}"
+        let escapedText = "{\"\\u0069d\":8,\"label\":\"escaped\"}"
+        let fromAlias = YJson.decodeStringWith(AliasRecordJson, aliasText)
+        let fromEscapedBytes = YJson.decodeBytesWith(AliasRecordJson, yJsonRegressionBytes(escapedText))
+        @Expect(fromAlias.id, 7)
+        @Expect(fromAlias.label, "legacy")
+        @Expect(fromEscapedBytes.id, 8)
+        @Expect(fromEscapedBytes.label, "escaped")
+    }
+
     @TestCase
     func generatedScalarScratchKeepsDefaultsAndBothInputKinds(): Unit {
         let defaults = YJson.decodeStringWith(ScalarScratchDefaultsJson, "{}")

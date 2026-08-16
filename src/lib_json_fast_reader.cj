@@ -178,6 +178,17 @@ public class JsonFastReader {
         }
     }
 
+    // Generated-code bridge for the allocation-free ordered object path.  It
+    // consumes only an exact compact `"name":` token (and the comma when this
+    // is not the first field).  A miss is transactional so generated codecs
+    // can immediately continue with the general name dispatcher.
+    public func tryReadRawCompactNameTokenBytes(
+        first: Bool,
+        expectedNameBytes: Array<Byte>
+    ): Bool {
+        tryReadRawAsciiNameTokenBytes(expectedNameBytes, first)
+    }
+
     func tryReadRawAsciiNameTokenBytes(nameBytes: Array<Byte>, first: Bool): Bool {
         var currentIndex = index
         if (!first) {

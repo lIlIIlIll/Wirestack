@@ -33,3 +33,33 @@ production: scalar candidates regressed about 47–48%, AVX2 candidates about
 DOM performance architecture is frozen for this release candidate; release
 hardening reopens performance work only after a stable >10% regression or new
 evidence of at least 15% realistic end-to-end upside.
+
+## Generated ordered-object fast path (2026-08-17)
+
+Generated typed codecs now probe their canonical compact field sequence before
+entering the general object-name dispatcher. A failed probe does not advance the
+reader, so reordered fields, aliases, escaped names, unknown fields, whitespace,
+and duplicate-field handling retain the existing fallback semantics.
+
+The retained change was measured against the pre-change snapshot on the same
+Xeon Gold 6248R host, pinned to CPU 8, Cangjie SDK 20260803, and a 128 MB heap.
+Eleven alternating fixed-workload pairs produced these medians:
+
+| Typed decode workload | Baseline | Ordered path | Improvement |
+|---|---:|---:|---:|
+| ProfileRecord string | 825.629 ns/op | 720.801 ns/op | 12.68% |
+| ProfileRecord bytes | 863.206 ns/op | 759.710 ns/op | 12.09% |
+| Person string | 2974.754 ns/op | 2191.537 ns/op | 26.56% |
+| Person bytes | 3015.710 ns/op | 2558.319 ns/op | 17.15% |
+
+The ProfileRecord samples had 0.39-1.44% per-side CV. Paired framework medians
+also showed an 18.44% improvement across the six large/deep generic object
+decode guards. Individual framework samples were GC-noisy, so their positive
+unknown-field, reordered-field, and pretty-input results are retained as
+directional regression guards rather than primary performance claims.
+
+On the fixed ProfileRecord string probe, five-run hardware counters decreased
+from 753.4M to 675.1M cycles and from 1.823B to 1.572B instructions. Five paired
+RSS observations had medians of 91,712 KiB before and 91,636 KiB after. An empty
+generic-collection shortcut was evaluated separately and rejected after its
+stable fixed probe regressed string decode by 1.00% and bytes decode by 0.89%.

@@ -593,6 +593,32 @@ private func appendLine(sb: StringBuilder, level: Int64, value: String): Unit {
     sb.append(r'\n')
 }
 
+private func appendFastFieldAssignment(
+    sb: StringBuilder,
+    level: Int64,
+    field: CodecField,
+    label: String
+): Unit {
+    let codec = fieldCodec(field)
+    let directRead = directScalarFastRead(field, "reader")
+    let readValue = if (field.staticGenerated) {
+        "__yJsonReadFast_${field.typeText}(reader, context)"
+    } else if (directRead.isEmpty()) {
+        "readJsonFastWith(${codec}, reader, context)"
+    } else {
+        directRead
+    }
+    let assignValue = "__value_${field.name} = " +
+        (if (field.isOption || usesScalarScratch(field)) { readValue } else { "Some(${readValue})" })
+    if (directRead.isEmpty() || directFieldNeedsContext(field)) {
+        appendLine(sb, level, "context.pushField(${label})")
+        appendLine(sb, level, "try { ${assignValue} } finally { context.popPath() }")
+    } else {
+        appendLine(sb, level, assignValue)
+    }
+    appendLine(sb, level, "__seen_${field.name} = true")
+}
+
 private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     let name = decl.identifier.value
     let fields = collectFields(body)
@@ -811,26 +837,31 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     }
     appendLine(sb, 3, "reader.startRawObject()")
     appendLine(sb, 3, "var __first = true")
+    var orderedFieldCount: Int64 = 0
+    for (field in fields) {
+        if (field.writeField) { orderedFieldCount++ }
+    }
+    if (orderedFieldCount > 0) {
+        appendLine(sb, 3, "while (true) {")
+        var canonicalLabelIndex: Int64 = 0
+        for (field in fields) {
+            if (field.writeField) {
+                appendLine(sb, 4, "if (!reader.tryReadRawCompactNameTokenBytes(__first, __yJsonFastFieldNames[${canonicalLabelIndex}])) { break }")
+                appendFastFieldAssignment(sb, 4, field, field.jsonNameExpr)
+                appendLine(sb, 4, "__first = false")
+            }
+            canonicalLabelIndex += 1 + field.aliases.size
+        }
+        appendLine(sb, 4, "break")
+        appendLine(sb, 3, "}")
+    }
     appendLine(sb, 3, "while (reader.hasRawObjectField(__first)) {")
     appendLine(sb, 4, "let __nameId = reader.readRawNameIdBytes(__first, __yJsonFastFieldNames)")
     appendLine(sb, 4, "match (__nameId) {")
     for (labelIndex in 0..fastLabels.size) {
         let (field, label) = fastLabels[labelIndex]
-        let codec = fieldCodec(field)
-        let directRead = directScalarFastRead(field, "reader")
-        let readValue = if (field.staticGenerated) {
-            "__yJsonReadFast_${field.typeText}(reader, context)"
-        } else if (directRead.isEmpty()) { "readJsonFastWith(${codec}, reader, context)" } else { directRead }
         appendLine(sb, 5, "case ${labelIndex} =>")
-        let assignValue = "__value_${field.name} = " +
-            (if (field.isOption || usesScalarScratch(field)) { readValue } else { "Some(${readValue})" })
-        if (directRead.isEmpty() || directFieldNeedsContext(field)) {
-            appendLine(sb, 6, "context.pushField(${label})")
-            appendLine(sb, 6, "try { ${assignValue} } finally { context.popPath() }")
-        } else {
-            appendLine(sb, 6, assignValue)
-        }
-        appendLine(sb, 6, "__seen_${field.name} = true")
+        appendFastFieldAssignment(sb, 6, field, label)
     }
     appendLine(sb, 5, "case _ => reader.skipRaw()")
     appendLine(sb, 4, "}")
