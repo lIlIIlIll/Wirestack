@@ -32,6 +32,14 @@ func sampleEscapedUnicodeString(): String {
     YJson.decodeStringWith(StringJson, escapedUnicodeStringJsonText())
 }
 
+func sampleBenchmarkStrings(count: Int64): ArrayList<String> {
+    let values = ArrayList<String>(count)
+    for (index in 0..count) {
+        values.add("value-${index}-仓颉-json")
+    }
+    values
+}
+
 func toStdxProfileList(source: ArrayList<ProfileRecord>): ArrayList<StdxProfileRecord> {
     let converted = ArrayList<StdxProfileRecord>(source.size)
     for (profile in source) {
@@ -129,6 +137,7 @@ class ComprehensiveJsonCompareBenchmarks {
     let temporalStats = sampleTemporalStats()
     let largeProfiles = sampleLargeProfileRecords()
     let largeInt64Map = sampleLargeInt64Map()
+    let largeStrings = sampleBenchmarkStrings(64)
     let deepNestedProfiles = sampleDeepNestedProfiles()
     let escapedUnicodeText = sampleEscapedUnicodeString()
     let stdxAddress: StdxAddress
@@ -140,6 +149,7 @@ class ComprehensiveJsonCompareBenchmarks {
     let stdxDeepNestedProfiles: ArrayList<HashMap<String, ArrayList<StdxProfileRecord>>>
     let profileListCodec = profileRecordArrayListJson()
     let int64MapCodec = int64HashMapJson()
+    let stringListCodec = YJson.stringArrayListCodec()
     let deepNestedCodec = nestedProfilesJson()
     let addressText: String
     let personText: String
@@ -148,6 +158,8 @@ class ComprehensiveJsonCompareBenchmarks {
     let temporalStatsText: String
     let largeProfilesText: String
     let largeInt64MapText: String
+    let emptyStringListText = "[]"
+    let largeStringListText: String
     let deepNestedProfilesText: String
     let escapedUnicodeJsonText: String
     let unorderedPersonText = unorderedPersonJsonText()
@@ -160,6 +172,10 @@ class ComprehensiveJsonCompareBenchmarks {
     let profileBundleBytes: Array<Byte>
     let uint64EnvelopeBytes: Array<Byte>
     let temporalStatsBytes: Array<Byte>
+    let largeProfilesBytes: Array<Byte>
+    let largeInt64MapBytes: Array<Byte>
+    let emptyStringListBytes: Array<Byte>
+    let largeStringListBytes: Array<Byte>
     let escapedUnicodeBytes: Array<Byte>
     let personAst: JsonValue
     let stdxPersonAst: stdxjson.JsonValue
@@ -185,6 +201,7 @@ class ComprehensiveJsonCompareBenchmarks {
         temporalStatsText = YJson.encodeStringWith(TemporalStatsJson, temporalStats)
         largeProfilesText = YJson.encodeStringWith(profileListCodec, largeProfiles)
         largeInt64MapText = YJson.encodeStringWith(int64MapCodec, largeInt64Map)
+        largeStringListText = YJson.encodeStringWith(stringListCodec, largeStrings)
         deepNestedProfilesText = YJson.encodeStringWith(deepNestedCodec, deepNestedProfiles)
         escapedUnicodeJsonText = YJson.encodeStringWith(StringJson, escapedUnicodeText)
 
@@ -193,6 +210,10 @@ class ComprehensiveJsonCompareBenchmarks {
         profileBundleBytes = encodeYjsonReflectBytesWith(ProfileBundleJson, profileBundle)
         uint64EnvelopeBytes = encodeYjsonReflectBytesWith(UInt64EnvelopeJson, uint64Envelope)
         temporalStatsBytes = encodeYjsonReflectBytesWith(TemporalStatsJson, temporalStats)
+        largeProfilesBytes = encodeYjsonReflectBytesWith(profileListCodec, largeProfiles)
+        largeInt64MapBytes = encodeYjsonReflectBytesWith(int64MapCodec, largeInt64Map)
+        emptyStringListBytes = unsafe { emptyStringListText.rawData() }
+        largeStringListBytes = encodeYjsonReflectBytesWith(stringListCodec, largeStrings)
         escapedUnicodeBytes = encodeYjsonReflectBytesWith(StringJson, escapedUnicodeText)
         unorderedPersonBytes = unsafe { unorderedPersonText.rawData() }
         unknownPersonBytes = unsafe { unknownPersonText.rawData() }
@@ -203,6 +224,8 @@ class ComprehensiveJsonCompareBenchmarks {
         assertJson(decodeStdxFromUtf8String<StdxPerson>(unknownPersonText).id == person.id, "stdx unknown person")
         assertJson(decodeStdxFromUtf8String<StdxPerson>(prettyPersonText).id == person.id, "stdx pretty person")
         assertJson(YJson.decodeStringWith(PersonJson, unknownPersonText).address.zipcode == 518000, "yjson unknown person")
+        assertJson(YJson.decodeBytesWith(stringListCodec, emptyStringListBytes).isEmpty(), "yjson empty string list")
+        assertJson(YJson.decodeBytesWith(stringListCodec, largeStringListBytes).size == 64, "yjson large string list")
         assertJson(decodeStdxFromUtf8String<ArrayList<StdxProfileRecord>>(largeProfilesText).size == largeProfiles.size, "stdx large profile list")
         assertJson(decodeStdxFromUtf8String<HashMap<String, Int64>>(largeInt64MapText).size == largeInt64Map.size, "stdx large int64 map")
         assertJson(
@@ -522,6 +545,11 @@ class ComprehensiveJsonCompareBenchmarks {
     }
 
     @Bench
+    func yjsonBytesDecodeLargeProfileArray(): Unit {
+        intSink = decodeYjsonReflectBytesWith(profileListCodec, largeProfilesBytes)[0].id
+    }
+
+    @Bench
     func stdxStringDecodeLargeProfileArray(): Unit {
         intSink = decodeStdxFromUtf8String<ArrayList<StdxProfileRecord>>(largeProfilesText)[0].id
     }
@@ -539,6 +567,31 @@ class ComprehensiveJsonCompareBenchmarks {
     @Bench
     func yjsonStringDecodeLargeInt64Map(): Unit {
         intSink = YJson.decodeStringWith(int64MapCodec, largeInt64MapText)["metric_32"]
+    }
+
+    @Bench
+    func yjsonBytesDecodeLargeInt64Map(): Unit {
+        intSink = decodeYjsonReflectBytesWith(int64MapCodec, largeInt64MapBytes)["metric_32"]
+    }
+
+    @Bench
+    func yjsonStringDecodeEmptyStringArray(): Unit {
+        intSink = YJson.decodeStringWith(stringListCodec, emptyStringListText).size
+    }
+
+    @Bench
+    func yjsonBytesDecodeEmptyStringArray(): Unit {
+        intSink = decodeYjsonReflectBytesWith(stringListCodec, emptyStringListBytes).size
+    }
+
+    @Bench
+    func yjsonStringDecodeLargeStringArray(): Unit {
+        intSink = YJson.decodeStringWith(stringListCodec, largeStringListText).size
+    }
+
+    @Bench
+    func yjsonBytesDecodeLargeStringArray(): Unit {
+        intSink = decodeYjsonReflectBytesWith(stringListCodec, largeStringListBytes).size
     }
 
     @Bench

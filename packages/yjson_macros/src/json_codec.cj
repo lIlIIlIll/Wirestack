@@ -541,6 +541,22 @@ private func directFieldNeedsContext(field: CodecField): Bool {
         typeText == "Option<String>"
 }
 
+private func scalarScratchInitializer(field: CodecField): Option<String> {
+    if (field.isOption || !field.codecExpr.isEmpty()) { return None<String> }
+    let typeText = field.typeText.replace(" ", "")
+    match (typeText) {
+        case "Bool" => Some("false")
+        case "Int8" | "Int16" | "Int32" | "Int64" |
+             "UInt8" | "UInt16" | "UInt32" | "UInt64" |
+             "Float16" | "Float32" | "Float64" => Some("${typeText}(0)")
+        case _ => None<String>
+    }
+}
+
+private func usesScalarScratch(field: CodecField): Bool {
+    scalarScratchInitializer(field).isSome()
+}
+
 private func genericDecl(generics: ArrayList<String>): String {
     if (generics.isEmpty()) { return "" }
     "<" + joinStrings(generics, ", ") + ">"
@@ -686,6 +702,8 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     for (field in fields) {
         if (field.isOption) {
             appendLine(sb, 3, "var __value_${field.name}: ${field.typeText} = None<${field.optionInner}>")
+        } else if (let Some(initializer) <- scalarScratchInitializer(field)) {
+            appendLine(sb, 3, "var __value_${field.name}: ${field.typeText} = ${initializer}")
         } else {
             appendLine(sb, 3, "var __value_${field.name}: Option<${field.typeText}> = None<${field.typeText}>")
         }
@@ -706,7 +724,8 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         labels.add(all: field.aliases)
         appendLine(sb, 5, "case " + joinStrings(labels, " | ") + " =>")
         appendLine(sb, 6, "if (__seen_${field.name} && reader.readConfig().rejectsDuplicateKeys()) { throw JsonException(\"Duplicate JSON field: \" + __name, code: \"duplicate_key\", path: context.currentPath()) }")
-        let assignValue = "__value_${field.name} = " + (if (field.isOption) { readValue } else { "Some(${readValue})" })
+        let assignValue = "__value_${field.name} = " +
+            (if (field.isOption || usesScalarScratch(field)) { readValue } else { "Some(${readValue})" })
         if (directRead.isEmpty() || directFieldNeedsContext(field)) {
             appendLine(sb, 6, "context.pushField(__name)")
             appendLine(sb, 6, "try { ${assignValue} } finally { context.popPath() }")
@@ -732,6 +751,12 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             if (let Some(field) <- fieldByName(fields, param.name)) {
                 if (field.isOption) {
                     args.add("__value_${field.name}")
+                } else if (usesScalarScratch(field)) {
+                    if (param.hasDefault) {
+                        args.add("if (__seen_${field.name}) { __value_${field.name} } else { ${param.defaultExpr} }")
+                    } else {
+                        args.add("__value_${field.name}")
+                    }
                 } else if (param.hasDefault) {
                     args.add("if (__seen_${field.name}) { __value_${field.name}.getOrThrow() } else { ${param.defaultExpr} }")
                 } else {
@@ -749,6 +774,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             for (param in params) { if (param.name == field.name) { covered = true; break } }
             if (!covered && field.mutable) {
                 if (field.isOption) { appendLine(sb, 3, "__result.${field.name} = __value_${field.name}") }
+                else if (usesScalarScratch(field)) { appendLine(sb, 3, "if (__seen_${field.name}) { __result.${field.name} = __value_${field.name} }") }
                 else { appendLine(sb, 3, "if (__seen_${field.name}) { __result.${field.name} = __value_${field.name}.getOrThrow() }") }
             }
         }
@@ -758,6 +784,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         for (field in fields) {
             if (!field.mutable) { throw Exception("immutable field `${field.name}` requires a constructor parameter") }
             if (field.isOption) { appendLine(sb, 3, "__result.${field.name} = __value_${field.name}") }
+            else if (usesScalarScratch(field)) { appendLine(sb, 3, "if (__seen_${field.name}) { __result.${field.name} = __value_${field.name} }") }
             else { appendLine(sb, 3, "if (__seen_${field.name}) { __result.${field.name} = __value_${field.name}.getOrThrow() }") }
         }
         appendLine(sb, 3, "return __result")
@@ -775,6 +802,8 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     for (field in fields) {
         if (field.isOption) {
             appendLine(sb, 3, "var __value_${field.name}: ${field.typeText} = None<${field.optionInner}>")
+        } else if (let Some(initializer) <- scalarScratchInitializer(field)) {
+            appendLine(sb, 3, "var __value_${field.name}: ${field.typeText} = ${initializer}")
         } else {
             appendLine(sb, 3, "var __value_${field.name}: Option<${field.typeText}> = None<${field.typeText}>")
         }
@@ -793,7 +822,8 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             "__yJsonReadFast_${field.typeText}(reader, context)"
         } else if (directRead.isEmpty()) { "readJsonFastWith(${codec}, reader, context)" } else { directRead }
         appendLine(sb, 5, "case ${labelIndex} =>")
-        let assignValue = "__value_${field.name} = " + (if (field.isOption) { readValue } else { "Some(${readValue})" })
+        let assignValue = "__value_${field.name} = " +
+            (if (field.isOption || usesScalarScratch(field)) { readValue } else { "Some(${readValue})" })
         if (directRead.isEmpty() || directFieldNeedsContext(field)) {
             appendLine(sb, 6, "context.pushField(${label})")
             appendLine(sb, 6, "try { ${assignValue} } finally { context.popPath() }")
@@ -818,6 +848,12 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             if (let Some(field) <- fieldByName(fields, param.name)) {
                 if (field.isOption) {
                     args.add("__value_${field.name}")
+                } else if (usesScalarScratch(field)) {
+                    if (param.hasDefault) {
+                        args.add("if (__seen_${field.name}) { __value_${field.name} } else { ${param.defaultExpr} }")
+                    } else {
+                        args.add("__value_${field.name}")
+                    }
                 } else if (param.hasDefault) {
                     args.add("if (__seen_${field.name}) { __value_${field.name}.getOrThrow() } else { ${param.defaultExpr} }")
                 } else {
@@ -835,6 +871,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             for (param in params) { if (param.name == field.name) { covered = true; break } }
             if (!covered && field.mutable) {
                 if (field.isOption) { appendLine(sb, 3, "__result.${field.name} = __value_${field.name}") }
+                else if (usesScalarScratch(field)) { appendLine(sb, 3, "if (__seen_${field.name}) { __result.${field.name} = __value_${field.name} }") }
                 else { appendLine(sb, 3, "if (__seen_${field.name}) { __result.${field.name} = __value_${field.name}.getOrThrow() }") }
             }
         }
@@ -844,6 +881,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         for (field in fields) {
             if (!field.mutable) { throw Exception("immutable field `${field.name}` requires a constructor parameter") }
             if (field.isOption) { appendLine(sb, 3, "__result.${field.name} = __value_${field.name}") }
+            else if (usesScalarScratch(field)) { appendLine(sb, 3, "if (__seen_${field.name}) { __result.${field.name} = __value_${field.name} }") }
             else { appendLine(sb, 3, "if (__seen_${field.name}) { __result.${field.name} = __value_${field.name}.getOrThrow() }") }
         }
         appendLine(sb, 3, "return __result")

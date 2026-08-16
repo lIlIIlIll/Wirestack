@@ -203,7 +203,7 @@ public class JsonEncodeContext {
 public class JsonDecodeContext {
     private let maxDepth: Int64
     private var depth: Int64 = 0
-    private let path = ArrayList<String>()
+    private var path: Option<ArrayList<String>> = None<ArrayList<String>>
     private var pathIndexPairs: Option<ArrayList<Int64>> = None<ArrayList<Int64>>
 
     public init(config: JsonReadConfig) {
@@ -211,10 +211,11 @@ public class JsonDecodeContext {
     }
 
     public func pushField(name: String): Unit {
-        path.add(name)
+        pathValues().add(name)
     }
 
     public func pushIndex(index: Int64): Unit {
+        let values = pathValues()
         let pairs = match (pathIndexPairs) {
             case Some(value) => value
             case None =>
@@ -222,21 +223,23 @@ public class JsonDecodeContext {
                 pathIndexPairs = Some(value)
                 value
         }
-        pairs.add(path.size)
+        pairs.add(values.size)
         pairs.add(index)
-        path.add("")
+        values.add("")
     }
 
     public func popPath(): Unit {
-        if (!path.isEmpty()) {
-            let position = path.size - 1
-            if (let Some(pairs) <- pathIndexPairs) {
-                if (!pairs.isEmpty() && pairs[pairs.size - 2] == position) {
-                    pairs.remove(at: pairs.size - 1)
-                    pairs.remove(at: pairs.size - 1)
+        if (let Some(values) <- path) {
+            if (!values.isEmpty()) {
+                let position = values.size - 1
+                if (let Some(pairs) <- pathIndexPairs) {
+                    if (!pairs.isEmpty() && pairs[pairs.size - 2] == position) {
+                        pairs.remove(at: pairs.size - 1)
+                        pairs.remove(at: pairs.size - 1)
+                    }
                 }
+                values.remove(at: values.size - 1)
             }
-            path.remove(at: path.size - 1)
         }
     }
 
@@ -254,21 +257,42 @@ public class JsonDecodeContext {
     }
 
     public func currentPath(): String {
-        let result = StringBuilder("$")
-        let pairs = pathIndexPairs.getOrDefault({ => ArrayList<Int64>() })
-        var pairCursor: Int64 = 0
-        for (position in 0..path.size) {
-            if (pairCursor < pairs.size && pairs[pairCursor] == position) {
-                result.append("[")
-                result.append(pairs[pairCursor + 1].toString())
-                result.append("]")
-                pairCursor += 2
-            } else {
-                result.append(".")
-                result.append(path[position])
-            }
+        let values = match (path) {
+            case Some(value) => value
+            case None => return "$"
         }
+        let result = StringBuilder("$")
+        match (pathIndexPairs) {
+            case Some(pairs) =>
+                var pairCursor: Int64 = 0
+                for (position in 0..values.size) {
+                    if (pairCursor < pairs.size && pairs[pairCursor] == position) {
+                        result.append("[")
+                        result.append(pairs[pairCursor + 1].toString())
+                        result.append("]")
+                        pairCursor += 2
+                    } else {
+                        result.append(".")
+                        result.append(values[position])
+                    }
+                }
+            case None =>
+                for (value in values) {
+                    result.append(".")
+                    result.append(value)
+                }
+            }
         result.toString()
+    }
+
+    private func pathValues(): ArrayList<String> {
+        match (path) {
+            case Some(value) => value
+            case None =>
+                let value = ArrayList<String>()
+                path = Some(value)
+                value
+        }
     }
 }
 
@@ -547,8 +571,12 @@ private class Int64ArrayListJsonCodec <: JsonArrayDirectCodec<ArrayList<Int64>> 
     public func readFast(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<Int64> {
         context.enterValue()
         try {
-            let result = ArrayList<Int64>()
             reader.startRawArray()
+            if (!reader.hasRawArrayItem(true)) {
+                reader.endRawArray()
+                return ArrayList<Int64>()
+            }
+            let result = ArrayList<Int64>(reader.suggestRawArrayCapacity())
             var first = true
             while (reader.hasRawArrayItem(first)) {
                 reader.beforeRawArrayItem(first)
@@ -590,8 +618,12 @@ private class StringArrayListJsonCodec <: JsonArrayDirectCodec<ArrayList<String>
     public func readFast(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<String> {
         context.enterValue()
         try {
-            let result = ArrayList<String>()
             reader.startRawArray()
+            if (!reader.hasRawArrayItem(true)) {
+                reader.endRawArray()
+                return ArrayList<String>()
+            }
+            let result = ArrayList<String>(reader.suggestRawArrayCapacity())
             var first = true
             while (reader.hasRawArrayItem(first)) {
                 reader.beforeRawArrayItem(first)
@@ -626,7 +658,9 @@ public func __yJsonReadStringArrayList(reader: JsonDirectReader, context: JsonDe
 public func __yJsonReadFastStringArrayList(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<String> {
     context.enterValue()
     try {
-        let result = ArrayList<String>(); reader.startRawArray(); var first = true
+        reader.startRawArray()
+        if (!reader.hasRawArrayItem(true)) { reader.endRawArray(); return ArrayList<String>() }
+        let result = ArrayList<String>(reader.suggestRawArrayCapacity()); var first = true
         while (reader.hasRawArrayItem(first)) { reader.beforeRawArrayItem(first); result.add(reader.readRawString()); first = false }
         reader.endRawArray(); result
     } finally { context.leaveValue() }
@@ -729,8 +763,12 @@ private class Int64HashMapJsonCodec <: JsonArrayDirectCodec<HashMap<String, Int6
     public func readFast(reader: JsonFastReader, context: JsonDecodeContext): HashMap<String, Int64> {
         context.enterValue()
         try {
-            let result = HashMap<String, Int64>()
             reader.startRawObject()
+            if (!reader.hasRawObjectField(true)) {
+                reader.endRawObject()
+                return HashMap<String, Int64>()
+            }
+            let result = HashMap<String, Int64>(reader.suggestRawObjectCapacity())
             var first = true
             while (reader.hasRawObjectField(first)) {
                 result[reader.readRawName(first)] = reader.readRawInt64()
@@ -762,7 +800,9 @@ public func __yJsonReadInt64HashMap(reader: JsonDirectReader, context: JsonDecod
 public func __yJsonReadFastInt64HashMap(reader: JsonFastReader, context: JsonDecodeContext): HashMap<String, Int64> {
     context.enterValue()
     try {
-        let result = HashMap<String, Int64>(); reader.startRawObject(); var first = true
+        reader.startRawObject()
+        if (!reader.hasRawObjectField(true)) { reader.endRawObject(); return HashMap<String, Int64>() }
+        let result = HashMap<String, Int64>(reader.suggestRawObjectCapacity()); var first = true
         while (reader.hasRawObjectField(first)) { result[reader.readRawName(first)] = reader.readRawInt64(); first = false }
         reader.endRawObject(); result
     } finally { context.leaveValue() }

@@ -136,6 +136,10 @@ def build_metadata() -> None:
         "string-decode-large-profile-array",
         Meta("大数组", "decode", "ArrayList<ProfileRecord>[64]", "string"),
     )
+    add_cangjie_pair(
+        "BytesDecodeLargeProfileArray",
+        Meta("大数组", "decode", "ArrayList<ProfileRecord>[64]", "bytes"),
+    )
     add_case(
         "StringEncodeLargeInt64Map",
         "string-encode-large-int64-map",
@@ -145,6 +149,26 @@ def build_metadata() -> None:
         "StringDecodeLargeInt64Map",
         "string-decode-large-int64-map",
         Meta("大 Map", "decode", "HashMap<String, Int64>[64]", "string"),
+    )
+    add_cangjie_pair(
+        "BytesDecodeLargeInt64Map",
+        Meta("大 Map", "decode", "HashMap<String, Int64>[64]", "bytes"),
+    )
+    add_cangjie_pair(
+        "StringDecodeEmptyStringArray",
+        Meta("空数组", "decode", "ArrayList<String>[0]", "string"),
+    )
+    add_cangjie_pair(
+        "BytesDecodeEmptyStringArray",
+        Meta("空数组", "decode", "ArrayList<String>[0]", "bytes"),
+    )
+    add_cangjie_pair(
+        "StringDecodeLargeStringArray",
+        Meta("大数组", "decode", "ArrayList<String>[64]", "string"),
+    )
+    add_cangjie_pair(
+        "BytesDecodeLargeStringArray",
+        Meta("大数组", "decode", "ArrayList<String>[64]", "bytes"),
     )
     add_case(
         "StringEncodeDeepNestedProfiles",

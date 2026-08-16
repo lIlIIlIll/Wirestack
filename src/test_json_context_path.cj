@@ -6,6 +6,17 @@ import std.unittest.testmacro.*
 @Test
 class JsonContextPathTest {
     @TestCase
+    func decodeContextKeepsEmptyPathSemanticsWithoutPushes(): Unit {
+        let context = JsonDecodeContext(JsonReadConfig())
+        @Expect(context.currentPath(), "$")
+        context.popPath()
+        @Expect(context.currentPath(), "$")
+        context.pushField("value")
+        context.popPath()
+        @Expect(context.currentPath(), "$")
+    }
+
+    @TestCase
     func decodeContextBuildsArrayPathOnlyWhenRequested(): Unit {
         let context = JsonDecodeContext(JsonReadConfig())
         context.pushField("items")

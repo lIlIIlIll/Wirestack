@@ -1,5 +1,7 @@
 package yjson
 
+import yjson_macros.*
+
 import std.collection.*
 import std.unittest.*
 import std.unittest.testmacro.*
@@ -60,8 +62,65 @@ func isFastCodec<T>(codec: JsonDirectCodec<T>): Bool {
     }
 }
 
+@JsonCodec
+public class ScalarScratchDefaults {
+    public var enabled: Bool = true
+    public var i8: Int8 = Int8(7)
+    public var i16: Int16 = Int16(7)
+    public var i32: Int32 = Int32(7)
+    public var i64: Int64 = Int64(7)
+    public var u8: UInt8 = UInt8(7)
+    public var u16: UInt16 = UInt16(7)
+    public var u32: UInt32 = UInt32(7)
+    public var u64: UInt64 = UInt64(7)
+    public var f16: Float16 = Float16(7)
+    public var f32: Float32 = Float32(7)
+    public var f64: Float64 = Float64(7)
+
+    public init() {}
+}
+
 @Test
 class YJsonRegressionTest {
+    @TestCase
+    func generatedScalarScratchKeepsDefaultsAndBothInputKinds(): Unit {
+        let defaults = YJson.decodeStringWith(ScalarScratchDefaultsJson, "{}")
+        @Expect(defaults.enabled)
+        @Expect(defaults.i64, 7)
+        @Expect(defaults.u64, UInt64(7))
+        @Expect(defaults.f64, Float64(7))
+
+        let text = "{" +
+            "\"enabled\":false,\"i8\":-8,\"i16\":-16,\"i32\":-32,\"i64\":-64," +
+            "\"u8\":8,\"u16\":16,\"u32\":32,\"u64\":64," +
+            "\"f16\":1.5,\"f32\":2.5,\"f64\":3.5}"
+        let fromString = YJson.decodeStringWith(ScalarScratchDefaultsJson, text)
+        let fromBytes = YJson.decodeBytesWith(ScalarScratchDefaultsJson, yJsonRegressionBytes(text))
+        @Expect(!fromString.enabled)
+        @Expect(fromString.i8, Int8(-8))
+        @Expect(fromString.i16, Int16(-16))
+        @Expect(fromString.i32, Int32(-32))
+        @Expect(fromString.i64, Int64(-64))
+        @Expect(fromString.u8, UInt8(8))
+        @Expect(fromString.u16, UInt16(16))
+        @Expect(fromString.u32, UInt32(32))
+        @Expect(fromString.u64, UInt64(64))
+        @Expect(fromString.f16, Float16(1.5))
+        @Expect(fromString.f32, Float32(2.5))
+        @Expect(fromString.f64, Float64(3.5))
+        @Expect(fromBytes.i64, fromString.i64)
+        @Expect(fromBytes.u64, fromString.u64)
+        @Expect(fromBytes.f64, fromString.f64)
+
+        let duplicate = YJson.decodeStringWith(ScalarScratchDefaultsJson, "{\"i64\":1,\"i64\":2}")
+        @Expect(duplicate.i64, 2)
+        @AssertThrows[JsonException](YJson.decodeStringWith(
+            ScalarScratchDefaultsJson,
+            "{\"i64\":1,\"i64\":2}",
+            config: JsonReadConfig(duplicateKeyPolicy: JsonDuplicateKeyPolicy.Reject)
+        ))
+    }
+
     @TestCase
     func parserRejectsLeadingZeroesInNumbers(): Unit {
         @Expect(!yJsonRegressionCanParse("{\"a\":01}"))
@@ -213,6 +272,8 @@ class YJsonRegressionTest {
         integers.add(0)
         integers.add(Int64.Max)
         let intCodec = YJson.int64ArrayListCodec()
+        @Expect(YJson.decodeStringWith(intCodec, "[ ]").isEmpty())
+        @Expect(YJson.decodeBytesWith(intCodec, yJsonRegressionBytes("[ ]")).isEmpty())
         let decodedIntegers = YJson.decodeStringWith(intCodec, YJson.encodeStringWith(intCodec, integers))
         @Expect(decodedIntegers.size, 3)
         @Expect(decodedIntegers[0], -1)
@@ -223,6 +284,10 @@ class YJsonRegressionTest {
         strings.add("仓颉")
         strings.add("quote\"slash\\line\n")
         let stringCodec = YJson.stringArrayListCodec()
+        let emptyStrings = YJson.decodeStringWith(stringCodec, "[ ]")
+        let emptyStringsAgain = YJson.decodeBytesWith(stringCodec, yJsonRegressionBytes("[]"))
+        emptyStrings.add("fresh")
+        @Expect(emptyStringsAgain.isEmpty())
         let decodedStrings = YJson.decodeStringWith(stringCodec, YJson.encodeStringWith(stringCodec, strings))
         @Expect(decodedStrings.size, 3)
         @Expect(decodedStrings[1], "仓颉")
@@ -232,6 +297,10 @@ class YJsonRegressionTest {
         values["short"] = -7
         values["escaped\"key"] = Int64.Max
         let mapCodec = YJson.int64HashMapCodec()
+        let emptyMap = YJson.decodeStringWith(mapCodec, "{ }")
+        let emptyMapAgain = YJson.decodeBytesWith(mapCodec, yJsonRegressionBytes("{}"))
+        emptyMap["fresh"] = 1
+        @Expect(emptyMapAgain.isEmpty())
         let decodedValues = YJson.decodeStringWith(mapCodec, YJson.encodeStringWith(mapCodec, values))
         @Expect(decodedValues["short"], -7)
         @Expect(decodedValues["escaped\"key"], Int64.Max)

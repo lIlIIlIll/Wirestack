@@ -9,8 +9,9 @@ script-dir = ""
 output-type = "executable"
 compile-option = "-O2"
 override-compile-option = ""
-link-option = "-L target/native -lyjson_scanner"
+link-option = "-L target/native -lyjson_scanner -lstdx.encoding.jsonFFI -lstdx.encoding.json.streamFFI"
 package-configuration = {}
 
 [dependencies]
   "yjson" = { path = "../..", output-type = "static" }
+  "stdx" = "0.0.3"
