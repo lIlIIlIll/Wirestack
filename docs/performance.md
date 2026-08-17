@@ -136,3 +136,33 @@ The reusable analyzer is `scripts/json_fast_session_summary.py`; raw evidence
 is preserved in the Server experiment directory
 `<home>/yjson-session-20260817-Codex` and local ignored `target/`
 evidence directories.
+
+## Rejected adaptive session follow-up (2026-08-17)
+
+The follow-up tested a generated shape gate: flat scalar/String objects reused
+session state, while container/nested objects such as `Person` fell back to the
+stateless decoder. The analyzer was corrected to use per-round paired medians
+instead of ratios of independently aggregated medians.
+
+Variant A reused only `JsonDecodeContext` and kept `JsonFastReader` immutable.
+Its five-pair Server screen rejected the design immediately: the six paired
+results ranged from -6.68% to +1.83%, with no retained flat-object gain.
+
+Variant B reused reader and context only for flat codecs. Its final wrapper-free
+screen restored the desired flat effects but still failed the frozen gates:
+
+| Workload | Five-pair session delta | Candidate decoder delta |
+|---|---:|---:|
+| ProfileRecord string | +67.48% | -0.23% |
+| ProfileRecord bytes | +65.44% | +1.41% |
+| Address string | +69.73% | +4.55% |
+| Address bytes | +57.24% | +4.58% |
+| Person string | -1.27% | +1.82% |
+| Person bytes | -0.44% | +2.12% |
+
+This was a screening result, not a publishable latency conclusion: several CVs
+were above 3%, both `Person` cases remained negative, and ordinary decoder
+regressions exceeded 2%. The planned eleven-pair formal run was therefore not
+started, and the session API and implementation were removed again. Raw screens
+remain under `<home>/yjson-adaptive-session-20260817` and ignored local
+`target/perf-adaptive-session-screen-*` directories.
