@@ -166,3 +166,30 @@ regressions exceeded 2%. The planned eleven-pair formal run was therefore not
 started, and the session API and implementation were removed again. Raw screens
 remain under `<home>/yjson-adaptive-session-20260817` and ignored local
 `target/perf-adaptive-session-screen-*` directories.
+
+## Rejected Person internal hot-path experiments (2026-08-17)
+
+A fresh Server profile of the frozen `5822c09` Person string decoder measured
+4,378.228 ns/op, two GCs, and 84,410,368 GC-freed bytes per 100,000 decodes.
+GC phase work accounted for 20.92% of sampled cycles; compact ordered-name
+probing accounted for 6.87%, string parsing/materialization for about 7.8%, and
+HashMap/array initialization was also visible. The existing String-list and
+Int64-map fast helpers were already active.
+
+Three semantic-preserving changes were screened independently with five
+alternating Server pairs. None passed the frozen requirement that both Person
+inputs be nonnegative, at least one improve by 2%, and guards stay within 1%:
+
+| Experiment | Person string | Person bytes | Rejection evidence |
+|---|---:|---:|---|
+| Fixed-length ordered-name comparisons | +0.80% | -0.90% | ProfileRecord/Address guards regressed about 2–4% |
+| Inline first decode-path component | -5.79% | +8.20% | Direction split by input; guards regressed; GC-freed bytes fell 11.48% |
+| Generated String-list/Int64-map loop fusion | +0.85% | +1.39% | Below 2%; ProfileRecord string regressed 3.71% |
+
+Because no individual change passed screening, the changes were not combined
+and the eleven-pair formal run was not started. All production code was
+restored. The fixed probe and paired analyzer remain in
+`packages/person_hotpath_probe` and `scripts/json_person_hotpath_summary.py`;
+raw evidence is preserved under
+`<home>/yjson-person-hotpath-20260817` and ignored local
+`target/perf-person-hotpath-phase*` directories.
