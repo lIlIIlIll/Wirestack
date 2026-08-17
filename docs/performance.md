@@ -95,3 +95,44 @@ profile, the previous generic TypeInfo descriptor lookup was absent above the
 0.1% reporting threshold; the two remaining TypeInfo method-table symbols
 totalled 1.41%. Five paired maximum-RSS observations had medians of 75,044 KiB
 and 75,540 KiB (+0.66%), within the 1% no-regression gate.
+
+## Rejected reusable fast-decode session experiment (2026-08-17)
+
+A caller-owned session that reused `JsonFastReader`, `JsonDecodeContext`, and
+path-buffer capacity was implemented and tested, then removed because it did
+not pass the frozen all-workload acceptance gate. The experiment used commit
+`5822c09` as baseline on the same Xeon Gold 6248R host, CPU 8, SDK 20260803,
+`-O2`, and `cjHeapSize=128MB`. Two independent rounds each collected eleven
+alternating process samples for baseline decoder, candidate decoder, and
+candidate session.
+
+The second round's diagnostic medians were:
+
+| Workload | Baseline decoder | Candidate decoder | Session | Session delta |
+|---|---:|---:|---:|---:|
+| ProfileRecord string | 1,365.512 ns | 1,356.914 ns | 508.047 ns | +62.79% |
+| ProfileRecord bytes | 1,549.674 ns | 1,508.829 ns | 566.107 ns | +63.47% |
+| Address string | 1,520.324 ns | 1,532.868 ns | 532.577 ns | +64.97% |
+| Address bytes | 1,550.821 ns | 1,526.123 ns | 608.093 ns | +60.79% |
+| Person string | 4,285.274 ns | 4,345.353 ns | 4,466.658 ns | -4.23% |
+| Person bytes | 4,845.357 ns | 5,020.067 ns | 5,000.557 ns | -3.20% |
+
+These are rejection diagnostics, not retained latency claims: several per-side
+CV values remained above 3% after the mandatory retest, Person regressed in
+both input forms, and candidate decoder Person bytes was 3.61% slower than the
+baseline. The session therefore failed the requirements that every workload
+must avoid regression and that the ordinary decoder stay within 2%.
+
+The rejected candidate did reduce aggregate median GC count by 42.86% and
+GC-freed bytes by 45.11%. Five ProfileRecord-string `perf stat` pairs reduced
+median cycles from 495.9M to 266.3M and instructions from 999.0M to 355.6M.
+Median process maximum RSS was 80,754 KiB for baseline and 58,310 KiB for the
+single-session path. After decoding and releasing a 4 MiB unknown field, a
+forced-GC probe reported 1,216,512 heap bytes versus 811,008 before, rather than
+retaining the input size. These positive signals did not override the required
+Person and variance gates, so no session API remains in the library.
+
+The reusable analyzer is `scripts/json_fast_session_summary.py`; raw evidence
+is preserved in the Server experiment directory
+`<home>/yjson-session-20260817-Codex` and local ignored `target/`
+evidence directories.
