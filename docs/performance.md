@@ -63,3 +63,35 @@ from 753.4M to 675.1M cycles and from 1.823B to 1.572B instructions. Five paired
 RSS observations had medians of 91,712 KiB before and 91,636 KiB after. An empty
 generic-collection shortcut was evaluated separately and rejected after its
 stable fixed probe regressed string decode by 1.00% and bytes decode by 0.89%.
+
+## Reusable generated fast decoder (2026-08-17)
+
+`YJson.fastDecoder(codec)` resolves the generated fast-decoder contract once.
+The returned `JsonFastDecoder<T>` exposes non-generic `decodeString` and
+`decodeBytes` methods implemented directly by each supported generated,
+non-generic object codec. Existing `FooJson` declarations and `decodeStringWith` / `decodeBytesWith`
+signatures are unchanged. Explicit read configurations use the regular direct
+reader so unknown-field, duplicate-key, number, location, and depth policies
+retain their existing semantics.
+
+The final fixed probe used the same Xeon Gold 6248R host, CPU 8, SDK 20260803,
+`-O2`, `cjHeapSize=128MB`, 100,000 decodes per process, and eleven alternating
+baseline/candidate pairs:
+
+| ProfileRecord workload | Existing generic API | Reusable decoder | Improvement | Baseline CV | Candidate CV |
+|---|---:|---:|---:|---:|---:|
+| String | 2,136.718 ns/op | 1,781.112 ns/op | 16.64% | 3.32% | 2.38% |
+| Bytes | 2,272.406 ns/op | 1,890.617 ns/op | 16.80% | 2.94% | 2.81% |
+
+The string baseline missed the 3% per-side CV target by 0.32 percentage points;
+independent retries were more GC-noisy under the 128 MB heap. The string result
+is therefore supported by the paired effect, counters, and profile rather than
+presented as an all-sides low-variance latency result. The bytes comparison met
+the per-side CV target directly.
+
+Seven paired `perf stat` runs reduced median cycles from 528.4M to 484.2M
+(-8.38%) and instructions from 1.050B to 981.6M (-6.48%). In the final sampled
+profile, the previous generic TypeInfo descriptor lookup was absent above the
+0.1% reporting threshold; the two remaining TypeInfo method-table symbols
+totalled 1.41%. Five paired maximum-RSS observations had medians of 75,044 KiB
+and 75,540 KiB (+0.66%), within the 1% no-regression gate.

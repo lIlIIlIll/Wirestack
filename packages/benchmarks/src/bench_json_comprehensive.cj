@@ -137,6 +137,8 @@ class ComprehensiveJsonCompareBenchmarks {
     let address = samplePerson().address
     let person = samplePerson()
     let profile = sampleProfileRecord()
+    let personFastDecoder = YJson.fastDecoder(PersonJson)
+    let profileFastDecoder = YJson.fastDecoder(ProfileRecordJson)
     let profileBundle = sampleProfileBundleForBench()
     let uint64Envelope = sampleUInt64Envelope()
     let temporalStats = sampleTemporalStats()
@@ -334,6 +336,24 @@ class ComprehensiveJsonCompareBenchmarks {
     }
 
     @Bench
+    func yjsonStringDecodeProfileRecordFastDecoderBatchGuard(): Unit {
+        var value: Int64 = 0
+        for (_ in 0..128) {
+            value += profileFastDecoder.decodeString(profileText).id
+        }
+        intSink = value
+    }
+
+    @Bench
+    func yjsonStringDecodePersonFastDecoderBatchGuard(): Unit {
+        var value: Int64 = 0
+        for (_ in 0..64) {
+            value += personFastDecoder.decodeString(personText).id
+        }
+        intSink = value
+    }
+
+    @Bench
     func stdxStringDecodePerson(): Unit {
         intSink = decodeStdxFromUtf8String<StdxPerson>(personText).id
     }
@@ -461,6 +481,24 @@ class ComprehensiveJsonCompareBenchmarks {
         var value: Int64 = 0
         for (_ in 0..128) {
             value += decodeYjsonReflectBytesWith(ProfileRecordJson, profileBytes).id
+        }
+        intSink = value
+    }
+
+    @Bench
+    func yjsonBytesDecodeProfileRecordFastDecoderBatchGuard(): Unit {
+        var value: Int64 = 0
+        for (_ in 0..128) {
+            value += profileFastDecoder.decodeBytes(profileBytes).id
+        }
+        intSink = value
+    }
+
+    @Bench
+    func yjsonBytesDecodePersonFastDecoderBatchGuard(): Unit {
+        var value: Int64 = 0
+        for (_ in 0..64) {
+            value += personFastDecoder.decodeBytes(personBytes).id
         }
         intSink = value
     }

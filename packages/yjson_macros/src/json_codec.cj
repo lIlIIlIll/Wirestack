@@ -672,7 +672,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     }
 
     let codecInterfaces = if (supportsFastRead) {
-        "JsonObjectCodec<${targetType}> & JsonArrayDirectCodec<${targetType}>"
+        "JsonObjectCodec<${targetType}> & JsonArrayDirectCodec<${targetType}> & JsonFastDecoder<${targetType}>"
     } else {
         "JsonObjectCodec<${targetType}>"
     }
@@ -918,6 +918,32 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         appendLine(sb, 3, "return __result")
     }
     appendLine(sb, 2, "} finally { context.leaveValue() }")
+    appendLine(sb, 1, "}")
+    appendLine(sb, 1, "public func decodeString(text: String): ${targetType} {")
+    appendLine(sb, 2, "let config = JsonReadConfig.defaults")
+    appendLine(sb, 2, "let reader = JsonFastReader(text)")
+    appendLine(sb, 2, "let result = readFast(reader, JsonDecodeContext(config))")
+    appendLine(sb, 2, "reader.expectEnd()")
+    appendLine(sb, 2, "result")
+    appendLine(sb, 1, "}")
+    appendLine(sb, 1, "public func decodeString(text: String, config!: JsonReadConfig): ${targetType} {")
+    appendLine(sb, 2, "let reader = JsonDirectReader(text, config: config)")
+    appendLine(sb, 2, "let result = read(reader, JsonDecodeContext(config))")
+    appendLine(sb, 2, "reader.expectEnd()")
+    appendLine(sb, 2, "result")
+    appendLine(sb, 1, "}")
+    appendLine(sb, 1, "public func decodeBytes(bytes: Array<Byte>): ${targetType} {")
+    appendLine(sb, 2, "let config = JsonReadConfig.defaults")
+    appendLine(sb, 2, "let reader = JsonFastReader(bytes)")
+    appendLine(sb, 2, "let result = readFast(reader, JsonDecodeContext(config))")
+    appendLine(sb, 2, "reader.expectEnd()")
+    appendLine(sb, 2, "result")
+    appendLine(sb, 1, "}")
+    appendLine(sb, 1, "public func decodeBytes(bytes: Array<Byte>, config!: JsonReadConfig): ${targetType} {")
+    appendLine(sb, 2, "let reader = JsonDirectReader(bytes, config: config)")
+    appendLine(sb, 2, "let result = read(reader, JsonDecodeContext(config))")
+    appendLine(sb, 2, "reader.expectEnd()")
+    appendLine(sb, 2, "result")
     appendLine(sb, 1, "}")
     }
     appendLine(sb, 0, "}")

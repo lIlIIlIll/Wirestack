@@ -69,6 +69,18 @@ main(): Unit {
     require(userJson == "{\"id\":7,\"name\":\"Alice\"}", "unexpected user JSON")
     require(user.id == 7 && user.name == "Alice", "user roundtrip failed")
 
+    let userDecoder = YJson.fastDecoder(ExternalUserJson)
+    let fastUser = userDecoder.decodeString(userJson)
+    let fastUserBytes = userDecoder.decodeBytes(unsafe { userJson.rawData() })
+    require(fastUser.id == 7 && fastUser.name == "Alice", "fast string decode failed")
+    require(fastUserBytes.id == 7 && fastUserBytes.name == "Alice", "fast bytes decode failed")
+    requireJsonError("unknown_field", { =>
+        let _ = userDecoder.decodeString(
+            "{\"id\":7,\"name\":\"Alice\",\"extra\":true}",
+            config: JsonReadConfig(unknownFieldPolicy: JsonUnknownFieldPolicy.Reject)
+        )
+    })
+
     let eventJson = YJson.toJson(ExternalEvent.Renamed("Alice", 8))
     match (YJson.fromJson<ExternalEvent>(eventJson)) {
         case ExternalEvent.Renamed(name, revision) =>

@@ -107,6 +107,21 @@ public interface JsonArrayDirectCodec<T> <: JsonDirectCodec<T> {
     func readFast(reader: JsonFastReader, context: JsonDecodeContext): T
 }
 
+/// Reusable typed decoder that resolves the fast codec contract once.
+///
+/// Create instances through `YJson.fastDecoder`. Its decode methods are
+/// intentionally non-generic so repeated calls avoid per-call generic runtime
+/// type resolution while preserving the normal read-configuration semantics.
+public interface JsonFastDecoder<T> {
+    func decodeString(text: String): T
+
+    func decodeString(text: String, config!: JsonReadConfig): T
+
+    func decodeBytes(bytes: Array<Byte>): T
+
+    func decodeBytes(bytes: Array<Byte>, config!: JsonReadConfig): T
+}
+
 public interface JsonArrayListDirectCodec<T> <: JsonArrayDirectCodec<T> {
     func readFastArrayList(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<T>
 }
@@ -939,6 +954,18 @@ public class YJson {
 
     public static func decodeWith<T>(codec: JsonDirectCodec<T>, value: JsonValue, config!: JsonCodecConfig = JsonCodecConfig.compact): T {
         decodeStringWith(codec, stringify(value, config: config.write), config: config.read)
+    }
+
+    /// Resolves a codec's fast-reader contract once for repeated typed decode.
+    public static func fastDecoder<T>(codec: JsonDirectCodec<T>): JsonFastDecoder<T> {
+        match (codec) {
+            case fast: JsonFastDecoder<T> => fast
+            case _ => throw JsonException(
+                "Codec does not provide a fast-reader implementation",
+                code: "codec_contract",
+                path: "$"
+            )
+        }
     }
 
     public static func encodeStringWith<T>(codec: JsonDirectCodec<T>, value: T, config!: JsonWriteConfig = JsonWriteConfig.compact): String {

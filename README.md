@@ -81,6 +81,19 @@ let text = YJson.toJson(User(7, "Alice"))
 let user = YJson.fromJson<User>(text)
 ```
 
+同一个支持 compact fast reader 的生成对象 codec 被高频重复解码时，可以在循环外
+解析一次 fast decoder，避免每次泛型调用的运行时类型解析：
+
+```cangjie noverify=usage-fragment
+let decoder = YJson.fastDecoder(UserJson)
+let userFromString = decoder.decodeString(text)
+let userFromBytes = decoder.decodeBytes(unsafe { text.rawData() })
+```
+
+无配置重载使用生成的 compact fast reader；传入显式 `JsonReadConfig` 时保持普通
+codec 的完整配置语义。不提供生成式 fast-decoder 合同的自定义 codec 会抛出
+`JsonException`，其错误码为 `codec_contract`。
+
 `@JsonCodec` 在调用方编译期间处理调用方 `src/` 中的类型，不依赖运行时反射。
 泛型实参必须有内置 codec 或同样可生成的 codec；参与生成的实例字段必须显式声明
 类型，不可变字段需要由可用构造函数接收。完整下游 fixture 位于

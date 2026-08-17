@@ -6,6 +6,18 @@ import std.collection.*
 import std.unittest.*
 import std.unittest.testmacro.*
 
+private class RegressionNonFastIntCodec <: JsonDirectCodec<Int64> {
+    public func write(value: Int64, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
+        let _ = context
+        writer.writeInt64(value)
+    }
+
+    public func read(reader: JsonDirectReader, context: JsonDecodeContext): Int64 {
+        let _ = context
+        reader.readInt64()
+    }
+}
+
 func yJsonRegressionCanParse(text: String): Bool {
     try {
         let _ = YJson.parse(text)
@@ -93,6 +105,33 @@ public class AliasRecord {
 
 @Test
 class YJsonRegressionTest {
+    @TestCase
+    func reusableFastDecoderPreservesStringBytesAndConfigSemantics(): Unit {
+        let decoder = YJson.fastDecoder(ProfileRecordJson)
+        let compact = "{\"profile_id\":7,\"alias\":\"fast\",\"level\":3}"
+        let fromString = decoder.decodeString(compact)
+        let fromBytes = decoder.decodeBytes(yJsonRegressionBytes(compact))
+        @Expect(fromString.id, 7)
+        @Expect(fromString.alias, "fast")
+        @Expect(fromString.level, Int32(3))
+        @Expect(fromBytes.id, 7)
+        @Expect(fromBytes.alias, "fast")
+        @Expect(fromBytes.level, Int32(3))
+
+        let unknownError = @AssertThrows[JsonException](decoder.decodeString(
+            "{\"profile_id\":7,\"alias\":\"fast\",\"level\":3,\"extra\":1}",
+            config: JsonReadConfig(unknownFieldPolicy: JsonUnknownFieldPolicy.Reject)
+        ))
+        @Expect(unknownError.code, "unknown_field")
+    }
+
+    @TestCase
+    func fastDecoderRejectsCodecWithoutFastContract(): Unit {
+        let error = @AssertThrows[JsonException](YJson.fastDecoder(RegressionNonFastIntCodec()))
+        @Expect(error.code, "codec_contract")
+        @Expect(error.path, "$")
+    }
+
     @TestCase
     func compactNameProbeMissKeepsGeneralDispatcherCursor(): Unit {
         let reader = JsonFastReader("{\"first\":1,\"second\":2}")
