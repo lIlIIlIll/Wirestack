@@ -250,3 +250,59 @@ restored. The fixed probe and paired analyzer remain in
 raw evidence is preserved under
 `<home>/yjson-person-hotpath-20260817` and ignored local
 `target/perf-person-hotpath-phase*` directories.
+
+## Rejected generated Borrowed View experiment (2026-08-17)
+
+A source-backed `TypeJsonViewSession` protocol was implemented for every
+`@JsonCodec` model. It reused caller-owned reader/context/scratch state, avoided
+owned String/container/model results on specialized fields, invalidated old
+views by generation, required custom `@JsonUsing` codecs to provide a
+non-constructing validator, and released input references on reset, error, or
+the next bind. The public API and implementation were removed after the frozen
+release gates failed.
+
+The source-verified baseline was the production snapshot underlying common-base
+commit `a9c962d`. Measurements used the Xeon Gold 6248R Server, CPU 8, SDK
+20260803, `-O2`, and `cjHeapSize=128MB`. The first eleven-round, three-way
+alternating run compared the frozen decoder, the candidate's ordinary decoder,
+and the candidate View with complete result traversal:
+
+| Workload | Borrowed paired gain | Positive pairs | Baseline/View CV |
+|---|---:|---:|---:|
+| ProfileRecord string | +52.19% | 11/11 | 3.65% / 8.29% |
+| ProfileRecord bytes | +56.56% | 11/11 | 5.55% / 5.90% |
+| Address string | +54.81% | 11/11 | 3.72% / 5.52% |
+| Address bytes | +56.53% | 11/11 | 5.86% / 5.89% |
+| Person string | +31.99% | 11/11 | 2.87% / 3.52% |
+| Person bytes | +42.29% | 11/11 | 3.78% / 11.68% |
+
+All six effect and positive-pair gates passed, and aggregate measured GC count
+and GC-freed bytes fell by 100%. They are rejection diagnostics rather than
+publishable latency claims: the mandatory 3% per-side CV gate failed, while the
+candidate ordinary decoder showed -4.87% on ProfileRecord bytes and -2.49% on
+Person string in that View-linked process, beyond the 2% limit.
+
+Several follow-ups separated the owned-only consumer binary, removed eager
+View-session/codec objects, restored the original generated codec interface,
+and eliminated redundant next-bind cleanup. The optimized isolated
+ProfileRecord-string sample reached +54.92%, and an owned-only run reached the
+ordinary non-regression range, but repeated eleven-sample runs still exceeded
+3% CV because another Server workload repeatedly changed socket/core frequency.
+A 500,000-iteration diagnostic stabilized Person but changed the frozen flat
+GC workload and therefore was not substituted for the 100,000-iteration gate.
+No delayed latency or hardware-counter claim is published.
+
+Non-latency safeguards passed before rollback. A clean build grew from 156.51s
+to 172.63s (+10.30%, within 15%), and the probe binary grew from 16,021,376 to
+16,613,256 bytes (+3.69%, within 10%). After twelve distinct 4 MiB inputs, forced
+GC reported 569,352 allocated bytes after the first input, a 608,920-byte peak,
+and 570,080 bytes at the end, demonstrating no cumulative input retention.
+These signals did not override the latency/CV/ordinary-decoder gates.
+
+Production contains no Borrowed View/session API from this experiment. The
+owned full-traversal probe, baseline harness, three-way sampler, counter sampler,
+and strict analyzer remain in `packages/person_hotpath_probe`,
+`benchmarks/borrowed_view_baseline_main.cj`,
+`scripts/json_borrowed_probe_run.py`, `scripts/json_borrowed_perf_stat.py`, and
+`scripts/json_person_hotpath_summary.py`. Raw append-only evidence is retained
+under `<home>/yjson-borrowed-formal-20260817/evidence` on the Server.
