@@ -11,24 +11,15 @@ private let ITERATIONS: Int64 = 100000
 private let PROFILE_DECODER = YJson.fastDecoder(ProfileRecordJson)
 private let ADDRESS_DECODER = YJson.fastDecoder(AddressJson)
 private let PERSON_DECODER = YJson.fastDecoder(PersonJson)
-private func ownedPersonChecksum(value: Person): Int64 {
+
+private func personChecksum(value: Person): Int64 {
     var result = value.id + Int64(value.age) + value.name.size
     for (tag in value.tags) { result += tag.size }
-    result += value.scores["math"]
-    result += value.scores["english"]
+    result += value.scores["math"] + value.scores["english"]
     result += value.address.street.size + value.address.zipcode
     match (value.nick) { case Some(text) => result += text.size; case None => () }
     result
 }
-
-private func ownedProfileChecksum(value: ProfileRecord): Int64 {
-    value.id + value.alias.size + Int64(value.level)
-}
-
-private func ownedAddressChecksum(value: Address): Int64 {
-    value.street.size + value.zipcode
-}
-
 
 private func report(action: () -> Int64): Unit {
     var warmupSink: Int64 = 0
@@ -49,7 +40,7 @@ private func report(action: () -> Int64): Unit {
 
 main(): Unit {
     let args = getCommandLine()
-    let mode = if (args.size > 1) { args[1] } else { "person-string" }
+    let mode = if (args.size > 1) { args[1] } else { "person-owned-full-string" }
     let profileText = YJson.encodeStringWith(ProfileRecordJson, sampleProfileRecord())
     let addressText = YJson.encodeStringWith(AddressJson, samplePerson().address)
     let personText = YJson.encodeStringWith(PersonJson, samplePerson())
@@ -57,18 +48,24 @@ main(): Unit {
     let addressBytes = unsafe { addressText.rawData() }
     let personBytes = unsafe { personText.rawData() }
     match (mode) {
-        case "profile-string" => report({ => PROFILE_DECODER.decodeString(profileText).id })
-        case "profile-bytes" => report({ => PROFILE_DECODER.decodeBytes(profileBytes).id })
-        case "address-string" => report({ => ADDRESS_DECODER.decodeString(addressText).zipcode })
-        case "address-bytes" => report({ => ADDRESS_DECODER.decodeBytes(addressBytes).zipcode })
-        case "person-string" => report({ => PERSON_DECODER.decodeString(personText).id })
-        case "person-bytes" => report({ => PERSON_DECODER.decodeBytes(personBytes).id })
-        case "profile-owned-full-string" => report({ => ownedProfileChecksum(PROFILE_DECODER.decodeString(profileText)) })
-        case "profile-owned-full-bytes" => report({ => ownedProfileChecksum(PROFILE_DECODER.decodeBytes(profileBytes)) })
-        case "address-owned-full-string" => report({ => ownedAddressChecksum(ADDRESS_DECODER.decodeString(addressText)) })
-        case "address-owned-full-bytes" => report({ => ownedAddressChecksum(ADDRESS_DECODER.decodeBytes(addressBytes)) })
-        case "person-owned-full-string" => report({ => ownedPersonChecksum(PERSON_DECODER.decodeString(personText)) })
-        case "person-owned-full-bytes" => report({ => ownedPersonChecksum(PERSON_DECODER.decodeBytes(personBytes)) })
+        case "profile-owned-full-string" => report({ =>
+            let value = PROFILE_DECODER.decodeString(profileText)
+            value.id + value.alias.size + Int64(value.level)
+        })
+        case "profile-owned-full-bytes" => report({ =>
+            let value = PROFILE_DECODER.decodeBytes(profileBytes)
+            value.id + value.alias.size + Int64(value.level)
+        })
+        case "address-owned-full-string" => report({ =>
+            let value = ADDRESS_DECODER.decodeString(addressText)
+            value.street.size + value.zipcode
+        })
+        case "address-owned-full-bytes" => report({ =>
+            let value = ADDRESS_DECODER.decodeBytes(addressBytes)
+            value.street.size + value.zipcode
+        })
+        case "person-owned-full-string" => report({ => personChecksum(PERSON_DECODER.decodeString(personText)) })
+        case "person-owned-full-bytes" => report({ => personChecksum(PERSON_DECODER.decodeBytes(personBytes)) })
         case _ => throw Exception("unknown probe mode: ${mode}")
     }
 }
