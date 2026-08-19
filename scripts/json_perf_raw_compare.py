@@ -58,6 +58,8 @@ def summarize(runs: list[list[float]]) -> dict[str, object]:
     run_medians = [statistics.median(run) for run in runs]
     mean = statistics.fmean(samples)
     deviation = statistics.pstdev(samples)
+    run_median_mean = statistics.fmean(run_medians)
+    run_median_deviation = statistics.pstdev(run_medians)
     return {
         "runs": len(runs),
         "samples": len(samples),
@@ -67,6 +69,10 @@ def summarize(runs: list[list[float]]) -> dict[str, object]:
         "max_ns": max(samples),
         "mean_ns": mean,
         "cv_percent": 0.0 if mean == 0.0 else deviation / mean * 100.0,
+        "run_median_mean_ns": run_median_mean,
+        "run_median_cv_percent": (
+            0.0 if run_median_mean == 0.0 else run_median_deviation / run_median_mean * 100.0
+        ),
         "run_medians_ns": run_medians,
     }
 
@@ -103,15 +109,15 @@ def compare(baseline_root: Path, candidate_root: Path) -> list[dict[str, object]
 
 def render_markdown(rows: Iterable[dict[str, object]]) -> str:
     lines = [
-        "| Case | Runs B/C | Baseline median | Candidate median | Paired improvement | Candidate p95 | Candidate CV |",
-        "|:--|--:|--:|--:|--:|--:|--:|",
+        "| Case | Runs B/C | Baseline median | Candidate median | Paired improvement | Candidate p95 | Candidate run-median CV | Candidate raw CV |",
+        "|:--|--:|--:|--:|--:|--:|--:|--:|",
     ]
     for row in rows:
         before = row["baseline"]
         after = row["candidate"]
         assert isinstance(before, dict) and isinstance(after, dict)
         lines.append(
-            "| {case} | {br}/{cr} | {bm:.3f} us | {cm:.3f} us | {delta:+.2f}% | {p95:.3f} us | {cv:.2f}% |".format(
+            "| {case} | {br}/{cr} | {bm:.3f} us | {cm:.3f} us | {delta:+.2f}% | {p95:.3f} us | {run_cv:.2f}% | {raw_cv:.2f}% |".format(
                 case=row["case"],
                 br=before["runs"],
                 cr=after["runs"],
@@ -119,7 +125,8 @@ def render_markdown(rows: Iterable[dict[str, object]]) -> str:
                 cm=float(after["median_ns"]) / 1_000.0,
                 delta=float(row["paired_improvement_median_percent"]),
                 p95=float(after["p95_ns"]) / 1_000.0,
-                cv=float(after["cv_percent"]),
+                run_cv=float(after["run_median_cv_percent"]),
+                raw_cv=float(after["cv_percent"]),
             )
         )
     return "\n".join(lines)
