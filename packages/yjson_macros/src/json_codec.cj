@@ -529,8 +529,18 @@ private func directScalarFastRead(field: CodecField, reader: String): String {
         case "ArrayList<String>" => "__yJsonReadFastStringArrayList(${reader}, context)"
         case "HashMap<String,Int64>" => "__yJsonReadFastInt64HashMap(${reader}, context)"
         case "Option<String>" => "__yJsonReadFastStringOption(${reader}, context)"
-        case "BigInt" => "${reader}.readRawBigInt()"
-        case "Decimal" => "${reader}.readRawDecimal()"
+        case "DateTime" => "jsonFastReadRfc3339DateTime(${reader})"
+        case "BigInt" => "jsonFastReadBigInt(${reader})"
+        case "Decimal" => "jsonFastReadDecimal(${reader})"
+        case "Float64" => "jsonFastReadFloat64(${reader})"
+        case "Float32" => "jsonFastReadFloat32(${reader})"
+        case "Float16" => "jsonFastReadFloat16(${reader})"
+        case "ArrayList<DateTime>" => "__yJsonReadFastArrayListRfc3339DateTime(${reader}, context)"
+        case "HashMap<String,DateTime>" => "__yJsonReadFastHashMapStringRfc3339DateTime(${reader}, context)"
+        case "ArrayList<BigInt>" => "__yJsonReadFastArrayListBigInt(${reader}, context)"
+        case "HashMap<String,BigInt>" => "__yJsonReadFastHashMapStringBigInt(${reader}, context)"
+        case "ArrayList<Decimal>" => "__yJsonReadFastArrayListDecimal(${reader}, context)"
+        case "HashMap<String,Decimal>" => "__yJsonReadFastHashMapStringDecimal(${reader}, context)"
         case _ => ""
     }
 }
@@ -538,7 +548,10 @@ private func directScalarFastRead(field: CodecField, reader: String): String {
 private func directFieldNeedsContext(field: CodecField): Bool {
     let typeText = field.typeText.replace(" ", "")
     typeText == "ArrayList<String>" || typeText == "HashMap<String,Int64>" ||
-        typeText == "Option<String>"
+        typeText == "Option<String>" || typeText == "ArrayList<DateTime>" ||
+        typeText == "HashMap<String,DateTime>" || typeText == "ArrayList<BigInt>" ||
+        typeText == "HashMap<String,BigInt>" || typeText == "ArrayList<Decimal>" ||
+        typeText == "HashMap<String,Decimal>"
 }
 
 private func scalarScratchInitializer(field: CodecField): Option<String> {

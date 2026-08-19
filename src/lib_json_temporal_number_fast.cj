@@ -732,6 +732,59 @@ public func jsonFastReadHashMapStringDecimal(reader: JsonFastReader): HashMap<St
     result
 }
 
+// Macro-generated codecs live in the consumer package, so keep the temporal
+// and arbitrary-precision container fast paths behind public context-aware
+// bridges.  The raw helpers above intentionally do not know about decode-path
+// depth; these wrappers preserve the same max-depth accounting as the existing
+// generated String/Int64 container helpers.
+public func __yJsonReadFastArrayListRfc3339DateTime(
+    reader: JsonFastReader,
+    context: JsonDecodeContext
+): ArrayList<DateTime> {
+    context.enterValue()
+    try { jsonFastReadArrayListRfc3339DateTime(reader) } finally { context.leaveValue() }
+}
+
+public func __yJsonReadFastHashMapStringRfc3339DateTime(
+    reader: JsonFastReader,
+    context: JsonDecodeContext
+): HashMap<String, DateTime> {
+    context.enterValue()
+    try { jsonFastReadHashMapStringRfc3339DateTime(reader) } finally { context.leaveValue() }
+}
+
+public func __yJsonReadFastArrayListBigInt(
+    reader: JsonFastReader,
+    context: JsonDecodeContext
+): ArrayList<BigInt> {
+    context.enterValue()
+    try { jsonFastReadArrayListBigInt(reader) } finally { context.leaveValue() }
+}
+
+public func __yJsonReadFastHashMapStringBigInt(
+    reader: JsonFastReader,
+    context: JsonDecodeContext
+): HashMap<String, BigInt> {
+    context.enterValue()
+    try { jsonFastReadHashMapStringBigInt(reader) } finally { context.leaveValue() }
+}
+
+public func __yJsonReadFastArrayListDecimal(
+    reader: JsonFastReader,
+    context: JsonDecodeContext
+): ArrayList<Decimal> {
+    context.enterValue()
+    try { jsonFastReadArrayListDecimal(reader) } finally { context.leaveValue() }
+}
+
+public func __yJsonReadFastHashMapStringDecimal(
+    reader: JsonFastReader,
+    context: JsonDecodeContext
+): HashMap<String, Decimal> {
+    context.enterValue()
+    try { jsonFastReadHashMapStringDecimal(reader) } finally { context.leaveValue() }
+}
+
 public func jsonFastFormatDecimal(value: Decimal): String {
     value.toString()
 }
