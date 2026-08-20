@@ -1,14 +1,14 @@
 # Public API inventory
 
-This inventory records the public surfaces introduced for the 1.0.0 release
-candidate by the reusable fast collection bridge and the optional native
-Float64 parser. The machine-readable source is
+This inventory records the public surfaces changed or introduced for the 2.0.0
+release candidate, including resource-limited parsing, the reusable fast
+collection bridge, and the optional native Float64 parser. The machine-readable source is
 [`release/public-api-inventory.toml`](../release/public-api-inventory.toml).
 
-The entries are additive. They do not remove or change an existing public
-signature, but they are still release-surface changes: the API inventory and
-ABI symbol inventory must be reviewed whenever one is added, removed, or
-renamed.
+Most entries are additive. `JsonReadConfig.init` is an intentional 2.0 breaking
+change: it adds constructor parameters and changes the default
+`maxPolymorphicObjectBytes` value. The API inventory and ABI symbol inventory
+must be reviewed whenever a declaration is added, removed, renamed, or changed.
 
 ## Package pairing
 
@@ -19,16 +19,30 @@ pin all packages to the same release:
 
 ```toml
 [dependencies]
-yjson = "1.0.0"
-yjson_macros = "1.0.0"
+yjson = "2.0.0"
+yjson_macros = "2.0.0"
 # or, for normal applications:
-yjson_all = "1.0.0"
+yjson_all = "2.0.0"
 ```
 
-`yjson_native` must use the same `yjson` version because its public backend
-interface and generated `@FastNative` bindings are compiled against the core
-package. Repository manifests use path dependencies for development; release
-manifests use the exact versions above.
+`yjson_native` and `yjson_yyjson` must use the same `yjson` version because
+their public facades and native bindings are compiled against the core package.
+Repository manifests use path dependencies for development; release manifests
+use the exact versions above.
+
+## Resource-limit configuration and native ABI
+
+| Surface | Contract | Compatibility disposition |
+|---|---|---|
+| `JsonReadConfig.maxBytes` | Input document bytes; `0` is unlimited | New 2.0 field and constructor parameter; rebuild required |
+| `JsonReadConfig.maxStringBytes` | Decoded UTF-8 bytes per value/key; `0` is unlimited | New 2.0 field and constructor parameter; rebuild required |
+| `JsonReadConfig.maxPolymorphicObjectBytes` | Root array/object raw subtree bytes; `0` is unlimited | Existing field; default changed from 16 MiB to unlimited |
+| `YJ_JSON_ValidateLimits` | Allocation-free native preflight shared by native backends | Additive C symbol |
+| `YJ_Compact_ParseWithLimits` | Limited Custom Native parse | Additive; old parse symbol preserved |
+| `YJ_Yyjson_ParseWithLimits` | Limited yyjson parse | Additive; old parse symbol preserved |
+
+See [resource limits](resource-limits.md) for measurement units, errors, and
+stream behavior.
 
 ## Stable generated-code bridge
 
@@ -58,12 +72,14 @@ process-global and must not race with decoding.
 
 ## Compatibility disposition
 
-- Source: existing consumers remain source-compatible; new macro output needs
-  the matching core release.
-- ABI: the reader addition is a non-`open`, non-overriding instance method;
-  native declarations are additive symbols/interfaces. Existing symbols are
-  not removed or retyped.
-- Semantics: collection preallocation and the optional Float64 parser have
+- Source: 1.x calls that construct `JsonReadConfig` must be rebuilt and may need
+  review of the changed polymorphic-object default; new macro output needs the
+  matching core release.
+- ABI: `JsonReadConfig` is not claimed binary-compatible with 1.x. The reader
+  addition is a non-`open`, non-overriding instance method; native declarations
+  are additive and the old C symbols remain available.
+- Semantics: resource budgets are opt-in because all three byte limits default
+  to zero. Collection preallocation and the optional Float64 parser retain
   fallback paths that preserve decoded values and errors.
 - Inventory: this file and the C ABI header are release gates. Update both
   before publishing a future API change.

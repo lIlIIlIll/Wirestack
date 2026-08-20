@@ -12,6 +12,8 @@ private let YJ_COMPACT_DOCUMENT_TOO_LARGE: Int32 = 6
 private let YJ_COMPACT_CLOSED: Int32 = 7
 private let YJ_COMPACT_TYPE_ERROR: Int32 = 8
 private let YJ_COMPACT_BOUNDS_ERROR: Int32 = 9
+private let YJ_COMPACT_STRING_TOO_LARGE: Int32 = 10
+private let YJ_COMPACT_VALUE_TOO_LARGE: Int32 = 11
 
 private let YJ_COMPACT_NULL: Int32 = 0
 private let YJ_COMPACT_BOOL: Int32 = 1
@@ -44,11 +46,13 @@ public enum NativeCompactDuplicateStrategy {
     | PresizedLoad625
 }
 
-@FastNative
 foreign func YJ_Compact_Parse(input: CPointer<UInt8>, length: Int64, flags: UInt32,
     maxDepth: Int64, outHandle: CPointer<UInt64>, outRoot: CPointer<UInt32>,
     outErrorCode: CPointer<UInt32>, outErrorOffset: CPointer<Int64>): Int32
-@FastNative
+foreign func YJ_Compact_ParseWithLimits(input: CPointer<UInt8>, length: Int64,
+    flags: UInt32, maxDepth: Int64, maxBytes: Int64, maxStringBytes: Int64,
+    maxValueBytes: Int64, outHandle: CPointer<UInt64>, outRoot: CPointer<UInt32>,
+    outErrorCode: CPointer<UInt32>, outErrorOffset: CPointer<Int64>): Int32
 foreign func YJ_Compact_Free(handle: UInt64): Unit
 @FastNative
 foreign func YJ_Compact_Kind(handle: UInt64, node: UInt32, outKind: CPointer<UInt32>): Int32
@@ -60,7 +64,6 @@ foreign func YJ_Compact_GetInt(handle: UInt64, node: UInt32, outValue: CPointer<
 foreign func YJ_Compact_GetBool(handle: UInt64, node: UInt32, outValue: CPointer<UInt32>): Int32
 @FastNative
 foreign func YJ_Compact_GetTextSize(handle: UInt64, node: UInt32, outSize: CPointer<UInt64>): Int32
-@FastNative
 foreign func YJ_Compact_CopyText(handle: UInt64, node: UInt32, output: CPointer<UInt8>,
     outputCapacity: UInt64, outWritten: CPointer<UInt64>): Int32
 @FastNative
@@ -70,37 +73,28 @@ foreign func YJ_Compact_ArrayGet(handle: UInt64, node: UInt32, index: UInt64,
 foreign func YJ_Compact_ObjectEntry(handle: UInt64, node: UInt32, index: UInt64,
     outValueKind: CPointer<UInt32>, outValuePayload: CPointer<UInt64>,
     outKeySize: CPointer<UInt64>): Int32
-@FastNative
 foreign func YJ_Compact_CopyObjectKey(handle: UInt64, node: UInt32, index: UInt64,
     output: CPointer<UInt8>, outputCapacity: UInt64, outWritten: CPointer<UInt64>): Int32
-@FastNative
 foreign func YJ_Compact_ObjectLookup(handle: UInt64, node: UInt32, key: CPointer<UInt8>,
     keyLength: UInt64, outValueKind: CPointer<UInt32>, outValuePayload: CPointer<UInt64>,
     outFound: CPointer<UInt32>): Int32
 @FastNative
 foreign func YJ_Compact_GetStringRefSize(handle: UInt64, stringRef: UInt64,
     outSize: CPointer<UInt64>): Int32
-@FastNative
 foreign func YJ_Compact_CopyStringRef(handle: UInt64, stringRef: UInt64,
     output: CPointer<UInt8>, outputCapacity: UInt64, outWritten: CPointer<UInt64>): Int32
-@FastNative
 foreign func YJ_Compact_TraversalChecksum(handle: UInt64): UInt64
-@FastNative
 foreign func YJ_Compact_Serialize(handle: UInt64, output: CPointer<UInt8>,
     outputCapacity: UInt64, outWritten: CPointer<UInt64>): Int32
 
-@FastNative
 foreign func YJ_Compact_SerializeAlloc(handle: UInt64, outBufferHandle: CPointer<UInt64>,
     outSize: CPointer<UInt64>): Int32
-@FastNative
 foreign func YJ_Compact_ExportTapeAlloc(handle: UInt64, outBufferHandle: CPointer<UInt64>,
     outSize: CPointer<UInt64>): Int32
 
-@FastNative
 foreign func YJ_Compact_CopyOwnedBuffer(bufferHandle: UInt64, output: CPointer<UInt8>,
     outputCapacity: UInt64): Int32
 
-@FastNative
 foreign func YJ_Compact_FreeOwnedBuffer(bufferHandle: UInt64): Unit
 @FastNative
 foreign func YJ_Compact_Stats(handle: UInt64, stats: CPointer<UInt64>, capacity: UInt64): Int32
@@ -111,7 +105,6 @@ foreign func YJ_Compact_Noop(value: UInt64): UInt64
 @FastNative
 foreign func YJ_Compact_ScalarProbe(value: UInt64, outValue: CPointer<UInt64>): Int32
 
-@FastNative
 foreign func YJ_Compact_CopyProbe(input: CPointer<UInt8>, length: UInt64,
     iterations: UInt64, outChecksum: CPointer<UInt64>): Int32
 
@@ -252,8 +245,16 @@ public class NativeCompactJsonDocument <: Resource {
             let errorHandle = acquireArrayRawData(outError)
             let offsetHandle = acquireArrayRawData(outOffset)
             try {
-                status = YJ_Compact_Parse(inputHandle.pointer, bytes.size, flags, config.maxDepth,
-                    handleHandle.pointer, rootHandle.pointer, errorHandle.pointer, offsetHandle.pointer)
+                if (config.maxBytes == 0 && config.maxStringBytes == 0 &&
+                    config.maxPolymorphicObjectBytes == 0) {
+                    status = YJ_Compact_Parse(inputHandle.pointer, bytes.size, flags, config.maxDepth,
+                        handleHandle.pointer, rootHandle.pointer, errorHandle.pointer, offsetHandle.pointer)
+                } else {
+                    status = YJ_Compact_ParseWithLimits(inputHandle.pointer, bytes.size, flags,
+                        config.maxDepth, config.maxBytes, config.maxStringBytes,
+                        config.maxPolymorphicObjectBytes, handleHandle.pointer, rootHandle.pointer,
+                        errorHandle.pointer, offsetHandle.pointer)
+                }
             } finally {
                 releaseArrayRawData(offsetHandle)
                 releaseArrayRawData(errorHandle)
@@ -739,6 +740,8 @@ private func nativeCompactParseError(bytes: Array<Byte>, code: Int32, offset: In
         case code == YJ_COMPACT_MAX_DEPTH => "max_depth"
         case code == YJ_COMPACT_OUT_OF_MEMORY => "out_of_memory"
         case code == YJ_COMPACT_DOCUMENT_TOO_LARGE => "document_too_large"
+        case code == YJ_COMPACT_STRING_TOO_LARGE => "string_too_large"
+        case code == YJ_COMPACT_VALUE_TOO_LARGE => "polymorphic_object_too_large"
         case _ => "parse_error"
     }
     let message = match {
@@ -747,9 +750,11 @@ private func nativeCompactParseError(bytes: Array<Byte>, code: Int32, offset: In
         case code == YJ_COMPACT_DUPLICATE_KEY => "Duplicate object key"
         case code == YJ_COMPACT_OUT_OF_MEMORY => "Native compact allocation failed"
         case code == YJ_COMPACT_DOCUMENT_TOO_LARGE => "Native compact document is too large"
+        case code == YJ_COMPACT_STRING_TOO_LARGE => "Native compact JSON string is too large"
+        case code == YJ_COMPACT_VALUE_TOO_LARGE => "Native compact JSON value is too large"
         case _ => "Invalid JSON"
     }
-    if (!includeLocation) { return JsonException(message, code: errorCode, byteOffset: offset) }
+    if (!includeLocation) { return JsonException(message, code: errorCode) }
     var line: Int64 = 1
     var column: Int64 = 1
     let limit = if (offset < 0) { 0 } else if (offset > bytes.size) { bytes.size } else { offset }

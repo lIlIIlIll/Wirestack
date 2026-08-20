@@ -267,6 +267,7 @@ public class CompactJsonDocument {
     private init(source: Array<Byte>) { this.source = source }
 
     public static func parse(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument {
+        validateJsonResourceLimits(bytes, config)
         let document = CompactJsonDocument(bytes)
         let parser = CompactJsonParser(document, JsonFastReader(bytes), config)
         document.rootIndex = parser.parse()

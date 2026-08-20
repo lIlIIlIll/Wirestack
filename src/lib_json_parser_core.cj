@@ -32,6 +32,7 @@ private class ArrayJsonByteSource <: JsonByteSource {
         this.size = data.size
         this.sourceText = None<String>
         this.readConfig = config
+        validateJsonResourceLimits(data, config)
     }
 
     public init(text: String, config!: JsonReadConfig = JsonReadConfig.defaults) {
@@ -41,6 +42,7 @@ private class ArrayJsonByteSource <: JsonByteSource {
         this.size = data.size
         this.sourceText = Some(text)
         this.readConfig = config
+        validateJsonResourceLimits(data, config)
     }
 
     public func hasMore(): Bool {
@@ -279,6 +281,7 @@ private class StreamJsonByteSource <: JsonByteSource {
     private var start: Int64 = 0
     private var end: Int64 = 0
     private var offset: Int64 = 0
+    private var loadedBytes: Int64 = 0
     private var reachedEnd: Bool = false
 
     public init(
@@ -336,6 +339,12 @@ private class StreamJsonByteSource <: JsonByteSource {
             reachedEnd = true
             return false
         }
+        if (readConfig.maxBytes > 0 && loadedBytes + read > readConfig.maxBytes) {
+            throw jsonResourceLimitException(readConfig,
+                "JSON document exceeds ${readConfig.maxBytes} bytes", "document_too_large",
+                readConfig.maxBytes)
+        }
+        loadedBytes += read
         start = 0
         end = read
         true
@@ -345,6 +354,9 @@ private class StreamJsonByteSource <: JsonByteSource {
 private class JsonParserCore {
     private let source: JsonByteSource
     private let config: JsonReadConfig
+    private var rootBudgetStart: Int64 = -1
+    private var rootBudgetActive: Bool = false
+    private var lastUnicodeEscapeBytes: Int64 = 0
 
     public init(source: JsonByteSource) {
         this.source = source
@@ -357,12 +369,38 @@ private class JsonParserCore {
             case _ => ()
         }
         skipSpaces()
+        if (config.maxPolymorphicObjectBytes > 0 && source.hasMore() &&
+            (source.peek() == b'[' || source.peek() == b'{')) {
+            rootBudgetStart = source.position()
+            rootBudgetActive = true
+        }
         let value = parseValue()
+        rootBudgetActive = false
         skipSpaces()
         if (source.hasMore()) {
             fail("Unexpected trailing input")
         }
         value
+    }
+
+    private func consumeByte(): Byte {
+        let value = source.consume()
+        if (rootBudgetActive && source.position() - rootBudgetStart > config.maxPolymorphicObjectBytes) {
+            throw jsonResourceLimitException(config,
+                "JSON value exceeds ${config.maxPolymorphicObjectBytes} bytes",
+                "polymorphic_object_too_large", rootBudgetStart + config.maxPolymorphicObjectBytes)
+        }
+        value
+    }
+
+    private func addDecodedStringBytes(current: Int64, added: Int64, offset: Int64): Int64 {
+        let next = current + added
+        if (config.maxStringBytes > 0 && next > config.maxStringBytes) {
+            throw jsonResourceLimitException(config,
+                "JSON string exceeds ${config.maxStringBytes} decoded UTF-8 bytes",
+                "string_too_large", offset)
+        }
+        next
     }
 
     private func parseFast(arraySource: ArrayJsonByteSource): JsonValue {
@@ -436,20 +474,20 @@ private class JsonParserCore {
         let literal = StringBuilder()
         var hasFractionalSyntax = false
         if (source.peek() == b'-') {
-            literal.append(Rune(source.consume()))
+            literal.append(Rune(consumeByte()))
         }
         parseIntegerDigitsInto(literal)
         if (source.hasMore() && source.peek() == b'.') {
             hasFractionalSyntax = true
-            literal.append(Rune(source.consume()))
+            literal.append(Rune(consumeByte()))
             requireDigit("Expected fractional digits")
             parseDigitsInto(literal)
         }
         if (source.hasMore() && (source.peek() == b'e' || source.peek() == b'E')) {
             hasFractionalSyntax = true
-            literal.append(Rune(source.consume()))
+            literal.append(Rune(consumeByte()))
             if (source.hasMore() && (source.peek() == b'+' || source.peek() == b'-')) {
-                literal.append(Rune(source.consume()))
+                literal.append(Rune(consumeByte()))
             }
             requireDigit("Expected exponent digits")
             parseDigitsInto(literal)
@@ -475,14 +513,14 @@ private class JsonParserCore {
     private func parseDigitsInto(buffer: StringBuilder): Unit {
         requireDigit("Expected digit")
         while (source.hasMore() && source.peek() >= b'0' && source.peek() <= b'9') {
-            buffer.append(Rune(source.consume()))
+            buffer.append(Rune(consumeByte()))
         }
     }
 
     private func parseIntegerDigitsInto(buffer: StringBuilder): Unit {
         requireDigit("Expected digit")
         if (source.peek() == b'0') {
-            buffer.append(Rune(source.consume()))
+            buffer.append(Rune(consumeByte()))
             if (source.hasMore() && source.peek() >= b'0' && source.peek() <= b'9') {
                 fail("Leading zeroes are not allowed in JSON numbers")
             }
@@ -507,26 +545,29 @@ private class JsonParserCore {
         }
         expectByte(b'"')
         let builder = StringBuilder()
+        var decodedBytes: Int64 = 0
         while (source.hasMore()) {
             let start = source.position()
-            let current = source.consume()
+            let current = consumeByte()
             match (current) {
                 case b'"' => return builder.toString()
                 case b'\\' =>
                     if (!source.hasMore()) {
                         fail("Unexpected end of escape sequence")
                     }
-                    let escaped = source.consume()
+                    let escaped = consumeByte()
                     match (escaped) {
-                        case b'"' => builder.append("\"")
-                        case b'\\' => builder.append("\\")
-                        case b'/' => builder.append("/")
-                        case b'b' => builder.append(r'\b')
-                        case b'f' => builder.append(r'\f')
-                        case b'n' => builder.append(r'\n')
-                        case b'r' => builder.append(r'\r')
-                        case b't' => builder.append(r'\t')
-                        case b'u' => builder.append(parseUnicodeEscape())
+                        case b'"' => builder.append("\""); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
+                        case b'\\' => builder.append("\\"); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
+                        case b'/' => builder.append("/"); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
+                        case b'b' => builder.append(r'\b'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
+                        case b'f' => builder.append(r'\f'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
+                        case b'n' => builder.append(r'\n'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
+                        case b'r' => builder.append(r'\r'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
+                        case b't' => builder.append(r'\t'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
+                        case b'u' =>
+                            builder.append(parseUnicodeEscape())
+                            decodedBytes = addDecodedStringBytes(decodedBytes, lastUnicodeEscapeBytes, start)
                         case _ => fail("Unsupported escape sequence")
                     }
                 case _ =>
@@ -535,8 +576,10 @@ private class JsonParserCore {
                             failAt("Unescaped control character in string literal", start)
                         }
                         builder.append(Rune(current))
+                        decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
                     } else {
                         builder.append(decodeUtf8Rune(current, start))
+                        decodedBytes = addDecodedStringBytes(decodedBytes, source.position() - start, start)
                     }
             }
         }
@@ -557,7 +600,7 @@ private class JsonParserCore {
         }
         let value = parseUnicodeEscapeValue(start)
         if (isJsonHighSurrogate(value)) {
-            if (!source.hasMore() || source.consume() != b'\\' || !source.hasMore() || source.consume() != b'u') {
+            if (!source.hasMore() || consumeByte() != b'\\' || !source.hasMore() || consumeByte() != b'u') {
                 failAt("Invalid unicode surrogate pair", start)
             }
             let lowStart = source.position()
@@ -565,6 +608,7 @@ private class JsonParserCore {
             if (!isJsonLowSurrogate(low)) {
                 failAt("Invalid unicode surrogate pair", start)
             }
+            lastUnicodeEscapeBytes = 4
             return try {
                 Rune(combineJsonSurrogates(value, low))
             } catch (_: Exception) {
@@ -574,6 +618,7 @@ private class JsonParserCore {
         if (isJsonLowSurrogate(value)) {
             failAt("Invalid unicode surrogate pair", start)
         }
+        lastUnicodeEscapeBytes = jsonUtf8ByteCount(value)
         return try {
             Rune(UInt32(value))
         } catch (_: Exception) {
@@ -587,7 +632,7 @@ private class JsonParserCore {
             if (!source.hasMore()) {
                 failAt("Incomplete unicode escape", start)
             }
-            value = value * 16 + hexValue(source.consume())
+            value = value * 16 + hexValue(consumeByte())
         }
         value
     }
@@ -609,7 +654,7 @@ private class JsonParserCore {
             if (!source.hasMore()) {
                 failAt("Invalid UTF-8 byte sequence", start)
             }
-            bytes[index] = UInt8(source.consume())
+            bytes[index] = UInt8(consumeByte())
         }
         return try {
             let (r, _) = Rune.fromUtf8(bytes, 0)
@@ -659,14 +704,14 @@ private class JsonParserCore {
         skipSpaces()
         let items = ArrayList<JsonValue>()
         if (peekByte(b']')) {
-            source.consume()
+            consumeByte()
             return JsonArrayValue(items)
         }
         while (true) {
             items.add(parseValue())
             skipSpaces()
             if (peekByte(b']')) {
-                source.consume()
+                consumeByte()
                 break
             }
             expectByte(b',')
@@ -711,7 +756,7 @@ private class JsonParserCore {
         skipSpaces()
         let fields = HashMap<String, JsonValue>()
         if (peekByte(b'}')) {
-            source.consume()
+            consumeByte()
             return JsonObjectValue(fields)
         }
         while (true) {
@@ -728,7 +773,7 @@ private class JsonParserCore {
             fields.add(key, parseValue())
             skipSpaces()
             if (peekByte(b'}')) {
-                source.consume()
+                consumeByte()
                 break
             }
             expectByte(b',')
@@ -746,7 +791,7 @@ private class JsonParserCore {
         }
         while (source.hasMore()) {
             match (source.peek()) {
-                case b' ' | b'\n' | b'\r' | b'\t' => source.consume()
+                case b' ' | b'\n' | b'\r' | b'\t' => consumeByte()
                 case _ => return
             }
         }
@@ -754,7 +799,7 @@ private class JsonParserCore {
 
     private func expectLiteral(literal: String): Unit {
         for (byte in unsafe { literal.rawData() }) {
-            if (!source.hasMore() || source.consume() != byte) {
+            if (!source.hasMore() || consumeByte() != byte) {
                 fail("Expected ${literal}")
             }
         }
@@ -767,7 +812,7 @@ private class JsonParserCore {
                 return
             case _ => ()
         }
-        if (!source.hasMore() || source.consume() != value) {
+        if (!source.hasMore() || consumeByte() != value) {
             fail("Unexpected token")
         }
     }

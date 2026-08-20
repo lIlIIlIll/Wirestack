@@ -26,11 +26,13 @@ def check_versions(inventory: dict) -> None:
     macro_version = load_toml(ROOT / "packages/yjson_macros/cjpm.toml")["package"]["version"]
     all_version = load_toml(ROOT / "packages/yjson_all/cjpm.toml")["package"]["version"]
     native_version = load_toml(ROOT / "packages/yjson_native/cjpm.toml")["package"]["version"]
+    yyjson_version = load_toml(ROOT / "packages/yjson_yyjson/cjpm.toml")["package"]["version"]
     expected = {
         "core": root_version,
         "macros": macro_version,
         "aggregate": all_version,
         "native": native_version,
+        "yyjson": yyjson_version,
     }
     for name, actual in expected.items():
         if actual != pairing[name]:
@@ -38,6 +40,7 @@ def check_versions(inventory: dict) -> None:
 
     release_all = load_toml(ROOT / "release/package-manifests/yjson_all.toml")
     release_native = load_toml(ROOT / "release/package-manifests/yjson_native.toml")
+    release_yyjson = load_toml(ROOT / "release/package-manifests/yjson_yyjson.toml")
     dependencies = release_all["dependencies"]
     if dependencies.get("yjson") != pairing["core"]:
         fail("release yjson_all must pin the inventory core version")
@@ -45,6 +48,8 @@ def check_versions(inventory: dict) -> None:
         fail("release yjson_all must pin the inventory macro version")
     if release_native["dependencies"].get("yjson") != pairing["core"]:
         fail("release yjson_native must pin the inventory core version")
+    if release_yyjson["dependencies"].get("yjson") != pairing["core"]:
+        fail("release yjson_yyjson must pin the inventory core version")
 
 
 def check_declarations(inventory: dict) -> None:
@@ -64,7 +69,7 @@ def main() -> int:
     inventory = load_toml(INVENTORY)
     if inventory.get("inventory_version") != 1:
         fail("unsupported inventory_version")
-    if inventory.get("release_version") != "1.0.0":
+    if inventory.get("release_version") != "2.0.0":
         fail("inventory release_version must match the current release candidate")
     check_versions(inventory)
     check_declarations(inventory)

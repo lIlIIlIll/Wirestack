@@ -60,7 +60,8 @@ native archive.
 Generated macro output calls the public
 `JsonFastReader.suggestRawCollectionCapacity()` bridge for generic object
 arrays. It is a bounded allocation hint rather than a stable application-level
-capacity API. `yjson`, `yjson_macros`, `yjson_all`, and `yjson_native` must be
+capacity API. `yjson`, `yjson_macros`, `yjson_all`, `yjson_native`, and
+`yjson_yyjson` must be
 consumed at the same release version; see the
 [public API inventory](public-api-inventory.md).
 
@@ -93,12 +94,21 @@ uses decoded key bytes, so source spellings `"a"` and `"\u0061"` collide.
 | invalid number | reject; detailed category/path | reject; byte offset | reject; generally `parse_error` |
 | duplicate with Reject | reject; currently `parse_error` | reject; currently `parse_error` | reject; currently `parse_error` |
 | maximum depth | `max_depth` | `max_depth` | `max_depth` |
+| document byte budget | `document_too_large` | `document_too_large` before DOM allocation | `document_too_large` before DOM allocation |
+| decoded string/key budget | `string_too_large` | `string_too_large` before DOM allocation | `string_too_large` before DOM allocation |
+| root container byte budget | `polymorphic_object_too_large` | `polymorphic_object_too_large` before DOM allocation | `polymorphic_object_too_large` before DOM allocation |
 | trailing content | reject | reject | reject |
 | allocation/document limit | runtime/OOM semantics | `out_of_memory` or `document_too_large` | `out_of_memory` or `document_too_large` |
 
 The public guarantee is semantic rejection plus a meaningful byte offset where
 available. Error categories and messages are not byte-for-byte identical across
 backends, and backend-internal numeric codes are not public API.
+
+Resource budgets are the exception to the otherwise coarser native categories:
+their public `JsonException.code` values are identical across all three
+backends. The old `YJ_Compact_Parse` and `YJ_Yyjson_Parse` C symbols remain;
+limited parsing uses the additive `*ParseWithLimits` symbols only when a budget
+is enabled.
 
 ## Security boundary
 

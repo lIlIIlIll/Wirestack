@@ -33,6 +33,15 @@ int32_t YJ_Yyjson_Parse(const uint8_t *input, int64_t length,
                        uint32_t flags, int64_t max_depth, uint32_t mode,
                        uint64_t *out_handle, uint32_t *out_error_code,
                        int64_t *out_error_offset);
+/* Additive resource-limited entry point. Zero limits mean unlimited. */
+int32_t YJ_Yyjson_ParseWithLimits(const uint8_t *input, int64_t length,
+                                 uint32_t flags, int64_t max_depth,
+                                 uint32_t mode, int64_t max_bytes,
+                                 int64_t max_string_bytes,
+                                 int64_t max_value_bytes,
+                                 uint64_t *out_handle,
+                                 uint32_t *out_error_code,
+                                 int64_t *out_error_offset);
 void YJ_Yyjson_Free(uint64_t handle);
 
 uint64_t YJ_Yyjson_TraversalChecksum(uint64_t handle);

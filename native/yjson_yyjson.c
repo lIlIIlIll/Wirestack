@@ -1012,6 +1012,24 @@ int32_t YJ_Yyjson_Parse(const uint8_t *input, int64_t length,
     return YJ_COMPACT_OK;
 }
 
+int32_t YJ_Yyjson_ParseWithLimits(const uint8_t *input, int64_t length,
+                                 uint32_t flags, int64_t max_depth,
+                                 uint32_t mode, int64_t max_bytes,
+                                 int64_t max_string_bytes,
+                                 int64_t max_value_bytes,
+                                 uint64_t *out_handle,
+                                 uint32_t *out_error_code,
+                                 int64_t *out_error_offset) {
+    int32_t status = YJ_JSON_ValidateLimits(input, length, max_depth, max_bytes,
+        max_string_bytes, max_value_bytes, out_error_code, out_error_offset);
+    if (status != YJ_COMPACT_OK) {
+        if (out_handle != NULL) *out_handle = 0;
+        return status;
+    }
+    return YJ_Yyjson_Parse(input, length, flags, max_depth, mode, out_handle,
+                          out_error_code, out_error_offset);
+}
+
 void YJ_Yyjson_Free(uint64_t handle) {
     fy_free_document((FyDocument *)(uintptr_t)handle);
 }

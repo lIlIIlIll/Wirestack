@@ -71,6 +71,9 @@ public class JsonReadConfig {
     public let includeErrorLocation: Bool
     public let maxDepth: Int64
     public let maxPolymorphicObjectBytes: Int64
+    public let maxStringBytes: Int64
+    public let maxBytes: Int64
+    let defaultFastPath: Bool
 
     public init(
         unknownFieldPolicy!: JsonUnknownFieldPolicy = JsonUnknownFieldPolicy.Ignore,
@@ -78,13 +81,21 @@ public class JsonReadConfig {
         numberPolicy!: JsonNumberPolicy = JsonNumberPolicy.Int64WhenExact,
         includeErrorLocation!: Bool = true,
         maxDepth!: Int64 = 256,
-        maxPolymorphicObjectBytes!: Int64 = 16 * 1024 * 1024
+        maxPolymorphicObjectBytes!: Int64 = 0,
+        maxStringBytes!: Int64 = 0,
+        maxBytes!: Int64 = 0
     ) {
         if (maxDepth <= 0) {
             throw IllegalArgumentException("maxDepth must be positive")
         }
-        if (maxPolymorphicObjectBytes <= 0) {
-            throw IllegalArgumentException("maxPolymorphicObjectBytes must be positive")
+        if (maxPolymorphicObjectBytes < 0) {
+            throw IllegalArgumentException("maxPolymorphicObjectBytes must not be negative")
+        }
+        if (maxStringBytes < 0) {
+            throw IllegalArgumentException("maxStringBytes must not be negative")
+        }
+        if (maxBytes < 0) {
+            throw IllegalArgumentException("maxBytes must not be negative")
         }
         this.unknownFieldPolicy = unknownFieldPolicy
         this.duplicateKeyPolicy = duplicateKeyPolicy
@@ -92,6 +103,23 @@ public class JsonReadConfig {
         this.includeErrorLocation = includeErrorLocation
         this.maxDepth = maxDepth
         this.maxPolymorphicObjectBytes = maxPolymorphicObjectBytes
+        this.maxStringBytes = maxStringBytes
+        this.maxBytes = maxBytes
+        let unknownIsDefault = match (unknownFieldPolicy) {
+            case Ignore => true
+            case _ => false
+        }
+        let duplicateIsDefault = match (duplicateKeyPolicy) {
+            case LastWins => true
+            case _ => false
+        }
+        let numberIsDefault = match (numberPolicy) {
+            case Int64WhenExact => true
+            case _ => false
+        }
+        this.defaultFastPath = unknownIsDefault && duplicateIsDefault && numberIsDefault &&
+            includeErrorLocation && maxDepth == 256 && maxPolymorphicObjectBytes == 0 &&
+            maxStringBytes == 0 && maxBytes == 0
     }
 
     public static let defaults: JsonReadConfig = JsonReadConfig()
@@ -112,20 +140,7 @@ public class JsonReadConfig {
 }
 
 func jsonReadConfigUsesDefaultFastPath(config: JsonReadConfig): Bool {
-    let unknownIsDefault = match (config.unknownFieldPolicy) {
-        case Ignore => true
-        case _ => false
-    }
-    let duplicateIsDefault = match (config.duplicateKeyPolicy) {
-        case LastWins => true
-        case _ => false
-    }
-    let numberIsDefault = match (config.numberPolicy) {
-        case Int64WhenExact => true
-        case _ => false
-    }
-    unknownIsDefault && duplicateIsDefault && numberIsDefault && config.includeErrorLocation &&
-        config.maxDepth == 256 && config.maxPolymorphicObjectBytes == 16 * 1024 * 1024
+    config.defaultFastPath
 }
 
 func jsonReadConfigRejectsUnknownFields(config: JsonReadConfig): Bool {

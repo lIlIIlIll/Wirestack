@@ -36,6 +36,22 @@ static void expect_error(const uint8_t *text, size_t length, uint32_t flags,
     assert(offset >= 0 || expected == YJ_COMPACT_OUT_OF_MEMORY);
 }
 
+static void expect_limit(const char *text, int64_t max_bytes,
+                         int64_t max_string_bytes, int64_t max_value_bytes,
+                         uint32_t expected) {
+    uint64_t handle = 0;
+    uint32_t error = 0;
+    int64_t offset = -1;
+    int32_t status = YJ_Yyjson_ParseWithLimits(
+        (const uint8_t *)text, (int64_t)strlen(text), 0, 256,
+        YJ_YYJSON_DIRECT, max_bytes, max_string_bytes, max_value_bytes,
+        &handle, &error, &offset);
+    assert(status == (int32_t)expected);
+    assert(error == expected);
+    assert(handle == 0);
+    assert(offset >= 0);
+}
+
 static char *serialize(uint64_t handle, uint64_t *size) {
     uint64_t buffer = 0;
     assert(YJ_Yyjson_SerializeAlloc(handle, &buffer, size) == YJ_COMPACT_OK);
@@ -217,6 +233,9 @@ static void test_errors(void) {
     expect_error((const uint8_t *)"[01]", 4, 0, YJ_COMPACT_PARSE_ERROR);
     expect_error((const uint8_t *)"[1]x", 4, 0, YJ_COMPACT_PARSE_ERROR);
     expect_error((const uint8_t *)"[1", 2, 0, YJ_COMPACT_PARSE_ERROR);
+    expect_limit("{\"a\":1}", 6, 0, 0, YJ_COMPACT_DOCUMENT_TOO_LARGE);
+    expect_limit("\"\\u4E2D\"", 0, 2, 0, YJ_COMPACT_STRING_TOO_LARGE);
+    expect_limit("{\"a\":[1,2]}", 0, 0, 10, YJ_COMPACT_VALUE_TOO_LARGE);
 }
 
 static void test_close_loop(void) {

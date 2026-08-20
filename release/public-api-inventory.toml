@@ -1,16 +1,17 @@
-# Public declarations added or widened for the 1.0.0 release candidate.
+# Public declarations added or changed for the 2.0.0 release candidate.
 # This is an additive inventory, not a replacement for the complete generated
 # symbol inventory used by the SDK ABI tooling.
 inventory_version = 1
-release_version = "1.0.0"
+release_version = "2.0.0"
 status = "approved"
-compatibility_policy = "additive declarations preserve existing consumers; inventory changes require review"
+compatibility_policy = "2.0.0 may break 1.x source or ABI only when explicitly recorded; inventory changes require review"
 
 [package_pairing]
-core = "1.0.0"
-macros = "1.0.0"
-aggregate = "1.0.0"
-native = "1.0.0"
+core = "2.0.0"
+macros = "2.0.0"
+aggregate = "2.0.0"
+native = "2.0.0"
+yyjson = "2.0.0"
 rule = "Generated macro output and the optional native facade must be consumed with the same yjson core release."
 
 [[api]]
@@ -132,3 +133,87 @@ stability = "stable-native-bridge"
 compatibility = "additive C symbol and header declaration"
 contract = "Parses one already validated JSON number token of at most 256 bytes; invalid bounds, malformed token text, or declined input return NaN."
 consumer = "yjson_native @FastNative bridge"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-constructor"
+symbol = "JsonReadConfig.init"
+signature = "public init(unknownFieldPolicy!: JsonUnknownFieldPolicy = Ignore, duplicateKeyPolicy!: JsonDuplicateKeyPolicy = LastWins, numberPolicy!: JsonNumberPolicy = Int64WhenExact, includeErrorLocation!: Bool = true, maxDepth!: Int64 = 256, maxPolymorphicObjectBytes!: Int64 = 0, maxStringBytes!: Int64 = 0, maxBytes!: Int64 = 0)"
+source = "src/lib_json_value.cj"
+needle = "maxStringBytes!: Int64 = 0,"
+stability = "stable-major-version-config-constructor"
+compatibility = "breaking versus 1.0.0: constructor parameters were added and maxPolymorphicObjectBytes default changed from 16 MiB to unlimited; rebuild consumers against 2.0.0"
+contract = "All resource limits reject negative values. Zero means unlimited; positive values opt into the corresponding parse-time budget."
+consumer = "All applications constructing JsonReadConfig"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-config-field"
+symbol = "JsonReadConfig.maxPolymorphicObjectBytes"
+signature = "public let maxPolymorphicObjectBytes: Int64"
+source = "src/lib_json_value.cj"
+needle = "public let maxPolymorphicObjectBytes: Int64"
+stability = "stable-config-field"
+compatibility = "existing field; 2.0.0 changes the default from 16 MiB to 0 and extends enforcement to public root-container parse paths"
+contract = "Maximum raw byte span of the root array or object subtree, including nested content and excluding surrounding whitespace; 0 means unlimited."
+consumer = "Applications bounding polymorphic or container-shaped JSON values"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-config-field"
+symbol = "JsonReadConfig.maxStringBytes"
+signature = "public let maxStringBytes: Int64"
+source = "src/lib_json_value.cj"
+needle = "public let maxStringBytes: Int64"
+stability = "stable-config-field"
+compatibility = "field and constructor parameter added in 2.0.0; requires consumer rebuild"
+contract = "Maximum decoded UTF-8 byte length of each JSON string value or object key; 0 means unlimited; overflow uses string_too_large."
+consumer = "Applications parsing untrusted JSON"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-config-field"
+symbol = "JsonReadConfig.maxBytes"
+signature = "public let maxBytes: Int64"
+source = "src/lib_json_value.cj"
+needle = "public let maxBytes: Int64"
+stability = "stable-config-field"
+compatibility = "field and constructor parameter added in 2.0.0; requires consumer rebuild"
+contract = "Maximum input document bytes for memory and stream readers; 0 means unlimited; overflow uses document_too_large."
+consumer = "Applications parsing untrusted JSON"
+
+[[api]]
+package = "yjson_native / C ABI"
+kind = "c-function"
+symbol = "YJ_JSON_ValidateLimits"
+signature = "int32_t YJ_JSON_ValidateLimits(const uint8_t*, int64_t, int64_t, int64_t, int64_t, int64_t, uint32_t*, int64_t*)"
+source = ["native/yjson_compact.h", "native/yjson_compact.c"]
+needle = "YJ_JSON_ValidateLimits"
+stability = "stable-native-bridge"
+compatibility = "additive C symbol; existing parse symbols remain unchanged"
+contract = "Allocation-free resource-limit validation shared by native backends; every zero limit means unlimited."
+consumer = "Custom Native and yyjson limited parse entry points"
+
+[[api]]
+package = "yjson_native / C ABI"
+kind = "c-function"
+symbol = "YJ_Compact_ParseWithLimits"
+signature = "int32_t YJ_Compact_ParseWithLimits(const uint8_t*, int64_t, uint32_t, int64_t, int64_t, int64_t, int64_t, uint64_t*, uint32_t*, uint32_t*, int64_t*)"
+source = ["native/yjson_compact.h", "native/yjson_compact.c"]
+needle = "YJ_Compact_ParseWithLimits"
+stability = "stable-native-bridge"
+compatibility = "additive C symbol; YJ_Compact_Parse is preserved"
+contract = "Applies document, decoded-string, and root-container byte limits before building the Custom Native DOM."
+consumer = "yjson_native resource-limited parsing"
+
+[[api]]
+package = "yjson_yyjson / C ABI"
+kind = "c-function"
+symbol = "YJ_Yyjson_ParseWithLimits"
+signature = "int32_t YJ_Yyjson_ParseWithLimits(const uint8_t*, int64_t, uint32_t, int64_t, uint32_t, int64_t, int64_t, int64_t, uint64_t*, uint32_t*, int64_t*)"
+source = ["native/yjson_yyjson.h", "native/yjson_yyjson.c"]
+needle = "YJ_Yyjson_ParseWithLimits"
+stability = "stable-native-bridge"
+compatibility = "additive C symbol; YJ_Yyjson_Parse is preserved"
+contract = "Applies the shared limits before yyjson allocates a DOM; error codes match the portable and Custom Native facades."
+consumer = "yjson_yyjson resource-limited parsing"

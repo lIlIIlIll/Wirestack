@@ -1,4 +1,16 @@
-# Release notes draft — 1.0.0 release candidate
+# Release notes draft — 2.0.0 release candidate
+
+## Breaking configuration change
+
+`JsonReadConfig` now exposes `maxBytes` and `maxStringBytes`, and
+`maxPolymorphicObjectBytes` applies to public root-container parse paths. All
+three byte limits default to `0` (unlimited). Adding constructor parameters and
+changing the previous 16 MiB default requires applications and all paired yjson
+packages to be rebuilt together for 2.0.0.
+
+Pure Cangjie, Custom Native, and yyjson now produce the same public resource
+error codes. The native C ABI is additive: old parse symbols remain available,
+while the limited entry points validate before DOM allocation.
 
 This candidate provides a portable Pure Cangjie JSON library plus two explicit
 native DOM packages:
@@ -29,7 +41,7 @@ full fresh-source local simulation entry point for release preflight.
 The yyjson package now localizes its vendored implementation symbols without
 modifying upstream 0.12.0 sources. A pinned yyjson 0.11.1 co-link fixture passes
 both shared-library load orders. Registry-style source artifacts with exact
-1.0.0 dependencies also passed isolated core, macro, Custom Native, and yyjson
+2.0.0 dependencies also passed isolated core, macro, Custom Native, and yyjson
 consumer builds before publication.
 
 Known limits: Linux x86_64 is the only qualified platform; AArch64 and musl are

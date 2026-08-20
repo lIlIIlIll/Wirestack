@@ -156,4 +156,23 @@ class NativeCompactDocumentTest {
             @Expect(YJson.parse(document.toString()).asObject().size(), 3)
         }
     }
+
+    @TestCase
+    func resourceLimitsMatchPortableBackend(): Unit {
+        let documentError = @AssertThrows[JsonException](NativeCompactJsonDocument.parse(
+            nativeCompactBytes("{\"a\":1}"), config: JsonReadConfig(maxBytes: 6)))
+        @Expect(documentError.code, "document_too_large")
+        let stringError = @AssertThrows[JsonException](NativeCompactJsonDocument.parse(
+            nativeCompactBytes("\"\\u4E2D\""), config: JsonReadConfig(maxStringBytes: 2)))
+        @Expect(stringError.code, "string_too_large")
+        let valueError = @AssertThrows[JsonException](NativeCompactJsonDocument.parse(
+            nativeCompactBytes("{\"a\":[1,2]}"),
+            config: JsonReadConfig(maxPolymorphicObjectBytes: 10)))
+        @Expect(valueError.code, "polymorphic_object_too_large")
+        let hiddenLocation = @AssertThrows[JsonException](NativeCompactJsonDocument.parse(
+            nativeCompactBytes("\"abc\""),
+            config: JsonReadConfig(includeErrorLocation: false, maxStringBytes: 2)))
+        @Expect(hiddenLocation.code, "string_too_large")
+        @Expect(hiddenLocation.byteOffset, -1)
+    }
 }

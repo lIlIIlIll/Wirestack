@@ -17,7 +17,9 @@ enum {
     YJ_COMPACT_DOCUMENT_TOO_LARGE = 6,
     YJ_COMPACT_CLOSED = 7,
     YJ_COMPACT_TYPE_ERROR = 8,
-    YJ_COMPACT_BOUNDS_ERROR = 9
+    YJ_COMPACT_BOUNDS_ERROR = 9,
+    YJ_COMPACT_STRING_TOO_LARGE = 10,
+    YJ_COMPACT_VALUE_TOO_LARGE = 11
 };
 
 enum {
@@ -50,6 +52,22 @@ int32_t YJ_Compact_Parse(const uint8_t *input, int64_t length,
                         uint32_t flags, int64_t max_depth,
                         uint64_t *out_handle, uint32_t *out_root,
                         uint32_t *out_error_code, int64_t *out_error_offset);
+/* Additive resource-limited entry point. Zero limits mean unlimited. */
+int32_t YJ_Compact_ParseWithLimits(const uint8_t *input, int64_t length,
+                                  uint32_t flags, int64_t max_depth,
+                                  int64_t max_bytes, int64_t max_string_bytes,
+                                  int64_t max_value_bytes,
+                                  uint64_t *out_handle, uint32_t *out_root,
+                                  uint32_t *out_error_code,
+                                  int64_t *out_error_offset);
+
+/* Allocation-free validation bridge shared by native JSON backends. */
+int32_t YJ_JSON_ValidateLimits(const uint8_t *input, int64_t length,
+                              int64_t max_depth, int64_t max_bytes,
+                              int64_t max_string_bytes,
+                              int64_t max_value_bytes,
+                              uint32_t *out_error_code,
+                              int64_t *out_error_offset);
 void YJ_Compact_Free(uint64_t handle);
 
 int32_t YJ_Compact_Kind(uint64_t handle, uint32_t node, uint32_t *out_kind);

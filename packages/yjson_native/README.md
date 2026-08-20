@@ -3,7 +3,7 @@
 Supported opt-in Custom Native Compact DOM backend for `yjson`.
 
 The package must use the same `yjson` release as its core dependency (the
-current release pair is `yjson_native = "1.0.0"` and `yjson = "1.0.0"`).
+current release pair is `yjson_native = "2.0.0"` and `yjson = "2.0.0"`).
 
 The module is source-built with a C11 compiler. Documents are explicit
 resources: close them deterministically. They are not thread-safe; callers must

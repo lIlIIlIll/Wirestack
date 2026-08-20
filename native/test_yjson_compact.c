@@ -30,6 +30,22 @@ static void expect_rejected(const uint8_t *json, size_t length, uint32_t flags,
     assert(offset >= 0 || expected == YJ_COMPACT_OUT_OF_MEMORY);
 }
 
+static void expect_limit(const char *json, int64_t max_bytes,
+                         int64_t max_string_bytes, int64_t max_value_bytes,
+                         uint32_t expected) {
+    uint64_t handle = 0;
+    uint32_t root = 0, error = 0;
+    int64_t offset = -1;
+    int32_t status = YJ_Compact_ParseWithLimits(
+        (const uint8_t *)json, (int64_t)strlen(json), 0, 256,
+        max_bytes, max_string_bytes, max_value_bytes,
+        &handle, &root, &error, &offset);
+    assert(status == (int32_t)expected);
+    assert(error == expected);
+    assert(handle == 0);
+    assert(offset >= 0);
+}
+
 int main(void) {
     uint32_t root;
     uint64_t handle = parse(
@@ -84,5 +100,8 @@ int main(void) {
     expect_rejected((const uint8_t *)"\"\\uD800\"", 8, 0, YJ_COMPACT_PARSE_ERROR);
     const uint8_t bad_utf8[] = {'"', 0xC0, 0xAF, '"'};
     expect_rejected(bad_utf8, sizeof(bad_utf8), 0, YJ_COMPACT_INVALID_UTF8);
+    expect_limit("{\"a\":1}", 6, 0, 0, YJ_COMPACT_DOCUMENT_TOO_LARGE);
+    expect_limit("\"\\u4E2D\"", 0, 2, 0, YJ_COMPACT_STRING_TOO_LARGE);
+    expect_limit("{\"a\":[1,2]}", 0, 0, 10, YJ_COMPACT_VALUE_TOO_LARGE);
     return 0;
 }

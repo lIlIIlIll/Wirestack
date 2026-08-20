@@ -1098,6 +1098,264 @@ static int yj_node(YjDocument *document, uint32_t node, YjNode **out) {
     return YJ_COMPACT_OK;
 }
 
+typedef struct {
+    const uint8_t *input;
+    int64_t length;
+    int64_t position;
+    int64_t max_depth;
+    int64_t max_string_bytes;
+    uint32_t resource_error;
+    int64_t resource_offset;
+    int invalid;
+} YjLimitParser;
+
+static void yj_limit_skip_ws(YjLimitParser *parser) {
+    while (parser->position < parser->length) {
+        uint8_t value = parser->input[parser->position];
+        if (value != ' ' && value != '\n' && value != '\r' && value != '\t') break;
+        parser->position++;
+    }
+}
+
+static int yj_limit_invalid(YjLimitParser *parser) {
+    parser->invalid = 1;
+    return 0;
+}
+
+static int yj_limit_resource(YjLimitParser *parser, uint32_t code, int64_t offset) {
+    parser->resource_error = code;
+    parser->resource_offset = offset;
+    return 0;
+}
+
+static int yj_limit_utf8_width(uint32_t scalar) {
+    if (scalar <= 0x7fu) return 1;
+    if (scalar <= 0x7ffu) return 2;
+    if (scalar <= 0xffffu) return 3;
+    return 4;
+}
+
+static int yj_limit_add_string_bytes(YjLimitParser *parser, int64_t *decoded,
+                                     int64_t amount, int64_t offset) {
+    if (*decoded > INT64_MAX - amount) {
+        return yj_limit_resource(parser, YJ_COMPACT_STRING_TOO_LARGE, offset);
+    }
+    *decoded += amount;
+    if (parser->max_string_bytes > 0 && *decoded > parser->max_string_bytes) {
+        return yj_limit_resource(parser, YJ_COMPACT_STRING_TOO_LARGE, offset);
+    }
+    return 1;
+}
+
+static int yj_limit_string(YjLimitParser *parser) {
+    if (parser->position >= parser->length || parser->input[parser->position] != '"')
+        return yj_limit_invalid(parser);
+    parser->position++;
+    int64_t decoded = 0;
+    while (parser->position < parser->length) {
+        int64_t start = parser->position;
+        uint8_t value = parser->input[parser->position++];
+        if (value == '"') return 1;
+        if (value < 0x20u) return yj_limit_invalid(parser);
+        if (value == '\\') {
+            if (parser->position >= parser->length) return yj_limit_invalid(parser);
+            uint8_t escaped = parser->input[parser->position++];
+            if (escaped == '"' || escaped == '\\' || escaped == '/' ||
+                escaped == 'b' || escaped == 'f' || escaped == 'n' ||
+                escaped == 'r' || escaped == 't') {
+                if (!yj_limit_add_string_bytes(parser, &decoded, 1, start)) return 0;
+                continue;
+            }
+            if (escaped != 'u') return yj_limit_invalid(parser);
+            uint64_t position = (uint64_t)parser->position;
+            uint32_t scalar = 0;
+            if (!yj_read_u16(parser->input, (uint64_t)parser->length, &position, &scalar))
+                return yj_limit_invalid(parser);
+            parser->position = (int64_t)position;
+            if (scalar >= 0xd800u && scalar <= 0xdbffu) {
+                if (parser->position + 2 > parser->length ||
+                    parser->input[parser->position] != '\\' ||
+                    parser->input[parser->position + 1] != 'u')
+                    return yj_limit_invalid(parser);
+                parser->position += 2;
+                position = (uint64_t)parser->position;
+                uint32_t low = 0;
+                if (!yj_read_u16(parser->input, (uint64_t)parser->length, &position, &low) ||
+                    low < 0xdc00u || low > 0xdfffu)
+                    return yj_limit_invalid(parser);
+                parser->position = (int64_t)position;
+                scalar = 0x10000u + ((scalar - 0xd800u) << 10) + (low - 0xdc00u);
+            } else if (scalar >= 0xdc00u && scalar <= 0xdfffu) {
+                return yj_limit_invalid(parser);
+            }
+            if (!yj_limit_add_string_bytes(parser, &decoded,
+                                           yj_limit_utf8_width(scalar), start)) return 0;
+            continue;
+        }
+        if (value < 0x80u) {
+            if (!yj_limit_add_string_bytes(parser, &decoded, 1, start)) return 0;
+            continue;
+        }
+        int64_t width = value >= 0xc2u && value <= 0xdfu ? 2 :
+            (value >= 0xe0u && value <= 0xefu ? 3 :
+             (value >= 0xf0u && value <= 0xf4u ? 4 : 0));
+        if (width == 0 || start > parser->length - width) return yj_limit_invalid(parser);
+        uint64_t bad = 0;
+        if (!yj_validate_utf8(parser->input + start, (uint64_t)width, &bad))
+            return yj_limit_invalid(parser);
+        parser->position = start + width;
+        if (!yj_limit_add_string_bytes(parser, &decoded, width, start)) return 0;
+    }
+    return yj_limit_invalid(parser);
+}
+
+static int yj_limit_value(YjLimitParser *parser, int64_t depth);
+
+static int yj_limit_array(YjLimitParser *parser, int64_t depth) {
+    if (depth >= parser->max_depth) return yj_limit_invalid(parser);
+    parser->position++;
+    yj_limit_skip_ws(parser);
+    if (parser->position < parser->length && parser->input[parser->position] == ']') {
+        parser->position++;
+        return 1;
+    }
+    for (;;) {
+        if (!yj_limit_value(parser, depth + 1)) return 0;
+        yj_limit_skip_ws(parser);
+        if (parser->position >= parser->length) return yj_limit_invalid(parser);
+        uint8_t value = parser->input[parser->position++];
+        if (value == ']') return 1;
+        if (value != ',') return yj_limit_invalid(parser);
+        yj_limit_skip_ws(parser);
+    }
+}
+
+static int yj_limit_object(YjLimitParser *parser, int64_t depth) {
+    if (depth >= parser->max_depth) return yj_limit_invalid(parser);
+    parser->position++;
+    yj_limit_skip_ws(parser);
+    if (parser->position < parser->length && parser->input[parser->position] == '}') {
+        parser->position++;
+        return 1;
+    }
+    for (;;) {
+        if (!yj_limit_string(parser)) return 0;
+        yj_limit_skip_ws(parser);
+        if (parser->position >= parser->length || parser->input[parser->position++] != ':')
+            return yj_limit_invalid(parser);
+        if (!yj_limit_value(parser, depth + 1)) return 0;
+        yj_limit_skip_ws(parser);
+        if (parser->position >= parser->length) return yj_limit_invalid(parser);
+        uint8_t value = parser->input[parser->position++];
+        if (value == '}') return 1;
+        if (value != ',') return yj_limit_invalid(parser);
+        yj_limit_skip_ws(parser);
+    }
+}
+
+static int yj_limit_literal(YjLimitParser *parser, const char *literal, int64_t size) {
+    if (parser->position > parser->length - size ||
+        memcmp(parser->input + parser->position, literal, (size_t)size) != 0)
+        return yj_limit_invalid(parser);
+    parser->position += size;
+    return 1;
+}
+
+static int yj_limit_number(YjLimitParser *parser) {
+    if (parser->input[parser->position] == '-') parser->position++;
+    if (parser->position >= parser->length) return yj_limit_invalid(parser);
+    if (parser->input[parser->position] == '0') {
+        parser->position++;
+        if (parser->position < parser->length &&
+            parser->input[parser->position] >= '0' && parser->input[parser->position] <= '9')
+            return yj_limit_invalid(parser);
+    } else {
+        if (parser->input[parser->position] < '1' || parser->input[parser->position] > '9')
+            return yj_limit_invalid(parser);
+        do { parser->position++; }
+        while (parser->position < parser->length &&
+               parser->input[parser->position] >= '0' && parser->input[parser->position] <= '9');
+    }
+    if (parser->position < parser->length && parser->input[parser->position] == '.') {
+        parser->position++;
+        if (parser->position >= parser->length || parser->input[parser->position] < '0' ||
+            parser->input[parser->position] > '9') return yj_limit_invalid(parser);
+        do { parser->position++; }
+        while (parser->position < parser->length &&
+               parser->input[parser->position] >= '0' && parser->input[parser->position] <= '9');
+    }
+    if (parser->position < parser->length &&
+        (parser->input[parser->position] == 'e' || parser->input[parser->position] == 'E')) {
+        parser->position++;
+        if (parser->position < parser->length &&
+            (parser->input[parser->position] == '+' || parser->input[parser->position] == '-'))
+            parser->position++;
+        if (parser->position >= parser->length || parser->input[parser->position] < '0' ||
+            parser->input[parser->position] > '9') return yj_limit_invalid(parser);
+        do { parser->position++; }
+        while (parser->position < parser->length &&
+               parser->input[parser->position] >= '0' && parser->input[parser->position] <= '9');
+    }
+    return 1;
+}
+
+static int yj_limit_value(YjLimitParser *parser, int64_t depth) {
+    yj_limit_skip_ws(parser);
+    if (parser->position >= parser->length) return yj_limit_invalid(parser);
+    uint8_t value = parser->input[parser->position];
+    if (value == '"') return yj_limit_string(parser);
+    if (value == '[') return yj_limit_array(parser, depth);
+    if (value == '{') return yj_limit_object(parser, depth);
+    if (value == 'n') return yj_limit_literal(parser, "null", 4);
+    if (value == 't') return yj_limit_literal(parser, "true", 4);
+    if (value == 'f') return yj_limit_literal(parser, "false", 5);
+    if (value == '-' || (value >= '0' && value <= '9')) return yj_limit_number(parser);
+    return yj_limit_invalid(parser);
+}
+
+int32_t YJ_JSON_ValidateLimits(const uint8_t *input, int64_t length,
+                              int64_t max_depth, int64_t max_bytes,
+                              int64_t max_string_bytes,
+                              int64_t max_value_bytes,
+                              uint32_t *out_error_code,
+                              int64_t *out_error_offset) {
+    if (out_error_code == NULL || out_error_offset == NULL) return YJ_COMPACT_PARSE_ERROR;
+    *out_error_code = YJ_COMPACT_OK;
+    *out_error_offset = -1;
+    if (input == NULL || length < 0 || max_depth <= 0 || max_bytes < 0 ||
+        max_string_bytes < 0 || max_value_bytes < 0) {
+        *out_error_code = YJ_COMPACT_PARSE_ERROR;
+        *out_error_offset = 0;
+        return YJ_COMPACT_PARSE_ERROR;
+    }
+    if (max_bytes > 0 && length > max_bytes) {
+        *out_error_code = YJ_COMPACT_DOCUMENT_TOO_LARGE;
+        *out_error_offset = max_bytes;
+        return YJ_COMPACT_DOCUMENT_TOO_LARGE;
+    }
+    if (max_string_bytes == 0 && max_value_bytes == 0) return YJ_COMPACT_OK;
+    YjLimitParser parser = {input, length, 0, max_depth, max_string_bytes,
+                            YJ_COMPACT_OK, -1, 0};
+    yj_limit_skip_ws(&parser);
+    if (parser.position >= length) return YJ_COMPACT_OK;
+    int64_t start = parser.position;
+    int root_container = input[start] == '[' || input[start] == '{';
+    if (!yj_limit_value(&parser, 0)) {
+        if (parser.resource_error != YJ_COMPACT_OK) {
+            *out_error_code = parser.resource_error;
+            *out_error_offset = parser.resource_offset;
+            return (int32_t)parser.resource_error;
+        }
+        return YJ_COMPACT_OK;
+    }
+    if (root_container && max_value_bytes > 0 && parser.position - start > max_value_bytes) {
+        *out_error_code = YJ_COMPACT_VALUE_TOO_LARGE;
+        *out_error_offset = start + max_value_bytes;
+        return YJ_COMPACT_VALUE_TOO_LARGE;
+    }
+    return YJ_COMPACT_OK;
+}
+
 int32_t YJ_Compact_Parse(const uint8_t *input, int64_t length,
                         uint32_t flags, int64_t max_depth,
                         uint64_t *out_handle, uint32_t *out_root,
@@ -1151,6 +1409,24 @@ error:
     *out_error_offset = parser.error_offset;
     yj_document_free(document);
     return (int32_t)*out_error_code;
+}
+
+int32_t YJ_Compact_ParseWithLimits(const uint8_t *input, int64_t length,
+                                  uint32_t flags, int64_t max_depth,
+                                  int64_t max_bytes, int64_t max_string_bytes,
+                                  int64_t max_value_bytes,
+                                  uint64_t *out_handle, uint32_t *out_root,
+                                  uint32_t *out_error_code,
+                                  int64_t *out_error_offset) {
+    int32_t status = YJ_JSON_ValidateLimits(input, length, max_depth, max_bytes,
+        max_string_bytes, max_value_bytes, out_error_code, out_error_offset);
+    if (status != YJ_COMPACT_OK) {
+        if (out_handle != NULL) *out_handle = 0;
+        if (out_root != NULL) *out_root = 0;
+        return status;
+    }
+    return YJ_Compact_Parse(input, length, flags, max_depth, out_handle, out_root,
+                           out_error_code, out_error_offset);
 }
 
 void YJ_Compact_Free(uint64_t handle) { yj_document_free(yj_from_handle(handle)); }

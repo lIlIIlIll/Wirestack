@@ -12,6 +12,8 @@ private let YJ_COMPACT_DOCUMENT_TOO_LARGE: Int32 = 6
 private let YJ_COMPACT_CLOSED: Int32 = 7
 private let YJ_COMPACT_TYPE_ERROR: Int32 = 8
 private let YJ_COMPACT_BOUNDS_ERROR: Int32 = 9
+private let YJ_COMPACT_STRING_TOO_LARGE: Int32 = 10
+private let YJ_COMPACT_VALUE_TOO_LARGE: Int32 = 11
 
 private let YJ_YYJSON_DIRECT: UInt32 = 0u32
 private let YJ_YYJSON_TRANSCODE: UInt32 = 1u32
@@ -23,26 +25,23 @@ private let YJ_YYJSON_RETAIN_ROOT_INDEX: UInt32 = 16u32
 private let YJ_YYJSON_LAZY_ROOT_INDEX: UInt32 = 32u32
 private let YJ_YYJSON_SEPARATE_VALIDATION: UInt32 = 64u32
 
-@FastNative
 foreign func YJ_Yyjson_Parse(input: CPointer<UInt8>, length: Int64, flags: UInt32,
     maxDepth: Int64, mode: UInt32, outHandle: CPointer<UInt64>,
     outErrorCode: CPointer<UInt32>, outErrorOffset: CPointer<Int64>): Int32
-@FastNative
+foreign func YJ_Yyjson_ParseWithLimits(input: CPointer<UInt8>, length: Int64,
+    flags: UInt32, maxDepth: Int64, mode: UInt32, maxBytes: Int64,
+    maxStringBytes: Int64, maxValueBytes: Int64, outHandle: CPointer<UInt64>,
+    outErrorCode: CPointer<UInt32>, outErrorOffset: CPointer<Int64>): Int32
 foreign func YJ_Yyjson_Free(handle: UInt64): Unit
-@FastNative
 foreign func YJ_Yyjson_TraversalChecksum(handle: UInt64): UInt64
 @FastNative
 foreign func YJ_Yyjson_RootSize(handle: UInt64, outSize: CPointer<UInt64>): Int32
-@FastNative
 foreign func YJ_Yyjson_ObjectLookupInt(handle: UInt64, key: CPointer<UInt8>, keyLength: UInt64,
     outValue: CPointer<Int64>, outFound: CPointer<UInt32>): Int32
-@FastNative
 foreign func YJ_Yyjson_SerializeAlloc(handle: UInt64, outBufferHandle: CPointer<UInt64>,
     outSize: CPointer<UInt64>): Int32
-@FastNative
 foreign func YJ_Yyjson_CopyOwnedBuffer(bufferHandle: UInt64, output: CPointer<UInt8>,
     outputCapacity: UInt64): Int32
-@FastNative
 foreign func YJ_Yyjson_FreeOwnedBuffer(bufferHandle: UInt64): Unit
 @FastNative
 foreign func YJ_Yyjson_Stats(handle: UInt64, stats: CPointer<UInt64>, capacity: UInt64): Int32
@@ -211,8 +210,16 @@ public class YyjsonCompactJsonDocument <: Resource {
             let errorHandle = acquireArrayRawData(outError)
             let offsetHandle = acquireArrayRawData(outOffset)
             try {
-                YJ_Yyjson_Parse(inputHandle.pointer, bytes.size, flags, config.maxDepth, nativeMode,
-                    handleHandle.pointer, errorHandle.pointer, offsetHandle.pointer)
+                if (config.maxBytes == 0 && config.maxStringBytes == 0 &&
+                    config.maxPolymorphicObjectBytes == 0) {
+                    YJ_Yyjson_Parse(inputHandle.pointer, bytes.size, flags, config.maxDepth,
+                        nativeMode, handleHandle.pointer, errorHandle.pointer, offsetHandle.pointer)
+                } else {
+                    YJ_Yyjson_ParseWithLimits(inputHandle.pointer, bytes.size, flags,
+                        config.maxDepth, nativeMode, config.maxBytes, config.maxStringBytes,
+                        config.maxPolymorphicObjectBytes, handleHandle.pointer,
+                        errorHandle.pointer, offsetHandle.pointer)
+                }
             } finally {
                 releaseArrayRawData(offsetHandle)
                 releaseArrayRawData(errorHandle)
@@ -346,6 +353,8 @@ private func yyjsonParseError(bytes: Array<Byte>, code: Int32, offset: Int64,
         case code == YJ_COMPACT_MAX_DEPTH => "max_depth"
         case code == YJ_COMPACT_OUT_OF_MEMORY => "out_of_memory"
         case code == YJ_COMPACT_DOCUMENT_TOO_LARGE => "document_too_large"
+        case code == YJ_COMPACT_STRING_TOO_LARGE => "string_too_large"
+        case code == YJ_COMPACT_VALUE_TOO_LARGE => "polymorphic_object_too_large"
         case _ => "parse_error"
     }
     let message = match {
@@ -353,9 +362,12 @@ private func yyjsonParseError(bytes: Array<Byte>, code: Int32, offset: Int64,
         case code == YJ_COMPACT_MAX_DEPTH => "Maximum JSON depth exceeded"
         case code == YJ_COMPACT_DUPLICATE_KEY => "Duplicate object key"
         case code == YJ_COMPACT_OUT_OF_MEMORY => "yyjson allocation failed"
+        case code == YJ_COMPACT_DOCUMENT_TOO_LARGE => "yyjson document is too large"
+        case code == YJ_COMPACT_STRING_TOO_LARGE => "yyjson JSON string is too large"
+        case code == YJ_COMPACT_VALUE_TOO_LARGE => "yyjson JSON value is too large"
         case _ => "Invalid JSON"
     }
-    if (!includeLocation) { return JsonException(message, code: errorCode, byteOffset: offset) }
+    if (!includeLocation) { return JsonException(message, code: errorCode) }
     var line: Int64 = 1
     var column: Int64 = 1
     let limit = if (offset < 0) { 0 } else if (offset > bytes.size) { bytes.size } else { offset }

@@ -97,4 +97,23 @@ class YyjsonCompactTests {
             @Expect(lazy.storageStats().rootIndexBuilds, 1u64)
         } finally { lazy.close() }
     }
+
+    @TestCase
+    func resourceLimitsMatchPortableBackend(): Unit {
+        let documentError = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
+            yyjsonBytes("{\"a\":1}"), config: JsonReadConfig(maxBytes: 6)))
+        @Expect(documentError.code, "document_too_large")
+        let stringError = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
+            yyjsonBytes("\"\\u4E2D\""), config: JsonReadConfig(maxStringBytes: 2)))
+        @Expect(stringError.code, "string_too_large")
+        let valueError = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
+            yyjsonBytes("{\"a\":[1,2]}"),
+            config: JsonReadConfig(maxPolymorphicObjectBytes: 10)))
+        @Expect(valueError.code, "polymorphic_object_too_large")
+        let hiddenLocation = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
+            yyjsonBytes("\"abc\""),
+            config: JsonReadConfig(includeErrorLocation: false, maxStringBytes: 2)))
+        @Expect(hiddenLocation.code, "string_too_large")
+        @Expect(hiddenLocation.byteOffset, -1)
+    }
 }

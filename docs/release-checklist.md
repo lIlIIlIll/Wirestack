@@ -52,15 +52,15 @@ tests, sanitizers, and consumer fixture pass there.
 
 - The source-only release manifest contains 103 files and excludes `target/`,
   object files, archives, shared libraries, performance corpora, and results.
-- A clean temporary source tree passed the 492-test core suite, examples,
-  Custom Native's 8 tests, yyjson Direct's 5 tests, and external core, macro,
+- The current release gate passed the 498-test core suite, examples,
+  Custom Native's 9 tests, yyjson Direct's 6 tests, and external core, macro,
   Custom Native, and yyjson consumer fixtures.
 - The C release gate passed Clang and GCC warning builds, targeted scanner,
   Custom Native, and yyjson tests, ASan, UBSan, LSan, and 50,000 deterministic
   differential cases.
 - yyjson is built offline from the unmodified vendored 0.12.0 source and its MIT
   license is included in the staged package.
-- Registry staging uses exact `1.0.0` central dependencies and no path
+- Registry staging uses exact `2.0.0` central dependencies and no path
   dependencies. Native packages are source-built from their staged package
   inputs. An isolated registry-style rehearsal inspected all five artifacts and
   built and ran core, macro, Custom Native, and yyjson consumers. `cjpm` 1.1.3
