@@ -5,10 +5,11 @@ release candidate, including resource-limited parsing, the reusable fast
 collection bridge, and the optional native Float64 parser. The machine-readable source is
 [`release/public-api-inventory.toml`](../release/public-api-inventory.toml).
 
-Most entries are additive. `JsonReadConfig.init` is an intentional 2.0 breaking
-change: it adds constructor parameters and changes the default
-`maxPolymorphicObjectBytes` value. The API inventory and ABI symbol inventory
-must be reviewed whenever a declaration is added, removed, renamed, or changed.
+Most entries are additive. `JsonReadConfig.init` and the `JsonValue` to
+`JsonNode` AST-root rename are intentional 2.0 breaking changes. The latter is
+required because the new unqualified `@JsonValue` macro occupies the same
+Cangjie declaration namespace. The API inventory and ABI symbol inventory must
+be reviewed whenever a declaration is added, removed, renamed, or changed.
 
 ## Package pairing
 
@@ -55,6 +56,21 @@ The reader method is public because macro expansion runs in the consumer's
 package. It is a generated-code bridge, not a promise that applications should
 depend on the current capacity heuristic.
 
+## JSON literal and mutable-node surface
+
+| Package | Declaration | Contract | Compatibility disposition |
+|---|---|---|---|
+| `yjson_macros` | `@Json({...})` | Direct compact writer; `$()` values and dynamic String keys are evaluated once left-to-right | Additive macro; requires matching core |
+| `yjson_macros` | `@JsonValue({...})` | Constructs a mutable `JsonNode` tree with the same literal grammar | Additive macro; reserves the old type name |
+| `yjson` | `JsonNode` | Mutable AST root with `[]` access and short scalar/container properties | Breaking rename from `JsonValue` |
+| `yjson` | `YJson.nullValue/array/object/value/writeValue` | Macro bridge plus explicit construction and conversion helpers | Additive overload family |
+| `yjson` | chainable `JsonArrayValue.add/set`, `JsonObjectValue.put` | Mutates and returns the same container | `put` return type changed from `Unit`; rebuild required |
+
+Static duplicate keys are rejected during macro expansion. Objects containing
+dynamic keys use LastWins; all interpolated expressions still run once, while
+only winning fields invoke their codec. `@Json` writes through
+`JsonDirectWriter` and does not materialize an intermediate `JsonNode` tree.
+
 ## Optional native Float64 surface
 
 | Package | Declaration | Contract |
@@ -73,8 +89,8 @@ process-global and must not race with decoding.
 ## Compatibility disposition
 
 - Source: 1.x calls that construct `JsonReadConfig` must be rebuilt and may need
-  review of the changed polymorphic-object default; new macro output needs the
-  matching core release.
+  review of the changed polymorphic-object default. `JsonValue` references must
+  migrate to `JsonNode`; new macro output needs the matching core release.
 - ABI: `JsonReadConfig` is not claimed binary-compatible with 1.x. The reader
   addition is a non-`open`, non-overriding instance method; native declarations
   are additive and the old C symbols remain available.

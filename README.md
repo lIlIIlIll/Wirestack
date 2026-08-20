@@ -1,6 +1,6 @@
 # yjson
 
-`yjson` 是面向仓颉 1.1.0 的 JSON 库，提供可修改的 `JsonValue` AST、
+`yjson` 是面向仓颉 1.1.0 的 JSON 库，提供可修改的 `JsonNode` AST、
 直接 typed codec、流式 API、JSON Schema 子集和紧凑只读 DOM。纯仓颉 core 是默认
 实现；两个 Native DOM 后端均为显式 opt-in。
 
@@ -81,6 +81,44 @@ let text = YJson.toJson(User(7, "Alice"))
 let user = YJson.fromJson<User>(text)
 ```
 
+### JSON 字面量宏与可修改 AST
+
+同一个 `yjson_all` 导入还提供表达式宏 `@Json` 和 `@JsonValue`。对象、数组、
+双引号字符串、JSON 数字、`true`、`false`、`null` 均可直接书写；数组和对象允许
+尾逗号。`$(expression)` 插入运行时值，`$(keyExpression): value` 插入动态
+`String` key：
+
+```cangjie noverify=usage-fragment
+let key = "user"
+let id: Int64 = 7
+
+let text = @Json({
+    "ok": true,
+    "items": [1, null, $(id),],
+    $(key): $(User(id, "Alice")),
+})
+
+let root = @JsonValue({"name": "Alice", "items": [1, 2,]})
+root["name"] = "Bob"
+root["items"][0] = 9
+let name = root["name"].string
+```
+
+`@Json` 直接驱动 `JsonDirectWriter` 生成 compact `String`，不会先建立完整
+`JsonNode` 树；`@JsonValue` 才返回可修改树。所有 `$()` 从左到右各求值一次。
+静态重复 key 是编译错误；只要对象含动态 key，运行时冲突使用 LastWins，而且只有
+最终获胜字段会调用其 codec。字符串采用仓颉双引号字面量的转义规则，数值拒绝
+下划线、进制前缀和类型后缀等非 JSON 写法。受仓颉源码词法限制，带正指数时写
+`1e3`，而不是无法被仓颉词法器送入宏的 `1e+3`。
+
+手工构造时可使用 `YJson.nullValue()`、`YJson.array()`、`YJson.object()` 和
+`YJson.value(...)`。`JsonArrayValue.add/set` 与 `JsonObjectValue.put` 返回自身，
+可链式调用；`JsonNode` 提供 `[]` 读写以及 `.string`、`.bool`、`.int64`、
+`.float64`、`.numberText`、`.array`、`.object`、`.isNull` 快捷属性。
+
+由于仓颉宏与类型共用声明命名空间，为提供不带别名的 `@JsonValue`，2.0 将原 AST
+根类型 `JsonValue` 不兼容地重命名为 `JsonNode`。
+
 同一个支持 compact fast reader 的生成对象 codec 被高频重复解码时，可以在循环外
 解析一次 fast decoder，避免每次泛型调用的运行时类型解析：
 
@@ -102,7 +140,8 @@ codec 的完整配置语义。不提供生成式 fast-decoder 合同的自定义
 `@JsonCodec` 在调用方编译期间处理调用方 `src/` 中的类型，不依赖运行时反射。
 泛型实参必须有内置 codec 或同样可生成的 codec；参与生成的实例字段必须显式声明
 类型，不可变字段需要由可用构造函数接收。完整下游 fixture 位于
-[`packages/codec_integration`](packages/codec_integration)。
+[`packages/codec_integration`](packages/codec_integration)；JSON 字面量的独立消费者
+位于 [`packages/json_literal_integration`](packages/json_literal_integration)。
 
 ### Public fast bridges and package pairing
 
@@ -123,7 +162,7 @@ bridge 也属于显式、进程级 backend API。它们的稳定契约、并发�
 |---|---|---|---|---|
 | Pure Cangjie | 是 | GC 管理，无显式关闭 | typed codec、AST、可移植默认、语义 oracle | 受 GC large-object geometry 限制的超大 DOM |
 | Custom Native Compact | 否，受支持 opt-in | C-owned，必须 `close()` | 较低内存、受控语义 fallback、超大对象 lookup | 希望完全 GC 管理的 API |
-| yyjson Direct Native DOM | 否，受支持 opt-in | C-owned，必须 `close()`；部分 workload 以空间换速度 | 实测通用 Native DOM 最快路径、coarse query、bulk traversal、serialize | 自动加速 `JsonValue.parse`，或百万节点逐节点 FFI 遍历 |
+| yyjson Direct Native DOM | 否，受支持 opt-in | C-owned，必须 `close()`；部分 workload 以空间换速度 | 实测通用 Native DOM 最快路径、coarse query、bulk traversal、serialize | 自动加速 `JsonNode.parse`，或百万节点逐节点 FFI 遍历 |
 
 详细合同见 [Backend 指南](docs/backends.md)。选择 backend 是显式 API 决策；库不按
 输入大小或文件名自动切换。

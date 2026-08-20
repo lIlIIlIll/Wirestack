@@ -4,7 +4,7 @@ import std.collection.*
 import std.unittest.*
 import std.unittest.testmacro.*
 
-func jsonValuesSemanticallyEqual(left: JsonValue, right: JsonValue): Bool {
+func jsonValuesSemanticallyEqual(left: JsonNode, right: JsonNode): Bool {
     if (left.kind() != right.kind()) {
         return false
     }

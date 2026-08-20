@@ -454,7 +454,7 @@ public class JsonDirectReader {
     // Materializes exactly one value while enforcing the byte budget against
     // the original input. This is reserved for discriminator-based decoding,
     // where the subtype is unknown until part of the object has been read.
-    public func readBoundedValue(maxBytes: Int64): JsonValue {
+    public func readBoundedValue(maxBytes: Int64): JsonNode {
         if (maxBytes <= 0) { throw IllegalArgumentException("maxBytes must be positive") }
         let start = source.position()
         readBoundedValueFrom(start, maxBytes, 0)
@@ -469,7 +469,7 @@ public class JsonDirectReader {
         }
     }
 
-    private func readBoundedValueFrom(start: Int64, maxBytes: Int64, depth: Int64): JsonValue {
+    private func readBoundedValueFrom(start: Int64, maxBytes: Int64, depth: Int64): JsonNode {
         if (depth >= config.maxDepth) {
             throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
         }
@@ -478,12 +478,12 @@ public class JsonDirectReader {
         if (!source.hasMore()) { fail("Unexpected end of input") }
         valuePrefixReady = true
         let current = source.peek()
-        let value: JsonValue = match {
+        let value: JsonNode = match {
             case current == b'n' => readNull(); JsonNullValue()
             case current == b't' || current == b'f' => JsonBoolValue(readBool())
             case current == b'"' => JsonStringValue(readString())
             case current == b'[' =>
-                let items = ArrayList<JsonValue>()
+                let items = ArrayList<JsonNode>()
                 startArray()
                 while (hasArrayItem()) {
                     items.add(readBoundedValueFrom(start, maxBytes, depth + 1))
@@ -492,7 +492,7 @@ public class JsonDirectReader {
                 endArray()
                 JsonArrayValue(items)
             case current == b'{' =>
-                let fields = HashMap<String, JsonValue>()
+                let fields = HashMap<String, JsonNode>()
                 startObject()
                 while (hasObjectField()) {
                     let name = readName()

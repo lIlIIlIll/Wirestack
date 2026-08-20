@@ -38,7 +38,7 @@ class NumberBoundaryTest {
     }
 
     // Helper to parse value
-    func parseValue(text: String): JsonValue {
+    func parseValue(text: String): JsonNode {
         YJson.parse(text)
     }
 
@@ -402,7 +402,7 @@ class UnicodeBoundaryTest {
         }
     }
 
-    func parseValue(text: String): JsonValue {
+    func parseValue(text: String): JsonNode {
         YJson.parse(text)
     }
 
@@ -605,7 +605,7 @@ class WhitespaceBoundaryTest {
         }
     }
 
-    func parseValue(text: String): JsonValue {
+    func parseValue(text: String): JsonNode {
         YJson.parse(text)
     }
 
@@ -919,7 +919,7 @@ class DeepNestingBoundaryTest {
         }
     }
 
-    func parseValue(text: String): JsonValue {
+    func parseValue(text: String): JsonNode {
         YJson.parse(text)
     }
 

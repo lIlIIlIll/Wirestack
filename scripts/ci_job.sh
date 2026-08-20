@@ -31,6 +31,8 @@ case "$job" in
         ;;
     macro-consumer)
         require_cangjie
+        (cd "$repo/packages/json_literal_integration" && cjpm run)
+        "$repo/scripts/check_json_literal_compile_fail.sh"
         stage_modules
         python3 "$repo/scripts/release_consumer_checks.py" \
             --modules-root "$modules" --only macro

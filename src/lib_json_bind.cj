@@ -83,43 +83,43 @@ public class JsonSubtypeMetadata {
 }
 
 public interface JsonValueCodec<T> {
-    func encode(value: T): JsonValue
+    func encode(value: T): JsonNode
 
-    func decode(value: JsonValue): T
+    func decode(value: JsonNode): T
 }
 
 class LambdaJsonCodec<T> <: JsonValueCodec<T> {
-    private let encoder: (T) -> JsonValue
-    private let decoder: (JsonValue) -> T
+    private let encoder: (T) -> JsonNode
+    private let decoder: (JsonNode) -> T
 
-    public init(encoder: (T) -> JsonValue, decoder: (JsonValue) -> T) {
+    public init(encoder: (T) -> JsonNode, decoder: (JsonNode) -> T) {
         this.encoder = encoder
         this.decoder = decoder
     }
 
-    public func encode(value: T): JsonValue {
+    public func encode(value: T): JsonNode {
         encoder(value)
     }
 
-    public func decode(value: JsonValue): T {
+    public func decode(value: JsonNode): T {
         decoder(value)
     }
 }
 
 public class YJsonAst {
-    public static func parse(text: String, config!: JsonReadConfig = JsonReadConfig.defaults): JsonValue {
-        JsonValue.parse(text, config: config)
+    public static func parse(text: String, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
+        JsonNode.parse(text, config: config)
     }
 
-    public static func parse(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): JsonValue {
-        JsonValue.parse(bytes, config: config)
+    public static func parse(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
+        JsonNode.parse(bytes, config: config)
     }
 
-    public static func stringify(value: JsonValue, config!: JsonWriteConfig = JsonWriteConfig.compact): String {
+    public static func stringify(value: JsonNode, config!: JsonWriteConfig = JsonWriteConfig.compact): String {
         writeJsonValueToString(value, config)
     }
 
-    public static func stringifyPretty(value: JsonValue, indent!: String = "  "): String {
+    public static func stringifyPretty(value: JsonNode, indent!: String = "  "): String {
         stringify(value, config: JsonWriteConfig(
             JsonWriteConfig.pretty.newline,
             indent,
@@ -132,14 +132,14 @@ public class YJsonAst {
         codec: JsonValueCodec<T>,
         value: T,
         config!: JsonCodecConfig = JsonCodecConfig.compact
-    ): JsonValue {
+    ): JsonNode {
         let _ = config
         codec.encode(value)
     }
 
     public static func decodeWith<T>(
         codec: JsonValueCodec<T>,
-        value: JsonValue,
+        value: JsonNode,
         config!: JsonCodecConfig = JsonCodecConfig.compact
     ): T {
         let _ = config
@@ -199,7 +199,7 @@ public class YJsonAst {
     public static func arrayCodec<T>(inner: JsonValueCodec<T>): JsonValueCodec<Array<T>> {
         LambdaJsonCodec<Array<T>>(
             { value =>
-                let items = ArrayList<JsonValue>(value.size)
+                let items = ArrayList<JsonNode>(value.size)
                 for (index in 0..value.size) {
                     items.add(inner.encode(value[index]))
                 }
@@ -217,7 +217,7 @@ public class YJsonAst {
     public static func arrayListCodec<T>(inner: JsonValueCodec<T>): JsonValueCodec<ArrayList<T>> {
         LambdaJsonCodec<ArrayList<T>>(
             { value =>
-                let items = ArrayList<JsonValue>(value.size)
+                let items = ArrayList<JsonNode>(value.size)
                 for (item in value) {
                     items.add(inner.encode(item))
                 }
@@ -235,7 +235,7 @@ public class YJsonAst {
     public static func hashMapCodec<T>(valueCodec: JsonValueCodec<T>): JsonValueCodec<HashMap<String, T>> {
         LambdaJsonCodec<HashMap<String, T>>(
             { value =>
-                let fields = HashMap<String, JsonValue>(value.size)
+                let fields = HashMap<String, JsonNode>(value.size)
                 for ((key, item) in value) {
                     fields.add(key, valueCodec.encode(item))
                 }

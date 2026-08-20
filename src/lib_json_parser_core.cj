@@ -133,7 +133,7 @@ private class ArrayJsonByteSource <: JsonByteSource {
         fail("Unterminated string literal")
     }
 
-    public func parseNumberFast(): JsonValue {
+    public func parseNumberFast(): JsonNode {
         let start = index
         var overflow = false
         if (data[index] == b'-') {
@@ -363,7 +363,7 @@ private class JsonParserCore {
         this.config = source.config()
     }
 
-    public func parse(): JsonValue {
+    public func parse(): JsonNode {
         match (source) {
             case arraySource: ArrayJsonByteSource => return parseFast(arraySource)
             case _ => ()
@@ -403,7 +403,7 @@ private class JsonParserCore {
         next
     }
 
-    private func parseFast(arraySource: ArrayJsonByteSource): JsonValue {
+    private func parseFast(arraySource: ArrayJsonByteSource): JsonNode {
         arraySource.skipSpacesFast()
         let value = parseValueFast(arraySource)
         arraySource.skipSpacesFast()
@@ -413,7 +413,7 @@ private class JsonParserCore {
         value
     }
 
-    private func parseValueFast(arraySource: ArrayJsonByteSource): JsonValue {
+    private func parseValueFast(arraySource: ArrayJsonByteSource): JsonNode {
         if (!arraySource.hasMore()) {
             failAt("Unexpected end of input", arraySource.position())
         }
@@ -436,7 +436,7 @@ private class JsonParserCore {
         }
     }
 
-    private func parseValue(): JsonValue {
+    private func parseValue(): JsonNode {
         if (!source.hasMore()) {
             fail("Unexpected end of input")
         }
@@ -452,12 +452,12 @@ private class JsonParserCore {
         }
     }
 
-    private func parseNull(): JsonValue {
+    private func parseNull(): JsonNode {
         expectLiteral("null")
         JsonNullValue()
     }
 
-    private func parseBool(): JsonValue {
+    private func parseBool(): JsonNode {
         if (source.peek() == b't') {
             expectLiteral("true")
             return JsonBoolValue(true)
@@ -466,7 +466,7 @@ private class JsonParserCore {
         JsonBoolValue(false)
     }
 
-    private func parseNumber(): JsonValue {
+    private func parseNumber(): JsonNode {
         match (source) {
             case arraySource: ArrayJsonByteSource => return arraySource.parseNumberFast()
             case _ => ()
@@ -496,7 +496,7 @@ private class JsonParserCore {
         buildParsedNumberValue(literalText, hasFractionalSyntax)
     }
 
-    private func buildParsedNumberValue(literal: String, hasFractionalSyntax: Bool): JsonValue {
+    private func buildParsedNumberValue(literal: String, hasFractionalSyntax: Bool): JsonNode {
         if (jsonReadConfigPreservesNumberLiterals(config)) {
             return JsonNumberLiteralValue(literal)
         }
@@ -678,10 +678,10 @@ private class JsonParserCore {
         failAt("Invalid UTF-8 byte sequence", start)
     }
 
-    private func parseArrayFast(arraySource: ArrayJsonByteSource): JsonValue {
+    private func parseArrayFast(arraySource: ArrayJsonByteSource): JsonNode {
         arraySource.expectByteFast(b'[')
         arraySource.skipSpacesFast()
-        let items = ArrayList<JsonValue>(4)
+        let items = ArrayList<JsonNode>(4)
         if (arraySource.peekByteFast(b']')) {
             arraySource.consume()
             return JsonArrayValue(items)
@@ -699,10 +699,10 @@ private class JsonParserCore {
         JsonArrayValue(items)
     }
 
-    private func parseArray(): JsonValue {
+    private func parseArray(): JsonNode {
         expectByte(b'[')
         skipSpaces()
-        let items = ArrayList<JsonValue>()
+        let items = ArrayList<JsonNode>()
         if (peekByte(b']')) {
             consumeByte()
             return JsonArrayValue(items)
@@ -720,10 +720,10 @@ private class JsonParserCore {
         JsonArrayValue(items)
     }
 
-    private func parseObjectFast(arraySource: ArrayJsonByteSource): JsonValue {
+    private func parseObjectFast(arraySource: ArrayJsonByteSource): JsonNode {
         arraySource.expectByteFast(b'{')
         arraySource.skipSpacesFast()
-        let fields = HashMap<String, JsonValue>(8)
+        let fields = HashMap<String, JsonNode>(8)
         if (arraySource.peekByteFast(b'}')) {
             arraySource.consume()
             return JsonObjectValue(fields)
@@ -751,10 +751,10 @@ private class JsonParserCore {
         JsonObjectValue(fields)
     }
 
-    private func parseObject(): JsonValue {
+    private func parseObject(): JsonNode {
         expectByte(b'{')
         skipSpaces()
-        let fields = HashMap<String, JsonValue>()
+        let fields = HashMap<String, JsonNode>()
         if (peekByte(b'}')) {
             consumeByte()
             return JsonObjectValue(fields)
@@ -840,17 +840,17 @@ private class JsonParserCore {
     }
 }
 
-func parseJsonValueFromText(text: String, config!: JsonReadConfig = JsonReadConfig.defaults): JsonValue {
+func parseJsonValueFromText(text: String, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
     JsonParserCore(ArrayJsonByteSource(text, config: config)).parse()
 }
 
-func parseJsonValueFromBytes(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): JsonValue {
+func parseJsonValueFromBytes(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
     JsonParserCore(ArrayJsonByteSource(bytes, config: config)).parse()
 }
 
 func parseJsonValueFromInputStream(
     input: InputStream,
     config!: JsonReadConfig = JsonReadConfig.defaults
-): JsonValue {
+): JsonNode {
     JsonParserCore(StreamJsonByteSource(input, config: config)).parse()
 }

@@ -37,11 +37,11 @@ class Fastjson2CompareBenchmarks {
     let profileBundleText: String
     let uint64EnvelopeText: String
     let temporalStatsText: String
-    let personAst: JsonValue
+    let personAst: JsonNode
     var stringSink = ""
     var intSink: Int64 = 0
     var bytesSink: Array<Byte> = Array<Byte>(0, repeat: 0u8)
-    var astSink: JsonValue = JsonNullValue()
+    var astSink: JsonNode = JsonNullValue()
 
     init() {
         personText = YJson.encodeStringWith(PersonJson, person)

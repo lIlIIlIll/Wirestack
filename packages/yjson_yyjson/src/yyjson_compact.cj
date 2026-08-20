@@ -148,7 +148,7 @@ public struct YyjsonCompactStorageStats {
 /// The pure Cangjie backend remains the portable default. This type is for
 /// callers that retain the native DOM and use coarse lookup, traversal, or
 /// serialization operations; it is not an acceleration path for
-/// `JsonValue.parse`, and materialization reparses serialized output.
+/// `JsonNode.parse`, and materialization reparses serialized output.
 ///
 /// This resource is intentionally bulk-first. It is not thread-safe: read/read
 /// is supported only when the caller externally guarantees the document stays
@@ -328,7 +328,7 @@ public class YyjsonCompactJsonDocument <: Resource {
 
     /// Coarse control path: one native serialization, then one Cangjie AST parse.
     /// This deliberately avoids per-node FFI and is benchmarked separately.
-    public func materializeViaSerialization(): JsonValue { YJson.parse(toBytes()) }
+    public func materializeViaSerialization(): JsonNode { YJson.parse(toBytes()) }
 
     private func requireOpen(): UInt64 {
         if (handle == 0u64) { throw IllegalStateException("yyjson compact document is closed") }

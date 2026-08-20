@@ -1,7 +1,7 @@
 # Performance methodology
 
 Performance claims are backend- and representation-specific. Typed codecs,
-`JsonValue`, Pure Compact, Custom Native DOM, yyjson Direct Native DOM, serde
+`JsonNode`, Pure Compact, Custom Native DOM, yyjson Direct Native DOM, serde
 Value, raw yyjson, and simdjson DOM are not interchangeable results.
 
 The retained Round-18 architecture was measured on an Intel Xeon Gold 6248R,

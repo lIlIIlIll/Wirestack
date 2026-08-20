@@ -451,11 +451,11 @@ class StdxCompareBenchmarks {
     let canonicalBundleText: String
     let canonicalUInt64EnvelopeText: String
     let canonicalTemporalStatsText: String
-    let yjsonPersonAst: JsonValue
+    let yjsonPersonAst: JsonNode
     let stdxPersonAst: stdxjson.JsonValue
     var stringSink = ""
     var intSink: Int64 = 0
-    var yjsonAstSink: JsonValue = JsonNullValue()
+    var yjsonAstSink: JsonNode = JsonNullValue()
     var stdxAstSink: stdxjson.JsonValue = stdxjson.JsonNull()
 
     init() {

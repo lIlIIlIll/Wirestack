@@ -83,6 +83,17 @@ main(): Unit {
     let text = YJson.toJson(Person(7, "Alice"))
     let value = YJson.fromJson<Person>(text)
     if (value.id != 7 || value.name != "Alice") { throw Exception("macro") }
+    let key = "person"
+    let literal = @Json({"ok": true, $(key): $(Person(8, "Bob")),})
+    if (literal != "{\\\"ok\\\":true,\\\"person\\\":{\\\"id\\\":8,\\\"name\\\":\\\"Bob\\\"}}") {
+        throw Exception("json literal")
+    }
+    let tree = @JsonValue({"name": "Alice", "items": [1, 2,]})
+    tree["name"] = "Bob"
+    tree["items"][0] = 9
+    if (tree["name"].string != "Bob" || tree["items"][0].int64 != 9) {
+        throw Exception("json value literal")
+    }
     println("macro consumer passed")
 }
 ''', base)

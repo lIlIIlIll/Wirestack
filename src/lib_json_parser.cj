@@ -9,7 +9,7 @@ class JsonParser {
         this.config = config
     }
 
-    func parse(): JsonValue {
+    func parse(): JsonNode {
         parseJsonValueFromText(text, config: config)
     }
 }

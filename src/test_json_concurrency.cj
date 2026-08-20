@@ -41,7 +41,7 @@ class ParallelParseSmokeTest {
     @TestCase
     func concurrentParseDifferentJsonStrings(): Unit {
         let count = 10
-        let futures = ArrayList<Future<JsonValue>>()
+        let futures = ArrayList<Future<JsonNode>>()
 
         for (i in 0..count) {
             let json = generateConcurrentTestJson(i)
@@ -66,7 +66,7 @@ class ParallelParseSmokeTest {
     func concurrentParseSameJsonString(): Unit {
         let json = "{\"shared\":\"value\",\"count\":100}"
         let count: Int64 = 20
-        let futures = ArrayList<Future<JsonValue>>()
+        let futures = ArrayList<Future<JsonNode>>()
         let ready = AtomicInt64(0)
         let start = AtomicInt64(0)
 
@@ -95,7 +95,7 @@ class ParallelParseSmokeTest {
     func concurrentParseLargeJson(): Unit {
         let json = generateLargeConcurrentJson(500)
         let count = 5
-        let futures = ArrayList<Future<JsonValue>>()
+        let futures = ArrayList<Future<JsonNode>>()
 
         for (_ in 0..count) {
             let future = spawn {
@@ -115,7 +115,7 @@ class ParallelParseSmokeTest {
     @TestCase
     func concurrentParseNestedStructures(): Unit {
         let count = 10
-        let futures = ArrayList<Future<JsonValue>>()
+        let futures = ArrayList<Future<JsonNode>>()
 
         for (i in 0..count) {
             let json = "{\"level\":${i},\"nested\":{\"a\":{\"b\":{\"c\":${i}}}}}"
@@ -148,7 +148,7 @@ class ParallelParseSmokeTest {
 @Test
 class ParallelSerializeSmokeTest {
 
-    /// 测试多个线程同时序列化不同的 JsonValue
+    /// 测试多个线程同时序列化不同的 JsonNode
     @TestCase
     func concurrentSerializeDifferentValues(): Unit {
         let count = 10
@@ -173,7 +173,7 @@ class ParallelSerializeSmokeTest {
         }
     }
 
-    /// 测试多个线程同时序列化同一个 JsonValue
+    /// 测试多个线程同时序列化同一个 JsonNode
     /// 注意：这测试读取安全性，不涉及修改
     @TestCase
     func concurrentSerializeSameValue(): Unit {
@@ -242,7 +242,7 @@ class ParallelSerializeSmokeTest {
 @Test
 class SharedReadSmokeTest {
 
-    /// 测试多线程读取同一个 JsonValue
+    /// 测试多线程读取同一个 JsonNode
     /// 这是安全的，因为读取不修改状态
     @TestCase
     func concurrentReadSharedValue(): Unit {

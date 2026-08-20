@@ -1,0 +1,16 @@
+[package]
+cjc-version = "1.1.0"
+name = "yjson_json_literal_compile_fail"
+organization = ""
+description = "Negative external-consumer fixture for duplicate static JSON literal keys"
+version = "2.0.0"
+target-dir = ""
+script-dir = ""
+output-type = "executable"
+compile-option = "-Woff unused"
+override-compile-option = ""
+link-option = ""
+package-configuration = {}
+
+[dependencies]
+yjson_all = { path = "../yjson_all" }

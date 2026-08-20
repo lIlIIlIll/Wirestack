@@ -27,7 +27,7 @@ func throwsJsonException(text: String): Bool {
 }
 
 // Helper function to parse and get value
-func parseValue(text: String): JsonValue {
+func parseValue(text: String): JsonNode {
     YJson.parse(text)
 }
 

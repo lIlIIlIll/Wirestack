@@ -194,12 +194,12 @@ class ComprehensiveJsonCompareBenchmarks {
     let largeStringListBytes: Array<Byte>
     let deepNestedProfilesBytes: Array<Byte>
     let escapedUnicodeBytes: Array<Byte>
-    let personAst: JsonValue
+    let personAst: JsonNode
     let stdxPersonAst: stdxjson.JsonValue
     var stringSink = ""
     var intSink: Int64 = 0
     var bytesSink: Array<Byte> = Array<Byte>(0, repeat: 0u8)
-    var yjsonAstSink: JsonValue = JsonNullValue()
+    var yjsonAstSink: JsonNode = JsonNullValue()
     var stdxAstSink: stdxjson.JsonValue = stdxjson.JsonNull()
 
     init() {

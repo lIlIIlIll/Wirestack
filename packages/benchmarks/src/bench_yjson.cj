@@ -30,7 +30,7 @@ class YJsonBenchmarks {
     let htmlText: String
     var stringSink = ""
     var intSink: Int64 = 0
-    var valueSink: JsonValue = JsonNullValue()
+    var valueSink: JsonNode = JsonNullValue()
 
     init() {
         nestedProfilesCodec = nestedProfilesJson()

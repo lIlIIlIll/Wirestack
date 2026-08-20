@@ -157,12 +157,12 @@ class JsonValueStreamWriter {
         this.multiline = !config.newline.isEmpty()
     }
 
-    public func write(value: JsonValue): Unit {
+    public func write(value: JsonNode): Unit {
         writeValue(value, 0)
         target.finish()
     }
 
-    private func writeValue(value: JsonValue, depth: Int64): Unit {
+    private func writeValue(value: JsonNode, depth: Int64): Unit {
         match (value) {
             case _: JsonNullValue => target.writeText("null")
             case boolValue: JsonBoolValue => target.writeText(boolValue.value.toString())
@@ -174,7 +174,7 @@ class JsonValueStreamWriter {
             case stringValue: JsonStringValue => writeStringValue(stringValue.value)
             case arrayValue: JsonArrayValue => writeArrayValue(arrayValue, depth)
             case objectValue: JsonObjectValue => writeObjectValue(objectValue, depth)
-            case _ => throw JsonException("Unsupported JsonValue implementation")
+            case _ => throw JsonException("Unsupported JsonNode implementation")
         }
     }
 
@@ -325,7 +325,7 @@ class JsonValueStreamWriter {
     }
 }
 
-func writeJsonValueToString(value: JsonValue, config: JsonWriteConfig): String {
+func writeJsonValueToString(value: JsonNode, config: JsonWriteConfig): String {
     if (config.newline.isEmpty() && !config.useSpaceAfterSeparators && !config.htmlSafe) {
         let writer = JsonDirectWriter()
         writeJsonValueCompact(writer, value)
@@ -341,6 +341,6 @@ func writeJsonValueToString(value: JsonValue, config: JsonWriteConfig): String {
     target.build()
 }
 
-func writeJsonValueToStream(value: JsonValue, out: OutputStream, config: JsonWriteConfig): Unit {
+func writeJsonValueToStream(value: JsonNode, out: OutputStream, config: JsonWriteConfig): Unit {
     JsonValueStreamWriter(StreamJsonWriterTarget(out), config).write(value)
 }

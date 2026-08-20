@@ -19,10 +19,10 @@ public class JsonValidationError <: JsonException {
 }
 
 public class JsonSchema {
-    public let document: JsonValue
+    public let document: JsonNode
     public let draft: String
 
-    public init(document: JsonValue, draft!: String = "https://json-schema.org/draft/2020-12/schema") {
+    public init(document: JsonNode, draft!: String = "https://json-schema.org/draft/2020-12/schema") {
         this.document = document
         this.draft = draft
         validateJsonSchemaDocument(document, "#")
@@ -32,7 +32,7 @@ public class JsonSchema {
         JsonSchema(YJson.parse(text))
     }
 
-    public static func fromValue(value: JsonValue): JsonSchema {
+    public static func fromValue(value: JsonNode): JsonSchema {
         JsonSchema(value)
     }
 
@@ -40,11 +40,11 @@ public class JsonSchema {
         JsonSchemaValidator(this)
     }
 
-    public func validate(instance: JsonValue): ArrayList<JsonValidationError> {
+    public func validate(instance: JsonNode): ArrayList<JsonValidationError> {
         validator().validate(instance)
     }
 
-    public func validateOrThrow(instance: JsonValue): Unit {
+    public func validateOrThrow(instance: JsonNode): Unit {
         validator().validateOrThrow(instance)
     }
 }
@@ -56,17 +56,17 @@ public class JsonSchemaValidator {
         this.schema = schema
     }
 
-    public func validate(instance: JsonValue): ArrayList<JsonValidationError> {
+    public func validate(instance: JsonNode): ArrayList<JsonValidationError> {
         let errors = ArrayList<JsonValidationError>()
         validateSchemaValue(schema.document, instance, "$", "#", errors, ArrayList<String>())
         errors
     }
 
-    public func isValid(instance: JsonValue): Bool {
+    public func isValid(instance: JsonNode): Bool {
         validate(instance).isEmpty()
     }
 
-    public func validateOrThrow(instance: JsonValue): Unit {
+    public func validateOrThrow(instance: JsonNode): Unit {
         let errors = validate(instance)
         if (!errors.isEmpty()) {
             throw errors[0]
@@ -74,8 +74,8 @@ public class JsonSchemaValidator {
     }
 
     private func validateSchemaValue(
-        schemaValue: JsonValue,
-        instance: JsonValue,
+        schemaValue: JsonNode,
+        instance: JsonNode,
         jsonPath: String,
         schemaPath: String,
         errors: ArrayList<JsonValidationError>,
@@ -96,7 +96,7 @@ public class JsonSchemaValidator {
 
     private func validateObjectSchema(
         objectSchema: JsonObjectValue,
-        instance: JsonValue,
+        instance: JsonNode,
         jsonPath: String,
         schemaPath: String,
         errors: ArrayList<JsonValidationError>,
@@ -230,8 +230,8 @@ public class JsonSchemaValidator {
     }
 
     private func validateType(
-        typeSchema: JsonValue,
-        instance: JsonValue,
+        typeSchema: JsonNode,
+        instance: JsonNode,
         jsonPath: String,
         schemaPath: String,
         errors: ArrayList<JsonValidationError>
@@ -259,8 +259,8 @@ public class JsonSchemaValidator {
     }
 
     private func validateEnum(
-        enumSchema: JsonValue,
-        instance: JsonValue,
+        enumSchema: JsonNode,
+        instance: JsonNode,
         jsonPath: String,
         schemaPath: String,
         errors: ArrayList<JsonValidationError>
@@ -275,8 +275,8 @@ public class JsonSchemaValidator {
     }
 
     private func validateNumericLimit(
-        limitSchema: JsonValue,
-        instance: JsonValue,
+        limitSchema: JsonNode,
+        instance: JsonNode,
         jsonPath: String,
         schemaPath: String,
         minimum: Bool,
@@ -296,8 +296,8 @@ public class JsonSchemaValidator {
     }
 
     private func validateStringLength(
-        lengthSchema: JsonValue,
-        instance: JsonValue,
+        lengthSchema: JsonNode,
+        instance: JsonNode,
         jsonPath: String,
         schemaPath: String,
         minimum: Bool,
@@ -318,8 +318,8 @@ public class JsonSchemaValidator {
     }
 
     private func validateRequired(
-        requiredSchema: JsonValue,
-        instance: JsonValue,
+        requiredSchema: JsonNode,
+        instance: JsonNode,
         jsonPath: String,
         schemaPath: String,
         errors: ArrayList<JsonValidationError>
@@ -338,8 +338,8 @@ public class JsonSchemaValidator {
     }
 
     private func validateProperties(
-        propertiesSchema: JsonValue,
-        instance: JsonValue,
+        propertiesSchema: JsonNode,
+        instance: JsonNode,
         jsonPath: String,
         schemaPath: String,
         errors: ArrayList<JsonValidationError>,
@@ -367,8 +367,8 @@ public class JsonSchemaValidator {
     }
 
     private func validateItems(
-        itemsSchema: JsonValue,
-        instance: JsonValue,
+        itemsSchema: JsonNode,
+        instance: JsonNode,
         jsonPath: String,
         schemaPath: String,
         errors: ArrayList<JsonValidationError>,
@@ -384,8 +384,8 @@ public class JsonSchemaValidator {
     }
 
     private func validateAllOf(
-        combinatorSchema: JsonValue,
-        instance: JsonValue,
+        combinatorSchema: JsonNode,
+        instance: JsonNode,
         jsonPath: String,
         schemaPath: String,
         errors: ArrayList<JsonValidationError>,
@@ -398,8 +398,8 @@ public class JsonSchemaValidator {
     }
 
     private func validateAnyOf(
-        combinatorSchema: JsonValue,
-        instance: JsonValue,
+        combinatorSchema: JsonNode,
+        instance: JsonNode,
         jsonPath: String,
         schemaPath: String,
         errors: ArrayList<JsonValidationError>,
@@ -417,8 +417,8 @@ public class JsonSchemaValidator {
     }
 
     private func validateOneOf(
-        combinatorSchema: JsonValue,
-        instance: JsonValue,
+        combinatorSchema: JsonNode,
+        instance: JsonNode,
         jsonPath: String,
         schemaPath: String,
         errors: ArrayList<JsonValidationError>,
@@ -439,8 +439,8 @@ public class JsonSchemaValidator {
     }
 
     private func validateNot(
-        notSchema: JsonValue,
-        instance: JsonValue,
+        notSchema: JsonNode,
+        instance: JsonNode,
         jsonPath: String,
         schemaPath: String,
         errors: ArrayList<JsonValidationError>,
@@ -455,16 +455,16 @@ public class JsonSchemaValidator {
 }
 
 private class JsonSchemaResolvedRef {
-    public let value: JsonValue
+    public let value: JsonNode
     public let schemaPath: String
 
-    public init(value: JsonValue, schemaPath: String) {
+    public init(value: JsonNode, schemaPath: String) {
         this.value = value
         this.schemaPath = schemaPath
     }
 }
 
-private func validateJsonSchemaDocument(schemaValue: JsonValue, schemaPath: String): Unit {
+private func validateJsonSchemaDocument(schemaValue: JsonNode, schemaPath: String): Unit {
     match (schemaValue) {
         case _: JsonBoolValue => ()
         case objectValue: JsonObjectValue =>
@@ -551,7 +551,7 @@ private func validateJsonSchemaDocumentArray(objectValue: JsonObjectValue, keywo
     }
 }
 
-private func validateJsonSchemaTypeKeyword(typeSchema: JsonValue, schemaPath: String): Unit {
+private func validateJsonSchemaTypeKeyword(typeSchema: JsonNode, schemaPath: String): Unit {
     match (typeSchema) {
         case typeName: JsonStringValue => validateJsonSchemaTypeName(typeName.value, schemaPath)
         case typeNames: JsonArrayValue =>
@@ -563,7 +563,7 @@ private func validateJsonSchemaTypeKeyword(typeSchema: JsonValue, schemaPath: St
     }
 }
 
-private func validateJsonSchemaStringArray(value: JsonValue, schemaPath: String): Unit {
+private func validateJsonSchemaStringArray(value: JsonNode, schemaPath: String): Unit {
     let array = value.asArray()
     for (index in 0..array.size()) {
         match (array[index]) {
@@ -591,7 +591,7 @@ private func addError(errors: ArrayList<JsonValidationError>, jsonPath: String, 
     errors.add(JsonValidationError(jsonPath, schemaPath, message))
 }
 
-private func jsonSchemaMatchesType(value: JsonValue, typeName: String): Bool {
+private func jsonSchemaMatchesType(value: JsonNode, typeName: String): Bool {
     match (typeName) {
         case "null" => if (let _: JsonNullValue <- value) { true } else { false }
         case "boolean" => if (let _: JsonBoolValue <- value) { true } else { false }
@@ -604,7 +604,7 @@ private func jsonSchemaMatchesType(value: JsonValue, typeName: String): Bool {
     }
 }
 
-private func jsonSchemaInstanceType(value: JsonValue): String {
+private func jsonSchemaInstanceType(value: JsonNode): String {
     match (value) {
         case _: JsonNullValue => "null"
         case _: JsonBoolValue => "boolean"
@@ -622,7 +622,7 @@ private func jsonSchemaInstanceType(value: JsonValue): String {
     }
 }
 
-private func jsonSchemaNumberAsFloat(value: JsonValue): Option<Float64> {
+private func jsonSchemaNumberAsFloat(value: JsonNode): Option<Float64> {
     match (value) {
         case intValue: JsonIntValue => Some(Float64(intValue.value))
         case floatValue: JsonFloatValue => Some(floatValue.value)
@@ -631,7 +631,7 @@ private func jsonSchemaNumberAsFloat(value: JsonValue): Option<Float64> {
     }
 }
 
-private func jsonSchemaIsInteger(value: JsonValue): Bool {
+private func jsonSchemaIsInteger(value: JsonNode): Bool {
     match (value) {
         case _: JsonIntValue => true
         case floatValue: JsonFloatValue =>
@@ -646,14 +646,14 @@ private func jsonSchemaIsInteger(value: JsonValue): Bool {
     }
 }
 
-private func requireSchemaNumber(value: JsonValue, schemaPath: String): Float64 {
+private func requireSchemaNumber(value: JsonNode, schemaPath: String): Float64 {
     match (jsonSchemaNumberAsFloat(value)) {
         case Some(number) => number
         case None => throw JsonException("${schemaPath}: expected numeric schema value")
     }
 }
 
-private func requireSchemaNonNegativeInt(value: JsonValue, schemaPath: String): Int64 {
+private func requireSchemaNonNegativeInt(value: JsonNode, schemaPath: String): Int64 {
     let decoded = value.asInt().value
     if (decoded < 0) {
         throw JsonException("${schemaPath}: expected non-negative integer schema value")
@@ -661,7 +661,7 @@ private func requireSchemaNonNegativeInt(value: JsonValue, schemaPath: String): 
     decoded
 }
 
-private func jsonSchemaValuesEqual(left: JsonValue, right: JsonValue): Bool {
+private func jsonSchemaValuesEqual(left: JsonNode, right: JsonNode): Bool {
     match ((left, right)) {
         case (_: JsonNullValue, _: JsonNullValue) => true
         case (leftBool: JsonBoolValue, rightBool: JsonBoolValue) => leftBool.value == rightBool.value

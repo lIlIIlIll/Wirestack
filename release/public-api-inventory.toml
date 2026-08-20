@@ -39,6 +39,66 @@ contract = "The macro emits the bridge only for fast collection readers and keep
 consumer = "Applications using yjson_all or a matching yjson/yjson_macros pair"
 
 [[api]]
+package = "yjson_macros"
+kind = "cangjie-expression-macro"
+symbol = "Json"
+signature = "public macro Json(input: Tokens): Tokens"
+source = "packages/yjson_macros/src/json_literal.cj"
+needle = "public macro Json(input: Tokens): Tokens"
+stability = "stable-json-literal-entry"
+compatibility = "additive macro; generated code requires the matching yjson core release"
+contract = "Accepts JSON-like object, array, scalar, trailing-comma, value-interpolation, and dynamic-key syntax and writes a compact String without building a full JsonNode tree."
+consumer = "Applications importing yjson_all or yjson_macros with yjson"
+
+[[api]]
+package = "yjson_macros"
+kind = "cangjie-expression-macro"
+symbol = "JsonValue"
+signature = "public macro JsonValue(input: Tokens): Tokens"
+source = "packages/yjson_macros/src/json_literal.cj"
+needle = "public macro JsonValue(input: Tokens): Tokens"
+stability = "stable-json-literal-entry"
+compatibility = "additive macro that requires the former JsonValue type to be renamed"
+contract = "Builds a mutable JsonNode tree; interpolations run exactly once left-to-right and dynamic key collisions use LastWins."
+consumer = "Applications importing yjson_all or yjson_macros with yjson"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-class-rename"
+symbol = "JsonNode"
+signature = "public abstract class JsonNode <: ToString"
+source = "src/lib_json_value.cj"
+needle = "public abstract class JsonNode <: ToString"
+stability = "stable-mutable-ast-root"
+compatibility = "intentional breaking rename from JsonValue; source and ABI rebuild required"
+contract = "Root of the mutable JSON AST and owner of short scalar/container properties plus object/array indexing."
+consumer = "Applications using the mutable AST or @JsonValue"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-overload-family"
+symbol = "YJson literal construction bridges"
+signature = "YJson.nullValue, array, object, value, writeValue"
+source = "src/lib_json_direct_codec.cj"
+needle = "public static func nullValue(): JsonNullValue"
+stability = "stable-json-literal-runtime-bridge"
+compatibility = "additive overloads"
+contract = "Provides explicit mutable-node factories, codec-backed conversion, and direct writer dispatch for macro-generated code."
+consumer = "@Json and @JsonValue generated code plus fluent application construction"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-instance-method-family"
+symbol = "JsonArrayValue.add/set and JsonObjectValue.put"
+signature = "chainable mutable container methods"
+source = "src/lib_json_value.cj"
+needle = "public func set(index: Int64, value: JsonNode): JsonArrayValue"
+stability = "stable-fluent-mutable-ast"
+compatibility = "additive add/set overloads; JsonObjectValue.put return type changes from Unit to JsonObjectValue"
+contract = "Mutates the receiver and returns it for chaining; generic overloads convert JsonCodecProvider values through YJson.value."
+consumer = "Applications constructing mutable JsonNode trees"
+
+[[api]]
 package = "yjson"
 kind = "cangjie-interface"
 symbol = "JsonNativeFloatParserBackend"

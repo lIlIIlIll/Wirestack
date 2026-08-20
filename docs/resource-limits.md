@@ -38,7 +38,7 @@ line 和 column；关闭位置计算不会改变错误码或预算结果。
 
 ## 覆盖的公开入口
 
-- `YJson.parse(String/Array<Byte>)` 和 `JsonValue.parse`
+- `YJson.parse(String/Array<Byte>)` 和 `JsonNode.parse`
 - `YJson.decodeStringWith`、`decodeBytesWith`、`decodeFromStreamWith`
 - `CompactJsonDocument.parse` / `YJson.parseCompact`
 - `NativeCompactJsonDocument.parse`

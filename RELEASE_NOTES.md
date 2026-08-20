@@ -1,5 +1,19 @@
 # Release notes draft — 2.0.0 release candidate
 
+## JSON literal syntax and AST rename
+
+`yjson_macros` now exports expression macros `@Json({...})` for direct compact
+writing and `@JsonValue({...})` for mutable-tree construction. Both accept
+nested object/array literals, trailing commas, value interpolation with `$()`,
+and dynamic String keys. Interpolations run exactly once from left to right;
+dynamic collisions use LastWins, and codecs run only for winning fields.
+
+The mutable AST root type is now `JsonNode` instead of `JsonValue`. This is an
+intentional source/ABI break: Cangjie macro and type declarations share a name,
+so the old type name cannot coexist with the requested unqualified
+`@JsonValue` macro. New indexing, short scalar properties, fluent array/object
+builders, and `YJson.value` conversion helpers accompany the rename.
+
 ## Breaking configuration change
 
 `JsonReadConfig` now exposes `maxBytes` and `maxStringBytes`, and
@@ -23,7 +37,7 @@ native DOM packages:
   native query, traversal, and serialization.
 
 Native documents require deterministic `close()` and external synchronization.
-They do not automatically accelerate `JsonValue.parse`. `yjson_all` now
+They do not automatically accelerate `JsonNode.parse`. `yjson_all` now
 aggregates only the core and AST macros; it no longer silently builds or enables
 Custom Native.
 

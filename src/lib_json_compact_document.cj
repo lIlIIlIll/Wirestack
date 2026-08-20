@@ -316,14 +316,14 @@ public class CompactJsonDocument {
         )
     }
     /// Dense sequential walk used by analytical workloads without creating
-    /// JsonValue nodes or CompactJsonValue views.
+    /// JsonNode nodes or CompactJsonValue views.
     public func traversalChecksum(): Int64 {
         var result: Int64 = 0
         for (index in 0..kinds.size) { result = result ^ kinds[index] ^ first[index] ^ second[index] }
         for (index in 0..objectValues.size) { result = result ^ Int64(objectKinds[index]) ^ objectValues[index] }
         result & 0x7FFF_FFFF
     }
-    public func materialize(): JsonValue { materializeAt(rootIndex) }
+    public func materialize(): JsonNode { materializeAt(rootIndex) }
 
     public func toString(): String {
         let writer = JsonDirectWriter()
@@ -530,7 +530,7 @@ public class CompactJsonDocument {
         first[index] != 0
     }
 
-    func materializeAt(index: Int64): JsonValue {
+    func materializeAt(index: Int64): JsonNode {
         let code = kinds[index]
         match {
             case code == COMPACT_NULL => JsonNullValue()
@@ -617,7 +617,7 @@ public class CompactJsonDocument {
         }
     }
 
-    private func materializeInline(kind: Int64, payload: Int64): JsonValue {
+    private func materializeInline(kind: Int64, payload: Int64): JsonNode {
         match {
             case kind == COMPACT_NULL => JsonNullValue()
             case kind == COMPACT_BOOL => JsonBoolValue(payload != 0)
@@ -672,7 +672,7 @@ public struct CompactJsonValue {
     public func asString(): String { if (inlineKind == COMPACT_STRING) { document.strings[inlinePayload] } else { document.stringAt(index) } }
     public func asInt64(): Int64 { if (inlineKind == COMPACT_INT) { inlinePayload } else { document.intAt(index) } }
     public func asBool(): Bool { if (inlineKind == COMPACT_BOOL) { inlinePayload != 0 } else { document.boolAt(index) } }
-    public func materialize(): JsonValue {
+    public func materialize(): JsonNode {
         if (inlineKind == COMPACT_NULL) { JsonNullValue() }
         else if (inlineKind == COMPACT_BOOL) { JsonBoolValue(inlinePayload != 0) }
         else if (inlineKind == COMPACT_INT) { JsonIntValue(inlinePayload) }

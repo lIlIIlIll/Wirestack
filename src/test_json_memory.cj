@@ -492,7 +492,7 @@ class JsonRepeatedAllocationSmokeTest {
 //
 // 1. 单个对象的精确内存大小：
 //    - getAllocatedHeapSize() 返回整个堆的统计
-//    - 无法获取单个 JsonValue 的精确内存占用
+//    - 无法获取单个 JsonNode 的精确内存占用
 //    - 建议：添加 sizeof() 或类似 API
 //
 // 2. 内存峰值实时监控：

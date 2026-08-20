@@ -72,7 +72,7 @@ parse. There is no per-token or per-field parse FFI. Use coarse lookup, native
 bulk traversal, and native serialization. Fine-grained getters are suitable for
 small query-style access, not sequential traversal of millions of nodes.
 
-Native DOM does not accelerate `JsonValue.parse(bytes)`. Materializing a native
+Native DOM does not accelerate `JsonNode.parse(bytes)`. Materializing a native
 DOM into the Cangjie AST was measured and rejected as a product fast path.
 
 ## Number and duplicate semantics

@@ -319,17 +319,17 @@ public class NativeCompactJsonDocument <: Resource {
         NativeCompactDuplicateStats(values)
     }
 
-    public func materialize(): JsonValue { root().materialize() }
+    public func materialize(): JsonNode { root().materialize() }
 
     /// One native export plus one Cangjie bulk construction. No per-node FFI.
-    public func materializeBulk(): JsonValue {
+    public func materializeBulk(): JsonNode {
         NativeCompactTapeReader(copyOwnedBuffer({ handle, buffer, size =>
             unsafe { YJ_Compact_ExportTapeAlloc(handle, buffer, size) }
         })).readDocument()
     }
 
     /// Control path for the bulk materialization experiment.
-    public func materializeViaSerialization(): JsonValue {
+    public func materializeViaSerialization(): JsonNode {
         YJson.parse(copyOwnedBuffer({ handle, buffer, size =>
             unsafe { YJ_Compact_SerializeAlloc(handle, buffer, size) }
         }))
@@ -559,7 +559,7 @@ private class NativeCompactTapeReader {
 
     init(bytes: Array<Byte>) { this.bytes = bytes }
 
-    func readDocument(): JsonValue {
+    func readDocument(): JsonNode {
         if (bytes.size < 5 || readByte() != b'Y' || readByte() != b'J' ||
             readByte() != b'T' || readByte() != b'1') {
             throw JsonException("Invalid native compact transfer tape")
@@ -569,7 +569,7 @@ private class NativeCompactTapeReader {
         value
     }
 
-    private func readValue(): JsonValue {
+    private func readValue(): JsonNode {
         let kind = readByte()
         match {
             case Int32(kind) == YJ_COMPACT_NULL => JsonNullValue()
@@ -691,7 +691,7 @@ public struct NativeCompactJsonValue {
         if (inlineKind >= 0) { document.stringRefAt(inlinePayload) } else { document.textAt(node) }
     }
 
-    public func materialize(): JsonValue {
+    public func materialize(): JsonNode {
         let valueKind = code()
         match {
             case valueKind == YJ_COMPACT_NULL => JsonNullValue()

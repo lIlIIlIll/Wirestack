@@ -13,8 +13,8 @@ they use internal reader/scanner APIs.
   selects `JsonFastReader` for default read configuration when the codec supports
   the fast path.
 - `YJsonAst` is the AST-oriented compatibility API. It converts through
-  `JsonValueCodec<T>` and materializes `JsonValue` nodes.
-- `JsonValue` and its subclasses form the public JSON AST.
+  `JsonValueCodec<T>` and materializes `JsonNode` nodes.
+- `JsonNode` and its subclasses form the public JSON AST.
 - `JsonReadConfig`, `JsonWriteConfig`, and `JsonCodecConfig` own behavior policy.
 - `JsonFastReader.suggestRawCollectionCapacity()` is a stable public bridge for
   generated macro code. It is not an application-level promise about the
@@ -53,7 +53,7 @@ YJson.encodeStringWith / encodeBytesWith / encodeToStreamWith
 
 ```text
 YJson.parse / YJsonAst.parse
-└── JsonValue.parse
+└── JsonNode.parse
     └── JsonParser
         └── json_parser_core
 

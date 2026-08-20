@@ -10,7 +10,7 @@ import std.unittest.testmacro.*
  *
  * 注意：当前实现不是真正的增量/分块解析器。
  * StreamJsonByteSource 使用缓冲读取，但仍需一次性读取全部数据后解析。
- * 流式写入支持增量输出到 OutputStream，但构建 JsonValue 时仍在内存中。
+ * 流式写入支持增量输出到 OutputStream，但构建 JsonNode 时仍在内存中。
  */
 
 // ============================================================================
@@ -431,7 +431,7 @@ class BufferedInputBoundarySmokeTest {
 //    - 建议：添加增量解析器 API（如 parseMore() 方法）
 //
 // 2. 流式写入时的内存峰值：
-//    - 当前需要先在内存中构建完整的 JsonValue 树
+//    - 当前需要先在内存中构建完整的 JsonNode 树
 //    - 对于超大结构，内存占用仍然很高
 //    - 建议：添加流式构建 API（如 JsonWriter.startObject() 等）
 //

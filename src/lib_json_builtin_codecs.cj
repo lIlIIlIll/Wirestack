@@ -35,7 +35,7 @@ func ensureUnsignedInt64(typeName: String, decoded: Int64): UInt64 {
     UInt64(decoded)
 }
 
-func decodeIntLike(typeName: String, value: JsonValue): Int64 {
+func decodeIntLike(typeName: String, value: JsonNode): Int64 {
     let decoded = match (value) {
         case jsonInt: JsonIntValue => jsonInt.value
         case jsonFloat: JsonFloatValue => Int64(jsonFloat.value)
@@ -52,7 +52,7 @@ func decodeIntLike(typeName: String, value: JsonValue): Int64 {
     }
 }
 
-func decodeUnsignedLike(value: JsonValue, typeName!: String = "UInt64"): UInt64 {
+func decodeUnsignedLike(value: JsonNode, typeName!: String = "UInt64"): UInt64 {
     let decoded = match (value) {
         case jsonInt: JsonIntValue => ensureUnsignedInt64(typeName, jsonInt.value)
         case _: JsonFloatValue => throw JsonException("Cannot decode value as ${typeName}")
@@ -68,7 +68,7 @@ func decodeUnsignedLike(value: JsonValue, typeName!: String = "UInt64"): UInt64 
     }
 }
 
-func decodeFloatLike(value: JsonValue): Float64 {
+func decodeFloatLike(value: JsonNode): Float64 {
     match (value) {
         case jsonInt: JsonIntValue => Float64(jsonInt.value)
         case jsonFloat: JsonFloatValue => jsonFloat.value
@@ -78,7 +78,7 @@ func decodeFloatLike(value: JsonValue): Float64 {
     }
 }
 
-public func decodeBigIntLike(value: JsonValue): BigInt {
+public func decodeBigIntLike(value: JsonNode): BigInt {
     try {
         return jsonFastParseBigInt(value.asNumberLiteral().literal)
     } catch (_: JsonException) {
@@ -89,7 +89,7 @@ public func decodeBigIntLike(value: JsonValue): BigInt {
     }
 }
 
-public func decodeDecimalLike(value: JsonValue): Decimal {
+public func decodeDecimalLike(value: JsonNode): Decimal {
     try {
         return jsonFastParseDecimal(value.asNumberLiteral().literal)
     } catch (_: JsonException) {
@@ -100,7 +100,7 @@ public func decodeDecimalLike(value: JsonValue): Decimal {
     }
 }
 
-func decodeRune(value: JsonValue): Rune {
+func decodeRune(value: JsonNode): Rune {
     let text = value.asString().value
     for (r in text.toRuneArray()) {
         return r

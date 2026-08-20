@@ -8,7 +8,7 @@ main(): Unit {
     let object = value.asObject()
     object.put("active", JsonBoolValue(true))
 
-    println("=== JsonValue AST ===")
+    println("=== JsonNode AST ===")
     println(YJson.stringifyPretty(object))
 
     let compact = YJson.parseCompact(unsafe { text.rawData() })
