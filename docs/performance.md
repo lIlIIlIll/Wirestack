@@ -4,6 +4,63 @@ Performance claims are backend- and representation-specific. Typed codecs,
 `JsonNode`, Pure Compact, Custom Native DOM, yyjson Direct Native DOM, serde
 Value, raw yyjson, and simdjson DOM are not interchangeable results.
 
+## JSON literal macros (2026-08-20)
+
+`@Json` and `@JsonValue` were measured on the Server's Intel Xeon Gold 6248R,
+pinned to CPU 8, with Cangjie SDK `1.1.0-alpha.20260817040003`, Cangjie `-O2`,
+and `cjHeapSize=128MB`. Each of the nine cases ran in its own process for eleven
+rounds. Case order used a balanced rotation with even rounds reversed; every
+process used a 300 ms warmup, a two-second minimum measurement, and emitted 200
+`csv-raw` duration batches. The table summarizes the eleven per-process raw
+medians, not the benchmark framework's fitted console estimate.
+
+| Case | Median | p95 | Run CV | Run MAD |
+|:--|--:|--:|--:|--:|
+| Generated `@JsonCodec` encode | 2.489 us | 2.577 us | 10.47% | 1.84% |
+| `@Json` with static keys | 3.571 us | 3.696 us | 8.33% | 1.84% |
+| `@Json` with one dynamic key | 4.873 us | 5.497 us | 8.27% | 7.19% |
+| Manual `JsonDirectWriter` | 2.046 us | 2.238 us | 6.08% | 0.92% |
+| `@JsonValue` build only | 2.450 us | 2.727 us | 8.20% | 4.96% |
+| Equivalent concrete-node AST build | 2.545 us | 3.069 us | 10.74% | 8.01% |
+| Fluent generic AST build | 17.824 us | 18.728 us | 4.54% | 4.20% |
+| `@JsonValue` build and stringify | 5.324 us | 5.384 us | 0.63% | 0.41% |
+| Concrete-node AST build and stringify | 5.340 us | 5.390 us | 2.58% | 0.11% |
+
+The paired results were:
+
+| Left path versus right path | Paired median delta | Direction agreement | Delta MAD |
+|:--|--:|--:|--:|
+| Static-key `@Json` versus generated codec | +44.87% | slower in 11/11 | 4.13 pp |
+| Static-key `@Json` versus manual writer | +73.97% | slower in 11/11 | 7.47 pp |
+| Dynamic-key `@Json` versus static-key `@Json` | +36.60% | slower in 11/11 | 9.89 pp |
+| `@JsonValue` versus equivalent concrete AST build | -7.07% | faster in 8/11 | 7.98 pp |
+| `@JsonValue` versus fluent generic AST build | -86.35% | faster in 11/11 | 0.87 pp |
+| `@JsonValue` stringify versus concrete AST stringify | -0.16% | faster in 6/11 | 0.81 pp |
+| Static-key `@Json` versus `@JsonValue` plus stringify | -32.61% | faster in 11/11 | 0.66 pp |
+
+Positive deltas mean the left path is slower. Static-key `@Json` is therefore a
+direct-output convenience path: it is consistently faster than building and
+stringifying an AST, but it does not match a generated codec or handwritten
+writer for this fixed shape. Dynamic keys pay for LastWins slot tracking.
+`@JsonValue` and the equivalent concrete-node construction are in the same
+performance band; the modest median difference is not treated as a win because
+three pairs reversed and both build-only series had high run variance. The
+large, stable advantage over fluent construction comes from emitting concrete
+literal nodes instead of routing every `.put<T>` through generic codec
+conversion.
+
+Several absolute-latency series exceeded the preferred 3% run-CV target, so
+these values are a same-host snapshot and the stable 11/11 paired directions
+carry more weight than precise absolute ratios. This run measured latency only;
+it does not support allocation or RSS claims. The reproducible runner and
+analyzer are `scripts/json_literal_perf_run.py` and
+`scripts/json_literal_perf_summary.py`. The 99 raw reports, manifest, logs, and
+metadata are retained on the Server under
+`<home>/yjson-json-literal-formal-20260820-ni926t/evidence` and in the
+local ignored directory `target/perf-json-literal-formal-20260820`. The uploaded
+source archive SHA-256 is
+`21ecdadd74ee24b0a3b3685d02ee586fb6628961acddb2d6b86580e3df30cf70`.
+
 The retained Round-18 architecture was measured on an Intel Xeon Gold 6248R,
 CPU 8 affinity, Cangjie SDK 20260803, Cangjie `-O2`, and native C
 `-std=c11 -O3 -fPIC -DNDEBUG` without `-march=native` or LTO. Representative
