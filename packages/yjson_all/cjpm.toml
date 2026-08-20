@@ -13,5 +13,6 @@
   package-configuration = {}
 
 [dependencies]
+# Keep the runtime and macro path dependencies on the same release pair.
   yjson = { path = "../.." }
   yjson_macros = { path = "../yjson_macros" }

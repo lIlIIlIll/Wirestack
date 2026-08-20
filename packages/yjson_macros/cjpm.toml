@@ -13,3 +13,5 @@
   package-configuration = {}
 
 [dependencies]
+# Release consumers must pair this macro with the same yjson core version.
+# The repository keeps this dependency path-free to avoid a build-time cycle.

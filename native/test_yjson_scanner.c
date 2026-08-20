@@ -1,6 +1,7 @@
 #include "yjson_scanner.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -129,6 +130,23 @@ static void test_many_element_plan(void) {
     assert(count == 16 && end == (int64_t)at);
 }
 
+static void test_parse_double_token(void) {
+    static const char text[] = "1.5,-0.0,1e308,1e-323,1.";
+    assert(YJ_JSON_ParseDouble((const uint8_t *)text, (int64_t)strlen(text),
+                               0, 3) == 1.5);
+    double negative_zero = YJ_JSON_ParseDouble((const uint8_t *)text,
+                                                (int64_t)strlen(text), 4, 4);
+    assert(negative_zero == 0.0 && signbit(negative_zero));
+    assert(isfinite(YJ_JSON_ParseDouble((const uint8_t *)text,
+                                         (int64_t)strlen(text), 9, 5)));
+    assert(YJ_JSON_ParseDouble((const uint8_t *)text, (int64_t)strlen(text),
+                               15, 6) > 0.0);
+    assert(isnan(YJ_JSON_ParseDouble((const uint8_t *)text,
+                                     (int64_t)strlen(text), 0, 4)));
+    assert(isnan(YJ_JSON_ParseDouble((const uint8_t *)text,
+                                     (int64_t)strlen(text), 0, 257)));
+}
+
 int main(void) {
     test_skip_nested_value();
     test_object_fields();
@@ -138,6 +156,7 @@ int main(void) {
     test_invalid_nested_boundaries();
     test_nested_object_range();
     test_many_element_plan();
+    test_parse_double_token();
     puts("yjson scanner targeted tests passed");
     return 0;
 }

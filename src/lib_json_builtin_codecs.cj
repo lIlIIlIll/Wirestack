@@ -202,15 +202,23 @@ public let Float16Json: JsonDirectCodec<Float16> = LambdaFastRawJsonDirectCodec<
 // Public bridges keep macro-generated consumer code independent of the
 // std.convert.Parsable extension imports used by this package's built-ins.
 public func jsonFastReadFloat64(reader: JsonFastReader): Float64 {
+    if (jsonNativeFloatParserAvailable()) {
+        if (reader.tryReadRawNumberToken()) {
+            match (jsonNativeParseFloat64(reader)) {
+                case Some(value) => return value
+                case None => return Float64.parse(reader.currentRawTokenAsciiString())
+            }
+        }
+    }
     Float64.parse(reader.readRawNumberLiteral())
 }
 
 public func jsonFastReadFloat32(reader: JsonFastReader): Float32 {
-    Float32(Float64.parse(reader.readRawNumberLiteral()))
+    Float32(jsonFastReadFloat64(reader))
 }
 
 public func jsonFastReadFloat16(reader: JsonFastReader): Float16 {
-    Float16(Float64.parse(reader.readRawNumberLiteral()))
+    Float16(jsonFastReadFloat64(reader))
 }
 
 public let StringJson: JsonDirectCodec<String> = LambdaFastRawJsonDirectCodec<String>(

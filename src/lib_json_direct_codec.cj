@@ -558,8 +558,13 @@ private class ArrayJsonCodec<T> <: JsonArrayDirectCodec<Array<T>> {
     public func readFast(reader: JsonFastReader, context: JsonDecodeContext): Array<T> {
         context.enterValue()
         try {
-            let result = ArrayList<T>()
             reader.startRawArray()
+            if (!reader.hasRawArrayItem(true)) {
+                reader.endRawArray()
+                return Array<T>()
+            }
+            let capacity = reader.suggestRawCollectionCapacity()
+            let result = if (capacity > 4) { ArrayList<T>(capacity) } else { ArrayList<T>() }
             var first = true
             var index: Int64 = 0
             if (reader.hasRawArrayItem(first)) {
@@ -624,8 +629,13 @@ private class ArrayListJsonCodec<T> <: JsonArrayDirectCodec<ArrayList<T>> {
     public func readFast(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<T> {
         context.enterValue()
         try {
-            let result = ArrayList<T>()
             reader.startRawArray()
+            if (!reader.hasRawArrayItem(true)) {
+                reader.endRawArray()
+                return ArrayList<T>()
+            }
+            let capacity = reader.suggestRawCollectionCapacity()
+            let result = if (capacity > 4) { ArrayList<T>(capacity) } else { ArrayList<T>() }
             var first = true
             var index: Int64 = 0
             if (reader.hasRawArrayItem(first)) {

@@ -635,8 +635,26 @@ public class JsonFastReader {
         false
     }
 
+    // Capacity hint retained for the existing scalar collection helpers.
     func suggestRawArrayCapacity(): Int64 {
         suggestContainerCapacity(32)
+    }
+
+    /// Returns a bounded allocation hint for a raw collection after the array
+    /// opener has been consumed. This is public because macro-generated fast
+    /// codecs execute in the consumer package. It never advances the cursor or
+    /// retains the input; callers must treat the value as a hint, not a size
+    /// guarantee.
+    public func suggestRawCollectionCapacity(): Int64 {
+        let remaining = size - index
+        let estimate = remaining / 64 + 1
+        if (estimate < 48) {
+            return 4
+        }
+        if (estimate > 64) {
+            return 64
+        }
+        estimate
     }
 
     public func endRawArray(): Unit {

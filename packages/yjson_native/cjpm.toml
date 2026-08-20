@@ -13,4 +13,5 @@
   package-configuration = {}
 
 [dependencies]
+# The native facade and its public backend seam require the matching core.
   yjson = { path = "../.." }

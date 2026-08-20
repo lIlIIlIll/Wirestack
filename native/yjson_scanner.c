@@ -1,12 +1,35 @@
 #include "yjson_scanner.h"
 
 #include <stddef.h>
+#include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 #if defined(__x86_64__) || defined(__i386__)
 #include <cpuid.h>
 #include <immintrin.h>
 #endif
+
+double YJ_JSON_ParseDouble(const uint8_t* input, int64_t len,
+    int64_t start, int64_t tokenLength)
+{
+    enum { MAX_TOKEN_BYTES = 256 };
+    if (input == NULL || len < 0 || start < 0 || tokenLength <= 0 ||
+        tokenLength > MAX_TOKEN_BYTES || start > len - tokenLength) {
+        return NAN;
+    }
+
+    char token[MAX_TOKEN_BYTES + 1];
+    memcpy(token, input + start, (size_t)tokenLength);
+    token[tokenLength] = '\0';
+
+    char* end = NULL;
+    double value = strtod(token, &end);
+    if (end != token + tokenLength) {
+        return NAN;
+    }
+    return value;
+}
 
 enum {
     TOKEN_OBJECT_START = 1,

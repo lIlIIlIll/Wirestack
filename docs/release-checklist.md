@@ -7,7 +7,7 @@ ambiguous native lifetime, or a source package that cannot build independently.
 
 | Gate | Required status |
 |---|---|
-| Public API inventory and freeze decision | PASS |
+| Public API inventory and freeze decision | PASS — [release/public-api-inventory.toml](../release/public-api-inventory.toml) |
 | Pure Cangjie core build and tests | PASS |
 | Runtime+macros downstream consumer | PASS |
 | Custom Native build with yyjson absent/disabled | PASS |
@@ -32,16 +32,17 @@ ambiguous native lifetime, or a source package that cannot build independently.
 
 Suggested CI jobs:
 
-1. `core`: `cjpm test` with no C build hook.
-2. `examples`: build and run the public core example.
-3. `macro-consumer`: build/run the external-style `@JsonCodec` fixture.
-4. `custom-native`: package tests plus external consumer, with yyjson disabled.
-5. `yyjson-native`: package tests plus external consumer; vendored source, offline.
-6. `native-clang` and `native-gcc`: project-owned C warning and targeted tests.
-7. `sanitizer`: ASan+UBSan with leak detection.
-8. `fuzz-short`: deterministic 5k cases on pull requests.
-9. `yyjson-symbol-isolation`: pinned dual-version co-link fixture.
-10. `fuzz-extended`: deterministic 50k+ cases nightly/manual.
+1. `api-inventory`: validate public declarations, C ABI needles, and exact package pairing.
+2. `core`: `cjpm test` with no C build hook.
+3. `examples`: build and run the public core example.
+4. `macro-consumer`: build/run the external-style `@JsonCodec` fixture.
+5. `custom-native`: package tests plus external consumer, with yyjson disabled.
+6. `yyjson-native`: package tests plus external consumer; vendored source, offline.
+7. `native-clang` and `native-gcc`: project-owned C warning and targeted tests.
+8. `sanitizer`: ASan+UBSan with leak detection.
+9. `fuzz-short`: deterministic 5k cases on pull requests.
+10. `yyjson-symbol-isolation`: pinned dual-version co-link fixture.
+11. `fuzz-extended`: deterministic 50k+ cases nightly/manual.
 
 Linux x86_64 is qualified. AArch64 is source-portable but unqualified; musl is
 not tested. Do not advertise either as supported until an actual SDK, build,
@@ -51,8 +52,8 @@ tests, sanitizers, and consumer fixture pass there.
 
 - The source-only release manifest contains 103 files and excludes `target/`,
   object files, archives, shared libraries, performance corpora, and results.
-- A clean temporary source tree passed the 485-test core suite, examples,
-  Custom Native's 7 tests, yyjson Direct's 5 tests, and external core, macro,
+- A clean temporary source tree passed the 492-test core suite, examples,
+  Custom Native's 8 tests, yyjson Direct's 5 tests, and external core, macro,
   Custom Native, and yyjson consumer fixtures.
 - The C release gate passed Clang and GCC warning builds, targeted scanner,
   Custom Native, and yyjson tests, ASan, UBSan, LSan, and 50,000 deterministic

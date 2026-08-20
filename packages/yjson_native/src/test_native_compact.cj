@@ -1,6 +1,7 @@
 package yjson_native
 
 import yjson.*
+import std.convert.Parsable
 import std.unittest.*
 import std.unittest.testmacro.*
 
@@ -31,6 +32,25 @@ class NativeScannerIntegrationTest {
         expected.append("仓颉\u{1D11E}")
         @Expect(YJson.decodeBytesWith(StringJson, nativeCompactBytes(builder.toString())),
             expected.toString())
+    }
+
+    private func assertNativeFloatMatchesStdlib(text: String): Unit {
+        let reader = JsonFastReader(text)
+        let actual = jsonFastReadFloat64(reader)
+        reader.expectEnd()
+        @Expect(actual.toBits(), Float64.parse(text).toBits())
+    }
+
+    @TestCase
+    func nativeFloatParserKeepsStdlibBitsAndLongTokenFallback(): Unit {
+        for (text in ["0", "-0.0", "1.5", "-12.75", "1e308", "1e309",
+            "1e-323", "1e-324", "-1e309", "-1e-324",
+            "0.12345678901234567", "3.141592653589793"]) {
+            assertNativeFloatMatchesStdlib(text)
+        }
+        var longToken = "0."
+        for (_ in 0..300) { longToken += "1" }
+        assertNativeFloatMatchesStdlib(longToken)
     }
 }
 

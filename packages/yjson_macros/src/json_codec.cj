@@ -988,7 +988,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         appendLine(sb, 1, "}")
         if (supportsFastRead) {
             appendLine(sb, 1, "public func readFast(reader: JsonFastReader, context: JsonDecodeContext): YJsonArrayList<${name}> {")
-            appendLine(sb, 2, "context.enterValue(); try { let __result = YJsonArrayList<${name}>(); reader.startRawArray(); var __first = true; var __index: Int64 = 0; while (reader.hasRawArrayItem(__first)) { reader.beforeRawArrayItem(__first); context.pushIndex(__index); try { __result.add(__yJsonReadFast_${name}(reader, context)) } finally { context.popPath() }; __first = false; __index++ }; reader.endRawArray(); return __result } finally { context.leaveValue() }")
+            appendLine(sb, 2, "context.enterValue(); try { reader.startRawArray(); if (!reader.hasRawArrayItem(true)) { reader.endRawArray(); return YJsonArrayList<${name}>() }; let __capacity = reader.suggestRawCollectionCapacity(); let __result = if (__capacity > 4) { YJsonArrayList<${name}>(__capacity) } else { YJsonArrayList<${name}>() }; var __first = true; var __index: Int64 = 0; while (reader.hasRawArrayItem(__first)) { reader.beforeRawArrayItem(__first); context.pushIndex(__index); try { __result.add(__yJsonReadFast_${name}(reader, context)) } finally { context.popPath() }; __first = false; __index++ }; reader.endRawArray(); return __result } finally { context.leaveValue() }")
             appendLine(sb, 1, "}")
         }
         appendLine(sb, 0, "}")
@@ -1003,7 +1003,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         appendLine(sb, 1, "}")
         if (supportsFastRead) {
             appendLine(sb, 1, "public func readFast(reader: JsonFastReader, context: JsonDecodeContext): Array<${name}> {")
-            appendLine(sb, 2, "context.enterValue(); try { let __result = YJsonArrayList<${name}>(); reader.startRawArray(); var __first = true; var __index: Int64 = 0; while (reader.hasRawArrayItem(__first)) { reader.beforeRawArrayItem(__first); context.pushIndex(__index); try { __result.add(__yJsonReadFast_${name}(reader, context)) } finally { context.popPath() }; __first = false; __index++ }; reader.endRawArray(); return __result.toArray() } finally { context.leaveValue() }")
+            appendLine(sb, 2, "context.enterValue(); try { reader.startRawArray(); if (!reader.hasRawArrayItem(true)) { reader.endRawArray(); return Array<${name}>() }; let __capacity = reader.suggestRawCollectionCapacity(); let __result = if (__capacity > 4) { YJsonArrayList<${name}>(__capacity) } else { YJsonArrayList<${name}>() }; var __first = true; var __index: Int64 = 0; while (reader.hasRawArrayItem(__first)) { reader.beforeRawArrayItem(__first); context.pushIndex(__index); try { __result.add(__yJsonReadFast_${name}(reader, context)) } finally { context.popPath() }; __first = false; __index++ }; reader.endRawArray(); return __result.toArray() } finally { context.leaveValue() }")
             appendLine(sb, 1, "}")
         }
         appendLine(sb, 0, "}")

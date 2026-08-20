@@ -99,6 +99,19 @@ codec 的完整配置语义。不提供生成式 fast-decoder 合同的自定义
 类型，不可变字段需要由可用构造函数接收。完整下游 fixture 位于
 [`packages/codec_integration`](packages/codec_integration)。
 
+### Public fast bridges and package pairing
+
+生成的 fast collection codec 会调用 `JsonFastReader` 的公开容量提示
+bridge；该方法只服务于宏生成代码，不是应用层的容量保证。可选的
+`JsonNativeFloatParserBackend` 和 `yjson_native` 的 Float64 `@FastNative`
+bridge 也属于显式、进程级 backend API。它们的稳定契约、并发边界、C ABI
+和兼容性清单见 [Public API inventory](docs/public-api-inventory.md)。
+
+由于宏代码在调用方编译，`yjson`、`yjson_macros`、`yjson_all` 和
+`yjson_native` 必须使用同一发布版本；当前版本是 `1.0.0`。普通应用优先使用
+`yjson_all = "1.0.0"`，直接组合 runtime 与 macro 时也要分别固定为
+`yjson = "1.0.0"` 和 `yjson_macros = "1.0.0"`。
+
 ## 选择 JSON representation
 
 | Backend | 默认 | 内存与生命周期 | 适用场景 | 不适用场景 |

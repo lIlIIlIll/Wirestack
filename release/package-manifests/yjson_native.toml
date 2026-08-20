@@ -9,4 +9,5 @@ compile-option = "-O2"
 link-option = "-L target/native -lyjson_scanner"
 
 [dependencies]
+# The public Float64 backend seam is compiled against this exact core release.
 yjson = "1.0.0"

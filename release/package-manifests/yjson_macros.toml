@@ -6,3 +6,7 @@ version = "1.0.0"
 output-type = "static"
 
 [dependencies]
+# Generated code calls the yjson 1.0.0 reader bridge. The macro package does
+# not declare yjson here because the development graph intentionally has the
+# core package depend on this build-time macro package; yjson_all pins both
+# release dependencies together.

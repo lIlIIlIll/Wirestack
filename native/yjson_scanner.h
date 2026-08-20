@@ -16,6 +16,15 @@ extern "C" {
 
 uint32_t YJ_JSON_SimdCaps(void);
 
+/*
+ * Parses one already validated JSON number token. `start` and `tokenLength`
+ * must describe a range inside `input[0..len)`, and tokenLength is limited to
+ * 256 bytes. Invalid bounds or token text return NaN. The caller must provide
+ * external synchronization if the input storage is shared.
+ */
+double YJ_JSON_ParseDouble(
+    const uint8_t* input, int64_t len, int64_t start, int64_t tokenLength);
+
 int32_t YJ_JSON_SkipValue(
     const uint8_t* input, int64_t len, int64_t start, uint32_t flags,
     int64_t* outEnd, int64_t* outError);

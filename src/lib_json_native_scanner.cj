@@ -5,6 +5,7 @@ const YJ_JSON_SCAN_OK: Int32 = 0
 const YJ_JSON_SCAN_FALLBACK: Int32 = 1
 const YJ_JSON_SCAN_CAPACITY: Int32 = 2
 const YJ_JSON_SCAN_VALIDATE_STRINGS = 1u32
+const YJSON_NATIVE_FLOAT_MAX_TOKEN_BYTES: Int64 = 256
 
 const YJSON_NATIVE_MIN_SKIP_BYTES = 32
 const YJSON_NATIVE_MIN_OBJECT_SCAN_BYTES = 1024
@@ -44,11 +45,21 @@ public interface JsonNativeNumericTapeBackend {
         outNext: CPointer<Int64>, outCount: CPointer<Int64>, outError: CPointer<Int64>): Int32
 }
 
+/// Optional scalar seam for numeric-heavy typed codecs. The portable package
+/// never installs this backend; yjson_native provides a short, non-blocking
+/// @FastNative implementation. A Float64 NaN return means that the backend
+/// declined the token and the caller must use the semantic Cangjie parser.
+public interface JsonNativeFloatParserBackend {
+    func parseFloat64(input: CPointer<UInt8>, len: Int64, start: Int64, tokenLength: Int64): Float64
+}
+
 private var jsonNativeScannerBackend: Option<JsonNativeScannerBackend> = None<JsonNativeScannerBackend>
 private var jsonNativeNumericScannerBackend: Option<JsonNativeNumericScannerBackend> =
     None<JsonNativeNumericScannerBackend>
 private var jsonNativeNumericTapeBackend: Option<JsonNativeNumericTapeBackend> =
     None<JsonNativeNumericTapeBackend>
+private var jsonNativeFloatParserBackend: Option<JsonNativeFloatParserBackend> =
+    None<JsonNativeFloatParserBackend>
 
 public func installJsonNativeScannerBackend(backend: JsonNativeScannerBackend): Unit {
     if (jsonNativeScannerBackend.isSome()) {
@@ -66,6 +77,45 @@ public func installJsonNativeNumericScannerBackend(backend: JsonNativeNumericSca
 
 public func installJsonNativeNumericTapeBackend(backend: JsonNativeNumericTapeBackend): Unit {
     jsonNativeNumericTapeBackend = Some(backend)
+}
+
+/// Installs one process-global Float64 parser backend. Install before any
+/// concurrent decoding and do not mix this low-level hook with another owner.
+public func installJsonNativeFloatParserBackend(backend: JsonNativeFloatParserBackend): Unit {
+    if (jsonNativeFloatParserBackend.isSome()) {
+        throw IllegalStateException("A JSON native float parser backend is already installed")
+    }
+    jsonNativeFloatParserBackend = Some(backend)
+}
+
+/// Removes the process-global Float64 parser backend. The caller owns the
+/// synchronization boundary and must ensure no decoder is using it.
+public func uninstallJsonNativeFloatParserBackend(): Unit {
+    jsonNativeFloatParserBackend = None<JsonNativeFloatParserBackend>
+}
+
+func jsonNativeFloatParserAvailable(): Bool {
+    jsonNativeFloatParserBackend.isSome()
+}
+
+func jsonNativeParseFloat64(reader: JsonFastReader): Option<Float64> {
+    let tokenLength = reader.currentRawTokenSize()
+    if (tokenLength <= 0 || tokenLength > YJSON_NATIVE_FLOAT_MAX_TOKEN_BYTES) {
+        return None<Float64>
+    }
+    let backend = match (jsonNativeFloatParserBackend) {
+        case Some(value) => value
+        case None => return None<Float64>
+    }
+    let data = reader.currentRawTokenData()
+    var result = Float64.NaN
+    unsafe {
+        let dataHandle = acquireArrayRawData(data)
+        result = backend.parseFloat64(dataHandle.pointer, data.size,
+            reader.currentRawTokenStartOffset(), tokenLength)
+        releaseArrayRawData(dataHandle)
+    }
+    if (result.isNaN()) { None<Float64> } else { Some(result) }
 }
 
 class JsonNativeNumericTape {

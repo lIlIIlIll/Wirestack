@@ -18,6 +18,9 @@ stage_modules() {
 }
 
 case "$job" in
+    api-inventory)
+        python3 "$repo/scripts/check_api_inventory.py"
+        ;;
     core)
         require_cangjie
         (cd "$repo" && cjpm test --no-color)
@@ -75,7 +78,7 @@ case "$job" in
         "$repo/scripts/release_yyjson_colink_check.sh"
         ;;
     *)
-        echo 'usage: scripts/ci_job.sh {core|examples|macro-consumer|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
+        echo 'usage: scripts/ci_job.sh {api-inventory|core|examples|macro-consumer|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
         exit 2
         ;;
 esac

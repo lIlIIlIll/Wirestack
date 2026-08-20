@@ -38,6 +38,32 @@ The thread contract is deliberately strict:
 - `close()` requires exclusive ownership and is idempotent;
 - operations after close fail with `IllegalStateException`.
 
+## Float64 fast-parser bridge
+
+The core package exposes `JsonNativeFloatParserBackend` as an optional,
+process-global seam for numeric-heavy generated codecs. `yjson_native` supplies
+the supported `@FastNative` implementation and `enableYJsonNative()` installs
+it together with the structural and bulk-number scanners. For isolated
+measurements, `enableYJsonNativeFloatOnly()` installs only the Float64 parser;
+`enableYJsonNativeNumericOnly()` is the separate bulk-number mode. These modes
+are mutually exclusive. The matching disable function must be used before
+selecting another isolated mode, and installation/removal must not race with
+decoding.
+
+The C bridge `YJ_JSON_ParseDouble` receives an already validated JSON number
+token, copies at most 256 bytes to a bounded stack buffer, and returns `NaN`
+for invalid bounds, malformed text, or a declined parse. The Cangjie caller
+then uses the portable parser. The bridge makes no Cangjie calls or I/O and is
+kept separate from the core package: Pure Cangjie remains usable without the
+native archive.
+
+Generated macro output calls the public
+`JsonFastReader.suggestRawCollectionCapacity()` bridge for generic object
+arrays. It is a bounded allocation hint rather than a stable application-level
+capacity API. `yjson`, `yjson_macros`, `yjson_all`, and `yjson_native` must be
+consumed at the same release version; see the
+[public API inventory](public-api-inventory.md).
+
 ## Access model
 
 Both native parsers cross the Cangjie/C boundary once for a whole-document

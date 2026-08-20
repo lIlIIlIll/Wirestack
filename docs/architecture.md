@@ -16,6 +16,9 @@ they use internal reader/scanner APIs.
   `JsonValueCodec<T>` and materializes `JsonValue` nodes.
 - `JsonValue` and its subclasses form the public JSON AST.
 - `JsonReadConfig`, `JsonWriteConfig`, and `JsonCodecConfig` own behavior policy.
+- `JsonFastReader.suggestRawCollectionCapacity()` is a stable public bridge for
+  generated macro code. It is not an application-level promise about the
+  reader's allocation heuristic.
 
 ## Typed decode path
 
@@ -86,6 +89,11 @@ codec constants such as `PersonJson`.
 - `benchmarks/java_fastjson2/`: standalone Java comparison harness.
 - `scripts/`: reproducible build and benchmark orchestration.
 - `target/`, `.cache/`, and `build-script-cache/`: disposable generated state.
+
+The generated macro package and the runtime package are version-coupled: a
+consumer must use matching `yjson` and `yjson_macros` releases, or the emitted
+fast reader may reference a bridge absent from the older runtime. The supported
+native facade follows the same core-version rule.
 
 ## Packaging boundary
 

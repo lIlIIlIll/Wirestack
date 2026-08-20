@@ -1,0 +1,134 @@
+# Public declarations added or widened for the 1.0.0 release candidate.
+# This is an additive inventory, not a replacement for the complete generated
+# symbol inventory used by the SDK ABI tooling.
+inventory_version = 1
+release_version = "1.0.0"
+status = "approved"
+compatibility_policy = "additive declarations preserve existing consumers; inventory changes require review"
+
+[package_pairing]
+core = "1.0.0"
+macros = "1.0.0"
+aggregate = "1.0.0"
+native = "1.0.0"
+rule = "Generated macro output and the optional native facade must be consumed with the same yjson core release."
+
+[[api]]
+package = "yjson"
+kind = "cangjie-instance-method"
+symbol = "JsonFastReader.suggestRawCollectionCapacity"
+signature = "public func suggestRawCollectionCapacity(): Int64"
+source = "src/lib_json_fast_reader.cj"
+needle = "public func suggestRawCollectionCapacity(): Int64"
+stability = "stable-generated-code-bridge"
+compatibility = "additive non-open non-overriding instance method"
+contract = "Returns a bounded capacity hint for the unread portion of the current raw array; it does not advance the reader or retain input."
+consumer = "Generated yjson_macros fast collection codecs"
+
+[[api]]
+package = "yjson_macros"
+kind = "generated-source-dependency"
+symbol = "reader.suggestRawCollectionCapacity"
+signature = "Generated readFast methods call JsonFastReader.suggestRawCollectionCapacity"
+source = "packages/yjson_macros/src/json_codec.cj"
+needle = "reader.suggestRawCollectionCapacity()"
+stability = "stable-generated-code-contract"
+compatibility = "requires the matching yjson core release when generated code is compiled"
+contract = "The macro emits the bridge only for fast collection readers and keeps the empty-array path allocation-free."
+consumer = "Applications using yjson_all or a matching yjson/yjson_macros pair"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-interface"
+symbol = "JsonNativeFloatParserBackend"
+signature = "public interface JsonNativeFloatParserBackend"
+source = "src/lib_json_native_scanner.cj"
+needle = "public interface JsonNativeFloatParserBackend"
+stability = "stable-optional-backend-seam"
+compatibility = "new interface; existing interfaces and implementations are unchanged"
+contract = "A process-level optional parser for an already validated JSON number token."
+consumer = "yjson_native and explicitly managed native backends"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-interface-method"
+symbol = "JsonNativeFloatParserBackend.parseFloat64"
+signature = "func parseFloat64(input: CPointer<UInt8>, len: Int64, start: Int64, tokenLength: Int64): Float64"
+source = "src/lib_json_native_scanner.cj"
+needle = "func parseFloat64(input: CPointer<UInt8>"
+stability = "stable-optional-backend-seam"
+compatibility = "member of a newly added interface; future additions must preserve implementer compatibility"
+contract = "Return NaN to decline and let the portable parser handle the token; the built-in bridge performs no Cangjie calls or blocking/I/O work."
+consumer = "Native backend implementers"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-function"
+symbol = "installJsonNativeFloatParserBackend"
+signature = "public func installJsonNativeFloatParserBackend(backend: JsonNativeFloatParserBackend): Unit"
+source = "src/lib_json_native_scanner.cj"
+needle = "public func installJsonNativeFloatParserBackend"
+stability = "stable-optional-backend-seam"
+compatibility = "additive public function"
+contract = "Installs one process-global Float64 backend; install before concurrent decoding and do not mix backend ownership models."
+consumer = "Optional native package and advanced backend integrations"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-function"
+symbol = "uninstallJsonNativeFloatParserBackend"
+signature = "public func uninstallJsonNativeFloatParserBackend(): Unit"
+source = "src/lib_json_native_scanner.cj"
+needle = "public func uninstallJsonNativeFloatParserBackend"
+stability = "stable-optional-backend-seam"
+compatibility = "additive public function"
+contract = "Removes the process-global Float64 backend; callers must ensure no decoder is using it."
+consumer = "Optional native package and advanced backend integrations"
+
+[[api]]
+package = "yjson_native"
+kind = "cangjie-function"
+symbol = "enableYJsonNative"
+signature = "public func enableYJsonNative(): Unit"
+source = "packages/yjson_native/src/native_backend.cj"
+needle = "public func enableYJsonNative(): Unit"
+stability = "stable-opt-in"
+compatibility = "existing additive activation now installs the Float64 backend together with the full native scanner set"
+contract = "Activates the process-global full native backend bundle once; activation modes are mutually exclusive and callers must finish setup before concurrent decoding."
+consumer = "Applications opting into the complete yjson_native backend"
+
+[[api]]
+package = "yjson_native"
+kind = "cangjie-function"
+symbol = "enableYJsonNativeFloatOnly"
+signature = "public func enableYJsonNativeFloatOnly(): Unit"
+source = "packages/yjson_native/src/native_backend.cj"
+needle = "public func enableYJsonNativeFloatOnly"
+stability = "stable-opt-in"
+compatibility = "additive public function"
+contract = "Installs only the bounded native Float64 parser; it is mutually exclusive with the full and numeric-only activation modes."
+consumer = "Isolated Float64 measurements or deployments"
+
+[[api]]
+package = "yjson_native"
+kind = "cangjie-function"
+symbol = "disableYJsonNativeFloatOnly"
+signature = "public func disableYJsonNativeFloatOnly(): Unit"
+source = "packages/yjson_native/src/native_backend.cj"
+needle = "public func disableYJsonNativeFloatOnly"
+stability = "stable-opt-in"
+compatibility = "additive public function"
+contract = "Idempotently removes the FloatOnly activation; it rejects attempts to disable a different active mode."
+consumer = "Isolated Float64 measurements or deployments"
+
+[[api]]
+package = "yjson_native / C ABI"
+kind = "c-function"
+symbol = "YJ_JSON_ParseDouble"
+signature = "double YJ_JSON_ParseDouble(const uint8_t*, int64_t, int64_t, int64_t)"
+source = ["native/yjson_scanner.h", "native/yjson_scanner.c"]
+needle = "YJ_JSON_ParseDouble"
+stability = "stable-native-bridge"
+compatibility = "additive C symbol and header declaration"
+contract = "Parses one already validated JSON number token of at most 256 bytes; invalid bounds, malformed token text, or declined input return NaN."
+consumer = "yjson_native @FastNative bridge"

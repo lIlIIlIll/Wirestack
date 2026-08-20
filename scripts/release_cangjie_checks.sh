@@ -36,6 +36,7 @@ run() {
 
 require_consistent_sdk
 
+run api-inventory python3 "$repo/scripts/check_api_inventory.py"
 run core bash -c 'cd "$1" && cjpm test --no-color' _ "$repo"
 run examples bash -c 'cd "$1/packages/examples" && cjpm run' _ "$repo"
 run macro-consumer bash -c 'cd "$1/packages/codec_integration" && cjpm run' _ "$repo"

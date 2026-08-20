@@ -95,6 +95,16 @@ main(): Unit {
     try (document = NativeCompactJsonDocument.parse(unsafe { "{\\"n\\":42}".rawData() })) {
         if (document.root().get("n").getOrThrow().asInt64() != 42) { throw Exception("native") }
     }
+    enableYJsonNativeFloatOnly()
+    let nativeFloatReader = JsonFastReader("1.5e2")
+    let nativeFloat = jsonFastReadFloat64(nativeFloatReader)
+    nativeFloatReader.expectEnd()
+    if (nativeFloat != 150.0) { throw Exception("native float") }
+    disableYJsonNativeFloatOnly()
+    let portableFloatReader = JsonFastReader("2.5")
+    let portableFloat = jsonFastReadFloat64(portableFloatReader)
+    portableFloatReader.expectEnd()
+    if (portableFloat != 2.5) { throw Exception("portable float fallback") }
     println("native consumer passed")
 }
 ''', base)
