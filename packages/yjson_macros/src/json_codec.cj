@@ -632,6 +632,55 @@ private func appendFastFieldAssignment(
     appendLine(sb, level, "__seen_${field.name} = true")
 }
 
+private func appendFastCanonicalDecodedResult(
+    sb: StringBuilder,
+    level: Int64,
+    fields: ArrayList<CodecField>,
+    params: ArrayList<CodecConstructorParam>,
+    targetType: String
+): Unit {
+    if (!params.isEmpty()) {
+        let args = ArrayList<String>()
+        for (param in params) {
+            if (let Some(field) <- fieldByName(fields, param.name)) {
+                if (field.isOption || usesScalarScratch(field)) {
+                    args.add("__value_${field.name}")
+                } else {
+                    args.add("__value_${field.name}.getOrThrow()")
+                }
+            } else if (param.hasDefault) {
+                args.add(param.defaultExpr)
+            } else {
+                throw Exception("constructor parameter `${param.name}` has no JSON property")
+            }
+        }
+        appendLine(sb, level, "let __result = ${targetType}(" + joinStrings(args, ", ") + ")")
+        for (field in fields) {
+            var covered = false
+            for (param in params) { if (param.name == field.name) { covered = true; break } }
+            if (!covered && field.mutable) {
+                if (field.isOption || usesScalarScratch(field)) {
+                    appendLine(sb, level, "__result.${field.name} = __value_${field.name}")
+                } else {
+                    appendLine(sb, level, "__result.${field.name} = __value_${field.name}.getOrThrow()")
+                }
+            }
+        }
+        appendLine(sb, level, "return __result")
+    } else {
+        appendLine(sb, level, "let __result = ${targetType}()")
+        for (field in fields) {
+            if (!field.mutable) { throw Exception("immutable field `${field.name}` requires a constructor parameter") }
+            if (field.isOption || usesScalarScratch(field)) {
+                appendLine(sb, level, "__result.${field.name} = __value_${field.name}")
+            } else {
+                appendLine(sb, level, "__result.${field.name} = __value_${field.name}.getOrThrow()")
+            }
+        }
+        appendLine(sb, level, "return __result")
+    }
+}
+
 private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     let name = decl.identifier.value
     let fields = collectFields(body)
@@ -851,8 +900,16 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     appendLine(sb, 3, "reader.startRawObject()")
     appendLine(sb, 3, "var __first = true")
     var orderedFieldCount: Int64 = 0
+    var lastOrderedFieldName = ""
+    var hasPostConstructorField = false
     for (field in fields) {
-        if (field.writeField) { orderedFieldCount++ }
+        if (field.writeField) {
+            orderedFieldCount++
+            lastOrderedFieldName = field.name
+            if (field.mutable && constructorParamByName(params, field.name).isNone()) {
+                hasPostConstructorField = true
+            }
+        }
     }
     if (orderedFieldCount > 0) {
         appendLine(sb, 3, "while (true) {")
@@ -867,6 +924,12 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         }
         appendLine(sb, 4, "break")
         appendLine(sb, 3, "}")
+        if (orderedFieldCount >= 3 && orderedFieldCount == fields.size && hasPostConstructorField) {
+            appendLine(sb, 3, "if (__seen_${lastOrderedFieldName} && !reader.hasRawObjectField(__first)) {")
+            appendLine(sb, 4, "reader.endRawObject()")
+            appendFastCanonicalDecodedResult(sb, 4, fields, params, targetType)
+            appendLine(sb, 3, "}")
+        }
     }
     appendLine(sb, 3, "while (reader.hasRawObjectField(__first)) {")
     appendLine(sb, 4, "let __nameId = reader.readRawNameIdBytes(__first, __yJsonFastFieldNames)")
