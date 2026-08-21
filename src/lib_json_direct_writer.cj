@@ -5,6 +5,8 @@ import std.io.*
 
 const JSON_DIRECT_BYTES_INITIAL_CAPACITY: Int64 = 256
 const JSON_DIRECT_PRETTY_STRING_INITIAL_CAPACITY: Int64 = 512
+const JSON_DIRECT_INT64_MAP_ENTRY_RESERVE_HINT: Int64 = 8
+const JSON_DIRECT_INT64_MAP_RESERVE_LIMIT: Int64 = 4096
 
 private func directStringWriterInitialCapacity(config: JsonWriteConfig): Int64 {
     if (config.newline == "\n" && config.indent == "    " && config.useSpaceAfterSeparators && !config.htmlSafe) {
@@ -61,6 +63,21 @@ func jsonRawCompactStringEscapeIndex(value: String): Int64 {
     -1
 }
 
+func jsonRawInt64MapReserveHint(prefixSize: Int64, entryCount: Int64): Int64 {
+    let entryHint = JSON_DIRECT_INT64_MAP_ENTRY_RESERVE_HINT
+    if (entryHint <= 0) {
+        return 0
+    }
+    if (prefixSize >= JSON_DIRECT_INT64_MAP_RESERVE_LIMIT - 2) {
+        return JSON_DIRECT_INT64_MAP_RESERVE_LIMIT
+    }
+    let remaining = JSON_DIRECT_INT64_MAP_RESERVE_LIMIT - prefixSize - 2
+    if (entryCount > remaining / entryHint) {
+        return JSON_DIRECT_INT64_MAP_RESERVE_LIMIT
+    }
+    prefixSize + 2 + entryCount * entryHint
+}
+
 abstract class JsonDirectWriterTarget {
     protected func writeText(value: String): Unit
 
@@ -82,7 +99,7 @@ abstract class JsonDirectWriterTarget {
 
     protected func writeTextStringArrayListNoEscape(prefix: String, values: ArrayList<String>, totalStringSize: Int64): Unit
 
-    protected func writeTextInt64MapNoEscape(prefix: String, values: HashMap<String, Int64>, totalNameSize: Int64, totalValueSize: Int64): Unit
+    protected func writeCompactInt64Map(prefix: String, values: HashMap<String, Int64>): Unit
 
     protected func writeNewlineAndIndent(newline: String, indent: String, depth: Int64): Unit
 
@@ -267,24 +284,36 @@ class DirectStringWriterTarget <: JsonDirectWriterTarget {
         writeRawByteNoEnsure(b']')
     }
 
-    public func writeTextInt64MapNoEscape(prefix: String, values: HashMap<String, Int64>, totalNameSize: Int64, totalValueSize: Int64): Unit {
-        ensureCapacity(used + prefix.size + totalNameSize + totalValueSize + values.size * 4 + 2)
+    public func writeCompactInt64Map(prefix: String, values: HashMap<String, Int64>): Unit {
+        reserveCapacity(jsonRawInt64MapReserveHint(prefix.size, values.size))
+        ensureCapacity(used + prefix.size + 1)
         copyTextNoEnsure(prefix)
         writeRawByteNoEnsure(b'{')
         var first = true
         for ((key, item) in values) {
-            if (first) {
-                first = false
+            let firstEscape = jsonRawCompactStringEscapeIndex(key)
+            if (firstEscape < 0) {
+                ensureCapacity(used + key.size + 24)
+                if (!first) {
+                    writeRawByteNoEnsure(b',')
+                }
+                writeRawByteNoEnsure(b'"')
+                copyTextNoEnsure(key)
+                writeRawByteNoEnsure(b'"')
+                writeRawByteNoEnsure(b':')
+                writeInt64NoEnsure(item)
             } else {
-                writeRawByteNoEnsure(b',')
+                if (!first) {
+                    writeByte(b',')
+                }
+                writeEscapedStringLiteralFromFirstEscape(key, firstEscape, false)
+                ensureCapacity(used + 21)
+                writeRawByteNoEnsure(b':')
+                writeInt64NoEnsure(item)
             }
-            writeRawByteNoEnsure(b'"')
-            copyTextNoEnsure(key)
-            writeRawByteNoEnsure(b'"')
-            writeRawByteNoEnsure(b':')
-            writeInt64NoEnsure(item)
+            first = false
         }
-        writeRawByteNoEnsure(b'}')
+        writeByte(b'}')
     }
 
     public func writeNewlineAndIndent(newline: String, indent: String, depth: Int64): Unit {
@@ -712,24 +741,36 @@ class DirectBytesWriterTarget <: JsonDirectWriterTarget {
         writeRawByteNoEnsure(b']')
     }
 
-    public func writeTextInt64MapNoEscape(prefix: String, values: HashMap<String, Int64>, totalNameSize: Int64, totalValueSize: Int64): Unit {
-        ensureCapacity(used + prefix.size + totalNameSize + totalValueSize + values.size * 4 + 2)
+    public func writeCompactInt64Map(prefix: String, values: HashMap<String, Int64>): Unit {
+        reserveCapacity(jsonRawInt64MapReserveHint(prefix.size, values.size))
+        ensureCapacity(used + prefix.size + 1)
         copyTextNoEnsure(prefix)
         writeRawByteNoEnsure(b'{')
         var first = true
         for ((key, item) in values) {
-            if (first) {
-                first = false
+            let firstEscape = jsonRawCompactStringEscapeIndex(key)
+            if (firstEscape < 0) {
+                ensureCapacity(used + key.size + 24)
+                if (!first) {
+                    writeRawByteNoEnsure(b',')
+                }
+                writeRawByteNoEnsure(b'"')
+                copyTextNoEnsure(key)
+                writeRawByteNoEnsure(b'"')
+                writeRawByteNoEnsure(b':')
+                writeInt64NoEnsure(item)
             } else {
-                writeRawByteNoEnsure(b',')
+                if (!first) {
+                    writeByte(b',')
+                }
+                writeEscapedStringLiteralFromFirstEscape(key, firstEscape, false)
+                ensureCapacity(used + 21)
+                writeRawByteNoEnsure(b':')
+                writeInt64NoEnsure(item)
             }
-            writeRawByteNoEnsure(b'"')
-            copyTextNoEnsure(key)
-            writeRawByteNoEnsure(b'"')
-            writeRawByteNoEnsure(b':')
-            writeInt64NoEnsure(item)
+            first = false
         }
-        writeRawByteNoEnsure(b'}')
+        writeByte(b'}')
     }
 
     public func writeNewlineAndIndent(newline: String, indent: String, depth: Int64): Unit {
@@ -1150,19 +1191,24 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
         writeRawByte(b']')
     }
 
-    public func writeTextInt64MapNoEscape(prefix: String, values: HashMap<String, Int64>, totalNameSize: Int64, totalValueSize: Int64): Unit {
-        reserveCapacity(prefix.size + totalNameSize + totalValueSize + values.size * 4 + 2)
+    public func writeCompactInt64Map(prefix: String, values: HashMap<String, Int64>): Unit {
+        reserveCapacity(jsonRawInt64MapReserveHint(prefix.size, values.size))
         writeText(prefix)
         writeRawByte(b'{')
         var first = true
         for ((key, item) in values) {
-            if (first) {
-                first = false
+            let firstEscape = jsonRawCompactStringEscapeIndex(key)
+            if (firstEscape < 0) {
+                first = writeObjectEntryNameInt64NoEscape(first, key, item)
             } else {
-                writeRawByte(b',')
+                if (!first) {
+                    writeRawByte(b',')
+                }
+                writeEscapedStringLiteralFromFirstEscape(key, firstEscape, false)
+                writeRawByte(b':')
+                writeInt64Text(item)
+                first = false
             }
-            writeStringLiteralNoEscapeName(key)
-            writeInt64Text(item)
         }
         writeRawByte(b'}')
     }
@@ -1631,21 +1677,33 @@ public class JsonDirectWriter {
     }
 
     func writeRawInt64Map(prefix: String, values: HashMap<String, Int64>): Unit {
-        var totalNameSize: Int64 = 0
-        var totalValueSize: Int64 = 0
-        for ((key, item) in values) {
-            if (firstStringEscapeIndex(key) >= 0) {
-                writeRawInt64MapFallback(prefix, values)
-                return
-            }
-            totalNameSize += key.size
-            totalValueSize += jsonRawInt64Size(item)
-        }
-        target.writeTextInt64MapNoEscape(prefix, values, totalNameSize, totalValueSize)
+        target.writeCompactInt64Map(prefix, values)
     }
 
-    func writeRawInt64MapNoEscape(prefix: String, values: HashMap<String, Int64>, totalNameSize: Int64, totalValueSize: Int64): Unit {
-        target.writeTextInt64MapNoEscape(prefix, values, totalNameSize, totalValueSize)
+    func tryWriteCompactRawMap<T>(values: HashMap<String, T>, codec: JsonRawWriteCodec<T>): Bool {
+        if (!canWriteRawCompactValue()) {
+            return false
+        }
+        target.reserveCapacity(jsonRawInt64MapReserveHint(0, values.size))
+        target.writeByte(b'{')
+        var first = true
+        for ((name, item) in values) {
+            if (first) {
+                first = false
+            } else {
+                target.writeByte(b',')
+            }
+            let firstEscape = jsonRawCompactStringEscapeIndex(name)
+            if (firstEscape < 0) {
+                target.writeStringLiteralNoEscapeName(name)
+            } else {
+                target.writeEscapedStringLiteralFromFirstEscape(name, firstEscape, false)
+                target.writeByte(b':')
+            }
+            codec.writeRaw(item, this)
+        }
+        target.writeByte(b'}')
+        true
     }
 
     func tryWriteCompactInt64ArrayList(values: ArrayList<Int64>): Bool {
@@ -1686,16 +1744,6 @@ public class JsonDirectWriter {
         beforeValue()
         writeRawInt64Map("", values)
         true
-    }
-
-    private func writeRawInt64MapFallback(prefix: String, values: HashMap<String, Int64>): Unit {
-        target.writeText(prefix)
-        target.writeByte(b'{')
-        var first = true
-        for ((key, item) in values) {
-            first = writeRawObjectEntryNameInt64(first, key, item)
-        }
-        target.writeByte(b'}')
     }
 
     func writeRawDefaultPrettyStringArrayList(prefix: String, values: ArrayList<String>, itemDepth: Int64, closeDepth: Int64): Unit {

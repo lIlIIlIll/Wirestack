@@ -152,6 +152,9 @@ def build_metadata() -> None:
         "StringDecodeLargeProfileStaticArrayList",
         Meta("静态容器对照", "decode", "ArrayList<ProfileRecord>[64] static", "string"),
     )
+    CANGJIE_META["yjsonStringEncodeLargeProfileStaticArrayList"] = Meta(
+        "静态容器对照", "encode", "ArrayList<ProfileRecord>[64] static", "string"
+    )
     add_cangjie_pair(
         "BytesDecodeLargeProfileStaticArrayList",
         Meta("静态容器对照", "decode", "ArrayList<ProfileRecord>[64] static", "bytes"),
@@ -462,7 +465,7 @@ def run_java_bench(quick: bool, java_args: Sequence[str], out_dir: Path) -> str:
 
 
 def run_cjfast_bench(cjfast_dir: Optional[str], out_dir: Path) -> str:
-    args = ["benchmarks/cjfast_json/run.sh"]
+    args = ["bash", "benchmarks/cjfast_json/run.sh"]
     if cjfast_dir:
         args.append(cjfast_dir)
     print(f"[json-baseline] running cjfast_json benchmark: {' '.join(args)}", file=sys.stderr)

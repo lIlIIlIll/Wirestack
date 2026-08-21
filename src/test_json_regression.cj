@@ -455,6 +455,72 @@ class YJsonRegressionTest {
     }
 
     @TestCase
+    func compactInt64MapEncodeMatchesAcrossTargetsAndGrowth(): Unit {
+        let codec = YJson.hashMapCodec(Int64Json)
+        let empty = HashMap<String, Int64>()
+        @Expect(YJson.encodeStringWith(codec, empty), "{}")
+        @Expect(String.fromUtf8(YJson.encodeBytesWith(codec, empty)), "{}")
+        let emptyOutput = MemoryOutputStream()
+        YJson.encodeToStreamWith(codec, empty, emptyOutput)
+        @Expect(emptyOutput.toUtf8String(), "{}")
+
+        let values = HashMap<String, Int64>(272)
+        for (index in 0..256) {
+            values["metric_${index}"] = index * 17 + 3
+        }
+        values[""] = 0
+        values["negative"] = -7
+        values["minimum"] = -9223372036854775808
+        values["maximum"] = Int64.Max
+        values["escaped\"key"] = 41
+        values["slash\\key"] = 42
+        values["line\nkey"] = 43
+        values["仓颉😀"] = 44
+        let longKeyBuilder = StringBuilder()
+        for (_ in 0..5000) {
+            longKeyBuilder.append("x")
+        }
+        let longKey = longKeyBuilder.toString()
+        values[longKey] = 45
+
+        let text = YJson.encodeStringWith(codec, values)
+        let bytesText = String.fromUtf8(YJson.encodeBytesWith(codec, values))
+        let output = MemoryOutputStream()
+        YJson.encodeToStreamWith(codec, values, output)
+        let streamText = output.toUtf8String()
+        @Expect(bytesText, text)
+        @Expect(streamText, text)
+        @Expect(YJson.encodeStringWith(YJson.int64HashMapCodec(), values), text)
+
+        let decoded = YJson.decodeStringWith(codec, text)
+        @Expect(decoded.size, values.size)
+        @Expect(decoded["minimum"], -9223372036854775808)
+        @Expect(decoded["maximum"], Int64.Max)
+        @Expect(decoded["escaped\"key"], 41)
+        @Expect(decoded["slash\\key"], 42)
+        @Expect(decoded["line\nkey"], 43)
+        @Expect(decoded["仓颉😀"], 44)
+        @Expect(decoded[longKey], 45)
+
+        let htmlValues = HashMap<String, Int64>()
+        htmlValues["<tag>"] = 1
+        let htmlText = YJson.encodeStringWith(
+            codec,
+            htmlValues,
+            config: JsonWriteConfig(
+                "",
+                "",
+                false,
+                true
+            )
+        )
+        @Expect(htmlText.contains("\\u003ctag\\u003e"))
+        @Expect(YJson.decodeStringWith(codec, htmlText)["<tag>"], 1)
+        let prettyText = YJson.encodeStringWith(codec, htmlValues, config: JsonWriteConfig.pretty)
+        @Expect(prettyText.contains("\n    \"<tag>\": 1\n"))
+    }
+
+    @TestCase
     func byteNativeAstMatchesStringAstAndRejectsInvalidUtf8(): Unit {
         let text = "{\"ascii\":\"value\",\"cjk\":\"仓颉\",\"emoji\":\"😀\",\"escaped\":\"line\\n\\u4ed3\",\"number\":-9223372036854775808}"
         let fromText = YJson.parse(text)

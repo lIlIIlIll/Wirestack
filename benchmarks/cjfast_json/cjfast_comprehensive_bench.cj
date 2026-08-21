@@ -363,6 +363,9 @@ class CjFastJsonComprehensiveBenchmarks {
     func cjfastStringEncodeLargeProfileArray(): Unit { stringSink = profiles.toJson() }
 
     @Bench
+    func cjfastStringEncodeLargeProfileStaticArrayList(): Unit { stringSink = profiles.toJson() }
+
+    @Bench
     func cjfastStringDecodeLargeProfileArray(): Unit {
         intSink = ArrayList<CompareProfileRecord>.fromJson(profilesText)[0].id
     }

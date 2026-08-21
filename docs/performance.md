@@ -4,6 +4,99 @@ Performance claims are backend- and representation-specific. Typed codecs,
 `JsonNode`, Pure Compact, Custom Native DOM, yyjson Direct Native DOM, serde
 Value, raw yyjson, and simdjson DOM are not interchangeable results.
 
+## cjfast_json comparison (2026-08-21)
+
+The current candidate based on yjson commit
+`6f2f47c597d4e5141b1efbfaa9cba8e5242e94d3` and cjfast_json commit
+`eefdedd1e53c93bb5ada11a96b9b81d88b2c6c65` were measured on the Server's
+Intel Xeon Gold 6248R, pinned to CPU 8, with Cangjie SDK
+`1.1.0-alpha.20260803040049`, Cangjie `-O2`, and `cjHeapSize=128MB`.
+The cjfast_json disposable checkout adds its missing `stdx = 0.0.3` manifest
+dependency and links the matching SDK's static JSON FFI libraries; the library
+implementation itself is unchanged.
+
+The 37 implemented, semantically matched workloads each ran as a separate
+process for eleven rounds. Workload order used a rotation with even rounds
+reversed, library order alternated by round, and every invocation emitted
+`csv-raw` duration batches. Positive paired deltas below mean cjfast_json took
+longer than yjson. Only rows with process-median CV no greater than 3% on both
+sides are accepted as stable absolute-latency comparisons:
+
+The optimized large-Map encode path also ran in an independent focused set. It
+met the two-sided stability gate and reversed the original result:
+
+| Workload | Input | yjson median | cjfast_json median | Paired delta | Direction | CV Y/C |
+|:--|:--|--:|--:|--:|:--|--:|
+| Encode `HashMap<String, Int64>[64]` | string | 119.887 us | 132.802 us | +10.82% | yjson faster 11/11 | 2.11% / 1.65% |
+
+The complete 37-workload run had five stable rows:
+
+| Workload | Input | yjson median | cjfast_json median | Paired delta | Direction | CV Y/C |
+|:--|:--|--:|--:|--:|:--|--:|
+| Encode `ArrayList<ProfileRecord>[64]` | string | 101.547 us | 75.899 us | -25.24% | cjfast_json faster 11/11 | 2.94% / 1.51% |
+| Encode `UInt64Envelope` | bytes | 9.537 us | 9.561 us | -0.34% | mixed, yjson faster 4/11 | 2.66% / 2.83% |
+| Encode `TemporalStats` | bytes | 20.371 us | 21.534 us | +5.10% | yjson faster 11/11 | 0.85% / 2.27% |
+| Encode `TemporalStats` | string | 20.879 us | 21.824 us | +3.65% | yjson faster 11/11 | 1.09% / 1.49% |
+| Encode deep nested profiles | string | 94.368 us | 74.138 us | -22.45% | cjfast_json faster 11/11 | 2.03% / 2.72% |
+
+Across all 37 workloads, yjson had the lower paired median in 29, with 25
+showing the same yjson-faster direction in all eleven pairs; cjfast_json had
+five unanimous directions. The large-Map row in this complete run was 119.239
+us versus 132.155 us (+9.50%, yjson faster 11/11), but cjfast_json's 4.01% CV
+keeps that row directional rather than stable. Those broader counts are
+directional evidence, not
+precise ratio claims: only five workloads met the strict two-sided 3% CV gate.
+During the run, one-minute system load ranged from 3.432 to 7.111 on 96 logical
+CPUs. CPU affinity was fixed, but host-wide load and frequency were not; this
+likely contributed to the process-level variance.
+
+The reproducible runner and analyzer are `scripts/json_cjfast_perf_run.py` and
+`scripts/json_cjfast_perf_summary.py`. The 814 raw reports, 814 per-process
+logs, manifest, metadata, and machine-readable summaries are retained on the
+Server under
+`<home>/yjson-cjfast-20260821-6f2f47c/target/cjfast-full36-rawgeneric-20260821-r1`
+and in the local ignored directory
+`target/cjfast-full37-rawgeneric-20260821-r1`. The stable focused Map evidence
+is retained in `target/cjfast-map-rawgeneric-20260821-r1`.
+
+### Large collection encode follow-up
+
+The 64-record array encode result was followed by an eleven-round, CPU-8 A/B
+that compared the runtime-composed `YJson.arrayListCodec(ProfileRecordJson)`
+with the macro-generated `ProfileRecordStaticArrayListJson`. The generic path
+remained stable at 102.374 us versus cjfast_json's 75.488 us. The static path's
+median fell to 76.800 us, leaving a 1.46% median gap to the duplicated
+cjfast_json baseline, but its process-median CV was 5.29%; the remaining gap is
+therefore inconclusive. This isolates most of the original 26.28% gap to the
+runtime-composed collection codec rather than object field generation.
+
+The accepted Map optimization has two parts. Specialized `Int64` Map writers
+now escape keys and write in one traversal with a bounded 4096-byte reserve.
+More importantly, the runtime-composed `YJson.hashMapCodec(Int64Json)` used by
+the benchmark recognizes raw scalar codecs and bypasses per-entry writer state
+and path tracking for root-level compact output. It preserves the normal path
+for nested, pretty, and HTML-safe output, and works across String, Bytes, and
+Stream targets.
+
+The focused stable run measured 119.887 us versus cjfast_json's 132.802 us
+(+10.82%, yjson faster 11/11). Two independent 21-round runs also favored
+yjson in 41 of 42 pairs by about 9.6%, but each had one side slightly above the
+3% CV gate, so they remain supporting directional evidence. The post-change
+profile no longer reports `pushField` or `popPath` as hotspots; the generic
+codec wrapper accounts for 0.27% of cycles, while `HashMapIterator.next`
+accounts for 19.25% and is now the dominant library-side cost.
+
+Rejected intermediate A/B evidence is retained in the ignored directories
+`target/cjfast-encode-ab-20260821-r1`,
+`target/cjfast-map-singlepass-20260821-r1`,
+`target/cjfast-map-threshold-20260821-r2`, and
+`target/cjfast-map-threshold-20260821-r3-21`. Accepted evidence is in
+`target/cjfast-map-rawgeneric-20260821-r1`,
+`target/cjfast-map-rawgeneric-formal-20260821-r1`,
+`target/cjfast-map-rawgeneric-formal-20260821-r2`, and
+`target/cjfast-map-rawgeneric-profile-20260821`. Focused reruns can use
+`scripts/json_cjfast_perf_run.py --workload-regex REGEX`.
+
 ## JSON literal macros (2026-08-20)
 
 `@Json` and `@JsonValue` were measured on the Server's Intel Xeon Gold 6248R,

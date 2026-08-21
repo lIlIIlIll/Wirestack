@@ -634,6 +634,11 @@ class ComprehensiveJsonCompareBenchmarks {
     }
 
     @Bench
+    func yjsonStringEncodeLargeProfileStaticArrayList(): Unit {
+        stringSink = YJson.encodeStringWith(staticProfileListCodec, largeProfiles)
+    }
+
+    @Bench
     func stdxStringEncodeLargeProfileArray(): Unit {
         stringSink = encodeStdxToUtf8String<ArrayList<StdxProfileRecord>>(stdxLargeProfiles)
     }

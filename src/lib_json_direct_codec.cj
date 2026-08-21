@@ -902,15 +902,25 @@ public func __yJsonReadFastStringOption(reader: JsonFastReader, context: JsonDec
 private class HashMapJsonCodec<T> <: JsonArrayDirectCodec<HashMap<String, T>> {
     private let inner: JsonDirectCodec<T>
     private let fastInner: JsonArrayDirectCodec<T>
+    private let rawInner: Option<JsonRawWriteCodec<T>>
 
     public init(inner: JsonDirectCodec<T>) {
         this.inner = inner
         this.fastInner = resolvedJsonFastCodec(inner)
+        this.rawInner = match (inner) {
+            case raw: JsonRawWriteCodec<T> => Some(raw)
+            case _ => None<JsonRawWriteCodec<T>>
+        }
     }
 
     public func write(value: HashMap<String, T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
         context.enterValue()
         try {
+            if (let Some(raw) <- rawInner) {
+                if (writer.tryWriteCompactRawMap(value, raw)) {
+                    return
+                }
+            }
             writer.startObject()
             for ((name, item) in value) {
                 writer.writeName(name)

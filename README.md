@@ -263,20 +263,43 @@ fast decoder 的 string 结果同时由 paired effect、硬件计数器和 profi
 
 ### 与其他库的对比
 
-以下是当前源码在同一 SSH Server 上的一次跨库 benchmark snapshot：Intel Xeon Gold
+#### cjfast_json 正式对比（2026-08-21）
+
+基于 yjson `6f2f47c` 的当前候选与 cjfast_json `eefdedd1` 在同一 SSH Server、CPU 8、
+SDK `1.1.0-alpha.20260803040049`、`-O2` 和 `cjHeapSize=128MB` 下完成了 37 个
+同语义 workload 的 11 轮交替 `csv-raw` 测量。每个 workload/库独立进程，单双轮
+反转库顺序；正值表示 cjfast_json 更慢。
+
+大 Map encode 的独立稳定复测中，yjson 从优化前落后 3.54% 变为领先 10.82%：
+
+| Workload | yjson | cjfast_json | Paired delta | 方向 | CV Y/C |
+|---|---:|---:|---:|---:|---:|
+| 大 Map encode / string | 119.887 us | 132.802 us | +10.82% | yjson 11/11 更快 | 2.11% / 1.65% |
+
+完整 37 项调度中，大 Map encode 同样为 yjson 11/11 更快、paired delta +9.50%，但
+cjfast_json 的进程中位数 CV 为 4.01%，因此只作为方向复现。严格要求两侧 CV 均不超过
+3% 后，完整调度有 5 项稳定；yjson 的 paired median 在全部 37 项中更低 29 项，其中
+25 项为 11/11 同方向，cjfast_json 有 5 项为 11/11 同方向。其余项目不能把精确倍率
+当作低方差结论。完整 p95、CV、MAD、原始样本及环境限制见
+[`docs/performance.md`](docs/performance.md)。可复现脚本是
+`scripts/json_cjfast_perf_run.py` 和 `scripts/json_cjfast_perf_summary.py`。
+
+#### 历史 stdx/Java 单轮快照（2026-08-20）
+
+以下是当时源码在同一 SSH Server 上的一次跨库 benchmark snapshot：Intel Xeon Gold
 6248R、CPU 8、Cangjie SDK `1.1.0-alpha.20260803040049`、Cangjie `-O2`；
 Java 对照使用 OpenJDK 11.0.31 和 fastjson2 2.0.52。Cangjie 侧使用
 `cjpm bench`，Java 侧使用仓库内的独立 harness；两种运行时的 GC 和计时器不同，
-所以这张表用于 workload 透视，不替代前面的 paired regression gate。
+所以这张历史表用于 workload 透视，不替代上面的 paired regression gate。
 
 | 库 | 版本 / revision | 覆盖样本 | 状态 |
 |---|---|---:|---|
-| yjson | 当前源码 | 60 | 已测；其中 36 个场景与两种外部对照完全重合 |
+| yjson | 当时源码 | 60 | 已测；其中 36 个场景与 stdx/Java 对照完全重合 |
 | `stdx.encoding.json` | 0.0.3 | 40 | 已测 |
 | Java fastjson2 | 2.0.52 / OpenJDK 11.0.31 | 36 | 已测 |
 | `cjfast_json` | `eefdedd1e53c93bb5ada11a96b9b81d88b2c6c65` | 0 | 未覆盖：pinned manifest 在 SDK 1.1.0 下导入 `stdx.encoding.json` 却未声明依赖，`cjpm bench` 直接失败 |
 
-下表只列出 yjson、stdx 和 fastjson2 都有结果的 36 个场景。数值单位为 ns/op，
+下表只列出当时 yjson、stdx 和 fastjson2 都有结果的 36 个场景。数值单位为 ns/op，
 越低越好；倍率为“对照库 / yjson”，小于 `1.00x` 表示对照库更快。`cjfast_json`
 没有可填数字，不用旧 SDK 或其它 harness 的结果替代。
 
