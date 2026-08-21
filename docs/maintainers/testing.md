@@ -24,9 +24,9 @@ Prepare the configured Cangjie environment before running `cjpm` commands.
 
 ```bash
 cjpm test --no-color
-(cd packages/examples && cjpm run)
-(cd packages/codec_integration && cjpm run)
-(cd packages/json_literal_integration && cjpm run)
+scripts/run_cjpm_executable.sh packages/examples
+scripts/run_cjpm_executable.sh packages/codec_integration
+scripts/run_cjpm_executable.sh packages/json_literal_integration
 scripts/check_json_literal_compile_fail.sh
 (cd packages/yjson_native && cjpm test --no-color)
 (cd packages/yjson_yyjson && cjpm test --no-color)
@@ -96,15 +96,14 @@ portable contract; it does not make the Native DOM API identical to `JsonNode`.
   command results, commit IDs, SDK identity, timestamps, logs, and checksums
   belong in release-specific evidence.
 
-## Current known gap
+## Executable exit-status gate
 
-The core suite does not currently exercise generated polymorphic decode through
-the external package with the default `maxPolymorphicObjectBytes = 0`. The
-`packages/codec_integration` consumer reaches `readBoundedValue(0)` and emits
-`IllegalArgumentException: maxBytes must be positive`; its `cjpm run` wrapper
-also returns exit code 0 despite that unhandled application exception. Both the
-runtime defect and consumer exit-status gate must be fixed before this layer can
-be recorded as PASS.
+`cjpm run` in the currently qualified toolchain can return exit code 0 after an
+unhandled application exception. Release and CI consumer gates therefore use
+`scripts/run_cjpm_executable.sh`: it builds with `cjpm`, then executes
+`target/release/bin/main` directly so runtime failures propagate as non-zero.
+The external codec consumer covers generated polymorphic decode with the
+default `maxPolymorphicObjectBytes = 0` and a positive-budget overflow case.
 
 ## Historical plan
 

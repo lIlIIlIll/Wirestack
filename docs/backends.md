@@ -2,6 +2,9 @@
 
 yjson 默认使用 Pure Cangjie 实现。Native backend 是独立 package，只有应用显式声明依赖并调用对应 API 时才会参与构建或运行；core 不会静默启用 Native，也不会在 Native package 构建失败后自动回退。
 
+`1.0.0-rc.1` 尚未发布到 registry，且当前 cjpm manifest 无法表达 prerelease 后缀；
+本文统一展示候选阶段可用的 checkout path dependency。
+
 ## 如何选择
 
 | 场景 | 建议入口 |
@@ -21,7 +24,7 @@ yjson 默认使用 Pure Cangjie 实现。Native backend 是独立 package，只�
 
 ```toml
 [dependencies]
-yjson = "2.0.0"
+yjson = { path = "../yjson" }
 ```
 
 typed codec、`JsonNode` 和 `CompactJsonDocument` 都可以在这个边界内使用。完整入口对比见 [API 选择指南](choosing-an-api.md)。
@@ -32,8 +35,8 @@ typed codec、`JsonNode` 和 `CompactJsonDocument` 都可以在这个边界内�
 
 ```toml
 [dependencies]
-yjson = "2.0.0"
-yjson_native = "2.0.0"
+yjson = { path = "../yjson" }
+yjson_native = { path = "../yjson/packages/yjson_native" }
 ```
 
 文档拥有 Native 资源，应使用 `try` 确定性关闭。由文档取得的 value view 不能越过文档生命周期：
@@ -55,8 +58,8 @@ DOM parse 与全局 scanner activation 相互独立；使用 `NativeCompactJsonD
 
 ```toml
 [dependencies]
-yjson = "2.0.0"
-yjson_yyjson = "2.0.0"
+yjson = { path = "../yjson" }
+yjson_yyjson = { path = "../yjson/packages/yjson_yyjson" }
 ```
 
 ```cangjie

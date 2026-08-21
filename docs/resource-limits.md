@@ -1,6 +1,6 @@
 # 不可信 JSON 输入的资源边界
 
-yjson 2.0 为内存输入、流式输入、typed decode、Compact DOM、Custom Native 和
+yjson 1.0 RC 为内存输入、流式输入、typed decode、Compact DOM、Custom Native 和
 yyjson backend 提供统一的显式资源预算。默认 `maxDepth` 是 256，三个 byte budget
 默认都是 `0`（不限制），因此可信输入的默认热路径不增加 byte-limit 扫描；处理 RPC、
 Agent、MCP 或其他不可信输入时应显式配置。
@@ -56,10 +56,9 @@ let model = YJson.decodeFromStreamWith(ModelJson, input, config: limits)
 所有资源参数拒绝负数。若 `includeErrorLocation` 为 `true`，异常同时携带 byte offset、
 line 和 column；关闭位置计算不会改变错误码或预算结果。
 
-> **2.0 RC known defect:** generated polymorphic decode 当前不能正确处理
-> `maxPolymorphicObjectBytes = 0`，会在 `readBoundedValue(0)` 抛出
-> `IllegalArgumentException`。在修复并通过 external codec consumer 前，应显式设置正数
-> budget。其他入口与配置模型中的 `0 = unlimited` contract 不变。
+generated polymorphic decode 遵循相同的 `0 = unlimited` contract；其
+`JsonDirectReader.readBoundedValue` bridge 仅拒绝负数，并在正数 budget 超限时产生
+`polymorphic_object_too_large`。
 
 ## 覆盖的公开入口
 
@@ -87,17 +86,17 @@ line 和 column；关闭位置计算不会改变错误码或预算结果。
 | `polymorphic_object_too_large` | 内存预检或 stream 增量拒绝 | C DOM 分配前拒绝 | yyjson DOM 分配前拒绝 |
 | `max_depth` | reader/parser 拒绝 | Custom Native parser 拒绝 | yyjson semantic validation 拒绝 |
 
-原有 `YJ_Compact_Parse` 和 `YJ_Yyjson_Parse` C ABI 保持不变。2.0 新增
+原有 `YJ_Compact_Parse` 和 `YJ_Yyjson_Parse` C ABI 保持不变。1.0 RC 新增
 `YJ_Compact_ParseWithLimits`、`YJ_Yyjson_ParseWithLimits` 和共享的
 `YJ_JSON_ValidateLimits`。Cangjie facade 在三个资源预算全为零时继续调用旧入口，显式
 启用任一预算时才调用新入口。
 
 ## 兼容性与版本配套
 
-这是 2.0 的明确破坏性配置变更：`JsonReadConfig` 构造器新增两个参数，且
+这是相对 pre-1.0 snapshot 的明确配置变更：`JsonReadConfig` 构造器新增两个参数，且
 `maxPolymorphicObjectBytes` 的默认值从 16 MiB 改为 `0`。旧二进制和旧生成代码不能
 作为 ABI 兼容证据；应用、`yjson_macros`、`yjson_all`、`yjson_native` 和
-`yjson_yyjson` 应统一升级并重新编译为 2.0。
+`yjson_yyjson` 应统一升级并针对 `1.0.0-rc.1` source candidate 重新编译。
 
 默认配置的语义是无限制，并保留原 fast path。限制模式会增加一次线性预检或增量计数，
 其目标是控制不可信输入风险，不承诺与无限制模式相同的吞吐量。

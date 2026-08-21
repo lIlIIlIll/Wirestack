@@ -11,7 +11,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-yellow?style=flat" alt="Apache License 2.0" /></a>
   <img src="https://img.shields.io/badge/Cangjie-1.1.0-3B82F6?style=flat" alt="Cangjie 1.1.0" />
-  <img src="https://img.shields.io/badge/version-2.0.0-10B981?style=flat" alt="Version 2.0.0" />
+  <img src="https://img.shields.io/badge/version-1.0.0--rc.1-10B981?style=flat" alt="Version 1.0.0-rc.1" />
 </p>
 
 yjson 默认使用纯仓颉实现。Native backend 是面向特定内存与遍历场景的显式可选项，
@@ -29,19 +29,22 @@ yjson 默认使用纯仓颉实现。Native backend 是面向特定内存与遍�
 
 要求仓颉 SDK 1.1.0，且 `cjc`、`cjpm` 位于 `PATH`。
 
+`1.0.0-rc.1` 当前尚未发布到 registry。当前 cjpm manifest 只接受三段数字版本，无法
+表达 `-rc.1`；因此候选阶段只支持 checkout path dependency，正式发布坐标将是 `1.0.0`。
+
 普通应用推荐使用聚合包，它同时提供 runtime、`@JsonCodec`、`@Json` 和
 `@JsonValue`：
 
 ```toml
 [dependencies]
-yjson_all = "2.0.0"
+yjson_all = { path = "../yjson/packages/yjson_all" }
 ```
 
 只需要 parser、AST 或内置 codec 时，可以仅依赖 core：
 
 ```toml
 [dependencies]
-yjson = "2.0.0"
+yjson = { path = "../yjson" }
 ```
 
 所有 yjson package 必须使用同一版本。
@@ -71,11 +74,10 @@ main(): Unit {
 }
 ```
 
-运行仓库内的纯仓颉示例：
+从仓库根目录运行纯仓颉示例：
 
 ```bash
-cd packages/examples
-cjpm run
+scripts/run_cjpm_executable.sh packages/examples
 ```
 
 ## 核心 API
@@ -175,7 +177,7 @@ typed codec 对比，且 16 MiB Read 因 yjson CV 9.60% 只作为方向证据。
 - **Native backend** — 需要显式依赖，document 必须 `close()`，且不是线程安全对象；当前仅 qualification Linux x86_64。
 - **资源预算** — byte budget 默认不限制，`maxDepth` 默认 256；处理不可信输入时应显式收紧。
 - **JSON Schema** — 支持常用类型、组合、本地引用和边界校验，但不是完整的 draft 2020-12 实现。
-- **2.0 RC 多态限制** — generated polymorphic decode 当前需显式设置正的 `maxPolymorphicObjectBytes`；详见 codec 指南。
+- **预发布状态** — `1.0.0-rc.1` 尚未完成 tag、registry publish 与 hosted CI，不应视为正式稳定版。
 
 ## 文档
 
@@ -186,7 +188,7 @@ typed codec 对比，且 16 MiB Read 因 yjson CV 9.60% 只作为方向证据。
 - [性能结论、方法与结果](docs/performance/README.md)
 - [不可信输入资源边界](docs/resource-limits.md)
 - [当前架构与调用链](docs/architecture.md)
-- [迁移指南](docs/migration/1.x-to-2.0.md) · [Changelog](CHANGELOG.md)
+- [预发布迁移指南](docs/migration/pre-1.0-to-1.0.md) · [Changelog](CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 - [第三方组件与许可](THIRD_PARTY_NOTICES.md)
 

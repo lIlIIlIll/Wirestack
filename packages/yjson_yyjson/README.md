@@ -8,10 +8,13 @@ are not thread-safe. Its Cangjie shared library localizes the vendored
 `yyjson_*` implementation symbols, so an application may independently link a
 second yyjson version. The vendored upstream sources remain unmodified.
 
+`1.0.0-rc.1` has not been published to the registry, and current cjpm manifests
+cannot express a prerelease suffix. Use matching checkout path dependencies.
+
 ```toml
 [dependencies]
-yjson = "2.0.0"
-yjson_yyjson = "2.0.0"
+yjson = { path = "../yjson" }
+yjson_yyjson = { path = "../yjson/packages/yjson_yyjson" }
 ```
 
 ```cangjie

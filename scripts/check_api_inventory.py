@@ -22,6 +22,7 @@ def fail(message: str) -> None:
 
 def check_versions(inventory: dict) -> None:
     pairing = inventory["package_pairing"]
+    manifest_version = inventory["package_manifest_version"]
     root_version = load_toml(ROOT / "cjpm.toml")["package"]["version"]
     macro_version = load_toml(ROOT / "packages/yjson_macros/cjpm.toml")["package"]["version"]
     all_version = load_toml(ROOT / "packages/yjson_all/cjpm.toml")["package"]["version"]
@@ -35,6 +36,8 @@ def check_versions(inventory: dict) -> None:
         "yyjson": yyjson_version,
     }
     for name, actual in expected.items():
+        if actual != manifest_version:
+            fail(f"{name} development version {actual!r} != package manifest version {manifest_version!r}")
         if actual != pairing[name]:
             fail(f"{name} development version {actual!r} != inventory {pairing[name]!r}")
 
@@ -69,7 +72,7 @@ def main() -> int:
     inventory = load_toml(INVENTORY)
     if inventory.get("inventory_version") != 1:
         fail("unsupported inventory_version")
-    if inventory.get("release_version") != "2.0.0":
+    if inventory.get("release_version") != "1.0.0-rc.1":
         fail("inventory release_version must match the current release candidate")
     check_versions(inventory)
     check_declarations(inventory)

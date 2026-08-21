@@ -1,6 +1,6 @@
 # yjson 当前架构
 
-本文描述 yjson 2.0 当前源码与发布包的边界。API/type 名称保留英文；仓库维护细节见
+本文描述 yjson 1.0 RC 当前源码与发布包的边界。API/type 名称保留英文；仓库维护细节见
 [Repository layout](maintainers/repository-layout.md)。
 
 ## Package graph

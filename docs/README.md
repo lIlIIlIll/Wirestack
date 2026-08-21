@@ -21,8 +21,8 @@
 
 ## 兼容性、迁移与性能
 
-- [1.x → 2.0 迁移](migration/1.x-to-2.0.md)
-- [2.0 API/ABI change inventory](public-api-inventory.md)：只记录 2.0 RC 的新增和变化，不是完整 API reference。
+- [pre-1.0 → 1.0 迁移](migration/pre-1.0-to-1.0.md)
+- [1.0 RC API/ABI change inventory](public-api-inventory.md)：只记录首个 RC 的新增和变化，不是完整 API reference。
 - [性能结论、方法与结果](performance/README.md)
 - [Release notes](../RELEASE_NOTES.md)
 
@@ -33,7 +33,7 @@
 - [测试策略与命令](maintainers/testing.md)
 - [Native backend 内部契约](maintainers/native-internals.md)
 - [发布流程](maintainers/releasing.md)
-- [2.0.0 RC1 evidence snapshot](../release/2.0.0-rc1/evidence.md)
+- [1.0.0-rc.1 evidence snapshot](../release/1.0.0-rc.1/evidence.md)
 - [历史初始 parser test plan](archive/initial-parser-test-plan.md)
 
 当前文档仍有两个明确缺口：完整逐符号 API reference 尚未自动生成；性能原始机器可读结果尚未全部随仓库发布。相应页面会区分“当前公开 contract”和“单次实验或 release evidence”。

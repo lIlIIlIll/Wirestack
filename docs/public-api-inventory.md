@@ -1,18 +1,23 @@
-# 2.0 API/ABI change inventory
+# 1.0 RC API/ABI change inventory
 
 This is a release-delta inventory, not a complete yjson API reference. It records
-the public surfaces changed or introduced for the 2.0.0 release candidate,
+the public surfaces stabilized or introduced for the `1.0.0-rc.1` candidate,
 including resource-limited parsing, the reusable fast
 collection bridge, and the optional native Float64 parser. The machine-readable source is
 [`release/public-api-inventory.toml`](../release/public-api-inventory.toml).
 
-Most entries are additive. `JsonReadConfig.init` and the `JsonValue` to
-`JsonNode` AST-root rename are intentional 2.0 breaking changes. The latter is
+Most entries are additive relative to pre-1.0 snapshots. `JsonReadConfig.init`
+and the `JsonValue` to `JsonNode` AST-root rename require snapshot consumers to
+rebuild. The latter is
 required because the new unqualified `@JsonValue` macro occupies the same
 Cangjie declaration namespace. The API inventory and ABI symbol inventory must
 be reviewed whenever a declaration is added, removed, renamed, or changed.
 
 ## Package pairing
+
+`1.0.0-rc.1` 尚未发布到 registry。当前 cjpm manifest 只接受三段数字版本，因此
+release identity 使用 `1.0.0-rc.1`，checked-in package manifests 使用未来正式版
+`1.0.0`。候选阶段只支持 checkout path dependencies。
 
 Generated code is compiled in the application, so `yjson_macros` cannot safely
 be mixed with an older `yjson` runtime after the generated reader starts using
@@ -21,10 +26,10 @@ pin all packages to the same release:
 
 ```toml
 [dependencies]
-yjson = "2.0.0"
-yjson_macros = "2.0.0"
+yjson = { path = "../yjson" }
+yjson_macros = { path = "../yjson/packages/yjson_macros" }
 # or, for normal applications:
-yjson_all = "2.0.0"
+yjson_all = { path = "../yjson/packages/yjson_all" }
 ```
 
 `yjson_native` and `yjson_yyjson` must use the same `yjson` version because
@@ -36,8 +41,8 @@ use the exact versions above.
 
 | Surface | Contract | Compatibility disposition |
 |---|---|---|
-| `JsonReadConfig.maxBytes` | Input document bytes; `0` is unlimited | New 2.0 field and constructor parameter; rebuild required |
-| `JsonReadConfig.maxStringBytes` | Decoded UTF-8 bytes per value/key; `0` is unlimited | New 2.0 field and constructor parameter; rebuild required |
+| `JsonReadConfig.maxBytes` | Input document bytes; `0` is unlimited | New for the 1.0 RC; snapshot consumers must rebuild |
+| `JsonReadConfig.maxStringBytes` | Decoded UTF-8 bytes per value/key; `0` is unlimited | New for the 1.0 RC; snapshot consumers must rebuild |
 | `JsonReadConfig.maxPolymorphicObjectBytes` | Root array/object raw subtree bytes; `0` is unlimited | Existing field; default changed from 16 MiB to unlimited |
 | `YJ_JSON_ValidateLimits` | Allocation-free native preflight shared by native backends | Additive C symbol |
 | `YJ_Compact_ParseWithLimits` | Limited Custom Native parse | Additive; old parse symbol preserved |
@@ -89,10 +94,10 @@ process-global and must not race with decoding.
 
 ## Compatibility disposition
 
-- Source: 1.x calls that construct `JsonReadConfig` must be rebuilt and may need
+- Source: pre-1.0 snapshot calls that construct `JsonReadConfig` must be rebuilt and may need
   review of the changed polymorphic-object default. `JsonValue` references must
   migrate to `JsonNode`; new macro output needs the matching core release.
-- ABI: `JsonReadConfig` is not claimed binary-compatible with 1.x. The reader
+- ABI: `JsonReadConfig` is not claimed binary-compatible with pre-1.0 snapshots. The reader
   addition is a non-`open`, non-overriding instance method; native declarations
   are additive and the old C symbols remain available.
 - Semantics: resource budgets are opt-in because all three byte limits default

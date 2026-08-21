@@ -66,7 +66,7 @@ arrays. It is a bounded allocation hint rather than a stable application-level
 capacity API. `yjson`, `yjson_macros`, `yjson_all`, `yjson_native`, and
 `yjson_yyjson` must be
 consumed at the same release version; see the
-[2.0 API/ABI change inventory](../public-api-inventory.md).
+[1.0 RC API/ABI change inventory](../public-api-inventory.md).
 
 ## Access model
 

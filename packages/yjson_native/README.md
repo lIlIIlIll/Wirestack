@@ -2,8 +2,9 @@
 
 Supported opt-in Custom Native Compact DOM backend for `yjson`.
 
-The package must use the same `yjson` release as its core dependency (the
-current release pair is `yjson_native = "2.0.0"` and `yjson = "2.0.0"`).
+The package must use the same `yjson` release as its core dependency. This
+candidate has not been published to the registry, and current cjpm manifests
+cannot express a prerelease suffix. Use matching checkout path dependencies.
 
 The module is source-built with a C11 compiler. Documents are explicit
 resources: close them deterministically. They are not thread-safe; callers must
@@ -11,8 +12,8 @@ provide external synchronization and `close()` requires exclusive ownership.
 
 ```toml
 [dependencies]
-yjson = "2.0.0"
-yjson_native = "2.0.0"
+yjson = { path = "../yjson" }
+yjson_native = { path = "../yjson/packages/yjson_native" }
 ```
 
 ```cangjie

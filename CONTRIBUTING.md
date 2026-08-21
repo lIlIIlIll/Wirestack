@@ -16,9 +16,9 @@ package 的边界。
 
 ```bash
 cjpm test --no-color
-(cd packages/examples && cjpm run)
-(cd packages/codec_integration && cjpm run)
-(cd packages/json_literal_integration && cjpm run)
+scripts/run_cjpm_executable.sh packages/examples
+scripts/run_cjpm_executable.sh packages/codec_integration
+scripts/run_cjpm_executable.sh packages/json_literal_integration
 ```
 
 Native、sanitizer、fuzz、release job 与 external consumer 命令见
@@ -26,7 +26,7 @@ Native、sanitizer、fuzz、release job 与 external consumer 命令见
 
 ## 变更要求
 
-- public declaration 变化同步更新 `release/public-api-inventory.toml` 与 2.0 delta 文档；
+- public declaration 变化同步更新 `release/public-api-inventory.toml` 与当前 RC delta 文档；
 - generated-code bridge 变化必须验证 matching macro consumer，并说明版本耦合；
 - backend 变化保持 Pure Cangjie 语义基准、显式 opt-in 与 deterministic `close()`；
 - 性能 claim 提交同环境 baseline/candidate raw evidence，并遵循

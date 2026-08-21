@@ -1,4 +1,4 @@
-# yjson 2.0.0 RC1 evidence snapshot
+# yjson 1.0.0-rc.1 evidence snapshot
 
 本页从原 `docs/release-checklist.md` 中拆出。它保留当时记录的结果，但还不是完整、可独立审计的 release artifact：原记录没有固定 commit SHA、UTC 时间、SDK digest、runner identity 与每个 log checksum。正式发布前必须补齐这些字段并重新运行 blocking gates。
 
@@ -6,6 +6,8 @@
 
 | Field | Value |
 | --- | --- |
+| Release identity | `1.0.0-rc.1` |
+| cjpm manifest version | `1.0.0`（当前 cjpm 不接受 prerelease 后缀；未发布） |
 | Commit SHA | NOT RECORDED |
 | UTC time | NOT RECORDED |
 | SDK digest | NOT RECORDED |

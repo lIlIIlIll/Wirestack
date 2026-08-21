@@ -1,4 +1,8 @@
-# Release notes draft — 2.0.0 release candidate
+# Release notes draft — 1.0.0-rc.1
+
+`1.0.0-rc.1` 尚未 tag、发布到 registry 或完成 hosted CI。当前 cjpm manifest 只能
+使用三段数字版本，因此 checked-in manifests 写作 `1.0.0`；这不表示正式版已经发布。
+候选阶段只支持 checkout path dependency。
 
 ## JSON literal syntax and AST rename
 
@@ -20,7 +24,7 @@ builders, and `YJson.value` conversion helpers accompany the rename.
 `maxPolymorphicObjectBytes` applies to public root-container parse paths. All
 three byte limits default to `0` (unlimited). Adding constructor parameters and
 changing the previous 16 MiB default requires applications and all paired yjson
-packages to be rebuilt together for 2.0.0.
+packages to be rebuilt together for 1.0.0-rc.1.
 
 Pure Cangjie, Custom Native, and yyjson now produce the same public resource
 error codes. The native C ABI is additive: old parse symbols remain available,
@@ -49,10 +53,10 @@ license material.
 ## Migration quick reference
 
 ```cangjie
-// 1.x
+// pre-1.0 snapshot
 let value: JsonValue = ...
 
-// 2.0
+// 1.0 release candidate
 let value: JsonNode = ...
 ```
 
@@ -74,8 +78,8 @@ let config = JsonReadConfig(
 | `yjson_native` | exact `yjson` version |
 | `yjson_yyjson` | exact `yjson` version |
 
-See the complete [1.x to 2.0 migration guide](docs/migration/1.x-to-2.0.md).
-Release validation belongs to the [RC evidence snapshot](release/2.0.0-rc1/evidence.md),
+See the complete [pre-1.0 to 1.0 migration guide](docs/migration/pre-1.0-to-1.0.md).
+Release validation belongs to the [RC evidence snapshot](release/1.0.0-rc.1/evidence.md),
 not to the user migration narrative.
 
 Known limits: Linux x86_64 is the only qualified platform; AArch64 and musl are

@@ -2,8 +2,12 @@
 
 ## Supported versions
 
-安全修复以当前 2.x release line 为主。尚未发布的 release candidate 不代表长期支持承诺；
-具体版本状态以 release notes 为准。
+| Version | Status |
+| --- | --- |
+| `main` | 开发中 |
+| `1.0.0-rc.1` | 尚未发布的预发布候选版，不代表长期支持承诺 |
+
+当前尚无正式稳定 release；具体版本状态以 release notes 为准。
 
 ## Reporting a vulnerability
 

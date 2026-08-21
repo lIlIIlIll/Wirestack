@@ -81,10 +81,8 @@ open class Animal {
 
 每个 subtype 也必须生成 codec。discriminator 缺失或未知分别产生稳定错误码；根多态对象还受 `maxPolymorphicObjectBytes` 约束。
 
-> **2.0 RC known defect:** 当前 generated polymorphic decode 会把默认值 `0` 直接传给
-> `JsonDirectReader.readBoundedValue(0)`，后者要求正数，因此默认配置会抛出
-> `IllegalArgumentException: maxBytes must be positive`。临时使用多态 decode 时必须显式
-> 设置一个正的 `maxPolymorphicObjectBytes`。这与“byte budget 的 `0` 表示 unlimited”公开
-> 配置语义冲突，属于 release-blocking implementation gap，而不是预期 contract。
+默认 `maxPolymorphicObjectBytes = 0` 表示不启用这一局部 byte budget；设置正数时，超限
+产生 `polymorphic_object_too_large`。负数配置会被拒绝。该语义同时适用于 generated
+polymorphic decode 使用的 `JsonDirectReader.readBoundedValue` bridge。
 
 宏展开代码依赖当前 runtime 的 generated-code bridge，因此 `yjson_macros` 与 `yjson` 必须使用完全匹配的版本并一起重新编译。
