@@ -452,16 +452,18 @@ public class JsonDirectReader {
     }
 
     // Materializes exactly one value while enforcing the byte budget against
-    // the original input. This is reserved for discriminator-based decoding,
-    // where the subtype is unknown until part of the object has been read.
+    // the original input. Zero disables this local budget, matching
+    // JsonReadConfig's public resource-limit semantics. This is reserved for
+    // discriminator-based decoding, where the subtype is unknown until part
+    // of the object has been read.
     public func readBoundedValue(maxBytes: Int64): JsonNode {
-        if (maxBytes <= 0) { throw IllegalArgumentException("maxBytes must be positive") }
+        if (maxBytes < 0) { throw IllegalArgumentException("maxBytes must not be negative") }
         let start = source.position()
         readBoundedValueFrom(start, maxBytes, 0)
     }
 
     private func ensureValueBudget(start: Int64, maxBytes: Int64): Unit {
-        if (source.position() - start > maxBytes) {
+        if (maxBytes > 0 && source.position() - start > maxBytes) {
             throw JsonException(
                 "Polymorphic JSON object exceeds ${maxBytes} bytes",
                 code: "polymorphic_object_too_large"

@@ -28,9 +28,14 @@ class JsonResourceLimitsTest {
         let config = JsonReadConfig(maxBytes: 0, maxStringBytes: 0,
             maxPolymorphicObjectBytes: 0)
         @Expect(YJson.parse("{\"value\":\"unlimited\"}", config: config).asObject().size(), 1)
+        @Expect(JsonDirectReader("{\"value\":\"unlimited\"}").readBoundedValue(0)
+            .asObject().size(), 1)
         @Expect(rejectsResourceConfig({ => let _ = JsonReadConfig(maxBytes: -1) }))
         @Expect(rejectsResourceConfig({ => let _ = JsonReadConfig(maxStringBytes: -1) }))
         @Expect(rejectsResourceConfig({ => let _ = JsonReadConfig(maxPolymorphicObjectBytes: -1) }))
+        @Expect(rejectsResourceConfig({ =>
+            let _ = JsonDirectReader("null").readBoundedValue(-1)
+        }))
     }
 
     @TestCase

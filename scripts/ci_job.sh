@@ -3,10 +3,8 @@ set -euo pipefail
 
 repo=$(cd "$(dirname "$0")/.." && pwd)
 job=${1:-}
-cache=$(mktemp -d "${TMPDIR:-/tmp}/yjson-ci-cache.XXXXXX")
 modules=$(mktemp -d "${TMPDIR:-/tmp}/yjson-ci-modules.XXXXXX")
-trap 'rm -rf "$cache" "$modules"' EXIT
-export CJPM_CONFIG="$cache/cjpm"
+trap 'rm -rf "$modules"' EXIT
 
 require_cangjie() {
     command -v cjc >/dev/null || { echo 'cjc is required on the CI runner' >&2; exit 2; }
@@ -27,11 +25,12 @@ case "$job" in
         ;;
     examples)
         require_cangjie
-        (cd "$repo/packages/examples" && cjpm run)
+        "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/examples"
         ;;
     macro-consumer)
         require_cangjie
-        (cd "$repo/packages/json_literal_integration" && cjpm run)
+        "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/codec_integration"
+        "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/json_literal_integration"
         "$repo/scripts/check_json_literal_compile_fail.sh"
         stage_modules
         python3 "$repo/scripts/release_consumer_checks.py" \
