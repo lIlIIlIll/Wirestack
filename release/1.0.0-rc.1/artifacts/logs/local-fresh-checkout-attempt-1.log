@@ -1,0 +1,7 @@
+Script started on 2026-08-22 03:21:15+08:00 [COMMAND="env YJSON_CI_JOBS='api-inventory core examples macro-consumer custom-native yyjson-native native-clang native-gcc sanitizer fuzz-short fuzz-extended yyjson-colink' <home>/.codex/scripts/codex_cangjie_env ./scripts/ci_fresh_checkout.sh" <not executed on terminal>]
+release tree copied files=103 destination=/tmp/yjson-ci-source.f7OAPg
+
+== fresh CI job: api-inventory ==
+python3: can't open file '/tmp/yjson-ci-source.f7OAPg/scripts/check_api_inventory.py': [Errno 2] No such file or directory
+
+Script done on 2026-08-22 03:21:15+08:00 [COMMAND_EXIT_CODE="2"]

@@ -1,0 +1,7 @@
+Script started on 2026-08-22 03:22:34+08:00 [COMMAND="env YJSON_CI_JOBS='api-inventory core examples macro-consumer custom-native yyjson-native native-clang native-gcc sanitizer fuzz-short fuzz-extended yyjson-colink' <home>/.codex/scripts/codex_cangjie_env ./scripts/ci_fresh_checkout.sh" <not executed on terminal>]
+release tree copied files=113 destination=/tmp/yjson-ci-source.Tow7Fw
+
+== fresh CI job: api-inventory ==
+api inventory error: Json references missing source packages/yjson_macros/src/json_literal.cj
+
+Script done on 2026-08-22 03:22:34+08:00 [COMMAND_EXIT_CODE="1"]

@@ -1,0 +1,4 @@
+Script started on 2026-08-22 04:01:59+08:00 [COMMAND="<home>/.codex/scripts/codex_cangjie_env python3 scripts/release_registry_rehearsal.py /tmp/yjson-rc1-rehearsal-final" <not executed on terminal>]
+registry-style rehearsal passed modules=5 destination=/tmp/yjson-rc1-rehearsal-final
+
+Script done on 2026-08-22 04:04:29+08:00 [COMMAND_EXIT_CODE="0"]

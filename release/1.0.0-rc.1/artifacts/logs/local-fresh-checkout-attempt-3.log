@@ -1,0 +1,69 @@
+Script started on 2026-08-22 03:23:37+08:00 [COMMAND="env YJSON_CI_JOBS='api-inventory core examples macro-consumer custom-native yyjson-native native-clang native-gcc sanitizer fuzz-short fuzz-extended yyjson-colink' <home>/.codex/scripts/codex_cangjie_env ./scripts/ci_fresh_checkout.sh" <not executed on terminal>]
+release tree copied files=114 destination=/tmp/yjson-ci-source.jbpBLk
+
+== fresh CI job: api-inventory ==
+public API inventory passed: 24 entries
+
+== fresh CI job: core ==
+[31merror[0m: undeclared identifier 'validateJsonResourceLimits'
+   [36m==>[0m /tmp/yjson-ci-source.jbpBLk/src/lib_json_compact_document.cj:273:9:
+    [36m| [0m
+[36m273[0m [36m| [0m        validateJsonResourceLimits(bytes, config)[0m
+    [36m| [0m        [31m^ [0m
+    [36m| [0m
+
+[31merror[0m: undeclared identifier 'validateJsonResourceLimits'
+  [36m==>[0m /tmp/yjson-ci-source.jbpBLk/src/lib_json_direct_reader.cj:34:9:
+   [36m| [0m
+[36m34[0m [36m| [0m        validateJsonResourceLimits(data, config)[0m
+   [36m| [0m        [31m^ [0m
+   [36m| [0m
+
+[31merror[0m: undeclared identifier 'jsonResourceLimitException'
+   [36m==>[0m /tmp/yjson-ci-source.jbpBLk/src/lib_json_direct_reader.cj:398:19:
+    [36m| [0m
+[36m398[0m [36m| [0m            throw jsonResourceLimitException(readConfig,[0m
+    [36m| [0m                  [31m^ [0m
+    [36m| [0m
+
+[31merror[0m: undeclared identifier 'jsonResourceLimitException'
+   [36m==>[0m /tmp/yjson-ci-source.jbpBLk/src/lib_json_direct_reader.cj:737:19:
+    [36m| [0m
+[36m737[0m [36m| [0m            throw jsonResourceLimitException(config,[0m
+    [36m| [0m                  [31m^ [0m
+    [36m| [0m
+
+[31merror[0m: undeclared identifier 'jsonResourceLimitException'
+   [36m==>[0m /tmp/yjson-ci-source.jbpBLk/src/lib_json_direct_reader.cj:747:19:
+    [36m| [0m
+[36m747[0m [36m| [0m            throw jsonResourceLimitException(config,[0m
+    [36m| [0m                  [31m^ [0m
+    [36m| [0m
+
+[31merror[0m: undeclared identifier 'jsonUtf8ByteCount'
+    [36m==>[0m /tmp/yjson-ci-source.jbpBLk/src/lib_json_direct_reader.cj:1230:34:
+     [36m| [0m
+[36m1230[0m [36m| [0m        lastUnicodeEscapeBytes = jsonUtf8ByteCount(value)[0m
+     [36m| [0m                                 [31m^ [0m
+     [36m| [0m
+
+[31merror[0m: undeclared identifier 'validateJsonResourceLimits'
+  [36m==>[0m /tmp/yjson-ci-source.jbpBLk/src/lib_json_parser_core.cj:35:9:
+   [36m| [0m
+[36m35[0m [36m| [0m        validateJsonResourceLimits(data, config)[0m
+   [36m| [0m        [31m^ [0m
+   [36m| [0m
+
+[31merror[0m: undeclared identifier 'validateJsonResourceLimits'
+  [36m==>[0m /tmp/yjson-ci-source.jbpBLk/src/lib_json_parser_core.cj:45:9:
+   [36m| [0m
+[36m45[0m [36m| [0m        validateJsonResourceLimits(data, config)[0m
+   [36m| [0m        [31m^ [0m
+   [36m| [0m
+
+12 errors generated, 8 errors printed.
+Error: failed to compile package `yjson`, return code is 1
+Error: please execute 'cjpm build -i' successfully first
+Error: cjpm test failed
+
+Script done on 2026-08-22 03:23:46+08:00 [COMMAND_EXIT_CODE="1"]

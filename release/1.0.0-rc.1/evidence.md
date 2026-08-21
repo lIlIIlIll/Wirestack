@@ -1,47 +1,80 @@
-# yjson 1.0.0-rc.1 evidence snapshot
+# yjson 1.0.0-rc.1 release evidence
 
-本页从原 `docs/release-checklist.md` 中拆出。它保留当时记录的结果，但还不是完整、可独立审计的 release artifact：原记录没有固定 commit SHA、UTC 时间、SDK digest、runner identity 与每个 log checksum。正式发布前必须补齐这些字段并重新运行 blocking gates。
+本页记录当前候选源码的可审计 release gate 状态。它取代旧 hardening round 中未绑定
+commit 的 PASS 快照；旧 external consumer PASS 因进程退出传播和默认多态路径随后发生
+修复而视为 `STALE`，不能作为当前候选的发布证据。
 
 ## Identity
 
 | Field | Value |
 | --- | --- |
-| Release identity | `1.0.0-rc.1` |
-| cjpm manifest version | `1.0.0`（当前 cjpm 不接受 prerelease 后缀；未发布） |
-| Commit SHA | NOT RECORDED |
-| UTC time | NOT RECORDED |
-| SDK digest | NOT RECORDED |
-| Runner identity | self-hosted Linux x86_64, exact identity NOT RECORDED |
-| Artifact/log checksums | NOT RECORDED |
+| Planned release identity | `1.0.0-rc.1` |
+| Candidate source commit | `42c79d2f271b756775583a2ce09b2ce64cb6497b` |
+| Evidence generated | `2026-08-21T20:06:45Z` |
+| cjpm manifest version | `1.0.0`（cjpm 不接受 prerelease 后缀；未发布） |
+| Release scripts revision | candidate source commit |
+| Runner | `Arch`, Linux x86_64, glibc 2.44 |
+| CPU | Intel Core i7-8700, 6 cores / 12 logical CPUs |
+| SDK | Cangjie `1.1.0-alpha.20260817040003 (cjnative)`, cjpm `1.1.3` |
+| SDK executable digests | `cjc` `02c01c8…57d3e`; `cjpm` `23a1dbc5…d572f` |
+| Evidence checksums | [`artifacts/checksums.txt`](artifacts/checksums.txt) |
 
-## Recorded gate state
+完整机器可读 identity 见 [`artifacts/environment.json`](artifacts/environment.json) 和
+[`artifacts/manifest.json`](artifacts/manifest.json)。
 
-- Source-only release manifest：PASS，记录为 103 files，并排除 `target/`、object、archive、shared library、performance corpora 与 results。
-- Core suite：PASS，原记录为 498 tests。
-- Examples 与 external core/macro/Custom Native/yyjson consumers：PASS。
-- Custom Native package：PASS，原记录为 9 tests。
-- yyjson Direct package：PASS，原记录为 6 tests。
-- Clang/GCC warning builds、targeted scanner/Native/yyjson tests：PASS。
-- ASan、UBSan、LSan：PASS。
-- Deterministic differential fuzz：PASS，原记录为 50,000 cases。
-- Registry-style staging/rehearsal：PASS；五个 artifact 完成检查，四类 consumer build/run 通过。`cjpm` 1.1.3 没有 local-registry 或 publish dry-run，因此没有真实 registry publish。
-- yyjson vendoring 与 symbol isolation：PASS；记录为 vendored 0.12.0，最终 shared library 导出零个 upstream `yyjson_*` implementation symbol，pinned 0.11.1 dual-version fixture 两种 load order 通过。
-- Commit/tag/publish：NOT RUN。
+## Current gate state
 
-## CI state
+| Gate | Status | Evidence |
+| --- | --- | --- |
+| Source-only release tree | PASS | 117 files；拒绝 `target/`、object、archive、shared library 与未声明 benchmark artifact |
+| Public API inventory | PASS | 24 entries |
+| Pure Cangjie core | PASS | 505 passed, 0 failed |
+| Examples and macro consumer | PASS | external macro consumer completed normally |
+| Custom Native | PASS | 9 passed；external consumer completed normally |
+| yyjson Direct | PASS | 6 passed；external consumer completed normally |
+| Clang/GCC warning gates | PASS | targeted native builds completed under both compilers |
+| Sanitizers | PASS | ASan, UBSan and LSan gate completed |
+| Differential fuzz | PASS | deterministic short 5,000 and extended 50,000 cases |
+| yyjson symbol isolation | PASS | vendored 0.12.0 plus pinned 0.11.1 fixture, hidden-local policy |
+| Package rehearsal | PASS | five `.cjp` artifacts; registry-style consumer rehearsal completed |
+| Hosted CI | **NOT RUN / NON-BLOCKING** | release owner explicitly approved local evidence as sufficient for this RC |
+| Annotated tag / registry publish | **NOT RUN** | not performed as part of this evidence update |
+
+The successful local transcript is
+[`local-fresh-checkout.log.gz`](artifacts/logs/local-fresh-checkout.log.gz), and the package
+rehearsal transcript is [`package-rehearsal.log`](artifacts/logs/package-rehearsal.log).
+
+## CI and release decision
 
 ```text
 Local fresh-checkout simulation: PASS
-Hosted GitCode execution: NOT RUN
-Release blocking policy: NOT RECORDED
+Hosted CI execution: NOT RUN
+Release blocking policy: NON-BLOCKING
+Exception approval: release owner instruction, 2026-08-22
+Approval rationale: hosted CI is not required for this release candidate
+Release decision: ELIGIBLE FOR RC TAG; TAG/PUBLISH NOT YET RUN
 ```
 
-原 hardening round 未授权 push，因此 hosted execution 没有发生。这不能写成合并的 “CI PASS”；正式 release review 必须明确它是 blocking 还是经审批 non-blocking。
+因此 hosted CI 的 `NOT RUN` 不再阻止本次 RC。`1.0.0-rc.1` 当前仍是绑定 exact SHA 的
+locally validated source candidate；创建 annotated tag 并记录 tag object 后，它才成为
+不可变 prerelease artifact。
 
-## Environment notes retained from the snapshot
+## Audit trail
 
-- Linux x86_64 当时被标记为 qualified；AArch64 仅被认为 source-portable，未 qualification；musl 未测试。
-- Release checks 会拒绝混合 Cangjie SDK 环境；`cjc`、`CANGJIE_HOME`、`CANGJIE_SDK_ROOT` 与 `CJ_SDK_LIBPATH` 必须来自同一 SDK。
-- yyjson 使用未修改的 vendored 0.12.0 source，并包含 MIT license。
+本轮没有隐藏失败重跑：前三次 fresh-checkout 暴露并修复了 release source manifest
+遗漏；第四次通过所有仓库内 gate，但因缺少独立 yyjson 0.11.1 fixture 而退出。最终运行
+使用官方 0.11.1 source fixture 并完整通过。所有失败 transcript 均保存在
+[`artifacts/logs/`](artifacts/logs/)；fixture tarball 不入库，其来源、版本与 SHA-256 记录在
+machine-readable manifest 中。
 
-稳定流程与当前 blocking policy 定义见 [`docs/maintainers/releasing.md`](../../docs/maintainers/releasing.md)。
+Package rehearsal 生成的五个候选 artifact 保存在 [`artifacts/packages/`](artifacts/packages/)。
+这些 artifact 仅用于本地验收，不代表 registry publish。
+
+## Remaining release actions
+
+1. 创建 annotated tag `1.0.0-rc.1`，再记录 tag object、UTC 时间与远程引用。
+2. 若执行 registry publish，追加 registry 返回值和 artifact URL。
+3. 正式 1.0 发布前提供并验证实际可用的私密安全报告渠道；当前
+   [`SECURITY.md`](../../SECURITY.md) 明确记录了该缺口。
+
+稳定发布流程见 [`docs/maintainers/releasing.md`](../../docs/maintainers/releasing.md)。

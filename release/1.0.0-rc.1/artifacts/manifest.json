@@ -1,0 +1,43 @@
+{
+  "releaseIdentity": "1.0.0-rc.1",
+  "candidateSourceCommit": "42c79d2f271b756775583a2ce09b2ce64cb6497b",
+  "generatedAtUtc": "2026-08-21T20:06:45Z",
+  "localFreshCheckout": {
+    "status": "PASS",
+    "sourceFileCount": 117,
+    "apiInventoryEntries": 24,
+    "coreTestsPassed": 505,
+    "customNativeTestsPassed": 9,
+    "yyjsonTestsPassed": 6,
+    "fuzzCases": [5000, 50000],
+    "completedAt": "2026-08-22T04:01:43+08:00",
+    "log": "logs/local-fresh-checkout.log.gz"
+  },
+  "packageRehearsal": {
+    "status": "PASS",
+    "moduleCount": 5,
+    "completedAt": "2026-08-22T04:04:29+08:00",
+    "log": "logs/package-rehearsal.log"
+  },
+  "yyjsonIsolationFixture": {
+    "upstreamVersion": "0.11.1",
+    "source": "https://github.com/ibireme/yyjson/archive/refs/tags/0.11.1.tar.gz",
+    "tarballSha256": "610a38a5e59192063f5f581ce0c3c1869971c458ea11b58dfe00d1c8269e255d",
+    "storedInRepository": false
+  },
+  "hostedCi": {
+    "status": "NOT_RUN",
+    "policy": "NON_BLOCKING",
+    "exceptionApproval": {
+      "authority": "release owner",
+      "approvedOn": "2026-08-22",
+      "rationale": "Hosted CI is not required for this release candidate."
+    }
+  },
+  "tag": {
+    "status": "NOT_RUN"
+  },
+  "registryPublish": {
+    "status": "NOT_RUN"
+  }
+}
