@@ -172,12 +172,6 @@ public class JsonFastReader {
         true
     }
 
-    func tryReadRawAsciiNameToken(name: String, first: Bool): Bool {
-        unsafe {
-            tryReadRawAsciiNameTokenBytes(name.rawData(), first)
-        }
-    }
-
     // Generated-code bridge for the allocation-free ordered object path.  It
     // consumes only an exact compact `"name":` token (and the comma when this
     // is not the first field).  A miss is transactional so generated codecs
@@ -212,12 +206,6 @@ public class JsonFastReader {
         }
         index = currentIndex + 2
         true
-    }
-
-    func tryReadRawObjectStartAsciiNameToken(name: String): Bool {
-        unsafe {
-            tryReadRawObjectStartAsciiNameTokenBytes(name.rawData())
-        }
     }
 
     func tryReadRawObjectStartAsciiNameTokenBytes(nameBytes: Array<Byte>): Bool {

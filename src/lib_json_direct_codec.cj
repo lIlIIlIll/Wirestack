@@ -1100,9 +1100,8 @@ public func __yJsonReadFastInt64HashMap(reader: JsonFastReader, context: JsonDec
 private func remainingJsonInputBytes(input: InputStream): Option<Array<Byte>> {
     match (input) {
         case byteInput: YJsonByteArrayInputStream => Some(byteInput.readRemainingBytes())
-        case _ => ()
+        case _ => None<Array<Byte>>
     }
-    None<Array<Byte>>
 }
 
 public class YJson {

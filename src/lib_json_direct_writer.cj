@@ -65,9 +65,6 @@ func jsonRawCompactStringEscapeIndex(value: String): Int64 {
 
 func jsonRawInt64MapReserveHint(prefixSize: Int64, entryCount: Int64): Int64 {
     let entryHint = JSON_DIRECT_INT64_MAP_ENTRY_RESERVE_HINT
-    if (entryHint <= 0) {
-        return 0
-    }
     if (prefixSize >= JSON_DIRECT_INT64_MAP_RESERVE_LIMIT - 2) {
         return JSON_DIRECT_INT64_MAP_RESERVE_LIMIT
     }

@@ -15,16 +15,6 @@ import std.unittest.testmacro.*
 @Test
 class NumberBoundaryTest {
 
-    // Helper function to check if parsing succeeds
-    func canParse(text: String): Bool {
-        try {
-            let _ = YJson.parse(text)
-            return true
-        } catch (_: Exception) {
-            return false
-        }
-    }
-
     // Helper function to check if parsing throws JsonException
     func throwsJsonException(text: String): Bool {
         try {
@@ -382,15 +372,6 @@ class NumberBoundaryTest {
 @Test
 class UnicodeBoundaryTest {
 
-    func canParse(text: String): Bool {
-        try {
-            let _ = YJson.parse(text)
-            return true
-        } catch (_: Exception) {
-            return false
-        }
-    }
-
     func throwsJsonException(text: String): Bool {
         try {
             let _ = YJson.parse(text)
@@ -584,15 +565,6 @@ class UnicodeBoundaryTest {
  */
 @Test
 class WhitespaceBoundaryTest {
-
-    func canParse(text: String): Bool {
-        try {
-            let _ = YJson.parse(text)
-            return true
-        } catch (_: Exception) {
-            return false
-        }
-    }
 
     func throwsJsonException(text: String): Bool {
         try {

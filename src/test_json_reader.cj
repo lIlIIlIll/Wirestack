@@ -1,9 +1,7 @@
 package yjson
 
-import std.collection.*
 import std.unittest.*
 import std.unittest.testmacro.*
-import std.math.numeric.*
 
 /**
  * FastReader 和 DirectReader 测试 - P1 级别

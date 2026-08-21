@@ -28,56 +28,6 @@ func ensureUnsignedRange(typeName: String, decoded: UInt64, max: UInt64): UInt64
     decoded
 }
 
-func ensureUnsignedInt64(typeName: String, decoded: Int64): UInt64 {
-    if (decoded < 0) {
-        throw JsonException("Cannot decode value as ${typeName}: out of range")
-    }
-    UInt64(decoded)
-}
-
-func decodeIntLike(typeName: String, value: JsonNode): Int64 {
-    let decoded = match (value) {
-        case jsonInt: JsonIntValue => jsonInt.value
-        case jsonFloat: JsonFloatValue => Int64(jsonFloat.value)
-        case jsonNumber: JsonNumberLiteralValue => Int64.parse(jsonNumber.literal)
-        case jsonString: JsonStringValue => Int64.parse(jsonString.value)
-        case _ => throw JsonException("Cannot decode value as ${typeName}")
-    }
-
-    match (typeName) {
-        case "Int32" => ensureIntRange(typeName, decoded, MINVAL_I32, MAXVAL_I32)
-        case "Int16" => ensureIntRange(typeName, decoded, MINVAL_I16, MAXVAL_I16)
-        case "Int8" => ensureIntRange(typeName, decoded, MINVAL_I8, MAXVAL_I8)
-        case _ => decoded
-    }
-}
-
-func decodeUnsignedLike(value: JsonNode, typeName!: String = "UInt64"): UInt64 {
-    let decoded = match (value) {
-        case jsonInt: JsonIntValue => ensureUnsignedInt64(typeName, jsonInt.value)
-        case _: JsonFloatValue => throw JsonException("Cannot decode value as ${typeName}")
-        case jsonNumber: JsonNumberLiteralValue => UInt64.parse(jsonNumber.literal)
-        case _ => throw JsonException("Cannot decode value as ${typeName}")
-    }
-
-    match (typeName) {
-        case "UInt32" => ensureUnsignedRange(typeName, decoded, MAXVAL_UI32)
-        case "UInt16" => ensureUnsignedRange(typeName, decoded, MAXVAL_UI16)
-        case "UInt8" => ensureUnsignedRange(typeName, decoded, MAXVAL_UI8)
-        case _ => decoded
-    }
-}
-
-func decodeFloatLike(value: JsonNode): Float64 {
-    match (value) {
-        case jsonInt: JsonIntValue => Float64(jsonInt.value)
-        case jsonFloat: JsonFloatValue => jsonFloat.value
-        case jsonNumber: JsonNumberLiteralValue => Float64.parse(jsonNumber.literal)
-        case jsonString: JsonStringValue => Float64.parse(jsonString.value)
-        case _ => throw JsonException("Cannot decode value as float")
-    }
-}
-
 public func decodeBigIntLike(value: JsonNode): BigInt {
     try {
         return jsonFastParseBigInt(value.asNumberLiteral().literal)
@@ -98,14 +48,6 @@ public func decodeDecimalLike(value: JsonNode): Decimal {
             case _ => throw JsonException("Cannot decode value as Decimal")
         }
     }
-}
-
-func decodeRune(value: JsonNode): Rune {
-    let text = value.asString().value
-    for (r in text.toRuneArray()) {
-        return r
-    }
-    throw JsonException("Cannot decode empty string as Rune")
 }
 
 func decodeRuneText(text: String): Rune {

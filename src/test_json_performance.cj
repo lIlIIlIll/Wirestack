@@ -1,6 +1,5 @@
 package yjson
 
-import std.collection.*
 import std.unittest.*
 import std.unittest.testmacro.*
 
@@ -24,7 +23,7 @@ func generateLargeArray(count: Int64): String {
 func generateLargeString(size: Int64): String {
     let builder = StringBuilder()
     builder.append("\"")
-    for (i in 0..size) { builder.append("a") }
+    for (_ in 0..size) { builder.append("a") }
     builder.append("\"")
     builder.toString()
 }

@@ -1,7 +1,5 @@
 package yjson
 
-import std.collection.*
-import std.io.*
 import std.unittest.*
 import std.unittest.testmacro.*
 

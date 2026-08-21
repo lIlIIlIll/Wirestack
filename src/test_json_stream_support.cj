@@ -51,12 +51,6 @@ class ByteArrayInputStream <: InputStream {
         size
     }
 
-    public func readRemainingBytes(): Array<Byte> {
-        let result = bytes[start..start + remain]
-        start += remain
-        remain = 0
-        result
-    }
 }
 
 class FixedChunkInputStream <: InputStream {
