@@ -8,4 +8,22 @@ are not thread-safe. Its Cangjie shared library localizes the vendored
 `yyjson_*` implementation symbols, so an application may independently link a
 second yyjson version. The vendored upstream sources remain unmodified.
 
-See the suite-level `docs/backends.md` and `THIRD_PARTY_NOTICES.md`.
+```toml
+[dependencies]
+yjson = "2.0.0"
+yjson_yyjson = "2.0.0"
+```
+
+```cangjie
+import yjson.*
+import yjson_yyjson.*
+
+let bytes = unsafe { "{\"n\":42}".rawData() }
+try (document = YyjsonCompactJsonDocument.parse(bytes)) {
+    println(document.getRootInt("n").getOrThrow())
+}
+```
+
+Use the same `yjson` version. See the suite-level
+[`docs/backends.md`](../../docs/backends.md) and
+[`THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md).

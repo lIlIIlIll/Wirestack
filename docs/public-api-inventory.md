@@ -1,7 +1,8 @@
-# Public API inventory
+# 2.0 API/ABI change inventory
 
-This inventory records the public surfaces changed or introduced for the 2.0.0
-release candidate, including resource-limited parsing, the reusable fast
+This is a release-delta inventory, not a complete yjson API reference. It records
+the public surfaces changed or introduced for the 2.0.0 release candidate,
+including resource-limited parsing, the reusable fast
 collection bridge, and the optional native Float64 parser. The machine-readable source is
 [`release/public-api-inventory.toml`](../release/public-api-inventory.toml).
 

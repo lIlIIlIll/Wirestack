@@ -1,8 +1,24 @@
-# Performance methodology
+# Performance research log
+
+> 当前对外结论见 [Performance](performance/README.md)，测量规范见
+> [Methodology](performance/methodology.md)。本文保留按日期追加的实验、profiling 与
+> rejected evidence，不应把任一历史段落自动视为当前版本承诺。
 
 Performance claims are backend- and representation-specific. Typed codecs,
 `JsonNode`, Pure Compact, Custom Native DOM, yyjson Direct Native DOM, serde
 Value, raw yyjson, and simdjson DOM are not interchangeable results.
+
+## Go yyjson DOM comparison (2026-08-22)
+
+yjson `JsonNode` 与纯 Go `dwisiswant0/yyjson` DOM 使用同一 fixture 生成算法和相同输入，
+在 Server 的固定 CPU 8 上以独立进程、11 轮旋转/反转 workload 顺序和交替 library
+顺序测量。Go yyjson 在 12 个 Read、Write、RoundTrip case 的 paired median 中全部较低；
+11 个两侧 CV ≤ 5% 的稳定行中，`yjson / Go yyjson` latency ratio 几何均值为 5.45x。
+
+这是一组跨 runtime DOM latency 对比，不包含 generated typed codec、allocation 或 RSS。
+16 MiB Read 的 yjson process-median CV 为 9.60%，该行只作为方向证据。完整 commit、环境、
+逐行结果、variance follow-up 与 artifact 状态见
+[2026-08-22 result](performance/results/2026-08-22-go-yyjson.md)。
 
 ## cjfast_json comparison (2026-08-21)
 
@@ -96,6 +112,38 @@ Rejected intermediate A/B evidence is retained in the ignored directories
 `target/cjfast-map-rawgeneric-formal-20260821-r2`, and
 `target/cjfast-map-rawgeneric-profile-20260821`. Focused reruns can use
 `scripts/json_cjfast_perf_run.py --workload-regex REGEX`.
+
+## Cross-library workload context (2026-08-20–21)
+
+The following table preserves the broader stdx.json, Java fastjson2, and
+cjfast_json workload context previously shown in the README. Each ratio is the
+other library's latency divided by yjson's latency in the matching batch. A
+ratio below `1.00x` therefore means the other library was faster. The `CV Y/C`
+column applies only to the 2026-08-21 yjson/cjfast_json eleven-round run.
+
+| Workload | yjson | stdx.json / yjson | fastjson2 / yjson | cjfast_json / yjson | CV Y/C |
+|---|---:|---:|---:|---:|---:|
+| Large Map encode / string | 1.00x | 3.43x | 0.04x | 1.09x | 2.14% / 4.01% |
+| Large Array decode / string | 1.00x | 25.21x | 0.19x | 1.77x | 4.99% / 3.15% |
+| Large Array encode / string | 1.00x | 4.48x | 0.06x | 0.75x | 2.94% / 1.51% |
+| `ProfileBundle` decode / bytes | 1.00x | 8.88x | 0.06x | 1.16x | 3.15% / 4.96% |
+| `ProfileBundle` encode / bytes | 1.00x | 6.78x | 0.05x | 0.92x | 3.14% / 4.24% |
+| `ProfileBundle` encode / string | 1.00x | 6.32x | 0.06x | 0.86x | 2.16% / 4.14% |
+| `UInt64Envelope` decode / bytes | 1.00x | 7.92x | 0.07x | 1.04x | 3.03% / 4.48% |
+| `UInt64Envelope` encode / bytes | 1.00x | 10.45x | 0.18x | 1.00x | 2.66% / 2.83% |
+| `UInt64Envelope` encode / string | 1.00x | 9.79x | 0.22x | 1.03x | 2.54% / 3.71% |
+| `TemporalStats` encode / bytes | 1.00x | 4.93x | 0.06x | 1.05x | 0.85% / 2.27% |
+| `TemporalStats` encode / string | 1.00x | 4.82x | 0.16x | 1.04x | 1.09% / 1.49% |
+| Deep nested decode / string | 1.00x | 8.79x | 0.07x | 1.26x | 3.45% / 1.12% |
+| Deep nested encode / string | 1.00x | 3.33x | 0.04x | 0.78x | 2.03% / 2.72% |
+
+This is not a synchronized four-library ranking. The stdx.json and Java
+fastjson2 snapshot was measured on 2026-08-20; cjfast_json was measured on
+2026-08-21. Java and Cangjie also differ in runtime, GC, and timing behavior,
+so the fastjson2 column is workload context rather than a cross-runtime product
+claim. Rows are displayed only when both yjson and cjfast_json process-median
+CV are no greater than 5%. A fourteenth qualifying static-container encode row
+has no stdx.json or fastjson2 counterpart and is omitted from this table.
 
 ## JSON literal macros (2026-08-20)
 

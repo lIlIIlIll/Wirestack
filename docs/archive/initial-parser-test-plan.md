@@ -1,4 +1,8 @@
-# yjson 测试计划
+# yjson 初始 Parser 测试计划（历史归档）
+
+> 本文是项目早期的 parser/serializer gap 计划，不再代表 yjson 2.0 的当前测试状态、
+> public contract 或 release gate。当前测试层级、命令和 CI mapping 见
+> [维护者测试指南](../maintainers/testing.md)。本文保留原始计划内容，仅供追溯。
 
 基于 JSONTestSuite 标准的完整测试设计
 

@@ -1,115 +1,150 @@
-# yjson architecture
+# yjson 当前架构
 
-## Scope
+本文描述 yjson 2.0 当前源码与发布包的边界。API/type 名称保留英文；仓库维护细节见
+[Repository layout](maintainers/repository-layout.md)。
 
-The repository contains the `yjson` library package, a build-time codec
-generator, a scanner linked as a static archive, and consumer packages for
-benchmarks and examples. White-box tests remain in the library package because
-they use internal reader/scanner APIs.
+## Package graph
 
-## Public API layers
-
-- `YJson` is the primary strongly typed API. It uses `JsonDirectCodec<T>` and
-  selects `JsonFastReader` for default read configuration when the codec supports
-  the fast path.
-- `YJsonAst` is the AST-oriented compatibility API. It converts through
-  `JsonValueCodec<T>` and materializes `JsonNode` nodes.
-- `JsonNode` and its subclasses form the public JSON AST.
-- `JsonReadConfig`, `JsonWriteConfig`, and `JsonCodecConfig` own behavior policy.
-- `JsonFastReader.suggestRawCollectionCapacity()` is a stable public bridge for
-  generated macro code. It is not an application-level promise about the
-  reader's allocation heuristic.
-
-## Typed decode path
+普通应用只需要依赖 `yjson_all`：
 
 ```text
-YJson.decodeStringWith / decodeBytesWith / decodeFromStreamWith
-├── default configuration and fast-capable codec
-│   └── JsonFastReader
-│       └── generated or built-in codec
-│           ├── compact/ordered Cangjie path
-│           ├── sequential fallback
-│           └── conditional native scan path
-└── general configuration
-    └── JsonDirectReader
+application
+└── yjson_all
+    ├── yjson          # runtime、typed API、AST、Compact DOM、Schema
+    └── yjson_macros   # @JsonCodec、@Json、@JsonValue
+
+optional native packages:
+application
+├── yjson_native       # Custom Native Compact + optional scanner activation
+└── yjson_yyjson       # yyjson Direct Native DOM
 ```
 
-The native path is cost-gated. Arrays must meet both byte-size and element-count
-thresholds before offset indexing is used; smaller arrays remain on sequential
-decoding.
+`yjson_all` 是 macro package，通过 `public import` 同时导出 runtime 与 macros。它不依赖、
+构建或启用任何 Native package。`yjson_native` 和 `yjson_yyjson` 都显式依赖同版本
+`yjson`，应用只有声明相应依赖时才会进入 Native 构建路径。
 
-## Encode path
+仓库开发 manifest 中，根 `yjson` 临时依赖 `yjson_macros`，因为 `src/` 内的 fixture 与
+white-box tests 也使用 `@JsonCodec`。发布 staging 只复制 `src/lib_*.cj`；发布态 `yjson`
+manifest 没有该依赖。这是仓库测试布局，不是下游 package graph 中的运行时反向依赖。
+
+## 编译期数据流
 
 ```text
-YJson.encodeStringWith / encodeBytesWith / encodeToStreamWith
-└── generated or built-in codec
-    └── JsonDirectWriter
-        ├── DirectStringWriterTarget
-        ├── DirectBytesWriterTarget
-        └── DirectStreamWriterTarget
+@JsonCodec declaration in consumer source
+        │
+        ▼
+yjson_macros declaration-macro expansion
+        │
+        ├── generated JsonDirectCodec<T>
+        ├── generated <Type>Json value/function
+        └── JsonCodecProvider conformance
+        │
+        ▼
+consumer package compiles generated code against matching yjson runtime
 ```
 
-## AST path
+`@JsonCodec` 支持 class、struct 和 enum。宏直接在声明所在的 consumer package 中展开，
+不会扫描项目目录，也不会写入 `src/generated_json_codecs.cj`。非泛型 public 类型生成
+public `<Type>Json` codec；泛型类型生成带约束的 codec function。
+
+`@Json` 与 `@JsonValue` 是 expression macros。前者展开为直接驱动
+`JsonDirectWriter` 的代码并返回 compact `String`；后者构造可修改 `JsonNode`。两者
+都不是运行时 parser 或 annotation processor。
+
+宏生成代码会调用 runtime 的 public bridge，因此 `yjson_macros` 与 `yjson` 必须使用
+相同版本。推荐依赖 `yjson_all`；单独选包时应显式锁定同一 release。
+
+## 运行时数据流
+
+### Typed encode/decode
 
 ```text
-YJson.parse / YJsonAst.parse
-└── JsonNode.parse
-    └── JsonParser
-        └── json_parser_core
-
-YJson.stringify / YJsonAst.stringify
-└── json_stream_writer
-    └── JsonDirectWriter for compact output
+YJson.toJson / fromJson<T>
+YJson.encode*With / decode*With
+        │
+        ▼
+generated or built-in JsonDirectCodec<T>
+        ├── encode ──> JsonDirectWriter ──> String / bytes / OutputStream
+        └── decode
+            ├── default compatible config ──> JsonFastReader
+            └── explicit policy/limits ─────> JsonDirectReader
 ```
 
-## Build-time generation
+`YJson.fastDecoder(codec)` 缓存同一个 codec 的 reusable decoder facade；每次调用仍创建
+本次输入的 reader。默认兼容配置可以选择 compact fast reader；显式 `JsonReadConfig`
+保留 unknown-field、duplicate-key、number 与 resource-limit 语义。
 
-`cjpm` invokes `build.cj` during `pre-build`:
+### Mutable AST
 
-1. `scripts/build_native_scanner.py` compiles `native/yjson_scanner.c` into
-   `target/native/libyjson_scanner.a`.
-2. The generator walks Cangjie files under `src/` and collects declarations
-   annotated with `@JsonCodec`.
-3. It writes specialized codecs to `src/generated_json_codecs.cj` only when the
-   rendered content changes.
+```text
+YJson.parse(String/bytes)
+        ▼
+JsonParserCore
+        ▼
+JsonNode tree
+        ├── mutation / indexing
+        └── YJson.stringify / stringifyPretty
+```
 
-All scanned files must declare the same Cangjie package. The generated file is a
-build artifact with source-level visibility because the package exports generated
-codec constants such as `PersonJson`.
+`JsonNode` 及其 scalar、array、object subclasses 是 GC 管理的可修改 DOM。Stream parse
+通过缓冲 `JsonByteSource` 消费输入，但结果仍是完整 AST。
 
-## Repository boundaries
+### Pure Cangjie Compact DOM
 
-- `src/lib_*.cj`: production Cangjie implementation.
-- `src/generated_*.cj`: generated codecs.
-- `src/test_*.cj`: package-local tests.
-- `packages/benchmarks/`: public benchmark consumer package.
-- `packages/examples/`: executable example consumer package.
-- `native/`: the scanner ABI and C implementation.
-- `benchmarks/cjfast_json/`: adapter copied into a pinned cjfast_json checkout.
-- `benchmarks/java_fastjson2/`: standalone Java comparison harness.
-- `scripts/`: reproducible build and benchmark orchestration.
-- `target/`, `.cache/`, and `build-script-cache/`: disposable generated state.
+```text
+YJson.parseCompact(bytes)
+        ▼
+CompactJsonDocument
+        ▼
+CompactJsonValue views ──> lookup / traversal / materialize
+```
 
-The generated macro package and the runtime package are version-coupled: a
-consumer must use matching `yjson` and `yjson_macros` releases, or the emitted
-fast reader may reference a bridge absent from the older runtime. The supported
-native facade follows the same core-version rule.
+Pure Compact 是 core 内的只读表示，由 GC 管理，不要求 `close()`。它与可修改
+`JsonNode` 是不同的数据模型。
 
-## Packaging boundary
+### Optional Native DOM
 
-The root package keeps production code, white-box tests, and fixture declarations
-together. This is intentional: regression tests use internal scanner APIs, and
-the generated codecs include public fixture types consumed by the other packages.
+```text
+bytes
+├── NativeCompactJsonDocument.parse  ──> Custom Native Compact
+└── YyjsonCompactJsonDocument.parse  ──> yyjson Direct Native DOM
+                                             │
+                                             └── explicit close()
+```
 
-The root files use `lib_` and `test_` prefixes because the active cjpm version
-scans only the package source directory itself.
+Native document 跨 Cangjie/C 边界进行整文档 parse，适合 coarse lookup、bulk traversal
+与 serialization。它们不会自动加速 `JsonNode.parse`，也不会被 `yjson_all` 启用。
+生命周期、线程安全和 backend 选择见 [Backend 使用指南](backends.md)。
 
-## Known structural debt
+## Native scanner seam
 
-- `build.cj` still combines native orchestration, AST discovery, model analysis,
-  and rendering. Splitting it requires first confirming how the active cjpm version
-  compiles multi-file build scripts.
-- A future test-package split must first extract or replace the white-box scanner
-  assertions.
-- `json_example_support.cj` contains public fixture types because their generated
-  codecs are currently consumed by tests and benchmarks.
+core 中的 `JsonNativeScannerBackend`、`JsonNativeNumericScannerBackend`、
+`JsonNativeNumericTapeBackend` 与 `JsonNativeFloatParserBackend` 是可选 backend seam。
+core 文件没有 C foreign declaration；backend 未安装时返回 portable fallback。
+
+`yjson_native` 的 `enableYJsonNative*` 函数才会安装相应 process-global backend。安装与
+移除必须发生在并发 decode 之前，且不同 activation mode 互斥。这一 seam 与 Native
+DOM document 是两个相关但独立的入口：使用 `NativeCompactJsonDocument` 不要求先调用
+`enableYJsonNative()`。
+
+## 源码仓库构建路径
+
+| 构建目标 | build hook | Native link | 说明 |
+|---|---|---|---|
+| 根 `yjson` 开发包 | 无 | 无 | 编译 runtime、fixture 与 white-box tests；开发 manifest 依赖 macros |
+| 发布态 `yjson` | 无 | 无 | 只包含 `src/lib_*.cj`，dependencies 为空 |
+| `yjson_macros` | 无 | 无 | consumer 编译期 macro package |
+| `yjson_all` | 无 | 无 | 聚合并锁定 core + macros |
+| `yjson_native` | `build.cj` pre-build | `libyjson_scanner.a` | 显式可选 Custom Native package |
+| `yjson_yyjson` | `build.cj` pre-build | `libyjson_yyjson.a` + scanner | 显式可选 vendored yyjson package |
+
+Native build script 在 invoking project 的 `target/native` 下生成 archive。下游普通
+`yjson`/`yjson_all` consumer 不运行这些 build hooks，也不需要 C compiler。
+
+## 稳定边界
+
+- Public application API 从 `YJson`、generated/built-in codec、`JsonNode`、
+  `CompactJsonDocument` 和显式 Native document 开始。
+- `JsonFastReader` 的部分 public 方法是 macro-generated code bridge，不是推荐的应用入口。
+- `src/example_support.cj`、`src/test_*.cj` 和 benchmark fixtures 不进入发布态 core artifact。
+- Native C ABI、symbol isolation、scanner internals 与 release staging 属于维护者边界。

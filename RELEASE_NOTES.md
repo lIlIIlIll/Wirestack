@@ -46,17 +46,37 @@ package gates, warning-clean native builds, sanitizer/differential-fuzz entry
 points, backend-selection documentation, and complete Apache-2.0 / yyjson MIT
 license material.
 
-GitCode CI workflows now expose separate core, examples, external macro,
-Custom Native, yyjson, Clang/GCC, sanitizer, short-fuzz, and symbol-isolation
-gates, with an extended 50k fuzz workflow. They require a self-hosted Linux
-x86_64 runner carrying a coherent Cangjie 1.1 SDK. The same job matrix has a
-full fresh-source local simulation entry point for release preflight.
+## Migration quick reference
 
-The yyjson package now localizes its vendored implementation symbols without
-modifying upstream 0.12.0 sources. A pinned yyjson 0.11.1 co-link fixture passes
-both shared-library load orders. Registry-style source artifacts with exact
-2.0.0 dependencies also passed isolated core, macro, Custom Native, and yyjson
-consumer builds before publication.
+```cangjie
+// 1.x
+let value: JsonValue = ...
+
+// 2.0
+let value: JsonNode = ...
+```
+
+For untrusted input, add explicit byte budgets when rebuilding the new config:
+
+```cangjie
+let config = JsonReadConfig(
+    maxDepth: 128,
+    maxBytes: 8 * 1024 * 1024,
+    maxStringBytes: 1024 * 1024,
+    maxPolymorphicObjectBytes: 4 * 1024 * 1024
+)
+```
+
+| Package | Pairing requirement |
+| --- | --- |
+| `yjson_macros` | exact `yjson` version |
+| `yjson_all` | internally matched core + macros |
+| `yjson_native` | exact `yjson` version |
+| `yjson_yyjson` | exact `yjson` version |
+
+See the complete [1.x to 2.0 migration guide](docs/migration/1.x-to-2.0.md).
+Release validation belongs to the [RC evidence snapshot](release/2.0.0-rc1/evidence.md),
+not to the user migration narrative.
 
 Known limits: Linux x86_64 is the only qualified platform; AArch64 and musl are
 not yet qualified. Native resource access is not thread-safe. Error messages and

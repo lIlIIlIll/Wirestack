@@ -1,10 +1,31 @@
 package yjson_examples
 
-import yjson.*
+import yjson_all.*
+
+@JsonCodec
+class ExampleUser {
+    public let id: Int64
+    public let name: String
+
+    public init(id: Int64, name: String) {
+        this.id = id
+        this.name = name
+    }
+}
 
 main(): Unit {
+    let userText = YJson.toJson(ExampleUser(7, "Alice"))
+    let user = YJson.fromJson<ExampleUser>(userText)
+    println("=== Generated typed codec ===")
+    println(user.name)
+
+    let literal = @Json({"ok": true, "user": $(user)})
+    println("=== JSON literal ===")
+    println(literal)
+
     let text = "{\"name\":\"Alice\",\"age\":30,\"tags\":[\"cangjie\",\"json\"]}"
-    let value = YJson.parse(text)
+    let limits = JsonReadConfig(maxDepth: 64, maxBytes: 1024 * 1024, maxStringBytes: 256 * 1024)
+    let value = YJson.parse(text, config: limits)
     let object = value.asObject()
     object.put("active", JsonBoolValue(true))
 

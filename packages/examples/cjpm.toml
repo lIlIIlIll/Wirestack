@@ -3,7 +3,7 @@ cjc-version = "1.1.0"
 name = "yjson_examples"
 organization = ""
 description = "Examples for yjson"
-version = "1.0.0"
+version = "2.0.0"
 target-dir = ""
 output-type = "executable"
 compile-option = "-O2"
@@ -12,4 +12,4 @@ link-option = ""
 package-configuration = {}
 
 [dependencies]
-  "yjson" = { path = "../..", output-type = "static" }
+  "yjson_all" = { path = "../yjson_all", output-type = "static" }

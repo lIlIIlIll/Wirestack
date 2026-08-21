@@ -1,8 +1,9 @@
 # 不可信 JSON 输入的资源边界
 
 yjson 2.0 为内存输入、流式输入、typed decode、Compact DOM、Custom Native 和
-yyjson backend 提供统一的显式资源预算。所有预算默认都是 `0`（不限制），因此可信输入
-的默认热路径不增加限制扫描；处理 RPC、Agent、MCP 或其他不可信输入时应显式配置。
+yyjson backend 提供统一的显式资源预算。默认 `maxDepth` 是 256，三个 byte budget
+默认都是 `0`（不限制），因此可信输入的默认热路径不增加 byte-limit 扫描；处理 RPC、
+Agent、MCP 或其他不可信输入时应显式配置。
 
 ```cangjie
 let limits = JsonReadConfig(
@@ -15,6 +16,20 @@ let limits = JsonReadConfig(
 let value = YJson.parse(payload, config: limits)
 let model = YJson.decodeFromStreamWith(ModelJson, input, config: limits)
 ```
+
+## 推荐起点
+
+下面是用于开始评审的配置档位，不是通用安全保证。应按协议允许的最大消息、字段和多态
+对象大小收紧，并结合应用自身的对象分配与并发上限：
+
+| 场景 | `maxDepth` | `maxBytes` | `maxStringBytes` | `maxPolymorphicObjectBytes` |
+|---|---:|---:|---:|---:|
+| HTTP API | 128 | 8 MiB | 1 MiB | 4 MiB |
+| Agent / MCP tool payload | 64 | 2 MiB | 256 KiB | 1 MiB |
+| 本地可信配置文件 | 256 | 按业务决定 | 按业务决定 | 按业务决定 |
+
+`maxBytes` 只限制输入体积，不是进程的严格总内存上限。AST、typed object、索引、解码后
+字符串和业务副本仍可能使峰值内存高于输入大小；并发请求还需要在上层单独限流。
 
 ## 预算语义
 
@@ -33,8 +48,18 @@ let model = YJson.decodeFromStreamWith(ModelJson, input, config: limits)
 `maxStringBytes` 约束。`JsonDirectReader.readBoundedValue(maxBytes)` 的局部显式预算
 仍然保留，适合在一个更大协议中只限制当前 polymorphic value。
 
+当前没有独立的 array element count、object property count 或 number-token length
+配置。元素和属性数量受 `maxBytes`、表示上限与可用内存间接约束；超大 number token
+由 `maxBytes`（或根容器内的 `maxPolymorphicObjectBytes`）约束，而不是
+`maxStringBytes`。
+
 所有资源参数拒绝负数。若 `includeErrorLocation` 为 `true`，异常同时携带 byte offset、
 line 和 column；关闭位置计算不会改变错误码或预算结果。
+
+> **2.0 RC known defect:** generated polymorphic decode 当前不能正确处理
+> `maxPolymorphicObjectBytes = 0`，会在 `readBoundedValue(0)` 抛出
+> `IllegalArgumentException`。在修复并通过 external codec consumer 前，应显式设置正数
+> budget。其他入口与配置模型中的 `0 = unlimited` contract 不变。
 
 ## 覆盖的公开入口
 
@@ -46,8 +71,12 @@ line 和 column；关闭位置计算不会改变错误码或预算结果。
 
 内存输入在创建 AST/DOM 前执行无分配预检。普通 `InputStream` 无法预知总长度，因此
 `JsonParserCore` 和 `JsonDirectReader` 在填充内部缓冲区和消费 token 时增量检查；超过
-预算后停止继续读取并抛出对应 `JsonException`。内存型 stream overload 会落到同一
-byte-array 预检路径。
+预算后停止后续 refill 并抛出对应 `JsonException`。当前内部 buffer 是 4096 bytes，
+一次 refill 已从底层 stream 取得的数据可能使实际 read-ahead 超过 `maxBytes`，最多到
+当前这一 buffer read 的边界。内存型 stream overload 会落到 byte-array 预检路径。
+
+资源超限或 parse 失败后，不保证 stream 停在调用方可恢复的消息边界，也不承诺可以继续
+复用。需要多消息协议时，应先由 framing 层切分消息。
 
 ## Backend 一致性
 

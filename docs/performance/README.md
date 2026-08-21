@@ -1,0 +1,45 @@
+# Performance
+
+yjson 的性能结论必须限定 backend、representation、workload 与输入形态。typed codec、
+`JsonNode`、Pure Compact、Custom Native DOM 与 yyjson Direct DOM 不能互换比较。
+
+## 当前可公开摘要
+
+2026-08-21 的同 runtime、同 SDK、CPU-pinned yjson/cjfast_json 测量覆盖 37 个语义匹配
+workload：yjson 在 29 项 paired median 更低，其中 25 项在 11/11 pair 中方向一致；
+cjfast_json 有 5 项方向一致。这个计数是方向证据，不是每一行都达到稳定绝对 ratio 的证据。
+
+README 只选取五个两侧 CV ≤ 5% 的代表 workload，并同时展示 yjson 的领先与落后。严格
+绝对延迟 gate 使用两侧 process-median CV ≤ 3%，完整 37-workload run 只有五行通过；
+Large Map 的稳定数字来自同环境独立 focused rerun。
+
+| Workload | yjson | cjfast_json | 解释 |
+| --- | ---: | ---: | --- |
+| Large Map encode / string | 119.887 µs | 132.802 µs | focused stable rerun，yjson -9.7% latency |
+| Large Array encode / string | 101.547 µs | 75.899 µs | cjfast_json 更快 |
+| `TemporalStats` encode / string | 20.879 µs | 21.824 µs | yjson 较低；严格 stable row |
+
+绝对时间只代表 Intel Xeon Gold 6248R、CPU 8、对应 SDK/commit 的快照。完整 commit、环境、
+表格与 follow-up 见 [2026-08-21 result](results/2026-08-21-cjfast-json.md)。
+
+2026-08-22 另行测量了 yjson `JsonNode` 与纯 Go `dwisiswant0/yyjson` DOM。相同 fixture、
+11 轮交替顺序下，Go yyjson 在 Read、Write、RoundTrip 的 12 项 paired median 中全部较低；
+11 个两侧 CV ≤ 5% 的稳定行，其 `yjson / Go yyjson` latency ratio 几何均值为 5.45x。
+16 MiB Read 的 yjson CV 为 9.60%，因此该行只提供方向证据。完整身份、表格和限制见
+[2026-08-22 Go yyjson result](results/2026-08-22-go-yyjson.md)。
+
+## 其他库
+
+stdx.json 与 Java fastjson2 数据来自 2026-08-20 的另一批测量；cjfast_json 来自
+2026-08-21。Java/Cangjie 也不是同 runtime。这些数据只提供 workload context，不能形成
+同步四库排名。Go yyjson 同样是独立的跨 runtime DOM 测量，不应与这些批次拼接排名。
+原四库表保留在 [research log](../performance.md#cross-library-workload-context-2026-08-2021)。
+
+## 复现与证据状态
+
+- [Methodology](methodology.md)：公开 claim 的测量与接受门槛。
+- [Benchmark guide](../../benchmarks/README.md)：adapter、依赖、命令、输出 schema。
+- [Research log](../performance.md)：JSON literal、fast decoder、profiling 与 rejected experiment。
+
+历史原始报告目前主要保存在 ignored target 目录或特定 Server 路径，没有全部提交为仓库
+artifact。因此这里区分“脚本可运行”和“历史结果可外部审计”；后者尚未完全满足。

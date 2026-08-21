@@ -9,7 +9,27 @@ The module is source-built with a C11 compiler. Documents are explicit
 resources: close them deterministically. They are not thread-safe; callers must
 provide external synchronization and `close()` requires exclusive ownership.
 
-See the suite-level `docs/backends.md` for the complete contract.
+```toml
+[dependencies]
+yjson = "2.0.0"
+yjson_native = "2.0.0"
+```
+
+```cangjie
+import yjson.*
+import yjson_native.*
+
+let bytes = unsafe { "{\"n\":42}".rawData() }
+try (document = NativeCompactJsonDocument.parse(bytes)) {
+    println(document.root().get("n").getOrThrow().asInt64())
+}
+```
+
+DOM parsing does not require `enableYJsonNative()`; activation functions below
+control optional scanner/number seams, not document ownership.
+
+See the suite-level [`docs/backends.md`](../../docs/backends.md) for selection,
+lifecycle, and thread-safety guidance.
 
 `enableYJsonNative()` also installs the optional Float64 token parser used by
 generated fast codecs. `enableYJsonNativeFloatOnly()` installs only that seam
