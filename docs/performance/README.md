@@ -13,11 +13,14 @@ README 只选取五个两侧 CV ≤ 5% 的代表 workload，并同时展示 yjso
 绝对延迟 gate 使用两侧 process-median CV ≤ 3%，完整 37-workload run 只有五行通过；
 Large Map 的稳定数字来自同环境独立 focused rerun。
 
-| Workload | yjson | cjfast_json | 解释 |
-| --- | ---: | ---: | --- |
-| Large Map encode / string | 119.887 µs | 132.802 µs | focused stable rerun，yjson -9.7% latency |
-| Large Array encode / string | 101.547 µs | 75.899 µs | cjfast_json 更快 |
-| `TemporalStats` encode / string | 20.879 µs | 21.824 µs | yjson 较低；严格 stable row |
+| Workload | yjson | cjfast_json | Latency ratio Y/C | Direction |
+| --- | ---: | ---: | ---: | --- |
+| Large Map encode / string | 119.887 µs | 132.802 µs | 0.903x | yjson faster 11/11 |
+| Large Array encode / string | 101.547 µs | 75.899 µs | 1.338x | cjfast_json faster 11/11 |
+| `TemporalStats` encode / string | 20.879 µs | 21.824 µs | 0.957x | yjson faster 11/11 |
+
+所有性能页面的 latency ratio 均按 `yjson median / peer median` 计算；小于 1 表示
+yjson 耗时更低。`Direction` 单独记录配对轮次的一致性，不再用反向 delta 表示。
 
 绝对时间只代表 Intel Xeon Gold 6248R、CPU 8、对应 SDK/commit 的快照。完整 commit、环境、
 表格与 follow-up 见 [2026-08-21 result](results/2026-08-21-cjfast-json.md)。
@@ -42,4 +45,6 @@ stdx.json 与 Java fastjson2 数据来自 2026-08-20 的另一批测量；cjfast
 - [Research log](../performance.md)：JSON literal、fast decoder、profiling 与 rejected experiment。
 
 历史原始报告目前主要保存在 ignored target 目录或特定 Server 路径，没有全部提交为仓库
-artifact。因此这里区分“脚本可运行”和“历史结果可外部审计”；后者尚未完全满足。
+artifact。当前公开内容只包括摘要、稳定行、方法与实验限制；完整历史 raw samples、p95、
+MAD 和 machine-readable summaries 尚未全部随仓库发布。因此这里区分“脚本可运行”和
+“历史结果可外部审计”；后者尚未完全满足。

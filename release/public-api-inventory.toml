@@ -17,6 +17,30 @@ rule = "Generated macro output and the optional native facade must be consumed w
 
 [[api]]
 package = "yjson"
+kind = "cangjie-static-method-family"
+symbol = "CompactJsonDocument.parseBorrowed/parseOwned"
+signature = "public static func parseBorrowed/parseOwned(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument"
+source = "src/lib_json_compact_document.cj"
+needle = "public static func parseBorrowed(bytes: Array<Byte>,"
+stability = "stable-compact-input-ownership"
+compatibility = "additive explicit ownership entries; parse remains a borrowed-input compatibility alias"
+contract = "Borrowed parsing retains caller bytes and forbids mutation or concurrent writes for the document lifetime; owned parsing copies before parse."
+consumer = "Applications choosing between zero-copy input retention and caller-mutation isolation"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-static-method-family"
+symbol = "YJson.parseCompactBorrowed/parseCompactOwned"
+signature = "public static func parseCompactBorrowed/parseCompactOwned(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument"
+source = "src/lib_json_compact_document.cj"
+needle = "public static func parseCompactBorrowed(bytes: Array<Byte>,"
+stability = "stable-compact-input-ownership"
+compatibility = "additive explicit ownership convenience entries; parseCompact remains borrowed"
+contract = "Convenience facade for the explicit borrowed and owned CompactJsonDocument parse contracts."
+consumer = "Applications using YJson Compact DOM entry points"
+
+[[api]]
+package = "yjson"
 kind = "cangjie-instance-method"
 symbol = "JsonFastReader.suggestRawCollectionCapacity"
 signature = "public func suggestRawCollectionCapacity(): Int64"

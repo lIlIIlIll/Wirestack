@@ -47,7 +47,13 @@ yjson_all = { path = "../yjson/packages/yjson_all" }
 yjson = { path = "../yjson" }
 ```
 
-所有 yjson package 必须使用同一版本。
+所有 yjson package 必须来自同一个 checkout 和同一个 exact commit；仅比较 manifest
+中的 `1.0.0` 版本字符串不足以证明候选代码配套。冻结候选后使用 annotated tag 或 SHA：
+
+```bash
+git fetch --tags origin
+git checkout --detach 1.0.0-rc.1
+```
 
 ## 快速开始
 
@@ -148,21 +154,23 @@ println(YJson.stringify(root))
 29 项 paired median 低于 `cjfast_json`。下表选择同时通过两侧 CV ≤ 5% 门槛的代表
 workload，并保留领先与落后方向：
 
-| Workload | yjson | cjfast_json | yjson 耗时变化 |
-|---|---:|---:|---:|
-| Large Map encode / string¹ | 119.887 µs | 132.802 µs | **-9.7%** |
-| Large Array decode / string | 43.340 µs | 77.940 µs | **-44.4%** |
-| Large Array encode / string | 101.547 µs | 75.899 µs | +33.8% |
-| `TemporalStats` encode / string | 20.879 µs | 21.824 µs | **-4.3%** |
-| Deep nested decode / string | 76.070 µs | 95.808 µs | **-20.6%** |
+| Workload | yjson | cjfast_json | Latency ratio Y/C | Direction |
+|---|---:|---:|---:|---|
+| Large Map encode / string¹ | 119.887 µs | 132.802 µs | **0.903x** | yjson faster 11/11 |
+| Large Array decode / string | 43.340 µs | 77.940 µs | **0.556x** | yjson faster |
+| Large Array encode / string | 101.547 µs | 75.899 µs | 1.338x | cjfast_json faster 11/11 |
+| `TemporalStats` encode / string | 20.879 µs | 21.824 µs | **0.957x** | yjson faster 11/11 |
+| Deep nested decode / string | 76.070 µs | 95.808 µs | **0.794x** | yjson faster |
 
-“yjson 耗时变化”按 `yjson / cjfast_json - 1` 计算，负数表示 yjson 耗时更低。¹ Large
+`Latency ratio Y/C` 统一按 `yjson median / cjfast_json median` 计算，小于 1 表示 yjson
+耗时更低。¹ Large
 Map 来自同环境的独立稳定复测；其余行来自 37-workload 正式测量。绝对时间是特定 Server、
 SDK 与 workload 的快照，不代表其他环境。
 
-完整的 37 项样本、p95、CV、MAD、四库 workload 透视和实验限制见
-[性能方法与结果](docs/performance/README.md)；复现入口见 [benchmark 指南](benchmarks/README.md)。
-其中 stdx.json、fastjson2 与 cjfast_json 数据来自不同批次，不能解读为一次同步四库排名。
+当前公开摘要、稳定行、方法和实验限制见[性能方法与结果](docs/performance/README.md)；
+复现入口见 [benchmark 指南](benchmarks/README.md)。完整历史 raw samples、p95、MAD 与
+machine-readable summaries 尚未全部随仓库发布。stdx.json、fastjson2 与 cjfast_json
+数据来自不同批次，不能解读为一次同步四库排名。
 
 另一次独立的跨 runtime DOM 测量使用纯 Go 的 `dwisiswant0/yyjson`。在相同 fixture 的
 Read、Write 与 RoundTrip 共 12 项中，Go yyjson 的 paired median 均较低；11 个两侧
@@ -172,12 +180,12 @@ typed codec 对比，且 16 MiB Read 因 yjson CV 9.60% 只作为方向证据。
 
 ## 兼容性与限制
 
-- **版本配套** — `yjson`、宏包、聚合包和 Native package 必须使用同一版本并重新编译。
+- **版本配套** — `yjson`、宏包、聚合包和 Native package 必须来自同一 checkout、同一 exact commit 并重新编译。
 - **Stream decode** — 当前会读取全部剩余输入，并非恒定内存的增量 parser；Stream 的所有权仍归调用方。
 - **Native backend** — 需要显式依赖，document 必须 `close()`，且不是线程安全对象；当前仅 qualification Linux x86_64。
 - **资源预算** — byte budget 默认不限制，`maxDepth` 默认 256；处理不可信输入时应显式收紧。
 - **JSON Schema** — 支持常用类型、组合、本地引用和边界校验，但不是完整的 draft 2020-12 实现。
-- **预发布状态** — `1.0.0-rc.1` 尚未完成 tag、registry publish 与 hosted CI，不应视为正式稳定版。
+- **预发布状态** — `1.0.0-rc.1` 只有在 exact commit、blocking gates、evidence 与 annotated tag 全部冻结后才是可复现 RC；registry publish 与 hosted CI 状态以 release evidence 为准。
 
 ## 文档
 

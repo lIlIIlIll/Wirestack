@@ -266,12 +266,29 @@ public class CompactJsonDocument {
     var keyDictionaryMisses: Int64 = 0
     private init(source: Array<Byte>) { this.source = source }
 
-    public static func parse(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument {
+    /// Parses without copying `bytes`. The caller must not mutate the array or
+    /// write it concurrently while the returned document remains reachable.
+    public static func parseBorrowed(bytes: Array<Byte>,
+        config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument {
         validateJsonResourceLimits(bytes, config)
         let document = CompactJsonDocument(bytes)
         let parser = CompactJsonParser(document, JsonFastReader(bytes), config)
         document.rootIndex = parser.parse()
         document
+    }
+
+    /// Parses an owned copy of `bytes`; later caller mutation cannot affect the
+    /// returned document.
+    public static func parseOwned(bytes: Array<Byte>,
+        config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument {
+        let owned = Array<Byte>(bytes.size, repeat: 0)
+        bytes.copyTo(owned, 0, 0, bytes.size)
+        parseBorrowed(owned, config: config)
+    }
+
+    /// Compatibility alias for the zero-copy borrowed-input entry point.
+    public static func parse(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument {
+        parseBorrowed(bytes, config: config)
     }
 
     public func root(): CompactJsonValue { CompactJsonValue(this, rootIndex) }
@@ -1685,6 +1702,16 @@ private class CompactHybridObjectPositions {
 
 extend YJson {
     public static func parseCompact(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument {
-        CompactJsonDocument.parse(bytes, config: config)
+        CompactJsonDocument.parseBorrowed(bytes, config: config)
+    }
+
+    public static func parseCompactBorrowed(bytes: Array<Byte>,
+        config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument {
+        CompactJsonDocument.parseBorrowed(bytes, config: config)
+    }
+
+    public static func parseCompactOwned(bytes: Array<Byte>,
+        config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument {
+        CompactJsonDocument.parseOwned(bytes, config: config)
     }
 }

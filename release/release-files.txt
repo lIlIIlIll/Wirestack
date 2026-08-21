@@ -26,6 +26,7 @@ src/lib_json_fast_reader.cj
 src/lib_json_native_scanner.cj
 src/lib_json_parser.cj
 src/lib_json_parser_core.cj
+src/lib_json_resource_limits.cj
 src/lib_json_schema.cj
 src/lib_json_stream_parser.cj
 src/lib_json_stream_support.cj
@@ -36,11 +37,13 @@ src/test_json_boundary.cj
 src/test_json_compact_document.cj
 src/test_json_concurrency.cj
 src/test_json_context_path.cj
+src/test_json_literal.cj
 src/test_json_memory.cj
 src/test_json_parser_compliance.cj
 src/test_json_performance.cj
 src/test_json_reader.cj
 src/test_json_regression.cj
+src/test_json_resource_limits.cj
 src/test_json_schema.cj
 src/test_json_serializer.cj
 src/test_json_special_cases.cj
@@ -71,6 +74,9 @@ scripts/release_consumer_checks.py
 scripts/release_benchmark_smoke.sh
 scripts/release_temp_tree.py
 scripts/release_package_stage.py
+scripts/check_api_inventory.py
+scripts/check_json_literal_compile_fail.sh
+scripts/run_cjpm_executable.sh
 scripts/ci_job.sh
 scripts/ci_fresh_checkout.sh
 scripts/release_registry_rehearsal.py
@@ -81,11 +87,13 @@ release/package-manifests/yjson.toml
 release/package-manifests/yjson_all.toml
 release/package-manifests/yjson_native.toml
 release/package-manifests/yjson_yyjson.toml
+release/public-api-inventory.toml
 
 # Macro, aggregate, optional backend, examples, and consumer fixtures
 packages/yjson_macros/cjpm.toml
 packages/yjson_macros/cjpm.lock
 packages/yjson_macros/src/json_codec.cj
+packages/yjson_macros/src/json_literal.cj
 packages/yjson_macros/README.md
 packages/yjson_all/cjpm.toml
 packages/yjson_all/cjpm.lock
@@ -110,3 +118,9 @@ packages/examples/src/main.cj
 packages/codec_integration/cjpm.toml
 packages/codec_integration/cjpm.lock
 packages/codec_integration/src/main.cj
+packages/json_literal_integration/cjpm.toml
+packages/json_literal_integration/cjpm.lock
+packages/json_literal_integration/src/main.cj
+packages/json_literal_compile_fail/cjpm.toml
+packages/json_literal_compile_fail/cjpm.lock
+packages/json_literal_compile_fail/src/main.cj

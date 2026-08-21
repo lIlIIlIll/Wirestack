@@ -34,31 +34,32 @@ implementation itself is unchanged.
 The 37 implemented, semantically matched workloads each ran as a separate
 process for eleven rounds. Workload order used a rotation with even rounds
 reversed, library order alternated by round, and every invocation emitted
-`csv-raw` duration batches. Positive paired deltas below mean cjfast_json took
-longer than yjson. Only rows with process-median CV no greater than 3% on both
+`csv-raw` duration batches. Ratios below are consistently defined as yjson
+median divided by cjfast_json median; values below 1 mean yjson took less time.
+Only rows with process-median CV no greater than 3% on both
 sides are accepted as stable absolute-latency comparisons:
 
 The optimized large-Map encode path also ran in an independent focused set. It
 met the two-sided stability gate and reversed the original result:
 
-| Workload | Input | yjson median | cjfast_json median | Paired delta | Direction | CV Y/C |
+| Workload | Input | yjson median | cjfast_json median | Latency ratio Y/C | Direction | CV Y/C |
 |:--|:--|--:|--:|--:|:--|--:|
-| Encode `HashMap<String, Int64>[64]` | string | 119.887 us | 132.802 us | +10.82% | yjson faster 11/11 | 2.11% / 1.65% |
+| Encode `HashMap<String, Int64>[64]` | string | 119.887 us | 132.802 us | 0.903x | yjson faster 11/11 | 2.11% / 1.65% |
 
 The complete 37-workload run had five stable rows:
 
-| Workload | Input | yjson median | cjfast_json median | Paired delta | Direction | CV Y/C |
+| Workload | Input | yjson median | cjfast_json median | Latency ratio Y/C | Direction | CV Y/C |
 |:--|:--|--:|--:|--:|:--|--:|
-| Encode `ArrayList<ProfileRecord>[64]` | string | 101.547 us | 75.899 us | -25.24% | cjfast_json faster 11/11 | 2.94% / 1.51% |
-| Encode `UInt64Envelope` | bytes | 9.537 us | 9.561 us | -0.34% | mixed, yjson faster 4/11 | 2.66% / 2.83% |
-| Encode `TemporalStats` | bytes | 20.371 us | 21.534 us | +5.10% | yjson faster 11/11 | 0.85% / 2.27% |
-| Encode `TemporalStats` | string | 20.879 us | 21.824 us | +3.65% | yjson faster 11/11 | 1.09% / 1.49% |
-| Encode deep nested profiles | string | 94.368 us | 74.138 us | -22.45% | cjfast_json faster 11/11 | 2.03% / 2.72% |
+| Encode `ArrayList<ProfileRecord>[64]` | string | 101.547 us | 75.899 us | 1.338x | cjfast_json faster 11/11 | 2.94% / 1.51% |
+| Encode `UInt64Envelope` | bytes | 9.537 us | 9.561 us | 0.997x | mixed, yjson faster 4/11 | 2.66% / 2.83% |
+| Encode `TemporalStats` | bytes | 20.371 us | 21.534 us | 0.946x | yjson faster 11/11 | 0.85% / 2.27% |
+| Encode `TemporalStats` | string | 20.879 us | 21.824 us | 0.957x | yjson faster 11/11 | 1.09% / 1.49% |
+| Encode deep nested profiles | string | 94.368 us | 74.138 us | 1.273x | cjfast_json faster 11/11 | 2.03% / 2.72% |
 
 Across all 37 workloads, yjson had the lower paired median in 29, with 25
 showing the same yjson-faster direction in all eleven pairs; cjfast_json had
 five unanimous directions. The large-Map row in this complete run was 119.239
-us versus 132.155 us (+9.50%, yjson faster 11/11), but cjfast_json's 4.01% CV
+us versus 132.155 us (ratio 0.902x, yjson faster 11/11), but cjfast_json's 4.01% CV
 keeps that row directional rather than stable. Those broader counts are
 directional evidence, not
 precise ratio claims: only five workloads met the strict two-sided 3% CV gate.
@@ -116,26 +117,26 @@ Rejected intermediate A/B evidence is retained in the ignored directories
 ## Cross-library workload context (2026-08-20–21)
 
 The following table preserves the broader stdx.json, Java fastjson2, and
-cjfast_json workload context previously shown in the README. Each ratio is the
-other library's latency divided by yjson's latency in the matching batch. A
-ratio below `1.00x` therefore means the other library was faster. The `CV Y/C`
+cjfast_json workload context previously shown in the README. Each ratio follows
+the repository-wide `yjson median / peer median` definition. A ratio below
+`1.00x` therefore means yjson was faster. The `CV Y/C`
 column applies only to the 2026-08-21 yjson/cjfast_json eleven-round run.
 
-| Workload | yjson | stdx.json / yjson | fastjson2 / yjson | cjfast_json / yjson | CV Y/C |
-|---|---:|---:|---:|---:|---:|
-| Large Map encode / string | 1.00x | 3.43x | 0.04x | 1.09x | 2.14% / 4.01% |
-| Large Array decode / string | 1.00x | 25.21x | 0.19x | 1.77x | 4.99% / 3.15% |
-| Large Array encode / string | 1.00x | 4.48x | 0.06x | 0.75x | 2.94% / 1.51% |
-| `ProfileBundle` decode / bytes | 1.00x | 8.88x | 0.06x | 1.16x | 3.15% / 4.96% |
-| `ProfileBundle` encode / bytes | 1.00x | 6.78x | 0.05x | 0.92x | 3.14% / 4.24% |
-| `ProfileBundle` encode / string | 1.00x | 6.32x | 0.06x | 0.86x | 2.16% / 4.14% |
-| `UInt64Envelope` decode / bytes | 1.00x | 7.92x | 0.07x | 1.04x | 3.03% / 4.48% |
-| `UInt64Envelope` encode / bytes | 1.00x | 10.45x | 0.18x | 1.00x | 2.66% / 2.83% |
-| `UInt64Envelope` encode / string | 1.00x | 9.79x | 0.22x | 1.03x | 2.54% / 3.71% |
-| `TemporalStats` encode / bytes | 1.00x | 4.93x | 0.06x | 1.05x | 0.85% / 2.27% |
-| `TemporalStats` encode / string | 1.00x | 4.82x | 0.16x | 1.04x | 1.09% / 1.49% |
-| Deep nested decode / string | 1.00x | 8.79x | 0.07x | 1.26x | 3.45% / 1.12% |
-| Deep nested encode / string | 1.00x | 3.33x | 0.04x | 0.78x | 2.03% / 2.72% |
+| Workload | yjson / stdx.json | yjson / fastjson2 | yjson / cjfast_json | CV Y/C |
+|---|---:|---:|---:|---:|
+| Large Map encode / string | 0.29x | 25.00x | 0.92x | 2.14% / 4.01% |
+| Large Array decode / string | 0.04x | 5.26x | 0.56x | 4.99% / 3.15% |
+| Large Array encode / string | 0.22x | 16.67x | 1.33x | 2.94% / 1.51% |
+| `ProfileBundle` decode / bytes | 0.11x | 16.67x | 0.86x | 3.15% / 4.96% |
+| `ProfileBundle` encode / bytes | 0.15x | 20.00x | 1.09x | 3.14% / 4.24% |
+| `ProfileBundle` encode / string | 0.16x | 16.67x | 1.16x | 2.16% / 4.14% |
+| `UInt64Envelope` decode / bytes | 0.13x | 14.29x | 0.96x | 3.03% / 4.48% |
+| `UInt64Envelope` encode / bytes | 0.10x | 5.56x | 1.00x | 2.66% / 2.83% |
+| `UInt64Envelope` encode / string | 0.10x | 4.55x | 0.97x | 2.54% / 3.71% |
+| `TemporalStats` encode / bytes | 0.20x | 16.67x | 0.95x | 0.85% / 2.27% |
+| `TemporalStats` encode / string | 0.21x | 6.25x | 0.96x | 1.09% / 1.49% |
+| Deep nested decode / string | 0.11x | 14.29x | 0.79x | 3.45% / 1.12% |
+| Deep nested encode / string | 0.30x | 25.00x | 1.28x | 2.03% / 2.72% |
 
 This is not a synchronized four-library ranking. The stdx.json and Java
 fastjson2 snapshot was measured on 2026-08-20; cjfast_json was measured on

@@ -58,6 +58,17 @@ class CompactJsonDocumentTest {
     }
 
     @TestCase
+    func ownedInputIsolatedFromCallerMutation(): Unit {
+        let bytes = compactBytes("{\"name\":\"Alice\",\"active\":true}")
+        let document = YJson.parseCompactOwned(bytes)
+        for (index in 0..bytes.size) { bytes[index] = b' ' }
+
+        @Expect(document.root().get("name").getOrThrow().asString(), "Alice")
+        @Expect(document.root().get("active").getOrThrow().asBool(), true)
+        @Expect(document.toString(), "{\"name\":\"Alice\",\"active\":true}")
+    }
+
+    @TestCase
     func preservesInt64BoundariesAndLargeNumberLiterals(): Unit {
         let document = YJson.parseCompact(compactBytes("[-9223372036854775808,9223372036854775807,9223372036854775808]"))
         @Expect(document.root().get(0).getOrThrow().asInt64(), -9223372036854775808)

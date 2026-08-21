@@ -35,7 +35,19 @@ yjson_all = { path = "../yjson/packages/yjson_all" }
 `yjson_native` and `yjson_yyjson` must use the same `yjson` version because
 their public facades and native bindings are compiled against the core package.
 Repository manifests use path dependencies for development; release manifests
-use the exact versions above.
+under [`release/package-manifests/`](../release/package-manifests/) use exact
+`1.0.0` dependencies. During checkout-based RC use, every yjson package must
+come from the same checkout and exact commit; matching manifest version strings
+alone do not prove package pairing.
+
+## Compact input ownership
+
+`CompactJsonDocument.parseBorrowed` and `YJson.parseCompactBorrowed` retain the
+caller's `Array<Byte>` without copying. The caller must treat that array as
+immutable and must not write it concurrently while the document is reachable.
+`parseOwned` and `parseCompactOwned` copy before parsing and isolate the
+document from later caller mutation. The existing `parse` and `parseCompact`
+entry points remain compatibility aliases for borrowed-input behavior.
 
 ## Resource-limit configuration and native ABI
 

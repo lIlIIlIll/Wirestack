@@ -28,6 +28,7 @@ stream 输入形态和语义差异。跨 runtime 数字只能作为 context，�
 
 方向计数与精确 ratio 分开报告：
 
+- 全仓库 latency ratio 统一为 `yjson median / peer median`；小于 1 表示 yjson 更快；
 - paired median 和 11/11 direction 可作为方向证据；
 - 精确绝对延迟比较要求两侧 process-median CV ≤ 3%；
 - README 代表表允许两侧 CV ≤ 5%，必须显示绝对时间并注明它是较宽的展示门槛；

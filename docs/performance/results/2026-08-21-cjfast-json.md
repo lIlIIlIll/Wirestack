@@ -14,16 +14,17 @@
 37 个语义匹配 workload 中，yjson 有 29 项 paired median 更低，25 项为 yjson faster
 11/11；cjfast_json 有 5 项一致方向。严格两侧 CV ≤ 3% gate 只有五行通过：
 
-| Workload | Input | yjson median | cjfast_json median | Paired delta | Direction | CV Y/C |
+| Workload | Input | yjson median | cjfast_json median | Latency ratio Y/C | Direction | CV Y/C |
 |:--|:--|--:|--:|--:|:--|--:|
-| Encode `ArrayList<ProfileRecord>[64]` | string | 101.547 µs | 75.899 µs | -25.24% | cjfast_json faster 11/11 | 2.94% / 1.51% |
-| Encode `UInt64Envelope` | bytes | 9.537 µs | 9.561 µs | -0.34% | mixed, yjson faster 4/11 | 2.66% / 2.83% |
-| Encode `TemporalStats` | bytes | 20.371 µs | 21.534 µs | +5.10% | yjson faster 11/11 | 0.85% / 2.27% |
-| Encode `TemporalStats` | string | 20.879 µs | 21.824 µs | +3.65% | yjson faster 11/11 | 1.09% / 1.49% |
-| Encode deep nested profiles | string | 94.368 µs | 74.138 µs | -22.45% | cjfast_json faster 11/11 | 2.03% / 2.72% |
+| Encode `ArrayList<ProfileRecord>[64]` | string | 101.547 µs | 75.899 µs | 1.338x | cjfast_json faster 11/11 | 2.94% / 1.51% |
+| Encode `UInt64Envelope` | bytes | 9.537 µs | 9.561 µs | 0.997x | mixed, yjson faster 4/11 | 2.66% / 2.83% |
+| Encode `TemporalStats` | bytes | 20.371 µs | 21.534 µs | 0.946x | yjson faster 11/11 | 0.85% / 2.27% |
+| Encode `TemporalStats` | string | 20.879 µs | 21.824 µs | 0.957x | yjson faster 11/11 | 1.09% / 1.49% |
+| Encode deep nested profiles | string | 94.368 µs | 74.138 µs | 1.273x | cjfast_json faster 11/11 | 2.03% / 2.72% |
 
-Positive paired delta 表示 cjfast_json 更慢。Large Map focused rerun 为 yjson 119.887 µs、
-cjfast_json 132.802 µs、yjson faster 11/11、CV 2.11% / 1.65%。
+`Latency ratio Y/C = yjson median / cjfast_json median`；小于 1 表示 yjson 更快。
+Large Map focused rerun 为 yjson 119.887 µs、cjfast_json 132.802 µs、ratio 0.903x、
+yjson faster 11/11、CV 2.11% / 1.65%。
 
 ## Limitations and artifacts
 
