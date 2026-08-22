@@ -20,10 +20,10 @@ Status values:
 
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
-| M0-001 | READY | — | First PRD backlog task. Inventory existing `stdx.net.tls/http`, `std.net`, SDK/runtime and external dependencies. |
-| M0-002 | BLOCKED | — | Depends on M0-001. |
+| M0-001 | COMPLETE | [`docs/evidence/M0-001/README.md`](../evidence/M0-001/README.md) | SDK/source inventory and delete/reuse/isolate decisions complete; no runtime gate implied. |
+| M0-002 | READY | — | M0-001 complete; freeze the actual CJPM package/directory mapping using the supplied SDK. |
 | M0-003 | BLOCKED | — | Depends on M0-002. |
-| M0-004 | BLOCKED | — | Depends on M0-001. |
+| M0-004 | READY | — | M0-001 complete; establish the gate harness and result schema. |
 | M0-005 | BLOCKED | — | Depends on M0-004. |
 | M0-006..M0-022 | BLOCKED | — | Follow the dependency graph in `implementation-backlog.md`. |
 
