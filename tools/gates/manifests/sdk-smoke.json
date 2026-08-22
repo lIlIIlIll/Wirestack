@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "gate_id": "SDK-SMOKE",
+  "description": "Validate the current Wirestack skeleton and execute a Cangjie program with the supplied SDK. This is not a network or platform-support gate.",
+  "scenarios": [
+    {
+      "id": "linux-x86_64-supplied-sdk",
+      "description": "Check/build Wirestack and compile/run an isolated Cangjie smoke program.",
+      "enabled": true,
+      "platforms": ["linux"],
+      "required_tools": ["cjc", "cjpm"],
+      "timeout_seconds": 180,
+      "steps": [
+        {
+          "id": "cjc-version",
+          "command": ["cjc", "--version"],
+          "timeout_seconds": 10
+        },
+        {
+          "id": "cjpm-version",
+          "command": ["cjpm", "--version"],
+          "timeout_seconds": 10
+        },
+        {
+          "id": "cjpm-check",
+          "command": ["cjpm", "check"],
+          "cwd": "{repo_root}",
+          "timeout_seconds": 120
+        },
+        {
+          "id": "cjpm-build",
+          "command": ["cjpm", "build"],
+          "cwd": "{repo_root}",
+          "timeout_seconds": 180
+        },
+        {
+          "id": "compile-smoke",
+          "command": [
+            "cjc",
+            "{repo_root}/tools/gates/probes/sdk_smoke.cj",
+            "-o",
+            "{work_dir}/sdk-smoke"
+          ],
+          "timeout_seconds": 60
+        },
+        {
+          "id": "run-smoke",
+          "command": ["{work_dir}/sdk-smoke"],
+          "timeout_seconds": 10
+        }
+      ]
+    }
+  ]
+}
