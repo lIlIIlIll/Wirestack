@@ -1,0 +1,19 @@
+import std.net.*
+
+main() {
+    let socket = TcpSocket("127.0.0.1", {{PORT}})
+    let payload = Array<Byte>({{CHUNK_SIZE}}, { _ => 1u8 })
+    let buffer = Array<Byte>({{CHUNK_SIZE}}, { _ => 0u8 })
+    var iteration: Int64 = 0
+    while (iteration < {{ITERATIONS}}) {
+        var received: Int64 = 0
+        socket.write(payload)
+        while (received < {{CHUNK_SIZE}}) {
+            let n = socket.read(buffer)
+            received += n
+        }
+        iteration += 1
+    }
+    socket.close()
+    println("WIRESTACK_RAW_TCP_OK")
+}
