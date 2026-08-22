@@ -1,0 +1,34 @@
+# Wirestack Gates
+
+Gate reports are durable evidence. A gate is not considered passed because code
+compiled or a single happy-path test ran.
+
+## M0 std.net adoption gates
+
+- `GATE-NET-01`: close/cancel wakes blocked read/write/connect/accept.
+- `GATE-NET-02`: one-reader/one-writer duplex and close/abort races.
+- `GATE-NET-03`: absolute Deadline is not reset by internal loops.
+- `GATE-NET-04`: peer EOF, RST, local close/abort and cancellation evidence.
+- `GATE-NET-05`: large I/O, copies, allocation and Windows 4 KiB behavior.
+- `GATE-NET-06`: repeated cleanup and long-running leak/soak behavior.
+- `GATE-NET-07`: Android/iOS/Harmony network and application lifecycle changes.
+
+Each report must record:
+
+- task ID and gate ID;
+- platform/device/VM and OS version;
+- Cangjie SDK/runtime version and relevant upstream commit;
+- exact command/configuration;
+- raw output location;
+- iteration count and percentile method where applicable;
+- resource counters;
+- PASS/FAIL/NOT RUN;
+- blocker and proposed upstream action when failed.
+
+A failed gate may unlock an `UP-*` tracking task. It must never be bypassed by
+polling, private runtime handles, exception-message parsing, or TLS-layer guesses.
+
+## Release gates
+
+Release-gate ownership and blockers are summarized in
+[`../planning/implementation-backlog.md`](../planning/implementation-backlog.md).
