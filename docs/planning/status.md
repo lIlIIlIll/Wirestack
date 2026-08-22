@@ -26,8 +26,8 @@ Status values:
 | M0-004 | COMPLETE | [`docs/evidence/M0-004/README.md`](../evidence/M0-004/README.md) | Versioned gate runner and evidence framework complete. |
 | M0-005 | COMPLETE | [`docs/evidence/M0-005/README.md`](../evidence/M0-005/README.md) | Existing Linux x86_64 `std.net` raw TCP baseline captured. |
 | M0-006 | COMPLETE | [`docs/evidence/M0-006/README.md`](../evidence/M0-006/README.md) | Linux x86_64 close/wakeup probes pass locally; global six-platform GATE-NET-01 remains incomplete. |
-| M0-007 | READY | — | Execute GATE-NET-02 full-duplex and close-race probes. |
-| M0-008 | BLOCKED | — | Depends on M0-007 evidence. |
+| M0-007 | COMPLETE | [`docs/evidence/M0-007/README.md`](../evidence/M0-007/README.md) | Full duplex and 100 close races pass; same-direction behavior captured; public abort is unavailable, so Linux/global GATE-NET-02 remain incomplete. |
+| M0-008 | READY | — | Execute absolute-deadline probes using M0-006/M0-007 evidence. |
 | M0-009 | BLOCKED | — | Depends on M0-008 evidence. |
 | M0-010 | READY | — | Linux large-buffer evidence may proceed independently; global GATE-NET-05 still needs Windows and future adapter comparison. |
 | M0-011 | READY | — | Depends on M0-005 and M0-006 evidence. |
@@ -42,6 +42,10 @@ Status values:
 failed gate provides reproducible evidence and an approved minimal upstream-interface RFC.
 Actual `std.net`/runtime source changes belong in their upstream repositories,
 not in the Wirestack worktree.
+
+The M0-007 abort probe records that the supplied SDK has no public `TcpSocket.abort()`
+member. This is evidence for later minimum-upstream analysis; it does not independently
+authorize an upstream implementation task.
 
 ## Later milestones
 
