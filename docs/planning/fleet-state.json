@@ -1,0 +1,35 @@
+{
+  "base_branch": "main",
+  "blocked": {},
+  "branch_overrides": {
+    "M0-008": "task/M0-008-absolute-deadline",
+    "M0-009": "task/M0-009-eof-terminal-evidence",
+    "M0-010": "task/M0-010-large-buffer-profile",
+    "M0-011": "task/M0-011-leak-soak-harness",
+    "M0-012": "task/M0-012-mobile-network-change",
+    "M0-013": "task/M0-013-dns-carrier-thread",
+    "M0-014": "task/M0-014-windows-copy-profile",
+    "M0-015": "task/M0-015-tls-provider-matrix"
+  },
+  "completed": [
+    "M0-001",
+    "M0-002",
+    "M0-003",
+    "M0-004",
+    "M0-005",
+    "M0-006",
+    "M0-007"
+  ],
+  "issue_numbers": {
+    "M0-008": 13,
+    "M0-009": 14,
+    "M0-010": 15,
+    "M0-011": 16,
+    "M0-012": 17,
+    "M0-013": 18,
+    "M0-014": 19,
+    "M0-015": 25
+  },
+  "max_parallel": 8,
+  "schema_version": 1
+}
