@@ -1,0 +1,30 @@
+name: Architecture Guard
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  architecture-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit-test the guard
+        run: python3 -m unittest discover -s tools/tests -p 'test_architecture_guard.py' -v
+      - name: Enforce repository boundaries
+        run: python3 tools/architecture_guard.py --root . --format text
+      - name: Emit machine-readable diagnostics
+        if: always()
+        run: python3 tools/architecture_guard.py --root . --format json > architecture-guard.json || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: architecture-guard
+          path: architecture-guard.json
