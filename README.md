@@ -50,11 +50,12 @@ yjson = { path = "../yjson" }
 所有 yjson package 必须来自同一个 checkout 和同一个 exact commit；仅比较 manifest
 中的 `1.0.0` 版本字符串不足以证明候选代码配套。当前完成本地 gate 的候选源码提交为
 `42c79d2f271b756775583a2ce09b2ce64cb6497b`。Hosted CI 尚未运行，但经 release owner
-明确审批为 `NON-BLOCKING`；`1.0.0-rc.1` tag 尚未创建。复现当前候选时使用 exact SHA：
+明确审批为 `NON-BLOCKING`。`1.0.0-rc.1` annotated tag 已冻结在包含完整 evidence 的
+`8c142347acb1aafe66d8c417e685a437d6535048`。使用 tag 或 exact SHA：
 
 ```bash
-git fetch origin
-git checkout --detach 42c79d2f271b756775583a2ce09b2ce64cb6497b
+git fetch --tags origin
+git checkout --detach 1.0.0-rc.1
 ```
 
 ## 快速开始

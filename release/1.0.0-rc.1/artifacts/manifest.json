@@ -35,7 +35,12 @@
     }
   },
   "tag": {
-    "status": "NOT_RUN"
+    "status": "CREATED",
+    "name": "1.0.0-rc.1",
+    "tagObject": "8296db716ddd9235793c69cf3b469d4579b8e33d",
+    "peeledTarget": "8c142347acb1aafe66d8c417e685a437d6535048",
+    "createdAt": "2026-08-22T18:24:28+08:00",
+    "remote": "origin"
   },
   "registryPublish": {
     "status": "NOT_RUN"

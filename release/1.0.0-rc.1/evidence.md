@@ -38,7 +38,8 @@ commit 的 PASS 快照；旧 external consumer PASS 因进程退出传播和默�
 | yyjson symbol isolation | PASS | vendored 0.12.0 plus pinned 0.11.1 fixture, hidden-local policy |
 | Package rehearsal | PASS | five `.cjp` artifacts; registry-style consumer rehearsal completed |
 | Hosted CI | **NOT RUN / NON-BLOCKING** | release owner explicitly approved local evidence as sufficient for this RC |
-| Annotated tag / registry publish | **NOT RUN** | not performed as part of this evidence update |
+| Annotated tag | **PASS** | `1.0.0-rc.1`; tag object `8296db716ddd9235793c69cf3b469d4579b8e33d`; peeled target `8c142347acb1aafe66d8c417e685a437d6535048` |
+| Registry publish | **NOT RUN** | no registry artifact was published |
 
 The successful local transcript is
 [`local-fresh-checkout.log.gz`](artifacts/logs/local-fresh-checkout.log.gz), and the package
@@ -52,12 +53,12 @@ Hosted CI execution: NOT RUN
 Release blocking policy: NON-BLOCKING
 Exception approval: release owner instruction, 2026-08-22
 Approval rationale: hosted CI is not required for this release candidate
-Release decision: ELIGIBLE FOR RC TAG; TAG/PUBLISH NOT YET RUN
+Release decision: RC TAG CREATED; REGISTRY PUBLISH NOT RUN
 ```
 
-因此 hosted CI 的 `NOT RUN` 不再阻止本次 RC。`1.0.0-rc.1` 当前仍是绑定 exact SHA 的
-locally validated source candidate；创建 annotated tag 并记录 tag object 后，它才成为
-不可变 prerelease artifact。
+因此 hosted CI 的 `NOT RUN` 不阻止本次 RC。`1.0.0-rc.1` annotated tag 已于
+`2026-08-22T18:24:28+08:00` 创建并推送；其 peeled target 与远程 `main` 当时的提交均为
+`8c142347acb1aafe66d8c417e685a437d6535048`，现在是不可变 prerelease source identity。
 
 ## Audit trail
 
@@ -72,9 +73,8 @@ Package rehearsal 生成的五个候选 artifact 保存在 [`artifacts/packages/
 
 ## Remaining release actions
 
-1. 创建 annotated tag `1.0.0-rc.1`，再记录 tag object、UTC 时间与远程引用。
-2. 若执行 registry publish，追加 registry 返回值和 artifact URL。
-3. 正式 1.0 发布前提供并验证实际可用的私密安全报告渠道；当前
+1. 若执行 registry publish，追加 registry 返回值和 artifact URL。
+2. 正式 1.0 发布前提供并验证实际可用的私密安全报告渠道；当前
    [`SECURITY.md`](../../SECURITY.md) 明确记录了该缺口。
 
 稳定发布流程见 [`docs/maintainers/releasing.md`](../../docs/maintainers/releasing.md)。
