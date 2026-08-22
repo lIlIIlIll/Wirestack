@@ -2,7 +2,7 @@
 
 Wirestack 是一个面向仓颉的跨平台安全网络栈项目，目标是在保留 `std.net` 作为官方默认 TCP/runtime 调度底座的前提下，重新定义并实现独立的 Transport、TLS、HTTPS、HTTP/1.1 与 HTTP/2 语义。
 
-当前仓库处于 **pre-M0 / bootstrap** 状态：只有产品、架构和实施控制面，尚未宣称任何 TLS、HTTP 或六平台运行能力已经实现。
+当前仓库处于 **M0 架构与采纳验证阶段**。现有 TLS/HTTP/std.net 已完成盘点，真实 CJPM 包布局已经冻结并可构建；尚未宣称任何 Transport、TLS、HTTP 或六平台运行能力已经实现。
 
 ## 目标
 
@@ -25,7 +25,46 @@ Wirestack 不直接调用 `CJ_MRT_Sock*` 私有 ABI，不自行实现六套 epol
 HTTP → TLS → Transport SPI ← StdNetTransport → std.net
 ```
 
-只有 `StdNetTransport` 适配层允许依赖 `std.net`。TLS Core、HTTP Core 与公共 API 不得导入或暴露 `std.net` 类型。
+只有 `wirestack.internal.transport_stdnet` 允许依赖 `std.net`。TLS Core、HTTP Core 与公共 API 不得导入或暴露 `std.net` 类型。
+
+已冻结的主要包：
+
+```text
+wirestack.tls
+wirestack.http
+wirestack.internal.transport
+wirestack.internal.transport_stdnet
+wirestack.internal.resolver
+wirestack.internal.connector
+wirestack.internal.tls_engine
+wirestack.internal.trust
+wirestack.internal.identity
+wirestack.internal.http1
+wirestack.internal.http2
+wirestack.internal.platform.*
+```
+
+这些包目前仅建立编译边界，没有占位公共 API。
+
+## 本地验证
+
+已验证工具链：
+
+```text
+Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)
+Cangjie Project Manager: 1.1.3
+```
+
+使用仓颉 SDK：
+
+```bash
+source /path/to/cangjie/envsetup.sh
+./scripts/check
+```
+
+当前统一检查执行 `cjpm check` 和 `cjpm build`。后续任务会在同一入口增加架构守卫和测试。
+
+SDK 归档、解压后的工具链和 `target/` 构建产物都不进入仓库。
 
 ## 文档
 
@@ -33,13 +72,15 @@ HTTP → TLS → Transport SPI ← StdNetTransport → std.net
 - [仓库实施 backlog](docs/planning/implementation-backlog.md)
 - [执行状态](docs/planning/status.md)
 - [架构与 ADR](docs/architecture/README.md)
+- [现有网络栈盘点](docs/architecture/current-network-stack-inventory.md)
+- [CJPM 包布局 ADR](docs/architecture/adr/0001-cjpm-package-layout.md)
 - [采纳与发布门禁](docs/gates/README.md)
 - [任务证据约定](docs/evidence/README.md)
-- [外部环境记录](docs/references/environment.md)
+- [SDK 检查记录](docs/references/cangjie-sdk-1.1.0-alpha.20260817040003.md)
 - [Codex/Agent 仓库规则](AGENTS.md)
 
 ## 当前执行点
 
-仓库 bootstrap 完成后，从 **M0-001：盘点现有 TLS/HTTP/std.net 实现与依赖图** 开始。M0 的目标是先获得六平台 `std.net` 采纳证据、TLS provider PoC、Transport SPI 和 threat model，再进入正式数据路径实现。
+M0-001 和 M0-002 已完成。下一条串行架构任务是 **M0-003：建立架构依赖守卫**；**M0-004：建立网络门禁测试框架与统一结果格式** 也已经满足依赖，可以在不修改同一控制文件的独立分支上推进。
 
 不要把“能交叉编译”视为平台支持完成；涉及平台能力的完成声明必须有真机或原生 VM 证据。
