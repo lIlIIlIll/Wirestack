@@ -1,0 +1,5 @@
+GATE-NET-01 Linux x86_64: PASS (global: INCOMPLETE)
+- blocked-read: PASS; samples=20; wake p99=0.186 ms
+- blocked-write: PASS; samples=20; wake p99=0.196 ms
+- blocked-connect: PASS; samples=20; wake p99=4.058 ms
+- blocked-accept: PASS; samples=20; wake p99=1.21 ms
