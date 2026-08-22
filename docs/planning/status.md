@@ -21,9 +21,9 @@ Status values:
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
 | M0-001 | COMPLETE | [`docs/evidence/M0-001/README.md`](../evidence/M0-001/README.md) | SDK/source inventory and delete/reuse/isolate decisions complete; no runtime gate implied. |
-| M0-002 | READY | — | M0-001 complete; freeze the actual CJPM package/directory mapping using the supplied SDK. |
-| M0-003 | BLOCKED | — | Depends on M0-002. |
-| M0-004 | READY | — | M0-001 complete; establish the gate harness and result schema. |
+| M0-002 | COMPLETE | [`docs/evidence/M0-002/README.md`](../evidence/M0-002/README.md) | Actual CJPM package/path mapping frozen by ADR-0001; no public API added. |
+| M0-003 | READY | — | Add the mechanical architecture dependency guard for the frozen paths. |
+| M0-004 | READY | — | Establish the network-gate harness and result schema. |
 | M0-005 | BLOCKED | — | Depends on M0-004. |
 | M0-006..M0-022 | BLOCKED | — | Follow the dependency graph in `implementation-backlog.md`. |
 
