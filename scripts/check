@@ -2,6 +2,14 @@
 set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
+
+python3 -m unittest discover -s tools/tests -p 'test_*.py' -v
+python3 -m unittest discover -s tools/gates/tests -p 'test_*.py' -v
+if [[ -d tools/benchmarks/tests ]]; then
+  python3 -m unittest discover -s tools/benchmarks/tests -p 'test_*.py' -v
+fi
+python3 tools/architecture_guard.py --root . --format text
+
 command -v cjc >/dev/null
 command -v cjpm >/dev/null
 cjpm check
