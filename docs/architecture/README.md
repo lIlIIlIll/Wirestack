@@ -18,6 +18,14 @@ Core rules:
 - one absolute monotonic Deadline and one cancellation model across all phases;
 - all resource collections and protocol limits are bounded.
 
+## Accepted ADRs
+
+- [ADR-0001: CJPM Package and Source Layout](adr/0001-cjpm-package-layout.md)
+
+## Supporting architecture records
+
+- [Current Cangjie TLS/HTTP/std.net inventory](current-network-stack-inventory.md)
+
 ## ADR policy
 
 Use [`adr/0000-template.md`](adr/0000-template.md).
