@@ -1,0 +1,6 @@
+M0-007 task=COMPLETE linux_gate=INCOMPLETE global=INCOMPLETE
+full-duplex=PASS close-race=PASS abort=BLOCKED
+full-duplex samples=20 exact read/write bytes=262144/262144
+close-race seeds=100 reader wake p99=0.342 ms writer wake p99=0.362 ms
+same-read outcomes: [1,4]=8 [4,1]=12
+same-write outcomes: both-success=5 writer1-only=6 writer2-only=9
