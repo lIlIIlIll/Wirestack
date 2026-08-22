@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+OUTPUT=${1:-"$ROOT/build/gates/sdk-smoke.json"}
+ARTIFACT_DIR=${2:-"$ROOT/build/gates/sdk-smoke-artifacts"}
+
+for tool in cjc cjpm python3; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        echo "required tool is not available: $tool" >&2
+        exit 3
+    fi
+done
+
+exec python3 "$ROOT/tools/gates/gate_runner.py" \
+    --manifest "$ROOT/tools/gates/manifests/sdk-smoke.json" \
+    --repo-root "$ROOT" \
+    --artifact-dir "$ARTIFACT_DIR" \
+    --output "$OUTPUT"
