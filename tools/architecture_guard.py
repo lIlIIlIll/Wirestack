@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Enforce Wirestack's source/package and dependency boundaries.
+"""Enforce Wirestack source/package, dependency, and native-link boundaries.
 
-The guard intentionally uses only the Python standard library so it can run on
-GitHub-hosted runners before the Cangjie SDK is installed.
+The guard uses only the Python standard library so it can run before a Cangjie
+SDK is installed. It scans production source and build metadata, not docs or
+generated output.
 """
 
 from __future__ import annotations
@@ -19,11 +20,13 @@ SCHEMA_VERSION = 1
 ALLOWED_STD_NET_PACKAGE = "wirestack.internal.transport_stdnet"
 IGNORED_DIRS = {
     ".git", ".cjpm", ".codex", ".idea", ".local", ".vscode",
-    "build", "dist", "out", "target",
+    "__pycache__", "build", "dist", "out", "target",
 }
 PACKAGE_RE = re.compile(
     r"(?m)^\s*package\s+([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*)\s*$"
 )
+STD_NET_RE = re.compile(r"(?<![A-Za-z0-9_])std\s*\.\s*net\b")
+
 SOURCE_RULES: tuple[tuple[str, re.Pattern[str], str], ...] = (
     (
         "private-runtime-socket-abi",
@@ -32,12 +35,12 @@ SOURCE_RULES: tuple[tuple[str, re.Pattern[str], str], ...] = (
     ),
     (
         "legacy-stdx-network-stack",
-        re.compile(r"\bstdx\s*\.\s*net\s*\.\s*(?:tls|http)(?:\b|\s*\.)"),
+        re.compile(r"(?<![A-Za-z0-9_])stdx\s*\.\s*net\s*\.\s*(?:tls|http)(?:\b|\s*\.)"),
         "The new stack must not depend on legacy stdx.net.tls/http packages.",
     ),
     (
         "legacy-tls-ffi",
-        re.compile(r"\bstdx\s*\.\s*net\s*\.\s*tlsFFI\b"),
+        re.compile(r"(?<![A-Za-z0-9_])(?:-l)?stdx\s*\.\s*net\s*\.\s*tlsFFI\b"),
         "The new stack must not link or reference stdx.net.tlsFFI.",
     ),
     (
@@ -46,16 +49,25 @@ SOURCE_RULES: tuple[tuple[str, re.Pattern[str], str], ...] = (
         "The new stack must not use the legacy CJ_TLS_DYN_* bridge.",
     ),
 )
-STD_NET_RE = re.compile(r"\bstd\s*\.\s*net\b")
+
 CONFIG_RULES: tuple[tuple[str, re.Pattern[str], str], ...] = SOURCE_RULES + (
     (
         "openssl-dynamic-loader-bridge",
-        re.compile(r"cangjie-dynamicLoader-opensslFFI"),
+        re.compile(r"(?<![A-Za-z0-9_])(?:-l)?cangjie-dynamicLoader-opensslFFI\b"),
         "Wirestack build configuration must not use the legacy OpenSSL dynamic-loader bridge.",
     ),
+    (
+        "system-openssl-link",
+        re.compile(
+            r"(?<![A-Za-z0-9_])(?:-l(?:ssl|crypto)\b|"
+            r"(?:lib)?(?:ssl|crypto)\.(?:a|so(?:\.[0-9.]+)?|dylib|lib|dll)\b)",
+            re.IGNORECASE,
+        ),
+        "Default Wirestack build configuration must not link a system OpenSSL library.",
+    ),
 )
-CONFIG_NAMES = {"CMakeLists.txt", "build.cj", "cjpm.toml"}
-CONFIG_SUFFIXES = {".c", ".cc", ".cmake", ".cpp", ".h", ".hpp", ".toml"}
+CONFIG_NAMES = {"CMakeLists.txt", "Makefile", "build.cj", "build.py", "cjpm.toml"}
+CONFIG_SUFFIXES = {".c", ".cc", ".cmake", ".cpp", ".h", ".hpp", ".mk", ".toml"}
 
 
 @dataclass(frozen=True, order=True)
@@ -77,7 +89,7 @@ def _blank(text: str) -> str:
 
 
 def strip_cangjie_comments_and_literals(text: str) -> str:
-    """Blank comments/literals while preserving source length and newlines."""
+    """Blank comments and quoted literals while preserving offsets/newlines."""
     out: list[str] = []
     i = 0
     size = len(text)
@@ -104,20 +116,17 @@ def strip_cangjie_comments_and_literals(text: str) -> str:
                     i += 1
             out.append(_blank(text[start:i]))
             continue
-        if text.startswith('\"\"\"', i):
+        if text.startswith('"""', i):
             start = i
             i += 3
             while i < size:
-                if text.startswith('\"\"\"', i):
+                if text.startswith('"""', i):
                     i += 3
                     break
-                if text[i] == "\\" and i + 1 < size:
-                    i += 2
-                else:
-                    i += 1
+                i += 2 if text[i] == "\\" and i + 1 < size else 1
             out.append(_blank(text[start:i]))
             continue
-        if text[i] in {'\"', "'"}:
+        if text[i] in {'"', "'"}:
             quote = text[i]
             start = i
             i += 1
@@ -176,20 +185,14 @@ def source_files(root: Path) -> Iterator[Path]:
 
 def configuration_files(root: Path) -> Iterator[Path]:
     candidates: set[Path] = set()
-    for name in CONFIG_NAMES:
-        candidate = root / name
-        if candidate.is_file():
-            candidates.add(candidate)
-    source_root = root / "src"
-    if source_root.is_dir():
-        for path in source_root.rglob("*"):
-            if not path.is_file() or path.suffix == ".cj":
-                continue
-            relative = path.relative_to(root)
-            if _is_ignored(relative):
-                continue
-            if path.name in CONFIG_NAMES or path.suffix in CONFIG_SUFFIXES:
-                candidates.add(path)
+    for path in root.rglob("*"):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(root)
+        if _is_ignored(relative):
+            continue
+        if path.name in CONFIG_NAMES or path.suffix.lower() in CONFIG_SUFFIXES:
+            candidates.add(path)
     yield from sorted(candidates)
 
 
@@ -204,7 +207,7 @@ def inspect_source(root: Path, path: Path) -> list[Violation]:
             root, path, text, 0, "package-declaration-missing",
             f"Expected package declaration: package {wanted}",
         ))
-        actual_package = None
+        actual_package: str | None = None
     else:
         actual_package = package_match.group(1)
         if actual_package != wanted:
@@ -212,11 +215,11 @@ def inspect_source(root: Path, path: Path) -> list[Violation]:
                 root, path, text, package_match.start(1), "package-path-mismatch",
                 f"Package {actual_package!r} does not match path; expected {wanted!r}.",
             ))
-    for match in STD_NET_RE.finditer(semantic):
-        if actual_package != ALLOWED_STD_NET_PACKAGE:
+    if actual_package != ALLOWED_STD_NET_PACKAGE:
+        for match in STD_NET_RE.finditer(semantic):
             violations.append(_violation(
                 root, path, text, match.start(), "std-net-boundary",
-                "Only wirestack.internal.transport_stdnet may reference std.net.",
+                f"Only {ALLOWED_STD_NET_PACKAGE} may reference std.net.",
             ))
     for rule, pattern, message in SOURCE_RULES:
         for match in pattern.finditer(semantic):
