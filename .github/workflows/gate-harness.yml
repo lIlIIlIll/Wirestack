@@ -1,0 +1,35 @@
+name: Gate Harness
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gate-harness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run gate-runner unit tests
+        run: python3 -m unittest discover -s tools/gates/tests -p 'test_gate_runner.py' -v
+      - name: Validate checked-in manifests
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, "tools/gates")
+          import gate_runner
+
+          manifests = sorted(Path("tools/gates/manifests").glob("*.json"))
+          if not manifests:
+              raise SystemExit("no gate manifests found")
+          for manifest in manifests:
+              gate_runner.load_manifest(manifest)
+              print(f"validated {manifest}")
+          PY
