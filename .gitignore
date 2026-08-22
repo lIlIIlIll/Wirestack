@@ -1,0 +1,26 @@
+# Cangjie / build output
+target/
+build/
+dist/
+out/
+
+# Local tool state
+.cjpm/
+.codex/
+.env
+.env.*
+!.env.example
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs, traces, local benchmark output
+*.log
+*.tmp
+*.prof
+*.trace
+coverage/
+.local/
