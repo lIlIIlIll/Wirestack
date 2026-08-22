@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+
+if [ "$#" -lt 1 ]; then
+    echo "usage: sh scripts/run-gates <manifest.json> [output.json] [artifact-dir]" >&2
+    exit 64
+fi
+
+MANIFEST=$1
+OUTPUT=${2:-"$ROOT/build/gates/result.json"}
+ARTIFACT_DIR=${3:-"$ROOT/build/gates/artifacts"}
+
+exec python3 "$ROOT/tools/gates/gate_runner.py" \
+    --manifest "$MANIFEST" \
+    --repo-root "$ROOT" \
+    --artifact-dir "$ARTIFACT_DIR" \
+    --output "$OUTPUT"
