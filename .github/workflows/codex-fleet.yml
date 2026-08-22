@@ -1,0 +1,48 @@
+name: Codex Fleet Planner
+
+on:
+  pull_request:
+    paths:
+      - "tools/codex_fleet.py"
+      - "tools/codex_fleet_core.py"
+      - "tools/tests/test_codex_fleet.py"
+      - "scripts/codex-fleet"
+      - "scripts/with-host-gate-lock"
+      - "docs/planning/fleet-state.json"
+      - "docs/planning/parallel-execution.md"
+      - ".github/workflows/codex-fleet.yml"
+  push:
+    branches: [main]
+    paths:
+      - "tools/codex_fleet.py"
+      - "tools/codex_fleet_core.py"
+      - "tools/tests/test_codex_fleet.py"
+      - "scripts/codex-fleet"
+      - "scripts/with-host-gate-lock"
+      - "docs/planning/fleet-state.json"
+      - "docs/planning/parallel-execution.md"
+      - ".github/workflows/codex-fleet.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  planner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        run: python3 -m unittest discover -s tools/tests -p 'test_codex_fleet.py' -v
+      - name: Compile planner
+        run: python3 -m py_compile tools/codex_fleet.py tools/codex_fleet_core.py
+      - name: Validate current READY wave
+        shell: bash
+        run: |
+          scripts/codex-fleet plan > fleet-plan.txt
+          cat fleet-plan.txt
+          for id in M0-008 M0-009 M0-010 M0-011 M0-012 M0-013 M0-014 M0-015; do
+            grep -q "^${id}[[:space:]]" fleet-plan.txt
+          done
