@@ -87,14 +87,15 @@ jobs:
             -w /work \
             alpine:3.22 \
             sh -euxc '
+              output="build/tls-provider-poc/$PROVIDER"
+              trap '\''test ! -e "$output" || chmod -R a+rX "$output"'\'' EXIT
               apk add --no-cache \
                 build-base cmake ninja perl git openssl ca-certificates python3
               python3 tools/tls_provider_poc/run.py \
                 --provider "$PROVIDER" \
-                --output "build/tls-provider-poc/$PROVIDER/result.json"
+                --output "$output/result.json"
               python3 tools/tls_provider_poc/validate.py \
-                --result "build/tls-provider-poc/$PROVIDER/result.json"
-              chmod -R a+rX "build/tls-provider-poc/$PROVIDER"
+                --result "$output/result.json"
             '
       - uses: actions/upload-artifact@v4
         if: always()
