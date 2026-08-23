@@ -1,0 +1,54 @@
+{
+  "build": {
+    "binary_bytes": 3105712,
+    "binary_sha256": "d132cee353916305c2c8d5e6e4af6b2b715900937d9696d0ed9d372ad28cccb9",
+    "runtime_loader_library_strings": [],
+    "static_archives": [
+      {
+        "bytes": 668872,
+        "name": "libssl.a",
+        "sha256": "7ca2656c2349a4a2d286bf1c79260bdb915c2f1cdb95d9728a9adf3ec5dc6735"
+      },
+      {
+        "bytes": 4090424,
+        "name": "libcrypto.a",
+        "sha256": "dc70463f2b028b038e015c72d4568d4b8e9fab43351326603ecb38b15fb53afc"
+      }
+    ],
+    "system_tls_dependencies": []
+  },
+  "build_log_sha256": "bde99d5e5a760db1475c09e3e0ec9e80367a88b03858fbbf5b42a655013d07fb",
+  "capabilities": {
+    "caller_cancellation": "PASS",
+    "close_notify": "PASS",
+    "custom_ca": "PASS",
+    "external_signer": "BLOCKED",
+    "mtls": "PASS",
+    "negative_hostname": "PASS",
+    "negative_untrusted_ca": "PASS",
+    "partial_io_backpressure": "PASS",
+    "repeated_cleanup": "PASS",
+    "session_resumption": "PASS",
+    "sni_hostname_alpn": "PASS",
+    "tls12": "PASS",
+    "tls13": "PASS",
+    "truncation": "PASS"
+  },
+  "finished_at": "2026-08-23T12:13:13.760238+00:00",
+  "notes": [
+    "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
+  ],
+  "platform": "macos-arm64",
+  "poc_exit_code": 0,
+  "provider": "aws-lc",
+  "schema_version": 1,
+  "source": {
+    "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+    "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+    "kind": "git",
+    "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
+  },
+  "started_at": "2026-08-23T12:12:34.954733+00:00",
+  "status": "PARTIAL",
+  "task_id": "M0-016"
+}
