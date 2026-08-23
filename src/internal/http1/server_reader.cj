@@ -1,7 +1,7 @@
 package wirestack.internal.http1
 
 import std.sync.Mutex
-import wirestack.http.*
+import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
 
 private const HTTP1_SERVER_READ_BUFFER_SIZE: Int64 = 16 * 1024
