@@ -226,3 +226,38 @@ handshake result retains the requested name. Paired real memory-BIO tests use
 two distinct certificates and policies to prove the selected name controls the
 certificate, TLS version and ALPN, while missing and unknown names expose stable
 selection error codes. This completes M3-022.
+
+## Session resumption
+
+Each provider owns a thread-safe LRU client-session store bounded to 256 entries,
+4 MiB total encoded state and 256 KiB per session. Entries use a monotonic expiry
+derived from the provider session lifetime. Replacement, expiry, eviction,
+single-use consumption and provider close overwrite the encoded session bytes;
+diagnostics expose only counts and byte totals.
+
+The store key includes the reference server identity, ordered ALPN offer, trust
+policy identity and selected Linux CA source, client identity, provider
+id/fingerprint and TLS version policy. A session cannot therefore bypass a
+changed authentication or negotiation context. TLS 1.3 tickets are consumed
+once as required by RFC 8446 privacy guidance; TLS 1.2 tickets may remain until
+expiry or eviction.
+
+Servers use stateless tickets with a random provider-instance key shared across
+fresh engine `SSL_CTX` objects and rotated after 48 hours. Each engine also
+installs a 32-byte digest of its complete server context as the session-id
+context, including SNI-selected identity, ALPN, protocol range and mTLS trust
+source. This prevents a valid ticket from crossing virtual-host or client-auth
+boundaries.
+
+AWS-LC defers TLS 1.3 `NewSessionTicket` generation until the first write, so
+the server engine performs one zero-length post-handshake write and the normal
+memory-BIO path transports the ticket. Client callbacks serialize at most one
+bounded ticket into engine-owned memory; Cangjie copies it into the store and
+clears the native copy. Session parsing strips any early-data capability before
+`SSL_set_session`, and early data is explicitly disabled on both `SSL_CTX` and
+`SSL`.
+
+Paired memory-BIO tests create fresh client and server engines and prove both
+TLS 1.2 and TLS 1.3 report `resumed`. Deterministic store tests prove limits,
+LRU eviction, expiry, single-use behavior and every isolation-key dimension.
+This completes M3-025.
