@@ -14,7 +14,9 @@ enum wirestack_tls_provider_status {
     WIRESTACK_TLS_PROVIDER_OUT_OF_MEMORY = 2,
     WIRESTACK_TLS_PROVIDER_CLOSED = 3,
     WIRESTACK_TLS_PROVIDER_RANDOM_FAILED = 4,
-    WIRESTACK_TLS_PROVIDER_ENGINE_FAILED = 5
+    WIRESTACK_TLS_PROVIDER_ENGINE_FAILED = 5,
+    WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID = 6,
+    WIRESTACK_TLS_PROVIDER_LIMIT_EXCEEDED = 7
 };
 
 enum wirestack_tls_engine_role {
@@ -56,6 +58,26 @@ const char *wirestack_tls_provider_backend(uint64_t handle);
 const char *wirestack_tls_provider_patch_level(uint64_t handle);
 uint64_t wirestack_tls_provider_capabilities(uint64_t handle);
 int32_t wirestack_tls_provider_random(uint64_t handle, uint8_t *output, uint64_t size);
+int32_t wirestack_tls_sha256(
+    const uint8_t *input,
+    uint64_t size,
+    uint8_t out_digest[32]
+);
+int32_t wirestack_tls_certificate_validate_der(
+    const uint8_t *input,
+    uint64_t size,
+    uint64_t maximum_extensions,
+    uint64_t *out_extension_count
+);
+int32_t wirestack_tls_certificate_subject_alt_names(
+    const uint8_t *input,
+    uint64_t size,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_required_size,
+    uint64_t *out_dns_count,
+    uint64_t *out_ip_count
+);
 
 int32_t wirestack_tls_engine_create(
     uint64_t provider_handle,
@@ -65,6 +87,43 @@ int32_t wirestack_tls_engine_create(
     uint64_t *out_engine_handle
 );
 void wirestack_tls_engine_destroy(uint64_t engine_handle);
+int32_t wirestack_tls_engine_add_trust_anchor_der(
+    uint64_t engine_handle,
+    const uint8_t *input,
+    uint64_t size
+);
+int32_t wirestack_tls_engine_add_spki_sha256_pin(
+    uint64_t engine_handle,
+    const uint8_t digest[32],
+    int32_t scope
+);
+int32_t wirestack_tls_engine_load_verify_locations(
+    uint64_t engine_handle,
+    const char *certificate_bundle,
+    const char *hashed_certificate_directory
+);
+int32_t wirestack_tls_engine_load_verify_bundle(
+    uint64_t engine_handle,
+    const char *certificate_bundle
+);
+int32_t wirestack_tls_engine_load_verify_directory(
+    uint64_t engine_handle,
+    const char *hashed_certificate_directory
+);
+int32_t wirestack_tls_engine_set_server_name(
+    uint64_t engine_handle,
+    const char *server_name
+);
+int32_t wirestack_tls_engine_set_dns_reference_identity(
+    uint64_t engine_handle,
+    const char *dns_name
+);
+int32_t wirestack_tls_engine_set_ip_reference_identity(
+    uint64_t engine_handle,
+    const uint8_t *address,
+    uint64_t size
+);
+int32_t wirestack_tls_engine_enable_peer_verification(uint64_t engine_handle);
 int32_t wirestack_tls_engine_handshake_step(
     uint64_t engine_handle,
     int32_t *out_step

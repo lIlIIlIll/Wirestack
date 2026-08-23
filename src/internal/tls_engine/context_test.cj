@@ -3,6 +3,7 @@ package wirestack.internal.tls_engine
 import std.collection.*
 import std.unittest.*
 import std.unittest.testmacro.*
+import wirestack.internal.trust.*
 
 @Test
 class TlsContextTest {
@@ -54,7 +55,7 @@ class TlsContextTest {
         let capabilities = TlsCapabilities.fromProvider(manifest)
         let input = ["h2", "http/1.1"]
         let context = TlsClientContext.builder(manifest, capabilities)
-            .trust(customTrust())
+            .trust(testTrust())
             .alpn(input)
             .build()
         input[0] = "mutated"
@@ -87,7 +88,7 @@ class TlsContextTest {
         let capabilities = TlsCapabilities.fromProvider(manifest)
         let strict = TlsClientContext.builder(manifest, capabilities)
             .securityProfile(TlsSecurityProfile.StrictTls13)
-            .trust(customTrust())
+            .trust(testTrust())
             .build()
         @Expect(isTls13(strict.security.minimumVersion))
         @Expect(isTls13(strict.security.maximumVersion))
@@ -97,7 +98,7 @@ class TlsContextTest {
             let _ = TlsClientContext.builder(manifest, capabilities)
                 .securityProfile(TlsSecurityProfile.StrictTls13)
                 .versions(TlsVersion.Tls12, TlsVersion.Tls13)
-                .trust(customTrust())
+                .trust(testTrust())
                 .build()
         } catch (error: TlsContextException) {
             match (error.code) {
@@ -116,7 +117,7 @@ class TlsContextTest {
             let _ = TlsClientContext.builder(
                 noTls13,
                 TlsCapabilities.fromProvider(noTls13)
-            ).trust(customTrust()).build()
+            ).trust(testTrust()).build()
         } catch (error: TlsContextException) {
             match (error.capability) {
                 case Some(TlsCapability.Tls13) => tls13Rejected = true
@@ -131,7 +132,7 @@ class TlsContextTest {
             let _ = TlsClientContext.builder(
                 noHttp2,
                 TlsCapabilities.fromProvider(noHttp2)
-            ).trust(customTrust()).alpn(["h2"]).build()
+            ).trust(testTrust()).alpn(["h2"]).build()
         } catch (error: TlsContextException) {
             match (error.capability) {
                 case Some(TlsCapability.Http2) => http2Rejected = true
@@ -149,7 +150,7 @@ class TlsContextTest {
             var rejected = false
             try {
                 let _ = TlsClientContext.builder(manifest, capabilities)
-                    .trust(customTrust())
+                    .trust(testTrust())
                     .alpn(values)
                     .build()
             } catch (error: TlsContextException) {
@@ -195,7 +196,7 @@ class TlsContextTest {
         let context = TlsServerContext.builder(manifest, capabilities)
             .identity(serverIdentity)
             .clientAuthentication(ClientAuthentication.Required)
-            .clientTrust(customTrust())
+            .clientTrust(testTrust())
             .alpn(["h2", "http/1.1"])
             .build()
         @Expect(context.alpnProtocols()[0], "h2")
@@ -248,8 +249,8 @@ private func fullManifest(bits!: UInt64 = 0x1ffu64): TlsProviderManifest {
     )
 }
 
-private func customTrust(): TlsTrustRequirement {
-    TlsTrustRequirement(TlsTrustRequirementKind.CustomRoots, "test-roots")
+private func testTrust(): TrustPolicy {
+    TrustPolicy.pinnedPublicKeys([SpkiSha256Pin(Array<Byte>(32, repeat: 7))])
 }
 
 private func isTls12(value: TlsVersion): Bool {

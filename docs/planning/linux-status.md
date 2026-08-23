@@ -70,6 +70,11 @@ Status values have the same fail-closed meaning as the global status file.
 | M3-006 immutable TLS contexts | COMPLETE | Builder-only mutable state; built client/server contexts defensively copy ALPN/configuration, expose immutable policy/capabilities and pass concurrent-sharing tests |
 | M3-007 security profiles | COMPLETE | Compatible/Modern default to TLS 1.2..1.3, StrictTls13 pins 1.3; AWS-LC min/max protocol controls enforce the selected range and compression, renegotiation, NULL/anonymous suites and 0-RTT remain disabled without cipher-string configuration |
 | M3-008 capability query/fail-fast | COMPLETE | Explicit systemTrust/customRoots/hardwareKeys/clientCertificate/serverMode/tls12/tls13/http2/networkBinding inventory; unsupported trust, key, version, HTTP/2 and server/mTLS requirements fail during context construction |
+| M3-009 `TrustPolicy`/evidence model | COMPLETE | System/CustomRoots/SystemPlusCustomRoots/PinnedPublicKeys are immutable and content-identified with SHA-256; no TrustAll state exists; normalized verification evidence contains no native object |
+| M3-010 bounded certificate input | COMPLETE | Exact DER X.509 decoding is performed by pinned AWS-LC; 16-chain/256-KiB-certificate/1-MiB-total/128-extension hard ceilings, duplicate rejection and bounded SAN extraction fail closed |
+| M3-011 reference identity verifier | COMPLETE | SAN-only DNS/IP models, no CN field/fallback, ASCII IDNA A-label handling, one-label wildcard rules, 256-SAN ceiling and native SNI/reference separation tests |
+| M3-012 custom roots/pinning | IN_PROGRESS | CustomRoots and SystemPlusCustomRoots load explicit DER anchors without disabling identity verification; SPKI SHA-256 leaf/any-chain pin callback is wired, but positive/mismatch end-to-end server handshake evidence remains |
+| M3-013 Linux system trust | IN_PROGRESS | Frozen ordered bundle/hashed-directory discovery, explicit AWS-LC loading, no provider-default fallback and current glibc host tests pass; native musl adapter execution evidence remains |
 
 ## Next critical path
 
