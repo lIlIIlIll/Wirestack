@@ -65,7 +65,7 @@ class Tests(unittest.TestCase):
         self.assertEqual("FAIL", result["decision"])
 
     def test_percentile_nearest_rank(self):
-        self.assertEqual(3.0, gate.percentile([1, 2, 3, 4], 50))
+        self.assertEqual(2.0, gate.percentile([1, 2, 3, 4], 50))
         self.assertEqual(4.0, gate.percentile([1, 2, 3, 4], 95))
 
 
