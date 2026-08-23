@@ -1,0 +1,45 @@
+name: Materialize M0-009
+
+on:
+  push:
+    branches:
+      - task/M0-009-eof-terminal-evidence
+    paths:
+      - ".automation/m0-009-materialize.tar.gz"
+      - ".github/workflows/materialize-m0-009.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify and extract task payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "3e3d299fb87696d11f6c8e55961d28004b0e1eb65e18d9823f448bef0c9c977e  .automation/m0-009-materialize.tar.gz" | sha256sum -c -
+          tar -xzf .automation/m0-009-materialize.tar.gz
+          chmod +x scripts/gate-net04-terminal-evidence
+          rm -f .automation/m0-009-materialize.tar.gz .github/workflows/materialize-m0-009.yml
+      - name: Verify materialized harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tools/gates/tests -p 'test_net04_terminal_evidence.py' -v
+          python3 -m py_compile tools/gates/net04_terminal_evidence.py tools/gates/net04_terminal_evidence_sources.py
+          gzip -dc docs/evidence/M0-009/linux_x86_64/result.json.gz | sha256sum
+          test "$(gzip -dc docs/evidence/M0-009/linux_x86_64/result.json.gz | sha256sum | cut -d' ' -f1)" = "2ca8598eb5e014378bb324ff8ac087a0e4e855fbc2f02f29cd0341df97e141fb"
+      - name: Commit materialized task
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "test(M0-009): add EOF and terminal evidence harness"
+          git push origin HEAD:task/M0-009-eof-terminal-evidence
