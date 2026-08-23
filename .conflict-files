@@ -1,3 +1,0 @@
-ancestorEntries = []
-ourEntries = ["tools/tests/test_tls_provider_poc.py"]
-theirEntries = ["tools/tests/test_tls_provider_poc.py"]
