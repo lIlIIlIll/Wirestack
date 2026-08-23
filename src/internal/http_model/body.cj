@@ -1,4 +1,4 @@
-package wirestack.http
+package wirestack.internal.http_model
 
 import std.fs.*
 import std.sync.Mutex
