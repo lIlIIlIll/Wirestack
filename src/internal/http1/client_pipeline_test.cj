@@ -81,10 +81,16 @@ private class PipelineEchoHandler <: Http1ServerHandler {
 }
 
 private func readPipelineBody(body: ResponseBody): String {
-    let buffer = Array<Byte>(16, repeat: 0)
-    let count = body.read(buffer)
+    let expected = body.contentLength.getOrThrow()
+    let bytes = Array<Byte>(expected, repeat: 0)
+    var offset: Int64 = 0
+    while (offset < expected) {
+        let buffer = Array<Byte>(expected - offset, repeat: 0)
+        let count = body.read(buffer)
+        if (count == 0) { break }
+        for (index in 0..count) { bytes[offset + index] = buffer[index] }
+        offset += count
+    }
     body.close()
-    let bytes = Array<Byte>(count, repeat: 0)
-    for (index in 0..count) { bytes[index] = buffer[index] }
     String.fromUtf8(bytes)
 }
