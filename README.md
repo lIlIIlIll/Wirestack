@@ -81,6 +81,6 @@ SDK 归档、解压后的工具链和 `target/` 构建产物都不进入仓库�
 
 ## 当前执行点
 
-M0-001～M0-009、M0-013、M0-015 和 M0-018 已完成。M0-016 已保留 Linux glibc、Linux musl 与 macOS arm64 的九份原生结果，但全部因 external signer 等能力缺口保持 `PARTIAL`；Windows 与移动平台证据仍缺失，因此任务为 `BLOCKED`。其余当前 M0 任务也受原生平台、长时运行或复制计数证据阻塞，仓库目前没有可安全启动的后续实现任务。
+Linux Transport/Resolver/Connector 基础实现已经形成三个本地提交。M0-016 保留的 AWS-LC Linux glibc/musl schema-v2 结果均为 `PASS`，包含 TLS 1.2/1.3 external signer 和各 10,000 次 handshake/close；ADR-0003 因此冻结 Linux 默认 provider。全局 M0-016/M0-020 仍因 Windows、macOS external signer 与移动平台证据缺失而保持 `BLOCKED`。当前 Linux 关键路径进入 AWS-LC 静态集成与 TLS Core 实现。
 
 不要把“能交叉编译”视为平台支持完成；涉及平台能力的完成声明必须有真机或原生 VM 证据。
