@@ -124,31 +124,6 @@ public struct TlsSecurityPolicy {
     }
 }
 
-public enum TlsIdentityUsage {
-    | Client
-    | Server
-}
-
-/** Opaque identity input; private-key material and native handles never appear here. */
-public struct TlsIdentityRequirement {
-    public let identityId: String
-    public let usage: TlsIdentityUsage
-    public let requiresHardwareKey: Bool
-
-    public init(
-        identityId: String,
-        usage: TlsIdentityUsage,
-        requiresHardwareKey!: Bool = false
-    ) {
-        if (identityId.isEmpty()) {
-            throw IllegalArgumentException("TLS identity id must not be empty")
-        }
-        this.identityId = identityId
-        this.usage = usage
-        this.requiresHardwareKey = requiresHardwareKey
-    }
-}
-
 public enum ClientAuthentication {
     | None
     | Optional
@@ -158,7 +133,6 @@ public enum ClientAuthentication {
 public enum TlsContextErrorCode {
     | MissingTrust
     | MissingIdentity
-    | InvalidIdentityUsage
     | InvalidVersionRange
     | InvalidAlpn
     | UnsupportedCapability
@@ -187,7 +161,7 @@ public class TlsClientContext {
     public let capabilities: TlsCapabilities
     public let security: TlsSecurityPolicy
     public let trust: TrustPolicy
-    public let identity: ?TlsIdentityRequirement
+    public let identity: ?LocalIdentity
     private let protocolNames: Array<String>
 
     private init(
@@ -195,7 +169,7 @@ public class TlsClientContext {
         capabilities: TlsCapabilities,
         security: TlsSecurityPolicy,
         trust: TrustPolicy,
-        identity: ?TlsIdentityRequirement,
+        identity: ?LocalIdentity,
         protocolNames: Array<String>
     ) {
         this.providerManifest = providerManifest
@@ -220,7 +194,7 @@ public class TlsClientContext {
         capabilities: TlsCapabilities,
         security: TlsSecurityPolicy,
         trust: TrustPolicy,
-        identity: ?TlsIdentityRequirement,
+        identity: ?LocalIdentity,
         protocolNames: Array<String>
     ): TlsClientContext {
         TlsClientContext(
@@ -239,7 +213,7 @@ public class TlsServerContext {
     public let providerManifest: TlsProviderManifest
     public let capabilities: TlsCapabilities
     public let security: TlsSecurityPolicy
-    public let identity: TlsIdentityRequirement
+    public let identity: LocalIdentity
     public let clientAuthentication: ClientAuthentication
     public let clientTrust: ?TrustPolicy
     private let protocolNames: Array<String>
@@ -248,7 +222,7 @@ public class TlsServerContext {
         providerManifest: TlsProviderManifest,
         capabilities: TlsCapabilities,
         security: TlsSecurityPolicy,
-        identity: TlsIdentityRequirement,
+        identity: LocalIdentity,
         clientAuthentication: ClientAuthentication,
         clientTrust: ?TrustPolicy,
         protocolNames: Array<String>
@@ -275,7 +249,7 @@ public class TlsServerContext {
         providerManifest: TlsProviderManifest,
         capabilities: TlsCapabilities,
         security: TlsSecurityPolicy,
-        identity: TlsIdentityRequirement,
+        identity: LocalIdentity,
         clientAuthentication: ClientAuthentication,
         clientTrust: ?TrustPolicy,
         protocolNames: Array<String>
@@ -299,7 +273,7 @@ public class TlsClientContextBuilder {
     private var minimum = TlsVersion.Tls12
     private var maximum = TlsVersion.Tls13
     private var trustRequirement: ?TrustPolicy = Some(TrustPolicy.system())
-    private var identityRequirement: ?TlsIdentityRequirement = None<TlsIdentityRequirement>
+    private var identityRequirement: ?LocalIdentity = None<LocalIdentity>
     private var protocols = Array<String>()
 
     internal init(providerManifest: TlsProviderManifest, capabilities: TlsCapabilities) {
@@ -331,7 +305,7 @@ public class TlsClientContextBuilder {
         this
     }
 
-    public func identity(value: TlsIdentityRequirement): TlsClientContextBuilder {
+    public func identity(value: LocalIdentity): TlsClientContextBuilder {
         identityRequirement = Some(value)
         this
     }
@@ -353,7 +327,7 @@ public class TlsClientContextBuilder {
         }
         validateTrust(resolvedTrust, capabilities)
         match (identityRequirement) {
-            case Some(value) => validateIdentity(value, TlsIdentityUsage.Client, capabilities)
+            case Some(value) => validateIdentity(value, true, capabilities)
             case None => ()
         }
         TlsClientContext.create(
@@ -373,7 +347,7 @@ public class TlsServerContextBuilder {
     private var profile = TlsSecurityProfile.Modern
     private var minimum = TlsVersion.Tls12
     private var maximum = TlsVersion.Tls13
-    private var identityRequirement: ?TlsIdentityRequirement = None<TlsIdentityRequirement>
+    private var identityRequirement: ?LocalIdentity = None<LocalIdentity>
     private var authentication = ClientAuthentication.None
     private var trustRequirement: ?TrustPolicy = None<TrustPolicy>
     private var protocols = Array<String>()
@@ -402,7 +376,7 @@ public class TlsServerContextBuilder {
         this
     }
 
-    public func identity(value: TlsIdentityRequirement): TlsServerContextBuilder {
+    public func identity(value: LocalIdentity): TlsServerContextBuilder {
         identityRequirement = Some(value)
         this
     }
@@ -433,7 +407,7 @@ public class TlsServerContextBuilder {
                 "TLS server context requires a local identity"
             )
         }
-        validateIdentity(resolvedIdentity, TlsIdentityUsage.Server, capabilities)
+        validateIdentity(resolvedIdentity, false, capabilities)
         match (authentication) {
             case ClientAuthentication.None => ()
             case _ =>
@@ -532,23 +506,16 @@ private func validateTrust(value: TrustPolicy, capabilities: TlsCapabilities): U
 }
 
 private func validateIdentity(
-    value: TlsIdentityRequirement,
-    expected: TlsIdentityUsage,
+    value: LocalIdentity,
+    clientIdentity: Bool,
     capabilities: TlsCapabilities
 ): Unit {
-    if (identityUsageNumber(value.usage) != identityUsageNumber(expected)) {
-        throw TlsContextException(
-            TlsContextErrorCode.InvalidIdentityUsage,
-            "TLS identity usage does not match the context role"
-        )
+    if (clientIdentity) {
+        requireCapability(capabilities, TlsCapability.ClientCertificate, "client identity")
+    } else {
+        requireCapability(capabilities, TlsCapability.ServerMode, "server identity")
     }
-    match (expected) {
-        case TlsIdentityUsage.Client =>
-            requireCapability(capabilities, TlsCapability.ClientCertificate, "client identity")
-        case TlsIdentityUsage.Server =>
-            requireCapability(capabilities, TlsCapability.ServerMode, "server identity")
-    }
-    if (value.requiresHardwareKey) {
+    if (value.privateKeyRef.requiresHardwareKey) {
         requireCapability(capabilities, TlsCapability.HardwareKeys, "hardware-backed identity")
     }
 }
@@ -571,13 +538,6 @@ internal func tlsVersionNumber(value: TlsVersion): Int64 {
     match (value) {
         case TlsVersion.Tls12 => 12
         case TlsVersion.Tls13 => 13
-    }
-}
-
-private func identityUsageNumber(value: TlsIdentityUsage): Int64 {
-    match (value) {
-        case TlsIdentityUsage.Client => 0
-        case TlsIdentityUsage.Server => 1
     }
 }
 

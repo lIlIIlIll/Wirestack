@@ -86,7 +86,7 @@ class TlsEnginePumpTest {
     @TestCase
     func customRootChainIsLoadedIntoARealAwsLcClientEngine(): Unit {
         let provider = AwsLcTlsProvider()
-        let roots = CertificateChain([DerCertificate(tlsEngineTestCertificateDer())])
+        let roots = CertificateChain([DerCertificate(tlsTestCertificateDer())])
         let context = TlsClientContext.builder(
             provider.manifest(),
             TlsCapabilities.fromProvider(provider.manifest())
@@ -113,12 +113,7 @@ class TlsEnginePumpTest {
     @TestCase
     func spkiPinPolicyConfiguresTheNativeVerificationPathBeforeHandshake(): Unit {
         let provider = AwsLcTlsProvider()
-        let pin = SpkiSha256Pin([
-            0x38, 0x10, 0x47, 0x98, 0x33, 0x60, 0x71, 0x56,
-            0x96, 0xef, 0x15, 0xed, 0xa6, 0x74, 0x24, 0x3b,
-            0xea, 0x5f, 0xb9, 0x7a, 0xc8, 0x52, 0xe4, 0xe5,
-            0xc3, 0xf1, 0xb4, 0xd8, 0x03, 0x2a, 0xf4, 0x3e
-        ])
+        let pin = tlsTestSpkiPin()
         let context = TlsClientContext.builder(
             provider.manifest(),
             TlsCapabilities.fromProvider(provider.manifest())
@@ -138,6 +133,70 @@ class TlsEnginePumpTest {
             @Expect(engine.pendingCiphertext() > 0)
         } finally {
             engine.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
+    func matchingSpkiPinCompletesARealClientServerHandshake(): Unit {
+        let provider = AwsLcTlsProvider()
+        let identity = tlsTestLocalIdentity()
+        let capabilities = provider.linuxCapabilities()
+        let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
+            .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
+            .build()
+        let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
+            .identity(identity)
+            .build()
+        let client = provider.createClientEngine(
+            clientContext,
+            ReferenceIdentity.Dns(HostName("example.com")),
+            serverName: Some(HostName("example.com"))
+        )
+        let server = provider.createServerEngine(serverContext)
+        try {
+            drivePairedMemoryHandshake(client, server)
+        } finally {
+            client.close()
+            server.close()
+            identity.privateKeyRef.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
+    func mismatchedSpkiPinFailsARealClientServerHandshake(): Unit {
+        let provider = AwsLcTlsProvider()
+        let identity = tlsTestLocalIdentity()
+        let capabilities = provider.linuxCapabilities()
+        let wrongPin = SpkiSha256Pin(Array<Byte>(32, repeat: 0))
+        let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
+            .trust(TrustPolicy.pinnedPublicKeys([wrongPin]))
+            .build()
+        let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
+            .identity(identity)
+            .build()
+        let client = provider.createClientEngine(
+            clientContext,
+            ReferenceIdentity.Dns(HostName("example.com")),
+            serverName: Some(HostName("example.com"))
+        )
+        let server = provider.createServerEngine(serverContext)
+        var rejected = false
+        try {
+            try {
+                drivePairedMemoryHandshake(client, server)
+            } catch (error: TlsEngineException) {
+                match (error.tlsCode) {
+                    case TlsEngineErrorCode.ProviderFailure => rejected = true
+                    case _ => ()
+                }
+            }
+            @Expect(rejected)
+        } finally {
+            client.close()
+            server.close()
+            identity.privateKeyRef.close()
             provider.close()
         }
     }
@@ -267,40 +326,64 @@ private func containsAscii(buffer: Array<Byte>, length: Int64, needle: String): 
     false
 }
 
-private func tlsEngineTestCertificateDer(): Array<Byte> {
-    decodeTlsEngineBase64(
-        "MIIDQzCCAiugAwIBAgIUV5PGYfjXOQnu+igzQly36jWWRgowDQYJKoZIhvcNAQELBQAwGjEYMBYGA1UEAwwPaWdub3JlZC5leGFtcGxlMB4XDTI2MDgyMzE5NTMyNVoXDTI2MDgyNDE5NTMyNVowGjEYMBYGA1UEAwwPaWdub3JlZC5leGFtcGxlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuQugF5gdGjMYdi0nY2Agd85kifIDv0NjOO+Wf1Att0pAQKp9I+7JJZzRElhj/2sCGMM+uS+mhcVV88jIDDSa5o9w0LeX5Rgl73Wm6m4fZWdywOzlZQ9Mo7CgmluShrv+Kps7gw94iApgvgzWtfBlXQJsRZil3Agtl2s8h+7v7CBf0iZ2EYGR3GFQJHTUFYJiCpOuiCT9FDG3rjwn1XA+r9Xg1LK2uAZ8wdv6VSrcuoiPE5SH33KDpg4XXgbNP6+PItb3+pRCk/5jWXG3CLHuc4kCwy9R4nG7XVKIC89Ye1bf08ZWcIWgEfwb7Mz3tvisJZ4pekbrMtx0MmHvuhY6hQIDAQABo4GAMH4wHQYDVR0OBBYEFDh1w+O/EI8PmXPwMAgNhbGaA63sMB8GA1UdIwQYMBaAFDh1w+O/EI8PmXPwMAgNhbGaA63sMA8GA1UdEwEB/wQFMAMBAf8wKwYDVR0RBCQwIoILZXhhbXBsZS5jb22CDSouZXhhbXBsZS5vcmeHBH8AAAEwDQYJKoZIhvcNAQELBQADggEBADzEAhmpVV1+ZPPmUXplLVBthDbVTmFlIwPMoUlzk7gQjNjKpjIRTPpRXQddr//UtCia9am74pJNr265vbVMAVWUCoIirkOtEvWc5FLjo1ZOCHo6Di8rMg1ThA1sRMjAKkMn5iw8f8vldJ2AXWpjxGK8yCZj063M9XShzzV95+BCGkmIJTXtG8mKcRko4sFQ1jWHBW4jX0PcLksB+1U8MBpevxgqoa8lgZQFzQhuFmGlJmXThCUWWElsKkwJSU62/E6wm1oxE+tngPQ4itqH0HS0X5YuEjCch8LgYetttH8eXSRkjNN+hY3e0a1jfhFDSqjH1i90c99oyJg1l5BXk0A="
+private func drivePairedMemoryHandshake(client: TlsEngine, server: TlsEngine): Unit {
+    for (_ in 0..128) {
+        let clientStep = client.handshakeStep()
+        let clientMoved = transferCiphertext(client, server)
+        let serverStep = server.handshakeStep()
+        let serverMoved = transferCiphertext(server, client)
+        if (isHandshakeComplete(clientStep) && isHandshakeComplete(serverStep)) {
+            return
+        }
+        if (!clientMoved && !serverMoved &&
+            isHandshakeReadBlocked(clientStep) && isHandshakeReadBlocked(serverStep)) {
+            throw TlsEngineException(
+                TlsEngineErrorCode.NoProgress,
+                "paired TLS memory handshake made no progress"
+            )
+        }
+    }
+    throw TlsEngineException(
+        TlsEngineErrorCode.NoProgress,
+        "paired TLS memory handshake exceeded its step bound"
     )
 }
 
-private func decodeTlsEngineBase64(value: String): Array<Byte> {
-    let output = ArrayList<Byte>()
-    var accumulator: Int64 = 0
-    var bits: Int64 = 0
-    for (byte in value.toArray()) {
-        if (byte == b'=') { break }
-        let decoded: Int64 = if (byte >= b'A' && byte <= b'Z') {
-            Int64(byte - b'A')
-        } else if (byte >= b'a' && byte <= b'z') {
-            Int64(byte - b'a') + 26
-        } else if (byte >= b'0' && byte <= b'9') {
-            Int64(byte - b'0') + 52
-        } else if (byte == b'+') {
-            62
-        } else if (byte == b'/') {
-            63
-        } else {
-            throw IllegalArgumentException("invalid TLS test fixture")
+private func transferCiphertext(source: TlsEngine, destination: TlsEngine): Bool {
+    let buffer = Array<Byte>(16 * 1024, repeat: 0)
+    var moved = false
+    while (source.pendingCiphertext() > 0) {
+        let count = source.drainCiphertext(MutableByteSpan(buffer))
+        var offset: Int64 = 0
+        while (offset < count) {
+            let written = destination.feedCiphertext(
+                ByteSpan(buffer, offset: offset, length: count - offset)
+            )
+            if (written <= 0) {
+                throw TlsEngineException(
+                    TlsEngineErrorCode.NoProgress,
+                    "paired TLS memory transport accepted no ciphertext"
+                )
+            }
+            offset += written
         }
-        accumulator = (accumulator << 6) | decoded
-        bits += 6
-        if (bits >= 8) {
-            bits -= 8
-            output.add(UInt8(UInt64((accumulator >> bits) & 0xff)))
-            accumulator &= if (bits == 0) { 0 } else { (1 << bits) - 1 }
-        }
+        moved = true
     }
-    output.toArray()
+    moved
+}
+
+private func isHandshakeComplete(value: TlsEngineStep): Bool {
+    match (value) {
+        case TlsEngineStep.Complete => true
+        case _ => false
+    }
+}
+
+private func isHandshakeReadBlocked(value: TlsEngineStep): Bool {
+    match (value) {
+        case TlsEngineStep.WantRead => true
+        case _ => false
+    }
 }
 
 private class ScriptedEngine <: TlsEngine {
