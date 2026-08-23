@@ -1,0 +1,54 @@
+{
+  "build": {
+    "binary_bytes": 7339232,
+    "binary_sha256": "5342b78b89ad3976b5cd1d347f63166fb09efd9315126f6727c9752ba0ae9fdc",
+    "runtime_loader_library_strings": [],
+    "static_archives": [
+      {
+        "bytes": 2078662,
+        "name": "libssl.a",
+        "sha256": "f79df5ad8deb02a202e88a9c633824b0b4254d61a36c34439be8aa43bd53ab7f"
+      },
+      {
+        "bytes": 12293540,
+        "name": "libcrypto.a",
+        "sha256": "c5f763563c0f2bf3a60cbf50426de3ac92c1a3608d8acaefa97fef8c24ff0a28"
+      }
+    ],
+    "system_tls_dependencies": []
+  },
+  "build_log_sha256": "f789347a08d130449919011dfbe91ba3dace9ac7d4a9eac0dc6eb45d299075f1",
+  "capabilities": {
+    "caller_cancellation": "PASS",
+    "close_notify": "PASS",
+    "custom_ca": "PASS",
+    "external_signer": "BLOCKED",
+    "mtls": "PASS",
+    "negative_hostname": "PASS",
+    "negative_untrusted_ca": "PASS",
+    "partial_io_backpressure": "PASS",
+    "repeated_cleanup": "PASS",
+    "session_resumption": "PASS",
+    "sni_hostname_alpn": "PASS",
+    "tls12": "PASS",
+    "tls13": "PASS",
+    "truncation": "PASS"
+  },
+  "finished_at": "2026-08-23T12:14:43.736477+00:00",
+  "notes": [
+    "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
+  ],
+  "platform": "linux-musl-x86_64",
+  "poc_exit_code": 0,
+  "provider": "openssl",
+  "schema_version": 1,
+  "source": {
+    "archive": "openssl-3.6.3.tar.gz",
+    "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
+    "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
+    "kind": "archive"
+  },
+  "started_at": "2026-08-23T12:12:37.290028+00:00",
+  "status": "PARTIAL",
+  "task_id": "M0-016"
+}

@@ -1,0 +1,59 @@
+{
+  "build": {
+    "binary_bytes": 742752,
+    "binary_sha256": "6a9732666c33bb1e2cd62e77094af5e44fa16aa9491492e2b18066bb43aa5a4b",
+    "runtime_loader_library_strings": [],
+    "static_archives": [
+      {
+        "bytes": 427384,
+        "name": "libmbedtls.a",
+        "sha256": "9039b8576e16ec6652e3788c266e69ca5e2fc95924c242a90b4a026fe4b267ac"
+      },
+      {
+        "bytes": 127528,
+        "name": "libmbedx509.a",
+        "sha256": "4b8f845acdc3b06c3d684540d431d8aa56cb059a91db4f8a9caa5b0a2bfa915e"
+      },
+      {
+        "bytes": 670520,
+        "name": "libtfpsacrypto.a",
+        "sha256": "cf5424a33b915fdafe51fe2d09b01a6f614ffc983e88bc8a1cc37d26d2c17f61"
+      }
+    ],
+    "system_tls_dependencies": []
+  },
+  "build_log_sha256": "e3c8ab7f1440fdc661eebd8944feb2314daa1da009abf01d68cd017def3a09c6",
+  "capabilities": {
+    "caller_cancellation": "PASS",
+    "close_notify": "PASS",
+    "custom_ca": "PASS",
+    "external_signer": "BLOCKED",
+    "mtls": "PASS",
+    "negative_hostname": "PASS",
+    "negative_untrusted_ca": "PASS",
+    "partial_io_backpressure": "PASS",
+    "repeated_cleanup": "PASS",
+    "session_resumption": "BLOCKED",
+    "sni_hostname_alpn": "PASS",
+    "tls12": "PASS",
+    "tls13": "PASS",
+    "truncation": "PASS"
+  },
+  "finished_at": "2026-08-23T12:12:49.027310+00:00",
+  "notes": [
+    "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
+  ],
+  "platform": "macos-arm64",
+  "poc_exit_code": 0,
+  "provider": "mbedtls",
+  "schema_version": 1,
+  "source": {
+    "archive": "mbedtls-4.2.0.tar.bz2",
+    "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
+    "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
+    "kind": "archive"
+  },
+  "started_at": "2026-08-23T12:12:36.753294+00:00",
+  "status": "PARTIAL",
+  "task_id": "M0-016"
+}

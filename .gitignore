@@ -4,6 +4,9 @@ build/
 dist/
 out/
 
+# Durable, checksum-pinned M0-016 evidence overrides user-level *.json ignores.
+!docs/evidence/M0-016/results/**/*.json
+
 # Local tool state
 .cjpm/
 .codex/

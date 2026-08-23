@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Fail-closed validator for M0-016 provider specifications and evidence."""
 from __future__ import annotations
-import argparse, json, re, sys
+import argparse, hashlib, json, re, sys
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-STATUSES = {"PASS", "FAIL", "BLOCKED", "NOT_RUN"}
+CAPABILITY_STATUSES = {"PASS", "FAIL", "BLOCKED", "NOT_RUN"}
+MATRIX_STATUSES = {"PASS", "PARTIAL", "FAIL", "BLOCKED", "NOT_RUN"}
 RESULT_STATUSES = {"PASS", "PARTIAL", "FAIL", "BLOCKED"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -25,6 +26,13 @@ def load(path: Path) -> dict[str, Any]:
         raise ValidationError(str(error)) from error
     require(isinstance(value, dict), f"{path}: root must be an object")
     return value
+
+def sha256_path(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 def validate_spec(spec: Mapping[str, Any]) -> None:
     require(spec.get("schema_version") == 1, "unsupported provider spec schema")
@@ -68,7 +76,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any]) -> None:
     required = set(spec["required_capabilities"])
     require(set(caps) == required, f"capability set mismatch: missing={sorted(required-set(caps))}, extra={sorted(set(caps)-required)}")
     for name, status in caps.items():
-        require(status in STATUSES, f"{name}: invalid status")
+        require(status in CAPABILITY_STATUSES, f"{name}: invalid status")
     build = result.get("build")
     require(isinstance(build, dict), "build object required")
     if result["status"] in {"PASS", "PARTIAL"}:
@@ -92,9 +100,27 @@ def validate_matrix(matrix: Mapping[str, Any], spec: Mapping[str, Any]) -> None:
         key = (cell.get("provider"), cell.get("platform"))
         require(key not in observed, f"duplicate cell {key}")
         observed.add(key)
-        require(cell.get("status") in STATUSES, f"{key}: invalid status")
+        status = cell.get("status")
+        require(status in MATRIX_STATUSES, f"{key}: invalid status")
         require(isinstance(cell.get("reason"), str) and cell["reason"], f"{key}: reason required")
+        if status in {"PASS", "PARTIAL", "FAIL"}:
+            require(isinstance(cell.get("result"), str) and cell["result"],
+                    f"{key}: retained result path required")
+            require(SHA256_RE.fullmatch(str(cell.get("sha256", ""))) is not None,
+                    f"{key}: retained result sha256 required")
     require(observed == expected, f"matrix coverage mismatch: missing={sorted(expected-observed)}, extra={sorted(observed-expected)}")
+
+def validate_retained_results(matrix: Mapping[str, Any], spec: Mapping[str, Any], repo: Path) -> None:
+    for cell in matrix["cells"]:
+        if cell["status"] not in {"PASS", "PARTIAL", "FAIL"}:
+            continue
+        result_path = repo / cell["result"]
+        result = load(result_path)
+        validate_result(result, spec)
+        require(result["provider"] == cell["provider"], f"{result_path}: provider mismatch")
+        require(result["platform"] == cell["platform"], f"{result_path}: platform mismatch")
+        require(result["status"] == cell["status"], f"{result_path}: status mismatch")
+        require(sha256_path(result_path) == cell["sha256"], f"{result_path}: sha256 mismatch")
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -108,7 +134,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.result:
             validate_result(load(args.result), spec)
         if args.matrix:
-            validate_matrix(load(args.matrix), spec)
+            matrix = load(args.matrix)
+            validate_matrix(matrix, spec)
+            validate_retained_results(matrix, spec, Path(__file__).resolve().parents[2])
     except ValidationError as error:
         print(f"M0-016 validation: FAIL: {error}", file=sys.stderr)
         return 1

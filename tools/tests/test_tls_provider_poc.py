@@ -23,6 +23,7 @@ class ProviderPocValidationTests(unittest.TestCase):
     def test_canonical_spec_and_matrix(self):
         validator.validate_spec(self.spec)
         validator.validate_matrix(self.matrix, self.spec)
+        validator.validate_retained_results(self.matrix, self.spec, ROOT)
 
     def test_missing_archive_digest_fails(self):
         value = copy.deepcopy(self.spec)
@@ -44,6 +45,20 @@ class ProviderPocValidationTests(unittest.TestCase):
         value["cells"].pop()
         with self.assertRaises(validator.ValidationError):
             validator.validate_matrix(value, self.spec)
+
+    def test_partial_matrix_cell_requires_retained_result(self):
+        value = copy.deepcopy(self.matrix)
+        cell = next(cell for cell in value["cells"] if cell["status"] == "PARTIAL")
+        cell.pop("result")
+        with self.assertRaises(validator.ValidationError):
+            validator.validate_matrix(value, self.spec)
+
+    def test_retained_result_digest_must_match(self):
+        value = copy.deepcopy(self.matrix)
+        cell = next(cell for cell in value["cells"] if cell["status"] == "PARTIAL")
+        cell["sha256"] = "0" * 64
+        with self.assertRaises(validator.ValidationError):
+            validator.validate_retained_results(value, self.spec, ROOT)
 
     def test_blocked_capability_cannot_pass(self):
         caps = {name: "PASS" for name in self.spec["required_capabilities"]}

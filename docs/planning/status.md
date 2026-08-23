@@ -35,7 +35,7 @@ Status values:
 | M0-013 | COMPLETE | [`docs/evidence/M0-013/README.md`](../evidence/M0-013/README.md) | Native Linux evidence shows carrier-thread starvation at 16+ delayed DNS resolutions; gate FAIL supports conditional UP-007 analysis, while global evidence remains incomplete. |
 | M0-014 | BLOCKED | — | Requires a native Windows SDK/runner and copied-byte instrumentation. |
 | M0-015 | COMPLETE | [`docs/evidence/M0-015/README.md`](../evidence/M0-015/README.md) | Provider matrix and M0-016 PoC contract frozen; no final provider selected. |
-| M0-016 | READY | — | Run the shortlisted provider PoCs and retain native/platform evidence without system TLS fallback. |
+| M0-016 | BLOCKED | [`docs/evidence/M0-016/README.md`](../evidence/M0-016/README.md) | Nine Linux glibc/musl and macOS results are retained as PARTIAL; Windows/mobile native evidence, external signer callbacks and Mbed TLS session resumption remain missing. |
 | M0-017 | BLOCKED | — | Depends on M0-012 and M0-016 native evidence. |
 | M0-018 | COMPLETE | [`docs/evidence/M0-018/README.md`](../evidence/M0-018/README.md) | Versioned threat register, fail-closed validator, tests and CI are active. |
 | M0-019 | BLOCKED | — | Depends on complete M0-006 through M0-014 evidence; M0-010..014 are not all complete. |
