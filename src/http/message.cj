@@ -47,6 +47,7 @@ public interface ResponseBodyObserver {
 public class ResponseBody <: Resource {
     private let stream: HttpBodyStream
     private let observer: ResponseBodyObserver
+    private let trailerProvider: () -> ?HttpTrailer
     private let stateMutex = Mutex()
     private var closed = false
     private var readInProgress = false
@@ -54,10 +55,16 @@ public class ResponseBody <: Resource {
     private var fullyConsumed = false
 
     public prop contentLength: ?Int64 { get() { stream.contentLength } }
+    public prop trailer: ?HttpTrailer { get() { trailerProvider() } }
 
-    public init(stream: HttpBodyStream, observer!: ResponseBodyObserver = NoopResponseBodyObserver()) {
+    public init(
+        stream: HttpBodyStream,
+        observer!: ResponseBodyObserver = NoopResponseBodyObserver(),
+        trailerProvider!: () -> ?HttpTrailer = { => None<HttpTrailer> }
+    ) {
         this.stream = stream
         this.observer = observer
+        this.trailerProvider = trailerProvider
     }
 
     public static func empty(observer!: ResponseBodyObserver = NoopResponseBodyObserver()): ResponseBody {
