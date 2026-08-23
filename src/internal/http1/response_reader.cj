@@ -53,6 +53,23 @@ public enum Http1ConnectExchangeResult {
     | Response(Http1ResponseReadResult)
 }
 
+public class Http1Upgrade {
+    public let responseHead: Http1ResponseHead
+    public let protocol: String
+    public let transport: DuplexTransport
+
+    public init(responseHead: Http1ResponseHead, protocol: String, transport: DuplexTransport) {
+        this.responseHead = responseHead
+        this.protocol = protocol
+        this.transport = transport
+    }
+}
+
+public enum Http1UpgradeExchangeResult {
+    | Upgraded(Http1Upgrade)
+    | Response(Http1ResponseReadResult)
+}
+
 /** Reads bounded interim heads and one final response, leaving the body fully streaming. */
 public func readHttp1Response(
     transport: DuplexTransport,
@@ -163,6 +180,96 @@ public func performHttp1Connect(
         try { transport.abort(reason: Some(AbortReason.ProtocolFailure)) } catch (_: Exception) {}
         throw error
     }
+}
+
+/** Consumes the input transport and transfers it only after a matching 101 response. */
+public func performHttp1Upgrade(
+    transport: DuplexTransport,
+    request: HttpRequest,
+    context!: OperationContext = OperationContext.background(),
+    limits!: HttpLimits = HttpLimits()
+): Http1UpgradeExchangeResult {
+    let requestedProtocol = validateUpgradeRequest(request)
+    try {
+        let _ = writeHttp1Request(transport, request, context: context, limits: limits)
+        let reader = Http1ResponseSequenceReader(transport, request.method, limits)
+        let interim = ArrayList<Http1InterimResponse>()
+        while (true) {
+            let parsed = reader.readNext(context)
+            let head = parsed.head
+            if (head.status < 200 && head.status != 101) {
+                addInterim(interim, head)
+                continue
+            }
+            if (head.status == 101) {
+                let responseProtocol = validateUpgradeResponse(head, requestedProtocol)
+                return Http1UpgradeExchangeResult.Upgraded(
+                    Http1Upgrade(
+                        head, responseProtocol,
+                        Http1PrefixedTransport(transport, parsed.remaining)
+                    )
+                )
+            }
+            let observer = Http1ConnectFailureObserver(transport)
+            return Http1UpgradeExchangeResult.Response(
+                finishResponse(transport, head, parsed.remaining, interim, context, limits, observer)
+            )
+        }
+        throw Exception("unreachable HTTP/1 Upgrade loop exit")
+    } catch (error: Exception) {
+        try { transport.abort(reason: Some(AbortReason.ProtocolFailure)) } catch (_: Exception) {}
+        throw error
+    }
+}
+
+private func validateUpgradeRequest(request: HttpRequest): String {
+    if (request.method == HttpMethod("CONNECT") || request.body.contentLength != Some(0) ||
+        !headerContainsToken(request.headers, "connection", "upgrade")) {
+        throw Http1ParseException(
+            Http1ParseErrorCode.InvalidHeader,
+            "HTTP/1 Upgrade requires a non-CONNECT empty request with Connection: upgrade"
+        )
+    }
+    let values = request.headers.getAll("upgrade")
+    if (values.size != 1 || !isUpgradeProtocol(values[0])) {
+        throw Http1ParseException(Http1ParseErrorCode.InvalidHeader, "HTTP/1 Upgrade requires one protocol token")
+    }
+    values[0]
+}
+
+private func validateUpgradeResponse(head: Http1ResponseHead, requestedProtocol: String): String {
+    let values = head.headers.getAll("upgrade")
+    if (!headerContainsToken(head.headers, "connection", "upgrade") || values.size != 1 ||
+        !isUpgradeProtocol(values[0]) || values[0].toAsciiLower() != requestedProtocol.toAsciiLower()) {
+        throw Http1ParseException(
+            Http1ParseErrorCode.InvalidHeader,
+            "HTTP/1 101 response does not confirm the requested Upgrade protocol"
+        )
+    }
+    values[0]
+}
+
+private func isUpgradeProtocol(value: String): Bool {
+    let bytes = value.toArray()
+    if (bytes.isEmpty()) { return false }
+    var slash: Int64 = -1
+    for (index in 0..bytes.size) {
+        if (bytes[index] == b'/') {
+            if (slash >= 0) { return false }
+            slash = index
+        } else if (!isUpgradeTokenByte(bytes[index])) {
+            return false
+        }
+    }
+    slash != 0 && slash != bytes.size - 1
+}
+
+private func isUpgradeTokenByte(byte: Byte): Bool {
+    (byte >= b'a' && byte <= b'z') || (byte >= b'A' && byte <= b'Z') ||
+        (byte >= b'0' && byte <= b'9') || byte == b'!' || byte == b'#' || byte == b'$' ||
+        byte == b'%' || byte == b'&' || byte == b'\'' || byte == b'*' || byte == b'+' ||
+        byte == b'-' || byte == b'.' || byte == b'^' || byte == b'_' || byte == b'`' ||
+        byte == b'|' || byte == b'~'
 }
 
 private class Http1ConnectFailureObserver <: ResponseBodyObserver {
