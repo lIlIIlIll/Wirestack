@@ -4,6 +4,8 @@ import std.sync.SyncCounter
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.common.*
+import wirestack.internal.connector.*
+import wirestack.internal.resolver.*
 import wirestack.internal.transport.*
 
 private func loopback(port: UInt16): SocketEndpoint {
@@ -221,5 +223,27 @@ class StdNetTransportTest {
         client.close()
         server.close()
         listener.close()
+    }
+
+    @TestCase
+    func happyEyeballsComposesWithTheDefaultStdNetFactory(): Unit {
+        let listener = StdNetTransportListener.bind(loopback(0))
+        let host = HostName("loopback.test")
+        let resolver = StaticResolver(
+            ResolveResult([listener.localEndpoint.address], host, ResolverSource.Static)
+        )
+        let connector = HappyEyeballsConnector(resolver, StdNetTransportFactory())
+        let accepted = spawn { listener.accept() }
+        let connected = connector.connect(host, listener.localEndpoint.port)
+        let server = accepted.get(Duration.second)
+        try {
+            @Expect(connected.diagnostics.winner, listener.localEndpoint)
+            @Expect(connected.diagnostics.attempts.size, 1)
+            @Expect(connected.diagnostics.attempts[0].won)
+        } finally {
+            connected.transport.close()
+            server.close()
+            listener.close()
+        }
     }
 }
