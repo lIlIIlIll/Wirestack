@@ -1,0 +1,13 @@
+task=COMPLETE
+linux_application_visible_profile=PASS
+linux_copy_profile=INCOMPLETE
+windows_native_profile=BLOCKED
+global_gate=INCOMPLETE
+cases=1MiB,100MiB
+warmup_per_case=1
+measured_samples_per_case=5
+receive_buffer_bytes=65536
+exact_bytes_verified=true
+fixed_4096_byte_cap=false
+allocation_count=UNAVAILABLE
+copied_bytes_per_operation=UNAVAILABLE

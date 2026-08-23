@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "task_id": "M0-010",
+  "task_status": "COMPLETE",
+  "gate_id": "GATE-NET-05",
+  "linux_application_visible_profile": "PASS",
+  "linux_copy_profile": "INCOMPLETE",
+  "windows_native_profile": "BLOCKED",
+  "global_gate_status": "INCOMPLETE",
+  "sdk_archive_sha256": "bc2ed8a34b9b6846a5445d3eba0ac66b146730a005d3df56d45a2b119416f40d",
+  "configuration": {
+    "receive_buffer_bytes": 65536,
+    "server_send_chunk_bytes": 65536,
+    "warmup_per_case": 1,
+    "measured_samples_per_case": 5
+  },
+  "cases": [
+    {
+      "name": "1MiB",
+      "payload_bytes": 1048576,
+      "sample_count": 5,
+      "exact_bytes_verified": true,
+      "payload_pattern_verified": true,
+      "application_reads_above_4096_observed": true,
+      "fixed_4096_byte_cap": false
+    },
+    {
+      "name": "100MiB",
+      "payload_bytes": 104857600,
+      "sample_count": 5,
+      "exact_bytes_verified": true,
+      "payload_pattern_verified": true,
+      "application_reads_above_4096_observed": true,
+      "fixed_4096_byte_cap": false
+    }
+  ],
+  "metric_availability": {
+    "application_visible_read_sizes": "MEASURED",
+    "throughput": "MEASURED",
+    "peak_rss": "MEASURED",
+    "server_send_sizes": "MEASURED",
+    "allocation_count": "UNAVAILABLE",
+    "copied_bytes_per_operation": "UNAVAILABLE",
+    "native_windows_copy_profile": "BLOCKED",
+    "future_stdnet_transport_comparison": "NOT_YET_APPLICABLE"
+  },
+  "non_claims": [
+    "not a global GATE-NET-05 pass",
+    "not a StdNetTransport measurement",
+    "not native Windows evidence",
+    "no allocation or copied-byte claim"
+  ]
+}
