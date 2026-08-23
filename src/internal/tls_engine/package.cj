@@ -321,6 +321,38 @@ public class AwsLcTlsProvider <: TlsProvider {
         }
     }
 
+    /** Creates a server engine that selects a complete immutable context by exact SNI. */
+    public func createServerEngine(selector: TlsServerContextSelector): TlsEngine {
+        synchronized(mutex) {
+            if (handle == 0u64) {
+                throw TlsProviderException(
+                    TlsProviderErrorCode.Closed,
+                    "TLS provider is closed"
+                )
+            }
+            if (selector.providerId != providerManifest.providerId ||
+                selector.providerFingerprint != providerManifest.fingerprint) {
+                throw TlsProviderException(
+                    TlsProviderErrorCode.InvalidManifest,
+                    "TLS SNI selector was built for a different provider identity"
+                )
+            }
+            let engine = AwsLcTlsEngine(
+                handle,
+                TlsEngineRole.Server,
+                selector.initialSecurityPolicy(),
+                providerManifest
+            )
+            try {
+                engine.configureServerNameSelection(selector)
+                engine
+            } catch (error: Exception) {
+                engine.close()
+                throw error
+            }
+        }
+    }
+
     public func close(): Unit {
         synchronized(mutex) {
             let current = handle

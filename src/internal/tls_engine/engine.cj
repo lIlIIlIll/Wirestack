@@ -12,6 +12,7 @@ private let ENGINE_COMPLETE: Int32 = 0
 private let ENGINE_WANT_READ: Int32 = 1
 private let ENGINE_WANT_WRITE: Int32 = 2
 private let ENGINE_NEED_SIGNATURE: Int32 = 3
+private let ENGINE_NEED_SERVER_SELECTION: Int32 = 4
 private let ENGINE_IO_COMPLETE: Int32 = 0
 private let ENGINE_IO_WANT_READ: Int32 = 1
 private let ENGINE_IO_WANT_WRITE: Int32 = 2
@@ -68,6 +69,20 @@ foreign func wirestack_tls_engine_set_alpn_protocols(
     protocols: CPointer<UInt8>,
     protocolsSize: UInt64
 ): Int32
+foreign func wirestack_tls_engine_set_protocol_versions(
+    engineHandle: UInt64,
+    minimumTlsVersion: Int32,
+    maximumTlsVersion: Int32
+): Int32
+foreign func wirestack_tls_engine_enable_server_name_selection(engineHandle: UInt64): Int32
+foreign func wirestack_tls_engine_server_name_selection_request(
+    engineHandle: UInt64,
+    output: CPointer<UInt8>,
+    outputCapacity: UInt64,
+    outRequiredSize: CPointer<UInt64>
+): Int32
+foreign func wirestack_tls_engine_complete_server_name_selection(engineHandle: UInt64): Int32
+foreign func wirestack_tls_engine_fail_server_name_selection(engineHandle: UInt64): Int32
 foreign func wirestack_tls_engine_set_identity_pkcs8(
     engineHandle: UInt64,
     leafCertificate: CPointer<UInt8>,
@@ -164,6 +179,7 @@ public enum TlsEngineStep {
     | WantRead
     | WantWrite
     | NeedSignature
+    | NeedServerSelection
 }
 
 public enum TlsEngineReadResult {
@@ -201,6 +217,11 @@ public interface HandshakeInfoTlsEngine {
     func handshakeInfo(): TlsHandshakeInfo
 }
 
+/** Optional engine facet used for asynchronous SNI context selection. */
+public interface ServerNameSelectingTlsEngine {
+    func serviceServerNameSelection(context: OperationContext): Unit
+}
+
 /** Immutable negotiated TLS facts. No provider-native object is retained. */
 public class TlsHandshakeInfo {
     public let version: TlsVersion
@@ -210,6 +231,7 @@ public class TlsHandshakeInfo {
     public let verificationEvidence: ?TrustVerificationEvidence
     public let resumed: Bool
     public let providerManifest: TlsProviderManifest
+    public let requestedServerName: ?String
 
     public init(
         version: TlsVersion,
@@ -218,7 +240,8 @@ public class TlsHandshakeInfo {
         peerCertificateChain: ?CertificateChain,
         verificationEvidence: ?TrustVerificationEvidence,
         resumed: Bool,
-        providerManifest: TlsProviderManifest
+        providerManifest: TlsProviderManifest,
+        requestedServerName!: ?String = None<String>
     ) {
         if (cipherSuite.isEmpty()) {
             throw IllegalArgumentException("TLS cipher suite must not be empty")
@@ -230,6 +253,7 @@ public class TlsHandshakeInfo {
         this.verificationEvidence = verificationEvidence
         this.resumed = resumed
         this.providerManifest = providerManifest
+        this.requestedServerName = requestedServerName
     }
 }
 
@@ -239,6 +263,7 @@ public enum TlsEngineErrorCode {
     | NoProgress
     | UnexpectedTransportEof
     | PrivateKeyFailure
+    | ServerNameSelectionFailure
 }
 
 /** Stable TLS-pump failure without provider-native types or secret material. */
@@ -283,7 +308,8 @@ private func providerFailure(operation: String, status: Int32): TlsEngineExcepti
 }
 
 /** AWS-LC memory-BIO engine. It never owns or accesses a socket. */
-public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine & HandshakeInfoTlsEngine {
+public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine &
+    HandshakeInfoTlsEngine & ServerNameSelectingTlsEngine {
     private let mutex = Mutex()
     private var handle: UInt64
     private var externalSigner: ?ExternalSigner = None<ExternalSigner>
@@ -291,6 +317,8 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine & HandshakeI
     private let providerManifest: TlsProviderManifest
     private var configuredTrust: ?TrustPolicy = None<TrustPolicy>
     private var verifiedReferenceIdentity: ?String = None<String>
+    private var serverContextSelector: ?TlsServerContextSelector = None<TlsServerContextSelector>
+    private var requestedServerName: ?String = None<String>
 
     internal init(
         providerHandle: UInt64,
@@ -376,6 +404,17 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine & HandshakeI
             )
             configuredTrust = Some(trust)
             verifiedReferenceIdentity = Some(referenceIdentityText(referenceIdentity))
+        }
+    }
+
+    internal func configureServerNameSelection(selector: TlsServerContextSelector): Unit {
+        synchronized(mutex) {
+            let current = requireOpen()
+            requireConfigurationSuccess(
+                "SNI context selection",
+                unsafe { wirestack_tls_engine_enable_server_name_selection(current) }
+            )
+            serverContextSelector = Some(selector)
         }
     }
 
@@ -528,8 +567,139 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine & HandshakeI
                 TlsEngineStep.WantWrite
             } else if (value == ENGINE_NEED_SIGNATURE) {
                 TlsEngineStep.NeedSignature
+            } else if (value == ENGINE_NEED_SERVER_SELECTION) {
+                TlsEngineStep.NeedServerSelection
             } else {
                 throw providerFailure("handshake step result", value)
+            }
+        }
+    }
+
+    public func serviceServerNameSelection(context: OperationContext): Unit {
+        try {
+            checkTlsOperationContext(context)
+        } catch (error: NetworkException) {
+            failPendingServerNameSelection()
+            throw error
+        }
+        let selectionInput = synchronized(mutex) {
+            let current = requireOpen()
+            let selector = match (serverContextSelector) {
+                case Some(value) => value
+                case None => throw TlsEngineException(
+                    TlsEngineErrorCode.ServerNameSelectionFailure,
+                    "TLS engine requested SNI selection without a selector"
+                )
+            }
+            let sizeOutput = Array<UInt64>(1, repeat: 0u64)
+            let queryStatus = unsafe {
+                let size = acquireArrayRawData(sizeOutput)
+                try {
+                    wirestack_tls_engine_server_name_selection_request(
+                        current,
+                        CPointer<UInt8>(),
+                        0u64,
+                        size.pointer
+                    )
+                } finally {
+                    releaseArrayRawData(size)
+                }
+            }
+            if (queryStatus != NATIVE_OK || sizeOutput[0] > 253u64) {
+                throw providerFailure("SNI selection request", queryStatus)
+            }
+            let storageSize = if (sizeOutput[0] == 0u64) { 1 } else { Int64(sizeOutput[0]) }
+            let encoded = Array<Byte>(storageSize, repeat: 0)
+            if (sizeOutput[0] != 0u64) {
+                let readStatus = unsafe {
+                    let output = acquireArrayRawData(encoded)
+                    let size = acquireArrayRawData(sizeOutput)
+                    try {
+                        wirestack_tls_engine_server_name_selection_request(
+                            current,
+                            output.pointer,
+                            UInt64(encoded.size),
+                            size.pointer
+                        )
+                    } finally {
+                        releaseArrayRawData(size)
+                        releaseArrayRawData(output)
+                    }
+                }
+                requireConfigurationSuccess("SNI selection request", readStatus)
+            }
+            let name = if (sizeOutput[0] == 0u64) {
+                None<String>
+            } else {
+                Some(String.fromUtf8(Array<Byte>(
+                    Int64(sizeOutput[0]),
+                    {index => encoded[index]}
+                )))
+            }
+            (selector, name)
+        }
+        let selectedContext = try {
+            selectionInput[0].select(selectionInput[1])
+        } catch (error: TlsServerNameSelectionException) {
+            failPendingServerNameSelection()
+            throw TlsEngineException(
+                TlsEngineErrorCode.ServerNameSelectionFailure,
+                "TLS server name selection failed",
+                cause: Some(error)
+            )
+        }
+        try {
+            checkTlsOperationContext(context)
+            configureSelectedServerContext(selectedContext)
+            synchronized(mutex) {
+                let current = requireOpen()
+                requireConfigurationSuccess(
+                    "SNI selection completion",
+                    unsafe { wirestack_tls_engine_complete_server_name_selection(current) }
+                )
+                requestedServerName = selectionInput[1]
+            }
+        } catch (error: Exception) {
+            failPendingServerNameSelection()
+            throw error
+        }
+    }
+
+    private func configureSelectedServerContext(context: TlsServerContext): Unit {
+        synchronized(mutex) {
+            let current = requireOpen()
+            requireConfigurationSuccess(
+                "selected SNI protocol policy",
+                unsafe {
+                    wirestack_tls_engine_set_protocol_versions(
+                        current,
+                        Int32(tlsVersionNumber(context.security.minimumVersion)),
+                        Int32(tlsVersionNumber(context.security.maximumVersion))
+                    )
+                }
+            )
+        }
+        configureLocalIdentity(context.identity)
+        configureAlpn(context.alpnProtocols())
+        let systemTrust = match (context.clientTrust) {
+            case Some(value) => if (engineRequiresSystemTrust(value)) {
+                Some(LinuxSystemTrustAdapter.discover())
+            } else {
+                None<LinuxSystemTrustLocation>
+            }
+            case None => None<LinuxSystemTrustLocation>
+        }
+        configureClientAuthentication(
+            context.clientAuthentication,
+            context.clientTrust,
+            systemTrust
+        )
+    }
+
+    private func failPendingServerNameSelection(): Unit {
+        synchronized(mutex) {
+            if (handle != 0u64) {
+                let _ = unsafe { wirestack_tls_engine_fail_server_name_selection(handle) }
             }
         }
     }
@@ -637,7 +807,8 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine & HandshakeI
                 peerChain,
                 evidence,
                 resumedOutput[0] != 0,
-                providerManifest
+                providerManifest,
+                requestedServerName: requestedServerName
             )
         }
     }
@@ -1249,6 +1420,13 @@ private func isClientRole(value: TlsEngineRole): Bool {
     }
 }
 
+private func engineRequiresSystemTrust(value: TrustPolicy): Bool {
+    match (value.kind) {
+        case TrustPolicyKind.System | TrustPolicyKind.SystemPlusCustomRoots => true
+        case _ => false
+    }
+}
+
 internal func createAwsLcTlsEngine(
     providerHandle: UInt64,
     role: TlsEngineRole,
@@ -1337,6 +1515,15 @@ public class TlsEnginePump {
                         case _ => throw TlsEngineException(
                             TlsEngineErrorCode.PrivateKeyFailure,
                             "TLS engine cannot service its external signature request"
+                        )
+                    }
+                case TlsEngineStep.NeedServerSelection =>
+                    match (engine) {
+                        case selecting: ServerNameSelectingTlsEngine =>
+                            selecting.serviceServerNameSelection(context)
+                        case _ => throw TlsEngineException(
+                            TlsEngineErrorCode.ServerNameSelectionFailure,
+                            "TLS engine cannot service its SNI selection request"
                         )
                     }
             }
