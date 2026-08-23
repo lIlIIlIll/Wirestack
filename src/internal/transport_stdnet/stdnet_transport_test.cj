@@ -81,9 +81,7 @@ class StdNetTransportTest {
         let client = StdNetTransport.connect(listener.localEndpoint)
         let server = accepted.get(Duration.second)
         let source = CancellationSource()
-        let started = SyncCounter(1)
         let result: Future<Bool> = spawn {
-            started.dec()
             try {
                 let _ = client.readSome(
                     MutableByteSpan(Array<Byte>(1, repeat: 0)),
@@ -97,7 +95,9 @@ class StdNetTransportTest {
                 }
             }
         }
-        started.waitUntilZero()
+        // The spawned task may not have entered readSome when it starts. Gate on
+        // the adapter's actual read lifecycle so this exercises active-I/O cancellation.
+        @Expect(client.waitUntilReadActive(Duration.second))
         source.cancel()
         @Expect(result.get(Duration.second), true)
         @Expect(client.isClosed())
