@@ -1,0 +1,27 @@
+{
+  "cells": [
+    {"platform": "linux-glibc-x86_64", "provider": "aws-lc", "reason": "Native PoC result has not yet been committed for this provider/platform cell.", "status": "NOT_RUN"},
+    {"platform": "linux-musl-x86_64", "provider": "aws-lc", "reason": "Native PoC result has not yet been committed for this provider/platform cell.", "status": "NOT_RUN"},
+    {"platform": "windows-x86_64", "provider": "aws-lc", "reason": "Native PoC result has not yet been committed for this provider/platform cell.", "status": "NOT_RUN"},
+    {"platform": "macos-arm64", "provider": "aws-lc", "reason": "Native PoC result has not yet been committed for this provider/platform cell.", "status": "NOT_RUN"},
+    {"platform": "android-aarch64", "provider": "aws-lc", "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.", "status": "BLOCKED"},
+    {"platform": "ios-aarch64", "provider": "aws-lc", "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.", "status": "BLOCKED"},
+    {"platform": "harmony-aarch64", "provider": "aws-lc", "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.", "status": "BLOCKED"},
+    {"platform": "linux-glibc-x86_64", "provider": "mbedtls", "reason": "Native PoC result has not yet been committed for this provider/platform cell.", "status": "NOT_RUN"},
+    {"platform": "linux-musl-x86_64", "provider": "mbedtls", "reason": "Native PoC result has not yet been committed for this provider/platform cell.", "status": "NOT_RUN"},
+    {"platform": "windows-x86_64", "provider": "mbedtls", "reason": "Native PoC result has not yet been committed for this provider/platform cell.", "status": "NOT_RUN"},
+    {"platform": "macos-arm64", "provider": "mbedtls", "reason": "Native PoC result has not yet been committed for this provider/platform cell.", "status": "NOT_RUN"},
+    {"platform": "android-aarch64", "provider": "mbedtls", "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.", "status": "BLOCKED"},
+    {"platform": "ios-aarch64", "provider": "mbedtls", "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.", "status": "BLOCKED"},
+    {"platform": "harmony-aarch64", "provider": "mbedtls", "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.", "status": "BLOCKED"},
+    {"platform": "linux-glibc-x86_64", "provider": "openssl", "reason": "Native PoC result has not yet been committed for this provider/platform cell.", "status": "NOT_RUN"},
+    {"platform": "linux-musl-x86_64", "provider": "openssl", "reason": "Native PoC result has not yet been committed for this provider/platform cell.", "status": "NOT_RUN"},
+    {"platform": "windows-x86_64", "provider": "openssl", "reason": "Native PoC result has not yet been committed for this provider/platform cell.", "status": "NOT_RUN"},
+    {"platform": "macos-arm64", "provider": "openssl", "reason": "Native PoC result has not yet been committed for this provider/platform cell.", "status": "NOT_RUN"},
+    {"platform": "android-aarch64", "provider": "openssl", "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.", "status": "BLOCKED"},
+    {"platform": "ios-aarch64", "provider": "openssl", "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.", "status": "BLOCKED"},
+    {"platform": "harmony-aarch64", "provider": "openssl", "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.", "status": "BLOCKED"}
+  ],
+  "schema_version": 1,
+  "task_id": "M0-016"
+}
