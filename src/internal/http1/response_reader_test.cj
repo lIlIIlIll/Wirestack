@@ -9,6 +9,53 @@ import wirestack.internal.transport.*
 @Test
 class Http1ResponseReaderTest {
     @TestCase
+    func explicitConnectTransfersBufferedTunnelBytesAndTransportOwnership(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 2048, maxChunk: 64)
+        let served: Future<Bool> = spawn {
+            let request = readReaderRequestHead(server)
+            writeAll(server, ByteSpan("HTTP/1.1 200 Connection Established\r\n\r\nabc".toArray()))
+            let requestBytes = Array<Byte>(4, repeat: 0)
+            readExact(server, MutableByteSpan(requestBytes))
+            request.target == "example.com:443" && requestBytes == "ping".toArray()
+        }
+        let exchanged = performHttp1Connect(client, HttpUrl.parse("https://example.com/"))
+        let tunnel = match (exchanged) {
+            case Http1ConnectExchangeResult.Tunnel(value) => value
+            case _ => throw Exception("expected CONNECT tunnel")
+        }
+        let prefix = Array<Byte>(3, repeat: 0)
+        readExact(tunnel.transport, MutableByteSpan(prefix))
+        @Expect(prefix, "abc".toArray())
+        writeAll(tunnel.transport, ByteSpan("ping".toArray()))
+        @Expect(served.get(Duration.second))
+        tunnel.transport.close()
+    }
+
+    @TestCase
+    func failedConnectRemainsAnHttpResponseAndClosesAfterBody(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 2048)
+        let served: Future<Bool> = spawn {
+            let _ = readReaderRequestHead(server)
+            writeAll(server, ByteSpan(
+                "HTTP/1.1 407 Proxy Authentication Required\r\nContent-Length: 3\r\n\r\nbad".toArray()
+            ))
+            let probe = Array<Byte>(1, repeat: 0)
+            match (server.readSome(MutableByteSpan(probe), context: OperationContext.background())) {
+                case ReadResult.EndOfStream => true
+                case _ => false
+            }
+        }
+        let exchanged = performHttp1Connect(client, HttpUrl.parse("https://example.com/"))
+        let response = match (exchanged) {
+            case Http1ConnectExchangeResult.Response(value) => value.response
+            case _ => throw Exception("expected CONNECT HTTP failure")
+        }
+        @Expect(response.status, 407)
+        @Expect(readReaderBody(response.body), "bad")
+        @Expect(served.get(Duration.second))
+    }
+
+    @TestCase
     func readsInterimAndFixedResponseWithoutBufferingTheBody(): Unit {
         let (client, server) = MemoryTransport.pair(capacity: 2048, maxChunk: 5)
         let wire = "HTTP/1.1 100 Continue\r\n\r\nHTTP/1.1 200 OK\r\nContent-Length: 5\r\nX-Test: yes\r\n\r\nhello"
@@ -95,6 +142,21 @@ class Http1ResponseReaderTest {
             @Expect(rejected)
         }
     }
+}
+
+private func readReaderRequestHead(transport: DuplexTransport): Http1RequestHead {
+    let parser = Http1RequestHeadParser()
+    while (true) {
+        let buffer = Array<Byte>(128, repeat: 0)
+        match (transport.readSome(MutableByteSpan(buffer), context: OperationContext.background())) {
+            case ReadResult.Data(count) =>
+                let input = Array<Byte>(count, repeat: 0)
+                for (index in 0..count) { input[index] = buffer[index] }
+                if (let Some(parsed) <- parser.feed(input)) { return parsed.head }
+            case ReadResult.EndOfStream => throw Exception("CONNECT client closed before request")
+        }
+    }
+    throw Exception("unreachable CONNECT request loop")
 }
 
 private class ReaderBodyObserver <: ResponseBodyObserver {
