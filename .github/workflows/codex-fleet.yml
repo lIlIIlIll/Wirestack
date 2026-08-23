@@ -43,6 +43,34 @@ jobs:
         run: |
           scripts/codex-fleet plan > fleet-plan.txt
           cat fleet-plan.txt
-          for id in M0-008 M0-009 M0-010 M0-011 M0-012 M0-013 M0-014 M0-015; do
-            grep -q "^${id}[[:space:]]" fleet-plan.txt
-          done
+          python3 - <<'PY'
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, "tools")
+          from codex_fleet_core import (
+              completed_ids,
+              load_state,
+              parse_backlog,
+              ready_tasks,
+          )
+
+          root = Path.cwd()
+          tasks = parse_backlog(root / "docs/planning/implementation-backlog.md")
+          state = load_state(root / "docs/planning/fleet-state.json")
+          maximum = int(state.get("max_parallel", 8))
+          expected = [task.task_id for task in ready_tasks(tasks, state)[:maximum]]
+          actual = [
+              line.split("\t", 1)[0]
+              for line in (root / "fleet-plan.txt").read_text(encoding="utf-8").splitlines()
+              if line.strip()
+          ]
+          if actual != expected:
+              raise SystemExit(f"READY wave mismatch: expected={expected}, actual={actual}")
+          overlap = completed_ids(state).intersection(actual)
+          if overlap:
+              raise SystemExit(f"completed tasks reappeared in READY wave: {sorted(overlap)}")
+          if len(actual) > maximum:
+              raise SystemExit(f"READY wave exceeds max_parallel={maximum}: {actual}")
+          print(f"validated READY wave ({len(actual)} tasks): {', '.join(actual)}")
+          PY
