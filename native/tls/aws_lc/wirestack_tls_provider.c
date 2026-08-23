@@ -161,6 +161,72 @@ static struct wirestack_tls_engine *engine_from_handle(uint64_t handle) {
     return engine;
 }
 
+static X509 *parse_exact_x509(const uint8_t *input, uint64_t size) {
+    const uint8_t *cursor = input;
+    X509 *certificate;
+    if (input == NULL || size == UINT64_C(0) || size > (uint64_t)LONG_MAX) {
+        return NULL;
+    }
+    certificate = d2i_X509(NULL, &cursor, (long)size);
+    if (certificate == NULL || cursor != input + size) {
+        X509_free(certificate);
+        return NULL;
+    }
+    return certificate;
+}
+
+static EVP_PKEY *parse_exact_pkcs8(const uint8_t *input, uint64_t size) {
+    const uint8_t *cursor = input;
+    PKCS8_PRIV_KEY_INFO *private_key_info;
+    EVP_PKEY *private_key;
+    if (input == NULL || size == UINT64_C(0) || size > (uint64_t)LONG_MAX) {
+        return NULL;
+    }
+    private_key_info = d2i_PKCS8_PRIV_KEY_INFO(NULL, &cursor, (long)size);
+    if (private_key_info == NULL || cursor != input + size) {
+        PKCS8_PRIV_KEY_INFO_free(private_key_info);
+        return NULL;
+    }
+    private_key = EVP_PKCS82PKEY(private_key_info);
+    PKCS8_PRIV_KEY_INFO_free(private_key_info);
+    return private_key;
+}
+
+int32_t wirestack_tls_private_key_validate_pkcs8(
+    const uint8_t *input,
+    uint64_t size
+) {
+    EVP_PKEY *private_key = parse_exact_pkcs8(input, size);
+    if (private_key == NULL) {
+        return WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
+    }
+    EVP_PKEY_free(private_key);
+    return WIRESTACK_TLS_PROVIDER_OK;
+}
+
+int32_t wirestack_tls_identity_validate_pkcs8(
+    const uint8_t *leaf_certificate,
+    uint64_t leaf_certificate_size,
+    const uint8_t *private_key,
+    uint64_t private_key_size
+) {
+    X509 *certificate = parse_exact_x509(leaf_certificate, leaf_certificate_size);
+    EVP_PKEY *key = parse_exact_pkcs8(private_key, private_key_size);
+    int matches;
+    if (certificate == NULL || key == NULL) {
+        X509_free(certificate);
+        EVP_PKEY_free(key);
+        return WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
+    }
+    ERR_clear_error();
+    matches = X509_check_private_key(certificate, key);
+    X509_free(certificate);
+    EVP_PKEY_free(key);
+    return matches == 1
+        ? WIRESTACK_TLS_PROVIDER_OK
+        : WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
+}
+
 int32_t wirestack_tls_provider_create(uint64_t *out_handle) {
     struct wirestack_tls_provider *provider;
     if (out_handle == NULL) {
@@ -463,16 +529,14 @@ int32_t wirestack_tls_engine_add_trust_anchor_der(
     uint64_t size
 ) {
     struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
-    const uint8_t *cursor = input;
     X509 *certificate;
     int result;
     if (engine == NULL || input == NULL || size == UINT64_C(0) ||
         size > (uint64_t)LONG_MAX) {
         return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
     }
-    certificate = d2i_X509(NULL, &cursor, (long)size);
-    if (certificate == NULL || cursor != input + size) {
-        X509_free(certificate);
+    certificate = parse_exact_x509(input, size);
+    if (certificate == NULL) {
         return WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
     }
     ERR_clear_error();
@@ -594,6 +658,61 @@ int32_t wirestack_tls_engine_enable_peer_verification(uint64_t engine_handle) {
     SSL_set_verify_depth(engine->ssl, 10);
     SSL_set_verify(engine->ssl, SSL_VERIFY_PEER, NULL);
     return WIRESTACK_TLS_PROVIDER_OK;
+}
+
+int32_t wirestack_tls_engine_set_identity_pkcs8(
+    uint64_t engine_handle,
+    const uint8_t *leaf_certificate,
+    uint64_t leaf_certificate_size,
+    const uint8_t *private_key,
+    uint64_t private_key_size
+) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    X509 *certificate;
+    EVP_PKEY *key;
+    int result;
+    if (engine == NULL) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    certificate = parse_exact_x509(leaf_certificate, leaf_certificate_size);
+    key = parse_exact_pkcs8(private_key, private_key_size);
+    if (certificate == NULL || key == NULL) {
+        X509_free(certificate);
+        EVP_PKEY_free(key);
+        return WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
+    }
+    ERR_clear_error();
+    result = SSL_use_certificate(engine->ssl, certificate) == 1 &&
+        SSL_use_PrivateKey(engine->ssl, key) == 1 &&
+        SSL_check_private_key(engine->ssl) == 1;
+    X509_free(certificate);
+    EVP_PKEY_free(key);
+    return result == 1
+        ? WIRESTACK_TLS_PROVIDER_OK
+        : WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
+}
+
+int32_t wirestack_tls_engine_add_identity_chain_certificate_der(
+    uint64_t engine_handle,
+    const uint8_t *certificate,
+    uint64_t certificate_size
+) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    X509 *parsed;
+    int result;
+    if (engine == NULL) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    parsed = parse_exact_x509(certificate, certificate_size);
+    if (parsed == NULL) {
+        return WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
+    }
+    ERR_clear_error();
+    result = SSL_add1_chain_cert(engine->ssl, parsed);
+    X509_free(parsed);
+    return result == 1
+        ? WIRESTACK_TLS_PROVIDER_OK
+        : WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
 }
 
 int32_t wirestack_tls_engine_handshake_step(
