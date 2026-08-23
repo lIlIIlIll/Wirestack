@@ -60,6 +60,13 @@ class Http1FramingTest {
         @Expect(isCloseDelimited(resolveResponseFraming(HttpHeaders(), 200, HttpMethod("GET"))))
         @Expect(contentLength(resolveResponseFraming(headers("Content-Length", "8"), 200, HttpMethod("GET"))), 8)
     }
+
+    @TestCase
+    func bodylessAndSuccessfulConnectResponsesRejectFramingFields(): Unit {
+        expectResponseFramingError(103, HttpMethod("GET"), headers("Content-Length", "1"))
+        expectResponseFramingError(204, HttpMethod("GET"), headers("Transfer-Encoding", "chunked"))
+        expectResponseFramingError(200, HttpMethod("CONNECT"), headers("Content-Length", "1"))
+    }
 }
 
 private func headers(name: String, value: String): HttpHeaders {
@@ -105,6 +112,17 @@ private func sameCode(left: Http1FramingErrorCode, right: Http1FramingErrorCode)
         case (Http1FramingErrorCode.InvalidContentLength, Http1FramingErrorCode.InvalidContentLength) => true
         case (Http1FramingErrorCode.ContentLengthWithTransferEncoding, Http1FramingErrorCode.ContentLengthWithTransferEncoding) => true
         case (Http1FramingErrorCode.AmbiguousTransferEncoding, Http1FramingErrorCode.AmbiguousTransferEncoding) => true
+        case (Http1FramingErrorCode.ForbiddenBodyFraming, Http1FramingErrorCode.ForbiddenBodyFraming) => true
         case _ => false
     }
+}
+
+private func expectResponseFramingError(status: UInt16, method: HttpMethod, headers: HttpHeaders): Unit {
+    var rejected = false
+    try {
+        let _ = resolveResponseFraming(headers, status, method)
+    } catch (error: Http1FramingException) {
+        rejected = sameCode(error.code, Http1FramingErrorCode.ForbiddenBodyFraming)
+    }
+    @Expect(rejected)
 }
