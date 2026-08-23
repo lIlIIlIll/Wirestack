@@ -29,7 +29,11 @@ jobs:
       - name: Run fail-closed validator tests
         run: python3 -m unittest discover -s tools/tests -p 'test_tls_provider_poc.py' -v
       - name: Compile Python tools
-        run: python3 -m py_compile tools/tls_provider_poc/run.py tools/tls_provider_poc/validate.py
+        run: |
+          python3 -m py_compile \
+            tools/tls_provider_poc/run.py \
+            tools/tls_provider_poc/run_musl.py \
+            tools/tls_provider_poc/validate.py
 
   linux-glibc:
     needs: validate-contract
@@ -91,7 +95,7 @@ jobs:
               trap '\''test ! -e "$output" || chmod -R a+rX "$output"'\'' EXIT
               apk add --no-cache \
                 build-base cmake ninja perl git openssl ca-certificates python3
-              python3 tools/tls_provider_poc/run.py \
+              python3 tools/tls_provider_poc/run_musl.py \
                 --provider "$PROVIDER" \
                 --output "$output/result.json"
               python3 tools/tls_provider_poc/validate.py \
