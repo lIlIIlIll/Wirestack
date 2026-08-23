@@ -1,7 +1,10 @@
 package wirestack.internal.tls_engine
 
 import std.sync.*
+import wirestack.internal.common.*
+import wirestack.internal.platform.linux.*
 import wirestack.internal.transport.*
+import wirestack.internal.trust.*
 
 private let ENGINE_CLIENT: Int32 = 0
 private let ENGINE_SERVER: Int32 = 1
@@ -23,6 +26,38 @@ foreign func wirestack_tls_engine_create(
     outEngineHandle: CPointer<UInt64>
 ): Int32
 foreign func wirestack_tls_engine_destroy(engineHandle: UInt64): Unit
+foreign func wirestack_tls_engine_add_trust_anchor_der(
+    engineHandle: UInt64,
+    input: CPointer<UInt8>,
+    size: UInt64
+): Int32
+foreign func wirestack_tls_engine_add_spki_sha256_pin(
+    engineHandle: UInt64,
+    digest: CPointer<UInt8>,
+    scope: Int32
+): Int32
+foreign func wirestack_tls_engine_load_verify_bundle(
+    engineHandle: UInt64,
+    certificateBundle: CString
+): Int32
+foreign func wirestack_tls_engine_load_verify_directory(
+    engineHandle: UInt64,
+    hashedCertificateDirectory: CString
+): Int32
+foreign func wirestack_tls_engine_set_server_name(
+    engineHandle: UInt64,
+    serverName: CString
+): Int32
+foreign func wirestack_tls_engine_set_dns_reference_identity(
+    engineHandle: UInt64,
+    dnsName: CString
+): Int32
+foreign func wirestack_tls_engine_set_ip_reference_identity(
+    engineHandle: UInt64,
+    address: CPointer<UInt8>,
+    size: UInt64
+): Int32
+foreign func wirestack_tls_engine_enable_peer_verification(engineHandle: UInt64): Int32
 foreign func wirestack_tls_engine_handshake_step(
     engineHandle: UInt64,
     outStep: CPointer<Int32>
@@ -166,6 +201,62 @@ public class AwsLcTlsEngine <: TlsEngine {
             throw providerFailure("engine creation", status)
         }
         handle = output[0]
+    }
+
+    internal func configureClientAuthentication(
+        trust: TrustPolicy,
+        referenceIdentity: ReferenceIdentity,
+        serverName: ?HostName,
+        systemTrustLocation: ?LinuxSystemTrustLocation
+    ): Unit {
+        synchronized(mutex) {
+            let current = requireOpen()
+            configureTrust(current, trust, systemTrustLocation)
+            if (let Some(name) <- serverName) {
+                withCString(name.ascii, {value =>
+                    requireConfigurationSuccess(
+                        "SNI server name",
+                        unsafe { wirestack_tls_engine_set_server_name(current, value) }
+                    )
+                })
+            }
+            match (referenceIdentity) {
+                case ReferenceIdentity.Dns(host) =>
+                    withCString(host.ascii, {value =>
+                        requireConfigurationSuccess(
+                            "DNS reference identity",
+                            unsafe {
+                                wirestack_tls_engine_set_dns_reference_identity(current, value)
+                            }
+                        )
+                    })
+                case ReferenceIdentity.Ip(address) =>
+                    if (address.zone.isSome()) {
+                        throw TlsEngineException(
+                            TlsEngineErrorCode.ProviderFailure,
+                            "TLS IP reference identity cannot contain a zone"
+                        )
+                    }
+                    let octets = address.toOctets()
+                    let status = unsafe {
+                        let input = acquireArrayRawData(octets)
+                        try {
+                            wirestack_tls_engine_set_ip_reference_identity(
+                                current,
+                                input.pointer,
+                                UInt64(octets.size)
+                            )
+                        } finally {
+                            releaseArrayRawData(input)
+                        }
+                    }
+                    requireConfigurationSuccess("IP reference identity", status)
+            }
+            requireConfigurationSuccess(
+                "peer verification",
+                unsafe { wirestack_tls_engine_enable_peer_verification(current) }
+            )
+        }
     }
 
     public func handshakeStep(): TlsEngineStep {
@@ -366,6 +457,123 @@ public class AwsLcTlsEngine <: TlsEngine {
             handle = 0u64
             unsafe { wirestack_tls_engine_destroy(current) }
         }
+    }
+}
+
+private func configureTrust(
+    engineHandle: UInt64,
+    trust: TrustPolicy,
+    systemTrustLocation: ?LinuxSystemTrustLocation
+): Unit {
+    match (trust.kind) {
+        case TrustPolicyKind.System => loadSystemTrust(engineHandle, systemTrustLocation)
+        case TrustPolicyKind.CustomRoots => addCustomRoots(engineHandle, trust)
+        case TrustPolicyKind.SystemPlusCustomRoots =>
+            loadSystemTrust(engineHandle, systemTrustLocation)
+            addCustomRoots(engineHandle, trust)
+        case TrustPolicyKind.PinnedPublicKeys => addPublicKeyPins(engineHandle, trust)
+    }
+}
+
+private func addPublicKeyPins(engineHandle: UInt64, trust: TrustPolicy): Unit {
+    for (pin in trust.pins()) {
+        let digest = pin.digestBytes()
+        let status = unsafe {
+            let input = acquireArrayRawData(digest)
+            try {
+                wirestack_tls_engine_add_spki_sha256_pin(
+                    engineHandle,
+                    input.pointer,
+                    nativePinScope(pin.scope)
+                )
+            } finally {
+                releaseArrayRawData(input)
+            }
+        }
+        requireConfigurationSuccess("SPKI SHA-256 pin", status)
+    }
+}
+
+private func nativePinScope(value: PinScope): Int32 {
+    match (value) {
+        case PinScope.LeafSubjectPublicKeyInfo => 0
+        case PinScope.AnyCertificateSubjectPublicKeyInfo => 1
+    }
+}
+
+private func addCustomRoots(engineHandle: UInt64, trust: TrustPolicy): Unit {
+    let roots = match (trust.customRootChain()) {
+        case Some(value) => value
+        case None => throw TlsEngineException(
+            TlsEngineErrorCode.ProviderFailure,
+            "custom-root trust policy contains no roots"
+        )
+    }
+    for (certificate in roots.certificates()) {
+        let der = certificate.derBytes()
+        let status = unsafe {
+            let input = acquireArrayRawData(der)
+            try {
+                wirestack_tls_engine_add_trust_anchor_der(
+                    engineHandle,
+                    input.pointer,
+                    UInt64(der.size)
+                )
+            } finally {
+                releaseArrayRawData(input)
+            }
+        }
+        requireConfigurationSuccess("custom trust anchor", status)
+    }
+}
+
+private func loadSystemTrust(
+    engineHandle: UInt64,
+    location: ?LinuxSystemTrustLocation
+): Unit {
+    let source = match (location) {
+        case Some(value) => value
+        case None => throw TlsEngineException(
+            TlsEngineErrorCode.ProviderFailure,
+            "Linux system trust requires an explicit discovered CA source"
+        )
+    }
+    match (source.certificateBundle) {
+        case Some(path) => withCString(path, {value =>
+            requireConfigurationSuccess(
+                "Linux CA bundle",
+                unsafe { wirestack_tls_engine_load_verify_bundle(engineHandle, value) }
+            )
+        })
+        case None => match (source.hashedCertificateDirectory) {
+            case Some(path) => withCString(path, {value =>
+                requireConfigurationSuccess(
+                    "Linux hashed CA directory",
+                    unsafe { wirestack_tls_engine_load_verify_directory(engineHandle, value) }
+                )
+            })
+            case None => throw TlsEngineException(
+                TlsEngineErrorCode.ProviderFailure,
+                "Linux system trust location contains no source"
+            )
+        }
+    }
+}
+
+private func withCString(value: String, action: (CString) -> Unit): Unit {
+    unsafe {
+        let encoded = LibC.mallocCString(value)
+        try {
+            action(encoded)
+        } finally {
+            LibC.free(encoded)
+        }
+    }
+}
+
+private func requireConfigurationSuccess(operation: String, status: Int32): Unit {
+    if (status != NATIVE_OK) {
+        throw providerFailure(operation, status)
     }
 }
 
