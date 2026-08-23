@@ -9,6 +9,51 @@ import wirestack.internal.transport.*
 @Test
 class Http1ResponseReaderTest {
     @TestCase
+    func explicitUpgradeTransfersOnlyAMatching101Protocol(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 2048, maxChunk: 64)
+        let served: Future<Bool> = spawn {
+            let request = readReaderRequestHead(server)
+            writeAll(server, ByteSpan(
+                "HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n\r\nxyz".toArray()
+            ))
+            request.target == "/chat"
+        }
+        let request = HttpRequest.get("http://example.com/chat").withHeaders(
+            HttpHeaders.builder().add("Connection", "keep-alive, Upgrade").add("Upgrade", "websocket").build()
+        )
+        let exchanged = performHttp1Upgrade(client, request)
+        let upgraded = match (exchanged) {
+            case Http1UpgradeExchangeResult.Upgraded(value) => value
+            case _ => throw Exception("expected HTTP Upgrade")
+        }
+        @Expect(upgraded.protocol, "websocket")
+        let prefix = Array<Byte>(3, repeat: 0)
+        readExact(upgraded.transport, MutableByteSpan(prefix))
+        @Expect(prefix, "xyz".toArray())
+        @Expect(served.get(Duration.second))
+        upgraded.transport.close()
+    }
+
+    @TestCase
+    func mismatchedUpgradeResponseFailsClosed(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 2048)
+        let served: Future<Unit> = spawn {
+            let _ = readReaderRequestHead(server)
+            writeAll(server, ByteSpan(
+                "HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: other\r\n\r\n".toArray()
+            ))
+        }
+        let request = HttpRequest.get("http://example.com/").withHeaders(
+            HttpHeaders.builder().add("Connection", "Upgrade").add("Upgrade", "websocket").build()
+        )
+        var rejected = false
+        try { let _ = performHttp1Upgrade(client, request) } catch (_: Http1ParseException) { rejected = true }
+        @Expect(rejected)
+        @Expect(client.isClosed())
+        served.get(Duration.second)
+    }
+
+    @TestCase
     func explicitConnectTransfersBufferedTunnelBytesAndTransportOwnership(): Unit {
         let (client, server) = MemoryTransport.pair(capacity: 2048, maxChunk: 64)
         let served: Future<Bool> = spawn {
