@@ -1,0 +1,19 @@
+[package]
+  cjc-version = "1.1.0"
+  name = "wirestack"
+  organization = ""
+  description = "Cross-platform TLS, HTTPS, HTTP/1.1 and HTTP/2 stack for Cangjie"
+  version = "0.1.0"
+  target-dir = ""
+  script-dir = ""
+  src-dir = "src"
+  output-type = "static"
+  compile-option = ""
+  override-compile-option = ""
+  link-option = ""
+  package-configuration = {}
+  repository = "https://github.com/lIlIIlIll/Wirestack.git"
+  homepage = "https://github.com/lIlIIlIll/Wirestack"
+  documentation = "https://github.com/lIlIIlIll/Wirestack/tree/main/docs"
+
+[dependencies]

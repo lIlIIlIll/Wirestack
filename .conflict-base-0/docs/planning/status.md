@@ -1,0 +1,62 @@
+# Wirestack Implementation Status
+
+This file is the lightweight execution index. The PRD and backlog remain the
+sources of truth for scope, dependencies, and acceptance criteria.
+
+Status values:
+
+- `READY`: dependencies satisfied; task may start.
+- `IN_PROGRESS`: exactly one active implementation branch/PR owns the task.
+- `BLOCKED`: dependency, gate, platform, upstream, or evidence requirement is missing.
+- `COMPLETE`: all acceptance criteria are satisfied and durable evidence is linked.
+
+## Repository bootstrap
+
+| ID | Status | Evidence | Notes |
+|---|---|---|---|
+| BOOTSTRAP-001 | COMPLETE | [`docs/evidence/BOOTSTRAP-001/README.md`](../evidence/BOOTSTRAP-001/README.md) | Initialized the repository control plane; no production network implementation. |
+
+## M0
+
+| ID | Status | Evidence | Notes |
+|---|---|---|---|
+| M0-001 | COMPLETE | [`docs/evidence/M0-001/README.md`](../evidence/M0-001/README.md) | SDK/source inventory and disposition decisions complete. |
+| M0-002 | COMPLETE | [`docs/evidence/M0-002/README.md`](../evidence/M0-002/README.md) | CJPM package/path mapping frozen by ADR-0001. |
+| M0-003 | COMPLETE | [`docs/evidence/M0-003/README.md`](../evidence/M0-003/README.md) | Architecture dependency guard and CI are active. |
+| M0-004 | COMPLETE | [`docs/evidence/M0-004/README.md`](../evidence/M0-004/README.md) | Versioned gate runner and evidence framework complete. |
+| M0-005 | COMPLETE | [`docs/evidence/M0-005/README.md`](../evidence/M0-005/README.md) | Existing Linux x86_64 `std.net` raw TCP baseline captured. |
+| M0-006 | COMPLETE | [`docs/evidence/M0-006/README.md`](../evidence/M0-006/README.md) | Linux close/wakeup probes pass; global six-platform GATE-NET-01 remains incomplete. |
+| M0-007 | COMPLETE | [`docs/evidence/M0-007/README.md`](../evidence/M0-007/README.md) | Full duplex and close races pass; public abort is unavailable, so GATE-NET-02 remains incomplete. |
+| M0-008 | COMPLETE | [`docs/evidence/M0-008/README.md`](../evidence/M0-008/README.md) | All 240 Linux absolute-budget samples pass; global GATE-NET-03 remains incomplete. |
+| M0-009 | COMPLETE | [`docs/evidence/M0-009/README.md`](../evidence/M0-009/README.md) | FIN, RST and local-close evidence is retained; public abort/cancel and global GATE-NET-04 remain incomplete. |
+| M0-010 | BLOCKED | [`docs/evidence/M0-010/README.md`](../evidence/M0-010/README.md) | Linux 64 KiB-buffer/100 MiB profile passes, but copied-byte instrumentation, Windows evidence and future adapter comparison are missing. |
+| M0-011 | BLOCKED | [`docs/evidence/M0-011/README.md`](../evidence/M0-011/README.md) | Bounded Linux stress passes; 100k counts, TLS cleanup, 24-hour soak and required native platforms remain outstanding. |
+| M0-012 | BLOCKED | — | Requires M0-011 evidence completion and Android/iOS/Harmony native-device execution. |
+| M0-013 | COMPLETE | [`docs/evidence/M0-013/README.md`](../evidence/M0-013/README.md) | Native Linux evidence shows carrier-thread starvation at 16+ delayed DNS resolutions; gate FAIL supports conditional UP-007 analysis, while global evidence remains incomplete. |
+| M0-014 | BLOCKED | — | Requires a native Windows SDK/runner and copied-byte instrumentation. |
+| M0-015 | COMPLETE | [`docs/evidence/M0-015/README.md`](../evidence/M0-015/README.md) | Provider matrix and M0-016 PoC contract frozen; no final provider selected. |
+| M0-016 | READY | — | Run the shortlisted provider PoCs and retain native/platform evidence without system TLS fallback. |
+| M0-017 | BLOCKED | — | Depends on M0-012 and M0-016 native evidence. |
+| M0-018 | COMPLETE | [`docs/evidence/M0-018/README.md`](../evidence/M0-018/README.md) | Versioned threat register, fail-closed validator, tests and CI are active. |
+| M0-019 | BLOCKED | — | Depends on complete M0-006 through M0-014 evidence; M0-010..014 are not all complete. |
+| M0-020 | BLOCKED | — | Depends on M0-016 and M0-018; final provider selection remains deferred. |
+| M0-021 | BLOCKED | — | Depends on all M0 gate evidence plus the accepted Transport SPI. |
+| M0-022 | BLOCKED | — | Depends on M0-004 through M0-021. |
+
+## Conditional upstream work
+
+`UP-001` through `UP-007` remain **BLOCKED / DO NOT START** until the corresponding
+failed gate provides reproducible evidence and an approved minimal upstream-interface RFC.
+Actual `std.net`/runtime source changes belong in their upstream repositories,
+not in the Wirestack worktree.
+
+The M0-007 and M0-009 capability probes record that the supplied SDK exposes no
+public `TcpSocket.abort()` and no public cancellation member. M0-013 additionally
+shows native Linux carrier-thread starvation under delayed DNS and identifies
+`UP-007` as a conditional candidate. These are inputs to M0-021; none independently
+authorize an upstream implementation task.
+
+## Later milestones
+
+M1 through M7 and P1 tasks remain blocked by their backlog dependencies. A Linux-only
+M0 result must not be generalized to the six-platform release matrix.

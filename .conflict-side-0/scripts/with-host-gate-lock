@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  echo "usage: $0 <resource-name> -- <command> [args...]" >&2
+  exit 2
+}
+
+[[ $# -ge 3 ]] || usage
+resource="$1"
+shift
+[[ "$1" == "--" ]] || usage
+shift
+[[ "$resource" =~ ^[A-Za-z0-9._-]+$ ]] || {
+  echo "invalid resource name: $resource" >&2
+  exit 2
+}
+command -v flock >/dev/null || {
+  echo "flock is required for host-gate serialization" >&2
+  exit 2
+}
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+common_dir="$(git -C "$repo_root" rev-parse --git-common-dir)"
+if [[ "$common_dir" != /* ]]; then
+  common_dir="$repo_root/$common_dir"
+fi
+lock_dir="$common_dir/wirestack-host-locks"
+mkdir -p "$lock_dir"
+
+exec flock -x "$lock_dir/$resource.lock" "$@"
