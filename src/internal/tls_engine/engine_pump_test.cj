@@ -3,7 +3,9 @@ package wirestack.internal.tls_engine
 import std.collection.*
 import std.unittest.*
 import std.unittest.testmacro.*
+import wirestack.internal.common.*
 import wirestack.internal.transport.*
+import wirestack.internal.trust.*
 
 @Test
 class TlsEnginePumpTest {
@@ -38,6 +40,93 @@ class TlsEnginePumpTest {
         let engine = provider.createEngine(
             TlsEngineRole.Client,
             TlsSecurityPolicy.forProfile(TlsSecurityProfile.StrictTls13)
+        )
+        try {
+            var wantsRead = false
+            match (engine.handshakeStep()) {
+                case TlsEngineStep.WantRead => wantsRead = true
+                case _ => ()
+            }
+            @Expect(wantsRead)
+            @Expect(engine.pendingCiphertext() > 0)
+        } finally {
+            engine.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
+    func LinuxSystemTrustLoadsExplicitlyAndSniStaysSeparateFromReferenceIdentity(): Unit {
+        let provider = AwsLcTlsProvider()
+        let context = TlsClientContext.builder(provider.manifest(), provider.linuxCapabilities())
+            .trust(TrustPolicy.system())
+            .build()
+        let engine = provider.createClientEngine(
+            context,
+            ReferenceIdentity.Dns(HostName("verify.example")),
+            serverName: Some(HostName("sni.example"))
+        )
+        try {
+            var wantsRead = false
+            match (engine.handshakeStep()) {
+                case TlsEngineStep.WantRead => wantsRead = true
+                case _ => ()
+            }
+            @Expect(wantsRead)
+            let output = Array<Byte>(4096, repeat: 0)
+            let count = engine.drainCiphertext(MutableByteSpan(output))
+            @Expect(containsAscii(output, count, "sni.example"))
+            @Expect(!containsAscii(output, count, "verify.example"))
+        } finally {
+            engine.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
+    func customRootChainIsLoadedIntoARealAwsLcClientEngine(): Unit {
+        let provider = AwsLcTlsProvider()
+        let roots = CertificateChain([DerCertificate(tlsEngineTestCertificateDer())])
+        let context = TlsClientContext.builder(
+            provider.manifest(),
+            TlsCapabilities.fromProvider(provider.manifest())
+        ).trust(TrustPolicy.customRoots(roots)).build()
+        let engine = provider.createClientEngine(
+            context,
+            ReferenceIdentity.Dns(HostName("example.com")),
+            serverName: Some(HostName("example.com"))
+        )
+        try {
+            var wantsRead = false
+            match (engine.handshakeStep()) {
+                case TlsEngineStep.WantRead => wantsRead = true
+                case _ => ()
+            }
+            @Expect(wantsRead)
+            @Expect(engine.pendingCiphertext() > 0)
+        } finally {
+            engine.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
+    func spkiPinPolicyConfiguresTheNativeVerificationPathBeforeHandshake(): Unit {
+        let provider = AwsLcTlsProvider()
+        let pin = SpkiSha256Pin([
+            0x38, 0x10, 0x47, 0x98, 0x33, 0x60, 0x71, 0x56,
+            0x96, 0xef, 0x15, 0xed, 0xa6, 0x74, 0x24, 0x3b,
+            0xea, 0x5f, 0xb9, 0x7a, 0xc8, 0x52, 0xe4, 0xe5,
+            0xc3, 0xf1, 0xb4, 0xd8, 0x03, 0x2a, 0xf4, 0x3e
+        ])
+        let context = TlsClientContext.builder(
+            provider.manifest(),
+            TlsCapabilities.fromProvider(provider.manifest())
+        ).trust(TrustPolicy.pinnedPublicKeys([pin])).build()
+        let engine = provider.createClientEngine(
+            context,
+            ReferenceIdentity.Dns(HostName("example.com")),
+            serverName: Some(HostName("example.com"))
         )
         try {
             var wantsRead = false
@@ -160,6 +249,58 @@ class TlsEnginePumpTest {
         @Expect(transport.readCalls, 0)
         @Expect(transport.writeCalls, 0)
     }
+}
+
+private func containsAscii(buffer: Array<Byte>, length: Int64, needle: String): Bool {
+    let bytes = needle.toArray()
+    if (bytes.isEmpty() || length < bytes.size) { return false }
+    for (start in 0..(length - bytes.size + 1)) {
+        var equal = true
+        for (index in 0..bytes.size) {
+            if (buffer[start + index] != bytes[index]) {
+                equal = false
+                break
+            }
+        }
+        if (equal) { return true }
+    }
+    false
+}
+
+private func tlsEngineTestCertificateDer(): Array<Byte> {
+    decodeTlsEngineBase64(
+        "MIIDQzCCAiugAwIBAgIUV5PGYfjXOQnu+igzQly36jWWRgowDQYJKoZIhvcNAQELBQAwGjEYMBYGA1UEAwwPaWdub3JlZC5leGFtcGxlMB4XDTI2MDgyMzE5NTMyNVoXDTI2MDgyNDE5NTMyNVowGjEYMBYGA1UEAwwPaWdub3JlZC5leGFtcGxlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuQugF5gdGjMYdi0nY2Agd85kifIDv0NjOO+Wf1Att0pAQKp9I+7JJZzRElhj/2sCGMM+uS+mhcVV88jIDDSa5o9w0LeX5Rgl73Wm6m4fZWdywOzlZQ9Mo7CgmluShrv+Kps7gw94iApgvgzWtfBlXQJsRZil3Agtl2s8h+7v7CBf0iZ2EYGR3GFQJHTUFYJiCpOuiCT9FDG3rjwn1XA+r9Xg1LK2uAZ8wdv6VSrcuoiPE5SH33KDpg4XXgbNP6+PItb3+pRCk/5jWXG3CLHuc4kCwy9R4nG7XVKIC89Ye1bf08ZWcIWgEfwb7Mz3tvisJZ4pekbrMtx0MmHvuhY6hQIDAQABo4GAMH4wHQYDVR0OBBYEFDh1w+O/EI8PmXPwMAgNhbGaA63sMB8GA1UdIwQYMBaAFDh1w+O/EI8PmXPwMAgNhbGaA63sMA8GA1UdEwEB/wQFMAMBAf8wKwYDVR0RBCQwIoILZXhhbXBsZS5jb22CDSouZXhhbXBsZS5vcmeHBH8AAAEwDQYJKoZIhvcNAQELBQADggEBADzEAhmpVV1+ZPPmUXplLVBthDbVTmFlIwPMoUlzk7gQjNjKpjIRTPpRXQddr//UtCia9am74pJNr265vbVMAVWUCoIirkOtEvWc5FLjo1ZOCHo6Di8rMg1ThA1sRMjAKkMn5iw8f8vldJ2AXWpjxGK8yCZj063M9XShzzV95+BCGkmIJTXtG8mKcRko4sFQ1jWHBW4jX0PcLksB+1U8MBpevxgqoa8lgZQFzQhuFmGlJmXThCUWWElsKkwJSU62/E6wm1oxE+tngPQ4itqH0HS0X5YuEjCch8LgYetttH8eXSRkjNN+hY3e0a1jfhFDSqjH1i90c99oyJg1l5BXk0A="
+    )
+}
+
+private func decodeTlsEngineBase64(value: String): Array<Byte> {
+    let output = ArrayList<Byte>()
+    var accumulator: Int64 = 0
+    var bits: Int64 = 0
+    for (byte in value.toArray()) {
+        if (byte == b'=') { break }
+        let decoded: Int64 = if (byte >= b'A' && byte <= b'Z') {
+            Int64(byte - b'A')
+        } else if (byte >= b'a' && byte <= b'z') {
+            Int64(byte - b'a') + 26
+        } else if (byte >= b'0' && byte <= b'9') {
+            Int64(byte - b'0') + 52
+        } else if (byte == b'+') {
+            62
+        } else if (byte == b'/') {
+            63
+        } else {
+            throw IllegalArgumentException("invalid TLS test fixture")
+        }
+        accumulator = (accumulator << 6) | decoded
+        bits += 6
+        if (bits >= 8) {
+            bits -= 8
+            output.add(UInt8(UInt64((accumulator >> bits) & 0xff)))
+            accumulator &= if (bits == 0) { 0 } else { (1 << bits) - 1 }
+        }
+    }
+    output.toArray()
 }
 
 private class ScriptedEngine <: TlsEngine {
