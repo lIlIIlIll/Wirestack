@@ -1,0 +1,397 @@
+{
+  "schema_version": 1,
+  "task_id": "M0-015",
+  "reviewed_at": "2026-08-23",
+  "decision_scope": "candidate screening only; final provider selection belongs to M0-020 after M0-016 PoC and M0-018 threat model",
+  "platforms": ["linux", "windows", "macos", "android", "ios", "harmony"],
+  "hard_requirements": [
+    "permissive_distribution_license",
+    "tls12_client_server",
+    "tls13_client_server",
+    "custom_transport_io",
+    "alpn",
+    "sni",
+    "mutual_tls",
+    "session_resumption",
+    "vendored_static_build",
+    "maintained_security_response",
+    "six_platform_poc_feasible"
+  ],
+  "status_vocabulary": ["MET", "NOT_MET", "UNKNOWN", "POC_REQUIRED"],
+  "platform_vocabulary": ["DOCUMENTED", "PORTABLE_EXPECTED", "UNKNOWN", "NOT_TARGETED"],
+  "shortlist": {
+    "primary": "aws-lc",
+    "secondary": "mbedtls",
+    "control": "openssl-3",
+    "reference_only": ["boringssl"],
+    "conditional": ["rustls-ffi"]
+  },
+  "candidates": [
+    {
+      "id": "aws-lc",
+      "name": "AWS-LC",
+      "disposition": "PRIMARY_POC",
+      "license": {"expression": "Apache-2.0 AND ISC-family bundled notices", "compatible": true},
+      "requirements": {
+        "permissive_distribution_license": "MET",
+        "tls12_client_server": "MET",
+        "tls13_client_server": "MET",
+        "custom_transport_io": "MET",
+        "alpn": "MET",
+        "sni": "MET",
+        "mutual_tls": "MET",
+        "session_resumption": "MET",
+        "vendored_static_build": "MET",
+        "maintained_security_response": "MET",
+        "six_platform_poc_feasible": "POC_REQUIRED"
+      },
+      "platforms": {
+        "linux": "DOCUMENTED",
+        "windows": "DOCUMENTED",
+        "macos": "DOCUMENTED",
+        "android": "DOCUMENTED",
+        "ios": "PORTABLE_EXPECTED",
+        "harmony": "UNKNOWN"
+      },
+      "custom_io_model": "OpenSSL/BoringSSL-compatible BIO and SSL state-machine APIs",
+      "api_stability": "source pin required; do not assume system ABI compatibility",
+      "strengths": [
+        "permissive license",
+        "actively maintained security library",
+        "TLS feature surface close to the required engine contract",
+        "vendored static build and FIPS path available as separate concerns"
+      ],
+      "risks": [
+        "HarmonyOS/OpenHarmony build is unverified",
+        "iOS device packaging and bitcode/toolchain details require PoC",
+        "BoringSSL-derived API evolution requires an exact source pin and adapter isolation"
+      ],
+      "evidence": [
+        "https://github.com/aws/aws-lc",
+        "https://github.com/aws/aws-lc/blob/main/LICENSE",
+        "https://github.com/aws/aws-lc/blob/main/BUILDING.md"
+      ]
+    },
+    {
+      "id": "mbedtls",
+      "name": "Mbed TLS",
+      "disposition": "SECONDARY_POC",
+      "license": {"expression": "Apache-2.0", "compatible": true},
+      "requirements": {
+        "permissive_distribution_license": "MET",
+        "tls12_client_server": "MET",
+        "tls13_client_server": "MET",
+        "custom_transport_io": "MET",
+        "alpn": "MET",
+        "sni": "MET",
+        "mutual_tls": "MET",
+        "session_resumption": "MET",
+        "vendored_static_build": "MET",
+        "maintained_security_response": "MET",
+        "six_platform_poc_feasible": "POC_REQUIRED"
+      },
+      "platforms": {
+        "linux": "DOCUMENTED",
+        "windows": "DOCUMENTED",
+        "macos": "PORTABLE_EXPECTED",
+        "android": "PORTABLE_EXPECTED",
+        "ios": "PORTABLE_EXPECTED",
+        "harmony": "PORTABLE_EXPECTED"
+      },
+      "custom_io_model": "caller-provided send/receive callbacks through mbedtls_ssl_set_bio",
+      "api_stability": "use an LTS/source pin; major-version migration is not ABI-transparent",
+      "strengths": [
+        "small portable C codebase",
+        "explicit custom I/O callbacks",
+        "permissive license and straightforward static vendoring",
+        "platform abstraction is suitable for mobile cross-compilation"
+      ],
+      "risks": [
+        "TLS 1.3 feature and interoperability coverage must be proven against Wirestack scenarios",
+        "system trust and non-exportable key integration require separate adapters",
+        "performance and certificate-path behavior require comparison with AWS-LC"
+      ],
+      "evidence": [
+        "https://github.com/Mbed-TLS/mbedtls",
+        "https://github.com/Mbed-TLS/mbedtls/blob/development/LICENSE",
+        "https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/ssl_8h/"
+      ]
+    },
+    {
+      "id": "openssl-3",
+      "name": "OpenSSL 3.x (vendored control)",
+      "disposition": "CONTROL_POC",
+      "license": {"expression": "Apache-2.0", "compatible": true},
+      "requirements": {
+        "permissive_distribution_license": "MET",
+        "tls12_client_server": "MET",
+        "tls13_client_server": "MET",
+        "custom_transport_io": "MET",
+        "alpn": "MET",
+        "sni": "MET",
+        "mutual_tls": "MET",
+        "session_resumption": "MET",
+        "vendored_static_build": "MET",
+        "maintained_security_response": "MET",
+        "six_platform_poc_feasible": "POC_REQUIRED"
+      },
+      "platforms": {
+        "linux": "DOCUMENTED",
+        "windows": "DOCUMENTED",
+        "macos": "DOCUMENTED",
+        "android": "PORTABLE_EXPECTED",
+        "ios": "PORTABLE_EXPECTED",
+        "harmony": "PORTABLE_EXPECTED"
+      },
+      "custom_io_model": "BIO abstraction including memory/custom BIO methods",
+      "api_stability": "stable public API within supported major lines; exact build remains pinned",
+      "strengths": [
+        "broad interoperability baseline",
+        "complete TLS feature set",
+        "strong documentation and mature tooling",
+        "useful control for comparing provider adapter semantics"
+      ],
+      "risks": [
+        "largest footprint and build surface in the shortlist",
+        "easy to accidentally recreate runtime system-library discovery",
+        "provider/module configuration increases packaging and attack surface",
+        "not preferred merely because the legacy stdx stack already used OpenSSL"
+      ],
+      "evidence": [
+        "https://github.com/openssl/openssl",
+        "https://github.com/openssl/openssl/blob/master/LICENSE.txt",
+        "https://github.com/openssl/openssl/blob/master/INSTALL.md"
+      ]
+    },
+    {
+      "id": "boringssl",
+      "name": "BoringSSL",
+      "disposition": "REFERENCE_ONLY",
+      "license": {"expression": "ISC/OpenSSL/SSLeay-family bundled notices", "compatible": true},
+      "requirements": {
+        "permissive_distribution_license": "MET",
+        "tls12_client_server": "MET",
+        "tls13_client_server": "MET",
+        "custom_transport_io": "MET",
+        "alpn": "MET",
+        "sni": "MET",
+        "mutual_tls": "MET",
+        "session_resumption": "MET",
+        "vendored_static_build": "MET",
+        "maintained_security_response": "MET",
+        "six_platform_poc_feasible": "POC_REQUIRED"
+      },
+      "platforms": {
+        "linux": "DOCUMENTED",
+        "windows": "DOCUMENTED",
+        "macos": "DOCUMENTED",
+        "android": "DOCUMENTED",
+        "ios": "PORTABLE_EXPECTED",
+        "harmony": "UNKNOWN"
+      },
+      "custom_io_model": "BIO and SSL state-machine APIs",
+      "api_stability": "explicitly no API or ABI stability guarantee",
+      "strengths": [
+        "high-quality technical reference for a compact modern TLS integration",
+        "broad deployment through Google products",
+        "feature model closely matches AWS-LC"
+      ],
+      "risks": [
+        "upstream explicitly does not present itself as a general-purpose stable library",
+        "no stable release/ABI contract",
+        "direct adoption duplicates much of the AWS-LC evaluation with greater integration risk"
+      ],
+      "evidence": [
+        "https://boringssl.googlesource.com/boringssl/+/HEAD/README.md",
+        "https://boringssl.googlesource.com/boringssl/+/HEAD/BUILDING.md",
+        "https://boringssl.googlesource.com/boringssl/+/HEAD/LICENSE"
+      ]
+    },
+    {
+      "id": "rustls-ffi",
+      "name": "rustls-ffi",
+      "disposition": "CONDITIONAL_HOLD",
+      "license": {"expression": "Apache-2.0 OR ISC OR MIT across the Rust dependency set", "compatible": true},
+      "requirements": {
+        "permissive_distribution_license": "MET",
+        "tls12_client_server": "MET",
+        "tls13_client_server": "MET",
+        "custom_transport_io": "MET",
+        "alpn": "MET",
+        "sni": "MET",
+        "mutual_tls": "MET",
+        "session_resumption": "MET",
+        "vendored_static_build": "POC_REQUIRED",
+        "maintained_security_response": "MET",
+        "six_platform_poc_feasible": "UNKNOWN"
+      },
+      "platforms": {
+        "linux": "DOCUMENTED",
+        "windows": "DOCUMENTED",
+        "macos": "DOCUMENTED",
+        "android": "PORTABLE_EXPECTED",
+        "ios": "PORTABLE_EXPECTED",
+        "harmony": "UNKNOWN"
+      },
+      "custom_io_model": "C ABI drives rustls connection state with caller-owned I/O callbacks",
+      "api_stability": "C API is versioned but Rust toolchain and transitive crates must be pinned",
+      "strengths": [
+        "memory-safe implementation core",
+        "modern TLS defaults",
+        "custom transport ownership fits the Wirestack engine split"
+      ],
+      "risks": [
+        "introduces a Rust toolchain and transitive supply chain into all target builds",
+        "Harmony target support and mobile packaging are unverified",
+        "binary size, panic/allocator boundary and debugging costs require a dedicated PoC"
+      ],
+      "evidence": [
+        "https://github.com/rustls/rustls-ffi",
+        "https://github.com/rustls/rustls",
+        "https://github.com/rustls/rustls-ffi/blob/main/LICENSE"
+      ]
+    },
+    {
+      "id": "wolfssl",
+      "name": "wolfSSL",
+      "disposition": "EXCLUDED_DEFAULT",
+      "license": {"expression": "GPL-2.0-or-later OR commercial", "compatible": false},
+      "requirements": {
+        "permissive_distribution_license": "NOT_MET",
+        "tls12_client_server": "MET",
+        "tls13_client_server": "MET",
+        "custom_transport_io": "MET",
+        "alpn": "MET",
+        "sni": "MET",
+        "mutual_tls": "MET",
+        "session_resumption": "MET",
+        "vendored_static_build": "MET",
+        "maintained_security_response": "MET",
+        "six_platform_poc_feasible": "POC_REQUIRED"
+      },
+      "platforms": {
+        "linux": "DOCUMENTED",
+        "windows": "DOCUMENTED",
+        "macos": "DOCUMENTED",
+        "android": "DOCUMENTED",
+        "ios": "DOCUMENTED",
+        "harmony": "PORTABLE_EXPECTED"
+      },
+      "custom_io_model": "custom I/O callback API",
+      "api_stability": "commercial support available; open distribution terms are the blocker",
+      "strengths": ["broad embedded/mobile platform coverage", "complete TLS feature surface"],
+      "risks": ["default open-source distribution would require GPL compliance or a commercial license"],
+      "evidence": [
+        "https://github.com/wolfSSL/wolfssl",
+        "https://github.com/wolfSSL/wolfssl/blob/master/LICENSING"
+      ]
+    },
+    {
+      "id": "s2n-tls",
+      "name": "s2n-tls",
+      "disposition": "EXCLUDED_DEFAULT",
+      "license": {"expression": "Apache-2.0", "compatible": true},
+      "requirements": {
+        "permissive_distribution_license": "MET",
+        "tls12_client_server": "MET",
+        "tls13_client_server": "MET",
+        "custom_transport_io": "MET",
+        "alpn": "MET",
+        "sni": "MET",
+        "mutual_tls": "MET",
+        "session_resumption": "MET",
+        "vendored_static_build": "MET",
+        "maintained_security_response": "MET",
+        "six_platform_poc_feasible": "NOT_MET"
+      },
+      "platforms": {
+        "linux": "DOCUMENTED",
+        "windows": "NOT_TARGETED",
+        "macos": "DOCUMENTED",
+        "android": "UNKNOWN",
+        "ios": "UNKNOWN",
+        "harmony": "UNKNOWN"
+      },
+      "custom_io_model": "caller-provided send/receive callbacks",
+      "api_stability": "public C API, but platform scope does not match Wirestack P0",
+      "strengths": ["focused TLS implementation", "strong security engineering", "permissive license"],
+      "risks": ["Windows and mobile six-platform delivery are not an upstream project target"],
+      "evidence": [
+        "https://github.com/aws/s2n-tls",
+        "https://github.com/aws/s2n-tls/blob/main/LICENSE"
+      ]
+    },
+    {
+      "id": "platform-native",
+      "name": "Platform-native TLS family",
+      "disposition": "EXCLUDED_SINGLE_DEFAULT",
+      "license": {"expression": "platform SDK terms", "compatible": true},
+      "requirements": {
+        "permissive_distribution_license": "MET",
+        "tls12_client_server": "POC_REQUIRED",
+        "tls13_client_server": "POC_REQUIRED",
+        "custom_transport_io": "UNKNOWN",
+        "alpn": "POC_REQUIRED",
+        "sni": "POC_REQUIRED",
+        "mutual_tls": "POC_REQUIRED",
+        "session_resumption": "UNKNOWN",
+        "vendored_static_build": "NOT_MET",
+        "maintained_security_response": "MET",
+        "six_platform_poc_feasible": "NOT_MET"
+      },
+      "platforms": {
+        "linux": "NOT_TARGETED",
+        "windows": "DOCUMENTED",
+        "macos": "DOCUMENTED",
+        "android": "DOCUMENTED",
+        "ios": "DOCUMENTED",
+        "harmony": "DOCUMENTED"
+      },
+      "custom_io_model": "varies by Schannel, Apple Security/Network, Android and Harmony APIs",
+      "api_stability": "stable per platform, no single cross-platform engine contract",
+      "strengths": ["native trust and hardware-key integration", "OS-managed security updates"],
+      "risks": [
+        "requires multiple TLS engines with divergent semantics",
+        "some native APIs own transport establishment and conflict with the Transport SPI",
+        "does not provide a Linux default"
+      ],
+      "evidence": [
+        "https://learn.microsoft.com/windows/win32/secauthn/secure-channel",
+        "https://developer.apple.com/documentation/security",
+        "https://developer.android.com/reference/javax/net/ssl/SSLEngine"
+      ]
+    },
+    {
+      "id": "bearssl",
+      "name": "BearSSL",
+      "disposition": "EXCLUDED",
+      "license": {"expression": "MIT", "compatible": true},
+      "requirements": {
+        "permissive_distribution_license": "MET",
+        "tls12_client_server": "MET",
+        "tls13_client_server": "NOT_MET",
+        "custom_transport_io": "MET",
+        "alpn": "POC_REQUIRED",
+        "sni": "MET",
+        "mutual_tls": "MET",
+        "session_resumption": "MET",
+        "vendored_static_build": "MET",
+        "maintained_security_response": "UNKNOWN",
+        "six_platform_poc_feasible": "POC_REQUIRED"
+      },
+      "platforms": {
+        "linux": "PORTABLE_EXPECTED",
+        "windows": "PORTABLE_EXPECTED",
+        "macos": "PORTABLE_EXPECTED",
+        "android": "PORTABLE_EXPECTED",
+        "ios": "PORTABLE_EXPECTED",
+        "harmony": "PORTABLE_EXPECTED"
+      },
+      "custom_io_model": "caller drives record engine I/O",
+      "api_stability": "small stable codebase, but required protocol generation is absent",
+      "strengths": ["small footprint", "simple portable implementation", "permissive license"],
+      "risks": ["no TLS 1.3 support", "maintenance/security response cadence is uncertain"],
+      "evidence": ["https://bearssl.org/", "https://www.bearssl.org/gitweb/?p=BearSSL"]
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+ancestorEntries = []
+ourEntries = ["tools/tls_provider_poc/mbedtls_memory_poc.c"]
+theirEntries = ["tools/tls_provider_poc/mbedtls_memory_poc.c"]

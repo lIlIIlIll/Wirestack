@@ -1,0 +1,148 @@
+{
+  "cases": [
+    {
+      "aggregate": {
+        "deadline_owner_late_ms": {"max": 4.514, "p50": 0.262, "p95": 0.408, "p99": 4.514},
+        "overshoot_ms": {"max": 4.603, "p50": 0.344, "p95": 0.496, "p99": 4.603},
+        "total_ms": {"max": 54.603, "p50": 50.344, "p95": 50.496, "p99": 54.603},
+        "wake_after_close_ms": {"max": 0.125, "p50": 0.089, "p95": 0.107, "p99": 0.125}
+      },
+      "budget_ms": 50, "decision": "PASS", "sample_count": 20, "scenario": "idle-read", "source_sha256": "1bcb08572fd510c1e858d01c9e49ea875159fa727aed7f664a366102a436407c"
+    },
+    {
+      "aggregate": {
+        "deadline_owner_late_ms": {"max": 4.61, "p50": 1.838, "p95": 2.216, "p99": 4.61},
+        "overshoot_ms": {"max": 4.729, "p50": 1.941, "p95": 2.306, "p99": 4.729},
+        "total_ms": {"max": 204.729, "p50": 201.941, "p95": 202.306, "p99": 204.729},
+        "wake_after_close_ms": {"max": 0.136, "p50": 0.107, "p95": 0.133, "p99": 0.136}
+      },
+      "budget_ms": 200, "decision": "PASS", "sample_count": 20, "scenario": "idle-read", "source_sha256": "1bcb08572fd510c1e858d01c9e49ea875159fa727aed7f664a366102a436407c"
+    },
+    {
+      "aggregate": {
+        "deadline_owner_late_ms": {"max": 10.155, "p50": 4.134, "p95": 10.138, "p99": 10.155},
+        "overshoot_ms": {"max": 10.245, "p50": 4.238, "p95": 10.238, "p99": 10.245},
+        "total_ms": {"max": 1010.245, "p50": 1004.238, "p95": 1010.238, "p99": 1010.245},
+        "wake_after_close_ms": {"max": 0.656, "p50": 0.104, "p95": 0.128, "p99": 0.656}
+      },
+      "budget_ms": 1000, "decision": "PASS", "sample_count": 20, "scenario": "idle-read", "source_sha256": "1bcb08572fd510c1e858d01c9e49ea875159fa727aed7f664a366102a436407c"
+    },
+    {
+      "aggregate": {
+        "deadline_owner_late_ms": {"max": 0.459, "p50": 0.284, "p95": 0.375, "p99": 0.459},
+        "overshoot_ms": {"max": 0.575, "p50": 0.418, "p95": 0.516, "p99": 0.575},
+        "total_ms": {"max": 50.575, "p50": 50.418, "p95": 50.516, "p99": 50.575},
+        "wake_after_close_ms": {"max": 0.235, "p50": 0.116, "p95": 0.214, "p99": 0.235}
+      },
+      "budget_ms": 50, "decision": "PASS", "sample_count": 20, "scenario": "partial-write", "source_sha256": "7df08a58af285babafd59f2e0f3194d37d84dd86857810ae7d9ea3ae9bc9d52e"
+    },
+    {
+      "aggregate": {
+        "deadline_owner_late_ms": {"max": 3.847, "p50": 1.768, "p95": 2.919, "p99": 3.847},
+        "overshoot_ms": {"max": 4.51, "p50": 1.93, "p95": 3.075, "p99": 4.51},
+        "total_ms": {"max": 204.51, "p50": 201.93, "p95": 203.075, "p99": 204.51},
+        "wake_after_close_ms": {"max": 0.664, "p50": 0.144, "p95": 0.179, "p99": 0.664}
+      },
+      "budget_ms": 200, "decision": "PASS", "sample_count": 20, "scenario": "partial-write", "source_sha256": "7df08a58af285babafd59f2e0f3194d37d84dd86857810ae7d9ea3ae9bc9d52e"
+    },
+    {
+      "aggregate": {
+        "deadline_owner_late_ms": {"max": 10.141, "p50": 2.615, "p95": 10.082, "p99": 10.141},
+        "overshoot_ms": {"max": 10.359, "p50": 2.801, "p95": 10.184, "p99": 10.359},
+        "total_ms": {"max": 1010.359, "p50": 1002.801, "p95": 1010.184, "p99": 1010.359},
+        "wake_after_close_ms": {"max": 0.218, "p50": 0.107, "p95": 0.186, "p99": 0.218}
+      },
+      "budget_ms": 1000, "decision": "PASS", "sample_count": 20, "scenario": "partial-write", "source_sha256": "7df08a58af285babafd59f2e0f3194d37d84dd86857810ae7d9ea3ae9bc9d52e"
+    },
+    {
+      "aggregate": {
+        "deadline_owner_late_ms": {"max": 1.882, "p50": 0.344, "p95": 0.844, "p99": 1.882},
+        "overshoot_ms": {"max": 1.979, "p50": 0.453, "p95": 0.928, "p99": 1.979},
+        "total_ms": {"max": 51.979, "p50": 50.453, "p95": 50.928, "p99": 51.979},
+        "wake_after_close_ms": {"max": 0.146, "p50": 0.107, "p95": 0.139, "p99": 0.146}
+      },
+      "budget_ms": 50, "decision": "PASS", "sample_count": 20, "scenario": "blocked-connect", "source_sha256": "a27a93871b8d4a86687968d5d0ef3c81b7279483e8c43ff864a182fd085301a6"
+    },
+    {
+      "aggregate": {
+        "deadline_owner_late_ms": {"max": 2.467, "p50": 2.06, "p95": 2.376, "p99": 2.467},
+        "overshoot_ms": {"max": 2.589, "p50": 2.155, "p95": 2.553, "p99": 2.589},
+        "total_ms": {"max": 202.589, "p50": 202.155, "p95": 202.553, "p99": 202.589},
+        "wake_after_close_ms": {"max": 0.177, "p50": 0.101, "p95": 0.144, "p99": 0.177}
+      },
+      "budget_ms": 200, "decision": "PASS", "sample_count": 20, "scenario": "blocked-connect", "source_sha256": "a27a93871b8d4a86687968d5d0ef3c81b7279483e8c43ff864a182fd085301a6"
+    },
+    {
+      "aggregate": {
+        "deadline_owner_late_ms": {"max": 10.207, "p50": 3.704, "p95": 10.146, "p99": 10.207},
+        "overshoot_ms": {"max": 10.31, "p50": 3.802, "p95": 10.244, "p99": 10.31},
+        "total_ms": {"max": 1010.31, "p50": 1003.802, "p95": 1010.244, "p99": 1010.31},
+        "wake_after_close_ms": {"max": 1.191, "p50": 0.104, "p95": 0.158, "p99": 1.191}
+      },
+      "budget_ms": 1000, "decision": "PASS", "sample_count": 20, "scenario": "blocked-connect", "source_sha256": "a27a93871b8d4a86687968d5d0ef3c81b7279483e8c43ff864a182fd085301a6"
+    },
+    {
+      "aggregate": {
+        "deadline_owner_late_ms": {"max": 0.758, "p50": 0.343, "p95": 0.481, "p99": 0.758},
+        "overshoot_ms": {"max": 0.838, "p50": 0.425, "p95": 0.571, "p99": 0.838},
+        "total_ms": {"max": 50.838, "p50": 50.425, "p95": 50.571, "p99": 50.838},
+        "wake_after_close_ms": {"max": 0.123, "p50": 0.09, "p95": 0.11, "p99": 0.123}
+      },
+      "budget_ms": 50, "decision": "PASS", "sample_count": 20, "scenario": "blocked-accept", "source_sha256": "a926ba99573bfccb2227f72db6b97fa6985d8323139f992a8c13256f31d520cc"
+    },
+    {
+      "aggregate": {
+        "deadline_owner_late_ms": {"max": 2.892, "p50": 1.795, "p95": 2.491, "p99": 2.892},
+        "overshoot_ms": {"max": 3.03, "p50": 1.899, "p95": 2.584, "p99": 3.03},
+        "total_ms": {"max": 203.03, "p50": 201.899, "p95": 202.584, "p99": 203.03},
+        "wake_after_close_ms": {"max": 0.149, "p50": 0.104, "p95": 0.146, "p99": 0.149}
+      },
+      "budget_ms": 200, "decision": "PASS", "sample_count": 20, "scenario": "blocked-accept", "source_sha256": "a926ba99573bfccb2227f72db6b97fa6985d8323139f992a8c13256f31d520cc"
+    },
+    {
+      "aggregate": {
+        "deadline_owner_late_ms": {"max": 10.135, "p50": 9.438, "p95": 10.08, "p99": 10.135},
+        "overshoot_ms": {"max": 10.248, "p50": 9.539, "p95": 10.182, "p99": 10.248},
+        "total_ms": {"max": 1010.248, "p50": 1009.539, "p95": 1010.182, "p99": 1010.248},
+        "wake_after_close_ms": {"max": 0.277, "p50": 0.097, "p95": 0.113, "p99": 0.277}
+      },
+      "budget_ms": 1000, "decision": "PASS", "sample_count": 20, "scenario": "blocked-accept", "source_sha256": "a926ba99573bfccb2227f72db6b97fa6985d8323139f992a8c13256f31d520cc"
+    }
+  ],
+  "configuration": {
+    "budgets_ms": [50, 200, 1000],
+    "execution_mode": "serialized by scenario; blocked-connect split into two 10-sample batches to avoid host backlog/TIME_WAIT contamination",
+    "repetitions_per_case": 20,
+    "timeout_seconds": 8.0,
+    "warmup_per_batch": 2
+  },
+  "environment": {
+    "architecture": "x86_64",
+    "cangjie_home": "/mnt/data/cangjie-sdk/cangjie",
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3",
+    "generated_at_utc": "2026-08-23T06:33:50.655683+00:00",
+    "os": "Linux-6.18.35-x86_64-with-glibc2.41",
+    "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+    "repository_revision": "054175b2f6d4b260ba1c645dc39575c6eee189d2"
+  },
+  "execution_groups": [
+    "idle-read: 2 warmups + 20 measured per budget",
+    "partial-write: 2 warmups + 20 measured per budget",
+    "blocked-connect: two independent batches of 1 warmup + 10 measured per budget",
+    "blocked-accept: 2 warmups + 20 measured per budget"
+  ],
+  "gate_id": "GATE-NET-03",
+  "global_gate_status": "INCOMPLETE",
+  "non_claims": [
+    "not six-platform gate completion",
+    "not Wirestack OperationContext implementation",
+    "does not claim public abort exists",
+    "does not use mutable per-socket timeout as the total budget"
+  ],
+  "schema_version": 1,
+  "scope": "Linux x86_64 supplied-SDK absolute-deadline evidence using public close wakeup",
+  "status": "PASS",
+  "task_id": "M0-008",
+  "thresholds": {"deadline_early_allowance_ms": 2.0, "overshoot": "max(20 ms, budget * 5%)"}
+}
