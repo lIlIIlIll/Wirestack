@@ -77,6 +77,11 @@ public interface TransportListener <: Resource {
     func close(): Unit
 }
 
+/** DNS-free connection-attempt boundary consumed by higher-level connectors. */
+public interface TransportFactory {
+    func connect(endpoint: SocketEndpoint, context: OperationContext): DuplexTransport
+}
+
 /** Writes an entire span without resetting the caller's operation budget. */
 public func writeAll(
     transport: DuplexTransport,
