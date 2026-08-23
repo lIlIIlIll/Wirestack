@@ -17,6 +17,12 @@ func tlsTestPrivateKeyDer(): Array<Byte> {
     )
 }
 
+func tlsTestSubjectPublicKeyInfoDer(): Array<Byte> {
+    decodeTlsTestBase64(
+        "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3+ICzVHaQ8+czxeV/aeg/iAIgwhqYytRVc17/BY3XdLtYSaG9O6wYxtqm5zZvcujcl35vStEEIc6RsXpQxAUzGp6Gq129MTDzdyW5a7x63bWC6Zlh6SpC4zFdt/xGJisJw/HS4LHLXKzQiSwHZPwFN7zOZ0JMAh05BLF4yEOwkbiqYUR3i7z0wVtvUFuL3NAGfZXzXY1HRi+Qfm/h9lbrMmQtm3kBGBmZUh8ASqugcfiCMziYYY1ygZw1MACxJ60nRfvq1wYVZdUmiD2WED4NF0VK58tP/qJ0KnKz/I2g4GcV5Xu1tH/2NYaI8YT2ejIQn6TgwYWN+3HaXe3Q83DQwIDAQAB"
+    )
+}
+
 func tlsTestSpkiPin(): SpkiSha256Pin {
     SpkiSha256Pin([
         0xff, 0xa0, 0x19, 0xf8, 0x3b, 0xe3, 0x10, 0x77,
