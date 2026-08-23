@@ -17,6 +17,7 @@ private let ENGINE_IO_COMPLETE: Int32 = 0
 private let ENGINE_IO_WANT_READ: Int32 = 1
 private let ENGINE_IO_WANT_WRITE: Int32 = 2
 private let ENGINE_IO_CLOSED: Int32 = 3
+private let ENGINE_IO_SHUTDOWN_SENT: Int32 = 4
 private let NATIVE_OK: Int32 = 0
 private let MAX_SIGNED_INT64: UInt64 = 0x7fffffffffffffffu64
 
@@ -186,6 +187,10 @@ foreign func wirestack_tls_engine_write_plaintext(
     outWritten: CPointer<UInt64>,
     outStep: CPointer<Int32>
 ): Int32
+foreign func wirestack_tls_engine_shutdown_step(
+    engineHandle: UInt64,
+    outStep: CPointer<Int32>
+): Int32
 
 public enum TlsEngineRole {
     | Client
@@ -214,6 +219,13 @@ public enum TlsEngineWriteResult {
     | PeerClosed
 }
 
+public enum TlsEngineShutdownResult {
+    | Complete
+    | Sent
+    | WantRead
+    | WantWrite
+}
+
 /** Provider-neutral external-I/O TLS state machine. */
 public interface TlsEngine <: Resource {
     func handshakeStep(): TlsEngineStep
@@ -222,6 +234,7 @@ public interface TlsEngine <: Resource {
     func feedCiphertext(source: ByteSpan): Int64
     func readPlaintext(destination: MutableByteSpan): TlsEngineReadResult
     func writePlaintext(source: ByteSpan): TlsEngineWriteResult
+    func shutdownStep(): TlsEngineShutdownResult
     func close(): Unit
 }
 
@@ -1141,6 +1154,25 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine &
         }
     }
 
+    public func shutdownStep(): TlsEngineShutdownResult {
+        synchronized(mutex) {
+            let current = requireOpen()
+            let stepOutput = Array<Int32>(1, repeat: -1)
+            let status = unsafe {
+                let step = acquireArrayRawData(stepOutput)
+                try {
+                    wirestack_tls_engine_shutdown_step(current, step.pointer)
+                } finally {
+                    releaseArrayRawData(step)
+                }
+            }
+            if (status != NATIVE_OK) {
+                throw providerFailure("shutdown", status)
+            }
+            decodeShutdownResult(stepOutput[0])
+        }
+    }
+
     public func close(): Unit {
         synchronized(mutex) {
             let current = handle
@@ -1610,6 +1642,20 @@ private func decodeWriteResult(step: Int32, count: Int64): TlsEngineWriteResult 
     }
 }
 
+private func decodeShutdownResult(step: Int32): TlsEngineShutdownResult {
+    if (step == ENGINE_IO_COMPLETE) {
+        TlsEngineShutdownResult.Complete
+    } else if (step == ENGINE_IO_SHUTDOWN_SENT) {
+        TlsEngineShutdownResult.Sent
+    } else if (step == ENGINE_IO_WANT_READ) {
+        TlsEngineShutdownResult.WantRead
+    } else if (step == ENGINE_IO_WANT_WRITE) {
+        TlsEngineShutdownResult.WantWrite
+    } else {
+        throw providerFailure("shutdown result", step)
+    }
+}
+
 /**
  * Bounded bridge between a provider memory-BIO engine and a DuplexTransport.
  * It preserves the caller's single absolute OperationContext across all loops.
@@ -1738,6 +1784,35 @@ public class TlsEnginePump {
             }
         }
         throw noProgress("TLS plaintext write loop terminated without a result")
+    }
+
+    /** Sends close_notify and waits for the peer's close_notify on one caller budget. */
+    public func shutdown(
+        engine: TlsEngine,
+        transport: DuplexTransport,
+        context!: OperationContext = OperationContext.background()
+    ): Unit {
+        let input = Array<Byte>(ciphertextChunkSize, repeat: 0)
+        let output = Array<Byte>(ciphertextChunkSize, repeat: 0)
+        while (true) {
+            checkTlsOperationContext(context)
+            let result = engine.shutdownStep()
+            let flushed = flushCiphertext(engine, transport, output, context)
+            match (result) {
+                case TlsEngineShutdownResult.Complete => return
+                case TlsEngineShutdownResult.Sent =>
+                    if (flushed == 0) {
+                        throw noProgress("TLS shutdown sent no close_notify ciphertext")
+                    }
+                case TlsEngineShutdownResult.WantRead =>
+                    receiveCiphertext(engine, transport, input, context)
+                case TlsEngineShutdownResult.WantWrite =>
+                    if (flushed == 0) {
+                        throw noProgress("TLS shutdown requested write without ciphertext")
+                    }
+            }
+        }
+        throw noProgress("TLS shutdown loop terminated without a result")
     }
 
     private func flushCiphertext(
