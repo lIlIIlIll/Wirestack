@@ -1,0 +1,6 @@
+M0-009 task=COMPLETE linux_semantics=PASS linux_gate=INCOMPLETE global=INCOMPLETE
+peer-fin samples=20 terminal=read-zero all-pass
+peer-rst samples=20 terminal=SocketException all-pass
+local-close samples=20 terminal=SocketException all-pass
+race samples=90 peer-first=30/30 local-first=30/30 equal-delay=30/30
+abort-capability=BLOCKED cancel-capability=BLOCKED
