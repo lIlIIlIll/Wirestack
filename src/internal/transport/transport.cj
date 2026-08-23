@@ -71,6 +71,12 @@ public interface DuplexTransport <: Resource {
     func abort(reason!: ?AbortReason): Unit
 }
 
+/** A bounded transport acceptor. Closing it must wake an active accept. */
+public interface TransportListener <: Resource {
+    func accept(context: OperationContext): DuplexTransport
+    func close(): Unit
+}
+
 /** Writes an entire span without resetting the caller's operation budget. */
 public func writeAll(
     transport: DuplexTransport,
