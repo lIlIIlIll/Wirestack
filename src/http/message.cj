@@ -53,6 +53,7 @@ public class ResponseBody <: Resource {
     private var readInProgress = false
     private var terminal = false
     private var fullyConsumed = false
+    private var consumedBytes: Int64 = 0
 
     public prop contentLength: ?Int64 { get() { stream.contentLength } }
     public prop trailer: ?HttpTrailer { get() { trailerProvider() } }
@@ -88,8 +89,57 @@ public class ResponseBody <: Resource {
             throw error
         }
         synchronized(stateMutex) { readInProgress = false }
+        if (count < 0 || count > destination.size) {
+            abandonAndClose()
+            throw HttpBodyException(
+                HttpBodyErrorCode.InvalidProgress,
+                "HTTP response body stream returned an invalid read count"
+            )
+        }
+        var reachedDeclaredEnd = false
+        if (count > 0) {
+            let total = synchronized(stateMutex) { consumedBytes += count; consumedBytes }
+            match (contentLength) {
+                case Some(expected) =>
+                    if (total > expected) {
+                        abandonAndClose()
+                        throw HttpBodyException(
+                            HttpBodyErrorCode.InvalidProgress,
+                            "HTTP response body exceeded its declared content length"
+                        )
+                    }
+                    reachedDeclaredEnd = total == expected
+                case None => ()
+            }
+        }
+        if (reachedDeclaredEnd) { completeAtEof() }
         if (count == 0 && !destination.isEmpty()) { completeAtEof() }
         count
+    }
+
+    /**
+     * Consumes and closes at most `maximumBytes` of unread body data.
+     * Returns true only when EOF was proven and the connection may remain reusable.
+     */
+    public func drain(maximumBytes: Int64, bufferSize!: Int64 = 16 * 1024): Bool {
+        if (maximumBytes < 0 || bufferSize <= 0 || bufferSize > 1024 * 1024) {
+            throw IllegalArgumentException("HTTP response drain limits are invalid")
+        }
+        let (wasClosed, wasFullyConsumed) = synchronized(stateMutex) { (closed, fullyConsumed) }
+        if (wasClosed) { return wasFullyConsumed }
+        if (wasFullyConsumed) { close(); return true }
+
+        var drained: Int64 = 0
+        while (drained < maximumBytes) {
+            let capacity = min(bufferSize, maximumBytes - drained)
+            let count = read(Array<Byte>(capacity, repeat: 0))
+            if (count == 0) { close(); return true }
+            drained += count
+        }
+
+        if (isFullyConsumed()) { close(); return true }
+        close()
+        false
     }
 
     public func close(): Unit {

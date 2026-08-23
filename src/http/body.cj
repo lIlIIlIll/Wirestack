@@ -27,6 +27,7 @@ public enum HttpBodyErrorCode {
     | FileChanged
     | PrematureEof
     | FactoryContractViolation
+    | InvalidProgress
 }
 
 public class HttpBodyException <: Exception {
