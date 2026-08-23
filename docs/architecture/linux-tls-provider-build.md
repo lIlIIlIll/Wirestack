@@ -177,3 +177,30 @@ operation. User exceptions therefore never cross the C ABI, no provider-global
 signer state or lock exists, and cancellation fails closed. Positive real
 handshake, deliberate user exception and pre-invocation cancellation tests
 close M3-016 and M3-018. M3-013 still needs native musl adapter evidence.
+
+## Negotiation results, ALPN and mutual TLS
+
+Configured ALPN values are encoded once into a bounded 4096-byte RFC 7301
+protocol vector. Clients install their offer directly on the instance `SSL`;
+servers retain an instance-owned immutable preference vector and select from the
+peer offer without global state. Server preference order is authoritative. If
+either endpoint configured ALPN, completing a handshake without a selected
+protocol is an error; a server callback with no shared value emits a fatal
+`no_application_protocol` path.
+
+After a completed handshake the C ABI copies, rather than exposes, the TLS
+version, IANA cipher-suite name, selected ALPN and leaf-first peer certificate
+chain. The chain is limited to 16 certificates, 256 KiB each and 1 MiB total.
+`TlsHandshakeInfo` combines those values with the session-reused bit, provider
+manifest, configured trust identity, matched pin and verified reference
+identity. `TlsConnection` snapshots that immutable result before taking
+ownership of the engine and transport.
+
+Client identities from `TlsClientContext` now use the same PKCS#8 or external
+signer path as server identities. Server `ClientAuthentication.None`,
+`Optional`, and `Required` map explicitly to AWS-LC verification modes. Optional
+authentication accepts an absent certificate without fabricating chain or trust
+evidence; Required rejects absence and returns the verified client chain and
+normalized trust evidence on success. Paired memory-BIO tests cover successful
+TLS 1.3 ALPN, no-shared-ALPN failure, required mTLS success/failure and optional
+mTLS without a certificate, completing M3-021, M3-023 and M3-024.

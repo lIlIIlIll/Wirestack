@@ -19,6 +19,7 @@ public class TlsConnection <: DuplexTransport {
     private let transport: DuplexTransport
     private let pump: TlsEnginePump
     private let transportInfo: TransportInfo
+    public let handshakeInfo: ?TlsHandshakeInfo
     private let lifecycleMutex = Mutex()
     private var lifecycle = TlsConnectionState.Open
     private var readActive = false
@@ -27,10 +28,16 @@ public class TlsConnection <: DuplexTransport {
     private var closeStarted = false
     private var abortStarted = false
 
-    private init(engine: TlsEngine, transport: DuplexTransport, pump: TlsEnginePump) {
+    private init(
+        engine: TlsEngine,
+        transport: DuplexTransport,
+        pump: TlsEnginePump,
+        handshakeInfo: ?TlsHandshakeInfo
+    ) {
         this.engine = engine
         this.transport = transport
         this.pump = pump
+        this.handshakeInfo = handshakeInfo
         let underlying = transport.info
         transportInfo = TransportInfo(
             "tls",
@@ -50,7 +57,11 @@ public class TlsConnection <: DuplexTransport {
     ): TlsConnection {
         try {
             pump.driveHandshake(engine, transport, context: context)
-            TlsConnection(engine, transport, pump)
+            let info = match (engine) {
+                case value: HandshakeInfoTlsEngine => Some(value.handshakeInfo())
+                case _ => None<TlsHandshakeInfo>
+            }
+            TlsConnection(engine, transport, pump, info)
         } catch (error: NetworkException) {
             try { transport.abort(reason: abortReason(error)) }
             finally { engine.close() }

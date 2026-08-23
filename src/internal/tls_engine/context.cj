@@ -470,14 +470,23 @@ private func validateVersions(
 }
 
 private func validateAlpn(values: Array<String>, capabilities: TlsCapabilities): Unit {
+    var wireBytes: Int64 = 0
     for (index in 0..values.size) {
         let value = values[index]
-        if (value.isEmpty() || value.size > 255) {
+        let encodedSize = value.toArray().size
+        if (value.isEmpty() || encodedSize > 255) {
             throw TlsContextException(
                 TlsContextErrorCode.InvalidAlpn,
                 "ALPN protocol names must contain 1..255 bytes"
             )
         }
+        if (wireBytes > 4096 - encodedSize - 1) {
+            throw TlsContextException(
+                TlsContextErrorCode.InvalidAlpn,
+                "ALPN protocol list must fit within 4096 encoded bytes"
+            )
+        }
+        wireBytes += encodedSize + 1
         for (prior in 0..index) {
             if (values[prior] == value) {
                 throw TlsContextException(
