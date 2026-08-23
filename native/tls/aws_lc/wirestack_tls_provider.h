@@ -60,6 +60,8 @@ int32_t wirestack_tls_provider_random(uint64_t handle, uint8_t *output, uint64_t
 int32_t wirestack_tls_engine_create(
     uint64_t provider_handle,
     int32_t role,
+    int32_t minimum_tls_version,
+    int32_t maximum_tls_version,
     uint64_t *out_engine_handle
 );
 void wirestack_tls_engine_destroy(uint64_t engine_handle);

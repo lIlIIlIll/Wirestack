@@ -81,5 +81,32 @@ transport, while close/abort races release the engine and underlying transport
 exactly once. TLS half-close remains deliberately unsupported until the
 `close_notify` work in M3-026.
 
-This closes the Linux portions of M3-001 through M3-005. Immutable context and
-security-policy construction begins at M3-006.
+## Context and security policy
+
+`TlsClientContext` and `TlsServerContext` use mutable builders but freeze all
+configuration at `build()`. ALPN arrays are copied on input and output, so one
+built context is safe to share across concurrent connection attempts. Context
+construction validates the version range, ALPN names, trust and identity role,
+mTLS prerequisites and every requested provider or platform capability before
+network I/O begins.
+
+The provider-neutral `TlsSecurityProfile` has three fixed policies:
+
+- `Compatible` and `Modern` permit TLS 1.2 through TLS 1.3;
+- `StrictTls13` permits TLS 1.3 only.
+
+The selected minimum and maximum are passed as typed version numbers to the C
+ABI and applied with AWS-LC protocol-version controls before `SSL` creation.
+There is no public or internal OpenSSL cipher-string escape hatch. Compression,
+renegotiation, NULL/anonymous cipher suites and 0-RTT remain disabled by the
+provider defaults and Wirestack exposes no operation that enables them.
+
+Capability reporting is explicit rather than inferred from provider names. The
+Linux AWS-LC profile currently reports custom roots, client certificates,
+server mode, TLS 1.2, TLS 1.3 and HTTP/2. System trust, hardware keys and network
+binding remain false until their Linux adapters are implemented; requesting any
+of them fails at context creation. Trust and identity requirements in this
+stage are opaque configuration descriptors only--certificate parsing, hostname
+verification, system trust and key-loading behavior begin at M3-009.
+
+This closes the Linux portions of M3-001 through M3-008.
