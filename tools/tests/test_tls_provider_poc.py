@@ -30,6 +30,15 @@ class ProviderPocValidationTests(unittest.TestCase):
         with self.assertRaises(validator.ValidationError):
             validator.validate_spec(value)
 
+    def test_archive_provider_requires_exact_commit(self):
+        value = copy.deepcopy(self.spec)
+        value["providers"][2].pop("commit")
+        value["providers"][2]["commit_resolution_url"] = (
+            "https://api.github.com/repos/openssl/openssl/git/ref/tags/openssl-3.6.3"
+        )
+        with self.assertRaises(validator.ValidationError):
+            validator.validate_spec(value)
+
     def test_missing_platform_cell_fails(self):
         value = copy.deepcopy(self.matrix)
         value["cells"].pop()
