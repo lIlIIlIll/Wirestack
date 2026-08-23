@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "task_id": "M0-011",
+  "task_status": "INCOMPLETE",
+  "gate_id": "GATE-NET-06",
+  "bounded_linux_status": "PASS",
+  "global_gate_status": "INCOMPLETE",
+  "sdk_archive_sha256": "bc2ed8a34b9b6846a5445d3eba0ac66b146730a005d3df56d45a2b119416f40d",
+  "executed": [
+    {
+      "mode": "connect-close",
+      "iterations": 2000,
+      "decision": "PASS",
+      "resource_samples": "MEASURED"
+    },
+    {
+      "mode": "echo-close",
+      "iterations": 1000,
+      "payload_bytes_per_iteration": 64,
+      "decision": "PASS",
+      "resource_samples": "MEASURED"
+    },
+    {
+      "mode": "peer-reset",
+      "iterations": 1000,
+      "decision": "PASS",
+      "resource_samples": "MEASURED"
+    },
+    {
+      "mode": "close-during-read",
+      "iterations": 500,
+      "decision": "PASS",
+      "resource_samples": "MEASURED"
+    }
+  ],
+  "deferred": [
+    {"id": "100000-transport-cleanups", "status": "NOT_RUN"},
+    {"id": "100000-tls-handshake-failure-cleanups", "status": "NOT_YET_APPLICABLE"},
+    {"id": "24-hour-idle-active-soak", "status": "NOT_RUN"},
+    {"id": "windows-native", "status": "BLOCKED"},
+    {"id": "macos-native", "status": "BLOCKED"},
+    {"id": "android-native", "status": "BLOCKED"},
+    {"id": "ios-native", "status": "BLOCKED"},
+    {"id": "harmony-native", "status": "BLOCKED"}
+  ],
+  "non_claims": [
+    "not full GATE-NET-06 completion",
+    "not a 24-hour soak",
+    "not TLS cleanup evidence",
+    "not six-platform evidence"
+  ]
+}
