@@ -100,6 +100,15 @@ class ArchitectureGuardTests(unittest.TestCase):
                        "target_link_options(wirestack PRIVATE -lssl -lcrypto)\n")
             self.assertIn("system-openssl-link", self.rules(root))
 
+    def test_pinned_static_provider_archive_is_allowed(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(root, "src/package.cj", "package wirestack\n")
+            self.write(root, "cjpm.toml",
+                       '[package]\nname = "wirestack"\nlink-option = "-lstdc++ -lpthread -ldl -lm"\n'
+                       '[ffi.c]\nwirestack_tls_provider = { path = "./target/native/current/lib" }\n')
+            self.assertEqual([], guard.run_guard(root))
+
     def test_config_scan_covers_nested_build_files(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)
