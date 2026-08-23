@@ -41,11 +41,11 @@ def validate_spec(spec: Mapping[str, Any]) -> None:
         require(provider.get("source_kind") in {"git", "archive"}, f"{pid}: source_kind")
         require(isinstance(provider.get("url"), str) and provider["url"].startswith("https://"), f"{pid}: https URL required")
         require(isinstance(provider.get("license_expression"), str) and provider["license_expression"], f"{pid}: license missing")
-        if provider["source_kind"] == "git":
-            require(COMMIT_RE.fullmatch(str(provider.get("commit", ""))) is not None, f"{pid}: exact commit required")
-        else:
-            require(SHA256_RE.fullmatch(str(provider.get("sha256", ""))) is not None, f"{pid}: archive sha256 required")
-            require(COMMIT_RE.fullmatch(str(provider.get("commit", ""))) is not None or provider.get("commit_resolution_url"), f"{pid}: commit or resolution URL required")
+        require(COMMIT_RE.fullmatch(str(provider.get("commit", ""))) is not None,
+                f"{pid}: exact commit required")
+        if provider["source_kind"] == "archive":
+            require(SHA256_RE.fullmatch(str(provider.get("sha256", ""))) is not None,
+                    f"{pid}: archive sha256 required")
     require(ids == REQUIRED_PROVIDER_IDS, f"provider set mismatch: {ids}")
     caps = spec.get("required_capabilities")
     platforms = spec.get("required_platforms")
