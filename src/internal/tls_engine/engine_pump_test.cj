@@ -167,6 +167,51 @@ class TlsEnginePumpTest {
     }
 
     @TestCase
+    func realAwsLcEnginesExchangeCloseNotifyInBothDirections(): Unit {
+        let provider = AwsLcTlsProvider()
+        let identity = tlsTestLocalIdentity()
+        let capabilities = provider.linuxCapabilities()
+        let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
+            .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
+            .build()
+        let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
+            .identity(identity)
+            .build()
+        let client = provider.createClientEngine(
+            clientContext,
+            ReferenceIdentity.Dns(HostName("example.com")),
+            serverName: Some(HostName("example.com"))
+        )
+        let server = provider.createServerEngine(serverContext)
+        try {
+            drivePairedMemoryHandshake(client, server)
+            match (client.shutdownStep()) {
+                case TlsEngineShutdownResult.Sent => @Expect(true)
+                case _ => @Fail("initiator must send close_notify before peer acknowledgement")
+            }
+            @Expect(transferCiphertext(client, server))
+            match (server.shutdownStep()) {
+                case TlsEngineShutdownResult.Sent => @Expect(true)
+                case _ => @Fail("peer must answer close_notify before completing shutdown")
+            }
+            @Expect(transferCiphertext(server, client))
+            match (client.shutdownStep()) {
+                case TlsEngineShutdownResult.Complete => @Expect(true)
+                case _ => @Fail("initiator must process the peer close_notify")
+            }
+            match (server.shutdownStep()) {
+                case TlsEngineShutdownResult.Complete => @Expect(true)
+                case _ => @Fail("peer must process the buffered initiator close_notify")
+            }
+        } finally {
+            client.close()
+            server.close()
+            identity.privateKeyRef.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
     func handshakeInfoReportsNegotiatedAlpnPeerChainAndVerificationEvidence(): Unit {
         let provider = AwsLcTlsProvider()
         let identity = tlsTestLocalIdentity()
@@ -986,6 +1031,10 @@ private class ScriptedEngine <: TlsEngine {
         TlsEngineWriteResult.PeerClosed
     }
 
+    public func shutdownStep(): TlsEngineShutdownResult {
+        TlsEngineShutdownResult.Complete
+    }
+
     public func close(): Unit {}
     public func isClosed(): Bool { false }
 }
@@ -1005,6 +1054,9 @@ private class StalledEngine <: TlsEngine {
     }
     public func writePlaintext(_: ByteSpan): TlsEngineWriteResult {
         TlsEngineWriteResult.PeerClosed
+    }
+    public func shutdownStep(): TlsEngineShutdownResult {
+        TlsEngineShutdownResult.Complete
     }
     public func close(): Unit {}
     public func isClosed(): Bool { false }

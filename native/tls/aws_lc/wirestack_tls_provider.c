@@ -1659,3 +1659,36 @@ int32_t wirestack_tls_engine_write_plaintext(
     result = SSL_write(engine->ssl, input, (int)size);
     return classify_io_result(engine->ssl, result, out_written, out_step);
 }
+
+int32_t wirestack_tls_engine_shutdown_step(
+    uint64_t engine_handle,
+    int32_t *out_step
+) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    int result;
+    int error;
+    if (engine == NULL || out_step == NULL) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    *out_step = -1;
+    ERR_clear_error();
+    result = SSL_shutdown(engine->ssl);
+    if (result == 1) {
+        *out_step = WIRESTACK_TLS_ENGINE_IO_COMPLETE;
+        return WIRESTACK_TLS_PROVIDER_OK;
+    }
+    if (result == 0) {
+        *out_step = WIRESTACK_TLS_ENGINE_IO_SHUTDOWN_SENT;
+        return WIRESTACK_TLS_PROVIDER_OK;
+    }
+    error = SSL_get_error(engine->ssl, result);
+    if (error == SSL_ERROR_WANT_READ) {
+        *out_step = WIRESTACK_TLS_ENGINE_IO_WANT_READ;
+        return WIRESTACK_TLS_PROVIDER_OK;
+    }
+    if (error == SSL_ERROR_WANT_WRITE) {
+        *out_step = WIRESTACK_TLS_ENGINE_IO_WANT_WRITE;
+        return WIRESTACK_TLS_PROVIDER_OK;
+    }
+    return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+}

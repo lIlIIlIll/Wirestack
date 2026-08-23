@@ -83,6 +83,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M3-023 ALPN/no-shared semantics | COMPLETE | Client offers and server preference lists use bounded RFC 7301 wire encoding; server preference wins deterministically, both endpoints report the same selected value, and either configured endpoint fails closed when no protocol is selected or shared |
 | M3-024 mutual TLS | COMPLETE | Client identities are installed from immutable contexts; server None/Optional/Required modes configure AWS-LC verification explicitly; required succeeds with a verified client chain and rejects absence, while optional succeeds without inventing peer evidence |
 | M3-025 bounded session resumption | COMPLETE | Provider-owned 256-entry/4-MiB LRU store expires and zeroes serialized sessions, consumes TLS 1.3 tickets once, and partitions by server identity, ordered ALPN, trust plus Linux CA source, client identity, provider and protocol policy; fresh-engine TLS 1.2 and TLS 1.3 handshakes report resumed while native 0-RTT remains disabled |
+| M3-026 close_notify/truncation/abort | COMPLETE | AWS-LC two-stage shutdown runs through the bounded memory-BIO pump on one caller Deadline; graceful close exchanges close_notify, bare TCP EOF retains `PeerClosedWithoutCloseNotify`, abort skips TLS shutdown, and every terminal/error race closes transport and releases the engine once |
 
 ## Next critical path
 
@@ -92,7 +93,7 @@ Status values have the same fail-closed meaning as the global status file.
    stable native error evidence.
 3. Land UP-007 or another proven non-carrier-blocking resolver backend, then
    complete Linux `SystemResolver` and native blackhole gates.
-4. Complete native musl trust-adapter evidence, then close-notify and structured
-   TLS error work under ADR-0003.
+4. Complete native musl trust-adapter evidence and structured TLS error/runtime
+   info work under ADR-0003.
 5. Implement HTTP/1.1, HTTP/2, Linux conformance, fuzz, benchmark, 24-hour soak,
    packaging and installation verification.

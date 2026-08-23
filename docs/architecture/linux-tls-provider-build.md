@@ -261,3 +261,21 @@ Paired memory-BIO tests create fresh client and server engines and prove both
 TLS 1.2 and TLS 1.3 report `resumed`. Deterministic store tests prove limits,
 LRU eviction, expiry, single-use behavior and every isolation-key dimension.
 This completes M3-025.
+
+## TLS shutdown
+
+Graceful connection close drives AWS-LC's two-stage `SSL_shutdown` through the
+same memory-BIO pump used for handshake and application data. New application
+writes stop when the connection enters `Closing`; the pump sends
+`close_notify`, drains every partial ciphertext write, and processes the peer's
+`close_notify` using the caller's single absolute `OperationContext`. Deadline
+or cancellation failure still closes the underlying transport and releases the
+engine exactly once.
+
+`TlsConnection.closureEvidence` distinguishes an exchanged `CloseNotify`, a
+bare transport EOF as `PeerClosedWithoutCloseNotify`, and `LocalAbort`. Abort
+never calls the TLS shutdown state machine: it terminates the underlying
+transport immediately so blocked I/O wakes, then releases the engine. A real
+paired AWS-LC test proves both shutdown directions, while deterministic tests
+cover truncation, expired close budgets, abort behavior and close/abort races.
+This completes M3-026.
