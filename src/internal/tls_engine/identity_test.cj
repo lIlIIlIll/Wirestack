@@ -3,6 +3,7 @@ package wirestack.internal.tls_engine
 import std.fs.*
 import std.unittest.*
 import std.unittest.testmacro.*
+import wirestack.internal.transport.*
 import wirestack.internal.trust.*
 
 @Test
@@ -77,4 +78,95 @@ class LocalIdentityTest {
         }
         @Expect(rejected)
     }
+
+    @TestCase
+    func externalSignerAndSystemHandleShareOneOpaqueKeyContract(): Unit {
+        let signer = ContractTestSigner()
+        let external = PrivateKeyRef.externalSigner(
+            "remote-key-7",
+            tlsTestSubjectPublicKeyInfoDer(),
+            signer
+        )
+        let system = PrivateKeyRef.systemHandle(
+            "linux",
+            "pkcs11-slot-2",
+            tlsTestSubjectPublicKeyInfoDer(),
+            signer
+        )
+        let chain = CertificateChain([DerCertificate(tlsTestCertificateDer())])
+        try {
+            let externalIdentity = LocalIdentity(chain, external)
+            let systemIdentity = LocalIdentity(chain, system)
+            @Expect(external.referenceIdentity, "remote-key-7")
+            @Expect(system.referenceIdentity, "linux:pkcs11-slot-2")
+            @Expect(!external.requiresHardwareKey)
+            @Expect(system.requiresHardwareKey)
+            @Expect(externalIdentity.contextIdentity != systemIdentity.contextIdentity)
+        } finally {
+            external.close()
+            system.close()
+        }
+    }
+
+    @TestCase
+    func duplicateSignerAlgorithmsAndMismatchedSpkiFailAtBuild(): Unit {
+        var duplicateRejected = false
+        try {
+            let _ = PrivateKeyRef.externalSigner(
+                "duplicate",
+                tlsTestSubjectPublicKeyInfoDer(),
+                DuplicateAlgorithmSigner()
+            )
+        } catch (error: PrivateKeyException) {
+            match (error.code) {
+                case PrivateKeyErrorCode.InvalidSigner => duplicateRejected = true
+                case _ => ()
+            }
+        }
+        @Expect(duplicateRejected)
+
+        let wrongSpki = tlsTestSubjectPublicKeyInfoDer()
+        wrongSpki[wrongSpki.size - 1] ^= 1
+        let key = PrivateKeyRef.externalSigner("wrong-spki", wrongSpki, ContractTestSigner())
+        var mismatchRejected = false
+        try {
+            let _ = LocalIdentity(
+                CertificateChain([DerCertificate(tlsTestCertificateDer())]),
+                key
+            )
+        } catch (error: PrivateKeyException) {
+            match (error.code) {
+                case PrivateKeyErrorCode.KeyCertificateMismatch => mismatchRejected = true
+                case _ => ()
+            }
+        } finally {
+            key.close()
+        }
+        @Expect(mismatchRejected)
+    }
+}
+
+private class ContractTestSigner <: ExternalSigner {
+    public func supportedAlgorithms(): Array<TlsSignatureAlgorithm> {
+        [TlsSignatureAlgorithm.RsaPssRsaeSha256]
+    }
+
+    public func sign(
+        _: ExternalSignatureRequest,
+        _: OperationContext
+    ): Array<Byte> { [1] }
+}
+
+private class DuplicateAlgorithmSigner <: ExternalSigner {
+    public func supportedAlgorithms(): Array<TlsSignatureAlgorithm> {
+        [
+            TlsSignatureAlgorithm.RsaPssRsaeSha256,
+            TlsSignatureAlgorithm.RsaPssRsaeSha256
+        ]
+    }
+
+    public func sign(
+        _: ExternalSignatureRequest,
+        _: OperationContext
+    ): Array<Byte> { [1] }
 }

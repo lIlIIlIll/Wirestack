@@ -11,6 +11,7 @@ private let ENGINE_SERVER: Int32 = 1
 private let ENGINE_COMPLETE: Int32 = 0
 private let ENGINE_WANT_READ: Int32 = 1
 private let ENGINE_WANT_WRITE: Int32 = 2
+private let ENGINE_NEED_SIGNATURE: Int32 = 3
 private let ENGINE_IO_COMPLETE: Int32 = 0
 private let ENGINE_IO_WANT_READ: Int32 = 1
 private let ENGINE_IO_WANT_WRITE: Int32 = 2
@@ -70,6 +71,26 @@ foreign func wirestack_tls_engine_add_identity_chain_certificate_der(
     certificate: CPointer<UInt8>,
     certificateSize: UInt64
 ): Int32
+foreign func wirestack_tls_engine_set_external_signer(
+    engineHandle: UInt64,
+    leafCertificate: CPointer<UInt8>,
+    leafCertificateSize: UInt64,
+    signatureAlgorithms: CPointer<UInt16>,
+    signatureAlgorithmCount: UInt64
+): Int32
+foreign func wirestack_tls_engine_external_signature_request(
+    engineHandle: UInt64,
+    outSignatureAlgorithm: CPointer<UInt16>,
+    output: CPointer<UInt8>,
+    outputCapacity: UInt64,
+    outRequiredSize: CPointer<UInt64>
+): Int32
+foreign func wirestack_tls_engine_complete_external_signature(
+    engineHandle: UInt64,
+    signature: CPointer<UInt8>,
+    signatureSize: UInt64
+): Int32
+foreign func wirestack_tls_engine_fail_external_signature(engineHandle: UInt64): Int32
 foreign func wirestack_tls_engine_handshake_step(
     engineHandle: UInt64,
     outStep: CPointer<Int32>
@@ -114,6 +135,7 @@ public enum TlsEngineStep {
     | Complete
     | WantRead
     | WantWrite
+    | NeedSignature
 }
 
 public enum TlsEngineReadResult {
@@ -141,18 +163,28 @@ public interface TlsEngine <: Resource {
     func close(): Unit
 }
 
+/** Optional engine facet used only when a local identity delegates signing. */
+public interface ExternalSigningTlsEngine {
+    func serviceExternalSignature(context: OperationContext): Unit
+}
+
 public enum TlsEngineErrorCode {
     | ProviderFailure
     | Closed
     | NoProgress
     | UnexpectedTransportEof
+    | PrivateKeyFailure
 }
 
 /** Stable TLS-pump failure without provider-native types or secret material. */
 public class TlsEngineException <: NetworkException {
     public let tlsCode: TlsEngineErrorCode
 
-    public init(code: TlsEngineErrorCode, message: String) {
+    public init(
+        code: TlsEngineErrorCode,
+        message: String,
+        cause!: ?Exception = None<Exception>
+    ) {
         super(
             NetworkErrorCategory.System,
             NetworkPhase.TlsHandshake,
@@ -162,7 +194,8 @@ public class TlsEngineException <: NetworkException {
                 case _ => NetworkErrorCode.SystemFailure
             },
             message,
-            retryability: Retryability.Never
+            retryability: Retryability.Never,
+            cause: cause
         )
         tlsCode = code
     }
@@ -185,9 +218,10 @@ private func providerFailure(operation: String, status: Int32): TlsEngineExcepti
 }
 
 /** AWS-LC memory-BIO engine. It never owns or accesses a socket. */
-public class AwsLcTlsEngine <: TlsEngine {
+public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine {
     private let mutex = Mutex()
     private var handle: UInt64
+    private var externalSigner: ?ExternalSigner = None<ExternalSigner>
 
     internal init(
         providerHandle: UInt64,
@@ -276,25 +310,51 @@ public class AwsLcTlsEngine <: TlsEngine {
             let current = requireOpen()
             let certificates = identity.certificateChain.certificates()
             let leaf = certificates[0].derBytes()
-            identity.privateKeyRef.withPkcs8({key =>
-                let status = unsafe {
-                    let certificateInput = acquireArrayRawData(leaf)
-                    let keyInput = acquireArrayRawData(key)
-                    try {
-                        wirestack_tls_engine_set_identity_pkcs8(
-                            current,
-                            certificateInput.pointer,
-                            UInt64(leaf.size),
-                            keyInput.pointer,
-                            UInt64(key.size)
-                        )
-                    } finally {
-                        releaseArrayRawData(keyInput)
-                        releaseArrayRawData(certificateInput)
+            match (identity.privateKeyRef.kind) {
+                case PrivateKeyKind.Pkcs8 => identity.privateKeyRef.withPkcs8({key =>
+                    let status = unsafe {
+                        let certificateInput = acquireArrayRawData(leaf)
+                        let keyInput = acquireArrayRawData(key)
+                        try {
+                            wirestack_tls_engine_set_identity_pkcs8(
+                                current,
+                                certificateInput.pointer,
+                                UInt64(leaf.size),
+                                keyInput.pointer,
+                                UInt64(key.size)
+                            )
+                        } finally {
+                            releaseArrayRawData(keyInput)
+                            releaseArrayRawData(certificateInput)
+                        }
                     }
-                }
-                requireConfigurationSuccess("local PKCS#8 identity", status)
-            })
+                    requireConfigurationSuccess("local PKCS#8 identity", status)
+                })
+                case _ =>
+                    let configuredAlgorithms = identity.privateKeyRef.signatureAlgorithms()
+                    let nativeAlgorithms = Array<UInt16>(
+                        configuredAlgorithms.size,
+                        {index => nativeSignatureAlgorithm(configuredAlgorithms[index])}
+                    )
+                    let status = unsafe {
+                        let certificateInput = acquireArrayRawData(leaf)
+                        let algorithmInput = acquireArrayRawData(nativeAlgorithms)
+                        try {
+                            wirestack_tls_engine_set_external_signer(
+                                current,
+                                certificateInput.pointer,
+                                UInt64(leaf.size),
+                                algorithmInput.pointer,
+                                UInt64(nativeAlgorithms.size)
+                            )
+                        } finally {
+                            releaseArrayRawData(algorithmInput)
+                            releaseArrayRawData(certificateInput)
+                        }
+                    }
+                    requireConfigurationSuccess("external signer identity", status)
+                    externalSigner = Some(identity.privateKeyRef.externalSignerReference())
+            }
             for (index in 1..certificates.size) {
                 let der = certificates[index].derBytes()
                 let status = unsafe {
@@ -336,8 +396,128 @@ public class AwsLcTlsEngine <: TlsEngine {
                 TlsEngineStep.WantRead
             } else if (value == ENGINE_WANT_WRITE) {
                 TlsEngineStep.WantWrite
+            } else if (value == ENGINE_NEED_SIGNATURE) {
+                TlsEngineStep.NeedSignature
             } else {
                 throw providerFailure("handshake step result", value)
+            }
+        }
+    }
+
+    public func serviceExternalSignature(context: OperationContext): Unit {
+        try {
+            checkTlsOperationContext(context)
+        } catch (error: NetworkException) {
+            failPendingExternalSignature()
+            throw error
+        }
+        let requestAndSigner = synchronized(mutex) {
+            let current = requireOpen()
+            let signer = match (externalSigner) {
+                case Some(value) => value
+                case None => throw TlsEngineException(
+                    TlsEngineErrorCode.PrivateKeyFailure,
+                    "TLS engine requested a signature without an external signer"
+                )
+            }
+            let algorithmOutput = Array<UInt16>(1, repeat: 0u16)
+            let sizeOutput = Array<UInt64>(1, repeat: 0u64)
+            let queryStatus = unsafe {
+                let algorithm = acquireArrayRawData(algorithmOutput)
+                let size = acquireArrayRawData(sizeOutput)
+                try {
+                    wirestack_tls_engine_external_signature_request(
+                        current,
+                        algorithm.pointer,
+                        CPointer<UInt8>(),
+                        0u64,
+                        size.pointer
+                    )
+                } finally {
+                    releaseArrayRawData(size)
+                    releaseArrayRawData(algorithm)
+                }
+            }
+            if (queryStatus != NATIVE_OK || sizeOutput[0] == 0u64 ||
+                sizeOutput[0] > 64u64 * 1024u64) {
+                throw providerFailure("external signature request", queryStatus)
+            }
+            let message = Array<Byte>(Int64(sizeOutput[0]), repeat: 0)
+            let readStatus = unsafe {
+                let algorithm = acquireArrayRawData(algorithmOutput)
+                let input = acquireArrayRawData(message)
+                let size = acquireArrayRawData(sizeOutput)
+                try {
+                    wirestack_tls_engine_external_signature_request(
+                        current,
+                        algorithm.pointer,
+                        input.pointer,
+                        UInt64(message.size),
+                        size.pointer
+                    )
+                } finally {
+                    releaseArrayRawData(size)
+                    releaseArrayRawData(input)
+                    releaseArrayRawData(algorithm)
+                }
+            }
+            requireConfigurationSuccess("external signature request", readStatus)
+            (signer, ExternalSignatureRequest(
+                tlsSignatureAlgorithmFromNative(algorithmOutput[0]),
+                message
+            ))
+        }
+        let signature = try {
+            requestAndSigner[0].sign(requestAndSigner[1], context)
+        } catch (error: Exception) {
+            synchronized(mutex) {
+                let current = requireOpen()
+                let _ = unsafe { wirestack_tls_engine_fail_external_signature(current) }
+            }
+            throw TlsEngineException(
+                TlsEngineErrorCode.PrivateKeyFailure,
+                "external TLS signer failed",
+                cause: Some(error)
+            )
+        }
+        try {
+            checkTlsOperationContext(context)
+        } catch (error: NetworkException) {
+            failPendingExternalSignature()
+            throw error
+        }
+        if (signature.isEmpty() || signature.size > 16 * 1024) {
+            synchronized(mutex) {
+                let current = requireOpen()
+                let _ = unsafe { wirestack_tls_engine_fail_external_signature(current) }
+            }
+            throw TlsEngineException(
+                TlsEngineErrorCode.PrivateKeyFailure,
+                "external TLS signer returned an invalid signature size"
+            )
+        }
+        synchronized(mutex) {
+            let current = requireOpen()
+            let status = unsafe {
+                let input = acquireArrayRawData(signature)
+                try {
+                    wirestack_tls_engine_complete_external_signature(
+                        current,
+                        input.pointer,
+                        UInt64(signature.size)
+                    )
+                } finally {
+                    releaseArrayRawData(input)
+                }
+            }
+            requireConfigurationSuccess("external signature completion", status)
+        }
+    }
+
+    private func failPendingExternalSignature(): Unit {
+        synchronized(mutex) {
+            if (handle != 0u64) {
+                let _ = unsafe { wirestack_tls_engine_fail_external_signature(handle) }
             }
         }
     }
@@ -490,6 +670,7 @@ public class AwsLcTlsEngine <: TlsEngine {
             let current = handle
             if (current != 0u64) {
                 handle = 0u64
+                externalSigner = None<ExternalSigner>
                 unsafe { wirestack_tls_engine_destroy(current) }
             }
         }
@@ -510,6 +691,7 @@ public class AwsLcTlsEngine <: TlsEngine {
         let current = handle
         if (current != 0u64) {
             handle = 0u64
+            externalSigner = None<ExternalSigner>
             unsafe { wirestack_tls_engine_destroy(current) }
         }
     }
@@ -698,7 +880,7 @@ public class TlsEnginePump {
         let input = Array<Byte>(ciphertextChunkSize, repeat: 0)
         let output = Array<Byte>(ciphertextChunkSize, repeat: 0)
         while (true) {
-            checkContext(context)
+            checkTlsOperationContext(context)
             let step = engine.handshakeStep()
             let flushed = flushCiphertext(engine, transport, output, context)
             match (step) {
@@ -712,6 +894,15 @@ public class TlsEnginePump {
                     }
                 case TlsEngineStep.WantRead =>
                     receiveCiphertext(engine, transport, input, context)
+                case TlsEngineStep.NeedSignature =>
+                    match (engine) {
+                        case signing: ExternalSigningTlsEngine =>
+                            signing.serviceExternalSignature(context)
+                        case _ => throw TlsEngineException(
+                            TlsEngineErrorCode.PrivateKeyFailure,
+                            "TLS engine cannot service its external signature request"
+                        )
+                    }
             }
         }
     }
@@ -728,7 +919,7 @@ public class TlsEnginePump {
         let input = Array<Byte>(ciphertextChunkSize, repeat: 0)
         let output = Array<Byte>(ciphertextChunkSize, repeat: 0)
         while (true) {
-            checkContext(context)
+            checkTlsOperationContext(context)
             let result = engine.readPlaintext(destination)
             let flushed = flushCiphertext(engine, transport, output, context)
             match (result) {
@@ -761,7 +952,7 @@ public class TlsEnginePump {
         let input = Array<Byte>(ciphertextChunkSize, repeat: 0)
         let output = Array<Byte>(ciphertextChunkSize, repeat: 0)
         while (true) {
-            checkContext(context)
+            checkTlsOperationContext(context)
             let result = engine.writePlaintext(source)
             let flushed = flushCiphertext(engine, transport, output, context)
             match (result) {
@@ -795,7 +986,7 @@ public class TlsEnginePump {
         synchronized(transportWriteMutex) {
             var total: Int64 = 0
             while (engine.pendingCiphertext() > 0) {
-                checkContext(context)
+                checkTlsOperationContext(context)
                 let requested = min(engine.pendingCiphertext(), buffer.size)
                 let drained = engine.drainCiphertext(MutableByteSpan(buffer, length: requested))
                 if (drained <= 0 || drained > requested) {
@@ -803,7 +994,7 @@ public class TlsEnginePump {
                 }
                 var remaining = ByteSpan(buffer, length: drained)
                 while (!remaining.isEmpty()) {
-                    checkContext(context)
+                    checkTlsOperationContext(context)
                     let written = transport.writeSome(remaining, context: context)
                     if (written <= 0 || written > remaining.length) {
                         throw noProgress("transport failed to write TLS ciphertext")
@@ -823,7 +1014,7 @@ public class TlsEnginePump {
         context: OperationContext
     ): Unit {
         synchronized(transportReadMutex) {
-            checkContext(context)
+            checkTlsOperationContext(context)
             match (transport.readSome(MutableByteSpan(buffer), context: context)) {
                 case ReadResult.EndOfStream =>
                     throw TlsEngineException(
@@ -853,28 +1044,28 @@ public class TlsEnginePump {
         }
     }
 
-    private func checkContext(context: OperationContext): Unit {
-        if (context.isCancellationRequested()) {
-            throw NetworkException(
-                NetworkErrorCategory.Cancelled,
-                NetworkPhase.TlsHandshake,
-                NetworkErrorCode.Cancelled,
-                "TLS handshake was cancelled",
-                retryability: Retryability.Never
-            )
-        }
-        if (context.isDeadlineExceeded()) {
-            throw NetworkException(
-                NetworkErrorCategory.DeadlineExceeded,
-                NetworkPhase.TlsHandshake,
-                NetworkErrorCode.TimedOut,
-                "TLS handshake deadline exceeded",
-                retryability: Retryability.Never
-            )
-        }
-    }
-
     private func noProgress(message: String): TlsEngineException {
         TlsEngineException(TlsEngineErrorCode.NoProgress, message)
+    }
+}
+
+private func checkTlsOperationContext(context: OperationContext): Unit {
+    if (context.isCancellationRequested()) {
+        throw NetworkException(
+            NetworkErrorCategory.Cancelled,
+            NetworkPhase.TlsHandshake,
+            NetworkErrorCode.Cancelled,
+            "TLS handshake was cancelled",
+            retryability: Retryability.Never
+        )
+    }
+    if (context.isDeadlineExceeded()) {
+        throw NetworkException(
+            NetworkErrorCategory.DeadlineExceeded,
+            NetworkPhase.TlsHandshake,
+            NetworkErrorCode.TimedOut,
+            "TLS handshake deadline exceeded",
+            retryability: Retryability.Never
+        )
     }
 }

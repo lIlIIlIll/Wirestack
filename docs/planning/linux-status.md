@@ -75,8 +75,9 @@ Status values have the same fail-closed meaning as the global status file.
 | M3-011 reference identity verifier | COMPLETE | SAN-only DNS/IP models, no CN field/fallback, ASCII IDNA A-label handling, one-label wildcard rules, 256-SAN ceiling and native SNI/reference separation tests |
 | M3-012 custom roots/pinning | COMPLETE | CustomRoots and SystemPlusCustomRoots load explicit DER anchors without disabling identity verification; SPKI SHA-256 leaf/any-chain pins pass a real matching client/server memory-BIO handshake and reject a mismatched pin |
 | M3-013 Linux system trust | IN_PROGRESS | Frozen ordered bundle/hashed-directory discovery, explicit AWS-LC loading, no provider-default fallback and current glibc host tests pass; native musl adapter execution evidence remains |
-| M3-016 `LocalIdentity`/opaque key contract | IN_PROGRESS | Immutable certificate-chain/key association and opaque zeroizable PKCS#8 reference are implemented; system-handle and external-signer contracts/bridge remain |
+| M3-016 `LocalIdentity`/opaque key contract | COMPLETE | One immutable identity binds a certificate chain to PKCS#8, opaque system handle/alias, or external signer refs; signer algorithms and SPKI are bounded, leaf/key matching is native, hardware capability is explicit, and key material/native handles never enter the public contract |
 | M3-017 PKCS#8/file identity | COMPLETE | Exact bounded unencrypted DER PKCS#8 and absolute readable regular-file adapters; native leaf/key match validation occurs during identity construction, transient copies are zeroed, close clears owned bytes, and server handshake uses the configured key |
+| M3-018 external signer bridge | COMPLETE | AWS-LC `SSL_PRIVATE_KEY_METHOD` captures a bounded request and returns retry; the pump calls the signer with the operation context outside native callbacks and engine/provider locks, then completes or fails the pending operation; real handshake, user exception and pre-sign cancellation paths pass |
 
 ## Next critical path
 
@@ -86,7 +87,7 @@ Status values have the same fail-closed meaning as the global status file.
    stable native error evidence.
 3. Land UP-007 or another proven non-carrier-blocking resolver backend, then
    complete Linux `SystemResolver` and native blackhole gates.
-4. Complete native musl trust-adapter evidence and the system-handle/external-
-   signer portions of the opaque private-key contract under ADR-0003.
+4. Complete native musl trust-adapter evidence, then handshake result, SNI
+   selection, ALPN, mTLS, session and close-notify work under ADR-0003.
 5. Implement HTTP/1.1, HTTP/2, Linux conformance, fuzz, benchmark, 24-hour soak,
    packaging and installation verification.
