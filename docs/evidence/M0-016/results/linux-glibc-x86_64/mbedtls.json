@@ -1,0 +1,59 @@
+{
+  "build": {
+    "binary_bytes": 859112,
+    "binary_sha256": "71c1b9984596b0a87c6d9a591f1c06e92a76871215a3ba3a0d6e7e8b4f343a69",
+    "runtime_loader_library_strings": [],
+    "static_archives": [
+      {
+        "bytes": 527948,
+        "name": "libmbedtls.a",
+        "sha256": "f482953c55b69186fdf4232cf2940d7dece626eb23e848abdb9b53255ab59804"
+      },
+      {
+        "bytes": 160334,
+        "name": "libmbedx509.a",
+        "sha256": "d5d9161982b2f701ce1e23284504f28de78587d36d636c4daf3003a182039380"
+      },
+      {
+        "bytes": 870918,
+        "name": "libtfpsacrypto.a",
+        "sha256": "31f032d2cda4600e3e5249a8ce0596386c977699eccc7facd72274115fe5bb9e"
+      }
+    ],
+    "system_tls_dependencies": []
+  },
+  "build_log_sha256": "c40049eff0195e636e31b90ffd6a7d6c43680251d9aae4ec3528824acd32f225",
+  "capabilities": {
+    "caller_cancellation": "PASS",
+    "close_notify": "PASS",
+    "custom_ca": "PASS",
+    "external_signer": "BLOCKED",
+    "mtls": "PASS",
+    "negative_hostname": "PASS",
+    "negative_untrusted_ca": "PASS",
+    "partial_io_backpressure": "PASS",
+    "repeated_cleanup": "PASS",
+    "session_resumption": "BLOCKED",
+    "sni_hostname_alpn": "PASS",
+    "tls12": "PASS",
+    "tls13": "PASS",
+    "truncation": "PASS"
+  },
+  "finished_at": "2026-08-23T12:13:00.762830+00:00",
+  "notes": [
+    "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
+  ],
+  "platform": "linux-glibc-x86_64",
+  "poc_exit_code": 0,
+  "provider": "mbedtls",
+  "schema_version": 1,
+  "source": {
+    "archive": "mbedtls-4.2.0.tar.bz2",
+    "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
+    "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
+    "kind": "archive"
+  },
+  "started_at": "2026-08-23T12:12:47.424628+00:00",
+  "status": "PARTIAL",
+  "task_id": "M0-016"
+}
