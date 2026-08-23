@@ -1,0 +1,15 @@
+STD-NET-DNS-CARRIER-THREAD: FAIL
+classification: CARRIER_THREAD_STARVATION_OBSERVED
+recommendation: runtime-native async resolver or a strictly bounded blocking resolver pool
+delay=0ms tasks=1 p95=10.252ms max=10.333ms starved=None
+delay=0ms tasks=4 p95=10.154ms max=15.066ms starved=None
+delay=0ms tasks=8 p95=10.156ms max=10.224ms starved=None
+delay=0ms tasks=16 p95=10.245ms max=10.304ms starved=None
+delay=0ms tasks=32 p95=10.171ms max=12.819ms starved=None
+delay=0ms tasks=64 p95=12.431ms max=14.798ms starved=None
+delay=200ms tasks=1 p95=10.136ms max=11.542ms starved=False
+delay=200ms tasks=4 p95=10.127ms max=10.55ms starved=False
+delay=200ms tasks=8 p95=10.585ms max=203.544ms starved=False
+delay=200ms tasks=16 p95=201.003ms max=203.238ms starved=True
+delay=200ms tasks=32 p95=201.117ms max=204.341ms starved=True
+delay=200ms tasks=64 p95=202.289ms max=403.204ms starved=True
