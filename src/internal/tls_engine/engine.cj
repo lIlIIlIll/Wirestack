@@ -59,6 +59,15 @@ foreign func wirestack_tls_engine_set_ip_reference_identity(
     size: UInt64
 ): Int32
 foreign func wirestack_tls_engine_enable_peer_verification(engineHandle: UInt64): Int32
+foreign func wirestack_tls_engine_configure_client_authentication(
+    engineHandle: UInt64,
+    required: Int32
+): Int32
+foreign func wirestack_tls_engine_set_alpn_protocols(
+    engineHandle: UInt64,
+    protocols: CPointer<UInt8>,
+    protocolsSize: UInt64
+): Int32
 foreign func wirestack_tls_engine_set_identity_pkcs8(
     engineHandle: UInt64,
     leafCertificate: CPointer<UInt8>,
@@ -94,6 +103,25 @@ foreign func wirestack_tls_engine_fail_external_signature(engineHandle: UInt64):
 foreign func wirestack_tls_engine_handshake_step(
     engineHandle: UInt64,
     outStep: CPointer<Int32>
+): Int32
+foreign func wirestack_tls_engine_handshake_info(
+    engineHandle: UInt64,
+    outTlsVersion: CPointer<Int32>,
+    cipherName: CPointer<UInt8>,
+    cipherNameCapacity: UInt64,
+    outCipherNameSize: CPointer<UInt64>,
+    negotiatedAlpn: CPointer<UInt8>,
+    negotiatedAlpnCapacity: UInt64,
+    outNegotiatedAlpnSize: CPointer<UInt64>,
+    outSessionReused: CPointer<Int32>,
+    outMatchedPinIndex: CPointer<Int64>
+): Int32
+foreign func wirestack_tls_engine_peer_chain_der(
+    engineHandle: UInt64,
+    output: CPointer<UInt8>,
+    outputCapacity: UInt64,
+    outRequiredSize: CPointer<UInt64>,
+    outCertificateCount: CPointer<UInt64>
 ): Int32
 foreign func wirestack_tls_engine_pending_ciphertext(
     engineHandle: UInt64,
@@ -168,6 +196,43 @@ public interface ExternalSigningTlsEngine {
     func serviceExternalSignature(context: OperationContext): Unit
 }
 
+/** Optional provider-neutral handshake result facet. */
+public interface HandshakeInfoTlsEngine {
+    func handshakeInfo(): TlsHandshakeInfo
+}
+
+/** Immutable negotiated TLS facts. No provider-native object is retained. */
+public class TlsHandshakeInfo {
+    public let version: TlsVersion
+    public let cipherSuite: String
+    public let negotiatedAlpn: ?String
+    public let peerCertificateChain: ?CertificateChain
+    public let verificationEvidence: ?TrustVerificationEvidence
+    public let resumed: Bool
+    public let providerManifest: TlsProviderManifest
+
+    public init(
+        version: TlsVersion,
+        cipherSuite: String,
+        negotiatedAlpn: ?String,
+        peerCertificateChain: ?CertificateChain,
+        verificationEvidence: ?TrustVerificationEvidence,
+        resumed: Bool,
+        providerManifest: TlsProviderManifest
+    ) {
+        if (cipherSuite.isEmpty()) {
+            throw IllegalArgumentException("TLS cipher suite must not be empty")
+        }
+        this.version = version
+        this.cipherSuite = cipherSuite
+        this.negotiatedAlpn = negotiatedAlpn
+        this.peerCertificateChain = peerCertificateChain
+        this.verificationEvidence = verificationEvidence
+        this.resumed = resumed
+        this.providerManifest = providerManifest
+    }
+}
+
 public enum TlsEngineErrorCode {
     | ProviderFailure
     | Closed
@@ -218,16 +283,23 @@ private func providerFailure(operation: String, status: Int32): TlsEngineExcepti
 }
 
 /** AWS-LC memory-BIO engine. It never owns or accesses a socket. */
-public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine {
+public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine & HandshakeInfoTlsEngine {
     private let mutex = Mutex()
     private var handle: UInt64
     private var externalSigner: ?ExternalSigner = None<ExternalSigner>
+    private let role: TlsEngineRole
+    private let providerManifest: TlsProviderManifest
+    private var configuredTrust: ?TrustPolicy = None<TrustPolicy>
+    private var verifiedReferenceIdentity: ?String = None<String>
 
     internal init(
         providerHandle: UInt64,
         role: TlsEngineRole,
-        security: TlsSecurityPolicy
+        security: TlsSecurityPolicy,
+        providerManifest: TlsProviderManifest
     ) {
+        this.role = role
+        this.providerManifest = providerManifest
         let output = Array<UInt64>(1, repeat: 0u64)
         let status = unsafe {
             let raw = acquireArrayRawData(output)
@@ -302,6 +374,64 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine {
                 "peer verification",
                 unsafe { wirestack_tls_engine_enable_peer_verification(current) }
             )
+            configuredTrust = Some(trust)
+            verifiedReferenceIdentity = Some(referenceIdentityText(referenceIdentity))
+        }
+    }
+
+    internal func configureAlpn(protocols: Array<String>): Unit {
+        if (protocols.isEmpty()) {
+            return
+        }
+        let wire = encodeAlpnProtocols(protocols)
+        synchronized(mutex) {
+            let current = requireOpen()
+            let status = unsafe {
+                let input = acquireArrayRawData(wire)
+                try {
+                    wirestack_tls_engine_set_alpn_protocols(
+                        current,
+                        input.pointer,
+                        UInt64(wire.size)
+                    )
+                } finally {
+                    releaseArrayRawData(input)
+                }
+            }
+            requireConfigurationSuccess("ALPN protocol list", status)
+        }
+    }
+
+    internal func configureClientAuthentication(
+        authentication: ClientAuthentication,
+        trust: ?TrustPolicy,
+        systemTrustLocation: ?LinuxSystemTrustLocation
+    ): Unit {
+        match (authentication) {
+            case ClientAuthentication.None => return
+            case _ => ()
+        }
+        let resolvedTrust = match (trust) {
+            case Some(value) => value
+            case None => throw TlsEngineException(
+                TlsEngineErrorCode.ProviderFailure,
+                "TLS server client authentication has no trust policy"
+            )
+        }
+        synchronized(mutex) {
+            let current = requireOpen()
+            configureTrust(current, resolvedTrust, systemTrustLocation)
+            let required: Int32 = match (authentication) {
+                case ClientAuthentication.Required => 1i32
+                case _ => 0i32
+            }
+            requireConfigurationSuccess(
+                "client certificate authentication",
+                unsafe {
+                    wirestack_tls_engine_configure_client_authentication(current, required)
+                }
+            )
+            configuredTrust = Some(resolvedTrust)
         }
     }
 
@@ -401,6 +531,114 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine {
             } else {
                 throw providerFailure("handshake step result", value)
             }
+        }
+    }
+
+    public func handshakeInfo(): TlsHandshakeInfo {
+        synchronized(mutex) {
+            let current = requireOpen()
+            let versionOutput = Array<Int32>(1, repeat: 0)
+            let cipherSizeOutput = Array<UInt64>(1, repeat: 0u64)
+            let alpnSizeOutput = Array<UInt64>(1, repeat: 0u64)
+            let resumedOutput = Array<Int32>(1, repeat: 0)
+            let matchedPinOutput = Array<Int64>(1, repeat: -1)
+            let queryStatus = unsafe {
+                let version = acquireArrayRawData(versionOutput)
+                let cipherSize = acquireArrayRawData(cipherSizeOutput)
+                let alpnSize = acquireArrayRawData(alpnSizeOutput)
+                let resumed = acquireArrayRawData(resumedOutput)
+                let matchedPin = acquireArrayRawData(matchedPinOutput)
+                try {
+                    wirestack_tls_engine_handshake_info(
+                        current,
+                        version.pointer,
+                        CPointer<UInt8>(),
+                        0u64,
+                        cipherSize.pointer,
+                        CPointer<UInt8>(),
+                        0u64,
+                        alpnSize.pointer,
+                        resumed.pointer,
+                        matchedPin.pointer
+                    )
+                } finally {
+                    releaseArrayRawData(matchedPin)
+                    releaseArrayRawData(resumed)
+                    releaseArrayRawData(alpnSize)
+                    releaseArrayRawData(cipherSize)
+                    releaseArrayRawData(version)
+                }
+            }
+            if (queryStatus != NATIVE_OK || cipherSizeOutput[0] == 0u64 ||
+                cipherSizeOutput[0] > 255u64 || alpnSizeOutput[0] > 255u64) {
+                throw providerFailure("handshake information query", queryStatus)
+            }
+            let cipher = Array<Byte>(Int64(cipherSizeOutput[0]), repeat: 0)
+            let alpnStorageSize = if (alpnSizeOutput[0] == 0u64) { 1 } else {
+                Int64(alpnSizeOutput[0])
+            }
+            let alpn = Array<Byte>(alpnStorageSize, repeat: 0)
+            let readStatus = unsafe {
+                let version = acquireArrayRawData(versionOutput)
+                let cipherBytes = acquireArrayRawData(cipher)
+                let cipherSize = acquireArrayRawData(cipherSizeOutput)
+                let alpnBytes = acquireArrayRawData(alpn)
+                let alpnSize = acquireArrayRawData(alpnSizeOutput)
+                let resumed = acquireArrayRawData(resumedOutput)
+                let matchedPin = acquireArrayRawData(matchedPinOutput)
+                try {
+                    wirestack_tls_engine_handshake_info(
+                        current,
+                        version.pointer,
+                        cipherBytes.pointer,
+                        UInt64(cipher.size),
+                        cipherSize.pointer,
+                        alpnBytes.pointer,
+                        UInt64(alpnSizeOutput[0]),
+                        alpnSize.pointer,
+                        resumed.pointer,
+                        matchedPin.pointer
+                    )
+                } finally {
+                    releaseArrayRawData(matchedPin)
+                    releaseArrayRawData(resumed)
+                    releaseArrayRawData(alpnSize)
+                    releaseArrayRawData(alpnBytes)
+                    releaseArrayRawData(cipherSize)
+                    releaseArrayRawData(cipherBytes)
+                    releaseArrayRawData(version)
+                }
+            }
+            requireConfigurationSuccess("handshake information", readStatus)
+            let peerChain = readPeerCertificateChain(current)
+            if (isClientRole(role) && peerChain.isNone()) {
+                throw TlsEngineException(
+                    TlsEngineErrorCode.ProviderFailure,
+                    "verified TLS client handshake returned no peer certificate chain"
+                )
+            }
+            let evidence = makeVerificationEvidence(
+                configuredTrust,
+                peerChain,
+                matchedPinOutput[0],
+                verifiedReferenceIdentity
+            )
+            TlsHandshakeInfo(
+                decodeTlsVersion(versionOutput[0]),
+                String.fromUtf8(cipher),
+                if (alpnSizeOutput[0] == 0u64) {
+                    None<String>
+                } else {
+                    Some(String.fromUtf8(Array<Byte>(
+                        Int64(alpnSizeOutput[0]),
+                        {index => alpn[index]}
+                    )))
+                },
+                peerChain,
+                evidence,
+                resumedOutput[0] != 0,
+                providerManifest
+            )
         }
     }
 
@@ -814,12 +1052,210 @@ private func requireConfigurationSuccess(operation: String, status: Int32): Unit
     }
 }
 
+private func encodeAlpnProtocols(protocols: Array<String>): Array<Byte> {
+    var total: Int64 = 0
+    for (protocol in protocols) {
+        let size = protocol.toArray().size
+        if (size <= 0 || size > 255 || total > 4096 - size - 1) {
+            throw TlsEngineException(
+                TlsEngineErrorCode.ProviderFailure,
+                "ALPN protocol list exceeds the native 4096-byte limit"
+            )
+        }
+        total += size + 1
+    }
+    let output = Array<Byte>(total, repeat: 0)
+    var offset: Int64 = 0
+    for (protocol in protocols) {
+        let bytes = protocol.toArray()
+        output[offset] = UInt8(bytes.size)
+        offset++
+        for (value in bytes) {
+            output[offset] = value
+            offset++
+        }
+    }
+    output
+}
+
+private func decodeTlsVersion(value: Int32): TlsVersion {
+    if (value == 12) {
+        TlsVersion.Tls12
+    } else if (value == 13) {
+        TlsVersion.Tls13
+    } else {
+        throw TlsEngineException(
+            TlsEngineErrorCode.ProviderFailure,
+            "TLS provider returned an unsupported negotiated version"
+        )
+    }
+}
+
+private func readPeerCertificateChain(engineHandle: UInt64): ?CertificateChain {
+    let metadata = Array<UInt64>(2, repeat: 0u64)
+    let queryStatus = unsafe {
+        let values = acquireArrayRawData(metadata)
+        try {
+            wirestack_tls_engine_peer_chain_der(
+                engineHandle,
+                CPointer<UInt8>(),
+                0u64,
+                values.pointer,
+                values.pointer + 1
+            )
+        } finally {
+            releaseArrayRawData(values)
+        }
+    }
+    if (queryStatus != NATIVE_OK || metadata[0] > 1024u64 * 1024u64 ||
+        metadata[1] > 16u64) {
+        throw providerFailure("peer certificate chain query", queryStatus)
+    }
+    if (metadata[1] == 0u64) {
+        return None<CertificateChain>
+    }
+    if (metadata[0] == 0u64) {
+        throw TlsEngineException(
+            TlsEngineErrorCode.ProviderFailure,
+            "TLS provider returned an empty encoded peer chain"
+        )
+    }
+    let packed = Array<Byte>(Int64(metadata[0]), repeat: 0)
+    let readStatus = unsafe {
+        let output = acquireArrayRawData(packed)
+        let values = acquireArrayRawData(metadata)
+        try {
+            wirestack_tls_engine_peer_chain_der(
+                engineHandle,
+                output.pointer,
+                UInt64(packed.size),
+                values.pointer,
+                values.pointer + 1
+            )
+        } finally {
+            releaseArrayRawData(values)
+            releaseArrayRawData(output)
+        }
+    }
+    requireConfigurationSuccess("peer certificate chain", readStatus)
+    let certificates = Array<DerCertificate>(Int64(metadata[1]), {index =>
+        let offset = peerCertificateOffset(packed, index)
+        let size = peerCertificateSize(packed, offset)
+        DerCertificate(Array<Byte>(size, {byteIndex => packed[offset + 4 + byteIndex]}))
+    })
+    let finalOffset = peerCertificateOffset(packed, certificates.size)
+    if (finalOffset != packed.size) {
+        throw TlsEngineException(
+            TlsEngineErrorCode.ProviderFailure,
+            "TLS provider returned malformed peer certificate framing"
+        )
+    }
+    Some(CertificateChain(certificates))
+}
+
+private func peerCertificateOffset(packed: Array<Byte>, targetIndex: Int64): Int64 {
+    var offset: Int64 = 0
+    for (_ in 0..targetIndex) {
+        let size = peerCertificateSize(packed, offset)
+        offset += 4 + size
+        if (offset > packed.size) {
+            throw TlsEngineException(
+                TlsEngineErrorCode.ProviderFailure,
+                "TLS provider returned truncated peer certificate framing"
+            )
+        }
+    }
+    offset
+}
+
+private func peerCertificateSize(packed: Array<Byte>, offset: Int64): Int64 {
+    if (offset < 0 || packed.size - offset < 4) {
+        throw TlsEngineException(
+            TlsEngineErrorCode.ProviderFailure,
+            "TLS provider returned truncated peer certificate length"
+        )
+    }
+    let size = Int64(packed[offset]) * 16777216 +
+        Int64(packed[offset + 1]) * 65536 +
+        Int64(packed[offset + 2]) * 256 + Int64(packed[offset + 3])
+    if (size <= 0 || size > 256 * 1024 || size > packed.size - offset - 4) {
+        throw TlsEngineException(
+            TlsEngineErrorCode.ProviderFailure,
+            "TLS provider returned an invalid peer certificate length"
+        )
+    }
+    size
+}
+
+private func makeVerificationEvidence(
+    trust: ?TrustPolicy,
+    peerChain: ?CertificateChain,
+    matchedPinIndex: Int64,
+    verifiedReferenceIdentity: ?String
+): ?TrustVerificationEvidence {
+    let policy = match (trust) {
+        case Some(value) => value
+        case None => return None<TrustVerificationEvidence>
+    }
+    let chain = match (peerChain) {
+        case Some(value) => value
+        case None => return None<TrustVerificationEvidence>
+    }
+    Some(TrustVerificationEvidence(
+        TrustVerificationStatus.Verified,
+        trustAnchorSource(policy.kind),
+        policy.contextIdentity,
+        chain.size(),
+        matchedPinIndex: if (matchedPinIndex >= 0) {
+            Some(matchedPinIndex)
+        } else {
+            None<Int64>
+        },
+        verifiedReferenceIdentity: verifiedReferenceIdentity
+    ))
+}
+
+private func trustAnchorSource(kind: TrustPolicyKind): TrustAnchorSource {
+    match (kind) {
+        case TrustPolicyKind.System => TrustAnchorSource.System
+        case TrustPolicyKind.CustomRoots => TrustAnchorSource.CustomRoots
+        case TrustPolicyKind.SystemPlusCustomRoots => TrustAnchorSource.SystemPlusCustomRoots
+        case TrustPolicyKind.PinnedPublicKeys => TrustAnchorSource.PublicKeyPin
+    }
+}
+
+private func referenceIdentityText(value: ReferenceIdentity): String {
+    match (value) {
+        case ReferenceIdentity.Dns(host) => host.ascii
+        case ReferenceIdentity.Ip(address) =>
+            let input = address.toOctets()
+            let digits: Array<Byte> = "0123456789abcdef".toArray()
+            let output = Array<Byte>(3 + input.size * 2, repeat: 0)
+            output[0] = b'i'
+            output[1] = b'p'
+            output[2] = b':'
+            for ((index, octet) in input.enumerate()) {
+                output[3 + index * 2] = digits[Int64(octet >> 4)]
+                output[4 + index * 2] = digits[Int64(octet & 0x0f)]
+            }
+            String.fromUtf8(output)
+    }
+}
+
+private func isClientRole(value: TlsEngineRole): Bool {
+    match (value) {
+        case TlsEngineRole.Client => true
+        case TlsEngineRole.Server => false
+    }
+}
+
 internal func createAwsLcTlsEngine(
     providerHandle: UInt64,
     role: TlsEngineRole,
-    security: TlsSecurityPolicy
+    security: TlsSecurityPolicy,
+    providerManifest: TlsProviderManifest
 ): TlsEngine {
-    AwsLcTlsEngine(providerHandle, role, security)
+    AwsLcTlsEngine(providerHandle, role, security, providerManifest)
 }
 
 private func decodeReadResult(step: Int32, count: Int64): TlsEngineReadResult {
