@@ -28,6 +28,13 @@ enum wirestack_tls_engine_step {
     WIRESTACK_TLS_ENGINE_WANT_WRITE = 2
 };
 
+enum wirestack_tls_engine_io_step {
+    WIRESTACK_TLS_ENGINE_IO_COMPLETE = 0,
+    WIRESTACK_TLS_ENGINE_IO_WANT_READ = 1,
+    WIRESTACK_TLS_ENGINE_IO_WANT_WRITE = 2,
+    WIRESTACK_TLS_ENGINE_IO_CLOSED = 3
+};
+
 enum wirestack_tls_provider_capability {
     WIRESTACK_TLS_CAP_CUSTOM_ROOTS = UINT64_C(1) << 0,
     WIRESTACK_TLS_CAP_CLIENT_CERT = UINT64_C(1) << 1,
@@ -75,6 +82,20 @@ int32_t wirestack_tls_engine_feed_ciphertext(
     const uint8_t *input,
     uint64_t size,
     uint64_t *out_written
+);
+int32_t wirestack_tls_engine_read_plaintext(
+    uint64_t engine_handle,
+    uint8_t *output,
+    uint64_t size,
+    uint64_t *out_read,
+    int32_t *out_step
+);
+int32_t wirestack_tls_engine_write_plaintext(
+    uint64_t engine_handle,
+    const uint8_t *input,
+    uint64_t size,
+    uint64_t *out_written,
+    int32_t *out_step
 );
 
 #if defined(__cplusplus)
