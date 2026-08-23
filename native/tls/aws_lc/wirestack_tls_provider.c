@@ -19,6 +19,9 @@
 #if !defined(OPENSSL_IS_AWSLC)
 #error "Wirestack's Linux provider must be compiled against pinned AWS-LC headers"
 #endif
+#if !defined(WIRESTACK_TLS_BUILD_FINGERPRINT)
+#error "Wirestack's Linux provider requires a repository build fingerprint"
+#endif
 
 #define WIRESTACK_TLS_PROVIDER_MAGIC UINT64_C(0x5753544c53505231)
 #define WIRESTACK_TLS_ENGINE_MAGIC UINT64_C(0x5753544c53454e31)
@@ -39,6 +42,13 @@ struct wirestack_tls_provider {
     uint64_t magic;
     uint8_t ticket_key[WIRESTACK_TLS_TICKET_KEY_BYTES];
     uint64_t ticket_key_created_at;
+};
+
+enum wirestack_tls_signer_state {
+    WIRESTACK_TLS_SIGNER_IDLE = 0,
+    WIRESTACK_TLS_SIGNER_REQUESTED = 1,
+    WIRESTACK_TLS_SIGNER_READY = 2,
+    WIRESTACK_TLS_SIGNER_FAILED = 3
 };
 
 struct wirestack_tls_engine {
@@ -69,14 +79,103 @@ struct wirestack_tls_engine {
     uint64_t pending_session_lifetime_seconds;
     int pending_session_single_use;
     int post_handshake_tickets_flushed;
+    int32_t last_error_class;
+    int64_t last_native_reason;
+    int64_t last_verify_result;
+    int32_t last_peer_alert;
 };
 
-enum wirestack_tls_signer_state {
-    WIRESTACK_TLS_SIGNER_IDLE = 0,
-    WIRESTACK_TLS_SIGNER_REQUESTED = 1,
-    WIRESTACK_TLS_SIGNER_READY = 2,
-    WIRESTACK_TLS_SIGNER_FAILED = 3
-};
+static void clear_last_error(struct wirestack_tls_engine *engine) {
+    engine->last_error_class = WIRESTACK_TLS_ERROR_PROVIDER_FAILURE;
+    engine->last_native_reason = 0;
+    engine->last_verify_result = X509_V_OK;
+    engine->last_peer_alert = -1;
+}
+
+static int32_t classify_verify_result(long verify_result) {
+    switch (verify_result) {
+        case X509_V_ERR_HOSTNAME_MISMATCH:
+        case X509_V_ERR_IP_ADDRESS_MISMATCH:
+            return WIRESTACK_TLS_ERROR_IDENTITY_MISMATCH;
+        case X509_V_ERR_CERT_HAS_EXPIRED:
+            return WIRESTACK_TLS_ERROR_CERTIFICATE_EXPIRED;
+        case X509_V_ERR_CERT_REVOKED:
+            return WIRESTACK_TLS_ERROR_CERTIFICATE_REVOKED;
+        default:
+            return WIRESTACK_TLS_ERROR_CERTIFICATE_UNTRUSTED;
+    }
+}
+
+static void capture_last_error(struct wirestack_tls_engine *engine) {
+    uint32_t packed = ERR_peek_last_error();
+    int reason = packed == 0u ? 0 : ERR_GET_REASON(packed);
+    long verify_result = SSL_get_verify_result(engine->ssl);
+    int32_t explicit_class = engine->last_error_class;
+    clear_last_error(engine);
+    engine->last_native_reason = (int64_t)reason;
+    engine->last_verify_result = (int64_t)verify_result;
+    if (explicit_class != WIRESTACK_TLS_ERROR_PROVIDER_FAILURE) {
+        engine->last_error_class = explicit_class;
+        return;
+    }
+    if (reason >= 1000 && reason <= 1255) {
+        engine->last_peer_alert = (int32_t)(reason - 1000);
+        switch (reason) {
+            case SSL_R_SSLV3_ALERT_BAD_RECORD_MAC:
+                engine->last_error_class = WIRESTACK_TLS_ERROR_BAD_MAC;
+                return;
+            case SSL_R_TLSV1_ALERT_RECORD_OVERFLOW:
+            case SSL_R_TLSV1_ALERT_DECODE_ERROR:
+                engine->last_error_class = WIRESTACK_TLS_ERROR_INVALID_RECORD;
+                return;
+            case SSL_R_TLSV1_ALERT_PROTOCOL_VERSION:
+                engine->last_error_class = WIRESTACK_TLS_ERROR_UNSUPPORTED_VERSION;
+                return;
+            case SSL_R_TLSV1_ALERT_NO_APPLICATION_PROTOCOL:
+                engine->last_error_class = WIRESTACK_TLS_ERROR_NO_SHARED_ALPN;
+                return;
+            case SSL_R_TLSV1_ALERT_CERTIFICATE_REQUIRED:
+            case SSL_R_SSLV3_ALERT_NO_CERTIFICATE:
+                engine->last_error_class = WIRESTACK_TLS_ERROR_CLIENT_CERTIFICATE_REQUIRED;
+                return;
+            case SSL_R_SSLV3_ALERT_CERTIFICATE_REVOKED:
+                engine->last_error_class = WIRESTACK_TLS_ERROR_CERTIFICATE_REVOKED;
+                return;
+            case SSL_R_SSLV3_ALERT_CERTIFICATE_EXPIRED:
+                engine->last_error_class = WIRESTACK_TLS_ERROR_CERTIFICATE_EXPIRED;
+                return;
+            case SSL_R_TLSV1_ALERT_UNKNOWN_CA:
+            case SSL_R_SSLV3_ALERT_BAD_CERTIFICATE:
+            case SSL_R_SSLV3_ALERT_UNSUPPORTED_CERTIFICATE:
+            case SSL_R_SSLV3_ALERT_CERTIFICATE_UNKNOWN:
+                engine->last_error_class = WIRESTACK_TLS_ERROR_CERTIFICATE_UNTRUSTED;
+                return;
+            default:
+                engine->last_error_class = WIRESTACK_TLS_ERROR_PEER_ALERT;
+                return;
+        }
+    }
+    if (reason == SSL_R_PEER_DID_NOT_RETURN_A_CERTIFICATE) {
+        engine->last_error_class = WIRESTACK_TLS_ERROR_CLIENT_CERTIFICATE_REQUIRED;
+    } else if (reason == SSL_R_CERTIFICATE_VERIFY_FAILED || verify_result != X509_V_OK) {
+        engine->last_error_class = classify_verify_result(verify_result);
+    } else if (reason == SSL_R_NO_SHARED_CIPHER) {
+        engine->last_error_class = WIRESTACK_TLS_ERROR_NO_SHARED_CIPHER;
+    } else if (reason == SSL_R_NO_APPLICATION_PROTOCOL) {
+        engine->last_error_class = WIRESTACK_TLS_ERROR_NO_SHARED_ALPN;
+    } else if (reason == SSL_R_UNSUPPORTED_PROTOCOL ||
+        reason == SSL_R_WRONG_VERSION_NUMBER || reason == SSL_R_UNKNOWN_PROTOCOL) {
+        engine->last_error_class = WIRESTACK_TLS_ERROR_UNSUPPORTED_VERSION;
+    } else if (reason == SSL_R_DECRYPTION_FAILED_OR_BAD_RECORD_MAC) {
+        engine->last_error_class = WIRESTACK_TLS_ERROR_BAD_MAC;
+    } else if (reason == SSL_R_INVALID_SSL_SESSION) {
+        engine->last_error_class = WIRESTACK_TLS_ERROR_SESSION_FAILURE;
+    } else if (engine->signer_state == WIRESTACK_TLS_SIGNER_FAILED) {
+        engine->last_error_class = WIRESTACK_TLS_ERROR_PRIVATE_KEY_FAILURE;
+    } else if (reason != 0) {
+        engine->last_error_class = WIRESTACK_TLS_ERROR_PROTOCOL_VIOLATION;
+    }
+}
 
 enum wirestack_tls_server_selection_state {
     WIRESTACK_TLS_SERVER_SELECTION_DISABLED = 0,
@@ -175,6 +274,7 @@ static enum ssl_private_key_result_t wirestack_external_sign_complete(
     }
     if (engine->signer_state == WIRESTACK_TLS_SIGNER_FAILED) {
         clear_sensitive_buffer(&engine->signer_input, &engine->signer_input_size);
+        engine->last_error_class = WIRESTACK_TLS_ERROR_PRIVATE_KEY_FAILURE;
         engine->signer_state = WIRESTACK_TLS_SIGNER_IDLE;
         return ssl_private_key_failure;
     }
@@ -235,6 +335,7 @@ static int wirestack_alpn_select(
             client_offset += 1u + client_length;
         }
     }
+    engine->last_error_class = WIRESTACK_TLS_ERROR_NO_SHARED_ALPN;
     return SSL_TLSEXT_ERR_ALERT_FATAL;
 }
 
@@ -569,12 +670,33 @@ const char *wirestack_tls_provider_fingerprint(uint64_t handle) {
         : "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478";
 }
 
+const char *wirestack_tls_provider_build_fingerprint(uint64_t handle) {
+    return provider_from_handle(handle) == NULL ? NULL : WIRESTACK_TLS_BUILD_FINGERPRINT;
+}
+
 const char *wirestack_tls_provider_backend(uint64_t handle) {
     return provider_from_handle(handle) == NULL ? NULL : "aws-lc-static";
 }
 
 const char *wirestack_tls_provider_patch_level(uint64_t handle) {
     return provider_from_handle(handle) == NULL ? NULL : "abi-1;patches=none";
+}
+
+const char *wirestack_tls_provider_target_triple(uint64_t handle) {
+    if (provider_from_handle(handle) == NULL) {
+        return NULL;
+    }
+#if defined(__x86_64__)
+    return "x86_64-unknown-linux-gnu";
+#elif defined(__aarch64__)
+    return "aarch64-unknown-linux-gnu";
+#else
+    return "unknown-unknown-linux-gnu";
+#endif
+}
+
+int32_t wirestack_tls_provider_external_openssl_dependency(uint64_t handle) {
+    return provider_from_handle(handle) == NULL ? -1 : 0;
 }
 
 uint64_t wirestack_tls_provider_capabilities(uint64_t handle) {
@@ -789,6 +911,7 @@ int32_t wirestack_tls_engine_create(
     engine->magic = WIRESTACK_TLS_ENGINE_MAGIC;
     engine->role = role;
     engine->matched_pin_index = -1;
+    clear_last_error(engine);
     SSL_CTX_set_early_data_enabled(engine->context, 0);
     if (role == WIRESTACK_TLS_ENGINE_CLIENT) {
         SSL_CTX_set_session_cache_mode(engine->context, SSL_SESS_CACHE_CLIENT);
@@ -1374,6 +1497,7 @@ int32_t wirestack_tls_engine_handshake_step(
     if (engine == NULL || out_step == NULL) {
         return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
     }
+    clear_last_error(engine);
     ERR_clear_error();
     result = SSL_do_handshake(engine->ssl);
     if (result == 1) {
@@ -1391,6 +1515,7 @@ int32_t wirestack_tls_engine_handshake_step(
         }
         SSL_get0_alpn_selected(engine->ssl, &selected_alpn, &selected_alpn_size);
         if (engine->alpn_required != 0 && selected_alpn_size == 0u) {
+            engine->last_error_class = WIRESTACK_TLS_ERROR_NO_SHARED_ALPN;
             return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
         }
         *out_step = WIRESTACK_TLS_ENGINE_COMPLETE;
@@ -1413,7 +1538,27 @@ int32_t wirestack_tls_engine_handshake_step(
         *out_step = WIRESTACK_TLS_ENGINE_NEED_SERVER_SELECTION;
         return WIRESTACK_TLS_PROVIDER_OK;
     }
+    capture_last_error(engine);
     return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+}
+
+int32_t wirestack_tls_engine_last_error(
+    uint64_t engine_handle,
+    int32_t *out_error_class,
+    int64_t *out_native_reason,
+    int64_t *out_verify_result,
+    int32_t *out_peer_alert
+) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    if (engine == NULL || out_error_class == NULL || out_native_reason == NULL ||
+        out_verify_result == NULL || out_peer_alert == NULL) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    *out_error_class = engine->last_error_class;
+    *out_native_reason = engine->last_native_reason;
+    *out_verify_result = engine->last_verify_result;
+    *out_peer_alert = engine->last_peer_alert;
+    return WIRESTACK_TLS_PROVIDER_OK;
 }
 
 int32_t wirestack_tls_engine_handshake_info(
@@ -1635,9 +1780,16 @@ int32_t wirestack_tls_engine_read_plaintext(
     }
     *out_read = UINT64_C(0);
     *out_step = -1;
+    clear_last_error(engine);
     ERR_clear_error();
     result = SSL_read(engine->ssl, output, (int)size);
-    return classify_io_result(engine->ssl, result, out_read, out_step);
+    {
+        int32_t status = classify_io_result(engine->ssl, result, out_read, out_step);
+        if (status != WIRESTACK_TLS_PROVIDER_OK) {
+            capture_last_error(engine);
+        }
+        return status;
+    }
 }
 
 int32_t wirestack_tls_engine_write_plaintext(
@@ -1655,9 +1807,16 @@ int32_t wirestack_tls_engine_write_plaintext(
     }
     *out_written = UINT64_C(0);
     *out_step = -1;
+    clear_last_error(engine);
     ERR_clear_error();
     result = SSL_write(engine->ssl, input, (int)size);
-    return classify_io_result(engine->ssl, result, out_written, out_step);
+    {
+        int32_t status = classify_io_result(engine->ssl, result, out_written, out_step);
+        if (status != WIRESTACK_TLS_PROVIDER_OK) {
+            capture_last_error(engine);
+        }
+        return status;
+    }
 }
 
 int32_t wirestack_tls_engine_shutdown_step(
@@ -1671,6 +1830,7 @@ int32_t wirestack_tls_engine_shutdown_step(
         return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
     }
     *out_step = -1;
+    clear_last_error(engine);
     ERR_clear_error();
     result = SSL_shutdown(engine->ssl);
     if (result == 1) {
@@ -1690,5 +1850,6 @@ int32_t wirestack_tls_engine_shutdown_step(
         *out_step = WIRESTACK_TLS_ENGINE_IO_WANT_WRITE;
         return WIRESTACK_TLS_PROVIDER_OK;
     }
+    capture_last_error(engine);
     return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
 }
