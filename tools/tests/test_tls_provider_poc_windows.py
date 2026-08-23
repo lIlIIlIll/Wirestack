@@ -1,0 +1,41 @@
+from __future__ import annotations
+
+import importlib.util
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+MODULE = ROOT / "tools/tls_provider_poc/run_windows.py"
+spec = importlib.util.spec_from_file_location("provider_windows", MODULE)
+windows = importlib.util.module_from_spec(spec)
+assert spec.loader
+spec.loader.exec_module(windows)
+
+
+class WindowsProviderPocTests(unittest.TestCase):
+    def test_platform_id_is_native_windows_cell(self) -> None:
+        self.assertEqual("windows-x86_64", windows.platform_id())
+
+    def test_forbidden_tls_dlls_are_detected(self) -> None:
+        output = """
+            DLL Name: KERNEL32.dll
+            DLL Name: libssl-3-x64.dll
+            DLL Name: LIBCRYPTO-3-x64.DLL
+            DLL Name: libwinpthread-1.dll
+        """
+        self.assertEqual(
+            ["LIBCRYPTO-3-x64.DLL", "libssl-3-x64.dll"],
+            windows.forbidden_windows_dependencies(output),
+        )
+
+    def test_unrelated_runtime_dlls_are_allowed(self) -> None:
+        output = """
+            DLL Name: KERNEL32.dll
+            DLL Name: ucrtbase.dll
+            DLL Name: libwinpthread-1.dll
+        """
+        self.assertEqual([], windows.forbidden_windows_dependencies(output))
+
+
+if __name__ == "__main__":
+    unittest.main()
