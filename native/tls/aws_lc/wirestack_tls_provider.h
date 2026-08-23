@@ -28,7 +28,8 @@ enum wirestack_tls_engine_step {
     WIRESTACK_TLS_ENGINE_COMPLETE = 0,
     WIRESTACK_TLS_ENGINE_WANT_READ = 1,
     WIRESTACK_TLS_ENGINE_WANT_WRITE = 2,
-    WIRESTACK_TLS_ENGINE_NEED_SIGNATURE = 3
+    WIRESTACK_TLS_ENGINE_NEED_SIGNATURE = 3,
+    WIRESTACK_TLS_ENGINE_NEED_SERVER_SELECTION = 4
 };
 
 enum wirestack_tls_engine_io_step {
@@ -150,6 +151,20 @@ int32_t wirestack_tls_engine_set_alpn_protocols(
     const uint8_t *protocols,
     uint64_t protocols_size
 );
+int32_t wirestack_tls_engine_set_protocol_versions(
+    uint64_t engine_handle,
+    int32_t minimum_tls_version,
+    int32_t maximum_tls_version
+);
+int32_t wirestack_tls_engine_enable_server_name_selection(uint64_t engine_handle);
+int32_t wirestack_tls_engine_server_name_selection_request(
+    uint64_t engine_handle,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_required_size
+);
+int32_t wirestack_tls_engine_complete_server_name_selection(uint64_t engine_handle);
+int32_t wirestack_tls_engine_fail_server_name_selection(uint64_t engine_handle);
 int32_t wirestack_tls_engine_set_identity_pkcs8(
     uint64_t engine_handle,
     const uint8_t *leaf_certificate,

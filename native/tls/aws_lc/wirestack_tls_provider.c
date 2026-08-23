@@ -55,6 +55,9 @@ struct wirestack_tls_engine {
     uint8_t *server_alpn_protocols;
     size_t server_alpn_protocols_size;
     int alpn_required;
+    uint8_t requested_server_name[254];
+    size_t requested_server_name_size;
+    int server_selection_state;
 };
 
 enum wirestack_tls_signer_state {
@@ -62,6 +65,15 @@ enum wirestack_tls_signer_state {
     WIRESTACK_TLS_SIGNER_REQUESTED = 1,
     WIRESTACK_TLS_SIGNER_READY = 2,
     WIRESTACK_TLS_SIGNER_FAILED = 3
+};
+
+enum wirestack_tls_server_selection_state {
+    WIRESTACK_TLS_SERVER_SELECTION_DISABLED = 0,
+    WIRESTACK_TLS_SERVER_SELECTION_IDLE = 1,
+    WIRESTACK_TLS_SERVER_SELECTION_REQUESTED = 2,
+    WIRESTACK_TLS_SERVER_SELECTION_READY = 3,
+    WIRESTACK_TLS_SERVER_SELECTION_FAILED = 4,
+    WIRESTACK_TLS_SERVER_SELECTION_COMPLETE = 5
 };
 
 static void clear_sensitive_buffer(uint8_t **buffer, size_t *size) {
@@ -195,6 +207,46 @@ static int valid_alpn_wire_list(const uint8_t *protocols, size_t size) {
         offset += 1u + length;
     }
     return offset == size;
+}
+
+static enum ssl_select_cert_result_t wirestack_select_server_certificate(
+    const SSL_CLIENT_HELLO *client_hello
+) {
+    struct wirestack_tls_engine *engine;
+    const char *server_name;
+    size_t size;
+    if (client_hello == NULL || client_hello->ssl == NULL) {
+        return ssl_select_cert_error;
+    }
+    engine = (struct wirestack_tls_engine *)SSL_get_app_data(client_hello->ssl);
+    if (engine == NULL || engine->magic != WIRESTACK_TLS_ENGINE_MAGIC) {
+        return ssl_select_cert_error;
+    }
+    if (engine->server_selection_state == WIRESTACK_TLS_SERVER_SELECTION_READY) {
+        engine->server_selection_state = WIRESTACK_TLS_SERVER_SELECTION_COMPLETE;
+        return ssl_select_cert_success;
+    }
+    if (engine->server_selection_state == WIRESTACK_TLS_SERVER_SELECTION_FAILED) {
+        engine->server_selection_state = WIRESTACK_TLS_SERVER_SELECTION_COMPLETE;
+        return ssl_select_cert_error;
+    }
+    if (engine->server_selection_state == WIRESTACK_TLS_SERVER_SELECTION_REQUESTED) {
+        return ssl_select_cert_retry;
+    }
+    if (engine->server_selection_state != WIRESTACK_TLS_SERVER_SELECTION_IDLE) {
+        return ssl_select_cert_error;
+    }
+    server_name = SSL_get_servername(client_hello->ssl, TLSEXT_NAMETYPE_host_name);
+    size = server_name == NULL ? 0u : strlen(server_name);
+    if (size > 253u) {
+        return ssl_select_cert_error;
+    }
+    if (size != 0u) {
+        memcpy(engine->requested_server_name, server_name, size);
+    }
+    engine->requested_server_name_size = size;
+    engine->server_selection_state = WIRESTACK_TLS_SERVER_SELECTION_REQUESTED;
+    return ssl_select_cert_retry;
 }
 
 static int certificate_spki_sha256(const X509 *certificate, uint8_t out_digest[32]) {
@@ -913,6 +965,82 @@ int32_t wirestack_tls_engine_set_alpn_protocols(
     return WIRESTACK_TLS_PROVIDER_OK;
 }
 
+int32_t wirestack_tls_engine_set_protocol_versions(
+    uint64_t engine_handle,
+    int32_t minimum_tls_version,
+    int32_t maximum_tls_version
+) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    int minimum_version;
+    int maximum_version;
+    if (engine == NULL ||
+        (minimum_tls_version != 12 && minimum_tls_version != 13) ||
+        (maximum_tls_version != 12 && maximum_tls_version != 13) ||
+        minimum_tls_version > maximum_tls_version) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    minimum_version = minimum_tls_version == 12 ? TLS1_2_VERSION : TLS1_3_VERSION;
+    maximum_version = maximum_tls_version == 12 ? TLS1_2_VERSION : TLS1_3_VERSION;
+    return SSL_set_min_proto_version(engine->ssl, minimum_version) &&
+        SSL_set_max_proto_version(engine->ssl, maximum_version)
+        ? WIRESTACK_TLS_PROVIDER_OK
+        : WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+}
+
+int32_t wirestack_tls_engine_enable_server_name_selection(uint64_t engine_handle) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    if (engine == NULL || engine->role != WIRESTACK_TLS_ENGINE_SERVER ||
+        engine->server_selection_state != WIRESTACK_TLS_SERVER_SELECTION_DISABLED) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    engine->server_selection_state = WIRESTACK_TLS_SERVER_SELECTION_IDLE;
+    SSL_CTX_set_select_certificate_cb(engine->context, wirestack_select_server_certificate);
+    return WIRESTACK_TLS_PROVIDER_OK;
+}
+
+int32_t wirestack_tls_engine_server_name_selection_request(
+    uint64_t engine_handle,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_required_size
+) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    if (engine == NULL || out_required_size == NULL ||
+        engine->server_selection_state != WIRESTACK_TLS_SERVER_SELECTION_REQUESTED ||
+        (output_capacity != UINT64_C(0) && output == NULL)) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    *out_required_size = (uint64_t)engine->requested_server_name_size;
+    if (output == NULL || output_capacity == UINT64_C(0)) {
+        return WIRESTACK_TLS_PROVIDER_OK;
+    }
+    if (output_capacity < (uint64_t)engine->requested_server_name_size) {
+        return WIRESTACK_TLS_PROVIDER_LIMIT_EXCEEDED;
+    }
+    memcpy(output, engine->requested_server_name, engine->requested_server_name_size);
+    return WIRESTACK_TLS_PROVIDER_OK;
+}
+
+int32_t wirestack_tls_engine_complete_server_name_selection(uint64_t engine_handle) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    if (engine == NULL ||
+        engine->server_selection_state != WIRESTACK_TLS_SERVER_SELECTION_REQUESTED) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    engine->server_selection_state = WIRESTACK_TLS_SERVER_SELECTION_READY;
+    return WIRESTACK_TLS_PROVIDER_OK;
+}
+
+int32_t wirestack_tls_engine_fail_server_name_selection(uint64_t engine_handle) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    if (engine == NULL ||
+        engine->server_selection_state != WIRESTACK_TLS_SERVER_SELECTION_REQUESTED) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    engine->server_selection_state = WIRESTACK_TLS_SERVER_SELECTION_FAILED;
+    return WIRESTACK_TLS_PROVIDER_OK;
+}
+
 int32_t wirestack_tls_engine_set_identity_pkcs8(
     uint64_t engine_handle,
     const uint8_t *leaf_certificate,
@@ -1093,6 +1221,10 @@ int32_t wirestack_tls_engine_handshake_step(
     }
     if (error == SSL_ERROR_WANT_PRIVATE_KEY_OPERATION) {
         *out_step = WIRESTACK_TLS_ENGINE_NEED_SIGNATURE;
+        return WIRESTACK_TLS_PROVIDER_OK;
+    }
+    if (error == SSL_ERROR_PENDING_CERTIFICATE) {
+        *out_step = WIRESTACK_TLS_ENGINE_NEED_SERVER_SELECTION;
         return WIRESTACK_TLS_PROVIDER_OK;
     }
     return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;

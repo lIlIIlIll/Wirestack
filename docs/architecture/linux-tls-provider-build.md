@@ -204,3 +204,25 @@ evidence; Required rejects absence and returns the verified client chain and
 normalized trust evidence on success. Paired memory-BIO tests cover successful
 TLS 1.3 ALPN, no-shared-ALPN failure, required mTLS success/failure and optional
 mTLS without a certificate, completing M3-021, M3-023 and M3-024.
+
+## SNI server-context selection
+
+SNI routing selects a complete immutable `TlsServerContext`, not only a
+certificate. A `TlsServerContextSelector` contains 1..256 exact canonical
+`HostName` routes belonging to the same provider identity. It defensively
+copies its route table and rejects duplicates, so it remains safe to share
+across concurrent handshakes.
+
+AWS-LC's certificate-selection callback copies at most 253 bytes of requested
+server name into engine-owned state and returns its retry result. It never calls
+Cangjie or user code. The pump observes that state, releases the engine mutex,
+performs the immutable lookup, then installs the selected context's protocol
+range, identity, ALPN and client-authentication policy before completing the
+native retry. No provider-global callback state or lock is used.
+
+Once SNI routing is enabled, an absent, invalid or unknown name fails closed;
+there is no implicit default-certificate fallback. The completed server
+handshake result retains the requested name. Paired real memory-BIO tests use
+two distinct certificates and policies to prove the selected name controls the
+certificate, TLS version and ALPN, while missing and unknown names expose stable
+selection error codes. This completes M3-022.
