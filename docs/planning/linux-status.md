@@ -67,6 +67,9 @@ Status values have the same fail-closed meaning as the global status file.
 | M3-003 secure random adapter | COMPLETE | AWS-LC CSPRNG fills caller-owned buffers, maps stable structured failures, logs no bytes and passes lifecycle tests |
 | M3-004 external byte-stream pump | COMPLETE | AWS-LC memory-BIO step/feed/drain ABI; bounded `TlsEnginePump` handles WANT_READ/WANT_WRITE, partial I/O, one absolute Deadline/cancel context, EOF and zero-progress fail-closed paths; native and Cangjie ClientHello smoke passes |
 | M3-005 `TlsConnection` lifecycle | COMPLETE | Handshake consumes engine/transport on success and failure; AWS-LC plaintext read/write ABI; one reader plus one writer, same-direction exclusion, failure/timeout abort, idempotent close/abort and 100-way terminal-race loops prove exactly-once release |
+| M3-006 immutable TLS contexts | COMPLETE | Builder-only mutable state; built client/server contexts defensively copy ALPN/configuration, expose immutable policy/capabilities and pass concurrent-sharing tests |
+| M3-007 security profiles | COMPLETE | Compatible/Modern default to TLS 1.2..1.3, StrictTls13 pins 1.3; AWS-LC min/max protocol controls enforce the selected range and compression, renegotiation, NULL/anonymous suites and 0-RTT remain disabled without cipher-string configuration |
+| M3-008 capability query/fail-fast | COMPLETE | Explicit systemTrust/customRoots/hardwareKeys/clientCertificate/serverMode/tls12/tls13/http2/networkBinding inventory; unsupported trust, key, version, HTTP/2 and server/mTLS requirements fail during context construction |
 
 ## Next critical path
 
@@ -76,8 +79,9 @@ Status values have the same fail-closed meaning as the global status file.
    stable native error evidence.
 3. Land UP-007 or another proven non-carrier-blocking resolver backend, then
    complete Linux `SystemResolver` and native blackhole gates.
-4. Implement immutable TLS contexts/security profiles and Linux trust/key
-   adapters under ADR-0003; the provider, external-I/O engine pump and
+4. Implement bounded certificate/trust inputs, hostname verification and Linux
+   system-trust/key adapters under ADR-0003; immutable contexts, security
+   profiles, provider capability checks, the external-I/O engine pump and
    `TlsConnection` ownership lifecycle are complete.
 5. Implement HTTP/1.1, HTTP/2, Linux conformance, fuzz, benchmark, 24-hour soak,
    packaging and installation verification.
