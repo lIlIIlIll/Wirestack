@@ -1,0 +1,36 @@
+{
+  "files": {
+    "result-summary.json": {
+      "bytes": 9230,
+      "sha256": "109622a5c43c741c6d83cbf0db57498bb8bfd927534bbcf3c82d7e3063fe98ce"
+    },
+    "run.log": {
+      "bytes": 886,
+      "sha256": "dadf9e9c923d04ae37da9612f801d94a055890cef5a0c7eb9569d6723957deb3"
+    },
+    "samples-00.jsonl": {
+      "bytes": 7089,
+      "sha256": "16410da3233afdb59e7b50d809c83d9b86d32eedcc0de761607d69451e26df22"
+    },
+    "samples-01.jsonl": {
+      "bytes": 7259,
+      "sha256": "91abd64b07f046279f98a91bff26801083ead4dce3294fc33000d00b5c1b45c9"
+    },
+    "samples-02.jsonl": {
+      "bytes": 7281,
+      "sha256": "37770b078f02adb24adc29d93eca11a2ea29720f15e9f749bc71e06bf31d3023"
+    },
+    "samples-03.jsonl": {
+      "bytes": 7473,
+      "sha256": "1356dd7bd7d6e42e920b3bc3b194d03d52404470abe3dd90b239bc905b135b30"
+    },
+    "sdk.sha256": {
+      "bytes": 85,
+      "sha256": "27ddda94342df26708d71c4461eab871d692df8cdf44ca7b0242b27784252919"
+    }
+  },
+  "full_event_report_sha256": "4c4b22ba86ba8e803633a306a36ceb98906163acd23bc9ae29cd4b74f6666a0c",
+  "implementation_commit": "a9af504f298ad3c6e26fe122eed8b540b0270ed6",
+  "schema_version": 1,
+  "task_id": "M0-013"
+}

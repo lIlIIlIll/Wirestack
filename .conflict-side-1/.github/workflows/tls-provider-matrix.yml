@@ -1,0 +1,38 @@
+name: TLS Provider Candidate Matrix
+
+on:
+  pull_request:
+    paths:
+      - "docs/architecture/tls-provider-candidates.json"
+      - "docs/architecture/tls-provider-candidate-matrix.md"
+      - "docs/evidence/M0-015/**"
+      - "tools/validate_tls_provider_matrix.py"
+      - "tools/tests/test_validate_tls_provider_matrix.py"
+      - ".github/workflows/tls-provider-matrix.yml"
+  push:
+    branches: [main]
+    paths:
+      - "docs/architecture/tls-provider-candidates.json"
+      - "docs/architecture/tls-provider-candidate-matrix.md"
+      - "docs/evidence/M0-015/**"
+      - "tools/validate_tls_provider_matrix.py"
+      - "tools/tests/test_validate_tls_provider_matrix.py"
+      - ".github/workflows/tls-provider-matrix.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate provider matrix
+        run: python3 tools/validate_tls_provider_matrix.py
+      - name: Test validator
+        run: python3 -m unittest discover -s tools/tests -p 'test_validate_tls_provider_matrix.py' -v
+      - name: Compile validator
+        run: python3 -m py_compile tools/validate_tls_provider_matrix.py
