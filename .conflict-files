@@ -1,3 +1,0 @@
-ancestorEntries = []
-ourEntries = [".github/workflows/tls-provider-poc.yml"]
-theirEntries = [".github/workflows/tls-provider-poc.yml"]
