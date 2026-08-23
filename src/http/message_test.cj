@@ -85,6 +85,36 @@ class HttpMessageTest {
     }
 
     @TestCase
+    func boundedDrainCompletesOnlyWhenEofIsProven(): Unit {
+        let completed = RecordingBodyObserver()
+        let shortBody = ResponseBody(RequestBody.bytes("data".toArray()).open(), observer: completed)
+        @Expect(shortBody.drain(4, bufferSize: 2))
+        @Expect(shortBody.isClosed())
+        @Expect(shortBody.isFullyConsumed())
+        @Expect(completed.completions, 1)
+        @Expect(completed.abandons, 0)
+
+        let abandoned = RecordingBodyObserver()
+        let longBody = ResponseBody(RequestBody.bytes("remaining".toArray()).open(), observer: abandoned)
+        @Expect(!longBody.drain(3, bufferSize: 2))
+        @Expect(longBody.isClosed())
+        @Expect(!longBody.isFullyConsumed())
+        @Expect(abandoned.completions, 0)
+        @Expect(abandoned.abandons, 1)
+    }
+
+    @TestCase
+    func invalidSourceProgressFailsClosed(): Unit {
+        let observer = RecordingBodyObserver()
+        let body = ResponseBody(InvalidProgressBodyStream(), observer: observer)
+        expectMessageBodyFailure(HttpBodyErrorCode.InvalidProgress, {
+            => let _ = body.read(Array<Byte>(1, repeat: 0))
+        })
+        @Expect(body.isClosed())
+        @Expect(observer.abandons, 1)
+    }
+
+    @TestCase
     func responseRejectsInvalidStatusAndReason(): Unit {
         for (status in [99, 1000]) {
             var rejected = false
@@ -120,6 +150,14 @@ private class FailingBodyStream <: HttpBodyStream {
     public func isClosed(): Bool { closed }
 }
 
+private class InvalidProgressBodyStream <: HttpBodyStream {
+    private var closed = false
+    public prop contentLength: ?Int64 { get() { None<Int64> } }
+    public func read(destination: Array<Byte>): Int64 { destination.size + 1 }
+    public func close(): Unit { closed = true }
+    public func isClosed(): Bool { closed }
+}
+
 private func expectMessageBodyFailure(code: HttpBodyErrorCode, action: () -> Unit): Unit {
     var matched = false
     try {
@@ -127,6 +165,7 @@ private func expectMessageBodyFailure(code: HttpBodyErrorCode, action: () -> Uni
     } catch (error: HttpBodyException) {
         match ((error.code, code)) {
             case (HttpBodyErrorCode.Closed, HttpBodyErrorCode.Closed) => matched = true
+            case (HttpBodyErrorCode.InvalidProgress, HttpBodyErrorCode.InvalidProgress) => matched = true
             case _ => ()
         }
     }
