@@ -90,6 +90,65 @@ class HttpModelTest {
             HttpHeader("A", "1"), HttpHeader("B", "2")
         ])
     }
+
+    @TestCase
+    func urlNormalizesSchemeHostAndDefaultTarget(): Unit {
+        let url = HttpUrl.parse("HTTPS://Example.COM")
+
+        @Expect(url.scheme, "https")
+        @Expect(url.host, "example.com")
+        @Expect(url.port, 443)
+        @Expect(!url.explicitPort)
+        @Expect(url.authority, "example.com")
+        @Expect(url.requestTarget, "/")
+        @Expect(url.toString(), "https://example.com/")
+    }
+
+    @TestCase
+    func urlPreservesExplicitPortPathAndQuery(): Unit {
+        let url = HttpUrl.parse("http://Example.com:8080/a%20b?q=one%2Ftwo")
+
+        @Expect(url.port, 8080)
+        @Expect(url.explicitPort)
+        @Expect(url.authority, "example.com:8080")
+        @Expect(url.requestTarget, "/a%20b?q=one%2Ftwo")
+    }
+
+    @TestCase
+    func urlRequiresBracketedIpv6AndKeepsQueryOnlyTargetValid(): Unit {
+        let ipv6 = HttpUrl.parse("https://[2001:DB8::1]:8443?ready=yes")
+
+        @Expect(ipv6.host, "2001:db8::1")
+        @Expect(ipv6.authority, "[2001:db8::1]:8443")
+        @Expect(ipv6.requestTarget, "/?ready=yes")
+    }
+
+    @TestCase
+    func urlRejectsAmbiguousAndUnsafeInputs(): Unit {
+        for (value in [
+            "ftp://example.com/",
+            "https://user@example.com/",
+            "https://2001:db8::1/",
+            "https://[1::2::3]/",
+            "https://[1:2:3]/",
+            "https://999.1.1.1/",
+            "https://01.2.3.4/",
+            "https://example.com:0/",
+            "https://example.com:65536/",
+            "https://example.com/bad path",
+            "https://example.com/%zz",
+            "https://example.com/#fragment",
+            "https://例子.test/"
+        ]) {
+            var rejected = false
+            try {
+                let _ = HttpUrl.parse(value)
+            } catch (_: IllegalArgumentException) {
+                rejected = true
+            }
+            @Expect(rejected)
+        }
+    }
 }
 
 private struct HttpHeaderInput {
