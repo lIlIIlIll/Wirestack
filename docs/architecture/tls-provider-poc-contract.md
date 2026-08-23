@@ -18,6 +18,9 @@ Version changes require a reviewed change to `tools/tls_provider_poc/providers.j
 - `BLOCKED`: the native platform or required environment is unavailable.
 
 `NOT_RUN`, missing cells and cross-compilation never count as native evidence.
+Schema-v2 `PASS` additionally requires a measured `repeated_cleanup_cycles`
+value of exactly 10,000. An AWS-LC external-signer `PASS` requires at least two
+observed callback invocations so TLS 1.2 and TLS 1.3 are both exercised.
 
 ## Required capability surface
 

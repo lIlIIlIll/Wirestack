@@ -1,28 +1,28 @@
 {
   "build": {
-    "binary_bytes": 4332288,
-    "binary_sha256": "2774ea6f1e1bcefd18c6dc39541d145eb4b53da2efa5116b9e7956272e34346b",
+    "binary_bytes": 4501360,
+    "binary_sha256": "73bbf628c891ec7701fd73ce0b34c2f4072b94c372c322aa3bbd99a4a3b05534",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 1250064,
+        "bytes": 1285488,
         "name": "libssl.a",
-        "sha256": "473edd0ebd4842c7233de3aca6bbb20dfba511bc7b3183f5bcdfd5fcfa27caa1"
+        "sha256": "d396786b2862990555d6f432aac73635df1cc5bf24667e1a46a35a5d131b16ac"
       },
       {
-        "bytes": 6900314,
+        "bytes": 7025754,
         "name": "libcrypto.a",
-        "sha256": "bed0ad791c375e42711de06bb85d67440b1b973bd80bed867d956719a5cfbdf0"
+        "sha256": "063fc4ba66e8c0d6b7a78053d042ef56fac81f5890f9f2cca0d4406ef0780bc6"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "e5a63fcf58c3cd6815c2abf567e77a17cd01960dd5bff282d18c750e23269d97",
+  "build_log_sha256": "64935e3c19bbf9441232e854420513d342da8ffa03a4b1dd490a1c96b65349c7",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
     "custom_ca": "PASS",
-    "external_signer": "BLOCKED",
+    "external_signer": "PASS",
     "mtls": "PASS",
     "negative_hostname": "PASS",
     "negative_untrusted_ca": "PASS",
@@ -34,21 +34,25 @@
     "tls13": "PASS",
     "truncation": "PASS"
   },
-  "finished_at": "2026-08-23T12:13:50.441179+00:00",
+  "finished_at": "2026-08-23T18:05:07.646606+00:00",
+  "metrics": {
+    "external_signer_calls": 2,
+    "repeated_cleanup_cycles": 10000
+  },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "platform": "linux-glibc-x86_64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 1,
+  "schema_version": 2,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
     "kind": "git",
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-23T12:12:51.943875+00:00",
-  "status": "PARTIAL",
+  "started_at": "2026-08-23T18:03:08.583928+00:00",
+  "status": "PASS",
   "task_id": "M0-016"
 }

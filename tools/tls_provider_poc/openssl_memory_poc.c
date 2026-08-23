@@ -1,5 +1,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <openssl/pem.h>
+#include <openssl/rsa.h>
 #include <openssl/x509_vfy.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,10 +10,64 @@
 #define MAX_STEPS 200000
 #define BIO_CAPACITY 4096
 #define PAYLOAD_SIZE 32768
+#define CLEANUP_CYCLES 10000
 
 static const unsigned char ALPN_WIRE[] = {2, 'h', '2', 8, 'h','t','t','p','/','1','.','1'};
 static int sni_seen = 0;
 static int alpn_seen = 0;
+
+#if defined(OPENSSL_IS_AWSLC)
+static EVP_PKEY *external_signer_key = NULL;
+static unsigned int external_signer_calls = 0;
+
+static enum ssl_private_key_result_t external_sign(
+    SSL *ssl, uint8_t *out, size_t *out_len, size_t max_out,
+    uint16_t signature_algorithm, const uint8_t *in, size_t in_len) {
+    (void)ssl;
+    if (external_signer_key == NULL) return ssl_private_key_failure;
+
+    const EVP_MD *digest = SSL_get_signature_algorithm_digest(signature_algorithm);
+    if (digest == NULL) return ssl_private_key_failure;
+
+    EVP_MD_CTX *digest_ctx = EVP_MD_CTX_new();
+    EVP_PKEY_CTX *key_ctx = NULL;
+    if (digest_ctx == NULL ||
+        EVP_DigestSignInit(digest_ctx, &key_ctx, digest, NULL,
+                           external_signer_key) != 1) {
+        EVP_MD_CTX_free(digest_ctx);
+        return ssl_private_key_failure;
+    }
+    if (SSL_is_signature_algorithm_rsa_pss(signature_algorithm) &&
+        (EVP_PKEY_CTX_set_rsa_padding(key_ctx, RSA_PKCS1_PSS_PADDING) <= 0 ||
+         EVP_PKEY_CTX_set_rsa_pss_saltlen(key_ctx, RSA_PSS_SALTLEN_DIGEST) <= 0)) {
+        EVP_MD_CTX_free(digest_ctx);
+        return ssl_private_key_failure;
+    }
+
+    size_t produced = max_out;
+    int ok = EVP_DigestSign(digest_ctx, out, &produced, in, in_len) == 1 &&
+             produced <= max_out;
+    EVP_MD_CTX_free(digest_ctx);
+    if (!ok) return ssl_private_key_failure;
+    *out_len = produced;
+    external_signer_calls++;
+    return ssl_private_key_success;
+}
+
+static const SSL_PRIVATE_KEY_METHOD EXTERNAL_KEY_METHOD = {
+    external_sign,
+    NULL,
+    NULL,
+};
+
+static EVP_PKEY *load_external_signer_key(const char *path) {
+    FILE *stream = fopen(path, "r");
+    if (stream == NULL) return NULL;
+    EVP_PKEY *key = PEM_read_PrivateKey(stream, NULL, NULL, NULL);
+    fclose(stream);
+    return key;
+}
+#endif
 
 static void fail(const char *what) {
     fprintf(stderr, "FAIL %s\n", what);
@@ -42,14 +98,36 @@ static int alpn_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen,
 }
 
 static SSL_CTX *make_server_ctx(const char *cert, const char *key, const char *ca,
-                                int version, int require_client) {
+                                int version, int require_client, int use_external_signer) {
     SSL_CTX *ctx = SSL_CTX_new(TLS_method());
     if (!ctx) fail("SSL_CTX_new server");
     if (!SSL_CTX_set_min_proto_version(ctx, version) ||
         !SSL_CTX_set_max_proto_version(ctx, version)) fail("server protocol version");
     if (SSL_CTX_use_certificate_chain_file(ctx, cert) != 1) fail("server cert");
-    if (SSL_CTX_use_PrivateKey_file(ctx, key, SSL_FILETYPE_PEM) != 1) fail("server key");
-    if (SSL_CTX_check_private_key(ctx) != 1) fail("server key check");
+    if (use_external_signer) {
+#if defined(OPENSSL_IS_AWSLC)
+        static const uint16_t signing_algorithms[] = {
+            SSL_SIGN_RSA_PSS_RSAE_SHA256,
+            SSL_SIGN_RSA_PSS_RSAE_SHA384,
+            SSL_SIGN_RSA_PSS_RSAE_SHA512,
+            SSL_SIGN_RSA_PKCS1_SHA256,
+            SSL_SIGN_RSA_PKCS1_SHA384,
+            SSL_SIGN_RSA_PKCS1_SHA512,
+        };
+        if (external_signer_key == NULL) fail("external signer key missing");
+        SSL_CTX_set_private_key_method(ctx, &EXTERNAL_KEY_METHOD);
+        if (SSL_CTX_set_signing_algorithm_prefs(
+                ctx, signing_algorithms,
+                sizeof(signing_algorithms) / sizeof(signing_algorithms[0])) != 1)
+            fail("external signer algorithms");
+#else
+        fail("external signer unavailable");
+#endif
+    } else {
+        if (SSL_CTX_use_PrivateKey_file(ctx, key, SSL_FILETYPE_PEM) != 1)
+            fail("server key");
+        if (SSL_CTX_check_private_key(ctx) != 1) fail("server key check");
+    }
     if (ca && SSL_CTX_load_verify_locations(ctx, ca, NULL) != 1) fail("server CA");
     if (require_client) {
         SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
@@ -229,7 +307,7 @@ static int basic_case(const char *server_cert, const char *server_key, const cha
                       const char *client_cert, const char *client_key, int version,
                       int mtls, int do_session) {
     sni_seen = alpn_seen = 0;
-    SSL_CTX *server_ctx = make_server_ctx(server_cert, server_key, ca, version, mtls);
+    SSL_CTX *server_ctx = make_server_ctx(server_cert, server_key, ca, version, mtls, 0);
     SSL_CTX *client_ctx = make_client_ctx(ca, mtls ? client_cert : NULL,
                                          mtls ? client_key : NULL, version, 1);
     Pair p = new_pair(client_ctx, server_ctx, "localhost", NULL);
@@ -253,7 +331,8 @@ static int basic_case(const char *server_cert, const char *server_key, const cha
 
 static int negative_case(const char *server_cert, const char *server_key, const char *ca,
                          const char *hostname, int trust_ca) {
-    SSL_CTX *server_ctx = make_server_ctx(server_cert, server_key, ca, TLS1_2_VERSION, 0);
+    SSL_CTX *server_ctx = make_server_ctx(
+        server_cert, server_key, ca, TLS1_2_VERSION, 0, 0);
     SSL_CTX *client_ctx = make_client_ctx(trust_ca ? ca : NULL, NULL, NULL,
                                          TLS1_2_VERSION, 1);
     Pair p = new_pair(client_ctx, server_ctx, hostname, NULL);
@@ -266,7 +345,8 @@ static int negative_case(const char *server_cert, const char *server_key, const 
 }
 
 static int truncation_case(const char *server_cert, const char *server_key, const char *ca) {
-    SSL_CTX *server_ctx = make_server_ctx(server_cert, server_key, ca, TLS1_2_VERSION, 0);
+    SSL_CTX *server_ctx = make_server_ctx(
+        server_cert, server_key, ca, TLS1_2_VERSION, 0, 0);
     SSL_CTX *client_ctx = make_client_ctx(ca, NULL, NULL, TLS1_2_VERSION, 1);
     Pair p = new_pair(client_ctx, server_ctx, "localhost", NULL);
     int ok = drive_handshake(&p, 1, MAX_STEPS);
@@ -307,6 +387,40 @@ static int cancellation_case(const char *ca) {
     return observed_want;
 }
 
+#if defined(OPENSSL_IS_AWSLC)
+static int external_signer_version_case(const char *server_cert, const char *server_key,
+                                        const char *ca, int version) {
+    SSL_CTX *server_ctx = make_server_ctx(
+        server_cert, server_key, ca, version, 0, 1);
+    SSL_CTX *client_ctx = make_client_ctx(ca, NULL, NULL, version, 1);
+    Pair p = new_pair(client_ctx, server_ctx, "localhost", NULL);
+    unsigned int calls_before = external_signer_calls;
+    int ok = drive_handshake(&p, 1, MAX_STEPS) &&
+             verify_negotiation(&p, version) && transfer_payload(&p) &&
+             external_signer_calls > calls_before;
+    if (ok) ok = clean_shutdown(&p);
+    free_pair(&p);
+    SSL_CTX_free(client_ctx);
+    SSL_CTX_free(server_ctx);
+    return ok;
+}
+
+static int external_signer_case(const char *server_cert, const char *server_key,
+                                const char *ca) {
+    external_signer_key = load_external_signer_key(server_key);
+    external_signer_calls = 0;
+    if (external_signer_key == NULL) return 0;
+    int ok = external_signer_version_case(
+                 server_cert, server_key, ca, TLS1_2_VERSION) &&
+             external_signer_version_case(
+                 server_cert, server_key, ca, TLS1_3_VERSION) &&
+             external_signer_calls >= 2;
+    EVP_PKEY_free(external_signer_key);
+    external_signer_key = NULL;
+    return ok;
+}
+#endif
+
 int main(int argc, char **argv) {
     if (argc != 6) {
         fprintf(stderr, "usage: %s SERVER_CERT SERVER_KEY CA CLIENT_CERT CLIENT_KEY\n", argv[0]);
@@ -329,8 +443,11 @@ int main(int argc, char **argv) {
     int untrusted = negative_case(server_cert, server_key, ca, "localhost", 0);
     int trunc = truncation_case(server_cert, server_key, ca);
     int cancel = cancellation_case(ca);
+#if defined(OPENSSL_IS_AWSLC)
+    int external_signer = external_signer_case(server_cert, server_key, ca);
+#endif
     int cleanup = 1;
-    for (int i = 0; i < 16 && cleanup; ++i) {
+    for (int i = 0; i < CLEANUP_CYCLES && cleanup; ++i) {
         cleanup = basic_case(server_cert, server_key, ca, client_cert, client_key,
                              TLS1_2_VERSION, 0, 0);
     }
@@ -347,8 +464,21 @@ int main(int argc, char **argv) {
     printf("CAP close_notify=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
     printf("CAP truncation=%s\n", trunc ? "PASS" : "FAIL");
     printf("CAP caller_cancellation=%s\n", cancel ? "PASS" : "FAIL");
+#if defined(OPENSSL_IS_AWSLC)
+    printf("CAP external_signer=%s\n", external_signer ? "PASS" : "FAIL");
+#else
     printf("CAP external_signer=BLOCKED\n");
+#endif
     printf("CAP repeated_cleanup=%s\n", cleanup ? "PASS" : "FAIL");
+    printf("METRIC repeated_cleanup_cycles=%d\n", CLEANUP_CYCLES);
+#if defined(OPENSSL_IS_AWSLC)
+    printf("METRIC external_signer_calls=%u\n", external_signer_calls);
+#endif
 
-    return (tls12 && tls13 && mtls && wrong_host && untrusted && trunc && cancel && cleanup) ? 0 : 1;
+    return (tls12 && tls13 && mtls && wrong_host && untrusted && trunc && cancel &&
+            cleanup &&
+#if defined(OPENSSL_IS_AWSLC)
+            external_signer &&
+#endif
+            1) ? 0 : 1;
 }
