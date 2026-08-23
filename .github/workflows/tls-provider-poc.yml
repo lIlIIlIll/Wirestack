@@ -66,3 +66,77 @@ jobs:
             build/tls-provider-poc/${{ matrix.provider }}/result.json
             build/tls-provider-poc/${{ matrix.provider }}/build.log
           if-no-files-found: warn
+
+  linux-musl:
+    needs: validate-contract
+    strategy:
+      fail-fast: false
+      matrix:
+        provider: [aws-lc, mbedtls, openssl]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and execute in native Alpine musl userspace
+        env:
+          PROVIDER: ${{ matrix.provider }}
+        run: |
+          docker run --rm \
+            -e PROVIDER \
+            -v "$GITHUB_WORKSPACE:/work" \
+            -w /work \
+            alpine:3.22 \
+            sh -euxc '
+              apk add --no-cache \
+                build-base cmake ninja perl git openssl ca-certificates python3
+              python3 tools/tls_provider_poc/run.py \
+                --provider "$PROVIDER" \
+                --output "build/tls-provider-poc/$PROVIDER/result.json"
+              python3 tools/tls_provider_poc/validate.py \
+                --result "build/tls-provider-poc/$PROVIDER/result.json"
+              chmod -R a+rX "build/tls-provider-poc/$PROVIDER"
+            '
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: m0-016-linux-musl-${{ matrix.provider }}
+          path: |
+            build/tls-provider-poc/${{ matrix.provider }}/result.json
+            build/tls-provider-poc/${{ matrix.provider }}/build.log
+          if-no-files-found: warn
+
+  macos-arm64:
+    needs: validate-contract
+    strategy:
+      fail-fast: false
+      matrix:
+        provider: [aws-lc, mbedtls, openssl]
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install native build dependencies
+        run: brew install cmake ninja openssl@3
+      - name: Build pinned provider and execute caller-driven PoC
+        env:
+          PATH: /opt/homebrew/opt/openssl@3/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin
+        run: |
+          test "$(uname -m)" = "arm64"
+          python3 tools/tls_provider_poc/run.py \
+            --provider "${{ matrix.provider }}" \
+            --output "build/tls-provider-poc/${{ matrix.provider }}/result.json"
+      - name: Validate native result
+        run: |
+          python3 tools/tls_provider_poc/validate.py \
+            --result "build/tls-provider-poc/${{ matrix.provider }}/result.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: m0-016-macos-arm64-${{ matrix.provider }}
+          path: |
+            build/tls-provider-poc/${{ matrix.provider }}/result.json
+            build/tls-provider-poc/${{ matrix.provider }}/build.log
+          if-no-files-found: warn
