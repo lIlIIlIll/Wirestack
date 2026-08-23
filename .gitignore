@@ -1,6 +1,7 @@
 # Cangjie / build output
 target/
 build/
+build-script-cache/
 dist/
 out/
 

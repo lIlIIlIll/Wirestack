@@ -27,6 +27,7 @@ Core rules:
 ## Supporting architecture records
 
 - [Current Cangjie TLS/HTTP/std.net inventory](current-network-stack-inventory.md)
+- [Linux TLS provider build and ABI](linux-tls-provider-build.md)
 
 ## ADR policy
 
