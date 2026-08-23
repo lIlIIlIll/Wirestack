@@ -71,5 +71,15 @@ transport EOF during handshake as truncation evidence, and fails closed on any
 zero-progress provider or transport result. Build-time native smoke and Cangjie
 tests both exercise a real AWS-LC ClientHello.
 
-This closes the Linux portions of M3-001 through M3-004. Connection ownership,
-concurrent application I/O and terminal cleanup begin at M3-005.
+`TlsConnection.handshake` consumes both the engine and transport on every path.
+After success it is the only owner and exposes plaintext through the internal
+`DuplexTransport` contract. One reader and one writer may overlap; a second
+same-direction operation fails immediately. Engine output and transport input
+are independently serialized so TLS control traffic cannot create concurrent
+same-direction transport calls. Handshake or application-I/O failure aborts the
+transport, while close/abort races release the engine and underlying transport
+exactly once. TLS half-close remains deliberately unsupported until the
+`close_notify` work in M3-026.
+
+This closes the Linux portions of M3-001 through M3-005. Immutable context and
+security-policy construction begins at M3-006.

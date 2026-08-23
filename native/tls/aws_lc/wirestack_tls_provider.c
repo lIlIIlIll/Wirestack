@@ -263,3 +263,71 @@ int32_t wirestack_tls_engine_feed_ciphertext(
     *out_written = (uint64_t)count;
     return WIRESTACK_TLS_PROVIDER_OK;
 }
+
+static int32_t classify_io_result(
+    SSL *ssl,
+    int result,
+    uint64_t *out_count,
+    int32_t *out_step
+) {
+    int error;
+    if (result > 0) {
+        *out_count = (uint64_t)result;
+        *out_step = WIRESTACK_TLS_ENGINE_IO_COMPLETE;
+        return WIRESTACK_TLS_PROVIDER_OK;
+    }
+    error = SSL_get_error(ssl, result);
+    if (error == SSL_ERROR_WANT_READ) {
+        *out_step = WIRESTACK_TLS_ENGINE_IO_WANT_READ;
+        return WIRESTACK_TLS_PROVIDER_OK;
+    }
+    if (error == SSL_ERROR_WANT_WRITE) {
+        *out_step = WIRESTACK_TLS_ENGINE_IO_WANT_WRITE;
+        return WIRESTACK_TLS_PROVIDER_OK;
+    }
+    if (error == SSL_ERROR_ZERO_RETURN) {
+        *out_step = WIRESTACK_TLS_ENGINE_IO_CLOSED;
+        return WIRESTACK_TLS_PROVIDER_OK;
+    }
+    return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+}
+
+int32_t wirestack_tls_engine_read_plaintext(
+    uint64_t engine_handle,
+    uint8_t *output,
+    uint64_t size,
+    uint64_t *out_read,
+    int32_t *out_step
+) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    int result;
+    if (engine == NULL || output == NULL || out_read == NULL || out_step == NULL ||
+        size == UINT64_C(0) || size > (uint64_t)INT_MAX) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    *out_read = UINT64_C(0);
+    *out_step = -1;
+    ERR_clear_error();
+    result = SSL_read(engine->ssl, output, (int)size);
+    return classify_io_result(engine->ssl, result, out_read, out_step);
+}
+
+int32_t wirestack_tls_engine_write_plaintext(
+    uint64_t engine_handle,
+    const uint8_t *input,
+    uint64_t size,
+    uint64_t *out_written,
+    int32_t *out_step
+) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    int result;
+    if (engine == NULL || input == NULL || out_written == NULL || out_step == NULL ||
+        size == UINT64_C(0) || size > (uint64_t)INT_MAX) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    *out_written = UINT64_C(0);
+    *out_step = -1;
+    ERR_clear_error();
+    result = SSL_write(engine->ssl, input, (int)size);
+    return classify_io_result(engine->ssl, result, out_written, out_step);
+}
