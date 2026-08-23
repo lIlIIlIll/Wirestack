@@ -1,6 +1,11 @@
 {
   "base_branch": "main",
-  "blocked": {},
+  "blocked": {
+    "M0-010": "Linux application-visible profile exists; copied-byte instrumentation, native Windows evidence and future StdNetTransport comparison remain missing.",
+    "M0-011": "Bounded Linux stress exists; 100k counts, TLS cleanup, 24-hour soak and required native platforms remain missing.",
+    "M0-012": "Requires M0-011 completion and Android/iOS/Harmony native-device execution.",
+    "M0-014": "Requires a native Windows SDK/runner and copied-byte instrumentation."
+  },
   "branch_overrides": {
     "M0-008": "task/M0-008-absolute-deadline",
     "M0-009": "task/M0-009-eof-terminal-evidence",
@@ -9,7 +14,9 @@
     "M0-012": "task/M0-012-mobile-network-change",
     "M0-013": "task/M0-013-dns-carrier-thread",
     "M0-014": "task/M0-014-windows-copy-profile",
-    "M0-015": "task/M0-015-tls-provider-matrix"
+    "M0-015": "task/M0-015-tls-provider-matrix",
+    "M0-016": "task/M0-016-tls-provider-poc",
+    "M0-018": "task/M0-018-threat-model"
   },
   "completed": [
     "M0-001",
@@ -19,7 +26,10 @@
     "M0-005",
     "M0-006",
     "M0-007",
-    "M0-008"
+    "M0-008",
+    "M0-009",
+    "M0-015",
+    "M0-018"
   ],
   "issue_numbers": {
     "M0-008": 13,
@@ -29,7 +39,9 @@
     "M0-012": 17,
     "M0-013": 18,
     "M0-014": 19,
-    "M0-015": 25
+    "M0-015": 25,
+    "M0-016": 36,
+    "M0-018": 34
   },
   "max_parallel": 8,
   "schema_version": 1
