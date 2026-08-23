@@ -262,6 +262,33 @@ public class AwsLcTlsProvider <: TlsProvider {
         }
     }
 
+    /** Creates a server engine with an already validated immutable local identity. */
+    public func createServerEngine(context: TlsServerContext): TlsEngine {
+        synchronized(mutex) {
+            if (handle == 0u64) {
+                throw TlsProviderException(
+                    TlsProviderErrorCode.Closed,
+                    "TLS provider is closed"
+                )
+            }
+            if (context.providerManifest.providerId != providerManifest.providerId ||
+                context.providerManifest.fingerprint != providerManifest.fingerprint) {
+                throw TlsProviderException(
+                    TlsProviderErrorCode.InvalidManifest,
+                    "TLS context was built for a different provider instance identity"
+                )
+            }
+            let engine = AwsLcTlsEngine(handle, TlsEngineRole.Server, context.security)
+            try {
+                engine.configureLocalIdentity(context.identity)
+                engine
+            } catch (error: Exception) {
+                engine.close()
+                throw error
+            }
+        }
+    }
+
     public func close(): Unit {
         synchronized(mutex) {
             let current = handle
