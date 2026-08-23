@@ -32,13 +32,13 @@ Status values:
 | M0-010 | BLOCKED | [`docs/evidence/M0-010/README.md`](../evidence/M0-010/README.md) | Linux 64 KiB-buffer/100 MiB profile passes, but copied-byte instrumentation, Windows evidence and future adapter comparison are missing. |
 | M0-011 | BLOCKED | [`docs/evidence/M0-011/README.md`](../evidence/M0-011/README.md) | Bounded Linux stress passes; 100k counts, TLS cleanup, 24-hour soak and required native platforms remain outstanding. |
 | M0-012 | BLOCKED | — | Requires M0-011 evidence completion and Android/iOS/Harmony native-device execution. |
-| M0-013 | READY | — | Execute the Linux DNS carrier-thread probe; other platforms remain separate evidence. |
+| M0-013 | COMPLETE | [`docs/evidence/M0-013/README.md`](../evidence/M0-013/README.md) | Native Linux evidence shows carrier-thread starvation at 16+ delayed DNS resolutions; gate FAIL supports conditional UP-007 analysis, while global evidence remains incomplete. |
 | M0-014 | BLOCKED | — | Requires a native Windows SDK/runner and copied-byte instrumentation. |
 | M0-015 | COMPLETE | [`docs/evidence/M0-015/README.md`](../evidence/M0-015/README.md) | Provider matrix and M0-016 PoC contract frozen; no final provider selected. |
 | M0-016 | READY | — | Run the shortlisted provider PoCs and retain native/platform evidence without system TLS fallback. |
 | M0-017 | BLOCKED | — | Depends on M0-012 and M0-016 native evidence. |
 | M0-018 | COMPLETE | [`docs/evidence/M0-018/README.md`](../evidence/M0-018/README.md) | Versioned threat register, fail-closed validator, tests and CI are active. |
-| M0-019 | BLOCKED | — | Depends on complete M0-006 through M0-014 evidence; M0-010..014 are not complete. |
+| M0-019 | BLOCKED | — | Depends on complete M0-006 through M0-014 evidence; M0-010..014 are not all complete. |
 | M0-020 | BLOCKED | — | Depends on M0-016 and M0-018; final provider selection remains deferred. |
 | M0-021 | BLOCKED | — | Depends on all M0 gate evidence plus the accepted Transport SPI. |
 | M0-022 | BLOCKED | — | Depends on M0-004 through M0-021. |
@@ -51,8 +51,10 @@ Actual `std.net`/runtime source changes belong in their upstream repositories,
 not in the Wirestack worktree.
 
 The M0-007 and M0-009 capability probes record that the supplied SDK exposes no
-public `TcpSocket.abort()` and no public cancellation member. These are inputs to
-M0-021; they do not independently authorize an upstream implementation task.
+public `TcpSocket.abort()` and no public cancellation member. M0-013 additionally
+shows native Linux carrier-thread starvation under delayed DNS and identifies
+`UP-007` as a conditional candidate. These are inputs to M0-021; none independently
+authorize an upstream implementation task.
 
 ## Later milestones
 
