@@ -161,6 +161,25 @@ class TlsContextTest {
             }
             @Expect(rejected)
         }
+
+        let oversized = Array<String>(17, {index =>
+            String.fromUtf8(Array<Byte>(255, {offset =>
+                if (offset == 254) { UInt8(index + 65) } else { b'a' }
+            }))
+        })
+        var oversizedRejected = false
+        try {
+            let _ = TlsClientContext.builder(manifest, capabilities)
+                .trust(testTrust())
+                .alpn(oversized)
+                .build()
+        } catch (error: TlsContextException) {
+            match (error.code) {
+                case TlsContextErrorCode.InvalidAlpn => oversizedRejected = true
+                case _ => ()
+            }
+        }
+        @Expect(oversizedRejected)
     }
 
     @TestCase
