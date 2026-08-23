@@ -1,7 +1,7 @@
 package wirestack.internal.http1
 
 import std.collection.ArrayList
-import wirestack.http.*
+import wirestack.internal.http_model.*
 
 public enum Http1BodyFraming {
     | Empty
