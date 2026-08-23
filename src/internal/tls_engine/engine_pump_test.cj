@@ -10,7 +10,10 @@ class TlsEnginePumpTest {
     @TestCase
     func awsLcClientEngineProducesAClientHelloWithoutSocketIo(): Unit {
         let provider = AwsLcTlsProvider()
-        let engine = provider.createEngine(TlsEngineRole.Client)
+        let engine = provider.createEngine(
+            TlsEngineRole.Client,
+            TlsSecurityPolicy.forProfile(TlsSecurityProfile.Modern)
+        )
         try {
             var wantsRead = false
             match (engine.handshakeStep()) {
@@ -23,6 +26,27 @@ class TlsEnginePumpTest {
             let count = engine.drainCiphertext(MutableByteSpan(output))
             @Expect(count > 5)
             @Expect(output[0], 22) // TLS handshake record content type.
+        } finally {
+            engine.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
+    func strictTls13PolicyIsAcceptedByTheNativeEngine(): Unit {
+        let provider = AwsLcTlsProvider()
+        let engine = provider.createEngine(
+            TlsEngineRole.Client,
+            TlsSecurityPolicy.forProfile(TlsSecurityProfile.StrictTls13)
+        )
+        try {
+            var wantsRead = false
+            match (engine.handshakeStep()) {
+                case TlsEngineStep.WantRead => wantsRead = true
+                case _ => ()
+            }
+            @Expect(wantsRead)
+            @Expect(engine.pendingCiphertext() > 0)
         } finally {
             engine.close()
             provider.close()

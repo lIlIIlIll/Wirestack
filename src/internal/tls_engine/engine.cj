@@ -18,6 +18,8 @@ private let MAX_SIGNED_INT64: UInt64 = 0x7fffffffffffffffu64
 foreign func wirestack_tls_engine_create(
     providerHandle: UInt64,
     role: Int32,
+    minimumTlsVersion: Int32,
+    maximumTlsVersion: Int32,
     outEngineHandle: CPointer<UInt64>
 ): Int32
 foreign func wirestack_tls_engine_destroy(engineHandle: UInt64): Unit
@@ -140,12 +142,22 @@ public class AwsLcTlsEngine <: TlsEngine {
     private let mutex = Mutex()
     private var handle: UInt64
 
-    internal init(providerHandle: UInt64, role: TlsEngineRole) {
+    internal init(
+        providerHandle: UInt64,
+        role: TlsEngineRole,
+        security: TlsSecurityPolicy
+    ) {
         let output = Array<UInt64>(1, repeat: 0u64)
         let status = unsafe {
             let raw = acquireArrayRawData(output)
             try {
-                wirestack_tls_engine_create(providerHandle, nativeRole(role), raw.pointer)
+                wirestack_tls_engine_create(
+                    providerHandle,
+                    nativeRole(role),
+                    Int32(tlsVersionNumber(security.minimumVersion)),
+                    Int32(tlsVersionNumber(security.maximumVersion)),
+                    raw.pointer
+                )
             } finally {
                 releaseArrayRawData(raw)
             }
@@ -359,9 +371,10 @@ public class AwsLcTlsEngine <: TlsEngine {
 
 internal func createAwsLcTlsEngine(
     providerHandle: UInt64,
-    role: TlsEngineRole
+    role: TlsEngineRole,
+    security: TlsSecurityPolicy
 ): TlsEngine {
-    AwsLcTlsEngine(providerHandle, role)
+    AwsLcTlsEngine(providerHandle, role, security)
 }
 
 private func decodeReadResult(step: Int32, count: Int64): TlsEngineReadResult {

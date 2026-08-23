@@ -110,7 +110,7 @@ public struct TlsProviderManifest {
 public interface TlsProvider {
     func manifest(): TlsProviderManifest
     func fillSecureRandom(output: Array<Byte>): Unit
-    func createEngine(role: TlsEngineRole): TlsEngine
+    func createEngine(role: TlsEngineRole, security: TlsSecurityPolicy): TlsEngine
     func close(): Unit
 }
 
@@ -192,7 +192,7 @@ public class AwsLcTlsProvider <: TlsProvider {
         }
     }
 
-    public func createEngine(role: TlsEngineRole): TlsEngine {
+    public func createEngine(role: TlsEngineRole, security: TlsSecurityPolicy): TlsEngine {
         synchronized(mutex) {
             if (handle == 0u64) {
                 throw TlsProviderException(
@@ -200,7 +200,7 @@ public class AwsLcTlsProvider <: TlsProvider {
                     "TLS provider is closed"
                 )
             }
-            createAwsLcTlsEngine(handle, role)
+            createAwsLcTlsEngine(handle, role, security)
         }
     }
 
