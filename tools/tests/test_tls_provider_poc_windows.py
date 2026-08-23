@@ -36,6 +36,21 @@ class WindowsProviderPocTests(unittest.TestCase):
         """
         self.assertEqual([], windows.forbidden_windows_dependencies(output))
 
+    def test_git_tree_command_avoids_msys_brace_rewrite(self) -> None:
+        command = windows.git_tree_command(Path("C:/work/provider"))
+        self.assertEqual(
+            [
+                "git", "-C", "C:/work/provider", "show", "-s",
+                "--format=%T", "HEAD",
+            ],
+            command,
+        )
+        self.assertNotIn("HEAD^{tree}", command)
+
+    def test_canonical_hooks_are_saved_before_replacement(self) -> None:
+        self.assertIsNot(windows.CANONICAL_SOURCE_PROVIDER, windows.source_provider)
+        self.assertIsNot(windows.CANONICAL_BUILD_PROVIDER, windows.build_provider)
+
 
 if __name__ == "__main__":
     unittest.main()
