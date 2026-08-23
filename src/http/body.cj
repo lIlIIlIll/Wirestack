@@ -20,6 +20,7 @@ public enum BodyReplayability <: Equatable<BodyReplayability> {
 
 public enum HttpBodyErrorCode {
     | Closed
+    | ConcurrentRead
     | AlreadyOpened
     | InvalidLength
     | InvalidFile
