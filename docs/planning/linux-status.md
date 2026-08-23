@@ -66,6 +66,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M3-002 provider SPI/build manifest | COMPLETE | Instance-owned opaque C ABI; provider-neutral Cangjie manifest exposes id/version/fingerprint/backend/capabilities/patch level; no native public type |
 | M3-003 secure random adapter | COMPLETE | AWS-LC CSPRNG fills caller-owned buffers, maps stable structured failures, logs no bytes and passes lifecycle tests |
 | M3-004 external byte-stream pump | COMPLETE | AWS-LC memory-BIO step/feed/drain ABI; bounded `TlsEnginePump` handles WANT_READ/WANT_WRITE, partial I/O, one absolute Deadline/cancel context, EOF and zero-progress fail-closed paths; native and Cangjie ClientHello smoke passes |
+| M3-005 `TlsConnection` lifecycle | COMPLETE | Handshake consumes engine/transport on success and failure; AWS-LC plaintext read/write ABI; one reader plus one writer, same-direction exclusion, failure/timeout abort, idempotent close/abort and 100-way terminal-race loops prove exactly-once release |
 
 ## Next critical path
 
@@ -75,8 +76,8 @@ Status values have the same fail-closed meaning as the global status file.
    stable native error evidence.
 3. Land UP-007 or another proven non-carrier-blocking resolver backend, then
    complete Linux `SystemResolver` and native blackhole gates.
-4. Implement the TLS connection/context state machines and Linux trust/key
-   adapters under ADR-0003; the static provider/SPI/CSPRNG and external-I/O
-   engine pump are complete.
+4. Implement immutable TLS contexts/security profiles and Linux trust/key
+   adapters under ADR-0003; the provider, external-I/O engine pump and
+   `TlsConnection` ownership lifecycle are complete.
 5. Implement HTTP/1.1, HTTP/2, Linux conformance, fuzz, benchmark, 24-hour soak,
    packaging and installation verification.
