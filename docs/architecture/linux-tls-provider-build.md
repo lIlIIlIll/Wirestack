@@ -61,5 +61,15 @@ no AWS-LC/native handle appears in public Wirestack APIs. Close is idempotent,
 use after close fails with `TlsProviderErrorCode.Closed`, and provider failures
 map to stable structured errors without logging secret bytes.
 
-This closes the Linux portions of M3-001, M3-002 and M3-003. TLS record/handshake
-state begins at M3-004 and remains separate from this build/SPI boundary.
+`AwsLcTlsEngine` owns an AWS-LC `SSL` state machine attached only to bounded
+memory BIOs. The C ABI exposes handshake step, pending-output, drain-output and
+feed-input operations; it never accepts a socket or transport handle.
+`TlsEnginePump` is the only bridge to `DuplexTransport`. It preserves one
+absolute `OperationContext`, drains ciphertext through partial writes before
+requesting more input, uses a bounded 1..65536-byte scratch size, treats
+transport EOF during handshake as truncation evidence, and fails closed on any
+zero-progress provider or transport result. Build-time native smoke and Cangjie
+tests both exercise a real AWS-LC ClientHello.
+
+This closes the Linux portions of M3-001 through M3-004. Connection ownership,
+concurrent application I/O and terminal cleanup begin at M3-005.
