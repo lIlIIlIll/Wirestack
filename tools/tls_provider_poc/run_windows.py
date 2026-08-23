@@ -52,6 +52,12 @@ def git_tree_command(src: Path) -> list[str]:
     return ["git", "-C", str(src), "show", "-s", "--format=%T", "HEAD"]
 
 
+def mbedtls_system_libraries() -> list[str]:
+    # TF-PSA-Crypto's Windows entropy implementation calls BCryptGenRandom.
+    # This is an OS entropy API, not a TLS provider dependency.
+    return ["-pthread", "-lm", "-lws2_32", "-lbcrypt"]
+
+
 def source_provider(
     spec: Mapping[str, Any], work: Path, log: Path
 ) -> tuple[Path, dict[str, Any]]:
@@ -139,7 +145,7 @@ def compile_poc(
         base.run([
             cc, "-std=c99", "-O2", "-Wall", "-Wextra", "-Werror",
             f"-I{include}", str(source), *[str(archive) for archive in archives],
-            "-pthread", "-lm", "-lws2_32", "-o", str(output),
+            *mbedtls_system_libraries(), "-o", str(output),
         ], cwd=work, log=log)
 
     if not output.is_file():
