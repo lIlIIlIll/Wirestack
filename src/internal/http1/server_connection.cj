@@ -15,7 +15,7 @@ public class Http1ServerResponse {
 }
 
 public interface Http1ServerHandler {
-    func handle(request: Http1ServerRequest): Http1ServerResponse
+    func handle(request: Http1ServerRequest, context: OperationContext): Http1ServerResponse
 }
 
 public struct Http1ServerConnectionResult {
@@ -55,7 +55,7 @@ public func serveHttp1Connection(
             let request = readHttp1ServerRequest(transport, context: context, limits: limits)
             var produced: ?Http1ServerResponse = None<Http1ServerResponse>
             try {
-                produced = Some(handler.handle(request))
+                produced = Some(handler.handle(request, context))
             } catch (error: Exception) {
                 request.close()
                 writeServerFailure(transport, request.head.method, context, limits)
