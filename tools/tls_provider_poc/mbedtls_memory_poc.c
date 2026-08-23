@@ -1,6 +1,4 @@
 #include <mbedtls/ssl.h>
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
 #include <mbedtls/x509_crt.h>
 #include <mbedtls/pk.h>
 #include <mbedtls/error.h>
@@ -35,8 +33,6 @@ typedef struct {
 } Pair;
 
 typedef struct {
-    mbedtls_entropy_context entropy;
-    mbedtls_ctr_drbg_context drbg;
     mbedtls_x509_crt ca;
     mbedtls_x509_crt server_cert;
     mbedtls_x509_crt client_cert;
@@ -83,8 +79,6 @@ static int sni_callback(void *opaque, mbedtls_ssl_context *ssl,
 
 static void material_init(Material *m) {
     memset(m, 0, sizeof(*m));
-    mbedtls_entropy_init(&m->entropy);
-    mbedtls_ctr_drbg_init(&m->drbg);
     mbedtls_x509_crt_init(&m->ca);
     mbedtls_x509_crt_init(&m->server_cert);
     mbedtls_x509_crt_init(&m->client_cert);
@@ -98,23 +92,16 @@ static void material_free(Material *m) {
     mbedtls_x509_crt_free(&m->client_cert);
     mbedtls_x509_crt_free(&m->server_cert);
     mbedtls_x509_crt_free(&m->ca);
-    mbedtls_ctr_drbg_free(&m->drbg);
-    mbedtls_entropy_free(&m->entropy);
 }
 
 static int load_material(Material *m, const char *server_cert, const char *server_key,
                          const char *ca, const char *client_cert, const char *client_key) {
-    const unsigned char personal[] = "wirestack-mbedtls-poc";
-    int ret = mbedtls_ctr_drbg_seed(&m->drbg, mbedtls_entropy_func, &m->entropy,
-                                    personal, sizeof(personal) - 1);
-    if (ret != 0) return ret;
+    int ret;
     if ((ret = mbedtls_x509_crt_parse_file(&m->ca, ca)) != 0) return ret;
     if ((ret = mbedtls_x509_crt_parse_file(&m->server_cert, server_cert)) != 0) return ret;
     if ((ret = mbedtls_x509_crt_parse_file(&m->client_cert, client_cert)) != 0) return ret;
-    if ((ret = mbedtls_pk_parse_keyfile(&m->server_key, server_key, NULL,
-                                        mbedtls_ctr_drbg_random, &m->drbg)) != 0) return ret;
-    if ((ret = mbedtls_pk_parse_keyfile(&m->client_key, client_key, NULL,
-                                        mbedtls_ctr_drbg_random, &m->drbg)) != 0) return ret;
+    if ((ret = mbedtls_pk_parse_keyfile(&m->server_key, server_key, NULL)) != 0) return ret;
+    if ((ret = mbedtls_pk_parse_keyfile(&m->client_key, client_key, NULL)) != 0) return ret;
     return 0;
 }
 
@@ -151,20 +138,20 @@ static int setup_pair(Pair *p, mbedtls_ssl_config *client_conf,
 }
 
 static int drive_handshake(Pair *p, int expect_success) {
-    int cd = 0;
-    int sd = 0;
+    int client_done = 0;
+    int server_done = 0;
     for (int step = 0; step < MAX_STEPS; ++step) {
-        if (!cd) {
+        if (!client_done) {
             int ret = mbedtls_ssl_handshake(&p->client);
-            if (ret == 0) cd = 1;
+            if (ret == 0) client_done = 1;
             else if (!allowed_progress(ret)) return expect_success ? 0 : 1;
         }
-        if (!sd) {
+        if (!server_done) {
             int ret = mbedtls_ssl_handshake(&p->server);
-            if (ret == 0) sd = 1;
+            if (ret == 0) server_done = 1;
             else if (!allowed_progress(ret)) return expect_success ? 0 : 1;
         }
-        if (cd && sd) return expect_success ? 1 : 0;
+        if (client_done && server_done) return expect_success ? 1 : 0;
     }
     return 0;
 }
@@ -172,7 +159,11 @@ static int drive_handshake(Pair *p, int expect_success) {
 static int transfer_payload(Pair *p) {
     unsigned char *src = malloc(PAYLOAD_SIZE);
     unsigned char *dst = malloc(PAYLOAD_SIZE);
-    if (!src || !dst) return 0;
+    if (!src || !dst) {
+        free(src);
+        free(dst);
+        return 0;
+    }
     for (int i = 0; i < PAYLOAD_SIZE; ++i) src[i] = (unsigned char)(i * 17u + 13u);
     size_t sent = 0;
     size_t received = 0;
@@ -202,20 +193,20 @@ static int transfer_payload(Pair *p) {
 }
 
 static int clean_shutdown(Pair *p) {
-    int cd = 0;
-    int sd = 0;
+    int client_done = 0;
+    int server_done = 0;
     for (int step = 0; step < MAX_STEPS; ++step) {
-        if (!cd) {
+        if (!client_done) {
             int ret = mbedtls_ssl_close_notify(&p->client);
-            if (ret == 0) cd = 1;
+            if (ret == 0) client_done = 1;
             else if (!allowed_progress(ret)) return 0;
         }
-        if (!sd) {
+        if (!server_done) {
             int ret = mbedtls_ssl_close_notify(&p->server);
-            if (ret == 0) sd = 1;
+            if (ret == 0) server_done = 1;
             else if (!allowed_progress(ret)) return 0;
         }
-        if (cd && sd) return 1;
+        if (client_done && server_done) return 1;
     }
     return 0;
 }
@@ -233,8 +224,6 @@ static int configure(Material *m, mbedtls_ssl_config *client_conf,
     if ((ret = mbedtls_ssl_config_defaults(server_conf, MBEDTLS_SSL_IS_SERVER,
                                             MBEDTLS_SSL_TRANSPORT_STREAM,
                                             MBEDTLS_SSL_PRESET_DEFAULT)) != 0) return ret;
-    mbedtls_ssl_conf_rng(client_conf, mbedtls_ctr_drbg_random, &m->drbg);
-    mbedtls_ssl_conf_rng(server_conf, mbedtls_ctr_drbg_random, &m->drbg);
     mbedtls_ssl_conf_min_tls_version(client_conf, version);
     mbedtls_ssl_conf_max_tls_version(client_conf, version);
     mbedtls_ssl_conf_min_tls_version(server_conf, version);
@@ -306,7 +295,6 @@ static int cancellation_case(Material *m) {
                                            MBEDTLS_SSL_TRANSPORT_STREAM,
                                            MBEDTLS_SSL_PRESET_DEFAULT);
     if (ret == 0) {
-        mbedtls_ssl_conf_rng(&conf, mbedtls_ctr_drbg_random, &m->drbg);
         mbedtls_ssl_conf_authmode(&conf, MBEDTLS_SSL_VERIFY_REQUIRED);
         mbedtls_ssl_conf_ca_chain(&conf, &m->ca, NULL);
         ret = mbedtls_ssl_setup(&ssl, &conf);
