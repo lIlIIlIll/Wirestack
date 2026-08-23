@@ -94,7 +94,7 @@ jobs:
               output="build/tls-provider-poc/$PROVIDER"
               trap '\''test ! -e "$output" || chmod -R a+rX "$output"'\'' EXIT
               apk add --no-cache \
-                build-base cmake ninja perl git openssl ca-certificates python3
+                build-base cmake ninja perl git openssl ca-certificates python3 linux-headers
               python3 tools/tls_provider_poc/run_musl.py \
                 --provider "$PROVIDER" \
                 --output "$output/result.json"
