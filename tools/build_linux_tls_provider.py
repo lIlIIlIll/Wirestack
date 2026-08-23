@@ -353,6 +353,7 @@ def build_provider(
                 "-Werror",
                 f"-I{prefix / 'include'}",
                 f"-I{shim_dir}",
+                f'-DWIRESTACK_TLS_BUILD_FINGERPRINT="{fingerprint}"',
                 "-c",
                 str(shim_source),
                 "-o",
@@ -392,6 +393,9 @@ int main(void) {
   if (wirestack_tls_provider_create(&handle) != 0) return 1;
   if (wirestack_tls_provider_random(handle, data, sizeof(data)) != 0) return 2;
   if (wirestack_tls_provider_capabilities(handle) == 0) return 3;
+  if (wirestack_tls_provider_target_triple(handle) == 0) return 10;
+  if (wirestack_tls_provider_external_openssl_dependency(handle) != 0) return 11;
+  if (wirestack_tls_provider_build_fingerprint(handle) == 0) return 12;
   if (wirestack_tls_engine_create(handle, WIRESTACK_TLS_ENGINE_CLIENT, 13, 12, &invalid_engine) == 0) return 4;
   if (wirestack_tls_engine_create(handle, WIRESTACK_TLS_ENGINE_CLIENT, 12, 13, &engine) != 0) return 5;
   if (wirestack_tls_engine_handshake_step(engine, &step) != 0) return 6;

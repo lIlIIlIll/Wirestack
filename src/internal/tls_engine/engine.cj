@@ -138,6 +138,13 @@ foreign func wirestack_tls_engine_handshake_step(
     engineHandle: UInt64,
     outStep: CPointer<Int32>
 ): Int32
+foreign func wirestack_tls_engine_last_error(
+    engineHandle: UInt64,
+    outErrorClass: CPointer<Int32>,
+    outNativeReason: CPointer<Int64>,
+    outVerifyResult: CPointer<Int64>,
+    outPeerAlert: CPointer<Int32>
+): Int32
 foreign func wirestack_tls_engine_handshake_info(
     engineHandle: UInt64,
     outTlsVersion: CPointer<Int32>,
@@ -289,7 +296,24 @@ public class TlsHandshakeInfo {
 }
 
 public enum TlsEngineErrorCode {
+    | ProtocolViolation
+    | UnsupportedVersion
+    | NoSharedCipher
+    | NoSharedAlpn
+    | CertificateUntrusted
+    | IdentityMismatch
+    | CertificateExpired
+    | CertificateRevoked
+    | ClientCertificateRequired
+    | HandshakeTimeout
+    | HandshakeCancelled
+    | PeerAlert
+    | PeerClosedWithoutCloseNotify
+    | InvalidRecord
+    | BadMac
+    | SessionFailure
     | ProviderFailure
+    | UnsupportedCapability
     | Closed
     | NoProgress
     | UnexpectedTransportEof
@@ -300,25 +324,49 @@ public enum TlsEngineErrorCode {
 /** Stable TLS-pump failure without provider-native types or secret material. */
 public class TlsEngineException <: NetworkException {
     public let tlsCode: TlsEngineErrorCode
+    /** X.509 verification result, when certificate verification failed. */
+    public let verificationCode: ?Int64
+    /** TLS alert description received from the peer, without provider text. */
+    public let peerAlert: ?Int32
 
     public init(
         code: TlsEngineErrorCode,
         message: String,
+        phase!: NetworkPhase = NetworkPhase.TlsHandshake,
+        nativeCode!: ?Int64 = None<Int64>,
+        verificationCode!: ?Int64 = None<Int64>,
+        peerAlert!: ?Int32 = None<Int32>,
         cause!: ?Exception = None<Exception>
     ) {
         super(
-            NetworkErrorCategory.System,
-            NetworkPhase.TlsHandshake,
+            match (code) {
+                case TlsEngineErrorCode.HandshakeCancelled => NetworkErrorCategory.Cancelled
+                case TlsEngineErrorCode.HandshakeTimeout => NetworkErrorCategory.DeadlineExceeded
+                case _ => NetworkErrorCategory.System
+            },
+            phase,
             match (code) {
                 case TlsEngineErrorCode.Closed => NetworkErrorCode.Closed
                 case TlsEngineErrorCode.UnexpectedTransportEof => NetworkErrorCode.UnexpectedEof
+                case TlsEngineErrorCode.PeerClosedWithoutCloseNotify => NetworkErrorCode.UnexpectedEof
+                case TlsEngineErrorCode.HandshakeTimeout => NetworkErrorCode.TimedOut
+                case TlsEngineErrorCode.HandshakeCancelled => NetworkErrorCode.Cancelled
+                case TlsEngineErrorCode.UnsupportedCapability => NetworkErrorCode.Unsupported
                 case _ => NetworkErrorCode.SystemFailure
             },
             message,
-            retryability: Retryability.Never,
+            retryability: match (code) {
+                case TlsEngineErrorCode.HandshakeTimeout => Retryability.SafeBeforeWrite
+                case TlsEngineErrorCode.HandshakeCancelled => Retryability.Never
+                case TlsEngineErrorCode.ProviderFailure => Retryability.Unknown
+                case _ => Retryability.Never
+            },
+            nativeCode: nativeCode,
             cause: cause
         )
         tlsCode = code
+        this.verificationCode = verificationCode
+        this.peerAlert = peerAlert
     }
 
     protected override func getClassName(): String { "TlsEngineException" }
@@ -335,6 +383,72 @@ private func providerFailure(operation: String, status: Int32): TlsEngineExcepti
     TlsEngineException(
         TlsEngineErrorCode.ProviderFailure,
         "TLS provider ${operation} failed: ${status}"
+    )
+}
+
+private func decodeNativeTlsError(value: Int32): TlsEngineErrorCode {
+    if (value == 1) { TlsEngineErrorCode.ProtocolViolation }
+    else if (value == 2) { TlsEngineErrorCode.UnsupportedVersion }
+    else if (value == 3) { TlsEngineErrorCode.NoSharedCipher }
+    else if (value == 4) { TlsEngineErrorCode.NoSharedAlpn }
+    else if (value == 5) { TlsEngineErrorCode.CertificateUntrusted }
+    else if (value == 6) { TlsEngineErrorCode.IdentityMismatch }
+    else if (value == 7) { TlsEngineErrorCode.CertificateExpired }
+    else if (value == 8) { TlsEngineErrorCode.CertificateRevoked }
+    else if (value == 9) { TlsEngineErrorCode.ClientCertificateRequired }
+    else if (value == 10) { TlsEngineErrorCode.PrivateKeyFailure }
+    else if (value == 11) { TlsEngineErrorCode.PeerAlert }
+    else if (value == 12) { TlsEngineErrorCode.InvalidRecord }
+    else if (value == 13) { TlsEngineErrorCode.BadMac }
+    else if (value == 14) { TlsEngineErrorCode.SessionFailure }
+    else { TlsEngineErrorCode.ProviderFailure }
+}
+
+private func engineFailure(
+    engineHandle: UInt64,
+    operation: String,
+    status: Int32,
+    phase: NetworkPhase
+): TlsEngineException {
+    let errorClass = Array<Int32>(1, repeat: 0)
+    let nativeReason = Array<Int64>(1, repeat: 0)
+    let verifyResult = Array<Int64>(1, repeat: 0)
+    let peerAlert = Array<Int32>(1, repeat: -1)
+    let queryStatus = unsafe {
+        let errorRaw = acquireArrayRawData(errorClass)
+        let nativeRaw = acquireArrayRawData(nativeReason)
+        let verifyRaw = acquireArrayRawData(verifyResult)
+        let alertRaw = acquireArrayRawData(peerAlert)
+        try {
+            wirestack_tls_engine_last_error(
+                engineHandle,
+                errorRaw.pointer,
+                nativeRaw.pointer,
+                verifyRaw.pointer,
+                alertRaw.pointer
+            )
+        } finally {
+            releaseArrayRawData(alertRaw)
+            releaseArrayRawData(verifyRaw)
+            releaseArrayRawData(nativeRaw)
+            releaseArrayRawData(errorRaw)
+        }
+    }
+    if (queryStatus != NATIVE_OK) {
+        return TlsEngineException(
+            TlsEngineErrorCode.ProviderFailure,
+            "TLS provider ${operation} failed: ${status}",
+            phase: phase
+        )
+    }
+    let code = decodeNativeTlsError(errorClass[0])
+    TlsEngineException(
+        code,
+        "TLS ${operation} failed",
+        phase: phase,
+        nativeCode: if (nativeReason[0] == 0) { None<Int64> } else { Some(nativeReason[0]) },
+        verificationCode: if (verifyResult[0] == 0) { None<Int64> } else { Some(verifyResult[0]) },
+        peerAlert: if (peerAlert[0] < 0) { None<Int32> } else { Some(peerAlert[0]) }
     )
 }
 
@@ -633,7 +747,7 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine &
                 }
             }
             if (status != NATIVE_OK) {
-                throw providerFailure("handshake step", status)
+                throw engineFailure(current, "handshake step", status, NetworkPhase.TlsHandshake)
             }
             capturePendingSession(current)
             let value = output[0]
@@ -1114,7 +1228,7 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine &
                 }
             }
             if (status != NATIVE_OK || countOutput[0] > UInt64(destination.length)) {
-                throw providerFailure("plaintext read", status)
+                throw engineFailure(current, "plaintext read", status, NetworkPhase.TlsRead)
             }
             capturePendingSession(current)
             decodeReadResult(stepOutput[0], Int64(countOutput[0]))
@@ -1148,7 +1262,7 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine &
                 }
             }
             if (status != NATIVE_OK || countOutput[0] > UInt64(source.length)) {
-                throw providerFailure("plaintext write", status)
+                throw engineFailure(current, "plaintext write", status, NetworkPhase.TlsWrite)
             }
             decodeWriteResult(stepOutput[0], Int64(countOutput[0]))
         }
@@ -1167,7 +1281,7 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine &
                 }
             }
             if (status != NATIVE_OK) {
-                throw providerFailure("shutdown", status)
+                throw engineFailure(current, "shutdown", status, NetworkPhase.TransportClose)
             }
             decodeShutdownResult(stepOutput[0])
         }
@@ -1772,7 +1886,7 @@ public class TlsEnginePump {
                     return count
                 case TlsEngineWriteResult.PeerClosed =>
                     throw TlsEngineException(
-                        TlsEngineErrorCode.UnexpectedTransportEof,
+                        TlsEngineErrorCode.PeerClosedWithoutCloseNotify,
                         "TLS peer closed before plaintext write completed"
                     )
                 case TlsEngineWriteResult.WantRead =>
@@ -1856,7 +1970,7 @@ public class TlsEnginePump {
             match (transport.readSome(MutableByteSpan(buffer), context: context)) {
                 case ReadResult.EndOfStream =>
                     throw TlsEngineException(
-                        TlsEngineErrorCode.UnexpectedTransportEof,
+                        TlsEngineErrorCode.PeerClosedWithoutCloseNotify,
                         "transport reached EOF while TLS expected a record"
                     )
                 case ReadResult.Data(count) =>
@@ -1889,21 +2003,15 @@ public class TlsEnginePump {
 
 private func checkTlsOperationContext(context: OperationContext): Unit {
     if (context.isCancellationRequested()) {
-        throw NetworkException(
-            NetworkErrorCategory.Cancelled,
-            NetworkPhase.TlsHandshake,
-            NetworkErrorCode.Cancelled,
-            "TLS handshake was cancelled",
-            retryability: Retryability.Never
+        throw TlsEngineException(
+            TlsEngineErrorCode.HandshakeCancelled,
+            "TLS handshake was cancelled"
         )
     }
     if (context.isDeadlineExceeded()) {
-        throw NetworkException(
-            NetworkErrorCategory.DeadlineExceeded,
-            NetworkPhase.TlsHandshake,
-            NetworkErrorCode.TimedOut,
-            "TLS handshake deadline exceeded",
-            retryability: Retryability.Never
+        throw TlsEngineException(
+            TlsEngineErrorCode.HandshakeTimeout,
+            "TLS handshake deadline exceeded"
         )
     }
 }
