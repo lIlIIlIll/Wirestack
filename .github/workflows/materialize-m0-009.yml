@@ -8,6 +8,11 @@ on:
     paths:
       - ".automation/m0-009-materialize.tar.gz"
       - ".github/workflows/materialize-m0-009.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".automation/m0-009-materialize.tar.gz"
+      - ".github/workflows/materialize-m0-009.yml"
 
 permissions:
   contents: write
@@ -15,10 +20,13 @@ permissions:
 jobs:
   materialize:
     runs-on: ubuntu-latest
+    env:
+      TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
       - name: Verify and extract task payload
         shell: bash
         run: |
@@ -42,4 +50,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "test(M0-009): add EOF and terminal evidence harness"
-          git push origin HEAD:task/M0-009-eof-terminal-evidence
+          git push origin "HEAD:${TARGET_BRANCH}"
