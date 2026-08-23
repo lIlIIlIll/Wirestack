@@ -40,6 +40,25 @@ enum wirestack_tls_engine_io_step {
     WIRESTACK_TLS_ENGINE_IO_SHUTDOWN_SENT = 4
 };
 
+/* Provider-neutral diagnostic classes. Values are part of the C ABI. */
+enum wirestack_tls_error_class {
+    WIRESTACK_TLS_ERROR_PROVIDER_FAILURE = 0,
+    WIRESTACK_TLS_ERROR_PROTOCOL_VIOLATION = 1,
+    WIRESTACK_TLS_ERROR_UNSUPPORTED_VERSION = 2,
+    WIRESTACK_TLS_ERROR_NO_SHARED_CIPHER = 3,
+    WIRESTACK_TLS_ERROR_NO_SHARED_ALPN = 4,
+    WIRESTACK_TLS_ERROR_CERTIFICATE_UNTRUSTED = 5,
+    WIRESTACK_TLS_ERROR_IDENTITY_MISMATCH = 6,
+    WIRESTACK_TLS_ERROR_CERTIFICATE_EXPIRED = 7,
+    WIRESTACK_TLS_ERROR_CERTIFICATE_REVOKED = 8,
+    WIRESTACK_TLS_ERROR_CLIENT_CERTIFICATE_REQUIRED = 9,
+    WIRESTACK_TLS_ERROR_PRIVATE_KEY_FAILURE = 10,
+    WIRESTACK_TLS_ERROR_PEER_ALERT = 11,
+    WIRESTACK_TLS_ERROR_INVALID_RECORD = 12,
+    WIRESTACK_TLS_ERROR_BAD_MAC = 13,
+    WIRESTACK_TLS_ERROR_SESSION_FAILURE = 14
+};
+
 enum wirestack_tls_provider_capability {
     WIRESTACK_TLS_CAP_CUSTOM_ROOTS = UINT64_C(1) << 0,
     WIRESTACK_TLS_CAP_CLIENT_CERT = UINT64_C(1) << 1,
@@ -57,8 +76,11 @@ void wirestack_tls_provider_destroy(uint64_t handle);
 const char *wirestack_tls_provider_id(uint64_t handle);
 const char *wirestack_tls_provider_version(uint64_t handle);
 const char *wirestack_tls_provider_fingerprint(uint64_t handle);
+const char *wirestack_tls_provider_build_fingerprint(uint64_t handle);
 const char *wirestack_tls_provider_backend(uint64_t handle);
 const char *wirestack_tls_provider_patch_level(uint64_t handle);
+const char *wirestack_tls_provider_target_triple(uint64_t handle);
+int32_t wirestack_tls_provider_external_openssl_dependency(uint64_t handle);
 uint64_t wirestack_tls_provider_capabilities(uint64_t handle);
 int32_t wirestack_tls_provider_random(uint64_t handle, uint8_t *output, uint64_t size);
 int32_t wirestack_tls_sha256(
@@ -219,6 +241,13 @@ int32_t wirestack_tls_engine_fail_external_signature(uint64_t engine_handle);
 int32_t wirestack_tls_engine_handshake_step(
     uint64_t engine_handle,
     int32_t *out_step
+);
+int32_t wirestack_tls_engine_last_error(
+    uint64_t engine_handle,
+    int32_t *out_error_class,
+    int64_t *out_native_reason,
+    int64_t *out_verify_result,
+    int32_t *out_peer_alert
 );
 int32_t wirestack_tls_engine_handshake_info(
     uint64_t engine_handle,

@@ -403,7 +403,9 @@ class TlsEnginePumpTest {
                 drivePairedMemoryHandshake(client, server)
             } catch (error: TlsEngineException) {
                 match (error.tlsCode) {
-                    case TlsEngineErrorCode.ProviderFailure => failed = true
+                    case TlsEngineErrorCode.NoSharedAlpn =>
+                        failed = isTlsHandshakePhase(error.phase) &&
+                            isNeverRetryable(error.retryability)
                     case _ => ()
                 }
             }
@@ -480,8 +482,13 @@ class TlsEnginePumpTest {
         try {
             try {
                 drivePairedMemoryHandshake(requiredClient, requiredServer)
-            } catch (_: TlsEngineException) {
-                rejected = true
+            } catch (error: TlsEngineException) {
+                match (error.tlsCode) {
+                    case TlsEngineErrorCode.ClientCertificateRequired =>
+                        rejected = isTlsHandshakePhase(error.phase) &&
+                            isNeverRetryable(error.retryability)
+                    case _ => ()
+                }
             }
             @Expect(rejected)
         } finally {
@@ -536,7 +543,10 @@ class TlsEnginePumpTest {
                 drivePairedMemoryHandshake(client, server)
             } catch (error: TlsEngineException) {
                 match (error.tlsCode) {
-                    case TlsEngineErrorCode.ProviderFailure => rejected = true
+                    case TlsEngineErrorCode.CertificateUntrusted =>
+                        rejected = isTlsHandshakePhase(error.phase) &&
+                            isNeverRetryable(error.retryability) &&
+                            error.nativeCode.isSome() && error.verificationCode.isSome()
                     case _ => ()
                 }
             }
@@ -679,7 +689,7 @@ class TlsEnginePumpTest {
                 let _ = server.handshakeStep()
             } catch (error: TlsEngineException) {
                 match (error.tlsCode) {
-                    case TlsEngineErrorCode.ProviderFailure => nativeFailed = true
+                    case TlsEngineErrorCode.PrivateKeyFailure => nativeFailed = true
                     case _ => ()
                 }
             }
@@ -741,7 +751,7 @@ class TlsEnginePumpTest {
             TlsEnginePump().driveHandshake(engine, transport)
         } catch (error: TlsEngineException) {
             match (error.tlsCode) {
-                case TlsEngineErrorCode.UnexpectedTransportEof =>
+                case TlsEngineErrorCode.PeerClosedWithoutCloseNotify =>
                     match (error.phase) {
                         case NetworkPhase.TlsHandshake => observed = true
                         case _ => ()
@@ -766,9 +776,11 @@ class TlsEnginePumpTest {
                 transport,
                 context: OperationContext(cancellation: source.token)
             )
-        } catch (error: NetworkException) {
-            match (error.code) {
-                case NetworkErrorCode.Cancelled => cancelled = true
+        } catch (error: TlsEngineException) {
+            match (error.tlsCode) {
+                case TlsEngineErrorCode.HandshakeCancelled =>
+                    cancelled = isTlsHandshakePhase(error.phase) &&
+                        isNeverRetryable(error.retryability)
                 case _ => ()
             }
         }
@@ -790,9 +802,10 @@ class TlsEnginePumpTest {
                 transport,
                 context: OperationContext(deadline: Some(Deadline.after(Duration.Zero)))
             )
-        } catch (error: NetworkException) {
-            match (error.code) {
-                case NetworkErrorCode.TimedOut => timedOut = true
+        } catch (error: TlsEngineException) {
+            match (error.tlsCode) {
+                case TlsEngineErrorCode.HandshakeTimeout =>
+                    timedOut = isTlsHandshakePhase(error.phase)
                 case _ => ()
             }
         }
@@ -802,6 +815,21 @@ class TlsEnginePumpTest {
         @Expect(transport.writeCalls, 0)
     }
 }
+
+private func isTlsHandshakePhase(value: NetworkPhase): Bool {
+    match (value) {
+        case NetworkPhase.TlsHandshake => true
+        case _ => false
+    }
+}
+
+private func isNeverRetryable(value: Retryability): Bool {
+    match (value) {
+        case Retryability.Never => true
+        case _ => false
+    }
+}
+
 
 private func containsAscii(buffer: Array<Byte>, length: Int64, needle: String): Bool {
     let bytes = needle.toArray()

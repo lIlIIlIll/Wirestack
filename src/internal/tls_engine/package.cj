@@ -1,5 +1,6 @@
 package wirestack.internal.tls_engine
 
+import std.collection.ArrayList
 import std.sync.*
 import wirestack.internal.common.*
 import wirestack.internal.platform.linux.*
@@ -22,8 +23,11 @@ foreign func wirestack_tls_provider_destroy(handle: UInt64): Unit
 foreign func wirestack_tls_provider_id(handle: UInt64): CString
 foreign func wirestack_tls_provider_version(handle: UInt64): CString
 foreign func wirestack_tls_provider_fingerprint(handle: UInt64): CString
+foreign func wirestack_tls_provider_build_fingerprint(handle: UInt64): CString
 foreign func wirestack_tls_provider_backend(handle: UInt64): CString
 foreign func wirestack_tls_provider_patch_level(handle: UInt64): CString
+foreign func wirestack_tls_provider_target_triple(handle: UInt64): CString
+foreign func wirestack_tls_provider_external_openssl_dependency(handle: UInt64): Int32
 foreign func wirestack_tls_provider_capabilities(handle: UInt64): UInt64
 foreign func wirestack_tls_provider_random(
     handle: UInt64,
@@ -109,6 +113,48 @@ public struct TlsProviderManifest {
     }
 }
 
+/** Stable Linux TLS provider/build diagnostics, detached from native handles. */
+public class TlsRuntimeSnapshot {
+    public let provider: TlsProviderManifest
+    public let targetTriple: String
+    public let buildFingerprint: String
+    public let externalOpenSslDependency: Bool
+    public let trustBackend: String
+    private let ownedTlsVersions: Array<String>
+    private let ownedHttpVersions: Array<String>
+    private let ownedFeatureFlags: Array<String>
+
+    public prop supportedTlsVersions: Array<String> {
+        get() { ownedTlsVersions.clone() }
+    }
+    public prop httpVersions: Array<String> {
+        get() { ownedHttpVersions.clone() }
+    }
+    public prop featureFlags: Array<String> {
+        get() { ownedFeatureFlags.clone() }
+    }
+
+    internal init(
+        provider: TlsProviderManifest,
+        targetTriple: String,
+        buildFingerprint: String,
+        externalOpenSslDependency: Bool,
+        trustBackend: String,
+        supportedTlsVersions: Array<String>,
+        httpVersions: Array<String>,
+        featureFlags: Array<String>
+    ) {
+        this.provider = provider
+        this.targetTriple = targetTriple
+        this.buildFingerprint = buildFingerprint
+        this.externalOpenSslDependency = externalOpenSslDependency
+        this.trustBackend = trustBackend
+        ownedTlsVersions = supportedTlsVersions.clone()
+        ownedHttpVersions = httpVersions.clone()
+        ownedFeatureFlags = featureFlags.clone()
+    }
+}
+
 /** Internal provider SPI. No native handle crosses this boundary. */
 public interface TlsProvider {
     func manifest(): TlsProviderManifest
@@ -167,6 +213,77 @@ public class AwsLcTlsProvider <: TlsProvider {
     }
 
     public func manifest(): TlsProviderManifest { providerManifest }
+
+    public func runtimeSnapshot(): TlsRuntimeSnapshot {
+        synchronized(mutex) {
+            let current = handle
+            if (current == 0u64) {
+                throw TlsProviderException(TlsProviderErrorCode.Closed, "TLS provider is closed")
+            }
+            let target = unsafe {
+                requiredString(wirestack_tls_provider_target_triple(current), "target triple")
+            }
+            let buildFingerprint = unsafe {
+                requiredString(
+                    wirestack_tls_provider_build_fingerprint(current),
+                    "build fingerprint"
+                )
+            }
+            let external = unsafe {
+                wirestack_tls_provider_external_openssl_dependency(current)
+            }
+            if (external < 0) {
+                throw TlsProviderException(
+                    TlsProviderErrorCode.InvalidManifest,
+                    "TLS provider returned no dependency identity"
+                )
+            }
+            let systemTrust = try {
+                let _ = LinuxSystemTrustAdapter.discover()
+                true
+            } catch (_: LinuxSystemTrustException) {
+                false
+            }
+            let tlsVersions = ArrayList<String>()
+            if (providerManifest.supports(TlsProviderCapability.Tls12)) {
+                tlsVersions.add("1.2")
+            }
+            if (providerManifest.supports(TlsProviderCapability.Tls13)) {
+                tlsVersions.add("1.3")
+            }
+            let httpVersions = ArrayList<String>()
+            httpVersions.add("1.1")
+            if (providerManifest.supports(TlsProviderCapability.Http2)) {
+                httpVersions.add("2")
+            }
+            let flags = ArrayList<String>()
+            if (providerManifest.supports(TlsProviderCapability.CustomRoots)) {
+                flags.add("custom-roots")
+            }
+            if (providerManifest.supports(TlsProviderCapability.ClientCertificate)) {
+                flags.add("client-certificate")
+            }
+            if (providerManifest.supports(TlsProviderCapability.Server)) {
+                flags.add("server")
+            }
+            if (providerManifest.supports(TlsProviderCapability.ExternalSigner)) {
+                flags.add("external-signer")
+            }
+            if (providerManifest.supports(TlsProviderCapability.SessionResumption)) {
+                flags.add("session-resumption")
+            }
+            TlsRuntimeSnapshot(
+                providerManifest,
+                target,
+                buildFingerprint,
+                external != 0,
+                if (systemTrust) { "linux-system" } else { "custom-roots-only" },
+                tlsVersions.toArray(),
+                httpVersions.toArray(),
+                flags.toArray()
+            )
+        }
+    }
 
     public func sessionStoreSnapshot(): TlsSessionStoreSnapshot { sessionStore.snapshot() }
 
