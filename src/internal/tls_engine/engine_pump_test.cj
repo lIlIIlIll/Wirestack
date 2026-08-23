@@ -223,6 +223,108 @@ class TlsEnginePumpTest {
     }
 
     @TestCase
+    func sniSelectsTheCompleteImmutableContextAndItsCertificate(): Unit {
+        let provider = AwsLcTlsProvider()
+        let primaryIdentity = tlsTestLocalIdentity()
+        let alternateIdentity = tlsAltTestLocalIdentity()
+        let capabilities = provider.linuxCapabilities()
+        let primaryContext = TlsServerContext.builder(provider.manifest(), capabilities)
+            .identity(primaryIdentity)
+            .alpn(["http/1.1"])
+            .build()
+        let alternateContext = TlsServerContext.builder(provider.manifest(), capabilities)
+            .identity(alternateIdentity)
+            .securityProfile(TlsSecurityProfile.StrictTls13)
+            .alpn(["h2"])
+            .build()
+        let selector = TlsServerContextSelector([
+            TlsServerNameRoute(HostName("example.com"), primaryContext),
+            TlsServerNameRoute(HostName("alt.example.com"), alternateContext)
+        ])
+        let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
+            .trust(TrustPolicy.customRoots(CertificateChain([
+                DerCertificate(tlsAltTestCertificateDer())
+            ])))
+            .alpn(["http/1.1", "h2"])
+            .build()
+        let client = provider.createClientEngine(
+            clientContext,
+            ReferenceIdentity.Dns(HostName("alt.example.com")),
+            serverName: Some(HostName("alt.example.com"))
+        )
+        let server = provider.createServerEngine(selector)
+        try {
+            drivePairedMemoryHandshake(client, server)
+            let clientInfo = requireHandshakeInfo(client)
+            let serverInfo = requireHandshakeInfo(server)
+            @Expect(clientInfo.negotiatedAlpn, Some("h2"))
+            @Expect(serverInfo.negotiatedAlpn, Some("h2"))
+            @Expect(serverInfo.requestedServerName, Some("alt.example.com"))
+            match (clientInfo.peerCertificateChain) {
+                case Some(chain) =>
+                    @Expect(chain.certificateAt(0).derBytes(), tlsAltTestCertificateDer())
+                case None => @Fail("SNI-selected server must return its selected certificate")
+            }
+            match (clientInfo.version) {
+                case TlsVersion.Tls13 => ()
+                case _ => @Fail("selected StrictTls13 context must control protocol policy")
+            }
+        } finally {
+            client.close()
+            server.close()
+            primaryIdentity.privateKeyRef.close()
+            alternateIdentity.privateKeyRef.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
+    func sniSelectorRejectsMissingAndUnknownNamesWithStableEvidence(): Unit {
+        for (name in [None<HostName>, Some(HostName("unknown.example.com"))]) {
+            let provider = AwsLcTlsProvider()
+            let identity = tlsTestLocalIdentity()
+            let capabilities = provider.linuxCapabilities()
+            let context = TlsServerContext.builder(provider.manifest(), capabilities)
+                .identity(identity)
+                .build()
+            let selector = TlsServerContextSelector([
+                TlsServerNameRoute(HostName("example.com"), context)
+            ])
+            let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
+                .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
+                .build()
+            let client = provider.createClientEngine(
+                clientContext,
+                ReferenceIdentity.Dns(HostName("example.com")),
+                serverName: name
+            )
+            let server = provider.createServerEngine(selector)
+            var selectionCode = None<TlsServerNameSelectionErrorCode>
+            try {
+                try {
+                    drivePairedMemoryHandshake(client, server)
+                } catch (error: TlsEngineException) {
+                    match (error.cause) {
+                        case Some(cause: TlsServerNameSelectionException) =>
+                            selectionCode = Some(cause.code)
+                        case _ => ()
+                    }
+                }
+                match ((name, selectionCode)) {
+                    case (None, Some(TlsServerNameSelectionErrorCode.MissingServerName)) => ()
+                    case (Some(_), Some(TlsServerNameSelectionErrorCode.NoMatchingServerName)) => ()
+                    case _ => @Fail("SNI rejection did not retain its stable selection code")
+                }
+            } finally {
+                client.close()
+                server.close()
+                identity.privateKeyRef.close()
+                provider.close()
+            }
+        }
+    }
+
+    @TestCase
     func noSharedAlpnFailsTheHandshakeInsteadOfSilentlySelectingNothing(): Unit {
         let provider = AwsLcTlsProvider()
         let identity = tlsTestLocalIdentity()
@@ -665,10 +767,10 @@ private func containsAscii(buffer: Array<Byte>, length: Int64, needle: String): 
 private func drivePairedMemoryHandshake(client: TlsEngine, server: TlsEngine): Unit {
     for (_ in 0..128) {
         let clientStep = client.handshakeStep()
-        serviceExternalSignatureIfRequested(client, clientStep)
+        serviceEngineRequestIfNeeded(client, clientStep)
         let clientMoved = transferCiphertext(client, server)
         let serverStep = server.handshakeStep()
-        serviceExternalSignatureIfRequested(server, serverStep)
+        serviceEngineRequestIfNeeded(server, serverStep)
         let serverMoved = transferCiphertext(server, client)
         if (isHandshakeComplete(clientStep) && isHandshakeComplete(serverStep)) {
             return
@@ -700,7 +802,7 @@ private func advanceToServerSignatureRequest(
 ): Unit {
     for (_ in 0..32) {
         let clientStep = client.handshakeStep()
-        serviceExternalSignatureIfRequested(client, clientStep)
+        serviceEngineRequestIfNeeded(client, clientStep)
         let _ = transferCiphertext(client, server)
         let serverStep = server.handshakeStep()
         match (serverStep) {
@@ -715,7 +817,7 @@ private func advanceToServerSignatureRequest(
     )
 }
 
-private func serviceExternalSignatureIfRequested(
+private func serviceEngineRequestIfNeeded(
     engine: TlsEngine,
     step: TlsEngineStep
 ): Unit {
@@ -726,6 +828,14 @@ private func serviceExternalSignatureIfRequested(
             case _ => throw TlsEngineException(
                 TlsEngineErrorCode.PrivateKeyFailure,
                 "test engine cannot service external signature"
+            )
+        }
+        case TlsEngineStep.NeedServerSelection => match (engine) {
+            case selecting: ServerNameSelectingTlsEngine =>
+                selecting.serviceServerNameSelection(OperationContext.background())
+            case _ => throw TlsEngineException(
+                TlsEngineErrorCode.ServerNameSelectionFailure,
+                "test engine cannot service SNI selection"
             )
         }
         case _ => ()
