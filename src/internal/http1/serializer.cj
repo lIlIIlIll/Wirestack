@@ -46,11 +46,16 @@ public func serializeClientRequestHead(
     headers: HttpHeaders,
     limits!: HttpLimits = HttpLimits()
 ): Http1SerializedHead {
+    let connectAuthority = if (url.host.contains(":")) {
+        "[${url.host}]:${url.port}"
+    } else {
+        "${url.host}:${url.port}"
+    }
     let builder = HttpHeaders.builder(limits: limits)
     for (entry in headers.entries) { builder.add(entry.name, entry.value) }
     let hosts = headers.getAll("host")
     if (hosts.isEmpty()) {
-        builder.add("Host", url.authority)
+        builder.add("Host", if (method == HttpMethod("CONNECT")) { connectAuthority } else { url.authority })
     } else {
         if (hosts.size != 1) {
             throw Http1ParseException(Http1ParseErrorCode.MissingOrDuplicateHost, "client request requires exactly one Host field")
@@ -63,8 +68,14 @@ public func serializeClientRequestHead(
         if (supplied.host.toAsciiLower() != url.host.toAsciiLower() || supplied.port != url.port) {
             throw Http1ParseException(Http1ParseErrorCode.MissingOrDuplicateHost, "client Host field differs from request URL origin")
         }
+        if (method == HttpMethod("CONNECT")) { builder.set("Host", connectAuthority) }
     }
-    serializeRequestHead(method, url.requestTarget, builder.build(), limits: limits)
+    let target = if (method == HttpMethod("CONNECT")) {
+        connectAuthority
+    } else {
+        url.requestTarget
+    }
+    serializeRequestHead(method, target, builder.build(), limits: limits)
 }
 
 /** Serializes an HTTP/1 response head with the same framing rules as the parser. */

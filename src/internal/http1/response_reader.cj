@@ -1,6 +1,7 @@
 package wirestack.internal.http1
 
 import std.collection.ArrayList
+import std.sync.Mutex
 import wirestack.http.*
 import wirestack.internal.transport.*
 
@@ -35,6 +36,21 @@ public class Http1ResponseReadResult {
         ownedInterim = interimResponses.clone()
         this.reusableCandidate = reusableCandidate
     }
+}
+
+public class Http1Tunnel {
+    public let responseHead: Http1ResponseHead
+    public let transport: DuplexTransport
+
+    public init(responseHead: Http1ResponseHead, transport: DuplexTransport) {
+        this.responseHead = responseHead
+        this.transport = transport
+    }
+}
+
+public enum Http1ConnectExchangeResult {
+    | Tunnel(Http1Tunnel)
+    | Response(Http1ResponseReadResult)
 }
 
 /** Reads bounded interim heads and one final response, leaving the body fully streaming. */
@@ -103,6 +119,130 @@ public func exchangeHttp1ExpectContinue(
         return finishResponse(transport, head, parsed.remaining, interim, context, limits, observer)
     }
     throw Exception("unreachable HTTP/1 expect-continue loop exit")
+}
+
+/** Consumes the input transport and transfers it only after a successful CONNECT response. */
+public func performHttp1Connect(
+    transport: DuplexTransport,
+    target: HttpUrl,
+    headers!: HttpHeaders = HttpHeaders(),
+    context!: OperationContext = OperationContext.background(),
+    limits!: HttpLimits = HttpLimits()
+): Http1ConnectExchangeResult {
+    let request = HttpRequest(HttpMethod("CONNECT"), target, headers: headers)
+    try {
+        let _ = writeHttp1Request(transport, request, context: context, limits: limits)
+        let reader = Http1ResponseSequenceReader(transport, request.method, limits)
+        let interim = ArrayList<Http1InterimResponse>()
+        while (true) {
+            let parsed = reader.readNext(context)
+            let head = parsed.head
+            if (head.status < 200 && head.status != 101) {
+                addInterim(interim, head)
+                continue
+            }
+            if (head.status >= 200 && head.status < 300) {
+                match (head.framing) {
+                    case Http1BodyFraming.Tunnel =>
+                        return Http1ConnectExchangeResult.Tunnel(
+                            Http1Tunnel(head, Http1PrefixedTransport(transport, parsed.remaining))
+                        )
+                    case _ => throw Http1ParseException(
+                        Http1ParseErrorCode.InvalidStatus,
+                        "successful CONNECT response did not enter tunnel framing"
+                    )
+                }
+            }
+            let observer = Http1ConnectFailureObserver(transport)
+            return Http1ConnectExchangeResult.Response(
+                finishResponse(transport, head, parsed.remaining, interim, context, limits, observer)
+            )
+        }
+        throw Exception("unreachable HTTP/1 CONNECT loop exit")
+    } catch (error: Exception) {
+        try { transport.abort(reason: Some(AbortReason.ProtocolFailure)) } catch (_: Exception) {}
+        throw error
+    }
+}
+
+private class Http1ConnectFailureObserver <: ResponseBodyObserver {
+    private let transport: DuplexTransport
+    init(transport: DuplexTransport) { this.transport = transport }
+    public func completed(): Unit { closeConnectTransport() }
+    public func abandoned(): Unit { closeConnectTransport() }
+    private func closeConnectTransport(): Unit {
+        try { transport.close(OperationContext.background()) } catch (_: Exception) {}
+    }
+}
+
+/** Replays bytes read with the CONNECT response before delegating tunnel I/O. */
+private class Http1PrefixedTransport <: DuplexTransport {
+    private let delegate: DuplexTransport
+    private let prefix: Array<Byte>
+    private var offset: Int64 = 0
+    private let mutex = Mutex()
+    private var readActive = false
+
+    init(delegate: DuplexTransport, prefix: Array<Byte>) {
+        this.delegate = delegate
+        this.prefix = prefix.clone()
+    }
+
+    public prop info: TransportInfo { get() { delegate.info } }
+
+    public func readSome(
+        destination: MutableByteSpan,
+        context!: OperationContext = OperationContext.background()
+    ): ReadResult {
+        if (context.isCancellationRequested()) {
+            throw NetworkException(
+                NetworkErrorCategory.Cancelled, NetworkPhase.TcpRead, NetworkErrorCode.Cancelled,
+                "CONNECT tunnel read cancelled", retryability: Retryability.Never
+            )
+        }
+        if (context.isDeadlineExceeded()) {
+            throw NetworkException(
+                NetworkErrorCategory.DeadlineExceeded, NetworkPhase.TcpRead, NetworkErrorCode.TimedOut,
+                "CONNECT tunnel read deadline exceeded", retryability: Retryability.Temporary
+            )
+        }
+        synchronized(mutex) {
+            if (readActive) {
+                throw NetworkException(
+                    NetworkErrorCategory.Read, NetworkPhase.TcpRead, NetworkErrorCode.ConcurrentOperation,
+                    "CONNECT tunnel already has an active reader", retryability: Retryability.Never
+                )
+            }
+            readActive = true
+        }
+        try {
+            if (destination.isEmpty()) { return ReadResult.Data(0) }
+            let count = synchronized(mutex) {
+                let available = prefix.size - offset
+                let copied = min(destination.length, available)
+                for (index in 0..copied) {
+                    destination.bytes[destination.offset + index] = prefix[offset + index]
+                }
+                offset += copied
+                copied
+            }
+            if (count > 0) { ReadResult.Data(count) }
+            else { delegate.readSome(destination, context: context) }
+        } finally {
+            synchronized(mutex) { readActive = false }
+        }
+    }
+
+    public func writeSome(
+        source: ByteSpan,
+        context!: OperationContext = OperationContext.background()
+    ): Int64 { delegate.writeSome(source, context: context) }
+
+    public func shutdown(direction: ShutdownDirection): Unit { delegate.shutdown(direction) }
+    public func close(context: OperationContext): Unit { delegate.close(context) }
+    public func close(): Unit { delegate.close() }
+    public func isClosed(): Bool { delegate.isClosed() }
+    public func abort(reason!: ?AbortReason = None<AbortReason>): Unit { delegate.abort(reason: reason) }
 }
 
 private func addInterim(interim: ArrayList<Http1InterimResponse>, head: Http1ResponseHead): Unit {
