@@ -45,49 +45,113 @@ public func readHttp1Response(
     limits!: HttpLimits = HttpLimits(),
     observer!: ResponseBodyObserver = InternalNoopBodyObserver()
 ): Http1ResponseReadResult {
-    var input = Array<Byte>()
+    let reader = Http1ResponseSequenceReader(transport, requestMethod, limits)
     let interim = ArrayList<Http1InterimResponse>()
     while (true) {
-        let parsed = readOneResponseHead(transport, requestMethod, input, context, limits)
+        let parsed = reader.readNext(context)
         let head = parsed.head
-        input = parsed.remaining
         if (head.status < 200 && head.status != 101) {
-            interim.add(Http1InterimResponse(head.status, head.reason, head.headers))
-            if (interim.size > MAX_INTERIM_RESPONSES) {
-                throw Http1ParseException(Http1ParseErrorCode.HeaderTooLarge, "too many HTTP/1 interim responses")
+            addInterim(interim, head)
+            continue
+        }
+        return finishResponse(transport, head, parsed.remaining, interim, context, limits, observer)
+    }
+    throw Exception("unreachable HTTP/1 response loop exit")
+}
+
+/**
+ * Sends a body only after 100 Continue or after the bounded continue wait expires.
+ * A final response received first leaves the request body unopened.
+ */
+public func exchangeHttp1ExpectContinue(
+    transport: DuplexTransport,
+    request: HttpRequest,
+    writer: Http1RequestWriter,
+    continueTimeout: Duration,
+    context!: OperationContext = OperationContext.background(),
+    limits!: HttpLimits = HttpLimits(),
+    observer!: ResponseBodyObserver = InternalNoopBodyObserver()
+): Http1ResponseReadResult {
+    if (continueTimeout <= Duration.Zero) {
+        throw IllegalArgumentException("HTTP/1 continue timeout must be positive")
+    }
+    writer.writeHead(transport, context: context)
+    let continueContext = context.shortenDeadline(continueTimeout)
+    let reader = Http1ResponseSequenceReader(transport, request.method, limits)
+    let interim = ArrayList<Http1InterimResponse>()
+    var bodySent = false
+    while (true) {
+        let parsed = try {
+            reader.readNext(if (bodySent) { context } else { continueContext })
+        } catch (error: NetworkException) {
+            if (!bodySent && !context.isDeadlineExceeded() && isContinueWaitTimeout(error)) {
+                writer.writeBody(transport, context: context)
+                bodySent = true
+                continue
+            }
+            throw error
+        }
+        let head = parsed.head
+        if (head.status < 200 && head.status != 101) {
+            addInterim(interim, head)
+            if (head.status == 100 && !bodySent) {
+                writer.writeBody(transport, context: context)
+                bodySent = true
             }
             continue
         }
-        match (head.framing) {
-            case Http1BodyFraming.Tunnel =>
-                throw Http1ParseException(
-                    Http1ParseErrorCode.InvalidStatus,
-                    "successful CONNECT requires the explicit HTTP/1 tunnel API"
-                )
-            case _ => ()
-        }
-        if (head.status == 101) {
+        return finishResponse(transport, head, parsed.remaining, interim, context, limits, observer)
+    }
+    throw Exception("unreachable HTTP/1 expect-continue loop exit")
+}
+
+private func addInterim(interim: ArrayList<Http1InterimResponse>, head: Http1ResponseHead): Unit {
+    interim.add(Http1InterimResponse(head.status, head.reason, head.headers))
+    if (interim.size > MAX_INTERIM_RESPONSES) {
+        throw Http1ParseException(Http1ParseErrorCode.HeaderTooLarge, "too many HTTP/1 interim responses")
+    }
+}
+
+private func finishResponse(
+    transport: DuplexTransport,
+    head: Http1ResponseHead,
+    input: Array<Byte>,
+    interim: ArrayList<Http1InterimResponse>,
+    context: OperationContext,
+    limits: HttpLimits,
+    observer: ResponseBodyObserver
+): Http1ResponseReadResult {
+    match (head.framing) {
+        case Http1BodyFraming.Tunnel =>
             throw Http1ParseException(
                 Http1ParseErrorCode.InvalidStatus,
-                "101 Switching Protocols requires the explicit HTTP/1 upgrade API"
+                "successful CONNECT requires the explicit HTTP/1 tunnel API"
             )
-        }
-        let source = responseBodySource(transport, head.framing, input, context, limits)
-        let body = match (source) {
-            case Http1ResponseBodySource.Plain(stream) => ResponseBody(stream, observer: observer)
-            case Http1ResponseBodySource.Chunked(stream) =>
-                ResponseBody(stream, observer: observer, trailerProvider: { => stream.trailer })
-        }
-        return Http1ResponseReadResult(
-            HttpResponse(
-                Int64(head.status), head.reason, body,
-                version: head.version, headers: head.headers
-            ),
-            interim.toArray(),
-            reusableCandidate: responseCanReuse(head)
+        case _ => ()
+    }
+    if (head.status == 101) {
+        throw Http1ParseException(
+            Http1ParseErrorCode.InvalidStatus,
+            "101 Switching Protocols requires the explicit HTTP/1 upgrade API"
         )
     }
-    throw Exception("unreachable HTTP/1 response loop exit")
+    let source = responseBodySource(transport, head.framing, input, context, limits)
+    let body = match (source) {
+        case Http1ResponseBodySource.Plain(stream) => ResponseBody(stream, observer: observer)
+        case Http1ResponseBodySource.Chunked(stream) =>
+            ResponseBody(stream, observer: observer, trailerProvider: { => stream.trailer })
+    }
+    Http1ResponseReadResult(
+        HttpResponse(Int64(head.status), head.reason, body, version: head.version, headers: head.headers),
+        interim.toArray(), reusableCandidate: responseCanReuse(head)
+    )
+}
+
+private func isContinueWaitTimeout(error: NetworkException): Bool {
+    match (error.code) {
+        case NetworkErrorCode.TimedOut => true
+        case _ => false
+    }
 }
 
 private func responseCanReuse(head: Http1ResponseHead): Bool {
@@ -119,37 +183,50 @@ internal func headerContainsToken(headers: HttpHeaders, name: String, token: Str
     false
 }
 
-private func readOneResponseHead(
-    transport: DuplexTransport,
-    requestMethod: HttpMethod,
-    initial: Array<Byte>,
-    context: OperationContext,
-    limits: HttpLimits
-): Http1ParsedResponseHead {
-    let parser = Http1ResponseHeadParser(requestMethod, limits: limits)
-    var input = initial
-    while (true) {
-        if (!input.isEmpty()) {
-            if (let Some(parsed) <- parser.feed(input)) { return parsed }
-        }
-        let buffer = Array<Byte>(HTTP1_READ_BUFFER_SIZE, repeat: 0)
-        match (transport.readSome(MutableByteSpan(buffer), context: context)) {
-            case ReadResult.Data(count) =>
-                if (count <= 0 || count > buffer.size) {
-                    throw Exception("transport returned invalid progress while reading HTTP/1 head")
-                }
-                input = copyResponsePrefix(buffer, count)
-            case ReadResult.EndOfStream =>
-                throw NetworkException(
-                    NetworkErrorCategory.Read,
-                    NetworkPhase.HttpHeaders,
-                    NetworkErrorCode.UnexpectedEof,
-                    "peer closed before completing the HTTP/1 response head",
-                    retryability: Retryability.Never
-                )
-        }
+private class Http1ResponseSequenceReader {
+    private let transport: DuplexTransport
+    private let requestMethod: HttpMethod
+    private let limits: HttpLimits
+    private var parser: Http1ResponseHeadParser
+    private var input = Array<Byte>()
+
+    init(transport: DuplexTransport, requestMethod: HttpMethod, limits: HttpLimits) {
+        this.transport = transport
+        this.requestMethod = requestMethod
+        this.limits = limits
+        parser = Http1ResponseHeadParser(requestMethod, limits: limits)
     }
-    throw Exception("unreachable HTTP/1 head loop exit")
+
+    func readNext(context: OperationContext): Http1ParsedResponseHead {
+        while (true) {
+            if (!input.isEmpty()) {
+                let current = input
+                input = Array<Byte>()
+                if (let Some(parsed) <- parser.feed(current)) {
+                    input = parsed.remaining
+                    parser = Http1ResponseHeadParser(requestMethod, limits: limits)
+                    return Http1ParsedResponseHead(parsed.head, input)
+                }
+            }
+            let buffer = Array<Byte>(HTTP1_READ_BUFFER_SIZE, repeat: 0)
+            match (transport.readSome(MutableByteSpan(buffer), context: context)) {
+                case ReadResult.Data(count) =>
+                    if (count <= 0 || count > buffer.size) {
+                        throw Exception("transport returned invalid progress while reading HTTP/1 head")
+                    }
+                    input = copyResponsePrefix(buffer, count)
+                case ReadResult.EndOfStream =>
+                    throw NetworkException(
+                        NetworkErrorCategory.Read,
+                        NetworkPhase.HttpHeaders,
+                        NetworkErrorCode.UnexpectedEof,
+                        "peer closed before completing the HTTP/1 response head",
+                        retryability: Retryability.Never
+                    )
+            }
+        }
+        throw Exception("unreachable HTTP/1 head loop exit")
+    }
 }
 
 private enum Http1ResponseBodySource {

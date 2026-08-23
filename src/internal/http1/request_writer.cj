@@ -7,6 +7,7 @@ public enum Http1RequestWriteErrorCode {
     | BodyLengthMismatch
     | BodyTooLarge
     | InvalidRequestFraming
+    | InvalidRequestState
     | WriteFailed
 }
 
@@ -52,22 +53,65 @@ public func writeHttp1Request(
     limits!: HttpLimits = HttpLimits(),
     trailer!: HttpTrailer = HttpTrailer()
 ): Http1RequestCommitEvidence {
-    let head = serializeClientRequestHead(request.method, request.url, request.headers, limits: limits)
-    validateBodyFraming(request.body, head.framing)
-    let tracker = RequestWriteTracker()
-    try {
-        writeTracked(transport, head.bytes, tracker, context)
-        writeBody(transport, request.body, head.framing, tracker, context, limits, trailer)
-        tracker.snapshot()
-    } catch (error: Http1RequestWriteException) {
-        throw error
-    } catch (error: Exception) {
-        throw Http1RequestWriteException(
-            Http1RequestWriteErrorCode.WriteFailed,
-            "HTTP/1 request write failed after ${tracker.wireBytesWritten} wire bytes",
-            tracker.snapshot(),
-            cause: error
-        )
+    let writer = Http1RequestWriter(request, limits: limits, trailer: trailer)
+    writer.writeHead(transport, context: context)
+    writer.writeBody(transport, context: context)
+    writer.evidence
+}
+
+/** Stateful two-stage writer used by Expect: 100-continue without opening the body early. */
+public class Http1RequestWriter {
+    private let request: HttpRequest
+    private let limits: HttpLimits
+    private let trailer: HttpTrailer
+    private let head: Http1SerializedHead
+    private let tracker = RequestWriteTracker()
+    private var headWritten = false
+    private var bodyWritten = false
+
+    public prop evidence: Http1RequestCommitEvidence { get() { tracker.snapshot() } }
+
+    public init(request: HttpRequest, limits!: HttpLimits = HttpLimits(), trailer!: HttpTrailer = HttpTrailer()) {
+        let serialized = serializeClientRequestHead(request.method, request.url, request.headers, limits: limits)
+        validateBodyFraming(request.body, serialized.framing)
+        this.request = request
+        this.limits = limits
+        this.trailer = trailer
+        head = serialized
+    }
+
+    public func writeHead(
+        transport: DuplexTransport,
+        context!: OperationContext = OperationContext.background()
+    ): Http1RequestCommitEvidence {
+        if (headWritten) { invalidWriterState("HTTP/1 request head has already been written", tracker.snapshot()) }
+        try {
+            writeTracked(transport, head.bytes, tracker, context)
+            headWritten = true
+            tracker.snapshot()
+        } catch (error: Http1RequestWriteException) {
+            throw error
+        } catch (error: Exception) {
+            writeFailure(error, tracker.snapshot())
+        }
+    }
+
+    public func writeBody(
+        transport: DuplexTransport,
+        context!: OperationContext = OperationContext.background()
+    ): Http1RequestCommitEvidence {
+        if (!headWritten || bodyWritten) {
+            invalidWriterState("HTTP/1 request body requires one completed head and one write", tracker.snapshot())
+        }
+        try {
+            writeRequestBody(transport, request.body, head.framing, tracker, context, limits, trailer)
+            bodyWritten = true
+            tracker.snapshot()
+        } catch (error: Http1RequestWriteException) {
+            throw error
+        } catch (error: Exception) {
+            writeFailure(error, tracker.snapshot())
+        }
     }
 }
 
@@ -96,7 +140,7 @@ private func validateBodyFraming(body: RequestBody, framing: Http1BodyFraming): 
     }
 }
 
-private func writeBody(
+private func writeRequestBody(
     transport: DuplexTransport,
     body: RequestBody,
     framing: Http1BodyFraming,
@@ -216,5 +260,18 @@ private func bodyLengthMismatch(evidence: Http1RequestCommitEvidence): Nothing {
         Http1RequestWriteErrorCode.BodyLengthMismatch,
         "HTTP request body bytes differ from the declared Content-Length",
         evidence
+    )
+}
+
+private func invalidWriterState(message: String, evidence: Http1RequestCommitEvidence): Nothing {
+    throw Http1RequestWriteException(Http1RequestWriteErrorCode.InvalidRequestState, message, evidence)
+}
+
+private func writeFailure(error: Exception, evidence: Http1RequestCommitEvidence): Nothing {
+    throw Http1RequestWriteException(
+        Http1RequestWriteErrorCode.WriteFailed,
+        "HTTP/1 request write failed after ${evidence.wireBytesWritten} wire bytes",
+        evidence,
+        cause: error
     )
 }

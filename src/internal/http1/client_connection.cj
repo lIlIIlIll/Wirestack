@@ -27,12 +27,21 @@ public class Http1ClientConnectionException <: Exception {
 public class Http1ClientConnection <: Resource {
     private let transport: DuplexTransport
     private let limits: HttpLimits
+    private let continueTimeout: Duration
     private let mutex = Mutex()
     private var state = Http1ClientConnectionState.Ready
 
-    public init(transport: DuplexTransport, limits!: HttpLimits = HttpLimits()) {
+    public init(
+        transport: DuplexTransport,
+        limits!: HttpLimits = HttpLimits(),
+        continueTimeout!: Duration = Duration.second
+    ) {
+        if (continueTimeout <= Duration.Zero) {
+            throw IllegalArgumentException("HTTP/1 continue timeout must be positive")
+        }
         this.transport = transport
         this.limits = limits
+        this.continueTimeout = continueTimeout
     }
 
     public func execute(
@@ -51,11 +60,20 @@ public class Http1ClientConnection <: Resource {
         }
         let observer = Http1ConnectionBodyObserver(this)
         try {
-            let _ = writeHttp1Request(transport, request, context: context, limits: limits, trailer: trailer)
-            let result = readHttp1Response(
-                transport, request.method,
-                context: context, limits: limits, observer: observer
-            )
+            let expectsContinue = headerContainsToken(request.headers, "expect", "100-continue") &&
+                request.body.contentLength != Some(0)
+            let result = if (expectsContinue) {
+                exchangeHttp1ExpectContinue(
+                    transport, request, Http1RequestWriter(request, limits: limits, trailer: trailer),
+                    continueTimeout, context: context, limits: limits, observer: observer
+                )
+            } else {
+                let _ = writeHttp1Request(transport, request, context: context, limits: limits, trailer: trailer)
+                readHttp1Response(
+                    transport, request.method,
+                    context: context, limits: limits, observer: observer
+                )
+            }
             let reusable = result.reusableCandidate &&
                 !headerContainsToken(request.headers, "connection", "close")
             observer.configure(reusable)
