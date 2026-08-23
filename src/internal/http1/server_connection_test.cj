@@ -72,7 +72,8 @@ class Http1ServerConnectionTest {
 }
 
 private class EchoServerHandler <: Http1ServerHandler {
-    public func handle(request: Http1ServerRequest): Http1ServerResponse {
+    public func handle(request: Http1ServerRequest, context: OperationContext): Http1ServerResponse {
+        let _ = context
         let bytes = readServerConnectionBytes(request.body)
         Http1ServerResponse(HttpResponse(200, "OK",
             ResponseBody(RequestBody.bytes(bytes).open()),
@@ -81,7 +82,8 @@ private class EchoServerHandler <: Http1ServerHandler {
 }
 
 private class RejectingServerHandler <: Http1ServerHandler {
-    public func handle(request: Http1ServerRequest): Http1ServerResponse {
+    public func handle(request: Http1ServerRequest, context: OperationContext): Http1ServerResponse {
+        let _ = context
         let _ = request
         Http1ServerResponse(HttpResponse(403, "Forbidden", ResponseBody.empty(),
             headers: HttpHeaders.builder().add("Content-Length", "0").build()))
@@ -89,7 +91,8 @@ private class RejectingServerHandler <: Http1ServerHandler {
 }
 
 private class FailingServerHandler <: Http1ServerHandler {
-    public func handle(request: Http1ServerRequest): Http1ServerResponse {
+    public func handle(request: Http1ServerRequest, context: OperationContext): Http1ServerResponse {
+        let _ = context
         let _ = request
         throw Exception("handler failed")
     }
