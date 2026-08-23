@@ -36,7 +36,8 @@ enum wirestack_tls_engine_io_step {
     WIRESTACK_TLS_ENGINE_IO_COMPLETE = 0,
     WIRESTACK_TLS_ENGINE_IO_WANT_READ = 1,
     WIRESTACK_TLS_ENGINE_IO_WANT_WRITE = 2,
-    WIRESTACK_TLS_ENGINE_IO_CLOSED = 3
+    WIRESTACK_TLS_ENGINE_IO_CLOSED = 3,
+    WIRESTACK_TLS_ENGINE_IO_SHUTDOWN_SENT = 4
 };
 
 enum wirestack_tls_provider_capability {
@@ -266,6 +267,10 @@ int32_t wirestack_tls_engine_write_plaintext(
     const uint8_t *input,
     uint64_t size,
     uint64_t *out_written,
+    int32_t *out_step
+);
+int32_t wirestack_tls_engine_shutdown_step(
+    uint64_t engine_handle,
     int32_t *out_step
 );
 
