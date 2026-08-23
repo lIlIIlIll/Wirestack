@@ -149,6 +149,22 @@ class HttpModelTest {
             @Expect(rejected)
         }
     }
+
+    @TestCase
+    func trailerRejectsRoutingAndFramingFields(): Unit {
+        let trailer = HttpTrailer(headers: HttpHeaders.builder().add("Digest", "sha-256=value").build())
+        @Expect(trailer.headers.getFirst("digest"), Some("sha-256=value"))
+
+        for (name in ["Content-Length", "Transfer-Encoding", "Host", "Connection", "Trailer", "Upgrade"]) {
+            var rejected = false
+            try {
+                let _ = HttpTrailer(headers: HttpHeaders.builder().add(name, "value").build())
+            } catch (_: IllegalArgumentException) {
+                rejected = true
+            }
+            @Expect(rejected)
+        }
+    }
 }
 
 private struct HttpHeaderInput {
