@@ -168,6 +168,7 @@ private func expectBodyFailure(code: HttpBodyErrorCode, action: () -> Unit): Uni
 private func sameBodyCode(left: HttpBodyErrorCode, right: HttpBodyErrorCode): Bool {
     match ((left, right)) {
         case (HttpBodyErrorCode.Closed, HttpBodyErrorCode.Closed) => true
+        case (HttpBodyErrorCode.ConcurrentRead, HttpBodyErrorCode.ConcurrentRead) => true
         case (HttpBodyErrorCode.AlreadyOpened, HttpBodyErrorCode.AlreadyOpened) => true
         case (HttpBodyErrorCode.InvalidLength, HttpBodyErrorCode.InvalidLength) => true
         case (HttpBodyErrorCode.InvalidFile, HttpBodyErrorCode.InvalidFile) => true
