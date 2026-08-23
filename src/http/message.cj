@@ -1,0 +1,176 @@
+package wirestack.http
+
+import std.sync.Mutex
+
+/** Immutable request description. Protocol execution owns the body's opened stream, not this model. */
+public class HttpRequest {
+    public let method: HttpMethod
+    public let url: HttpUrl
+    public let headers: HttpHeaders
+    public let body: RequestBody
+
+    public init(
+        method: HttpMethod,
+        url: HttpUrl,
+        headers!: HttpHeaders = HttpHeaders(),
+        body!: RequestBody = RequestBody.empty()
+    ) {
+        this.method = method
+        this.url = url
+        this.headers = headers
+        this.body = body
+    }
+
+    public static func get(url: String): HttpRequest {
+        HttpRequest(HttpMethod("GET"), HttpUrl.parse(url))
+    }
+
+    public static func post(url: String, body: RequestBody): HttpRequest {
+        HttpRequest(HttpMethod("POST"), HttpUrl.parse(url), body: body)
+    }
+
+    public func withHeaders(headers: HttpHeaders): HttpRequest {
+        HttpRequest(method, url, headers: headers, body: body)
+    }
+}
+
+/** Pool/connection lifecycle hook. Implementations must not expose their transport through this API. */
+public interface ResponseBodyObserver {
+    func completed(): Unit
+    func abandoned(): Unit
+}
+
+/**
+ * Single-owner response body. EOF completes reuse eligibility; an early close abandons it.
+ * Exactly one observer callback is made, including when reading or closing fails.
+ */
+public class ResponseBody <: Resource {
+    private let stream: HttpBodyStream
+    private let observer: ResponseBodyObserver
+    private let stateMutex = Mutex()
+    private var closed = false
+    private var readInProgress = false
+    private var terminal = false
+    private var fullyConsumed = false
+
+    public prop contentLength: ?Int64 { get() { stream.contentLength } }
+
+    public init(stream: HttpBodyStream, observer!: ResponseBodyObserver = NoopResponseBodyObserver()) {
+        this.stream = stream
+        this.observer = observer
+    }
+
+    public static func empty(observer!: ResponseBodyObserver = NoopResponseBodyObserver()): ResponseBody {
+        ResponseBody(RequestBody.empty().open(), observer: observer)
+    }
+
+    public func read(destination: Array<Byte>): Int64 {
+        synchronized(stateMutex) {
+            if (closed) { throw HttpBodyException(HttpBodyErrorCode.Closed, "HTTP response body is closed") }
+            if (readInProgress) {
+                throw HttpBodyException(HttpBodyErrorCode.ConcurrentRead, "HTTP response body already has an active reader")
+            }
+            readInProgress = true
+        }
+
+        let count = try {
+            stream.read(destination)
+        } catch (error: Exception) {
+            synchronized(stateMutex) { readInProgress = false }
+            abandonAndClose()
+            throw error
+        }
+        synchronized(stateMutex) { readInProgress = false }
+        if (count == 0 && !destination.isEmpty()) { completeAtEof() }
+        count
+    }
+
+    public func close(): Unit {
+        var notifyAbandoned = false
+        synchronized(stateMutex) {
+            if (closed) { return }
+            closed = true
+            if (!terminal) {
+                terminal = true
+                notifyAbandoned = !fullyConsumed
+            }
+        }
+        try {
+            stream.close()
+        } finally {
+            if (notifyAbandoned) { observer.abandoned() }
+        }
+    }
+
+    public func isClosed(): Bool { synchronized(stateMutex) { closed } }
+
+    public func isFullyConsumed(): Bool { synchronized(stateMutex) { fullyConsumed } }
+
+    private func completeAtEof(): Unit {
+        var notify = false
+        synchronized(stateMutex) {
+            if (!terminal) {
+                terminal = true
+                fullyConsumed = true
+                notify = true
+            }
+        }
+        if (notify) { observer.completed() }
+    }
+
+    private func abandonAndClose(): Unit {
+        var notify = false
+        synchronized(stateMutex) {
+            if (!terminal) {
+                terminal = true
+                notify = true
+            }
+            closed = true
+        }
+        try { stream.close() } catch (_: Exception) {}
+        if (notify) { observer.abandoned() }
+    }
+}
+
+/** Immutable response head plus its uniquely-owned streaming body. */
+public class HttpResponse <: Resource {
+    public let status: Int64
+    public let reason: String
+    public let version: HttpVersion
+    public let headers: HttpHeaders
+    public let body: ResponseBody
+
+    public init(
+        status: Int64,
+        reason: String,
+        body: ResponseBody,
+        version!: HttpVersion = HttpVersion.Http11,
+        headers!: HttpHeaders = HttpHeaders()
+    ) {
+        if (status < 100 || status > 999) {
+            throw IllegalArgumentException("HTTP status must be exactly three decimal digits")
+        }
+        validateReason(reason)
+        this.status = status
+        this.reason = reason
+        this.version = version
+        this.headers = headers
+        this.body = body
+    }
+
+    public func close(): Unit { body.close() }
+    public func isClosed(): Bool { body.isClosed() }
+}
+
+private class NoopResponseBodyObserver <: ResponseBodyObserver {
+    public func completed(): Unit {}
+    public func abandoned(): Unit {}
+}
+
+private func validateReason(reason: String): Unit {
+    for (byte in reason.toArray()) {
+        if (byte == 0u8 || byte == 10u8 || byte == 13u8 || byte < 32u8 || byte == 127u8) {
+            throw IllegalArgumentException("HTTP reason phrase contains a control character")
+        }
+    }
+}
