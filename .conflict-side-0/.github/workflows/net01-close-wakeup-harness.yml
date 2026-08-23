@@ -1,0 +1,22 @@
+name: NET-01 Close Wakeup Harness
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  harness-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test NET-01 harness
+        run: python3 -m unittest discover -s tools/gates/tests -p 'test_net01_close_wakeup.py' -v
+      - name: Compile harness
+        run: python3 -m py_compile tools/gates/net01_close_wakeup.py

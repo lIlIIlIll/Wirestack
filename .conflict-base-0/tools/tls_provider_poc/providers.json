@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "task_id": "M0-016",
+  "providers": [
+    {
+      "id": "aws-lc",
+      "role": "primary",
+      "version": "5.5.0",
+      "source_kind": "git",
+      "url": "https://github.com/aws/aws-lc.git",
+      "tag": "v5.5.0",
+      "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+      "license_expression": "Apache-2.0 OR ISC",
+      "poc_family": "openssl-compatible"
+    },
+    {
+      "id": "mbedtls",
+      "role": "secondary",
+      "version": "4.2.0",
+      "source_kind": "archive",
+      "url": "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-4.2.0/mbedtls-4.2.0.tar.bz2",
+      "sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
+      "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
+      "license_expression": "Apache-2.0 OR GPL-2.0-or-later",
+      "poc_family": "mbedtls"
+    },
+    {
+      "id": "openssl",
+      "role": "control",
+      "version": "3.6.3",
+      "source_kind": "archive",
+      "url": "https://github.com/openssl/openssl/releases/download/openssl-3.6.3/openssl-3.6.3.tar.gz",
+      "sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
+      "tag": "openssl-3.6.3",
+      "commit_resolution_url": "https://api.github.com/repos/openssl/openssl/git/ref/tags/openssl-3.6.3",
+      "license_expression": "Apache-2.0",
+      "poc_family": "openssl-compatible"
+    }
+  ],
+  "required_capabilities": [
+    "tls12",
+    "tls13",
+    "sni_hostname_alpn",
+    "custom_ca",
+    "partial_io_backpressure",
+    "mtls",
+    "session_resumption",
+    "negative_hostname",
+    "negative_untrusted_ca",
+    "close_notify",
+    "truncation",
+    "caller_cancellation",
+    "external_signer",
+    "repeated_cleanup"
+  ],
+  "required_platforms": [
+    "linux-glibc-x86_64",
+    "linux-musl-x86_64",
+    "windows-x86_64",
+    "macos-arm64",
+    "android-aarch64",
+    "ios-aarch64",
+    "harmony-aarch64"
+  ]
+}
