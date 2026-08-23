@@ -2,7 +2,7 @@ package wirestack.internal.http1
 
 import std.collection.ArrayList
 import std.sync.*
-import wirestack.http.*
+import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
 
 public class Http1ServerConfig {
