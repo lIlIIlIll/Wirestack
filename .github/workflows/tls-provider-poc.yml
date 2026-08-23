@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "tools/tls_provider_poc/**"
-      - "tools/tests/test_tls_provider_poc.py"
+      - "tools/tests/test_tls_provider_poc*.py"
       - "docs/architecture/tls-provider-poc-contract.md"
       - "docs/evidence/M0-016/**"
       - "scripts/tls-provider-poc"
@@ -27,12 +27,13 @@ jobs:
           python3 tools/tls_provider_poc/validate.py \
             --matrix docs/evidence/M0-016/platform-matrix.json
       - name: Run fail-closed validator tests
-        run: python3 -m unittest discover -s tools/tests -p 'test_tls_provider_poc.py' -v
+        run: python3 -m unittest discover -s tools/tests -p 'test_tls_provider_poc*.py' -v
       - name: Compile Python tools
         run: |
           python3 -m py_compile \
             tools/tls_provider_poc/run.py \
             tools/tls_provider_poc/run_musl.py \
+            tools/tls_provider_poc/run_windows.py \
             tools/tls_provider_poc/validate.py
 
   linux-glibc:
@@ -141,6 +142,56 @@ jobs:
         if: always()
         with:
           name: m0-016-macos-arm64-${{ matrix.provider }}
+          path: |
+            build/tls-provider-poc/${{ matrix.provider }}/result.json
+            build/tls-provider-poc/${{ matrix.provider }}/build.log
+          if-no-files-found: warn
+
+  windows-x86_64:
+    needs: validate-contract
+    strategy:
+      fail-fast: false
+      matrix:
+        provider: [aws-lc, mbedtls, openssl]
+    runs-on: windows-2025
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            git
+            make
+            perl
+            mingw-w64-ucrt-x86_64-ca-certificates
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-openssl
+            mingw-w64-ucrt-x86_64-python
+      - name: Build pinned provider and execute native Windows PoC
+        shell: msys2 {0}
+        env:
+          PROVIDER: ${{ matrix.provider }}
+          CC: gcc
+          CXX: g++
+        run: |
+          python tools/tls_provider_poc/run_windows.py \
+            --provider "$PROVIDER" \
+            --output "build/tls-provider-poc/$PROVIDER/result.json"
+      - name: Validate native result
+        shell: msys2 {0}
+        env:
+          PROVIDER: ${{ matrix.provider }}
+        run: |
+          python tools/tls_provider_poc/validate.py \
+            --result "build/tls-provider-poc/$PROVIDER/result.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: m0-016-windows-x86_64-${{ matrix.provider }}
           path: |
             build/tls-provider-poc/${{ matrix.provider }}/result.json
             build/tls-provider-poc/${{ matrix.provider }}/build.log
