@@ -141,6 +141,15 @@ int32_t wirestack_tls_engine_set_ip_reference_identity(
     uint64_t size
 );
 int32_t wirestack_tls_engine_enable_peer_verification(uint64_t engine_handle);
+int32_t wirestack_tls_engine_configure_client_authentication(
+    uint64_t engine_handle,
+    int32_t required
+);
+int32_t wirestack_tls_engine_set_alpn_protocols(
+    uint64_t engine_handle,
+    const uint8_t *protocols,
+    uint64_t protocols_size
+);
 int32_t wirestack_tls_engine_set_identity_pkcs8(
     uint64_t engine_handle,
     const uint8_t *leaf_certificate,
@@ -176,6 +185,25 @@ int32_t wirestack_tls_engine_fail_external_signature(uint64_t engine_handle);
 int32_t wirestack_tls_engine_handshake_step(
     uint64_t engine_handle,
     int32_t *out_step
+);
+int32_t wirestack_tls_engine_handshake_info(
+    uint64_t engine_handle,
+    int32_t *out_tls_version,
+    uint8_t *cipher_name,
+    uint64_t cipher_name_capacity,
+    uint64_t *out_cipher_name_size,
+    uint8_t *negotiated_alpn,
+    uint64_t negotiated_alpn_capacity,
+    uint64_t *out_negotiated_alpn_size,
+    int32_t *out_session_reused,
+    int64_t *out_matched_pin_index
+);
+int32_t wirestack_tls_engine_peer_chain_der(
+    uint64_t engine_handle,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_required_size,
+    uint64_t *out_certificate_count
 );
 int32_t wirestack_tls_engine_pending_ciphertext(
     uint64_t engine_handle,
