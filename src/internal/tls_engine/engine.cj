@@ -58,6 +58,18 @@ foreign func wirestack_tls_engine_set_ip_reference_identity(
     size: UInt64
 ): Int32
 foreign func wirestack_tls_engine_enable_peer_verification(engineHandle: UInt64): Int32
+foreign func wirestack_tls_engine_set_identity_pkcs8(
+    engineHandle: UInt64,
+    leafCertificate: CPointer<UInt8>,
+    leafCertificateSize: UInt64,
+    privateKey: CPointer<UInt8>,
+    privateKeySize: UInt64
+): Int32
+foreign func wirestack_tls_engine_add_identity_chain_certificate_der(
+    engineHandle: UInt64,
+    certificate: CPointer<UInt8>,
+    certificateSize: UInt64
+): Int32
 foreign func wirestack_tls_engine_handshake_step(
     engineHandle: UInt64,
     outStep: CPointer<Int32>
@@ -256,6 +268,49 @@ public class AwsLcTlsEngine <: TlsEngine {
                 "peer verification",
                 unsafe { wirestack_tls_engine_enable_peer_verification(current) }
             )
+        }
+    }
+
+    internal func configureLocalIdentity(identity: LocalIdentity): Unit {
+        synchronized(mutex) {
+            let current = requireOpen()
+            let certificates = identity.certificateChain.certificates()
+            let leaf = certificates[0].derBytes()
+            identity.privateKeyRef.withPkcs8({key =>
+                let status = unsafe {
+                    let certificateInput = acquireArrayRawData(leaf)
+                    let keyInput = acquireArrayRawData(key)
+                    try {
+                        wirestack_tls_engine_set_identity_pkcs8(
+                            current,
+                            certificateInput.pointer,
+                            UInt64(leaf.size),
+                            keyInput.pointer,
+                            UInt64(key.size)
+                        )
+                    } finally {
+                        releaseArrayRawData(keyInput)
+                        releaseArrayRawData(certificateInput)
+                    }
+                }
+                requireConfigurationSuccess("local PKCS#8 identity", status)
+            })
+            for (index in 1..certificates.size) {
+                let der = certificates[index].derBytes()
+                let status = unsafe {
+                    let input = acquireArrayRawData(der)
+                    try {
+                        wirestack_tls_engine_add_identity_chain_certificate_der(
+                            current,
+                            input.pointer,
+                            UInt64(der.size)
+                        )
+                    } finally {
+                        releaseArrayRawData(input)
+                    }
+                }
+                requireConfigurationSuccess("local identity chain certificate", status)
+            }
         }
     }
 

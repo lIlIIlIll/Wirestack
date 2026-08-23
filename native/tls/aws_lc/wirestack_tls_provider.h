@@ -78,6 +78,16 @@ int32_t wirestack_tls_certificate_subject_alt_names(
     uint64_t *out_dns_count,
     uint64_t *out_ip_count
 );
+int32_t wirestack_tls_private_key_validate_pkcs8(
+    const uint8_t *input,
+    uint64_t size
+);
+int32_t wirestack_tls_identity_validate_pkcs8(
+    const uint8_t *leaf_certificate,
+    uint64_t leaf_certificate_size,
+    const uint8_t *private_key,
+    uint64_t private_key_size
+);
 
 int32_t wirestack_tls_engine_create(
     uint64_t provider_handle,
@@ -124,6 +134,18 @@ int32_t wirestack_tls_engine_set_ip_reference_identity(
     uint64_t size
 );
 int32_t wirestack_tls_engine_enable_peer_verification(uint64_t engine_handle);
+int32_t wirestack_tls_engine_set_identity_pkcs8(
+    uint64_t engine_handle,
+    const uint8_t *leaf_certificate,
+    uint64_t leaf_certificate_size,
+    const uint8_t *private_key,
+    uint64_t private_key_size
+);
+int32_t wirestack_tls_engine_add_identity_chain_certificate_der(
+    uint64_t engine_handle,
+    const uint8_t *certificate,
+    uint64_t certificate_size
+);
 int32_t wirestack_tls_engine_handshake_step(
     uint64_t engine_handle,
     int32_t *out_step

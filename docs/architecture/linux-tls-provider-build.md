@@ -102,12 +102,11 @@ renegotiation, NULL/anonymous cipher suites and 0-RTT remain disabled by the
 provider defaults and Wirestack exposes no operation that enables them.
 
 Capability reporting is explicit rather than inferred from provider names. The
-Linux AWS-LC profile currently reports custom roots, client certificates,
-server mode, TLS 1.2, TLS 1.3 and HTTP/2. System trust, hardware keys and network
-binding remain false until their Linux adapters are implemented; requesting any
-of them fails at context creation. Trust and identity requirements in this
-stage are opaque configuration descriptors only--certificate parsing, hostname
-verification, system trust and key-loading behavior begin at M3-009.
+Linux AWS-LC profile reports custom roots, client certificates, server mode,
+TLS 1.2, TLS 1.3 and HTTP/2. System trust is reported only when the explicit
+Linux adapter discovers a usable frozen CA source. Hardware keys and network
+binding remain false until their adapters are implemented; requesting either
+fails at context creation.
 
 This closes the Linux portions of M3-001 through M3-008.
 
@@ -147,5 +146,18 @@ directory from `/etc/ssl/certs` then `/etc/pki/tls/certs`. If neither source is
 usable, capability discovery reports system trust unavailable and context
 construction fails; there is no environment or provider-default fallback.
 
-M3-009 through M3-011 are complete. M3-012 still needs positive and negative
-end-to-end pin handshakes, and M3-013 still needs native musl adapter evidence.
+## Local identity and end-to-end pin verification
+
+`LocalIdentity` binds a leaf-first certificate chain to an opaque
+`PrivateKeyRef`. The implemented Linux software-key variant accepts only one
+exact, unencrypted DER PKCS#8 object, either from caller memory or an absolute,
+readable, bounded regular file. AWS-LC checks the leaf/key match during identity
+construction, before a context can be used. Transient key copies are zeroed,
+and closing the reference clears the owned PKCS#8 bytes.
+
+Server engines install the leaf, private key and any intermediate chain through
+the pinned native provider. A paired memory-BIO test completes a real TLS
+client/server handshake with the fixture's SPKI pin, while the same handshake
+with a wrong pin fails in the provider verification path. M3-012 and M3-017 are
+therefore complete. M3-013 still needs native musl adapter evidence, and M3-016
+still needs system-handle and external-signer contracts.

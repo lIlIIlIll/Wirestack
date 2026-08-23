@@ -178,63 +178,55 @@ class TlsContextTest {
         }
         @Expect(missingIdentity)
 
-        let serverIdentity = TlsIdentityRequirement("server", TlsIdentityUsage.Server)
-        var missingTrust = false
+        let serverIdentity = tlsTestLocalIdentity()
         try {
-            let _ = TlsServerContext.builder(manifest, capabilities)
+            var missingTrust = false
+            try {
+                let _ = TlsServerContext.builder(manifest, capabilities)
+                    .identity(serverIdentity)
+                    .clientAuthentication(ClientAuthentication.Required)
+                    .build()
+            } catch (error: TlsContextException) {
+                match (error.code) {
+                    case TlsContextErrorCode.MissingTrust => missingTrust = true
+                    case _ => ()
+                }
+            }
+            @Expect(missingTrust)
+
+            let context = TlsServerContext.builder(manifest, capabilities)
                 .identity(serverIdentity)
                 .clientAuthentication(ClientAuthentication.Required)
+                .clientTrust(testTrust())
+                .alpn(["h2", "http/1.1"])
                 .build()
-        } catch (error: TlsContextException) {
-            match (error.code) {
-                case TlsContextErrorCode.MissingTrust => missingTrust = true
-                case _ => ()
-            }
+            @Expect(context.alpnProtocols()[0], "h2")
+        } finally {
+            serverIdentity.privateKeyRef.close()
         }
-        @Expect(missingTrust)
-
-        let context = TlsServerContext.builder(manifest, capabilities)
-            .identity(serverIdentity)
-            .clientAuthentication(ClientAuthentication.Required)
-            .clientTrust(testTrust())
-            .alpn(["h2", "http/1.1"])
-            .build()
-        @Expect(context.alpnProtocols()[0], "h2")
     }
 
     @TestCase
-    func identityRoleAndHardwareCapabilityAreValidatedAtBuildTime(): Unit {
-        let manifest = fullManifest()
-        let capabilities = TlsCapabilities.fromProvider(manifest)
-        var roleRejected = false
+    func clientIdentityCapabilityIsValidatedAtBuildTime(): Unit {
+        let manifest = fullManifest(bits: 0x1fdu64)
+        let identity = tlsTestLocalIdentity()
+        var rejected = false
         try {
-            let _ = TlsServerContext.builder(manifest, capabilities)
-                .identity(TlsIdentityRequirement("client", TlsIdentityUsage.Client))
-                .build()
-        } catch (error: TlsContextException) {
-            match (error.code) {
-                case TlsContextErrorCode.InvalidIdentityUsage => roleRejected = true
-                case _ => ()
+            try {
+                let _ = TlsClientContext.builder(
+                    manifest,
+                    TlsCapabilities.fromProvider(manifest)
+                ).trust(testTrust()).identity(identity).build()
+            } catch (error: TlsContextException) {
+                match (error.capability) {
+                    case Some(TlsCapability.ClientCertificate) => rejected = true
+                    case _ => ()
+                }
             }
+            @Expect(rejected)
+        } finally {
+            identity.privateKeyRef.close()
         }
-        @Expect(roleRejected)
-
-        var hardwareRejected = false
-        try {
-            let _ = TlsServerContext.builder(manifest, capabilities)
-                .identity(TlsIdentityRequirement(
-                    "hardware-server",
-                    TlsIdentityUsage.Server,
-                    requiresHardwareKey: true
-                ))
-                .build()
-        } catch (error: TlsContextException) {
-            match (error.capability) {
-                case Some(TlsCapability.HardwareKeys) => hardwareRejected = true
-                case _ => ()
-            }
-        }
-        @Expect(hardwareRejected)
     }
 }
 
