@@ -27,14 +27,15 @@ Status values:
 | M0-005 | COMPLETE | [`docs/evidence/M0-005/README.md`](../evidence/M0-005/README.md) | Existing Linux x86_64 `std.net` raw TCP baseline captured. |
 | M0-006 | COMPLETE | [`docs/evidence/M0-006/README.md`](../evidence/M0-006/README.md) | Linux x86_64 close/wakeup probes pass locally; global six-platform GATE-NET-01 remains incomplete. |
 | M0-007 | COMPLETE | [`docs/evidence/M0-007/README.md`](../evidence/M0-007/README.md) | Full duplex and 100 close races pass; same-direction behavior captured; public abort is unavailable, so Linux/global GATE-NET-02 remain incomplete. |
-| M0-008 | READY | — | Execute absolute-deadline probes using M0-006/M0-007 evidence. |
-| M0-009 | BLOCKED | — | Depends on M0-008 evidence. |
+| M0-008 | COMPLETE | [`docs/evidence/M0-008/README.md`](../evidence/M0-008/README.md) | All 240 Linux absolute-budget samples pass; global six-platform GATE-NET-03 remains incomplete. |
+| M0-009 | READY | — | Execute EOF and terminal-evidence probes using M0-006/M0-008 results. |
 | M0-010 | READY | — | Linux large-buffer evidence may proceed independently; global GATE-NET-05 still needs Windows and future adapter comparison. |
-| M0-011 | READY | — | Depends on M0-005 and M0-006 evidence. |
-| M0-012 | BLOCKED | — | Depends on M0-011 evidence and native mobile runners. |
-| M0-013 | BLOCKED | — | Follow the dependency graph in `implementation-backlog.md`. |
-| M0-014 | BLOCKED | — | Requires a native Windows SDK/runner. |
-| M0-015..M0-022 | BLOCKED | — | Follow the dependency graph in `implementation-backlog.md`. |
+| M0-011 | READY | — | Depends on M0-004; current Linux bounded stress may proceed, while 24-hour/TLS/platform portions remain incomplete. |
+| M0-012 | BLOCKED | — | Evidence contract can be implemented, but required Android/iOS/Harmony native-device execution is unavailable. |
+| M0-013 | READY | — | Linux DNS carrier-thread probe may proceed from the completed gate framework. |
+| M0-014 | BLOCKED | — | Requires a native Windows SDK/runner; validator and evidence contract may be prepared separately. |
+| M0-015 | READY | — | Provider candidate matrix depends only on M0-001 inventory. |
+| M0-016..M0-022 | BLOCKED | — | Follow the dependency graph in `implementation-backlog.md`. |
 
 ## Conditional upstream work
 
