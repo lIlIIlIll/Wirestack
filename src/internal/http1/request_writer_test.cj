@@ -8,6 +8,30 @@ import wirestack.internal.transport.*
 @Test
 class Http1RequestWriterTest {
     @TestCase
+    func twoStageWriterDoesNotOpenBodyBeforeExplicitCommit(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 4096)
+        let stream = CountingOpenBodyStream("body".toArray())
+        let request = HttpRequest(
+            HttpMethod("POST"), HttpUrl.parse("http://example.com/upload"),
+            headers: HttpHeaders.builder().add("Content-Length", "4").add("Expect", "100-continue").build(),
+            body: RequestBody.oneShot(stream)
+        )
+        let writer = Http1RequestWriter(request)
+        let headEvidence = writer.writeHead(client)
+        @Expect(headEvidence.requestCommitted)
+        @Expect(!headEvidence.bodyCommitted)
+        @Expect(stream.readCalls, 0)
+
+        let head = readRequestWriterHead(server)
+        @Expect(head.head.target, "/upload")
+        let finalEvidence = writer.writeBody(client)
+        @Expect(finalEvidence.bodyBytesWritten, 4)
+        @Expect(stream.readCalls > 0)
+        expectRequestWriterFailure(Http1RequestWriteErrorCode.InvalidRequestState, { => let _ = writer.writeBody(client) })
+        client.close()
+        server.close()
+    }
+    @TestCase
     func writesFixedBodyThroughPartialTransportOperations(): Unit {
         let (writer, reader) = MemoryTransport.pair(capacity: 1024, maxChunk: 2)
         let request = HttpRequest(
@@ -124,6 +148,48 @@ private class WriterTestBodyStream <: HttpBodyStream {
     public func isClosed(): Bool { closed }
 }
 
+private class CountingOpenBodyStream <: HttpBodyStream {
+    private let bytes: Array<Byte>
+    private var offset: Int64 = 0
+    private var closed = false
+    var readCalls: Int64 = 0
+
+    init(bytes: Array<Byte>) { this.bytes = bytes.clone() }
+    public prop contentLength: ?Int64 { get() { Some(bytes.size) } }
+    public func read(destination: Array<Byte>): Int64 {
+        readCalls++
+        if (closed) { throw Exception("closed counting body") }
+        if (destination.isEmpty() || offset == bytes.size) { return 0 }
+        let count = min(destination.size, bytes.size - offset)
+        for (index in 0..count) { destination[index] = bytes[offset + index] }
+        offset += count
+        count
+    }
+    public func close(): Unit { closed = true }
+    public func isClosed(): Bool { closed }
+}
+
+private func readRequestWriterHead(transport: DuplexTransport): Http1ParsedRequestHead {
+    let parser = Http1RequestHeadParser()
+    while (true) {
+        let buffer = Array<Byte>(64, repeat: 0)
+        match (transport.readSome(MutableByteSpan(buffer), context: OperationContext.background())) {
+            case ReadResult.Data(count) =>
+                let input = Array<Byte>(count, repeat: 0)
+                for (index in 0..count) { input[index] = buffer[index] }
+                if (let Some(parsed) <- parser.feed(input)) { return parsed }
+            case ReadResult.EndOfStream => throw Exception("request writer closed before head")
+        }
+    }
+    throw Exception("unreachable request writer head loop")
+}
+
+private func expectRequestWriterFailure(code: Http1RequestWriteErrorCode, action: () -> Unit): Unit {
+    var matched = false
+    try { action() } catch (error: Http1RequestWriteException) { matched = isWriteCode(error.code, code) }
+    @Expect(matched)
+}
+
 private func captureWriteFailure(
     transport: DuplexTransport,
     request: HttpRequest
@@ -141,6 +207,7 @@ private func isWriteCode(left: Http1RequestWriteErrorCode, right: Http1RequestWr
         case (Http1RequestWriteErrorCode.BodyLengthMismatch, Http1RequestWriteErrorCode.BodyLengthMismatch) => true
         case (Http1RequestWriteErrorCode.BodyTooLarge, Http1RequestWriteErrorCode.BodyTooLarge) => true
         case (Http1RequestWriteErrorCode.InvalidRequestFraming, Http1RequestWriteErrorCode.InvalidRequestFraming) => true
+        case (Http1RequestWriteErrorCode.InvalidRequestState, Http1RequestWriteErrorCode.InvalidRequestState) => true
         case (Http1RequestWriteErrorCode.WriteFailed, Http1RequestWriteErrorCode.WriteFailed) => true
         case _ => false
     }
