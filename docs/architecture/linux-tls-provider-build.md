@@ -110,3 +110,42 @@ stage are opaque configuration descriptors only--certificate parsing, hostname
 verification, system trust and key-loading behavior begin at M3-009.
 
 This closes the Linux portions of M3-001 through M3-008.
+
+## Trust and reference identity
+
+`TrustPolicy` now represents `System`, `CustomRoots`,
+`SystemPlusCustomRoots` and `PinnedPublicKeys`; no `TrustAll` state is
+representable. Every policy receives a SHA-256 content identity suitable for
+session and pool isolation. SPKI pins are exactly 32-byte SHA-256 digests and
+declare leaf-only or any-certificate scope. Pin verification treats the
+matching certificate as the explicit trust anchor and still applies X.509 path,
+validity and reference-identity checks.
+
+Certificate input is exact DER only. The native adapter rejects trailing data,
+malformed X.509, duplicate certificates and excess extensions before a context
+can use the chain. Hard ceilings are 16 certificates, 256 KiB per certificate,
+1 MiB per chain, 128 extensions per certificate and 256 SAN identities. Native
+SAN extraction returns only bounded DNS/IP values to the provider-neutral
+verifier.
+
+DNS and IP reference identities are distinct types. DNS matching is SAN-only,
+accepts canonical ASCII IDNA A-labels, never falls back to Common Name and only
+permits a wildcard as the complete left-most label matching exactly one label.
+SNI is supplied separately and a ClientHello test proves that changing the
+reference identity does not change the emitted SNI extension.
+
+Linux system trust never calls `SSL_CTX_set_default_verify_paths`. It selects
+the first readable non-empty bundle in this frozen order:
+
+1. `/etc/ssl/certs/ca-certificates.crt`;
+2. `/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem`;
+3. `/etc/pki/tls/certs/ca-bundle.crt`;
+4. `/etc/ssl/ca-bundle.pem`.
+
+Only when no bundle is usable does it select the first readable hashed
+directory from `/etc/ssl/certs` then `/etc/pki/tls/certs`. If neither source is
+usable, capability discovery reports system trust unavailable and context
+construction fails; there is no environment or provider-default fallback.
+
+M3-009 through M3-011 are complete. M3-012 still needs positive and negative
+end-to-end pin handshakes, and M3-013 still needs native musl adapter evidence.
