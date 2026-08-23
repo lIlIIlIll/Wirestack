@@ -1,6 +1,9 @@
 package wirestack.internal.tls_engine
 
 import std.sync.*
+import wirestack.internal.common.*
+import wirestack.internal.platform.linux.*
+import wirestack.internal.trust.*
 
 private let PROVIDER_OK: Int32 = 0
 
@@ -204,6 +207,61 @@ public class AwsLcTlsProvider <: TlsProvider {
         }
     }
 
+    public func linuxCapabilities(): TlsCapabilities {
+        try {
+            let _ = LinuxSystemTrustAdapter.discover()
+            TlsCapabilities.fromProvider(providerManifest, systemTrustAvailable: true)
+        } catch (_: LinuxSystemTrustException) {
+            TlsCapabilities.fromProvider(providerManifest)
+        }
+    }
+
+    /**
+     * Creates a verification-enabled client engine. SNI and reference identity
+     * are separate inputs even when callers intentionally give them the same host.
+     */
+    public func createClientEngine(
+        context: TlsClientContext,
+        referenceIdentity: ReferenceIdentity,
+        serverName!: ?HostName = None<HostName>,
+        systemTrustLocation!: ?LinuxSystemTrustLocation = None<LinuxSystemTrustLocation>
+    ): TlsEngine {
+        synchronized(mutex) {
+            if (handle == 0u64) {
+                throw TlsProviderException(
+                    TlsProviderErrorCode.Closed,
+                    "TLS provider is closed"
+                )
+            }
+            if (context.providerManifest.providerId != providerManifest.providerId ||
+                context.providerManifest.fingerprint != providerManifest.fingerprint) {
+                throw TlsProviderException(
+                    TlsProviderErrorCode.InvalidManifest,
+                    "TLS context was built for a different provider instance identity"
+                )
+            }
+            let resolvedSystemTrust = if (requiresSystemTrust(context.trust) &&
+                systemTrustLocation.isNone()) {
+                Some(LinuxSystemTrustAdapter.discover())
+            } else {
+                systemTrustLocation
+            }
+            let engine = AwsLcTlsEngine(handle, TlsEngineRole.Client, context.security)
+            try {
+                engine.configureClientAuthentication(
+                    context.trust,
+                    referenceIdentity,
+                    serverName,
+                    resolvedSystemTrust
+                )
+                engine
+            } catch (error: Exception) {
+                engine.close()
+                throw error
+            }
+        }
+    }
+
     public func close(): Unit {
         synchronized(mutex) {
             let current = handle
@@ -220,5 +278,13 @@ public class AwsLcTlsProvider <: TlsProvider {
             handle = 0u64
             unsafe { wirestack_tls_provider_destroy(current) }
         }
+    }
+}
+
+private func requiresSystemTrust(value: TrustPolicy): Bool {
+    match (value.kind) {
+        case TrustPolicyKind.System => true
+        case TrustPolicyKind.SystemPlusCustomRoots => true
+        case _ => false
     }
 }

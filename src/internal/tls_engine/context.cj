@@ -1,5 +1,7 @@
 package wirestack.internal.tls_engine
 
+import wirestack.internal.trust.*
+
 public enum TlsCapability {
     | SystemTrust
     | CustomRoots
@@ -122,31 +124,6 @@ public struct TlsSecurityPolicy {
     }
 }
 
-public enum TlsTrustRequirementKind {
-    | System
-    | CustomRoots
-    | SystemPlusCustomRoots
-    | PinnedPublicKeys
-}
-
-/** Opaque validated trust input consumed by the M3-009 trust implementation. */
-public struct TlsTrustRequirement {
-    public let kind: TlsTrustRequirementKind
-    public let configurationId: String
-
-    public init(kind: TlsTrustRequirementKind, configurationId: String) {
-        if (configurationId.isEmpty()) {
-            throw IllegalArgumentException("TLS trust configuration identity must not be empty")
-        }
-        this.kind = kind
-        this.configurationId = configurationId
-    }
-
-    public static func system(configurationId!: String = "system"): TlsTrustRequirement {
-        TlsTrustRequirement(TlsTrustRequirementKind.System, configurationId)
-    }
-}
-
 public enum TlsIdentityUsage {
     | Client
     | Server
@@ -209,7 +186,7 @@ public class TlsClientContext {
     public let providerManifest: TlsProviderManifest
     public let capabilities: TlsCapabilities
     public let security: TlsSecurityPolicy
-    public let trust: TlsTrustRequirement
+    public let trust: TrustPolicy
     public let identity: ?TlsIdentityRequirement
     private let protocolNames: Array<String>
 
@@ -217,7 +194,7 @@ public class TlsClientContext {
         providerManifest: TlsProviderManifest,
         capabilities: TlsCapabilities,
         security: TlsSecurityPolicy,
-        trust: TlsTrustRequirement,
+        trust: TrustPolicy,
         identity: ?TlsIdentityRequirement,
         protocolNames: Array<String>
     ) {
@@ -242,7 +219,7 @@ public class TlsClientContext {
         providerManifest: TlsProviderManifest,
         capabilities: TlsCapabilities,
         security: TlsSecurityPolicy,
-        trust: TlsTrustRequirement,
+        trust: TrustPolicy,
         identity: ?TlsIdentityRequirement,
         protocolNames: Array<String>
     ): TlsClientContext {
@@ -264,7 +241,7 @@ public class TlsServerContext {
     public let security: TlsSecurityPolicy
     public let identity: TlsIdentityRequirement
     public let clientAuthentication: ClientAuthentication
-    public let clientTrust: ?TlsTrustRequirement
+    public let clientTrust: ?TrustPolicy
     private let protocolNames: Array<String>
 
     private init(
@@ -273,7 +250,7 @@ public class TlsServerContext {
         security: TlsSecurityPolicy,
         identity: TlsIdentityRequirement,
         clientAuthentication: ClientAuthentication,
-        clientTrust: ?TlsTrustRequirement,
+        clientTrust: ?TrustPolicy,
         protocolNames: Array<String>
     ) {
         this.providerManifest = providerManifest
@@ -300,7 +277,7 @@ public class TlsServerContext {
         security: TlsSecurityPolicy,
         identity: TlsIdentityRequirement,
         clientAuthentication: ClientAuthentication,
-        clientTrust: ?TlsTrustRequirement,
+        clientTrust: ?TrustPolicy,
         protocolNames: Array<String>
     ): TlsServerContext {
         TlsServerContext(
@@ -321,7 +298,7 @@ public class TlsClientContextBuilder {
     private var profile = TlsSecurityProfile.Modern
     private var minimum = TlsVersion.Tls12
     private var maximum = TlsVersion.Tls13
-    private var trustRequirement: ?TlsTrustRequirement = Some(TlsTrustRequirement.system())
+    private var trustRequirement: ?TrustPolicy = Some(TrustPolicy.system())
     private var identityRequirement: ?TlsIdentityRequirement = None<TlsIdentityRequirement>
     private var protocols = Array<String>()
 
@@ -349,7 +326,7 @@ public class TlsClientContextBuilder {
         this
     }
 
-    public func trust(value: TlsTrustRequirement): TlsClientContextBuilder {
+    public func trust(value: TrustPolicy): TlsClientContextBuilder {
         trustRequirement = Some(value)
         this
     }
@@ -398,7 +375,7 @@ public class TlsServerContextBuilder {
     private var maximum = TlsVersion.Tls13
     private var identityRequirement: ?TlsIdentityRequirement = None<TlsIdentityRequirement>
     private var authentication = ClientAuthentication.None
-    private var trustRequirement: ?TlsTrustRequirement = None<TlsTrustRequirement>
+    private var trustRequirement: ?TrustPolicy = None<TrustPolicy>
     private var protocols = Array<String>()
 
     internal init(providerManifest: TlsProviderManifest, capabilities: TlsCapabilities) {
@@ -435,7 +412,7 @@ public class TlsServerContextBuilder {
         this
     }
 
-    public func clientTrust(value: TlsTrustRequirement): TlsServerContextBuilder {
+    public func clientTrust(value: TrustPolicy): TlsServerContextBuilder {
         trustRequirement = Some(value)
         this
     }
@@ -541,16 +518,16 @@ private func validateAlpn(values: Array<String>, capabilities: TlsCapabilities):
     }
 }
 
-private func validateTrust(value: TlsTrustRequirement, capabilities: TlsCapabilities): Unit {
+private func validateTrust(value: TrustPolicy, capabilities: TlsCapabilities): Unit {
     match (value.kind) {
-        case TlsTrustRequirementKind.System =>
+        case TrustPolicyKind.System =>
             requireCapability(capabilities, TlsCapability.SystemTrust, "system trust")
-        case TlsTrustRequirementKind.CustomRoots =>
+        case TrustPolicyKind.CustomRoots =>
             requireCapability(capabilities, TlsCapability.CustomRoots, "custom roots")
-        case TlsTrustRequirementKind.SystemPlusCustomRoots =>
+        case TrustPolicyKind.SystemPlusCustomRoots =>
             requireCapability(capabilities, TlsCapability.SystemTrust, "system trust")
             requireCapability(capabilities, TlsCapability.CustomRoots, "custom roots")
-        case TlsTrustRequirementKind.PinnedPublicKeys => ()
+        case TrustPolicyKind.PinnedPublicKeys => ()
     }
 }
 
