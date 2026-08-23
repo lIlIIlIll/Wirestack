@@ -223,6 +223,16 @@ class TlsEnginePumpTest {
     }
 
     @TestCase
+    func tls13TicketResumesAcrossFreshEnginesWithoutEarlyData(): Unit {
+        proveRealSessionResumption(TlsVersion.Tls13, TlsVersion.Tls13, true)
+    }
+
+    @TestCase
+    func tls12TicketResumesAcrossFreshEngines(): Unit {
+        proveRealSessionResumption(TlsVersion.Tls12, TlsVersion.Tls12, false)
+    }
+
+    @TestCase
     func sniSelectsTheCompleteImmutableContextAndItsCertificate(): Unit {
         let provider = AwsLcTlsProvider()
         let primaryIdentity = tlsTestLocalIdentity()
@@ -762,6 +772,59 @@ private func containsAscii(buffer: Array<Byte>, length: Int64, needle: String): 
         if (equal) { return true }
     }
     false
+}
+
+private func proveRealSessionResumption(
+    minimum: TlsVersion,
+    maximum: TlsVersion,
+    expectSingleUse: Bool
+): Unit {
+    let provider = AwsLcTlsProvider()
+    let identity = tlsTestLocalIdentity()
+    let capabilities = provider.linuxCapabilities()
+    let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
+        .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
+        .versions(minimum, maximum)
+        .alpn(["h2"])
+        .build()
+    let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
+        .identity(identity)
+        .versions(minimum, maximum)
+        .alpn(["h2"])
+        .build()
+    let firstClient = provider.createClientEngine(
+        clientContext,
+        ReferenceIdentity.Dns(HostName("example.com")),
+        serverName: Some(HostName("example.com"))
+    )
+    let firstServer = provider.createServerEngine(serverContext)
+    try {
+        drivePairedMemoryHandshake(firstClient, firstServer)
+        let scratch = Array<Byte>(1, repeat: 0)
+        let _ = firstClient.readPlaintext(MutableByteSpan(scratch))
+        @Expect(provider.sessionStoreSnapshot().entries, 1)
+    } finally {
+        firstClient.close()
+        firstServer.close()
+    }
+    let resumedClient = provider.createClientEngine(
+        clientContext,
+        ReferenceIdentity.Dns(HostName("example.com")),
+        serverName: Some(HostName("example.com"))
+    )
+    @Expect(provider.sessionStoreSnapshot().entries, if (expectSingleUse) { 0 } else { 1 })
+    let resumedServer = provider.createServerEngine(serverContext)
+    try {
+        drivePairedMemoryHandshake(resumedClient, resumedServer)
+        @Expect(requireHandshakeInfo(resumedClient).resumed)
+        @Expect(requireHandshakeInfo(resumedServer).resumed)
+        @Expect(clientContext.security.zeroRttEnabled, false)
+    } finally {
+        resumedClient.close()
+        resumedServer.close()
+        identity.privateKeyRef.close()
+        provider.close()
+    }
 }
 
 private func drivePairedMemoryHandshake(client: TlsEngine, server: TlsEngine): Unit {

@@ -132,6 +132,7 @@ public class AwsLcTlsProvider <: TlsProvider {
     private let mutex = Mutex()
     private var handle: UInt64
     private let providerManifest: TlsProviderManifest
+    private let sessionStore = TlsSessionStore()
 
     public init() {
         let out = Array<UInt64>(1, repeat: 0u64)
@@ -166,6 +167,8 @@ public class AwsLcTlsProvider <: TlsProvider {
     }
 
     public func manifest(): TlsProviderManifest { providerManifest }
+
+    public func sessionStoreSnapshot(): TlsSessionStoreSnapshot { sessionStore.snapshot() }
 
     public func fillSecureRandom(output: Array<Byte>): Unit {
         synchronized(mutex) {
@@ -263,6 +266,10 @@ public class AwsLcTlsProvider <: TlsProvider {
                 if (let Some(identity) <- context.identity) {
                     engine.configureLocalIdentity(identity)
                 }
+                engine.configureSessionStore(
+                    sessionStore,
+                    clientSessionKey(context, referenceIdentity, resolvedSystemTrust)
+                )
                 engine
             } catch (error: Exception) {
                 engine.close()
@@ -313,6 +320,9 @@ public class AwsLcTlsProvider <: TlsProvider {
                     context.clientTrust,
                     resolvedSystemTrust
                 )
+                engine.configureServerSessionIdContext(
+                    serverSessionIdContext(context, resolvedSystemTrust)
+                )
                 engine
             } catch (error: Exception) {
                 engine.close()
@@ -359,6 +369,7 @@ public class AwsLcTlsProvider <: TlsProvider {
             if (current != 0u64) {
                 handle = 0u64
                 unsafe { wirestack_tls_provider_destroy(current) }
+                sessionStore.close()
             }
         }
     }
@@ -368,6 +379,7 @@ public class AwsLcTlsProvider <: TlsProvider {
         if (current != 0u64) {
             handle = 0u64
             unsafe { wirestack_tls_provider_destroy(current) }
+            sessionStore.close()
         }
     }
 }

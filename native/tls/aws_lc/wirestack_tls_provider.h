@@ -156,6 +156,24 @@ int32_t wirestack_tls_engine_set_protocol_versions(
     int32_t minimum_tls_version,
     int32_t maximum_tls_version
 );
+int32_t wirestack_tls_engine_set_session_id_context(
+    uint64_t engine_handle,
+    const uint8_t *context,
+    uint64_t context_size
+);
+int32_t wirestack_tls_engine_offer_session(
+    uint64_t engine_handle,
+    const uint8_t *session,
+    uint64_t session_size
+);
+int32_t wirestack_tls_engine_pending_session(
+    uint64_t engine_handle,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_required_size,
+    uint64_t *out_lifetime_seconds,
+    int32_t *out_single_use
+);
 int32_t wirestack_tls_engine_enable_server_name_selection(uint64_t engine_handle);
 int32_t wirestack_tls_engine_server_name_selection_request(
     uint64_t engine_handle,
