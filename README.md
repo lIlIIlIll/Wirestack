@@ -2,7 +2,7 @@
 
 Wirestack 是一个面向仓颉的跨平台安全网络栈项目，目标是在保留 `std.net` 作为官方默认 TCP/runtime 调度底座的前提下，重新定义并实现独立的 Transport、TLS、HTTPS、HTTP/1.1 与 HTTP/2 语义。
 
-当前仓库已进入 **Linux-first Transport/Resolver 实现阶段**。Transport Core 与 Linux `StdNetTransport`/listener 已具备真实 loopback 连接、双向 I/O、Deadline、取消和关闭唤醒测试；当前公开 `std.net` 缺少 typed half-close 与稳定 native error code，相关能力保持 fail-closed。Resolver、TLS、HTTP 与六平台能力尚未完成。
+当前仓库已进入 **Linux-first TLS 实现阶段**。Transport Core、Linux `StdNetTransport`/listener、Resolver contract 与 Happy Eyeballs core 已实现；AWS-LC 5.5.0 已在 Linux glibc/musl 原生 PoC 全能力通过并由 ADR-0003 选定。当前公开 `std.net` 仍缺少 typed half-close、稳定 native error code 与非 carrier-blocking DNS 接口，相关能力保持 fail-closed；生产 TLS、HTTP 与六平台能力尚未完成。
 
 ## 目标
 
@@ -44,7 +44,7 @@ wirestack.internal.http2
 wirestack.internal.platform.*
 ```
 
-这些包目前仅建立编译边界，没有占位公共 API。
+Transport、Resolver 与 Connector 包已经包含首批实现；TLS、HTTP 包仍只保留已冻结的编译边界。
 
 ## 本地验证
 

@@ -16,7 +16,7 @@ Status values have the same fail-closed meaning as the global status file.
 | large-buffer/copy profile | BLOCKED | Large-buffer behavior passes; copied-byte/allocation instrumentation and adapter comparison remain |
 | leak/soak | BLOCKED | Bounded stress passes; 100k cleanup and 24-hour Linux soak remain |
 | DNS scheduler behavior | COMPLETE | M0-013 records starvation and mandates a bounded resolver pool |
-| TLS provider | BLOCKED | glibc/musl results are PARTIAL; external signer remains unproved and no provider is selected |
+| TLS provider | COMPLETE | AWS-LC 5.5.0 is selected by ADR-0003 after schema-v2 glibc/musl PASS results, executed external signing and 10,000 cleanup cycles |
 | Transport SPI | IN_PROGRESS | Core types are implemented; listener, lifecycle closure and upstream capability mapping remain |
 | Linux continuous gates | BLOCKED | Depends on the remaining Linux M0 evidence and decisions |
 
@@ -43,14 +43,29 @@ Status values have the same fail-closed meaning as the global status file.
 | M1-022 stable std.net errors | BLOCKED | Timeout/cancel/closed are stable; public `SocketException` exposes no native code, so errno classes require an upstream API instead of message matching |
 | M1-023 transport diagnostics | IN_PROGRESS | Backend/endpoints/capabilities and staging copied-byte counters exist; event sink/runtime backend discovery remain |
 
+## Implemented Resolver and Connector Core
+
+| Task | Status | Evidence |
+|---|---|---|
+| M2-001 host/IP/endpoint model | IN_PROGRESS | Strict canonical ASCII `HostName`, typed IPv4/IPv6/zone endpoints and equality/hash tests; IDNA and authority parsing remain |
+| M2-002 Resolver contract | COMPLETE | All-address result, family filter, canonical host, source, optional expiration, structured errors and diagnostics |
+| M2-003 bounded resolver backend | BLOCKED | M0-013 proves `std.net` DNS can starve carriers; the pinned SDK exposes neither async resolver nor an independent native worker API, so UP-007 is required |
+| M2-005 Linux `SystemResolver` | BLOCKED | Depends on M2-003/UP-007; no direct `IPAddress.resolve` wrapper is presented as production-safe |
+| M2-009 normalization/diagnostics | IN_PROGRESS | Stable deduplication preserves family/zone evidence and never invents TTL; trace event sink remains |
+| M2-010 route model | NOT_STARTED | Direct/proxy and origin/proxy DNS separation remain |
+| M2-011 RFC 8305 attempt plan | COMPLETE | Stable family interleaving, intra-family order, deduplication and bounded candidate tests |
+| M2-012/013 Happy Eyeballs scheduler | COMPLETE | Shared parent Deadline, linked cancellation, atomic first winner, loser abort, joined candidates and per-attempt diagnostics |
+| M2-014 scripted connector tests | IN_PROGRESS | IPv6 blackhole, simultaneous success, all-fail and pre-cancel cases pass; success+cancel/deadline boundary matrix remains |
+| M2-015/016 native network gates/benchmark | NOT_STARTED | Linux network emulation, glibc/musl runs and DNS-to-connected benchmark remain |
+
 ## Next critical path
 
 1. Complete shared Transport lifecycle/exactly-once primitives and the remaining
    deterministic race tests.
 2. Submit the minimal `std.net` upstream interface RFC for typed half-close and
    stable native error evidence.
-3. Implement the bounded Linux resolver and Happy Eyeballs connector.
-4. Complete the Linux TLS provider PoC, select/pin one provider, then implement
-   TLS Core and Linux trust/key adapters.
+3. Land UP-007 or another proven non-carrier-blocking resolver backend, then
+   complete Linux `SystemResolver` and native blackhole gates.
+4. Implement AWS-LC-backed TLS Core and Linux trust/key adapters under ADR-0003.
 5. Implement HTTP/1.1, HTTP/2, Linux conformance, fuzz, benchmark, 24-hour soak,
    packaging and installation verification.

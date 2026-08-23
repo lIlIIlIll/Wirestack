@@ -9,6 +9,22 @@ import wirestack.internal.transport.*
 
 private const DEFAULT_STAGING_BUFFER_SIZE: Int64 = 16 * 1024
 
+/** Default DNS-free connection factory for Linux Happy Eyeballs attempts. */
+public class StdNetTransportFactory <: TransportFactory {
+    private let stagingBufferSize: Int64
+
+    public init(stagingBufferSize!: Int64 = DEFAULT_STAGING_BUFFER_SIZE) {
+        if (stagingBufferSize <= 0) {
+            throw IllegalArgumentException("stagingBufferSize must be positive")
+        }
+        this.stagingBufferSize = stagingBufferSize
+    }
+
+    public func connect(endpoint: SocketEndpoint, context: OperationContext): DuplexTransport {
+        StdNetTransport.connect(endpoint, context: context, stagingBufferSize: stagingBufferSize)
+    }
+}
+
 /**
  * Linux TCP adapter over public std.net APIs.
  *
@@ -311,7 +327,8 @@ public class StdNetTransport <: DuplexTransport {
         synchronized(lifecycleMutex) { writeActive = false }
     }
 
-    internal func waitUntilReadActive(timeout: Duration): Bool {
+    /** Waits for read activity for bounded lifecycle diagnostics and race gates. */
+    public func waitUntilReadActive(timeout: Duration): Bool {
         let expiresAt = MonoTime.now() + timeout
         synchronized(lifecycleMutex) {
             while (!readActive && !closed && !aborted) {

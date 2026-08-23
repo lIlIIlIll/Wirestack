@@ -22,6 +22,7 @@ Core rules:
 
 - [ADR-0001: CJPM Package and Source Layout](adr/0001-cjpm-package-layout.md)
 - [ADR-0002: Linux-first delivery profile](adr/0002-linux-first-delivery-profile.md)
+- [ADR-0003: Linux TLS provider selection](adr/0003-linux-tls-provider.md)
 
 ## Supporting architecture records
 
