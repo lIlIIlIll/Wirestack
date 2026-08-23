@@ -2,7 +2,7 @@ package wirestack.internal.http1
 
 import std.unittest.*
 import std.unittest.testmacro.*
-import wirestack.http.*
+import wirestack.internal.http_model.*
 
 @Test
 class Http1HeadParserTest {
