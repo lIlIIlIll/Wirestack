@@ -14,3 +14,4 @@ command -v cjc >/dev/null
 command -v cjpm >/dev/null
 cjpm check
 cjpm build
+cjpm test

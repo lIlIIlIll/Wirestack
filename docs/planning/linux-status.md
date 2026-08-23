@@ -58,6 +58,15 @@ Status values have the same fail-closed meaning as the global status file.
 | M2-014 scripted connector tests | IN_PROGRESS | IPv6 blackhole, simultaneous success, all-fail and pre-cancel cases pass; success+cancel/deadline boundary matrix remains |
 | M2-015/016 native network gates/benchmark | NOT_STARTED | Linux network emulation, glibc/musl runs and DNS-to-connected benchmark remain |
 
+## Implemented TLS Provider Foundation
+
+| Task | Status | Evidence |
+|---|---|---|
+| M3-001 pinned static provider build | COMPLETE | AWS-LC 5.5.0 exact commit/tree, clean-source enforcement, fixed static options, single archive, native smoke and content-addressed build manifest |
+| M3-002 provider SPI/build manifest | COMPLETE | Instance-owned opaque C ABI; provider-neutral Cangjie manifest exposes id/version/fingerprint/backend/capabilities/patch level; no native public type |
+| M3-003 secure random adapter | COMPLETE | AWS-LC CSPRNG fills caller-owned buffers, maps stable structured failures, logs no bytes and passes lifecycle tests |
+| M3-004 external byte-stream pump | NOT_STARTED | Requires provider TLS engine operations over `DuplexTransport` with WANT_READ/WANT_WRITE, partial I/O, Deadline, cancel and backpressure |
+
 ## Next critical path
 
 1. Complete shared Transport lifecycle/exactly-once primitives and the remaining
@@ -66,6 +75,8 @@ Status values have the same fail-closed meaning as the global status file.
    stable native error evidence.
 3. Land UP-007 or another proven non-carrier-blocking resolver backend, then
    complete Linux `SystemResolver` and native blackhole gates.
-4. Implement AWS-LC-backed TLS Core and Linux trust/key adapters under ADR-0003.
+4. Implement the AWS-LC TLS engine pump, connection/context state machines and
+   Linux trust/key adapters under ADR-0003; the static provider/SPI/CSPRNG
+   foundation is complete.
 5. Implement HTTP/1.1, HTTP/2, Linux conformance, fuzz, benchmark, 24-hour soak,
    packaging and installation verification.

@@ -10,10 +10,13 @@
   output-type = "static"
   compile-option = ""
   override-compile-option = ""
-  link-option = ""
+  link-option = "-lstdc++ -lpthread -ldl -lm"
   package-configuration = {}
   repository = "https://github.com/lIlIIlIll/Wirestack.git"
   homepage = "https://github.com/lIlIIlIll/Wirestack"
   documentation = "https://github.com/lIlIIlIll/Wirestack/tree/main/docs"
 
 [dependencies]
+
+[ffi.c]
+  wirestack_tls_provider = { path = "./target/native/current/lib" }
