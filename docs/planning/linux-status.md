@@ -32,16 +32,25 @@ Status values have the same fail-closed meaning as the global status file.
 | M1-007 structured network error | COMPLETE | category/phase/code/retryability/native/endpoint/cause model and tests |
 | M1-010 `DuplexTransport` contract | IN_PROGRESS | Contract and MemoryTransport semantics exist; shared lifecycle state machine remains |
 | M1-011 `writeAll`/`readExact` | COMPLETE | Partial I/O, empty range and premature EOF tests |
+| M1-012 `TransportListener` | COMPLETE | Contract plus bounded `StdNetTransportListener`; Deadline/cancel/close wakeup integration tests |
 | M1-013 `MemoryTransport` | IN_PROGRESS | Bounded duplex, backpressure, half-close, EOF, cancellation and terminal tests pass; listener/fault scripting remains |
+| M1-015/016 `StdNetTransport` ownership/connect | COMPLETE | DNS-free `IPSocketAddress` construction, exclusive adapter ownership, absolute connect budget and actual endpoints |
+| M1-017 `StdNetTransport.readSome` | COMPLETE | Partial reads, peer EOF, local close/cancel distinction, Deadline and one-reader guard tested on Linux loopback |
+| M1-018 bounded write staging | IN_PROGRESS | Bounded partial writes and copied-byte counters exist; current whole-Array `std.net` API still forces per-call staging allocation |
+| M1-019 typed half-close | BLOCKED | Public pinned `TcpSocket` has no shutdown API; adapter reports `Unsupported` and requires UP-003 |
+| M1-020 idempotent close/abort | COMPLETE | Native close is claimed once; close/cancel wake blocked read and listener accept without returning false EOF |
+| M1-021 `StdNetTransportListener` | COMPLETE | IP-only bind, bounded backlog, endpoints and accept Deadline/cancel/close semantics |
+| M1-022 stable std.net errors | BLOCKED | Timeout/cancel/closed are stable; public `SocketException` exposes no native code, so errno classes require an upstream API instead of message matching |
+| M1-023 transport diagnostics | IN_PROGRESS | Backend/endpoints/capabilities and staging copied-byte counters exist; event sink/runtime backend discovery remain |
 
 ## Next critical path
 
-1. Complete shared Transport lifecycle/exactly-once primitives and deterministic
-   race tests.
-2. Freeze the Linux Transport SPI and minimal `std.net` upstream interface RFC.
-3. Implement `StdNetTransport` without DNS or private-handle access.
-4. Implement the bounded Linux resolver and Happy Eyeballs connector.
-5. Complete the Linux TLS provider PoC, select/pin one provider, then implement
+1. Complete shared Transport lifecycle/exactly-once primitives and the remaining
+   deterministic race tests.
+2. Submit the minimal `std.net` upstream interface RFC for typed half-close and
+   stable native error evidence.
+3. Implement the bounded Linux resolver and Happy Eyeballs connector.
+4. Complete the Linux TLS provider PoC, select/pin one provider, then implement
    TLS Core and Linux trust/key adapters.
-6. Implement HTTP/1.1, HTTP/2, Linux conformance, fuzz, benchmark, 24-hour soak,
+5. Implement HTTP/1.1, HTTP/2, Linux conformance, fuzz, benchmark, 24-hour soak,
    packaging and installation verification.
