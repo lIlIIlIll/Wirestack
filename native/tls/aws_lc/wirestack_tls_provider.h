@@ -27,7 +27,8 @@ enum wirestack_tls_engine_role {
 enum wirestack_tls_engine_step {
     WIRESTACK_TLS_ENGINE_COMPLETE = 0,
     WIRESTACK_TLS_ENGINE_WANT_READ = 1,
-    WIRESTACK_TLS_ENGINE_WANT_WRITE = 2
+    WIRESTACK_TLS_ENGINE_WANT_WRITE = 2,
+    WIRESTACK_TLS_ENGINE_NEED_SIGNATURE = 3
 };
 
 enum wirestack_tls_engine_io_step {
@@ -88,6 +89,12 @@ int32_t wirestack_tls_identity_validate_pkcs8(
     const uint8_t *private_key,
     uint64_t private_key_size
 );
+int32_t wirestack_tls_identity_validate_spki(
+    const uint8_t *leaf_certificate,
+    uint64_t leaf_certificate_size,
+    const uint8_t *subject_public_key_info,
+    uint64_t subject_public_key_info_size
+);
 
 int32_t wirestack_tls_engine_create(
     uint64_t provider_handle,
@@ -146,6 +153,26 @@ int32_t wirestack_tls_engine_add_identity_chain_certificate_der(
     const uint8_t *certificate,
     uint64_t certificate_size
 );
+int32_t wirestack_tls_engine_set_external_signer(
+    uint64_t engine_handle,
+    const uint8_t *leaf_certificate,
+    uint64_t leaf_certificate_size,
+    const uint16_t *signature_algorithms,
+    uint64_t signature_algorithm_count
+);
+int32_t wirestack_tls_engine_external_signature_request(
+    uint64_t engine_handle,
+    uint16_t *out_signature_algorithm,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_required_size
+);
+int32_t wirestack_tls_engine_complete_external_signature(
+    uint64_t engine_handle,
+    const uint8_t *signature,
+    uint64_t signature_size
+);
+int32_t wirestack_tls_engine_fail_external_signature(uint64_t engine_handle);
 int32_t wirestack_tls_engine_handshake_step(
     uint64_t engine_handle,
     int32_t *out_step

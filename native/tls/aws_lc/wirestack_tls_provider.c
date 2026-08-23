@@ -21,6 +21,8 @@
 #define WIRESTACK_TLS_PROVIDER_MAGIC UINT64_C(0x5753544c53505231)
 #define WIRESTACK_TLS_ENGINE_MAGIC UINT64_C(0x5753544c53454e31)
 #define WIRESTACK_TLS_MAXIMUM_PINS 32
+#define WIRESTACK_TLS_MAXIMUM_SIGNER_INPUT (64u * 1024u)
+#define WIRESTACK_TLS_MAXIMUM_SIGNATURE (16u * 1024u)
 #define WIRESTACK_TLS_PIN_LEAF UINT8_C(0)
 #define WIRESTACK_TLS_PIN_ANY_CERTIFICATE UINT8_C(1)
 
@@ -38,6 +40,96 @@ struct wirestack_tls_engine {
     uint8_t pin_scopes[WIRESTACK_TLS_MAXIMUM_PINS];
     size_t pin_count;
     int matched_pin_index;
+    uint8_t *signer_input;
+    size_t signer_input_size;
+    uint16_t signer_algorithm;
+    uint8_t *signer_signature;
+    size_t signer_signature_size;
+    int signer_state;
+};
+
+enum wirestack_tls_signer_state {
+    WIRESTACK_TLS_SIGNER_IDLE = 0,
+    WIRESTACK_TLS_SIGNER_REQUESTED = 1,
+    WIRESTACK_TLS_SIGNER_READY = 2,
+    WIRESTACK_TLS_SIGNER_FAILED = 3
+};
+
+static void clear_sensitive_buffer(uint8_t **buffer, size_t *size) {
+    if (*buffer != NULL) {
+        OPENSSL_cleanse(*buffer, *size);
+        free(*buffer);
+        *buffer = NULL;
+    }
+    *size = 0;
+}
+
+static enum ssl_private_key_result_t wirestack_external_sign(
+    SSL *ssl,
+    uint8_t *out,
+    size_t *out_len,
+    size_t max_out,
+    uint16_t signature_algorithm,
+    const uint8_t *input,
+    size_t input_size
+) {
+    struct wirestack_tls_engine *engine =
+        (struct wirestack_tls_engine *)SSL_get_app_data(ssl);
+    (void)out;
+    (void)out_len;
+    (void)max_out;
+    if (engine == NULL || engine->magic != WIRESTACK_TLS_ENGINE_MAGIC ||
+        engine->signer_state != WIRESTACK_TLS_SIGNER_IDLE || input == NULL ||
+        input_size == 0 || input_size > WIRESTACK_TLS_MAXIMUM_SIGNER_INPUT) {
+        return ssl_private_key_failure;
+    }
+    engine->signer_input = (uint8_t *)malloc(input_size);
+    if (engine->signer_input == NULL) {
+        return ssl_private_key_failure;
+    }
+    memcpy(engine->signer_input, input, input_size);
+    engine->signer_input_size = input_size;
+    engine->signer_algorithm = signature_algorithm;
+    engine->signer_state = WIRESTACK_TLS_SIGNER_REQUESTED;
+    return ssl_private_key_retry;
+}
+
+static enum ssl_private_key_result_t wirestack_external_sign_complete(
+    SSL *ssl,
+    uint8_t *out,
+    size_t *out_len,
+    size_t max_out
+) {
+    struct wirestack_tls_engine *engine =
+        (struct wirestack_tls_engine *)SSL_get_app_data(ssl);
+    if (engine == NULL || engine->magic != WIRESTACK_TLS_ENGINE_MAGIC) {
+        return ssl_private_key_failure;
+    }
+    if (engine->signer_state == WIRESTACK_TLS_SIGNER_REQUESTED) {
+        return ssl_private_key_retry;
+    }
+    if (engine->signer_state == WIRESTACK_TLS_SIGNER_FAILED) {
+        clear_sensitive_buffer(&engine->signer_input, &engine->signer_input_size);
+        engine->signer_state = WIRESTACK_TLS_SIGNER_IDLE;
+        return ssl_private_key_failure;
+    }
+    if (engine->signer_state != WIRESTACK_TLS_SIGNER_READY ||
+        engine->signer_signature == NULL || engine->signer_signature_size == 0 ||
+        engine->signer_signature_size > max_out) {
+        return ssl_private_key_failure;
+    }
+    memcpy(out, engine->signer_signature, engine->signer_signature_size);
+    *out_len = engine->signer_signature_size;
+    clear_sensitive_buffer(&engine->signer_input, &engine->signer_input_size);
+    clear_sensitive_buffer(&engine->signer_signature, &engine->signer_signature_size);
+    engine->signer_state = WIRESTACK_TLS_SIGNER_IDLE;
+    return ssl_private_key_success;
+}
+
+static const SSL_PRIVATE_KEY_METHOD WIRESTACK_EXTERNAL_KEY_METHOD = {
+    wirestack_external_sign,
+    NULL,
+    wirestack_external_sign_complete
 };
 
 static int certificate_spki_sha256(const X509 *certificate, uint8_t out_digest[32]) {
@@ -192,6 +284,20 @@ static EVP_PKEY *parse_exact_pkcs8(const uint8_t *input, uint64_t size) {
     return private_key;
 }
 
+static EVP_PKEY *parse_exact_spki(const uint8_t *input, uint64_t size) {
+    const uint8_t *cursor = input;
+    EVP_PKEY *public_key;
+    if (input == NULL || size == UINT64_C(0) || size > (uint64_t)LONG_MAX) {
+        return NULL;
+    }
+    public_key = d2i_PUBKEY(NULL, &cursor, (long)size);
+    if (public_key == NULL || cursor != input + size) {
+        EVP_PKEY_free(public_key);
+        return NULL;
+    }
+    return public_key;
+}
+
 int32_t wirestack_tls_private_key_validate_pkcs8(
     const uint8_t *input,
     uint64_t size
@@ -223,6 +329,34 @@ int32_t wirestack_tls_identity_validate_pkcs8(
     X509_free(certificate);
     EVP_PKEY_free(key);
     return matches == 1
+        ? WIRESTACK_TLS_PROVIDER_OK
+        : WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
+}
+
+int32_t wirestack_tls_identity_validate_spki(
+    const uint8_t *leaf_certificate,
+    uint64_t leaf_certificate_size,
+    const uint8_t *subject_public_key_info,
+    uint64_t subject_public_key_info_size
+) {
+    X509 *certificate = parse_exact_x509(leaf_certificate, leaf_certificate_size);
+    EVP_PKEY *expected = parse_exact_spki(
+        subject_public_key_info,
+        subject_public_key_info_size
+    );
+    EVP_PKEY *actual;
+    int matches;
+    if (certificate == NULL || expected == NULL) {
+        X509_free(certificate);
+        EVP_PKEY_free(expected);
+        return WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
+    }
+    actual = X509_get_pubkey(certificate);
+    matches = actual != NULL && EVP_PKEY_cmp(actual, expected) == 1;
+    EVP_PKEY_free(actual);
+    EVP_PKEY_free(expected);
+    X509_free(certificate);
+    return matches
         ? WIRESTACK_TLS_PROVIDER_OK
         : WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
 }
@@ -499,6 +633,7 @@ int32_t wirestack_tls_engine_create(
         free(engine);
         return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
     }
+    SSL_set_app_data(engine->ssl, engine);
     BIO_set_mem_eof_return(incoming, -1);
     SSL_set_bio(engine->ssl, incoming, outgoing);
     engine->incoming = incoming;
@@ -518,6 +653,8 @@ void wirestack_tls_engine_destroy(uint64_t engine_handle) {
         return;
     }
     engine->magic = UINT64_C(0);
+    clear_sensitive_buffer(&engine->signer_input, &engine->signer_input_size);
+    clear_sensitive_buffer(&engine->signer_signature, &engine->signer_signature_size);
     SSL_free(engine->ssl);
     SSL_CTX_free(engine->context);
     free(engine);
@@ -715,6 +852,98 @@ int32_t wirestack_tls_engine_add_identity_chain_certificate_der(
         : WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
 }
 
+int32_t wirestack_tls_engine_set_external_signer(
+    uint64_t engine_handle,
+    const uint8_t *leaf_certificate,
+    uint64_t leaf_certificate_size,
+    const uint16_t *signature_algorithms,
+    uint64_t signature_algorithm_count
+) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    X509 *certificate;
+    int result;
+    if (engine == NULL || signature_algorithms == NULL ||
+        signature_algorithm_count == UINT64_C(0) ||
+        signature_algorithm_count > UINT64_C(16) ||
+        signature_algorithm_count > (uint64_t)SIZE_MAX) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    certificate = parse_exact_x509(leaf_certificate, leaf_certificate_size);
+    if (certificate == NULL) {
+        return WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
+    }
+    ERR_clear_error();
+    result = SSL_use_certificate(engine->ssl, certificate) == 1 &&
+        SSL_set_signing_algorithm_prefs(
+            engine->ssl,
+            signature_algorithms,
+            (size_t)signature_algorithm_count
+        ) == 1;
+    X509_free(certificate);
+    if (result != 1) {
+        return WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
+    }
+    SSL_set_private_key_method(engine->ssl, &WIRESTACK_EXTERNAL_KEY_METHOD);
+    return WIRESTACK_TLS_PROVIDER_OK;
+}
+
+int32_t wirestack_tls_engine_external_signature_request(
+    uint64_t engine_handle,
+    uint16_t *out_signature_algorithm,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_required_size
+) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    if (engine == NULL || out_signature_algorithm == NULL ||
+        out_required_size == NULL ||
+        engine->signer_state != WIRESTACK_TLS_SIGNER_REQUESTED ||
+        (output_capacity != UINT64_C(0) && output == NULL)) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    *out_signature_algorithm = engine->signer_algorithm;
+    *out_required_size = (uint64_t)engine->signer_input_size;
+    if (output == NULL || output_capacity == UINT64_C(0)) {
+        return WIRESTACK_TLS_PROVIDER_OK;
+    }
+    if (output_capacity < (uint64_t)engine->signer_input_size) {
+        return WIRESTACK_TLS_PROVIDER_LIMIT_EXCEEDED;
+    }
+    memcpy(output, engine->signer_input, engine->signer_input_size);
+    return WIRESTACK_TLS_PROVIDER_OK;
+}
+
+int32_t wirestack_tls_engine_complete_external_signature(
+    uint64_t engine_handle,
+    const uint8_t *signature,
+    uint64_t signature_size
+) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    if (engine == NULL || signature == NULL || signature_size == UINT64_C(0) ||
+        signature_size > WIRESTACK_TLS_MAXIMUM_SIGNATURE ||
+        signature_size > (uint64_t)SIZE_MAX ||
+        engine->signer_state != WIRESTACK_TLS_SIGNER_REQUESTED) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    engine->signer_signature = (uint8_t *)malloc((size_t)signature_size);
+    if (engine->signer_signature == NULL) {
+        return WIRESTACK_TLS_PROVIDER_OUT_OF_MEMORY;
+    }
+    memcpy(engine->signer_signature, signature, (size_t)signature_size);
+    engine->signer_signature_size = (size_t)signature_size;
+    engine->signer_state = WIRESTACK_TLS_SIGNER_READY;
+    return WIRESTACK_TLS_PROVIDER_OK;
+}
+
+int32_t wirestack_tls_engine_fail_external_signature(uint64_t engine_handle) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    if (engine == NULL || engine->signer_state != WIRESTACK_TLS_SIGNER_REQUESTED) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    engine->signer_state = WIRESTACK_TLS_SIGNER_FAILED;
+    return WIRESTACK_TLS_PROVIDER_OK;
+}
+
 int32_t wirestack_tls_engine_handshake_step(
     uint64_t engine_handle,
     int32_t *out_step
@@ -738,6 +967,10 @@ int32_t wirestack_tls_engine_handshake_step(
     }
     if (error == SSL_ERROR_WANT_WRITE) {
         *out_step = WIRESTACK_TLS_ENGINE_WANT_WRITE;
+        return WIRESTACK_TLS_PROVIDER_OK;
+    }
+    if (error == SSL_ERROR_WANT_PRIVATE_KEY_OPERATION) {
+        *out_step = WIRESTACK_TLS_ENGINE_NEED_SIGNATURE;
         return WIRESTACK_TLS_PROVIDER_OK;
     }
     return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;

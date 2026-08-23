@@ -159,5 +159,21 @@ Server engines install the leaf, private key and any intermediate chain through
 the pinned native provider. A paired memory-BIO test completes a real TLS
 client/server handshake with the fixture's SPKI pin, while the same handshake
 with a wrong pin fails in the provider verification path. M3-012 and M3-017 are
-therefore complete. M3-013 still needs native musl adapter evidence, and M3-016
-still needs system-handle and external-signer contracts.
+therefore complete.
+
+The same opaque `PrivateKeyRef` now represents PKCS#8, a platform system
+handle/alias, or an external signer. Handle/signer refs carry only a stable
+identity, bounded DER SubjectPublicKeyInfo, an explicit hardware-backed bit and
+1..16 non-duplicate TLS signature algorithms. AWS-LC validates that the public
+key matches the leaf certificate before a context is usable.
+
+External signing uses AWS-LC's retry protocol rather than a C-to-Cangjie user
+callback. The native `SSL_PRIVATE_KEY_METHOD` copies at most 64 KiB of signing
+input into instance-owned engine state and returns
+`SSL_ERROR_WANT_PRIVATE_KEY_OPERATION`. The Cangjie pump retrieves that request,
+releases its engine mutex, checks the same `OperationContext`, calls user code,
+then supplies at most 16 KiB of signature or explicitly fails the pending
+operation. User exceptions therefore never cross the C ABI, no provider-global
+signer state or lock exists, and cancellation fails closed. Positive real
+handshake, deliberate user exception and pre-invocation cancellation tests
+close M3-016 and M3-018. M3-013 still needs native musl adapter evidence.
