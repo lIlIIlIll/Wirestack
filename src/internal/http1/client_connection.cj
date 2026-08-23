@@ -49,6 +49,15 @@ public class Http1ClientConnection <: Resource {
         context!: OperationContext = OperationContext.background(),
         trailer!: HttpTrailer = HttpTrailer()
     ): Http1ResponseReadResult {
+        executeTracked(request, context: context, trailer: trailer, onTerminated: { _ => })
+    }
+
+    internal func executeTracked(
+        request: HttpRequest,
+        context!: OperationContext = OperationContext.background(),
+        trailer!: HttpTrailer = HttpTrailer(),
+        onTerminated!: (Bool) -> Unit = { _ => }
+    ): Http1ResponseReadResult {
         synchronized(mutex) {
             match (state) {
                 case Http1ClientConnectionState.Ready => state = Http1ClientConnectionState.Exchanging
@@ -58,7 +67,7 @@ public class Http1ClientConnection <: Resource {
                 )
             }
         }
-        let observer = Http1ConnectionBodyObserver(this)
+        let observer = Http1ConnectionBodyObserver(this, onTerminated)
         try {
             let expectsContinue = headerContainsToken(request.headers, "expect", "100-continue") &&
                 request.body.contentLength != Some(0)
@@ -154,11 +163,15 @@ public class Http1ClientConnection <: Resource {
 
 private class Http1ConnectionBodyObserver <: ResponseBodyObserver {
     private let connection: Http1ClientConnection
+    private let onTerminated: (Bool) -> Unit
     private let mutex = Mutex()
     private var configured = false
     private var reusable = false
 
-    init(connection: Http1ClientConnection) { this.connection = connection }
+    init(connection: Http1ClientConnection, onTerminated: (Bool) -> Unit) {
+        this.connection = connection
+        this.onTerminated = onTerminated
+    }
 
     func configure(reusable: Bool): Unit {
         synchronized(mutex) {
@@ -171,7 +184,11 @@ private class Http1ConnectionBodyObserver <: ResponseBodyObserver {
     public func completed(): Unit {
         let canReuse = synchronized(mutex) { configured && reusable }
         connection.bodyTerminated(canReuse, false)
+        onTerminated(canReuse)
     }
 
-    public func abandoned(): Unit { connection.bodyTerminated(false, true) }
+    public func abandoned(): Unit {
+        connection.bodyTerminated(false, true)
+        onTerminated(false)
+    }
 }
