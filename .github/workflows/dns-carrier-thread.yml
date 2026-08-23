@@ -1,0 +1,24 @@
+name: DNS Carrier Thread Harness
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  harness-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test DNS carrier-thread harness
+        run: python3 -m unittest discover -s tools/gates/tests -p 'test_dns_carrier_thread.py' -v
+      - name: Compile Python harness
+        run: python3 -m py_compile tools/gates/dns_carrier_thread.py
+      - name: Compile native delay shim
+        run: gcc -shared -fPIC -O2 -Wall -Wextra -Werror -o /tmp/libgai-delay.so tools/gates/native/gai_delay.c -ldl -pthread
