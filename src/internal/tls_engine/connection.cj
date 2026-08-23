@@ -10,6 +10,13 @@ public enum TlsConnectionState {
     | Aborted
 }
 
+/** Stable evidence explaining how the TLS byte stream terminated. */
+public enum TlsClosureEvidence {
+    | CloseNotify
+    | PeerClosedWithoutCloseNotify
+    | LocalAbort
+}
+
 /**
  * Owns one TLS engine and the sole reference to its ciphertext transport.
  * Construction consumes both inputs whether the handshake succeeds or fails.
@@ -27,6 +34,7 @@ public class TlsConnection <: DuplexTransport {
     private var engineReleased = false
     private var closeStarted = false
     private var abortStarted = false
+    private var terminalEvidence = None<TlsClosureEvidence>
 
     private init(
         engine: TlsEngine,
@@ -81,14 +89,24 @@ public class TlsConnection <: DuplexTransport {
         get() { synchronized(lifecycleMutex) { lifecycle } }
     }
 
+    public prop closureEvidence: ?TlsClosureEvidence {
+        get() { synchronized(lifecycleMutex) { terminalEvidence } }
+    }
+
     public func readSome(
         destination: MutableByteSpan,
         context!: OperationContext = OperationContext.background()
     ): ReadResult {
         beginRead()
         try {
-            pump.readPlaintext(engine, transport, destination, context: context)
+            let result = pump.readPlaintext(engine, transport, destination, context: context)
+            match (result) {
+                case ReadResult.EndOfStream => recordEvidence(TlsClosureEvidence.CloseNotify)
+                case _ => ()
+            }
+            result
         } catch (error: NetworkException) {
+            recordTruncation(error)
             abort(reason: abortReason(error))
             throw error
         } catch (error: Exception) {
@@ -146,17 +164,24 @@ public class TlsConnection <: DuplexTransport {
             return
         }
         try {
-            transport.close(context)
-        } catch (error: Exception) {
-            abort(reason: Some(AbortReason.ProtocolFailure))
-            throw error
+            try {
+                pump.shutdown(engine, transport, context: context)
+                recordEvidence(TlsClosureEvidence.CloseNotify)
+            } catch (error: NetworkException) {
+                recordTruncation(error)
+                throw error
+            }
         } finally {
-            releaseEngineOnce()
-        }
-        synchronized(lifecycleMutex) {
-            match (lifecycle) {
-                case TlsConnectionState.Closing => lifecycle = TlsConnectionState.Closed
-                case _ => ()
+            try {
+                transport.close(context)
+            } finally {
+                releaseEngineOnce()
+                synchronized(lifecycleMutex) {
+                    match (lifecycle) {
+                        case TlsConnectionState.Closing => lifecycle = TlsConnectionState.Closed
+                        case _ => ()
+                    }
+                }
             }
         }
     }
@@ -171,6 +196,9 @@ public class TlsConnection <: DuplexTransport {
                 case TlsConnectionState.Closed | TlsConnectionState.Aborted => false
                 case _ =>
                     lifecycle = TlsConnectionState.Aborted
+                    if (terminalEvidence.isNone()) {
+                        terminalEvidence = Some(TlsClosureEvidence.LocalAbort)
+                    }
                     if (!abortStarted) {
                         abortStarted = true
                         true
@@ -207,6 +235,17 @@ public class TlsConnection <: DuplexTransport {
     private func beginWrite(): Unit {
         synchronized(lifecycleMutex) {
             requireOpen(NetworkPhase.TlsWrite)
+            match (terminalEvidence) {
+                case Some(TlsClosureEvidence.CloseNotify) =>
+                    throw NetworkException(
+                        NetworkErrorCategory.Closed,
+                        NetworkPhase.TlsWrite,
+                        NetworkErrorCode.Closed,
+                        "TLS peer has sent close_notify",
+                        retryability: Retryability.Never
+                    )
+                case _ => ()
+            }
             if (writeActive) {
                 throw concurrentTlsOperation(NetworkErrorCategory.Write, NetworkPhase.TlsWrite)
             }
@@ -239,6 +278,23 @@ public class TlsConnection <: DuplexTransport {
         }
         if (release) {
             engine.close()
+        }
+    }
+
+    private func recordEvidence(value: TlsClosureEvidence): Unit {
+        synchronized(lifecycleMutex) {
+            if (terminalEvidence.isNone()) {
+                terminalEvidence = Some(value)
+            }
+        }
+    }
+
+    private func recordTruncation(error: NetworkException): Unit {
+        match (error.code) {
+            case NetworkErrorCode.UnexpectedEof => synchronized(lifecycleMutex) {
+                    terminalEvidence = Some(TlsClosureEvidence.PeerClosedWithoutCloseNotify)
+                }
+            case _ => ()
         }
     }
 
