@@ -179,6 +179,23 @@ public class HttpHeadersBuilder {
     public func build(): HttpHeaders { HttpHeaders(entries: values.toArray(), limits: limits) }
 }
 
+/** Immutable trailer fields; routing and framing fields are never representable here. */
+public class HttpTrailer {
+    public let headers: HttpHeaders
+
+    public init(headers!: HttpHeaders = HttpHeaders()) {
+        for (name in [
+            "content-length", "transfer-encoding", "host", "connection",
+            "trailer", "upgrade", "proxy-connection", "keep-alive"
+        ]) {
+            if (headers.contains(name)) {
+                throw IllegalArgumentException("HTTP trailer contains a forbidden routing or framing field")
+            }
+        }
+        this.headers = headers
+    }
+}
+
 private func validateHeaderCollection(entries: Array<HttpHeader>, limits: HttpLimits): Unit {
     if (entries.size > limits.maxHeaderCount) {
         throw IllegalArgumentException("HTTP header count exceeds configured limit")
