@@ -1,6 +1,6 @@
 package wirestack.internal.http1
 
-import wirestack.http.*
+import wirestack.internal.http_model.*
 import wirestack.internal.common.*
 import wirestack.internal.connector.*
 import wirestack.internal.resolver.*
