@@ -1,0 +1,1 @@
+The raw report is produced by tools/gates/net05_large_buffer_profile.py with schema_version=1 and contains cases[].warmup_samples, cases[].samples, per-sample read_sizes, rss_samples_kib, server_send_sizes, process evidence, and aggregate percentiles.

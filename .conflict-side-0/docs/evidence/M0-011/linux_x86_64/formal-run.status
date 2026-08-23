@@ -1,0 +1,13 @@
+task=INCOMPLETE
+bounded_linux_status=PASS
+global_gate=INCOMPLETE
+connect_close_iterations=2000
+echo_close_iterations=1000
+peer_reset_iterations=1000
+close_during_read_iterations=500
+rss_samples=MEASURED
+fd_samples=MEASURED
+transport_cleanup_100000=NOT_RUN
+tls_handshake_failure_cleanup_100000=NOT_YET_APPLICABLE
+soak_24h=NOT_RUN
+other_native_platforms=BLOCKED
