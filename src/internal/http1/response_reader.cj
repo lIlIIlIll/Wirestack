@@ -507,7 +507,7 @@ private func responseBodySource(
     }
 }
 
-private class Http1FixedBodyStream <: HttpBodyStream {
+internal class Http1FixedBodyStream <: HttpBodyStream {
     private let transport: DuplexTransport
     private let context: OperationContext
     private let initial: Array<Byte>
@@ -594,7 +594,7 @@ private class Http1CloseBodyStream <: HttpBodyStream {
     public func isClosed(): Bool { closed }
 }
 
-private class Http1ChunkedBodyStream <: HttpBodyStream {
+internal class Http1ChunkedBodyStream <: HttpBodyStream {
     private let transport: DuplexTransport
     private let context: OperationContext
     private let decoder: Http1ChunkedDecoder
