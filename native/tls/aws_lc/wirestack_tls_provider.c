@@ -125,22 +125,38 @@ int32_t wirestack_tls_provider_random(uint64_t handle, uint8_t *output, uint64_t
 int32_t wirestack_tls_engine_create(
     uint64_t provider_handle,
     int32_t role,
+    int32_t minimum_tls_version,
+    int32_t maximum_tls_version,
     uint64_t *out_engine_handle
 ) {
     struct wirestack_tls_engine *engine = NULL;
     BIO *incoming = NULL;
     BIO *outgoing = NULL;
+    int minimum_version;
+    int maximum_version;
     if (provider_from_handle(provider_handle) == NULL || out_engine_handle == NULL ||
-        (role != WIRESTACK_TLS_ENGINE_CLIENT && role != WIRESTACK_TLS_ENGINE_SERVER)) {
+        (role != WIRESTACK_TLS_ENGINE_CLIENT && role != WIRESTACK_TLS_ENGINE_SERVER) ||
+        (minimum_tls_version != 12 && minimum_tls_version != 13) ||
+        (maximum_tls_version != 12 && maximum_tls_version != 13) ||
+        minimum_tls_version > maximum_tls_version) {
         return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
     }
+    minimum_version = minimum_tls_version == 12 ? TLS1_2_VERSION : TLS1_3_VERSION;
+    maximum_version = maximum_tls_version == 12 ? TLS1_2_VERSION : TLS1_3_VERSION;
     *out_engine_handle = UINT64_C(0);
     engine = (struct wirestack_tls_engine *)calloc(1, sizeof(*engine));
     if (engine == NULL) {
         return WIRESTACK_TLS_PROVIDER_OUT_OF_MEMORY;
     }
     engine->context = SSL_CTX_new(TLS_method());
-    engine->ssl = engine->context == NULL ? NULL : SSL_new(engine->context);
+    if (engine->context == NULL ||
+        !SSL_CTX_set_min_proto_version(engine->context, minimum_version) ||
+        !SSL_CTX_set_max_proto_version(engine->context, maximum_version)) {
+        SSL_CTX_free(engine->context);
+        free(engine);
+        return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+    }
+    engine->ssl = SSL_new(engine->context);
     incoming = BIO_new(BIO_s_mem());
     outgoing = BIO_new(BIO_s_mem());
     if (engine->ssl == NULL || incoming == NULL || outgoing == NULL) {
