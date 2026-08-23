@@ -21,13 +21,19 @@ public class Http1InterimResponse {
 
 public class Http1ResponseReadResult {
     public let response: HttpResponse
+    public let reusableCandidate: Bool
     private let ownedInterim: Array<Http1InterimResponse>
 
     public prop interimResponses: Array<Http1InterimResponse> { get() { ownedInterim.clone() } }
 
-    public init(response: HttpResponse, interimResponses: Array<Http1InterimResponse>) {
+    public init(
+        response: HttpResponse,
+        interimResponses: Array<Http1InterimResponse>,
+        reusableCandidate!: Bool = true
+    ) {
         this.response = response
         ownedInterim = interimResponses.clone()
+        this.reusableCandidate = reusableCandidate
     }
 }
 
@@ -77,10 +83,40 @@ public func readHttp1Response(
                 Int64(head.status), head.reason, body,
                 version: head.version, headers: head.headers
             ),
-            interim.toArray()
+            interim.toArray(),
+            reusableCandidate: responseCanReuse(head)
         )
     }
     throw Exception("unreachable HTTP/1 response loop exit")
+}
+
+private func responseCanReuse(head: Http1ResponseHead): Bool {
+    match (head.framing) {
+        case Http1BodyFraming.CloseDelimited | Http1BodyFraming.Tunnel => return false
+        case _ => ()
+    }
+    !headerContainsToken(head.headers, "connection", "close")
+}
+
+internal func headerContainsToken(headers: HttpHeaders, name: String, token: String): Bool {
+    for (field in headers.getAll(name)) {
+        let bytes = field.toArray()
+        var start = 0
+        while (start <= bytes.size) {
+            var end = start
+            while (end < bytes.size && bytes[end] != b',') { end += 1 }
+            var left = start
+            var right = end
+            while (left < right && (bytes[left] == b' ' || bytes[left] == 9u8)) { left += 1 }
+            while (right > left && (bytes[right - 1] == b' ' || bytes[right - 1] == 9u8)) { right -= 1 }
+            if (String.fromUtf8(copyResponseRange(bytes, left, right)).toAsciiLower() == token.toAsciiLower()) {
+                return true
+            }
+            if (end == bytes.size) { break }
+            start = end + 1
+        }
+    }
+    false
 }
 
 private func readOneResponseHead(
@@ -311,6 +347,12 @@ private func copyResponseBytes(
 private func copyResponsePrefix(bytes: Array<Byte>, count: Int64): Array<Byte> {
     let result = Array<Byte>(count, repeat: 0)
     for (index in 0..count) { result[index] = bytes[index] }
+    result
+}
+
+private func copyResponseRange(bytes: Array<Byte>, start: Int64, end: Int64): Array<Byte> {
+    let result = Array<Byte>(end - start, repeat: 0)
+    for (index in start..end) { result[index - start] = bytes[index] }
     result
 }
 
