@@ -1,6 +1,8 @@
 package wirestack.internal.tls_engine
 
 import std.collection.*
+import std.fs.*
+import std.process.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.common.*
@@ -202,6 +204,151 @@ class TlsEnginePumpTest {
     }
 
     @TestCase
+    func externalSignerCompletesARealHandshakeOutsideTheNativeCallback(): Unit {
+        let provider = AwsLcTlsProvider()
+        let signer = OpenSslProcessTestSigner()
+        let key = PrivateKeyRef.externalSigner(
+            "test-process-signer",
+            tlsTestSubjectPublicKeyInfoDer(),
+            signer
+        )
+        let identity = LocalIdentity(
+            CertificateChain([DerCertificate(tlsTestCertificateDer())]),
+            key
+        )
+        let capabilities = provider.linuxCapabilities()
+        let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
+            .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
+            .build()
+        let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
+            .identity(identity)
+            .build()
+        let client = provider.createClientEngine(
+            clientContext,
+            ReferenceIdentity.Dns(HostName("example.com")),
+            serverName: Some(HostName("example.com"))
+        )
+        let server = provider.createServerEngine(serverContext)
+        try {
+            drivePairedMemoryHandshake(client, server)
+            @Expect(signer.calls > 0)
+        } finally {
+            client.close()
+            server.close()
+            key.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
+    func externalSignerExceptionFailsClosedWithoutCrossingTheCAbi(): Unit {
+        let provider = AwsLcTlsProvider()
+        let key = PrivateKeyRef.externalSigner(
+            "throwing-signer",
+            tlsTestSubjectPublicKeyInfoDer(),
+            ThrowingTestSigner()
+        )
+        let identity = LocalIdentity(
+            CertificateChain([DerCertificate(tlsTestCertificateDer())]),
+            key
+        )
+        let capabilities = provider.linuxCapabilities()
+        let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
+            .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
+            .build()
+        let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
+            .identity(identity)
+            .build()
+        let client = provider.createClientEngine(
+            clientContext,
+            ReferenceIdentity.Dns(HostName("example.com"))
+        )
+        let server = provider.createServerEngine(serverContext)
+        var rejected = false
+        try {
+            try {
+                drivePairedMemoryHandshake(client, server)
+            } catch (error: TlsEngineException) {
+                match (error.tlsCode) {
+                    case TlsEngineErrorCode.PrivateKeyFailure =>
+                        rejected = error.cause.isSome()
+                    case _ => ()
+                }
+            }
+            @Expect(rejected)
+        } finally {
+            client.close()
+            server.close()
+            key.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
+    func cancellationBeforeSignerInvocationFailsThePendingNativeOperation(): Unit {
+        let provider = AwsLcTlsProvider()
+        let signer = OpenSslProcessTestSigner()
+        let key = PrivateKeyRef.externalSigner(
+            "cancelled-signer",
+            tlsTestSubjectPublicKeyInfoDer(),
+            signer
+        )
+        let identity = LocalIdentity(
+            CertificateChain([DerCertificate(tlsTestCertificateDer())]),
+            key
+        )
+        let capabilities = provider.linuxCapabilities()
+        let client = provider.createClientEngine(
+            TlsClientContext.builder(provider.manifest(), capabilities)
+                .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
+                .build(),
+            ReferenceIdentity.Dns(HostName("example.com"))
+        )
+        let server = provider.createServerEngine(
+            TlsServerContext.builder(provider.manifest(), capabilities)
+                .identity(identity)
+                .build()
+        )
+        let cancellation = CancellationSource()
+        var cancelled = false
+        var nativeFailed = false
+        try {
+            advanceToServerSignatureRequest(client, server)
+            cancellation.cancel()
+            try {
+                match (server) {
+                    case signing: ExternalSigningTlsEngine =>
+                        signing.serviceExternalSignature(
+                            OperationContext(cancellation: cancellation.token)
+                        )
+                    case _ => ()
+                }
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.Cancelled => cancelled = true
+                    case _ => ()
+                }
+            }
+            try {
+                let _ = server.handshakeStep()
+            } catch (error: TlsEngineException) {
+                match (error.tlsCode) {
+                    case TlsEngineErrorCode.ProviderFailure => nativeFailed = true
+                    case _ => ()
+                }
+            }
+            @Expect(cancelled)
+            @Expect(signer.calls, 0)
+            @Expect(nativeFailed)
+        } finally {
+            client.close()
+            server.close()
+            key.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
     func pumpHandlesWantReadWriteAndPartialIoWithBoundedBuffers(): Unit {
         let engine = ScriptedEngine()
         let transport = ScriptedTransport([7, 6, 5], readChunk: 2, writeChunk: 2)
@@ -329,8 +476,10 @@ private func containsAscii(buffer: Array<Byte>, length: Int64, needle: String): 
 private func drivePairedMemoryHandshake(client: TlsEngine, server: TlsEngine): Unit {
     for (_ in 0..128) {
         let clientStep = client.handshakeStep()
+        serviceExternalSignatureIfRequested(client, clientStep)
         let clientMoved = transferCiphertext(client, server)
         let serverStep = server.handshakeStep()
+        serviceExternalSignatureIfRequested(server, serverStep)
         let serverMoved = transferCiphertext(server, client)
         if (isHandshakeComplete(clientStep) && isHandshakeComplete(serverStep)) {
             return
@@ -347,6 +496,44 @@ private func drivePairedMemoryHandshake(client: TlsEngine, server: TlsEngine): U
         TlsEngineErrorCode.NoProgress,
         "paired TLS memory handshake exceeded its step bound"
     )
+}
+
+private func advanceToServerSignatureRequest(
+    client: TlsEngine,
+    server: TlsEngine
+): Unit {
+    for (_ in 0..32) {
+        let clientStep = client.handshakeStep()
+        serviceExternalSignatureIfRequested(client, clientStep)
+        let _ = transferCiphertext(client, server)
+        let serverStep = server.handshakeStep()
+        match (serverStep) {
+            case TlsEngineStep.NeedSignature => return
+            case _ => ()
+        }
+        let _ = transferCiphertext(server, client)
+    }
+    throw TlsEngineException(
+        TlsEngineErrorCode.NoProgress,
+        "server did not request an external signature"
+    )
+}
+
+private func serviceExternalSignatureIfRequested(
+    engine: TlsEngine,
+    step: TlsEngineStep
+): Unit {
+    match (step) {
+        case TlsEngineStep.NeedSignature => match (engine) {
+            case signing: ExternalSigningTlsEngine =>
+                signing.serviceExternalSignature(OperationContext.background())
+            case _ => throw TlsEngineException(
+                TlsEngineErrorCode.PrivateKeyFailure,
+                "test engine cannot service external signature"
+            )
+        }
+        case _ => ()
+    }
 }
 
 private func transferCiphertext(source: TlsEngine, destination: TlsEngine): Bool {
@@ -452,6 +639,64 @@ private class StalledEngine <: TlsEngine {
     }
     public func close(): Unit {}
     public func isClosed(): Bool { false }
+}
+
+private class OpenSslProcessTestSigner <: ExternalSigner {
+    var calls: Int64 = 0
+
+    public func supportedAlgorithms(): Array<TlsSignatureAlgorithm> {
+        [TlsSignatureAlgorithm.RsaPssRsaeSha256]
+    }
+
+    public func sign(
+        request: ExternalSignatureRequest,
+        _: OperationContext
+    ): Array<Byte> {
+        let keyFile = File.createTemp("/tmp")
+        let inputFile = File.createTemp("/tmp")
+        let outputFile = File.createTemp("/tmp")
+        let keyPath = keyFile.info.path.toString()
+        let inputPath = inputFile.info.path.toString()
+        let outputPath = outputFile.info.path.toString()
+        keyFile.close()
+        inputFile.close()
+        outputFile.close()
+        try {
+            File.writeTo(keyPath, tlsTestPrivateKeyDer())
+            File.writeTo(inputPath, request.messageBytes())
+            let status = execute(
+                "/usr/bin/openssl",
+                [
+                    "dgst", "-sha256", "-sign", keyPath, "-keyform", "DER",
+                    "-sigopt", "rsa_padding_mode:pss",
+                    "-sigopt", "rsa_pss_saltlen:digest",
+                    "-out", outputPath, inputPath
+                ]
+            )
+            if (status != 0) {
+                throw IllegalStateException("test external signer process failed")
+            }
+            calls++
+            File.readFrom(outputPath)
+        } finally {
+            remove(keyPath)
+            remove(inputPath)
+            remove(outputPath)
+        }
+    }
+}
+
+private class ThrowingTestSigner <: ExternalSigner {
+    public func supportedAlgorithms(): Array<TlsSignatureAlgorithm> {
+        [TlsSignatureAlgorithm.RsaPssRsaeSha256]
+    }
+
+    public func sign(
+        _: ExternalSignatureRequest,
+        _: OperationContext
+    ): Array<Byte> {
+        throw IllegalStateException("deliberate signer failure")
+    }
 }
 
 private class ScriptedTransport <: DuplexTransport {
