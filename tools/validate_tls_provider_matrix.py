@@ -102,8 +102,13 @@ def validate_matrix(value: Mapping[str, Any]) -> None:
     require(value.get("task_id") == "M0-015", "task_id must be M0-015")
     require(isinstance(value.get("reviewed_at"), str) and value["reviewed_at"],
             "reviewed_at missing")
-    require("not final provider selection" in str(value.get("decision_scope", "")),
-            "decision scope must state that final selection is deferred")
+    decision_scope = str(value.get("decision_scope", "")).lower()
+    require(
+        "final provider selection" in decision_scope
+        and "m0-020" in decision_scope
+        and any(marker in decision_scope for marker in ("belongs to", "deferred", "not final")),
+        "decision scope must state that final selection is deferred to M0-020",
+    )
 
     platform_list = value.get("platforms")
     require(isinstance(platform_list, list) and len(platform_list) == 6,

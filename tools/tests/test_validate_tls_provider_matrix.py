@@ -27,6 +27,12 @@ class Tests(unittest.TestCase):
         with self.assertRaises(validator.MatrixError):
             validator.validate_matrix(value)
 
+    def test_final_selection_must_be_deferred_to_m0_020(self):
+        value = copy.deepcopy(self.value)
+        value["decision_scope"] = "final provider selection completed by M0-015"
+        with self.assertRaises(validator.MatrixError):
+            validator.validate_matrix(value)
+
     def test_missing_platform_fails(self):
         value = copy.deepcopy(self.value)
         del value["candidates"][0]["platforms"]["harmony"]
