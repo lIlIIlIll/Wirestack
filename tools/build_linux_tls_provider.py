@@ -387,17 +387,18 @@ def build_provider(
 #include <stdint.h>
 int main(void) {
   uint64_t handle = 0; unsigned char data[32] = {0};
-  uint64_t engine = 0, pending = 0, drained = 0;
+  uint64_t engine = 0, invalid_engine = 0, pending = 0, drained = 0;
   int32_t step = -1;
   if (wirestack_tls_provider_create(&handle) != 0) return 1;
   if (wirestack_tls_provider_random(handle, data, sizeof(data)) != 0) return 2;
   if (wirestack_tls_provider_capabilities(handle) == 0) return 3;
-  if (wirestack_tls_engine_create(handle, WIRESTACK_TLS_ENGINE_CLIENT, &engine) != 0) return 4;
-  if (wirestack_tls_engine_handshake_step(engine, &step) != 0) return 5;
-  if (step != WIRESTACK_TLS_ENGINE_WANT_READ && step != WIRESTACK_TLS_ENGINE_WANT_WRITE) return 6;
-  if (wirestack_tls_engine_pending_ciphertext(engine, &pending) != 0 || pending == 0) return 7;
+  if (wirestack_tls_engine_create(handle, WIRESTACK_TLS_ENGINE_CLIENT, 13, 12, &invalid_engine) == 0) return 4;
+  if (wirestack_tls_engine_create(handle, WIRESTACK_TLS_ENGINE_CLIENT, 12, 13, &engine) != 0) return 5;
+  if (wirestack_tls_engine_handshake_step(engine, &step) != 0) return 6;
+  if (step != WIRESTACK_TLS_ENGINE_WANT_READ && step != WIRESTACK_TLS_ENGINE_WANT_WRITE) return 7;
+  if (wirestack_tls_engine_pending_ciphertext(engine, &pending) != 0 || pending == 0) return 8;
   if (pending > sizeof(data)) pending = sizeof(data);
-  if (wirestack_tls_engine_drain_ciphertext(engine, data, pending, &drained) != 0 || drained == 0) return 8;
+  if (wirestack_tls_engine_drain_ciphertext(engine, data, pending, &drained) != 0 || drained == 0) return 9;
   wirestack_tls_engine_destroy(engine);
   wirestack_tls_provider_destroy(handle);
   return 0;
