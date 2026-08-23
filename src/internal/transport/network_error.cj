@@ -39,6 +39,11 @@ public enum NetworkPhase {
 
 public enum NetworkErrorCode {
     | Resolve
+    | NameNotFound
+    | NoData
+    | TemporaryFailure
+    | InvalidName
+    | UnsupportedFamily
     | ConnectRefused
     | NetworkUnreachable
     | HostUnreachable
@@ -65,7 +70,7 @@ public enum Retryability {
 }
 
 /** Stable error evidence shared by transport, TLS and HTTP phases. */
-public class NetworkException <: IOException {
+public open class NetworkException <: IOException {
     public let category: NetworkErrorCategory
     public let phase: NetworkPhase
     public let code: NetworkErrorCode
@@ -97,7 +102,7 @@ public class NetworkException <: IOException {
         this.cause = cause
     }
 
-    protected override func getClassName(): String {
+    protected open override func getClassName(): String {
         "NetworkException"
     }
 }
