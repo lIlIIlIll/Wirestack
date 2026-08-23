@@ -2,7 +2,7 @@
 
 Wirestack 是一个面向仓颉的跨平台安全网络栈项目，目标是在保留 `std.net` 作为官方默认 TCP/runtime 调度底座的前提下，重新定义并实现独立的 Transport、TLS、HTTPS、HTTP/1.1 与 HTTP/2 语义。
 
-当前仓库处于 **M0 架构与采纳验证阶段**。现有 TLS/HTTP/std.net 已完成盘点，真实 CJPM 包布局已经冻结并可构建；尚未宣称任何 Transport、TLS、HTTP 或六平台运行能力已经实现。
+当前仓库已进入 **Linux-first Transport Core 实现阶段**。现有 TLS/HTTP/std.net 已完成盘点，真实 CJPM 包布局已经冻结并可构建；Transport Core 的字节区间、Deadline、取消、OperationContext、结构化错误、通用 I/O helper 和有界 MemoryTransport 已开始落地。Linux `StdNetTransport`、TLS、HTTP 与六平台能力尚未完成。
 
 ## 目标
 
@@ -71,6 +71,7 @@ SDK 归档、解压后的工具链和 `target/` 构建产物都不进入仓库�
 - [产品 PRD](docs/product/prd.md)
 - [仓库实施 backlog](docs/planning/implementation-backlog.md)
 - [执行状态](docs/planning/status.md)
+- [Linux-first 执行状态](docs/planning/linux-status.md)
 - [架构与 ADR](docs/architecture/README.md)
 - [现有网络栈盘点](docs/architecture/current-network-stack-inventory.md)
 - [CJPM 包布局 ADR](docs/architecture/adr/0001-cjpm-package-layout.md)
