@@ -174,6 +174,14 @@ private class ScriptedEngine <: TlsEngine {
         count
     }
 
+    public func readPlaintext(_: MutableByteSpan): TlsEngineReadResult {
+        TlsEngineReadResult.PeerClosed
+    }
+
+    public func writePlaintext(_: ByteSpan): TlsEngineWriteResult {
+        TlsEngineWriteResult.PeerClosed
+    }
+
     public func close(): Unit {}
     public func isClosed(): Bool { false }
 }
@@ -188,6 +196,12 @@ private class StalledEngine <: TlsEngine {
     public func pendingCiphertext(): Int64 { 0 }
     public func drainCiphertext(_: MutableByteSpan): Int64 { 0 }
     public func feedCiphertext(_: ByteSpan): Int64 { 0 }
+    public func readPlaintext(_: MutableByteSpan): TlsEngineReadResult {
+        TlsEngineReadResult.PeerClosed
+    }
+    public func writePlaintext(_: ByteSpan): TlsEngineWriteResult {
+        TlsEngineWriteResult.PeerClosed
+    }
     public func close(): Unit {}
     public func isClosed(): Bool { false }
 }
