@@ -4,7 +4,7 @@ import std.collection.ArrayList
 import std.sync.*
 import std.unittest.*
 import std.unittest.testmacro.*
-import wirestack.http.*
+import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
 
 @Test

@@ -3,7 +3,7 @@ package wirestack.internal.http1
 import std.sync.AtomicInt64
 import std.unittest.*
 import std.unittest.testmacro.*
-import wirestack.http.*
+import wirestack.internal.http_model.*
 import wirestack.internal.common.*
 import wirestack.internal.resolver.*
 import wirestack.internal.transport.*
