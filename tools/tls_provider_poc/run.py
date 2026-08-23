@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 CAP_RE = re.compile(r"^CAP\s+([a-z0-9_]+)=(PASS|FAIL|BLOCKED|NOT_RUN)$", re.M)
+METRIC_RE = re.compile(r"^METRIC\s+([a-z0-9_]+)=([0-9]+)$", re.M)
 FORBIDDEN_DEP_RE = re.compile(r"(?:libssl|libcrypto|libmbedtls|libmbedx509|libtfpsacrypto|libmbedcrypto)\.(?:so|dylib|dll)", re.I)
 
 
@@ -143,14 +144,24 @@ def source_provider(spec: Mapping[str, Any], work: Path, log: Path) -> tuple[Pat
     source_root.mkdir(parents=True, exist_ok=True)
     if spec["source_kind"] == "git":
         src = source_root / spec["id"]
-        run(["git", "init", str(src)], cwd=work, log=log)
-        run(["git", "-C", str(src), "remote", "add", "origin", spec["url"]], cwd=work, log=log)
-        run(["git", "-C", str(src), "fetch", "--depth", "1", "origin", spec["commit"]], cwd=work, log=log)
-        run(["git", "-C", str(src), "checkout", "--detach", "FETCH_HEAD"], cwd=work, log=log)
-        commit = run(["git", "-C", str(src), "rev-parse", "HEAD"], cwd=work, log=log).stdout.strip()
+        git_env = os.environ.copy()
+        # Source acquisition must not inherit developer-specific URL rewrites,
+        # credentials or aliases. The pinned public HTTPS URL is the evidence
+        # boundary and must remain the transport used by this runner.
+        git_env["GIT_CONFIG_GLOBAL"] = os.devnull
+        run(["git", "init", str(src)], cwd=work, log=log, env=git_env)
+        run(["git", "-C", str(src), "remote", "add", "origin", spec["url"]],
+            cwd=work, log=log, env=git_env)
+        run(["git", "-C", str(src), "fetch", "--depth", "1", "origin", spec["commit"]],
+            cwd=work, log=log, env=git_env)
+        run(["git", "-C", str(src), "checkout", "--detach", "FETCH_HEAD"],
+            cwd=work, log=log, env=git_env)
+        commit = run(["git", "-C", str(src), "rev-parse", "HEAD"],
+                     cwd=work, log=log, env=git_env).stdout.strip()
         if commit != spec["commit"]:
             raise PocError(f"commit mismatch: {commit}")
-        tree = run(["git", "-C", str(src), "rev-parse", "HEAD^{tree}"], cwd=work, log=log).stdout.strip()
+        tree = run(["git", "-C", str(src), "rev-parse", "HEAD^{tree}"],
+                   cwd=work, log=log, env=git_env).stdout.strip()
         digest = hashlib.sha256((commit + "\n" + tree + "\n").encode()).hexdigest()
         return src, {"commit": commit, "tree": tree, "content_sha256": digest, "kind": "git"}
 
@@ -305,6 +316,16 @@ def parse_caps(stdout: str, required: Sequence[str]) -> dict[str, str]:
     return caps
 
 
+def parse_metrics(stdout: str, provider: str, caps: Mapping[str, str]) -> dict[str, int]:
+    metrics = {name: int(value) for name, value in METRIC_RE.findall(stdout)}
+    if metrics.get("repeated_cleanup_cycles") != 10000:
+        raise PocError("PoC did not execute exactly 10,000 repeated cleanup cycles")
+    if provider == "aws-lc" and caps.get("external_signer") == "PASS":
+        if metrics.get("external_signer_calls", 0) < 2:
+            raise PocError("AWS-LC external signer did not serve both TLS versions")
+    return metrics
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     repo_default = Path(__file__).resolve().parents[2]
@@ -324,7 +345,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     log = work / "build.log"
     started = dt.datetime.now(dt.timezone.utc)
     result: dict[str, Any] = {
-        "schema_version": 1,
+        "schema_version": 2,
         "task_id": "M0-016",
         "provider": args.provider,
         "platform": platform_id(),
@@ -351,6 +372,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         ], cwd=work, log=log, check=False)
         result["poc_exit_code"] = completed.returncode
         result["capabilities"] = parse_caps(completed.stdout, spec_all["required_capabilities"])
+        result["metrics"] = parse_metrics(
+            completed.stdout, args.provider, result["capabilities"])
         failed = [name for name, status in result["capabilities"].items() if status == "FAIL"]
         blocked = [name for name, status in result["capabilities"].items() if status == "BLOCKED"]
         forbidden = result["build"]["system_tls_dependencies"] or result["build"]["runtime_loader_library_strings"]

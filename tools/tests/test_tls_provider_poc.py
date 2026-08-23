@@ -94,6 +94,54 @@ class ProviderPocValidationTests(unittest.TestCase):
         with self.assertRaises(validator.ValidationError):
             validator.validate_result(result, self.spec)
 
+    def test_pass_requires_measured_schema_v2(self):
+        caps = {name: "PASS" for name in self.spec["required_capabilities"]}
+        result = {
+            "schema_version": 1,
+            "task_id": "M0-016",
+            "provider": "aws-lc",
+            "platform": "linux-glibc-x86_64",
+            "status": "PASS",
+            "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
+            "capabilities": caps,
+            "build": {
+                "static_archives": ["libssl.a"],
+                "system_tls_dependencies": [],
+                "runtime_loader_library_strings": [],
+            },
+        }
+        with self.assertRaises(validator.ValidationError):
+            validator.validate_result(result, self.spec)
+
+    def test_schema_v2_requires_exact_cleanup_and_signer_counts(self):
+        caps = {name: "PASS" for name in self.spec["required_capabilities"]}
+        result = {
+            "schema_version": 2,
+            "task_id": "M0-016",
+            "provider": "aws-lc",
+            "platform": "linux-glibc-x86_64",
+            "status": "PASS",
+            "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
+            "capabilities": caps,
+            "metrics": {
+                "repeated_cleanup_cycles": 9999,
+                "external_signer_calls": 1,
+            },
+            "build": {
+                "static_archives": ["libssl.a"],
+                "system_tls_dependencies": [],
+                "runtime_loader_library_strings": [],
+            },
+        }
+        with self.assertRaises(validator.ValidationError):
+            validator.validate_result(result, self.spec)
+
+        result["metrics"] = {
+            "repeated_cleanup_cycles": 10000,
+            "external_signer_calls": 2,
+        }
+        validator.validate_result(result, self.spec)
+
 
 if __name__ == "__main__":
     unittest.main()

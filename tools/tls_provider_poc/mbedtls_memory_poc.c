@@ -10,6 +10,7 @@
 #define MAX_STEPS 300000
 #define RING_CAPACITY 2048
 #define PAYLOAD_SIZE 32768
+#define CLEANUP_CYCLES 10000
 
 typedef struct {
     unsigned char data[RING_CAPACITY];
@@ -357,7 +358,7 @@ int main(int argc, char **argv) {
     int trunc = truncation_case(&m);
     int cancel = cancellation_case(&m);
     int cleanup = 1;
-    for (int i = 0; i < 16 && cleanup; ++i)
+    for (int i = 0; i < CLEANUP_CYCLES && cleanup; ++i)
         cleanup = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_2, 0);
 
     printf("CAP tls12=%s\n", tls12 ? "PASS" : "FAIL");
@@ -374,6 +375,7 @@ int main(int argc, char **argv) {
     printf("CAP caller_cancellation=%s\n", cancel ? "PASS" : "FAIL");
     printf("CAP external_signer=BLOCKED\n");
     printf("CAP repeated_cleanup=%s\n", cleanup ? "PASS" : "FAIL");
+    printf("METRIC repeated_cleanup_cycles=%d\n", CLEANUP_CYCLES);
 
     material_free(&m);
     mbedtls_psa_crypto_free();
