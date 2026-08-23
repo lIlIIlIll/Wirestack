@@ -55,7 +55,18 @@ static void append_log(const char *phase, unsigned long long seq,
         node ? node : "(null)");
     if (length > 0) {
         size_t amount = (size_t)length < sizeof(buffer) ? (size_t)length : sizeof(buffer) - 1;
-        (void)write(fd, buffer, amount);
+        size_t offset = 0;
+        while (offset < amount) {
+            ssize_t written = write(fd, buffer + offset, amount - offset);
+            if (written > 0) {
+                offset += (size_t)written;
+                continue;
+            }
+            if (written < 0 && errno == EINTR) {
+                continue;
+            }
+            break;
+        }
     }
     close(fd);
 }
