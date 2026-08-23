@@ -21,6 +21,7 @@ Core rules:
 ## Accepted ADRs
 
 - [ADR-0001: CJPM Package and Source Layout](adr/0001-cjpm-package-layout.md)
+- [ADR-0002: Linux-first delivery profile](adr/0002-linux-first-delivery-profile.md)
 
 ## Supporting architecture records
 
