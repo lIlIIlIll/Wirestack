@@ -51,6 +51,13 @@ class WindowsProviderPocTests(unittest.TestCase):
         self.assertIsNot(windows.CANONICAL_SOURCE_PROVIDER, windows.source_provider)
         self.assertIsNot(windows.CANONICAL_BUILD_PROVIDER, windows.build_provider)
 
+    def test_mbedtls_links_windows_cng_entropy(self) -> None:
+        libraries = windows.mbedtls_system_libraries()
+        self.assertIn("-lbcrypt", libraries)
+        self.assertIn("-lws2_32", libraries)
+        self.assertFalse(any("ssl" in item.lower() for item in libraries))
+        self.assertFalse(any("crypto" in item.lower() for item in libraries))
+
 
 if __name__ == "__main__":
     unittest.main()
