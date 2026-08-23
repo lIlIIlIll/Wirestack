@@ -16,6 +16,7 @@ public enum Http1FramingErrorCode {
     | InvalidContentLength
     | ContentLengthWithTransferEncoding
     | AmbiguousTransferEncoding
+    | ForbiddenBodyFraming
 }
 
 public class Http1FramingException <: Exception {
@@ -54,11 +55,16 @@ public func resolveResponseFraming(
     let chunked = parseTransferEncoding(headers)
     rejectClTeCombination(contentLength, chunked)
 
-    if (requestMethod == HttpMethod("HEAD") || status < 200 || status == 204 || status == 304) {
+    if (status < 200 || status == 204) {
+        if (contentLength.isSome() || chunked) { forbiddenBodyFraming() }
         return Http1BodyFraming.Empty
     }
     if (requestMethod == HttpMethod("CONNECT") && status >= 200 && status < 300) {
+        if (contentLength.isSome() || chunked) { forbiddenBodyFraming() }
         return Http1BodyFraming.Tunnel
+    }
+    if (requestMethod == HttpMethod("HEAD") || status == 304) {
+        return Http1BodyFraming.Empty
     }
     if (chunked) { return Http1BodyFraming.Chunked }
     match (contentLength) {
@@ -159,6 +165,13 @@ private func ambiguousTransferEncoding(): Nothing {
     throw Http1FramingException(
         Http1FramingErrorCode.AmbiguousTransferEncoding,
         "HTTP/1 Transfer-Encoding must be exactly one final chunked coding"
+    )
+}
+
+private func forbiddenBodyFraming(): Nothing {
+    throw Http1FramingException(
+        Http1FramingErrorCode.ForbiddenBodyFraming,
+        "HTTP/1 status or successful CONNECT forbids body framing fields"
     )
 }
 
