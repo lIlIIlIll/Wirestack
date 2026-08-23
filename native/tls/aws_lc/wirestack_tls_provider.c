@@ -14,6 +14,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #if !defined(OPENSSL_IS_AWSLC)
 #error "Wirestack's Linux provider must be compiled against pinned AWS-LC headers"
@@ -28,11 +29,16 @@
 #define WIRESTACK_TLS_MAXIMUM_PEER_CHAIN_LENGTH 16u
 #define WIRESTACK_TLS_MAXIMUM_PEER_CERTIFICATE_BYTES (256u * 1024u)
 #define WIRESTACK_TLS_MAXIMUM_PEER_CHAIN_BYTES (1024u * 1024u)
+#define WIRESTACK_TLS_MAXIMUM_SESSION_BYTES (256u * 1024u)
+#define WIRESTACK_TLS_TICKET_KEY_BYTES 48u
+#define WIRESTACK_TLS_TICKET_KEY_ROTATION_SECONDS (48u * 60u * 60u)
 #define WIRESTACK_TLS_PIN_LEAF UINT8_C(0)
 #define WIRESTACK_TLS_PIN_ANY_CERTIFICATE UINT8_C(1)
 
 struct wirestack_tls_provider {
     uint64_t magic;
+    uint8_t ticket_key[WIRESTACK_TLS_TICKET_KEY_BYTES];
+    uint64_t ticket_key_created_at;
 };
 
 struct wirestack_tls_engine {
@@ -58,6 +64,11 @@ struct wirestack_tls_engine {
     uint8_t requested_server_name[254];
     size_t requested_server_name_size;
     int server_selection_state;
+    uint8_t *pending_session;
+    size_t pending_session_size;
+    uint64_t pending_session_lifetime_seconds;
+    int pending_session_single_use;
+    int post_handshake_tickets_flushed;
 };
 
 enum wirestack_tls_signer_state {
@@ -83,6 +94,39 @@ static void clear_sensitive_buffer(uint8_t **buffer, size_t *size) {
         *buffer = NULL;
     }
     *size = 0;
+}
+
+static int wirestack_new_session(SSL *ssl, SSL_SESSION *session) {
+    struct wirestack_tls_engine *engine =
+        (struct wirestack_tls_engine *)SSL_get_app_data(ssl);
+    uint8_t *serialized = NULL;
+    size_t serialized_size = 0u;
+    if (engine == NULL || engine->magic != WIRESTACK_TLS_ENGINE_MAGIC ||
+        engine->role != WIRESTACK_TLS_ENGINE_CLIENT ||
+        SSL_SESSION_is_resumable(session) != 1 ||
+        SSL_SESSION_to_bytes(session, &serialized, &serialized_size) != 1) {
+        return 0;
+    }
+    if (serialized_size == 0u || serialized_size > WIRESTACK_TLS_MAXIMUM_SESSION_BYTES) {
+        if (serialized != NULL) {
+            OPENSSL_cleanse(serialized, serialized_size);
+            OPENSSL_free(serialized);
+        }
+        return 0;
+    }
+    clear_sensitive_buffer(&engine->pending_session, &engine->pending_session_size);
+    engine->pending_session = (uint8_t *)malloc(serialized_size);
+    if (engine->pending_session != NULL) {
+        memcpy(engine->pending_session, serialized, serialized_size);
+        engine->pending_session_size = serialized_size;
+        engine->pending_session_lifetime_seconds =
+            (uint64_t)SSL_SESSION_get_timeout(session);
+        engine->pending_session_single_use =
+            SSL_SESSION_should_be_single_use(session) != 0 ? 1 : 0;
+    }
+    OPENSSL_cleanse(serialized, serialized_size);
+    OPENSSL_free(serialized);
+    return 0;
 }
 
 static enum ssl_private_key_result_t wirestack_external_sign(
@@ -480,6 +524,7 @@ int32_t wirestack_tls_identity_validate_spki(
 
 int32_t wirestack_tls_provider_create(uint64_t *out_handle) {
     struct wirestack_tls_provider *provider;
+    time_t created_at;
     if (out_handle == NULL) {
         return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
     }
@@ -488,6 +533,13 @@ int32_t wirestack_tls_provider_create(uint64_t *out_handle) {
     if (provider == NULL) {
         return WIRESTACK_TLS_PROVIDER_OUT_OF_MEMORY;
     }
+    if (RAND_bytes(provider->ticket_key, sizeof(provider->ticket_key)) != 1) {
+        OPENSSL_cleanse(provider, sizeof(*provider));
+        free(provider);
+        return WIRESTACK_TLS_PROVIDER_RANDOM_FAILED;
+    }
+    created_at = time(NULL);
+    provider->ticket_key_created_at = created_at > 0 ? (uint64_t)created_at : UINT64_C(0);
     provider->magic = WIRESTACK_TLS_PROVIDER_MAGIC;
     *out_handle = (uint64_t)(uintptr_t)provider;
     return WIRESTACK_TLS_PROVIDER_OK;
@@ -499,6 +551,7 @@ void wirestack_tls_provider_destroy(uint64_t handle) {
         return;
     }
     provider->magic = UINT64_C(0);
+    OPENSSL_cleanse(provider->ticket_key, sizeof(provider->ticket_key));
     free(provider);
 }
 
@@ -705,12 +758,13 @@ int32_t wirestack_tls_engine_create(
     int32_t maximum_tls_version,
     uint64_t *out_engine_handle
 ) {
+    struct wirestack_tls_provider *provider = provider_from_handle(provider_handle);
     struct wirestack_tls_engine *engine = NULL;
     BIO *incoming = NULL;
     BIO *outgoing = NULL;
     int minimum_version;
     int maximum_version;
-    if (provider_from_handle(provider_handle) == NULL || out_engine_handle == NULL ||
+    if (provider == NULL || out_engine_handle == NULL ||
         (role != WIRESTACK_TLS_ENGINE_CLIENT && role != WIRESTACK_TLS_ENGINE_SERVER) ||
         (minimum_tls_version != 12 && minimum_tls_version != 13) ||
         (maximum_tls_version != 12 && maximum_tls_version != 13) ||
@@ -735,6 +789,43 @@ int32_t wirestack_tls_engine_create(
     engine->magic = WIRESTACK_TLS_ENGINE_MAGIC;
     engine->role = role;
     engine->matched_pin_index = -1;
+    SSL_CTX_set_early_data_enabled(engine->context, 0);
+    if (role == WIRESTACK_TLS_ENGINE_CLIENT) {
+        SSL_CTX_set_session_cache_mode(engine->context, SSL_SESS_CACHE_CLIENT);
+        SSL_CTX_sess_set_new_cb(engine->context, wirestack_new_session);
+    } else {
+        time_t observed_at = time(NULL);
+        uint64_t now = observed_at > 0 ? (uint64_t)observed_at : UINT64_C(0);
+        if (provider->ticket_key_created_at == UINT64_C(0) && now != UINT64_C(0)) {
+            provider->ticket_key_created_at = now;
+        } else if (provider->ticket_key_created_at != UINT64_C(0) &&
+            now > provider->ticket_key_created_at &&
+            now - provider->ticket_key_created_at >=
+                (uint64_t)WIRESTACK_TLS_TICKET_KEY_ROTATION_SECONDS) {
+            if (RAND_bytes(provider->ticket_key, sizeof(provider->ticket_key)) != 1) {
+                SSL_CTX_free(engine->context);
+                OPENSSL_cleanse(engine, sizeof(*engine));
+                free(engine);
+                return WIRESTACK_TLS_PROVIDER_RANDOM_FAILED;
+            }
+            provider->ticket_key_created_at = now;
+        }
+        SSL_CTX_set_session_cache_mode(
+            engine->context,
+            SSL_SESS_CACHE_SERVER | SSL_SESS_CACHE_NO_INTERNAL
+        );
+        SSL_CTX_set_num_tickets(engine->context, 1u);
+        if (SSL_CTX_set_tlsext_ticket_keys(
+                engine->context,
+                provider->ticket_key,
+                sizeof(provider->ticket_key)
+            ) != 1) {
+            SSL_CTX_free(engine->context);
+            OPENSSL_cleanse(engine, sizeof(*engine));
+            free(engine);
+            return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+        }
+    }
     SSL_CTX_set_cert_verify_callback(
         engine->context,
         wirestack_certificate_verify_callback,
@@ -752,6 +843,7 @@ int32_t wirestack_tls_engine_create(
         return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
     }
     SSL_set_app_data(engine->ssl, engine);
+    SSL_set_early_data_enabled(engine->ssl, 0);
     BIO_set_mem_eof_return(incoming, -1);
     SSL_set_bio(engine->ssl, incoming, outgoing);
     engine->incoming = incoming;
@@ -773,6 +865,7 @@ void wirestack_tls_engine_destroy(uint64_t engine_handle) {
     engine->magic = UINT64_C(0);
     clear_sensitive_buffer(&engine->signer_input, &engine->signer_input_size);
     clear_sensitive_buffer(&engine->signer_signature, &engine->signer_signature_size);
+    clear_sensitive_buffer(&engine->pending_session, &engine->pending_session_size);
     free(engine->server_alpn_protocols);
     SSL_free(engine->ssl);
     SSL_CTX_free(engine->context);
@@ -985,6 +1078,89 @@ int32_t wirestack_tls_engine_set_protocol_versions(
         SSL_set_max_proto_version(engine->ssl, maximum_version)
         ? WIRESTACK_TLS_PROVIDER_OK
         : WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+}
+
+int32_t wirestack_tls_engine_set_session_id_context(
+    uint64_t engine_handle,
+    const uint8_t *context,
+    uint64_t context_size
+) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    if (engine == NULL || engine->role != WIRESTACK_TLS_ENGINE_SERVER ||
+        context == NULL || context_size == UINT64_C(0) || context_size > 32u) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    return SSL_set_session_id_context(engine->ssl, context, (size_t)context_size) == 1
+        ? WIRESTACK_TLS_PROVIDER_OK
+        : WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+}
+
+int32_t wirestack_tls_engine_offer_session(
+    uint64_t engine_handle,
+    const uint8_t *session_bytes,
+    uint64_t session_size
+) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    SSL_SESSION *session;
+    SSL_SESSION *without_early_data;
+    int result;
+    if (engine == NULL || engine->role != WIRESTACK_TLS_ENGINE_CLIENT ||
+        session_bytes == NULL || session_size == UINT64_C(0) ||
+        session_size > WIRESTACK_TLS_MAXIMUM_SESSION_BYTES ||
+        session_size > (uint64_t)SIZE_MAX) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    session = SSL_SESSION_from_bytes(
+        session_bytes,
+        (size_t)session_size,
+        engine->context
+    );
+    if (session == NULL || SSL_SESSION_is_resumable(session) != 1) {
+        SSL_SESSION_free(session);
+        return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+    }
+    without_early_data = SSL_SESSION_copy_without_early_data(session);
+    SSL_SESSION_free(session);
+    if (without_early_data == NULL) {
+        return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+    }
+    result = SSL_set_session(engine->ssl, without_early_data);
+    SSL_SESSION_free(without_early_data);
+    return result == 1
+        ? WIRESTACK_TLS_PROVIDER_OK
+        : WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+}
+
+int32_t wirestack_tls_engine_pending_session(
+    uint64_t engine_handle,
+    uint8_t *output,
+    uint64_t output_capacity,
+    uint64_t *out_required_size,
+    uint64_t *out_lifetime_seconds,
+    int32_t *out_single_use
+) {
+    struct wirestack_tls_engine *engine = engine_from_handle(engine_handle);
+    if (engine == NULL || engine->role != WIRESTACK_TLS_ENGINE_CLIENT ||
+        out_required_size == NULL || out_lifetime_seconds == NULL ||
+        out_single_use == NULL ||
+        (output_capacity != UINT64_C(0) && output == NULL)) {
+        return WIRESTACK_TLS_PROVIDER_INVALID_ARGUMENT;
+    }
+    *out_required_size = (uint64_t)engine->pending_session_size;
+    *out_lifetime_seconds = engine->pending_session_lifetime_seconds;
+    *out_single_use = engine->pending_session_single_use;
+    if (output == NULL || output_capacity == UINT64_C(0) ||
+        engine->pending_session_size == 0u) {
+        return WIRESTACK_TLS_PROVIDER_OK;
+    }
+    if (output_capacity < (uint64_t)engine->pending_session_size) {
+        return WIRESTACK_TLS_PROVIDER_LIMIT_EXCEEDED;
+    }
+    memcpy(output, engine->pending_session, engine->pending_session_size);
+    clear_sensitive_buffer(&engine->pending_session, &engine->pending_session_size);
+    engine->pending_session_lifetime_seconds = UINT64_C(0);
+    engine->pending_session_single_use = 0;
+    return WIRESTACK_TLS_PROVIDER_OK;
 }
 
 int32_t wirestack_tls_engine_enable_server_name_selection(uint64_t engine_handle) {
@@ -1203,6 +1379,16 @@ int32_t wirestack_tls_engine_handshake_step(
     if (result == 1) {
         const uint8_t *selected_alpn = NULL;
         unsigned selected_alpn_size = 0;
+        if (engine->role == WIRESTACK_TLS_ENGINE_SERVER &&
+            SSL_version(engine->ssl) == TLS1_3_VERSION &&
+            engine->post_handshake_tickets_flushed == 0) {
+            int ticket_result = SSL_write(engine->ssl, NULL, 0);
+            if (ticket_result < 0 &&
+                SSL_get_error(engine->ssl, ticket_result) != SSL_ERROR_WANT_WRITE) {
+                return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;
+            }
+            engine->post_handshake_tickets_flushed = 1;
+        }
         SSL_get0_alpn_selected(engine->ssl, &selected_alpn, &selected_alpn_size);
         if (engine->alpn_required != 0 && selected_alpn_size == 0u) {
             return WIRESTACK_TLS_PROVIDER_ENGINE_FAILED;

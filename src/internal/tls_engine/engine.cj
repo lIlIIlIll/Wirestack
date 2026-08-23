@@ -74,6 +74,24 @@ foreign func wirestack_tls_engine_set_protocol_versions(
     minimumTlsVersion: Int32,
     maximumTlsVersion: Int32
 ): Int32
+foreign func wirestack_tls_engine_set_session_id_context(
+    engineHandle: UInt64,
+    context: CPointer<UInt8>,
+    contextSize: UInt64
+): Int32
+foreign func wirestack_tls_engine_offer_session(
+    engineHandle: UInt64,
+    session: CPointer<UInt8>,
+    sessionSize: UInt64
+): Int32
+foreign func wirestack_tls_engine_pending_session(
+    engineHandle: UInt64,
+    output: CPointer<UInt8>,
+    outputCapacity: UInt64,
+    outRequiredSize: CPointer<UInt64>,
+    outLifetimeSeconds: CPointer<UInt64>,
+    outSingleUse: CPointer<Int32>
+): Int32
 foreign func wirestack_tls_engine_enable_server_name_selection(engineHandle: UInt64): Int32
 foreign func wirestack_tls_engine_server_name_selection_request(
     engineHandle: UInt64,
@@ -319,6 +337,8 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine &
     private var verifiedReferenceIdentity: ?String = None<String>
     private var serverContextSelector: ?TlsServerContextSelector = None<TlsServerContextSelector>
     private var requestedServerName: ?String = None<String>
+    private var sessionStore: ?TlsSessionStore = None<TlsSessionStore>
+    private var sessionKey: ?TlsSessionKey = None<TlsSessionKey>
 
     internal init(
         providerHandle: UInt64,
@@ -404,6 +424,50 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine &
             )
             configuredTrust = Some(trust)
             verifiedReferenceIdentity = Some(referenceIdentityText(referenceIdentity))
+        }
+    }
+
+    internal func configureSessionStore(store: TlsSessionStore, key: TlsSessionKey): Unit {
+        let offered = store.take(key)
+        synchronized(mutex) {
+            let current = requireOpen()
+            if (let Some(encoded) <- offered) {
+                let status = unsafe {
+                    let input = acquireArrayRawData(encoded)
+                    try {
+                        wirestack_tls_engine_offer_session(
+                            current,
+                            input.pointer,
+                            UInt64(encoded.size)
+                        )
+                    } finally {
+                        releaseArrayRawData(input)
+                    }
+                }
+                for (index in 0..encoded.size) { encoded[index] = 0 }
+                requireConfigurationSuccess("cached TLS session", status)
+            }
+            sessionStore = Some(store)
+            sessionKey = Some(key)
+        }
+    }
+
+    internal func configureServerSessionIdContext(context: Array<Byte>): Unit {
+        synchronized(mutex) {
+            let current = requireOpen()
+            let status = unsafe {
+                let input = acquireArrayRawData(context)
+                try {
+                    wirestack_tls_engine_set_session_id_context(
+                        current,
+                        input.pointer,
+                        UInt64(context.size)
+                    )
+                } finally {
+                    releaseArrayRawData(input)
+                }
+            }
+            requireConfigurationSuccess("server session partition", status)
         }
     }
 
@@ -558,6 +622,7 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine &
             if (status != NATIVE_OK) {
                 throw providerFailure("handshake step", status)
             }
+            capturePendingSession(current)
             let value = output[0]
             if (value == ENGINE_COMPLETE) {
                 TlsEngineStep.Complete
@@ -694,6 +759,7 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine &
             context.clientTrust,
             systemTrust
         )
+        configureServerSessionIdContext(serverSessionIdContext(context, systemTrust))
     }
 
     private func failPendingServerNameSelection(): Unit {
@@ -1037,6 +1103,7 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine &
             if (status != NATIVE_OK || countOutput[0] > UInt64(destination.length)) {
                 throw providerFailure("plaintext read", status)
             }
+            capturePendingSession(current)
             decodeReadResult(stepOutput[0], Int64(countOutput[0]))
         }
     }
@@ -1094,6 +1161,79 @@ public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine &
             throw TlsEngineException(TlsEngineErrorCode.Closed, "TLS engine is closed")
         }
         handle
+    }
+
+    private func capturePendingSession(current: UInt64): Unit {
+        let storeAndKey = match ((sessionStore, sessionKey)) {
+            case (Some(store), Some(key)) => Some((store, key))
+            case _ => None<(TlsSessionStore, TlsSessionKey)>
+        }
+        if (storeAndKey.isNone()) {
+            return
+        }
+        let sizeOutput = Array<UInt64>(1, repeat: 0u64)
+        let lifetimeOutput = Array<UInt64>(1, repeat: 0u64)
+        let singleUseOutput = Array<Int32>(1, repeat: 0)
+        let queryStatus = unsafe {
+            let size = acquireArrayRawData(sizeOutput)
+            let lifetime = acquireArrayRawData(lifetimeOutput)
+            let singleUse = acquireArrayRawData(singleUseOutput)
+            try {
+                wirestack_tls_engine_pending_session(
+                    current,
+                    CPointer<UInt8>(),
+                    0u64,
+                    size.pointer,
+                    lifetime.pointer,
+                    singleUse.pointer
+                )
+            } finally {
+                releaseArrayRawData(singleUse)
+                releaseArrayRawData(lifetime)
+                releaseArrayRawData(size)
+            }
+        }
+        if (queryStatus != NATIVE_OK || sizeOutput[0] > 256u64 * 1024u64) {
+            throw providerFailure("pending TLS session query", queryStatus)
+        }
+        if (sizeOutput[0] == 0u64) {
+            return
+        }
+        let encoded = Array<Byte>(Int64(sizeOutput[0]), repeat: 0)
+        let readStatus = unsafe {
+            let output = acquireArrayRawData(encoded)
+            let size = acquireArrayRawData(sizeOutput)
+            let lifetime = acquireArrayRawData(lifetimeOutput)
+            let singleUse = acquireArrayRawData(singleUseOutput)
+            try {
+                wirestack_tls_engine_pending_session(
+                    current,
+                    output.pointer,
+                    UInt64(encoded.size),
+                    size.pointer,
+                    lifetime.pointer,
+                    singleUse.pointer
+                )
+            } finally {
+                releaseArrayRawData(singleUse)
+                releaseArrayRawData(lifetime)
+                releaseArrayRawData(size)
+                releaseArrayRawData(output)
+            }
+        }
+        if (readStatus != NATIVE_OK) {
+            for (index in 0..encoded.size) { encoded[index] = 0 }
+            throw providerFailure("pending TLS session", readStatus)
+        }
+        match (storeAndKey) {
+            case Some(value) => value[0].put(
+                value[1],
+                encoded,
+                lifetimeOutput[0],
+                singleUseOutput[0] != 0
+            )
+            case None => ()
+        }
     }
 
     ~init() {
