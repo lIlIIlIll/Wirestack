@@ -167,28 +167,179 @@ class TlsConnectionTest {
             @Expect(connection.isClosed())
         }
     }
+
+    @TestCase
+    func gracefulCloseSendsAndProcessesCloseNotifyBeforeReleasingResources(): Unit {
+        let engine = LifecycleEngine(shutdownNeedsPeer: true)
+        let transport = LifecycleTransport(respondToTlsClose: true)
+        let connection = TlsConnection.handshake(engine, transport)
+
+        connection.close(OperationContext(deadline: Some(Deadline.after(Duration.second))))
+
+        @Expect(engine.shutdownCalls.load(), 3)
+        @Expect(transport.writeCalls.load(), 1)
+        @Expect(transport.readCalls.load(), 1)
+        @Expect(transport.closeCalls.load(), 1)
+        @Expect(engine.closeCalls.load(), 1)
+        match (connection.closureEvidence) {
+            case Some(TlsClosureEvidence.CloseNotify) => @Expect(true)
+            case _ => @Fail("graceful close must retain close_notify evidence")
+        }
+    }
+
+    @TestCase
+    func tcpEofDuringGracefulCloseRetainsTruncationAndStillReleasesEverything(): Unit {
+        let engine = LifecycleEngine(shutdownNeedsPeer: true)
+        let transport = LifecycleTransport()
+        let connection = TlsConnection.handshake(engine, transport)
+        var truncated = false
+
+        try {
+            connection.close(OperationContext(deadline: Some(Deadline.after(Duration.second))))
+        } catch (error: NetworkException) {
+            match (error.code) {
+                case NetworkErrorCode.UnexpectedEof => truncated = true
+                case _ => ()
+            }
+        }
+
+        @Expect(truncated)
+        @Expect(connection.isClosed())
+        @Expect(transport.closeCalls.load(), 1)
+        @Expect(engine.closeCalls.load(), 1)
+        match (connection.closureEvidence) {
+            case Some(TlsClosureEvidence.PeerClosedWithoutCloseNotify) => @Expect(true)
+            case _ => @Fail("bare TCP EOF must retain TLS truncation evidence")
+        }
+    }
+
+    @TestCase
+    func expiredCloseBudgetStillClosesTransportAndReleasesEngine(): Unit {
+        let engine = LifecycleEngine(shutdownNeedsPeer: true)
+        let transport = LifecycleTransport(respondToTlsClose: true)
+        let connection = TlsConnection.handshake(engine, transport)
+        var timedOut = false
+
+        try {
+            connection.close(
+                OperationContext(deadline: Some(Deadline.after(Duration.Zero)))
+            )
+        } catch (error: NetworkException) {
+            match (error.code) {
+                case NetworkErrorCode.TimedOut => timedOut = true
+                case _ => ()
+            }
+        }
+
+        @Expect(timedOut)
+        @Expect(engine.shutdownCalls.load(), 0)
+        @Expect(transport.closeCalls.load(), 1)
+        @Expect(engine.closeCalls.load(), 1)
+        @Expect(connection.isClosed())
+    }
+
+    @TestCase
+    func abortNeverAttemptsTlsShutdownAndRetainsLocalAbortEvidence(): Unit {
+        let engine = LifecycleEngine(shutdownNeedsPeer: true)
+        let transport = LifecycleTransport(respondToTlsClose: true)
+        let connection = TlsConnection.handshake(engine, transport)
+
+        connection.abort(reason: Some(AbortReason.ApplicationAbort))
+
+        @Expect(engine.shutdownCalls.load(), 0)
+        @Expect(transport.writeCalls.load(), 0)
+        @Expect(transport.abortCalls.load(), 1)
+        @Expect(engine.closeCalls.load(), 1)
+        match (connection.closureEvidence) {
+            case Some(TlsClosureEvidence.LocalAbort) => @Expect(true)
+            case _ => @Fail("abort must retain local termination evidence")
+        }
+    }
+
+    @TestCase
+    func tcpEofDuringApplicationReadRetainsTruncationBeforeAbort(): Unit {
+        let engine = LifecycleEngine(readNeedsTransport: true)
+        let transport = LifecycleTransport()
+        let connection = TlsConnection.handshake(engine, transport)
+        var truncated = false
+
+        try {
+            let _ = connection.readSome(MutableByteSpan(Array<Byte>(1, repeat: 0)))
+        } catch (error: NetworkException) {
+            match (error.code) {
+                case NetworkErrorCode.UnexpectedEof => truncated = true
+                case _ => ()
+            }
+        }
+
+        @Expect(truncated)
+        @Expect(transport.abortCalls.load(), 1)
+        match (connection.closureEvidence) {
+            case Some(TlsClosureEvidence.PeerClosedWithoutCloseNotify) => @Expect(true)
+            case _ => @Fail("application read must retain bare EOF as TLS truncation")
+        }
+    }
+
+    @TestCase
+    func peerCloseNotifyProducesEofEvidenceAndRejectsNewApplicationWrites(): Unit {
+        let engine = LifecycleEngine(peerClosedRead: true)
+        let connection = TlsConnection.handshake(engine, LifecycleTransport())
+
+        match (connection.readSome(MutableByteSpan(Array<Byte>(1, repeat: 0)))) {
+            case ReadResult.EndOfStream => @Expect(true)
+            case _ => @Fail("peer close_notify must produce plaintext EOF")
+        }
+        var writeClosed = false
+        try {
+            let _ = connection.writeSome(ByteSpan([1]))
+        } catch (error: NetworkException) {
+            match (error.code) {
+                case NetworkErrorCode.Closed => writeClosed = true
+                case _ => ()
+            }
+        }
+
+        @Expect(writeClosed)
+        match (connection.closureEvidence) {
+            case Some(TlsClosureEvidence.CloseNotify) => @Expect(true)
+            case _ => @Fail("peer close_notify must be retained")
+        }
+        connection.close()
+    }
 }
 
 private class LifecycleEngine <: TlsEngine {
     private let failHandshake: Bool
     private let failRead: Bool
     private let blockRead: Bool
+    private let readNeedsTransport: Bool
+    private let peerClosedRead: Bool
+    private let shutdownNeedsPeer: Bool
     private let entered: ?SyncCounter
     private let readMutex = Mutex()
     private let readChanged = synchronized(readMutex) { readMutex.condition() }
     private var readReleased = false
+    private var closeNotifyPending = false
+    private var peerCloseReceived = false
     let closeCalls = AtomicInt64(0)
     let writtenBytes = AtomicInt64(0)
+    let shutdownCalls = AtomicInt64(0)
 
     init(
         failHandshake!: Bool = false,
         failRead!: Bool = false,
         blockRead!: Bool = false,
+        readNeedsTransport!: Bool = false,
+        peerClosedRead!: Bool = false,
+        shutdownNeedsPeer!: Bool = false,
         entered!: ?SyncCounter = None<SyncCounter>
     ) {
         this.failHandshake = failHandshake
         this.failRead = failRead
         this.blockRead = blockRead
+        this.readNeedsTransport = readNeedsTransport
+        this.peerClosedRead = peerClosedRead
+        this.shutdownNeedsPeer = shutdownNeedsPeer
         this.entered = entered
     }
 
@@ -202,9 +353,17 @@ private class LifecycleEngine <: TlsEngine {
         TlsEngineStep.Complete
     }
 
-    public func pendingCiphertext(): Int64 { 0 }
-    public func drainCiphertext(_: MutableByteSpan): Int64 { 0 }
-    public func feedCiphertext(source: ByteSpan): Int64 { source.length }
+    public func pendingCiphertext(): Int64 { if (closeNotifyPending) { 1 } else { 0 } }
+    public func drainCiphertext(destination: MutableByteSpan): Int64 {
+        if (!closeNotifyPending || destination.isEmpty()) { return 0 }
+        destination.bytes[destination.offset] = 21
+        closeNotifyPending = false
+        1
+    }
+    public func feedCiphertext(source: ByteSpan): Int64 {
+        if (!source.isEmpty()) { peerCloseReceived = true }
+        source.length
+    }
 
     public func readPlaintext(destination: MutableByteSpan): TlsEngineReadResult {
         if (failRead) {
@@ -216,6 +375,8 @@ private class LifecycleEngine <: TlsEngine {
                 retryability: Retryability.Never
             )
         }
+        if (peerClosedRead) { return TlsEngineReadResult.PeerClosed }
+        if (readNeedsTransport) { return TlsEngineReadResult.WantRead }
         if (blockRead) {
             match (entered) {
                 case Some(counter) => counter.dec()
@@ -234,6 +395,18 @@ private class LifecycleEngine <: TlsEngine {
         TlsEngineWriteResult.Consumed(source.length)
     }
 
+    public func shutdownStep(): TlsEngineShutdownResult {
+        shutdownCalls.fetchAdd(1)
+        if (!shutdownNeedsPeer || peerCloseReceived) {
+            return TlsEngineShutdownResult.Complete
+        }
+        if (shutdownCalls.load() == 1) {
+            closeNotifyPending = true
+            return TlsEngineShutdownResult.Sent
+        }
+        TlsEngineShutdownResult.WantRead
+    }
+
     public func close(): Unit { closeCalls.fetchAdd(1); () }
     public func isClosed(): Bool { closeCalls.load() > 0 }
 
@@ -246,6 +419,7 @@ private class LifecycleEngine <: TlsEngine {
 }
 
 private class LifecycleTransport <: DuplexTransport {
+    private let respondToTlsClose: Bool
     let readCalls = AtomicInt64(0)
     let writeCalls = AtomicInt64(0)
     let closeCalls = AtomicInt64(0)
@@ -253,17 +427,26 @@ private class LifecycleTransport <: DuplexTransport {
     let terminalDisposals = AtomicInt64(0)
     private let disposed = AtomicBool(false)
 
+    init(respondToTlsClose!: Bool = false) {
+        this.respondToTlsClose = respondToTlsClose
+    }
+
     public prop info: TransportInfo {
         get() { TransportInfo("lifecycle-test", runtimeIoBackend: "deterministic") }
     }
 
     public func readSome(
-        _: MutableByteSpan,
+        destination: MutableByteSpan,
         context!: OperationContext = OperationContext.background()
     ): ReadResult {
         let _ = context
         readCalls.fetchAdd(1)
-        ReadResult.EndOfStream
+        if (respondToTlsClose) {
+            destination.bytes[destination.offset] = 21
+            ReadResult.Data(1)
+        } else {
+            ReadResult.EndOfStream
+        }
     }
 
     public func writeSome(
