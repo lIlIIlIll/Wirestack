@@ -167,6 +167,195 @@ class TlsEnginePumpTest {
     }
 
     @TestCase
+    func handshakeInfoReportsNegotiatedAlpnPeerChainAndVerificationEvidence(): Unit {
+        let provider = AwsLcTlsProvider()
+        let identity = tlsTestLocalIdentity()
+        let capabilities = provider.linuxCapabilities()
+        let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
+            .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
+            .alpn(["http/1.1", "h2"])
+            .build()
+        let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
+            .identity(identity)
+            .alpn(["h2", "http/1.1"])
+            .build()
+        let client = provider.createClientEngine(
+            clientContext,
+            ReferenceIdentity.Dns(HostName("example.com")),
+            serverName: Some(HostName("example.com"))
+        )
+        let server = provider.createServerEngine(serverContext)
+        try {
+            drivePairedMemoryHandshake(client, server)
+            let clientInfo = requireHandshakeInfo(client)
+            let serverInfo = requireHandshakeInfo(server)
+            @Expect(clientInfo.cipherSuite.isEmpty(), false)
+            @Expect(clientInfo.negotiatedAlpn, Some("h2"))
+            @Expect(serverInfo.negotiatedAlpn, Some("h2"))
+            @Expect(clientInfo.resumed, false)
+            @Expect(clientInfo.providerManifest.providerId, "aws-lc")
+            match (clientInfo.version) {
+                case TlsVersion.Tls13 => ()
+                case _ => @Fail("expected TLS 1.3 negotiation")
+            }
+            match (clientInfo.peerCertificateChain) {
+                case Some(chain) => @Expect(chain.size(), 1)
+                case None => @Fail("client handshake info must retain the peer chain")
+            }
+            match (clientInfo.verificationEvidence) {
+                case Some(evidence) =>
+                    @Expect(evidence.peerChainLength, 1)
+                    @Expect(evidence.matchedPinIndex, Some(0))
+                    @Expect(evidence.verifiedReferenceIdentity, Some("example.com"))
+                    match (evidence.status) {
+                        case TrustVerificationStatus.Verified => ()
+                        case _ => @Fail("expected verified trust evidence")
+                    }
+                case None => @Fail("client handshake info must retain verification evidence")
+            }
+            @Expect(serverInfo.peerCertificateChain.isNone())
+        } finally {
+            client.close()
+            server.close()
+            identity.privateKeyRef.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
+    func noSharedAlpnFailsTheHandshakeInsteadOfSilentlySelectingNothing(): Unit {
+        let provider = AwsLcTlsProvider()
+        let identity = tlsTestLocalIdentity()
+        let capabilities = provider.linuxCapabilities()
+        let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
+            .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
+            .alpn(["http/1.1"])
+            .build()
+        let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
+            .identity(identity)
+            .alpn(["h2"])
+            .build()
+        let client = provider.createClientEngine(
+            clientContext,
+            ReferenceIdentity.Dns(HostName("example.com"))
+        )
+        let server = provider.createServerEngine(serverContext)
+        var failed = false
+        try {
+            try {
+                drivePairedMemoryHandshake(client, server)
+            } catch (error: TlsEngineException) {
+                match (error.tlsCode) {
+                    case TlsEngineErrorCode.ProviderFailure => failed = true
+                    case _ => ()
+                }
+            }
+            @Expect(failed)
+        } finally {
+            client.close()
+            server.close()
+            identity.privateKeyRef.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
+    func requiredMutualTlsUsesClientIdentityAndReturnsServerVerificationEvidence(): Unit {
+        let provider = AwsLcTlsProvider()
+        let identity = tlsTestLocalIdentity()
+        let capabilities = provider.linuxCapabilities()
+        let pinned = TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()])
+        let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
+            .trust(pinned)
+            .identity(identity)
+            .build()
+        let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
+            .identity(identity)
+            .clientAuthentication(ClientAuthentication.Required)
+            .clientTrust(pinned)
+            .build()
+        let client = provider.createClientEngine(
+            clientContext,
+            ReferenceIdentity.Dns(HostName("example.com"))
+        )
+        let server = provider.createServerEngine(serverContext)
+        try {
+            drivePairedMemoryHandshake(client, server)
+            let serverInfo = requireHandshakeInfo(server)
+            match (serverInfo.peerCertificateChain) {
+                case Some(chain) => @Expect(chain.size(), 1)
+                case None => @Fail("required mTLS must retain the client certificate chain")
+            }
+            match (serverInfo.verificationEvidence) {
+                case Some(evidence) =>
+                    @Expect(evidence.peerChainLength, 1)
+                    @Expect(evidence.matchedPinIndex, Some(0))
+                case None => @Fail("required mTLS must retain client verification evidence")
+            }
+        } finally {
+            client.close()
+            server.close()
+            identity.privateKeyRef.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
+    func requiredMutualTlsRejectsMissingClientIdentityButOptionalAllowsIt(): Unit {
+        let provider = AwsLcTlsProvider()
+        let identity = tlsTestLocalIdentity()
+        let capabilities = provider.linuxCapabilities()
+        let pinned = TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()])
+        let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
+            .trust(pinned)
+            .build()
+        let requiredContext = TlsServerContext.builder(provider.manifest(), capabilities)
+            .identity(identity)
+            .clientAuthentication(ClientAuthentication.Required)
+            .clientTrust(pinned)
+            .build()
+        let requiredClient = provider.createClientEngine(
+            clientContext,
+            ReferenceIdentity.Dns(HostName("example.com"))
+        )
+        let requiredServer = provider.createServerEngine(requiredContext)
+        var rejected = false
+        try {
+            try {
+                drivePairedMemoryHandshake(requiredClient, requiredServer)
+            } catch (_: TlsEngineException) {
+                rejected = true
+            }
+            @Expect(rejected)
+        } finally {
+            requiredClient.close()
+            requiredServer.close()
+        }
+
+        let optionalContext = TlsServerContext.builder(provider.manifest(), capabilities)
+            .identity(identity)
+            .clientAuthentication(ClientAuthentication.Optional)
+            .clientTrust(pinned)
+            .build()
+        let optionalClient = provider.createClientEngine(
+            clientContext,
+            ReferenceIdentity.Dns(HostName("example.com"))
+        )
+        let optionalServer = provider.createServerEngine(optionalContext)
+        try {
+            drivePairedMemoryHandshake(optionalClient, optionalServer)
+            let info = requireHandshakeInfo(optionalServer)
+            @Expect(info.peerCertificateChain.isNone())
+            @Expect(info.verificationEvidence.isNone())
+        } finally {
+            optionalClient.close()
+            optionalServer.close()
+            identity.privateKeyRef.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
     func mismatchedSpkiPinFailsARealClientServerHandshake(): Unit {
         let provider = AwsLcTlsProvider()
         let identity = tlsTestLocalIdentity()
@@ -496,6 +685,13 @@ private func drivePairedMemoryHandshake(client: TlsEngine, server: TlsEngine): U
         TlsEngineErrorCode.NoProgress,
         "paired TLS memory handshake exceeded its step bound"
     )
+}
+
+private func requireHandshakeInfo(engine: TlsEngine): TlsHandshakeInfo {
+    match (engine) {
+        case value: HandshakeInfoTlsEngine => value.handshakeInfo()
+        case _ => throw IllegalStateException("test TLS engine exposes no handshake info")
+    }
 }
 
 private func advanceToServerSignatureRequest(

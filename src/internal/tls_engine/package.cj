@@ -203,7 +203,7 @@ public class AwsLcTlsProvider <: TlsProvider {
                     "TLS provider is closed"
                 )
             }
-            createAwsLcTlsEngine(handle, role, security)
+            createAwsLcTlsEngine(handle, role, security, providerManifest)
         }
     }
 
@@ -246,7 +246,12 @@ public class AwsLcTlsProvider <: TlsProvider {
             } else {
                 systemTrustLocation
             }
-            let engine = AwsLcTlsEngine(handle, TlsEngineRole.Client, context.security)
+            let engine = AwsLcTlsEngine(
+                handle,
+                TlsEngineRole.Client,
+                context.security,
+                providerManifest
+            )
             try {
                 engine.configureClientAuthentication(
                     context.trust,
@@ -254,6 +259,10 @@ public class AwsLcTlsProvider <: TlsProvider {
                     serverName,
                     resolvedSystemTrust
                 )
+                engine.configureAlpn(context.alpnProtocols())
+                if (let Some(identity) <- context.identity) {
+                    engine.configureLocalIdentity(identity)
+                }
                 engine
             } catch (error: Exception) {
                 engine.close()
@@ -263,7 +272,10 @@ public class AwsLcTlsProvider <: TlsProvider {
     }
 
     /** Creates a server engine with an already validated immutable local identity. */
-    public func createServerEngine(context: TlsServerContext): TlsEngine {
+    public func createServerEngine(
+        context: TlsServerContext,
+        systemTrustLocation!: ?LinuxSystemTrustLocation = None<LinuxSystemTrustLocation>
+    ): TlsEngine {
         synchronized(mutex) {
             if (handle == 0u64) {
                 throw TlsProviderException(
@@ -278,9 +290,29 @@ public class AwsLcTlsProvider <: TlsProvider {
                     "TLS context was built for a different provider instance identity"
                 )
             }
-            let engine = AwsLcTlsEngine(handle, TlsEngineRole.Server, context.security)
+            let resolvedSystemTrust = match (context.clientTrust) {
+                case Some(trust) => if (requiresSystemTrust(trust) &&
+                    systemTrustLocation.isNone()) {
+                    Some(LinuxSystemTrustAdapter.discover())
+                } else {
+                    systemTrustLocation
+                }
+                case None => systemTrustLocation
+            }
+            let engine = AwsLcTlsEngine(
+                handle,
+                TlsEngineRole.Server,
+                context.security,
+                providerManifest
+            )
             try {
                 engine.configureLocalIdentity(context.identity)
+                engine.configureAlpn(context.alpnProtocols())
+                engine.configureClientAuthentication(
+                    context.clientAuthentication,
+                    context.clientTrust,
+                    resolvedSystemTrust
+                )
                 engine
             } catch (error: Exception) {
                 engine.close()
