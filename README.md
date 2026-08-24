@@ -97,7 +97,7 @@ scripts/run_cjpm_executable.sh packages/examples
 | 直接构造 JSON 文本 | `@Json({...})` | `String` |
 | 构造并修改 JSON 树 | `@JsonValue({...})` | `JsonNode` |
 | 解析或输出 JSON 树 | `YJson.parse` / `YJson.stringify` | `JsonNode` / `String` |
-| 低内存只读查询 | `YJson.parseCompact` | `CompactJsonDocument` |
+| 可切换后端的只读查询 | `YJson.parseDocument` | `JsonDocument`（默认 Pure Compact） |
 | 自定义或内置 codec | `encode*With` / `decode*With` | typed value / JSON |
 | Stream I/O | `encodeToStreamWith` / `decodeFromStreamWith` | caller-owned stream |
 

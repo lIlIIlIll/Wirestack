@@ -21,10 +21,14 @@ import yjson.*
 import yjson_native.*
 
 let bytes = unsafe { "{\"n\":42}".rawData() }
-try (document = NativeCompactJsonDocument.parse(bytes)) {
-    println(document.root().get("n").getOrThrow().asInt64())
+try (document = YJson.parseDocument(bytes, backend: NativeCompactBackend)) {
+    println(document.getRootInt("n").getOrThrow())
 }
 ```
+
+This is the same facade used by the portable `PureCompactBackend` and optional
+`YyjsonBackend`. Use `NativeCompactJsonDocument` directly when per-node views,
+storage statistics, or backend-specific tuning are required.
 
 DOM parsing does not require `enableYJsonNative()`; activation functions below
 control optional scanner/number seams, not document ownership.

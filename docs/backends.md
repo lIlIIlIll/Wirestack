@@ -11,9 +11,10 @@ yjson 默认使用 Pure Cangjie 实现。Native backend 是独立 package，只�
 | --- | --- |
 | 普通 typed encode/decode | `YJson`，Pure Cangjie |
 | 需要修改 JSON 树 | `JsonNode` |
-| 跨平台、低额外依赖的只读访问 | `CompactJsonDocument` |
-| 需要 Native-owned Compact DOM | `NativeCompactJsonDocument` |
-| 大文档批量遍历或根对象查询 | `YyjsonCompactJsonDocument` |
+| 可切换 backend 的只读访问 | `YJson.parseDocument` |
+| 跨平台、低额外依赖的只读访问 | `PureCompactBackend`（默认） |
+| 需要 Native-owned Compact DOM | `NativeCompactBackend` |
+| 大文档批量遍历或根对象查询 | `YyjsonBackend` |
 | 不希望管理资源生命周期 | Pure Cangjie API |
 
 优先从 Pure Cangjie 开始。只有 profiling 表明 DOM 构建或遍历是瓶颈，并且部署平台可以构建 C11 源码时，再选择 Native package。
@@ -28,6 +29,25 @@ yjson = { path = "../yjson" }
 ```
 
 typed codec、`JsonNode` 和 `CompactJsonDocument` 都可以在这个边界内使用。完整入口对比见 [API 选择指南](choosing-an-api.md)。
+
+三个 document backend 现在共享同一个入口和生命周期接口：
+
+```cangjie
+try (document = YJson.parseDocument("{\"n\":42}")) {
+    // 未指定 backend 时使用 PureCompactBackend
+    println(document.getRootInt("n").getOrThrow())
+}
+```
+
+`JsonDocument` 提供 `rootSize`、根对象整数查询、`materialize`、序列化和
+`close`。需要任意深度查询时，显式调用 `materialize()` 得到脱离 document
+生命周期的 `JsonNode`。统一 facade 不伪造所有 backend 都具备的逐节点零复制
+view；需要该能力或 storage stats、遍历 checksum 等调优接口时，继续直接使用
+backend 的具体 document 类型。
+
+统一入口拥有输入语义：`parseDocument(bytes)` 返回后，调用方可以修改或复用原数组。
+Pure backend 因而会复制输入；明确需要零复制且能保证数组不可变时，直接使用
+`CompactJsonDocument.parseBorrowed`。
 
 ## Custom Native Compact DOM
 
@@ -46,13 +66,14 @@ import yjson.*
 import yjson_native.*
 
 let bytes = unsafe { "{\"n\":42}".rawData() }
-try (document = NativeCompactJsonDocument.parse(bytes)) {
-    let n = document.root().get("n").getOrThrow().asInt64()
-    println(n)
+try (document = YJson.parseDocument(bytes, backend: NativeCompactBackend)) {
+    println(document.getRootInt("n").getOrThrow())
 }
 ```
 
 DOM parse 与全局 scanner activation 相互独立；使用 `NativeCompactJsonDocument` 不需要调用 `enableYJsonNative()`。
+需要选择 source ownership 或 duplicate strategy 时，可构造
+`NativeCompactJsonBackend(...)` 传给同一个入口。
 
 ## yyjson Direct Native DOM
 
@@ -67,13 +88,14 @@ import yjson.*
 import yjson_yyjson.*
 
 let bytes = unsafe { "{\"n\":42}".rawData() }
-try (document = YyjsonCompactJsonDocument.parse(bytes)) {
-    let n = document.getRootInt("n").getOrThrow()
-    println(n)
+try (document = YJson.parseDocument(bytes, backend: YyjsonBackend)) {
+    println(document.getRootInt("n").getOrThrow())
 }
 ```
 
 package vendoring yyjson 0.12.0，并在其 Cangjie 动态库中隐藏实现符号，避免与应用独立链接的其他 yyjson 版本直接冲突。
+qualification 参数可通过 `YyjsonCompactJsonBackend(...)` 显式配置；支持的默认路径仍是
+Direct、SemanticDispatch、Retained 与 Separate。
 
 ## 可选 Float64 fast-parser bridge
 

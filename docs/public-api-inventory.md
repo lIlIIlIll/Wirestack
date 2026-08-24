@@ -83,6 +83,10 @@ depend on the current capacity heuristic.
 | `yjson` | `JsonNode` | Mutable AST root with `[]` access and short scalar/container properties | Breaking rename from `JsonValue` |
 | `yjson` | `YJson.nullValue/array/object/value/writeValue` | Macro bridge plus explicit construction and conversion helpers | Additive overload family |
 | `yjson` | chainable `JsonArrayValue.add/set`, `JsonObjectValue.put` | Mutates and returns the same container | `put` return type changed from `Unit`; rebuild required |
+| `yjson` | `JsonDocumentBackend` / `JsonDocument` | Selectable read-only document facade with deterministic resource lifecycle | Additive interface family |
+| `yjson` | `YJson.parseDocument` / `PureCompactBackend` | Unified String/bytes entry; Pure Compact is the portable default | Additive overload family |
+| `yjson_native` | `NativeCompactBackend` / `NativeCompactJsonBackend` | Default and configurable Custom Native facade adapters | Additive optional-package API |
+| `yjson_yyjson` | `YyjsonBackend` / `YyjsonCompactJsonBackend` | Default Direct and configurable yyjson facade adapters | Additive optional-package API |
 
 Static duplicate keys are rejected during macro expansion. Objects containing
 dynamic keys use LastWins; all interpolated expressions still run once, while

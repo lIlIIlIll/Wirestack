@@ -22,10 +22,14 @@ import yjson.*
 import yjson_yyjson.*
 
 let bytes = unsafe { "{\"n\":42}".rawData() }
-try (document = YyjsonCompactJsonDocument.parse(bytes)) {
+try (document = YJson.parseDocument(bytes, backend: YyjsonBackend)) {
     println(document.getRootInt("n").getOrThrow())
 }
 ```
+
+This is the same facade used by the portable `PureCompactBackend` and optional
+`NativeCompactBackend`. Use `YyjsonCompactJsonDocument` directly for storage
+statistics, traversal checksum, or qualification controls.
 
 Use the same `yjson` version. See the suite-level
 [`docs/backends.md`](../../docs/backends.md) and

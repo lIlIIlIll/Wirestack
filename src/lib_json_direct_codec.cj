@@ -1113,6 +1113,21 @@ public class YJson {
         JsonNode.parse(bytes, config: config)
     }
 
+    /// Parses a read-only document using one explicit backend. The portable
+    /// Pure Compact backend remains the default and does not enable Native code.
+    public static func parseDocument(text: String,
+        backend!: JsonDocumentBackend = PureCompactBackend,
+        config!: JsonReadConfig = JsonReadConfig.defaults): JsonDocument {
+        backend.parse(unsafe { text.rawData() }, config)
+    }
+
+    /// Parses raw UTF-8 into the unified read-only document facade.
+    public static func parseDocument(bytes: Array<Byte>,
+        backend!: JsonDocumentBackend = PureCompactBackend,
+        config!: JsonReadConfig = JsonReadConfig.defaults): JsonDocument {
+        backend.parse(bytes, config)
+    }
+
     public static func stringify(value: JsonNode, config!: JsonWriteConfig = JsonWriteConfig.compact): String {
         writeJsonValueToString(value, config)
     }
