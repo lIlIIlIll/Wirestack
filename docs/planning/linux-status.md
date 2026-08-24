@@ -108,7 +108,8 @@ Status values have the same fail-closed meaning as the global status file.
 | M6-003 SETTINGS negotiation | COMPLETE | Received batches validate and apply atomically before ACK, local batches are acknowledged FIFO, initial-window deltas are explicit, unexpected ACK and pending-batch overflow fail closed, unknown settings remain interoperable and advertised resource values are capped by local policy |
 | M6-004 HPACK integer/string/static table | COMPLETE | RFC integer vectors round-trip; truncation, continuation overflow, invalid prefixes and bounded string lengths fail closed; all 61 RFC static entries use exact one-based indexing and bounded table accounting |
 | M6-005 HPACK Huffman | COMPLETE | The complete 257-symbol RFC codebook passes request examples and all-octet round trips; EOS in data, non-EOS padding, overlong padding, invalid prefixes and encoded/decoded output overflow fail closed without unbounded temporary allocation |
-| M6-006..020 dynamic table through benchmark | NOT_STARTED | Dynamic table, header blocks, connection/stream state, flow control, multiplexed client/server/pool integration, conformance/fuzz and 1/10/100-stream evidence remain required |
+| M6-006 HPACK dynamic table | COMPLETE | Exact `name + value + 32` accounting, newest-first wire indexes, oldest-first eviction, immediate shrink, oversized-entry clearing and zero capacity are bounded; sensitive/never-indexed fields never enter shared state and table-size updates cannot exceed the SETTINGS-derived ceiling |
+| M6-007..020 header blocks through benchmark | NOT_STARTED | Header blocks, connection/stream state, flow control, multiplexed client/server/pool integration, conformance/fuzz and 1/10/100-stream evidence remain required |
 
 ## Next critical path
 
