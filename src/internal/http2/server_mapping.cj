@@ -69,7 +69,7 @@ public interface Http2ServerHandler {
  * One peer-initiated server exchange. The connection reader feeds DATA and
  * trailing HEADERS while a lightweight handler task may consume the body.
  */
-public class Http2ServerExchange {
+public class Http2ServerExchange <: Http2StreamResetListener {
     public let streamId: Http2StreamId
     public let request: Http2ServerRequest
     private let registry: Http2StreamRegistry
@@ -195,6 +195,11 @@ public class Http2ServerExchange {
         cleanupFlowIfClosed()
     }
 
+    /** Wakes a blocked handler body read after reset cleanup has claimed this stream. */
+    public func streamReset(event: Http2StreamResetEvent): Unit {
+        if (event.streamId.value == streamId.value) { bodyChannel.reset(event) }
+    }
+
     private func finishPeerSide(): Unit {
         synchronized(mutex) { peerEnded = true }
         registry.peerEnd(streamId)
@@ -224,6 +229,7 @@ private class Http2ServerBodyChannel <: HttpBodyStream {
     private var eof = false
     private var applicationClosed = false
     private var retainedTrailer: ?HttpTrailer = None<HttpTrailer>
+    private var resetEvent: ?Http2StreamResetEvent = None<Http2StreamResetEvent>
 
     prop trailer: ?HttpTrailer { get() { synchronized(mutex) { retainedTrailer } } }
     public prop contentLength: ?Int64 { get() { expectedContentLength } }
@@ -291,13 +297,23 @@ private class Http2ServerBodyChannel <: HttpBodyStream {
         }
     }
 
+    func reset(event: Http2StreamResetEvent): Unit {
+        synchronized(mutex) {
+            if (resetEvent.isSome()) { return }
+            resetEvent = Some(event)
+            segments.clear()
+            eof = true
+            changed.notifyAll()
+        }
+    }
+
     public func read(destination: Array<Byte>): Int64 {
         if (destination.isEmpty()) { return 0 }
         let registration = context.cancellation.register { => wake() }
         var updates = Array<Http2Frame>()
         try {
             let result = synchronized(mutex) {
-                while (segments.isEmpty() && !eof && !applicationClosed) {
+                while (segments.isEmpty() && !eof && !applicationClosed && resetEvent.isNone()) {
                     checkServerBodyContext(context)
                     match (context.deadline) {
                         case Some(deadline) => changed.wait(timeout: deadline.remaining())
@@ -305,6 +321,11 @@ private class Http2ServerBodyChannel <: HttpBodyStream {
                     }
                 }
                 checkServerBodyContext(context)
+                if (let Some(event) <- resetEvent) {
+                    throw Http2ProtocolException(
+                        event.code, Http2ErrorScope.Stream(event.streamId), event.reason
+                    )
+                }
                 if (applicationClosed) {
                     throw Http2MessageException(
                         Http2MessageErrorCode.InvalidMessageSequence, "HTTP/2 request body is closed"
