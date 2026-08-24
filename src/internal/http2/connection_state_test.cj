@@ -171,7 +171,9 @@ private func expectConnectionFailure(action: () -> Unit): Unit {
 
 private func expectIllegalStateChange(action: () -> Unit): Unit {
     var failed = false
-    try { action() } catch (_: IllegalArgumentException) { failed = true }
+    try { action() }
+    catch (_: IllegalArgumentException) { failed = true }
+    catch (_: IllegalStateException) { failed = true }
     @Expect(failed)
 }
 

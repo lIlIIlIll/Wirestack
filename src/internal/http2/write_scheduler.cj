@@ -111,7 +111,9 @@ public class Http2WriteScheduler {
     private var writerRunning = false
     private var controlBurst: Int64 = 0
     private var active: ?Http2QueuedWrite = None<Http2QueuedWrite>
-    private var transportTerminalClaimed = false
+    // 0 = unclaimed, 1 = graceful close in progress, 2 = terminal. Abort may
+    // upgrade state 1 exactly once to interrupt a blocked graceful close.
+    private var transportTerminalState: Int64 = 0
 
     public prop state: Http2WriteSchedulerState { get() { synchronized(mutex) { schedulerState } } }
     public prop pendingWrites: Int64 { get() { synchronized(mutex) { queuedCount } } }
@@ -164,14 +166,63 @@ public class Http2WriteScheduler {
     /** Immediately fails queued work and interrupts an active transport write. */
     public func abort(reason!: AbortReason = AbortReason.ApplicationAbort): Unit {
         let failed = synchronized(mutex) {
-            if (isSchedulerTerminal(schedulerState)) { return }
-            schedulerState = Http2WriteSchedulerState.Failed
-            let claimed = drainQueuedLocked()
-            changed.notifyAll()
-            claimed
+            if (isSchedulerTerminal(schedulerState)) {
+                Array<Http2QueuedWrite>()
+            } else {
+                schedulerState = Http2WriteSchedulerState.Failed
+                let claimed = drainQueuedLocked()
+                changed.notifyAll()
+                claimed
+            }
         }
         for (item in failed) { item.ticket.markFailed("HTTP/2 write scheduler aborted") }
         abortTransportOnce(reason)
+    }
+
+    /** Waits without polling for either graceful drain or terminal failure. */
+    public func waitUntilTerminal(
+        context!: OperationContext = OperationContext.background()
+    ): Http2WriteSchedulerState {
+        let registration = context.cancellation.register { => wakeWriter() }
+        try {
+            synchronized(mutex) {
+                while (!isSchedulerTerminal(schedulerState)) {
+                    checkWriterContext(context)
+                    match (context.deadline) {
+                        case Some(deadline) => changed.wait(timeout: deadline.remaining())
+                        case None => changed.wait()
+                    }
+                }
+                schedulerState
+            }
+        } finally {
+            registration.unregister()
+        }
+    }
+
+    /** Gracefully closes the owned transport once after every accepted frame drains. */
+    public func finishTransport(context!: OperationContext = OperationContext.background()): Bool {
+        let claimed = synchronized(mutex) {
+            if (!isSchedulerClosed(schedulerState)) {
+                throw IllegalStateException("HTTP/2 transport cannot close before writer drain")
+            }
+            if (transportTerminalState != 0) { false }
+            else { transportTerminalState = 1; true }
+        }
+        if (!claimed) { return false }
+        try {
+            transport.close(context)
+        } catch (error: Exception) {
+            // A failed graceful close must still terminate the transport. If a
+            // racing abort already upgraded state 1, that caller owns abort.
+            abortTransportOnce(writerAbortReason(context))
+            throw error
+        } finally {
+            synchronized(mutex) {
+                if (transportTerminalState == 1) { transportTerminalState = 2 }
+            }
+        }
+        true
     }
 
     /** Runs on exactly one caller task until graceful drain or terminal failure. */
@@ -386,8 +437,8 @@ public class Http2WriteScheduler {
 
     private func abortTransportOnce(reason: AbortReason): Unit {
         let claimed = synchronized(mutex) {
-            if (transportTerminalClaimed) { false }
-            else { transportTerminalClaimed = true; true }
+            if (transportTerminalState == 2) { false }
+            else { transportTerminalState = 2; true }
         }
         if (claimed) { try { transport.abort(reason: Some(reason)) } catch (_: Exception) {} }
     }
