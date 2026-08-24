@@ -46,7 +46,7 @@ class HpackCoreTest {
     func stringLengthLimitAndTruncationFailBeforeCopy(): Unit {
         expectHpackFailure({ => let _ = decodeHpackString([3, 1, 2], 0, 3u64) })
         expectHpackFailure({ => let _ = decodeHpackString([3, 1, 2, 3], 0, 2u64) })
-        expectHpackFailure({ => let _ = decodeHpackString([0x80], 0, 1u64) })
+        expectHpackFailure({ => let _ = decodeHpackString([0x81, 0xff], 0, 1u64) })
     }
 
     @TestCase
