@@ -28,6 +28,7 @@ public class HttpClientBuilder {
     private var configuredRequestTimeout: ?Duration = None<Duration>
     private var configuredLimits = HttpLimits()
     private var configuredRedirectPolicy = HttpRedirectPolicy()
+    private var configuredRetryPolicy = HttpRetryPolicy()
 
     public init() {}
 
@@ -53,12 +54,20 @@ public class HttpClientBuilder {
         this
     }
 
+    public func retryPolicy(value: HttpRetryPolicy): HttpClientBuilder {
+        configuredRetryPolicy = value
+        this
+    }
+
     public func build(): HttpClient {
         let selected = match (configuredResolver) {
             case Some(value) => value
             case None => UnavailableSystemResolver()
         }
-        HttpClient(selected, configuredRequestTimeout, configuredLimits, configuredRedirectPolicy)
+        HttpClient(
+            selected, configuredRequestTimeout, configuredLimits,
+            configuredRedirectPolicy, configuredRetryPolicy
+        )
     }
 }
 
@@ -68,6 +77,7 @@ public class HttpClient <: Resource {
     private let requestTimeout: ?Duration
     private let limits: HttpLimits
     private let redirectPolicy: HttpRedirectPolicy
+    private let retryPolicy: HttpRetryPolicy
     private let transportFactory = stdnet.StdNetTransportFactory()
     private let cleartext: http1.Http1CleartextClient
     private let mutex = Mutex()
@@ -75,11 +85,12 @@ public class HttpClient <: Resource {
     private var closed = false
 
     init(resolver: resolver.Resolver, requestTimeout: ?Duration, limits: HttpLimits,
-        redirectPolicy: HttpRedirectPolicy) {
+        redirectPolicy: HttpRedirectPolicy, retryPolicy: HttpRetryPolicy) {
         this.resolver = resolver
         this.requestTimeout = requestTimeout
         this.limits = limits
         this.redirectPolicy = redirectPolicy
+        this.retryPolicy = retryPolicy
         cleartext = http1.Http1CleartextClient(resolver, transportFactory, limits: limits)
     }
 
@@ -101,7 +112,7 @@ public class HttpClient <: Resource {
         var current = request
         var redirectCount: Int64 = 0
         while (true) {
-            let response = executeOnce(current, operation, trailer)
+            let response = executeWithRetries(current, operation, trailer)
             let next = try {
                 redirectPolicy.nextRequest(
                     current, response, redirectsFollowed: redirectCount, limits: limits
@@ -129,6 +140,20 @@ public class HttpClient <: Resource {
             case "https" => httpsClient().execute(request, context: operation, trailer: trailer)
             case _ => throw IllegalArgumentException("HTTP client accepts only http and https URLs")
         }
+    }
+
+    private func executeWithRetries(request: HttpRequest, operation: OperationContext,
+        trailer: HttpTrailer): HttpResponse {
+        var attempt: Int64 = 1
+        while (true) {
+            try {
+                return executeOnce(request, operation, trailer)
+            } catch (error: Exception) {
+                if (!retryPolicy.shouldRetry(request, error, attempt, operation)) { throw error }
+                attempt++
+            }
+        }
+        throw Exception("unreachable HTTP retry loop exit")
     }
 
     public func close(): Unit {

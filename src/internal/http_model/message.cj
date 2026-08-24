@@ -2,23 +2,32 @@ package wirestack.internal.http_model
 
 import std.sync.Mutex
 
+public enum HttpRetrySafety {
+    | Default
+    | ExplicitlySafe
+    | Disabled
+}
+
 /** Immutable request description. Protocol execution owns the body's opened stream, not this model. */
 public class HttpRequest {
     public let method: HttpMethod
     public let url: HttpUrl
     public let headers: HttpHeaders
     public let body: RequestBody
+    public let retrySafety: HttpRetrySafety
 
     public init(
         method: HttpMethod,
         url: HttpUrl,
         headers!: HttpHeaders = HttpHeaders(),
-        body!: RequestBody = RequestBody.empty()
+        body!: RequestBody = RequestBody.empty(),
+        retrySafety!: HttpRetrySafety = HttpRetrySafety.Default
     ) {
         this.method = method
         this.url = url
         this.headers = headers
         this.body = body
+        this.retrySafety = retrySafety
     }
 
     public static func get(url: String): HttpRequest {
@@ -30,7 +39,11 @@ public class HttpRequest {
     }
 
     public func withHeaders(headers: HttpHeaders): HttpRequest {
-        HttpRequest(method, url, headers: headers, body: body)
+        HttpRequest(method, url, headers: headers, body: body, retrySafety: retrySafety)
+    }
+
+    public func withRetrySafety(value: HttpRetrySafety): HttpRequest {
+        HttpRequest(method, url, headers: headers, body: body, retrySafety: value)
     }
 }
 
