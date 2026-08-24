@@ -91,6 +91,7 @@ public class HttpClient <: Resource {
     private let forwardProxy: ?http1.Http1ForwardProxyClient
     private let mutex = Mutex()
     private var https: ?http1.Http1HttpsClient = None<http1.Http1HttpsClient>
+    private var httpsProxy: ?http1.Http1HttpsProxyClient = None<http1.Http1HttpsProxyClient>
     private var closed = false
 
     init(resolver: resolver.Resolver, requestTimeout: ?Duration, limits: HttpLimits,
@@ -168,8 +169,14 @@ public class HttpClient <: Resource {
             case ("https", HttpProxyRoute.Direct) =>
                 httpsClient().execute(withProxyAuthorization(request, None<String>),
                     context: operation, trailer: trailer)
-            case ("https", HttpProxyRoute.Proxy(_)) =>
-                throw IllegalStateException("HTTPS proxy CONNECT is not implemented")
+            case ("https", HttpProxyRoute.Proxy(value)) =>
+                let authorization = value.authorization(request.url, operation)
+                httpsProxyClient(value).execute(
+                    withProxyAuthorization(request, None<String>),
+                    proxyAuthorization: authorization,
+                    context: operation,
+                    trailer: trailer
+                )
             case _ => throw IllegalArgumentException("HTTP client accepts only http and https URLs")
         }
     }
@@ -189,17 +196,18 @@ public class HttpClient <: Resource {
     }
 
     public func close(): Unit {
-        let secure = synchronized(mutex) {
+        let (secure, tunneled) = synchronized(mutex) {
             if (closed) {
-                None<http1.Http1HttpsClient>
+                (None<http1.Http1HttpsClient>, None<http1.Http1HttpsProxyClient>)
             } else {
                 closed = true
-                https
+                (https, httpsProxy)
             }
         }
         cleartext.close()
         match (forwardProxy) { case Some(value) => value.close(); case None => () }
         match (secure) { case Some(value) => value.close(); case None => () }
+        match (tunneled) { case Some(value) => value.close(); case None => () }
     }
 
     public func isClosed(): Bool { synchronized(mutex) { closed } }
@@ -218,6 +226,25 @@ public class HttpClient <: Resource {
                     )
                     https = Some(value)
                     value
+            }
+        }
+    }
+
+    private func httpsProxyClient(value: HttpProxyConfig): http1.Http1HttpsProxyClient {
+        synchronized(mutex) {
+            if (closed) { throw IllegalStateException("HTTP client is closed") }
+            match (httpsProxy) {
+                case Some(client) => client
+                case None =>
+                    let client = http1.Http1HttpsProxyClient(
+                        toInternalProxyEndpoint(value.endpoint),
+                        value.resolver,
+                        transportFactory,
+                        http1.AwsLcHttp1TlsHandshaker.systemDefault(),
+                        limits: limits
+                    )
+                    httpsProxy = Some(client)
+                    client
             }
         }
     }

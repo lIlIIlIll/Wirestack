@@ -4,6 +4,7 @@ import wirestack.internal.http_model as model
 import wirestack.internal.common as common
 import wirestack.internal.resolver as resolver
 import wirestack.internal.transport as transport
+import wirestack.internal.http1 as http1
 
 public type HttpMethod = model.HttpMethod
 public type HttpVersion = model.HttpVersion
@@ -54,3 +55,4 @@ public type NetworkPhase = transport.NetworkPhase
 public type NetworkErrorCode = transport.NetworkErrorCode
 public type Retryability = transport.Retryability
 public type NetworkException = transport.NetworkException
+public type HttpProxyConnectException = http1.Http1ProxyConnectException
