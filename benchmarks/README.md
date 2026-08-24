@@ -14,9 +14,14 @@ baseline runner，也没有把 Go adapter 提交到本目录。结果、API 边�
 ## 目录
 
 - `packages/benchmarks/`：yjson 与 stdx.json 的 Cangjie benchmark cases。
+- `packages/backend_benchmarks/`：Pure AST、Pure Compact、Custom Native 与
+  `yjson_yyjson` Direct 的独立 DOM backend 对比；不混入 typed codec 排名。
 - `cjfast_json/`：把 adapter 注入 pinned cjfast_json checkout。
 - `java_fastjson2/`：独立 fastjson2 Java harness。
 - `scripts/json_perf_baseline.py`：运行或读取三种输出，生成统一结果。
+- `scripts/json_backend_perf_run.py`：固定 CPU、平衡顺序地采集 backend raw CSV。
+- `scripts/json_backend_perf_summary.py`：以 yyjson Direct 为参照汇总 median、p95、CV
+  和 paired latency ratio。
 
 ## 环境依赖
 
@@ -46,6 +51,22 @@ scripts/json_perf_baseline.py --quick \
 cd packages/benchmarks
 ../../scripts/codex_cangjie_env cjpm bench --no-color --filter ComprehensiveJsonCompareBenchmarks
 ```
+
+`yjson_yyjson` 是 Native DOM backend，不提供 generated typed codec，因此使用独立的
+等语义 DOM workload：
+
+```bash
+scripts/codex_cangjie_env scripts/json_backend_perf_run.py \
+  target/backend-perf --cpu 8 --runs 11
+scripts/json_backend_perf_summary.py target/backend-perf
+```
+
+Focused reruns can select one or more complete operation groups with repeatable
+`--operation`, while retaining the yyjson reference required by the summary.
+
+该矩阵固定使用 `YyjsonCompactMode.Direct`、`SemanticDispatch`、`Retained`、
+`Separate`（均为 `YyjsonCompactJsonDocument.parse` 的 RC 默认值），比较 16,384-entry
+对象的 parse lifecycle、retained lookup、traversal、serialize 与 round-trip。
 
 常用选项：
 
