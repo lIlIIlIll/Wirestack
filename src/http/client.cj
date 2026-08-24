@@ -77,11 +77,11 @@ public class HttpClientBuilder {
             case Some(value) => value
             case None => UnavailableSystemResolver()
         }
-        var directTls = None<http1.Http1TlsHandshaker>
+        var directTls = None<http1.HttpAlpnTlsHandshaker>
         var proxyTls = None<http1.Http1TlsHandshaker>
         try {
             if (let Some(value) <- configuredTls) {
-                directTls = Some(value.createHandshaker())
+                directTls = Some(value.createAlpnHandshaker())
                 if (configuredProxy.isSome()) { proxyTls = Some(value.createHandshaker()) }
             }
             HttpClient(
@@ -109,14 +109,14 @@ public class HttpClient <: Resource {
     private let cleartext: http1.Http1CleartextClient
     private let forwardProxy: ?http1.Http1ForwardProxyClient
     private let mutex = Mutex()
-    private var https: ?http1.Http1HttpsClient = None<http1.Http1HttpsClient>
+    private var https: ?http1.HttpAutomaticHttpsClient = None<http1.HttpAutomaticHttpsClient>
     private var httpsProxy: ?http1.Http1HttpsProxyClient = None<http1.Http1HttpsProxyClient>
     private var closed = false
 
     init(resolver: resolver.Resolver, requestTimeout: ?Duration, limits: HttpLimits,
         redirectPolicy: HttpRedirectPolicy, retryPolicy: HttpRetryPolicy,
         proxy: ?HttpProxyConfig,
-        directTlsHandshaker: ?http1.Http1TlsHandshaker,
+        directTlsHandshaker: ?http1.HttpAlpnTlsHandshaker,
         proxyTlsHandshaker: ?http1.Http1TlsHandshaker) {
         this.resolver = resolver
         this.requestTimeout = requestTimeout
@@ -132,10 +132,10 @@ public class HttpClient <: Resource {
             case None => None<http1.Http1ForwardProxyClient>
         }
         https = match (directTlsHandshaker) {
-            case Some(value) => Some(http1.Http1HttpsClient(
+            case Some(value) => Some(http1.HttpAutomaticHttpsClient(
                 resolver, transportFactory, value, limits: limits
             ))
-            case None => None<http1.Http1HttpsClient>
+            case None => None<http1.HttpAutomaticHttpsClient>
         }
         httpsProxy = match ((proxy, proxyTlsHandshaker)) {
             case (Some(value), Some(handshaker)) => Some(http1.Http1HttpsProxyClient(
@@ -241,7 +241,7 @@ public class HttpClient <: Resource {
     public func close(): Unit {
         let (secure, tunneled) = synchronized(mutex) {
             if (closed) {
-                (None<http1.Http1HttpsClient>, None<http1.Http1HttpsProxyClient>)
+                (None<http1.HttpAutomaticHttpsClient>, None<http1.Http1HttpsProxyClient>)
             } else {
                 closed = true
                 (https, httpsProxy)
@@ -255,16 +255,16 @@ public class HttpClient <: Resource {
 
     public func isClosed(): Bool { synchronized(mutex) { closed } }
 
-    private func httpsClient(): http1.Http1HttpsClient {
+    private func httpsClient(): http1.HttpAutomaticHttpsClient {
         synchronized(mutex) {
             if (closed) { throw IllegalStateException("HTTP client is closed") }
             match (https) {
                 case Some(value) => value
                 case None =>
-                    let value = http1.Http1HttpsClient(
+                    let value = http1.HttpAutomaticHttpsClient(
                         resolver,
                         transportFactory,
-                        http1.AwsLcHttp1TlsHandshaker.systemDefault(),
+                        http1.AwsLcHttp1TlsHandshaker.systemDefaultAlpn(),
                         limits: limits
                     )
                     https = Some(value)
