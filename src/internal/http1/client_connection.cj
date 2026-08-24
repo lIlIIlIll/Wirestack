@@ -28,13 +28,15 @@ public class Http1ClientConnection <: Resource {
     private let transport: DuplexTransport
     private let limits: HttpLimits
     private let continueTimeout: Duration
+    private let targetForm: Http1RequestTargetForm
     private let mutex = Mutex()
     private var state = Http1ClientConnectionState.Ready
 
     public init(
         transport: DuplexTransport,
         limits!: HttpLimits = HttpLimits(),
-        continueTimeout!: Duration = Duration.second
+        continueTimeout!: Duration = Duration.second,
+        targetForm!: Http1RequestTargetForm = Http1RequestTargetForm.Origin
     ) {
         if (continueTimeout <= Duration.Zero) {
             throw IllegalArgumentException("HTTP/1 continue timeout must be positive")
@@ -42,6 +44,7 @@ public class Http1ClientConnection <: Resource {
         this.transport = transport
         this.limits = limits
         this.continueTimeout = continueTimeout
+        this.targetForm = targetForm
     }
 
     public func execute(
@@ -73,11 +76,16 @@ public class Http1ClientConnection <: Resource {
                 request.body.contentLength != Some(0)
             let result = if (expectsContinue) {
                 exchangeHttp1ExpectContinue(
-                    transport, request, Http1RequestWriter(request, limits: limits, trailer: trailer),
+                    transport, request, Http1RequestWriter(
+                        request, limits: limits, trailer: trailer, targetForm: targetForm
+                    ),
                     continueTimeout, context: context, limits: limits, observer: observer
                 )
             } else {
-                let _ = writeHttp1Request(transport, request, context: context, limits: limits, trailer: trailer)
+                let _ = writeHttp1Request(
+                    transport, request, context: context, limits: limits, trailer: trailer,
+                    targetForm: targetForm
+                )
                 readHttp1Response(
                     transport, request.method,
                     context: context, limits: limits, observer: observer
