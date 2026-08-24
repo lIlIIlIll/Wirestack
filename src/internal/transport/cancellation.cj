@@ -24,11 +24,15 @@ public class CancellationRegistration {
 
 /** Read-only cancellation capability passed to operations. */
 public class CancellationToken {
-    private static let NONE = CancellationToken(CancellationState())
+    private static let NONE_STATE = CancellationState()
+    private static let NONE_REGISTRATION = CancellationRegistration(NONE_STATE, 0)
+    private static let NONE = CancellationToken(NONE_STATE, permanentlyActive: true)
     private let state: CancellationState
+    private let permanentlyActive: Bool
 
-    internal init(state: CancellationState) {
+    internal init(state: CancellationState, permanentlyActive!: Bool = false) {
         this.state = state
+        this.permanentlyActive = permanentlyActive
     }
 
     /** A token that cannot be cancelled by a caller. */
@@ -47,7 +51,13 @@ public class CancellationToken {
      * runs synchronously before this method returns.
      */
     public func register(callback: () -> Unit): CancellationRegistration {
-        state.register(callback)
+        if (permanentlyActive) {
+            // A never-cancelled token cannot invoke the callback. Reusing one
+            // zero-id registration keeps hot background I/O allocation-free.
+            NONE_REGISTRATION
+        } else {
+            state.register(callback)
+        }
     }
 }
 
