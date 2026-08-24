@@ -82,6 +82,91 @@ public class Http1ForwardProxyClient <: Resource {
     public func isClosed(): Bool { pool.isClosed() }
 }
 
+/** A non-2xx proxy CONNECT response. Credentials and response bodies are never retained. */
+public class Http1ProxyConnectException <: NetworkException {
+    public let status: Int64
+    public let reason: String
+
+    public init(status: Int64, reason: String) {
+        super(
+            NetworkErrorCategory.Connect,
+            NetworkPhase.ProxyConnect,
+            NetworkErrorCode.ConnectRefused,
+            "HTTP proxy rejected CONNECT with status ${status}",
+            retryability: Retryability.Never
+        )
+        this.status = status
+        this.reason = reason
+    }
+
+    protected override func getClassName(): String { "Http1ProxyConnectException" }
+}
+
+/** HTTPS-over-CONNECT pipeline. Proxy routing never changes TLS reference identity or SNI. */
+public class Http1HttpsProxyClient <: Resource {
+    private let endpoint: Http1ProxyEndpoint
+    private let resolver: Resolver
+    private let transportFactory: TransportFactory
+    private let handshaker: Http1TlsHandshaker
+    private let pool: Http1ConnectionPool
+    private let limits: HttpLimits
+    private let attemptDelay: Duration
+    private let continueTimeout: Duration
+
+    public init(
+        endpoint: Http1ProxyEndpoint,
+        resolver: Resolver,
+        transportFactory: TransportFactory,
+        handshaker: Http1TlsHandshaker,
+        poolConfig!: Http1ConnectionPoolConfig = Http1ConnectionPoolConfig(),
+        limits!: HttpLimits = HttpLimits(),
+        attemptDelay!: Duration = 250 * Duration.millisecond,
+        continueTimeout!: Duration = Duration.second
+    ) {
+        this.endpoint = endpoint
+        this.resolver = resolver
+        this.transportFactory = transportFactory
+        this.handshaker = handshaker
+        pool = Http1ConnectionPool(config: poolConfig)
+        this.limits = limits
+        this.attemptDelay = attemptDelay
+        this.continueTimeout = continueTimeout
+    }
+
+    public func execute(request: HttpRequest,
+        proxyAuthorization!: ?String = None<String>,
+        context!: OperationContext = OperationContext.background(),
+        trailer!: HttpTrailer = HttpTrailer()): HttpResponse {
+        if (request.url.scheme != "https") {
+            throw IllegalArgumentException("HTTPS proxy client accepts only https URLs")
+        }
+        let key = HttpConnectionPoolKey(
+            "https", request.url.host, request.url.port, Some(endpoint.identity), "default",
+            handshaker.tlsContextIdentity, handshaker.trustContextIdentity,
+            handshaker.clientIdentity, handshaker.providerIdentity, handshaker.alpnPolicy
+        )
+        let factory = Http1HttpsProxyConnectionFactory(
+            endpoint, resolver, transportFactory, handshaker, request.url, proxyAuthorization,
+            limits, attemptDelay, continueTimeout
+        )
+        let lease = pool.acquire(key, factory, context: context)
+        try {
+            let result = lease.connection.executeTracked(request, context: context, trailer: trailer,
+                onTerminated: { reusable =>
+                    if (reusable) { pool.release(lease) } else { pool.discard(lease) }
+                })
+            result.response
+        } catch (error: Exception) {
+            pool.discard(lease)
+            throw error
+        }
+    }
+
+    public func snapshot(): Http1ConnectionPoolSnapshot { pool.snapshot() }
+    public func close(): Unit { pool.close(); handshaker.close() }
+    public func isClosed(): Bool { pool.isClosed() }
+}
+
 private class Http1ForwardProxyConnectionFactory <: Http1ConnectionFactory {
     private let endpoint: Http1ProxyEndpoint
     private let connector: HappyEyeballsConnector
@@ -112,5 +197,67 @@ private class Http1ForwardProxyConnectionFactory <: Http1ConnectionFactory {
             transport, limits: limits, continueTimeout: continueTimeout,
             targetForm: Http1RequestTargetForm.Absolute
         )
+    }
+}
+
+private class Http1HttpsProxyConnectionFactory <: Http1ConnectionFactory {
+    private let endpoint: Http1ProxyEndpoint
+    private let connector: HappyEyeballsConnector
+    private let transportFactory: TransportFactory
+    private let handshaker: Http1TlsHandshaker
+    private let target: HttpUrl
+    private let connectHeaders: HttpHeaders
+    private let limits: HttpLimits
+    private let continueTimeout: Duration
+
+    init(endpoint: Http1ProxyEndpoint, resolver: Resolver, transportFactory: TransportFactory,
+        handshaker: Http1TlsHandshaker, target: HttpUrl, proxyAuthorization: ?String,
+        limits: HttpLimits, attemptDelay: Duration, continueTimeout: Duration) {
+        this.endpoint = endpoint
+        connector = HappyEyeballsConnector(resolver, transportFactory, attemptDelay: attemptDelay)
+        this.transportFactory = transportFactory
+        this.handshaker = handshaker
+        this.target = target
+        let builder = HttpHeaders.builder(limits: limits)
+        if (let Some(value) <- proxyAuthorization) { builder.add("Proxy-Authorization", value) }
+        connectHeaders = builder.build()
+        this.limits = limits
+        this.continueTimeout = continueTimeout
+    }
+
+    public func create(key: HttpConnectionPoolKey, context: OperationContext): Http1ClientConnection {
+        if (key.scheme != "https" || key.proxyRoute != Some(endpoint.identity) ||
+            key.originHost != target.host || key.originPort != target.port) {
+            throw IllegalArgumentException("HTTPS proxy factory received a mismatched route key")
+        }
+        let proxyTransport = connectProxy(endpoint, connector, transportFactory, context)
+        let exchanged = performHttp1Connect(
+            proxyTransport, target, headers: connectHeaders, context: context, limits: limits
+        )
+        match (exchanged) {
+            case Http1ConnectExchangeResult.Tunnel(tunnel) =>
+                try {
+                    let tls = handshaker.handshake(HostName(key.originHost), tunnel.transport, context)
+                    Http1ClientConnection(tls, limits: limits, continueTimeout: continueTimeout)
+                } catch (error: Exception) {
+                    try { tunnel.transport.abort(reason: Some(AbortReason.ProtocolFailure)) }
+                    catch (_: Exception) {}
+                    throw error
+                }
+            case Http1ConnectExchangeResult.Response(result) =>
+                let status = result.response.status
+                let reason = result.response.reason
+                try { let _ = result.response.body.drain(64 * 1024) }
+                finally { result.response.close() }
+                throw Http1ProxyConnectException(status, reason)
+        }
+    }
+}
+
+private func connectProxy(endpoint: Http1ProxyEndpoint, connector: HappyEyeballsConnector,
+    transportFactory: TransportFactory, context: OperationContext): DuplexTransport {
+    match (endpoint.ipAddress) {
+        case Some(address) => transportFactory.connect(SocketEndpoint(address, endpoint.port), context)
+        case None => connector.connect(endpoint.hostName.getOrThrow(), endpoint.port, context: context).transport
     }
 }
