@@ -31,6 +31,15 @@ yjson 耗时更低。`Direction` 单独记录配对轮次的一致性，不再�
 16 MiB Read 的 yjson CV 为 9.60%，因此该行只提供方向证据。完整身份、表格和限制见
 [2026-08-22 Go yyjson result](results/2026-08-22-go-yyjson.md)。
 
+2026-08-24 对同一个 `JsonCodec<T>` 的 Pure、Custom Native 与 yyjson typed stream backend
+进行了 11 轮、132 独立进程的 CPU-pinned 对比。80 B Small encode 是唯一三侧都通过
+CV ≤ 5% 的 operation group：Pure 为 11.420 µs，Custom Native 为 13.700 µs，yyjson
+为 13.500 µs。56,101 B Large decode 中 Native/yyjson 均有 10/11 pair 快于 Pure，但
+三侧 CV 为 6.70%–8.32%，所以只保留方向，不发布观察到的比例为精确 claim。Large
+workload 是 `Array<HashMap<String,String>>[512]`，不是 cjfast_json 对比中的单个 Large
+Map。完整 contract、表格、环境 workaround 与 artifact 边界见
+[2026-08-24 typed stream backend result](results/2026-08-24-stream-backends.md)。
+
 ## 其他库
 
 stdx.json 与 Java fastjson2 数据来自 2026-08-20 的另一批测量；cjfast_json 来自

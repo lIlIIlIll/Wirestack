@@ -52,14 +52,20 @@ cd packages/benchmarks
 ../../scripts/codex_cangjie_env cjpm bench --no-color --filter ComprehensiveJsonCompareBenchmarks
 ```
 
-`yjson_yyjson` 是 Native DOM backend，不提供 generated typed codec，因此使用独立的
-等语义 DOM workload：
+下面的既有 runner 比较 Native DOM API，因此使用独立的等语义 DOM workload，不混入
+generated typed codec。`yjson_yyjson` 现在也提供 `YyjsonStreamBackend`，但 typed stream
+backend 使用另一套 contract 和结果页：
 
 ```bash
 scripts/codex_cangjie_env scripts/json_backend_perf_run.py \
   target/backend-perf --cpu 8 --runs 11
 scripts/json_backend_perf_summary.py target/backend-perf
 ```
+
+Pure、Custom Native 与 yyjson 的 typed stream 对比见
+[2026-08-24 result](../docs/performance/results/2026-08-24-stream-backends.md)。该次临时
+harness 和 raw evidence 尚未提交，不能从 checkout 单独复现；不要用上面的 DOM runner
+替代它或把两组数字拼成统一排名。
 
 Focused reruns can select one or more complete operation groups with repeatable
 `--operation`, while retaining the yyjson reference required by the summary.

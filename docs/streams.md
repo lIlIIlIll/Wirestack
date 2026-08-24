@@ -60,3 +60,14 @@ path，可能在 `finish()` 报告 `output_too_large` 前已经提交前缀。�
 成功调用一次 `finish()`。session close 是幂等的，但 close 后不得再取得 reader/writer。
 
 需要 framed transport 时，应由上层协议先切分一条完整消息，再把受限的 bytes 或 stream 交给 yjson。
+
+## 性能选择
+
+Pure 是默认 backend，也应作为小对象和 encode 的首选：它直接增量写出，不承担完整
+document 与 bulk tape 的固定成本。Native backend 的主要潜在收益在较大 typed decode，
+但收益取决于 payload、目标类型和 Server 环境，不能仅凭 backend 名称推断。
+
+当前 Server 对比使用相同 `JsonCodec<T>`：80 B Small encode 中 Pure 明确更快；56,101 B
+`Array<HashMap<String,String>>[512]` decode 中 Custom Native 与 yyjson 各有 10/11 pair
+快于 Pure，但 CV 未通过 5% 门槛，因此只构成方向证据。测量 contract 和完整限制见
+[2026-08-24 typed stream backend result](performance/results/2026-08-24-stream-backends.md)。
