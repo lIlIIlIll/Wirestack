@@ -173,6 +173,33 @@ public class Http2ConnectionStateMachine {
         }
     }
 
+    /**
+     * Atomically admits one locally initiated stream only while the connection
+     * is open. Serializing this check with GOAWAY reception closes the
+     * check-then-open race that a pool-level phase snapshot cannot close.
+     */
+    public func openLocalStream(
+        registry: Http2StreamRegistry,
+        endStream!: Bool = false
+    ): Http2StreamStateMachine {
+        synchronized(mutex) {
+            requireOpenForNewStreamLocked()
+            registry.openLocal(endStream: endStream)
+        }
+    }
+
+    /** Atomically admits a peer stream only before local or remote draining starts. */
+    public func openPeerStream(
+        registry: Http2StreamRegistry,
+        streamId: Http2StreamId,
+        endStream!: Bool = false
+    ): Http2StreamStateMachine {
+        synchronized(mutex) {
+            requireOpenForNewStreamLocked()
+            registry.openPeer(streamId, endStream: endStream)
+        }
+    }
+
     /** Starts or narrows graceful drain and returns the corresponding GOAWAY. */
     public func beginDrain(
         lastStreamId!: ?Http2StreamId = None<Http2StreamId>,
@@ -283,6 +310,18 @@ public class Http2ConnectionStateMachine {
 
     private func requireNotClosedLocked(): Unit {
         if (isClosedPhase(phaseState)) { throw IllegalStateException("HTTP/2 connection is closed") }
+    }
+
+    private func requireOpenForNewStreamLocked(): Unit {
+        match (phaseState) {
+            case Http2ConnectionPhase.Open => ()
+            case Http2ConnectionPhase.Preface =>
+                throw IllegalStateException("HTTP/2 connection is not ready for new streams")
+            case Http2ConnectionPhase.Draining =>
+                throw IllegalStateException("HTTP/2 draining connection does not accept new streams")
+            case Http2ConnectionPhase.Closed =>
+                throw IllegalStateException("HTTP/2 connection is closed")
+        }
     }
 
     private func requirePeerInitiatedStream(streamId: Http2StreamId): Unit {

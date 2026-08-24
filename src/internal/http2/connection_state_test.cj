@@ -89,11 +89,17 @@ class Http2ConnectionStateMachineTest {
     @TestCase
     func localDrainUsesProcessedPeerBoundaryAndNeverIncreases(): Unit {
         let server = openServer()
+        let registry = Http2StreamRegistry(Http2ConnectionRole.Server)
+        let firstPeer = server.openPeerStream(registry, Http2StreamId(1u32))
+        @Expect(firstPeer.id.value, 1u32)
         server.markPeerStreamProcessed(Http2StreamId(1u32))
         server.markPeerStreamProcessed(Http2StreamId(5u32))
         let first = decodeHttp2GoAway(server.beginDrain())
         @Expect(first.lastStreamId.value, 5u32)
         @Expect(isDrainingPhase(server.phase))
+        expectIllegalStateChange({ =>
+            let _ = server.openPeerStream(registry, Http2StreamId(3u32))
+        })
         let narrowed = decodeHttp2GoAway(server.beginDrain(lastStreamId: Some(Http2StreamId(3u32))))
         @Expect(narrowed.lastStreamId.value, 3u32)
         expectIllegalStateChange({ => let _ = server.beginDrain(lastStreamId: Some(Http2StreamId(5u32))) })
