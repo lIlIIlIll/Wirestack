@@ -118,3 +118,34 @@ clientTls.close()
 All DER inputs are bounded and validated before network use. Closing a config
 zeroes its retained key copy; the built client/server owns a separate validated
 key reference until it is closed.
+
+## Structured events and stable errors
+
+Install an event sink on the immutable operation context when a request needs
+diagnostic evidence:
+
+```cj
+class MySink <: NetworkEventSink {
+    public func emit(event: NetworkEvent): Unit {
+        // Enqueue quickly; emit may run concurrently for connection attempts.
+        metrics.record(event.kind, event.outcome)
+    }
+}
+
+let context = OperationContext(
+    trace: Some(NetworkTraceContext("request-42", spanId: "fetch")),
+    eventSink: Some(MySink())
+)
+let response = client.get("https://service.internal/data", context: context)
+```
+
+The sink is disabled by default. Sink exceptions are isolated from network I/O.
+Events contain only typed lifecycle outcome, phase, stable network error code,
+opaque trace identifiers and an optional connection ID. Their type has no field
+for URLs, headers, cookies, authorization values, bodies, certificates, keys or
+session secrets.
+
+Public HTTP protocol/policy failures use `HttpException.code`, including
+`InvalidUrl`, `InvalidRequest`, `InvalidResponse`, `HeaderLimitExceeded`,
+`BodyLimitExceeded`, `InvalidFraming`, `ProxyFailure`, `PoolExhausted`,
+`RedirectLimit` and `BodyNotReplayable`. HTTP 4xx/5xx remain normal responses.

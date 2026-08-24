@@ -43,12 +43,16 @@ public class Http1CleartextClient <: Resource {
                 context: context,
                 trailer: trailer,
                 onTerminated: { reusable =>
-                    if (reusable) { pool.release(lease) } else { pool.discard(lease) }
+                    if (reusable) {
+                        pool.release(lease, context: context)
+                    } else {
+                        pool.discard(lease, context: context)
+                    }
                 }
             )
             result.response
         } catch (error: Exception) {
-            pool.discard(lease)
+            pool.discard(lease, context: context)
             throw error
         }
     }

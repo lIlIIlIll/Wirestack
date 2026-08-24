@@ -33,6 +33,10 @@ public type SocketEndpoint = common.SocketEndpoint
 public type HostName = common.HostName
 
 public type NetworkTraceContext = transport.NetworkTraceContext
+public type NetworkEventKind = transport.NetworkEventKind
+public type NetworkEventOutcome = transport.NetworkEventOutcome
+public type NetworkEvent = transport.NetworkEvent
+public type NetworkEventSink = transport.NetworkEventSink
 public type OperationContext = transport.OperationContext
 public type MonotonicClock = transport.MonotonicClock
 public type Deadline = transport.Deadline
