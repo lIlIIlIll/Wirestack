@@ -111,7 +111,25 @@ public class HappyEyeballsConnector {
         context!: OperationContext = OperationContext.background()
     ): ConnectResult {
         checkConnectContext(context)
-        let resolved = resolver.resolve(host, None<String>, options, context)
+        emitNetworkEvent(context, NetworkEvent(
+            NetworkEventKind.DnsStarted,
+            NetworkEventOutcome.Started,
+            trace: context.trace,
+            phase: Some(NetworkPhase.Dns)
+        ))
+        let resolved = try {
+            let value = resolver.resolve(host, None<String>, options, context)
+            emitNetworkEvent(context, NetworkEvent(
+                NetworkEventKind.DnsCompleted,
+                NetworkEventOutcome.Succeeded,
+                trace: context.trace,
+                phase: Some(NetworkPhase.Dns)
+            ))
+            value
+        } catch (error: Exception) {
+            emitFailedEvent(context, NetworkEventKind.DnsCompleted, NetworkPhase.Dns, error)
+            throw error
+        }
         checkConnectContext(context)
         let plan = buildAttemptPlan(resolved.addresses, port, attemptDelay: attemptDelay)
         runPlan(plan, resolved.diagnostics, context)
@@ -154,6 +172,12 @@ public class HappyEyeballsConnector {
 
             match (outcome) {
                 case Some(winner) =>
+                    emitNetworkEvent(parent, NetworkEvent(
+                        NetworkEventKind.TcpConnected,
+                        NetworkEventOutcome.Succeeded,
+                        trace: parent.trace,
+                        phase: Some(NetworkPhase.TcpConnect)
+                    ))
                     ConnectResult(
                         winner.transport,
                         ConnectDiagnostics(
@@ -189,17 +213,34 @@ public class HappyEyeballsConnector {
             let child = OperationContext(
                 deadline: parent.deadline,
                 cancellation: cancellation,
-                trace: parent.trace
+                trace: parent.trace,
+                eventSink: parent.eventSink
             )
+            emitNetworkEvent(parent, NetworkEvent(
+                NetworkEventKind.ConnectAttemptStarted,
+                NetworkEventOutcome.Started,
+                trace: parent.trace,
+                phase: Some(NetworkPhase.TcpConnect)
+            ))
             try {
                 let connected = attemptFactory.connect(candidate.endpoint, child)
+                emitNetworkEvent(parent, NetworkEvent(
+                    NetworkEventKind.ConnectAttemptCompleted,
+                    NetworkEventOutcome.Succeeded,
+                    trace: parent.trace,
+                    phase: Some(NetworkPhase.TcpConnect)
+                ))
                 let won = coordinator.tryWin(candidate, connected, startedAt, MonoTime.now())
                 if (!won) {
                     connected.abort(reason: Some(AbortReason.ApplicationAbort))
                 }
             } catch (error: NetworkException) {
+                emitFailedEvent(parent, NetworkEventKind.ConnectAttemptCompleted,
+                    NetworkPhase.TcpConnect, error)
                 coordinator.recordFailure(candidate, startedAt, MonoTime.now(), error)
             } catch (error: Exception) {
+                emitFailedEvent(parent, NetworkEventKind.ConnectAttemptCompleted,
+                    NetworkPhase.TcpConnect, error)
                 coordinator.recordFailure(
                     candidate,
                     startedAt,
@@ -217,6 +258,21 @@ public class HappyEyeballsConnector {
             coordinator.completeAttempt()
         }
     }
+}
+
+private func emitFailedEvent(context: OperationContext, kind: NetworkEventKind,
+    phase: NetworkPhase, error: Exception): Unit {
+    let code = match (error) {
+        case value: NetworkException => Some(value.code)
+        case _ => Some(NetworkErrorCode.SystemFailure)
+    }
+    emitNetworkEvent(context, NetworkEvent(
+        kind,
+        NetworkEventOutcome.Failed,
+        trace: context.trace,
+        phase: Some(phase),
+        errorCode: code
+    ))
 }
 
 private struct Winner {

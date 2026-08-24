@@ -1,5 +1,6 @@
 package wirestack.internal.transport
 
+import std.collection.ArrayList
 import std.time.MonoTime
 import std.unittest.*
 import std.unittest.testmacro.*
@@ -11,8 +12,32 @@ class OperationContextTest {
         let context = OperationContext.background()
         @Expect(context.deadline.isNone())
         @Expect(context.trace.isNone())
+        @Expect(context.eventSink.isNone())
         @Expect(!context.isCancellationRequested())
         @Expect(!context.isDeadlineExceeded())
+    }
+
+    @TestCase
+    func derivedContextsRetainEventSinkAndSinkFailuresAreIsolated(): Unit {
+        let sink = RecordingNetworkEventSink()
+        let context = OperationContext(
+            trace: Some(NetworkTraceContext("trace-1")), eventSink: Some(sink)
+        ).shortenDeadline(Duration.second)
+        @Expect(context.eventSink.isSome())
+
+        emitNetworkEvent(context, NetworkEvent(
+            NetworkEventKind.HttpConnectionAcquired,
+            NetworkEventOutcome.Succeeded,
+            trace: context.trace
+        ))
+        @Expect(sink.events.size, 1)
+        @Expect(sink.events[0].trace.getOrThrow().traceId, "trace-1")
+
+        // Observability is never allowed to change operation completion.
+        emitNetworkEvent(
+            context.withEventSink(Some<NetworkEventSink>(ThrowingNetworkEventSink())),
+            NetworkEvent(NetworkEventKind.ConnectionClosed, NetworkEventOutcome.Succeeded)
+        )
     }
 
     @TestCase
@@ -61,5 +86,17 @@ class OperationContextTest {
 
         @Expect(emptyRejected)
         @Expect(oversizedRejected)
+    }
+}
+
+private class RecordingNetworkEventSink <: NetworkEventSink {
+    let events = ArrayList<NetworkEvent>()
+    public func emit(event: NetworkEvent): Unit { events.add(event) }
+}
+
+private class ThrowingNetworkEventSink <: NetworkEventSink {
+    public func emit(event: NetworkEvent): Unit {
+        let _ = event
+        throw Exception("sink failure")
     }
 }

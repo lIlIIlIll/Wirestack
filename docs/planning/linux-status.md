@@ -27,8 +27,8 @@ Status values have the same fail-closed meaning as the global status file.
 | M1-002 `ByteSpan`/`MutableByteSpan` | COMPLETE | Checked zero-copy ranges, slice/advance and tests |
 | M1-003 monotonic `Deadline` | COMPLETE | `MonoTime`, injected clock, remaining/expiry/child tests |
 | M1-004 cancellation primitive | IN_PROGRESS | Registration, unregister, fast-fail and exactly-once tests pass; larger race matrix remains |
-| M1-005 `OperationContext` | COMPLETE | Immutable Deadline/cancellation/trace propagation tests |
-| M1-006 trace context | IN_PROGRESS | Bounded read-only identifiers exist; event sink remains |
+| M1-005 `OperationContext` | COMPLETE | Immutable Deadline/cancellation/trace/event-sink propagation tests |
+| M1-006 trace context | COMPLETE | Bounded read-only identifiers and default-off, exception-isolated, secret-free structured event sink |
 | M1-007 structured network error | COMPLETE | category/phase/code/retryability/native/endpoint/cause model and tests |
 | M1-010 `DuplexTransport` contract | IN_PROGRESS | Contract and MemoryTransport semantics exist; shared lifecycle state machine remains |
 | M1-011 `writeAll`/`readExact` | COMPLETE | Partial I/O, empty range and premature EOF tests |
@@ -41,7 +41,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M1-020 idempotent close/abort | COMPLETE | Native close is claimed once; close/cancel wake blocked read and listener accept without returning false EOF |
 | M1-021 `StdNetTransportListener` | COMPLETE | IP-only bind, bounded backlog, endpoints and accept Deadline/cancel/close semantics |
 | M1-022 stable std.net errors | BLOCKED | Timeout/cancel/closed are stable; public `SocketException` exposes no native code, so errno classes require an upstream API instead of message matching |
-| M1-023 transport diagnostics | IN_PROGRESS | Backend/endpoints/capabilities and staging copied-byte counters exist; event sink/runtime backend discovery remain |
+| M1-023 transport diagnostics | IN_PROGRESS | Backend/endpoints/capabilities, staging copied-byte counters and event sink exist; runtime backend discovery remains |
 
 ## Implemented Resolver and Connector Core
 
@@ -51,7 +51,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M2-002 Resolver contract | COMPLETE | All-address result, family filter, canonical host, source, optional expiration, structured errors and diagnostics |
 | M2-003 bounded resolver backend | BLOCKED | M0-013 proves `std.net` DNS can starve carriers; the pinned SDK exposes neither async resolver nor an independent native worker API, so UP-007 is required |
 | M2-005 Linux `SystemResolver` | BLOCKED | Depends on M2-003/UP-007; no direct `IPAddress.resolve` wrapper is presented as production-safe |
-| M2-009 normalization/diagnostics | IN_PROGRESS | Stable deduplication preserves family/zone evidence and never invents TTL; trace event sink remains |
+| M2-009 normalization/diagnostics | COMPLETE | Stable deduplication preserves family/zone evidence and never invents TTL; connector emits DnsStarted/DnsCompleted for every resolver implementation |
 | M2-010 route model | NOT_STARTED | Direct/proxy and origin/proxy DNS separation remain |
 | M2-011 RFC 8305 attempt plan | COMPLETE | Stable family interleaving, intra-family order, deduplication and bounded candidate tests |
 | M2-012/013 Happy Eyeballs scheduler | COMPLETE | Shared parent Deadline, linked cancellation, atomic first winner, loser abort, joined candidates and per-attempt diagnostics |
@@ -86,6 +86,19 @@ Status values have the same fail-closed meaning as the global status file.
 | M3-026 close_notify/truncation/abort | COMPLETE | AWS-LC two-stage shutdown runs through the bounded memory-BIO pump on one caller Deadline; graceful close exchanges close_notify, bare TCP EOF retains `PeerClosedWithoutCloseNotify`, abort skips TLS shutdown, and every terminal/error race closes transport and releases the engine once |
 | M3-027 structured TLS errors/runtime info | COMPLETE | AWS-LC reason, X.509 verification and peer-alert evidence normalize to provider-neutral TLS codes; handshake/read/write/close phases and retryability are stable, truncation/cancel/timeout remain distinct, and `TlsRuntime.info()` reports provider/build/target/trust/version/feature identity with `externalOpenSslDependency=false` |
 
+## Implemented HTTP/1 Core
+
+| Task | Status | Evidence |
+|---|---|---|
+| M5-001..019 HTTP models, codecs and pool | COMPLETE | Strict bounded URL/header/framing/chunked/request/response models; streaming body ownership, complete pool key and bounded cancellation-aware reuse are covered by deterministic tests |
+| M5-020 end-to-end client pipeline | COMPLETE | URL route, resolver, Happy Eyeballs, direct/proxy TCP, TLS/ALPN and HTTP/1 share one immutable `OperationContext`; DNS/connect/TLS/pool lifecycle events retain its trace |
+| M5-021..022 explicit proxy and CONNECT | COMPLETE | Direct/NO_PROXY routing, independent proxy DNS, authorization isolation, CONNECT handoff and origin SNI/reference identity tests |
+| M5-023..024 redirect and retry | COMPLETE | Bounded redirect/retry policy, sensitive-header stripping, downgrade protection, replay/commit evidence and shared absolute Deadline tests |
+| M5-025..027 server and shutdown | COMPLETE | Cleartext and TLS HTTP/1 server, bounded connection/request lifecycle, graceful-to-abort shutdown and handshake-race tests |
+| M5-028 structured errors/events | COMPLETE | Stable public HTTP error mapping plus default-off exception-isolated typed events whose schema cannot carry URL/header/body/credential/key/session data |
+| M5-029 conformance/security tests | COMPLETE | Deterministic URL/proxy fuzz, parser/chunked corpus, request-smuggling corpus, partial I/O, body/pool and graceful-shutdown races |
+| M5-030 benchmark/docs | IN_PROGRESS | Keep-alive runner and 16/64 MiB bounded-memory gates pass; pinned SDK lacks a stdx HTTP baseline, so the ≥90% comparison remains NOT RUN |
+
 ## Next critical path
 
 1. Complete shared Transport lifecycle/exactly-once primitives and the remaining
@@ -96,5 +109,5 @@ Status values have the same fail-closed meaning as the global status file.
    complete Linux `SystemResolver` and native blackhole gates.
 4. Complete native musl trust-adapter evidence and M3-028 TLS interoperability,
    fuzz, dependency and benchmark gates under ADR-0003.
-5. Implement HTTP/1.1, HTTP/2, Linux conformance, benchmark, 24-hour soak,
-   packaging and installation verification.
+5. Implement HTTP/2, then complete Linux stress/soak, stdx comparison when an
+   eligible baseline SDK exists, packaging and installation verification.

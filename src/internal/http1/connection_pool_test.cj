@@ -36,8 +36,41 @@ private class FailingPoolFactory <: Http1ConnectionFactory {
     }
 }
 
+private class PoolEventSink <: NetworkEventSink {
+    let events = ArrayList<NetworkEvent>()
+    public func emit(event: NetworkEvent): Unit { events.add(event) }
+}
+
 @Test
 class Http1ConnectionPoolTest {
+    @TestCase
+    func emitsSecretFreeAcquireAndReleaseLifecycle(): Unit {
+        let pool = Http1ConnectionPool()
+        let factory = PoolTestFactory()
+        let sink = PoolEventSink()
+        let context = OperationContext(
+            trace: Some(NetworkTraceContext("pool-trace")), eventSink: Some(sink)
+        )
+
+        let first = pool.acquire(poolTestKey(), factory, context: context)
+        pool.release(first, context: context)
+        let second = pool.acquire(poolTestKey(), factory, context: context)
+        pool.discard(second, context: context)
+
+        @Expect(sink.events.size, 5)
+        expectPoolEvent(sink.events[0], NetworkEventKind.HttpConnectionAcquired,
+            NetworkEventOutcome.Succeeded, first.id)
+        expectPoolEvent(sink.events[1], NetworkEventKind.HttpConnectionReleased,
+            NetworkEventOutcome.Released, first.id)
+        expectPoolEvent(sink.events[2], NetworkEventKind.HttpConnectionAcquired,
+            NetworkEventOutcome.Reused, second.id)
+        expectPoolEvent(sink.events[3], NetworkEventKind.HttpConnectionReleased,
+            NetworkEventOutcome.Discarded, second.id)
+        expectPoolEvent(sink.events[4], NetworkEventKind.ConnectionClosed,
+            NetworkEventOutcome.Succeeded, second.id)
+        pool.close()
+    }
+
     @TestCase
     func reusesOnlyTheSameCompleteKey(): Unit {
         let pool = Http1ConnectionPool()
@@ -146,6 +179,34 @@ class Http1ConnectionPoolTest {
         pool.discard(lease)
         @Expect(pool.snapshot().connections, 0)
         pool.close()
+    }
+}
+
+private func expectPoolEvent(event: NetworkEvent, kind: NetworkEventKind,
+    outcome: NetworkEventOutcome, id: Int64): Unit {
+    @Expect(samePoolEventKind(event.kind, kind))
+    @Expect(samePoolEventOutcome(event.outcome, outcome))
+    @Expect(event.connectionId, Some(id))
+    @Expect(event.trace.getOrThrow().traceId, "pool-trace")
+    @Expect(event.errorCode.isNone())
+}
+
+private func samePoolEventKind(left: NetworkEventKind, right: NetworkEventKind): Bool {
+    match ((left, right)) {
+        case (NetworkEventKind.HttpConnectionAcquired, NetworkEventKind.HttpConnectionAcquired) => true
+        case (NetworkEventKind.HttpConnectionReleased, NetworkEventKind.HttpConnectionReleased) => true
+        case (NetworkEventKind.ConnectionClosed, NetworkEventKind.ConnectionClosed) => true
+        case _ => false
+    }
+}
+
+private func samePoolEventOutcome(left: NetworkEventOutcome, right: NetworkEventOutcome): Bool {
+    match ((left, right)) {
+        case (NetworkEventOutcome.Succeeded, NetworkEventOutcome.Succeeded) => true
+        case (NetworkEventOutcome.Reused, NetworkEventOutcome.Reused) => true
+        case (NetworkEventOutcome.Released, NetworkEventOutcome.Released) => true
+        case (NetworkEventOutcome.Discarded, NetworkEventOutcome.Discarded) => true
+        case _ => false
     }
 }
 

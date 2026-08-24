@@ -118,8 +118,39 @@ private func hostAndResolver(addresses: Array<IpAddress>): (HostName, StaticReso
     (host, StaticResolver(ResolveResult(addresses, host, ResolverSource.Static)))
 }
 
+private class ConnectorEventSink <: NetworkEventSink {
+    private let mutex = Mutex()
+    private let recorded = ArrayList<NetworkEvent>()
+    public func emit(event: NetworkEvent): Unit { synchronized(mutex) { recorded.add(event) } }
+    func events(): Array<NetworkEvent> { synchronized(mutex) { recorded.toArray() } }
+}
+
 @Test
 class HappyEyeballsConnectorTest {
+    @TestCase
+    func emitsCompleteDnsAttemptAndConnectedLifecycle(): Unit {
+        let (host, resolver) = hostAndResolver([ipv4Address(2)])
+        let factory = ScriptedAttemptFactory(ScriptMode.BlackholeThenSuccess)
+        let connector = HappyEyeballsConnector(resolver, factory)
+        let sink = ConnectorEventSink()
+        let context = OperationContext(
+            trace: Some(NetworkTraceContext("connect-trace")), eventSink: Some(sink)
+        )
+        let result = connector.connect(host, 443, context: context)
+        let events = sink.events()
+
+        @Expect(events.size, 5)
+        @Expect(isEvent(events[0], NetworkEventKind.DnsStarted, NetworkEventOutcome.Started))
+        @Expect(isEvent(events[1], NetworkEventKind.DnsCompleted, NetworkEventOutcome.Succeeded))
+        @Expect(isEvent(events[2], NetworkEventKind.ConnectAttemptStarted, NetworkEventOutcome.Started))
+        @Expect(isEvent(events[3], NetworkEventKind.ConnectAttemptCompleted, NetworkEventOutcome.Succeeded))
+        @Expect(isEvent(events[4], NetworkEventKind.TcpConnected, NetworkEventOutcome.Succeeded))
+        for (event in events) {
+            @Expect(event.trace.getOrThrow().traceId, "connect-trace")
+        }
+        result.transport.close()
+    }
+
     @TestCase
     func blackholedFirstCandidateIsCancelledAndJoinedBeforeReturn(): Unit {
         let (host, resolver) = hostAndResolver([ipv6Address(1), ipv4Address(2)])
@@ -193,6 +224,30 @@ class HappyEyeballsConnectorTest {
         }
         @Expect(cancelled)
         @Expect(factory.startedCount, 0)
+    }
+}
+
+private func isEvent(event: NetworkEvent, kind: NetworkEventKind,
+    outcome: NetworkEventOutcome): Bool {
+    sameConnectorKind(event.kind, kind) && sameConnectorOutcome(event.outcome, outcome)
+}
+
+private func sameConnectorKind(left: NetworkEventKind, right: NetworkEventKind): Bool {
+    match ((left, right)) {
+        case (NetworkEventKind.DnsStarted, NetworkEventKind.DnsStarted) => true
+        case (NetworkEventKind.DnsCompleted, NetworkEventKind.DnsCompleted) => true
+        case (NetworkEventKind.ConnectAttemptStarted, NetworkEventKind.ConnectAttemptStarted) => true
+        case (NetworkEventKind.ConnectAttemptCompleted, NetworkEventKind.ConnectAttemptCompleted) => true
+        case (NetworkEventKind.TcpConnected, NetworkEventKind.TcpConnected) => true
+        case _ => false
+    }
+}
+
+private func sameConnectorOutcome(left: NetworkEventOutcome, right: NetworkEventOutcome): Bool {
+    match ((left, right)) {
+        case (NetworkEventOutcome.Started, NetworkEventOutcome.Started) => true
+        case (NetworkEventOutcome.Succeeded, NetworkEventOutcome.Succeeded) => true
+        case _ => false
     }
 }
 

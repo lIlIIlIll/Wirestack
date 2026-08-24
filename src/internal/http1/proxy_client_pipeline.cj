@@ -68,11 +68,15 @@ public class Http1ForwardProxyClient <: Resource {
         try {
             let result = lease.connection.executeTracked(request, context: context, trailer: trailer,
                 onTerminated: { reusable =>
-                    if (reusable) { pool.release(lease) } else { pool.discard(lease) }
+                    if (reusable) {
+                        pool.release(lease, context: context)
+                    } else {
+                        pool.discard(lease, context: context)
+                    }
                 })
             result.response
         } catch (error: Exception) {
-            pool.discard(lease)
+            pool.discard(lease, context: context)
             throw error
         }
     }
@@ -153,11 +157,15 @@ public class Http1HttpsProxyClient <: Resource {
         try {
             let result = lease.connection.executeTracked(request, context: context, trailer: trailer,
                 onTerminated: { reusable =>
-                    if (reusable) { pool.release(lease) } else { pool.discard(lease) }
+                    if (reusable) {
+                        pool.release(lease, context: context)
+                    } else {
+                        pool.discard(lease, context: context)
+                    }
                 })
             result.response
         } catch (error: Exception) {
-            pool.discard(lease)
+            pool.discard(lease, context: context)
             throw error
         }
     }
@@ -188,7 +196,10 @@ private class Http1ForwardProxyConnectionFactory <: Http1ConnectionFactory {
             throw IllegalArgumentException("HTTP forward proxy factory received a mismatched route key")
         }
         let transport = match (endpoint.ipAddress) {
-            case Some(address) => transportFactory.connect(SocketEndpoint(address, endpoint.port), context)
+            case Some(address) =>
+                let connected = transportFactory.connect(SocketEndpoint(address, endpoint.port), context)
+                emitProxyTcpConnected(context)
+                connected
             case None =>
                 let host = endpoint.hostName.getOrThrow()
                 connector.connect(host, endpoint.port, context: context).transport
@@ -231,11 +242,17 @@ private class Http1HttpsProxyConnectionFactory <: Http1ConnectionFactory {
             throw IllegalArgumentException("HTTPS proxy factory received a mismatched route key")
         }
         let proxyTransport = connectProxy(endpoint, connector, transportFactory, context)
-        let exchanged = performHttp1Connect(
-            proxyTransport, target, headers: connectHeaders, context: context, limits: limits
-        )
+        let exchanged = try {
+            performHttp1Connect(
+                proxyTransport, target, headers: connectHeaders, context: context, limits: limits
+            )
+        } catch (error: Exception) {
+            emitProxyTunnelEvent(context, NetworkEventOutcome.Failed, proxyEventCode(error))
+            throw error
+        }
         match (exchanged) {
             case Http1ConnectExchangeResult.Tunnel(tunnel) =>
+                emitProxyTunnelEvent(context, NetworkEventOutcome.Succeeded, None<NetworkErrorCode>)
                 try {
                     let tls = handshaker.handshake(HostName(key.originHost), tunnel.transport, context)
                     Http1ClientConnection(tls, limits: limits, continueTimeout: continueTimeout)
@@ -249,15 +266,47 @@ private class Http1HttpsProxyConnectionFactory <: Http1ConnectionFactory {
                 let reason = result.response.reason
                 try { let _ = result.response.body.drain(64 * 1024) }
                 finally { result.response.close() }
+                emitProxyTunnelEvent(context, NetworkEventOutcome.Failed,
+                    Some(NetworkErrorCode.ConnectRefused))
                 throw Http1ProxyConnectException(status, reason)
         }
     }
 }
 
+private func proxyEventCode(error: Exception): ?NetworkErrorCode {
+    match (error) {
+        case value: NetworkException => Some(value.code)
+        case _ => Some(NetworkErrorCode.SystemFailure)
+    }
+}
+
+private func emitProxyTunnelEvent(context: OperationContext,
+    outcome: NetworkEventOutcome, code: ?NetworkErrorCode): Unit {
+    emitNetworkEvent(context, NetworkEvent(
+        NetworkEventKind.ProxyTunnelEstablished,
+        outcome,
+        trace: context.trace,
+        phase: Some(NetworkPhase.ProxyConnect),
+        errorCode: code
+    ))
+}
+
 private func connectProxy(endpoint: Http1ProxyEndpoint, connector: HappyEyeballsConnector,
     transportFactory: TransportFactory, context: OperationContext): DuplexTransport {
     match (endpoint.ipAddress) {
-        case Some(address) => transportFactory.connect(SocketEndpoint(address, endpoint.port), context)
+        case Some(address) =>
+            let connected = transportFactory.connect(SocketEndpoint(address, endpoint.port), context)
+            emitProxyTcpConnected(context)
+            connected
         case None => connector.connect(endpoint.hostName.getOrThrow(), endpoint.port, context: context).transport
     }
+}
+
+private func emitProxyTcpConnected(context: OperationContext): Unit {
+    emitNetworkEvent(context, NetworkEvent(
+        NetworkEventKind.TcpConnected,
+        NetworkEventOutcome.Succeeded,
+        trace: context.trace,
+        phase: Some(NetworkPhase.TcpConnect)
+    ))
 }

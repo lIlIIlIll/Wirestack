@@ -70,29 +70,40 @@ public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker {
         synchronized(mutex) {
             if (closed) { throw IllegalStateException("HTTP TLS server handshaker is closed") }
         }
-        let connection = TlsConnection.handshake(
-            provider.createServerEngine(serverContext), transport, context: context
-        )
-        match (connection.handshakeInfo) {
-            case Some(info) => match (info.negotiatedAlpn) {
-                case Some(protocol) =>
-                    if (protocol != "http/1.1") {
-                        connection.abort(reason: Some(AbortReason.ProtocolFailure))
-                        throw TlsEngineException(
-                            TlsEngineErrorCode.NoSharedAlpn,
-                            "TLS HTTP/1 server negotiated an unexpected ALPN protocol"
-                        )
-                    }
-                case None => ()
+        emitServerTlsEvent(context, NetworkEventOutcome.Started, None<NetworkErrorCode>)
+        try {
+            let connection = TlsConnection.handshake(
+                provider.createServerEngine(serverContext), transport, context: context
+            )
+            match (connection.handshakeInfo) {
+                case Some(info) => match (info.negotiatedAlpn) {
+                    case Some(protocol) =>
+                        if (protocol != "http/1.1") {
+                            connection.abort(reason: Some(AbortReason.ProtocolFailure))
+                            throw TlsEngineException(
+                                TlsEngineErrorCode.NoSharedAlpn,
+                                "TLS HTTP/1 server negotiated an unexpected ALPN protocol"
+                            )
+                        }
+                    case None => ()
+                }
+                case None =>
+                    connection.abort(reason: Some(AbortReason.ProtocolFailure))
+                    throw TlsEngineException(
+                        TlsEngineErrorCode.ProviderFailure,
+                        "TLS HTTP/1 server handshake returned no negotiated evidence"
+                    )
             }
-            case None =>
-                connection.abort(reason: Some(AbortReason.ProtocolFailure))
-                throw TlsEngineException(
-                    TlsEngineErrorCode.ProviderFailure,
-                    "TLS HTTP/1 server handshake returned no negotiated evidence"
-                )
+            emitServerTlsEvent(context, NetworkEventOutcome.Succeeded, None<NetworkErrorCode>)
+            connection
+        } catch (error: Exception) {
+            let code = match (error) {
+                case value: NetworkException => Some(value.code)
+                case _ => Some(NetworkErrorCode.SystemFailure)
+            }
+            emitServerTlsEvent(context, NetworkEventOutcome.Failed, code)
+            throw error
         }
-        connection
     }
 
     public func close(): Unit {
@@ -106,4 +117,19 @@ public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker {
     }
 
     public func isClosed(): Bool { synchronized(mutex) { closed } }
+}
+
+private func emitServerTlsEvent(context: OperationContext,
+    outcome: NetworkEventOutcome, code: ?NetworkErrorCode): Unit {
+    let kind = match (outcome) {
+        case NetworkEventOutcome.Started => NetworkEventKind.TlsHandshakeStarted
+        case _ => NetworkEventKind.TlsHandshakeCompleted
+    }
+    emitNetworkEvent(context, NetworkEvent(
+        kind,
+        outcome,
+        trace: context.trace,
+        phase: Some(NetworkPhase.TlsHandshake),
+        errorCode: code
+    ))
 }

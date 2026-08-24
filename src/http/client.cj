@@ -151,7 +151,12 @@ public class HttpClient <: Resource {
 
     public func get(url: String,
         context!: OperationContext = OperationContext.background()): HttpResponse {
-        send(HttpRequest.get(url), context: context)
+        let request = try {
+            HttpRequest.get(url)
+        } catch (error: Exception) {
+            throw HttpException(HttpErrorCode.InvalidUrl, "invalid HTTP URL", cause: error)
+        }
+        send(request, context: context)
     }
 
     public func send(request: HttpRequest,
@@ -161,27 +166,31 @@ public class HttpClient <: Resource {
             case Some(value) => context.shortenDeadline(value)
             case None => context
         }
-        var current = request
-        var redirectCount: Int64 = 0
-        while (true) {
-            let response = executeWithRetries(current, operation, trailer)
-            let next = try {
-                redirectPolicy.nextRequest(
-                    current, response, redirectsFollowed: redirectCount, limits: limits
-                )
-            } catch (error: Exception) {
-                response.close()
-                throw error
+        try {
+            var current = request
+            var redirectCount: Int64 = 0
+            while (true) {
+                let response = executeWithRetries(current, operation, trailer)
+                let next = try {
+                    redirectPolicy.nextRequest(
+                        current, response, redirectsFollowed: redirectCount, limits: limits
+                    )
+                } catch (error: Exception) {
+                    response.close()
+                    throw error
+                }
+                match (next) {
+                    case Some(value) =>
+                        let _ = response.body.drain(redirectPolicy.maximumDrainBytes)
+                        current = value
+                        redirectCount++
+                    case None => return response
+                }
             }
-            match (next) {
-                case Some(value) =>
-                    let _ = response.body.drain(redirectPolicy.maximumDrainBytes)
-                    current = value
-                    redirectCount++
-                case None => return response
-            }
+            throw Exception("unreachable HTTP redirect loop exit")
+        } catch (error: Exception) {
+            throw wrapHttpError(error)
         }
-        throw Exception("unreachable HTTP redirect loop exit")
     }
 
     private func executeOnce(request: HttpRequest, operation: OperationContext,
