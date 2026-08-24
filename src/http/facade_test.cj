@@ -1,5 +1,6 @@
 package wirestack.http
 
+import std.sync.AtomicInt64
 import std.unittest.*
 import std.unittest.testmacro.*
 
@@ -56,6 +57,35 @@ class HttpFacadeTest {
     }
 
     @TestCase
+    func clientFollowsOriginRelativeRedirectEndToEnd(): Unit {
+        let handler = PublicRedirectHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let host = HostName("redirect.test")
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult(
+                [server.localEndpoint.address], host, ResolverSource.Static
+            )))
+            .requestTimeout(Duration.second)
+            .build()
+        try {
+            let response = client.get("http://redirect.test:${server.localEndpoint.port}/start")
+            @Expect(response.status, 200)
+            @Expect(handler.calls.load(), 2)
+            response.close()
+        } finally {
+            client.close()
+            let _ = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(Duration.second))
+            ))
+            serving.get(Duration.second)
+        }
+    }
+
+    @TestCase
     func serverBuilderRequiresEndpointAndHandler(): Unit {
         var missingEndpoint = false
         try {
@@ -85,5 +115,34 @@ private class PublicEmptyHandler <: HttpServerHandler {
             ResponseBody.empty(),
             headers: HttpHeaders.builder().add("Content-Length", "0").build()
         ))
+    }
+}
+
+private class PublicRedirectHandler <: HttpServerHandler {
+    let calls = AtomicInt64(0)
+
+    public func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse {
+        let _ = context
+        let _ = request.body.read(Array<Byte>(1, repeat: 0))
+        let call = calls.fetchAdd(1) + 1
+        if (call == 1) {
+            HttpServerResponse(HttpResponse(
+                302,
+                "Found",
+                ResponseBody.empty(),
+                headers: HttpHeaders.builder()
+                    .add("Location", "/final")
+                    .add("Content-Length", "0")
+                    .build()
+            ))
+        } else {
+            @Expect(request.target, "/final")
+            HttpServerResponse(HttpResponse(
+                200,
+                "OK",
+                ResponseBody.empty(),
+                headers: HttpHeaders.builder().add("Content-Length", "0").build()
+            ))
+        }
     }
 }
