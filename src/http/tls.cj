@@ -49,6 +49,21 @@ public class HttpClientTlsConfig <: Resource {
         }
     }
 
+    internal func createAlpnHandshaker(): http1.HttpAlpnTlsHandshaker {
+        synchronized(mutex) {
+            if (closed) { throw IllegalStateException("HTTP client TLS configuration is closed") }
+            http1.AwsLcHttp1TlsHandshaker.createWithDerAlpn(
+                cloneHttpClientDerChain(trustRoots),
+                clientCertificateChainDer: cloneHttpClientDerChain(clientCertificates),
+                clientPrivateKeyPkcs8Der: clientPrivateKey.clone(),
+                securityProfile: match (profile) {
+                    case HttpClientTlsSecurityProfile.Modern => tls.TlsSecurityProfile.Modern
+                    case HttpClientTlsSecurityProfile.StrictTls13 => tls.TlsSecurityProfile.StrictTls13
+                }
+            )
+        }
+    }
+
     public func close(): Unit {
         synchronized(mutex) {
             if (!closed) {

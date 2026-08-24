@@ -165,6 +165,100 @@ class Http2WriteSchedulerTest {
         @Expect(scheduler.pendingWrites, 0)
         @Expect(scheduler.pendingBytes, 0u64)
     }
+
+    @TestCase
+    func reservedDataConsumesFlowOnlyWhenTheWriterClaimsIt(): Unit {
+        let flow = Http2FlowController()
+        let streamId = Http2StreamId(1u32)
+        flow.openStream(streamId)
+        let permit = flow.reserveSend(streamId, 3)
+        let scheduler = Http2WriteScheduler(RecordingSchedulerTransport())
+        let frame = Http2Frame(
+            Http2FrameHeader(3u32, Http2FrameType.Data, Http2Flags(), streamId),
+            [1u8, 2u8, 3u8]
+        )
+        let ticket = scheduler.enqueueReservedData(frame, permit)
+
+        @Expect(flow.snapshot(streamId).sendWindow, 65535)
+        @Expect(flow.snapshot(streamId).reservedSendBytes, 3)
+        scheduler.close()
+        @Expect(isSchedulerTestClosed(scheduler.run()))
+        @Expect(isWriteTestWritten(ticket.wait()))
+        @Expect(flow.snapshot(streamId).sendWindow, 65532)
+        @Expect(flow.snapshot(streamId).reservedSendBytes, 0)
+    }
+
+    @TestCase
+    func cancellingQueuedReservedDataReturnsAllFlowCapacity(): Unit {
+        let flow = Http2FlowController()
+        let streamId = Http2StreamId(1u32)
+        flow.openStream(streamId)
+        let permit = flow.reserveSend(streamId, 4)
+        let scheduler = Http2WriteScheduler(RecordingSchedulerTransport())
+        let ticket = scheduler.enqueueReservedData(Http2Frame(
+            Http2FrameHeader(4u32, Http2FrameType.Data, Http2Flags(), streamId),
+            [1u8, 2u8, 3u8, 4u8]
+        ), permit)
+
+        @Expect(ticket.cancel())
+        @Expect(isWriteTestCancelled(ticket.wait()))
+        @Expect(flow.snapshot(streamId).sendWindow, 65535)
+        @Expect(flow.snapshot(streamId).reservedSendBytes, 0)
+        @Expect(flow.pendingPermitCount, 0)
+        scheduler.close()
+        @Expect(isSchedulerTestClosed(scheduler.run()))
+    }
+
+    @TestCase
+    func concurrentHeaderBatchesStayContiguousOnTheWire(): Unit {
+        let transport = RecordingSchedulerTransport(maxChunk: 1)
+        let scheduler = Http2WriteScheduler(
+            transport, limits: Http2Limits(maxPendingWrites: 64u32, maxPendingWriteBytes: 4096u32)
+        )
+        let writer = spawn { scheduler.run() }
+        let producers = ArrayList<Future<Unit>>()
+        for (index in 0..16) {
+            let streamId = Http2StreamId(UInt32(index * 2 + 1))
+            producers.add(spawn {
+                let _ = scheduler.enqueueControlBatch([
+                    schedulerHeaderPart(streamId, false),
+                    schedulerContinuationPart(streamId)
+                ])
+            })
+        }
+        for (producer in producers) { producer.get(Duration.second) }
+        scheduler.close()
+        @Expect(isSchedulerTestClosed(writer.get(Duration.second)))
+
+        let frames = decodeScheduledFrames(transport.bytes())
+        @Expect(frames.size, 32)
+        for (index in 0..16) {
+            let first = frames[index * 2]
+            let second = frames[index * 2 + 1]
+            @Expect(http2FrameTypeCode(first.header.frameType), 1u8)
+            @Expect(http2FrameTypeCode(second.header.frameType), 9u8)
+            @Expect(first.header.streamId.value, second.header.streamId.value)
+        }
+    }
+}
+
+private func schedulerHeaderPart(streamId: Http2StreamId, endHeaders: Bool): Http2Frame {
+    Http2Frame(
+        Http2FrameHeader(
+            1u32, Http2FrameType.Headers,
+            Http2Flags(raw: if (endHeaders) { 0x04u8 } else { 0u8 }), streamId
+        ),
+        [0x82u8]
+    )
+}
+
+private func schedulerContinuationPart(streamId: Http2StreamId): Http2Frame {
+    Http2Frame(
+        Http2FrameHeader(
+            1u32, Http2FrameType.Continuation, Http2Flags(raw: 0x04u8), streamId
+        ),
+        [0x84u8]
+    )
 }
 
 private class RecordingSchedulerTransport <: DuplexTransport {
