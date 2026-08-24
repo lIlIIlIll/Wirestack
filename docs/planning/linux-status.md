@@ -107,7 +107,8 @@ Status values have the same fail-closed meaning as the global status file.
 | M6-002 incremental frame codec | COMPLETE | All required P0 frame envelopes round-trip across every single-byte boundary and contiguous multi-frame input; configured size rejection occurs before payload buffering, unknown types/flags remain forward-compatible, reserved stream bits are ignored on read and cleared on write, and Transport partial writes complete under one operation context |
 | M6-003 SETTINGS negotiation | COMPLETE | Received batches validate and apply atomically before ACK, local batches are acknowledged FIFO, initial-window deltas are explicit, unexpected ACK and pending-batch overflow fail closed, unknown settings remain interoperable and advertised resource values are capped by local policy |
 | M6-004 HPACK integer/string/static table | COMPLETE | RFC integer vectors round-trip; truncation, continuation overflow, invalid prefixes and bounded string lengths fail closed; all 61 RFC static entries use exact one-based indexing and bounded table accounting |
-| M6-005..020 Huffman through benchmark | NOT_STARTED | Huffman, dynamic table, header blocks, connection/stream state, flow control, multiplexed client/server/pool integration, conformance/fuzz and 1/10/100-stream evidence remain required |
+| M6-005 HPACK Huffman | COMPLETE | The complete 257-symbol RFC codebook passes request examples and all-octet round trips; EOS in data, non-EOS padding, overlong padding, invalid prefixes and encoded/decoded output overflow fail closed without unbounded temporary allocation |
+| M6-006..020 dynamic table through benchmark | NOT_STARTED | Dynamic table, header blocks, connection/stream state, flow control, multiplexed client/server/pool integration, conformance/fuzz and 1/10/100-stream evidence remain required |
 
 ## Next critical path
 
