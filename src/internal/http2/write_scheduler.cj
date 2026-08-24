@@ -213,6 +213,43 @@ public class Http2WriteScheduler {
         }
     }
 
+    /** Cancels every queued frame owned by one reset stream, optionally retaining its RST ticket. */
+    public func cancelStream(
+        streamId: Http2StreamId,
+        preservingTicketId!: ?Int64 = None<Int64>
+    ): Int64 {
+        let removed = synchronized(mutex) {
+            let claimed = ArrayList<Http2QueuedWrite>()
+            var controlIndex: Int64 = controls.size - 1
+            while (controlIndex >= 0) {
+                let item = controls[controlIndex]
+                if (item.streamId.value == streamId.value && !preservesWrite(item, preservingTicketId)) {
+                    claimed.add(controls.remove(at: controlIndex))
+                }
+                controlIndex -= 1
+            }
+            var queueIndex: Int64 = dataStreams.size - 1
+            while (queueIndex >= 0) {
+                let queue = dataStreams[queueIndex]
+                if (queue.streamId.value == streamId.value) {
+                    for (item in queue.items) {
+                        if (!preservesWrite(item, preservingTicketId)) { claimed.add(item) }
+                    }
+                    let _ = dataStreams.remove(at: queueIndex)
+                }
+                queueIndex -= 1
+            }
+            for (item in claimed) {
+                queuedCount -= 1
+                queuedBytes -= UInt64(item.bytes.size)
+            }
+            if (!claimed.isEmpty()) { changed.notifyAll() }
+            claimed.toArray()
+        }
+        for (item in removed) { item.ticket.markCancelled() }
+        removed.size
+    }
+
     private func runWriter(context: OperationContext): Unit {
         while (true) {
             let item = takeNext(context)
@@ -374,6 +411,10 @@ private class Http2DataWriteQueue {
     let streamId: Http2StreamId
     let items = ArrayList<Http2QueuedWrite>()
     init(streamId: Http2StreamId) { this.streamId = streamId }
+}
+
+private func preservesWrite(item: Http2QueuedWrite, value: ?Int64): Bool {
+    match (value) { case Some(id) => item.id == id; case None => false }
 }
 
 private func checkWriterContext(context: OperationContext): Unit {
