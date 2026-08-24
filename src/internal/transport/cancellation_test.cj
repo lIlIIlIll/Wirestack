@@ -54,9 +54,11 @@ class CancellationTest {
         let token = CancellationToken.none()
         let calls = AtomicInt64(0)
         let registration = token.register { => calls.fetchAdd(1); () }
+        let second = token.register { => calls.fetchAdd(1); () }
 
         @Expect(!token.isCancellationRequested)
         registration.unregister()
+        second.unregister()
         @Expect(calls.load(), 0)
     }
 
