@@ -110,7 +110,8 @@ Status values have the same fail-closed meaning as the global status file.
 | M6-005 HPACK Huffman | COMPLETE | The complete 257-symbol RFC codebook passes request examples and all-octet round trips; EOS in data, non-EOS padding, overlong padding, invalid prefixes and encoded/decoded output overflow fail closed without unbounded temporary allocation |
 | M6-006 HPACK dynamic table | COMPLETE | Exact `name + value + 32` accounting, newest-first wire indexes, oldest-first eviction, immediate shrink, oversized-entry clearing and zero capacity are bounded; sensitive/never-indexed fields never enter shared state and table-size updates cannot exceed the SETTINGS-derived ceiling |
 | M6-007 header blocks | COMPLETE | RFC request blocks and exact Huffman encoding pass; indexed/literal/never-indexed/table-update representations share bounded state; HEADERS/PUSH_PROMISE/CONTINUATION enforce same-stream non-interleaving, strip padding/priority overhead and cap compressed fragments, header count and list bytes |
-| M6-008..020 connection state through benchmark | NOT_STARTED | Connection/stream state, flow control, multiplexed client/server/pool integration, conformance/fuzz and 1/10/100-stream evidence remain required |
+| M6-008 connection state machine | COMPLETE | Client/server prefaces and mandatory initial SETTINGS are strict; Open/Draining/Closed transitions retain one terminal record, 100x8 racing finish calls complete exactly once, GOAWAY boundaries only narrow, and connection errors publish at most one bounded terminal GOAWAY |
+| M6-009..020 reader loop through benchmark | NOT_STARTED | Reader/writer ownership, stream state, flow control, multiplexed client/server/pool integration, conformance/fuzz and 1/10/100-stream evidence remain required |
 
 ## Next critical path
 
