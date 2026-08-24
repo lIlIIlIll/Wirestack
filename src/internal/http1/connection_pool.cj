@@ -164,6 +164,33 @@ public class Http1ConnectionPool <: Resource {
         }
     }
 
+    /**
+     * Adopts one already-negotiated connection without exceeding pool bounds.
+     * Used only when ALPN discovers HTTP/1.1 while creating an automatic
+     * protocol connection.
+     */
+    public func adopt(
+        key: HttpConnectionPoolKey,
+        connection: Http1ClientConnection,
+        context!: OperationContext = OperationContext.background()
+    ): Http1PoolLease {
+        preflight(context)
+        let lease = synchronized(mutex) {
+            if (closed) { throw poolClosed() }
+            if (entries.size + reservations.size >= config.maximumConnections ||
+                countForKey(key) >= config.maximumConnectionsPerKey) {
+                throw poolExhausted()
+            }
+            let id = nextId
+            nextId++
+            entries.add(Http1PoolEntry(id, key, connection, true, clock.now()))
+            changed.notifyAll()
+            Http1PoolLease(id, key, connection)
+        }
+        emitPoolAcquired(context, lease.id, NetworkEventOutcome.Succeeded)
+        lease
+    }
+
     /** Returns only a ready connection. Unsafe and failed claims are discarded; stale claims are ignored. */
     public func release(lease: Http1PoolLease,
         context!: OperationContext = OperationContext.background()): Unit {

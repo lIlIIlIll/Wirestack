@@ -12,6 +12,32 @@ import wirestack.internal.trust.*
 @Test
 class Http1TlsServerTest {
     @TestCase
+    func automaticClientOffersH2FirstAndFallsBackToServerHttp11(): Unit {
+        let server = AwsLcHttp1ServerTlsHandshaker.create(
+            [http1TlsTestCertificateDer()], http1TlsTestPrivateKeyDer()
+        )
+        let client = AwsLcHttp1TlsHandshaker.createAlpn(
+            TrustPolicy.pinnedPublicKeys([http1TlsServerPin()])
+        )
+        let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 64 * 1024)
+        let context = OperationContext(deadline: Some(Deadline.after(3 * Duration.second)))
+        try {
+            let accepting = spawn { server.handshake(serverTransport, context) }
+            let negotiated = client.handshakeNegotiated(
+                HostName("example.com"), clientTransport, context
+            )
+            let accepted = accepting.get(3 * Duration.second)
+            @Expect(client.alpnPolicy, "h2,http/1.1")
+            @Expect(isTlsFallbackHttp11(negotiated.protocol))
+            negotiated.transport.abort(reason: Some(AbortReason.ApplicationAbort))
+            accepted.abort(reason: Some(AbortReason.ApplicationAbort))
+        } finally {
+            client.close()
+            server.close()
+        }
+    }
+
+    @TestCase
     func requiredMutualTlsCarriesAuthenticatedHttp1Exchange(): Unit {
         let certificate = http1TlsTestCertificateDer()
         let server = AwsLcHttp1ServerTlsHandshaker.create(
@@ -47,6 +73,10 @@ class Http1TlsServerTest {
             server.close()
         }
     }
+}
+
+private func isTlsFallbackHttp11(value: HttpNegotiatedProtocol): Bool {
+    match (value) { case HttpNegotiatedProtocol.Http11 => true; case _ => false }
 }
 
 private func runTlsHttp1Exchange(
