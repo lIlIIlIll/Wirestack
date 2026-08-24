@@ -30,6 +30,7 @@ public class HttpClientBuilder {
     private var configuredRedirectPolicy = HttpRedirectPolicy()
     private var configuredRetryPolicy = HttpRetryPolicy()
     private var configuredProxy: ?HttpProxyConfig = None<HttpProxyConfig>
+    private var configuredTls: ?HttpClientTlsConfig = None<HttpClientTlsConfig>
 
     public init() {}
 
@@ -66,15 +67,33 @@ public class HttpClientBuilder {
         this
     }
 
+    public func tls(value: HttpClientTlsConfig): HttpClientBuilder {
+        configuredTls = Some(value)
+        this
+    }
+
     public func build(): HttpClient {
         let selected = match (configuredResolver) {
             case Some(value) => value
             case None => UnavailableSystemResolver()
         }
-        HttpClient(
-            selected, configuredRequestTimeout, configuredLimits,
-            configuredRedirectPolicy, configuredRetryPolicy, configuredProxy
-        )
+        var directTls = None<http1.Http1TlsHandshaker>
+        var proxyTls = None<http1.Http1TlsHandshaker>
+        try {
+            if (let Some(value) <- configuredTls) {
+                directTls = Some(value.createHandshaker())
+                if (configuredProxy.isSome()) { proxyTls = Some(value.createHandshaker()) }
+            }
+            HttpClient(
+                selected, configuredRequestTimeout, configuredLimits,
+                configuredRedirectPolicy, configuredRetryPolicy, configuredProxy,
+                directTls, proxyTls
+            )
+        } catch (error: Exception) {
+            match (directTls) { case Some(value) => value.close(); case None => () }
+            match (proxyTls) { case Some(value) => value.close(); case None => () }
+            throw error
+        }
     }
 }
 
@@ -96,7 +115,9 @@ public class HttpClient <: Resource {
 
     init(resolver: resolver.Resolver, requestTimeout: ?Duration, limits: HttpLimits,
         redirectPolicy: HttpRedirectPolicy, retryPolicy: HttpRetryPolicy,
-        proxy: ?HttpProxyConfig) {
+        proxy: ?HttpProxyConfig,
+        directTlsHandshaker: ?http1.Http1TlsHandshaker,
+        proxyTlsHandshaker: ?http1.Http1TlsHandshaker) {
         this.resolver = resolver
         this.requestTimeout = requestTimeout
         this.limits = limits
@@ -109,6 +130,19 @@ public class HttpClient <: Resource {
                 toInternalProxyEndpoint(value.endpoint), value.resolver, transportFactory, limits: limits
             ))
             case None => None<http1.Http1ForwardProxyClient>
+        }
+        https = match (directTlsHandshaker) {
+            case Some(value) => Some(http1.Http1HttpsClient(
+                resolver, transportFactory, value, limits: limits
+            ))
+            case None => None<http1.Http1HttpsClient>
+        }
+        httpsProxy = match ((proxy, proxyTlsHandshaker)) {
+            case (Some(value), Some(handshaker)) => Some(http1.Http1HttpsProxyClient(
+                toInternalProxyEndpoint(value.endpoint), value.resolver, transportFactory,
+                handshaker, limits: limits
+            ))
+            case _ => None<http1.Http1HttpsProxyClient>
         }
     }
 
