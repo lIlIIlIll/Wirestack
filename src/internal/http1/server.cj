@@ -37,8 +37,27 @@ public struct Http1ServerShutdownResult {
 
 private class Http1ActiveConnection {
     let id: Int64
-    let transport: DuplexTransport
-    init(id: Int64, transport: DuplexTransport) { this.id = id; this.transport = transport }
+    private let mutex = Mutex()
+    private var current: DuplexTransport
+    private var forced = false
+
+    init(id: Int64, transport: DuplexTransport) { this.id = id; current = transport }
+
+    func transport(): DuplexTransport { synchronized(mutex) { current } }
+
+    /** Transfers active ownership from the accepted socket to its TLS wrapper. */
+    func promote(value: DuplexTransport): Bool {
+        let accepted = synchronized(mutex) {
+            if (forced) { false } else { current = value; true }
+        }
+        if (!accepted) { value.abort(reason: Some(AbortReason.ProtocolFailure)) }
+        accepted
+    }
+
+    func forceAbort(): Unit {
+        let value = synchronized(mutex) { forced = true; current }
+        value.abort(reason: Some(AbortReason.ProtocolFailure))
+    }
 }
 
 /** Bounded listener owner with idempotent graceful-to-forced shutdown. */
@@ -46,6 +65,7 @@ public class Http1Server <: Resource {
     private let listener: TransportListener
     private let handler: Http1ServerHandler
     private let config: Http1ServerConfig
+    private let tlsHandshaker: ?Http1ServerTlsHandshaker
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
     private let forceCancellation = CancellationSource()
@@ -54,12 +74,15 @@ public class Http1Server <: Resource {
     private var stopping = false
     private var running = false
     private var completed: Int64 = 0
+    private var handshakerClosed = false
 
     public init(listener: TransportListener, handler: Http1ServerHandler,
-        config!: Http1ServerConfig = Http1ServerConfig()) {
+        config!: Http1ServerConfig = Http1ServerConfig(),
+        tlsHandshaker!: ?Http1ServerTlsHandshaker = None<Http1ServerTlsHandshaker>) {
         this.listener = listener
         this.handler = handler
         this.config = config
+        this.tlsHandshaker = tlsHandshaker
     }
 
     /** Runs the accept loop on the caller. Accepted connections execute concurrently up to the hard bound. */
@@ -105,12 +128,12 @@ public class Http1Server <: Resource {
         let completedBefore = synchronized(mutex) { completed }
         requestStop()
         let registration = context.cancellation.register({ => synchronized(mutex) { changed.notifyAll() } })
-        var forced = ArrayList<DuplexTransport>()
+        var forced = ArrayList<Http1ActiveConnection>()
         try {
             synchronized(mutex) {
                 while (!active.isEmpty()) {
                     if (context.isCancellationRequested() || context.isDeadlineExceeded()) {
-                        for (entry in active) { forced.add(entry.transport) }
+                        for (entry in active) { forced.add(entry) }
                         break
                     }
                     match (context.deadline) {
@@ -124,11 +147,10 @@ public class Http1Server <: Resource {
         }
         if (!forced.isEmpty()) {
             forceCancellation.cancel()
-            for (transport in forced) {
-                transport.abort(reason: Some(AbortReason.ProtocolFailure))
-            }
+            for (entry in forced) { entry.forceAbort() }
         }
         let (completedAfter, remaining) = synchronized(mutex) { (completed, active.size) }
+        closeHandshakerIfIdle()
         Http1ServerShutdownResult(completedAfter - completedBefore, forced.size, remaining)
     }
 
@@ -141,8 +163,15 @@ public class Http1Server <: Resource {
     private func serveAccepted(entry: Http1ActiveConnection, parent: OperationContext): Unit {
         let connectionContext = parent.withCancellation(forceCancellation.token)
         try {
+            let applicationTransport = match (tlsHandshaker) {
+                case Some(handshaker) =>
+                    let secured = handshaker.handshake(entry.transport(), connectionContext)
+                    if (!entry.promote(secured)) { return }
+                    secured
+                case None => entry.transport()
+            }
             let result = serveHttp1Connection(
-                entry.transport, handler, context: connectionContext,
+                applicationTransport, handler, context: connectionContext,
                 limits: config.limits, maximumRequests: config.maximumRequestsPerConnection
             )
             match (result.tunnelTransport) {
@@ -150,7 +179,7 @@ public class Http1Server <: Resource {
                 case None => ()
             }
         } catch (_: Exception) {
-            entry.transport.abort(reason: Some(AbortReason.ProtocolFailure))
+            entry.forceAbort()
         } finally {
             synchronized(mutex) {
                 let index = activeIndex(entry.id)
@@ -158,6 +187,7 @@ public class Http1Server <: Resource {
                 completed++
                 changed.notifyAll()
             }
+            closeHandshakerIfIdle()
         }
     }
 
@@ -183,6 +213,7 @@ public class Http1Server <: Resource {
             if (stopping) { false } else { stopping = true; changed.notifyAll(); true }
         }
         if (closeListener) { listener.close() }
+        closeHandshakerIfIdle()
     }
 
     private func isStopping(): Bool { synchronized(mutex) { stopping } }
@@ -190,5 +221,20 @@ public class Http1Server <: Resource {
     private func activeIndex(id: Int64): Int64 {
         for (index in 0..active.size) { if (active[index].id == id) { return index } }
         -1
+    }
+
+    private func closeHandshakerIfIdle(): Unit {
+        let value = synchronized(mutex) {
+            if (!stopping || !active.isEmpty() || handshakerClosed) {
+                None<Http1ServerTlsHandshaker>
+            } else {
+                handshakerClosed = true
+                tlsHandshaker
+            }
+        }
+        match (value) {
+            case Some(handshaker) => try { handshaker.close() } catch (_: Exception) {}
+            case None => ()
+        }
     }
 }
