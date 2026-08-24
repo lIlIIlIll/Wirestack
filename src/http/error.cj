@@ -1,6 +1,7 @@
 package wirestack.http
 
 import wirestack.internal.http1 as http1
+import wirestack.internal.http2 as http2
 import wirestack.internal.transport as transport
 
 /** Stable HTTP failures. HTTP 4xx/5xx responses are not errors in this model. */
@@ -44,6 +45,7 @@ internal func classifyHttpError(error: Exception): ?HttpErrorCode {
             case _ => HttpErrorCode.InvalidResponse
         })
         case _: http1.Http1ProxyConnectException => Some(HttpErrorCode.ProxyFailure)
+        case _: http2.Http2GoAwayException => Some(HttpErrorCode.ConnectionGoAway)
         case value: http1.Http1ParseException => Some(match (value.code) {
             case http1.Http1ParseErrorCode.HeaderTooLarge => HttpErrorCode.HeaderLimitExceeded
             case http1.Http1ParseErrorCode.LineTooLong => HttpErrorCode.HeaderLimitExceeded

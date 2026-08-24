@@ -2,6 +2,7 @@ package wirestack.http
 
 import std.unittest.*
 import std.unittest.testmacro.*
+import wirestack.internal.http2 as http2
 
 @Test
 class HttpRetryPolicyTest {
@@ -88,4 +89,46 @@ class HttpRetryPolicyTest {
             OperationContext(deadline: Some(Deadline.after(Duration.Zero)))
         ))
     }
+
+    @TestCase
+    func goAwayRetriesOnlyDefinitelyUnprocessedSafeReplayableRequests(): Unit {
+        let policy = HttpRetryPolicy()
+        let definitely = goAwayRetryError(
+            5u32, 3u32, http2.Http2GoAwayRequestDisposition.DefinitelyNotProcessed
+        )
+        let uncertain = goAwayRetryError(
+            3u32, 3u32, http2.Http2GoAwayRequestDisposition.MayHaveBeenProcessed
+        )
+        let get = HttpRequest.get("https://example.test/")
+        @Expect(policy.shouldRetry(get, definitely, 1, OperationContext.background()))
+        @Expect(!policy.shouldRetry(get, uncertain, 1, OperationContext.background()))
+        @Expect(!policy.shouldRetry(
+            HttpRequest.post("https://example.test/", RequestBody.string("x")),
+            definitely, 1, OperationContext.background()
+        ))
+        @Expect(!policy.shouldRetry(
+            get, definitely, 1, OperationContext.background(), responseCommitted: true
+        ))
+
+        let stream = RequestBody.string("x").open()
+        let oneShot = HttpRequest(
+            HttpMethod("GET"), HttpUrl.parse("https://example.test/"),
+            body: RequestBody.oneShot(stream)
+        )
+        @Expect(!policy.shouldRetry(oneShot, definitely, 1, OperationContext.background()))
+        stream.close()
+    }
+}
+
+private func goAwayRetryError(
+    streamId: UInt32,
+    lastStreamId: UInt32,
+    disposition: http2.Http2GoAwayRequestDisposition
+): http2.Http2GoAwayException {
+    http2.Http2GoAwayException(http2.Http2GoAwayRetryEvidence(
+        http2.Http2StreamId(streamId),
+        http2.Http2StreamId(lastStreamId),
+        http2.Http2ErrorCode.NoError,
+        disposition
+    ))
 }
