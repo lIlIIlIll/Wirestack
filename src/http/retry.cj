@@ -1,6 +1,7 @@
 package wirestack.http
 
 import wirestack.internal.http1 as http1
+import wirestack.internal.http2 as http2
 import wirestack.internal.transport as transport
 
 /** Bounded automatic retry policy. Unknown and generic exceptions always fail closed. */
@@ -29,6 +30,7 @@ public class HttpRetryPolicy {
         match (error) {
             case value: transport.NetworkException => retryable(value.retryability)
             case value: http1.Http1RequestWriteException => retryWriteFailure(value)
+            case value: http2.Http2GoAwayException => value.evidence.definitelyNotProcessed
             case _ => false
         }
     }
