@@ -93,31 +93,52 @@ public func decodeHpackInteger(input: Array<Byte>, offset: Int64, prefixBits: UI
     throw HpackException("HPACK integer continuation is too long")
 }
 
-/** Encodes one non-Huffman HPACK string literal. */
-public func encodeHpackString(value: Array<Byte>): Array<Byte> {
-    let prefix = encodeHpackInteger(UInt64(value.size), 7u8)
+/** Encodes one bounded HPACK string literal, optionally using RFC Huffman. */
+public func encodeHpackString(
+    value: Array<Byte>,
+    huffman!: Bool = false,
+    maxEncodedBytes!: UInt64 = 65536u64
+): Array<Byte> {
+    let encoded = if (huffman) {
+        encodeHpackHuffman(value, maxOutputBytes: maxEncodedBytes)
+    } else {
+        if (UInt64(value.size) > maxEncodedBytes) {
+            throw HpackException("HPACK string exceeds the configured encoded limit")
+        }
+        value.clone()
+    }
+    let prefix = encodeHpackInteger(UInt64(encoded.size), 7u8, prefix: if (huffman) { 0x80u8 } else { 0u8 })
     let output = ArrayList<Byte>()
     for (octet in prefix) { output.add(octet) }
-    for (octet in value) { output.add(octet) }
+    for (octet in encoded) { output.add(octet) }
     output.toArray()
 }
 
-/** Decodes one bounded non-Huffman string literal. Huffman is M6-005. */
-public func decodeHpackString(input: Array<Byte>, offset: Int64, maxBytes: UInt64): HpackStringResult {
+/** Decodes one HPACK string with separate encoded and decoded hard limits. */
+public func decodeHpackString(
+    input: Array<Byte>,
+    offset: Int64,
+    maxBytes: UInt64,
+    maxEncodedBytes!: UInt64 = 65536u64
+): HpackStringResult {
     if (offset < 0 || offset >= input.size) { throw HpackException("HPACK string is truncated") }
-    if ((input[offset] & 0x80u8) != 0u8) {
-        throw HpackException("HPACK Huffman string requires the bounded Huffman decoder")
-    }
+    let huffman = (input[offset] & 0x80u8) != 0u8
     let length = decodeHpackInteger(input, offset, 7u8)
-    if (length.value > maxBytes || length.value > UInt64(Int64.Max)) {
-        throw HpackException("HPACK string exceeds the configured limit")
+    if (length.value > maxEncodedBytes || length.value > UInt64(Int64.Max)) {
+        throw HpackException("HPACK string exceeds the configured encoded limit")
     }
     let count = Int64(length.value)
     if (length.nextOffset > input.size || count > input.size - length.nextOffset) {
         throw HpackException("HPACK string payload is truncated")
     }
-    let output = Array<Byte>(count, repeat: 0u8)
-    for (index in 0..count) { output[index] = input[length.nextOffset + index] }
+    let encoded = Array<Byte>(count, repeat: 0u8)
+    for (index in 0..count) { encoded[index] = input[length.nextOffset + index] }
+    let output = if (huffman) {
+        decodeHpackHuffman(encoded, maxOutputBytes: maxBytes)
+    } else {
+        if (length.value > maxBytes) { throw HpackException("HPACK string exceeds the configured decoded limit") }
+        encoded
+    }
     HpackStringResult(output, length.nextOffset + count)
 }
 
