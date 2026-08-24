@@ -4,6 +4,11 @@ import std.collection.ArrayList
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
 
+public enum Http1RequestTargetForm {
+    | Origin
+    | Absolute
+}
+
 /** Immutable serialized head plus the framing decision used to create it. */
 public class Http1SerializedHead {
     private let ownedBytes: Array<Byte>
@@ -44,6 +49,7 @@ public func serializeClientRequestHead(
     method: HttpMethod,
     url: HttpUrl,
     headers: HttpHeaders,
+    targetForm!: Http1RequestTargetForm = Http1RequestTargetForm.Origin,
     limits!: HttpLimits = HttpLimits()
 ): Http1SerializedHead {
     let connectAuthority = if (url.host.contains(":")) {
@@ -73,7 +79,10 @@ public func serializeClientRequestHead(
     let target = if (method == HttpMethod("CONNECT")) {
         connectAuthority
     } else {
-        url.requestTarget
+        match (targetForm) {
+            case Http1RequestTargetForm.Origin => url.requestTarget
+            case Http1RequestTargetForm.Absolute => url.toString()
+        }
     }
     serializeRequestHead(method, target, builder.build(), limits: limits)
 }

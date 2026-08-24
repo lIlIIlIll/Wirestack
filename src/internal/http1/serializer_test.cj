@@ -23,6 +23,21 @@ class Http1SerializerTest {
     }
 
     @TestCase
+    func forwardProxyRequestUsesAbsoluteFormAndOriginHost(): Unit {
+        let serialized = serializeClientRequestHead(
+            HttpMethod("GET"),
+            HttpUrl.parse("http://Example.com:8080/path?q=1"),
+            HttpHeaders(),
+            targetForm: Http1RequestTargetForm.Absolute
+        )
+
+        @Expect(
+            String.fromUtf8(serialized.bytes),
+            "GET http://example.com:8080/path?q=1 HTTP/1.1\r\nHost: example.com:8080\r\n\r\n"
+        )
+    }
+
+    @TestCase
     func requestPreservesOrderedMultipleFieldsAndLengthFraming(): Unit {
         let headers = HttpHeaders.builder()
             .add("Host", "example.com")

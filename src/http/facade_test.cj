@@ -116,6 +116,54 @@ class HttpFacadeTest {
     }
 
     @TestCase
+    func forwardProxyUsesAbsoluteFormIndependentDnsAndHookCredentials(): Unit {
+        let handler = PublicForwardProxyHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let proxyHost = HostName("proxy.test")
+        let proxyResolver = CountingPublicResolver(ResolveResult(
+            [server.localEndpoint.address], proxyHost, ResolverSource.Static
+        ))
+        let originResolver = RejectingPublicResolver()
+        let authorization = PublicProxyAuthorization()
+        let proxy = HttpProxyConfig(
+            HttpProxyEndpoint.hostname("proxy.test", server.localEndpoint.port),
+            proxyResolver,
+            authorizationProvider: Some(authorization)
+        )
+        let client = HttpClient.builder()
+            .resolver(originResolver)
+            .proxy(proxy)
+            .requestTimeout(Duration.second)
+            .build()
+        try {
+            let request = HttpRequest(
+                HttpMethod("GET"),
+                HttpUrl.parse("http://origin.test:8081/path?q=1"),
+                headers: HttpHeaders.builder()
+                    .add("Proxy-Authorization", "Caller value must be replaced")
+                    .build()
+            )
+            let response = client.send(request)
+            @Expect(response.status, 200)
+            response.close()
+            @Expect(handler.valid.load(), 1)
+            @Expect(proxyResolver.calls.load(), 1)
+            @Expect(originResolver.calls.load(), 0)
+            @Expect(authorization.calls.load(), 1)
+        } finally {
+            client.close()
+            let _ = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(Duration.second))
+            ))
+            serving.get(Duration.second)
+        }
+    }
+
+    @TestCase
     func serverBuilderRequiresEndpointAndHandler(): Unit {
         var missingEndpoint = false
         try {
@@ -193,5 +241,68 @@ private class FlakyPublicResolver <: Resolver {
             throw ResolveException(ResolveErrorCode.TemporaryFailure, "scripted temporary DNS failure")
         }
         result
+    }
+}
+
+private class CountingPublicResolver <: Resolver {
+    private let result: ResolveResult
+    let calls = AtomicInt64(0)
+
+    init(result: ResolveResult) { this.result = result }
+
+    public func resolve(host: HostName, service: ?String, options: ResolveOptions,
+        context: OperationContext): ResolveResult {
+        let _ = host
+        let _ = service
+        let _ = options
+        let _ = context
+        calls.fetchAdd(1)
+        result
+    }
+}
+
+private class RejectingPublicResolver <: Resolver {
+    let calls = AtomicInt64(0)
+
+    public func resolve(host: HostName, service: ?String, options: ResolveOptions,
+        context: OperationContext): ResolveResult {
+        let _ = host
+        let _ = service
+        let _ = options
+        let _ = context
+        calls.fetchAdd(1)
+        throw ResolveException(ResolveErrorCode.NameNotFound, "origin resolver must not run for a proxy route")
+    }
+}
+
+private class PublicProxyAuthorization <: HttpProxyAuthorizationProvider {
+    let calls = AtomicInt64(0)
+
+    public func authorization(proxy: HttpProxyEndpoint, target: HttpUrl,
+        context: OperationContext): ?String {
+        let _ = context
+        @Expect(proxy.identity.startsWith("proxy.test:"))
+        @Expect(target.host, "origin.test")
+        calls.fetchAdd(1)
+        Some("Basic hook-value")
+    }
+}
+
+private class PublicForwardProxyHandler <: HttpServerHandler {
+    let valid = AtomicInt64(0)
+
+    public func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse {
+        let _ = context
+        let _ = request.body.read(Array<Byte>(1, repeat: 0))
+        if (request.target == "http://origin.test:8081/path?q=1" &&
+            request.headers.getFirst("host") == Some("origin.test:8081") &&
+            request.headers.getFirst("proxy-authorization") == Some("Basic hook-value") &&
+            request.headers.getAll("proxy-authorization").size == 1) {
+            valid.store(1)
+        }
+        HttpServerResponse(HttpResponse(
+            200, "OK", ResponseBody.empty(),
+            headers: HttpHeaders.builder().add("Content-Length", "0").build()
+        ))
     }
 }

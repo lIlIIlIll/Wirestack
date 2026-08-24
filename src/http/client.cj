@@ -29,6 +29,7 @@ public class HttpClientBuilder {
     private var configuredLimits = HttpLimits()
     private var configuredRedirectPolicy = HttpRedirectPolicy()
     private var configuredRetryPolicy = HttpRetryPolicy()
+    private var configuredProxy: ?HttpProxyConfig = None<HttpProxyConfig>
 
     public init() {}
 
@@ -59,6 +60,12 @@ public class HttpClientBuilder {
         this
     }
 
+    /** Installs one explicit proxy route. Environment, PAC, and WPAD are never consulted. */
+    public func proxy(value: HttpProxyConfig): HttpClientBuilder {
+        configuredProxy = Some(value)
+        this
+    }
+
     public func build(): HttpClient {
         let selected = match (configuredResolver) {
             case Some(value) => value
@@ -66,7 +73,7 @@ public class HttpClientBuilder {
         }
         HttpClient(
             selected, configuredRequestTimeout, configuredLimits,
-            configuredRedirectPolicy, configuredRetryPolicy
+            configuredRedirectPolicy, configuredRetryPolicy, configuredProxy
         )
     }
 }
@@ -78,20 +85,30 @@ public class HttpClient <: Resource {
     private let limits: HttpLimits
     private let redirectPolicy: HttpRedirectPolicy
     private let retryPolicy: HttpRetryPolicy
+    private let proxy: ?HttpProxyConfig
     private let transportFactory = stdnet.StdNetTransportFactory()
     private let cleartext: http1.Http1CleartextClient
+    private let forwardProxy: ?http1.Http1ForwardProxyClient
     private let mutex = Mutex()
     private var https: ?http1.Http1HttpsClient = None<http1.Http1HttpsClient>
     private var closed = false
 
     init(resolver: resolver.Resolver, requestTimeout: ?Duration, limits: HttpLimits,
-        redirectPolicy: HttpRedirectPolicy, retryPolicy: HttpRetryPolicy) {
+        redirectPolicy: HttpRedirectPolicy, retryPolicy: HttpRetryPolicy,
+        proxy: ?HttpProxyConfig) {
         this.resolver = resolver
         this.requestTimeout = requestTimeout
         this.limits = limits
         this.redirectPolicy = redirectPolicy
         this.retryPolicy = retryPolicy
+        this.proxy = proxy
         cleartext = http1.Http1CleartextClient(resolver, transportFactory, limits: limits)
+        forwardProxy = match (proxy) {
+            case Some(value) => Some(http1.Http1ForwardProxyClient(
+                toInternalProxyEndpoint(value.endpoint), value.resolver, transportFactory, limits: limits
+            ))
+            case None => None<http1.Http1ForwardProxyClient>
+        }
     }
 
     public static func default(): HttpClient { HttpClient.builder().build() }
@@ -135,9 +152,24 @@ public class HttpClient <: Resource {
     private func executeOnce(request: HttpRequest, operation: OperationContext,
         trailer: HttpTrailer): HttpResponse {
         if (isClosed()) { throw IllegalStateException("HTTP client is closed") }
-        match (request.url.scheme) {
-            case "http" => cleartext.execute(request, context: operation, trailer: trailer)
-            case "https" => httpsClient().execute(request, context: operation, trailer: trailer)
+        let route = match (proxy) {
+            case Some(value) => value.routeFor(request.url)
+            case None => HttpProxyRoute.Direct
+        }
+        match ((request.url.scheme, route)) {
+            case ("http", HttpProxyRoute.Direct) =>
+                cleartext.execute(withProxyAuthorization(request, None<String>),
+                    context: operation, trailer: trailer)
+            case ("http", HttpProxyRoute.Proxy(value)) =>
+                let authorization = value.authorization(request.url, operation)
+                forwardProxy.getOrThrow().execute(
+                    withProxyAuthorization(request, authorization), context: operation, trailer: trailer
+                )
+            case ("https", HttpProxyRoute.Direct) =>
+                httpsClient().execute(withProxyAuthorization(request, None<String>),
+                    context: operation, trailer: trailer)
+            case ("https", HttpProxyRoute.Proxy(_)) =>
+                throw IllegalStateException("HTTPS proxy CONNECT is not implemented")
             case _ => throw IllegalArgumentException("HTTP client accepts only http and https URLs")
         }
     }
@@ -166,6 +198,7 @@ public class HttpClient <: Resource {
             }
         }
         cleartext.close()
+        match (forwardProxy) { case Some(value) => value.close(); case None => () }
         match (secure) { case Some(value) => value.close(); case None => () }
     }
 
@@ -188,6 +221,28 @@ public class HttpClient <: Resource {
             }
         }
     }
+}
+
+private func toInternalProxyEndpoint(value: HttpProxyEndpoint): http1.Http1ProxyEndpoint {
+    match ((value.hostName, value.ipAddress)) {
+        case (Some(host), None) => http1.Http1ProxyEndpoint.hostname(host, value.port, value.identity)
+        case (None, Some(address)) => http1.Http1ProxyEndpoint.address(address, value.port, value.identity)
+        case _ => throw IllegalArgumentException("HTTP proxy endpoint has an invalid address form")
+    }
+}
+
+/** Removes caller-supplied proxy credentials and adds only the route hook's validated value. */
+private func withProxyAuthorization(request: HttpRequest, value: ?String): HttpRequest {
+    let builder = HttpHeaders.builder()
+    for (entry in request.headers.entries) {
+        if (entry.name.toAsciiLower() != "proxy-authorization") {
+            builder.add(entry.name, entry.value)
+        }
+    }
+    if (let Some(authorization) <- value) {
+        builder.add("Proxy-Authorization", authorization)
+    }
+    request.withHeaders(builder.build())
 }
 
 private class UnavailableSystemResolver <: resolver.Resolver {

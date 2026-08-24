@@ -51,9 +51,10 @@ public func writeHttp1Request(
     request: HttpRequest,
     context!: OperationContext = OperationContext.background(),
     limits!: HttpLimits = HttpLimits(),
-    trailer!: HttpTrailer = HttpTrailer()
+    trailer!: HttpTrailer = HttpTrailer(),
+    targetForm!: Http1RequestTargetForm = Http1RequestTargetForm.Origin
 ): Http1RequestCommitEvidence {
-    let writer = Http1RequestWriter(request, limits: limits, trailer: trailer)
+    let writer = Http1RequestWriter(request, limits: limits, trailer: trailer, targetForm: targetForm)
     writer.writeHead(transport, context: context)
     writer.writeBody(transport, context: context)
     writer.evidence
@@ -71,8 +72,11 @@ public class Http1RequestWriter {
 
     public prop evidence: Http1RequestCommitEvidence { get() { tracker.snapshot() } }
 
-    public init(request: HttpRequest, limits!: HttpLimits = HttpLimits(), trailer!: HttpTrailer = HttpTrailer()) {
-        let serialized = serializeClientRequestHead(request.method, request.url, request.headers, limits: limits)
+    public init(request: HttpRequest, limits!: HttpLimits = HttpLimits(), trailer!: HttpTrailer = HttpTrailer(),
+        targetForm!: Http1RequestTargetForm = Http1RequestTargetForm.Origin) {
+        let serialized = serializeClientRequestHead(
+            request.method, request.url, request.headers, targetForm: targetForm, limits: limits
+        )
         validateBodyFraming(request.body, serialized.framing)
         this.request = request
         this.limits = limits
