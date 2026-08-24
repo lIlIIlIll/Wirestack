@@ -279,6 +279,11 @@ public class Http2ConnectionStateMachine {
                 case Http2SettingsReceiveResult.Acknowledged(_) => Http2ConnectionReceiveResult([])
             }
         }
+        if (isPingFrameType(frame.header.frameType)) {
+            let ping = decodeHttp2Ping(frame)
+            return if (ping.ack) { Http2ConnectionReceiveResult([]) }
+                else { Http2ConnectionReceiveResult([encodeHttp2Ping(ping.opaqueData, ack: true)]) }
+        }
         if (isGoAwayFrameType(frame.header.frameType)) {
             let decoded = decodeHttp2GoAway(frame)
             requireLocallyInitiatedStreamOrZero(decoded.lastStreamId)
@@ -405,4 +410,8 @@ private func isSettingsFrameType(frameType: Http2FrameType): Bool {
 
 private func isGoAwayFrameType(frameType: Http2FrameType): Bool {
     match (frameType) { case Http2FrameType.GoAway => true; case _ => false }
+}
+
+private func isPingFrameType(frameType: Http2FrameType): Bool {
+    match (frameType) { case Http2FrameType.Ping => true; case _ => false }
 }
