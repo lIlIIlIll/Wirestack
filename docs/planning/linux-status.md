@@ -99,6 +99,14 @@ Status values have the same fail-closed meaning as the global status file.
 | M5-029 conformance/security tests | COMPLETE | Deterministic URL/proxy fuzz, parser/chunked corpus, request-smuggling corpus, partial I/O, body/pool and graceful-shutdown races |
 | M5-030 benchmark/docs | IN_PROGRESS | Keep-alive runner and 16/64 MiB bounded-memory gates pass; pinned SDK lacks a stdx HTTP baseline, so the ≥90% comparison remains NOT RUN |
 
+## Implemented HTTP/2 Core
+
+| Task | Status | Evidence |
+|---|---|---|
+| M6-001 frame/setting/error models | COMPLETE | Typed standard and extension frame/error/setting codes, 31-bit stream identities, protocol error scope and explicit frame/table/header/write/window/stream bounds are covered by deterministic tests |
+| M6-002 incremental frame codec | COMPLETE | All required P0 frame envelopes round-trip across every single-byte boundary and contiguous multi-frame input; configured size rejection occurs before payload buffering, unknown types/flags remain forward-compatible, reserved stream bits are ignored on read and cleared on write, and Transport partial writes complete under one operation context |
+| M6-003..020 negotiation through benchmark | NOT_STARTED | SETTINGS timing, HPACK, header blocks, connection/stream state, flow control, multiplexed client/server/pool integration, conformance/fuzz and 1/10/100-stream evidence remain required |
+
 ## Next critical path
 
 1. Complete shared Transport lifecycle/exactly-once primitives and the remaining
