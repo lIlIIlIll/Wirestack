@@ -19,6 +19,7 @@ public type HttpBodyException = model.HttpBodyException
 public type HttpBodyStream = model.HttpBodyStream
 public type RequestBody = model.RequestBody
 public type HttpRequest = model.HttpRequest
+public type HttpRetrySafety = model.HttpRetrySafety
 public type ResponseBodyObserver = model.ResponseBodyObserver
 public type ResponseBody = model.ResponseBody
 public type HttpResponse = model.HttpResponse
@@ -47,3 +48,9 @@ public type ResolveResult = resolver.ResolveResult
 public type ResolveException = resolver.ResolveException
 public type Resolver = resolver.Resolver
 public type StaticResolver = resolver.StaticResolver
+
+public type NetworkErrorCategory = transport.NetworkErrorCategory
+public type NetworkPhase = transport.NetworkPhase
+public type NetworkErrorCode = transport.NetworkErrorCode
+public type Retryability = transport.Retryability
+public type NetworkException = transport.NetworkException
