@@ -127,6 +127,68 @@ public class Http2WriteScheduler {
 
     /** Fails immediately instead of exceeding either configured queue bound. */
     public func enqueue(frame: Http2Frame): Http2WriteTicket {
+        enqueueOwned(frame, None<Http2SendPermit>)
+    }
+
+    /**
+     * Couples one DATA frame to its reserved flow permit. The single writer
+     * consumes credit immediately before the first transport byte, closing the
+     * enqueue/beginSend race for concurrent streams.
+     */
+    public func enqueueReservedData(
+        frame: Http2Frame,
+        permit: Http2SendPermit
+    ): Http2WriteTicket {
+        if (!isDataFrame(frame.header.frameType) ||
+            frame.header.streamId.value != permit.streamId.value ||
+            Int64(frame.header.length) != permit.amount) {
+            throw IllegalArgumentException("HTTP/2 DATA frame does not match its flow permit")
+        }
+        try { enqueueOwned(frame, Some(permit)) }
+        catch (error: Exception) { let _ = permit.cancel(); throw error }
+    }
+
+    /** Atomically admits one non-DATA control sequence, preserving wire contiguity. */
+    public func enqueueControlBatch(frames: Array<Http2Frame>): Array<Http2WriteTicket> {
+        if (frames.isEmpty()) { throw IllegalArgumentException("HTTP/2 control batch cannot be empty") }
+        let encoded = ArrayList<Array<Byte>>()
+        var totalBytes = 0u64
+        for (frame in frames) {
+            if (isDataFrame(frame.header.frameType)) {
+                throw IllegalArgumentException("HTTP/2 control batch cannot contain DATA")
+            }
+            let bytes = serializeHttp2Frame(frame)
+            encoded.add(bytes)
+            totalBytes += UInt64(bytes.size)
+        }
+        synchronized(mutex) {
+            if (!isSchedulerOpen(schedulerState)) {
+                throw IllegalStateException("HTTP/2 write scheduler is not accepting frames")
+            }
+            if (frames.size > Int64(limits.maxPendingWrites) - queuedCount ||
+                totalBytes > UInt64(limits.maxPendingWriteBytes) -
+                    min(queuedBytes, UInt64(limits.maxPendingWriteBytes))) {
+                throw Http2WriteQueueFullException("HTTP/2 control batch reached the pending write limit")
+            }
+            let tickets = ArrayList<Http2WriteTicket>()
+            for (index in 0..frames.size) {
+                let frame = frames[index]
+                let ticket = Http2WriteTicket(nextId, frame.header.streamId, this)
+                controls.add(Http2QueuedWrite(nextId, frame.header.streamId, encoded[index], ticket))
+                nextId++
+                queuedCount++
+                queuedBytes += UInt64(encoded[index].size)
+                tickets.add(ticket)
+            }
+            changed.notifyAll()
+            tickets.toArray()
+        }
+    }
+
+    private func enqueueOwned(
+        frame: Http2Frame,
+        permit: ?Http2SendPermit
+    ): Http2WriteTicket {
         let bytes = serializeHttp2Frame(frame)
         synchronized(mutex) {
             if (!isSchedulerOpen(schedulerState)) {
@@ -143,7 +205,7 @@ public class Http2WriteScheduler {
             let id = nextId
             nextId += 1
             let ticket = Http2WriteTicket(id, frame.header.streamId, this)
-            let item = Http2QueuedWrite(id, frame.header.streamId, bytes, ticket)
+            let item = Http2QueuedWrite(id, frame.header.streamId, bytes, ticket, permit: permit)
             if (isDataFrame(frame.header.frameType)) { enqueueDataLocked(item) }
             else { controls.add(item) }
             queuedCount += 1
@@ -259,7 +321,7 @@ public class Http2WriteScheduler {
             item
         }
         match (removed) {
-            case Some(item) => item.ticket.markCancelled(); true
+            case Some(item) => item.cancelPermit(); item.ticket.markCancelled(); true
             case None => false
         }
     }
@@ -297,7 +359,7 @@ public class Http2WriteScheduler {
             if (!claimed.isEmpty()) { changed.notifyAll() }
             claimed.toArray()
         }
-        for (item in removed) { item.ticket.markCancelled() }
+        for (item in removed) { item.cancelPermit(); item.ticket.markCancelled() }
         removed.size
     }
 
@@ -308,6 +370,11 @@ public class Http2WriteScheduler {
                 case None => return
                 case Some(value) =>
                     value.ticket.markWriting()
+                    if (!value.beginPermit(context)) {
+                        synchronized(mutex) { active = None<Http2QueuedWrite> }
+                        value.ticket.markCancelled()
+                        continue
+                    }
                     writeQueued(value, context)
                     let shouldFail = synchronized(mutex) {
                         active = None<Http2QueuedWrite>
@@ -404,8 +471,8 @@ public class Http2WriteScheduler {
             changed.notifyAll()
             (pending, current)
         }
-        for (item in queued) { item.ticket.markFailed(reason) }
-        if (let Some(item) <- writing) { item.ticket.markFailed(reason) }
+        for (item in queued) { item.cancelPermit(); item.ticket.markFailed(reason) }
+        if (let Some(item) <- writing) { item.cancelPermit(); item.ticket.markFailed(reason) }
     }
 
     private func writeQueued(item: Http2QueuedWrite, context: OperationContext): Unit {
@@ -450,12 +517,25 @@ private class Http2QueuedWrite {
     let streamId: Http2StreamId
     let bytes: Array<Byte>
     let ticket: Http2WriteTicket
-    init(id: Int64, streamId: Http2StreamId, bytes: Array<Byte>, ticket: Http2WriteTicket) {
+    private let permit: ?Http2SendPermit
+    init(
+        id: Int64,
+        streamId: Http2StreamId,
+        bytes: Array<Byte>,
+        ticket: Http2WriteTicket,
+        permit!: ?Http2SendPermit = None<Http2SendPermit>
+    ) {
         this.id = id
         this.streamId = streamId
         this.bytes = bytes
         this.ticket = ticket
+        this.permit = permit
     }
+
+    func beginPermit(context: OperationContext): Bool {
+        match (permit) { case Some(value) => value.beginSend(context: context); case None => true }
+    }
+    func cancelPermit(): Unit { if (let Some(value) <- permit) { let _ = value.cancel() } }
 }
 
 private class Http2DataWriteQueue {
