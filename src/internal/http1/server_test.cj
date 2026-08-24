@@ -10,6 +10,62 @@ import wirestack.internal.transport.*
 @Test
 class Http1ServerTest {
     @TestCase
+    func shutdownAbortsConnectionBlockedInsideTlsHandshake(): Unit {
+        let listener = Http1TestListener()
+        let (client, accepted) = MemoryTransport.pair(capacity: 4096)
+        listener.enqueue(accepted)
+        let handshaker = BlockingServerTlsHandshaker()
+        let server = Http1Server(
+            listener, Http1StaticHandler(),
+            config: Http1ServerConfig(maximumConnections: 1),
+            tlsHandshaker: Some<Http1ServerTlsHandshaker>(handshaker)
+        )
+        let serving: Future<Unit> = spawn { server.serve() }
+        listener.waitForAccepted(1)
+        handshaker.waitUntilEntered()
+
+        let forced = server.shutdown(context: OperationContext(
+            deadline: Some(Deadline.after(5 * Duration.millisecond))))
+        @Expect(forced.aborted, 1)
+        let drained = server.shutdown(context: OperationContext(
+            deadline: Some(Deadline.after(Duration.second))))
+        @Expect(drained.activeAtReturn, 0)
+        serving.get(Duration.second)
+        @Expect(handshaker.closes.load(), 1)
+        client.close()
+    }
+
+    @TestCase
+    func acceptSideTlsHookOwnsConnectionAndClosesAfterShutdown(): Unit {
+        let listener = Http1TestListener()
+        let (client, accepted) = MemoryTransport.pair(capacity: 4096)
+        listener.enqueue(accepted)
+        let handshaker = PassThroughServerTlsHandshaker()
+        let server = Http1Server(
+            listener, Http1StaticHandler(),
+            config: Http1ServerConfig(maximumConnections: 1),
+            tlsHandshaker: Some<Http1ServerTlsHandshaker>(handshaker)
+        )
+        let serving: Future<Unit> = spawn { server.serve() }
+        listener.waitForAccepted(1)
+
+        let request = HttpRequest(HttpMethod("GET"), HttpUrl.parse("http://example.com/"),
+            headers: HttpHeaders.builder().add("Connection", "close").build())
+        let _ = writeHttp1Request(client, request)
+        let response = readHttp1Response(client, request.method)
+        @Expect(response.response.status, 200)
+        response.response.close()
+
+        let result = server.shutdown(context: OperationContext(
+            deadline: Some(Deadline.after(Duration.second))))
+        serving.get(Duration.second)
+        @Expect(result.activeAtReturn, 0)
+        @Expect(handshaker.handshakes.load(), 1)
+        @Expect(handshaker.closes.load(), 1)
+        client.close()
+    }
+
+    @TestCase
     func gracefulShutdownStopsAcceptAfterCompletedConnection(): Unit {
         let listener = Http1TestListener()
         let (client, accepted) = MemoryTransport.pair(capacity: 4096)
@@ -77,6 +133,48 @@ class Http1ServerTest {
         server.close()
         serving.get(Duration.second)
         secondClient.close()
+    }
+}
+
+private class PassThroughServerTlsHandshaker <: Http1ServerTlsHandshaker {
+    let handshakes = AtomicInt64(0)
+    let closes = AtomicInt64(0)
+
+    public func handshake(transport: DuplexTransport,
+        context: OperationContext): DuplexTransport {
+        let _ = context
+        handshakes.fetchAdd(1)
+        transport
+    }
+
+    public func close(): Unit { let _ = closes.fetchAdd(1) }
+    public func isClosed(): Bool { closes.load() > 0 }
+}
+
+private class BlockingServerTlsHandshaker <: Http1ServerTlsHandshaker {
+    private let mutex = Mutex()
+    private let entered = synchronized(mutex) { mutex.condition() }
+    private var inside = false
+    let closes = AtomicInt64(0)
+
+    public func handshake(transport: DuplexTransport,
+        context: OperationContext): DuplexTransport {
+        synchronized(mutex) { inside = true; entered.notifyAll() }
+        let _ = transport.readSome(MutableByteSpan(Array<Byte>(1, repeat: 0)), context: context)
+        transport
+    }
+
+    public func close(): Unit { let _ = closes.fetchAdd(1) }
+    public func isClosed(): Bool { closes.load() > 0 }
+
+    func waitUntilEntered(): Unit {
+        let deadline = Deadline.after(Duration.second)
+        synchronized(mutex) {
+            while (!inside) {
+                if (deadline.isExpired()) { throw Exception("TLS handshake did not start") }
+                entered.wait(timeout: deadline.remaining())
+            }
+        }
     }
 }
 
