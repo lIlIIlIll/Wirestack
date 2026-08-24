@@ -6,6 +6,7 @@ public class Http2Limits {
     public let maxHeaderTableBytes: UInt32
     public let maxHeaderListBytes: UInt32
     public let maxHeaderBlockBytes: UInt32
+    public let maxHeaderFields: UInt32
     public let maxPendingWriteBytes: UInt32
     public let maxPendingWrites: UInt32
     public let maxConcurrentStreams: UInt32
@@ -17,6 +18,7 @@ public class Http2Limits {
         maxHeaderTableBytes!: UInt32 = 4096u32,
         maxHeaderListBytes!: UInt32 = 65536u32,
         maxHeaderBlockBytes!: UInt32 = 65536u32,
+        maxHeaderFields!: UInt32 = 128u32,
         maxPendingWriteBytes!: UInt32 = 1048576u32,
         maxPendingWrites!: UInt32 = 256u32,
         maxConcurrentStreams!: UInt32 = 100u32,
@@ -28,6 +30,7 @@ public class Http2Limits {
         }
         requirePositive(maxHeaderListBytes, "header list bytes")
         requirePositive(maxHeaderBlockBytes, "header block bytes")
+        requirePositive(maxHeaderFields, "header fields")
         requirePositive(maxPendingWriteBytes, "pending write bytes")
         requirePositive(maxPendingWrites, "pending writes")
         requirePositive(maxConcurrentStreams, "concurrent streams")
@@ -39,6 +42,7 @@ public class Http2Limits {
         this.maxHeaderTableBytes = maxHeaderTableBytes
         this.maxHeaderListBytes = maxHeaderListBytes
         this.maxHeaderBlockBytes = maxHeaderBlockBytes
+        this.maxHeaderFields = maxHeaderFields
         this.maxPendingWriteBytes = maxPendingWriteBytes
         this.maxPendingWrites = maxPendingWrites
         this.maxConcurrentStreams = maxConcurrentStreams
