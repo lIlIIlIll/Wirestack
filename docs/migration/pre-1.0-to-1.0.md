@@ -33,6 +33,27 @@ let config = JsonReadConfig(
 `maxStringBytes` 是新增字段；`maxPolymorphicObjectBytes` 从 pre-1.0 snapshot 的
 16 MiB 改为 unlimited，是需要安全评审的行为变化，不代表适合不可信输入。
 
+## Typed codec 与 stream backend
+
+`JsonDirectCodec<T>` 已更名为 backend-neutral `JsonCodec<T>`，且没有兼容 alias。
+自定义 codec 的方法参数也应改为 `JsonCodecReader` / `JsonCodecWriter`：
+
+```cangjie
+class UserCodec <: JsonCodec<User> {
+    public func write(value: User, writer: JsonCodecWriter,
+        context: JsonEncodeContext): Unit { ... }
+    public func read(reader: JsonCodecReader,
+        context: JsonDecodeContext): User { ... }
+}
+```
+
+stream 入口默认仍使用 Pure incremental 行为；依赖 optional package 后可通过命名参数
+`backend: NativeCompactStreamBackend` 或 `backend: YyjsonStreamBackend` 显式选择
+whole-document Native 路径。没有自动 backend 探测或静默 fallback。
+
+写出预算现在由 `JsonWriteConfig.maxBytes` 控制，默认 `0 = unlimited`。Pure stream
+超限时可能已有前缀写入，whole-document Native backend 则在写入 caller stream 前失败。
+
 ## Package pairing
 
 | Package | 1.0 RC 要求 |

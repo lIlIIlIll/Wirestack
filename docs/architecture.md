@@ -35,7 +35,7 @@ manifest 没有该依赖。这是仓库测试布局，不是下游 package graph
         ▼
 yjson_macros declaration-macro expansion
         │
-        ├── generated JsonDirectCodec<T>
+        ├── generated JsonCodec<T>
         ├── generated <Type>Json value/function
         └── JsonCodecProvider conformance
         │
@@ -63,16 +63,25 @@ YJson.toJson / fromJson<T>
 YJson.encode*With / decode*With
         │
         ▼
-generated or built-in JsonDirectCodec<T>
-        ├── encode ──> JsonDirectWriter ──> String / bytes / OutputStream
+generated or built-in JsonCodec<T>
+        ├── encode ──> JsonCodecWriter
+        │                 ├── JsonDirectWriter ──> String / bytes / OutputStream
+        │                 └── JsonStreamTapeWriter ──> whole-document Native backend
         └── decode
             ├── default compatible config ──> JsonFastReader
-            └── explicit policy/limits ─────> JsonDirectReader
+            └── semantic contract ──────────> JsonCodecReader
+                                              ├── JsonDirectReader
+                                              └── JsonStreamTapeReader
 ```
 
 `YJson.fastDecoder(codec)` 缓存同一个 codec 的 reusable decoder facade；每次调用仍创建
 本次输入的 reader。默认兼容配置可以选择 compact fast reader；显式 `JsonReadConfig`
 保留 unknown-field、duplicate-key、number 与 resource-limit 语义。
+
+`JsonStreamBackend` 只选择 caller-owned stream 如何连接 typed codec，不是 framing 或
+SAX API。默认 `PureStreamBackend` 增量读写；`NativeCompactStreamBackend` 和
+`YyjsonStreamBackend` 先处理完整 document，再通过 matching-version bulk tape 与同一
+`JsonCodec<T>` 交互。Native 路径不会逐节点跨 FFI，也不会静默回退到 Pure backend。
 
 ### Mutable AST
 

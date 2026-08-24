@@ -23,6 +23,7 @@ yjson 默认使用纯仓颉实现。Native backend 是面向特定内存与遍�
 - **直接输出的 JSON 字面量** — `@Json({...})` 支持运行时插值，并直接驱动 writer 生成紧凑 JSON。
 - **统一的数据模型** — 同一套库覆盖 typed codec、可修改 `JsonNode` 与低内存只读 `CompactJsonDocument`。
 - **Pure Cangjie 默认实现** — core 不包含隐式 native 依赖；Custom Native 与 yyjson backend 均需显式选择。
+- **可切换 typed Stream backend** — 同一 `JsonCodec<T>` 可使用默认 Pure incremental，或显式选择 whole-document Native backend。
 - **明确的输入 contract** — 未知字段、重复 key、数字保留和资源预算都由公开配置控制。
 
 ## 安装
@@ -99,7 +100,7 @@ scripts/run_cjpm_executable.sh packages/examples
 | 解析或输出 JSON 树 | `YJson.parse` / `YJson.stringify` | `JsonNode` / `String` |
 | 可切换后端的只读查询 | `YJson.parseDocument` | `JsonDocument`（默认 Pure Compact） |
 | 自定义或内置 codec | `encode*With` / `decode*With` | typed value / JSON |
-| Stream I/O | `encodeToStreamWith` / `decodeFromStreamWith` | caller-owned stream |
+| Stream I/O | `encodeToStreamWith` / `decodeFromStreamWith` | caller-owned stream；默认 Pure，可显式选择 backend |
 
 ### Parser 与 AST
 

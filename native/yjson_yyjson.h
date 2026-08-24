@@ -53,6 +53,17 @@ int32_t YJ_Yyjson_ObjectLookupInt(uint64_t handle,
 int32_t YJ_Yyjson_SerializeAlloc(uint64_t handle,
                                 uint64_t *out_buffer_handle,
                                 uint64_t *out_size);
+/* Matching-version typed-stream bridge using the shared YJT1 preorder tape. */
+int32_t YJ_Yyjson_ExportTapeAlloc(uint64_t handle,
+                                 uint64_t *out_buffer_handle,
+                                 uint64_t *out_size);
+int32_t YJ_Yyjson_EncodeTapeAlloc(const uint8_t *tape, uint64_t tape_length,
+                                 const uint8_t *newline, uint64_t newline_length,
+                                 const uint8_t *indent, uint64_t indent_length,
+                                 uint32_t use_space_after_separators,
+                                 uint32_t html_safe, int64_t max_depth,
+                                 int64_t max_bytes, uint64_t *out_buffer_handle,
+                                 uint64_t *out_size, uint32_t *out_error_code);
 int32_t YJ_Yyjson_CopyOwnedBuffer(uint64_t buffer_handle,
                                  uint8_t *output,
                                  uint64_t output_capacity);

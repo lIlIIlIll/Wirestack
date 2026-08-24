@@ -9,7 +9,7 @@
 | 构造 JSON 文本 | `@Json({...})` | 插值后直接写出 `String`，不先构建 AST |
 | 构造、解析并修改树 | `JsonNode` / `@JsonValue` | 可修改、易组合 |
 | 只读查询文档 | `YJson.parseDocument` | 统一 facade，默认 Pure Compact，可显式切换 Native backend |
-| caller-owned stream | `encodeToStreamWith/decodeFromStreamWith` | 不关闭调用方 stream |
+| caller-owned stream | `encodeToStreamWith/decodeFromStreamWith` | 默认 Pure；可显式选择 backend；不关闭 stream |
 | Native-owned DOM | optional backend package | 需要显式生命周期管理 |
 | 校验 JSON 实例 | `JsonSchema` | 常用 draft 2020-12 子集 |
 
@@ -51,3 +51,8 @@ try (document = YJson.parseDocument(text)) {
 Native 不改变默认 typed API 的身份，也不会被 `yjson_all` 隐式启用。统一的是
 document 调用入口，不是依赖关系或底层表示；只有在 profiling 与部署约束都支持时
 才依赖 `yjson_native` 或 `yjson_yyjson`。选择表和完整示例见 [Backend 使用指南](backends.md)。
+
+Native package 也提供 typed stream backend：`NativeCompactStreamBackend` 与
+`YyjsonStreamBackend`。它们是 whole-document 模式，通过一次 native parse/export 或
+encode/copy 驱动 backend-neutral `JsonCodec<T>`；不会逐节点 FFI，也不会在失败时静默
+切换到 Pure。完整语义见 [Stream I/O](streams.md)。

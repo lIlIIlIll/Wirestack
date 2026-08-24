@@ -1,6 +1,7 @@
 #include "yjson_compact.h"
 
 #include <limits.h>
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdatomic.h>
@@ -1852,6 +1853,199 @@ int32_t YJ_Compact_ExportTapeAlloc(uint64_t handle, uint64_t *out_buffer_handle,
     }
     *out_buffer_handle = (uint64_t)(uintptr_t)buffer;
     *out_size = buffer->size;
+    return YJ_COMPACT_OK;
+}
+
+typedef struct {
+    const uint8_t *data;
+    uint64_t length;
+    uint64_t position;
+    const uint8_t *newline;
+    uint64_t newline_length;
+    const uint8_t *indent;
+    uint64_t indent_length;
+    uint32_t use_space;
+    uint32_t html_safe;
+    int64_t max_depth;
+    uint32_t error_code;
+    YjBuffer *output;
+} YjStreamTapeEncoder;
+
+static int yj_stream_tape_require(YjStreamTapeEncoder *encoder, uint64_t count) {
+    if (encoder->position > encoder->length || count > encoder->length - encoder->position) {
+        encoder->error_code = YJ_COMPACT_PARSE_ERROR;
+        return 0;
+    }
+    return 1;
+}
+
+static int yj_stream_tape_u32(YjStreamTapeEncoder *encoder, uint32_t *out) {
+    if (!yj_stream_tape_require(encoder, 4u)) return 0;
+    const uint8_t *at = encoder->data + encoder->position;
+    *out = (uint32_t)at[0] | ((uint32_t)at[1] << 8) |
+           ((uint32_t)at[2] << 16) | ((uint32_t)at[3] << 24);
+    encoder->position += 4u;
+    return 1;
+}
+
+static int yj_stream_tape_text(YjStreamTapeEncoder *encoder,
+                               const uint8_t **out_text, uint32_t *out_length) {
+    uint32_t length;
+    if (!yj_stream_tape_u32(encoder, &length) ||
+        !yj_stream_tape_require(encoder, length)) return 0;
+    *out_text = encoder->data + encoder->position;
+    *out_length = length;
+    encoder->position += length;
+    return 1;
+}
+
+static void yj_stream_write_indent(YjStreamTapeEncoder *encoder, int64_t depth) {
+    yj_buffer_write(encoder->output, encoder->newline, encoder->newline_length);
+    for (int64_t i = 0; i < depth; i++)
+        yj_buffer_write(encoder->output, encoder->indent, encoder->indent_length);
+}
+
+static void yj_stream_serialize_string(YjStreamTapeEncoder *encoder,
+                                       const uint8_t *data, uint32_t length) {
+    static const char hex[] = "0123456789abcdef";
+    yj_buffer_byte(encoder->output, '"');
+    for (uint32_t i = 0; i < length; i++) {
+        uint8_t c = data[i];
+        switch (c) {
+            case '"': yj_buffer_write(encoder->output, (const uint8_t *)"\\\"", 2); break;
+            case '\\': yj_buffer_write(encoder->output, (const uint8_t *)"\\\\", 2); break;
+            case '\b': yj_buffer_write(encoder->output, (const uint8_t *)"\\b", 2); break;
+            case '\f': yj_buffer_write(encoder->output, (const uint8_t *)"\\f", 2); break;
+            case '\n': yj_buffer_write(encoder->output, (const uint8_t *)"\\n", 2); break;
+            case '\r': yj_buffer_write(encoder->output, (const uint8_t *)"\\r", 2); break;
+            case '\t': yj_buffer_write(encoder->output, (const uint8_t *)"\\t", 2); break;
+            default:
+                if (c < 0x20u || (encoder->html_safe &&
+                    (c == '<' || c == '>' || c == '&' || c == '=' || c == '\''))) {
+                    uint8_t escaped[6] = {'\\', 'u', '0', '0',
+                        (uint8_t)hex[c >> 4], (uint8_t)hex[c & 15u]};
+                    yj_buffer_write(encoder->output, escaped, 6);
+                } else {
+                    yj_buffer_byte(encoder->output, c);
+                }
+        }
+    }
+    yj_buffer_byte(encoder->output, '"');
+}
+
+static int yj_stream_encode_value(YjStreamTapeEncoder *encoder, int64_t depth) {
+    if (depth >= encoder->max_depth) {
+        encoder->error_code = YJ_COMPACT_MAX_DEPTH;
+        return 0;
+    }
+    if (!yj_stream_tape_require(encoder, 1u)) return 0;
+    uint8_t kind = encoder->data[encoder->position++];
+    switch (kind) {
+        case YJ_COMPACT_NULL:
+            yj_buffer_write(encoder->output, (const uint8_t *)"null", 4u);
+            return 1;
+        case YJ_COMPACT_BOOL:
+            if (!yj_stream_tape_require(encoder, 1u)) return 0;
+            if (encoder->data[encoder->position++] != 0u)
+                yj_buffer_write(encoder->output, (const uint8_t *)"true", 4u);
+            else
+                yj_buffer_write(encoder->output, (const uint8_t *)"false", 5u);
+            return 1;
+        case YJ_COMPACT_INT: {
+            if (!yj_stream_tape_require(encoder, 8u)) return 0;
+            uint64_t bits = 0u;
+            for (uint32_t i = 0; i < 8u; i++)
+                bits |= (uint64_t)encoder->data[encoder->position + i] << (i * 8u);
+            encoder->position += 8u;
+            char text[32];
+            int written = snprintf(text, sizeof(text), "%" PRId64, (int64_t)bits);
+            if (written < 0) { encoder->error_code = YJ_COMPACT_PARSE_ERROR; return 0; }
+            yj_buffer_write(encoder->output, (const uint8_t *)text, (uint64_t)written);
+            return 1;
+        }
+        case YJ_COMPACT_NUMBER: {
+            const uint8_t *text; uint32_t length;
+            if (!yj_stream_tape_text(encoder, &text, &length)) return 0;
+            yj_buffer_write(encoder->output, text, length);
+            return 1;
+        }
+        case YJ_COMPACT_STRING: {
+            const uint8_t *text; uint32_t length;
+            if (!yj_stream_tape_text(encoder, &text, &length)) return 0;
+            yj_stream_serialize_string(encoder, text, length);
+            return 1;
+        }
+        case YJ_COMPACT_ARRAY: {
+            uint32_t count;
+            if (!yj_stream_tape_u32(encoder, &count)) return 0;
+            yj_buffer_byte(encoder->output, '[');
+            for (uint32_t i = 0; i < count; i++) {
+                if (i != 0u) yj_buffer_byte(encoder->output, ',');
+                if (encoder->newline_length != 0u) yj_stream_write_indent(encoder, depth + 1);
+                if (!yj_stream_encode_value(encoder, depth + 1)) return 0;
+            }
+            if (count != 0u && encoder->newline_length != 0u)
+                yj_stream_write_indent(encoder, depth);
+            yj_buffer_byte(encoder->output, ']');
+            return 1;
+        }
+        case YJ_COMPACT_OBJECT: {
+            uint32_t count;
+            if (!yj_stream_tape_u32(encoder, &count)) return 0;
+            yj_buffer_byte(encoder->output, '{');
+            for (uint32_t i = 0; i < count; i++) {
+                const uint8_t *key; uint32_t key_length;
+                if (i != 0u) yj_buffer_byte(encoder->output, ',');
+                if (encoder->newline_length != 0u) yj_stream_write_indent(encoder, depth + 1);
+                if (!yj_stream_tape_text(encoder, &key, &key_length)) return 0;
+                yj_stream_serialize_string(encoder, key, key_length);
+                yj_buffer_byte(encoder->output, ':');
+                if (encoder->use_space) yj_buffer_byte(encoder->output, ' ');
+                if (!yj_stream_encode_value(encoder, depth + 1)) return 0;
+            }
+            if (count != 0u && encoder->newline_length != 0u)
+                yj_stream_write_indent(encoder, depth);
+            yj_buffer_byte(encoder->output, '}');
+            return 1;
+        }
+        default:
+            encoder->error_code = YJ_COMPACT_PARSE_ERROR;
+            return 0;
+    }
+}
+
+int32_t YJ_Stream_EncodeTapeAlloc(const uint8_t *tape, uint64_t tape_length,
+                                 const uint8_t *newline, uint64_t newline_length,
+                                 const uint8_t *indent, uint64_t indent_length,
+                                 uint32_t use_space_after_separators,
+                                 uint32_t html_safe, int64_t max_depth,
+                                 int64_t max_bytes, uint64_t *out_buffer_handle,
+                                 uint64_t *out_size, uint32_t *out_error_code) {
+    if (tape == NULL || tape_length < 5u || newline == NULL || indent == NULL ||
+        max_depth <= 0 || max_bytes < 0 || out_buffer_handle == NULL ||
+        out_size == NULL || out_error_code == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+    if (memcmp(tape, "YJT1", 4u) != 0) {
+        *out_error_code = YJ_COMPACT_PARSE_ERROR;
+        return YJ_COMPACT_PARSE_ERROR;
+    }
+    YjBuffer *buffer = (YjBuffer *)calloc(1u, sizeof(YjBuffer));
+    if (buffer == NULL) return YJ_COMPACT_OUT_OF_MEMORY;
+    YjStreamTapeEncoder encoder = {
+        tape, tape_length, 4u, newline, newline_length, indent, indent_length,
+        use_space_after_separators, html_safe, max_depth, YJ_COMPACT_OK, buffer
+    };
+    if (!yj_stream_encode_value(&encoder, 0) || encoder.position != tape_length || buffer->failed) {
+        uint32_t error = buffer->failed ? YJ_COMPACT_OUT_OF_MEMORY : encoder.error_code;
+        if (error == YJ_COMPACT_OK) error = YJ_COMPACT_PARSE_ERROR;
+        free(buffer->data); free(buffer); *out_error_code = error; return (int32_t)error;
+    }
+    if (max_bytes > 0 && buffer->size > (uint64_t)max_bytes) {
+        free(buffer->data); free(buffer); *out_error_code = YJ_COMPACT_VALUE_TOO_LARGE;
+        return YJ_COMPACT_VALUE_TOO_LARGE;
+    }
+    *out_buffer_handle = (uint64_t)(uintptr_t)buffer;
+    *out_size = buffer->size;
+    *out_error_code = YJ_COMPACT_OK;
     return YJ_COMPACT_OK;
 }
 

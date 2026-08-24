@@ -343,16 +343,16 @@ public func sampleUInt64Envelope(): UInt64Envelope {
     )
 }
 
-public func profileRecordOptionJson(): JsonDirectCodec<Option<ProfileRecord>> {
+public func profileRecordOptionJson(): JsonCodec<Option<ProfileRecord>> {
     YJson.optionCodec(ProfileRecordJson)
 }
 
-public func nestedProfilesJson(): JsonDirectCodec<ArrayList<HashMap<String, ArrayList<ProfileRecord>>>> {
+public func nestedProfilesJson(): JsonCodec<ArrayList<HashMap<String, ArrayList<ProfileRecord>>>> {
     YJson.arrayListCodec(YJson.hashMapCodec(YJson.arrayListCodec(ProfileRecordJson)))
 }
 
 public func encodeToUtf8String<T>(
-    codec: JsonDirectCodec<T>,
+    codec: JsonCodec<T>,
     value: T,
     config!: JsonWriteConfig = JsonWriteConfig.compact
 ): String {
@@ -361,7 +361,7 @@ public func encodeToUtf8String<T>(
     out.toUtf8String()
 }
 
-public func decodeFromUtf8String<T>(codec: JsonDirectCodec<T>, text: String): T {
+public func decodeFromUtf8String<T>(codec: JsonCodec<T>, text: String): T {
     YJson.decodeFromStreamWith(codec, ByteArrayInputStream(text))
 }
 

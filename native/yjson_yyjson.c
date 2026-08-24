@@ -4,6 +4,7 @@
 #include "vendor/yyjson/yyjson.h"
 
 #include <limits.h>
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -1238,6 +1239,112 @@ static void fy_buffer_byte(FyBuffer *buffer, uint8_t value) {
     fy_buffer_write(buffer, &value, 1);
 }
 
+static void fy_tape_u32(FyBuffer *buffer, uint32_t value) {
+    uint8_t bytes[4];
+    for (uint32_t i = 0; i < 4u; i++) bytes[i] = (uint8_t)(value >> (i * 8u));
+    fy_buffer_write(buffer, bytes, 4u);
+}
+
+static void fy_tape_u64(FyBuffer *buffer, uint64_t value) {
+    uint8_t bytes[8];
+    for (uint32_t i = 0; i < 8u; i++) bytes[i] = (uint8_t)(value >> (i * 8u));
+    fy_buffer_write(buffer, bytes, 8u);
+}
+
+static void fy_tape_text(FyBuffer *buffer, const uint8_t *text, uint32_t length) {
+    fy_tape_u32(buffer, length);
+    fy_buffer_write(buffer, text, length);
+}
+
+static void fy_direct_tape_value(yyjson_val *value, FyBuffer *buffer) {
+    if (yyjson_is_null(value)) { fy_buffer_byte(buffer, YJ_COMPACT_NULL); return; }
+    if (yyjson_is_bool(value)) {
+        fy_buffer_byte(buffer, YJ_COMPACT_BOOL);
+        fy_buffer_byte(buffer, yyjson_get_bool(value) ? 1u : 0u);
+        return;
+    }
+    if (yyjson_is_sint(value)) {
+        fy_buffer_byte(buffer, YJ_COMPACT_INT);
+        fy_tape_u64(buffer, (uint64_t)yyjson_get_sint(value));
+        return;
+    }
+    if (yyjson_is_uint(value)) {
+        uint64_t number = yyjson_get_uint(value);
+        if (number <= (uint64_t)INT64_MAX) {
+            fy_buffer_byte(buffer, YJ_COMPACT_INT);
+            fy_tape_u64(buffer, number);
+        } else {
+            char text[32];
+            int length = snprintf(text, sizeof(text), "%" PRIu64, number);
+            fy_buffer_byte(buffer, YJ_COMPACT_NUMBER);
+            fy_tape_text(buffer, (const uint8_t *)text, (uint32_t)length);
+        }
+        return;
+    }
+    if (yyjson_is_raw(value)) {
+        fy_buffer_byte(buffer, YJ_COMPACT_NUMBER);
+        fy_tape_text(buffer, (const uint8_t *)yyjson_get_raw(value),
+                     (uint32_t)yyjson_get_len(value));
+        return;
+    }
+    if (yyjson_is_real(value)) {
+        char text[32];
+        int length = snprintf(text, sizeof(text), "%.17g", yyjson_get_real(value));
+        fy_buffer_byte(buffer, YJ_COMPACT_NUMBER);
+        fy_tape_text(buffer, (const uint8_t *)text, (uint32_t)length);
+        return;
+    }
+    if (yyjson_is_str(value)) {
+        fy_buffer_byte(buffer, YJ_COMPACT_STRING);
+        fy_tape_text(buffer, (const uint8_t *)yyjson_get_str(value),
+                     (uint32_t)yyjson_get_len(value));
+        return;
+    }
+    if (yyjson_is_arr(value)) {
+        fy_buffer_byte(buffer, YJ_COMPACT_ARRAY);
+        fy_tape_u32(buffer, (uint32_t)yyjson_arr_size(value));
+        yyjson_arr_iter iter = yyjson_arr_iter_with(value);
+        yyjson_val *child;
+        while ((child = yyjson_arr_iter_next(&iter)) != NULL)
+            fy_direct_tape_value(child, buffer);
+        return;
+    }
+    fy_buffer_byte(buffer, YJ_COMPACT_OBJECT);
+    fy_tape_u32(buffer, (uint32_t)yyjson_obj_size(value));
+    yyjson_obj_iter iter = yyjson_obj_iter_with(value);
+    yyjson_val *key;
+    while ((key = yyjson_obj_iter_next(&iter)) != NULL) {
+        fy_tape_text(buffer, (const uint8_t *)yyjson_get_str(key),
+                     (uint32_t)yyjson_get_len(key));
+        fy_direct_tape_value(yyjson_obj_iter_get_val(key), buffer);
+    }
+}
+
+static void fy_flat_tape_value(FyFlatDocument *document, uint32_t node_index,
+                               FyBuffer *buffer) {
+    FyNode *node = &document->nodes[node_index];
+    fy_buffer_byte(buffer, node->kind);
+    if (node->kind == YJ_COMPACT_NULL) return;
+    if (node->kind == YJ_COMPACT_BOOL) { fy_buffer_byte(buffer, node->payload ? 1u : 0u); return; }
+    if (node->kind == YJ_COMPACT_INT) { fy_tape_u64(buffer, node->payload); return; }
+    if (node->kind == YJ_COMPACT_NUMBER || node->kind == YJ_COMPACT_STRING) {
+        uint32_t offset = (uint32_t)(node->payload >> 32);
+        fy_tape_text(buffer, document->strings + offset, (uint32_t)node->payload);
+        return;
+    }
+    fy_tape_u32(buffer, node->aux);
+    if (node->kind == YJ_COMPACT_ARRAY) {
+        for (uint32_t i = 0; i < node->aux; i++)
+            fy_flat_tape_value(document, document->array_entries[node->payload + i], buffer);
+        return;
+    }
+    for (uint32_t i = 0; i < node->aux; i++) {
+        FyObjectEntry *entry = &document->object_entries[node->payload + i];
+        fy_tape_text(buffer, document->strings + entry->key.offset, entry->key.length);
+        fy_flat_tape_value(document, entry->value, buffer);
+    }
+}
+
 static void fy_write_escaped(FyBuffer *buffer, const uint8_t *text, uint32_t length) {
     static const char hex[] = "0123456789abcdef";
     fy_buffer_byte(buffer, '"');
@@ -1336,6 +1443,74 @@ int32_t YJ_Yyjson_SerializeAlloc(uint64_t handle,
     *out_buffer_handle = (uint64_t)(uintptr_t)owned;
     *out_size = owned->size;
     return YJ_COMPACT_OK;
+}
+
+static int32_t fy_copy_custom_owned(uint64_t custom_buffer, uint64_t custom_size,
+                                    uint64_t *out_buffer_handle, uint64_t *out_size) {
+    FyOwnedBuffer *owned = (FyOwnedBuffer *)calloc(1, sizeof(FyOwnedBuffer));
+    if (owned == NULL) {
+        YJ_Compact_FreeOwnedBuffer(custom_buffer);
+        return YJ_COMPACT_OUT_OF_MEMORY;
+    }
+    owned->data = custom_size == 0u ? NULL : (uint8_t *)malloc((size_t)custom_size);
+    owned->size = custom_size;
+    if ((custom_size != 0u && owned->data == NULL) ||
+        YJ_Compact_CopyOwnedBuffer(custom_buffer, owned->data, custom_size) != YJ_COMPACT_OK) {
+        YJ_Compact_FreeOwnedBuffer(custom_buffer);
+        free(owned->data); free(owned);
+        return YJ_COMPACT_OUT_OF_MEMORY;
+    }
+    YJ_Compact_FreeOwnedBuffer(custom_buffer);
+    *out_buffer_handle = (uint64_t)(uintptr_t)owned;
+    *out_size = custom_size;
+    return YJ_COMPACT_OK;
+}
+
+int32_t YJ_Yyjson_ExportTapeAlloc(uint64_t handle,
+                                 uint64_t *out_buffer_handle,
+                                 uint64_t *out_size) {
+    FyDocument *document = (FyDocument *)(uintptr_t)handle;
+    if (document == NULL) return YJ_COMPACT_CLOSED;
+    if (out_buffer_handle == NULL || out_size == NULL) return YJ_COMPACT_PARSE_ERROR;
+    if (document->fallback_custom_handle != 0u) {
+        uint64_t custom_buffer = 0u, custom_size = 0u;
+        int32_t status = YJ_Compact_ExportTapeAlloc(document->fallback_custom_handle,
+                                                    &custom_buffer, &custom_size);
+        if (status != YJ_COMPACT_OK) return status;
+        return fy_copy_custom_owned(custom_buffer, custom_size,
+                                    out_buffer_handle, out_size);
+    }
+    FyBuffer tape = {0};
+    fy_buffer_write(&tape, "YJT1", 4u);
+    if (document->flat == NULL) fy_direct_tape_value(document->root, &tape);
+    else fy_flat_tape_value(document->flat, document->flat->root, &tape);
+    if (tape.failed) { free(tape.data); return YJ_COMPACT_OUT_OF_MEMORY; }
+    FyOwnedBuffer *owned = (FyOwnedBuffer *)calloc(1, sizeof(FyOwnedBuffer));
+    if (owned == NULL) { free(tape.data); return YJ_COMPACT_OUT_OF_MEMORY; }
+    owned->data = tape.data;
+    owned->size = tape.size;
+    *out_buffer_handle = (uint64_t)(uintptr_t)owned;
+    *out_size = owned->size;
+    return YJ_COMPACT_OK;
+}
+
+int32_t YJ_Yyjson_EncodeTapeAlloc(const uint8_t *tape, uint64_t tape_length,
+                                 const uint8_t *newline, uint64_t newline_length,
+                                 const uint8_t *indent, uint64_t indent_length,
+                                 uint32_t use_space_after_separators,
+                                 uint32_t html_safe, int64_t max_depth,
+                                 int64_t max_bytes, uint64_t *out_buffer_handle,
+                                 uint64_t *out_size, uint32_t *out_error_code) {
+    uint64_t custom_buffer = 0u, custom_size = 0u;
+    int32_t status = YJ_Stream_EncodeTapeAlloc(tape, tape_length, newline, newline_length,
+        indent, indent_length, use_space_after_separators, html_safe, max_depth,
+        max_bytes, &custom_buffer, &custom_size, out_error_code);
+    if (status != YJ_COMPACT_OK) return status;
+    status = fy_copy_custom_owned(custom_buffer, custom_size,
+                                  out_buffer_handle, out_size);
+    if (status != YJ_COMPACT_OK && out_error_code != NULL)
+        *out_error_code = (uint32_t)status;
+    return status;
 }
 
 int32_t YJ_Yyjson_CopyOwnedBuffer(uint64_t buffer_handle,

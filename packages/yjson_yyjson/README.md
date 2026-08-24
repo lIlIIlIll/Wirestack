@@ -31,6 +31,20 @@ This is the same facade used by the portable `PureCompactBackend` and optional
 `NativeCompactBackend`. Use `YyjsonCompactJsonDocument` directly for storage
 statistics, traversal checksum, or qualification controls.
 
+The optional package also exposes `YyjsonStreamBackend` for typed caller-owned
+streams:
+
+```cangjie
+YJson.encodeToStreamWith(UserJson, user, output,
+    backend: YyjsonStreamBackend)
+let user = YJson.decodeFromStreamWith(UserJson, input,
+    backend: YyjsonStreamBackend)
+```
+
+This supported Direct-mode backend buffers one whole document, crosses the ABI
+only in bulk, preserves Pure `JsonWriteConfig` output bytes, and never closes
+caller streams or silently switches to the Pure backend.
+
 Use the same `yjson` version. See the suite-level
 [`docs/backends.md`](../../docs/backends.md) and
 [`THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md).

@@ -45,8 +45,8 @@ let model = YJson.decodeFromStreamWith(ModelJson, input, config: limits)
 的 `maxStringBytes` 结果。
 
 `maxPolymorphicObjectBytes` 只约束根容器。标量根值仍由 `maxBytes` 和
-`maxStringBytes` 约束。`JsonDirectReader.readBoundedValue(maxBytes)` 的局部显式预算
-仍然保留，适合在一个更大协议中只限制当前 polymorphic value。
+`maxStringBytes` 约束。generated codec 通过 backend-neutral
+`JsonCodecReader.readReplayValue(maxBytes)` 执行这一局部预算。
 
 当前没有独立的 array element count、object property count 或 number-token length
 配置。元素和属性数量受 `maxBytes`、表示上限与可用内存间接约束；超大 number token
@@ -56,9 +56,9 @@ let model = YJson.decodeFromStreamWith(ModelJson, input, config: limits)
 所有资源参数拒绝负数。若 `includeErrorLocation` 为 `true`，异常同时携带 byte offset、
 line 和 column；关闭位置计算不会改变错误码或预算结果。
 
-generated polymorphic decode 遵循相同的 `0 = unlimited` contract；其
-`JsonDirectReader.readBoundedValue` bridge 仅拒绝负数，并在正数 budget 超限时产生
-`polymorphic_object_too_large`。
+generated polymorphic decode 遵循相同的 `0 = unlimited` contract。Pure reader
+直接按原始输入跨度计量；Custom Native 与 yyjson 在 DOM 分配前按同一原始跨度预检，
+导出的 bulk tape 不会把 tape 元数据重复计入预算。
 
 ## 覆盖的公开入口
 

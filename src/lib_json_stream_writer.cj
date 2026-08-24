@@ -12,6 +12,7 @@ public class JsonWriteConfig {
     public let htmlSafe: Bool
     public let includeErrorLocation: Bool
     public let maxDepth: Int64
+    public let maxBytes: Int64
 
     public init(
         newline: String,
@@ -19,10 +20,14 @@ public class JsonWriteConfig {
         useSpaceAfterSeparators: Bool,
         htmlSafe: Bool,
         includeErrorLocation!: Bool = true,
-        maxDepth!: Int64 = 256
+        maxDepth!: Int64 = 256,
+        maxBytes!: Int64 = 0
     ) {
         if (maxDepth <= 0) {
             throw IllegalArgumentException("maxDepth must be positive")
+        }
+        if (maxBytes < 0) {
+            throw IllegalArgumentException("maxBytes must not be negative")
         }
         this.newline = newline
         this.indent = indent
@@ -30,6 +35,7 @@ public class JsonWriteConfig {
         this.htmlSafe = htmlSafe
         this.includeErrorLocation = includeErrorLocation
         this.maxDepth = maxDepth
+        this.maxBytes = maxBytes
     }
 
     public static let compact: JsonWriteConfig = JsonWriteConfig(
@@ -333,7 +339,7 @@ func writeJsonValueToString(value: JsonNode, config: JsonWriteConfig): String {
     }
     if (!config.newline.isEmpty() || (!config.useSpaceAfterSeparators && config.htmlSafe)) {
         let writer = JsonDirectWriter(config)
-        writeJsonValueDirect(writer, value)
+        writeJsonNodeToCodecWriter(writer, value)
         return writer.finishString()
     }
     let target = StringJsonWriterTarget()

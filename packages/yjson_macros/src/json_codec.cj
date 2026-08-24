@@ -488,9 +488,9 @@ private func directScalarWrite(field: CodecField, value: String): String {
         case "Float32" | "Float16" => "writer.writeFloat64(Float64(${value}))"
         case "String" => "writer.writeString(${value})"
         case "ArrayList<String>" =>
-            "context.enterValue(); try { if (!writer.tryWriteCompactStringArrayList(${value})) { writer.startArray(); for (__fastItem in ${value}) { writer.writeString(__fastItem) }; writer.endArray() } } finally { context.leaveValue() }"
+            "context.enterValue(); try { if (!jsonTryWriteCompactStringArrayList(writer, ${value})) { writer.startArray(); for (__fastItem in ${value}) { writer.writeString(__fastItem) }; writer.endArray() } } finally { context.leaveValue() }"
         case "HashMap<String,Int64>" =>
-            "context.enterValue(); try { if (!writer.tryWriteCompactInt64Map(${value})) { writer.startObject(); for ((__fastName, __fastItem) in ${value}) { writer.writeName(__fastName); writer.writeInt64(__fastItem) }; writer.endObject() } } finally { context.leaveValue() }"
+            "context.enterValue(); try { if (!jsonTryWriteCompactInt64Map(writer, ${value})) { writer.startObject(); for ((__fastName, __fastItem) in ${value}) { writer.writeName(__fastName); writer.writeInt64(__fastItem) }; writer.endObject() } } finally { context.leaveValue() }"
         case "Option<String>" => "__yJsonWriteStringOption(${value}, writer, context)"
         case _ => ""
     }
@@ -734,7 +734,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     }
 
     let codecInterfaces = if (supportsFastRead) {
-        "JsonObjectCodec<${targetType}> & JsonArrayDirectCodec<${targetType}> & JsonFastDecoder<${targetType}>"
+        "JsonObjectCodec<${targetType}> & JsonFastCodec<${targetType}> & JsonFastDecoder<${targetType}>"
     } else {
         "JsonObjectCodec<${targetType}>"
     }
@@ -744,14 +744,14 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             !directScalarRead(field, "reader").isEmpty() &&
             !directScalarFastRead(field, "reader").isEmpty()
         if (field.codecExpr.isEmpty() && !field.staticGenerated && !fullyDirect) {
-            appendLine(sb, 1, "private let ${cachedFieldCodecName(field)}: JsonDirectCodec<${field.typeText}> = ${defaultFieldCodec(field.typeText)}")
+            appendLine(sb, 1, "private let ${cachedFieldCodecName(field)}: JsonCodec<${field.typeText}> = ${defaultFieldCodec(field.typeText)}")
         }
     }
     if (supportsFastRead) {
         appendLine(sb, 1, "private let __yJsonFastFieldNames: Array<Array<Byte>> = unsafe { [" +
             joinStrings(fastLabelBytes, ", ") + "] }")
     }
-    appendLine(sb, 1, "public func write(value: ${targetType}, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {")
+    appendLine(sb, 1, "public func write(value: ${targetType}, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {")
     if (isClass) { appendLine(sb, 2, "context.enterObject(value)") } else { appendLine(sb, 2, "context.enterValue()") }
     appendLine(sb, 2, "try {")
     appendLine(sb, 3, "writer.startObject()")
@@ -759,7 +759,10 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     appendLine(sb, 3, "writer.endObject()")
     appendLine(sb, 2, if (isClass) { "} finally { context.leaveObject() }" } else { "} finally { context.leaveValue() }" })
     appendLine(sb, 1, "}")
-    appendLine(sb, 1, "public func writeObjectFields(value: ${targetType}, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {")
+    appendLine(sb, 1, "public func writeObjectFields(value: ${targetType}, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {")
+    // Scalar-only records do not otherwise touch the path context. Keep the
+    // generated signature uniform without producing consumer build warnings.
+    appendLine(sb, 2, "let _ = context")
     for (field in fields) {
         if (!field.writeField) { continue }
         let codec = fieldCodec(field)
@@ -784,7 +787,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         }
     }
     appendLine(sb, 1, "}")
-    appendLine(sb, 1, "public func read(reader: JsonDirectReader, context: JsonDecodeContext): ${targetType} {")
+    appendLine(sb, 1, "public func read(reader: JsonCodecReader, context: JsonDecodeContext): ${targetType} {")
     appendLine(sb, 2, "context.enterValue()")
     appendLine(sb, 2, "try {")
     for (field in fields) {
@@ -1033,20 +1036,20 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     } else { false }
     if (generics.isEmpty()) {
         appendLine(sb, 0, "private let __yJsonConcrete_${name} = ${codecName}()")
-        appendLine(sb, 0, "${visibility}let ${name}Json: JsonDirectCodec<${name}> = __yJsonConcrete_${name}")
-        appendLine(sb, 0, "${visibility}func __yJsonWrite_${name}(value: ${name}, writer: JsonDirectWriter, context: JsonEncodeContext): Unit { __yJsonConcrete_${name}.write(value, writer, context) }")
-        appendLine(sb, 0, "${visibility}func __yJsonRead_${name}(reader: JsonDirectReader, context: JsonDecodeContext): ${name} { __yJsonConcrete_${name}.read(reader, context) }")
+        appendLine(sb, 0, "${visibility}let ${name}Json: JsonCodec<${name}> = __yJsonConcrete_${name}")
+        appendLine(sb, 0, "${visibility}func __yJsonWrite_${name}(value: ${name}, writer: JsonCodecWriter, context: JsonEncodeContext): Unit { __yJsonConcrete_${name}.write(value, writer, context) }")
+        appendLine(sb, 0, "${visibility}func __yJsonRead_${name}(reader: JsonCodecReader, context: JsonDecodeContext): ${name} { __yJsonConcrete_${name}.read(reader, context) }")
         if (supportsFastRead) {
             appendLine(sb, 0, "${visibility}func __yJsonReadFast_${name}(reader: JsonFastReader, context: JsonDecodeContext): ${name} { __yJsonConcrete_${name}.readFast(reader, context) }")
         }
         // Bounded level-one container expansion.  These companions keep the
         // public generic codecs as the compatibility fallback, while allowing
         // a generated object element/value to stay on a concrete call chain.
-        appendLine(sb, 0, "private class __YJsonStaticArrayList_${name} <: JsonArrayDirectCodec<YJsonArrayList<${name}>> {")
-        appendLine(sb, 1, "public func write(value: YJsonArrayList<${name}>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {")
+        appendLine(sb, 0, "private class __YJsonStaticArrayList_${name} <: JsonFastCodec<YJsonArrayList<${name}>> {")
+        appendLine(sb, 1, "public func write(value: YJsonArrayList<${name}>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {")
         appendLine(sb, 2, "context.enterValue(); try { writer.startArray(); var __index: Int64 = 0; for (__item in value) { context.pushIndex(__index); try { __yJsonWrite_${name}(__item, writer, context) } finally { context.popPath() }; __index++ }; writer.endArray() } finally { context.leaveValue() }")
         appendLine(sb, 1, "}")
-        appendLine(sb, 1, "public func read(reader: JsonDirectReader, context: JsonDecodeContext): YJsonArrayList<${name}> {")
+        appendLine(sb, 1, "public func read(reader: JsonCodecReader, context: JsonDecodeContext): YJsonArrayList<${name}> {")
         appendLine(sb, 2, "context.enterValue(); try { let __result = YJsonArrayList<${name}>(); reader.startArray(); var __index: Int64 = 0; while (reader.hasArrayItem()) { context.pushIndex(__index); try { __result.add(__yJsonRead_${name}(reader, context)) } finally { context.popPath() }; __index++ }; reader.endArray(); return __result } finally { context.leaveValue() }")
         appendLine(sb, 1, "}")
         if (supportsFastRead) {
@@ -1055,13 +1058,13 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             appendLine(sb, 1, "}")
         }
         appendLine(sb, 0, "}")
-        appendLine(sb, 0, "${visibility}let ${name}StaticArrayListJson: JsonDirectCodec<YJsonArrayList<${name}>> = __YJsonStaticArrayList_${name}()")
+        appendLine(sb, 0, "${visibility}let ${name}StaticArrayListJson: JsonCodec<YJsonArrayList<${name}>> = __YJsonStaticArrayList_${name}()")
 
-        appendLine(sb, 0, "private class __YJsonStaticArray_${name} <: JsonArrayDirectCodec<Array<${name}>> {")
-        appendLine(sb, 1, "public func write(value: Array<${name}>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {")
+        appendLine(sb, 0, "private class __YJsonStaticArray_${name} <: JsonFastCodec<Array<${name}>> {")
+        appendLine(sb, 1, "public func write(value: Array<${name}>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {")
         appendLine(sb, 2, "context.enterValue(); try { writer.startArray(); for (__index in 0..value.size) { context.pushIndex(__index); try { __yJsonWrite_${name}(value[__index], writer, context) } finally { context.popPath() } }; writer.endArray() } finally { context.leaveValue() }")
         appendLine(sb, 1, "}")
-        appendLine(sb, 1, "public func read(reader: JsonDirectReader, context: JsonDecodeContext): Array<${name}> {")
+        appendLine(sb, 1, "public func read(reader: JsonCodecReader, context: JsonDecodeContext): Array<${name}> {")
         appendLine(sb, 2, "context.enterValue(); try { let __result = YJsonArrayList<${name}>(); reader.startArray(); var __index: Int64 = 0; while (reader.hasArrayItem()) { context.pushIndex(__index); try { __result.add(__yJsonRead_${name}(reader, context)) } finally { context.popPath() }; __index++ }; reader.endArray(); return __result.toArray() } finally { context.leaveValue() }")
         appendLine(sb, 1, "}")
         if (supportsFastRead) {
@@ -1070,22 +1073,22 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             appendLine(sb, 1, "}")
         }
         appendLine(sb, 0, "}")
-        appendLine(sb, 0, "${visibility}let ${name}StaticArrayJson: JsonDirectCodec<Array<${name}>> = __YJsonStaticArray_${name}()")
+        appendLine(sb, 0, "${visibility}let ${name}StaticArrayJson: JsonCodec<Array<${name}>> = __YJsonStaticArray_${name}()")
 
-        appendLine(sb, 0, "private class __YJsonStaticOption_${name} <: JsonArrayDirectCodec<Option<${name}>> {")
-        appendLine(sb, 1, "public func write(value: Option<${name}>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit { match (value) { case Some(__item) => __yJsonWrite_${name}(__item, writer, context); case None => writer.writeNull() } }")
-        appendLine(sb, 1, "public func read(reader: JsonDirectReader, context: JsonDecodeContext): Option<${name}> { if (reader.tryReadNull()) { None<${name}> } else { Some(__yJsonRead_${name}(reader, context)) } }")
+        appendLine(sb, 0, "private class __YJsonStaticOption_${name} <: JsonFastCodec<Option<${name}>> {")
+        appendLine(sb, 1, "public func write(value: Option<${name}>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit { match (value) { case Some(__item) => __yJsonWrite_${name}(__item, writer, context); case None => writer.writeNull() } }")
+        appendLine(sb, 1, "public func read(reader: JsonCodecReader, context: JsonDecodeContext): Option<${name}> { if (reader.tryReadNull()) { None<${name}> } else { Some(__yJsonRead_${name}(reader, context)) } }")
         if (supportsFastRead) {
             appendLine(sb, 1, "public func readFast(reader: JsonFastReader, context: JsonDecodeContext): Option<${name}> { if (reader.tryReadRawNull()) { None<${name}> } else { Some(__yJsonReadFast_${name}(reader, context)) } }")
         }
         appendLine(sb, 0, "}")
-        appendLine(sb, 0, "${visibility}let ${name}StaticOptionJson: JsonDirectCodec<Option<${name}>> = __YJsonStaticOption_${name}()")
+        appendLine(sb, 0, "${visibility}let ${name}StaticOptionJson: JsonCodec<Option<${name}>> = __YJsonStaticOption_${name}()")
 
-        appendLine(sb, 0, "private class __YJsonStaticMap_${name} <: JsonArrayDirectCodec<YJsonHashMap<String, ${name}>> {")
-        appendLine(sb, 1, "public func write(value: YJsonHashMap<String, ${name}>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {")
+        appendLine(sb, 0, "private class __YJsonStaticMap_${name} <: JsonFastCodec<YJsonHashMap<String, ${name}>> {")
+        appendLine(sb, 1, "public func write(value: YJsonHashMap<String, ${name}>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {")
         appendLine(sb, 2, "context.enterValue(); try { writer.startObject(); for ((__name, __item) in value) { writer.writeName(__name); context.pushField(__name); try { __yJsonWrite_${name}(__item, writer, context) } finally { context.popPath() } }; writer.endObject() } finally { context.leaveValue() }")
         appendLine(sb, 1, "}")
-        appendLine(sb, 1, "public func read(reader: JsonDirectReader, context: JsonDecodeContext): YJsonHashMap<String, ${name}> {")
+        appendLine(sb, 1, "public func read(reader: JsonCodecReader, context: JsonDecodeContext): YJsonHashMap<String, ${name}> {")
         appendLine(sb, 2, "context.enterValue(); try { let __result = YJsonHashMap<String, ${name}>(); reader.startObject(); while (reader.hasObjectField()) { let __name = reader.readName(); context.pushField(__name); try { __result[__name] = __yJsonRead_${name}(reader, context) } finally { context.popPath() } }; reader.endObject(); return __result } finally { context.leaveValue() }")
         appendLine(sb, 1, "}")
         if (supportsFastRead) {
@@ -1094,16 +1097,16 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             appendLine(sb, 1, "}")
         }
         appendLine(sb, 0, "}")
-        appendLine(sb, 0, "${visibility}let ${name}StaticHashMapJson: JsonDirectCodec<YJsonHashMap<String, ${name}>> = __YJsonStaticMap_${name}()")
-        appendLine(sb, 0, "func __yJsonDirectCodec_${name}(): JsonDirectCodec<${name}> { ${name}Json }")
+        appendLine(sb, 0, "${visibility}let ${name}StaticHashMapJson: JsonCodec<YJsonHashMap<String, ${name}>> = __YJsonStaticMap_${name}()")
+        appendLine(sb, 0, "func __yJsonCodec_${name}(): JsonCodec<${name}> { ${name}Json }")
         if (!inheritsCodecProvider && !hasModifier(decl, TokenKind.OPEN) && !hasModifier(decl, TokenKind.ABSTRACT)) {
             appendLine(sb, 0, "extend ${name} <: JsonCodecProvider {")
             appendLine(sb, 1, "public static func jsonCodec(): JsonAnyCodec { eraseJsonCodec(${name}Json) }")
             appendLine(sb, 0, "}")
         }
     } else {
-        appendLine(sb, 0, "${visibility}func ${name}Json${genericText}(): JsonDirectCodec<${targetType}>${constraints} { ${codecName}${genericText}() }")
-        appendLine(sb, 0, "func __yJsonDirectCodec_${name}${genericText}(): JsonDirectCodec<${targetType}>${constraints} { ${name}Json${genericText}() }")
+        appendLine(sb, 0, "${visibility}func ${name}Json${genericText}(): JsonCodec<${targetType}>${constraints} { ${codecName}${genericText}() }")
+        appendLine(sb, 0, "func __yJsonCodec_${name}${genericText}(): JsonCodec<${targetType}>${constraints} { ${name}Json${genericText}() }")
         if (!inheritsCodecProvider && !hasModifier(decl, TokenKind.OPEN) && !hasModifier(decl, TokenKind.ABSTRACT)) {
             appendLine(sb, 0, "extend${genericText} ${targetType} <: JsonCodecProvider${constraints} {")
             appendLine(sb, 1, "public static func jsonCodec(): JsonAnyCodec { eraseJsonCodec(${name}Json${genericText}()) }")
@@ -1136,8 +1139,8 @@ private func renderEnumCodec(decl: EnumDecl): Tokens {
     }
 
     let sb = StringBuilder()
-    appendLine(sb, 0, "private class ${codecName}${genericText} <: JsonDirectCodec<${targetType}>${constraints} {")
-    appendLine(sb, 1, "public func write(value: ${targetType}, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {")
+    appendLine(sb, 0, "private class ${codecName}${genericText} <: JsonCodec<${targetType}>${constraints} {")
+    appendLine(sb, 1, "public func write(value: ${targetType}, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {")
     appendLine(sb, 2, "context.enterValue()")
     appendLine(sb, 2, "try {")
     appendLine(sb, 3, "match (value) {")
@@ -1163,7 +1166,7 @@ private func renderEnumCodec(decl: EnumDecl): Tokens {
     appendLine(sb, 3, "}")
     appendLine(sb, 2, "} finally { context.leaveValue() }")
     appendLine(sb, 1, "}")
-    appendLine(sb, 1, "public func read(reader: JsonDirectReader, context: JsonDecodeContext): ${targetType} {")
+    appendLine(sb, 1, "public func read(reader: JsonCodecReader, context: JsonDecodeContext): ${targetType} {")
     appendLine(sb, 2, "context.enterValue()")
     appendLine(sb, 2, "try {")
     appendLine(sb, 3, "reader.startArray()")
@@ -1194,12 +1197,12 @@ private func renderEnumCodec(decl: EnumDecl): Tokens {
 
     let visibility = if (hasModifier(decl, TokenKind.PUBLIC)) { "public " } else { "" }
     if (generics.isEmpty()) {
-        appendLine(sb, 0, "${visibility}let ${name}Json: JsonDirectCodec<${name}> = ${codecName}()")
+        appendLine(sb, 0, "${visibility}let ${name}Json: JsonCodec<${name}> = ${codecName}()")
         appendLine(sb, 0, "extend ${name} <: JsonCodecProvider {")
         appendLine(sb, 1, "public static func jsonCodec(): JsonAnyCodec { eraseJsonCodec(${name}Json) }")
         appendLine(sb, 0, "}")
     } else {
-        appendLine(sb, 0, "${visibility}func ${name}Json${genericText}(): JsonDirectCodec<${targetType}>${constraints} { ${codecName}${genericText}() }")
+        appendLine(sb, 0, "${visibility}func ${name}Json${genericText}(): JsonCodec<${targetType}>${constraints} { ${codecName}${genericText}() }")
         appendLine(sb, 0, "extend${genericText} ${targetType} <: JsonCodecProvider${constraints} {")
         appendLine(sb, 1, "public static func jsonCodec(): JsonAnyCodec { eraseJsonCodec(${name}Json${genericText}()) }")
         appendLine(sb, 0, "}")
@@ -1244,13 +1247,13 @@ private func renderPolymorphicCodec(
     }
 
     let sb = StringBuilder()
-    appendLine(sb, 0, "private class ${codecName}${genericText} <: JsonDirectCodec<${targetType}>${constraints} {")
+    appendLine(sb, 0, "private class ${codecName}${genericText} <: JsonCodec<${targetType}>${constraints} {")
     for (field in fields) {
         if (field.codecExpr.isEmpty()) {
-            appendLine(sb, 1, "private let ${cachedFieldCodecName(field)}: JsonDirectCodec<${field.typeText}> = ${defaultFieldCodec(field.typeText)}")
+            appendLine(sb, 1, "private let ${cachedFieldCodecName(field)}: JsonCodec<${field.typeText}> = ${defaultFieldCodec(field.typeText)}")
         }
     }
-    appendLine(sb, 1, "public func write(value: ${targetType}, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {")
+    appendLine(sb, 1, "public func write(value: ${targetType}, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {")
     appendLine(sb, 2, "context.enterObject(value)")
     appendLine(sb, 2, "try {")
     appendLine(sb, 3, "writer.startObject()")
@@ -1273,7 +1276,7 @@ private func renderPolymorphicCodec(
                 appendLine(sb, 5, "try { ${codec}.write(value.${field.name}, writer, context) } finally { context.popPath() }")
             }
         }
-        appendLine(sb, 5, "match (__yJsonDirectCodec_${subtype.typeText}()) {")
+        appendLine(sb, 5, "match (__yJsonCodec_${subtype.typeText}()) {")
         appendLine(sb, 6, "case __objectCodec: JsonObjectCodec<${subtype.typeText}> => __objectCodec.writeObjectFields(__subtype, writer, context)")
         appendLine(sb, 6, "case _ => throw JsonException(\"Polymorphic subtype codec must be an object codec\", code: \"codec_contract\", path: context.currentPath())")
         appendLine(sb, 5, "}")
@@ -1283,32 +1286,35 @@ private func renderPolymorphicCodec(
     appendLine(sb, 3, "writer.endObject()")
     appendLine(sb, 2, "} finally { context.leaveObject() }")
     appendLine(sb, 1, "}")
-    appendLine(sb, 1, "public func read(reader: JsonDirectReader, context: JsonDecodeContext): ${targetType} {")
+    appendLine(sb, 1, "public func read(reader: JsonCodecReader, context: JsonDecodeContext): ${targetType} {")
     appendLine(sb, 2, "context.enterValue()")
     appendLine(sb, 2, "try {")
-    appendLine(sb, 3, "let __value = reader.readBoundedValue(reader.readConfig().maxPolymorphicObjectBytes)")
-    appendLine(sb, 3, "let __object = __value.asObject()")
-    appendLine(sb, 3, "let __tag = __object.get(${discriminator}).getOrThrow({ => JsonException(\"Missing polymorphic discriminator\", code: \"missing_discriminator\", path: context.currentPath()) }).asString().value")
-    appendLine(sb, 3, "let _ = __object.entries().remove(${discriminator})")
-    appendLine(sb, 3, "let __payload = __object.toString()")
-    appendLine(sb, 3, "match (__tag) {")
+    appendLine(sb, 3, "let __replay = reader.readReplayValue(reader.readConfig().maxPolymorphicObjectBytes)")
+    appendLine(sb, 3, "try {")
+    appendLine(sb, 4, "let __tag = __replay.rootStringField(${discriminator}).getOrThrow({ => JsonException(\"Missing polymorphic discriminator\", code: \"missing_discriminator\", path: context.currentPath()) })")
+    appendLine(sb, 4, "match (__tag) {")
     for (subtype in subtypes) {
-        appendLine(sb, 4, "case ${subtype.wireNameExpr} => YJson.decodeStringWith<${subtype.typeText}>(__yJsonDirectCodec_${subtype.typeText}(), __payload, config: reader.readConfig())")
+        appendLine(sb, 5, "case ${subtype.wireNameExpr} =>")
+        appendLine(sb, 6, "let __subtypeReader = __replay.openObjectReaderExcluding(${discriminator})")
+        appendLine(sb, 6, "let __result: ${targetType} = __yJsonCodec_${subtype.typeText}().read(__subtypeReader, context)")
+        appendLine(sb, 6, "__subtypeReader.expectEnd()")
+        appendLine(sb, 6, "__result")
     }
-    appendLine(sb, 4, "case _ => throw JsonException(\"Unknown polymorphic discriminator: \" + __tag, code: \"unknown_discriminator\", path: context.currentPath())")
-    appendLine(sb, 3, "}")
+    appendLine(sb, 5, "case _ => throw JsonException(\"Unknown polymorphic discriminator: \" + __tag, code: \"unknown_discriminator\", path: context.currentPath())")
+    appendLine(sb, 4, "}")
+    appendLine(sb, 3, "} finally { __replay.close() }")
     appendLine(sb, 2, "} finally { context.leaveValue() }")
     appendLine(sb, 1, "}")
     appendLine(sb, 0, "}")
 
     let visibility = if (hasModifier(decl, TokenKind.PUBLIC)) { "public " } else { "" }
     if (generics.isEmpty()) {
-        appendLine(sb, 0, "${visibility}let ${name}Json: JsonDirectCodec<${name}> = ${codecName}()")
+        appendLine(sb, 0, "${visibility}let ${name}Json: JsonCodec<${name}> = ${codecName}()")
         appendLine(sb, 0, "extend ${name} <: JsonCodecProvider {")
         appendLine(sb, 1, "public static func jsonCodec(): JsonAnyCodec { eraseJsonCodec(${name}Json) }")
         appendLine(sb, 0, "}")
     } else {
-        appendLine(sb, 0, "${visibility}func ${name}Json${genericText}(): JsonDirectCodec<${targetType}>${constraints} { ${codecName}${genericText}() }")
+        appendLine(sb, 0, "${visibility}func ${name}Json${genericText}(): JsonCodec<${targetType}>${constraints} { ${codecName}${genericText}() }")
         appendLine(sb, 0, "extend${genericText} ${targetType} <: JsonCodecProvider${constraints} {")
         appendLine(sb, 1, "public static func jsonCodec(): JsonAnyCodec { eraseJsonCodec(${name}Json${genericText}()) }")
         appendLine(sb, 0, "}")

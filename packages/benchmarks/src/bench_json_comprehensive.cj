@@ -16,15 +16,15 @@ import std.unittest.testmacro.*
 import stdx.encoding.json as stdxjson
 import stdx.encoding.json.stream.*
 
-func profileRecordArrayListJson(): JsonDirectCodec<ArrayList<ProfileRecord>> {
+func profileRecordArrayListJson(): JsonCodec<ArrayList<ProfileRecord>> {
     YJson.arrayListCodec(ProfileRecordJson)
 }
 
-func profileRecordArrayJson(): JsonDirectCodec<Array<ProfileRecord>> {
+func profileRecordArrayJson(): JsonCodec<Array<ProfileRecord>> {
     YJson.arrayCodec(ProfileRecordJson)
 }
 
-func int64HashMapJson(): JsonDirectCodec<HashMap<String, Int64>> {
+func int64HashMapJson(): JsonCodec<HashMap<String, Int64>> {
     YJson.hashMapCodec(Int64Json)
 }
 

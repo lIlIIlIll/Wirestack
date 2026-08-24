@@ -57,84 +57,84 @@ func decodeRuneText(text: String): Rune {
     throw JsonException("Cannot decode empty string as Rune")
 }
 
-public let BoolJson: JsonDirectCodec<Bool> = LambdaFastRawJsonDirectCodec<Bool>(
+public let BoolJson: JsonCodec<Bool> = LambdaFastRawJsonCodec<Bool>(
     { value, writer => writer.writeBool(value) },
     { reader => reader.readBool() },
     { reader => reader.readRawBool() },
     { value, writer => writer.writeRawBool(value) }
 )
 
-public let Int64Json: JsonDirectCodec<Int64> = LambdaFastRawJsonDirectCodec<Int64>(
+public let Int64Json: JsonCodec<Int64> = LambdaFastRawJsonCodec<Int64>(
     { value, writer => writer.writeInt64(value) },
     { reader => reader.readInt64() },
     { reader => reader.readRawInt64() },
     { value, writer => writer.writeRawInt64(value) }
 )
 
-public let Int32Json: JsonDirectCodec<Int32> = LambdaFastRawJsonDirectCodec<Int32>(
+public let Int32Json: JsonCodec<Int32> = LambdaFastRawJsonCodec<Int32>(
     { value, writer => writer.writeInt64(Int64(value)) },
     { reader => Int32(ensureIntRange("Int32", reader.readInt64(), MINVAL_I32, MAXVAL_I32)) },
     { reader => reader.readRawInt32() },
     { value, writer => writer.writeRawInt64(Int64(value)) }
 )
 
-public let Int16Json: JsonDirectCodec<Int16> = LambdaFastRawJsonDirectCodec<Int16>(
+public let Int16Json: JsonCodec<Int16> = LambdaFastRawJsonCodec<Int16>(
     { value, writer => writer.writeInt64(Int64(value)) },
     { reader => Int16(ensureIntRange("Int16", reader.readInt64(), MINVAL_I16, MAXVAL_I16)) },
     { reader => reader.readRawInt16() },
     { value, writer => writer.writeRawInt64(Int64(value)) }
 )
 
-public let Int8Json: JsonDirectCodec<Int8> = LambdaFastRawJsonDirectCodec<Int8>(
+public let Int8Json: JsonCodec<Int8> = LambdaFastRawJsonCodec<Int8>(
     { value, writer => writer.writeInt64(Int64(value)) },
     { reader => Int8(ensureIntRange("Int8", reader.readInt64(), MINVAL_I8, MAXVAL_I8)) },
     { reader => reader.readRawInt8() },
     { value, writer => writer.writeRawInt64(Int64(value)) }
 )
 
-public let UInt64Json: JsonDirectCodec<UInt64> = LambdaFastRawJsonDirectCodec<UInt64>(
+public let UInt64Json: JsonCodec<UInt64> = LambdaFastRawJsonCodec<UInt64>(
     { value, writer => writer.writeUInt64(value) },
     { reader => reader.readUInt64() },
     { reader => reader.readRawUInt64() },
     { value, writer => writer.writeRawUInt64(value) }
 )
 
-public let UInt32Json: JsonDirectCodec<UInt32> = LambdaFastRawJsonDirectCodec<UInt32>(
+public let UInt32Json: JsonCodec<UInt32> = LambdaFastRawJsonCodec<UInt32>(
     { value, writer => writer.writeUInt64(UInt64(value)) },
     { reader => UInt32(ensureUnsignedRange("UInt32", reader.readUInt64(), MAXVAL_UI32)) },
     { reader => reader.readRawUInt32() },
     { value, writer => writer.writeRawUInt64(UInt64(value)) }
 )
 
-public let UInt16Json: JsonDirectCodec<UInt16> = LambdaFastRawJsonDirectCodec<UInt16>(
+public let UInt16Json: JsonCodec<UInt16> = LambdaFastRawJsonCodec<UInt16>(
     { value, writer => writer.writeUInt64(UInt64(value)) },
     { reader => UInt16(ensureUnsignedRange("UInt16", reader.readUInt64(), MAXVAL_UI16)) },
     { reader => reader.readRawUInt16() },
     { value, writer => writer.writeRawUInt64(UInt64(value)) }
 )
 
-public let UInt8Json: JsonDirectCodec<UInt8> = LambdaFastRawJsonDirectCodec<UInt8>(
+public let UInt8Json: JsonCodec<UInt8> = LambdaFastRawJsonCodec<UInt8>(
     { value, writer => writer.writeUInt64(UInt64(value)) },
     { reader => UInt8(ensureUnsignedRange("UInt8", reader.readUInt64(), MAXVAL_UI8)) },
     { reader => reader.readRawUInt8() },
     { value, writer => writer.writeRawUInt64(UInt64(value)) }
 )
 
-public let Float64Json: JsonDirectCodec<Float64> = LambdaFastRawJsonDirectCodec<Float64>(
+public let Float64Json: JsonCodec<Float64> = LambdaFastRawJsonCodec<Float64>(
     { value, writer => writer.writeFloat64(value) },
     { reader => reader.readFloat64() },
     { reader => Float64.parse(reader.readRawNumberLiteral()) },
     { value, writer => writer.writeFloat64(value) }
 )
 
-public let Float32Json: JsonDirectCodec<Float32> = LambdaFastRawJsonDirectCodec<Float32>(
+public let Float32Json: JsonCodec<Float32> = LambdaFastRawJsonCodec<Float32>(
     { value, writer => writer.writeFloat64(Float64(value)) },
     { reader => Float32(reader.readFloat64()) },
     { reader => Float32(Float64.parse(reader.readRawNumberLiteral())) },
     { value, writer => writer.writeFloat64(Float64(value)) }
 )
 
-public let Float16Json: JsonDirectCodec<Float16> = LambdaFastRawJsonDirectCodec<Float16>(
+public let Float16Json: JsonCodec<Float16> = LambdaFastRawJsonCodec<Float16>(
     { value, writer => writer.writeFloat64(Float64(value)) },
     { reader => Float16(reader.readFloat64()) },
     { reader => Float16(Float64.parse(reader.readRawNumberLiteral())) },
@@ -163,35 +163,35 @@ public func jsonFastReadFloat16(reader: JsonFastReader): Float16 {
     Float16(jsonFastReadFloat64(reader))
 }
 
-public let StringJson: JsonDirectCodec<String> = LambdaFastRawJsonDirectCodec<String>(
+public let StringJson: JsonCodec<String> = LambdaFastRawJsonCodec<String>(
     { value, writer => writer.writeString(value) },
     { reader => reader.readString() },
     { reader => reader.readRawString() },
     { value, writer => writer.writeRawString(value) }
 )
 
-public let DateTimeJson: JsonDirectCodec<DateTime> = LambdaFastRawJsonDirectCodec<DateTime>(
+public let DateTimeJson: JsonCodec<DateTime> = LambdaFastRawJsonCodec<DateTime>(
     { value, writer => writer.writeString(jsonFastFormatRfc3339DateTime(value)) },
     { reader => jsonFastParseRfc3339DateTime(reader.readString()) },
     { reader => jsonFastParseRfc3339DateTime(reader.readRawString()) },
     { value, writer => writer.writeRawString(jsonFastFormatRfc3339DateTime(value)) }
 )
 
-public let BigIntJson: JsonDirectCodec<BigInt> = LambdaFastRawJsonDirectCodec<BigInt>(
+public let BigIntJson: JsonCodec<BigInt> = LambdaFastRawJsonCodec<BigInt>(
     { value, writer => writer.writeRawNumber(jsonFastFormatBigInt(value)) },
     { reader => jsonFastParseBigInt(reader.readNumberLiteral()) },
     { reader => jsonFastParseBigInt(reader.readRawNumberLiteral()) },
     { value, writer => writer.writeRawNumberValue(jsonFastFormatBigInt(value)) }
 )
 
-public let DecimalJson: JsonDirectCodec<Decimal> = LambdaFastRawJsonDirectCodec<Decimal>(
+public let DecimalJson: JsonCodec<Decimal> = LambdaFastRawJsonCodec<Decimal>(
     { value, writer => writer.writeRawNumber(jsonFastFormatDecimal(value)) },
     { reader => jsonFastParseDecimal(reader.readNumberLiteral()) },
     { reader => jsonFastParseDecimal(reader.readRawNumberLiteral()) },
     { value, writer => writer.writeRawNumberValue(jsonFastFormatDecimal(value)) }
 )
 
-public let RuneJson: JsonDirectCodec<Rune> = LambdaFastRawJsonDirectCodec<Rune>(
+public let RuneJson: JsonCodec<Rune> = LambdaFastRawJsonCodec<Rune>(
     { value, writer => writer.writeString(value.toString()) },
     { reader => decodeRuneText(reader.readString()) },
     { reader => decodeRuneText(reader.readRawString()) },

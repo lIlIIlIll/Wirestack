@@ -19,7 +19,7 @@ class YJsonBenchmarks {
     let person = samplePerson()
     let uint64Value = UInt64.parse("18446744073709551615")
     let uint64Envelope = sampleUInt64Envelope()
-    let nestedProfilesCodec: JsonDirectCodec<ArrayList<HashMap<String, ArrayList<ProfileRecord>>>>
+    let nestedProfilesCodec: JsonCodec<ArrayList<HashMap<String, ArrayList<ProfileRecord>>>>
     let personText: String
     let personStreamText: String
     let addressText: String

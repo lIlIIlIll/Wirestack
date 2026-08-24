@@ -3,18 +3,34 @@ package yjson
 import yjson_macros.*
 
 import std.collection.*
+import std.io.*
 import std.unittest.*
 import std.unittest.testmacro.*
 
-private class RegressionNonFastIntCodec <: JsonDirectCodec<Int64> {
-    public func write(value: Int64, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
+private class RegressionNonFastIntCodec <: JsonCodec<Int64> {
+    public func write(value: Int64, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {
         let _ = context
         writer.writeInt64(value)
     }
 
-    public func read(reader: JsonDirectReader, context: JsonDecodeContext): Int64 {
+    public func read(reader: JsonCodecReader, context: JsonDecodeContext): Int64 {
         let _ = context
         reader.readInt64()
+    }
+}
+
+private class RegressionNamedPureBackend <: JsonStreamBackend {
+    var decoderOpened: Bool = false
+
+    public func name(): String { "pure-incremental" }
+    public func decodeBuffering(): JsonStreamBufferingMode { JsonStreamBufferingMode.Incremental }
+    public func encodeBuffering(): JsonStreamBufferingMode { JsonStreamBufferingMode.Incremental }
+    public func openDecoder(input: InputStream, config: JsonReadConfig): JsonStreamDecodeSession {
+        decoderOpened = true
+        PureStreamBackend.openDecoder(input, config)
+    }
+    public func openEncoder(output: OutputStream, config: JsonWriteConfig): JsonStreamEncodeSession {
+        PureStreamBackend.openEncoder(output, config)
     }
 }
 
@@ -67,9 +83,9 @@ func yJsonRegressionBytes(text: String): Array<Byte> {
     }
 }
 
-func isFastCodec<T>(codec: JsonDirectCodec<T>): Bool {
+func isFastCodec<T>(codec: JsonCodec<T>): Bool {
     match (codec) {
-        case _: JsonArrayDirectCodec<T> => true
+        case _: JsonFastCodec<T> => true
         case _ => false
     }
 }
@@ -261,6 +277,57 @@ class YJsonRegressionTest {
         @Expect(decoded.id, 42)
         @Expect(decoded.scores["english"], 88)
         @Expect(decoded.address.street, "Nanshan Road")
+    }
+
+    @TestCase
+    func memoryStreamNeverBypassesSelectedBackendByName(): Unit {
+        let backend = RegressionNamedPureBackend()
+        let decoded = YJson.decodeFromStreamWith(PersonJson,
+            YJsonByteArrayInputStream(YJson.encodeBytesWith(PersonJson, samplePerson())),
+            backend: backend)
+        @Expect(backend.decoderOpened)
+        @Expect(decoded.id, 42)
+    }
+
+    @TestCase
+    func providerStreamConveniencesUsePureBackendByDefault(): Unit {
+        let output = MemoryOutputStream()
+        YJson.toStream(samplePerson(), output)
+        let decoded = YJson.fromStream<Person>(YJsonByteArrayInputStream(output.toByteArray()))
+        @Expect(decoded.id, 42)
+        @Expect(decoded.address.zipcode, 518000)
+    }
+
+    @TestCase
+    func writeByteLimitAppliesToAllPureTargets(): Unit {
+        @AssertThrows[IllegalArgumentException](JsonWriteConfig("", "", false, false,
+            maxBytes: -1))
+        let config = JsonWriteConfig("", "", false, false, maxBytes: 3)
+        let stringError = @AssertThrows[JsonException](YJson.encodeStringWith(StringJson,
+            "long", config: config))
+        @Expect(stringError.code, "output_too_large")
+        let bytesError = @AssertThrows[JsonException](YJson.encodeBytesWith(StringJson,
+            "long", config: config))
+        @Expect(bytesError.code, "output_too_large")
+        let streamError = @AssertThrows[JsonException](YJson.encodeToStreamWith(StringJson,
+            "long", MemoryOutputStream(), config: config))
+        @Expect(streamError.code, "output_too_large")
+    }
+
+    @TestCase
+    func streamSessionsRejectUseAfterCloseAndDoubleFinish(): Unit {
+        let closed = PureStreamBackend.openEncoder(MemoryOutputStream(), JsonWriteConfig.compact)
+        closed.close()
+        closed.close()
+        @Expect(closed.isClosed())
+        @AssertThrows[IllegalStateException](closed.writer())
+
+        let finished = PureStreamBackend.openEncoder(MemoryOutputStream(), JsonWriteConfig.compact)
+        finished.writer().writeNull()
+        finished.finish()
+        @AssertThrows[IllegalStateException](finished.finish())
+        @AssertThrows[IllegalStateException](finished.writer())
+        finished.close()
     }
 
     @TestCase

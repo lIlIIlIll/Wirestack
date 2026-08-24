@@ -91,6 +91,11 @@ foreign func YJ_Compact_SerializeAlloc(handle: UInt64, outBufferHandle: CPointer
     outSize: CPointer<UInt64>): Int32
 foreign func YJ_Compact_ExportTapeAlloc(handle: UInt64, outBufferHandle: CPointer<UInt64>,
     outSize: CPointer<UInt64>): Int32
+foreign func YJ_Stream_EncodeTapeAlloc(tape: CPointer<UInt8>, tapeLength: UInt64,
+    newline: CPointer<UInt8>, newlineLength: UInt64, indent: CPointer<UInt8>,
+    indentLength: UInt64, useSpaceAfterSeparators: UInt32, htmlSafe: UInt32,
+    maxDepth: Int64, maxBytes: Int64, outBufferHandle: CPointer<UInt64>,
+    outSize: CPointer<UInt64>, outErrorCode: CPointer<UInt32>): Int32
 
 foreign func YJ_Compact_CopyOwnedBuffer(bufferHandle: UInt64, output: CPointer<UInt8>,
     outputCapacity: UInt64): Int32
@@ -107,6 +112,62 @@ foreign func YJ_Compact_ScalarProbe(value: UInt64, outValue: CPointer<UInt64>): 
 
 foreign func YJ_Compact_CopyProbe(input: CPointer<UInt8>, length: UInt64,
     iterations: UInt64, outChecksum: CPointer<UInt64>): Int32
+
+func encodeNativeStreamTape(tape: Array<Byte>, config: JsonWriteConfig): Array<Byte> {
+    let newline = unsafe { config.newline.rawData() }
+    let indent = unsafe { config.indent.rawData() }
+    let buffer = Array<UInt64>(1, repeat: 0u64)
+    let size = Array<UInt64>(1, repeat: 0u64)
+    let error = Array<UInt32>(1, repeat: 0u32)
+    let status = unsafe {
+        let tapeHandle = acquireArrayRawData(tape)
+        let newlineHandle = acquireArrayRawData(newline)
+        let indentHandle = acquireArrayRawData(indent)
+        let bufferHandle = acquireArrayRawData(buffer)
+        let sizeHandle = acquireArrayRawData(size)
+        let errorHandle = acquireArrayRawData(error)
+        try {
+            YJ_Stream_EncodeTapeAlloc(tapeHandle.pointer, UInt64(tape.size),
+                newlineHandle.pointer, UInt64(newline.size), indentHandle.pointer,
+                UInt64(indent.size), if (config.useSpaceAfterSeparators) { 1u32 } else { 0u32 },
+                if (config.htmlSafe) { 1u32 } else { 0u32 }, config.maxDepth, config.maxBytes,
+                bufferHandle.pointer, sizeHandle.pointer, errorHandle.pointer)
+        } finally {
+            releaseArrayRawData(errorHandle)
+            releaseArrayRawData(sizeHandle)
+            releaseArrayRawData(bufferHandle)
+            releaseArrayRawData(indentHandle)
+            releaseArrayRawData(newlineHandle)
+            releaseArrayRawData(tapeHandle)
+        }
+    }
+    if (status != YJ_COMPACT_OK) {
+        match {
+            case Int32(error[0]) == YJ_COMPACT_VALUE_TOO_LARGE =>
+                throw JsonException("Encoded JSON exceeds ${config.maxBytes} bytes",
+                    code: "output_too_large")
+            case Int32(error[0]) == YJ_COMPACT_MAX_DEPTH =>
+                throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
+            case Int32(error[0]) == YJ_COMPACT_OUT_OF_MEMORY =>
+                throw JsonException("Native stream encode allocation failed", code: "out_of_memory")
+            case _ => throw JsonException("Invalid JSON stream tape", code: "codec_contract")
+        }
+    }
+    let output = Array<Byte>(Int64(size[0]), repeat: 0)
+    try {
+        let copyStatus = unsafe {
+            let outputHandle = acquireArrayRawData(output)
+            try { YJ_Compact_CopyOwnedBuffer(buffer[0], outputHandle.pointer, UInt64(output.size)) }
+            finally { releaseArrayRawData(outputHandle) }
+        }
+        if (copyStatus != YJ_COMPACT_OK) {
+            throw JsonException("Native stream output copy failed", code: "codec_contract")
+        }
+        output
+    } finally {
+        unsafe { YJ_Compact_FreeOwnedBuffer(buffer[0]) }
+    }
+}
 
 /// Native-owned memory counters. `persistentCommitted` includes C-owned input,
 /// POD store capacities, and arena blocks; it is not Cangjie heap usage or RSS.
@@ -326,6 +387,12 @@ public class NativeCompactJsonDocument <: Resource {
         NativeCompactTapeReader(copyOwnedBuffer({ handle, buffer, size =>
             unsafe { YJ_Compact_ExportTapeAlloc(handle, buffer, size) }
         })).readDocument()
+    }
+
+    func exportStreamTape(): Array<Byte> {
+        copyOwnedBuffer({ handle, buffer, size =>
+            unsafe { YJ_Compact_ExportTapeAlloc(handle, buffer, size) }
+        })
     }
 
     /// Control path for the bulk materialization experiment.

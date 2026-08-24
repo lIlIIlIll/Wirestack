@@ -1,11 +1,12 @@
-# Public declarations stabilized or changed for the 1.0.0-rc.1 candidate.
-# This is an additive inventory, not a replacement for the complete generated
-# symbol inventory used by the SDK ABI tooling.
+# Current additive declaration inventory. `release_version` identifies the
+# immutable baseline; entries added after that tag describe the Unreleased
+# development delta and are not claims about the tagged RC artifact.
+# This does not replace the complete symbol inventory used by SDK ABI tooling.
 inventory_version = 1
 release_version = "1.0.0-rc.1"
 package_manifest_version = "1.0.0"
-status = "approved"
-compatibility_policy = "1.0.0-rc.1 may differ from pre-1.0 snapshots only when explicitly recorded; inventory changes require review"
+status = "development-after-baseline"
+compatibility_policy = "The 1.0.0-rc.1 baseline is frozen; post-tag inventory changes are Unreleased deltas that require review and consumer rebuild validation"
 
 [package_pairing]
 core = "1.0.0"
@@ -302,3 +303,99 @@ stability = "stable-native-bridge"
 compatibility = "additive C symbol; YJ_Yyjson_Parse is preserved"
 contract = "Applies the shared limits before yyjson allocates a DOM; error codes match the portable and Custom Native facades."
 consumer = "yjson_yyjson resource-limited parsing"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-interface-rename"
+symbol = "JsonCodec<T>"
+signature = "public interface JsonCodec<T>"
+source = "src/lib_json_direct_codec.cj"
+needle = "public interface JsonCodec<T>"
+stability = "stable-typed-codec"
+compatibility = "intentional breaking rename from JsonDirectCodec<T>; no compatibility alias; consumers must rebuild"
+contract = "Backend-neutral typed codec over JsonCodecReader and JsonCodecWriter."
+consumer = "Generated, built-in, and application custom codecs"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-interface-family"
+symbol = "JsonStreamBackend and sessions"
+signature = "JsonStreamBackend, JsonStreamDecodeSession, JsonStreamEncodeSession, JsonStreamBufferingMode"
+source = "src/lib_json_direct_codec.cj"
+needle = "public interface JsonStreamBackend"
+stability = "stable-stream-backend"
+compatibility = "additive interface family"
+contract = "Connects exactly one typed JSON document to caller-owned streams; backends report incremental or whole-document buffering and never close caller streams."
+consumer = "Applications selecting stream execution and optional backend implementers"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-config-field"
+symbol = "JsonWriteConfig.maxBytes"
+signature = "public let maxBytes: Int64"
+source = "src/lib_json_stream_writer.cj"
+needle = "public let maxBytes: Int64"
+stability = "stable-config-field"
+compatibility = "field and constructor parameter added; snapshot consumers must rebuild"
+contract = "Maximum encoded JSON bytes; 0 means unlimited and overflow uses output_too_large."
+consumer = "Applications bounding encoded output"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-static-method-family"
+symbol = "YJson typed stream entries"
+signature = "encodeToStreamWith/decodeFromStreamWith with backend; toStream/fromStream"
+source = "src/lib_json_direct_codec.cj"
+needle = "backend!: JsonStreamBackend = PureStreamBackend"
+stability = "stable-stream-entry"
+compatibility = "backend named optional parameters and provider conveniences added; rebuild required"
+contract = "Pure incremental is the default; explicit backend selection never silently falls back and caller streams remain open."
+consumer = "Typed stream applications"
+
+[[api]]
+package = "yjson_native"
+kind = "cangjie-value"
+symbol = "NativeCompactStreamBackend"
+signature = "public let NativeCompactStreamBackend: JsonStreamBackend"
+source = "packages/yjson_native/src/stream_backend.cj"
+needle = "public let NativeCompactStreamBackend"
+stability = "stable-opt-in"
+compatibility = "additive optional-package API"
+contract = "Whole-document Custom Native typed stream encode/decode through the matching shared tape without per-node FFI."
+consumer = "Applications explicitly choosing Custom Native streams"
+
+[[api]]
+package = "yjson_yyjson"
+kind = "cangjie-value"
+symbol = "YyjsonStreamBackend"
+signature = "public let YyjsonStreamBackend: JsonStreamBackend"
+source = "packages/yjson_yyjson/src/stream_backend.cj"
+needle = "public let YyjsonStreamBackend"
+stability = "stable-opt-in"
+compatibility = "additive optional-package API"
+contract = "Whole-document yyjson Direct typed stream encode/decode through the matching shared tape without per-node FFI."
+consumer = "Applications explicitly choosing yyjson Direct streams"
+
+[[api]]
+package = "yjson_native / C ABI"
+kind = "c-function-family"
+symbol = "YJ_Compact_ExportTapeAlloc / YJ_Stream_EncodeTapeAlloc"
+signature = "bulk matching-version typed-stream tape export and encode"
+source = ["native/yjson_compact.h", "native/yjson_compact.c"]
+needle = "YJ_Stream_EncodeTapeAlloc"
+stability = "matching-version-native-bridge"
+compatibility = "additive C symbols"
+contract = "One coarse ABI call exports or encodes the internal YJT1 preorder tape; the tape is not a persistence format."
+consumer = "yjson_native typed stream backend"
+
+[[api]]
+package = "yjson_yyjson / C ABI"
+kind = "c-function-family"
+symbol = "YJ_Yyjson_ExportTapeAlloc / YJ_Yyjson_EncodeTapeAlloc"
+signature = "bulk matching-version yyjson typed-stream tape export and encode"
+source = ["native/yjson_yyjson.h", "native/yjson_yyjson.c"]
+needle = "YJ_Yyjson_EncodeTapeAlloc"
+stability = "matching-version-native-bridge"
+compatibility = "additive C symbols"
+contract = "One coarse ABI call exports or encodes the shared preorder tape and returns yyjson-package-owned output."
+consumer = "yjson_yyjson typed stream backend"

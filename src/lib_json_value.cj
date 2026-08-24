@@ -788,7 +788,7 @@ func writeJsonObjectEntryCompact(writer: JsonDirectWriter, first: Bool, key: Str
     }
 }
 
-func writeJsonValueDirect(writer: JsonDirectWriter, value: JsonNode): Unit {
+func writeJsonNodeToCodecWriter(writer: JsonCodecWriter, value: JsonNode): Unit {
     match (value) {
         case _: JsonNullValue => writer.writeNull()
         case boolValue: JsonBoolValue => writer.writeBool(boolValue.value)
@@ -799,14 +799,14 @@ func writeJsonValueDirect(writer: JsonDirectWriter, value: JsonNode): Unit {
         case arrayValue: JsonArrayValue =>
             writer.startArray()
             for (item in arrayValue.values()) {
-                writeJsonValueDirect(writer, item)
+                writeJsonNodeToCodecWriter(writer, item)
             }
             writer.endArray()
         case objectValue: JsonObjectValue =>
             writer.startObject()
             for ((key, item) in objectValue.entries()) {
                 writer.writeName(key)
-                writeJsonValueDirect(writer, item)
+                writeJsonNodeToCodecWriter(writer, item)
             }
             writer.endObject()
         case _ => throw JsonException("Unsupported JsonNode implementation")

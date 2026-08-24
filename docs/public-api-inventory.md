@@ -1,14 +1,16 @@
-# 1.0 RC API/ABI change inventory
+# Current API/ABI change inventory
 
 This is a release-delta inventory, not a complete yjson API reference. It records
-the public surfaces stabilized or introduced for the `1.0.0-rc.1` candidate,
-including resource-limited parsing, the reusable fast
-collection bridge, and the optional native Float64 parser. The machine-readable source is
+the public surfaces stabilized in the `1.0.0-rc.1` baseline plus accepted
+Unreleased development deltas. Post-tag entries are not part of the immutable
+`1.0.0-rc.1` artifact until a later candidate is frozen. The inventory includes
+resource-limited parsing, the reusable fast collection bridge, and the optional
+native Float64 parser. The machine-readable source is
 [`release/public-api-inventory.toml`](../release/public-api-inventory.toml).
 
-Most entries are additive relative to pre-1.0 snapshots. `JsonReadConfig.init`
-and the `JsonValue` to `JsonNode` AST-root rename require snapshot consumers to
-rebuild. The latter is
+Most entries are additive relative to pre-1.0 snapshots. `JsonReadConfig.init`,
+the `JsonDirectCodec<T>` to `JsonCodec<T>` rename, and the `JsonValue` to
+`JsonNode` AST-root rename require snapshot consumers to rebuild. The latter is
 required because the new unqualified `@JsonValue` macro occupies the same
 Cangjie declaration namespace. The API inventory and ABI symbol inventory must
 be reviewed whenever a declaration is added, removed, renamed, or changed.
@@ -62,6 +64,25 @@ entry points remain compatibility aliases for borrowed-input behavior.
 
 See [resource limits](resource-limits.md) for measurement units, errors, and
 stream behavior.
+
+## Typed stream backend surface
+
+| Package | Declaration | Contract | Compatibility disposition |
+|---|---|---|---|
+| `yjson` | `JsonCodec<T>` | Backend-neutral typed read/write codec using `JsonCodecReader` and `JsonCodecWriter` | Intentional breaking rename from `JsonDirectCodec<T>`; no compatibility alias |
+| `yjson` | `JsonStreamBackend` and session interfaces | Connect one caller-owned stream to one typed JSON document; backend never closes caller streams | Additive interface family |
+| `yjson` | `PureStreamBackend` | Default incremental typed stream backend | Additive stable default |
+| `yjson` | `YJson.encodeToStreamWith/decodeFromStreamWith` backend parameter | Explicit backend selection; no silent fallback | Existing entries extended with a named optional parameter; rebuild required |
+| `yjson` | `YJson.toStream/fromStream` | Provider convenience family | Additive |
+| `yjson` | `JsonWriteConfig.maxBytes` | Output-byte limit; `0` is unlimited; overflow is `output_too_large` | Constructor and field added; rebuild required |
+| `yjson_native` | `NativeCompactStreamBackend` | Whole-document Custom Native encode/decode via bulk tape | Additive optional-package API |
+| `yjson_yyjson` | `YyjsonStreamBackend` | Whole-document supported yyjson Direct encode/decode via bulk tape | Additive optional-package API |
+
+The shared tape and replay interfaces are matching-version generated/native
+bridges, not application persistence formats. Generated polymorphic decode
+captures once and replays the subtype directly; it does not serialize an AST
+and parse it again. Optional Native packages and macro output must come from the
+same checkout and exact commit as core.
 
 ## Stable generated-code bridge
 

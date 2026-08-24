@@ -15,10 +15,10 @@ private class JsonLiteralTracked {
     }
 }
 
-private class JsonLiteralTrackedCodec <: JsonDirectCodec<JsonLiteralTracked> {
+private class JsonLiteralTrackedCodec <: JsonCodec<JsonLiteralTracked> {
     public func write(
         value: JsonLiteralTracked,
-        writer: JsonDirectWriter,
+        writer: JsonCodecWriter,
         context: JsonEncodeContext
     ): Unit {
         let _ = context
@@ -26,13 +26,13 @@ private class JsonLiteralTrackedCodec <: JsonDirectCodec<JsonLiteralTracked> {
         writer.writeInt64(value.value)
     }
 
-    public func read(reader: JsonDirectReader, context: JsonDecodeContext): JsonLiteralTracked {
+    public func read(reader: JsonCodecReader, context: JsonDecodeContext): JsonLiteralTracked {
         let _ = context
         JsonLiteralTracked(reader.readInt64())
     }
 }
 
-private let JsonLiteralTrackedJson: JsonDirectCodec<JsonLiteralTracked> = JsonLiteralTrackedCodec()
+private let JsonLiteralTrackedJson: JsonCodec<JsonLiteralTracked> = JsonLiteralTrackedCodec()
 
 extend JsonLiteralTracked <: JsonCodecProvider {
     public static func jsonCodec(): JsonAnyCodec {

@@ -103,6 +103,15 @@ int32_t YJ_Compact_SerializeAlloc(uint64_t handle, uint64_t *out_buffer_handle,
                                  uint64_t *out_size);
 int32_t YJ_Compact_ExportTapeAlloc(uint64_t handle, uint64_t *out_buffer_handle,
                                   uint64_t *out_size);
+/* Matching-version typed-stream bridge. The tape is the YJT1 preorder format
+ * produced by YJ_Compact_ExportTapeAlloc and the core JsonStreamTapeWriter. */
+int32_t YJ_Stream_EncodeTapeAlloc(const uint8_t *tape, uint64_t tape_length,
+                                 const uint8_t *newline, uint64_t newline_length,
+                                 const uint8_t *indent, uint64_t indent_length,
+                                 uint32_t use_space_after_separators,
+                                 uint32_t html_safe, int64_t max_depth,
+                                 int64_t max_bytes, uint64_t *out_buffer_handle,
+                                 uint64_t *out_size, uint32_t *out_error_code);
 int32_t YJ_Compact_CopyOwnedBuffer(uint64_t buffer_handle, uint8_t *output,
                                   uint64_t output_capacity);
 void YJ_Compact_FreeOwnedBuffer(uint64_t buffer_handle);

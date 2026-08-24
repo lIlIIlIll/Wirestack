@@ -1,6 +1,6 @@
 # `@JsonCodec` 生成指南
 
-`@JsonCodec` 是 `yjson_macros` 提供的 declaration macro。它在消费方 package 编译时展开，生成匹配的 `JsonDirectCodec<T>` 与 `JsonCodecProvider` 实现；它不是扫描 `src/` 的 build script，也不会生成仓库级 `generated_json_codecs.cj`。
+`@JsonCodec` 是 `yjson_macros` 提供的 declaration macro。它在消费方 package 编译时展开，生成匹配的 `JsonCodec<T>` 与 `JsonCodecProvider` 实现；它不是扫描 `src/` 的 build script，也不会生成仓库级 `generated_json_codecs.cj`。
 
 ## 支持的声明
 
@@ -26,7 +26,7 @@ class User {
 }
 ```
 
-宏会公开 `UserJson: JsonDirectCodec<User>`，并使 `User` 可直接传给 `YJson.toJson` 与 `YJson.fromJson<User>`。
+宏会公开 `UserJson: JsonCodec<User>`，并使 `User` 可直接传给 `YJson.toJson` 与 `YJson.fromJson<User>`。
 
 ## 字段参与规则
 
@@ -82,7 +82,8 @@ open class Animal {
 每个 subtype 也必须生成 codec。discriminator 缺失或未知分别产生稳定错误码；根多态对象还受 `maxPolymorphicObjectBytes` 约束。
 
 默认 `maxPolymorphicObjectBytes = 0` 表示不启用这一局部 byte budget；设置正数时，超限
-产生 `polymorphic_object_too_large`。负数配置会被拒绝。该语义同时适用于 generated
-polymorphic decode 使用的 `JsonDirectReader.readBoundedValue` bridge。
+产生 `polymorphic_object_too_large`。负数配置会被拒绝。generated polymorphic decode
+通过 `JsonCodecReader.readReplayValue` 捕获一次根值，读取 discriminator 后直接重放给
+subtype codec；Native tape 路径不把对象序列化成 JSON 再解析。
 
 宏展开代码依赖当前 runtime 的 generated-code bridge，因此 `yjson_macros` 与 `yjson` 必须使用完全匹配的版本并一起重新编译。

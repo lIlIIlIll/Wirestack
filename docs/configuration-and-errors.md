@@ -26,7 +26,10 @@ JsonReadConfig(
 `JsonWriteConfig.compact` 生成紧凑文本，`JsonWriteConfig.pretty` 使用换行与四空格缩进。
 便利入口 `YJson.stringifyPretty()` 的默认参数是两空格；需要与 `JsonWriteConfig.pretty`
 完全一致时应显式传入对应配置或缩进。自定义配置还控制 newline、indent、separator 空格、
-HTML-safe escaping、错误位置与最大深度。
+HTML-safe escaping、错误位置、最大深度与 `maxBytes`。写出侧 `maxBytes = 0` 表示
+unlimited；正数超限产生 `output_too_large`。whole-document Native backend 在写入调用方
+stream 前完成检查；默认 Pure backend 可能已经写出前缀，因此失败后不得继续使用该
+document 的输出。
 
 ## 错误处理
 
@@ -42,6 +45,7 @@ HTML-safe escaping、错误位置与最大深度。
 | `unknown_discriminator` | generated polymorphic decode 遇到未知 discriminator 值 |
 | `max_depth` | 读取或写出超过最大嵌套深度 |
 | `document_too_large` | `maxBytes` 或 Compact 表示上限被触发 |
+| `output_too_large` | 写出结果超过 `JsonWriteConfig.maxBytes` |
 | `string_too_large` | decoded UTF-8 string 超过预算 |
 | `polymorphic_object_too_large` | 根多态对象超过 replay budget |
 | `codec_type_mismatch` | erased codec 收到或返回错误类型 |

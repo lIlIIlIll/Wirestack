@@ -83,6 +83,10 @@ main(): Unit {
     let text = YJson.toJson(Person(7, "Alice"))
     let value = YJson.fromJson<Person>(text)
     if (value.id != 7 || value.name != "Alice") { throw Exception("macro") }
+    let output = YJsonMemoryOutputStream()
+    YJson.toStream(Person(9, "Stream"), output)
+    let streamed = YJson.fromStream<Person>(YJsonByteArrayInputStream(output.toByteArray()))
+    if (streamed.id != 9 || streamed.name != "Stream") { throw Exception("macro stream") }
     let key = "person"
     let literal = @Json({"ok": true, $(key): $(Person(8, "Bob")),})
     if (literal != "{\\\"ok\\\":true,\\\"person\\\":{\\\"id\\\":8,\\\"name\\\":\\\"Bob\\\"}}") {
@@ -116,6 +120,14 @@ main(): Unit {
     let portableFloat = jsonFastReadFloat64(portableFloatReader)
     portableFloatReader.expectEnd()
     if (portableFloat != 2.5) { throw Exception("portable float fallback") }
+    let codec = YJson.arrayCodec(Int64Json)
+    let streamOutput = YJsonMemoryOutputStream()
+    YJson.encodeToStreamWith(codec, [1, 2, 3], streamOutput,
+        backend: NativeCompactStreamBackend)
+    let streamed = YJson.decodeFromStreamWith(codec,
+        YJsonByteArrayInputStream(streamOutput.toByteArray()),
+        backend: NativeCompactStreamBackend)
+    if (streamed.size != 3 || streamed[2] != 3) { throw Exception("native stream") }
     println("native consumer passed")
 }
 ''', base)
@@ -128,6 +140,13 @@ main(): Unit {
     try (document = YyjsonCompactJsonDocument.parse(unsafe { "{\\"n\\":42}".rawData() })) {
         if (document.getRootInt("n").getOrThrow() != 42) { throw Exception("yyjson") }
     }
+    let codec = YJson.arrayCodec(Int64Json)
+    let streamOutput = YJsonMemoryOutputStream()
+    YJson.encodeToStreamWith(codec, [1, 2, 3], streamOutput,
+        backend: YyjsonStreamBackend)
+    let streamed = YJson.decodeFromStreamWith(codec,
+        YJsonByteArrayInputStream(streamOutput.toByteArray()), backend: YyjsonStreamBackend)
+    if (streamed.size != 3 || streamed[2] != 3) { throw Exception("yyjson stream") }
     println("yyjson consumer passed")
 }
 ''', base)

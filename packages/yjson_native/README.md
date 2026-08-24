@@ -30,6 +30,20 @@ This is the same facade used by the portable `PureCompactBackend` and optional
 `YyjsonBackend`. Use `NativeCompactJsonDocument` directly when per-node views,
 storage statistics, or backend-specific tuning are required.
 
+For typed caller-owned streams, select the whole-document backend explicitly:
+
+```cangjie
+let output: OutputStream = ...
+YJson.encodeToStreamWith(UserJson, user, output,
+    backend: NativeCompactStreamBackend)
+let user = YJson.decodeFromStreamWith(UserJson, input,
+    backend: NativeCompactStreamBackend)
+```
+
+It shares the application `JsonCodec<T>` contract with the Pure backend. The
+Native bridge performs coarse parse/export and encode/copy calls, never
+per-node FFI, and does not close caller streams or silently fall back to Pure.
+
 DOM parsing does not require `enableYJsonNative()`; activation functions below
 control optional scanner/number seams, not document ownership.
 

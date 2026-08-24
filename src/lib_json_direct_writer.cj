@@ -76,6 +76,8 @@ func jsonRawInt64MapReserveHint(prefixSize: Int64, entryCount: Int64): Int64 {
 }
 
 abstract class JsonDirectWriterTarget {
+    public func bytesWritten(): Int64
+
     protected func writeText(value: String): Unit
 
     protected func writeTextRange(value: String, start: Int64, end: Int64): Unit
@@ -605,6 +607,8 @@ class DirectStringWriterTarget <: JsonDirectWriterTarget {
 
     public func finish(): Unit {}
 
+    public func bytesWritten(): Int64 { used }
+
 
     public func build(): String {
         String.fromUtf8(buffer[0..used])
@@ -1062,6 +1066,8 @@ class DirectBytesWriterTarget <: JsonDirectWriterTarget {
 
     public func finish(): Unit {}
 
+    public func bytesWritten(): Int64 { used }
+
 
     public func build(): Array<Byte> {
         buffer[0..used]
@@ -1072,6 +1078,7 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
     private let out: OutputStream
     private let buffer: Array<Byte>
     private var used: Int64 = 0
+    private var committed: Int64 = 0
 
     public init(out: OutputStream) {
         this.out = out
@@ -1092,6 +1099,7 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
             unsafe {
                 out.write(value.rawData()[start..end])
             }
+            committed += size
             return
         }
         if (used + size > buffer.size) {
@@ -1316,6 +1324,7 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
         } else {
             out.write(buffer[0..used])
         }
+        committed += used
         used = 0
     }
 
@@ -1468,6 +1477,8 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
         out.flush()
     }
 
+    public func bytesWritten(): Int64 { committed + used }
+
 }
 
 private class JsonDirectWriteContext {
@@ -1480,7 +1491,7 @@ private class JsonDirectWriteContext {
     }
 }
 
-public class JsonDirectWriter {
+public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
     private let target: JsonDirectWriterTarget
     private let config: JsonWriteConfig
     private let multiline: Bool
@@ -1517,10 +1528,12 @@ public class JsonDirectWriter {
 
     public func finish(): Unit {
         target.finish()
+        enforceOutputLimit()
     }
 
     public func finishString(): String {
         target.finish()
+        enforceOutputLimit()
         match (target) {
             case stringTarget: DirectStringWriterTarget => stringTarget.build()
             case _ => throw JsonException("JsonDirectWriter is not a string writer")
@@ -1529,9 +1542,20 @@ public class JsonDirectWriter {
 
     public func finishBytes(): Array<Byte> {
         target.finish()
+        enforceOutputLimit()
         match (target) {
             case bytesTarget: DirectBytesWriterTarget => bytesTarget.build()
             case _ => throw JsonException("JsonDirectWriter is not a bytes writer")
+        }
+    }
+
+    private func enforceOutputLimit(): Unit {
+        if (config.maxBytes > 0 && target.bytesWritten() > config.maxBytes) {
+            throw JsonException(
+                "Encoded JSON exceeds ${config.maxBytes} bytes",
+                code: "output_too_large",
+                byteOffset: if (config.includeErrorLocation) { config.maxBytes } else { -1 }
+            )
         }
     }
 
@@ -1703,7 +1727,7 @@ public class JsonDirectWriter {
         true
     }
 
-    func tryWriteCompactInt64ArrayList(values: ArrayList<Int64>): Bool {
+    public func tryWriteCompactInt64ArrayList(values: ArrayList<Int64>): Bool {
         if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
             return false
         }

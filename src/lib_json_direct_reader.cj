@@ -417,7 +417,7 @@ private class JsonDirectReadContext {
     }
 }
 
-public class JsonDirectReader {
+public class JsonDirectReader <: JsonCodecReader {
     private let source: JsonDirectByteSource
     private let config: JsonReadConfig
     private let streaming: Bool
@@ -449,6 +449,10 @@ public class JsonDirectReader {
 
     public func readConfig(): JsonReadConfig {
         config
+    }
+
+    public func readReplayValue(maxBytes: Int64): JsonReplayValue {
+        JsonNodeReplayValue(readBoundedValue(maxBytes), config)
     }
 
     // Materializes exactly one value while enforcing the byte budget against
@@ -1356,5 +1360,46 @@ public class JsonDirectReader {
             line: source.lineAt(offset),
             column: source.columnAt(offset)
         )
+    }
+}
+
+private class JsonNodeReplayValue <: JsonReplayValue {
+    private let value: JsonNode
+    private let config: JsonReadConfig
+    private var closed: Bool = false
+
+    init(value: JsonNode, config: JsonReadConfig) {
+        this.value = value
+        this.config = config
+    }
+
+    public func close(): Unit { closed = true }
+
+    public func isClosed(): Bool { closed }
+
+    public func rootStringField(name: String): Option<String> {
+        requireOpen()
+        match (value.asObject().get(name)) {
+            case Some(field) => Some(field.asString().value)
+            case None => None<String>
+        }
+    }
+
+    public func openObjectReaderExcluding(name: String): JsonCodecReader {
+        requireOpen()
+        let filtered = JsonObjectValue()
+        for ((fieldName, fieldValue) in value.asObject().entries()) {
+            if (fieldName != name) { filtered.put(fieldName, fieldValue) }
+        }
+        JsonDirectReader(filtered.toString(), config: config)
+    }
+
+    public func materialize(): JsonNode {
+        requireOpen()
+        value
+    }
+
+    private func requireOpen(): Unit {
+        if (closed) { throw IllegalStateException("JSON replay value is closed") }
     }
 }

@@ -13,11 +13,11 @@ import yjson.*
 import std.unittest.*
 import std.unittest.testmacro.*
 
-func encodeYjsonReflectBytesWith<T>(codec: JsonDirectCodec<T>, value: T): Array<Byte> {
+func encodeYjsonReflectBytesWith<T>(codec: JsonCodec<T>, value: T): Array<Byte> {
     YJson.encodeBytesWith(codec, value)
 }
 
-func decodeYjsonReflectBytesWith<T>(codec: JsonDirectCodec<T>, bytes: Array<Byte>): T {
+func decodeYjsonReflectBytesWith<T>(codec: JsonCodec<T>, bytes: Array<Byte>): T {
     YJson.decodeBytesWith(codec, bytes)
 }
 
