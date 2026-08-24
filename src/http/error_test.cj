@@ -3,6 +3,7 @@ package wirestack.http
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.http1 as http1
+import wirestack.internal.http2 as http2
 import wirestack.internal.transport as transport
 
 @Test
@@ -46,6 +47,14 @@ class HttpErrorTest {
         expectHttpError(
             HttpRedirectException(HttpRedirectErrorCode.TooManyRedirects, "secret redirect detail"),
             HttpErrorCode.RedirectLimit
+        )
+        expectHttpError(
+            http2.Http2GoAwayException(http2.Http2GoAwayRetryEvidence(
+                http2.Http2StreamId(5u32), http2.Http2StreamId(3u32),
+                http2.Http2ErrorCode.NoError,
+                http2.Http2GoAwayRequestDisposition.DefinitelyNotProcessed
+            )),
+            HttpErrorCode.ConnectionGoAway
         )
     }
 }
