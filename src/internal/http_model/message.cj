@@ -61,6 +61,7 @@ public class ResponseBody <: Resource {
     private let stream: HttpBodyStream
     private let observer: ResponseBodyObserver
     private let trailerProvider: () -> ?HttpTrailer
+    private let completeAtDeclaredLength: Bool
     private let stateMutex = Mutex()
     private var closed = false
     private var readInProgress = false
@@ -74,11 +75,13 @@ public class ResponseBody <: Resource {
     public init(
         stream: HttpBodyStream,
         observer!: ResponseBodyObserver = NoopResponseBodyObserver(),
-        trailerProvider!: () -> ?HttpTrailer = { => None<HttpTrailer> }
+        trailerProvider!: () -> ?HttpTrailer = { => None<HttpTrailer> },
+        completeAtDeclaredLength!: Bool = true
     ) {
         this.stream = stream
         this.observer = observer
         this.trailerProvider = trailerProvider
+        this.completeAtDeclaredLength = completeAtDeclaredLength
     }
 
     public static func empty(observer!: ResponseBodyObserver = NoopResponseBodyObserver()): ResponseBody {
@@ -125,7 +128,7 @@ public class ResponseBody <: Resource {
                 case None => ()
             }
         }
-        if (reachedDeclaredEnd) { completeAtEof() }
+        if (reachedDeclaredEnd && completeAtDeclaredLength) { completeAtEof() }
         if (count == 0 && !destination.isEmpty()) { completeAtEof() }
         count
     }
