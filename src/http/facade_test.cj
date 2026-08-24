@@ -86,6 +86,36 @@ class HttpFacadeTest {
     }
 
     @TestCase
+    func clientRetriesOneTemporaryDnsFailureWithinTheSameDeadline(): Unit {
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(PublicEmptyHandler())
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let host = HostName("retry.test")
+        let resolver = FlakyPublicResolver(ResolveResult(
+            [server.localEndpoint.address], host, ResolverSource.Static
+        ))
+        let client = HttpClient.builder()
+            .resolver(resolver)
+            .requestTimeout(Duration.second)
+            .retryPolicy(HttpRetryPolicy(maximumAttempts: 2))
+            .build()
+        try {
+            let response = client.get("http://retry.test:${server.localEndpoint.port}/ready")
+            @Expect(response.status, 200)
+            @Expect(resolver.calls.load(), 2)
+            response.close()
+        } finally {
+            client.close()
+            let _ = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(Duration.second))
+            ))
+            serving.get(Duration.second)
+        }
+    }
+
+    @TestCase
     func serverBuilderRequiresEndpointAndHandler(): Unit {
         var missingEndpoint = false
         try {
@@ -144,5 +174,24 @@ private class PublicRedirectHandler <: HttpServerHandler {
                 headers: HttpHeaders.builder().add("Content-Length", "0").build()
             ))
         }
+    }
+}
+
+private class FlakyPublicResolver <: Resolver {
+    private let result: ResolveResult
+    let calls = AtomicInt64(0)
+
+    init(result: ResolveResult) { this.result = result }
+
+    public func resolve(host: HostName, service: ?String, options: ResolveOptions,
+        context: OperationContext): ResolveResult {
+        let _ = host
+        let _ = service
+        let _ = options
+        let _ = context
+        if (calls.fetchAdd(1) == 0) {
+            throw ResolveException(ResolveErrorCode.TemporaryFailure, "scripted temporary DNS failure")
+        }
+        result
     }
 }
