@@ -111,7 +111,8 @@ Status values have the same fail-closed meaning as the global status file.
 | M6-006 HPACK dynamic table | COMPLETE | Exact `name + value + 32` accounting, newest-first wire indexes, oldest-first eviction, immediate shrink, oversized-entry clearing and zero capacity are bounded; sensitive/never-indexed fields never enter shared state and table-size updates cannot exceed the SETTINGS-derived ceiling |
 | M6-007 header blocks | COMPLETE | RFC request blocks and exact Huffman encoding pass; indexed/literal/never-indexed/table-update representations share bounded state; HEADERS/PUSH_PROMISE/CONTINUATION enforce same-stream non-interleaving, strip padding/priority overhead and cap compressed fragments, header count and list bytes |
 | M6-008 connection state machine | COMPLETE | Client/server prefaces and mandatory initial SETTINGS are strict; Open/Draining/Closed transitions retain one terminal record, 100x8 racing finish calls complete exactly once, GOAWAY boundaries only narrow, and connection errors publish at most one bounded terminal GOAWAY |
-| M6-009..020 reader loop through benchmark | NOT_STARTED | Reader/writer ownership, stream state, flow control, multiplexed client/server/pool integration, conformance/fuzz and 1/10/100-stream evidence remain required |
+| M6-009 single reader loop | COMPLETE | One claimed task owns transport reads for the connection; preface and partial frames dispatch in wire order, malformed/EOF/handler failures terminate deterministically, and a bounded listener registry wakes 100 stream listeners exactly once while isolating callback failures |
+| M6-010..020 writer scheduler through benchmark | NOT_STARTED | Writer ownership, stream state, flow control, multiplexed client/server/pool integration, conformance/fuzz and 1/10/100-stream evidence remain required |
 
 ## Next critical path
 
