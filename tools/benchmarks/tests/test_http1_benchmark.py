@@ -1,0 +1,47 @@
+from __future__ import annotations
+
+import importlib.util
+import sys
+import unittest
+from pathlib import Path
+
+MODULE_PATH = Path(__file__).resolve().parents[1] / "http1_benchmark.py"
+SPEC = importlib.util.spec_from_file_location("http1_benchmark", MODULE_PATH)
+assert SPEC is not None and SPEC.loader is not None
+MODULE = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = MODULE
+SPEC.loader.exec_module(MODULE)
+
+
+def sample(rps: float = 1000.0, rss16: int = 100_000,
+           rss64: int = 108_000) -> dict[str, dict[str, float | int]]:
+    return {
+        "keep_alive_small": {"requests_per_second": rps, "peak_rss_kib": 90_000},
+        "stream_16mib": {"requests_per_second": 1.0, "peak_rss_kib": rss16},
+        "stream_64mib": {"requests_per_second": 1.0, "peak_rss_kib": rss64},
+    }
+
+
+class Http1BenchmarkTest(unittest.TestCase):
+    def test_missing_baseline_is_partial_not_pass(self) -> None:
+        result = MODULE.classify(sample(), None)
+        self.assertEqual(result["decision"], "PARTIAL")
+        self.assertEqual(result["stdx_comparison"]["decision"], "NOT_RUN")
+        self.assertEqual(result["streaming_memory"]["decision"], "PASS")
+
+    def test_baseline_threshold_is_ninety_percent(self) -> None:
+        self.assertEqual(MODULE.classify(sample(900.0), 1000.0)["decision"], "PASS")
+        self.assertEqual(MODULE.classify(sample(899.9), 1000.0)["decision"], "FAIL")
+
+    def test_linear_memory_growth_fails(self) -> None:
+        result = MODULE.classify(sample(rss16=50_000, rss64=200_000), 1000.0)
+        self.assertEqual(result["decision"], "FAIL")
+        self.assertEqual(result["streaming_memory"]["decision"], "FAIL")
+
+    def test_descendant_totals_include_recursive_children(self) -> None:
+        snapshot = {10: (1, 100, 2), 11: (10, 200, 3), 12: (11, 300, 4), 99: (1, 999, 9)}
+        self.assertEqual(MODULE.descendant_totals(10, snapshot), (600, 9))
+
+
+if __name__ == "__main__":
+    unittest.main()
