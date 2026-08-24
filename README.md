@@ -152,6 +152,23 @@ println(YJson.stringify(root))
 
 静态重复 key 是编译错误。对象包含动态 key 时，运行时冲突采用 LastWins。
 
+## 库能力对比
+
+下表比较公开文档可确认的主要能力，不代表性能排名。`◐` 表示部分或间接支持，`—` 表示
+本次查阅的公开资料未确认该能力，并非断言任何扩展都无法实现。
+
+| 能力 | yjson | stdx.json | cjfast_json | fastjson2 | Go yyjson |
+| --- | --- | --- | --- | --- | --- |
+| Generated typed mapping | ✅ `@JsonCodec` | — | ✅ `@JsonAdapter` | ✅ ASM / `@JSONCompiler` | ◐ typed 入口委托 `encoding/json` |
+| Mutable / compact DOM | ✅ / ✅ | ✅ / — | — / — | ✅ / ◐ | ✅ / ✅ |
+| Stream/token I/O | ✅ backend 可选 | ✅ | ✅ | ✅ | ◐ incremental DOM |
+| Polymorphism / custom codec | ✅ / ✅ | — / ✅ | — / ✅ | ✅ / ✅ | — / ◐ |
+| Schema / standard path-patch | ◐ / — | — / ◐ | — / — | ✅ / ✅ JSONPath | — / ✅ Pointer/Patch |
+| Cangjie 直接依赖 | ✅ | ✅ SDK | ✅ | N/A（Java/JVM） | N/A（Go） |
+
+完整矩阵、符号含义、跨 runtime 边界与来源见[库能力对比](docs/library-comparison.md)。性能
+数据仍以独立测量批次为准，不能由这张能力表推导。
+
 ## 性能
 
 在固定 CPU、相同 SDK 与构建参数、交替执行的 37 项同语义 Server 测量中，yjson 有
@@ -195,6 +212,7 @@ typed codec 对比，且 16 MiB Read 因 yjson CV 9.60% 只作为方向证据。
 
 - [文档导航与用户指南](docs/README.md)
 - [API 选择与使用场景](docs/choosing-an-api.md)
+- [yjson、stdx.json、cjfast_json、fastjson2 与 Go yyjson 能力对比](docs/library-comparison.md)
 - [`@JsonCodec` 生成规则](docs/codec-generation.md)
 - [Backend 选择与生命周期](docs/backends.md)
 - [性能结论、方法与结果](docs/performance/README.md)

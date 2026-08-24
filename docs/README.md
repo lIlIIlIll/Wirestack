@@ -21,6 +21,7 @@
 
 ## 兼容性、迁移与性能
 
+- [库能力对比](library-comparison.md)：区分 Cangjie 原生能力、跨 runtime 参照和“未在公开资料核实”。
 - [pre-1.0 → 1.0 迁移](migration/pre-1.0-to-1.0.md)
 - [1.0 RC API/ABI change inventory](public-api-inventory.md)：只记录首个 RC 的新增和变化，不是完整 API reference。
 - [性能结论、方法与结果](performance/README.md)

@@ -13,6 +13,10 @@
 | Native-owned DOM | optional backend package | 需要显式生命周期管理 |
 | 校验 JSON 实例 | `JsonSchema` | 常用 draft 2020-12 子集 |
 
+如果是在 yjson、stdx.json、cjfast_json 或跨 runtime 方案之间选库，先看
+[库能力对比](library-comparison.md)。该表只比较公开 contract；性能选型还需使用相同
+workload、SDK 和部署环境重新测量。
+
 ## Typed API
 
 类型能使用 `JsonCodecProvider` 时，优先采用最短入口：

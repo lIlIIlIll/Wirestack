@@ -42,6 +42,9 @@ Map。完整 contract、表格、环境 workaround 与 artifact 边界见
 
 ## 其他库
 
+功能覆盖范围另见[库能力对比](../library-comparison.md)。能力矩阵不代表性能排名，也不能
+用于拼接下面这些不同日期、runtime 与 benchmark batch 的数据。
+
 stdx.json 与 Java fastjson2 数据来自 2026-08-20 的另一批测量；cjfast_json 来自
 2026-08-21。Java/Cangjie 也不是同 runtime。这些数据只提供 workload context，不能形成
 同步四库排名。Go yyjson 同样是独立的跨 runtime DOM 测量，不应与这些批次拼接排名。
