@@ -119,28 +119,39 @@ public class AwsLcHttp1TlsHandshaker <: Http1TlsHandshaker {
         synchronized(mutex) {
             if (closed) { throw IllegalStateException("HTTPS handshaker is closed") }
         }
-        let engine = provider.createClientEngine(
-            context,
-            ReferenceIdentity.Dns(host),
-            serverName: Some(host)
-        )
-        let connection = TlsConnection.handshake(engine, transport, context: operation)
-        match (connection.handshakeInfo) {
-            case Some(info) => match (info.negotiatedAlpn) {
-                case Some(protocol) =>
-                    if (protocol != "http/1.1") {
-                        connection.abort(reason: Some(AbortReason.ProtocolFailure))
-                        throw TlsEngineException(TlsEngineErrorCode.NoSharedAlpn,
-                            "HTTPS HTTP/1 connection negotiated an unexpected ALPN protocol")
-                    }
-                case None => () // RFC 7301 absence falls back to HTTP/1.1 for HTTPS.
+        emitTlsHandshakeEvent(operation, NetworkEventOutcome.Started, None<NetworkErrorCode>)
+        try {
+            let engine = provider.createClientEngine(
+                context,
+                ReferenceIdentity.Dns(host),
+                serverName: Some(host)
+            )
+            let connection = TlsConnection.handshake(engine, transport, context: operation)
+            match (connection.handshakeInfo) {
+                case Some(info) => match (info.negotiatedAlpn) {
+                    case Some(protocol) =>
+                        if (protocol != "http/1.1") {
+                            connection.abort(reason: Some(AbortReason.ProtocolFailure))
+                            throw TlsEngineException(TlsEngineErrorCode.NoSharedAlpn,
+                                "HTTPS HTTP/1 connection negotiated an unexpected ALPN protocol")
+                        }
+                    case None => () // RFC 7301 absence falls back to HTTP/1.1 for HTTPS.
+                }
+                case None =>
+                    connection.abort(reason: Some(AbortReason.ProtocolFailure))
+                    throw TlsEngineException(TlsEngineErrorCode.ProviderFailure,
+                        "HTTPS handshake returned no negotiated TLS evidence")
             }
-            case None =>
-                connection.abort(reason: Some(AbortReason.ProtocolFailure))
-                throw TlsEngineException(TlsEngineErrorCode.ProviderFailure,
-                    "HTTPS handshake returned no negotiated TLS evidence")
+            emitTlsHandshakeEvent(operation, NetworkEventOutcome.Succeeded, None<NetworkErrorCode>)
+            connection
+        } catch (error: Exception) {
+            let code = match (error) {
+                case value: NetworkException => Some(value.code)
+                case _ => Some(NetworkErrorCode.SystemFailure)
+            }
+            emitTlsHandshakeEvent(operation, NetworkEventOutcome.Failed, code)
+            throw error
         }
-        connection
     }
 
     public func close(): Unit {
@@ -153,6 +164,21 @@ public class AwsLcHttp1TlsHandshaker <: Http1TlsHandshaker {
         }
     }
     public func isClosed(): Bool { synchronized(mutex) { closed } }
+}
+
+private func emitTlsHandshakeEvent(context: OperationContext,
+    outcome: NetworkEventOutcome, code: ?NetworkErrorCode): Unit {
+    let kind = match (outcome) {
+        case NetworkEventOutcome.Started => NetworkEventKind.TlsHandshakeStarted
+        case _ => NetworkEventKind.TlsHandshakeCompleted
+    }
+    emitNetworkEvent(context, NetworkEvent(
+        kind,
+        outcome,
+        trace: context.trace,
+        phase: Some(NetworkPhase.TlsHandshake),
+        errorCode: code
+    ))
 }
 
 /** DNS-to-TLS-to-HTTP/1 pipeline with complete security partitioning. */
@@ -190,11 +216,15 @@ public class Http1HttpsClient <: Resource {
         try {
             let result = lease.connection.executeTracked(request, context: context, trailer: trailer,
                 onTerminated: { reusable =>
-                    if (reusable) { pool.release(lease) } else { pool.discard(lease) }
+                    if (reusable) {
+                        pool.release(lease, context: context)
+                    } else {
+                        pool.discard(lease, context: context)
+                    }
                 })
             result.response
         } catch (error: Exception) {
-            pool.discard(lease)
+            pool.discard(lease, context: context)
             throw error
         }
     }
