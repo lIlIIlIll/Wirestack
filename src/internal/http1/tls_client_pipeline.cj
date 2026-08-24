@@ -24,12 +24,15 @@ public interface Http1TlsHandshaker <: Resource {
 public class AwsLcHttp1TlsHandshaker <: Http1TlsHandshaker {
     private let provider: AwsLcTlsProvider
     private let context: TlsClientContext
+    private let ownedPrivateKey: ?PrivateKeyRef
     private let mutex = Mutex()
     private var closed = false
 
-    private init(provider: AwsLcTlsProvider, context: TlsClientContext) {
+    private init(provider: AwsLcTlsProvider, context: TlsClientContext,
+        ownedPrivateKey: ?PrivateKeyRef) {
         this.provider = provider
         this.context = context
+        this.ownedPrivateKey = ownedPrivateKey
     }
 
     public static func systemDefault(): AwsLcHttp1TlsHandshaker {
@@ -41,6 +44,47 @@ public class AwsLcHttp1TlsHandshaker <: Http1TlsHandshaker {
         identity!: ?LocalIdentity = None<LocalIdentity>,
         securityProfile!: TlsSecurityProfile = TlsSecurityProfile.Modern
     ): AwsLcHttp1TlsHandshaker {
+        createOwned(trust, identity, None<PrivateKeyRef>, securityProfile)
+    }
+
+    /** Creates a handshaker that exclusively owns an optional DER client identity. */
+    public static func createWithDer(
+        customTrustRootsDer: Array<Array<Byte>>,
+        clientCertificateChainDer!: Array<Array<Byte>> = Array<Array<Byte>>(),
+        clientPrivateKeyPkcs8Der!: Array<Byte> = Array<Byte>(),
+        securityProfile!: TlsSecurityProfile = TlsSecurityProfile.Modern
+    ): AwsLcHttp1TlsHandshaker {
+        let roots = ArrayList<DerCertificate>()
+        for (encoded in customTrustRootsDer) { roots.add(DerCertificate(encoded)) }
+        let trust = TrustPolicy.customRoots(CertificateChain(roots.toArray()))
+        if (clientCertificateChainDer.isEmpty() != clientPrivateKeyPkcs8Der.isEmpty()) {
+            throw IllegalArgumentException(
+                "HTTPS client certificate chain and PKCS#8 key must be configured together"
+            )
+        }
+        if (clientCertificateChainDer.isEmpty()) {
+            return createOwned(
+                trust, None<LocalIdentity>, None<PrivateKeyRef>, securityProfile
+            )
+        }
+        let certificates = ArrayList<DerCertificate>()
+        for (encoded in clientCertificateChainDer) { certificates.add(DerCertificate(encoded)) }
+        let key = PrivateKeyRef.pkcs8(clientPrivateKeyPkcs8Der)
+        try {
+            let identity = LocalIdentity(CertificateChain(certificates.toArray()), key)
+            createOwned(trust, Some(identity), Some(key), securityProfile)
+        } catch (error: Exception) {
+            key.close()
+            throw error
+        }
+    }
+
+    private static func createOwned(
+        trust: TrustPolicy,
+        identity: ?LocalIdentity,
+        ownedPrivateKey: ?PrivateKeyRef,
+        securityProfile: TlsSecurityProfile
+    ): AwsLcHttp1TlsHandshaker {
         let provider = AwsLcTlsProvider()
         try {
             let builder = TlsClientContext.builder(provider.manifest(), provider.linuxCapabilities())
@@ -49,9 +93,10 @@ public class AwsLcHttp1TlsHandshaker <: Http1TlsHandshaker {
             builder.trust(trust)
             if (let Some(value) <- identity) { builder.identity(value) }
             let context = builder.build()
-            AwsLcHttp1TlsHandshaker(provider, context)
+            AwsLcHttp1TlsHandshaker(provider, context, ownedPrivateKey)
         } catch (error: Exception) {
             provider.close()
+            match (ownedPrivateKey) { case Some(value) => value.close(); case None => () }
             throw error
         }
     }
@@ -102,7 +147,10 @@ public class AwsLcHttp1TlsHandshaker <: Http1TlsHandshaker {
         let shouldClose = synchronized(mutex) {
             if (closed) { false } else { closed = true; true }
         }
-        if (shouldClose) { provider.close() }
+        if (shouldClose) {
+            provider.close()
+            match (ownedPrivateKey) { case Some(value) => value.close(); case None => () }
+        }
     }
     public func isClosed(): Bool { synchronized(mutex) { closed } }
 }

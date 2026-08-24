@@ -181,6 +181,48 @@ class HttpFacadeTest {
         }
         @Expect(missingHandler)
     }
+
+    @TestCase
+    func tlsServerConfigFailsClosedBeforeBinding(): Unit {
+        let invalid = HttpServerTlsConfig([], [1u8, 2u8, 3u8])
+        var invalidRejected = false
+        try {
+            let _ = HttpServer.builder()
+                .listen(publicLoopback(0))
+                .handler(PublicEmptyHandler())
+                .tls(invalid)
+                .build()
+        } catch (_: Exception) {
+            invalidRejected = true
+        } finally {
+            invalid.close()
+        }
+        @Expect(invalidRejected)
+
+        let closed = HttpServerTlsConfig([], [])
+        closed.close()
+        var closedRejected = false
+        try {
+            let _ = HttpServer.builder()
+                .listen(publicLoopback(0))
+                .handler(PublicEmptyHandler())
+                .tls(closed)
+                .build()
+        } catch (_: IllegalStateException) {
+            closedRejected = true
+        }
+        @Expect(closedRejected)
+
+        let clientTls = HttpClientTlsConfig([])
+        clientTls.close()
+        var clientClosedRejected = false
+        try {
+            let _ = HttpClient.builder().tls(clientTls).build()
+        } catch (_: IllegalStateException) {
+            clientClosedRejected = true
+        }
+        @Expect(clientClosedRejected)
+    }
 }
 
 private class PublicEmptyHandler <: HttpServerHandler {
