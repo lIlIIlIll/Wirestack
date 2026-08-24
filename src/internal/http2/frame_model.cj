@@ -10,6 +10,7 @@ public class Http2Limits {
     public let maxPendingWrites: UInt32
     public let maxConcurrentStreams: UInt32
     public let initialWindowSize: UInt32
+    public let maxPendingSettings: UInt32
 
     public init(
         maxFrameSize!: UInt32 = 16384u32,
@@ -19,7 +20,8 @@ public class Http2Limits {
         maxPendingWriteBytes!: UInt32 = 1048576u32,
         maxPendingWrites!: UInt32 = 256u32,
         maxConcurrentStreams!: UInt32 = 100u32,
-        initialWindowSize!: UInt32 = 65535u32
+        initialWindowSize!: UInt32 = 65535u32,
+        maxPendingSettings!: UInt32 = 16u32
     ) {
         if (maxFrameSize < 16384u32 || maxFrameSize > 16777215u32) {
             throw IllegalArgumentException("HTTP/2 max frame size must be in [16384, 16777215]")
@@ -29,6 +31,7 @@ public class Http2Limits {
         requirePositive(maxPendingWriteBytes, "pending write bytes")
         requirePositive(maxPendingWrites, "pending writes")
         requirePositive(maxConcurrentStreams, "concurrent streams")
+        requirePositive(maxPendingSettings, "pending settings")
         if (initialWindowSize > 2147483647u32) {
             throw IllegalArgumentException("HTTP/2 initial window must fit 31 bits")
         }
@@ -40,6 +43,7 @@ public class Http2Limits {
         this.maxPendingWrites = maxPendingWrites
         this.maxConcurrentStreams = maxConcurrentStreams
         this.initialWindowSize = initialWindowSize
+        this.maxPendingSettings = maxPendingSettings
     }
 }
 
@@ -220,6 +224,18 @@ public func http2SettingIdFromWire(identifier: UInt16): Http2SettingId {
         case 5u16 => Http2SettingId.MaxFrameSize
         case 6u16 => Http2SettingId.MaxHeaderListSize
         case value => Http2SettingId.Unknown(value)
+    }
+}
+
+public func http2SettingIdToWire(identifier: Http2SettingId): UInt16 {
+    match (identifier) {
+        case Http2SettingId.HeaderTableSize => 1u16
+        case Http2SettingId.EnablePush => 2u16
+        case Http2SettingId.MaxConcurrentStreams => 3u16
+        case Http2SettingId.InitialWindowSize => 4u16
+        case Http2SettingId.MaxFrameSize => 5u16
+        case Http2SettingId.MaxHeaderListSize => 6u16
+        case Http2SettingId.Unknown(value) => value
     }
 }
 
