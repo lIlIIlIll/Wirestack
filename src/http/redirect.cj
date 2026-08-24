@@ -80,7 +80,10 @@ public class HttpRedirectPolicy {
             rewriteToGet,
             limits
         )
-        Some(HttpRequest(nextMethod, target, headers: headers, body: nextBody))
+        Some(HttpRequest(
+            nextMethod, target, headers: headers, body: nextBody,
+            retrySafety: request.retrySafety
+        ))
     }
 }
 
