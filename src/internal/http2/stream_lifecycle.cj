@@ -2,6 +2,7 @@ package wirestack.internal.http2
 
 import std.collection.ArrayList
 import std.sync.Mutex
+import wirestack.internal.transport.*
 
 public enum Http2StreamState {
     | Idle
@@ -139,6 +140,7 @@ public class Http2StreamRegistry <: Http2ReaderTerminationListener {
     private let role: Http2ConnectionRole
     private let hardMaximum: UInt32
     private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
     private let streams = ArrayList<Http2ManagedStream>()
     private var localMaximum: UInt32
     private var peerMaximum: UInt32
@@ -248,6 +250,25 @@ public class Http2StreamRegistry <: Http2ReaderTerminationListener {
         won
     }
 
+    /** Waits without polling until every active stream finishes or the caller budget ends. */
+    public func waitUntilEmpty(context!: OperationContext = OperationContext.background()): Bool {
+        let registration = context.cancellation.register { => wakeRegistryWaiters() }
+        try {
+            synchronized(mutex) {
+                while (!streams.isEmpty() && terminal.isNone()) {
+                    if (context.isCancellationRequested() || context.isDeadlineExceeded()) { return false }
+                    match (context.deadline) {
+                        case Some(deadline) => changed.wait(timeout: deadline.remaining())
+                        case None => changed.wait()
+                    }
+                }
+                streams.isEmpty()
+            }
+        } finally {
+            registration.unregister()
+        }
+    }
+
     /** Idempotently closes and removes every active stream. */
     public func closeConnection(completion: Http2ConnectionCompletion): Bool {
         let (won, claimed, registration) = synchronized(mutex) {
@@ -257,6 +278,7 @@ public class Http2StreamRegistry <: Http2ReaderTerminationListener {
                 terminal = Some(completion)
                 let result = streams.toArray()
                 streams.clear()
+                changed.notifyAll()
                 let currentRegistration = readerRegistration
                 readerRegistration = None<Http2ReaderTerminationRegistration>
                 (true, result, currentRegistration)
@@ -301,6 +323,7 @@ public class Http2StreamRegistry <: Http2ReaderTerminationListener {
             for (index in 0..streams.size) {
                 if (streams[index].machine.id.value == streamId.value) {
                     let _ = streams.remove(at: index)
+                    changed.notifyAll()
                     return
                 }
             }
@@ -325,6 +348,8 @@ public class Http2StreamRegistry <: Http2ReaderTerminationListener {
     private func requireRegistryOpenLocked(): Unit {
         if (terminal.isSome()) { throw IllegalStateException("HTTP/2 connection stream registry is closed") }
     }
+
+    private func wakeRegistryWaiters(): Unit { synchronized(mutex) { changed.notifyAll() } }
 
     private func requirePeerStreamIdLocked(streamId: Http2StreamId): Unit {
         if (!streamId.isStream()) { throw streamConnectionFailure("HTTP/2 peer stream id must be non-zero") }
