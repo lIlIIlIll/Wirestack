@@ -50,6 +50,16 @@ DEFAULT_SCENARIOS = (
     Scenario("close-during-read", 500),
 )
 
+FULL_LINUX_SCENARIOS = (
+    Scenario("connect-close", 100_000),
+    Scenario("peer-reset", 100_000),
+    Scenario("close-during-read", 100_000),
+)
+
+SOAK_MINIMUM_SECONDS = 24 * 60 * 60
+RSS_GROWTH_LIMIT_KIB = 8192.0
+FD_GROWTH_LIMIT = 1.0
+
 
 def percentile(values: Sequence[float], percent: float) -> float | None:
     if not values:
@@ -176,9 +186,13 @@ class StressServer:
 
     def _handle(self, connection: socket.socket) -> None:
         connection.settimeout(self.timeout)
-        if self.mode == "connect-close":
+        mode = self.mode
+        if mode == "mixed-soak":
+            modes = ("connect-close", "echo-close", "peer-reset", "close-during-read")
+            mode = modes[(self.accepted - 1) % len(modes)]
+        if mode == "connect-close":
             return
-        if self.mode == "echo-close":
+        if mode == "echo-close":
             data = bytearray()
             while len(data) < 64:
                 chunk = connection.recv(64 - len(data))
@@ -191,12 +205,12 @@ class StressServer:
             connection.sendall(data)
             self.bytes_echoed += len(data)
             return
-        if self.mode == "peer-reset":
+        if mode == "peer-reset":
             connection.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER,
                                   struct.pack("ii", 1, 0))
             self.reset_count += 1
             return
-        if self.mode == "close-during-read":
+        if mode == "close-during-read":
             while True:
                 try:
                     data = connection.recv(64)
@@ -261,6 +275,47 @@ def parse_result(stdout: str) -> dict[str, str]:
     return fields
 
 
+def median(values: Sequence[float]) -> float:
+    ordered = sorted(values)
+    middle = len(ordered) // 2
+    if len(ordered) % 2:
+        return ordered[middle]
+    return (ordered[middle - 1] + ordered[middle]) / 2.0
+
+
+def resource_trend(samples: Sequence[Mapping[str, int]]) -> dict[str, Any]:
+    """Detect sustained end-to-end growth after excluding process warmup."""
+    if len(samples) < 20:
+        return {"decision": "INCONCLUSIVE", "reason": "fewer than 20 samples"}
+    warmup = max(1, len(samples) // 5)
+    steady = samples[warmup:]
+    window = max(1, len(steady) // 5)
+    first = steady[:window]
+    last = steady[-window:]
+    first_rss = median([float(item["rss_kib"]) for item in first])
+    last_rss = median([float(item["rss_kib"]) for item in last])
+    first_fd = median([float(item["fd_count"]) for item in first])
+    last_fd = median([float(item["fd_count"]) for item in last])
+    rss_growth = last_rss - first_rss
+    fd_growth = last_fd - first_fd
+    decision = "PASS" if (
+        rss_growth <= RSS_GROWTH_LIMIT_KIB and fd_growth <= FD_GROWTH_LIMIT
+    ) else "FAIL"
+    return {
+        "decision": decision,
+        "warmup_samples_excluded": warmup,
+        "comparison_window_samples": window,
+        "first_rss_median_kib": first_rss,
+        "last_rss_median_kib": last_rss,
+        "rss_growth_kib": rss_growth,
+        "rss_growth_limit_kib": RSS_GROWTH_LIMIT_KIB,
+        "first_fd_median": first_fd,
+        "last_fd_median": last_fd,
+        "fd_growth": fd_growth,
+        "fd_growth_limit": FD_GROWTH_LIMIT,
+    }
+
+
 def resource_aggregate(samples: Sequence[Mapping[str, int]]) -> dict[str, Any]:
     if not samples:
         return {"sample_count": 0, "rss_kib": None, "fd_count": None}
@@ -290,7 +345,7 @@ def classify(scenario: Scenario, fields: Mapping[str, str], process: Mapping[str
     close_errors = int(fields["closeErrors"])
     mode_ok = fields["mode"] == scenario.mode and fields["unknownMode"] == "false"
     base_ok = (process["exit_code"] == 0 and not process["timed_out"] and mode_ok and
-               iterations == scenario.iterations and connected == iterations and
+               iterations == scenario.iterations and
                completed == iterations and server.accepted == iterations and
                other_errors == 0 and close_errors == 0)
     if scenario.mode == "echo-close":
@@ -299,9 +354,13 @@ def classify(scenario: Scenario, fields: Mapping[str, str], process: Mapping[str
                    server.bytes_received == iterations * 64 and
                    server.bytes_echoed == iterations * 64)
     elif scenario.mode == "peer-reset":
-        base_ok = base_ok and server.reset_count == iterations and socket_errors == iterations
+        base_ok = (base_ok and connected <= iterations and
+                   server.reset_count == iterations and socket_errors == iterations)
     elif scenario.mode == "close-during-read":
-        base_ok = base_ok and socket_errors + eof == iterations
+        base_ok = (base_ok and connected == iterations and
+                   socket_errors + eof == iterations)
+    else:
+        base_ok = base_ok and connected == iterations
     return {
         "mode": scenario.mode, "decision": "PASS" if base_ok else "FAIL",
         "iterations": iterations, "connected": connected, "completed": completed,
@@ -313,6 +372,7 @@ def classify(scenario: Scenario, fields: Mapping[str, str], process: Mapping[str
                    "bytes_echoed": server.bytes_echoed,
                    "reset_count": server.reset_count},
         "resources": {"aggregate": resource_aggregate(sampler.samples),
+                      "trend": resource_trend(sampler.samples),
                       "samples": sampler.samples},
         "process": dict(process),
     }
@@ -341,18 +401,50 @@ def compile_probe(artifacts: Path, timeout: float) -> tuple[Path, dict[str, Any]
 
 
 def execute(artifacts: Path, scenarios: Sequence[Scenario], timeout: float,
-            revision: str) -> dict[str, Any]:
+            revision: str, sample_interval: float = 0.01,
+            soak_seconds: int = 0) -> dict[str, Any]:
     artifacts.mkdir(parents=True, exist_ok=True)
     binary, compile_info = compile_probe(artifacts, timeout)
     results = []
     for scenario in scenarios:
-        sampler = ResourceSampler()
+        sampler = ResourceSampler(sample_interval)
         with StressServer(scenario.mode, scenario.iterations, timeout) as server:
             process = run_process([str(binary), scenario.mode, str(server.port),
                                    str(scenario.iterations)], artifacts / "probe",
                                   timeout, sampler)
         results.append(classify(scenario, parse_result(process["stdout"]),
                                 process, server, sampler))
+    soak = None
+    if soak_seconds > 0:
+        sampler = ResourceSampler(sample_interval)
+        with StressServer("mixed-soak", sys.maxsize, timeout) as server:
+            process = run_process([str(binary), "mixed-soak", str(server.port),
+                                   str(soak_seconds)], artifacts / "probe",
+                                  soak_seconds + timeout, sampler)
+        fields = parse_result(process["stdout"])
+        iterations = int(fields["iterations"])
+        trend = resource_trend(sampler.samples)
+        passed = (
+            process["exit_code"] == 0 and not process["timed_out"] and
+            fields["mode"] == "mixed-soak" and iterations > 0 and
+            int(fields["completed"]) == iterations and
+            int(fields["otherErrors"]) == 0 and
+            int(fields["closeErrors"]) == 0 and server.accepted == iterations and
+            trend["decision"] == "PASS"
+        )
+        soak = {
+            "decision": "PASS" if passed else "FAIL",
+            "requested_seconds": soak_seconds,
+            "iterations": iterations,
+            "connected": int(fields["connected"]),
+            "completed": int(fields["completed"]),
+            "socket_errors": int(fields["socketErrors"]),
+            "eof": int(fields["eof"]),
+            "server_accepted": server.accepted,
+            "resources": {"aggregate": resource_aggregate(sampler.samples),
+                          "trend": trend, "samples": sampler.samples},
+            "process": dict(process),
+        }
     bounded_status = "PASS" if all(item["decision"] == "PASS" for item in results) else "FAIL"
     return {
         "schema_version": SCHEMA_VERSION,
@@ -366,11 +458,13 @@ def execute(artifacts: Path, scenarios: Sequence[Scenario], timeout: float,
                         "cjc": command_text(["cjc", "--version"]),
                         "cjpm": command_text(["cjpm", "--version"]),
                         "cangjie_home": os.environ.get("CANGJIE_HOME")},
-        "compile": compile_info, "scenarios": results,
+        "compile": compile_info, "scenarios": results, "soak": soak,
         "deferred": [
             {"id": "100000-transport-cleanups", "status": "NOT_RUN"},
             {"id": "100000-tls-handshake-failure-cleanups", "status": "NOT_YET_APPLICABLE"},
-            {"id": "24-hour-idle-active-soak", "status": "NOT_RUN"},
+            {"id": "24-hour-idle-active-soak", "status":
+             "PASS" if soak is not None and soak["decision"] == "PASS" and
+             soak_seconds >= SOAK_MINIMUM_SECONDS else "NOT_RUN"},
             {"id": "windows-native", "status": "BLOCKED"},
             {"id": "macos-native", "status": "BLOCKED"},
             {"id": "android-native", "status": "BLOCKED"},
@@ -407,6 +501,40 @@ def parse_scenarios(text: str) -> tuple[Scenario, ...]:
     return tuple(result)
 
 
+def load_tls_cleanup_report(path: Path | None) -> dict[str, Any] | None:
+    if path is None:
+        return None
+    value = json.loads(path.read_text(encoding="utf-8"))
+    required = {
+        "schema_version": 1,
+        "task_id": "M0-011",
+        "scenario": "tls-handshake-failure-cleanup",
+        "requested_cycles": 100_000,
+        "completed_cycles": 100_000,
+        "decision": "PASS",
+    }
+    for key, expected in required.items():
+        if value.get(key) != expected:
+            raise GateError(
+                f"TLS cleanup report {key}={value.get(key)!r}, expected {expected!r}")
+    trend = value.get("resources", {}).get("trend", {})
+    if trend.get("decision") != "PASS":
+        raise GateError("TLS cleanup report lacks PASS resource trend")
+    build = value.get("build", {})
+    if build.get("system_tls_dependencies") or build.get("runtime_loader_library_strings"):
+        raise GateError("TLS cleanup report contains a forbidden system TLS dependency")
+    return value
+
+
+def transport_cleanup_pass(results: Sequence[Mapping[str, Any]]) -> bool:
+    by_mode = {item["mode"]: item for item in results}
+    return all(
+        mode in by_mode and by_mode[mode]["decision"] == "PASS" and
+        by_mode[mode]["iterations"] >= 100_000
+        for mode in ("connect-close", "peer-reset", "close-during-read")
+    )
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     root = Path(__file__).resolve().parents[2]
     parser = argparse.ArgumentParser()
@@ -420,24 +548,68 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--repository-revision",
                         default=os.environ.get("WIRESTACK_REPOSITORY_REVISION", "unknown"))
     parser.add_argument("--quick", action="store_true")
+    parser.add_argument("--full-linux", action="store_true")
+    parser.add_argument("--soak-seconds", type=int, default=0)
+    parser.add_argument("--sample-interval-seconds", type=float, default=0.01)
+    parser.add_argument("--tls-cleanup-report", type=Path)
     args = parser.parse_args(argv)
     scenarios = args.scenarios
     if args.quick:
         scenarios = tuple(Scenario(item.mode, min(item.iterations, 5)) for item in DEFAULT_SCENARIOS)
+    elif args.full_linux:
+        scenarios = FULL_LINUX_SCENARIOS
+    if args.soak_seconds < 0:
+        parser.error("--soak-seconds must be non-negative")
+    if args.sample_interval_seconds <= 0:
+        parser.error("--sample-interval-seconds must be positive")
     try:
+        tls_cleanup = load_tls_cleanup_report(
+            args.tls_cleanup_report.resolve() if args.tls_cleanup_report else None)
         report = execute(args.artifact_dir.resolve(), scenarios,
-                         args.timeout_seconds, args.repository_revision)
+                         args.timeout_seconds, args.repository_revision,
+                         args.sample_interval_seconds, args.soak_seconds)
+        report["tls_handshake_failure_cleanup"] = tls_cleanup
+        transport_pass = transport_cleanup_pass(report["scenarios"])
+        soak_pass = (
+            report["soak"] is not None and report["soak"]["decision"] == "PASS" and
+            report["soak"]["requested_seconds"] >= SOAK_MINIMUM_SECONDS
+        )
+        tls_pass = tls_cleanup is not None
+        report["linux_profile_status"] = (
+            "PASS" if transport_pass and soak_pass and tls_pass else "INCOMPLETE")
+        non_claims = ["not full GATE-NET-06 completion", "not six-platform evidence"]
+        if not transport_pass:
+            non_claims.append("not 100000-cleanup transport evidence")
+        if not soak_pass:
+            non_claims.append("not a 24-hour soak")
+        if not tls_pass:
+            non_claims.append("not TLS cleanup evidence")
+        report["non_claims"] = non_claims
+        for item in report["deferred"]:
+            if item["id"] == "100000-transport-cleanups":
+                item["status"] = "PASS" if transport_pass else "NOT_RUN"
+            elif item["id"] == "100000-tls-handshake-failure-cleanups":
+                item["status"] = "PASS" if tls_pass else "NOT_RUN"
         atomic_json(args.output.resolve(), report)
     except Exception as error:
         print(f"GATE-NET-06: ERROR: {type(error).__name__}: {error}", file=sys.stderr)
         return 1
-    print(f"M0-011 task=INCOMPLETE bounded-Linux={report['bounded_linux_status']} global=INCOMPLETE")
+    print(f"M0-011 Linux={report['linux_profile_status']} "
+          f"bounded-Linux={report['bounded_linux_status']} global=INCOMPLETE")
     for item in report["scenarios"]:
         resources = item["resources"]["aggregate"]
         print(f"- {item['mode']}: {item['decision']} iterations={item['iterations']} "
               f"rss-max={resources['rss_kib']['max'] if resources['rss_kib'] else None} KiB "
               f"fd-max={resources['fd_count']['max'] if resources['fd_count'] else None}")
-    return 0
+    if report["soak"] is not None:
+        soak = report["soak"]
+        print(f"- mixed-soak: {soak['decision']} seconds={soak['requested_seconds']} "
+              f"iterations={soak['iterations']} trend={soak['resources']['trend']['decision']}")
+    passed = (report["linux_profile_status"] == "PASS" if args.full_linux else
+              report["bounded_linux_status"] == "PASS")
+    if not args.full_linux and report["soak"] is not None:
+        passed = passed and report["soak"]["decision"] == "PASS"
+    return 0 if passed else 1
 
 
 if __name__ == "__main__":

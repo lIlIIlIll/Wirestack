@@ -28,6 +28,34 @@ Each report must record:
 A failed gate may unlock an `UP-*` tracking task. It must never be bypassed by
 polling, private runtime handles, exception-message parsing, or TLS-layer guesses.
 
+### Linux GATE-NET-06 formal profile
+
+The Linux profile uses two fail-closed reports. First run the pinned AWS-LC
+failed-handshake cleanup workload:
+
+```bash
+bash scripts/gate-net06-tls-failure-cleanup \
+  --cycles 100000 \
+  --output build/gates/net06-tls-failure-cleanup.json
+```
+
+Then run the transport counts and 24-hour mixed soak, importing that exact
+report:
+
+```bash
+bash scripts/gate-net06-leak-soak \
+  --full-linux \
+  --soak-seconds 86400 \
+  --sample-interval-seconds 60 \
+  --timeout-seconds 1800 \
+  --tls-cleanup-report build/gates/net06-tls-failure-cleanup.json
+```
+
+Short or missing runs remain `INCOMPLETE`. The formal Linux result requires all
+three 100,000-iteration transport scenarios, exactly 100,000 failed TLS
+handshake cleanups, a full 86,400-second soak, PASS RSS/FD steady-state trends,
+and no dynamic system TLS dependency.
+
 ## Release gates
 
 Release-gate ownership and blockers are summarized in

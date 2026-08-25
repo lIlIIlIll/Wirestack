@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import sys
+import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -71,11 +73,43 @@ class Tests(unittest.TestCase):
         server = self.server(); server.reset_count = 3
         self.assertEqual("PASS", gate.classify(
             scenario, fields, self.process(), server, self.sampler())["decision"])
+        fields["connected"] = "2"
+        self.assertEqual("PASS", gate.classify(
+            scenario, fields, self.process(), server, self.sampler())["decision"])
 
     def test_resource_aggregate(self):
         aggregate = gate.resource_aggregate(self.sampler().samples)
         self.assertEqual(110, aggregate["rss_kib"]["max"])
         self.assertEqual(5, aggregate["fd_count"]["max"])
+
+    def test_resource_trend_excludes_warmup_and_accepts_bounded_plateau(self):
+        samples = [
+            {"elapsed_ms": index * 10,
+             "rss_kib": 100 + min(index, 4) * 100,
+             "fd_count": 4 + (1 if index % 2 else 0)}
+            for index in range(100)
+        ]
+        trend = gate.resource_trend(samples)
+        self.assertEqual("PASS", trend["decision"])
+        self.assertEqual(20, trend["warmup_samples_excluded"])
+
+    def test_resource_trend_rejects_sustained_rss_or_fd_growth(self):
+        rss = [
+            {"elapsed_ms": index * 10, "rss_kib": index * 1024,
+             "fd_count": 4}
+            for index in range(100)
+        ]
+        fds = [
+            {"elapsed_ms": index * 10, "rss_kib": 100,
+             "fd_count": index}
+            for index in range(100)
+        ]
+        self.assertEqual("FAIL", gate.resource_trend(rss)["decision"])
+        self.assertEqual("FAIL", gate.resource_trend(fds)["decision"])
+
+    def test_resource_trend_is_inconclusive_without_enough_samples(self):
+        self.assertEqual("INCONCLUSIVE", gate.resource_trend(
+            self.sampler().samples)["decision"])
 
     def test_scenario_parser(self):
         parsed = gate.parse_scenarios("connect-close:10,echo-close:5")
@@ -83,6 +117,41 @@ class Tests(unittest.TestCase):
                          tuple(item.mode for item in parsed))
         with self.assertRaises(Exception):
             gate.parse_scenarios("connect-close:0")
+
+    def test_full_linux_profile_uses_required_counts(self):
+        self.assertEqual(
+            (("connect-close", 100000), ("peer-reset", 100000),
+             ("close-during-read", 100000)),
+            tuple((item.mode, item.iterations) for item in gate.FULL_LINUX_SCENARIOS),
+        )
+
+    def test_transport_cleanup_pass_consumes_serialized_scenario_records(self):
+        records = [
+            {"mode": mode, "decision": "PASS", "iterations": 100000}
+            for mode in ("connect-close", "peer-reset", "close-during-read")
+        ]
+        self.assertTrue(gate.transport_cleanup_pass(records))
+        records[0]["iterations"] = 99999
+        self.assertFalse(gate.transport_cleanup_pass(records))
+
+    def test_tls_cleanup_report_is_fail_closed(self):
+        report = {
+            "schema_version": 1, "task_id": "M0-011",
+            "scenario": "tls-handshake-failure-cleanup",
+            "requested_cycles": 100000, "completed_cycles": 100000,
+            "decision": "PASS",
+            "resources": {"trend": {"decision": "PASS"}},
+            "build": {"system_tls_dependencies": [],
+                      "runtime_loader_library_strings": []},
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "tls.json"
+            path.write_text(json.dumps(report))
+            self.assertEqual("PASS", gate.load_tls_cleanup_report(path)["decision"])
+            report["completed_cycles"] = 99999
+            path.write_text(json.dumps(report))
+            with self.assertRaises(gate.GateError):
+                gate.load_tls_cleanup_report(path)
 
 
 if __name__ == "__main__":

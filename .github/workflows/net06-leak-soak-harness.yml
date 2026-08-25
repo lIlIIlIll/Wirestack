@@ -5,16 +5,26 @@ on:
     paths:
       - "tools/gates/net06_leak_soak.py"
       - "tools/gates/net06_leak_soak_sources.py"
+      - "tools/gates/net06_tls_failure_cleanup.py"
       - "tools/gates/tests/test_net06_leak_soak.py"
+      - "tools/gates/tests/test_net06_tls_failure_cleanup.py"
+      - "tools/tls_provider_poc/openssl_memory_poc.c"
+      - "tools/tls_provider_poc/run.py"
       - "scripts/gate-net06-leak-soak"
+      - "scripts/gate-net06-tls-failure-cleanup"
       - ".github/workflows/net06-leak-soak-harness.yml"
   push:
     branches: [main]
     paths:
       - "tools/gates/net06_leak_soak.py"
       - "tools/gates/net06_leak_soak_sources.py"
+      - "tools/gates/net06_tls_failure_cleanup.py"
       - "tools/gates/tests/test_net06_leak_soak.py"
+      - "tools/gates/tests/test_net06_tls_failure_cleanup.py"
+      - "tools/tls_provider_poc/openssl_memory_poc.c"
+      - "tools/tls_provider_poc/run.py"
       - "scripts/gate-net06-leak-soak"
+      - "scripts/gate-net06-tls-failure-cleanup"
       - ".github/workflows/net06-leak-soak-harness.yml"
 
 permissions:
@@ -29,6 +39,10 @@ jobs:
         with:
           python-version: "3.12"
       - name: Test NET-06 harness
-        run: python3 -m unittest discover -s tools/gates/tests -p 'test_net06_leak_soak.py' -v
+        run: python3 -m unittest discover -s tools/gates/tests -p 'test_net06*.py' -v
       - name: Compile harness
-        run: python3 -m py_compile tools/gates/net06_leak_soak.py tools/gates/net06_leak_soak_sources.py
+        run: >-
+          python3 -m py_compile
+          tools/gates/net06_leak_soak.py
+          tools/gates/net06_leak_soak_sources.py
+          tools/gates/net06_tls_failure_cleanup.py

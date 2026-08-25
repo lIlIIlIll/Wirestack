@@ -10,7 +10,12 @@
 #define MAX_STEPS 200000
 #define BIO_CAPACITY 4096
 #define PAYLOAD_SIZE 32768
+#ifndef CLEANUP_CYCLES
 #define CLEANUP_CYCLES 10000
+#endif
+#ifndef FAILURE_CLEANUP_CYCLES
+#define FAILURE_CLEANUP_CYCLES 0
+#endif
 
 static const unsigned char ALPN_WIRE[] = {2, 'h', '2', 8, 'h','t','t','p','/','1','.','1'};
 static int sni_seen = 0;
@@ -451,6 +456,11 @@ int main(int argc, char **argv) {
         cleanup = basic_case(server_cert, server_key, ca, client_cert, client_key,
                              TLS1_2_VERSION, 0, 0);
     }
+    int failure_cleanup = 1;
+    for (int i = 0; i < FAILURE_CLEANUP_CYCLES && failure_cleanup; ++i) {
+        failure_cleanup = negative_case(
+            server_cert, server_key, ca, "not-localhost", 1);
+    }
 
     printf("CAP tls12=%s\n", tls12 ? "PASS" : "FAIL");
     printf("CAP tls13=%s\n", tls13 ? "PASS" : "FAIL");
@@ -471,12 +481,13 @@ int main(int argc, char **argv) {
 #endif
     printf("CAP repeated_cleanup=%s\n", cleanup ? "PASS" : "FAIL");
     printf("METRIC repeated_cleanup_cycles=%d\n", CLEANUP_CYCLES);
+    printf("METRIC failure_cleanup_cycles=%d\n", FAILURE_CLEANUP_CYCLES);
 #if defined(OPENSSL_IS_AWSLC)
     printf("METRIC external_signer_calls=%u\n", external_signer_calls);
 #endif
 
     return (tls12 && tls13 && mtls && wrong_host && untrusted && trunc && cancel &&
-            cleanup &&
+            cleanup && failure_cleanup &&
 #if defined(OPENSSL_IS_AWSLC)
             external_signer &&
 #endif
