@@ -162,18 +162,17 @@ println(YJson.stringify(root))
 
 ## 性能
 
-在 37 项同语义测量中，yjson 有 29 项 paired median 低于 `cjfast_json`。下表选择
-通过稳定性门槛的代表 workload，并保留领先与落后方向：
+rc.2 候选的同批次测量包含 yjson、`stdx.json` 与 `cjfast_json` 的全部 36 个共同
+workload。下表选择通过三库 CV≤5% 门槛的代表行，并保留领先与落后方向：
 
-| Workload | yjson | cjfast_json | Latency ratio Y/C | Direction |
-|---|---:|---:|---:|---|
-| Large Map encode / string¹ | 119.887 µs | 132.802 µs | **0.903x** | yjson faster 11/11 |
-| Large Array encode / string | 101.547 µs | 75.899 µs | 1.338x | cjfast_json faster 11/11 |
-| `TemporalStats` encode / string | 20.879 µs | 21.824 µs | **0.957x** | yjson faster 11/11 |
+| Workload | yjson | stdx.json | cjfast_json | Y/S | Y/C | Direction vs cjfast |
+|---|---:|---:|---:|---:|---:|---|
+| Large Map encode / string | 120.094 µs | 259.263 µs | 131.072 µs | **0.465x** | **0.917x** | yjson faster 11/11 |
+| Nested object encode / bytes | 14.528 µs | 76.827 µs | 12.657 µs | **0.189x** | 1.145x | cjfast faster 11/11 |
+| `TemporalStats` encode / string | 21.163 µs | 81.277 µs | 21.824 µs | **0.261x** | **0.971x** | yjson faster 10/11 |
 
-`Latency ratio Y/C` 按 `yjson median / cjfast_json median` 计算，小于 1 表示 yjson
-耗时更低。¹ Large Map 来自独立稳定复测。绝对时间只代表对应 workload，不应外推为
-所有输入或平台上的性能排名。
+`Y/S` 与 `Y/C` 分别按 `yjson median / peer median` 计算，小于 1 表示 yjson 耗时更低。
+绝对时间只代表对应 workload，不应外推为所有输入或平台上的性能排名。
 
 更多结果和适用边界见[性能说明](docs/performance/README.md)。不同 runtime 或不同批次的
 数字不能拼接为统一排名。

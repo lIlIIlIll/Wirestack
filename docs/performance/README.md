@@ -7,10 +7,11 @@ Pure Compact、Custom Native DOM 与 yyjson Direct DOM 不是等价路径，不�
 
 ### Linux release 三库全量表
 
-当前候选 `1eac96b3e49862dd13323e2c99e7ae0ce246b6c2` 的 yjson、stdx.json、
-cjfast_json 同批次结果包含全部 36 个共同 workload；9 行为 `stable`，27 行为 `noisy`，
-没有因 CV 超过 5% 删除任何行。见 [完整表与环境边界](results/2026-08-25-linux-release-three-library.md)
-和 [machine-readable CSV](results/2026-08-25-linux-release-three-library.csv)。
+rc.2 候选 `15d264c34123ff2624572d946c55c7395ccd7fe9` 的 yjson、stdx.json、
+cjfast_json 同批次结果包含全部 36 个共同 workload；13 行为 `stable`，23 行为 `noisy`，
+没有因 CV 超过 5% 删除任何行。见 [完整表与环境边界](results/2026-08-25-linux-rc2-three-library.md)
+和 [machine-readable CSV](results/2026-08-25-linux-rc2-three-library.csv)。完整原始轮次、日志、
+manifest 与 checksum 随 [rc.2 evidence](../../release/1.0.0-rc.2/evidence.md) 发布。
 
 ### yjson 与 cjfast_json
 

@@ -1,0 +1,59 @@
+{
+  "releaseIdentity": "1.0.0-rc.2",
+  "candidateSourceCommit": "15d264c34123ff2624572d946c55c7395ccd7fe9",
+  "generatedAtUtc": "2026-08-25T10:34:00Z",
+  "sourceArchive": {
+    "fileCount": 176,
+    "sha256": "3b924dc80319a0af48022c0a34e62969947dfa593dbbfeedca10c6047ceb1f76",
+    "storedInRepository": false
+  },
+  "localFreshCheckout": {
+    "status": "PASS",
+    "apiSnapshotDeclarations": 1065,
+    "reviewedApiDeltas": 38,
+    "coreTestsPassed": 535,
+    "standardsRequiredPassed": 2110,
+    "standardsOptionalFormatsPassed": 3074,
+    "fuzzCases": [5000, 50000],
+    "log": "logs/local-fresh-checkout.log.gz"
+  },
+  "packageRehearsal": {
+    "status": "PASS",
+    "moduleCount": 6,
+    "log": "logs/package-rehearsal.log"
+  },
+  "performanceComparison": {
+    "status": "PASS",
+    "candidateSourceCommit": "15d264c34123ff2624572d946c55c7395ccd7fe9",
+    "libraries": ["yjson", "stdx.json", "cjfast_json"],
+    "workloads": 36,
+    "runsPerLibraryAndWorkload": 11,
+    "cvLimitPercent": 5.0,
+    "stableWorkloads": 13,
+    "noisyWorkloadsRetained": 23,
+    "cjfastJsonCommit": "eefdedd1e53c93bb5ada11a96b9b81d88b2c6c65",
+    "fullArtifact": "performance/full-result.tar.gz",
+    "fullArtifactSha256": "24f1109ca25db2166bc66fde71fddeb46520cdd6fbe2318fedaa7e9de40b25c5"
+  },
+  "yyjsonIsolationFixture": {
+    "upstreamVersion": "0.11.1",
+    "source": "https://github.com/ibireme/yyjson/archive/refs/tags/0.11.1.tar.gz",
+    "tarballSha256": "610a38a5e59192063f5f581ce0c3c1869971c458ea11b58dfe00d1c8269e255d",
+    "storedInRepository": false
+  },
+  "hostedCi": {
+    "status": "NOT_RUN",
+    "policy": "NON_BLOCKING",
+    "exceptionApproval": {
+      "authority": "release owner",
+      "approvedOn": "2026-08-25",
+      "rationale": "Hosted CI is not required for this release candidate; complete Linux local evidence is blocking."
+    }
+  },
+  "tag": {
+    "status": "NOT_RUN"
+  },
+  "registryPublish": {
+    "status": "NOT_RUN"
+  }
+}

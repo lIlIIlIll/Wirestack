@@ -1,0 +1,41 @@
+{
+  "capturedAtUtc": "2026-08-25T10:34:00Z",
+  "qualificationRunner": {
+    "hostname": "Arch",
+    "os": "Linux 7.1.9-arch1-2",
+    "architecture": "x86_64",
+    "libc": "glibc 2.44",
+    "cpu": "Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz",
+    "physicalCores": 6,
+    "logicalCpus": 12,
+    "cangjie": {
+      "sdkRoot": "<home>/cangjie_sdk/daily/cangjie",
+      "cjcVersion": "1.1.0-alpha.20260817040003 (cjnative)",
+      "cjcSha256": "02c01c8b90f5228c380306cd661d33a2d1c05262be34019128d2a37946e57d3e",
+      "cjpmVersion": "1.1.3",
+      "cjpmSha256": "23a1dbc5f21a0e6022ea92005c31307a0afc1f3401c35762b1f1403fa0fd572f"
+    },
+    "nativeCompilers": {
+      "clang": "15.0.7",
+      "gcc": "16.2.1"
+    }
+  },
+  "performanceRunner": {
+    "hostname": "ubuntu2223131",
+    "os": "Linux 5.15.0-187-generic",
+    "architecture": "x86_64",
+    "libc": "glibc 2.35",
+    "cpu": "Intel(R) Xeon(R) Gold 6248R CPU @ 3.00GHz",
+    "physicalCores": 48,
+    "logicalCpus": 96,
+    "pinnedCpu": 8,
+    "cangjie": {
+      "sdkRoot": "<home>/fastjson-bench-sdk-20260803/cangjie",
+      "cjcVersion": "1.1.0-alpha.20260803040049 (cjnative)",
+      "cjcSha256": "a314ec301c1b1e04ba0889f3d27068b5fa6535b14bce9677a8996849b793df86",
+      "cjpmVersion": "1.1.3",
+      "cjpmSha256": "5dc2da000faf7a8fbf05277a267a451ed3ca6f1819fbdef76596ebc37842aed6",
+      "stdxVersion": "0.0.3"
+    }
+  }
+}

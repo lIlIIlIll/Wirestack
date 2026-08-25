@@ -35,7 +35,10 @@
 - [测试策略](maintainers/testing.md)
 - [Native backend 内部契约](maintainers/native-internals.md)
 - [发布流程](maintainers/releasing.md)
+- [1.0.0-rc.2 evidence snapshot](../release/1.0.0-rc.2/evidence.md)
 - [1.0.0-rc.1 evidence snapshot](../release/1.0.0-rc.1/evidence.md)
 - [历史初始 parser test plan](archive/initial-parser-test-plan.md)
 
-当前文档仍有两个明确缺口：完整逐符号 API reference 尚未自动生成；性能原始机器可读结果尚未全部随仓库发布。相应页面会区分“当前公开 contract”和“单次实验或 release evidence”。
+当前文档仍缺少面向用户的完整逐符号 API reference；CI 已提供完整公开声明快照，rc.2
+性能原始样本也随 release evidence 发布。相应页面会继续区分“公开 contract”和“单次实验
+或 release evidence”。

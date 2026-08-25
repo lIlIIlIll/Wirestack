@@ -12,3 +12,9 @@ benchmarks/java_fastjson2/build/
 !release/1.0.0-rc.1/artifacts/environment.json
 !release/1.0.0-rc.1/artifacts/manifest.json
 !release/1.0.0-rc.1/artifacts/checksums.txt
+!release/1.0.0-rc.2/artifacts/environment.json
+!release/1.0.0-rc.2/artifacts/manifest.json
+!release/1.0.0-rc.2/artifacts/checksums.txt
+!release/1.0.0-rc.2/artifacts/performance/summary.json
+!release/1.0.0-rc.2/artifacts/performance/metadata.json
+!release/1.0.0-rc.2/artifacts/performance/checksums.txt

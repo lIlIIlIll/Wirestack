@@ -1,0 +1,4 @@
+Script started on 2026-08-25 18:28:02+08:00 [COMMAND="python3 scripts/release_registry_rehearsal.py /tmp/yjson-rc2-rehearsal-final-15d264c" <not executed on terminal>]
+registry-style rehearsal passed modules=6 destination=/tmp/yjson-rc2-rehearsal-final-15d264c
+
+Script done on 2026-08-25 18:32:42+08:00 [COMMAND_EXIT_CODE="0"]
