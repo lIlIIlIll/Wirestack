@@ -1,63 +1,61 @@
 # 配置与错误
 
+yjson 的读取与写出策略都通过不可隐式猜测的 config 传入。默认配置适合可信输入和兼容
+行为；服务端接收不可信内容时，应显式设置预算。
+
 ## 读取配置
 
-`JsonReadConfig.defaults` 等价于以下主要策略：
-
 ```cangjie
-JsonReadConfig(
+let config = JsonReadConfig(
     unknownFieldPolicy: JsonUnknownFieldPolicy.Ignore,
     duplicateKeyPolicy: JsonDuplicateKeyPolicy.LastWins,
     numberPolicy: JsonNumberPolicy.Int64WhenExact,
     includeErrorLocation: true,
     maxDepth: 256,
-    maxPolymorphicObjectBytes: 0,
+    maxBytes: 0,
     maxStringBytes: 0,
-    maxBytes: 0
+    maxPolymorphicObjectBytes: 0
 )
 ```
 
-三个 byte limit 的 `0` 表示 unlimited；`maxDepth` 必须为正数。处理不可信输入时不要依赖 unlimited 默认值，见 [资源限制](resource-limits.md)。
+三个 byte limit 的 `0` 都表示 unlimited；`maxDepth` 必须为正数。`PreserveLiteral` 保留
+非结构化 number token 的文本表示。未知 typed 字段与重复 key 可分别切换为 Reject。
 
-`JsonNumberPolicy.PreserveLiteral` 保留非结构化 number token 的文本表示；默认策略会在精确可表示时产生 Int64。重复 key 与未知 typed 字段可分别改为 Reject。
+具体预算语义、入口覆盖和 Native 一致性见 [资源限制](resource-limits.md)。
 
 ## 写出配置
 
-`JsonWriteConfig.compact` 生成紧凑文本，`JsonWriteConfig.pretty` 使用换行与四空格缩进。
-便利入口 `YJson.stringifyPretty()` 的默认参数是两空格；需要与 `JsonWriteConfig.pretty`
-完全一致时应显式传入对应配置或缩进。自定义配置还控制 newline、indent、separator 空格、
-HTML-safe escaping、错误位置、最大深度与 `maxBytes`。写出侧 `maxBytes = 0` 表示
-unlimited；正数超限产生 `output_too_large`。whole-document Native backend 在写入调用方
-stream 前完成检查；默认 Pure backend 可能已经写出前缀，因此失败后不得继续使用该
-document 的输出。
+- `JsonWriteConfig.compact`：紧凑输出。
+- `JsonWriteConfig.pretty`：换行和四空格缩进。
+- `YJson.stringifyPretty(value)`：便利入口，默认两空格缩进。
 
-## 错误处理
+自定义配置还控制 newline、indent、separator space、HTML-safe escaping、错误位置、最大
+深度与 `maxBytes`。写出预算超限使用 `output_too_large`。Stream 失败可能已写出前缀，
+不要继续复用该 document 的输出。
 
-解析、codec 与限制错误使用 `JsonException`。对需要稳定分类的调用方，应判断 `error.code`，不要匹配 message。常见公开 code 包括：
+## 按稳定错误码处理
+
+解析、codec 和预算失败使用 `JsonException`。调用方应匹配 `error.code`，不要解析 message。
 
 | code | 含义 |
 | --- | --- |
-| `parse_error` | JSON token 或文档结构无效 |
-| `unknown_field` | typed decode 在 Reject 策略下遇到未知字段 |
-| `duplicate_key` | Reject 策略下遇到重复 key |
-| `missing_field` | generated codec 的必需字段缺失 |
-| `missing_discriminator` | generated polymorphic decode 缺少 discriminator |
-| `unknown_discriminator` | generated polymorphic decode 遇到未知 discriminator 值 |
-| `max_depth` | 读取或写出超过最大嵌套深度 |
-| `document_too_large` | `maxBytes` 或 Compact 表示上限被触发 |
-| `output_too_large` | 写出结果超过 `JsonWriteConfig.maxBytes` |
-| `string_too_large` | decoded UTF-8 string 超过预算 |
-| `polymorphic_object_too_large` | 根多态对象超过 replay budget |
-| `codec_type_mismatch` | erased codec 收到或返回错误类型 |
-| `codec_contract` | 调用了 codec 未提供的 fast contract |
+| `parse_error` | JSON token、UTF-8 或文档结构无效 |
+| `unknown_field` | Reject 策略遇到未知 typed 字段 |
+| `duplicate_key` | Reject 策略遇到重复 key |
+| `missing_field` | generated codec 必需字段缺失 |
+| `missing_discriminator` / `unknown_discriminator` | 多态 discriminator 错误 |
+| `max_depth` | 读取或写出超过嵌套深度 |
+| `document_too_large` | 文档 byte budget 或表示上限触发 |
+| `string_too_large` | decoded UTF-8 string 超出预算 |
+| `polymorphic_object_too_large` | 根多态对象 replay budget 触发 |
+| `output_too_large` | 写出超过 byte budget |
+| `codec_type_mismatch` / `codec_contract` | erased 类型或 fast contract 错误 |
 | `missing_key` / `index_out_of_bounds` | AST 查询失败 |
-| `invalid_json_pointer` / `json_pointer_not_found` | Pointer 语法无效或目标不存在 |
-| `invalid_json_patch` / `json_patch_test_failed` | Patch 文档无效或 test 操作失败 |
+| `invalid_json_pointer` / `json_pointer_not_found` | Pointer 错误 |
+| `invalid_json_patch` / `json_patch_test_failed` | Patch 错误 |
 | `invalid_json_path` | JSONPath 表达式无效 |
-| `unsupported_schema_dialect` | Schema 声明了 draft 2020-12 之外的 dialect |
-| `unsupported_schema_format` | `StrictAssertion` 遇到未注册的 Schema format |
+| `unsupported_schema_dialect` | Schema 不是 draft 2020-12 |
+| `unsupported_schema_format` | StrictAssertion 遇到未知 format |
 
-启用 `includeErrorLocation` 时，适用的 parse/limit 错误会附带 offset/location；并非所有语义错误都能提供相同粒度的位置。
-Pure String、bytes 和 stream 的语法错误统一使用 `parse_error`；Reject 策略下重复 key
-统一使用 `duplicate_key`。typed fast 字段匹配即使已经确定名称不匹配，也仍会完整验证
-JSON string grammar 与 UTF-8，非法未知 key 不会降级为普通 unknown field。
+`includeErrorLocation` 为 true 时，适用的 parse/limit 错误携带 offset、line 和 column；
+语义错误不保证具有同样的位置粒度。

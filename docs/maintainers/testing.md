@@ -1,106 +1,62 @@
-# Testing yjson
+# 测试 yjson
 
-This guide defines stable test layers and release expectations. One-off execution
-details belong in release evidence rather than this document.
+稳定文档定义测试层和发布期望；某次运行的 commit、SDK、日志、case 数与 checksum 写入
+对应 `release/<version>/evidence.md`。
 
-## Test layers
+## 测试层
 
-| Layer | Scope | Primary entry point |
-|---|---|---|
-| Core unit and contract tests | parser, writer, codecs, AST, Compact, streams, Schema, limits | `cjpm test` |
-| External codec consumer | caller-package `@JsonCodec`, enum, polymorphism, fast decoder | `packages/codec_integration` |
-| JSON literal consumer | `@Json`, `@JsonValue`, interpolation order, dynamic LastWins | `packages/json_literal_integration` |
-| Standards conformance | pinned JSON Schema, JSONPath and JSON Patch suites through public API | `scripts/run_standards_conformance.py` |
-| Release performance | complete interleaved yjson/stdx.json/cjfast_json table | `scripts/release_performance_compare.sh` |
-| Compile-fail macro tests | invalid literal grammar and duplicate static keys | `scripts/check_json_literal_compile_fail.sh` |
-| Custom Native package | DOM lifecycle, policies, resource limits | `packages/yjson_native` |
-| yyjson package | Direct DOM lifecycle, semantics, resource limits | `packages/yjson_yyjson` |
-| Native C checks | warnings, scanner/DOM tests, sanitizers, differential fuzz | `scripts/release_native_checks.sh` |
-| External release consumers | staged core, macro, Custom Native, yyjson packages | `scripts/release_consumer_checks.py` |
-| Package/release boundaries | manifests, source staging, symbols, licenses | release scripts |
+| Layer | 验证内容 | 入口 |
+| --- | --- | --- |
+| Core | parser、writer、codec、AST、Compact、stream、Schema、limits | `cjpm test` |
+| External codec consumer | 调用方 macro、enum、多态、fast decoder | `packages/codec_integration` |
+| Literal consumer | `@Json`、`@JsonValue`、插值顺序、LastWins | `packages/json_literal_integration` |
+| Compile-fail | 无效 literal grammar、静态重复 key | `scripts/check_json_literal_compile_fail.sh` |
+| Standards | 固定 revision Schema/Path/Patch suites | `scripts/run_standards_conformance.py` |
+| Optional packages | Native DOM、stream、lifecycle、limits | 各 package test/consumer |
+| Native C | warnings、sanitizers、differential fuzz | `scripts/release_native_checks.sh` |
+| Packaging | staging、manifest、license、symbols、isolated consumers | release scripts |
+| Performance | 同批次完整三库 workload | `scripts/release_performance_compare.sh` |
 
-## CI mapping
+Benchmark 不能替代 correctness test；root white-box pass 也不能替代 staged external consumer。
 
-`scripts/ci_job.sh` is the reusable job dispatcher:
+## CI job mapping
 
-| Job | Evidence |
-|---|---|
-| `api-inventory` | declaration, C ABI, and package-pairing inventory |
-| `core` | core test suite without a C build hook |
-| `standards-conformance` | pinned JSON Schema required, JSONPath CTS, and JSON Patch suites |
-| `schema-formats-conformance` | optional international/URI format package suite; required core remains independently gated |
-| `performance-comparison` | complete three-library release table; noisy rows retained |
-| `examples` | documented Pure Cangjie example |
-| `macro-consumer` | literal consumer, compile-fail cases, staged macro consumer |
-| `custom-native` | optional package tests, external consumer, no yyjson symbols |
-| `yyjson-native` | offline vendored package tests and external consumer |
-| `native-clang` / `native-gcc` | warning-clean targeted C checks |
-| `sanitizer` | ASan, UBSan, and leak detection |
-| `fuzz-short` / `fuzz-extended` | deterministic backend differential semantics |
-| `yyjson-colink` | vendored symbol isolation with the pinned second version |
+`scripts/ci_job.sh` 提供 `api-inventory`、`core`、`standards-conformance`、
+`schema-formats-conformance`、`performance-comparison`、`examples`、`macro-consumer`、
+`custom-native`、`yyjson-native`、`native-clang`、`native-gcc`、`sanitizer`、`fuzz-short`、
+`fuzz-extended` 和 `yyjson-colink` 等 job。
 
-Fresh-source and hosted executions are separate evidence and must never share one status.
+本地 fresh-source 与 hosted CI 是两份独立证据。一个 PASS 不能自动填充另一个状态。
+当前 release qualification 的阻断平台是 Linux x86_64；未执行的平台必须记录
+`NOT RUN / NON-BLOCKING / potentially supported`。
 
-当前 release qualification matrix 以 Linux x86_64 为阻断目标。Windows、macOS 与
-ARM64 的结果在接入前记录为 `NOT RUN / NON-BLOCKING / potentially supported`，不得写成
-PASS 或 supported。
+## Feature × backend
 
-## Feature × backend coverage
+| Public behavior | Pure | Custom Native | yyjson | External consumer |
+| --- | ---: | ---: | ---: | ---: |
+| Parser/serializer semantics | 主实现 | differential | differential | examples |
+| Generated class/struct/enum | 是 | n/a | n/a | codec consumer |
+| Generated polymorphism | 是 | n/a | n/a | codec consumer |
+| JSON literals | 是 | n/a | n/a | literal consumer |
+| Stream ownership/limits | 是 | 是 | 是 | package consumers |
+| Mutable AST | 是 | materialize | materialize | examples |
+| Compact query/lifecycle | 是 | 是 | 是 | release consumers |
+| Duplicate/number/resource policies | 是 | 是 | 是 | release consumers |
+| Schema / Pointer / Patch / Path | 是 | n/a | n/a | standards consumer |
 
-| Public behavior | Pure core | Custom Native | yyjson Direct | External consumer |
-|---|---:|---:|---:|---:|
-| RFC parser and serializer behavior | yes | differential | differential | examples |
-| Generated class/struct/enum codec | yes | n/a | n/a | codec integration |
-| Polymorphic generated codec | yes | n/a | n/a | codec integration |
-| JSON literals and dynamic keys | yes | n/a | n/a | literal integration |
-| Stream ownership and limits | yes | n/a | n/a | core tests |
-| Mutable AST | yes | materialization only | serialization materialization | examples |
-| Compact read-only query | Pure Compact | native view | coarse root query | release consumers |
-| Duplicate/number/resource policies | yes | yes | yes | release consumers |
-| Deterministic close and use-after-close | n/a | yes | yes | release consumers |
-| Schema | yes | n/a | n/a | core tests |
-| JSON Pointer/Patch/Path | yes | n/a | n/a | official conformance consumer |
+Differential 表示对照 portable semantic oracle，不代表 Native DOM API 与 `JsonNode` 相同。
 
-“Differential” means the Native C harness compares semantic results against the
-portable contract; it does not make the Native DOM API identical to `JsonNode`.
+## 测试政策
 
-## Test policy
+- 一个 case 只写一个确定预期；“接受或拒绝均可”不是 contract。
+- 优先验证 public result、error code、lifecycle、package boundary 和 compatibility。
+- 只有 public API 无法安全暴露 regression 时才使用 white-box test。
+- 外部 corpus 固定 revision 和预期 cardinality，不依赖浮动 upstream checkout。
+- executable 必须传播应用异常；shell exit 0 但输出含未处理异常仍是失败。
+- 性能只提供性能证据，不证明语义正确。
 
-- Test public results, errors, lifecycle, package boundaries, and compatibility.
-- Keep white-box tests only where a public contract cannot expose the scanner or
-  generated-code regression safely.
-- Specify one expected outcome. Phrases such as “accept or reject” are not test
-  cases until the product contract chooses one behavior.
-- Treat performance measurements as benchmark evidence, not correctness tests.
-- Record fixed JSONTestSuite or other external corpus revisions when imported;
-  do not rely on an unpinned upstream checkout.
-- Release-blocking policy belongs in the stable release procedure. Actual
-  command results, commit IDs, SDK identity, timestamps, logs, and checksums
-  belong in release-specific evidence.
+固定 standards baseline 当前为 Schema required 1299、JSONPath CTS 703、JSON Patch 108；
+optional format provider 增加 964 个适用 cases。具体 PASS 结果属于 release evidence。
 
-## Standards conformance gate
-
-The standards gate fixes upstream revisions and validates expected cardinalities through an
-independent public-API consumer. The release-blocking default is:
-
-| Suite | Required result |
-| --- | ---: |
-| JSON Schema draft 2020-12 required | 1299/1299 |
-| JSONPath CTS | 703/703 |
-| JSON Patch tests | 108/108 |
-
-Installing the optional `yjson_schema_formats` provider adds 964 applicable optional tests. The
-current result is 964/964 for that layer and 3074/3074 overall. The default 2110-case gate does not
-install the provider.
-
-## Executable exit-status gate
-
-Executable gates must propagate unhandled application exceptions as failures; shell success alone
-is not sufficient. The external codec consumer covers generated polymorphic decode with the default
-unlimited budget and a positive-budget overflow case.
-
-## Historical plan
-
-The former root `TEST_PLAN.md` is archived as
-[`docs/archive/initial-parser-test-plan.md`](../archive/initial-parser-test-plan.md).
-Its gap counts, ambiguous outcomes, and future-work statements are historical.
+早期 parser gap 计划保存在
+[`docs/archive/initial-parser-test-plan.md`](../archive/initial-parser-test-plan.md)，不代表当前 gate。

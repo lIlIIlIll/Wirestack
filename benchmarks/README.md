@@ -1,29 +1,32 @@
-# Benchmarks
+# yjson benchmarks
 
-本目录保存 yjson 的性能 workload 与对比 adapter。它们服务于回归分析，不构成产品 API。
+本目录保存性能 workload、peer adapter 和汇总脚本。它们用于回归与发布证据，不是产品
+API，也不能单独证明语义正确。
 
-## 覆盖范围
+## 组成
 
-- `packages/benchmarks/`：yjson 与 stdx.json 的 typed workload；
-- `packages/backend_benchmarks/`：Pure AST、Pure Compact、Custom Native 与 yyjson Direct
-  的 DOM backend workload；
-- `cjfast_json/`：cjfast_json typed adapter；
-- `java_fastjson2/`：fastjson2 adapter；
-- `scripts/json_perf_baseline.py`：统一结果 schema；
-- `scripts/json_backend_perf_run.py` 与 `json_backend_perf_summary.py`：backend 采集与汇总。
+| 路径 | 作用 |
+| --- | --- |
+| `packages/benchmarks` | yjson、stdx.json typed workload |
+| `packages/backend_benchmarks` | AST / Compact / Native DOM workload |
+| `cjfast_json` | cjfast_json typed adapter |
+| `java_fastjson2` | fastjson2 adapter |
+| `scripts/json_perf_baseline.py` | 统一采集 schema |
+| `scripts/json_backend_perf_run.py` | backend runner |
+| `scripts/json_backend_perf_summary.py` | backend 汇总 |
 
-不同 runner 可能跨越 runtime，不能把输出直接解释成统一排名。DOM backend、typed codec
-与 typed stream 也必须分别报告。
+Typed codec、DOM backend、typed stream 和跨 runtime adapter 必须分别报告，不能把不同
+representation 或 lifecycle 拼成统一排名。
 
-## 结果要求
+## 发布结果要求
 
-公开结论必须：
+- workload 语义、API、payload 和输入形态一致；
+- baseline/candidate 或多库交替、反转顺序执行；
+- 完整保留 yjson、stdx.json、cjfast_json 的共同 workload；
+- 高 CV 行保留并标为 noisy；
+- 方向证据与稳定精确比例分开；
+- 保存 commit/runtime/host identity、raw rounds、manifest 与 checksum；
+- 不把临时路径、quick run 或未同步的跨批次数字写入 README。
 
-- 使用等语义 workload，并明确 API、representation 与输入形态；
-- 分开报告方向证据和通过稳定性门槛的精确比例；
-- 每个 release 输出 yjson、stdx.json、cjfast_json 的全部共同 workload；
-- 保留高 CV 行，并明确标记 `noisy`；
-- 保留 baseline/candidate 身份和可审计的聚合结果；
-- 不把机器本地路径、临时日志或一次 quick run 写入用户文档。
-
-统计口径和现有结果见[性能文档](../docs/performance/README.md)。
+统计和证据政策见[性能方法](../docs/performance/methodology.md)，可引用结果见
+[性能入口](../docs/performance/README.md)。

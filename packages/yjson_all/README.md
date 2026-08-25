@@ -1,9 +1,7 @@
 # yjson_all
 
-普通应用推荐的聚合 package，同时导出 `yjson` runtime 与 `yjson_macros` 中的
-`@JsonCodec`、`@Json`、`@JsonValue`：
-
-`1.0.0-rc.1` 尚未发布到 registry，候选阶段使用 path dependency：
+普通应用推荐的 aggregate package。它同时导出 `yjson` runtime 与 `yjson_macros` 的
+`@JsonCodec`、`@Json`、`@JsonValue`，但不会引入任何 Native backend。
 
 ```toml
 [dependencies]
@@ -25,10 +23,8 @@ main(): Unit {
 }
 ```
 
-只需要 parser、AST、Compact DOM 或 built-in codec 时，可以直接依赖 `yjson`；需要
-macro 时优先使用本聚合 package。
+当前示例使用 path dependency，不假定 registry 包已发布。aggregate、runtime 和 macro 必须
+来自同一 checkout 或 release。只需要 parser/AST/built-in codec 时可直接依赖 `yjson`；
+需要 Native 时由应用额外声明对应 optional package。
 
-`yjson_all` keeps runtime and macro versions aligned. It does not build or enable optional Native
-DOM backends.
-
-完整指南见仓库的 [文档入口](../../docs/README.md)。
+完整采用路径见[文档入口](../../docs/README.md)。

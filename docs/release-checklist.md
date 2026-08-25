@@ -1,5 +1,6 @@
-# Release documentation moved
+# Release checklist
 
-稳定发布流程与 blocking policy 见 [维护者发布指南](maintainers/releasing.md)。
+发布清单已合并到[维护者发布流程](maintainers/releasing.md)。请在那里维护稳定 gate，并把
+某次候选的实际结果写入 `release/<version>/evidence.md`。
 
-`1.0.0-rc.1` 的一次性结果快照见 [release evidence](../release/1.0.0-rc.1/evidence.md)。该证据页会把本地 fresh-checkout simulation 与 hosted CI 分开记录，不把未运行的 hosted gate 标为 PASS。
+不要在本页复制 case 数、commit、CI 状态或 artifact URL，以免形成第二份会漂移的事实源。

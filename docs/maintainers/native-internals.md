@@ -1,126 +1,63 @@
-# Native backend internals and contracts
+# Native backend 内部契约
 
-> 面向用户的选择、安装与最小示例见 [Backend 使用指南](../backends.md)。本文保留 C ABI、
-> activation seam、symbol isolation、semantic index 与安全验证等维护者契约。
+用户安装、选型和生命周期见 [Backend 使用指南](../backends.md)。本页只记录 C ABI、
+activation、symbol isolation、语义索引和安全验证等维护者边界。
 
-## Product boundary
+## 产品边界
 
-`yjson` is the portable default and semantic oracle. It has no native
-link dependency. `yjson_all` re-exports the core and AST macros only; it
-does not install or enable a native backend.
+Pure `yjson` 是默认实现和语义 oracle，不链接 Native。`yjson_native` 与 `yjson_yyjson` 是
+显式 optional package；选中后构建/链接失败必须暴露，不能假装回退成功。backend 内部可在
+保持 public contract 时选择 portable 子路径。
 
-`yjson_native` and `yjson_yyjson` are supported opt-in packages.
-Selecting one package is explicit. If a selected native package cannot be built
-or linked, the operation fails; package unavailability is not silently hidden by
-falling back to Pure Cangjie. Internal semantic fallback inside a selected
-backend is permitted when it preserves the same public contract.
+yyjson package 静态 vendoring 0.12.0，并以 hidden visibility 编译其 public C symbols。
+Cangjie shared library 不应导出 `yyjson_*`。dual-version fixture 需要证明应用同时链接固定
+0.11.1 时，无论加载顺序如何，adapter 都绑定自己的 0.12.0。
 
-The yyjson package statically vendors yyjson and compiles its public API with
-ELF hidden visibility. The resulting Cangjie shared library exports no
-`yyjson_*` symbols. A dual-version fixture verifies that the adapter continues
-to bind its vendored 0.12.0 implementation while an application independently
-uses yyjson 0.11.1, in either shared-library load order. The upstream vendored
-source remains byte-for-byte unmodified; isolation is a build property.
+## 生命周期与线程
 
-## Backend matrix
+Native document 实现 `Resource`：
 
-| Backend | Stability for this RC | Toolchain | Lifetime | Thread safety | Primary operations |
-|---|---|---|---|---|---|
-| Pure Cangjie AST/Compact/typed codec | stable freeze candidate | Cangjie SDK | GC-managed | ordinary value/object rules | encode, decode, AST, Compact |
-| Custom Native Compact | supported opt-in; backend-specific tuning knobs remain experimental | C11, Python 3, `ar` | explicit `Resource.close()` | not thread-safe | native DOM, lookup, bulk traversal, serialize |
-| yyjson Direct Native DOM | supported opt-in; qualification selectors remain experimental | C11, Python 3, `ar` | explicit `Resource.close()` | not thread-safe | fastest measured general native DOM, coarse query, serialize |
-
-Native document destructors are leak safety nets, not deterministic lifecycle
-APIs. Use `try (document = ...)` or an explicit `try/finally`. A value view keeps
-its document owner reachable, but closing that owner invalidates the view.
-
-The thread contract is deliberately strict:
-
-- callers provide external synchronization for read/read access;
-- read/close and serialize/close races are forbidden;
-- `close()` requires exclusive ownership and is idempotent;
-- operations after close fail with `IllegalStateException`.
-
-## Float64 fast-parser bridge
-
-The core package exposes `JsonNativeFloatParserBackend` as an optional,
-process-global seam for numeric-heavy generated codecs. `yjson_native` supplies
-the supported `@FastNative` implementation and `enableYJsonNative()` installs
-it together with the structural and bulk-number scanners. For isolated
-measurements, `enableYJsonNativeFloatOnly()` installs only the Float64 parser;
-`enableYJsonNativeNumericOnly()` is the separate bulk-number mode. These modes
-are mutually exclusive. The matching disable function must be used before
-selecting another isolated mode, and installation/removal must not race with
-decoding.
-
-The C bridge `YJ_JSON_ParseDouble` receives an already validated JSON number
-token, copies at most 256 bytes to a bounded stack buffer, and returns `NaN`
-for invalid bounds, malformed text, or a declined parse. The Cangjie caller
-then uses the portable parser. The bridge makes no Cangjie calls or I/O and is
-kept separate from the core package: Pure Cangjie remains usable without the
-native archive.
-
-Generated macro output calls the public
-`JsonFastReader.suggestRawCollectionCapacity()` bridge for generic object
-arrays. It is a bounded allocation hint rather than a stable application-level
-capacity API. `yjson`, `yjson_macros`, `yjson_all`, `yjson_native`, and
-`yjson_yyjson` must be
-consumed at the same release version; see the
-[1.0 RC API/ABI change inventory](../public-api-inventory.md).
+- `close()` 幂等且需要独占所有权；
+- 所有 read/read 并发也由调用方同步；
+- read/close、serialize/close race 禁止；
+- close 后操作抛出 `IllegalStateException`；
+- view 保持 owner 可达，但 owner close 后 view 无效；
+- destructor 只用于泄漏兜底。
 
 ## Access model
 
-Both native parsers cross the Cangjie/C boundary once for a whole-document
-parse. There is no per-token or per-field parse FFI. Use coarse lookup, native
-bulk traversal, and native serialization. Fine-grained getters are suitable for
-small query-style access, not sequential traversal of millions of nodes.
+两个 Native parser 都以 whole-document 调用跨 Cangjie/C 边界。推荐 coarse lookup、bulk
+traversal 和 native serialization；大量 per-node getter 会放大 FFI 固定成本。Native DOM
+不会加速 `JsonNode.parse`，materialize 也不是默认 fast path。
 
-Native DOM does not accelerate `JsonNode.parse(bytes)`. Materializing a native
-DOM into the Cangjie AST was measured and rejected as a product fast path.
+Typed stream 使用 bulk tape：decode 为 parse/export/copy，encode 为 tape/copy。generated
+codec 只看到 `JsonCodecReader/Writer` contract。
 
-## Number and duplicate semantics
+## Scanner 与 Float64 seam
 
-All backends preserve exact `Int64`. Overflow integers, decimals, exponents,
-`-0`, and `PreserveLiteral` inputs keep the required literal semantics. The
-yyjson backend uses bounded semantic dispatch and may internally use Custom
-Native for shapes that cannot use the direct representation safely.
+`enableYJsonNative()` 安装 structural、bulk-number 和 Float64 backend；FloatOnly 与
+NumericOnly 用于隔离部署/测量，模式互斥。安装、移除或切换不得与 decode 并发。
 
-Duplicate policy is `LastWins` by default or `Reject` when configured. Equality
-uses decoded key bytes, so source spellings `"a"` and `"\u0061"` collide.
+`YJ_JSON_ParseDouble` 接收已验证 number token，最多复制 256 bytes 到有界 stack buffer；
+无效 bounds、格式或主动拒绝返回 NaN，由 Cangjie 调用方回退 portable parser。bridge 不
+执行 Cangjie callback、I/O 或阻塞操作。
 
-## Error compatibility
+## 数字、重复 key 与错误
 
-| Failure | Pure Cangjie | Custom Native | yyjson Direct |
-|---|---|---|---|
-| invalid UTF-8 | reject; detailed `JsonException` | reject; byte offset | reject; byte offset, coarser category |
-| invalid escape | reject; detailed category/path | reject; byte offset | reject; generally `parse_error` |
-| invalid number | reject; detailed category/path | reject; byte offset | reject; generally `parse_error` |
-| duplicate with Reject | reject; currently `parse_error` | reject; currently `parse_error` | reject; currently `parse_error` |
-| maximum depth | `max_depth` | `max_depth` | `max_depth` |
-| document byte budget | `document_too_large` | `document_too_large` before DOM allocation | `document_too_large` before DOM allocation |
-| decoded string/key budget | `string_too_large` | `string_too_large` before DOM allocation | `string_too_large` before DOM allocation |
-| root container byte budget | `polymorphic_object_too_large` | `polymorphic_object_too_large` before DOM allocation | `polymorphic_object_too_large` before DOM allocation |
-| trailing content | reject | reject | reject |
-| allocation/document limit | runtime/OOM semantics | `out_of_memory` or `document_too_large` | `out_of_memory` or `document_too_large` |
+所有 backend 保留精确 `Int64`；overflow integer、decimal、exponent、`-0` 与
+`PreserveLiteral` 保持 literal 语义。duplicate key 默认 LastWins，Reject 比较 decoded key
+bytes，因此 `"a"` 和 `"\u0061"` 冲突。
 
-The public guarantee is semantic rejection plus a meaningful byte offset where
-available. Error categories and messages are not byte-for-byte identical across
-backends, and backend-internal numeric codes are not public API.
+Native message 和细分类不要求与 Pure 逐字一致；无效输入必须拒绝，并在可用时给出 byte
+offset。资源预算的公开 error code 必须跨 backend 一致。limited parse 使用 additive
+`*ParseWithLimits` C symbols；全零预算继续走旧 ABI。
 
-Resource budgets are the exception to the otherwise coarser native categories:
-their public `JsonException.code` values are identical across all three
-backends. The old `YJ_Compact_Parse` and `YJ_Yyjson_Parse` C symbols remain;
-limited parsing uses the additive `*ParseWithLimits` symbols only when a budget
-is enabled.
+## 安全与 qualification
 
-## Security boundary
+Native semantic index 使用 per-document randomized seed，并始终执行 exact byte equality。
+Linux entropy 顺序为 `getrandom`、`/dev/urandom`、process-specific fallback。随机化降低可
+预测 collision 攻击，但不承诺开放寻址表不存在最坏情况。
 
-Custom and yyjson semantic indexes use a per-document randomized seed. Linux
-uses `getrandom`, then `/dev/urandom`; a process-specific fallback preserves
-correctness if both entropy sources fail. Exact byte equality is always checked.
-Randomization materially reduces predictable collision attacks, but no open
-addressing table can promise that worst-case behavior is impossible.
-
-Native code expands the memory-safety surface. Release qualification therefore
-includes targeted malformed-input tests, ASan/UBSan/LSan, and deterministic
-differential fuzzing.
+Native release qualification 必须包含：malformed-input targeted tests、warning-clean
+clang/gcc、ASan、UBSan、LSan、确定性 differential fuzz、allocation failure/lifecycle 和
+symbol isolation。结果记录在具体 release evidence，不写入本页。

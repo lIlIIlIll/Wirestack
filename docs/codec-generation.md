@@ -1,15 +1,10 @@
 # `@JsonCodec` 生成指南
 
-`@JsonCodec` 是 `yjson_macros` 提供的 declaration macro。它在消费方 package 编译时展开，生成匹配的 `JsonCodec<T>` 与 `JsonCodecProvider` 实现；它不是扫描 `src/` 的 build script，也不会生成仓库级 `generated_json_codecs.cj`。
+`@JsonCodec` 是 `yjson_macros` 提供的 declaration macro。它在声明所在的调用方 package
+编译时展开，生成匹配的 `JsonCodec<T>` 和 `JsonCodecProvider`。它不扫描源码目录，也不
+写入仓库级 generated 文件。
 
-## 支持的声明
-
-- class、struct 和 enum；
-- generic 声明，但参与字段 codec 推导的类型参数必须满足 `JsonCodecProvider` 约束；
-- associated-value enum；
-- 通过 `@JsonPolymorphic` 与重复的 `@JsonSubtype` 声明封闭的多态映射。
-
-最小示例：
+## 最小声明
 
 ```cangjie
 import yjson_all.*
@@ -26,19 +21,28 @@ class User {
 }
 ```
 
-宏会公开 `UserJson: JsonCodec<User>`，并使 `User` 可直接传给 `YJson.toJson` 与 `YJson.fromJson<User>`。
+非泛型 public 类型会得到 public `UserJson: JsonCodec<User>`。随后既可以使用最短的
+`YJson.toJson/fromJson<User>`，也可以把 `UserJson` 传给显式 codec 入口。
 
-## 字段参与规则
+## 支持范围
 
-- public 字段默认参与，且必须写出显式类型。
-- private 字段不会参与；private 字段不能用 `@JsonProperty` 暴露。
-- protected、internal 或默认可见性字段只有标记 `@JsonProperty` 才参与。
-- `@JsonIgnore` 排除字段。
-- `@JsonName["wire_name"]` 修改写出名称与主读取名称。
-- `@JsonAlias["old_name"]` 增加读取 alias；可以重复声明。
-- `@JsonIncludeNull` 使值为 `None` 的 `Option` 字段仍写出 `null`。
-- `@JsonUsing[codecExpression]` 为字段指定 custom codec。
-- `@JsonStatic` 声明字段类型本身由 `@JsonCodec` 生成，用于直接绑定静态 fast bridge；不能与 `@JsonUsing` 组合。
+- class、struct、enum 和 associated-value enum；
+- generic 声明；参与 codec 推导的类型参数必须满足 `JsonCodecProvider` 约束；
+- 通过 `@JsonPolymorphic` 和重复 `@JsonSubtype` 声明的封闭多态映射。
+
+## 字段如何参与
+
+| 声明 | 行为 |
+| --- | --- |
+| public 且有显式类型 | 默认参与 |
+| private | 不参与，也不能用 `@JsonProperty` 暴露 |
+| protected/internal/默认可见性 + `@JsonProperty` | 显式参与 |
+| `@JsonIgnore` | 排除 |
+| `@JsonName["wire_name"]` | 修改写出名称和主读取名称 |
+| `@JsonAlias["old_name"]` | 增加只读 alias，可重复 |
+| `@JsonIncludeNull` | `Option` 为 `None` 时仍写出 `null` |
+| `@JsonUsing[codecExpression]` | 为该字段选择 custom codec |
+| `@JsonStatic` | 绑定由 `@JsonCodec` 生成的字段 codec；不能与 `@JsonUsing` 共用 |
 
 ```cangjie
 @JsonCodec
@@ -60,11 +64,15 @@ class Profile {
 }
 ```
 
-## 构造与缺失字段
+## 构造、缺失字段和未知字段
 
-宏从可用 initializer 中选择参数最多的构造器，并按参数 identifier 匹配字段；构造参数默认值可以处理缺失输入。构造器未覆盖的 mutable 字段会在构造后赋值，immutable 字段必须由构造器接收。
+宏选择可用 initializer 中参数最多的一项，并按参数 identifier 匹配字段。构造器未覆盖的
+mutable 字段在构造后赋值；immutable 字段必须由构造器接收。构造参数默认值可以处理缺失
+输入，`Option<T>` 字段默认也不是必需字段。
 
-普通必需字段缺失会得到 `JsonException.code == "missing_field"`。`Option<T>` 字段不是必需字段。未知字段默认忽略，可通过 `JsonReadConfig(unknownFieldPolicy: JsonUnknownFieldPolicy.Reject)` 改为拒绝；重复 key 默认 LastWins，也可以改为 Reject。
+- 必需字段缺失：`missing_field`。
+- 未知字段：默认忽略；`JsonUnknownFieldPolicy.Reject` 时为 `unknown_field`。
+- 重复 key：默认 LastWins；`JsonDuplicateKeyPolicy.Reject` 时为 `duplicate_key`。
 
 ## 多态类型
 
@@ -79,13 +87,15 @@ open class Animal {
 }
 ```
 
-每个 subtype 也必须生成 codec。discriminator 缺失或未知分别产生稳定错误码；根多态对象还受 `maxPolymorphicObjectBytes` 约束。
+每个 subtype 都必须有 codec。discriminator 缺失和未知分别产生
+`missing_discriminator` 与 `unknown_discriminator`。generated reader 捕获一次根值，读取
+discriminator 后把同一值 replay 给 subtype codec；Native tape 不会先序列化再解析。
 
-默认 `maxPolymorphicObjectBytes = 0` 表示不启用这一局部 byte budget；设置正数时，超限
-产生 `polymorphic_object_too_large`。负数配置会被拒绝。generated polymorphic decode
-通过 `JsonCodecReader.readReplayValue` 捕获一次根值，读取 discriminator 后直接重放给
-subtype codec；Native tape 路径不把对象序列化成 JSON 再解析。
-多态 dispatcher 本身不重复占用 `JsonDecodeContext` 的容器深度；replay 的根对象由最终
-subtype codec 计一次，因此 `maxDepth = 1` 可以读取仅含标量字段的根 subtype 对象。
+`maxPolymorphicObjectBytes = 0` 表示不启用局部 byte budget；正数超限产生
+`polymorphic_object_too_large`，负数配置被拒绝。根多态 dispatcher 不重复计入容器深度。
 
-宏展开代码依赖当前 runtime 的 generated-code bridge，因此 `yjson_macros` 与 `yjson` 必须使用完全匹配的版本并一起重新编译。
+## 版本边界
+
+宏生成代码会调用 runtime 的 public bridge。`yjson_macros`、`yjson` 与 `yjson_all` 必须
+来自同一 checkout 或 release，并一起重新编译。推荐让应用只依赖 `yjson_all`，避免手动
+形成不匹配组合。

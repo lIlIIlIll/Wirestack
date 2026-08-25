@@ -1,26 +1,22 @@
 # Security policy
 
-## Supported versions
+## 支持范围
 
-| Version | Status |
-| --- | --- |
-| `main` | 开发中 |
-| `1.0.0-rc.1` | 尚未发布的预发布候选版，不代表长期支持承诺 |
+仓库当前处于 1.0 候选阶段；`main` 持续开发，历史 RC 不构成长期支持承诺。具体 release
+状态以 `RELEASE_NOTES.md` 与对应 evidence 为准。
 
-当前尚无正式稳定 release；具体版本状态以 release notes 为准。
+## 报告漏洞
 
-## Reporting a vulnerability
+不要在公开 issue 中提交 exploit、敏感 payload 或未修复漏洞细节。优先使用代码托管平台
+或组织公布的私密安全渠道，并提供：受影响版本/commit、最小复现、影响、触发条件和已知
+缓解方式。
 
-请优先使用代码托管平台提供的私密安全报告渠道，并提供受影响版本、最小复现、影响与已知
-缓解方式。不要在公开 issue 中提交 exploit、敏感 payload 或未修复漏洞细节。
+本仓库目前没有在本页验证过的专用安全邮箱或 private-report URL。若找不到组织的非公开
+渠道，请保留复现材料，等待维护者公布可验证入口；不要创建公开占位 issue。缺少可验证
+私密渠道仍是正式 1.0 发布前的流程 blocker。
 
-本仓库当前没有经过验证的专用安全邮箱或私密报告入口。不要在公开 issue 中创建占位报告，
-因为标题、时间和参与者信息也可能暴露漏洞存在。请先通过组织已公布的非公开联络渠道联系
-维护团队；若找不到该渠道，请保留完整复现，等待维护者在本页公布可验证的私密入口。
+## 处理不可信 JSON
 
-缺少可验证的私密报告渠道是正式 `1.0.0` 发布前的安全流程阻断项。维护者不得把普通公开
-issue、个人临时账号或未经验证的地址描述为已闭环渠道。
-
-处理不可信 JSON 时应显式设置 [资源限制](docs/resource-limits.md)。这些限制降低资源滥用
-风险，但 `maxBytes` 不是严格的进程总内存上限，也不能替代协议 framing、并发限流与上层
-认证授权。
+应用应显式配置[资源限制](docs/resource-limits.md)，并在上层提供 framing、并发限流、认证
+与授权。`maxBytes` 限制 JSON 文档，不是严格进程总内存上限；Native backend 还扩大内存
+安全审计面，只有完成 sanitizer、fuzz 和生命周期 gate 的平台才可声明 qualified。
