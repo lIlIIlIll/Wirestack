@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import pathlib
+import subprocess
 import sys
 import tomllib
 
@@ -76,7 +77,9 @@ def main() -> int:
         fail("inventory release_version must match the current release candidate")
     check_versions(inventory)
     check_declarations(inventory)
-    print(f"public API inventory passed: {len(inventory['api'])} entries")
+    subprocess.run([sys.executable, str(ROOT / "scripts/generate_public_api_snapshot.py")],
+        cwd=ROOT, check=True)
+    print(f"public API inventory passed: {len(inventory['api'])} reviewed deltas")
     return 0
 
 

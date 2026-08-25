@@ -12,8 +12,12 @@ Most entries are additive relative to pre-1.0 snapshots. `JsonReadConfig.init`,
 the `JsonDirectCodec<T>` to `JsonCodec<T>` rename, and the `JsonValue` to
 `JsonNode` AST-root rename require snapshot consumers to rebuild. The latter is
 required because the new unqualified `@JsonValue` macro occupies the same
-Cangjie declaration namespace. The API inventory and ABI symbol inventory must
-be reviewed whenever a declaration is added, removed, renamed, or changed.
+Cangjie declaration namespace. The reviewed delta and the complete generated
+declaration snapshot must be reviewed whenever a declaration is added, removed,
+renamed, or changed. CI compares
+[`release/public-api-snapshot.txt`](../release/public-api-snapshot.txt), which
+includes public interface members and exported `YJ_*` C functions, so an
+unregistered public addition can no longer pass through a needle-only check.
 
 ## Package pairing
 
@@ -90,10 +94,23 @@ same checkout and exact commit as core.
 |---|---|---|---|
 | `yjson` | `JsonFastReader.suggestRawCollectionCapacity(): Int64` | Bounded hint (`4..64`) from the unread raw-array window; does not advance or retain input | Generated fast collection codecs |
 | `yjson_macros` | Generated call to the bridge | Used only after the empty-array check; changes allocation strategy, not JSON semantics | `@JsonCodec` output |
+| `yjson` | `JsonCodecReader.skipValueWithDepth` | Enforces the remaining syntax-depth budget while skipping an unknown subtree | Third-party reader implementations; source-breaking after rc.1, rc.2 rebuild required |
+| `yjson` | `JsonDecodeContext.remainingDepth` / `JsonFastReader.skipRawWithDepth` | Connects generated typed depth state to semantic and fast subtree skipping | Matching-version generated code; rc.2 rebuild required |
 
 The reader method is public because macro expansion runs in the consumer's
 package. It is a generated-code bridge, not a promise that applications should
 depend on the current capacity heuristic.
+
+## Post-rc.1 Schema immutability change
+
+`JsonSchema.document` changes from a public mutable field to a read-only
+property returning a detached `JsonNode` copy. Existing source reads keep the
+same spelling, but compiled consumers must rebuild and mutations of the returned
+tree intentionally no longer change validation. The validator and reference
+resolver operate on the private construction-time snapshot. The configured
+external `JsonSchemaResolver` remains a documented live dependency:
+applications requiring repeatable external resolution must provide an
+immutable resolver.
 
 ## JSON literal and mutable-node surface
 

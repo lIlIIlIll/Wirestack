@@ -1,7 +1,8 @@
 # Current additive declaration inventory. `release_version` identifies the
 # immutable baseline; entries added after that tag describe the Unreleased
 # development delta and are not claims about the tagged RC artifact.
-# This does not replace the complete symbol inventory used by SDK ABI tooling.
+# The complete declaration snapshot is release/public-api-snapshot.txt; this
+# file records compatibility classification and user-facing contracts.
 inventory_version = 1
 release_version = "1.0.0-rc.1"
 package_manifest_version = "1.0.0"
@@ -423,3 +424,51 @@ stability = "stable-opt-in"
 compatibility = "additive optional-package API"
 contract = "Installs IDNA2008 hostname/email, URI/IRI, and RFC 6570 URI Template assertions; requires system libidn2."
 consumer = "Applications explicitly enabling internationalized Schema format assertions"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-interface-method"
+symbol = "JsonCodecReader.skipValueWithDepth"
+signature = "func skipValueWithDepth(maxDepth: Int64): Unit"
+source = "src/lib_json_direct_codec.cj"
+needle = "func skipValueWithDepth(maxDepth: Int64): Unit"
+stability = "matching-version-generated-backend-abi"
+compatibility = "source-breaking after 1.0.0-rc.1 for third-party JsonCodecReader implementers; rc.2 rebuild and implementation update required"
+contract = "Skips one value while enforcing the remaining container-depth budget; generated unknown-field handling uses this method."
+consumer = "Generated codecs and custom JsonCodecReader backend implementers"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-generated-bridge-method"
+symbol = "JsonDecodeContext.remainingDepth"
+signature = "public func remainingDepth(): Int64"
+source = "src/lib_json_direct_codec.cj"
+needle = "public func remainingDepth(): Int64"
+stability = "matching-version-generated-code-abi"
+compatibility = "additive after 1.0.0-rc.1; macro output and runtime must be rebuilt from the same rc.2 candidate"
+contract = "Exposes the typed reader's remaining container-depth budget to generated unknown-field handling."
+consumer = "Matching-version @JsonCodec generated code"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-generated-bridge-method"
+symbol = "JsonFastReader.skipRawWithDepth"
+signature = "public func skipRawWithDepth(maxDepth: Int64): Unit"
+source = "src/lib_json_fast_reader.cj"
+needle = "public func skipRawWithDepth(maxDepth: Int64): Unit"
+stability = "matching-version-generated-code-abi"
+compatibility = "additive after 1.0.0-rc.1; macro output and runtime must be rebuilt from the same rc.2 candidate"
+contract = "Skips one raw value while enforcing the generated codec's remaining container-depth budget."
+consumer = "Matching-version @JsonCodec generated fast code"
+
+[[api]]
+package = "yjson"
+kind = "cangjie-field-to-property"
+symbol = "JsonSchema.document"
+signature = "public prop document: JsonNode"
+source = "src/lib_json_schema.cj"
+needle = "public prop document: JsonNode"
+stability = "stable-schema-snapshot-accessor"
+compatibility = "binary declaration change after 1.0.0-rc.1; source reads remain valid, returned mutations no longer alter validation; rc.2 rebuild required"
+contract = "Returns a detached mutable copy while validation uses an immutable private schema snapshot."
+consumer = "Applications inspecting a parsed JsonSchema document"

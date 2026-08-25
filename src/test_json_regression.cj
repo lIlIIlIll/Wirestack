@@ -54,6 +54,18 @@ func yJsonRegressionDirectNameId(candidate: String, text: String): Int64 {
     id
 }
 
+func yJsonRegressionDirectNameIdBytes(candidate: String, text: String): Int64 {
+    let bytes = unsafe { text.rawData().clone() }
+    let reader = JsonDirectReader(bytes)
+    reader.startObject()
+    @Assert(reader.hasObjectField())
+    let id = reader.readNameId([candidate])
+    let _ = reader.readInt64()
+    reader.endObject()
+    reader.expectEnd()
+    id
+}
+
 func yJsonRegressionFastNameId(candidate: String, text: String): Int64 {
     let reader = JsonFastReader(text)
     reader.startRawObject()
@@ -269,6 +281,20 @@ class YJsonRegressionTest {
     func directReadersMatchNonAsciiFieldNames(): Unit {
         @Expect(yJsonRegressionDirectNameId("名字", "{\"名字\":1}"), 0)
         @Expect(yJsonRegressionFastNameId("名字", "{\"名字\":1}"), 0)
+    }
+
+    @TestCase
+    func directNameIdValidatesEscapedSurrogates(): Unit {
+        for (text in ["{\"\\uD800\":1}", "{\"\\uDC00\":1}"]) {
+            let stringError = @AssertThrows[JsonException](
+                yJsonRegressionDirectNameId("plain", text))
+            @Expect(stringError.code, "parse_error")
+            let bytesError = @AssertThrows[JsonException](
+                yJsonRegressionDirectNameIdBytes("plain", text))
+            @Expect(bytesError.code, "parse_error")
+        }
+        @Expect(yJsonRegressionDirectNameId("plain", "{\"\\uD834\\uDD1E\":1}"), -1)
+        @Expect(yJsonRegressionDirectNameIdBytes("plain", "{\"\\uD834\\uDD1E\":1}"), -1)
     }
 
     @TestCase

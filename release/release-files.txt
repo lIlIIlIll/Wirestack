@@ -16,6 +16,7 @@ docs/configuration-and-errors.md
 docs/maintainers/releasing.md
 docs/maintainers/testing.md
 docs/path-and-patch.md
+docs/public-api-inventory.md
 docs/resource-limits.md
 docs/performance.md
 docs/performance/README.md
@@ -101,6 +102,7 @@ scripts/json_perf_baseline.py
 scripts/release_temp_tree.py
 scripts/release_package_stage.py
 scripts/check_api_inventory.py
+scripts/generate_public_api_snapshot.py
 scripts/check_json_literal_compile_fail.sh
 scripts/run_cjpm_executable.sh
 scripts/run_standards_conformance.py
@@ -114,7 +116,11 @@ benchmarks/cjfast_json/run.sh
 packages/benchmarks/build.cj
 packages/benchmarks/cjpm.toml
 packages/benchmarks/cjpm.lock
+packages/benchmarks/src/bench_fastjson2_compare.cj
 packages/benchmarks/src/bench_json_comprehensive.cj
+packages/benchmarks/src/bench_json_literal.cj
+packages/benchmarks/src/bench_stdx_compare.cj
+packages/benchmarks/src/bench_yjson.cj
 
 # Registry-ready package manifests (development manifests remain path-based)
 release/package-manifests/yjson_macros.toml
@@ -124,6 +130,7 @@ release/package-manifests/yjson_native.toml
 release/package-manifests/yjson_schema_formats.toml
 release/package-manifests/yjson_yyjson.toml
 release/public-api-inventory.toml
+release/public-api-snapshot.txt
 
 # Macro, aggregate, optional backend, examples, and consumer fixtures
 packages/yjson_macros/cjpm.toml

@@ -30,6 +30,10 @@ class YJsonSchemaTest {
         let schema = JsonSchema.fromValue(source)
         source.asObject().put("type", JsonStringValue("integer"))
         @Expect(schema.validate(YJson.parse("\"ok\"")).isEmpty())
+        let exposed = schema.document
+        exposed.asObject().put("type", JsonStringValue("integer"))
+        @Expect(schema.validate(YJson.parse("\"still a string\"")).isEmpty())
+        @Expect(!schema.validate(YJson.parse("42")).isEmpty())
         let _ = @AssertThrows[IllegalStateException](
             JsonSchemaConfig.defaults.formats.register("mutable-default", EvenLengthSchemaFormat()))
     }

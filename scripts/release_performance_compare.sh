@@ -123,9 +123,12 @@ export LC_ALL=C
 ) > "$preflight/cjfast-json.log" 2>&1 < /dev/null
 
 if [[ "${YJSON_PERF_PREFLIGHT_ONLY:-0}" == "1" ]]; then
-    sha256sum "$preflight/environment.txt" "$preflight/cjfast-prepare.log" \
-        "$preflight/yjson.log" "$preflight/stdx-json.log" "$preflight/cjfast-json.log" \
-        > "$result/checksums.txt"
+    (
+        cd "$result"
+        sha256sum preflight/environment.txt preflight/cjfast-prepare.log \
+            preflight/yjson.log preflight/stdx-json.log preflight/cjfast-json.log \
+            > checksums.txt
+    )
     printf 'release performance preflight complete: %s\n' "$result"
     exit 0
 fi
@@ -142,10 +145,13 @@ python3 "$source_stage/scripts/json_cjfast_perf_summary.py" "$result/run" \
     --csv "$result/summary.csv" \
     --markdown "$result/summary.md"
 
-sha256sum "$preflight/environment.txt" "$preflight/cjfast-prepare.log" \
-    "$preflight/yjson.log" "$preflight/stdx-json.log" "$preflight/cjfast-json.log" \
-    "$result/run/metadata.json" "$result/run/manifest.csv" \
-    "$result/summary.json" "$result/summary.csv" "$result/summary.md" \
-    > "$result/checksums.txt"
+(
+    cd "$result"
+    sha256sum preflight/environment.txt preflight/cjfast-prepare.log \
+        preflight/yjson.log preflight/stdx-json.log preflight/cjfast-json.log \
+        run/metadata.json run/manifest.csv \
+        summary.json summary.csv summary.md \
+        > checksums.txt
+)
 
 printf 'release performance comparison complete: %s\n' "$result"

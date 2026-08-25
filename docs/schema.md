@@ -49,6 +49,11 @@ let config = JsonSchemaConfig(resolver: Some<JsonSchemaResolver>(registry))
 let schema = JsonSchema.parse("{\"$ref\":\"urn:example:types#id\"}", config: config)
 ```
 
+`JsonSchema` 在构造时复制 schema 文档并冻结 format registry。公开的
+`schema.document` 每次返回独立的可修改副本，修改该副本不会改变后续验证。
+外部 `JsonSchemaResolver` 仍是实时依赖；需要完全可重复验证时，应用应提供不可变
+resolver 或在冻结候选前固定其资源集合。
+
 registry key 是不带 fragment 的资源 URI；fragment 可以是 JSON Pointer 或 `$anchor`。
 自定义 `JsonSchemaResolver` 可以从磁盘或应用缓存读取，但网络策略、缓存、鉴权与超时均由
 应用负责。

@@ -8,6 +8,7 @@ scripts/__pycache__/
 benchmarks/java_fastjson2/build/
 
 # Audited RC evidence overrides the developer-wide *.json / *.txt ignores.
+!release/public-api-snapshot.txt
 !release/1.0.0-rc.1/artifacts/environment.json
 !release/1.0.0-rc.1/artifacts/manifest.json
 !release/1.0.0-rc.1/artifacts/checksums.txt

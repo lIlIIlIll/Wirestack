@@ -166,5 +166,17 @@ class JsonResourceLimitsTest {
         @Expect(streamError.byteOffset >= 0)
         @Expect(streamError.line, 2)
         @Expect(streamError.column > 0)
+
+        let parserNewlineError = @AssertThrows[JsonException](parseJsonValueFromStream(
+            FixedChunkInputStream("\"abc\ndef\"", 1)))
+        @Expect(parserNewlineError.byteOffset, 4)
+        @Expect(parserNewlineError.line, 1)
+        @Expect(parserNewlineError.column, 5)
+
+        let directStream = JsonDirectReader(FixedChunkInputStream("\"abc\ndef\"", 1))
+        let directNewlineError = @AssertThrows[JsonException](directStream.readString())
+        @Expect(directNewlineError.byteOffset, 4)
+        @Expect(directNewlineError.line, 1)
+        @Expect(directNewlineError.column, 5)
     }
 }

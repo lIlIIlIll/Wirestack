@@ -319,6 +319,26 @@ private class ArrayJsonDirectByteSource <: JsonDirectByteSource {
             value = value * 16 + hexValue(data[index])
             index++
         }
+        if (isJsonHighSurrogate(value)) {
+            if (index + 2 > size || data[index] != b'\\' || data[index + 1] != b'u') {
+                failAt("Invalid unicode surrogate pair", start)
+            }
+            index += 2
+            let lowStart = index
+            var low: Int64 = 0
+            for (_ in 0..4) {
+                if (index >= size) { failAt("Incomplete unicode escape", lowStart) }
+                low = low * 16 + hexValue(data[index])
+                index++
+            }
+            if (!isJsonLowSurrogate(low)) {
+                failAt("Invalid unicode surrogate pair", start)
+            }
+            return -1
+        }
+        if (isJsonLowSurrogate(value)) {
+            failAt("Invalid unicode surrogate pair", start)
+        }
         if (value <= 0x7F) {
             return value
         }
@@ -376,8 +396,7 @@ private class StreamJsonDirectByteSource <: JsonDirectByteSource {
     private var offset: Int64 = 0
     private var loadedBytes: Int64 = 0
     private var reachedEnd: Bool = false
-    private var currentLine: Int64 = 1
-    private var currentColumn: Int64 = 1
+    private let newlineOffsets = ArrayList<Int64>()
 
     public init(
         input: InputStream,
@@ -400,13 +419,8 @@ private class StreamJsonDirectByteSource <: JsonDirectByteSource {
     public func consume(): Byte {
         let value = buffer[start]
         start++
+        if (value == b'\n') { newlineOffsets.add(offset) }
         offset++
-        if (value == b'\n') {
-            currentLine++
-            currentColumn = 1
-        } else {
-            currentColumn++
-        }
         value
     }
 
@@ -420,13 +434,12 @@ private class StreamJsonDirectByteSource <: JsonDirectByteSource {
 
     public func lineAt(offset: Int64): Int64 {
         if (!readConfig.includeErrorLocation) { return -1 }
-        currentLine
+        jsonStreamLineAt(newlineOffsets, offset)
     }
 
     public func columnAt(offset: Int64): Int64 {
         if (!readConfig.includeErrorLocation) { return -1 }
-        let distance = this.offset - offset
-        if (distance > 0 && distance < currentColumn) { currentColumn - distance } else { currentColumn }
+        jsonStreamColumnAt(newlineOffsets, offset)
     }
 
     private func ensureAvailable(): Bool {

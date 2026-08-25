@@ -241,6 +241,30 @@ func jsonColumnFromUtf8Bytes(data: Array<Byte>, offset: Int64): Int64 {
     column
 }
 
+// Stream readers retain only the current byte buffer, so error positions must
+// be reconstructed from absolute newline offsets instead of the current
+// cursor. Newlines at the queried offset belong to the preceding line, which
+// matches jsonLineFromUtf8Bytes/jsonColumnFromUtf8Bytes.
+func jsonStreamLineAt(newlineOffsets: ArrayList<Int64>, offset: Int64): Int64 {
+    if (offset < 0) { return -1 }
+    var line: Int64 = 1
+    for (newlineOffset in newlineOffsets) {
+        if (newlineOffset >= offset) { break }
+        line++
+    }
+    line
+}
+
+func jsonStreamColumnAt(newlineOffsets: ArrayList<Int64>, offset: Int64): Int64 {
+    if (offset < 0) { return -1 }
+    for (index in 0..newlineOffsets.size) {
+        let reverseIndex = newlineOffsets.size - index - 1
+        let newlineOffset = newlineOffsets[reverseIndex]
+        if (newlineOffset < offset) { return offset - newlineOffset }
+    }
+    offset + 1
+}
+
 public abstract class JsonNode <: ToString {
     public static func parse(text: String, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
         JsonParser(text, config: config).parse()

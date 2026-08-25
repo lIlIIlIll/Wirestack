@@ -114,15 +114,20 @@ public class JsonSchemaConfig {
 }
 
 public class JsonSchema {
-    public let document: JsonNode
+    private let documentValue: JsonNode
     public let draft: String
     public let config: JsonSchemaConfig
     let validationVocabulary: Bool
 
+    /// Returns a detached copy so callers cannot mutate the compiled schema.
+    public prop document: JsonNode {
+        get() { documentValue.deepCopy() }
+    }
+
     public init(document: JsonNode, draft!: String = "https://json-schema.org/draft/2020-12/schema",
         config!: JsonSchemaConfig = JsonSchemaConfig.defaults) {
         let frozenDocument = document.deepCopy()
-        this.document = frozenDocument
+        this.documentValue = frozenDocument
         this.draft = draft
         this.config = JsonSchemaConfig(resolver: config.resolver, formatMode: config.formatMode,
             formats: config.formats.frozenCopy())
@@ -180,6 +185,8 @@ public class JsonSchema {
     public func validateOrThrow(instance: JsonNode): Unit {
         validator().validateOrThrow(instance)
     }
+
+    func internalDocument(): JsonNode { documentValue }
 }
 
 public class JsonSchemaValidator {
@@ -196,8 +203,9 @@ public class JsonSchemaValidator {
         baseUriStack.clear()
         resourceStack.clear()
         baseUriStack.add("")
-        resourceStack.add(schema.document)
-        validateSchemaValue(schema.document, instance, "$", "#", errors, ArrayList<String>())
+        let document = schema.internalDocument()
+        resourceStack.add(document)
+        validateSchemaValue(document, instance, "$", "#", errors, ArrayList<String>())
         baseUriStack.clear()
         resourceStack.clear()
         errors
@@ -835,7 +843,7 @@ public class JsonSchemaValidator {
                 adoptPointerResource: fragment.startsWith("#/"))
             case None => ()
         }
-        match (findJsonSchemaResource(schema.document, "", resourceUri)) {
+        match (findJsonSchemaResource(schema.internalDocument(), "", resourceUri)) {
             case Some(found) => return attachJsonSchemaResolutionContext(
                 resolveSchemaFragment(found.resource, fragment, absolute), found.baseUri, found.resource,
                 adoptPointerResource: fragment.startsWith("#/"))
