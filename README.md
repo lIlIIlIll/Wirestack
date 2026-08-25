@@ -140,16 +140,16 @@ println(YJson.stringify(root))
 
 ## 库能力对比
 
-下表比较公开文档可确认的主要能力，不代表性能排名。`◐` 表示部分或间接支持，`—` 表示
-本次查阅的公开资料未确认该能力，并非断言任何扩展都无法实现。
+下表比较固定源码/API 快照中的主要公开能力，不代表性能排名。`◐` 表示部分或间接支持，
+`❌` 表示当前审计版本没有对应公开 API。
 
 | 能力 | yjson | stdx.json | cjfast_json | fastjson2 | Go yyjson |
 | --- | --- | --- | --- | --- | --- |
-| Generated typed mapping | ✅ `@JsonCodec` | — | ✅ `@JsonAdapter` | ✅ ASM / `@JSONCompiler` | ◐ typed 入口委托 `encoding/json` |
-| Mutable / compact DOM | ✅ / ✅ | ✅ / — | — / — | ✅ / ◐ | ✅ / ✅ |
-| Stream/token I/O | ✅ backend 可选 | ✅ | ✅ | ✅ | ◐ incremental DOM |
-| Polymorphism / custom codec | ✅ / ✅ | — / ✅ | — / ✅ | ✅ / ✅ | — / ◐ |
-| Schema / standard path-patch | ✅ 2020-12 required + optional suites / ✅ Pointer, Patch, Merge, JSONPath | — / ◐ | — / — | ✅ / ✅ JSONPath | — / ✅ Pointer/Patch |
+| Generated typed mapping | ✅ `@JsonCodec` | ❌ | ✅ `@JsonAdapter` | ✅ ASM / `@JSONCompiler` | ◐ typed 入口委托 `encoding/json` |
+| Mutable / compact DOM | ✅ / ✅ | ✅ / ❌ | ◐ `Any` 通用树 / ❌ | ✅ / ❌ | ✅ / ✅ |
+| Stream/token I/O | ✅ backend 可选 | ✅ | ✅ | ✅ | ◐ incremental reader / stdlib Decoder |
+| Polymorphism / custom codec | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ | ✅ / ✅ | ❌ / ◐ |
+| Schema / standard path-patch | ✅ 2020-12 required + optional suites / ✅ Pointer, Patch, Merge, JSONPath | ❌ / ❌ | ❌ / ❌ | ✅ / ◐ SQL:2016 JSONPath | ❌ / ✅ Pointer/Patch/Merge |
 | Cangjie 直接依赖 | ✅ | ✅ SDK | ✅ | N/A（Java/JVM） | N/A（Go） |
 
 完整矩阵、符号含义、跨 runtime 边界与来源见[库能力对比](docs/library-comparison.md)。性能
