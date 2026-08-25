@@ -11,6 +11,7 @@ details belong in release evidence rather than this document.
 | External codec consumer | caller-package `@JsonCodec`, enum, polymorphism, fast decoder | `packages/codec_integration` |
 | JSON literal consumer | `@Json`, `@JsonValue`, interpolation order, dynamic LastWins | `packages/json_literal_integration` |
 | Standards conformance | pinned JSON Schema, JSONPath and JSON Patch suites through public API | `scripts/run_standards_conformance.py` |
+| Release performance | complete interleaved yjson/stdx.json/cjfast_json table | `scripts/release_performance_compare.sh` |
 | Compile-fail macro tests | invalid literal grammar and duplicate static keys | `scripts/check_json_literal_compile_fail.sh` |
 | Custom Native package | DOM lifecycle, policies, resource limits | `packages/yjson_native` |
 | yyjson package | Direct DOM lifecycle, semantics, resource limits | `packages/yjson_yyjson` |

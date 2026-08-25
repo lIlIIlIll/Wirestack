@@ -14,13 +14,17 @@
 1. public API/ABI inventory 未评审或 machine-readable inventory 校验失败；
 2. Pure Cangjie core、examples、macro consumer 任一失败；
 3. 固定 revision 的 JSON Schema required、JSONPath CTS 或 JSON Patch conformance gate 失败；
-4. Custom Native 或 yyjson package 不能由自身 staged source 独立构建；
-5. warning gate、ASan、UBSan、LSan 或 differential fuzz 失败；
-6. package input 缺失、出现未声明 Native dependency、license 缺失；
-7. external consumer、版本配套、C ABI 或 yyjson symbol-isolation 失败；
-8. documented example 失败或 Native ownership/lifetime 含糊；
-9. source archive 包含 target、object、archive、shared library 或未声明 benchmark artifact；
-10. qualified platform 上出现已确认的 release-blocking performance regression。
+4. yjson、stdx.json、cjfast_json 同批次性能表缺少任一共同 workload 或任一库；
+5. Custom Native 或 yyjson package 不能由自身 staged source 独立构建；
+6. warning gate、ASan、UBSan、LSan 或 differential fuzz 失败；
+7. package input 缺失、出现未声明 Native dependency、license 缺失；
+8. external consumer、版本配套、C ABI 或 yyjson symbol-isolation 失败；
+9. documented example 失败或 Native ownership/lifetime 含糊；
+10. source archive 包含 target、object、archive、shared library 或未声明 benchmark artifact；
+11. qualified platform 上出现已确认的 release-blocking performance regression。
+
+高 CV 本身不阻止发布，也不得删除对应行；该行必须标为 `noisy`，是否构成性能回归由
+release owner 根据配对方向、历史基线和 workload 重要性单独判定。
 
 ## Required jobs
 

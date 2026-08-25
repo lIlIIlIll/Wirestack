@@ -2,6 +2,7 @@
 LICENSE
 THIRD_PARTY_NOTICES.md
 README.md
+CHANGELOG.md
 RELEASE_NOTES.md
 cjpm.toml
 cjpm.lock
@@ -10,10 +11,20 @@ cjpm.lock
 .gitcode/workflows/extended.yml
 docs/architecture.md
 docs/backends.md
+docs/codec-generation.md
+docs/configuration-and-errors.md
+docs/maintainers/releasing.md
+docs/maintainers/testing.md
 docs/path-and-patch.md
+docs/resource-limits.md
 docs/performance.md
+docs/performance/README.md
+docs/performance/methodology.md
+docs/performance/results/2026-08-25-linux-release-three-library.md
+docs/performance/results/2026-08-25-linux-release-three-library.csv
 docs/release-checklist.md
 docs/schema.md
+benchmarks/README.md
 release/release-files.txt
 
 # Pure Cangjie core, including its owned test suite
@@ -83,6 +94,10 @@ scripts/release_yyjson_colink_check.sh
 scripts/release_cangjie_checks.sh
 scripts/release_consumer_checks.py
 scripts/release_benchmark_smoke.sh
+scripts/release_performance_compare.sh
+scripts/json_cjfast_perf_run.py
+scripts/json_cjfast_perf_summary.py
+scripts/json_perf_baseline.py
 scripts/release_temp_tree.py
 scripts/release_package_stage.py
 scripts/check_api_inventory.py
@@ -92,6 +107,14 @@ scripts/run_standards_conformance.py
 scripts/ci_job.sh
 scripts/ci_fresh_checkout.sh
 scripts/release_registry_rehearsal.py
+
+# Release performance comparison source
+benchmarks/cjfast_json/cjfast_comprehensive_bench.cj
+benchmarks/cjfast_json/run.sh
+packages/benchmarks/build.cj
+packages/benchmarks/cjpm.toml
+packages/benchmarks/cjpm.lock
+packages/benchmarks/src/bench_json_comprehensive.cj
 
 # Registry-ready package manifests (development manifests remain path-based)
 release/package-manifests/yjson_macros.toml

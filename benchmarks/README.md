@@ -21,6 +21,8 @@
 
 - 使用等语义 workload，并明确 API、representation 与输入形态；
 - 分开报告方向证据和通过稳定性门槛的精确比例；
+- 每个 release 输出 yjson、stdx.json、cjfast_json 的全部共同 workload；
+- 保留高 CV 行，并明确标记 `noisy`；
 - 保留 baseline/candidate 身份和可审计的聚合结果；
 - 不把机器本地路径、临时日志或一次 quick run 写入用户文档。
 

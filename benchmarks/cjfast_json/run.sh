@@ -7,6 +7,7 @@ CJFAST_JSON_REPO="${CJFAST_JSON_REPO:-https://gitcode.com/Cangjie-TPC/cjfast_jso
 CJFAST_JSON_DIR="${CJFAST_JSON_DIR:-${1:-}}"
 CJFAST_JSON_WORK_DIR="${CJFAST_JSON_WORK_DIR:-}"
 CJFAST_SKIP_BUILD="${CJFAST_SKIP_BUILD:-0}"
+CJFAST_PREPARE_ONLY="${CJFAST_PREPARE_ONLY:-0}"
 CJFAST_STDX_FFI_DIR="${CJFAST_STDX_FFI_DIR:-${CANGJIE_STDX_PATH:-}}"
 CJFAST_STDX_FFI_DIR="${CJFAST_STDX_FFI_DIR/\/dynamic\/stdx/\/static\/stdx}"
 CJFAST_SDK_LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
@@ -28,6 +29,16 @@ if [[ ! -f "${WORK_DIR}/cjpm.toml" ]]; then
     fi
 fi
 
+if [[ "${CJFAST_REQUIRE_CLEAN_SOURCE:-0}" == "1" ]]; then
+    GENERATED_DIR=$(find "${WORK_DIR}" -type d \
+        \( -name target -o -name build-script-cache \) -print -quit)
+    if [[ -n "${GENERATED_DIR}" ]]; then
+        echo "error: cjfast benchmark source contains generated state: ${GENERATED_DIR}" >&2
+        echo "use a fresh source-only CJFAST_JSON_WORK_DIR" >&2
+        exit 2
+    fi
+fi
+
 # The pinned project imports stdx packages but leaves its dependency table empty.
 # Patch only the disposable benchmark checkout so cjpm 1.1 can resolve them.
 if ! grep -Eq '^[[:space:]]*"?stdx"?[[:space:]]*=' "${WORK_DIR}/cjpm.toml"; then
@@ -43,6 +54,10 @@ sed -i "s|^  link-option = \"\"$|  link-option = \"-L ${CJFAST_STDX_FFI_DIR} -ls
 
 mkdir -p "${WORK_DIR}/src/bench"
 cp "${ROOT_DIR}/benchmarks/cjfast_json/cjfast_comprehensive_bench.cj" "${WORK_DIR}/src/bench/"
+if [[ "${CJFAST_PREPARE_ONLY}" == "1" ]]; then
+    printf '%s\n' "${WORK_DIR}"
+    exit 0
+fi
 cd "${WORK_DIR}"
 export LD_LIBRARY_PATH="${CJFAST_SDK_LD_LIBRARY_PATH}"
 if [[ "${CJFAST_SKIP_BUILD}" == "1" ]]; then

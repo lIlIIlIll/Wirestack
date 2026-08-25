@@ -5,6 +5,13 @@ Pure Compact、Custom Native DOM 与 yyjson Direct DOM 不是等价路径，不�
 
 ## 结果摘要
 
+### Linux release 三库全量表
+
+当前候选 `1eac96b3e49862dd13323e2c99e7ae0ce246b6c2` 的 yjson、stdx.json、
+cjfast_json 同批次结果包含全部 36 个共同 workload；9 行为 `stable`，27 行为 `noisy`，
+没有因 CV 超过 5% 删除任何行。见 [完整表与环境边界](results/2026-08-25-linux-release-three-library.md)
+和 [machine-readable CSV](results/2026-08-25-linux-release-three-library.csv)。
+
 ### yjson 与 cjfast_json
 
 37 项同语义 workload 中，yjson 有 29 项 paired median 更低。以下是通过展示稳定性门槛的
@@ -36,5 +43,8 @@ ratio 几何均值为 **5.45x**。完整表格见 [Go yyjson DOM](results/2026-0
 - 精确比例只展示通过稳定性门槛的行；其余结果只描述方向或标记为不确定。
 - 跨 runtime、不同日期或不同 workload 的数字不能拼接为统一排名。
 - 延迟数据不能推导 allocation、RSS 或峰值内存。
+
+每个 release 都必须附带 yjson、stdx.json 与 cjfast_json 的同批次完整表。高 CV 行仍然
+展示，只标记为 `noisy`；稳定性门槛不会用于筛除 workload。
 
 统计口径见[性能方法](methodology.md)，历史设计取舍见[性能研究摘要](../performance.md)。

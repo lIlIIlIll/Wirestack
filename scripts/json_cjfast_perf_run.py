@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run yjson and cjfast_json benchmarks as paired interleaved processes."""
+"""Run yjson, stdx.json, and cjfast_json as interleaved benchmark processes."""
 
 from __future__ import annotations
 
@@ -65,13 +65,18 @@ def matched_workloads() -> list[dict[str, str]]:
         for case, meta in baseline.CANGJIE_META.items()
         if case.startswith("yjson") and case in yjson_methods
     }
+    stdx = {
+        meta_key(meta): case
+        for case, meta in baseline.CANGJIE_META.items()
+        if case.startswith("stdx") and case in yjson_methods
+    }
     cjfast = {
         meta_key(meta): case
         for case, meta in baseline.CJFAST_META.items()
         if case in cjfast_methods
     }
     workloads = []
-    for key in sorted(set(yjson) & set(cjfast)):
+    for key in sorted(set(yjson) & set(stdx) & set(cjfast)):
         scenario, operation, payload, input_kind = key
         workloads.append({
             "workload": " | ".join(key),
@@ -80,10 +85,11 @@ def matched_workloads() -> list[dict[str, str]]:
             "payload": payload,
             "input_kind": input_kind,
             "yjson_case": yjson[key],
+            "stdx_json_case": stdx[key],
             "cjfast_json_case": cjfast[key],
         })
     if not workloads:
-        raise ValueError("no implemented yjson/cjfast_json benchmark workloads overlap")
+        raise ValueError("no implemented yjson/stdx.json/cjfast_json benchmark workloads overlap")
     return workloads
 
 
@@ -93,8 +99,10 @@ def balanced_workloads(workloads: list[dict[str, str]], round_id: int) -> list[d
     return rotated if round_id % 2 == 1 else list(reversed(rotated))
 
 
-def library_order(round_id: int) -> tuple[str, str]:
-    return ("yjson", "cjfast_json") if round_id % 2 == 1 else ("cjfast_json", "yjson")
+def library_order(round_id: int) -> tuple[str, str, str]:
+    libraries = ("yjson", "stdx_json", "cjfast_json")
+    offset = (round_id - 1) % len(libraries)
+    return libraries[offset:] + libraries[:offset]
 
 
 def main() -> int:
@@ -140,11 +148,12 @@ def main() -> int:
         "cpu": args.cpu,
         "heap": args.heap,
         "runs": args.runs,
-        "schedule": "workload rotation; even rounds reversed; library order alternates by round",
+        "schedule": "workload rotation; even rounds reversed; three-library order rotates by round",
         "workload_count": len(workloads),
         "workloads": workloads,
         "yjson_commit": args.yjson_commit,
         "cjfast_json_commit": args.cjfast_commit,
+        "stdx_dependency": "0.0.3",
         "sdk_label": args.sdk_label,
         "yjson_source_sha256": source_digest(ROOT),
         "cjfast_source_sha256": source_digest(cjfast_work_dir),
@@ -171,6 +180,7 @@ def main() -> int:
             "elapsed_seconds", "load1_before", "load1_after", "report_path", "log_path",
         ))
         writer.writeheader()
+        built_packages = {"yjson": False, "cjfast_json": False}
         for round_id in range(1, args.runs + 1):
             for workload_position, workload in enumerate(
                 balanced_workloads(workloads, round_id), start=1
@@ -185,17 +195,21 @@ def main() -> int:
                         log_dir /
                         f"run-{round_id:02d}-workload-{workload_position:02d}-{library}.log"
                     )
-                    if library == "yjson":
+                    if library in {"yjson", "stdx_json"}:
                         cwd = YJSON_BENCH_DIR
                         filter_name = f"ComprehensiveJsonCompareBenchmarks.{source_case}*"
+                        build_key = "yjson"
                     else:
                         cwd = cjfast_work_dir
                         filter_name = f"CjFastJsonComprehensiveBenchmarks.{source_case}*"
-                    command = [
-                        "taskset", "-c", str(args.cpu), "cjpm", "bench", "--skip-build", "--no-color",
-                        "--filter", filter_name, "--report-path", str(report_path),
+                        build_key = "cjfast_json"
+                    command = ["taskset", "-c", str(args.cpu), "cjpm", "bench"]
+                    if built_packages[build_key]:
+                        command.append("--skip-build")
+                    command.extend([
+                        "--no-color", "--filter", filter_name, "--report-path", str(report_path),
                         "--report-format", "csv-raw", "--random-seed", str(round_id),
-                    ]
+                    ])
                     load_before = os.getloadavg()[0]
                     started = time.monotonic()
                     completed = subprocess.run(command, cwd=cwd, env=env, capture_output=True, text=True)
@@ -208,6 +222,7 @@ def main() -> int:
                             f"library={library}; see {log_path}", file=sys.stderr,
                         )
                         return completed.returncode
+                    built_packages[build_key] = True
                     if not list(report_path.rglob("bench-*.csv")):
                         print(
                             f"benchmark produced no raw CSV: round={round_id} "
