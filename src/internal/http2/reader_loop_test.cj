@@ -151,6 +151,27 @@ class Http2ConnectionReaderTest {
         try { let _ = bounded.register(CountingTerminationListener()) } catch (_: IllegalStateException) { rejected = true }
         @Expect(rejected)
     }
+
+    @TestCase
+    func readerRegistryReservesOneListenerBeyondTheStreamLimit(): Unit {
+        let machine = Http2ConnectionStateMachine(Http2ConnectionRole.Client)
+        let reader = Http2ConnectionReader(
+            ScriptedReaderTransport([]), machine, RecordingReaderHandler(),
+            limits: Http2Limits(maxConcurrentStreams: 1u32)
+        )
+        let first = reader.terminationRegistry.register(CountingTerminationListener())
+        let second = reader.terminationRegistry.register(CountingTerminationListener())
+        @Expect(reader.terminationRegistry.activeCount, 2)
+        var rejected = false
+        try {
+            let _ = reader.terminationRegistry.register(CountingTerminationListener())
+        } catch (_: IllegalStateException) {
+            rejected = true
+        }
+        @Expect(rejected)
+        first.unregister()
+        second.unregister()
+    }
 }
 
 private class RecordingReaderHandler <: Http2InboundFrameHandler {
