@@ -5,6 +5,41 @@ import std.sync.*
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
 
+/** Read-only bounded resource counters used by diagnostics and benchmarks. */
+public class Http2ClientMetrics {
+    public let pendingWrites: Int64
+    public let pendingWriteBytes: UInt64
+    public let maximumPendingWrites: Int64
+    public let maximumPendingWriteBytes: UInt64
+    public let pendingFlowPermits: Int64
+    public let flowControlStalls: Int64
+    public let readerTerminationListeners: Int64
+    public let resetListeners: Int64
+    public let goAwayListeners: Int64
+
+    internal init(
+        pendingWrites: Int64,
+        pendingWriteBytes: UInt64,
+        maximumPendingWrites: Int64,
+        maximumPendingWriteBytes: UInt64,
+        pendingFlowPermits: Int64,
+        flowControlStalls: Int64,
+        readerTerminationListeners: Int64,
+        resetListeners: Int64,
+        goAwayListeners: Int64
+    ) {
+        this.pendingWrites = pendingWrites
+        this.pendingWriteBytes = pendingWriteBytes
+        this.maximumPendingWrites = maximumPendingWrites
+        this.maximumPendingWriteBytes = maximumPendingWriteBytes
+        this.pendingFlowPermits = pendingFlowPermits
+        this.flowControlStalls = flowControlStalls
+        this.readerTerminationListeners = readerTerminationListeners
+        this.resetListeners = resetListeners
+        this.goAwayListeners = goAwayListeners
+    }
+}
+
 /**
  * One multiplexed HTTP/2 client connection. A single reader and writer own the
  * transport while request tasks own independent stream exchanges.
@@ -101,6 +136,20 @@ public class Http2ClientConnection <: Resource {
     public prop streamCapacity: UInt32 { get() { registry.peerMaxConcurrentStreams } }
     public prop acceptingNewStreams: Bool {
         get() { goAway.acceptingNewStreams && closer.result.isNone() && machine.completion.isNone() }
+    }
+
+    public func metrics(): Http2ClientMetrics {
+        Http2ClientMetrics(
+            writer.pendingWrites,
+            writer.pendingBytes,
+            writer.maximumPendingWrites,
+            writer.maximumPendingBytes,
+            flow.pendingPermitCount,
+            flow.flowControlStalls,
+            reader.terminationRegistry.activeCount,
+            reset.activeListenerCount,
+            goAway.activeListenerCount
+        )
     }
 
     /** Executes one request on an independently-owned stream. */
@@ -365,20 +414,25 @@ class Http2ClientExchange <: ResponseBodyObserver {
                     changed.notifyAll()
                 }
                 if (endStream) {
-                    channel.finish(None<HttpTrailer>)
                     registry.peerEnd(streamId)
+                    channel.finish(None<HttpTrailer>)
                 }
             case Http2ClientHeaderEventKind.Trailer =>
-                channel.finish(event.trailer)
                 registry.peerEnd(streamId)
+                channel.finish(event.trailer)
         }
     }
 
     func acceptData(frame: Http2Frame): Unit {
         let decoded = decodeClientData(frame, streamId)
         sequence.acceptData(decoded.data.size, frame.header.flags.isEndStream())
-        channel.offer(decoded.data, Int64(frame.header.length), frame.header.flags.isEndStream())
-        if (frame.header.flags.isEndStream()) { registry.peerEnd(streamId) }
+        if (frame.header.flags.isEndStream()) {
+            channel.offer(decoded.data, Int64(frame.header.length), false)
+            registry.peerEnd(streamId)
+            channel.finish(None<HttpTrailer>)
+        } else {
+            channel.offer(decoded.data, Int64(frame.header.length), false)
+        }
     }
 
     func awaitResponse(waitContext: OperationContext): HttpResponse {
