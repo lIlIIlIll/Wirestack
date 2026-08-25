@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "gate_id": "GATE-HTTP2-QUALITY",
+  "description": "Linux HTTP/2 conformance, race and deterministic mutation fuzz evidence",
+  "scenarios": [
+    {
+      "id": "linux-http2-conformance",
+      "platforms": ["linux"],
+      "required_tools": ["python3", "cjc", "cjpm"],
+      "timeout_seconds": 600,
+      "steps": [
+        {
+          "id": "run-conformance",
+          "command": ["python3", "tools/gates/http2_quality.py", "--suite", "conformance", "--output", "{artifact_dir}/http2-conformance.json"]
+        }
+      ]
+    },
+    {
+      "id": "linux-http2-fuzz",
+      "platforms": ["linux"],
+      "required_tools": ["python3", "cjc", "cjpm"],
+      "timeout_seconds": 600,
+      "steps": [
+        {
+          "id": "run-fuzz",
+          "command": ["python3", "tools/gates/http2_quality.py", "--suite", "fuzz", "--output", "{artifact_dir}/http2-fuzz.json"]
+        }
+      ]
+    }
+  ]
+}
