@@ -152,7 +152,10 @@ def source_provider(spec: Mapping[str, Any], work: Path, log: Path) -> tuple[Pat
         run(["git", "init", str(src)], cwd=work, log=log, env=git_env)
         run(["git", "-C", str(src), "remote", "add", "origin", spec["url"]],
             cwd=work, log=log, env=git_env)
-        run(["git", "-C", str(src), "fetch", "--depth", "1", "origin", spec["commit"]],
+        # AWS-LC release commits may require one parent object for Git's shallow
+        # traversal. Depth two remains a bounded exact-SHA acquisition while
+        # avoiding GitHub's "did not send all necessary objects" depth-one failure.
+        run(["git", "-C", str(src), "fetch", "--depth", "2", "origin", spec["commit"]],
             cwd=work, log=log, env=git_env)
         run(["git", "-C", str(src), "checkout", "--detach", "FETCH_HEAD"],
             cwd=work, log=log, env=git_env)
@@ -257,7 +260,8 @@ def generate_fixtures(work: Path, log: Path) -> Path:
 
 
 def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
-                archives: Sequence[Path], work: Path, log: Path) -> Path:
+                archives: Sequence[Path], work: Path, log: Path,
+                extra_cflags: Sequence[str] = ()) -> Path:
     output = work / "provider-poc"
     include = prefix / "include"
     if spec["poc_family"] == "openssl-compatible":
@@ -265,7 +269,7 @@ def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
         obj = work / "poc.o"
         run([
             os.environ.get("CC", "cc"), "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
-            f"-I{include}", "-c", str(source), "-o", str(obj),
+            f"-I{include}", *extra_cflags, "-c", str(source), "-o", str(obj),
         ], cwd=work, log=log)
         command = [os.environ.get("CXX", "c++"), str(obj), *[str(a) for a in archives], "-pthread", "-lm"]
         if sys.platform.startswith("linux"):
