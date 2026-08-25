@@ -17,6 +17,7 @@
 - [配置与错误](configuration-and-errors.md)
 - [资源限制](resource-limits.md)
 - [JSON Schema](schema.md)
+- [JSON Pointer、Patch、Merge Patch 与 JSONPath](path-and-patch.md)
 - [Backend 使用指南](backends.md)
 
 ## 兼容性、迁移与性能
@@ -31,7 +32,7 @@
 
 - [当前架构](architecture.md)
 - [Repository layout](maintainers/repository-layout.md)
-- [测试策略与命令](maintainers/testing.md)
+- [测试策略](maintainers/testing.md)
 - [Native backend 内部契约](maintainers/native-internals.md)
 - [发布流程](maintainers/releasing.md)
 - [1.0.0-rc.1 evidence snapshot](../release/1.0.0-rc.1/evidence.md)

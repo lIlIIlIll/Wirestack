@@ -51,5 +51,10 @@ document 的输出。
 | `codec_type_mismatch` | erased codec 收到或返回错误类型 |
 | `codec_contract` | 调用了 codec 未提供的 fast contract |
 | `missing_key` / `index_out_of_bounds` | AST 查询失败 |
+| `invalid_json_pointer` / `json_pointer_not_found` | Pointer 语法无效或目标不存在 |
+| `invalid_json_patch` / `json_patch_test_failed` | Patch 文档无效或 test 操作失败 |
+| `invalid_json_path` | JSONPath 表达式无效 |
+| `unsupported_schema_dialect` | Schema 声明了 draft 2020-12 之外的 dialect |
+| `unsupported_schema_format` | `StrictAssertion` 遇到未注册的 Schema format |
 
 启用 `includeErrorLocation` 时，适用的 parse/limit 错误会附带 offset/location；并非所有语义错误都能提供相同粒度的位置。

@@ -1,8 +1,7 @@
 # Testing yjson
 
-This guide defines the stable test layers and commands. Test counts and one-off
-release results are intentionally not copied here; command output and immutable
-release evidence are the source of truth for those values.
+This guide defines stable test layers and release expectations. One-off execution
+details belong in release evidence rather than this document.
 
 ## Test layers
 
@@ -11,37 +10,13 @@ release evidence are the source of truth for those values.
 | Core unit and contract tests | parser, writer, codecs, AST, Compact, streams, Schema, limits | `cjpm test` |
 | External codec consumer | caller-package `@JsonCodec`, enum, polymorphism, fast decoder | `packages/codec_integration` |
 | JSON literal consumer | `@Json`, `@JsonValue`, interpolation order, dynamic LastWins | `packages/json_literal_integration` |
+| Standards conformance | pinned JSON Schema, JSONPath and JSON Patch suites through public API | `scripts/run_standards_conformance.py` |
 | Compile-fail macro tests | invalid literal grammar and duplicate static keys | `scripts/check_json_literal_compile_fail.sh` |
 | Custom Native package | DOM lifecycle, policies, resource limits | `packages/yjson_native` |
 | yyjson package | Direct DOM lifecycle, semantics, resource limits | `packages/yjson_yyjson` |
 | Native C checks | warnings, scanner/DOM tests, sanitizers, differential fuzz | `scripts/release_native_checks.sh` |
 | External release consumers | staged core, macro, Custom Native, yyjson packages | `scripts/release_consumer_checks.py` |
 | Package/release boundaries | manifests, source staging, symbols, licenses | release scripts |
-
-## Local commands
-
-Prepare the configured Cangjie environment before running `cjpm` commands.
-
-```bash
-cjpm test --no-color
-scripts/run_cjpm_executable.sh packages/examples
-scripts/run_cjpm_executable.sh packages/codec_integration
-scripts/run_cjpm_executable.sh packages/json_literal_integration
-scripts/check_json_literal_compile_fail.sh
-(cd packages/yjson_native && cjpm test --no-color)
-(cd packages/yjson_yyjson && cjpm test --no-color)
-```
-
-Native validation is split by purpose:
-
-```bash
-YJSON_NATIVE_CHECK_MODE=targeted scripts/release_native_checks.sh
-YJSON_NATIVE_CHECK_MODE=sanitizer scripts/release_native_checks.sh
-YJSON_NATIVE_CHECK_MODE=fuzz YJSON_FUZZ_CASES=5000 scripts/release_native_checks.sh
-```
-
-Use the extended fuzz count only for a release/nightly gate. Do not replace a
-semantic test with a higher fuzz count.
 
 ## CI mapping
 
@@ -51,6 +26,7 @@ semantic test with a higher fuzz count.
 |---|---|
 | `api-inventory` | declaration, C ABI, and package-pairing inventory |
 | `core` | core test suite without a C build hook |
+| `standards-conformance` | pinned JSON Schema required, JSONPath CTS, and JSON Patch suites |
 | `examples` | documented Pure Cangjie example |
 | `macro-consumer` | literal consumer, compile-fail cases, staged macro consumer |
 | `custom-native` | optional package tests, external consumer, no yyjson symbols |
@@ -60,9 +36,7 @@ semantic test with a higher fuzz count.
 | `fuzz-short` / `fuzz-extended` | deterministic backend differential semantics |
 | `yyjson-colink` | vendored symbol isolation with the pinned second version |
 
-`scripts/ci_fresh_checkout.sh` runs the configured job set from a fresh source
-tree. A local simulation and a hosted CI execution are separate evidence and
-must never share one status.
+Fresh-source and hosted executions are separate evidence and must never share one status.
 
 ## Feature × backend coverage
 
@@ -78,6 +52,7 @@ must never share one status.
 | Duplicate/number/resource policies | yes | yes | yes | release consumers |
 | Deterministic close and use-after-close | n/a | yes | yes | release consumers |
 | Schema | yes | n/a | n/a | core tests |
+| JSON Pointer/Patch/Path | yes | n/a | n/a | official conformance consumer |
 
 “Differential” means the Native C harness compares semantic results against the
 portable contract; it does not make the Native DOM API identical to `JsonNode`.
@@ -96,14 +71,26 @@ portable contract; it does not make the Native DOM API identical to `JsonNode`.
   command results, commit IDs, SDK identity, timestamps, logs, and checksums
   belong in release-specific evidence.
 
+## Standards conformance gate
+
+The standards gate fixes upstream revisions and validates expected cardinalities through an
+independent public-API consumer. The release-blocking default is:
+
+| Suite | Required result |
+| --- | ---: |
+| JSON Schema draft 2020-12 required | 1299/1299 |
+| JSONPath CTS | 703/703 |
+| JSON Patch tests | 108/108 |
+
+Installing the optional `yjson_schema_formats` provider adds 964 applicable optional tests. The
+current result is 964/964 for that layer and 3074/3074 overall. The default 2110-case gate does not
+install the provider.
+
 ## Executable exit-status gate
 
-`cjpm run` in the currently qualified toolchain can return exit code 0 after an
-unhandled application exception. Release and CI consumer gates therefore use
-`scripts/run_cjpm_executable.sh`: it builds with `cjpm`, then executes
-`target/release/bin/main` directly so runtime failures propagate as non-zero.
-The external codec consumer covers generated polymorphic decode with the
-default `maxPolymorphicObjectBytes = 0` and a positive-budget overflow case.
+Executable gates must propagate unhandled application exceptions as failures; shell success alone
+is not sufficient. The external codec consumer covers generated polymorphic decode with the default
+unlimited budget and a positive-budget overflow case.
 
 ## Historical plan
 

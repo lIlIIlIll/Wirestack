@@ -4,13 +4,8 @@
 
 ## Release identity
 
-冻结候选版本后先记录：
-
-- exact commit SHA 与 UTC 时间；
-- `cjc`/`cjpm` 版本、SDK root 或 digest；
-- runner identity、OS/libc、CPU architecture；
-- release scripts revision；
-- staged artifact 与 log checksum。
+候选 evidence 必须绑定 exact commit、工具链身份、gate 结果与 artifact checksum。临时目录、
+开发机路径和逐条执行过程不属于发布说明。
 
 ## Blocking gates
 
@@ -18,13 +13,14 @@
 
 1. public API/ABI inventory 未评审或 machine-readable inventory 校验失败；
 2. Pure Cangjie core、examples、macro consumer 任一失败；
-3. Custom Native 或 yyjson package 不能由自身 staged source 独立构建；
-4. warning gate、ASan、UBSan、LSan 或 differential fuzz 失败；
-5. package input 缺失、出现未声明 Native dependency、license 缺失；
-6. external consumer、版本配套、C ABI 或 yyjson symbol-isolation 失败；
-7. documented example 失败或 Native ownership/lifetime 含糊；
-8. source archive 包含 target、object、archive、shared library 或未声明 benchmark artifact；
-9. qualified platform 上出现已确认的 release-blocking performance regression。
+3. 固定 revision 的 JSON Schema required、JSONPath CTS 或 JSON Patch conformance gate 失败；
+4. Custom Native 或 yyjson package 不能由自身 staged source 独立构建；
+5. warning gate、ASan、UBSan、LSan 或 differential fuzz 失败；
+6. package input 缺失、出现未声明 Native dependency、license 缺失；
+7. external consumer、版本配套、C ABI 或 yyjson symbol-isolation 失败；
+8. documented example 失败或 Native ownership/lifetime 含糊；
+9. source archive 包含 target、object、archive、shared library 或未声明 benchmark artifact；
+10. qualified platform 上出现已确认的 release-blocking performance regression。
 
 ## Required jobs
 
@@ -32,6 +28,7 @@
 | --- | --- |
 | `api-inventory` | public declarations、C ABI needles、exact package pairing |
 | `core` | 无 C build hook 的 core tests |
+| `standards-conformance` | pinned Schema required、JSONPath CTS 与 JSON Patch public-API consumer |
 | `examples` | public example build/run |
 | `macro-consumer` | 外部式 `@JsonCodec` consumer |
 | `custom-native` | package tests + external consumer，yyjson disabled |
@@ -43,7 +40,7 @@
 | `yyjson-symbol-isolation` | pinned dual-version co-link fixture |
 | `package-rehearsal` | source-only manifests、staging、registry-style consumers |
 
-仓库命令与 job mapping 见 [testing.md](testing.md)。SDK build 不属于普通 package release gate；需要验证 SDK 时按 SDK 仓库自身流程执行。
+job mapping 见 [testing.md](testing.md)。SDK build 不属于普通 package release gate。
 
 ## Local and hosted evidence
 

@@ -1,11 +1,8 @@
 # Release notes — 1.0.0-rc.1
 
-`1.0.0-rc.1` 已创建 annotated tag，尚未发布到 registry 或完成 hosted CI。候选源码提交
-`42c79d2f271b756775583a2ce09b2ce64cb6497b` 已通过本地 fresh-checkout gates 与 package
-rehearsal。Hosted CI 尚未运行，但 release owner 已在 2026-08-22 明确批准其为
-`NON-BLOCKING`。当前 cjpm manifest 只能使用三段数字版本，因此 checked-in manifests
-写作 `1.0.0`；这不表示正式版已经发布。候选阶段可使用 `1.0.0-rc.1` tag 的 checkout
-path dependency，所有 yjson package 必须来自同一 checkout。
+`1.0.0-rc.1` 已创建 tag，尚未发布到 registry。checked-in manifests 使用 `1.0.0`，
+候选阶段应从同一个 `1.0.0-rc.1` source tree 引用全部 yjson package。完整验收状态见
+[release evidence](release/1.0.0-rc.1/evidence.md)。
 
 ## JSON literal syntax and AST rename
 

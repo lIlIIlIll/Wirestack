@@ -16,11 +16,12 @@ application
 optional native packages:
 application
 ├── yjson_native       # Custom Native Compact + optional scanner activation
+├── yjson_schema_formats # libidn2-backed international Schema formats
 └── yjson_yyjson       # yyjson Direct Native DOM
 ```
 
 `yjson_all` 是 macro package，通过 `public import` 同时导出 runtime 与 macros。它不依赖、
-构建或启用任何 Native package。`yjson_native` 和 `yjson_yyjson` 都显式依赖同版本
+构建或启用任何 Native package。`yjson_native`、`yjson_schema_formats` 和 `yjson_yyjson` 都显式依赖同版本
 `yjson`，应用只有声明相应依赖时才会进入 Native 构建路径。
 
 仓库开发 manifest 中，根 `yjson` 临时依赖 `yjson_macros`，因为 `src/` 内的 fixture 与

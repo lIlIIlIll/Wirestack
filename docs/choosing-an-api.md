@@ -11,7 +11,9 @@
 | 只读查询文档 | `YJson.parseDocument` | 统一 facade，默认 Pure Compact，可显式切换 Native backend |
 | caller-owned stream | `encodeToStreamWith/decodeFromStreamWith` | 默认 Pure；可显式选择 backend；不关闭 stream |
 | Native-owned DOM | optional backend package | 需要显式生命周期管理 |
-| 校验 JSON 实例 | `JsonSchema` | 常用 draft 2020-12 子集 |
+| 校验 JSON 实例 | `JsonSchema` | draft 2020-12；外部资源显式 resolver；format 默认 annotation，可安装 provider |
+| 定位或查询节点 | `JsonPointer` / `JsonPath` | RFC 6901 精确位置 / RFC 9535 多结果查询 |
+| 原子更新文档 | `JsonPatch` / `JsonMergePatch` | RFC 6902 操作序列 / RFC 7386 merge 语义 |
 
 如果是在 yjson、stdx.json、cjfast_json 或跨 runtime 方案之间选库，先看
 [库能力对比](library-comparison.md)。该表只比较公开 contract；性能选型还需使用相同

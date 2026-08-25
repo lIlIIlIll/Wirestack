@@ -1,0 +1,16 @@
+[package]
+cjc-version = "1.1.0"
+name = "yjson_standards_conformance"
+organization = ""
+description = "Official JSON standards conformance adapter for yjson"
+version = "1.0.0"
+target-dir = ""
+output-type = "executable"
+compile-option = ""
+override-compile-option = ""
+link-option = ""
+package-configuration = {}
+
+[dependencies]
+"yjson" = { path = "../..", output-type = "static" }
+"yjson_schema_formats" = { path = "../yjson_schema_formats" }

@@ -18,6 +18,7 @@ MODULES = (
     "yjson",
     "yjson_all",
     "yjson_native",
+    "yjson_schema_formats",
     "yjson_yyjson",
 )
 
@@ -59,6 +60,9 @@ def stage(name: str, destination: pathlib.Path, development: bool) -> None:
     copy_path(package / "src", module / "src")
     copy_path(package / "README.md", module / "README.md")
     copy_path(ROOT / "LICENSE", module / "LICENSE")
+    if name == "yjson_schema_formats":
+        copy_path(package / "build.cj", module / "build.cj")
+        copy_path(package / "native", module / "native")
     if name in ("yjson_native", "yjson_yyjson"):
         copy_path(package / "build.cj", module / "build.cj")
         copy_path(ROOT / "scripts" / "build_native_scanner.py", module / "scripts" / "build_native_scanner.py")

@@ -4,25 +4,10 @@
 [当前架构](docs/architecture.md)，并保持 Pure Cangjie core、macro 和 optional Native
 package 的边界。
 
-## 开发环境
-
-- Cangjie SDK 1.1；
-- `cjc`、`cjpm` 在 `PATH`；
-- 仅修改 Native package 时需要 C11 compiler 与 archiver。
-
 ## 验证
 
-按修改范围运行最小充分验证：
-
-```bash
-cjpm test --no-color
-scripts/run_cjpm_executable.sh packages/examples
-scripts/run_cjpm_executable.sh packages/codec_integration
-scripts/run_cjpm_executable.sh packages/json_literal_integration
-```
-
-Native、sanitizer、fuzz、release job 与 external consumer 命令见
-[测试指南](docs/maintainers/testing.md)。不要用 benchmark 代替 correctness test。
+按修改范围完成 core、consumer、Native 或 standards gate。范围与发布要求见
+[测试指南](docs/maintainers/testing.md)；benchmark 不能替代 correctness test。
 
 ## 变更要求
 

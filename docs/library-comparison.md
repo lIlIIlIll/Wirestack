@@ -22,8 +22,8 @@
 | 字段映射声明 | ✅ 字段名、忽略、默认值等宏配置 | — 公开 API index 未发现 annotation | ✅ name/ignore/null/default annotations | ✅ annotations | ◐ Go tags，经 `encoding/json` 兼容路径 |
 | Typed polymorphism | ✅ 显式 discriminator/subtype | — 公开 API index 未记录 | — 官方 README 未记录 | ✅ opt-in AutoType | — 官方 README 未记录 |
 | JSON literal DSL | ✅ `@Json` / `@JsonValue` | — | — | ◐ Kotlin DSL；不是 Cangjie 语法 | — |
-| JSON Schema | ◐ draft 2020-12 常用子集 | — 公开 API index 未记录 | — 官方 README 未记录 | ✅ | — 官方 README 未记录 |
-| 标准 path/patch | ◐ DOM 索引；无标准 JSONPath/Patch | ◐ DOM 索引 | — 官方 README 未记录 | ✅ JSONPath | ✅ JSON Pointer/Patch/Merge Patch |
+| JSON Schema | ✅ draft 2020-12 required + optional suites；可选国际化 format provider | — 公开 API index 未记录 | — 官方 README 未记录 | ✅ | — 官方 README 未记录 |
+| 标准 path/patch | ✅ RFC 6901/6902/7386 与 RFC 9535；官方 suites 全部通过 | ◐ DOM 索引 | — 官方 README 未记录 | ✅ JSONPath | ✅ JSON Pointer/Patch/Merge Patch |
 | 显式输入资源预算 | ✅ depth 与 byte budgets | — 公开 API index 未记录 | — 官方 README 未记录 | — 本次查阅资料未确认统一预算 API | ◐ incremental reader 要求最大输入大小 |
 | Native 加速 | ✅ 显式可选 Custom Native/yyjson packages | — 用户不可选择 backend | — 官方 README 未记录 | N/A；JVM/ASM 优化路径 | N/A；项目明确 Pure Go、无 CGo |
 | Binary JSON | — JSON text | — 公开 API index 未记录 | — 官方 README 未记录 | ✅ JSONB | — 官方 README 未记录 |
@@ -44,11 +44,18 @@
 “能力更多”不自动意味着目标 workload 更快或部署成本更低。Native backend、document
 生命周期、输入所有权和线程安全差异仍应分别查阅各库 contract。
 
+yjson 的结论由仓库内可重复 gate 支撑：固定 revision 的 JSON Schema draft 2020-12
+required suite 为 1299/1299，JSONPath CTS 为 703/703，JSON Patch tests 为 108/108。
+安装 `yjson_schema_formats` provider 后，适用于当前 dialect 的 JSON Schema optional audit
+为 964/964；默认不安装 provider 的 required gate 仍为 2110/2110。contract 与边界见
+[Schema](schema.md)、[标准路径与 Patch](path-and-patch.md)及[测试指南](maintainers/testing.md)。
+
 ## 对比快照与来源
 
 - yjson：当前候选实现与[文档导航](README.md)，typed/DOM/backend contract 见
   [API 选择指南](choosing-an-api.md)、[Codec 生成](codec-generation.md)、
-  [Backend 指南](backends.md)和[资源限制](resource-limits.md)。
+  [Backend 指南](backends.md)、[Schema](schema.md)、[标准路径与 Patch](path-and-patch.md)
+  和[资源限制](resource-limits.md)。
 - stdx.json：Cangjie stdx `main` API index，生成时间 `2026-08-24T03:50:21Z`；主要入口为
   [`stdx.encoding.json`](https://955work.icu/dev/stdx/libs_stdx/encoding/json/json_package_api/encoding_json_package_classes.html)
   与 `stdx.encoding.json_stream`。

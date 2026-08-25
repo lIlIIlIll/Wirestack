@@ -1,0 +1,16 @@
+[package]
+cjc-version = "1.1.0"
+name = "yjson_schema_formats"
+organization = ""
+description = "Optional internationalized URI and hostname formats for yjson JSON Schema"
+version = "1.0.0"
+target-dir = ""
+script-dir = ""
+output-type = "dynamic"
+compile-option = "-O2"
+override-compile-option = ""
+link-option = "-L target/native -lyjson_schema_formats -lidn2"
+package-configuration = {}
+
+[dependencies]
+yjson = { path = "../.." }

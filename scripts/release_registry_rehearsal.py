@@ -24,6 +24,7 @@ MODULES = (
     "yjson",
     "yjson_all",
     "yjson_native",
+    "yjson_schema_formats",
     "yjson_yyjson",
 )
 LEAF_BUNDLES = ("yjson_macros", "yjson")
@@ -76,6 +77,10 @@ def inspect_artifact(name: str, archive_path: pathlib.Path) -> None:
                         "scripts/build_native_scanner.py", "build.cj")
             if not all(any(member.endswith(item) for member in members) for item in required):
                 raise RuntimeError("Custom Native artifact is incomplete")
+        if name == "yjson_schema_formats":
+            required = ("native/schema_formats.c", "build.cj")
+            if not all(any(member.endswith(item) for member in members) for item in required):
+                raise RuntimeError("Schema formats artifact is incomplete")
         if name == "yjson_yyjson":
             required = ("native/yjson_yyjson.c", "native/vendor/yyjson/yyjson.c",
                         "native/vendor/yyjson/yyjson.h", "native/vendor/yyjson/LICENSE",

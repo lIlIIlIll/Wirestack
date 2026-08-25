@@ -9,10 +9,5 @@
 - Pure `CompactJsonDocument` 查询；
 - built-in codec roundtrip。
 
-```bash
-cd packages/examples
-cjpm run
-```
-
 Stream、Schema 与 Native 示例分别见 [Stream I/O](../../docs/streams.md)、
 [JSON Schema](../../docs/schema.md) 与 [Backend 使用指南](../../docs/backends.md)。

@@ -255,6 +255,17 @@ public abstract class JsonNode <: ToString {
 
     public func kind(): JsonKind
 
+    /// Returns a detached JSON tree. Shared children are copied per occurrence.
+    public func deepCopy(): JsonNode {
+        deepCopyJsonNode(this)
+    }
+
+    /// JSON data-model equality. Numerically equal JSON numbers compare equal
+    /// even when their lexical representations differ.
+    public func equivalentTo(other: JsonNode): Bool {
+        jsonNodesEquivalent(this, other)
+    }
+
     public func toPrettyString(): String {
         toPrettyString("  ")
     }
@@ -605,6 +616,21 @@ public class JsonArrayValue <: JsonNode {
         set(index, YJson.value(value))
     }
 
+    public func insert(index: Int64, value: JsonNode): JsonArrayValue {
+        if (index < 0 || index > items.size) {
+            throw JsonException("Array index ${index} is out of bounds", code: "index_out_of_bounds")
+        }
+        items.add(value, at: index)
+        this
+    }
+
+    public func removeAt(index: Int64): JsonNode {
+        if (index < 0 || index >= items.size) {
+            throw JsonException("Array index ${index} is out of bounds", code: "index_out_of_bounds")
+        }
+        items.remove(at: index)
+    }
+
     public func size(): Int64 {
         items.size
     }
@@ -662,6 +688,10 @@ public class JsonObjectValue <: JsonNode {
 
     public func get(key: String): Option<JsonNode> {
         fields.get(key)
+    }
+
+    public func remove(key: String): Option<JsonNode> {
+        fields.remove(key)
     }
 
     public func entries(): HashMap<String, JsonNode> {

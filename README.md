@@ -48,16 +48,8 @@ yjson_all = { path = "../yjson/packages/yjson_all" }
 yjson = { path = "../yjson" }
 ```
 
-所有 yjson package 必须来自同一个 checkout 和同一个 exact commit；仅比较 manifest
-中的 `1.0.0` 版本字符串不足以证明候选代码配套。当前完成本地 gate 的候选源码提交为
-`42c79d2f271b756775583a2ce09b2ce64cb6497b`。Hosted CI 尚未运行，但经 release owner
-明确审批为 `NON-BLOCKING`。`1.0.0-rc.1` annotated tag 已冻结在包含完整 evidence 的
-`8c142347acb1aafe66d8c417e685a437d6535048`。使用 tag 或 exact SHA：
-
-```bash
-git fetch --tags origin
-git checkout --detach 1.0.0-rc.1
-```
+候选阶段应使用 `1.0.0-rc.1` tag，并确保所有 yjson package 来自同一版本。发布身份与
+验证状态见 [release evidence](release/1.0.0-rc.1/evidence.md)。
 
 ## 快速开始
 
@@ -82,12 +74,6 @@ main(): Unit {
     let user = YJson.fromJson<User>(text)
     println(user.name)
 }
-```
-
-从仓库根目录运行纯仓颉示例：
-
-```bash
-scripts/run_cjpm_executable.sh packages/examples
 ```
 
 ## 核心 API
@@ -163,41 +149,38 @@ println(YJson.stringify(root))
 | Mutable / compact DOM | ✅ / ✅ | ✅ / — | — / — | ✅ / ◐ | ✅ / ✅ |
 | Stream/token I/O | ✅ backend 可选 | ✅ | ✅ | ✅ | ◐ incremental DOM |
 | Polymorphism / custom codec | ✅ / ✅ | — / ✅ | — / ✅ | ✅ / ✅ | — / ◐ |
-| Schema / standard path-patch | ◐ / — | — / ◐ | — / — | ✅ / ✅ JSONPath | — / ✅ Pointer/Patch |
+| Schema / standard path-patch | ✅ 2020-12 required + optional suites / ✅ Pointer, Patch, Merge, JSONPath | — / ◐ | — / — | ✅ / ✅ JSONPath | — / ✅ Pointer/Patch |
 | Cangjie 直接依赖 | ✅ | ✅ SDK | ✅ | N/A（Java/JVM） | N/A（Go） |
 
 完整矩阵、符号含义、跨 runtime 边界与来源见[库能力对比](docs/library-comparison.md)。性能
 数据仍以独立测量批次为准，不能由这张能力表推导。
 
+标准文档操作入口包括 `JsonPointer`（RFC 6901）、`JsonPatch`（RFC 6902）、
+`JsonMergePatch`（RFC 7386）和 `JsonPath`（RFC 9535）；Schema 只接受 draft 2020-12，
+外部 `$ref` 由应用注入 `JsonSchemaResolver`，core 不执行网络访问。用法与边界见
+[Schema](docs/schema.md)和[标准路径与 Patch](docs/path-and-patch.md)。
+
 ## 性能
 
-在固定 CPU、相同 SDK 与构建参数、交替执行的 37 项同语义 Server 测量中，yjson 有
-29 项 paired median 低于 `cjfast_json`。下表选择同时通过两侧 CV ≤ 5% 门槛的代表
-workload，并保留领先与落后方向：
+在 37 项同语义测量中，yjson 有 29 项 paired median 低于 `cjfast_json`。下表选择
+通过稳定性门槛的代表 workload，并保留领先与落后方向：
 
 | Workload | yjson | cjfast_json | Latency ratio Y/C | Direction |
 |---|---:|---:|---:|---|
 | Large Map encode / string¹ | 119.887 µs | 132.802 µs | **0.903x** | yjson faster 11/11 |
-| Large Array decode / string | 43.340 µs | 77.940 µs | **0.556x** | yjson faster |
 | Large Array encode / string | 101.547 µs | 75.899 µs | 1.338x | cjfast_json faster 11/11 |
 | `TemporalStats` encode / string | 20.879 µs | 21.824 µs | **0.957x** | yjson faster 11/11 |
-| Deep nested decode / string | 76.070 µs | 95.808 µs | **0.794x** | yjson faster |
 
-`Latency ratio Y/C` 统一按 `yjson median / cjfast_json median` 计算，小于 1 表示 yjson
-耗时更低。¹ Large
-Map 来自同环境的独立稳定复测；其余行来自 37-workload 正式测量。绝对时间是特定 Server、
-SDK 与 workload 的快照，不代表其他环境。
+`Latency ratio Y/C` 按 `yjson median / cjfast_json median` 计算，小于 1 表示 yjson
+耗时更低。¹ Large Map 来自独立稳定复测。绝对时间只代表对应 workload，不应外推为
+所有输入或平台上的性能排名。
 
-当前公开摘要、稳定行、方法和实验限制见[性能方法与结果](docs/performance/README.md)；
-复现入口见 [benchmark 指南](benchmarks/README.md)。完整历史 raw samples、p95、MAD 与
-machine-readable summaries 尚未全部随仓库发布。stdx.json、fastjson2 与 cjfast_json
-数据来自不同批次，不能解读为一次同步四库排名。
+更多结果和适用边界见[性能说明](docs/performance/README.md)。不同 runtime 或不同批次的
+数字不能拼接为统一排名。
 
-另一次独立的跨 runtime DOM 测量使用纯 Go 的 `dwisiswant0/yyjson`。在相同 fixture 的
-Read、Write 与 RoundTrip 共 12 项中，Go yyjson 的 paired median 均较低；11 个两侧
-CV ≤ 5% 的稳定行中，`yjson / Go yyjson` latency ratio 几何均值为 **5.45x**。这不是
-typed codec 对比，且 16 MiB Read 因 yjson CV 9.60% 只作为方向证据。完整表格与边界见
-[2026-08-22 Go yyjson DOM 结果](docs/performance/results/2026-08-22-go-yyjson.md)。
+跨 runtime 的 DOM 测量中，Go `dwisiswant0/yyjson` 在全部 12 项 paired median 中更低；
+稳定行的 `yjson / Go yyjson` latency ratio 几何均值为 **5.45x**。这不是 typed codec
+对比，详见 [Go yyjson DOM 结果](docs/performance/results/2026-08-22-go-yyjson.md)。
 
 ## 兼容性与限制
 
@@ -205,8 +188,10 @@ typed codec 对比，且 16 MiB Read 因 yjson CV 9.60% 只作为方向证据。
 - **Stream decode** — 当前会读取全部剩余输入，并非恒定内存的增量 parser；Stream 的所有权仍归调用方。
 - **Native backend** — 需要显式依赖，document 必须 `close()`，且不是线程安全对象；当前仅 qualification Linux x86_64。
 - **资源预算** — byte budget 默认不限制，`maxDepth` 默认 256；处理不可信输入时应显式收紧。
-- **JSON Schema** — 支持常用类型、组合、本地引用和边界校验，但不是完整的 draft 2020-12 实现。
-- **预发布状态** — `1.0.0-rc.1` 只有在 exact commit、blocking gates、evidence 与 annotated tag 全部冻结后才是可复现 RC；registry publish 与 hosted CI 状态以 release evidence 为准。
+- **JSON Schema format assertion** — 默认 `Annotation`；core 提供基础 format，国际化
+  hostname/email、URI/IRI 与 URI Template 由可选 `yjson_schema_formats` provider 提供。
+  required 1299/1299、适用 optional 964/964 均通过固定 revision 官方 suite。
+- **预发布状态** — `1.0.0-rc.1` 尚未发布到 registry；状态以 release evidence 为准。
 
 ## 文档
 
@@ -221,18 +206,6 @@ typed codec 对比，且 16 MiB Read 因 yjson CV 9.60% 只作为方向证据。
 - [预发布迁移指南](docs/migration/pre-1.0-to-1.0.md) · [Changelog](CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 - [第三方组件与许可](THIRD_PARTY_NOTICES.md)
-
-## 构建与贡献
-
-```bash
-cjpm test
-(cd packages/yjson_native && cjpm test)
-(cd packages/yjson_yyjson && cjpm test)
-YJSON_FUZZ_CASES=5000 scripts/release_native_checks.sh
-```
-
-Native 构建脚本尊重 `CC` 与 `AR`。提交修改前请运行与变更范围对应的 core、consumer
-或 Native 验证；性能变更还应附带同环境 baseline/candidate 原始样本。
 
 ## 许可证
 

@@ -2,9 +2,7 @@
 
 Supported opt-in Custom Native Compact DOM backend for `yjson`.
 
-The package must use the same `yjson` release as its core dependency. This
-candidate has not been published to the registry, and current cjpm manifests
-cannot express a prerelease suffix. Use matching checkout path dependencies.
+The package must use the same `yjson` release as its core dependency.
 
 The module is source-built with a C11 compiler. Documents are explicit
 resources: close them deterministically. They are not thread-safe; callers must

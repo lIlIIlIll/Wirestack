@@ -13,6 +13,7 @@ architecture is described in [the architecture guide](../architecture.md).
 | `packages/yjson_macros/` | declaration and expression macros | separate package |
 | `packages/yjson_all/` | aggregate import | separate package |
 | `packages/yjson_native/` | Custom Native facade and tests | optional package |
+| `packages/yjson_schema_formats/` | Internationalized Schema format provider | optional package |
 | `packages/yjson_yyjson/` | yyjson facade, vendored source, and tests | optional package |
 | `packages/*_integration/` | external-style consumers | no |
 | `native/` | scanner, Custom Compact, yyjson adapter, and C tests | native packages only |
@@ -39,9 +40,10 @@ The apparent generated fixtures in root builds are macro expansions of
 
 ## Build hooks
 
-Only the optional Native packages own yjson build hooks:
+Only optional packages with native dependencies own yjson build hooks:
 
 - `packages/yjson_native/build.cj` builds scanner and Custom Compact archives.
+- `packages/yjson_schema_formats/build.cj` builds the narrow libidn2 validation seam.
 - `packages/yjson_yyjson/build.cj` builds scanner, Custom Compact support, and
   the vendored yyjson adapter.
 - `packages/benchmarks/build.cj` is benchmark infrastructure, not a published

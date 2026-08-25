@@ -10,8 +10,10 @@ cjpm.lock
 .gitcode/workflows/extended.yml
 docs/architecture.md
 docs/backends.md
+docs/path-and-patch.md
 docs/performance.md
 docs/release-checklist.md
+docs/schema.md
 release/release-files.txt
 
 # Pure Cangjie core, including its owned test suite
@@ -22,14 +24,20 @@ src/lib_json_compact_document.cj
 src/lib_json_direct_codec.cj
 src/lib_json_direct_reader.cj
 src/lib_json_direct_writer.cj
+src/lib_json_document.cj
 src/lib_json_fast_reader.cj
 src/lib_json_native_scanner.cj
 src/lib_json_parser.cj
 src/lib_json_parser_core.cj
+src/lib_json_patch.cj
+src/lib_json_path.cj
+src/lib_json_pointer.cj
 src/lib_json_resource_limits.cj
 src/lib_json_schema.cj
+src/lib_json_stream_backend.cj
 src/lib_json_stream_parser.cj
 src/lib_json_stream_support.cj
+src/lib_json_stream_tape.cj
 src/lib_json_stream_writer.cj
 src/lib_json_temporal_number_fast.cj
 src/lib_json_value.cj
@@ -37,10 +45,13 @@ src/test_json_boundary.cj
 src/test_json_compact_document.cj
 src/test_json_concurrency.cj
 src/test_json_context_path.cj
+src/test_json_document.cj
 src/test_json_literal.cj
 src/test_json_memory.cj
 src/test_json_parser_compliance.cj
+src/test_json_path.cj
 src/test_json_performance.cj
+src/test_json_pointer_patch.cj
 src/test_json_reader.cj
 src/test_json_regression.cj
 src/test_json_resource_limits.cj
@@ -77,6 +88,7 @@ scripts/release_package_stage.py
 scripts/check_api_inventory.py
 scripts/check_json_literal_compile_fail.sh
 scripts/run_cjpm_executable.sh
+scripts/run_standards_conformance.py
 scripts/ci_job.sh
 scripts/ci_fresh_checkout.sh
 scripts/release_registry_rehearsal.py
@@ -86,6 +98,7 @@ release/package-manifests/yjson_macros.toml
 release/package-manifests/yjson.toml
 release/package-manifests/yjson_all.toml
 release/package-manifests/yjson_native.toml
+release/package-manifests/yjson_schema_formats.toml
 release/package-manifests/yjson_yyjson.toml
 release/public-api-inventory.toml
 
@@ -104,11 +117,25 @@ packages/yjson_native/cjpm.lock
 packages/yjson_native/build.cj
 packages/yjson_native/src/native_backend.cj
 packages/yjson_native/src/native_compact.cj
+packages/yjson_native/src/document_backend.cj
+packages/yjson_native/src/stream_backend.cj
+packages/yjson_native/src/test_document_backend.cj
 packages/yjson_native/src/test_native_compact.cj
+packages/yjson_native/src/test_stream_backend.cj
 packages/yjson_native/README.md
+packages/yjson_schema_formats/cjpm.toml
+packages/yjson_schema_formats/build.cj
+packages/yjson_schema_formats/native/schema_formats.c
+packages/yjson_schema_formats/src/formats.cj
+packages/yjson_schema_formats/src/test_formats.cj
+packages/yjson_schema_formats/README.md
 packages/yjson_yyjson/cjpm.toml
 packages/yjson_yyjson/cjpm.lock
 packages/yjson_yyjson/build.cj
+packages/yjson_yyjson/src/document_backend.cj
+packages/yjson_yyjson/src/stream_backend.cj
+packages/yjson_yyjson/src/test_document_backend.cj
+packages/yjson_yyjson/src/test_stream_backend.cj
 packages/yjson_yyjson/src/yyjson_compact.cj
 packages/yjson_yyjson/src/test_yyjson_compact.cj
 packages/yjson_yyjson/README.md
@@ -124,3 +151,7 @@ packages/json_literal_integration/src/main.cj
 packages/json_literal_compile_fail/cjpm.toml
 packages/json_literal_compile_fail/cjpm.lock
 packages/json_literal_compile_fail/src/main.cj
+packages/standards_conformance/cjpm.toml
+packages/standards_conformance/cjpm.lock
+packages/standards_conformance/src/main.cj
+packages/standards_conformance/README.md

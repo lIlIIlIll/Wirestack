@@ -12,6 +12,16 @@ func yJsonSchemaValid(schemaText: String, instanceText: String): Bool {
     yJsonSchemaErrors(schemaText, instanceText).isEmpty()
 }
 
+private class EvenLengthSchemaFormat <: JsonSchemaFormat {
+    public func validate(value: String): Bool { value.toRuneArray().size % 2 == 0 }
+}
+
+private class TestSchemaFormatProvider <: JsonSchemaFormatProvider {
+    public func installInto(registry: JsonSchemaFormatRegistry): Unit {
+        registry.register("even-length", EvenLengthSchemaFormat())
+    }
+}
+
 @Test
 class YJsonSchemaTest {
     @TestCase
@@ -134,5 +144,60 @@ class YJsonSchemaTest {
         @Expect(errors.size, 1)
         @Expect(errors[0].schemaPath, "#/$ref")
         @Expect(errors[0].message.contains("unresolved local $ref"))
+    }
+
+    @TestCase
+    func draft202012NumericStringArrayAndObjectKeywords(): Unit {
+        @Expect(yJsonSchemaValid("{\"multipleOf\":0.01,\"exclusiveMinimum\":1}", "1.25"))
+        @Expect(!yJsonSchemaValid("{\"multipleOf\":0.01}", "1.001"))
+        @Expect(yJsonSchemaValid("{\"type\":\"integer\"}", "1.0"))
+        @Expect(!yJsonSchemaValid("{\"pattern\":\"^[A-Z]+$\"}", "\"Ab\""))
+        let arraySchema = "{\"prefixItems\":[{\"type\":\"string\"}],\"items\":{\"type\":\"integer\"}," +
+            "\"contains\":{\"minimum\":10},\"minContains\":1,\"uniqueItems\":true}"
+        @Expect(yJsonSchemaValid(arraySchema, "[\"id\",10,11]"))
+        @Expect(!yJsonSchemaValid(arraySchema, "[\"id\",2,2]"))
+        let objectSchema = "{\"properties\":{\"id\":true,\"name\":true},\"patternProperties\":{\"^x-\":{\"type\":\"string\"}}," +
+            "\"additionalProperties\":false,\"dependentRequired\":{\"id\":[\"name\"]}}"
+        @Expect(yJsonSchemaValid(objectSchema, "{\"id\":1,\"name\":\"n\",\"x-a\":\"v\"}"))
+        @Expect(!yJsonSchemaValid(objectSchema, "{\"id\":1,\"other\":true}"))
+    }
+
+    @TestCase
+    func registryResolvesExternalPointersAndAnchors(): Unit {
+        let registry = JsonSchemaRegistry()
+        registry.register("urn:test:defs", "{\"$defs\":{\"positive\":{\"$anchor\":\"positive\",\"type\":\"integer\",\"minimum\":1}}}")
+        let config = JsonSchemaConfig(resolver: Some<JsonSchemaResolver>(registry))
+        @Expect(JsonSchema.parse("{\"$ref\":\"urn:test:defs#positive\"}", config: config).validator().isValid(JsonIntValue(2)))
+        @Expect(!JsonSchema.parse("{\"$ref\":\"urn:test:defs#/$defs/positive\"}", config: config).validator().isValid(JsonIntValue(0)))
+    }
+
+    @TestCase
+    func unsupportedDialectAndOptInFormatAssertion(): Unit {
+        @AssertThrows[JsonException](JsonSchema.parse("{\"$schema\":\"http://json-schema.org/draft-07/schema#\"}"))
+        @Expect(JsonSchema.parse("{\"format\":\"ipv4\"}").validator().isValid(JsonStringValue("999.1.1.1")))
+        let strict = JsonSchemaConfig(formatMode: JsonSchemaFormatMode.Assertion)
+        @Expect(!JsonSchema.parse("{\"format\":\"ipv4\"}", config: strict).validator().isValid(JsonStringValue("999.1.1.1")))
+    }
+
+    @TestCase
+    func formatModesAndProviderRegistryHaveExplicitUnknownPolicy(): Unit {
+        let unknownSchema = "{\"format\":\"application-specific\"}"
+        @Expect(JsonSchema.parse(unknownSchema).validator().isValid(JsonStringValue("value")))
+        let assertion = JsonSchemaConfig(formatMode: JsonSchemaFormatMode.Assertion)
+        @Expect(JsonSchema.parse(unknownSchema, config: assertion).validator().isValid(JsonStringValue("value")))
+
+        let strict = JsonSchemaConfig(formatMode: JsonSchemaFormatMode.StrictAssertion)
+        let unsupported = JsonSchema.parse(unknownSchema, config: strict).validate(JsonStringValue("value"))
+        @Expect(unsupported.size, 1)
+        @Expect(unsupported[0].code, "unsupported_schema_format")
+
+        let formats = JsonSchemaFormatRegistry.withCoreFormats()
+        formats.install(TestSchemaFormatProvider())
+        let configured = JsonSchemaConfig(formatMode: JsonSchemaFormatMode.Assertion, formats: formats)
+        @Expect(JsonSchema.parse("{\"format\":\"even-length\"}", config: configured)
+            .validator().isValid(JsonStringValue("仓颉")))
+        @Expect(!JsonSchema.parse("{\"format\":\"even-length\"}", config: configured)
+            .validator().isValid(JsonStringValue("json!")))
+        @AssertThrows[IllegalArgumentException](formats.register("even-length", EvenLengthSchemaFormat()))
     }
 }

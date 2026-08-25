@@ -34,7 +34,7 @@ yjson_macros = { path = "../yjson/packages/yjson_macros" }
 yjson_all = { path = "../yjson/packages/yjson_all" }
 ```
 
-`yjson_native` and `yjson_yyjson` must use the same `yjson` version because
+`yjson_native`, `yjson_schema_formats`, and `yjson_yyjson` must use the same `yjson` version because
 their public facades and native bindings are compiled against the core package.
 Repository manifests use path dependencies for development; release manifests
 under [`release/package-manifests/`](../release/package-manifests/) use exact
@@ -108,6 +108,13 @@ depend on the current capacity heuristic.
 | `yjson` | `YJson.parseDocument` / `PureCompactBackend` | Unified String/bytes entry; Pure Compact is the portable default | Additive overload family |
 | `yjson_native` | `NativeCompactBackend` / `NativeCompactJsonBackend` | Default and configurable Custom Native facade adapters | Additive optional-package API |
 | `yjson_yyjson` | `YyjsonBackend` / `YyjsonCompactJsonBackend` | Default Direct and configurable yyjson facade adapters | Additive optional-package API |
+| `yjson` | `JsonPointer` / `JsonPointerException` | RFC 6901 string and URI-fragment evaluation | Additive API family |
+| `yjson` | `JsonPatch` / `JsonPatchOperation` / `JsonMergePatch` | RFC 6902 and RFC 7386 copy plus atomic in-place application | Additive API family |
+| `yjson` | `JsonPath` / `JsonPathMatch` | RFC 9535 parse and multi-result query with normalized paths | Additive API family |
+| `yjson` | `JsonSchemaConfig` / `JsonSchemaResolver` / `JsonSchemaRegistry` | Draft 2020-12 resource resolution; core performs no network I/O | Additive API family |
+| `yjson` | `JsonSchemaFormat`, `JsonSchemaFormatProvider`, `JsonSchemaFormatRegistry` | Explicit format extension seam; duplicate names reject unless replacement is requested | Additive API family |
+| `yjson` | `JsonSchemaFormatMode.StrictAssertion` | Unknown format yields `unsupported_schema_format`; default remains `Annotation` | Additive enum case |
+| `yjson_schema_formats` | `StandardInternationalFormats` | Optional IDNA2008, URI/IRI and URI Template provider backed by libidn2 | Additive optional-package API |
 
 Static duplicate keys are rejected during macro expansion. Objects containing
 dynamic keys use LastWins; all interpolated expressions still run once, while
