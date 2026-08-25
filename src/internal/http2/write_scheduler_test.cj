@@ -31,6 +31,8 @@ class Http2WriteSchedulerTest {
         @Expect(transport.shutdownCalls.load(), 0)
         @Expect(scheduler.pendingWrites, 0)
         @Expect(scheduler.pendingBytes, 0u64)
+        @Expect(scheduler.maximumPendingWrites, 3)
+        @Expect(scheduler.maximumPendingBytes, 37u64)
     }
 
     @TestCase
@@ -83,6 +85,8 @@ class Http2WriteSchedulerTest {
         let _ = byteScheduler.enqueue(schedulerData(1u32, 1u8))
         expectWriteQueueFull({ => let _ = byteScheduler.enqueue(schedulerData(3u32, 2u8)) })
         @Expect(byteScheduler.pendingBytes, 10u64)
+        @Expect(byteScheduler.maximumPendingWrites, 1)
+        @Expect(byteScheduler.maximumPendingBytes, 10u64)
         byteScheduler.abort()
     }
 
