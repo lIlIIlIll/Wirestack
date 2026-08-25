@@ -384,6 +384,12 @@ public class JsonStreamTapeReader <: JsonCodecReader {
         position = scanValue(position)
     }
 
+    public func skipValueWithDepth(maxDepth: Int64): Unit {
+        if (maxDepth < 0) { throw IllegalArgumentException("maxDepth must not be negative") }
+        beforeValue()
+        position = scanValueBounded(position, 0, maxDepth)
+    }
+
     func copyNextValueTo(writer: JsonCodecWriter): Unit {
         match {
             case peekByte() == JSON_STREAM_TAPE_NULL => readNull(); writer.writeNull()
@@ -417,8 +423,8 @@ public class JsonStreamTapeReader <: JsonCodecReader {
                 match (config.numberPolicy) {
                     case JsonNumberPolicy.Int64WhenExact =>
                         try { JsonIntValue(Int64.parse(literal)) }
-                        catch (_: Exception) { JsonNumberLiteralValue(literal) }
-                    case _ => JsonNumberLiteralValue(literal)
+                        catch (_: Exception) { JsonNumberLiteralValue.fromParsedLiteral(literal) }
+                    case _ => JsonNumberLiteralValue.fromParsedLiteral(literal)
                 }
             case peekByte() == JSON_STREAM_TAPE_STRING => JsonStringValue(readString())
             case peekByte() == JSON_STREAM_TAPE_ARRAY =>
@@ -484,6 +490,39 @@ public class JsonStreamTapeReader <: JsonCodecReader {
                 }
                 cursor
             case _ => fail("Unknown JSON tape value kind")
+        }
+    }
+
+    private func scanValueBounded(start: Int64, depth: Int64, maxDepth: Int64): Int64 {
+        var cursor = start
+        let kind = byteAt(cursor); cursor++
+        match {
+            case kind == JSON_STREAM_TAPE_NULL => cursor
+            case kind == JSON_STREAM_TAPE_BOOL => requireRange(cursor, 1); cursor + 1
+            case kind == JSON_STREAM_TAPE_INT => requireRange(cursor, 8); cursor + 8
+            case kind == JSON_STREAM_TAPE_NUMBER || kind == JSON_STREAM_TAPE_STRING => scanString(cursor)
+            case kind == JSON_STREAM_TAPE_ARRAY =>
+                requireSkippedContainerDepth(depth, maxDepth)
+                let count = uint32At(cursor); cursor += 4
+                for (_ in 0..Int64(count)) {
+                    cursor = scanValueBounded(cursor, depth + 1, maxDepth)
+                }
+                cursor
+            case kind == JSON_STREAM_TAPE_OBJECT =>
+                requireSkippedContainerDepth(depth, maxDepth)
+                let count = uint32At(cursor); cursor += 4
+                for (_ in 0..Int64(count)) {
+                    cursor = scanString(cursor)
+                    cursor = scanValueBounded(cursor, depth + 1, maxDepth)
+                }
+                cursor
+            case _ => fail("Unknown JSON tape value kind")
+        }
+    }
+
+    private func requireSkippedContainerDepth(depth: Int64, maxDepth: Int64): Unit {
+        if (depth >= maxDepth) {
+            throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
         }
     }
 

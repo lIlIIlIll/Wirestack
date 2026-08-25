@@ -96,6 +96,11 @@ main(): Unit {
             require(dog.id == 41 && dog.bark == "loud", "base-typed subtype data was not preserved")
         case _ => throw Exception("base-typed runtime subtype was not preserved")
     }
+    match (YJson.fromJson<ExternalAnimal>(animalJson, config: JsonReadConfig(maxDepth: 1))) {
+        case dog: ExternalDog =>
+            require(dog.id == 41 && dog.bark == "loud", "scalar subtype fields consumed container depth")
+        case _ => throw Exception("maxDepth=1 polymorphic subtype was not preserved")
+    }
 
     let directDogJson = YJson.toJson(ExternalDog(42, "direct"))
     let directDog = YJson.fromJson<ExternalDog>(directDogJson)

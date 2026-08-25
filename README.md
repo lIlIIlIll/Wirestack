@@ -184,6 +184,8 @@ println(YJson.stringify(root))
 
 ## 兼容性与限制
 
+- **当前资格平台** — 1.0 RC 的阻断 build、tests、standards、sanitizer、fuzz 和 external consumer 以 Linux x86_64 为准。
+- **其他平台** — Pure Cangjie 源码因语言跨平台能力可能可用于 Windows、macOS 与 ARM64，但当前均为 `unverified / potentially supported`，不是 1.0 RC 的已验证支持声明；后续按平台逐项 qualification。
 - **版本配套** — `yjson`、宏包、聚合包和 Native package 必须来自同一 checkout、同一 exact commit 并重新编译。
 - **Stream decode** — 当前会读取全部剩余输入，并非恒定内存的增量 parser；Stream 的所有权仍归调用方。
 - **Native backend** — 需要显式依赖，document 必须 `close()`，且不是线程安全对象；当前仅 qualification Linux x86_64。

@@ -156,13 +156,13 @@ private class ArrayJsonByteSource <: JsonByteSource {
                 }
             }
             if (consumeFractionalOrExponentIfPresent()) {
-                return JsonNumberLiteralValue(asciiStringFromRange(start, index))
+                return JsonNumberLiteralValue.fromParsedLiteral(asciiStringFromRange(start, index))
             }
             if (jsonReadConfigPreservesNumberLiterals(readConfig)) {
-                return JsonNumberLiteralValue(asciiStringFromRange(start, index))
+                return JsonNumberLiteralValue.fromParsedLiteral(asciiStringFromRange(start, index))
             }
             return if (overflow) {
-                JsonNumberLiteralValue(asciiStringFromRange(start, index))
+                JsonNumberLiteralValue.fromParsedLiteral(asciiStringFromRange(start, index))
             } else {
                 JsonIntValue(result)
             }
@@ -185,13 +185,13 @@ private class ArrayJsonByteSource <: JsonByteSource {
             }
         }
         if (consumeFractionalOrExponentIfPresent()) {
-            return JsonNumberLiteralValue(asciiStringFromRange(start, index))
+            return JsonNumberLiteralValue.fromParsedLiteral(asciiStringFromRange(start, index))
         }
         if (jsonReadConfigPreservesNumberLiterals(readConfig)) {
-            return JsonNumberLiteralValue(asciiStringFromRange(start, index))
+            return JsonNumberLiteralValue.fromParsedLiteral(asciiStringFromRange(start, index))
         }
         if (overflow) {
-            return JsonNumberLiteralValue(asciiStringFromRange(start, index))
+            return JsonNumberLiteralValue.fromParsedLiteral(asciiStringFromRange(start, index))
         }
         JsonIntValue(result)
     }
@@ -283,6 +283,8 @@ private class StreamJsonByteSource <: JsonByteSource {
     private var offset: Int64 = 0
     private var loadedBytes: Int64 = 0
     private var reachedEnd: Bool = false
+    private var currentLine: Int64 = 1
+    private var currentColumn: Int64 = 1
 
     public init(
         input: InputStream,
@@ -306,6 +308,12 @@ private class StreamJsonByteSource <: JsonByteSource {
         let value = buffer[start]
         start++
         offset++
+        if (value == b'\n') {
+            currentLine++
+            currentColumn = 1
+        } else {
+            currentColumn++
+        }
         value
     }
 
@@ -318,13 +326,14 @@ private class StreamJsonByteSource <: JsonByteSource {
     }
 
     public func lineAt(offset: Int64): Int64 {
-        let _ = offset
-        -1
+        if (!readConfig.includeErrorLocation) { return -1 }
+        currentLine
     }
 
     public func columnAt(offset: Int64): Int64 {
-        let _ = offset
-        -1
+        if (!readConfig.includeErrorLocation) { return -1 }
+        let distance = this.offset - offset
+        if (distance > 0 && distance < currentColumn) { currentColumn - distance } else { currentColumn }
     }
 
     private func ensureAvailable(): Bool {
@@ -357,6 +366,7 @@ private class JsonParserCore {
     private var rootBudgetStart: Int64 = -1
     private var rootBudgetActive: Bool = false
     private var lastUnicodeEscapeBytes: Int64 = 0
+    private var containerDepth: Int64 = 0
 
     public init(source: JsonByteSource) {
         this.source = source
@@ -498,15 +508,15 @@ private class JsonParserCore {
 
     private func buildParsedNumberValue(literal: String, hasFractionalSyntax: Bool): JsonNode {
         if (jsonReadConfigPreservesNumberLiterals(config)) {
-            return JsonNumberLiteralValue(literal)
+            return JsonNumberLiteralValue.fromParsedLiteral(literal)
         }
         if (hasFractionalSyntax) {
-            return JsonNumberLiteralValue(literal)
+            return JsonNumberLiteralValue.fromParsedLiteral(literal)
         }
         return try {
             JsonIntValue(Int64.parse(literal))
         } catch (_: Exception) {
-            JsonNumberLiteralValue(literal)
+            JsonNumberLiteralValue.fromParsedLiteral(literal)
         }
     }
 
@@ -679,6 +689,8 @@ private class JsonParserCore {
     }
 
     private func parseArrayFast(arraySource: ArrayJsonByteSource): JsonNode {
+        enterContainer(arraySource.position())
+        try {
         arraySource.expectByteFast(b'[')
         arraySource.skipSpacesFast()
         let items = ArrayList<JsonNode>(4)
@@ -697,9 +709,14 @@ private class JsonParserCore {
             arraySource.skipSpacesFast()
         }
         JsonArrayValue(items)
+        } finally {
+            leaveContainer()
+        }
     }
 
     private func parseArray(): JsonNode {
+        enterContainer(source.position())
+        try {
         expectByte(b'[')
         skipSpaces()
         let items = ArrayList<JsonNode>()
@@ -718,9 +735,14 @@ private class JsonParserCore {
             skipSpaces()
         }
         JsonArrayValue(items)
+        } finally {
+            leaveContainer()
+        }
     }
 
     private func parseObjectFast(arraySource: ArrayJsonByteSource): JsonNode {
+        enterContainer(arraySource.position())
+        try {
         arraySource.expectByteFast(b'{')
         arraySource.skipSpacesFast()
         let fields = HashMap<String, JsonNode>(8)
@@ -737,7 +759,7 @@ private class JsonParserCore {
             arraySource.expectByteFast(b':')
             arraySource.skipSpacesFast()
             if (jsonReadConfigRejectsDuplicateKeys(config) && fields.contains(key)) {
-                failAt("Duplicate object key '${key}'", arraySource.position())
+                policyFailAt("Duplicate object key '${key}'", "duplicate_key", arraySource.position())
             }
             fields.add(key, parseValueFast(arraySource))
             arraySource.skipSpacesFast()
@@ -749,9 +771,14 @@ private class JsonParserCore {
             arraySource.skipSpacesFast()
         }
         JsonObjectValue(fields)
+        } finally {
+            leaveContainer()
+        }
     }
 
     private func parseObject(): JsonNode {
+        enterContainer(source.position())
+        try {
         expectByte(b'{')
         skipSpaces()
         let fields = HashMap<String, JsonNode>()
@@ -768,7 +795,7 @@ private class JsonParserCore {
             expectByte(b':')
             skipSpaces()
             if (jsonReadConfigRejectsDuplicateKeys(config) && fields.contains(key)) {
-                fail("Duplicate object key '${key}'")
+                policyFailAt("Duplicate object key '${key}'", "duplicate_key", source.position())
             }
             fields.add(key, parseValue())
             skipSpaces()
@@ -780,6 +807,31 @@ private class JsonParserCore {
             skipSpaces()
         }
         JsonObjectValue(fields)
+        } finally {
+            leaveContainer()
+        }
+    }
+
+    private func enterContainer(offset: Int64): Unit {
+        if (containerDepth >= config.maxDepth) {
+            throw jsonResourceLimitException(config,
+                "Maximum JSON depth ${config.maxDepth} exceeded", "max_depth", offset)
+        }
+        containerDepth++
+    }
+
+    private func leaveContainer(): Unit {
+        if (containerDepth > 0) { containerDepth-- }
+    }
+
+    private func policyFailAt(message: String, code: String, offset: Int64): Nothing {
+        throw JsonException(
+            message,
+            code: code,
+            byteOffset: if (config.includeErrorLocation) { offset } else { -1 },
+            line: source.lineAt(offset),
+            column: source.columnAt(offset)
+        )
     }
 
     private func skipSpaces(): Unit {

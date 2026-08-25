@@ -28,6 +28,8 @@ details belong in release evidence rather than this document.
 | `api-inventory` | declaration, C ABI, and package-pairing inventory |
 | `core` | core test suite without a C build hook |
 | `standards-conformance` | pinned JSON Schema required, JSONPath CTS, and JSON Patch suites |
+| `schema-formats-conformance` | optional international/URI format package suite; required core remains independently gated |
+| `performance-comparison` | complete three-library release table; noisy rows retained |
 | `examples` | documented Pure Cangjie example |
 | `macro-consumer` | literal consumer, compile-fail cases, staged macro consumer |
 | `custom-native` | optional package tests, external consumer, no yyjson symbols |
@@ -38,6 +40,10 @@ details belong in release evidence rather than this document.
 | `yyjson-colink` | vendored symbol isolation with the pinned second version |
 
 Fresh-source and hosted executions are separate evidence and must never share one status.
+
+当前 release qualification matrix 以 Linux x86_64 为阻断目标。Windows、macOS 与
+ARM64 的结果在接入前记录为 `NOT RUN / NON-BLOCKING / potentially supported`，不得写成
+PASS 或 supported。
 
 ## Feature × backend coverage
 

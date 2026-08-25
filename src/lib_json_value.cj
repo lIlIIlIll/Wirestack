@@ -536,7 +536,19 @@ public class JsonNumberLiteralValue <: JsonNode {
     public let literal: String
 
     public init(literal: String) {
+        if (!isValidJsonNumberLiteral(literal)) {
+            throw IllegalArgumentException("Invalid JSON number literal: ${literal}")
+        }
         this.literal = literal
+    }
+
+    private init(literal: String, parsed: Bool) {
+        let _ = parsed
+        this.literal = literal
+    }
+
+    static func fromParsedLiteral(literal: String): JsonNumberLiteralValue {
+        JsonNumberLiteralValue(literal, true)
     }
 
     public func kind(): JsonKind {
@@ -550,6 +562,40 @@ public class JsonNumberLiteralValue <: JsonNode {
     public func toPrettyString(indent: String): String {
         let _ = indent
         literal
+    }
+}
+
+private func isValidJsonNumberLiteral(literal: String): Bool {
+    unsafe {
+        let bytes = literal.rawData()
+        if (bytes.isEmpty()) { return false }
+        var index: Int64 = 0
+        if (bytes[index] == b'-') {
+            index++
+            if (index >= bytes.size) { return false }
+        }
+        if (bytes[index] == b'0') {
+            index++
+            if (index < bytes.size && bytes[index] >= b'0' && bytes[index] <= b'9') {
+                return false
+            }
+        } else {
+            if (bytes[index] < b'1' || bytes[index] > b'9') { return false }
+            index++
+            while (index < bytes.size && bytes[index] >= b'0' && bytes[index] <= b'9') { index++ }
+        }
+        if (index < bytes.size && bytes[index] == b'.') {
+            index++
+            if (index >= bytes.size || bytes[index] < b'0' || bytes[index] > b'9') { return false }
+            while (index < bytes.size && bytes[index] >= b'0' && bytes[index] <= b'9') { index++ }
+        }
+        if (index < bytes.size && (bytes[index] == b'e' || bytes[index] == b'E')) {
+            index++
+            if (index < bytes.size && (bytes[index] == b'+' || bytes[index] == b'-')) { index++ }
+            if (index >= bytes.size || bytes[index] < b'0' || bytes[index] > b'9') { return false }
+            while (index < bytes.size && bytes[index] >= b'0' && bytes[index] <= b'9') { index++ }
+        }
+        index == bytes.size
     }
 }
 

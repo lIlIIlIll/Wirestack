@@ -36,6 +36,7 @@ public interface JsonCodecReader {
     func readDecimal(): Decimal
     func readNumberLiteral(): String
     func skipValue(): Unit
+    func skipValueWithDepth(maxDepth: Int64): Unit
 }
 
 /// A captured JSON value that can be replayed without serializing and parsing
@@ -413,6 +414,13 @@ public class JsonDecodeContext {
         if (depth > 0) {
             depth--
         }
+    }
+
+    /// Remaining container levels available to a subtree skipped by a reader.
+    /// Generated codecs use this bridge so unknown fields obey the same depth
+    /// budget as known fields.
+    public func remainingDepth(): Int64 {
+        maxDepth - depth
     }
 
     public func currentPath(): String {

@@ -827,7 +827,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     }
     appendLine(sb, 5, "case _ =>")
     appendLine(sb, 6, "if (reader.readConfig().rejectsUnknownFields()) { throw JsonException(\"Unknown JSON field: \" + __name, code: \"unknown_field\", path: context.currentPath()) }")
-    appendLine(sb, 6, "reader.skipValue()")
+    appendLine(sb, 6, "reader.skipValueWithDepth(context.remainingDepth())")
     appendLine(sb, 4, "}")
     appendLine(sb, 3, "}")
     appendLine(sb, 3, "reader.endObject()")
@@ -942,7 +942,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         appendLine(sb, 5, "case ${labelIndex} =>")
         appendFastFieldAssignment(sb, 6, field, label)
     }
-    appendLine(sb, 5, "case _ => reader.skipRaw()")
+    appendLine(sb, 5, "case _ => reader.skipRawWithDepth(context.remainingDepth())")
     appendLine(sb, 4, "}")
     appendLine(sb, 4, "__first = false")
     appendLine(sb, 3, "}")
@@ -1287,23 +1287,23 @@ private func renderPolymorphicCodec(
     appendLine(sb, 2, "} finally { context.leaveObject() }")
     appendLine(sb, 1, "}")
     appendLine(sb, 1, "public func read(reader: JsonCodecReader, context: JsonDecodeContext): ${targetType} {")
-    appendLine(sb, 2, "context.enterValue()")
+    // The subtype codec owns the one JsonDecodeContext container entry for the
+    // replayed root object. The polymorphic dispatcher only selects that codec;
+    // charging the same object here would make maxDepth=1 reject scalar fields.
+    appendLine(sb, 2, "let __replay = reader.readReplayValue(reader.readConfig().maxPolymorphicObjectBytes)")
     appendLine(sb, 2, "try {")
-    appendLine(sb, 3, "let __replay = reader.readReplayValue(reader.readConfig().maxPolymorphicObjectBytes)")
-    appendLine(sb, 3, "try {")
-    appendLine(sb, 4, "let __tag = __replay.rootStringField(${discriminator}).getOrThrow({ => JsonException(\"Missing polymorphic discriminator\", code: \"missing_discriminator\", path: context.currentPath()) })")
-    appendLine(sb, 4, "match (__tag) {")
+    appendLine(sb, 3, "let __tag = __replay.rootStringField(${discriminator}).getOrThrow({ => JsonException(\"Missing polymorphic discriminator\", code: \"missing_discriminator\", path: context.currentPath()) })")
+    appendLine(sb, 3, "match (__tag) {")
     for (subtype in subtypes) {
-        appendLine(sb, 5, "case ${subtype.wireNameExpr} =>")
-        appendLine(sb, 6, "let __subtypeReader = __replay.openObjectReaderExcluding(${discriminator})")
-        appendLine(sb, 6, "let __result: ${targetType} = __yJsonCodec_${subtype.typeText}().read(__subtypeReader, context)")
-        appendLine(sb, 6, "__subtypeReader.expectEnd()")
-        appendLine(sb, 6, "__result")
+        appendLine(sb, 4, "case ${subtype.wireNameExpr} =>")
+        appendLine(sb, 5, "let __subtypeReader = __replay.openObjectReaderExcluding(${discriminator})")
+        appendLine(sb, 5, "let __result: ${targetType} = __yJsonCodec_${subtype.typeText}().read(__subtypeReader, context)")
+        appendLine(sb, 5, "__subtypeReader.expectEnd()")
+        appendLine(sb, 5, "__result")
     }
-    appendLine(sb, 5, "case _ => throw JsonException(\"Unknown polymorphic discriminator: \" + __tag, code: \"unknown_discriminator\", path: context.currentPath())")
-    appendLine(sb, 4, "}")
-    appendLine(sb, 3, "} finally { __replay.close() }")
-    appendLine(sb, 2, "} finally { context.leaveValue() }")
+    appendLine(sb, 4, "case _ => throw JsonException(\"Unknown polymorphic discriminator: \" + __tag, code: \"unknown_discriminator\", path: context.currentPath())")
+    appendLine(sb, 3, "}")
+    appendLine(sb, 2, "} finally { __replay.close() }")
     appendLine(sb, 1, "}")
     appendLine(sb, 0, "}")
 

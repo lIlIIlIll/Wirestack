@@ -316,7 +316,7 @@ func deepCopyJsonNode(value: JsonNode): JsonNode {
         case boolValue: JsonBoolValue => JsonBoolValue(boolValue.value)
         case intValue: JsonIntValue => JsonIntValue(intValue.value)
         case floatValue: JsonFloatValue => JsonFloatValue(floatValue.value)
-        case numberValue: JsonNumberLiteralValue => JsonNumberLiteralValue(numberValue.literal)
+        case numberValue: JsonNumberLiteralValue => JsonNumberLiteralValue.fromParsedLiteral(numberValue.literal)
         case stringValue: JsonStringValue => JsonStringValue(stringValue.value)
         case arrayValue: JsonArrayValue =>
             let result = JsonArrayValue()

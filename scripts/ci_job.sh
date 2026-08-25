@@ -27,6 +27,17 @@ case "$job" in
         require_cangjie
         python3 "$repo/scripts/run_standards_conformance.py" --quiet-failures
         ;;
+    schema-formats-conformance)
+        require_cangjie
+        python3 "$repo/scripts/run_standards_conformance.py" --quiet-failures \
+            --include-schema-optional
+        ;;
+    performance-comparison)
+        require_cangjie
+        : "${YJSON_PERF_RESULT_DIR:?set YJSON_PERF_RESULT_DIR}"
+        "$repo/scripts/release_performance_compare.sh" "$YJSON_PERF_RESULT_DIR" \
+            "${YJSON_CJFAST_WORK_DIR:-}"
+        ;;
     examples)
         require_cangjie
         "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/examples"
@@ -83,7 +94,7 @@ case "$job" in
         "$repo/scripts/release_yyjson_colink_check.sh"
         ;;
     *)
-        echo 'usage: scripts/ci_job.sh {api-inventory|core|standards-conformance|examples|macro-consumer|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
+        echo 'usage: scripts/ci_job.sh {api-inventory|core|standards-conformance|schema-formats-conformance|performance-comparison|examples|macro-consumer|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
         exit 2
         ;;
 esac

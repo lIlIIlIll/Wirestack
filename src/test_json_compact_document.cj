@@ -155,7 +155,7 @@ class CompactJsonDocumentTest {
     func sourceKeyViewRejectsInvalidUtf8WithoutMaterializing(): Unit {
         let invalid: Array<Byte> = [b'{', b'"', 0xEDu8, 0xA0u8, 0x80u8, b'"', b':', b'1', b'}']
         let error = @AssertThrows[JsonException](YJson.parseCompact(invalid))
-        @Expect(error.code, "json_error")
+        @Expect(error.code, "parse_error")
     }
 
     @TestCase

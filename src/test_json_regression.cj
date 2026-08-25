@@ -122,6 +122,34 @@ public class AliasRecord {
 @Test
 class YJsonRegressionTest {
     @TestCase
+    func generatedFastDecodeRejectsMalformedUnknownKeys(): Unit {
+        let control: Array<Byte> = [b'{', b'"', 0x01u8, b'"', b':', b'0', b'}']
+        let controlError = @AssertThrows[JsonException](YJson.decodeBytesWith(PersonJson, control))
+        @Expect(controlError.code, "parse_error")
+        @Expect(controlError.byteOffset >= 0)
+
+        let invalidUtf8: Array<Byte> = [b'{', b'"', 0xC3u8, b'(', b'"', b':', b'0', b'}']
+        let utf8Error = @AssertThrows[JsonException](YJson.decodeBytesWith(PersonJson, invalidUtf8))
+        @Expect(utf8Error.code, "parse_error")
+        @Expect(utf8Error.byteOffset >= 0)
+    }
+
+    @TestCase
+    func generatedUnknownFieldSkipCannotBypassDepthBudget(): Unit {
+        let semanticError = @AssertThrows[JsonException](YJson.decodeStringWith(
+            PersonJson, "{\"unknown\":[[]]}", config: JsonReadConfig(maxDepth: 2)))
+        @Expect(semanticError.code, "max_depth")
+
+        let text = StringBuilder("{\"unknown\":")
+        for (_ in 0..256) { text.append("[") }
+        text.append("0")
+        for (_ in 0..256) { text.append("]") }
+        text.append("}")
+        let fastError = @AssertThrows[JsonException](
+            YJson.decodeStringWith(PersonJson, text.toString()))
+        @Expect(fastError.code, "max_depth")
+    }
+    @TestCase
     func reusableFastDecoderPreservesStringBytesAndConfigSemantics(): Unit {
         let decoder = YJson.fastDecoder(ProfileRecordJson)
         let compact = "{\"profile_id\":7,\"alias\":\"fast\",\"level\":3}"

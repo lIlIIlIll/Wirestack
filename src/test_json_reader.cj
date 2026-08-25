@@ -418,6 +418,25 @@ class FastReaderStringTest {
 class FastReaderFieldMatchingTest {
 
     @TestCase
+    func unknownNamesStillValidateJsonStringGrammar(): Unit {
+        let control: Array<Byte> = [b'{', b'"', 0x01u8, b'"', b':', b'1', b'}']
+        let controlReader = JsonFastReader(control)
+        controlReader.startRawObject()
+        let controlError = @AssertThrows[JsonException](
+            controlReader.readRawNameIdBytes(true, unsafe { [makeBytes("known")] }))
+        @Expect(controlError.code, "parse_error")
+        @Expect(controlError.byteOffset >= 0)
+
+        let invalidUtf8: Array<Byte> = [b'{', b'"', 0xC3u8, b'(', b'"', b':', b'1', b'}']
+        let utf8Reader = JsonFastReader(invalidUtf8)
+        utf8Reader.startRawObject()
+        let utf8Error = @AssertThrows[JsonException](
+            utf8Reader.readRawNameIdBytes(true, unsafe { [makeBytes("known")] }))
+        @Expect(utf8Error.code, "parse_error")
+        @Expect(utf8Error.byteOffset >= 0)
+    }
+
+    @TestCase
     func readRawNameIdBytesMatch(): Unit {
         let reader = JsonFastReader("{\"field\":1}")
         reader.startRawObject()

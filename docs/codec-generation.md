@@ -85,5 +85,7 @@ open class Animal {
 产生 `polymorphic_object_too_large`。负数配置会被拒绝。generated polymorphic decode
 通过 `JsonCodecReader.readReplayValue` 捕获一次根值，读取 discriminator 后直接重放给
 subtype codec；Native tape 路径不把对象序列化成 JSON 再解析。
+多态 dispatcher 本身不重复占用 `JsonDecodeContext` 的容器深度；replay 的根对象由最终
+subtype codec 计一次，因此 `maxDepth = 1` 可以读取仅含标量字段的根 subtype 对象。
 
 宏展开代码依赖当前 runtime 的 generated-code bridge，因此 `yjson_macros` 与 `yjson` 必须使用完全匹配的版本并一起重新编译。

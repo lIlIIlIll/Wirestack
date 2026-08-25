@@ -12,12 +12,16 @@ yjson 默认使用 Pure Cangjie 实现。Native backend 是独立 package，只�
 | 普通 typed encode/decode | `YJson`，Pure Cangjie |
 | 需要修改 JSON 树 | `JsonNode` |
 | 可切换 backend 的只读访问 | `YJson.parseDocument` |
-| 跨平台、低额外依赖的只读访问 | `PureCompactBackend`（默认） |
+| 可移植、低额外依赖的只读访问 | `PureCompactBackend`（默认） |
 | 需要 Native-owned Compact DOM | `NativeCompactBackend` |
 | 大文档批量遍历或根对象查询 | `YyjsonBackend` |
 | 不希望管理资源生命周期 | Pure Cangjie API |
 
 优先从 Pure Cangjie 开始。只有 profiling 表明 DOM 构建或遍历是瓶颈，并且部署平台可以构建 C11 源码时，再选择 Native package。
+
+当前 1.0 RC 只 qualification Linux x86_64。Pure backend 依赖仓颉语言与标准库，源码预期
+具有较好的可移植性；Windows、macOS 与 ARM64 目前只能称为 `unverified / potentially
+supported`，在对应 SDK、build、tests 与 consumer gate 完成前不进入支持矩阵。
 
 ## Pure Cangjie
 

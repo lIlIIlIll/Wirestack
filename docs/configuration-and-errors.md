@@ -58,3 +58,6 @@ document 的输出。
 | `unsupported_schema_format` | `StrictAssertion` 遇到未注册的 Schema format |
 
 启用 `includeErrorLocation` 时，适用的 parse/limit 错误会附带 offset/location；并非所有语义错误都能提供相同粒度的位置。
+Pure String、bytes 和 stream 的语法错误统一使用 `parse_error`；Reject 策略下重复 key
+统一使用 `duplicate_key`。typed fast 字段匹配即使已经确定名称不匹配，也仍会完整验证
+JSON string grammar 与 UTF-8，非法未知 key 不会降级为普通 unknown field。

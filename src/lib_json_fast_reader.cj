@@ -1184,7 +1184,14 @@ public class JsonFastReader {
     }
 
     public func skipRaw(): Unit {
-        skipRawValue()
+        skipRawValueBounded(0, -1)
+    }
+
+    /// Skips one value while enforcing a container-depth budget relative to
+    /// the current generated-code context. A scalar consumes no depth.
+    public func skipRawWithDepth(maxDepth: Int64): Unit {
+        if (maxDepth < 0) { throw IllegalArgumentException("maxDepth must not be negative") }
+        skipRawValueBounded(0, maxDepth)
     }
 
     func tryNativeObjectFields(): Option<JsonNativeObjectFields> {
@@ -1247,7 +1254,7 @@ public class JsonFastReader {
         expectByte(b':')
     }
 
-    private func skipRawValue(): Unit {
+    private func skipRawValueBounded(depth: Int64, maxDepth: Int64): Unit {
         if (!hasMore()) {
             fail("Unexpected end of input")
         }
@@ -1258,7 +1265,7 @@ public class JsonFastReader {
             fail("Unexpected end of input")
         }
         let current = peek()
-        if (shouldUseNativeSkip(current)) {
+        if (maxDepth < 0 && shouldUseNativeSkip(current)) {
             let nativeEnd = jsonNativeSkipValue(data, size, index, validateStrings)
             if (nativeEnd >= 0) {
                 index = nativeEnd
@@ -1271,8 +1278,8 @@ public class JsonFastReader {
             case current == b'f' => expectLiteral("false")
             case current == b'"' =>
                 scanRawString()
-            case current == b'[' => skipRawArray()
-            case current == b'{' => skipRawObject()
+            case current == b'[' => skipRawArrayBounded(depth, maxDepth)
+            case current == b'{' => skipRawObjectBounded(depth, maxDepth)
             case current == b'-' || (current >= b'0' && current <= b'9') =>
                 skipRawNumber()
             case _ => fail("Unexpected token")
@@ -1283,7 +1290,12 @@ public class JsonFastReader {
         (current == b'{' || current == b'[') && size - index >= YJSON_NATIVE_SKIP_MIN_REMAINING_BYTES
     }
 
-    private func skipRawArray(): Unit {
+    private func skipRawArrayBounded(depth: Int64, maxDepth: Int64): Unit {
+        if (maxDepth >= 0 && depth >= maxDepth) {
+            throw JsonException("Maximum JSON depth exceeded", code: "max_depth",
+                byteOffset: index, line: jsonLineFromUtf8Bytes(data, index),
+                column: jsonColumnFromUtf8Bytes(data, index))
+        }
         expectByte(b'[')
         skipSpaces()
         if (hasMore() && peek() == b']') {
@@ -1291,7 +1303,7 @@ public class JsonFastReader {
             return
         }
         while (true) {
-            skipRawValue()
+            skipRawValueBounded(depth + 1, maxDepth)
             skipSpaces()
             if (hasMore() && peek() == b']') {
                 index++
@@ -1301,7 +1313,12 @@ public class JsonFastReader {
         }
     }
 
-    private func skipRawObject(): Unit {
+    private func skipRawObjectBounded(depth: Int64, maxDepth: Int64): Unit {
+        if (maxDepth >= 0 && depth >= maxDepth) {
+            throw JsonException("Maximum JSON depth exceeded", code: "max_depth",
+                byteOffset: index, line: jsonLineFromUtf8Bytes(data, index),
+                column: jsonColumnFromUtf8Bytes(data, index))
+        }
         expectByte(b'{')
         skipSpaces()
         if (hasMore() && peek() == b'}') {
@@ -1312,7 +1329,7 @@ public class JsonFastReader {
             scanRawString()
             skipSpaces()
             expectByte(b':')
-            skipRawValue()
+            skipRawValueBounded(depth + 1, maxDepth)
             skipSpaces()
             if (hasMore() && peek() == b'}') {
                 index++
@@ -1915,7 +1932,12 @@ public class JsonFastReader {
             if (current == b'\\') {
                 code = consumeEscapedAsciiForName()
             } else if (current < 0x80) {
+                if (current < 0x20) {
+                    failAt("Unescaped control character in string literal", index - 1)
+                }
                 code = Int64(current)
+            } else if (validateStrings) {
+                index += validatedUtf8WidthAt(index - 1) - 1
             }
             if (active != 0u64) {
                 active = updateActiveNameByteCandidates(candidates, active, nameIndex, code)
@@ -1960,7 +1982,12 @@ public class JsonFastReader {
             if (current == b'\\') {
                 code = consumeEscapedAsciiForName()
             } else if (current < 0x80) {
+                if (current < 0x20) {
+                    failAt("Unescaped control character in string literal", index - 1)
+                }
                 code = Int64(current)
+            } else if (validateStrings) {
+                index += validatedUtf8WidthAt(index - 1) - 1
             }
             if (active != 0u64) {
                 active = updateActiveNameByteCandidates(candidates, active, nameIndex, code)
@@ -2263,6 +2290,12 @@ public class JsonFastReader {
     }
 
     private func failAt(message: String, offset: Int64): Nothing {
-        throw JsonException("${message} at byte ${offset}")
+        throw JsonException(
+            "${message} at byte ${offset}",
+            code: "parse_error",
+            byteOffset: offset,
+            line: jsonLineFromUtf8Bytes(data, offset),
+            column: jsonColumnFromUtf8Bytes(data, offset)
+        )
     }
 }

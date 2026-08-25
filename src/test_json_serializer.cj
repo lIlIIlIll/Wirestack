@@ -138,6 +138,13 @@ class JsonSerializerComplianceTest {
     }
 
     @TestCase
+    func rejectInvalidPublicNumberLiterals(): Unit {
+        for (literal in ["NaN", "01", "1.", "null", ""]) {
+            let _ = @AssertThrows[IllegalArgumentException](JsonNumberLiteralValue(literal))
+        }
+    }
+
+    @TestCase
     func serializeEmptyString(): Unit {
         let empty = JsonStringValue("")
         @Expect(empty.toString(), "\"\"")

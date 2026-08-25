@@ -35,8 +35,10 @@ public interface JsonSchemaFormatProvider {
 /// Explicit format registry used by Assertion and StrictAssertion modes.
 public class JsonSchemaFormatRegistry {
     private let formats = HashMap<String, JsonSchemaFormat>()
+    private var frozen: Bool = false
 
     public func register(name: String, format: JsonSchemaFormat, replace!: Bool = false): Unit {
+        if (frozen) { throw IllegalStateException("Schema format registry is immutable") }
         if (name.isEmpty()) { throw IllegalArgumentException("Schema format name must not be empty") }
         if (!replace && formats.get(name).isSome()) {
             throw IllegalArgumentException("Schema format ${name} is already registered")
@@ -55,6 +57,13 @@ public class JsonSchemaFormatRegistry {
             registry.register(name, CoreJsonSchemaFormat(name))
         }
         registry
+    }
+
+    func frozenCopy(): JsonSchemaFormatRegistry {
+        let copy = JsonSchemaFormatRegistry()
+        for ((name, format) in formats) { copy.formats[name] = format }
+        copy.frozen = true
+        copy
     }
 }
 
@@ -100,7 +109,8 @@ public class JsonSchemaConfig {
         this.formats = formats
     }
 
-    public static let defaults = JsonSchemaConfig()
+    public static let defaults = JsonSchemaConfig(
+        formats: JsonSchemaFormatRegistry.withCoreFormats().frozenCopy())
 }
 
 public class JsonSchema {
@@ -111,21 +121,23 @@ public class JsonSchema {
 
     public init(document: JsonNode, draft!: String = "https://json-schema.org/draft/2020-12/schema",
         config!: JsonSchemaConfig = JsonSchemaConfig.defaults) {
-        this.document = document
+        let frozenDocument = document.deepCopy()
+        this.document = frozenDocument
         this.draft = draft
-        this.config = config
+        this.config = JsonSchemaConfig(resolver: config.resolver, formatMode: config.formatMode,
+            formats: config.formats.frozenCopy())
         if (draft != "https://json-schema.org/draft/2020-12/schema" &&
             draft != "https://json-schema.org/draft/2020-12/schema#") {
             throw JsonException("Unsupported JSON Schema dialect ${draft}", code: "unsupported_schema_dialect")
         }
         var usesValidationVocabulary = true
-        match (document) {
+        match (frozenDocument) {
             case objectValue: JsonObjectValue => match (objectValue.get("$schema")) {
                 case Some(value) =>
                     let declared = value.asString().value
                     if (declared != "https://json-schema.org/draft/2020-12/schema" &&
                         declared != "https://json-schema.org/draft/2020-12/schema#") {
-                        match (config.resolver) {
+                        match (this.config.resolver) {
                             case Some(resolver) => match (resolver.resolve(stripJsonSchemaFragment(declared))) {
                                 case Some(metaSchema) =>
                                     match (metaSchema.asObject().get("$vocabulary")) {
@@ -146,7 +158,7 @@ public class JsonSchema {
             case _ => ()
         }
         this.validationVocabulary = usesValidationVocabulary
-        validateJsonSchemaDocument(document, "#")
+        validateJsonSchemaDocument(frozenDocument, "#")
     }
 
     public static func parse(text: String, config!: JsonSchemaConfig = JsonSchemaConfig.defaults): JsonSchema {

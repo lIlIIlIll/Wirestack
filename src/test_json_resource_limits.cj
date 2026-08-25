@@ -114,4 +114,57 @@ class JsonResourceLimitsTest {
         @Expect(error.code, "string_too_large")
         @Expect(error.byteOffset, -1)
     }
+
+    @TestCase
+    func astDepthCountsContainersOnlyForStringAndBytes(): Unit {
+        let one = JsonReadConfig(maxDepth: 1)
+        @Expect(YJson.parse("{\"name\":\"alice\"}", config: one).asObject().size(), 1)
+        @Expect(resourceLimitErrorCode({ =>
+            let _ = YJson.parse("{\"child\":{}}", config: one)
+        }), "max_depth")
+        let nestedBytes = unsafe { "[[]]".rawData().clone() }
+        @Expect(resourceLimitErrorCode({ =>
+            let _ = YJson.parse(nestedBytes, config: one)
+        }), "max_depth")
+        @Expect(resourceLimitErrorCode({ =>
+            let _ = parseJsonValueFromStream(FixedChunkInputStream("[[]]", 1), config: one)
+        }), "max_depth")
+    }
+
+    @TestCase
+    func boundedReplayDoesNotChargeScalarChildrenAsDepth(): Unit {
+        let reader = JsonDirectReader("{\"name\":\"alice\"}", config: JsonReadConfig(maxDepth: 1))
+        @Expect(reader.readBoundedValue(0).asObject()["name"].asString().value, "alice")
+    }
+
+    @TestCase
+    func skippedUnknownSubtreeUsesRemainingDepth(): Unit {
+        let direct = JsonDirectReader("{\"unknown\":[[]]}", config: JsonReadConfig(maxDepth: 2))
+        direct.startObject()
+        @Expect(direct.readName(), "unknown")
+        @Expect(resourceLimitErrorCode({ => direct.skipValueWithDepth(1) }), "max_depth")
+
+        let fast = JsonFastReader("[[[]]]")
+        @Expect(resourceLimitErrorCode({ => fast.skipRawWithDepth(2) }), "max_depth")
+    }
+
+    @TestCase
+    func policyAndStreamErrorsCarryStableCodesAndLocations(): Unit {
+        let duplicateConfig = JsonReadConfig(duplicateKeyPolicy: JsonDuplicateKeyPolicy.Reject)
+        let astDuplicate = @AssertThrows[JsonException](
+            YJson.parse("{\"a\":1,\"a\":2}", config: duplicateConfig))
+        @Expect(astDuplicate.code, "duplicate_key")
+
+        let direct = JsonDirectReader("{\"a\":1,\"a\":2}", config: duplicateConfig)
+        direct.startObject(); @Expect(direct.readName(), "a"); @Expect(direct.readInt64(), 1)
+        let directDuplicate = @AssertThrows[JsonException](direct.readName())
+        @Expect(directDuplicate.code, "duplicate_key")
+
+        let streamError = @AssertThrows[JsonException](parseJsonValueFromStream(
+            FixedChunkInputStream("{\n  \"a\": }", 1)))
+        @Expect(streamError.code, "parse_error")
+        @Expect(streamError.byteOffset >= 0)
+        @Expect(streamError.line, 2)
+        @Expect(streamError.column > 0)
+    }
 }

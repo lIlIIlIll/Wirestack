@@ -33,6 +33,8 @@ release owner 根据配对方向、历史基线和 workload 重要性单独判�
 | `api-inventory` | public declarations、C ABI needles、exact package pairing |
 | `core` | 无 C build hook 的 core tests |
 | `standards-conformance` | pinned Schema required、JSONPath CTS 与 JSON Patch public-API consumer |
+| `schema-formats-conformance` | 安装可选 format package 后的 Schema required + 964 项 optional formats |
+| `performance-comparison` | yjson / stdx.json / cjfast_json 全量共同 workload、CV、p95 与 ratio |
 | `examples` | public example build/run |
 | `macro-consumer` | 外部式 `@JsonCodec` consumer |
 | `custom-native` | package tests + external consumer，yyjson disabled |
@@ -60,7 +62,12 @@ Release blocking policy: BLOCKING / NON-BLOCKING
 
 ## Platform statement
 
-只对实际完成 SDK、build、tests、sanitizers 和 external consumer 的平台声明 supported/qualified。源码看起来可移植不等于已 qualification。
+1.0 RC 的当前阻断平台是 Linux x86_64。只对实际完成 SDK、build、tests、standards、
+sanitizers、fuzz 和 external consumer 的平台声明 supported/qualified。
+
+Windows、macOS 与 ARM64 是远期 qualification 目标。Pure Cangjie 源码可以表述为
+`unverified / potentially supported`，但源码看起来可移植不等于已 qualification，且这些
+平台当前不阻止 Linux RC。
 
 ## Publish
 

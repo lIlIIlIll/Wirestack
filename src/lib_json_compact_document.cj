@@ -553,7 +553,7 @@ public class CompactJsonDocument {
             case code == COMPACT_NULL => JsonNullValue()
             case code == COMPACT_BOOL => JsonBoolValue(first[index] != 0)
             case code == COMPACT_INT => JsonIntValue(first[index])
-            case code == COMPACT_NUMBER => JsonNumberLiteralValue(strings[first[index]])
+            case code == COMPACT_NUMBER => JsonNumberLiteralValue.fromParsedLiteral(strings[first[index]])
             case code == COMPACT_STRING => JsonStringValue(strings[first[index]])
             case code == COMPACT_ARRAY =>
                 let result = JsonArrayValue()
@@ -573,7 +573,7 @@ public class CompactJsonDocument {
                 for (offset in 0..second[index]) {
                     let position = start + offset
                     if (numberKinds[position]) { result.add(JsonIntValue(numberPayloads[position])) }
-                    else { result.add(JsonNumberLiteralValue(strings[numberPayloads[position]])) }
+                    else { result.add(JsonNumberLiteralValue.fromParsedLiteral(strings[numberPayloads[position]])) }
                 }
                 result
             case _ =>
@@ -639,7 +639,7 @@ public class CompactJsonDocument {
             case kind == COMPACT_NULL => JsonNullValue()
             case kind == COMPACT_BOOL => JsonBoolValue(payload != 0)
             case kind == COMPACT_INT => JsonIntValue(payload)
-            case kind == COMPACT_NUMBER => JsonNumberLiteralValue(strings[payload])
+            case kind == COMPACT_NUMBER => JsonNumberLiteralValue.fromParsedLiteral(strings[payload])
             case _ => JsonStringValue(strings[payload])
         }
     }
@@ -693,7 +693,9 @@ public struct CompactJsonValue {
         if (inlineKind == COMPACT_NULL) { JsonNullValue() }
         else if (inlineKind == COMPACT_BOOL) { JsonBoolValue(inlinePayload != 0) }
         else if (inlineKind == COMPACT_INT) { JsonIntValue(inlinePayload) }
-        else if (inlineKind == COMPACT_NUMBER) { JsonNumberLiteralValue(document.strings[inlinePayload]) }
+        else if (inlineKind == COMPACT_NUMBER) {
+            JsonNumberLiteralValue.fromParsedLiteral(document.strings[inlinePayload])
+        }
         else if (inlineKind == COMPACT_STRING) { JsonStringValue(document.strings[inlinePayload]) }
         else { document.materializeAt(index) }
     }

@@ -40,6 +40,15 @@ let model = YJson.decodeFromStreamWith(ModelJson, input, config: limits)
 | `maxPolymorphicObjectBytes` | 根数组或根对象从 opening token 到 closing token 的原始字节跨度，包含所有嵌套内容，不含前后空白 | 不限制 | `polymorphic_object_too_large` |
 | `maxDepth` | 数组和对象的嵌套深度 | 不适用，必须为正数 | `max_depth` |
 
+`maxDepth` 只在进入数组或对象时增加；根容器计为 1，字符串、数字、布尔值和 `null`
+不增加深度。该规则由 parser/reader 在实际消费输入时执行，覆盖 AST、typed fast、typed
+semantic、stream、polymorphic replay 和 unknown-field skip，不依赖是否启用了 byte
+budget 预扫描。
+
+generated codec 跳过未知字段时会传入当前剩余深度预算。带深度预算的 skip 不使用无法
+证明子树最大相对深度的 Native whole-subtree shortcut；在 Native scanner ABI 能返回该
+证明之前，正确性优先于这一局部加速。
+
 `\uXXXX` 转义按解码后的 Unicode scalar 计量。例如 `"\u4E2D"` 的字符串预算是
 3 字节，代理对 `"\uD83D\uDE42"` 是 4 字节。原生 UTF-8 与等价转义因此具有相同
 的 `maxStringBytes` 结果。

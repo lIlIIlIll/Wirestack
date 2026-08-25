@@ -25,6 +25,15 @@ private class TestSchemaFormatProvider <: JsonSchemaFormatProvider {
 @Test
 class YJsonSchemaTest {
     @TestCase
+    func schemaSnapshotsDocumentAndDefaultFormats(): Unit {
+        let source = YJson.parse("{\"type\":\"string\"}")
+        let schema = JsonSchema.fromValue(source)
+        source.asObject().put("type", JsonStringValue("integer"))
+        @Expect(schema.validate(YJson.parse("\"ok\"")).isEmpty())
+        let _ = @AssertThrows[IllegalStateException](
+            JsonSchemaConfig.defaults.formats.register("mutable-default", EvenLengthSchemaFormat()))
+    }
+    @TestCase
     func booleanSchemasAcceptAndReject(): Unit {
         @Expect(yJsonSchemaValid("true", "{\"anything\":1}"))
         let errors = yJsonSchemaErrors("false", "null")

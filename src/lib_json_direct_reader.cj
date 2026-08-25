@@ -108,7 +108,12 @@ private class ArrayJsonDirectByteSource <: JsonDirectByteSource {
             if (current == b'\\') {
                 code = consumeEscapedAsciiForName()
             } else if (current < 0x80) {
+                if (current < 0x20) {
+                    failAt("Unescaped control character in string literal", index - 1)
+                }
                 code = Int64(current)
+            } else {
+                index += validatedUtf8WidthAt(index - 1) - 1
             }
             if (active != 0u64) {
                 active = updateActiveNameCandidates(candidates, active, nameIndex, code)
@@ -271,6 +276,39 @@ private class ArrayJsonDirectByteSource <: JsonDirectByteSource {
         }
     }
 
+    private func validatedUtf8WidthAt(start: Int64): Int64 {
+        let first = UInt8(data[start])
+        if (first >= 0xC2u8 && first <= 0xDFu8) {
+            requireUtf8Continuation(start + 1, 0x80u8, 0xBFu8, start)
+            return 2
+        }
+        if (first >= 0xE0u8 && first <= 0xEFu8) {
+            requireUtf8Continuation(start + 1,
+                if (first == 0xE0u8) { 0xA0u8 } else { 0x80u8 },
+                if (first == 0xEDu8) { 0x9Fu8 } else { 0xBFu8 }, start)
+            requireUtf8Continuation(start + 2, 0x80u8, 0xBFu8, start)
+            return 3
+        }
+        if (first >= 0xF0u8 && first <= 0xF4u8) {
+            requireUtf8Continuation(start + 1,
+                if (first == 0xF0u8) { 0x90u8 } else { 0x80u8 },
+                if (first == 0xF4u8) { 0x8Fu8 } else { 0xBFu8 }, start)
+            requireUtf8Continuation(start + 2, 0x80u8, 0xBFu8, start)
+            requireUtf8Continuation(start + 3, 0x80u8, 0xBFu8, start)
+            return 4
+        }
+        failAt("Invalid UTF-8 byte sequence", start)
+    }
+
+    private func requireUtf8Continuation(position: Int64, minimum: UInt8,
+        maximum: UInt8, errorPosition: Int64): Unit {
+        if (position >= size) { failAt("Invalid UTF-8 byte sequence", errorPosition) }
+        let value = UInt8(data[position])
+        if (value < minimum || value > maximum) {
+            failAt("Invalid UTF-8 byte sequence", errorPosition)
+        }
+    }
+
     private func parseUnicodeAsciiEscape(): Int64 {
         let start = index
         var value: Int64 = 0
@@ -338,6 +376,8 @@ private class StreamJsonDirectByteSource <: JsonDirectByteSource {
     private var offset: Int64 = 0
     private var loadedBytes: Int64 = 0
     private var reachedEnd: Bool = false
+    private var currentLine: Int64 = 1
+    private var currentColumn: Int64 = 1
 
     public init(
         input: InputStream,
@@ -361,6 +401,12 @@ private class StreamJsonDirectByteSource <: JsonDirectByteSource {
         let value = buffer[start]
         start++
         offset++
+        if (value == b'\n') {
+            currentLine++
+            currentColumn = 1
+        } else {
+            currentColumn++
+        }
         value
     }
 
@@ -373,13 +419,14 @@ private class StreamJsonDirectByteSource <: JsonDirectByteSource {
     }
 
     public func lineAt(offset: Int64): Int64 {
-        let _ = offset
-        -1
+        if (!readConfig.includeErrorLocation) { return -1 }
+        currentLine
     }
 
     public func columnAt(offset: Int64): Int64 {
-        let _ = offset
-        -1
+        if (!readConfig.includeErrorLocation) { return -1 }
+        let distance = this.offset - offset
+        if (distance > 0 && distance < currentColumn) { currentColumn - distance } else { currentColumn }
     }
 
     private func ensureAvailable(): Bool {
@@ -463,7 +510,7 @@ public class JsonDirectReader <: JsonCodecReader {
     public func readBoundedValue(maxBytes: Int64): JsonNode {
         if (maxBytes < 0) { throw IllegalArgumentException("maxBytes must not be negative") }
         let start = source.position()
-        readBoundedValueFrom(start, maxBytes, 0)
+        readBoundedValueFrom(start, maxBytes)
     }
 
     private func ensureValueBudget(start: Int64, maxBytes: Int64): Unit {
@@ -475,10 +522,7 @@ public class JsonDirectReader <: JsonCodecReader {
         }
     }
 
-    private func readBoundedValueFrom(start: Int64, maxBytes: Int64, depth: Int64): JsonNode {
-        if (depth >= config.maxDepth) {
-            throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
-        }
+    private func readBoundedValueFrom(start: Int64, maxBytes: Int64): JsonNode {
         beforeValue()
         ensureValueBudget(start, maxBytes)
         if (!source.hasMore()) { fail("Unexpected end of input") }
@@ -492,7 +536,7 @@ public class JsonDirectReader <: JsonCodecReader {
                 let items = ArrayList<JsonNode>()
                 startArray()
                 while (hasArrayItem()) {
-                    items.add(readBoundedValueFrom(start, maxBytes, depth + 1))
+                    items.add(readBoundedValueFrom(start, maxBytes))
                     ensureValueBudget(start, maxBytes)
                 }
                 endArray()
@@ -502,12 +546,13 @@ public class JsonDirectReader <: JsonCodecReader {
                 startObject()
                 while (hasObjectField()) {
                     let name = readName()
-                    fields.add(name, readBoundedValueFrom(start, maxBytes, depth + 1))
+                    fields.add(name, readBoundedValueFrom(start, maxBytes))
                     ensureValueBudget(start, maxBytes)
                 }
                 endObject()
                 JsonObjectValue(fields)
-            case current == b'-' || (current >= b'0' && current <= b'9') => JsonNumberLiteralValue(readNumberLiteral())
+            case current == b'-' || (current >= b'0' && current <= b'9') =>
+                JsonNumberLiteralValue.fromParsedLiteral(readNumberLiteral())
             case _ => fail("Unexpected token")
         }
         ensureValueBudget(start, maxBytes)
@@ -523,6 +568,7 @@ public class JsonDirectReader <: JsonCodecReader {
 
     public func startObject(): Unit {
         beforeValue()
+        requireContainerDepth(source.position())
         beginRootBudgetIfNeeded()
         expectByte(b'{')
         contexts.add(JsonDirectReadContext(true))
@@ -560,7 +606,7 @@ public class JsonDirectReader <: JsonCodecReader {
         let id = parseNameId(candidates)
         if (id < 0) {
             if (jsonReadConfigRejectsUnknownFields(config)) {
-                fail("Unknown JSON field")
+                policyFail("Unknown JSON field", "unknown_field")
             }
         } else {
             rejectNameIfConfigured(candidates[id])
@@ -575,7 +621,7 @@ public class JsonDirectReader <: JsonCodecReader {
         }
         let context = contexts[contexts.size - 1]
         if (context.seenNames.contains(name)) {
-            fail("Duplicate object key '${name}'")
+            policyFail("Duplicate object key '${name}'", "duplicate_key")
         }
         context.seenNames.add(name)
     }
@@ -606,6 +652,7 @@ public class JsonDirectReader <: JsonCodecReader {
 
     public func startArray(): Unit {
         beforeValue()
+        requireContainerDepth(source.position())
         beginRootBudgetIfNeeded()
         expectByte(b'[')
         contexts.add(JsonDirectReadContext(false))
@@ -692,12 +739,24 @@ public class JsonDirectReader <: JsonCodecReader {
     }
 
     public func skipValue(): Unit {
+        skipValueWithDepth(config.maxDepth - contexts.size)
+    }
+
+    public func skipValueWithDepth(maxDepth: Int64): Unit {
+        if (maxDepth < 0) { throw IllegalArgumentException("maxDepth must not be negative") }
         beforeValue()
         if (source.hasMore() && (source.peek() == b'[' || source.peek() == b'{')) {
             beginRootBudgetIfNeeded()
         }
-        skipRawValue()
+        skipRawValueBounded(0, maxDepth)
         if (contexts.isEmpty()) { rootBudgetActive = false }
+    }
+
+    private func requireContainerDepth(offset: Int64): Unit {
+        if (contexts.size >= config.maxDepth) {
+            throw jsonResourceLimitException(config,
+                "Maximum JSON depth ${config.maxDepth} exceeded", "max_depth", offset)
+        }
     }
 
     private func beforeValue(): Unit {
@@ -768,7 +827,7 @@ public class JsonDirectReader <: JsonCodecReader {
         context
     }
 
-    private func skipRawValue(): Unit {
+    private func skipRawValueBounded(depth: Int64, maxDepth: Int64): Unit {
         skipSpaces()
         if (!source.hasMore()) {
             fail("Unexpected end of input")
@@ -780,15 +839,19 @@ public class JsonDirectReader <: JsonCodecReader {
             case current == b'f' => expectLiteral("false")
             case current == b'"' =>
                 scanRawString()
-            case current == b'[' => skipRawArray()
-            case current == b'{' => skipRawObject()
+            case current == b'[' => skipRawArrayBounded(depth, maxDepth)
+            case current == b'{' => skipRawObjectBounded(depth, maxDepth)
             case current == b'-' || (current >= b'0' && current <= b'9') =>
                 skipNumberLiteral()
             case _ => fail("Unexpected token")
         }
     }
 
-    private func skipRawArray(): Unit {
+    private func skipRawArrayBounded(depth: Int64, maxDepth: Int64): Unit {
+        if (depth >= maxDepth) {
+            throw jsonResourceLimitException(config,
+                "Maximum JSON depth ${config.maxDepth} exceeded", "max_depth", source.position())
+        }
         expectByte(b'[')
         skipSpaces()
         if (source.hasMore() && source.peek() == b']') {
@@ -796,7 +859,7 @@ public class JsonDirectReader <: JsonCodecReader {
             return
         }
         while (true) {
-            skipRawValue()
+            skipRawValueBounded(depth + 1, maxDepth)
             skipSpaces()
             if (source.hasMore() && source.peek() == b']') {
                 consumeByte()
@@ -806,7 +869,11 @@ public class JsonDirectReader <: JsonCodecReader {
         }
     }
 
-    private func skipRawObject(): Unit {
+    private func skipRawObjectBounded(depth: Int64, maxDepth: Int64): Unit {
+        if (depth >= maxDepth) {
+            throw jsonResourceLimitException(config,
+                "Maximum JSON depth ${config.maxDepth} exceeded", "max_depth", source.position())
+        }
         expectByte(b'{')
         skipSpaces()
         if (source.hasMore() && source.peek() == b'}') {
@@ -817,7 +884,7 @@ public class JsonDirectReader <: JsonCodecReader {
             scanRawString()
             skipSpaces()
             expectByte(b':')
-            skipRawValue()
+            skipRawValueBounded(depth + 1, maxDepth)
             skipSpaces()
             if (source.hasMore() && source.peek() == b'}') {
                 consumeByte()
@@ -1106,6 +1173,7 @@ public class JsonDirectReader <: JsonCodecReader {
         var active = initialNameMatchMask(candidates.size)
         var index: Int64 = 0
         while (source.hasMore()) {
+            let start = source.position()
             let current = consumeByte()
             if (current == b'"') {
                 if (active == 0u64) {
@@ -1122,7 +1190,12 @@ public class JsonDirectReader <: JsonCodecReader {
             if (current == b'\\') {
                 code = consumeEscapedAsciiForName()
             } else if (current < 0x80) {
+                if (current < 0x20) {
+                    failAt("Unescaped control character in string literal", start)
+                }
                 code = Int64(current)
+            } else {
+                let _ = decodeUtf8Rune(current, start)
             }
             if (active != 0u64) {
                 active = updateActiveNameCandidates(candidates, active, index, code)
@@ -1350,6 +1423,17 @@ public class JsonDirectReader <: JsonCodecReader {
 
     private func fail(message: String): Nothing {
         failAt(message, source.position())
+    }
+
+    private func policyFail(message: String, code: String): Nothing {
+        let offset = source.position()
+        throw JsonException(
+            message,
+            code: code,
+            byteOffset: if (config.includeErrorLocation) { offset } else { -1 },
+            line: source.lineAt(offset),
+            column: source.columnAt(offset)
+        )
     }
 
     private func failAt(message: String, offset: Int64): Nothing {
