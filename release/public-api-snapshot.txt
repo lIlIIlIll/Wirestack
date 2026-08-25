@@ -382,9 +382,15 @@ yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonWriteStringArr
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonWriteStringOption(value: Option<String>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func eraseJsonCodec<T>(codec: JsonCodec<T>): JsonAnyCodec
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func jsonCodecOf<T>(): JsonCodec<T> where T <: JsonCodecProvider
+yjson|src/lib_json_direct_codec.cj|<top-level>|public func jsonTryBeginGeneratedCompactRawValue(writer: JsonDirectWriter): Bool
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func jsonTryWriteCompactInt64ArrayList( writer: JsonCodecWriter, values: ArrayList<Int64> ): Bool
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func jsonTryWriteCompactInt64Map( writer: JsonCodecWriter, values: HashMap<String, Int64> ): Bool
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func jsonTryWriteCompactStringArrayList( writer: JsonCodecWriter, values: ArrayList<String> ): Bool
+yjson|src/lib_json_direct_codec.cj|<top-level>|public func jsonWriteGeneratedCompactObjectBegin(writer: JsonDirectWriter): Unit
+yjson|src/lib_json_direct_codec.cj|<top-level>|public func jsonWriteGeneratedCompactObjectEnd(writer: JsonDirectWriter): Unit
+yjson|src/lib_json_direct_codec.cj|<top-level>|public func jsonWriteGeneratedCompactObjectEntryBool( writer: JsonDirectWriter, first: Bool, name: String, value: Bool ): Bool
+yjson|src/lib_json_direct_codec.cj|<top-level>|public func jsonWriteGeneratedCompactObjectEntryInt64( writer: JsonDirectWriter, first: Bool, name: String, value: Int64 ): Bool
+yjson|src/lib_json_direct_codec.cj|<top-level>|public func jsonWriteGeneratedCompactObjectEntryString( writer: JsonDirectWriter, first: Bool, name: String, value: String ): Bool
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func read(reader: JsonCodecReader, context: JsonDecodeContext): Array<T>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func read(reader: JsonCodecReader, context: JsonDecodeContext): ArrayList<Int64>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func read(reader: JsonCodecReader, context: JsonDecodeContext): ArrayList<String>
@@ -416,6 +422,10 @@ yjson|src/lib_json_direct_codec.cj|<top-level>|public func write(value: Option<S
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func write(value: Option<T>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func write(value: T, writer: JsonCodecWriter, context: JsonEncodeContext): Unit
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func writeAny(value: Any, writer: JsonCodecWriter, context: JsonEncodeContext): Unit
+yjson|src/lib_json_direct_codec.cj|<top-level>|public func writeDirect(value: ArrayList<T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit
+yjson|src/lib_json_direct_codec.cj|<top-level>|public func writeDirect(value: HashMap<String, T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit
+yjson|src/lib_json_direct_codec.cj|<top-level>|public func writeDirect(value: Option<T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit
+yjson|src/lib_json_direct_codec.cj|<top-level>|public func writeJsonDirectWith<T>( codec: JsonCodec<T>, value: T, writer: JsonDirectWriter, context: JsonEncodeContext ): Unit
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func writeRaw(value: T, writer: JsonDirectWriter): Unit
 yjson|src/lib_json_direct_codec.cj|<top-level>|public init( writerFn: (T, JsonCodecWriter) -> Unit, readerFn: (JsonCodecReader) -> T, fastReaderFn: (JsonFastReader) -> T )
 yjson|src/lib_json_direct_codec.cj|<top-level>|public init( writerFn: (T, JsonCodecWriter) -> Unit, readerFn: (JsonCodecReader) -> T, fastReaderFn: (JsonFastReader) -> T, rawWriterFn: (T, JsonDirectWriter) -> Unit )
@@ -431,6 +441,8 @@ yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonCodecBulkWri
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonCodecProvider
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonCodecReader
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonCodecWriter
+yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonCompactRawCodec<T> <: JsonDirectWriteCodec<T>
+yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonDirectWriteCodec<T> <: JsonCodec<T>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonFastCodec<T> <: JsonCodec<T>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonFastDecoder<T>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonObjectCodec<T> <: JsonCodec<T>
@@ -485,6 +497,7 @@ yjson|src/lib_json_direct_codec.cj|JsonCodecWriter|func writeString(value: Strin
 yjson|src/lib_json_direct_codec.cj|JsonCodecWriter|func writeUInt64(value: UInt64): Unit
 yjson|src/lib_json_direct_codec.cj|JsonCodec|func read(reader: JsonCodecReader, context: JsonDecodeContext): T
 yjson|src/lib_json_direct_codec.cj|JsonCodec|func write(value: T, writer: JsonCodecWriter, context: JsonEncodeContext): Unit
+yjson|src/lib_json_direct_codec.cj|JsonCompactRawCodec|func writeCompactRaw(value: T, writer: JsonDirectWriter, context: JsonEncodeContext): Unit
 yjson|src/lib_json_direct_codec.cj|JsonDecodeContext|public func currentPath(): String
 yjson|src/lib_json_direct_codec.cj|JsonDecodeContext|public func enterValue(): Unit
 yjson|src/lib_json_direct_codec.cj|JsonDecodeContext|public func leaveValue(): Unit
@@ -493,6 +506,7 @@ yjson|src/lib_json_direct_codec.cj|JsonDecodeContext|public func pushField(name:
 yjson|src/lib_json_direct_codec.cj|JsonDecodeContext|public func pushIndex(index: Int64): Unit
 yjson|src/lib_json_direct_codec.cj|JsonDecodeContext|public func remainingDepth(): Int64
 yjson|src/lib_json_direct_codec.cj|JsonDecodeContext|public init(config: JsonReadConfig)
+yjson|src/lib_json_direct_codec.cj|JsonDirectWriteCodec|func writeDirect(value: T, writer: JsonDirectWriter, context: JsonEncodeContext): Unit
 yjson|src/lib_json_direct_codec.cj|JsonEncodeContext|public func currentPath(): String
 yjson|src/lib_json_direct_codec.cj|JsonEncodeContext|public func enterObject<T>(value: T): Unit
 yjson|src/lib_json_direct_codec.cj|JsonEncodeContext|public func enterValue(): Unit
@@ -501,6 +515,8 @@ yjson|src/lib_json_direct_codec.cj|JsonEncodeContext|public func leaveValue(): U
 yjson|src/lib_json_direct_codec.cj|JsonEncodeContext|public func popPath(): Unit
 yjson|src/lib_json_direct_codec.cj|JsonEncodeContext|public func pushField(name: String): Unit
 yjson|src/lib_json_direct_codec.cj|JsonEncodeContext|public func pushIndex(index: Int64): Unit
+yjson|src/lib_json_direct_codec.cj|JsonEncodeContext|public func updateLastField(name: String): Unit
+yjson|src/lib_json_direct_codec.cj|JsonEncodeContext|public func updateLastIndex(index: Int64): Unit
 yjson|src/lib_json_direct_codec.cj|JsonEncodeContext|public init(config: JsonWriteConfig)
 yjson|src/lib_json_direct_codec.cj|JsonFastCodec|func readFast(reader: JsonFastReader, context: JsonDecodeContext): T
 yjson|src/lib_json_direct_codec.cj|JsonFastDecoder|func decodeBytes(bytes: Array<Byte>): T
@@ -614,10 +630,6 @@ yjson|src/lib_json_direct_writer.cj|<top-level>|public func writeTextStringLiter
 yjson|src/lib_json_direct_writer.cj|<top-level>|public func writeTextStringLiteralNoEscape(prefix: String, value: String): Unit
 yjson|src/lib_json_direct_writer.cj|<top-level>|public func writeTextStringLiteralTextNoEscape(prefix: String, value: String, suffix: String): Unit
 yjson|src/lib_json_direct_writer.cj|<top-level>|public func writeUInt64Text(value: UInt64): Unit
-yjson|src/lib_json_direct_writer.cj|<top-level>|public init(objectContext: Bool)
-yjson|src/lib_json_direct_writer.cj|<top-level>|public let objectContext: Bool
-yjson|src/lib_json_direct_writer.cj|<top-level>|public var expectingFieldValue: Bool = false
-yjson|src/lib_json_direct_writer.cj|<top-level>|public var first: Bool = true
 yjson|src/lib_json_direct_writer.cj|JsonDirectWriter|public func endArray(): Unit
 yjson|src/lib_json_direct_writer.cj|JsonDirectWriter|public func finish(): Unit
 yjson|src/lib_json_direct_writer.cj|JsonDirectWriter|public func finishBytes(): Array<Byte>

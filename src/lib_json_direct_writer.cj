@@ -1481,21 +1481,20 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
 
 }
 
-private class JsonDirectWriteContext {
-    public let objectContext: Bool
-    public var first: Bool = true
-    public var expectingFieldValue: Bool = false
-
-    public init(objectContext: Bool) {
-        this.objectContext = objectContext
-    }
-}
-
 public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
+    private static let ARRAY_FIRST: UInt8 = 0x1
+    private static let ARRAY_NEXT: UInt8 = 0x0
+    private static let OBJECT_FIRST: UInt8 = 0x3
+    private static let OBJECT_NEXT: UInt8 = 0x2
+    private static let OBJECT_EXPECTING_VALUE: UInt8 = 0x6
+    private static let OBJECT_MASK: UInt8 = 0x2
+    private static let FIRST_MASK: UInt8 = 0x1
+    private static let EXPECTING_VALUE_MASK: UInt8 = 0x4
+
     private let target: JsonDirectWriterTarget
     private let config: JsonWriteConfig
     private let multiline: Bool
-    private let contexts = ArrayList<JsonDirectWriteContext>()
+    private let contexts = ArrayList<UInt8>()
 
     public init(pretty!: Bool = false) {
         let writerConfig = if (pretty) { JsonWriteConfig.pretty } else { JsonWriteConfig.compact }
@@ -1527,11 +1526,13 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
     }
 
     public func finish(): Unit {
+        ensureCompleteWriterState()
         target.finish()
         enforceOutputLimit()
     }
 
     public func finishString(): String {
+        ensureCompleteWriterState()
         target.finish()
         enforceOutputLimit()
         match (target) {
@@ -1541,6 +1542,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
     }
 
     public func finishBytes(): Array<Byte> {
+        ensureCompleteWriterState()
         target.finish()
         enforceOutputLimit()
         match (target) {
@@ -1559,8 +1561,22 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         }
     }
 
+    private func ensureCompleteWriterState(): Unit {
+        if (!contexts.isEmpty()) {
+            throw JsonException("Unbalanced JSON writer state")
+        }
+    }
+
     func canWriteRawCompactValue(): Bool {
         contexts.isEmpty() && !multiline && !config.useSpaceAfterSeparators && !config.htmlSafe
+    }
+
+    func tryBeginGeneratedCompactRawValue(): Bool {
+        if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
+            return false
+        }
+        beforeValue()
+        true
     }
 
     func canWriteRawDefaultPrettyValue(): Bool {
@@ -2082,12 +2098,12 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
     public func startObject(): Unit {
         beforeValue()
         target.writeByte(b'{')
-        contexts.add(JsonDirectWriteContext(true))
+        contexts.add(OBJECT_FIRST)
     }
 
     public func endObject(): Unit {
         let context = popContext(true)
-        if (!context.first && multiline) {
+        if ((context & FIRST_MASK) == 0 && multiline) {
             writeNewlineAndIndent(contexts.size)
         }
         target.writeByte(b'}')
@@ -2096,12 +2112,12 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
     public func startArray(): Unit {
         beforeValue()
         target.writeByte(b'[')
-        contexts.add(JsonDirectWriteContext(false))
+        contexts.add(ARRAY_FIRST)
     }
 
     public func endArray(): Unit {
         let context = popContext(false)
-        if (!context.first && multiline) {
+        if ((context & FIRST_MASK) == 0 && multiline) {
             writeNewlineAndIndent(contexts.size)
         }
         target.writeByte(b']')
@@ -2127,18 +2143,18 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         if (contexts.isEmpty()) {
             throw JsonException("Cannot write a field name outside object")
         }
-        let context = contexts[contexts.size - 1]
-        if (!context.objectContext || context.expectingFieldValue) {
+        let index = contexts.size - 1
+        let context = contexts[index]
+        if ((context & OBJECT_MASK) == 0 || (context & EXPECTING_VALUE_MASK) != 0) {
             throw JsonException("Cannot write a field name here")
         }
-        if (context.first) {
+        if ((context & FIRST_MASK) != 0) {
             writeEntryPrefix(contexts.size)
-            context.first = false
         } else {
             target.writeByte(b',')
             writeEntryPrefix(contexts.size)
         }
-        context.expectingFieldValue = true
+        contexts[index] = OBJECT_EXPECTING_VALUE
     }
 
     public func writeNull(): Unit {
@@ -2181,30 +2197,33 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         if (contexts.isEmpty()) {
             return
         }
-        let context = contexts[contexts.size - 1]
-        if (context.objectContext) {
-            if (!context.expectingFieldValue) {
+        let index = contexts.size - 1
+        let context = contexts[index]
+        if ((context & OBJECT_MASK) != 0) {
+            if ((context & EXPECTING_VALUE_MASK) == 0) {
                 throw JsonException("Object values must be preceded by a field name")
             }
-            context.expectingFieldValue = false
+            contexts[index] = OBJECT_NEXT
             return
         }
-        if (context.first) {
+        if ((context & FIRST_MASK) != 0) {
             writeEntryPrefix(contexts.size)
-            context.first = false
+            contexts[index] = ARRAY_NEXT
             return
         }
         target.writeByte(b',')
         writeEntryPrefix(contexts.size)
     }
 
-    private func popContext(expectedObject: Bool): JsonDirectWriteContext {
+    private func popContext(expectedObject: Bool): UInt8 {
         if (contexts.isEmpty()) {
             throw JsonException("Unbalanced JSON writer state")
         }
         let index = contexts.size - 1
         let context = contexts[index]
-        if (context.objectContext != expectedObject || context.expectingFieldValue) {
+        let objectContext = (context & OBJECT_MASK) != 0
+        let expectingFieldValue = (context & EXPECTING_VALUE_MASK) != 0
+        if (objectContext != expectedObject || expectingFieldValue) {
             throw JsonException("Unbalanced JSON writer state")
         }
         contexts.remove(at: index)

@@ -94,6 +94,9 @@ same checkout and exact commit as core.
 |---|---|---|---|
 | `yjson` | `JsonFastReader.suggestRawCollectionCapacity(): Int64` | Bounded hint (`4..64`) from the unread raw-array window; does not advance or retain input | Generated fast collection codecs |
 | `yjson_macros` | Generated call to the bridge | Used only after the empty-array check; changes allocation strategy, not JSON semantics | `@JsonCodec` output |
+| `yjson` | `JsonEncodeContext.updateLastField/updateLastIndex` | Reuses one pushed path frame across non-empty generated containers while retaining the current error key/index | Matching-version generated code; core and macros must be rebuilt together |
+| `yjson` / `yjson_macros` | `JsonDirectWriteCodec` / `writeJsonDirectWith` / generated `writeDirect` | Retains the concrete `JsonDirectWriter` type through nested generated codecs while preserving semantic writer state, formatting, depth, paths, escaping, and limits | Matching-version generated code; consumers must rebuild core and macros together |
+| `yjson` / `yjson_macros` | `JsonCompactRawCodec` / generated compact object entry bridge / `writeCompactRaw` | Emits only statically safe String/Bool/signed-integer generated objects as compact raw subtrees after consuming one semantic parent value state; cycle/depth context remains active and pretty, spaced, `htmlSafe`, Option, custom-codec, generic, and unsupported shapes fall back | Matching-version generated code; consumers must rebuild core and macros together |
 | `yjson` | `JsonCodecReader.skipValueWithDepth` | Enforces the remaining syntax-depth budget while skipping an unknown subtree | Third-party reader implementations; source-breaking after rc.1, rc.2 rebuild required |
 | `yjson` | `JsonDecodeContext.remainingDepth` / `JsonFastReader.skipRawWithDepth` | Connects generated typed depth state to semantic and fast subtree skipping | Matching-version generated code; rc.2 rebuild required |
 

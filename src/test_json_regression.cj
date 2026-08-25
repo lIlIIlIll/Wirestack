@@ -19,6 +19,20 @@ private class RegressionNonFastIntCodec <: JsonCodec<Int64> {
     }
 }
 
+private class RegressionPathFailingIntCodec <: JsonCodec<Int64> {
+    public func write(value: Int64, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {
+        if (value == 2) {
+            throw JsonException("intentional encode failure", code: "test_failure", path: context.currentPath())
+        }
+        writer.writeInt64(value)
+    }
+
+    public func read(reader: JsonCodecReader, context: JsonDecodeContext): Int64 {
+        let _ = context
+        reader.readInt64()
+    }
+}
+
 private class RegressionNamedPureBackend <: JsonStreamBackend {
     var decoderOpened: Bool = false
 
@@ -413,6 +427,80 @@ class YJsonRegressionTest {
     }
 
     @TestCase
+    func generatedCompactRawRecordPreservesTargetsConfigAndDepthPath(): Unit {
+        let profile = makeProfileRecord(-7, "quote\"slash\\line\n<tag>", -3)
+        let expected = "{\"profile_id\":-7,\"alias\":\"quote\\\"slash\\\\line\\n<tag>\",\"level\":-3}"
+        @Expect(YJson.encodeStringWith(ProfileRecordJson, profile), expected)
+        @Expect(String.fromUtf8(YJson.encodeBytesWith(ProfileRecordJson, profile)), expected)
+        let output = MemoryOutputStream()
+        YJson.encodeToStreamWith(ProfileRecordJson, profile, output)
+        @Expect(output.toUtf8String(), expected)
+
+        let pretty = YJson.encodeStringWith(ProfileRecordJson, profile, config: JsonWriteConfig.pretty)
+        @Expect(pretty.contains("\n    \"profile_id\": -7"))
+        @Expect(YJson.decodeStringWith(ProfileRecordJson, pretty).alias, profile.alias)
+        let htmlSafe = YJson.encodeStringWith(
+            ProfileRecordJson,
+            profile,
+            config: JsonWriteConfig("", "", false, true)
+        )
+        @Expect(htmlSafe.contains("\\u003ctag\\u003e"))
+        let custom = YJson.encodeStringWith(
+            ProfileRecordJson,
+            profile,
+            config: JsonWriteConfig("\r\n", "\t", true, false)
+        )
+        @Expect(custom.contains("\r\n\t\"alias\": "))
+        @Expect(YJson.decodeStringWith(ProfileRecordJson, custom).alias, profile.alias)
+
+        let profiles = ArrayList<ProfileRecord>()
+        profiles.add(profile)
+        let codec = YJson.arrayListCodec(ProfileRecordJson)
+        let depthError = @AssertThrows[JsonException](YJson.encodeStringWith(
+            codec,
+            profiles,
+            config: JsonWriteConfig("", "", false, false, maxDepth: 1)
+        ))
+        @Expect(depthError.code, "max_depth")
+        @Expect(depthError.path, "$[0]")
+        @Expect(YJson.decodeStringWith(
+            codec,
+            YJson.encodeStringWith(codec, profiles, config: JsonWriteConfig("", "", false, false, maxDepth: 2))
+        )[0].alias, profile.alias)
+
+        let profilesByName = HashMap<String, ArrayList<ProfileRecord>>()
+        profilesByName["group"] = profiles
+        let nested = ArrayList<HashMap<String, ArrayList<ProfileRecord>>>()
+        nested.add(profilesByName)
+        let nestedCodec = YJson.arrayListCodec(YJson.hashMapCodec(YJson.arrayListCodec(ProfileRecordJson)))
+        let nestedExpected = "[{\"group\":[${expected}]}]"
+        @Expect(YJson.encodeStringWith(nestedCodec, nested), nestedExpected)
+        @Expect(String.fromUtf8(YJson.encodeBytesWith(nestedCodec, nested)), nestedExpected)
+        let nestedOutput = MemoryOutputStream()
+        YJson.encodeToStreamWith(nestedCodec, nested, nestedOutput)
+        @Expect(nestedOutput.toUtf8String(), nestedExpected)
+        let nestedPretty = YJson.encodeStringWith(nestedCodec, nested, config: JsonWriteConfig.pretty)
+        @Expect(YJson.decodeStringWith(nestedCodec, nestedPretty)[0]["group"][0].alias, profile.alias)
+        let nestedDepthError = @AssertThrows[JsonException](YJson.encodeStringWith(
+            nestedCodec,
+            nested,
+            config: JsonWriteConfig("", "", false, false, maxDepth: 3)
+        ))
+        @Expect(nestedDepthError.code, "max_depth")
+        @Expect(nestedDepthError.path, "$[0].group[0]")
+        @Expect(YJson.decodeStringWith(
+            nestedCodec,
+            YJson.encodeStringWith(nestedCodec, nested, config: JsonWriteConfig("", "", false, false, maxDepth: 4))
+        )[0]["group"][0].id, profile.id)
+
+        let profileArrayCodec = YJson.arrayCodec(ProfileRecordJson)
+        @Expect(YJson.encodeStringWith(profileArrayCodec, profiles.toArray()), "[${expected}]")
+        let profileOptionCodec = YJson.optionCodec(ProfileRecordJson)
+        @Expect(YJson.encodeStringWith(profileOptionCodec, Some(profile)), expected)
+        @Expect(YJson.encodeStringWith(profileOptionCodec, None<ProfileRecord>), "null")
+    }
+
+    @TestCase
     func astDefaultPrettyPersonStringifyRoundtrips(): Unit {
         let person = samplePerson()
         let personAst = YJson.parse(YJson.encodeStringWith(PersonJson, person))
@@ -525,6 +613,28 @@ class YJsonRegressionTest {
         let decodedNestedBytes = YJson.decodeBytesWith(nestedCodec, yJsonRegressionBytes(encodedNested))
         @Expect(decodedNested[1]["group_1"][1].id, 101)
         @Expect(decodedNestedBytes[1]["group_1"][1].id, 101)
+    }
+
+    @TestCase
+    func genericCollectionEncodeFrameReusePreservesFailurePaths(): Unit {
+        let itemCodec = RegressionPathFailingIntCodec()
+        let values = ArrayList<Int64>()
+        values.add(1)
+        values.add(2)
+        let arrayError = @AssertThrows[JsonException](
+            YJson.encodeStringWith(YJson.arrayListCodec(itemCodec), values)
+        )
+        @Expect(arrayError.code, "test_failure")
+        @Expect(arrayError.path, "$[1]")
+
+        let entries = HashMap<String, Int64>()
+        entries["ok"] = 1
+        entries["broken"] = 2
+        let mapError = @AssertThrows[JsonException](
+            YJson.encodeStringWith(YJson.hashMapCodec(itemCodec), entries)
+        )
+        @Expect(mapError.code, "test_failure")
+        @Expect(mapError.path, "$.broken")
     }
 
     @TestCase
