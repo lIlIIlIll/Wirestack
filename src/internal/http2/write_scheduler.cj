@@ -111,6 +111,8 @@ public class Http2WriteScheduler {
     private var writerRunning = false
     private var controlBurst: Int64 = 0
     private var active: ?Http2QueuedWrite = None<Http2QueuedWrite>
+    private var maximumQueuedCount: Int64 = 0
+    private var maximumQueuedBytes: UInt64 = 0u64
     // 0 = unclaimed, 1 = graceful close in progress, 2 = terminal. Abort may
     // upgrade state 1 exactly once to interrupt a blocked graceful close.
     private var transportTerminalState: Int64 = 0
@@ -118,6 +120,8 @@ public class Http2WriteScheduler {
     public prop state: Http2WriteSchedulerState { get() { synchronized(mutex) { schedulerState } } }
     public prop pendingWrites: Int64 { get() { synchronized(mutex) { queuedCount } } }
     public prop pendingBytes: UInt64 { get() { synchronized(mutex) { queuedBytes } } }
+    public prop maximumPendingWrites: Int64 { get() { synchronized(mutex) { maximumQueuedCount } } }
+    public prop maximumPendingBytes: UInt64 { get() { synchronized(mutex) { maximumQueuedBytes } } }
     public prop isWriterRunning: Bool { get() { synchronized(mutex) { writerRunning } } }
 
     public init(transport: DuplexTransport, limits!: Http2Limits = Http2Limits()) {
@@ -178,6 +182,7 @@ public class Http2WriteScheduler {
                 nextId++
                 queuedCount++
                 queuedBytes += UInt64(encoded[index].size)
+                recordQueueHighWaterLocked()
                 tickets.add(ticket)
             }
             changed.notifyAll()
@@ -210,9 +215,15 @@ public class Http2WriteScheduler {
             else { controls.add(item) }
             queuedCount += 1
             queuedBytes += size
+            recordQueueHighWaterLocked()
             changed.notifyAll()
             ticket
         }
+    }
+
+    private func recordQueueHighWaterLocked(): Unit {
+        maximumQueuedCount = max(maximumQueuedCount, queuedCount)
+        maximumQueuedBytes = max(maximumQueuedBytes, queuedBytes)
     }
 
     /** Idempotently stops admission; the writer drains every accepted frame. */

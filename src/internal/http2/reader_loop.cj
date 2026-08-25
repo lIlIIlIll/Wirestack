@@ -43,9 +43,9 @@ public class Http2ReaderTerminationRegistry {
 
     public prop activeCount: Int64 { get() { synchronized(mutex) { listeners.size } } }
 
-    public init(maxListeners: UInt32) {
+    public init(maxListeners: UInt32, reservedListeners!: UInt32 = 0u32) {
         if (maxListeners == 0u32) { throw IllegalArgumentException("HTTP/2 reader listener limit must be positive") }
-        limit = Int64(maxListeners)
+        limit = Int64(maxListeners) + Int64(reservedListeners)
     }
 
     /** A late registration is invoked synchronously with retained terminal evidence. */
@@ -119,7 +119,9 @@ public class Http2ConnectionReader {
         this.machine = machine
         this.handler = handler
         parser = Http2FrameParser(limits: limits)
-        terminations = Http2ReaderTerminationRegistry(limits.maxConcurrentStreams)
+        // The stream registry owns one connection-level listener in addition
+        // to one request listener for every concurrently active stream.
+        terminations = Http2ReaderTerminationRegistry(limits.maxConcurrentStreams, reservedListeners: 1u32)
     }
 
     /** Runs to terminal completion on the caller's task; a second call is rejected forever. */

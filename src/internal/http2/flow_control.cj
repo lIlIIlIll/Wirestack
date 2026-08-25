@@ -82,6 +82,7 @@ public class Http2FlowController {
     private var receiveInitialStreamWindow: Int64 = HTTP2_DEFAULT_WINDOW
     private var peerMaxFrameSize: Int64 = 16384
     private var waitingReservations: Int64 = 0
+    private var sendStallCount: Int64 = 0
     private var nextPermitId: Int64 = 1
     private var closed = false
 
@@ -91,6 +92,7 @@ public class Http2FlowController {
     public prop receiveConnectionAvailable: Int64 { get() { synchronized(mutex) { receiveConnectionWindow } } }
     public prop activeStreamCount: Int64 { get() { synchronized(mutex) { streams.size } } }
     public prop pendingPermitCount: Int64 { get() { synchronized(mutex) { permits.size } } }
+    public prop flowControlStalls: Int64 { get() { synchronized(mutex) { sendStallCount } } }
     public prop bufferedReceiveBytes: Int64 {
         get() { synchronized(mutex) { HTTP2_DEFAULT_WINDOW - receiveConnectionWindow } }
     }
@@ -177,6 +179,7 @@ public class Http2FlowController {
         requirePositiveFlowBytes(requested)
         let registration = context.cancellation.register { => wakeFlowWaiters() }
         var counted = false
+        var stalled = false
         try {
             synchronized(mutex) {
                 requireFlowOpenLocked()
@@ -191,6 +194,7 @@ public class Http2FlowController {
                     let stream = requireFlowStreamLocked(streamId)
                     let amount = reservableLocked(stream, requested)
                     if (amount > 0) { return reserveLocked(stream, amount) }
+                    if (!stalled) { sendStallCount += 1; stalled = true }
                     waitFlowChangeLocked(context)
                 }
                 throw IllegalStateException("unreachable HTTP/2 flow reservation state")
@@ -311,6 +315,7 @@ public class Http2FlowController {
 
     internal func beginPermit(permit: Http2SendPermit, context: OperationContext): Bool {
         let registration = context.cancellation.register { => wakeFlowWaiters() }
+        var stalled = false
         try {
             synchronized(mutex) {
                 while (true) {
@@ -328,6 +333,7 @@ public class Http2FlowController {
                         changed.notifyAll()
                         return true
                     }
+                    if (!stalled) { sendStallCount += 1; stalled = true }
                     waitFlowChangeLocked(context)
                 }
                 false
