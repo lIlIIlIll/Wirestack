@@ -55,6 +55,7 @@ six-platform milestone.
 | M1-012 | COMPLETE | [`docs/evidence/M1-012/README.md`](../evidence/M1-012/README.md) | `TransportListener` and the Linux adapter enforce a bounded backlog, cancellable and deadline-aware accept, deterministic close wakeup, exactly-once terminal selection and structured accept errors. |
 | M1-013 | COMPLETE | [`docs/evidence/M1-013/README.md`](../evidence/M1-013/README.md) | `MemoryTransport` now includes a bounded listener and manually advanced FIFO scheduler while preserving paired partial I/O, half-close, EOF, backpressure and terminal cleanup. |
 | M1-014 | COMPLETE | [`docs/evidence/M1-014/README.md`](../evidence/M1-014/README.md) | Bounded read/write scripts reproduce manual delay, short I/O, EOF, terminal reset, cancellation races and structured error phases through a FIFO virtual waiter. |
+| M1-018 | COMPLETE | [`docs/evidence/M1-018/README.md`](../evidence/M1-018/README.md) | `writeSome` performs bounded partial writes through one connection-retained exact-size staging array, the 16 KiB default carries a typical TLS record, and copied bytes remain measurable; the canonical repository gate separately retains one unrelated HTTP/2 package-interference error. |
 
 ## Conditional upstream work
 

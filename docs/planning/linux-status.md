@@ -39,7 +39,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M1-014 scripted transport | COMPLETE | Bounded FIFO scripts cover manual delay, short read/write, EOF, reset, cancellation races and injected error phases; [Linux evidence](../evidence/M1-014/README.md) |
 | M1-015/016 `StdNetTransport` ownership/connect | COMPLETE | DNS-free `IPSocketAddress` construction, exclusive adapter ownership, absolute connect budget and actual endpoints |
 | M1-017 `StdNetTransport.readSome` | COMPLETE | Partial reads, peer EOF, local close/cancel distinction, Deadline and one-reader guard tested on Linux loopback |
-| M1-018 bounded write staging | IN_PROGRESS | Bounded partial writes and copied-byte counters exist; current whole-Array `std.net` API still forces per-call staging allocation |
+| M1-018 bounded write staging | COMPLETE | One connection-retained exact-size array serves bounded partial writes, the 16 KiB default carries a typical TLS record, and copied bytes remain measurable; [Linux evidence](../evidence/M1-018/README.md) |
 | M1-019 typed half-close | BLOCKED | Public pinned `TcpSocket` has no shutdown API; adapter reports `Unsupported` and requires UP-003 |
 | M1-020 idempotent close/abort | COMPLETE | Native close is claimed once; close/cancel wake blocked read and listener accept without returning false EOF |
 | M1-021 `StdNetTransportListener` | COMPLETE | IP-only bind, bounded backlog, endpoints and accept Deadline/cancel/close semantics |
