@@ -47,6 +47,7 @@ public class StdNetTransport <: DuplexTransport {
     private var nativeClosed = false
     private var copiedReadBytes: Int64 = 0
     private var copiedWriteBytes: Int64 = 0
+    private var writeStaging = Array<Byte>()
 
     private init(
         socket: TcpSocket,
@@ -131,14 +132,21 @@ public class StdNetTransport <: DuplexTransport {
                 return ReadResult.Data(0)
             }
             let count = min(destination.length, stagingBufferSize)
-            let staging = Array<Byte>(count, repeat: 0)
+            let direct = destination.offset == 0 &&
+                destination.length == destination.bytes.size &&
+                count == destination.bytes.size
+            let target = if (direct) {
+                destination.bytes
+            } else {
+                Array<Byte>(count, repeat: 0)
+            }
             let gate = OperationGate()
             let registration = context.cancellation.register {
                 => gate.interrupt { => abort(reason: Some(AbortReason.Cancelled)) }
             }
             try {
                 socket.readTimeout = remaining(context)
-                let received = socket.read(staging)
+                let received = socket.read(target)
                 if (!gate.complete()) {
                     throw contextOrTerminalError(context, NetworkErrorCategory.Read, NetworkPhase.TcpRead)
                 }
@@ -146,10 +154,12 @@ public class StdNetTransport <: DuplexTransport {
                     ensureNotLocallyTerminated(context, NetworkErrorCategory.Read, NetworkPhase.TcpRead)
                     return ReadResult.EndOfStream
                 }
-                for (index in 0..received) {
-                    destination.bytes[destination.offset + index] = staging[index]
+                if (!direct) {
+                    for (index in 0..received) {
+                        destination.bytes[destination.offset + index] = target[index]
+                    }
+                    synchronized(lifecycleMutex) { copiedReadBytes += received }
                 }
-                synchronized(lifecycleMutex) { copiedReadBytes += received }
                 ReadResult.Data(received)
             } catch (error: SocketTimeoutException) {
                 let _ = gate.complete()
@@ -176,9 +186,23 @@ public class StdNetTransport <: DuplexTransport {
                 return 0
             }
             let count = min(source.length, stagingBufferSize)
-            let staging = Array<Byte>(count, repeat: 0)
-            for (index in 0..count) {
-                staging[index] = source.bytes[source.offset + index]
+            let direct = source.offset == 0 &&
+                source.length == source.bytes.size &&
+                count == source.bytes.size
+            let payload = if (direct) {
+                source.bytes
+            } else {
+                synchronized(lifecycleMutex) {
+                    if (writeStaging.size != count) {
+                        writeStaging = Array<Byte>(count, repeat: 0)
+                    }
+                    writeStaging
+                }
+            }
+            if (!direct) {
+                for (index in 0..count) {
+                    payload[index] = source.bytes[source.offset + index]
+                }
             }
             let gate = OperationGate()
             let registration = context.cancellation.register {
@@ -186,11 +210,13 @@ public class StdNetTransport <: DuplexTransport {
             }
             try {
                 socket.writeTimeout = remaining(context)
-                socket.write(staging)
+                socket.write(payload)
                 if (!gate.complete()) {
                     throw contextOrTerminalError(context, NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
                 }
-                synchronized(lifecycleMutex) { copiedWriteBytes += count }
+                if (!direct) {
+                    synchronized(lifecycleMutex) { copiedWriteBytes += count }
+                }
                 count
             } catch (error: SocketTimeoutException) {
                 let _ = gate.complete()
