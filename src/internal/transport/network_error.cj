@@ -59,6 +59,7 @@ public enum NetworkErrorCode {
     | UnexpectedEof
     | Unsupported
     | SystemFailure
+    | InvalidState
 }
 
 public enum Retryability {
