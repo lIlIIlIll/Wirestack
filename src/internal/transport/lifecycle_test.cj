@@ -132,6 +132,23 @@ class TransportLifecycleTest {
     }
 
     @TestCase
+    func operationClaimsAllowDuplexButRejectSameDirectionConcurrency(): Unit {
+        let lifecycle = openLifecycle()
+        lifecycle.beginRead()
+        lifecycle.beginWrite()
+
+        @Expect(throwsLifecycleCode({ => lifecycle.beginRead() }, NetworkErrorCode.ConcurrentOperation))
+        @Expect(throwsLifecycleCode({ => lifecycle.beginWrite() }, NetworkErrorCode.ConcurrentOperation))
+
+        lifecycle.endRead()
+        lifecycle.endWrite()
+        lifecycle.beginRead()
+        lifecycle.beginWrite()
+        lifecycle.endRead()
+        lifecycle.endWrite()
+    }
+
+    @TestCase
     func everyTerminalModeReleasesRegisteredResourcesExactlyOnce(): Unit {
         for (mode in 0..3) {
             let lifecycle = openLifecycle()
@@ -263,7 +280,8 @@ private func throwsLifecycleCode(action: () -> Unit, expected: NetworkErrorCode)
 private func sameLifecycleCode(left: NetworkErrorCode, right: NetworkErrorCode): Bool {
     match ((left, right)) {
         case (NetworkErrorCode.InvalidState, NetworkErrorCode.InvalidState) |
-             (NetworkErrorCode.Closed, NetworkErrorCode.Closed) => true
+             (NetworkErrorCode.Closed, NetworkErrorCode.Closed) |
+             (NetworkErrorCode.ConcurrentOperation, NetworkErrorCode.ConcurrentOperation) => true
         case _ => false
     }
 }

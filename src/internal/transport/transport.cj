@@ -64,10 +64,26 @@ public struct TransportInfo {
 public interface DuplexTransport <: Resource {
     prop info: TransportInfo
 
+    /**
+     * Reads at most destination.length bytes. Empty destinations return
+     * Data(0) immediately; only a peer FIN is reported as EndOfStream.
+     * At most one read may be active, independently of one active write.
+     */
     func readSome(destination: MutableByteSpan, context!: OperationContext): ReadResult
+
+    /**
+     * Writes at most source.length bytes and may return a partial count. Empty
+     * sources return zero immediately. At most one write may be active.
+     */
     func writeSome(source: ByteSpan, context!: OperationContext): Int64
+
+    /** Closes only the selected direction and preserves the other direction. */
     func shutdown(direction: ShutdownDirection): Unit
+
+    /** Attempts graceful, idempotent completion without resetting context. */
     func close(context: OperationContext): Unit
+
+    /** Immediately and idempotently terminates both directions. */
     func abort(reason!: ?AbortReason): Unit
 }
 

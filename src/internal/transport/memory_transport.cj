@@ -8,18 +8,25 @@ public class MemoryTransport <: DuplexTransport {
     private let incoming: MemoryBytePipe
     private let outgoing: MemoryBytePipe
     private let maxChunk: Int64
-    private let lifecycleMutex = Mutex()
-    private var readActive = false
-    private var writeActive = false
-    private var readShutdown = false
-    private var writeShutdown = false
-    private var closed = false
-    private var aborted = false
+    private let lifecycle = TransportLifecycle()
 
     private init(incoming: MemoryBytePipe, outgoing: MemoryBytePipe, maxChunk: Int64) {
         this.incoming = incoming
         this.outgoing = outgoing
         this.maxChunk = maxChunk
+        lifecycle.markAccepted()
+        lifecycle.markOpen()
+        let _ = lifecycle.registerTerminalCleanup { =>
+            match (lifecycle.state) {
+                case TransportState.Closed =>
+                    outgoing.closeWriter()
+                    incoming.closeReader()
+                case TransportState.Aborted | TransportState.Failed =>
+                    incoming.abort()
+                    outgoing.abort()
+                case _ => ()
+            }
+        }
     }
 
     public static func pair(
@@ -51,14 +58,14 @@ public class MemoryTransport <: DuplexTransport {
         context!: OperationContext = OperationContext.background()
     ): ReadResult {
         preflight(context, NetworkErrorCategory.Read, NetworkPhase.TcpRead)
-        beginRead()
+        lifecycle.beginRead()
         try {
             if (destination.isEmpty()) {
                 return ReadResult.Data(0)
             }
             incoming.read(destination, context)
         } finally {
-            endRead()
+            lifecycle.endRead()
         }
     }
 
@@ -67,43 +74,26 @@ public class MemoryTransport <: DuplexTransport {
         context!: OperationContext = OperationContext.background()
     ): Int64 {
         preflight(context, NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
-        beginWrite()
+        lifecycle.beginWrite()
         try {
             if (source.isEmpty()) {
                 return 0
             }
             outgoing.write(source, min(maxChunk, source.length), context)
         } finally {
-            endWrite()
+            lifecycle.endWrite()
         }
     }
 
     public func shutdown(direction: ShutdownDirection): Unit {
+        if (!lifecycle.shutdown(direction)) { return }
         match (direction) {
-            case ShutdownDirection.Read =>
-                let changed = synchronized(lifecycleMutex) {
-                    if (readShutdown || closed || aborted) {
-                        false
-                    } else {
-                        readShutdown = true
-                        true
-                    }
-                }
-                if (changed) {
-                    incoming.closeReader()
-                }
-            case ShutdownDirection.Write =>
-                let changed = synchronized(lifecycleMutex) {
-                    if (writeShutdown || closed || aborted) {
-                        false
-                    } else {
-                        writeShutdown = true
-                        true
-                    }
-                }
-                if (changed) {
-                    outgoing.closeWriter()
-                }
+            case ShutdownDirection.Read => incoming.closeReader()
+            case ShutdownDirection.Write => outgoing.closeWriter()
+        }
+        match (lifecycle.state) {
+            case TransportState.Closing => let _ = lifecycle.markClosed()
+            case _ => ()
         }
     }
 
@@ -111,19 +101,8 @@ public class MemoryTransport <: DuplexTransport {
         // Closing this in-memory transport never waits. It must remain usable
         // as cleanup even when the operation budget has already expired.
         let _ = context
-        let changed = synchronized(lifecycleMutex) {
-            if (closed || aborted) {
-                false
-            } else {
-                closed = true
-                readShutdown = true
-                writeShutdown = true
-                true
-            }
-        }
-        if (changed) {
-            outgoing.closeWriter()
-            incoming.closeReader()
+        if (lifecycle.beginClose()) {
+            let _ = lifecycle.markClosed()
         }
     }
 
@@ -133,56 +112,11 @@ public class MemoryTransport <: DuplexTransport {
 
     public func abort(reason!: ?AbortReason = None<AbortReason>): Unit {
         let _ = reason
-        let changed = synchronized(lifecycleMutex) {
-            if (closed || aborted) {
-                false
-            } else {
-                aborted = true
-                readShutdown = true
-                writeShutdown = true
-                true
-            }
-        }
-        if (changed) {
-            incoming.abort()
-            outgoing.abort()
-        }
+        let _ = lifecycle.abort()
     }
 
     public func isClosed(): Bool {
-        synchronized(lifecycleMutex) { closed || aborted }
-    }
-
-    private func beginRead(): Unit {
-        synchronized(lifecycleMutex) {
-            if (readActive) {
-                throw concurrentOperation(NetworkErrorCategory.Read, NetworkPhase.TcpRead)
-            }
-            if (readShutdown || closed || aborted) {
-                throw closedOperation(NetworkErrorCategory.Read, NetworkPhase.TcpRead)
-            }
-            readActive = true
-        }
-    }
-
-    private func endRead(): Unit {
-        synchronized(lifecycleMutex) { readActive = false }
-    }
-
-    private func beginWrite(): Unit {
-        synchronized(lifecycleMutex) {
-            if (writeActive) {
-                throw concurrentOperation(NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
-            }
-            if (writeShutdown || closed || aborted) {
-                throw closedOperation(NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
-            }
-            writeActive = true
-        }
-    }
-
-    private func endWrite(): Unit {
-        synchronized(lifecycleMutex) { writeActive = false }
+        lifecycle.isTerminal
     }
 }
 
@@ -326,10 +260,6 @@ private func checkWaitContext(
     phase: NetworkPhase
 ): Unit {
     preflight(context, category, phase)
-}
-
-private func concurrentOperation(category: NetworkErrorCategory, phase: NetworkPhase): NetworkException {
-    NetworkException(category, phase, NetworkErrorCode.ConcurrentOperation, "same-direction operation already active")
 }
 
 private func closedOperation(category: NetworkErrorCategory, phase: NetworkPhase): NetworkException {

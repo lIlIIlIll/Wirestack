@@ -26,6 +26,26 @@ class MemoryTransportTest {
     }
 
     @TestCase
+    func emptyBuffersReturnZeroWithoutProducingEofOrPeerData(): Unit {
+        let (left, right) = MemoryTransport.pair()
+        match (left.readSome(MutableByteSpan(Array<Byte>(0, repeat: 0)))) {
+            case ReadResult.Data(count) => @Expect(count, 0)
+            case ReadResult.EndOfStream => @Expect(false)
+        }
+        @Expect(left.writeSome(ByteSpan(Array<Byte>(0, repeat: 0))), 0)
+
+        left.shutdown(ShutdownDirection.Write)
+        match (right.readSome(MutableByteSpan(Array<Byte>(0, repeat: 0)))) {
+            case ReadResult.Data(count) => @Expect(count, 0)
+            case ReadResult.EndOfStream => @Expect(false)
+        }
+        match (right.readSome(MutableByteSpan(Array<Byte>(1, repeat: 0)))) {
+            case ReadResult.EndOfStream => @Expect(true)
+            case ReadResult.Data(_) => @Expect(false)
+        }
+    }
+
+    @TestCase
     func writeShutdownProducesPeerEofAfterBufferedData(): Unit {
         let (left, right) = MemoryTransport.pair()
         @Expect(left.writeSome(ByteSpan([7, 8])), 2)

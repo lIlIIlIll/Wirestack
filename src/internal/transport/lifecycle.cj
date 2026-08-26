@@ -13,6 +13,8 @@ public class TransportLifecycle {
     private let mutex = Mutex()
     private let completion: OperationCompletion
     private var current = TransportState.Created
+    private var readActive = false
+    private var writeActive = false
 
     public prop state: TransportState { get() { synchronized(mutex) { current } } }
 
@@ -127,24 +129,64 @@ public class TransportLifecycle {
     /** Rejects reads before Open and after the read direction closes. */
     public func requireReadable(): Unit {
         synchronized(mutex) {
-            match (current) {
-                case TransportState.Open | TransportState.WriteHalfClosed => ()
-                case TransportState.Created | TransportState.Connecting | TransportState.Accepted =>
-                    throw invalidLifecycleOperation(NetworkErrorCategory.Read, NetworkPhase.TcpRead)
-                case _ => throw closedLifecycleOperation(NetworkErrorCategory.Read, NetworkPhase.TcpRead)
-            }
+            requireReadableLocked()
         }
     }
 
     /** Rejects writes before Open and after the write direction closes. */
     public func requireWritable(): Unit {
         synchronized(mutex) {
-            match (current) {
-                case TransportState.Open | TransportState.ReadHalfClosed => ()
-                case TransportState.Created | TransportState.Connecting | TransportState.Accepted =>
-                    throw invalidLifecycleOperation(NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
-                case _ => throw closedLifecycleOperation(NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
+            requireWritableLocked()
+        }
+    }
+
+    /** Atomically validates and claims the single allowed read operation. */
+    internal func beginRead(): Unit {
+        synchronized(mutex) {
+            requireReadableLocked()
+            if (readActive) {
+                throw concurrentLifecycleOperation(NetworkErrorCategory.Read, NetworkPhase.TcpRead)
             }
+            readActive = true
+        }
+    }
+
+    /** Releases the read claim acquired by beginRead. */
+    internal func endRead(): Unit {
+        synchronized(mutex) { readActive = false }
+    }
+
+    /** Atomically validates and claims the single allowed write operation. */
+    internal func beginWrite(): Unit {
+        synchronized(mutex) {
+            requireWritableLocked()
+            if (writeActive) {
+                throw concurrentLifecycleOperation(NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
+            }
+            writeActive = true
+        }
+    }
+
+    /** Releases the write claim acquired by beginWrite. */
+    internal func endWrite(): Unit {
+        synchronized(mutex) { writeActive = false }
+    }
+
+    private func requireReadableLocked(): Unit {
+        match (current) {
+            case TransportState.Open | TransportState.WriteHalfClosed => ()
+            case TransportState.Created | TransportState.Connecting | TransportState.Accepted =>
+                throw invalidLifecycleOperation(NetworkErrorCategory.Read, NetworkPhase.TcpRead)
+            case _ => throw closedLifecycleOperation(NetworkErrorCategory.Read, NetworkPhase.TcpRead)
+        }
+    }
+
+    private func requireWritableLocked(): Unit {
+        match (current) {
+            case TransportState.Open | TransportState.ReadHalfClosed => ()
+            case TransportState.Created | TransportState.Connecting | TransportState.Accepted =>
+                throw invalidLifecycleOperation(NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
+            case _ => throw closedLifecycleOperation(NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
         }
     }
 
@@ -195,6 +237,19 @@ private func closedLifecycleOperation(
         phase,
         NetworkErrorCode.Closed,
         "transport direction is closed",
+        retryability: Retryability.Never
+    )
+}
+
+private func concurrentLifecycleOperation(
+    category: NetworkErrorCategory,
+    phase: NetworkPhase
+): NetworkException {
+    NetworkException(
+        category,
+        phase,
+        NetworkErrorCode.ConcurrentOperation,
+        "same-direction transport operation already active",
         retryability: Retryability.Never
     )
 }
