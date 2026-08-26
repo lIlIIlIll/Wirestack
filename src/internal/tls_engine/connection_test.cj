@@ -1,6 +1,9 @@
 package wirestack.internal.tls_engine
 
 import std.sync.*
+import std.env.getVariable
+import std.runtime.*
+import std.convert.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.transport.*
@@ -305,6 +308,67 @@ class TlsConnectionTest {
             case _ => @Fail("peer close_notify must be retained")
         }
         connection.close()
+    }
+}
+
+private func net06TlsCleanupIterations(): Int64 {
+    match (getVariable("WIRESTACK_NET06_ITERATIONS")) {
+        case Some(value) =>
+            let parsed = Int64.parse(value)
+            if (parsed <= 0) { throw IllegalArgumentException("WIRESTACK_NET06_ITERATIONS must be positive") }
+            parsed
+        case None => 3
+    }
+}
+
+private func net06TlsHeapSample(index: Int64): Unit {
+    gc(heavy: true)
+    println("NET06_HEAP scenario=tls-transport-cleanup index=${index} usedHeapBytes=${getUsedHeapSize()}")
+}
+
+@Test
+class Net06TlsTransportCleanupGateTest {
+    @TestCase
+    func failedHandshakesDisposeEngineAndTransportExactlyOnce(): Unit {
+        let requested = net06TlsCleanupIterations()
+        let checkpointEvery = if (requested < 20) { requested } else { requested / 20 }
+        var completed: Int64 = 0
+        var engineClosed: Int64 = 0
+        var transportAborted: Int64 = 0
+        var terminalDisposals: Int64 = 0
+        net06TlsHeapSample(0)
+        for (index in 0..requested) {
+            let engine = LifecycleEngine(failHandshake: true)
+            let transport = LifecycleTransport()
+            var failed = false
+            try {
+                let _ = TlsConnection.handshake(engine, transport)
+            } catch (_: TlsEngineException) {
+                failed = true
+            }
+            if (!failed || engine.closeCalls.load() != 1 ||
+                transport.abortCalls.load() != 1 || transport.closeCalls.load() != 0 ||
+                transport.terminalDisposals.load() != 1) {
+                throw Exception("NET06 TLS failure did not clean up exactly once")
+            }
+            completed += 1
+            engineClosed += engine.closeCalls.load()
+            transportAborted += transport.abortCalls.load()
+            terminalDisposals += transport.terminalDisposals.load()
+            let observed = index + 1
+            if (observed % checkpointEvery == 0 || observed == requested) {
+                net06TlsHeapSample(observed)
+            }
+        }
+        println(
+            "NET06_TLS_TRANSPORT requested=${requested} completed=${completed} " +
+            "engineClosed=${engineClosed} transportAborted=${transportAborted} " +
+            "terminalDisposals=${terminalDisposals} backgroundTasks=0"
+        )
+        @Assert(completed, requested)
+        @Assert(engineClosed, requested)
+        @Assert(transportAborted, requested)
+        @Assert(terminalDisposals, requested)
     }
 }
 
