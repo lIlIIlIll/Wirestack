@@ -51,6 +51,7 @@ six-platform milestone.
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
 | M1-010 | COMPLETE | [`docs/evidence/M1-010/README.md`](../evidence/M1-010/README.md) | `DuplexTransport` semantics are frozen; lifecycle claims enforce one reader and one writer, and MemoryTransport proves empty-buffer, half-close, cancellation, deadline, close and abort behavior. |
+| M1-011 | COMPLETE | [`docs/evidence/M1-011/README.md`](../evidence/M1-011/README.md) | `writeAll` and `readExact` retain one absolute operation budget across partial I/O, reject invalid progress without spinning, preserve partial results, and distinguish premature EOF, cancellation and deadline failure. |
 
 ## Conditional upstream work
 

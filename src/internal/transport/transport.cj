@@ -98,7 +98,10 @@ public interface TransportFactory {
     func connect(endpoint: SocketEndpoint, context: OperationContext): DuplexTransport
 }
 
-/** Writes an entire span without resetting the caller's operation budget. */
+/**
+ * Writes an entire span through partial writes. Every attempt receives the
+ * original OperationContext, so retries never reset its absolute deadline.
+ */
 public func writeAll(
     transport: DuplexTransport,
     source: ByteSpan,
@@ -110,16 +113,20 @@ public func writeAll(
         if (written <= 0 || written > remaining.length) {
             throw NetworkException(
                 NetworkErrorCategory.System,
-                NetworkPhase.HttpBody,
+                NetworkPhase.TcpWrite,
                 NetworkErrorCode.SystemFailure,
-                "transport writeSome returned an invalid byte count"
+                "transport writeSome returned an invalid byte count",
+                retryability: Retryability.Never
             )
         }
         remaining = remaining.advance(written)
     }
 }
 
-/** Reads exactly one span or reports a structured premature EOF. */
+/**
+ * Reads exactly one span through partial reads. Every attempt receives the
+ * original OperationContext. Peer EOF before completion is UnexpectedEof.
+ */
 public func readExact(
     transport: DuplexTransport,
     destination: MutableByteSpan,
@@ -132,16 +139,17 @@ public func readExact(
                 if (count <= 0 || count > remaining.length) {
                     throw NetworkException(
                         NetworkErrorCategory.System,
-                        NetworkPhase.HttpBody,
+                        NetworkPhase.TcpRead,
                         NetworkErrorCode.SystemFailure,
-                        "transport readSome returned an invalid byte count"
+                        "transport readSome returned an invalid byte count",
+                        retryability: Retryability.Never
                     )
                 }
                 remaining = remaining.advance(count)
             case ReadResult.EndOfStream =>
                 throw NetworkException(
                     NetworkErrorCategory.Read,
-                    NetworkPhase.HttpBody,
+                    NetworkPhase.TcpRead,
                     NetworkErrorCode.UnexpectedEof,
                     "peer reached end of stream before the requested bytes were read",
                     retryability: Retryability.Never
