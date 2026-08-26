@@ -93,5 +93,14 @@ platform matrix.
 
 ## Later milestones
 
-M1 through M7 and P1 tasks remain blocked by their backlog dependencies. A Linux-only
-M0 result must not be generalized to the six-platform release matrix.
+M1 through M7 and P1 global completion remains blocked by backlog dependencies. A
+Linux-only result must not be generalized to the six-platform release matrix.
+
+The following M6 closure work is now formally tracked from the current Linux
+source audit; status here describes task readiness, not global milestone completion:
+
+| ID | Status | Evidence | Notes |
+|---|---|---|---|
+| M6-021 | READY | [`docs/planning/linux-status.md`](linux-status.md) | Public `HttpServer` lacks H2 ALPN dispatch and real TLS H2 server end-to-end evidence. |
+| M6-022 | BLOCKED | — | Depends on M6-021; public cancellation tokens exist, but typed request/connection/stream handles do not. |
+| M6-023 | BLOCKED | — | Depends on M6-021 and M6-022; finite streaming evidence does not prove SSE/unbounded cumulative steadiness. |
