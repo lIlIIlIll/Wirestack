@@ -71,9 +71,10 @@ class Http2ServerMappingTest {
         @Expect(buffer[0], b'c')
         exchange.acceptTrailers([HpackHeaderField("digest", "done")], true)
         @Expect(exchange.request.body.trailer.getOrThrow().headers.getFirst("digest"), Some("done"))
-        @Expect(fixture.sink.totalCredit(), 12)
+        @Expect(fixture.sink.totalCredit(), 0)
         @Expect(fixture.registry.activeCount, 1)
         exchange.finishLocal()
+        @Expect(fixture.sink.totalCredit(), 6)
         @Expect(fixture.registry.activeCount, 0)
         @Expect(fixture.flow.activeStreamCount, 0)
     }
@@ -132,6 +133,28 @@ class Http2ServerMappingTest {
     }
 
     @TestCase
+    func streamingResponseMayExceedTheConfiguredRequestBodyBound(): Unit {
+        let flow = Http2FlowController()
+        let id = Http2StreamId(1u32)
+        flow.openStream(id)
+        let response = HttpResponse(
+            200, "OK", ResponseBody(ServerStreamingSegments("abcd".toArray(), 2))
+        )
+        let plan = mapHttp2ServerResponse(
+            id, HttpMethod("GET"), Http2ServerResponse(response), flow,
+            limits: HttpLimits(maxBodyBytes: 2)
+        )
+        let body = plan.openBody()
+        let first = body.next()
+        @Expect(first.frame.getOrThrow().payload, "ab".toArray())
+        @Expect(first.beginData())
+        let second = body.next()
+        @Expect(second.frame.getOrThrow().payload, "cd".toArray())
+        @Expect(second.beginData())
+        @Expect(isServerEndData(body.next().kind))
+    }
+
+    @TestCase
     func responseRulesCloseBodiesOnEveryTerminalOrFailurePath(): Unit {
         let flow = Http2FlowController()
         let id = Http2StreamId(1u32)
@@ -175,6 +198,28 @@ private class EmptyServerHandler <: Http2ServerHandler {
         let _ = context
         Http2ServerResponse(HttpResponse(200, "OK", ResponseBody.empty()))
     }
+}
+
+private class ServerStreamingSegments <: HttpBodyStream {
+    private let bytes: Array<Byte>
+    private let segmentBytes: Int64
+    private var offset: Int64 = 0
+    private var closed = false
+    init(bytes: Array<Byte>, segmentBytes: Int64) {
+        this.bytes = bytes.clone()
+        this.segmentBytes = segmentBytes
+    }
+    public prop contentLength: ?Int64 { get() { None<Int64> } }
+    public func read(destination: Array<Byte>): Int64 {
+        if (closed) { throw IllegalStateException("streaming response is closed") }
+        if (destination.isEmpty() || offset == bytes.size) { return 0 }
+        let count = min(min(destination.size, bytes.size - offset), segmentBytes)
+        for (index in 0..count) { destination[index] = bytes[offset + index] }
+        offset += count
+        count
+    }
+    public func close(): Unit { closed = true }
+    public func isClosed(): Bool { closed }
 }
 
 private class RecordingServerSink <: Http2ServerControlSink {
@@ -279,6 +324,10 @@ private func isNeverIndexedServer(value: HpackIndexingMode): Bool {
 
 private func isServerData(value: Http2ServerBodyEventKind): Bool {
     match (value) { case Http2ServerBodyEventKind.Data => true; case _ => false }
+}
+
+private func isServerEndData(value: Http2ServerBodyEventKind): Bool {
+    match (value) { case Http2ServerBodyEventKind.EndData => true; case _ => false }
 }
 
 private func isServerTrailers(value: Http2ServerBodyEventKind): Bool {

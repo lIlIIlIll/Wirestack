@@ -148,6 +148,22 @@ class Http1ResponseReaderTest {
     }
 
     @TestCase
+    func chunkedStreamingResponseMayExceedThePerSegmentBodyBound(): Unit {
+        let (client, server) = MemoryTransport.pair(capacity: 2048, maxChunk: 3)
+        let serving = spawn {
+            writeAll(server, ByteSpan(
+                "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n".toArray()
+            ))
+            writeAll(server, ByteSpan("2\r\nab\r\n2\r\ncd\r\n0\r\n\r\n".toArray()))
+        }
+        let result = readHttp1Response(
+            client, HttpMethod("GET"), limits: HttpLimits(maxBodyBytes: 2)
+        )
+        @Expect(readReaderBody(result.response.body), "abcd")
+        serving.get(Duration.second)
+    }
+
+    @TestCase
     func prematureFixedBodyEofAbandonsResponseExactlyOnce(): Unit {
         let (client, server) = MemoryTransport.pair(capacity: 2048)
         writeAll(server, ByteSpan("HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\nno".toArray()))

@@ -6,6 +6,7 @@ import wirestack.internal.transport.*
 
 private const HTTP2_DEFAULT_WINDOW: Int64 = 65535
 private const HTTP2_MAX_WINDOW: Int64 = 2147483647
+private const HTTP2_CONNECTION_UPDATE_THRESHOLD: Int64 = HTTP2_DEFAULT_WINDOW / 2
 
 public enum Http2SendPermitState {
     | Reserved
@@ -77,6 +78,7 @@ public class Http2FlowController {
     private let permits = ArrayList<Http2SendPermit>()
     private var sendConnectionWindow: Int64 = HTTP2_DEFAULT_WINDOW
     private var receiveConnectionWindow: Int64 = HTTP2_DEFAULT_WINDOW
+    private var pendingConnectionReceiveCredit: Int64 = 0
     private var reservedConnectionBytes: Int64 = 0
     private var sendInitialStreamWindow: Int64 = HTTP2_DEFAULT_WINDOW
     private var receiveInitialStreamWindow: Int64 = HTTP2_DEFAULT_WINDOW
@@ -94,7 +96,13 @@ public class Http2FlowController {
     public prop pendingPermitCount: Int64 { get() { synchronized(mutex) { permits.size } } }
     public prop flowControlStalls: Int64 { get() { synchronized(mutex) { sendStallCount } } }
     public prop bufferedReceiveBytes: Int64 {
-        get() { synchronized(mutex) { HTTP2_DEFAULT_WINDOW - receiveConnectionWindow } }
+        get() {
+            synchronized(mutex) {
+                var total: Int64 = 0
+                for (stream in streams) { total += stream.bufferedReceiveBytes }
+                total
+            }
+        }
     }
 
     public init(limits!: Http2Limits = Http2Limits()) { this.limits = limits }
@@ -124,9 +132,13 @@ public class Http2FlowController {
             else {
                 let stream = streams.remove(at: index)
                 cancelStreamPermitsLocked(streamId)
-                receiveConnectionWindow += stream.bufferedReceiveBytes
+                // A stream boundary is a natural flush point for all coalesced
+                // connection credit, including credit consumed on other streams.
+                let returned = stream.bufferedReceiveBytes + pendingConnectionReceiveCredit
+                pendingConnectionReceiveCredit = 0
+                receiveConnectionWindow += returned
                 changed.notifyAll()
-                stream.bufferedReceiveBytes
+                returned
             }
         }
         if (discarded == 0) { [] }
@@ -142,6 +154,7 @@ public class Http2FlowController {
             permits.clear()
             streams.clear()
             reservedConnectionBytes = 0
+            pendingConnectionReceiveCredit = 0
             changed.notifyAll()
         }
     }
@@ -284,10 +297,28 @@ public class Http2FlowController {
     }
 
     /**
-     * Returns exact connection and stream credit only after application
-     * consumption. No body bytes or deferred update queue are retained here.
+     * Returns credit only after application consumption and coalesces small
+     * reads until half-window thresholds. This bounds WINDOW_UPDATE pressure
+     * without retaining body bytes or delaying a peer once useful credit is
+     * available.
      */
     public func consumeReceived(streamId: Http2StreamId, bytes: Int64): Array<Http2Frame> {
+        consumeReceivedWithPolicy(streamId, bytes, false)
+    }
+
+    /**
+     * Returns consumed credit immediately when an application discards a body.
+     * This prevents an abandoned stream from withholding connection capacity.
+     */
+    internal func consumeReceivedNow(streamId: Http2StreamId, bytes: Int64): Array<Http2Frame> {
+        consumeReceivedWithPolicy(streamId, bytes, true)
+    }
+
+    private func consumeReceivedWithPolicy(
+        streamId: Http2StreamId,
+        bytes: Int64,
+        force: Bool
+    ): Array<Http2Frame> {
         requirePositiveFlowBytes(bytes)
         synchronized(mutex) {
             requireFlowOpenLocked()
@@ -295,17 +326,36 @@ public class Http2FlowController {
             if (bytes > stream.bufferedReceiveBytes) {
                 throw IllegalArgumentException("HTTP/2 cannot consume more DATA than was received")
             }
-            if (receiveConnectionWindow > HTTP2_MAX_WINDOW - bytes ||
-                stream.receiveWindow > HTTP2_MAX_WINDOW - bytes) {
+            if (pendingConnectionReceiveCredit > HTTP2_MAX_WINDOW - bytes ||
+                stream.pendingReceiveCredit > HTTP2_MAX_WINDOW - bytes) {
                 throw IllegalStateException("HTTP/2 receive credit accounting overflow")
             }
             stream.bufferedReceiveBytes -= bytes
-            receiveConnectionWindow += bytes
-            stream.receiveWindow += bytes
-            [
-                encodeHttp2WindowUpdate(Http2StreamId(0u32), UInt32(bytes), limits: limits),
-                encodeHttp2WindowUpdate(streamId, UInt32(bytes), limits: limits)
-            ]
+            pendingConnectionReceiveCredit += bytes
+            stream.pendingReceiveCredit += bytes
+            let updates = ArrayList<Http2Frame>()
+            let streamThreshold = max(1, receiveInitialStreamWindow / 2)
+            if (force || stream.pendingReceiveCredit >= streamThreshold) {
+                let credit = stream.pendingReceiveCredit
+                if (stream.receiveWindow > HTTP2_MAX_WINDOW - credit) {
+                    throw IllegalStateException("HTTP/2 stream receive credit accounting overflow")
+                }
+                stream.receiveWindow += credit
+                stream.pendingReceiveCredit = 0
+                updates.add(encodeHttp2WindowUpdate(streamId, UInt32(credit), limits: limits))
+            }
+            if (force || pendingConnectionReceiveCredit >= HTTP2_CONNECTION_UPDATE_THRESHOLD) {
+                let credit = pendingConnectionReceiveCredit
+                if (receiveConnectionWindow > HTTP2_MAX_WINDOW - credit) {
+                    throw IllegalStateException("HTTP/2 connection receive credit accounting overflow")
+                }
+                receiveConnectionWindow += credit
+                pendingConnectionReceiveCredit = 0
+                updates.add(encodeHttp2WindowUpdate(
+                    Http2StreamId(0u32), UInt32(credit), limits: limits
+                ))
+            }
+            updates.toArray()
         }
     }
 
@@ -440,6 +490,7 @@ private class Http2FlowStream {
     var receiveWindow: Int64
     var reservedSendBytes: Int64 = 0
     var bufferedReceiveBytes: Int64 = 0
+    var pendingReceiveCredit: Int64 = 0
 
     init(id: Http2StreamId, sendWindow: Int64, receiveWindow: Int64) {
         this.id = id

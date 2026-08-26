@@ -223,6 +223,16 @@ class Http2ClientMappingTest {
     }
 
     @TestCase
+    func streamingResponseMayExceedTheConfiguredRequestBodyBound(): Unit {
+        let sequence = Http2ClientResponseSequence(
+            Http2StreamId(1u32), HttpMethod("GET"), limits: HttpLimits(maxBodyBytes: 2)
+        )
+        let _ = sequence.acceptHeaders([HpackHeaderField(":status", "200")], false)
+        sequence.acceptData(2, false)
+        sequence.acceptData(2, true)
+    }
+
+    @TestCase
     func bodylessAndConnectResponseRulesAreExplicit(): Unit {
         let head = Http2ClientResponseSequence(Http2StreamId(1u32), HttpMethod("HEAD"))
         let event = head.acceptHeaders([
