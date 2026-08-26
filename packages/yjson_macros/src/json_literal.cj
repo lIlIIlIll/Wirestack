@@ -401,7 +401,7 @@ private class JsonDslRenderer {
         let builder = StringBuilder()
         jsonDslAppendLine(builder, 0, "({ =>")
         renderBindings(document.bindings, builder, 1)
-        jsonDslAppendLine(builder, 1, "let __yjson_literal_writer = JsonDirectWriter()")
+        jsonDslAppendLine(builder, 1, "let __yjson_literal_writer = GeneratedSupportV1.newWriter()")
         jsonDslAppendLine(builder, 1, "let __yjson_literal_context = JsonEncodeContext(JsonWriteConfig.compact)")
         renderDirect(document.root, builder, 1)
         jsonDslAppendLine(builder, 1, "__yjson_literal_writer.finishString()")

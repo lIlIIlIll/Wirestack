@@ -10,6 +10,14 @@
 #include <immintrin.h>
 #endif
 
+uint32_t YJ_JSON_ProbeV1(void)
+{
+    /* Every required primitive is compiled into this translation unit. The
+     * versioned probe is the single initialization handshake; changing the
+     * bundle ABI requires a new probe symbol and value. */
+    return YJ_JSON_ACCEL_PROBE_V1;
+}
+
 double YJ_JSON_ParseDouble(const uint8_t* input, int64_t len,
     int64_t start, int64_t tokenLength)
 {
@@ -71,6 +79,53 @@ int32_t YJ_JSON_EscapeString(const uint8_t* input, int64_t len, uint8_t htmlSafe
     }
     YJ_WRITE_BYTE('"');
 #undef YJ_WRITE_BYTE
+    *outWritten = written;
+    return YJ_JSON_SCAN_OK;
+}
+
+static int32_t yj_json_write_int64(uint8_t* output, int64_t outputCap,
+    int64_t* written, int64_t value)
+{
+    uint8_t digits[20];
+    int32_t count = 0;
+    uint64_t magnitude;
+    if (value < 0) {
+        if (*written >= outputCap) return YJ_JSON_SCAN_CAPACITY;
+        output[(*written)++] = '-';
+        magnitude = (uint64_t)(-(value + 1)) + 1u;
+    } else {
+        magnitude = (uint64_t)value;
+    }
+    do {
+        digits[count++] = (uint8_t)('0' + (magnitude % 10u));
+        magnitude /= 10u;
+    } while (magnitude != 0u);
+    if (*written > outputCap - count) return YJ_JSON_SCAN_CAPACITY;
+    while (count > 0) output[(*written)++] = digits[--count];
+    return YJ_JSON_SCAN_OK;
+}
+
+int32_t YJ_JSON_FormatInt64Array(const int64_t* values, int64_t count,
+    uint8_t* output, int64_t outputCap, int64_t outputOffset,
+    int64_t* outWritten)
+{
+    if (values == NULL || output == NULL || outWritten == NULL || count < 0 ||
+        outputOffset < 0 || outputOffset > outputCap ||
+        outputCap - outputOffset < 2) return YJ_JSON_SCAN_ERROR;
+    output += outputOffset;
+    outputCap -= outputOffset;
+    int64_t written = 0;
+    output[written++] = '[';
+    for (int64_t index = 0; index < count; ++index) {
+        if (index > 0) {
+            if (written >= outputCap) return YJ_JSON_SCAN_CAPACITY;
+            output[written++] = ',';
+        }
+        int32_t status = yj_json_write_int64(output, outputCap, &written, values[index]);
+        if (status != YJ_JSON_SCAN_OK) return status;
+    }
+    if (written >= outputCap) return YJ_JSON_SCAN_CAPACITY;
+    output[written++] = ']';
     *outWritten = written;
     return YJ_JSON_SCAN_OK;
 }
@@ -734,6 +789,84 @@ static int32_t finish_status(YjParser* parser, int32_t status, int64_t* outError
         *outError = parser->error >= 0 ? parser->error : parser->pos;
     }
     return status;
+}
+
+int32_t YJ_JSON_ParseInt64Array(
+    const uint8_t* input, int64_t len, int64_t start,
+    int64_t* values, int64_t valueCap,
+    int64_t* outEnd, int64_t* outCount, int64_t* outError)
+{
+    if (input == NULL || values == NULL || outEnd == NULL || outCount == NULL ||
+        outError == NULL || start < 0 || start > len || valueCap < 0) {
+        if (outError != NULL) *outError = start;
+        return YJ_JSON_SCAN_ERROR;
+    }
+    YjParser parser = make_parser(input, len, start, 0u);
+    skip_ws(&parser);
+    if (parser.pos >= parser.len || parser.data[parser.pos] != '[') {
+        *outError = parser.pos;
+        return YJ_JSON_SCAN_FALLBACK;
+    }
+    parser.pos++;
+    skip_ws(&parser);
+    int64_t count = 0;
+    if (parser.pos < parser.len && parser.data[parser.pos] == ']') {
+        parser.pos++;
+        *outEnd = parser.pos; *outCount = 0; *outError = -1;
+        return YJ_JSON_SCAN_OK;
+    }
+    while (parser.pos < parser.len) {
+        if (count >= valueCap) {
+            *outError = count + 1;
+            return YJ_JSON_SCAN_CAPACITY;
+        }
+        int32_t negative = parser.data[parser.pos] == '-';
+        if (negative) parser.pos++;
+        if (parser.pos >= parser.len || !is_digit(parser.data[parser.pos])) {
+            *outError = parser.pos;
+            return YJ_JSON_SCAN_FALLBACK;
+        }
+        uint64_t magnitude = 0;
+        const uint64_t limit = negative ? UINT64_C(9223372036854775808) : UINT64_C(9223372036854775807);
+        if (parser.data[parser.pos] == '0') {
+            parser.pos++;
+            if (parser.pos < parser.len && is_digit(parser.data[parser.pos])) {
+                *outError = parser.pos;
+                return YJ_JSON_SCAN_FALLBACK;
+            }
+        } else {
+            while (parser.pos < parser.len && is_digit(parser.data[parser.pos])) {
+                uint64_t digit = (uint64_t)(parser.data[parser.pos] - '0');
+                if (magnitude > (limit - digit) / 10u) {
+                    *outError = parser.pos;
+                    return YJ_JSON_SCAN_FALLBACK;
+                }
+                magnitude = magnitude * 10u + digit;
+                parser.pos++;
+            }
+        }
+        if (negative) {
+            values[count] = magnitude == UINT64_C(9223372036854775808)
+                ? INT64_MIN : -(int64_t)magnitude;
+        } else {
+            values[count] = (int64_t)magnitude;
+        }
+        count++;
+        skip_ws(&parser);
+        if (parser.pos < parser.len && parser.data[parser.pos] == ']') {
+            parser.pos++;
+            *outEnd = parser.pos; *outCount = count; *outError = -1;
+            return YJ_JSON_SCAN_OK;
+        }
+        if (parser.pos >= parser.len || parser.data[parser.pos] != ',') {
+            *outError = parser.pos;
+            return YJ_JSON_SCAN_FALLBACK;
+        }
+        parser.pos++;
+        skip_ws(&parser);
+    }
+    *outError = parser.pos;
+    return YJ_JSON_SCAN_FALLBACK;
 }
 
 int32_t YJ_JSON_SkipValue(

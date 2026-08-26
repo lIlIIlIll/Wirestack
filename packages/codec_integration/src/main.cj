@@ -1,5 +1,6 @@
 package yjson_codec_integration
 
+import std.collection.*
 import yjson_all.*
 
 private func require(condition: Bool, message: String): Unit {
@@ -68,6 +69,15 @@ main(): Unit {
     let user = YJson.fromJson<ExternalUser>(userJson)
     require(userJson == "{\"id\":7,\"name\":\"Alice\"}", "unexpected user JSON")
     require(user.id == 7 && user.name == "Alice", "user roundtrip failed")
+
+    let users = ArrayList<ExternalUser>([ExternalUser(8, "Bob"), ExternalUser(9, "Lin")])
+    let usersJson = YJson.toJson(users)
+    let nested = YJson.fromJson<ArrayList<HashMap<String, ArrayList<ExternalUser>>>>(
+        "[{\"team\":${usersJson}}]")
+    let nestedUsers = nested[0].get("team")
+    require(nestedUsers.isSome(), "recursive generated container key missing")
+    require(nestedUsers.getOrThrow()[1].name == "Lin",
+        "recursive generated container roundtrip failed")
 
     let userDecoder = YJson.fastDecoder(ExternalUserJson)
     let fastUser = userDecoder.decodeString(userJson)

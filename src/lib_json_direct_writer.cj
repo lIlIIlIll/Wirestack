@@ -5,6 +5,8 @@ import std.io.*
 
 const JSON_DIRECT_BYTES_INITIAL_CAPACITY: Int64 = 256
 const JSON_DIRECT_PRETTY_STRING_INITIAL_CAPACITY: Int64 = 512
+const JSON_STREAM_BUFFER_CAPACITY: Int64 = 4096
+const JSON_STREAM_DIRECT_WRITE_THRESHOLD: Int64 = 2048
 const JSON_DIRECT_INT64_MAP_ENTRY_RESERVE_HINT: Int64 = 8
 const JSON_DIRECT_INT64_MAP_RESERVE_LIMIT: Int64 = 4096
 
@@ -86,7 +88,11 @@ abstract class JsonDirectWriterTarget {
 
     protected func writeBytes(value: Array<Byte>): Unit
 
+    protected func writeBytesRange(value: Array<Byte>, start: Int64, end: Int64): Unit
+
     protected func reserveCapacity(additional: Int64): Unit
+
+    protected func tryWriteNativeInt64Array(values: ArrayList<Int64>): Bool
 
     protected func writeStringLiteralNoEscape(value: String): Unit
 
@@ -190,10 +196,29 @@ class DirectStringWriterTarget <: JsonDirectWriterTarget {
         used += value.size
     }
 
+    public func writeBytesRange(value: Array<Byte>, start: Int64, end: Int64): Unit {
+        let size = end - start
+        if (size <= 0) { return }
+        ensureCapacity(used + size)
+        value.copyTo(buffer, start, used, size)
+        used += size
+    }
+
     public func reserveCapacity(additional: Int64): Unit {
         if (additional > 0) {
             ensureCapacity(used + additional)
         }
+    }
+
+    public func tryWriteNativeInt64Array(values: ArrayList<Int64>): Bool {
+        if (values.size < YJSON_NATIVE_MIN_WRITER_INT64_COUNT) { return false }
+        let required = values.size * 21 + 1
+        ensureCapacity(used + required)
+        if (let Some(written) <- jsonNativeFormatInt64ArrayInto(values, buffer, used)) {
+            used += written
+            return true
+        }
+        false
     }
 
     public func writeStringLiteralNoEscape(value: String): Unit {
@@ -656,10 +681,29 @@ class DirectBytesWriterTarget <: JsonDirectWriterTarget {
         used += value.size
     }
 
+    public func writeBytesRange(value: Array<Byte>, start: Int64, end: Int64): Unit {
+        let size = end - start
+        if (size <= 0) { return }
+        ensureCapacity(used + size)
+        value.copyTo(buffer, start, used, size)
+        used += size
+    }
+
     public func reserveCapacity(additional: Int64): Unit {
         if (additional > 0) {
             ensureCapacity(used + additional)
         }
+    }
+
+    public func tryWriteNativeInt64Array(values: ArrayList<Int64>): Bool {
+        if (values.size < YJSON_NATIVE_MIN_WRITER_INT64_COUNT) { return false }
+        let required = values.size * 21 + 1
+        ensureCapacity(used + required)
+        if (let Some(written) <- jsonNativeFormatInt64ArrayInto(values, buffer, used)) {
+            used += written
+            return true
+        }
+        false
     }
 
     public func writeStringLiteralNoEscape(value: String): Unit {
@@ -1147,11 +1191,27 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
         used += value.size
     }
 
+    public func writeBytesRange(value: Array<Byte>, start: Int64, end: Int64): Unit {
+        let size = end - start
+        if (size <= 0) { return }
+        if (size >= JSON_STREAM_DIRECT_WRITE_THRESHOLD) {
+            flushBuffer()
+            out.write(value[start..end])
+            committed += size
+            return
+        }
+        if (used + size > buffer.size) { flushBuffer() }
+        value.copyTo(buffer, start, used, size)
+        used += size
+    }
+
     public func reserveCapacity(additional: Int64): Unit {
         if (additional > 0 && additional < buffer.size) {
             ensureBufferedCapacity(additional)
         }
     }
+
+    public func tryWriteNativeInt64Array(_values: ArrayList<Int64>): Bool { false }
 
     public func writeStringLiteralNoEscape(value: String): Unit {
         writeRawByte(b'"')
@@ -1510,7 +1570,7 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
 
 }
 
-public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
+public class JsonDirectWriter <: GeneratedSupportV1Writer {
     private static let ARRAY_FIRST: UInt8 = 0x1
     private static let ARRAY_NEXT: UInt8 = 0x0
     private static let OBJECT_FIRST: UInt8 = 0x3
@@ -1600,7 +1660,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         contexts.isEmpty() && !multiline && !config.useSpaceAfterSeparators && !config.htmlSafe
     }
 
-    func tryBeginGeneratedCompactRawValue(): Bool {
+    public func tryBeginGeneratedCompactRawValue(): Bool {
         if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
             return false
         }
@@ -1620,23 +1680,23 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         target.writeText(value)
     }
 
-    func writeRawByte(value: Byte): Unit {
+    public func writeRawByte(value: Byte): Unit {
         target.writeByte(value)
     }
 
-    func writeRawBeginArray(): Unit {
+    public func writeRawBeginArray(): Unit {
         target.writeByte(b'[')
     }
 
-    func writeRawEndArray(): Unit {
+    public func writeRawEndArray(): Unit {
         target.writeByte(b']')
     }
 
-    func writeRawBeginObject(): Unit {
+    public func writeRawBeginObject(): Unit {
         target.writeByte(b'{')
     }
 
-    func writeRawEndObject(): Unit {
+    public func writeRawEndObject(): Unit {
         target.writeByte(b'}')
     }
 
@@ -1654,7 +1714,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         }
     }
 
-    func writeRawObjectEntryName(first: Bool, value: String): Bool {
+    public func writeRawObjectEntryName(first: Bool, value: String): Bool {
         if (!first) {
             target.writeByte(b',')
         }
@@ -1662,7 +1722,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         false
     }
 
-    func writeRawObjectEntryNameString(first: Bool, name: String, value: String): Bool {
+    public func writeRawObjectEntryNameString(first: Bool, name: String, value: String): Bool {
         if (!first) {
             target.writeByte(b',')
         }
@@ -1671,7 +1731,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         false
     }
 
-    func writeRawObjectEntryNameInt64(first: Bool, name: String, value: Int64): Bool {
+    public func writeRawObjectEntryNameInt64(first: Bool, name: String, value: Int64): Bool {
         let firstEscape = firstStringEscapeIndex(name)
         if (firstEscape < 0) {
             return target.writeObjectEntryNameInt64NoEscape(first, name, value)
@@ -1684,7 +1744,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         false
     }
 
-    func writeRawObjectEntryNameBool(first: Bool, name: String, value: Bool): Bool {
+    public func writeRawObjectEntryNameBool(first: Bool, name: String, value: Bool): Bool {
         if (!first) {
             target.writeByte(b',')
         }
@@ -1777,6 +1837,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
             return false
         }
         beforeValue()
+        if (target.tryWriteNativeInt64Array(values)) { return true }
         var totalValueSize: Int64 = 0
         for (item in values) {
             totalValueSize += jsonRawInt64Size(item)
@@ -1896,7 +1957,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         writeStringLiteralName(value)
     }
 
-    func writeRawNull(): Unit {
+    public func writeRawNull(): Unit {
         target.writeText("null")
     }
 

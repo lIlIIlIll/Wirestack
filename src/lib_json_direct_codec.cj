@@ -122,7 +122,7 @@ public interface JsonAnyCodec {
 
     func readAny(reader: JsonCodecReader, context: JsonDecodeContext): Any
 
-    func readAnyFast(reader: JsonFastReader, context: JsonDecodeContext): Any
+    func readAnyFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): Any
 }
 
 public interface JsonCodecProvider {
@@ -148,7 +148,7 @@ private class ErasedJsonCodec<T> <: JsonAnyCodec {
         codec.read(reader, context)
     }
 
-    public func readAnyFast(reader: JsonFastReader, context: JsonDecodeContext): Any {
+    public func readAnyFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): Any {
         match (codec) {
             case fast: JsonFastCodec<T> => fast.readFast(reader, context)
             case _ => throw JsonException("Codec does not provide a fast-reader implementation", code: "codec_contract",
@@ -180,7 +180,7 @@ private class ReifiedJsonCodec<T> <: JsonCodec<T> {
         }
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): T {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T {
         match (codec.readAnyFast(reader, context)) {
             case typed: T => typed
             case _ => throw JsonException("Decoded value type mismatch", code: "codec_type_mismatch",
@@ -210,26 +210,26 @@ public func jsonCodecOf<T>(): JsonCodec<T> where T <: JsonCodecProvider {
 
 // Kept as an internal optimization surface for the existing built-in codecs.
 public interface JsonFastCodec<T> <: JsonCodec<T> {
-    func readFast(reader: JsonFastReader, context: JsonDecodeContext): T
+    func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T
 }
 
 /// Matching-version bridge used by generated codecs to retain the concrete
 /// direct-writer type across nested semantic encode calls.
 public interface JsonDirectWriteCodec<T> <: JsonCodec<T> {
-    func writeDirect(value: T, writer: JsonDirectWriter, context: JsonEncodeContext): Unit
+    func writeDirect(value: T, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit
 }
 
 /// Matching-version generated-code bridge for objects whose fields can be
 /// emitted directly in compact mode without bypassing encode context checks.
 public interface JsonCompactRawCodec<T> <: JsonDirectWriteCodec<T> {
     func supportsCompactRaw(): Bool
-    func writeCompactRaw(value: T, writer: JsonDirectWriter, context: JsonEncodeContext): Unit
+    func writeCompactRaw(value: T, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit
 }
 
 public func writeJsonDirectWith<T>(
     codec: JsonCodec<T>,
     value: T,
-    writer: JsonDirectWriter,
+    writer: GeneratedSupportV1Writer,
     context: JsonEncodeContext
 ): Unit {
     match (codec) {
@@ -238,32 +238,32 @@ public func writeJsonDirectWith<T>(
     }
 }
 
-public func jsonTryBeginGeneratedCompactRawValue(writer: JsonDirectWriter): Bool {
+public func jsonTryBeginGeneratedCompactRawValue(writer: GeneratedSupportV1Writer): Bool {
     writer.tryBeginGeneratedCompactRawValue()
 }
 
-public func jsonWriteGeneratedCompactObjectBegin(writer: JsonDirectWriter): Unit {
+public func jsonWriteGeneratedCompactObjectBegin(writer: GeneratedSupportV1Writer): Unit {
     writer.writeRawBeginObject()
 }
 
-public func jsonWriteGeneratedCompactObjectEnd(writer: JsonDirectWriter): Unit {
+public func jsonWriteGeneratedCompactObjectEnd(writer: GeneratedSupportV1Writer): Unit {
     writer.writeRawEndObject()
 }
 
-public func jsonWriteGeneratedCompactArrayBegin(writer: JsonDirectWriter): Unit {
+public func jsonWriteGeneratedCompactArrayBegin(writer: GeneratedSupportV1Writer): Unit {
     writer.writeRawBeginArray()
 }
 
-public func jsonWriteGeneratedCompactArrayEnd(writer: JsonDirectWriter): Unit {
+public func jsonWriteGeneratedCompactArrayEnd(writer: GeneratedSupportV1Writer): Unit {
     writer.writeRawEndArray()
 }
 
-public func jsonWriteGeneratedCompactComma(writer: JsonDirectWriter): Unit {
+public func jsonWriteGeneratedCompactComma(writer: GeneratedSupportV1Writer): Unit {
     writer.writeRawByte(b',')
 }
 
 public func jsonWriteGeneratedCompactObjectEntryName(
-    writer: JsonDirectWriter,
+    writer: GeneratedSupportV1Writer,
     first: Bool,
     name: String
 ): Bool {
@@ -271,7 +271,7 @@ public func jsonWriteGeneratedCompactObjectEntryName(
 }
 
 public func jsonWriteGeneratedCompactObjectEntryString(
-    writer: JsonDirectWriter,
+    writer: GeneratedSupportV1Writer,
     first: Bool,
     name: String,
     value: String
@@ -280,7 +280,7 @@ public func jsonWriteGeneratedCompactObjectEntryString(
 }
 
 public func jsonWriteGeneratedCompactObjectEntryBool(
-    writer: JsonDirectWriter,
+    writer: GeneratedSupportV1Writer,
     first: Bool,
     name: String,
     value: Bool
@@ -289,7 +289,7 @@ public func jsonWriteGeneratedCompactObjectEntryBool(
 }
 
 public func jsonWriteGeneratedCompactObjectEntryInt64(
-    writer: JsonDirectWriter,
+    writer: GeneratedSupportV1Writer,
     first: Bool,
     name: String,
     value: Int64
@@ -313,15 +313,15 @@ public interface JsonFastDecoder<T> {
 }
 
 public interface JsonArrayListFastCodec<T> <: JsonFastCodec<T> {
-    func readFastArrayList(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<T>
+    func readFastArrayList(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): ArrayList<T>
 }
 
 interface JsonRawWriteCodec<T> <: JsonCodec<T> {
-    func writeRaw(value: T, writer: JsonDirectWriter): Unit
+    func writeRaw(value: T, writer: GeneratedSupportV1Writer): Unit
 }
 
 interface JsonArrayListRawWriteCodec<T> <: JsonArrayListFastCodec<T> {
-    func writeRawArrayList(value: ArrayList<T>, writer: JsonDirectWriter): Unit
+    func writeRawArrayList(value: ArrayList<T>, writer: GeneratedSupportV1Writer): Unit
 }
 
 public class JsonEncodeContext {
@@ -600,9 +600,9 @@ class LambdaYJsonCodec<T> <: JsonFastCodec<T> {
         readerFn(reader)
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): T {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T {
         let _ = context
-        fastReaderFn(reader)
+        fastReaderFn(yJsonGeneratedReaderV1(reader))
     }
 }
 
@@ -637,8 +637,8 @@ class LambdaFastRawJsonCodec<T> <: JsonFastCodec<T> & JsonRawWriteCodec<T> {
         }
     }
 
-    public func writeRaw(value: T, writer: JsonDirectWriter): Unit {
-        rawWriterFn(value, writer)
+    public func writeRaw(value: T, writer: GeneratedSupportV1Writer): Unit {
+        rawWriterFn(value, yJsonGeneratedWriterV1(writer))
     }
 
     public func read(reader: JsonCodecReader, context: JsonDecodeContext): T {
@@ -646,13 +646,13 @@ class LambdaFastRawJsonCodec<T> <: JsonFastCodec<T> & JsonRawWriteCodec<T> {
         readerFn(reader)
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): T {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T {
         let _ = context
-        fastReaderFn(reader)
+        fastReaderFn(yJsonGeneratedReaderV1(reader))
     }
 }
 
-public func readJsonFastWith<T>(codec: JsonCodec<T>, reader: JsonFastReader, context: JsonDecodeContext): T {
+public func readJsonFastWith<T>(codec: JsonCodec<T>, reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T {
     match (codec) {
         case reified: ReifiedJsonCodec<T> => reified.readFast(reader, context)
         case fast: JsonFastCodec<T> => fast.readFast(reader, context)
@@ -676,7 +676,7 @@ private class ReifiedFastCodecAdapter<T> <: JsonFastCodec<T> {
         inner.read(reader, context)
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): T {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T {
         inner.readFast(reader, context)
     }
 }
@@ -696,7 +696,7 @@ private class ContractFastCodecAdapter<T> <: JsonFastCodec<T> {
         inner.read(reader, context)
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): T {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T {
         readJsonFastWith(inner, reader, context)
     }
 }
@@ -739,7 +739,7 @@ private class OptionJsonCodec<T> <: JsonFastCodec<Option<T>> & JsonCompactRawCod
         }
     }
 
-    public func writeDirect(value: Option<T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
+    public func writeDirect(value: Option<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
         if (supportsCompactRaw() && jsonTryBeginGeneratedCompactRawValue(writer)) {
             writeCompactRaw(value, writer, context)
             return
@@ -761,7 +761,7 @@ private class OptionJsonCodec<T> <: JsonFastCodec<Option<T>> & JsonCompactRawCod
         }
     }
 
-    public func writeCompactRaw(value: Option<T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
+    public func writeCompactRaw(value: Option<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
         match (value) {
             case Some(item) =>
                 match (compactRawInner) {
@@ -779,7 +779,7 @@ private class OptionJsonCodec<T> <: JsonFastCodec<Option<T>> & JsonCompactRawCod
         Some(inner.read(reader, context))
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): Option<T> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): Option<T> {
         if (reader.tryReadRawNull()) {
             return None<T>
         }
@@ -804,7 +804,7 @@ private class StringOptionJsonCodec <: JsonFastCodec<Option<String>> {
         Some(reader.readString())
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): Option<String> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): Option<String> {
         let _ = context
         if (reader.tryReadRawNull()) {
             return None<String>
@@ -861,7 +861,7 @@ private class ArrayJsonCodec<T> <: JsonFastCodec<Array<T>> & JsonCompactRawCodec
         }
     }
 
-    public func writeDirect(value: Array<T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
+    public func writeDirect(value: Array<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
         if (supportsCompactRaw() && jsonTryBeginGeneratedCompactRawValue(writer)) {
             writeCompactRaw(value, writer, context)
             return
@@ -898,7 +898,7 @@ private class ArrayJsonCodec<T> <: JsonFastCodec<Array<T>> & JsonCompactRawCodec
         }
     }
 
-    public func writeCompactRaw(value: Array<T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
+    public func writeCompactRaw(value: Array<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
         context.enterValue()
         try {
             jsonWriteGeneratedCompactArrayBegin(writer)
@@ -947,7 +947,7 @@ private class ArrayJsonCodec<T> <: JsonFastCodec<Array<T>> & JsonCompactRawCodec
         }
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): Array<T> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): Array<T> {
         context.enterValue()
         try {
             reader.startRawArray()
@@ -1040,7 +1040,7 @@ private class ArrayListJsonCodec<T> <: JsonFastCodec<ArrayList<T>> & JsonCompact
         }
     }
 
-    public func writeDirect(value: ArrayList<T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
+    public func writeDirect(value: ArrayList<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
         if (supportsCompactRaw() && jsonTryBeginGeneratedCompactRawValue(writer)) {
             writeCompactRaw(value, writer, context)
             return
@@ -1079,7 +1079,7 @@ private class ArrayListJsonCodec<T> <: JsonFastCodec<ArrayList<T>> & JsonCompact
         }
     }
 
-    public func writeCompactRaw(value: ArrayList<T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
+    public func writeCompactRaw(value: ArrayList<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
         context.enterValue()
         try {
             jsonWriteGeneratedCompactArrayBegin(writer)
@@ -1130,7 +1130,7 @@ private class ArrayListJsonCodec<T> <: JsonFastCodec<ArrayList<T>> & JsonCompact
         }
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<T> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): ArrayList<T> {
         context.enterValue()
         try {
             reader.startRawArray()
@@ -1192,9 +1192,12 @@ private class Int64ArrayListJsonCodec <: JsonFastCodec<ArrayList<Int64>> {
     public func read(reader: JsonCodecReader, context: JsonDecodeContext): ArrayList<Int64> {
         ArrayListJsonCodec<Int64>(Int64Json).read(reader, context)
     }
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<Int64> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): ArrayList<Int64> {
         context.enterValue()
         try {
+            if (let Some(result) <- yJsonTryReadNativeInt64ArrayListV1(reader)) {
+                return result
+            }
             reader.startRawArray()
             if (!reader.hasRawArrayItem(true)) {
                 reader.endRawArray()
@@ -1247,7 +1250,7 @@ private class StringArrayListJsonCodec <: JsonFastCodec<ArrayList<String>> {
         }
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<String> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): ArrayList<String> {
         context.enterValue()
         try {
             reader.startRawArray()
@@ -1303,7 +1306,7 @@ public func __yJsonReadStringArrayList(reader: JsonCodecReader, context: JsonDec
     }
 }
 
-public func __yJsonReadFastStringArrayList(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<String> {
+public func __yJsonReadFastStringArrayList(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): ArrayList<String> {
     context.enterValue()
     try {
         reader.startRawArray()
@@ -1342,7 +1345,7 @@ public func __yJsonReadStringOption(reader: JsonCodecReader, context: JsonDecode
     }
 }
 
-public func __yJsonReadFastStringOption(reader: JsonFastReader, context: JsonDecodeContext): Option<String> {
+public func __yJsonReadFastStringOption(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): Option<String> {
     let _ = context
     if (reader.tryReadRawNull()) {
         None<String>
@@ -1417,7 +1420,7 @@ private class HashMapJsonCodec<T> <: JsonFastCodec<HashMap<String, T>> & JsonCom
         }
     }
 
-    public func writeDirect(value: HashMap<String, T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
+    public func writeDirect(value: HashMap<String, T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
         if (supportsCompactRaw() && jsonTryBeginGeneratedCompactRawValue(writer)) {
             writeCompactRaw(value, writer, context)
             return
@@ -1425,7 +1428,7 @@ private class HashMapJsonCodec<T> <: JsonFastCodec<HashMap<String, T>> & JsonCom
         context.enterValue()
         try {
             if (let Some(raw) <- rawInner) {
-                if (writer.tryWriteCompactRawMap(value, raw)) {
+                if (yJsonGeneratedWriterV1(writer).tryWriteCompactRawMap(value, raw)) {
                     return
                 }
             }
@@ -1465,7 +1468,7 @@ private class HashMapJsonCodec<T> <: JsonFastCodec<HashMap<String, T>> & JsonCom
         }
     }
 
-    public func writeCompactRaw(value: HashMap<String, T>, writer: JsonDirectWriter, context: JsonEncodeContext): Unit {
+    public func writeCompactRaw(value: HashMap<String, T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
         context.enterValue()
         try {
             jsonWriteGeneratedCompactObjectBegin(writer)
@@ -1515,7 +1518,7 @@ private class HashMapJsonCodec<T> <: JsonFastCodec<HashMap<String, T>> & JsonCom
         }
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): HashMap<String, T> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): HashMap<String, T> {
         context.enterValue()
         try {
             reader.startRawObject()
@@ -1579,7 +1582,7 @@ private class Int64HashMapJsonCodec <: JsonFastCodec<HashMap<String, Int64>> {
         }
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): HashMap<String, Int64> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): HashMap<String, Int64> {
         context.enterValue()
         try {
             reader.startRawObject()
@@ -1633,7 +1636,7 @@ public func __yJsonReadInt64HashMap(reader: JsonCodecReader, context: JsonDecode
     }
 }
 
-public func __yJsonReadFastInt64HashMap(reader: JsonFastReader, context: JsonDecodeContext): HashMap<String, Int64> {
+public func __yJsonReadFastInt64HashMap(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): HashMap<String, Int64> {
     context.enterValue()
     try {
         reader.startRawObject()

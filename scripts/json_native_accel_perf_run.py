@@ -19,8 +19,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BENCH_DIR = ROOT / "packages" / "native_accel_benchmarks"
-CASES = ("writeEscapedStrings", "writeEscapedBytes", "readNumericArray", "writePlainStrings")
-ADVERTISED = frozenset(("writeEscapedStrings", "writeEscapedBytes", "readNumericArray"))
+CASES = (
+    "writeNumericArray",
+    "writeNumericBytes",
+    "readNumericArray",
+    "readNumericDocument",
+    "writeEscapedStrings",
+    "writeEscapedBytes",
+    "writePlainStrings",
+)
+ADVERTISED = frozenset(("writeNumericBytes", "readNumericDocument"))
 
 
 def run_text(command: list[str], cwd: Path, env: dict[str, str]) -> str:

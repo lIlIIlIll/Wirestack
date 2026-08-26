@@ -38,4 +38,23 @@ class NativeAccelPublicContractTest {
         YJson.toStream(pair, pairStream)
         @Expect(pairStream.toUtf8String(), pairExpected)
     }
+
+    @TestCase
+    func bulkInt64ReadWritePreservesSemanticsAndScalarFallback(): Unit {
+        YJsonNativeAccel.initialize()
+        let values = ArrayList<Int64>()
+        for (index in 0..4096) { values.add(index * 17 - 12345) }
+        let text = YJson.toJson(values)
+        let decoded = YJson.fromJson<ArrayList<Int64>>(text)
+        @Expect(decoded.size, values.size)
+        @Expect(decoded[0], values[0])
+        @Expect(decoded[2048], values[2048])
+        @Expect(decoded[4095], values[4095])
+        @Expect(String.fromUtf8(YJson.encodeBytesWith(YJson.int64ArrayListCodec(), values)), text)
+
+        let requiresScalarBoundary = "[${Int64.Min},0,${Int64.Max}]"
+        let boundary = YJson.fromJson<ArrayList<Int64>>(requiresScalarBoundary)
+        @Expect(boundary[0], Int64.Min)
+        @Expect(boundary[2], Int64.Max)
+    }
 }

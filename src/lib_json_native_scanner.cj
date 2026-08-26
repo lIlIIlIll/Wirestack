@@ -1,5 +1,6 @@
 package yjson
 
+import std.collection.*
 
 const YJ_JSON_SCAN_OK: Int32 = 0
 const YJ_JSON_SCAN_FALLBACK: Int32 = 1
@@ -12,7 +13,8 @@ const YJSON_NATIVE_MIN_OBJECT_SCAN_BYTES = 1024
 const YJSON_NATIVE_MIN_ARRAY_SCAN_BYTES = 240
 const YJSON_NATIVE_MIN_DECODE_BYTES = 16
 const YJSON_NATIVE_MIN_READER_DECODE_BYTES = 256
-const YJSON_NATIVE_MIN_WRITER_ESCAPE_BYTES = 64
+const YJSON_NATIVE_MIN_WRITER_ESCAPE_BYTES = 4096
+const YJSON_NATIVE_MIN_WRITER_INT64_COUNT = 256
 const YJSON_NATIVE_MIN_ARRAY_ELEMENT_COUNT = 16
 const YJSON_NATIVE_OBJECT_FIELD_CAP = 64
 const YJSON_NATIVE_OBJECT_FIELD_WORDS = 5
@@ -38,6 +40,9 @@ public interface JsonNativeNumericScannerBackend {
         flags: UInt32, tokens: CPointer<UInt64>, tokenCap: Int64,
         outNext: CPointer<Int64>, outCount: CPointer<Int64>, outDone: CPointer<Int64>,
         outError: CPointer<Int64>): Int32
+    func parseInt64Array(input: CPointer<UInt8>, len: Int64, start: Int64,
+        values: CPointer<Int64>, valueCap: Int64, outEnd: CPointer<Int64>,
+        outCount: CPointer<Int64>, outError: CPointer<Int64>): Int32
 }
 
 public interface JsonNativeNumericTapeBackend {
@@ -60,6 +65,9 @@ public interface JsonNativeFloatParserBackend {
 public interface JsonNativeWriterBackend {
     func escapeString(input: CPointer<UInt8>, len: Int64, htmlSafe: Bool,
         output: CPointer<UInt8>, outputCap: Int64, outWritten: CPointer<Int64>): Int32
+    func formatInt64Array(values: CPointer<Int64>, count: Int64,
+        output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64,
+        outWritten: CPointer<Int64>): Int32
 }
 
 /// Versioned internal product bundle consumed by yjson_native. Applications
@@ -76,6 +84,44 @@ private var jsonNativeNumericTapeBackend: Option<JsonNativeNumericTapeBackend> =
 private var jsonNativeFloatParserBackend: Option<JsonNativeFloatParserBackend> =
     None<JsonNativeFloatParserBackend>
 private var jsonNativeWriterBackend: Option<JsonNativeWriterBackend> = None<JsonNativeWriterBackend>
+
+func jsonNativeFormatInt64ArrayInto(values: ArrayList<Int64>, output: Array<Byte>,
+    outputOffset: Int64): Option<Int64> {
+    if (values.size < YJSON_NATIVE_MIN_WRITER_INT64_COUNT) {
+        return None<Int64>
+    }
+    let backend = match (jsonNativeWriterBackend) {
+        case Some(item) => item
+        case None => return None<Int64>
+    }
+    if (values.size > (Int64.Max - 1) / 21) {
+        throw JsonAccelerationException("JSON integer array is too large for native formatting",
+            code: "acceleration_writer_failure")
+    }
+    let contiguous = values.toArray()
+    let required = values.size * 21 + 1
+    if (outputOffset < 0 || outputOffset > output.size ||
+        required > output.size - outputOffset) {
+        throw JsonAccelerationException("Native JSON integer output buffer is too small",
+            code: "acceleration_writer_failure")
+    }
+    let written = Array<Int64>(1, repeat: 0)
+    unsafe {
+        let valuesHandle = acquireArrayRawData(contiguous)
+        let outputHandle = acquireArrayRawData(output)
+        let writtenHandle = acquireArrayRawData(written)
+        let status = backend.formatInt64Array(valuesHandle.pointer, contiguous.size,
+            outputHandle.pointer, output.size, outputOffset, writtenHandle.pointer)
+        releaseArrayRawData(writtenHandle)
+        releaseArrayRawData(outputHandle)
+        releaseArrayRawData(valuesHandle)
+        if (status != YJ_JSON_SCAN_OK || written[0] < 2 || written[0] > output.size) {
+            throw JsonAccelerationException("Native JSON integer formatting failed",
+                code: "acceleration_writer_failure")
+        }
+    }
+    Some(written[0])
+}
 
 private func installJsonNativeScannerBackend(backend: JsonNativeScannerBackend): Unit {
     if (jsonNativeScannerBackend.isSome()) {
@@ -246,6 +292,47 @@ class JsonNativeNumericChunk {
     func tokenEnd(index: Int64): Int64 { Int64(words[index * 4 + 1]) }
     func magnitude(index: Int64): Int64 { Int64(words[index * 4 + 2]) }
     func flags(index: Int64): UInt64 { words[index * 4 + 3] }
+}
+
+class JsonNativeInt64Array {
+    let values: Array<Int64>
+    let count: Int64
+    let end: Int64
+
+    init(values: Array<Int64>, count: Int64, end: Int64) {
+        this.values = values; this.count = count; this.end = end
+    }
+}
+
+func jsonNativeParseInt64Array(data: Array<Byte>, start: Int64): Option<JsonNativeInt64Array> {
+    let backend = match (jsonNativeNumericScannerBackend) {
+        case Some(value) => value
+        case None => return None<JsonNativeInt64Array>
+    }
+    let capacity = (data.size - start + 1) / 2
+    let values = Array<Int64>(capacity, repeat: 0)
+    let end = Array<Int64>(1, repeat: 0)
+    let count = Array<Int64>(1, repeat: 0)
+    let error = Array<Int64>(1, repeat: -1)
+    unsafe {
+        let dataHandle = acquireArrayRawData(data)
+        let valuesHandle = acquireArrayRawData(values)
+        let endHandle = acquireArrayRawData(end)
+        let countHandle = acquireArrayRawData(count)
+        let errorHandle = acquireArrayRawData(error)
+        let status = backend.parseInt64Array(dataHandle.pointer, data.size, start,
+            valuesHandle.pointer, values.size, endHandle.pointer, countHandle.pointer,
+            errorHandle.pointer)
+        releaseArrayRawData(errorHandle); releaseArrayRawData(countHandle)
+        releaseArrayRawData(endHandle); releaseArrayRawData(valuesHandle)
+        releaseArrayRawData(dataHandle)
+        if (status == YJ_JSON_SCAN_OK && count[0] >= 0 && count[0] <= values.size) {
+            return Some(JsonNativeInt64Array(values, count[0], end[0]))
+        }
+        if (status == YJ_JSON_SCAN_FALLBACK) { return None<JsonNativeInt64Array> }
+        throw JsonAccelerationException("Native JSON Int64 array conversion failed",
+            code: "acceleration_reader_failure")
+    }
 }
 
 func jsonNativeScanNumericArrayChunk(data: Array<Byte>, start: Int64,

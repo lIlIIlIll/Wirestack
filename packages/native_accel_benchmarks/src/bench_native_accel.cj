@@ -23,9 +23,9 @@ private func configureAccelerationMode(): Unit {
 
 @Test
 @Configure[
-    warmup: Duration.millisecond * 300,
-    minDuration: Duration.second,
-    minBatches: 12
+    warmup: Duration.second,
+    minDuration: Duration.second * 3,
+    minBatches: 20
 ]
 class NativeAccelerationBenchmarks {
     let escapedValues = ArrayList<String>()
@@ -33,6 +33,7 @@ class NativeAccelerationBenchmarks {
     let numericText: String
     let plainValues = ArrayList<String>()
     let escapedCodec = YJson.arrayListCodec(StringJson)
+    let numericCodec = YJson.int64ArrayListCodec()
     var stringSink = ""
     var bytesSink: Array<Byte> = Array<Byte>(0, repeat: 0u8)
     var intSink: Int64 = 0
@@ -40,9 +41,9 @@ class NativeAccelerationBenchmarks {
     init() {
         configureAccelerationMode()
         let escaped = "0123456789012345678901234567890123456789012345678901234567890123\n\"\\<中🙂"
-        for (_ in 0..128) { escapedValues.add(escaped) }
-        for (index in 0..4096) { numericValues.add(index * 17 - 12345) }
-        for (index in 0..128) { plainValues.add("plain-${index}-abcdefghijklmnopqrstuvwxyz") }
+        for (_ in 0..1024) { escapedValues.add(escaped) }
+        for (index in 0..16384) { numericValues.add(index * 17 - 12345) }
+        for (index in 0..1024) { plainValues.add("plain-${index}-abcdefghijklmnopqrstuvwxyz") }
         numericText = YJson.toJson(numericValues)
         if (YJson.fromJson<ArrayList<Int64>>(numericText).size != numericValues.size) {
             throw Exception("Native acceleration benchmark fixture validation failed")
@@ -60,9 +61,25 @@ class NativeAccelerationBenchmarks {
     }
 
     @Bench
+    func writeNumericArray(): Unit {
+        stringSink = YJson.toJson(numericValues)
+    }
+
+    @Bench
+    func writeNumericBytes(): Unit {
+        bytesSink = YJson.encodeBytesWith(numericCodec, numericValues)
+    }
+
+    @Bench
     func readNumericArray(): Unit {
         let values = YJson.fromJson<ArrayList<Int64>>(numericText)
         intSink = values[values.size - 1]
+    }
+
+    @Bench
+    func readNumericDocument(): Unit {
+        let document = YJson.parseDocument(numericText)
+        intSink = document.rootSize()
     }
 
     @Bench

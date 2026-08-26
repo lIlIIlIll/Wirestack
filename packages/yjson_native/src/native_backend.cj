@@ -3,6 +3,9 @@ package yjson_native
 import yjson.*
 
 @FastNative
+foreign func YJ_JSON_ProbeV1(): UInt32
+
+@FastNative
 foreign func YJ_JSON_SimdCaps(): UInt32
 
 @FastNative
@@ -33,6 +36,16 @@ foreign func YJ_JSON_DecodeString(input: CPointer<UInt8>, len: Int64, start: Int
 foreign func YJ_JSON_EscapeString(input: CPointer<UInt8>, len: Int64, htmlSafe: Bool,
     output: CPointer<UInt8>, outputCap: Int64, outWritten: CPointer<Int64>): Int32
 
+@FastNative
+foreign func YJ_JSON_FormatInt64Array(values: CPointer<Int64>, count: Int64,
+    output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64,
+    outWritten: CPointer<Int64>): Int32
+
+@FastNative
+foreign func YJ_JSON_ParseInt64Array(input: CPointer<UInt8>, len: Int64, start: Int64,
+    values: CPointer<Int64>, valueCap: Int64, outEnd: CPointer<Int64>,
+    outCount: CPointer<Int64>, outError: CPointer<Int64>): Int32
+
 private class CJsonNativeScannerBackend <: JsonNativeAccelerationPrimitivesV1 {
     public func simdCaps(): UInt32 { unsafe { YJ_JSON_SimdCaps() } }
 
@@ -55,6 +68,12 @@ private class CJsonNativeScannerBackend <: JsonNativeAccelerationPrimitivesV1 {
     public func scanNumericArrayChunk(input: CPointer<UInt8>, len: Int64, start: Int64, flags: UInt32, tokens: CPointer<UInt64>, tokenCap: Int64, outNext: CPointer<Int64>, outCount: CPointer<Int64>, outDone: CPointer<Int64>, outError: CPointer<Int64>): Int32 {
         unsafe { YJ_JSON_ScanNumericArrayChunk(input, len, start, flags, tokens, tokenCap, outNext, outCount, outDone, outError) }
     }
+    public func parseInt64Array(input: CPointer<UInt8>, len: Int64, start: Int64,
+        values: CPointer<Int64>, valueCap: Int64, outEnd: CPointer<Int64>,
+        outCount: CPointer<Int64>, outError: CPointer<Int64>): Int32 {
+        unsafe { YJ_JSON_ParseInt64Array(input, len, start, values, valueCap,
+            outEnd, outCount, outError) }
+    }
     public func scanNumericTape(input: CPointer<UInt8>, len: Int64, start: Int64, pageBytes: Int64, flags: UInt32, tokens: CPointer<UInt64>, tokenCap: Int64, outNext: CPointer<Int64>, outCount: CPointer<Int64>, outError: CPointer<Int64>): Int32 {
         unsafe { YJ_JSON_ScanNumericTape(input, len, start, pageBytes, flags, tokens, tokenCap, outNext, outCount, outError) }
     }
@@ -70,6 +89,13 @@ private class CJsonNativeScannerBackend <: JsonNativeAccelerationPrimitivesV1 {
     public func escapeString(input: CPointer<UInt8>, len: Int64, htmlSafe: Bool,
         output: CPointer<UInt8>, outputCap: Int64, outWritten: CPointer<Int64>): Int32 {
         unsafe { YJ_JSON_EscapeString(input, len, htmlSafe, output, outputCap, outWritten) }
+    }
+
+    public func formatInt64Array(values: CPointer<Int64>, count: Int64,
+        output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64,
+        outWritten: CPointer<Int64>): Int32 {
+        unsafe { YJ_JSON_FormatInt64Array(values, count, output, outputCap, outputOffset,
+            outWritten) }
     }
 }
 
@@ -93,10 +119,20 @@ private class CustomNativeAccelerationProviderV1 <: JsonAccelerationProviderV1 {
     public func protocolVersion(): Int64 { 1 }
     public func abiVersion(): Int64 { 1 }
     public func activate(): Unit {
-        // Resolves the linked symbols and executes the capability probe during
-        // initialization so missing-library/CPU/ABI failures cannot surface as
-        // a later silent portable fallback.
-        let _ = nativeScannerCapabilitiesForTesting()
+        // Resolve and validate the full linked primitive bundle before the
+        // process-wide runtime state is frozen.
+        let probe = unsafe { YJ_JSON_ProbeV1() }
+        if (probe != 0x594A0101u32) {
+            throw JsonAccelerationException(
+                "Custom Native primitive ABI probe mismatch: expected 0x594A0101, got ${probe}",
+                code: "acceleration_abi_mismatch")
+        }
+        let caps = nativeScannerCapabilitiesForTesting()
+        if ((caps & 1u32) == 0u32) {
+            throw JsonAccelerationException(
+                "Custom Native primitives do not support this CPU",
+                code: "acceleration_cpu_unsupported")
+        }
         enableYJsonNative()
     }
 }

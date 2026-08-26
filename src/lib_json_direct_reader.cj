@@ -5,466 +5,6 @@ import std.convert.Parsable
 import std.io.*
 import std.math.numeric.*
 
-private abstract class JsonDirectByteSource {
-    public func hasMore(): Bool
-
-    public func peek(): Byte
-
-    public func consume(): Byte
-
-    public func position(): Int64
-
-    public func config(): JsonReadConfig
-
-    public func lineAt(offset: Int64): Int64
-
-    public func columnAt(offset: Int64): Int64
-}
-
-private class ArrayJsonDirectByteSource <: JsonDirectByteSource {
-    private let data: Array<Byte>
-    private let size: Int64
-    private let readConfig: JsonReadConfig
-    private var index: Int64 = 0
-
-    public init(data: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults) {
-        this.data = data
-        this.size = data.size
-        this.readConfig = config
-        validateJsonResourceLimits(data, config)
-    }
-
-    public func hasMore(): Bool {
-        index < size
-    }
-
-    public func peek(): Byte {
-        data[index]
-    }
-
-    public func consume(): Byte {
-        let value = data[index]
-        index++
-        value
-    }
-
-    public func position(): Int64 {
-        index
-    }
-
-    public func config(): JsonReadConfig {
-        readConfig
-    }
-
-    public func lineAt(offset: Int64): Int64 {
-        if (!readConfig.includeErrorLocation) {
-            return -1
-        }
-        jsonLineFromUtf8Bytes(data, offset)
-    }
-
-    public func columnAt(offset: Int64): Int64 {
-        if (!readConfig.includeErrorLocation) {
-            return -1
-        }
-        jsonColumnFromUtf8Bytes(data, offset)
-    }
-
-    public func skipSpacesFast(): Unit {
-        while (index < size) {
-            match (data[index]) {
-                case b' ' | b'\n' | b'\r' | b'\t' => index++
-                case _ => return
-            }
-        }
-    }
-
-    public func expectByteFast(value: Byte): Unit {
-        if (index >= size || data[index] != value) {
-            fail("Unexpected token")
-        }
-        index++
-    }
-
-    public func parseNameIdFast(candidates: Array<String>): Int64 {
-        expectByteFast(b'"')
-        var active = initialNameMatchMask(candidates.size)
-        var nameIndex: Int64 = 0
-        while (index < size) {
-            let current = data[index]
-            index++
-            if (current == b'"') {
-                if (active == 0u64) {
-                    return -1
-                }
-                for (candidateIndex in 0..candidates.size) {
-                    if (((active & nameMatchBit(candidateIndex)) != 0u64) && candidates[candidateIndex].size == nameIndex) {
-                        return candidateIndex
-                    }
-                }
-                return -1
-            }
-            var code: Int64 = -1
-            if (current == b'\\') {
-                code = consumeEscapedAsciiForName()
-            } else if (current < 0x80) {
-                if (current < 0x20) {
-                    failAt("Unescaped control character in string literal", index - 1)
-                }
-                code = Int64(current)
-            } else {
-                index += validatedUtf8WidthAt(index - 1) - 1
-            }
-            if (active != 0u64) {
-                active = updateActiveNameCandidates(candidates, active, nameIndex, code)
-            }
-            nameIndex++
-        }
-        fail("Unterminated string literal")
-    }
-
-    public func parseInt64LiteralFast(): Int64 {
-        skipSpacesFast()
-        if (index >= size) {
-            fail("Expected integer")
-        }
-        if (data[index] == b'-') {
-            index++
-            requireDigit("Expected digit")
-            var result: Int64 = 0
-            if (data[index] == b'0') {
-                index++
-                rejectLeadingZero()
-            } else {
-                while (index < size && data[index] >= b'0' && data[index] <= b'9') {
-                    let digit = Int64(data[index] - b'0')
-                    if (result < ((-0x8000_0000_0000_0000 + digit) / 10)) {
-                        fail("Integer literal out of Int64 range")
-                    }
-                    result = result * 10 - digit
-                    index++
-                }
-            }
-            rejectFractionalOrExponentForInteger()
-            return result
-        }
-        requireDigit("Expected digit")
-        var result: Int64 = 0
-        if (data[index] == b'0') {
-            index++
-            rejectLeadingZero()
-        } else {
-            while (index < size && data[index] >= b'0' && data[index] <= b'9') {
-                let digit = Int64(data[index] - b'0')
-                if (result > ((0x7FFF_FFFF_FFFF_FFFF - digit) / 10)) {
-                    fail("Integer literal out of Int64 range")
-                }
-                result = result * 10 + digit
-                index++
-            }
-        }
-        rejectFractionalOrExponentForInteger()
-        result
-    }
-
-    public func parseUInt64LiteralFast(): UInt64 {
-        skipSpacesFast()
-        if (index >= size || data[index] == b'-') {
-            fail("Expected unsigned integer")
-        }
-        requireDigit("Expected digit")
-        var result: UInt64 = 0
-        if (data[index] == b'0') {
-            index++
-            rejectLeadingZero()
-        } else {
-            while (index < size && data[index] >= b'0' && data[index] <= b'9') {
-                let digit = UInt64(data[index] - b'0')
-                if (result > ((UInt64.Max - digit) / 10)) {
-                    fail("Integer literal out of UInt64 range")
-                }
-                result = result * 10 + digit
-                index++
-            }
-        }
-        rejectFractionalOrExponentForInteger()
-        result
-    }
-
-    public func tryParseSimpleString(): Option<String> {
-        let quotePosition = index
-        expectByteFast(b'"')
-        let start = index
-        while (index < size) {
-            let current = data[index]
-            if (current == b'"') {
-                let end = index
-                index++
-                return try {
-                    Some(String.fromUtf8(data[start..end]))
-                } catch (_: Exception) {
-                    failAt("Invalid UTF-8 byte sequence", start)
-                }
-            }
-            if (current == b'\\') {
-                index = quotePosition
-                return None<String>
-            }
-            if (current < 0x20) {
-                failAt("Unescaped control character in string literal", index)
-            }
-            index++
-        }
-        fail("Unterminated string literal")
-    }
-
-    private func updateActiveNameCandidates(
-        candidates: Array<String>,
-        active: UInt64,
-        nameIndex: Int64,
-        code: Int64
-    ): UInt64 {
-        if (code < 0 || code > 0x7F) {
-            return 0u64
-        }
-        var next = 0u64
-        let byte = UInt8(code)
-        for (candidateIndex in 0..candidates.size) {
-            let bit = nameMatchBit(candidateIndex)
-            if ((active & bit) == 0u64) {
-                continue
-            }
-            unsafe {
-                let candidate = candidates[candidateIndex].rawData()
-                if (nameIndex < candidate.size && candidate[nameIndex] == byte) {
-                    next |= bit
-                }
-            }
-        }
-        next
-    }
-
-    private func initialNameMatchMask(size: Int64): UInt64 {
-        var mask = 0u64
-        for (candidateIndex in 0..size) {
-            mask |= nameMatchBit(candidateIndex)
-        }
-        mask
-    }
-
-    private func nameMatchBit(candidateIndex: Int64): UInt64 {
-        1u64 << candidateIndex
-    }
-
-    private func consumeEscapedAsciiForName(): Int64 {
-        if (index >= size) {
-            fail("Unexpected end of escape sequence")
-        }
-        let escaped = data[index]
-        index++
-        match (escaped) {
-            case b'"' => return Int64(b'"')
-            case b'\\' => return Int64(b'\\')
-            case b'/' => return Int64(b'/')
-            case b'b' => return Int64(b'\b')
-            case b'f' => return Int64(b'\f')
-            case b'n' => return Int64(b'\n')
-            case b'r' => return Int64(b'\r')
-            case b't' => return Int64(b'\t')
-            case b'u' => return parseUnicodeAsciiEscape()
-            case _ => fail("Unsupported escape sequence")
-        }
-    }
-
-    private func validatedUtf8WidthAt(start: Int64): Int64 {
-        let first = UInt8(data[start])
-        if (first >= 0xC2u8 && first <= 0xDFu8) {
-            requireUtf8Continuation(start + 1, 0x80u8, 0xBFu8, start)
-            return 2
-        }
-        if (first >= 0xE0u8 && first <= 0xEFu8) {
-            requireUtf8Continuation(start + 1,
-                if (first == 0xE0u8) { 0xA0u8 } else { 0x80u8 },
-                if (first == 0xEDu8) { 0x9Fu8 } else { 0xBFu8 }, start)
-            requireUtf8Continuation(start + 2, 0x80u8, 0xBFu8, start)
-            return 3
-        }
-        if (first >= 0xF0u8 && first <= 0xF4u8) {
-            requireUtf8Continuation(start + 1,
-                if (first == 0xF0u8) { 0x90u8 } else { 0x80u8 },
-                if (first == 0xF4u8) { 0x8Fu8 } else { 0xBFu8 }, start)
-            requireUtf8Continuation(start + 2, 0x80u8, 0xBFu8, start)
-            requireUtf8Continuation(start + 3, 0x80u8, 0xBFu8, start)
-            return 4
-        }
-        failAt("Invalid UTF-8 byte sequence", start)
-    }
-
-    private func requireUtf8Continuation(position: Int64, minimum: UInt8,
-        maximum: UInt8, errorPosition: Int64): Unit {
-        if (position >= size) { failAt("Invalid UTF-8 byte sequence", errorPosition) }
-        let value = UInt8(data[position])
-        if (value < minimum || value > maximum) {
-            failAt("Invalid UTF-8 byte sequence", errorPosition)
-        }
-    }
-
-    private func parseUnicodeAsciiEscape(): Int64 {
-        let start = index
-        var value: Int64 = 0
-        for (_ in 0..4) {
-            if (index >= size) {
-                failAt("Incomplete unicode escape", start)
-            }
-            value = value * 16 + hexValue(data[index])
-            index++
-        }
-        if (isJsonHighSurrogate(value)) {
-            if (index + 2 > size || data[index] != b'\\' || data[index + 1] != b'u') {
-                failAt("Invalid unicode surrogate pair", start)
-            }
-            index += 2
-            let lowStart = index
-            var low: Int64 = 0
-            for (_ in 0..4) {
-                if (index >= size) { failAt("Incomplete unicode escape", lowStart) }
-                low = low * 16 + hexValue(data[index])
-                index++
-            }
-            if (!isJsonLowSurrogate(low)) {
-                failAt("Invalid unicode surrogate pair", start)
-            }
-            return -1
-        }
-        if (isJsonLowSurrogate(value)) {
-            failAt("Invalid unicode surrogate pair", start)
-        }
-        if (value <= 0x7F) {
-            return value
-        }
-        return -1
-    }
-
-    private func hexValue(value: Byte): Int64 {
-        match {
-            case value >= b'0' && value <= b'9' => Int64(value - b'0')
-            case value >= b'a' && value <= b'f' => Int64(value - b'a') + 10
-            case value >= b'A' && value <= b'F' => Int64(value - b'A') + 10
-            case _ => fail("Invalid unicode escape")
-        }
-    }
-
-    private func rejectFractionalOrExponentForInteger(): Unit {
-        if (index < size && (data[index] == b'.' || data[index] == b'e' || data[index] == b'E')) {
-            fail("Expected integer")
-        }
-    }
-
-    private func rejectLeadingZero(): Unit {
-        if (index < size && data[index] >= b'0' && data[index] <= b'9') {
-            fail("Leading zeroes are not allowed in JSON numbers")
-        }
-    }
-
-    private func requireDigit(message: String): Unit {
-        if (index >= size || data[index] < b'0' || data[index] > b'9') {
-            fail(message)
-        }
-    }
-
-    private func fail(message: String): Nothing {
-        failAt(message, index)
-    }
-
-    private func failAt(message: String, offset: Int64): Nothing {
-        throw JsonException(
-            message,
-            code: "parse_error",
-            byteOffset: if (readConfig.includeErrorLocation) { offset } else { -1 },
-            line: lineAt(offset),
-            column: columnAt(offset)
-        )
-    }
-}
-
-private class StreamJsonDirectByteSource <: JsonDirectByteSource {
-    private let input: InputStream
-    private let buffer: Array<Byte>
-    private let readConfig: JsonReadConfig
-    private var start: Int64 = 0
-    private var end: Int64 = 0
-    private var offset: Int64 = 0
-    private var loadedBytes: Int64 = 0
-    private var reachedEnd: Bool = false
-    private let newlineOffsets = ArrayList<Int64>()
-
-    public init(
-        input: InputStream,
-        bufferSize!: Int64 = 4096,
-        config!: JsonReadConfig = JsonReadConfig.defaults
-    ) {
-        this.input = input
-        this.buffer = Array<Byte>(bufferSize, repeat: 0)
-        this.readConfig = config
-    }
-
-    public func hasMore(): Bool {
-        ensureAvailable()
-    }
-
-    public func peek(): Byte {
-        buffer[start]
-    }
-
-    public func consume(): Byte {
-        let value = buffer[start]
-        start++
-        if (value == b'\n') { newlineOffsets.add(offset) }
-        offset++
-        value
-    }
-
-    public func position(): Int64 {
-        offset
-    }
-
-    public func config(): JsonReadConfig {
-        readConfig
-    }
-
-    public func lineAt(offset: Int64): Int64 {
-        if (!readConfig.includeErrorLocation) { return -1 }
-        jsonStreamLineAt(newlineOffsets, offset)
-    }
-
-    public func columnAt(offset: Int64): Int64 {
-        if (!readConfig.includeErrorLocation) { return -1 }
-        jsonStreamColumnAt(newlineOffsets, offset)
-    }
-
-    private func ensureAvailable(): Bool {
-        if (start < end) {
-            return true
-        }
-        if (reachedEnd) {
-            return false
-        }
-        let read = input.read(buffer)
-        if (read == 0) {
-            reachedEnd = true
-            return false
-        }
-        if (readConfig.maxBytes > 0 && loadedBytes + read > readConfig.maxBytes) {
-            throw jsonResourceLimitException(readConfig,
-                "JSON document exceeds ${readConfig.maxBytes} bytes", "document_too_large",
-                readConfig.maxBytes)
-        }
-        loadedBytes += read
-        start = 0
-        end = read
-        true
-    }
-}
 
 private class JsonDirectReadContext {
     public let objectContext: Bool
@@ -478,31 +18,26 @@ private class JsonDirectReadContext {
 }
 
 public class JsonDirectReader <: JsonCodecReader {
-    private let source: JsonDirectByteSource
+    private let source: InputCursor
     private let config: JsonReadConfig
     private let streaming: Bool
     private let contexts = ArrayList<JsonDirectReadContext>()
     private var valuePrefixReady: Bool = false
-    private var rootBudgetStart: Int64 = -1
-    private var rootBudgetActive: Bool = false
-    private var lastUnicodeEscapeBytes: Int64 = 0
 
     public init(text: String, config!: JsonReadConfig = JsonReadConfig.defaults) {
-        unsafe {
-            source = ArrayJsonDirectByteSource(text.rawData(), config: config)
-        }
+        source = Utf8Cursor(text, config: config)
         this.config = config
         this.streaming = false
     }
 
     public init(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults) {
-        source = ArrayJsonDirectByteSource(bytes, config: config)
+        source = Utf8Cursor(bytes, config: config)
         this.config = config
         this.streaming = false
     }
 
     public init(input: InputStream, config!: JsonReadConfig = JsonReadConfig.defaults) {
-        source = StreamJsonDirectByteSource(input, config: config)
+        source = StreamInputCursor(input, config: config)
         this.config = config
         this.streaming = true
     }
@@ -588,14 +123,14 @@ public class JsonDirectReader <: JsonCodecReader {
     }
 
     public func endObject(): Unit {
-        let wasRoot = contexts.size == 1 && rootBudgetActive
+        let wasRoot = contexts.size == 1 && source.isValueBudgetActive()
         let context = popContext(true)
         if (context.expectingFieldValue) {
             fail("Expected object field value")
         }
         skipSpaces()
         expectByte(b'}')
-        if (wasRoot) { rootBudgetActive = false }
+        if (wasRoot) { source.endValueBudget() }
     }
 
     public func hasObjectField(): Bool {
@@ -672,11 +207,11 @@ public class JsonDirectReader <: JsonCodecReader {
     }
 
     public func endArray(): Unit {
-        let wasRoot = contexts.size == 1 && rootBudgetActive
+        let wasRoot = contexts.size == 1 && source.isValueBudgetActive()
         let context = popContext(false)
         skipSpaces()
         expectByte(b']')
-        if (wasRoot) { rootBudgetActive = false }
+        if (wasRoot) { source.endValueBudget() }
         let _ = context
     }
 
@@ -762,7 +297,7 @@ public class JsonDirectReader <: JsonCodecReader {
             beginRootBudgetIfNeeded()
         }
         skipRawValueBounded(0, maxDepth)
-        if (contexts.isEmpty()) { rootBudgetActive = false }
+        if (contexts.isEmpty()) { source.endValueBudget() }
     }
 
     private func requireContainerDepth(offset: Int64): Unit {
@@ -800,31 +335,14 @@ public class JsonDirectReader <: JsonCodecReader {
     }
 
     private func beginRootBudgetIfNeeded(): Unit {
-        if (streaming && !rootBudgetActive && contexts.isEmpty() &&
+        if (streaming && !source.isValueBudgetActive() && contexts.isEmpty() &&
             config.maxPolymorphicObjectBytes > 0) {
-            rootBudgetStart = source.position()
-            rootBudgetActive = true
+            source.beginValueBudget(config.maxPolymorphicObjectBytes)
         }
     }
 
     private func consumeByte(): Byte {
-        let value = source.consume()
-        if (rootBudgetActive && source.position() - rootBudgetStart > config.maxPolymorphicObjectBytes) {
-            throw jsonResourceLimitException(config,
-                "JSON value exceeds ${config.maxPolymorphicObjectBytes} bytes",
-                "polymorphic_object_too_large", rootBudgetStart + config.maxPolymorphicObjectBytes)
-        }
-        value
-    }
-
-    private func addDecodedStringBytes(current: Int64, added: Int64, offset: Int64): Int64 {
-        let next = current + added
-        if (config.maxStringBytes > 0 && next > config.maxStringBytes) {
-            throw jsonResourceLimitException(config,
-                "JSON string exceeds ${config.maxStringBytes} decoded UTF-8 bytes",
-                "string_too_large", offset)
-        }
-        next
+        source.consumeJsonByte()
     }
 
     private func popContext(expectedObject: Bool): JsonDirectReadContext {
@@ -909,68 +427,18 @@ public class JsonDirectReader <: JsonCodecReader {
 
     private func skipNumberLiteral(): Unit {
         skipSpaces()
-        if (source.hasMore() && source.peek() == b'-') {
-            consumeByte()
-        }
-        skipIntegerDigits()
-        if (source.hasMore() && source.peek() == b'.') {
-            consumeByte()
-            requireDigit("Expected fractional digits")
-            skipDigits()
-        }
-        if (source.hasMore() && (source.peek() == b'e' || source.peek() == b'E')) {
-            consumeByte()
-            if (source.hasMore() && (source.peek() == b'+' || source.peek() == b'-')) {
-                consumeByte()
-            }
-            requireDigit("Expected exponent digits")
-            skipDigits()
-        }
-    }
-
-    private func skipDigits(): Unit {
-        requireDigit("Expected digit")
-        while (source.hasMore() && source.peek() >= b'0' && source.peek() <= b'9') {
-            consumeByte()
-        }
-    }
-
-    private func skipIntegerDigits(): Unit {
-        requireDigit("Expected digit")
-        if (source.peek() == b'0') {
-            consumeByte()
-            rejectLeadingZeroFromSource()
-            return
-        }
-        skipDigits()
+        let _ = source.readJsonNumberLiteral()
     }
 
     private func parseNumberLiteral(): String {
         skipSpaces()
-        let literal = StringBuilder()
-        if (source.hasMore() && source.peek() == b'-') {
-            literal.append(Rune(consumeByte()))
-        }
-        parseIntegerDigitsInto(literal)
-        if (source.hasMore() && source.peek() == b'.') {
-            literal.append(Rune(consumeByte()))
-            requireDigit("Expected fractional digits")
-            parseDigitsInto(literal)
-        }
-        if (source.hasMore() && (source.peek() == b'e' || source.peek() == b'E')) {
-            literal.append(Rune(consumeByte()))
-            if (source.hasMore() && (source.peek() == b'+' || source.peek() == b'-')) {
-                literal.append(Rune(consumeByte()))
-            }
-            requireDigit("Expected exponent digits")
-            parseDigitsInto(literal)
-        }
-        literal.toString()
+        source.readJsonNumberLiteral()
     }
 
     private func parseInt64Literal(): Int64 {
         match (source) {
-            case arraySource: ArrayJsonDirectByteSource => return arraySource.parseInt64LiteralFast()
+            case arraySource: Utf8Cursor =>
+                if (!source.isValueBudgetActive()) { return arraySource.parseInt64LiteralFast() }
             case _ => ()
         }
         skipSpaces()
@@ -1016,7 +484,8 @@ public class JsonDirectReader <: JsonCodecReader {
 
     private func parseUInt64Literal(): UInt64 {
         match (source) {
-            case arraySource: ArrayJsonDirectByteSource => return arraySource.parseUInt64LiteralFast()
+            case arraySource: Utf8Cursor =>
+                if (!source.isValueBudgetActive()) { return arraySource.parseUInt64LiteralFast() }
             case _ => ()
         }
         skipSpaces()
@@ -1053,23 +522,6 @@ public class JsonDirectReader <: JsonCodecReader {
         }
     }
 
-    private func parseDigitsInto(buffer: StringBuilder): Unit {
-        requireDigit("Expected digit")
-        while (source.hasMore() && source.peek() >= b'0' && source.peek() <= b'9') {
-            buffer.append(Rune(consumeByte()))
-        }
-    }
-
-    private func parseIntegerDigitsInto(buffer: StringBuilder): Unit {
-        requireDigit("Expected digit")
-        if (source.peek() == b'0') {
-            buffer.append(Rune(consumeByte()))
-            rejectLeadingZeroFromSource()
-            return
-        }
-        parseDigitsInto(buffer)
-    }
-
     private func requireDigit(message: String): Unit {
         if (!source.hasMore() || source.peek() < b'0' || source.peek() > b'9') {
             fail(message)
@@ -1077,60 +529,11 @@ public class JsonDirectReader <: JsonCodecReader {
     }
 
     private func parseString(): String {
-        match (source) {
-            case arraySource: ArrayJsonDirectByteSource =>
-                if (config.maxStringBytes == 0 && !rootBudgetActive) {
-                    if (let Some(value) <- arraySource.tryParseSimpleString()) {
-                        return value
-                    }
-                }
-            case _ => ()
-        }
-        expectByte(b'"')
-        let builder = StringBuilder()
-        var decodedBytes: Int64 = 0
-        while (source.hasMore()) {
-            let start = source.position()
-            let current = consumeByte()
-            match (current) {
-                case b'"' => return builder.toString()
-                case b'\\' =>
-                    if (!source.hasMore()) {
-                        fail("Unexpected end of escape sequence")
-                    }
-                    let escaped = consumeByte()
-                    match (escaped) {
-                        case b'"' => builder.append("\""); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b'\\' => builder.append("\\"); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b'/' => builder.append("/"); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b'b' => builder.append(r'\b'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b'f' => builder.append(r'\f'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b'n' => builder.append(r'\n'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b'r' => builder.append(r'\r'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b't' => builder.append(r'\t'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b'u' =>
-                            builder.append(parseUnicodeEscape())
-                            decodedBytes = addDecodedStringBytes(decodedBytes, lastUnicodeEscapeBytes, start)
-                        case _ => fail("Unsupported escape sequence")
-                    }
-                case _ =>
-                    if (current < 0x80) {
-                        if (current < 0x20) {
-                            failAt("Unescaped control character in string literal", start)
-                        }
-                        builder.append(Rune(current))
-                        decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                    } else {
-                        builder.append(decodeUtf8Rune(current, start))
-                        decodedBytes = addDecodedStringBytes(decodedBytes, source.position() - start, start)
-                    }
-            }
-        }
-        fail("Unterminated string literal")
+        source.readJsonString()
     }
 
     private func scanRawString(): Unit {
-        if (config.maxStringBytes > 0 || rootBudgetActive) {
+        if (config.maxStringBytes > 0 || source.isValueBudgetActive()) {
             let _ = parseString()
             return
         }
@@ -1146,7 +549,7 @@ public class JsonDirectReader <: JsonCodecReader {
                         failAt("Unescaped control character in string literal", start)
                     }
                     if (current >= 0x80) {
-                        let _ = decodeUtf8Rune(current, start)
+                        let _ = source.decodeJsonUtf8Rune(current, start)
                     }
             }
         }
@@ -1161,14 +564,14 @@ public class JsonDirectReader <: JsonCodecReader {
         match (escaped) {
             case b'"' | b'\\' | b'/' | b'b' | b'f' | b'n' | b'r' | b't' => return
             case b'u' =>
-                let _ = parseUnicodeEscape()
+                let _ = source.readJsonUnicodeEscape()
                 return
             case _ => failAt("Unsupported escape sequence", start)
         }
     }
 
     private func parseNameId(candidates: Array<String>): Int64 {
-        if (config.maxStringBytes > 0 || rootBudgetActive || candidates.size > 63 ||
+        if (config.maxStringBytes > 0 || source.isValueBudgetActive() || candidates.size > 63 ||
             !allCandidateNamesAscii(candidates)) {
             let name = parseString()
             for (candidateIndex in 0..candidates.size) {
@@ -1179,7 +582,7 @@ public class JsonDirectReader <: JsonCodecReader {
             return -1
         }
         match (source) {
-            case arraySource: ArrayJsonDirectByteSource => return arraySource.parseNameIdFast(candidates)
+            case arraySource: Utf8Cursor => return arraySource.parseNameIdFast(candidates)
             case _ => ()
         }
         expectByte(b'"')
@@ -1208,7 +611,7 @@ public class JsonDirectReader <: JsonCodecReader {
                 }
                 code = Int64(current)
             } else {
-                let _ = decodeUtf8Rune(current, start)
+                let _ = source.decodeJsonUtf8Rune(current, start)
             }
             if (active != 0u64) {
                 active = updateActiveNameCandidates(candidates, active, index, code)
@@ -1284,7 +687,7 @@ public class JsonDirectReader <: JsonCodecReader {
             case b'r' => return Int64(b'\r')
             case b't' => return Int64(b'\t')
             case b'u' =>
-                let r = parseUnicodeEscape()
+                let (r, _) = source.readJsonUnicodeEscape()
                 let code = UInt32(r)
                 return if (code <= 0x7Fu32) {
                     Int64(code)
@@ -1295,101 +698,8 @@ public class JsonDirectReader <: JsonCodecReader {
         }
     }
 
-    private func parseUnicodeEscape(): Rune {
-        let start = source.position()
-        let value = parseUnicodeEscapeValue(start)
-        if (isJsonHighSurrogate(value)) {
-            if (!source.hasMore() || consumeByte() != b'\\' || !source.hasMore() || consumeByte() != b'u') {
-                failAt("Invalid unicode surrogate pair", start)
-            }
-            let lowStart = source.position()
-            let low = parseUnicodeEscapeValue(lowStart)
-            if (!isJsonLowSurrogate(low)) {
-                failAt("Invalid unicode surrogate pair", start)
-            }
-            lastUnicodeEscapeBytes = 4
-            return try {
-                Rune(combineJsonSurrogates(value, low))
-            } catch (_: Exception) {
-                failAt("Invalid unicode escape", start)
-            }
-        }
-        if (isJsonLowSurrogate(value)) {
-            failAt("Invalid unicode surrogate pair", start)
-        }
-        lastUnicodeEscapeBytes = jsonUtf8ByteCount(value)
-        return try {
-            Rune(UInt32(value))
-        } catch (_: Exception) {
-            failAt("Invalid unicode escape", start)
-        }
-    }
-
-    private func parseUnicodeEscapeValue(start: Int64): Int64 {
-        var value: Int64 = 0
-        for (_ in 0..4) {
-            if (!source.hasMore()) {
-                failAt("Incomplete unicode escape", start)
-            }
-            value = value * 16 + hexValue(consumeByte())
-        }
-        value
-    }
-
-    private func hexValue(value: Byte): Int64 {
-        match {
-            case value >= b'0' && value <= b'9' => Int64(value - b'0')
-            case value >= b'a' && value <= b'f' => Int64(value - b'a') + 10
-            case value >= b'A' && value <= b'F' => Int64(value - b'A') + 10
-            case _ => fail("Invalid unicode escape")
-        }
-    }
-
-    private func decodeUtf8Rune(first: Byte, start: Int64): Rune {
-        let width = utf8Width(first, start)
-        let bytes = Array<UInt8>(width, repeat: 0u8)
-        bytes[0] = UInt8(first)
-        for (index in 1..width) {
-            if (!source.hasMore()) {
-                failAt("Invalid UTF-8 byte sequence", start)
-            }
-            bytes[index] = UInt8(consumeByte())
-        }
-        return try {
-            let (r, _) = Rune.fromUtf8(bytes, 0)
-            r
-        } catch (_: Exception) {
-            failAt("Invalid UTF-8 byte sequence", start)
-        }
-    }
-
-    private func utf8Width(first: Byte, start: Int64): Int64 {
-        let unsigned = UInt8(first)
-        if ((unsigned & 0xE0u8) == 0xC0u8) {
-            return 2
-        }
-        if ((unsigned & 0xF0u8) == 0xE0u8) {
-            return 3
-        }
-        if ((unsigned & 0xF8u8) == 0xF0u8) {
-            return 4
-        }
-        failAt("Invalid UTF-8 byte sequence", start)
-    }
-
     private func skipSpaces(): Unit {
-        match (source) {
-            case arraySource: ArrayJsonDirectByteSource =>
-                arraySource.skipSpacesFast()
-                return
-            case _ => ()
-        }
-        while (source.hasMore()) {
-            match (source.peek()) {
-                case b' ' | b'\n' | b'\r' | b'\t' => consumeByte()
-                case _ => return
-            }
-        }
+        source.skipJsonWhitespace()
     }
 
     private func expectLiteral(literal: String): Unit {
@@ -1425,9 +735,11 @@ public class JsonDirectReader <: JsonCodecReader {
 
     private func expectByte(value: Byte): Unit {
         match (source) {
-            case arraySource: ArrayJsonDirectByteSource =>
-                arraySource.expectByteFast(value)
-                return
+            case arraySource: Utf8Cursor =>
+                if (!source.isValueBudgetActive()) {
+                    arraySource.expectByteFast(value)
+                    return
+                }
             case _ => ()
         }
         if (!source.hasMore() || source.peek() != value) {

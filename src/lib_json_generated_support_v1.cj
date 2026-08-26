@@ -1,10 +1,56 @@
 package yjson
 
-/// Stable generated-code protocol for yjson 2.x patch releases. The concrete
-/// reader and writer aliases are confined to this versioned compatibility
-/// layer; generated source names only this protocol.
-public type GeneratedSupportV1Reader = JsonFastReader
-public type GeneratedSupportV1Writer = JsonDirectWriter
+import std.collection.*
+
+/// Narrow semantic reader contract consumed by generated codecs. Implementors
+/// remain runtime-owned; generated source never names a concrete parser class.
+public interface GeneratedSupportV1Reader {
+    func expectEnd(): Unit
+    func startRawObject(): Unit
+    func endRawObject(): Unit
+    func hasRawObjectField(first: Bool): Bool
+    func readRawName(first: Bool): String
+    func readRawNameIdBytes(first: Bool, candidates: Array<Array<Byte>>): Int64
+    func tryReadRawCompactNameTokenBytes(first: Bool, nameBytes: Array<Byte>): Bool
+
+    func startRawArray(): Unit
+    func endRawArray(): Unit
+    func hasRawArrayItem(first: Bool): Bool
+    func beforeRawArrayItem(first: Bool): Unit
+    func suggestRawCollectionCapacity(): Int64
+    func suggestRawArrayCapacity(): Int64
+    func suggestRawObjectCapacity(): Int64
+
+    func tryReadRawNull(): Bool
+    func readRawBool(): Bool
+    func readRawString(): String
+    func readRawInt64(): Int64
+    func readRawInt32(): Int32
+    func readRawInt16(): Int16
+    func readRawInt8(): Int8
+    func readRawUInt64(): UInt64
+    func readRawUInt32(): UInt32
+    func readRawUInt16(): UInt16
+    func readRawUInt8(): UInt8
+    func skipRawWithDepth(maxDepth: Int64): Unit
+}
+
+/// Narrow semantic writer contract consumed by generated codecs. Structural
+/// correctness remains owned by the core writer state machine.
+public interface GeneratedSupportV1Writer <: JsonCodecWriter & JsonCodecBulkWriter {
+    func finishString(): String
+    func tryBeginGeneratedCompactRawValue(): Bool
+    func writeRawBeginObject(): Unit
+    func writeRawEndObject(): Unit
+    func writeRawBeginArray(): Unit
+    func writeRawEndArray(): Unit
+    func writeRawByte(value: Byte): Unit
+    func writeRawNull(): Unit
+    func writeRawObjectEntryName(first: Bool, value: String): Bool
+    func writeRawObjectEntryNameString(first: Bool, name: String, value: String): Bool
+    func writeRawObjectEntryNameBool(first: Bool, name: String, value: Bool): Bool
+    func writeRawObjectEntryNameInt64(first: Bool, name: String, value: Int64): Bool
+}
 
 public class GeneratedSupportV1 {
     public static func protocolVersion(): Int64 { yJsonGeneratedProtocolVersion() }
@@ -20,6 +66,7 @@ public class GeneratedSupportV1 {
 
     public static func newFastReader(text: String): GeneratedSupportV1Reader { JsonFastReader(text) }
     public static func newFastReader(bytes: Array<Byte>): GeneratedSupportV1Reader { JsonFastReader(bytes) }
+    public static func newWriter(): GeneratedSupportV1Writer { JsonDirectWriter() }
     public static func newSemanticReader(text: String, config: JsonReadConfig): JsonCodecReader {
         JsonDirectReader(text, config: config)
     }
@@ -57,5 +104,27 @@ public class GeneratedSupportV1 {
     public static func writeCompactEntryInt64(writer: GeneratedSupportV1Writer, first: Bool,
         name: String, value: Int64): Bool {
         jsonWriteGeneratedCompactObjectEntryInt64(writer, first, name, value)
+    }
+}
+
+func yJsonGeneratedReaderV1(reader: GeneratedSupportV1Reader): JsonFastReader {
+    match (reader) {
+        case concrete: JsonFastReader => concrete
+        case _ => throw JsonException("Unsupported generated reader implementation",
+            code: "generated_protocol_mismatch", path: "$")
+    }
+}
+
+func yJsonTryReadNativeInt64ArrayListV1(
+    reader: GeneratedSupportV1Reader
+): Option<ArrayList<Int64>> {
+    yJsonGeneratedReaderV1(reader).tryReadNativeInt64ArrayList()
+}
+
+func yJsonGeneratedWriterV1(writer: GeneratedSupportV1Writer): JsonDirectWriter {
+    match (writer) {
+        case concrete: JsonDirectWriter => concrete
+        case _ => throw JsonException("Unsupported generated writer implementation",
+            code: "generated_protocol_mismatch", path: "$")
     }
 }
