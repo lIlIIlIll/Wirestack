@@ -24,7 +24,7 @@ Status values:
 | M0-002 | COMPLETE | [`docs/evidence/M0-002/README.md`](../evidence/M0-002/README.md) | CJPM package/path mapping frozen by ADR-0001. |
 | M0-003 | COMPLETE | [`docs/evidence/M0-003/README.md`](../evidence/M0-003/README.md) | Architecture dependency guard and CI are active. |
 | M0-004 | COMPLETE | [`docs/evidence/M0-004/README.md`](../evidence/M0-004/README.md) | Versioned gate runner and evidence framework complete. |
-| M0-005 | BLOCKED | [`docs/evidence/M0-005/README.md`](../evidence/M0-005/README.md) | No retained M0-005 baseline exists; required small-payload/LAN/thread metrics are missing and the public SDK exposes no reliable allocations/op or raw copied-bytes/op counter. |
+| M0-005 | COMPLETE | [`docs/evidence/M0-005/README.md`](../evidence/M0-005/README.md) | Schema-v3 native Linux evidence covers all six payloads on loopback and a separate KVM/virbr0 LAN peer with exact bytes, percentiles, read count, threads, RSS, native allocations/op and raw receive copied-bytes/op. |
 | M0-006 | COMPLETE | [`docs/evidence/M0-006/README.md`](../evidence/M0-006/README.md) | Linux close/wakeup probes pass; global six-platform GATE-NET-01 remains incomplete. |
 | M0-007 | COMPLETE | [`docs/evidence/M0-007/README.md`](../evidence/M0-007/README.md) | Full duplex and close races pass; public abort is unavailable, so GATE-NET-02 remains incomplete. |
 | M0-008 | COMPLETE | [`docs/evidence/M0-008/README.md`](../evidence/M0-008/README.md) | All 240 Linux absolute-budget samples pass; global GATE-NET-03 remains incomplete. |
