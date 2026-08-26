@@ -102,5 +102,5 @@ source audit; status here describes task readiness, not global milestone complet
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
 | M6-021 | COMPLETE | [`docs/evidence/M6-021/README.md`](../evidence/M6-021/README.md) | Public `HttpServer` dispatches real TLS loopback connections by negotiated `h2` or `http/1.1`, with bounded H2 streams, graceful GOAWAY and structured stream errors. |
-| M6-022 | READY | [`docs/planning/linux-status.md`](linux-status.md) | M6-021 is complete; public cancellation tokens exist, but typed request/connection/stream handles do not. |
-| M6-023 | BLOCKED | — | Depends on M6-021 and M6-022; finite streaming evidence does not prove SSE/unbounded cumulative steadiness. |
+| M6-022 | COMPLETE | [`docs/evidence/M6-022/README.md`](../evidence/M6-022/README.md) | Typed request, connection and H2 stream handles provide idempotent public cancellation across routing/DNS through body ownership; real H1/H2 loopback tests prove connection fan-out, stream isolation and prompt terminal cleanup. |
+| M6-023 | READY | [`docs/planning/linux-status.md`](linux-status.md) | M6-022 is complete; the one-hour, one-million-event H1/H2 SSE steady-state and cancellation profile is the remaining acceptance work. |

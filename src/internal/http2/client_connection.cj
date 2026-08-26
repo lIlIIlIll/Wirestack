@@ -184,6 +184,7 @@ public class Http2ClientConnection <: Resource {
         goAwayRegistration: Http2GoAwayRegistration,
         signal: Http2ClientExecutionSignal,
         context!: OperationContext = OperationContext.background(),
+        connectionCancellation!: CancellationToken = CancellationToken.none(),
         onTerminated!: () -> Unit = { => }
     ): HttpResponse {
         let termination = reader.terminationRegistry.register(signal)
@@ -198,6 +199,7 @@ public class Http2ClientConnection <: Resource {
             signal.attach(opened)
             opened.bindReset(reset.register(opened.streamId, signal))
             dispatcher.add(opened)
+            opened.bindCancellation(context.cancellation, connectionCancellation)
             submitHeaderFields(opened.streamId, plan.initialHeaders, plan.endStreamOnHeaders, context)
             if (!plan.endStreamOnHeaders) {
                 sendRequestBody(opened, plan.openBody(), context)
@@ -218,6 +220,10 @@ public class Http2ClientConnection <: Resource {
     public func pollHealth(): Http2HealthPollResult { health.poll() }
     public func close(): Unit { let _ = closer.close() }
     public func isClosed(): Bool { closer.result.isSome() || machine.completion.isSome() }
+    public func cancel(): Unit {
+        dispatcher.cancelAll()
+        let _ = closer.abort(reason: AbortReason.Cancelled)
+    }
     public func abort(reason!: AbortReason = AbortReason.ApplicationAbort): Unit {
         let _ = closer.abort(reason: reason)
     }
@@ -360,6 +366,8 @@ class Http2ClientExchange <: ResponseBodyObserver {
     private var response: ?HttpResponse = None<HttpResponse>
     private var failure: ?Exception = None<Exception>
     private var resetRegistration: ?Http2StreamResetRegistration = None<Http2StreamResetRegistration>
+    private var streamCancellation: ?CancellationRegistration = None<CancellationRegistration>
+    private var connectionCancellation: ?CancellationRegistration = None<CancellationRegistration>
     private var connection: ?Http2ClientConnection = None<Http2ClientConnection>
     private var terminal = false
 
@@ -394,6 +402,24 @@ class Http2ClientExchange <: ResponseBodyObserver {
 
     func bind(connection: Http2ClientConnection): Unit { this.connection = Some(connection) }
     func bindReset(value: Http2StreamResetRegistration): Unit { resetRegistration = Some(value) }
+
+    func bindCancellation(streamToken: CancellationToken, connectionToken: CancellationToken): Unit {
+        let streamRegistration = streamToken.register { => cancelStream() }
+        let connectionRegistration = connectionToken.register { => cancelConnection() }
+        let discard = synchronized(mutex) {
+            if (terminal) {
+                true
+            } else {
+                streamCancellation = Some(streamRegistration)
+                connectionCancellation = Some(connectionRegistration)
+                false
+            }
+        }
+        if (discard) {
+            streamRegistration.unregister()
+            connectionRegistration.unregister()
+        }
+    }
 
     func acceptHeaders(fields: Array<HpackHeaderField>, endStream: Bool): Unit {
         let event = sequence.acceptHeaders(fields, endStream)
@@ -472,6 +498,11 @@ class Http2ClientExchange <: ResponseBodyObserver {
         finish()
     }
 
+    func connectionTerminated(error: Exception): Unit {
+        signalFailure(error)
+        finish()
+    }
+
     public func completed(): Unit { finish() }
     public func abandoned(): Unit {
         try { let _ = reset.cancelLocal(streamId) } catch (_: Exception) {}
@@ -484,6 +515,8 @@ class Http2ClientExchange <: ResponseBodyObserver {
         }
         if (!owns) { return }
         try { channel.close() } catch (_: Exception) {}
+        if (let Some(value) <- streamCancellation) { value.unregister() }
+        if (let Some(value) <- connectionCancellation) { value.unregister() }
         if (let Some(value) <- resetRegistration) { value.unregister() }
         goAwayRegistration.unregister()
         readerRegistration.unregister()
@@ -496,6 +529,23 @@ class Http2ClientExchange <: ResponseBodyObserver {
     }
 
     private func wake(): Unit { synchronized(mutex) { changed.notifyAll() } }
+
+    private func cancelStream(): Unit {
+        let error = NetworkException(
+            NetworkErrorCategory.Cancelled, NetworkPhase.HttpBody, NetworkErrorCode.Cancelled,
+            "HTTP/2 stream cancelled", retryability: Retryability.Never
+        )
+        signalFailure(error)
+        try { let _ = reset.cancelLocal(streamId) } catch (_: Exception) {}
+        finish()
+    }
+
+    private func cancelConnection(): Unit {
+        match (connection) {
+            case Some(value) => value.cancel()
+            case None => cancelStream()
+        }
+    }
 }
 
 private class Http2ClientBodyChannel <: HttpBodyStream {
@@ -722,6 +772,21 @@ private class Http2ClientDispatcher <: Http2InboundFrameHandler {
         }
     }
 
+    func cancelAll(): Unit {
+        let current = synchronized(mutex) {
+            let result = ArrayList<Http2ClientExchange>()
+            for (exchange in exchanges) { result.add(exchange) }
+            result.toArray()
+        }
+        for (exchange in current) {
+            exchange.connectionTerminated(NetworkException(
+                NetworkErrorCategory.Cancelled, NetworkPhase.HttpBody,
+                NetworkErrorCode.Cancelled, "HTTP/2 connection cancelled",
+                retryability: Retryability.Never
+            ))
+        }
+    }
+
     public func handle(frame: Http2Frame, result: Http2ConnectionReceiveResult): Unit {
         if (let Some(value) <- health) { let _ = value.observeInbound(frame) }
         for (outbound in result.outbound) { let _ = writer.enqueue(outbound) }
@@ -764,13 +829,21 @@ private class Http2ClientDispatcher <: Http2InboundFrameHandler {
         completion: Http2ConnectionCompletion,
         terminalGoAway: ?Http2Frame
     ): Unit {
-        let _ = completion
         if (let Some(frame) <- terminalGoAway) {
             try { let _ = writer.enqueue(frame) } catch (_: Exception) {}
         }
         flow.close()
         if (let Some(value) <- health) { value.close() }
-        synchronized(mutex) { changed.notifyAll() }
+        let current = synchronized(mutex) {
+            changed.notifyAll()
+            let result = ArrayList<Http2ClientExchange>()
+            for (exchange in exchanges) { result.add(exchange) }
+            result.toArray()
+        }
+        let error = Http2ProtocolException(
+            completion.code, Http2ErrorScope.Connection, completion.reason
+        )
+        for (exchange in current) { exchange.connectionTerminated(error) }
     }
 
     private func handleSettings(frame: Http2Frame): Unit {
