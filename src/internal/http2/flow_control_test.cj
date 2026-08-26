@@ -122,16 +122,32 @@ class Http2FlowControllerTest {
         @Expect(flow.bufferedReceiveBytes, 4)
 
         let updates = flow.consumeReceived(id, 3)
-        @Expect(updates.size, 2)
-        @Expect(updates[0].header.streamId.value, 0u32)
-        @Expect(updates[1].header.streamId.value, 2u32)
+        @Expect(updates.size, 1)
+        @Expect(updates[0].header.streamId.value, 2u32)
         @Expect(decodeHttp2WindowUpdate(updates[0]), 3u32)
-        @Expect(decodeHttp2WindowUpdate(updates[1]), 3u32)
         @Expect(flow.snapshot(id).receiveWindow, 3)
         @Expect(flow.snapshot(id).bufferedReceiveBytes, 1)
         expectFlowProtocol(Http2ErrorCode.FlowControlError, false, { => flow.receiveData(id, 4) })
-        let _ = flow.consumeReceived(id, 1)
+        @Expect(flow.consumeReceived(id, 1).isEmpty())
         expectIllegalArgumentFlow({ => let _ = flow.consumeReceived(id, 1) })
+        let closeUpdates = flow.closeStream(id)
+        @Expect(closeUpdates.size, 1)
+        @Expect(closeUpdates[0].header.streamId.value, 0u32)
+        @Expect(decodeHttp2WindowUpdate(closeUpdates[0]), 4u32)
+    }
+
+    @TestCase
+    func smallReceiveReadsCoalesceWindowUpdates(): Unit {
+        let flow = Http2FlowController()
+        let id = Http2StreamId(2u32)
+        flow.openStream(id)
+        flow.receiveData(id, 32768)
+        var updateCount: Int64 = 0
+        for (_ in 0..128) { updateCount += flow.consumeReceived(id, 256).size }
+        @Expect(updateCount, 2)
+        @Expect(flow.snapshot(id).bufferedReceiveBytes, 0)
+        @Expect(flow.snapshot(id).receiveWindow, 65535)
+        @Expect(flow.receiveConnectionAvailable, 65535)
     }
 
     @TestCase

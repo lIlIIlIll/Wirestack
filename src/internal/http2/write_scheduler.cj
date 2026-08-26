@@ -190,6 +190,62 @@ public class Http2WriteScheduler {
         }
     }
 
+    /** Waits for bounded queue capacity instead of turning small-read credit into a queue failure. */
+    public func enqueueControlBatchWaiting(
+        frames: Array<Http2Frame>,
+        context!: OperationContext = OperationContext.background()
+    ): Array<Http2WriteTicket> {
+        if (frames.isEmpty()) { return [] }
+        let encoded = ArrayList<Array<Byte>>()
+        var totalBytes = 0u64
+        for (frame in frames) {
+            if (isDataFrame(frame.header.frameType)) {
+                throw IllegalArgumentException("HTTP/2 control batch cannot contain DATA")
+            }
+            let bytes = serializeHttp2Frame(frame)
+            encoded.add(bytes)
+            totalBytes += UInt64(bytes.size)
+        }
+        if (frames.size > Int64(limits.maxPendingWrites) ||
+            totalBytes > UInt64(limits.maxPendingWriteBytes)) {
+            throw Http2WriteQueueFullException("HTTP/2 control batch exceeds the configured queue bounds")
+        }
+        let registration = context.cancellation.register { => wakeWriter() }
+        try {
+            synchronized(mutex) {
+                while (true) {
+                    checkWriterContext(context)
+                    if (!isSchedulerOpen(schedulerState)) {
+                        throw IllegalStateException("HTTP/2 write scheduler is not accepting frames")
+                    }
+                    if (frames.size <= Int64(limits.maxPendingWrites) - queuedCount &&
+                        totalBytes <= UInt64(limits.maxPendingWriteBytes) -
+                            min(queuedBytes, UInt64(limits.maxPendingWriteBytes))) {
+                        let tickets = ArrayList<Http2WriteTicket>()
+                        for (index in 0..frames.size) {
+                            let frame = frames[index]
+                            let ticket = Http2WriteTicket(nextId, frame.header.streamId, this)
+                            controls.add(Http2QueuedWrite(
+                                nextId, frame.header.streamId, encoded[index], ticket
+                            ))
+                            nextId++
+                            queuedCount++
+                            queuedBytes += UInt64(encoded[index].size)
+                            recordQueueHighWaterLocked()
+                            tickets.add(ticket)
+                        }
+                        changed.notifyAll()
+                        return tickets.toArray()
+                    }
+                    waitWriterChange(context)
+                }
+                throw IllegalStateException("unreachable HTTP/2 control admission state")
+            }
+        } finally {
+            registration.unregister()
+        }
+    }
+
     private func enqueueOwned(
         frame: Http2Frame,
         permit: ?Http2SendPermit
@@ -416,6 +472,7 @@ public class Http2WriteScheduler {
             queuedCount -= 1
             queuedBytes -= UInt64(item.bytes.size)
             active = Some(item)
+            changed.notifyAll()
             Some(item)
         }
     }

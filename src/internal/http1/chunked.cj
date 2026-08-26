@@ -61,6 +61,7 @@ private enum ChunkDecoderState {
 /** Strict streaming chunked decoder; body bytes are emitted instead of accumulated. */
 public class Http1ChunkedDecoder {
     private let limits: HttpLimits
+    private let enforceCumulativeBodyLimit: Bool
     private var state = ChunkDecoderState.SizeLine
     private var line = ArrayList<Byte>()
     private var lineSawCr = false
@@ -71,7 +72,16 @@ public class Http1ChunkedDecoder {
     private let trailerFields = ArrayList<HttpHeader>()
     private var completedTrailer: ?HttpTrailer = None<HttpTrailer>
 
-    public init(limits!: HttpLimits = HttpLimits()) { this.limits = limits }
+    public init(limits!: HttpLimits = HttpLimits()) {
+        this.limits = limits
+        enforceCumulativeBodyLimit = true
+    }
+
+    /** Response streams retain per-chunk bounds without imposing a lifetime byte ceiling. */
+    internal init(limits: HttpLimits, streamingResponse!: Bool) {
+        this.limits = limits
+        enforceCumulativeBodyLimit = !streamingResponse
+    }
 
     public func feed(input: Array<Byte>): Http1ChunkDecodeBatch {
         match (state) {
@@ -158,10 +168,11 @@ public class Http1ChunkedDecoder {
         let right = chunkTrimEnd(bytes, left, sizeEnd)
         let size = parseChunkSize(bytes, left, right)
         if (semicolon >= 0) { validateChunkExtensions(bytes, semicolon, bytes.size) }
-        if (size > limits.maxBodyBytes - decodedBytes) {
+        if (size > limits.maxBodyBytes ||
+            (enforceCumulativeBodyLimit && size > limits.maxBodyBytes - decodedBytes)) {
             throw Http1ChunkException(Http1ChunkErrorCode.BodyTooLarge, "decoded chunked body exceeds configured limit")
         }
-        decodedBytes += size
+        if (enforceCumulativeBodyLimit) { decodedBytes += size }
         if (size == 0) {
             state = ChunkDecoderState.Trailers
         } else {

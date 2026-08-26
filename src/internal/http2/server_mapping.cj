@@ -370,7 +370,7 @@ private class Http2ServerBodyChannel <: HttpBodyStream {
             var credit: Int64 = 0
             for (segment in segments) { credit += segment.remainingFlowBytes }
             segments.clear()
-            if (credit > 0) { updates = flow.consumeReceived(streamId, credit) }
+            if (credit > 0) { updates = flow.consumeReceivedNow(streamId, credit) }
             changed.notifyAll()
         }
         if (!updates.isEmpty()) { sink.submit(updates) }
@@ -592,12 +592,11 @@ public class Http2ServerResponseBody <: Resource {
             eof = true
             return
         }
-        if (count > limits.maxBodyBytes - consumed) {
-            serverLocalBodyError("HTTP/2 response body exceeds the configured limit")
-        }
-        consumed += count
         if (let Some(expected) <- expectedContentLength) {
-            if (consumed > expected) { serverLocalBodyError("HTTP/2 response body exceeds Content-Length") }
+            if (count > expected - min(consumed, expected)) {
+                serverLocalBodyError("HTTP/2 response body exceeds Content-Length")
+            }
+            consumed += count
         }
         staging = Array<Byte>(count, repeat: 0)
         for (index in 0..count) { staging[index] = buffer[index] }

@@ -519,9 +519,11 @@ private func responseBodySource(
             }
             Http1ResponseBodySource.Plain(Http1FixedBodyStream(transport, length, initial, context))
         case Http1BodyFraming.Chunked =>
-            Http1ResponseBodySource.Chunked(Http1ChunkedBodyStream(transport, initial, context, limits))
+            Http1ResponseBodySource.Chunked(Http1ChunkedBodyStream(
+                transport, initial, context, limits, streamingResponse: true
+            ))
         case Http1BodyFraming.CloseDelimited =>
-            Http1ResponseBodySource.Plain(Http1CloseBodyStream(transport, initial, context, limits.maxBodyBytes))
+            Http1ResponseBodySource.Plain(Http1CloseBodyStream(transport, initial, context))
         case Http1BodyFraming.Tunnel => throw Exception("tunnel framing was not intercepted")
     }
 }
@@ -571,18 +573,14 @@ private class Http1CloseBodyStream <: HttpBodyStream {
     private let transport: DuplexTransport
     private let context: OperationContext
     private let initial: Array<Byte>
-    private let maximum: Int64
     private var initialOffset: Int64 = 0
-    private var consumed: Int64 = 0
     private var eof = false
     private var closed = false
 
-    init(transport: DuplexTransport, initial: Array<Byte>, context: OperationContext, maximum: Int64) {
-        if (initial.size > maximum) { responseBodyTooLarge() }
+    init(transport: DuplexTransport, initial: Array<Byte>, context: OperationContext) {
         this.transport = transport
         this.initial = initial.clone()
         this.context = context
-        this.maximum = maximum
     }
 
     public prop contentLength: ?Int64 { get() { None<Int64> } }
@@ -591,24 +589,14 @@ private class Http1CloseBodyStream <: HttpBodyStream {
         if (destination.isEmpty()) { return 0 }
         checkHttp1BodyContext(context)
         if (eof) { return 0 }
-        let fromInitial = copyResponseBytes(initial, initialOffset, destination, maximum - consumed)
+        let fromInitial = copyResponseBytes(initial, initialOffset, destination, destination.size)
         if (fromInitial > 0) {
             initialOffset += fromInitial
-            consumed += fromInitial
             return fromInitial
         }
-        if (consumed == maximum) {
-            let probe = Array<Byte>(1, repeat: 0)
-            return match (transport.readSome(MutableByteSpan(probe), context: context)) {
-                case ReadResult.Data(_) => responseBodyTooLarge()
-                case ReadResult.EndOfStream => eof = true; 0
-            }
-        }
-        let wanted = min(destination.size, maximum - consumed)
-        match (transport.readSome(MutableByteSpan(destination, length: wanted), context: context)) {
+        match (transport.readSome(MutableByteSpan(destination), context: context)) {
             case ReadResult.Data(count) =>
-                if (count <= 0 || count > wanted) { invalidResponseProgress() }
-                consumed += count
+                if (count <= 0 || count > destination.size) { invalidResponseProgress() }
                 count
             case ReadResult.EndOfStream => eof = true; 0
         }
@@ -631,11 +619,21 @@ internal class Http1ChunkedBodyStream <: HttpBodyStream {
     prop trailer: ?HttpTrailer { get() { completedTrailer } }
     public prop contentLength: ?Int64 { get() { None<Int64> } }
 
-    init(transport: DuplexTransport, initial: Array<Byte>, context: OperationContext, limits: HttpLimits) {
+    init(
+        transport: DuplexTransport,
+        initial: Array<Byte>,
+        context: OperationContext,
+        limits: HttpLimits,
+        streamingResponse!: Bool = false
+    ) {
         this.transport = transport
         raw = initial.clone()
         this.context = context
-        decoder = Http1ChunkedDecoder(limits: limits)
+        decoder = if (streamingResponse) {
+            Http1ChunkedDecoder(limits, streamingResponse: true)
+        } else {
+            Http1ChunkedDecoder(limits: limits)
+        }
     }
 
     public func read(destination: Array<Byte>): Int64 {
@@ -735,8 +733,4 @@ private func prematureResponseEof(): Nothing {
         "peer closed before completing the HTTP/1 Content-Length body",
         retryability: Retryability.Never
     )
-}
-
-private func responseBodyTooLarge(): Nothing {
-    throw Http1ChunkException(Http1ChunkErrorCode.BodyTooLarge, "HTTP/1 response body exceeds configured limit")
 }
