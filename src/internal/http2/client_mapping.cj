@@ -280,14 +280,12 @@ public class Http2ClientResponseSequence {
         if (!finalHeadSeen || !bodyAllowed) {
             responseProtocolError(streamId, "HTTP/2 DATA is not valid in the current response state")
         }
-        if (length < 0 || length > limits.maxBodyBytes - receivedBodyBytes) {
-            responseProtocolError(streamId, "HTTP/2 response body exceeds the configured limit")
-        }
-        receivedBodyBytes += length
+        if (length < 0) { responseProtocolError(streamId, "HTTP/2 response DATA length is negative") }
         if (let Some(expected) <- expectedContentLength) {
-            if (receivedBodyBytes > expected) {
+            if (length > expected - min(receivedBodyBytes, expected)) {
                 responseProtocolError(streamId, "HTTP/2 response body exceeds Content-Length")
             }
+            receivedBodyBytes += length
         }
         if (endStream) { finishBodyLength(); terminal = true }
     }

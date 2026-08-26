@@ -642,7 +642,7 @@ private class Http2ClientBodyChannel <: HttpBodyStream {
                 if (credit > 0) { updates = flow.consumeReceived(streamId, credit) }
                 result
             }
-            submitClientUpdates(writer, updates)
+            submitClientUpdates(writer, updates, context)
             count
         } finally {
             registration.unregister()
@@ -657,16 +657,18 @@ private class Http2ClientBodyChannel <: HttpBodyStream {
             var credit: Int64 = 0
             for (segment in segments) { credit += segment.remainingFlowBytes }
             segments.clear()
-            if (credit > 0) { updates = flow.consumeReceived(streamId, credit) }
+            if (credit > 0) { updates = flow.consumeReceivedNow(streamId, credit) }
             changed.notifyAll()
         }
-        submitClientUpdates(writer, updates)
+        submitClientUpdates(writer, updates, context)
     }
 
     public func isClosed(): Bool { synchronized(mutex) { closed } }
 
     private func publishCredit(bytes: Int64): Unit {
-        if (bytes > 0) { submitClientUpdates(writer, flow.consumeReceived(streamId, bytes)) }
+        if (bytes > 0) {
+            submitClientUpdates(writer, flow.consumeReceived(streamId, bytes), context)
+        }
     }
 
     private func wake(): Unit { synchronized(mutex) { changed.notifyAll() } }
@@ -934,8 +936,15 @@ private func waitClientWrite(ticket: Http2WriteTicket, context: OperationContext
     }
 }
 
-private func submitClientUpdates(writer: Http2WriteScheduler, frames: Array<Http2Frame>): Unit {
-    for (frame in frames) { let _ = writer.enqueue(frame) }
+private func submitClientUpdates(
+    writer: Http2WriteScheduler,
+    frames: Array<Http2Frame>,
+    context: OperationContext
+): Unit {
+    if (frames.isEmpty()) { return }
+    waitClientWrites(
+        writer.enqueueControlBatchWaiting(frames, context: context), context
+    )
 }
 
 private func checkClientContext(context: OperationContext): Unit {

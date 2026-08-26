@@ -143,19 +143,17 @@ private func writeChunkedResponseBody(transport: DuplexTransport, body: Response
     tracker: ResponseWriteTracker, context: OperationContext, limits: HttpLimits,
     trailer: HttpTrailer): Unit {
     let buffer = Array<Byte>(16384, repeat: 0)
-    var total: Int64 = 0
     while (true) {
         let count = body.read(buffer)
         if (count == 0) { break }
-        if (count < 0 || count > buffer.size || count > limits.maxBodyBytes - total) {
+        if (count < 0 || count > buffer.size || count > limits.maxBodyBytes) {
             throw Http1ResponseWriteException(Http1ResponseWriteErrorCode.BodyTooLarge,
-                "HTTP/1 chunked response body exceeds its configured bound", tracker.snapshot())
+                "HTTP/1 response chunk exceeds its configured bound", tracker.snapshot())
         }
         let data = responsePrefix(buffer, count)
         let encoded = encodeHttp1Chunk(data, limits: limits)
         writeResponseTracked(transport, encoded, tracker, context,
             bodyStart: encoded.size - count - 2, bodyLength: count)
-        total += count
     }
     writeResponseTracked(transport, encodeHttp1FinalChunk(trailer: trailer, limits: limits), tracker, context)
 }
@@ -163,17 +161,15 @@ private func writeChunkedResponseBody(transport: DuplexTransport, body: Response
 private func writeCloseDelimitedResponseBody(transport: DuplexTransport, body: ResponseBody,
     tracker: ResponseWriteTracker, context: OperationContext, limits: HttpLimits): Unit {
     let buffer = Array<Byte>(16384, repeat: 0)
-    var total: Int64 = 0
     while (true) {
         let count = body.read(buffer)
         if (count == 0) { break }
-        if (count < 0 || count > buffer.size || count > limits.maxBodyBytes - total) {
+        if (count < 0 || count > buffer.size || count > limits.maxBodyBytes) {
             throw Http1ResponseWriteException(Http1ResponseWriteErrorCode.BodyTooLarge,
-                "HTTP/1 close-delimited response body exceeds its configured bound", tracker.snapshot())
+                "HTTP/1 response segment exceeds its configured bound", tracker.snapshot())
         }
         writeResponseTracked(transport, buffer, tracker, context, length: count,
             bodyStart: 0, bodyLength: count)
-        total += count
     }
 }
 

@@ -39,6 +39,26 @@ class Http1ServerResponseWriterTest {
     }
 
     @TestCase
+    func chunkedStreamingResponseMayExceedThePerSegmentBodyBound(): Unit {
+        let (server, client) = MemoryTransport.pair(capacity: 2048)
+        let response = HttpResponse(200, "OK",
+            ResponseBody(ServerWriterBody("abcd".toArray(), None<Int64>, maxRead: 2)),
+            headers: HttpHeaders.builder().add("Transfer-Encoding", "chunked").build())
+        let written = spawn {
+            let _ = writeHttp1Response(
+                server, HttpMethod("GET"), response,
+                limits: HttpLimits(maxBodyBytes: 2)
+            )
+        }
+        let expected = "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n" +
+            "2\r\nab\r\n2\r\ncd\r\n0\r\n\r\n"
+        let received = Array<Byte>(expected.toArray().size, repeat: 0)
+        readExact(client, MutableByteSpan(received))
+        @Expect(String.fromUtf8(received), expected)
+        written.get(Duration.second)
+    }
+
+    @TestCase
     func headResponseNeverTransfersRepresentationBytes(): Unit {
         let (server, client) = MemoryTransport.pair(capacity: 2048)
         let response = HttpResponse(200, "OK",
@@ -86,13 +106,18 @@ private class ServerWriterBody <: HttpBodyStream {
     private let declared: ?Int64
     private var offset: Int64 = 0
     private var closed = false
+    private let maxRead: Int64
 
-    init(bytes: Array<Byte>, declared: ?Int64) { this.bytes = bytes.clone(); this.declared = declared }
+    init(bytes: Array<Byte>, declared: ?Int64, maxRead!: Int64 = Int64.Max) {
+        this.bytes = bytes.clone()
+        this.declared = declared
+        this.maxRead = maxRead
+    }
     public prop contentLength: ?Int64 { get() { declared } }
     public func read(destination: Array<Byte>): Int64 {
         if (closed) { throw Exception("closed server writer body") }
         if (destination.isEmpty() || offset == bytes.size) { return 0 }
-        let count = min(destination.size, bytes.size - offset)
+        let count = min(min(destination.size, bytes.size - offset), maxRead)
         for (index in 0..count) { destination[index] = bytes[offset + index] }
         offset += count
         count

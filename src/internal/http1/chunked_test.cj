@@ -106,6 +106,19 @@ class Http1ChunkedCodecTest {
     }
 
     @TestCase
+    func streamingResponseKeepsEachChunkBoundedWithoutALifetimeCeiling(): Unit {
+        let decoder = Http1ChunkedDecoder(
+            HttpLimits(maxBodyBytes: 2), streamingResponse: true
+        )
+        let first = decoder.feed("2\r\nab\r\n".toArray())
+        @Expect(first.data, "ab".toArray())
+        @Expect(!first.complete)
+        let second = decoder.feed("2\r\ncd\r\n0\r\n\r\n".toArray())
+        @Expect(second.data, "cd".toArray())
+        @Expect(second.complete)
+    }
+
+    @TestCase
     func rejectsForbiddenOrFoldedTrailers(): Unit {
         expectChunkFailure(Http1ChunkErrorCode.InvalidTrailer, "0\r\nContent-Length: 1\r\n\r\n")
         expectChunkFailure(Http1ChunkErrorCode.InvalidTrailer, "0\r\nDigest: a\r\n folded\r\n\r\n")
