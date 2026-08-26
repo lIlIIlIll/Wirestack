@@ -527,7 +527,8 @@ public class HttpAutomaticHttpsClient <: Resource {
     public func execute(
         request: HttpRequest,
         context!: OperationContext = OperationContext.background(),
-        trailer!: HttpTrailer = HttpTrailer()
+        trailer!: HttpTrailer = HttpTrailer(),
+        connectionCancellation!: CancellationToken = CancellationToken.none()
     ): HttpResponse {
         if (request.url.scheme != "https") {
             throw IllegalArgumentException("automatic HTTPS client accepts only https URLs")
@@ -538,11 +539,14 @@ public class HttpAutomaticHttpsClient <: Resource {
                 try {
                     executeHttp1(key, request, context, trailer)
                 } catch (switched: Http2NegotiatedException) {
-                    executeAdoptedHttp2(key, switched.connection, request, context, trailer)
+                    executeAdoptedHttp2(
+                        key, switched.connection, request, context, trailer,
+                        connectionCancellation
+                    )
                 }
             case _ =>
                 try {
-                    executeHttp2(key, request, context, trailer)
+                    executeHttp2(key, request, context, trailer, connectionCancellation)
                 } catch (fallback: Http11NegotiatedException) {
                     match (fallback.connection) {
                         case Some(connection) => executeAdoptedHttp1(key, connection, request, context, trailer)
@@ -562,7 +566,8 @@ public class HttpAutomaticHttpsClient <: Resource {
         key: HttpConnectionPoolKey,
         request: HttpRequest,
         context: OperationContext,
-        trailer: HttpTrailer
+        trailer: HttpTrailer,
+        connectionCancellation: CancellationToken
     ): HttpResponse {
         let plan = mapHttp2ClientRequest(request, trailer: trailer, limits: limits, http2Limits: http2Limits)
         let signal = Http2ClientExecutionSignal()
@@ -577,7 +582,7 @@ public class HttpAutomaticHttpsClient <: Resource {
         }
         try {
             executable.executeClaimed(
-                request, plan, lease.admission, signal, context,
+                request, plan, lease.admission, signal, context, connectionCancellation,
                 { => h2Pool.release(lease) }
             )
         } catch (error: Exception) {
@@ -600,7 +605,8 @@ public class HttpAutomaticHttpsClient <: Resource {
         connection: Http2ClientPoolConnection,
         request: HttpRequest,
         context: OperationContext,
-        trailer: HttpTrailer
+        trailer: HttpTrailer,
+        connectionCancellation: CancellationToken
     ): HttpResponse {
         let plan = mapHttp2ClientRequest(request, trailer: trailer, limits: limits, http2Limits: http2Limits)
         let signal = Http2ClientExecutionSignal()
@@ -610,11 +616,11 @@ public class HttpAutomaticHttpsClient <: Resource {
             )
         } catch (error: Exception) {
             connection.close()
-            return executeHttp2(key, request, context, trailer)
+            return executeHttp2(key, request, context, trailer, connectionCancellation)
         }
         try {
             connection.executeClaimed(
-                request, plan, lease.admission, signal, context,
+                request, plan, lease.admission, signal, context, connectionCancellation,
                 { => h2Pool.release(lease) }
             )
         } catch (error: Exception) {

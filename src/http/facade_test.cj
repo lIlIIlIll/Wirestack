@@ -14,6 +14,217 @@ private func publicLoopback(port: UInt16): SocketEndpoint {
 @Test
 class HttpFacadeTest {
     @TestCase
+    func typedCancellationHandlesAreScopedIdempotentAndStopBeforeNetworkIo(): Unit {
+        let requestCancellation = HttpRequestCancellationHandle()
+        let connectionCancellation = HttpConnectionCancellationHandle()
+        let streamCancellation = HttpStreamCancellationHandle()
+        @Expect(requestCancellation.scope, HttpCancellationScope.Request)
+        @Expect(connectionCancellation.scope, HttpCancellationScope.Connection)
+        @Expect(streamCancellation.scope, HttpCancellationScope.Stream)
+        @Expect(requestCancellation.cancel())
+        @Expect(!requestCancellation.cancel())
+        @Expect(requestCancellation.isCancellationRequested)
+        let raceHandle = HttpStreamCancellationHandle()
+        let raceWinners = AtomicInt64(0)
+        let racers = ArrayList<Future<Unit>>()
+        for (_ in 0..64) {
+            racers.add(spawn {
+                if (raceHandle.cancel()) { let _ = raceWinners.fetchAdd(1) }
+            })
+        }
+        for (racer in racers) { racer.get(3 * Duration.second) }
+        @Expect(raceWinners.load(), 1)
+        @Expect(!raceHandle.cancel())
+
+        let handler = PublicCancellationHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let host = HostName("cancel.test")
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult(
+                [server.localEndpoint.address], host, ResolverSource.Static
+            )))
+            .requestTimeout(3 * Duration.second)
+            .build()
+        var cancelled = false
+        try {
+            let warmup = client.get(
+                "http://cancel.test:${server.localEndpoint.port}/small"
+            )
+            @Expect(readPublicBody(warmup.body), "ok")
+            warmup.close()
+            let _ = client.getControlled(
+                "http://cancel.test:${server.localEndpoint.port}/small",
+                HttpCancellationHandles(request: Some(requestCancellation))
+            )
+        } catch (error: NetworkException) {
+            match (error.category) {
+                case NetworkErrorCategory.Cancelled => cancelled = true
+                case _ => ()
+            }
+        } finally {
+            client.close()
+            let _ = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(3 * Duration.second))
+            ))
+            serving.get(3 * Duration.second)
+        }
+        @Expect(cancelled)
+        @Expect(handler.calls.load(), 1)
+        @Expect(connectionCancellation.cancel())
+        @Expect(!connectionCancellation.cancel())
+        @Expect(streamCancellation.cancel())
+        @Expect(!streamCancellation.cancel())
+    }
+
+    @TestCase
+    func publicHttp1ConnectionHandleCancelsBodyAndLeavesClientReusable(): Unit {
+        let handler = PublicCancellationHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let host = HostName("cancel.test")
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult(
+                [server.localEndpoint.address], host, ResolverSource.Static
+            )))
+            .requestTimeout(5 * Duration.second)
+            .build()
+        try {
+            let connectionCancellation = HttpConnectionCancellationHandle()
+            let response = client.getControlled(
+                "http://cancel.test:${server.localEndpoint.port}/large",
+                HttpCancellationHandles(connection: Some(connectionCancellation))
+            )
+            @Expect(response.version, HttpVersion.Http11)
+            @Expect(response.body.read(Array<Byte>(4096, repeat: 0u8)), 4096)
+            @Expect(connectionCancellation.cancel())
+            @Expect(!connectionCancellation.cancel())
+            @Expect(publicBodyReadWasCancelled(response.body))
+            response.close()
+
+            let next = client.get("http://cancel.test:${server.localEndpoint.port}/small")
+            @Expect(readPublicBody(next.body), "ok")
+            next.close()
+            @Expect(handler.http1HandleChecks.load() >= 2)
+            client.close()
+            let result = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(5 * Duration.second))
+            ))
+            @Expect(result.activeAtReturn, 0)
+            serving.get(5 * Duration.second)
+        } finally {
+            client.close()
+            if (!server.isClosed()) {
+                let _ = server.shutdown(context: OperationContext(
+                    deadline: Some(Deadline.after(5 * Duration.second))
+                ))
+                serving.get(5 * Duration.second)
+            }
+        }
+    }
+
+    @TestCase
+    func publicHttp2StreamAndConnectionHandlesRespectTheirScopes(): Unit {
+        let certificate = publicTlsTestCertificateDer()
+        let serverTls = HttpServerTlsConfig([certificate], publicTlsTestPrivateKeyDer())
+        let handler = PublicCancellationHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .tls(serverTls)
+            .http2StreamLimit(8u32)
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let host = HostName("example.com")
+        let clientTls = HttpClientTlsConfig([certificate])
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult(
+                [server.localEndpoint.address], host, ResolverSource.Static
+            )))
+            .tls(clientTls)
+            .requestTimeout(5 * Duration.second)
+            .build()
+        try {
+            let streamCancellation = HttpStreamCancellationHandle()
+            let first = client.getControlled(
+                "https://example.com:${server.localEndpoint.port}/large",
+                HttpCancellationHandles(stream: Some(streamCancellation))
+            )
+            @Expect(first.version, HttpVersion.Http2)
+            @Expect(first.body.read(Array<Byte>(4096, repeat: 0u8)), 4096)
+            let sibling = client.get(
+                "https://example.com:${server.localEndpoint.port}/small"
+            )
+            @Expect(readPublicBody(sibling.body), "ok")
+            sibling.close()
+            @Expect(streamCancellation.cancel())
+            @Expect(!streamCancellation.cancel())
+            @Expect(publicBodyReadWasCancelled(first.body))
+            first.close()
+
+            let stillUsable = client.get(
+                "https://example.com:${server.localEndpoint.port}/small"
+            )
+            @Expect(readPublicBody(stillUsable.body), "ok")
+            stillUsable.close()
+
+            let requestCancellation = HttpRequestCancellationHandle()
+            let wholeRequest = client.getControlled(
+                "https://example.com:${server.localEndpoint.port}/large",
+                HttpCancellationHandles(request: Some(requestCancellation))
+            )
+            @Expect(wholeRequest.body.read(Array<Byte>(4096, repeat: 0u8)), 4096)
+            @Expect(requestCancellation.cancel())
+            @Expect(!requestCancellation.cancel())
+            @Expect(publicBodyReadWasCancelled(wholeRequest.body))
+            wholeRequest.close()
+
+            let afterRequestCancel = client.get(
+                "https://example.com:${server.localEndpoint.port}/small"
+            )
+            @Expect(readPublicBody(afterRequestCancel.body), "ok")
+            afterRequestCancel.close()
+
+            let connectionCancellation = HttpConnectionCancellationHandle()
+            let onConnection = client.getControlled(
+                "https://example.com:${server.localEndpoint.port}/large",
+                HttpCancellationHandles(connection: Some(connectionCancellation))
+            )
+            let otherStream = client.get(
+                "https://example.com:${server.localEndpoint.port}/large"
+            )
+            @Expect(connectionCancellation.cancel())
+            @Expect(!connectionCancellation.cancel())
+            @Expect(publicBodyReadWasCancelled(onConnection.body))
+            @Expect(publicBodyReadWasCancelled(otherStream.body))
+            onConnection.close()
+            otherStream.close()
+            @Expect(handler.http2HandleChecks.load() >= 7)
+            let result = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(5 * Duration.second))
+            ))
+            @Expect(result.activeAtReturn, 0)
+            serving.get(5 * Duration.second)
+        } finally {
+            client.close()
+            clientTls.close()
+            if (!server.isClosed()) {
+                let _ = server.shutdown(context: OperationContext(
+                    deadline: Some(Deadline.after(5 * Duration.second))
+                ))
+                serving.get(5 * Duration.second)
+            }
+            serverTls.close()
+        }
+    }
+
+    @TestCase
     func tlsHttp2StreamLimitIsAppliedAcrossConcurrentPublicRequests(): Unit {
         let certificate = publicTlsTestCertificateDer()
         let serverTls = HttpServerTlsConfig(
@@ -461,6 +672,56 @@ private class PublicHttp2EchoHandler <: HttpServerHandler {
                 headers: HttpHeaders.builder().add("X-Response-Trailer", "done").build()
             )
         )
+    }
+}
+
+private class PublicCancellationHandler <: HttpServerHandler {
+    let calls = AtomicInt64(0)
+    let http1HandleChecks = AtomicInt64(0)
+    let http2HandleChecks = AtomicInt64(0)
+
+    public func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse {
+        let _ = context
+        calls.fetchAdd(1)
+        @Expect(request.requestCancellation.scope, HttpCancellationScope.Request)
+        @Expect(request.connectionCancellation.scope, HttpCancellationScope.Connection)
+        match (request.version) {
+            case HttpVersion.Http2 =>
+                @Expect(
+                    request.streamCancellation.getOrThrow().scope,
+                    HttpCancellationScope.Stream
+                )
+                http2HandleChecks.fetchAdd(1)
+            case _ =>
+                @Expect(request.streamCancellation.isNone())
+                http1HandleChecks.fetchAdd(1)
+        }
+        let _ = request.body.read(Array<Byte>(1, repeat: 0u8))
+        let bytes = if (request.target == "/large") {
+            Array<Byte>(256 * 1024, repeat: b'x')
+        } else {
+            "ok".toArray()
+        }
+        HttpServerResponse(HttpResponse(
+            200,
+            "OK",
+            ResponseBody(RequestBody.bytes(bytes).open()),
+            headers: HttpHeaders.builder()
+                .add("Content-Length", bytes.size.toString())
+                .build()
+        ))
+    }
+}
+
+private func publicBodyReadWasCancelled(body: ResponseBody): Bool {
+    try {
+        let _ = body.read(Array<Byte>(4096, repeat: 0u8))
+        false
+    } catch (error: NetworkException) {
+        match (error.category) {
+            case NetworkErrorCategory.Cancelled => true
+            case _ => false
+        }
     }
 }
 

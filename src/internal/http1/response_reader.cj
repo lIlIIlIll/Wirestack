@@ -545,7 +545,9 @@ internal class Http1FixedBodyStream <: HttpBodyStream {
     public prop contentLength: ?Int64 { get() { Some(length) } }
     public func read(destination: Array<Byte>): Int64 {
         ensureResponseStreamOpen(closed)
-        if (destination.isEmpty() || consumed == length) { return 0 }
+        if (destination.isEmpty()) { return 0 }
+        checkHttp1BodyContext(context)
+        if (consumed == length) { return 0 }
         let fromInitial = copyResponseBytes(initial, initialOffset, destination, length - consumed)
         if (fromInitial > 0) {
             initialOffset += fromInitial
@@ -586,7 +588,9 @@ private class Http1CloseBodyStream <: HttpBodyStream {
     public prop contentLength: ?Int64 { get() { None<Int64> } }
     public func read(destination: Array<Byte>): Int64 {
         ensureResponseStreamOpen(closed)
-        if (destination.isEmpty() || eof) { return 0 }
+        if (destination.isEmpty()) { return 0 }
+        checkHttp1BodyContext(context)
+        if (eof) { return 0 }
         let fromInitial = copyResponseBytes(initial, initialOffset, destination, maximum - consumed)
         if (fromInitial > 0) {
             initialOffset += fromInitial
@@ -637,6 +641,7 @@ internal class Http1ChunkedBodyStream <: HttpBodyStream {
     public func read(destination: Array<Byte>): Int64 {
         ensureResponseStreamOpen(closed)
         if (destination.isEmpty()) { return 0 }
+        checkHttp1BodyContext(context)
         while (true) {
             let copied = copyResponseBytes(pending, pendingOffset, destination, destination.size)
             if (copied > 0) { pendingOffset += copied; return copied }
@@ -674,6 +679,21 @@ internal class Http1ChunkedBodyStream <: HttpBodyStream {
 private class InternalNoopBodyObserver <: ResponseBodyObserver {
     public func completed(): Unit {}
     public func abandoned(): Unit {}
+}
+
+private func checkHttp1BodyContext(context: OperationContext): Unit {
+    if (context.isCancellationRequested()) {
+        throw NetworkException(
+            NetworkErrorCategory.Cancelled, NetworkPhase.HttpBody, NetworkErrorCode.Cancelled,
+            "HTTP/1 body cancelled", retryability: Retryability.Never
+        )
+    }
+    if (context.isDeadlineExceeded()) {
+        throw NetworkException(
+            NetworkErrorCategory.DeadlineExceeded, NetworkPhase.HttpBody, NetworkErrorCode.TimedOut,
+            "HTTP/1 body deadline exceeded", retryability: Retryability.Temporary
+        )
+    }
 }
 
 private func copyResponseBytes(
