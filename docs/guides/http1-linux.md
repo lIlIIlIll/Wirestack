@@ -46,6 +46,40 @@ try {
 Always consume or close the request body before returning when the connection
 should remain reusable.
 
+## Typed cancellation handles
+
+Create a handle before starting a request when another task must stop work
+without owning the response object:
+
+```cj
+let requestCancellation = HttpRequestCancellationHandle()
+let streamCancellation = HttpStreamCancellationHandle()
+let response = client.getControlled(
+    "https://service.internal/events",
+    HttpCancellationHandles(
+        request: Some(requestCancellation),
+        stream: Some(streamCancellation)
+    )
+)
+
+// Either call is idempotent; exactly one caller observes true.
+let _ = streamCancellation.cancel()
+response.close()
+```
+
+`HttpRequestCancellationHandle` covers the complete request path from routing
+and DNS through response-body EOF. `HttpStreamCancellationHandle` sends one
+HTTP/2 `RST_STREAM` and leaves sibling streams usable. HTTP/1.1 has no
+independent stream scope, so cancelling its current stream/request terminates
+the exclusive connection. `HttpConnectionCancellationHandle` aborts the
+selected H1 connection or every stream on the selected H2 connection.
+
+Server handlers receive the same typed control surface on
+`HttpServerRequest`: `requestCancellation`, `connectionCancellation`, and an
+optional `streamCancellation` that is present only for HTTP/2. Handler contexts
+observe cancellation through the same immutable `OperationContext`; no second
+timeout owner is created.
+
 ## TLS HTTP/2 and HTTP/1.1 server
 
 Certificate chains are leaf-first DER arrays; private keys are exact,

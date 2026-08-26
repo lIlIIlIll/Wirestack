@@ -165,7 +165,16 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                 let exchange = Http2ServerExchange.open(
                     block.streamId, decoder.decode(block.bytes), block.endStream,
                     registry.getOrThrow(), flow, this, limits: limits, http2Limits: http2Limits,
-                    streamAlreadyOpened: true
+                    streamAlreadyOpened: true,
+                    localCancellation: { =>
+                        try {
+                            let _ = reset.getOrThrow().cancelLocal(
+                                block.streamId,
+                                code: Http2ErrorCode.Cancel,
+                                reason: "HTTP/2 server stream cancelled by public handle"
+                            )
+                        } catch (_: Exception) {}
+                    }
                 )
                 machine.markPeerStreamProcessed(block.streamId)
                 synchronized(mutex) { exchanges.add(exchange) }

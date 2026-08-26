@@ -158,26 +158,73 @@ public class HttpClient <: Resource {
 
     public func get(url: String,
         context!: OperationContext = OperationContext.background()): HttpResponse {
+        send(parseGetRequest(url), context: context)
+    }
+
+    public func getControlled(
+        url: String,
+        cancellation: HttpCancellationHandles,
+        context!: OperationContext = OperationContext.background()
+    ): HttpResponse {
+        sendControlled(parseGetRequest(url), cancellation, context: context)
+    }
+
+    private func parseGetRequest(url: String): HttpRequest {
         let request = try {
             HttpRequest.get(url)
         } catch (error: Exception) {
             throw HttpException(HttpErrorCode.InvalidUrl, "invalid HTTP URL", cause: error)
         }
-        send(request, context: context)
+        request
     }
 
     public func send(request: HttpRequest,
         context!: OperationContext = OperationContext.background(),
-        trailer!: HttpTrailer = HttpTrailer()): HttpResponse {
-        let operation = match (requestTimeout) {
+        trailer!: HttpTrailer = HttpTrailer()
+    ): HttpResponse {
+        sendInternal(
+            request, context, trailer,
+            None<HttpRequestCancellationHandle>,
+            None<HttpConnectionCancellationHandle>,
+            None<HttpStreamCancellationHandle>
+        )
+    }
+
+    public func sendControlled(
+        request: HttpRequest,
+        cancellation: HttpCancellationHandles,
+        context!: OperationContext = OperationContext.background(),
+        trailer!: HttpTrailer = HttpTrailer()
+    ): HttpResponse {
+        sendInternal(
+            request, context, trailer,
+            cancellation.request, cancellation.connection, cancellation.stream
+        )
+    }
+
+    private func sendInternal(
+        request: HttpRequest,
+        context: OperationContext,
+        trailer: HttpTrailer,
+        requestCancellation: ?HttpRequestCancellationHandle,
+        connectionCancellation: ?HttpConnectionCancellationHandle,
+        streamCancellation: ?HttpStreamCancellationHandle
+    ): HttpResponse {
+        let bounded = match (requestTimeout) {
             case Some(value) => context.shortenDeadline(value)
             case None => context
         }
+        let cancellation = HttpRequestCancellationOperation(
+            bounded, requestCancellation, connectionCancellation, streamCancellation
+        )
+        let operation = cancellation.context
         try {
             var current = request
             var redirectCount: Int64 = 0
             while (true) {
-                let response = executeWithRetries(current, operation, trailer)
+                let response = executeWithRetries(
+                    current, operation, trailer, cancellation.connectionCancellation
+                )
                 let next = try {
                     redirectPolicy.nextRequest(
                         current, response, redirectsFollowed: redirectCount, limits: limits
@@ -191,17 +238,20 @@ public class HttpClient <: Resource {
                         let _ = response.body.drain(redirectPolicy.maximumDrainBytes)
                         current = value
                         redirectCount++
-                    case None => return response
+                    case None => return cancellation.wrap(response)
                 }
             }
             throw Exception("unreachable HTTP redirect loop exit")
         } catch (error: Exception) {
+            cancellation.fail()
             throw wrapHttpError(error)
         }
     }
 
     private func executeOnce(request: HttpRequest, operation: OperationContext,
-        trailer: HttpTrailer): HttpResponse {
+        trailer: HttpTrailer,
+        connectionCancellation: transport.CancellationToken
+    ): HttpResponse {
         if (isClosed()) { throw IllegalStateException("HTTP client is closed") }
         let route = match (proxy) {
             case Some(value) => value.routeFor(request.url)
@@ -218,7 +268,8 @@ public class HttpClient <: Resource {
                 )
             case ("https", HttpProxyRoute.Direct) =>
                 httpsClient().execute(withProxyAuthorization(request, None<String>),
-                    context: operation, trailer: trailer)
+                    context: operation, trailer: trailer,
+                    connectionCancellation: connectionCancellation)
             case ("https", HttpProxyRoute.Proxy(value)) =>
                 let authorization = value.authorization(request.url, operation)
                 httpsProxyClient(value).execute(
@@ -232,11 +283,13 @@ public class HttpClient <: Resource {
     }
 
     private func executeWithRetries(request: HttpRequest, operation: OperationContext,
-        trailer: HttpTrailer): HttpResponse {
+        trailer: HttpTrailer,
+        connectionCancellation: transport.CancellationToken
+    ): HttpResponse {
         var attempt: Int64 = 1
         while (true) {
             try {
-                return executeOnce(request, operation, trailer)
+                return executeOnce(request, operation, trailer, connectionCancellation)
             } catch (error: Exception) {
                 if (!retryPolicy.shouldRetry(request, error, attempt, operation)) { throw error }
                 attempt++

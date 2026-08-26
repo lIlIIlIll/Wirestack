@@ -40,13 +40,22 @@ public class Http2ServerRequest <: Resource {
     public let streamId: Http2StreamId
     public let head: Http2ServerRequestHead
     public let body: ResponseBody
+    private let localCancellation: () -> Unit
 
-    internal init(streamId: Http2StreamId, head: Http2ServerRequestHead, body: ResponseBody) {
+    internal init(
+        streamId: Http2StreamId,
+        head: Http2ServerRequestHead,
+        body: ResponseBody,
+        localCancellation!: () -> Unit = { => }
+    ) {
         this.streamId = streamId
         this.head = head
         this.body = body
+        this.localCancellation = localCancellation
     }
 
+    /** Requests one local RST_STREAM without exposing the reset manager. */
+    public func cancelStream(): Unit { localCancellation() }
     public func close(): Unit { body.close() }
     public func isClosed(): Bool { body.isClosed() }
 }
@@ -115,7 +124,8 @@ public class Http2ServerExchange <: Http2StreamResetListener {
         context!: OperationContext = OperationContext.background(),
         limits!: HttpLimits = HttpLimits(),
         http2Limits!: Http2Limits = Http2Limits(),
-        streamAlreadyOpened!: Bool = false
+        streamAlreadyOpened!: Bool = false,
+        localCancellation!: () -> Unit = { => }
     ): Http2ServerExchange {
         if (!streamAlreadyOpened) { let _ = registry.openPeer(streamId, endStream: endStream) }
         var flowOpened = false
@@ -130,7 +140,9 @@ public class Http2ServerExchange <: Http2StreamResetListener {
             if (endStream) { channel.finish(None<HttpTrailer>) }
             let body = ResponseBody(channel, trailerProvider: { => channel.trailer })
             Http2ServerExchange(
-                streamId, Http2ServerRequest(streamId, head, body), registry, flow, sink,
+                streamId, Http2ServerRequest(
+                    streamId, head, body, localCancellation: localCancellation
+                ), registry, flow, sink,
                 channel, limits, http2Limits, endStream
             )
         } catch (error: Exception) {
