@@ -32,7 +32,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M1-007 structured network error | COMPLETE | category/phase/code/retryability/native/endpoint/cause model and tests |
 | M1-008 exactly-once completion | COMPLETE | Bounded cleanup registry, one terminal winner, idempotent unregister, late-registration cleanup, failure isolation and 100-round registration/unregister races; [Linux evidence](../evidence/M1-008/README.md) |
 | M1-009 Transport lifecycle | COMPLETE | Controlled creation/open/half-close/close/abort/failure transitions, stable invalid-state errors, bounded terminal cleanup and 100-round terminal races; [Linux evidence](../evidence/M1-009/README.md) |
-| M1-010 `DuplexTransport` contract | IN_PROGRESS | Contract and MemoryTransport semantics exist; adapters still need conversion from local lifecycle fields to the shared M1-009 state machine |
+| M1-010 `DuplexTransport` contract | COMPLETE | The contract freezes read/write/shutdown/close/abort semantics, empty buffers never fabricate EOF, same-direction concurrency fails, and `MemoryTransport` uses the shared lifecycle; adapter-local native wakeup fields are outside this core-contract task; [Linux evidence](../evidence/M1-010/README.md) |
 | M1-011 `writeAll`/`readExact` | COMPLETE | Partial I/O, empty range and premature EOF tests |
 | M1-012 `TransportListener` | COMPLETE | Contract plus bounded `StdNetTransportListener`; Deadline/cancel/close wakeup integration tests |
 | M1-013 `MemoryTransport` | IN_PROGRESS | Bounded duplex, backpressure, half-close, EOF, cancellation and terminal tests pass; listener/fault scripting remains |

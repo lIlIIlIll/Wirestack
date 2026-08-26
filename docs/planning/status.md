@@ -43,6 +43,15 @@ Status values:
 | M0-021 | BLOCKED | — | Depends on all M0 gate evidence plus the accepted Transport SPI. |
 | M0-022 | BLOCKED | — | Depends on M0-004 through M0-021. |
 
+## Linux M1 closure work
+
+This table records Linux-only completion and does not generalize to the global
+six-platform milestone.
+
+| ID | Status | Evidence | Notes |
+|---|---|---|---|
+| M1-010 | COMPLETE | [`docs/evidence/M1-010/README.md`](../evidence/M1-010/README.md) | `DuplexTransport` semantics are frozen; lifecycle claims enforce one reader and one writer, and MemoryTransport proves empty-buffer, half-close, cancellation, deadline, close and abort behavior. |
+
 ## Conditional upstream work
 
 `UP-001` through `UP-007` remain **BLOCKED / DO NOT START** until the corresponding
