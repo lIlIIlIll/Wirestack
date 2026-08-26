@@ -116,25 +116,34 @@ class RssSampler:
     def __init__(self, interval_seconds: float = 0.005) -> None:
         self.interval_seconds = interval_seconds
         self.samples_kib: list[int] = []
+        self.thread_samples: list[int] = []
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
 
     def start(self, pid: int) -> None:
         self._stop.clear()
         self.samples_kib = []
+        self.thread_samples = []
+
+        status = Path(f"/proc/{pid}/status")
+
+        def sample_once() -> None:
+            try:
+                lines = status.read_text(encoding="utf-8").splitlines()
+            except (FileNotFoundError, ProcessLookupError, PermissionError):
+                return
+            for line in lines:
+                if line.startswith("VmRSS:"):
+                    self.samples_kib.append(int(line.split()[1]))
+                elif line.startswith("Threads:"):
+                    self.thread_samples.append(int(line.split()[1]))
 
         def sample() -> None:
-            status = Path(f"/proc/{pid}/status")
             while not self._stop.is_set():
-                try:
-                    for line in status.read_text(encoding="utf-8").splitlines():
-                        if line.startswith("VmRSS:"):
-                            self.samples_kib.append(int(line.split()[1]))
-                            break
-                except (FileNotFoundError, ProcessLookupError, PermissionError):
-                    pass
+                sample_once()
                 self._stop.wait(self.interval_seconds)
 
+        sample_once()
         self._thread = threading.Thread(target=sample, daemon=True)
         self._thread.start()
 
@@ -148,6 +157,10 @@ class RssSampler:
     @property
     def peak_kib(self) -> int | None:
         return max(self.samples_kib) if self.samples_kib else None
+
+    @property
+    def peak_threads(self) -> int | None:
+        return max(self.thread_samples) if self.thread_samples else None
 
 
 class StreamServer:
@@ -249,8 +262,9 @@ def classify_sample(case: Case, requested_buffer: int, process: Mapping[str, Any
     close_code = int(fields["closeCode"])
     exact = (bytes_read == case.payload_bytes == server.bytes_sent == sum(read_sizes))
     process_ok = process["exit_code"] == 0 and not process["timed_out"]
+    expected_progress = read_calls > 0 or case.payload_bytes == 0
     valid = (process_ok and exact and invalid == 0 and not eof and close_code == 0 and
-             read_calls == len(read_sizes) and read_calls > 0 and
+             read_calls == len(read_sizes) and expected_progress and
              all(0 < size <= requested_buffer for size in read_sizes))
     transfer_ms = round(duration_ns / 1_000_000.0, 3)
     throughput = None
@@ -268,11 +282,15 @@ def classify_sample(case: Case, requested_buffer: int, process: Mapping[str, Any
         "read_sizes": list(read_sizes),
         "max_read_size": max(read_sizes) if read_sizes else None,
         "min_read_size": min(read_sizes) if read_sizes else None,
-        "fixed_4k_cap": fixed_4k_cap(read_sizes, requested_buffer),
+        "fixed_4k_cap": (
+            case.payload_bytes > 4096 and fixed_4k_cap(read_sizes, requested_buffer)
+        ),
         "transfer_ms": transfer_ms,
         "throughput_mib_per_second": throughput,
         "peak_rss_kib": rss.peak_kib,
         "rss_samples_kib": rss.samples_kib,
+        "peak_thread_count": rss.peak_threads,
+        "thread_count_samples": rss.thread_samples,
         "server_send_sizes": server.send_sizes,
         "process": dict(process),
     }
@@ -283,6 +301,8 @@ def aggregate(case: Case, samples: Sequence[Mapping[str, Any]]) -> dict[str, Any
                   if item["throughput_mib_per_second"] is not None]
     transfer = [float(item["transfer_ms"]) for item in samples]
     rss = [float(item["peak_rss_kib"]) for item in samples if item["peak_rss_kib"] is not None]
+    threads = [float(item["peak_thread_count"]) for item in samples
+               if item["peak_thread_count"] is not None]
     read_sizes = [int(size) for item in samples for size in item["read_sizes"]]
     read_calls = [float(item["read_calls"]) for item in samples]
     return {
@@ -295,11 +315,17 @@ def aggregate(case: Case, samples: Sequence[Mapping[str, Any]]) -> dict[str, Any
             "p99": percentile(throughput, 99), "min": round(min(throughput), 3),
         },
         "peak_rss_kib": {"p50": percentile(rss, 50), "p95": percentile(rss, 95),
-                         "p99": percentile(rss, 99), "max": round(max(rss), 3)},
+                         "p99": percentile(rss, 99),
+                         "max": round(max(rss), 3) if rss else None},
+        "peak_thread_count": {"p50": percentile(threads, 50),
+                              "p95": percentile(threads, 95),
+                              "p99": percentile(threads, 99),
+                              "max": round(max(threads), 3) if threads else None},
         "read_size_bytes": {"p50": percentile(read_sizes, 50),
                             "p95": percentile(read_sizes, 95),
                             "p99": percentile(read_sizes, 99),
-                            "min": min(read_sizes), "max": max(read_sizes)},
+                            "min": min(read_sizes) if read_sizes else None,
+                            "max": max(read_sizes) if read_sizes else None},
         "read_calls": {"p50": percentile(read_calls, 50),
                        "p95": percentile(read_calls, 95),
                        "p99": percentile(read_calls, 99)},
@@ -335,8 +361,8 @@ def run_sample(binary: Path, case: Case, buffer_size: int, artifacts: Path,
                timeout: float) -> dict[str, Any]:
     rss = RssSampler()
     with StreamServer(case.payload_bytes, 64 * 1024, timeout) as server:
-        process = run_process([str(binary), str(server.port), str(case.payload_bytes),
-                               str(buffer_size)], artifacts / "probe", timeout, rss)
+        process = run_process([str(binary), "127.0.0.1", str(server.port), str(case.payload_bytes),
+                               str(buffer_size), "verbose"], artifacts / "probe", timeout, rss)
     read_sizes, fields = parse_probe_output(process["stdout"])
     return classify_sample(case, buffer_size, process, read_sizes, fields, server, rss)
 

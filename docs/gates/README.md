@@ -28,6 +28,24 @@ Each report must record:
 A failed gate may unlock an `UP-*` tracking task. It must never be bypassed by
 polling, private runtime handles, exception-message parsing, or TLS-layer guesses.
 
+### Linux raw TCP baseline
+
+Capture every required M0-005 loopback payload with one warmup and five measured
+samples:
+
+```bash
+bash scripts/gate-m0-005-raw-tcp-baseline \
+  --warmup 1 \
+  --repetitions 5 \
+  --repository-revision <tested-commit>
+```
+
+The report measures exact bytes, application-visible read sizes, transfer
+latency, throughput, peak RSS and process thread count for 0 B, 1 KiB, 16 KiB,
+64 KiB, 1 MiB and 100 MiB. It remains `BLOCKED` until a native LAN run and
+supported allocations/op and raw copied-bytes/op counters are also present.
+Do not infer those counters from heap-size deltas.
+
 ### Linux GATE-NET-06 formal profile
 
 The Linux profile uses two fail-closed reports. First run the pinned AWS-LC
