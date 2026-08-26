@@ -29,5 +29,13 @@ class NativeAccelPublicContractTest {
         let html = JsonWriteConfig("", "", false, true)
         @Expect(YJson.toJson(value, config: html),
             "\"0123456789012345678901234567890123456789012345678901234567890123\\n\\\"\\\\\\u003c中🙂\"")
+
+        let pair = ArrayList<String>(["prefix", value, value])
+        let pairExpected = "[\"prefix\",${expected},${expected}]"
+        @Expect(YJson.toJson(pair), pairExpected)
+        @Expect(String.fromUtf8(YJson.encodeBytesWith(YJson.arrayListCodec(StringJson), pair)), pairExpected)
+        let pairStream = YJsonMemoryOutputStream()
+        YJson.toStream(pair, pairStream)
+        @Expect(pairStream.toUtf8String(), pairExpected)
     }
 }
