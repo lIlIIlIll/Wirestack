@@ -39,5 +39,6 @@ let first = root.get("items").getOrThrow().get(0).getOrThrow().asInt64()
 兼容入口 `YJson.parseCompact` 与 `CompactJsonDocument.parse` 保持 borrowed 语义。不能保证
 输入在 document 生命周期内不可变时，选择 owned 入口。
 
-Pure Compact document 由 GC 管理，不需要 `close()`。Native document 的生命周期完全
-不同，必须显式关闭；见 [Backend 使用指南](backends.md)。
+`YJson.parseDocument` 返回的 Compact document 始终由 GC 管理，不需要 `close()`。
+显式资源生命周期只存在于独立 `yjson_backends.BackendJsonDocument`；见
+[Backend 使用指南](backends.md)。

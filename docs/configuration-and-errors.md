@@ -11,10 +11,12 @@ let config = JsonReadConfig(
     duplicateKeyPolicy: JsonDuplicateKeyPolicy.LastWins,
     numberPolicy: JsonNumberPolicy.Int64WhenExact,
     includeErrorLocation: true,
-    maxDepth: 256,
-    maxBytes: 0,
-    maxStringBytes: 0,
-    maxPolymorphicObjectBytes: 0
+    limits: JsonReadLimits(
+        maxDepth: 256,
+        maxBytes: 0,
+        maxStringBytes: 0,
+        maxPolymorphicObjectBytes: 0
+    )
 )
 ```
 
@@ -56,6 +58,7 @@ let config = JsonReadConfig(
 | `invalid_json_path` | JSONPath 表达式无效 |
 | `unsupported_schema_dialect` | Schema 不是 draft 2020-12 |
 | `unsupported_schema_format` | StrictAssertion 遇到未知 format |
+| `work_limit_exceeded` | JSONPath、Patch/Merge Patch 或 Schema 工作预算耗尽 |
 
 `includeErrorLocation` 为 true 时，适用的 parse/limit 错误携带 offset、line 和 column；
 语义错误不保证具有同样的位置粒度。

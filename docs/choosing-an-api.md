@@ -11,11 +11,11 @@ Native”选择入口，不要因为某个底层类型看起来更快就直接�
 | 已有 built-in 或 custom codec | `encode*With/decode*With` | 显式传入 `JsonCodec<T>` |
 | 直接拼出 JSON 文本 | `@Json({...})` | 返回 `String`，不构建 AST |
 | 构造或修改 JSON 树 | `@JsonValue` / `YJson.parse` | 返回可修改 `JsonNode` |
-| 只读查询文档 | `YJson.parseDocument` | 默认 Pure Compact，可显式选 backend |
+| 只读查询文档 | `YJson.parseDocument` | GC 管理的 Compact document |
 | 读写 caller-owned stream | `toStream/fromStream` 或 `*StreamWith` | yjson 不关闭 stream |
-| 校验 JSON 实例 | `JsonSchema` | 只支持 draft 2020-12 |
-| 精确定位或多结果查询 | `JsonPointer` / `JsonPath` | RFC 6901 / RFC 9535 |
-| 原子更新 JSON | `JsonPatch` / `JsonMergePatch` | RFC 6902 / RFC 7386 |
+| 校验 JSON 实例 | `yjson_algorithms.JsonSchema` | draft 2020-12；默认有限预算 |
+| 精确定位或多结果查询 | `yjson_algorithms` 的 Pointer / Path | 默认有限预算 |
+| 原子更新 JSON | `yjson_algorithms` 的 Patch / Merge Patch | 默认有限预算 |
 
 ## 有目标类型：使用 typed codec
 
@@ -46,9 +46,8 @@ let user = YJson.fromJson<User>(text)
 let tree = YJson.parse(text)
 tree.asObject().put("active", JsonBoolValue(true))
 
-try (document = YJson.parseDocument(text)) {
-    let name = document.materialize()["name"].string
-}
+let document = YJson.parseDocument(text)
+let name = document.materialize()["name"].string
 ```
 
 `materialize()` 会转成完整 `JsonNode`，因此也会放弃 Compact 表示的内存特性。需要频繁、
@@ -56,11 +55,12 @@ try (document = YJson.parseDocument(text)) {
 
 ## 是否需要 Native
 
-默认从 Pure Cangjie 开始。只有 profiling 证明 DOM parse、查询或较大 typed decode 是瓶颈，
-并且部署环境能构建 Native package 时，才评估 `yjson_native` 或 `yjson_yyjson`。
+默认从 Pure Cangjie 开始。只有 profiling 证明读写是瓶颈，并且部署环境能构建 Native
+package 时，才在应用启动、首次 `YJson` 调用前执行一次
+`YJsonNativeAccel.initialize()`。初始化成功后继续使用相同 `YJson` API；失败不会静默回退。
 
-Native 不会被 `yjson_all` 自动启用，也不会在失败时静默回退。它还引入显式 `close()`、
-线程同步和平台 qualification 要求。完整选择矩阵见 [Backend 使用指南](backends.md)。
+只有确实需要 Custom Native/yyjson whole-document DOM 或 stream 行为时，才使用
+`yjson_backends` 的显式资源 API。完整选择矩阵见 [Backend 使用指南](backends.md)。
 
 ## 下一步
 

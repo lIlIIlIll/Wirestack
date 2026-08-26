@@ -9,7 +9,8 @@
 - generated codec 保留 canonical fast path，显式 config 继续走完整语义 reader。
 - `YJson.fastDecoder` 复用 codec 选择，但不持有输入或跨调用共享可变 parser state。
 - Large Map encode 使用单次遍历和 direct output，避免排序/materialization/二次扫描。
-- Pure 保持默认 backend；Native 由应用基于 profiling 显式选择。
+- Pure 是未配置时冻结的默认引擎；Native 加速只在首次 `YJson` 调用前由应用基于
+  profiling 显式初始化一次。
 
 ## 未采用
 

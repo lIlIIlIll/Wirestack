@@ -33,6 +33,7 @@
 ## 选型与迁移
 
 - [库能力对比](library-comparison.md)：比较公开 contract；不把跨批次性能数据拼成排名。
+- [1.x → 2.0 迁移](migration/1.x-to-2.0.md)：单引擎、启动冻结、limits 与算法包拆分。
 - [pre-1.0 → 1.0 迁移](migration/pre-1.0-to-1.0.md)：类型改名、配置变化、codec 和
   package 配套要求。
 - [性能文档](performance/README.md)：当前可引用结论、方法、原始结果入口与适用边界。

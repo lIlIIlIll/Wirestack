@@ -11,11 +11,12 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-yellow?style=flat" alt="Apache License 2.0" /></a>
   <img src="https://img.shields.io/badge/Cangjie-1.1.0-3B82F6?style=flat" alt="Cangjie 1.1.0" />
-  <img src="https://img.shields.io/badge/manifest-1.0.0-10B981?style=flat" alt="Manifest version 1.0.0" />
+  <img src="https://img.shields.io/badge/manifest-2.0.0-10B981?style=flat" alt="Manifest version 2.0.0" />
 </p>
 
-yjson 默认只使用仓颉实现。普通应用通过 `@JsonCodec` 获得类型安全的 JSON
-编解码；需要 Native DOM 或 Native typed stream backend 时，再显式添加对应 package。
+yjson 2.0 默认使用跨平台、GC 管理的 Pure 引擎。普通应用只需要
+`YJson.toJson`、`YJson.fromJson<T>` 与 `YJson.parseDocument`；不需要选择 backend，
+也不需要管理 scanner、whole-document 资源或 `close()`。
 
 ## 适合什么场景
 
@@ -48,8 +49,9 @@ Native backend。只使用 parser、AST 或内置 codec 时，可以仅依赖 co
 yjson = { path = "../yjson" }
 ```
 
-所有 yjson package 必须来自同一 checkout 或同一 release，并一起重新编译。Native
-package 的依赖和构建要求见 [Backend 使用指南](docs/backends.md)。
+`yjson` 与 `yjson_macros` 作为一个发行单元升级；generated codec 通过 v1 protocol
+检查兼容性，不要求应用人工匹配 exact commit。Native 加速与高级 backend 的依赖和
+构建要求见 [Backend 使用指南](docs/backends.md)。
 
 ## 快速开始
 
@@ -88,10 +90,10 @@ main(): Unit {
 | 使用显式或自定义 codec | `encode*With` / `decode*With` | 不要求类型实现 provider |
 | 直接构造 JSON 文本 | `@Json({...})` | 返回 `String`；不先创建 AST |
 | 构造并修改 JSON 树 | `@JsonValue({...})` / `YJson.parse` | 返回 `JsonNode` |
-| 只读查询文档 | `YJson.parseDocument` | 默认 Pure Compact；backend 可切换 |
+| 只读查询文档 | `YJson.parseDocument` | GC 管理的 Compact document，无 `close()` |
 | 读写 caller-owned stream | `toStream` / `fromStream` 或 `*StreamWith` | 不关闭调用方 stream |
-| 校验 JSON | `JsonSchema` | draft 2020-12 |
-| 定位、查询或更新节点 | `JsonPointer` / `JsonPath` / `JsonPatch` | 标准化路径与变更语义 |
+| 校验 JSON | `yjson_algorithms.JsonSchema` | draft 2020-12；默认有限预算 |
+| 定位、查询或更新节点 | `yjson_algorithms` 的 Pointer / Path / Patch | 默认有限预算 |
 
 不知道从哪里开始时，阅读 [API 选择指南](docs/choosing-an-api.md)。
 
@@ -121,23 +123,26 @@ flowchart LR
     All --> Macros[yjson_macros]
     Macros --> Codec[generated JsonCodec]
     Codec --> Core
-    Core --> Pure[Pure Cangjie parser / AST / Compact / Stream]
-    App -. 显式依赖 .-> Native[yjson_native / yjson_yyjson]
-    Native --> Core
+    Core --> Pure[单一 reader / writer semantic engine]
+    App -. 启动时一次 initialize .-> Accel[yjson_native_accel]
+    Accel --> Core
+    App -. 高级显式资源 .-> Backends[yjson_backends]
 ```
 
-普通 typed 调用从 generated 或 built-in `JsonCodec<T>` 进入 backend-neutral reader/writer。
-Native package 是可选边界，不会自动替换 core 行为。更完整的调用链见
+普通 typed 调用从 generated 或 built-in `JsonCodec<T>` 进入同一 reader/writer。
+`YJsonNativeAccel.initialize()` 只在首次 `YJson` 调用前冻结一次 Native profile；之后仍使用
+相同 `YJson` API，初始化失败不会静默回退。更完整的调用链见
 [架构说明](docs/architecture.md)。
 
 ## 重要边界
 
-- `JsonReadConfig` 的 byte limit 默认 `0 = unlimited`，`maxDepth` 默认 256；处理不可信
-  输入时应显式设置预算。
-- 默认 Pure stream backend 增量读取单个完整 JSON document；它不是多文档 framing
+- `JsonReadConfig` 组合 `JsonReadLimits`，`JsonWriteConfig` 组合 `JsonWriteLimits`；
+  byte limit 的 `0` 表示 unlimited，默认深度为 256。
+- 默认 stream API 真正增量读取单个完整 JSON document；它不是多文档 framing
   protocol。decode 失败后，不保证 stream 停在可恢复边界。
-- Native document 是显式资源，必须 `close()`，并且不是线程安全对象。
-- `yjson`、`yjson_macros`、`yjson_all` 与可选 Native package 必须版本匹配。
+- 默认 `JsonDocument` 由 GC 管理。只有 `yjson_backends.BackendJsonDocument` 是显式资源。
+- JSONPath、Patch/Merge Patch 与 Schema 位于 `yjson_algorithms`，默认预算耗尽统一抛出
+  `JsonWorkLimitException(code: "work_limit_exceeded")`；可信离线任务可显式使用 `.unlimited`。
 - 当前 release qualification 以 Linux x86_64 为阻断平台；其他平台不得从源码可移植性
   推断为已验证支持。
 - 性能结果只适用于对应源码、SDK、主机、workload 和测量方法，不代表普遍排名。
@@ -155,7 +160,7 @@ Native package 是可选边界，不会自动替换 core 行为。更完整的�
 - [Backend 使用指南](docs/backends.md)
 - [JSON Schema](docs/schema.md)
 - [性能方法与结果](docs/performance/README.md)
-- [pre-1.0 → 1.0 迁移](docs/migration/pre-1.0-to-1.0.md)
+- [1.x → 2.0 迁移](docs/migration/1.x-to-2.0.md)
 - [Release notes](RELEASE_NOTES.md) · [Changelog](CHANGELOG.md)
 
 维护者请从[测试策略](docs/maintainers/testing.md)、

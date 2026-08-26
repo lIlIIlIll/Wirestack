@@ -7,13 +7,15 @@
 
 ```cangjie
 let readConfig = JsonReadConfig(
-    maxDepth: 128,
-    maxBytes: 8 * 1024 * 1024,
-    maxStringBytes: 1024 * 1024,
-    maxPolymorphicObjectBytes: 4 * 1024 * 1024
-)
+    limits: JsonReadLimits(
+        maxDepth: 128,
+        maxBytes: 8 * 1024 * 1024,
+        maxStringBytes: 1024 * 1024,
+        maxPolymorphicObjectBytes: 4 * 1024 * 1024
+    ))
 
-let writeConfig = JsonWriteConfig(maxDepth: 128, maxBytes: 8 * 1024 * 1024)
+let writeConfig = JsonWriteConfig("", "", false, false,
+    limits: JsonWriteLimits(maxDepth: 128, maxBytes: 8 * 1024 * 1024))
 ```
 
 具体数值必须根据协议上限和业务 payload 调整。所有资源参数拒绝负数；byte limit 的
@@ -54,4 +56,5 @@ Native、yyjson Direct 和 generated polymorphic replay。未知字段 skip 继�
 `includeErrorLocation` 只控制位置信息，不改变错误码或预算结果。启用限制可能增加线性预检
 或计数成本，不承诺与 unlimited fast path 相同的吞吐量。
 
-所有 runtime、macro、aggregate 与 Native package 必须版本匹配并一起重新编译。
+高层算法还具有独立的 `JsonPathLimits`、`JsonPatchLimits` 与 `JsonSchemaLimits`；默认值
+适用于不可信输入，预算耗尽统一使用 `work_limit_exceeded`。

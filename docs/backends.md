@@ -1,82 +1,58 @@
-# Backend 使用指南
+# Native 加速与高级 Backend
 
-yjson 默认使用 Pure Cangjie。Native backend 是独立 package，只有应用显式声明依赖并选择
-对应 API 时才参与构建或运行；构建或执行失败不会被静默 fallback 隐藏。
+yjson 2.0 的普通 API 没有 backend 参数。默认 Pure 引擎跨平台、GC 管理；可选 Native
+加速只改变同一 semantic engine 的 primitive，不改变应用调用方式。
 
-## 先从 Pure 开始
-
-| 场景 | 推荐入口 |
-| --- | --- |
-| 普通 typed encode/decode | `YJson` + Pure codec path |
-| 需要修改 JSON | `JsonNode` |
-| Portable 只读查询 | `YJson.parseDocument`，默认 `PureCompactBackend` |
-| Native-owned Compact DOM | `NativeCompactBackend` |
-| yyjson Direct DOM | `YyjsonBackend` |
-| Typed caller-owned stream | 默认 Pure；profiling 后显式选 Native stream backend |
-
-Native 只有在 profiling 显示 DOM parse、遍历或较大 typed decode 是瓶颈，并且部署平台能
-构建 C11 source 时才值得引入。当前阻断 qualification 平台是 Linux x86_64；其他平台只能
-描述为未验证、可能支持。
-
-## 添加依赖
-
-Custom Native：
+## 启动时启用 Custom Native
 
 ```toml
 [dependencies]
-yjson = { path = "../yjson" }
-yjson_native = { path = "../yjson/packages/yjson_native" }
+yjson_all = { path = "../yjson/packages/yjson_all" }
+yjson_native_accel = { path = "../yjson/packages/yjson_native_accel" }
 ```
 
-yyjson Direct：
-
-```toml
-[dependencies]
-yjson = { path = "../yjson" }
-yjson_yyjson = { path = "../yjson/packages/yjson_yyjson" }
-```
-
-示例不假定 registry 包已发布。core 与 optional package 必须来自同一 checkout 或 release。
-
-## 统一 document facade
+在任何 `YJson` 调用前初始化一次：
 
 ```cangjie
-let bytes = unsafe { "{\"n\":42}".rawData() }
+YJsonNativeAccel.initialize()
 
-try (document = YJson.parseDocument(bytes, backend: NativeCompactBackend)) {
+let text = YJson.toJson(value)
+let value = YJson.fromJson<MyType>(text)
+let document = YJson.parseDocument(text)
+```
+
+第一次普通 `YJson` 调用会冻结 Pure；成功初始化会冻结 Native。相同 Native 初始化可幂等
+重复。晚初始化、不同 provider 竞争、ABI/protocol 不匹配或缺少 Native 能力都会抛出
+`JsonAccelerationException`。不支持 uninstall、运行期切换或静默回退。
+
+默认 `JsonDocument` 始终是 managed Compact representation；Native 临时资源在
+`parseDocument` 返回前释放，调用方不需要 `close()`。
+
+## 高级显式 Backend
+
+只有确实需要 Native/yyjson DOM 或 whole-document stream 的应用才依赖
+`yjson_backends` 以及对应实现包：
+
+```cangjie
+import yjson_backends.*
+import yjson_yyjson.*
+
+try (document = YJsonAdvanced.parseDocumentWithBackend(bytes, YyjsonDocumentBackend)) {
     println(document.getRootInt("n").getOrThrow())
 }
 ```
 
-同一入口还接受默认 `PureCompactBackend` 和 `YyjsonBackend`。需要后端专有 view、统计或
-qualification knob 时，才直接使用 `NativeCompactJsonDocument` 或
-`YyjsonCompactJsonDocument`。
+高级 document 类型为 `BackendJsonDocument <: Resource`，必须确定性关闭；它不是线程
+安全对象。高级 stream 使用名称明确的 `NativeCompactWholeDocumentStreamBackend` 或
+`YyjsonWholeDocumentStreamBackend`：
 
-## 生命周期与并发
+```cangjie
+YJsonAdvanced.encodeToStreamWithBackend(
+    UserJson, user, output, NativeCompactWholeDocumentStreamBackend)
+```
 
-- Pure Compact 由 GC 管理，不需要 `close()`。
-- Native document 必须用 `try (document = ...)` 或 `finally` 确定性关闭。
-- Native document 不是线程安全对象；并发 read/read 也需要外部同步。
-- read/close、serialize/close race 禁止；`close()` 需要独占所有权。
-- `close()` 幂等；close 后操作抛出 `IllegalStateException`。
-- view 会保持 owner 可达，但 owner 关闭后 view 也失效。
-
-析构器只是泄漏兜底，不是生命周期 API。
-
-## Typed stream backend
-
-`NativeCompactStreamBackend` 与 `YyjsonStreamBackend` 以 whole-document 模式驱动同一个
-backend-neutral `JsonCodec<T>`。它们跨 ABI 执行 bulk parse/export 或 encode/copy，不做
-per-node FFI，不关闭 caller stream，也不静默回退。
-
-所有 backend 保持相同的公开配置语义；错误 message 和 Native 内部分类不要求逐字一致，
-资源预算的 `JsonException.code` 必须一致。
-
-## Scanner activation 不是 DOM 依赖
-
-`NativeCompactJsonDocument` 不要求调用 `enableYJsonNative()`。后者安装 process-global
-scanner/number seam，必须在并发 decode 开始前完成；Full、FloatOnly、NumericOnly 模式
-互斥，切换前应使用匹配的 disable 函数。
+WholeDocument backend 会读取到 EOF；普通 `YJson.toStream/fromStream` 不会，它们始终使用
+增量 reader/writer。所有 target 仍共享相同的配置、错误码和 writer 结构状态机。
 
 底层 ABI、symbol isolation 与安全契约见
 [Native backend internals](maintainers/native-internals.md)。
