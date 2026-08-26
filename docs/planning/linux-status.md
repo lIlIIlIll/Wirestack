@@ -51,7 +51,7 @@ Status values have the same fail-closed meaning as the global status file.
 
 | Task | Status | Evidence |
 |---|---|---|
-| M2-001 host/IP/endpoint model | IN_PROGRESS | Strict canonical ASCII `HostName`, typed IPv4/IPv6/zone endpoints and equality/hash tests; IDNA and authority parsing remain |
+| M2-001 host/IP/endpoint model | COMPLETE | Canonical ASCII/A-label `HostName`, exact DNS length bounds, typed immutable IPv4/IPv6/zone values, separate `UInt16` ports and authority-syntax rejection are covered without implicit DNS; [Linux evidence](../evidence/M2-001/README.md) |
 | M2-002 Resolver contract | COMPLETE | All-address result, family filter, canonical host, source, optional expiration, structured errors and diagnostics |
 | M2-003 bounded resolver backend | BLOCKED | M0-013 proves `std.net` DNS can starve carriers; the pinned SDK exposes neither async resolver nor an independent native worker API, so UP-007 is required |
 | M2-005 Linux `SystemResolver` | BLOCKED | Depends on M2-003/UP-007; no direct `IPAddress.resolve` wrapper is presented as production-safe |
