@@ -1,55 +1,50 @@
-# M0-011 evidence: GATE-NET-06 leak and soak harness
+# M0-011 evidence: GATE-NET-06 leak and soak
 
 ## Status
 
-- Harness and bounded Linux x86_64 execution: **PASS**
-- M0-011 task: **INCOMPLETE**
-- Global GATE-NET-06: **INCOMPLETE**
+- Formal Linux x86_64 workload: **PASS**
+- Linux GATE-NET-06 acceptance: **INCOMPLETE**
+- M0-011 task and global GATE-NET-06: **INCOMPLETE**
 
-The task remains incomplete by design. The bounded run does not satisfy the
-PRD's full transport/TLS cleanup counts, 24-hour soak, or six-platform native
-matrix.
+The Linux run completed every minimum workload from PRD GATE-NET-06. It does
+not close the gate because the current harness directly measures process RSS
+and native file descriptors only. Separate timer, waiter, native-buffer, GC-root
+and unreclaimed-background-task counters are not yet present, and the other
+required native platforms have not executed this gate.
 
-## Executed bounded scenarios
+## Executed Linux workload
 
-| Scenario | Iterations | Verification |
+| Scenario | Executed | Decision |
 |---|---:|---|
-| repeated connect/close | 2,000 | exact connect, accept, completion and close totals |
-| repeated active echo/connect/close | 1,000 | exact 64-byte payload and echo totals |
-| repeated peer reset | 1,000 | one public `SocketException` per reset |
-| repeated close during blocked read | 500 | each waiter reached EOF or `SocketException` and terminated |
+| connect/close | 100,000 | PASS |
+| peer reset | 100,000 | PASS |
+| close during blocked read | 100,000 | PASS |
+| TLS failed-handshake cleanup | 100,000 | PASS |
+| idle/active mixed soak | 86,400 seconds; 187,051,774 iterations | PASS |
 
-For every scenario the harness retains process exit/timeout state, server totals,
-raw RSS samples, raw native file-descriptor samples and aggregate percentiles.
-All subprocesses, server loops and sampler threads have explicit bounds.
+The 24-hour steady-state comparison excluded 288 warmup samples and compared
+the first and last 230-sample windows. Median RSS changed from 12,758 KiB to
+10,510 KiB (-2,248 KiB); median FD count remained 5. TLS cleanup compared 136
+sample windows after excluding 170 warmup samples: median RSS remained 6,844
+KiB and median FD count remained 3.
 
-## Deferred requirements
+## Reproducibility
 
-- 100,000 transport cleanup iterations: `NOT_RUN`.
-- 100,000 TLS handshake-failure cleanups: `NOT_YET_APPLICABLE`.
-- 24-hour idle/active mixed soak: `NOT_RUN`.
-- Windows, macOS, Android, iOS and HarmonyOS/OpenHarmony: `BLOCKED`.
+- Harness revision: `4323da2`
+- Linux: `7.1.9-arch1-2`, x86_64, glibc 2.44
+- Cangjie: `1.1.0-alpha.20260817040003`, target
+  `x86_64-unknown-linux-gnu`
+- AWS-LC source commit: `991e67ff4cf04df4dd89e407f8b920c6936cb56a`
+- AWS-LC source tree: `ae54cd9455f9630451d505855afe808a9f028b25`
 
-Non-execution never contributes to a PASS result.
+Full raw reports, process output, exact counters and all timestamped RSS/FD
+samples are retained under [`linux_x86_64/`](linux_x86_64/).
 
-## Toolchain
+## Remaining acceptance work
 
-```text
-Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)
-Target: x86_64-unknown-linux-gnu
-Cangjie Project Manager: 1.1.3
-SDK archive SHA-256: bc2ed8a34b9b6846a5445d3eba0ac66b146730a005d3df56d45a2b119416f40d
-```
+- Add direct bounded accounting for timers, waiters, native buffers, GC roots
+  and background tasks, then prove no monotonic growth.
+- Execute native Windows, macOS, Android, iOS and HarmonyOS/OpenHarmony profiles.
 
-## Execution
-
-```bash
-source /mnt/data/cangjie-sdk/cangjie/envsetup.sh
-scripts/with-host-gate-lock linux-native-gate -- \
-  bash scripts/gate-net06-leak-soak
-```
-
-## Boundary
-
-No production Transport/TLS/HTTP implementation, private socket handle,
-`CJ_MRT_Sock*`, polling workaround or simulated platform result is added.
+Non-execution and unmeasured resource classes never contribute to a COMPLETE
+decision.
