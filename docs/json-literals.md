@@ -16,8 +16,9 @@ let text = @Json({
 })
 ```
 
-静态 token 在编译期验证。插值值通过 `JsonCodecProvider` 写出，`@Json` 直接驱动
-`JsonDirectWriter`，不会先创建 AST。
+静态 token 在编译期验证。插值值通过 `JsonCodecProvider` 写出，`@Json` 只依赖版本化的
+`GeneratedSupportV1Writer`，由 runtime 选择具体 writer，不会先创建 AST。生成源码不引用
+`JsonDirectWriter` 或其他具体 reader/writer 类。
 
 ## 构造可修改树：`@JsonValue`
 
@@ -39,5 +40,6 @@ println(YJson.stringify(root))
 - 只要对象含动态 key，运行时冲突采用 LastWins。
 - 即使字段最终被覆盖，其 key/value 插值表达式仍会执行；不要依赖 codec 写出副作用。
 
-macro 需要 `yjson_all`，或一组完全匹配的 `yjson` 与 `yjson_macros` 依赖。仓库中的
+macro 需要 `yjson_all`，或 protocol 兼容的 `yjson` 与 `yjson_macros` 依赖。默认 aggregate
+负责版本配套；v1 SPI 不变时允许跨 patch 版本，协议不匹配会明确失败。仓库中的
 `packages/json_literal_integration` 验证语法、求值顺序、动态冲突和可修改节点行为。

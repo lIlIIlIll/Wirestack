@@ -34,7 +34,10 @@ CV 门槛只控制可陈述精度，不是筛选 workload 的工具。
 
 - typed codec 只与等语义 typed codec 比较。
 - DOM parse/query/serialize 按 representation 和 lifecycle 分开。
-- Native parse/roundtrip 必须计入 deterministic `close()`。
+- 默认 `YJson.parseDocument` 返回 managed Compact document，不存在 `close()`；Native 临时
+  资源必须在计时操作返回前释放。
+- 只有高级 `BackendJsonDocument` parse/roundtrip 才必须在计时范围内包含 deterministic
+  `close()`。
 - 跨 runtime 结果只描述该 API/workload，不代表产品整体。
 - latency、throughput、allocation、RSS 和 peak memory 分别测量和陈述。
 
@@ -46,3 +49,16 @@ CV 门槛只控制可陈述精度，不是筛选 workload 的工具。
 
 用户结果页只保留理解结论所需的统计和限制。原始样本、日志、manifest、checksum 与环境
 细节进入不可变 release artifact；开发机绝对路径和临时排障过程不进入稳定文档。
+
+## Native acceleration gate
+
+Pure 与 Native 必须在独立进程中运行，因为首次 `YJson` 调用会冻结引擎。正式 gate 固定
+11 轮、同一 CPU affinity、128 MiB heap，并在每轮交替 Pure/Native 顺序：
+
+- 广告 read/write workload：双方 CV ≤ 5%、`Native/Pure ≤ 0.95`，且 Native 至少赢 6/11；
+- 普通稳定 workload：双方 CV ≤ 5%、`Native/Pure ≤ 1.05`；
+- 任一行超过 CV 门槛时，丢弃该批次并完整重跑一次，不按单行挑选样本；
+- immediate rerun 只有在 build-source digest 未变化时才能复用可执行文件。
+
+这个 gate 证明的是列出的 workload，不自动证明所有 typed container、stream 或 DOM 调用都被
+加速。

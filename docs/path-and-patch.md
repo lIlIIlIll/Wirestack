@@ -3,6 +3,13 @@
 这组 API 都操作 `JsonNode`，但解决的问题不同：Pointer 定位一个明确位置，JSONPath 查询
 零到多个结果，Patch 描述可验证的变更。
 
+这些类型位于可选 `yjson_algorithms` package：
+
+```cangjie
+import yjson.*
+import yjson_algorithms.*
+```
+
 ## JSON Pointer（RFC 6901）
 
 ```cangjie
@@ -45,5 +52,8 @@ let updated = patch.apply(root)
 Merge Patch 适合按对象形状表达更新：object 中的 `null` 表示删除对应成员，其他值替换或
 递归合并。数组不做逐元素 merge，而是整体替换。
 
-处理不可信 Patch/Path 输入时，先对原始 JSON 设置[资源预算](resource-limits.md)。标准
-套件的固定 revision、case 数和 release gate 见[测试指南](maintainers/testing.md)。
+处理不可信 Patch/Path 输入时，除对原始 JSON 设置[解析资源预算](resource-limits.md)外，还要
+保留默认 `JsonPathLimits` / `JsonPatchLimits`，或传入更严格的预算。可信离线任务才应显式
+使用 `.unlimited`。预算耗尽抛出 `JsonWorkLimitException`，error code 为
+`work_limit_exceeded`。标准套件的固定 revision、case 数和 release gate 见
+[测试指南](maintainers/testing.md)。

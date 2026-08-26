@@ -23,8 +23,9 @@ main(): Unit {
 }
 ```
 
-当前示例使用 path dependency，不假定 registry 包已发布。aggregate、runtime 和 macro 必须
-来自同一 checkout 或 release。只需要 parser/AST/built-in codec 时可直接依赖 `yjson`；
-需要 Native 时由应用额外声明对应 optional package。
+当前示例使用 path dependency，不假定 registry 包已发布。aggregate 管理 runtime 和 macro
+的发行配套；generated-support v1 SPI 不变时允许跨 patch 版本。只需要
+parser/AST/built-in codec 时可直接依赖 `yjson`；需要 Native 时由应用额外声明对应 optional
+package。
 
 完整采用路径见[文档入口](../../docs/README.md)。

@@ -5,6 +5,8 @@ AST、Pure Compact、Native DOM 与 typed stream 是不同问题，不能拼成�
 
 ## 当前结果入口
 
+- [Native 单引擎加速门禁](results/2026-08-26-native-acceleration.md)：同一 `YJson` API 下
+  Pure/Native 的固定 CPU、128 MiB、11 轮交替测量。
 - [Linux 三库 release 表](results/2026-08-25-linux-rc2-three-library.md)：yjson、stdx.json、
   cjfast_json 同批次的 36 个共同 workload。
 - [yjson / cjfast_json](results/2026-08-21-cjfast-json.md)：typed codec 对比。

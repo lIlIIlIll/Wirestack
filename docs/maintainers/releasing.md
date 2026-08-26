@@ -26,6 +26,11 @@ identity。发布期间不混入未评审 public API 或生成代码 bridge 变�
 高 CV 不自动阻断，也不能成为隐藏结果的理由；标记 noisy 后由 release owner 结合配对方向、
 历史基线和 workload 重要性处置。
 
+Native acceleration 是更严格的独立阻断 gate：广告 read 和 write workload 必须各自达到
+`Native/Pure ≤ 0.95` 且至少赢 6/11，普通稳定 workload 不得回退超过 5%，所有行双方
+CV 必须 ≤ 5%。出现 noisy 行时丢弃整批并完整重跑一次；第二批仍不稳定或任一性能条件失败，
+则 2.0 acceleration qualification 不完成，不能只隐藏失败行或宣传局部结果。
+
 ## 3. 记录 local 与 hosted 状态
 
 ```text

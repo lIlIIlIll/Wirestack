@@ -96,6 +96,11 @@ discriminator 后把同一值 replay 给 subtype codec；Native tape 不会先�
 
 ## 版本边界
 
-宏生成代码会调用 runtime 的 public bridge。`yjson_macros`、`yjson` 与 `yjson_all` 必须
-来自同一 checkout 或 release，并一起重新编译。推荐让应用只依赖 `yjson_all`，避免手动
-形成不匹配组合。
+宏输出嵌入所需的 generated-support protocol version，并且只调用
+`GeneratedSupportV1Reader`、`GeneratedSupportV1Writer`、replay/polymorphic 等窄 SPI；生成
+源码不依赖 `JsonDirectReader`、`JsonDirectWriter` 或公开 raw helper。v1 SPI 不变时允许
+runtime 与宏跨 patch 版本使用；协议不匹配会在编译或初始化边界明确失败。
+
+普通应用推荐只依赖 `yjson_all`，由 aggregate 管理 runtime 与 macro 的配套版本。直接组合
+`yjson` 与 `yjson_macros` 时，应选择声明相同 generated-support protocol 的发行版本，不再
+需要人工匹配 exact commit。

@@ -3,6 +3,13 @@
 yjson 只解释 draft 2020-12。显式 `$schema` 声明其他 dialect 时返回
 `unsupported_schema_dialect`，避免把不同 draft 的同名 keyword 静默解释错。
 
+Schema 位于可选 `yjson_algorithms` package：
+
+```cangjie
+import yjson.*
+import yjson_algorithms.*
+```
+
 ## 最小校验
 
 ```cangjie
@@ -34,7 +41,7 @@ dynamic reference、对象/数组 applicator、组合关键字、unevaluated 关
 
 ## 外部资源
 
-core 不访问网络。应用通过 `JsonSchemaResolver` 提供资源：
+`yjson_algorithms` 不访问网络。应用通过 `UriResolver` 提供资源：
 
 ```cangjie
 let registry = JsonSchemaRegistry()
@@ -42,7 +49,7 @@ registry.register("urn:example:types", """
 {"$defs":{"id":{"$anchor":"id","type":"integer","minimum":1}}}
 """)
 
-let config = JsonSchemaConfig(resolver: Some<JsonSchemaResolver>(registry))
+let config = JsonSchemaConfig(resolver: Some<UriResolver>(registry))
 let schema = JsonSchema.parse("{\"$ref\":\"urn:example:types#id\"}", config: config)
 ```
 
@@ -71,6 +78,13 @@ let config = JsonSchemaConfig(
 ```
 
 registry 应在配置阶段完成修改；共享给并发 validation 后不得继续注册或替换 format。
+
+## 工作预算
+
+`JsonSchemaConfig` 默认使用 `JsonSchemaLimits.defaults`：100000 evaluations、1000 次 ref
+resolution、100 个 errors、depth 256。任一预算耗尽抛出 `JsonWorkLimitException`，error code
+为 `work_limit_exceeded`。可信离线任务可以显式配置 `JsonSchemaLimits.unlimited`；处理不可信
+schema 或 instance 时不应关闭预算。
 
 ## Conformance 证据
 
