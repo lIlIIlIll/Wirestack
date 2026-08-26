@@ -6,12 +6,15 @@ on:
       - "tools/gates/net06_leak_soak.py"
       - "tools/gates/net06_leak_soak_sources.py"
       - "tools/gates/net06_tls_failure_cleanup.py"
+      - "tools/gates/net06_production_cleanup.py"
       - "tools/gates/tests/test_net06_leak_soak.py"
       - "tools/gates/tests/test_net06_tls_failure_cleanup.py"
+      - "tools/gates/tests/test_net06_production_cleanup.py"
       - "tools/tls_provider_poc/openssl_memory_poc.c"
       - "tools/tls_provider_poc/run.py"
       - "scripts/gate-net06-leak-soak"
       - "scripts/gate-net06-tls-failure-cleanup"
+      - "scripts/gate-net06-production-cleanup"
       - ".github/workflows/net06-leak-soak-harness.yml"
   push:
     branches: [main]
@@ -19,12 +22,15 @@ on:
       - "tools/gates/net06_leak_soak.py"
       - "tools/gates/net06_leak_soak_sources.py"
       - "tools/gates/net06_tls_failure_cleanup.py"
+      - "tools/gates/net06_production_cleanup.py"
       - "tools/gates/tests/test_net06_leak_soak.py"
       - "tools/gates/tests/test_net06_tls_failure_cleanup.py"
+      - "tools/gates/tests/test_net06_production_cleanup.py"
       - "tools/tls_provider_poc/openssl_memory_poc.c"
       - "tools/tls_provider_poc/run.py"
       - "scripts/gate-net06-leak-soak"
       - "scripts/gate-net06-tls-failure-cleanup"
+      - "scripts/gate-net06-production-cleanup"
       - ".github/workflows/net06-leak-soak-harness.yml"
 
 permissions:
@@ -46,3 +52,4 @@ jobs:
           tools/gates/net06_leak_soak.py
           tools/gates/net06_leak_soak_sources.py
           tools/gates/net06_tls_failure_cleanup.py
+          tools/gates/net06_production_cleanup.py
