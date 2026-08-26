@@ -35,6 +35,12 @@ public struct Http1ServerShutdownResult {
     }
 }
 
+/** Protocol-neutral owner for one accepted transport. */
+public interface HttpServerConnectionHandler <: Resource {
+    func serve(transport: DuplexTransport, context: OperationContext): Unit
+    func beginShutdown(): Unit
+}
+
 private class Http1ActiveConnection {
     let id: Int64
     private let mutex = Mutex()
@@ -66,6 +72,7 @@ public class Http1Server <: Resource {
     private let handler: Http1ServerHandler
     private let config: Http1ServerConfig
     private let tlsHandshaker: ?Http1ServerTlsHandshaker
+    private let connectionHandler: ?HttpServerConnectionHandler
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
     private let forceCancellation = CancellationSource()
@@ -78,11 +85,16 @@ public class Http1Server <: Resource {
 
     public init(listener: TransportListener, handler: Http1ServerHandler,
         config!: Http1ServerConfig = Http1ServerConfig(),
-        tlsHandshaker!: ?Http1ServerTlsHandshaker = None<Http1ServerTlsHandshaker>) {
+        tlsHandshaker!: ?Http1ServerTlsHandshaker = None<Http1ServerTlsHandshaker>,
+        connectionHandler!: ?HttpServerConnectionHandler = None<HttpServerConnectionHandler>) {
+        if (tlsHandshaker.isSome() && connectionHandler.isSome()) {
+            throw IllegalArgumentException("HTTP server accepts either a TLS handshaker or a connection handler")
+        }
         this.listener = listener
         this.handler = handler
         this.config = config
         this.tlsHandshaker = tlsHandshaker
+        this.connectionHandler = connectionHandler
     }
 
     /** Runs the accept loop on the caller. Accepted connections execute concurrently up to the hard bound. */
@@ -163,6 +175,10 @@ public class Http1Server <: Resource {
     private func serveAccepted(entry: Http1ActiveConnection, parent: OperationContext): Unit {
         let connectionContext = parent.withCancellation(forceCancellation.token)
         try {
+            if (let Some(dispatcher) <- connectionHandler) {
+                dispatcher.serve(entry.transport(), connectionContext)
+                return
+            }
             let applicationTransport = match (tlsHandshaker) {
                 case Some(handshaker) =>
                     let secured = handshaker.handshake(entry.transport(), connectionContext)
@@ -213,6 +229,12 @@ public class Http1Server <: Resource {
             if (stopping) { false } else { stopping = true; changed.notifyAll(); true }
         }
         if (closeListener) { listener.close() }
+        if (closeListener) {
+            match (connectionHandler) {
+                case Some(value) => try { value.beginShutdown() } catch (_: Exception) {}
+                case None => ()
+            }
+        }
         closeHandshakerIfIdle()
     }
 
@@ -224,16 +246,20 @@ public class Http1Server <: Resource {
     }
 
     private func closeHandshakerIfIdle(): Unit {
-        let value = synchronized(mutex) {
+        let (value, dispatcher) = synchronized(mutex) {
             if (!stopping || !active.isEmpty() || handshakerClosed) {
-                None<Http1ServerTlsHandshaker>
+                (None<Http1ServerTlsHandshaker>, None<HttpServerConnectionHandler>)
             } else {
                 handshakerClosed = true
-                tlsHandshaker
+                (tlsHandshaker, connectionHandler)
             }
         }
         match (value) {
             case Some(handshaker) => try { handshaker.close() } catch (_: Exception) {}
+            case None => ()
+        }
+        match (dispatcher) {
+            case Some(value) => try { value.close() } catch (_: Exception) {}
             case None => ()
         }
     }
