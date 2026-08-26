@@ -58,6 +58,15 @@ six-platform milestone.
 | M1-018 | COMPLETE | [`docs/evidence/M1-018/README.md`](../evidence/M1-018/README.md) | `writeSome` performs bounded partial writes through one connection-retained exact-size staging array, the 16 KiB default carries a typical TLS record, and copied bytes remain measurable; the canonical repository gate separately retains one unrelated HTTP/2 package-interference error. |
 | M1-027 | COMPLETE | [`docs/evidence/M1-027/README.md`](../evidence/M1-027/README.md) | The internal background fast path reduces empty `readSome` P50 from 297.042 ns to 92.110 ns; the formal Linux 5-payload x 11-round GATE-NET-05 comparison passes every throughput and P95 threshold with zero staging copies. |
 
+## Linux M2 closure work
+
+This table records Linux-only deterministic completion and does not override
+the native platform dependencies in the global backlog.
+
+| ID | Status | Evidence | Notes |
+|---|---|---|---|
+| M2-014 | COMPLETE | [`docs/evidence/M2-014/README.md`](../evidence/M2-014/README.md) | Scripted resolver and connector tests cover IPv6 first success and blackhole fallback, simultaneous success, all-fail, pre-cancel, success-plus-cancel and the exact Deadline publication boundary. |
+
 ## Conditional upstream work
 
 `UP-001` through `UP-007` remain **BLOCKED / DO NOT START** until the corresponding
