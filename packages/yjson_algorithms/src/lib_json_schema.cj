@@ -1,4 +1,6 @@
-package yjson
+package yjson_algorithms
+
+import yjson.*
 
 import std.collection.*
 import std.convert.Parsable
@@ -67,14 +69,14 @@ public class JsonSchemaFormatRegistry {
     }
 }
 
-public interface JsonSchemaResolver {
+public interface UriResolver {
     /// Resolves an absolute or application-defined schema resource URI.
     /// Implementations may load from memory, disk, or an application cache;
     /// yjson itself never performs network I/O.
     func resolve(uri: String): Option<JsonNode>
 }
 
-public class JsonSchemaRegistry <: JsonSchemaResolver {
+public class JsonSchemaRegistry <: UriResolver {
     private let resources = HashMap<String, JsonNode>()
 
     public func register(uri: String, schema: JsonNode): Unit {
@@ -97,16 +99,19 @@ public class JsonSchemaRegistry <: JsonSchemaResolver {
 public enum JsonSchemaFormatMode { Annotation | Assertion | StrictAssertion }
 
 public class JsonSchemaConfig {
-    public let resolver: Option<JsonSchemaResolver>
+    public let resolver: Option<UriResolver>
     public let formatMode: JsonSchemaFormatMode
     public let formats: JsonSchemaFormatRegistry
+    public let limits: JsonSchemaLimits
 
-    public init(resolver!: Option<JsonSchemaResolver> = None<JsonSchemaResolver>,
+    public init(resolver!: Option<UriResolver> = None<UriResolver>,
         formatMode!: JsonSchemaFormatMode = JsonSchemaFormatMode.Annotation,
-        formats!: JsonSchemaFormatRegistry = JsonSchemaFormatRegistry.withCoreFormats()) {
+        formats!: JsonSchemaFormatRegistry = JsonSchemaFormatRegistry.withCoreFormats(),
+        limits!: JsonSchemaLimits = JsonSchemaLimits.defaults) {
         this.resolver = resolver
         this.formatMode = formatMode
         this.formats = formats
+        this.limits = limits
     }
 
     public static let defaults = JsonSchemaConfig(
@@ -130,7 +135,7 @@ public class JsonSchema {
         this.documentValue = frozenDocument
         this.draft = draft
         this.config = JsonSchemaConfig(resolver: config.resolver, formatMode: config.formatMode,
-            formats: config.formats.frozenCopy())
+            formats: config.formats.frozenCopy(), limits: config.limits)
         if (draft != "https://json-schema.org/draft/2020-12/schema" &&
             draft != "https://json-schema.org/draft/2020-12/schema#") {
             throw JsonException("Unsupported JSON Schema dialect ${draft}", code: "unsupported_schema_dialect")
@@ -193,6 +198,8 @@ public class JsonSchemaValidator {
     private let schema: JsonSchema
     private let baseUriStack = ArrayList<String>()
     private let resourceStack = ArrayList<JsonNode>()
+    private var evaluationCount: Int64 = 0
+    private var refResolutionCount: Int64 = 0
 
     public init(schema: JsonSchema) {
         this.schema = schema
@@ -202,6 +209,8 @@ public class JsonSchemaValidator {
         let errors = ArrayList<JsonValidationError>()
         baseUriStack.clear()
         resourceStack.clear()
+        evaluationCount = 0
+        refResolutionCount = 0
         baseUriStack.add("")
         let document = schema.internalDocument()
         resourceStack.add(document)
@@ -230,17 +239,22 @@ public class JsonSchemaValidator {
         errors: ArrayList<JsonValidationError>,
         refStack: ArrayList<String>
     ): Unit {
+        evaluationCount++
+        enforceWorkLimit(evaluationCount, schema.config.limits.maxEvaluations, "schema evaluations")
+        enforceWorkLimit(jsonSchemaPathDepth(schemaPath), schema.config.limits.maxDepth, "schema depth")
         match (schemaValue) {
             case boolSchema: JsonBoolValue =>
                 if (!boolSchema.value) {
                     addError(errors, jsonPath, schemaPath, "boolean schema false rejects every value")
                 }
+                enforceWorkLimit(errors.size, schema.config.limits.maxErrors, "schema errors")
                 return
             case objectSchema: JsonObjectValue =>
                 validateObjectSchema(objectSchema, instance, jsonPath, schemaPath, errors, refStack)
             case _ =>
                 addError(errors, jsonPath, schemaPath, "schema must be a boolean or object")
         }
+        enforceWorkLimit(errors.size, schema.config.limits.maxErrors, "schema errors")
     }
 
     private func validateObjectSchema(
@@ -825,6 +839,8 @@ public class JsonSchemaValidator {
     }
 
     private func resolveRef(refText: String): Option<JsonSchemaResolvedRef> {
+        refResolutionCount++
+        enforceWorkLimit(refResolutionCount, schema.config.limits.maxRefResolutions, "reference resolutions")
         let base = baseUriStack[baseUriStack.size - 1]
         let absolute = resolveJsonSchemaUri(base, refText)
         let hashIndex = absolute.indexOf("#")
@@ -1915,4 +1931,12 @@ private func jsonPointerEscape(token: String): String {
         builder.append(token[segmentStart..token.size])
     }
     builder.toString()
+}
+
+private func jsonSchemaPathDepth(path: String): Int64 {
+    var depth: Int64 = 0
+    for (value in unsafe { path.rawData() }) {
+        if (value == b'/') { depth++ }
+    }
+    depth
 }

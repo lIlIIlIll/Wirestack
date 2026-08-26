@@ -53,6 +53,11 @@ public interface JsonNativeFloatParserBackend {
     func parseFloat64(input: CPointer<UInt8>, len: Int64, start: Int64, tokenLength: Int64): Float64
 }
 
+/// Versioned internal product bundle consumed by yjson_native. Applications
+/// configure it only through YJsonNativeAccel.initialize().
+public interface JsonNativeAccelerationPrimitivesV1 <: JsonNativeScannerBackend &
+    JsonNativeNumericScannerBackend & JsonNativeNumericTapeBackend & JsonNativeFloatParserBackend {}
+
 private var jsonNativeScannerBackend: Option<JsonNativeScannerBackend> = None<JsonNativeScannerBackend>
 private var jsonNativeNumericScannerBackend: Option<JsonNativeNumericScannerBackend> =
     None<JsonNativeNumericScannerBackend>
@@ -61,37 +66,43 @@ private var jsonNativeNumericTapeBackend: Option<JsonNativeNumericTapeBackend> =
 private var jsonNativeFloatParserBackend: Option<JsonNativeFloatParserBackend> =
     None<JsonNativeFloatParserBackend>
 
-public func installJsonNativeScannerBackend(backend: JsonNativeScannerBackend): Unit {
+private func installJsonNativeScannerBackend(backend: JsonNativeScannerBackend): Unit {
     if (jsonNativeScannerBackend.isSome()) {
         throw IllegalStateException("A JSON native scanner backend is already installed")
     }
     jsonNativeScannerBackend = Some(backend)
 }
 
-public func installJsonNativeNumericScannerBackend(backend: JsonNativeNumericScannerBackend): Unit {
+private func installJsonNativeNumericScannerBackend(backend: JsonNativeNumericScannerBackend): Unit {
     if (jsonNativeNumericScannerBackend.isSome()) {
         throw IllegalStateException("A JSON native numeric scanner backend is already installed")
     }
     jsonNativeNumericScannerBackend = Some(backend)
 }
 
-public func installJsonNativeNumericTapeBackend(backend: JsonNativeNumericTapeBackend): Unit {
+private func installJsonNativeNumericTapeBackend(backend: JsonNativeNumericTapeBackend): Unit {
     jsonNativeNumericTapeBackend = Some(backend)
 }
 
 /// Installs one process-global Float64 parser backend. Install before any
 /// concurrent decoding and do not mix this low-level hook with another owner.
-public func installJsonNativeFloatParserBackend(backend: JsonNativeFloatParserBackend): Unit {
+private func installJsonNativeFloatParserBackend(backend: JsonNativeFloatParserBackend): Unit {
     if (jsonNativeFloatParserBackend.isSome()) {
         throw IllegalStateException("A JSON native float parser backend is already installed")
     }
     jsonNativeFloatParserBackend = Some(backend)
 }
 
-/// Removes the process-global Float64 parser backend. The caller owns the
-/// synchronization boundary and must ensure no decoder is using it.
-public func uninstallJsonNativeFloatParserBackend(): Unit {
-    jsonNativeFloatParserBackend = None<JsonNativeFloatParserBackend>
+/// Installs the complete v1 primitive bundle atomically during runtime freeze.
+public func activateJsonNativePrimitivesV1(backend: JsonNativeAccelerationPrimitivesV1): Unit {
+    if (jsonNativeScannerBackend.isSome() || jsonNativeNumericScannerBackend.isSome() ||
+        jsonNativeNumericTapeBackend.isSome() || jsonNativeFloatParserBackend.isSome()) {
+        throw IllegalStateException("JSON native acceleration is already installed")
+    }
+    installJsonNativeScannerBackend(backend)
+    installJsonNativeNumericScannerBackend(backend)
+    installJsonNativeNumericTapeBackend(backend)
+    installJsonNativeFloatParserBackend(backend)
 }
 
 func jsonNativeFloatParserAvailable(): Bool {
@@ -174,13 +185,6 @@ class JsonNativeNumericTape {
     func earlyRefillCount(): Int64 { refillsBeforeExhaustion }
 }
 
-
-/// Test/support hook for comparing the portable compact parser with an
-/// explicitly installed bulk backend in an isolated process.
-public func uninstallJsonNativeNumericScannerBackend(): Unit {
-    jsonNativeNumericScannerBackend = None<JsonNativeNumericScannerBackend>
-    jsonNativeNumericTapeBackend = None<JsonNativeNumericTapeBackend>
-}
 
 class JsonNativeNumericChunk {
     let words: Array<UInt64>

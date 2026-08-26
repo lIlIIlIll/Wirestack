@@ -58,6 +58,8 @@ def main() -> int:
         core = quote(modules / "yjson" if modules else ROOT)
         aggregate = quote(modules / "yjson_all" if modules else ROOT / "packages" / "yjson_all")
         native = quote(modules / "yjson_native" if modules else ROOT / "packages" / "yjson_native")
+        native_accel = quote(modules / "yjson_native_accel" if modules else ROOT / "packages" / "yjson_native_accel")
+        backends = quote(modules / "yjson_backends" if modules else ROOT / "packages" / "yjson_backends")
         yyjson = quote(modules / "yjson_yyjson" if modules else ROOT / "packages" / "yjson_yyjson")
         if "core" in selected:
             run_fixture("core", f'yjson = {{ path = "{core}" }}', '''package yjson_release_core
@@ -103,49 +105,48 @@ main(): Unit {
 ''', base)
         if "native" in selected:
             run_fixture("native", f'''yjson = {{ path = "{core}" }}
-yjson_native = {{ path = "{native}" }}''', '''package yjson_release_native
+yjson_native = {{ path = "{native}" }}
+yjson_native_accel = {{ path = "{native_accel}" }}
+yjson_backends = {{ path = "{backends}" }}''', '''package yjson_release_native
 import yjson.*
 import yjson_native.*
+import yjson_native_accel.*
+import yjson_backends.*
 main(): Unit {
-    try (document = NativeCompactJsonDocument.parse(unsafe { "{\\"n\\":42}".rawData() })) {
-        if (document.root().get("n").getOrThrow().asInt64() != 42) { throw Exception("native") }
+    YJsonNativeAccel.initialize()
+    let managed = YJson.parseDocument("{\\"n\\":42}")
+    if (managed.root().get("n").getOrThrow().asInt64() != 42) { throw Exception("native accel") }
+    try (document = YJsonAdvanced.parseDocumentWithBackend("{\\"n\\":42}",
+        NativeCompactDocumentBackend)) {
+        if (document.getRootInt("n").getOrThrow() != 42) { throw Exception("native advanced") }
     }
-    enableYJsonNativeFloatOnly()
-    let nativeFloatReader = JsonFastReader("1.5e2")
-    let nativeFloat = jsonFastReadFloat64(nativeFloatReader)
-    nativeFloatReader.expectEnd()
-    if (nativeFloat != 150.0) { throw Exception("native float") }
-    disableYJsonNativeFloatOnly()
-    let portableFloatReader = JsonFastReader("2.5")
-    let portableFloat = jsonFastReadFloat64(portableFloatReader)
-    portableFloatReader.expectEnd()
-    if (portableFloat != 2.5) { throw Exception("portable float fallback") }
     let codec = YJson.arrayCodec(Int64Json)
     let streamOutput = YJsonMemoryOutputStream()
-    YJson.encodeToStreamWith(codec, [1, 2, 3], streamOutput,
-        backend: NativeCompactStreamBackend)
-    let streamed = YJson.decodeFromStreamWith(codec,
-        YJsonByteArrayInputStream(streamOutput.toByteArray()),
-        backend: NativeCompactStreamBackend)
+    YJsonAdvanced.encodeToStreamWithBackend(codec, [1, 2, 3], streamOutput,
+        NativeCompactWholeDocumentStreamBackend)
+    let streamed = YJsonAdvanced.decodeFromStreamWithBackend(codec,
+        YJsonByteArrayInputStream(streamOutput.toByteArray()), NativeCompactWholeDocumentStreamBackend)
     if (streamed.size != 3 || streamed[2] != 3) { throw Exception("native stream") }
     println("native consumer passed")
 }
 ''', base)
         if "yyjson" in selected:
             run_fixture("yyjson", f'''yjson = {{ path = "{core}" }}
-yjson_yyjson = {{ path = "{yyjson}" }}''', '''package yjson_release_yyjson
+yjson_yyjson = {{ path = "{yyjson}" }}
+yjson_backends = {{ path = "{backends}" }}''', '''package yjson_release_yyjson
 import yjson.*
 import yjson_yyjson.*
+import yjson_backends.*
 main(): Unit {
-    try (document = YyjsonCompactJsonDocument.parse(unsafe { "{\\"n\\":42}".rawData() })) {
+    try (document = YJsonAdvanced.parseDocumentWithBackend("{\\"n\\":42}", YyjsonDocumentBackend)) {
         if (document.getRootInt("n").getOrThrow() != 42) { throw Exception("yyjson") }
     }
     let codec = YJson.arrayCodec(Int64Json)
     let streamOutput = YJsonMemoryOutputStream()
-    YJson.encodeToStreamWith(codec, [1, 2, 3], streamOutput,
-        backend: YyjsonStreamBackend)
-    let streamed = YJson.decodeFromStreamWith(codec,
-        YJsonByteArrayInputStream(streamOutput.toByteArray()), backend: YyjsonStreamBackend)
+    YJsonAdvanced.encodeToStreamWithBackend(codec, [1, 2, 3], streamOutput,
+        YyjsonWholeDocumentStreamBackend)
+    let streamed = YJsonAdvanced.decodeFromStreamWithBackend(codec,
+        YJsonByteArrayInputStream(streamOutput.toByteArray()), YyjsonWholeDocumentStreamBackend)
     if (streamed.size != 3 || streamed[2] != 3) { throw Exception("yyjson stream") }
     println("yyjson consumer passed")
 }

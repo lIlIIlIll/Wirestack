@@ -104,11 +104,33 @@ public enum JsonNumberPolicy {
     Int64WhenExact | PreserveLiteral
 }
 
+public class JsonReadLimits {
+    public let maxDepth: Int64
+    public let maxPolymorphicObjectBytes: Int64
+    public let maxStringBytes: Int64
+    public let maxBytes: Int64
+
+    public init(maxDepth!: Int64 = 256, maxPolymorphicObjectBytes!: Int64 = 0,
+        maxStringBytes!: Int64 = 0, maxBytes!: Int64 = 0) {
+        if (maxDepth <= 0) { throw IllegalArgumentException("maxDepth must be positive") }
+        if (maxPolymorphicObjectBytes < 0) { throw IllegalArgumentException("maxPolymorphicObjectBytes must not be negative") }
+        if (maxStringBytes < 0) { throw IllegalArgumentException("maxStringBytes must not be negative") }
+        if (maxBytes < 0) { throw IllegalArgumentException("maxBytes must not be negative") }
+        this.maxDepth = maxDepth
+        this.maxPolymorphicObjectBytes = maxPolymorphicObjectBytes
+        this.maxStringBytes = maxStringBytes
+        this.maxBytes = maxBytes
+    }
+
+    public static let defaults: JsonReadLimits = JsonReadLimits()
+}
+
 public class JsonReadConfig {
     public let unknownFieldPolicy: JsonUnknownFieldPolicy
     public let duplicateKeyPolicy: JsonDuplicateKeyPolicy
     public let numberPolicy: JsonNumberPolicy
     public let includeErrorLocation: Bool
+    public let limits: JsonReadLimits
     public let maxDepth: Int64
     public let maxPolymorphicObjectBytes: Int64
     public let maxStringBytes: Int64
@@ -120,31 +142,17 @@ public class JsonReadConfig {
         duplicateKeyPolicy!: JsonDuplicateKeyPolicy = JsonDuplicateKeyPolicy.LastWins,
         numberPolicy!: JsonNumberPolicy = JsonNumberPolicy.Int64WhenExact,
         includeErrorLocation!: Bool = true,
-        maxDepth!: Int64 = 256,
-        maxPolymorphicObjectBytes!: Int64 = 0,
-        maxStringBytes!: Int64 = 0,
-        maxBytes!: Int64 = 0
+        limits!: JsonReadLimits = JsonReadLimits.defaults
     ) {
-        if (maxDepth <= 0) {
-            throw IllegalArgumentException("maxDepth must be positive")
-        }
-        if (maxPolymorphicObjectBytes < 0) {
-            throw IllegalArgumentException("maxPolymorphicObjectBytes must not be negative")
-        }
-        if (maxStringBytes < 0) {
-            throw IllegalArgumentException("maxStringBytes must not be negative")
-        }
-        if (maxBytes < 0) {
-            throw IllegalArgumentException("maxBytes must not be negative")
-        }
         this.unknownFieldPolicy = unknownFieldPolicy
         this.duplicateKeyPolicy = duplicateKeyPolicy
         this.numberPolicy = numberPolicy
         this.includeErrorLocation = includeErrorLocation
-        this.maxDepth = maxDepth
-        this.maxPolymorphicObjectBytes = maxPolymorphicObjectBytes
-        this.maxStringBytes = maxStringBytes
-        this.maxBytes = maxBytes
+        this.limits = limits
+        this.maxDepth = limits.maxDepth
+        this.maxPolymorphicObjectBytes = limits.maxPolymorphicObjectBytes
+        this.maxStringBytes = limits.maxStringBytes
+        this.maxBytes = limits.maxBytes
         let unknownIsDefault = match (unknownFieldPolicy) {
             case Ignore => true
             case _ => false
@@ -158,7 +166,7 @@ public class JsonReadConfig {
             case _ => false
         }
         this.defaultFastPath = unknownIsDefault && duplicateIsDefault && numberIsDefault && includeErrorLocation &&
-            maxDepth == 256 && maxPolymorphicObjectBytes == 0 && maxStringBytes == 0 && maxBytes == 0
+            limits.maxDepth == 256 && limits.maxPolymorphicObjectBytes == 0 && limits.maxStringBytes == 0 && limits.maxBytes == 0
     }
 
     public static let defaults: JsonReadConfig = JsonReadConfig()

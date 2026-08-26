@@ -2,11 +2,11 @@
 cjc-version = "1.1.0"
 name = "yjson_macros"
 description = "AST codec macros for yjson"
-version = "1.0.0"
+version = "2.0.0"
 output-type = "static"
 
 [dependencies]
-# Generated code calls the yjson 1.0.0 reader bridge. The macro package does
+# Generated code calls the yjson 2.0.0 reader bridge. The macro package does
 # not declare yjson here because the development graph intentionally has the
 # core package depend on this build-time macro package; yjson_all pins both
 # release dependencies together.

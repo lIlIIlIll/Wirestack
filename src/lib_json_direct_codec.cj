@@ -107,30 +107,6 @@ public func jsonTryWriteCompactInt64Map(
     }
 }
 
-public enum JsonStreamBufferingMode {
-    | Incremental
-    | WholeDocument
-}
-
-public interface JsonStreamDecodeSession <: Resource {
-    func reader(): JsonCodecReader
-}
-
-public interface JsonStreamEncodeSession <: Resource {
-    func writer(): JsonCodecWriter
-    func finish(): Unit
-}
-
-/// Selects how the caller-owned stream is connected to a typed codec.
-/// Backends never close the caller's stream.
-public interface JsonStreamBackend {
-    func name(): String
-    func decodeBuffering(): JsonStreamBufferingMode
-    func encodeBuffering(): JsonStreamBufferingMode
-    func openDecoder(input: InputStream, config: JsonReadConfig): JsonStreamDecodeSession
-    func openEncoder(output: OutputStream, config: JsonWriteConfig): JsonStreamEncodeSession
-}
-
 public interface JsonCodec<T> {
     func write(value: T, writer: JsonCodecWriter, context: JsonEncodeContext): Unit
 
@@ -1678,38 +1654,33 @@ public func __yJsonReadFastInt64HashMap(reader: JsonFastReader, context: JsonDec
     }
 }
 
-private func remainingJsonInputBytes(input: InputStream): Option<Array<Byte>> {
-    match (input) {
-        case byteInput: YJsonByteArrayInputStream => Some(byteInput.readRemainingBytes())
-        case _ => None<Array<Byte>>
-    }
-}
-
 public class YJson {
     public static func parse(text: String, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
+        freezeYJsonRuntime()
         JsonNode.parse(text, config: config)
     }
 
     public static func parse(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
+        freezeYJsonRuntime()
         JsonNode.parse(bytes, config: config)
     }
 
-    /// Parses a read-only document using one explicit backend. The portable
-    /// Pure Compact backend remains the default and does not enable Native code.
+    /// Parses a GC-managed read-only Compact document with the frozen engine.
     public static func parseDocument(text: String,
-        backend!: JsonDocumentBackend = PureCompactBackend,
         config!: JsonReadConfig = JsonReadConfig.defaults): JsonDocument {
-        backend.parse(unsafe { text.rawData() }, config)
+        freezeYJsonRuntime()
+        parseManagedJsonDocument(unsafe { text.rawData() }, config)
     }
 
     /// Parses raw UTF-8 into the unified read-only document facade.
     public static func parseDocument(bytes: Array<Byte>,
-        backend!: JsonDocumentBackend = PureCompactBackend,
         config!: JsonReadConfig = JsonReadConfig.defaults): JsonDocument {
-        backend.parse(bytes, config)
+        freezeYJsonRuntime()
+        parseManagedJsonDocument(bytes, config)
     }
 
     public static func stringify(value: JsonNode, config!: JsonWriteConfig = JsonWriteConfig.compact): String {
+        freezeYJsonRuntime()
         writeJsonValueToString(value, config)
     }
 
@@ -1771,10 +1742,12 @@ public class YJson {
     }
 
     public static func toJson<T>(value: T, config!: JsonWriteConfig = JsonWriteConfig.compact): String where T <: JsonCodecProvider {
+        freezeYJsonRuntime()
         encodeStringWith(jsonCodecOf<T>(), value, config: config)
     }
 
     public static func fromJson<T>(text: String, config!: JsonReadConfig = JsonReadConfig.defaults): T where T <: JsonCodecProvider {
+        freezeYJsonRuntime()
         decodeStringWith(jsonCodecOf<T>(), text, config: config)
     }
 
@@ -1802,6 +1775,7 @@ public class YJson {
 
     public static func encodeStringWith<T>(codec: JsonCodec<T>, value: T,
         config!: JsonWriteConfig = JsonWriteConfig.compact): String {
+        freezeYJsonRuntime()
         let writer = JsonDirectWriter(config)
         codec.write(value, writer, JsonEncodeContext(config))
         writer.finishString()
@@ -1809,6 +1783,7 @@ public class YJson {
 
     public static func encodeBytesWith<T>(codec: JsonCodec<T>, value: T,
         config!: JsonWriteConfig = JsonWriteConfig.compact): Array<Byte> {
+        freezeYJsonRuntime()
         let writer = JsonDirectWriter.bytes(config: config)
         codec.write(value, writer, JsonEncodeContext(config))
         writer.finishBytes()
@@ -1816,6 +1791,7 @@ public class YJson {
 
     public static func decodeStringWith<T>(codec: JsonCodec<T>, text: String,
         config!: JsonReadConfig = JsonReadConfig.defaults): T {
+        freezeYJsonRuntime()
         if (jsonReadConfigUsesDefaultFastPath(config)) {
             match (codec) {
                 case fast: JsonFastCodec<T> =>
@@ -1834,6 +1810,7 @@ public class YJson {
 
     public static func decodeBytesWith<T>(codec: JsonCodec<T>, bytes: Array<Byte>,
         config!: JsonReadConfig = JsonReadConfig.defaults): T {
+        freezeYJsonRuntime()
         if (jsonReadConfigUsesDefaultFastPath(config)) {
             match (codec) {
                 case fast: JsonFastCodec<T> =>
@@ -1851,41 +1828,32 @@ public class YJson {
     }
 
     public static func encodeToStreamWith<T>(codec: JsonCodec<T>, value: T, out: OutputStream,
-        backend!: JsonStreamBackend = PureStreamBackend,
         config!: JsonWriteConfig = JsonWriteConfig.compact): Unit {
-        let session = backend.openEncoder(out, config)
-        try {
-            codec.write(value, session.writer(), JsonEncodeContext(config))
-            session.finish()
-        } finally {
-            session.close()
-        }
+        freezeYJsonRuntime()
+        let writer = JsonDirectWriter(out, config: config)
+        codec.write(value, writer, JsonEncodeContext(config))
+        writer.finish()
     }
 
     public static func decodeFromStreamWith<T>(codec: JsonCodec<T>, input: InputStream,
-        backend!: JsonStreamBackend = PureStreamBackend,
         config!: JsonReadConfig = JsonReadConfig.defaults): T {
-        let session = backend.openDecoder(input, config)
-        try {
-            let reader = session.reader()
-            let result = codec.read(reader, JsonDecodeContext(config))
-            reader.expectEnd()
-            result
-        } finally {
-            session.close()
-        }
+        freezeYJsonRuntime()
+        let reader = JsonDirectReader(input, config: config)
+        let result = codec.read(reader, JsonDecodeContext(config))
+        reader.expectEnd()
+        result
     }
 
     public static func toStream<T>(value: T, out: OutputStream,
-        backend!: JsonStreamBackend = PureStreamBackend,
         config!: JsonWriteConfig = JsonWriteConfig.compact): Unit where T <: JsonCodecProvider {
-        encodeToStreamWith(jsonCodecOf<T>(), value, out, backend: backend, config: config)
+        freezeYJsonRuntime()
+        encodeToStreamWith(jsonCodecOf<T>(), value, out, config: config)
     }
 
     public static func fromStream<T>(input: InputStream,
-        backend!: JsonStreamBackend = PureStreamBackend,
         config!: JsonReadConfig = JsonReadConfig.defaults): T where T <: JsonCodecProvider {
-        decodeFromStreamWith(jsonCodecOf<T>(), input, backend: backend, config: config)
+        freezeYJsonRuntime()
+        decodeFromStreamWith(jsonCodecOf<T>(), input, config: config)
     }
 
     public static func optionCodec<T>(inner: JsonCodec<T>): JsonCodec<Option<T>> {

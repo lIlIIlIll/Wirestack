@@ -5,12 +5,27 @@ import std.io.*
 const JSON_STREAM_BUFFER_CAPACITY: Int64 = 4096
 const JSON_STREAM_DIRECT_WRITE_THRESHOLD: Int64 = 2048
 
+public class JsonWriteLimits {
+    public let maxDepth: Int64
+    public let maxBytes: Int64
+
+    public init(maxDepth!: Int64 = 256, maxBytes!: Int64 = 0) {
+        if (maxDepth <= 0) { throw IllegalArgumentException("maxDepth must be positive") }
+        if (maxBytes < 0) { throw IllegalArgumentException("maxBytes must not be negative") }
+        this.maxDepth = maxDepth
+        this.maxBytes = maxBytes
+    }
+
+    public static let defaults: JsonWriteLimits = JsonWriteLimits()
+}
+
 public class JsonWriteConfig {
     public let newline: String
     public let indent: String
     public let useSpaceAfterSeparators: Bool
     public let htmlSafe: Bool
     public let includeErrorLocation: Bool
+    public let limits: JsonWriteLimits
     public let maxDepth: Int64
     public let maxBytes: Int64
 
@@ -20,22 +35,16 @@ public class JsonWriteConfig {
         useSpaceAfterSeparators: Bool,
         htmlSafe: Bool,
         includeErrorLocation!: Bool = true,
-        maxDepth!: Int64 = 256,
-        maxBytes!: Int64 = 0
+        limits!: JsonWriteLimits = JsonWriteLimits.defaults
     ) {
-        if (maxDepth <= 0) {
-            throw IllegalArgumentException("maxDepth must be positive")
-        }
-        if (maxBytes < 0) {
-            throw IllegalArgumentException("maxBytes must not be negative")
-        }
         this.newline = newline
         this.indent = indent
         this.useSpaceAfterSeparators = useSpaceAfterSeparators
         this.htmlSafe = htmlSafe
         this.includeErrorLocation = includeErrorLocation
-        this.maxDepth = maxDepth
-        this.maxBytes = maxBytes
+        this.limits = limits
+        this.maxDepth = limits.maxDepth
+        this.maxBytes = limits.maxBytes
     }
 
     public static let compact: JsonWriteConfig = JsonWriteConfig(

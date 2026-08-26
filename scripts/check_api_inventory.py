@@ -73,8 +73,8 @@ def main() -> int:
     inventory = load_toml(INVENTORY)
     if inventory.get("inventory_version") != 1:
         fail("unsupported inventory_version")
-    if inventory.get("release_version") != "1.0.0-rc.1":
-        fail("inventory release_version must match the current release candidate")
+    if inventory.get("release_version") != "2.0.0":
+        fail("inventory release_version must match the 2.0 release line")
     check_versions(inventory)
     check_declarations(inventory)
     subprocess.run([sys.executable, str(ROOT / "scripts/generate_public_api_snapshot.py")],

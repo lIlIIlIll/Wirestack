@@ -3,7 +3,6 @@ package yjson
 import yjson_macros.*
 
 import std.collection.*
-import std.io.*
 import std.unittest.*
 import std.unittest.testmacro.*
 
@@ -30,21 +29,6 @@ private class RegressionPathFailingIntCodec <: JsonCodec<Int64> {
     public func read(reader: JsonCodecReader, context: JsonDecodeContext): Int64 {
         let _ = context
         reader.readInt64()
-    }
-}
-
-private class RegressionNamedPureBackend <: JsonStreamBackend {
-    var decoderOpened: Bool = false
-
-    public func name(): String { "pure-incremental" }
-    public func decodeBuffering(): JsonStreamBufferingMode { JsonStreamBufferingMode.Incremental }
-    public func encodeBuffering(): JsonStreamBufferingMode { JsonStreamBufferingMode.Incremental }
-    public func openDecoder(input: InputStream, config: JsonReadConfig): JsonStreamDecodeSession {
-        decoderOpened = true
-        PureStreamBackend.openDecoder(input, config)
-    }
-    public func openEncoder(output: OutputStream, config: JsonWriteConfig): JsonStreamEncodeSession {
-        PureStreamBackend.openEncoder(output, config)
     }
 }
 
@@ -163,7 +147,7 @@ class YJsonRegressionTest {
     @TestCase
     func generatedUnknownFieldSkipCannotBypassDepthBudget(): Unit {
         let semanticError = @AssertThrows[JsonException](YJson.decodeStringWith(
-            PersonJson, "{\"unknown\":[[]]}", config: JsonReadConfig(maxDepth: 2)))
+            PersonJson, "{\"unknown\":[[]]}", config: JsonReadConfig(limits: JsonReadLimits(maxDepth: 2))))
         @Expect(semanticError.code, "max_depth")
 
         let text = StringBuilder("{\"unknown\":")
@@ -348,16 +332,6 @@ class YJsonRegressionTest {
     }
 
     @TestCase
-    func memoryStreamNeverBypassesSelectedBackendByName(): Unit {
-        let backend = RegressionNamedPureBackend()
-        let decoded = YJson.decodeFromStreamWith(PersonJson,
-            YJsonByteArrayInputStream(YJson.encodeBytesWith(PersonJson, samplePerson())),
-            backend: backend)
-        @Expect(backend.decoderOpened)
-        @Expect(decoded.id, 42)
-    }
-
-    @TestCase
     func providerStreamConveniencesUsePureBackendByDefault(): Unit {
         let output = MemoryOutputStream()
         YJson.toStream(samplePerson(), output)
@@ -369,8 +343,8 @@ class YJsonRegressionTest {
     @TestCase
     func writeByteLimitAppliesToAllPureTargets(): Unit {
         @AssertThrows[IllegalArgumentException](JsonWriteConfig("", "", false, false,
-            maxBytes: -1))
-        let config = JsonWriteConfig("", "", false, false, maxBytes: 3)
+            limits: JsonWriteLimits(maxBytes: -1)))
+        let config = JsonWriteConfig("", "", false, false, limits: JsonWriteLimits(maxBytes: 3))
         let stringError = @AssertThrows[JsonException](YJson.encodeStringWith(StringJson,
             "long", config: config))
         @Expect(stringError.code, "output_too_large")
@@ -383,19 +357,13 @@ class YJsonRegressionTest {
     }
 
     @TestCase
-    func streamSessionsRejectUseAfterCloseAndDoubleFinish(): Unit {
-        let closed = PureStreamBackend.openEncoder(MemoryOutputStream(), JsonWriteConfig.compact)
-        closed.close()
-        closed.close()
-        @Expect(closed.isClosed())
-        @AssertThrows[IllegalStateException](closed.writer())
-
-        let finished = PureStreamBackend.openEncoder(MemoryOutputStream(), JsonWriteConfig.compact)
-        finished.writer().writeNull()
-        finished.finish()
-        @AssertThrows[IllegalStateException](finished.finish())
-        @AssertThrows[IllegalStateException](finished.writer())
-        finished.close()
+    func streamWriterRejectsIllegalStructuralOrder(): Unit {
+        let writer = JsonDirectWriter(MemoryOutputStream(), config: JsonWriteConfig.compact)
+        @AssertThrows[JsonException](writer.writeName("orphan"))
+        writer.startArray()
+        writer.writeNull()
+        writer.endArray()
+        writer.finish()
     }
 
     @TestCase
@@ -459,13 +427,13 @@ class YJsonRegressionTest {
         let depthError = @AssertThrows[JsonException](YJson.encodeStringWith(
             codec,
             profiles,
-            config: JsonWriteConfig("", "", false, false, maxDepth: 1)
+            config: JsonWriteConfig("", "", false, false, limits: JsonWriteLimits(maxDepth: 1))
         ))
         @Expect(depthError.code, "max_depth")
         @Expect(depthError.path, "$[0]")
         @Expect(YJson.decodeStringWith(
             codec,
-            YJson.encodeStringWith(codec, profiles, config: JsonWriteConfig("", "", false, false, maxDepth: 2))
+            YJson.encodeStringWith(codec, profiles, config: JsonWriteConfig("", "", false, false, limits: JsonWriteLimits(maxDepth: 2)))
         )[0].alias, profile.alias)
 
         let profilesByName = HashMap<String, ArrayList<ProfileRecord>>()
@@ -484,13 +452,13 @@ class YJsonRegressionTest {
         let nestedDepthError = @AssertThrows[JsonException](YJson.encodeStringWith(
             nestedCodec,
             nested,
-            config: JsonWriteConfig("", "", false, false, maxDepth: 3)
+            config: JsonWriteConfig("", "", false, false, limits: JsonWriteLimits(maxDepth: 3))
         ))
         @Expect(nestedDepthError.code, "max_depth")
         @Expect(nestedDepthError.path, "$[0].group[0]")
         @Expect(YJson.decodeStringWith(
             nestedCodec,
-            YJson.encodeStringWith(nestedCodec, nested, config: JsonWriteConfig("", "", false, false, maxDepth: 4))
+            YJson.encodeStringWith(nestedCodec, nested, config: JsonWriteConfig("", "", false, false, limits: JsonWriteLimits(maxDepth: 4)))
         )[0]["group"][0].id, profile.id)
 
         let profileArrayCodec = YJson.arrayCodec(ProfileRecordJson)

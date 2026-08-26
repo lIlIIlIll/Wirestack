@@ -29,7 +29,7 @@ foreign func YJ_JSON_ScanString(input: CPointer<UInt8>, len: Int64, start: Int64
 @FastNative
 foreign func YJ_JSON_DecodeString(input: CPointer<UInt8>, len: Int64, start: Int64, flags: UInt32, output: CPointer<UInt8>, outputCap: Int64, outEnd: CPointer<Int64>, outWritten: CPointer<Int64>, outError: CPointer<Int64>): Int32
 
-private class CJsonNativeScannerBackend <: JsonNativeScannerBackend & JsonNativeNumericScannerBackend & JsonNativeNumericTapeBackend & JsonNativeFloatParserBackend {
+private class CJsonNativeScannerBackend <: JsonNativeAccelerationPrimitivesV1 {
     public func simdCaps(): UInt32 { unsafe { YJ_JSON_SimdCaps() } }
 
     public func parseFloat64(input: CPointer<UInt8>, len: Int64, start: Int64, tokenLength: Int64): Float64 {
@@ -64,36 +64,7 @@ private class CJsonNativeScannerBackend <: JsonNativeScannerBackend & JsonNative
     }
 }
 
-// Backend activation is process-global. Keep the modes explicit so a
-// FloatOnly or NumericOnly experiment cannot silently mask a later full
-// activation, and disabling one mode cannot leave the other seams installed.
-private const YJSON_NATIVE_MODE_NONE: Int32 = 0
-private const YJSON_NATIVE_MODE_FULL: Int32 = 1
-private const YJSON_NATIVE_MODE_FLOAT_ONLY: Int32 = 2
-private const YJSON_NATIVE_MODE_NUMERIC_ONLY: Int32 = 3
-private var yJsonNativeMode: Int32 = YJSON_NATIVE_MODE_NONE
-
-private func beginNativeMode(mode: Int32, name: String): Bool {
-    if (yJsonNativeMode == YJSON_NATIVE_MODE_NONE) {
-        return true
-    }
-    if (yJsonNativeMode == mode) {
-        return false
-    }
-    throw IllegalStateException(
-        "${name} cannot be combined with another yjson_native activation mode")
-}
-
-private func endNativeMode(mode: Int32, name: String): Bool {
-    if (yJsonNativeMode == YJSON_NATIVE_MODE_NONE) {
-        return false
-    }
-    if (yJsonNativeMode != mode) {
-        throw IllegalStateException(
-            "${name} does not match the active yjson_native activation mode")
-    }
-    return true
-}
+private var yJsonNativeEnabled: Bool = false
 
 // Package-local test support. Keeping this out of the public surface lets the
 // optional package verify that the linked scanner archive is callable without
@@ -102,60 +73,26 @@ func nativeScannerCapabilitiesForTesting(): UInt32 {
     unsafe { YJ_JSON_SimdCaps() }
 }
 
-public func enableYJsonNative(): Unit {
-    if (beginNativeMode(YJSON_NATIVE_MODE_FULL, "enableYJsonNative")) {
-        let backend = CJsonNativeScannerBackend()
-        installJsonNativeScannerBackend(backend)
-        installJsonNativeNumericScannerBackend(backend)
-        installJsonNativeNumericTapeBackend(backend)
-        installJsonNativeFloatParserBackend(backend)
-        yJsonNativeMode = YJSON_NATIVE_MODE_FULL
+func enableYJsonNative(): Unit {
+    if (yJsonNativeEnabled) { return }
+    activateJsonNativePrimitivesV1(CJsonNativeScannerBackend())
+    yJsonNativeEnabled = true
+}
+
+private class CustomNativeAccelerationProviderV1 <: JsonAccelerationProviderV1 {
+    public func identity(): String { "yjson-custom-native-v1" }
+    public func protocolVersion(): Int64 { 1 }
+    public func abiVersion(): Int64 { 1 }
+    public func activate(): Unit {
+        // Resolves the linked symbols and executes the capability probe during
+        // initialization so missing-library/CPU/ABI failures cannot surface as
+        // a later silent portable fallback.
+        let _ = nativeScannerCapabilitiesForTesting()
+        enableYJsonNative()
     }
 }
 
-
-/// Installs only the bounded native Float64 token parser. The foreign call is
-/// deliberately kept separate from the structural and bulk-number backends so
-/// its cost and semantic surface can be measured independently. Activation
-/// modes are mutually exclusive; call the matching disable function before
-/// selecting another isolated mode.
-public func enableYJsonNativeFloatOnly(): Unit {
-    if (beginNativeMode(YJSON_NATIVE_MODE_FLOAT_ONLY, "enableYJsonNativeFloatOnly")) {
-        let backend = CJsonNativeScannerBackend()
-        installJsonNativeFloatParserBackend(backend)
-        yJsonNativeMode = YJSON_NATIVE_MODE_FLOAT_ONLY
-    }
-}
-
-
-/// Removes the FloatOnly activation. Calling it while another mode is active
-/// throws instead of leaving the process-global backend state partially reset.
-public func disableYJsonNativeFloatOnly(): Unit {
-    if (endNativeMode(YJSON_NATIVE_MODE_FLOAT_ONLY, "disableYJsonNativeFloatOnly")) {
-        uninstallJsonNativeFloatParserBackend()
-        yJsonNativeMode = YJSON_NATIVE_MODE_NONE
-    }
-}
-
-
-/// Installs only the additive bulk-number seam. Benchmarks and deployments can
-/// evaluate it independently of the established string/structural scanner.
-/// Activation modes are mutually exclusive.
-public func enableYJsonNativeNumericOnly(): Unit {
-    if (beginNativeMode(YJSON_NATIVE_MODE_NUMERIC_ONLY, "enableYJsonNativeNumericOnly")) {
-        let backend = CJsonNativeScannerBackend()
-        installJsonNativeNumericScannerBackend(backend)
-        installJsonNativeNumericTapeBackend(backend)
-        yJsonNativeMode = YJSON_NATIVE_MODE_NUMERIC_ONLY
-    }
-}
-
-
-/// Removes the NumericOnly activation. Calling it while another mode is active
-/// throws instead of leaving the process-global backend state partially reset.
-public func disableYJsonNativeNumericOnly(): Unit {
-    if (endNativeMode(YJSON_NATIVE_MODE_NUMERIC_ONLY, "disableYJsonNativeNumericOnly")) {
-        uninstallJsonNativeNumericScannerBackend()
-        yJsonNativeMode = YJSON_NATIVE_MODE_NONE
-    }
+/// Versioned package seam consumed only by yjson_native_accel.
+public func customNativeAccelerationProviderV1(): JsonAccelerationProviderV1 {
+    CustomNativeAccelerationProviderV1()
 }

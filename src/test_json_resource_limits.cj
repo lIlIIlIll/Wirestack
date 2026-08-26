@@ -25,14 +25,14 @@ private func rejectsResourceConfig(action: () -> Unit): Bool {
 class JsonResourceLimitsTest {
     @TestCase
     func zeroMeansUnlimitedAndNegativeLimitsAreRejected(): Unit {
-        let config = JsonReadConfig(maxBytes: 0, maxStringBytes: 0,
-            maxPolymorphicObjectBytes: 0)
+        let config = JsonReadConfig(limits: JsonReadLimits(maxBytes: 0, maxStringBytes: 0,
+            maxPolymorphicObjectBytes: 0))
         @Expect(YJson.parse("{\"value\":\"unlimited\"}", config: config).asObject().size(), 1)
         @Expect(JsonDirectReader("{\"value\":\"unlimited\"}").readBoundedValue(0)
             .asObject().size(), 1)
-        @Expect(rejectsResourceConfig({ => let _ = JsonReadConfig(maxBytes: -1) }))
-        @Expect(rejectsResourceConfig({ => let _ = JsonReadConfig(maxStringBytes: -1) }))
-        @Expect(rejectsResourceConfig({ => let _ = JsonReadConfig(maxPolymorphicObjectBytes: -1) }))
+        @Expect(rejectsResourceConfig({ => let _ = JsonReadConfig(limits: JsonReadLimits(maxBytes: -1)) }))
+        @Expect(rejectsResourceConfig({ => let _ = JsonReadConfig(limits: JsonReadLimits(maxStringBytes: -1)) }))
+        @Expect(rejectsResourceConfig({ => let _ = JsonReadConfig(limits: JsonReadLimits(maxPolymorphicObjectBytes: -1)) }))
         @Expect(rejectsResourceConfig({ =>
             let _ = JsonDirectReader("null").readBoundedValue(-1)
         }))
@@ -41,39 +41,39 @@ class JsonResourceLimitsTest {
     @TestCase
     func documentLimitUsesExactInputBytes(): Unit {
         let text = "{\"a\":1}"
-        @Expect(YJson.parse(text, config: JsonReadConfig(maxBytes: 7)).asObject().size(), 1)
+        @Expect(YJson.parse(text, config: JsonReadConfig(limits: JsonReadLimits(maxBytes: 7))).asObject().size(), 1)
         @Expect(resourceLimitErrorCode({ =>
-            let _ = YJson.parse(text, config: JsonReadConfig(maxBytes: 6))
+            let _ = YJson.parse(text, config: JsonReadConfig(limits: JsonReadLimits(maxBytes: 6)))
         }), "document_too_large")
         @Expect(resourceLimitErrorCode({ =>
             let _ = CompactJsonDocument.parse(unsafe { text.rawData() },
-                config: JsonReadConfig(maxBytes: 6))
+                config: JsonReadConfig(limits: JsonReadLimits(maxBytes: 6)))
         }), "document_too_large")
     }
 
     @TestCase
     func stringLimitCountsDecodedUtf8BytesForValuesAndKeys(): Unit {
-        @Expect(YJson.parse("\"abc\"", config: JsonReadConfig(maxStringBytes: 3)).asString().value,
+        @Expect(YJson.parse("\"abc\"", config: JsonReadConfig(limits: JsonReadLimits(maxStringBytes: 3))).asString().value,
             "abc")
         @Expect(resourceLimitErrorCode({ =>
-            let _ = YJson.parse("\"abc\"", config: JsonReadConfig(maxStringBytes: 2))
+            let _ = YJson.parse("\"abc\"", config: JsonReadConfig(limits: JsonReadLimits(maxStringBytes: 2)))
         }), "string_too_large")
 
-        @Expect(YJson.parse("\"\\u4E2D\"", config: JsonReadConfig(maxStringBytes: 3)).asString().value,
+        @Expect(YJson.parse("\"\\u4E2D\"", config: JsonReadConfig(limits: JsonReadLimits(maxStringBytes: 3))).asString().value,
             "中")
         @Expect(resourceLimitErrorCode({ =>
-            let _ = YJson.parse("\"\\u4E2D\"", config: JsonReadConfig(maxStringBytes: 2))
+            let _ = YJson.parse("\"\\u4E2D\"", config: JsonReadConfig(limits: JsonReadLimits(maxStringBytes: 2)))
         }), "string_too_large")
-        @Expect(YJson.parse("\"🙂\"", config: JsonReadConfig(maxStringBytes: 4)).asString().value,
+        @Expect(YJson.parse("\"🙂\"", config: JsonReadConfig(limits: JsonReadLimits(maxStringBytes: 4))).asString().value,
             "🙂")
         @Expect(resourceLimitErrorCode({ =>
-            let _ = YJson.parse("{\"\\u4E2D\":1}", config: JsonReadConfig(maxStringBytes: 2))
+            let _ = YJson.parse("{\"\\u4E2D\":1}", config: JsonReadConfig(limits: JsonReadLimits(maxStringBytes: 2)))
         }), "string_too_large")
         @Expect(YJson.parse("\"\\uD83D\\uDE42\"",
-            config: JsonReadConfig(maxStringBytes: 4)).asString().value, "🙂")
+            config: JsonReadConfig(limits: JsonReadLimits(maxStringBytes: 4))).asString().value, "🙂")
         @Expect(resourceLimitErrorCode({ =>
             let _ = YJson.parse("\"\\uD83D\\uDE42\"",
-                config: JsonReadConfig(maxStringBytes: 3))
+                config: JsonReadConfig(limits: JsonReadLimits(maxStringBytes: 3)))
         }), "string_too_large")
     }
 
@@ -81,43 +81,44 @@ class JsonResourceLimitsTest {
     func rootContainerLimitIncludesNestedContentButNotTrailingWhitespace(): Unit {
         let text = "{\"a\":[1,2]}"
         @Expect(YJson.parse(text + "   ",
-            config: JsonReadConfig(maxPolymorphicObjectBytes: text.size)).asObject().size(), 1)
+            config: JsonReadConfig(limits: JsonReadLimits(maxPolymorphicObjectBytes: text.size))).asObject().size(), 1)
         @Expect(resourceLimitErrorCode({ =>
             let _ = YJson.parse(text,
-                config: JsonReadConfig(maxPolymorphicObjectBytes: text.size - 1))
+                config: JsonReadConfig(limits: JsonReadLimits(maxPolymorphicObjectBytes: text.size - 1)))
         }), "polymorphic_object_too_large")
     }
 
     @TestCase
     func chunkedStreamEnforcesAllLimitsDuringTypedDecode(): Unit {
         @Expect(YJson.decodeFromStreamWith(StringJson, FixedChunkInputStream("\"中\"", 1),
-            config: JsonReadConfig(maxBytes: 5, maxStringBytes: 3)), "中")
+            config: JsonReadConfig(limits: JsonReadLimits(maxBytes: 5, maxStringBytes: 3))), "中")
         @Expect(resourceLimitErrorCode({ =>
             let _ = YJson.decodeFromStreamWith(StringJson, FixedChunkInputStream("\"中\"", 1),
-                config: JsonReadConfig(maxStringBytes: 2))
+                config: JsonReadConfig(limits: JsonReadLimits(maxStringBytes: 2)))
         }), "string_too_large")
         @Expect(resourceLimitErrorCode({ =>
             let _ = YJson.decodeFromStreamWith(StringJson, FixedChunkInputStream("\"abc\"", 1),
-                config: JsonReadConfig(maxBytes: 4))
+                config: JsonReadConfig(limits: JsonReadLimits(maxBytes: 4)))
         }), "document_too_large")
         @Expect(resourceLimitErrorCode({ =>
             let _ = YJson.decodeFromStreamWith(YJson.arrayCodec<Int64>(Int64Json),
                 FixedChunkInputStream("[1,2]", 1),
-                config: JsonReadConfig(maxPolymorphicObjectBytes: 4))
+                config: JsonReadConfig(limits: JsonReadLimits(maxPolymorphicObjectBytes: 4)))
         }), "polymorphic_object_too_large")
     }
 
     @TestCase
     func disabledErrorLocationKeepsResourceCodeButOmitsOffset(): Unit {
         let error = @AssertThrows[JsonException](YJson.parse("\"abc\"",
-            config: JsonReadConfig(includeErrorLocation: false, maxStringBytes: 2)))
+            config: JsonReadConfig(includeErrorLocation: false,
+                limits: JsonReadLimits(maxStringBytes: 2))))
         @Expect(error.code, "string_too_large")
         @Expect(error.byteOffset, -1)
     }
 
     @TestCase
     func astDepthCountsContainersOnlyForStringAndBytes(): Unit {
-        let one = JsonReadConfig(maxDepth: 1)
+        let one = JsonReadConfig(limits: JsonReadLimits(maxDepth: 1))
         @Expect(YJson.parse("{\"name\":\"alice\"}", config: one).asObject().size(), 1)
         @Expect(resourceLimitErrorCode({ =>
             let _ = YJson.parse("{\"child\":{}}", config: one)
@@ -133,13 +134,13 @@ class JsonResourceLimitsTest {
 
     @TestCase
     func boundedReplayDoesNotChargeScalarChildrenAsDepth(): Unit {
-        let reader = JsonDirectReader("{\"name\":\"alice\"}", config: JsonReadConfig(maxDepth: 1))
+        let reader = JsonDirectReader("{\"name\":\"alice\"}", config: JsonReadConfig(limits: JsonReadLimits(maxDepth: 1)))
         @Expect(reader.readBoundedValue(0).asObject()["name"].asString().value, "alice")
     }
 
     @TestCase
     func skippedUnknownSubtreeUsesRemainingDepth(): Unit {
-        let direct = JsonDirectReader("{\"unknown\":[[]]}", config: JsonReadConfig(maxDepth: 2))
+        let direct = JsonDirectReader("{\"unknown\":[[]]}", config: JsonReadConfig(limits: JsonReadLimits(maxDepth: 2)))
         direct.startObject()
         @Expect(direct.readName(), "unknown")
         @Expect(resourceLimitErrorCode({ => direct.skipValueWithDepth(1) }), "max_depth")
