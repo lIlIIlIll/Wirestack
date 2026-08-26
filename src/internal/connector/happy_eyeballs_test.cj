@@ -2,6 +2,7 @@ package wirestack.internal.connector
 
 import std.collection.ArrayList
 import std.sync.*
+import std.time.MonoTime
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.common.*
@@ -125,6 +126,52 @@ private class ConnectorEventSink <: NetworkEventSink {
     func events(): Array<NetworkEvent> { synchronized(mutex) { recorded.toArray() } }
 }
 
+private class ConnectorFakeClock <: MonotonicClock {
+    private let mutex = Mutex()
+    private var current: MonoTime
+
+    init(start: MonoTime) {
+        current = start
+    }
+
+    public func now(): MonoTime {
+        synchronized(mutex) { current }
+    }
+
+    func advance(duration: Duration): Unit {
+        synchronized(mutex) { current = current + duration }
+    }
+}
+
+private enum ConnectorRaceTrigger {
+    | Cancel(CancellationSource)
+    | Expire(ConnectorFakeClock, Duration)
+}
+
+/** Runs one terminal parent action after connect succeeds but before tryWin. */
+private class ConnectorRaceSink <: NetworkEventSink {
+    private let trigger: ConnectorRaceTrigger
+    private let fired = AtomicBool(false)
+
+    init(trigger: ConnectorRaceTrigger) {
+        this.trigger = trigger
+    }
+
+    public func emit(event: NetworkEvent): Unit {
+        if (!isEvent(
+            event,
+            NetworkEventKind.ConnectAttemptCompleted,
+            NetworkEventOutcome.Succeeded
+        ) || fired.swap(true)) {
+            return
+        }
+        match (trigger) {
+            case ConnectorRaceTrigger.Cancel(source) => source.cancel()
+            case ConnectorRaceTrigger.Expire(clock, duration) => clock.advance(duration)
+        }
+    }
+}
+
 @Test
 class HappyEyeballsConnectorTest {
     @TestCase
@@ -163,6 +210,30 @@ class HappyEyeballsConnectorTest {
         @Expect(result.diagnostics.attempts[1].won)
         @Expect(factory.startedCount, 2)
         @Expect(factory.completedCount, 2)
+        @Expect(factory.activeCount, 0)
+        result.transport.close()
+    }
+
+    @TestCase
+    func ipv6FirstSuccessSkipsLaterIpv4Attempt(): Unit {
+        let (host, resolver) = hostAndResolver([ipv6Address(2), ipv4Address(3)])
+        let factory = ScriptedAttemptFactory(ScriptMode.BlackholeThenSuccess)
+        let connector = HappyEyeballsConnector(
+            resolver,
+            factory,
+            attemptDelay: Duration.second
+        )
+        let result = connector.connect(host, 443)
+
+        @Expect(result.diagnostics.winner.address, ipv6Address(2))
+        @Expect(result.diagnostics.attempts.size, 2)
+        @Expect(result.diagnostics.attempts[0].won)
+        @Expect(connectDiagnosticCode(
+            result.diagnostics.attempts[1],
+            NetworkErrorCode.Cancelled
+        ))
+        @Expect(factory.startedCount, 1)
+        @Expect(factory.completedCount, 1)
         @Expect(factory.activeCount, 0)
         result.transport.close()
     }
@@ -224,6 +295,95 @@ class HappyEyeballsConnectorTest {
         }
         @Expect(cancelled)
         @Expect(factory.startedCount, 0)
+    }
+
+    @TestCase
+    func parentCancellationAfterSuccessPreventsWinnerPublication(): Unit {
+        let (host, resolver) = hostAndResolver([ipv4Address(2)])
+        let factory = ScriptedAttemptFactory(ScriptMode.BlackholeThenSuccess)
+        let source = CancellationSource()
+        let sink = ConnectorRaceSink(ConnectorRaceTrigger.Cancel(source))
+        let connector = HappyEyeballsConnector(resolver, factory)
+
+        let error = try {
+            let _ = connector.connect(
+                host,
+                443,
+                context: OperationContext(
+                    cancellation: source.token,
+                    eventSink: Some(sink)
+                )
+            )
+            @Fail("cancelled success was published as a winner")
+        } catch (value: ConnectException) {
+            value
+        }
+        @Expect(connectExceptionCode(error, NetworkErrorCode.Cancelled))
+        @Expect(error.attempts.size, 1)
+        @Expect(!error.attempts[0].won)
+        @Expect(factory.startedCount, 1)
+        @Expect(factory.completedCount, 1)
+        @Expect(factory.activeCount, 0)
+        let states = factory.transportStates()
+        @Expect(states.size, 1)
+        @Expect(states[0])
+    }
+
+    @TestCase
+    func deadlineAtSuccessBoundaryPreventsWinnerPublication(): Unit {
+        let (host, resolver) = hostAndResolver([ipv4Address(2)])
+        let factory = ScriptedAttemptFactory(ScriptMode.BlackholeThenSuccess)
+        let clock = ConnectorFakeClock(MonoTime.now())
+        let deadline = Deadline.after(Duration.second, clock: clock)
+        let sink = ConnectorRaceSink(
+            ConnectorRaceTrigger.Expire(clock, Duration.second)
+        )
+        let connector = HappyEyeballsConnector(resolver, factory)
+
+        let error = try {
+            let _ = connector.connect(
+                host,
+                443,
+                context: OperationContext(
+                    deadline: Some(deadline),
+                    eventSink: Some(sink)
+                )
+            )
+            @Fail("deadline-expired success was published as a winner")
+        } catch (value: ConnectException) {
+            value
+        }
+        @Expect(connectExceptionCode(error, NetworkErrorCode.TimedOut))
+        @Expect(error.attempts.size, 1)
+        @Expect(!error.attempts[0].won)
+        @Expect(factory.startedCount, 1)
+        @Expect(factory.completedCount, 1)
+        @Expect(factory.activeCount, 0)
+        let states = factory.transportStates()
+        @Expect(states.size, 1)
+        @Expect(states[0])
+    }
+}
+
+private func connectDiagnosticCode(
+    diagnostic: AttemptDiagnostic,
+    expected: NetworkErrorCode
+): Bool {
+    match (diagnostic.error) {
+        case Some(error) => connectNetworkCode(error.code, expected)
+        case None => false
+    }
+}
+
+private func connectExceptionCode(error: ConnectException, expected: NetworkErrorCode): Bool {
+    connectNetworkCode(error.code, expected)
+}
+
+private func connectNetworkCode(actual: NetworkErrorCode, expected: NetworkErrorCode): Bool {
+    match ((actual, expected)) {
+        case (NetworkErrorCode.Cancelled, NetworkErrorCode.Cancelled) => true
+        case (NetworkErrorCode.TimedOut, NetworkErrorCode.TimedOut) => true
+        case _ => false
     }
 }
 
