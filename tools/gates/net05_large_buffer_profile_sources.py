@@ -5,10 +5,12 @@ import std.time.*
 import std.convert.*
 
 main(args: Array<String>): Int64 {
-    let port = UInt16.parse(args[0])
-    let expected = Int64.parse(args[1])
-    let bufferSize = Int64.parse(args[2])
-    let socket = TcpSocket("127.0.0.1", port)
+    let host = args[0]
+    let port = UInt16.parse(args[1])
+    let expected = Int64.parse(args[2])
+    let bufferSize = Int64.parse(args[3])
+    let reportReads = args[4] == "verbose"
+    let socket = TcpSocket(host, port)
     socket.connect()
     let buffer = Array<Byte>(bufferSize, repeat: 0)
     let started = MonoTime.now()
@@ -31,7 +33,9 @@ main(args: Array<String>): Int64 {
         }
         total += n
         reads += 1
-        println("READ size=${n}")
+        if (reportReads) {
+            println("READ size=${n}")
+        }
     }
     let durationNs = (MonoTime.now() - started).toNanoseconds()
     var closeCode: Int64 = 0
