@@ -1416,9 +1416,10 @@ public class JsonDirectReader <: JsonCodecReader {
             case _ => ()
         }
         for (byte in unsafe { literal.rawData() }) {
-            if (!source.hasMore() || consumeByte() != byte) {
+            if (!source.hasMore() || source.peek() != byte) {
                 fail("Expected ${literal}")
             }
+            consumeByte()
         }
     }
 
@@ -1429,9 +1430,10 @@ public class JsonDirectReader <: JsonCodecReader {
                 return
             case _ => ()
         }
-        if (!source.hasMore() || consumeByte() != value) {
+        if (!source.hasMore() || source.peek() != value) {
             fail("Unexpected token")
         }
+        consumeByte()
     }
 
     private func fail(message: String): Nothing {

@@ -12,6 +12,7 @@ const YJSON_NATIVE_MIN_OBJECT_SCAN_BYTES = 1024
 const YJSON_NATIVE_MIN_ARRAY_SCAN_BYTES = 240
 const YJSON_NATIVE_MIN_DECODE_BYTES = 16
 const YJSON_NATIVE_MIN_READER_DECODE_BYTES = 256
+const YJSON_NATIVE_MIN_WRITER_ESCAPE_BYTES = 64
 const YJSON_NATIVE_MIN_ARRAY_ELEMENT_COUNT = 16
 const YJSON_NATIVE_OBJECT_FIELD_CAP = 64
 const YJSON_NATIVE_OBJECT_FIELD_WORDS = 5
@@ -53,10 +54,19 @@ public interface JsonNativeFloatParserBackend {
     func parseFloat64(input: CPointer<UInt8>, len: Int64, start: Int64, tokenLength: Int64): Float64
 }
 
+/// Writer-side primitive. It only transforms a single already accepted
+/// Cangjie String into one quoted JSON token; separator/state/limits remain in
+/// JsonDirectWriter.
+public interface JsonNativeWriterBackend {
+    func escapeString(input: CPointer<UInt8>, len: Int64, htmlSafe: Bool,
+        output: CPointer<UInt8>, outputCap: Int64, outWritten: CPointer<Int64>): Int32
+}
+
 /// Versioned internal product bundle consumed by yjson_native. Applications
 /// configure it only through YJsonNativeAccel.initialize().
 public interface JsonNativeAccelerationPrimitivesV1 <: JsonNativeScannerBackend &
-    JsonNativeNumericScannerBackend & JsonNativeNumericTapeBackend & JsonNativeFloatParserBackend {}
+    JsonNativeNumericScannerBackend & JsonNativeNumericTapeBackend & JsonNativeFloatParserBackend &
+    JsonNativeWriterBackend {}
 
 private var jsonNativeScannerBackend: Option<JsonNativeScannerBackend> = None<JsonNativeScannerBackend>
 private var jsonNativeNumericScannerBackend: Option<JsonNativeNumericScannerBackend> =
@@ -65,6 +75,7 @@ private var jsonNativeNumericTapeBackend: Option<JsonNativeNumericTapeBackend> =
     None<JsonNativeNumericTapeBackend>
 private var jsonNativeFloatParserBackend: Option<JsonNativeFloatParserBackend> =
     None<JsonNativeFloatParserBackend>
+private var jsonNativeWriterBackend: Option<JsonNativeWriterBackend> = None<JsonNativeWriterBackend>
 
 private func installJsonNativeScannerBackend(backend: JsonNativeScannerBackend): Unit {
     if (jsonNativeScannerBackend.isSome()) {
@@ -96,13 +107,47 @@ private func installJsonNativeFloatParserBackend(backend: JsonNativeFloatParserB
 /// Installs the complete v1 primitive bundle atomically during runtime freeze.
 public func activateJsonNativePrimitivesV1(backend: JsonNativeAccelerationPrimitivesV1): Unit {
     if (jsonNativeScannerBackend.isSome() || jsonNativeNumericScannerBackend.isSome() ||
-        jsonNativeNumericTapeBackend.isSome() || jsonNativeFloatParserBackend.isSome()) {
+        jsonNativeNumericTapeBackend.isSome() || jsonNativeFloatParserBackend.isSome() ||
+        jsonNativeWriterBackend.isSome()) {
         throw IllegalStateException("JSON native acceleration is already installed")
     }
     installJsonNativeScannerBackend(backend)
     installJsonNativeNumericScannerBackend(backend)
     installJsonNativeNumericTapeBackend(backend)
     installJsonNativeFloatParserBackend(backend)
+    jsonNativeWriterBackend = Some(backend)
+}
+
+func jsonNativeEscapeString(value: String, htmlSafe: Bool): Option<Array<Byte>> {
+    if (value.size < YJSON_NATIVE_MIN_WRITER_ESCAPE_BYTES) {
+        return None<Array<Byte>>
+    }
+    let backend = match (jsonNativeWriterBackend) {
+        case Some(item) => item
+        case None => return None<Array<Byte>>
+    }
+    if (value.size > (Int64.Max - 2) / 6) {
+        throw JsonAccelerationException("JSON string is too large for native escaping",
+            code: "acceleration_writer_failure")
+    }
+    let output = Array<Byte>(value.size * 6 + 2, repeat: 0)
+    let written = Array<Int64>(1, repeat: 0)
+    unsafe {
+        let input = value.rawData()
+        let inputHandle = acquireArrayRawData(input)
+        let outputHandle = acquireArrayRawData(output)
+        let writtenHandle = acquireArrayRawData(written)
+        let status = backend.escapeString(inputHandle.pointer, input.size, htmlSafe,
+            outputHandle.pointer, output.size, writtenHandle.pointer)
+        releaseArrayRawData(writtenHandle)
+        releaseArrayRawData(outputHandle)
+        releaseArrayRawData(inputHandle)
+        if (status != YJ_JSON_SCAN_OK || written[0] < 2 || written[0] > output.size) {
+            throw JsonAccelerationException("Native JSON string escaping failed",
+                code: "acceleration_writer_failure")
+        }
+    }
+    Some(output[0..written[0]])
 }
 
 func jsonNativeFloatParserAvailable(): Bool {

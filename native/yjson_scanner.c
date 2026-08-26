@@ -31,6 +31,50 @@ double YJ_JSON_ParseDouble(const uint8_t* input, int64_t len,
     return value;
 }
 
+static int yj_json_writer_needs_html_escape(uint8_t value) {
+    return value == '<' || value == '>' || value == '&' || value == '=' || value == '\'';
+}
+
+int32_t YJ_JSON_EscapeString(const uint8_t* input, int64_t len, uint8_t htmlSafe,
+    uint8_t* output, int64_t outputCap, int64_t* outWritten) {
+    static const uint8_t hex[] = "0123456789abcdef";
+    int64_t written = 0;
+    if (input == NULL || output == NULL || outWritten == NULL || len < 0 || outputCap < 2) {
+        return YJ_JSON_SCAN_ERROR;
+    }
+#define YJ_WRITE_BYTE(byteValue) do { \
+        if (written >= outputCap) return YJ_JSON_SCAN_CAPACITY; \
+        output[written++] = (uint8_t)(byteValue); \
+    } while (0)
+    YJ_WRITE_BYTE('"');
+    for (int64_t index = 0; index < len; ++index) {
+        uint8_t value = input[index];
+        if (value >= 0x20 && value != '"' && value != '\\' &&
+            (!htmlSafe || !yj_json_writer_needs_html_escape(value))) {
+            YJ_WRITE_BYTE(value);
+            continue;
+        }
+        YJ_WRITE_BYTE('\\');
+        switch (value) {
+            case '"': YJ_WRITE_BYTE('"'); break;
+            case '\\': YJ_WRITE_BYTE('\\'); break;
+            case '\b': YJ_WRITE_BYTE('b'); break;
+            case '\f': YJ_WRITE_BYTE('f'); break;
+            case '\n': YJ_WRITE_BYTE('n'); break;
+            case '\r': YJ_WRITE_BYTE('r'); break;
+            case '\t': YJ_WRITE_BYTE('t'); break;
+            default:
+                YJ_WRITE_BYTE('u'); YJ_WRITE_BYTE('0'); YJ_WRITE_BYTE('0');
+                YJ_WRITE_BYTE(hex[value >> 4]); YJ_WRITE_BYTE(hex[value & 0x0f]);
+                break;
+        }
+    }
+    YJ_WRITE_BYTE('"');
+#undef YJ_WRITE_BYTE
+    *outWritten = written;
+    return YJ_JSON_SCAN_OK;
+}
+
 enum {
     TOKEN_OBJECT_START = 1,
     TOKEN_OBJECT_END = 2,

@@ -844,9 +844,10 @@ private class JsonParserCore {
 
     private func expectLiteral(literal: String): Unit {
         for (byte in unsafe { literal.rawData() }) {
-            if (!source.hasMore() || consumeByte() != byte) {
+            if (!source.hasMore() || source.peek() != byte) {
                 fail("Expected ${literal}")
             }
+            consumeByte()
         }
     }
 
@@ -857,9 +858,10 @@ private class JsonParserCore {
                 return
             case _ => ()
         }
-        if (!source.hasMore() || consumeByte() != value) {
+        if (!source.hasMore() || source.peek() != value) {
             fail("Unexpected token")
         }
+        consumeByte()
     }
 
     private func peekByte(value: Byte): Bool {

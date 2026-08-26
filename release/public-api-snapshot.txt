@@ -29,6 +29,7 @@ c-abi|native/yjson_compact.h|<top-level>|void YJ_Compact_Free(uint64_t handle);
 c-abi|native/yjson_compact.h|<top-level>|void YJ_Compact_FreeOwnedBuffer(uint64_t buffer_handle);
 c-abi|native/yjson_scanner.h|<top-level>|double YJ_JSON_ParseDouble( const uint8_t* input, int64_t len, int64_t start, int64_t tokenLength);
 c-abi|native/yjson_scanner.h|<top-level>|int32_t YJ_JSON_DecodeString( const uint8_t* input, int64_t len, int64_t start, uint32_t flags, uint8_t* output, int64_t outputCap, int64_t* outEnd, int64_t* outWritten, int64_t* outError);
+c-abi|native/yjson_scanner.h|<top-level>|int32_t YJ_JSON_EscapeString( const uint8_t* input, int64_t len, uint8_t htmlSafe, uint8_t* output, int64_t outputCap, int64_t* outWritten);
 c-abi|native/yjson_scanner.h|<top-level>|int32_t YJ_JSON_ScanArrayElements( const uint8_t* input, int64_t len, int64_t start, uint32_t flags, uint64_t* elements, int64_t elementCap, int64_t* outEnd, int64_t* outError);
 c-abi|native/yjson_scanner.h|<top-level>|int32_t YJ_JSON_ScanNumericArrayChunk( const uint8_t* input, int64_t len, int64_t start, uint32_t flags, uint64_t* tokens, int64_t tokenCap, int64_t* outNext, int64_t* outCount, int64_t* outDone, int64_t* outError);
 c-abi|native/yjson_scanner.h|<top-level>|int32_t YJ_JSON_ScanNumericTape( const uint8_t* input, int64_t len, int64_t start, int64_t pageBytes, uint32_t flags, uint64_t* tokens, int64_t tokenCap, int64_t* outNext, int64_t* outCount, int64_t* outError);
@@ -72,6 +73,7 @@ yjson_native|packages/yjson_native/src/native_backend.cj|<top-level>|public func
 yjson_native|packages/yjson_native/src/native_backend.cj|<top-level>|public func activate(): Unit
 yjson_native|packages/yjson_native/src/native_backend.cj|<top-level>|public func customNativeAccelerationProviderV1(): JsonAccelerationProviderV1
 yjson_native|packages/yjson_native/src/native_backend.cj|<top-level>|public func decodeString(input: CPointer<UInt8>, len: Int64, start: Int64, flags: UInt32, output: CPointer<UInt8>, outputCap: Int64, outEnd: CPointer<Int64>, outWritten: CPointer<Int64>, outError: CPointer<Int64>): Int32
+yjson_native|packages/yjson_native/src/native_backend.cj|<top-level>|public func escapeString(input: CPointer<UInt8>, len: Int64, htmlSafe: Bool, output: CPointer<UInt8>, outputCap: Int64, outWritten: CPointer<Int64>): Int32
 yjson_native|packages/yjson_native/src/native_backend.cj|<top-level>|public func identity(): String
 yjson_native|packages/yjson_native/src/native_backend.cj|<top-level>|public func parseFloat64(input: CPointer<UInt8>, len: Int64, start: Int64, tokenLength: Int64): Float64
 yjson_native|packages/yjson_native/src/native_backend.cj|<top-level>|public func protocolVersion(): Int64
@@ -609,6 +611,7 @@ yjson|src/lib_json_direct_writer.cj|<top-level>|public func finish(): Unit
 yjson|src/lib_json_direct_writer.cj|<top-level>|public func reserveCapacity(additional: Int64): Unit
 yjson|src/lib_json_direct_writer.cj|<top-level>|public func writeBoolText(value: Bool): Unit
 yjson|src/lib_json_direct_writer.cj|<top-level>|public func writeByte(value: Byte): Unit
+yjson|src/lib_json_direct_writer.cj|<top-level>|public func writeBytes(value: Array<Byte>): Unit
 yjson|src/lib_json_direct_writer.cj|<top-level>|public func writeCompactInt64Map(prefix: String, values: HashMap<String, Int64>): Unit
 yjson|src/lib_json_direct_writer.cj|<top-level>|public func writeEscapedStringLiteralFromFirstEscape(value: String, firstEscape: Int64, htmlSafe: Bool): Unit
 yjson|src/lib_json_direct_writer.cj|<top-level>|public func writeFloat64Text(value: Float64): Unit
@@ -700,11 +703,12 @@ yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func writeCompactObjectEnd(writer: GeneratedSupportV1Writer): Unit
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func writeNested<T>(codec: JsonCodec<T>, value: T, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit
 yjson|src/lib_json_native_scanner.cj|<top-level>|public func activateJsonNativePrimitivesV1(backend: JsonNativeAccelerationPrimitivesV1): Unit
-yjson|src/lib_json_native_scanner.cj|<top-level>|public interface JsonNativeAccelerationPrimitivesV1 <: JsonNativeScannerBackend & JsonNativeNumericScannerBackend & JsonNativeNumericTapeBackend & JsonNativeFloatParserBackend
+yjson|src/lib_json_native_scanner.cj|<top-level>|public interface JsonNativeAccelerationPrimitivesV1 <: JsonNativeScannerBackend & JsonNativeNumericScannerBackend & JsonNativeNumericTapeBackend & JsonNativeFloatParserBackend & JsonNativeWriterBackend
 yjson|src/lib_json_native_scanner.cj|<top-level>|public interface JsonNativeFloatParserBackend
 yjson|src/lib_json_native_scanner.cj|<top-level>|public interface JsonNativeNumericScannerBackend
 yjson|src/lib_json_native_scanner.cj|<top-level>|public interface JsonNativeNumericTapeBackend
 yjson|src/lib_json_native_scanner.cj|<top-level>|public interface JsonNativeScannerBackend
+yjson|src/lib_json_native_scanner.cj|<top-level>|public interface JsonNativeWriterBackend
 yjson|src/lib_json_native_scanner.cj|JsonNativeFloatParserBackend|func parseFloat64(input: CPointer<UInt8>, len: Int64, start: Int64, tokenLength: Int64): Float64
 yjson|src/lib_json_native_scanner.cj|JsonNativeNumericScannerBackend|func scanNumericArrayChunk(input: CPointer<UInt8>, len: Int64, start: Int64, flags: UInt32, tokens: CPointer<UInt64>, tokenCap: Int64, outNext: CPointer<Int64>, outCount: CPointer<Int64>, outDone: CPointer<Int64>, outError: CPointer<Int64>): Int32
 yjson|src/lib_json_native_scanner.cj|JsonNativeNumericTapeBackend|func scanNumericTape(input: CPointer<UInt8>, len: Int64, start: Int64, pageBytes: Int64, flags: UInt32, tokens: CPointer<UInt64>, tokenCap: Int64, outNext: CPointer<Int64>, outCount: CPointer<Int64>, outError: CPointer<Int64>): Int32
@@ -714,6 +718,7 @@ yjson|src/lib_json_native_scanner.cj|JsonNativeScannerBackend|func scanObjectFie
 yjson|src/lib_json_native_scanner.cj|JsonNativeScannerBackend|func scanString(input: CPointer<UInt8>, len: Int64, start: Int64, flags: UInt32, outEnd: CPointer<Int64>, outError: CPointer<Int64>): Int32
 yjson|src/lib_json_native_scanner.cj|JsonNativeScannerBackend|func simdCaps(): UInt32
 yjson|src/lib_json_native_scanner.cj|JsonNativeScannerBackend|func skipValue(input: CPointer<UInt8>, len: Int64, start: Int64, flags: UInt32, outEnd: CPointer<Int64>, outError: CPointer<Int64>): Int32
+yjson|src/lib_json_native_scanner.cj|JsonNativeWriterBackend|func escapeString(input: CPointer<UInt8>, len: Int64, htmlSafe: Bool, output: CPointer<UInt8>, outputCap: Int64, outWritten: CPointer<Int64>): Int32
 yjson|src/lib_json_parser_core.cj|<top-level>|public func columnAt(offset: Int64): Int64
 yjson|src/lib_json_parser_core.cj|<top-level>|public func config(): JsonReadConfig
 yjson|src/lib_json_parser_core.cj|<top-level>|public func consume(): Byte

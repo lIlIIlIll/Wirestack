@@ -147,6 +147,24 @@ static void test_parse_double_token(void) {
                                      (int64_t)strlen(text), 0, 257)));
 }
 
+static void test_escape_string_token(void) {
+    static const uint8_t input[] = "left\n\"\\<中";
+    static const uint8_t expected[] = "\"left\\n\\\"\\\\<中\"";
+    static const uint8_t html_expected[] = "\"left\\n\\\"\\\\\\u003c中\"";
+    uint8_t output[128] = {0};
+    int64_t written = -1;
+    assert(YJ_JSON_EscapeString(input, (int64_t)(sizeof(input) - 1), 0,
+                                output, (int64_t)sizeof(output), &written) == YJ_JSON_SCAN_OK);
+    assert(written == (int64_t)(sizeof(expected) - 1));
+    assert(memcmp(output, expected, sizeof(expected) - 1) == 0);
+    assert(YJ_JSON_EscapeString(input, (int64_t)(sizeof(input) - 1), 1,
+                                output, (int64_t)sizeof(output), &written) == YJ_JSON_SCAN_OK);
+    assert(written == (int64_t)(sizeof(html_expected) - 1));
+    assert(memcmp(output, html_expected, sizeof(html_expected) - 1) == 0);
+    assert(YJ_JSON_EscapeString(input, (int64_t)(sizeof(input) - 1), 0,
+                                output, 2, &written) == YJ_JSON_SCAN_CAPACITY);
+}
+
 int main(void) {
     test_skip_nested_value();
     test_object_fields();
@@ -157,6 +175,7 @@ int main(void) {
     test_nested_object_range();
     test_many_element_plan();
     test_parse_double_token();
+    test_escape_string_token();
     puts("yjson scanner targeted tests passed");
     return 0;
 }

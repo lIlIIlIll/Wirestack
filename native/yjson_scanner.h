@@ -43,6 +43,11 @@ int32_t YJ_JSON_DecodeString(
     uint8_t* output, int64_t outputCap,
     int64_t* outEnd, int64_t* outWritten, int64_t* outError);
 
+/* Writes one complete quoted JSON string token into caller-owned storage. */
+int32_t YJ_JSON_EscapeString(
+    const uint8_t* input, int64_t len, uint8_t htmlSafe,
+    uint8_t* output, int64_t outputCap, int64_t* outWritten);
+
 int32_t YJ_JSON_ScanObjectFields(
     const uint8_t* input, int64_t len, int64_t start, uint32_t flags,
     uint64_t* fields, int64_t fieldCap,

@@ -29,6 +29,10 @@ foreign func YJ_JSON_ScanString(input: CPointer<UInt8>, len: Int64, start: Int64
 @FastNative
 foreign func YJ_JSON_DecodeString(input: CPointer<UInt8>, len: Int64, start: Int64, flags: UInt32, output: CPointer<UInt8>, outputCap: Int64, outEnd: CPointer<Int64>, outWritten: CPointer<Int64>, outError: CPointer<Int64>): Int32
 
+@FastNative
+foreign func YJ_JSON_EscapeString(input: CPointer<UInt8>, len: Int64, htmlSafe: Bool,
+    output: CPointer<UInt8>, outputCap: Int64, outWritten: CPointer<Int64>): Int32
+
 private class CJsonNativeScannerBackend <: JsonNativeAccelerationPrimitivesV1 {
     public func simdCaps(): UInt32 { unsafe { YJ_JSON_SimdCaps() } }
 
@@ -61,6 +65,11 @@ private class CJsonNativeScannerBackend <: JsonNativeAccelerationPrimitivesV1 {
 
     public func decodeString(input: CPointer<UInt8>, len: Int64, start: Int64, flags: UInt32, output: CPointer<UInt8>, outputCap: Int64, outEnd: CPointer<Int64>, outWritten: CPointer<Int64>, outError: CPointer<Int64>): Int32 {
         unsafe { YJ_JSON_DecodeString(input, len, start, flags, output, outputCap, outEnd, outWritten, outError) }
+    }
+
+    public func escapeString(input: CPointer<UInt8>, len: Int64, htmlSafe: Bool,
+        output: CPointer<UInt8>, outputCap: Int64, outWritten: CPointer<Int64>): Int32 {
+        unsafe { YJ_JSON_EscapeString(input, len, htmlSafe, output, outputCap, outWritten) }
     }
 }
 

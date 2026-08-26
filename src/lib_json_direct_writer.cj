@@ -84,6 +84,8 @@ abstract class JsonDirectWriterTarget {
 
     protected func writeByte(value: Byte): Unit
 
+    protected func writeBytes(value: Array<Byte>): Unit
+
     protected func reserveCapacity(additional: Int64): Unit
 
     protected func writeStringLiteralNoEscape(value: String): Unit
@@ -179,6 +181,13 @@ class DirectStringWriterTarget <: JsonDirectWriterTarget {
     public func writeByte(value: Byte): Unit {
         ensureCapacity(used + 1)
         writeRawByteNoEnsure(value)
+    }
+
+    public func writeBytes(value: Array<Byte>): Unit {
+        if (value.isEmpty()) { return }
+        ensureCapacity(used + value.size)
+        value.copyTo(buffer, 0, used, value.size)
+        used += value.size
     }
 
     public func reserveCapacity(additional: Int64): Unit {
@@ -638,6 +647,13 @@ class DirectBytesWriterTarget <: JsonDirectWriterTarget {
     public func writeByte(value: Byte): Unit {
         ensureCapacity(used + 1)
         writeRawByteNoEnsure(value)
+    }
+
+    public func writeBytes(value: Array<Byte>): Unit {
+        if (value.isEmpty()) { return }
+        ensureCapacity(used + value.size)
+        value.copyTo(buffer, 0, used, value.size)
+        used += value.size
     }
 
     public func reserveCapacity(additional: Int64): Unit {
@@ -1116,6 +1132,19 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
 
     public func writeByte(value: Byte): Unit {
         writeRawByte(value)
+    }
+
+    public func writeBytes(value: Array<Byte>): Unit {
+        if (value.isEmpty()) { return }
+        if (value.size >= JSON_STREAM_DIRECT_WRITE_THRESHOLD) {
+            flushBuffer()
+            out.write(value)
+            committed += value.size
+            return
+        }
+        if (used + value.size > buffer.size) { flushBuffer() }
+        value.copyTo(buffer, 0, used, value.size)
+        used += value.size
     }
 
     public func reserveCapacity(additional: Int64): Unit {
@@ -2260,6 +2289,10 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
     }
 
     private func writeStringLiteralFromFirstEscape(value: String, firstEscape: Int64): Unit {
+        if (let Some(escaped) <- jsonNativeEscapeString(value, config.htmlSafe)) {
+            target.writeBytes(escaped)
+            return
+        }
         target.writeEscapedStringLiteralFromFirstEscape(value, firstEscape, config.htmlSafe)
     }
 

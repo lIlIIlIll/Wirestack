@@ -87,6 +87,18 @@ contract = "Applications call once before any YJson operation and continue using
 consumer = "Applications opting into Custom Native primitives"
 
 [[api]]
+package = "yjson"
+kind = "native-writer-protocol"
+symbol = "JsonNativeWriterBackend / JsonNativeAccelerationPrimitivesV1"
+signature = "escapeString(input, len, htmlSafe, output, outputCap, outWritten)"
+source = "src/lib_json_native_scanner.cj"
+needle = "public interface JsonNativeWriterBackend"
+stability = "protocol-v1"
+compatibility = "new 2.0 internal cross-package acceleration seam"
+contract = "Native code writes one quoted string token into caller-owned storage; core retains writer state, separators, limits, and failure policy."
+consumer = "yjson_native implementation only"
+
+[[api]]
 package = "yjson_backends"
 kind = "advanced-backend-family"
 symbol = "YJsonAdvanced / BackendJsonDocument"
