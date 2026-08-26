@@ -8,6 +8,7 @@ import wirestack.internal.common.*
 import wirestack.internal.transport.*
 
 private const DEFAULT_STAGING_BUFFER_SIZE: Int64 = 16 * 1024
+private const MAX_LISTENER_BACKLOG: Int64 = 65535
 
 /** Default DNS-free connection factory for Linux Happy Eyeballs attempts. */
 public class StdNetTransportFactory <: TransportFactory {
@@ -417,6 +418,7 @@ public class StdNetTransportListener <: TransportListener {
     private let stagingBufferSize: Int64
     private let mutex = Mutex()
     private var closed = false
+    private let activeAccepts = AtomicInt64(0)
     public let localEndpoint: SocketEndpoint
 
     private init(server: TcpServerSocket, localEndpoint: SocketEndpoint, stagingBufferSize: Int64) {
@@ -430,8 +432,8 @@ public class StdNetTransportListener <: TransportListener {
         backlog!: Int64 = 128,
         stagingBufferSize!: Int64 = DEFAULT_STAGING_BUFFER_SIZE
     ): StdNetTransportListener {
-        if (backlog <= 0) {
-            throw IllegalArgumentException("listener backlog must be positive")
+        if (backlog <= 0 || backlog > MAX_LISTENER_BACKLOG) {
+            throw IllegalArgumentException("listener backlog must be between 1 and 65535")
         }
         if (stagingBufferSize <= 0) {
             throw IllegalArgumentException("stagingBufferSize must be positive")
@@ -455,6 +457,7 @@ public class StdNetTransportListener <: TransportListener {
             throw closedError(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept)
         }
         let gate = OperationGate()
+        beginAccept()
         let registration = context.cancellation.register { => gate.interrupt { => close() } }
         try {
             let accepted = server.accept(timeout: remaining(context))
@@ -464,7 +467,9 @@ public class StdNetTransportListener <: TransportListener {
             }
             StdNetTransport.fromAccepted(accepted, stagingBufferSize: stagingBufferSize)
         } catch (error: SocketTimeoutException) {
-            let _ = gate.complete()
+            if (!gate.complete()) {
+                throw cancelled(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept, cause: Some(error))
+            }
             throw timedOut(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept, error)
         } catch (error: SocketException) {
             let _ = gate.complete()
@@ -486,6 +491,7 @@ public class StdNetTransportListener <: TransportListener {
             )
         } finally {
             registration.unregister()
+            endAccept()
         }
     }
 
@@ -509,6 +515,29 @@ public class StdNetTransportListener <: TransportListener {
 
     public func isClosed(): Bool {
         synchronized(mutex) { closed }
+    }
+
+    /** Waits for an active accept for deterministic lifecycle and race tests. */
+    func waitUntilAcceptActive(timeout: Duration): Bool {
+        let expiresAt = MonoTime.now() + timeout
+        while (activeAccepts.load() == 0 && !isClosed()) {
+            if (MonoTime.now() >= expiresAt) {
+                return false
+            }
+            sleep(Duration.millisecond)
+        }
+        activeAccepts.load() > 0
+    }
+
+    private func beginAccept(): Unit {
+        if (isClosed()) {
+            throw closedError(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept)
+        }
+        activeAccepts.fetchAdd(1)
+    }
+
+    private func endAccept(): Unit {
+        activeAccepts.fetchSub(1)
     }
 }
 
