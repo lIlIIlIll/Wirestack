@@ -15,6 +15,106 @@ private func loopback(port: UInt16): SocketEndpoint {
 @Test
 class StdNetTransportTest {
     @TestCase
+    func writeSomeIsPartialAndReusesBoundedConnectionStaging(): Unit {
+        let listener = StdNetTransportListener.bind(loopback(0), stagingBufferSize: 3)
+        let accepted = spawn { listener.accept() }
+        let client = StdNetTransport.connect(listener.localEndpoint, stagingBufferSize: 3)
+        let server = accepted.get(Duration.second)
+        try {
+            @Expect(client.writeSome(ByteSpan([1, 2, 3, 4, 5])), 3)
+            let first = Array<Byte>(3, repeat: 0)
+            readExact(server, MutableByteSpan(first))
+            let expectedFirst: Array<Byte> = [1, 2, 3]
+            @Expect(first, expectedFirst)
+
+            @Expect(client.writeSome(ByteSpan([6, 7, 8, 9])), 3)
+            let second = Array<Byte>(3, repeat: 0)
+            readExact(server, MutableByteSpan(second))
+            let expectedSecond: Array<Byte> = [6, 7, 8]
+            @Expect(second, expectedSecond)
+
+            let tailSource: Array<Byte> = [0, 10, 11, 0]
+            @Expect(client.writeSome(ByteSpan(tailSource, offset: 1, length: 2)), 2)
+            let tail = Array<Byte>(2, repeat: 0)
+            readExact(server, MutableByteSpan(tail))
+            let expectedTail: Array<Byte> = [10, 11]
+            @Expect(tail, expectedTail)
+
+            let (_, writeCopies) = client.stagingCopiedBytes
+            @Expect(writeCopies, 8)
+        } finally {
+            client.close()
+            server.close()
+            listener.close()
+        }
+    }
+
+    @TestCase
+    func wholeArrayReadAndWriteBypassStagingForATypicalTlsRecord(): Unit {
+        let listener = StdNetTransportListener.bind(loopback(0))
+        let accepted = spawn { listener.accept() }
+        let client = StdNetTransport.connect(listener.localEndpoint)
+        let server = accepted.get(Duration.second)
+        try {
+            let record = Array<Byte>(16 * 1024, repeat: 0x5a)
+            @Expect(client.writeSome(ByteSpan(record)), 16 * 1024)
+            let received = Array<Byte>(16 * 1024, repeat: 0)
+            readExact(server, MutableByteSpan(received))
+            @Expect(received, record)
+            writeAll(server, ByteSpan(received))
+            let echoed = Array<Byte>(16 * 1024, repeat: 0)
+            readExact(client, MutableByteSpan(echoed))
+            @Expect(echoed, record)
+            let (clientReadCopies, clientWriteCopies) = client.stagingCopiedBytes
+            @Expect(clientReadCopies, 0)
+            @Expect(clientWriteCopies, 0)
+        } finally {
+            client.close()
+            server.close()
+            listener.close()
+        }
+    }
+
+    @TestCase
+    func subrangesRetainBoundedStagingAndCopyAccounting(): Unit {
+        let listener = StdNetTransportListener.bind(loopback(0), stagingBufferSize: 3)
+        let accepted = spawn { listener.accept() }
+        let client = StdNetTransport.connect(listener.localEndpoint, stagingBufferSize: 3)
+        let server = accepted.get(Duration.second)
+        try {
+            let source: Array<Byte> = [0, 1, 2, 3, 0]
+            @Expect(client.writeSome(ByteSpan(source, offset: 1, length: 3)), 3)
+
+            let destination = Array<Byte>(5, repeat: 0)
+            match (server.readSome(
+                MutableByteSpan(destination, offset: 1, length: 3),
+                context: OperationContext.background()
+            )) {
+                case ReadResult.Data(count) => @Expect(count, 3)
+                case ReadResult.EndOfStream => @Expect(false)
+            }
+            let expected: Array<Byte> = [0, 1, 2, 3, 0]
+            @Expect(destination, expected)
+
+            writeAll(server, ByteSpan(destination, offset: 1, length: 3))
+            let echoed = Array<Byte>(5, repeat: 0)
+            match (client.readSome(MutableByteSpan(echoed, offset: 1, length: 3))) {
+                case ReadResult.Data(count) => @Expect(count, 3)
+                case ReadResult.EndOfStream => @Expect(false)
+            }
+            @Expect(echoed, expected)
+
+            let (clientReadCopies, clientWriteCopies) = client.stagingCopiedBytes
+            @Expect(clientWriteCopies, 3)
+            @Expect(clientReadCopies, 3)
+        } finally {
+            client.close()
+            server.close()
+            listener.close()
+        }
+    }
+
+    @TestCase
     func connectsByResolvedIpAndTransfersBothDirections(): Unit {
         let listener = StdNetTransportListener.bind(loopback(0), backlog: 4, stagingBufferSize: 3)
         let accepted: Future<DuplexTransport> = spawn { listener.accept() }
@@ -38,7 +138,7 @@ class StdNetTransportTest {
             @Expect(response, expectedResponse)
 
             let (readCopies, writeCopies) = client.stagingCopiedBytes
-            @Expect(readCopies, 2)
+            @Expect(readCopies, 0)
             @Expect(writeCopies, 5)
         } finally {
             client.close()
