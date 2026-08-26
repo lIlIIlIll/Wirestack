@@ -12,6 +12,48 @@ import wirestack.internal.trust.*
 @Test
 class Http1TlsServerTest {
     @TestCase
+    func alpnServerRejectsAClientWithNoSharedHttpProtocol(): Unit {
+        let server = AwsLcHttp1ServerTlsHandshaker.createAlpn(
+            [http1TlsTestCertificateDer()], http1TlsTestPrivateKeyDer()
+        )
+        let provider = AwsLcTlsProvider()
+        let clientContext = TlsClientContext.builder(
+            provider.manifest(), provider.linuxCapabilities()
+        ).trust(TrustPolicy.pinnedPublicKeys([http1TlsServerPin()]))
+            .alpn(["wirestack.invalid"])
+            .build()
+        let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 64 * 1024)
+        let context = OperationContext(deadline: Some(Deadline.after(3 * Duration.second)))
+        let accepting = spawn {
+            try {
+                let _ = server.handshakeNegotiated(serverTransport, context)
+                false
+            } catch (error: TlsEngineException) {
+                match (error.tlsCode) {
+                    case TlsEngineErrorCode.NoSharedAlpn => true
+                    case _ => false
+                }
+            }
+        }
+        var clientRejected = false
+        try {
+            let engine = provider.createClientEngine(
+                clientContext,
+                ReferenceIdentity.Dns(HostName("example.com")),
+                serverName: Some(HostName("example.com"))
+            )
+            let _ = TlsConnection.handshake(engine, clientTransport, context: context)
+        } catch (_: Exception) {
+            clientRejected = true
+        } finally {
+            @Expect(clientRejected)
+            @Expect(accepting.get(3 * Duration.second))
+            provider.close()
+            server.close()
+        }
+    }
+
+    @TestCase
     func automaticClientOffersH2FirstAndFallsBackToServerHttp11(): Unit {
         let server = AwsLcHttp1ServerTlsHandshaker.create(
             [http1TlsTestCertificateDer()], http1TlsTestPrivateKeyDer()
