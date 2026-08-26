@@ -56,7 +56,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M2-003 bounded resolver backend | BLOCKED | M0-013 proves `std.net` DNS can starve carriers; the pinned SDK exposes neither async resolver nor an independent native worker API, so UP-007 is required |
 | M2-005 Linux `SystemResolver` | BLOCKED | Depends on M2-003/UP-007; no direct `IPAddress.resolve` wrapper is presented as production-safe |
 | M2-009 normalization/diagnostics | COMPLETE | Stable deduplication preserves family/zone evidence and never invents TTL; connector emits DnsStarted/DnsCompleted for every resolver implementation |
-| M2-010 route model | NOT_STARTED | Direct/proxy and origin/proxy DNS separation remain |
+| M2-010 route model | COMPLETE | Immutable direct/explicit-proxy routes separate origin, connect target and DNS ownership, retain bounded network/TLS/ALPN parameters and never discover a system proxy; [Linux evidence](../evidence/M2-010/README.md) |
 | M2-011 RFC 8305 attempt plan | COMPLETE | Stable family interleaving, intra-family order, deduplication and bounded candidate tests |
 | M2-012/013 Happy Eyeballs scheduler | COMPLETE | Shared parent Deadline, linked cancellation, atomic first winner, loser abort, joined candidates and per-attempt diagnostics |
 | M2-014 scripted connector tests | COMPLETE | IPv6 first success and blackhole fallback, simultaneous success, all-fail, pre-cancel, success+cancel and injected Deadline boundary all pass; candidates are joined and rejected winners are aborted; [Linux evidence](../evidence/M2-014/README.md) |
