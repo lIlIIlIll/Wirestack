@@ -72,6 +72,7 @@ public class Http1ClientConnection <: Resource {
             }
         }
         let observer = Http1ConnectionBodyObserver(this, onTerminated)
+        observer.bindCancellation(context.cancellation)
         try {
             let expectsContinue = headerContainsToken(request.headers, "expect", "100-continue") &&
                 request.body.contentLength != Some(0)
@@ -116,6 +117,7 @@ public class Http1ClientConnection <: Resource {
             }
             result
         } catch (error: Exception) {
+            observer.executionFailed()
             failConnection()
             throw error
         }
@@ -131,6 +133,17 @@ public class Http1ClientConnection <: Resource {
             }
         }
         if (shouldClose) { transport.close(OperationContext.background()) }
+    }
+
+    /** Immediately wakes the active exchange and prevents this connection from re-entering the pool. */
+    public func abort(reason!: AbortReason = AbortReason.ApplicationAbort): Unit {
+        let shouldAbort = synchronized(mutex) {
+            match (state) {
+                case Http1ClientConnectionState.Closed | Http1ClientConnectionState.Failed => false
+                case _ => state = Http1ClientConnectionState.Failed; true
+            }
+        }
+        if (shouldAbort) { transport.abort(reason: Some(reason)) }
     }
 
     public func isClosed(): Bool {
@@ -160,15 +173,7 @@ public class Http1ClientConnection <: Resource {
     }
 
     private func failConnection(): Unit {
-        let shouldAbort = synchronized(mutex) {
-            match (state) {
-                case Http1ClientConnectionState.Closed | Http1ClientConnectionState.Failed => false
-                case _ => state = Http1ClientConnectionState.Failed; true
-            }
-        }
-        if (shouldAbort) {
-            try { transport.abort(reason: Some(AbortReason.ProtocolFailure)) } catch (_: Exception) {}
-        }
+        try { abort(reason: AbortReason.ProtocolFailure) } catch (_: Exception) {}
     }
 }
 
@@ -178,6 +183,8 @@ private class Http1ConnectionBodyObserver <: ResponseBodyObserver {
     private let mutex = Mutex()
     private var configured = false
     private var reusable = false
+    private var terminal = false
+    private var cancellation: ?CancellationRegistration = None<CancellationRegistration>
 
     init(connection: Http1ClientConnection, onTerminated: (Bool) -> Unit) {
         this.connection = connection
@@ -192,14 +199,50 @@ private class Http1ConnectionBodyObserver <: ResponseBodyObserver {
         }
     }
 
+    func bindCancellation(token: CancellationToken): Unit {
+        let registration = token.register { => cancelled() }
+        let discard = synchronized(mutex) {
+            if (terminal) { true } else { cancellation = Some(registration); false }
+        }
+        if (discard) { registration.unregister() }
+    }
+
+    func executionFailed(): Unit {
+        let registration = synchronized(mutex) {
+            if (terminal) { None<CancellationRegistration> }
+            else { terminal = true; cancellation }
+        }
+        if (let Some(value) <- registration) { value.unregister() }
+    }
+
     public func completed(): Unit {
-        let canReuse = synchronized(mutex) { configured && reusable }
-        connection.bodyTerminated(canReuse, false)
-        onTerminated(canReuse)
+        finish(synchronized(mutex) { configured && reusable }, false)
     }
 
     public func abandoned(): Unit {
-        connection.bodyTerminated(false, true)
+        finish(false, true)
+    }
+
+    private func cancelled(): Unit {
+        let won = claimTerminal()
+        if (!won) { return }
+        try { connection.abort(reason: AbortReason.Cancelled) } catch (_: Exception) {}
         onTerminated(false)
+    }
+
+    private func finish(canReuse: Bool, abandoned: Bool): Unit {
+        if (!claimTerminal()) { return }
+        connection.bodyTerminated(canReuse, abandoned)
+        onTerminated(canReuse)
+    }
+
+    private func claimTerminal(): Bool {
+        var registration = None<CancellationRegistration>
+        let won = synchronized(mutex) {
+            if (terminal) { false }
+            else { terminal = true; registration = cancellation; true }
+        }
+        if (let Some(value) <- registration) { value.unregister() }
+        won
     }
 }

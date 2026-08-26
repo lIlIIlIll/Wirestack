@@ -81,21 +81,41 @@ public class HttpServerRequest {
     public let version: HttpVersion
     public let headers: HttpHeaders
     public let body: ResponseBody
+    public let requestCancellation: HttpRequestCancellationHandle
+    public let connectionCancellation: HttpConnectionCancellationHandle
+    public let streamCancellation: ?HttpStreamCancellationHandle
 
-    init(value: http1.Http1ServerRequest) {
+    init(
+        value: http1.Http1ServerRequest,
+        requestCancellation: HttpRequestCancellationHandle,
+        connectionCancellation: HttpConnectionCancellationHandle,
+        body: ResponseBody
+    ) {
         method = value.head.method
         target = value.head.target
         version = value.head.version
         headers = value.head.headers
-        body = value.body
+        this.body = body
+        this.requestCancellation = requestCancellation
+        this.connectionCancellation = connectionCancellation
+        streamCancellation = None<HttpStreamCancellationHandle>
     }
 
-    init(value: http2.Http2ServerRequest) {
+    init(
+        value: http2.Http2ServerRequest,
+        requestCancellation: HttpRequestCancellationHandle,
+        connectionCancellation: HttpConnectionCancellationHandle,
+        streamCancellation: HttpStreamCancellationHandle,
+        body: ResponseBody
+    ) {
         method = value.head.method
         target = value.head.target
         version = HttpVersion.Http2
         headers = value.head.headers
-        body = value.body
+        this.body = body
+        this.requestCancellation = requestCancellation
+        this.connectionCancellation = connectionCancellation
+        this.streamCancellation = Some(streamCancellation)
     }
 }
 
@@ -244,23 +264,76 @@ public class HttpServer <: Resource {
 
 private class PublicHttp1Handler <: http1.Http1ServerHandler {
     private let delegate: HttpServerHandler
-    init(delegate: HttpServerHandler) { this.delegate = delegate }
+    private let connectionCancellation: HttpConnectionCancellationHandle
+    init(
+        delegate: HttpServerHandler,
+        connectionCancellation!: HttpConnectionCancellationHandle = HttpConnectionCancellationHandle()
+    ) {
+        this.delegate = delegate
+        this.connectionCancellation = connectionCancellation
+    }
 
     public func handle(request: http1.Http1ServerRequest,
         context: transport.OperationContext): http1.Http1ServerResponse {
-        let response = delegate.handle(HttpServerRequest(request), context)
-        http1.Http1ServerResponse(response.response, trailer: response.trailer)
+        let requestCancellation = HttpRequestCancellationHandle()
+        let cancellation = HttpRequestCancellationOperation(
+            context, Some(requestCancellation), Some(connectionCancellation),
+            None<HttpStreamCancellationHandle>
+        )
+        cancellation.retain(requestCancellation.cancellationToken.register { =>
+            let _ = connectionCancellation.cancel()
+        })
+        try {
+            let response = delegate.handle(
+                HttpServerRequest(
+                    request, requestCancellation, connectionCancellation,
+                    cancellation.wrapRequestBody(request.body)
+                ),
+                cancellation.context
+            )
+            http1.Http1ServerResponse(
+                cancellation.wrap(response.response), trailer: response.trailer
+            )
+        } catch (error: Exception) {
+            cancellation.fail()
+            throw error
+        }
     }
 }
 
 private class PublicHttp2Handler <: http2.Http2ServerHandler {
     private let delegate: HttpServerHandler
-    init(delegate: HttpServerHandler) { this.delegate = delegate }
+    private let connectionCancellation: HttpConnectionCancellationHandle
+    init(delegate: HttpServerHandler, connectionCancellation: HttpConnectionCancellationHandle) {
+        this.delegate = delegate
+        this.connectionCancellation = connectionCancellation
+    }
 
     public func handle(request: http2.Http2ServerRequest,
         context: transport.OperationContext): http2.Http2ServerResponse {
-        let response = delegate.handle(HttpServerRequest(request), context)
-        http2.Http2ServerResponse(response.response, trailer: response.trailer)
+        let requestCancellation = HttpRequestCancellationHandle()
+        let streamCancellation = HttpStreamCancellationHandle()
+        let cancellation = HttpRequestCancellationOperation(
+            context, Some(requestCancellation), Some(connectionCancellation),
+            Some(streamCancellation)
+        )
+        cancellation.retain(requestCancellation.cancellationToken.register { => request.cancelStream() })
+        cancellation.retain(streamCancellation.cancellationToken.register { => request.cancelStream() })
+        try {
+            let response = delegate.handle(
+                HttpServerRequest(
+                    request, requestCancellation, connectionCancellation, streamCancellation,
+                    cancellation.wrapRequestBody(request.body)
+                ),
+                cancellation.context
+            )
+            http2.Http2ServerResponse(
+                cancellation.wrap(response.response), trailer: response.trailer
+            )
+        } catch (error: Exception) {
+            cancellation.fail()
+            throw error
+        }
     }
 }
 
@@ -293,20 +366,12 @@ private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHand
 
     public func serve(value: transport.DuplexTransport, context: transport.OperationContext): Unit {
         match (tlsHandshaker) {
-            case None =>
-                let _ = http1.serveHttp1Connection(
-                    value, PublicHttp1Handler(publicHandler), context: context, limits: limits,
-                    maximumRequests: maximumHttp1Requests
-                )
+            case None => serveHttp1(value, context)
             case Some(handshaker) =>
                 let negotiated = handshaker.handshakeNegotiated(value, context)
                 match (negotiated.protocol) {
                     case http1.HttpServerNegotiatedProtocol.Http11 =>
-                        let _ = http1.serveHttp1Connection(
-                            negotiated.transport, PublicHttp1Handler(publicHandler),
-                            context: context, limits: limits,
-                            maximumRequests: maximumHttp1Requests
-                        )
+                        serveHttp1(negotiated.transport, context)
                     case http1.HttpServerNegotiatedProtocol.Http2 =>
                         serveHttp2(negotiated.transport, context)
                 }
@@ -335,25 +400,51 @@ private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHand
 
     public func isClosed(): Bool { synchronized(mutex) { closed } }
 
+    private func serveHttp1(
+        transportValue: transport.DuplexTransport,
+        context: transport.OperationContext
+    ): Unit {
+        let cancellation = HttpConnectionCancellationHandle()
+        let registration = cancellation.cancellationToken.register { =>
+            try { transportValue.abort(reason: Some(transport.AbortReason.Cancelled)) }
+            catch (_: Exception) {}
+        }
+        try {
+            let _ = http1.serveHttp1Connection(
+                transportValue, PublicHttp1Handler(
+                    publicHandler, connectionCancellation: cancellation
+                ),
+                context: context, limits: limits,
+                maximumRequests: maximumHttp1Requests
+            )
+        } finally { registration.unregister() }
+    }
+
     private func serveHttp2(
         secured: transport.DuplexTransport,
         context: transport.OperationContext
     ): Unit {
-        let connection = http2.Http2ServerConnection(
-            secured, PublicHttp2Handler(publicHandler), limits: limits, http2Limits: http2Limits
+        let cancellation = HttpConnectionCancellationHandle()
+        let created = http2.Http2ServerConnection(
+            secured, PublicHttp2Handler(publicHandler, cancellation),
+            limits: limits, http2Limits: http2Limits
         )
+        let cancellationRegistration = cancellation.cancellationToken.register { =>
+            created.abort()
+        }
         var connectionId: Int64 = 0
         let admitted = synchronized(mutex) {
             if (stopping) { false } else {
                 connectionId = nextConnectionId
                 nextConnectionId++
-                h2Connections.add(PublicHttp2ConnectionEntry(connectionId, connection))
+                h2Connections.add(PublicHttp2ConnectionEntry(connectionId, created))
                 true
             }
         }
-        if (!admitted) { connection.abort(); return }
-        try { connection.serve(context: context) }
+        if (!admitted) { cancellationRegistration.unregister(); created.abort(); return }
+        try { created.serve(context: context) }
         finally {
+            cancellationRegistration.unregister()
             synchronized(mutex) {
                 for (index in 0..h2Connections.size) {
                     if (h2Connections[index].id == connectionId) {

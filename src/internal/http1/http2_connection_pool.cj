@@ -89,6 +89,7 @@ public interface Http2ExecutableConnection <: Http2MultiplexedConnection {
         claim: Http2PoolStreamClaim,
         signal: Http2ClientExecutionSignal,
         context: OperationContext,
+        connectionCancellation: CancellationToken,
         onTerminated: () -> Unit
     ): HttpResponse
 }
@@ -117,11 +118,13 @@ public class Http2ClientPoolConnection <: Http2ExecutableConnection {
         claim: Http2PoolStreamClaim,
         signal: Http2ClientExecutionSignal,
         context: OperationContext,
+        connectionCancellation: CancellationToken,
         onTerminated: () -> Unit
     ): HttpResponse {
         connection.executeAdmitted(
             request, plan, claim.stream, claim.registration, signal,
-            context: context, onTerminated: onTerminated
+            context: context, connectionCancellation: connectionCancellation,
+            onTerminated: onTerminated
         )
     }
 
