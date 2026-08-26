@@ -67,6 +67,27 @@ class Http2ConnectionPoolTest {
     }
 
     @TestCase
+    func newConnectionIsPublishedOnlyAfterItsFirstStreamIsAdmitted(): Unit {
+        let pool = Http2ConnectionPool()
+        let gate = PoolAdmissionGate()
+        let factory = PoolGatedFactory(gate)
+        let key = poolKey("origin.example", "h2,http/1.1")
+        let pending = spawn { pool.acquire(key, PoolNoopGoAwayListener(), factory) }
+
+        gate.waitUntilEntered()
+        let beforePublication = pool.snapshot()
+        gate.release()
+        let lease = pending.get(Duration.second)
+
+        @Expect(beforePublication.connections, 0)
+        @Expect(beforePublication.reservations, 1)
+        @Expect(pool.snapshot().activeStreams, 1)
+        factory.finish(lease)
+        pool.release(lease)
+        pool.close()
+    }
+
+    @TestCase
     func completeSecurityKeyPreventsCrossContextReuse(): Unit {
         let pool = Http2ConnectionPool()
         let factory = PoolFakeFactory(100u32)
@@ -177,6 +198,80 @@ private class PoolFakeFactory <: Http2MultiplexedConnectionFactory {
         }
         throw Exception("pooled HTTP/2 stream owner was not found")
     }
+}
+
+private class PoolAdmissionGate {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var entered = false
+    private var released = false
+
+    func enter(): Unit {
+        synchronized(mutex) {
+            entered = true
+            changed.notifyAll()
+            let deadline = Deadline.after(Duration.second)
+            while (!released) {
+                let remaining = deadline.remaining()
+                if (remaining <= Duration.Zero) {
+                    throw Exception("timed out waiting to release first HTTP/2 stream admission")
+                }
+                changed.wait(timeout: remaining)
+            }
+        }
+    }
+
+    func waitUntilEntered(): Unit {
+        synchronized(mutex) {
+            let deadline = Deadline.after(Duration.second)
+            while (!entered) {
+                let remaining = deadline.remaining()
+                if (remaining <= Duration.Zero) {
+                    throw Exception("timed out waiting for first HTTP/2 stream admission")
+                }
+                changed.wait(timeout: remaining)
+            }
+        }
+    }
+
+    func release(): Unit { synchronized(mutex) { released = true; changed.notifyAll() } }
+}
+
+private class PoolGatedFactory <: Http2MultiplexedConnectionFactory {
+    private let connection: PoolGatedConnection
+
+    init(gate: PoolAdmissionGate) { connection = PoolGatedConnection(gate) }
+
+    public func create(_: HttpConnectionPoolKey, _: OperationContext): Http2MultiplexedConnection {
+        connection
+    }
+
+    func finish(lease: Http2PoolLease): Unit { connection.finish(lease.admission.stream.id) }
+}
+
+private class PoolGatedConnection <: Http2MultiplexedConnection {
+    private let delegate = PoolFakeConnection(1u32)
+    private let gate: PoolAdmissionGate
+    private let firstAdmission = AtomicBool(true)
+
+    init(gate: PoolAdmissionGate) { this.gate = gate }
+
+    public prop activeStreamCount: Int64 { get() { delegate.activeStreamCount } }
+    public prop streamCapacity: UInt32 { get() { delegate.streamCapacity } }
+    public prop acceptingNewStreams: Bool { get() { delegate.acceptingNewStreams } }
+
+    public func openStream(
+        listener: Http2GoAwayListener,
+        endStream: Bool
+    ): Http2PoolStreamClaim {
+        if (firstAdmission.compareAndSwap(true, false)) { gate.enter() }
+        delegate.openStream(listener, endStream)
+    }
+
+    public func close(): Unit { delegate.close() }
+    public func isClosed(): Bool { delegate.isClosed() }
+    public func abort(reason!: AbortReason): Unit { delegate.abort(reason: reason) }
+    func finish(id: Http2StreamId): Unit { delegate.finish(id) }
 }
 
 private class PoolFakeConnection <: Http2MultiplexedConnection {

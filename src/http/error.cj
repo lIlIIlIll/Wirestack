@@ -46,6 +46,10 @@ internal func classifyHttpError(error: Exception): ?HttpErrorCode {
         })
         case _: http1.Http1ProxyConnectException => Some(HttpErrorCode.ProxyFailure)
         case _: http2.Http2GoAwayException => Some(HttpErrorCode.ConnectionGoAway)
+        case value: http2.Http2ProtocolException => Some(match (value.scope) {
+            case http2.Http2ErrorScope.Stream(_) => HttpErrorCode.StreamReset
+            case http2.Http2ErrorScope.Connection => HttpErrorCode.ProtocolViolation
+        })
         case value: http1.Http1ParseException => Some(match (value.code) {
             case http1.Http1ParseErrorCode.HeaderTooLarge => HttpErrorCode.HeaderLimitExceeded
             case http1.Http1ParseErrorCode.LineTooLong => HttpErrorCode.HeaderLimitExceeded

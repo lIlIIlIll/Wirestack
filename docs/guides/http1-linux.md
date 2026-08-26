@@ -1,4 +1,4 @@
-# Linux HTTP/1 client and server
+# Linux HTTP client and server
 
 Wirestack's Linux facade uses typed endpoints. `HttpClient.builder().build()`
 owns a bounded `SystemResolver` by default. A resolver passed through
@@ -46,7 +46,7 @@ try {
 Always consume or close the request body before returning when the connection
 should remain reusable.
 
-## TLS HTTP/1 server
+## TLS HTTP/2 and HTTP/1.1 server
 
 Certificate chains are leaf-first DER arrays; private keys are exact,
 unencrypted DER PKCS#8 objects.
@@ -60,12 +60,17 @@ let server = HttpServer.builder()
     .listen(SocketEndpoint(loopback, 8443))
     .handler(MyHandler())
     .tls(tls)
+    .http2StreamLimit(100u32)
     .build()
 tls.close() // The built server owns validated provider/key state.
 ```
 
-The server offers only `http/1.1` ALPN. A client that omits ALPN may use the
-standard HTTP/1.1 fallback; an incompatible ALPN fails the handshake.
+The same server offers `h2,http/1.1` and dispatches only from the protocol
+retained in the completed TLS handshake. The public request reports
+`HttpVersion.Http2` or `HttpVersion.Http11`; no internal HTTP/2 or TLS type
+enters the handler API. `http2StreamLimit` is the advertised and enforced
+per-connection concurrent-stream bound. A client with no shared protocol, or
+one that completes without negotiated ALPN evidence, fails the handshake.
 
 ## HTTPS through an explicit CONNECT proxy
 

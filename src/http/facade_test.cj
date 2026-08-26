@@ -1,8 +1,11 @@
 package wirestack.http
 
-import std.sync.AtomicInt64
+import std.collection.ArrayList
+import std.sync.*
 import std.unittest.*
 import std.unittest.testmacro.*
+import wirestack.internal.http1 as http1test
+import wirestack.internal.transport_stdnet as stdnettest
 
 private func publicLoopback(port: UInt16): SocketEndpoint {
     SocketEndpoint(IpAddress(IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8]), port)
@@ -10,6 +13,162 @@ private func publicLoopback(port: UInt16): SocketEndpoint {
 
 @Test
 class HttpFacadeTest {
+    @TestCase
+    func tlsHttp2StreamLimitIsAppliedAcrossConcurrentPublicRequests(): Unit {
+        let certificate = publicTlsTestCertificateDer()
+        let serverTls = HttpServerTlsConfig(
+            [certificate], publicTlsTestPrivateKeyDer()
+        )
+        let handler = PublicHttp2LimitHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .tls(serverTls)
+            .http2StreamLimit(1u32)
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let host = HostName("example.com")
+        let clientTls = HttpClientTlsConfig([certificate])
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult(
+                [server.localEndpoint.address], host, ResolverSource.Static
+            )))
+            .tls(clientTls)
+            .requestTimeout(5 * Duration.second)
+            .build()
+        try {
+            let first = spawn {
+                client.get("https://example.com:${server.localEndpoint.port}/limit/first")
+            }
+            handler.waitForFirst()
+            let second = spawn {
+                client.get("https://example.com:${server.localEndpoint.port}/limit/second")
+            }
+            let secondResponse = second.get(5 * Duration.second)
+            let firstResponse = first.get(5 * Duration.second)
+            @Expect(secondResponse.status, 204)
+            @Expect(firstResponse.status, 204)
+            secondResponse.close()
+            firstResponse.close()
+            @Expect(handler.maximumActive.load(), 2)
+
+            let result = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(5 * Duration.second))
+            ))
+            @Expect(result.gracefullyCompleted, 2)
+            @Expect(result.aborted, 0)
+            @Expect(result.activeAtReturn, 0)
+            serving.get(5 * Duration.second)
+        } finally {
+            client.close()
+            clientTls.close()
+            if (!server.isClosed()) {
+                let _ = server.shutdown(context: OperationContext(
+                    deadline: Some(Deadline.after(5 * Duration.second))
+                ))
+                serving.get(5 * Duration.second)
+            }
+            serverTls.close()
+        }
+    }
+
+    @TestCase
+    func tlsFacadeNegotiatesHttp2AndMapsBodyTrailersAndResponse(): Unit {
+        let certificate = publicTlsTestCertificateDer()
+        let serverTls = HttpServerTlsConfig(
+            [certificate], publicTlsTestPrivateKeyDer()
+        )
+        let handler = PublicHttp2EchoHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .tls(serverTls)
+            .http2StreamLimit(4u32)
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let host = HostName("example.com")
+        let clientTls = HttpClientTlsConfig([certificate])
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult(
+                [server.localEndpoint.address], host, ResolverSource.Static
+            )))
+            .tls(clientTls)
+            .requestTimeout(3 * Duration.second)
+            .build()
+        try {
+            let response = client.send(
+                HttpRequest.post(
+                    "https://example.com:${server.localEndpoint.port}/h2",
+                    RequestBody.string("request-body")
+                ),
+                trailer: HttpTrailer(
+                    headers: HttpHeaders.builder().add("X-Request-Trailer", "done").build()
+                )
+            )
+            @Expect(response.status, 201)
+            @Expect(readPublicBody(response.body), "response-body")
+            @Expect(response.body.trailer.getOrThrow().headers.getFirst("x-response-trailer"), Some("done"))
+            @Expect(handler.http2Calls.load(), 1)
+            response.close()
+
+            let h1Context = OperationContext(
+                deadline: Some(Deadline.after(3 * Duration.second))
+            )
+            let h1Handshaker = http1test.AwsLcHttp1TlsHandshaker.createWithDer([certificate])
+            let h1Transport = stdnettest.StdNetTransportFactory().connect(
+                server.localEndpoint, h1Context
+            )
+            let h1Connection = http1test.Http1ClientConnection(
+                h1Handshaker.handshake(HostName("example.com"), h1Transport, h1Context)
+            )
+            try {
+                let h1Response = h1Connection.execute(
+                    HttpRequest.get(
+                        "https://example.com:${server.localEndpoint.port}/h1"
+                    ),
+                    context: h1Context
+                ).response
+                @Expect(h1Response.status, 200)
+                h1Response.close()
+                @Expect(handler.http1Calls.load(), 1)
+            } finally {
+                h1Connection.close()
+                h1Handshaker.close()
+            }
+
+            var structuredReset = false
+            try {
+                let _ = client.get(
+                    "https://example.com:${server.localEndpoint.port}/fail"
+                )
+            } catch (error: HttpException) {
+                match (error.code) {
+                    case HttpErrorCode.StreamReset => structuredReset = true
+                    case _ => ()
+                }
+            }
+            @Expect(structuredReset)
+
+            let result = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(3 * Duration.second))
+            ))
+            @Expect(result.gracefullyCompleted, 1)
+            @Expect(result.aborted, 0)
+            @Expect(result.activeAtReturn, 0)
+            serving.get(3 * Duration.second)
+        } finally {
+            client.close()
+            clientTls.close()
+            if (!server.isClosed()) {
+                let _ = server.shutdown(context: OperationContext(
+                    deadline: Some(Deadline.after(3 * Duration.second))
+                ))
+                serving.get(3 * Duration.second)
+            }
+            serverTls.close()
+        }
+    }
+
     @TestCase
     func explicitResolverConnectsPublicClientAndServer(): Unit {
         let server = HttpServer.builder()
@@ -235,6 +394,124 @@ class HttpFacadeTest {
         }
         @Expect(clientClosedRejected)
     }
+}
+
+private class PublicHttp2LimitHandler <: HttpServerHandler {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var arrivals: Int64 = 0
+    private var active: Int64 = 0
+    let maximumActive = AtomicInt64(0)
+
+    func waitForFirst(): Unit {
+        synchronized(mutex) {
+            while (arrivals == 0) { changed.wait(timeout: 5 * Duration.second) }
+        }
+    }
+
+    public func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse {
+        let _ = context
+        @Expect(request.version, HttpVersion.Http2)
+        synchronized(mutex) {
+            arrivals++
+            active++
+            maximumActive.store(max(maximumActive.load(), active))
+            changed.notifyAll()
+            while (arrivals < 2) { changed.wait(timeout: 5 * Duration.second) }
+        }
+        let response = HttpServerResponse(HttpResponse(
+            204, "No Content", ResponseBody.empty()
+        ))
+        synchronized(mutex) { active--; changed.notifyAll() }
+        response
+    }
+}
+
+private class PublicHttp2EchoHandler <: HttpServerHandler {
+    let http2Calls = AtomicInt64(0)
+    let http1Calls = AtomicInt64(0)
+
+    public func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse {
+        let _ = context
+        if (request.target == "/h1") {
+            @Expect(request.version, HttpVersion.Http11)
+            http1Calls.fetchAdd(1)
+            return HttpServerResponse(HttpResponse(
+                200, "OK", ResponseBody.empty(),
+                headers: HttpHeaders.builder().add("Content-Length", "0").build()
+            ))
+        }
+        @Expect(request.version, HttpVersion.Http2)
+        if (request.target == "/fail") {
+            throw Exception("scripted public HTTP/2 handler failure")
+        }
+        @Expect(request.target, "/h2")
+        @Expect(readPublicBody(request.body), "request-body")
+        @Expect(
+            request.body.trailer.getOrThrow().headers.getFirst("x-request-trailer"),
+            Some("done")
+        )
+        http2Calls.fetchAdd(1)
+        HttpServerResponse(
+            HttpResponse(
+                201, "Created", ResponseBody(RequestBody.string("response-body").open()),
+                headers: HttpHeaders.builder().add("Content-Length", "13").build()
+            ),
+            trailer: HttpTrailer(
+                headers: HttpHeaders.builder().add("X-Response-Trailer", "done").build()
+            )
+        )
+    }
+}
+
+private func readPublicBody(body: ResponseBody): String {
+    let output = ArrayList<Byte>()
+    let buffer = Array<Byte>(4, repeat: 0u8)
+    while (true) {
+        let count = body.read(buffer)
+        if (count == 0) { break }
+        for (index in 0..count) { output.add(buffer[index]) }
+    }
+    String.fromUtf8(output.toArray())
+}
+
+// Self-signed public test identity, valid 2026-08-23 through 2036-08-20.
+private func publicTlsTestCertificateDer(): Array<Byte> {
+    decodePublicTlsBase64(
+        "MIIDQzCCAiugAwIBAgIUDZ6pPmV6gcjC9tTovgITROZDWi4wDQYJKoZIhvcNAQELBQAwGjEYMBYGA1UEAwwPaWdub3JlZC5leGFtcGxlMB4XDTI2MDgyMzIwMTkyOFoXDTM2MDgyMDIwMTkyOFowGjEYMBYGA1UEAwwPaWdub3JlZC5leGFtcGxlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3+ICzVHaQ8+czxeV/aeg/iAIgwhqYytRVc17/BY3XdLtYSaG9O6wYxtqm5zZvcujcl35vStEEIc6RsXpQxAUzGp6Gq129MTDzdyW5a7x63bWC6Zlh6SpC4zFdt/xGJisJw/HS4LHLXKzQiSwHZPwFN7zOZ0JMAh05BLF4yEOwkbiqYUR3i7z0wVtvUFuL3NAGfZXzXY1HRi+Qfm/h9lbrMmQtm3kBGBmZUh8ASqugcfiCMziYYY1ygZw1MACxJ60nRfvq1wYVZdUmiD2WED4NF0VK58tP/qJ0KnKz/I2g4GcV5Xu1tH/2NYaI8YT2ejIQn6TgwYWN+3HaXe3Q83DQwIDAQABo4GAMH4wHQYDVR0OBBYEFOdUzp+rhoI4EOD+k/HiZeHgTdcEMB8GA1UdIwQYMBaAFOdUzp+rhoI4EOD+k/HiZeHgTdcEMA8GA1UdEwEB/wQFMAMBAf8wKwYDVR0RBCQwIoILZXhhbXBsZS5jb22CDSouZXhhbXBsZS5vcmeHBH8AAAEwDQYJKoZIhvcNAQELBQADggEBALHiaFne/TJfVzznruLWTPKpQV/+dZKhPw8X2umZ1fLd6/sD2xtoeDof2IOx+HqQJuQNFNY8lAHsCb5J72/O5rXBhHHbYxwTL/LuAo9fKbCCwxp10Y5gwPrEcl5T1ZlsAgPTKq10ONwNR03wefE6epejITvX2nCNJUiaf3BWzFiq5xsZXfUHoil/AqAJfqnAgiABoOs/ZxErf0q16Apr4rjFvreAwsiYr1YgJ4aL97j3jCvJUNreGr8TNUBachUSrRvWcOOTaw90eex/6DnvU1EHDknlmcuuzywawVNzrTd10EuHimVfJgo1hRSzXd4deCHKStlYkPKZpwU/M+Al8F0="
+    )
+}
+
+private func publicTlsTestPrivateKeyDer(): Array<Byte> {
+    decodePublicTlsBase64(
+        "MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDf4gLNUdpDz5zPF5X9p6D+IAiDCGpjK1FVzXv8Fjdd0u1hJob07rBjG2qbnNm9y6NyXfm9K0QQhzpGxelDEBTManoarXb0xMPN3JblrvHrdtYLpmWHpKkLjMV23/EYmKwnD8dLgsctcrNCJLAdk/AU3vM5nQkwCHTkEsXjIQ7CRuKphRHeLvPTBW29QW4vc0AZ9lfNdjUdGL5B+b+H2VusyZC2beQEYGZlSHwBKq6Bx+IIzOJhhjXKBnDUwALEnrSdF++rXBhVl1SaIPZYQPg0XRUrny0/+onQqcrP8jaDgZxXle7W0f/Y1hojxhPZ6MhCfpODBhY37cdpd7dDzcNDAgMBAAECggEAKz/5o5l27VerptQbHTPnZYBhtJKJHtxM66L1GzddfcoUIorzUljUCWlP+HzeEYzH5/2gk7tKfFjrWKW+EL8IDY9aRFITY2ipnNjK69cWlBLSedCs133nTDxnHzZW2JYR17/0E7HRcYWxfIsi3KvqGtYRLaWZE0bm8fJweRa3R69WXYsZOYDK1CDMmrGZ572+5thDTVaiQKOOUBPNgucnB894rYtLYs98sb+2h4EUHZ0cQCIBUVdwu6BAFMwiAEtz2CClwA1G2fq59A9mqQXSkj8WaUHUgo9WcExt6pBEb5MPca+BHWz/aqdC9HRKQFBl3kn4h0qEGkLSy0WrMLKm7QKBgQD6fmd1BDrlsgbLoai3NnrnqKVbn8+0vnJjmTTykxeYHQXxBt3fzH+t42crJowQbuLeoO20oUY0VU8eQVh7bWvduucfFqrecLCL6GhhAFxp2dMjgOdvIim3QN9kvTSUlwOYchA43RTA7wWSzUf1+bL1XWs5bUNg5azpN0Btkma5xQKBgQDkzdwslfjcZgOp1QX2oSPOaA1VuOEJnr3+I2SR8FNH+bVwfbrilF5Mm08jHHHgoqgnGZLG7GLIgQAU1PmIr84hB7CE3JM9xXJ3t0jZ7BktfJEHLzog2Dr6vzXGT+yDcd2q1Lr3GL6x18Y+kgv6ieLv047SOBLal4o8iEjj9PZBZwKBgQCEzx4VKZ/8hq4ZquVj9iulxYGemZWrc8n8So+LCTfaO5EZ4JUkgi0zyby6YR6j29bHSLWfLl6lgpGHLgg2sKYfEmhV0FPZyg+griEhROq6aHYMfdy2zHsnoOqQY8yL96E9Y0R8kaLeRBxFYDeGD9S1SMl/0hGGP1+06slrDtMOLQKBgQCGArDviFN/O1zv7u4UOuNO9JDC4Ysk6E4deLth4uHUaURFA88fAImO0vRx+yoTyRE1/XuDeVaOW0gh62/QCDByFh/kYZD4ABqAVeCcivVgN/J1w8qHDD7XOIEViyBbCKktcnWjXmHqphfd9AqCDprVnxKqu98HGvUDaUtQANzvBwKBgQDJkuAOZocXTl77PfxDWfsP57StrsiuL+AvoH2FscRcT19e9T2U4YuCsyVydRM+gjUoJX5VPedIo+/gcvJrQcJIfwzZlqMMEJnYcWjoG8GYVtub9/xxSPmfuyj3GDbXEcirKkmGOmI5hPEP2UIasTUeljm8sHSP2B52kyKmdVGuUg=="
+    )
+}
+
+private func decodePublicTlsBase64(value: String): Array<Byte> {
+    let output = ArrayList<Byte>()
+    var accumulator: Int64 = 0
+    var bits: Int64 = 0
+    for (byte in value.toArray()) {
+        if (byte == b'=') { break }
+        let decoded: Int64 = if (byte >= b'A' && byte <= b'Z') {
+            Int64(byte - b'A')
+        } else if (byte >= b'a' && byte <= b'z') {
+            Int64(byte - b'a') + 26
+        } else if (byte >= b'0' && byte <= b'9') {
+            Int64(byte - b'0') + 52
+        } else if (byte == b'+') { 62 }
+        else if (byte == b'/') { 63 }
+        else { throw IllegalArgumentException("invalid public TLS test fixture") }
+        accumulator = (accumulator << 6) | decoded
+        bits += 6
+        if (bits >= 8) {
+            bits -= 8
+            output.add(UInt8(UInt64((accumulator >> bits) & 0xff)))
+            accumulator &= if (bits == 0) { 0 } else { (1 << bits) - 1 }
+        }
+    }
+    output.toArray()
 }
 
 private class PublicEmptyHandler <: HttpServerHandler {
