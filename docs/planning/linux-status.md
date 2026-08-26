@@ -35,7 +35,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M1-010 `DuplexTransport` contract | COMPLETE | The contract freezes read/write/shutdown/close/abort semantics, empty buffers never fabricate EOF, same-direction concurrency fails, and `MemoryTransport` uses the shared lifecycle; adapter-local native wakeup fields are outside this core-contract task; [Linux evidence](../evidence/M1-010/README.md) |
 | M1-011 `writeAll`/`readExact` | COMPLETE | Partial I/O, empty range and premature EOF tests |
 | M1-012 `TransportListener` | COMPLETE | Contract plus bounded `StdNetTransportListener`; Deadline/cancel/close wakeup integration tests; [Linux evidence](../evidence/M1-012/README.md) |
-| M1-013 `MemoryTransport` | IN_PROGRESS | Bounded duplex, backpressure, half-close, EOF, cancellation and terminal tests pass; listener/fault scripting remains |
+| M1-013 `MemoryTransport` | COMPLETE | Bounded duplex, backpressure, half-close, EOF and cancellation plus a bounded listener and manually advanced FIFO scheduler; fault scripting remains M1-014; [Linux evidence](../evidence/M1-013/README.md) |
 | M1-015/016 `StdNetTransport` ownership/connect | COMPLETE | DNS-free `IPSocketAddress` construction, exclusive adapter ownership, absolute connect budget and actual endpoints |
 | M1-017 `StdNetTransport.readSome` | COMPLETE | Partial reads, peer EOF, local close/cancel distinction, Deadline and one-reader guard tested on Linux loopback |
 | M1-018 bounded write staging | IN_PROGRESS | Bounded partial writes and copied-byte counters exist; current whole-Array `std.net` API still forces per-call staging allocation |
