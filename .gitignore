@@ -10,6 +10,7 @@ out/
 !docs/evidence/M0-010/linux_x86_64/*.json
 !docs/evidence/M0-016/results/**/*.json
 !docs/evidence/M0-011/linux_x86_64/*.json
+!docs/evidence/M6-023/linux_x86_64/*.json
 
 # Local tool state
 .cjpm/
