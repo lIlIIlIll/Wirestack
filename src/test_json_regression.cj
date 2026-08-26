@@ -357,6 +357,29 @@ class YJsonRegressionTest {
     }
 
     @TestCase
+    func publicWriterTargetsAreByteIdenticalForEveryOutputProfile(): Unit {
+        let codec = YJson.arrayListCodec(ProfileRecordJson)
+        let values = ArrayList<ProfileRecord>()
+        values.add(makeProfileRecord(-7, "quote\"slash\\line\n<tag>", -3))
+        values.add(makeProfileRecord(9, "仓颉😀", 11))
+        let configs = [
+            JsonWriteConfig.compact,
+            JsonWriteConfig.pretty,
+            JsonWriteConfig("\r\n", "\t", true, false),
+            JsonWriteConfig("", "", false, true)
+        ]
+        for (config in configs) {
+            let stringOutput = YJson.encodeStringWith(codec, values, config: config)
+            let byteOutput = String.fromUtf8(YJson.encodeBytesWith(codec, values, config: config))
+            let stream = MemoryOutputStream()
+            YJson.encodeToStreamWith(codec, values, stream, config: config)
+            @Expect(byteOutput, stringOutput)
+            @Expect(stream.toUtf8String(), stringOutput)
+            @Expect(YJson.decodeStringWith(codec, stringOutput)[1].alias, "仓颉😀")
+        }
+    }
+
+    @TestCase
     func streamWriterRejectsIllegalStructuralOrder(): Unit {
         let writer = JsonDirectWriter(MemoryOutputStream(), config: JsonWriteConfig.compact)
         @AssertThrows[JsonException](writer.writeName("orphan"))

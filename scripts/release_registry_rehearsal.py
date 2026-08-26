@@ -2,9 +2,9 @@
 """Create and exercise isolated registry-style release artifacts.
 
 cjpm 1.1.3 has no local-registry or publish dry-run command. Leaf packages are
-bundled with cjpm itself. Packages whose exact 1.0.0 dependencies are not yet in
+bundled with cjpm itself. Packages whose exact 2.0.0 dependencies are not yet in
 the central repository are archived in the same source layout, then extracted
-and resolved to sibling artifact directories only for the consumer rehearsal.
+and resolved to sibling artifact directories only for the 2.0 consumer rehearsal.
 The original artifact manifests remain central-version-only.
 """
 
@@ -18,12 +18,15 @@ import tarfile
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-VERSION = "1.0.0"
+VERSION = "2.0.0"
 MODULES = (
     "yjson_macros",
     "yjson",
     "yjson_all",
     "yjson_native",
+    "yjson_native_accel",
+    "yjson_backends",
+    "yjson_algorithms",
     "yjson_schema_formats",
     "yjson_yyjson",
 )
@@ -77,6 +80,18 @@ def inspect_artifact(name: str, archive_path: pathlib.Path) -> None:
                         "scripts/build_native_scanner.py", "build.cj")
             if not all(any(member.endswith(item) for member in members) for item in required):
                 raise RuntimeError("Custom Native artifact is incomplete")
+        if name == "yjson_native_accel":
+            required = ("src/native_accel.cj", "README.md")
+            if not all(any(member.endswith(item) for member in members) for item in required):
+                raise RuntimeError("Native acceleration artifact is incomplete")
+        if name == "yjson_backends":
+            if not any(member.endswith("src/backends.cj") for member in members):
+                raise RuntimeError("Advanced backends artifact is incomplete")
+        if name == "yjson_algorithms":
+            required = ("src/work_limits.cj", "src/lib_json_schema.cj",
+                        "src/lib_json_path.cj", "src/lib_json_patch.cj")
+            if not all(any(member.endswith(item) for member in members) for item in required):
+                raise RuntimeError("Algorithms artifact is incomplete")
         if name == "yjson_schema_formats":
             required = ("native/schema_formats.c", "build.cj")
             if not all(any(member.endswith(item) for member in members) for item in required):
@@ -91,8 +106,11 @@ def inspect_artifact(name: str, archive_path: pathlib.Path) -> None:
 
 def rewrite_for_local_resolution(modules: pathlib.Path) -> None:
     replacements = {
-        'yjson_macros = "1.0.0"': 'yjson_macros = { path = "../yjson_macros" }',
-        'yjson = "1.0.0"': 'yjson = { path = "../yjson" }',
+        'yjson_macros = "2.0.0"': 'yjson_macros = { path = "../yjson_macros" }',
+        'yjson_native = "2.0.0"': 'yjson_native = { path = "../yjson_native" }',
+        'yjson_backends = "2.0.0"': 'yjson_backends = { path = "../yjson_backends" }',
+        'yjson_algorithms = "2.0.0"': 'yjson_algorithms = { path = "../yjson_algorithms" }',
+        'yjson = "2.0.0"': 'yjson = { path = "../yjson" }',
     }
     for module in modules.iterdir():
         manifest = module / "cjpm.toml"

@@ -3,7 +3,7 @@
 inventory_version = 1
 release_version = "2.0.0"
 package_manifest_version = "2.0.0"
-status = "2.0-development"
+status = "2.0-release-ready"
 compatibility_policy = "2.0 is a breaking redesign; no deprecated aliases or compatibility shims are provided"
 
 [package_pairing]
@@ -11,6 +11,10 @@ core = "2.0.0"
 macros = "2.0.0"
 aggregate = "2.0.0"
 native = "2.0.0"
+native_accel = "2.0.0"
+backends = "2.0.0"
+algorithms = "2.0.0"
+schema_formats = "2.0.0"
 yyjson = "2.0.0"
 rule = "yjson and yjson_macros are one release unit; generated support protocol v1 may remain compatible across patch releases"
 

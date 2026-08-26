@@ -19,6 +19,10 @@ case "$job" in
     api-inventory)
         python3 "$repo/scripts/check_api_inventory.py"
         ;;
+    runtime-freeze)
+        require_cangjie
+        "$repo/scripts/runtime_freeze_contract_checks.sh"
+        ;;
     core)
         require_cangjie
         (cd "$repo" && cjpm test --no-color)
@@ -50,6 +54,17 @@ case "$job" in
         stage_modules
         python3 "$repo/scripts/release_consumer_checks.py" \
             --modules-root "$modules" --only macro
+        ;;
+    algorithms-consumer)
+        require_cangjie
+        stage_modules
+        python3 "$repo/scripts/release_consumer_checks.py" \
+            --modules-root "$modules" --only algorithms --only schema-formats
+        ;;
+    registry-rehearsal)
+        require_cangjie
+        rehearsal="$modules/registry-rehearsal"
+        python3 "$repo/scripts/release_registry_rehearsal.py" "$rehearsal"
         ;;
     custom-native)
         require_cangjie
@@ -94,7 +109,7 @@ case "$job" in
         "$repo/scripts/release_yyjson_colink_check.sh"
         ;;
     *)
-        echo 'usage: scripts/ci_job.sh {api-inventory|core|standards-conformance|schema-formats-conformance|performance-comparison|examples|macro-consumer|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
+        echo 'usage: scripts/ci_job.sh {api-inventory|runtime-freeze|core|standards-conformance|schema-formats-conformance|performance-comparison|examples|macro-consumer|algorithms-consumer|registry-rehearsal|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
         exit 2
         ;;
 esac

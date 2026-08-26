@@ -24,36 +24,41 @@ def fail(message: str) -> None:
 def check_versions(inventory: dict) -> None:
     pairing = inventory["package_pairing"]
     manifest_version = inventory["package_manifest_version"]
-    root_version = load_toml(ROOT / "cjpm.toml")["package"]["version"]
-    macro_version = load_toml(ROOT / "packages/yjson_macros/cjpm.toml")["package"]["version"]
-    all_version = load_toml(ROOT / "packages/yjson_all/cjpm.toml")["package"]["version"]
-    native_version = load_toml(ROOT / "packages/yjson_native/cjpm.toml")["package"]["version"]
-    yyjson_version = load_toml(ROOT / "packages/yjson_yyjson/cjpm.toml")["package"]["version"]
-    expected = {
-        "core": root_version,
-        "macros": macro_version,
-        "aggregate": all_version,
-        "native": native_version,
-        "yyjson": yyjson_version,
+    manifests = {
+        "core": ROOT / "cjpm.toml",
+        "macros": ROOT / "packages/yjson_macros/cjpm.toml",
+        "aggregate": ROOT / "packages/yjson_all/cjpm.toml",
+        "native": ROOT / "packages/yjson_native/cjpm.toml",
+        "native_accel": ROOT / "packages/yjson_native_accel/cjpm.toml",
+        "backends": ROOT / "packages/yjson_backends/cjpm.toml",
+        "algorithms": ROOT / "packages/yjson_algorithms/cjpm.toml",
+        "schema_formats": ROOT / "packages/yjson_schema_formats/cjpm.toml",
+        "yyjson": ROOT / "packages/yjson_yyjson/cjpm.toml",
     }
+    expected = {name: load_toml(path)["package"]["version"]
+                for name, path in manifests.items()}
     for name, actual in expected.items():
         if actual != manifest_version:
             fail(f"{name} development version {actual!r} != package manifest version {manifest_version!r}")
         if actual != pairing[name]:
             fail(f"{name} development version {actual!r} != inventory {pairing[name]!r}")
 
-    release_all = load_toml(ROOT / "release/package-manifests/yjson_all.toml")
-    release_native = load_toml(ROOT / "release/package-manifests/yjson_native.toml")
-    release_yyjson = load_toml(ROOT / "release/package-manifests/yjson_yyjson.toml")
-    dependencies = release_all["dependencies"]
-    if dependencies.get("yjson") != pairing["core"]:
-        fail("release yjson_all must pin the inventory core version")
-    if dependencies.get("yjson_macros") != pairing["macros"]:
-        fail("release yjson_all must pin the inventory macro version")
-    if release_native["dependencies"].get("yjson") != pairing["core"]:
-        fail("release yjson_native must pin the inventory core version")
-    if release_yyjson["dependencies"].get("yjson") != pairing["core"]:
-        fail("release yjson_yyjson must pin the inventory core version")
+    release_names = {
+        "core": "yjson", "macros": "yjson_macros", "aggregate": "yjson_all",
+        "native": "yjson_native", "native_accel": "yjson_native_accel",
+        "backends": "yjson_backends", "algorithms": "yjson_algorithms",
+        "schema_formats": "yjson_schema_formats", "yyjson": "yjson_yyjson",
+    }
+    released = {name: load_toml(ROOT / f"release/package-manifests/{module}.toml")
+                for name, module in release_names.items()}
+    for name, manifest in released.items():
+        if manifest["package"]["version"] != pairing[name]:
+            fail(f"release {release_names[name]} version must match inventory")
+        for dependency, version in manifest.get("dependencies", {}).items():
+            dependency_key = next((key for key, module in release_names.items()
+                                   if module == dependency), None)
+            if dependency_key is None or version != pairing[dependency_key]:
+                fail(f"release {release_names[name]} dependency {dependency} is not pinned to inventory")
 
 
 def check_declarations(inventory: dict) -> None:
