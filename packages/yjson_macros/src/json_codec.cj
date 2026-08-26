@@ -496,18 +496,38 @@ private func directScalarWrite(field: CodecField, value: String): String {
     }
 }
 
-private func compactRawFieldWrite(field: CodecField, value: String, first: String): String {
+private func compactRawScalarFieldWrite(field: CodecField, value: String, first: String): String {
     if (!field.codecExpr.isEmpty() || field.staticGenerated || field.isOption) { return "" }
     match (field.typeText.replace(" ", "")) {
         case "String" =>
-            "${first} = GeneratedSupportV1.writeCompactEntryString(writer, ${first}, ${field.jsonNameExpr}, ${value})"
+            "${first} = __writer.writeRawObjectEntryNameString(${first}, ${field.jsonNameExpr}, ${value})"
         case "Bool" =>
-            "${first} = GeneratedSupportV1.writeCompactEntryBool(writer, ${first}, ${field.jsonNameExpr}, ${value})"
+            "${first} = __writer.writeRawObjectEntryNameBool(${first}, ${field.jsonNameExpr}, ${value})"
         case "Int64" =>
-            "${first} = GeneratedSupportV1.writeCompactEntryInt64(writer, ${first}, ${field.jsonNameExpr}, ${value})"
+            "${first} = __writer.writeRawObjectEntryNameInt64(${first}, ${field.jsonNameExpr}, ${value})"
         case "Int32" | "Int16" | "Int8" =>
-            "${first} = GeneratedSupportV1.writeCompactEntryInt64(writer, ${first}, ${field.jsonNameExpr}, Int64(${value}))"
+            "${first} = __writer.writeRawObjectEntryNameInt64(${first}, ${field.jsonNameExpr}, Int64(${value}))"
         case _ => ""
+    }
+}
+
+private func compactRawCodecName(field: CodecField): String {
+    "__yJsonCompactRaw_${field.name}"
+}
+
+private func compactRawFieldWrite(field: CodecField, value: String, first: String): String {
+    let scalar = compactRawScalarFieldWrite(field, value, first)
+    if (!scalar.isEmpty()) { return scalar }
+    if (!field.codecExpr.isEmpty() || field.staticGenerated ||
+        !directScalarWrite(field, value).isEmpty()) { return "" }
+    let write = "${first} = __writer.writeRawObjectEntryName(${first}, ${field.jsonNameExpr}); " +
+        "context.pushField(${field.jsonNameExpr}); try { match (${compactRawCodecName(field)}) { " +
+        "case Some(__raw) => __raw.writeCompactRaw(${value}, writer, context); " +
+        "case None => throw JsonException(\"Compact raw codec is unavailable\") } } finally { context.popPath() }"
+    if (field.isOption && !field.includeNull) {
+        "if (${value}.isSome()) { ${write} }"
+    } else {
+        write
     }
 }
 
@@ -758,7 +778,9 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     }
 
     let supportsCompactRaw = supportsCompactRawWrite(fields)
-    let directInterface = if (supportsCompactRaw) { "JsonCompactRawCodec<${targetType}>" } else { "JsonDirectWriteCodec<${targetType}>" }
+    let directInterface = if (supportsCompactRaw) {
+        "JsonCompactRawCodec<${targetType}> & JsonCompactRawArrayListElementCodec<${targetType}>"
+    } else { "JsonDirectWriteCodec<${targetType}>" }
     let codecInterfaces = if (supportsFastRead) {
         "JsonObjectCodec<${targetType}> & JsonFastCodec<${targetType}> & JsonFastDecoder<${targetType}> & ${directInterface}"
     } else {
@@ -771,6 +793,10 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             !directScalarFastRead(field, "reader").isEmpty()
         if (field.codecExpr.isEmpty() && !field.staticGenerated && !fullyDirect) {
             appendLine(sb, 1, "private let ${cachedFieldCodecName(field)}: JsonCodec<${field.typeText}> = ${defaultFieldCodec(field.typeText)}")
+            if (compactRawScalarFieldWrite(field, "__value", "__first").isEmpty() &&
+                directScalarWrite(field, "__value").isEmpty()) {
+                appendLine(sb, 1, "private let ${compactRawCodecName(field)}: Option<JsonCompactRawCodec<${field.typeText}>> = match (${cachedFieldCodecName(field)}) { case __raw: JsonCompactRawCodec<${field.typeText}> => Some(__raw); case _ => None<JsonCompactRawCodec<${field.typeText}>> }")
+            }
         }
     }
     if (supportsFastRead) {
@@ -816,7 +842,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     appendLine(sb, 1, "}")
     appendLine(sb, 1, "public func writeDirect(value: ${targetType}, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {")
     if (supportsCompactRaw) {
-        appendLine(sb, 2, "if (GeneratedSupportV1.tryBeginCompactValue(writer)) { writeCompactRaw(value, writer, context); return }")
+        appendLine(sb, 2, "if (supportsCompactRaw() && writer.tryBeginGeneratedCompactRawValue()) { writeCompactRaw(value, writer, context); return }")
     }
     if (isClass) { appendLine(sb, 2, "context.enterObject(value)") } else { appendLine(sb, 2, "context.enterValue()") }
     appendLine(sb, 2, "try {")
@@ -854,18 +880,51 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     }
     appendLine(sb, 1, "}")
     if (supportsCompactRaw) {
-        appendLine(sb, 1, "public func supportsCompactRaw(): Bool { true }")
+        let rawChecks = ArrayList<String>()
+        for (field in fields) {
+            if (!field.writeField) { continue }
+            if (compactRawScalarFieldWrite(field, "__value", "__first").isEmpty() &&
+                directScalarWrite(field, "__value").isEmpty()) {
+                rawChecks.add("${compactRawCodecName(field)}.isSome()")
+            }
+        }
+        appendLine(sb, 1, "public func supportsCompactRaw(): Bool { " +
+            (if (rawChecks.isEmpty()) { "true" } else { joinStrings(rawChecks, " && ") }) + " }")
         appendLine(sb, 1, "public func writeCompactRaw(value: ${targetType}, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {")
+        appendLine(sb, 2, "writeCompactRawWithCursor(value, writer, GeneratedSupportV1.writeCursor(writer), context)")
+        appendLine(sb, 1, "}")
+        appendLine(sb, 1, "private func writeCompactRawWithCursor(value: ${targetType}, writer: GeneratedSupportV1Writer, __writer: GeneratedSupportV1WriteCursor, context: JsonEncodeContext): Unit {")
+        appendLine(sb, 2, "let _ = writer")
         if (isClass) { appendLine(sb, 2, "context.enterObject(value)") } else { appendLine(sb, 2, "context.enterValue()") }
         appendLine(sb, 2, "try {")
-        appendLine(sb, 3, "GeneratedSupportV1.writeCompactObjectBegin(writer)")
+        appendLine(sb, 3, "__writer.writeRawBeginObject()")
         appendLine(sb, 3, "var __first = true")
         for (field in fields) {
             if (!field.writeField) { continue }
             appendLine(sb, 3, compactRawFieldWrite(field, "value.${field.name}", "__first"))
         }
-        appendLine(sb, 3, "GeneratedSupportV1.writeCompactObjectEnd(writer)")
+        appendLine(sb, 3, "__writer.writeRawEndObject()")
         appendLine(sb, 2, if (isClass) { "} finally { context.leaveObject() }" } else { "} finally { context.leaveValue() }" })
+        appendLine(sb, 1, "}")
+        appendLine(sb, 1, "public func writeCompactRawArrayList(value: YJsonArrayList<${targetType}>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {")
+        appendLine(sb, 2, "context.enterValue()")
+        appendLine(sb, 2, "try {")
+        appendLine(sb, 3, "let __writer = GeneratedSupportV1.writeCursor(writer)")
+        appendLine(sb, 3, "__writer.reserveRawCollectionCapacity(value.size)")
+        appendLine(sb, 3, "__writer.writeRawBeginArray()")
+        appendLine(sb, 3, "var __index: Int64 = 0")
+        appendLine(sb, 3, "if (!value.isEmpty()) {")
+        appendLine(sb, 4, "context.pushIndex(0)")
+        appendLine(sb, 4, "try {")
+        appendLine(sb, 5, "for (__item in value) {")
+        appendLine(sb, 6, "if (__index > 0) { __writer.writeRawByte(b','); context.updateLastIndex(__index) }")
+        appendLine(sb, 6, "writeCompactRawWithCursor(__item, writer, __writer, context)")
+        appendLine(sb, 6, "__index++")
+        appendLine(sb, 5, "}")
+        appendLine(sb, 4, "} finally { context.popPath() }")
+        appendLine(sb, 3, "}")
+        appendLine(sb, 3, "__writer.writeRawEndArray()")
+        appendLine(sb, 2, "} finally { context.leaveValue() }")
         appendLine(sb, 1, "}")
     }
     appendLine(sb, 1, "public func read(reader: JsonCodecReader, context: JsonDecodeContext): ${targetType} {")

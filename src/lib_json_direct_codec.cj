@@ -226,6 +226,13 @@ public interface JsonCompactRawCodec<T> <: JsonDirectWriteCodec<T> {
     func writeCompactRaw(value: T, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit
 }
 
+/// Optional generated-code bulk seam. ArrayList resolves it once so an
+/// element codec can reuse one writer cursor across the complete loop.
+public interface JsonCompactRawArrayListElementCodec<T> {
+    func writeCompactRawArrayList(value: ArrayList<T>, writer: GeneratedSupportV1Writer,
+        context: JsonEncodeContext): Unit
+}
+
 public func writeJsonDirectWith<T>(
     codec: JsonCodec<T>,
     value: T,
@@ -740,7 +747,7 @@ private class OptionJsonCodec<T> <: JsonFastCodec<Option<T>> & JsonCompactRawCod
     }
 
     public func writeDirect(value: Option<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
-        if (supportsCompactRaw() && jsonTryBeginGeneratedCompactRawValue(writer)) {
+        if (supportsCompactRaw() && writer.tryBeginGeneratedCompactRawValue()) {
             writeCompactRaw(value, writer, context)
             return
         }
@@ -862,7 +869,7 @@ private class ArrayJsonCodec<T> <: JsonFastCodec<Array<T>> & JsonCompactRawCodec
     }
 
     public func writeDirect(value: Array<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
-        if (supportsCompactRaw() && jsonTryBeginGeneratedCompactRawValue(writer)) {
+        if (supportsCompactRaw() && writer.tryBeginGeneratedCompactRawValue()) {
             writeCompactRaw(value, writer, context)
             return
         }
@@ -901,25 +908,28 @@ private class ArrayJsonCodec<T> <: JsonFastCodec<Array<T>> & JsonCompactRawCodec
     public func writeCompactRaw(value: Array<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
         context.enterValue()
         try {
-            jsonWriteGeneratedCompactArrayBegin(writer)
+            let rawWriter = GeneratedSupportV1.writeCursor(writer)
+            rawWriter.reserveRawCollectionCapacity(value.size)
+            rawWriter.writeRawBeginArray()
             if (!value.isEmpty()) {
+                let raw = match (compactRawInner) {
+                    case Some(item) => item
+                    case None => throw JsonException("Compact raw codec is unavailable")
+                }
                 context.pushIndex(0)
                 try {
                     for (index in 0..value.size) {
                         if (index > 0) {
-                            jsonWriteGeneratedCompactComma(writer)
+                            rawWriter.writeRawByte(b',')
                             context.updateLastIndex(index)
                         }
-                        match (compactRawInner) {
-                            case Some(raw) => raw.writeCompactRaw(value[index], writer, context)
-                            case None => throw JsonException("Compact raw codec is unavailable")
-                        }
+                        raw.writeCompactRaw(value[index], writer, context)
                     }
                 } finally {
                     context.popPath()
                 }
             }
-            jsonWriteGeneratedCompactArrayEnd(writer)
+            rawWriter.writeRawEndArray()
         } finally {
             context.leaveValue()
         }
@@ -995,6 +1005,7 @@ private class ArrayListJsonCodec<T> <: JsonFastCodec<ArrayList<T>> & JsonCompact
     private let fastInner: JsonFastCodec<T>
     private let directInner: Option<JsonDirectWriteCodec<T>>
     private let compactRawInner: Option<JsonCompactRawCodec<T>>
+    private let compactRawArrayListInner: Option<JsonCompactRawArrayListElementCodec<T>>
 
     public init(inner: JsonCodec<T>) {
         this.inner = inner
@@ -1006,6 +1017,10 @@ private class ArrayListJsonCodec<T> <: JsonFastCodec<ArrayList<T>> & JsonCompact
         this.compactRawInner = match (inner) {
             case raw: JsonCompactRawCodec<T> => Some(raw)
             case _ => None<JsonCompactRawCodec<T>>
+        }
+        this.compactRawArrayListInner = match (inner) {
+            case bulk: JsonCompactRawArrayListElementCodec<T> => Some(bulk)
+            case _ => None<JsonCompactRawArrayListElementCodec<T>>
         }
     }
 
@@ -1041,7 +1056,7 @@ private class ArrayListJsonCodec<T> <: JsonFastCodec<ArrayList<T>> & JsonCompact
     }
 
     public func writeDirect(value: ArrayList<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
-        if (supportsCompactRaw() && jsonTryBeginGeneratedCompactRawValue(writer)) {
+        if (supportsCompactRaw() && writer.tryBeginGeneratedCompactRawValue()) {
             writeCompactRaw(value, writer, context)
             return
         }
@@ -1080,29 +1095,36 @@ private class ArrayListJsonCodec<T> <: JsonFastCodec<ArrayList<T>> & JsonCompact
     }
 
     public func writeCompactRaw(value: ArrayList<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
+        if (let Some(bulk) <- compactRawArrayListInner) {
+            bulk.writeCompactRawArrayList(value, writer, context)
+            return
+        }
         context.enterValue()
         try {
-            jsonWriteGeneratedCompactArrayBegin(writer)
+            let rawWriter = GeneratedSupportV1.writeCursor(writer)
+            rawWriter.reserveRawCollectionCapacity(value.size)
+            rawWriter.writeRawBeginArray()
             var index: Int64 = 0
             if (!value.isEmpty()) {
+                let raw = match (compactRawInner) {
+                    case Some(item) => item
+                    case None => throw JsonException("Compact raw codec is unavailable")
+                }
                 context.pushIndex(0)
                 try {
                     for (item in value) {
                         if (index > 0) {
-                            jsonWriteGeneratedCompactComma(writer)
+                            rawWriter.writeRawByte(b',')
                             context.updateLastIndex(index)
                         }
-                        match (compactRawInner) {
-                            case Some(raw) => raw.writeCompactRaw(item, writer, context)
-                            case None => throw JsonException("Compact raw codec is unavailable")
-                        }
+                        raw.writeCompactRaw(item, writer, context)
                         index++
                     }
                 } finally {
                     context.popPath()
                 }
             }
-            jsonWriteGeneratedCompactArrayEnd(writer)
+            rawWriter.writeRawEndArray()
         } finally {
             context.leaveValue()
         }
@@ -1421,7 +1443,7 @@ private class HashMapJsonCodec<T> <: JsonFastCodec<HashMap<String, T>> & JsonCom
     }
 
     public func writeDirect(value: HashMap<String, T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
-        if (supportsCompactRaw() && jsonTryBeginGeneratedCompactRawValue(writer)) {
+        if (supportsCompactRaw() && writer.tryBeginGeneratedCompactRawValue()) {
             writeCompactRaw(value, writer, context)
             return
         }
@@ -1471,8 +1493,13 @@ private class HashMapJsonCodec<T> <: JsonFastCodec<HashMap<String, T>> & JsonCom
     public func writeCompactRaw(value: HashMap<String, T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
         context.enterValue()
         try {
-            jsonWriteGeneratedCompactObjectBegin(writer)
+            let rawWriter = GeneratedSupportV1.writeCursor(writer)
+            rawWriter.writeRawBeginObject()
             if (!value.isEmpty()) {
+                let raw = match (compactRawInner) {
+                    case Some(item) => item
+                    case None => throw JsonException("Compact raw codec is unavailable")
+                }
                 var first = true
                 try {
                     for ((name, item) in value) {
@@ -1481,17 +1508,14 @@ private class HashMapJsonCodec<T> <: JsonFastCodec<HashMap<String, T>> & JsonCom
                         } else {
                             context.updateLastField(name)
                         }
-                        first = jsonWriteGeneratedCompactObjectEntryName(writer, first, name)
-                        match (compactRawInner) {
-                            case Some(raw) => raw.writeCompactRaw(item, writer, context)
-                            case None => throw JsonException("Compact raw codec is unavailable")
-                        }
+                        first = rawWriter.writeRawObjectEntryName(first, name)
+                        raw.writeCompactRaw(item, writer, context)
                     }
                 } finally {
                     context.popPath()
                 }
             }
-            jsonWriteGeneratedCompactObjectEnd(writer)
+            rawWriter.writeRawEndObject()
         } finally {
             context.leaveValue()
         }

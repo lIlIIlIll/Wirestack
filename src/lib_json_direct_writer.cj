@@ -1583,7 +1583,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     private let target: JsonDirectWriterTarget
     private let config: JsonWriteConfig
     private let multiline: Bool
-    private let contexts = ArrayList<UInt8>()
+    private var contexts: Option<ArrayList<UInt8>> = None<ArrayList<UInt8>>
 
     public init(pretty!: Bool = false) {
         let writerConfig = if (pretty) { JsonWriteConfig.pretty } else { JsonWriteConfig.compact }
@@ -1612,6 +1612,10 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
 
     public static func bytes(config!: JsonWriteConfig = JsonWriteConfig.compact): JsonDirectWriter {
         JsonDirectWriter(DirectBytesWriterTarget(), config)
+    }
+
+    public func generatedCursorV1(): GeneratedSupportV1WriteCursor {
+        GeneratedSupportV1WriteCursor(this)
     }
 
     public func finish(): Unit {
@@ -1651,13 +1655,30 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     }
 
     private func ensureCompleteWriterState(): Unit {
-        if (!contexts.isEmpty()) {
+        if (!contextsAreEmpty()) {
             throw JsonException("Unbalanced JSON writer state")
         }
     }
 
+    private func contextValues(): ArrayList<UInt8> {
+        match (contexts) {
+            case Some(value) => value
+            case None =>
+                let value = ArrayList<UInt8>()
+                contexts = Some(value)
+                value
+        }
+    }
+
+    private func contextsAreEmpty(): Bool {
+        match (contexts) {
+            case Some(value) => value.isEmpty()
+            case None => true
+        }
+    }
+
     func canWriteRawCompactValue(): Bool {
-        contexts.isEmpty() && !multiline && !config.useSpaceAfterSeparators && !config.htmlSafe
+        contextsAreEmpty() && !multiline && !config.useSpaceAfterSeparators && !config.htmlSafe
     }
 
     public func tryBeginGeneratedCompactRawValue(): Bool {
@@ -1669,7 +1690,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     }
 
     func canWriteRawDefaultPrettyValue(): Bool {
-        contexts.isEmpty() &&
+        contextsAreEmpty() &&
             config.newline == "\n" &&
             config.indent == "    " &&
             config.useSpaceAfterSeparators &&
@@ -1702,6 +1723,13 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
 
     func reserveRawCapacity(additional: Int64): Unit {
         target.reserveCapacity(additional)
+    }
+
+    func reserveRawCollectionCapacity(count: Int64): Unit {
+        if (count < 4) { return }
+        var hint = count * 64 + 2
+        if (hint > 4096) { hint = 4096 }
+        target.reserveCapacity(hint)
     }
 
     func rawTargetForGenerated(): JsonDirectWriterTarget {
@@ -2188,13 +2216,14 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     public func startObject(): Unit {
         beforeValue()
         target.writeByte(b'{')
-        contexts.add(OBJECT_FIRST)
+        contextValues().add(OBJECT_FIRST)
     }
 
     public func endObject(): Unit {
         let context = popContext(true)
+        let values = contextValues()
         if ((context & FIRST_MASK) == 0 && multiline) {
-            writeNewlineAndIndent(contexts.size)
+            writeNewlineAndIndent(values.size)
         }
         target.writeByte(b'}')
     }
@@ -2202,13 +2231,14 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     public func startArray(): Unit {
         beforeValue()
         target.writeByte(b'[')
-        contexts.add(ARRAY_FIRST)
+        contextValues().add(ARRAY_FIRST)
     }
 
     public func endArray(): Unit {
         let context = popContext(false)
+        let values = contextValues()
         if ((context & FIRST_MASK) == 0 && multiline) {
-            writeNewlineAndIndent(contexts.size)
+            writeNewlineAndIndent(values.size)
         }
         target.writeByte(b']')
     }
@@ -2230,21 +2260,22 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     }
 
     private func beforeName(): Unit {
-        if (contexts.isEmpty()) {
+        if (contextsAreEmpty()) {
             throw JsonException("Cannot write a field name outside object")
         }
-        let index = contexts.size - 1
-        let context = contexts[index]
+        let values = contextValues()
+        let index = values.size - 1
+        let context = values[index]
         if ((context & OBJECT_MASK) == 0 || (context & EXPECTING_VALUE_MASK) != 0) {
             throw JsonException("Cannot write a field name here")
         }
         if ((context & FIRST_MASK) != 0) {
-            writeEntryPrefix(contexts.size)
+            writeEntryPrefix(values.size)
         } else {
             target.writeByte(b',')
-            writeEntryPrefix(contexts.size)
+            writeEntryPrefix(values.size)
         }
-        contexts[index] = OBJECT_EXPECTING_VALUE
+        values[index] = OBJECT_EXPECTING_VALUE
     }
 
     public func writeNull(): Unit {
@@ -2284,39 +2315,41 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     }
 
     private func beforeValue(): Unit {
-        if (contexts.isEmpty()) {
+        if (contextsAreEmpty()) {
             return
         }
-        let index = contexts.size - 1
-        let context = contexts[index]
+        let values = contextValues()
+        let index = values.size - 1
+        let context = values[index]
         if ((context & OBJECT_MASK) != 0) {
             if ((context & EXPECTING_VALUE_MASK) == 0) {
                 throw JsonException("Object values must be preceded by a field name")
             }
-            contexts[index] = OBJECT_NEXT
+            values[index] = OBJECT_NEXT
             return
         }
         if ((context & FIRST_MASK) != 0) {
-            writeEntryPrefix(contexts.size)
-            contexts[index] = ARRAY_NEXT
+            writeEntryPrefix(values.size)
+            values[index] = ARRAY_NEXT
             return
         }
         target.writeByte(b',')
-        writeEntryPrefix(contexts.size)
+        writeEntryPrefix(values.size)
     }
 
     private func popContext(expectedObject: Bool): UInt8 {
-        if (contexts.isEmpty()) {
+        if (contextsAreEmpty()) {
             throw JsonException("Unbalanced JSON writer state")
         }
-        let index = contexts.size - 1
-        let context = contexts[index]
+        let values = contextValues()
+        let index = values.size - 1
+        let context = values[index]
         let objectContext = (context & OBJECT_MASK) != 0
         let expectingFieldValue = (context & EXPECTING_VALUE_MASK) != 0
         if (objectContext != expectedObject || expectingFieldValue) {
             throw JsonException("Unbalanced JSON writer state")
         }
-        contexts.remove(at: index)
+        values.remove(at: index)
         context
     }
 

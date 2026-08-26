@@ -460,6 +460,7 @@ yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonCodecBulkWri
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonCodecProvider
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonCodecReader
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonCodecWriter
+yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonCompactRawArrayListElementCodec<T>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonCompactRawCodec<T> <: JsonDirectWriteCodec<T>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonDirectWriteCodec<T> <: JsonCodec<T>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface JsonFastCodec<T> <: JsonCodec<T>
@@ -513,6 +514,7 @@ yjson|src/lib_json_direct_codec.cj|JsonCodecWriter|func writeString(value: Strin
 yjson|src/lib_json_direct_codec.cj|JsonCodecWriter|func writeUInt64(value: UInt64): Unit
 yjson|src/lib_json_direct_codec.cj|JsonCodec|func read(reader: JsonCodecReader, context: JsonDecodeContext): T
 yjson|src/lib_json_direct_codec.cj|JsonCodec|func write(value: T, writer: JsonCodecWriter, context: JsonEncodeContext): Unit
+yjson|src/lib_json_direct_codec.cj|JsonCompactRawArrayListElementCodec|func writeCompactRawArrayList(value: ArrayList<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit
 yjson|src/lib_json_direct_codec.cj|JsonCompactRawCodec|func supportsCompactRaw(): Bool
 yjson|src/lib_json_direct_codec.cj|JsonCompactRawCodec|func writeCompactRaw(value: T, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit
 yjson|src/lib_json_direct_codec.cj|JsonDecodeContext|public func currentPath(): String
@@ -630,6 +632,7 @@ yjson|src/lib_json_direct_writer.cj|JsonDirectWriter|public func endArray(): Uni
 yjson|src/lib_json_direct_writer.cj|JsonDirectWriter|public func finish(): Unit
 yjson|src/lib_json_direct_writer.cj|JsonDirectWriter|public func finishBytes(): Array<Byte>
 yjson|src/lib_json_direct_writer.cj|JsonDirectWriter|public func finishString(): String
+yjson|src/lib_json_direct_writer.cj|JsonDirectWriter|public func generatedCursorV1(): GeneratedSupportV1WriteCursor
 yjson|src/lib_json_direct_writer.cj|JsonDirectWriter|public func startArray(): Unit
 yjson|src/lib_json_direct_writer.cj|JsonDirectWriter|public func startObject(): Unit
 yjson|src/lib_json_direct_writer.cj|JsonDirectWriter|public func tryBeginGeneratedCompactRawValue(): Bool
@@ -694,6 +697,7 @@ yjson|src/lib_json_fast_reader.cj|JsonFastReader|public init(text: String)
 yjson|src/lib_json_generated_support_v1.cj|<top-level>|public class GeneratedSupportV1
 yjson|src/lib_json_generated_support_v1.cj|<top-level>|public interface GeneratedSupportV1Reader
 yjson|src/lib_json_generated_support_v1.cj|<top-level>|public interface GeneratedSupportV1Writer <: JsonCodecWriter & JsonCodecBulkWriter
+yjson|src/lib_json_generated_support_v1.cj|<top-level>|public struct GeneratedSupportV1WriteCursor
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1Reader|func beforeRawArrayItem(first: Bool): Unit
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1Reader|func endRawArray(): Unit
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1Reader|func endRawObject(): Unit
@@ -720,7 +724,18 @@ yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1Reader|func suggest
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1Reader|func suggestRawObjectCapacity(): Int64
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1Reader|func tryReadRawCompactNameTokenBytes(first: Bool, nameBytes: Array<Byte>): Bool
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1Reader|func tryReadRawNull(): Bool
+yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1WriteCursor|public func reserveRawCollectionCapacity(count: Int64): Unit
+yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1WriteCursor|public func writeRawBeginArray(): Unit
+yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1WriteCursor|public func writeRawBeginObject(): Unit
+yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1WriteCursor|public func writeRawByte(value: Byte): Unit
+yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1WriteCursor|public func writeRawEndArray(): Unit
+yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1WriteCursor|public func writeRawEndObject(): Unit
+yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1WriteCursor|public func writeRawObjectEntryName(first: Bool, value: String): Bool
+yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1WriteCursor|public func writeRawObjectEntryNameBool(first: Bool, name: String, value: Bool): Bool
+yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1WriteCursor|public func writeRawObjectEntryNameInt64(first: Bool, name: String, value: Int64): Bool
+yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1WriteCursor|public func writeRawObjectEntryNameString(first: Bool, name: String, value: String): Bool
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1Writer|func finishString(): String
+yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1Writer|func generatedCursorV1(): GeneratedSupportV1WriteCursor
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1Writer|func tryBeginGeneratedCompactRawValue(): Bool
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1Writer|func writeRawBeginArray(): Unit
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1Writer|func writeRawBeginObject(): Unit
@@ -746,6 +761,7 @@ yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func writeCompactEntryString(writer: GeneratedSupportV1Writer, first: Bool, name: String, value: String): Bool
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func writeCompactObjectBegin(writer: GeneratedSupportV1Writer): Unit
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func writeCompactObjectEnd(writer: GeneratedSupportV1Writer): Unit
+yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func writeCursor(writer: GeneratedSupportV1Writer): GeneratedSupportV1WriteCursor
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func writeNested<T>(codec: JsonCodec<T>, value: T, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit
 yjson|src/lib_json_native_scanner.cj|<top-level>|public func activateJsonNativePrimitivesV1(backend: JsonNativeAccelerationPrimitivesV1): Unit
 yjson|src/lib_json_native_scanner.cj|<top-level>|public interface JsonNativeAccelerationPrimitivesV1 <: JsonNativeScannerBackend & JsonNativeNumericScannerBackend & JsonNativeNumericTapeBackend & JsonNativeFloatParserBackend & JsonNativeWriterBackend

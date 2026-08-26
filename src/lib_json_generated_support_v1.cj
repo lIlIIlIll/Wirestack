@@ -39,6 +39,7 @@ public interface GeneratedSupportV1Reader {
 /// correctness remains owned by the core writer state machine.
 public interface GeneratedSupportV1Writer <: JsonCodecWriter & JsonCodecBulkWriter {
     func finishString(): String
+    func generatedCursorV1(): GeneratedSupportV1WriteCursor
     func tryBeginGeneratedCompactRawValue(): Bool
     func writeRawBeginObject(): Unit
     func writeRawEndObject(): Unit
@@ -50,6 +51,36 @@ public interface GeneratedSupportV1Writer <: JsonCodecWriter & JsonCodecBulkWrit
     func writeRawObjectEntryNameString(first: Bool, name: String, value: String): Bool
     func writeRawObjectEntryNameBool(first: Bool, name: String, value: Bool): Bool
     func writeRawObjectEntryNameInt64(first: Bool, name: String, value: Int64): Bool
+}
+
+/// Versioned, allocation-free view used after the runtime writer has been
+/// resolved once. Generated source only depends on generated_support.v1 while
+/// field loops avoid repeated interface dispatch.
+public struct GeneratedSupportV1WriteCursor {
+    private let writer: JsonDirectWriter
+
+    init(writer: JsonDirectWriter) { this.writer = writer }
+
+    public func writeRawBeginObject(): Unit { writer.writeRawBeginObject() }
+    public func writeRawEndObject(): Unit { writer.writeRawEndObject() }
+    public func writeRawBeginArray(): Unit { writer.writeRawBeginArray() }
+    public func writeRawEndArray(): Unit { writer.writeRawEndArray() }
+    public func writeRawByte(value: Byte): Unit { writer.writeRawByte(value) }
+    public func reserveRawCollectionCapacity(count: Int64): Unit {
+        writer.reserveRawCollectionCapacity(count)
+    }
+    public func writeRawObjectEntryName(first: Bool, value: String): Bool {
+        writer.writeRawObjectEntryName(first, value)
+    }
+    public func writeRawObjectEntryNameString(first: Bool, name: String, value: String): Bool {
+        writer.writeRawObjectEntryNameString(first, name, value)
+    }
+    public func writeRawObjectEntryNameBool(first: Bool, name: String, value: Bool): Bool {
+        writer.writeRawObjectEntryNameBool(first, name, value)
+    }
+    public func writeRawObjectEntryNameInt64(first: Bool, name: String, value: Int64): Bool {
+        writer.writeRawObjectEntryNameInt64(first, name, value)
+    }
 }
 
 public class GeneratedSupportV1 {
@@ -67,6 +98,9 @@ public class GeneratedSupportV1 {
     public static func newFastReader(text: String): GeneratedSupportV1Reader { JsonFastReader(text) }
     public static func newFastReader(bytes: Array<Byte>): GeneratedSupportV1Reader { JsonFastReader(bytes) }
     public static func newWriter(): GeneratedSupportV1Writer { JsonDirectWriter() }
+    public static func writeCursor(writer: GeneratedSupportV1Writer): GeneratedSupportV1WriteCursor {
+        writer.generatedCursorV1()
+    }
     public static func newSemanticReader(text: String, config: JsonReadConfig): JsonCodecReader {
         JsonDirectReader(text, config: config)
     }
