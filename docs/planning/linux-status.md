@@ -30,6 +30,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M1-005 `OperationContext` | COMPLETE | Immutable Deadline/cancellation/trace/event-sink propagation tests |
 | M1-006 trace context | COMPLETE | Bounded read-only identifiers and default-off, exception-isolated, secret-free structured event sink |
 | M1-007 structured network error | COMPLETE | category/phase/code/retryability/native/endpoint/cause model and tests |
+| M1-008 exactly-once completion | COMPLETE | Bounded cleanup registry, one terminal winner, idempotent unregister, late-registration cleanup, failure isolation and 100-round registration/unregister races; [Linux evidence](../evidence/M1-008/README.md) |
 | M1-010 `DuplexTransport` contract | IN_PROGRESS | Contract and MemoryTransport semantics exist; shared lifecycle state machine remains |
 | M1-011 `writeAll`/`readExact` | COMPLETE | Partial I/O, empty range and premature EOF tests |
 | M1-012 `TransportListener` | COMPLETE | Contract plus bounded `StdNetTransportListener`; Deadline/cancel/close wakeup integration tests |
