@@ -30,7 +30,7 @@ Status values:
 | M0-008 | COMPLETE | [`docs/evidence/M0-008/README.md`](../evidence/M0-008/README.md) | All 240 Linux absolute-budget samples pass; global GATE-NET-03 remains incomplete. |
 | M0-009 | COMPLETE | [`docs/evidence/M0-009/README.md`](../evidence/M0-009/README.md) | FIN, RST and local-close evidence is retained; public abort/cancel and global GATE-NET-04 remain incomplete. |
 | M0-010 | BLOCKED | [`docs/evidence/M0-010/README.md`](../evidence/M0-010/README.md) | Linux 64 KiB-buffer/100 MiB profile passes, but copied-byte instrumentation, Windows evidence and future adapter comparison are missing. |
-| M0-011 | BLOCKED | [`docs/evidence/M0-011/README.md`](../evidence/M0-011/README.md) | Bounded Linux stress passes; 100k counts, TLS cleanup, 24-hour soak and required native platforms remain outstanding. |
+| M0-011 | BLOCKED | [`docs/evidence/M0-011/README.md`](../evidence/M0-011/README.md) | Linux 100k transport/TLS workloads and 24-hour soak pass; timer/waiter/native-buffer/GC-root/background-task accounting and required native platforms remain outstanding. |
 | M0-012 | BLOCKED | — | Requires M0-011 evidence completion and Android/iOS/Harmony native-device execution. |
 | M0-013 | COMPLETE | [`docs/evidence/M0-013/README.md`](../evidence/M0-013/README.md) | Native Linux evidence shows carrier-thread starvation at 16+ delayed DNS resolutions; gate FAIL supports conditional UP-007 analysis, while global evidence remains incomplete. |
 | M0-014 | BLOCKED | — | Requires a native Windows SDK/runner and copied-byte instrumentation. |

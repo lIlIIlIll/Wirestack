@@ -1,52 +1,41 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "task_id": "M0-011",
   "task_status": "INCOMPLETE",
   "gate_id": "GATE-NET-06",
-  "bounded_linux_status": "PASS",
+  "linux_workload_status": "PASS",
+  "linux_acceptance_status": "INCOMPLETE",
   "global_gate_status": "INCOMPLETE",
-  "sdk_archive_sha256": "bc2ed8a34b9b6846a5445d3eba0ac66b146730a005d3df56d45a2b119416f40d",
-  "executed": [
-    {
-      "mode": "connect-close",
-      "iterations": 2000,
-      "decision": "PASS",
-      "resource_samples": "MEASURED"
+  "repository_revision": "4323da2",
+  "reports": {
+    "linux_profile": {
+      "path": "linux-profile.json",
+      "sha256": "0cf4528c203131d4c6926ce27f9dbbbf3f11ff10f21848169d5ecc2a4248b93d"
     },
-    {
-      "mode": "echo-close",
-      "iterations": 1000,
-      "payload_bytes_per_iteration": 64,
-      "decision": "PASS",
-      "resource_samples": "MEASURED"
-    },
-    {
-      "mode": "peer-reset",
-      "iterations": 1000,
-      "decision": "PASS",
-      "resource_samples": "MEASURED"
-    },
-    {
-      "mode": "close-during-read",
-      "iterations": 500,
-      "decision": "PASS",
-      "resource_samples": "MEASURED"
+    "tls_failure_cleanup": {
+      "path": "tls-failure-cleanup.json",
+      "sha256": "fa4b773ade2ed3a8f654d7c3851f99b09df89e1c24ac991867c20098832bbbac"
     }
+  },
+  "executed": [
+    {"mode": "connect-close", "iterations": 100000, "decision": "PASS"},
+    {"mode": "peer-reset", "iterations": 100000, "decision": "PASS"},
+    {"mode": "close-during-read", "iterations": 100000, "decision": "PASS"},
+    {"mode": "tls-handshake-failure-cleanup", "iterations": 100000, "decision": "PASS"},
+    {"mode": "mixed-soak", "seconds": 86400, "iterations": 187051774, "decision": "PASS"}
   ],
-  "deferred": [
-    {"id": "100000-transport-cleanups", "status": "NOT_RUN"},
-    {"id": "100000-tls-handshake-failure-cleanups", "status": "NOT_YET_APPLICABLE"},
-    {"id": "24-hour-idle-active-soak", "status": "NOT_RUN"},
-    {"id": "windows-native", "status": "BLOCKED"},
-    {"id": "macos-native", "status": "BLOCKED"},
-    {"id": "android-native", "status": "BLOCKED"},
-    {"id": "ios-native", "status": "BLOCKED"},
-    {"id": "harmony-native", "status": "BLOCKED"}
+  "measured_resource_classes": ["process-rss", "native-file-descriptors"],
+  "unmeasured_acceptance_classes": [
+    "timers",
+    "waiters",
+    "native-buffers",
+    "gc-roots",
+    "background-tasks"
   ],
+  "deferred_platforms": ["windows", "macos", "android", "ios", "harmony"],
   "non_claims": [
-    "not full GATE-NET-06 completion",
-    "not a 24-hour soak",
-    "not TLS cleanup evidence",
+    "not complete Linux GATE-NET-06 acceptance",
+    "not full global GATE-NET-06 completion",
     "not six-platform evidence"
   ]
 }

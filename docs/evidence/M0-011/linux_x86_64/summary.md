@@ -1,21 +1,27 @@
-# GATE-NET-06 — bounded Linux x86_64 result
+# GATE-NET-06 — formal Linux x86_64 workload
 
-**Bounded execution:** PASS  
-**M0-011 task:** INCOMPLETE  
-**Global gate:** INCOMPLETE
+**Executed workload:** PASS  
+**Linux acceptance:** INCOMPLETE  
+**M0-011/global gate:** INCOMPLETE
 
-| Scenario | Iterations | Client completion | Server total | Decision |
-|---|---:|---:|---:|---|
-| connect/close | 2,000 | 2,000 | 2,000 accepts | PASS |
-| active echo/connect/close | 1,000 | 1,000 | 1,000 exact echoes | PASS |
-| peer reset | 1,000 | 1,000 | 1,000 RST closes | PASS |
-| close during blocked read | 500 | 500 | 500 accepts | PASS |
+| Scenario | Requested | Completed/server total | Decision |
+|---|---:|---:|---|
+| connect/close | 100,000 | 100,000 | PASS |
+| peer reset | 100,000 | 100,000 | PASS |
+| close during blocked read | 100,000 | 100,000 | PASS |
+| TLS failed-handshake cleanup | 100,000 | 100,000 | PASS |
+| mixed idle/active soak | 86,400 s | 187,051,774 | PASS |
 
-Each process was sampled through `/proc/<pid>/status` and `/proc/<pid>/fd`.
-The report retains raw timestamped RSS and FD arrays plus first, last, min, max,
-P50, P95 and P99 aggregates. All server accept totals and echo byte totals
-matched the requested iteration counts.
+The soak retained 1,440 one-minute samples. After warmup exclusion, median RSS
+fell by 2,248 KiB and median FD count changed by 0. The TLS cleanup retained 853
+quarter-second samples; both steady-state median RSS and FD growth were 0. The
+AWS-LC binary had no system TLS dynamic dependency or TLS loader-library string.
 
-This bounded result is not evidence for 100,000 iterations, TLS handshake
-cleanup, a 24-hour soak or another platform. Those entries remain explicitly
-`NOT_RUN`, `NOT_YET_APPLICABLE` or `BLOCKED`.
+The formal count scenarios use coarse one-minute sampling and therefore contain
+too few samples for an independent trend decision; their exact completion and
+server counters pass. Long-duration RSS/FD trend evidence comes from the 24-hour
+mixed soak and the TLS cleanup workload.
+
+This evidence does not directly count timers, waiters, native buffers, GC roots
+or background tasks. Those PRD acceptance classes remain unmeasured, so the
+Linux gate remains INCOMPLETE despite the executed workload PASS.
