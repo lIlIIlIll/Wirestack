@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
   "task_id": "M0-011",
-  "task_status": "INCOMPLETE",
+  "task_status": "BLOCKED",
   "gate_id": "GATE-NET-06",
   "linux_workload_status": "PASS",
-  "linux_acceptance_status": "INCOMPLETE",
+  "linux_acceptance_status": "PASS",
   "global_gate_status": "INCOMPLETE",
-  "repository_revision": "4323da2",
+  "repository_revision": "e35365ae82775e639cf39c57e82c42f07e5f3b93",
   "reports": {
     "linux_profile": {
       "path": "linux-profile.json",
@@ -15,6 +15,10 @@
     "tls_failure_cleanup": {
       "path": "tls-failure-cleanup.json",
       "sha256": "fa4b773ade2ed3a8f654d7c3851f99b09df89e1c24ac991867c20098832bbbac"
+    },
+    "production_cleanup": {
+      "path": "production-cleanup.json",
+      "sha256": "ee0fbf5b2878989b9c22f01e04f9b4925c63fe3f0c3c35ddb8f2ddda5e7073a9"
     }
   },
   "executed": [
@@ -22,19 +26,23 @@
     {"mode": "peer-reset", "iterations": 100000, "decision": "PASS"},
     {"mode": "close-during-read", "iterations": 100000, "decision": "PASS"},
     {"mode": "tls-handshake-failure-cleanup", "iterations": 100000, "decision": "PASS"},
-    {"mode": "mixed-soak", "seconds": 86400, "iterations": 187051774, "decision": "PASS"}
+    {"mode": "mixed-soak", "seconds": 86400, "iterations": 187051774, "decision": "PASS"},
+    {"mode": "production-cancel-close", "iterations": 100000, "decision": "PASS"},
+    {"mode": "production-tls-transport-cleanup", "iterations": 100000, "decision": "PASS"}
   ],
-  "measured_resource_classes": ["process-rss", "native-file-descriptors"],
-  "unmeasured_acceptance_classes": [
+  "measured_resource_classes": [
+    "process-rss",
+    "native-file-descriptors",
+    "socket-handles",
     "timers",
     "waiters",
     "native-buffers",
     "gc-roots",
     "background-tasks"
   ],
+  "unmeasured_acceptance_classes": [],
   "deferred_platforms": ["windows", "macos", "android", "ios", "harmony"],
   "non_claims": [
-    "not complete Linux GATE-NET-06 acceptance",
     "not full global GATE-NET-06 completion",
     "not six-platform evidence"
   ]

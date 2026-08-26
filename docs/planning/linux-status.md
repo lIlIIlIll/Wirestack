@@ -14,7 +14,7 @@ Status values have the same fail-closed meaning as the global status file.
 | close/wakeup and absolute Deadline | COMPLETE | M0-006 and M0-008 native Linux results |
 | duplex and EOF classification | BLOCKED | Executed behavior passes; public typed half-close is absent and requires UP-003 |
 | large-buffer/copy profile | BLOCKED | Large-buffer behavior passes; copied-byte/allocation instrumentation and adapter comparison remain |
-| leak/soak | BLOCKED | Bounded stress passes; 100k cleanup and 24-hour Linux soak remain |
+| leak/soak | COMPLETE | Linux GATE-NET-06 passes all seven workloads: three 100,000-iteration transport scenarios, 100,000 provider and production TLS cleanups, 100,000 production cancellations, and an 86,400-second mixed soak with PASS resource trends; [Linux evidence](../evidence/M0-011/README.md) |
 | DNS scheduler behavior | COMPLETE | M0-013 records starvation and mandates a bounded resolver pool |
 | TLS provider | COMPLETE | AWS-LC 5.5.0 is selected by ADR-0003 after schema-v2 glibc/musl PASS results, executed external signing and 10,000 cleanup cycles |
 | Transport SPI | IN_PROGRESS | Core types are implemented; listener, lifecycle closure and upstream capability mapping remain |
