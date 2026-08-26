@@ -129,7 +129,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M6-020 benchmark and documentation | COMPLETE | Forward/reverse 1/10/100-stream Linux runs record raw latencies, req/s, P50/P95/P99, process-tree RSS/FDs, explicit queue high-water and flow-control stalls; 100 streams use one connection owner versus 100 HTTP/1 owners (99% reduction), with the in-memory protocol-core scope stated explicitly; [Linux acceptance evidence](../evidence/M6-020/README.md) |
 | M6-021 HTTP/2 server facade/ALPN/E2E | COMPLETE | The same public `HttpServer` negotiates `h2,http/1.1` with native AWS-LC and dispatches only from retained ALPN evidence; real TLS loopback tests cover H2 request/response bodies and trailers, H1 fallback, bounded concurrent streams, structured stream reset, no-shared-ALPN failure, and graceful GOAWAY shutdown; [Linux acceptance evidence](../evidence/M6-021/README.md) |
 | M6-022 public cancellation handles | COMPLETE | Typed public request, connection and H2 stream handles share the canonical operation context; real H1/H2 loopback tests prove idempotence, H1 wakeup, H2 stream isolation, connection fan-out and terminal cleanup; [Linux acceptance evidence](../evidence/M6-022/README.md) |
-| M6-023 SSE/unbounded streaming profile | READY | M6-022 supplies the public cancellation surface; retain one-hour and at-least-one-million-event H1/H2 SSE steady-state, backpressure, cancellation-budget and H2 sibling evidence |
+| M6-023 SSE/unbounded streaming profile | COMPLETE | Parallel real H1/H2 `text/event-stream` profiles each ran for at least one hour and consumed more than 90 million numbered events; heavy-GC heap, RSS, FD, socket and thread trends passed, public cancellation stayed below 50 ms, and the H2 sibling survived stream cancellation; [Linux acceptance evidence](../evidence/M6-023/README.md) |
 
 ## Next critical path
 
@@ -141,7 +141,5 @@ Status values have the same fail-closed meaning as the global status file.
    complete Linux `SystemResolver` and native blackhole gates.
 4. Complete native musl trust-adapter evidence and M3-028 TLS interoperability,
    fuzz, dependency and benchmark gates under ADR-0003.
-5. Complete M6-023 SSE/unbounded streaming profile (one hour and at least one
-   million events per H1/H2 profile; no repeated 24-hour soak).
-6. Complete Linux stress/soak, stdx comparison when an eligible baseline SDK
+5. Complete Linux stress/soak, stdx comparison when an eligible baseline SDK
    exists, packaging and installation verification.
