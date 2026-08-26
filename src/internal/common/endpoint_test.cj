@@ -55,4 +55,31 @@ class EndpointTest {
         @Expect(wrongV6)
         @Expect(zoneRejected)
     }
+
+    @TestCase
+    func ipv6ZoneAndPortBoundariesRemainTypedIdentity(): Unit {
+        let bytes = Array<Byte>(16, repeat: 0)
+        let unscoped = IpAddress(IpAddressFamily.Ipv6, bytes)
+        let numericZone = IpAddress(IpAddressFamily.Ipv6, bytes, zone: Some("2"))
+        let namedZone = IpAddress(IpAddressFamily.Ipv6, bytes, zone: Some("eth0"))
+
+        @Expect(unscoped != numericZone)
+        @Expect(numericZone != namedZone)
+        @Expect(SocketEndpoint(unscoped, 0).port, 0)
+        @Expect(SocketEndpoint(namedZone, 65535u16).port, 65535u16)
+    }
+
+    @TestCase
+    func rejectsEmptyAndOversizedIpv6Zones(): Unit {
+        let bytes = Array<Byte>(16, repeat: 0)
+        for (zone in ["", String.fromUtf8(Array<Byte>(65, repeat: b'z'))]) {
+            var rejected = false
+            try {
+                let _ = IpAddress(IpAddressFamily.Ipv6, bytes, zone: Some(zone))
+            } catch (_: IllegalArgumentException) {
+                rejected = true
+            }
+            @Expect(rejected)
+        }
+    }
 }
