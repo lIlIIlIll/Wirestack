@@ -101,6 +101,6 @@ source audit; status here describes task readiness, not global milestone complet
 
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
-| M6-021 | READY | [`docs/planning/linux-status.md`](linux-status.md) | Public `HttpServer` lacks H2 ALPN dispatch and real TLS H2 server end-to-end evidence. |
-| M6-022 | BLOCKED | — | Depends on M6-021; public cancellation tokens exist, but typed request/connection/stream handles do not. |
+| M6-021 | COMPLETE | [`docs/evidence/M6-021/README.md`](../evidence/M6-021/README.md) | Public `HttpServer` dispatches real TLS loopback connections by negotiated `h2` or `http/1.1`, with bounded H2 streams, graceful GOAWAY and structured stream errors. |
+| M6-022 | READY | [`docs/planning/linux-status.md`](linux-status.md) | M6-021 is complete; public cancellation tokens exist, but typed request/connection/stream handles do not. |
 | M6-023 | BLOCKED | — | Depends on M6-021 and M6-022; finite streaming evidence does not prove SSE/unbounded cumulative steadiness. |

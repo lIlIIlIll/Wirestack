@@ -127,8 +127,8 @@ Status values have the same fail-closed meaning as the global status file.
 | M6-018 ALPN/pool multiplexing | COMPLETE | Direct HTTPS automatically executes the negotiated protocol: native AWS-LC offers `h2,http/1.1` and proves H1 fallback, while the bounded complete-security-key pools multiplex h2 by live peer stream capacity, serialize first-use connection creation, stream request/response bodies, isolate RST, and reject new work after GOAWAY while accepted streams finish; [Linux acceptance evidence](../evidence/M6-018/README.md) |
 | M6-019 conformance/race/fuzz | COMPLETE | HPACK and flow-control vectors, unified invalid-order and CONTINUATION cases, independent and combined RST_STREAM+GOAWAY races, plus bounded deterministic frame-parser/HPACK mutation corpora pass under the reproducible Linux quality manifest; [Linux acceptance evidence](../evidence/M6-019/README.md) |
 | M6-020 benchmark and documentation | COMPLETE | Forward/reverse 1/10/100-stream Linux runs record raw latencies, req/s, P50/P95/P99, process-tree RSS/FDs, explicit queue high-water and flow-control stalls; 100 streams use one connection owner versus 100 HTTP/1 owners (99% reduction), with the in-memory protocol-core scope stated explicitly; [Linux acceptance evidence](../evidence/M6-020/README.md) |
-| M6-021 HTTP/2 server facade/ALPN/E2E | READY | Internal H2 server mapping and TLS ALPN primitives exist, but public `HttpServer` still dispatches only HTTP/1; the formal task now requires real TLS loopback H2/H1 dispatch and public-facade acceptance evidence |
-| M6-022 public cancellation handles | BLOCKED | Public cancellation tokens exist, but no typed request/connection/stream control handles; depends on the M6-021 public server/dispatch boundary |
+| M6-021 HTTP/2 server facade/ALPN/E2E | COMPLETE | The same public `HttpServer` negotiates `h2,http/1.1` with native AWS-LC and dispatches only from retained ALPN evidence; real TLS loopback tests cover H2 request/response bodies and trailers, H1 fallback, bounded concurrent streams, structured stream reset, no-shared-ALPN failure, and graceful GOAWAY shutdown; [Linux acceptance evidence](../evidence/M6-021/README.md) |
+| M6-022 public cancellation handles | READY | M6-021 froze the public request and connection dispatch boundary; typed request/connection/stream control handles remain unimplemented |
 | M6-023 SSE/unbounded streaming profile | BLOCKED | Existing 16/64 MiB bounded-memory evidence is finite; depends on M6-021/M6-022 before the one-hour, one-million-event H1/H2 steady-state and cancellation profile can run |
 
 ## Next critical path
@@ -141,7 +141,7 @@ Status values have the same fail-closed meaning as the global status file.
    complete Linux `SystemResolver` and native blackhole gates.
 4. Complete native musl trust-adapter evidence and M3-028 TLS interoperability,
    fuzz, dependency and benchmark gates under ADR-0003.
-5. Complete M6-021 public H2 server/ALPN dispatch, M6-022 typed public
-   cancellation handles, then M6-023 SSE/unbounded streaming profile.
+5. Complete M6-022 typed public cancellation handles, then M6-023
+   SSE/unbounded streaming profile.
 6. Complete Linux stress/soak, stdx comparison when an eligible baseline SDK
    exists, packaging and installation verification.

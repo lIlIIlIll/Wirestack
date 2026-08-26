@@ -3,6 +3,7 @@ package wirestack.http
 import std.collection.ArrayList
 import std.sync.*
 import wirestack.internal.http1 as http1
+import wirestack.internal.http2 as http2
 import wirestack.internal.tls_engine as tls
 import wirestack.internal.transport as transport
 import wirestack.internal.transport_stdnet as stdnet
@@ -45,10 +46,10 @@ public class HttpServerTlsConfig <: Resource {
         profile = securityProfile
     }
 
-    internal func createHandshaker(): http1.Http1ServerTlsHandshaker {
+    internal func createHandshaker(): http1.HttpServerAlpnHandshaker {
         synchronized(mutex) {
             if (closed) { throw IllegalStateException("HTTP server TLS configuration is closed") }
-            http1.AwsLcHttp1ServerTlsHandshaker.create(
+            http1.AwsLcHttp1ServerTlsHandshaker.createAlpn(
                 cloneHttpServerDerChain(certificateChain),
                 privateKey.clone(),
                 clientAuthentication: toInternalClientAuthentication(authentication),
@@ -88,6 +89,14 @@ public class HttpServerRequest {
         headers = value.head.headers
         body = value.body
     }
+
+    init(value: http2.Http2ServerRequest) {
+        method = value.head.method
+        target = value.head.target
+        version = HttpVersion.Http2
+        headers = value.head.headers
+        body = value.body
+    }
 }
 
 /** Handler-owned response and optional chunk trailer. */
@@ -114,6 +123,7 @@ public class HttpServerBuilder {
     private var maximumConnections: Int64 = 1024
     private var maximumRequestsPerConnection: Int64 = 1000
     private var backlog: Int64 = 128
+    private var maximumHttp2Streams: UInt32 = 100u32
     private var tlsConfig: ?HttpServerTlsConfig = None<HttpServerTlsConfig>
 
     public init() {}
@@ -135,6 +145,13 @@ public class HttpServerBuilder {
 
     public func listenBacklog(value: Int64): HttpServerBuilder { backlog = value; this }
 
+    /** Sets the hard concurrent stream bound advertised by each HTTP/2 connection. */
+    public func http2StreamLimit(value: UInt32): HttpServerBuilder {
+        if (value == 0u32) { throw IllegalArgumentException("HTTP/2 stream limit must be positive") }
+        maximumHttp2Streams = value
+        this
+    }
+
     public func build(): HttpServer {
         let selectedEndpoint = match (endpoint) {
             case Some(value) => value
@@ -145,13 +162,18 @@ public class HttpServerBuilder {
             case None => throw IllegalStateException("HTTP server handler is required")
         }
         let handshaker = match (tlsConfig) {
-            case Some(value) => Some<http1.Http1ServerTlsHandshaker>(value.createHandshaker())
-            case None => None<http1.Http1ServerTlsHandshaker>
+            case Some(value) => Some<http1.HttpServerAlpnHandshaker>(value.createHandshaker())
+            case None => None<http1.HttpServerAlpnHandshaker>
         }
         var listener: ?stdnet.StdNetTransportListener = None<stdnet.StdNetTransportListener>
         try {
             let bound = stdnet.StdNetTransportListener.bind(selectedEndpoint, backlog: backlog)
             listener = Some(bound)
+            let dispatcher = PublicServerConnectionDispatcher(
+                selectedHandler, handshaker, configuredLimits,
+                http2.Http2Limits(maxConcurrentStreams: maximumHttp2Streams),
+                maximumRequestsPerConnection
+            )
             let core = http1.Http1Server(
                 bound,
                 PublicHttp1Handler(selectedHandler),
@@ -160,7 +182,7 @@ public class HttpServerBuilder {
                     maximumRequestsPerConnection: maximumRequestsPerConnection,
                     limits: configuredLimits
                 ),
-                tlsHandshaker: handshaker
+                connectionHandler: Some<http1.HttpServerConnectionHandler>(dispatcher)
             )
             HttpServer(core, bound.localEndpoint)
         } catch (error: Exception) {
@@ -228,5 +250,127 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
         context: transport.OperationContext): http1.Http1ServerResponse {
         let response = delegate.handle(HttpServerRequest(request), context)
         http1.Http1ServerResponse(response.response, trailer: response.trailer)
+    }
+}
+
+private class PublicHttp2Handler <: http2.Http2ServerHandler {
+    private let delegate: HttpServerHandler
+    init(delegate: HttpServerHandler) { this.delegate = delegate }
+
+    public func handle(request: http2.Http2ServerRequest,
+        context: transport.OperationContext): http2.Http2ServerResponse {
+        let response = delegate.handle(HttpServerRequest(request), context)
+        http2.Http2ServerResponse(response.response, trailer: response.trailer)
+    }
+}
+
+/** Owns TLS negotiation and keeps every live H2 connection available to graceful shutdown. */
+private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHandler {
+    private let publicHandler: HttpServerHandler
+    private let tlsHandshaker: ?http1.HttpServerAlpnHandshaker
+    private let limits: HttpLimits
+    private let http2Limits: http2.Http2Limits
+    private let maximumHttp1Requests: Int64
+    private let mutex = Mutex()
+    private let h2Connections = ArrayList<PublicHttp2ConnectionEntry>()
+    private var nextConnectionId: Int64 = 1
+    private var stopping = false
+    private var closed = false
+
+    init(
+        handler: HttpServerHandler,
+        tlsHandshaker: ?http1.HttpServerAlpnHandshaker,
+        limits: HttpLimits,
+        http2Limits: http2.Http2Limits,
+        maximumHttp1Requests: Int64
+    ) {
+        publicHandler = handler
+        this.tlsHandshaker = tlsHandshaker
+        this.limits = limits
+        this.http2Limits = http2Limits
+        this.maximumHttp1Requests = maximumHttp1Requests
+    }
+
+    public func serve(value: transport.DuplexTransport, context: transport.OperationContext): Unit {
+        match (tlsHandshaker) {
+            case None =>
+                let _ = http1.serveHttp1Connection(
+                    value, PublicHttp1Handler(publicHandler), context: context, limits: limits,
+                    maximumRequests: maximumHttp1Requests
+                )
+            case Some(handshaker) =>
+                let negotiated = handshaker.handshakeNegotiated(value, context)
+                match (negotiated.protocol) {
+                    case http1.HttpServerNegotiatedProtocol.Http11 =>
+                        let _ = http1.serveHttp1Connection(
+                            negotiated.transport, PublicHttp1Handler(publicHandler),
+                            context: context, limits: limits,
+                            maximumRequests: maximumHttp1Requests
+                        )
+                    case http1.HttpServerNegotiatedProtocol.Http2 =>
+                        serveHttp2(negotiated.transport, context)
+                }
+        }
+    }
+
+    public func beginShutdown(): Unit {
+        let current = synchronized(mutex) {
+            stopping = true
+            let result = ArrayList<http2.Http2ServerConnection>()
+            for (entry in h2Connections) { result.add(entry.connection) }
+            result.toArray()
+        }
+        for (connection in current) { connection.beginDrain() }
+    }
+
+    public func close(): Unit {
+        let shouldClose = synchronized(mutex) {
+            if (closed) { false } else { closed = true; true }
+        }
+        if (shouldClose) {
+            beginShutdown()
+            match (tlsHandshaker) { case Some(value) => value.close(); case None => () }
+        }
+    }
+
+    public func isClosed(): Bool { synchronized(mutex) { closed } }
+
+    private func serveHttp2(
+        secured: transport.DuplexTransport,
+        context: transport.OperationContext
+    ): Unit {
+        let connection = http2.Http2ServerConnection(
+            secured, PublicHttp2Handler(publicHandler), limits: limits, http2Limits: http2Limits
+        )
+        var connectionId: Int64 = 0
+        let admitted = synchronized(mutex) {
+            if (stopping) { false } else {
+                connectionId = nextConnectionId
+                nextConnectionId++
+                h2Connections.add(PublicHttp2ConnectionEntry(connectionId, connection))
+                true
+            }
+        }
+        if (!admitted) { connection.abort(); return }
+        try { connection.serve(context: context) }
+        finally {
+            synchronized(mutex) {
+                for (index in 0..h2Connections.size) {
+                    if (h2Connections[index].id == connectionId) {
+                        let _ = h2Connections.remove(at: index)
+                        break
+                    }
+                }
+            }
+        }
+    }
+}
+
+private class PublicHttp2ConnectionEntry {
+    let id: Int64
+    let connection: http2.Http2ServerConnection
+    init(id: Int64, connection: http2.Http2ServerConnection) {
+        this.id = id
+        this.connection = connection
     }
 }

@@ -114,9 +114,10 @@ public class Http2ServerExchange <: Http2StreamResetListener {
         sink: Http2ServerControlSink,
         context!: OperationContext = OperationContext.background(),
         limits!: HttpLimits = HttpLimits(),
-        http2Limits!: Http2Limits = Http2Limits()
+        http2Limits!: Http2Limits = Http2Limits(),
+        streamAlreadyOpened!: Bool = false
     ): Http2ServerExchange {
-        let _ = registry.openPeer(streamId, endStream: endStream)
+        if (!streamAlreadyOpened) { let _ = registry.openPeer(streamId, endStream: endStream) }
         var flowOpened = false
         try {
             flow.openStream(streamId)

@@ -258,6 +258,20 @@ public class Http2ConnectionPool <: Resource {
                         var reservationOutstanding = true
                         try {
                             let created = factory.create(key, context)
+                            let admission = try {
+                                created.openStream(listener, endStream)
+                            } catch (_: Http2StreamLimitException) {
+                                synchronized(mutex) {
+                                    removeHttp2Reservation(key)
+                                    reservationOutstanding = false
+                                    changed.notifyAll()
+                                }
+                                closeHttp2Quietly(created)
+                                continue
+                            } catch (error: Exception) {
+                                closeHttp2Quietly(created)
+                                throw error
+                            }
                             let accepted = synchronized(mutex) {
                                 removeHttp2Reservation(key)
                                 reservationOutstanding = false
@@ -271,24 +285,12 @@ public class Http2ConnectionPool <: Resource {
                                 }
                             }
                             if (!accepted) {
+                                admission.registration.unregister()
                                 closeHttp2Quietly(created)
                                 if (closed) { throw http2PoolClosed() }
                                 continue
                             }
-                            try {
-                                let admission = created.openStream(listener, endStream)
-                                return Http2PoolLease(id, key, created, admission)
-                            } catch (_: Http2StreamLimitException) {
-                                // A fresh connection may receive SETTINGS(0) or
-                                // GOAWAY between publication and admission.
-                                removeConnection(id)
-                                closeHttp2Quietly(created)
-                                continue
-                            } catch (error: Exception) {
-                                removeConnection(id)
-                                closeHttp2Quietly(created)
-                                throw error
-                            }
+                            return Http2PoolLease(id, key, created, admission)
                         } catch (error: Exception) {
                             if (reservationOutstanding) {
                                 synchronized(mutex) {
@@ -454,14 +456,6 @@ public class Http2ConnectionPool <: Resource {
             if (entries[index].id == id) { return index }
         }
         -1
-    }
-
-    private func removeConnection(id: Int64): Unit {
-        synchronized(mutex) {
-            let index = findHttp2Entry(id)
-            if (index >= 0) { let _ = entries.remove(at: index) }
-            changed.notifyAll()
-        }
     }
 
     private func countHttp2ForKey(key: HttpConnectionPoolKey): Int64 {

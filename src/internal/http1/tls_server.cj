@@ -11,8 +11,29 @@ public interface Http1ServerTlsHandshaker <: Resource {
     func handshake(transport: DuplexTransport, context: OperationContext): DuplexTransport
 }
 
+public enum HttpServerNegotiatedProtocol {
+    | Http2
+    | Http11
+}
+
+public class HttpServerNegotiatedTransport {
+    public let protocol: HttpServerNegotiatedProtocol
+    public let transport: DuplexTransport
+    public init(protocol: HttpServerNegotiatedProtocol, transport: DuplexTransport) {
+        this.protocol = protocol
+        this.transport = transport
+    }
+}
+
+public interface HttpServerAlpnHandshaker <: Resource {
+    func handshakeNegotiated(
+        transport: DuplexTransport,
+        context: OperationContext
+    ): HttpServerNegotiatedTransport
+}
+
 /** Linux AWS-LC TLS 1.2/1.3 server restricted to HTTP/1.1 ALPN. */
-public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker {
+public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker & HttpServerAlpnHandshaker {
     private let provider: AwsLcTlsProvider
     private let serverContext: TlsServerContext
     private let privateKey: PrivateKeyRef
@@ -33,6 +54,33 @@ public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker {
         clientTrustRootsDer!: Array<Array<Byte>> = Array<Array<Byte>>(),
         securityProfile!: TlsSecurityProfile = TlsSecurityProfile.Modern
     ): AwsLcHttp1ServerTlsHandshaker {
+        createWithProtocols(
+            certificateChainDer, privateKeyPkcs8Der, ["http/1.1"],
+            clientAuthentication, clientTrustRootsDer, securityProfile
+        )
+    }
+
+    public static func createAlpn(
+        certificateChainDer: Array<Array<Byte>>,
+        privateKeyPkcs8Der: Array<Byte>,
+        clientAuthentication!: ClientAuthentication = ClientAuthentication.None,
+        clientTrustRootsDer!: Array<Array<Byte>> = Array<Array<Byte>>(),
+        securityProfile!: TlsSecurityProfile = TlsSecurityProfile.Modern
+    ): AwsLcHttp1ServerTlsHandshaker {
+        createWithProtocols(
+            certificateChainDer, privateKeyPkcs8Der, ["h2", "http/1.1"],
+            clientAuthentication, clientTrustRootsDer, securityProfile
+        )
+    }
+
+    private static func createWithProtocols(
+        certificateChainDer: Array<Array<Byte>>,
+        privateKeyPkcs8Der: Array<Byte>,
+        protocols: Array<String>,
+        clientAuthentication: ClientAuthentication,
+        clientTrustRootsDer: Array<Array<Byte>>,
+        securityProfile: TlsSecurityProfile
+    ): AwsLcHttp1ServerTlsHandshaker {
         let certificates = ArrayList<DerCertificate>()
         for (encoded in certificateChainDer) { certificates.add(DerCertificate(encoded)) }
         let chain = CertificateChain(certificates.toArray())
@@ -44,7 +92,7 @@ public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker {
             provider = Some(created)
             let builder = TlsServerContext.builder(
                 created.manifest(), created.linuxCapabilities()
-            ).securityProfile(securityProfile).identity(identity).alpn(["http/1.1"])
+            ).securityProfile(securityProfile).identity(identity).alpn(protocols)
                 .clientAuthentication(clientAuthentication)
             match (clientAuthentication) {
                 case ClientAuthentication.None =>
@@ -67,6 +115,22 @@ public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker {
     }
 
     public func handshake(transport: DuplexTransport, context: OperationContext): DuplexTransport {
+        let negotiated = handshakeNegotiated(transport, context)
+        match (negotiated.protocol) {
+            case HttpServerNegotiatedProtocol.Http11 => negotiated.transport
+            case HttpServerNegotiatedProtocol.Http2 =>
+                negotiated.transport.abort(reason: Some(AbortReason.ProtocolFailure))
+                throw TlsEngineException(
+                    TlsEngineErrorCode.NoSharedAlpn,
+                    "TLS HTTP/1 server negotiated an unexpected ALPN protocol"
+                )
+        }
+    }
+
+    public func handshakeNegotiated(
+        transport: DuplexTransport,
+        context: OperationContext
+    ): HttpServerNegotiatedTransport {
         synchronized(mutex) {
             if (closed) { throw IllegalStateException("HTTP TLS server handshaker is closed") }
         }
@@ -75,17 +139,24 @@ public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker {
             let connection = TlsConnection.handshake(
                 provider.createServerEngine(serverContext), transport, context: context
             )
-            match (connection.handshakeInfo) {
+            let protocol = match (connection.handshakeInfo) {
                 case Some(info) => match (info.negotiatedAlpn) {
-                    case Some(protocol) =>
-                        if (protocol != "http/1.1") {
+                    case Some(value) =>
+                        if (value == "h2") { HttpServerNegotiatedProtocol.Http2 }
+                        else if (value == "http/1.1") { HttpServerNegotiatedProtocol.Http11 }
+                        else {
                             connection.abort(reason: Some(AbortReason.ProtocolFailure))
                             throw TlsEngineException(
                                 TlsEngineErrorCode.NoSharedAlpn,
-                                "TLS HTTP/1 server negotiated an unexpected ALPN protocol"
+                                "TLS HTTP server negotiated an unsupported ALPN protocol"
                             )
                         }
-                    case None => ()
+                    case None =>
+                        connection.abort(reason: Some(AbortReason.ProtocolFailure))
+                        throw TlsEngineException(
+                            TlsEngineErrorCode.NoSharedAlpn,
+                            "TLS HTTP server completed without a negotiated ALPN protocol"
+                        )
                 }
                 case None =>
                     connection.abort(reason: Some(AbortReason.ProtocolFailure))
@@ -95,7 +166,7 @@ public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker {
                     )
             }
             emitServerTlsEvent(context, NetworkEventOutcome.Succeeded, None<NetworkErrorCode>)
-            connection
+            HttpServerNegotiatedTransport(protocol, connection)
         } catch (error: Exception) {
             let code = match (error) {
                 case value: NetworkException => Some(value.code)
