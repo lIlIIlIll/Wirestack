@@ -1,6 +1,9 @@
 package wirestack.internal.transport_stdnet
 
 import std.sync.SyncCounter
+import std.env.getVariable
+import std.runtime.*
+import std.convert.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.common.*
@@ -10,6 +13,92 @@ import wirestack.internal.transport.*
 
 private func loopback(port: UInt16): SocketEndpoint {
     SocketEndpoint(IpAddress(IpAddressFamily.Ipv4, [127, 0, 0, 1]), port)
+}
+
+private func net06CancellationIterations(): Int64 {
+    match (getVariable("WIRESTACK_NET06_ITERATIONS")) {
+        case Some(value) =>
+            let parsed = Int64.parse(value)
+            if (parsed <= 0) { throw IllegalArgumentException("WIRESTACK_NET06_ITERATIONS must be positive") }
+            parsed
+        case None => 3
+    }
+}
+
+private func net06CancellationHeapSample(index: Int64): Unit {
+    gc(heavy: true)
+    println("NET06_HEAP scenario=cancellation index=${index} usedHeapBytes=${getUsedHeapSize()}")
+}
+
+@Test
+class Net06CancellationGateTest {
+    @TestCase
+    func cancelledReadsReleaseSocketsWaitersAndTasks(): Unit {
+        let requested = net06CancellationIterations()
+        let checkpointEvery = if (requested < 20) { requested } else { requested / 20 }
+        let listener = StdNetTransportListener.bind(loopback(0), backlog: 16)
+        var completed: Int64 = 0
+        var joinedTasks: Int64 = 0
+        var activeReads: Int64 = 0
+        net06CancellationHeapSample(0)
+        try {
+            for (index in 0..requested) {
+                let accepted: Future<DuplexTransport> = spawn { listener.accept() }
+                let client = StdNetTransport.connect(listener.localEndpoint)
+                let server = accepted.get(5 * Duration.second)
+                joinedTasks += 1
+                let source = CancellationSource()
+                try {
+                    let cancelled: Future<Bool> = spawn {
+                        try {
+                            let _ = client.readSome(
+                                MutableByteSpan(Array<Byte>(1, repeat: 0)),
+                                context: OperationContext(cancellation: source.token)
+                            )
+                            false
+                        } catch (error: NetworkException) {
+                            match (error.code) {
+                                case NetworkErrorCode.Cancelled => true
+                                case _ => false
+                            }
+                        }
+                    }
+                    if (!client.waitUntilReadActive(5 * Duration.second)) {
+                        throw Exception("NET06 cancellation read did not become active")
+                    }
+                    source.cancel()
+                    if (!cancelled.get(5 * Duration.second)) {
+                        throw Exception("NET06 cancellation did not produce Cancelled")
+                    }
+                    joinedTasks += 1
+                    if (client.waitUntilReadActive(Duration.Zero)) { activeReads += 1 }
+                    if (!client.isClosed()) {
+                        throw Exception("NET06 cancelled transport remained open")
+                    }
+                    completed += 1
+                } finally {
+                    client.close()
+                    server.close()
+                }
+                let observed = index + 1
+                if (observed % checkpointEvery == 0 || observed == requested) {
+                    net06CancellationHeapSample(observed)
+                }
+            }
+        } finally {
+            listener.close()
+        }
+        let backgroundTasks = requested * 2 - joinedTasks
+        println(
+            "NET06_CANCELLATION requested=${requested} completed=${completed} " +
+            "joinedTasks=${joinedTasks} activeReads=${activeReads} " +
+            "backgroundTasks=${backgroundTasks}"
+        )
+        @Assert(completed, requested)
+        @Assert(joinedTasks, requested * 2)
+        @Assert(activeReads, 0)
+        @Assert(backgroundTasks, 0)
+    }
 }
 
 @Test

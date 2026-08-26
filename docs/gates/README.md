@@ -74,6 +74,23 @@ three 100,000-iteration transport scenarios, exactly 100,000 failed TLS
 handshake cleanups, a full 86,400-second soak, PASS RSS/FD steady-state trends,
 and no dynamic system TLS dependency.
 
+After those immutable workload reports exist, close the production-path cleanup
+checks without repeating the 24-hour soak:
+
+```bash
+bash scripts/gate-net06-production-cleanup \
+  --iterations 100000 \
+  --soak-report docs/evidence/M0-011/linux_x86_64/linux-profile.json \
+  --provider-cleanup-report docs/evidence/M0-011/linux_x86_64/tls-failure-cleanup.json
+```
+
+This command verifies the reused reports fail-closed, then exercises the real
+`StdNetTransport` cancellation and `TlsConnection` failed-handshake ownership
+paths. It records process-tree socket, timerfd, thread, FD and RSS samples,
+heavy-GC heap checkpoints, exact task joins, and exactly-once TLS disposal.
+Changing either reused report changes its recorded SHA-256 and requires review;
+the command never starts another soak.
+
 ## Release gates
 
 Release-gate ownership and blockers are summarized in
