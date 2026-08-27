@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--gcov-root", type=Path, required=True)
+parser.add_argument("--gcov-root", type=Path, required=True, action="append")
 parser.add_argument("--output", type=Path, required=True)
 parser.add_argument("--baseline", type=Path, required=True)
 parser.add_argument("--root", type=Path, required=True)
@@ -18,51 +18,80 @@ args = parser.parse_args()
 repository_root = args.root.resolve()
 source_root = repository_root / "src"
 
+
+def semantic_branch_lines(source: Path) -> set[int]:
+    """Return lines whose branches are explicit in the Cangjie source.
+
+    cjcov's gcov stream also reports compiler-generated edges for checked
+    arithmetic, bounds checks, calls, and exception propagation. Those edges
+    are useful to the compiler, but they are not source branch coverage and
+    many cannot be selected by a test input. Keep only explicit control-flow
+    headers and boolean short-circuit expressions.
+    """
+
+    result: set[int] = set()
+    continuation = False
+    control = re.compile(r"(^|\W)(if|while|for|match|case)(\W|$)")
+    for number, raw in enumerate(source.read_text(encoding="utf-8").splitlines(), 1):
+        text = raw.strip()
+        starts_control = bool(control.search(text))
+        explicit_boolean = "&&" in text or "||" in text
+        if starts_control or explicit_boolean or continuation:
+            result.add(number)
+        if starts_control:
+            continuation = "{" not in text and "=>" not in text
+        elif continuation and ("{" in text or "=>" in text):
+            continuation = False
+        elif continuation and not text:
+            continuation = False
+    return result
+
 records: dict[str, dict[int, int]] = {}
 branch_records: dict[str, dict[tuple[int, int], int]] = {}
-for path in args.gcov_root.rglob("*.gcov"):
-    lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    source = ""
-    for line in lines[:10]:
-        match = re.match(r"\s*-:\s*0:Source:(.+)$", line)
-        if match:
-            source = match.group(1)
-            break
-    if not source:
-        continue
-    try:
-        resolved = Path(source).resolve()
-        resolved.relative_to(source_root)
-    except ValueError:
-        continue
-    if not resolved.name.startswith("lib_") or resolved.suffix != ".cj":
-        continue
-    relative = str(resolved.relative_to(repository_root))
-    target = records.setdefault(relative, {})
-    branch_target = branch_records.setdefault(relative, {})
-    current_number = 0
-    branch_index = 0
-    for line in lines:
-        match = re.match(r"\s*([^:]+):\s*(\d+):", line)
-        if match:
-            current_number = int(match.group(2))
-            branch_index = 0
-        if line.startswith("branch "):
-            branch_match = re.match(
-                r"branch\s+\d+\s+(?:taken\s+(\d+)|never executed)$", line
-            )
-            if branch_match and current_number > 0:
-                count = int(branch_match.group(1) or 0)
-                key = (current_number, branch_index)
-                branch_target[key] = max(branch_target.get(key, 0), count)
-                branch_index += 1
+for gcov_root in args.gcov_root:
+    for path in gcov_root.rglob("*.gcov"):
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        source = ""
+        for line in lines[:10]:
+            match = re.match(r"\s*-:\s*0:Source:(.+)$", line)
+            if match:
+                source = match.group(1)
+                break
+        if not source:
             continue
-        if not match or match.group(1).strip() == "-":
+        source_path = Path(source)
+        resolved = source_root / source_path.name
+        if not resolved.exists():
             continue
-        count_text = match.group(1).strip().rstrip("*")
-        count = 0 if count_text.startswith("#") else int(count_text)
-        number = int(match.group(2))
-        target[number] = max(target.get(number, 0), count)
+        if not resolved.name.startswith("lib_") or resolved.suffix != ".cj":
+            continue
+        relative = str(resolved.relative_to(repository_root))
+        target = records.setdefault(relative, {})
+        branch_target = branch_records.setdefault(relative, {})
+        source_branch_lines = semantic_branch_lines(resolved)
+        current_number = 0
+        branch_index = 0
+        for line in lines:
+            match = re.match(r"\s*([^:]+):\s*(\d+):", line)
+            if match:
+                current_number = int(match.group(2))
+                branch_index = 0
+            if line.startswith("branch "):
+                branch_match = re.match(
+                    r"branch\s+\d+\s+(?:taken\s+(\d+)|never executed)$", line
+                )
+                if branch_match and current_number in source_branch_lines:
+                    count = int(branch_match.group(1) or 0)
+                    key = (current_number, branch_index)
+                    branch_target[key] = max(branch_target.get(key, 0), count)
+                    branch_index += 1
+                continue
+            if not match or match.group(1).strip() == "-":
+                continue
+            count_text = match.group(1).strip().rstrip("*")
+            count = 0 if count_text.startswith("#") else int(count_text)
+            number = int(match.group(2))
+            target[number] = max(target.get(number, 0), count)
 
 if not records:
     raise SystemExit("no src/lib_*.cj coverage records were found")

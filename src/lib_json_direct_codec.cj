@@ -257,26 +257,6 @@ public func jsonWriteGeneratedCompactObjectEnd(writer: GeneratedSupportV1Writer)
     writer.writeRawEndObject()
 }
 
-public func jsonWriteGeneratedCompactArrayBegin(writer: GeneratedSupportV1Writer): Unit {
-    writer.writeRawBeginArray()
-}
-
-public func jsonWriteGeneratedCompactArrayEnd(writer: GeneratedSupportV1Writer): Unit {
-    writer.writeRawEndArray()
-}
-
-public func jsonWriteGeneratedCompactComma(writer: GeneratedSupportV1Writer): Unit {
-    writer.writeRawByte(b',')
-}
-
-public func jsonWriteGeneratedCompactObjectEntryName(
-    writer: GeneratedSupportV1Writer,
-    first: Bool,
-    name: String
-): Bool {
-    writer.writeRawObjectEntryName(first, name)
-}
-
 public func jsonWriteGeneratedCompactObjectEntryString(
     writer: GeneratedSupportV1Writer,
     first: Bool,
@@ -319,16 +299,8 @@ public interface JsonFastDecoder<T> {
     func decodeBytes(bytes: Array<Byte>, config!: JsonReadConfig): T
 }
 
-public interface JsonArrayListFastCodec<T> <: JsonFastCodec<T> {
-    func readFastArrayList(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): ArrayList<T>
-}
-
 interface JsonRawWriteCodec<T> <: JsonCodec<T> {
     func writeRaw(value: T, writer: GeneratedSupportV1Writer): Unit
-}
-
-interface JsonArrayListRawWriteCodec<T> <: JsonArrayListFastCodec<T> {
-    func writeRawArrayList(value: ArrayList<T>, writer: GeneratedSupportV1Writer): Unit
 }
 
 public class JsonEncodeContext {
@@ -558,58 +530,6 @@ public class JsonDecodeContext {
                 path = Some(value)
                 value
         }
-    }
-}
-
-// Compatibility adapters for the existing highly specialized built-in codecs.
-class LambdaSemanticJsonCodec<T> <: JsonCodec<T> {
-    private let writerFn: (T, JsonCodecWriter) -> Unit
-    private let readerFn: (JsonCodecReader) -> T
-
-    public init(writerFn: (T, JsonCodecWriter) -> Unit, readerFn: (JsonCodecReader) -> T) {
-        this.writerFn = writerFn
-        this.readerFn = readerFn
-    }
-
-    public func write(value: T, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {
-        let _ = context
-        writerFn(value, writer)
-    }
-
-    public func read(reader: JsonCodecReader, context: JsonDecodeContext): T {
-        let _ = context
-        readerFn(reader)
-    }
-}
-
-class LambdaYJsonCodec<T> <: JsonFastCodec<T> {
-    private let writerFn: (T, JsonCodecWriter) -> Unit
-    private let readerFn: (JsonCodecReader) -> T
-    private let fastReaderFn: (JsonFastReader) -> T
-
-    public init(
-        writerFn: (T, JsonCodecWriter) -> Unit,
-        readerFn: (JsonCodecReader) -> T,
-        fastReaderFn: (JsonFastReader) -> T
-    ) {
-        this.writerFn = writerFn
-        this.readerFn = readerFn
-        this.fastReaderFn = fastReaderFn
-    }
-
-    public func write(value: T, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {
-        let _ = context
-        writerFn(value, writer)
-    }
-
-    public func read(reader: JsonCodecReader, context: JsonDecodeContext): T {
-        let _ = context
-        readerFn(reader)
-    }
-
-    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T {
-        let _ = context
-        fastReaderFn(yJsonGeneratedReaderV1(reader))
     }
 }
 
@@ -912,10 +832,9 @@ private class ArrayJsonCodec<T> <: JsonFastCodec<Array<T>> & JsonCompactRawCodec
             rawWriter.reserveRawCollectionCapacity(value.size)
             rawWriter.writeRawBeginArray()
             if (!value.isEmpty()) {
-                let raw = match (compactRawInner) {
-                    case Some(item) => item
-                    case None => throw JsonException("Compact raw codec is unavailable")
-                }
+                // writeCompactRaw is reachable only after supportsCompactRaw
+                // has confirmed this invariant.
+                let raw = compactRawInner.getOrThrow()
                 context.pushIndex(0)
                 try {
                     for (index in 0..value.size) {
@@ -1106,10 +1025,9 @@ private class ArrayListJsonCodec<T> <: JsonFastCodec<ArrayList<T>> & JsonCompact
             rawWriter.writeRawBeginArray()
             var index: Int64 = 0
             if (!value.isEmpty()) {
-                let raw = match (compactRawInner) {
-                    case Some(item) => item
-                    case None => throw JsonException("Compact raw codec is unavailable")
-                }
+                // writeCompactRaw is reachable only after supportsCompactRaw
+                // has confirmed this invariant.
+                let raw = compactRawInner.getOrThrow()
                 context.pushIndex(0)
                 try {
                     for (item in value) {
@@ -1297,22 +1215,6 @@ private class StringArrayListJsonCodec <: JsonFastCodec<ArrayList<String>> {
 
 // Concrete generated-code bridges. They are public only because macro output
 // may live in a consumer package; ordinary users should use YJson codecs.
-public func __yJsonWriteStringArrayList(value: ArrayList<String>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {
-    context.enterValue()
-    try {
-        if (jsonTryWriteCompactStringArrayList(writer, value)) {
-            return
-        }
-        writer.startArray();
-        for (item in value) {
-            writer.writeString(item)
-        };
-        writer.endArray()
-    } finally {
-        context.leaveValue()
-    }
-}
-
 public func __yJsonReadStringArrayList(reader: JsonCodecReader, context: JsonDecodeContext): ArrayList<String> {
     context.enterValue()
     try {
@@ -1496,10 +1398,9 @@ private class HashMapJsonCodec<T> <: JsonFastCodec<HashMap<String, T>> & JsonCom
             let rawWriter = GeneratedSupportV1.writeCursor(writer)
             rawWriter.writeRawBeginObject()
             if (!value.isEmpty()) {
-                let raw = match (compactRawInner) {
-                    case Some(item) => item
-                    case None => throw JsonException("Compact raw codec is unavailable")
-                }
+                // writeCompactRaw is reachable only after supportsCompactRaw
+                // has confirmed this invariant.
+                let raw = compactRawInner.getOrThrow()
                 var first = true
                 try {
                     for ((name, item) in value) {
@@ -1625,23 +1526,6 @@ private class Int64HashMapJsonCodec <: JsonFastCodec<HashMap<String, Int64>> {
         } finally {
             context.leaveValue()
         }
-    }
-}
-
-public func __yJsonWriteInt64HashMap(value: HashMap<String, Int64>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {
-    context.enterValue()
-    try {
-        if (jsonTryWriteCompactInt64Map(writer, value)) {
-            return
-        }
-        writer.startObject();
-        for ((name, item) in value) {
-            writer.writeName(name);
-            writer.writeInt64(item)
-        };
-        writer.endObject()
-    } finally {
-        context.leaveValue()
     }
 }
 

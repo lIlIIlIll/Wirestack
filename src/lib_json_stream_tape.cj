@@ -649,6 +649,3 @@ private class JsonStreamTapeReplayValue <: JsonReplayValue {
         if (closed) { throw IllegalStateException("JSON replay value is closed") }
     }
 }
-
-@OverflowWrapping
-private func int64Bits(value: Int64): UInt64 { UInt64(value) }

@@ -200,6 +200,7 @@ public class JsonSchemaValidator {
     private let resourceStack = ArrayList<JsonNode>()
     private var evaluationCount: Int64 = 0
     private var refResolutionCount: Int64 = 0
+    private var validationDepth: Int64 = 0
 
     public init(schema: JsonSchema) {
         this.schema = schema
@@ -211,6 +212,7 @@ public class JsonSchemaValidator {
         resourceStack.clear()
         evaluationCount = 0
         refResolutionCount = 0
+        validationDepth = 0
         baseUriStack.add("")
         let document = schema.internalDocument()
         resourceStack.add(document)
@@ -239,22 +241,24 @@ public class JsonSchemaValidator {
         errors: ArrayList<JsonValidationError>,
         refStack: ArrayList<String>
     ): Unit {
-        evaluationCount++
-        enforceWorkLimit(evaluationCount, schema.config.limits.maxEvaluations, "schema evaluations")
-        enforceWorkLimit(jsonSchemaPathDepth(schemaPath), schema.config.limits.maxDepth, "schema depth")
-        match (schemaValue) {
-            case boolSchema: JsonBoolValue =>
-                if (!boolSchema.value) {
-                    addError(errors, jsonPath, schemaPath, "boolean schema false rejects every value")
-                }
-                enforceWorkLimit(errors.size, schema.config.limits.maxErrors, "schema errors")
-                return
-            case objectSchema: JsonObjectValue =>
-                validateObjectSchema(objectSchema, instance, jsonPath, schemaPath, errors, refStack)
-            case _ =>
-                addError(errors, jsonPath, schemaPath, "schema must be a boolean or object")
+        consumeEvaluation()
+        enforceWorkLimit(validationDepth, schema.config.limits.maxDepth, "schema depth")
+        validationDepth++
+        try {
+            match (schemaValue) {
+                case boolSchema: JsonBoolValue =>
+                    if (!boolSchema.value) {
+                        addError(errors, jsonPath, schemaPath, "boolean schema false rejects every value")
+                    }
+                    return
+                case objectSchema: JsonObjectValue =>
+                    validateObjectSchema(objectSchema, instance, jsonPath, schemaPath, errors, refStack)
+                case _ =>
+                    addError(errors, jsonPath, schemaPath, "schema must be a boolean or object")
+            }
+        } finally {
+            validationDepth--
         }
-        enforceWorkLimit(errors.size, schema.config.limits.maxErrors, "schema errors")
     }
 
     private func validateObjectSchema(
@@ -685,6 +689,7 @@ public class JsonSchemaValidator {
                 match (objectSchema.get("uniqueItems")) {
                     case Some(value) => if (value.asBool().value) {
                         for (i in 0..arrayValue.size()) { for (j in i + 1..arrayValue.size()) {
+                            consumeEvaluation()
                             if (arrayValue[i].equivalentTo(arrayValue[j])) { addError(errors, jsonPath,
                                 appendSchemaPath(schemaPath, "uniqueItems"), "array items must be unique"); return }
                         }}
@@ -1141,6 +1146,17 @@ public class JsonSchemaValidator {
         if (nestedErrors.isEmpty()) {
             addError(errors, jsonPath, schemaPath, "value must not match this schema")
         }
+    }
+
+    private func consumeEvaluation(): Unit {
+        evaluationCount++
+        enforceWorkLimit(evaluationCount, schema.config.limits.maxEvaluations, "schema evaluations")
+    }
+
+    private func addError(errors: ArrayList<JsonValidationError>, jsonPath: String,
+        schemaPath: String, message: String, code!: String = "schema_validation"): Unit {
+        enforceWorkLimit(errors.size + 1, schema.config.limits.maxErrors, "schema errors")
+        errors.add(JsonValidationError(jsonPath, schemaPath, message, code: code))
     }
 }
 
@@ -1791,11 +1807,6 @@ private func validateJsonSchemaTypeName(name: String, schemaPath: String): Unit 
     }
 }
 
-private func addError(errors: ArrayList<JsonValidationError>, jsonPath: String, schemaPath: String,
-    message: String, code!: String = "schema_validation"): Unit {
-    errors.add(JsonValidationError(jsonPath, schemaPath, message, code: code))
-}
-
 private func jsonSchemaMatchesType(value: JsonNode, typeName: String): Bool {
     match (typeName) {
         case "null" => if (let _: JsonNullValue <- value) { true } else { false }
@@ -1931,12 +1942,4 @@ private func jsonPointerEscape(token: String): String {
         builder.append(token[segmentStart..token.size])
     }
     builder.toString()
-}
-
-private func jsonSchemaPathDepth(path: String): Int64 {
-    var depth: Int64 = 0
-    for (value in unsafe { path.rawData() }) {
-        if (value == b'/') { depth++ }
-    }
-    depth
 }

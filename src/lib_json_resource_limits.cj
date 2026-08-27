@@ -263,10 +263,6 @@ func jsonUtf8ByteCount(scalar: Int64): Int64 {
     else { 4 }
 }
 
-func jsonReadConfigHasResourceLimits(config: JsonReadConfig): Bool {
-    config.maxBytes > 0 || config.maxStringBytes > 0 || config.maxPolymorphicObjectBytes > 0
-}
-
 func jsonResourceLimitException(data: Array<Byte>, config: JsonReadConfig, message: String,
     code: String, offset: Int64): JsonException {
     if (!config.includeErrorLocation) { return JsonException(message, code: code) }

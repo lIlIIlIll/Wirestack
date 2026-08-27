@@ -3,7 +3,7 @@
   name = "yjson_all"
   organization = ""
   description = "Aggregate import for yjson runtime and macros"
-  version = "2.0.0"
+  version = "2.0.1"
   target-dir = ""
   script-dir = ""
   output-type = "static"

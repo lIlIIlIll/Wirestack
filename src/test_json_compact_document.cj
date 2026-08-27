@@ -183,4 +183,64 @@ class CompactJsonDocumentTest {
         try { let _ = YJson.parseCompact(invalid) } catch (_: JsonException) { rejectedUtf8 = true }
         @Assert(rejectedUtf8)
     }
+
+    @TestCase
+    func exercisesEveryPackedValueViewAndLookupOutcome(): Unit {
+        let cases = [
+            "null", "false", "true", "-9", "1.25e2", "\"text\"",
+            "[]", "[1,2]", "[\"a\",\"b\"]", "[1,2.5,9223372036854775808]",
+            "[null,false,3,4.5,\"x\",{},[]]",
+            "{\"n\":null,\"b\":false,\"i\":7,\"d\":2.5,\"s\":\"v\",\"a\":[1],\"o\":{}}"
+        ]
+        for (text in cases) {
+            let document = YJson.parseCompact(compactBytes(text),
+                config: JsonReadConfig(numberPolicy: JsonNumberPolicy.PreserveLiteral))
+            let root = document.root()
+            @Expect(root.materialize().toString(), YJson.parse(text,
+                config: JsonReadConfig(numberPolicy: JsonNumberPolicy.PreserveLiteral)).toString())
+            @Expect(YJson.parse(document.toString()).toString(), YJson.parse(text).toString())
+            @Expect(document.nodeCount() > 0, true)
+            @Expect(document.sourceSize(), compactBytes(text).size)
+            @Expect(document.storageStats().nodes, document.nodeCount())
+            @Expect(document.traversalChecksum() >= 0, true)
+        }
+
+        let ints = YJson.parseCompact(compactBytes("[1,2]")).root()
+        @Expect(ints.get(-1).isNone(), true)
+        @Expect(ints.get(2).isNone(), true)
+        @Expect(ints.get(0).getOrThrow().kind(), JsInt)
+        @Expect(ints.get(0).getOrThrow().size(), 0)
+        @Expect(ints.get(0).getOrThrow().get(0).isNone(), true)
+        @Expect(ints.get(0).getOrThrow().get("x").isNone(), true)
+
+        let strings = YJson.parseCompact(compactBytes("[\"a\",\"b\"]")).root()
+        @Expect(strings.get(1).getOrThrow().kind(), JsString)
+        @Expect(strings.get(1).getOrThrow().asString(), "b")
+
+        let numbers = YJson.parseCompact(compactBytes("[1,2.5,9223372036854775808]")).root()
+        @Expect(numbers.get(0).getOrThrow().kind(), JsInt)
+        @Expect(numbers.get(1).getOrThrow().kind(), JsNumberLiteral)
+        @Expect(numbers.get(2).getOrThrow().kind(), JsNumberLiteral)
+        @Expect(numbers.get(1).getOrThrow().materialize().toString(), "2.5")
+
+        let scalar = YJson.parseCompact(compactBytes("true")).root()
+        @Expect(scalar.get(0).isNone(), true)
+        @Expect(scalar.get("x").isNone(), true)
+        @AssertThrows[JsonException](scalar.asString())
+        @AssertThrows[JsonException](scalar.asInt64())
+
+        var objectText = "{"
+        for (index in 0..20) {
+            if (index > 0) { objectText += "," }
+            objectText += "\"key_${index}\":${index}"
+        }
+        objectText += "}"
+        let object = YJson.parseCompact(compactBytes(objectText)).root()
+        @Expect(object.get("key_19").getOrThrow().asInt64(), 19)
+        @Expect(object.get("key_19").getOrThrow().asInt64(), 19)
+        @Expect(object.get("missing").isNone(), true)
+        @Expect(object.get("missing").isNone(), true)
+        @Expect(object.get(0).isNone(), true)
+        @AssertThrows[JsonException](object.asBool())
+    }
 }

@@ -42,14 +42,15 @@ qualification 不使用该 hosted workaround。
 ## Core coverage
 
 运行 `scripts/coverage.sh`。脚本在临时 source tree 中以 `-O0` 编译，生成 cjcov HTML、JSON、
-XML 与 `coverage/lcov.info`，并在结束时清理临时树。统计范围仅为 root package 的
-`src/lib_*.cj`；测试源码、package 源码、build output 与 SDK/runtime 不计入。CI 将同一份
-LCOV 以 `core` flag 上传到 Codecov，上传失败会阻断 workflow。
+XML 与 `coverage/lcov.info`，并在结束时清理临时树。脚本合并 root tests、runtime freeze 场景和
+Native acceleration tests 对 `src/lib_*.cj` 的命中。测试源码、package 源码、build output 与
+SDK/runtime 不计入。Branch coverage 只统计 Cangjie 源码中的显式 `if`、`while`、`for`、
+`match`、`case`、`&&` 和 `||` 分支，不统计编译器为溢出检查、边界检查和异常传播生成的边。
+CI 将同一份 LCOV 以 `core` flag 上传到 Codecov，上传失败会阻断 workflow。
 
-`coverage-baseline.toml` 保存首次完整测量建立的 line/branch 基线，项目允许最多 0.1 个百分点
-回退。Pull request 新增或修改的 core 可执行行必须达到 90% line coverage；这些行上的 branch
-必须达到 80%。首次引入 baseline 的 bootstrap release 只执行 project gate；baseline 合并到
-目标分支后，后续 pull request 才执行 patch gate。
+`coverage-baseline.toml` 固定 project line 80%、project branch 70%、patch line 90% 和 patch
+branch 80% 四项门禁。首次引入 baseline 的 bootstrap release 只执行 project gate；baseline
+合并到目标分支后，后续 pull request 才执行 patch gate。
 
 Native acceleration 目前是 release qualification runner，不是 `ci_job.sh` 的短任务。正式执行
 固定 11 轮，详细门槛见[性能方法](../performance/methodology.md)。

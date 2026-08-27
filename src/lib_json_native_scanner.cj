@@ -164,19 +164,50 @@ public func activateJsonNativePrimitivesV1(backend: JsonNativeAccelerationPrimit
     jsonNativeWriterBackend = Some(backend)
 }
 
-func jsonNativeEscapeString(value: String, htmlSafe: Bool): Option<Array<Byte>> {
+func jsonNativeEscapedStringSize(value: String, htmlSafe: Bool): Option<Int64> {
     if (value.size < YJSON_NATIVE_MIN_WRITER_ESCAPE_BYTES) {
-        return None<Array<Byte>>
+        return None<Int64>
     }
-    let backend = match (jsonNativeWriterBackend) {
-        case Some(item) => item
-        case None => return None<Array<Byte>>
+    if (jsonNativeWriterBackend.isNone()) {
+        return None<Int64>
     }
     if (value.size > (Int64.Max - 2) / 6) {
         throw JsonAccelerationException("JSON string is too large for native escaping",
             code: "acceleration_writer_failure")
     }
-    let output = Array<Byte>(value.size * 6 + 2, repeat: 0)
+    Some(jsonEscapedStringLiteralSize(value, htmlSafe))
+}
+
+func jsonEscapedStringLiteralSize(value: String, htmlSafe: Bool): Int64 {
+    var required: Int64 = 2
+    unsafe {
+        let bytes = value.rawData()
+        for (byte in bytes) {
+            if (byte >= 0x20u8 && byte != b'"' && byte != b'\\' &&
+                (!htmlSafe || !jsonNativeWriterNeedsHtmlEscape(byte))) {
+                required++
+            } else if (byte == b'"' || byte == b'\\' || byte == b'\b' || byte == b'\f' ||
+                byte == b'\n' || byte == b'\r' || byte == b'\t') {
+                required += 2
+            } else {
+                required += 6
+            }
+        }
+    }
+    required
+}
+
+private func jsonNativeWriterNeedsHtmlEscape(value: Byte): Bool {
+    value == b'<' || value == b'>' || value == b'&' || value == b'=' || value == b'\''
+}
+
+func jsonNativeEscapeString(value: String, htmlSafe: Bool,
+    required: Int64): Option<Array<Byte>> {
+    let backend = match (jsonNativeWriterBackend) {
+        case Some(item) => item
+        case None => return None<Array<Byte>>
+    }
+    let output = Array<Byte>(required, repeat: 0)
     let written = Array<Int64>(1, repeat: 0)
     unsafe {
         let input = value.rawData()
@@ -188,7 +219,7 @@ func jsonNativeEscapeString(value: String, htmlSafe: Bool): Option<Array<Byte>> 
         releaseArrayRawData(writtenHandle)
         releaseArrayRawData(outputHandle)
         releaseArrayRawData(inputHandle)
-        if (status != YJ_JSON_SCAN_OK || written[0] < 2 || written[0] > output.size) {
+        if (status != YJ_JSON_SCAN_OK || written[0] != output.size) {
             throw JsonAccelerationException("Native JSON string escaping failed",
                 code: "acceleration_writer_failure")
         }
@@ -465,14 +496,12 @@ private func nativeJsonScannerAvailable(): Bool {
 }
 
 class JsonNativeObjectFields {
-    private let data: Array<Byte>
     private let words: Array<UInt64>
     private let count: Int64
     let objectEnd: Int64
     private var cursor: Int64 = 0
 
-    init(data: Array<Byte>, words: Array<UInt64>, count: Int64, objectEnd: Int64) {
-        this.data = data
+    init(words: Array<UInt64>, count: Int64, objectEnd: Int64) {
         this.words = words
         this.count = count
         this.objectEnd = objectEnd
@@ -494,109 +523,6 @@ class JsonNativeObjectFields {
         Int64(words[cursor * YJSON_NATIVE_OBJECT_FIELD_WORDS + 4])
     }
 
-    func currentNameSize(): Int64 {
-        Int64(words[cursor * YJSON_NATIVE_OBJECT_FIELD_WORDS + 1])
-    }
-
-    func currentNameByte(offset: Int64): Byte {
-        let nameStart = Int64(words[cursor * YJSON_NATIVE_OBJECT_FIELD_WORDS])
-        data[nameStart + offset]
-    }
-
-    func currentNameEqualsAscii3(b0: Byte, b1: Byte, b2: Byte): Bool {
-        let base = cursor * YJSON_NATIVE_OBJECT_FIELD_WORDS
-        let nameStart = Int64(words[base])
-        Int64(words[base + 1]) == 3 &&
-            data[nameStart] == b0 &&
-            data[nameStart + 1] == b1 &&
-            data[nameStart + 2] == b2
-    }
-
-    func currentNameEqualsAscii4(b0: Byte, b1: Byte, b2: Byte, b3: Byte): Bool {
-        let base = cursor * YJSON_NATIVE_OBJECT_FIELD_WORDS
-        let nameStart = Int64(words[base])
-        Int64(words[base + 1]) == 4 &&
-            data[nameStart] == b0 &&
-            data[nameStart + 1] == b1 &&
-            data[nameStart + 2] == b2 &&
-            data[nameStart + 3] == b3
-    }
-
-    func currentNameEqualsAscii6(b0: Byte, b1: Byte, b2: Byte, b3: Byte, b4: Byte, b5: Byte): Bool {
-        let base = cursor * YJSON_NATIVE_OBJECT_FIELD_WORDS
-        let nameStart = Int64(words[base])
-        Int64(words[base + 1]) == 6 &&
-            data[nameStart] == b0 &&
-            data[nameStart + 1] == b1 &&
-            data[nameStart + 2] == b2 &&
-            data[nameStart + 3] == b3 &&
-            data[nameStart + 4] == b4 &&
-            data[nameStart + 5] == b5
-    }
-
-    func currentNameEqualsAscii7(
-        b0: Byte,
-        b1: Byte,
-        b2: Byte,
-        b3: Byte,
-        b4: Byte,
-        b5: Byte,
-        b6: Byte
-    ): Bool {
-        let base = cursor * YJSON_NATIVE_OBJECT_FIELD_WORDS
-        let nameStart = Int64(words[base])
-        Int64(words[base + 1]) == 7 &&
-            data[nameStart] == b0 &&
-            data[nameStart + 1] == b1 &&
-            data[nameStart + 2] == b2 &&
-            data[nameStart + 3] == b3 &&
-            data[nameStart + 4] == b4 &&
-            data[nameStart + 5] == b5 &&
-            data[nameStart + 6] == b6
-    }
-
-    func currentNameEqualsAscii11(
-        b0: Byte,
-        b1: Byte,
-        b2: Byte,
-        b3: Byte,
-        b4: Byte,
-        b5: Byte,
-        b6: Byte,
-        b7: Byte,
-        b8: Byte,
-        b9: Byte,
-        b10: Byte
-    ): Bool {
-        let base = cursor * YJSON_NATIVE_OBJECT_FIELD_WORDS
-        let nameStart = Int64(words[base])
-        Int64(words[base + 1]) == 11 &&
-            data[nameStart] == b0 &&
-            data[nameStart + 1] == b1 &&
-            data[nameStart + 2] == b2 &&
-            data[nameStart + 3] == b3 &&
-            data[nameStart + 4] == b4 &&
-            data[nameStart + 5] == b5 &&
-            data[nameStart + 6] == b6 &&
-            data[nameStart + 7] == b7 &&
-            data[nameStart + 8] == b8 &&
-            data[nameStart + 9] == b9 &&
-            data[nameStart + 10] == b10
-    }
-
-    func currentNameEqualsBytes(nameBytes: Array<Byte>): Bool {
-        let nameStart = Int64(words[cursor * YJSON_NATIVE_OBJECT_FIELD_WORDS])
-        let nameSize = Int64(words[cursor * YJSON_NATIVE_OBJECT_FIELD_WORDS + 1])
-        if (nameBytes.size != nameSize) {
-            return false
-        }
-        for (offset in 0..nameSize) {
-            if (data[nameStart + offset] != nameBytes[offset]) {
-                return false
-            }
-        }
-        true
-    }
 }
 
 class JsonNativeArrayElements {
@@ -609,10 +535,6 @@ class JsonNativeArrayElements {
         this.words = words
         this.count = count
         this.arrayEnd = arrayEnd
-    }
-
-    func elementCount(): Int64 {
-        count
     }
 
     func hasCurrent(): Bool {
@@ -817,22 +739,13 @@ func jsonNativeScanObjectFields(
             } else {
                 countOrError[0]
             }
-            return Some(JsonNativeObjectFields(data, words, count, end[0]))
+            return Some(JsonNativeObjectFields(words, count, end[0]))
         }
         if (status == YJ_JSON_SCAN_FALLBACK || status == YJ_JSON_SCAN_CAPACITY) {
             return None<JsonNativeObjectFields>
         }
         throw JsonException("Native JSON scanner error at byte ${countOrError[0]}")
     }
-}
-
-func jsonNativeScanArrayElements(
-    data: Array<Byte>,
-    size: Int64,
-    start: Int64,
-    validateStrings: Bool
-): Option<JsonNativeArrayElements> {
-    jsonNativeScanArrayElementsAtLeast(data, size, start, validateStrings, 0, 0)
 }
 
 func jsonNativeScanArrayElementsAtLeast(

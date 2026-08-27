@@ -51,7 +51,10 @@ public class JsonPath {
     }
 
     public func query(root: JsonNode, limits!: JsonPathLimits = JsonPathLimits.defaults): ArrayList<JsonPathMatch> {
-        let work = JsonPathWork(limits)
+        queryWithWork(root, JsonPathWork(limits))
+    }
+
+    func queryWithWork(root: JsonNode, work: JsonPathWork): ArrayList<JsonPathMatch> {
         var current = ArrayList<JsonPathMatch>()
         current.add(JsonPathMatch(root, "$"))
         for (segment in segments) {
@@ -64,15 +67,18 @@ public class JsonPath {
                     applyJsonPathSegment(segment, candidate, next, root, work)
                 }
             }
-            work.matches(next.size)
             current = next
         }
         current
     }
 
     public func values(root: JsonNode, limits!: JsonPathLimits = JsonPathLimits.defaults): ArrayList<JsonNode> {
+        valuesWithWork(root, JsonPathWork(limits))
+    }
+
+    func valuesWithWork(root: JsonNode, work: JsonPathWork): ArrayList<JsonNode> {
         let result = ArrayList<JsonNode>()
-        for (matched in query(root, limits: limits)) { result.add(matched.value) }
+        for (matched in queryWithWork(root, work)) { result.add(matched.value) }
         result
     }
 
@@ -82,7 +88,7 @@ public class JsonPath {
     }
 }
 
-private class JsonPathWork {
+class JsonPathWork {
     let limits: JsonPathLimits
     var visited: Int64 = 0
     var filterSteps: Int64 = 0
@@ -96,7 +102,10 @@ private class JsonPathWork {
         filterSteps++
         enforceWorkLimit(filterSteps, limits.maxFilterSteps, "filter steps")
     }
-    func matches(count: Int64): Unit { enforceWorkLimit(count, limits.maxMatches, "matches") }
+    func appendMatch(output: ArrayList<JsonPathMatch>, value: JsonPathMatch): Unit {
+        enforceWorkLimit(output.size + 1, limits.maxMatches, "matches")
+        output.add(value)
+    }
 }
 
 enum JsonPathSelectorKind { Name | Index | Wildcard | Slice | Filter }
@@ -422,7 +431,7 @@ private func applyJsonPathSegment(segment: JsonPathSegment, candidate: JsonPathM
         match (selector.kind) {
             case Name => match (candidate.value) {
                 case objectValue: JsonObjectValue => match (objectValue.get(selector.name)) {
-                    case Some(value) => output.add(JsonPathMatch(value,
+                    case Some(value) => work.appendMatch(output, JsonPathMatch(value,
                         appendNormalizedJsonPathName(candidate.normalizedPath, selector.name)))
                     case None => ()
                 }
@@ -432,51 +441,66 @@ private func applyJsonPathSegment(segment: JsonPathSegment, candidate: JsonPathM
                 case arrayValue: JsonArrayValue =>
                     let index = normalizeJsonPathIndex(selector.index, arrayValue.size())
                     if (index >= 0 && index < arrayValue.size()) {
-                        output.add(JsonPathMatch(arrayValue[index], "${candidate.normalizedPath}[${index}]"))
+                        work.appendMatch(output,
+                            JsonPathMatch(arrayValue[index], "${candidate.normalizedPath}[${index}]"))
                     }
                 case _ => ()
             }
-            case Wildcard => appendJsonPathChildren(candidate, output)
+            case Wildcard => appendJsonPathChildren(candidate, output, work, true)
             case Slice => match (candidate.value) {
-                case arrayValue: JsonArrayValue => appendJsonPathSlice(candidate, arrayValue, selector, output)
+                case arrayValue: JsonArrayValue =>
+                    appendJsonPathSlice(candidate, arrayValue, selector, output, work)
                 case _ => ()
             }
             case Filter =>
                 let children = ArrayList<JsonPathMatch>()
-                appendJsonPathChildren(candidate, children)
+                appendJsonPathChildren(candidate, children, work, false)
                 for (child in children) {
                     work.filter()
-                    if (evaluateJsonPathFilter(selector.filter, child.value, root)) { output.add(child) }
+                    if (evaluateJsonPathFilter(selector.filter, child.value, root, work)) {
+                        work.appendMatch(output, child)
+                    }
                 }
         }
     }
 }
 
-private func appendJsonPathChildren(candidate: JsonPathMatch, output: ArrayList<JsonPathMatch>): Unit {
+private func appendJsonPathChildren(candidate: JsonPathMatch, output: ArrayList<JsonPathMatch>,
+    work: JsonPathWork, countMatches: Bool): Unit {
     match (candidate.value) {
         case objectValue: JsonObjectValue => for ((name, value) in objectValue.entries()) {
-            output.add(JsonPathMatch(value, appendNormalizedJsonPathName(candidate.normalizedPath, name)))
+            work.visit(0)
+            let matched = JsonPathMatch(value, appendNormalizedJsonPathName(candidate.normalizedPath, name))
+            if (countMatches) { work.appendMatch(output, matched) } else { output.add(matched) }
         }
         case arrayValue: JsonArrayValue => for (index in 0..arrayValue.size()) {
-            output.add(JsonPathMatch(arrayValue[index], "${candidate.normalizedPath}[${index}]"))
+            work.visit(0)
+            let matched = JsonPathMatch(arrayValue[index], "${candidate.normalizedPath}[${index}]")
+            if (countMatches) { work.appendMatch(output, matched) } else { output.add(matched) }
         }
         case _ => ()
     }
 }
 
 private func appendJsonPathSlice(candidate: JsonPathMatch, arrayValue: JsonArrayValue,
-    selector: JsonPathSelector, output: ArrayList<JsonPathMatch>): Unit {
+    selector: JsonPathSelector, output: ArrayList<JsonPathMatch>, work: JsonPathWork): Unit {
     let size = arrayValue.size()
     let step = selector.step
     if (step == 0) { return }
     var start = normalizeJsonPathSliceEndpoint(selector.start, size, step, true)
     let end = normalizeJsonPathSliceEndpoint(selector.end, size, step, false)
     if (step > 0) {
-        while (start < end && start < size) { if (start >= 0) { output.add(JsonPathMatch(arrayValue[start],
-            "${candidate.normalizedPath}[${start}]")) }; start += step }
+        while (start < end && start < size) { if (start >= 0) {
+            work.visit(0)
+            work.appendMatch(output, JsonPathMatch(arrayValue[start],
+                "${candidate.normalizedPath}[${start}]"))
+        }; start += step }
     } else {
-        while (start > end && start >= 0) { if (start < size) { output.add(JsonPathMatch(arrayValue[start],
-            "${candidate.normalizedPath}[${start}]")) }; start += step }
+        while (start > end && start >= 0) { if (start < size) {
+            work.visit(0)
+            work.appendMatch(output, JsonPathMatch(arrayValue[start],
+                "${candidate.normalizedPath}[${start}]"))
+        }; start += step }
     }
 }
 
@@ -566,29 +590,32 @@ private func splitJsonPathText(text: String, separator: Byte): ArrayList<String>
     result.add(text[start..text.size]); result
 }
 
-private func evaluateJsonPathFilter(expression: String, current: JsonNode, root: JsonNode): Bool {
+private func evaluateJsonPathFilter(expression: String, current: JsonNode, root: JsonNode,
+    work: JsonPathWork): Bool {
     let text = stripJsonPathParentheses(trimJsonPathWhitespace(expression))
     match (findJsonPathTopLevelOperator(text, "||")) {
-        case Some(index) => return evaluateJsonPathFilter(text[0..index], current, root) ||
-            evaluateJsonPathFilter(text[index + 2..text.size], current, root)
+        case Some(index) => return evaluateJsonPathFilter(text[0..index], current, root, work) ||
+            evaluateJsonPathFilter(text[index + 2..text.size], current, root, work)
         case None => ()
     }
     match (findJsonPathTopLevelOperator(text, "&&")) {
-        case Some(index) => return evaluateJsonPathFilter(text[0..index], current, root) &&
-            evaluateJsonPathFilter(text[index + 2..text.size], current, root)
+        case Some(index) => return evaluateJsonPathFilter(text[0..index], current, root, work) &&
+            evaluateJsonPathFilter(text[index + 2..text.size], current, root, work)
         case None => ()
     }
-    if (text.startsWith("!")) { return !evaluateJsonPathFilter(text[1..text.size], current, root) }
+    if (text.startsWith("!")) {
+        return !evaluateJsonPathFilter(text[1..text.size], current, root, work)
+    }
     for (op in ["==", "!=", "<=", ">=", "<", ">"]) {
         match (findJsonPathTopLevelOperator(text, op)) {
             case Some(index) =>
-                let left = evaluateJsonPathOperand(text[0..index], current, root)
-                let right = evaluateJsonPathOperand(text[index + op.size..text.size], current, root)
+                let left = evaluateJsonPathOperand(text[0..index], current, root, work)
+                let right = evaluateJsonPathOperand(text[index + op.size..text.size], current, root, work)
                 return compareJsonPathOperands(left, right, op)
             case None => ()
         }
     }
-    let value = evaluateJsonPathOperand(text, current, root)
+    let value = evaluateJsonPathOperand(text, current, root, work)
     if (text.startsWith("match(") || text.startsWith("search(")) {
         return value.size == 1 && value[0].asBool().value
     }
@@ -610,17 +637,17 @@ private func validateJsonPathShorthandName(name: String, position: Int64): Unit 
 }
 
 private func evaluateJsonPathOperand(expression: String, current: JsonNode,
-    root: JsonNode): ArrayList<JsonNode> {
+    root: JsonNode, work: JsonPathWork): ArrayList<JsonNode> {
     let text = trimJsonPathWhitespace(expression)
     if (text.startsWith("@") || text.startsWith("$")) {
         let base = if (text.startsWith("@")) { current } else { root }
         let pathText = "$" + removeJsonPathQueryWhitespace(text[1..text.size])
-        return JsonPath.parse(pathText).values(base)
+        return JsonPath.parse(pathText).valuesWithWork(base, work)
     }
     for (functionName in ["length", "count", "value", "match", "search"]) {
         if (text.startsWith(functionName + "(") && text.endsWith(")")) {
             return evaluateJsonPathFunction(functionName,
-                text[functionName.size + 1..text.size - 1], current, root)
+                text[functionName.size + 1..text.size - 1], current, root, work)
         }
     }
     let result = ArrayList<JsonNode>()
@@ -634,13 +661,13 @@ private func evaluateJsonPathOperand(expression: String, current: JsonNode,
 }
 
 private func evaluateJsonPathFunction(name: String, arguments: String,
-    current: JsonNode, root: JsonNode): ArrayList<JsonNode> {
+    current: JsonNode, root: JsonNode, work: JsonPathWork): ArrayList<JsonNode> {
     let result = ArrayList<JsonNode>()
     let args = splitJsonPathArguments(arguments)
     match (name) {
         case "length" =>
             if (args.size != 1) { throw JsonPathException("length() expects one argument", arguments) }
-            let values = evaluateJsonPathOperand(args[0], current, root)
+            let values = evaluateJsonPathOperand(args[0], current, root, work)
             if (values.size == 1) { match (values[0]) {
                 case value: JsonStringValue => result.add(JsonIntValue(value.value.toRuneArray().size))
                 case value: JsonArrayValue => result.add(JsonIntValue(value.size()))
@@ -649,15 +676,15 @@ private func evaluateJsonPathFunction(name: String, arguments: String,
             }}
         case "count" =>
             if (args.size != 1) { throw JsonPathException("count() expects one argument", arguments) }
-            result.add(JsonIntValue(evaluateJsonPathOperand(args[0], current, root).size))
+            result.add(JsonIntValue(evaluateJsonPathOperand(args[0], current, root, work).size))
         case "value" =>
             if (args.size != 1) { throw JsonPathException("value() expects one argument", arguments) }
-            let values = evaluateJsonPathOperand(args[0], current, root)
+            let values = evaluateJsonPathOperand(args[0], current, root, work)
             if (values.size == 1) { result.add(values[0]) }
         case "match" | "search" =>
             if (args.size != 2) { throw JsonPathException("${name}() expects two arguments", arguments) }
-            let values = evaluateJsonPathOperand(args[0], current, root)
-            let patterns = evaluateJsonPathOperand(args[1], current, root)
+            let values = evaluateJsonPathOperand(args[0], current, root, work)
+            let patterns = evaluateJsonPathOperand(args[1], current, root, work)
             var matched = false
             if (values.size == 1 && patterns.size == 1) {
                 match ((values[0], patterns[0])) {

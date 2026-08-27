@@ -208,11 +208,10 @@ public class JsonDirectReader <: JsonCodecReader {
 
     public func endArray(): Unit {
         let wasRoot = contexts.size == 1 && source.isValueBudgetActive()
-        let context = popContext(false)
+        let _ = popContext(false)
         skipSpaces()
         expectByte(b']')
         if (wasRoot) { source.endValueBudget() }
-        let _ = context
     }
 
     public func hasArrayItem(): Bool {

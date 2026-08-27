@@ -2,7 +2,7 @@
 """Create and exercise isolated registry-style release artifacts.
 
 cjpm 1.1.3 has no local-registry or publish dry-run command. Leaf packages are
-bundled with cjpm itself. Packages whose exact 2.0.0 dependencies are not yet in
+bundled with cjpm itself. Packages whose exact 2.0.1 dependencies are not yet in
 the central repository are archived in the same source layout, then extracted
 and resolved to sibling artifact directories only for the 2.0 consumer rehearsal.
 The original artifact manifests remain central-version-only.
@@ -18,7 +18,7 @@ import tarfile
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-VERSION = "2.0.0"
+VERSION = "2.0.1"
 MODULES = (
     "yjson_macros",
     "yjson",
@@ -142,11 +142,11 @@ def inspect_artifact(name: str, archive_path: pathlib.Path) -> None:
 
 def rewrite_for_local_resolution(modules: pathlib.Path) -> None:
     replacements = {
-        'yjson_macros = "2.0.0"': 'yjson_macros = { path = "../yjson_macros" }',
-        'yjson_native = "2.0.0"': 'yjson_native = { path = "../yjson_native" }',
-        'yjson_backends = "2.0.0"': 'yjson_backends = { path = "../yjson_backends" }',
-        'yjson_algorithms = "2.0.0"': 'yjson_algorithms = { path = "../yjson_algorithms" }',
-        'yjson = "2.0.0"': 'yjson = { path = "../yjson" }',
+        'yjson_macros = "2.0.1"': 'yjson_macros = { path = "../yjson_macros" }',
+        'yjson_native = "2.0.1"': 'yjson_native = { path = "../yjson_native" }',
+        'yjson_backends = "2.0.1"': 'yjson_backends = { path = "../yjson_backends" }',
+        'yjson_algorithms = "2.0.1"': 'yjson_algorithms = { path = "../yjson_algorithms" }',
+        'yjson = "2.0.1"': 'yjson = { path = "../yjson" }',
     }
     for module in modules.iterdir():
         manifest = module / "cjpm.toml"
