@@ -15,6 +15,57 @@ private func loopback(port: UInt16): SocketEndpoint {
     SocketEndpoint(IpAddress(IpAddressFamily.Ipv4, [127, 0, 0, 1]), port)
 }
 
+private func stableReadSocketError(
+    error: NetworkException,
+    expectedCode: NetworkErrorCode,
+    expectedRetryability: Retryability
+): Bool {
+    let categoryMatches = match (error.category) {
+        case NetworkErrorCategory.Read => true
+        case _ => false
+    }
+    let phaseMatches = match (error.phase) {
+        case NetworkPhase.TcpRead => true
+        case _ => false
+    }
+    let codeMatches = match ((error.code, expectedCode)) {
+        case (NetworkErrorCode.Cancelled, NetworkErrorCode.Cancelled) |
+             (NetworkErrorCode.TimedOut, NetworkErrorCode.TimedOut) |
+             (NetworkErrorCode.Closed, NetworkErrorCode.Closed) => true
+        case _ => false
+    }
+    let retryabilityMatches = match ((error.retryability, expectedRetryability)) {
+        case (Retryability.Never, Retryability.Never) |
+             (Retryability.Temporary, Retryability.Temporary) => true
+        case _ => false
+    }
+    categoryMatches && phaseMatches && codeMatches && retryabilityMatches &&
+        error.nativeCode.isNone() && error.localEndpoint.isSome() &&
+        error.remoteEndpoint.isSome() && error.cause.isSome()
+}
+
+private func stableUnknownConnectError(error: NetworkException, endpoint: SocketEndpoint): Bool {
+    let categoryMatches = match (error.category) {
+        case NetworkErrorCategory.Connect => true
+        case _ => false
+    }
+    let phaseMatches = match (error.phase) {
+        case NetworkPhase.TcpConnect => true
+        case _ => false
+    }
+    let codeMatches = match (error.code) {
+        case NetworkErrorCode.SystemFailure => true
+        case _ => false
+    }
+    let retryabilityMatches = match (error.retryability) {
+        case Retryability.Unknown => true
+        case _ => false
+    }
+    categoryMatches && phaseMatches && codeMatches && retryabilityMatches &&
+        error.nativeCode.isNone() && error.localEndpoint.isNone() &&
+        error.remoteEndpoint == Some(endpoint) && error.cause.isSome()
+}
+
 private func net06CancellationIterations(): Int64 {
     match (getVariable("WIRESTACK_NET06_ITERATIONS")) {
         case Some(value) =>
@@ -330,10 +381,7 @@ class StdNetTransportTest {
                 )
                 false
             } catch (error: NetworkException) {
-                match (error.code) {
-                    case NetworkErrorCode.Cancelled => true
-                    case _ => false
-                }
+                stableReadSocketError(error, NetworkErrorCode.Cancelled, Retryability.Never)
             }
         }
         // The spawned task may not have entered readSome when it starts. Gate on
@@ -417,16 +465,52 @@ class StdNetTransportTest {
                 context: OperationContext(deadline: Some(Deadline.after(20 * Duration.millisecond)))
             )
         } catch (error: NetworkException) {
-            match (error.code) {
-                case NetworkErrorCode.TimedOut => timedOut = true
-                case _ => ()
-            }
+            timedOut = stableReadSocketError(
+                error,
+                NetworkErrorCode.TimedOut,
+                Retryability.Temporary
+            )
         }
         @Expect(timedOut)
         @Expect(!client.isClosed())
         client.close()
         server.close()
         listener.close()
+    }
+
+    @TestCase
+    func localCloseMapsBlockedReadWithStableEvidence(): Unit {
+        let listener = StdNetTransportListener.bind(loopback(0))
+        let accepted = spawn { listener.accept() }
+        let client = StdNetTransport.connect(listener.localEndpoint)
+        let server = accepted.get(Duration.second)
+        let result: Future<Bool> = spawn {
+            try {
+                let _ = client.readSome(MutableByteSpan(Array<Byte>(1, repeat: 0)))
+                false
+            } catch (error: NetworkException) {
+                stableReadSocketError(error, NetworkErrorCode.Closed, Retryability.Never)
+            }
+        }
+        @Assert(client.waitUntilReadActive(Duration.second))
+        client.close()
+        @Expect(result.get(Duration.second), true)
+        server.close()
+        listener.close()
+    }
+
+    @TestCase
+    func unknownConnectFailureMapsWithoutMessageOrNativeCode(): Unit {
+        let listener = StdNetTransportListener.bind(loopback(0))
+        let endpoint = listener.localEndpoint
+        listener.close()
+        var stable = false
+        try {
+            let _ = StdNetTransport.connect(endpoint)
+        } catch (error: NetworkException) {
+            stable = stableUnknownConnectError(error, endpoint)
+        }
+        @Expect(stable)
     }
 
     @TestCase
