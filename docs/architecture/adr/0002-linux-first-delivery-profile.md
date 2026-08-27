@@ -42,9 +42,10 @@ this ADR.
    Transport `abort()` and cancellation to close the owned `TcpSocket`. Local
    lifecycle state must classify that result as `Cancelled`, `Closed` or
    `DeadlineExceeded`; peer FIN must remain `EndOfStream`.
-2. The supplied SDK has no public typed half-close. Wirestack must not use a
-   private handle or `CJ_MRT_Sock*`; Linux release therefore still requires the
-   M0-021/UP-003 public `std.net` interface change and regression evidence.
+2. The supplied SDK has no public typed TCP half-close. ADR-0005 makes this an
+   optional transport capability. `StdNetTransport` reports it as unsupported,
+   and the Linux release does not depend on UP-003. Wirestack must not use a
+   private handle or `CJ_MRT_Sock*`.
 3. M0-013's carrier-thread starvation is a real Linux failure. Production DNS
    must use a strictly bounded blocking resolver pool until a runtime-native
    asynchronous resolver exists. No unbounded thread fallback is allowed.
@@ -62,6 +63,7 @@ this ADR.
 - Global task status and six-platform release claims remain fail-closed.
 - Platform-independent core code is implemented once and remains suitable for
   later platform adapters.
-- A usable Linux release cannot omit typed half-close, native glibc evidence,
-  external signing, long soak, fuzzing, benchmarks or protocol
-  conformance merely because other platforms are deferred.
+- A usable Linux release cannot omit native glibc evidence, external signing,
+  long soak, fuzzing, benchmarks, or protocol conformance merely because other
+  platforms are deferred. Optional transport capabilities must fail with a
+  stable error when the public SDK does not provide them.

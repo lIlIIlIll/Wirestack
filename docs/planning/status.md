@@ -29,10 +29,10 @@ Status values:
 | M0-007 | COMPLETE | [`docs/evidence/M0-007/README.md`](../evidence/M0-007/README.md) | Full duplex and close races pass; public abort is unavailable, so GATE-NET-02 remains incomplete. |
 | M0-008 | COMPLETE | [`docs/evidence/M0-008/README.md`](../evidence/M0-008/README.md) | All 240 Linux absolute-budget samples pass; global GATE-NET-03 remains incomplete. |
 | M0-009 | COMPLETE | [`docs/evidence/M0-009/README.md`](../evidence/M0-009/README.md) | FIN, RST and local-close evidence is retained; public abort/cancel and global GATE-NET-04 remain incomplete. |
-| M0-010 | BLOCKED | [`docs/evidence/M0-010/README.md`](../evidence/M0-010/README.md) | Schema-v2 evidence completes all five Linux payloads, copied-byte/allocation instrumentation and an 11-round O2 adapter comparison. GATE-NET-05 fails all five throughput cases and four P95 cases, providing the failed-gate evidence for conditional UP-004 analysis; Windows remains missing. |
+| M0-010 | BLOCKED | [`docs/evidence/M0-010/README.md`](../evidence/M0-010/README.md) | Schema-v2 evidence completes all five Linux payloads, copied-byte/allocation instrumentation and an 11-round O2 adapter comparison. GATE-NET-05 fails all five throughput cases and four P95 cases, providing evidence for the future UP-004 candidate; Windows remains missing. UP-004 does not block Wirestack release. |
 | M0-011 | BLOCKED | [`docs/evidence/M0-011/README.md`](../evidence/M0-011/README.md) | Linux GATE-NET-06 acceptance passes, including production cancellation/TLS cleanup and all resource classes; Windows, macOS and mobile native profiles remain outstanding. |
 | M0-012 | BLOCKED | — | Requires M0-011 evidence completion and Android/iOS/Harmony native-device execution. |
-| M0-013 | COMPLETE | [`docs/evidence/M0-013/README.md`](../evidence/M0-013/README.md) | Native Linux evidence shows carrier-thread starvation at 16+ delayed DNS resolutions; gate FAIL supports conditional UP-007 analysis, while global evidence remains incomplete. |
+| M0-013 | COMPLETE | [`docs/evidence/M0-013/README.md`](../evidence/M0-013/README.md) | Native Linux evidence shows carrier-thread starvation at 16+ delayed DNS resolutions. Wirestack uses a bounded resolver pool; the failure remains evidence for the future UP-007 candidate, which does not block release. |
 | M0-014 | BLOCKED | — | Requires a native Windows SDK/runner and copied-byte instrumentation. |
 | M0-015 | COMPLETE | [`docs/evidence/M0-015/README.md`](../evidence/M0-015/README.md) | Provider matrix and M0-016 PoC contract frozen; ADR-0003 selects AWS-LC for Linux only. |
 | M0-016 | BLOCKED | [`docs/evidence/M0-016/README.md`](../evidence/M0-016/README.md) | AWS-LC glibc/musl schema-v2 results PASS every capability; seven retained cells remain PARTIAL and Windows/mobile native evidence is missing. |
@@ -40,9 +40,10 @@ Status values:
 | M0-018 | COMPLETE | [`docs/evidence/M0-018/README.md`](../evidence/M0-018/README.md) | Versioned threat register, fail-closed validator, tests and CI are active. |
 | M0-019 | BLOCKED | — | Depends on complete M0-006 through M0-014 evidence; M0-010..014 are not all complete. |
 | M0-020 | BLOCKED | [`docs/architecture/adr/0003-linux-tls-provider.md`](../architecture/adr/0003-linux-tls-provider.md) | Linux profile selects pinned AWS-LC; the global six-platform provider decision remains deferred. |
-| M0-021 | BLOCKED | — | Depends on all M0 gate evidence plus the accepted Transport SPI. |
-| M0-022 | BLOCKED | — | Depends on M0-004 through M0-021. |
+| M0-021 | BLOCKED | — | Future upstream-candidate inventory. It requires all M0 gate evidence and the accepted Transport SPI, but it does not block a Wirestack release. |
+| M0-022 | BLOCKED | — | Depends on M0-004 through M0-020 and M0-024. It does not depend on M0-021 or an upstream source change. |
 | M0-023 | COMPLETE | [`docs/evidence/M0-023/README.md`](../evidence/M0-023/README.md) | ADR-0004 freezes the current Linux release target as glibc and defers musl to P1-011 until the Cangjie SDK supports it. |
+| M0-024 | COMPLETE | [`docs/evidence/M0-024/README.md`](../evidence/M0-024/README.md) | ADR-0005 removes runtime and `std.net` source changes from the release dependency graph; unsupported transport capabilities fail through stable public Wirestack contracts. |
 
 ## Linux M1 closure work
 
@@ -57,6 +58,9 @@ six-platform milestone.
 | M1-013 | COMPLETE | [`docs/evidence/M1-013/README.md`](../evidence/M1-013/README.md) | `MemoryTransport` now includes a bounded listener and manually advanced FIFO scheduler while preserving paired partial I/O, half-close, EOF, backpressure and terminal cleanup. |
 | M1-014 | COMPLETE | [`docs/evidence/M1-014/README.md`](../evidence/M1-014/README.md) | Bounded read/write scripts reproduce manual delay, short I/O, EOF, terminal reset, cancellation races and structured error phases through a FIFO virtual waiter. |
 | M1-018 | COMPLETE | [`docs/evidence/M1-018/README.md`](../evidence/M1-018/README.md) | `writeSome` performs bounded partial writes through one connection-retained exact-size staging array, the 16 KiB default carries a typical TLS record, and copied bytes remain measurable; the canonical repository gate separately retains one unrelated HTTP/2 package-interference error. |
+| M1-019 | READY | — | ADR-0005 permits the current adapter to report `supportsHalfClose=false` and return stable `Unsupported`; focused qualification remains. |
+| M1-022 | READY | — | Stable context and lifecycle mapping no longer depends on a native socket code; focused qualification remains. |
+| M1-023 | BLOCKED | — | Depends on M1-022 qualification; exact operating-system event-backend discovery is optional under ADR-0005. |
 | M1-027 | COMPLETE | [`docs/evidence/M1-027/README.md`](../evidence/M1-027/README.md) | The internal background fast path reduces empty `readSome` P50 from 297.042 ns to 92.110 ns; the formal Linux 5-payload x 11-round GATE-NET-05 comparison passes every throughput and P95 threshold with zero staging copies. |
 
 ## Linux M2 closure work
@@ -83,18 +87,25 @@ global six-platform M3 milestone.
 |---|---|---|---|
 | M3-028 | COMPLETE | [`docs/evidence/M3-028/README.md`](../evidence/M3-028/README.md) | Native Linux qualification passes 70 deterministic TLS/trust tests, four bounded fuzz targets, TLS 1.2/1.3 OpenSSL interoperability, dependency scanning, body and idle-memory limits, 11-round full/resumed handshake gates, and 1.2125 times the pinned stdx bulk throughput. |
 
-## Conditional upstream work
+## Future upstream enhancements
 
-`UP-001` through `UP-007` remain **BLOCKED / DO NOT START** until the corresponding
-failed gate provides reproducible evidence and an approved minimal upstream-interface RFC.
-Actual `std.net`/runtime source changes belong in their upstream repositories,
-not in the Wirestack worktree.
+`UP-001` through `UP-007` are not Wirestack release dependencies. They remain
+**BLOCKED / DO NOT START** until a failed gate provides reproducible evidence
+and an approved minimal upstream-interface RFC. Actual `std.net` or runtime
+source changes belong in their upstream repositories, not in the Wirestack
+worktree.
+
+No current Wirestack task may list an `UP-*` task or a runtime/`std.net` source
+change as a dependency, readiness condition, completion condition, or release
+gate. Supported profiles must close against public SDK capabilities and the
+documented Wirestack fallback.
 
 The M0-007 and M0-009 capability probes record that the supplied SDK exposes no
 public `TcpSocket.abort()` and no public cancellation member. M0-013 additionally
-shows native Linux carrier-thread starvation under delayed DNS and identifies
-`UP-007` as a conditional candidate. These are inputs to M0-021; none independently
-authorize an upstream implementation task.
+shows native Linux carrier-thread starvation under delayed DNS. Wirestack uses
+stable capability fallback for missing socket features and a bounded resolver
+pool for DNS. UP-003, UP-005, and UP-007 remain optional future improvements;
+none authorizes an upstream implementation task.
 
 ## Linux M5 closure work
 

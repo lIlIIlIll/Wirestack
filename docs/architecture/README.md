@@ -24,6 +24,7 @@ Core rules:
 - [ADR-0002: Linux-first delivery profile](adr/0002-linux-first-delivery-profile.md)
 - [ADR-0003: Linux TLS provider selection](adr/0003-linux-tls-provider.md)
 - [ADR-0004: Current Linux libc support](adr/0004-linux-glibc-support.md)
+- [ADR-0005: Upstream-independent transport capabilities](adr/0005-upstream-independent-transport-capabilities.md)
 
 ## Supporting architecture records
 
@@ -44,4 +45,4 @@ M0 is expected to freeze at least:
 - Transport SPI semantics;
 - TLS provider and build strategy;
 - minimum OS/API/SDK matrix;
-- any gate-driven upstream `std.net`/runtime changes.
+- capability behavior when the public SDK lacks an optional transport feature.

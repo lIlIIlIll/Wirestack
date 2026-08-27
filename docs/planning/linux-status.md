@@ -14,13 +14,13 @@ Status values have the same fail-closed meaning as the global status file.
 | Architecture and gate harness | COMPLETE | M0-001 through M0-004 and M0-018 evidence |
 | Linux libc scope | COMPLETE | The current release supports native glibc x86_64. ADR-0004 defers musl to P1-011 until the Cangjie SDK supports it. |
 | close/wakeup and absolute Deadline | COMPLETE | M0-006 and M0-008 native Linux results |
-| duplex and EOF classification | BLOCKED | Executed behavior passes; public typed half-close is absent and requires UP-003 |
+| duplex and EOF classification | COMPLETE | Concurrent read/write, close wakeup, peer EOF, local close, RST, cancellation, and TLS truncation pass. `StdNetTransport` reports unsupported directional TCP shutdown through ADR-0005; UP-003 is a future enhancement. |
 | large-buffer/copy profile | COMPLETE | M0-010 measures all five payloads, native process allocations, syscall receive bytes and adapter staging copies, and retains the failed pre-optimization comparison. The M1-027 Wirestack fast path then passes the unchanged five-payload x 11-round O2 GATE-NET-05 thresholds with zero adapter staging copies, so UP-004 is not required for the Linux profile; [Linux evidence](../evidence/M1-027/README.md) |
 | leak/soak | COMPLETE | Linux GATE-NET-06 passes all seven workloads: three 100,000-iteration transport scenarios, 100,000 provider and production TLS cleanups, 100,000 production cancellations, and an 86,400-second mixed soak with PASS resource trends; [Linux evidence](../evidence/M0-011/README.md) |
 | DNS scheduler behavior | COMPLETE | M0-013 records starvation and mandates a bounded resolver pool |
 | TLS provider | COMPLETE | AWS-LC 5.5.0 is selected by ADR-0003 after schema-v2 glibc/musl PASS results, executed external signing and 10,000 cleanup cycles |
-| Transport SPI | IN_PROGRESS | Core types are implemented; listener, lifecycle closure and upstream capability mapping remain |
-| Linux continuous gates | BLOCKED | Depends on the remaining Linux M0 evidence and decisions |
+| Transport SPI | IN_PROGRESS | Core types, listener, lifecycle, capability reporting, and stable fallback errors are implemented. M1-019, M1-022, and M1-023 still require focused qualification. |
+| Linux continuous gates | READY | Linux M0 decisions and evidence are complete; M1 qualification and Linux release automation remain. |
 
 ## Implemented Transport Core
 
@@ -42,11 +42,11 @@ Status values have the same fail-closed meaning as the global status file.
 | M1-015/016 `StdNetTransport` ownership/connect | COMPLETE | DNS-free `IPSocketAddress` construction, exclusive adapter ownership, absolute connect budget and actual endpoints |
 | M1-017 `StdNetTransport.readSome` | COMPLETE | Partial reads, peer EOF, local close/cancel distinction, Deadline and one-reader guard tested on Linux loopback |
 | M1-018 bounded write staging | COMPLETE | One connection-retained exact-size array serves bounded partial writes, the 16 KiB default carries a typical TLS record, and copied bytes remain measurable; [Linux evidence](../evidence/M1-018/README.md) |
-| M1-019 typed half-close | BLOCKED | Public pinned `TcpSocket` has no shutdown API; adapter reports `Unsupported` and requires UP-003 |
+| M1-019 typed half-close capability | READY | The adapter reports `supportsHalfClose=false` and stable `Unsupported` without private ABI access. ADR-0005 removes UP-003 from the release dependency; focused qualification remains. |
 | M1-020 idempotent close/abort | COMPLETE | Native close is claimed once; close/cancel wake blocked read and listener accept without returning false EOF |
 | M1-021 `StdNetTransportListener` | COMPLETE | IP-only bind, bounded backlog, endpoints and accept Deadline/cancel/close semantics |
-| M1-022 stable std.net errors | BLOCKED | Timeout/cancel/closed are stable; public `SocketException` exposes no native code, so errno classes require an upstream API instead of message matching |
-| M1-023 transport diagnostics | IN_PROGRESS | Backend/endpoints/capabilities, staging copied-byte counters and event sink exist; runtime backend discovery remains |
+| M1-022 stable std.net errors | READY | Timeout, cancellation, and local close use context and lifecycle evidence. Other socket failures use stable `SystemFailure/Unknown` with no message matching; focused qualification remains. |
+| M1-023 transport diagnostics | BLOCKED | Depends on M1-022 qualification. Backend, runtime family, endpoints, capabilities, staging counters, and event sink exist; exact OS event-backend discovery is optional. |
 | M1-027 background context cost | COMPLETE | The internal background fast path lowers empty `readSome` P50 from 297.042 ns to 92.110 ns; the formal 5-payload x 11-round GATE-NET-05 comparison passes every threshold with zero staging copies; [Linux evidence](../evidence/M1-027/README.md) |
 
 ## Implemented Resolver and Connector Core
@@ -134,14 +134,12 @@ Status values have the same fail-closed meaning as the global status file.
 | M6-022 public cancellation handles | COMPLETE | Typed public request, connection and H2 stream handles share the canonical operation context; real H1/H2 loopback tests prove idempotence, H1 wakeup, H2 stream isolation, connection fan-out and terminal cleanup; [Linux acceptance evidence](../evidence/M6-022/README.md) |
 | M6-023 SSE/unbounded streaming profile | COMPLETE | Parallel real H1/H2 `text/event-stream` profiles each ran for at least one hour and consumed more than 90 million numbered events; heavy-GC heap, RSS, FD, socket and thread trends passed, public cancellation stayed below 50 ms, and the H2 sibling survived stream cancellation; [Linux acceptance evidence](../evidence/M6-023/README.md) |
 | M6-024 HTTP/2 sibling fairness | COMPLETE | A zero-window-only connection-credit flush and bounded least-recently-served send reservations let 1/10/100 siblings complete while a connection-window-exhausting response stays open; 100 independent real TLS h2 runs completed 10,000 siblings with no timeout or connection abort; [Linux acceptance evidence](../evidence/M6-024/README.md) |
+| M6-025 HTTP/2 facade termination | COMPLETE | Exclusive per-call TLS scratch removes concurrent read/write aliasing; the original three-case sequence passes 100/100 same-process rounds, the repository check passes 538/538 non-Performance cases, and M3-028 performance remains qualified; [Linux acceptance evidence](../evidence/M6-025/README.md) |
 
 ## Next critical path
 
-1. Complete shared Transport lifecycle/exactly-once primitives and the remaining
-   deterministic race tests.
-2. Submit the minimal `std.net` upstream interface RFC for typed half-close and
-   stable native error evidence.
-3. Complete M3-028 TLS interoperability, fuzz, dependency and benchmark gates
-   under ADR-0003 and ADR-0004.
-4. Complete Linux stress/soak, stdx comparison when an eligible baseline SDK
-   exists, packaging and installation verification.
+1. Qualify M1-019 and M1-022 against the ADR-0005 capability and error rules.
+2. Complete M1-023, then run M1-024 deterministic races and assemble M1-025
+   from the retained leak, soak, cancellation, and performance evidence.
+3. Define Linux-specific M7 packaging, installation, SBOM, API freeze, fuzz,
+   performance, and release-candidate tasks without waiting for other platforms.
