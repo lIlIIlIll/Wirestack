@@ -13,6 +13,7 @@ out/
 !docs/evidence/M6-023/linux_x86_64/*.json
 !docs/evidence/M2-003/linux_x86_64/*.json
 !docs/evidence/M2-005/linux_glibc_x86_64/*.json
+!docs/evidence/M2-015/linux_glibc_x86_64/*.json
 
 # Local tool state
 .cjpm/

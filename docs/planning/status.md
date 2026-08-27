@@ -71,6 +71,7 @@ the native platform dependencies in the global backlog.
 | M2-005 | COMPLETE | [`docs/evidence/M2-005/README.md`](../evidence/M2-005/README.md) | The public resolver, stable errors, cancellation, lifecycle, and default client integration pass on native Linux glibc. ADR-0004 defers musl to P1-011. |
 | M2-010 | COMPLETE | [`docs/evidence/M2-010/README.md`](../evidence/M2-010/README.md) | Immutable direct and explicit-proxy routes separate origin/connect targets and DNS ownership while retaining bounded network-binding, TLS-context and ALPN parameters; system-proxy discovery remains out of scope. |
 | M2-014 | COMPLETE | [`docs/evidence/M2-014/README.md`](../evidence/M2-014/README.md) | Scripted resolver and connector tests cover IPv6 first success and blackhole fallback, simultaneous success, all-fail, pre-cancel, success-plus-cancel and the exact Deadline publication boundary. |
+| M2-015 | COMPLETE | [`docs/evidence/M2-015/README.md`](../evidence/M2-015/README.md) | Native glibc network namespaces prove IPv6 available/blackhole fallback, 20/100 ms RTT, 1% loss, joined losers with bounded resources, and one shared Deadline for 2/8 candidates. |
 
 ## Conditional upstream work
 

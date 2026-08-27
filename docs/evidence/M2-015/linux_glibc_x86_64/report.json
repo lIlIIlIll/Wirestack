@@ -1,0 +1,1498 @@
+{
+  "deadline_scaling": {
+    "absolute_delta_ms": 3,
+    "decision": "PASS",
+    "delta_limit_ms": 150,
+    "eight_candidates_ms": 352,
+    "two_candidates_ms": 355
+  },
+  "decision": "PASS",
+  "environment": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3",
+    "ip": "ip utility, iproute2-7.2.0, libbpf 1.7.0",
+    "libc": [
+      "glibc",
+      "2.44"
+    ],
+    "namespace": "unshare --user --map-root-user --net",
+    "tc": "tc utility, iproute2-7.2.0, libbpf 1.7.0",
+    "uname": {
+      "machine": "x86_64",
+      "node": "Arch",
+      "processor": "",
+      "release": "7.1.9-arch1-2",
+      "system": "Linux",
+      "version": "#1 SMP PREEMPT_DYNAMIC Fri, 21 Aug 2026 22:18:59 +0000"
+    }
+  },
+  "generated_at_utc": "2026-08-27T08:36:11.540910+00:00",
+  "platform_scope": "linux-glibc-x86_64",
+  "scenarios": {
+    "deadline-2": {
+      "decision": "PASS",
+      "elapsed_limit_ms": {
+        "lower": 350,
+        "upper": 600
+      },
+      "impairment": {
+        "bytes": 148,
+        "command": [
+          "tc",
+          "-s",
+          "filter",
+          "show",
+          "dev",
+          "lo",
+          "egress"
+        ],
+        "dropped": 2,
+        "packets": 2,
+        "raw": "filter protocol ip pref 49152 flower chain 0 \nfilter protocol ip pref 49152 flower chain 0 handle 0x1 \n  eth_type ipv4\n  ip_proto tcp\n  dst_ip 192.0.2.0/24\n  tcp_flags 0x2/2\n  not_in_hw\n\taction order 1: gact action drop\n\t random type none pass val 0\n\t index 1 ref 1 bind 1 installed 1 sec used 0 sec firstused 0 sec\n\tAction statistics:\n\tSent 148 bytes 2 pkt (dropped 2, overlimits 0 requeues 0) \n\tbacklog 0b 0p requeues 0\n\n"
+      },
+      "process": {
+        "command": [
+          "/home/elliot/.codex/scripts/codex_cangjie_env",
+          "--cwd",
+          "/home/elliot/playground/Wirestack",
+          "cjpm",
+          "test",
+          "src/internal/transport_stdnet",
+          "-j",
+          "1",
+          "--parallel",
+          "1",
+          "--filter",
+          "M2015NativeNetworkGateTest.*",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color",
+          "--skip-build"
+        ],
+        "duration_ms": 1265.261,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 363432966 ns, RESULT:\n    TCS: M2015NativeNetworkGateTest, time elapsed: 357165894 ns, RESULT:\n    [ PASSED ] CASE: runProfile (356381636 ns)\n    STDOUT:\n    M2015_RESULT scenario=deadline-2 outcome=deadline terminal=TimedOut attempts=2 elapsedMs=355\nSummary: TOTAL: 37\n    PASSED: 1, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 369464124 ns, RESULT:\nTP: wirestack.*, time elapsed: 369335577 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.transport_stdnet, time elapsed: 363432966 ns\nSummary: TOTAL: 37\n    PASSED: 1, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+        "timed_out": false
+      },
+      "resources": {
+        "samples": [
+          {
+            "elapsed_ms": 1,
+            "fd_count": 3,
+            "process_count": 1,
+            "rss_kib": 27424,
+            "socket_count": 0,
+            "thread_count": 5
+          },
+          {
+            "elapsed_ms": 101,
+            "fd_count": 12,
+            "process_count": 2,
+            "rss_kib": 231896,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 210,
+            "fd_count": 12,
+            "process_count": 2,
+            "rss_kib": 367724,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 297,
+            "fd_count": 6,
+            "process_count": 1,
+            "rss_kib": 30752,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 394,
+            "fd_count": 20,
+            "process_count": 3,
+            "rss_kib": 65356,
+            "socket_count": 0,
+            "thread_count": 13
+          },
+          {
+            "elapsed_ms": 496,
+            "fd_count": 21,
+            "process_count": 3,
+            "rss_kib": 67976,
+            "socket_count": 0,
+            "thread_count": 13
+          },
+          {
+            "elapsed_ms": 585,
+            "fd_count": 21,
+            "process_count": 3,
+            "rss_kib": 70088,
+            "socket_count": 0,
+            "thread_count": 13
+          },
+          {
+            "elapsed_ms": 672,
+            "fd_count": 4,
+            "process_count": 1,
+            "rss_kib": 35936,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 754,
+            "fd_count": 5,
+            "process_count": 1,
+            "rss_kib": 41940,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 840,
+            "fd_count": 29,
+            "process_count": 3,
+            "rss_kib": 89844,
+            "socket_count": 5,
+            "thread_count": 20
+          },
+          {
+            "elapsed_ms": 923,
+            "fd_count": 29,
+            "process_count": 3,
+            "rss_kib": 89844,
+            "socket_count": 5,
+            "thread_count": 20
+          },
+          {
+            "elapsed_ms": 1005,
+            "fd_count": 29,
+            "process_count": 3,
+            "rss_kib": 89844,
+            "socket_count": 5,
+            "thread_count": 20
+          },
+          {
+            "elapsed_ms": 1085,
+            "fd_count": 29,
+            "process_count": 3,
+            "rss_kib": 89844,
+            "socket_count": 5,
+            "thread_count": 20
+          },
+          {
+            "elapsed_ms": 1158,
+            "fd_count": 25,
+            "process_count": 3,
+            "rss_kib": 89424,
+            "socket_count": 2,
+            "thread_count": 18
+          }
+        ]
+      },
+      "result": {
+        "attempts": 2,
+        "cancelled_losers": null,
+        "elapsed_ms": 355,
+        "outcome": "deadline",
+        "scenario": "deadline-2",
+        "terminal": "TimedOut",
+        "winners": null
+      }
+    },
+    "deadline-8": {
+      "decision": "PASS",
+      "elapsed_limit_ms": {
+        "lower": 350,
+        "upper": 600
+      },
+      "impairment": {
+        "bytes": 592,
+        "command": [
+          "tc",
+          "-s",
+          "filter",
+          "show",
+          "dev",
+          "lo",
+          "egress"
+        ],
+        "dropped": 8,
+        "packets": 8,
+        "raw": "filter protocol ip pref 49152 flower chain 0 \nfilter protocol ip pref 49152 flower chain 0 handle 0x1 \n  eth_type ipv4\n  ip_proto tcp\n  dst_ip 192.0.2.0/24\n  tcp_flags 0x2/2\n  not_in_hw\n\taction order 1: gact action drop\n\t random type none pass val 0\n\t index 2 ref 1 bind 1 installed 1 sec used 0 sec firstused 0 sec\n\tAction statistics:\n\tSent 592 bytes 8 pkt (dropped 8, overlimits 0 requeues 0) \n\tbacklog 0b 0p requeues 0\n\n"
+      },
+      "process": {
+        "command": [
+          "/home/elliot/.codex/scripts/codex_cangjie_env",
+          "--cwd",
+          "/home/elliot/playground/Wirestack",
+          "cjpm",
+          "test",
+          "src/internal/transport_stdnet",
+          "-j",
+          "1",
+          "--parallel",
+          "1",
+          "--filter",
+          "M2015NativeNetworkGateTest.*",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color",
+          "--skip-build"
+        ],
+        "duration_ms": 1199.863,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 359420230 ns, RESULT:\n    TCS: M2015NativeNetworkGateTest, time elapsed: 353384820 ns, RESULT:\n    [ PASSED ] CASE: runProfile (352614612 ns)\n    STDOUT:\n    M2015_RESULT scenario=deadline-8 outcome=deadline terminal=TimedOut attempts=8 elapsedMs=352\nSummary: TOTAL: 37\n    PASSED: 1, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 366072566 ns, RESULT:\nTP: wirestack.*, time elapsed: 365924406 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.transport_stdnet, time elapsed: 359420230 ns\nSummary: TOTAL: 37\n    PASSED: 1, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+        "timed_out": false
+      },
+      "resources": {
+        "samples": [
+          {
+            "elapsed_ms": 0,
+            "fd_count": 6,
+            "process_count": 1,
+            "rss_kib": 29544,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 68,
+            "fd_count": 12,
+            "process_count": 2,
+            "rss_kib": 192300,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 132,
+            "fd_count": 12,
+            "process_count": 2,
+            "rss_kib": 331780,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 198,
+            "fd_count": 6,
+            "process_count": 1,
+            "rss_kib": 29332,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 276,
+            "fd_count": 13,
+            "process_count": 2,
+            "rss_kib": 43456,
+            "socket_count": 0,
+            "thread_count": 12
+          },
+          {
+            "elapsed_ms": 394,
+            "fd_count": 20,
+            "process_count": 3,
+            "rss_kib": 67352,
+            "socket_count": 0,
+            "thread_count": 13
+          },
+          {
+            "elapsed_ms": 479,
+            "fd_count": 21,
+            "process_count": 3,
+            "rss_kib": 67976,
+            "socket_count": 0,
+            "thread_count": 13
+          },
+          {
+            "elapsed_ms": 550,
+            "fd_count": 21,
+            "process_count": 3,
+            "rss_kib": 70088,
+            "socket_count": 0,
+            "thread_count": 13
+          },
+          {
+            "elapsed_ms": 641,
+            "fd_count": 4,
+            "process_count": 1,
+            "rss_kib": 41196,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 727,
+            "fd_count": 16,
+            "process_count": 2,
+            "rss_kib": 64924,
+            "socket_count": 2,
+            "thread_count": 14
+          },
+          {
+            "elapsed_ms": 851,
+            "fd_count": 33,
+            "process_count": 3,
+            "rss_kib": 89640,
+            "socket_count": 9,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 933,
+            "fd_count": 35,
+            "process_count": 3,
+            "rss_kib": 89648,
+            "socket_count": 11,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1008,
+            "fd_count": 35,
+            "process_count": 3,
+            "rss_kib": 89648,
+            "socket_count": 11,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1086,
+            "fd_count": 35,
+            "process_count": 3,
+            "rss_kib": 89648,
+            "socket_count": 11,
+            "thread_count": 22
+          }
+        ]
+      },
+      "result": {
+        "attempts": 8,
+        "cancelled_losers": null,
+        "elapsed_ms": 352,
+        "outcome": "deadline",
+        "scenario": "deadline-8",
+        "terminal": "TimedOut",
+        "winners": null
+      }
+    },
+    "ipv6-available": {
+      "decision": "PASS",
+      "impairment": null,
+      "listener": {
+        "accepted": 1,
+        "error": null,
+        "expected": 1
+      },
+      "process": {
+        "command": [
+          "/home/elliot/.codex/scripts/codex_cangjie_env",
+          "--cwd",
+          "/home/elliot/playground/Wirestack",
+          "cjpm",
+          "test",
+          "src/internal/transport_stdnet",
+          "-j",
+          "1",
+          "--parallel",
+          "1",
+          "--filter",
+          "M2015NativeNetworkGateTest.*",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "duration_ms": 5077.544,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 6433076 ns, RESULT:\n    TCS: M2015NativeNetworkGateTest, time elapsed: 1549356 ns, RESULT:\n    [ PASSED ] CASE: runProfile (967909 ns)\n    STDOUT:\n    M2015_RESULT scenario=ipv6-available outcome=success winners=1 attempts=2 cancelledLosers=1 elapsedMs=0\nSummary: TOTAL: 37\n    PASSED: 1, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 12141011 ns, RESULT:\nTP: wirestack.*, time elapsed: 12046759 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.transport_stdnet, time elapsed: 6433076 ns\nSummary: TOTAL: 37\n    PASSED: 1, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+        "timed_out": false
+      },
+      "resources": {
+        "samples": [],
+        "trend": null
+      },
+      "result": {
+        "attempts": 2,
+        "cancelled_losers": 1,
+        "elapsed_ms": 0,
+        "outcome": "success",
+        "scenario": "ipv6-available",
+        "terminal": null,
+        "winners": 1
+      }
+    },
+    "ipv6-blackhole": {
+      "decision": "PASS",
+      "impairment": {
+        "bytes": 6016,
+        "command": [
+          "tc",
+          "-s",
+          "filter",
+          "show",
+          "dev",
+          "lo",
+          "egress"
+        ],
+        "dropped": 64,
+        "packets": 64,
+        "raw": "filter protocol ipv6 pref 49152 flower chain 0 \nfilter protocol ipv6 pref 49152 flower chain 0 handle 0x1 \n  eth_type ipv6\n  ip_proto tcp\n  dst_ip 2001:db8::2\n  tcp_flags 0x2/2\n  not_in_hw\n\taction order 1: gact action drop\n\t random type none pass val 0\n\t index 1 ref 1 bind 1 installed 3 sec used 0 sec firstused 2 sec\n\tAction statistics:\n\tSent 6016 bytes 64 pkt (dropped 64, overlimits 0 requeues 0) \n\tbacklog 0b 0p requeues 0\n\n"
+      },
+      "listener": {
+        "accepted": 64,
+        "error": null,
+        "expected": 64
+      },
+      "process": {
+        "command": [
+          "/home/elliot/.codex/scripts/codex_cangjie_env",
+          "--cwd",
+          "/home/elliot/playground/Wirestack",
+          "cjpm",
+          "test",
+          "src/internal/transport_stdnet",
+          "-j",
+          "1",
+          "--parallel",
+          "1",
+          "--filter",
+          "M2015NativeNetworkGateTest.*",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color",
+          "--skip-build"
+        ],
+        "duration_ms": 3369.506,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 2604816730 ns, RESULT:\n    TCS: M2015NativeNetworkGateTest, time elapsed: 2599008616 ns, RESULT:\n    [ PASSED ] CASE: runProfile (2598112559 ns)\n    STDOUT:\n    M2015_RESULT scenario=ipv6-blackhole outcome=success winners=64 attempts=128 cancelledLosers=64 elapsedMs=2597\nSummary: TOTAL: 37\n    PASSED: 1, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 2612240741 ns, RESULT:\nTP: wirestack.*, time elapsed: 2612132548 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.transport_stdnet, time elapsed: 2604816730 ns\nSummary: TOTAL: 37\n    PASSED: 1, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+        "timed_out": false
+      },
+      "resources": {
+        "samples": [
+          {
+            "elapsed_ms": 0,
+            "fd_count": 7,
+            "process_count": 1,
+            "rss_kib": 29104,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 69,
+            "fd_count": 12,
+            "process_count": 2,
+            "rss_kib": 143564,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 138,
+            "fd_count": 12,
+            "process_count": 2,
+            "rss_kib": 264608,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 204,
+            "fd_count": 12,
+            "process_count": 2,
+            "rss_kib": 367796,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 270,
+            "fd_count": 6,
+            "process_count": 1,
+            "rss_kib": 30744,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 369,
+            "fd_count": 20,
+            "process_count": 3,
+            "rss_kib": 67424,
+            "socket_count": 0,
+            "thread_count": 13
+          },
+          {
+            "elapsed_ms": 446,
+            "fd_count": 21,
+            "process_count": 3,
+            "rss_kib": 68016,
+            "socket_count": 0,
+            "thread_count": 13
+          },
+          {
+            "elapsed_ms": 513,
+            "fd_count": 20,
+            "process_count": 3,
+            "rss_kib": 68148,
+            "socket_count": 0,
+            "thread_count": 13
+          },
+          {
+            "elapsed_ms": 579,
+            "fd_count": 5,
+            "process_count": 1,
+            "rss_kib": 41944,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 642,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 90212,
+            "socket_count": 4,
+            "thread_count": 21
+          },
+          {
+            "elapsed_ms": 710,
+            "fd_count": 29,
+            "process_count": 3,
+            "rss_kib": 90632,
+            "socket_count": 5,
+            "thread_count": 21
+          },
+          {
+            "elapsed_ms": 845,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 90724,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 907,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 90832,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 969,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 90880,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1032,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 90948,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1097,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 90976,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1160,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91052,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1221,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91108,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1280,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91204,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1340,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91252,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1404,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91356,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1487,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91476,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1590,
+            "fd_count": 27,
+            "process_count": 3,
+            "rss_kib": 91532,
+            "socket_count": 3,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1653,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91612,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1729,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91656,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1815,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91748,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1896,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91824,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 1974,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91908,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 2047,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91980,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 2133,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92072,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 2242,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92148,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 2309,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92184,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 2373,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92244,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 2453,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92304,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 2520,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92332,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 2587,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92428,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 2702,
+            "fd_count": 27,
+            "process_count": 3,
+            "rss_kib": 92516,
+            "socket_count": 3,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 2807,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92592,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 2898,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92648,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 2985,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92704,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 3064,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92772,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 3151,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92860,
+            "socket_count": 4,
+            "thread_count": 22
+          },
+          {
+            "elapsed_ms": 3232,
+            "fd_count": 6,
+            "process_count": 1,
+            "rss_kib": 42008,
+            "socket_count": 0,
+            "thread_count": 7
+          }
+        ],
+        "trend": {
+          "comparison_window_samples": 7,
+          "decision": "PASS",
+          "growth": {
+            "fd_count": {
+              "first_median": 28.0,
+              "growth": 0.0,
+              "growth_limit": 8.0,
+              "last_median": 28.0
+            },
+            "process_count": {
+              "first_median": 3.0,
+              "growth": 0.0,
+              "growth_limit": 0.0,
+              "last_median": 3.0
+            },
+            "rss_kib": {
+              "first_median": 90724.0,
+              "growth": 1924.0,
+              "growth_limit": 16384.0,
+              "last_median": 92648.0
+            },
+            "socket_count": {
+              "first_median": 4.0,
+              "growth": 0.0,
+              "growth_limit": 2.0,
+              "last_median": 4.0
+            },
+            "thread_count": {
+              "first_median": 22.0,
+              "growth": 0.0,
+              "growth_limit": 4.0,
+              "last_median": 22.0
+            }
+          },
+          "sample_count": 43,
+          "warmup_samples_excluded": 8
+        }
+      },
+      "result": {
+        "attempts": 128,
+        "cancelled_losers": 64,
+        "elapsed_ms": 2597,
+        "outcome": "success",
+        "scenario": "ipv6-blackhole",
+        "terminal": null,
+        "winners": 64
+      }
+    },
+    "loss-1pct": {
+      "decision": "PASS",
+      "impairment": {
+        "bytes": 108179,
+        "command": [
+          "tc",
+          "-s",
+          "qdisc",
+          "show",
+          "dev",
+          "lo"
+        ],
+        "dropped": 7,
+        "packets": 969,
+        "raw": "qdisc netem 800d: root refcnt 2 limit 1000 loss 1% seed 2015\n Sent 108179 bytes 969 pkt (dropped 7, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "listener": {
+        "accepted": 128,
+        "error": null,
+        "expected": 128
+      },
+      "process": {
+        "command": [
+          "/home/elliot/.codex/scripts/codex_cangjie_env",
+          "--cwd",
+          "/home/elliot/playground/Wirestack",
+          "cjpm",
+          "test",
+          "src/internal/transport_stdnet",
+          "-j",
+          "1",
+          "--parallel",
+          "1",
+          "--filter",
+          "M2015NativeNetworkGateTest.*",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color",
+          "--skip-build"
+        ],
+        "duration_ms": 3696.394,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 3102721076 ns, RESULT:\n    TCS: M2015NativeNetworkGateTest, time elapsed: 3098108389 ns, RESULT:\n    [ PASSED ] CASE: runProfile (3097387811 ns)\n    STDOUT:\n    M2015_RESULT scenario=loss-1pct outcome=success winners=128 attempts=128 cancelledLosers=0 elapsedMs=3097\nSummary: TOTAL: 37\n    PASSED: 1, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 3109849059 ns, RESULT:\nTP: wirestack.*, time elapsed: 3109802612 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.transport_stdnet, time elapsed: 3102721076 ns\nSummary: TOTAL: 37\n    PASSED: 1, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+        "timed_out": false
+      },
+      "resources": {
+        "samples": [
+          {
+            "elapsed_ms": 0,
+            "fd_count": 4,
+            "process_count": 1,
+            "rss_kib": 28984,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 75,
+            "fd_count": 12,
+            "process_count": 2,
+            "rss_kib": 183924,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 141,
+            "fd_count": 12,
+            "process_count": 2,
+            "rss_kib": 367864,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 214,
+            "fd_count": 6,
+            "process_count": 1,
+            "rss_kib": 30748,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 271,
+            "fd_count": 21,
+            "process_count": 3,
+            "rss_kib": 68028,
+            "socket_count": 0,
+            "thread_count": 14
+          },
+          {
+            "elapsed_ms": 343,
+            "fd_count": 21,
+            "process_count": 3,
+            "rss_kib": 70136,
+            "socket_count": 0,
+            "thread_count": 14
+          },
+          {
+            "elapsed_ms": 426,
+            "fd_count": 5,
+            "process_count": 1,
+            "rss_kib": 41956,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 508,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91356,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 580,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91356,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 657,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91356,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 735,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91356,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 806,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91356,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 876,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91356,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 945,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91356,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 1014,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91356,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 1090,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91356,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 1162,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91356,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 1227,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91356,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 1290,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91356,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 1389,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91356,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 1569,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91648,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 1706,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91648,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 1780,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91648,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 1872,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91648,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 1952,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91648,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2013,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91648,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2071,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91648,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2135,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91648,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2210,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91648,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2280,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91648,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2338,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91648,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2400,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91648,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2459,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91648,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2513,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 91648,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2583,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2645,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2702,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2760,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2818,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2877,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2938,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 2994,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 3051,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 3204,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 3270,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 3337,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 3400,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 3471,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 3547,
+            "fd_count": 28,
+            "process_count": 3,
+            "rss_kib": 92420,
+            "socket_count": 4,
+            "thread_count": 23
+          },
+          {
+            "elapsed_ms": 3629,
+            "fd_count": 6,
+            "process_count": 1,
+            "rss_kib": 42020,
+            "socket_count": 0,
+            "thread_count": 8
+          }
+        ],
+        "trend": {
+          "comparison_window_samples": 8,
+          "decision": "PASS",
+          "growth": {
+            "fd_count": {
+              "first_median": 28.0,
+              "growth": 0.0,
+              "growth_limit": 8.0,
+              "last_median": 28.0
+            },
+            "process_count": {
+              "first_median": 3.0,
+              "growth": 0.0,
+              "growth_limit": 0.0,
+              "last_median": 3.0
+            },
+            "rss_kib": {
+              "first_median": 91356.0,
+              "growth": 1064.0,
+              "growth_limit": 16384.0,
+              "last_median": 92420.0
+            },
+            "socket_count": {
+              "first_median": 4.0,
+              "growth": 0.0,
+              "growth_limit": 2.0,
+              "last_median": 4.0
+            },
+            "thread_count": {
+              "first_median": 23.0,
+              "growth": 0.0,
+              "growth_limit": 4.0,
+              "last_median": 23.0
+            }
+          },
+          "sample_count": 50,
+          "warmup_samples_excluded": 10
+        }
+      },
+      "result": {
+        "attempts": 128,
+        "cancelled_losers": 0,
+        "elapsed_ms": 3097,
+        "outcome": "success",
+        "scenario": "loss-1pct",
+        "terminal": null,
+        "winners": 128
+      }
+    },
+    "rtt-100ms": {
+      "decision": "PASS",
+      "impairment": {
+        "bytes": 37594,
+        "command": [
+          "tc",
+          "-s",
+          "qdisc",
+          "show",
+          "dev",
+          "lo"
+        ],
+        "dropped": 0,
+        "packets": 60,
+        "raw": "qdisc netem 800c: root refcnt 2 limit 1000 delay 50ms seed 14594099869675746005\n Sent 37594 bytes 60 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 66b 1p requeues 0\n"
+      },
+      "listener": {
+        "accepted": 1,
+        "error": null,
+        "expected": 1
+      },
+      "process": {
+        "command": [
+          "/home/elliot/.codex/scripts/codex_cangjie_env",
+          "--cwd",
+          "/home/elliot/playground/Wirestack",
+          "cjpm",
+          "test",
+          "src/internal/transport_stdnet",
+          "-j",
+          "1",
+          "--parallel",
+          "1",
+          "--filter",
+          "M2015NativeNetworkGateTest.*",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color",
+          "--skip-build"
+        ],
+        "duration_ms": 1605.275,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 108218303 ns, RESULT:\n    TCS: M2015NativeNetworkGateTest, time elapsed: 102227446 ns, RESULT:\n    [ PASSED ] CASE: runProfile (101310847 ns)\n    STDOUT:\n    M2015_RESULT scenario=rtt-100ms outcome=success winners=1 attempts=2 cancelledLosers=1 elapsedMs=100\nSummary: TOTAL: 37\n    PASSED: 1, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 162487298 ns, RESULT:\nTP: wirestack.*, time elapsed: 162303502 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.transport_stdnet, time elapsed: 108218303 ns\nSummary: TOTAL: 37\n    PASSED: 1, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+        "timed_out": false
+      },
+      "resources": {
+        "samples": [],
+        "trend": null
+      },
+      "result": {
+        "attempts": 2,
+        "cancelled_losers": 1,
+        "elapsed_ms": 100,
+        "outcome": "success",
+        "scenario": "rtt-100ms",
+        "terminal": null,
+        "winners": 1
+      }
+    },
+    "rtt-20ms": {
+      "decision": "PASS",
+      "impairment": {
+        "bytes": 37926,
+        "command": [
+          "tc",
+          "-s",
+          "qdisc",
+          "show",
+          "dev",
+          "lo"
+        ],
+        "dropped": 0,
+        "packets": 65,
+        "raw": "qdisc netem 800b: root refcnt 2 limit 1000 delay 10ms seed 15579326777524453254\n Sent 37926 bytes 65 pkt (dropped 0, overlimits 0 requeues 0) \n backlog 0b 0p requeues 0\n"
+      },
+      "listener": {
+        "accepted": 1,
+        "error": null,
+        "expected": 1
+      },
+      "process": {
+        "command": [
+          "/home/elliot/.codex/scripts/codex_cangjie_env",
+          "--cwd",
+          "/home/elliot/playground/Wirestack",
+          "cjpm",
+          "test",
+          "src/internal/transport_stdnet",
+          "-j",
+          "1",
+          "--parallel",
+          "1",
+          "--filter",
+          "M2015NativeNetworkGateTest.*",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color",
+          "--skip-build"
+        ],
+        "duration_ms": 957.581,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 28148437 ns, RESULT:\n    TCS: M2015NativeNetworkGateTest, time elapsed: 22586394 ns, RESULT:\n    [ PASSED ] CASE: runProfile (21877196 ns)\n    STDOUT:\n    M2015_RESULT scenario=rtt-20ms outcome=success winners=1 attempts=2 cancelledLosers=1 elapsedMs=21\nSummary: TOTAL: 37\n    PASSED: 1, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 40230870 ns, RESULT:\nTP: wirestack.*, time elapsed: 40151584 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.transport_stdnet, time elapsed: 28148437 ns\nSummary: TOTAL: 37\n    PASSED: 1, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+        "timed_out": false
+      },
+      "resources": {
+        "samples": [],
+        "trend": null
+      },
+      "result": {
+        "attempts": 2,
+        "cancelled_losers": 1,
+        "elapsed_ms": 21,
+        "outcome": "success",
+        "scenario": "rtt-20ms",
+        "terminal": null,
+        "winners": 1
+      }
+    }
+  },
+  "schema_version": 1,
+  "source_digests": {
+    "docs/evidence/M2-015/test-plan.md": "84483a0f7272f7a7d334294441426cb1638d2df1a7705aed456bf5ca3639e8e6",
+    "src/internal/transport_stdnet/m2_015_native_network_test.cj": "f727441ac46f1813d9eb03c032fd9fd0fc884afc9e0d50af5cde026fd346f72b",
+    "tools/gates/m2_015_native_network.py": "62395ed93d1dbbf94836e452ab589da6d8fc9d91d12e75f87b8518ce4f7b34c4"
+  },
+  "task_id": "M2-015",
+  "thresholds": {
+    "blackhole_iterations": 64,
+    "candidate_count_delta_ms": 150,
+    "deadline_ms": 350,
+    "deadline_overshoot_ms": 250,
+    "loss_iterations": 128
+  }
+}
