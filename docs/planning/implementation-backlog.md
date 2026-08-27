@@ -2,8 +2,10 @@
 
 **依据：**《Wirestack：仓颉跨平台 TLS/HTTPS 网络栈重写 PRD》v2.1（2026-08-27）  
 **文档类型：** Issue/PR 级实施 backlog  
-**主线任务数：** 174  
+**全平台主线任务数：** 181  
+**Linux 稳定版收口任务数：** 14  
 **远期上游任务数：** 7  
+**当前发布任务数：** 195  
 **目标：** 将 PRD 转换为可排期、可并行、可验收、可追踪的仓库任务；不在此文档中改变 PRD 已冻结的产品边界。
 
 > 仓库事实：Wirestack 是独立仓颉绿地网络库仓库，GitHub 为 `lIlIIlIll/Wirestack`。新公共包默认使用 `wirestack.*`，内部实现使用 `wirestack.internal.*`。`cangjie_stdx`、仓颉 SDK、`std.net` 与 runtime 源码均为外部参考或上游仓库，不属于 Wirestack 工作树。实际物理目录与 `cjpm` target 由 M0-002 根据当前仓颉工具链冻结；本 backlog 在此之前只约束逻辑模块边界、依赖方向和验收语义。
@@ -441,6 +443,40 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 
 ---
 
+## 5.9 M7：Linux glibc 稳定版收口
+
+ADR-0002 允许 Linux 在其原生依赖完成后独立交付。以下任务只关闭
+Linux x86_64 glibc 单元，不改变 M7-001～M7-017 的六平台状态。每项都使用
+公开 SDK、Wirestack 内部有界方案或稳定 capability fallback。`UP-*` 和
+runtime、`std.net` 源码修改不得成为依赖。
+
+**Linux 退出条件：**
+
+- PRD 的 15 条生命周期不变量和 22 条发布验收均完成适用性判定；
+- 所有适用于 Linux 的 P0 项都有原生执行证据；
+- Linux artifact 可安装、可查询、可验证，且不依赖系统 OpenSSL；
+- fuzz、性能、24 小时以上最终 soak、安全审查、SBOM、签名和 API freeze 通过；
+- 非 Linux 条目明确记为 `NOT_APPLICABLE_TO_LINUX_PROFILE`，不得记为全局 PASS。
+
+| ID | 任务 | 责任域 | 复杂度 | 依赖 | PRD 追踪 | 合并/验收条件 |
+|---|---|---|---:|---|---|---|
+| M7-018 | 冻结 Linux M7 任务图与证据边界 | 质量 | C2 | M1-025,M2-016,M3-028,M5-030,M6-025 | ADR-0002/0004/0005；PRD §21.5/§25–26 | Linux 任务逐项覆盖追踪、架构、artifact、安装、soak、fuzz、性能、SBOM、API、文档、安全、签名和候选报告；依赖图不包含 M1-026、M4 或 `UP-*`；全局 M7 状态不变。 |
+| M7-019 | 执行 Linux P0、不变量与发布验收追踪审计 | 质量 | C3 | M7-018 | PRD §17/§26 | 逐项映射所有 P0、15 条不变量和 22 条发布验收；Linux 适用项链接代码、测试和报告，非 Linux 项标记 `NOT_APPLICABLE_TO_LINUX_PROFILE`；任一证据缺口形成阻断项。 |
+| M7-020 | 执行 Linux 最终架构与私有 ABI 审计 | 架构 | C2 | M7-019 | PRD §7.2/§24.1/§26 | Core 无 `std.net`，公共 API 无底层类型，仓库无 `CJ_MRT_Sock*`，新 HTTP/TLS 无旧 bridge、global provider 或系统 OpenSSL loader；审计可重复运行。 |
+| M7-021 | 构建、扫描并安装 Linux release artifact | 发布 | C4 | M7-020,M3-028 | PRD §21.5/§23/§26 | 原生 release 构建生成可复现 digest 和依赖清单；干净 consumer 安装并运行 HTTPS client/server 与 runtime-info smoke；产物不搜索或链接系统 `libssl`/`libcrypto`，且 `externalOpenSslDependency=false`。 |
+| M7-022 | 完成 Linux 最终 24h+ soak 与资源上限报告 | 可靠性 | C4 | M7-021,M6-023 | PRD §9/§17/§19 | 原生 release artifact 连续运行至少 24 小时，混合 idle/active、connect/reset/cancel、H1 pool、H2 multiplex 和 SSE；记录 RSS、FD、socket、timer、waiter、buffer、GC root、task 和线程，所有集合有界且无单调泄漏。 |
+| M7-023 | 建立 Linux 持续 fuzz 门禁与发布阈值 | 安全 | C4 | M7-018,M3-028,M5-029,M6-019 | PRD §18/§21.4 | 十个 PRD fuzz target 均有版本化 corpus、seed、时间或迭代阈值、崩溃保存和重放命令；原生 release 门禁达到阈值且无未修复崩溃。 |
+| M7-024 | 建立 Linux 性能回归基线与发布门禁 | 性能 | C4 | M7-018,M1-025,M2-016,M3-028,M5-030,M6-020..M6-025 | PRD §19/§22 | 版本化 raw TCP、DNS-to-connected、TLS、H1、H2、取消、SSE 和内存基线；固定环境、轮次和阈值，保留原始输出并自动给出 PASS/FAIL。 |
+| M7-025 | 生成 Linux SBOM、provider manifest 与 build fingerprint | 发布 | C3 | M7-021,M3-002 | PRD §13.1/§18/§23/§26 | SBOM 与 artifact digest 绑定；manifest 可查询 provider、crypto、trust、capability、patch level、target 和 features；fingerprint 对同一输入稳定，对依赖变化敏感。 |
+| M7-026 | 冻结 Linux 公共 API 并执行兼容性检查 | API | C4 | M7-019,M5-030,M6-020..M6-025 | PRD §24/§28/§29 | 生成版本化 API baseline；冻结包名、major 和 cancellation handle；兼容性门禁通过，且公共声明不含 global TlsKit、TrustAll、OpenSSL string、StreamingSocket 或旧适配器。 |
+| M7-027 | 完成 Linux 迁移指南与可运行示例 | 文档 | C3 | M7-026 | PRD §6/§24.3/§29 | 文档覆盖 timeout 到 Deadline、取消、CA、mTLS、stream body、retry、errors 和移除 OpenSSL 配置；HTTPS client、已有 transport TLS、CONNECT+TLS、H1/H2 server、SSE、mTLS、自定义 CA 和分作用域取消示例在干净 consumer 中构建运行。 |
+| M7-028 | 准备 Linux 独立安全审查材料 | 安全 | C3 | M7-019..M7-025 | PRD §18/§27 | 材料包含 threat model、架构、provider、C ABI、parser、key/trust、fuzz、SBOM、已知限制、复现环境和证据 digest；不含密钥、secret 或敏感请求数据。 |
+| M7-029 | 完成 Linux 独立安全审查与修复闭环 | 安全 | C4 | M7-028 | PRD §18/§26 | 独立审查者记录范围、方法和发现；所有发现分级并可复现，修复带回归；任何未关闭 High/Critical 使任务失败。 |
+| M7-030 | 实现 Linux artifact 签名与安全更新流程 | 发布 | C3 | M7-025,M7-029 | PRD §18/§23/§27 | artifact、SBOM 和 manifest 均有可验证签名；干净 consumer 演练验证、拒绝篡改、provider 升级、回滚、公告和 SBOM 更新。 |
+| M7-031 | 生成 Linux 稳定版验收矩阵与候选报告 | 质量 | C4 | M7-019..M7-030 | PRD §26 | 22 条验收逐项记录 PASS、FAIL 或 `NOT_APPLICABLE_TO_LINUX_PROFILE`，并链接 artifact digest、原生平台证据和已知限制；任一 Linux P0 FAIL、缺失证据或未关闭 High/Critical 阻断 Linux 稳定版。 |
+
+---
+
 ## 6. 远期上游增强
 
 这些任务不属于 Wirestack release 依赖。只有对应失败报告、最小接口 RFC 和
@@ -577,9 +613,11 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 
 ## 11. 任务统计
 
-- 主线任务：**174**
+- 全平台主线任务：**181**
+- Linux 稳定版收口任务：**14**
 - 远期上游任务：**7**
-- 稳定版后 P1/独立项目：**10**
-- 主线 + 条件任务总数：**181**
+- 稳定版后 P1/独立项目：**11**
+- 当前发布相关任务总数：**195**
+- 全部已记录任务总数：**213**
 
 该数量代表 Issue/PR 级工作项，不代表必须串行执行；关键是保持里程碑退出门禁和依赖方向。
