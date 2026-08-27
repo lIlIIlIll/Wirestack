@@ -1,30 +1,16 @@
 # Raw evidence handling
 
-The harness writes the full schema-versioned report to:
+The formal report is committed as [`result.json`](result.json). It contains
+all read-size arrays, RSS and thread samples, process results, paired execution
+order, percentiles, `strace` receive traces and instrumentation digests.
+
+The formal command is:
 
 ```text
-build/gates/net05-large-buffer-profile.json
+timeout 900s env DISABLE_ZOXIDE=1 /home/elliot/.codex/scripts/codex_cangjie_env --cwd /home/elliot/playground/Wirestack bash scripts/gate-net05-large-buffer-profile --warmup 1 --repetitions 11 --output /tmp/wirestack-m0-010-fair-shape-formal11.json --artifact-dir /tmp/wirestack-m0-010-fair-shape-formal11-artifacts --repository-revision working-tree-m0-010-fair-shape
 ```
 
-The report contains every measured read-size array, RSS sample, server send size,
-process result and aggregate. It is intentionally not replaced by the compact
-`manifest.json`.
-
-For a reproducible native run:
-
-```bash
-source /mnt/data/cangjie-sdk/cangjie/envsetup.sh
-scripts/with-host-gate-lock linux-native-gate -- \
-  bash scripts/gate-net05-large-buffer-profile \
-    --warmup 1 --repetitions 5
-
-gzip -n -9 -c build/gates/net05-large-buffer-profile.json \
-  > build/gates/net05-large-buffer-profile.json.gz
-sha256sum \
-  build/gates/net05-large-buffer-profile.json \
-  build/gates/net05-large-buffer-profile.json.gz
-```
-
-A PR must not claim global GATE-NET-05 completion without attaching or otherwise
-persisting that raw report, native Windows copied-byte evidence, and a future
-`StdNetTransport` comparison.
+Exit 1 is the expected command result for the retained report because the
+runner completed its matrix and made the measured `linux_profile_status=FAIL`
+decision. A missing tool, build error, timeout or malformed result would instead
+emit `GATE-NET-05 profile: ERROR` and would not qualify as gate evidence.
