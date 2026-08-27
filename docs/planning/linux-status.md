@@ -1,7 +1,8 @@
 # Linux delivery status
 
 This file tracks the Linux-first profile accepted by
-[ADR-0002](../architecture/adr/0002-linux-first-delivery-profile.md). The
+[ADR-0002](../architecture/adr/0002-linux-first-delivery-profile.md) and amended
+by [ADR-0004](../architecture/adr/0004-linux-glibc-support.md). The
 global six-platform status remains in [`status.md`](status.md).
 
 Status values have the same fail-closed meaning as the global status file.
@@ -11,6 +12,7 @@ Status values have the same fail-closed meaning as the global status file.
 | Area | Status | Current evidence or next requirement |
 |---|---|---|
 | Architecture and gate harness | COMPLETE | M0-001 through M0-004 and M0-018 evidence |
+| Linux libc scope | COMPLETE | The current release supports native glibc x86_64. ADR-0004 defers musl to P1-011 until the Cangjie SDK supports it. |
 | close/wakeup and absolute Deadline | COMPLETE | M0-006 and M0-008 native Linux results |
 | duplex and EOF classification | BLOCKED | Executed behavior passes; public typed half-close is absent and requires UP-003 |
 | large-buffer/copy profile | COMPLETE | M0-010 measures all five payloads, native process allocations, syscall receive bytes and adapter staging copies, and retains the failed pre-optimization comparison. The M1-027 Wirestack fast path then passes the unchanged five-payload x 11-round O2 GATE-NET-05 thresholds with zero adapter staging copies, so UP-004 is not required for the Linux profile; [Linux evidence](../evidence/M1-027/README.md) |
@@ -60,7 +62,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M2-011 RFC 8305 attempt plan | COMPLETE | Stable family interleaving, intra-family order, deduplication and bounded candidate tests |
 | M2-012/013 Happy Eyeballs scheduler | COMPLETE | Shared parent Deadline, linked cancellation, atomic first winner, loser abort, joined candidates and per-attempt diagnostics |
 | M2-014 scripted connector tests | COMPLETE | IPv6 first success and blackhole fallback, simultaneous success, all-fail, pre-cancel, success+cancel and injected Deadline boundary all pass; candidates are joined and rejected winners are aborted; [Linux evidence](../evidence/M2-014/README.md) |
-| M2-015/016 native network gates/benchmark | NOT_STARTED | Linux network emulation, glibc/musl runs and DNS-to-connected benchmark remain |
+| M2-015/016 native network gates/benchmark | READY | Native glibc network emulation and the DNS-to-connected benchmark remain; musl is outside the current profile under ADR-0004. |
 
 ## Implemented TLS Provider Foundation
 
@@ -137,9 +139,8 @@ Status values have the same fail-closed meaning as the global status file.
    deterministic race tests.
 2. Submit the minimal `std.net` upstream interface RFC for typed half-close and
    stable native error evidence.
-3. Land UP-007 or another proven non-carrier-blocking resolver backend, then
-   complete Linux `SystemResolver` and native blackhole gates.
-4. Complete native musl trust-adapter evidence and M3-028 TLS interoperability,
-   fuzz, dependency and benchmark gates under ADR-0003.
+3. Complete M2-015 native glibc network-emulation tests and M2-016 metrics.
+4. Complete M3-028 TLS interoperability, fuzz, dependency and benchmark gates
+   under ADR-0003 and ADR-0004.
 5. Complete Linux stress/soak, stdx comparison when an eligible baseline SDK
    exists, packaging and installation verification.
