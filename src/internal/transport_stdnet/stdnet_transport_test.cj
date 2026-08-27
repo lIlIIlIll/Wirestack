@@ -237,7 +237,7 @@ class StdNetTransportTest {
     }
 
     @TestCase
-    func emptyOperationsAreImmediateAndHalfCloseFailsExplicitly(): Unit {
+    func emptyOperationsAreImmediate(): Unit {
         let listener = StdNetTransportListener.bind(loopback(0))
         let accepted = spawn { listener.accept() }
         let client = StdNetTransport.connect(listener.localEndpoint)
@@ -248,16 +248,66 @@ class StdNetTransportTest {
                 case ReadResult.EndOfStream => @Expect(false)
             }
             @Expect(client.writeSome(ByteSpan(Array<Byte>())), 0)
-            var unsupported = false
-            try {
-                client.shutdown(ShutdownDirection.Write)
-            } catch (error: NetworkException) {
-                match (error.code) {
-                    case NetworkErrorCode.Unsupported => unsupported = true
-                    case _ => ()
+        } finally {
+            client.close()
+            server.close()
+            listener.close()
+        }
+    }
+
+    @TestCase
+    func unsupportedHalfClosePreservesBothDirections(): Unit {
+        let listener = StdNetTransportListener.bind(loopback(0))
+        let accepted = spawn { listener.accept() }
+        let client = StdNetTransport.connect(listener.localEndpoint)
+        let server = accepted.get(Duration.second)
+        try {
+            @Expect(!client.info.supportsHalfClose)
+
+            for (direction in [ShutdownDirection.Read, ShutdownDirection.Write]) {
+                var unsupported = false
+                try {
+                    client.shutdown(direction)
+                } catch (error: NetworkException) {
+                    let stableCategory = match (error.category) {
+                        case NetworkErrorCategory.Unsupported => true
+                        case _ => false
+                    }
+                    let stablePhase = match (error.phase) {
+                        case NetworkPhase.TransportClose => true
+                        case _ => false
+                    }
+                    let stableCode = match (error.code) {
+                        case NetworkErrorCode.Unsupported => true
+                        case _ => false
+                    }
+                    let stableRetryability = match (error.retryability) {
+                        case Retryability.Never => true
+                        case _ => false
+                    }
+                    @Expect(stableCategory)
+                    @Expect(stablePhase)
+                    @Expect(stableCode)
+                    @Expect(stableRetryability)
+                    @Expect(error.nativeCode.isNone())
+                    @Expect(error.localEndpoint, client.info.localEndpoint)
+                    @Expect(error.remoteEndpoint, client.info.remoteEndpoint)
+                    unsupported = true
                 }
+                @Expect(unsupported)
+
+                writeAll(client, ByteSpan([1]))
+                let request = Array<Byte>(1, repeat: 0)
+                readExact(server, MutableByteSpan(request))
+                let expectedRequest: Array<Byte> = [1]
+                @Expect(request, expectedRequest)
+
+                writeAll(server, ByteSpan([2]))
+                let response = Array<Byte>(1, repeat: 0)
+                readExact(client, MutableByteSpan(response))
+                let expectedResponse: Array<Byte> = [2]
+                @Expect(response, expectedResponse)
             }
-            @Expect(unsupported)
         } finally {
             client.close()
             server.close()
