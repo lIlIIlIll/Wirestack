@@ -2,7 +2,7 @@
 
 Wirestack 是一个面向仓颉的跨平台安全网络栈项目，目标是在保留 `std.net` 作为官方默认 TCP/runtime 调度底座的前提下，重新定义并实现独立的 Transport、TLS、HTTPS、HTTP/1.1 与 HTTP/2 语义。
 
-当前仓库已进入 **Linux glibc-first TLS 实现阶段**。Transport Core、Linux `StdNetTransport`/listener、Resolver contract 与 Happy Eyeballs core 已实现；AWS-LC 5.5.0 已在 Linux glibc/musl 原生 PoC 全能力通过并由 ADR-0003 选定。ADR-0004 将当前 Wirestack Linux 发布目标限定为 glibc；musl 等仓颉 SDK 支持后再采纳。当前公开 `std.net` 仍缺少 typed half-close 和稳定 native error code，相关能力保持 fail-closed；生产 TLS、HTTP 与六平台能力尚未完成。
+当前仓库已完成 Linux glibc 上的 Transport、Resolver、Connector、TLS、HTTP/1.1 与 HTTP/2 主体实现和验收。AWS-LC 5.5.0 是 Linux provider。公开 cancellation handles、HTTP/2 server facade、ALPN dispatch 和一小时 SSE profile 已有 native Linux 证据。ADR-0004 将 musl 延后到 SDK 正式支持之后。ADR-0005 规定 Wirestack release 不依赖 runtime 或 `std.net` 源码修改；缺少 typed TCP half-close、native socket code 或精确 runtime backend 时，适配器使用稳定的能力和错误表示。
 
 ## 目标
 
@@ -44,7 +44,7 @@ wirestack.internal.http2
 wirestack.internal.platform.*
 ```
 
-Transport、Resolver 与 Connector 包已经包含首批实现；TLS、HTTP 包仍只保留已冻结的编译边界。
+Transport、Resolver、Connector、TLS、HTTP/1.1 与 HTTP/2 包已经包含 Linux glibc 实现。全平台发布矩阵仍未完成。
 
 ## 本地验证
 
@@ -62,7 +62,7 @@ source /path/to/cangjie/envsetup.sh
 ./scripts/check
 ```
 
-当前统一检查执行 `cjpm check` 和 `cjpm build`。后续任务会在同一入口增加架构守卫和测试。
+当前统一检查执行架构守卫、构建和测试。长期 profile 和部分 native gate 由各任务的证据命令单独运行。
 
 SDK 归档、解压后的工具链和 `target/` 构建产物都不进入仓库。
 
@@ -82,6 +82,6 @@ SDK 归档、解压后的工具链和 `target/` 构建产物都不进入仓库�
 
 ## 当前执行点
 
-Linux Transport/Resolver/Connector 基础实现已经形成三个本地提交。M0-016 保留的 AWS-LC Linux glibc/musl schema-v2 结果均为 `PASS`，包含 TLS 1.2/1.3 external signer 和各 10,000 次 handshake/close；ADR-0003 因此冻结 Linux 默认 provider。全局 M0-016/M0-020 仍因 Windows、macOS external signer 与移动平台证据缺失而保持 `BLOCKED`。当前 Linux 关键路径进入 AWS-LC 静态集成与 TLS Core 实现。
+Linux glibc 主体能力已经完成。当前关键路径是 M1-024 确定性竞态测试、M1-025 泄漏与 benchmark 收口，以及 Linux 专用的 M7 发布任务。UP-001 至 UP-007 都是远期上游增强，不在 Wirestack 发布依赖图中。全局六平台状态仍因其他平台的原生证据缺失而保持 fail-closed。
 
 不要把“能交叉编译”视为平台支持完成；涉及平台能力的完成声明必须有真机或原生 VM 证据。
