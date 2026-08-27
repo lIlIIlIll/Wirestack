@@ -5,7 +5,7 @@
   "decision": "PASS",
   "source_sha256": {
     "docs/product/prd.md": "a201d628d43ca53d925a98f2ee24ade92ba22f0eb5d7e565e1c1ca1792b140cf",
-    "docs/planning/implementation-backlog.md": "60e95587a95b407129e44eb2392cdeed34993808702c4521b19c0c5a15897a4f",
+    "docs/planning/implementation-backlog.md": "27dca9f0aea110aa23396346f4bf44954bae56d9dadb399eaa8947ca49fa2266",
     "tools/architecture_guard.py": "e84fb0919d1790c17971a7133c592780c7b3783dfe2753adf34d8d15ce51dd42",
     "cjpm.toml": "47fa86311bacf7f092f4a6641f200a7e11196d6ed020c7f1f914e8d51650ae17"
   },
