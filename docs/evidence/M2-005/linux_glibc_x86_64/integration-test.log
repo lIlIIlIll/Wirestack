@@ -1,0 +1,17 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 275012894 ns, RESULT:
+    TCS: HttpFacadeTest, time elapsed: 264606724 ns, RESULT:
+    [ PASSED ] CASE: defaultSystemResolverConnectsPublicClientAndServer (261900691 ns)
+Summary: TOTAL: 66
+    PASSED: 1, SKIPPED: 65, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 281434645 ns, RESULT:
+TP: wirestack.*, time elapsed: 281369532 ns, RESULT:
+    PASSED:
+    TP: wirestack.http, time elapsed: 275012894 ns
+Summary: TOTAL: 66
+    PASSED: 1, SKIPPED: 65, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

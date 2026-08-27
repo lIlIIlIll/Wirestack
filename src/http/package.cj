@@ -53,6 +53,7 @@ public type ResolveResult = resolver.ResolveResult
 public type ResolveException = resolver.ResolveException
 public type Resolver = resolver.Resolver
 public type StaticResolver = resolver.StaticResolver
+public type SystemResolver = resolver.SystemResolver
 
 public type NetworkErrorCategory = transport.NetworkErrorCategory
 public type NetworkPhase = transport.NetworkPhase
