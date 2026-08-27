@@ -4,6 +4,8 @@ build/
 build-script-cache/
 dist/
 out/
+__pycache__/
+*.py[cod]
 
 # Durable, checksum-pinned evidence overrides user-level *.json ignores.
 !docs/evidence/M0-005/linux_x86_64/*.json
@@ -14,6 +16,7 @@ out/
 !docs/evidence/M2-003/linux_x86_64/*.json
 !docs/evidence/M2-005/linux_glibc_x86_64/*.json
 !docs/evidence/M2-015/linux_glibc_x86_64/*.json
+!docs/evidence/M2-016/linux_glibc_x86_64/*.json
 
 # Local tool state
 .cjpm/
