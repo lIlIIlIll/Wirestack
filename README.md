@@ -9,9 +9,17 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-yellow?style=flat" alt="Apache License 2.0" /></a>
-  <img src="https://img.shields.io/badge/Cangjie-1.1.0-3B82F6?style=flat" alt="Cangjie 1.1.0" />
-  <img src="https://img.shields.io/badge/manifest-2.0.0-10B981?style=flat" alt="Manifest version 2.0.0" />
+  <a href="https://github.com/lIlIIlIll/yjson/actions/workflows/ci.yml"><img src="https://github.com/lIlIIlIll/yjson/actions/workflows/ci.yml/badge.svg?branch=main" alt="Tests" /></a>
+  <a href="https://codecov.io/gh/lIlIIlIll/yjson"><img src="https://codecov.io/gh/lIlIIlIll/yjson/branch/main/graph/badge.svg?flag=core" alt="Core Coverage" /></a>
+  <a href="https://github.com/lIlIIlIll/yjson/releases/latest"><img src="https://img.shields.io/github/v/release/lIlIIlIll/yjson?display_name=tag&sort=semver" alt="Release" /></a>
+  <a href="docs/performance/results/2026-08-27-yjson-2.0.0.md"><img src="https://img.shields.io/badge/Performance-qualified-10B981" alt="Performance qualified" /></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Cangjie-%3E%3D1.1.0-3B82F6" alt="Cangjie 1.1.0 or later" />
+  <a href="release/2.0.0/evidence.md"><img src="https://img.shields.io/badge/Linux%20x86__64-qualified-10B981" alt="Linux x86_64 qualified" /></a>
+  <a href="docs/architecture.md"><img src="https://img.shields.io/badge/engine-Pure%20default-8B5CF6" alt="Pure engine by default" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-yellow" alt="Apache License 2.0" /></a>
 </p>
 
 yjson 2.0 默认使用跨平台、GC 管理的 Pure 引擎。普通应用只需要
@@ -81,6 +89,24 @@ main(): Unit {
 `@JsonCodec` 在调用方编译时生成 `UserJson: JsonCodec<User>` 和
 `JsonCodecProvider` 实现。它不扫描源码目录，也不依赖运行时反射。可运行的完整示例位于
 [`packages/examples`](packages/examples/README.md)。
+
+## 性能
+
+2.0.0 的发布门禁在固定的 Linux x86_64 Server CPU 8、128 MiB 环境中执行，每个
+workload 交替测量 11 轮。下表只展示发布门槛 workload；数值是中位数，比例越低越快。
+
+| Workload | yjson / Native | 对照 | 比例 | 胜出轮次 |
+| --- | ---: | ---: | ---: | ---: |
+| Large Array encode / string | 46.080 µs | cjfast_json 76.117 µs | 0.608x | 11/11 |
+| ProfileBundle encode / bytes | 10.344 µs | cjfast_json 12.546 µs | 0.816x | 11/11 |
+| ProfileBundle encode / string | 10.767 µs | cjfast_json 12.338 µs | 0.845x | 11/11 |
+| Deep Nested encode / string | 63.552 µs | cjfast_json 74.500 µs | 0.856x | 11/11 |
+| Native writeNumericBytes | 0.559 ms | Pure 2.354 ms | 0.238x | 11/11 |
+| Native readNumericDocument | 1.211 ms | Pure 2.148 ms | 0.564x | 11/11 |
+
+这些结果只适用于对应源码、SDK、主机、workload 和测量方法。完整 36-workload 结果、
+CV、原始样本、checksum 与复现边界见
+[2.0.0 性能报告](docs/performance/results/2026-08-27-yjson-2.0.0.md)。
 
 ## 按任务选择 API
 

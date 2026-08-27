@@ -7,6 +7,9 @@ RELEASE_NOTES.md
 cjpm.toml
 cjpm.lock
 .gitignore
+.github/workflows/ci.yml
+codecov.yml
+coverage-baseline.toml
 .gitcode/workflows/ci.yml
 .gitcode/workflows/extended.yml
 docs/architecture.md
@@ -24,6 +27,7 @@ docs/performance/methodology.md
 docs/performance/results/2026-08-25-linux-release-three-library.md
 docs/performance/results/2026-08-25-linux-release-three-library.csv
 docs/performance/results/2026-08-26-native-acceleration.md
+docs/performance/results/2026-08-27-yjson-2.0.0.md
 docs/release-checklist.md
 docs/schema.md
 benchmarks/README.md
@@ -109,6 +113,10 @@ scripts/runtime_freeze_contract_checks.sh
 scripts/ci_job.sh
 scripts/ci_fresh_checkout.sh
 scripts/release_registry_rehearsal.py
+scripts/latest_cangjie_nightly.py
+scripts/coverage.sh
+scripts/cjcov_to_lcov.py
+scripts/check_patch_coverage.py
 
 # Release performance comparison source
 benchmarks/cjfast_json/cjfast_comprehensive_bench.cj

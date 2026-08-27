@@ -22,15 +22,31 @@ Benchmark 不能替代 correctness test；root white-box pass 也不能替代 st
 
 ## CI job mapping
 
-`scripts/ci_job.sh` 提供 `api-inventory`、`core`、`standards-conformance`、
-`schema-formats-conformance`、`performance-comparison`、`examples`、`macro-consumer`、
-`custom-native`、`yyjson-native`、`native-clang`、`native-gcc`、`sanitizer`、`fuzz-short`、
-`fuzz-extended` 和 `yyjson-colink` 等 job。
+GitHub Actions 的 `CI` workflow 在 GitHub-hosted Linux x86_64 runner 上执行每日 correctness
+门禁。`scripts/ci_job.sh` 提供 `api-inventory`、`runtime-freeze`、`core`、
+`standards-conformance`、`schema-formats-conformance`、`examples`、`macro-consumer`、
+`algorithms-consumer`、`registry-rehearsal`、`custom-native`、`yyjson-native`、`native-clang`、
+`native-gcc`、`sanitizer`、`fuzz-short` 和 `yyjson-colink` 等 job。
+
+workflow 在每个七天窗口首次运行时解析最新完整 Cangjie nightly，并缓存所选版本。Tests 与
+Core Coverage 必须使用同一个版本；窗口内重跑不会切换 SDK。Server performance、50,000-case
+扩展 fuzz 与 Windows cross build 仍属于发布资格验证，不进入日常 hosted CI。
+
+## Core coverage
+
+运行 `scripts/coverage.sh`。脚本在临时 source tree 中以 `-O0` 编译，生成 cjcov HTML、JSON、
+XML 与 `coverage/lcov.info`，并在结束时清理临时树。统计范围仅为 root package 的
+`src/lib_*.cj`；测试源码、package 源码、build output 与 SDK/runtime 不计入。CI 将同一份
+LCOV 以 `core` flag 上传到 Codecov，上传失败会阻断 workflow。
+
+`coverage-baseline.toml` 保存首次完整测量建立的 line/branch 基线，项目允许最多 0.1 个百分点
+回退。Pull request 新增或修改的 core 可执行行必须达到 90% line coverage；这些行上的 branch
+必须达到 80%。
 
 Native acceleration 目前是 release qualification runner，不是 `ci_job.sh` 的短任务。正式执行
 固定 11 轮，详细门槛见[性能方法](../performance/methodology.md)。
 
-本地 fresh-source 与 hosted CI 是两份独立证据。一个 PASS 不能自动填充另一个状态。
+本地 fresh-source、coverage 与 hosted CI 是三份独立证据。一个 PASS 不能自动填充另一个状态。
 当前 release qualification 的阻断平台是 Linux x86_64；未执行的平台必须记录
 `NOT RUN / NON-BLOCKING / potentially supported`。
 

@@ -1,0 +1,25 @@
+coverage:
+  precision: 1
+  round: down
+  range: 70..95
+  status:
+    project:
+      core:
+        flags: [core]
+        target: auto
+        threshold: 0.1%
+    patch:
+      core:
+        flags: [core]
+        target: 90%
+        threshold: 0%
+
+flag_management:
+  default_rules:
+    carryforward: false
+  individual_flags:
+    - name: core
+      paths:
+        - src/lib_*.cj
+
+comment: false

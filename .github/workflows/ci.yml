@@ -1,0 +1,136 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, "release/**"]
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nightly:
+    name: Cangjie nightly (7-day window)
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+      - name: Select seven-day cache window
+        id: window
+        run: echo "value=$(( $(date -u +%s) / 604800 ))" >> "$GITHUB_OUTPUT"
+      - name: Restore nightly selection
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: .ci/cangjie-nightly-version
+          key: cangjie-nightly-linux-x64-${{ steps.window.outputs.value }}
+      - name: Resolve latest complete nightly
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p .ci
+          python3 scripts/latest_cangjie_nightly.py > .ci/cangjie-nightly-version
+      - name: Export shared nightly version
+        id: version
+        run: echo "value=$(cat .ci/cangjie-nightly-version)" >> "$GITHUB_OUTPUT"
+
+  tests:
+    name: Tests (${{ matrix.gate }})
+    needs: nightly
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        gate:
+          - api-inventory
+          - runtime-freeze
+          - core
+          - standards-conformance
+          - schema-formats-conformance
+          - examples
+          - macro-consumer
+          - algorithms-consumer
+          - registry-rehearsal
+          - custom-native
+          - yyjson-native
+          - native-clang
+          - native-gcc
+          - sanitizer
+          - fuzz-short
+          - yyjson-colink
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+      - name: Setup Cangjie
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ needs.nightly.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
+      - name: Install native prerequisites
+        if: contains(fromJSON('["schema-formats-conformance","algorithms-consumer","registry-rehearsal","custom-native","yyjson-native","native-clang","native-gcc","sanitizer","fuzz-short","yyjson-colink"]'), matrix.gate)
+        run: sudo apt-get update && sudo apt-get install -y clang gcc libidn2-dev
+      - name: Fetch pinned yyjson co-link fixture
+        if: matrix.gate == 'yyjson-colink'
+        run: |
+          curl -fL https://github.com/ibireme/yyjson/archive/refs/tags/0.11.1.tar.gz -o /tmp/yyjson-0.11.1.tar.gz
+          echo '610a38a5e59192063f5f581ce0c3c1869971c458ea11b58dfe00d1c8269e255d  /tmp/yyjson-0.11.1.tar.gz' | sha256sum -c -
+          mkdir -p /tmp/yjson-yyjson-second
+          tar -xzf /tmp/yyjson-0.11.1.tar.gz -C /tmp/yjson-yyjson-second
+      - name: Record toolchain
+        run: |
+          cjc -v
+          cjpm --version
+      - name: Run gate
+        env:
+          YJSON_SECOND_YYJSON_ROOT: ${{ matrix.gate == 'yyjson-colink' && '/tmp/yjson-yyjson-second/yyjson-0.11.1' || '' }}
+        run: scripts/ci_job.sh "${{ matrix.gate }}"
+
+  coverage:
+    name: Core Coverage
+    needs: nightly
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+          fetch-depth: 0
+      - name: Setup Cangjie
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ needs.nightly.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
+      - name: Generate cjcov and LCOV reports
+        run: scripts/coverage.sh
+      - name: Verify patch line and branch coverage
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git diff --unified=0 "$BASE_SHA"...HEAD -- 'src/lib_*.cj' > coverage/patch.diff
+          python3 scripts/check_patch_coverage.py \
+            --diff coverage/patch.diff \
+            --lcov coverage/lcov.info \
+            --baseline coverage-baseline.toml
+      - name: Upload core coverage to Codecov
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac
+        with:
+          use_oidc: true
+          files: coverage/lcov.info
+          flags: core
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true

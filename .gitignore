@@ -5,6 +5,10 @@
 build-script-cache/
 target/
 scripts/__pycache__/
+coverage/
+cov_output/
+*.gcda
+*.gcno
 benchmarks/java_fastjson2/build/
 
 # Audited RC evidence overrides the developer-wide *.json / *.txt ignores.

@@ -22,6 +22,7 @@ identity。发布期间不混入未评审 public API 或生成代码 bridge 变�
 8. external consumer 或 documented lifecycle 失败；
 9. source archive 包含 build output 或未声明 artifact；
 10. qualified platform 上存在未处置的 correctness/security blocker。
+11. GitHub Actions correctness、Core Coverage 或 Codecov upload 失败。
 
 高 CV 不自动阻断，也不能成为隐藏结果的理由；标记 noisy 后由 release owner 结合配对方向、
 历史基线和 workload 重要性处置。
@@ -39,8 +40,8 @@ Hosted CI execution: PASS / FAIL / NOT RUN
 Release blocking policy: BLOCKING / NON-BLOCKING
 ```
 
-本地 PASS 不能写成 hosted PASS。若 hosted 未运行仍允许发布，evidence 必须写清 policy 与
-审批人。
+本地 PASS 不能写成 hosted PASS。2.0 stable release 要求发布 PR 与合并后的 `main` workflow
+均通过；不得以本地证据替代 hosted CI 或 Codecov。
 
 ## 4. 审查平台声明
 
@@ -59,8 +60,12 @@ SDK build 不属于普通 yjson package release gate。
 
 ## 6. Tag 与 publish
 
-所有 blocker 关闭且 evidence review 完成后，才执行 tag/publish。发布动作、registry 返回值、
-artifact URL 与 checksum 追加到该版本不可变 evidence；后续候选不得覆写旧记录。
+所有 blocker 关闭且 evidence review 完成后，先通过普通 pull request 合并到 `main`，再等待
+`main` workflow 通过。随后在该 `main` commit 创建 annotated tag 和 stable GitHub Release，
+并上传九个 `.cjp`、`checksums.txt`、`manifest.json` 与 `environment.json`。中心 package registry
+发布是单独动作；未获授权时保持 unpublished。
+
+发布动作、artifact URL 与 checksum 追加到该版本不可变 evidence；后续候选不得覆写旧记录。
 
 测试层与 job mapping 见 [testing.md](testing.md)，性能发布规则见
 [performance methodology](../performance/methodology.md)。
