@@ -64,11 +64,13 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         status = self.read("docs/planning/status.md")
         linux = self.read("docs/planning/linux-status.md")
         self.assertIn("| M7-018 | COMPLETE |", status)
-        self.assertIn("| M7-019 | READY |", status)
+        self.assertIn("| M7-019 | COMPLETE |", status)
+        self.assertIn("| M7-020 | READY |", status)
         self.assertIn("| M7-023 | READY |", status)
         self.assertIn("| M7-024 | READY |", status)
+        self.assertIn("| M7-026 | READY |", status)
         self.assertIn("do not\nchange the status of the six-platform M7-001 through M7-017 tasks", status)
-        self.assertIn("Start M7-019", linux)
+        self.assertIn("Start M7-020", linux)
 
     def test_evidence_rejects_upstream_and_non_linux_completion_inference(self) -> None:
         evidence = self.read("docs/evidence/M7-018/README.md")
