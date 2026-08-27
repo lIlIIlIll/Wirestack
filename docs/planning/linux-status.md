@@ -155,7 +155,7 @@ replace the six-platform M7-001 through M7-017 tasks.
 | M7-022 Linux final 24h+ soak | READY | The release artifact is qualified. Run the required mixed workload for at least 24 hours. |
 | M7-023 Linux release fuzz gate | READY | Existing parser and mutation coverage supplies the target inputs; release thresholds and crash replay remain. |
 | M7-024 Linux performance gate | READY | Existing component reports supply the baselines; one versioned release decision remains. |
-| M7-025 Linux SBOM and fingerprint | READY | The release artifact digest and pinned provider inputs are available. |
+| M7-025 Linux SBOM and fingerprint | COMPLETE | The SPDX 2.3 SBOM, provider manifest and deterministic fingerprint bind the qualified artifact to pinned native inputs, target, toolchain, trust, capabilities and features; runtime/std source changes are not dependencies; [evidence](../evidence/M7-025/README.md). |
 | M7-026 Linux API freeze | READY | M7-019 is complete. Freeze and compatibility-check the Linux public API on a separate branch. |
 | M7-027 Linux migration and examples | BLOCKED | Waits for M7-026. |
 | M7-028 Linux security review package | BLOCKED | Waits for M7-019 through M7-025. |
@@ -165,5 +165,5 @@ replace the six-platform M7-001 through M7-017 tasks.
 
 ## Next critical path
 
-1. Start M7-025 and bind the SBOM, provider manifest, and build fingerprint to the qualified artifact.
-2. M7-022, M7-023, M7-024 and M7-026 are independent READY tasks, but each needs its own branch.
+1. Start M7-026 and freeze the Linux public API; this is the shortest remaining path and unlocks M7-027.
+2. M7-022, M7-023 and M7-024 are independent READY tasks, but each needs its own branch.

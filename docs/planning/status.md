@@ -157,7 +157,7 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 | M7-022 | READY | — | The installed release artifact is qualified; run the final 24-hour mixed workload and resource-bound gate. |
 | M7-023 | READY | — | The Linux TLS, HTTP/1 and HTTP/2 parser and mutation evidence is complete; the release fuzz threshold remains. |
 | M7-024 | READY | — | The component performance reports are complete; the versioned Linux release gate remains. |
-| M7-025 | READY | — | The release artifact and provider inputs are qualified; generate the bound SBOM, provider manifest, and build fingerprint. |
+| M7-025 | COMPLETE | [`docs/evidence/M7-025/README.md`](../evidence/M7-025/README.md) | The SPDX 2.3 SBOM, provider manifest and deterministic fingerprint bind the qualified artifact, provider/resolver digests, target, toolchain, trust, capabilities and features. runtime/std source changes remain optional long-term upstream requirements, not release dependencies. |
 | M7-026 | READY | — | M7-019 is complete; the Linux public API baseline and compatibility gate may proceed on its own branch. |
 | M7-027 | BLOCKED | — | Depends on M7-026. |
 | M7-028 | BLOCKED | — | Depends on M7-019 through M7-025. |
