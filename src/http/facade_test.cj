@@ -41,19 +41,31 @@ class HttpFacadeTest {
     }
 
     @TestCase
-    func defaultResolverFailsClosedBeforeOpeningASocket(): Unit {
+    func defaultSystemResolverConnectsPublicClientAndServer(): Unit {
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(PublicEmptyHandler())
+            .connectionLimit(4)
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
         let client = HttpClient.default()
-        var unavailable = false
         try {
-            let _ = client.get("http://example.com/")
-        } catch (error: HttpClientCapabilityException) {
-            match (error.code) {
-                case HttpClientCapabilityErrorCode.SystemResolverUnavailable => unavailable = true
-            }
+            let response = client.get(
+                "http://localhost:${server.localEndpoint.port}/ready",
+                context: OperationContext(
+                    deadline: Some(Deadline.after(Duration.second))
+                )
+            )
+            @Expect(response.status, 200)
+            @Expect(response.body.read(Array<Byte>(1, repeat: 0)), 0)
+            response.close()
         } finally {
             client.close()
+            let _ = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(Duration.second))
+            ))
+            serving.get(Duration.second)
         }
-        @Expect(unavailable)
     }
 
     @TestCase

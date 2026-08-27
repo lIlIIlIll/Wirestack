@@ -122,6 +122,24 @@ public class ResolveException <: NetworkException {
         this.resolveCode = resolveCode
     }
 
+    internal init(
+        resolveCode: ResolveErrorCode,
+        message: String,
+        nativeCode: ?Int64,
+        cause!: ?Exception = None<Exception>
+    ) {
+        super(
+            NetworkErrorCategory.Resolve,
+            NetworkPhase.Dns,
+            toNetworkCode(resolveCode),
+            message,
+            retryability: resolveRetryability(resolveCode),
+            nativeCode: nativeCode,
+            cause: cause
+        )
+        this.resolveCode = resolveCode
+    }
+
     protected override func getClassName(): String {
         "ResolveException"
     }

@@ -1,0 +1,212 @@
+{
+  "artifacts": {
+    "fixture_log_sha256": "e084d48cde45281f9df33ed5abe66c5bcbac88f53da13d7caedb7bf8cbe700f3",
+    "fixture_sha256": "fd64ac4e5087f36253bee48f10676e259a5bb8e1b086bf52149c5f06c910972d"
+  },
+  "configuration": {
+    "expected_hosts": {
+      "again.m2-005.test": 1,
+      "all.m2-005.test": 3,
+      "delay.m2-005.test": 1,
+      "family.m2-005.test": 1,
+      "localhost": 2,
+      "nodata.m2-005.test": 1,
+      "noname.m2-005.test": 1,
+      "system.m2-005.test": 1
+    },
+    "expected_integration_tests": 1,
+    "expected_resolver_tests": 6
+  },
+  "decision": "PASS",
+  "failures": [],
+  "fixture": {
+    "call_count": 11,
+    "calls": [
+      {
+        "duration_ms": 3.138,
+        "family": 0,
+        "host": "localhost",
+        "pid": 2578867,
+        "result": 0,
+        "sequence": 0
+      },
+      {
+        "duration_ms": 0.024,
+        "family": 0,
+        "host": "all.m2-005.test",
+        "pid": 2578867,
+        "result": 0,
+        "sequence": 1
+      },
+      {
+        "duration_ms": 0.013,
+        "family": 2,
+        "host": "all.m2-005.test",
+        "pid": 2578867,
+        "result": 0,
+        "sequence": 2
+      },
+      {
+        "duration_ms": 0.026,
+        "family": 0,
+        "host": "all.m2-005.test",
+        "pid": 2578867,
+        "result": 0,
+        "sequence": 3
+      },
+      {
+        "duration_ms": 0.01,
+        "family": 0,
+        "host": "noname.m2-005.test",
+        "pid": 2578867,
+        "result": -2,
+        "sequence": 4
+      },
+      {
+        "duration_ms": 0.017,
+        "family": 0,
+        "host": "nodata.m2-005.test",
+        "pid": 2578867,
+        "result": 0,
+        "sequence": 5
+      },
+      {
+        "duration_ms": 0.014,
+        "family": 0,
+        "host": "again.m2-005.test",
+        "pid": 2578867,
+        "result": -3,
+        "sequence": 6
+      },
+      {
+        "duration_ms": 0.02,
+        "family": 0,
+        "host": "family.m2-005.test",
+        "pid": 2578867,
+        "result": -6,
+        "sequence": 7
+      },
+      {
+        "duration_ms": 0.031,
+        "family": 0,
+        "host": "system.m2-005.test",
+        "pid": 2578867,
+        "result": -11,
+        "sequence": 8
+      },
+      {
+        "duration_ms": 200.039,
+        "family": 0,
+        "host": "delay.m2-005.test",
+        "pid": 2578867,
+        "result": 0,
+        "sequence": 9
+      },
+      {
+        "duration_ms": 2.288,
+        "family": 0,
+        "host": "localhost",
+        "pid": 2579406,
+        "result": 0,
+        "sequence": 0
+      }
+    ],
+    "host_counts": {
+      "again.m2-005.test": 1,
+      "all.m2-005.test": 3,
+      "delay.m2-005.test": 1,
+      "family.m2-005.test": 1,
+      "localhost": 2,
+      "nodata.m2-005.test": 1,
+      "noname.m2-005.test": 1,
+      "system.m2-005.test": 1
+    }
+  },
+  "fixture_compile": {
+    "command": [
+      "/usr/lib/llvm15/bin/clang",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "/home/elliot/playground/Wirestack/tools/gates/native/m2_005_gai_fixture.c",
+      "-o",
+      "/tmp/wirestack-m2-005-vsy_soqq/libwirestack-m2-005-gai-fixture.so",
+      "-ldl",
+      "-pthread"
+    ],
+    "duration_ms": 366.578,
+    "exit_code": 0,
+    "output": "",
+    "timed_out": false
+  },
+  "gate_id": "M2-005-SYSTEM-RESOLVER-GLIBC",
+  "generated_at_utc": "2026-08-27T06:27:07.135496Z",
+  "integration_test": {
+    "command": [
+      "/home/elliot/cangjie_sdk/daily/cangjie/tools/bin/cjpm",
+      "test",
+      "src/http",
+      "--skip-build",
+      "-j",
+      "1",
+      "--parallel",
+      "1",
+      "--filter",
+      "HttpFacadeTest.defaultSystemResolverConnectsPublicClientAndServer",
+      "--show-all-output",
+      "--no-color",
+      "--no-progress"
+    ],
+    "duration_ms": 1137.483,
+    "exit_code": 0,
+    "output": "--------------------------------------------------------------------------------------------------\nTP: wirestack.http, time elapsed: 275012894 ns, RESULT:\n    TCS: HttpFacadeTest, time elapsed: 264606724 ns, RESULT:\n    [ PASSED ] CASE: defaultSystemResolverConnectsPublicClientAndServer (261900691 ns)\nSummary: TOTAL: 66\n    PASSED: 1, SKIPPED: 65, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 281434645 ns, RESULT:\nTP: wirestack.*, time elapsed: 281369532 ns, RESULT:\n    PASSED:\n    TP: wirestack.http, time elapsed: 275012894 ns\nSummary: TOTAL: 66\n    PASSED: 1, SKIPPED: 65, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+    "timed_out": false
+  },
+  "platform": {
+    "cjc": {
+      "command": [
+        "cjc",
+        "-v"
+      ],
+      "duration_ms": 265.21,
+      "exit_code": 0,
+      "output": "Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu\n",
+      "timed_out": false
+    },
+    "libc": {
+      "ldd_output": "ldd (GNU libc) 2.44\nCopyright (C) 2024 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\nWritten by Roland McGrath and Ulrich Drepper.\n",
+      "name": "glibc",
+      "reported_name": "glibc",
+      "reported_version": "2.44"
+    },
+    "machine": "x86_64",
+    "release": "7.1.9-arch1-2",
+    "system": "Linux"
+  },
+  "resolver_test": {
+    "command": [
+      "/home/elliot/cangjie_sdk/daily/cangjie/tools/bin/cjpm",
+      "test",
+      "src/http",
+      "-j",
+      "1",
+      "--parallel",
+      "1",
+      "--filter",
+      "M2005SystemResolverTest",
+      "--show-all-output",
+      "--no-color",
+      "--no-progress"
+    ],
+    "duration_ms": 11915.115,
+    "exit_code": 0,
+    "output": "--------------------------------------------------------------------------------------------------\nTP: wirestack.http, time elapsed: 314607216 ns, RESULT:\n    TCS: M2005SystemResolverTest, time elapsed: 301780647 ns, RESULT:\n    [ PASSED ] CASE: resolvesLocalhostThroughThePublicContract (12309314 ns)\n    [ PASSED ] CASE: fixtureReturnsAllCandidatesAndDoesNotInventTtl (10604702 ns)\n    [ PASSED ] CASE: fixtureAppliesFamilyAndResultBounds (18391965 ns)\n    [ PASSED ] CASE: fixtureMapsStableErrorsAndRetainsNativeEvidence (49585657 ns)\n    [ PASSED ] CASE: fixtureCancellationAndDeadlineReturnBeforeNativeCleanup (201223201 ns)\n    STDERR:\n    An exception has occurred:\n    ResolveException: resolution cancelled\n    \t at wirestack.internal.resolver::checkResolveContext(wirestack.internal.transport::OperationContext)(/home/elliot/playground/Wirestack/src/internal/resolver/package.cj:231)\n    \t at wirestack.internal.resolver::LinuxBoundedResolverBackend::resolve(wirestack.internal.common::HostName, std.core::Option<...>, wirestack.internal.resolver::ResolveOptions, wirestack.internal.transport::OperationContext)(/home/elliot/playground/Wirestack/src/internal/resolver/bounded_backend.cj:139)\n    \t at wirestack.internal.resolver::SystemResolver::resolve(wirestack.internal.common::HostName, std.core::Option<...>, wirestack.internal.resolver::ResolveOptions, wirestack.internal.transport::OperationContext)(/home/elliot/playground/Wirestack/src/internal/resolver/system_resolver.cj:29)\n    \t at wirestack.internal.resolver::SystemResolver::resolve(wirestack.internal.common::HostName, wirestack.internal.resolver::ResolveOptions, wirestack.internal.transport::OperationContext)(/home/elliot/playground/Wirestack/src/internal/resolver/system_resolver.cj:38)\n    \t at wirestack.http/test::M2005SystemResolverTest::fixtureCancellationAndDeadlineReturnBeforeNativeCleanup::lambda.0()(/home/elliot/playground/Wirestack/src/http/system_resolver_test.cj:94)\n    [ PASSED ] CASE: validatesBoundsAndRejectsUseAfterClose (5057571 ns)\nSummary: TOTAL: 66\n    PASSED: 6, SKIPPED: 60, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 316588935 ns, RESULT:\nTP: wirestack.*, time elapsed: 316431870 ns, RESULT:\n    PASSED:\n    TP: wirestack.http, time elapsed: 314607216 ns\nSummary: TOTAL: 66\n    PASSED: 6, SKIPPED: 60, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+    "timed_out": false
+  },
+  "schema_version": 1,
+  "scope": "native Linux glibc leg only",
+  "task_id": "M2-005"
+}
