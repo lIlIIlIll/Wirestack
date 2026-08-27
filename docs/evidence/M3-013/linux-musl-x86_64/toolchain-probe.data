@@ -1,0 +1,15 @@
+schema=wirestack.m3-013.musl-toolchain-probe.v1
+captured_at=2026-08-27T08:26:26+08:00
+requested_target=x86_64-unknown-linux-musl
+probe_source=main(): Int64 { 0 }
+sdk_1=Cangjie Compiler 1.1.0-alpha.20260817040003 cjnative
+sdk_1_host_target=x86_64-unknown-linux-gnu
+sdk_1_exit_code=1
+sdk_1_stderr=The environment "musl" is not found or supported!
+sdk_2=Cangjie Compiler 1.0.0 cjnative
+sdk_2_host_target=x86_64-unknown-linux-gnu
+sdk_2_exit_code=1
+sdk_2_stderr=The environment "musl" is not found or supported!
+native_musl_wirestack_execution=NOT_RUN
+result=BLOCKED
+blocker=no locally available supported Cangjie musl target or native musl SDK
