@@ -153,11 +153,11 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 | M7-018 | COMPLETE | [`docs/evidence/M7-018/README.md`](../evidence/M7-018/README.md) | The Linux M7 graph now has separate trace, architecture, artifact, soak, fuzz, performance, SBOM, API, documentation, security, signing and candidate-report tasks. No Linux task depends on M1-026, M4, `UP-*`, or runtime/`std.net` source changes. |
 | M7-019 | COMPLETE | [`docs/evidence/M7-019/README.md`](../evidence/M7-019/README.md) | The fail-closed Linux audit maps 32 P0 requirements, all 15 lifecycle invariants and all 22 release criteria. It records 31/32 P0 PASS, 15/15 invariants PASS, 15/22 release criteria PASS, six release gaps and one mobile-only NOT_APPLICABLE item. runtime/std changes remain optional future requirements, never Wirestack dependencies. |
 | M7-020 | COMPLETE | [`docs/evidence/M7-020/README.md`](../evidence/M7-020/README.md) | The repeatable Linux audit scans 188 Cangjie files and 11 build/native files. Core has no `std.net`; public packages expose no low-level types; private socket ABI, old bridges, global TLS providers, and system OpenSSL loaders are absent. runtime/std source changes remain optional future work. |
-| M7-021 | READY | — | M7-020 and the Linux TLS provider qualification are complete; build, scan and install the Linux release artifact. |
-| M7-022 | BLOCKED | — | Depends on the installed release artifact from M7-021. |
+| M7-021 | COMPLETE | [`docs/evidence/M7-021/README.md`](../evidence/M7-021/README.md) | The native glibc artifact is byte-reproducible, installs in a clean CJPM consumer, runs an HTTPS client/server and runtime-info smoke, and has no system OpenSSL dependency or loader string. |
+| M7-022 | READY | — | The installed release artifact is qualified; run the final 24-hour mixed workload and resource-bound gate. |
 | M7-023 | READY | — | The Linux TLS, HTTP/1 and HTTP/2 parser and mutation evidence is complete; the release fuzz threshold remains. |
 | M7-024 | READY | — | The component performance reports are complete; the versioned Linux release gate remains. |
-| M7-025 | BLOCKED | — | Depends on M7-021. |
+| M7-025 | READY | — | The release artifact and provider inputs are qualified; generate the bound SBOM, provider manifest, and build fingerprint. |
 | M7-026 | READY | — | M7-019 is complete; the Linux public API baseline and compatibility gate may proceed on its own branch. |
 | M7-027 | BLOCKED | — | Depends on M7-026. |
 | M7-028 | BLOCKED | — | Depends on M7-019 through M7-025. |
