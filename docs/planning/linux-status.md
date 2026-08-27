@@ -45,6 +45,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M1-021 `StdNetTransportListener` | COMPLETE | IP-only bind, bounded backlog, endpoints and accept Deadline/cancel/close semantics |
 | M1-022 stable std.net errors | BLOCKED | Timeout/cancel/closed are stable; public `SocketException` exposes no native code, so errno classes require an upstream API instead of message matching |
 | M1-023 transport diagnostics | IN_PROGRESS | Backend/endpoints/capabilities, staging copied-byte counters and event sink exist; runtime backend discovery remains |
+| M1-027 background context cost | COMPLETE | The internal background fast path lowers empty `readSome` P50 from 297.042 ns to 92.110 ns; the formal 5-payload x 11-round GATE-NET-05 comparison passes every threshold with zero staging copies; [Linux evidence](../evidence/M1-027/README.md) |
 
 ## Implemented Resolver and Connector Core
 

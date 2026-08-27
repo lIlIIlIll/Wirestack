@@ -125,7 +125,10 @@ public class StdNetTransport <: DuplexTransport {
         destination: MutableByteSpan,
         context!: OperationContext = OperationContext.background()
     ): ReadResult {
-        checkContext(context, NetworkErrorCategory.Read, NetworkPhase.TcpRead)
+        let background = isBackgroundContext(context)
+        if (!background) {
+            checkContext(context, NetworkErrorCategory.Read, NetworkPhase.TcpRead)
+        }
         beginRead()
         try {
             if (destination.isEmpty()) {
@@ -140,6 +143,15 @@ public class StdNetTransport <: DuplexTransport {
             } else {
                 Array<Byte>(count, repeat: 0)
             }
+            if (background) {
+                try {
+                    return finishRead(socket.read(target), target, destination, direct, context)
+                } catch (error: SocketTimeoutException) {
+                    throw timedOut(NetworkErrorCategory.Read, NetworkPhase.TcpRead, error)
+                } catch (error: SocketException) {
+                    throw mapSocketError(error, context, NetworkErrorCategory.Read, NetworkPhase.TcpRead)
+                }
+            }
             let gate = OperationGate()
             let registration = context.cancellation.register {
                 => gate.interrupt { => abort(reason: Some(AbortReason.Cancelled)) }
@@ -150,17 +162,7 @@ public class StdNetTransport <: DuplexTransport {
                 if (!gate.complete()) {
                     throw contextOrTerminalError(context, NetworkErrorCategory.Read, NetworkPhase.TcpRead)
                 }
-                if (received == 0) {
-                    ensureNotLocallyTerminated(context, NetworkErrorCategory.Read, NetworkPhase.TcpRead)
-                    return ReadResult.EndOfStream
-                }
-                if (!direct) {
-                    for (index in 0..received) {
-                        destination.bytes[destination.offset + index] = target[index]
-                    }
-                    synchronized(lifecycleMutex) { copiedReadBytes += received }
-                }
-                ReadResult.Data(received)
+                finishRead(received, target, destination, direct, context)
             } catch (error: SocketTimeoutException) {
                 let _ = gate.complete()
                 throw timedOut(NetworkErrorCategory.Read, NetworkPhase.TcpRead, error)
@@ -168,6 +170,7 @@ public class StdNetTransport <: DuplexTransport {
                 let _ = gate.complete()
                 throw mapSocketError(error, context, NetworkErrorCategory.Read, NetworkPhase.TcpRead)
             } finally {
+                resetReadTimeout()
                 registration.unregister()
             }
         } finally {
@@ -179,7 +182,10 @@ public class StdNetTransport <: DuplexTransport {
         source: ByteSpan,
         context!: OperationContext = OperationContext.background()
     ): Int64 {
-        checkContext(context, NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
+        let background = isBackgroundContext(context)
+        if (!background) {
+            checkContext(context, NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
+        }
         beginWrite()
         try {
             if (source.isEmpty()) {
@@ -204,6 +210,16 @@ public class StdNetTransport <: DuplexTransport {
                     payload[index] = source.bytes[source.offset + index]
                 }
             }
+            if (background) {
+                try {
+                    socket.write(payload)
+                    return finishWrite(count, direct)
+                } catch (error: SocketTimeoutException) {
+                    throw timedOut(NetworkErrorCategory.Write, NetworkPhase.TcpWrite, error)
+                } catch (error: SocketException) {
+                    throw mapSocketError(error, context, NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
+                }
+            }
             let gate = OperationGate()
             let registration = context.cancellation.register {
                 => gate.interrupt { => abort(reason: Some(AbortReason.Cancelled)) }
@@ -214,10 +230,7 @@ public class StdNetTransport <: DuplexTransport {
                 if (!gate.complete()) {
                     throw contextOrTerminalError(context, NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
                 }
-                if (!direct) {
-                    synchronized(lifecycleMutex) { copiedWriteBytes += count }
-                }
-                count
+                finishWrite(count, direct)
             } catch (error: SocketTimeoutException) {
                 let _ = gate.complete()
                 throw timedOut(NetworkErrorCategory.Write, NetworkPhase.TcpWrite, error)
@@ -225,6 +238,7 @@ public class StdNetTransport <: DuplexTransport {
                 let _ = gate.complete()
                 throw mapSocketError(error, context, NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
             } finally {
+                resetWriteTimeout()
                 registration.unregister()
             }
         } finally {
@@ -327,14 +341,12 @@ public class StdNetTransport <: DuplexTransport {
                 throw closedError(NetworkErrorCategory.Read, NetworkPhase.TcpRead)
             }
             readActive = true
-            lifecycleChanged.notifyAll()
         }
     }
 
     private func endRead(): Unit {
         synchronized(lifecycleMutex) {
             readActive = false
-            lifecycleChanged.notifyAll()
         }
     }
 
@@ -354,19 +366,65 @@ public class StdNetTransport <: DuplexTransport {
         synchronized(lifecycleMutex) { writeActive = false }
     }
 
+    private func finishRead(
+        received: Int64,
+        target: Array<Byte>,
+        destination: MutableByteSpan,
+        direct: Bool,
+        context: OperationContext
+    ): ReadResult {
+        if (received == 0) {
+            ensureNotLocallyTerminated(context, NetworkErrorCategory.Read, NetworkPhase.TcpRead)
+            return ReadResult.EndOfStream
+        }
+        if (!direct) {
+            for (index in 0..received) {
+                destination.bytes[destination.offset + index] = target[index]
+            }
+            synchronized(lifecycleMutex) { copiedReadBytes += received }
+        }
+        ReadResult.Data(received)
+    }
+
+    private func finishWrite(count: Int64, direct: Bool): Int64 {
+        if (!direct) {
+            synchronized(lifecycleMutex) { copiedWriteBytes += count }
+        }
+        count
+    }
+
+    private func resetReadTimeout(): Unit {
+        try {
+            socket.readTimeout = None<Duration>
+        } catch (_: Exception) {
+            // A concurrent close can make the reset unavailable. The closed
+            // transport cannot perform another background read.
+        }
+    }
+
+    private func resetWriteTimeout(): Unit {
+        try {
+            socket.writeTimeout = None<Duration>
+        } catch (_: Exception) {
+            // A concurrent close can make the reset unavailable. The closed
+            // transport cannot perform another background write.
+        }
+    }
+
     /** Waits for read activity for bounded lifecycle diagnostics and race gates. */
     public func waitUntilReadActive(timeout: Duration): Bool {
         let expiresAt = MonoTime.now() + timeout
-        synchronized(lifecycleMutex) {
-            while (!readActive && !closed && !aborted) {
-                let now = MonoTime.now()
-                if (now >= expiresAt) {
-                    return false
-                }
-                lifecycleChanged.wait(timeout: expiresAt - now)
+        while (true) {
+            let (active, terminal) = synchronized(lifecycleMutex) { (readActive, closed || aborted) }
+            if (active) {
+                return true
             }
-            readActive
+            if (terminal || MonoTime.now() >= expiresAt) {
+                return false
+            }
+            sleep(Duration.millisecond)
         }
+        false
     }
 
     private func ensureNotLocallyTerminated(
@@ -586,6 +644,13 @@ private func remaining(context: OperationContext): ?Duration {
         case Some(deadline) => Some(deadline.remaining())
         case None => None<Duration>
     }
+}
+
+private func isBackgroundContext(context: OperationContext): Bool {
+    context.deadline.isNone() &&
+        context.cancellation.permanentlyActive &&
+        context.trace.isNone() &&
+        context.eventSink.isNone()
 }
 
 private func checkContext(
