@@ -107,30 +107,6 @@ public func jsonTryWriteCompactInt64Map(
     }
 }
 
-public enum JsonStreamBufferingMode {
-    | Incremental
-    | WholeDocument
-}
-
-public interface JsonStreamDecodeSession <: Resource {
-    func reader(): JsonCodecReader
-}
-
-public interface JsonStreamEncodeSession <: Resource {
-    func writer(): JsonCodecWriter
-    func finish(): Unit
-}
-
-/// Selects how the caller-owned stream is connected to a typed codec.
-/// Backends never close the caller's stream.
-public interface JsonStreamBackend {
-    func name(): String
-    func decodeBuffering(): JsonStreamBufferingMode
-    func encodeBuffering(): JsonStreamBufferingMode
-    func openDecoder(input: InputStream, config: JsonReadConfig): JsonStreamDecodeSession
-    func openEncoder(output: OutputStream, config: JsonWriteConfig): JsonStreamEncodeSession
-}
-
 public interface JsonCodec<T> {
     func write(value: T, writer: JsonCodecWriter, context: JsonEncodeContext): Unit
 
@@ -146,7 +122,7 @@ public interface JsonAnyCodec {
 
     func readAny(reader: JsonCodecReader, context: JsonDecodeContext): Any
 
-    func readAnyFast(reader: JsonFastReader, context: JsonDecodeContext): Any
+    func readAnyFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): Any
 }
 
 public interface JsonCodecProvider {
@@ -172,7 +148,7 @@ private class ErasedJsonCodec<T> <: JsonAnyCodec {
         codec.read(reader, context)
     }
 
-    public func readAnyFast(reader: JsonFastReader, context: JsonDecodeContext): Any {
+    public func readAnyFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): Any {
         match (codec) {
             case fast: JsonFastCodec<T> => fast.readFast(reader, context)
             case _ => throw JsonException("Codec does not provide a fast-reader implementation", code: "codec_contract",
@@ -204,7 +180,7 @@ private class ReifiedJsonCodec<T> <: JsonCodec<T> {
         }
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): T {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T {
         match (codec.readAnyFast(reader, context)) {
             case typed: T => typed
             case _ => throw JsonException("Decoded value type mismatch", code: "codec_type_mismatch",
@@ -234,7 +210,98 @@ public func jsonCodecOf<T>(): JsonCodec<T> where T <: JsonCodecProvider {
 
 // Kept as an internal optimization surface for the existing built-in codecs.
 public interface JsonFastCodec<T> <: JsonCodec<T> {
-    func readFast(reader: JsonFastReader, context: JsonDecodeContext): T
+    func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T
+}
+
+/// Matching-version bridge used by generated codecs to retain the concrete
+/// direct-writer type across nested semantic encode calls.
+public interface JsonDirectWriteCodec<T> <: JsonCodec<T> {
+    func writeDirect(value: T, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit
+}
+
+/// Matching-version generated-code bridge for objects whose fields can be
+/// emitted directly in compact mode without bypassing encode context checks.
+public interface JsonCompactRawCodec<T> <: JsonDirectWriteCodec<T> {
+    func supportsCompactRaw(): Bool
+    func writeCompactRaw(value: T, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit
+}
+
+/// Optional generated-code bulk seam. ArrayList resolves it once so an
+/// element codec can reuse one writer cursor across the complete loop.
+public interface JsonCompactRawArrayListElementCodec<T> {
+    func writeCompactRawArrayList(value: ArrayList<T>, writer: GeneratedSupportV1Writer,
+        context: JsonEncodeContext): Unit
+}
+
+public func writeJsonDirectWith<T>(
+    codec: JsonCodec<T>,
+    value: T,
+    writer: GeneratedSupportV1Writer,
+    context: JsonEncodeContext
+): Unit {
+    match (codec) {
+        case direct: JsonDirectWriteCodec<T> => direct.writeDirect(value, writer, context)
+        case _ => codec.write(value, writer, context)
+    }
+}
+
+public func jsonTryBeginGeneratedCompactRawValue(writer: GeneratedSupportV1Writer): Bool {
+    writer.tryBeginGeneratedCompactRawValue()
+}
+
+public func jsonWriteGeneratedCompactObjectBegin(writer: GeneratedSupportV1Writer): Unit {
+    writer.writeRawBeginObject()
+}
+
+public func jsonWriteGeneratedCompactObjectEnd(writer: GeneratedSupportV1Writer): Unit {
+    writer.writeRawEndObject()
+}
+
+public func jsonWriteGeneratedCompactArrayBegin(writer: GeneratedSupportV1Writer): Unit {
+    writer.writeRawBeginArray()
+}
+
+public func jsonWriteGeneratedCompactArrayEnd(writer: GeneratedSupportV1Writer): Unit {
+    writer.writeRawEndArray()
+}
+
+public func jsonWriteGeneratedCompactComma(writer: GeneratedSupportV1Writer): Unit {
+    writer.writeRawByte(b',')
+}
+
+public func jsonWriteGeneratedCompactObjectEntryName(
+    writer: GeneratedSupportV1Writer,
+    first: Bool,
+    name: String
+): Bool {
+    writer.writeRawObjectEntryName(first, name)
+}
+
+public func jsonWriteGeneratedCompactObjectEntryString(
+    writer: GeneratedSupportV1Writer,
+    first: Bool,
+    name: String,
+    value: String
+): Bool {
+    writer.writeRawObjectEntryNameString(first, name, value)
+}
+
+public func jsonWriteGeneratedCompactObjectEntryBool(
+    writer: GeneratedSupportV1Writer,
+    first: Bool,
+    name: String,
+    value: Bool
+): Bool {
+    writer.writeRawObjectEntryNameBool(first, name, value)
+}
+
+public func jsonWriteGeneratedCompactObjectEntryInt64(
+    writer: GeneratedSupportV1Writer,
+    first: Bool,
+    name: String,
+    value: Int64
+): Bool {
+    writer.writeRawObjectEntryNameInt64(first, name, value)
 }
 
 /// Reusable typed decoder that resolves the fast codec contract once.
@@ -253,21 +320,21 @@ public interface JsonFastDecoder<T> {
 }
 
 public interface JsonArrayListFastCodec<T> <: JsonFastCodec<T> {
-    func readFastArrayList(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<T>
+    func readFastArrayList(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): ArrayList<T>
 }
 
 interface JsonRawWriteCodec<T> <: JsonCodec<T> {
-    func writeRaw(value: T, writer: JsonDirectWriter): Unit
+    func writeRaw(value: T, writer: GeneratedSupportV1Writer): Unit
 }
 
 interface JsonArrayListRawWriteCodec<T> <: JsonArrayListFastCodec<T> {
-    func writeRawArrayList(value: ArrayList<T>, writer: JsonDirectWriter): Unit
+    func writeRawArrayList(value: ArrayList<T>, writer: GeneratedSupportV1Writer): Unit
 }
 
 public class JsonEncodeContext {
     private let maxDepth: Int64
     private var depth: Int64 = 0
-    private let path = ArrayList<String>()
+    private var path: Option<ArrayList<String>> = None<ArrayList<String>>
     private var pathIndexPairs: Option<ArrayList<Int64>> = None<ArrayList<Int64>>
 
     public init(config: JsonWriteConfig) {
@@ -275,10 +342,11 @@ public class JsonEncodeContext {
     }
 
     public func pushField(name: String): Unit {
-        path.add(name)
+        pathValues().add(name)
     }
 
     public func pushIndex(index: Int64): Unit {
+        let values = pathValues()
         let pairs = match (pathIndexPairs) {
             case Some(value) => value
             case None =>
@@ -286,21 +354,38 @@ public class JsonEncodeContext {
                 pathIndexPairs = Some(value)
                 value
         }
-        pairs.add(path.size)
+        pairs.add(values.size)
         pairs.add(index)
-        path.add("")
+        values.add("")
     }
 
     public func popPath(): Unit {
-        if (!path.isEmpty()) {
-            let position = path.size - 1
-            if (let Some(pairs) <- pathIndexPairs) {
-                if (!pairs.isEmpty() && pairs[pairs.size - 2] == position) {
-                    pairs.remove(at: pairs.size - 1)
-                    pairs.remove(at: pairs.size - 1)
+        if (let Some(values) <- path) {
+            if (!values.isEmpty()) {
+                let position = values.size - 1
+                if (let Some(pairs) <- pathIndexPairs) {
+                    if (!pairs.isEmpty() && pairs[pairs.size - 2] == position) {
+                        pairs.remove(at: pairs.size - 1)
+                        pairs.remove(at: pairs.size - 1)
+                    }
                 }
+                values.remove(at: position)
             }
-            path.remove(at: path.size - 1)
+        }
+    }
+
+    public func updateLastField(name: String): Unit {
+        let values = pathValues()
+        if (!values.isEmpty()) {
+            values[values.size - 1] = name
+        }
+    }
+
+    public func updateLastIndex(index: Int64): Unit {
+        if (let Some(pairs) <- pathIndexPairs) {
+            if (!pairs.isEmpty()) {
+                pairs[pairs.size - 1] = index
+            }
         }
     }
 
@@ -327,10 +412,14 @@ public class JsonEncodeContext {
     }
 
     public func currentPath(): String {
+        let values = match (path) {
+            case Some(value) => value
+            case None => return "$"
+        }
         let result = StringBuilder("$")
         let pairs = pathIndexPairs.getOrDefault({=> ArrayList<Int64>()})
         var pairCursor: Int64 = 0
-        for (position in 0..path.size) {
+        for (position in 0..values.size) {
             if (pairCursor < pairs.size && pairs[pairCursor] == position) {
                 result.append("[")
                 result.append(pairs[pairCursor + 1].toString())
@@ -338,10 +427,20 @@ public class JsonEncodeContext {
                 pairCursor += 2
             } else {
                 result.append(".")
-                result.append(path[position])
+                result.append(values[position])
             }
         }
         result.toString()
+    }
+
+    private func pathValues(): ArrayList<String> {
+        match (path) {
+            case Some(value) => value
+            case None =>
+                let value = ArrayList<String>()
+                path = Some(value)
+                value
+        }
     }
 }
 
@@ -508,9 +607,9 @@ class LambdaYJsonCodec<T> <: JsonFastCodec<T> {
         readerFn(reader)
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): T {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T {
         let _ = context
-        fastReaderFn(reader)
+        fastReaderFn(yJsonGeneratedReaderV1(reader))
     }
 }
 
@@ -545,8 +644,8 @@ class LambdaFastRawJsonCodec<T> <: JsonFastCodec<T> & JsonRawWriteCodec<T> {
         }
     }
 
-    public func writeRaw(value: T, writer: JsonDirectWriter): Unit {
-        rawWriterFn(value, writer)
+    public func writeRaw(value: T, writer: GeneratedSupportV1Writer): Unit {
+        rawWriterFn(value, yJsonGeneratedWriterV1(writer))
     }
 
     public func read(reader: JsonCodecReader, context: JsonDecodeContext): T {
@@ -554,13 +653,13 @@ class LambdaFastRawJsonCodec<T> <: JsonFastCodec<T> & JsonRawWriteCodec<T> {
         readerFn(reader)
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): T {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T {
         let _ = context
-        fastReaderFn(reader)
+        fastReaderFn(yJsonGeneratedReaderV1(reader))
     }
 }
 
-public func readJsonFastWith<T>(codec: JsonCodec<T>, reader: JsonFastReader, context: JsonDecodeContext): T {
+public func readJsonFastWith<T>(codec: JsonCodec<T>, reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T {
     match (codec) {
         case reified: ReifiedJsonCodec<T> => reified.readFast(reader, context)
         case fast: JsonFastCodec<T> => fast.readFast(reader, context)
@@ -584,7 +683,7 @@ private class ReifiedFastCodecAdapter<T> <: JsonFastCodec<T> {
         inner.read(reader, context)
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): T {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T {
         inner.readFast(reader, context)
     }
 }
@@ -604,7 +703,7 @@ private class ContractFastCodecAdapter<T> <: JsonFastCodec<T> {
         inner.read(reader, context)
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): T {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T {
         readJsonFastWith(inner, reader, context)
     }
 }
@@ -617,17 +716,66 @@ private func resolvedJsonFastCodec<T>(codec: JsonCodec<T>): JsonFastCodec<T> {
     }
 }
 
-private class OptionJsonCodec<T> <: JsonFastCodec<Option<T>> {
+private class OptionJsonCodec<T> <: JsonFastCodec<Option<T>> & JsonCompactRawCodec<Option<T>> {
     private let inner: JsonCodec<T>
+    private let directInner: Option<JsonDirectWriteCodec<T>>
+    private let compactRawInner: Option<JsonCompactRawCodec<T>>
 
     public init(inner: JsonCodec<T>) {
         this.inner = inner
+        this.directInner = match (inner) {
+            case direct: JsonDirectWriteCodec<T> => Some(direct)
+            case _ => None<JsonDirectWriteCodec<T>>
+        }
+        this.compactRawInner = match (inner) {
+            case raw: JsonCompactRawCodec<T> => Some(raw)
+            case _ => None<JsonCompactRawCodec<T>>
+        }
     }
 
     public func write(value: Option<T>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {
+        match (writer) {
+            case direct: JsonDirectWriter =>
+                writeDirect(value, direct, context)
+                return
+            case _ => ()
+        }
         match (value) {
             case Some(item) => inner.write(item, writer, context)
             case None => writer.writeNull()
+        }
+    }
+
+    public func writeDirect(value: Option<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
+        if (supportsCompactRaw() && writer.tryBeginGeneratedCompactRawValue()) {
+            writeCompactRaw(value, writer, context)
+            return
+        }
+        match (value) {
+            case Some(item) =>
+                match (directInner) {
+                    case Some(direct) => direct.writeDirect(item, writer, context)
+                    case None => inner.write(item, writer, context)
+                }
+            case None => writer.writeNull()
+        }
+    }
+
+    public func supportsCompactRaw(): Bool {
+        match (compactRawInner) {
+            case Some(raw) => raw.supportsCompactRaw()
+            case None => false
+        }
+    }
+
+    public func writeCompactRaw(value: Option<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
+        match (value) {
+            case Some(item) =>
+                match (compactRawInner) {
+                    case Some(raw) => raw.writeCompactRaw(item, writer, context)
+                    case None => throw JsonException("Compact raw codec is unavailable")
+                }
+            case None => writer.writeRawNull()
         }
     }
 
@@ -638,7 +786,7 @@ private class OptionJsonCodec<T> <: JsonFastCodec<Option<T>> {
         Some(inner.read(reader, context))
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): Option<T> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): Option<T> {
         if (reader.tryReadRawNull()) {
             return None<T>
         }
@@ -663,7 +811,7 @@ private class StringOptionJsonCodec <: JsonFastCodec<Option<String>> {
         Some(reader.readString())
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): Option<String> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): Option<String> {
         let _ = context
         if (reader.tryReadRawNull()) {
             return None<String>
@@ -672,28 +820,116 @@ private class StringOptionJsonCodec <: JsonFastCodec<Option<String>> {
     }
 }
 
-private class ArrayJsonCodec<T> <: JsonFastCodec<Array<T>> {
+private class ArrayJsonCodec<T> <: JsonFastCodec<Array<T>> & JsonCompactRawCodec<Array<T>> {
     private let inner: JsonCodec<T>
     private let fastInner: JsonFastCodec<T>
+    private let directInner: Option<JsonDirectWriteCodec<T>>
+    private let compactRawInner: Option<JsonCompactRawCodec<T>>
 
     public init(inner: JsonCodec<T>) {
         this.inner = inner
         this.fastInner = resolvedJsonFastCodec(inner)
+        this.directInner = match (inner) {
+            case direct: JsonDirectWriteCodec<T> => Some(direct)
+            case _ => None<JsonDirectWriteCodec<T>>
+        }
+        this.compactRawInner = match (inner) {
+            case raw: JsonCompactRawCodec<T> => Some(raw)
+            case _ => None<JsonCompactRawCodec<T>>
+        }
     }
 
     public func write(value: Array<T>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {
+        match (writer) {
+            case direct: JsonDirectWriter =>
+                writeDirect(value, direct, context)
+                return
+            case _ => ()
+        }
         context.enterValue()
         try {
             writer.startArray()
-            for (index in 0..value.size) {
-                context.pushIndex(index)
+            if (!value.isEmpty()) {
+                context.pushIndex(0)
                 try {
-                    inner.write(value[index], writer, context)
+                    for (index in 0..value.size) {
+                        if (index > 0) {
+                            context.updateLastIndex(index)
+                        }
+                        inner.write(value[index], writer, context)
+                    }
                 } finally {
                     context.popPath()
                 }
             }
             writer.endArray()
+        } finally {
+            context.leaveValue()
+        }
+    }
+
+    public func writeDirect(value: Array<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
+        if (supportsCompactRaw() && writer.tryBeginGeneratedCompactRawValue()) {
+            writeCompactRaw(value, writer, context)
+            return
+        }
+        context.enterValue()
+        try {
+            writer.startArray()
+            if (!value.isEmpty()) {
+                context.pushIndex(0)
+                try {
+                    for (index in 0..value.size) {
+                        if (index > 0) {
+                            context.updateLastIndex(index)
+                        }
+                        match (directInner) {
+                            case Some(direct) => direct.writeDirect(value[index], writer, context)
+                            case None => inner.write(value[index], writer, context)
+                        }
+                    }
+                } finally {
+                    context.popPath()
+                }
+            }
+            writer.endArray()
+        } finally {
+            context.leaveValue()
+        }
+    }
+
+    public func supportsCompactRaw(): Bool {
+        match (compactRawInner) {
+            case Some(raw) => raw.supportsCompactRaw()
+            case None => false
+        }
+    }
+
+    public func writeCompactRaw(value: Array<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
+        context.enterValue()
+        try {
+            let rawWriter = GeneratedSupportV1.writeCursor(writer)
+            rawWriter.reserveRawCollectionCapacity(value.size)
+            rawWriter.writeRawBeginArray()
+            if (!value.isEmpty()) {
+                let raw = match (compactRawInner) {
+                    case Some(item) => item
+                    case None => throw JsonException("Compact raw codec is unavailable")
+                }
+                context.pushIndex(0)
+                try {
+                    for (index in 0..value.size) {
+                        if (index > 0) {
+                            rawWriter.writeRawByte(b',')
+                            context.updateLastIndex(index)
+                        }
+                        raw.writeCompactRaw(value[index], writer, context)
+                    }
+                } finally {
+                    context.popPath()
+                }
+            }
+            rawWriter.writeRawEndArray()
         } finally {
             context.leaveValue()
         }
@@ -721,7 +957,7 @@ private class ArrayJsonCodec<T> <: JsonFastCodec<Array<T>> {
         }
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): Array<T> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): Array<T> {
         context.enterValue()
         try {
             reader.startRawArray()
@@ -764,30 +1000,131 @@ private class ArrayJsonCodec<T> <: JsonFastCodec<Array<T>> {
     }
 }
 
-private class ArrayListJsonCodec<T> <: JsonFastCodec<ArrayList<T>> {
+private class ArrayListJsonCodec<T> <: JsonFastCodec<ArrayList<T>> & JsonCompactRawCodec<ArrayList<T>> {
     private let inner: JsonCodec<T>
     private let fastInner: JsonFastCodec<T>
+    private let directInner: Option<JsonDirectWriteCodec<T>>
+    private let compactRawInner: Option<JsonCompactRawCodec<T>>
+    private let compactRawArrayListInner: Option<JsonCompactRawArrayListElementCodec<T>>
 
     public init(inner: JsonCodec<T>) {
         this.inner = inner
         this.fastInner = resolvedJsonFastCodec(inner)
+        this.directInner = match (inner) {
+            case direct: JsonDirectWriteCodec<T> => Some(direct)
+            case _ => None<JsonDirectWriteCodec<T>>
+        }
+        this.compactRawInner = match (inner) {
+            case raw: JsonCompactRawCodec<T> => Some(raw)
+            case _ => None<JsonCompactRawCodec<T>>
+        }
+        this.compactRawArrayListInner = match (inner) {
+            case bulk: JsonCompactRawArrayListElementCodec<T> => Some(bulk)
+            case _ => None<JsonCompactRawArrayListElementCodec<T>>
+        }
     }
 
     public func write(value: ArrayList<T>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {
+        match (writer) {
+            case direct: JsonDirectWriter =>
+                writeDirect(value, direct, context)
+                return
+            case _ => ()
+        }
         context.enterValue()
         try {
             writer.startArray()
             var index: Int64 = 0
-            for (item in value) {
-                context.pushIndex(index)
+            if (!value.isEmpty()) {
+                context.pushIndex(0)
                 try {
-                    inner.write(item, writer, context)
+                    for (item in value) {
+                        if (index > 0) {
+                            context.updateLastIndex(index)
+                        }
+                        inner.write(item, writer, context)
+                        index++
+                    }
                 } finally {
                     context.popPath()
                 }
-                index++
             }
             writer.endArray()
+        } finally {
+            context.leaveValue()
+        }
+    }
+
+    public func writeDirect(value: ArrayList<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
+        if (supportsCompactRaw() && writer.tryBeginGeneratedCompactRawValue()) {
+            writeCompactRaw(value, writer, context)
+            return
+        }
+        context.enterValue()
+        try {
+            writer.startArray()
+            var index: Int64 = 0
+            if (!value.isEmpty()) {
+                context.pushIndex(0)
+                try {
+                    for (item in value) {
+                        if (index > 0) {
+                            context.updateLastIndex(index)
+                        }
+                        match (directInner) {
+                            case Some(direct) => direct.writeDirect(item, writer, context)
+                            case None => inner.write(item, writer, context)
+                        }
+                        index++
+                    }
+                } finally {
+                    context.popPath()
+                }
+            }
+            writer.endArray()
+        } finally {
+            context.leaveValue()
+        }
+    }
+
+    public func supportsCompactRaw(): Bool {
+        match (compactRawInner) {
+            case Some(raw) => raw.supportsCompactRaw()
+            case None => false
+        }
+    }
+
+    public func writeCompactRaw(value: ArrayList<T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
+        if (let Some(bulk) <- compactRawArrayListInner) {
+            bulk.writeCompactRawArrayList(value, writer, context)
+            return
+        }
+        context.enterValue()
+        try {
+            let rawWriter = GeneratedSupportV1.writeCursor(writer)
+            rawWriter.reserveRawCollectionCapacity(value.size)
+            rawWriter.writeRawBeginArray()
+            var index: Int64 = 0
+            if (!value.isEmpty()) {
+                let raw = match (compactRawInner) {
+                    case Some(item) => item
+                    case None => throw JsonException("Compact raw codec is unavailable")
+                }
+                context.pushIndex(0)
+                try {
+                    for (item in value) {
+                        if (index > 0) {
+                            rawWriter.writeRawByte(b',')
+                            context.updateLastIndex(index)
+                        }
+                        raw.writeCompactRaw(item, writer, context)
+                        index++
+                    }
+                } finally {
+                    context.popPath()
+                }
+            }
+            rawWriter.writeRawEndArray()
         } finally {
             context.leaveValue()
         }
@@ -815,7 +1152,7 @@ private class ArrayListJsonCodec<T> <: JsonFastCodec<ArrayList<T>> {
         }
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<T> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): ArrayList<T> {
         context.enterValue()
         try {
             reader.startRawArray()
@@ -877,9 +1214,12 @@ private class Int64ArrayListJsonCodec <: JsonFastCodec<ArrayList<Int64>> {
     public func read(reader: JsonCodecReader, context: JsonDecodeContext): ArrayList<Int64> {
         ArrayListJsonCodec<Int64>(Int64Json).read(reader, context)
     }
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<Int64> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): ArrayList<Int64> {
         context.enterValue()
         try {
+            if (let Some(result) <- yJsonTryReadNativeInt64ArrayListV1(reader)) {
+                return result
+            }
             reader.startRawArray()
             if (!reader.hasRawArrayItem(true)) {
                 reader.endRawArray()
@@ -932,7 +1272,7 @@ private class StringArrayListJsonCodec <: JsonFastCodec<ArrayList<String>> {
         }
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<String> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): ArrayList<String> {
         context.enterValue()
         try {
             reader.startRawArray()
@@ -988,7 +1328,7 @@ public func __yJsonReadStringArrayList(reader: JsonCodecReader, context: JsonDec
     }
 }
 
-public func __yJsonReadFastStringArrayList(reader: JsonFastReader, context: JsonDecodeContext): ArrayList<String> {
+public func __yJsonReadFastStringArrayList(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): ArrayList<String> {
     context.enterValue()
     try {
         reader.startRawArray()
@@ -1027,7 +1367,7 @@ public func __yJsonReadStringOption(reader: JsonCodecReader, context: JsonDecode
     }
 }
 
-public func __yJsonReadFastStringOption(reader: JsonFastReader, context: JsonDecodeContext): Option<String> {
+public func __yJsonReadFastStringOption(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): Option<String> {
     let _ = context
     if (reader.tryReadRawNull()) {
         None<String>
@@ -1036,10 +1376,12 @@ public func __yJsonReadFastStringOption(reader: JsonFastReader, context: JsonDec
     }
 }
 
-private class HashMapJsonCodec<T> <: JsonFastCodec<HashMap<String, T>> {
+private class HashMapJsonCodec<T> <: JsonFastCodec<HashMap<String, T>> & JsonCompactRawCodec<HashMap<String, T>> {
     private let inner: JsonCodec<T>
     private let fastInner: JsonFastCodec<T>
     private let rawInner: Option<JsonRawWriteCodec<T>>
+    private let directInner: Option<JsonDirectWriteCodec<T>>
+    private let compactRawInner: Option<JsonCompactRawCodec<T>>
 
     public init(inner: JsonCodec<T>) {
         this.inner = inner
@@ -1048,9 +1390,23 @@ private class HashMapJsonCodec<T> <: JsonFastCodec<HashMap<String, T>> {
             case raw: JsonRawWriteCodec<T> => Some(raw)
             case _ => None<JsonRawWriteCodec<T>>
         }
+        this.directInner = match (inner) {
+            case direct: JsonDirectWriteCodec<T> => Some(direct)
+            case _ => None<JsonDirectWriteCodec<T>>
+        }
+        this.compactRawInner = match (inner) {
+            case raw: JsonCompactRawCodec<T> => Some(raw)
+            case _ => None<JsonCompactRawCodec<T>>
+        }
     }
 
     public func write(value: HashMap<String, T>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {
+        match (writer) {
+            case direct: JsonDirectWriter =>
+                writeDirect(value, direct, context)
+                return
+            case _ => ()
+        }
         context.enterValue()
         try {
             if (let Some(raw) <- rawInner) {
@@ -1061,16 +1417,105 @@ private class HashMapJsonCodec<T> <: JsonFastCodec<HashMap<String, T>> {
                 }
             }
             writer.startObject()
-            for ((name, item) in value) {
-                writer.writeName(name)
-                context.pushField(name)
+            if (!value.isEmpty()) {
+                var first = true
                 try {
-                    inner.write(item, writer, context)
+                    for ((name, item) in value) {
+                        writer.writeName(name)
+                        if (first) {
+                            context.pushField(name)
+                            first = false
+                        } else {
+                            context.updateLastField(name)
+                        }
+                        inner.write(item, writer, context)
+                    }
+                } finally {
+                    if (!first) {
+                        context.popPath()
+                    }
+                }
+            }
+            writer.endObject()
+        } finally {
+            context.leaveValue()
+        }
+    }
+
+    public func writeDirect(value: HashMap<String, T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
+        if (supportsCompactRaw() && writer.tryBeginGeneratedCompactRawValue()) {
+            writeCompactRaw(value, writer, context)
+            return
+        }
+        context.enterValue()
+        try {
+            if (let Some(raw) <- rawInner) {
+                if (yJsonGeneratedWriterV1(writer).tryWriteCompactRawMap(value, raw)) {
+                    return
+                }
+            }
+            writer.startObject()
+            if (!value.isEmpty()) {
+                var first = true
+                try {
+                    for ((name, item) in value) {
+                        writer.writeName(name)
+                        if (first) {
+                            context.pushField(name)
+                            first = false
+                        } else {
+                            context.updateLastField(name)
+                        }
+                        match (directInner) {
+                            case Some(direct) => direct.writeDirect(item, writer, context)
+                            case None => inner.write(item, writer, context)
+                        }
+                    }
+                } finally {
+                    if (!first) {
+                        context.popPath()
+                    }
+                }
+            }
+            writer.endObject()
+        } finally {
+            context.leaveValue()
+        }
+    }
+
+    public func supportsCompactRaw(): Bool {
+        match (compactRawInner) {
+            case Some(raw) => raw.supportsCompactRaw()
+            case None => false
+        }
+    }
+
+    public func writeCompactRaw(value: HashMap<String, T>, writer: GeneratedSupportV1Writer, context: JsonEncodeContext): Unit {
+        context.enterValue()
+        try {
+            let rawWriter = GeneratedSupportV1.writeCursor(writer)
+            rawWriter.writeRawBeginObject()
+            if (!value.isEmpty()) {
+                let raw = match (compactRawInner) {
+                    case Some(item) => item
+                    case None => throw JsonException("Compact raw codec is unavailable")
+                }
+                var first = true
+                try {
+                    for ((name, item) in value) {
+                        if (first) {
+                            context.pushField(name)
+                        } else {
+                            context.updateLastField(name)
+                        }
+                        first = rawWriter.writeRawObjectEntryName(first, name)
+                        raw.writeCompactRaw(item, writer, context)
+                    }
                 } finally {
                     context.popPath()
                 }
             }
-            writer.endObject()
+            rawWriter.writeRawEndObject()
         } finally {
             context.leaveValue()
         }
@@ -1097,7 +1542,7 @@ private class HashMapJsonCodec<T> <: JsonFastCodec<HashMap<String, T>> {
         }
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): HashMap<String, T> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): HashMap<String, T> {
         context.enterValue()
         try {
             reader.startRawObject()
@@ -1161,7 +1606,7 @@ private class Int64HashMapJsonCodec <: JsonFastCodec<HashMap<String, Int64>> {
         }
     }
 
-    public func readFast(reader: JsonFastReader, context: JsonDecodeContext): HashMap<String, Int64> {
+    public func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): HashMap<String, Int64> {
         context.enterValue()
         try {
             reader.startRawObject()
@@ -1215,7 +1660,7 @@ public func __yJsonReadInt64HashMap(reader: JsonCodecReader, context: JsonDecode
     }
 }
 
-public func __yJsonReadFastInt64HashMap(reader: JsonFastReader, context: JsonDecodeContext): HashMap<String, Int64> {
+public func __yJsonReadFastInt64HashMap(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): HashMap<String, Int64> {
     context.enterValue()
     try {
         reader.startRawObject()
@@ -1236,38 +1681,33 @@ public func __yJsonReadFastInt64HashMap(reader: JsonFastReader, context: JsonDec
     }
 }
 
-private func remainingJsonInputBytes(input: InputStream): Option<Array<Byte>> {
-    match (input) {
-        case byteInput: YJsonByteArrayInputStream => Some(byteInput.readRemainingBytes())
-        case _ => None<Array<Byte>>
-    }
-}
-
 public class YJson {
     public static func parse(text: String, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
+        freezeYJsonRuntime()
         JsonNode.parse(text, config: config)
     }
 
     public static func parse(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
+        freezeYJsonRuntime()
         JsonNode.parse(bytes, config: config)
     }
 
-    /// Parses a read-only document using one explicit backend. The portable
-    /// Pure Compact backend remains the default and does not enable Native code.
+    /// Parses a GC-managed read-only Compact document with the frozen engine.
     public static func parseDocument(text: String,
-        backend!: JsonDocumentBackend = PureCompactBackend,
         config!: JsonReadConfig = JsonReadConfig.defaults): JsonDocument {
-        backend.parse(unsafe { text.rawData() }, config)
+        freezeYJsonRuntime()
+        parseManagedJsonDocument(unsafe { text.rawData() }, config)
     }
 
     /// Parses raw UTF-8 into the unified read-only document facade.
     public static func parseDocument(bytes: Array<Byte>,
-        backend!: JsonDocumentBackend = PureCompactBackend,
         config!: JsonReadConfig = JsonReadConfig.defaults): JsonDocument {
-        backend.parse(bytes, config)
+        freezeYJsonRuntime()
+        parseManagedJsonDocument(bytes, config)
     }
 
     public static func stringify(value: JsonNode, config!: JsonWriteConfig = JsonWriteConfig.compact): String {
+        freezeYJsonRuntime()
         writeJsonValueToString(value, config)
     }
 
@@ -1329,10 +1769,12 @@ public class YJson {
     }
 
     public static func toJson<T>(value: T, config!: JsonWriteConfig = JsonWriteConfig.compact): String where T <: JsonCodecProvider {
+        freezeYJsonRuntime()
         encodeStringWith(jsonCodecOf<T>(), value, config: config)
     }
 
     public static func fromJson<T>(text: String, config!: JsonReadConfig = JsonReadConfig.defaults): T where T <: JsonCodecProvider {
+        freezeYJsonRuntime()
         decodeStringWith(jsonCodecOf<T>(), text, config: config)
     }
 
@@ -1360,6 +1802,7 @@ public class YJson {
 
     public static func encodeStringWith<T>(codec: JsonCodec<T>, value: T,
         config!: JsonWriteConfig = JsonWriteConfig.compact): String {
+        freezeYJsonRuntime()
         let writer = JsonDirectWriter(config)
         codec.write(value, writer, JsonEncodeContext(config))
         writer.finishString()
@@ -1367,6 +1810,7 @@ public class YJson {
 
     public static func encodeBytesWith<T>(codec: JsonCodec<T>, value: T,
         config!: JsonWriteConfig = JsonWriteConfig.compact): Array<Byte> {
+        freezeYJsonRuntime()
         let writer = JsonDirectWriter.bytes(config: config)
         codec.write(value, writer, JsonEncodeContext(config))
         writer.finishBytes()
@@ -1374,6 +1818,7 @@ public class YJson {
 
     public static func decodeStringWith<T>(codec: JsonCodec<T>, text: String,
         config!: JsonReadConfig = JsonReadConfig.defaults): T {
+        freezeYJsonRuntime()
         if (jsonReadConfigUsesDefaultFastPath(config)) {
             match (codec) {
                 case fast: JsonFastCodec<T> =>
@@ -1392,6 +1837,7 @@ public class YJson {
 
     public static func decodeBytesWith<T>(codec: JsonCodec<T>, bytes: Array<Byte>,
         config!: JsonReadConfig = JsonReadConfig.defaults): T {
+        freezeYJsonRuntime()
         if (jsonReadConfigUsesDefaultFastPath(config)) {
             match (codec) {
                 case fast: JsonFastCodec<T> =>
@@ -1409,41 +1855,32 @@ public class YJson {
     }
 
     public static func encodeToStreamWith<T>(codec: JsonCodec<T>, value: T, out: OutputStream,
-        backend!: JsonStreamBackend = PureStreamBackend,
         config!: JsonWriteConfig = JsonWriteConfig.compact): Unit {
-        let session = backend.openEncoder(out, config)
-        try {
-            codec.write(value, session.writer(), JsonEncodeContext(config))
-            session.finish()
-        } finally {
-            session.close()
-        }
+        freezeYJsonRuntime()
+        let writer = JsonDirectWriter(out, config: config)
+        codec.write(value, writer, JsonEncodeContext(config))
+        writer.finish()
     }
 
     public static func decodeFromStreamWith<T>(codec: JsonCodec<T>, input: InputStream,
-        backend!: JsonStreamBackend = PureStreamBackend,
         config!: JsonReadConfig = JsonReadConfig.defaults): T {
-        let session = backend.openDecoder(input, config)
-        try {
-            let reader = session.reader()
-            let result = codec.read(reader, JsonDecodeContext(config))
-            reader.expectEnd()
-            result
-        } finally {
-            session.close()
-        }
+        freezeYJsonRuntime()
+        let reader = JsonDirectReader(input, config: config)
+        let result = codec.read(reader, JsonDecodeContext(config))
+        reader.expectEnd()
+        result
     }
 
     public static func toStream<T>(value: T, out: OutputStream,
-        backend!: JsonStreamBackend = PureStreamBackend,
         config!: JsonWriteConfig = JsonWriteConfig.compact): Unit where T <: JsonCodecProvider {
-        encodeToStreamWith(jsonCodecOf<T>(), value, out, backend: backend, config: config)
+        freezeYJsonRuntime()
+        encodeToStreamWith(jsonCodecOf<T>(), value, out, config: config)
     }
 
     public static func fromStream<T>(input: InputStream,
-        backend!: JsonStreamBackend = PureStreamBackend,
         config!: JsonReadConfig = JsonReadConfig.defaults): T where T <: JsonCodecProvider {
-        decodeFromStreamWith(jsonCodecOf<T>(), input, backend: backend, config: config)
+        freezeYJsonRuntime()
+        decodeFromStreamWith(jsonCodecOf<T>(), input, config: config)
     }
 
     public static func optionCodec<T>(inner: JsonCodec<T>): JsonCodec<Option<T>> {

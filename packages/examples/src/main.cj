@@ -24,7 +24,8 @@ main(): Unit {
     println(literal)
 
     let text = "{\"name\":\"Alice\",\"age\":30,\"tags\":[\"cangjie\",\"json\"]}"
-    let limits = JsonReadConfig(maxDepth: 64, maxBytes: 1024 * 1024, maxStringBytes: 256 * 1024)
+    let limits = JsonReadConfig(limits: JsonReadLimits(
+        maxDepth: 64, maxBytes: 1024 * 1024, maxStringBytes: 256 * 1024))
     let value = YJson.parse(text, config: limits)
     let object = value.asObject()
     object.put("active", JsonBoolValue(true))

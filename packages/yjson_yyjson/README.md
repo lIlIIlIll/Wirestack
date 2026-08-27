@@ -1,49 +1,30 @@
 # yjson_yyjson
 
-Supported opt-in yyjson Direct Native DOM backend for `yjson`, vendoring
-unmodified yyjson 0.12.0 under the MIT License.
-
-The module is source-built and offline. Documents are explicit resources and
-are not thread-safe. Its Cangjie shared library localizes the vendored
-`yyjson_*` implementation symbols, so an application may independently link a
-second yyjson version. The vendored upstream sources remain unmodified.
-
-The package must use the same `yjson` release as its core dependency.
+显式可选的 yyjson Direct DOM 与 typed stream package，vendoring 未修改的 yyjson 0.12.0
+source（MIT License）。
 
 ```toml
 [dependencies]
 yjson = { path = "../yjson" }
+yjson_backends = { path = "../yjson/packages/yjson_backends" }
 yjson_yyjson = { path = "../yjson/packages/yjson_yyjson" }
 ```
 
 ```cangjie
 import yjson.*
+import yjson_backends.*
 import yjson_yyjson.*
 
 let bytes = unsafe { "{\"n\":42}".rawData() }
-try (document = YJson.parseDocument(bytes, backend: YyjsonBackend)) {
+try (document = YJsonAdvanced.parseDocumentWithBackend(bytes, YyjsonDocumentBackend)) {
     println(document.getRootInt("n").getOrThrow())
 }
 ```
 
-This is the same facade used by the portable `PureCompactBackend` and optional
-`NativeCompactBackend`. Use `YyjsonCompactJsonDocument` directly for storage
-statistics, traversal checksum, or qualification controls.
+Document 是显式 resource、非线程安全。`YyjsonWholeDocumentStreamBackend` 处理完整 document，再以 bulk
+tape 驱动同一个 `JsonCodec<T>`；它不关闭 caller stream，也不静默切换到 Pure。
 
-The optional package also exposes `YyjsonStreamBackend` for typed caller-owned
-streams:
-
-```cangjie
-YJson.encodeToStreamWith(UserJson, user, output,
-    backend: YyjsonStreamBackend)
-let user = YJson.decodeFromStreamWith(UserJson, input,
-    backend: YyjsonStreamBackend)
-```
-
-This supported Direct-mode backend buffers one whole document, crosses the ABI
-only in bulk, preserves Pure `JsonWriteConfig` output bytes, and never closes
-caller streams or silently switches to the Pure backend.
-
-Use the same `yjson` version. See the suite-level
-[`docs/backends.md`](../../docs/backends.md) and
-[`THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md).
+vendored `yyjson_*` symbols 在 Cangjie shared library 中本地化，以允许应用独立链接其他
+yyjson 版本。package 与 core 必须版本匹配。完整生命周期见
+[Backend 指南](../../docs/backends.md)，第三方许可和 checksum 见
+[THIRD_PARTY_NOTICES](../../THIRD_PARTY_NOTICES.md)。

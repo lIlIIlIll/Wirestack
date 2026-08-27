@@ -14,6 +14,11 @@ extern "C" {
 
 #define YJ_JSON_SCAN_VALIDATE_STRINGS 1u
 
+#define YJ_JSON_ACCEL_PROBE_V1 0x594A0101u
+
+/* Verifies the native primitive bundle ABI before runtime freeze. */
+uint32_t YJ_JSON_ProbeV1(void);
+
 uint32_t YJ_JSON_SimdCaps(void);
 
 /*
@@ -42,6 +47,23 @@ int32_t YJ_JSON_DecodeString(
     const uint8_t* input, int64_t len, int64_t start, uint32_t flags,
     uint8_t* output, int64_t outputCap,
     int64_t* outEnd, int64_t* outWritten, int64_t* outError);
+
+/* Writes one complete quoted JSON string token into caller-owned storage. */
+int32_t YJ_JSON_EscapeString(
+    const uint8_t* input, int64_t len, uint8_t htmlSafe,
+    uint8_t* output, int64_t outputCap, int64_t* outWritten);
+
+/* Formats one compact JSON array from caller-owned contiguous Int64 values. */
+int32_t YJ_JSON_FormatInt64Array(
+    const int64_t* values, int64_t count,
+    uint8_t* output, int64_t outputCap, int64_t outputOffset,
+    int64_t* outWritten);
+
+/* Validates and converts one complete JSON Int64 array in a single call. */
+int32_t YJ_JSON_ParseInt64Array(
+    const uint8_t* input, int64_t len, int64_t start,
+    int64_t* values, int64_t valueCap,
+    int64_t* outEnd, int64_t* outCount, int64_t* outError);
 
 int32_t YJ_JSON_ScanObjectFields(
     const uint8_t* input, int64_t len, int64_t start, uint32_t flags,

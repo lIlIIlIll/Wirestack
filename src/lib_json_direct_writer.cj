@@ -5,6 +5,8 @@ import std.io.*
 
 const JSON_DIRECT_BYTES_INITIAL_CAPACITY: Int64 = 256
 const JSON_DIRECT_PRETTY_STRING_INITIAL_CAPACITY: Int64 = 512
+const JSON_STREAM_BUFFER_CAPACITY: Int64 = 4096
+const JSON_STREAM_DIRECT_WRITE_THRESHOLD: Int64 = 2048
 const JSON_DIRECT_INT64_MAP_ENTRY_RESERVE_HINT: Int64 = 8
 const JSON_DIRECT_INT64_MAP_RESERVE_LIMIT: Int64 = 4096
 
@@ -84,7 +86,13 @@ abstract class JsonDirectWriterTarget {
 
     protected func writeByte(value: Byte): Unit
 
+    protected func writeBytes(value: Array<Byte>): Unit
+
+    protected func writeBytesRange(value: Array<Byte>, start: Int64, end: Int64): Unit
+
     protected func reserveCapacity(additional: Int64): Unit
+
+    protected func tryWriteNativeInt64Array(values: ArrayList<Int64>): Bool
 
     protected func writeStringLiteralNoEscape(value: String): Unit
 
@@ -181,10 +189,36 @@ class DirectStringWriterTarget <: JsonDirectWriterTarget {
         writeRawByteNoEnsure(value)
     }
 
+    public func writeBytes(value: Array<Byte>): Unit {
+        if (value.isEmpty()) { return }
+        ensureCapacity(used + value.size)
+        value.copyTo(buffer, 0, used, value.size)
+        used += value.size
+    }
+
+    public func writeBytesRange(value: Array<Byte>, start: Int64, end: Int64): Unit {
+        let size = end - start
+        if (size <= 0) { return }
+        ensureCapacity(used + size)
+        value.copyTo(buffer, start, used, size)
+        used += size
+    }
+
     public func reserveCapacity(additional: Int64): Unit {
         if (additional > 0) {
             ensureCapacity(used + additional)
         }
+    }
+
+    public func tryWriteNativeInt64Array(values: ArrayList<Int64>): Bool {
+        if (values.size < YJSON_NATIVE_MIN_WRITER_INT64_COUNT) { return false }
+        let required = values.size * 21 + 1
+        ensureCapacity(used + required)
+        if (let Some(written) <- jsonNativeFormatInt64ArrayInto(values, buffer, used)) {
+            used += written
+            return true
+        }
+        false
     }
 
     public func writeStringLiteralNoEscape(value: String): Unit {
@@ -640,10 +674,36 @@ class DirectBytesWriterTarget <: JsonDirectWriterTarget {
         writeRawByteNoEnsure(value)
     }
 
+    public func writeBytes(value: Array<Byte>): Unit {
+        if (value.isEmpty()) { return }
+        ensureCapacity(used + value.size)
+        value.copyTo(buffer, 0, used, value.size)
+        used += value.size
+    }
+
+    public func writeBytesRange(value: Array<Byte>, start: Int64, end: Int64): Unit {
+        let size = end - start
+        if (size <= 0) { return }
+        ensureCapacity(used + size)
+        value.copyTo(buffer, start, used, size)
+        used += size
+    }
+
     public func reserveCapacity(additional: Int64): Unit {
         if (additional > 0) {
             ensureCapacity(used + additional)
         }
+    }
+
+    public func tryWriteNativeInt64Array(values: ArrayList<Int64>): Bool {
+        if (values.size < YJSON_NATIVE_MIN_WRITER_INT64_COUNT) { return false }
+        let required = values.size * 21 + 1
+        ensureCapacity(used + required)
+        if (let Some(written) <- jsonNativeFormatInt64ArrayInto(values, buffer, used)) {
+            used += written
+            return true
+        }
+        false
     }
 
     public func writeStringLiteralNoEscape(value: String): Unit {
@@ -1118,11 +1178,40 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
         writeRawByte(value)
     }
 
+    public func writeBytes(value: Array<Byte>): Unit {
+        if (value.isEmpty()) { return }
+        if (value.size >= JSON_STREAM_DIRECT_WRITE_THRESHOLD) {
+            flushBuffer()
+            out.write(value)
+            committed += value.size
+            return
+        }
+        if (used + value.size > buffer.size) { flushBuffer() }
+        value.copyTo(buffer, 0, used, value.size)
+        used += value.size
+    }
+
+    public func writeBytesRange(value: Array<Byte>, start: Int64, end: Int64): Unit {
+        let size = end - start
+        if (size <= 0) { return }
+        if (size >= JSON_STREAM_DIRECT_WRITE_THRESHOLD) {
+            flushBuffer()
+            out.write(value[start..end])
+            committed += size
+            return
+        }
+        if (used + size > buffer.size) { flushBuffer() }
+        value.copyTo(buffer, start, used, size)
+        used += size
+    }
+
     public func reserveCapacity(additional: Int64): Unit {
         if (additional > 0 && additional < buffer.size) {
             ensureBufferedCapacity(additional)
         }
     }
+
+    public func tryWriteNativeInt64Array(_values: ArrayList<Int64>): Bool { false }
 
     public func writeStringLiteralNoEscape(value: String): Unit {
         writeRawByte(b'"')
@@ -1481,21 +1570,20 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
 
 }
 
-private class JsonDirectWriteContext {
-    public let objectContext: Bool
-    public var first: Bool = true
-    public var expectingFieldValue: Bool = false
+public class JsonDirectWriter <: GeneratedSupportV1Writer {
+    private static let ARRAY_FIRST: UInt8 = 0x1
+    private static let ARRAY_NEXT: UInt8 = 0x0
+    private static let OBJECT_FIRST: UInt8 = 0x3
+    private static let OBJECT_NEXT: UInt8 = 0x2
+    private static let OBJECT_EXPECTING_VALUE: UInt8 = 0x6
+    private static let OBJECT_MASK: UInt8 = 0x2
+    private static let FIRST_MASK: UInt8 = 0x1
+    private static let EXPECTING_VALUE_MASK: UInt8 = 0x4
 
-    public init(objectContext: Bool) {
-        this.objectContext = objectContext
-    }
-}
-
-public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
     private let target: JsonDirectWriterTarget
     private let config: JsonWriteConfig
     private let multiline: Bool
-    private let contexts = ArrayList<JsonDirectWriteContext>()
+    private var contexts: Option<ArrayList<UInt8>> = None<ArrayList<UInt8>>
 
     public init(pretty!: Bool = false) {
         let writerConfig = if (pretty) { JsonWriteConfig.pretty } else { JsonWriteConfig.compact }
@@ -1526,12 +1614,18 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         JsonDirectWriter(DirectBytesWriterTarget(), config)
     }
 
+    public func generatedCursorV1(): GeneratedSupportV1WriteCursor {
+        GeneratedSupportV1WriteCursor(this)
+    }
+
     public func finish(): Unit {
+        ensureCompleteWriterState()
         target.finish()
         enforceOutputLimit()
     }
 
     public func finishString(): String {
+        ensureCompleteWriterState()
         target.finish()
         enforceOutputLimit()
         match (target) {
@@ -1541,6 +1635,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
     }
 
     public func finishBytes(): Array<Byte> {
+        ensureCompleteWriterState()
         target.finish()
         enforceOutputLimit()
         match (target) {
@@ -1559,12 +1654,43 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         }
     }
 
+    private func ensureCompleteWriterState(): Unit {
+        if (!contextsAreEmpty()) {
+            throw JsonException("Unbalanced JSON writer state")
+        }
+    }
+
+    private func contextValues(): ArrayList<UInt8> {
+        match (contexts) {
+            case Some(value) => value
+            case None =>
+                let value = ArrayList<UInt8>()
+                contexts = Some(value)
+                value
+        }
+    }
+
+    private func contextsAreEmpty(): Bool {
+        match (contexts) {
+            case Some(value) => value.isEmpty()
+            case None => true
+        }
+    }
+
     func canWriteRawCompactValue(): Bool {
-        contexts.isEmpty() && !multiline && !config.useSpaceAfterSeparators && !config.htmlSafe
+        contextsAreEmpty() && !multiline && !config.useSpaceAfterSeparators && !config.htmlSafe
+    }
+
+    public func tryBeginGeneratedCompactRawValue(): Bool {
+        if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
+            return false
+        }
+        beforeValue()
+        true
     }
 
     func canWriteRawDefaultPrettyValue(): Bool {
-        contexts.isEmpty() &&
+        contextsAreEmpty() &&
             config.newline == "\n" &&
             config.indent == "    " &&
             config.useSpaceAfterSeparators &&
@@ -1575,28 +1701,35 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         target.writeText(value)
     }
 
-    func writeRawByte(value: Byte): Unit {
+    public func writeRawByte(value: Byte): Unit {
         target.writeByte(value)
     }
 
-    func writeRawBeginArray(): Unit {
+    public func writeRawBeginArray(): Unit {
         target.writeByte(b'[')
     }
 
-    func writeRawEndArray(): Unit {
+    public func writeRawEndArray(): Unit {
         target.writeByte(b']')
     }
 
-    func writeRawBeginObject(): Unit {
+    public func writeRawBeginObject(): Unit {
         target.writeByte(b'{')
     }
 
-    func writeRawEndObject(): Unit {
+    public func writeRawEndObject(): Unit {
         target.writeByte(b'}')
     }
 
     func reserveRawCapacity(additional: Int64): Unit {
         target.reserveCapacity(additional)
+    }
+
+    func reserveRawCollectionCapacity(count: Int64): Unit {
+        if (count < 4) { return }
+        var hint = count * 64 + 2
+        if (hint > 4096) { hint = 4096 }
+        target.reserveCapacity(hint)
     }
 
     func rawTargetForGenerated(): JsonDirectWriterTarget {
@@ -1609,7 +1742,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         }
     }
 
-    func writeRawObjectEntryName(first: Bool, value: String): Bool {
+    public func writeRawObjectEntryName(first: Bool, value: String): Bool {
         if (!first) {
             target.writeByte(b',')
         }
@@ -1617,7 +1750,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         false
     }
 
-    func writeRawObjectEntryNameString(first: Bool, name: String, value: String): Bool {
+    public func writeRawObjectEntryNameString(first: Bool, name: String, value: String): Bool {
         if (!first) {
             target.writeByte(b',')
         }
@@ -1626,7 +1759,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         false
     }
 
-    func writeRawObjectEntryNameInt64(first: Bool, name: String, value: Int64): Bool {
+    public func writeRawObjectEntryNameInt64(first: Bool, name: String, value: Int64): Bool {
         let firstEscape = firstStringEscapeIndex(name)
         if (firstEscape < 0) {
             return target.writeObjectEntryNameInt64NoEscape(first, name, value)
@@ -1639,7 +1772,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         false
     }
 
-    func writeRawObjectEntryNameBool(first: Bool, name: String, value: Bool): Bool {
+    public func writeRawObjectEntryNameBool(first: Bool, name: String, value: Bool): Bool {
         if (!first) {
             target.writeByte(b',')
         }
@@ -1732,6 +1865,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
             return false
         }
         beforeValue()
+        if (target.tryWriteNativeInt64Array(values)) { return true }
         var totalValueSize: Int64 = 0
         for (item in values) {
             totalValueSize += jsonRawInt64Size(item)
@@ -1851,7 +1985,7 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         writeStringLiteralName(value)
     }
 
-    func writeRawNull(): Unit {
+    public func writeRawNull(): Unit {
         target.writeText("null")
     }
 
@@ -2082,13 +2216,14 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
     public func startObject(): Unit {
         beforeValue()
         target.writeByte(b'{')
-        contexts.add(JsonDirectWriteContext(true))
+        contextValues().add(OBJECT_FIRST)
     }
 
     public func endObject(): Unit {
         let context = popContext(true)
-        if (!context.first && multiline) {
-            writeNewlineAndIndent(contexts.size)
+        let values = contextValues()
+        if ((context & FIRST_MASK) == 0 && multiline) {
+            writeNewlineAndIndent(values.size)
         }
         target.writeByte(b'}')
     }
@@ -2096,13 +2231,14 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
     public func startArray(): Unit {
         beforeValue()
         target.writeByte(b'[')
-        contexts.add(JsonDirectWriteContext(false))
+        contextValues().add(ARRAY_FIRST)
     }
 
     public func endArray(): Unit {
         let context = popContext(false)
-        if (!context.first && multiline) {
-            writeNewlineAndIndent(contexts.size)
+        let values = contextValues()
+        if ((context & FIRST_MASK) == 0 && multiline) {
+            writeNewlineAndIndent(values.size)
         }
         target.writeByte(b']')
     }
@@ -2124,21 +2260,22 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
     }
 
     private func beforeName(): Unit {
-        if (contexts.isEmpty()) {
+        if (contextsAreEmpty()) {
             throw JsonException("Cannot write a field name outside object")
         }
-        let context = contexts[contexts.size - 1]
-        if (!context.objectContext || context.expectingFieldValue) {
+        let values = contextValues()
+        let index = values.size - 1
+        let context = values[index]
+        if ((context & OBJECT_MASK) == 0 || (context & EXPECTING_VALUE_MASK) != 0) {
             throw JsonException("Cannot write a field name here")
         }
-        if (context.first) {
-            writeEntryPrefix(contexts.size)
-            context.first = false
+        if ((context & FIRST_MASK) != 0) {
+            writeEntryPrefix(values.size)
         } else {
             target.writeByte(b',')
-            writeEntryPrefix(contexts.size)
+            writeEntryPrefix(values.size)
         }
-        context.expectingFieldValue = true
+        values[index] = OBJECT_EXPECTING_VALUE
     }
 
     public func writeNull(): Unit {
@@ -2178,36 +2315,41 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
     }
 
     private func beforeValue(): Unit {
-        if (contexts.isEmpty()) {
+        if (contextsAreEmpty()) {
             return
         }
-        let context = contexts[contexts.size - 1]
-        if (context.objectContext) {
-            if (!context.expectingFieldValue) {
+        let values = contextValues()
+        let index = values.size - 1
+        let context = values[index]
+        if ((context & OBJECT_MASK) != 0) {
+            if ((context & EXPECTING_VALUE_MASK) == 0) {
                 throw JsonException("Object values must be preceded by a field name")
             }
-            context.expectingFieldValue = false
+            values[index] = OBJECT_NEXT
             return
         }
-        if (context.first) {
-            writeEntryPrefix(contexts.size)
-            context.first = false
+        if ((context & FIRST_MASK) != 0) {
+            writeEntryPrefix(values.size)
+            values[index] = ARRAY_NEXT
             return
         }
         target.writeByte(b',')
-        writeEntryPrefix(contexts.size)
+        writeEntryPrefix(values.size)
     }
 
-    private func popContext(expectedObject: Bool): JsonDirectWriteContext {
-        if (contexts.isEmpty()) {
+    private func popContext(expectedObject: Bool): UInt8 {
+        if (contextsAreEmpty()) {
             throw JsonException("Unbalanced JSON writer state")
         }
-        let index = contexts.size - 1
-        let context = contexts[index]
-        if (context.objectContext != expectedObject || context.expectingFieldValue) {
+        let values = contextValues()
+        let index = values.size - 1
+        let context = values[index]
+        let objectContext = (context & OBJECT_MASK) != 0
+        let expectingFieldValue = (context & EXPECTING_VALUE_MASK) != 0
+        if (objectContext != expectedObject || expectingFieldValue) {
             throw JsonException("Unbalanced JSON writer state")
         }
-        contexts.remove(at: index)
+        values.remove(at: index)
         context
     }
 
@@ -2241,6 +2383,10 @@ public class JsonDirectWriter <: JsonCodecWriter & JsonCodecBulkWriter {
     }
 
     private func writeStringLiteralFromFirstEscape(value: String, firstEscape: Int64): Unit {
+        if (let Some(escaped) <- jsonNativeEscapeString(value, config.htmlSafe)) {
+            target.writeBytes(escaped)
+            return
+        }
         target.writeEscapedStringLiteralFromFirstEscape(value, firstEscape, config.htmlSafe)
     }
 

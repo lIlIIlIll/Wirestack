@@ -1,4 +1,6 @@
-package yjson
+package yjson_algorithms
+
+import yjson.*
 
 import std.collection.*
 import std.math.numeric.*
@@ -92,25 +94,56 @@ public class JsonPatch {
     }
 
     /// Applies atomically to a detached copy. The input is never changed.
-    public func apply(target: JsonNode): JsonNode {
-        applyJsonPatchOperations(target.deepCopy(), patchOperations)
+    public func apply(target: JsonNode, limits!: JsonPatchLimits = JsonPatchLimits.defaults): JsonNode {
+        enforceWorkLimit(patchOperations.size, limits.maxOperations, "patch operations")
+        enforceWorkLimit(jsonPatchNodeCount(target), limits.maxCopiedNodes, "copied nodes")
+        for (operation in patchOperations) {
+            enforceWorkLimit(operation.path.rawTokens().size, limits.maxPointerSegments, "pointer segments")
+            if (let Some(source) <- operation.source) {
+                enforceWorkLimit(source.rawTokens().size, limits.maxPointerSegments, "pointer segments")
+            }
+        }
+        let result = applyJsonPatchOperations(target.deepCopy(), patchOperations)
+        enforceWorkLimit(jsonPatchNodeCount(result), limits.maxCopiedNodes, "copied nodes")
+        result
     }
 
     /// Applies atomically and commits into the original root container when
     /// its kind is unchanged. Callers must always use the returned root.
-    public func applyInPlace(target: JsonNode): JsonNode {
-        let result = apply(target)
+    public func applyInPlace(target: JsonNode,
+        limits!: JsonPatchLimits = JsonPatchLimits.defaults): JsonNode {
+        let result = apply(target, limits: limits)
         commitJsonRoot(target, result)
     }
 }
 
 public class JsonMergePatch {
-    public static func apply(target: JsonNode, patch: JsonNode): JsonNode {
-        applyJsonMergePatch(target.deepCopy(), patch)
+    public static func apply(target: JsonNode, patch: JsonNode,
+        limits!: JsonPatchLimits = JsonPatchLimits.defaults): JsonNode {
+        enforceWorkLimit(jsonPatchNodeCount(target) + jsonPatchNodeCount(patch),
+            limits.maxCopiedNodes, "copied nodes")
+        let result = applyJsonMergePatch(target.deepCopy(), patch)
+        enforceWorkLimit(jsonPatchNodeCount(result), limits.maxCopiedNodes, "copied nodes")
+        result
     }
 
-    public static func applyInPlace(target: JsonNode, patch: JsonNode): JsonNode {
-        commitJsonRoot(target, apply(target, patch))
+    public static func applyInPlace(target: JsonNode, patch: JsonNode,
+        limits!: JsonPatchLimits = JsonPatchLimits.defaults): JsonNode {
+        commitJsonRoot(target, apply(target, patch, limits: limits))
+    }
+}
+
+private func jsonPatchNodeCount(value: JsonNode): Int64 {
+    match (value) {
+        case arrayValue: JsonArrayValue =>
+            var total: Int64 = 1
+            for (item in arrayValue.values()) { total += jsonPatchNodeCount(item) }
+            total
+        case objectValue: JsonObjectValue =>
+            var total: Int64 = 1
+            for ((_, item) in objectValue.entries()) { total += jsonPatchNodeCount(item) }
+            total
+        case _ => 1
     }
 }
 
@@ -316,7 +349,7 @@ func deepCopyJsonNode(value: JsonNode): JsonNode {
         case boolValue: JsonBoolValue => JsonBoolValue(boolValue.value)
         case intValue: JsonIntValue => JsonIntValue(intValue.value)
         case floatValue: JsonFloatValue => JsonFloatValue(floatValue.value)
-        case numberValue: JsonNumberLiteralValue => JsonNumberLiteralValue.fromParsedLiteral(numberValue.literal)
+        case numberValue: JsonNumberLiteralValue => JsonNumberLiteralValue(numberValue.literal)
         case stringValue: JsonStringValue => JsonStringValue(stringValue.value)
         case arrayValue: JsonArrayValue =>
             let result = JsonArrayValue()

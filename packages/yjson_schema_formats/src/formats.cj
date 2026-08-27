@@ -1,7 +1,7 @@
 package yjson_schema_formats
 
 import std.collection.*
-import yjson.*
+import yjson_algorithms.*
 
 // The native seam is deliberately a Boolean validator; no libidn2-owned
 // allocation crosses into managed Cangjie code.

@@ -1,4 +1,6 @@
-package yjson
+package yjson_algorithms
+
+import yjson.*
 
 import std.collection.*
 import std.convert.Parsable

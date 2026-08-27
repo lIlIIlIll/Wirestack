@@ -147,7 +147,59 @@ static void test_parse_double_token(void) {
                                      (int64_t)strlen(text), 0, 257)));
 }
 
+static void test_escape_string_token(void) {
+    static const uint8_t input[] = "left\n\"\\<中";
+    static const uint8_t expected[] = "\"left\\n\\\"\\\\<中\"";
+    static const uint8_t html_expected[] = "\"left\\n\\\"\\\\\\u003c中\"";
+    uint8_t output[128] = {0};
+    int64_t written = -1;
+    assert(YJ_JSON_EscapeString(input, (int64_t)(sizeof(input) - 1), 0,
+                                output, (int64_t)sizeof(output), &written) == YJ_JSON_SCAN_OK);
+    assert(written == (int64_t)(sizeof(expected) - 1));
+    assert(memcmp(output, expected, sizeof(expected) - 1) == 0);
+    assert(YJ_JSON_EscapeString(input, (int64_t)(sizeof(input) - 1), 1,
+                                output, (int64_t)sizeof(output), &written) == YJ_JSON_SCAN_OK);
+    assert(written == (int64_t)(sizeof(html_expected) - 1));
+    assert(memcmp(output, html_expected, sizeof(html_expected) - 1) == 0);
+    assert(YJ_JSON_EscapeString(input, (int64_t)(sizeof(input) - 1), 0,
+                                output, 2, &written) == YJ_JSON_SCAN_CAPACITY);
+}
+
+static void test_format_int64_array(void) {
+    static const int64_t values[] = {0, -1, INT64_MAX, INT64_MIN};
+    static const uint8_t expected[] =
+        "[0,-1,9223372036854775807,-9223372036854775808]";
+    uint8_t output[128] = {0};
+    int64_t written = -1;
+    assert(YJ_JSON_FormatInt64Array(values, 4, output, sizeof(output), 0, &written) ==
+           YJ_JSON_SCAN_OK);
+    assert(written == (int64_t)(sizeof(expected) - 1));
+    assert(memcmp(output, expected, sizeof(expected) - 1) == 0);
+    assert(YJ_JSON_FormatInt64Array(values, 4, output, 2, 0, &written) ==
+           YJ_JSON_SCAN_CAPACITY);
+}
+
+static void test_parse_int64_array(void) {
+    static const char text[] =
+        " [0, -1, 9223372036854775807, -9223372036854775808] tail";
+    int64_t values[8] = {0};
+    int64_t end = -1, count = -1, error = -1;
+    assert(YJ_JSON_ParseInt64Array((const uint8_t *)text, (int64_t)strlen(text),
+                                   0, values, 8, &end, &count, &error) ==
+           YJ_JSON_SCAN_OK);
+    assert(count == 4 && error == -1 && text[end] == ' ');
+    assert(values[0] == 0 && values[1] == -1);
+    assert(values[2] == INT64_MAX && values[3] == INT64_MIN);
+
+    static const char invalid[] = "[1,2.0,3]";
+    assert(YJ_JSON_ParseInt64Array((const uint8_t *)invalid,
+                                   (int64_t)strlen(invalid), 0, values, 8,
+                                   &end, &count, &error) == YJ_JSON_SCAN_FALLBACK);
+    assert(error >= 0);
+}
+
 int main(void) {
+    assert(YJ_JSON_ProbeV1() == YJ_JSON_ACCEL_PROBE_V1);
     test_skip_nested_value();
     test_object_fields();
     test_array_ranges();
@@ -157,6 +209,9 @@ int main(void) {
     test_nested_object_range();
     test_many_element_plan();
     test_parse_double_token();
+    test_escape_string_token();
+    test_format_int64_array();
+    test_parse_int64_array();
     puts("yjson scanner targeted tests passed");
     return 0;
 }

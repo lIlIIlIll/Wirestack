@@ -1,4 +1,6 @@
-package yjson
+package yjson_algorithms
+
+import yjson.*
 
 import std.collection.*
 import std.unittest.*
@@ -179,7 +181,7 @@ class YJsonSchemaTest {
     func registryResolvesExternalPointersAndAnchors(): Unit {
         let registry = JsonSchemaRegistry()
         registry.register("urn:test:defs", "{\"$defs\":{\"positive\":{\"$anchor\":\"positive\",\"type\":\"integer\",\"minimum\":1}}}")
-        let config = JsonSchemaConfig(resolver: Some<JsonSchemaResolver>(registry))
+        let config = JsonSchemaConfig(resolver: Some<UriResolver>(registry))
         @Expect(JsonSchema.parse("{\"$ref\":\"urn:test:defs#positive\"}", config: config).validator().isValid(JsonIntValue(2)))
         @Expect(!JsonSchema.parse("{\"$ref\":\"urn:test:defs#/$defs/positive\"}", config: config).validator().isValid(JsonIntValue(0)))
     }

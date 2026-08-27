@@ -1,5 +1,6 @@
 package yjson_codec_integration
 
+import std.collection.*
 import yjson_all.*
 
 private func require(condition: Bool, message: String): Unit {
@@ -69,6 +70,15 @@ main(): Unit {
     require(userJson == "{\"id\":7,\"name\":\"Alice\"}", "unexpected user JSON")
     require(user.id == 7 && user.name == "Alice", "user roundtrip failed")
 
+    let users = ArrayList<ExternalUser>([ExternalUser(8, "Bob"), ExternalUser(9, "Lin")])
+    let usersJson = YJson.toJson(users)
+    let nested = YJson.fromJson<ArrayList<HashMap<String, ArrayList<ExternalUser>>>>(
+        "[{\"team\":${usersJson}}]")
+    let nestedUsers = nested[0].get("team")
+    require(nestedUsers.isSome(), "recursive generated container key missing")
+    require(nestedUsers.getOrThrow()[1].name == "Lin",
+        "recursive generated container roundtrip failed")
+
     let userDecoder = YJson.fastDecoder(ExternalUserJson)
     let fastUser = userDecoder.decodeString(userJson)
     let fastUserBytes = userDecoder.decodeBytes(unsafe { userJson.rawData() })
@@ -96,7 +106,7 @@ main(): Unit {
             require(dog.id == 41 && dog.bark == "loud", "base-typed subtype data was not preserved")
         case _ => throw Exception("base-typed runtime subtype was not preserved")
     }
-    match (YJson.fromJson<ExternalAnimal>(animalJson, config: JsonReadConfig(maxDepth: 1))) {
+    match (YJson.fromJson<ExternalAnimal>(animalJson, config: JsonReadConfig(limits: JsonReadLimits(maxDepth: 1)))) {
         case dog: ExternalDog =>
             require(dog.id == 41 && dog.bark == "loud", "scalar subtype fields consumed container depth")
         case _ => throw Exception("maxDepth=1 polymorphic subtype was not preserved")
@@ -115,7 +125,7 @@ main(): Unit {
     requireJsonError("polymorphic_object_too_large", { =>
         let _ = YJson.fromJson<ExternalAnimal>(
             "{\"kind\":\"dog\",\"bark\":\"too large\"}",
-            config: JsonReadConfig(maxPolymorphicObjectBytes: 8)
+            config: JsonReadConfig(limits: JsonReadLimits(maxPolymorphicObjectBytes: 8))
         )
     })
 

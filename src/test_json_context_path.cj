@@ -36,4 +36,23 @@ class JsonContextPathTest {
         context.pushIndex(3)
         @Expect(context.currentPath(), "$.[literal[3]")
     }
+
+    @TestCase
+    func encodeContextUpdatesReusablePathFrames(): Unit {
+        let context = JsonEncodeContext(JsonWriteConfig.compact)
+        @Expect(context.currentPath(), "$")
+        context.updateLastField("ignored")
+        context.updateLastIndex(99)
+        @Expect(context.currentPath(), "$")
+
+        context.pushField("groups")
+        context.pushIndex(0)
+        context.updateLastIndex(63)
+        @Expect(context.currentPath(), "$.groups[63]")
+        context.popPath()
+        context.updateLastField("featured")
+        @Expect(context.currentPath(), "$.featured")
+        context.popPath()
+        @Expect(context.currentPath(), "$")
+    }
 }

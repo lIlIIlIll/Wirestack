@@ -3,53 +3,63 @@
 <h1 align="center">yjson</h1>
 
 <p align="center">
-  <strong>面向仓颉的高性能 JSON 库，提供编译期生成的类型安全 Codec、JSON 字面量、可修改 AST 与流式 API。</strong>
+  <strong>面向仓颉的类型安全 JSON 库</strong>
   <br />
-  <em>Pure Cangjie by default · Compile-time generated codecs · Explicit native opt-ins</em>
+  <em>编译期 Codec · JSON 字面量 · Mutable AST · Compact DOM · Stream I/O</em>
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-yellow?style=flat" alt="Apache License 2.0" /></a>
-  <img src="https://img.shields.io/badge/Cangjie-1.1.0-3B82F6?style=flat" alt="Cangjie 1.1.0" />
-  <img src="https://img.shields.io/badge/version-1.0.0--rc.1-10B981?style=flat" alt="Version 1.0.0-rc.1" />
+  <a href="https://github.com/lIlIIlIll/yjson/actions/workflows/ci.yml"><img src="https://github.com/lIlIIlIll/yjson/actions/workflows/ci.yml/badge.svg?branch=main" alt="Tests" /></a>
+  <a href="https://codecov.io/gh/lIlIIlIll/yjson"><img src="https://codecov.io/gh/lIlIIlIll/yjson/branch/main/graph/badge.svg?flag=core" alt="Core Coverage" /></a>
+  <a href="https://github.com/lIlIIlIll/yjson/releases/latest"><img src="https://img.shields.io/github/v/release/lIlIIlIll/yjson?display_name=tag&sort=semver" alt="Release" /></a>
+  <a href="docs/performance/results/2026-08-27-yjson-2.0.0.md"><img src="https://img.shields.io/badge/Performance-qualified-10B981" alt="Performance qualified" /></a>
 </p>
 
-yjson 默认使用纯仓颉实现。Native backend 是面向特定内存与遍历场景的显式可选项，
-不会被 core 或宏包隐式启用。
+<p align="center">
+  <img src="https://img.shields.io/badge/Cangjie-%3E%3D1.1.0-3B82F6" alt="Cangjie 1.1.0 or later" />
+  <a href="release/2.0.0/evidence.md"><img src="https://img.shields.io/badge/Linux%20x86__64-qualified-10B981" alt="Linux x86_64 qualified" /></a>
+  <a href="docs/architecture.md"><img src="https://img.shields.io/badge/engine-Pure%20default-8B5CF6" alt="Pure engine by default" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-yellow" alt="Apache License 2.0" /></a>
+</p>
 
-## Why yjson?
+yjson 2.0 默认使用跨平台、GC 管理的 Pure 引擎。普通应用只需要
+`YJson.toJson`、`YJson.fromJson<T>` 与 `YJson.parseDocument`；不需要选择 backend，
+也不需要管理 scanner、whole-document 资源或 `close()`。
 
-- **编译期生成 Codec** — `@JsonCodec` 在调用方生成类型安全的编解码代码，不依赖运行时反射。
-- **直接输出的 JSON 字面量** — `@Json({...})` 支持运行时插值，并直接驱动 writer 生成紧凑 JSON。
-- **统一的数据模型** — 同一套库覆盖 typed codec、可修改 `JsonNode` 与低内存只读 `CompactJsonDocument`。
-- **Pure Cangjie 默认实现** — core 不包含隐式 native 依赖；Custom Native 与 yyjson backend 均需显式选择。
-- **可切换 typed Stream backend** — 同一 `JsonCodec<T>` 可使用默认 Pure incremental，或显式选择 whole-document Native backend。
-- **明确的输入 contract** — 未知字段、重复 key、数字保留和资源预算都由公开配置控制。
+## 适合什么场景
+
+- class、struct、enum 与 JSON 之间的类型安全转换；
+- 需要编译期生成代码、但不希望依赖运行时反射的应用；
+- 同时需要 typed codec、可修改 `JsonNode`、只读 Compact DOM 或 Stream I/O 的项目；
+- 需要明确控制未知字段、重复 key、数字策略、嵌套深度和 byte budget 的服务端程序；
+- 需要 JSON Schema draft 2020-12、JSON Pointer、Patch、Merge Patch 或 JSONPath 的工具。
+
+如果只需要 SDK 自带的基础 JSON 能力，或不需要 generated typed mapping，先阅读
+[库能力对比](docs/library-comparison.md)，再决定是否引入 yjson。
 
 ## 安装
 
-要求仓颉 SDK 1.1.0，且 `cjc`、`cjpm` 位于 `PATH`。
+要求仓颉 SDK 1.1.0，且 `cjc`、`cjpm` 位于 `PATH`。当前仓库示例使用 path
+dependency，不假定任何 registry 包已经发布。
 
-`1.0.0-rc.1` 当前尚未发布到 registry。当前 cjpm manifest 只接受三段数字版本，无法
-表达 `-rc.1`；因此候选阶段只支持 checkout path dependency，正式发布坐标将是 `1.0.0`。
-
-普通应用推荐使用聚合包，它同时提供 runtime、`@JsonCodec`、`@Json` 和
-`@JsonValue`：
+普通应用推荐依赖聚合包：
 
 ```toml
 [dependencies]
 yjson_all = { path = "../yjson/packages/yjson_all" }
 ```
 
-只需要 parser、AST 或内置 codec 时，可以仅依赖 core：
+`yjson_all` 同时导出 runtime 与 `@JsonCodec`、`@Json`、`@JsonValue`。它不会隐式启用
+Native backend。只使用 parser、AST 或内置 codec 时，可以仅依赖 core：
 
 ```toml
 [dependencies]
 yjson = { path = "../yjson" }
 ```
 
-候选阶段应使用 `1.0.0-rc.1` tag，并确保所有 yjson package 来自同一版本。发布身份与
-验证状态见 [release evidence](release/1.0.0-rc.1/evidence.md)。
+`yjson` 与 `yjson_macros` 作为一个发行单元升级；generated codec 通过 v1 protocol
+检查兼容性，不要求应用人工匹配 exact commit。Native 加速与高级 backend 的依赖和
+构建要求见 [Backend 使用指南](docs/backends.md)。
 
 ## 快速开始
 
@@ -76,138 +86,119 @@ main(): Unit {
 }
 ```
 
-## 核心 API
-
-| 需求 | 推荐入口 | 返回值 |
-|---|---|---|
-| 类型安全编解码 | `YJson.toJson` / `YJson.fromJson<T>` | typed value / `String` |
-| 直接构造 JSON 文本 | `@Json({...})` | `String` |
-| 构造并修改 JSON 树 | `@JsonValue({...})` | `JsonNode` |
-| 解析或输出 JSON 树 | `YJson.parse` / `YJson.stringify` | `JsonNode` / `String` |
-| 可切换后端的只读查询 | `YJson.parseDocument` | `JsonDocument`（默认 Pure Compact） |
-| 自定义或内置 codec | `encode*With` / `decode*With` | typed value / JSON |
-| Stream I/O | `encodeToStreamWith` / `decodeFromStreamWith` | caller-owned stream；默认 Pure，可显式选择 backend |
-
-### Parser 与 AST
-
-```cangjie
-let value = YJson.parse("{\"name\":\"Alice\",\"age\":30}")
-let object = value.asObject()
-object.put("active", JsonBoolValue(true))
-
-println(object.get("name").getOrThrow().asString().value)
-println(YJson.stringifyPretty(object))
-```
-
-### 重复 typed decode
-
-高频复用同一个 generated codec 时，可以缓存 fast decoder：
-
-```cangjie
-let decoder = YJson.fastDecoder(UserJson)
-let fromString = decoder.decodeString(text)
-let fromBytes = decoder.decodeBytes(unsafe { text.rawData() })
-```
-
-无配置重载使用 compact fast reader；显式传入 `JsonReadConfig` 时保留完整配置语义。
-
-## JSON 字面量
-
-`@Json` 直接驱动 `JsonDirectWriter`。`$()` 可以插入运行时值，并按从左到右的顺序各
-求值一次：
-
-```cangjie
-let key = "user"
-let id: Int64 = 7
-
-let text = @Json({
-    "ok": true,
-    "items": [1, null, $(id)],
-    $(key): $(User(id, "Alice")),
-})
-```
-
-`@JsonValue` 返回可修改的 `JsonNode`：
-
-```cangjie
-let root = @JsonValue({"name": "Alice", "items": [1, 2]})
-root["name"] = "Bob"
-root["items"][0] = 9
-println(YJson.stringify(root))
-```
-
-静态重复 key 是编译错误。对象包含动态 key 时，运行时冲突采用 LastWins。
-
-## 库能力对比
-
-下表比较固定源码/API 快照中的主要公开能力，不代表性能排名。`◐` 表示部分或间接支持，
-`❌` 表示当前审计版本没有对应公开 API。
-
-| 能力 | yjson | stdx.json | cjfast_json | fastjson2 | Go yyjson |
-| --- | --- | --- | --- | --- | --- |
-| Generated typed mapping | ✅ `@JsonCodec` | ❌ | ✅ `@JsonAdapter` | ✅ ASM / `@JSONCompiler` | ◐ typed 入口委托 `encoding/json` |
-| Mutable / compact DOM | ✅ / ✅ | ✅ / ❌ | ◐ `Any` 通用树 / ❌ | ✅ / ❌ | ✅ / ✅ |
-| Stream/token I/O | ✅ backend 可选 | ✅ | ✅ | ✅ | ◐ incremental reader / stdlib Decoder |
-| Polymorphism / custom codec | ✅ / ✅ | ❌ / ✅ | ❌ / ✅ | ✅ / ✅ | ❌ / ◐ |
-| Schema / standard path-patch | ✅ 2020-12 required + optional suites / ✅ Pointer, Patch, Merge, JSONPath | ❌ / ❌ | ❌ / ❌ | ✅ / ◐ SQL:2016 JSONPath | ❌ / ✅ Pointer/Patch/Merge |
-| Cangjie 直接依赖 | ✅ | ✅ SDK | ✅ | N/A（Java/JVM） | N/A（Go） |
-
-完整矩阵、符号含义、跨 runtime 边界与来源见[库能力对比](docs/library-comparison.md)。性能
-数据仍以独立测量批次为准，不能由这张能力表推导。
-
-标准文档操作入口包括 `JsonPointer`（RFC 6901）、`JsonPatch`（RFC 6902）、
-`JsonMergePatch`（RFC 7386）和 `JsonPath`（RFC 9535）；Schema 只接受 draft 2020-12，
-外部 `$ref` 由应用注入 `JsonSchemaResolver`，core 不执行网络访问。用法与边界见
-[Schema](docs/schema.md)和[标准路径与 Patch](docs/path-and-patch.md)。
+`@JsonCodec` 在调用方编译时生成 `UserJson: JsonCodec<User>` 和
+`JsonCodecProvider` 实现。它不扫描源码目录，也不依赖运行时反射。可运行的完整示例位于
+[`packages/examples`](packages/examples/README.md)。
 
 ## 性能
 
-rc.2 候选的同批次测量包含 yjson、`stdx.json` 与 `cjfast_json` 的全部 36 个共同
-workload。下表选择通过三库 CV≤5% 门槛的代表行，并保留领先与落后方向：
+2.0.0 的发布门禁在固定的 Linux x86_64 Server CPU 8、128 MiB 环境中执行，每个
+workload 交替测量 11 轮。下表只展示发布门槛 workload；数值是中位数，比例越低越快。
 
-| Workload | yjson | stdx.json | cjfast_json | Y/S | Y/C | Direction vs cjfast |
-|---|---:|---:|---:|---:|---:|---|
-| Large Map encode / string | 120.094 µs | 259.263 µs | 131.072 µs | **0.465x** | **0.917x** | yjson faster 11/11 |
-| Nested object encode / bytes | 14.528 µs | 76.827 µs | 12.657 µs | **0.189x** | 1.145x | cjfast faster 11/11 |
-| `TemporalStats` encode / string | 21.163 µs | 81.277 µs | 21.824 µs | **0.261x** | **0.971x** | yjson faster 10/11 |
+| Workload | yjson / Native | 对照 | 比例 | 胜出轮次 |
+| --- | ---: | ---: | ---: | ---: |
+| Large Array encode / string | 46.080 µs | cjfast_json 76.117 µs | 0.608x | 11/11 |
+| ProfileBundle encode / bytes | 10.344 µs | cjfast_json 12.546 µs | 0.816x | 11/11 |
+| ProfileBundle encode / string | 10.767 µs | cjfast_json 12.338 µs | 0.845x | 11/11 |
+| Deep Nested encode / string | 63.552 µs | cjfast_json 74.500 µs | 0.856x | 11/11 |
+| Native writeNumericBytes | 0.559 ms | Pure 2.354 ms | 0.238x | 11/11 |
+| Native readNumericDocument | 1.211 ms | Pure 2.148 ms | 0.564x | 11/11 |
 
-`Y/S` 与 `Y/C` 分别按 `yjson median / peer median` 计算，小于 1 表示 yjson 耗时更低。
-绝对时间只代表对应 workload，不应外推为所有输入或平台上的性能排名。
+这些结果只适用于对应源码、SDK、主机、workload 和测量方法。完整 36-workload 结果、
+CV、原始样本、checksum 与复现边界见
+[2.0.0 性能报告](docs/performance/results/2026-08-27-yjson-2.0.0.md)。
 
-更多结果和适用边界见[性能说明](docs/performance/README.md)。不同 runtime 或不同批次的
-数字不能拼接为统一排名。
+## 按任务选择 API
 
-跨 runtime 的 DOM 测量中，Go `dwisiswant0/yyjson` 在全部 12 项 paired median 中更低；
-稳定行的 `yjson / Go yyjson` latency ratio 几何均值为 **5.45x**。这不是 typed codec
-对比，详见 [Go yyjson DOM 结果](docs/performance/results/2026-08-22-go-yyjson.md)。
+| 你要做什么 | 使用什么 | 结果或约束 |
+| --- | --- | --- |
+| typed value 与 JSON 互转 | `YJson.toJson` / `YJson.fromJson<T>` | 类型安全；类型需提供 codec |
+| 使用显式或自定义 codec | `encode*With` / `decode*With` | 不要求类型实现 provider |
+| 直接构造 JSON 文本 | `@Json({...})` | 返回 `String`；不先创建 AST |
+| 构造并修改 JSON 树 | `@JsonValue({...})` / `YJson.parse` | 返回 `JsonNode` |
+| 只读查询文档 | `YJson.parseDocument` | GC 管理的 Compact document，无 `close()` |
+| 读写 caller-owned stream | `toStream` / `fromStream` 或 `*StreamWith` | 不关闭调用方 stream |
+| 校验 JSON | `yjson_algorithms.JsonSchema` | draft 2020-12；默认有限预算 |
+| 定位、查询或更新节点 | `yjson_algorithms` 的 Pointer / Path / Patch | 默认有限预算 |
 
-## 兼容性与限制
+不知道从哪里开始时，阅读 [API 选择指南](docs/choosing-an-api.md)。
 
-- **当前资格平台** — 1.0 RC 的阻断 build、tests、standards、sanitizer、fuzz 和 external consumer 以 Linux x86_64 为准。
-- **其他平台** — Pure Cangjie 源码因语言跨平台能力可能可用于 Windows、macOS 与 ARM64，但当前均为 `unverified / potentially supported`，不是 1.0 RC 的已验证支持声明；后续按平台逐项 qualification。
-- **版本配套** — `yjson`、宏包、聚合包和 Native package 必须来自同一 checkout、同一 exact commit 并重新编译。
-- **Stream decode** — 当前会读取全部剩余输入，并非恒定内存的增量 parser；Stream 的所有权仍归调用方。
-- **Native backend** — 需要显式依赖，document 必须 `close()`，且不是线程安全对象；当前仅 qualification Linux x86_64。
-- **资源预算** — byte budget 默认不限制，`maxDepth` 默认 256；处理不可信输入时应显式收紧。
-- **JSON Schema format assertion** — 默认 `Annotation`；core 提供基础 format，国际化
-  hostname/email、URI/IRI 与 URI Template 由可选 `yjson_schema_formats` provider 提供。
-  required 1299/1299、适用 optional 964/964 均通过固定 revision 官方 suite。
-- **预发布状态** — `1.0.0-rc.1` 尚未发布到 registry；状态以 release evidence 为准。
+## 两种 JSON 字面量
+
+`@Json` 直接生成紧凑 JSON 文本；`@JsonValue` 构造可修改树。`$()` 插值表达式从左到右
+各求值一次。
+
+```cangjie
+let id: Int64 = 7
+let text = @Json({"ok": true, "user": $(User(id, "Alice"))})
+
+let node = @JsonValue({"name": "Alice", "items": [1, 2]})
+node["name"] = "Bob"
+println(YJson.stringify(node))
+```
+
+静态重复 key 是编译错误；动态 key 冲突采用 LastWins。完整语法和求值规则见
+[JSON 字面量](docs/json-literals.md)。
+
+## 组件关系
+
+```mermaid
+flowchart LR
+    App[应用代码] --> All[yjson_all]
+    All --> Core[yjson runtime]
+    All --> Macros[yjson_macros]
+    Macros --> Codec[generated JsonCodec]
+    Codec --> Core
+    Core --> Pure[单一 reader / writer semantic engine]
+    App -. 启动时一次 initialize .-> Accel[yjson_native_accel]
+    Accel --> Core
+    App -. 高级显式资源 .-> Backends[yjson_backends]
+```
+
+普通 typed 调用从 generated 或 built-in `JsonCodec<T>` 进入同一 reader/writer。
+`YJsonNativeAccel.initialize()` 只在首次 `YJson` 调用前冻结一次 Native profile；之后仍使用
+相同 `YJson` API，初始化失败不会静默回退。更完整的调用链见
+[架构说明](docs/architecture.md)。
+
+## 重要边界
+
+- `JsonReadConfig` 组合 `JsonReadLimits`，`JsonWriteConfig` 组合 `JsonWriteLimits`；
+  byte limit 的 `0` 表示 unlimited，默认深度为 256。
+- 默认 stream API 真正增量读取单个完整 JSON document；它不是多文档 framing
+  protocol。decode 失败后，不保证 stream 停在可恢复边界。
+- 默认 `JsonDocument` 由 GC 管理。只有 `yjson_backends.BackendJsonDocument` 是显式资源。
+- JSONPath、Patch/Merge Patch 与 Schema 位于 `yjson_algorithms`，默认预算耗尽统一抛出
+  `JsonWorkLimitException(code: "work_limit_exceeded")`；可信离线任务可显式使用 `.unlimited`。
+- 当前 release qualification 以 Linux x86_64 为阻断平台；其他平台不得从源码可移植性
+  推断为已验证支持。
+- 性能结果只适用于对应源码、SDK、主机、workload 和测量方法，不代表普遍排名。
+
+配置、安全边界和错误码分别见[配置与错误](docs/configuration-and-errors.md)与
+[资源限制](docs/resource-limits.md)。
 
 ## 文档
 
-- [文档导航与用户指南](docs/README.md)
-- [API 选择与使用场景](docs/choosing-an-api.md)
-- [yjson、stdx.json、cjfast_json、fastjson2 与 Go yyjson 能力对比](docs/library-comparison.md)
+- [从安装到进阶的文档导航](docs/README.md)
+- [API 选择指南](docs/choosing-an-api.md)
 - [`@JsonCodec` 生成规则](docs/codec-generation.md)
-- [Backend 选择与生命周期](docs/backends.md)
-- [性能结论、方法与结果](docs/performance/README.md)
-- [不可信输入资源边界](docs/resource-limits.md)
-- [当前架构与调用链](docs/architecture.md)
-- [预发布迁移指南](docs/migration/pre-1.0-to-1.0.md) · [Changelog](CHANGELOG.md)
-- [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
-- [第三方组件与许可](THIRD_PARTY_NOTICES.md)
+- [AST 与 Compact DOM](docs/ast-and-compact.md)
+- [Stream I/O](docs/streams.md)
+- [Backend 使用指南](docs/backends.md)
+- [JSON Schema](docs/schema.md)
+- [性能方法与结果](docs/performance/README.md)
+- [1.x → 2.0 迁移](docs/migration/1.x-to-2.0.md)
+- [Release notes](RELEASE_NOTES.md) · [Changelog](CHANGELOG.md)
+
+维护者请从[测试策略](docs/maintainers/testing.md)、
+[发布流程](docs/maintainers/releasing.md)和[仓库布局](docs/maintainers/repository-layout.md)
+开始。单次 RC 验收结果保存在 `release/`，不作为通用使用文档。
+
+## 参与项目
+
+提交代码前请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。安全问题的报告边界与当前渠道见
+[SECURITY.md](SECURITY.md)；不要在公开 issue 中提交未修复漏洞的利用细节。
 
 ## 许可证
 
-[Apache License 2.0](LICENSE)
+[Apache License 2.0](LICENSE)。可选 yyjson backend 的第三方许可见
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

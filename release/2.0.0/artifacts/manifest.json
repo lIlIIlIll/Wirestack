@@ -1,0 +1,94 @@
+{
+  "releaseIdentity": "2.0.0",
+  "candidateSourceCommit": "2d02b82ceb96e4ce170c09913a279f0963f5a212",
+  "generatedAtUtc": "2026-08-27T04:44:21Z",
+  "sourceArchive": {
+    "fileCount": 215,
+    "sha256": "3ef8dff31d06724fc82eeca7690abe73a869be771b2b71fa5ec581894754faac",
+    "format": "sorted tar, mtime/uid/gid zeroed, gzip -n",
+    "storedInRepository": false
+  },
+  "localFreshCheckout": {
+    "status": "PASS",
+    "evidenceSourceCommit": "497245f54c7bd7ff8d056ed2a3cfb20d26c80a41",
+    "retentionReason": "Subsequent candidate changes affect schema formats compiler discovery, tests, CI, documentation, and evidence. The current build hook is covered by the final local O2 package rehearsal and hosted standards and consumer jobs.",
+    "apiSnapshotDeclarations": 1071,
+    "reviewedApiDeltas": 10,
+    "runtimeFreezeScenarios": 5,
+    "coreTestsPassed": 521,
+    "standardsRequiredPassed": 2110,
+    "standardsOptionalAggregatePassed": 3074,
+    "fuzzCases": [5000],
+    "log": "logs/local-fresh-checkout.log.gz"
+  },
+  "coreCoverage": {
+    "status": "PASS",
+    "testsPassed": 521,
+    "line": {"hit": 5407, "total": 8998, "percent": 60.1},
+    "branch": {"hit": 4205, "total": 10090, "percent": 41.7},
+    "log": "logs/core-coverage.log.gz"
+  },
+  "packageRehearsal": {
+    "status": "PASS",
+    "candidateSourceCommit": "2d02b82ceb96e4ce170c09913a279f0963f5a212",
+    "moduleCount": 9,
+    "log": "logs/package-rehearsal.log.gz"
+  },
+  "generalPerformance": {
+    "status": "PASS",
+    "candidateSourceCommit": "d8f7a5121796b2a70c7cd21fc72dd84c26f4b29d",
+    "libraries": ["yjson", "stdx.json", "cjfast_json"],
+    "workloads": 36,
+    "runsPerLibraryAndWorkload": 11,
+    "cvLimitPercent": 5.0,
+    "stableThreeLibraryWorkloads": 13,
+    "noisyWorkloadsRetained": 23,
+    "requiredFullRerunCompleted": true,
+    "fixedWorkloadGate": "PASS",
+    "cjfastJsonCommit": "eefdedd1e53c93bb5ada11a96b9b81d88b2c6c65",
+    "fullArtifact": "performance/general/full-result.tar.gz",
+    "fullArtifactSha256": "8b3dd8776de9409df8252ce4c338089f8ea4e87ad29a30d817f59fd671fed76d"
+  },
+  "nativeAcceleration": {
+    "status": "PASS",
+    "runsPerModeAndWorkload": 11,
+    "workloads": 7,
+    "cvLimitPercent": 5.0,
+    "requiredFullRerunCompleted": true,
+    "advertisedWriteRatio": 0.238,
+    "advertisedReadRatio": 0.564,
+    "ordinaryRegressionLimitPercent": 5.0,
+    "fullArtifact": "performance/native/full-result.tar.gz",
+    "fullArtifactSha256": "7c97d0419a67621eb25c66964c315e92a312ba679d9f0dbbb09df42bcc89275b"
+  },
+  "additionalGates": {
+    "yyjsonCoLink": "PASS",
+    "windowsPureCrossBuild": "PASS",
+    "extendedFuzzCases": 50000,
+    "retainedEvidenceSourceCommit": "d8f7a5121796b2a70c7cd21fc72dd84c26f4b29d",
+    "retentionReason": "The candidate changes after this commit affect tests, documentation, CI, and evidence only; production sources are identical."
+  },
+  "yyjsonIsolationFixture": {
+    "upstreamVersion": "0.11.1",
+    "source": "https://github.com/ibireme/yyjson/archive/refs/tags/0.11.1.tar.gz",
+    "tarballSha256": "610a38a5e59192063f5f581ce0c3c1869971c458ea11b58dfe00d1c8269e255d",
+    "storedInRepository": false
+  },
+  "hostedCi": {
+    "status": "PULL_REQUEST_PASS_MAIN_PENDING",
+    "policy": "BLOCKING",
+    "pullRequest": "https://github.com/lIlIIlIll/yjson/pull/1",
+    "pullRequestHead": "2d02b82ceb96e4ce170c09913a279f0963f5a212",
+    "pullRequestRun": "https://github.com/lIlIIlIll/yjson/actions/runs/33039594558",
+    "nightlySdk": "1.3.0-alpha.20260827010033",
+    "coreOptimization": "-O2",
+    "dependencyBoundaryOverride": "-O1 for this exact nightly only because external-path llc -O2 exits 139; the next seven-day nightly returns to -O2",
+    "requiredRuns": ["release pull request: PASS", "merged main: PENDING"]
+  },
+  "tag": {
+    "status": "NOT_RUN"
+  },
+  "registryPublish": {
+    "status": "NOT_RUN"
+  }
+}

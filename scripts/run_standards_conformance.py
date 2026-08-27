@@ -113,6 +113,7 @@ def main() -> int:
     parser.add_argument("--report", type=Path)
     parser.add_argument("--quiet-failures", action="store_true")
     parser.add_argument("--include-schema-optional", action="store_true")
+    parser.add_argument("--override-compile-option", default="")
     args = parser.parse_args()
 
     supplied = {
@@ -151,13 +152,32 @@ def main() -> int:
     repo = Path(__file__).resolve().parent.parent
     command = ["cjpm", "run", "--", str(manifest_path)]
     print(f"run schema={actual[0]} jsonpath={actual[1]} jsonpatch={actual[2]}", flush=True)
-    completed = subprocess.run(
-        command,
-        cwd=repo / "packages" / "standards_conformance",
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-    )
+    project = repo / "packages" / "standards_conformance"
+    project_manifest = project / "cjpm.toml"
+    original_manifest = None
+    if args.override_compile_option:
+        original_manifest = project_manifest.read_text(encoding="utf-8")
+        marker = 'override-compile-option = ""'
+        if original_manifest.count(marker) != 1:
+            raise RuntimeError("unexpected standards conformance manifest")
+        project_manifest.write_text(
+            original_manifest.replace(
+                marker,
+                f'override-compile-option = "{args.override_compile_option}"',
+            ),
+            encoding="utf-8",
+        )
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=project,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+    finally:
+        if original_manifest is not None:
+            project_manifest.write_text(original_manifest, encoding="utf-8")
     if args.report:
         args.report.write_text(completed.stdout, encoding="utf-8")
     if args.quiet_failures:
@@ -168,6 +188,13 @@ def main() -> int:
         sys.stdout.write(completed.stdout)
     summaries = [line for line in completed.stdout.splitlines() if line.startswith("SUMMARY\t")]
     if len(summaries) != 1:
+        if args.quiet_failures and completed.stdout:
+            # Quiet mode normally keeps the conformance log concise. If the
+            # adapter never starts, retain its compiler/runtime diagnostics so
+            # hosted CI failures remain actionable.
+            sys.stderr.write(completed.stdout)
+            if not completed.stdout.endswith("\n"):
+                sys.stderr.write("\n")
         print("conformance adapter did not emit exactly one SUMMARY line", file=sys.stderr)
         result = 1
     else:

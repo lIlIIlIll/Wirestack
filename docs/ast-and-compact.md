@@ -1,8 +1,9 @@
 # AST 与 Compact DOM
 
-## `JsonNode`: 可修改 AST
+yjson 有两种 Pure Cangjie 文档表示：可修改的 `JsonNode`，以及只读的
+`CompactJsonDocument`。二者服务不同的生命周期，不是可互换的性能开关。
 
-`YJson.parse` 返回 `JsonNode`。节点类型包括 null、bool、integer、float、保留字面量的 number、string、array 与 object：
+## 可修改 AST：`JsonNode`
 
 ```cangjie
 let root = YJson.parse("{\"name\":\"Alice\",\"items\":[1,2]}")
@@ -11,9 +12,10 @@ object.put("active", JsonBoolValue(true))
 println(YJson.stringifyPretty(object))
 ```
 
-当输入需要增删字段、替换数组元素、与其他树组合或交给 `JsonSchema` 校验时使用 AST。
+需要增删字段、替换数组元素、组合多棵树、应用 Patch 或 Schema 校验时使用 AST。节点包括
+null、bool、integer、float、保留字面量的 number、string、array 和 object。
 
-## `CompactJsonDocument`: Pure Cangjie 只读 DOM
+## 只读 Compact DOM
 
 ```cangjie
 let bytes = unsafe { "{\"name\":\"Alice\",\"items\":[1,2]}".rawData() }
@@ -23,13 +25,20 @@ let name = root.get("name").getOrThrow().asString()
 let first = root.get("items").getOrThrow().get(0).getOrThrow().asInt64()
 ```
 
-`CompactJsonValue` 支持 `kind()`、`size()`、按数组下标或对象 key 查询，以及 scalar 转换。document 可以 `toString()`，也可以 `materialize()` 成 `JsonNode`。
+`CompactJsonValue` 支持 `kind()`、`size()`、数组下标、对象 key 和 scalar 转换。document
+可以序列化，也可以 `materialize()` 成 `JsonNode`；materialize 后不再保留 Compact 表示的
+内存优势。
 
-Pure Compact document 由 Cangjie 对象管理，不需要 `close()`。输入所有权有两个显式入口：
+## Borrowed 与 owned 输入
 
-| 入口 | 输入 contract |
+| 入口 | 所有权 contract |
 | --- | --- |
-| `parseBorrowed` / `parseCompactBorrowed` | 零复制并保留原数组。document 可达期间，调用方必须把数组视为 immutable，不得修改内容或与写操作并发。 |
-| `parseOwned` / `parseCompactOwned` | 解析前复制数组。返回后调用方可以修改或复用原数组。 |
+| `parseCompactBorrowed` / `parseBorrowed` | 零复制并保留原数组；document 可达期间不得修改数组或与写操作并发 |
+| `parseCompactOwned` / `parseOwned` | 解析前复制；返回后原数组可修改或复用 |
 
-兼容入口 `CompactJsonDocument.parse` 与 `YJson.parseCompact` 保持 borrowed 语义。无法保证输入在 document 生命周期内不被修改时，应使用 owned 入口。Native Compact document 的生命周期不同，见 [Backend 使用指南](backends.md)。
+兼容入口 `YJson.parseCompact` 与 `CompactJsonDocument.parse` 保持 borrowed 语义。不能保证
+输入在 document 生命周期内不可变时，选择 owned 入口。
+
+`YJson.parseDocument` 返回的 Compact document 始终由 GC 管理，不需要 `close()`。
+显式资源生命周期只存在于独立 `yjson_backends.BackendJsonDocument`；见
+[Backend 使用指南](backends.md)。

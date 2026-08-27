@@ -1,44 +1,56 @@
 # yjson 文档
 
-这里是 README 与维护者证据之间的用户文档入口。用户指南以中文为主，保留 Cangjie API/type 的英文名称；尚未建立逐页双语镜像，维护者历史文档可能仍为英文。
+这套文档按任务组织：先让应用成功完成一次 typed roundtrip，再根据数据模型、I/O、
+安全和部署需求进入对应主题。API/type 名称保持英文，说明以中文为主。
 
-## 开始使用
+## 第一次使用
 
-1. [项目 README](../README.md)：定位、安装和最短 typed codec 示例。
-2. [API 选择指南](choosing-an-api.md)：typed、AST、Compact DOM、stream 与 Native 的选择。
-3. [Codec 生成](codec-generation.md)：`@JsonCodec` 的声明、字段与构造规则。
-4. [JSON 字面量](json-literals.md)：`@Json`、`@JsonValue` 和运行时插值。
+1. 在应用的 `cjpm.toml` 中添加 `yjson_all` path dependency。
+2. 复制项目 README 中的 `@JsonCodec` 示例，确认 `YJson.toJson` 与
+   `YJson.fromJson<T>` 完成 roundtrip。
+3. 根据 [API 选择指南](choosing-an-api.md)判断后续使用 typed codec、AST、Compact DOM
+   还是 Stream。
+4. 在接收不可信输入前，配置[资源限制](resource-limits.md)并按稳定 `error.code` 处理失败。
 
-## 数据模型与 I/O
+仓库内可运行示例见 [`packages/examples`](../packages/examples/README.md)。如果示例与文档
+冲突，以 package manifest、公开声明和可运行测试为准。
 
-- [自定义 Codec](custom-codecs.md)
-- [AST 与 Compact DOM](ast-and-compact.md)
-- [Stream I/O](streams.md)
-- [配置与错误](configuration-and-errors.md)
-- [资源限制](resource-limits.md)
-- [JSON Schema](schema.md)
-- [JSON Pointer、Patch、Merge Patch 与 JSONPath](path-and-patch.md)
-- [Backend 使用指南](backends.md)
+## 常用任务
 
-## 兼容性、迁移与性能
+| 任务 | 入口文档 |
+| --- | --- |
+| 为 class、struct、enum 生成 codec | [`@JsonCodec` 生成指南](codec-generation.md) |
+| 编写 custom codec | [自定义 Codec](custom-codecs.md) |
+| 使用 `@Json` / `@JsonValue` | [JSON 字面量](json-literals.md) |
+| 解析、修改或只读查询 JSON | [AST 与 Compact DOM](ast-and-compact.md) |
+| 从 stream 读取或写出 typed value | [Stream I/O](streams.md) |
+| 启用 Native 加速或显式高级 backend | [Backend 使用指南](backends.md) |
+| 设置读取/写出策略并处理错误 | [配置与错误](configuration-and-errors.md) |
+| 限制深度、文档和字符串大小 | [资源限制](resource-limits.md) |
+| 校验 JSON Schema draft 2020-12 | [JSON Schema](schema.md) |
+| 使用 Pointer、Path 或 Patch | [标准路径与 Patch](path-and-patch.md) |
 
-- [库能力对比](library-comparison.md)：基于固定源码/API 快照区分完整支持、部分支持、不支持与 runtime 边界。
-- [pre-1.0 → 1.0 迁移](migration/pre-1.0-to-1.0.md)
-- [1.0 RC API/ABI change inventory](public-api-inventory.md)：只记录首个 RC 的新增和变化，不是完整 API reference。
-- [性能结论、方法与结果](performance/README.md)
-- [Release notes](../RELEASE_NOTES.md)
+## 选型与迁移
 
-## 维护者文档
+- [库能力对比](library-comparison.md)：比较公开 contract；不把跨批次性能数据拼成排名。
+- [1.x → 2.0 迁移](migration/1.x-to-2.0.md)：单引擎、启动冻结、limits 与算法包拆分。
+- [pre-1.0 → 1.0 迁移](migration/pre-1.0-to-1.0.md)：类型改名、配置变化、codec 和
+  package 配套要求。
+- [性能文档](performance/README.md)：当前可引用结论、方法、原始结果入口与适用边界。
+- [Release notes](../RELEASE_NOTES.md)和 [Changelog](../CHANGELOG.md)：用户可见变化。
 
-- [当前架构](architecture.md)
-- [Repository layout](maintainers/repository-layout.md)
-- [测试策略](maintainers/testing.md)
+## 维护者入口
+
+- [当前架构与 package graph](architecture.md)
+- [Repository layout 与发布边界](maintainers/repository-layout.md)
+- [测试层级、标准套件与 CI mapping](maintainers/testing.md)
 - [Native backend 内部契约](maintainers/native-internals.md)
-- [发布流程](maintainers/releasing.md)
-- [1.0.0-rc.2 evidence snapshot](../release/1.0.0-rc.2/evidence.md)
-- [1.0.0-rc.1 evidence snapshot](../release/1.0.0-rc.1/evidence.md)
-- [历史初始 parser test plan](archive/initial-parser-test-plan.md)
+- [发布流程与证据规则](maintainers/releasing.md)
+- [公开 API/ABI change inventory](public-api-inventory.md)
 
-当前文档仍缺少面向用户的完整逐符号 API reference；CI 已提供完整公开声明快照，rc.2
-性能原始样本也随 release evidence 发布。相应页面会继续区分“公开 contract”和“单次实验
-或 release evidence”。
+`release/` 保存一次性候选证据；`docs/performance/results/` 保存带日期的测量结果；
+`docs/archive/` 保存不再代表当前 contract 的历史计划。它们不能替代上面的稳定用户指南。
+
+当前仍没有逐符号 API reference。需要精确签名时，请查看 `src/lib_*.cj` 的 public
+声明与 `release/public-api-snapshot.txt`；需要下游采用示例时，优先查看独立 consumer
+package，而不是根 package 的 white-box tests。

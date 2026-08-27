@@ -82,3 +82,32 @@ class FixedChunkInputStream <: InputStream {
         readSize
     }
 }
+
+/// Emits exactly one caller-selected prefix before exposing the remainder.
+/// This catches tokens whose semantic state must survive every possible chunk
+/// boundary without turning a zero-length read into a false end-of-input.
+class SplitPointInputStream <: InputStream {
+    private let bytes: Array<Byte>
+    private let splitPoint: Int64
+    private var start: Int64 = 0
+
+    public init(text: String, splitPoint: Int64) {
+        unsafe { this.bytes = text.rawData() }
+        this.splitPoint = splitPoint
+    }
+
+    public init(bytes: Array<Byte>, splitPoint: Int64) {
+        this.bytes = bytes
+        this.splitPoint = splitPoint
+    }
+
+    public func read(buf: Array<Byte>): Int64 {
+        if (start >= bytes.size) { return 0 }
+        let boundary = if (start < splitPoint) { splitPoint } else { bytes.size }
+        var readSize = boundary - start
+        if (readSize > buf.size) { readSize = buf.size }
+        bytes.copyTo(buf, start, 0, readSize)
+        start += readSize
+        readSize
+    }
+}

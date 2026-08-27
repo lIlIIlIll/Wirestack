@@ -1,13 +1,20 @@
 # yjson examples
 
-这个可运行 package 展示一条短的 Pure Cangjie 用户路径：
+该 executable 展示不需要 Native toolchain 的最短用户路径：
 
-- `@JsonCodec` typed roundtrip；
-- `@Json` runtime interpolation；
-- 显式 `JsonReadConfig` 资源预算；
-- 可修改 `JsonNode`；
-- Pure `CompactJsonDocument` 查询；
-- built-in codec roundtrip。
+1. `@JsonCodec` typed roundtrip；
+2. `@Json` runtime interpolation；
+3. 显式 `JsonReadConfig`；
+4. 可修改 `JsonNode`；
+5. Pure Compact 查询；
+6. built-in codec roundtrip。
 
-Stream、Schema 与 Native 示例分别见 [Stream I/O](../../docs/streams.md)、
-[JSON Schema](../../docs/schema.md) 与 [Backend 使用指南](../../docs/backends.md)。
+在本目录、准备好仓颉 SDK 环境后运行：
+
+```shell
+cjpm run
+```
+
+示例只依赖 `yjson_all`，因此不会构建或启用 Native backend。Stream、Schema 与 Native
+分别见 [Stream I/O](../../docs/streams.md)、[JSON Schema](../../docs/schema.md)和
+[Backend 使用指南](../../docs/backends.md)。

@@ -1,4 +1,6 @@
-package yjson
+package yjson_algorithms
+
+import yjson.*
 
 import std.collection.*
 import std.convert.Parsable
@@ -43,37 +45,58 @@ public class JsonPath {
         JsonPathParser(expression).parse()
     }
 
-    public static func select(expression: String, root: JsonNode): ArrayList<JsonPathMatch> {
-        parse(expression).query(root)
+    public static func select(expression: String, root: JsonNode,
+        limits!: JsonPathLimits = JsonPathLimits.defaults): ArrayList<JsonPathMatch> {
+        parse(expression).query(root, limits: limits)
     }
 
-    public func query(root: JsonNode): ArrayList<JsonPathMatch> {
+    public func query(root: JsonNode, limits!: JsonPathLimits = JsonPathLimits.defaults): ArrayList<JsonPathMatch> {
+        let work = JsonPathWork(limits)
         var current = ArrayList<JsonPathMatch>()
         current.add(JsonPathMatch(root, "$"))
         for (segment in segments) {
             let next = ArrayList<JsonPathMatch>()
             for (candidate in current) {
                 if (segment.descendant) {
-                    applyJsonPathAtEveryDescendant(segment, candidate, next, root)
+                    applyJsonPathAtEveryDescendant(segment, candidate, next, root, work, 0)
                 } else {
-                    applyJsonPathSegment(segment, candidate, next, root)
+                    work.visit(0)
+                    applyJsonPathSegment(segment, candidate, next, root, work)
                 }
             }
+            work.matches(next.size)
             current = next
         }
         current
     }
 
-    public func values(root: JsonNode): ArrayList<JsonNode> {
+    public func values(root: JsonNode, limits!: JsonPathLimits = JsonPathLimits.defaults): ArrayList<JsonNode> {
         let result = ArrayList<JsonNode>()
-        for (matched in query(root)) { result.add(matched.value) }
+        for (matched in query(root, limits: limits)) { result.add(matched.value) }
         result
     }
 
-    public func first(root: JsonNode): Option<JsonPathMatch> {
-        let matches = query(root)
+    public func first(root: JsonNode, limits!: JsonPathLimits = JsonPathLimits.defaults): Option<JsonPathMatch> {
+        let matches = query(root, limits: limits)
         if (matches.isEmpty()) { None<JsonPathMatch> } else { Some(matches[0]) }
     }
+}
+
+private class JsonPathWork {
+    let limits: JsonPathLimits
+    var visited: Int64 = 0
+    var filterSteps: Int64 = 0
+    init(limits: JsonPathLimits) { this.limits = limits }
+    func visit(depth: Int64): Unit {
+        visited++
+        enforceWorkLimit(visited, limits.maxVisitedNodes, "visited nodes")
+        enforceWorkLimit(depth, limits.maxDepth, "depth")
+    }
+    func filter(): Unit {
+        filterSteps++
+        enforceWorkLimit(filterSteps, limits.maxFilterSteps, "filter steps")
+    }
+    func matches(count: Int64): Unit { enforceWorkLimit(count, limits.maxMatches, "matches") }
 }
 
 enum JsonPathSelectorKind { Name | Index | Wildcard | Slice | Filter }
@@ -377,23 +400,24 @@ private func jsonPathQueryIsSingular(text: String): Bool {
 }
 
 private func applyJsonPathAtEveryDescendant(segment: JsonPathSegment, candidate: JsonPathMatch,
-    output: ArrayList<JsonPathMatch>, root: JsonNode): Unit {
-    applyJsonPathSegment(segment, candidate, output, root)
+    output: ArrayList<JsonPathMatch>, root: JsonNode, work: JsonPathWork, depth: Int64): Unit {
+    work.visit(depth)
+    applyJsonPathSegment(segment, candidate, output, root, work)
     match (candidate.value) {
         case objectValue: JsonObjectValue => for ((name, child) in objectValue.entries()) {
             applyJsonPathAtEveryDescendant(segment,
-                JsonPathMatch(child, appendNormalizedJsonPathName(candidate.normalizedPath, name)), output, root)
+                JsonPathMatch(child, appendNormalizedJsonPathName(candidate.normalizedPath, name)), output, root, work, depth + 1)
         }
         case arrayValue: JsonArrayValue => for (index in 0..arrayValue.size()) {
             applyJsonPathAtEveryDescendant(segment,
-                JsonPathMatch(arrayValue[index], "${candidate.normalizedPath}[${index}]"), output, root)
+                JsonPathMatch(arrayValue[index], "${candidate.normalizedPath}[${index}]"), output, root, work, depth + 1)
         }
         case _ => ()
     }
 }
 
 private func applyJsonPathSegment(segment: JsonPathSegment, candidate: JsonPathMatch,
-    output: ArrayList<JsonPathMatch>, root: JsonNode): Unit {
+    output: ArrayList<JsonPathMatch>, root: JsonNode, work: JsonPathWork): Unit {
     for (selector in segment.selectors) {
         match (selector.kind) {
             case Name => match (candidate.value) {
@@ -421,6 +445,7 @@ private func applyJsonPathSegment(segment: JsonPathSegment, candidate: JsonPathM
                 let children = ArrayList<JsonPathMatch>()
                 appendJsonPathChildren(candidate, children)
                 for (child in children) {
+                    work.filter()
                     if (evaluateJsonPathFilter(selector.filter, child.value, root)) { output.add(child) }
                 }
         }

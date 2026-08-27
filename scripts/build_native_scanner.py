@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import pathlib
+import platform
 import shutil
 import subprocess
 import sys
@@ -9,6 +10,8 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 NATIVE_DIR = ROOT / "native"
 DEFAULT_OUT_DIR = ROOT / "target" / "native"
+SUPPORTED_SYSTEM = "Linux"
+SUPPORTED_MACHINES = {"x86_64", "amd64"}
 
 
 def find_tool(env_name: str, default: str) -> str:
@@ -19,6 +22,13 @@ def find_tool(env_name: str, default: str) -> str:
 
 
 def main() -> int:
+    system = platform.system()
+    machine = platform.machine().lower()
+    if system != SUPPORTED_SYSTEM or machine not in SUPPORTED_MACHINES:
+        raise SystemExit(
+            "yjson_native_accel supports Linux x86_64 only; "
+            f"current build host is {system} {platform.machine()}"
+        )
     out_dir = DEFAULT_OUT_DIR
     build_yyjson = False
     yyjson_mode_explicit = False

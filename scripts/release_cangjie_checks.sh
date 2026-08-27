@@ -4,7 +4,8 @@ set -euo pipefail
 repo=$(cd "$(dirname "$0")/.." && pwd)
 
 require_consistent_sdk() {
-    local cjc_path sdk_root variable value
+    local cjc_path sdk_root variable value entry resolved found
+    local -a entries
     cjc_path=$(readlink -f "$(command -v cjc)")
     sdk_root=$(dirname "$(dirname "$cjc_path")")
 
@@ -19,7 +20,19 @@ require_consistent_sdk() {
     done
 
     value=${CJ_SDK_LIBPATH:-}
-    if [[ -n "$value" && ":$value:" != *":$sdk_root/"* ]]; then
+    found=false
+    if [[ -n "$value" ]]; then
+        IFS=: read -r -a entries <<< "$value"
+        for entry in "${entries[@]}"; do
+            [[ -n "$entry" ]] || continue
+            resolved=$(readlink -f "$entry" 2>/dev/null || true)
+            if [[ "$resolved" == "$sdk_root"/* ]]; then
+                found=true
+                break
+            fi
+        done
+    fi
+    if [[ -n "$value" && "$found" != true ]]; then
         printf 'error: CJ_SDK_LIBPATH does not reference cjc SDK root %s\n' \
             "$sdk_root" >&2
         printf 'activate one Cangjie SDK consistently before running release checks\n' >&2
@@ -37,6 +50,7 @@ run() {
 require_consistent_sdk
 
 run api-inventory python3 "$repo/scripts/check_api_inventory.py"
+run runtime-freeze "$repo/scripts/runtime_freeze_contract_checks.sh"
 run core bash -c 'cd "$1" && cjpm test --no-color' _ "$repo"
 run examples "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/examples"
 run macro-consumer "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/codec_integration"

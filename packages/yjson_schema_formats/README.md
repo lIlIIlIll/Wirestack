@@ -1,9 +1,8 @@
 # yjson_schema_formats
 
-Optional JSON Schema format assertions for internationalized hostnames and
-emails, URI/IRI references, and RFC 6570 URI Templates. The package uses the
-system `libidn2` implementation for IDNA2008, Punycode round-trip, Bidi, and
-ContextJ validation.
+可选 JSON Schema format provider，覆盖国际化 hostname/email、URI/IRI reference 与 RFC
+6570 URI Template。package 使用系统 `libidn2` 完成 IDNA2008、Punycode round-trip、Bidi
+和 ContextJ/ContextO 验证。
 
 ```cangjie
 import yjson.*
@@ -17,8 +16,8 @@ let config = JsonSchemaConfig(
 )
 ```
 
-`Annotation` remains the core default and does not invoke any registered
-format. `StrictAssertion` reports `unsupported_schema_format` for an unknown
-format instead of silently accepting it. Configure the mutable registry before
-sharing `JsonSchemaConfig`; do not register or replace formats concurrently
-with validation.
+core 默认 `Annotation`，不会执行注册的 assertion。`StrictAssertion` 遇到未知 format 时
+返回 `unsupported_schema_format`。registry 应在配置阶段完成修改，共享给并发 validation
+后不得继续注册或替换。
+
+Schema dialect、resolver 与 conformance 说明见 [JSON Schema](../../docs/schema.md)。

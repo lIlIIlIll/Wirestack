@@ -1,66 +1,41 @@
 # yjson_native
 
-Supported opt-in Custom Native Compact DOM backend for `yjson`.
+Custom Native 实现包。普通应用应依赖 `yjson_native_accel` 并在启动时调用一次
+`YJsonNativeAccel.initialize()`；本包中的 DOM 与 whole-document stream 仅供高级 API 使用。
 
-The package must use the same `yjson` release as its core dependency.
-
-The module is source-built with a C11 compiler. Documents are explicit
-resources: close them deterministically. They are not thread-safe; callers must
-provide external synchronization and `close()` requires exclusive ownership.
+## Document backend
 
 ```toml
 [dependencies]
 yjson = { path = "../yjson" }
+yjson_backends = { path = "../yjson/packages/yjson_backends" }
 yjson_native = { path = "../yjson/packages/yjson_native" }
 ```
 
 ```cangjie
 import yjson.*
+import yjson_backends.*
 import yjson_native.*
 
 let bytes = unsafe { "{\"n\":42}".rawData() }
-try (document = YJson.parseDocument(bytes, backend: NativeCompactBackend)) {
+try (document = YJsonAdvanced.parseDocumentWithBackend(bytes, NativeCompactDocumentBackend)) {
     println(document.getRootInt("n").getOrThrow())
 }
 ```
 
-This is the same facade used by the portable `PureCompactBackend` and optional
-`YyjsonBackend`. Use `NativeCompactJsonDocument` directly when per-node views,
-storage statistics, or backend-specific tuning are required.
+Document 是显式 resource、非线程安全，必须确定性 `close()`。需要 per-node view、storage
+统计或 qualification knob 时才直接使用 `NativeCompactJsonDocument`。
 
-For typed caller-owned streams, select the whole-document backend explicitly:
+## Typed stream
 
-```cangjie
-let output: OutputStream = ...
-YJson.encodeToStreamWith(UserJson, user, output,
-    backend: NativeCompactStreamBackend)
-let user = YJson.decodeFromStreamWith(UserJson, input,
-    backend: NativeCompactStreamBackend)
-```
+`NativeCompactWholeDocumentStreamBackend` 以 whole-document bulk tape 驱动应用的
+`JsonCodec<T>`。它不逐节点跨 FFI，不关闭 caller stream，也不静默 fallback。
 
-It shares the application `JsonCodec<T>` contract with the Pure backend. The
-Native bridge performs coarse parse/export and encode/copy calls, never
-per-node FFI, and does not close caller streams or silently fall back to Pure.
+## 普通 API 加速
 
-DOM parsing does not require `enableYJsonNative()`; activation functions below
-control optional scanner/number seams, not document ownership.
+普通应用不直接安装或移除 scanner seam。`YJsonNativeAccel.initialize()` 在首次 `YJson`
+调用前一次性冻结 Native profile；之后仍使用 `YJson.toJson/fromJson/parseDocument`。
 
-See the suite-level [`docs/backends.md`](../../docs/backends.md) for selection,
-lifecycle, and thread-safety guidance.
-
-`enableYJsonNative()` also installs the optional Float64 token parser used by
-generated fast codecs. `enableYJsonNativeFloatOnly()` installs only that seam
-for isolated deployments and measurements; its matching
-`disableYJsonNativeFloatOnly()` returns to the uninstalled state.
-`enableYJsonNativeNumericOnly()` and its matching disable function are a
-separate mode. Full, FloatOnly, and NumericOnly activation modes are mutually
-exclusive, and selecting another mode without disabling the active isolated
-mode throws `IllegalStateException`.
-
-The `@FastNative` bridge receives an already validated JSON number, rejects
-tokens over 256 bytes, uses a bounded stack buffer, and performs no Cangjie
-calls or blocking/I/O work. A missing or declined native result falls back to
-the portable parser; the core `yjson` package never installs this backend by
-itself. Install or remove the global backend before starting concurrent
-decoders; do not race enable/disable calls with decoding. The C symbol and
-contract are listed in [`docs/public-api-inventory.md`](../../docs/public-api-inventory.md).
+package 与 core 必须版本匹配。完整选择和生命周期见
+[Backend 使用指南](../../docs/backends.md)，底层 bridge 见
+[Native internals](../../docs/maintainers/native-internals.md)。

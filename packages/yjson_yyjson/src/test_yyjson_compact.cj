@@ -101,18 +101,19 @@ class YyjsonCompactTests {
     @TestCase
     func resourceLimitsMatchPortableBackend(): Unit {
         let documentError = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
-            yyjsonBytes("{\"a\":1}"), config: JsonReadConfig(maxBytes: 6)))
+            yyjsonBytes("{\"a\":1}"), config: JsonReadConfig(limits: JsonReadLimits(maxBytes: 6))))
         @Expect(documentError.code, "document_too_large")
         let stringError = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
-            yyjsonBytes("\"\\u4E2D\""), config: JsonReadConfig(maxStringBytes: 2)))
+            yyjsonBytes("\"\\u4E2D\""), config: JsonReadConfig(limits: JsonReadLimits(maxStringBytes: 2))))
         @Expect(stringError.code, "string_too_large")
         let valueError = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
             yyjsonBytes("{\"a\":[1,2]}"),
-            config: JsonReadConfig(maxPolymorphicObjectBytes: 10)))
+            config: JsonReadConfig(limits: JsonReadLimits(maxPolymorphicObjectBytes: 10))))
         @Expect(valueError.code, "polymorphic_object_too_large")
         let hiddenLocation = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
             yyjsonBytes("\"abc\""),
-            config: JsonReadConfig(includeErrorLocation: false, maxStringBytes: 2)))
+            config: JsonReadConfig(includeErrorLocation: false,
+                limits: JsonReadLimits(maxStringBytes: 2))))
         @Expect(hiddenLocation.code, "string_too_large")
         @Expect(hiddenLocation.byteOffset, -1)
     }

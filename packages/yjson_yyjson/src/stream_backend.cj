@@ -2,13 +2,14 @@ package yjson_yyjson
 
 import std.io.*
 import yjson.*
+import yjson_backends.*
 
 private class YyjsonStreamDecodeSession <: JsonStreamDecodeSession {
     private let readerValue: JsonStreamTapeReader
     private var closed: Bool = false
 
     init(input: InputStream, config: JsonReadConfig) {
-        let bytes = readJsonWholeStream(input, config)
+        let bytes = readJsonWholeDocumentStream(input, config)
         let document = YyjsonCompactJsonDocument.parse(bytes, config: config)
         let tape = try { document.exportStreamTape() } finally { document.close() }
         // Native preflight already enforced the polymorphic budget against the
@@ -81,4 +82,4 @@ private class YyjsonJsonStreamBackendImpl <: JsonStreamBackend {
 
 /// Whole-document typed stream backend implemented by the supported yyjson
 /// Direct mode and the matching-version compact tape bridge.
-public let YyjsonStreamBackend: JsonStreamBackend = YyjsonJsonStreamBackendImpl()
+public let YyjsonWholeDocumentStreamBackend: JsonStreamBackend = YyjsonJsonStreamBackendImpl()

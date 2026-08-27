@@ -1,5 +1,7 @@
 package yjson_schema_formats
 
+import yjson_algorithms.*
+
 import std.unittest.*
 import std.unittest.testmacro.*
 import yjson.*

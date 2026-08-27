@@ -4,7 +4,7 @@ import std.collection.*
 import std.unittest.*
 import std.unittest.testmacro.*
 
-private func compactBytes(text: String): Array<Byte> { unsafe { text.rawData() } }
+private func compactBytes(text: String): Array<Byte> { unsafe { text.rawData().clone() } }
 
 @Test
 class CompactJsonDocumentTest {

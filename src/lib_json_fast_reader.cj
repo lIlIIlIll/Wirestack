@@ -1,5 +1,6 @@
 package yjson
 
+import std.collection.*
 import std.convert.Parsable
 import std.math.numeric.*
 import std.time.*
@@ -66,7 +67,7 @@ struct JsonObjectKeyView {
     func isSource(): Bool { sourceStart >= 0 }
 }
 
-public class JsonFastReader {
+public class JsonFastReader <: GeneratedSupportV1Reader {
     private let data: Array<Byte>
     private let size: Int64
     private let validateStrings: Bool
@@ -135,6 +136,25 @@ public class JsonFastReader {
 
     func rewind(position: Int64): Unit {
         index = position
+    }
+
+    func tryReadNativeInt64ArrayList(): Option<ArrayList<Int64>> {
+        let original = index
+        skipSpaces()
+        if (!hasMore() || peek() != b'[' || size - index < 1024) {
+            index = original
+            return None<ArrayList<Int64>>
+        }
+        let converted = match (jsonNativeParseInt64Array(data, index)) {
+            case Some(value) => value
+            case None =>
+                index = original
+                return None<ArrayList<Int64>>
+        }
+        let result = ArrayList<Int64>(converted.count)
+        for (offset in 0..converted.count) { result.add(converted.values[offset]) }
+        index = converted.end
+        Some(result)
     }
 
     func tryEndRawObject(): Bool {
@@ -234,7 +254,7 @@ public class JsonFastReader {
         expectByte(b'{')
     }
 
-    func suggestRawObjectCapacity(): Int64 {
+    public func suggestRawObjectCapacity(): Int64 {
         suggestContainerCapacity(48)
     }
 
@@ -624,7 +644,7 @@ public class JsonFastReader {
     }
 
     // Capacity hint retained for the existing scalar collection helpers.
-    func suggestRawArrayCapacity(): Int64 {
+    public func suggestRawArrayCapacity(): Int64 {
         suggestContainerCapacity(32)
     }
 

@@ -1,0 +1,24 @@
+{
+  "started_at_utc": "2026-08-26T22:28:51.620845+00:00",
+  "host": "ubuntu2223131",
+  "platform": "Linux-5.15.0-187-generic-x86_64-with-glibc2.35",
+  "cpu": 8,
+  "heap": "128MB",
+  "runs": 11,
+  "cases": [
+    "writeNumericArray",
+    "writeNumericBytes",
+    "readNumericArray",
+    "readNumericDocument",
+    "writeEscapedStrings",
+    "writeEscapedBytes",
+    "writePlainStrings"
+  ],
+  "schedule": "case rotation; Pure/Native order alternates by round",
+  "formal_qualification": true,
+  "source_sha256": "cf6ee25b0002ab53f46c6872d5c770ee2462e61d9c6c9ccc11ed23e144e51779",
+  "build_reused": false,
+  "cjc_version": "Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+  "cjpm_version": "Cangjie Project Manager: 1.1.3",
+  "affinity_probe": "Cpus_allowed_list:\t8"
+}

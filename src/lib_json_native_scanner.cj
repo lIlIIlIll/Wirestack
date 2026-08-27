@@ -1,5 +1,6 @@
 package yjson
 
+import std.collection.*
 
 const YJ_JSON_SCAN_OK: Int32 = 0
 const YJ_JSON_SCAN_FALLBACK: Int32 = 1
@@ -12,6 +13,8 @@ const YJSON_NATIVE_MIN_OBJECT_SCAN_BYTES = 1024
 const YJSON_NATIVE_MIN_ARRAY_SCAN_BYTES = 240
 const YJSON_NATIVE_MIN_DECODE_BYTES = 16
 const YJSON_NATIVE_MIN_READER_DECODE_BYTES = 256
+const YJSON_NATIVE_MIN_WRITER_ESCAPE_BYTES = 4096
+const YJSON_NATIVE_MIN_WRITER_INT64_COUNT = 256
 const YJSON_NATIVE_MIN_ARRAY_ELEMENT_COUNT = 16
 const YJSON_NATIVE_OBJECT_FIELD_CAP = 64
 const YJSON_NATIVE_OBJECT_FIELD_WORDS = 5
@@ -37,6 +40,9 @@ public interface JsonNativeNumericScannerBackend {
         flags: UInt32, tokens: CPointer<UInt64>, tokenCap: Int64,
         outNext: CPointer<Int64>, outCount: CPointer<Int64>, outDone: CPointer<Int64>,
         outError: CPointer<Int64>): Int32
+    func parseInt64Array(input: CPointer<UInt8>, len: Int64, start: Int64,
+        values: CPointer<Int64>, valueCap: Int64, outEnd: CPointer<Int64>,
+        outCount: CPointer<Int64>, outError: CPointer<Int64>): Int32
 }
 
 public interface JsonNativeNumericTapeBackend {
@@ -53,6 +59,23 @@ public interface JsonNativeFloatParserBackend {
     func parseFloat64(input: CPointer<UInt8>, len: Int64, start: Int64, tokenLength: Int64): Float64
 }
 
+/// Writer-side primitive. It only transforms a single already accepted
+/// Cangjie String into one quoted JSON token; separator/state/limits remain in
+/// JsonDirectWriter.
+public interface JsonNativeWriterBackend {
+    func escapeString(input: CPointer<UInt8>, len: Int64, htmlSafe: Bool,
+        output: CPointer<UInt8>, outputCap: Int64, outWritten: CPointer<Int64>): Int32
+    func formatInt64Array(values: CPointer<Int64>, count: Int64,
+        output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64,
+        outWritten: CPointer<Int64>): Int32
+}
+
+/// Versioned internal product bundle consumed by yjson_native. Applications
+/// configure it only through YJsonNativeAccel.initialize().
+public interface JsonNativeAccelerationPrimitivesV1 <: JsonNativeScannerBackend &
+    JsonNativeNumericScannerBackend & JsonNativeNumericTapeBackend & JsonNativeFloatParserBackend &
+    JsonNativeWriterBackend {}
+
 private var jsonNativeScannerBackend: Option<JsonNativeScannerBackend> = None<JsonNativeScannerBackend>
 private var jsonNativeNumericScannerBackend: Option<JsonNativeNumericScannerBackend> =
     None<JsonNativeNumericScannerBackend>
@@ -60,38 +83,117 @@ private var jsonNativeNumericTapeBackend: Option<JsonNativeNumericTapeBackend> =
     None<JsonNativeNumericTapeBackend>
 private var jsonNativeFloatParserBackend: Option<JsonNativeFloatParserBackend> =
     None<JsonNativeFloatParserBackend>
+private var jsonNativeWriterBackend: Option<JsonNativeWriterBackend> = None<JsonNativeWriterBackend>
 
-public func installJsonNativeScannerBackend(backend: JsonNativeScannerBackend): Unit {
+func jsonNativeFormatInt64ArrayInto(values: ArrayList<Int64>, output: Array<Byte>,
+    outputOffset: Int64): Option<Int64> {
+    if (values.size < YJSON_NATIVE_MIN_WRITER_INT64_COUNT) {
+        return None<Int64>
+    }
+    let backend = match (jsonNativeWriterBackend) {
+        case Some(item) => item
+        case None => return None<Int64>
+    }
+    if (values.size > (Int64.Max - 1) / 21) {
+        throw JsonAccelerationException("JSON integer array is too large for native formatting",
+            code: "acceleration_writer_failure")
+    }
+    let contiguous = values.toArray()
+    let required = values.size * 21 + 1
+    if (outputOffset < 0 || outputOffset > output.size ||
+        required > output.size - outputOffset) {
+        throw JsonAccelerationException("Native JSON integer output buffer is too small",
+            code: "acceleration_writer_failure")
+    }
+    let written = Array<Int64>(1, repeat: 0)
+    unsafe {
+        let valuesHandle = acquireArrayRawData(contiguous)
+        let outputHandle = acquireArrayRawData(output)
+        let writtenHandle = acquireArrayRawData(written)
+        let status = backend.formatInt64Array(valuesHandle.pointer, contiguous.size,
+            outputHandle.pointer, output.size, outputOffset, writtenHandle.pointer)
+        releaseArrayRawData(writtenHandle)
+        releaseArrayRawData(outputHandle)
+        releaseArrayRawData(valuesHandle)
+        if (status != YJ_JSON_SCAN_OK || written[0] < 2 || written[0] > output.size) {
+            throw JsonAccelerationException("Native JSON integer formatting failed",
+                code: "acceleration_writer_failure")
+        }
+    }
+    Some(written[0])
+}
+
+private func installJsonNativeScannerBackend(backend: JsonNativeScannerBackend): Unit {
     if (jsonNativeScannerBackend.isSome()) {
         throw IllegalStateException("A JSON native scanner backend is already installed")
     }
     jsonNativeScannerBackend = Some(backend)
 }
 
-public func installJsonNativeNumericScannerBackend(backend: JsonNativeNumericScannerBackend): Unit {
+private func installJsonNativeNumericScannerBackend(backend: JsonNativeNumericScannerBackend): Unit {
     if (jsonNativeNumericScannerBackend.isSome()) {
         throw IllegalStateException("A JSON native numeric scanner backend is already installed")
     }
     jsonNativeNumericScannerBackend = Some(backend)
 }
 
-public func installJsonNativeNumericTapeBackend(backend: JsonNativeNumericTapeBackend): Unit {
+private func installJsonNativeNumericTapeBackend(backend: JsonNativeNumericTapeBackend): Unit {
     jsonNativeNumericTapeBackend = Some(backend)
 }
 
 /// Installs one process-global Float64 parser backend. Install before any
 /// concurrent decoding and do not mix this low-level hook with another owner.
-public func installJsonNativeFloatParserBackend(backend: JsonNativeFloatParserBackend): Unit {
+private func installJsonNativeFloatParserBackend(backend: JsonNativeFloatParserBackend): Unit {
     if (jsonNativeFloatParserBackend.isSome()) {
         throw IllegalStateException("A JSON native float parser backend is already installed")
     }
     jsonNativeFloatParserBackend = Some(backend)
 }
 
-/// Removes the process-global Float64 parser backend. The caller owns the
-/// synchronization boundary and must ensure no decoder is using it.
-public func uninstallJsonNativeFloatParserBackend(): Unit {
-    jsonNativeFloatParserBackend = None<JsonNativeFloatParserBackend>
+/// Installs the complete v1 primitive bundle atomically during runtime freeze.
+public func activateJsonNativePrimitivesV1(backend: JsonNativeAccelerationPrimitivesV1): Unit {
+    if (jsonNativeScannerBackend.isSome() || jsonNativeNumericScannerBackend.isSome() ||
+        jsonNativeNumericTapeBackend.isSome() || jsonNativeFloatParserBackend.isSome() ||
+        jsonNativeWriterBackend.isSome()) {
+        throw IllegalStateException("JSON native acceleration is already installed")
+    }
+    installJsonNativeScannerBackend(backend)
+    installJsonNativeNumericScannerBackend(backend)
+    installJsonNativeNumericTapeBackend(backend)
+    installJsonNativeFloatParserBackend(backend)
+    jsonNativeWriterBackend = Some(backend)
+}
+
+func jsonNativeEscapeString(value: String, htmlSafe: Bool): Option<Array<Byte>> {
+    if (value.size < YJSON_NATIVE_MIN_WRITER_ESCAPE_BYTES) {
+        return None<Array<Byte>>
+    }
+    let backend = match (jsonNativeWriterBackend) {
+        case Some(item) => item
+        case None => return None<Array<Byte>>
+    }
+    if (value.size > (Int64.Max - 2) / 6) {
+        throw JsonAccelerationException("JSON string is too large for native escaping",
+            code: "acceleration_writer_failure")
+    }
+    let output = Array<Byte>(value.size * 6 + 2, repeat: 0)
+    let written = Array<Int64>(1, repeat: 0)
+    unsafe {
+        let input = value.rawData()
+        let inputHandle = acquireArrayRawData(input)
+        let outputHandle = acquireArrayRawData(output)
+        let writtenHandle = acquireArrayRawData(written)
+        let status = backend.escapeString(inputHandle.pointer, input.size, htmlSafe,
+            outputHandle.pointer, output.size, writtenHandle.pointer)
+        releaseArrayRawData(writtenHandle)
+        releaseArrayRawData(outputHandle)
+        releaseArrayRawData(inputHandle)
+        if (status != YJ_JSON_SCAN_OK || written[0] < 2 || written[0] > output.size) {
+            throw JsonAccelerationException("Native JSON string escaping failed",
+                code: "acceleration_writer_failure")
+        }
+    }
+    Some(output[0..written[0]])
 }
 
 func jsonNativeFloatParserAvailable(): Bool {
@@ -175,13 +277,6 @@ class JsonNativeNumericTape {
 }
 
 
-/// Test/support hook for comparing the portable compact parser with an
-/// explicitly installed bulk backend in an isolated process.
-public func uninstallJsonNativeNumericScannerBackend(): Unit {
-    jsonNativeNumericScannerBackend = None<JsonNativeNumericScannerBackend>
-    jsonNativeNumericTapeBackend = None<JsonNativeNumericTapeBackend>
-}
-
 class JsonNativeNumericChunk {
     let words: Array<UInt64>
     let count: Int64
@@ -197,6 +292,47 @@ class JsonNativeNumericChunk {
     func tokenEnd(index: Int64): Int64 { Int64(words[index * 4 + 1]) }
     func magnitude(index: Int64): Int64 { Int64(words[index * 4 + 2]) }
     func flags(index: Int64): UInt64 { words[index * 4 + 3] }
+}
+
+class JsonNativeInt64Array {
+    let values: Array<Int64>
+    let count: Int64
+    let end: Int64
+
+    init(values: Array<Int64>, count: Int64, end: Int64) {
+        this.values = values; this.count = count; this.end = end
+    }
+}
+
+func jsonNativeParseInt64Array(data: Array<Byte>, start: Int64): Option<JsonNativeInt64Array> {
+    let backend = match (jsonNativeNumericScannerBackend) {
+        case Some(value) => value
+        case None => return None<JsonNativeInt64Array>
+    }
+    let capacity = (data.size - start + 1) / 2
+    let values = Array<Int64>(capacity, repeat: 0)
+    let end = Array<Int64>(1, repeat: 0)
+    let count = Array<Int64>(1, repeat: 0)
+    let error = Array<Int64>(1, repeat: -1)
+    unsafe {
+        let dataHandle = acquireArrayRawData(data)
+        let valuesHandle = acquireArrayRawData(values)
+        let endHandle = acquireArrayRawData(end)
+        let countHandle = acquireArrayRawData(count)
+        let errorHandle = acquireArrayRawData(error)
+        let status = backend.parseInt64Array(dataHandle.pointer, data.size, start,
+            valuesHandle.pointer, values.size, endHandle.pointer, countHandle.pointer,
+            errorHandle.pointer)
+        releaseArrayRawData(errorHandle); releaseArrayRawData(countHandle)
+        releaseArrayRawData(endHandle); releaseArrayRawData(valuesHandle)
+        releaseArrayRawData(dataHandle)
+        if (status == YJ_JSON_SCAN_OK && count[0] >= 0 && count[0] <= values.size) {
+            return Some(JsonNativeInt64Array(values, count[0], end[0]))
+        }
+        if (status == YJ_JSON_SCAN_FALLBACK) { return None<JsonNativeInt64Array> }
+        throw JsonAccelerationException("Native JSON Int64 array conversion failed",
+            code: "acceleration_reader_failure")
+    }
 }
 
 func jsonNativeScanNumericArrayChunk(data: Array<Byte>, start: Int64,

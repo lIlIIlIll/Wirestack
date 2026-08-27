@@ -5,6 +5,7 @@ import std.env.*
 import std.fs.*
 import std.io.*
 import yjson.*
+import yjson_algorithms.*
 import yjson_schema_formats.*
 
 private class SuiteStats {
@@ -53,7 +54,7 @@ private func runSchema(manifest: JsonObjectValue, stats: SuiteStats): Unit {
         let formatMode = if (optionalBool(fileObject, "format_assertion")) {
             JsonSchemaFormatMode.Assertion
         } else { JsonSchemaFormatMode.Annotation }
-        let config = JsonSchemaConfig(resolver: Some<JsonSchemaResolver>(registry),
+        let config = JsonSchemaConfig(resolver: Some<UriResolver>(registry),
             formatMode: formatMode, formats: formats)
         for (groupNode in required(fileObject, "groups").asArray().values()) {
             let group = groupNode.asObject()

@@ -785,6 +785,60 @@ public func __yJsonReadFastHashMapStringDecimal(
     try { jsonFastReadHashMapStringDecimal(reader) } finally { context.leaveValue() }
 }
 
+public func jsonFastReadRfc3339DateTime(reader: GeneratedSupportV1Reader): DateTime {
+    jsonFastReadRfc3339DateTime(yJsonGeneratedReaderV1(reader))
+}
+
+public func jsonFastReadBigInt(reader: GeneratedSupportV1Reader): BigInt {
+    jsonFastReadBigInt(yJsonGeneratedReaderV1(reader))
+}
+
+public func jsonFastReadDecimal(reader: GeneratedSupportV1Reader): Decimal {
+    jsonFastReadDecimal(yJsonGeneratedReaderV1(reader))
+}
+
+public func __yJsonReadFastArrayListRfc3339DateTime(
+    reader: GeneratedSupportV1Reader,
+    context: JsonDecodeContext
+): ArrayList<DateTime> {
+    __yJsonReadFastArrayListRfc3339DateTime(yJsonGeneratedReaderV1(reader), context)
+}
+
+public func __yJsonReadFastHashMapStringRfc3339DateTime(
+    reader: GeneratedSupportV1Reader,
+    context: JsonDecodeContext
+): HashMap<String, DateTime> {
+    __yJsonReadFastHashMapStringRfc3339DateTime(yJsonGeneratedReaderV1(reader), context)
+}
+
+public func __yJsonReadFastArrayListBigInt(
+    reader: GeneratedSupportV1Reader,
+    context: JsonDecodeContext
+): ArrayList<BigInt> {
+    __yJsonReadFastArrayListBigInt(yJsonGeneratedReaderV1(reader), context)
+}
+
+public func __yJsonReadFastHashMapStringBigInt(
+    reader: GeneratedSupportV1Reader,
+    context: JsonDecodeContext
+): HashMap<String, BigInt> {
+    __yJsonReadFastHashMapStringBigInt(yJsonGeneratedReaderV1(reader), context)
+}
+
+public func __yJsonReadFastArrayListDecimal(
+    reader: GeneratedSupportV1Reader,
+    context: JsonDecodeContext
+): ArrayList<Decimal> {
+    __yJsonReadFastArrayListDecimal(yJsonGeneratedReaderV1(reader), context)
+}
+
+public func __yJsonReadFastHashMapStringDecimal(
+    reader: GeneratedSupportV1Reader,
+    context: JsonDecodeContext
+): HashMap<String, Decimal> {
+    __yJsonReadFastHashMapStringDecimal(yJsonGeneratedReaderV1(reader), context)
+}
+
 public func jsonFastFormatDecimal(value: Decimal): String {
     value.toString()
 }

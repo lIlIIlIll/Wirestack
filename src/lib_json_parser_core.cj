@@ -4,7 +4,11 @@ import std.collection.*
 import std.convert.Parsable
 import std.io.*
 
-private abstract class JsonByteSource {
+abstract class InputCursor {
+    private var valueBudgetStart: Int64 = -1
+    private var valueBudgetLimit: Int64 = 0
+    private var valueBudgetActive: Bool = false
+
     public func hasMore(): Bool
 
     public func peek(): Byte
@@ -18,9 +22,241 @@ private abstract class JsonByteSource {
     public func lineAt(offset: Int64): Int64
 
     public func columnAt(offset: Int64): Int64
+
+    public func beginValueBudget(limit: Int64): Unit {
+        valueBudgetStart = position()
+        valueBudgetLimit = limit
+        valueBudgetActive = limit > 0
+    }
+
+    public func endValueBudget(): Unit {
+        valueBudgetActive = false
+    }
+
+    public func isValueBudgetActive(): Bool {
+        valueBudgetActive
+    }
+
+    public func consumeJsonByte(): Byte {
+        let value = consume()
+        if (valueBudgetActive && position() - valueBudgetStart > valueBudgetLimit) {
+            throw jsonResourceLimitException(config(),
+                "JSON value exceeds ${valueBudgetLimit} bytes",
+                "polymorphic_object_too_large", valueBudgetStart + valueBudgetLimit)
+        }
+        value
+    }
+
+    public func skipJsonWhitespace(): Unit {
+        match (this) {
+            case cursor: Utf8Cursor =>
+                if (!valueBudgetActive) {
+                    cursor.skipSpacesFast()
+                    return
+                }
+            case _ => ()
+        }
+        while (hasMore()) {
+            match (peek()) {
+                case b' ' | b'\n' | b'\r' | b'\t' => consumeJsonByte()
+                case _ => return
+            }
+        }
+    }
+
+    public func readJsonNumberLiteral(): String {
+        let literal = StringBuilder()
+        if (hasMore() && peek() == b'-') {
+            literal.append(Rune(consumeJsonByte()))
+        }
+        readJsonIntegerDigits(literal)
+        if (hasMore() && peek() == b'.') {
+            literal.append(Rune(consumeJsonByte()))
+            requireJsonDigit("Expected fractional digits")
+            readJsonDigits(literal)
+        }
+        if (hasMore() && (peek() == b'e' || peek() == b'E')) {
+            literal.append(Rune(consumeJsonByte()))
+            if (hasMore() && (peek() == b'+' || peek() == b'-')) {
+                literal.append(Rune(consumeJsonByte()))
+            }
+            requireJsonDigit("Expected exponent digits")
+            readJsonDigits(literal)
+        }
+        literal.toString()
+    }
+
+    public func readJsonString(): String {
+        match (this) {
+            case cursor: Utf8Cursor =>
+                if (config().maxStringBytes == 0 && !valueBudgetActive) {
+                    if (let Some(value) <- cursor.tryParseSimpleString()) {
+                        return value
+                    }
+                }
+            case _ => ()
+        }
+        expectJsonByte(b'"')
+        let builder = StringBuilder()
+        var decodedBytes: Int64 = 0
+        while (hasMore()) {
+            let start = position()
+            let current = consumeJsonByte()
+            match (current) {
+                case b'"' => return builder.toString()
+                case b'\\' =>
+                    if (!hasMore()) { failJson("Unexpected end of escape sequence") }
+                    let escaped = consumeJsonByte()
+                    match (escaped) {
+                        case b'"' => builder.append("\""); decodedBytes = addDecodedJsonBytes(decodedBytes, 1, start)
+                        case b'\\' => builder.append("\\"); decodedBytes = addDecodedJsonBytes(decodedBytes, 1, start)
+                        case b'/' => builder.append("/"); decodedBytes = addDecodedJsonBytes(decodedBytes, 1, start)
+                        case b'b' => builder.append(r'\b'); decodedBytes = addDecodedJsonBytes(decodedBytes, 1, start)
+                        case b'f' => builder.append(r'\f'); decodedBytes = addDecodedJsonBytes(decodedBytes, 1, start)
+                        case b'n' => builder.append(r'\n'); decodedBytes = addDecodedJsonBytes(decodedBytes, 1, start)
+                        case b'r' => builder.append(r'\r'); decodedBytes = addDecodedJsonBytes(decodedBytes, 1, start)
+                        case b't' => builder.append(r'\t'); decodedBytes = addDecodedJsonBytes(decodedBytes, 1, start)
+                        case b'u' =>
+                            let (r, size) = readJsonUnicodeEscape()
+                            builder.append(r)
+                            decodedBytes = addDecodedJsonBytes(decodedBytes, size, start)
+                        case _ => failJson("Unsupported escape sequence")
+                    }
+                case _ =>
+                    if (current < 0x80) {
+                        if (current < 0x20) {
+                            failJsonAt("Unescaped control character in string literal", start)
+                        }
+                        builder.append(Rune(current))
+                        decodedBytes = addDecodedJsonBytes(decodedBytes, 1, start)
+                    } else {
+                        builder.append(decodeJsonUtf8Rune(current, start))
+                        decodedBytes = addDecodedJsonBytes(decodedBytes, position() - start, start)
+                    }
+            }
+        }
+        failJson("Unterminated string literal")
+    }
+
+    public func readJsonUnicodeEscape(): (Rune, Int64) {
+        let start = position()
+        if (!hasMore()) { failJson("Incomplete unicode escape") }
+        let value = readJsonUnicodeEscapeValue(start)
+        if (isJsonHighSurrogate(value)) {
+            if (!hasMore() || consumeJsonByte() != b'\\' || !hasMore() || consumeJsonByte() != b'u') {
+                failJsonAt("Invalid unicode surrogate pair", start)
+            }
+            let low = readJsonUnicodeEscapeValue(position())
+            if (!isJsonLowSurrogate(low)) {
+                failJsonAt("Invalid unicode surrogate pair", start)
+            }
+            return try {
+                (Rune(combineJsonSurrogates(value, low)), 4)
+            } catch (_: Exception) {
+                failJsonAt("Invalid unicode escape", start)
+            }
+        }
+        if (isJsonLowSurrogate(value)) {
+            failJsonAt("Invalid unicode surrogate pair", start)
+        }
+        return try {
+            (Rune(UInt32(value)), jsonUtf8ByteCount(value))
+        } catch (_: Exception) {
+            failJsonAt("Invalid unicode escape", start)
+        }
+    }
+
+    public func decodeJsonUtf8Rune(first: Byte, start: Int64): Rune {
+        let unsigned = UInt8(first)
+        let width = match {
+            case (unsigned & 0xE0u8) == 0xC0u8 => 2
+            case (unsigned & 0xF0u8) == 0xE0u8 => 3
+            case (unsigned & 0xF8u8) == 0xF0u8 => 4
+            case _ => failJsonAt("Invalid UTF-8 byte sequence", start)
+        }
+        let bytes = Array<UInt8>(width, repeat: 0u8)
+        bytes[0] = UInt8(first)
+        for (index in 1..width) {
+            if (!hasMore()) { failJsonAt("Invalid UTF-8 byte sequence", start) }
+            bytes[index] = UInt8(consumeJsonByte())
+        }
+        return try {
+            let (r, _) = Rune.fromUtf8(bytes, 0)
+            r
+        } catch (_: Exception) {
+            failJsonAt("Invalid UTF-8 byte sequence", start)
+        }
+    }
+
+    private func readJsonDigits(buffer: StringBuilder): Unit {
+        requireJsonDigit("Expected digit")
+        while (hasMore() && peek() >= b'0' && peek() <= b'9') {
+            buffer.append(Rune(consumeJsonByte()))
+        }
+    }
+
+    private func readJsonIntegerDigits(buffer: StringBuilder): Unit {
+        requireJsonDigit("Expected digit")
+        if (peek() == b'0') {
+            buffer.append(Rune(consumeJsonByte()))
+            if (hasMore() && peek() >= b'0' && peek() <= b'9') {
+                failJson("Leading zeroes are not allowed in JSON numbers")
+            }
+            return
+        }
+        readJsonDigits(buffer)
+    }
+
+    private func requireJsonDigit(message: String): Unit {
+        if (!hasMore() || peek() < b'0' || peek() > b'9') { failJson(message) }
+    }
+
+    private func expectJsonByte(value: Byte): Unit {
+        if (!hasMore() || peek() != value) { failJson("Unexpected token") }
+        consumeJsonByte()
+    }
+
+    private func readJsonUnicodeEscapeValue(start: Int64): Int64 {
+        var value: Int64 = 0
+        for (_ in 0..4) {
+            if (!hasMore()) { failJsonAt("Incomplete unicode escape", start) }
+            value = value * 16 + jsonHexValue(consumeJsonByte())
+        }
+        value
+    }
+
+    private func jsonHexValue(value: Byte): Int64 {
+        match {
+            case value >= b'0' && value <= b'9' => Int64(value - b'0')
+            case value >= b'a' && value <= b'f' => Int64(value - b'a') + 10
+            case value >= b'A' && value <= b'F' => Int64(value - b'A') + 10
+            case _ => failJson("Invalid unicode escape")
+        }
+    }
+
+    private func addDecodedJsonBytes(current: Int64, added: Int64, offset: Int64): Int64 {
+        let next = current + added
+        let limit = config().maxStringBytes
+        if (limit > 0 && next > limit) {
+            throw jsonResourceLimitException(config(),
+                "JSON string exceeds ${limit} decoded UTF-8 bytes", "string_too_large", offset)
+        }
+        next
+    }
+
+    private func failJson(message: String): Nothing {
+        failJsonAt(message, position())
+    }
+
+    private func failJsonAt(message: String, offset: Int64): Nothing {
+        let readConfig = config()
+        throw JsonException(message, code: "parse_error",
+            byteOffset: if (readConfig.includeErrorLocation) { offset } else { -1 },
+            line: lineAt(offset), column: columnAt(offset))
+    }
 }
 
-private class ArrayJsonByteSource <: JsonByteSource {
+class Utf8Cursor <: InputCursor {
     private let data: Array<Byte>
     private let size: Int64
     private let sourceText: Option<String>
@@ -235,6 +471,252 @@ private class ArrayJsonByteSource <: JsonByteSource {
         }
     }
 
+    public func parseNameIdFast(candidates: Array<String>): Int64 {
+        expectByteFast(b'"')
+        var active = initialNameMatchMask(candidates.size)
+        var nameIndex: Int64 = 0
+        while (index < size) {
+            let current = data[index]
+            index++
+            if (current == b'"') {
+                if (active == 0u64) {
+                    return -1
+                }
+                for (candidateIndex in 0..candidates.size) {
+                    if (((active & nameMatchBit(candidateIndex)) != 0u64) && candidates[candidateIndex].size == nameIndex) {
+                        return candidateIndex
+                    }
+                }
+                return -1
+            }
+            var code: Int64 = -1
+            if (current == b'\\') {
+                code = consumeEscapedAsciiForName()
+            } else if (current < 0x80) {
+                if (current < 0x20) {
+                    failAt("Unescaped control character in string literal", index - 1)
+                }
+                code = Int64(current)
+            } else {
+                index += validatedUtf8WidthAt(index - 1) - 1
+            }
+            if (active != 0u64) {
+                active = updateActiveNameCandidates(candidates, active, nameIndex, code)
+            }
+            nameIndex++
+        }
+        fail("Unterminated string literal")
+    }
+
+    public func parseInt64LiteralFast(): Int64 {
+        skipSpacesFast()
+        if (index >= size) {
+            fail("Expected integer")
+        }
+        if (data[index] == b'-') {
+            index++
+            requireDigit("Expected digit")
+            var result: Int64 = 0
+            if (data[index] == b'0') {
+                index++
+                rejectLeadingZero()
+            } else {
+                while (index < size && data[index] >= b'0' && data[index] <= b'9') {
+                    let digit = Int64(data[index] - b'0')
+                    if (result < ((-0x8000_0000_0000_0000 + digit) / 10)) {
+                        fail("Integer literal out of Int64 range")
+                    }
+                    result = result * 10 - digit
+                    index++
+                }
+            }
+            rejectFractionalOrExponentForInteger()
+            return result
+        }
+        requireDigit("Expected digit")
+        var result: Int64 = 0
+        if (data[index] == b'0') {
+            index++
+            rejectLeadingZero()
+        } else {
+            while (index < size && data[index] >= b'0' && data[index] <= b'9') {
+                let digit = Int64(data[index] - b'0')
+                if (result > ((0x7FFF_FFFF_FFFF_FFFF - digit) / 10)) {
+                    fail("Integer literal out of Int64 range")
+                }
+                result = result * 10 + digit
+                index++
+            }
+        }
+        rejectFractionalOrExponentForInteger()
+        result
+    }
+
+    public func parseUInt64LiteralFast(): UInt64 {
+        skipSpacesFast()
+        if (index >= size || data[index] == b'-') {
+            fail("Expected unsigned integer")
+        }
+        requireDigit("Expected digit")
+        var result: UInt64 = 0
+        if (data[index] == b'0') {
+            index++
+            rejectLeadingZero()
+        } else {
+            while (index < size && data[index] >= b'0' && data[index] <= b'9') {
+                let digit = UInt64(data[index] - b'0')
+                if (result > ((UInt64.Max - digit) / 10)) {
+                    fail("Integer literal out of UInt64 range")
+                }
+                result = result * 10 + digit
+                index++
+            }
+        }
+        rejectFractionalOrExponentForInteger()
+        result
+    }
+    private func updateActiveNameCandidates(
+        candidates: Array<String>,
+        active: UInt64,
+        nameIndex: Int64,
+        code: Int64
+    ): UInt64 {
+        if (code < 0 || code > 0x7F) {
+            return 0u64
+        }
+        var next = 0u64
+        let byte = UInt8(code)
+        for (candidateIndex in 0..candidates.size) {
+            let bit = nameMatchBit(candidateIndex)
+            if ((active & bit) == 0u64) {
+                continue
+            }
+            unsafe {
+                let candidate = candidates[candidateIndex].rawData()
+                if (nameIndex < candidate.size && candidate[nameIndex] == byte) {
+                    next |= bit
+                }
+            }
+        }
+        next
+    }
+
+    private func initialNameMatchMask(size: Int64): UInt64 {
+        var mask = 0u64
+        for (candidateIndex in 0..size) {
+            mask |= nameMatchBit(candidateIndex)
+        }
+        mask
+    }
+
+    private func nameMatchBit(candidateIndex: Int64): UInt64 {
+        1u64 << candidateIndex
+    }
+
+    private func consumeEscapedAsciiForName(): Int64 {
+        if (index >= size) {
+            fail("Unexpected end of escape sequence")
+        }
+        let escaped = data[index]
+        index++
+        match (escaped) {
+            case b'"' => return Int64(b'"')
+            case b'\\' => return Int64(b'\\')
+            case b'/' => return Int64(b'/')
+            case b'b' => return Int64(b'\b')
+            case b'f' => return Int64(b'\f')
+            case b'n' => return Int64(b'\n')
+            case b'r' => return Int64(b'\r')
+            case b't' => return Int64(b'\t')
+            case b'u' => return parseUnicodeAsciiEscape()
+            case _ => fail("Unsupported escape sequence")
+        }
+    }
+
+    private func validatedUtf8WidthAt(start: Int64): Int64 {
+        let first = UInt8(data[start])
+        if (first >= 0xC2u8 && first <= 0xDFu8) {
+            requireUtf8Continuation(start + 1, 0x80u8, 0xBFu8, start)
+            return 2
+        }
+        if (first >= 0xE0u8 && first <= 0xEFu8) {
+            requireUtf8Continuation(start + 1,
+                if (first == 0xE0u8) { 0xA0u8 } else { 0x80u8 },
+                if (first == 0xEDu8) { 0x9Fu8 } else { 0xBFu8 }, start)
+            requireUtf8Continuation(start + 2, 0x80u8, 0xBFu8, start)
+            return 3
+        }
+        if (first >= 0xF0u8 && first <= 0xF4u8) {
+            requireUtf8Continuation(start + 1,
+                if (first == 0xF0u8) { 0x90u8 } else { 0x80u8 },
+                if (first == 0xF4u8) { 0x8Fu8 } else { 0xBFu8 }, start)
+            requireUtf8Continuation(start + 2, 0x80u8, 0xBFu8, start)
+            requireUtf8Continuation(start + 3, 0x80u8, 0xBFu8, start)
+            return 4
+        }
+        failAt("Invalid UTF-8 byte sequence", start)
+    }
+
+    private func requireUtf8Continuation(position: Int64, minimum: UInt8,
+        maximum: UInt8, errorPosition: Int64): Unit {
+        if (position >= size) { failAt("Invalid UTF-8 byte sequence", errorPosition) }
+        let value = UInt8(data[position])
+        if (value < minimum || value > maximum) {
+            failAt("Invalid UTF-8 byte sequence", errorPosition)
+        }
+    }
+
+    private func parseUnicodeAsciiEscape(): Int64 {
+        let start = index
+        var value: Int64 = 0
+        for (_ in 0..4) {
+            if (index >= size) {
+                failAt("Incomplete unicode escape", start)
+            }
+            value = value * 16 + hexValue(data[index])
+            index++
+        }
+        if (isJsonHighSurrogate(value)) {
+            if (index + 2 > size || data[index] != b'\\' || data[index + 1] != b'u') {
+                failAt("Invalid unicode surrogate pair", start)
+            }
+            index += 2
+            let lowStart = index
+            var low: Int64 = 0
+            for (_ in 0..4) {
+                if (index >= size) { failAt("Incomplete unicode escape", lowStart) }
+                low = low * 16 + hexValue(data[index])
+                index++
+            }
+            if (!isJsonLowSurrogate(low)) {
+                failAt("Invalid unicode surrogate pair", start)
+            }
+            return -1
+        }
+        if (isJsonLowSurrogate(value)) {
+            failAt("Invalid unicode surrogate pair", start)
+        }
+        if (value <= 0x7F) {
+            return value
+        }
+        return -1
+    }
+
+    private func hexValue(value: Byte): Int64 {
+        match {
+            case value >= b'0' && value <= b'9' => Int64(value - b'0')
+            case value >= b'a' && value <= b'f' => Int64(value - b'a') + 10
+            case value >= b'A' && value <= b'F' => Int64(value - b'A') + 10
+            case _ => fail("Invalid unicode escape")
+        }
+    }
+
+    private func rejectFractionalOrExponentForInteger(): Unit {
+        if (index < size && (data[index] == b'.' || data[index] == b'e' || data[index] == b'E')) {
+            fail("Expected integer")
+        }
+    }
+
     private func stringFromUtf8Range(start: Int64, end: Int64): String {
         if (let Some(text) <- sourceText) {
             return try {
@@ -274,7 +756,7 @@ private class ArrayJsonByteSource <: JsonByteSource {
     }
 }
 
-private class StreamJsonByteSource <: JsonByteSource {
+class StreamInputCursor <: InputCursor {
     private let input: InputStream
     private let buffer: Array<Byte>
     private let readConfig: JsonReadConfig
@@ -354,31 +836,30 @@ private class StreamJsonByteSource <: JsonByteSource {
 }
 
 private class JsonParserCore {
-    private let source: JsonByteSource
+    private let source: InputCursor
     private let config: JsonReadConfig
-    private var rootBudgetStart: Int64 = -1
-    private var rootBudgetActive: Bool = false
-    private var lastUnicodeEscapeBytes: Int64 = 0
     private var containerDepth: Int64 = 0
 
-    public init(source: JsonByteSource) {
+    public init(source: InputCursor) {
         this.source = source
         this.config = source.config()
     }
 
     public func parse(): JsonNode {
         match (source) {
-            case arraySource: ArrayJsonByteSource => return parseFast(arraySource)
+            case arraySource: Utf8Cursor =>
+                if (config.maxStringBytes == 0 && config.maxPolymorphicObjectBytes == 0) {
+                    return parseFast(arraySource)
+                }
             case _ => ()
         }
         skipSpaces()
         if (config.maxPolymorphicObjectBytes > 0 && source.hasMore() &&
             (source.peek() == b'[' || source.peek() == b'{')) {
-            rootBudgetStart = source.position()
-            rootBudgetActive = true
+            source.beginValueBudget(config.maxPolymorphicObjectBytes)
         }
         let value = parseValue()
-        rootBudgetActive = false
+        source.endValueBudget()
         skipSpaces()
         if (source.hasMore()) {
             fail("Unexpected trailing input")
@@ -387,26 +868,10 @@ private class JsonParserCore {
     }
 
     private func consumeByte(): Byte {
-        let value = source.consume()
-        if (rootBudgetActive && source.position() - rootBudgetStart > config.maxPolymorphicObjectBytes) {
-            throw jsonResourceLimitException(config,
-                "JSON value exceeds ${config.maxPolymorphicObjectBytes} bytes",
-                "polymorphic_object_too_large", rootBudgetStart + config.maxPolymorphicObjectBytes)
-        }
-        value
+        source.consumeJsonByte()
     }
 
-    private func addDecodedStringBytes(current: Int64, added: Int64, offset: Int64): Int64 {
-        let next = current + added
-        if (config.maxStringBytes > 0 && next > config.maxStringBytes) {
-            throw jsonResourceLimitException(config,
-                "JSON string exceeds ${config.maxStringBytes} decoded UTF-8 bytes",
-                "string_too_large", offset)
-        }
-        next
-    }
-
-    private func parseFast(arraySource: ArrayJsonByteSource): JsonNode {
+    private func parseFast(arraySource: Utf8Cursor): JsonNode {
         arraySource.skipSpacesFast()
         let value = parseValueFast(arraySource)
         arraySource.skipSpacesFast()
@@ -416,7 +881,7 @@ private class JsonParserCore {
         value
     }
 
-    private func parseValueFast(arraySource: ArrayJsonByteSource): JsonNode {
+    private func parseValueFast(arraySource: Utf8Cursor): JsonNode {
         if (!arraySource.hasMore()) {
             failAt("Unexpected end of input", arraySource.position())
         }
@@ -471,31 +936,12 @@ private class JsonParserCore {
 
     private func parseNumber(): JsonNode {
         match (source) {
-            case arraySource: ArrayJsonByteSource => return arraySource.parseNumberFast()
+            case arraySource: Utf8Cursor =>
+                if (!source.isValueBudgetActive()) { return arraySource.parseNumberFast() }
             case _ => ()
         }
-        let literal = StringBuilder()
-        var hasFractionalSyntax = false
-        if (source.peek() == b'-') {
-            literal.append(Rune(consumeByte()))
-        }
-        parseIntegerDigitsInto(literal)
-        if (source.hasMore() && source.peek() == b'.') {
-            hasFractionalSyntax = true
-            literal.append(Rune(consumeByte()))
-            requireDigit("Expected fractional digits")
-            parseDigitsInto(literal)
-        }
-        if (source.hasMore() && (source.peek() == b'e' || source.peek() == b'E')) {
-            hasFractionalSyntax = true
-            literal.append(Rune(consumeByte()))
-            if (source.hasMore() && (source.peek() == b'+' || source.peek() == b'-')) {
-                literal.append(Rune(consumeByte()))
-            }
-            requireDigit("Expected exponent digits")
-            parseDigitsInto(literal)
-        }
-        let literalText = literal.toString()
+        let literalText = source.readJsonNumberLiteral()
+        let hasFractionalSyntax = literalText.contains(".") || literalText.contains("e") || literalText.contains("E")
         buildParsedNumberValue(literalText, hasFractionalSyntax)
     }
 
@@ -513,175 +959,18 @@ private class JsonParserCore {
         }
     }
 
-    private func parseDigitsInto(buffer: StringBuilder): Unit {
-        requireDigit("Expected digit")
-        while (source.hasMore() && source.peek() >= b'0' && source.peek() <= b'9') {
-            buffer.append(Rune(consumeByte()))
-        }
-    }
-
-    private func parseIntegerDigitsInto(buffer: StringBuilder): Unit {
-        requireDigit("Expected digit")
-        if (source.peek() == b'0') {
-            buffer.append(Rune(consumeByte()))
-            if (source.hasMore() && source.peek() >= b'0' && source.peek() <= b'9') {
-                fail("Leading zeroes are not allowed in JSON numbers")
-            }
-            return
-        }
-        parseDigitsInto(buffer)
-    }
-
-    private func requireDigit(message: String): Unit {
-        if (!source.hasMore() || source.peek() < b'0' || source.peek() > b'9') {
-            fail(message)
-        }
-    }
-
     private func parseString(): String {
-        match (source) {
-            case arraySource: ArrayJsonByteSource =>
-                if (let Some(value) <- arraySource.tryParseSimpleString()) {
-                    return value
-                }
-            case _ => ()
-        }
-        expectByte(b'"')
-        let builder = StringBuilder()
-        var decodedBytes: Int64 = 0
-        while (source.hasMore()) {
-            let start = source.position()
-            let current = consumeByte()
-            match (current) {
-                case b'"' => return builder.toString()
-                case b'\\' =>
-                    if (!source.hasMore()) {
-                        fail("Unexpected end of escape sequence")
-                    }
-                    let escaped = consumeByte()
-                    match (escaped) {
-                        case b'"' => builder.append("\""); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b'\\' => builder.append("\\"); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b'/' => builder.append("/"); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b'b' => builder.append(r'\b'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b'f' => builder.append(r'\f'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b'n' => builder.append(r'\n'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b'r' => builder.append(r'\r'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b't' => builder.append(r'\t'); decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                        case b'u' =>
-                            builder.append(parseUnicodeEscape())
-                            decodedBytes = addDecodedStringBytes(decodedBytes, lastUnicodeEscapeBytes, start)
-                        case _ => fail("Unsupported escape sequence")
-                    }
-                case _ =>
-                    if (current < 0x80) {
-                        if (current < 0x20) {
-                            failAt("Unescaped control character in string literal", start)
-                        }
-                        builder.append(Rune(current))
-                        decodedBytes = addDecodedStringBytes(decodedBytes, 1, start)
-                    } else {
-                        builder.append(decodeUtf8Rune(current, start))
-                        decodedBytes = addDecodedStringBytes(decodedBytes, source.position() - start, start)
-                    }
-            }
-        }
-        fail("Unterminated string literal")
+        source.readJsonString()
     }
 
-    private func parseStringFast(arraySource: ArrayJsonByteSource): String {
+    private func parseStringFast(arraySource: Utf8Cursor): String {
         if (let Some(value) <- arraySource.tryParseSimpleString()) {
             return value
         }
         parseString()
     }
 
-    private func parseUnicodeEscape(): Rune {
-        let start = source.position()
-        if (!source.hasMore()) {
-            fail("Incomplete unicode escape")
-        }
-        let value = parseUnicodeEscapeValue(start)
-        if (isJsonHighSurrogate(value)) {
-            if (!source.hasMore() || consumeByte() != b'\\' || !source.hasMore() || consumeByte() != b'u') {
-                failAt("Invalid unicode surrogate pair", start)
-            }
-            let lowStart = source.position()
-            let low = parseUnicodeEscapeValue(lowStart)
-            if (!isJsonLowSurrogate(low)) {
-                failAt("Invalid unicode surrogate pair", start)
-            }
-            lastUnicodeEscapeBytes = 4
-            return try {
-                Rune(combineJsonSurrogates(value, low))
-            } catch (_: Exception) {
-                failAt("Invalid unicode escape", start)
-            }
-        }
-        if (isJsonLowSurrogate(value)) {
-            failAt("Invalid unicode surrogate pair", start)
-        }
-        lastUnicodeEscapeBytes = jsonUtf8ByteCount(value)
-        return try {
-            Rune(UInt32(value))
-        } catch (_: Exception) {
-            failAt("Invalid unicode escape", start)
-        }
-    }
-
-    private func parseUnicodeEscapeValue(start: Int64): Int64 {
-        var value: Int64 = 0
-        for (_ in 0..4) {
-            if (!source.hasMore()) {
-                failAt("Incomplete unicode escape", start)
-            }
-            value = value * 16 + hexValue(consumeByte())
-        }
-        value
-    }
-
-    private func hexValue(value: Byte): Int64 {
-        match {
-            case value >= b'0' && value <= b'9' => Int64(value - b'0')
-            case value >= b'a' && value <= b'f' => Int64(value - b'a') + 10
-            case value >= b'A' && value <= b'F' => Int64(value - b'A') + 10
-            case _ => fail("Invalid unicode escape")
-        }
-    }
-
-    private func decodeUtf8Rune(first: Byte, start: Int64): Rune {
-        let width = utf8Width(first, start)
-        let bytes = Array<UInt8>(width, repeat: 0u8)
-        bytes[0] = UInt8(first)
-        for (index in 1..width) {
-            if (!source.hasMore()) {
-                failAt("Invalid UTF-8 byte sequence", start)
-            }
-            bytes[index] = UInt8(consumeByte())
-        }
-        return try {
-            let (r, _) = Rune.fromUtf8(bytes, 0)
-            r
-        } catch (_: Exception) {
-            failAt("Invalid UTF-8 byte sequence", start)
-        }
-    }
-
-    private func utf8Width(first: Byte, start: Int64): Int64 {
-        let unsigned = UInt8(first)
-        if ((unsigned & 0xE0u8) == 0xC0u8) {
-            return 2
-        }
-        if ((unsigned & 0xF0u8) == 0xE0u8) {
-            return 3
-        }
-        if ((unsigned & 0xF8u8) == 0xF0u8) {
-            return 4
-        }
-        failAt("Invalid UTF-8 byte sequence", start)
-    }
-
-    private func parseArrayFast(arraySource: ArrayJsonByteSource): JsonNode {
+    private func parseArrayFast(arraySource: Utf8Cursor): JsonNode {
         enterContainer(arraySource.position())
         try {
         arraySource.expectByteFast(b'[')
@@ -733,7 +1022,7 @@ private class JsonParserCore {
         }
     }
 
-    private func parseObjectFast(arraySource: ArrayJsonByteSource): JsonNode {
+    private func parseObjectFast(arraySource: Utf8Cursor): JsonNode {
         enterContainer(arraySource.position())
         try {
         arraySource.expectByteFast(b'{')
@@ -828,43 +1117,36 @@ private class JsonParserCore {
     }
 
     private func skipSpaces(): Unit {
-        match (source) {
-            case arraySource: ArrayJsonByteSource =>
-                arraySource.skipSpacesFast()
-                return
-            case _ => ()
-        }
-        while (source.hasMore()) {
-            match (source.peek()) {
-                case b' ' | b'\n' | b'\r' | b'\t' => consumeByte()
-                case _ => return
-            }
-        }
+        source.skipJsonWhitespace()
     }
 
     private func expectLiteral(literal: String): Unit {
         for (byte in unsafe { literal.rawData() }) {
-            if (!source.hasMore() || consumeByte() != byte) {
+            if (!source.hasMore() || source.peek() != byte) {
                 fail("Expected ${literal}")
             }
+            consumeByte()
         }
     }
 
     private func expectByte(value: Byte): Unit {
         match (source) {
-            case arraySource: ArrayJsonByteSource =>
-                arraySource.expectByteFast(value)
-                return
+            case arraySource: Utf8Cursor =>
+                if (!source.isValueBudgetActive()) {
+                    arraySource.expectByteFast(value)
+                    return
+                }
             case _ => ()
         }
-        if (!source.hasMore() || consumeByte() != value) {
+        if (!source.hasMore() || source.peek() != value) {
             fail("Unexpected token")
         }
+        consumeByte()
     }
 
     private func peekByte(value: Byte): Bool {
         match (source) {
-            case arraySource: ArrayJsonByteSource => return arraySource.peekByteFast(value)
+            case arraySource: Utf8Cursor => return arraySource.peekByteFast(value)
             case _ => ()
         }
         source.hasMore() && source.peek() == value
@@ -886,16 +1168,16 @@ private class JsonParserCore {
 }
 
 func parseJsonValueFromText(text: String, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
-    JsonParserCore(ArrayJsonByteSource(text, config: config)).parse()
+    JsonParserCore(Utf8Cursor(text, config: config)).parse()
 }
 
 func parseJsonValueFromBytes(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
-    JsonParserCore(ArrayJsonByteSource(bytes, config: config)).parse()
+    JsonParserCore(Utf8Cursor(bytes, config: config)).parse()
 }
 
 func parseJsonValueFromInputStream(
     input: InputStream,
     config!: JsonReadConfig = JsonReadConfig.defaults
 ): JsonNode {
-    JsonParserCore(StreamJsonByteSource(input, config: config)).parse()
+    JsonParserCore(StreamInputCursor(input, config: config)).parse()
 }

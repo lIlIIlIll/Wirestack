@@ -1,6 +1,7 @@
 package yjson_native
 
 import yjson.*
+import yjson_backends.*
 import std.unittest.*
 import std.unittest.testmacro.*
 
@@ -9,7 +10,7 @@ class NativeDocumentBackendTest {
     @TestCase
     func unifiedEntryUsesCustomNative(): Unit {
         let bytes = unsafe { "{\"id\":42,\"items\":[1,2]}".rawData() }
-        try (document = YJson.parseDocument(bytes, backend: NativeCompactBackend)) {
+        try (document = YJsonAdvanced.parseDocumentWithBackend(bytes, NativeCompactDocumentBackend)) {
             @Expect(document.backendName(), "custom-native")
             @Expect(document.rootSize(), 2)
             @Expect(document.getRootInt("id").getOrThrow(), 42)
@@ -20,7 +21,7 @@ class NativeDocumentBackendTest {
 
     @TestCase
     func facadePreservesResourceLifecycle(): Unit {
-        let document = YJson.parseDocument("[1,2]", backend: NativeCompactBackend)
+        let document = YJsonAdvanced.parseDocumentWithBackend("[1,2]", NativeCompactDocumentBackend)
         document.close()
         document.close()
         @Expect(document.isClosed())

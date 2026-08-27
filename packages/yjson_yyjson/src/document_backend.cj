@@ -1,6 +1,7 @@
 package yjson_yyjson
 
 import yjson.*
+import yjson_backends.*
 
 /// Configurable yyjson implementation of the unified document facade.
 public class YyjsonCompactJsonBackend <: JsonDocumentBackend {
@@ -28,7 +29,7 @@ public class YyjsonCompactJsonBackend <: JsonDocumentBackend {
         }
     }
 
-    public func parse(bytes: Array<Byte>, config: JsonReadConfig): JsonDocument {
+    public func parse(bytes: Array<Byte>, config: JsonReadConfig): BackendJsonDocument {
         YyjsonJsonDocumentAdapter(YyjsonCompactJsonDocument.parse(bytes,
             config: config,
             mode: mode,
@@ -38,7 +39,7 @@ public class YyjsonCompactJsonBackend <: JsonDocumentBackend {
     }
 }
 
-private class YyjsonJsonDocumentAdapter <: JsonDocument {
+private class YyjsonJsonDocumentAdapter <: BackendJsonDocument {
     private let document: YyjsonCompactJsonDocument
 
     init(document: YyjsonCompactJsonDocument) {
@@ -61,4 +62,4 @@ private class YyjsonJsonDocumentAdapter <: JsonDocument {
 }
 
 /// Supported yyjson Direct backend for `YJson.parseDocument`.
-public let YyjsonBackend: JsonDocumentBackend = YyjsonCompactJsonBackend()
+public let YyjsonDocumentBackend: JsonDocumentBackend = YyjsonCompactJsonBackend()

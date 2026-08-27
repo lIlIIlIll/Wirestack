@@ -5,6 +5,7 @@ import std.io.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import yjson.*
+import yjson_backends.*
 
 private class NativeBackendTestOutput <: OutputStream {
     private let bytes = ArrayList<Byte>()
@@ -26,8 +27,8 @@ class NativeStreamBackendTest {
             let pure = NativeBackendTestOutput()
             let native = NativeBackendTestOutput()
             YJson.encodeToStreamWith(codec, value, pure, config: config)
-            YJson.encodeToStreamWith(codec, value, native,
-                backend: NativeCompactStreamBackend, config: config)
+            YJsonAdvanced.encodeToStreamWithBackend(codec, value, native,
+                NativeCompactWholeDocumentStreamBackend, config: config)
             @Expect(native.toString(), pure.toString())
         }
     }
@@ -35,25 +36,25 @@ class NativeStreamBackendTest {
     @TestCase
     func decodeUsesTypedCodecAndEnforcesInputLimit(): Unit {
         let codec = YJson.arrayCodec(Int64Json)
-        let value = YJson.decodeFromStreamWith(codec, YJsonByteArrayInputStream("[1,2,3]"),
-            backend: NativeCompactStreamBackend)
+        let value = YJsonAdvanced.decodeFromStreamWithBackend(codec, YJsonByteArrayInputStream("[1,2,3]"),
+            NativeCompactWholeDocumentStreamBackend)
         @Expect(value.size, 3)
         @Expect(value[2], 3)
-        let typeError = @AssertThrows[JsonException](YJson.decodeFromStreamWith(Int64Json,
-            YJsonByteArrayInputStream("1.25"), backend: NativeCompactStreamBackend))
+        let typeError = @AssertThrows[JsonException](YJsonAdvanced.decodeFromStreamWithBackend(Int64Json,
+            YJsonByteArrayInputStream("1.25"), NativeCompactWholeDocumentStreamBackend))
         @Expect(typeError.code, "parse_error")
-        let error = @AssertThrows[JsonException](YJson.decodeFromStreamWith(codec,
-            YJsonByteArrayInputStream("[1,2,3]"), backend: NativeCompactStreamBackend,
-            config: JsonReadConfig(maxBytes: 4)))
+        let error = @AssertThrows[JsonException](YJsonAdvanced.decodeFromStreamWithBackend(codec,
+            YJsonByteArrayInputStream("[1,2,3]"), NativeCompactWholeDocumentStreamBackend,
+            config: JsonReadConfig(limits: JsonReadLimits(maxBytes: 4))))
         @Expect(error.code, "document_too_large")
     }
 
     @TestCase
     func outputLimitFailsBeforeNativeWrites(): Unit {
         let output = NativeBackendTestOutput()
-        let error = @AssertThrows[JsonException](YJson.encodeToStreamWith(StringJson,
-            "too long", output, backend: NativeCompactStreamBackend,
-            config: JsonWriteConfig("", "", false, false, maxBytes: 4)))
+        let error = @AssertThrows[JsonException](YJsonAdvanced.encodeToStreamWithBackend(StringJson,
+            "too long", output, NativeCompactWholeDocumentStreamBackend,
+            config: JsonWriteConfig("", "", false, false, limits: JsonWriteLimits(maxBytes: 4))))
         @Expect(error.code, "output_too_large")
         @Expect(output.toBytes().size, 0)
     }

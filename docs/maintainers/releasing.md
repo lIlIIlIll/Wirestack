@@ -1,56 +1,38 @@
-# Releasing yjson
+# 发布 yjson
 
-本文只定义每次发布重复执行的流程与 gate。测试数量、commit、runner、时间和一次性结果必须写入对应 `release/<version>/evidence.md`，不在本页手工维护。
+本页定义可重复流程，不记录一次性结果。每次候选的 commit、SDK、runner、命令结果、日志与
+checksum 必须进入 `release/<version>/evidence.md`。
 
-## Release identity
+## 1. 冻结身份
 
-候选 evidence 必须绑定 exact commit、工具链身份、gate 结果与 artifact checksum。临时目录、
-开发机路径和逐条执行过程不属于发布说明。
+候选必须绑定 exact commit、所有 package 的版本配套、工具链身份和 planned release
+identity。发布期间不混入未评审 public API 或生成代码 bridge 变化。
 
-## Blocking gates
+## 2. 执行阻断 gate
 
-以下失败会阻止发布：
+以下失败阻止发布：
 
-1. public API/ABI inventory 未评审或 machine-readable inventory 校验失败；
-2. Pure Cangjie core、examples、macro consumer 任一失败；
-3. 固定 revision 的 JSON Schema required、JSONPath CTS 或 JSON Patch conformance gate 失败；
-4. yjson、stdx.json、cjfast_json 同批次性能表缺少任一共同 workload 或任一库；
-5. Custom Native 或 yyjson package 不能由自身 staged source 独立构建；
-6. warning gate、ASan、UBSan、LSan 或 differential fuzz 失败；
-7. package input 缺失、出现未声明 Native dependency、license 缺失；
-8. external consumer、版本配套、C ABI 或 yyjson symbol-isolation 失败；
-9. documented example 失败或 Native ownership/lifetime 含糊；
-10. source archive 包含 target、object、archive、shared library 或未声明 benchmark artifact；
-11. qualified platform 上出现已确认的 release-blocking performance regression。
+1. API/ABI inventory 或 package-pairing 校验失败；
+2. core、examples、macro/literal consumer 失败；
+3. 固定 standards suites 失败；
+4. release performance 表缺库、缺共同 workload 或确认发生阻断 regression；
+5. staged Native package 不能从自身 source 独立构建；
+6. warning、ASan、UBSan、LSan 或 differential fuzz 失败；
+7. manifest、source staging、license、C ABI 或 symbol isolation 失败；
+8. external consumer 或 documented lifecycle 失败；
+9. source archive 包含 build output 或未声明 artifact；
+10. qualified platform 上存在未处置的 correctness/security blocker。
+11. GitHub Actions correctness、Core Coverage 或 Codecov upload 失败。
 
-高 CV 本身不阻止发布，也不得删除对应行；该行必须标为 `noisy`，是否构成性能回归由
-release owner 根据配对方向、历史基线和 workload 重要性单独判定。
+高 CV 不自动阻断，也不能成为隐藏结果的理由；标记 noisy 后由 release owner 结合配对方向、
+历史基线和 workload 重要性处置。
 
-## Required jobs
+Native acceleration 是更严格的独立阻断 gate：广告 read 和 write workload 必须各自达到
+`Native/Pure ≤ 0.95` 且至少赢 6/11，普通稳定 workload 不得回退超过 5%，所有行双方
+CV 必须 ≤ 5%。出现 noisy 行时丢弃整批并完整重跑一次；第二批仍不稳定或任一性能条件失败，
+则 2.0 acceleration qualification 不完成，不能只隐藏失败行或宣传局部结果。
 
-| Job | Scope |
-| --- | --- |
-| `api-inventory` | public declarations、C ABI needles、exact package pairing |
-| `core` | 无 C build hook 的 core tests |
-| `standards-conformance` | pinned Schema required、JSONPath CTS 与 JSON Patch public-API consumer |
-| `schema-formats-conformance` | 安装可选 format package 后的 Schema required + 964 项 optional formats |
-| `performance-comparison` | yjson / stdx.json / cjfast_json 全量共同 workload、CV、p95 与 ratio |
-| `examples` | public example build/run |
-| `macro-consumer` | 外部式 `@JsonCodec` consumer |
-| `custom-native` | package tests + external consumer，yyjson disabled |
-| `yyjson-native` | offline vendored build、tests + consumer |
-| `native-clang` / `native-gcc` | warnings 与 targeted C tests |
-| `sanitizer` | ASan、UBSan、LSan |
-| `fuzz-short` | PR 上 deterministic short differential fuzz |
-| `fuzz-extended` | release 前 extended differential fuzz |
-| `yyjson-symbol-isolation` | pinned dual-version co-link fixture |
-| `package-rehearsal` | source-only manifests、staging、registry-style consumers |
-
-job mapping 见 [testing.md](testing.md)。SDK build 不属于普通 package release gate。
-
-## Local and hosted evidence
-
-本地 fresh-checkout simulation 与 hosted CI 是两个独立 gate，证据必须分别写：
+## 3. 记录 local 与 hosted 状态
 
 ```text
 Local fresh-checkout simulation: PASS / FAIL / NOT RUN
@@ -58,17 +40,32 @@ Hosted CI execution: PASS / FAIL / NOT RUN
 Release blocking policy: BLOCKING / NON-BLOCKING
 ```
 
-本地 PASS 不能自动把 hosted execution 标为 PASS。是否允许 hosted NOT RUN 发布，必须在对应 release evidence 中给出明确 policy 与审批人。
+本地 PASS 不能写成 hosted PASS。2.0 stable release 要求发布 PR 与合并后的 `main` workflow
+均通过；不得以本地证据替代 hosted CI 或 Codecov。
 
-## Platform statement
+## 4. 审查平台声明
 
-1.0 RC 的当前阻断平台是 Linux x86_64。只对实际完成 SDK、build、tests、standards、
-sanitizers、fuzz 和 external consumer 的平台声明 supported/qualified。
+只对实际完成 SDK、build、tests、standards、sanitizer、fuzz 和 consumer gate 的平台声明
+qualified。源码看起来可移植，只能支持 `unverified / potentially supported` 表述。
 
-Windows、macOS 与 ARM64 是远期 qualification 目标。Pure Cangjie 源码可以表述为
-`unverified / potentially supported`，但源码看起来可移植不等于已 qualification，且这些
-平台当前不阻止 Linux RC。
+## 5. Stage 与 rehearsal
 
-## Publish
+- 生成 source-only package layout。
+- 检查 release manifest 不含 path dependency。
+- 独立构建 core、macros、aggregate 与 optional packages。
+- 运行 registry-style external consumers。
+- 核对 third-party notice、vendored checksum 和 exported symbols。
 
-在所有 blocking gate 与 evidence review 完成后，才执行 commit/tag/publish。发布动作、registry 返回值、artifact URL 和 checksum 追加到不可变 evidence；不要用后续 release 的结果覆写旧记录。
+SDK build 不属于普通 yjson package release gate。
+
+## 6. Tag 与 publish
+
+所有 blocker 关闭且 evidence review 完成后，先通过普通 pull request 合并到 `main`，再等待
+`main` workflow 通过。随后在该 `main` commit 创建 annotated tag 和 stable GitHub Release，
+并上传九个 `.cjp`、`checksums.txt`、`manifest.json` 与 `environment.json`。中心 package registry
+发布是单独动作；未获授权时保持 unpublished。
+
+发布动作、artifact URL 与 checksum 追加到该版本不可变 evidence；后续候选不得覆写旧记录。
+
+测试层与 job mapping 见 [testing.md](testing.md)，性能发布规则见
+[performance methodology](../performance/methodology.md)。

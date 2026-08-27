@@ -1,16 +1,64 @@
-# 性能方法
+# 性能测量方法
 
-公开性能结论遵守以下约束：
+公开结论必须能回答：测了什么 API、在什么源码和环境、与谁比较、怎样处理顺序偏差与波动。
 
-- 明确 library/backend、API、operation、payload 与输入形态；
-- baseline 与 candidate 使用相同 workload，并交替执行以降低顺序偏差；
-- 方向结论与精确比例分开，波动超出门槛时不发布精确比例；
-- latency ratio 统一为 `yjson median / peer median`；
-- README 展示行要求两侧 CV ≤ 5%，更严格的绝对延迟结论使用 CV ≤ 3%；
-- 每个 release 必须发布 yjson、stdx.json、cjfast_json 同批次的完整匹配 workload 表；
-- CV 只决定 `stable` / `noisy` 标签，任何已完成 workload 都不得因波动过大而隐藏；
-- 跨 runtime 数据只提供特定 API 的上下文，不代表产品整体排名；
-- 延迟、吞吐、allocation 与峰值内存分别陈述，不能相互推导。
+## 身份冻结
 
-结果页只保留理解结论所需的 workload、统计值和限制。机器路径、临时目录、运行日志与
-一次性排障过程不属于用户文档；需要长期审计的原始证据应作为不可变 artifact 单独发布。
+每次测量记录：
+
+- yjson 与 peer 的 commit/tag/checksum；
+- Cangjie SDK 或其他 runtime 版本；
+- OS、architecture、CPU 和必要的编译/link 选项；
+- workload、payload checksum、operation 与输入形态；
+- warmup、轮次、执行顺序和结果 schema。
+
+没有这些身份信息的本地数字只能用于探索，不能进入用户-facing 结论。
+
+## 配对执行
+
+baseline/candidate 或多库比较使用等语义 workload，并交替或反转执行顺序以降低热状态、
+频率和后台负载偏差。先验证输出/checksum，再记录时间；错误结果即使更快也不计入性能。
+
+## 统计与展示
+
+- 以 process median 为主要延迟统计。
+- ratio 为 `yjson median / peer median`。
+- README/代表行要求双方 CV ≤ 5%。
+- 更严格的绝对延迟声明要求 CV ≤ 3%。
+- 未过门槛的行保留并标记 noisy，不发布精确比例。
+- 配对胜负方向可作为探索证据，但必须与稳定比例分开。
+
+CV 门槛只控制可陈述精度，不是筛选 workload 的工具。
+
+## 比较边界
+
+- typed codec 只与等语义 typed codec 比较。
+- DOM parse/query/serialize 按 representation 和 lifecycle 分开。
+- 默认 `YJson.parseDocument` 返回 managed Compact document，不存在 `close()`；Native 临时
+  资源必须在计时操作返回前释放。
+- 只有高级 `BackendJsonDocument` parse/roundtrip 才必须在计时范围内包含 deterministic
+  `close()`。
+- 跨 runtime 结果只描述该 API/workload，不代表产品整体。
+- latency、throughput、allocation、RSS 和 peak memory 分别测量和陈述。
+
+## 候选处置
+
+优化候选必须在目标 workload 外检查邻近 workload 和总表。确认 regression 且没有被明确
+接受时回滚候选，并记录“未采用”而不是只保留最佳局部结果。固定-local quick run 只能决定
+是否继续正式测量。
+
+用户结果页只保留理解结论所需的统计和限制。原始样本、日志、manifest、checksum 与环境
+细节进入不可变 release artifact；开发机绝对路径和临时排障过程不进入稳定文档。
+
+## Native acceleration gate
+
+Pure 与 Native 必须在独立进程中运行，因为首次 `YJson` 调用会冻结引擎。正式 gate 固定
+11 轮、同一 CPU affinity、128 MiB heap，并在每轮交替 Pure/Native 顺序：
+
+- 广告 read/write workload：双方 CV ≤ 5%、`Native/Pure ≤ 0.95`，且 Native 至少赢 6/11；
+- 普通稳定 workload：双方 CV ≤ 5%、`Native/Pure ≤ 1.05`；
+- 任一行超过 CV 门槛时，丢弃该批次并完整重跑一次，不按单行挑选样本；
+- immediate rerun 只有在 build-source digest 未变化时才能复用可执行文件。
+
+这个 gate 证明的是列出的 workload，不自动证明所有 typed container、stream 或 DOM 调用都被
+加速。

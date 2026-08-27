@@ -2,13 +2,14 @@ package yjson_native
 
 import std.io.*
 import yjson.*
+import yjson_backends.*
 
 private class NativeStreamDecodeSession <: JsonStreamDecodeSession {
     private let readerValue: JsonStreamTapeReader
     private var closed: Bool = false
 
     init(input: InputStream, config: JsonReadConfig) {
-        let bytes = readJsonWholeStream(input, config)
+        let bytes = readJsonWholeDocumentStream(input, config)
         let document = NativeCompactJsonDocument.parse(bytes, config: config)
         let tape = try { document.exportStreamTape() } finally { document.close() }
         // Native parse already enforced maxPolymorphicObjectBytes against the
@@ -81,4 +82,4 @@ private class NativeCompactJsonStreamBackendImpl <: JsonStreamBackend {
 
 /// Whole-document typed stream backend implemented by the Custom Native DOM
 /// and the matching-version compact tape serializer.
-public let NativeCompactStreamBackend: JsonStreamBackend = NativeCompactJsonStreamBackendImpl()
+public let NativeCompactWholeDocumentStreamBackend: JsonStreamBackend = NativeCompactJsonStreamBackendImpl()

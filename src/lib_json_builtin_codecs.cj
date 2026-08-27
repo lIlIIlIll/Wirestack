@@ -163,6 +163,18 @@ public func jsonFastReadFloat16(reader: JsonFastReader): Float16 {
     Float16(jsonFastReadFloat64(reader))
 }
 
+public func jsonFastReadFloat64(reader: GeneratedSupportV1Reader): Float64 {
+    jsonFastReadFloat64(yJsonGeneratedReaderV1(reader))
+}
+
+public func jsonFastReadFloat32(reader: GeneratedSupportV1Reader): Float32 {
+    jsonFastReadFloat32(yJsonGeneratedReaderV1(reader))
+}
+
+public func jsonFastReadFloat16(reader: GeneratedSupportV1Reader): Float16 {
+    jsonFastReadFloat16(yJsonGeneratedReaderV1(reader))
+}
+
 public let StringJson: JsonCodec<String> = LambdaFastRawJsonCodec<String>(
     { value, writer => writer.writeString(value) },
     { reader => reader.readString() },

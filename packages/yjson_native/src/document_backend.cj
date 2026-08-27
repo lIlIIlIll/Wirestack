@@ -1,6 +1,7 @@
 package yjson_native
 
 import yjson.*
+import yjson_backends.*
 
 /// Configurable Custom Native implementation of the unified document facade.
 public class NativeCompactJsonBackend <: JsonDocumentBackend {
@@ -20,7 +21,7 @@ public class NativeCompactJsonBackend <: JsonDocumentBackend {
 
     public func name(): String { "custom-native" }
 
-    public func parse(bytes: Array<Byte>, config: JsonReadConfig): JsonDocument {
+    public func parse(bytes: Array<Byte>, config: JsonReadConfig): BackendJsonDocument {
         NativeJsonDocumentAdapter(NativeCompactJsonDocument.parse(bytes,
             config: config,
             sourceOwnership: sourceOwnership,
@@ -29,7 +30,7 @@ public class NativeCompactJsonBackend <: JsonDocumentBackend {
     }
 }
 
-private class NativeJsonDocumentAdapter <: JsonDocument {
+private class NativeJsonDocumentAdapter <: BackendJsonDocument {
     private let document: NativeCompactJsonDocument
 
     init(document: NativeCompactJsonDocument) {
@@ -53,4 +54,4 @@ private class NativeJsonDocumentAdapter <: JsonDocument {
 }
 
 /// Default Custom Native backend for `YJson.parseDocument`.
-public let NativeCompactBackend: JsonDocumentBackend = NativeCompactJsonBackend()
+public let NativeCompactDocumentBackend: JsonDocumentBackend = NativeCompactJsonBackend()
