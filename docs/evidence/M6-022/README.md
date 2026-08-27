@@ -62,9 +62,43 @@ environment.
      `waitUntilWaiters` in `src/internal/http1/connection_pool.cj`.
    - `cjpm test`: 444 passed, 0 skipped, 0 errors, 0 failed.
 
+## 2026-08-27 stability follow-up
+
+A repeated run exposed a race in the public HTTP/2 cancellation acceptance
+test before cancellation was requested. The test consumed 4 KiB from a
+256-KiB response and then waited for a sibling body. When the first response
+won the scheduling race and exhausted the 65,535-byte connection window, the
+4-KiB consumption remained below the coalesced WINDOW_UPDATE threshold and the
+sibling read reached the shared five-second deadline.
+
+The acceptance order now opens the sibling response, cancels the first stream,
+verifies the first body receives structured `Cancelled`, and only then reads
+the sibling body. This directly verifies the M6-022 contract: stream
+cancellation returns connection credit and does not terminate an already-open
+sibling. It does not weaken the deadline or change production flow-control
+policy.
+
+1. Pre-fix repeated focused run
+   - Command: 100 sequential `cjpm test --skip-build` invocations filtered to
+     `HttpFacadeTest.publicHttp2StreamAndConnectionHandlesRespectTheirScopes`.
+   - Result: exit 1 after a focused invocation reported
+     `NetworkException: HTTP/2 operation deadline exceeded` at
+     `facade_test.cj:164` while reading the sibling before cancellation.
+2. Post-fix focused rebuild
+   - Exit 0; 1 passed, 547 skipped, 0 errors, 0 failed.
+3. Post-fix repeated focused run
+   - The same 100 sequential filtered `--skip-build` invocations passed
+     100/100.
+4. Post-fix `scripts/check`
+   - Exit 0.
+   - Python architecture/tool tests: 57 passed.
+   - Python gate-runner tests: 110 passed.
+   - Python benchmark-tool tests: 11 passed.
+   - Architecture guard: PASS.
+   - `cjpm check` and `cjpm build`: success.
+   - `cjpm test`: 548 total; 532 passed, 16 skipped, 0 errors, 0 failed.
+
 ## Remaining scope
 
-M6-022 is complete on Linux. M6-023 is now READY: it must retain one-hour and
-at-least-one-million-event H1/H2 SSE raw samples, bounded steady-state resource
-evidence, slow-consumer backpressure, cancellation-budget evidence and H2
-sibling-stream isolation. It does not require another 24-hour soak.
+M6-022 remains complete on native glibc Linux. M6-023 is tracked and evidenced
+separately; this follow-up makes no new platform claim.
