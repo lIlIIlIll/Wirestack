@@ -70,9 +70,11 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("| M7-022 | READY |", status)
         self.assertIn("| M7-023 | READY |", status)
         self.assertIn("| M7-024 | READY |", status)
+        self.assertIn("| M7-025 | COMPLETE |", status)
         self.assertIn("| M7-026 | READY |", status)
         self.assertIn("do not\nchange the status of the six-platform M7-001 through M7-017 tasks", status)
-        self.assertIn("Start M7-025", linux)
+        self.assertIn("Start M7-026", linux)
+        self.assertIn("runtime/std source changes are not dependencies", linux)
 
     def test_evidence_rejects_upstream_and_non_linux_completion_inference(self) -> None:
         evidence = self.read("docs/evidence/M7-018/README.md")
