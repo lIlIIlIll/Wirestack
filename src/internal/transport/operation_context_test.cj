@@ -121,22 +121,23 @@ class OperationContextTest {
 
     @TestCase
     func traceIdentifiersAreBoundedAndNonEmpty(): Unit {
-        var emptyRejected = false
-        try {
-            let _ = NetworkTraceContext("")
-        } catch (_: IllegalArgumentException) {
-            emptyRejected = true
-        }
+        let boundary = "x" * 128
+        let accepted = NetworkTraceContext(boundary, spanId: boundary)
+        @Expect(accepted.traceId, boundary)
+        @Expect(accepted.spanId, boundary)
 
-        var oversizedRejected = false
-        try {
-            let _ = NetworkTraceContext("x" * 129)
-        } catch (_: IllegalArgumentException) {
-            oversizedRejected = true
-        }
+        @Expect(traceContextIsRejected("", ""))
+        @Expect(traceContextIsRejected("x" * 129, ""))
+        @Expect(traceContextIsRejected("trace", "x" * 129))
+    }
+}
 
-        @Expect(emptyRejected)
-        @Expect(oversizedRejected)
+private func traceContextIsRejected(traceId: String, spanId: String): Bool {
+    try {
+        let _ = NetworkTraceContext(traceId, spanId: spanId)
+        false
+    } catch (_: IllegalArgumentException) {
+        true
     }
 }
 
