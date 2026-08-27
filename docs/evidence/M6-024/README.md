@@ -1,11 +1,11 @@
-# M6-024 discovery evidence
+# M6-024 HTTP/2 sibling-fairness evidence
 
 Date: 2026-08-27
 
 ## Status
 
-READY. All declared dependencies are COMPLETE. This file records discovery
-evidence only. It does not claim an implementation or a passing gate.
+COMPLETE on native glibc Linux. All declared dependencies are COMPLETE. The
+frozen scenario matrix is in [`test-plan.md`](test-plan.md).
 
 ## Scope and affected platforms
 
@@ -72,9 +72,70 @@ cancellation-handle defect.
   must not create one control frame per application read.
 - Keep control frames ahead of DATA and retain one bounded writer.
 
-## Acceptance gate
+## Implemented correction
 
-M6-024 is COMPLETE only when all of these conditions pass:
+- A body read flushes pending connection receive credit only when the current
+  connection receive window is zero. Ordinary small reads keep the existing
+  half-window coalescing policy.
+- Send reservations use a bounded least-recently-served stream order. A stream
+  that consumed the previous grant cannot reacquire all newly available
+  connection credit ahead of ready siblings.
+- Reservation cancellation removes the waiter and wakes the next eligible
+  stream. Closing a flow makes the liveness flush an empty operation so the
+  existing cancellation terminal remains authoritative.
+- No public declaration, timeout, window, queue, stream, or body-buffer limit
+  changed.
+
+## Raw Linux candidate output
+
+Focused real TLS h2 and deterministic flow-control output:
+
+```text
+M6_024_RESULT protocol=h2 exhaustedBytes=65535 consumedBytes=4096 siblings=100 latency1Ns=15694694 latency10Ns=76764436 latency100Ns=626954112 siblingTimeouts=0 connectionAborts=0
+M6_024_FLOW_RESULT siblings=100 connectionCredit=4096 flowControlStalls=101 pendingReservations=0 connectionWindowUpdateFrames=1
+```
+
+The pre-fix baseline reached the existing 5-second absolute request deadline
+while reading the first 2-byte sibling. It therefore had sibling latency of at
+least 5,000,000,000 ns and a FAIL decision. The pre-fix run did not emit a
+flow-stall counter; its retained structured timeout is the baseline liveness
+failure.
+
+The post-fix 100-run race executed 100 independent real TLS h2 connections,
+each with 100 sibling requests while the first response remained open:
+
+```text
+M6_024_RACE_RESULT decision=PASS passed=100 failed=0
+```
+
+Across those 100 runs, cumulative latency ranges were:
+
+- first sibling: 13,314,623 to 160,042,368 ns;
+- first ten siblings: 63,507,669 to 399,701,620 ns;
+- all one hundred siblings: 767,387,781 to 1,979,696,184 ns.
+
+This completed 10,000 sibling responses with zero sibling timeout and zero
+connection abort. Candidate decision: **PASS**.
+
+## Commands and exact results
+
+1. Test-plan validator: exit 0; P=10, S=7, T=6; status `passed`.
+2. Focused liveness, cancellation-race, and public facade command with
+   `--show-all-output`: exit 0; 4 passed, 547 skipped, 0 error, 0 failed.
+3. One hundred sequential focused `cjpm test --skip-build` invocations: exit
+   0; 100 passed, 0 failed.
+4. `env DISABLE_ZOXIDE=1 ./scripts/check`: exit 0.
+   - architecture/tool tests: 57 passed;
+   - gate-runner tests: 110 passed;
+   - benchmark-tool tests: 11 passed;
+   - architecture guard: PASS;
+   - `cjpm check` and `cjpm build`: success;
+   - Cangjie tests: 551 total, 535 passed, 16 tagged profile tests skipped,
+     0 error, 0 failed.
+
+## Acceptance decision
+
+All task conditions pass on the recorded native Linux environment:
 
 1. A real TLS h2 loopback test reproduces the 256-KiB slow stream and 4-KiB
    consumption without cancelling or closing that stream.

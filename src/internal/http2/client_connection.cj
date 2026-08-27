@@ -617,6 +617,9 @@ private class Http2ClientBodyChannel <: HttpBodyStream {
 
     public func read(destination: Array<Byte>): Int64 {
         if (destination.isEmpty()) { return 0 }
+        submitClientUpdates(
+            writer, flow.flushStalledConnectionReceiveCredit(), context
+        )
         let registration = context.cancellation.register { => wake() }
         var updates = Array<Http2Frame>()
         try {

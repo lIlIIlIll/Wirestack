@@ -2,6 +2,7 @@ package wirestack.http
 
 import std.collection.ArrayList
 import std.sync.*
+import std.time.MonoTime
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.http1 as http1test
@@ -222,6 +223,81 @@ class HttpFacadeTest {
                 ))
                 serving.get(5 * Duration.second)
             }
+            serverTls.close()
+        }
+    }
+
+    @TestCase
+    func publicHttp2SlowStreamCannotStarveOneTenOrHundredSiblings(): Unit {
+        let certificate = publicTlsTestCertificateDer()
+        let serverTls = HttpServerTlsConfig([certificate], publicTlsTestPrivateKeyDer())
+        let handler = PublicSiblingFairnessHandler()
+        let server = HttpServer.builder()
+            .listen(publicLoopback(0))
+            .handler(handler)
+            .tls(serverTls)
+            .http2StreamLimit(8u32)
+            .build()
+        let serving: Future<Unit> = spawn { server.serve() }
+        let host = HostName("example.com")
+        let clientTls = HttpClientTlsConfig([certificate])
+        let client = HttpClient.builder()
+            .resolver(StaticResolver(ResolveResult(
+                [server.localEndpoint.address], host, ResolverSource.Static
+            )))
+            .tls(clientTls)
+            .requestTimeout(5 * Duration.second)
+            .build()
+        var first: ?HttpResponse = None<HttpResponse>
+        try {
+            let slow = client.get(
+                "https://example.com:${server.localEndpoint.port}/large-stall"
+            )
+            first = Some(slow)
+            @Expect(slow.version, HttpVersion.Http2)
+            handler.waitUntilConnectionWindowExhausted()
+            @Expect(slow.body.read(Array<Byte>(4096, repeat: 0u8)), 4096)
+
+            let siblingsStarted = MonoTime.now()
+            var latency1Ns: Int64 = 0
+            var latency10Ns: Int64 = 0
+            var latency100Ns: Int64 = 0
+            var completed: Int64 = 0
+            for (_ in 0..100) {
+                let sibling = client.get(
+                    "https://example.com:${server.localEndpoint.port}/small"
+                )
+                try {
+                    @Expect(sibling.version, HttpVersion.Http2)
+                    @Expect(readPublicBody(sibling.body), "ok")
+                    completed++
+                    if (completed == 1) {
+                        latency1Ns = (MonoTime.now() - siblingsStarted).toNanoseconds()
+                    } else if (completed == 10) {
+                        latency10Ns = (MonoTime.now() - siblingsStarted).toNanoseconds()
+                    } else if (completed == 100) {
+                        latency100Ns = (MonoTime.now() - siblingsStarted).toNanoseconds()
+                    }
+                } finally {
+                    sibling.close()
+                }
+            }
+            @Expect(completed, 100)
+            @Expect(handler.siblingCalls.load(), 100)
+            println(
+                "M6_024_RESULT protocol=h2 exhaustedBytes=65535 consumedBytes=4096 " +
+                "siblings=${completed} latency1Ns=${latency1Ns} latency10Ns=${latency10Ns} " +
+                "latency100Ns=${latency100Ns} siblingTimeouts=0 connectionAborts=0"
+            )
+        } finally {
+            handler.releaseLargeBody()
+            if (let Some(slow) <- first) { slow.close() }
+            client.close()
+            clientTls.close()
+            let _ = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(5 * Duration.second))
+            ))
+            serving.get(5 * Duration.second)
             serverTls.close()
         }
     }
@@ -713,6 +789,80 @@ private class PublicCancellationHandler <: HttpServerHandler {
                 .build()
         ))
     }
+}
+
+private class PublicSiblingFairnessHandler <: HttpServerHandler {
+    private let largeBody = PublicConnectionWindowBody()
+    let siblingCalls = AtomicInt64(0)
+
+    func waitUntilConnectionWindowExhausted(): Unit { largeBody.waitUntilBlocked() }
+    func releaseLargeBody(): Unit { largeBody.release() }
+
+    public func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse {
+        let _ = context
+        @Expect(request.version, HttpVersion.Http2)
+        let _ = request.body.read(Array<Byte>(1, repeat: 0u8))
+        if (request.target == "/large-stall") {
+            return HttpServerResponse(HttpResponse(
+                200, "OK", ResponseBody(largeBody),
+                headers: HttpHeaders.builder()
+                    .add("Content-Type", "application/octet-stream")
+                    .build()
+            ))
+        }
+        @Expect(request.target, "/small")
+        siblingCalls.fetchAdd(1)
+        HttpServerResponse(HttpResponse(
+            200, "OK", ResponseBody(RequestBody.string("ok").open()),
+            headers: HttpHeaders.builder().add("Content-Length", "2").build()
+        ))
+    }
+}
+
+private class PublicConnectionWindowBody <: HttpBodyStream {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var remaining: Int64 = 65535
+    private var blocked = false
+    private var released = false
+    private var closed = false
+
+    public prop contentLength: ?Int64 { get() { None<Int64> } }
+
+    func waitUntilBlocked(): Unit {
+        synchronized(mutex) {
+            while (!blocked) {
+                changed.wait(timeout: 5 * Duration.second)
+                if (!blocked) { @Fail("large HTTP/2 body did not exhaust the connection window") }
+            }
+        }
+    }
+
+    func release(): Unit {
+        synchronized(mutex) { released = true; changed.notifyAll() }
+    }
+
+    public func read(destination: Array<Byte>): Int64 {
+        synchronized(mutex) {
+            if (closed || destination.isEmpty()) { return 0 }
+            if (remaining > 0) {
+                let count = min(destination.size, remaining)
+                for (index in 0..count) { destination[index] = b'x' }
+                remaining -= count
+                return count
+            }
+            blocked = true
+            changed.notifyAll()
+            while (!released && !closed) { changed.wait() }
+            0
+        }
+    }
+
+    public func close(): Unit {
+        synchronized(mutex) { closed = true; changed.notifyAll() }
+    }
+
+    public func isClosed(): Bool { synchronized(mutex) { closed } }
 }
 
 private func publicBodyReadWasCancelled(body: ResponseBody): Bool {
