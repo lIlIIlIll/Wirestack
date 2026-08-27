@@ -1,0 +1,2034 @@
+{
+  "cancellation": {
+    "process": {
+      "command": [
+        "/home/elliot/.codex/scripts/codex_cangjie_env",
+        "cjpm",
+        "test",
+        "src/internal/transport_stdnet",
+        "-j",
+        "1",
+        "--parallel",
+        "1",
+        "--filter=M125TransportCancellationProfileTest.*",
+        "--show-all-output",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 22432648856 ns, RESULT:\n    TCS: M125TransportCancellationProfileTest, time elapsed: 22427089409 ns, RESULT:\n    [ PASSED ] CASE: blockedRead (1190382021 ns)\n    STDOUT:\n    M125_CANCEL scenario=blocked-read index=0 measured=false active=true terminal=cancelled latencyNs=1234768 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=1 measured=false active=true terminal=cancelled latencyNs=1112020 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=2 measured=true active=true terminal=cancelled latencyNs=1096808 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=3 measured=true active=true terminal=cancelled latencyNs=1095232 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=4 measured=true active=true terminal=cancelled latencyNs=1125078 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=5 measured=true active=true terminal=cancelled latencyNs=1099018 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=6 measured=true active=true terminal=cancelled latencyNs=1101619 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=7 measured=true active=true terminal=cancelled latencyNs=1120195 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=8 measured=true active=true terminal=cancelled latencyNs=1113760 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=9 measured=true active=true terminal=cancelled latencyNs=1104467 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=10 measured=true active=true terminal=cancelled latencyNs=1109216 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=11 measured=true active=true terminal=cancelled latencyNs=1119459 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=12 measured=true active=true terminal=cancelled latencyNs=1101522 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=13 measured=true active=true terminal=cancelled latencyNs=1108013 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=14 measured=true active=true terminal=cancelled latencyNs=1117068 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=15 measured=true active=true terminal=cancelled latencyNs=1107631 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=16 measured=true active=true terminal=cancelled latencyNs=1138557 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=17 measured=true active=true terminal=cancelled latencyNs=1116582 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=18 measured=true active=true terminal=cancelled latencyNs=1128480 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=19 measured=true active=true terminal=cancelled latencyNs=1104067 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=20 measured=true active=true terminal=cancelled latencyNs=1151266 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=21 measured=true active=true terminal=cancelled latencyNs=1113826 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=22 measured=true active=true terminal=cancelled latencyNs=1114942 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=23 measured=true active=true terminal=cancelled latencyNs=1103220 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=24 measured=true active=true terminal=cancelled latencyNs=1115406 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=25 measured=true active=true terminal=cancelled latencyNs=1092279 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=26 measured=true active=true terminal=cancelled latencyNs=1131270 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=27 measured=true active=true terminal=cancelled latencyNs=1106858 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=28 measured=true active=true terminal=cancelled latencyNs=1130123 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=29 measured=true active=true terminal=cancelled latencyNs=1093374 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=30 measured=true active=true terminal=cancelled latencyNs=1116479 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=31 measured=true active=true terminal=cancelled latencyNs=1111568 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=32 measured=true active=true terminal=cancelled latencyNs=1083489 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=33 measured=true active=true terminal=cancelled latencyNs=1109182 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=34 measured=true active=true terminal=cancelled latencyNs=1147764 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=35 measured=true active=true terminal=cancelled latencyNs=1131701 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=36 measured=true active=true terminal=cancelled latencyNs=1113779 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=37 measured=true active=true terminal=cancelled latencyNs=1093827 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=38 measured=true active=true terminal=cancelled latencyNs=1105345 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=39 measured=true active=true terminal=cancelled latencyNs=1094245 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=40 measured=true active=true terminal=cancelled latencyNs=1088824 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=41 measured=true active=true terminal=cancelled latencyNs=1116847 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=42 measured=true active=true terminal=cancelled latencyNs=1107252 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=43 measured=true active=true terminal=cancelled latencyNs=1112415 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=44 measured=true active=true terminal=cancelled latencyNs=1094590 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=45 measured=true active=true terminal=cancelled latencyNs=1137943 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=46 measured=true active=true terminal=cancelled latencyNs=1107200 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=47 measured=true active=true terminal=cancelled latencyNs=1079377 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=48 measured=true active=true terminal=cancelled latencyNs=1111895 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=49 measured=true active=true terminal=cancelled latencyNs=1102683 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=50 measured=true active=true terminal=cancelled latencyNs=1121165 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=51 measured=true active=true terminal=cancelled latencyNs=1084589 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=52 measured=true active=true terminal=cancelled latencyNs=1729042 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=53 measured=true active=true terminal=cancelled latencyNs=1159594 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=54 measured=true active=true terminal=cancelled latencyNs=1115817 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=55 measured=true active=true terminal=cancelled latencyNs=1119398 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=56 measured=true active=true terminal=cancelled latencyNs=1115437 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=57 measured=true active=true terminal=cancelled latencyNs=1135553 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=58 measured=true active=true terminal=cancelled latencyNs=2050256 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=59 measured=true active=true terminal=cancelled latencyNs=1160404 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=60 measured=true active=true terminal=cancelled latencyNs=9097715 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=61 measured=true active=true terminal=cancelled latencyNs=8765652 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=62 measured=true active=true terminal=cancelled latencyNs=1103560 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=63 measured=true active=true terminal=cancelled latencyNs=4430731 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=64 measured=true active=true terminal=cancelled latencyNs=1105737 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=65 measured=true active=true terminal=cancelled latencyNs=1104996 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=66 measured=true active=true terminal=cancelled latencyNs=1101805 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=67 measured=true active=true terminal=cancelled latencyNs=3482395 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=68 measured=true active=true terminal=cancelled latencyNs=10160230 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=69 measured=true active=true terminal=cancelled latencyNs=4620949 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=70 measured=true active=true terminal=cancelled latencyNs=4880413 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=71 measured=true active=true terminal=cancelled latencyNs=1185312 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=72 measured=true active=true terminal=cancelled latencyNs=1888754 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=73 measured=true active=true terminal=cancelled latencyNs=1152047 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=74 measured=true active=true terminal=cancelled latencyNs=1108988 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=75 measured=true active=true terminal=cancelled latencyNs=1107216 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=76 measured=true active=true terminal=cancelled latencyNs=1917299 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=77 measured=true active=true terminal=cancelled latencyNs=1093122 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=78 measured=true active=true terminal=cancelled latencyNs=1102751 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=79 measured=true active=true terminal=cancelled latencyNs=1113451 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=80 measured=true active=true terminal=cancelled latencyNs=1144987 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=81 measured=true active=true terminal=cancelled latencyNs=1176844 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=82 measured=true active=true terminal=cancelled latencyNs=1110785 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=83 measured=true active=true terminal=cancelled latencyNs=1164811 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=84 measured=true active=true terminal=cancelled latencyNs=1105946 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=85 measured=true active=true terminal=cancelled latencyNs=1109184 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=86 measured=true active=true terminal=cancelled latencyNs=1264191 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=87 measured=true active=true terminal=cancelled latencyNs=1778730 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=88 measured=true active=true terminal=cancelled latencyNs=1127839 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=89 measured=true active=true terminal=cancelled latencyNs=1822014 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=90 measured=true active=true terminal=cancelled latencyNs=1162773 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=91 measured=true active=true terminal=cancelled latencyNs=1155220 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=92 measured=true active=true terminal=cancelled latencyNs=1108307 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=93 measured=true active=true terminal=cancelled latencyNs=1125076 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=94 measured=true active=true terminal=cancelled latencyNs=1120913 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=95 measured=true active=true terminal=cancelled latencyNs=1098132 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=96 measured=true active=true terminal=cancelled latencyNs=1132613 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=97 measured=true active=true terminal=cancelled latencyNs=1108809 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=98 measured=true active=true terminal=cancelled latencyNs=78600 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=99 measured=true active=true terminal=cancelled latencyNs=2401792 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=100 measured=true active=true terminal=cancelled latencyNs=2313027 completed=true progress=0\n    M125_CANCEL scenario=blocked-read index=101 measured=true active=true terminal=cancelled latencyNs=1179861 completed=true progress=0\n    [ PASSED ] CASE: blockedWrite (21235864269 ns)\n    STDOUT:\n    M125_CANCEL scenario=blocked-write index=0 measured=false active=true terminal=cancelled latencyNs=1092034 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=1 measured=false active=true terminal=cancelled latencyNs=1091577 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=2 measured=true active=true terminal=cancelled latencyNs=1109858 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=3 measured=true active=true terminal=cancelled latencyNs=1150758 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=4 measured=true active=true terminal=cancelled latencyNs=1093459 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=5 measured=true active=true terminal=cancelled latencyNs=3557037 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=6 measured=true active=true terminal=cancelled latencyNs=1105752 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=7 measured=true active=true terminal=cancelled latencyNs=1166227 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=8 measured=true active=true terminal=cancelled latencyNs=1358473 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=9 measured=true active=true terminal=cancelled latencyNs=1262865 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=10 measured=true active=true terminal=cancelled latencyNs=1078668 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=11 measured=true active=true terminal=cancelled latencyNs=1112673 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=12 measured=true active=true terminal=cancelled latencyNs=1101821 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=13 measured=true active=true terminal=cancelled latencyNs=1642146 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=14 measured=true active=true terminal=cancelled latencyNs=1124451 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=15 measured=true active=true terminal=cancelled latencyNs=1116744 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=16 measured=true active=true terminal=cancelled latencyNs=1149843 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=17 measured=true active=true terminal=cancelled latencyNs=1101969 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=18 measured=true active=true terminal=cancelled latencyNs=1116769 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=19 measured=true active=true terminal=cancelled latencyNs=1158475 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=20 measured=true active=true terminal=cancelled latencyNs=2981579 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=21 measured=true active=true terminal=cancelled latencyNs=1122687 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=22 measured=true active=true terminal=cancelled latencyNs=1089072 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=23 measured=true active=true terminal=cancelled latencyNs=1094688 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=24 measured=true active=true terminal=cancelled latencyNs=1094451 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=25 measured=true active=true terminal=cancelled latencyNs=1105605 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=26 measured=true active=true terminal=cancelled latencyNs=1118754 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=27 measured=true active=true terminal=cancelled latencyNs=1098742 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=28 measured=true active=true terminal=cancelled latencyNs=1102893 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=29 measured=true active=true terminal=cancelled latencyNs=4117911 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=30 measured=true active=true terminal=cancelled latencyNs=1098791 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=31 measured=true active=true terminal=cancelled latencyNs=1097203 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=32 measured=true active=true terminal=cancelled latencyNs=1114002 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=33 measured=true active=true terminal=cancelled latencyNs=1108997 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=34 measured=true active=true terminal=cancelled latencyNs=1101411 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=35 measured=true active=true terminal=cancelled latencyNs=1115404 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=36 measured=true active=true terminal=cancelled latencyNs=1121509 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=37 measured=true active=true terminal=cancelled latencyNs=1123547 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=38 measured=true active=true terminal=cancelled latencyNs=1080013 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=39 measured=true active=true terminal=cancelled latencyNs=1124606 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=40 measured=true active=true terminal=cancelled latencyNs=1117003 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=41 measured=true active=true terminal=cancelled latencyNs=1126091 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=42 measured=true active=true terminal=cancelled latencyNs=1128181 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=43 measured=true active=true terminal=cancelled latencyNs=1107123 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=44 measured=true active=true terminal=cancelled latencyNs=1117052 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=45 measured=true active=true terminal=cancelled latencyNs=1158859 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=46 measured=true active=true terminal=cancelled latencyNs=1105258 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=47 measured=true active=true terminal=cancelled latencyNs=3056131 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=48 measured=true active=true terminal=cancelled latencyNs=1632526 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=49 measured=true active=true terminal=cancelled latencyNs=1108544 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=50 measured=true active=true terminal=cancelled latencyNs=1119357 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=51 measured=true active=true terminal=cancelled latencyNs=1069341 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=52 measured=true active=true terminal=cancelled latencyNs=1087791 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=53 measured=true active=true terminal=cancelled latencyNs=1123970 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=54 measured=true active=true terminal=cancelled latencyNs=1177484 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=55 measured=true active=true terminal=cancelled latencyNs=1108688 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=56 measured=true active=true terminal=cancelled latencyNs=1110184 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=57 measured=true active=true terminal=cancelled latencyNs=1123038 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=58 measured=true active=true terminal=cancelled latencyNs=1174051 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=59 measured=true active=true terminal=cancelled latencyNs=1112558 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=60 measured=true active=true terminal=cancelled latencyNs=1121196 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=61 measured=true active=true terminal=cancelled latencyNs=1090638 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=62 measured=true active=true terminal=cancelled latencyNs=1099403 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=63 measured=true active=true terminal=cancelled latencyNs=1102876 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=64 measured=true active=true terminal=cancelled latencyNs=1095898 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=65 measured=true active=true terminal=cancelled latencyNs=1098824 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=66 measured=true active=true terminal=cancelled latencyNs=1153437 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=67 measured=true active=true terminal=cancelled latencyNs=1169855 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=68 measured=true active=true terminal=cancelled latencyNs=1259546 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=69 measured=true active=true terminal=cancelled latencyNs=1095195 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=70 measured=true active=true terminal=cancelled latencyNs=1075682 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=71 measured=true active=true terminal=cancelled latencyNs=1090899 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=72 measured=true active=true terminal=cancelled latencyNs=6532531 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=73 measured=true active=true terminal=cancelled latencyNs=1133528 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=74 measured=true active=true terminal=cancelled latencyNs=1092596 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=75 measured=true active=true terminal=cancelled latencyNs=1208082 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=76 measured=true active=true terminal=cancelled latencyNs=2803029 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=77 measured=true active=true terminal=cancelled latencyNs=1129666 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=78 measured=true active=true terminal=cancelled latencyNs=1107069 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=79 measured=true active=true terminal=cancelled latencyNs=1097107 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=80 measured=true active=true terminal=cancelled latencyNs=1112920 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=81 measured=true active=true terminal=cancelled latencyNs=1124620 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=82 measured=true active=true terminal=cancelled latencyNs=1203723 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=83 measured=true active=true terminal=cancelled latencyNs=1181920 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=84 measured=true active=true terminal=cancelled latencyNs=1104568 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=85 measured=true active=true terminal=cancelled latencyNs=1104747 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=86 measured=true active=true terminal=cancelled latencyNs=1379151 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=87 measured=true active=true terminal=cancelled latencyNs=2046139 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=88 measured=true active=true terminal=cancelled latencyNs=1122927 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=89 measured=true active=true terminal=cancelled latencyNs=1127093 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=90 measured=true active=true terminal=cancelled latencyNs=1132375 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=91 measured=true active=true terminal=cancelled latencyNs=1090944 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=92 measured=true active=true terminal=cancelled latencyNs=1103555 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=93 measured=true active=true terminal=cancelled latencyNs=1109155 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=94 measured=true active=true terminal=cancelled latencyNs=1110950 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=95 measured=true active=true terminal=cancelled latencyNs=1117768 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=96 measured=true active=true terminal=cancelled latencyNs=1110095 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=97 measured=true active=true terminal=cancelled latencyNs=1583211 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=98 measured=true active=true terminal=cancelled latencyNs=1098324 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=99 measured=true active=true terminal=cancelled latencyNs=2082146 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=100 measured=true active=true terminal=cancelled latencyNs=1086106 completed=true progress=1\n    M125_CANCEL scenario=blocked-write index=101 measured=true active=true terminal=cancelled latencyNs=1091515 completed=true progress=1\nSummary: TOTAL: 48\n    PASSED: 2, SKIPPED: 46, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 22440352542 ns, RESULT:\nTP: wirestack.*, time elapsed: 22440265826 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.transport_stdnet, time elapsed: 22432648856 ns\nSummary: TOTAL: 48\n    PASSED: 2, SKIPPED: 46, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+      "timed_out": false
+    },
+    "summary": {
+      "blocked-read": {
+        "decision": "PASS",
+        "limit_ns": 50000000,
+        "max_ns": 10160230,
+        "p50_ns": 1115406,
+        "p95_ns": 4430731,
+        "p99_ns": 9097715,
+        "sample_count": 100,
+        "samples": [
+          {
+            "active": true,
+            "completed": true,
+            "index": 0,
+            "latency_ns": 1234768,
+            "measured": false,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 1,
+            "latency_ns": 1112020,
+            "measured": false,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 2,
+            "latency_ns": 1096808,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 3,
+            "latency_ns": 1095232,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 4,
+            "latency_ns": 1125078,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 5,
+            "latency_ns": 1099018,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 6,
+            "latency_ns": 1101619,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 7,
+            "latency_ns": 1120195,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 8,
+            "latency_ns": 1113760,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 9,
+            "latency_ns": 1104467,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 10,
+            "latency_ns": 1109216,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 11,
+            "latency_ns": 1119459,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 12,
+            "latency_ns": 1101522,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 13,
+            "latency_ns": 1108013,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 14,
+            "latency_ns": 1117068,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 15,
+            "latency_ns": 1107631,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 16,
+            "latency_ns": 1138557,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 17,
+            "latency_ns": 1116582,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 18,
+            "latency_ns": 1128480,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 19,
+            "latency_ns": 1104067,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 20,
+            "latency_ns": 1151266,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 21,
+            "latency_ns": 1113826,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 22,
+            "latency_ns": 1114942,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 23,
+            "latency_ns": 1103220,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 24,
+            "latency_ns": 1115406,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 25,
+            "latency_ns": 1092279,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 26,
+            "latency_ns": 1131270,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 27,
+            "latency_ns": 1106858,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 28,
+            "latency_ns": 1130123,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 29,
+            "latency_ns": 1093374,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 30,
+            "latency_ns": 1116479,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 31,
+            "latency_ns": 1111568,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 32,
+            "latency_ns": 1083489,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 33,
+            "latency_ns": 1109182,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 34,
+            "latency_ns": 1147764,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 35,
+            "latency_ns": 1131701,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 36,
+            "latency_ns": 1113779,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 37,
+            "latency_ns": 1093827,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 38,
+            "latency_ns": 1105345,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 39,
+            "latency_ns": 1094245,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 40,
+            "latency_ns": 1088824,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 41,
+            "latency_ns": 1116847,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 42,
+            "latency_ns": 1107252,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 43,
+            "latency_ns": 1112415,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 44,
+            "latency_ns": 1094590,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 45,
+            "latency_ns": 1137943,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 46,
+            "latency_ns": 1107200,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 47,
+            "latency_ns": 1079377,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 48,
+            "latency_ns": 1111895,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 49,
+            "latency_ns": 1102683,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 50,
+            "latency_ns": 1121165,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 51,
+            "latency_ns": 1084589,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 52,
+            "latency_ns": 1729042,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 53,
+            "latency_ns": 1159594,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 54,
+            "latency_ns": 1115817,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 55,
+            "latency_ns": 1119398,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 56,
+            "latency_ns": 1115437,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 57,
+            "latency_ns": 1135553,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 58,
+            "latency_ns": 2050256,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 59,
+            "latency_ns": 1160404,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 60,
+            "latency_ns": 9097715,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 61,
+            "latency_ns": 8765652,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 62,
+            "latency_ns": 1103560,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 63,
+            "latency_ns": 4430731,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 64,
+            "latency_ns": 1105737,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 65,
+            "latency_ns": 1104996,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 66,
+            "latency_ns": 1101805,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 67,
+            "latency_ns": 3482395,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 68,
+            "latency_ns": 10160230,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 69,
+            "latency_ns": 4620949,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 70,
+            "latency_ns": 4880413,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 71,
+            "latency_ns": 1185312,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 72,
+            "latency_ns": 1888754,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 73,
+            "latency_ns": 1152047,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 74,
+            "latency_ns": 1108988,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 75,
+            "latency_ns": 1107216,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 76,
+            "latency_ns": 1917299,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 77,
+            "latency_ns": 1093122,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 78,
+            "latency_ns": 1102751,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 79,
+            "latency_ns": 1113451,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 80,
+            "latency_ns": 1144987,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 81,
+            "latency_ns": 1176844,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 82,
+            "latency_ns": 1110785,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 83,
+            "latency_ns": 1164811,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 84,
+            "latency_ns": 1105946,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 85,
+            "latency_ns": 1109184,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 86,
+            "latency_ns": 1264191,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 87,
+            "latency_ns": 1778730,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 88,
+            "latency_ns": 1127839,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 89,
+            "latency_ns": 1822014,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 90,
+            "latency_ns": 1162773,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 91,
+            "latency_ns": 1155220,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 92,
+            "latency_ns": 1108307,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 93,
+            "latency_ns": 1125076,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 94,
+            "latency_ns": 1120913,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 95,
+            "latency_ns": 1098132,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 96,
+            "latency_ns": 1132613,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 97,
+            "latency_ns": 1108809,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 98,
+            "latency_ns": 78600,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 99,
+            "latency_ns": 2401792,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 100,
+            "latency_ns": 2313027,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 101,
+            "latency_ns": 1179861,
+            "measured": true,
+            "progress": 0,
+            "terminal": "cancelled"
+          }
+        ],
+        "warmup_count": 2
+      },
+      "blocked-write": {
+        "decision": "PASS",
+        "limit_ns": 50000000,
+        "max_ns": 6532531,
+        "p50_ns": 1115404,
+        "p95_ns": 2803029,
+        "p99_ns": 4117911,
+        "sample_count": 100,
+        "samples": [
+          {
+            "active": true,
+            "completed": true,
+            "index": 0,
+            "latency_ns": 1092034,
+            "measured": false,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 1,
+            "latency_ns": 1091577,
+            "measured": false,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 2,
+            "latency_ns": 1109858,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 3,
+            "latency_ns": 1150758,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 4,
+            "latency_ns": 1093459,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 5,
+            "latency_ns": 3557037,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 6,
+            "latency_ns": 1105752,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 7,
+            "latency_ns": 1166227,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 8,
+            "latency_ns": 1358473,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 9,
+            "latency_ns": 1262865,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 10,
+            "latency_ns": 1078668,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 11,
+            "latency_ns": 1112673,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 12,
+            "latency_ns": 1101821,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 13,
+            "latency_ns": 1642146,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 14,
+            "latency_ns": 1124451,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 15,
+            "latency_ns": 1116744,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 16,
+            "latency_ns": 1149843,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 17,
+            "latency_ns": 1101969,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 18,
+            "latency_ns": 1116769,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 19,
+            "latency_ns": 1158475,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 20,
+            "latency_ns": 2981579,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 21,
+            "latency_ns": 1122687,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 22,
+            "latency_ns": 1089072,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 23,
+            "latency_ns": 1094688,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 24,
+            "latency_ns": 1094451,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 25,
+            "latency_ns": 1105605,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 26,
+            "latency_ns": 1118754,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 27,
+            "latency_ns": 1098742,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 28,
+            "latency_ns": 1102893,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 29,
+            "latency_ns": 4117911,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 30,
+            "latency_ns": 1098791,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 31,
+            "latency_ns": 1097203,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 32,
+            "latency_ns": 1114002,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 33,
+            "latency_ns": 1108997,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 34,
+            "latency_ns": 1101411,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 35,
+            "latency_ns": 1115404,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 36,
+            "latency_ns": 1121509,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 37,
+            "latency_ns": 1123547,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 38,
+            "latency_ns": 1080013,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 39,
+            "latency_ns": 1124606,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 40,
+            "latency_ns": 1117003,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 41,
+            "latency_ns": 1126091,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 42,
+            "latency_ns": 1128181,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 43,
+            "latency_ns": 1107123,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 44,
+            "latency_ns": 1117052,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 45,
+            "latency_ns": 1158859,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 46,
+            "latency_ns": 1105258,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 47,
+            "latency_ns": 3056131,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 48,
+            "latency_ns": 1632526,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 49,
+            "latency_ns": 1108544,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 50,
+            "latency_ns": 1119357,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 51,
+            "latency_ns": 1069341,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 52,
+            "latency_ns": 1087791,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 53,
+            "latency_ns": 1123970,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 54,
+            "latency_ns": 1177484,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 55,
+            "latency_ns": 1108688,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 56,
+            "latency_ns": 1110184,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 57,
+            "latency_ns": 1123038,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 58,
+            "latency_ns": 1174051,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 59,
+            "latency_ns": 1112558,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 60,
+            "latency_ns": 1121196,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 61,
+            "latency_ns": 1090638,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 62,
+            "latency_ns": 1099403,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 63,
+            "latency_ns": 1102876,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 64,
+            "latency_ns": 1095898,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 65,
+            "latency_ns": 1098824,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 66,
+            "latency_ns": 1153437,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 67,
+            "latency_ns": 1169855,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 68,
+            "latency_ns": 1259546,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 69,
+            "latency_ns": 1095195,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 70,
+            "latency_ns": 1075682,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 71,
+            "latency_ns": 1090899,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 72,
+            "latency_ns": 6532531,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 73,
+            "latency_ns": 1133528,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 74,
+            "latency_ns": 1092596,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 75,
+            "latency_ns": 1208082,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 76,
+            "latency_ns": 2803029,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 77,
+            "latency_ns": 1129666,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 78,
+            "latency_ns": 1107069,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 79,
+            "latency_ns": 1097107,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 80,
+            "latency_ns": 1112920,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 81,
+            "latency_ns": 1124620,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 82,
+            "latency_ns": 1203723,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 83,
+            "latency_ns": 1181920,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 84,
+            "latency_ns": 1104568,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 85,
+            "latency_ns": 1104747,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 86,
+            "latency_ns": 1379151,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 87,
+            "latency_ns": 2046139,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 88,
+            "latency_ns": 1122927,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 89,
+            "latency_ns": 1127093,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 90,
+            "latency_ns": 1132375,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 91,
+            "latency_ns": 1090944,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 92,
+            "latency_ns": 1103555,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 93,
+            "latency_ns": 1109155,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 94,
+            "latency_ns": 1110950,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 95,
+            "latency_ns": 1117768,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 96,
+            "latency_ns": 1110095,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 97,
+            "latency_ns": 1583211,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 98,
+            "latency_ns": 1098324,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 99,
+            "latency_ns": 2082146,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 100,
+            "latency_ns": 1086106,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          },
+          {
+            "active": true,
+            "completed": true,
+            "index": 101,
+            "latency_ns": 1091515,
+            "measured": true,
+            "progress": 1,
+            "terminal": "cancelled"
+          }
+        ],
+        "warmup_count": 2
+      }
+    }
+  },
+  "configuration": {
+    "cancellation_p99_limit_ns": 50000000,
+    "repetitions": 100,
+    "retained_soak_reused": true,
+    "warmup": 2
+  },
+  "decision": "PASS",
+  "net05": {
+    "cases": [
+      {
+        "decision": "PASS",
+        "name": "1KiB",
+        "p95_latency_ratio": 0.943396,
+        "payload_bytes": 1024,
+        "throughput_ratio": 1.365428
+      },
+      {
+        "decision": "PASS",
+        "name": "16KiB",
+        "p95_latency_ratio": 0.990445,
+        "payload_bytes": 16384,
+        "throughput_ratio": 1.198192
+      },
+      {
+        "decision": "PASS",
+        "name": "64KiB",
+        "p95_latency_ratio": 0.333576,
+        "payload_bytes": 65536,
+        "throughput_ratio": 0.988339
+      },
+      {
+        "decision": "PASS",
+        "name": "1MiB",
+        "p95_latency_ratio": 0.96729,
+        "payload_bytes": 1048576,
+        "throughput_ratio": 1.04297
+      },
+      {
+        "decision": "PASS",
+        "name": "100MiB",
+        "p95_latency_ratio": 0.961544,
+        "payload_bytes": 104857600,
+        "throughput_ratio": 1.114788
+      }
+    ],
+    "decision": "PASS",
+    "source_sha256": "2bab904ceeaad6c1aec87bdc8b3c04db85c8da16154cc90c2c382fc66cda70b8"
+  },
+  "net06": {
+    "decision": "PASS",
+    "executed": [
+      {
+        "decision": "PASS",
+        "iterations": 100000,
+        "mode": "connect-close"
+      },
+      {
+        "decision": "PASS",
+        "iterations": 100000,
+        "mode": "peer-reset"
+      },
+      {
+        "decision": "PASS",
+        "iterations": 100000,
+        "mode": "close-during-read"
+      },
+      {
+        "decision": "PASS",
+        "iterations": 100000,
+        "mode": "tls-handshake-failure-cleanup"
+      },
+      {
+        "decision": "PASS",
+        "iterations": 187051774,
+        "mode": "mixed-soak",
+        "seconds": 86400
+      },
+      {
+        "decision": "PASS",
+        "iterations": 100000,
+        "mode": "production-cancel-close"
+      },
+      {
+        "decision": "PASS",
+        "iterations": 100000,
+        "mode": "production-tls-transport-cleanup"
+      }
+    ],
+    "measured_resource_classes": [
+      "process-rss",
+      "native-file-descriptors",
+      "socket-handles",
+      "timers",
+      "waiters",
+      "native-buffers",
+      "gc-roots",
+      "background-tasks"
+    ],
+    "production_cancellation_heap_growth_bytes": -131072,
+    "production_cancellation_lifecycle_growth": {
+      "process_count": {
+        "first_median": 3.0,
+        "growth": 0.0,
+        "growth_limit": 0,
+        "last_median": 3.0
+      },
+      "socket_count": {
+        "first_median": 6.0,
+        "growth": 0.0,
+        "growth_limit": 1,
+        "last_median": 6.0
+      },
+      "thread_count": {
+        "first_median": 24.0,
+        "growth": 1.0,
+        "growth_limit": 2,
+        "last_median": 25.0
+      },
+      "timerfd_count": {
+        "first_median": 0.0,
+        "growth": 0.0,
+        "growth_limit": 0,
+        "last_median": 0.0
+      }
+    },
+    "production_cancellation_marker": {
+      "active_reads": 0,
+      "background_tasks": 0,
+      "completed": 100000,
+      "joined_tasks": 200000,
+      "requested": 100000
+    },
+    "soak_sha256": "0cf4528c203131d4c6926ce27f9dbbbf3f11ff10f21848169d5ecc2a4248b93d",
+    "source_sha256": "ee0fbf5b2878989b9c22f01e04f9b4925c63fe3f0c3c35ddb8f2ddda5e7073a9"
+  },
+  "non_claims": [
+    "No other platform was executed.",
+    "The retained 24-hour soak was verified by digest and not rerun.",
+    "No runtime, std, or SDK source was changed or built."
+  ],
+  "platform": "linux-x86_64-glibc",
+  "repository_revision": "workspace-m1-025-linux-qualification",
+  "schema_version": 1,
+  "source_sha256": {
+    "profile_test": "18796816bb6aba6d271d6811702fb38ba7add044813bc70fa922f0643a954a99",
+    "qualification_runner": "1e92c39aa95755ab117ab229bc5f039038115d5b40f8f28380b84f0656619eef"
+  },
+  "task_id": "M1-025"
+}

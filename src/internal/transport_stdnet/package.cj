@@ -502,6 +502,22 @@ public class StdNetTransport <: DuplexTransport {
         false
     }
 
+    /** Waits for write activity for bounded lifecycle diagnostics and race gates. */
+    internal func waitUntilWriteActive(timeout: Duration): Bool {
+        let expiresAt = MonoTime.now() + timeout
+        while (true) {
+            let (active, terminal) = synchronized(lifecycleMutex) { (writeActive, closed || aborted) }
+            if (active) {
+                return true
+            }
+            if (terminal || MonoTime.now() >= expiresAt) {
+                return false
+            }
+            sleep(Duration.millisecond)
+        }
+        false
+    }
+
     private func ensureNotLocallyTerminated(
         context: OperationContext,
         category: NetworkErrorCategory,

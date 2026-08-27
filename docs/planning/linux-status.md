@@ -19,7 +19,7 @@ Status values have the same fail-closed meaning as the global status file.
 | leak/soak | COMPLETE | Linux GATE-NET-06 passes all seven workloads: three 100,000-iteration transport scenarios, 100,000 provider and production TLS cleanups, 100,000 production cancellations, and an 86,400-second mixed soak with PASS resource trends; [Linux evidence](../evidence/M0-011/README.md) |
 | DNS scheduler behavior | COMPLETE | M0-013 records starvation and mandates a bounded resolver pool |
 | TLS provider | COMPLETE | AWS-LC 5.5.0 is selected by ADR-0003 after schema-v2 glibc/musl PASS results, executed external signing and 10,000 cleanup cycles |
-| Transport SPI | IN_PROGRESS | Core types, listener, lifecycle, deterministic races, half-close fallback, stable std.net errors, and transport diagnostics are qualified without upstream source changes. Only M1-025 milestone evidence remains. |
+| Transport SPI | COMPLETE | Core semantics, native adapter behavior, deterministic races, 100,000-iteration cleanup, the digest-pinned 24-hour soak, raw TCP thresholds and cancellation P99 pass without upstream source changes; [M1-025 evidence](../evidence/M1-025/README.md). |
 | Linux continuous gates | READY | Linux M0 decisions and evidence are complete; M1 qualification and Linux release automation remain. |
 
 ## Implemented Transport Core
@@ -50,6 +50,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M1-022 stable std.net errors | COMPLETE | Native Linux qualification proves cancellation, Deadline, local close, listener errors, and unknown connect failures retain stable coordinates and endpoints without native-code or message assumptions; [evidence](../evidence/M1-022/README.md). |
 | M1-023 transport diagnostics | COMPLETE | Native Linux tests prove backend, `cjnative` runtime family, mirrored typed endpoints, capability flags, and post-close stability through the provider-neutral `TransportInfo` contract; exact OS event-backend discovery remains optional; [evidence](../evidence/M1-023/README.md). |
 | M1-024 deterministic Transport races | COMPLETE | Admitted blocked read/write operations terminate under close/abort, both success/cancel orders complete once without leaking data, and half-close fallback, repeated terminal calls and registration cleanup pass without runtime or `std.net` source changes; [Linux evidence](../evidence/M1-024/README.md). |
+| M1-025 Transport leak/soak/benchmark | COMPLETE | Five payloads pass the 95% throughput and 1.10 P95 limits, blocked read/write cancellation P99 is 9.098/4.118 ms, and retained 100,000-iteration cleanup plus the digest-verified 24-hour soak cover all resource classes; [Linux evidence](../evidence/M1-025/README.md). |
 | M1-027 background context cost | COMPLETE | The internal background fast path lowers empty `readSome` P50 from 297.042 ns to 92.110 ns; the formal 5-payload x 11-round GATE-NET-05 comparison passes every threshold with zero staging copies; [Linux evidence](../evidence/M1-027/README.md) |
 
 ## Implemented Resolver and Connector Core
@@ -141,7 +142,5 @@ Status values have the same fail-closed meaning as the global status file.
 
 ## Next critical path
 
-1. Assemble M1-025 from the retained leak, soak, cancellation, and performance
-   evidence.
-2. Define Linux-specific M7 packaging, installation, SBOM, API freeze, fuzz,
+1. Define Linux-specific M7 packaging, installation, SBOM, API freeze, fuzz,
    performance, and release-candidate tasks without waiting for other platforms.
