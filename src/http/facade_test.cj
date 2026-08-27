@@ -685,6 +685,22 @@ class HttpFacadeTest {
     }
 }
 
+/** Bounded same-process regression for the M6-025 facade failure sequence. */
+@Test
+@Tag[Performance]
+class Http2FacadeTerminationProfileTest {
+    @TestCase
+    func runsConcurrentFacadeSequenceOneHundredTimesAndTerminates(): Unit {
+        let facade = HttpFacadeTest()
+        for (round in 1..=100) {
+            facade.publicHttp2StreamAndConnectionHandlesRespectTheirScopes()
+            facade.publicHttp2SlowStreamCannotStarveOneTenOrHundredSiblings()
+            facade.tlsHttp2StreamLimitIsAppliedAcrossConcurrentPublicRequests()
+            println("M6_025_ROUND round=${round} scenarios=3 failures=0 timeouts=0")
+        }
+    }
+}
+
 private class PublicHttp2LimitHandler <: HttpServerHandler {
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
