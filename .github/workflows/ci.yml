@@ -95,7 +95,7 @@ jobs:
           # Cangjie nightly 20260827010033 crashes in llc when this large
           # module is optimized as an external path dependency at O2. Core O2
           # remains blocking; only dependency-boundary gates use O1.
-          YJSON_CI_DEPENDENCY_OVERRIDE: ${{ needs.nightly.outputs.version == '1.3.0-alpha.20260827010033' && contains(fromJSON('["standards-conformance","schema-formats-conformance","algorithms-consumer","registry-rehearsal"]'), matrix.gate) && '-O1' || '' }}
+          YJSON_CI_DEPENDENCY_OVERRIDE: ${{ needs.nightly.outputs.version == '1.3.0-alpha.20260827010033' && contains(fromJSON('["runtime-freeze","standards-conformance","schema-formats-conformance","examples","macro-consumer","algorithms-consumer","registry-rehearsal","custom-native","yyjson-native"]'), matrix.gate) && '-O1' || '' }}
         run: |
           # The current nightly's LLVM backend can recurse deeply while
           # optimizing yjson as a path dependency on hosted x86_64 runners.
