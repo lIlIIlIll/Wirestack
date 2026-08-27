@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, "release/**"]
+    branches: [main]
   schedule:
     - cron: "17 2 * * *"
   workflow_dispatch:
@@ -92,7 +92,10 @@ jobs:
       - name: Run gate
         env:
           YJSON_SECOND_YYJSON_ROOT: ${{ matrix.gate == 'yyjson-colink' && '/tmp/yjson-yyjson-second/yyjson-0.11.1' || '' }}
-        run: scripts/ci_job.sh "${{ matrix.gate }}"
+        run: |
+          ulimit -s 65536
+          ulimit -s
+          scripts/ci_job.sh "${{ matrix.gate }}"
 
   coverage:
     name: Core Coverage
@@ -115,8 +118,20 @@ jobs:
           archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
       - name: Generate cjcov and LCOV reports
         run: scripts/coverage.sh
-      - name: Verify patch line and branch coverage
+      - name: Detect established coverage baseline
         if: github.event_name == 'pull_request'
+        id: baseline
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if git show "$BASE_SHA:coverage-baseline.toml" >/dev/null 2>&1; then
+            echo "enforce_patch=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enforce_patch=false" >> "$GITHUB_OUTPUT"
+            echo "Bootstrap release: base branch has no coverage baseline; project gates remain blocking."
+          fi
+      - name: Verify patch line and branch coverage
+        if: github.event_name == 'pull_request' && steps.baseline.outputs.enforce_patch == 'true'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |

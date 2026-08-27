@@ -41,7 +41,8 @@ LCOV 以 `core` flag 上传到 Codecov，上传失败会阻断 workflow。
 
 `coverage-baseline.toml` 保存首次完整测量建立的 line/branch 基线，项目允许最多 0.1 个百分点
 回退。Pull request 新增或修改的 core 可执行行必须达到 90% line coverage；这些行上的 branch
-必须达到 80%。
+必须达到 80%。首次引入 baseline 的 bootstrap release 只执行 project gate；baseline 合并到
+目标分支后，后续 pull request 才执行 patch gate。
 
 Native acceleration 目前是 release qualification runner，不是 `ci_job.sh` 的短任务。正式执行
 固定 11 轮，详细门槛见[性能方法](../performance/methodology.md)。
