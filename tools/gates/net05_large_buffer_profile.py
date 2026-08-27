@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Profile current std.net large-buffer reads on Linux x86_64.
-
-This is pre-Wirestack evidence. It does not measure future StdNetTransport and
-cannot complete the global GATE-NET-05 without native Windows copy evidence.
-"""
+"""Compare raw std.net and StdNetTransport receive paths on Linux x86_64."""
 from __future__ import annotations
 
 import argparse
@@ -28,8 +24,9 @@ from typing import Any, Mapping, Sequence
 
 from net05_large_buffer_profile_sources import RECEIVE_SOURCE
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 PATTERN = 37
+KIB = 1024
 MIB = 1024 * 1024
 READ_RE = re.compile(r"^READ size=(\d+)$", re.M)
 RESULT_RE = re.compile(r"^RESULT\s+(.+)$", re.M)
@@ -46,7 +43,23 @@ class Case:
     payload_bytes: int
 
 
-CASES = (Case("1MiB", 1 * MIB), Case("100MiB", 100 * MIB))
+CASES = (
+    Case("1KiB", 1 * KIB),
+    Case("16KiB", 16 * KIB),
+    Case("64KiB", 64 * KIB),
+    Case("1MiB", 1 * MIB),
+    Case("100MiB", 100 * MIB),
+)
+THROUGHPUT_RATIO_MINIMUM = 0.95
+P95_LATENCY_RATIO_MAXIMUM = 1.10
+ADAPTER_TEST_FILTER = "Net05StdNetTransportBenchmarkTest.receive"
+RAW_TEST_FILTER = "Net05RawStdNetBenchmarkTest.receive"
+HEAPTRACK_ALLOCATIONS_RE = re.compile(
+    r"^\s*allocations:\s+([0-9][0-9,]*)\s*$", re.MULTILINE
+)
+STRACE_RECVFROM_RE = re.compile(
+    r"(?:recvfrom\(|<\.\.\. recvfrom resumed>).*?=\s+(-?\d+)(?:\s+.*)?$"
+)
 
 
 def percentile(values: Sequence[float], percent: float) -> float | None:
@@ -79,12 +92,15 @@ def terminate_process_group(process: subprocess.Popen[str]) -> None:
 
 
 def run_process(command: Sequence[str], cwd: Path, timeout: float,
-                rss_sampler: "RssSampler | None" = None) -> dict[str, Any]:
+                rss_sampler: "RssSampler | None" = None,
+                environment: Mapping[str, str] | None = None) -> dict[str, Any]:
     kwargs: dict[str, Any] = {
         "args": list(command), "cwd": cwd, "stdin": subprocess.DEVNULL,
         "stdout": subprocess.PIPE, "stderr": subprocess.PIPE,
         "text": True, "errors": "replace", "shell": False,
     }
+    if environment is not None:
+        kwargs["env"] = dict(environment)
     if os.name == "nt":
         kwargs["creationflags"] = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
     else:
@@ -253,7 +269,8 @@ def fixed_4k_cap(read_sizes: Sequence[int], requested_buffer: int) -> bool:
 
 def classify_sample(case: Case, requested_buffer: int, process: Mapping[str, Any],
                     read_sizes: Sequence[int], fields: Mapping[str, str],
-                    server: StreamServer, rss: RssSampler) -> dict[str, Any]:
+                    server: StreamServer, rss: RssSampler,
+                    implementation: str = "std.net") -> dict[str, Any]:
     bytes_read = int(fields["bytes"])
     read_calls = int(fields["readCalls"])
     invalid = int(fields["invalid"])
@@ -263,15 +280,23 @@ def classify_sample(case: Case, requested_buffer: int, process: Mapping[str, Any
     exact = (bytes_read == case.payload_bytes == server.bytes_sent == sum(read_sizes))
     process_ok = process["exit_code"] == 0 and not process["timed_out"]
     expected_progress = read_calls > 0 or case.payload_bytes == 0
+    copied_read_bytes = int(fields.get("copiedReadBytes", "0"))
+    copied_write_bytes = int(fields.get("copiedWriteBytes", "0"))
+    copied_bytes_valid = (
+        implementation == "std.net" or
+        (copied_read_bytes == 0 and copied_write_bytes == 0)
+    )
     valid = (process_ok and exact and invalid == 0 and not eof and close_code == 0 and
              read_calls == len(read_sizes) and expected_progress and
-             all(0 < size <= requested_buffer for size in read_sizes))
+             all(0 < size <= requested_buffer for size in read_sizes) and
+             copied_bytes_valid)
     transfer_ms = round(duration_ns / 1_000_000.0, 3)
     throughput = None
     if duration_ns > 0:
         throughput = round((case.payload_bytes / MIB) / (duration_ns / 1_000_000_000.0), 3)
     return {
         "decision": "PASS" if valid else "FAIL",
+        "implementation": implementation,
         "payload_bytes": case.payload_bytes,
         "bytes_read": bytes_read,
         "server_bytes_sent": server.bytes_sent,
@@ -292,6 +317,8 @@ def classify_sample(case: Case, requested_buffer: int, process: Mapping[str, Any
         "peak_thread_count": rss.peak_threads,
         "thread_count_samples": rss.thread_samples,
         "server_send_sizes": server.send_sizes,
+        "adapter_staging_copied_read_bytes": copied_read_bytes,
+        "adapter_staging_copied_write_bytes": copied_write_bytes,
         "process": dict(process),
     }
 
@@ -345,46 +372,287 @@ def command_text(command: Sequence[str]) -> str | None:
 
 
 def compile_probe(artifacts: Path, timeout: float) -> tuple[Path, dict[str, Any]]:
+    """Build the shared minimal raw probe used by the M0-005 baseline."""
     directory = artifacts / "probe"
     directory.mkdir(parents=True, exist_ok=True)
     source = directory / "net05_receive.cj"
     binary = directory / "net05_receive"
     source.write_text(RECEIVE_SOURCE, encoding="utf-8")
-    result = run_process(["cjc", str(source), "-o", str(binary)], directory, timeout)
+    result = run_process(["cjc", "-O2", str(source), "-o", str(binary)], directory, timeout)
     if result["timed_out"] or result["exit_code"] != 0 or not binary.is_file():
         raise GateError(f"probe compilation failed: {result}")
     return binary, {"source_sha256": hashlib.sha256(RECEIVE_SOURCE.encode()).hexdigest(),
                     "process": result}
 
 
+def enable_o2_manifest(manifest_path: Path) -> None:
+    manifest = manifest_path.read_text(encoding="utf-8")
+    pattern = re.compile(r'^(\s*compile-option\s*=\s*)"[^"]*"', re.MULTILINE)
+    if len(pattern.findall(manifest)) != 1:
+        raise GateError("expected one package compile-option in benchmark snapshot")
+    manifest_path.write_text(
+        pattern.sub(r'\1"-O2"', manifest, count=1), encoding="utf-8"
+    )
+
+
+def compile_adapter_probe(root: Path, artifacts: Path,
+                          timeout: float) -> tuple[Path, dict[str, Any]]:
+    snapshot = artifacts / "adapter-snapshot"
+    if snapshot.exists():
+        shutil.rmtree(snapshot)
+    shutil.copytree(
+        root, snapshot,
+        ignore=shutil.ignore_patterns(
+            ".git", ".cjpm", ".codex", "target", "build", "__pycache__", "*.pyc"
+        ),
+    )
+    native = root / "target/native"
+    if not native.is_dir():
+        raise GateError("Wirestack native provider artifacts are missing")
+    snapshot_target = snapshot / "target"
+    snapshot_target.mkdir()
+    (snapshot_target / "native").symlink_to(native, target_is_directory=True)
+    enable_o2_manifest(snapshot / "cjpm.toml")
+    command = [
+        "cjpm", "test", "src/internal/transport_stdnet", "-j", "1", "--no-run"
+    ]
+    result = run_process(command, snapshot, timeout)
+    binary = snapshot / "target/release/unittest_bin/wirestack.internal.transport_stdnet"
+    if result["timed_out"] or result["exit_code"] != 0 or not binary.is_file():
+        raise GateError(f"adapter probe compilation failed: {result}")
+    source = snapshot / "src/internal/transport_stdnet/benchmark_harness_test.cj"
+    return binary, {
+        "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+        "manifest_compile_option": "-O2",
+        "process": result,
+    }
+
+
+def benchmark_environment(server: StreamServer, case: Case,
+                          buffer_size: int) -> dict[str, str]:
+    environment = dict(os.environ)
+    environment.update({
+        "WIRESTACK_NET05_HOST": "127.0.0.1",
+        "WIRESTACK_NET05_PORT": str(server.port),
+        "WIRESTACK_NET05_EXPECTED": str(case.payload_bytes),
+        "WIRESTACK_NET05_BUFFER_SIZE": str(buffer_size),
+    })
+    return environment
+
+
+def unittest_probe_command(binary: Path, test_filter: str) -> list[str]:
+    return [
+        str(binary), f"--filter={test_filter}",
+        "--show-all-output", "--no-progress", "--no-color",
+    ]
+
+
 def run_sample(binary: Path, case: Case, buffer_size: int, artifacts: Path,
                timeout: float) -> dict[str, Any]:
     rss = RssSampler()
     with StreamServer(case.payload_bytes, 64 * 1024, timeout) as server:
-        process = run_process([str(binary), "127.0.0.1", str(server.port), str(case.payload_bytes),
-                               str(buffer_size), "verbose"], artifacts / "probe", timeout, rss)
+        process = run_process(
+            unittest_probe_command(binary, RAW_TEST_FILTER), binary.parent,
+            timeout, rss, environment=benchmark_environment(server, case, buffer_size)
+        )
     read_sizes, fields = parse_probe_output(process["stdout"])
-    return classify_sample(case, buffer_size, process, read_sizes, fields, server, rss)
+    return classify_sample(
+        case, buffer_size, process, read_sizes, fields, server, rss,
+        implementation="std.net",
+    )
 
 
-def execute(artifacts: Path, warmup: int, repetitions: int, timeout: float,
-            revision: str, buffer_size: int = 64 * 1024) -> dict[str, Any]:
+def run_adapter_sample(binary: Path, case: Case, buffer_size: int,
+                       artifacts: Path, timeout: float) -> dict[str, Any]:
+    rss = RssSampler()
+    with StreamServer(case.payload_bytes, 64 * 1024, timeout) as server:
+        process = run_process(
+            unittest_probe_command(binary, ADAPTER_TEST_FILTER), binary.parent,
+            timeout, rss, environment=benchmark_environment(server, case, buffer_size)
+        )
+    read_sizes, fields = parse_probe_output(process["stdout"])
+    return classify_sample(
+        case, buffer_size, process, read_sizes, fields, server, rss,
+        implementation="StdNetTransport",
+    )
+
+
+def parse_heaptrack_allocations(stderr: str) -> int:
+    matches = HEAPTRACK_ALLOCATIONS_RE.findall(stderr)
+    if len(matches) != 1:
+        raise GateError(f"expected one heaptrack allocation count, found {len(matches)}")
+    return int(matches[0].replace(",", ""))
+
+
+def parse_strace_recvfrom_results(trace: str) -> list[int]:
+    results = []
+    for line in trace.splitlines():
+        match = STRACE_RECVFROM_RE.search(line)
+        if match is not None:
+            results.append(int(match.group(1)))
+    return results
+
+
+def run_instrumented_sample(binary: Path, implementation: str, case: Case,
+                            buffer_size: int, artifacts: Path,
+                            timeout: float) -> dict[str, Any]:
+    label = "std-net" if implementation == "std.net" else "stdnet-transport"
+    sample_dir = artifacts / "instrumentation" / case.name / label
+    sample_dir.mkdir(parents=True, exist_ok=True)
+    trace_path = sample_dir / "recvfrom.trace"
+    heaptrack_prefix = sample_dir / "heaptrack-data"
+    heaptrack_path = Path(f"{heaptrack_prefix}.zst")
+    trace_path.unlink(missing_ok=True)
+    heaptrack_path.unlink(missing_ok=True)
+    rss = RssSampler()
+    with StreamServer(case.payload_bytes, 64 * 1024, timeout) as server:
+        test_filter = RAW_TEST_FILTER if implementation == "std.net" else ADAPTER_TEST_FILTER
+        probe_command = unittest_probe_command(binary, test_filter)
+        command = [
+            "strace", "-f", "-qq", "-s", "0", "-e", "trace=recvfrom",
+            "-o", str(trace_path), "heaptrack", "--record-only",
+            "-o", str(heaptrack_prefix), *probe_command,
+        ]
+        process = run_process(
+            command, binary.parent, timeout, rss,
+            environment=benchmark_environment(server, case, buffer_size)
+        )
+    if not trace_path.is_file():
+        raise GateError(f"strace did not produce {implementation} receive evidence")
+    if not heaptrack_path.is_file():
+        raise GateError(f"heaptrack did not produce {implementation} allocation evidence")
+    trace = trace_path.read_text(encoding="utf-8", errors="replace")
+    recvfrom_results = parse_strace_recvfrom_results(trace)
+    read_sizes = [value for value in recvfrom_results if value > 0]
+    _reported_read_sizes, fields = parse_probe_output(process["stdout"])
+    sample = classify_sample(
+        case, buffer_size, process, read_sizes, fields, server, rss,
+        implementation=implementation,
+    )
+    allocations = parse_heaptrack_allocations(process["stderr"])
+    copied_bytes = sum(read_sizes)
+    attempts = len(recvfrom_results)
+    valid = (
+        sample["decision"] == "PASS" and allocations > 0 and
+        copied_bytes == case.payload_bytes and
+        len(read_sizes) == sample["read_calls"]
+    )
+    sample["instrumentation"] = {
+        "decision": "PASS" if valid else "FAIL",
+        "native_allocation_events_per_process_operation": allocations,
+        "recvfrom_attempts": attempts,
+        "successful_recvfrom_calls": len(read_sizes),
+        "syscall_receive_copied_bytes_per_process_operation": copied_bytes,
+        "adapter_staging_copied_read_bytes_per_process_operation": (
+            sample["adapter_staging_copied_read_bytes"]
+        ),
+        "strace_trace": trace,
+        "strace_trace_sha256": hashlib.sha256(trace.encode()).hexdigest(),
+        "heaptrack_record_sha256": hashlib.sha256(heaptrack_path.read_bytes()).hexdigest(),
+    }
+    return sample
+
+
+def compare_implementations(raw: Mapping[str, Any],
+                            adapter: Mapping[str, Any]) -> dict[str, Any]:
+    raw_throughput = float(raw["throughput_mib_per_second"]["p50"])
+    adapter_throughput = float(adapter["throughput_mib_per_second"]["p50"])
+    raw_p95 = float(raw["transfer_ms"]["p95"])
+    adapter_p95 = float(adapter["transfer_ms"]["p95"])
+    throughput_ratio = adapter_throughput / raw_throughput if raw_throughput > 0 else 0.0
+    latency_ratio = adapter_p95 / raw_p95 if raw_p95 > 0 else float("inf")
+    throughput_pass = throughput_ratio >= THROUGHPUT_RATIO_MINIMUM
+    latency_pass = latency_ratio <= P95_LATENCY_RATIO_MAXIMUM
+    return {
+        "decision": "PASS" if throughput_pass and latency_pass else "FAIL",
+        "throughput_ratio": round(throughput_ratio, 6),
+        "throughput_minimum": THROUGHPUT_RATIO_MINIMUM,
+        "throughput_decision": "PASS" if throughput_pass else "FAIL",
+        "p95_latency_ratio": round(latency_ratio, 6),
+        "p95_latency_maximum": P95_LATENCY_RATIO_MAXIMUM,
+        "p95_latency_decision": "PASS" if latency_pass else "FAIL",
+    }
+
+
+def execute(root: Path, artifacts: Path, warmup: int, repetitions: int,
+            timeout: float, build_timeout: float, revision: str,
+            buffer_size: int = 64 * 1024) -> dict[str, Any]:
     if shutil.which("cjc") is None:
         raise GateError("cjc unavailable; source the supplied SDK environment")
+    for tool in ("strace", "heaptrack"):
+        if shutil.which(tool) is None:
+            raise GateError(f"{tool} is required for M0-010 copy/allocation evidence")
     artifacts.mkdir(parents=True, exist_ok=True)
-    binary, compile_info = compile_probe(artifacts, timeout)
+    comparison_binary, comparison_compile = compile_adapter_probe(
+        root, artifacts, build_timeout
+    )
     results = []
     for case in CASES:
-        warmups = [run_sample(binary, case, buffer_size, artifacts, timeout)
-                   for _ in range(warmup)]
-        samples = [run_sample(binary, case, buffer_size, artifacts, timeout)
-                   for _ in range(repetitions)]
-        decision = "PASS" if all(item["decision"] == "PASS" for item in samples) else "FAIL"
-        results.append({"name": case.name, "decision": decision,
-                        "payload_bytes": case.payload_bytes,
-                        "sample_count": len(samples),
-                        "aggregate": aggregate(case, samples),
-                        "warmup_samples": warmups, "samples": samples})
+        raw_warmups = []
+        adapter_warmups = []
+        for _ in range(warmup):
+            raw_warmups.append(run_sample(comparison_binary, case, buffer_size, artifacts, timeout))
+            adapter_warmups.append(
+                run_adapter_sample(comparison_binary, case, buffer_size, artifacts, timeout)
+            )
+        raw_samples = []
+        adapter_samples = []
+        paired_order = []
+        for index in range(repetitions):
+            order = ("std.net", "StdNetTransport") if index % 2 == 0 else (
+                "StdNetTransport", "std.net"
+            )
+            paired_order.append(list(order))
+            for implementation in order:
+                if implementation == "std.net":
+                    raw_samples.append(
+                        run_sample(comparison_binary, case, buffer_size, artifacts, timeout)
+                    )
+                else:
+                    adapter_samples.append(
+                        run_adapter_sample(
+                            comparison_binary, case, buffer_size, artifacts, timeout
+                        )
+                    )
+        raw_aggregate = aggregate(case, raw_samples)
+        adapter_aggregate = aggregate(case, adapter_samples)
+        comparison = compare_implementations(raw_aggregate, adapter_aggregate)
+        raw_instrumented = run_instrumented_sample(
+            comparison_binary, "std.net", case, buffer_size, artifacts, timeout
+        )
+        adapter_instrumented = run_instrumented_sample(
+            comparison_binary, "StdNetTransport", case, buffer_size, artifacts, timeout
+        )
+        samples_pass = all(
+            item["decision"] == "PASS" for item in raw_samples + adapter_samples
+        )
+        instrumentation_pass = (
+            raw_instrumented["instrumentation"]["decision"] == "PASS" and
+            adapter_instrumented["instrumentation"]["decision"] == "PASS"
+        )
+        decision = "PASS" if (
+            samples_pass and instrumentation_pass and comparison["decision"] == "PASS"
+        ) else "FAIL"
+        results.append({
+            "name": case.name,
+            "decision": decision,
+            "payload_bytes": case.payload_bytes,
+            "sample_count_per_implementation": repetitions,
+            "paired_order": paired_order,
+            "comparison": comparison,
+            "std_net": {
+                "aggregate": raw_aggregate,
+                "instrumented_sample": raw_instrumented,
+                "warmup_samples": raw_warmups,
+                "samples": raw_samples,
+            },
+            "stdnet_transport": {
+                "aggregate": adapter_aggregate,
+                "instrumented_sample": adapter_instrumented,
+                "warmup_samples": adapter_warmups,
+                "samples": adapter_samples,
+            },
+        })
     linux_status = "PASS" if all(case["decision"] == "PASS" for case in results) else "FAIL"
     return {
         "schema_version": SCHEMA_VERSION,
@@ -392,7 +660,10 @@ def execute(artifacts: Path, warmup: int, repetitions: int, timeout: float,
         "gate_id": "GATE-NET-05", "linux_profile_status": linux_status,
         "global_gate_status": "INCOMPLETE",
         "configuration": {"warmup": warmup, "repetitions": repetitions,
-                          "timeout_seconds": timeout, "receive_buffer_bytes": buffer_size,
+                          "timeout_seconds": timeout,
+                          "build_timeout_seconds": build_timeout,
+                          "comparison_process_shape": "same_unittest_binary",
+                          "receive_buffer_bytes": buffer_size,
                           "server_send_chunk_bytes": 64 * 1024},
         "environment": {"repository_revision": revision,
                         "generated_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -404,16 +675,17 @@ def execute(artifacts: Path, warmup: int, repetitions: int, timeout: float,
         "metric_availability": {
             "application_visible_read_sizes": "MEASURED",
             "throughput": "MEASURED", "peak_rss": "MEASURED",
-            "allocation_count": "UNAVAILABLE",
-            "copied_bytes_per_operation": "UNAVAILABLE",
+            "native_process_allocation_events": "MEASURED",
+            "syscall_receive_copied_bytes_per_operation": "MEASURED",
+            "adapter_staging_copied_bytes_per_operation": "MEASURED",
             "windows_native_copy_profile": "BLOCKED",
-            "future_stdnet_transport_comparison": "NOT_YET_APPLICABLE",
+            "stdnet_transport_comparison": "MEASURED",
         },
         "non_claims": ["not a global GATE-NET-05 pass",
-                       "not a StdNetTransport measurement",
                        "not native Windows evidence",
-                       "no allocation or copied-byte claim"],
-        "compile": compile_info, "cases": results,
+                       "not M1-025 leak, soak or cancellation evidence"],
+        "compile": {"comparison_binary": comparison_compile},
+        "cases": results,
     }
 
 
@@ -440,6 +712,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--warmup", type=int, default=1)
     parser.add_argument("--repetitions", type=int, default=5)
     parser.add_argument("--timeout-seconds", type=float, default=180.0)
+    parser.add_argument("--build-timeout-seconds", type=float, default=600.0)
     parser.add_argument("--repository-revision",
                         default=os.environ.get("WIRESTACK_REPOSITORY_REVISION", "unknown"))
     parser.add_argument("--quick", action="store_true")
@@ -448,22 +721,33 @@ def main(argv: Sequence[str] | None = None) -> int:
         args.warmup = 0; args.repetitions = 1
         global CASES
         CASES = (Case("1MiB", 1 * MIB),)
+    if args.warmup < 0 or args.repetitions <= 0:
+        parser.error("warmup must be non-negative and repetitions must be positive")
     try:
-        report = execute(args.artifact_dir.resolve(), args.warmup, args.repetitions,
-                         args.timeout_seconds, args.repository_revision)
+        report = execute(
+            root, args.artifact_dir.resolve(), args.warmup, args.repetitions,
+            args.timeout_seconds, args.build_timeout_seconds,
+            args.repository_revision,
+        )
         atomic_json(args.output.resolve(), report)
     except Exception as error:
         print(f"GATE-NET-05 profile: ERROR: {type(error).__name__}: {error}", file=sys.stderr)
         return 1
     print(f"M0-010 task={report['task_status']} Linux={report['linux_profile_status']} global=INCOMPLETE")
     for case in report["cases"]:
-        aggregate_value = case["aggregate"]
-        print(f"- {case['name']}: {case['decision']} samples={case['sample_count']} "
-              f"read-max={aggregate_value['read_size_bytes']['max']} "
-              f"fixed4k={aggregate_value['fixed_4k_cap']} "
-              f"throughput-p50={aggregate_value['throughput_mib_per_second']['p50']} MiB/s "
-              f"rss-max={aggregate_value['peak_rss_kib']['max']} KiB")
-    return 0
+        raw = case["std_net"]["aggregate"]
+        adapter = case["stdnet_transport"]["aggregate"]
+        comparison = case["comparison"]
+        print(
+            f"- {case['name']}: {case['decision']} "
+            f"samples={case['sample_count_per_implementation']} "
+            f"raw-throughput-p50={raw['throughput_mib_per_second']['p50']} MiB/s "
+            f"adapter-throughput-p50={adapter['throughput_mib_per_second']['p50']} MiB/s "
+            f"throughput-ratio={comparison['throughput_ratio']} "
+            f"p95-latency-ratio={comparison['p95_latency_ratio']} "
+            f"adapter-read-max={adapter['read_size_bytes']['max']}"
+        )
+    return 0 if report["linux_profile_status"] == "PASS" else 1
 
 
 if __name__ == "__main__":

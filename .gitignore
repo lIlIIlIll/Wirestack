@@ -7,6 +7,7 @@ out/
 
 # Durable, checksum-pinned evidence overrides user-level *.json ignores.
 !docs/evidence/M0-005/linux_x86_64/*.json
+!docs/evidence/M0-010/linux_x86_64/*.json
 !docs/evidence/M0-016/results/**/*.json
 !docs/evidence/M0-011/linux_x86_64/*.json
 
