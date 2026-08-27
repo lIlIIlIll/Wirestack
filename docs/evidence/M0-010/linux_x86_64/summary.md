@@ -1,21 +1,11 @@
-# GATE-NET-05 — Linux x86_64 large-buffer profile
+# GATE-NET-05 Linux x86_64 comparison
 
-**Task implementation:** COMPLETE  
-**Linux application-visible profile:** PASS  
-**Linux copied-byte/allocation profile:** INCOMPLETE  
-**Global gate:** INCOMPLETE
+- Task evidence: COMPLETE
+- Linux gate: FAIL
+- Global gate: INCOMPLETE
 
-| Case | Measured samples | Buffer | Exact bytes | Reads above 4 KiB | Result |
-|---|---:|---:|---|---|---|
-| 1 MiB | 5 | 64 KiB | yes | yes | PASS |
-| 100 MiB | 5 | 64 KiB | yes | yes | PASS |
-
-The 100 MiB case reuses one 64 KiB Cangjie receive buffer; it does not allocate
-a body-sized Cangjie byte array. The harness records raw read-size arrays,
-throughput samples, server send sizes, RSS samples and process outcomes in its
-schema-versioned JSON output.
-
-The current public SDK/runtime environment provides no reliable allocation
-counter or copied-byte instrumentation. Those fields remain `UNAVAILABLE`, not
-zero. Native Windows evidence and the future `StdNetTransport` comparison are
-also outstanding, so GATE-NET-05 remains incomplete.
+Eleven alternating `-O2` samples compare raw `std.net` and
+`StdNetTransport` for every GATE-NET-05 payload. Exact bytes and all ten native
+instrumentation operations pass. The adapter misses the 95% throughput floor
+for 16 KiB through 100 MiB and misses the P95 latency limit for 64 KiB and
+100 MiB. See [`result.json`](result.json) for every sample and trace.

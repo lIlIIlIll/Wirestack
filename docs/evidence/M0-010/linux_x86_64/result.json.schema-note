@@ -1,1 +1,3 @@
-The raw report is produced by tools/gates/net05_large_buffer_profile.py with schema_version=1 and contains cases[].warmup_samples, cases[].samples, per-sample read_sizes, rss_samples_kib, server_send_sizes, process evidence, and aggregate percentiles.
+`result.json` uses schema_version=2. Each case retains alternating paired order,
+raw `std.net` and `StdNetTransport` warmups, eleven measured samples, aggregates,
+threshold decisions and one separate native instrumented sample per path.
