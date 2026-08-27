@@ -42,6 +42,7 @@ Status values:
 | M0-020 | BLOCKED | [`docs/architecture/adr/0003-linux-tls-provider.md`](../architecture/adr/0003-linux-tls-provider.md) | Linux profile selects pinned AWS-LC; the global six-platform provider decision remains deferred. |
 | M0-021 | BLOCKED | — | Depends on all M0 gate evidence plus the accepted Transport SPI. |
 | M0-022 | BLOCKED | — | Depends on M0-004 through M0-021. |
+| M0-023 | COMPLETE | [`docs/evidence/M0-023/README.md`](../evidence/M0-023/README.md) | ADR-0004 freezes the current Linux release target as glibc and defers musl to P1-011 until the Cangjie SDK supports it. |
 
 ## Linux M1 closure work
 
