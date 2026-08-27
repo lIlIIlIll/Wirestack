@@ -282,7 +282,7 @@ private func parseHeaders(lines: Array<Array<Byte>>, limits: HttpLimits): HttpHe
     builder.build()
 }
 
-private func validateHostHeader(headers: HttpHeaders, method: HttpMethod, target: String): Unit {
+internal func validateHostHeader(headers: HttpHeaders, method: HttpMethod, target: String): Unit {
     let hosts = headers.getAll("host")
     if (hosts.size != 1) {
         throw Http1ParseException(Http1ParseErrorCode.MissingOrDuplicateHost, "HTTP/1.1 request requires exactly one Host field")
@@ -313,7 +313,7 @@ private func parseHostAuthority(value: String, scheme: String): HttpUrl {
     }
 }
 
-private func validateRequestTarget(method: HttpMethod, target: String): Unit {
+internal func validateRequestTarget(method: HttpMethod, target: String): Unit {
     if (target == "*") {
         if (method != HttpMethod("OPTIONS")) { invalidTarget() }
         return

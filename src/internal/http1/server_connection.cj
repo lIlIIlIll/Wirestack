@@ -50,9 +50,13 @@ public func serveHttp1Connection(
     var served: Int64 = 0
     var unread = false
     var tunnel = false
+    let requestReadBuffer = Array<Byte>(16 * 1024, repeat: 0)
     try {
         while (served < maximumRequests) {
-            let request = readHttp1ServerRequest(transport, context: context, limits: limits)
+            let request = readHttp1ServerRequest(
+                transport, context: context, limits: limits,
+                readBuffer: Some(requestReadBuffer)
+            )
             var produced: ?Http1ServerResponse = None<Http1ServerResponse>
             try {
                 produced = Some(handler.handle(request, context))
