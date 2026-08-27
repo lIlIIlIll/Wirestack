@@ -2,7 +2,7 @@
 
 This directory binds qualification, package rehearsal, general performance and
 Native acceleration evidence to candidate source commit
-`497245f54c7bd7ff8d056ed2a3cfb20d26c80a41`.
+`2d02b82ceb96e4ce170c09913a279f0963f5a212`.
 
 - `logs/local-fresh-checkout.log.gz` is the complete Linux release-gate transcript.
 - `logs/core-coverage.log.gz` records the unoptimized 521-case core coverage gate.

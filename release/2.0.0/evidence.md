@@ -9,8 +9,8 @@ allowlist 中，因此不会改变已验证源码。
 | Field | Value |
 | --- | --- |
 | Planned release identity | `2.0.0` |
-| Candidate source commit | `497245f54c7bd7ff8d056ed2a3cfb20d26c80a41` |
-| Evidence generated | `2026-08-27T03:28:43Z` |
+| Candidate source commit | `2d02b82ceb96e4ce170c09913a279f0963f5a212` |
+| Evidence generated | `2026-08-27T04:44:21Z` |
 | Package manifest version | `2.0.0`（九个 package，尚未发布） |
 | Qualification runner | `Arch`, Linux x86_64, glibc 2.44 |
 | Qualification SDK | Cangjie `1.1.0-alpha.20260817040003`, cjpm `1.1.3` |
@@ -44,13 +44,16 @@ allowlist 中，因此不会改变已验证源码。
 | Package rehearsal | PASS | nine unpublished 2.0.0 `.cjp` artifacts and registry-style consumers |
 | Three-library performance | PASS | 36/36 workloads, 11 rounds；规定的一次 noisy rerun 已完成 |
 | Native acceleration | PASS | 11 rounds；广告 read/write 均提升至少 5%，普通 workload 无超过 5% 回退 |
-| Hosted CI | **PENDING / BLOCKING** | 发布 PR 与合并后 `main` workflow 均必须通过 |
+| Hosted CI | **PR PASS / MAIN PENDING / BLOCKING** | PR #1 run `33039594558` 全部通过；合并后 `main` workflow 尚未执行 |
 | Annotated tag | **NOT RUN** | 候选已验证但未打 tag |
 | Registry publish | **NOT RUN** | 未发布任何 package |
 
 完整 fresh-source、core coverage、扩展 fuzz、co-link、Windows cross build 和 package rehearsal
-日志位于 [`artifacts/logs/`](artifacts/logs/)。Cangjie 编译日志仍包含 SDK unittest 宏展开
-产生的 warning；本表的 Native compiler PASS 指仓库定义的 Clang/GCC `-Werror` gate，
+日志位于 [`artifacts/logs/`](artifacts/logs/)。本候选相对 local fresh-source 日志绑定的
+`497245f5` 只修改 schema formats compiler discovery、测试/CI、文档与 evidence；当前 build hook
+已由本地 `-O2` package rehearsal 和 hosted standards/consumer jobs 验证。Cangjie 编译日志仍
+包含 SDK unittest 宏展开产生的 warning；本表的 Native compiler PASS 指仓库定义的
+Clang/GCC `-Werror` gate，
 不把宏生成告警误写为“零告警”。
 
 ## General performance evidence
@@ -94,9 +97,9 @@ archive SHA-256 为
 Local fresh-source simulation: PASS
 General performance qualification: PASS after required full rerun
 Native acceleration qualification: PASS after required full rerun
-Hosted CI execution: PENDING
+Hosted CI execution: PR PASS; MERGED MAIN PENDING
 Hosted CI policy: BLOCKING
-Release decision: LOCAL CANDIDATE VERIFIED; HOSTED CI PENDING; TAG NOT RUN; REGISTRY PUBLISH NOT RUN
+Release decision: PR CANDIDATE VERIFIED; MERGED MAIN PENDING; TAG NOT RUN; REGISTRY PUBLISH NOT RUN
 ```
 
 Linux x86_64 是完整 qualified 平台。Windows x86_64 仅完成 Pure cross build；macOS 与

@@ -1,15 +1,17 @@
 {
   "releaseIdentity": "2.0.0",
-  "candidateSourceCommit": "497245f54c7bd7ff8d056ed2a3cfb20d26c80a41",
-  "generatedAtUtc": "2026-08-27T03:28:43Z",
+  "candidateSourceCommit": "2d02b82ceb96e4ce170c09913a279f0963f5a212",
+  "generatedAtUtc": "2026-08-27T04:44:21Z",
   "sourceArchive": {
     "fileCount": 215,
-    "sha256": "a3d0fdcffb7314551717f9e636475b0bb903520726187f20a15bbcad63c67fdd",
+    "sha256": "3ef8dff31d06724fc82eeca7690abe73a869be771b2b71fa5ec581894754faac",
     "format": "sorted tar, mtime/uid/gid zeroed, gzip -n",
     "storedInRepository": false
   },
   "localFreshCheckout": {
     "status": "PASS",
+    "evidenceSourceCommit": "497245f54c7bd7ff8d056ed2a3cfb20d26c80a41",
+    "retentionReason": "Subsequent candidate changes affect schema formats compiler discovery, tests, CI, documentation, and evidence. The current build hook is covered by the final local O2 package rehearsal and hosted standards and consumer jobs.",
     "apiSnapshotDeclarations": 1071,
     "reviewedApiDeltas": 10,
     "runtimeFreezeScenarios": 5,
@@ -28,6 +30,7 @@
   },
   "packageRehearsal": {
     "status": "PASS",
+    "candidateSourceCommit": "2d02b82ceb96e4ce170c09913a279f0963f5a212",
     "moduleCount": 9,
     "log": "logs/package-rehearsal.log.gz"
   },
@@ -72,9 +75,15 @@
     "storedInRepository": false
   },
   "hostedCi": {
-    "status": "PENDING",
+    "status": "PULL_REQUEST_PASS_MAIN_PENDING",
     "policy": "BLOCKING",
-    "requiredRuns": ["release pull request", "merged main"]
+    "pullRequest": "https://github.com/lIlIIlIll/yjson/pull/1",
+    "pullRequestHead": "2d02b82ceb96e4ce170c09913a279f0963f5a212",
+    "pullRequestRun": "https://github.com/lIlIIlIll/yjson/actions/runs/33039594558",
+    "nightlySdk": "1.3.0-alpha.20260827010033",
+    "coreOptimization": "-O2",
+    "dependencyBoundaryOverride": "-O1 for this exact nightly only because external-path llc -O2 exits 139; the next seven-day nightly returns to -O2",
+    "requiredRuns": ["release pull request: PASS", "merged main: PENDING"]
   },
   "tag": {
     "status": "NOT_RUN"
