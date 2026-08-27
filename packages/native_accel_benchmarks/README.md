@@ -24,5 +24,6 @@ If either side exceeds 5% CV, discard the qualification and run all 11 rounds
 once more. `--skip-build` is accepted for that immediate rerun only when the
 recorded build-source digest still matches the current workspace.
 
-The latest dated result is documented in
-[`docs/performance/results/2026-08-26-native-acceleration.md`](../../docs/performance/results/2026-08-26-native-acceleration.md).
+The latest release result is documented in
+[`docs/performance/results/2026-08-27-yjson-2.0.0.md`](../../docs/performance/results/2026-08-27-yjson-2.0.0.md#native-acceleration).
+The 2026-08-26 page remains an immutable historical result for its recorded source digest.

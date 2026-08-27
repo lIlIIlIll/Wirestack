@@ -3,12 +3,20 @@
 yjson 的性能取决于 API、representation、payload、输入形态和主机。typed codec、mutable
 AST、Pure Compact、Native DOM 与 typed stream 是不同问题，不能拼成一个“最快库”排名。
 
-## 当前结果入口
+## 当前 release 结果
 
-- [Native 单引擎加速门禁](results/2026-08-26-native-acceleration.md)：同一 `YJson` API 下
-  Pure/Native 的固定 CPU、128 MiB、11 轮交替测量。
-- [Linux 三库 release 表](results/2026-08-25-linux-rc2-three-library.md)：yjson、stdx.json、
-  cjfast_json 同批次的 36 个共同 workload。
+- [yjson 2.0.0 性能验收](results/2026-08-27-yjson-2.0.0.md)：最终候选源码的三库
+  36-workload 表与 Native 单引擎 7-workload 门禁。两组结果都使用固定 CPU、128 MiB heap
+  和 11 轮交替测量，并保留完整 release artifact。
+
+## 历史结果
+
+- [2026-08-26 Native 单引擎加速门禁](results/2026-08-26-native-acceleration.md)：2.0.0
+  最终候选之前的固定源码批次。
+- [2026-08-25 Linux rc.2 三库表](results/2026-08-25-linux-rc2-three-library.md)：
+  `1.0.0-rc.2` 的 36 个共同 workload。
+- [2026-08-25 Linux release baseline](results/2026-08-25-linux-release-three-library.md)：
+  后续 correctness 修改之前的固定源码批次。
 - [yjson / cjfast_json](results/2026-08-21-cjfast-json.md)：typed codec 对比。
 - [Go yyjson DOM](results/2026-08-22-go-yyjson.md)：跨 runtime mutable DOM 对比，不代表
   generated typed codec。
