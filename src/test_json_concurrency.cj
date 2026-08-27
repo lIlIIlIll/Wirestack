@@ -394,6 +394,21 @@ class ParallelCounterSmokeTest {
 @Test
 class ParallelRoundtripSmokeTest {
 
+    @TestCase
+    func concurrentTypedStreamCallsKeepIndependentState(): Unit {
+        let text = YJson.toJson(sampleLargeProfileRecords(count: 128))
+        let count: Int64 = 16
+        let futures = ArrayList<Future<Int64>>()
+        for (index in 0..count) {
+            futures.add(spawn {
+                let chunk = index % 7 + 1
+                YJson.fromStream<ArrayList<ProfileRecord>>(
+                    FixedChunkInputStream(text, chunk)).size
+            })
+        }
+        for (future in futures) { @Expect(future.get(), 128) }
+    }
+
     /// 测试并发解析和序列化往返
     @TestCase
     func concurrentRoundtrip(): Unit {

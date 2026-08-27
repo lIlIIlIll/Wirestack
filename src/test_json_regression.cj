@@ -32,6 +32,25 @@ private class RegressionPathFailingIntCodec <: JsonCodec<Int64> {
     }
 }
 
+private class RegressionReentrantStreamCodec <: JsonCodec<Int64> {
+    public func write(value: Int64, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {
+        let nested = MemoryOutputStream()
+        YJson.encodeToStreamWith(Int64Json, value + 1, nested)
+        @Expect(nested.toUtf8String(), (value + 1).toString())
+        let _ = context
+        writer.writeInt64(value)
+    }
+
+    public func read(reader: JsonCodecReader, context: JsonDecodeContext): Int64 {
+        let nested = YJson.decodeFromStreamWith(Int64Json, YJsonByteArrayInputStream("41"))
+        @Expect(nested, 41)
+        let _ = context
+        reader.readInt64()
+    }
+}
+
+private let RegressionReentrantStreamJson: JsonCodec<Int64> = RegressionReentrantStreamCodec()
+
 func yJsonRegressionCanParse(text: String): Bool {
     try {
         let _ = YJson.parse(text)
@@ -347,6 +366,58 @@ class YJsonRegressionTest {
         let decoded = YJson.fromStream<Person>(YJsonByteArrayInputStream(output.toByteArray()))
         @Expect(decoded.id, 42)
         @Expect(decoded.address.zipcode, 518000)
+    }
+
+    @TestCase
+    func streamCallsIsolateConfigFailureAndPathState(): Unit {
+        let limited = JsonReadConfig(limits: JsonReadLimits(maxStringBytes: 2))
+        let error = @AssertThrows[JsonException](YJson.decodeFromStreamWith(
+            StringJson, FixedChunkInputStream("\"abcd\"", 1), config: limited))
+        @Expect(error.code, "string_too_large")
+
+        @Expect(YJson.decodeFromStreamWith(
+            StringJson, FixedChunkInputStream("\"ok after failure\"", 1)), "ok after failure")
+
+        let rejectUnknown = JsonReadConfig(unknownFieldPolicy: JsonUnknownFieldPolicy.Reject)
+        let withUnknown = "{" +
+            "\"unknown\":1,\"user_id\":42,\"name\":\"Lin\",\"age\":28," +
+            "\"tags\":[\"cangjie\"],\"scores\":{\"math\":95}," +
+            "\"address\":{\"street_name\":\"Nanshan Road\",\"zipcode\":518000}," +
+            "\"nick\":null}"
+        @AssertThrows[JsonException](YJson.decodeFromStreamWith(
+            PersonJson, YJsonByteArrayInputStream(withUnknown), config: rejectUnknown))
+        @Expect(YJson.decodeFromStreamWith(
+            PersonJson, YJsonByteArrayInputStream(withUnknown)).id, 42)
+    }
+
+    @TestCase
+    func streamCallsSupportSameThreadReentry(): Unit {
+        @Expect(YJson.decodeFromStreamWith(
+            RegressionReentrantStreamJson, YJsonByteArrayInputStream("7")), 7)
+        let output = MemoryOutputStream()
+        YJson.encodeToStreamWith(RegressionReentrantStreamJson, 9, output)
+        @Expect(output.toUtf8String(), "9")
+    }
+
+    @TestCase
+    func streamWriterCallsIsolateFailureAndConfigState(): Unit {
+        let limited = JsonWriteConfig("", "", false, false,
+            limits: JsonWriteLimits(maxBytes: 3))
+        @AssertThrows[JsonException](YJson.encodeToStreamWith(
+            StringJson, "long", MemoryOutputStream(), config: limited))
+
+        let compact = MemoryOutputStream()
+        YJson.encodeToStreamWith(StringJson, "safe", compact)
+        @Expect(compact.toUtf8String(), "\"safe\"")
+
+        let pretty = MemoryOutputStream()
+        YJson.encodeToStreamWith(YJson.arrayCodec<Int64>(Int64Json), [1, 2], pretty,
+            config: JsonWriteConfig.pretty)
+        @Expect(pretty.toUtf8String().contains("\n"))
+
+        let compactAgain = MemoryOutputStream()
+        YJson.encodeToStreamWith(YJson.arrayCodec<Int64>(Int64Json), [1, 2], compactAgain)
+        @Expect(compactAgain.toUtf8String(), "[1,2]")
     }
 
     @TestCase
