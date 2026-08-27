@@ -53,7 +53,7 @@ Status values have the same fail-closed meaning as the global status file.
 |---|---|---|
 | M2-001 host/IP/endpoint model | COMPLETE | Canonical ASCII/A-label `HostName`, exact DNS length bounds, typed immutable IPv4/IPv6/zone values, separate `UInt16` ports and authority-syntax rejection are covered without implicit DNS; [Linux evidence](../evidence/M2-001/README.md) |
 | M2-002 Resolver contract | COMPLETE | All-address result, family filter, canonical host, source, optional expiration, structured errors and diagnostics |
-| M2-003 bounded resolver backend | BLOCKED | M0-013 proves `std.net` DNS can starve carriers; the pinned SDK exposes neither async resolver nor an independent native worker API, so UP-007 is required |
+| M2-003 bounded resolver backend | COMPLETE | A fixed native pthread pool enforces bounded FIFO admission, metrics, prompt cancellation/Deadline handling and worker cleanup without blocking Cangjie carriers or using private runtime ABI; [Linux evidence](../evidence/M2-003/README.md) |
 | M2-005 Linux `SystemResolver` | BLOCKED | Depends on M2-003/UP-007; no direct `IPAddress.resolve` wrapper is presented as production-safe |
 | M2-009 normalization/diagnostics | COMPLETE | Stable deduplication preserves family/zone evidence and never invents TTL; connector emits DnsStarted/DnsCompleted for every resolver implementation |
 | M2-010 route model | COMPLETE | Immutable direct/explicit-proxy routes separate origin, connect target and DNS ownership, retain bounded network/TLS/ALPN parameters and never discover a system proxy; [Linux evidence](../evidence/M2-010/README.md) |
