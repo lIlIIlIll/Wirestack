@@ -203,7 +203,8 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M1-023 | 实现 `TransportInfo`、endpoint 与运行时诊断 | 可观测性 | C2 | M1-006,M1-015..M1-022 | PRD §20 | 公开 transport backend、runtime IO backend、local/remote endpoint、能力；不泄漏 std.net 类型。 |
 | M1-024 | 完成 Transport 确定性竞态测试 | 测试 | C4 | M1-013..M1-023 | PRD §17/§21.2 | read+close、write+abort、success+cancel、half-close、重复 close/abort、registration cleanup 全覆盖。 |
 | M1-025 | 完成 Transport 泄漏、soak 与 benchmark | 性能 | C4 | M1-024 | PRD §19.1/§22 | 对比现有 std.net；达到吞吐≥95%、P95 恶化≤10%、取消 P99≤50ms；无 handle/waiter 单调增长。 |
-| M1-026 | 六平台复跑采纳门禁并关闭 M1 | 测试 | C4 | M1-025,UP-*（按需） | PRD M1 exit | GATE-NET-01～06 全平台通过，GATE-NET-07 移动平台通过；所有上游补丁具备回归证据。 |
+| M1-027 | 分析并优化 background `OperationContext` 的每调用成本 | 性能 | C4 | M0-010,M1-005,M1-017,M1-018 | TR-CTX-001–005；GATE-NET-05；PRD §19.1/§22 | 按[任务说明](m1-027-background-operation-context-performance.md)先量化 context、取消/Deadline、lifecycle、operation gate 与 native I/O 的增量成本，再仅对无取消、无 Deadline 的 background 路径实施 Wirestack 内部 fast path；不得削弱取消、Deadline、同方向并发拒绝或 exactly-once；同一 `-O2` binary 的 5 payload × 11 轮正式门禁全部达到吞吐≥95%、P95 恶化≤10%，且 staging copy 保持 0。 |
+| M1-026 | 六平台复跑采纳门禁并关闭 M1 | 测试 | C4 | M1-025,M1-027,UP-*（按需） | PRD M1 exit | GATE-NET-01～06 全平台通过，GATE-NET-07 移动平台通过；所有上游补丁具备回归证据。 |
 
 ---
 
