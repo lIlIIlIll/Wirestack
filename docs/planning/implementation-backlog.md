@@ -400,6 +400,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M6-021 | 实现 HTTP/2 server facade、ALPN dispatch 与端到端验收 | HTTP2 | C4 | M3-023,M5-025..M5-027,M6-014..M6-019 | PRD §15.7–15.8/§21 | 同一公共 `HttpServer` 在真实 TLS loopback 上只依据已协商 ALPN 分派 `h2`/`http/1.1`；H2 request/body/trailer/response、并发限制、GOAWAY graceful shutdown 与结构化错误端到端通过；无协商协议稳定失败；公共 API 不暴露内部 H2/TLS 类型。 |
 | M6-022 | 公开 request/connection/stream cancellation handle | API | C4 | M5-020,M5-025..M5-027,M6-015,M6-018,M6-021 | PRD §10.2/§15.1–15.2/§15.7/§17 | 公共 handle 明确 request、connection、stream 作用域且 `cancel` 幂等；request cancel 覆盖 DNS→body 全路径，H1 connection cancel 唤醒并终止所属请求，H2 stream cancel 只发该流 RST 且不影响 sibling，H2 connection cancel 唤醒全部流；成功/EOF/close/cancel/GOAWAY 竞态 exactly-once 且 registration、waiter、buffer 及时释放。 |
 | M6-023 | 完成 SSE/无限累计 streaming profile | 可靠性 | C4 | M5-004,M5-020,M6-018,M6-021,M6-022 | PRD §15.1–15.2/§15.7/§19.3/§22 | 真实 H1/H2 `text/event-stream` 各连续运行至少 1 小时且消费不少于 1,000,000 个带序号事件；不全量累计，应用/协议队列、flow-control、RSS 与 heavy-GC heap 在预热后保持显式上限/稳态；slow consumer 触发背压而非增长，公开 cancel 在预算内退出，H2 sibling stream 不受影响；保留原始样本、环境和 PASS/FAIL 报告，不要求重复 24h soak。 |
+| M6-024 | 消除 connection window 耗尽时的 sibling starvation | HTTP2/可靠性 | C4 | M6-010,M6-012,M6-019,M6-021,M6-022 | PRD §15.7/§19.3/§22 | 在真实 TLS loopback 上，256 KiB 慢流占满 65,535-byte connection window 且 client 仅消费 4 KiB 后，不 cancel/close 该流，随后 1/10/100 个 2-byte sibling 均在各自单调绝对 Deadline 内完成；DATA 调度和 coalesced WINDOW_UPDATE 保证所有 ready stream 有界进展，且控制帧数、write queue、window、body buffer 保持现有上限；保留 pre-fix FAIL、post-fix raw latency/flow-control stall 和 100-run race evidence；Linux 原生通过只关闭 Linux cell，公共 API 不变。 |
 
 ---
 
@@ -419,18 +420,18 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 |---|---|---|---:|---|---|---|
 | M7-001 | 执行 P0 需求与不变量追踪审计 | 质量 | C3 | M1..M6 | PRD §17/§26 | 每个 P0、15 条生命周期不变量、22 条发布验收均映射测试/报告/代码；缺口形成阻断 issue。 |
 | M7-002 | 执行最终架构依赖与私有 ABI 审计 | 架构 | C2 | M0-003,M7-001 | PRD §7.2/§26 | Core 无 std.net；公共 API 无底层类型；Wirestack 无 `CJ_MRT_Sock*`；新 HTTP/TLS 无旧 bridge/global provider。 |
-| M7-003 | 执行全平台动态依赖/OpenSSL 扫描 | 发布 | C3 | M3-028,M4-014,M6-020..M6-023 | PRD §4 G-001/§23/§26 | 每个平台 artifact 生成依赖清单；默认产物不搜索/链接系统 libssl/libcrypto/OpenSSL DLL。 |
-| M7-004 | 建立全平台 release CI 与真机/原生 VM 门禁 | 基础设施 | C4 | M1-026,M2-015,M3-028,M4-014,M5-030,M6-020..M6-023 | PRD §21.5/§26；ADR-0004 | Windows、Linux glibc、macOS、Android、iOS、Harmony 均完成 compile/unit/integration/native gate；仅交叉编译不算通过。 |
+| M7-003 | 执行全平台动态依赖/OpenSSL 扫描 | 发布 | C3 | M3-028,M4-014,M6-020..M6-024 | PRD §4 G-001/§23/§26 | 每个平台 artifact 生成依赖清单；默认产物不搜索/链接系统 libssl/libcrypto/OpenSSL DLL。 |
+| M7-004 | 建立全平台 release CI 与真机/原生 VM 门禁 | 基础设施 | C4 | M1-026,M2-015,M3-028,M4-014,M5-030,M6-020..M6-024 | PRD §21.5/§26；ADR-0004 | Windows、Linux glibc、macOS、Android、iOS、Harmony 均完成 compile/unit/integration/native gate；仅交叉编译不算通过。 |
 | M7-005 | 完成最终 24h+ soak 与资源上限报告 | 可靠性 | C4 | M7-004 | PRD §9/§17/§19 | idle/active、10k idle（目标平台）、connect/reset/cancel、H1 pool、H2 multiplex 混合；所有集合有界且无单调泄漏。 |
 | M7-006 | 建立持续 fuzz 任务与发布阈值 | 安全 | C4 | M3-028,M5-029,M6-019 | PRD §18/§21.4 | TLS record/handshake/hostname/cert/H1/chunked/H2/HPACK/URL/proxy targets 持续运行；崩溃可复现并阻断发布。 |
-| M7-007 | 建立性能回归基线与 CI gate | 性能 | C4 | M1-025,M2-016,M3-028,M5-030,M6-020..M6-023 | PRD §19/§22 | raw TCP/TLS/H1/H2/取消/SSE 长流/内存基线版本化；门槛自动判定，平台抖动单独记录。 |
+| M7-007 | 建立性能回归基线与 CI gate | 性能 | C4 | M1-025,M2-016,M3-028,M5-030,M6-020..M6-024 | PRD §19/§22 | raw TCP/TLS/H1/H2/取消/SSE 长流/内存基线版本化；门槛自动判定，平台抖动单独记录。 |
 | M7-008 | 准备独立安全审查材料 | 安全 | C3 | M0-018,M7-001..M7-007 | PRD §18/§27 | 提供 threat model、架构、provider、C ABI、parser、key/trust、fuzz、SBOM、已知限制和复现环境。 |
 | M7-009 | 完成独立安全审查与修复闭环 | 安全 | C4 | M7-008 | PRD §18/§26 | 所有发现分级、复现、修复、回归；High/Critical 未关闭时 release gate 必失败。 |
 | M7-010 | 生成 SBOM、provider manifest 与 build fingerprint | 发布 | C3 | M3-002,M7-003 | PRD §13.1/§18/§23 | 每个 artifact 可查询 provider/crypto/trust/capability/patch level/target/features；SBOM 与构建产物绑定。 |
 | M7-011 | 实现发布 artifact 签名与验证流程 | 发布 | C3 | M7-010 | PRD §23 | 所有 release artifact、SBOM、manifest 有签名；发布和消费侧验证步骤文档化并在 CI 演练。 |
-| M7-012 | 执行公共 API freeze 与兼容性检查 | API | C4 | M5-030,M6-020..M6-023,M7-001 | PRD §24/§28/§29 | 冻结包名/major/API 和公开 cancellation handle；无 global TlsKit/TrustAll/OpenSSL string/StreamingSocket/旧适配器；生成 API baseline。 |
+| M7-012 | 执行公共 API freeze 与兼容性检查 | API | C4 | M5-030,M6-020..M6-024,M7-001 | PRD §24/§28/§29 | 冻结包名/major/API 和公开 cancellation handle；无 global TlsKit/TrustAll/OpenSSL string/StreamingSocket/旧适配器；生成 API baseline。 |
 | M7-013 | 编写迁移指南与 API mapping | 文档 | C3 | M7-012 | PRD §24.3 | 覆盖 timeout→Deadline、cancel、CA、mTLS、stream body、retry、errors、移除 OpenSSL 配置；旧新包共存边界明确。 |
-| M7-014 | 完成用户与协议开发者示例 | 文档 | C3 | M5-030,M6-020..M6-023,M7-012 | PRD §6/§29 | HTTPS client、已有 transport TLS、CONNECT+TLS、H1/H2 server、SSE、mTLS、自定义 CA、分作用域取消/Deadline 示例可构建运行。 |
+| M7-014 | 完成用户与协议开发者示例 | 文档 | C3 | M5-030,M6-020..M6-024,M7-012 | PRD §6/§29 | HTTPS client、已有 transport TLS、CONNECT+TLS、H1/H2 server、SSE、mTLS、自定义 CA、分作用域取消/Deadline 示例可构建运行。 |
 | M7-015 | 建立安全更新 SLA、provider 升级与回滚手册 | 发布 | C3 | M0-020,M7-010,M7-011 | PRD §18/§23/§27 | 漏洞分级、补丁窗口、版本发布、回滚、公告、SBOM 更新和兼容验证流程可演练。 |
 | M7-016 | 构建六平台 release artifact 与安装验证 | 发布 | C4 | M7-003..M7-015 | PRD §23/§26 | 每个平台包可安装、运行、查询 runtime info；文档不要求安装 OpenSSL；旧 global provider 不影响新栈。 |
 | M7-017 | 生成稳定版验收矩阵与发布候选报告 | 质量 | C3 | M7-001..M7-016 | PRD §26 | 22 条验收逐项给出 PASS/FAIL、证据链接、artifact digest、平台、已知限制；任一 P0 FAIL 阻断稳定版。 |
@@ -566,9 +567,9 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 
 ## 11. 任务统计
 
-- 主线任务：**173**
+- 主线任务：**174**
 - 条件上游任务：**7**
 - 稳定版后 P1/独立项目：**10**
-- 主线 + 条件任务总数：**180**
+- 主线 + 条件任务总数：**181**
 
 该数量代表 Issue/PR 级工作项，不代表必须串行执行；关键是保持里程碑退出门禁和依赖方向。
