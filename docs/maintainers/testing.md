@@ -35,7 +35,9 @@ Core Coverage 必须使用同一个版本；窗口内重跑不会切换 SDK。Se
 若某个已确认的 nightly compiler 只在外部 dependency codegen 阶段崩溃，workflow 可以按完整
 SDK 版本对受影响的 dependency-boundary job 设置较低优化级别。例外不得使用版本范围，Core
 仍须以 `-O2` 通过；下一个七天窗口选择新 nightly 后会自动恢复 external `-O2`，让问题重新
-进入门禁。发布 artifact 的 manifest 和本地 release qualification 不使用该 hosted workaround。
+进入门禁。`registry-rehearsal` 的 staging bundle compile 也使用相同例外；脚本随后恢复 manifest，
+并从恢复后的 staging source 创建检查用 archive。发布 artifact 的 manifest 和本地 release
+qualification 不使用该 hosted workaround。
 
 ## Core coverage
 

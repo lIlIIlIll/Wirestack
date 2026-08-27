@@ -31,6 +31,7 @@ MODULES = (
     "yjson_yyjson",
 )
 LEAF_BUNDLES = ("yjson_macros", "yjson")
+SUPPORTED_COMPILE_OVERRIDES = ("-O0", "-O1")
 
 
 def run(command: list[str], cwd: pathlib.Path, env: dict[str, str]) -> None:
@@ -58,6 +59,41 @@ def deterministic_archive(module: pathlib.Path, output: pathlib.Path) -> None:
             info.mtime = 0
             with source.open("rb") as stream:
                 archive.addfile(info, stream)
+
+
+def bundle_leaf(
+    module: pathlib.Path,
+    output: pathlib.Path,
+    env: dict[str, str],
+    compile_override: str,
+) -> None:
+    manifest = module / "cjpm.toml"
+    original_manifest = manifest.read_text(encoding="utf-8")
+    use_override = bool(compile_override and module.name == "yjson")
+    if use_override:
+        marker = 'compile-option = "-O2"'
+        if original_manifest.count(marker) != 1:
+            raise RuntimeError(f"unexpected cjpm manifest: {manifest}")
+        manifest.write_text(
+            original_manifest.replace(
+                marker,
+                f'compile-option = "{compile_override}"',
+            ),
+            encoding="utf-8",
+        )
+    try:
+        run(["cjpm", "bundle", "--skip-test", "--skip-lint"], module, env)
+    finally:
+        if use_override:
+            manifest.write_text(original_manifest, encoding="utf-8")
+
+    if use_override:
+        # The override is a hosted-compiler workaround, not release metadata.
+        # Archive the restored staging tree so consumers still inspect the O2
+        # release manifest. Build output is excluded by deterministic_archive.
+        deterministic_archive(module, output)
+    else:
+        shutil.copy2(module / "target" / output.name, output)
 
 
 def inspect_artifact(name: str, archive_path: pathlib.Path) -> None:
@@ -125,7 +161,14 @@ def main() -> int:
     parser.add_argument("destination", type=pathlib.Path)
     parser.add_argument("--skip-consumers", action="store_true")
     parser.add_argument("--consumer-override-compile-option", default="")
+    parser.add_argument("--bundle-override-compile-option", default="")
     args = parser.parse_args()
+    for override in (
+        args.consumer_override_compile_option,
+        args.bundle_override_compile_option,
+    ):
+        if override and override not in SUPPORTED_COMPILE_OVERRIDES:
+            raise SystemExit(f"unsupported dependency override: {override}")
     destination = args.destination.resolve()
     if destination.exists() and any(destination.iterdir()):
         raise SystemExit(f"destination is not empty: {destination}")
@@ -147,8 +190,12 @@ def main() -> int:
 
         output = artifacts / f"{name}-{VERSION}.cjp"
         if name in LEAF_BUNDLES:
-            run(["cjpm", "bundle", "--skip-test", "--skip-lint"], staged / name, env)
-            shutil.copy2(staged / name / "target" / output.name, output)
+            bundle_leaf(
+                staged / name,
+                output,
+                env,
+                args.bundle_override_compile_option,
+            )
         else:
             deterministic_archive(staged / name, output)
         inspect_artifact(name, output)
