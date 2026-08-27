@@ -1,0 +1,1112 @@
+{
+  "compile": {
+    "manifest_compile_option": "-O2",
+    "process": {
+      "command": [
+        "cjpm",
+        "test",
+        "src/internal/transport_stdnet",
+        "-j",
+        "1",
+        "--no-run"
+      ],
+      "duration_ms": 137018.607,
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "   Finished `test` profile compilation\n   Executable files at `/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin`\ncjpm test success\n",
+      "timed_out": false
+    },
+    "source_sha256": "83a28f8654eae9c18fed2767d5e013a268d7de5ee6374270a8eb5877bd07b9f6"
+  },
+  "configuration": {
+    "allocation_iterations": 10000,
+    "compile_option": "-O2",
+    "timing_repetitions": 5
+  },
+  "environment": {
+    "architecture": "x86_64",
+    "cangjie_home": "/home/elliot/cangjie_sdk/daily/cangjie",
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3",
+    "generated_at_utc": "2026-08-27T04:07:40.344743+00:00",
+    "os": "Linux-7.1.9-arch1-2-x86_64-with-glibc2.44",
+    "python": "3.14.7 (main, Aug 10 2026, 07:46:56) [GCC 16.1.1 20260728]",
+    "repository_revision": "working-tree-pre-fastpath"
+  },
+  "metric_availability": {
+    "cycles": "MEASURED",
+    "instructions": "MEASURED",
+    "ipc": "MEASURED",
+    "native_process_allocation_events": "MEASURED",
+    "wall_time": "MEASURED"
+  },
+  "profile": "background-operation-context-per-call",
+  "schema_version": 1,
+  "stages": [
+    {
+      "allocation": {
+        "events_above_control": 0,
+        "events_above_control_per_call": 0.0,
+        "heaptrack_record": "/tmp/wirestack-m1-027-baseline-artifacts/allocations/control-loop/heaptrack-data.zst",
+        "iterations": 10000,
+        "native_process_allocation_events": 36700
+      },
+      "name": "control-loop",
+      "perf": {
+        "cycles": 64169625,
+        "cycles_per_call": 64.17,
+        "instructions": 45436177,
+        "instructions_per_call": 45.436,
+        "ipc": 0.708064,
+        "iterations": 1000000
+      },
+      "timing": {
+        "nanoseconds_per_call": {
+          "max": 2.45,
+          "min": 1.233,
+          "p50": 2.065
+        },
+        "repetitions": 5,
+        "samples": [
+          {
+            "checksum": 500000,
+            "duration_ns": 2065306,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 2.065,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.controlLoop",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 38.162,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=control-loop iterations=1000000 durationNs=2065306 checksum=500000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 3462569 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 3021143 ns, RESULT:\n    [ PASSED ] CASE: controlLoop (2462221 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "control-loop"
+          },
+          {
+            "checksum": 500000,
+            "duration_ns": 1233394,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 1.233,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.controlLoop",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 43.955,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=control-loop iterations=1000000 durationNs=1233394 checksum=500000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 2239140 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 1933981 ns, RESULT:\n    [ PASSED ] CASE: controlLoop (1536814 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "control-loop"
+          },
+          {
+            "checksum": 500000,
+            "duration_ns": 1710491,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 1.71,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.controlLoop",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 56.135,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=control-loop iterations=1000000 durationNs=1710491 checksum=500000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 6386444 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 5737427 ns, RESULT:\n    [ PASSED ] CASE: controlLoop (3528452 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "control-loop"
+          },
+          {
+            "checksum": 500000,
+            "duration_ns": 2197723,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 2.198,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.controlLoop",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 44.515,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=control-loop iterations=1000000 durationNs=2197723 checksum=500000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 3746118 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 3248483 ns, RESULT:\n    [ PASSED ] CASE: controlLoop (2644018 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "control-loop"
+          },
+          {
+            "checksum": 500000,
+            "duration_ns": 2449931,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 2.45,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.controlLoop",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 48.88,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=control-loop iterations=1000000 durationNs=2449931 checksum=500000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 3930348 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 3504820 ns, RESULT:\n    [ PASSED ] CASE: controlLoop (2913704 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "control-loop"
+          }
+        ]
+      }
+    },
+    {
+      "allocation": {
+        "events_above_control": 2,
+        "events_above_control_per_call": 0.0002,
+        "heaptrack_record": "/tmp/wirestack-m1-027-baseline-artifacts/allocations/background-context-check/heaptrack-data.zst",
+        "iterations": 10000,
+        "native_process_allocation_events": 36702
+      },
+      "name": "background-context-check",
+      "perf": {
+        "cycles": 97168482,
+        "cycles_per_call": 97.168,
+        "instructions": 113444524,
+        "instructions_per_call": 113.445,
+        "ipc": 1.167503,
+        "iterations": 1000000
+      },
+      "timing": {
+        "nanoseconds_per_call": {
+          "max": 22.947,
+          "min": 14.636,
+          "p50": 15.262
+        },
+        "repetitions": 5,
+        "samples": [
+          {
+            "checksum": 0,
+            "duration_ns": 14636138,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 14.636,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.backgroundContextCheck",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 43.986,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=background-context-check iterations=1000000 durationNs=14636138 checksum=0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 16009162 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 15600371 ns, RESULT:\n    [ PASSED ] CASE: backgroundContextCheck (15092331 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "background-context-check"
+          },
+          {
+            "checksum": 0,
+            "duration_ns": 14887412,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 14.887,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.backgroundContextCheck",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 44.888,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=background-context-check iterations=1000000 durationNs=14887412 checksum=0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 16148693 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 15746953 ns, RESULT:\n    [ PASSED ] CASE: backgroundContextCheck (15252583 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "background-context-check"
+          },
+          {
+            "checksum": 0,
+            "duration_ns": 15261557,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 15.262,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.backgroundContextCheck",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 44.979,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=background-context-check iterations=1000000 durationNs=15261557 checksum=0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 16436207 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 16065758 ns, RESULT:\n    [ PASSED ] CASE: backgroundContextCheck (15627596 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "background-context-check"
+          },
+          {
+            "checksum": 0,
+            "duration_ns": 22947423,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 22.947,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.backgroundContextCheck",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 66.223,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=background-context-check iterations=1000000 durationNs=22947423 checksum=0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 24356476 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 23910028 ns, RESULT:\n    [ PASSED ] CASE: backgroundContextCheck (23330115 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "background-context-check"
+          },
+          {
+            "checksum": 0,
+            "duration_ns": 18601501,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 18.602,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.backgroundContextCheck",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 75.685,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=background-context-check iterations=1000000 durationNs=18601501 checksum=0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 19938362 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 19514528 ns, RESULT:\n    [ PASSED ] CASE: backgroundContextCheck (18999548 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "background-context-check"
+          }
+        ]
+      }
+    },
+    {
+      "allocation": {
+        "events_above_control": 6,
+        "events_above_control_per_call": 0.0006,
+        "heaptrack_record": "/tmp/wirestack-m1-027-baseline-artifacts/allocations/deadline-check/heaptrack-data.zst",
+        "iterations": 10000,
+        "native_process_allocation_events": 36706
+      },
+      "name": "deadline-check",
+      "perf": {
+        "cycles": 350974022,
+        "cycles_per_call": 350.974,
+        "instructions": 415454300,
+        "instructions_per_call": 415.454,
+        "ipc": 1.183718,
+        "iterations": 1000000
+      },
+      "timing": {
+        "nanoseconds_per_call": {
+          "max": 107.65,
+          "min": 87.193,
+          "p50": 95.229
+        },
+        "repetitions": 5,
+        "samples": [
+          {
+            "checksum": 0,
+            "duration_ns": 87192642,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 87.193,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.deadlineCheck",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 126.967,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=deadline-check iterations=1000000 durationNs=87192642 checksum=0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 88590929 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 88079715 ns, RESULT:\n    [ PASSED ] CASE: deadlineCheck (87588881 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "deadline-check"
+          },
+          {
+            "checksum": 0,
+            "duration_ns": 107650495,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 107.65,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.deadlineCheck",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 154.29,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=deadline-check iterations=1000000 durationNs=107650495 checksum=0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 109626704 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 108846458 ns, RESULT:\n    [ PASSED ] CASE: deadlineCheck (108246361 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "deadline-check"
+          },
+          {
+            "checksum": 0,
+            "duration_ns": 89230807,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 89.231,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.deadlineCheck",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 130.263,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=deadline-check iterations=1000000 durationNs=89230807 checksum=0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 90686891 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 90280084 ns, RESULT:\n    [ PASSED ] CASE: deadlineCheck (89698651 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "deadline-check"
+          },
+          {
+            "checksum": 0,
+            "duration_ns": 95228828,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 95.229,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.deadlineCheck",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 134.049,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=deadline-check iterations=1000000 durationNs=95228828 checksum=0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 96570030 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 96151776 ns, RESULT:\n    [ PASSED ] CASE: deadlineCheck (95650298 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "deadline-check"
+          },
+          {
+            "checksum": 0,
+            "duration_ns": 101169811,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 101.17,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.deadlineCheck",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 145.092,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=deadline-check iterations=1000000 durationNs=101169811 checksum=0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 102873625 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 102327532 ns, RESULT:\n    [ PASSED ] CASE: deadlineCheck (101591464 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "deadline-check"
+          }
+        ]
+      }
+    },
+    {
+      "allocation": {
+        "events_above_control": 0,
+        "events_above_control_per_call": 0.0,
+        "heaptrack_record": "/tmp/wirestack-m1-027-baseline-artifacts/allocations/none-cancellation-registration/heaptrack-data.zst",
+        "iterations": 10000,
+        "native_process_allocation_events": 36700
+      },
+      "name": "none-cancellation-registration",
+      "perf": {
+        "cycles": 150877296,
+        "cycles_per_call": 150.877,
+        "instructions": 164695734,
+        "instructions_per_call": 164.696,
+        "ipc": 1.091587,
+        "iterations": 1000000
+      },
+      "timing": {
+        "nanoseconds_per_call": {
+          "max": 67.377,
+          "min": 43.337,
+          "p50": 54.616
+        },
+        "repetitions": 5,
+        "samples": [
+          {
+            "checksum": 1000000,
+            "duration_ns": 61797000,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 61.797,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.noneCancellationRegistration",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 131.239,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=none-cancellation-registration iterations=1000000 durationNs=61797000 checksum=1000000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 63102242 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 62710624 ns, RESULT:\n    [ PASSED ] CASE: noneCancellationRegistration (62195549 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "none-cancellation-registration"
+          },
+          {
+            "checksum": 1000000,
+            "duration_ns": 50682895,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 50.683,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.noneCancellationRegistration",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 133.282,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=none-cancellation-registration iterations=1000000 durationNs=50682895 checksum=1000000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 53012615 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 52441350 ns, RESULT:\n    [ PASSED ] CASE: noneCancellationRegistration (51118277 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "none-cancellation-registration"
+          },
+          {
+            "checksum": 1000000,
+            "duration_ns": 54616072,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 54.616,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.noneCancellationRegistration",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 116.206,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=none-cancellation-registration iterations=1000000 durationNs=54616072 checksum=1000000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 57968257 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 57043675 ns, RESULT:\n    [ PASSED ] CASE: noneCancellationRegistration (55814697 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "none-cancellation-registration"
+          },
+          {
+            "checksum": 1000000,
+            "duration_ns": 67376993,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 67.377,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.noneCancellationRegistration",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 148.392,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=none-cancellation-registration iterations=1000000 durationNs=67376993 checksum=1000000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 69695485 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 69296776 ns, RESULT:\n    [ PASSED ] CASE: noneCancellationRegistration (67831905 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "none-cancellation-registration"
+          },
+          {
+            "checksum": 1000000,
+            "duration_ns": 43336859,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 43.337,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.noneCancellationRegistration",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 135.92,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=none-cancellation-registration iterations=1000000 durationNs=43336859 checksum=1000000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 45302696 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 44496923 ns, RESULT:\n    [ PASSED ] CASE: noneCancellationRegistration (43799116 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "none-cancellation-registration"
+          }
+        ]
+      }
+    },
+    {
+      "allocation": {
+        "events_above_control": 0,
+        "events_above_control_per_call": 0.0,
+        "heaptrack_record": "/tmp/wirestack-m1-027-baseline-artifacts/allocations/cancellable-registration/heaptrack-data.zst",
+        "iterations": 10000,
+        "native_process_allocation_events": 36700
+      },
+      "name": "cancellable-registration",
+      "perf": {
+        "cycles": 117942643,
+        "cycles_per_call": 1179.426,
+        "instructions": 110934776,
+        "instructions_per_call": 1109.348,
+        "ipc": 0.940582,
+        "iterations": 100000
+      },
+      "timing": {
+        "nanoseconds_per_call": {
+          "max": 246.004,
+          "min": 182.323,
+          "p50": 229.331
+        },
+        "repetitions": 5,
+        "samples": [
+          {
+            "checksum": 100000,
+            "duration_ns": 18232349,
+            "iterations": 100000,
+            "nanoseconds_per_call": 182.323,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.cancellableRegistration",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 49.887,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=cancellable-registration iterations=100000 durationNs=18232349 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 19322538 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 19009107 ns, RESULT:\n    [ PASSED ] CASE: cancellableRegistration (18574131 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "cancellable-registration"
+          },
+          {
+            "checksum": 100000,
+            "duration_ns": 22933089,
+            "iterations": 100000,
+            "nanoseconds_per_call": 229.331,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.cancellableRegistration",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 49.467,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=cancellable-registration iterations=100000 durationNs=22933089 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 24165247 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 23787779 ns, RESULT:\n    [ PASSED ] CASE: cancellableRegistration (23292023 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "cancellable-registration"
+          },
+          {
+            "checksum": 100000,
+            "duration_ns": 20313844,
+            "iterations": 100000,
+            "nanoseconds_per_call": 203.138,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.cancellableRegistration",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 52.576,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=cancellable-registration iterations=100000 durationNs=20313844 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 21650144 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 21231550 ns, RESULT:\n    [ PASSED ] CASE: cancellableRegistration (20709709 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "cancellable-registration"
+          },
+          {
+            "checksum": 100000,
+            "duration_ns": 24600368,
+            "iterations": 100000,
+            "nanoseconds_per_call": 246.004,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.cancellableRegistration",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 60.248,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=cancellable-registration iterations=100000 durationNs=24600368 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 26259723 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 25768287 ns, RESULT:\n    [ PASSED ] CASE: cancellableRegistration (25093267 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "cancellable-registration"
+          },
+          {
+            "checksum": 100000,
+            "duration_ns": 23915852,
+            "iterations": 100000,
+            "nanoseconds_per_call": 239.159,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.cancellableRegistration",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 60.177,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=cancellable-registration iterations=100000 durationNs=23915852 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 25613634 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 25129109 ns, RESULT:\n    [ PASSED ] CASE: cancellableRegistration (24436346 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "cancellable-registration"
+          }
+        ]
+      }
+    },
+    {
+      "allocation": {
+        "events_above_control": 0,
+        "events_above_control_per_call": 0.0,
+        "heaptrack_record": "/tmp/wirestack-m1-027-baseline-artifacts/allocations/operation-gate/heaptrack-data.zst",
+        "iterations": 10000,
+        "native_process_allocation_events": 36700
+      },
+      "name": "operation-gate",
+      "perf": {
+        "cycles": 125597480,
+        "cycles_per_call": 125.597,
+        "instructions": 89082239,
+        "instructions_per_call": 89.082,
+        "ipc": 0.709268,
+        "iterations": 1000000
+      },
+      "timing": {
+        "nanoseconds_per_call": {
+          "max": 43.643,
+          "min": 31.844,
+          "p50": 40.558
+        },
+        "repetitions": 5,
+        "samples": [
+          {
+            "checksum": 1000000,
+            "duration_ns": 43642854,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 43.643,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.operationGate",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 108.978,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=operation-gate iterations=1000000 durationNs=43642854 checksum=1000000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 45107915 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 44641814 ns, RESULT:\n    [ PASSED ] CASE: operationGate (44092019 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "operation-gate"
+          },
+          {
+            "checksum": 1000000,
+            "duration_ns": 31844407,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 31.844,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.operationGate",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 110.607,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=operation-gate iterations=1000000 durationNs=31844407 checksum=1000000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 33551949 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 33069600 ns, RESULT:\n    [ PASSED ] CASE: operationGate (32495546 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "operation-gate"
+          },
+          {
+            "checksum": 1000000,
+            "duration_ns": 40558191,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 40.558,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.operationGate",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 111.704,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=operation-gate iterations=1000000 durationNs=40558191 checksum=1000000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 42066699 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 41573303 ns, RESULT:\n    [ PASSED ] CASE: operationGate (40994559 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "operation-gate"
+          },
+          {
+            "checksum": 1000000,
+            "duration_ns": 43152853,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 43.153,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.operationGate",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 142.184,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=operation-gate iterations=1000000 durationNs=43152853 checksum=1000000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 44423344 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 43984823 ns, RESULT:\n    [ PASSED ] CASE: operationGate (43528224 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "operation-gate"
+          },
+          {
+            "checksum": 1000000,
+            "duration_ns": 35404642,
+            "iterations": 1000000,
+            "nanoseconds_per_call": 35.405,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.operationGate",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 95.978,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=operation-gate iterations=1000000 durationNs=35404642 checksum=1000000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 41534049 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 40762277 ns, RESULT:\n    [ PASSED ] CASE: operationGate (36203914 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "operation-gate"
+          }
+        ]
+      }
+    },
+    {
+      "allocation": {
+        "events_above_control": 194,
+        "events_above_control_per_call": 0.0194,
+        "heaptrack_record": "/tmp/wirestack-m1-027-baseline-artifacts/allocations/empty-background-read/heaptrack-data.zst",
+        "iterations": 10000,
+        "native_process_allocation_events": 36894
+      },
+      "name": "empty-background-read",
+      "perf": {
+        "cycles": 148978445,
+        "cycles_per_call": 1489.784,
+        "instructions": 157514034,
+        "instructions_per_call": 1575.14,
+        "ipc": 1.057294,
+        "iterations": 100000
+      },
+      "timing": {
+        "nanoseconds_per_call": {
+          "max": 351.421,
+          "min": 260.858,
+          "p50": 297.042
+        },
+        "repetitions": 5,
+        "samples": [
+          {
+            "checksum": 100000,
+            "duration_ns": 35142114,
+            "iterations": 100000,
+            "nanoseconds_per_call": 351.421,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.emptyBackgroundRead",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 71.115,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=empty-background-read iterations=100000 durationNs=35142114 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 37729745 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 37230534 ns, RESULT:\n    [ PASSED ] CASE: emptyBackgroundRead (36568419 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "empty-background-read"
+          },
+          {
+            "checksum": 100000,
+            "duration_ns": 29574169,
+            "iterations": 100000,
+            "nanoseconds_per_call": 295.742,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.emptyBackgroundRead",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 71.965,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=empty-background-read iterations=100000 durationNs=29574169 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 32397832 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 32015214 ns, RESULT:\n    [ PASSED ] CASE: emptyBackgroundRead (31414543 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "empty-background-read"
+          },
+          {
+            "checksum": 100000,
+            "duration_ns": 29704220,
+            "iterations": 100000,
+            "nanoseconds_per_call": 297.042,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.emptyBackgroundRead",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 66.968,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=empty-background-read iterations=100000 durationNs=29704220 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 31837794 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 31427932 ns, RESULT:\n    [ PASSED ] CASE: emptyBackgroundRead (30908339 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "empty-background-read"
+          },
+          {
+            "checksum": 100000,
+            "duration_ns": 31888819,
+            "iterations": 100000,
+            "nanoseconds_per_call": 318.888,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.emptyBackgroundRead",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 71.677,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=empty-background-read iterations=100000 durationNs=31888819 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 35405646 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 34897565 ns, RESULT:\n    [ PASSED ] CASE: emptyBackgroundRead (34001244 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "empty-background-read"
+          },
+          {
+            "checksum": 100000,
+            "duration_ns": 26085759,
+            "iterations": 100000,
+            "nanoseconds_per_call": 260.858,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.emptyBackgroundRead",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 67.56,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=empty-background-read iterations=100000 durationNs=26085759 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 28296172 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 27759175 ns, RESULT:\n    [ PASSED ] CASE: emptyBackgroundRead (27217493 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "empty-background-read"
+          }
+        ]
+      }
+    },
+    {
+      "allocation": {
+        "events_above_control": 192,
+        "events_above_control_per_call": 0.0192,
+        "heaptrack_record": "/tmp/wirestack-m1-027-baseline-artifacts/allocations/none-read-timeout-assignment/heaptrack-data.zst",
+        "iterations": 10000,
+        "native_process_allocation_events": 36892
+      },
+      "name": "none-read-timeout-assignment",
+      "perf": {
+        "cycles": 55093420,
+        "cycles_per_call": 550.934,
+        "instructions": 41623878,
+        "instructions_per_call": 416.239,
+        "ipc": 0.755515,
+        "iterations": 100000
+      },
+      "timing": {
+        "nanoseconds_per_call": {
+          "max": 32.215,
+          "min": 14.996,
+          "p50": 22.588
+        },
+        "repetitions": 5,
+        "samples": [
+          {
+            "checksum": 100000,
+            "duration_ns": 1535458,
+            "iterations": 100000,
+            "nanoseconds_per_call": 15.355,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.noneReadTimeoutAssignment",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 37.357,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=none-read-timeout-assignment iterations=100000 durationNs=1535458 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 4598987 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 4104219 ns, RESULT:\n    [ PASSED ] CASE: noneReadTimeoutAssignment (3124815 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "none-read-timeout-assignment"
+          },
+          {
+            "checksum": 100000,
+            "duration_ns": 1499597,
+            "iterations": 100000,
+            "nanoseconds_per_call": 14.996,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.noneReadTimeoutAssignment",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 44.881,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=none-read-timeout-assignment iterations=100000 durationNs=1499597 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 3402052 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 2967100 ns, RESULT:\n    [ PASSED ] CASE: noneReadTimeoutAssignment (2552811 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "none-read-timeout-assignment"
+          },
+          {
+            "checksum": 100000,
+            "duration_ns": 2324679,
+            "iterations": 100000,
+            "nanoseconds_per_call": 23.247,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.noneReadTimeoutAssignment",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 41.085,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=none-read-timeout-assignment iterations=100000 durationNs=2324679 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 4144808 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 3746165 ns, RESULT:\n    [ PASSED ] CASE: noneReadTimeoutAssignment (3230035 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "none-read-timeout-assignment"
+          },
+          {
+            "checksum": 100000,
+            "duration_ns": 3221462,
+            "iterations": 100000,
+            "nanoseconds_per_call": 32.215,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.noneReadTimeoutAssignment",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 40.031,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=none-read-timeout-assignment iterations=100000 durationNs=3221462 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 5500632 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 5018834 ns, RESULT:\n    [ PASSED ] CASE: noneReadTimeoutAssignment (4516655 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "none-read-timeout-assignment"
+          },
+          {
+            "checksum": 100000,
+            "duration_ns": 2258800,
+            "iterations": 100000,
+            "nanoseconds_per_call": 22.588,
+            "process": {
+              "command": [
+                "/tmp/wirestack-m1-027-baseline-artifacts/adapter-snapshot/target/release/unittest_bin/wirestack.internal.transport_stdnet",
+                "--filter=M127OperationContextCostProfileTest.noneReadTimeoutAssignment",
+                "--show-all-output",
+                "--no-progress",
+                "--no-color"
+              ],
+              "duration_ms": 71.547,
+              "exit_code": 0,
+              "stderr": "",
+              "stdout": "M127_PROFILE stage=none-read-timeout-assignment iterations=100000 durationNs=2258800 checksum=100000\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 4199761 ns, RESULT:\n    TCS: M127OperationContextCostProfileTest, time elapsed: 3806882 ns, RESULT:\n    [ PASSED ] CASE: noneReadTimeoutAssignment (3255137 ns)\nSummary: TOTAL: 28\n    PASSED: 1, SKIPPED: 27, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+              "timed_out": false
+            },
+            "stage": "none-read-timeout-assignment"
+          }
+        ]
+      }
+    }
+  ],
+  "task_id": "M1-027"
+}
