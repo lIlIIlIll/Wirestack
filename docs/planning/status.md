@@ -72,6 +72,7 @@ the native platform dependencies in the global backlog.
 | M2-010 | COMPLETE | [`docs/evidence/M2-010/README.md`](../evidence/M2-010/README.md) | Immutable direct and explicit-proxy routes separate origin/connect targets and DNS ownership while retaining bounded network-binding, TLS-context and ALPN parameters; system-proxy discovery remains out of scope. |
 | M2-014 | COMPLETE | [`docs/evidence/M2-014/README.md`](../evidence/M2-014/README.md) | Scripted resolver and connector tests cover IPv6 first success and blackhole fallback, simultaneous success, all-fail, pre-cancel, success-plus-cancel and the exact Deadline publication boundary. |
 | M2-015 | COMPLETE | [`docs/evidence/M2-015/README.md`](../evidence/M2-015/README.md) | Native glibc network namespaces prove IPv6 available/blackhole fallback, 20/100 ms RTT, 1% loss, joined losers with bounded resources, and one shared Deadline for 2/8 candidates. |
+| M2-016 | COMPLETE | [`docs/evidence/M2-016/README.md`](../evidence/M2-016/README.md) | The isolated `-O2` native benchmark retains DNS, first-attempt, winner, total, connection-count and cancellation metrics across six profiles and 528 measured samples; cancellation P99 is 3.908 ms against the 50 ms limit. |
 
 ## Conditional upstream work
 

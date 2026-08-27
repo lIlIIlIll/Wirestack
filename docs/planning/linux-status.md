@@ -63,7 +63,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M2-012/013 Happy Eyeballs scheduler | COMPLETE | Shared parent Deadline, linked cancellation, atomic first winner, loser abort, joined candidates and per-attempt diagnostics |
 | M2-014 scripted connector tests | COMPLETE | IPv6 first success and blackhole fallback, simultaneous success, all-fail, pre-cancel, success+cancel and injected Deadline boundary all pass; candidates are joined and rejected winners are aborted; [Linux evidence](../evidence/M2-014/README.md) |
 | M2-015 native network gate | COMPLETE | Native glibc user/network namespaces cover IPv6 available and 64 blackhole fallbacks, 20/100 ms RTT, 128 connections under 1% loss, flat socket/thread/FD trends, and a 3 ms elapsed delta between 2/8 candidates sharing one Deadline; [evidence](../evidence/M2-015/README.md) |
-| M2-016 DNS-to-connected benchmark | READY | DNS, first attempt, winner, total connection, connection count and cancellation-latency metrics remain; musl is outside the current profile under ADR-0004. |
+| M2-016 DNS-to-connected benchmark | COMPLETE | Six native profiles retain 528 measured DNS/attempt/winner/total/count/cancellation samples from an isolated `-O2` build; cancellation P99 is 3.908 ms and every profile passes; [evidence](../evidence/M2-016/README.md). |
 
 ## Implemented TLS Provider Foundation
 
@@ -140,8 +140,7 @@ Status values have the same fail-closed meaning as the global status file.
    deterministic race tests.
 2. Submit the minimal `std.net` upstream interface RFC for typed half-close and
    stable native error evidence.
-3. Complete M2-016 DNS-to-connected and per-attempt metrics.
-4. Complete M3-028 TLS interoperability, fuzz, dependency and benchmark gates
+3. Complete M3-028 TLS interoperability, fuzz, dependency and benchmark gates
    under ADR-0003 and ADR-0004.
-5. Complete Linux stress/soak, stdx comparison when an eligible baseline SDK
+4. Complete Linux stress/soak, stdx comparison when an eligible baseline SDK
    exists, packaging and installation verification.
