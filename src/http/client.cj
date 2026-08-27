@@ -1,7 +1,6 @@
 package wirestack.http
 
 import std.sync.Mutex
-import wirestack.internal.common as common
 import wirestack.internal.http1 as http1
 import wirestack.internal.resolver as resolver
 import wirestack.internal.transport as transport
@@ -34,7 +33,7 @@ public class HttpClientBuilder {
 
     public init() {}
 
-    /** Installs a provider-neutral resolver. Required for hostnames until SystemResolver lands. */
+    /** Installs a caller-owned provider-neutral resolver instead of the Linux system resolver. */
     public func resolver(value: Resolver): HttpClientBuilder {
         configuredResolver = Some(value)
         this
@@ -73,9 +72,13 @@ public class HttpClientBuilder {
     }
 
     public func build(): HttpClient {
-        let selected = match (configuredResolver) {
+        var ownedSystemResolver = None<resolver.SystemResolver>
+        let selected: resolver.Resolver = match (configuredResolver) {
             case Some(value) => value
-            case None => UnavailableSystemResolver()
+            case None =>
+                let value = SystemResolver(workerCount: 4, queueCapacity: 64)
+                ownedSystemResolver = Some(value)
+                value
         }
         var directTls = None<http1.HttpAlpnTlsHandshaker>
         var proxyTls = None<http1.Http1TlsHandshaker>
@@ -87,11 +90,12 @@ public class HttpClientBuilder {
             HttpClient(
                 selected, configuredRequestTimeout, configuredLimits,
                 configuredRedirectPolicy, configuredRetryPolicy, configuredProxy,
-                directTls, proxyTls
+                directTls, proxyTls, ownedSystemResolver
             )
         } catch (error: Exception) {
             match (directTls) { case Some(value) => value.close(); case None => () }
             match (proxyTls) { case Some(value) => value.close(); case None => () }
+            match (ownedSystemResolver) { case Some(value) => value.close(); case None => () }
             throw error
         }
     }
@@ -100,6 +104,7 @@ public class HttpClientBuilder {
 /** Linux HTTP/1 facade. HTTPS initializes the AWS-LC handshaker lazily. */
 public class HttpClient <: Resource {
     private let resolver: resolver.Resolver
+    private let ownedSystemResolver: ?resolver.SystemResolver
     private let requestTimeout: ?Duration
     private let limits: HttpLimits
     private let redirectPolicy: HttpRedirectPolicy
@@ -117,8 +122,10 @@ public class HttpClient <: Resource {
         redirectPolicy: HttpRedirectPolicy, retryPolicy: HttpRetryPolicy,
         proxy: ?HttpProxyConfig,
         directTlsHandshaker: ?http1.HttpAlpnTlsHandshaker,
-        proxyTlsHandshaker: ?http1.Http1TlsHandshaker) {
+        proxyTlsHandshaker: ?http1.Http1TlsHandshaker,
+        ownedSystemResolver: ?resolver.SystemResolver) {
         this.resolver = resolver
+        this.ownedSystemResolver = ownedSystemResolver
         this.requestTimeout = requestTimeout
         this.limits = limits
         this.redirectPolicy = redirectPolicy
@@ -251,6 +258,7 @@ public class HttpClient <: Resource {
         match (forwardProxy) { case Some(value) => value.close(); case None => () }
         match (secure) { case Some(value) => value.close(); case None => () }
         match (tunneled) { case Some(value) => value.close(); case None => () }
+        match (ownedSystemResolver) { case Some(value) => value.close(); case None => () }
     }
 
     public func isClosed(): Bool { synchronized(mutex) { closed } }
@@ -313,22 +321,4 @@ private func withProxyAuthorization(request: HttpRequest, value: ?String): HttpR
         builder.add("Proxy-Authorization", authorization)
     }
     request.withHeaders(builder.build())
-}
-
-private class UnavailableSystemResolver <: resolver.Resolver {
-    public func resolve(
-        host: common.HostName,
-        service: ?String,
-        options: resolver.ResolveOptions,
-        context: transport.OperationContext
-    ): resolver.ResolveResult {
-        let _ = host
-        let _ = service
-        let _ = options
-        let _ = context
-        throw HttpClientCapabilityException(
-            HttpClientCapabilityErrorCode.SystemResolverUnavailable,
-            "the pinned Linux SDK has no proven bounded asynchronous SystemResolver; configure HttpClient.builder().resolver(...)"
-        )
-    }
 }

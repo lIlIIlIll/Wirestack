@@ -1,0 +1,30 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 314607216 ns, RESULT:
+    TCS: M2005SystemResolverTest, time elapsed: 301780647 ns, RESULT:
+    [ PASSED ] CASE: resolvesLocalhostThroughThePublicContract (12309314 ns)
+    [ PASSED ] CASE: fixtureReturnsAllCandidatesAndDoesNotInventTtl (10604702 ns)
+    [ PASSED ] CASE: fixtureAppliesFamilyAndResultBounds (18391965 ns)
+    [ PASSED ] CASE: fixtureMapsStableErrorsAndRetainsNativeEvidence (49585657 ns)
+    [ PASSED ] CASE: fixtureCancellationAndDeadlineReturnBeforeNativeCleanup (201223201 ns)
+    STDERR:
+    An exception has occurred:
+    ResolveException: resolution cancelled
+    	 at wirestack.internal.resolver::checkResolveContext(wirestack.internal.transport::OperationContext)(/home/elliot/playground/Wirestack/src/internal/resolver/package.cj:231)
+    	 at wirestack.internal.resolver::LinuxBoundedResolverBackend::resolve(wirestack.internal.common::HostName, std.core::Option<...>, wirestack.internal.resolver::ResolveOptions, wirestack.internal.transport::OperationContext)(/home/elliot/playground/Wirestack/src/internal/resolver/bounded_backend.cj:139)
+    	 at wirestack.internal.resolver::SystemResolver::resolve(wirestack.internal.common::HostName, std.core::Option<...>, wirestack.internal.resolver::ResolveOptions, wirestack.internal.transport::OperationContext)(/home/elliot/playground/Wirestack/src/internal/resolver/system_resolver.cj:29)
+    	 at wirestack.internal.resolver::SystemResolver::resolve(wirestack.internal.common::HostName, wirestack.internal.resolver::ResolveOptions, wirestack.internal.transport::OperationContext)(/home/elliot/playground/Wirestack/src/internal/resolver/system_resolver.cj:38)
+    	 at wirestack.http/test::M2005SystemResolverTest::fixtureCancellationAndDeadlineReturnBeforeNativeCleanup::lambda.0()(/home/elliot/playground/Wirestack/src/http/system_resolver_test.cj:94)
+    [ PASSED ] CASE: validatesBoundsAndRejectsUseAfterClose (5057571 ns)
+Summary: TOTAL: 66
+    PASSED: 6, SKIPPED: 60, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 316588935 ns, RESULT:
+TP: wirestack.*, time elapsed: 316431870 ns, RESULT:
+    PASSED:
+    TP: wirestack.http, time elapsed: 314607216 ns
+Summary: TOTAL: 66
+    PASSED: 6, SKIPPED: 60, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
