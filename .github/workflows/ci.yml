@@ -93,7 +93,10 @@ jobs:
         env:
           YJSON_SECOND_YYJSON_ROOT: ${{ matrix.gate == 'yyjson-colink' && '/tmp/yjson-yyjson-second/yyjson-0.11.1' || '' }}
         run: |
-          ulimit -s 65536
+          # The current nightly's LLVM backend can recurse deeply while
+          # optimizing yjson as a path dependency on hosted x86_64 runners.
+          # Match the 128 MiB stack used by the release qualification gate.
+          ulimit -s 131072
           ulimit -s
           scripts/ci_job.sh "${{ matrix.gate }}"
 

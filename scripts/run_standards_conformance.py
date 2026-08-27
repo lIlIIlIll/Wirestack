@@ -168,6 +168,13 @@ def main() -> int:
         sys.stdout.write(completed.stdout)
     summaries = [line for line in completed.stdout.splitlines() if line.startswith("SUMMARY\t")]
     if len(summaries) != 1:
+        if args.quiet_failures and completed.stdout:
+            # Quiet mode normally keeps the conformance log concise. If the
+            # adapter never starts, retain its compiler/runtime diagnostics so
+            # hosted CI failures remain actionable.
+            sys.stderr.write(completed.stdout)
+            if not completed.stdout.endswith("\n"):
+                sys.stderr.write("\n")
         print("conformance adapter did not emit exactly one SUMMARY line", file=sys.stderr)
         result = 1
     else:
