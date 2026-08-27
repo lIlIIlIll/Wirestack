@@ -20,7 +20,8 @@ Status values have the same fail-closed meaning as the global status file.
 | DNS scheduler behavior | COMPLETE | M0-013 records starvation and mandates a bounded resolver pool |
 | TLS provider | COMPLETE | AWS-LC 5.5.0 is selected by ADR-0003 after schema-v2 glibc/musl PASS results, executed external signing and 10,000 cleanup cycles |
 | Transport SPI | COMPLETE | Core semantics, native adapter behavior, deterministic races, 100,000-iteration cleanup, the digest-pinned 24-hour soak, raw TCP thresholds and cancellation P99 pass without upstream source changes; [M1-025 evidence](../evidence/M1-025/README.md). |
-| Linux continuous gates | READY | Linux M0 decisions and evidence are complete; M1 qualification and Linux release automation remain. |
+| Linux M0 through M6 gates | COMPLETE | Native glibc evidence closes the implemented Transport, resolver, connector, TLS, HTTP/1 and HTTP/2 profile. |
+| Linux stable release | IN_PROGRESS | M7-018 freezes the Linux-only release graph. M7-019, M7-023 and M7-024 are READY; no task waits for another platform or an upstream source change. |
 
 ## Implemented Transport Core
 
@@ -140,7 +141,29 @@ Status values have the same fail-closed meaning as the global status file.
 | M6-024 HTTP/2 sibling fairness | COMPLETE | A zero-window-only connection-credit flush and bounded least-recently-served send reservations let 1/10/100 siblings complete while a connection-window-exhausting response stays open; 100 independent real TLS h2 runs completed 10,000 siblings with no timeout or connection abort; [Linux acceptance evidence](../evidence/M6-024/README.md) |
 | M6-025 HTTP/2 facade termination | COMPLETE | Exclusive per-call TLS scratch removes concurrent read/write aliasing; the original three-case sequence passes 100/100 same-process rounds, the repository check passes 538/538 non-Performance cases, and M3-028 performance remains qualified; [Linux acceptance evidence](../evidence/M6-025/README.md) |
 
+## Linux M7 stable-release closure
+
+M7-018 through M7-031 are Linux x86_64 glibc tasks. They do not close or
+replace the six-platform M7-001 through M7-017 tasks.
+
+| Task | Status | Current evidence or next requirement |
+|---|---|---|
+| M7-018 Linux M7 task graph | COMPLETE | The graph covers P0 traceability, architecture, artifact build and installation, final soak, fuzz, performance, SBOM, API freeze, documentation, independent security review, signing and the candidate report; [evidence](../evidence/M7-018/README.md) |
+| M7-019 Linux requirement audit | READY | Audit every P0 item, 15 lifecycle invariants and 22 release criteria. Preserve non-Linux items as `NOT_APPLICABLE_TO_LINUX_PROFILE`, not PASS. |
+| M7-020 Linux architecture audit | BLOCKED | Waits for M7-019. |
+| M7-021 Linux artifact and installation | BLOCKED | Waits for M7-020. |
+| M7-022 Linux final 24h+ soak | BLOCKED | Waits for the M7-021 release artifact. |
+| M7-023 Linux release fuzz gate | READY | Existing parser and mutation coverage supplies the target inputs; release thresholds and crash replay remain. |
+| M7-024 Linux performance gate | READY | Existing component reports supply the baselines; one versioned release decision remains. |
+| M7-025 Linux SBOM and fingerprint | BLOCKED | Waits for M7-021. |
+| M7-026 Linux API freeze | BLOCKED | Waits for M7-019. |
+| M7-027 Linux migration and examples | BLOCKED | Waits for M7-026. |
+| M7-028 Linux security review package | BLOCKED | Waits for M7-019 through M7-025. |
+| M7-029 Linux independent security review | BLOCKED | Waits for M7-028 and an independent reviewer. |
+| M7-030 Linux signing and update flow | BLOCKED | Waits for M7-025 and M7-029. |
+| M7-031 Linux release candidate | BLOCKED | Waits for M7-019 through M7-030. |
+
 ## Next critical path
 
-1. Define Linux-specific M7 packaging, installation, SBOM, API freeze, fuzz,
-   performance, and release-candidate tasks without waiting for other platforms.
+1. Start M7-019 and produce the fail-closed Linux requirement audit.
+2. M7-023 and M7-024 are independent READY tasks, but each needs its own branch.
