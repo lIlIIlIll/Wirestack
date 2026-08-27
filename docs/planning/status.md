@@ -158,8 +158,8 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 | M7-023 | READY | — | The Linux TLS, HTTP/1 and HTTP/2 parser and mutation evidence is complete; the release fuzz threshold remains. |
 | M7-024 | READY | — | The component performance reports are complete; the versioned Linux release gate remains. |
 | M7-025 | COMPLETE | [`docs/evidence/M7-025/README.md`](../evidence/M7-025/README.md) | The SPDX 2.3 SBOM, provider manifest and deterministic fingerprint bind the qualified artifact, provider/resolver digests, target, toolchain, trust, capabilities and features. runtime/std source changes remain optional long-term upstream requirements, not release dependencies. |
-| M7-026 | READY | — | M7-019 is complete; the Linux public API baseline and compatibility gate may proceed on its own branch. |
-| M7-027 | BLOCKED | — | Depends on M7-026. |
+| M7-026 | COMPLETE | [`docs/evidence/M7-026/README.md`](../evidence/M7-026/README.md) | The versioned Linux baseline freezes package `wirestack` major 0, 82 declarations, 50 resolved alias targets and all three public cancellation handles. The deterministic gate rejects legacy/global TLS, low-level socket and OpenSSL cipher-string surfaces without depending on runtime/std source changes. |
+| M7-027 | READY | — | M7-026 is complete; the Linux migration guide and clean-consumer examples may proceed on their own branch. |
 | M7-028 | BLOCKED | — | Depends on M7-019 through M7-025. |
 | M7-029 | BLOCKED | — | Depends on M7-028 and an independent reviewer. |
 | M7-030 | BLOCKED | — | Depends on M7-025 and M7-029. |
