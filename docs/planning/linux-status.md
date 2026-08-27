@@ -19,7 +19,7 @@ Status values have the same fail-closed meaning as the global status file.
 | leak/soak | COMPLETE | Linux GATE-NET-06 passes all seven workloads: three 100,000-iteration transport scenarios, 100,000 provider and production TLS cleanups, 100,000 production cancellations, and an 86,400-second mixed soak with PASS resource trends; [Linux evidence](../evidence/M0-011/README.md) |
 | DNS scheduler behavior | COMPLETE | M0-013 records starvation and mandates a bounded resolver pool |
 | TLS provider | COMPLETE | AWS-LC 5.5.0 is selected by ADR-0003 after schema-v2 glibc/musl PASS results, executed external signing and 10,000 cleanup cycles |
-| Transport SPI | IN_PROGRESS | Core types, listener, lifecycle, and half-close capability fallback are qualified. M1-022 and M1-023 still require focused qualification. |
+| Transport SPI | IN_PROGRESS | Core types, listener, lifecycle, half-close fallback, and stable std.net error mapping are qualified. M1-023 still requires focused qualification. |
 | Linux continuous gates | READY | Linux M0 decisions and evidence are complete; M1 qualification and Linux release automation remain. |
 
 ## Implemented Transport Core
@@ -45,8 +45,8 @@ Status values have the same fail-closed meaning as the global status file.
 | M1-019 typed half-close capability | COMPLETE | Native Linux loopback qualification covers Read and Write shutdown, stable `Unsupported` fields, retained endpoints, and continued bidirectional I/O; [evidence](../evidence/M1-019/README.md). |
 | M1-020 idempotent close/abort | COMPLETE | Native close is claimed once; close/cancel wake blocked read and listener accept without returning false EOF |
 | M1-021 `StdNetTransportListener` | COMPLETE | IP-only bind, bounded backlog, endpoints and accept Deadline/cancel/close semantics |
-| M1-022 stable std.net errors | READY | Timeout, cancellation, and local close use context and lifecycle evidence. Other socket failures use stable `SystemFailure/Unknown` with no message matching; focused qualification remains. |
-| M1-023 transport diagnostics | BLOCKED | Depends on M1-022 qualification. Backend, runtime family, endpoints, capabilities, staging counters, and event sink exist; exact OS event-backend discovery is optional. |
+| M1-022 stable std.net errors | COMPLETE | Native Linux qualification proves cancellation, Deadline, local close, listener errors, and unknown connect failures retain stable coordinates and endpoints without native-code or message assumptions; [evidence](../evidence/M1-022/README.md). |
+| M1-023 transport diagnostics | READY | M1-022 is complete. Backend, runtime family, endpoints, capabilities, staging counters, and event sink exist; exact OS event-backend discovery is optional. |
 | M1-027 background context cost | COMPLETE | The internal background fast path lowers empty `readSome` P50 from 297.042 ns to 92.110 ns; the formal 5-payload x 11-round GATE-NET-05 comparison passes every threshold with zero staging copies; [Linux evidence](../evidence/M1-027/README.md) |
 
 ## Implemented Resolver and Connector Core
@@ -138,8 +138,8 @@ Status values have the same fail-closed meaning as the global status file.
 
 ## Next critical path
 
-1. Qualify M1-022 against the ADR-0005 stable error rules.
-2. Complete M1-023, then run M1-024 deterministic races and assemble M1-025
+1. Complete M1-023 transport diagnostics qualification.
+2. Run M1-024 deterministic races and assemble M1-025
    from the retained leak, soak, cancellation, and performance evidence.
 3. Define Linux-specific M7 packaging, installation, SBOM, API freeze, fuzz,
    performance, and release-candidate tasks without waiting for other platforms.
