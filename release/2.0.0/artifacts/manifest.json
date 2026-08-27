@@ -1,0 +1,79 @@
+{
+  "releaseIdentity": "2.0.0",
+  "candidateSourceCommit": "d8f7a5121796b2a70c7cd21fc72dd84c26f4b29d",
+  "generatedAtUtc": "2026-08-27T00:09:39Z",
+  "sourceArchive": {
+    "fileCount": 207,
+    "sha256": "659db12731b418a5d97d096f099673d619bae5eed5cea01e786cf84fc5606bc5",
+    "storedInRepository": false
+  },
+  "localFreshCheckout": {
+    "status": "PASS",
+    "apiSnapshotDeclarations": 1071,
+    "reviewedApiDeltas": 10,
+    "runtimeFreezeScenarios": 5,
+    "coreTestsPassed": 521,
+    "standardsRequiredPassed": 2110,
+    "standardsOptionalAggregatePassed": 3074,
+    "fuzzCases": [5000, 50000],
+    "log": "logs/local-fresh-checkout.log.gz"
+  },
+  "packageRehearsal": {
+    "status": "PASS",
+    "moduleCount": 9,
+    "log": "logs/package-rehearsal.log.gz"
+  },
+  "generalPerformance": {
+    "status": "PASS",
+    "candidateSourceCommit": "d8f7a5121796b2a70c7cd21fc72dd84c26f4b29d",
+    "libraries": ["yjson", "stdx.json", "cjfast_json"],
+    "workloads": 36,
+    "runsPerLibraryAndWorkload": 11,
+    "cvLimitPercent": 5.0,
+    "stableThreeLibraryWorkloads": 13,
+    "noisyWorkloadsRetained": 23,
+    "requiredFullRerunCompleted": true,
+    "fixedWorkloadGate": "PASS",
+    "cjfastJsonCommit": "eefdedd1e53c93bb5ada11a96b9b81d88b2c6c65",
+    "fullArtifact": "performance/general/full-result.tar.gz",
+    "fullArtifactSha256": "8b3dd8776de9409df8252ce4c338089f8ea4e87ad29a30d817f59fd671fed76d"
+  },
+  "nativeAcceleration": {
+    "status": "PASS",
+    "runsPerModeAndWorkload": 11,
+    "workloads": 7,
+    "cvLimitPercent": 5.0,
+    "requiredFullRerunCompleted": true,
+    "advertisedWriteRatio": 0.238,
+    "advertisedReadRatio": 0.564,
+    "ordinaryRegressionLimitPercent": 5.0,
+    "fullArtifact": "performance/native/full-result.tar.gz",
+    "fullArtifactSha256": "7c97d0419a67621eb25c66964c315e92a312ba679d9f0dbbb09df42bcc89275b"
+  },
+  "additionalGates": {
+    "yyjsonCoLink": "PASS",
+    "windowsPureCrossBuild": "PASS",
+    "extendedFuzzCases": 50000
+  },
+  "yyjsonIsolationFixture": {
+    "upstreamVersion": "0.11.1",
+    "source": "https://github.com/ibireme/yyjson/archive/refs/tags/0.11.1.tar.gz",
+    "tarballSha256": "610a38a5e59192063f5f581ce0c3c1869971c458ea11b58dfe00d1c8269e255d",
+    "storedInRepository": false
+  },
+  "hostedCi": {
+    "status": "NOT_RUN",
+    "policy": "NON_BLOCKING",
+    "exceptionApproval": {
+      "authority": "release owner",
+      "approvedOn": "2026-08-25",
+      "rationale": "Complete local fresh-source evidence is blocking; hosted CI is not required for this candidate."
+    }
+  },
+  "tag": {
+    "status": "NOT_RUN"
+  },
+  "registryPublish": {
+    "status": "NOT_RUN"
+  }
+}
