@@ -161,12 +161,14 @@ class HttpFacadeTest {
             let sibling = client.get(
                 "https://example.com:${server.localEndpoint.port}/small"
             )
-            @Expect(readPublicBody(sibling.body), "ok")
-            sibling.close()
+            // Keep the sibling open across cancellation; the cancelled stream
+            // must return enough connection credit for its body to complete.
             @Expect(streamCancellation.cancel())
             @Expect(!streamCancellation.cancel())
             @Expect(publicBodyReadWasCancelled(first.body))
             first.close()
+            @Expect(readPublicBody(sibling.body), "ok")
+            sibling.close()
 
             let stillUsable = client.get(
                 "https://example.com:${server.localEndpoint.port}/small"
