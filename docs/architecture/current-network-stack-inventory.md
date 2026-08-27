@@ -327,7 +327,8 @@ of M0-001.
 M0-002 may now freeze a real CJPM package layout using the supplied SDK.
 M0-004 may start in parallel because its only dependency, M0-001, is complete.
 
-The following remain explicitly unresolved until their gates run:
+At the time of this inventory, the following items remained unresolved until
+their gates ran:
 
 - whether close reliably wakes every blocked operation on every target;
 - whether local close can be distinguished from peer EOF without upstream work;
@@ -338,3 +339,8 @@ The following remain explicitly unresolved until their gates run:
 - the TLS provider choice.
 
 No `UP-*` task is unlocked by this inventory alone.
+
+Later records resolve the Linux decisions. ADR-0003 selects AWS-LC, ADR-0004
+defines the glibc target, and ADR-0005 makes runtime and `std.net` changes
+optional future improvements. Current status lives in
+`docs/planning/linux-status.md`.

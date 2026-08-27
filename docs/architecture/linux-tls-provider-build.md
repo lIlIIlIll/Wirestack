@@ -78,8 +78,8 @@ same-direction operation fails immediately. Engine output and transport input
 are independently serialized so TLS control traffic cannot create concurrent
 same-direction transport calls. Handshake or application-I/O failure aborts the
 transport, while close/abort races release the engine and underlying transport
-exactly once. TLS half-close remains deliberately unsupported until the
-`close_notify` work in M3-026.
+exactly once. M3-026 implements TLS shutdown with `close_notify`; it does not
+depend on directional TCP shutdown.
 
 ## Context and security policy
 
