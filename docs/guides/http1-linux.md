@@ -1,8 +1,14 @@
 # Linux HTTP/1 client and server
 
-Wirestack's Linux facade uses typed endpoints and explicit resolvers. It never
-consults proxy environment variables, PAC, or WPAD, and the default hostname
-resolver fails closed until the SDK exposes a proven bounded async resolver.
+Wirestack's Linux facade uses typed endpoints. `HttpClient.builder().build()`
+owns a bounded `SystemResolver` by default. A resolver passed through
+`HttpClientBuilder.resolver` remains caller-owned. The facade never consults
+proxy environment variables, PAC, or WPAD.
+
+`SystemResolver` runs blocking system DNS calls on a fixed native worker pool.
+Its default bounds are four workers and 64 queued requests. The result retains
+all candidates up to `ResolveOptions.maxResults`, does not invent a TTL, and
+maps native resolver failures to `ResolveErrorCode`.
 
 ## Cleartext client and server
 

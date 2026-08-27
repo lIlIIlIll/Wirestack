@@ -191,6 +191,10 @@ internal class LinuxBoundedResolverBackend {
         }
     }
 
+    internal func isClosed(): Bool {
+        synchronized(mutex) { poolHandle == 0u64 }
+    }
+
     private func submit(
         host: HostName,
         service: ?String,
@@ -303,7 +307,12 @@ internal class LinuxBoundedResolverBackend {
             let code = resolveError(output.result[0])
             throw ResolveException(
                 code,
-                "Linux resolver failed with native code ${output.nativeCode[0]}"
+                "Linux system resolver failed",
+                if (output.nativeCode[0] == 0) {
+                    None<Int64>
+                } else {
+                    Some(output.nativeCode[0])
+                }
             )
         }
         let addresses = ArrayList<IpAddress>()
