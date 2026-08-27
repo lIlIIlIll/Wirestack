@@ -58,7 +58,7 @@ public func writeHttp1Response(
     validateResponseBody(response.body, head.framing, status, requestMethod)
     let tracker = ResponseWriteTracker(head.framing)
     try {
-        writeResponseTracked(transport, head.bytes, tracker, context)
+        writeResponseTracked(transport, head.bytesForWrite(), tracker, context)
         writeResponseBody(transport, response.body, head.framing, tracker, context, limits, trailer)
         tracker.snapshot()
     } catch (error: Http1ResponseWriteException) {
