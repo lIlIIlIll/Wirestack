@@ -1,0 +1,15 @@
+schema=wirestack.m3-013.system-trust.v1
+captured_at=2026-08-27T08:26:26+08:00
+platform=linux-glibc-x86_64
+kernel=Linux Arch 7.1.9-arch1-2 x86_64
+libc=glibc-2.44
+cjc=Cangjie Compiler 1.1.0-alpha.20260817040003 cjnative
+cjc_target=x86_64-unknown-linux-gnu
+selected_bundle=/etc/ssl/certs/ca-certificates.crt
+selected_bundle_size=185311
+selected_bundle_sha256=8c97794a899a32666593979dc7adfaec8bda2b420eb092ff0d987e44ad0bf6ea
+focused_test_total=4
+focused_test_passed=4
+focused_test_failed=0
+focused_test_errors=0
+result=PASS

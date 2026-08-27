@@ -107,8 +107,47 @@ private func usableDirectory(path: String): Bool {
     }
     try {
         let info = FileInfo(path)
-        info.isDirectory() && info.canRead()
+        if (!info.isDirectory() || !info.canRead()) {
+            return false
+        }
+        let found = [false]
+        Directory.walk(Path(path)) { entry =>
+            if (!found[0] && isUsableHashedCertificate(entry)) {
+                found[0] = true
+            }
+            !found[0]
+        }
+        found[0]
     } catch (_: Exception) {
         false
     }
+}
+
+private func isUsableHashedCertificate(entry: FileInfo): Bool {
+    if (!isHashedCertificateName(entry.name)) {
+        return false
+    }
+    try {
+        (entry.isRegular() || entry.isSymbolicLink()) && entry.canRead() && entry.size > 0
+    } catch (_: Exception) {
+        false
+    }
+}
+
+private func isHashedCertificateName(name: String): Bool {
+    let bytes = name.toArray()
+    if (bytes.size < 10 || bytes[8] != b'.') {
+        return false
+    }
+    for (index in 0..8) {
+        if (!bytes[index].isAsciiHex()) {
+            return false
+        }
+    }
+    for (index in 9..bytes.size) {
+        if (!bytes[index].isAsciiNumber()) {
+            return false
+        }
+    }
+    true
 }
