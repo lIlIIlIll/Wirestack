@@ -10,6 +10,24 @@ import wirestack.internal.transport.*
 private const DEFAULT_STAGING_BUFFER_SIZE: Int64 = 16 * 1024
 private const MAX_LISTENER_BACKLOG: Int64 = 65535
 
+@When[os == "Windows"]
+@C
+private struct AbortiveLinger {
+    var enabled: UInt16 = 1
+    var seconds: UInt16 = 0
+
+    static const size: UIntNative = 4
+}
+
+@When[os != "Windows"]
+@C
+private struct AbortiveLinger {
+    var enabled: Int32 = 1
+    var seconds: Int32 = 0
+
+    static const size: UIntNative = 8
+}
+
 /** Default DNS-free connection factory for Linux Happy Eyeballs attempts. */
 public class StdNetTransportFactory <: TransportFactory {
     private let stagingBufferSize: Int64
@@ -334,7 +352,7 @@ public class StdNetTransport <: DuplexTransport {
         }
         if (shouldClose) {
             try {
-                socket.linger = Some(Duration.Zero)
+                configureAbortiveClose(socket)
             } catch (_: Exception) {
                 // Abort still closes if SO_LINGER cannot be configured.
             }
@@ -597,6 +615,26 @@ public class StdNetTransport <: DuplexTransport {
         } else {
             nativeClosed = true
             true
+        }
+    }
+}
+
+private func configureAbortiveClose(socket: TcpSocket): Unit {
+    unsafe {
+        let value = LibC.malloc<AbortiveLinger>()
+        if (value.isNull()) {
+            throw IllegalMemoryException("failed to allocate SO_LINGER value")
+        }
+        try {
+            value.write(AbortiveLinger())
+            socket.setSocketOption(
+                OptionLevel.SOCKET,
+                OptionName.SO_LINGER,
+                CPointer(value),
+                AbortiveLinger.size
+            )
+        } finally {
+            LibC.free(value)
         }
     }
 }
