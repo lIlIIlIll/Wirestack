@@ -66,6 +66,7 @@ the native platform dependencies in the global backlog.
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
 | M2-001 | COMPLETE | [`docs/evidence/M2-001/README.md`](../evidence/M2-001/README.md) | Canonical ASCII/A-label host names and typed immutable IPv4/IPv6/zone endpoints cover exact name, label and port boundaries without implicit DNS or accepting authority syntax as a host. |
+| M2-003 | COMPLETE | [`docs/evidence/M2-003/README.md`](../evidence/M2-003/README.md) | A fixed native pthread pool provides strictly bounded FIFO DNS admission, metrics, prompt canonical cancellation/Deadline handling and worker cleanup without occupying scheduler carriers or using private runtime ABI. |
 | M2-010 | COMPLETE | [`docs/evidence/M2-010/README.md`](../evidence/M2-010/README.md) | Immutable direct and explicit-proxy routes separate origin/connect targets and DNS ownership while retaining bounded network-binding, TLS-context and ALPN parameters; system-proxy discovery remains out of scope. |
 | M2-014 | COMPLETE | [`docs/evidence/M2-014/README.md`](../evidence/M2-014/README.md) | Scripted resolver and connector tests cover IPv6 first success and blackhole fallback, simultaneous success, all-fail, pre-cancel, success-plus-cancel and the exact Deadline publication boundary. |
 
