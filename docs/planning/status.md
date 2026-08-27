@@ -142,3 +142,25 @@ source audit; status here describes task readiness, not global milestone complet
 | M6-023 | COMPLETE | [`docs/evidence/M6-023/README.md`](../evidence/M6-023/README.md) | Parallel real H1/H2 SSE profiles each ran for at least one hour and consumed more than 90 million numbered events with bounded resource trends, slow-consumer backpressure, public cancellation below 50 ms and H2 sibling isolation. |
 | M6-024 | COMPLETE | [`docs/evidence/M6-024/README.md`](../evidence/M6-024/README.md) | A zero-window-only connection-credit flush and bounded least-recently-served send reservations keep 1/10/100 siblings live while the slow stream remains open. Real TLS h2 passes 100/100 independent runs and 10,000 sibling responses without timeout or connection abort; the public API and existing bounds are unchanged. |
 | M6-025 | COMPLETE | [`docs/evidence/M6-025/README.md`](../evidence/M6-025/README.md) | TLS scratch is leased exclusively to each active read/write call and returned to bounded per-direction caches, so HTTP/2 full-duplex facade traffic no longer aliases active mutable buffers. The original three-case sequence completed 100/100 same-process rounds (300 scenario executions), `src/http` passed 66/66 non-Performance cases, `scripts/check` passed 538/538 non-Performance cases, and the requalified M3-028 performance gate remained PASS. |
+
+## Linux M7 stable-release closure
+
+These tasks close only the native Linux x86_64 glibc profile. They do not
+change the status of the six-platform M7-001 through M7-017 tasks.
+
+| ID | Status | Evidence | Notes |
+|---|---|---|---|
+| M7-018 | COMPLETE | [`docs/evidence/M7-018/README.md`](../evidence/M7-018/README.md) | The Linux M7 graph now has separate trace, architecture, artifact, soak, fuzz, performance, SBOM, API, documentation, security, signing and candidate-report tasks. No Linux task depends on M1-026, M4, `UP-*`, or runtime/`std.net` source changes. |
+| M7-019 | READY | — | Linux M0 through M6 evidence is available. Audit every P0 item, all 15 lifecycle invariants and all 22 release criteria before later release claims. |
+| M7-020 | BLOCKED | — | Depends on M7-019. |
+| M7-021 | BLOCKED | — | Depends on M7-020 and the completed Linux TLS provider qualification. |
+| M7-022 | BLOCKED | — | Depends on the installed release artifact from M7-021. |
+| M7-023 | READY | — | The Linux TLS, HTTP/1 and HTTP/2 parser and mutation evidence is complete; the release fuzz threshold remains. |
+| M7-024 | READY | — | The component performance reports are complete; the versioned Linux release gate remains. |
+| M7-025 | BLOCKED | — | Depends on M7-021. |
+| M7-026 | BLOCKED | — | Depends on M7-019. |
+| M7-027 | BLOCKED | — | Depends on M7-026. |
+| M7-028 | BLOCKED | — | Depends on M7-019 through M7-025. |
+| M7-029 | BLOCKED | — | Depends on M7-028 and an independent reviewer. |
+| M7-030 | BLOCKED | — | Depends on M7-025 and M7-029. |
+| M7-031 | BLOCKED | — | Depends on M7-019 through M7-030. |
