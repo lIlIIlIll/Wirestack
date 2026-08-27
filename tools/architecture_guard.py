@@ -18,6 +18,7 @@ from typing import Iterator, Sequence
 
 SCHEMA_VERSION = 1
 ALLOWED_STD_NET_PACKAGE = "wirestack.internal.transport_stdnet"
+PUBLIC_API_PACKAGES = {"wirestack", "wirestack.http", "wirestack.tls"}
 IGNORED_DIRS = {
     ".git", ".cjpm", ".codex", ".idea", ".local", ".vscode",
     "__pycache__", "build", "dist", "out", "target",
@@ -26,6 +27,9 @@ PACKAGE_RE = re.compile(
     r"(?m)^\s*package\s+([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*)\s*$"
 )
 STD_NET_RE = re.compile(r"(?<![A-Za-z0-9_])std\s*\.\s*net\b")
+PUBLIC_DECLARATION_RE = re.compile(
+    r"^\s*public\s+(?P<kind>class|struct|interface|enum|func|prop|let|var|type)\b"
+)
 
 SOURCE_RULES: tuple[tuple[str, re.Pattern[str], str], ...] = (
     (
@@ -48,6 +52,24 @@ SOURCE_RULES: tuple[tuple[str, re.Pattern[str], str], ...] = (
         re.compile(r"\bCJ_TLS_DYN_[A-Za-z0-9_]*\b"),
         "The new stack must not use the legacy CJ_TLS_DYN_* bridge.",
     ),
+    (
+        "legacy-global-tls-provider",
+        re.compile(r"\b(?:TlsKit|setGlobalTlsKit|getGlobalTlsKit)\b"),
+        "The new stack must not define or use the legacy global TLS provider API.",
+    ),
+)
+
+PUBLIC_API_RULES: tuple[tuple[str, re.Pattern[str], str], ...] = (
+    (
+        "public-low-level-socket-type",
+        re.compile(r"\b(?:TcpSocket|TcpServerSocket|StreamingSocket|SocketException)\b"),
+        "Wirestack public packages must not expose low-level socket types.",
+    ),
+    (
+        "public-native-provider-type",
+        re.compile(r"\b(?:SSL_CTX|SSL|X509|EVP_PKEY|AwsLc[A-Za-z0-9_]*)\b"),
+        "Wirestack public packages must not expose native TLS provider types.",
+    ),
 )
 
 CONFIG_RULES: tuple[tuple[str, re.Pattern[str], str], ...] = SOURCE_RULES + (
@@ -55,6 +77,15 @@ CONFIG_RULES: tuple[tuple[str, re.Pattern[str], str], ...] = SOURCE_RULES + (
         "openssl-dynamic-loader-bridge",
         re.compile(r"(?<![A-Za-z0-9_])(?:-l)?cangjie-dynamicLoader-opensslFFI\b"),
         "Wirestack build configuration must not use the legacy OpenSSL dynamic-loader bridge.",
+    ),
+    (
+        "system-openssl-loader",
+        re.compile(
+            r"\b(?:dlopen|LoadLibrary(?:A|W)?)\s*\([^\n)]*"
+            r"(?:lib)?(?:ssl|crypto)(?:\.|[\"'])",
+            re.IGNORECASE,
+        ),
+        "Wirestack must not load a system OpenSSL library at runtime.",
     ),
     (
         "system-openssl-link",
@@ -151,6 +182,40 @@ def expected_package(source_root: Path, path: Path) -> str:
     return "wirestack" if not parts else "wirestack." + ".".join(parts)
 
 
+def public_declaration_spans(text: str) -> Iterator[tuple[int, str]]:
+    """Yield public declaration headers with offsets into stripped source."""
+    lines = text.splitlines(keepends=True)
+    offsets: list[int] = []
+    offset = 0
+    for line in lines:
+        offsets.append(offset)
+        offset += len(line)
+
+    index = 0
+    while index < len(lines):
+        match = PUBLIC_DECLARATION_RE.match(lines[index])
+        if match is None:
+            index += 1
+            continue
+        start = offsets[index]
+        kind = match.group("kind")
+        end_index = index
+        parentheses = 0
+        while end_index < len(lines):
+            line = lines[end_index]
+            parentheses += line.count("(") - line.count(")")
+            if "{" in line:
+                break
+            if kind in {"func", "prop"} and parentheses <= 0:
+                break
+            if kind in {"let", "var", "type"}:
+                break
+            end_index += 1
+        end = offsets[end_index] + len(lines[end_index])
+        yield start, text[start:end]
+        index = end_index + 1
+
+
 def _position(text: str, offset: int) -> tuple[int, int, str]:
     line = text.count("\n", 0, offset) + 1
     line_start = text.rfind("\n", 0, offset) + 1
@@ -221,6 +286,13 @@ def inspect_source(root: Path, path: Path) -> list[Violation]:
                 root, path, text, match.start(), "std-net-boundary",
                 f"Only {ALLOWED_STD_NET_PACKAGE} may reference std.net.",
             ))
+    if actual_package in PUBLIC_API_PACKAGES:
+        for start, declaration in public_declaration_spans(semantic):
+            for rule, pattern, message in PUBLIC_API_RULES:
+                for match in pattern.finditer(declaration):
+                    violations.append(_violation(
+                        root, path, text, start + match.start(), rule, message,
+                    ))
     for rule, pattern, message in SOURCE_RULES:
         for match in pattern.finditer(semantic):
             violations.append(_violation(root, path, text, match.start(), rule, message))

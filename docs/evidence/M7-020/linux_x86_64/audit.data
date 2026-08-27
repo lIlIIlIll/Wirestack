@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "task_id": "M7-020",
+  "platform": "linux-x86_64-glibc",
+  "decision": "PASS",
+  "source_sha256": {
+    "docs/product/prd.md": "a201d628d43ca53d925a98f2ee24ade92ba22f0eb5d7e565e1c1ca1792b140cf",
+    "docs/planning/implementation-backlog.md": "60e95587a95b407129e44eb2392cdeed34993808702c4521b19c0c5a15897a4f",
+    "tools/architecture_guard.py": "e84fb0919d1790c17971a7133c592780c7b3783dfe2753adf34d8d15ce51dd42",
+    "cjpm.toml": "47fa86311bacf7f092f4a6641f200a7e11196d6ed020c7f1f914e8d51650ae17"
+  },
+  "inventory": {
+    "cangjie_files": 188,
+    "configuration_and_native_files": 11,
+    "public_api_package_files": 24,
+    "semantic_std_net_files": [
+      "src/internal/transport_stdnet/benchmark_harness_test.cj",
+      "src/internal/transport_stdnet/m1_025_cancellation_profile_test.cj",
+      "src/internal/transport_stdnet/m1_027_operation_context_profile_test.cj",
+      "src/internal/transport_stdnet/package.cj"
+    ]
+  },
+  "guard_rules": [
+    "std-net-boundary",
+    "public-low-level-socket-type",
+    "public-native-provider-type",
+    "private-runtime-socket-abi",
+    "legacy-stdx-network-stack",
+    "legacy-tls-ffi",
+    "legacy-tls-dynamic-bridge",
+    "legacy-global-tls-provider",
+    "openssl-dynamic-loader-bridge",
+    "system-openssl-loader",
+    "system-openssl-link"
+  ],
+  "checks": [
+    {
+      "id": "ARCH-01",
+      "requirement": "Only StdNetTransport may reference std.net; Core, TLS, HTTP/1, HTTP/2, and public packages may not.",
+      "status": "PASS",
+      "evidence": ["tools/architecture_guard.py", "tools/tests/test_architecture_guard.py", "src/internal/transport_stdnet/package.cj"]
+    },
+    {
+      "id": "ARCH-02",
+      "requirement": "Public packages expose no low-level socket or native TLS provider type.",
+      "status": "PASS",
+      "evidence": ["tools/architecture_guard.py", "tools/tests/test_architecture_guard.py", "src/http/package.cj"]
+    },
+    {
+      "id": "ARCH-03",
+      "requirement": "Wirestack production source and native configuration contain no CJ_MRT_Sock private ABI call.",
+      "status": "PASS",
+      "evidence": ["tools/architecture_guard.py", "tools/tests/test_architecture_guard.py", "docs/evidence/M0-024/README.md"]
+    },
+    {
+      "id": "ARCH-04",
+      "requirement": "The new HTTP and TLS stack uses no stdx network stack, tlsFFI, or CJ_TLS_DYN bridge.",
+      "status": "PASS",
+      "evidence": ["tools/architecture_guard.py", "tools/tests/test_architecture_guard.py", "docs/evidence/M0-003/README.md"]
+    },
+    {
+      "id": "ARCH-05",
+      "requirement": "The new stack defines and uses no legacy global TLS provider API.",
+      "status": "PASS",
+      "evidence": ["tools/architecture_guard.py", "tools/tests/test_architecture_guard.py", "src/internal/tls_engine/context.cj"]
+    },
+    {
+      "id": "ARCH-06",
+      "requirement": "Build and native files contain no system OpenSSL link or runtime loader.",
+      "status": "PASS",
+      "evidence": ["tools/architecture_guard.py", "tools/tests/test_architecture_guard.py", "cjpm.toml"]
+    },
+    {
+      "id": "ARCH-07",
+      "requirement": "Linux release architecture depends on public SDK capabilities and not runtime or std source changes.",
+      "status": "PASS",
+      "evidence": ["docs/architecture/adr/0005-upstream-independent-transport-capabilities.md", "docs/evidence/M0-024/README.md", "docs/planning/implementation-backlog.md"]
+    }
+  ],
+  "non_claims": [
+    "runtime/std changes remain optional future upstream work and are not Wirestack dependencies.",
+    "This source audit does not prove the installed release artifact dependency set; M7-021 owns that scan.",
+    "This Linux audit does not complete global M7 or any non-Linux platform profile."
+  ]
+}

@@ -21,7 +21,7 @@ Status values have the same fail-closed meaning as the global status file.
 | TLS provider | COMPLETE | AWS-LC 5.5.0 is selected by ADR-0003 after schema-v2 glibc/musl PASS results, executed external signing and 10,000 cleanup cycles |
 | Transport SPI | COMPLETE | Core semantics, native adapter behavior, deterministic races, 100,000-iteration cleanup, the digest-pinned 24-hour soak, raw TCP thresholds and cancellation P99 pass without upstream source changes; [M1-025 evidence](../evidence/M1-025/README.md). |
 | Linux M0 through M6 gates | COMPLETE | Native glibc evidence closes the implemented Transport, resolver, connector, TLS, HTTP/1 and HTTP/2 profile. |
-| Linux stable release | IN_PROGRESS | M7-019 completes the fail-closed requirement audit. M7-020, M7-023, M7-024 and M7-026 are READY; no task waits for another platform or an upstream source change. |
+| Linux stable release | IN_PROGRESS | M7-020 completes the final source architecture audit. M7-021, M7-023, M7-024 and M7-026 are READY; no task waits for another platform or an upstream source change. |
 
 ## Implemented Transport Core
 
@@ -150,8 +150,8 @@ replace the six-platform M7-001 through M7-017 tasks.
 |---|---|---|
 | M7-018 Linux M7 task graph | COMPLETE | The graph covers P0 traceability, architecture, artifact build and installation, final soak, fuzz, performance, SBOM, API freeze, documentation, independent security review, signing and the candidate report; [evidence](../evidence/M7-018/README.md) |
 | M7-019 Linux requirement audit | COMPLETE | The machine-checked audit covers 32 P0 requirements, 15 lifecycle invariants and 22 release criteria. Seven requirement gaps map to M7-021 through M7-025 and M7-029; Android/iOS listener acceptance is `NOT_APPLICABLE_TO_LINUX_PROFILE`; [evidence](../evidence/M7-019/README.md). |
-| M7-020 Linux architecture audit | READY | M7-019 is complete. Run the final dependency-direction, private-ABI, legacy-bridge and provider-loader audit. |
-| M7-021 Linux artifact and installation | BLOCKED | Waits for M7-020. |
+| M7-020 Linux architecture audit | COMPLETE | The repeatable guard finds zero violations across 188 Cangjie files and 11 build/native files. It covers dependency direction, public low-level types, private ABI, old bridges, global providers and system OpenSSL loaders; [evidence](../evidence/M7-020/README.md). |
+| M7-021 Linux artifact and installation | READY | M7-020 and M3-028 are complete. Build, scan and install the native release artifact. |
 | M7-022 Linux final 24h+ soak | BLOCKED | Waits for the M7-021 release artifact. |
 | M7-023 Linux release fuzz gate | READY | Existing parser and mutation coverage supplies the target inputs; release thresholds and crash replay remain. |
 | M7-024 Linux performance gate | READY | Existing component reports supply the baselines; one versioned release decision remains. |
@@ -165,5 +165,5 @@ replace the six-platform M7-001 through M7-017 tasks.
 
 ## Next critical path
 
-1. Start M7-020 and produce the repeatable final Linux architecture audit.
+1. Start M7-021 and qualify the installed Linux release artifact.
 2. M7-023, M7-024 and M7-026 are independent READY tasks, but each needs its own branch.
