@@ -21,7 +21,7 @@ Status values have the same fail-closed meaning as the global status file.
 | TLS provider | COMPLETE | AWS-LC 5.5.0 is selected by ADR-0003 after schema-v2 glibc/musl PASS results, executed external signing and 10,000 cleanup cycles |
 | Transport SPI | COMPLETE | Core semantics, native adapter behavior, deterministic races, 100,000-iteration cleanup, the digest-pinned 24-hour soak, raw TCP thresholds and cancellation P99 pass without upstream source changes; [M1-025 evidence](../evidence/M1-025/README.md). |
 | Linux M0 through M6 gates | COMPLETE | Native glibc evidence closes the implemented Transport, resolver, connector, TLS, HTTP/1 and HTTP/2 profile. |
-| Linux stable release | IN_PROGRESS | M7-021 qualifies the native installable artifact. M7-022 through M7-026 are READY where their declared dependencies permit; no task waits for another platform or an upstream source change. |
+| Linux stable release | IN_PROGRESS | M7-021 qualifies the native installable artifact, M7-025 binds its supply-chain metadata, and M7-026 freezes the public API. Remaining Linux tasks do not wait for another platform or an upstream source change. |
 
 ## Implemented Transport Core
 
@@ -156,8 +156,8 @@ replace the six-platform M7-001 through M7-017 tasks.
 | M7-023 Linux release fuzz gate | READY | Existing parser and mutation coverage supplies the target inputs; release thresholds and crash replay remain. |
 | M7-024 Linux performance gate | READY | Existing component reports supply the baselines; one versioned release decision remains. |
 | M7-025 Linux SBOM and fingerprint | COMPLETE | The SPDX 2.3 SBOM, provider manifest and deterministic fingerprint bind the qualified artifact to pinned native inputs, target, toolchain, trust, capabilities and features; runtime/std source changes are not dependencies; [evidence](../evidence/M7-025/README.md). |
-| M7-026 Linux API freeze | READY | M7-019 is complete. Freeze and compatibility-check the Linux public API on a separate branch. |
-| M7-027 Linux migration and examples | BLOCKED | Waits for M7-026. |
+| M7-026 Linux API freeze | COMPLETE | The versioned baseline freezes package `wirestack` major 0, 82 declarations, 50 resolved alias targets and the request/connection/stream cancellation handles. The compatibility gate rejects legacy and low-level public surfaces; [evidence](../evidence/M7-026/README.md). |
+| M7-027 Linux migration and examples | READY | M7-026 is complete. Write the migration guide and validate every public example in a clean consumer. |
 | M7-028 Linux security review package | BLOCKED | Waits for M7-019 through M7-025. |
 | M7-029 Linux independent security review | BLOCKED | Waits for M7-028 and an independent reviewer. |
 | M7-030 Linux signing and update flow | BLOCKED | Waits for M7-025 and M7-029. |
@@ -165,5 +165,5 @@ replace the six-platform M7-001 through M7-017 tasks.
 
 ## Next critical path
 
-1. Start M7-026 and freeze the Linux public API; this is the shortest remaining path and unlocks M7-027.
+1. Start M7-027 and finish the migration guide plus clean-consumer examples.
 2. M7-022, M7-023 and M7-024 are independent READY tasks, but each needs its own branch.
