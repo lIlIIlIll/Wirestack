@@ -28,7 +28,7 @@ Status values have the same fail-closed meaning as the global status file.
 |---|---|---|
 | M1-001 Transport package skeleton | COMPLETE | Physical Core and StdNet packages, co-located package tests, the adapter benchmark harness, and architecture-enforced internal boundaries build under the accepted CJPM layout; [evidence](../evidence/M1-001/README.md). |
 | M1-002 `ByteSpan`/`MutableByteSpan` | COMPLETE | Checked constructor, slice and advance ranges for both span types; zero-copy identity, mutable write-through and empty-end behavior pass; [evidence](../evidence/M1-002/README.md). |
-| M1-003 monotonic `Deadline` | COMPLETE | `MonoTime`, injected clock, remaining/expiry/child tests |
+| M1-003 monotonic `Deadline` | COMPLETE | `MonoTime`, injected-clock remaining and expiry behavior, and child-budget non-extension including zero-duration and expired-parent cases pass; [evidence](../evidence/M1-003/README.md). |
 | M1-004 cancellation primitive | COMPLETE | Registration, idempotent unregister, already-cancelled fast-fail, 100-round cancel/register/unregister races, callback failure isolation and reentrant lock-free callback execution pass; [Linux evidence](../evidence/M1-004/README.md) |
 | M1-005 `OperationContext` | COMPLETE | Immutable Deadline/cancellation/trace/event-sink propagation tests |
 | M1-006 trace context | COMPLETE | Bounded read-only identifiers and default-off, exception-isolated, secret-free structured event sink |
