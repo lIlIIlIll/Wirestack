@@ -76,9 +76,12 @@ public func readHttp1Response(
     requestMethod: HttpMethod,
     context!: OperationContext = OperationContext.background(),
     limits!: HttpLimits = HttpLimits(),
-    observer!: ResponseBodyObserver = InternalNoopBodyObserver()
+    observer!: ResponseBodyObserver = InternalNoopBodyObserver(),
+    readBuffer!: ?Array<Byte> = None<Array<Byte>>
 ): Http1ResponseReadResult {
-    let reader = Http1ResponseSequenceReader(transport, requestMethod, limits)
+    let reader = Http1ResponseSequenceReader(
+        transport, requestMethod, limits, readBuffer: readBuffer
+    )
     let interim = ArrayList<Http1InterimResponse>()
     while (true) {
         let parsed = reader.readNext(context)
@@ -103,14 +106,17 @@ public func exchangeHttp1ExpectContinue(
     continueTimeout: Duration,
     context!: OperationContext = OperationContext.background(),
     limits!: HttpLimits = HttpLimits(),
-    observer!: ResponseBodyObserver = InternalNoopBodyObserver()
+    observer!: ResponseBodyObserver = InternalNoopBodyObserver(),
+    readBuffer!: ?Array<Byte> = None<Array<Byte>>
 ): Http1ResponseReadResult {
     if (continueTimeout <= Duration.Zero) {
         throw IllegalArgumentException("HTTP/1 continue timeout must be positive")
     }
     writer.writeHead(transport, context: context)
     let continueContext = context.shortenDeadline(continueTimeout)
-    let reader = Http1ResponseSequenceReader(transport, request.method, limits)
+    let reader = Http1ResponseSequenceReader(
+        transport, request.method, limits, readBuffer: readBuffer
+    )
     let interim = ArrayList<Http1InterimResponse>()
     var bodySent = false
     while (true) {
@@ -434,13 +440,27 @@ private class Http1ResponseSequenceReader {
     private let transport: DuplexTransport
     private let requestMethod: HttpMethod
     private let limits: HttpLimits
+    private let readBuffer: Array<Byte>
     private var parser: Http1ResponseHeadParser
     private var input = Array<Byte>()
 
-    init(transport: DuplexTransport, requestMethod: HttpMethod, limits: HttpLimits) {
+    init(
+        transport: DuplexTransport,
+        requestMethod: HttpMethod,
+        limits: HttpLimits,
+        readBuffer!: ?Array<Byte> = None<Array<Byte>>
+    ) {
         this.transport = transport
         this.requestMethod = requestMethod
         this.limits = limits
+        this.readBuffer = match (readBuffer) {
+            case Some(value) =>
+                if (value.isEmpty()) {
+                    throw IllegalArgumentException("HTTP/1 response read buffer must not be empty")
+                }
+                value
+            case None => Array<Byte>(HTTP1_READ_BUFFER_SIZE, repeat: 0)
+        }
         parser = Http1ResponseHeadParser(requestMethod, limits: limits)
     }
 
@@ -455,13 +475,12 @@ private class Http1ResponseSequenceReader {
                     return Http1ParsedResponseHead(parsed.head, input)
                 }
             }
-            let buffer = Array<Byte>(HTTP1_READ_BUFFER_SIZE, repeat: 0)
-            match (transport.readSome(MutableByteSpan(buffer), context: context)) {
+            match (transport.readSome(MutableByteSpan(readBuffer), context: context)) {
                 case ReadResult.Data(count) =>
-                    if (count <= 0 || count > buffer.size) {
+                    if (count <= 0 || count > readBuffer.size) {
                         throw Exception("transport returned invalid progress while reading HTTP/1 head")
                     }
-                    input = copyResponsePrefix(buffer, count)
+                    input = copyResponsePrefix(readBuffer, count)
                 case ReadResult.EndOfStream =>
                     throw NetworkException(
                         NetworkErrorCategory.Read,

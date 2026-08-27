@@ -90,7 +90,7 @@ public class Http1RequestWriter {
     ): Http1RequestCommitEvidence {
         if (headWritten) { invalidWriterState("HTTP/1 request head has already been written", tracker.snapshot()) }
         try {
-            writeTracked(transport, head.bytes, tracker, context)
+            writeTracked(transport, head.bytesForWrite(), tracker, context)
             headWritten = true
             tracker.snapshot()
         } catch (error: Http1RequestWriteException) {

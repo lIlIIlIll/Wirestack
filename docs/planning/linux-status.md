@@ -101,7 +101,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M5-025..027 server and shutdown | COMPLETE | Cleartext and TLS HTTP/1 server, bounded connection/request lifecycle, graceful-to-abort shutdown and handshake-race tests |
 | M5-028 structured errors/events | COMPLETE | Stable public HTTP error mapping plus default-off exception-isolated typed events whose schema cannot carry URL/header/body/credential/key/session data |
 | M5-029 conformance/security tests | COMPLETE | Deterministic URL/proxy fuzz, parser/chunked corpus, request-smuggling corpus, partial I/O, body/pool and graceful-shutdown races |
-| M5-030 benchmark/docs | IN_PROGRESS | Keep-alive runner and 16/64 MiB bounded-memory gates pass; pinned SDK lacks a stdx HTTP baseline, so the ≥90% comparison remains NOT RUN |
+| M5-030 benchmark/docs | COMPLETE | Native Linux O2 gate passes: Wirestack median 10,073.727 req/s versus pinned stdx 4,829.858 req/s, ratio 2.0857; 64 MiB versus 16 MiB RSS changes by -948 KiB (0.962x); public client/server, CONNECT and mTLS examples are documented; [`evidence`](../evidence/M5-030/README.md) |
 
 ## Implemented HTTP/2 Core
 

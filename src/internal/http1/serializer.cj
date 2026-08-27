@@ -16,32 +16,31 @@ public class Http1SerializedHead {
 
     public prop bytes: Array<Byte> { get() { ownedBytes.clone() } }
 
+    internal func bytesForWrite(): Array<Byte> { ownedBytes }
+
     public init(bytes: Array<Byte>, framing: Http1BodyFraming) {
         ownedBytes = bytes.clone()
         this.framing = framing
     }
 }
 
-/** Serializes an already-selected HTTP/1 request target and validates its wire image. */
+/** Serializes an already-selected HTTP/1 request target after typed semantic validation. */
 public func serializeRequestHead(
     method: HttpMethod,
     target: String,
     headers: HttpHeaders,
     limits!: HttpLimits = HttpLimits()
 ): Http1SerializedHead {
+    validateRequestTarget(method, target)
+    validateHostHeader(headers, method, target)
+    let startLine = "${method} ${target} HTTP/1.1\r\n"
     let output = ArrayList<Byte>()
-    appendText(output, "${method} ${target} HTTP/1.1\r\n")
+    appendText(output, startLine)
     appendHeaders(output, headers)
     appendText(output, "\r\n")
     let bytes = output.toArray()
-    let parsed = match (Http1RequestHeadParser(limits: limits).feed(bytes)) {
-        case Some(value) => value
-        case None => throw Http1ParseException(Http1ParseErrorCode.InvalidStartLine, "serialized request head is incomplete")
-    }
-    if (!parsed.remaining.isEmpty()) {
-        throw Http1ParseException(Http1ParseErrorCode.InvalidHeader, "serialized request head retained unexpected bytes")
-    }
-    Http1SerializedHead(bytes, parsed.head.framing)
+    validateSerializedHeadBounds(bytes, startLine, limits)
+    Http1SerializedHead(bytes, resolveRequestFraming(headers))
 }
 
 /** Adds or validates Host from a normalized URL and emits origin-form for direct requests. */
@@ -95,19 +94,15 @@ public func serializeResponseHead(
     requestMethod: HttpMethod,
     limits!: HttpLimits = HttpLimits()
 ): Http1SerializedHead {
+    validateResponseStartLine(status, reason)
+    let startLine = "HTTP/1.1 ${status} ${reason}\r\n"
     let output = ArrayList<Byte>()
-    appendText(output, "HTTP/1.1 ${status} ${reason}\r\n")
+    appendText(output, startLine)
     appendHeaders(output, headers)
     appendText(output, "\r\n")
     let bytes = output.toArray()
-    let parsed = match (Http1ResponseHeadParser(requestMethod, limits: limits).feed(bytes)) {
-        case Some(value) => value
-        case None => throw Http1ParseException(Http1ParseErrorCode.InvalidStartLine, "serialized response head is incomplete")
-    }
-    if (!parsed.remaining.isEmpty()) {
-        throw Http1ParseException(Http1ParseErrorCode.InvalidHeader, "serialized response head retained unexpected bytes")
-    }
-    Http1SerializedHead(bytes, parsed.head.framing)
+    validateSerializedHeadBounds(bytes, startLine, limits)
+    Http1SerializedHead(bytes, resolveResponseFraming(headers, status, requestMethod))
 }
 
 /** Writes through the transport's partial-write loop under one operation budget. */
@@ -116,7 +111,43 @@ public func writeSerializedHead(
     head: Http1SerializedHead,
     context!: OperationContext = OperationContext.background()
 ): Unit {
-    writeAll(transport, ByteSpan(head.bytes), context: context)
+    writeAll(transport, ByteSpan(head.bytesForWrite()), context: context)
+}
+
+private func validateResponseStartLine(status: UInt16, reason: String): Unit {
+    if (status < 100 || status > 999) {
+        throw Http1ParseException(
+            Http1ParseErrorCode.InvalidStatus,
+            "HTTP/1 response status must contain three decimal digits"
+        )
+    }
+    for (value in reason.toArray()) {
+        if ((value < 32u8 && value != 9u8) || value == 127u8) {
+            throw Http1ParseException(
+                Http1ParseErrorCode.InvalidStartLine,
+                "HTTP/1 reason phrase contains a control byte"
+            )
+        }
+    }
+}
+
+private func validateSerializedHeadBounds(
+    bytes: Array<Byte>,
+    startLine: String,
+    limits: HttpLimits
+): Unit {
+    if (startLine.toArray().size - 2 > limits.maxHeaderLineBytes) {
+        throw Http1ParseException(
+            Http1ParseErrorCode.LineTooLong,
+            "HTTP/1 line exceeds configured limit"
+        )
+    }
+    if (bytes.size > limits.maxHeaderBytes) {
+        throw Http1ParseException(
+            Http1ParseErrorCode.HeaderTooLarge,
+            "HTTP/1 head exceeds configured limit"
+        )
+    }
 }
 
 private func appendHeaders(output: ArrayList<Byte>, headers: HttpHeaders): Unit {

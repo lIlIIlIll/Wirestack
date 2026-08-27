@@ -24,22 +24,30 @@ public func readHttp1ServerRequest(
     transport: DuplexTransport,
     context!: OperationContext = OperationContext.background(),
     limits!: HttpLimits = HttpLimits(),
-    observer!: ResponseBodyObserver = Http1ServerNoopObserver()
+    observer!: ResponseBodyObserver = Http1ServerNoopObserver(),
+    readBuffer!: ?Array<Byte> = None<Array<Byte>>
 ): Http1ServerRequest {
+    let selectedReadBuffer = match (readBuffer) {
+        case Some(value) =>
+            if (value.isEmpty()) {
+                throw IllegalArgumentException("HTTP/1 server read buffer must not be empty")
+            }
+            value
+        case None => Array<Byte>(HTTP1_SERVER_READ_BUFFER_SIZE, repeat: 0)
+    }
     let parser = Http1RequestHeadParser(limits: limits)
     var parsed: ?Http1ParsedRequestHead = None<Http1ParsedRequestHead>
     while (parsed.isNone()) {
-        let buffer = Array<Byte>(HTTP1_SERVER_READ_BUFFER_SIZE, repeat: 0)
-        match (transport.readSome(MutableByteSpan(buffer), context: context)) {
+        match (transport.readSome(MutableByteSpan(selectedReadBuffer), context: context)) {
             case ReadResult.Data(count) =>
-                if (count <= 0 || count > buffer.size) {
+                if (count <= 0 || count > selectedReadBuffer.size) {
                     throw NetworkException(
                         NetworkErrorCategory.Read, NetworkPhase.HttpHeaders, NetworkErrorCode.SystemFailure,
                         "transport returned invalid progress while reading HTTP/1 request head",
                         retryability: Retryability.Never
                     )
                 }
-                parsed = parser.feed(copyServerPrefix(buffer, count))
+                parsed = parser.feed(copyServerPrefix(selectedReadBuffer, count))
             case ReadResult.EndOfStream =>
                 throw NetworkException(
                     NetworkErrorCategory.Read, NetworkPhase.HttpHeaders, NetworkErrorCode.UnexpectedEof,

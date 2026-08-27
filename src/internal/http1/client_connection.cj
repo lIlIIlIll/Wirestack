@@ -29,6 +29,7 @@ public class Http1ClientConnection <: Resource {
     private let limits: HttpLimits
     private let continueTimeout: Duration
     private let targetForm: Http1RequestTargetForm
+    private let responseReadBuffer = Array<Byte>(16 * 1024, repeat: 0)
     private let mutex = Mutex()
     private var state = Http1ClientConnectionState.Ready
 
@@ -79,7 +80,8 @@ public class Http1ClientConnection <: Resource {
                     transport, request, Http1RequestWriter(
                         request, limits: limits, trailer: trailer, targetForm: targetForm
                     ),
-                    continueTimeout, context: context, limits: limits, observer: observer
+                    continueTimeout, context: context, limits: limits, observer: observer,
+                    readBuffer: Some(responseReadBuffer)
                 )
             } else {
                 let _ = writeHttp1Request(
@@ -88,7 +90,8 @@ public class Http1ClientConnection <: Resource {
                 )
                 readHttp1Response(
                     transport, request.method,
-                    context: context, limits: limits, observer: observer
+                    context: context, limits: limits, observer: observer,
+                    readBuffer: Some(responseReadBuffer)
                 )
             }
             let reusable = result.reusableCandidate &&
