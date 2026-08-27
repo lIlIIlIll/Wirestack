@@ -82,6 +82,15 @@ shows native Linux carrier-thread starvation under delayed DNS and identifies
 `UP-007` as a conditional candidate. These are inputs to M0-021; none independently
 authorize an upstream implementation task.
 
+## Linux M5 closure work
+
+This table records Linux-only HTTP/1 completion. It does not replace the global
+platform matrix.
+
+| ID | Status | Evidence | Notes |
+|---|---|---|---|
+| M5-030 | COMPLETE | [`docs/evidence/M5-030/README.md`](../evidence/M5-030/README.md) | Native Linux O2 comparison reaches 2.0857 times the pinned stdx keep-alive throughput; 16/64 MiB streaming RSS growth is bounded; client/server, CONNECT, and mTLS examples are documented. |
+
 ## Later milestones
 
 M1 through M7 and P1 tasks remain blocked by their backlog dependencies. A Linux-only

@@ -8,6 +8,7 @@ import wirestack.internal.transport.*
 
 /** Machine-readable benchmark harness; threshold decisions live in tools/benchmarks. */
 @Test
+@Tag[Performance]
 class Http1KeepAliveBenchmarkTest {
     @TestCase
     func benchmarkKeepAliveSmall(): Unit {
@@ -42,12 +43,14 @@ class Http1KeepAliveBenchmarkTest {
 }
 
 @Test
+@Tag[Performance]
 class Http1Stream16MiBBenchmarkTest {
     @TestCase
     func benchmarkStream16MiB(): Unit { benchmarkStream(16 * 1024 * 1024, "stream_16mib") }
 }
 
 @Test
+@Tag[Performance]
 class Http1Stream64MiBBenchmarkTest {
     @TestCase
     func benchmarkStream64MiB(): Unit { benchmarkStream(64 * 1024 * 1024, "stream_64mib") }

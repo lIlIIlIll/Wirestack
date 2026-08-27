@@ -1,0 +1,410 @@
+{
+  "cases": {
+    "keep_alive_small": {
+      "checksum": 400000,
+      "duration_ns": 198536260,
+      "duration_ns_max": 451893210,
+      "duration_ns_min": 121605407,
+      "iterations": 2000,
+      "peak_fd_count": 7,
+      "peak_rss_kib": 92556,
+      "requests_per_second": 10073.727,
+      "round_count": 7,
+      "rounds": [
+        {
+          "bytes": 0,
+          "checksum": 400000,
+          "command": [
+            "/tmp/wirestack-http1-build-hv1k6rae/repository/target/release/unittest_bin/wirestack.http",
+            "--filter=Http1PublicKeepAliveBenchmarkTest",
+            "--show-all-output",
+            "--no-progress",
+            "--no-color"
+          ],
+          "duration_ns": 172182727,
+          "iterations": 2000,
+          "peak_fd_count": 7,
+          "peak_rss_kib": 91956,
+          "requests_per_second": 11615.566990061669,
+          "resource_samples": 3,
+          "scenario": "keep_alive_small",
+          "throughput_mib_per_second": null,
+          "wall_duration_ms": 279.5729810022749
+        },
+        {
+          "bytes": 0,
+          "checksum": 400000,
+          "command": [
+            "/tmp/wirestack-http1-build-hv1k6rae/repository/target/release/unittest_bin/wirestack.http",
+            "--filter=Http1PublicKeepAliveBenchmarkTest",
+            "--show-all-output",
+            "--no-progress",
+            "--no-color"
+          ],
+          "duration_ns": 121605407,
+          "iterations": 2000,
+          "peak_fd_count": 7,
+          "peak_rss_kib": 83764,
+          "requests_per_second": 16446.637113759258,
+          "resource_samples": 3,
+          "scenario": "keep_alive_small",
+          "throughput_mib_per_second": null,
+          "wall_duration_ms": 240.7379760115873
+        },
+        {
+          "bytes": 0,
+          "checksum": 400000,
+          "command": [
+            "/tmp/wirestack-http1-build-hv1k6rae/repository/target/release/unittest_bin/wirestack.http",
+            "--filter=Http1PublicKeepAliveBenchmarkTest",
+            "--show-all-output",
+            "--no-progress",
+            "--no-color"
+          ],
+          "duration_ns": 170162615,
+          "iterations": 2000,
+          "peak_fd_count": 7,
+          "peak_rss_kib": 78744,
+          "requests_per_second": 11753.463003609811,
+          "resource_samples": 3,
+          "scenario": "keep_alive_small",
+          "throughput_mib_per_second": null,
+          "wall_duration_ms": 243.2890970085282
+        },
+        {
+          "bytes": 0,
+          "checksum": 400000,
+          "command": [
+            "/tmp/wirestack-http1-build-hv1k6rae/repository/target/release/unittest_bin/wirestack.http",
+            "--filter=Http1PublicKeepAliveBenchmarkTest",
+            "--show-all-output",
+            "--no-progress",
+            "--no-color"
+          ],
+          "duration_ns": 198536260,
+          "iterations": 2000,
+          "peak_fd_count": 7,
+          "peak_rss_kib": 73832,
+          "requests_per_second": 10073.726582741107,
+          "resource_samples": 3,
+          "scenario": "keep_alive_small",
+          "throughput_mib_per_second": null,
+          "wall_duration_ms": 288.9442589948885
+        },
+        {
+          "bytes": 0,
+          "checksum": 400000,
+          "command": [
+            "/tmp/wirestack-http1-build-hv1k6rae/repository/target/release/unittest_bin/wirestack.http",
+            "--filter=Http1PublicKeepAliveBenchmarkTest",
+            "--show-all-output",
+            "--no-progress",
+            "--no-color"
+          ],
+          "duration_ns": 451893210,
+          "iterations": 2000,
+          "peak_fd_count": 7,
+          "peak_rss_kib": 46612,
+          "requests_per_second": 4425.824411037289,
+          "resource_samples": 5,
+          "scenario": "keep_alive_small",
+          "throughput_mib_per_second": null,
+          "wall_duration_ms": 545.6754390033893
+        },
+        {
+          "bytes": 0,
+          "checksum": 400000,
+          "command": [
+            "/tmp/wirestack-http1-build-hv1k6rae/repository/target/release/unittest_bin/wirestack.http",
+            "--filter=Http1PublicKeepAliveBenchmarkTest",
+            "--show-all-output",
+            "--no-progress",
+            "--no-color"
+          ],
+          "duration_ns": 282853044,
+          "iterations": 2000,
+          "peak_fd_count": 7,
+          "peak_rss_kib": 89600,
+          "requests_per_second": 7070.809533165215,
+          "resource_samples": 3,
+          "scenario": "keep_alive_small",
+          "throughput_mib_per_second": null,
+          "wall_duration_ms": 362.93751301127486
+        },
+        {
+          "bytes": 0,
+          "checksum": 400000,
+          "command": [
+            "/tmp/wirestack-http1-build-hv1k6rae/repository/target/release/unittest_bin/wirestack.http",
+            "--filter=Http1PublicKeepAliveBenchmarkTest",
+            "--show-all-output",
+            "--no-progress",
+            "--no-color"
+          ],
+          "duration_ns": 208029920,
+          "iterations": 2000,
+          "peak_fd_count": 7,
+          "peak_rss_kib": 92556,
+          "requests_per_second": 9614.001678220133,
+          "resource_samples": 3,
+          "scenario": "keep_alive_small",
+          "throughput_mib_per_second": null,
+          "wall_duration_ms": 271.1204260122031
+        }
+      ],
+      "scenario": "keep_alive_small"
+    },
+    "stream_16mib": {
+      "bytes": 16777216,
+      "checksum": 174841,
+      "command": [
+        "/tmp/wirestack-http1-build-hv1k6rae/repository/target/release/unittest_bin/wirestack.internal.http1",
+        "--filter=Http1Stream16MiBBenchmarkTest",
+        "--show-all-output",
+        "--no-progress",
+        "--no-color"
+      ],
+      "duration_ns": 5088828179,
+      "iterations": 1,
+      "peak_fd_count": 3,
+      "peak_rss_kib": 24996,
+      "requests_per_second": 0.19650889454799964,
+      "resource_samples": 60,
+      "scenario": "stream_16mib",
+      "throughput_mib_per_second": 3.144142312767994,
+      "wall_duration_ms": 5137.510305998148
+    },
+    "stream_64mib": {
+      "bytes": 67108864,
+      "checksum": 679830,
+      "command": [
+        "/tmp/wirestack-http1-build-hv1k6rae/repository/target/release/unittest_bin/wirestack.internal.http1",
+        "--filter=Http1Stream64MiBBenchmarkTest",
+        "--show-all-output",
+        "--no-progress",
+        "--no-color"
+      ],
+      "duration_ns": 21864564847,
+      "iterations": 1,
+      "peak_fd_count": 3,
+      "peak_rss_kib": 24048,
+      "requests_per_second": 0.045736103462274406,
+      "resource_samples": 227,
+      "scenario": "stream_64mib",
+      "throughput_mib_per_second": 2.927110621585562,
+      "wall_duration_ms": 21901.188330026343
+    }
+  },
+  "configuration": {
+    "optimization": "-O2",
+    "ordering": "alternating; Wirestack first on odd-numbered rounds",
+    "required_ratio": 0.9,
+    "rounds": 7
+  },
+  "decision": "PASS",
+  "platform": {
+    "machine": "x86_64",
+    "python": "3.14.7",
+    "release": "7.1.9-arch1-2",
+    "system": "Linux"
+  },
+  "schema_version": 2,
+  "source": {
+    "benchmark_runner_sha256": "f8c6076be71f509719480a7eec52f5813ba9d829caf56d81b0fbf0012ed2a71e",
+    "build_commands": [
+      [
+        "/home/elliot/.codex/scripts/codex_cangjie_env",
+        "cjpm",
+        "test",
+        "src/internal/http1",
+        "-j",
+        "1",
+        "--no-run"
+      ],
+      [
+        "/home/elliot/.codex/scripts/codex_cangjie_env",
+        "cjpm",
+        "test",
+        "src/http",
+        "-j",
+        "1",
+        "--no-run"
+      ]
+    ],
+    "build_working_directory": "/tmp/wirestack-http1-build-hv1k6rae/repository",
+    "public_harness_sha256": "4a444faf008c9751e8c6a658dcd17f9807e5cec7dea5ea259e73413730ea8926",
+    "stream_harness_sha256": "a443e85fdb6521e883b63e56b4d92d80c95f2ca3f54b68f9f15141fb1b2eeb92"
+  },
+  "stdx_comparison": {
+    "decision": "PASS",
+    "ratio": 2.0857,
+    "required_ratio": 0.9,
+    "stdx_requests_per_second": 4829.858,
+    "stdx_rounds": {
+      "checksum": 400000,
+      "duration_ns": 414090830,
+      "duration_ns_max": 569948891,
+      "duration_ns_min": 196476235,
+      "iterations": 2000,
+      "peak_fd_count": 7,
+      "peak_rss_kib": 50968,
+      "requests_per_second": 4829.858,
+      "round_count": 7,
+      "rounds": [
+        {
+          "bytes": 0,
+          "checksum": 400000,
+          "command": [
+            "/tmp/wirestack-http1-stdx-6h4_wt2f/stdx_http1_benchmark"
+          ],
+          "duration_ns": 414090830,
+          "iterations": 2000,
+          "peak_fd_count": 7,
+          "peak_rss_kib": 50876,
+          "requests_per_second": 4829.85822216831,
+          "resource_samples": 5,
+          "scenario": "keep_alive_small",
+          "throughput_mib_per_second": null,
+          "wall_duration_ms": 492.4527920084074
+        },
+        {
+          "bytes": 0,
+          "checksum": 400000,
+          "command": [
+            "/tmp/wirestack-http1-stdx-6h4_wt2f/stdx_http1_benchmark"
+          ],
+          "duration_ns": 569948891,
+          "iterations": 2000,
+          "peak_fd_count": 7,
+          "peak_rss_kib": 50888,
+          "requests_per_second": 3509.086571764204,
+          "resource_samples": 4,
+          "scenario": "keep_alive_small",
+          "throughput_mib_per_second": null,
+          "wall_duration_ms": 661.7817390069831
+        },
+        {
+          "bytes": 0,
+          "checksum": 400000,
+          "command": [
+            "/tmp/wirestack-http1-stdx-6h4_wt2f/stdx_http1_benchmark"
+          ],
+          "duration_ns": 559699416,
+          "iterations": 2000,
+          "peak_fd_count": 7,
+          "peak_rss_kib": 49504,
+          "requests_per_second": 3573.346590735053,
+          "resource_samples": 6,
+          "scenario": "keep_alive_small",
+          "throughput_mib_per_second": null,
+          "wall_duration_ms": 658.3312540024053
+        },
+        {
+          "bytes": 0,
+          "checksum": 400000,
+          "command": [
+            "/tmp/wirestack-http1-stdx-6h4_wt2f/stdx_http1_benchmark"
+          ],
+          "duration_ns": 406165824,
+          "iterations": 2000,
+          "peak_fd_count": 7,
+          "peak_rss_kib": 50548,
+          "requests_per_second": 4924.097208139304,
+          "resource_samples": 4,
+          "scenario": "keep_alive_small",
+          "throughput_mib_per_second": null,
+          "wall_duration_ms": 478.40070101665333
+        },
+        {
+          "bytes": 0,
+          "checksum": 400000,
+          "command": [
+            "/tmp/wirestack-http1-stdx-6h4_wt2f/stdx_http1_benchmark"
+          ],
+          "duration_ns": 305488305,
+          "iterations": 2000,
+          "peak_fd_count": 7,
+          "peak_rss_kib": 50968,
+          "requests_per_second": 6546.895469533604,
+          "resource_samples": 5,
+          "scenario": "keep_alive_small",
+          "throughput_mib_per_second": null,
+          "wall_duration_ms": 512.5418469833676
+        },
+        {
+          "bytes": 0,
+          "checksum": 400000,
+          "command": [
+            "/tmp/wirestack-http1-stdx-6h4_wt2f/stdx_http1_benchmark"
+          ],
+          "duration_ns": 505069344,
+          "iterations": 2000,
+          "peak_fd_count": 7,
+          "peak_rss_kib": 50372,
+          "requests_per_second": 3959.852293074434,
+          "resource_samples": 4,
+          "scenario": "keep_alive_small",
+          "throughput_mib_per_second": null,
+          "wall_duration_ms": 591.7993760085665
+        },
+        {
+          "bytes": 0,
+          "checksum": 400000,
+          "command": [
+            "/tmp/wirestack-http1-stdx-6h4_wt2f/stdx_http1_benchmark"
+          ],
+          "duration_ns": 196476235,
+          "iterations": 2000,
+          "peak_fd_count": 7,
+          "peak_rss_kib": 45580,
+          "requests_per_second": 10179.348153734725,
+          "resource_samples": 3,
+          "scenario": "keep_alive_small",
+          "throughput_mib_per_second": null,
+          "wall_duration_ms": 282.7169939992018
+        }
+      ],
+      "scenario": "keep_alive_small"
+    },
+    "wirestack_requests_per_second": 10073.727
+  },
+  "stdx_reference": {
+    "archive_path": "/tmp/cangjie-stdx-linux-x64-1.1.3.1.zip",
+    "archive_sha256": "41653244d6e4706359b906b1e1092db601d6fd8b07d72f03a0a2bfa33886a26f",
+    "asset_id": 75664,
+    "asset_name": "cangjie-stdx-linux-x64-1.1.3.1.zip",
+    "compile_command": [
+      "/home/elliot/.codex/scripts/codex_cangjie_env",
+      "cjc",
+      "-O2",
+      "/tmp/wirestack-http1-stdx-6h4_wt2f/stdx_http1_benchmark.cj",
+      "-L",
+      "/tmp/wirestack-stdx-1.1.3.1.sAN2Jp/linux_x86_64_cjnative/dynamic/stdx",
+      "--import-path",
+      "/tmp/wirestack-stdx-1.1.3.1.sAN2Jp/linux_x86_64_cjnative/dynamic/stdx",
+      "-lstdx.net.http",
+      "-o",
+      "/tmp/wirestack-http1-stdx-6h4_wt2f/stdx_http1_benchmark"
+    ],
+    "driver_source_sha256": "23e56ac2f63bf8cb323cff9c780f3f7527d447ad046308ce1db54cfecac531db",
+    "dynamic_directory": "linux_x86_64_cjnative/dynamic/stdx",
+    "extracted_root": "/tmp/wirestack-stdx-1.1.3.1.sAN2Jp",
+    "module_sha256": {
+      "libstdx.net.http.so": "7cef96d9bed8fdaf110ce328482934d52740eb51867ed955258e4e43aaa3accb",
+      "stdx.net.http.cjo": "fd468ca3df668145a8ea90467020dfaca0533930949f9649bb3315b6c24aafa6"
+    },
+    "reference_sha256": "94e5da36f29153e2e16a854c20d9d92eebae55dabe8e3f38460d29522dd603fe",
+    "release_commit": "8fa4b04b4cb1753e8f3581e4935cf72ad145fedc",
+    "release_tag": "v1.1.3.1",
+    "repository": "Cangjie/cangjie_stdx",
+    "schema_version": 1
+  },
+  "streaming_memory": {
+    "decision": "PASS",
+    "maximum_growth_kib": 16384,
+    "maximum_ratio": 1.5,
+    "rss_growth_kib": -948,
+    "rss_ratio": 0.962
+  },
+  "task_id": "M5-030"
+}
