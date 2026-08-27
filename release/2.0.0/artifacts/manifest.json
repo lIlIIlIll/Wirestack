@@ -1,10 +1,11 @@
 {
   "releaseIdentity": "2.0.0",
-  "candidateSourceCommit": "d8f7a5121796b2a70c7cd21fc72dd84c26f4b29d",
-  "generatedAtUtc": "2026-08-27T00:09:39Z",
+  "candidateSourceCommit": "497245f54c7bd7ff8d056ed2a3cfb20d26c80a41",
+  "generatedAtUtc": "2026-08-27T03:28:43Z",
   "sourceArchive": {
-    "fileCount": 207,
-    "sha256": "659db12731b418a5d97d096f099673d619bae5eed5cea01e786cf84fc5606bc5",
+    "fileCount": 215,
+    "sha256": "a3d0fdcffb7314551717f9e636475b0bb903520726187f20a15bbcad63c67fdd",
+    "format": "sorted tar, mtime/uid/gid zeroed, gzip -n",
     "storedInRepository": false
   },
   "localFreshCheckout": {
@@ -15,8 +16,15 @@
     "coreTestsPassed": 521,
     "standardsRequiredPassed": 2110,
     "standardsOptionalAggregatePassed": 3074,
-    "fuzzCases": [5000, 50000],
+    "fuzzCases": [5000],
     "log": "logs/local-fresh-checkout.log.gz"
+  },
+  "coreCoverage": {
+    "status": "PASS",
+    "testsPassed": 521,
+    "line": {"hit": 5407, "total": 8998, "percent": 60.1},
+    "branch": {"hit": 4205, "total": 10090, "percent": 41.7},
+    "log": "logs/core-coverage.log.gz"
   },
   "packageRehearsal": {
     "status": "PASS",
@@ -53,7 +61,9 @@
   "additionalGates": {
     "yyjsonCoLink": "PASS",
     "windowsPureCrossBuild": "PASS",
-    "extendedFuzzCases": 50000
+    "extendedFuzzCases": 50000,
+    "retainedEvidenceSourceCommit": "d8f7a5121796b2a70c7cd21fc72dd84c26f4b29d",
+    "retentionReason": "The candidate changes after this commit affect tests, documentation, CI, and evidence only; production sources are identical."
   },
   "yyjsonIsolationFixture": {
     "upstreamVersion": "0.11.1",
@@ -62,13 +72,9 @@
     "storedInRepository": false
   },
   "hostedCi": {
-    "status": "NOT_RUN",
-    "policy": "NON_BLOCKING",
-    "exceptionApproval": {
-      "authority": "release owner",
-      "approvedOn": "2026-08-25",
-      "rationale": "Complete local fresh-source evidence is blocking; hosted CI is not required for this candidate."
-    }
+    "status": "PENDING",
+    "policy": "BLOCKING",
+    "requiredRuns": ["release pull request", "merged main"]
   },
   "tag": {
     "status": "NOT_RUN"

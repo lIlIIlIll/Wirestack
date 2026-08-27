@@ -9,8 +9,8 @@ allowlist 中，因此不会改变已验证源码。
 | Field | Value |
 | --- | --- |
 | Planned release identity | `2.0.0` |
-| Candidate source commit | `d8f7a5121796b2a70c7cd21fc72dd84c26f4b29d` |
-| Evidence generated | `2026-08-27T00:09:39Z` |
+| Candidate source commit | `497245f54c7bd7ff8d056ed2a3cfb20d26c80a41` |
+| Evidence generated | `2026-08-27T03:28:43Z` |
 | Package manifest version | `2.0.0`（九个 package，尚未发布） |
 | Qualification runner | `Arch`, Linux x86_64, glibc 2.44 |
 | Qualification SDK | Cangjie `1.1.0-alpha.20260817040003`, cjpm `1.1.3` |
@@ -27,27 +27,28 @@ allowlist 中，因此不会改变已验证源码。
 
 | Gate | Status | Evidence |
 | --- | --- | --- |
-| Source-only release tree | PASS | allowlist 207 files；不包含 VCS、target、cache 或 Native binary |
+| Source-only release tree | PASS | allowlist 215 files；不包含 VCS、target、cache 或 Native binary |
 | Complete public API snapshot | PASS | 1,071 declarations；10 reviewed 2.0 deltas |
 | Runtime startup freeze | PASS | Pure late-init、version mismatch、provider conflict、activation failure、concurrent race |
 | Pure Cangjie core | PASS | 521 passed, 0 failed |
+| Core coverage | PASS | line 60.1%（5,407/8,998）；branch 41.7%（4,205/10,090） |
 | Standards required | PASS | 2,110/2,110（Schema required、JSONPath CTS、JSON Patch） |
 | Schema optional formats | PASS | 3,074/3,074 aggregate |
 | Examples and external consumers | PASS | examples、macro/literal、algorithms、schema formats completed |
 | Custom Native | PASS | package、external consumer、Clang/GCC targeted gate |
 | yyjson advanced backend | PASS | 11/11 package tests and external consumer |
 | Sanitizers | PASS | ASan、UBSan、LSan gate completed |
-| Differential fuzz | PASS | deterministic 5,000 and 50,000 cases |
+| Differential fuzz | PASS | 当前候选 deterministic 5,000 cases；50,000-case 扩展证据来自同一 production source 的 `d8f7a512` |
 | yyjson symbol isolation | PASS | vendored 0.12.0 与 pinned 0.11.1 的四种 co-link 组合 |
-| Windows Pure cross build | PASS | `x86_64-w64-mingw32` build completed；未宣称 Windows runtime qualified |
+| Windows Pure cross build | PASS | 同一 production source 的 `d8f7a512` 完成 `x86_64-w64-mingw32` build；未宣称 Windows runtime qualified |
 | Package rehearsal | PASS | nine unpublished 2.0.0 `.cjp` artifacts and registry-style consumers |
 | Three-library performance | PASS | 36/36 workloads, 11 rounds；规定的一次 noisy rerun 已完成 |
 | Native acceleration | PASS | 11 rounds；广告 read/write 均提升至少 5%，普通 workload 无超过 5% 回退 |
-| Hosted CI | **NOT RUN / NON-BLOCKING** | release-owner policy；完整 local fresh-source evidence 为 blocking |
+| Hosted CI | **PENDING / BLOCKING** | 发布 PR 与合并后 `main` workflow 均必须通过 |
 | Annotated tag | **NOT RUN** | 候选已验证但未打 tag |
 | Registry publish | **NOT RUN** | 未发布任何 package |
 
-完整 fresh-source transcript、扩展 fuzz、co-link、Windows cross build 和 package rehearsal
+完整 fresh-source、core coverage、扩展 fuzz、co-link、Windows cross build 和 package rehearsal
 日志位于 [`artifacts/logs/`](artifacts/logs/)。Cangjie 编译日志仍包含 SDK unittest 宏展开
 产生的 warning；本表的 Native compiler PASS 指仓库定义的 Clang/GCC `-Werror` gate，
 不把宏生成告警误写为“零告警”。
@@ -93,9 +94,9 @@ archive SHA-256 为
 Local fresh-source simulation: PASS
 General performance qualification: PASS after required full rerun
 Native acceleration qualification: PASS after required full rerun
-Hosted CI execution: NOT RUN
-Hosted CI policy: NON-BLOCKING (release owner)
-Release decision: CANDIDATE VERIFIED; TAG NOT RUN; REGISTRY PUBLISH NOT RUN
+Hosted CI execution: PENDING
+Hosted CI policy: BLOCKING
+Release decision: LOCAL CANDIDATE VERIFIED; HOSTED CI PENDING; TAG NOT RUN; REGISTRY PUBLISH NOT RUN
 ```
 
 Linux x86_64 是完整 qualified 平台。Windows x86_64 仅完成 Pure cross build；macOS 与

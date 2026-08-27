@@ -2,9 +2,10 @@
 
 This directory binds qualification, package rehearsal, general performance and
 Native acceleration evidence to candidate source commit
-`d8f7a5121796b2a70c7cd21fc72dd84c26f4b29d`.
+`497245f54c7bd7ff8d056ed2a3cfb20d26c80a41`.
 
 - `logs/local-fresh-checkout.log.gz` is the complete Linux release-gate transcript.
+- `logs/core-coverage.log.gz` records the unoptimized 521-case core coverage gate.
 - `logs/package-rehearsal.log.gz` records the nine-package registry-style rehearsal.
 - `logs/fuzz-extended.log.gz`, `logs/yyjson-colink.log.gz` and
   `logs/pure-windows-build.log.gz` record the extra gates.
