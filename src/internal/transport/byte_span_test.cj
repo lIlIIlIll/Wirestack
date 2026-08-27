@@ -81,5 +81,7 @@ class ByteSpanTest {
         expectIllegalArgument { => let _ = ByteSpan(bytes).slice(2, length: 2) }
         expectIllegalArgument { => let _ = ByteSpan(bytes).advance(4) }
         expectIllegalArgument { => let _ = MutableByteSpan(bytes, offset: 3, length: 1) }
+        expectIllegalArgument { => let _ = MutableByteSpan(bytes).slice(-1, length: 0) }
+        expectIllegalArgument { => let _ = MutableByteSpan(bytes).advance(4) }
     }
 }
