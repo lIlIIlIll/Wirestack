@@ -30,7 +30,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M1-002 `ByteSpan`/`MutableByteSpan` | COMPLETE | Checked constructor, slice and advance ranges for both span types; zero-copy identity, mutable write-through and empty-end behavior pass; [evidence](../evidence/M1-002/README.md). |
 | M1-003 monotonic `Deadline` | COMPLETE | `MonoTime`, injected-clock remaining and expiry behavior, and child-budget non-extension including zero-duration and expired-parent cases pass; [evidence](../evidence/M1-003/README.md). |
 | M1-004 cancellation primitive | COMPLETE | Registration, idempotent unregister, already-cancelled fast-fail, 100-round cancel/register/unregister races, callback failure isolation and reentrant lock-free callback execution pass; [Linux evidence](../evidence/M1-004/README.md) |
-| M1-005 `OperationContext` | COMPLETE | Immutable Deadline/cancellation/trace/event-sink propagation tests |
+| M1-005 `OperationContext` | COMPLETE | Immutable Deadline, cancellation, trace and event-sink inputs survive every derivation helper; child budgets cannot extend their parent and a pre-cancelled write produces no peer data; [evidence](../evidence/M1-005/README.md). |
 | M1-006 trace context | COMPLETE | Bounded read-only identifiers and default-off, exception-isolated, secret-free structured event sink |
 | M1-007 structured network error | COMPLETE | category/phase/code/retryability/native/endpoint/cause model and tests |
 | M1-008 exactly-once completion | COMPLETE | Bounded cleanup registry, one terminal winner, idempotent unregister, late-registration cleanup, failure isolation and 100-round registration/unregister races; [Linux evidence](../evidence/M1-008/README.md) |
