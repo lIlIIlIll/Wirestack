@@ -128,6 +128,7 @@ case "$job" in
         registry_args=()
         if [[ -n "${YJSON_CI_DEPENDENCY_OVERRIDE:-}" ]]; then
             registry_args+=(
+                "--bundle-override-compile-option=${YJSON_CI_DEPENDENCY_OVERRIDE}"
                 "--consumer-override-compile-option=${YJSON_CI_DEPENDENCY_OVERRIDE}")
         fi
         python3 "$repo/scripts/release_registry_rehearsal.py" "$rehearsal" \
