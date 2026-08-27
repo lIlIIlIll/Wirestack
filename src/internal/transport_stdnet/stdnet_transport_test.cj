@@ -44,6 +44,27 @@ private func stableReadSocketError(
         error.remoteEndpoint.isSome() && error.cause.isSome()
 }
 
+private func stableClosedRead(error: NetworkException): Bool {
+    let categoryMatches = match (error.category) {
+        case NetworkErrorCategory.Read => true
+        case _ => false
+    }
+    let phaseMatches = match (error.phase) {
+        case NetworkPhase.TcpRead => true
+        case _ => false
+    }
+    let codeMatches = match (error.code) {
+        case NetworkErrorCode.Closed => true
+        case _ => false
+    }
+    let retryabilityMatches = match (error.retryability) {
+        case Retryability.Never => true
+        case _ => false
+    }
+    categoryMatches && phaseMatches && codeMatches && retryabilityMatches &&
+        error.localEndpoint.isSome() && error.remoteEndpoint.isSome()
+}
+
 private func stableUnknownConnectError(error: NetworkException, endpoint: SocketEndpoint): Bool {
     let categoryMatches = match (error.category) {
         case NetworkErrorCategory.Connect => true
@@ -489,7 +510,7 @@ class StdNetTransportTest {
                 let _ = client.readSome(MutableByteSpan(Array<Byte>(1, repeat: 0)))
                 false
             } catch (error: NetworkException) {
-                stableReadSocketError(error, NetworkErrorCode.Closed, Retryability.Never)
+                stableClosedRead(error)
             }
         }
         @Assert(client.waitUntilReadActive(Duration.second))
@@ -497,6 +518,75 @@ class StdNetTransportTest {
         @Expect(result.get(Duration.second), true)
         server.close()
         listener.close()
+    }
+
+    @TestCase
+    func explicitAbortWakesBlockedReadWithStableEvidence(): Unit {
+        let listener = StdNetTransportListener.bind(loopback(0))
+        let accepted = spawn { listener.accept() }
+        let client = StdNetTransport.connect(listener.localEndpoint)
+        let server = accepted.get(Duration.second)
+        let result: Future<Bool> = spawn {
+            try {
+                let _ = client.readSome(MutableByteSpan(Array<Byte>(1, repeat: 0)))
+                false
+            } catch (error: NetworkException) {
+                stableClosedRead(error)
+            }
+        }
+        @Assert(client.waitUntilReadActive(Duration.second))
+        client.abort(reason: Some(AbortReason.ApplicationAbort))
+        @Expect(result.get(Duration.second), true)
+        client.abort()
+        client.close()
+        server.close()
+        listener.close()
+    }
+
+    @TestCase
+    func firstCloseOrAbortKeepsItsPeerVisibleTerminalResult(): Unit {
+        let gracefulListener = StdNetTransportListener.bind(loopback(0))
+        let gracefulAccepted = spawn { gracefulListener.accept() }
+        let gracefulClient = StdNetTransport.connect(gracefulListener.localEndpoint)
+        let gracefulServer = gracefulAccepted.get(Duration.second)
+        gracefulClient.close()
+        gracefulClient.abort(reason: Some(AbortReason.ApplicationAbort))
+        gracefulClient.close()
+        match (gracefulServer.readSome(
+            MutableByteSpan(Array<Byte>(1, repeat: 0)),
+            context: OperationContext.background()
+        )) {
+            case ReadResult.EndOfStream => ()
+            case ReadResult.Data(_) => @Fail("graceful close did not produce peer EOF")
+        }
+        gracefulServer.close()
+        gracefulListener.close()
+
+        let abortListener = StdNetTransportListener.bind(loopback(0))
+        let abortAccepted = spawn { abortListener.accept() }
+        let abortClient = StdNetTransport.connect(abortListener.localEndpoint)
+        let abortServer = abortAccepted.get(Duration.second)
+        writeAll(abortClient, ByteSpan([1]))
+        let transferred = Array<Byte>(1, repeat: 0)
+        readExact(abortServer, MutableByteSpan(transferred))
+        abortClient.abort(reason: Some(AbortReason.ApplicationAbort))
+        abortClient.close()
+        abortClient.abort()
+        var resetObserved = false
+        try {
+            match (abortServer.readSome(
+                MutableByteSpan(Array<Byte>(1, repeat: 0)),
+                context: OperationContext.background()
+            )) {
+                case ReadResult.EndOfStream => ()
+                case ReadResult.Data(_) => ()
+            }
+        } catch (_: NetworkException) {
+            resetObserved = true
+        }
+        @Expect(resetObserved)
+        abortServer.close()
+        abortListener.close()
     }
 
     @TestCase
