@@ -253,7 +253,7 @@ public class StdNetTransport <: DuplexTransport {
             NetworkErrorCategory.Unsupported,
             NetworkPhase.TransportClose,
             NetworkErrorCode.Unsupported,
-            "typed TCP half-close requires the public std.net UP-003 capability",
+            "this transport adapter does not support directional TCP shutdown",
             retryability: Retryability.Never,
             localEndpoint: localEndpoint,
             remoteEndpoint: remoteEndpoint
