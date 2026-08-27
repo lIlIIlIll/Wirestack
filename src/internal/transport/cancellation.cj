@@ -16,6 +16,9 @@ public class CancellationRegistration {
 
     /** Idempotently prevents a callback that cancellation has not claimed. */
     public func unregister(): Unit {
+        if (id == 0) {
+            return
+        }
         if (!unregistered.swap(true)) {
             state.unregister(id)
         }
@@ -28,7 +31,7 @@ public class CancellationToken {
     private static let NONE_REGISTRATION = CancellationRegistration(NONE_STATE, 0)
     private static let NONE = CancellationToken(NONE_STATE, permanentlyActive: true)
     private let state: CancellationState
-    private let permanentlyActive: Bool
+    protected let permanentlyActive: Bool
 
     internal init(state: CancellationState, permanentlyActive!: Bool = false) {
         this.state = state
