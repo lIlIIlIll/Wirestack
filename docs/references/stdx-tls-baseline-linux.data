@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "repository": "Cangjie/cangjie_stdx",
+  "release_tag": "v1.1.3.1",
+  "release_commit": "8fa4b04b4cb1753e8f3581e4935cf72ad145fedc",
+  "asset_id": 75664,
+  "asset_name": "cangjie-stdx-linux-x64-1.1.3.1.zip",
+  "archive_sha256": "41653244d6e4706359b906b1e1092db601d6fd8b07d72f03a0a2bfa33886a26f",
+  "dynamic_directory": "linux_x86_64_cjnative/dynamic/stdx",
+  "module_sha256": {
+    "libstdx.net.tls.so": "205bde15367c279fe4e17b9de0e4a8d084d1902fc507a6fc2fff228047e41387",
+    "stdx.net.tls.cjo": "1f78ba687c9edfe16e3e9113887a243f13c2db5f1cb175e761f3add4792279e2",
+    "libstdx.net.tls.common.so": "8a9a9e12904d42469c5cd77e2649effd8aa38d9f1939c0deb7a4e1bcb1462090",
+    "stdx.net.tls.common.cjo": "459f80f50fe7f4b201bbfd2692b169cb95e388cc5605c4085c93fadd1863bd37"
+  }
+}

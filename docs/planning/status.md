@@ -74,6 +74,15 @@ the native platform dependencies in the global backlog.
 | M2-015 | COMPLETE | [`docs/evidence/M2-015/README.md`](../evidence/M2-015/README.md) | Native glibc network namespaces prove IPv6 available/blackhole fallback, 20/100 ms RTT, 1% loss, joined losers with bounded resources, and one shared Deadline for 2/8 candidates. |
 | M2-016 | COMPLETE | [`docs/evidence/M2-016/README.md`](../evidence/M2-016/README.md) | The isolated `-O2` native benchmark retains DNS, first-attempt, winner, total, connection-count and cancellation metrics across six profiles and 528 measured samples; cancellation P99 is 3.908 ms against the 50 ms limit. |
 
+## Linux M3 closure work
+
+This table records Linux glibc TLS completion only. It does not complete the
+global six-platform M3 milestone.
+
+| ID | Status | Evidence | Notes |
+|---|---|---|---|
+| M3-028 | COMPLETE | [`docs/evidence/M3-028/README.md`](../evidence/M3-028/README.md) | Native Linux qualification passes 70 deterministic TLS/trust tests, four bounded fuzz targets, TLS 1.2/1.3 OpenSSL interoperability, dependency scanning, body and idle-memory limits, 11-round full/resumed handshake gates, and 1.2125 times the pinned stdx bulk throughput. |
+
 ## Conditional upstream work
 
 `UP-001` through `UP-007` remain **BLOCKED / DO NOT START** until the corresponding
