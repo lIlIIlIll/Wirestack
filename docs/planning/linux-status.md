@@ -13,7 +13,7 @@ Status values have the same fail-closed meaning as the global status file.
 | Architecture and gate harness | COMPLETE | M0-001 through M0-004 and M0-018 evidence |
 | close/wakeup and absolute Deadline | COMPLETE | M0-006 and M0-008 native Linux results |
 | duplex and EOF classification | BLOCKED | Executed behavior passes; public typed half-close is absent and requires UP-003 |
-| large-buffer/copy profile | BLOCKED | Large-buffer behavior passes; copied-byte/allocation instrumentation and adapter comparison remain |
+| large-buffer/copy profile | COMPLETE | M0-010 measures all five payloads, native process allocations, syscall receive bytes and adapter staging copies, and retains the failed pre-optimization comparison. The M1-027 Wirestack fast path then passes the unchanged five-payload x 11-round O2 GATE-NET-05 thresholds with zero adapter staging copies, so UP-004 is not required for the Linux profile; [Linux evidence](../evidence/M1-027/README.md) |
 | leak/soak | COMPLETE | Linux GATE-NET-06 passes all seven workloads: three 100,000-iteration transport scenarios, 100,000 provider and production TLS cleanups, 100,000 production cancellations, and an 86,400-second mixed soak with PASS resource trends; [Linux evidence](../evidence/M0-011/README.md) |
 | DNS scheduler behavior | COMPLETE | M0-013 records starvation and mandates a bounded resolver pool |
 | TLS provider | COMPLETE | AWS-LC 5.5.0 is selected by ADR-0003 after schema-v2 glibc/musl PASS results, executed external signing and 10,000 cleanup cycles |
