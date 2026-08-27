@@ -9,6 +9,9 @@
 - generated codec 保留 canonical fast path，显式 config 继续走完整语义 reader。
 - `YJson.fastDecoder` 复用 codec 选择，但不持有输入或跨调用共享可变 parser state。
 - Large Map encode 使用单次遍历和 direct output，避免排序/materialization/二次扫描。
+- Stream cursor 只在当前连续窗口内处理完整 ASCII string、field name 和 `Int64` token；跨
+  chunk、escape、UTF-8 和错误路径继续走共享语义 parser。
+- Direct reader 只在 duplicate-key policy 要求拒绝重复 key 时分配 name set。
 - Pure 是未配置时冻结的默认引擎；Native 加速只在首次 `YJson` 调用前由应用基于
   profiling 显式初始化一次。
 
@@ -18,6 +21,8 @@
 - 按 payload 动态切换 session：分支与状态增加，未形成稳定全局收益。
 - borrowed view 作为 generated codec 默认路径：扩大 public lifetime contract，收益不稳定。
 - 为单一 Person workload 添加专用产品路径：局部收益不足以覆盖回归面。
+- 每线程单槽 4 KiB Stream scratch 池：稳定行差异都低于 1%，且没有达到两个 payload 的
+  生命周期门槛。public API 保留内部优化空间，但当前实现不携带这个池。
 - Native DOM materialize 成 AST 作为通用 fast path：跨层和完整树分配抵消目标收益。
 
 这些结论不是永久禁令。新的实现可以在等语义、配对、反转顺序和完整回归表下重新验证，
