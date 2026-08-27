@@ -11,6 +11,12 @@ require_cangjie() {
     command -v cjpm >/dev/null || { echo 'cjpm is required on the CI runner' >&2; exit 2; }
 }
 
+dependency_override_args() {
+    if [[ -n "${YJSON_CI_DEPENDENCY_OVERRIDE:-}" ]]; then
+        printf '%s\n' "--override-compile-option=${YJSON_CI_DEPENDENCY_OVERRIDE}"
+    fi
+}
+
 stage_modules() {
     python3 "$repo/scripts/release_package_stage.py" "$modules" --development
 }
@@ -29,12 +35,15 @@ case "$job" in
         ;;
     standards-conformance)
         require_cangjie
-        python3 "$repo/scripts/run_standards_conformance.py" --quiet-failures
+        mapfile -t override_args < <(dependency_override_args)
+        python3 "$repo/scripts/run_standards_conformance.py" --quiet-failures \
+            "${override_args[@]}"
         ;;
     schema-formats-conformance)
         require_cangjie
+        mapfile -t override_args < <(dependency_override_args)
         python3 "$repo/scripts/run_standards_conformance.py" --quiet-failures \
-            --include-schema-optional
+            --include-schema-optional "${override_args[@]}"
         ;;
     performance-comparison)
         require_cangjie
@@ -58,13 +67,21 @@ case "$job" in
     algorithms-consumer)
         require_cangjie
         stage_modules
+        mapfile -t override_args < <(dependency_override_args)
         python3 "$repo/scripts/release_consumer_checks.py" \
-            --modules-root "$modules" --only algorithms --only schema-formats
+            --modules-root "$modules" --only algorithms --only schema-formats \
+            "${override_args[@]}"
         ;;
     registry-rehearsal)
         require_cangjie
         rehearsal="$modules/registry-rehearsal"
-        python3 "$repo/scripts/release_registry_rehearsal.py" "$rehearsal"
+        registry_args=()
+        if [[ -n "${YJSON_CI_DEPENDENCY_OVERRIDE:-}" ]]; then
+            registry_args+=(
+                "--consumer-override-compile-option=${YJSON_CI_DEPENDENCY_OVERRIDE}")
+        fi
+        python3 "$repo/scripts/release_registry_rehearsal.py" "$rehearsal" \
+            "${registry_args[@]}"
         ;;
     custom-native)
         require_cangjie

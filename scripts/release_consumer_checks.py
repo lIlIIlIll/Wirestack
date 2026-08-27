@@ -16,7 +16,13 @@ def quote(path: pathlib.Path) -> str:
     return path.as_posix().replace('"', '\\"')
 
 
-def run_fixture(name: str, dependencies: str, source: str, base: pathlib.Path) -> None:
+def run_fixture(
+    name: str,
+    dependencies: str,
+    source: str,
+    base: pathlib.Path,
+    override_compile_option: str,
+) -> None:
     project = base / name
     (project / "src").mkdir(parents=True)
     manifest = f'''[package]
@@ -25,6 +31,7 @@ name = "yjson_release_{name}"
 version = "0.0.0"
 output-type = "executable"
 compile-option = "-O2"
+override-compile-option = "{override_compile_option}"
 
 [dependencies]
 {dependencies}
@@ -47,6 +54,7 @@ compile-option = "-O2"
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--modules-root", type=pathlib.Path)
+    parser.add_argument("--override-compile-option", default="")
     parser.add_argument(
         "--only", choices=("core", "macro", "algorithms", "schema-formats", "native", "yyjson"),
         action="append"
@@ -88,7 +96,7 @@ main(): Unit {
     }
     println("core consumer passed")
 }
-''', base)
+''', base, args.override_compile_option)
         if "macro" in selected:
             run_fixture("macro", f'yjson_all = {{ path = "{aggregate}" }}', '''package yjson_release_macro
 import yjson_all.*
@@ -119,7 +127,7 @@ main(): Unit {
     }
     println("macro consumer passed")
 }
-''', base)
+''', base, args.override_compile_option)
         if "algorithms" in selected:
             run_fixture("algorithms", f'''yjson = {{ path = "{core}" }}
 yjson_algorithms = {{ path = "{algorithms}" }}''', '''package yjson_release_algorithms
@@ -135,7 +143,7 @@ main(): Unit {
     if (!schema.validate(root).isEmpty()) { throw Exception("json schema") }
     println("algorithms consumer passed")
 }
-''', base)
+''', base, args.override_compile_option)
         if "schema-formats" in selected:
             run_fixture("schema_formats", f'''yjson = {{ path = "{core}" }}
 yjson_algorithms = {{ path = "{algorithms}" }}
@@ -151,7 +159,7 @@ main(): Unit {
     if (!schema.validator().isValid(JsonStringValue("실례.테스트"))) { throw Exception("schema formats") }
     println("schema formats consumer passed")
 }
-''', base)
+''', base, args.override_compile_option)
         if "native" in selected:
             run_fixture("native", f'''yjson = {{ path = "{core}" }}
 yjson_native = {{ path = "{native}" }}
@@ -213,7 +221,7 @@ main(): Unit {
     }
     println("native consumer passed")
 }
-''', base)
+''', base, args.override_compile_option)
         if "yyjson" in selected:
             run_fixture("yyjson", f'''yjson = {{ path = "{core}" }}
 yjson_yyjson = {{ path = "{yyjson}" }}
@@ -254,7 +262,7 @@ main(): Unit {
     }
     println("yyjson consumer passed")
 }
-''', base)
+''', base, args.override_compile_option)
     finally:
         shutil.rmtree(base)
     return 0

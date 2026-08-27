@@ -76,7 +76,7 @@ jobs:
           version: ${{ needs.nightly.outputs.version }}
           archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
       - name: Install native prerequisites
-        if: contains(fromJSON('["schema-formats-conformance","algorithms-consumer","registry-rehearsal","custom-native","yyjson-native","native-clang","native-gcc","sanitizer","fuzz-short","yyjson-colink"]'), matrix.gate)
+        if: contains(fromJSON('["standards-conformance","schema-formats-conformance","algorithms-consumer","registry-rehearsal","custom-native","yyjson-native","native-clang","native-gcc","sanitizer","fuzz-short","yyjson-colink"]'), matrix.gate)
         run: sudo apt-get update && sudo apt-get install -y clang gcc libidn2-dev
       - name: Fetch pinned yyjson co-link fixture
         if: matrix.gate == 'yyjson-colink'
@@ -92,6 +92,10 @@ jobs:
       - name: Run gate
         env:
           YJSON_SECOND_YYJSON_ROOT: ${{ matrix.gate == 'yyjson-colink' && '/tmp/yjson-yyjson-second/yyjson-0.11.1' || '' }}
+          # Cangjie nightly 20260827010033 crashes in llc when this large
+          # module is optimized as an external path dependency at O2. Core O2
+          # remains blocking; only dependency-boundary gates use O1.
+          YJSON_CI_DEPENDENCY_OVERRIDE: ${{ needs.nightly.outputs.version == '1.3.0-alpha.20260827010033' && contains(fromJSON('["standards-conformance","schema-formats-conformance","algorithms-consumer","registry-rehearsal"]'), matrix.gate) && '-O1' || '' }}
         run: |
           # The current nightly's LLVM backend can recurse deeply while
           # optimizing yjson as a path dependency on hosted x86_64 runners.

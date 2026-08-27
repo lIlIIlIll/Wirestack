@@ -32,6 +32,11 @@ workflow 在每个七天窗口首次运行时解析最新完整 Cangjie nightly�
 Core Coverage 必须使用同一个版本；窗口内重跑不会切换 SDK。Server performance、50,000-case
 扩展 fuzz 与 Windows cross build 仍属于发布资格验证，不进入日常 hosted CI。
 
+若某个已确认的 nightly compiler 只在外部 dependency codegen 阶段崩溃，workflow 可以按完整
+SDK 版本对受影响的 dependency-boundary job 设置较低优化级别。例外不得使用版本范围，Core
+仍须以 `-O2` 通过；下一个七天窗口选择新 nightly 后会自动恢复 external `-O2`，让问题重新
+进入门禁。发布 artifact 的 manifest 和本地 release qualification 不使用该 hosted workaround。
+
 ## Core coverage
 
 运行 `scripts/coverage.sh`。脚本在临时 source tree 中以 `-O0` 编译，生成 cjcov HTML、JSON、

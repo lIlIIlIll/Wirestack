@@ -124,6 +124,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("destination", type=pathlib.Path)
     parser.add_argument("--skip-consumers", action="store_true")
+    parser.add_argument("--consumer-override-compile-option", default="")
     args = parser.parse_args()
     destination = args.destination.resolve()
     if destination.exists() and any(destination.iterdir()):
@@ -158,8 +159,12 @@ def main() -> int:
 
     rewrite_for_local_resolution(resolved)
     if not args.skip_consumers:
-        run([sys.executable, str(ROOT / "scripts/release_consumer_checks.py"),
-             "--modules-root", str(resolved)], ROOT, env)
+        command = [sys.executable, str(ROOT / "scripts/release_consumer_checks.py"),
+                   "--modules-root", str(resolved)]
+        if args.consumer_override_compile_option:
+            command.append(
+                f"--override-compile-option={args.consumer_override_compile_option}")
+        run(command, ROOT, env)
     print(f"registry-style rehearsal passed modules={len(MODULES)} destination={destination}")
     return 0
 
