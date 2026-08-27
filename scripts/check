@@ -10,6 +10,8 @@ if [[ -d tools/benchmarks/tests ]]; then
 fi
 python3 tools/architecture_guard.py --root . --format text
 
+scripts/build-linux-resolver --quiet
+
 command -v cjc >/dev/null
 command -v cjpm >/dev/null
 cjpm check

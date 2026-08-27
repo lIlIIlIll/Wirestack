@@ -1,0 +1,90 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 16959269 ns, RESULT:
+Summary: TOTAL: 148
+    PASSED: 0, SKIPPED: 148, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport, time elapsed: 6131061 ns, RESULT:
+Summary: TOTAL: 75
+    PASSED: 0, SKIPPED: 75, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.tls_engine, time elapsed: 4378032 ns, RESULT:
+Summary: TOTAL: 58
+    PASSED: 0, SKIPPED: 58, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.connector, time elapsed: 1953303 ns, RESULT:
+Summary: TOTAL: 17
+    PASSED: 0, SKIPPED: 17, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 8810940 ns, RESULT:
+Summary: TOTAL: 60
+    PASSED: 0, SKIPPED: 60, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http1, time elapsed: 11068300 ns, RESULT:
+Summary: TOTAL: 113
+    PASSED: 0, SKIPPED: 113, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.common, time elapsed: 1276133 ns, RESULT:
+Summary: TOTAL: 9
+    PASSED: 0, SKIPPED: 9, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.resolver, time elapsed: 2041713778 ns, RESULT:
+    TCS: M2003BoundedResolverBackendTest, time elapsed: 2041255723 ns, RESULT:
+    [ PASSED ] CASE: resolvesLocalhostWithBoundedMetricsAndIdempotentClose (211435312 ns)
+    [ PASSED ] CASE: appliesIpv4FamilyAndRejectsUseAfterClose (200584111 ns)
+    [ PASSED ] CASE: validatesPoolBounds (44076 ns)
+    [ PASSED ] CASE: preCancelledContextDoesNotSubmitNativeWork (172498 ns)
+    [ PASSED ] CASE: delayedNativeWorkDoesNotStarveCangjieHeartbeat (815537698 ns)
+    [ PASSED ] CASE: cancellationCompletesPromptlyWhileNativeJobCleansUp (200478716 ns)
+    [ PASSED ] CASE: deadlineCompletesPromptlyWhileNativeJobCleansUp (200419786 ns)
+    [ PASSED ] CASE: queueAdmissionIsStrictlyBounded (409849628 ns)
+Summary: TOTAL: 11
+    PASSED: 8, SKIPPED: 3, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.trust, time elapsed: 1283081 ns, RESULT:
+Summary: TOTAL: 9
+    PASSED: 0, SKIPPED: 9, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.tls, time elapsed: 457858 ns, RESULT:
+Summary: TOTAL: 2
+    PASSED: 0, SKIPPED: 2, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.platform.linux, time elapsed: 779462 ns, RESULT:
+Summary: TOTAL: 4
+    PASSED: 0, SKIPPED: 4, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport_stdnet, time elapsed: 5114406 ns, RESULT:
+Summary: TOTAL: 36
+    PASSED: 0, SKIPPED: 36, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 2211316684 ns, RESULT:
+TP: wirestack.*, time elapsed: 2211259947 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.common, time elapsed: 1276133 ns
+    TP: wirestack.internal.platform.linux, time elapsed: 779462 ns
+    TP: wirestack.internal.transport, time elapsed: 6131061 ns
+    TP: wirestack.internal.trust, time elapsed: 1283081 ns
+    TP: wirestack.internal.http2, time elapsed: 16959269 ns
+    TP: wirestack.internal.resolver, time elapsed: 2041713778 ns
+    TP: wirestack.internal.tls_engine, time elapsed: 4378032 ns
+    TP: wirestack.internal.connector, time elapsed: 1953303 ns
+    TP: wirestack.tls, time elapsed: 457858 ns
+    TP: wirestack.internal.http1, time elapsed: 11068300 ns
+    TP: wirestack.internal.transport_stdnet, time elapsed: 5114406 ns
+    TP: wirestack.http, time elapsed: 8810940 ns
+Summary: TOTAL: 542
+    PASSED: 8, SKIPPED: 534, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

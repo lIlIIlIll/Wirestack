@@ -208,7 +208,7 @@ private func matchesFamily(address: IpAddress, requested: ResolveAddressFamily):
     }
 }
 
-private func checkResolveContext(context: OperationContext): Unit {
+internal func checkResolveContext(context: OperationContext): Unit {
     if (context.isCancellationRequested()) {
         throw ResolveException(ResolveErrorCode.Cancelled, "resolution cancelled")
     }

@@ -19,4 +19,5 @@
 [dependencies]
 
 [ffi.c]
+  wirestack_resolver = { path = "./target/native/resolver/current/lib" }
   wirestack_tls_provider = { path = "./target/native/current/lib" }
