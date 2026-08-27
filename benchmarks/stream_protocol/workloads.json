@@ -1,0 +1,18 @@
+{
+  "protocol_version": 1,
+  "payloads": [
+    {"id": "person", "type": "Person", "record_count": 1, "target_size": "200-300 B"},
+    {"id": "records-64k", "type": "ArrayList<ProfileRecord>", "record_count": 1024, "target_size": "约 64 KiB"},
+    {"id": "records-1m", "type": "ArrayList<ProfileRecord>", "record_count": 16384, "target_size": "约 1 MiB"}
+  ],
+  "decode_chunks": [
+    {"id": "chunk-64", "description": "每次最多读取 64 bytes"},
+    {"id": "chunk-4k", "description": "每次最多读取 4096 bytes"},
+    {"id": "chunk-random", "description": "每次读取 1 到 8192 bytes，固定 seed 0x6a09e667f3bcc909"}
+  ],
+  "encode_sinks": [
+    {"id": "memory", "description": "在内存中保留输出；计时不包含最终 snapshot"},
+    {"id": "counting", "description": "只统计 byte 数并计算滚动 checksum，不保留输出"}
+  ],
+  "lifecycles": ["unpooled-one-shot", "pooled-steady-state"]
+}

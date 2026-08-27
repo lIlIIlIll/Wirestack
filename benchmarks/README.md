@@ -14,6 +14,9 @@ API，也不能单独证明语义正确。
 | `scripts/json_perf_baseline.py` | 统一采集 schema |
 | `scripts/json_backend_perf_run.py` | backend runner |
 | `scripts/json_backend_perf_summary.py` | backend 汇总 |
+| `stream_protocol/workloads.json` | Stream protocol v1 workload 与输入 profile |
+| `scripts/json_stream_protocol_run.py` | previous-yjson 与候选的生命周期配对采集 |
+| `scripts/json_stream_peer_run.py` | yjson 与 stdx.json 的 incremental Stream 配对采集 |
 
 Typed codec、DOM backend、typed stream 和跨 runtime adapter 必须分别报告，不能把不同
 representation 或 lifecycle 拼成统一排名。
@@ -30,3 +33,14 @@ representation 或 lifecycle 拼成统一排名。
 
 统计和证据政策见[性能方法](../docs/performance/methodology.md)，可引用结果见
 [性能入口](../docs/performance/README.md)。
+
+## 验证 Stream 文档
+
+运行下面的命令，校验归档 checksum、机器汇总和生成的 workload 页面：
+
+```terminal
+scripts/ci_job.sh stream-docs
+```
+
+命令输出每个文件的 `OK`、`Stream workload documentation is current`，以及三个 JSON
+汇总的等价检查。正式 benchmark 必须在文档规定的 Server 环境运行，不能用这个检查替代。
