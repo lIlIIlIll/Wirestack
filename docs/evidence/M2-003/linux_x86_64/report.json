@@ -1,0 +1,114 @@
+{
+  "artifacts": {
+    "delay_shim_sha256": "dd824aaed51a3e20e14f81a8fe11f4189e52cc7a8e5b173955efd23d67d07e8b",
+    "shim_log_sha256": "5bdf37175515749f77b1ebe0311b487643736288d540cf1a895f4892daebcc1f"
+  },
+  "configuration": {
+    "delay_ms": 200,
+    "expected_getaddrinfo_calls": 14,
+    "expected_tests": 8
+  },
+  "decision": "PASS",
+  "failures": [],
+  "focused_test": {
+    "command": [
+      "/home/elliot/cangjie_sdk/daily/cangjie/tools/bin/cjpm",
+      "test",
+      "--filter=M2003BoundedResolverBackendTest.*",
+      "--no-color",
+      "--no-progress"
+    ],
+    "duration_ms": 15644.87,
+    "exit_code": 0,
+    "output": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http2, time elapsed: 16959269 ns, RESULT:\nSummary: TOTAL: 148\n    PASSED: 0, SKIPPED: 148, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport, time elapsed: 6131061 ns, RESULT:\nSummary: TOTAL: 75\n    PASSED: 0, SKIPPED: 75, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.tls_engine, time elapsed: 4378032 ns, RESULT:\nSummary: TOTAL: 58\n    PASSED: 0, SKIPPED: 58, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.connector, time elapsed: 1953303 ns, RESULT:\nSummary: TOTAL: 17\n    PASSED: 0, SKIPPED: 17, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.http, time elapsed: 8810940 ns, RESULT:\nSummary: TOTAL: 60\n    PASSED: 0, SKIPPED: 60, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http1, time elapsed: 11068300 ns, RESULT:\nSummary: TOTAL: 113\n    PASSED: 0, SKIPPED: 113, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.common, time elapsed: 1276133 ns, RESULT:\nSummary: TOTAL: 9\n    PASSED: 0, SKIPPED: 9, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.resolver, time elapsed: 2041713778 ns, RESULT:\n    TCS: M2003BoundedResolverBackendTest, time elapsed: 2041255723 ns, RESULT:\n    [ PASSED ] CASE: resolvesLocalhostWithBoundedMetricsAndIdempotentClose (211435312 ns)\n    [ PASSED ] CASE: appliesIpv4FamilyAndRejectsUseAfterClose (200584111 ns)\n    [ PASSED ] CASE: validatesPoolBounds (44076 ns)\n    [ PASSED ] CASE: preCancelledContextDoesNotSubmitNativeWork (172498 ns)\n    [ PASSED ] CASE: delayedNativeWorkDoesNotStarveCangjieHeartbeat (815537698 ns)\n    [ PASSED ] CASE: cancellationCompletesPromptlyWhileNativeJobCleansUp (200478716 ns)\n    [ PASSED ] CASE: deadlineCompletesPromptlyWhileNativeJobCleansUp (200419786 ns)\n    [ PASSED ] CASE: queueAdmissionIsStrictlyBounded (409849628 ns)\nSummary: TOTAL: 11\n    PASSED: 8, SKIPPED: 3, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.trust, time elapsed: 1283081 ns, RESULT:\nSummary: TOTAL: 9\n    PASSED: 0, SKIPPED: 9, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.tls, time elapsed: 457858 ns, RESULT:\nSummary: TOTAL: 2\n    PASSED: 0, SKIPPED: 2, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.platform.linux, time elapsed: 779462 ns, RESULT:\nSummary: TOTAL: 4\n    PASSED: 0, SKIPPED: 4, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 5114406 ns, RESULT:\nSummary: TOTAL: 36\n    PASSED: 0, SKIPPED: 36, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 2211316684 ns, RESULT:\nTP: wirestack.*, time elapsed: 2211259947 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.common, time elapsed: 1276133 ns\n    TP: wirestack.internal.platform.linux, time elapsed: 779462 ns\n    TP: wirestack.internal.transport, time elapsed: 6131061 ns\n    TP: wirestack.internal.trust, time elapsed: 1283081 ns\n    TP: wirestack.internal.http2, time elapsed: 16959269 ns\n    TP: wirestack.internal.resolver, time elapsed: 2041713778 ns\n    TP: wirestack.internal.tls_engine, time elapsed: 4378032 ns\n    TP: wirestack.internal.connector, time elapsed: 1953303 ns\n    TP: wirestack.tls, time elapsed: 457858 ns\n    TP: wirestack.internal.http1, time elapsed: 11068300 ns\n    TP: wirestack.internal.transport_stdnet, time elapsed: 5114406 ns\n    TP: wirestack.http, time elapsed: 8810940 ns\nSummary: TOTAL: 542\n    PASSED: 8, SKIPPED: 534, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+    "timed_out": false
+  },
+  "gate_id": "M2-003-BOUNDED-RESOLVER-POOL",
+  "generated_at_utc": "2026-08-27T05:58:25.188855Z",
+  "platform": {
+    "libc": [
+      "glibc",
+      "2.44"
+    ],
+    "machine": "x86_64",
+    "release": "7.1.9-arch1-2",
+    "system": "Linux"
+  },
+  "resolver_build": {
+    "command": [
+      "/home/elliot/playground/Wirestack/scripts/build-linux-resolver",
+      "--quiet"
+    ],
+    "duration_ms": 274.926,
+    "exit_code": 0,
+    "output": "",
+    "timed_out": false
+  },
+  "resolver_manifest": {
+    "archive": {
+      "path": "lib/libwirestack_resolver.a",
+      "sha256": "d3be88e49266d8779df2cb93efda664f7e9de890313edf5cccf172714806651f"
+    },
+    "build_fingerprint": "10f4ca06e159413435448de808f14ac3960fa51026165e9083c30be32732c3b5",
+    "inputs": {
+      "compiler": "/usr/lib/llvm15/bin/clang",
+      "compiler_version": "clang version 15.0.7 (https://aur.archlinux.org/clang15.git 54b9d2a3efbba5b82f7faae09725b95f76756716)",
+      "flags": [
+        "-std=c11",
+        "-O2",
+        "-fPIC",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-pthread"
+      ],
+      "header_sha256": "3e3e11c847283c846b96630fc97b4640844d56a765c51056551142d9f088873d",
+      "schema": 1,
+      "source_sha256": "dd40797c719e225a5349cdafb48255acd7220b5af4cbc48e6121f5dd52860e44",
+      "target": "x86_64-pc-linux-gnu"
+    },
+    "private_runtime_abi": false,
+    "schema_version": 1,
+    "worker_model": "fixed pthread pool with bounded FIFO admission"
+  },
+  "schema_version": 1,
+  "shim": {
+    "call_count": 14,
+    "duration_ms": {
+      "maximum": 202.233,
+      "minimum": 200.154
+    },
+    "maximum_concurrent": 2,
+    "thread_ids": [
+      1814203,
+      1814270,
+      1814326,
+      1814327,
+      1814726,
+      1814885,
+      1815005
+    ],
+    "unique_thread_count": 7
+  },
+  "shim_compile": {
+    "command": [
+      "/usr/lib/llvm15/bin/clang",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-o",
+      "/tmp/wirestack-m2-003-_za4z9dj/libwirestack-gai-delay.so",
+      "/home/elliot/playground/Wirestack/tools/gates/native/gai_delay.c",
+      "-ldl",
+      "-pthread"
+    ],
+    "duration_ms": 175.435,
+    "exit_code": 0,
+    "output": "",
+    "timed_out": false
+  },
+  "task_id": "M2-003"
+}
