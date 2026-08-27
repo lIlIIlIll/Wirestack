@@ -33,7 +33,8 @@ M0-001 and M0-002 must record at minimum:
 | `cangjie_stdx` legacy baseline | TBD | TBD | M0-001 |
 | `std.net` source/runtime | TBD | TBD | M0-001 |
 | Windows target | TBD | TBD | M0-017 |
-| Linux glibc/musl targets | TBD | TBD | M0-017 |
+| Linux glibc target | `x86_64-unknown-linux-gnu` | Cangjie `1.1.0-alpha.20260817040003` | M0-023 |
+| Linux musl target | Deferred; current SDK unsupported | ADR-0004 / P1-011 | M0-023 |
 | macOS target | TBD | TBD | M0-017 |
 | Android target | TBD | TBD | M0-017 |
 | iOS target | TBD | TBD | M0-017 |

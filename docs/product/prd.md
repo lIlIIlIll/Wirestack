@@ -1,8 +1,8 @@
 # Wirestack：仓颉跨平台 TLS/HTTPS 网络栈重写 PRD
 
-**版本：** 2.0  
+**版本：** 2.1  
 **状态：** 架构确认稿  
-**日期：** 2026-08-22  
+**日期：** 2026-08-27  
 **目标平台：** Windows、Linux、macOS、Android、iOS、HarmonyOS/OpenHarmony  
 **文档主题：** 在保留 `std.net` 作为默认网络实现依赖的前提下，重写跨平台 TLS、HTTPS 与 HTTP/2 栈
 
@@ -28,6 +28,7 @@
 4. 不使用现有 `std.net` 的域名解析和字符串地址连接路径；Resolver 与 Happy Eyeballs Connector 单独实现。
 5. 仅当跨平台采纳门禁失败时，才对 `std.net` 或 runtime 做定向补强。
 6. 禁止 Wirestack 直接调用 `CJ_MRT_Sock*` 私有 ABI，也不自行实现六套 epoll/kqueue/IOCP 网络循环。
+7. 当前 Linux 发布目标只包含仓颉 SDK 支持的 glibc target。musl 延后到仓颉 SDK 提供受支持的 target、标准库和 runtime 后再采纳。
 
 ### 0.2 仓库与命名边界
 
@@ -1634,11 +1635,15 @@ proxy parser
 |---|---:|---:|---:|---:|
 | Windows | 必须 | 必须 | 必须 | 必须 |
 | Linux glibc | 必须 | 必须 | 必须 | 必须 |
-| Linux musl | 必须 | 必须 | 必须 | 必须 |
+| Linux musl | 延后 | 延后 | 延后 | 延后 |
 | macOS | 必须 | 必须 | 必须 | 必须 |
 | Android | 必须 | 必须 | 必须 | 必须 |
 | iOS | 必须 | 必须 | 必须 | 必须 |
 | HarmonyOS/OHOS | 必须 | 必须 | 必须 | 必须 |
+
+当前仓颉 SDK 不支持 Linux musl。Wirestack 不发布 musl artifact，也不把
+C/C++ provider PoC、容器执行或交叉编译记为 Wirestack musl 支持。仓颉 SDK
+提供受支持的 musl target、标准库和 runtime 后，P1-011 才能启动。
 
 仅交叉编译通过不视为平台支持完成。
 

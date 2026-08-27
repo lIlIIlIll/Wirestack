@@ -2,7 +2,7 @@
 
 **依据：**《Wirestack：仓颉跨平台 TLS/HTTPS 网络栈重写 PRD》v2.0（2026-08-22）  
 **文档类型：** Issue/PR 级实施 backlog  
-**主线任务数：** 173  
+**主线任务数：** 174  
 **条件上游任务数：** 7  
 **目标：** 将 PRD 转换为可排期、可并行、可验收、可追踪的仓库任务；不在此文档中改变 PRD 已冻结的产品边界。
 
@@ -162,6 +162,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M0-020 | 冻结 TLS provider 选择与构建策略 ADR | 架构 | C3 | M0-016,M0-018 | D-007/D-008；PRD §13/§23 | 记录 provider、版本锁定、构建时选择、无运行时 fallback、补丁/回滚责任、许可证与 SBOM 方案。 |
 | M0-021 | 形成最小 `std.net`/runtime 改造清单 | 架构 | C2 | M0-006..M0-014,M0-019 | PRD §8.4/§9.1 | 每项必须包含失败门禁、影响平台、最小正式接口、回归测试和禁止旁路方案；无证据项不得进入清单。 |
 | M0-022 | 建立 M0 持续门禁 CI | 基础设施 | C3 | M0-004..M0-021 | PRD §21.5 | 平台可用时自动运行短门禁；长 soak/真机任务可手动触发但产出同一结果格式；架构守卫为必过项。 |
+| M0-023 | 冻结当前 Linux glibc 支持范围并延后 musl | 架构 | C2 | M0-001,M0-004 | PRD §0.1/§21.5；ADR-0004 | PRD、ADR、backlog、status 和证据一致声明当前 Linux 仅支持 glibc；musl 不记为失败或通过，由 SDK 支持条件触发 P1-011。 |
 
 ---
 
@@ -225,7 +226,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M2-002 | 定义 Resolver/ResolveResult/ResolveError 契约 | Resolver | C3 | M1-005,M1-007,M2-001 | DNS-001–003 | 结果包含全部地址、family、canonical host、source、可选 expiration、diagnostics；无 TTL 时不伪造。 |
 | M2-003 | 实现 resolver backend 调度与有界阻塞兜底 | Resolver | C4 | M0-013,M2-002 | DNS-004 | 优先 runtime/platform async；必要时使用有界 pool，队列/线程/取消均有上限和指标。 |
 | M2-004 | 实现 Windows SystemResolver | 平台 | C3 | M2-002,M2-003 | DNS-001–004 | 结构化错误、全部候选、取消/Deadline、无 carrier 无限阻塞；平台集成测试通过。 |
-| M2-005 | 实现 Linux glibc/musl SystemResolver | 平台 | C3 | M2-002,M2-003 | DNS-001–004 | glibc/musl 都通过；不假造 TTL；错误稳定映射。 |
+| M2-005 | 实现 Linux glibc SystemResolver | 平台 | C3 | M2-002,M2-003 | DNS-001–004；ADR-0004 | native glibc 通过；不假造 TTL；错误稳定映射。musl 由 P1-011 采纳。 |
 | M2-006 | 实现 macOS/iOS SystemResolver | 平台 | C3 | M2-002,M2-003 | DNS-001–004 | macOS/iOS 原生路径通过；支持应用取消和网络变化后的新解析。 |
 | M2-007 | 实现 Android SystemResolver | 平台 | C3 | M2-002,M2-003 | DNS-001–004 | 真机高并发解析不拖死调度器；网络切换后新查询使用当前网络。 |
 | M2-008 | 实现 HarmonyOS/OHOS SystemResolver | 平台 | C3 | M2-002,M2-003 | DNS-001–004 | 真机/原生环境通过，错误和取消语义与其他平台一致。 |
@@ -266,7 +267,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M3-010 | 实现证书链输入模型、解析边界与资源上限 | TLS | C3 | M3-009,M0-018 | PRD §13.5/§18 | 限制链长、单证书/总字节、扩展解析；错误不泄漏 provider 类型；异常输入可 fuzz。 |
 | M3-011 | 实现 reference identity/hostname verifier | 安全 | C4 | M2-001,M3-010 | PRD §13.5 | SAN-only；DNS/IP 分开；不回退 CN；wildcard/IDNA/边界向量通过；SNI 与 reference identity 分开建模。 |
 | M3-012 | 实现 CustomRoots/SystemPlusCustomRoots 与 pinning | TLS | C3 | M3-009..M3-011 | PRD §13.5 | 自定义 CA 不关闭 identity 验证；pin 作用域和算法明确；trust context identity 可用于 session/pool 隔离。 |
-| M3-013 | 实现 Linux system trust adapter | 平台 | C4 | M3-009..M3-012 | PRD §14.2/§28 | 冻结 CA bundle/dir 规则；支持 glibc/musl 目标；无 silent fallback；平台证据和错误稳定。 |
+| M3-013 | 实现 Linux glibc system trust adapter | 平台 | C4 | M3-009..M3-012 | PRD §14.2/§28；ADR-0004 | 冻结 CA bundle/dir 规则；native glibc 通过；无 silent fallback；平台证据和错误稳定。musl 由 P1-011 采纳。 |
 | M3-014 | 实现 Windows system trust adapter | 平台 | C4 | M3-009..M3-012 | PRD §14.2 | 使用系统证书链与策略；返回 identity/chain 证据；不导出 native provider 对象。 |
 | M3-015 | 实现 macOS system trust adapter | 平台 | C4 | M3-009..M3-012 | PRD §14.2 | 使用系统信任评估；行为、错误、证据与统一模型对齐。 |
 | M3-016 | 定义 `LocalIdentity`/opaque `PrivateKeyRef`/signer 契约 | TLS | C3 | M3-006,M0-018 | PRD §13.6 | 支持 PKCS#8、系统 handle/alias、external signer；TLS engine 不强制导出私钥；用户异常不跨 C ABI。 |
@@ -477,6 +478,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | P1-008 | TLCP 阶段与 provider 归属 | PRD §28 | 作为独立协议/供应链决策，不污染 TLS1.2/1.3 基线。 |
 | P1-009 | 0-RTT | PRD §5/§13.9 | 需单独重放安全模型；P0 明确关闭。 |
 | P1-010 | HTTP/3/QUIC | PRD §5 | 独立项目，不复用 TCP Transport 假设；不得提前侵入本项目公共 API。 |
+| P1-011 | Linux musl 采纳 | ADR-0004 | 仓颉 SDK 发布受支持的 musl target、标准库、runtime 和构建说明后启动；必须补齐 native compile/unit/integration、resolver、trust、依赖、性能和安装证据。 |
 
 ---
 

@@ -3,13 +3,16 @@
 - Status: Accepted for the Linux delivery profile
 - Date: 2026-08-24
 - Related tasks: M0-016, M0-018, Linux profile of M0-020
+- Amended by: ADR-0004
 
 ## Context
 
-ADR-0002 permits a Linux-only provider decision after one candidate passes every
-required native capability on both Linux glibc and Linux musl. The decision must
-also preserve the threat-model controls for supply chain, private-key isolation,
-native callbacks and deterministic cleanup.
+When this ADR was accepted, ADR-0002 permitted a Linux-only provider decision
+after one candidate passed every required native capability on both Linux glibc
+and Linux musl. ADR-0004 later removed musl from the current Wirestack release
+matrix because the Cangjie SDK does not support that target. The provider
+decision must still preserve the threat-model controls for supply chain,
+private-key isolation, native callbacks and deterministic cleanup.
 
 AWS-LC 5.5.0 at commit
 `991e67ff4cf04df4dd89e407f8b920c6936cb56a` now has retained schema-v2 `PASS`
@@ -46,9 +49,9 @@ The following rules are mandatory:
    fail closed; user exceptions never cross the C ABI.
 5. Trust policy is owned by Wirestack and the Linux trust adapter. No provider
    default silently replaces the selected system/custom trust policy.
-6. A source-pin or patch change must rerun the complete Linux glibc/musl PoC,
-   static dependency scan, TLS tests, fuzz corpus and performance gates before
-   promotion.
+6. A source-pin or patch change must rerun the complete Linux glibc PoC, static
+   dependency scan, TLS tests, fuzz corpus and performance gates before
+   promotion. The musl PoC becomes required only after P1-011 starts.
 
 ## Supply-chain and release policy
 
