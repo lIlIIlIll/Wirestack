@@ -137,7 +137,8 @@ public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker & HttpSer
         emitServerTlsEvent(context, NetworkEventOutcome.Started, None<NetworkErrorCode>)
         try {
             let connection = TlsConnection.handshake(
-                provider.createServerEngine(serverContext), transport, context: context
+                provider.createServerEngine(serverContext), transport,
+                context: context, pump: TlsEnginePump()
             )
             let protocol = match (connection.handshakeInfo) {
                 case Some(info) => match (info.negotiatedAlpn) {

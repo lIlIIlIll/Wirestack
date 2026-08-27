@@ -2,10 +2,10 @@
 
 ## 状态
 
-- 规划状态：**READY**
+- 规划状态：**COMPLETE**
 - 责任域：HTTP/2 可靠性
 - 影响平台：Linux x86_64 glibc
-- 依赖：M6-021、M6-022、M6-023、M6-024，均为 COMPLETE
+- 依赖：M3-028、M6-021、M6-022、M6-023、M6-024，均为 COMPLETE
 - 证据目录：`docs/evidence/M6-025/`
 
 ## 触发证据
@@ -45,8 +45,9 @@ cangjie_env; timeout 600s cjpm test src/internal/http1 src/tls src/http -j 1 --p
    H2 stream registry、flow-control waiter、write reservation 和 server shutdown
    状态。
 3. 判断首个错误和后续不退出是否共享一个根因。若存在多个独立缺陷，任务须
-   分别给出复现和修复证据，但仍只修改 M6-025 范围内的 HTTP facade、HTTP/2
-   生命周期或对应测试清理代码。
+   分别给出复现和修复证据。若 bounded A/B 证明根因位于 facade 依赖的 TLS
+   transport，则允许修改对应内部 transport 实现，但不得扩大到 TLS 公共 API、
+   provider、SDK 或平台代码。
 4. 修复实际根因。所有成功、异常、取消和断言失败路径都必须有界地关闭 client、
    server、TLS connection、stream、Future 和 waiter。
 5. 增加确定性回归。回归必须证明用例之间不共享可变状态，前一个用例失败后也
@@ -61,6 +62,8 @@ cangjie_env; timeout 600s cjpm test src/internal/http1 src/tls src/http -j 1 --p
   语义。
 - 不降低 M6-024 的 sibling fairness、窗口、队列和 buffer 上限。
 - 不用 exception message 作为产品控制流。
+- 不保留跨 TLS read/write 调用复用的可变 scratch；每个全双工操作必须拥有
+  独立且显式有界的 ciphertext scratch。
 - 公共 `wirestack.http` API 保持兼容，除非根因证据证明现有公共契约无法满足
   PRD。任何公共 API 变更须单独完成兼容性审查。
 
