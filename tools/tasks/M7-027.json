@@ -1,0 +1,73 @@
+{
+  "acceptance_commands": [
+    {
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/M7-027/test-plan.md", "--json"],
+      "gate": "task",
+      "id": "test-plan-matrix",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["python3", "-m", "unittest", "tools.tests.test_m7_027_linux_examples"],
+      "gate": "task",
+      "id": "gate-fault-injection",
+      "long_running": false,
+      "timeout_seconds": 60
+    },
+    {
+      "argv": ["scripts/check-m7-027-linux-examples", "--json"],
+      "gate": "task",
+      "id": "clean-consumer-examples",
+      "long_running": false,
+      "timeout_seconds": 900
+    },
+    {
+      "argv": ["scripts/check-m7-026-linux-api"],
+      "gate": "task",
+      "id": "api-freeze",
+      "long_running": false,
+      "timeout_seconds": 120
+    }
+  ],
+  "allowed_paths": [
+    ".gitignore",
+    "docs/evidence/M7-027",
+    "docs/guides/migrate-to-wirestack-linux.md",
+    "docs/planning/linux-status.md",
+    "docs/planning/status.md",
+    "examples/linux/m7_027",
+    "scripts/check-m7-027-linux-examples",
+    "tools/m7_027_linux_examples.py",
+    "tools/tasks/M7-027.json",
+    "tools/tests/test_m7_linux_task_graph.py",
+    "tools/tests/test_m7_027_linux_examples.py"
+  ],
+  "dependencies": ["M7-026", "M3-029"],
+  "long_running_gate": false,
+  "platforms": ["linux-x86_64-glibc"],
+  "required_evidence": [
+    "docs/evidence/M7-027/evidence.json",
+    "docs/evidence/M7-027/linux_x86_64/examples.json",
+    "docs/evidence/M7-027/task-check.json"
+  ],
+  "schema_version": 1,
+  "source_paths": [
+    ".gitignore",
+    "docs/evidence/M7-027/README.md",
+    "docs/evidence/M7-027/test-plan.md",
+    "docs/guides/migrate-to-wirestack-linux.md",
+    "docs/planning/linux-status.md",
+    "docs/planning/status.md",
+    "examples/linux/m7_027/fixtures.cj",
+    "examples/linux/m7_027/http_examples.cj",
+    "examples/linux/m7_027/main.cj",
+    "examples/linux/m7_027/transport_tls_example.cj",
+    "scripts/check-m7-027-linux-examples",
+    "tools/m7_027_linux_examples.py",
+    "tools/tasks/M7-027.json",
+    "tools/tests/test_m7_linux_task_graph.py",
+    "tools/tests/test_m7_027_linux_examples.py"
+  ],
+  "task_id": "M7-027",
+  "timeout_seconds": 1200
+}
