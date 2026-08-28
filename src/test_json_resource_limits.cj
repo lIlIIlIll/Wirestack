@@ -105,6 +105,11 @@ class JsonResourceLimitsTest {
                 FixedChunkInputStream("[1,2]", 1),
                 config: JsonReadConfig(limits: JsonReadLimits(maxPolymorphicObjectBytes: 4)))
         }), "polymorphic_object_too_large")
+        @Expect(resourceLimitErrorCode({ =>
+            let _ = YJson.decodeFromStreamWith(YJson.arrayCodec<Int64>(Int64Json),
+                FixedChunkInputStream("[    ", 1),
+                config: JsonReadConfig(limits: JsonReadLimits(maxPolymorphicObjectBytes: 4)))
+        }), "polymorphic_object_too_large")
     }
 
     @TestCase

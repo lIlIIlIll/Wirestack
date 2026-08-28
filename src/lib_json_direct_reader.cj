@@ -726,9 +726,14 @@ public class JsonDirectReader <: JsonCodecReader {
 
     private func skipSpaces(): Unit {
         match (source) {
-            case streamSource: StreamInputCursor => streamSource.skipSpacesFast()
-            case _ => source.skipJsonWhitespace()
+            case streamSource: StreamInputCursor =>
+                if (!source.isValueBudgetActive()) {
+                    streamSource.skipSpacesFast()
+                    return
+                }
+            case _ => ()
         }
+        source.skipJsonWhitespace()
     }
 
     private func expectLiteral(literal: String): Unit {
