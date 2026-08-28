@@ -57,6 +57,12 @@ public class Http2ClientConnection <: Resource {
     private let dispatcher: Http2ClientDispatcher
     private let encoder: HpackEncoder
     private let encoderMutex = Mutex()
+    private let initialHeadersMutex = Mutex()
+    private let initialHeadersChanged = synchronized(initialHeadersMutex) {
+        initialHeadersMutex.condition()
+    }
+    private var nextInitialHeadersStreamId: UInt32 = 1u32
+    private let abandonedInitialHeaders = ArrayList<UInt32>()
     private let limits: HttpLimits
     private let http2Limits: Http2Limits
 
@@ -189,6 +195,7 @@ public class Http2ClientConnection <: Resource {
     ): HttpResponse {
         let termination = reader.terminationRegistry.register(signal)
         var exchange: ?Http2ClientExchange = None<Http2ClientExchange>
+        var initialHeadersQueued = false
         try {
             let opened = Http2ClientExchange(
                 stream.id, request.method, registry, flow, writer, reset,
@@ -199,19 +206,38 @@ public class Http2ClientConnection <: Resource {
             signal.attach(opened)
             opened.bindReset(reset.register(opened.streamId, signal))
             dispatcher.add(opened)
+            signal.attachInitialHeadersWakeup({ => wakeInitialHeaders() })
+            let initialTickets = enqueueInitialHeaderFields(
+                opened.streamId, plan.initialHeaders, plan.endStreamOnHeaders, signal, context
+            )
+            initialHeadersQueued = true
             opened.bindCancellation(context.cancellation, connectionCancellation)
-            submitHeaderFields(opened.streamId, plan.initialHeaders, plan.endStreamOnHeaders, context)
+            waitClientWrites(initialTickets, context)
+            health.observeOutboundActivity()
             if (!plan.endStreamOnHeaders) {
                 sendRequestBody(opened, plan.openBody(), context)
             }
             opened.awaitResponse(context)
         } catch (error: Exception) {
+            if (!initialHeadersQueued) { abandonInitialHeaders(stream.id) }
             match (exchange) {
-                case Some(value) => value.failLocal(error)
+                case Some(value) =>
+                    if (initialHeadersQueued) { value.failLocal(error) }
+                    else { value.failBeforeInitialHeaders(error) }
                 case None =>
                     goAwayRegistration.unregister()
                     termination.unregister()
-                    try { let _ = reset.cancelLocal(stream.id) } catch (_: Exception) {}
+                    if (initialHeadersQueued) {
+                        try { let _ = reset.cancelLocal(stream.id) } catch (_: Exception) {}
+                    } else {
+                        try {
+                            let _ = registry.reset(
+                                stream.id, Http2ErrorCode.Cancel,
+                                "HTTP/2 request failed before initial headers"
+                            )
+                        } catch (_: Exception) {}
+                        let _ = flow.closeStream(stream.id)
+                    }
             }
             throw error
         }
@@ -242,6 +268,84 @@ public class Http2ClientConnection <: Resource {
         }
         waitClientWrites(tickets, context)
         health.observeOutboundActivity()
+    }
+
+    /**
+     * Publishes newly opened streams in stream-id order. Admission and request
+     * execution are intentionally separate for pool capacity accounting, so
+     * concurrent callers may otherwise enqueue stream 3 before stream 1.
+     */
+    private func enqueueInitialHeaderFields(
+        streamId: Http2StreamId,
+        fields: Array<HpackFieldEncoding>,
+        endStream: Bool,
+        signal: Http2ClientExecutionSignal,
+        context: OperationContext
+    ): Array<Http2WriteTicket> {
+        synchronized(initialHeadersMutex) {
+            while (streamId.value != nextInitialHeadersStreamId) {
+                if (streamId.value < nextInitialHeadersStreamId) {
+                    throw Http2ProtocolException(
+                        Http2ErrorCode.StreamClosed, Http2ErrorScope.Stream(streamId),
+                        "HTTP/2 client stream was abandoned before initial headers"
+                    )
+                }
+                if (let Some(error) <- signal.retainedFailure()) { throw error }
+                checkClientContext(context)
+                match (context.deadline) {
+                    case Some(deadline) => initialHeadersChanged.wait(timeout: deadline.remaining())
+                    case None => initialHeadersChanged.wait()
+                }
+            }
+            if (let Some(error) <- signal.retainedFailure()) { throw error }
+            checkClientContext(context)
+            let tickets = synchronized(encoderMutex) {
+                let block = encoder.encode(fields)
+                writer.enqueueControlBatch(fragmentClientHeaders(
+                    streamId, block, endStream, machine.peerSettings.maxFrameSize, http2Limits
+                ))
+            }
+            advanceInitialHeadersLocked()
+            tickets
+        }
+    }
+
+    private func abandonInitialHeaders(streamId: Http2StreamId): Unit {
+        synchronized(initialHeadersMutex) {
+            if (streamId.value < nextInitialHeadersStreamId) { return }
+            if (streamId.value == nextInitialHeadersStreamId) {
+                advanceInitialHeadersLocked()
+                return
+            }
+            for (value in abandonedInitialHeaders) {
+                if (value == streamId.value) { return }
+            }
+            if (abandonedInitialHeaders.size >= Int64(http2Limits.maxConcurrentStreams)) {
+                throw IllegalStateException("HTTP/2 initial-header abandonment limit reached")
+            }
+            abandonedInitialHeaders.add(streamId.value)
+        }
+    }
+
+    private func advanceInitialHeadersLocked(): Unit {
+        nextInitialHeadersStreamId += 2u32
+        while (true) {
+            var found: Int64 = -1
+            for (index in 0..abandonedInitialHeaders.size) {
+                if (abandonedInitialHeaders[index] == nextInitialHeadersStreamId) {
+                    found = index
+                    break
+                }
+            }
+            if (found < 0) { break }
+            let _ = abandonedInitialHeaders.remove(at: found)
+            nextInitialHeadersStreamId += 2u32
+        }
+        initialHeadersChanged.notifyAll()
+    }
+
+    private func wakeInitialHeaders(): Unit {
+        synchronized(initialHeadersMutex) { initialHeadersChanged.notifyAll() }
     }
 
     private func sendRequestBody(
@@ -322,11 +426,22 @@ public class Http2ClientExecutionSignal <: Http2GoAwayListener &
     private let mutex = Mutex()
     private var exchange: ?Http2ClientExchange = None<Http2ClientExchange>
     private var failure: ?Exception = None<Exception>
+    private var initialHeadersWakeup: () -> Unit = { => }
 
     func attach(value: Http2ClientExchange): Unit {
         let retained = synchronized(mutex) { exchange = Some(value); failure }
         if (let Some(error) <- retained) { value.signalFailure(error) }
     }
+
+    func attachInitialHeadersWakeup(value: () -> Unit): Unit {
+        let failed = synchronized(mutex) {
+            initialHeadersWakeup = value
+            failure.isSome()
+        }
+        if (failed) { value() }
+    }
+
+    func retainedFailure(): ?Exception { synchronized(mutex) { failure } }
 
     public func connectionGoAway(error: Http2GoAwayException): Unit { retain(error) }
 
@@ -339,11 +454,12 @@ public class Http2ClientExecutionSignal <: Http2GoAwayListener &
     }
 
     private func retain(error: Exception): Unit {
-        let target = synchronized(mutex) {
+        let targets = synchronized(mutex) {
             if (failure.isNone()) { failure = Some(error) }
-            exchange
+            (exchange, initialHeadersWakeup)
         }
-        if (let Some(value) <- target) { value.signalFailure(error) }
+        if (let Some(value) <- targets[0]) { value.signalFailure(error) }
+        targets[1]()
     }
 }
 
@@ -495,6 +611,18 @@ class Http2ClientExchange <: ResponseBodyObserver {
         // failure cleanup into a second exception and leak registrations.
         try { channel.close() } catch (_: Exception) {}
         try { let _ = reset.cancelLocal(streamId) } catch (_: Exception) {}
+        finish()
+    }
+
+    func failBeforeInitialHeaders(error: Exception): Unit {
+        signalFailure(error)
+        try { channel.close() } catch (_: Exception) {}
+        try {
+            let _ = registry.reset(
+                streamId, Http2ErrorCode.Cancel,
+                "HTTP/2 request failed before initial headers"
+            )
+        } catch (_: Exception) {}
         finish()
     }
 
