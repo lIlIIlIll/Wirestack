@@ -20,7 +20,9 @@ from typing import Any, Callable, Mapping, Sequence
 
 SCHEMA_VERSION = 1
 EVIDENCE_SCHEMA_VERSION = 1
-MAX_TIMEOUT_SECONDS = 86_400
+# A 24-hour command needs time for build, startup, report flush, and bounded
+# teardown. Keep the contract finite while allowing one full day plus overhead.
+MAX_TIMEOUT_SECONDS = 172_800
 CAPTURE_BYTES = 16_384
 EXIT_CODES = {"PASS": 0, "READY": 0, "FAIL": 1, "INVALID": 2,
               "BLOCKED": 3, "SKIPPED": 4, "STALE": 5, "DEGRADED": 6}

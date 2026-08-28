@@ -11,7 +11,7 @@
           "gate": {"enum": ["fast", "task", "full", "long"]},
           "id": {"minLength": 1, "type": "string"},
           "long_running": {"type": "boolean"},
-          "timeout_seconds": {"exclusiveMinimum": 0, "maximum": 86400, "type": "number"}
+          "timeout_seconds": {"exclusiveMinimum": 0, "maximum": 172800, "type": "number"}
         },
         "required": ["id", "argv", "timeout_seconds", "long_running", "gate"],
         "type": "object"
@@ -27,7 +27,7 @@
     "schema_version": {"const": 1},
     "source_paths": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
     "task_id": {"pattern": "^[A-Z][A-Z0-9]*-[0-9]{3}$", "type": "string"},
-    "timeout_seconds": {"exclusiveMinimum": 0, "maximum": 86400, "type": "number"}
+    "timeout_seconds": {"exclusiveMinimum": 0, "maximum": 172800, "type": "number"}
   },
   "required": ["schema_version", "task_id", "dependencies", "allowed_paths", "platforms", "acceptance_commands", "required_evidence", "timeout_seconds", "long_running_gate", "source_paths"],
   "type": "object"
