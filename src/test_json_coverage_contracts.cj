@@ -373,6 +373,38 @@ class JsonCoverageContractsTest {
         GeneratedSupportV1.writeCompactObjectEnd(writer)
         @Expect(writer.finishString(), "{\"s\":\"x\",\"b\":true,\"i\":7}")
 
+        let legacyArrayWriter = GeneratedSupportV1.newWriter()
+        @Expect(GeneratedSupportV1.tryBeginCompactValue(legacyArrayWriter))
+        jsonWriteGeneratedCompactArrayBegin(legacyArrayWriter)
+        legacyArrayWriter.writeRawNull()
+        jsonWriteGeneratedCompactComma(legacyArrayWriter)
+        legacyArrayWriter.writeRawNull()
+        jsonWriteGeneratedCompactArrayEnd(legacyArrayWriter)
+        @Expect(legacyArrayWriter.finishString(), "[null,null]")
+
+        let legacyObjectWriter = GeneratedSupportV1.newWriter()
+        @Expect(GeneratedSupportV1.tryBeginCompactValue(legacyObjectWriter))
+        jsonWriteGeneratedCompactObjectBegin(legacyObjectWriter)
+        @Expect(!jsonWriteGeneratedCompactObjectEntryName(legacyObjectWriter, true, "value"))
+        legacyObjectWriter.writeRawNull()
+        jsonWriteGeneratedCompactObjectEnd(legacyObjectWriter)
+        @Expect(legacyObjectWriter.finishString(), "{\"value\":null}")
+
+        let stringValues = ArrayList<String>()
+        stringValues.add("a")
+        stringValues.add("b")
+        let stringListWriter = JsonDirectWriter()
+        __yJsonWriteStringArrayList(stringValues, stringListWriter,
+            JsonEncodeContext(JsonWriteConfig.compact))
+        @Expect(stringListWriter.finishString(), "[\"a\",\"b\"]")
+
+        let intValues = HashMap<String, Int64>()
+        intValues["value"] = 7
+        let intMapWriter = JsonDirectWriter()
+        __yJsonWriteInt64HashMap(intValues, intMapWriter,
+            JsonEncodeContext(JsonWriteConfig.compact))
+        @Expect(YJson.parse(intMapWriter.finishString()).asObject()["value"].asInt().value, 7)
+
         let cursorWriter = GeneratedSupportV1.newWriter()
         @Expect(GeneratedSupportV1.tryBeginCompactValue(cursorWriter))
         let cursor = GeneratedSupportV1.writeCursor(cursorWriter)
@@ -580,6 +612,75 @@ class JsonCoverageContractsTest {
         }
         @AssertThrows[JsonException](JsonDirectReader(
             YJsonByteArrayInputStream("[1,2,3]")).readBoundedValue(4))
+    }
+
+    @TestCase
+    func streamWindowFastPathsPreserveTypedSemanticsAndFallbacks(): Unit {
+        let arrayReader = JsonDirectReader(YJsonByteArrayInputStream(
+            " \n\r\t [0,-7,9223372036854775807,-9223372036854775808] \t"))
+        let expected: Array<Int64> = [0, -7, Int64.Max, Int64.Min]
+        arrayReader.startArray()
+        for (value in expected) {
+            @Expect(arrayReader.hasArrayItem())
+            @Expect(arrayReader.readInt64(), value)
+        }
+        @Expect(!arrayReader.hasArrayItem())
+        arrayReader.endArray()
+        arrayReader.expectEnd()
+
+        let whitespaceTerminated = ["1 ", "2\n", "3\r", "4\t"]
+        for (index in 0..whitespaceTerminated.size) {
+            let reader = JsonDirectReader(YJsonByteArrayInputStream(whitespaceTerminated[index]))
+            @Expect(reader.readInt64(), index + 1)
+            reader.expectEnd()
+        }
+        for (invalid in ["01,", "9223372036854775808 ",
+            "-9223372036854775809 ", "1.0 ", "- "]) {
+            @AssertThrows[JsonException](JsonDirectReader(
+                YJsonByteArrayInputStream(invalid)).readInt64())
+        }
+
+        let simpleString = JsonDirectReader(YJsonByteArrayInputStream("\"plain ascii\""))
+        @Expect(simpleString.readString(), "plain ascii")
+        simpleString.expectEnd()
+        let escapedString = JsonDirectReader(YJsonByteArrayInputStream("\"line\\nfeed\""))
+        @Expect(escapedString.readString(), "line\nfeed")
+        escapedString.expectEnd()
+        let utf8String = JsonDirectReader(YJsonByteArrayInputStream("\"仓颉\""))
+        @Expect(utf8String.readString(), "仓颉")
+        utf8String.expectEnd()
+        let splitString = JsonDirectReader(FixedChunkInputStream("\"chunk boundary\"", 2))
+        @Expect(splitString.readString(), "chunk boundary")
+        splitString.expectEnd()
+
+        let candidates = ["tiny", "target", "longer"]
+        let names = JsonDirectReader(YJsonByteArrayInputStream(
+            "{\"target\":1,\"targex\":2,\"unknown\":3,\"tar\\u0067et\":4}"))
+        names.startObject()
+        @Expect(names.readNameId(candidates), 1); @Expect(names.readInt64(), 1)
+        @Expect(names.readNameId(candidates), -1); @Expect(names.readInt64(), 2)
+        @Expect(names.readNameId(candidates), -1); @Expect(names.readInt64(), 3)
+        @Expect(names.readNameId(candidates), 1); @Expect(names.readInt64(), 4)
+        names.endObject(); names.expectEnd()
+
+        let splitName = JsonDirectReader(FixedChunkInputStream("{\"target\":5}", 2))
+        splitName.startObject()
+        @Expect(splitName.readNameId(candidates), 1)
+        @Expect(splitName.readInt64(), 5)
+        splitName.endObject(); splitName.expectEnd()
+
+        let defaultDuplicate = JsonDirectReader(YJsonByteArrayInputStream("{\"a\":1,\"a\":2}"))
+        defaultDuplicate.startObject()
+        @Expect(defaultDuplicate.readName(), "a"); @Expect(defaultDuplicate.readInt64(), 1)
+        @Expect(defaultDuplicate.readName(), "a"); @Expect(defaultDuplicate.readInt64(), 2)
+        defaultDuplicate.endObject(); defaultDuplicate.expectEnd()
+
+        let rejectingDuplicate = JsonDirectReader(YJsonByteArrayInputStream("{\"a\":1,\"a\":2}"),
+            config: JsonReadConfig(duplicateKeyPolicy: JsonDuplicateKeyPolicy.Reject))
+        rejectingDuplicate.startObject()
+        @Expect(rejectingDuplicate.readName(), "a"); @Expect(rejectingDuplicate.readInt64(), 1)
+        let duplicate = @AssertThrows[JsonException](rejectingDuplicate.readName())
+        @Expect(duplicate.code, "duplicate_key")
     }
 
     @TestCase

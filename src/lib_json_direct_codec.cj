@@ -213,6 +213,12 @@ public interface JsonFastCodec<T> <: JsonCodec<T> {
     func readFast(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): T
 }
 
+/// Public 2.0 generated-code contract retained for patch-version source
+/// compatibility. New macro output uses the narrower GeneratedSupportV1 SPI.
+public interface JsonArrayListFastCodec<T> <: JsonFastCodec<T> {
+    func readFastArrayList(reader: GeneratedSupportV1Reader, context: JsonDecodeContext): ArrayList<T>
+}
+
 /// Matching-version bridge used by generated codecs to retain the concrete
 /// direct-writer type across nested semantic encode calls.
 public interface JsonDirectWriteCodec<T> <: JsonCodec<T> {
@@ -255,6 +261,26 @@ public func jsonWriteGeneratedCompactObjectBegin(writer: GeneratedSupportV1Write
 
 public func jsonWriteGeneratedCompactObjectEnd(writer: GeneratedSupportV1Writer): Unit {
     writer.writeRawEndObject()
+}
+
+public func jsonWriteGeneratedCompactArrayBegin(writer: GeneratedSupportV1Writer): Unit {
+    writer.writeRawBeginArray()
+}
+
+public func jsonWriteGeneratedCompactArrayEnd(writer: GeneratedSupportV1Writer): Unit {
+    writer.writeRawEndArray()
+}
+
+public func jsonWriteGeneratedCompactComma(writer: GeneratedSupportV1Writer): Unit {
+    writer.writeRawByte(b',')
+}
+
+public func jsonWriteGeneratedCompactObjectEntryName(
+    writer: GeneratedSupportV1Writer,
+    first: Bool,
+    name: String
+): Bool {
+    writer.writeRawObjectEntryName(first, name)
 }
 
 public func jsonWriteGeneratedCompactObjectEntryString(
@@ -1252,6 +1278,14 @@ public func __yJsonReadFastStringArrayList(reader: GeneratedSupportV1Reader, con
     }
 }
 
+public func __yJsonWriteStringArrayList(
+    value: ArrayList<String>,
+    writer: JsonCodecWriter,
+    context: JsonEncodeContext
+): Unit {
+    YJson.stringArrayListCodec().write(value, writer, context)
+}
+
 public func __yJsonWriteStringOption(value: Option<String>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {
     let _ = context
     match (value) {
@@ -1563,6 +1597,14 @@ public func __yJsonReadFastInt64HashMap(reader: GeneratedSupportV1Reader, contex
     } finally {
         context.leaveValue()
     }
+}
+
+public func __yJsonWriteInt64HashMap(
+    value: HashMap<String, Int64>,
+    writer: JsonCodecWriter,
+    context: JsonEncodeContext
+): Unit {
+    YJson.int64HashMapCodec().write(value, writer, context)
 }
 
 public class YJson {
