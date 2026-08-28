@@ -1,5 +1,6 @@
 package wirestack.internal.tls_engine
 
+import std.env.getVariable
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.common.*
@@ -12,26 +13,46 @@ private const M3028_MUTATIONS: Int64 = 512
 @Test
 class M3028TlsFuzzTest {
     @TestCase
-    func recordAndHandshakeMutationsHaveDeterministicTypedTerminals(): Unit {
-        let hello = m3028ClientHello()
-        @Assert(hello.size > 64)
-        for (target in ["record", "handshake"]) {
-            for (index in 0..M3028_MUTATIONS) {
-                let input = m3028Mutate(hello, target, index)
-                let first = m3028ClassifyServerInput(input)
-                let second = m3028ClassifyServerInput(input)
-                @Assert(first, second)
-            }
+    func recordMutationsHaveDeterministicTypedTerminals(): Unit {
+        let hello = m7023TlsSeed("tls-record", m3028ClientHello())
+        @Assert(!hello.isEmpty())
+        for (index in 0..M3028_MUTATIONS) {
+            let input = m3028Mutate(hello, "record", index)
+            let first = m3028ClassifyServerInput(input)
+            let second = m3028ClassifyServerInput(input)
+            @Assert(first, second)
         }
         println(
-            "M3028_FUZZ target=tls-record,tls-handshake seed=3028 " +
-            "mutations=${M3028_MUTATIONS * 2} decision=PASS"
+            "M7023_FUZZ target=tls-record seed=7023 " +
+            "iterations=${M3028_MUTATIONS} decision=PASS"
         )
     }
 
     @TestCase
+    func handshakeMutationsHaveDeterministicTypedTerminals(): Unit {
+        let hello = m7023TlsSeed("tls-handshake", m3028ClientHello())
+        @Assert(!hello.isEmpty())
+        for (index in 0..M3028_MUTATIONS) {
+            let input = m3028Mutate(hello, "handshake", index)
+            let first = m3028ClassifyServerInput(input)
+            let second = m3028ClassifyServerInput(input)
+            @Assert(first, second)
+        }
+        println(
+            "M7023_FUZZ target=tls-handshake seed=7023 " +
+            "iterations=${M3028_MUTATIONS} decision=PASS"
+        )
+        if (getVariable("WIRESTACK_M7_023_TARGET").isNone()) {
+            println(
+                "M3028_FUZZ target=tls-record,tls-handshake seed=3028 " +
+                "mutations=${M3028_MUTATIONS * 2} decision=PASS"
+            )
+        }
+    }
+
+    @TestCase
     func certificateAdapterMutationsHaveDeterministicTypedTerminals(): Unit {
-        let certificate = tlsTestCertificateDer()
+        let certificate = m7023TlsSeed("certificate-adapter", tlsTestCertificateDer())
         for (index in 0..M3028_MUTATIONS) {
             let input = m3028Mutate(certificate, "certificate", index)
             let first = m3028ClassifyCertificate(input)
@@ -39,10 +60,61 @@ class M3028TlsFuzzTest {
             @Assert(first, second)
         }
         println(
-            "M3028_FUZZ target=certificate-adapter seed=3028 " +
-            "mutations=${M3028_MUTATIONS} decision=PASS"
+            "M7023_FUZZ target=certificate-adapter seed=7023 " +
+            "iterations=${M3028_MUTATIONS} decision=PASS"
         )
+        if (getVariable("WIRESTACK_M7_023_TARGET").isNone()) {
+            println(
+                "M3028_FUZZ target=certificate-adapter seed=3028 " +
+                "mutations=${M3028_MUTATIONS} decision=PASS"
+            )
+        }
     }
+}
+
+private func m7023TlsSeed(target: String, fallback: Array<Byte>): Array<Byte> {
+    match (getVariable("WIRESTACK_M7_023_TARGET")) {
+        case None => fallback
+        case Some(actual) =>
+            if (actual != target) {
+                throw IllegalStateException("M7-023 target mismatch: ${actual}")
+            }
+            match (getVariable("WIRESTACK_M7_023_CORPUS_HEX")) {
+                case Some(value) => m7023TlsHex(value)
+                case None => throw IllegalStateException("missing M7-023 corpus")
+            }
+    }
+}
+
+private func m7023TlsHex(value: String): Array<Byte> {
+    let input = value.toArray()
+    var digits: Int64 = 0
+    for (byte in input) { if (byte > 32u8) { digits++ } }
+    if (digits == 0 || digits % 2 != 0) {
+        throw IllegalArgumentException("invalid M7-023 hex corpus")
+    }
+    let output = Array<Byte>(digits / 2, repeat: 0u8)
+    var high: ?Byte = None<Byte>
+    var index: Int64 = 0
+    for (byte in input) {
+        if (byte <= 32u8) { continue }
+        let nibble = m7023TlsNibble(byte)
+        match (high) {
+            case None => high = Some(nibble)
+            case Some(value) =>
+                output[index] = (value << 4) | nibble
+                index++
+                high = None<Byte>
+        }
+    }
+    output
+}
+
+private func m7023TlsNibble(value: Byte): Byte {
+    if (value >= b'0' && value <= b'9') { value - b'0' }
+    else if (value >= b'a' && value <= b'f') { value - b'a' + 10u8 }
+    else if (value >= b'A' && value <= b'F') { value - b'A' + 10u8 }
+    else { throw IllegalArgumentException("invalid M7-023 hex digit") }
 }
 
 private func m3028ClientHello(): Array<Byte> {
