@@ -164,3 +164,9 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 | M7-029 | BLOCKED | — | Depends on M7-028 and an independent reviewer. |
 | M7-030 | BLOCKED | — | Depends on M7-025 and M7-029. |
 | M7-031 | BLOCKED | — | Depends on M7-019 through M7-030. |
+
+## P1 independent repository infrastructure
+
+| ID | Status | Evidence | Notes |
+|---|---|---|---|
+| P1-012 | COMPLETE | [`docs/evidence/P1-012/README.md`](../evidence/P1-012/README.md) | Fail-closed repository diagnostics, task contracts, layered checks and source-bound evidence freshness validation pass on Linux glibc; no long-duration gate ran. |

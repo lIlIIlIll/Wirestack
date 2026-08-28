@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [[ $# -lt 1 ]]; then echo "usage: scripts/check-task <TASK-ID> [--json] [--output PATH]" >&2; exit 2; fi
+task_id="$1"; shift
+exec python3 "$repo_root/tools/repository/repository_tooling.py" --root "$repo_root" check task "$task_id" "$@"
