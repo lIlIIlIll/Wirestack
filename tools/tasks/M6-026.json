@@ -16,6 +16,7 @@
     }
   ],
   "allowed_paths": [
+    ".gitignore",
     "docs/evidence/M6-026",
     "docs/planning/implementation-backlog.md",
     "docs/planning/linux-status.md",
@@ -39,6 +40,7 @@
   ],
   "schema_version": 1,
   "source_paths": [
+    ".gitignore",
     "docs/evidence/M6-026/test-plan.md",
     "docs/planning/implementation-backlog.md",
     "docs/planning/linux-status.md",
