@@ -321,6 +321,9 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
     /// guarantee.
     public func suggestRawCollectionCapacity(): Int64 {
         let remaining = size - index
+        if (remaining >= 3072 && isRootRawArrayPosition()) {
+            return sampleRootArrayCapacity(remaining)
+        }
         let estimate = remaining / 64 + 1
         if (estimate < 48) {
             return 4
@@ -329,6 +332,60 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
             return 64
         }
         estimate
+    }
+
+    private func isRootRawArrayPosition(): Bool {
+        var opener = index - 1
+        while (opener >= 0 && isJsonSpace(data[opener])) { opener-- }
+        if (opener < 0 || data[opener] != b'[') { return false }
+        for (cursor in 0..opener) {
+            if (!isJsonSpace(data[cursor])) { return false }
+        }
+        true
+    }
+
+    private func sampleRootArrayCapacity(remaining: Int64): Int64 {
+        let sampleEnd = if (index + 512 < size) { index + 512 } else { size }
+        var cursor = index
+        var depth: Int64 = 0
+        var entries: Int64 = 1
+        var inString = false
+        var escaped = false
+        while (cursor < sampleEnd) {
+            let current = data[cursor]
+            if (inString) {
+                if (escaped) {
+                    escaped = false
+                } else if (current == b'\\') {
+                    escaped = true
+                } else if (current == b'"') {
+                    inString = false
+                }
+            } else {
+                match (current) {
+                    case b'"' => inString = true
+                    case b'[' | b'{' => depth++
+                    case b'}' => if (depth > 0) { depth-- }
+                    case b']' =>
+                        if (depth == 0) {
+                            return if (entries < 4) { 4 } else { entries }
+                        }
+                        depth--
+                    case b',' => if (depth == 0) { entries++ }
+                    case _ => ()
+                }
+            }
+            cursor++
+        }
+        if (entries < 2) {
+            let conservative = remaining / 64 + 1
+            return if (conservative > 1024) { 1024 } else { conservative }
+        }
+        // The sampled window is non-empty and at least two entries were seen,
+        // so averageBytes is positive and the estimate cannot be below 8.
+        let averageBytes = (cursor - index) / entries
+        let estimate = remaining / averageBytes + 1
+        if (estimate > 1024) { 1024 } else { estimate }
     }
 
     public func endRawArray(): Unit {
@@ -982,8 +1039,9 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
                 index++
                 rejectLeadingZero()
             } else {
-                while (hasMore() && peek() >= b'0' && peek() <= b'9') {
-                    let digit = Int64(consume() - b'0')
+                while (index < size && data[index] >= b'0' && data[index] <= b'9') {
+                    let digit = Int64(data[index] - b'0')
+                    index++
                     if (result < ((-0x8000_0000_0000_0000 + digit) / 10)) {
                         fail("Integer literal out of Int64 range")
                     }
@@ -999,8 +1057,9 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
             index++
             rejectLeadingZero()
         } else {
-            while (hasMore() && peek() >= b'0' && peek() <= b'9') {
-                let digit = Int64(consume() - b'0')
+            while (index < size && data[index] >= b'0' && data[index] <= b'9') {
+                let digit = Int64(data[index] - b'0')
+                index++
                 if (result > ((0x7FFF_FFFF_FFFF_FFFF - digit) / 10)) {
                     fail("Integer literal out of Int64 range")
                 }
@@ -1028,8 +1087,9 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
             index++
             rejectLeadingZero()
         } else {
-            while (hasMore() && peek() >= b'0' && peek() <= b'9') {
-                let digit = UInt64(consume() - b'0')
+            while (index < size && data[index] >= b'0' && data[index] <= b'9') {
+                let digit = UInt64(data[index] - b'0')
+                index++
                 if (result > ((UInt64.Max - digit) / 10)) {
                     fail("Integer literal out of UInt64 range")
                 }
@@ -1048,7 +1108,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
 
     private func consumeDigits(): Unit {
         requireDigit("Expected digit")
-        while (hasMore() && peek() >= b'0' && peek() <= b'9') {
+        while (index < size && data[index] >= b'0' && data[index] <= b'9') {
             index++
         }
     }

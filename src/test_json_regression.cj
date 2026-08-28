@@ -687,6 +687,72 @@ class YJsonRegressionTest {
     }
 
     @TestCase
+    func rootCollectionCapacitySamplingPreservesEveryJsonShape(): Unit {
+        let stringJson = StringBuilder("[")
+        for (index in 0..96) {
+            if (index > 0) { stringJson.append(",") }
+            stringJson.append("\"segment-${index},\\\\nvalue-with-a-long-tail\"")
+        }
+        stringJson.append("]")
+        let strings = YJson.decodeStringWith(YJson.arrayListCodec(StringJson), stringJson.toString())
+        @Expect(strings.size, 96)
+        @Expect(strings[95].contains("segment-95,"))
+
+        let nestedJson = StringBuilder("[")
+        for (index in 0..7000) {
+            if (index > 0) { nestedJson.append(",") }
+            nestedJson.append("[${index},${index + 1}]")
+        }
+        nestedJson.append("]")
+        let nestedCodec = YJson.arrayListCodec(YJson.arrayListCodec(Int64Json))
+        let nested = YJson.decodeStringWith(nestedCodec, nestedJson.toString())
+        @Expect(nested.size, 7000)
+        @Expect(nested[6999][1], 7000)
+
+        let intListCodec = YJson.arrayListCodec(Int64Json)
+        let dense = YJson.decodeStringWith(intListCodec, generateLargeArray(5000))
+        @Expect(dense.size, 5000)
+
+        let profiles = sampleLargeProfileRecords(count: 96)
+        let profileListCodec = YJson.arrayListCodec(ProfileRecordJson)
+        let decodedProfiles = YJson.decodeStringWith(
+            profileListCodec, YJson.encodeStringWith(profileListCodec, profiles)
+        )
+        @Expect(decodedProfiles.size, 96)
+        @Expect(decodedProfiles[95].id, profiles[95].id)
+
+        let oneLargeString = StringBuilder("[\"")
+        for (_ in 0..3200) { oneLargeString.append("a") }
+        oneLargeString.append("\"]")
+        @Expect(YJson.decodeStringWith(
+            YJson.arrayListCodec(StringJson), oneLargeString.toString()
+        )[0].size, 3200)
+
+        let oneHugeString = StringBuilder("[\"")
+        for (_ in 0..70000) { oneHugeString.append("b") }
+        oneHugeString.append("\"]")
+        @Expect(YJson.decodeStringWith(
+            YJson.arrayListCodec(StringJson), oneHugeString.toString()
+        )[0].size, 70000)
+
+        let trailingSpace = StringBuilder("[1]")
+        for (_ in 0..3200) { trailingSpace.append(" ") }
+        let single = YJson.decodeStringWith(intListCodec, trailingSpace.toString())
+        @Expect(single.size, 1)
+        @Expect(single[0], 1)
+
+        let fourWithTrailingSpace = StringBuilder("[1,2,3,4]")
+        for (_ in 0..3200) { fourWithTrailingSpace.append(" ") }
+        @Expect(YJson.decodeStringWith(intListCodec, fourWithTrailingSpace.toString()).size, 4)
+
+        let invalidClose = StringBuilder("[}")
+        for (_ in 0..3200) { invalidClose.append(" ") }
+        @AssertThrows[JsonException](YJson.decodeStringWith(intListCodec, invalidClose.toString()))
+
+        @Expect(YJson.decodeStringWith(intListCodec, "[1,2]").size, 2)
+    }
+
+    @TestCase
     func genericCollectionEncodeFrameReusePreservesFailurePaths(): Unit {
         let itemCodec = RegressionPathFailingIntCodec()
         let values = ArrayList<Int64>()

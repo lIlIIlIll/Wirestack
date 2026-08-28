@@ -17,9 +17,52 @@ API，也不能单独证明语义正确。
 | `stream_protocol/workloads.json` | Stream protocol v1 workload 与输入 profile |
 | `scripts/json_stream_protocol_run.py` | previous-yjson 与候选的生命周期配对采集 |
 | `scripts/json_stream_peer_run.py` | yjson 与 stdx.json 的 incremental Stream 配对采集 |
+| `scripts/json_pure_perf_compare.py` | Pure baseline/candidate 内部优化配对采集 |
 
 Typed codec、DOM backend、typed stream 和跨 runtime adapter 必须分别报告，不能把不同
 representation 或 lifecycle 拼成统一排名。
+
+## Pure baseline/candidate workload
+
+`scripts/json_pure_perf_compare.py` 用于判断内部优化是否值得保留。它不构建源码。运行前需要
+准备两个独立源码目录，并分别构建 `packages/benchmarks`。两个目录中的 benchmark manifest
+必须相同。
+
+语料目录必须包含 `person.json`、`records-64k.json` 和 `records-1m.json`。各 workload 测量
+以下操作：
+
+| Case 模式 | 输入与计时边界 |
+| --- | --- |
+| `yjsonStringEncodePerson` / `DecodePerson` | 单个 generated `Person` 与 `String` 互转 |
+| `*LargeProfileArray` | generated `ProfileRecord` 大数组；覆盖字段名、字符串和整数 |
+| `*DeepNestedProfiles` | `ArrayList<HashMap<String, ArrayList<ProfileRecord>>>`；覆盖递归容器 |
+| `*ProfileBundle` | generated bundle 的 String 或 bytes encode/decode |
+| `*EscapedUnicodeString` | 含控制字符、反斜杠和非 ASCII 文本的 encode |
+| `parseStringRecords*` | `YJson.parseDocument(String)`，分别使用 64 KiB 和 1 MiB 文档 |
+| `parseBytesRecords*` | `YJson.parseDocument(Array<Byte>)`，使用相同文档 |
+| `decode*Chunk4k` | `YJson.fromStream`，输入由 4096-byte chunk 提供 |
+| `encode*Memory` | `YJson.toStream` 写入 caller-owned memory stream |
+
+在 Linux Server 上运行完整矩阵：
+
+```terminal
+scripts/json_pure_perf_compare.py \
+  --baseline /path/to/baseline \
+  --candidate /path/to/candidate \
+  --corpus /path/to/corpus \
+  --output /path/to/result \
+  --rounds 11 \
+  --target-case yjsonStringDecodeLargeProfileArray \
+  --enforce
+```
+
+不传 `--cpu` 时，runner 采样物理 core 的两个 hardware thread，并选择两者利用率都低于 1%
+的 core。每次测量固定到其中一个 thread，另一个由 `scripts/monitor_cpu_pair.py` 记录。runner
+把 heap 固定为 128 MiB，并在奇偶轮反转 baseline/candidate 顺序。
+
+成功运行会生成 `summary.json`、`summary.md`、`cpu-selection.json`、CPU 监控 CSV，以及每轮
+原始 benchmark report 和日志。`--enforce` 固定要求 11 轮；任一 case 回退超过 5%、任一方
+CV 超过 5%，或 `--target-case` 指定的目标未提升 5% 或少于 5/11 轮胜出时，命令返回非零状态。
 
 ## 发布结果要求
 

@@ -1622,7 +1622,7 @@ public class YJson {
     public static func parseDocument(text: String,
         config!: JsonReadConfig = JsonReadConfig.defaults): JsonDocument {
         freezeYJsonRuntime()
-        parseManagedJsonDocument(unsafe { text.rawData() }, config)
+        parseManagedJsonDocument(text, config)
     }
 
     /// Parses raw UTF-8 into the unified read-only document facade.
