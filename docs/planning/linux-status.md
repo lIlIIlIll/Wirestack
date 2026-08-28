@@ -140,7 +140,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M6-023 SSE/unbounded streaming profile | COMPLETE | Parallel real H1/H2 `text/event-stream` profiles each ran for at least one hour and consumed more than 90 million numbered events; heavy-GC heap, RSS, FD, socket and thread trends passed, public cancellation stayed below 50 ms, and the H2 sibling survived stream cancellation; [Linux acceptance evidence](../evidence/M6-023/README.md) |
 | M6-024 HTTP/2 sibling fairness | COMPLETE | A zero-window-only connection-credit flush and bounded least-recently-served send reservations let 1/10/100 siblings complete while a connection-window-exhausting response stays open; 100 independent real TLS h2 runs completed 10,000 siblings with no timeout or connection abort; [Linux acceptance evidence](../evidence/M6-024/README.md) |
 | M6-025 HTTP/2 facade termination | COMPLETE | Exclusive per-call TLS scratch removes concurrent read/write aliasing; the original three-case sequence passes 100/100 same-process rounds, the repository check passes 538/538 non-Performance cases, and M3-028 performance remains qualified; [Linux acceptance evidence](../evidence/M6-025/README.md) |
-| M6-026 HTTP/2 concurrent response bodies | IN_PROGRESS | M7-022 retained a connection-level `ProtocolViolation` from two public H2 body consumers. The task adds a real-TLS two-stream barrier and 1,000-batch regression before changing product code; [test plan](../evidence/M6-026/test-plan.md). |
+| M6-026 HTTP/2 concurrent response bodies | COMPLETE | Initial client HEADERS are published in increasing stream-ID order even when pool admission and execution race; unpublished cancellation stays local. A real-TLS public gate passes 1,000 two-stream batches, 2,000 exact bodies, zero failure/timeout/residual handler, and the full repository check; [evidence](../evidence/M6-026/README.md). |
 | M3-029 public TLS facade | COMPLETE | Provider-neutral client/server contexts, existing-transport handshake, connection/listener ownership and negotiated metadata pass public-package tests, clean-consumer Linux TLS acceptance and the API/architecture gates; [evidence](../evidence/M3-029/README.md). |
 
 ## Linux M7 stable-release closure
@@ -167,7 +167,6 @@ replace the six-platform M7-001 through M7-017 tasks.
 
 ## Next critical path
 
-1. Complete M6-026 for the installed-artifact HTTP/2 concurrent response-body
-   failure, then requalify M7-021 without weakening the M7-022 workload.
-2. Resume M7-022's explicit 24-hour mixed release soak.
-3. After M7-022, prepare M7-028's independent security-review package.
+1. Resume M7-022's explicit 24-hour mixed release soak with the requalified
+   M7-021 artifact and unchanged workload.
+2. After M7-022, prepare M7-028's independent security-review package.
