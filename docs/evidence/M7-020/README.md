@@ -5,8 +5,8 @@ Status: **COMPLETE**
 Decision: **PASS**
 
 The final source audit passes all M7-020 checks for the Linux x86_64 glibc
-profile. The result covers 188 repository Cangjie files, 11 build or native
-files, and 24 files in public API packages.
+profile. The refreshed result covers 190 repository Cangjie files, 11 build or
+native files, and 26 files in public API packages.
 
 ## Result
 
