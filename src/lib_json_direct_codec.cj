@@ -1283,19 +1283,7 @@ public func __yJsonWriteStringArrayList(
     writer: JsonCodecWriter,
     context: JsonEncodeContext
 ): Unit {
-    context.enterValue()
-    try {
-        if (jsonTryWriteCompactStringArrayList(writer, value)) {
-            return
-        }
-        writer.startArray()
-        for (item in value) {
-            writer.writeString(item)
-        }
-        writer.endArray()
-    } finally {
-        context.leaveValue()
-    }
+    YJson.stringArrayListCodec().write(value, writer, context)
 }
 
 public func __yJsonWriteStringOption(value: Option<String>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {
@@ -1616,20 +1604,7 @@ public func __yJsonWriteInt64HashMap(
     writer: JsonCodecWriter,
     context: JsonEncodeContext
 ): Unit {
-    context.enterValue()
-    try {
-        if (jsonTryWriteCompactInt64Map(writer, value)) {
-            return
-        }
-        writer.startObject()
-        for ((name, item) in value) {
-            writer.writeName(name)
-            writer.writeInt64(item)
-        }
-        writer.endObject()
-    } finally {
-        context.leaveValue()
-    }
+    YJson.int64HashMapCodec().write(value, writer, context)
 }
 
 public class YJson {
