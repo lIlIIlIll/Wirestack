@@ -287,6 +287,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M3-026 | 实现 `close_notify`、truncation evidence 与 TLS abort | TLS | C4 | M3-005,M3-021,M3-022 | PRD §13.8 | graceful close 在 Deadline 内发送/处理 close_notify；peer TCP EOF 无 close_notify 保留证据；最终总释放资源。 |
 | M3-027 | 实现 TLS 结构化错误与 runtime info | 可观测性 | C3 | M1-007,M3-002..M3-026 | PRD §16.2/§20 | 覆盖协议、版本、cipher、ALPN、证书、identity、key、alert、truncation、provider；phase/重试性稳定。 |
 | M3-028 | 完成 TLS 确定性、互操作、fuzz、依赖扫描与 benchmark | 测试 | C4 | M3-001..M3-027 | PRD §19.2/§21/§22/§23 | 协议向量、主机名、session、close、truncated、外部实现互操作、fuzz 无崩溃；吞吐/握手/内存达标；无系统 OpenSSL 依赖。 |
+| M3-029 | 实现并冻结 provider-neutral 公共 TLS facade | TLS/API | C4 | M3-028,M7-026 | PRD §6.2/§7/§13/§17/§29 | `wirestack.tls` 公开不可变 client/server context、existing-transport handshake、`TlsConnection`/`TlsListener`、协商结果和稳定错误；成功后转移 transport 所有权，失败/取消/Deadline abort，close/abort 幂等；公共声明无 `std.net`、native provider、OpenSSL 配置或旧 socket 类型；public-only 测试与干净 consumer 原生运行通过，并有意更新 API baseline。 |
 
 ---
 
@@ -469,7 +470,7 @@ runtime、`std.net` 源码修改不得成为依赖。
 | M7-024 | 建立 Linux 性能回归基线与发布门禁 | 性能 | C4 | M7-018,M1-025,M2-016,M3-028,M5-030,M6-020..M6-025 | PRD §19/§22 | 版本化 raw TCP、DNS-to-connected、TLS、H1、H2、取消、SSE 和内存基线；固定环境、轮次和阈值，保留原始输出并自动给出 PASS/FAIL。 |
 | M7-025 | 生成 Linux SBOM、provider manifest 与 build fingerprint | 发布 | C3 | M7-021,M3-002 | PRD §13.1/§18/§23/§26 | SBOM 与 artifact digest 绑定；manifest 可查询 provider、crypto、trust、capability、patch level、target 和 features；fingerprint 对同一输入稳定，对依赖变化敏感。 |
 | M7-026 | 冻结 Linux 公共 API 并执行兼容性检查 | API | C4 | M7-019,M5-030,M6-020..M6-025 | PRD §24/§28/§29 | 生成版本化 API baseline；冻结包名、major 和 cancellation handle；兼容性门禁通过，且公共声明不含 global TlsKit、TrustAll、OpenSSL string、StreamingSocket 或旧适配器。 |
-| M7-027 | 完成 Linux 迁移指南与可运行示例 | 文档 | C3 | M7-026 | PRD §6/§24.3/§29 | 文档覆盖 timeout 到 Deadline、取消、CA、mTLS、stream body、retry、errors 和移除 OpenSSL 配置；HTTPS client、已有 transport TLS、CONNECT+TLS、H1/H2 server、SSE、mTLS、自定义 CA 和分作用域取消示例在干净 consumer 中构建运行。 |
+| M7-027 | 完成 Linux 迁移指南与可运行示例 | 文档 | C3 | M7-026,M3-029 | PRD §6/§24.3/§29 | 文档覆盖 timeout 到 Deadline、取消、CA、mTLS、stream body、retry、errors 和移除 OpenSSL 配置；HTTPS client、已有 transport TLS、CONNECT+TLS、H1/H2 server、SSE、mTLS、自定义 CA 和分作用域取消示例在干净 consumer 中构建运行。 |
 | M7-028 | 准备 Linux 独立安全审查材料 | 安全 | C3 | M7-019..M7-025 | PRD §18/§27 | 材料包含 threat model、架构、provider、C ABI、parser、key/trust、fuzz、SBOM、已知限制、复现环境和证据 digest；不含密钥、secret 或敏感请求数据。 |
 | M7-029 | 完成 Linux 独立安全审查与修复闭环 | 安全 | C4 | M7-028 | PRD §18/§26 | 独立审查者记录范围、方法和发现；所有发现分级并可复现，修复带回归；任何未关闭 High/Critical 使任务失败。 |
 | M7-030 | 实现 Linux artifact 签名与安全更新流程 | 发布 | C3 | M7-025,M7-029 | PRD §18/§23/§27 | artifact、SBOM 和 manifest 均有可验证签名；干净 consumer 演练验证、拒绝篡改、provider 升级、回滚、公告和 SBOM 更新。 |
