@@ -1,5 +1,6 @@
 package wirestack.internal.http2
 
+import std.env.getVariable
 import std.unittest.*
 import std.unittest.testmacro.*
 
@@ -8,7 +9,7 @@ class Http2DeterministicFuzzTest {
     @TestCase
     func frameParserDeterministicMutationCorpusStaysBounded(): Unit {
         let seeds: Array<Array<Byte>> = [
-            serializeHttp2Frame(encodeHttp2Settings([])),
+            m7023Http2Seed("http2-frame", serializeHttp2Frame(encodeHttp2Settings([]))),
             serializeHttp2Frame(encodeHttp2Ping([0u8, 1u8, 2u8, 3u8, 4u8, 5u8, 6u8, 7u8])),
             serializeHttp2Frame(encodeHttp2RstStream(Http2StreamId(1u32), Http2ErrorCode.Cancel)),
             serializeHttp2Frame(encodeHttp2WindowUpdate(Http2StreamId(1u32), 1u32)),
@@ -34,12 +35,16 @@ class Http2DeterministicFuzzTest {
             }
         }
         @Expect(executions > 200)
+        println(
+            "M7023_FUZZ target=http2-frame seed=7023 " +
+            "iterations=${executions} decision=PASS"
+        )
     }
 
     @TestCase
     func hpackDecoderDeterministicMutationCorpusFailsClosed(): Unit {
         let seeds: Array<Array<Byte>> = [
-            [0x82u8],
+            m7023Http2Seed("hpack-decoder", [0x82u8]),
             [0x82u8, 0x86u8, 0x84u8],
             fuzzHexBytes("828684410f7777772e6578616d706c652e636f6d"),
             fuzzHexBytes("828684be58086e6f2d6361636865"),
@@ -63,6 +68,10 @@ class Http2DeterministicFuzzTest {
             }
         }
         @Expect(executions > 250)
+        println(
+            "M7023_FUZZ target=hpack-decoder seed=7023 " +
+            "iterations=${executions} decision=PASS"
+        )
     }
 
     @TestCase
@@ -83,6 +92,51 @@ class Http2DeterministicFuzzTest {
         let tableLimit = Http2Limits(maxHeaderTableBytes: 0u32)
         expectFuzzHpackFailure({ => let _ = HpackDecoder(limits: tableLimit).decode([0x21u8]) })
     }
+}
+
+private func m7023Http2Seed(target: String, fallback: Array<Byte>): Array<Byte> {
+    match (getVariable("WIRESTACK_M7_023_TARGET")) {
+        case None => fallback
+        case Some(actual) =>
+            if (actual != target) {
+                throw IllegalStateException("M7-023 target mismatch: ${actual}")
+            }
+            match (getVariable("WIRESTACK_M7_023_CORPUS_HEX")) {
+                case Some(value) => m7023Http2Hex(value)
+                case None => throw IllegalStateException("missing M7-023 corpus")
+            }
+    }
+}
+
+private func m7023Http2Hex(value: String): Array<Byte> {
+    let input = value.toArray()
+    var digits: Int64 = 0
+    for (byte in input) { if (byte > 32u8) { digits++ } }
+    if (digits == 0 || digits % 2 != 0) {
+        throw IllegalArgumentException("invalid M7-023 hex corpus")
+    }
+    let output = Array<Byte>(digits / 2, repeat: 0u8)
+    var high: ?Byte = None<Byte>
+    var index: Int64 = 0
+    for (byte in input) {
+        if (byte <= 32u8) { continue }
+        let nibble = m7023Http2Nibble(byte)
+        match (high) {
+            case None => high = Some(nibble)
+            case Some(value) =>
+                output[index] = (value << 4) | nibble
+                index++
+                high = None<Byte>
+        }
+    }
+    output
+}
+
+private func m7023Http2Nibble(value: Byte): Byte {
+    if (value >= b'0' && value <= b'9') { value - b'0' }
+    else if (value >= b'a' && value <= b'f') { value - b'a' + 10u8 }
+    else if (value >= b'A' && value <= b'F') { value - b'A' + 10u8 }
+    else { throw IllegalArgumentException("invalid M7-023 hex digit") }
 }
 
 private func runFrameMutation(input: Array<Byte>): Unit {

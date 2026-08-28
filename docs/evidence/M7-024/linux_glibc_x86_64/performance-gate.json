@@ -1,0 +1,2288 @@
+{
+  "artifacts": [
+    {
+      "bytes": 3406666,
+      "decision": "PASS",
+      "name": "raw_tcp",
+      "path": "docs/evidence/M1-027/linux_x86_64/final-net05-formal11.data",
+      "sha256": "2bab904ceeaad6c1aec87bdc8b3c04db85c8da16154cc90c2c382fc66cda70b8"
+    },
+    {
+      "bytes": 82321,
+      "decision": "PASS",
+      "name": "cancellation",
+      "path": "docs/evidence/M1-025/linux_x86_64/report.data",
+      "sha256": "03f2ab715c8ef28458bfe5f71f48d6a6b725bc4adbf0d02645be81e5a9509a8a"
+    },
+    {
+      "bytes": 431437,
+      "decision": "PASS",
+      "name": "dns_to_connected",
+      "path": "docs/evidence/M2-016/linux_glibc_x86_64/dns-to-connected.json",
+      "sha256": "087da7ab38ab939b5a1ab81410936c3fe3326b23f0f7912b7fc04b072e22cc86"
+    },
+    {
+      "bytes": 83737,
+      "decision": "PASS",
+      "name": "tls",
+      "path": "docs/evidence/M6-025/linux_glibc_x86_64/m3-028-requalification.report",
+      "sha256": "9ee4cf08eab8c5872d8c2923444beaa075209540e0e01758e1963a61dd482926"
+    },
+    {
+      "bytes": 13668,
+      "decision": "PASS",
+      "name": "http1",
+      "path": "docs/evidence/M5-030/linux_x86_64/http1-benchmark.data",
+      "sha256": "8521871dedd09f2439abbf4cbfa27edb9048db839f87dd2a71042937d8db19e1"
+    },
+    {
+      "bytes": 107129,
+      "decision": "PASS",
+      "name": "http2",
+      "path": "docs/evidence/M7-024/linux_glibc_x86_64/http2-benchmark-after-m6-026.json",
+      "sha256": "b4261bd1568e28afc123ff0f249f2eb1a54ca3a38be107c5da1966a496fe2226"
+    },
+    {
+      "bytes": 167269,
+      "decision": "PASS",
+      "name": "sse",
+      "path": "docs/evidence/M6-023/linux_x86_64/sse-streaming-profile.json",
+      "sha256": "3e5c39c925a753e5917969cdbf5f067b6b4a5a18a4475485e26775ac001212ec"
+    }
+  ],
+  "decision": "PASS",
+  "domains": [
+    {
+      "checks": [
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "source decision",
+          "operator": "eq"
+        },
+        {
+          "actual": "same_unittest_binary",
+          "decision": "PASS",
+          "expected": "same_unittest_binary",
+          "name": "release process shape",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "measured rounds",
+          "operator": "eq"
+        },
+        {
+          "actual": 1,
+          "decision": "PASS",
+          "expected": 1,
+          "name": "warmup rounds",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "Linux x86_64 glibc environment",
+          "operator": "eq"
+        },
+        {
+          "actual": "x86_64",
+          "decision": "PASS",
+          "expected": "x86_64",
+          "name": "architecture",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "raw TCP Cangjie version",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "raw TCP target",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "raw TCP CJPM version",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            1024,
+            16384,
+            65536,
+            1048576,
+            104857600
+          ],
+          "decision": "PASS",
+          "expected": [
+            1024,
+            16384,
+            65536,
+            1048576,
+            104857600
+          ],
+          "name": "payload inventory",
+          "operator": "eq"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "1KiB decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "1KiB samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "1KiB paired order",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "1KiB std.net raw samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "1KiB adapter raw samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 1.365428,
+          "decision": "PASS",
+          "expected": 0.95,
+          "name": "1KiB throughput ratio",
+          "operator": "ge"
+        },
+        {
+          "actual": 0.943396,
+          "decision": "PASS",
+          "expected": 1.1,
+          "name": "1KiB P95 latency ratio",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "1KiB staging read bytes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "1KiB staging write bytes",
+          "operator": "le"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "16KiB decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "16KiB samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "16KiB paired order",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "16KiB std.net raw samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "16KiB adapter raw samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 1.198192,
+          "decision": "PASS",
+          "expected": 0.95,
+          "name": "16KiB throughput ratio",
+          "operator": "ge"
+        },
+        {
+          "actual": 0.990445,
+          "decision": "PASS",
+          "expected": 1.1,
+          "name": "16KiB P95 latency ratio",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "16KiB staging read bytes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "16KiB staging write bytes",
+          "operator": "le"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "64KiB decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "64KiB samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "64KiB paired order",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "64KiB std.net raw samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "64KiB adapter raw samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 0.988339,
+          "decision": "PASS",
+          "expected": 0.95,
+          "name": "64KiB throughput ratio",
+          "operator": "ge"
+        },
+        {
+          "actual": 0.333576,
+          "decision": "PASS",
+          "expected": 1.1,
+          "name": "64KiB P95 latency ratio",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "64KiB staging read bytes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "64KiB staging write bytes",
+          "operator": "le"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "1MiB decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "1MiB samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "1MiB paired order",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "1MiB std.net raw samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "1MiB adapter raw samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 1.04297,
+          "decision": "PASS",
+          "expected": 0.95,
+          "name": "1MiB throughput ratio",
+          "operator": "ge"
+        },
+        {
+          "actual": 0.96729,
+          "decision": "PASS",
+          "expected": 1.1,
+          "name": "1MiB P95 latency ratio",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "1MiB staging read bytes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "1MiB staging write bytes",
+          "operator": "le"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "100MiB decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "100MiB samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "100MiB paired order",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "100MiB std.net raw samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "100MiB adapter raw samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 1.114788,
+          "decision": "PASS",
+          "expected": 0.95,
+          "name": "100MiB throughput ratio",
+          "operator": "ge"
+        },
+        {
+          "actual": 0.961544,
+          "decision": "PASS",
+          "expected": 1.1,
+          "name": "100MiB P95 latency ratio",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "100MiB staging read bytes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "100MiB staging write bytes",
+          "operator": "le"
+        }
+      ],
+      "decision": "PASS",
+      "metrics": {
+        "cases": [
+          {
+            "p95_latency_ratio": 0.943396,
+            "payload_bytes": 1024,
+            "throughput_ratio": 1.365428
+          },
+          {
+            "p95_latency_ratio": 0.990445,
+            "payload_bytes": 16384,
+            "throughput_ratio": 1.198192
+          },
+          {
+            "p95_latency_ratio": 0.333576,
+            "payload_bytes": 65536,
+            "throughput_ratio": 0.988339
+          },
+          {
+            "p95_latency_ratio": 0.96729,
+            "payload_bytes": 1048576,
+            "throughput_ratio": 1.04297
+          },
+          {
+            "p95_latency_ratio": 0.961544,
+            "payload_bytes": 104857600,
+            "throughput_ratio": 1.114788
+          }
+        ]
+      },
+      "name": "raw-tcp"
+    },
+    {
+      "checks": [
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "source decision",
+          "operator": "eq"
+        },
+        {
+          "actual": "linux-glibc-x86_64",
+          "decision": "PASS",
+          "expected": "linux-glibc-x86_64",
+          "name": "platform scope",
+          "operator": "eq"
+        },
+        {
+          "actual": "-O2",
+          "decision": "PASS",
+          "expected": "-O2",
+          "name": "optimization",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "measured rounds",
+          "operator": "eq"
+        },
+        {
+          "actual": 8,
+          "decision": "PASS",
+          "expected": 8,
+          "name": "samples per round",
+          "operator": "eq"
+        },
+        {
+          "actual": 88,
+          "decision": "PASS",
+          "expected": 88,
+          "name": "samples per profile",
+          "operator": "eq"
+        },
+        {
+          "actual": "Linux",
+          "decision": "PASS",
+          "expected": "Linux",
+          "name": "system",
+          "operator": "eq"
+        },
+        {
+          "actual": "x86_64",
+          "decision": "PASS",
+          "expected": "x86_64",
+          "name": "machine",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            "glibc",
+            "2.44"
+          ],
+          "decision": "PASS",
+          "expected": [
+            "glibc",
+            "2.44"
+          ],
+          "name": "libc",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "DNS Cangjie version",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "DNS target",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "DNS CJPM version",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            "cancellation",
+            "ipv6-available",
+            "ipv6-blackhole",
+            "loss-1pct",
+            "rtt-100ms",
+            "rtt-20ms"
+          ],
+          "decision": "PASS",
+          "expected": [
+            "cancellation",
+            "ipv6-available",
+            "ipv6-blackhole",
+            "loss-1pct",
+            "rtt-100ms",
+            "rtt-20ms"
+          ],
+          "name": "profile inventory",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            "cancellation"
+          ],
+          "decision": "PASS",
+          "expected": [
+            "cancellation"
+          ],
+          "name": "cancellation sample identity",
+          "operator": "eq"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "cancellation decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "cancellation round count",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8
+          ],
+          "decision": "PASS",
+          "expected": [
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8
+          ],
+          "name": "cancellation round samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 88,
+          "decision": "PASS",
+          "expected": 88,
+          "name": "cancellation aggregate samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 3907507,
+          "decision": "PASS",
+          "expected": 50000000,
+          "name": "DNS cancellation P99",
+          "operator": "le"
+        },
+        {
+          "actual": [
+            "ipv6-available"
+          ],
+          "decision": "PASS",
+          "expected": [
+            "ipv6-available"
+          ],
+          "name": "ipv6-available sample identity",
+          "operator": "eq"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "ipv6-available decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "ipv6-available round count",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8
+          ],
+          "decision": "PASS",
+          "expected": [
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8
+          ],
+          "name": "ipv6-available round samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 88,
+          "decision": "PASS",
+          "expected": 88,
+          "name": "ipv6-available aggregate samples",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            "ipv6-blackhole"
+          ],
+          "decision": "PASS",
+          "expected": [
+            "ipv6-blackhole"
+          ],
+          "name": "ipv6-blackhole sample identity",
+          "operator": "eq"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "ipv6-blackhole decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "ipv6-blackhole round count",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8
+          ],
+          "decision": "PASS",
+          "expected": [
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8
+          ],
+          "name": "ipv6-blackhole round samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 88,
+          "decision": "PASS",
+          "expected": 88,
+          "name": "ipv6-blackhole aggregate samples",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            "loss-1pct"
+          ],
+          "decision": "PASS",
+          "expected": [
+            "loss-1pct"
+          ],
+          "name": "loss-1pct sample identity",
+          "operator": "eq"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "loss-1pct decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "loss-1pct round count",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8
+          ],
+          "decision": "PASS",
+          "expected": [
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8
+          ],
+          "name": "loss-1pct round samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 88,
+          "decision": "PASS",
+          "expected": 88,
+          "name": "loss-1pct aggregate samples",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            "rtt-100ms"
+          ],
+          "decision": "PASS",
+          "expected": [
+            "rtt-100ms"
+          ],
+          "name": "rtt-100ms sample identity",
+          "operator": "eq"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "rtt-100ms decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "rtt-100ms round count",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8
+          ],
+          "decision": "PASS",
+          "expected": [
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8
+          ],
+          "name": "rtt-100ms round samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 88,
+          "decision": "PASS",
+          "expected": 88,
+          "name": "rtt-100ms aggregate samples",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            "rtt-20ms"
+          ],
+          "decision": "PASS",
+          "expected": [
+            "rtt-20ms"
+          ],
+          "name": "rtt-20ms sample identity",
+          "operator": "eq"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "rtt-20ms decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "rtt-20ms round count",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8
+          ],
+          "decision": "PASS",
+          "expected": [
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8,
+            8
+          ],
+          "name": "rtt-20ms round samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 88,
+          "decision": "PASS",
+          "expected": 88,
+          "name": "rtt-20ms aggregate samples",
+          "operator": "eq"
+        }
+      ],
+      "decision": "PASS",
+      "metrics": {
+        "profiles": {
+          "cancellation": {
+            "cancellation_p99_ns": 3907507,
+            "total_p50_ns": 20180498,
+            "total_p95_ns": 22009348,
+            "total_p99_ns": 26061873
+          },
+          "ipv6-available": {
+            "total_p50_ns": 10247888,
+            "total_p95_ns": 13165286,
+            "total_p99_ns": 15890799
+          },
+          "ipv6-blackhole": {
+            "total_p50_ns": 263971573,
+            "total_p95_ns": 272736383,
+            "total_p99_ns": 279873867
+          },
+          "loss-1pct": {
+            "total_p50_ns": 10241789,
+            "total_p95_ns": 13531638,
+            "total_p99_ns": 1051085491
+          },
+          "rtt-100ms": {
+            "total_p50_ns": 110313867,
+            "total_p95_ns": 112604585,
+            "total_p99_ns": 115896446
+          },
+          "rtt-20ms": {
+            "total_p50_ns": 30226318,
+            "total_p95_ns": 33690450,
+            "total_p99_ns": 34503217
+          }
+        }
+      },
+      "name": "dns-to-connected"
+    },
+    {
+      "checks": [
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "source decision",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "Linux glibc environment",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "TLS system",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "TLS machine",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "TLS libc",
+          "operator": "eq"
+        },
+        {
+          "actual": 1.4493531931907038,
+          "decision": "PASS",
+          "expected": 0.9,
+          "name": "bulk throughput ratio",
+          "operator": "ge"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "bulk throughput ratio source decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 0.11124318685745632,
+          "decision": "PASS",
+          "expected": 1.1,
+          "name": "full handshake P50 ratio",
+          "operator": "le"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "full handshake P50 ratio source decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 0.1325503506830209,
+          "decision": "PASS",
+          "expected": 1.2,
+          "name": "full handshake P95 ratio",
+          "operator": "le"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "full handshake P95 ratio source decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "bulk_tls13 Wirestack rounds",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "bulk_tls13 stdx rounds",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "full_tls13 Wirestack rounds",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "full_tls13 stdx rounds",
+          "operator": "eq"
+        },
+        {
+          "actual": 11,
+          "decision": "PASS",
+          "expected": 11,
+          "name": "resumed rounds",
+          "operator": "ge"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "all resumed rounds reused a session",
+          "operator": "eq"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "memory decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 4788,
+          "decision": "PASS",
+          "expected": 32768,
+          "name": "body peak growth",
+          "operator": "le"
+        },
+        {
+          "actual": 0.04723011363636364,
+          "decision": "PASS",
+          "expected": 0.25,
+          "name": "body growth ratio",
+          "operator": "le"
+        },
+        {
+          "actual": 45.59650025733402,
+          "decision": "PASS",
+          "expected": 48.0,
+          "name": "idle KiB per connection",
+          "operator": "le"
+        }
+      ],
+      "decision": "PASS",
+      "metrics": {
+        "body_peak_growth_kib": 4788,
+        "bulk_throughput_ratio": 1.4493531931907038,
+        "full_handshake_p50_ratio": 0.11124318685745632,
+        "full_handshake_p95_ratio": 0.1325503506830209,
+        "idle_kib_per_connection": 45.59650025733402,
+        "resumed_rounds": 11
+      },
+      "name": "tls"
+    },
+    {
+      "checks": [
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "source decision",
+          "operator": "eq"
+        },
+        {
+          "actual": "-O2",
+          "decision": "PASS",
+          "expected": "-O2",
+          "name": "optimization",
+          "operator": "eq"
+        },
+        {
+          "actual": 7,
+          "decision": "PASS",
+          "expected": 7,
+          "name": "alternating measured rounds",
+          "operator": "eq"
+        },
+        {
+          "actual": "Linux",
+          "decision": "PASS",
+          "expected": "Linux",
+          "name": "HTTP/1 system",
+          "operator": "eq"
+        },
+        {
+          "actual": "x86_64",
+          "decision": "PASS",
+          "expected": "x86_64",
+          "name": "HTTP/1 machine",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "HTTP/1 stdx compile optimization",
+          "operator": "eq"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "throughput decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 2.0857,
+          "decision": "PASS",
+          "expected": 0.9,
+          "name": "throughput ratio",
+          "operator": "ge"
+        },
+        {
+          "actual": 7,
+          "decision": "PASS",
+          "expected": 7,
+          "name": "Wirestack raw rounds",
+          "operator": "eq"
+        },
+        {
+          "actual": 7,
+          "decision": "PASS",
+          "expected": 7,
+          "name": "stdx raw rounds",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            16777216,
+            67108864
+          ],
+          "decision": "PASS",
+          "expected": [
+            16777216,
+            67108864
+          ],
+          "name": "streamed body inventory",
+          "operator": "eq"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "memory decision",
+          "operator": "eq"
+        },
+        {
+          "actual": -948,
+          "decision": "PASS",
+          "expected": 16384,
+          "name": "RSS growth",
+          "operator": "le"
+        },
+        {
+          "actual": 0.962,
+          "decision": "PASS",
+          "expected": 1.5,
+          "name": "RSS ratio",
+          "operator": "le"
+        }
+      ],
+      "decision": "PASS",
+      "metrics": {
+        "rss_growth_kib": -948,
+        "rss_ratio": 0.962,
+        "stdx_requests_per_second": 4829.858,
+        "throughput_ratio": 2.0857,
+        "wirestack_requests_per_second": 10073.727
+      },
+      "name": "http1"
+    },
+    {
+      "checks": [
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "source decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 20,
+          "decision": "PASS",
+          "expected": 20,
+          "name": "measured rounds per pass",
+          "operator": "eq"
+        },
+        {
+          "actual": 2,
+          "decision": "PASS",
+          "expected": 2,
+          "name": "pass count",
+          "operator": "eq"
+        },
+        {
+          "actual": "Linux",
+          "decision": "PASS",
+          "expected": "Linux",
+          "name": "HTTP/2 system",
+          "operator": "eq"
+        },
+        {
+          "actual": "x86_64",
+          "decision": "PASS",
+          "expected": "x86_64",
+          "name": "HTTP/2 machine",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "HTTP/2 Cangjie version",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "HTTP/2 target",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "HTTP/2 CJPM version",
+          "operator": "eq"
+        },
+        {
+          "actual": "add5239e12407e259efd13f00404cbdd1444f020708a06a109f8f5e1da762bbe",
+          "decision": "PASS",
+          "expected": "add5239e12407e259efd13f00404cbdd1444f020708a06a109f8f5e1da762bbe",
+          "name": "HTTP/2 report production source digest",
+          "operator": "eq"
+        },
+        {
+          "actual": "add5239e12407e259efd13f00404cbdd1444f020708a06a109f8f5e1da762bbe",
+          "decision": "PASS",
+          "expected": "add5239e12407e259efd13f00404cbdd1444f020708a06a109f8f5e1da762bbe",
+          "name": "HTTP/2 current production source digest",
+          "operator": "eq"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "connection reduction decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 0.01,
+          "decision": "PASS",
+          "expected": 0.25,
+          "name": "HTTP/2 connection ratio",
+          "operator": "le"
+        },
+        {
+          "actual": [
+            "streams_1",
+            "streams_10",
+            "streams_100"
+          ],
+          "decision": "PASS",
+          "expected": [
+            "streams_1",
+            "streams_10",
+            "streams_100"
+          ],
+          "name": "concurrency inventory",
+          "operator": "eq"
+        },
+        {
+          "actual": 1,
+          "decision": "PASS",
+          "expected": 1,
+          "name": "streams_1 concurrency",
+          "operator": "eq"
+        },
+        {
+          "actual": 1,
+          "decision": "PASS",
+          "expected": 1,
+          "name": "streams_1 connections",
+          "operator": "eq"
+        },
+        {
+          "actual": 40,
+          "decision": "PASS",
+          "expected": 40,
+          "name": "streams_1 measured requests",
+          "operator": "eq"
+        },
+        {
+          "actual": 2,
+          "decision": "PASS",
+          "expected": 2,
+          "name": "streams_1 raw passes",
+          "operator": "eq"
+        },
+        {
+          "actual": 2,
+          "decision": "PASS",
+          "expected": 256,
+          "name": "streams_1 queue writes",
+          "operator": "le"
+        },
+        {
+          "actual": 31,
+          "decision": "PASS",
+          "expected": 1048576,
+          "name": "streams_1 queue bytes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "streams_1 flow permits",
+          "operator": "le"
+        },
+        {
+          "actual": 20,
+          "decision": "PASS",
+          "expected": 20,
+          "name": "streams_1 pass 1 request samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 256,
+          "name": "streams_1 pass 1 bounded writes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "streams_1 pass 1 terminal flow permits",
+          "operator": "eq"
+        },
+        {
+          "actual": 20,
+          "decision": "PASS",
+          "expected": 20,
+          "name": "streams_1 pass 2 request samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 256,
+          "name": "streams_1 pass 2 bounded writes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "streams_1 pass 2 terminal flow permits",
+          "operator": "eq"
+        },
+        {
+          "actual": 10,
+          "decision": "PASS",
+          "expected": 10,
+          "name": "streams_10 concurrency",
+          "operator": "eq"
+        },
+        {
+          "actual": 1,
+          "decision": "PASS",
+          "expected": 1,
+          "name": "streams_10 connections",
+          "operator": "eq"
+        },
+        {
+          "actual": 400,
+          "decision": "PASS",
+          "expected": 400,
+          "name": "streams_10 measured requests",
+          "operator": "eq"
+        },
+        {
+          "actual": 2,
+          "decision": "PASS",
+          "expected": 2,
+          "name": "streams_10 raw passes",
+          "operator": "eq"
+        },
+        {
+          "actual": 9,
+          "decision": "PASS",
+          "expected": 256,
+          "name": "streams_10 queue writes",
+          "operator": "le"
+        },
+        {
+          "actual": 171,
+          "decision": "PASS",
+          "expected": 1048576,
+          "name": "streams_10 queue bytes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "streams_10 flow permits",
+          "operator": "le"
+        },
+        {
+          "actual": 200,
+          "decision": "PASS",
+          "expected": 200,
+          "name": "streams_10 pass 1 request samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 256,
+          "name": "streams_10 pass 1 bounded writes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "streams_10 pass 1 terminal flow permits",
+          "operator": "eq"
+        },
+        {
+          "actual": 200,
+          "decision": "PASS",
+          "expected": 200,
+          "name": "streams_10 pass 2 request samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 1,
+          "decision": "PASS",
+          "expected": 256,
+          "name": "streams_10 pass 2 bounded writes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "streams_10 pass 2 terminal flow permits",
+          "operator": "eq"
+        },
+        {
+          "actual": 100,
+          "decision": "PASS",
+          "expected": 100,
+          "name": "streams_100 concurrency",
+          "operator": "eq"
+        },
+        {
+          "actual": 1,
+          "decision": "PASS",
+          "expected": 1,
+          "name": "streams_100 connections",
+          "operator": "eq"
+        },
+        {
+          "actual": 4000,
+          "decision": "PASS",
+          "expected": 4000,
+          "name": "streams_100 measured requests",
+          "operator": "eq"
+        },
+        {
+          "actual": 2,
+          "decision": "PASS",
+          "expected": 2,
+          "name": "streams_100 raw passes",
+          "operator": "eq"
+        },
+        {
+          "actual": 50,
+          "decision": "PASS",
+          "expected": 256,
+          "name": "streams_100 queue writes",
+          "operator": "le"
+        },
+        {
+          "actual": 979,
+          "decision": "PASS",
+          "expected": 1048576,
+          "name": "streams_100 queue bytes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "streams_100 flow permits",
+          "operator": "le"
+        },
+        {
+          "actual": 2000,
+          "decision": "PASS",
+          "expected": 2000,
+          "name": "streams_100 pass 1 request samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 256,
+          "name": "streams_100 pass 1 bounded writes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "streams_100 pass 1 terminal flow permits",
+          "operator": "eq"
+        },
+        {
+          "actual": 2000,
+          "decision": "PASS",
+          "expected": 2000,
+          "name": "streams_100 pass 2 request samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 256,
+          "name": "streams_100 pass 2 bounded writes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "streams_100 pass 2 terminal flow permits",
+          "operator": "eq"
+        }
+      ],
+      "decision": "PASS",
+      "metrics": {
+        "cases": {
+          "streams_1": {
+            "connections": 1,
+            "p50_latency_ns": 1135016,
+            "p95_latency_ns": 2123926,
+            "p99_latency_ns": 4386664,
+            "peak_rss_kib": 1095988,
+            "requests_per_second": 739.806
+          },
+          "streams_10": {
+            "connections": 1,
+            "p50_latency_ns": 6338278,
+            "p95_latency_ns": 10826553,
+            "p99_latency_ns": 11730100,
+            "peak_rss_kib": 1234364,
+            "requests_per_second": 1376.7
+          },
+          "streams_100": {
+            "connections": 1,
+            "p50_latency_ns": 68656519,
+            "p95_latency_ns": 110471019,
+            "p99_latency_ns": 120186695,
+            "peak_rss_kib": 1102952,
+            "requests_per_second": 1286.515
+          }
+        },
+        "connection_ratio": 0.01
+      },
+      "name": "http2"
+    },
+    {
+      "checks": [
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "source decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 2,
+          "decision": "PASS",
+          "expected": 2,
+          "name": "warmup samples",
+          "operator": "eq"
+        },
+        {
+          "actual": 100,
+          "decision": "PASS",
+          "expected": 100,
+          "name": "measured samples",
+          "operator": "eq"
+        },
+        {
+          "actual": "linux-x86_64-glibc",
+          "decision": "PASS",
+          "expected": "linux-x86_64-glibc",
+          "name": "cancellation profile",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            "blocked-read",
+            "blocked-write"
+          ],
+          "decision": "PASS",
+          "expected": [
+            "blocked-read",
+            "blocked-write"
+          ],
+          "name": "scenario inventory",
+          "operator": "eq"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "blocked-read decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 100,
+          "decision": "PASS",
+          "expected": 100,
+          "name": "blocked-read sample count",
+          "operator": "eq"
+        },
+        {
+          "actual": 9097715,
+          "decision": "PASS",
+          "expected": 50000000,
+          "name": "blocked-read P99",
+          "operator": "le"
+        },
+        {
+          "actual": 100,
+          "decision": "PASS",
+          "expected": 100,
+          "name": "blocked-read retained measured samples",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "blocked-read typed terminals",
+          "operator": "eq"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "blocked-write decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 100,
+          "decision": "PASS",
+          "expected": 100,
+          "name": "blocked-write sample count",
+          "operator": "eq"
+        },
+        {
+          "actual": 4117911,
+          "decision": "PASS",
+          "expected": 50000000,
+          "name": "blocked-write P99",
+          "operator": "le"
+        },
+        {
+          "actual": 100,
+          "decision": "PASS",
+          "expected": 100,
+          "name": "blocked-write retained measured samples",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "blocked-write typed terminals",
+          "operator": "eq"
+        }
+      ],
+      "decision": "PASS",
+      "metrics": {
+        "scenarios": {
+          "blocked-read": {
+            "max_ns": 10160230,
+            "p50_ns": 1115406,
+            "p95_ns": 4430731,
+            "p99_ns": 9097715
+          },
+          "blocked-write": {
+            "max_ns": 6532531,
+            "p50_ns": 1115404,
+            "p95_ns": 2803029,
+            "p99_ns": 4117911
+          }
+        }
+      },
+      "name": "cancellation"
+    },
+    {
+      "checks": [
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "source decision",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "formal parameters",
+          "operator": "eq"
+        },
+        {
+          "actual": 3600,
+          "decision": "PASS",
+          "expected": 3600,
+          "name": "duration parameter",
+          "operator": "ge"
+        },
+        {
+          "actual": 1000000,
+          "decision": "PASS",
+          "expected": 1000000,
+          "name": "event parameter",
+          "operator": "ge"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "SSE system",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "SSE machine",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "SSE libc",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "SSE Cangjie version",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "SSE target",
+          "operator": "eq"
+        },
+        {
+          "actual": true,
+          "decision": "PASS",
+          "expected": true,
+          "name": "SSE CJPM version",
+          "operator": "eq"
+        },
+        {
+          "actual": [
+            "h1",
+            "h2"
+          ],
+          "decision": "PASS",
+          "expected": [
+            "h1",
+            "h2"
+          ],
+          "name": "protocol inventory",
+          "operator": "eq"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "h1 decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 3600,
+          "decision": "PASS",
+          "expected": 3600,
+          "name": "h1 elapsed seconds",
+          "operator": "ge"
+        },
+        {
+          "actual": 95935756,
+          "decision": "PASS",
+          "expected": 1000000,
+          "name": "h1 events",
+          "operator": "ge"
+        },
+        {
+          "actual": 3417085,
+          "decision": "PASS",
+          "expected": 50000000,
+          "name": "h1 cancellation latency",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "h1 sequence errors",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "h1 application pending bytes",
+          "operator": "le"
+        },
+        {
+          "actual": 356,
+          "decision": "PASS",
+          "expected": 300,
+          "name": "h1 resource samples",
+          "operator": "ge"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 2,
+          "name": "h1 FD growth",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 2,
+          "name": "h1 socket growth",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 2,
+          "name": "h1 thread growth",
+          "operator": "le"
+        },
+        {
+          "actual": -30864,
+          "decision": "PASS",
+          "expected": 32768,
+          "name": "h1 RSS growth",
+          "operator": "le"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "h2 decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 3600,
+          "decision": "PASS",
+          "expected": 3600,
+          "name": "h2 elapsed seconds",
+          "operator": "ge"
+        },
+        {
+          "actual": 90877593,
+          "decision": "PASS",
+          "expected": 1000000,
+          "name": "h2 events",
+          "operator": "ge"
+        },
+        {
+          "actual": 3457675,
+          "decision": "PASS",
+          "expected": 50000000,
+          "name": "h2 cancellation latency",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "h2 sequence errors",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "h2 application pending bytes",
+          "operator": "le"
+        },
+        {
+          "actual": 356,
+          "decision": "PASS",
+          "expected": 300,
+          "name": "h2 resource samples",
+          "operator": "ge"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 2,
+          "name": "h2 FD growth",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 2,
+          "name": "h2 socket growth",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 2,
+          "name": "h2 thread growth",
+          "operator": "le"
+        },
+        {
+          "actual": -32356,
+          "decision": "PASS",
+          "expected": 32768,
+          "name": "h2 RSS growth",
+          "operator": "le"
+        }
+      ],
+      "decision": "PASS",
+      "metrics": {
+        "profiles": {
+          "h1": {
+            "cancel_latency_ns": 3417085,
+            "elapsed_ms": 3600017,
+            "events": 95935756,
+            "resource_samples": 356,
+            "rss_growth_kib": -30864
+          },
+          "h2": {
+            "cancel_latency_ns": 3457675,
+            "elapsed_ms": 3600021,
+            "events": 90877593,
+            "resource_samples": 356,
+            "rss_growth_kib": -32356
+          }
+        }
+      },
+      "name": "sse"
+    },
+    {
+      "checks": [
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "Transport resource decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 8,
+          "decision": "PASS",
+          "expected": 8,
+          "name": "Transport measured resource classes",
+          "operator": "ge"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "TLS memory decision",
+          "operator": "eq"
+        },
+        {
+          "actual": 4788,
+          "decision": "PASS",
+          "expected": 32768,
+          "name": "TLS body growth",
+          "operator": "le"
+        },
+        {
+          "actual": 45.59650025733402,
+          "decision": "PASS",
+          "expected": 48.0,
+          "name": "TLS idle slope",
+          "operator": "le"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "HTTP/1 memory decision",
+          "operator": "eq"
+        },
+        {
+          "actual": -948,
+          "decision": "PASS",
+          "expected": 16384,
+          "name": "HTTP/1 RSS growth",
+          "operator": "le"
+        },
+        {
+          "actual": 2,
+          "decision": "PASS",
+          "expected": 256,
+          "name": "streams_1 pending writes",
+          "operator": "le"
+        },
+        {
+          "actual": 31,
+          "decision": "PASS",
+          "expected": 1048576,
+          "name": "streams_1 pending bytes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "streams_1 flow permits",
+          "operator": "le"
+        },
+        {
+          "actual": 9,
+          "decision": "PASS",
+          "expected": 256,
+          "name": "streams_10 pending writes",
+          "operator": "le"
+        },
+        {
+          "actual": 171,
+          "decision": "PASS",
+          "expected": 1048576,
+          "name": "streams_10 pending bytes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "streams_10 flow permits",
+          "operator": "le"
+        },
+        {
+          "actual": 50,
+          "decision": "PASS",
+          "expected": 256,
+          "name": "streams_100 pending writes",
+          "operator": "le"
+        },
+        {
+          "actual": 979,
+          "decision": "PASS",
+          "expected": 1048576,
+          "name": "streams_100 pending bytes",
+          "operator": "le"
+        },
+        {
+          "actual": 0,
+          "decision": "PASS",
+          "expected": 0,
+          "name": "streams_100 flow permits",
+          "operator": "le"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "SSE h1 resource trend",
+          "operator": "eq"
+        },
+        {
+          "actual": -30864,
+          "decision": "PASS",
+          "expected": 32768,
+          "name": "SSE h1 RSS growth",
+          "operator": "le"
+        },
+        {
+          "actual": "PASS",
+          "decision": "PASS",
+          "expected": "PASS",
+          "name": "SSE h2 resource trend",
+          "operator": "eq"
+        },
+        {
+          "actual": -32356,
+          "decision": "PASS",
+          "expected": 32768,
+          "name": "SSE h2 RSS growth",
+          "operator": "le"
+        }
+      ],
+      "decision": "PASS",
+      "metrics": {
+        "http1_rss_growth_kib": -948,
+        "http2_peak_rss_kib": {
+          "streams_1": 1095988,
+          "streams_10": 1234364,
+          "streams_100": 1102952
+        },
+        "sse_rss_growth_kib": {
+          "h1": -30864,
+          "h2": -32356
+        },
+        "tls_body_growth_kib": 4788,
+        "tls_idle_kib_per_connection": 45.59650025733402,
+        "transport_resource_classes": 8
+      },
+      "name": "memory"
+    }
+  ],
+  "evaluation_environment": {
+    "libc": [
+      "glibc",
+      "2.44"
+    ],
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "failed_domains": [],
+  "gate_id": "M7-024-LINUX-PERFORMANCE",
+  "generated_at_utc": "2026-08-28T05:31:03.035221+00:00",
+  "manifest_environment": {
+    "cangjie": "1.1.0-alpha.20260817040003",
+    "cjpm": "1.1.3",
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "optimization": "-O2",
+    "system": "Linux",
+    "target": "x86_64-unknown-linux-gnu"
+  },
+  "profile": "linux-glibc-x86_64",
+  "schema_version": 1
+}

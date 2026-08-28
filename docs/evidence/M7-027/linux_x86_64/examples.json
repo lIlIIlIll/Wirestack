@@ -1,0 +1,33 @@
+{
+  "acceptance_status": "PASS",
+  "checks": {
+    "cleanConsumerBuild": "PASS",
+    "cleanConsumerRun": "PASS",
+    "exampleMarkers": [
+      "HTTP1_SERVER=PASS",
+      "SSE=PASS",
+      "SCOPED_CANCELLATION=PASS",
+      "CONNECT_TLS=PASS",
+      "HTTPS_CLIENT=PASS",
+      "CUSTOM_CA=PASS",
+      "HTTP2_SERVER=PASS",
+      "EXISTING_TRANSPORT_TLS=PASS",
+      "MTLS=PASS"
+    ],
+    "migrationGuide": "PASS",
+    "publicImportsOnly": "PASS",
+    "skippedAsPass": false
+  },
+  "commands": [
+    "tools/build_linux_tls_provider.py --offline",
+    "tools/build_linux_resolver.py --quiet",
+    "cjpm build (temporary clean consumer)",
+    "temporary clean consumer executable"
+  ],
+  "decision": "PASS",
+  "platform": "linux-x86_64-glibc",
+  "schemaVersion": 1,
+  "source_task": "M7-027",
+  "status": "PASS",
+  "taskId": "M7-027"
+}

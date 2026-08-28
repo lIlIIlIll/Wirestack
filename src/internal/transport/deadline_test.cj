@@ -64,7 +64,23 @@ class DeadlineTest {
     }
 
     @TestCase
-    func rejectsNegativeDurationsWithoutReadingTheClock(): Unit {
+    func zeroAndExpiredChildrenCannotExtendTheParent(): Unit {
+        let clock = FakeMonotonicClock(MonoTime.now())
+        let parent = Deadline.after(Duration.second, clock: clock)
+        let zero = parent.child(Duration.Zero)
+
+        @Expect(zero.isExpired())
+        @Expect(zero.expiresAt < parent.expiresAt)
+
+        clock.advance(2 * Duration.second)
+        let expiredChild = parent.child(Duration.second)
+        @Expect(expiredChild.expiresAt, parent.expiresAt)
+        @Expect(expiredChild.isExpired())
+        @Expect(expiredChild.remaining(), Duration.Zero)
+    }
+
+    @TestCase
+    func rejectsNegativeDurations(): Unit {
         let clock = FakeMonotonicClock(MonoTime.now())
         var afterRejected = false
         try {

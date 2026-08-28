@@ -1,7 +1,8 @@
 package wirestack.internal.http2
 
 import std.collection.ArrayList
-import std.sync.AtomicInt64
+import std.sync.*
+import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.transport.*
@@ -151,6 +152,84 @@ class Http2FlowControllerTest {
     }
 
     @TestCase
+    func stalledConnectionCreditFlushesOnceWithoutChangingSmallReadCoalescing(): Unit {
+        let flow = Http2FlowController()
+        let id = Http2StreamId(2u32)
+        flow.openStream(id)
+        flow.receiveData(id, 65535)
+        @Expect(flow.receiveConnectionAvailable, 0)
+        @Expect(flow.consumeReceived(id, 4096).isEmpty())
+
+        let updates = flow.flushStalledConnectionReceiveCredit()
+        @Expect(updates.size, 1)
+        @Expect(updates[0].header.streamId.value, 0u32)
+        @Expect(decodeHttp2WindowUpdate(updates[0]), 4096u32)
+        @Expect(flow.receiveConnectionAvailable, 4096)
+        @Expect(flow.flushStalledConnectionReceiveCredit().isEmpty())
+        flow.close()
+        @Expect(flow.flushStalledConnectionReceiveCredit().isEmpty())
+    }
+
+    @TestCase
+    func leastRecentlyServedStreamsReceiveCreditBeforeThePreviousOwner(): Unit {
+        let flow = Http2FlowController(limits: Http2Limits(
+            maxPendingWrites: 128u32, maxConcurrentStreams: 128u32
+        ))
+        let large = Http2StreamId(1u32)
+        flow.openStream(large)
+        for (_ in 0..3) { @Expect(flow.reserveSend(large, 16384).beginSend()) }
+        @Expect(flow.reserveSend(large, 16383).beginSend())
+        @Expect(flow.sendConnectionAvailable, 0)
+
+        let largeCancellation = CancellationSource()
+        let largeWaiter = spawn {
+            try {
+                let _ = flow.reserveSend(
+                    large, 4096,
+                    context: OperationContext(cancellation: largeCancellation.token)
+                )
+                false
+            } catch (error: NetworkException) {
+                isCancelledFlowError(error)
+            }
+        }
+        waitForFlowReservations(flow, 1)
+        let siblingWaiters = ArrayList<Future<Http2SendPermit>>()
+        for (index in 0..100) {
+            let id = Http2StreamId(UInt32(index * 2 + 3))
+            flow.openStream(id)
+            siblingWaiters.add(spawn { flow.reserveSend(id, 2) })
+        }
+        waitForFlowReservations(flow, 101)
+
+        flow.receiveWindowUpdate(encodeHttp2WindowUpdate(Http2StreamId(0u32), 4096u32))
+        let siblingPermits = ArrayList<Http2SendPermit>()
+        for (index in 0..siblingWaiters.size) {
+            let permit = siblingWaiters[index].get(Duration.second)
+            @Expect(permit.streamId.value, UInt32(index * 2 + 3))
+            @Expect(permit.amount, 2)
+            siblingPermits.add(permit)
+        }
+        @Expect(flow.flowControlStalls, 101)
+        let unrelatedProbe = Http2StreamId(203u32)
+        flow.openStream(unrelatedProbe)
+        let unrelatedPermit = flow.tryReserveSend(unrelatedProbe, 1).getOrThrow()
+        @Expect(unrelatedPermit.cancel())
+        largeCancellation.cancel()
+        @Expect(largeWaiter.get(Duration.second))
+        for (permit in siblingPermits) { @Expect(permit.cancel()) }
+        let cleanupProbe = Http2StreamId(205u32)
+        flow.openStream(cleanupProbe)
+        let cleanupPermit = flow.tryReserveSend(cleanupProbe, 1).getOrThrow()
+        @Expect(cleanupPermit.cancel())
+        println(
+            "M6_024_FLOW_RESULT siblings=100 connectionCredit=4096 " +
+            "flowControlStalls=${flow.flowControlStalls} pendingReservations=" +
+            "0 connectionWindowUpdateFrames=1"
+        )
+    }
+
+    @TestCase
     func connectionSendWindowIsSharedAcrossStreams(): Unit {
         let flow = Http2FlowController()
         let first = Http2StreamId(1u32)
@@ -296,4 +375,14 @@ private func isPermitSendingTest(value: Http2SendPermitState): Bool {
 
 private func isPermitCancelledTest(value: Http2SendPermitState): Bool {
     match (value) { case Http2SendPermitState.Cancelled => true; case _ => false }
+}
+
+private func waitForFlowReservations(flow: Http2FlowController, expected: Int64): Unit {
+    let deadline = MonoTime.now() + Duration.second
+    while (flow.flowControlStalls < expected) {
+        if (MonoTime.now() >= deadline) {
+            @Fail("HTTP/2 flow reservation waiters did not reach ${expected}")
+        }
+        sleep(Duration.millisecond)
+    }
 }

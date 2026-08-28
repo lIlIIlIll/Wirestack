@@ -1,0 +1,374 @@
+{
+  "acceptance_status": "INCOMPLETE",
+  "artifact": {
+    "installed_as_only_wirestack_dependency": true,
+    "path": "dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
+    "payload_sha256": "a02aaa388356e62a8da8ad8b3b16fda0a1d9bc9767adeb2e0322fd7f58c5b869",
+    "qualification_sha256": "bfc5e1d84eab9b8aa3c1b5a20bf48eddc45f7686b44bd1f46bb16ce879415fc9",
+    "sha256": "aad5b788d3404f80a5934fa5e156ee653e592820651bcc9f0198512a74ce4a04"
+  },
+  "decision": "INCOMPLETE",
+  "formal_parameters_met": false,
+  "generated_at_utc": "2026-08-28T05:11:16.432688+00:00",
+  "non_claims": [
+    "This result applies only to native Linux x86_64 glibc.",
+    "A short preflight is not 24-hour acceptance evidence.",
+    "This task does not sign the artifact or close the independent security review."
+  ],
+  "parameters": {
+    "application_sample_seconds": 2.0,
+    "duration_seconds": 10,
+    "idle_milliseconds": 100,
+    "minimum_formal_seconds": 86400,
+    "resource_sample_seconds": 1.0,
+    "teardown_seconds": 300
+  },
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "preflight_status": "PASS",
+  "process": {
+    "build_output_tail": "\u001b[33mwarning\u001b[0m: unused function:'waitUntilWriteActive'\n   \u001b[36m==>\u001b[0m /tmp/wirestack-m7-022-n806eakf/install/wirestack-0.1.0/src/internal/transport_stdnet/package.cj:506:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m506\u001b[0m \u001b[36m| \u001b[0m      internal func waitUntilWriteActive(timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m507\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m519\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilAcceptActive'\n   \u001b[36m==>\u001b[0m /tmp/wirestack-m7-022-n806eakf/install/wirestack-0.1.0/src/internal/transport_stdnet/package.cj:804:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m804\u001b[0m \u001b[36m| \u001b[0m      func waitUntilAcceptActive(timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m805\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m813\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n2 warnings generated, 2 warnings printed.\n\u001b[33mwarning\u001b[0m: unused function:'metrics'\n   \u001b[36m==>\u001b[0m /tmp/wirestack-m7-022-n806eakf/install/wirestack-0.1.0/src/internal/resolver/bounded_backend.cj:151:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m151\u001b[0m \u001b[36m| \u001b[0m      internal func metrics(): ResolverPoolMetrics {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m152\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         synchronized(mutex) {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m175\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilWaiters'\n   \u001b[36m==>\u001b[0m /tmp/wirestack-m7-022-n806eakf/install/wirestack-0.1.0/src/internal/http1/connection_pool.cj:374:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m374\u001b[0m \u001b[36m| \u001b[0m      internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m375\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m384\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\ncjpm build success\n",
+    "clean_consumer_build": "PASS",
+    "command": [
+      "/home/elliot/.codex/scripts/codex_cangjie_env",
+      "--cwd",
+      "/tmp/wirestack-m7-022-n806eakf/consumer",
+      "/tmp/wirestack-m7-022-n806eakf/consumer/target/release/bin/main",
+      "10",
+      "2000",
+      "100"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "wall_elapsed_ms": 10303
+  },
+  "raw_log": {
+    "bytes": 1357,
+    "path": "docs/evidence/M7-022/linux_x86_64/preflight-after-m6-026.log",
+    "sha256": "e8002e1041532ffd1bd6f3723ed8d0a52b48985d9e9c1c781aaf5b1d3f5fe996",
+    "tail": "M7022_SAMPLE index=0 elapsedMs=2112 usedHeapBytes=20779008 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=11 h1Requests=14 h2Requests=36 sseEvents=88\nM7022_SAMPLE index=1 elapsedMs=4028 usedHeapBytes=2617344 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=20 h1Requests=25 h2Requests=64 sseEvents=160\nM7022_SAMPLE index=2 elapsedMs=6105 usedHeapBytes=3059712 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=31 h1Requests=39 h2Requests=98 sseEvents=248\nM7022_SAMPLE index=3 elapsedMs=8070 usedHeapBytes=4165632 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=41 h1Requests=52 h2Requests=130 sseEvents=328\nM7022_SAMPLE index=4 elapsedMs=10168 usedHeapBytes=3067904 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=52 h1Requests=65 h2Requests=164 sseEvents=416\nM7022_SAMPLE index=5 elapsedMs=10169 usedHeapBytes=3067904 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=52 h1Requests=65 h2Requests=164 sseEvents=416\nM7022_RESULT durationSeconds=10 elapsedMs=10174 cycles=52 activePhases=52 idlePhases=52 connects=22 h1Requests=65 h2Requests=164 h2MultiplexBatches=52 sseH1Events=208 sseH2Events=208 requestCancels=52 streamResets=52 connectionCancels=7 reconnects=7 spawnedTasks=104 joinedTasks=104 sequenceErrors=0 maxCancelLatencyNs=11344077 activeWaiters=0 activeBuffers=0 backgroundTasks=0 serverTasks=0\n"
+  },
+  "resources": {
+    "application": {
+      "samples": [
+        {
+          "activeBuffers": 0,
+          "activeWaiters": 0,
+          "backgroundTasks": 2,
+          "cycles": 11,
+          "elapsedMs": 2112,
+          "h1Requests": 14,
+          "h2Requests": 36,
+          "index": 0,
+          "sseEvents": 88,
+          "usedHeapBytes": 20779008
+        },
+        {
+          "activeBuffers": 0,
+          "activeWaiters": 0,
+          "backgroundTasks": 2,
+          "cycles": 20,
+          "elapsedMs": 4028,
+          "h1Requests": 25,
+          "h2Requests": 64,
+          "index": 1,
+          "sseEvents": 160,
+          "usedHeapBytes": 2617344
+        },
+        {
+          "activeBuffers": 0,
+          "activeWaiters": 0,
+          "backgroundTasks": 2,
+          "cycles": 31,
+          "elapsedMs": 6105,
+          "h1Requests": 39,
+          "h2Requests": 98,
+          "index": 2,
+          "sseEvents": 248,
+          "usedHeapBytes": 3059712
+        },
+        {
+          "activeBuffers": 0,
+          "activeWaiters": 0,
+          "backgroundTasks": 2,
+          "cycles": 41,
+          "elapsedMs": 8070,
+          "h1Requests": 52,
+          "h2Requests": 130,
+          "index": 3,
+          "sseEvents": 328,
+          "usedHeapBytes": 4165632
+        },
+        {
+          "activeBuffers": 0,
+          "activeWaiters": 0,
+          "backgroundTasks": 2,
+          "cycles": 52,
+          "elapsedMs": 10168,
+          "h1Requests": 65,
+          "h2Requests": 164,
+          "index": 4,
+          "sseEvents": 416,
+          "usedHeapBytes": 3067904
+        },
+        {
+          "activeBuffers": 0,
+          "activeWaiters": 0,
+          "backgroundTasks": 2,
+          "cycles": 52,
+          "elapsedMs": 10169,
+          "h1Requests": 65,
+          "h2Requests": 164,
+          "index": 5,
+          "sseEvents": 416,
+          "usedHeapBytes": 3067904
+        }
+      ],
+      "trend": {
+        "bounded_application_owners": true,
+        "decision": "PASS",
+        "heavy_gc_heap": {
+          "decision": "PASS",
+          "first_median": 2617344,
+          "growth": 450560,
+          "growth_limit": 33554432,
+          "last_median": 3067904,
+          "monotonic_growth": false,
+          "positive_steps": 2
+        },
+        "minimum_samples": 5,
+        "sample_count": 6,
+        "workload_progress": true
+      }
+    },
+    "coverage": {
+      "buffer": "zero application-owned buffers between cycles and at terminal",
+      "fd": "process-tree file descriptors",
+      "gc_root": "heavy-GC used heap steady-state trend",
+      "rss": "process-tree VmRSS",
+      "socket": "process-tree socket descriptors",
+      "task": "joined spawned tasks plus bounded server tasks and thread trend",
+      "thread": "process-tree thread count",
+      "timer": "process-tree timerfd descriptors",
+      "waiter": "zero application-owned waiters between cycles and at terminal"
+    },
+    "process_tree": {
+      "samples": [
+        {
+          "elapsed_ms": 0,
+          "fd_count": 5,
+          "process_count": 1,
+          "rss_kib": 22532,
+          "socket_count": 1,
+          "thread_count": 5,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 1039,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 36840,
+          "socket_count": 6,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 2083,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 45724,
+          "socket_count": 4,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 3157,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 34248,
+          "socket_count": 4,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 4320,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 28888,
+          "socket_count": 6,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 5364,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 29364,
+          "socket_count": 4,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 6404,
+          "fd_count": 10,
+          "process_count": 1,
+          "rss_kib": 28400,
+          "socket_count": 6,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 7442,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 28956,
+          "socket_count": 4,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 8472,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 30468,
+          "socket_count": 4,
+          "thread_count": 10,
+          "timerfd_count": 0
+        },
+        {
+          "elapsed_ms": 9522,
+          "fd_count": 8,
+          "process_count": 1,
+          "rss_kib": 29040,
+          "socket_count": 4,
+          "thread_count": 10,
+          "timerfd_count": 0
+        }
+      ],
+      "trend": {
+        "decision": "PASS",
+        "metrics": {
+          "fd_count": {
+            "decision": "PASS",
+            "first_median": 8,
+            "growth": 0,
+            "growth_limit": 2,
+            "last_median": 8,
+            "monotonic_growth": false,
+            "positive_steps": 2
+          },
+          "process_count": {
+            "decision": "PASS",
+            "first_median": 1,
+            "growth": 0,
+            "growth_limit": 0,
+            "last_median": 1,
+            "monotonic_growth": false,
+            "positive_steps": 0
+          },
+          "rss_kib": {
+            "decision": "PASS",
+            "first_median": 45724,
+            "growth": -16684,
+            "growth_limit": 65536,
+            "last_median": 29040,
+            "monotonic_growth": false,
+            "positive_steps": 3
+          },
+          "socket_count": {
+            "decision": "PASS",
+            "first_median": 4,
+            "growth": 0,
+            "growth_limit": 2,
+            "last_median": 4,
+            "monotonic_growth": false,
+            "positive_steps": 2
+          },
+          "thread_count": {
+            "decision": "PASS",
+            "first_median": 10,
+            "growth": 0,
+            "growth_limit": 2,
+            "last_median": 10,
+            "monotonic_growth": false,
+            "positive_steps": 0
+          },
+          "timerfd_count": {
+            "decision": "PASS",
+            "first_median": 0,
+            "growth": 0,
+            "growth_limit": 2,
+            "last_median": 0,
+            "monotonic_growth": false,
+            "positive_steps": 0
+          }
+        },
+        "minimum_samples": 5,
+        "sample_count": 10
+      }
+    }
+  },
+  "schema_version": 1,
+  "source": {
+    "consumer": "tools/release_soak/main.cj",
+    "consumer_sha256": "dd7fd1a3a7a81409877eca858e6b958e4b8aed0a1081601520af30c25777fd80",
+    "fixture": "examples/linux/m7_027/fixtures.cj",
+    "fixture_sha256": "860752218df930ebc3aa6f194a6d2dfdd339e85c2008b727b702f965d9dbf91f"
+  },
+  "source_task": "M7-022",
+  "status": "INCOMPLETE",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  },
+  "workload": {
+    "checks": {
+      "active_idle_mix": true,
+      "cancellation_latency": true,
+      "child_duration": true,
+      "connection_recovery": true,
+      "connections": true,
+      "cycles": true,
+      "h1_pool": true,
+      "h2_multiplex": true,
+      "parent_duration": true,
+      "request_cancellation": true,
+      "requested_duration": true,
+      "sequence_integrity": true,
+      "sse": true,
+      "stream_reset": true,
+      "task_join": true,
+      "terminal_owners": true
+    },
+    "decision": "PASS",
+    "result": {
+      "activeBuffers": 0,
+      "activePhases": 52,
+      "activeWaiters": 0,
+      "backgroundTasks": 0,
+      "connectionCancels": 7,
+      "connects": 22,
+      "cycles": 52,
+      "durationSeconds": 10,
+      "elapsedMs": 10174,
+      "h1Requests": 65,
+      "h2MultiplexBatches": 52,
+      "h2Requests": 164,
+      "idlePhases": 52,
+      "joinedTasks": 104,
+      "maxCancelLatencyNs": 11344077,
+      "reconnects": 7,
+      "requestCancels": 52,
+      "sequenceErrors": 0,
+      "serverTasks": 0,
+      "spawnedTasks": 104,
+      "sseH1Events": 208,
+      "sseH2Events": 208,
+      "streamResets": 52
+    }
+  }
+}

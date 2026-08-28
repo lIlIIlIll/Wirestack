@@ -1,5 +1,6 @@
 package wirestack.internal.http1
 
+import std.env.getVariable
 import std.unittest.*
 import std.unittest.testmacro.*
 import wirestack.internal.http_model.*
@@ -88,11 +89,16 @@ class Http1SmugglingCorpusTest {
 
     @TestCase
     func everyAcceptedSingleByteMutationHasACanonicalReparse(): Unit {
-        let seed = "POST /upload?q=1 HTTP/1.1\r\nHost: example.com\r\nContent-Length: 5\r\nX-Test: value\r\n\r\nhello".toArray()
+        let seed = m7023Http1Seed(
+            "http1-parser",
+            "POST /upload?q=1 HTTP/1.1\r\nHost: example.com\r\nContent-Length: 5\r\nX-Test: value\r\n\r\nhello".toArray()
+        )
         let replacements = [0u8, 9u8, 10u8, 13u8, 32u8, 44u8, 58u8, 65u8, 127u8, 255u8]
         var accepted: Int64 = 0
+        var executions: Int64 = 0
         for (index in 0..seed.size) {
             for (replacement in replacements) {
+                executions++
                 let mutated = seed.clone()
                 mutated[index] = replacement
                 try {
@@ -109,6 +115,36 @@ class Http1SmugglingCorpusTest {
             }
         }
         @Expect(accepted > 100)
+        println(
+            "M7023_FUZZ target=http1-parser seed=7023 " +
+            "iterations=${executions} decision=PASS"
+        )
+    }
+
+    @TestCase
+    func chunkedMutationsHaveDeterministicBoundedTerminals(): Unit {
+        let seed = m7023Http1Seed(
+            "chunked-decoder", "4\r\nWiki\r\n0\r\n\r\n".toArray()
+        )
+        let replacements = [0u8, 10u8, 13u8, 32u8, 43u8, 59u8, 127u8, 255u8]
+        var executions: Int64 = 0
+        for (index in 0..seed.size) {
+            for (replacement in replacements) {
+                let mutated = seed.clone()
+                mutated[index] = replacement
+                @Assert(m7023ClassifyChunked(mutated), m7023ClassifyChunked(mutated))
+                executions++
+            }
+        }
+        for (length in 0..(seed.size + 1)) {
+            let truncated = copyCorpusRange(seed, 0, length)
+            @Assert(m7023ClassifyChunked(truncated), m7023ClassifyChunked(truncated))
+            executions++
+        }
+        println(
+            "M7023_FUZZ target=chunked-decoder seed=7023 " +
+            "iterations=${executions} decision=PASS"
+        )
     }
 
     @TestCase
@@ -125,6 +161,62 @@ class Http1SmugglingCorpusTest {
             @Expect(corpusContentLength(parsed.head.framing), 3)
         }
     }
+}
+
+private func m7023ClassifyChunked(input: Array<Byte>): String {
+    try {
+        let decoder = Http1ChunkedDecoder()
+        let batch = decoder.feed(input)
+        if (!batch.complete) { decoder.finish() }
+        "accepted"
+    } catch (_: Exception) {
+        "rejected"
+    }
+}
+
+private func m7023Http1Seed(target: String, fallback: Array<Byte>): Array<Byte> {
+    match (getVariable("WIRESTACK_M7_023_TARGET")) {
+        case None => fallback
+        case Some(actual) =>
+            if (actual != target) {
+                throw IllegalStateException("M7-023 target mismatch: ${actual}")
+            }
+            match (getVariable("WIRESTACK_M7_023_CORPUS_HEX")) {
+                case Some(value) => m7023Http1Hex(value)
+                case None => throw IllegalStateException("missing M7-023 corpus")
+            }
+    }
+}
+
+private func m7023Http1Hex(value: String): Array<Byte> {
+    let input = value.toArray()
+    var digits: Int64 = 0
+    for (byte in input) { if (byte > 32u8) { digits++ } }
+    if (digits == 0 || digits % 2 != 0) {
+        throw IllegalArgumentException("invalid M7-023 hex corpus")
+    }
+    let output = Array<Byte>(digits / 2, repeat: 0u8)
+    var high: ?Byte = None<Byte>
+    var index: Int64 = 0
+    for (byte in input) {
+        if (byte <= 32u8) { continue }
+        let nibble = m7023Http1Nibble(byte)
+        match (high) {
+            case None => high = Some(nibble)
+            case Some(value) =>
+                output[index] = (value << 4) | nibble
+                index++
+                high = None<Byte>
+        }
+    }
+    output
+}
+
+private func m7023Http1Nibble(value: Byte): Byte {
+    if (value >= b'0' && value <= b'9') { value - b'0' }
+    else if (value >= b'a' && value <= b'f') { value - b'a' + 10u8 }
+    else if (value >= b'A' && value <= b'F') { value - b'A' + 10u8 }
+    else { throw IllegalArgumentException("invalid M7-023 hex digit") }
 }
 
 private func requestHeadAccepted(fields: String): Bool {

@@ -18,7 +18,8 @@ private func listenerErrorCoordinates(error: NetworkException): Bool {
         case NetworkPhase.ServerAccept => true
         case _ => false
     }
-    categoryMatches && phaseMatches
+    categoryMatches && phaseMatches && error.nativeCode.isNone() &&
+        error.localEndpoint.isSome()
 }
 
 private func listenerCancelled(error: NetworkException): Bool {

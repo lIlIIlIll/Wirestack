@@ -1,0 +1,76 @@
+{
+  "build": {
+    "command": [
+      "cjpm",
+      "test",
+      "src/internal/tls_engine",
+      "src/internal/trust",
+      "src/internal/http1",
+      "src/internal/http2",
+      "src/http",
+      "-j",
+      "1",
+      "--no-run",
+      "--no-progress",
+      "--no-color"
+    ],
+    "duration_ms": 117801.923,
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "   Finished `test` profile compilation\n   Executable files at `/tmp/wirestack-m7-023-j73op2a2/wirestack/target/release/unittest_bin`\ncjpm test success\n",
+    "timed_out": false
+  },
+  "corpus_version": "m7-023-v1",
+  "crash_artifacts": [],
+  "decision": "PASS",
+  "environment": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3",
+    "libc": "glibc 2.44",
+    "machine": "x86_64",
+    "release": "7.1.9-arch1-2",
+    "system": "Linux"
+  },
+  "finished_at_utc": "2026-08-28T05:23:58.377222Z",
+  "gate_id": "M7-023-LINUX-FUZZ",
+  "manifest": "tools/gates/manifests/m7-023-linux-fuzz.json",
+  "manifest_sha256": "a3bce21dc697a5d307b1fc451d8ee6d929bac38bd610ed6fe6839d7cd0739e41",
+  "mode": "replay",
+  "profile": "linux_glibc_x86_64",
+  "release_compile_option": "-O2",
+  "schema_version": 1,
+  "source_sha256": "d36ddd00c3d4845af380c79396eee6add9a84f245a882cd7d25878fa2533d4a9",
+  "started_at_utc": "2026-08-28T05:21:58.260253Z",
+  "target_count": 1,
+  "targets": [
+    {
+      "corpus": "fuzz/corpus/m7-023/v1/chunked.hex",
+      "corpus_sha256": "cb3c0b3cb27e94f45cba1ec3bba68a95e7e507061dcfde682ebac22931a4a734",
+      "decision": "PASS",
+      "marker": {
+        "decision": "PASS",
+        "iterations": 127,
+        "seed": 7023,
+        "target": "chunked-decoder"
+      },
+      "minimum_iterations": 100,
+      "process": {
+        "command": [
+          "/tmp/wirestack-m7-023-j73op2a2/wirestack/target/release/unittest_bin/wirestack.internal.http1",
+          "--filter=Http1SmugglingCorpusTest.chunkedMutationsHaveDeterministicBoundedTerminals",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "duration_ms": 25.531,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "M7023_FUZZ target=chunked-decoder seed=7023 iterations=127 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http1, time elapsed: 2347915 ns, RESULT:\n    TCS: Http1SmugglingCorpusTest, time elapsed: 1428865 ns, RESULT:\n    [ PASSED ] CASE: chunkedMutationsHaveDeterministicBoundedTerminals (1176254 ns)\nSummary: TOTAL: 115\n    PASSED: 1, SKIPPED: 114, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "timed_out": false
+      },
+      "reasons": [],
+      "seed": 7023,
+      "target": "chunked-decoder"
+    }
+  ]
+}

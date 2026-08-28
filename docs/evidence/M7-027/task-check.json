@@ -1,0 +1,96 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M7-027/test-plan.md",
+        "--json"
+      ],
+      "duration_ms": 114.386,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-28T05:42:11.161299Z",
+      "id": "test-plan-matrix",
+      "started_at_utc": "2026-08-28T05:42:11.046915Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-027/test-plan-matrix.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"counts\": {\"paths\": 18, \"scenarios\": 15, \"tests\": 12}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+      "stdout_path": "build/repository-tooling/M7-027/test-plan-matrix.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m7_027_linux_examples"
+      ],
+      "duration_ms": 113.868,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-28T05:42:11.275279Z",
+      "id": "gate-fault-injection",
+      "started_at_utc": "2026-08-28T05:42:11.161421Z",
+      "status": "PASS",
+      "stderr_excerpt": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.003s\n\nOK\n",
+      "stderr_path": "build/repository-tooling/M7-027/gate-fault-injection.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "",
+      "stdout_path": "build/repository-tooling/M7-027/gate-fault-injection.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "scripts/check-m7-027-linux-examples",
+        "--json"
+      ],
+      "duration_ms": 13543.516,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-28T05:42:24.818970Z",
+      "id": "clean-consumer-examples",
+      "started_at_utc": "2026-08-28T05:42:11.275459Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-027/clean-consumer-examples.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"acceptance_status\": \"PASS\", \"checks\": {\"cleanConsumerBuild\": \"PASS\", \"cleanConsumerRun\": \"PASS\", \"exampleMarkers\": [\"HTTP1_SERVER=PASS\", \"SSE=PASS\", \"SCOPED_CANCELLATION=PASS\", \"CONNECT_TLS=PASS\", \"HTTPS_CLIENT=PASS\", \"CUSTOM_CA=PASS\", \"HTTP2_SERVER=PASS\", \"EXISTING_TRANSPORT_TLS=PASS\", \"MTLS=PASS\"], \"migrationGuide\": \"PASS\", \"publicImportsOnly\": \"PASS\", \"skippedAsPass\": false}, \"commands\": [\"tools/build_linux_tls_provider.py --offline\", \"tools/build_linux_resolver.py --quiet\", \"cjpm build (temporary clean consumer)\", \"temporary clean consumer executable\"], \"decision\": \"PASS\", \"platform\": \"linux-x86_64-glibc\", \"schemaVersion\": 1, \"source_task\": \"M7-027\", \"status\": \"PASS\", \"taskId\": \"M7-027\"}\n",
+      "stdout_path": "build/repository-tooling/M7-027/clean-consumer-examples.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "scripts/check-m7-026-linux-api"
+      ],
+      "duration_ms": 766.545,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-28T05:42:25.585622Z",
+      "id": "api-freeze",
+      "started_at_utc": "2026-08-28T05:42:24.819084Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-027/api-freeze.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "M7-026 Linux API compatibility: PASS\npackage=wirestack@0.1.0\ndeclarations=147\nresolved_aliases=105\ninventory_sha256=9221db662b0c24980a18c12853dba5c5c62bae2f5f7bf3dc1f8924b98fe0b865\n",
+      "stdout_path": "build/repository-tooling/M7-027/api-freeze.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "task",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M7-027"
+}

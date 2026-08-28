@@ -39,4 +39,27 @@ class NetworkErrorTest {
         @Expect(error.remoteEndpoint.getOrThrow().port, 443)
         @Expect(error.toString(), "NetworkException: connection refused")
     }
+
+    @TestCase
+    func retainsLocalEndpointCauseAndOptionalDefaults(): Unit {
+        let local = SocketEndpoint(IpAddress(IpAddressFamily.Ipv4, [127, 0, 0, 1]), 32100)
+        let underlying = Exception("socket setup failed")
+        let error = NetworkException(
+            NetworkErrorCategory.System,
+            NetworkPhase.TcpRead,
+            NetworkErrorCode.SystemFailure,
+            "read failed",
+            localEndpoint: Some(local),
+            cause: Some<Exception>(underlying)
+        )
+
+        match (error.retryability) {
+            case Retryability.Unknown => @Expect(true)
+            case _ => @Expect(false)
+        }
+        @Expect(error.nativeCode.isNone())
+        @Expect(error.remoteEndpoint.isNone())
+        @Expect(error.localEndpoint.getOrThrow().port, 32100)
+        @Expect(error.cause.getOrThrow().toString(), underlying.toString())
+    }
 }

@@ -1,0 +1,477 @@
+{
+  "schema_version": 1,
+  "task_id": "M7-019",
+  "platform": "linux-x86_64-glibc",
+  "decision": "AUDIT_COMPLETE_RELEASE_BLOCKED",
+  "source_sha256": {
+    "docs/product/prd.md": "a201d628d43ca53d925a98f2ee24ade92ba22f0eb5d7e565e1c1ca1792b140cf",
+    "docs/planning/implementation-backlog.md": "b0be7da7b65d299c49d9a8befa862200a161b6f2908624b64d5502488c8776a7"
+  },
+  "p0_requirements": [
+    {
+      "id": "TR-BUF-001",
+      "source": "PRD 10.1",
+      "requirement": "Checked non-copying byte spans with safe native-call lifetime and advancement.",
+      "status": "PASS",
+      "evidence": ["src/internal/transport/transport.cj", "src/internal/transport/byte_span_test.cj", "docs/evidence/M1-002/README.md"],
+      "note": "Construction, slicing, advancement, and boundary behavior are covered on Linux."
+    },
+    {
+      "id": "TR-CTX-001",
+      "source": "PRD 10.2",
+      "requirement": "Every waiting operation accepts the canonical OperationContext.",
+      "status": "PASS",
+      "evidence": ["src/internal/transport/operation_context.cj", "src/internal/transport/operation_context_test.cj", "docs/evidence/M1-005/README.md"],
+      "note": "The canonical immutable context carries deadline, cancellation, and trace state."
+    },
+    {
+      "id": "TR-CTX-002",
+      "source": "PRD 10.2",
+      "requirement": "Deadline uses a monotonic clock rather than wall time.",
+      "status": "PASS",
+      "evidence": ["src/internal/transport/deadline.cj", "src/internal/transport/deadline_test.cj", "docs/evidence/M1-003/README.md"],
+      "note": "Linux deadline tests bind expiry and remaining-budget behavior to monotonic time."
+    },
+    {
+      "id": "TR-CTX-003",
+      "source": "PRD 10.2",
+      "requirement": "Child operations inherit or shorten, never extend, the parent deadline.",
+      "status": "PASS",
+      "evidence": ["src/internal/transport/deadline.cj", "src/internal/transport/deadline_test.cj", "docs/evidence/M1-003/README.md"],
+      "note": "Derived-deadline cases prove the parent absolute budget cannot be extended."
+    },
+    {
+      "id": "TR-CTX-004",
+      "source": "PRD 10.2",
+      "requirement": "Pre-cancelled operations create no network side effect.",
+      "status": "PASS",
+      "evidence": ["src/internal/transport/operation_context.cj", "src/internal/transport/operation_context_test.cj", "docs/evidence/M1-005/README.md"],
+      "note": "Pre-cancellation is checked before transport work begins."
+    },
+    {
+      "id": "TR-CTX-005",
+      "source": "PRD 10.2",
+      "requirement": "Cancellation registrations, timers, and waiters detach at terminal state.",
+      "status": "PASS",
+      "evidence": ["src/internal/transport/completion.cj", "src/internal/transport/completion_test.cj", "docs/evidence/M1-008/README.md"],
+      "note": "Exactly-once completion tests include terminal cleanup and late-callback suppression."
+    },
+    {
+      "id": "TR-STREAM-001",
+      "source": "PRD 10.3",
+      "requirement": "Duplex transport exposes typed read, write, shutdown, close, and abort operations.",
+      "status": "PASS",
+      "evidence": ["src/internal/transport/transport.cj", "src/internal/transport/transport_test.cj", "docs/evidence/M1-010/README.md"],
+      "note": "The public transport contract and Linux implementations preserve typed terminal results."
+    },
+    {
+      "id": "TR-STREAM-002",
+      "source": "PRD 10.3",
+      "requirement": "One read and one write may overlap; same-direction overlap is rejected.",
+      "status": "PASS",
+      "evidence": ["src/internal/transport/lifecycle.cj", "src/internal/transport/m1_024_transport_race_test.cj", "docs/evidence/M1-024/README.md"],
+      "note": "Deterministic race coverage exercises allowed duplex and rejected same-direction overlap."
+    },
+    {
+      "id": "TR-STREAM-003",
+      "source": "PRD 10.3",
+      "requirement": "Partial writes are legal and writeAll completes the requested span.",
+      "status": "PASS",
+      "evidence": ["src/internal/transport/transport.cj", "src/internal/transport/transport_test.cj", "docs/evidence/M1-018/README.md"],
+      "note": "Partial-write and bounded staging behavior are covered without upstream span I/O."
+    },
+    {
+      "id": "TR-STREAM-004",
+      "source": "PRD 10.3",
+      "requirement": "Empty reads and writes return zero immediately; only EndOfStream represents EOF.",
+      "status": "PASS",
+      "evidence": ["src/internal/transport/memory_transport.cj", "src/internal/transport/memory_transport_test.cj", "docs/evidence/M1-010/README.md"],
+      "note": "Empty-buffer and EOF cases are distinct in the transport tests."
+    },
+    {
+      "id": "TR-STREAM-005",
+      "source": "PRD 10.3",
+      "requirement": "Local close, cancellation, and deadline are not reported as peer EOF.",
+      "status": "PASS",
+      "evidence": ["src/internal/transport/network_error.cj", "src/internal/transport/network_error_test.cj", "docs/evidence/M1-022/README.md"],
+      "note": "Stable categories retain local terminal causes independently of peer EOF."
+    },
+    {
+      "id": "TR-STREAM-006",
+      "source": "PRD 10.3",
+      "requirement": "Directional shutdown is capability-reported and unsupported fallback is stable.",
+      "status": "PASS",
+      "evidence": ["src/internal/transport/transport.cj", "src/internal/transport/transport_test.cj", "docs/evidence/M1-019/README.md"],
+      "note": "Linux reports unsupported half-close without private handles or dependency on UP-003."
+    },
+    {
+      "id": "TR-STREAM-007",
+      "source": "PRD 10.3",
+      "requirement": "Close is graceful, abort is immediate, and both terminal paths are idempotent.",
+      "status": "PASS",
+      "evidence": ["src/internal/transport/lifecycle.cj", "src/internal/transport/m1_024_transport_race_test.cj", "docs/evidence/M1-020/README.md"],
+      "note": "Linux close/abort race evidence preserves the first terminal result and wakes waiters."
+    },
+    {
+      "id": "TR-LISTEN-001",
+      "source": "PRD 10.4",
+      "requirement": "Listener accept supports cancellation and deadline; close wakes accept; backlog is bounded.",
+      "status": "PASS",
+      "evidence": ["src/internal/transport/memory_transport_listener.cj", "src/internal/transport/memory_transport_listener_test.cj", "docs/evidence/M1-012/README.md"],
+      "note": "The listener contract and deterministic listener tests cover all P0 terminal paths."
+    },
+    {
+      "id": "DNS-001",
+      "source": "PRD 12.1",
+      "requirement": "Resolver accepts host, service, options, and OperationContext.",
+      "status": "PASS",
+      "evidence": ["src/internal/resolver/system_resolver.cj", "src/internal/resolver/resolver_test.cj", "docs/evidence/M2-001/README.md"],
+      "note": "The resolver interface and Linux backend use the canonical operation context."
+    },
+    {
+      "id": "DNS-002",
+      "source": "PRD 12.1",
+      "requirement": "Resolution returns candidates, family, normalized host, source, optional expiry, and diagnostics.",
+      "status": "PASS",
+      "evidence": ["src/internal/resolver/system_resolver.cj", "src/internal/resolver/resolver_test.cj", "docs/evidence/M2-001/README.md"],
+      "note": "Result metadata is structured and no TTL is fabricated when the system omits it."
+    },
+    {
+      "id": "DNS-003",
+      "source": "PRD 12.1",
+      "requirement": "Resolver failures use the specified stable categories.",
+      "status": "PASS",
+      "evidence": ["src/internal/resolver/system_resolver.cj", "src/internal/resolver/resolver_test.cj", "docs/evidence/M2-005/README.md"],
+      "note": "Linux native and synthetic failures map to structured resolver categories."
+    },
+    {
+      "id": "DNS-004",
+      "source": "PRD 12.1",
+      "requirement": "Resolution cannot consume scheduler carriers without bound.",
+      "status": "PASS",
+      "evidence": ["src/internal/resolver/bounded_backend.cj", "src/internal/resolver/bounded_backend_test.cj", "docs/evidence/M2-003/README.md"],
+      "note": "Wirestack uses an explicitly bounded resolver pool; runtime-native async DNS is optional."
+    },
+    {
+      "id": "CONN-001",
+      "source": "PRD 12.2",
+      "requirement": "Connector implements RFC 8305-style interleaving and staggered attempts.",
+      "status": "PASS",
+      "evidence": ["src/internal/connector/happy_eyeballs.cj", "src/internal/connector/attempt_plan_test.cj", "docs/evidence/M2-010/README.md"],
+      "note": "Attempt-plan tests cover address-family interleaving and launch delay."
+    },
+    {
+      "id": "CONN-002",
+      "source": "PRD 12.2",
+      "requirement": "First successful candidate wins and every loser closes.",
+      "status": "PASS",
+      "evidence": ["src/internal/connector/happy_eyeballs.cj", "src/internal/connector/happy_eyeballs_test.cj", "docs/evidence/M2-010/README.md"],
+      "note": "Winner selection and deterministic loser cleanup are directly exercised."
+    },
+    {
+      "id": "CONN-003",
+      "source": "PRD 12.2",
+      "requirement": "DNS and all connection attempts share one total deadline.",
+      "status": "PASS",
+      "evidence": ["src/internal/connector/happy_eyeballs.cj", "src/internal/connector/happy_eyeballs_test.cj", "docs/evidence/M2-014/README.md"],
+      "note": "Connector orchestration forwards one absolute operation budget."
+    },
+    {
+      "id": "CONN-004",
+      "source": "PRD 12.2",
+      "requirement": "Connector diagnostics retain candidate timing, failures, winner, and cancellation cause.",
+      "status": "PASS",
+      "evidence": ["src/internal/connector/route.cj", "src/internal/connector/route_test.cj", "docs/evidence/M2-014/README.md"],
+      "note": "Route and connector evidence retain stable per-attempt diagnostics."
+    },
+    {
+      "id": "CONN-005",
+      "source": "PRD 12.2",
+      "requirement": "Cancellation leaves no background connection and rejects late success.",
+      "status": "PASS",
+      "evidence": ["src/internal/connector/happy_eyeballs.cj", "src/internal/connector/happy_eyeballs_test.cj", "docs/evidence/M2-015/README.md"],
+      "note": "Native Linux network emulation verifies cleanup and cancellation races."
+    },
+    {
+      "id": "TLS-PROV-001",
+      "source": "PRD 13.1",
+      "requirement": "TLS providers are instances rather than mutable global singletons.",
+      "status": "PASS",
+      "evidence": ["src/internal/tls_engine/context.cj", "src/internal/tls_engine/context_test.cj", "docs/evidence/M3-028/README.md"],
+      "note": "Provider selection is carried by explicit context instances."
+    },
+    {
+      "id": "TLS-PROV-002",
+      "source": "PRD 13.1",
+      "requirement": "Public APIs expose no native provider type.",
+      "status": "PASS",
+      "evidence": ["src/http/tls.cj", "src/internal/tls_engine/provider_test.cj", "docs/evidence/M3-028/README.md"],
+      "note": "Public TLS and HTTP declarations remain provider-neutral."
+    },
+    {
+      "id": "TLS-PROV-003",
+      "source": "PRD 13.1",
+      "requirement": "The official provider is build-time selected with no runtime fallback.",
+      "status": "PASS",
+      "evidence": ["src/internal/tls_engine/context.cj", "src/internal/tls_engine/provider_test.cj", "docs/evidence/M3-028/README.md"],
+      "note": "Linux qualification uses one build-selected provider and rejects runtime guessing."
+    },
+    {
+      "id": "TLS-PROV-004",
+      "source": "PRD 13.1",
+      "requirement": "The release manifest contains provider and build fingerprint metadata.",
+      "status": "GAP",
+      "blocking_task": "M7-025",
+      "evidence": ["docs/planning/implementation-backlog.md", "docs/evidence/M3-028/README.md"],
+      "note": "Component provider evidence exists, but no artifact-bound Linux SBOM and provider manifest exists yet."
+    },
+    {
+      "id": "PLATFORM-LINUX-HTTPS-CLIENT",
+      "source": "PRD 3 and 13.7",
+      "requirement": "Linux HTTPS client is a P0 platform capability.",
+      "status": "PASS",
+      "evidence": ["src/http/client.cj", "src/http/facade_test.cj", "docs/evidence/M3-028/README.md"],
+      "note": "Native Linux TLS qualification and HTTP facade tests cover the Linux slice only."
+    },
+    {
+      "id": "PLATFORM-LINUX-TLS-HTTP-SERVER",
+      "source": "PRD 3, 13.7, and 15.8",
+      "requirement": "Linux TLS and HTTP server are P0 platform capabilities.",
+      "status": "PASS",
+      "evidence": ["src/http/server.cj", "src/internal/http1/tls_server_test.cj", "docs/evidence/M6-021/README.md"],
+      "note": "Linux HTTP/1.1 and HTTP/2 TLS server acceptance covers ALPN dispatch."
+    },
+    {
+      "id": "HTTP-PROXY-P0",
+      "source": "PRD 15.5",
+      "requirement": "Explicit proxy, CONNECT, auth hook, NO_PROXY, dual stack, and separate DNS are supported.",
+      "status": "PASS",
+      "evidence": ["src/http/proxy.cj", "src/http/proxy_test.cj", "docs/evidence/M5-030/README.md"],
+      "note": "Proxy policy and HTTP/1 CONNECT pipeline behavior are covered on Linux."
+    },
+    {
+      "id": "HTTP1-P0",
+      "source": "PRD 15.6",
+      "requirement": "HTTP/1.1 client/server framing and smuggling defenses satisfy the P0 list.",
+      "status": "PASS",
+      "evidence": ["src/internal/http1/response_reader.cj", "src/internal/http1/smuggling_corpus_test.cj", "docs/evidence/M5-030/README.md"],
+      "note": "Codec, connection, server, corpus, and benchmark evidence closes the Linux HTTP/1 slice."
+    },
+    {
+      "id": "HTTP2-P0",
+      "source": "PRD 15.7",
+      "requirement": "HTTP/2 frames, HPACK, flow control, bounded multiplexing, and cancellation satisfy P0.",
+      "status": "PASS",
+      "evidence": ["src/internal/http2/connection_state.cj", "src/internal/http2/conformance_test.cj", "docs/evidence/M6-025/README.md"],
+      "note": "Linux conformance, bounded scheduling, sibling cancellation, and facade termination evidence pass."
+    }
+  ],
+  "lifecycle_invariants": [
+    {
+      "id": "INV-01", "source": "PRD 17.1", "requirement": "Each native socket is disposed at most once.", "status": "PASS",
+      "evidence": ["src/internal/transport/lifecycle.cj", "src/internal/transport/m1_024_transport_race_test.cj", "docs/evidence/M1-015/README.md"],
+      "note": "Exclusive ownership and terminal races retain one disposal path."
+    },
+    {
+      "id": "INV-02", "source": "PRD 17.2", "requirement": "Each operation completes at most once.", "status": "PASS",
+      "evidence": ["src/internal/transport/completion.cj", "src/internal/transport/completion_test.cj", "docs/evidence/M1-008/README.md"],
+      "note": "Completion arbitration is deterministic and exactly once."
+    },
+    {
+      "id": "INV-03", "source": "PRD 17.3", "requirement": "No user callback runs after operation completion.", "status": "PASS",
+      "evidence": ["src/internal/transport/completion.cj", "src/internal/transport/completion_test.cj", "docs/evidence/M1-008/README.md"],
+      "note": "Late cancellation and timer callbacks are suppressed."
+    },
+    {
+      "id": "INV-04", "source": "PRD 17.4", "requirement": "After TLS wrapping, callers cannot continue using the underlying transport.", "status": "PASS",
+      "evidence": ["src/internal/tls_engine/connection.cj", "src/internal/tls_engine/connection_test.cj", "docs/evidence/M3-028/README.md"],
+      "note": "TLS connection ownership consumes the underlying transport."
+    },
+    {
+      "id": "INV-05", "source": "PRD 17.5", "requirement": "A transport permits at most one read and one write concurrently.", "status": "PASS",
+      "evidence": ["src/internal/transport/lifecycle.cj", "src/internal/transport/m1_024_transport_race_test.cj", "docs/evidence/M1-024/README.md"],
+      "note": "Same-direction exclusion and cross-direction concurrency are race-tested."
+    },
+    {
+      "id": "INV-06", "source": "PRD 17.6", "requirement": "A connection is not pooled before the response body completes.", "status": "PASS",
+      "evidence": ["src/internal/http1/connection_pool.cj", "src/internal/http1/connection_pool_test.cj", "docs/evidence/M5-030/README.md"],
+      "note": "Body lifecycle controls HTTP/1 connection reuse."
+    },
+    {
+      "id": "INV-07", "source": "PRD 17.7", "requirement": "Cancelling one HTTP/2 stream does not affect siblings.", "status": "PASS",
+      "evidence": ["src/internal/http2/stream_reset.cj", "src/internal/http2/stream_reset_test.cj", "docs/evidence/M6-024/README.md"],
+      "note": "Sibling progress and fairness remain intact after stream reset."
+    },
+    {
+      "id": "INV-08", "source": "PRD 17.8", "requirement": "Registrations and timers detach in terminal state.", "status": "PASS",
+      "evidence": ["src/internal/transport/completion.cj", "src/internal/transport/completion_test.cj", "docs/evidence/M1-008/README.md"],
+      "note": "Terminal cleanup is part of exactly-once completion."
+    },
+    {
+      "id": "INV-09", "source": "PRD 17.9", "requirement": "All Happy Eyeballs losing candidates close.", "status": "PASS",
+      "evidence": ["src/internal/connector/happy_eyeballs.cj", "src/internal/connector/happy_eyeballs_test.cj", "docs/evidence/M2-015/README.md"],
+      "note": "Native network-emulation evidence includes loser cleanup."
+    },
+    {
+      "id": "INV-10", "source": "PRD 17.10", "requirement": "Provider callbacks do not invoke user code while holding an internal global lock.", "status": "PASS",
+      "evidence": ["src/internal/tls_engine/engine.cj", "src/internal/tls_engine/engine_pump_test.cj", "docs/evidence/M3-028/README.md"],
+      "note": "Provider pumping and external-signer callback tests preserve the lock boundary."
+    },
+    {
+      "id": "INV-11", "source": "PRD 17.11", "requirement": "User exceptions never cross the C ABI.", "status": "PASS",
+      "evidence": ["src/internal/tls_engine/engine.cj", "src/internal/tls_engine/engine_pump_test.cj", "docs/evidence/M3-028/README.md"],
+      "note": "Callback failures are captured and translated before returning through the provider boundary."
+    },
+    {
+      "id": "INV-12", "source": "PRD 17.12", "requirement": "Finalizers perform no socket or TLS cleanup.", "status": "PASS",
+      "evidence": ["src/internal/transport/lifecycle.cj", "src/internal/tls_engine/connection.cj", "docs/evidence/M1-015/README.md"],
+      "note": "Cleanup is explicit and ownership-driven rather than finalizer-driven."
+    },
+    {
+      "id": "INV-13", "source": "PRD 17.13", "requirement": "Operation context is immutable after construction.", "status": "PASS",
+      "evidence": ["src/internal/transport/operation_context.cj", "src/internal/transport/operation_context_test.cj", "docs/evidence/M1-005/README.md"],
+      "note": "Context fields and derived contexts preserve immutability."
+    },
+    {
+      "id": "INV-14", "source": "PRD 17.14", "requirement": "Queues, caches, session stores, and windows are bounded.", "status": "PASS",
+      "evidence": ["src/internal/http2/write_scheduler.cj", "src/internal/http2/write_scheduler_test.cj", "docs/evidence/M6-019/README.md"],
+      "note": "Component implementations and tests enforce explicit bounds; final artifact soak remains REL-19."
+    },
+    {
+      "id": "INV-15", "source": "PRD 17.15", "requirement": "Close and abort are idempotent.", "status": "PASS",
+      "evidence": ["src/internal/transport/lifecycle.cj", "src/internal/transport/m1_024_transport_race_test.cj", "docs/evidence/M1-020/README.md"],
+      "note": "Repeated and mixed terminal calls preserve a single terminal outcome."
+    }
+  ],
+  "release_acceptance": [
+    {
+      "id": "REL-01", "source": "PRD 26.1", "requirement": "The Linux slice of the six-platform HTTPS client criterion passes natively.", "status": "PASS",
+      "evidence": ["src/http/client.cj", "src/http/facade_test.cj", "docs/evidence/M3-028/README.md"],
+      "note": "Only Linux x86_64 glibc is evaluated here; other platform cells are outside this profile."
+    },
+    {
+      "id": "REL-02", "source": "PRD 26.2", "requirement": "The Linux TLS/HTTP server slice passes natively.", "status": "PASS",
+      "evidence": ["src/http/server.cj", "src/internal/http1/tls_server_test.cj", "docs/evidence/M6-021/README.md"],
+      "note": "The Linux server slice passes; Windows, macOS, and HarmonyOS are outside this audit."
+    },
+    {
+      "id": "REL-03", "source": "PRD 26.3", "requirement": "Android and iOS foreground listener tests pass.", "status": "NOT_APPLICABLE_TO_LINUX_PROFILE",
+      "evidence": ["docs/product/prd.md", "docs/architecture/adr/0002-linux-first-delivery-profile.md"],
+      "note": "This criterion contains only mobile platform execution and cannot be reported as Linux PASS."
+    },
+    {
+      "id": "REL-04", "source": "PRD 26.4", "requirement": "The default Linux release artifact has no system OpenSSL runtime dependency.", "status": "GAP", "blocking_task": "M7-021",
+      "evidence": ["docs/evidence/M3-028/README.md", "docs/planning/implementation-backlog.md"],
+      "note": "Development binaries pass provider checks, but the installed release artifact and dependency scan do not exist yet."
+    },
+    {
+      "id": "REL-05", "source": "PRD 26.5", "requirement": "TLS 1.2 and TLS 1.3 interoperability pass.", "status": "PASS",
+      "evidence": ["src/internal/tls_engine/connection.cj", "src/internal/tls_engine/connection_test.cj", "docs/evidence/M3-028/README.md"],
+      "note": "Native Linux TLS qualification covers both required protocol versions."
+    },
+    {
+      "id": "REL-06", "source": "PRD 26.6", "requirement": "HTTP/1.1 and HTTP/2 conformance pass.", "status": "PASS",
+      "evidence": ["src/internal/http1/smuggling_corpus_test.cj", "src/internal/http2/conformance_test.cj", "docs/evidence/M6-019/README.md"],
+      "note": "Linux codec, negative corpus, and HTTP/2 conformance evidence pass."
+    },
+    {
+      "id": "REL-07", "source": "PRD 26.7", "requirement": "Happy Eyeballs blackhole behavior passes.", "status": "PASS",
+      "evidence": ["src/internal/connector/happy_eyeballs.cj", "src/internal/connector/happy_eyeballs_test.cj", "docs/evidence/M2-015/README.md"],
+      "note": "Native Linux emulation covers blackhole, stagger, cancellation, and cleanup."
+    },
+    {
+      "id": "REL-08", "source": "PRD 26.8", "requirement": "DNS, connect, TLS, and HTTP body share cancellation semantics.", "status": "PASS",
+      "evidence": ["src/http/cancellation.cj", "src/http/facade_test.cj", "docs/evidence/M6-022/README.md"],
+      "note": "Public request, connection, and stream cancellation propagate through the stack."
+    },
+    {
+      "id": "REL-09", "source": "PRD 26.9", "requirement": "All deadlines are monotonic absolute deadlines.", "status": "PASS",
+      "evidence": ["src/internal/transport/deadline.cj", "src/internal/transport/deadline_test.cj", "docs/evidence/M1-003/README.md"],
+      "note": "The canonical deadline type and cross-layer evidence preserve one absolute budget."
+    },
+    {
+      "id": "REL-10", "source": "PRD 26.10", "requirement": "Peer EOF, local close, RST, and TLS truncation remain distinct.", "status": "PASS",
+      "evidence": ["src/internal/transport/network_error.cj", "src/internal/tls_engine/connection_test.cj", "docs/evidence/M0-009/README.md"],
+      "note": "Linux terminal evidence and TLS close-notify handling retain distinct results."
+    },
+    {
+      "id": "REL-11", "source": "PRD 26.11", "requirement": "The one-reader and one-writer concurrency contract passes.", "status": "PASS",
+      "evidence": ["src/internal/transport/lifecycle.cj", "src/internal/transport/m1_024_transport_race_test.cj", "docs/evidence/M1-024/README.md"],
+      "note": "Deterministic Linux race qualification passes."
+    },
+    {
+      "id": "REL-12", "source": "PRD 26.12", "requirement": "No connection owns a dedicated operating-system thread.", "status": "PASS",
+      "evidence": ["src/internal/resolver/bounded_backend.cj", "src/internal/http2/reader_loop.cj", "docs/evidence/M0-011/README.md"],
+      "note": "Connection work uses Cangjie tasks and bounded shared infrastructure, not per-connection OS threads."
+    },
+    {
+      "id": "REL-13", "source": "PRD 26.13", "requirement": "The versioned Linux release benchmark gate passes.", "status": "GAP", "blocking_task": "M7-024",
+      "evidence": ["docs/evidence/M1-025/README.md", "docs/evidence/M2-016/README.md", "docs/evidence/M3-028/README.md", "docs/evidence/M5-030/README.md", "docs/evidence/M6-024/README.md"],
+      "note": "Component thresholds pass, but the consolidated versioned release gate has not been frozen or run."
+    },
+    {
+      "id": "REL-14", "source": "PRD 26.14", "requirement": "The release fuzz threshold has no unrepaired crash.", "status": "GAP", "blocking_task": "M7-023",
+      "evidence": ["src/http/deterministic_fuzz_test.cj", "src/internal/http2/deterministic_fuzz_test.cj", "docs/evidence/M6-019/README.md"],
+      "note": "Deterministic parser mutation tests pass, but continuous target thresholds and crash replay remain."
+    },
+    {
+      "id": "REL-15", "source": "PRD 26.15", "requirement": "Independent security review has no open High or Critical finding.", "status": "GAP", "blocking_task": "M7-029",
+      "evidence": ["docs/product/prd.md", "docs/planning/implementation-backlog.md"],
+      "note": "No independent Linux stable-release security review has been completed."
+    },
+    {
+      "id": "REL-16", "source": "PRD 26.16", "requirement": "The artifact-bound SBOM and provider manifest are complete.", "status": "GAP", "blocking_task": "M7-025",
+      "evidence": ["docs/evidence/M3-028/README.md", "docs/planning/implementation-backlog.md"],
+      "note": "Provider qualification exists, but artifact digest, SBOM, manifest, and fingerprint are not yet bound."
+    },
+    {
+      "id": "REL-17", "source": "PRD 26.17", "requirement": "Documentation does not require installing OpenSSL.", "status": "PASS",
+      "evidence": ["docs/guides/http1-linux.md", "docs/architecture/linux-tls-provider-build.md", "docs/evidence/M3-028/README.md"],
+      "note": "Maintained Linux documentation uses the build-selected bundled provider path."
+    },
+    {
+      "id": "REL-18", "source": "PRD 26.18", "requirement": "A legacy global TLS provider cannot affect the new stack.", "status": "PASS",
+      "evidence": ["src/internal/tls_engine/context.cj", "src/internal/tls_engine/context_test.cj", "docs/evidence/M3-028/README.md"],
+      "note": "The new stack uses explicit provider contexts and contains no global provider lookup."
+    },
+    {
+      "id": "REL-19", "source": "PRD 26.19", "requirement": "All resource collections remain bounded in the final release artifact.", "status": "GAP", "blocking_task": "M7-022",
+      "evidence": ["src/internal/http2/write_scheduler_test.cj", "docs/evidence/M0-011/README.md", "docs/evidence/M6-023/README.md"],
+      "note": "Component bounds and SSE profiles pass, but the installed artifact has not completed the final 24-hour mixed soak."
+    },
+    {
+      "id": "REL-20", "source": "PRD 26.20", "requirement": "Errors retain stable category, phase, and retryability.", "status": "PASS",
+      "evidence": ["src/internal/transport/network_error.cj", "src/http/error_test.cj", "docs/evidence/M1-022/README.md"],
+      "note": "Transport through HTTP errors retain stable structured coordinates without message matching."
+    },
+    {
+      "id": "REL-21", "source": "PRD 26.21", "requirement": "Wirestack never calls the private CJ_MRT_Sock ABI.", "status": "PASS",
+      "evidence": ["tools/architecture_guard.py", "tools/tests/test_architecture_guard.py", "docs/evidence/M0-024/README.md"],
+      "note": "The existing repeatable architecture guard rejects private socket ABI references; M7-020 broadens final architecture signoff."
+    },
+    {
+      "id": "REL-22", "source": "PRD 26.22", "requirement": "Wirestack release does not depend on std.net or runtime source modification.", "status": "PASS",
+      "evidence": ["docs/architecture/adr/0005-upstream-independent-transport-capabilities.md", "docs/evidence/M0-024/README.md", "docs/planning/implementation-backlog.md"],
+      "note": "runtime/std changes are optional future upstream enhancements only; public SDK capability fallbacks close Linux release behavior."
+    }
+  ],
+  "blockers": [
+    {"requirement_id": "TLS-PROV-004", "task_id": "M7-025"},
+    {"requirement_id": "REL-04", "task_id": "M7-021"},
+    {"requirement_id": "REL-13", "task_id": "M7-024"},
+    {"requirement_id": "REL-14", "task_id": "M7-023"},
+    {"requirement_id": "REL-15", "task_id": "M7-029"},
+    {"requirement_id": "REL-16", "task_id": "M7-025"},
+    {"requirement_id": "REL-19", "task_id": "M7-022"}
+  ],
+  "summary": {
+    "p0_requirements": {"total": 32, "pass": 31, "gap": 1, "not_applicable": 0},
+    "lifecycle_invariants": {"total": 15, "pass": 15, "gap": 0, "not_applicable": 0},
+    "release_acceptance": {"total": 22, "pass": 15, "gap": 6, "not_applicable": 1}
+  },
+  "non_claims": [
+    "This Linux profile audit does not complete global M7 or any non-Linux platform cell.",
+    "No Wirestack build, test, task, or release gate depends on runtime/std source changes; those remain optional future upstream needs.",
+    "Linux musl is not supported by the supplied Cangjie SDK and is neither passed nor failed by this glibc audit."
+  ]
+}

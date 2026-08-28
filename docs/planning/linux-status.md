@@ -14,24 +14,26 @@ Status values have the same fail-closed meaning as the global status file.
 | Architecture and gate harness | COMPLETE | M0-001 through M0-004 and M0-018 evidence |
 | Linux libc scope | COMPLETE | The current release supports native glibc x86_64. ADR-0004 defers musl to P1-011 until the Cangjie SDK supports it. |
 | close/wakeup and absolute Deadline | COMPLETE | M0-006 and M0-008 native Linux results |
-| duplex and EOF classification | BLOCKED | Executed behavior passes; public typed half-close is absent and requires UP-003 |
+| duplex and EOF classification | COMPLETE | Concurrent read/write, close wakeup, peer EOF, local close, RST, cancellation, and TLS truncation pass. `StdNetTransport` reports unsupported directional TCP shutdown through ADR-0005; UP-003 is a future enhancement. |
 | large-buffer/copy profile | COMPLETE | M0-010 measures all five payloads, native process allocations, syscall receive bytes and adapter staging copies, and retains the failed pre-optimization comparison. The M1-027 Wirestack fast path then passes the unchanged five-payload x 11-round O2 GATE-NET-05 thresholds with zero adapter staging copies, so UP-004 is not required for the Linux profile; [Linux evidence](../evidence/M1-027/README.md) |
 | leak/soak | COMPLETE | Linux GATE-NET-06 passes all seven workloads: three 100,000-iteration transport scenarios, 100,000 provider and production TLS cleanups, 100,000 production cancellations, and an 86,400-second mixed soak with PASS resource trends; [Linux evidence](../evidence/M0-011/README.md) |
 | DNS scheduler behavior | COMPLETE | M0-013 records starvation and mandates a bounded resolver pool |
 | TLS provider | COMPLETE | AWS-LC 5.5.0 is selected by ADR-0003 after schema-v2 glibc/musl PASS results, executed external signing and 10,000 cleanup cycles |
-| Transport SPI | IN_PROGRESS | Core types are implemented; listener, lifecycle closure and upstream capability mapping remain |
-| Linux continuous gates | BLOCKED | Depends on the remaining Linux M0 evidence and decisions |
+| Transport SPI | COMPLETE | Core semantics, native adapter behavior, deterministic races, 100,000-iteration cleanup, the digest-pinned 24-hour soak, raw TCP thresholds and cancellation P99 pass without upstream source changes; [M1-025 evidence](../evidence/M1-025/README.md). |
+| Linux M0 through M6 gates | COMPLETE | Native glibc evidence closes the implemented Transport, resolver, connector, TLS, HTTP/1 and HTTP/2 profile. |
+| Linux stable release | IN_PROGRESS | M7-021 qualifies the native installable artifact, M7-025 binds its supply-chain metadata, and M7-026 freezes the public API. Remaining Linux tasks do not wait for another platform or an upstream source change. |
 
 ## Implemented Transport Core
 
 | Task | Status | Evidence |
 |---|---|---|
-| M1-002 `ByteSpan`/`MutableByteSpan` | COMPLETE | Checked zero-copy ranges, slice/advance and tests |
-| M1-003 monotonic `Deadline` | COMPLETE | `MonoTime`, injected clock, remaining/expiry/child tests |
+| M1-001 Transport package skeleton | COMPLETE | Physical Core and StdNet packages, co-located package tests, the adapter benchmark harness, and architecture-enforced internal boundaries build under the accepted CJPM layout; [evidence](../evidence/M1-001/README.md). |
+| M1-002 `ByteSpan`/`MutableByteSpan` | COMPLETE | Checked constructor, slice and advance ranges for both span types; zero-copy identity, mutable write-through and empty-end behavior pass; [evidence](../evidence/M1-002/README.md). |
+| M1-003 monotonic `Deadline` | COMPLETE | `MonoTime`, injected-clock remaining and expiry behavior, and child-budget non-extension including zero-duration and expired-parent cases pass; [evidence](../evidence/M1-003/README.md). |
 | M1-004 cancellation primitive | COMPLETE | Registration, idempotent unregister, already-cancelled fast-fail, 100-round cancel/register/unregister races, callback failure isolation and reentrant lock-free callback execution pass; [Linux evidence](../evidence/M1-004/README.md) |
-| M1-005 `OperationContext` | COMPLETE | Immutable Deadline/cancellation/trace/event-sink propagation tests |
-| M1-006 trace context | COMPLETE | Bounded read-only identifiers and default-off, exception-isolated, secret-free structured event sink |
-| M1-007 structured network error | COMPLETE | category/phase/code/retryability/native/endpoint/cause model and tests |
+| M1-005 `OperationContext` | COMPLETE | Immutable Deadline, cancellation, trace and event-sink inputs survive every derivation helper; child budgets cannot extend their parent and a pre-cancelled write produces no peer data; [evidence](../evidence/M1-005/README.md). |
+| M1-006 trace context | COMPLETE | Bounded read-only identifiers propagate unchanged; the structured sink is off by default, excludes sensitive protocol payload fields, and isolates user exceptions; [evidence](../evidence/M1-006/README.md). |
+| M1-007 structured network error | COMPLETE | Stable category, phase, code and retryability retain optional native code, both endpoints and cause; received HTTP 4xx/5xx statuses remain responses; [evidence](../evidence/M1-007/README.md). |
 | M1-008 exactly-once completion | COMPLETE | Bounded cleanup registry, one terminal winner, idempotent unregister, late-registration cleanup, failure isolation and 100-round registration/unregister races; [Linux evidence](../evidence/M1-008/README.md) |
 | M1-009 Transport lifecycle | COMPLETE | Controlled creation/open/half-close/close/abort/failure transitions, stable invalid-state errors, bounded terminal cleanup and 100-round terminal races; [Linux evidence](../evidence/M1-009/README.md) |
 | M1-010 `DuplexTransport` contract | COMPLETE | The contract freezes read/write/shutdown/close/abort semantics, empty buffers never fabricate EOF, same-direction concurrency fails, and `MemoryTransport` uses the shared lifecycle; adapter-local native wakeup fields are outside this core-contract task; [Linux evidence](../evidence/M1-010/README.md) |
@@ -39,14 +41,17 @@ Status values have the same fail-closed meaning as the global status file.
 | M1-012 `TransportListener` | COMPLETE | Contract plus bounded `StdNetTransportListener`; Deadline/cancel/close wakeup integration tests; [Linux evidence](../evidence/M1-012/README.md) |
 | M1-013 `MemoryTransport` | COMPLETE | Bounded duplex, backpressure, half-close, EOF and cancellation plus a bounded listener and manually advanced FIFO scheduler; fault scripting remains M1-014; [Linux evidence](../evidence/M1-013/README.md) |
 | M1-014 scripted transport | COMPLETE | Bounded FIFO scripts cover manual delay, short read/write, EOF, reset, cancellation races and injected error phases; [Linux evidence](../evidence/M1-014/README.md) |
-| M1-015/016 `StdNetTransport` ownership/connect | COMPLETE | DNS-free `IPSocketAddress` construction, exclusive adapter ownership, absolute connect budget and actual endpoints |
+| M1-015 `StdNetTransport` ownership/construction | COMPLETE | Public construction accepts only resolved `SocketEndpoint` values; the adapter exclusively owns its private `TcpSocket`, exposes no socket alias or private handle, and fast-fails pre-cancelled construction; [evidence](../evidence/M1-015/README.md). |
+| M1-016 IP connect attempt | COMPLETE | DNS-free `IPSocketAddress` construction, absolute connect budget and actual endpoints; independent evidence closure remains separate. |
 | M1-017 `StdNetTransport.readSome` | COMPLETE | Partial reads, peer EOF, local close/cancel distinction, Deadline and one-reader guard tested on Linux loopback |
 | M1-018 bounded write staging | COMPLETE | One connection-retained exact-size array serves bounded partial writes, the 16 KiB default carries a typical TLS record, and copied bytes remain measurable; [Linux evidence](../evidence/M1-018/README.md) |
-| M1-019 typed half-close | BLOCKED | Public pinned `TcpSocket` has no shutdown API; adapter reports `Unsupported` and requires UP-003 |
-| M1-020 idempotent close/abort | COMPLETE | Native close is claimed once; close/cancel wake blocked read and listener accept without returning false EOF |
+| M1-019 typed half-close capability | COMPLETE | Native Linux loopback qualification covers Read and Write shutdown, stable `Unsupported` fields, retained endpoints, and continued bidirectional I/O; [evidence](../evidence/M1-019/README.md). |
+| M1-020 idempotent close/abort | COMPLETE | Native close is claimed once; close-first retains peer EOF, abort-first produces a non-EOF peer exception through public `SO_LINGER`, and close/cancel/abort wake blocked work without false EOF; [evidence](../evidence/M1-020/README.md). |
 | M1-021 `StdNetTransportListener` | COMPLETE | IP-only bind, bounded backlog, endpoints and accept Deadline/cancel/close semantics |
-| M1-022 stable std.net errors | BLOCKED | Timeout/cancel/closed are stable; public `SocketException` exposes no native code, so errno classes require an upstream API instead of message matching |
-| M1-023 transport diagnostics | IN_PROGRESS | Backend/endpoints/capabilities, staging copied-byte counters and event sink exist; runtime backend discovery remains |
+| M1-022 stable std.net errors | COMPLETE | Native Linux qualification proves cancellation, Deadline, local close, listener errors, and unknown connect failures retain stable coordinates and endpoints without native-code or message assumptions; [evidence](../evidence/M1-022/README.md). |
+| M1-023 transport diagnostics | COMPLETE | Native Linux tests prove backend, `cjnative` runtime family, mirrored typed endpoints, capability flags, and post-close stability through the provider-neutral `TransportInfo` contract; exact OS event-backend discovery remains optional; [evidence](../evidence/M1-023/README.md). |
+| M1-024 deterministic Transport races | COMPLETE | Admitted blocked read/write operations terminate under close/abort, both success/cancel orders complete once without leaking data, and half-close fallback, repeated terminal calls and registration cleanup pass without runtime or `std.net` source changes; [Linux evidence](../evidence/M1-024/README.md). |
+| M1-025 Transport leak/soak/benchmark | COMPLETE | Five payloads pass the 95% throughput and 1.10 P95 limits, blocked read/write cancellation P99 is 9.098/4.118 ms, and retained 100,000-iteration cleanup plus the digest-verified 24-hour soak cover all resource classes; [Linux evidence](../evidence/M1-025/README.md). |
 | M1-027 background context cost | COMPLETE | The internal background fast path lowers empty `readSome` P50 from 297.042 ns to 92.110 ns; the formal 5-payload x 11-round GATE-NET-05 comparison passes every threshold with zero staging copies; [Linux evidence](../evidence/M1-027/README.md) |
 
 ## Implemented Resolver and Connector Core
@@ -62,7 +67,8 @@ Status values have the same fail-closed meaning as the global status file.
 | M2-011 RFC 8305 attempt plan | COMPLETE | Stable family interleaving, intra-family order, deduplication and bounded candidate tests |
 | M2-012/013 Happy Eyeballs scheduler | COMPLETE | Shared parent Deadline, linked cancellation, atomic first winner, loser abort, joined candidates and per-attempt diagnostics |
 | M2-014 scripted connector tests | COMPLETE | IPv6 first success and blackhole fallback, simultaneous success, all-fail, pre-cancel, success+cancel and injected Deadline boundary all pass; candidates are joined and rejected winners are aborted; [Linux evidence](../evidence/M2-014/README.md) |
-| M2-015/016 native network gates/benchmark | READY | Native glibc network emulation and the DNS-to-connected benchmark remain; musl is outside the current profile under ADR-0004. |
+| M2-015 native network gate | COMPLETE | Native glibc user/network namespaces cover IPv6 available and 64 blackhole fallbacks, 20/100 ms RTT, 128 connections under 1% loss, flat socket/thread/FD trends, and a 3 ms elapsed delta between 2/8 candidates sharing one Deadline; [evidence](../evidence/M2-015/README.md) |
+| M2-016 DNS-to-connected benchmark | COMPLETE | Six native profiles retain 528 measured DNS/attempt/winner/total/count/cancellation samples from an isolated `-O2` build; cancellation P99 is 3.908 ms and every profile passes; [evidence](../evidence/M2-016/README.md). |
 
 ## Implemented TLS Provider Foundation
 
@@ -132,15 +138,35 @@ Status values have the same fail-closed meaning as the global status file.
 | M6-021 HTTP/2 server facade/ALPN/E2E | COMPLETE | The same public `HttpServer` negotiates `h2,http/1.1` with native AWS-LC and dispatches only from retained ALPN evidence; real TLS loopback tests cover H2 request/response bodies and trailers, H1 fallback, bounded concurrent streams, structured stream reset, no-shared-ALPN failure, and graceful GOAWAY shutdown; [Linux acceptance evidence](../evidence/M6-021/README.md) |
 | M6-022 public cancellation handles | COMPLETE | Typed public request, connection and H2 stream handles share the canonical operation context; real H1/H2 loopback tests prove idempotence, H1 wakeup, H2 stream isolation, connection fan-out and terminal cleanup; [Linux acceptance evidence](../evidence/M6-022/README.md) |
 | M6-023 SSE/unbounded streaming profile | COMPLETE | Parallel real H1/H2 `text/event-stream` profiles each ran for at least one hour and consumed more than 90 million numbered events; heavy-GC heap, RSS, FD, socket and thread trends passed, public cancellation stayed below 50 ms, and the H2 sibling survived stream cancellation; [Linux acceptance evidence](../evidence/M6-023/README.md) |
+| M6-024 HTTP/2 sibling fairness | COMPLETE | A zero-window-only connection-credit flush and bounded least-recently-served send reservations let 1/10/100 siblings complete while a connection-window-exhausting response stays open; 100 independent real TLS h2 runs completed 10,000 siblings with no timeout or connection abort; [Linux acceptance evidence](../evidence/M6-024/README.md) |
+| M6-025 HTTP/2 facade termination | COMPLETE | Exclusive per-call TLS scratch removes concurrent read/write aliasing; the original three-case sequence passes 100/100 same-process rounds, the repository check passes 538/538 non-Performance cases, and M3-028 performance remains qualified; [Linux acceptance evidence](../evidence/M6-025/README.md) |
+| M6-026 HTTP/2 concurrent response bodies | COMPLETE | Initial client HEADERS are published in increasing stream-ID order even when pool admission and execution race; unpublished cancellation stays local. A real-TLS public gate passes 1,000 two-stream batches, 2,000 exact bodies, zero failure/timeout/residual handler, and the full repository check; [evidence](../evidence/M6-026/README.md). |
+| M3-029 public TLS facade | COMPLETE | Provider-neutral client/server contexts, existing-transport handshake, connection/listener ownership and negotiated metadata pass public-package tests, clean-consumer Linux TLS acceptance and the API/architecture gates; [evidence](../evidence/M3-029/README.md). |
+
+## Linux M7 stable-release closure
+
+M7-018 through M7-031 are Linux x86_64 glibc tasks. They do not close or
+replace the six-platform M7-001 through M7-017 tasks.
+
+| Task | Status | Current evidence or next requirement |
+|---|---|---|
+| M7-018 Linux M7 task graph | COMPLETE | The graph covers P0 traceability, architecture, artifact build and installation, final soak, fuzz, performance, SBOM, API freeze, documentation, independent security review, signing and the candidate report; [evidence](../evidence/M7-018/README.md) |
+| M7-019 Linux requirement audit | COMPLETE | The machine-checked audit covers 32 P0 requirements, 15 lifecycle invariants and 22 release criteria. Seven requirement gaps map to M7-021 through M7-025 and M7-029; Android/iOS listener acceptance is `NOT_APPLICABLE_TO_LINUX_PROFILE`; [evidence](../evidence/M7-019/README.md). |
+| M7-020 Linux architecture audit | COMPLETE | The repeatable guard finds zero violations across 188 Cangjie files and 11 build/native files. It covers dependency direction, public low-level types, private ABI, old bridges, global providers and system OpenSSL loaders; [evidence](../evidence/M7-020/README.md). |
+| M7-021 Linux artifact and installation | COMPLETE | Two normalized builds produce the same SHA-256. A clean installed consumer runs HTTPS client/server and runtime-info smoke, and its ELF has no system OpenSSL dependency; [evidence](../evidence/M7-021/README.md). |
+| M7-022 Linux final 24h+ soak | IN_PROGRESS | M6-026 fixed the concurrent HTTP/2 response-body failure, M7-021 requalified the installed artifact, and the unchanged workload passes its post-fix 10-second installed-artifact preflight with all semantic and sampled resource checks. The explicit uninterrupted 86,400-second run remains outstanding; [evidence](../evidence/M7-022/README.md). |
+| M7-023 Linux release fuzz gate | COMPLETE | The post-M6-026 native `-O2` requalification consumes digest-pinned corpora for all ten PRD targets and passes 6,465 deterministic iterations with zero current-run crash artifact; its report source fingerprint matches the current tree; [evidence](../evidence/M7-023/README.md). |
+| M7-024 Linux performance gate | COMPLETE | The post-M6-026 H2 matrix was rerun with the original controls and bound to the current production-source fingerprint. The aggregate gate verifies seven raw reports and passes 254/254 checks across raw TCP, DNS, TLS, H1, H2, cancellation, SSE and memory; [evidence](../evidence/M7-024/README.md). |
+| M7-025 Linux SBOM and fingerprint | COMPLETE | The SPDX 2.3 SBOM, provider manifest and deterministic fingerprint bind the qualified artifact to pinned native inputs, target, toolchain, trust, capabilities and features; runtime/std source changes are not dependencies; [evidence](../evidence/M7-025/README.md). |
+| M7-026 Linux API freeze | COMPLETE | The versioned baseline freezes package `wirestack` major 0, 82 declarations, 50 resolved alias targets and the request/connection/stream cancellation handles. The compatibility gate rejects legacy and low-level public surfaces; [evidence](../evidence/M7-026/README.md). |
+| M7-027 Linux migration and examples | COMPLETE | The maintained guide covers every PRD migration topic. A native temporary consumer builds and runs the checked-in public HTTPS, caller-owned transport TLS, CONNECT configuration, H1/H2 server, SSE, custom CA, mTLS and scoped-cancellation examples; [evidence](../evidence/M7-027/README.md). |
+| M7-028 Linux security review package | BLOCKED | Waits for M7-019 through M7-025. |
+| M7-029 Linux independent security review | BLOCKED | Waits for M7-028 and an independent reviewer. |
+| M7-030 Linux signing and update flow | BLOCKED | Waits for M7-025 and M7-029. |
+| M7-031 Linux release candidate | BLOCKED | Waits for M7-019 through M7-030. |
 
 ## Next critical path
 
-1. Complete shared Transport lifecycle/exactly-once primitives and the remaining
-   deterministic race tests.
-2. Submit the minimal `std.net` upstream interface RFC for typed half-close and
-   stable native error evidence.
-3. Complete M2-015 native glibc network-emulation tests and M2-016 metrics.
-4. Complete M3-028 TLS interoperability, fuzz, dependency and benchmark gates
-   under ADR-0003 and ADR-0004.
-5. Complete Linux stress/soak, stdx comparison when an eligible baseline SDK
-   exists, packaging and installation verification.
+1. Resume M7-022's explicit 24-hour mixed release soak with the requalified
+   M7-021 artifact and unchanged workload.
+2. After M7-022, prepare M7-028's independent security-review package.

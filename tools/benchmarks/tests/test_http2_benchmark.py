@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -58,6 +59,25 @@ class Http2BenchmarkTest(unittest.TestCase):
     def test_descendant_totals_include_recursive_children(self) -> None:
         snapshot = {10: (1, 100, 2), 11: (10, 200, 3), 12: (11, 300, 4), 99: (1, 999, 9)}
         self.assertEqual(MODULE.descendant_totals(10, snapshot), (600, 9))
+
+    def test_production_source_fingerprint_changes_with_source_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for source_directory in MODULE.PRODUCTION_SOURCE_DIRECTORIES:
+                path = root / source_directory
+                path.mkdir(parents=True)
+                (path / "package.cj").write_text("package sample\n", encoding="utf-8")
+                (path / "ignored_test.cj").write_text("first test\n", encoding="utf-8")
+            first = MODULE.production_source_sha256(root)
+            (root / MODULE.PRODUCTION_SOURCE_DIRECTORIES[1] / "package.cj").write_text(
+                "package changed\n", encoding="utf-8"
+            )
+            second = MODULE.production_source_sha256(root)
+            self.assertNotEqual(first, second)
+            (root / MODULE.PRODUCTION_SOURCE_DIRECTORIES[1] / "ignored_test.cj").write_text(
+                "changed test only\n", encoding="utf-8"
+            )
+            self.assertEqual(second, MODULE.production_source_sha256(root))
 
 
 if __name__ == "__main__":

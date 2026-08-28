@@ -1774,8 +1774,21 @@ private func decodeShutdownResult(step: Int32): TlsEngineShutdownResult {
  * Bounded bridge between a provider memory-BIO engine and a DuplexTransport.
  * It preserves the caller's single absolute OperationContext across all loops.
  */
+private class TlsPumpScratch {
+    let input: Array<Byte>
+    let output: Array<Byte>
+
+    init(size: Int64) {
+        input = Array<Byte>(size, repeat: 0)
+        output = Array<Byte>(size, repeat: 0)
+    }
+}
+
 public class TlsEnginePump {
+    private static let HANDSHAKE_CHUNK_SIZE: Int64 = 2 * 1024
     private let ciphertextChunkSize: Int64
+    private var readScratch = None<TlsPumpScratch>
+    private var writeScratch = None<TlsPumpScratch>
     private let transportReadMutex = Mutex()
     private let transportWriteMutex = Mutex()
 
@@ -1786,13 +1799,53 @@ public class TlsEnginePump {
         this.ciphertextChunkSize = ciphertextChunkSize
     }
 
+    /** Drops data-plane scratch storage while the connection is idle. */
+    internal func releaseIdleBuffers(): Unit {
+        synchronized(transportReadMutex) { readScratch = None<TlsPumpScratch> }
+        synchronized(transportWriteMutex) { writeScratch = None<TlsPumpScratch> }
+    }
+
+    private func takeReadScratch(): TlsPumpScratch {
+        synchronized(transportReadMutex) {
+            match (readScratch) {
+                case Some(value) => readScratch = None<TlsPumpScratch>; value
+                case None => TlsPumpScratch(ciphertextChunkSize)
+            }
+        }
+    }
+
+    private func returnReadScratch(value: TlsPumpScratch): Unit {
+        synchronized(transportReadMutex) {
+            if (readScratch.isNone()) { readScratch = Some(value) }
+        }
+    }
+
+    private func takeWriteScratch(): TlsPumpScratch {
+        synchronized(transportWriteMutex) {
+            match (writeScratch) {
+                case Some(value) => writeScratch = None<TlsPumpScratch>; value
+                case None => TlsPumpScratch(ciphertextChunkSize)
+            }
+        }
+    }
+
+    private func returnWriteScratch(value: TlsPumpScratch): Unit {
+        synchronized(transportWriteMutex) {
+            if (writeScratch.isNone()) { writeScratch = Some(value) }
+        }
+    }
+
     public func driveHandshake(
         engine: TlsEngine,
         transport: DuplexTransport,
         context!: OperationContext = OperationContext.background()
     ): Unit {
-        let input = Array<Byte>(ciphertextChunkSize, repeat: 0)
-        let output = Array<Byte>(ciphertextChunkSize, repeat: 0)
+        // Handshake flights are incrementally feedable/drainable. Keeping this
+        // scratch smaller than the steady-state record buffers avoids charging
+        // allocator high-water pages to every subsequently idle connection.
+        let handshakeChunkSize = min(HANDSHAKE_CHUNK_SIZE, ciphertextChunkSize)
+        let input = Array<Byte>(handshakeChunkSize, repeat: 0)
+        let output = Array<Byte>(handshakeChunkSize, repeat: 0)
         while (true) {
             checkTlsOperationContext(context)
             let step = engine.handshakeStep()
@@ -1839,28 +1892,31 @@ public class TlsEnginePump {
         if (destination.isEmpty()) {
             return ReadResult.Data(0)
         }
-        let input = Array<Byte>(ciphertextChunkSize, repeat: 0)
-        let output = Array<Byte>(ciphertextChunkSize, repeat: 0)
-        while (true) {
-            checkTlsOperationContext(context)
-            let result = engine.readPlaintext(destination)
-            let flushed = flushCiphertext(engine, transport, output, context)
-            match (result) {
-                case TlsEngineReadResult.Data(count) =>
-                    if (count <= 0 || count > destination.length) {
-                        throw noProgress("TLS engine returned invalid plaintext read progress")
+        let scratch = takeReadScratch()
+        try {
+            while (true) {
+                checkTlsOperationContext(context)
+                let result = engine.readPlaintext(destination)
+                let flushed = flushCiphertext(engine, transport, scratch.output, context)
+                match (result) {
+                    case TlsEngineReadResult.Data(count) =>
+                        if (count <= 0 || count > destination.length) {
+                            throw noProgress("TLS engine returned invalid plaintext read progress")
+                        }
+                        return ReadResult.Data(count)
+                    case TlsEngineReadResult.PeerClosed => return ReadResult.EndOfStream
+                    case TlsEngineReadResult.WantRead =>
+                        receiveCiphertext(engine, transport, scratch.input, context)
+                    case TlsEngineReadResult.WantWrite =>
+                        if (flushed == 0) {
+                            throw noProgress("TLS plaintext read requested write without ciphertext")
                     }
-                    return ReadResult.Data(count)
-                case TlsEngineReadResult.PeerClosed => return ReadResult.EndOfStream
-                case TlsEngineReadResult.WantRead =>
-                    receiveCiphertext(engine, transport, input, context)
-                case TlsEngineReadResult.WantWrite =>
-                    if (flushed == 0) {
-                        throw noProgress("TLS plaintext read requested write without ciphertext")
                 }
             }
+            throw noProgress("TLS plaintext read loop terminated without a result")
+        } finally {
+            returnReadScratch(scratch)
         }
-        throw noProgress("TLS plaintext read loop terminated without a result")
     }
 
     public func writePlaintext(
@@ -1872,32 +1928,35 @@ public class TlsEnginePump {
         if (source.isEmpty()) {
             return 0
         }
-        let input = Array<Byte>(ciphertextChunkSize, repeat: 0)
-        let output = Array<Byte>(ciphertextChunkSize, repeat: 0)
-        while (true) {
-            checkTlsOperationContext(context)
-            let result = engine.writePlaintext(source)
-            let flushed = flushCiphertext(engine, transport, output, context)
-            match (result) {
-                case TlsEngineWriteResult.Consumed(count) =>
-                    if (count <= 0 || count > source.length) {
-                        throw noProgress("TLS engine returned invalid plaintext write progress")
+        let scratch = takeWriteScratch()
+        try {
+            while (true) {
+                checkTlsOperationContext(context)
+                let result = engine.writePlaintext(source)
+                let flushed = flushCiphertext(engine, transport, scratch.output, context)
+                match (result) {
+                    case TlsEngineWriteResult.Consumed(count) =>
+                        if (count <= 0 || count > source.length) {
+                            throw noProgress("TLS engine returned invalid plaintext write progress")
+                        }
+                        return count
+                    case TlsEngineWriteResult.PeerClosed =>
+                        throw TlsEngineException(
+                            TlsEngineErrorCode.PeerClosedWithoutCloseNotify,
+                            "TLS peer closed before plaintext write completed"
+                        )
+                    case TlsEngineWriteResult.WantRead =>
+                        receiveCiphertext(engine, transport, scratch.input, context)
+                    case TlsEngineWriteResult.WantWrite =>
+                        if (flushed == 0) {
+                            throw noProgress("TLS plaintext write requested write without ciphertext")
                     }
-                    return count
-                case TlsEngineWriteResult.PeerClosed =>
-                    throw TlsEngineException(
-                        TlsEngineErrorCode.PeerClosedWithoutCloseNotify,
-                        "TLS peer closed before plaintext write completed"
-                    )
-                case TlsEngineWriteResult.WantRead =>
-                    receiveCiphertext(engine, transport, input, context)
-                case TlsEngineWriteResult.WantWrite =>
-                    if (flushed == 0) {
-                        throw noProgress("TLS plaintext write requested write without ciphertext")
                 }
             }
+            throw noProgress("TLS plaintext write loop terminated without a result")
+        } finally {
+            returnWriteScratch(scratch)
         }
-        throw noProgress("TLS plaintext write loop terminated without a result")
     }
 
     /** Sends close_notify and waits for the peer's close_notify on one caller budget. */
@@ -1906,8 +1965,9 @@ public class TlsEnginePump {
         transport: DuplexTransport,
         context!: OperationContext = OperationContext.background()
     ): Unit {
-        let input = Array<Byte>(ciphertextChunkSize, repeat: 0)
-        let output = Array<Byte>(ciphertextChunkSize, repeat: 0)
+        let shutdownChunkSize = min(HANDSHAKE_CHUNK_SIZE, ciphertextChunkSize)
+        let input = Array<Byte>(shutdownChunkSize, repeat: 0)
+        let output = Array<Byte>(shutdownChunkSize, repeat: 0)
         while (true) {
             checkTlsOperationContext(context)
             let result = engine.shutdownStep()

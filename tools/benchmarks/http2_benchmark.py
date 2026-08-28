@@ -33,6 +33,12 @@ CASES = (
     ("streams_10", 10, "Http2Streams10BenchmarkTest"),
     ("streams_100", 100, "Http2Streams100BenchmarkTest"),
 )
+PRODUCTION_SOURCE_DIRECTORIES = (
+    "src/internal/http1",
+    "src/internal/http2",
+    "src/internal/http_model",
+    "src/internal/transport",
+)
 
 
 class BenchmarkError(RuntimeError):
@@ -263,6 +269,25 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def production_source_sha256(repo: Path) -> str:
+    digest = hashlib.sha256()
+    paths: list[Path] = []
+    for directory in PRODUCTION_SOURCE_DIRECTORIES:
+        paths.extend(
+            path for path in (repo / directory).glob("*.cj")
+            if not path.name.endswith("_test.cj")
+        )
+    if not paths:
+        raise BenchmarkError("HTTP/2 production source inventory is empty")
+    for path in sorted(paths):
+        relative = path.relative_to(repo).as_posix()
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
 def tool_version(command: Sequence[str], repo: Path) -> str:
     completed = subprocess.run(command, cwd=repo, stdin=subprocess.DEVNULL,
                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -302,6 +327,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "source": {
             "benchmark_runner_sha256": sha256(Path(__file__)),
             "harness_sha256": sha256(repo / "src/internal/http1/http2_benchmark_harness_test.cj"),
+            "production_source_sha256": production_source_sha256(repo),
         },
         "method": {"warmup_rounds_per_pass": 2, "measured_rounds_per_pass": 20,
                    "pass_order": [[1, 10, 100], [100, 10, 1]],

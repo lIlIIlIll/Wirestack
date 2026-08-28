@@ -1,0 +1,7 @@
+M7022_SAMPLE index=0 elapsedMs=2112 usedHeapBytes=20779008 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=11 h1Requests=14 h2Requests=36 sseEvents=88
+M7022_SAMPLE index=1 elapsedMs=4028 usedHeapBytes=2617344 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=20 h1Requests=25 h2Requests=64 sseEvents=160
+M7022_SAMPLE index=2 elapsedMs=6105 usedHeapBytes=3059712 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=31 h1Requests=39 h2Requests=98 sseEvents=248
+M7022_SAMPLE index=3 elapsedMs=8070 usedHeapBytes=4165632 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=41 h1Requests=52 h2Requests=130 sseEvents=328
+M7022_SAMPLE index=4 elapsedMs=10168 usedHeapBytes=3067904 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=52 h1Requests=65 h2Requests=164 sseEvents=416
+M7022_SAMPLE index=5 elapsedMs=10169 usedHeapBytes=3067904 activeWaiters=0 activeBuffers=0 backgroundTasks=2 cycles=52 h1Requests=65 h2Requests=164 sseEvents=416
+M7022_RESULT durationSeconds=10 elapsedMs=10174 cycles=52 activePhases=52 idlePhases=52 connects=22 h1Requests=65 h2Requests=164 h2MultiplexBatches=52 sseH1Events=208 sseH2Events=208 requestCancels=52 streamResets=52 connectionCancels=7 reconnects=7 spawnedTasks=104 joinedTasks=104 sequenceErrors=0 maxCancelLatencyNs=11344077 activeWaiters=0 activeBuffers=0 backgroundTasks=0 serverTasks=0

@@ -141,8 +141,9 @@ Agents may commit, push, open PRs, and repair CI automatically. They do not merg
 - M0-008 through M0-014 unlock M0-019 after all evidence, including failures and BLOCKED platform results, is retained.
 - M0-012 plus M0-016 unlock M0-017.
 - M0-016 plus M0-018 unlock M0-020.
-- M0-019 plus all gate evidence unlock M0-021.
-- M0-004 through M0-021 unlock M0-022.
+- M0-019 plus all gate evidence unlock the future M0-021 upstream-candidate inventory.
+- M0-004 through M0-020 plus M0-024 unlock M0-022. M0-022 does not wait for
+  M0-021 or an upstream source change.
 - M0 exit unlocks the M1 task graph; the same READY-task rolling policy continues through M7.
 
 ## Evidence integrity

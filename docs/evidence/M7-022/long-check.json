@@ -1,0 +1,43 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "scripts/gate-m7-022-linux-soak",
+        "--duration-seconds",
+        "86400",
+        "--application-sample-seconds",
+        "300",
+        "--resource-sample-seconds",
+        "60",
+        "--idle-milliseconds",
+        "250",
+        "--teardown-seconds",
+        "300",
+        "--raw-log",
+        "docs/evidence/M7-022/linux_x86_64/soak.log",
+        "--output",
+        "docs/evidence/M7-022/linux_x86_64/soak.json"
+      ],
+      "duration_ms": 26545.814,
+      "error_code": null,
+      "exit_code": 1,
+      "finished_at_utc": "2026-08-28T04:25:25.606510Z",
+      "id": "installed-artifact-24h-soak",
+      "started_at_utc": "2026-08-28T04:24:59.060696Z",
+      "status": "FAIL",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-022/installed-artifact-24h-soak.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "M7-022 Linux release soak: FAIL: SOAK_EXIT: child exited 1: An exception has occurred:\nHttpException: HTTP protocol violation\nAn exception has occurred:\nHttpException: HTTP protocol violation\n\t at wirestack.http::wrapHttpError(std.core::Exception)(/tmp/wirestack-m7-022-p9oyyzvl/install/wirestack-0.1.0/src/http/error.cj:85)\n\t at wirestack.http::HttpClient::sendInternal(wirestack.internal.http_model::HttpRequest, wirestack.internal.transport::OperationContext, wirestack.internal.http_model::HttpTrailer, std.core::Option<...>, std.core::Option<...>, std.core::Option<...>)(/tmp/wirestack-m7-022-p9oyyzvl/install/wirestack-0.1.0/src/http/client.cj:247)\n\t at wirestack.http::HttpClient::send(wirestack.internal.http_model::HttpRequest, wirestack.internal.transport::OperationContext, wirestack.internal.http_model::HttpTrailer)(/tmp/wirestack-m7-022-p9oyyzvl/install/wirestack-0.1.0/src/http/client.cj:185)\n\t at wirestack.http::HttpClient::get(std.core::String, wirestack.internal.transport::OperationContext)(/tmp/wirestack-m7-022-p9oyyzvl/install/wirestack-0.1.0/src/http/client.cj:161)\n\t at wirestack_m7_022_soak::ready(wirestack.http::HttpClient, std.core::String, wirestack.internal.http_model::HttpVersion)(/tmp/wirestack-m7-022-p9oyyzvl/consumer/src/main.cj:156)\n\t at wirestack.http::wrapHttpError(std.core::Exception)(/tmp/wirestack-m7-022-p9oyyzvl/install/wirestack-0.1.0/src/http/error.cj:85)\n\t at wirestack.http::HttpClient::sendInternal(wirestack.internal.http_model::HttpRequest, wirestack.internal.transport::OperationContext, wirestack.internal.http_model::HttpTrailer, std.core::Option<...>, std.core::Option<...>, std.core::Option<...>)(/tmp/wirestack-m7-022-p9oyyzvl/install/wirestack-0.1.0/src/http/client.cj:247)\n\t at wirestack.http::HttpClient::send(wirestack.internal.http_model::HttpRequest, wirestack.internal.transport::OperationContext, wirestack.internal.http_model::HttpTrailer)(/tmp/wirestack-m7-022-p9oyyzvl/install/wirestack-0.1.0/src/http/client.cj:185)\n\t at wirestack.http::HttpClient::get(std.core::String, wirestack.internal.transport::OperationContext)(/tmp/wirestack-m7-022-p9oyyzvl/install/wirestack-0.1.0/src/http/client.cj:161)\n\t at wirestack_m7_022_soak::ready(wirestack.http::HttpClient, std.core::String, wirestack.internal.http_model::HttpVersion)(/tmp/wirestack-m7-022-p9oyyzvl/consumer/src/main.cj:156)\nM7-022 soak failed: HttpException: HTTP protocol violation\n\n",
+      "stdout_path": "build/repository-tooling/M7-022/installed-artifact-24h-soak.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "long",
+  "schema_version": 1,
+  "status": "FAIL",
+  "task_id": "M7-022"
+}

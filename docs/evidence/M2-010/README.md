@@ -107,4 +107,6 @@ existed.
 
 This task models route intent only. It does not discover system proxies, open
 connections, issue CONNECT, execute TLS/ALPN, or replace the later HTTP pool
-key. Native Linux resolver backend work remains blocked by M2-003/UP-007.
+key. At M2-010 completion, native Linux resolver work still awaited M2-003;
+that task is now complete. UP-007 remains an optional future upstream
+enhancement and is not a current Wirestack task or release dependency.

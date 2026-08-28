@@ -32,12 +32,25 @@ public enum TransportState {
     | Failed
 }
 
+/**
+ * Provider-neutral, read-only transport diagnostics.
+ *
+ * runtimeIoBackend names a stable runtime family. It must not claim an
+ * operating-system event mechanism unless the public SDK exposes one.
+ * Endpoints use Wirestack types and never expose a provider socket object.
+ */
 public struct TransportInfo {
+    /** Transport adapter identity, such as std.net or memory. */
     public let backend: String
+    /** Stable runtime family, such as cjnative or deterministic. */
     public let runtimeIoBackend: String
+    /** Bound local endpoint when the adapter can report it. */
     public let localEndpoint: ?SocketEndpoint
+    /** Connected peer endpoint when the adapter can report it. */
     public let remoteEndpoint: ?SocketEndpoint
+    /** Whether directional read and write shutdown are supported. */
     public let supportsHalfClose: Bool
+    /** Whether immediate abort is supported. */
     public let supportsAbort: Bool
 
     public init(

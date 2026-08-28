@@ -118,6 +118,23 @@ class Http1ResponseReaderTest {
     }
 
     @TestCase
+    func received4xxAnd5xxRemainHttpResponses(): Unit {
+        for (status in [404, 500]) {
+            let (client, server) = MemoryTransport.pair(capacity: 2048)
+            writeAll(server, ByteSpan(
+                "HTTP/1.1 ${status} Received\r\nContent-Length: 0\r\n\r\n".toArray()
+            ))
+
+            let result = readHttp1Response(client, HttpMethod("GET"))
+            @Expect(result.response.status, status)
+            @Expect(result.response.body.read(Array<Byte>(1, repeat: 0)), 0)
+            result.response.close()
+            client.close()
+            server.close()
+        }
+    }
+
+    @TestCase
     func decodesChunkedResponseAndPublishesTrailerAtEof(): Unit {
         let (client, server) = MemoryTransport.pair(capacity: 2048, maxChunk: 2)
         let wire = "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n2\r\nhe\r\n3\r\nllo\r\n0\r\nDigest: done\r\n\r\n"

@@ -1,0 +1,71 @@
+{
+  "acceptance_commands": [
+    {
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-tasks", "--json"],
+      "gate": "fast",
+      "id": "task-contracts",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/P1-012/test-plan.md", "--json"],
+      "gate": "task",
+      "id": "test-plan-matrix",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["python3", "-m", "unittest", "tools.repository.tests.test_repository_tooling", "-v"],
+      "gate": "task",
+      "id": "repository-tooling-tests",
+      "long_running": false,
+      "timeout_seconds": 180
+    }
+  ],
+  "allowed_paths": [
+    "scripts/repo-doctor",
+    "scripts/check-fast",
+    "scripts/check-task",
+    "scripts/check-full",
+    "scripts/check-long",
+    "scripts/verify-evidence",
+    "tools/repository",
+    "tools/tasks",
+    "tools/tests/test_m7_linux_task_graph.py",
+    "docs/evidence/P1-012",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "docs/evidence/M7-019/linux_x86_64/audit.data",
+    "docs/evidence/M7-020/linux_x86_64/audit.data",
+    "docs/evidence/M7-021/linux_x86_64/qualification.json",
+    ".gitignore"
+  ],
+  "dependencies": ["M7-024"],
+  "long_running_gate": false,
+  "platforms": ["linux-x86_64-glibc"],
+  "required_evidence": [
+    "docs/evidence/P1-012/evidence.json",
+    "docs/evidence/P1-012/task-check.json",
+    "docs/evidence/P1-012/full-check.json"
+  ],
+  "schema_version": 1,
+  "source_paths": [
+    "tools/repository/repository_tooling.py",
+    "tools/repository/tests/test_repository_tooling.py",
+    "tools/tests/test_m7_linux_task_graph.py",
+    "tools/tasks/schema-v1.json",
+    "tools/tasks/P1-012.json",
+    "scripts/repo-doctor",
+    "scripts/check-fast",
+    "scripts/check-task",
+    "scripts/check-full",
+    "scripts/check-long",
+    "scripts/verify-evidence",
+    "docs/evidence/P1-012/test-plan.md",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    ".gitignore"
+  ],
+  "task_id": "P1-012",
+  "timeout_seconds": 3600
+}
