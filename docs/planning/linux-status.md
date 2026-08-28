@@ -140,6 +140,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M6-023 SSE/unbounded streaming profile | COMPLETE | Parallel real H1/H2 `text/event-stream` profiles each ran for at least one hour and consumed more than 90 million numbered events; heavy-GC heap, RSS, FD, socket and thread trends passed, public cancellation stayed below 50 ms, and the H2 sibling survived stream cancellation; [Linux acceptance evidence](../evidence/M6-023/README.md) |
 | M6-024 HTTP/2 sibling fairness | COMPLETE | A zero-window-only connection-credit flush and bounded least-recently-served send reservations let 1/10/100 siblings complete while a connection-window-exhausting response stays open; 100 independent real TLS h2 runs completed 10,000 siblings with no timeout or connection abort; [Linux acceptance evidence](../evidence/M6-024/README.md) |
 | M6-025 HTTP/2 facade termination | COMPLETE | Exclusive per-call TLS scratch removes concurrent read/write aliasing; the original three-case sequence passes 100/100 same-process rounds, the repository check passes 538/538 non-Performance cases, and M3-028 performance remains qualified; [Linux acceptance evidence](../evidence/M6-025/README.md) |
+| M3-029 public TLS facade | COMPLETE | Provider-neutral client/server contexts, existing-transport handshake, connection/listener ownership and negotiated metadata pass public-package tests, clean-consumer Linux TLS acceptance and the API/architecture gates; [evidence](../evidence/M3-029/README.md). |
 
 ## Linux M7 stable-release closure
 
@@ -157,7 +158,7 @@ replace the six-platform M7-001 through M7-017 tasks.
 | M7-024 Linux performance gate | READY | Existing component reports supply the baselines; one versioned release decision remains. |
 | M7-025 Linux SBOM and fingerprint | COMPLETE | The SPDX 2.3 SBOM, provider manifest and deterministic fingerprint bind the qualified artifact to pinned native inputs, target, toolchain, trust, capabilities and features; runtime/std source changes are not dependencies; [evidence](../evidence/M7-025/README.md). |
 | M7-026 Linux API freeze | COMPLETE | The versioned baseline freezes package `wirestack` major 0, 82 declarations, 50 resolved alias targets and the request/connection/stream cancellation handles. The compatibility gate rejects legacy and low-level public surfaces; [evidence](../evidence/M7-026/README.md). |
-| M7-027 Linux migration and examples | READY | M7-026 is complete. Write the migration guide and validate every public example in a clean consumer. |
+| M7-027 Linux migration and examples | READY | M7-026 and M3-029 are complete. Write the migration guide and validate every public example in a clean consumer. |
 | M7-028 Linux security review package | BLOCKED | Waits for M7-019 through M7-025. |
 | M7-029 Linux independent security review | BLOCKED | Waits for M7-028 and an independent reviewer. |
 | M7-030 Linux signing and update flow | BLOCKED | Waits for M7-025 and M7-029. |
