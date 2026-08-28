@@ -1,6 +1,6 @@
 # M7-022 Linux final release soak evidence
 
-Status: BLOCKED
+Status: IN_PROGRESS
 
 ## Scope
 
@@ -17,6 +17,23 @@ A short run can validate the workload and reporting path, but it cannot produce
 an acceptance PASS.
 
 ## Current result
+
+After M6-026 completed and M7-021 produced a newly qualified artifact, the
+non-long task gate passed again. The 10-second installed-artifact preflight
+completed 52 mixed cycles, 52 HTTP/2 multiplex batches, 104 joined concurrent
+tasks, 52 request cancellations, 52 stream resets and 7 connection
+cancellation/recovery cycles. It completed 65 HTTP/1.1 requests, 164 HTTP/2
+requests and 416 numbered SSE events with zero sequence error and zero terminal
+waiter, buffer, background-task or server-task owner. Application heap and all
+sampled process-tree resource trends passed.
+
+The preflight correctly remains `INCOMPLETE`: its 10-second duration does not
+meet the formal 86,400-second parameter. The machine report is
+[`linux_x86_64/preflight-after-m6-026.json`](linux_x86_64/preflight-after-m6-026.json),
+and the non-long task report is
+[`task-check-after-m6-026.json`](task-check-after-m6-026.json).
+
+### Retained first formal failure
 
 The 60-second native preflight completed 307 cycles, 614 joined concurrent
 tasks and 39 connection cancellation and recovery cycles. Its workload and
@@ -40,13 +57,14 @@ small response bodies through the public facade.
 
 ## Decision
 
-M7-022 remains BLOCKED. The failed run is not 24-hour evidence and no resource
-bound claim is made from it. Do not reduce the workload, relabel a preflight or
-reuse M0-011's transport-only report.
+M7-022 is no longer blocked by the HTTP/2 facade failure. M6-026 supplies the
+1,000-batch public regression and product fix, M7-021 requalified the installed
+artifact, and the unchanged mixed workload now passes the short preflight.
 
-Resume M7-022 only after a separate HTTP/2 facade task supplies a public
-regression, fixes the product cause, and M7-021 produces and qualifies a new
-installed artifact.
+The task remains IN_PROGRESS until one uninterrupted formal run reaches at
+least 86,400 seconds and every semantic and resource bound passes. Do not
+reduce the workload, relabel a preflight or reuse M0-011's transport-only
+report.
 
 ## Boundaries
 
@@ -54,4 +72,5 @@ installed artifact.
 - No SDK component was built.
 - No non-Linux platform was tested.
 - No remote branch was pushed.
-- M7-028 and the later Linux release tasks remain blocked by M7-022.
+- The formal 24-hour run was not restarted in this update.
+- M7-028 and the later Linux release tasks remain blocked by M7-022 completion.
