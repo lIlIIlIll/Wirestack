@@ -149,6 +149,21 @@ class RepositoryToolingTests(unittest.TestCase):
         self.assertEqual("SKIPPED", report["status"])
         self.assertEqual([], report["commands"])
 
+    def test_long_timeout_allows_one_day_plus_bounded_teardown(self) -> None:
+        manifest = self.manifest()
+        manifest["timeout_seconds"] = 90_000
+        manifest["acceptance_commands"][0].update({
+            "timeout_seconds": 90_000,
+            "long_running": True,
+            "gate": "long",
+        })
+        manifest["long_running_gate"] = True
+        tooling.validate_task(manifest, self.root)
+        manifest["timeout_seconds"] = tooling.MAX_TIMEOUT_SECONDS + 1
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.validate_task(manifest, self.root)
+        self.assertEqual("TIMEOUT", caught.exception.code)
+
     def test_command_capture_is_bounded(self) -> None:
         command = {"id": "large", "argv": ["python3", "-c", "print('x'*50000)"],
                    "timeout_seconds": 10, "long_running": False, "gate": "task"}
