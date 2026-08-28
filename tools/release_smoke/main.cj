@@ -4,7 +4,7 @@ import std.collection.ArrayList
 import std.sync.*
 import std.time.*
 import wirestack.http.*
-import wirestack.tls.*
+import wirestack.tls as tls
 
 private func loopback(port: UInt16): SocketEndpoint {
     SocketEndpoint(IpAddress(IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8]), port)
@@ -37,6 +37,15 @@ private func readBody(body: ResponseBody): String {
 
 main(): Int64 {
     let certificate = certificateDer()
+    let publicKey = tls.PrivateKeyRef.pkcs8(privateKeyDer())
+    let publicServerContext = tls.TlsServerContext.builder()
+        .identity(tls.LocalIdentity(tls.CertificateChain([tls.DerCertificate(certificate)]), publicKey))
+        .alpn(["h2", "http/1.1"])
+        .build()
+    let publicClientContext = tls.TlsClientContext.builder()
+        .trust(tls.TrustPolicy.customRoots(tls.CertificateChain([tls.DerCertificate(certificate)])))
+        .alpn(["h2", "http/1.1"])
+        .build()
     let serverTls = HttpServerTlsConfig([certificate], privateKeyDer())
     let server = HttpServer.builder()
         .listen(loopback(0))
@@ -67,15 +76,18 @@ main(): Int64 {
             response.close()
         }
         if (result == 0) {
-            let info = TlsRuntime.info()
+            let info = tls.TlsRuntime.info()
             if (info.transportBackend != "std-net") { result = 20 }
             else if (info.runtimeIoBackend != "cjnative") { result = 21 }
             else if (info.tlsProvider != "aws-lc") { result = 22 }
             else if (info.tlsProviderVersion != "5.5.0") { result = 23 }
             else if (info.externalOpenSslDependency) { result = 24 }
             else if (info.buildFingerprint.isEmpty()) { result = 25 }
+            else if (publicServerContext.alpnProtocols() != ["h2", "http/1.1"]) { result = 26 }
+            else if (publicClientContext.alpnProtocols() != ["h2", "http/1.1"]) { result = 27 }
             else {
                 println("HTTPS_CLIENT_SERVER=PASS")
+                println("PUBLIC_TLS_FACADE=PASS")
                 println("HTTP_VERSION=2")
                 println("transportBackend=${info.transportBackend}")
                 println("runtimeIoBackend=${info.runtimeIoBackend}")
@@ -95,6 +107,7 @@ main(): Int64 {
         serving.get(5 * Duration.second)
         clientTls.close()
         serverTls.close()
+        publicKey.close()
     }
     return result
 }

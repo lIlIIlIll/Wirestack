@@ -97,6 +97,7 @@ global six-platform M3 milestone.
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
 | M3-028 | COMPLETE | [`docs/evidence/M3-028/README.md`](../evidence/M3-028/README.md) | Native Linux qualification passes 70 deterministic TLS/trust tests, four bounded fuzz targets, TLS 1.2/1.3 OpenSSL interoperability, dependency scanning, body and idle-memory limits, 11-round full/resumed handshake gates, and 1.2125 times the pinned stdx bulk throughput. |
+| M3-029 | COMPLETE | [`docs/evidence/M3-029/README.md`](../evidence/M3-029/README.md) | Provider-neutral public client/server contexts, existing-transport handshake, TLS connection/listener ownership, negotiated metadata and stable errors pass public-package tests, clean-consumer Linux TLS acceptance, architecture checks and the intentionally updated API baseline. |
 
 ## Future upstream enhancements
 
@@ -159,7 +160,7 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 | M7-024 | COMPLETE | [`docs/evidence/M7-024/README.md`](../evidence/M7-024/README.md) | The digest-pinned Linux release manifest aggregates seven raw component reports and passes 252 field-level checks across raw TCP, DNS-to-connected, TLS, H1, H2, cancellation, SSE and memory; all eight domains pass with no changed source artifact. |
 | M7-025 | COMPLETE | [`docs/evidence/M7-025/README.md`](../evidence/M7-025/README.md) | The SPDX 2.3 SBOM, provider manifest and deterministic fingerprint bind the qualified artifact, provider/resolver digests, target, toolchain, trust, capabilities and features. runtime/std source changes remain optional long-term upstream requirements, not release dependencies. |
 | M7-026 | COMPLETE | [`docs/evidence/M7-026/README.md`](../evidence/M7-026/README.md) | The versioned Linux baseline freezes package `wirestack` major 0, 82 declarations, 50 resolved alias targets and all three public cancellation handles. The deterministic gate rejects legacy/global TLS, low-level socket and OpenSSL cipher-string surfaces without depending on runtime/std source changes. |
-| M7-027 | READY | — | M7-026 is complete; the Linux migration guide and clean-consumer examples may proceed on their own branch. |
+| M7-027 | READY | — | M7-026 and M3-029 are complete. Write the migration guide and validate all documented examples in clean consumers. |
 | M7-028 | BLOCKED | — | Depends on M7-019 through M7-025. |
 | M7-029 | BLOCKED | — | Depends on M7-028 and an independent reviewer. |
 | M7-030 | BLOCKED | — | Depends on M7-025 and M7-029. |

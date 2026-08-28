@@ -5,7 +5,7 @@
   "decision": "AUDIT_COMPLETE_RELEASE_BLOCKED",
   "source_sha256": {
     "docs/product/prd.md": "a201d628d43ca53d925a98f2ee24ade92ba22f0eb5d7e565e1c1ca1792b140cf",
-    "docs/planning/implementation-backlog.md": "dc18f66232721d8275a0a8ffc8db96eea268b3d5ce65c2fb7c6661ac456fd6c1"
+    "docs/planning/implementation-backlog.md": "b601a61f1400ce0ac0abaceffebcead2a5a6df96db1805b31b2b9baba8867831"
   },
   "p0_requirements": [
     {

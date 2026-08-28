@@ -1,0 +1,73 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M3-029/test-plan.md",
+        "--json"
+      ],
+      "duration_ms": 113.992,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-28T03:16:51.661406Z",
+      "id": "test-plan-matrix",
+      "started_at_utc": "2026-08-28T03:16:51.547417Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M3-029/test-plan-matrix.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"counts\": {\"paths\": 18, \"scenarios\": 15, \"tests\": 12}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+      "stdout_path": "build/repository-tooling/M3-029/test-plan-matrix.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "scripts/check-m3-029-linux-tls-facade"
+      ],
+      "duration_ms": 23460.333,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-28T03:17:15.121896Z",
+      "id": "public-tls-facade",
+      "started_at_utc": "2026-08-28T03:16:51.661572Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M3-029/public-tls-facade.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "M3-029 PASS: public TLS facade accepted\n",
+      "stdout_path": "build/repository-tooling/M3-029/public-tls-facade.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "scripts/check-m7-026-linux-api"
+      ],
+      "duration_ms": 1067.099,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-28T03:17:16.189158Z",
+      "id": "api-compatibility",
+      "started_at_utc": "2026-08-28T03:17:15.122067Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M3-029/api-compatibility.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "M7-026 Linux API compatibility: PASS\npackage=wirestack@0.1.0\ndeclarations=147\nresolved_aliases=105\ninventory_sha256=9221db662b0c24980a18c12853dba5c5c62bae2f5f7bf3dc1f8924b98fe0b865\n",
+      "stdout_path": "build/repository-tooling/M3-029/api-compatibility.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "task",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M3-029"
+}

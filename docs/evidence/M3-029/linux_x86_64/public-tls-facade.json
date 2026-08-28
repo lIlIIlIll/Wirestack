@@ -1,0 +1,21 @@
+{
+  "acceptance_status": "PASS",
+  "checks": {
+    "cleanConsumerBuild": "PASS",
+    "publicFacadeConstruction": "PASS",
+    "publicPackageTests": "PASS_6_OF_6",
+    "realTlsLoopback": "PASS",
+    "skippedAsPass": false
+  },
+  "commands": [
+    "cjpm test src/tls -j1 --parallel 1 --exclude-tags=Performance",
+    "cjpm build (clean path consumer)",
+    "clean consumer executable"
+  ],
+  "decision": "PASS",
+  "platform": "linux-x86_64-glibc",
+  "schemaVersion": 1,
+  "source_task": "M3-029",
+  "status": "PASS",
+  "taskId": "M3-029"
+}
