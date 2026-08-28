@@ -70,6 +70,7 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("| M7-022 | IN_PROGRESS |", status)
         self.assertIn("| M6-026 | COMPLETE |", status)
         self.assertIn("| M7-023 | COMPLETE |", status)
+        self.assertIn("| M7-023 Linux release fuzz gate | COMPLETE |", linux)
         self.assertIn("| M7-024 | COMPLETE |", status)
         self.assertIn("| M7-025 | COMPLETE |", status)
         self.assertIn("| M7-026 | COMPLETE |", status)
