@@ -153,7 +153,7 @@ replace the six-platform M7-001 through M7-017 tasks.
 | M7-019 Linux requirement audit | COMPLETE | The machine-checked audit covers 32 P0 requirements, 15 lifecycle invariants and 22 release criteria. Seven requirement gaps map to M7-021 through M7-025 and M7-029; Android/iOS listener acceptance is `NOT_APPLICABLE_TO_LINUX_PROFILE`; [evidence](../evidence/M7-019/README.md). |
 | M7-020 Linux architecture audit | COMPLETE | The repeatable guard finds zero violations across 188 Cangjie files and 11 build/native files. It covers dependency direction, public low-level types, private ABI, old bridges, global providers and system OpenSSL loaders; [evidence](../evidence/M7-020/README.md). |
 | M7-021 Linux artifact and installation | COMPLETE | Two normalized builds produce the same SHA-256. A clean installed consumer runs HTTPS client/server and runtime-info smoke, and its ELF has no system OpenSSL dependency; [evidence](../evidence/M7-021/README.md). |
-| M7-022 Linux final 24h+ soak | READY | The release artifact is qualified. Run the required mixed workload for at least 24 hours. |
+| M7-022 Linux final 24h+ soak | BLOCKED | The formal installed-artifact run failed before its first resource interval when two concurrent HTTP/2 response-body requests terminated with `ProtocolViolation`. A separate facade fix and M7-021 artifact requalification must pass before the uninterrupted 24-hour run resumes; [failure evidence](../evidence/M7-022/README.md). |
 | M7-023 Linux release fuzz gate | READY | Existing parser and mutation coverage supplies the target inputs; release thresholds and crash replay remain. |
 | M7-024 Linux performance gate | READY | Existing component reports supply the baselines; one versioned release decision remains. |
 | M7-025 Linux SBOM and fingerprint | COMPLETE | The SPDX 2.3 SBOM, provider manifest and deterministic fingerprint bind the qualified artifact to pinned native inputs, target, toolchain, trust, capabilities and features; runtime/std source changes are not dependencies; [evidence](../evidence/M7-025/README.md). |
@@ -166,5 +166,7 @@ replace the six-platform M7-001 through M7-017 tasks.
 
 ## Next critical path
 
-1. Run M7-022's explicit 24-hour mixed release soak.
-2. After M7-022, prepare M7-028's independent security-review package.
+1. Fix the installed-artifact HTTP/2 concurrent response-body failure and
+   requalify M7-021 without weakening the M7-022 workload.
+2. Resume M7-022's explicit 24-hour mixed release soak.
+3. After M7-022, prepare M7-028's independent security-review package.
