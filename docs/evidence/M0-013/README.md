@@ -51,6 +51,10 @@ Linux carrier-thread set and stall unrelated runnable Cangjie tasks. It supports
 a future requirement for a runtime-native asynchronous resolver or a strictly
 bounded blocking resolver pool.
 
+Wirestack selected and completed the bounded-pool path in M2-003. The runtime
+resolver option therefore remains a future upstream enhancement, not a
+dependency of the current implementation or Linux release.
+
 It does **not** directly authorize an upstream runtime change. M0-021 must review
 all M0 gate failures and produce the minimal upstream-interface RFC before
 `UP-007` can start. No production Resolver, Transport, TLS or HTTP code is added

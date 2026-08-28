@@ -10,6 +10,24 @@ import wirestack.internal.transport.*
 private const DEFAULT_STAGING_BUFFER_SIZE: Int64 = 16 * 1024
 private const MAX_LISTENER_BACKLOG: Int64 = 65535
 
+@When[os == "Windows"]
+@C
+private struct AbortiveLinger {
+    var enabled: UInt16 = 1
+    var seconds: UInt16 = 0
+
+    static const size: UIntNative = 4
+}
+
+@When[os != "Windows"]
+@C
+private struct AbortiveLinger {
+    var enabled: Int32 = 1
+    var seconds: Int32 = 0
+
+    static const size: UIntNative = 8
+}
+
 /** Default DNS-free connection factory for Linux Happy Eyeballs attempts. */
 public class StdNetTransportFactory <: TransportFactory {
     private let stagingBufferSize: Int64
@@ -70,7 +88,12 @@ public class StdNetTransport <: DuplexTransport {
         context!: OperationContext = OperationContext.background(),
         stagingBufferSize!: Int64 = DEFAULT_STAGING_BUFFER_SIZE
     ): StdNetTransport {
-        checkContext(context, NetworkErrorCategory.Connect, NetworkPhase.TcpConnect)
+        checkContext(
+            context,
+            NetworkErrorCategory.Connect,
+            NetworkPhase.TcpConnect,
+            remoteEndpoint: Some(endpoint)
+        )
         let socket = TcpSocket(toStdEndpoint(endpoint))
         let transport = StdNetTransport(
             socket,
@@ -127,7 +150,13 @@ public class StdNetTransport <: DuplexTransport {
     ): ReadResult {
         let background = isBackgroundContext(context)
         if (!background) {
-            checkContext(context, NetworkErrorCategory.Read, NetworkPhase.TcpRead)
+            checkContext(
+                context,
+                NetworkErrorCategory.Read,
+                NetworkPhase.TcpRead,
+                localEndpoint: localEndpoint,
+                remoteEndpoint: remoteEndpoint
+            )
         }
         beginRead()
         try {
@@ -147,7 +176,13 @@ public class StdNetTransport <: DuplexTransport {
                 try {
                     return finishRead(socket.read(target), target, destination, direct, context)
                 } catch (error: SocketTimeoutException) {
-                    throw timedOut(NetworkErrorCategory.Read, NetworkPhase.TcpRead, error)
+                    throw timedOut(
+                        NetworkErrorCategory.Read,
+                        NetworkPhase.TcpRead,
+                        error,
+                        localEndpoint: localEndpoint,
+                        remoteEndpoint: remoteEndpoint
+                    )
                 } catch (error: SocketException) {
                     throw mapSocketError(error, context, NetworkErrorCategory.Read, NetworkPhase.TcpRead)
                 }
@@ -165,7 +200,13 @@ public class StdNetTransport <: DuplexTransport {
                 finishRead(received, target, destination, direct, context)
             } catch (error: SocketTimeoutException) {
                 let _ = gate.complete()
-                throw timedOut(NetworkErrorCategory.Read, NetworkPhase.TcpRead, error)
+                throw timedOut(
+                    NetworkErrorCategory.Read,
+                    NetworkPhase.TcpRead,
+                    error,
+                    localEndpoint: localEndpoint,
+                    remoteEndpoint: remoteEndpoint
+                )
             } catch (error: SocketException) {
                 let _ = gate.complete()
                 throw mapSocketError(error, context, NetworkErrorCategory.Read, NetworkPhase.TcpRead)
@@ -184,7 +225,13 @@ public class StdNetTransport <: DuplexTransport {
     ): Int64 {
         let background = isBackgroundContext(context)
         if (!background) {
-            checkContext(context, NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
+            checkContext(
+                context,
+                NetworkErrorCategory.Write,
+                NetworkPhase.TcpWrite,
+                localEndpoint: localEndpoint,
+                remoteEndpoint: remoteEndpoint
+            )
         }
         beginWrite()
         try {
@@ -215,7 +262,13 @@ public class StdNetTransport <: DuplexTransport {
                     socket.write(payload)
                     return finishWrite(count, direct)
                 } catch (error: SocketTimeoutException) {
-                    throw timedOut(NetworkErrorCategory.Write, NetworkPhase.TcpWrite, error)
+                    throw timedOut(
+                        NetworkErrorCategory.Write,
+                        NetworkPhase.TcpWrite,
+                        error,
+                        localEndpoint: localEndpoint,
+                        remoteEndpoint: remoteEndpoint
+                    )
                 } catch (error: SocketException) {
                     throw mapSocketError(error, context, NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
                 }
@@ -233,7 +286,13 @@ public class StdNetTransport <: DuplexTransport {
                 finishWrite(count, direct)
             } catch (error: SocketTimeoutException) {
                 let _ = gate.complete()
-                throw timedOut(NetworkErrorCategory.Write, NetworkPhase.TcpWrite, error)
+                throw timedOut(
+                    NetworkErrorCategory.Write,
+                    NetworkPhase.TcpWrite,
+                    error,
+                    localEndpoint: localEndpoint,
+                    remoteEndpoint: remoteEndpoint
+                )
             } catch (error: SocketException) {
                 let _ = gate.complete()
                 throw mapSocketError(error, context, NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
@@ -253,7 +312,7 @@ public class StdNetTransport <: DuplexTransport {
             NetworkErrorCategory.Unsupported,
             NetworkPhase.TransportClose,
             NetworkErrorCode.Unsupported,
-            "typed TCP half-close requires the public std.net UP-003 capability",
+            "this transport adapter does not support directional TCP shutdown",
             retryability: Retryability.Never,
             localEndpoint: localEndpoint,
             remoteEndpoint: remoteEndpoint
@@ -293,7 +352,7 @@ public class StdNetTransport <: DuplexTransport {
         }
         if (shouldClose) {
             try {
-                socket.linger = Some(Duration.Zero)
+                configureAbortiveClose(socket)
             } catch (_: Exception) {
                 // Abort still closes if SO_LINGER cannot be configured.
             }
@@ -323,7 +382,13 @@ public class StdNetTransport <: DuplexTransport {
             }
         } catch (error: SocketTimeoutException) {
             let _ = gate.complete()
-            throw timedOut(NetworkErrorCategory.Connect, NetworkPhase.TcpConnect, error)
+            throw timedOut(
+                NetworkErrorCategory.Connect,
+                NetworkPhase.TcpConnect,
+                error,
+                localEndpoint: localEndpoint,
+                remoteEndpoint: remoteEndpoint
+            )
         } catch (error: SocketException) {
             let _ = gate.complete()
             throw mapSocketError(error, context, NetworkErrorCategory.Connect, NetworkPhase.TcpConnect)
@@ -338,7 +403,12 @@ public class StdNetTransport <: DuplexTransport {
                 throw concurrent(NetworkErrorCategory.Read, NetworkPhase.TcpRead)
             }
             if (closed || aborted) {
-                throw closedError(NetworkErrorCategory.Read, NetworkPhase.TcpRead)
+                throw closedError(
+                    NetworkErrorCategory.Read,
+                    NetworkPhase.TcpRead,
+                    localEndpoint: localEndpoint,
+                    remoteEndpoint: remoteEndpoint
+                )
             }
             readActive = true
         }
@@ -356,7 +426,12 @@ public class StdNetTransport <: DuplexTransport {
                 throw concurrent(NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
             }
             if (closed || aborted) {
-                throw closedError(NetworkErrorCategory.Write, NetworkPhase.TcpWrite)
+                throw closedError(
+                    NetworkErrorCategory.Write,
+                    NetworkPhase.TcpWrite,
+                    localEndpoint: localEndpoint,
+                    remoteEndpoint: remoteEndpoint
+                )
             }
             writeActive = true
         }
@@ -427,19 +502,50 @@ public class StdNetTransport <: DuplexTransport {
         false
     }
 
+    /** Waits for write activity for bounded lifecycle diagnostics and race gates. */
+    internal func waitUntilWriteActive(timeout: Duration): Bool {
+        let expiresAt = MonoTime.now() + timeout
+        while (true) {
+            let (active, terminal) = synchronized(lifecycleMutex) { (writeActive, closed || aborted) }
+            if (active) {
+                return true
+            }
+            if (terminal || MonoTime.now() >= expiresAt) {
+                return false
+            }
+            sleep(Duration.millisecond)
+        }
+        false
+    }
+
     private func ensureNotLocallyTerminated(
         context: OperationContext,
         category: NetworkErrorCategory,
         phase: NetworkPhase
     ): Unit {
         if (context.isCancellationRequested()) {
-            throw cancelled(category, phase)
+            throw cancelled(
+                category,
+                phase,
+                localEndpoint: localEndpoint,
+                remoteEndpoint: remoteEndpoint
+            )
         }
         if (context.isDeadlineExceeded()) {
-            throw deadlineExceeded(category, phase)
+            throw deadlineExceeded(
+                category,
+                phase,
+                localEndpoint: localEndpoint,
+                remoteEndpoint: remoteEndpoint
+            )
         }
         if (isClosed()) {
-            throw closedError(category, phase)
+            throw closedError(
+                category,
+                phase,
+                localEndpoint: localEndpoint,
+                remoteEndpoint: remoteEndpoint
+            )
         }
     }
 
@@ -449,12 +555,27 @@ public class StdNetTransport <: DuplexTransport {
         phase: NetworkPhase
     ): NetworkException {
         if (context.isCancellationRequested()) {
-            return cancelled(category, phase)
+            return cancelled(
+                category,
+                phase,
+                localEndpoint: localEndpoint,
+                remoteEndpoint: remoteEndpoint
+            )
         }
         if (context.isDeadlineExceeded()) {
-            return deadlineExceeded(category, phase)
+            return deadlineExceeded(
+                category,
+                phase,
+                localEndpoint: localEndpoint,
+                remoteEndpoint: remoteEndpoint
+            )
         }
-        closedError(category, phase)
+        closedError(
+            category,
+            phase,
+            localEndpoint: localEndpoint,
+            remoteEndpoint: remoteEndpoint
+        )
     }
 
     private func mapSocketError(
@@ -464,13 +585,31 @@ public class StdNetTransport <: DuplexTransport {
         phase: NetworkPhase
     ): NetworkException {
         if (context.isCancellationRequested()) {
-            return cancelled(category, phase, cause: Some(error))
+            return cancelled(
+                category,
+                phase,
+                cause: Some(error),
+                localEndpoint: localEndpoint,
+                remoteEndpoint: remoteEndpoint
+            )
         }
         if (context.isDeadlineExceeded()) {
-            return deadlineExceeded(category, phase, cause: Some(error))
+            return deadlineExceeded(
+                category,
+                phase,
+                cause: Some(error),
+                localEndpoint: localEndpoint,
+                remoteEndpoint: remoteEndpoint
+            )
         }
         if (isClosed()) {
-            return closedError(category, phase, cause: Some(error))
+            return closedError(
+                category,
+                phase,
+                cause: Some(error),
+                localEndpoint: localEndpoint,
+                remoteEndpoint: remoteEndpoint
+            )
         }
         // SocketException exposes no stable native code. Message matching is
         // deliberately forbidden, so fail closed instead of guessing errno.
@@ -492,6 +631,26 @@ public class StdNetTransport <: DuplexTransport {
         } else {
             nativeClosed = true
             true
+        }
+    }
+}
+
+private func configureAbortiveClose(socket: TcpSocket): Unit {
+    unsafe {
+        let value = LibC.malloc<AbortiveLinger>()
+        if (value.isNull()) {
+            throw IllegalMemoryException("failed to allocate SO_LINGER value")
+        }
+        try {
+            value.write(AbortiveLinger())
+            socket.setSocketOption(
+                OptionLevel.SOCKET,
+                OptionName.SO_LINGER,
+                CPointer(value),
+                AbortiveLinger.size
+            )
+        } finally {
+            LibC.free(value)
         }
     }
 }
@@ -536,9 +695,18 @@ public class StdNetTransportListener <: TransportListener {
     public func accept(
         context: OperationContext
     ): DuplexTransport {
-        checkContext(context, NetworkErrorCategory.Accept, NetworkPhase.ServerAccept)
+        checkContext(
+            context,
+            NetworkErrorCategory.Accept,
+            NetworkPhase.ServerAccept,
+            localEndpoint: Some(localEndpoint)
+        )
         if (isClosed()) {
-            throw closedError(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept)
+            throw closedError(
+                NetworkErrorCategory.Accept,
+                NetworkPhase.ServerAccept,
+                localEndpoint: Some(localEndpoint)
+            )
         }
         let gate = OperationGate()
         beginAccept()
@@ -547,30 +715,61 @@ public class StdNetTransportListener <: TransportListener {
             let accepted = server.accept(timeout: remaining(context))
             if (!gate.complete()) {
                 accepted.close()
-                throw cancelled(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept)
+                throw cancelled(
+                    NetworkErrorCategory.Accept,
+                    NetworkPhase.ServerAccept,
+                    localEndpoint: Some(localEndpoint)
+                )
             }
             StdNetTransport.fromAccepted(accepted, stagingBufferSize: stagingBufferSize)
         } catch (error: SocketTimeoutException) {
             if (!gate.complete()) {
-                throw cancelled(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept, cause: Some(error))
+                throw cancelled(
+                    NetworkErrorCategory.Accept,
+                    NetworkPhase.ServerAccept,
+                    cause: Some(error),
+                    localEndpoint: Some(localEndpoint)
+                )
             }
-            throw timedOut(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept, error)
+            throw timedOut(
+                NetworkErrorCategory.Accept,
+                NetworkPhase.ServerAccept,
+                error,
+                localEndpoint: Some(localEndpoint)
+            )
         } catch (error: SocketException) {
             let _ = gate.complete()
             if (context.isCancellationRequested()) {
-                throw cancelled(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept, cause: Some(error))
+                throw cancelled(
+                    NetworkErrorCategory.Accept,
+                    NetworkPhase.ServerAccept,
+                    cause: Some(error),
+                    localEndpoint: Some(localEndpoint)
+                )
             }
             if (context.isDeadlineExceeded()) {
-                throw deadlineExceeded(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept, cause: Some(error))
+                throw deadlineExceeded(
+                    NetworkErrorCategory.Accept,
+                    NetworkPhase.ServerAccept,
+                    cause: Some(error),
+                    localEndpoint: Some(localEndpoint)
+                )
             }
             if (isClosed()) {
-                throw closedError(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept, cause: Some(error))
+                throw closedError(
+                    NetworkErrorCategory.Accept,
+                    NetworkPhase.ServerAccept,
+                    cause: Some(error),
+                    localEndpoint: Some(localEndpoint)
+                )
             }
             throw NetworkException(
                 NetworkErrorCategory.Accept,
                 NetworkPhase.ServerAccept,
                 NetworkErrorCode.SystemFailure,
                 "std.net accept failed without a public native error code",
+                retryability: Retryability.Unknown,
+                localEndpoint: Some(localEndpoint),
                 cause: Some(error)
             )
         } finally {
@@ -615,7 +814,11 @@ public class StdNetTransportListener <: TransportListener {
 
     private func beginAccept(): Unit {
         if (isClosed()) {
-            throw closedError(NetworkErrorCategory.Accept, NetworkPhase.ServerAccept)
+            throw closedError(
+                NetworkErrorCategory.Accept,
+                NetworkPhase.ServerAccept,
+                localEndpoint: Some(localEndpoint)
+            )
         }
         activeAccepts.fetchAdd(1)
     }
@@ -656,13 +859,25 @@ private func isBackgroundContext(context: OperationContext): Bool {
 private func checkContext(
     context: OperationContext,
     category: NetworkErrorCategory,
-    phase: NetworkPhase
+    phase: NetworkPhase,
+    localEndpoint!: ?SocketEndpoint = None<SocketEndpoint>,
+    remoteEndpoint!: ?SocketEndpoint = None<SocketEndpoint>
 ): Unit {
     if (context.isCancellationRequested()) {
-        throw cancelled(category, phase)
+        throw cancelled(
+            category,
+            phase,
+            localEndpoint: localEndpoint,
+            remoteEndpoint: remoteEndpoint
+        )
     }
     if (context.isDeadlineExceeded()) {
-        throw deadlineExceeded(category, phase)
+        throw deadlineExceeded(
+            category,
+            phase,
+            localEndpoint: localEndpoint,
+            remoteEndpoint: remoteEndpoint
+        )
     }
 }
 
@@ -724,7 +939,9 @@ private func concurrent(category: NetworkErrorCategory, phase: NetworkPhase): Ne
 private func cancelled(
     category: NetworkErrorCategory,
     phase: NetworkPhase,
-    cause!: ?Exception = None<Exception>
+    cause!: ?Exception = None<Exception>,
+    localEndpoint!: ?SocketEndpoint = None<SocketEndpoint>,
+    remoteEndpoint!: ?SocketEndpoint = None<SocketEndpoint>
 ): NetworkException {
     NetworkException(
         category,
@@ -732,6 +949,8 @@ private func cancelled(
         NetworkErrorCode.Cancelled,
         "operation cancelled",
         retryability: Retryability.Never,
+        localEndpoint: localEndpoint,
+        remoteEndpoint: remoteEndpoint,
         cause: cause
     )
 }
@@ -739,7 +958,9 @@ private func cancelled(
 private func deadlineExceeded(
     category: NetworkErrorCategory,
     phase: NetworkPhase,
-    cause!: ?Exception = None<Exception>
+    cause!: ?Exception = None<Exception>,
+    localEndpoint!: ?SocketEndpoint = None<SocketEndpoint>,
+    remoteEndpoint!: ?SocketEndpoint = None<SocketEndpoint>
 ): NetworkException {
     NetworkException(
         category,
@@ -747,6 +968,8 @@ private func deadlineExceeded(
         NetworkErrorCode.TimedOut,
         "operation deadline exceeded",
         retryability: Retryability.Temporary,
+        localEndpoint: localEndpoint,
+        remoteEndpoint: remoteEndpoint,
         cause: cause
     )
 }
@@ -754,7 +977,9 @@ private func deadlineExceeded(
 private func timedOut(
     category: NetworkErrorCategory,
     phase: NetworkPhase,
-    cause: Exception
+    cause: Exception,
+    localEndpoint!: ?SocketEndpoint = None<SocketEndpoint>,
+    remoteEndpoint!: ?SocketEndpoint = None<SocketEndpoint>
 ): NetworkException {
     NetworkException(
         category,
@@ -762,6 +987,8 @@ private func timedOut(
         NetworkErrorCode.TimedOut,
         "std.net operation timed out",
         retryability: Retryability.Temporary,
+        localEndpoint: localEndpoint,
+        remoteEndpoint: remoteEndpoint,
         cause: Some(cause)
     )
 }
@@ -769,7 +996,9 @@ private func timedOut(
 private func closedError(
     category: NetworkErrorCategory,
     phase: NetworkPhase,
-    cause!: ?Exception = None<Exception>
+    cause!: ?Exception = None<Exception>,
+    localEndpoint!: ?SocketEndpoint = None<SocketEndpoint>,
+    remoteEndpoint!: ?SocketEndpoint = None<SocketEndpoint>
 ): NetworkException {
     NetworkException(
         category,
@@ -777,6 +1006,8 @@ private func closedError(
         NetworkErrorCode.Closed,
         "transport is closed",
         retryability: Retryability.Never,
+        localEndpoint: localEndpoint,
+        remoteEndpoint: remoteEndpoint,
         cause: cause
     )
 }

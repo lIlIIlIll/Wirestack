@@ -4,6 +4,18 @@ build/
 build-script-cache/
 dist/
 out/
+__pycache__/
+!tools/tasks/*.json
+!docs/evidence/P1-012/*.json
+!docs/evidence/M3-029/*.json
+!docs/evidence/M3-029/linux_x86_64/*.json
+!docs/evidence/M6-026/*.json
+!docs/evidence/M6-026/linux_x86_64/*.json
+!docs/evidence/M7-027/*.json
+!docs/evidence/M7-027/linux_x86_64/*.json
+!docs/evidence/M7-022/*.json
+!docs/evidence/M7-022/linux_x86_64/*.json
+*.py[cod]
 
 # Durable, checksum-pinned evidence overrides user-level *.json ignores.
 !docs/evidence/M0-005/linux_x86_64/*.json
@@ -13,6 +25,15 @@ out/
 !docs/evidence/M6-023/linux_x86_64/*.json
 !docs/evidence/M2-003/linux_x86_64/*.json
 !docs/evidence/M2-005/linux_glibc_x86_64/*.json
+!docs/evidence/M2-015/linux_glibc_x86_64/*.json
+!docs/evidence/M2-016/linux_glibc_x86_64/*.json
+!docs/evidence/M3-028/linux_glibc_x86_64/*.json
+!docs/evidence/M7-021/linux_x86_64/*.json
+!docs/evidence/M7-023/linux_glibc_x86_64/*.json
+!docs/evidence/M7-024/linux_glibc_x86_64/*.json
+!docs/evidence/M7-025/linux_x86_64/*.json
+!docs/evidence/M7-026/linux_x86_64/*.json
+!docs/api/baselines/*.json
 
 # Local tool state
 .cjpm/
@@ -31,6 +52,7 @@ Thumbs.db
 *.log
 !docs/evidence/M2-003/linux_x86_64/*.log
 !docs/evidence/M2-005/linux_glibc_x86_64/*.log
+!docs/evidence/M7-022/linux_x86_64/*.log
 *.tmp
 *.prof
 *.trace

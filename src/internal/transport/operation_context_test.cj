@@ -55,6 +55,57 @@ class OperationContextTest {
     }
 
     @TestCase
+    func derivationHelpersChangeOnlyTheirNamedField(): Unit {
+        let originalSource = CancellationSource()
+        let replacementSource = CancellationSource()
+        let trace = NetworkTraceContext("request-2", spanId: "headers")
+        let sink = RecordingNetworkEventSink()
+        let parent = Deadline.after(24 * Duration.hour)
+        let context = OperationContext(
+            deadline: Some(parent),
+            cancellation: originalSource.token,
+            trace: Some(trace),
+            eventSink: Some(sink)
+        )
+
+        let replacedCancellation = context.withCancellation(replacementSource.token)
+        let clearedTrace = context.withTrace(None<NetworkTraceContext>)
+        let clearedSink = context.withEventSink(None<NetworkEventSink>)
+        let relativeChild = context.shortenDeadline(Duration.second)
+        let earlier = Deadline(MonoTime.now() + 2 * Duration.second)
+        let absoluteChild = context.withEarlierDeadline(earlier)
+
+        @Expect(replacedCancellation.deadline.getOrThrow().expiresAt, parent.expiresAt)
+        @Expect(replacedCancellation.trace.getOrThrow().traceId, trace.traceId)
+        @Expect(replacedCancellation.eventSink.isSome())
+        @Expect(clearedTrace.deadline.getOrThrow().expiresAt, parent.expiresAt)
+        @Expect(clearedTrace.trace.isNone())
+        @Expect(clearedTrace.eventSink.isSome())
+        @Expect(clearedSink.deadline.getOrThrow().expiresAt, parent.expiresAt)
+        @Expect(clearedSink.trace.getOrThrow().traceId, trace.traceId)
+        @Expect(clearedSink.eventSink.isNone())
+        @Expect(relativeChild.deadline.getOrThrow().expiresAt < parent.expiresAt)
+        @Expect(relativeChild.trace.getOrThrow().traceId, trace.traceId)
+        @Expect(relativeChild.eventSink.isSome())
+        @Expect(absoluteChild.deadline.getOrThrow().expiresAt, earlier.expiresAt)
+        @Expect(absoluteChild.trace.getOrThrow().traceId, trace.traceId)
+        @Expect(absoluteChild.eventSink.isSome())
+        @Expect(context.deadline.getOrThrow().expiresAt, parent.expiresAt)
+        @Expect(context.trace.getOrThrow().traceId, trace.traceId)
+        @Expect(context.eventSink.isSome())
+
+        originalSource.cancel()
+        @Expect(context.isCancellationRequested())
+        @Expect(!replacedCancellation.isCancellationRequested())
+        @Expect(clearedTrace.isCancellationRequested())
+        @Expect(clearedSink.isCancellationRequested())
+        @Expect(relativeChild.isCancellationRequested())
+        @Expect(absoluteChild.isCancellationRequested())
+        replacementSource.cancel()
+        @Expect(replacedCancellation.isCancellationRequested())
+    }
+
+    @TestCase
     func earlierDeadlineCannotBeExtended(): Unit {
         let now = MonoTime.now()
         let early = Deadline(now + Duration.second)
@@ -70,22 +121,23 @@ class OperationContextTest {
 
     @TestCase
     func traceIdentifiersAreBoundedAndNonEmpty(): Unit {
-        var emptyRejected = false
-        try {
-            let _ = NetworkTraceContext("")
-        } catch (_: IllegalArgumentException) {
-            emptyRejected = true
-        }
+        let boundary = "x" * 128
+        let accepted = NetworkTraceContext(boundary, spanId: boundary)
+        @Expect(accepted.traceId, boundary)
+        @Expect(accepted.spanId, boundary)
 
-        var oversizedRejected = false
-        try {
-            let _ = NetworkTraceContext("x" * 129)
-        } catch (_: IllegalArgumentException) {
-            oversizedRejected = true
-        }
+        @Expect(traceContextIsRejected("", ""))
+        @Expect(traceContextIsRejected("x" * 129, ""))
+        @Expect(traceContextIsRejected("trace", "x" * 129))
+    }
+}
 
-        @Expect(emptyRejected)
-        @Expect(oversizedRejected)
+private func traceContextIsRejected(traceId: String, spanId: String): Bool {
+    try {
+        let _ = NetworkTraceContext(traceId, spanId: spanId)
+        false
+    } catch (_: IllegalArgumentException) {
+        true
     }
 }
 

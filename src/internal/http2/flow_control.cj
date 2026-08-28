@@ -76,6 +76,7 @@ public class Http2FlowController {
     private let changed = synchronized(mutex) { mutex.condition() }
     private let streams = ArrayList<Http2FlowStream>()
     private let permits = ArrayList<Http2SendPermit>()
+    private let reservationWaiters = ArrayList<Http2ReservationWaiter>()
     private var sendConnectionWindow: Int64 = HTTP2_DEFAULT_WINDOW
     private var receiveConnectionWindow: Int64 = HTTP2_DEFAULT_WINDOW
     private var pendingConnectionReceiveCredit: Int64 = 0
@@ -83,9 +84,10 @@ public class Http2FlowController {
     private var sendInitialStreamWindow: Int64 = HTTP2_DEFAULT_WINDOW
     private var receiveInitialStreamWindow: Int64 = HTTP2_DEFAULT_WINDOW
     private var peerMaxFrameSize: Int64 = 16384
-    private var waitingReservations: Int64 = 0
     private var sendStallCount: Int64 = 0
     private var nextPermitId: Int64 = 1
+    private var nextReservationWaiterId: Int64 = 1
+    private var nextSendGrantOrder: Int64 = 1
     private var closed = false
 
     public prop sendConnectionAvailable: Int64 {
@@ -173,7 +175,8 @@ public class Http2FlowController {
         requirePositiveFlowBytes(requested)
         synchronized(mutex) {
             requireFlowOpenLocked()
-            if (permits.size + waitingReservations >= Int64(limits.maxPendingWrites)) {
+            if (hasReservableReservationWaiterLocked() ||
+                permits.size >= Int64(limits.maxPendingWrites)) {
                 return None<Http2SendPermit>
             }
             let stream = requireFlowStreamLocked(streamId)
@@ -191,29 +194,38 @@ public class Http2FlowController {
     ): Http2SendPermit {
         requirePositiveFlowBytes(requested)
         let registration = context.cancellation.register { => wakeFlowWaiters() }
-        var counted = false
         var stalled = false
         try {
             synchronized(mutex) {
                 requireFlowOpenLocked()
-                if (permits.size + waitingReservations >= Int64(limits.maxPendingWrites)) {
+                if (permits.size + reservationWaiters.size >= Int64(limits.maxPendingWrites)) {
                     throw Http2WriteQueueFullException("HTTP/2 flow reservation limit reached")
                 }
-                waitingReservations += 1
-                counted = true
-                while (true) {
-                    checkFlowContext(context)
-                    requireFlowOpenLocked()
-                    let stream = requireFlowStreamLocked(streamId)
-                    let amount = reservableLocked(stream, requested)
-                    if (amount > 0) { return reserveLocked(stream, amount) }
-                    if (!stalled) { sendStallCount += 1; stalled = true }
-                    waitFlowChangeLocked(context)
+                let waiter = Http2ReservationWaiter(
+                    nextReservationWaiterId, streamId, requested
+                )
+                nextReservationWaiterId += 1
+                reservationWaiters.add(waiter)
+                changed.notifyAll()
+                try {
+                    while (true) {
+                        checkFlowContext(context)
+                        requireFlowOpenLocked()
+                        let stream = requireFlowStreamLocked(streamId)
+                        let amount = reservableLocked(stream, requested)
+                        if (amount > 0 && isNextReservationWaiterLocked(waiter)) {
+                            return reserveLocked(stream, amount)
+                        }
+                        if (!stalled) { sendStallCount += 1; stalled = true }
+                        waitFlowChangeLocked(context)
+                    }
+                    throw IllegalStateException("unreachable HTTP/2 flow reservation state")
+                } finally {
+                    removeReservationWaiterLocked(waiter)
+                    changed.notifyAll()
                 }
-                throw IllegalStateException("unreachable HTTP/2 flow reservation state")
             }
         } finally {
-            if (counted) { synchronized(mutex) { waitingReservations -= 1; changed.notifyAll() } }
             registration.unregister()
         }
     }
@@ -314,6 +326,29 @@ public class Http2FlowController {
         consumeReceivedWithPolicy(streamId, bytes, true)
     }
 
+    /** Flushes coalesced connection credit only when the peer cannot send more DATA. */
+    internal func flushStalledConnectionReceiveCredit(): Array<Http2Frame> {
+        let credit = synchronized(mutex) {
+            if (closed || receiveConnectionWindow != 0 || pendingConnectionReceiveCredit == 0) {
+                0
+            } else {
+                let claimed = pendingConnectionReceiveCredit
+                if (receiveConnectionWindow > HTTP2_MAX_WINDOW - claimed) {
+                    throw IllegalStateException("HTTP/2 connection receive credit accounting overflow")
+                }
+                receiveConnectionWindow += claimed
+                pendingConnectionReceiveCredit = 0
+                claimed
+            }
+        }
+        if (credit == 0) { [] }
+        else {
+            [encodeHttp2WindowUpdate(
+                Http2StreamId(0u32), UInt32(credit), limits: limits
+            )]
+        }
+    }
+
     private func consumeReceivedWithPolicy(
         streamId: Http2StreamId,
         bytes: Int64,
@@ -412,6 +447,8 @@ public class Http2FlowController {
     private func reserveLocked(stream: Http2FlowStream, amount: Int64): Http2SendPermit {
         let permit = Http2SendPermit(nextPermitId, this, stream.id, amount)
         nextPermitId += 1
+        stream.lastSendGrantOrder = nextSendGrantOrder
+        nextSendGrantOrder += 1
         stream.reservedSendBytes += amount
         reservedConnectionBytes += amount
         permits.add(permit)
@@ -423,6 +460,59 @@ public class Http2FlowController {
             minFlow(requested, peerMaxFrameSize),
             minFlow(sendConnectionWindow - reservedConnectionBytes, stream.sendWindow - stream.reservedSendBytes)
         )
+    }
+
+    private func isNextReservationWaiterLocked(target: Http2ReservationWaiter): Bool {
+        var selected: ?Http2ReservationWaiter = None<Http2ReservationWaiter>
+        for (waiter in reservationWaiters) {
+            if (let Some(stream) <- findFlowStreamLocked(waiter.streamId)) {
+                if (reservableLocked(stream, waiter.requested) <= 0) { continue }
+                match (selected) {
+                    case Some(current) =>
+                        if (reservationWaiterPrecedesLocked(waiter, current)) {
+                            selected = Some(waiter)
+                        }
+                    case None => selected = Some(waiter)
+                }
+            }
+        }
+        match (selected) {
+            case Some(waiter) => waiter.id == target.id
+            case None => false
+        }
+    }
+
+    private func hasReservableReservationWaiterLocked(): Bool {
+        for (waiter in reservationWaiters) {
+            if (let Some(stream) <- findFlowStreamLocked(waiter.streamId)) {
+                if (reservableLocked(stream, waiter.requested) > 0) { return true }
+            }
+        }
+        false
+    }
+
+    private func reservationWaiterPrecedesLocked(
+        candidate: Http2ReservationWaiter,
+        current: Http2ReservationWaiter
+    ): Bool {
+        let candidateStream = requireFlowStreamLocked(candidate.streamId)
+        let currentStream = requireFlowStreamLocked(current.streamId)
+        if (candidateStream.lastSendGrantOrder != currentStream.lastSendGrantOrder) {
+            return candidateStream.lastSendGrantOrder < currentStream.lastSendGrantOrder
+        }
+        if (candidate.streamId.value != current.streamId.value) {
+            return candidate.streamId.value < current.streamId.value
+        }
+        candidate.id < current.id
+    }
+
+    private func removeReservationWaiterLocked(target: Http2ReservationWaiter): Unit {
+        for (index in 0..reservationWaiters.size) {
+            if (reservationWaiters[index].id == target.id) {
+                let _ = reservationWaiters.remove(at: index)
+                return
+            }
+        }
     }
 
     private func cancelStreamPermitsLocked(streamId: Http2StreamId): Unit {
@@ -491,11 +581,24 @@ private class Http2FlowStream {
     var reservedSendBytes: Int64 = 0
     var bufferedReceiveBytes: Int64 = 0
     var pendingReceiveCredit: Int64 = 0
+    var lastSendGrantOrder: Int64 = 0
 
     init(id: Http2StreamId, sendWindow: Int64, receiveWindow: Int64) {
         this.id = id
         this.sendWindow = sendWindow
         this.receiveWindow = receiveWindow
+    }
+}
+
+private class Http2ReservationWaiter {
+    let id: Int64
+    let streamId: Http2StreamId
+    let requested: Int64
+
+    init(id: Int64, streamId: Http2StreamId, requested: Int64) {
+        this.id = id
+        this.streamId = streamId
+        this.requested = requested
     }
 }
 

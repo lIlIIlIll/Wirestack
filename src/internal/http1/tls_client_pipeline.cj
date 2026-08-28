@@ -208,7 +208,9 @@ public class AwsLcHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandshak
                 ReferenceIdentity.Dns(host),
                 serverName: Some(host)
             )
-            let connection = TlsConnection.handshake(engine, transport, context: operation)
+            let connection = TlsConnection.handshake(
+                engine, transport, context: operation, pump: TlsEnginePump()
+            )
             let protocol = try {
                 match (connection.handshakeInfo) {
                     case Some(info) => match (info.negotiatedAlpn) {

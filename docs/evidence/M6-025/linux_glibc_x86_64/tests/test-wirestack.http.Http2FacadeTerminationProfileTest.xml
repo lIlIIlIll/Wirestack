@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="wirestack.http.Http2FacadeTerminationProfileTest" tests="1" failures="0" errors="0" skipped="0" time="65.521248" timestamp="2026-08-27T14:04:52.924291342Z">
+	<properties>
+		<property name="tags" value="Performance"/>
+	</properties>
+	<testcase name="runsConcurrentFacadeSequenceOneHundredTimesAndTerminates" classname="wirestack.http.Http2FacadeTerminationProfileTest" assertions="45200" time="65.520503"/>
+</testsuite>
