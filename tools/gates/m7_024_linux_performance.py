@@ -32,6 +32,12 @@ EXPECTED_ARTIFACTS = (
     "http2",
     "sse",
 )
+HTTP2_SOURCE_DIRECTORIES = (
+    "src/internal/http1",
+    "src/internal/http2",
+    "src/internal/http_model",
+    "src/internal/transport",
+)
 
 
 class GateError(Exception):
@@ -47,6 +53,25 @@ def sha256(path: Path) -> str:
     with path.open("rb") as stream:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
+    return digest.hexdigest()
+
+
+def http2_source_sha256(root: Path) -> str:
+    digest = hashlib.sha256()
+    paths: list[Path] = []
+    for directory in HTTP2_SOURCE_DIRECTORIES:
+        paths.extend(
+            path for path in (root / directory).glob("*.cj")
+            if not path.name.endswith("_test.cj")
+        )
+    if not paths:
+        raise GateError("HTTP/2 production source inventory is empty")
+    for path in sorted(paths):
+        relative = path.relative_to(root).as_posix()
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
     return digest.hexdigest()
 
 
@@ -190,6 +215,11 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
             character not in "0123456789abcdef" for character in digest
         ):
             raise GateError(f"invalid artifact digest: {name}")
+    http2_source = artifacts["http2"].get("source_sha256")
+    if not isinstance(http2_source, str) or len(http2_source) != 64 or any(
+        character not in "0123456789abcdef" for character in http2_source
+    ):
+        raise GateError("invalid HTTP/2 production source digest")
     if not isinstance(manifest.get("thresholds"), dict):
         raise GateError("manifest thresholds are missing")
 
@@ -407,7 +437,9 @@ def validate_http1(document: Mapping[str, Any], limits: Mapping[str, Any],
 
 
 def validate_http2(document: Mapping[str, Any], limits: Mapping[str, Any],
-                   expected_environment: Mapping[str, Any] | None = None) -> DomainResult:
+                   expected_environment: Mapping[str, Any] | None = None,
+                   expected_source_sha256: str | None = None,
+                   current_source_sha256: str | None = None) -> DomainResult:
     result = DomainResult("http2")
     result.check("source decision", document["decision"], "eq", "PASS")
     method = document["method"]
@@ -418,6 +450,19 @@ def validate_http2(document: Mapping[str, Any], limits: Mapping[str, Any],
         result.check("HTTP/2 system", platform_data["system"], "eq", expected_environment["system"])
         result.check("HTTP/2 machine", platform_data["machine"], "eq", expected_environment["machine"])
         check_toolchain(result, "HTTP/2", document["toolchain"]["cjc"], document["toolchain"]["cjpm"], expected_environment)
+    if expected_source_sha256 is not None:
+        result.check(
+            "HTTP/2 report production source digest",
+            document["source"]["production_source_sha256"],
+            "eq",
+            expected_source_sha256,
+        )
+        result.check(
+            "HTTP/2 current production source digest",
+            current_source_sha256,
+            "eq",
+            expected_source_sha256,
+        )
     reduction = document["connection_reduction"]
     result.check("connection reduction decision", reduction["decision"], "eq", "PASS")
     result.check("HTTP/2 connection ratio", reduction["ratio"], "le", limits["maximum_connection_ratio"])
@@ -570,7 +615,11 @@ def evaluate(root: Path, manifest: Mapping[str, Any]) -> dict[str, Any]:
         ("dns-to-connected", lambda: validate_dns(documents["dns_to_connected"], thresholds["dns_to_connected"], environment)),
         ("tls", lambda: validate_tls(documents["tls"], thresholds["tls"], environment)),
         ("http1", lambda: validate_http1(documents["http1"], thresholds["http1"], environment)),
-        ("http2", lambda: validate_http2(documents["http2"], thresholds["http2"], environment)),
+        ("http2", lambda: validate_http2(
+            documents["http2"], thresholds["http2"], environment,
+            manifest["artifacts"]["http2"]["source_sha256"],
+            http2_source_sha256(root),
+        )),
         ("cancellation", lambda: validate_cancellation(documents["cancellation"], thresholds["cancellation"], environment)),
         ("sse", lambda: validate_sse(documents["sse"], thresholds["sse"], environment)),
         ("memory", lambda: validate_memory(documents, manifest)),
