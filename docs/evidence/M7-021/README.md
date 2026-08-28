@@ -13,10 +13,10 @@ The clean consumer ran an HTTPS client and server through the public
 | Field | Result |
 |---|---|
 | Name | `wirestack-0.1.0-linux-x86_64-glibc.tar.gz` |
-| Size | 2,474,219 bytes |
-| SHA-256 | `55aec28b201b3481e85b647eee0f180f3f0ca0677b098f866b385a8e6a9bba55` |
-| Payload SHA-256 | `44a2127078e1f0c57c5406caff995b72892bf78e60ada57ded972df7b1d7bfbc` |
-| Production Cangjie files | 87 |
+| Size | 2,478,208 bytes |
+| SHA-256 | `aad5b788d3404f80a5934fa5e156ee653e592820651bcc9f0198512a74ce4a04` |
+| Payload SHA-256 | `a02aaa388356e62a8da8ad8b3b16fda0a1d9bc9767adeb2e0322fd7f58c5b869` |
+| Production Cangjie files | 88 |
 | Reproducibility | Two builds were byte-identical |
 
 The artifact contains production Cangjie source, CJPM metadata, the pinned
@@ -38,6 +38,7 @@ The native smoke returned:
 
 ```text
 HTTPS_CLIENT_SERVER=PASS
+PUBLIC_TLS_FACADE=PASS
 HTTP_VERSION=2
 transportBackend=std-net
 runtimeIoBackend=cjnative
