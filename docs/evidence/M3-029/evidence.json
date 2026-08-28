@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-28T03:23:56.802706Z",
+  "generated_at_utc": "2026-08-28T05:37:02.450098Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,7 +11,7 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-029/task-check.json",
-      "sha256": "8cf17b3242c1ad6dc622b36c541d0d2d2170b9658add0e70a2aca17a19eaf342",
+      "sha256": "afed9a5371577b95546f40bf69261a5c57166b52ccdc82b0a15cdc92b60f6d55",
       "source_task": "M3-029"
     },
     {
@@ -21,25 +21,25 @@
       "source_task": "M3-029"
     }
   ],
-  "revision": "fe02e5487ec2ec268b4137dedf61d1704ac508ea",
+  "revision": "492c13dfb26532f0be7e75df838c0edb36e5f101",
   "schema_version": 1,
   "source_sha256": {
-    ".gitignore": "b66bfa6a00bb3cac76f66fd2c23258e565c51ab0de5acf84c1d8320a98705429",
+    ".gitignore": "e09286a746cd8cba718f97d5bc3c0de373b9cb3e115d67b2c61b2e2e3b7f2361",
     "docs/api/baselines/wirestack-linux-v0.json": "50e8aa855857319c4841be8880f973c5702a2be4490acf07b6076ad48085efd6",
     "docs/evidence/M3-029/README.md": "f213099c6c321004db80b6a39e2226342c500235d965925f5e1541ecd2df63c8",
     "docs/evidence/M3-029/test-plan.md": "b04ecbf52c750aedc39196936ed6191405fb7f0c1573d464c180195c84e1b313",
-    "docs/evidence/M7-019/linux_x86_64/audit.data": "f68b6f0839c790462c466db6a0a1de79f03ed0083676e47bfefdbe7eba49fa8d",
-    "docs/evidence/M7-020/linux_x86_64/audit.data": "68f1855ee9f534dccbbb0d4ed57e819ac93169094b334deaa93d928ea982c030",
-    "docs/evidence/M7-021/linux_x86_64/qualification.json": "e858f9d134f5a1bf90654fd54c7fb4b8405efbd5aa1d592e27f0fee0c8039393",
-    "docs/evidence/M7-025/README.md": "4b0aa06a57cafab27a514541bb0fedc446252691f0447eab8ec76e732ec8daa6",
-    "docs/evidence/M7-025/linux_x86_64/build-fingerprint.json": "151490bb6fd11417e3af16592fdf57483aa0ea6000fd0d325e6ad95f508f68b7",
-    "docs/evidence/M7-025/linux_x86_64/bundle.json": "02d66917f66747b4c28df2ccbe989115b2ebfcbdd05c74ab3900350926d195d9",
-    "docs/evidence/M7-025/linux_x86_64/provider-manifest.json": "3db913cf1ac0a01e2dd303ddee15fed376508f87f0deb8f332ee5dd896b6f06f",
-    "docs/evidence/M7-025/linux_x86_64/sbom.spdx.json": "d015580a738b5bb1bdab595c71fd4a4596058699bc0045fa1b25700cac33b68c",
+    "docs/evidence/M7-019/linux_x86_64/audit.data": "d9edfd74c4e7dbd1160d3bd0e1be643b940e08fa61ba93f11d9a89f820c33082",
+    "docs/evidence/M7-020/linux_x86_64/audit.data": "69bab3c10fe29c2689e8dea0eec2729dfd72390e6b803068e3fb8671599bd5e5",
+    "docs/evidence/M7-021/linux_x86_64/qualification.json": "bfc5e1d84eab9b8aa3c1b5a20bf48eddc45f7686b44bd1f46bb16ce879415fc9",
+    "docs/evidence/M7-025/README.md": "58ce41592e28bb2cebbe0783d5d96bcaea2e79596f35161de1e8473ce4b19a05",
+    "docs/evidence/M7-025/linux_x86_64/build-fingerprint.json": "87cba146a6f3f26a077a88c283c8c635689e1fadef02e2cfef165a978f43d8a0",
+    "docs/evidence/M7-025/linux_x86_64/bundle.json": "58c31f352624a77d3de0b8d9721c5aac27bcbadbd77fe7852bd385b01948d96c",
+    "docs/evidence/M7-025/linux_x86_64/provider-manifest.json": "dc081ce783cec65d1c6f1e2f89b53a64ae5b80f93d35ed891a5f286eadb858e1",
+    "docs/evidence/M7-025/linux_x86_64/sbom.spdx.json": "c30601af48c237f6c287f7535cdd6b1120120cafef5393cf77b9119b891b5998",
     "docs/evidence/M7-026/linux_x86_64/api-compatibility.json": "355ffcc1752328570a4bdbf2a0d03eaea377c22d0934d9241ebd303b8bf54cf9",
-    "docs/planning/implementation-backlog.md": "b601a61f1400ce0ac0abaceffebcead2a5a6df96db1805b31b2b9baba8867831",
-    "docs/planning/linux-status.md": "1aeddbbf27d5e7d06e33247a9d775e7d87511d1082636ca183405aceaa65dc08",
-    "docs/planning/status.md": "917d639df5053cfc5a2c232381901d0093c42f900a7f467b85fd0f8b3c823b45",
+    "docs/planning/implementation-backlog.md": "b0be7da7b65d299c49d9a8befa862200a161b6f2908624b64d5502488c8776a7",
+    "docs/planning/linux-status.md": "47a8dabe0955e273bdfb46c2cfd4d5ddb85a27d02bfec33a29779ad19e89c233",
+    "docs/planning/status.md": "bedbc4bc05fd632f1c49166c0c21af9510af0e2be7ad956ed77578cb6b5c04df",
     "scripts/check-m3-029-linux-tls-facade": "428d55be11bbbf2ac25c0c9ff2b676689400ae556db5be1cceaaace06cf712cf",
     "src/tls/facade.cj": "49c9936f2b260f5019a81e9bd8d28ee71fb7e2cc21991ab3c1a65ff43c87581e",
     "src/tls/facade_test.cj": "bdfe795edc520c190485d5f00b5ea178487ed8720d9c3b157a34c99f3ce239f9",
@@ -48,7 +48,7 @@
     "tools/release_smoke/main.cj": "f2cafa9f57c9ee01fc06f74bed9e53a55888fc6278e0017f2b991d3515a8cdca",
     "tools/tasks/M3-029.json": "9dd4fcdf8a2aa5e4c624336f9ca579dd66451e6d23e1d57e8dfe6dd70da2975a",
     "tools/tests/test_m3_029_linux_tls_facade.py": "e31ec302faaa793ad371138feb3afda42f5964c9de3c6dc5bb23f16df4d8b51a",
-    "tools/tests/test_m7_linux_task_graph.py": "48915c1c9afecaafd948a485574e994417f9f5c100b29565327eb3864490001a"
+    "tools/tests/test_m7_linux_task_graph.py": "7c38edf184399998fdd7cb40e03ba8b145ef0e0f83a3959790e1d37bf851da7f"
   },
   "source_task": "M3-029",
   "toolchain": {
