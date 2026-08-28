@@ -97,6 +97,22 @@ class M7024LinuxPerformanceGateTest(unittest.TestCase):
             for item in report["checks"]
         ))
 
+    def test_http2_source_drift_fails_domain(self):
+        expected = self.manifest["artifacts"]["http2"]["source_sha256"]
+        report = gate.validate_http2(
+            self.documents["http2"],
+            self.manifest["thresholds"]["http2"],
+            self.manifest["environment"],
+            expected,
+            "0" * 64,
+        ).report()
+        self.assertEqual("FAIL", report["decision"])
+        self.assertTrue(any(
+            item["name"] == "HTTP/2 current production source digest"
+            and item["decision"] == "FAIL"
+            for item in report["checks"]
+        ))
+
     def test_domain_schema_error_and_atomic_failure_report_are_explicit(self):
         outcome = gate.run_validator(
             "tls",

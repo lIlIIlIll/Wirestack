@@ -66,14 +66,14 @@ modify a source report, build an SDK component, or access another repository.
 
 | Test ID | Scenario IDs | Path IDs | Input | Expected result | Assertions | Type |
 |---|---|---|---|---|---|---|
-| T001 | S001-S006 | P001,P003,P005,P007,P009,P011 | Checked-in manifest and reports | Aggregate PASS with eight PASS domains | Assert exact domain set, artifact digests, controls, extracted metrics and zero failures | minimal |
+| T001 | S001,S002,S003,S004,S005,S006 | P001,P003,P005,P007,P009,P011 | Checked-in manifest and reports | Aggregate PASS with eight PASS domains | Assert exact domain set, artifact digests, controls, extracted metrics and zero failures | minimal |
 | T002 | S007 | P002,P012 | Manifest with an unknown or missing domain | Aggregate FAIL | Assert exact-domain error and no false PASS | boundary |
 | T003 | S007 | P002,P004,P012 | Escaping path, stale digest, missing file and malformed JSON | Aggregate FAIL before metric trust | Assert affected artifact and reason are retained | boundary,error |
 | T004 | S007 | P004,P010,P012 | `NaN`, infinity, wrong scalar type and missing metric | Aggregate FAIL | Assert finite-number/type/key checks fail closed | boundary,error |
 | T005 | S007 | P006,P008,P012 | Wrong platform/toolchain, reduced rounds or missing workload | Affected domain FAIL | Assert actual and required controls are present in output | regression |
 | T006 | S007 | P010,P012 | Each comparison operator at equality and just beyond its limit | Equality passes and threshold miss fails | Assert `ge`, `le` and `eq` boundary semantics | boundary |
 | T007 | S008 | P001,P003,P011 | Two runs with identical inputs | Both PASS with stable normalized domain results | Assert input digests unchanged and volatile timestamps are the only permitted report difference | repeated-call |
-| T008 | S001-S006 | P003,P005,P007,P009 | Native glibc release evidence inspection | Platform-specific PASS only | Assert Linux/x86_64/glibc and pinned compiler/CJPM; make no musl or global claim | platform |
+| T008 | S001,S002,S003,S004,S005,S006 | P003,P005,P007,P009 | Native glibc release evidence inspection | Platform-specific PASS only | Assert Linux/x86_64/glibc and pinned compiler/CJPM; make no musl or global claim | platform |
 
 ## Evidence and gaps
 
