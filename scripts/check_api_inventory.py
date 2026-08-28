@@ -78,7 +78,7 @@ def main() -> int:
     inventory = load_toml(INVENTORY)
     if inventory.get("inventory_version") != 1:
         fail("unsupported inventory_version")
-    if inventory.get("release_version") != "2.0.0":
+    if inventory.get("release_version") != "2.0.1":
         fail("inventory release_version must match the 2.0 release line")
     check_versions(inventory)
     check_declarations(inventory)

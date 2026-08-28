@@ -787,7 +787,6 @@ public class JsonObjectValue <: JsonNode {
     }
 }
 
-let JSON_HEX = "0123456789ABCDEF"
 
 func isJsonHighSurrogate(value: Int64): Bool {
     value >= 0xD800 && value <= 0xDBFF
@@ -807,38 +806,6 @@ func ensureFiniteJsonFloat(value: Float64): Unit {
     }
 }
 
-func writeEscapedJsonString(builder: StringBuilder, value: String): Unit {
-    builder.append("\"")
-    for (r in value.toRuneArray()) {
-        match (r) {
-            case r'"' => builder.append("\\\"")
-            case r'\\' => builder.append("\\\\")
-            case r'\b' => builder.append("\\b")
-            case r'\f' => builder.append("\\f")
-            case r'\n' => builder.append("\\n")
-            case r'\r' => builder.append("\\r")
-            case r'\t' => builder.append("\\t")
-            case _ =>
-                if (UInt32(r) < UInt32(32)) {
-                    let code = UInt32(r)
-                    builder.append("\\u")
-                    builder.append(JSON_HEX[Int64(code >> 12)].toString())
-                    builder.append(JSON_HEX[Int64((code >> 8) & 0xF)].toString())
-                    builder.append(JSON_HEX[Int64((code >> 4) & 0xF)].toString())
-                    builder.append(JSON_HEX[Int64(code & 0xF)].toString())
-                } else {
-                    builder.append(r)
-                }
-        }
-    }
-    builder.append("\"")
-}
-
-func writeIndent(builder: StringBuilder, depth: Int64, indent: String): Unit {
-    for (_ in 0..depth) {
-        builder.append(indent)
-    }
-}
 
 func writeJsonValueCompact(writer: JsonDirectWriter, value: JsonNode): Unit {
     match (value) {
@@ -917,68 +884,6 @@ func writeJsonNodeToCodecWriter(writer: JsonCodecWriter, value: JsonNode): Unit 
                 writeJsonNodeToCodecWriter(writer, item)
             }
             writer.endObject()
-        case _ => throw JsonException("Unsupported JsonNode implementation")
-    }
-}
-
-func writeJsonValue(builder: StringBuilder, value: JsonNode, depth: Int64, pretty: Bool, indent: String): Unit {
-    match (value) {
-        case _: JsonNullValue => builder.append("null")
-        case boolValue: JsonBoolValue => builder.append(boolValue.value.toString())
-        case intValue: JsonIntValue => builder.append(intValue.value.toString())
-        case floatValue: JsonFloatValue =>
-            ensureFiniteJsonFloat(floatValue.value)
-            builder.append(floatValue.value.toString())
-        case numberValue: JsonNumberLiteralValue => builder.append(numberValue.literal)
-        case stringValue: JsonStringValue => writeEscapedJsonString(builder, stringValue.value)
-        case arrayValue: JsonArrayValue =>
-            builder.append("[")
-            if (arrayValue.size() != 0) {
-                var first = true
-                for (item in arrayValue.values()) {
-                    if (!first) {
-                        builder.append(",")
-                    }
-                    if (pretty) {
-                        builder.append("\n")
-                        writeIndent(builder, depth + 1, indent)
-                    }
-                    writeJsonValue(builder, item, depth + 1, pretty, indent)
-                    first = false
-                }
-                if (pretty) {
-                    builder.append("\n")
-                    writeIndent(builder, depth, indent)
-                }
-            }
-            builder.append("]")
-        case objectValue: JsonObjectValue =>
-            builder.append("{")
-            if (objectValue.size() != 0) {
-                var first = true
-                for ((key, item) in objectValue.entries()) {
-                    if (!first) {
-                        builder.append(",")
-                    }
-                    if (pretty) {
-                        builder.append("\n")
-                        writeIndent(builder, depth + 1, indent)
-                    }
-                    writeEscapedJsonString(builder, key)
-                    builder.append(if (pretty) {
-                        ": "
-                    } else {
-                        ":"
-                    })
-                    writeJsonValue(builder, item, depth + 1, pretty, indent)
-                    first = false
-                }
-                if (pretty) {
-                    builder.append("\n")
-                    writeIndent(builder, depth, indent)
-                }
-            }
-            builder.append("}")
         case _ => throw JsonException("Unsupported JsonNode implementation")
     }
 }

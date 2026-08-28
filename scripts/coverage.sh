@@ -11,9 +11,27 @@ python3 -c 'import shutil; shutil.rmtree("coverage", ignore_errors=True); shutil
 cp "$root/cjpm.toml" "$root/cjpm.lock" "$work/"
 mkdir -p "$work/packages"
 cp -R "$root/src" "$work/src"
+cp -R "$root/native" "$work/native"
+mkdir -p "$work/scripts"
+cp "$root/scripts/build_native_scanner.py" "$work/scripts/build_native_scanner.py"
 cp -R "$root/packages/yjson_macros" "$work/packages/yjson_macros"
+cp -R "$root/packages/runtime_freeze_contract" "$work/packages/runtime_freeze_contract"
+cp -R "$root/packages/yjson_backends" "$work/packages/yjson_backends"
+cp -R "$root/packages/yjson_native" "$work/packages/yjson_native"
+cp -R "$root/packages/yjson_native_accel" "$work/packages/yjson_native_accel"
+python3 -c 'import shutil; shutil.rmtree("'"$work"'/packages/runtime_freeze_contract/target", ignore_errors=True); shutil.rmtree("'"$work"'/packages/runtime_freeze_contract/cov_output", ignore_errors=True)' \
+    </dev/null
+python3 -c 'import shutil; [shutil.rmtree("'"$work"'/packages/" + name + "/" + child, ignore_errors=True) for name in ("yjson_backends", "yjson_native", "yjson_native_accel") for child in ("target", "cov_output", "build-script-cache")]' \
+    </dev/null
 perl -0pi -e 's/compile-option = "-O2"/compile-option = "-O0"/' "$work/cjpm.toml"
+perl -0pi -e 's/compile-option = "-O2"/compile-option = "-O0"/' \
+    "$work/packages/runtime_freeze_contract/cjpm.toml" \
+    "$work/packages/yjson_backends/cjpm.toml" \
+    "$work/packages/yjson_native/cjpm.toml" \
+    "$work/packages/yjson_native_accel/cjpm.toml"
 grep -F 'compile-option = "-O0"' "$work/cjpm.toml" >/dev/null
+grep -F 'compile-option = "-O0"' "$work/packages/runtime_freeze_contract/cjpm.toml" >/dev/null
+grep -F 'compile-option = "-O0"' "$work/packages/yjson_native_accel/cjpm.toml" >/dev/null
 mkdir -p "$root/coverage"
 
 cd "$work"
@@ -23,8 +41,30 @@ cjpm clean
 cjpm test --coverage --no-progress --timeout-each=30s
 cjcov --root . --source src --include src --output "$root/coverage/cjcov" \
     --branches --json --xml --html-details --keep
+
+runtime_package="$work/packages/runtime_freeze_contract"
+cd "$runtime_package"
+cjpm build --coverage
+for scenario in pure-late generated-reader-late version-mismatch native-conflict activation-failure concurrent-race; do
+    ./target/release/bin/main "$scenario"
+done
+cjcov --root "$work" --source "$work/src" --include "$work/src" \
+    --output "$work/runtime-cjcov" --branches --json --keep
+
+native_package="$work/packages/yjson_native_accel"
+cd "$native_package"
+cjpm clean
+cjpm test --coverage --no-progress --timeout-each=30s
+cp -f 0-yjson.gcda cov_output/yjson_native_accel/0-yjson.gcda
+cjcov --root "$work" --source "$work/src" --include "$work/src" \
+    --output "$work/native-cjcov" --branches --json --keep
+
 python3 "$root/scripts/cjcov_to_lcov.py" \
-    --root . --gcov-root cov_output --output "$root/coverage/lcov.info" \
+    --root "$root" \
+    --gcov-root "$work/cov_output" \
+    --gcov-root "$runtime_package" \
+    --gcov-root "$native_package/cov_output" \
+    --output "$root/coverage/lcov.info" \
     --baseline "$root/coverage-baseline.toml"
 
 printf 'yjson core coverage passed\n'

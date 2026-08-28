@@ -95,16 +95,27 @@ public class GeneratedSupportV1 {
         }
     }
 
-    public static func newFastReader(text: String): GeneratedSupportV1Reader { JsonFastReader(text) }
-    public static func newFastReader(bytes: Array<Byte>): GeneratedSupportV1Reader { JsonFastReader(bytes) }
-    public static func newWriter(): GeneratedSupportV1Writer { JsonDirectWriter() }
+    public static func newFastReader(text: String): GeneratedSupportV1Reader {
+        freezeYJsonRuntime()
+        JsonFastReader(text)
+    }
+    public static func newFastReader(bytes: Array<Byte>): GeneratedSupportV1Reader {
+        freezeYJsonRuntime()
+        JsonFastReader(bytes)
+    }
+    public static func newWriter(): GeneratedSupportV1Writer {
+        freezeYJsonRuntime()
+        JsonDirectWriter()
+    }
     public static func writeCursor(writer: GeneratedSupportV1Writer): GeneratedSupportV1WriteCursor {
         writer.generatedCursorV1()
     }
     public static func newSemanticReader(text: String, config: JsonReadConfig): JsonCodecReader {
+        freezeYJsonRuntime()
         JsonDirectReader(text, config: config)
     }
     public static func newSemanticReader(bytes: Array<Byte>, config: JsonReadConfig): JsonCodecReader {
+        freezeYJsonRuntime()
         JsonDirectReader(bytes, config: config)
     }
 

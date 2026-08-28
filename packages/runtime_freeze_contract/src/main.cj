@@ -52,6 +52,17 @@ private func pureLateInitialization(): Unit {
     requireEqual(activations.load(), 0, "late activation count")
 }
 
+private func generatedReaderLateInitialization(): Unit {
+    let activations = AtomicInt64(0)
+    let reader = GeneratedSupportV1.newFastReader("true")
+    requireEqual(reader.readRawBool(), true, "generated reader value")
+    reader.expectEnd()
+    requireEqual(accelerationCode({ => initializeYJsonAccelerationV1(
+        ProbeProvider("A", activations)) }), "acceleration_initialized_too_late",
+        "generated reader late initialization")
+    requireEqual(activations.load(), 0, "generated reader late activation count")
+}
+
 private func versionMismatch(): Unit {
     let activations = AtomicInt64(0)
     requireEqual(accelerationCode({ => initializeYJsonAccelerationV1(
@@ -118,6 +129,7 @@ main(args: Array<String>): Int64 {
     if (args.size != 1) { return 2 }
     match (args[0]) {
         case "pure-late" => pureLateInitialization()
+        case "generated-reader-late" => generatedReaderLateInitialization()
         case "version-mismatch" => versionMismatch()
         case "native-conflict" => nativeIdempotenceAndConflict()
         case "activation-failure" => failedActivationDoesNotFreeze()

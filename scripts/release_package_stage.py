@@ -36,11 +36,11 @@ def copy_path(source: pathlib.Path, target: pathlib.Path) -> None:
 
 def development_manifest(name: str, text: str) -> str:
     replacements = {
-        'yjson_macros = "2.0.0"': 'yjson_macros = { path = "../yjson_macros" }',
-        'yjson_native = "2.0.0"': 'yjson_native = { path = "../yjson_native" }',
-        'yjson_backends = "2.0.0"': 'yjson_backends = { path = "../yjson_backends" }',
-        'yjson_algorithms = "2.0.0"': 'yjson_algorithms = { path = "../yjson_algorithms" }',
-        'yjson = "2.0.0"': 'yjson = { path = "../yjson" }',
+        'yjson_macros = "2.0.1"': 'yjson_macros = { path = "../yjson_macros" }',
+        'yjson_native = "2.0.1"': 'yjson_native = { path = "../yjson_native" }',
+        'yjson_backends = "2.0.1"': 'yjson_backends = { path = "../yjson_backends" }',
+        'yjson_algorithms = "2.0.1"': 'yjson_algorithms = { path = "../yjson_algorithms" }',
+        'yjson = "2.0.1"': 'yjson = { path = "../yjson" }',
     }
     for release_value, path_value in replacements.items():
         text = text.replace(release_value, path_value)

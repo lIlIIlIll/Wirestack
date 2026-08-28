@@ -1,47 +1,10 @@
 package yjson
 
 import std.collection.*
-import std.convert.Parsable
-import std.math.numeric.*
 import std.time.*
-
-private func allJsonRawNameCandidatesAscii(candidates: Array<Array<Byte>>): Bool {
-    for (candidate in candidates) {
-        for (byte in candidate) {
-            if (byte >= 0x80) {
-                return false
-            }
-        }
-    }
-    true
-}
-
-private func initialJsonRawNameMatchMask(size: Int64): UInt64 {
-    var mask = 0u64
-    for (candidateIndex in 0..size) {
-        mask |= 1u64 << candidateIndex
-    }
-    mask
-}
 
 private let YJSON_NATIVE_SKIP_MIN_REMAINING_BYTES: Int64 = 128
 private let YJSON_RAW_NUMBER_SMALL_DIGITS: Int64 = 18
-
-class JsonRawNameMatcher {
-    public let candidates: Array<Array<Byte>>
-    public let useAsciiFastPath: Bool
-    public let initialMask: UInt64
-
-    public init(candidates: Array<Array<Byte>>) {
-        this.candidates = candidates
-        this.useAsciiFastPath = candidates.size <= 63 && allJsonRawNameCandidatesAscii(candidates)
-        this.initialMask = if (useAsciiFastPath) {
-            initialJsonRawNameMatchMask(candidates.size)
-        } else {
-            0u64
-        }
-    }
-}
 
 // Package-internal object-key representation used by CompactJsonDocument.
 // A no-escape key retains only its validated source range; escaped keys keep
@@ -73,10 +36,6 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
     private let validateStrings: Bool
     private let sourceText: Option<String>
     private var index: Int64 = 0
-    private var rawNameStart: Int64 = 0
-    private var rawNameEnd: Int64 = 0
-    private var rawNameSize: Int64 = 0
-    private var rawNameFirst: Byte = 0
     private var rawTokenStart: Int64 = 0
     private var rawTokenEnd: Int64 = 0
     private var rawTokenNumberDigitCount: Int64 = 0
@@ -228,27 +187,6 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         true
     }
 
-    func tryReadRawObjectStartAsciiNameTokenBytes(nameBytes: Array<Byte>): Bool {
-        var currentIndex = index
-        if (currentIndex + nameBytes.size + 4 > size ||
-            data[currentIndex] != b'{' ||
-            data[currentIndex + 1] != b'"') {
-            return false
-        }
-        currentIndex += 2
-        for (offset in 0..nameBytes.size) {
-            if (data[currentIndex + offset] != nameBytes[offset]) {
-                return false
-            }
-        }
-        currentIndex += nameBytes.size
-        if (data[currentIndex] != b'"' || data[currentIndex + 1] != b':') {
-            return false
-        }
-        index = currentIndex + 2
-        true
-    }
-
     public func startRawObject(): Unit {
         skipSpaces()
         expectByte(b'{')
@@ -299,30 +237,6 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         true
     }
 
-    func startRawObjectFields(): Bool {
-        startRawObject()
-        skipSpaces()
-        hasMore() && peek() != b'}'
-    }
-
-    func nextRawObjectFieldAfterValue(): Bool {
-        if (hasMore() && peek() == b',') {
-            index++
-            if (hasMore() && !isJsonSpace(peek())) {
-                return true
-            }
-            skipSpaces()
-            return true
-        }
-        skipSpaces()
-        if (hasMore() && peek() == b'}') {
-            return false
-        }
-        expectByte(b',')
-        skipSpaces()
-        true
-    }
-
     public func readRawName(first: Bool): String {
         beforeRawFieldName(first)
         let name = parseString()
@@ -337,7 +251,6 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         beforeRawFieldName(first)
         expectByte(b'"')
         let start = index
-        var ascii = true
         while (index < size) {
             let current = data[index]
             if (current == b'"') {
@@ -347,7 +260,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
                 return JsonObjectKeyView(start, end - start)
             }
             if (current == b'\\') {
-                let value = parseEscapedString(start, ascii)
+                let value = parseEscapedString(start)
                 afterRawFieldName()
                 return JsonObjectKeyView(value)
             }
@@ -355,7 +268,6 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
                 failAt("Unescaped control character in string literal", index)
             }
             if (current >= 0x80) {
-                ascii = false
                 if (validateStrings) {
                     index += validatedUtf8WidthAt(index)
                     continue
@@ -376,257 +288,10 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         id
     }
 
-    func readRawNameId(first: Bool, matcher: JsonRawNameMatcher): Int64 {
-        beforeRawFieldName(first)
-        let id = parseNameId(matcher)
-        afterRawFieldName()
-        id
-    }
-
     func readRawNameAfterSeparator(): String {
         let name = parseString()
         afterRawFieldName()
         name
-    }
-
-    func readRawNameIdAfterSeparator(matcher: JsonRawNameMatcher): Int64 {
-        let id = parseNameId(matcher)
-        afterRawFieldName()
-        id
-    }
-
-    func trySkipUnknownRawObjectTail(matcher: JsonRawNameMatcher): Bool {
-        let start = index
-        var first = false
-        while (nextRawObjectField(first)) {
-            let nameId = readRawNameIdAfterSeparator(matcher)
-            if (nameId >= 0) {
-                index = start
-                return false
-            }
-            skipRaw()
-            first = false
-        }
-        endRawObject()
-        true
-    }
-
-    func trySkipUnknownRawObjectFieldsUntilNameToken(expectedNameId: Int64, matcher: JsonRawNameMatcher): Bool {
-        let start = index
-        while (nextRawObjectField(false)) {
-            let nameId = readRawNameIdAfterSeparator(matcher)
-            if (nameId == expectedNameId) {
-                return true
-            }
-            if (nameId >= 0) {
-                index = start
-                return false
-            }
-            skipRaw()
-        }
-        index = start
-        false
-    }
-
-    func trySkipOneUnknownRawObjectFieldBeforeNameToken(expectedNameBytes: Array<Byte>, matcher: JsonRawNameMatcher): Bool {
-        let start = index
-        if (!nextRawObjectField(false)) {
-            index = start
-            return false
-        }
-        let nameId = readRawNameIdAfterSeparator(matcher)
-        if (nameId >= 0) {
-            index = start
-            return false
-        }
-        skipRaw()
-        if (tryReadRawAsciiNameTokenBytes(expectedNameBytes, false)) {
-            return true
-        }
-        index = start
-        false
-    }
-
-    func readSimpleRawNameNoHashAfterSeparator(): Bool {
-        let start = index
-        if (!hasMore() || peek() != b'"') {
-            return false
-        }
-        index++
-        rawNameStart = index
-        while (index < size) {
-            let current = data[index]
-            if (current == b'"') {
-                rawNameEnd = index
-                rawNameSize = rawNameEnd - rawNameStart
-                rawNameFirst = if (rawNameSize > 0) {
-                    data[rawNameStart]
-                } else {
-                    0
-                }
-                index++
-                afterRawFieldName()
-                return true
-            }
-            if (current == b'\\' || current >= 0x80) {
-                index = start
-                return false
-            }
-            if (current < 0x20) {
-                failAt("Unescaped control character in string literal", index)
-            }
-            index++
-        }
-        fail("Unterminated string literal")
-    }
-
-    func currentRawNameSize(): Int64 {
-        rawNameSize
-    }
-
-    func currentRawNameEquals(name: String): Bool {
-        if (name.size != rawNameSize) {
-            return false
-        }
-        if (rawNameSize > 0 && rawNameFirst != name[0]) {
-            return false
-        }
-        for (offset in 0..name.size) {
-            if (data[rawNameStart + offset] != name[offset]) {
-                return false
-            }
-        }
-        true
-    }
-
-    func currentRawNameEqualsBytes(nameBytes: Array<Byte>): Bool {
-        if (nameBytes.size != rawNameSize) {
-            return false
-        }
-        if (rawNameSize == 0) {
-            return true
-        }
-        if (rawNameFirst != nameBytes[0]) {
-            return false
-        }
-        match (rawNameSize) {
-            case 3 =>
-                return data[rawNameStart + 1] == nameBytes[1] &&
-                    data[rawNameStart + 2] == nameBytes[2]
-            case 4 =>
-                return data[rawNameStart + 1] == nameBytes[1] &&
-                    data[rawNameStart + 2] == nameBytes[2] &&
-                    data[rawNameStart + 3] == nameBytes[3]
-            case 6 =>
-                return data[rawNameStart + 1] == nameBytes[1] &&
-                    data[rawNameStart + 2] == nameBytes[2] &&
-                    data[rawNameStart + 3] == nameBytes[3] &&
-                    data[rawNameStart + 4] == nameBytes[4] &&
-                    data[rawNameStart + 5] == nameBytes[5]
-            case 7 =>
-                return data[rawNameStart + 1] == nameBytes[1] &&
-                    data[rawNameStart + 2] == nameBytes[2] &&
-                    data[rawNameStart + 3] == nameBytes[3] &&
-                    data[rawNameStart + 4] == nameBytes[4] &&
-                    data[rawNameStart + 5] == nameBytes[5] &&
-                    data[rawNameStart + 6] == nameBytes[6]
-            case 11 =>
-                return data[rawNameStart + 1] == nameBytes[1] &&
-                    data[rawNameStart + 2] == nameBytes[2] &&
-                    data[rawNameStart + 3] == nameBytes[3] &&
-                    data[rawNameStart + 4] == nameBytes[4] &&
-                    data[rawNameStart + 5] == nameBytes[5] &&
-                    data[rawNameStart + 6] == nameBytes[6] &&
-                    data[rawNameStart + 7] == nameBytes[7] &&
-                    data[rawNameStart + 8] == nameBytes[8] &&
-                    data[rawNameStart + 9] == nameBytes[9] &&
-                    data[rawNameStart + 10] == nameBytes[10]
-            case _ => ()
-        }
-        for (offset in 1..nameBytes.size) {
-            if (data[rawNameStart + offset] != nameBytes[offset]) {
-                return false
-            }
-        }
-        true
-    }
-
-    func currentRawNameByte(offset: Int64): Byte {
-        if (offset == 0) {
-            return rawNameFirst
-        }
-        data[rawNameStart + offset]
-    }
-
-    func currentRawNameEqualsAscii3(b0: Byte, b1: Byte, b2: Byte): Bool {
-        rawNameSize == 3 &&
-            rawNameFirst == b0 &&
-            data[rawNameStart + 1] == b1 &&
-            data[rawNameStart + 2] == b2
-    }
-
-    func currentRawNameEqualsAscii4(b0: Byte, b1: Byte, b2: Byte, b3: Byte): Bool {
-        rawNameSize == 4 &&
-            rawNameFirst == b0 &&
-            data[rawNameStart + 1] == b1 &&
-            data[rawNameStart + 2] == b2 &&
-            data[rawNameStart + 3] == b3
-    }
-
-    func currentRawNameEqualsAscii6(b0: Byte, b1: Byte, b2: Byte, b3: Byte, b4: Byte, b5: Byte): Bool {
-        rawNameSize == 6 &&
-            rawNameFirst == b0 &&
-            data[rawNameStart + 1] == b1 &&
-            data[rawNameStart + 2] == b2 &&
-            data[rawNameStart + 3] == b3 &&
-            data[rawNameStart + 4] == b4 &&
-            data[rawNameStart + 5] == b5
-    }
-
-    func currentRawNameEqualsAscii7(
-        b0: Byte,
-        b1: Byte,
-        b2: Byte,
-        b3: Byte,
-        b4: Byte,
-        b5: Byte,
-        b6: Byte
-    ): Bool {
-        rawNameSize == 7 &&
-            rawNameFirst == b0 &&
-            data[rawNameStart + 1] == b1 &&
-            data[rawNameStart + 2] == b2 &&
-            data[rawNameStart + 3] == b3 &&
-            data[rawNameStart + 4] == b4 &&
-            data[rawNameStart + 5] == b5 &&
-            data[rawNameStart + 6] == b6
-    }
-
-    func currentRawNameEqualsAscii11(
-        b0: Byte,
-        b1: Byte,
-        b2: Byte,
-        b3: Byte,
-        b4: Byte,
-        b5: Byte,
-        b6: Byte,
-        b7: Byte,
-        b8: Byte,
-        b9: Byte,
-        b10: Byte
-    ): Bool {
-        rawNameSize == 11 &&
-            rawNameFirst == b0 &&
-            data[rawNameStart + 1] == b1 &&
-            data[rawNameStart + 2] == b2 &&
-            data[rawNameStart + 3] == b3 &&
-            data[rawNameStart + 4] == b4 &&
-            data[rawNameStart + 5] == b5 &&
-            data[rawNameStart + 6] == b6 &&
-            data[rawNameStart + 7] == b7 &&
-            data[rawNameStart + 8] == b8 &&
-            data[rawNameStart + 9] == b9 &&
-            data[rawNameStart + 10] == b10
     }
 
     public func startRawArray(): Unit {
@@ -730,32 +395,6 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         }
         index++
         true
-    }
-
-    func tryNativeArrayElements(): Option<JsonNativeArrayElements> {
-        let start = index
-        skipSpaces()
-        if (!hasMore() || peek() != b'[') {
-            index = start
-            return None<JsonNativeArrayElements>
-        }
-        match (jsonNativeScanArrayElementsAtLeast(
-            data,
-            size,
-            index,
-            validateStrings,
-            YJSON_NATIVE_MIN_ARRAY_SCAN_BYTES,
-            YJSON_NATIVE_MIN_ARRAY_ELEMENT_COUNT
-        )) {
-            case Some(elements) => return Some(elements)
-            case None =>
-                index = start
-                return None<JsonNativeArrayElements>
-        }
-    }
-
-    func finishNativeArrayElements(elements: JsonNativeArrayElements): Unit {
-        index = elements.arrayEnd
     }
 
     public func beforeRawArrayItem(first: Bool): Unit {
@@ -886,17 +525,8 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         parseInt64Literal()
     }
 
-    func readRawInt64Compact(): Int64 {
-        parseInt64LiteralNoSpace()
-    }
-
     public func readRawInt32(): Int32 {
         let value = parseInt64Literal()
-        int64ToInt32(value)
-    }
-
-    func readRawInt32Compact(): Int32 {
-        let value = parseInt64LiteralNoSpace()
         int64ToInt32(value)
     }
 
@@ -912,11 +542,6 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         int64ToInt16(value)
     }
 
-    func readRawInt16Compact(): Int16 {
-        let value = parseInt64LiteralNoSpace()
-        int64ToInt16(value)
-    }
-
     private func int64ToInt16(value: Int64): Int16 {
         if (value < -0x8000 || value > 0x7FFF) {
             fail("Integer literal out of Int16 range")
@@ -926,11 +551,6 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
 
     public func readRawInt8(): Int8 {
         let value = parseInt64Literal()
-        int64ToInt8(value)
-    }
-
-    func readRawInt8Compact(): Int8 {
-        let value = parseInt64LiteralNoSpace()
         int64ToInt8(value)
     }
 
@@ -945,17 +565,8 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         parseUInt64Literal()
     }
 
-    func readRawUInt64Compact(): UInt64 {
-        parseUInt64LiteralNoSpace()
-    }
-
     public func readRawUInt32(): UInt32 {
         let value = parseUInt64Literal()
-        uint64ToUInt32(value)
-    }
-
-    func readRawUInt32Compact(): UInt32 {
-        let value = parseUInt64LiteralNoSpace()
         uint64ToUInt32(value)
     }
 
@@ -971,11 +582,6 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         uint64ToUInt16(value)
     }
 
-    func readRawUInt16Compact(): UInt16 {
-        let value = parseUInt64LiteralNoSpace()
-        uint64ToUInt16(value)
-    }
-
     private func uint64ToUInt16(value: UInt64): UInt16 {
         if (value > 0xFFFFu64) {
             fail("Integer literal out of UInt16 range")
@@ -988,11 +594,6 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         uint64ToUInt8(value)
     }
 
-    func readRawUInt8Compact(): UInt8 {
-        let value = parseUInt64LiteralNoSpace()
-        uint64ToUInt8(value)
-    }
-
     private func uint64ToUInt8(value: UInt64): UInt8 {
         if (value > 0xFFu64) {
             fail("Integer literal out of UInt8 range")
@@ -1000,20 +601,8 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         UInt8(value)
     }
 
-    public func readRawBigInt(): BigInt {
-        BigInt.parse(readRawNumberLiteral())
-    }
-
-    public func readRawDecimal(): Decimal {
-        Decimal.parse(readRawNumberLiteral())
-    }
-
     public func readRawNumberLiteral(): String {
         parseNumberLiteral()
-    }
-
-    func readRawNumberLiteralCompact(): String {
-        parseNumberLiteralNoSpace()
     }
 
     func tryReadRawNumberToken(): Bool {
@@ -1212,49 +801,6 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
     public func skipRawWithDepth(maxDepth: Int64): Unit {
         if (maxDepth < 0) { throw IllegalArgumentException("maxDepth must not be negative") }
         skipRawValueBounded(0, maxDepth)
-    }
-
-    func tryNativeObjectFields(): Option<JsonNativeObjectFields> {
-        let start = index
-        skipSpaces()
-        if (!hasMore() || peek() != b'{') {
-            index = start
-            return None<JsonNativeObjectFields>
-        }
-        if (size - index < YJSON_NATIVE_MIN_OBJECT_SCAN_BYTES) {
-            index = start
-            return None<JsonNativeObjectFields>
-        }
-        if (hasJsonValuePrefixBefore(index)) {
-            index = start
-            return None<JsonNativeObjectFields>
-        }
-        if (index + 1 < size && isJsonSpace(data[index + 1])) {
-            index = start
-            return None<JsonNativeObjectFields>
-        }
-        match (jsonNativeScanObjectFields(data, size, index, validateStrings)) {
-            case Some(fields) => return Some(fields)
-            case None =>
-                index = start
-                return None<JsonNativeObjectFields>
-        }
-    }
-
-    func finishNativeObjectFields(fields: JsonNativeObjectFields): Unit {
-        index = fields.objectEnd
-    }
-
-    private func hasJsonValuePrefixBefore(position: Int64): Bool {
-        var cursor = position - 1
-        while (cursor >= 0 && isJsonSpace(data[cursor])) {
-            cursor--
-        }
-        if (cursor < 0) {
-            return false
-        }
-        let previous = data[cursor]
-        previous == b'[' || previous == b',' || previous == b':'
     }
 
     private func beforeRawFieldName(first: Bool): Unit {
@@ -1535,7 +1081,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
                 return stringFromUtf8Range(start, end)
             }
             if (current == b'\\') {
-                return parseEscapedString(start, leadingSegmentAscii)
+                return parseEscapedString(start)
             }
             if (current < 0x20) {
                 failAt("Unescaped control character in string literal", index)
@@ -1548,92 +1094,24 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         fail("Unterminated string literal")
     }
 
-    private func parseEscapedString(start: Int64, leadingSegmentAscii: Bool): String {
+    private func parseEscapedString(start: Int64): String {
         let quoteStart = start - 1
         if (!validateStrings) {
-            if (let Some(value) <- tryDecodeEscapedStringToUtf8(start)) {
-                return value
-            }
+            return decodeEscapedStringToUtf8(start)
+        } else {
             if (size - quoteStart >= YJSON_NATIVE_MIN_READER_DECODE_BYTES) {
                 if (let Some(decoded) <- jsonNativeDecodeString(data, size, quoteStart, validateStrings)) {
                     index = decoded.end
                     return decoded.value
                 }
             }
-        } else {
-            if (size - quoteStart < YJSON_NATIVE_MIN_READER_DECODE_BYTES) {
-                if (let Some(value) <- tryDecodeEscapedStringToUtf8(start)) {
-                    return value
-                }
-            } else {
-                if (let Some(decoded) <- jsonNativeDecodeString(data, size, quoteStart, validateStrings)) {
-                    index = decoded.end
-                    return decoded.value
-                }
-                if (let Some(value) <- tryDecodeEscapedStringToUtf8(start)) {
-                    return value
-                }
-            }
         }
-        let builder = StringBuilder()
-        var segmentStart = start
-        var segmentAscii = leadingSegmentAscii
-        while (hasMore()) {
-            let currentStart = index
-            let current = consume()
-            match (current) {
-                case b'"' =>
-                    if (currentStart > segmentStart) {
-                        builder.append(stringFromEscapedSegment(segmentStart, currentStart, segmentAscii))
-                    }
-                    return builder.toString()
-                case b'\\' =>
-                    if (currentStart > segmentStart) {
-                        builder.append(stringFromEscapedSegment(segmentStart, currentStart, segmentAscii))
-                    }
-                    if (!hasMore()) {
-                        fail("Unexpected end of escape sequence")
-                    }
-                    let escaped = consume()
-                    match (escaped) {
-                        case b'"' => builder.append("\"")
-                        case b'\\' => builder.append("\\")
-                        case b'/' => builder.append("/")
-                        case b'b' => builder.append(r'\b')
-                        case b'f' => builder.append(r'\f')
-                        case b'n' => builder.append(r'\n')
-                        case b'r' => builder.append(r'\r')
-                        case b't' => builder.append(r'\t')
-                        case b'u' => builder.append(parseUnicodeEscape())
-                        case _ => fail("Unsupported escape sequence")
-                    }
-                    segmentStart = index
-                    segmentAscii = true
-                case _ =>
-                    if (current < 0x20) {
-                        failAt("Unescaped control character in string literal", currentStart)
-                    }
-                    if (current >= 0x80) {
-                        segmentAscii = false
-                    }
-                    if (validateStrings && current >= 0x80) {
-                        let beforeDecode = index
-                        let _ = decodeUtf8Rune(current, currentStart)
-                        index = beforeDecode + utf8Width(current, currentStart) - 1
-                    }
-            }
-        }
-        fail("Unterminated string literal")
+        // The scalar decoder either returns a complete semantic string or
+        // throws a normalized parse error. There is no third fallback state.
+        decodeEscapedStringToUtf8(start)
     }
 
-    private func stringFromEscapedSegment(start: Int64, end: Int64, ascii: Bool): String {
-        if (ascii) {
-            return asciiStringFromRange(start, end)
-        }
-        stringFromUtf8Range(start, end)
-    }
-
-    private func tryDecodeEscapedStringToUtf8(start: Int64): Option<String> {
+    private func decodeEscapedStringToUtf8(start: Int64): String {
         let output = Array<Byte>(escapedStringContentSize(start), repeat: 0)
         var read = start
         var segmentStart = start
@@ -1643,7 +1121,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
             if (current == b'"') {
                 written = copyEscapedStringSegment(output, segmentStart, read, written)
                 index = read + 1
-                return Some(unsafe { String.fromUtf8Unchecked(output[0..written]) })
+                return unsafe { String.fromUtf8Unchecked(output[0..written]) }
             }
             if (current == b'\\') {
                 written = copyEscapedStringSegment(output, segmentStart, read, written)
@@ -1933,56 +1411,6 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         }
         expectByte(b'"')
         var active = initialNameMatchMask(candidates.size)
-        var nameIndex: Int64 = 0
-        while (index < size) {
-            let current = data[index]
-            index++
-            if (current == b'"') {
-                if (active == 0u64) {
-                    return -1
-                }
-                for (candidateIndex in 0..candidates.size) {
-                    if (((active & nameMatchBit(candidateIndex)) != 0u64) && candidates[candidateIndex].size == nameIndex) {
-                        return candidateIndex
-                    }
-                }
-                return -1
-            }
-            var code: Int64 = -1
-            if (current == b'\\') {
-                code = consumeEscapedAsciiForName()
-            } else if (current < 0x80) {
-                if (current < 0x20) {
-                    failAt("Unescaped control character in string literal", index - 1)
-                }
-                code = Int64(current)
-            } else if (validateStrings) {
-                index += validatedUtf8WidthAt(index - 1) - 1
-            }
-            if (active != 0u64) {
-                active = updateActiveNameByteCandidates(candidates, active, nameIndex, code)
-            }
-            nameIndex++
-        }
-        fail("Unterminated string literal")
-    }
-
-    private func parseNameId(matcher: JsonRawNameMatcher): Int64 {
-        let candidates = matcher.candidates
-        if (!matcher.useAsciiFastPath) {
-            let name = parseString()
-            for (candidateIndex in 0..candidates.size) {
-                if (String.fromUtf8(candidates[candidateIndex]) == name) {
-                    return candidateIndex
-                }
-            }
-            return -1
-        }
-        if (let Some(id) <- tryParseSimpleNameId(candidates)) {
-            return id
-        }
-        expectByte(b'"')
-        var active = matcher.initialMask
         var nameIndex: Int64 = 0
         while (index < size) {
             let current = data[index]

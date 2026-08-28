@@ -1,6 +1,5 @@
-# Established by the first complete core coverage run for yjson 2.0.
-# Project gates allow at most a 0.1 percentage-point regression.
-project_line_percent = 60.0
-project_branch_percent = 41.6
+# Required project and patch coverage gates for the yjson 2.x release line.
+project_line_percent = 80.0
+project_branch_percent = 70.0
 patch_line_percent = 90.0
 patch_branch_percent = 80.0

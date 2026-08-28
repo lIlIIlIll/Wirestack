@@ -132,6 +132,15 @@ public class AliasRecord {
 @Test
 class YJsonRegressionTest {
     @TestCase
+    func escapedStringSizeCoversNativePreflightCategories(): Unit {
+        @Expect(jsonEscapedStringLiteralSize("plain", false), 7)
+        @Expect(jsonEscapedStringLiteralSize("\"\\\b\f\n\r\t\u{001F}", false), 22)
+        @Expect(jsonEscapedStringLiteralSize("<>&='", false), 7)
+        @Expect(jsonEscapedStringLiteralSize("<>&='", true), 32)
+        @Expect(jsonEscapedStringLiteralSize("仓颉", false), 8)
+    }
+
+    @TestCase
     func generatedFastDecodeRejectsMalformedUnknownKeys(): Unit {
         let control: Array<Byte> = [b'{', b'"', 0x01u8, b'"', b':', b'0', b'}']
         let controlError = @AssertThrows[JsonException](YJson.decodeBytesWith(PersonJson, control))

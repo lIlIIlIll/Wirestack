@@ -96,16 +96,15 @@ public class JsonPatch {
     /// Applies atomically to a detached copy. The input is never changed.
     public func apply(target: JsonNode, limits!: JsonPatchLimits = JsonPatchLimits.defaults): JsonNode {
         enforceWorkLimit(patchOperations.size, limits.maxOperations, "patch operations")
-        enforceWorkLimit(jsonPatchNodeCount(target), limits.maxCopiedNodes, "copied nodes")
         for (operation in patchOperations) {
             enforceWorkLimit(operation.path.rawTokens().size, limits.maxPointerSegments, "pointer segments")
             if (let Some(source) <- operation.source) {
                 enforceWorkLimit(source.rawTokens().size, limits.maxPointerSegments, "pointer segments")
             }
         }
-        let result = applyJsonPatchOperations(target.deepCopy(), patchOperations)
-        enforceWorkLimit(jsonPatchNodeCount(result), limits.maxCopiedNodes, "copied nodes")
-        result
+        let copyWork = JsonPatchCopyWork(limits.maxCopiedNodes)
+        copyWork.charge(target)
+        applyJsonPatchOperations(target.deepCopy(), patchOperations, copyWork)
     }
 
     /// Applies atomically and commits into the original root container when
@@ -144,6 +143,21 @@ private func jsonPatchNodeCount(value: JsonNode): Int64 {
             for ((_, item) in objectValue.entries()) { total += jsonPatchNodeCount(item) }
             total
         case _ => 1
+    }
+}
+
+private class JsonPatchCopyWork {
+    private let limit: Int64
+    private var copiedNodes: Int64 = 0
+
+    init(limit: Int64) { this.limit = limit }
+
+    func charge(value: JsonNode): Unit {
+        let count = jsonPatchNodeCount(value)
+        if (limit > 0 && (count > limit || copiedNodes > limit - count)) {
+            throw JsonWorkLimitException("JSON algorithm copied nodes budget exceeded (${limit})")
+        }
+        copiedNodes += count
     }
 }
 
@@ -193,11 +207,14 @@ private func validateJsonPatchOperation(operation: JsonPatchOperation, index: In
     }
 }
 
-private func applyJsonPatchOperations(initial: JsonNode, operations: Array<JsonPatchOperation>): JsonNode {
+private func applyJsonPatchOperations(initial: JsonNode, operations: Array<JsonPatchOperation>,
+    copyWork: JsonPatchCopyWork): JsonNode {
     var root = initial
     for (index in 0..operations.size) {
         try {
-            root = applyJsonPatchOperation(root, operations[index])
+            root = applyJsonPatchOperation(root, operations[index], copyWork)
+        } catch (error: JsonWorkLimitException) {
+            throw error
         } catch (error: JsonPatchException) {
             throw JsonPatchException(error.message, operationIndex: index, code: error.code, path: error.path)
         } catch (error: JsonPointerException) {
@@ -211,20 +228,30 @@ private func applyJsonPatchOperations(initial: JsonNode, operations: Array<JsonP
     root
 }
 
-private func applyJsonPatchOperation(root: JsonNode, operation: JsonPatchOperation): JsonNode {
+private func applyJsonPatchOperation(root: JsonNode, operation: JsonPatchOperation,
+    copyWork: JsonPatchCopyWork): JsonNode {
     match (operation.kind) {
-        case Add => jsonPatchAdd(root, operation.path, operation.value.getOrThrow().deepCopy())
+        case Add =>
+            let value = operation.value.getOrThrow()
+            copyWork.charge(value)
+            jsonPatchAdd(root, operation.path, value.deepCopy())
         case Remove =>
             let (nextRoot, _) = jsonPatchRemove(root, operation.path)
             nextRoot
-        case Replace => jsonPatchReplace(root, operation.path, operation.value.getOrThrow().deepCopy())
+        case Replace =>
+            let value = operation.value.getOrThrow()
+            copyWork.charge(value)
+            jsonPatchReplace(root, operation.path, value.deepCopy())
         case Copy =>
-            let sourceValue = operation.source.getOrThrow().evaluate(root).deepCopy()
-            jsonPatchAdd(root, operation.path, sourceValue)
+            let sourceValue = operation.source.getOrThrow().evaluate(root)
+            copyWork.charge(sourceValue)
+            jsonPatchAdd(root, operation.path, sourceValue.deepCopy())
         case Move => jsonPatchMove(root, operation.source.getOrThrow(), operation.path)
         case Test =>
+            let expected = operation.value.getOrThrow()
+            copyWork.charge(expected)
             let actual = operation.path.evaluate(root)
-            if (!actual.equivalentTo(operation.value.getOrThrow())) {
+            if (!actual.equivalentTo(expected)) {
                 throw JsonPatchException("JSON Patch test operation failed", code: "json_patch_test_failed",
                     path: operation.path.toString())
             }

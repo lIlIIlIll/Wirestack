@@ -62,6 +62,24 @@ class YJsonTemporalNumberFastTest {
         reader.expectEnd()
     }
 
+    private func assertRfc3339FallbackMatchesStdlib(text: String): Unit {
+        let expected: Option<DateTime> = try {
+            Some(DateTime.parse(text, DateTimeFormat.RFC3339))
+        } catch (_: Exception) {
+            None<DateTime>
+        }
+        match (expected) {
+            case Some(value) =>
+                @Expect(jsonFastParseRfc3339DateTime(text), value)
+                let reader = JsonFastReader(bytes("\"" + text + "\""))
+                @Expect(jsonFastReadRfc3339DateTime(reader), value)
+            case None =>
+                @AssertThrows[Exception](jsonFastParseRfc3339DateTime(text))
+                let reader = JsonFastReader(bytes("\"" + text + "\""))
+                @AssertThrows[Exception](jsonFastReadRfc3339DateTime(reader))
+        }
+    }
+
     @TestCase
     func datetimeFastPathParsesBenchmarkOffsetShape(): Unit {
         let text = "\"2024-06-20T14:42:33+08:00\""
@@ -94,6 +112,41 @@ class YJsonTemporalNumberFastTest {
         assertRfc3339DecodeMatchesStdlib("2032-01-02T08:34:05+05:30")
         assertRfc3339DecodeMatchesStdlib("2032-01-01T22:34:05-04:30")
         assertRfc3339DecodeMatchesStdlib("2024-06-20T14:42:33+24:00")
+    }
+
+    @TestCase
+    func datetimeFastPathCoversCalendarAndFallbackDecisionMatrix(): Unit {
+        let monthDays: Array<Int64> = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        for (month in 1..13) {
+            let monthText = if (month < 10) { "0${month}" } else { "${month}" }
+            let day = monthDays[month - 1]
+            let dayText = if (day < 10) { "0${day}" } else { "${day}" }
+            assertRfc3339DecodeMatchesStdlib("2023-${monthText}-${dayText}T12:34:56Z")
+        }
+        assertRfc3339DecodeMatchesStdlib("1900-02-28T12:34:56Z")
+        assertRfc3339DecodeMatchesStdlib("2000-02-29T12:34:56Z")
+
+        // Each mutation reaches a distinct fast-path guard before the stdlib
+        // fallback rejects it. Run both String and raw-token implementations.
+        let invalid = [
+            "2024-01-01T00:00:00", "2024/01-01T00:00:00Z",
+            "2024-01/01T00:00:00Z", "2024-01-01 00:00:00Z",
+            "2024-01-01T00-00:00Z", "2024-01-01T00:00-00Z",
+            "0000-01-01T00:00:00Z", "x024-01-01T00:00:00Z",
+            "2024-x1-01T00:00:00Z", "2024-00-01T00:00:00Z",
+            "2024-13-01T00:00:00Z", "2024-01-x1T00:00:00Z",
+            "2024-01-00T00:00:00Z", "2024-01-32T00:00:00Z",
+            "2023-02-29T00:00:00Z", "2024-01-01Tx0:00:00Z",
+            "2024-01-01T24:00:00Z", "2024-01-01T00:x0:00Z",
+            "2024-01-01T00:60:00Z", "2024-01-01T00:00:x0Z",
+            "2024-01-01T00:00:60Z", "2024-01-01T00:00:00X",
+            "2024-01-01T00:00:00*08:00", "2024-01-01T00:00:00+08-00",
+            "2024-01-01T00:00:00+x8:00", "2024-01-01T00:00:00+24:00",
+            "2024-01-01T00:00:00+08:x0", "2024-01-01T00:00:00+08:60"
+        ]
+        for (text in invalid) {
+            assertRfc3339FallbackMatchesStdlib(text)
+        }
     }
 
     @TestCase

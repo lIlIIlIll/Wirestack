@@ -3,7 +3,7 @@ cjc-version = "1.1.0"
 name = "yjson_native_accel_benchmarks"
 organization = ""
 description = "Pure and Native single-engine qualification benchmarks for yjson"
-version = "2.0.0"
+version = "2.0.1"
 output-type = "executable"
 compile-option = "-O2"
 
