@@ -11,6 +11,16 @@ cov_output/
 *.gcno
 benchmarks/java_fastjson2/build/
 
+# Versioned Stream protocol specification and frozen development evidence.
+!benchmarks/stream_protocol/workloads.json
+!benchmarks/results/stream-v1/2026-08-28/formal-cell-1.tar.gz
+!benchmarks/results/stream-v1/2026-08-28/peer-cell-1.tar.gz
+!benchmarks/results/stream-v1/2026-08-28/checksums.txt
+!benchmarks/results/stream-v1/2026-08-28/formal-cell-1/*.json
+!benchmarks/results/stream-v1/2026-08-28/formal-cell-1/payloads/*.json
+!benchmarks/results/stream-v1/2026-08-28/peer-cell-1/*.json
+!benchmarks/results/stream-v1/2026-08-28/peer-cell-1/payloads/*.json
+
 # Audited RC evidence overrides the developer-wide *.json / *.txt ignores.
 !release/public-api-snapshot.txt
 !release/1.0.0-rc.1/artifacts/environment.json

@@ -10,10 +10,15 @@ private class JsonDirectReadContext {
     public let objectContext: Bool
     public var first: Bool = true
     public var expectingFieldValue: Bool = false
-    public let seenNames = HashSet<String>()
+    public var seenNames: Option<HashSet<String>>
 
-    public init(objectContext: Bool) {
+    public init(objectContext: Bool, trackDuplicateNames: Bool) {
         this.objectContext = objectContext
+        this.seenNames = if (trackDuplicateNames) {
+            Some(HashSet<String>())
+        } else {
+            None<HashSet<String>>
+        }
     }
 }
 
@@ -119,7 +124,7 @@ public class JsonDirectReader <: JsonCodecReader {
         requireContainerDepth(source.position())
         beginRootBudgetIfNeeded()
         expectByte(b'{')
-        contexts.add(JsonDirectReadContext(true))
+        contexts.add(JsonDirectReadContext(true, jsonReadConfigRejectsDuplicateKeys(config)))
     }
 
     public func endObject(): Unit {
@@ -168,10 +173,14 @@ public class JsonDirectReader <: JsonCodecReader {
             return
         }
         let context = contexts[contexts.size - 1]
-        if (context.seenNames.contains(name)) {
+        let seenNames = match (context.seenNames) {
+            case Some(value) => value
+            case None => return
+        }
+        if (seenNames.contains(name)) {
             policyFail("Duplicate object key '${name}'", "duplicate_key")
         }
-        context.seenNames.add(name)
+        seenNames.add(name)
     }
 
     private func beforeName(): Unit {
@@ -203,7 +212,7 @@ public class JsonDirectReader <: JsonCodecReader {
         requireContainerDepth(source.position())
         beginRootBudgetIfNeeded()
         expectByte(b'[')
-        contexts.add(JsonDirectReadContext(false))
+        contexts.add(JsonDirectReadContext(false, false))
     }
 
     public func endArray(): Unit {
@@ -438,6 +447,11 @@ public class JsonDirectReader <: JsonCodecReader {
         match (source) {
             case arraySource: Utf8Cursor =>
                 if (!source.isValueBudgetActive()) { return arraySource.parseInt64LiteralFast() }
+            case streamSource: StreamInputCursor =>
+                if (!source.isValueBudgetActive()) {
+                    skipSpaces()
+                    if (let Some(value) <- streamSource.tryParseInt64Window()) { return value }
+                }
             case _ => ()
         }
         skipSpaces()
@@ -528,6 +542,15 @@ public class JsonDirectReader <: JsonCodecReader {
     }
 
     private func parseString(): String {
+        match (source) {
+            case streamSource: StreamInputCursor =>
+                if (config.maxStringBytes == 0 && !source.isValueBudgetActive()) {
+                    if (let Some(value) <- streamSource.tryParseSimpleAsciiStringWindow()) {
+                        return value
+                    }
+                }
+            case _ => ()
+        }
         source.readJsonString()
     }
 
@@ -582,6 +605,10 @@ public class JsonDirectReader <: JsonCodecReader {
         }
         match (source) {
             case arraySource: Utf8Cursor => return arraySource.parseNameIdFast(candidates)
+            case streamSource: StreamInputCursor =>
+                if (let Some(value) <- streamSource.tryParseNameIdWindow(candidates)) {
+                    return value
+                }
             case _ => ()
         }
         expectByte(b'"')
@@ -698,7 +725,10 @@ public class JsonDirectReader <: JsonCodecReader {
     }
 
     private func skipSpaces(): Unit {
-        source.skipJsonWhitespace()
+        match (source) {
+            case streamSource: StreamInputCursor => streamSource.skipSpacesFast()
+            case _ => source.skipJsonWhitespace()
+        }
     }
 
     private func expectLiteral(literal: String): Unit {
@@ -737,6 +767,10 @@ public class JsonDirectReader <: JsonCodecReader {
             case arraySource: Utf8Cursor =>
                 if (!source.isValueBudgetActive()) {
                     arraySource.expectByteFast(value)
+                    return
+                }
+            case streamSource: StreamInputCursor =>
+                if (!source.isValueBudgetActive() && streamSource.consumeExpectedByteFast(value)) {
                     return
                 }
             case _ => ()

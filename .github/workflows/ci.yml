@@ -13,6 +13,16 @@ permissions:
   contents: read
 
 jobs:
+  stream-docs:
+    name: Stream evidence drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+      - name: Verify frozen Stream evidence and generated documentation
+        run: scripts/ci_job.sh stream-docs
+
   nightly:
     name: Cangjie nightly (7-day window)
     runs-on: ubuntu-latest

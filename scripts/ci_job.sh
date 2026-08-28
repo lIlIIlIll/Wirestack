@@ -66,6 +66,62 @@ stage_modules() {
 }
 
 case "$job" in
+    stream-docs)
+        evidence="$repo/benchmarks/results/stream-v1/2026-08-28"
+        extracted="$modules/stream-evidence"
+        peer_extracted="$modules/stream-peer-evidence"
+        regenerated="$modules/stream-regenerated"
+        (cd "$evidence" && sha256sum -c checksums.txt)
+        python3 "$repo/scripts/generate_json_stream_workloads.py" \
+            "$evidence/formal-cell-1" --check
+        python3 "$repo/scripts/check_local_markdown_links.py" \
+            "$repo/README.md" \
+            "$repo/benchmarks/README.md" \
+            "$evidence/README.md" \
+            "$repo/docs/README.md" \
+            "$repo/docs/streams.md" \
+            "$repo/docs/performance.md" \
+            "$repo/docs/performance/README.md" \
+            "$repo/docs/performance/methodology.md" \
+            "$repo/docs/performance/stream.md" \
+            "$repo/docs/performance/stream-workloads.md" \
+            "$repo/docs/performance/results/2026-08-28-stream-protocol-v1.md"
+        mkdir -p "$extracted" "$peer_extracted" "$regenerated"
+        tar -xzf "$evidence/formal-cell-1.tar.gz" -C "$extracted"
+        tar -xzf "$evidence/peer-cell-1.tar.gz" -C "$peer_extracted"
+        python3 "$repo/scripts/json_stream_protocol_summary.py" \
+            "$extracted/formal-cell-1" --variant baseline \
+            --json "$regenerated/baseline-summary.json" \
+            --markdown "$regenerated/baseline-summary.md" >/dev/null
+        python3 "$repo/scripts/json_stream_protocol_summary.py" \
+            "$extracted/formal-cell-1" --variant candidate \
+            --json "$regenerated/candidate-summary.json" \
+            --markdown "$regenerated/candidate-summary.md" >/dev/null
+        python3 "$repo/scripts/json_stream_protocol_compare.py" \
+            "$regenerated/baseline-summary.json" "$regenerated/candidate-summary.json" \
+            --json "$regenerated/compare.json" \
+            --markdown "$regenerated/compare.md" >/dev/null
+        python3 "$repo/scripts/json_stream_protocol_compare.py" \
+            "$regenerated/baseline-summary.json" "$regenerated/candidate-summary.json" \
+            --candidate-lifecycle unpooled \
+            --json "$regenerated/compare-unpooled.json" \
+            --markdown "$regenerated/compare-unpooled.md" >/dev/null
+        for name in baseline-summary.json candidate-summary.json compare.json \
+                compare-unpooled.json; do
+            python3 "$repo/scripts/check_json_numeric_equivalence.py" \
+                "$evidence/formal-cell-1/$name" "$regenerated/$name"
+        done
+        for name in baseline-summary.md candidate-summary.md compare.md compare-unpooled.md; do
+            cmp "$regenerated/$name" "$evidence/formal-cell-1/$name"
+        done
+        python3 "$repo/scripts/json_stream_peer_summary.py" \
+            "$peer_extracted/yjson-stream-peer-v1-20260828-formal-v10" \
+            --json "$regenerated/peer-summary.json" \
+            --markdown "$regenerated/peer-summary.md" >/dev/null
+        python3 "$repo/scripts/check_json_numeric_equivalence.py" \
+            "$evidence/peer-cell-1/peer-summary.json" "$regenerated/peer-summary.json"
+        cmp "$regenerated/peer-summary.md" "$evidence/peer-cell-1/peer-summary.md"
+        ;;
     api-inventory)
         python3 "$repo/scripts/check_api_inventory.py"
         ;;
@@ -179,7 +235,7 @@ case "$job" in
         "$repo/scripts/release_yyjson_colink_check.sh"
         ;;
     *)
-        echo 'usage: scripts/ci_job.sh {api-inventory|runtime-freeze|core|standards-conformance|schema-formats-conformance|performance-comparison|examples|macro-consumer|algorithms-consumer|registry-rehearsal|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
+        echo 'usage: scripts/ci_job.sh {stream-docs|api-inventory|runtime-freeze|core|standards-conformance|schema-formats-conformance|performance-comparison|examples|macro-consumer|algorithms-consumer|registry-rehearsal|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
         exit 2
         ;;
 esac

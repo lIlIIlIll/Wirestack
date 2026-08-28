@@ -33,6 +33,12 @@ abstract class InputCursor {
         valueBudgetActive = false
     }
 
+    protected func resetValueBudget(): Unit {
+        valueBudgetStart = -1
+        valueBudgetLimit = 0
+        valueBudgetActive = false
+    }
+
     public func isValueBudgetActive(): Bool {
         valueBudgetActive
     }
@@ -91,6 +97,12 @@ abstract class InputCursor {
             case cursor: Utf8Cursor =>
                 if (config().maxStringBytes == 0 && !valueBudgetActive) {
                     if (let Some(value) <- cursor.tryParseSimpleString()) {
+                        return value
+                    }
+                }
+            case cursor: StreamInputCursor =>
+                if (config().maxStringBytes == 0 && !valueBudgetActive) {
+                    if (let Some(value) <- cursor.tryParseSimpleAsciiStringWindow()) {
                         return value
                     }
                 }
@@ -809,6 +821,125 @@ class StreamInputCursor <: InputCursor {
     public func columnAt(offset: Int64): Int64 {
         if (!readConfig.includeErrorLocation) { return -1 }
         jsonStreamColumnAt(newlineOffsets, offset)
+    }
+
+    public func skipSpacesFast(): Unit {
+        while (ensureAvailable()) {
+            match (buffer[start]) {
+                case b' ' | b'\n' | b'\r' | b'\t' => let _ = consume()
+                case _ => return
+            }
+        }
+    }
+
+    public func consumeExpectedByteFast(value: Byte): Bool {
+        if (!ensureAvailable() || buffer[start] != value) { return false }
+        let _ = consume()
+        true
+    }
+
+    // Consume only a complete simple ASCII string from this window. The
+    // general semantic path handles escapes, UTF-8, and chunk boundaries.
+    public func tryParseSimpleAsciiStringWindow(): Option<String> {
+        if (!ensureAvailable() || buffer[start] != b'"') { return None<String> }
+        let contentStart = start + 1
+        var cursor = contentStart
+        while (cursor < end) {
+            let current = buffer[cursor]
+            if (current == b'"') {
+                let value = unsafe { String.fromUtf8Unchecked(buffer[contentStart..cursor]) }
+                advanceWindow(cursor - start + 1)
+                return Some(value)
+            }
+            if (current == b'\\' || current < 0x20 || current >= 0x80) {
+                return None<String>
+            }
+            cursor++
+        }
+        None<String>
+    }
+
+    // Some(-1) means a complete unknown name. None leaves the cursor intact
+    // for the escape-aware and cross-window matcher.
+    public func tryParseNameIdWindow(candidates: Array<String>): Option<Int64> {
+        if (!ensureAvailable() || buffer[start] != b'"') { return None<Int64> }
+        let contentStart = start + 1
+        var cursor = contentStart
+        while (cursor < end) {
+            let current = buffer[cursor]
+            if (current == b'"') {
+                let length = cursor - contentStart
+                var result: Int64 = -1
+                for (candidateIndex in 0..candidates.size) {
+                    unsafe {
+                        let bytes = candidates[candidateIndex].rawData()
+                        if (bytes.size != length) { continue }
+                        var matches = true
+                        for (index in 0..length) {
+                            if (bytes[index] != buffer[contentStart + index]) {
+                                matches = false
+                                break
+                            }
+                        }
+                        if (matches) {
+                            result = candidateIndex
+                            break
+                        }
+                    }
+                }
+                advanceWindow(cursor - start + 1)
+                return Some(result)
+            }
+            if (current == b'\\' || current < 0x20 || current >= 0x80) {
+                return None<Int64>
+            }
+            cursor++
+        }
+        None<Int64>
+    }
+
+    // Parse only a complete valid Int64 token visible in this window. Invalid
+    // or boundary-spanning tokens stay untouched for the shared parser.
+    public func tryParseInt64Window(): Option<Int64> {
+        if (!ensureAvailable()) { return None<Int64> }
+        var cursor = start
+        let negative = buffer[cursor] == b'-'
+        if (negative) {
+            cursor++
+            if (cursor >= end) { return None<Int64> }
+        }
+        if (buffer[cursor] < b'0' || buffer[cursor] > b'9') { return None<Int64> }
+        if (buffer[cursor] == b'0' && cursor + 1 < end &&
+            buffer[cursor + 1] >= b'0' && buffer[cursor + 1] <= b'9') {
+            return None<Int64>
+        }
+        var result: Int64 = 0
+        while (cursor < end && buffer[cursor] >= b'0' && buffer[cursor] <= b'9') {
+            let digit = Int64(buffer[cursor] - b'0')
+            if (negative) {
+                if (result < ((-0x8000_0000_0000_0000 + digit) / 10)) {
+                    return None<Int64>
+                }
+                result = result * 10 - digit
+            } else {
+                if (result > ((0x7FFF_FFFF_FFFF_FFFF - digit) / 10)) {
+                    return None<Int64>
+                }
+                result = result * 10 + digit
+            }
+            cursor++
+        }
+        if (cursor == end) { return None<Int64> }
+        match (buffer[cursor]) {
+            case b',' | b']' | b'}' | b' ' | b'\n' | b'\r' | b'\t' => ()
+            case _ => return None<Int64>
+        }
+        advanceWindow(cursor - start)
+        Some(result)
+    }
+
+    private func advanceWindow(count: Int64): Unit {
+        for (_ in 0..count) { let _ = consume() }
     }
 
     private func ensureAvailable(): Bool {

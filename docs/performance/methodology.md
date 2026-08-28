@@ -62,3 +62,25 @@ Pure 与 Native 必须在独立进程中运行，因为首次 `YJson` 调用会�
 
 这个 gate 证明的是列出的 workload，不自动证明所有 typed container、stream 或 DOM 调用都被
 加速。
+
+## Stream protocol v1
+
+Stream 比较只接受 caller-owned `InputStream` 或 `OutputStream`。Decode 的 stream 和 chunk
+plan 在计时区外创建。Encode 的 sink 在计时区外创建，最终 snapshot 不计入 materializing
+sink 的时间。必须预聚合为 `String` 或 `ByteBuffer`，或必须创建 DOM/tape 的 peer 标为
+`N/A`。
+
+正式采集固定 CPU 8 和 128 MiB heap。每个 workload、实现和生命周期的单元格使用独立
+进程，运行 11 轮。case 顺序轮转并反转，配对顺序交替。核心矩阵使用 64-byte、4096-byte
+和确定性 1 到 8192-byte chunk，以及 memory 和 counting sink。1-byte chunk 只用于正确性
+验证。
+
+候选必须同时满足以下条件：
+
+- 稳定核心行相对冻结 baseline 不回退超过 5%；
+- 至少两个 canonical Decode workload 提升 5%，且候选赢至少 6/11；
+- 内部 scratch 复用在至少两个 canonical payload 上快于关闭复用；
+- 所有阻断行双方 CV 不超过 5%。
+
+完整重跑一次后仍超过 CV 门槛的批次必须保留并标为未通过。方向一致的 noisy 行可以说明
+观察方向，不能发布精确比例。

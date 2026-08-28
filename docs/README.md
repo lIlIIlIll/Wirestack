@@ -24,6 +24,7 @@
 | 使用 `@Json` / `@JsonValue` | [JSON 字面量](json-literals.md) |
 | 解析、修改或只读查询 JSON | [AST 与 Compact DOM](ast-and-compact.md) |
 | 从 stream 读取或写出 typed value | [Stream I/O](streams.md) |
+| 查看 incremental stream 性能边界 | [Stream 性能](performance/stream.md) |
 | 启用 Native 加速或显式高级 backend | [Backend 使用指南](backends.md) |
 | 设置读取/写出策略并处理错误 | [配置与错误](configuration-and-errors.md) |
 | 限制深度、文档和字符串大小 | [资源限制](resource-limits.md) |

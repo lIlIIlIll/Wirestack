@@ -9,6 +9,13 @@ AST、Pure Compact、Native DOM 与 typed stream 是不同问题，不能拼成�
   36-workload 表与 Native 单引擎 7-workload 门禁。两组结果都使用固定 CPU、128 MiB heap
   和 11 轮交替测量，并保留完整 release artifact。
 
+## 当前开发结果
+
+- [2026-08-28 Stream protocol v1](results/2026-08-28-stream-protocol-v1.md)：typed
+  incremental encode/decode、三种 payload、三种 chunk、两种 sink 和内部 scratch 生命周期。
+  结果包含 previous-yjson A/B 与 yjson/stdx.json peer 表，并保留完整 Server 原始数据。
+  A/B 稳定性与生命周期门槛未通过，因此不能作为发布性能声明。
+
 ## 历史结果
 
 - [2026-08-26 Native 单引擎加速门禁](results/2026-08-26-native-acceleration.md)：2.0.0
@@ -25,6 +32,9 @@ AST、Pure Compact、Native DOM 与 typed stream 是不同问题，不能拼成�
 
 带日期页面是固定源码和环境的结果，不会因为后续优化而改写。release 原始轮次、manifest、
 日志和 checksum 位于对应 `release/<version>/artifacts`。
+
+未进入 release 的开发结果保存在 `benchmarks/results/<protocol>/<date>/`。这些结果可以解释
+设计取舍，但只有结果页明确写为通过时才能用于发布声明。
 
 ## 如何读表
 

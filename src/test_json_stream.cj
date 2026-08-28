@@ -382,10 +382,9 @@ class JsonStreamRoundtripFunctionalityTest {
 class BufferedInputBoundarySmokeTest {
 
     /// 测试分块读取边界（模拟分块流）
-    /// 注意：当前实现会一次性读取整个流，这里测试的是缓冲边界处理
     @TestCase
     func parseAcrossMultipleReadCallsSmoke(): Unit {
-        // 这里只验证 parser 能处理多次 read()，不宣称增量语义
+        // 验证增量 parser 在多次 read() 之间保留语法状态。
         let json = generateJsonArrayOfInts(200)
         let stream = FixedChunkInputStream(json, 7)
         let value = parseJsonValueFromStream(stream)
@@ -417,22 +416,5 @@ class BufferedInputBoundarySmokeTest {
     }
 }
 
-// ============================================================================
-// 功能限制说明
-// ============================================================================
-
-// 注意：以下功能当前不支持，标注为未来改进方向：
-//
-// 1. 真正的增量/分块解析：
-//    - 当前 StreamJsonByteSource 会缓冲整个流数据
-//    - 无法处理不完整的输入或多次追加的输入
-//    - 建议：添加增量解析器 API（如 parseMore() 方法）
-//
-// 2. 流式写入时的内存峰值：
-//    - 当前需要先在内存中构建完整的 JsonNode 树
-//    - 对于超大结构，内存占用仍然很高
-//    - 建议：添加流式构建 API（如 JsonWriter.startObject() 等）
-//
-// 3. 文件流式处理：
-//    - 当前可以处理 FileInputStream，但会加载到内存
-//    - 建议：添加文件专用的流式处理接口
+// Stream API 增量读取一个完整 JSON document，但不提供多文档 framing。
+// JsonNode 路径仍需保留完整结果树；typed codec 路径不先构建 JsonNode。
