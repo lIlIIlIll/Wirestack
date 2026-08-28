@@ -73,9 +73,10 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("| M7-025 | COMPLETE |", status)
         self.assertIn("| M7-026 | COMPLETE |", status)
         self.assertIn("| M3-029 | COMPLETE |", status)
-        self.assertIn("| M7-027 | READY |", status)
+        self.assertIn("| M7-027 | COMPLETE |", status)
+        self.assertIn("docs/evidence/M7-027/README.md", status)
         self.assertIn("do not\nchange the status of the six-platform M7-001 through M7-017 tasks", status)
-        self.assertIn("Start M7-027", linux)
+        self.assertIn("Run M7-022's explicit 24-hour mixed release soak", linux)
         self.assertIn("runtime/std source changes are not dependencies", linux)
 
     def test_evidence_rejects_upstream_and_non_linux_completion_inference(self) -> None:

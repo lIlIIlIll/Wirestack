@@ -158,7 +158,7 @@ replace the six-platform M7-001 through M7-017 tasks.
 | M7-024 Linux performance gate | READY | Existing component reports supply the baselines; one versioned release decision remains. |
 | M7-025 Linux SBOM and fingerprint | COMPLETE | The SPDX 2.3 SBOM, provider manifest and deterministic fingerprint bind the qualified artifact to pinned native inputs, target, toolchain, trust, capabilities and features; runtime/std source changes are not dependencies; [evidence](../evidence/M7-025/README.md). |
 | M7-026 Linux API freeze | COMPLETE | The versioned baseline freezes package `wirestack` major 0, 82 declarations, 50 resolved alias targets and the request/connection/stream cancellation handles. The compatibility gate rejects legacy and low-level public surfaces; [evidence](../evidence/M7-026/README.md). |
-| M7-027 Linux migration and examples | READY | M7-026 and M3-029 are complete. Write the migration guide and validate every public example in a clean consumer. |
+| M7-027 Linux migration and examples | COMPLETE | The maintained guide covers every PRD migration topic. A native temporary consumer builds and runs the checked-in public HTTPS, caller-owned transport TLS, CONNECT configuration, H1/H2 server, SSE, custom CA, mTLS and scoped-cancellation examples; [evidence](../evidence/M7-027/README.md). |
 | M7-028 Linux security review package | BLOCKED | Waits for M7-019 through M7-025. |
 | M7-029 Linux independent security review | BLOCKED | Waits for M7-028 and an independent reviewer. |
 | M7-030 Linux signing and update flow | BLOCKED | Waits for M7-025 and M7-029. |
@@ -166,5 +166,5 @@ replace the six-platform M7-001 through M7-017 tasks.
 
 ## Next critical path
 
-1. Start M7-027 and finish the migration guide plus clean-consumer examples.
-2. M7-022, M7-023 and M7-024 are independent READY tasks, but each needs its own branch.
+1. Run M7-022's explicit 24-hour mixed release soak.
+2. After M7-022, prepare M7-028's independent security-review package.
