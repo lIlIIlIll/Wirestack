@@ -9,6 +9,8 @@ __pycache__/
 !docs/evidence/P1-012/*.json
 !docs/evidence/M3-029/*.json
 !docs/evidence/M3-029/linux_x86_64/*.json
+!docs/evidence/M6-026/*.json
+!docs/evidence/M6-026/linux_x86_64/*.json
 !docs/evidence/M7-027/*.json
 !docs/evidence/M7-027/linux_x86_64/*.json
 !docs/evidence/M7-022/*.json
