@@ -1,0 +1,337 @@
+{
+  "build": {
+    "command": [
+      "cjpm",
+      "test",
+      "src/internal/tls_engine",
+      "src/internal/trust",
+      "src/internal/http1",
+      "src/internal/http2",
+      "src/http",
+      "-j",
+      "1",
+      "--no-run",
+      "--no-progress",
+      "--no-color"
+    ],
+    "duration_ms": 121249.345,
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "   Finished `test` profile compilation\n   Executable files at `/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin`\ncjpm test success\n",
+    "timed_out": false
+  },
+  "corpus_version": "m7-023-v1",
+  "crash_artifacts": [],
+  "decision": "PASS",
+  "environment": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3",
+    "libc": "glibc 2.44",
+    "machine": "x86_64",
+    "release": "7.1.9-arch1-2",
+    "system": "Linux"
+  },
+  "finished_at_utc": "2026-08-28T05:16:51.583351Z",
+  "gate_id": "M7-023-LINUX-FUZZ",
+  "manifest": "tools/gates/manifests/m7-023-linux-fuzz.json",
+  "manifest_sha256": "a3bce21dc697a5d307b1fc451d8ee6d929bac38bd610ed6fe6839d7cd0739e41",
+  "mode": "campaign",
+  "profile": "linux_glibc_x86_64",
+  "release_compile_option": "-O2",
+  "schema_version": 1,
+  "source_sha256": "d36ddd00c3d4845af380c79396eee6add9a84f245a882cd7d25878fa2533d4a9",
+  "started_at_utc": "2026-08-28T05:14:43.664380Z",
+  "target_count": 10,
+  "targets": [
+    {
+      "corpus": "fuzz/corpus/m7-023/v1/tls-record.hex",
+      "corpus_sha256": "a870c9ad0be02ddf5a92afa86028e9d20d21cbe399208472d0386803f45b945c",
+      "decision": "PASS",
+      "marker": {
+        "decision": "PASS",
+        "iterations": 512,
+        "seed": 7023,
+        "target": "tls-record"
+      },
+      "minimum_iterations": 512,
+      "process": {
+        "command": [
+          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.tls_engine",
+          "--filter=M3028TlsFuzzTest.recordMutationsHaveDeterministicTypedTerminals",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "duration_ms": 877.71,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "M7023_FUZZ target=tls-record seed=7023 iterations=512 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.tls_engine, time elapsed: 822829857 ns, RESULT:\n    TCS: M3028TlsFuzzTest, time elapsed: 821887941 ns, RESULT:\n    [ PASSED ] CASE: recordMutationsHaveDeterministicTypedTerminals (821533778 ns)\nSummary: TOTAL: 61\n    PASSED: 1, SKIPPED: 60, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "timed_out": false
+      },
+      "reasons": [],
+      "seed": 7023,
+      "target": "tls-record"
+    },
+    {
+      "corpus": "fuzz/corpus/m7-023/v1/tls-handshake.hex",
+      "corpus_sha256": "a870c9ad0be02ddf5a92afa86028e9d20d21cbe399208472d0386803f45b945c",
+      "decision": "PASS",
+      "marker": {
+        "decision": "PASS",
+        "iterations": 512,
+        "seed": 7023,
+        "target": "tls-handshake"
+      },
+      "minimum_iterations": 512,
+      "process": {
+        "command": [
+          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.tls_engine",
+          "--filter=M3028TlsFuzzTest.handshakeMutationsHaveDeterministicTypedTerminals",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "duration_ms": 881.294,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "M7023_FUZZ target=tls-handshake seed=7023 iterations=512 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.tls_engine, time elapsed: 860917672 ns, RESULT:\n    TCS: M3028TlsFuzzTest, time elapsed: 860401621 ns, RESULT:\n    [ PASSED ] CASE: handshakeMutationsHaveDeterministicTypedTerminals (860158892 ns)\nSummary: TOTAL: 61\n    PASSED: 1, SKIPPED: 60, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "timed_out": false
+      },
+      "reasons": [],
+      "seed": 7023,
+      "target": "tls-handshake"
+    },
+    {
+      "corpus": "fuzz/corpus/m7-023/v1/hostname.hex",
+      "corpus_sha256": "1719b83d2eee012d2b4d6241b449e483ec4095462079a0231de5c6cb70d234a7",
+      "decision": "PASS",
+      "marker": {
+        "decision": "PASS",
+        "iterations": 2048,
+        "seed": 7023,
+        "target": "hostname-verifier"
+      },
+      "minimum_iterations": 2048,
+      "process": {
+        "command": [
+          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.trust",
+          "--filter=M3028HostnameFuzzTest.hostnameMutationsHaveDeterministicTypedTerminals",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "duration_ms": 63.462,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "M7023_FUZZ target=hostname-verifier seed=7023 iterations=2048 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.trust, time elapsed: 35332341 ns, RESULT:\n    TCS: M3028HostnameFuzzTest, time elapsed: 35133972 ns, RESULT:\n    [ PASSED ] CASE: hostnameMutationsHaveDeterministicTypedTerminals (34835294 ns)\nSummary: TOTAL: 10\n    PASSED: 1, SKIPPED: 9, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "timed_out": false
+      },
+      "reasons": [],
+      "seed": 7023,
+      "target": "hostname-verifier"
+    },
+    {
+      "corpus": "fuzz/corpus/m7-023/v1/certificate.hex",
+      "corpus_sha256": "4e6b307323500f1c590c96d892d5459fa4857d70485a7e3c161823a2d515614b",
+      "decision": "PASS",
+      "marker": {
+        "decision": "PASS",
+        "iterations": 512,
+        "seed": 7023,
+        "target": "certificate-adapter"
+      },
+      "minimum_iterations": 512,
+      "process": {
+        "command": [
+          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.tls_engine",
+          "--filter=M3028TlsFuzzTest.certificateAdapterMutationsHaveDeterministicTypedTerminals",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "duration_ms": 39.584,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "M7023_FUZZ target=certificate-adapter seed=7023 iterations=512 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.tls_engine, time elapsed: 10873903 ns, RESULT:\n    TCS: M3028TlsFuzzTest, time elapsed: 10009575 ns, RESULT:\n    [ PASSED ] CASE: certificateAdapterMutationsHaveDeterministicTypedTerminals (9692150 ns)\nSummary: TOTAL: 61\n    PASSED: 1, SKIPPED: 60, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "timed_out": false
+      },
+      "reasons": [],
+      "seed": 7023,
+      "target": "certificate-adapter"
+    },
+    {
+      "corpus": "fuzz/corpus/m7-023/v1/http1-head.hex",
+      "corpus_sha256": "5856acca97866d8dca66c3296d55106f8da3155e2ed4c78d3cb9325cb3e3ed9c",
+      "decision": "PASS",
+      "marker": {
+        "decision": "PASS",
+        "iterations": 870,
+        "seed": 7023,
+        "target": "http1-parser"
+      },
+      "minimum_iterations": 800,
+      "process": {
+        "command": [
+          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.http1",
+          "--filter=Http1SmugglingCorpusTest.everyAcceptedSingleByteMutationHasACanonicalReparse",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "duration_ms": 53.268,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "M7023_FUZZ target=http1-parser seed=7023 iterations=870 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http1, time elapsed: 25950127 ns, RESULT:\n    TCS: Http1SmugglingCorpusTest, time elapsed: 24710991 ns, RESULT:\n    [ PASSED ] CASE: everyAcceptedSingleByteMutationHasACanonicalReparse (24261474 ns)\nSummary: TOTAL: 115\n    PASSED: 1, SKIPPED: 114, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "timed_out": false
+      },
+      "reasons": [],
+      "seed": 7023,
+      "target": "http1-parser"
+    },
+    {
+      "corpus": "fuzz/corpus/m7-023/v1/chunked.hex",
+      "corpus_sha256": "cb3c0b3cb27e94f45cba1ec3bba68a95e7e507061dcfde682ebac22931a4a734",
+      "decision": "PASS",
+      "marker": {
+        "decision": "PASS",
+        "iterations": 127,
+        "seed": 7023,
+        "target": "chunked-decoder"
+      },
+      "minimum_iterations": 100,
+      "process": {
+        "command": [
+          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.http1",
+          "--filter=Http1SmugglingCorpusTest.chunkedMutationsHaveDeterministicBoundedTerminals",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "duration_ms": 34.391,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "M7023_FUZZ target=chunked-decoder seed=7023 iterations=127 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http1, time elapsed: 2708492 ns, RESULT:\n    TCS: Http1SmugglingCorpusTest, time elapsed: 1703901 ns, RESULT:\n    [ PASSED ] CASE: chunkedMutationsHaveDeterministicBoundedTerminals (1346456 ns)\nSummary: TOTAL: 115\n    PASSED: 1, SKIPPED: 114, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "timed_out": false
+      },
+      "reasons": [],
+      "seed": 7023,
+      "target": "chunked-decoder"
+    },
+    {
+      "corpus": "fuzz/corpus/m7-023/v1/http2-frame.hex",
+      "corpus_sha256": "65926b0e8eaa97070404c40cccbe81d3e0dc48f271e562a384981d0bdc717196",
+      "decision": "PASS",
+      "marker": {
+        "decision": "PASS",
+        "iterations": 289,
+        "seed": 7023,
+        "target": "http2-frame"
+      },
+      "minimum_iterations": 200,
+      "process": {
+        "command": [
+          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.http2",
+          "--filter=Http2DeterministicFuzzTest.frameParserDeterministicMutationCorpusStaysBounded",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "duration_ms": 39.938,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "M7023_FUZZ target=http2-frame seed=7023 iterations=289 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http2, time elapsed: 7464178 ns, RESULT:\n    TCS: Http2DeterministicFuzzTest, time elapsed: 5974759 ns, RESULT:\n    [ PASSED ] CASE: frameParserDeterministicMutationCorpusStaysBounded (5687754 ns)\nSummary: TOTAL: 152\n    PASSED: 1, SKIPPED: 151, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "timed_out": false
+      },
+      "reasons": [],
+      "seed": 7023,
+      "target": "http2-frame"
+    },
+    {
+      "corpus": "fuzz/corpus/m7-023/v1/hpack.hex",
+      "corpus_sha256": "086e0e279a7f0317ec53ec916dad52f685e7853097663fde6dcb0b4eef2ab511",
+      "decision": "PASS",
+      "marker": {
+        "decision": "PASS",
+        "iterations": 290,
+        "seed": 7023,
+        "target": "hpack-decoder"
+      },
+      "minimum_iterations": 250,
+      "process": {
+        "command": [
+          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.http2",
+          "--filter=Http2DeterministicFuzzTest.hpackDecoderDeterministicMutationCorpusFailsClosed",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "duration_ms": 37.138,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "M7023_FUZZ target=hpack-decoder seed=7023 iterations=290 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http2, time elapsed: 7926858 ns, RESULT:\n    TCS: Http2DeterministicFuzzTest, time elapsed: 5749305 ns, RESULT:\n    [ PASSED ] CASE: hpackDecoderDeterministicMutationCorpusFailsClosed (5417225 ns)\nSummary: TOTAL: 152\n    PASSED: 1, SKIPPED: 151, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "timed_out": false
+      },
+      "reasons": [],
+      "seed": 7023,
+      "target": "hpack-decoder"
+    },
+    {
+      "corpus": "fuzz/corpus/m7-023/v1/url.hex",
+      "corpus_sha256": "b8c3f5b3b76887c848ae397d71c9cdafa0cab47807150fc4a34aa1f212e62766",
+      "decision": "PASS",
+      "marker": {
+        "decision": "PASS",
+        "iterations": 825,
+        "seed": 7023,
+        "target": "url-authority"
+      },
+      "minimum_iterations": 500,
+      "process": {
+        "command": [
+          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.http",
+          "--filter=Http1DeterministicFuzzTest.acceptedUrlMutationsRoundTripToOneCanonicalIdentity",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "duration_ms": 26.949,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "M7023_FUZZ target=url-authority seed=7023 iterations=825 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.http, time elapsed: 4692875 ns, RESULT:\n    TCS: Http1DeterministicFuzzTest, time elapsed: 4050657 ns, RESULT:\n    [ PASSED ] CASE: acceptedUrlMutationsRoundTripToOneCanonicalIdentity (3754550 ns)\nSummary: TOTAL: 70\n    PASSED: 1, SKIPPED: 69, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "timed_out": false
+      },
+      "reasons": [],
+      "seed": 7023,
+      "target": "url-authority"
+    },
+    {
+      "corpus": "fuzz/corpus/m7-023/v1/proxy.hex",
+      "corpus_sha256": "1a50d7d7bee3bd74b6198f8c573ccb15c51d3cf7bf8c91ad0d5551e39c4a54e0",
+      "decision": "PASS",
+      "marker": {
+        "decision": "PASS",
+        "iterations": 480,
+        "seed": 7023,
+        "target": "proxy-parser"
+      },
+      "minimum_iterations": 300,
+      "process": {
+        "command": [
+          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.http",
+          "--filter=Http1DeterministicFuzzTest.acceptedNoProxyMutationsRemainDeterministicAcrossTargets",
+          "--show-all-output",
+          "--no-progress",
+          "--no-color"
+        ],
+        "duration_ms": 30.053,
+        "exit_code": 0,
+        "stderr": "",
+        "stdout": "M7023_FUZZ target=proxy-parser seed=7023 iterations=480 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.http, time elapsed: 4950068 ns, RESULT:\n    TCS: Http1DeterministicFuzzTest, time elapsed: 3946529 ns, RESULT:\n    [ PASSED ] CASE: acceptedNoProxyMutationsRemainDeterministicAcrossTargets (3613574 ns)\nSummary: TOTAL: 70\n    PASSED: 1, SKIPPED: 69, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "timed_out": false
+      },
+      "reasons": [],
+      "seed": 7023,
+      "target": "proxy-parser"
+    }
+  ]
+}

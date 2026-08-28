@@ -7,6 +7,8 @@
 - Excluded: other platforms, Linux musl, runtime/std source changes, and
   coverage-guided compiler instrumentation not supplied by the pinned SDK
 
+## Semantics
+
 This task turns the existing bounded deterministic mutation tests into one
 release gate. Every campaign consumes a committed corpus, declares a stable
 seed and minimum iteration count, saves a replayable failure artifact, and can
@@ -26,35 +28,38 @@ be rerun from that artifact. A Linux PASS does not imply global M7 completion.
 
 ## Target path matrix
 
-| ID | Path IDs | PRD target | Parser boundary | Corpus class | Assertions / expected terminals |
+| Scenario ID | Triggered path IDs | PRD target | Parser boundary | Corpus class | Assertions / expected terminals |
 |---|---|---|---|---|---|
-| S001 | P001-P003 | TLS record parser | TLS provider record ingestion | Valid and malformed record bytes, truncation, length and bit mutations | Assert bounded acceptance or typed TLS rejection |
-| S002 | P001-P003 | TLS handshake parser | ClientHello handshake ingestion | Valid and malformed handshake bytes, truncation, length and bit mutations | Assert bounded handshake step or typed TLS rejection |
-| S003 | P001-P003 | Hostname verifier | SAN/reference identity matching | DNS, wildcard, A-label and malformed hostname seeds | Assert deterministic match or typed identity/input rejection |
-| S004 | P001-P003 | Certificate input adapter | DER certificate construction and provider adapter | DER seed with truncation, length and bit mutations | Assert accepted adapter input or typed certificate/provider rejection |
-| S005 | P001-P003 | HTTP/1.1 request/response parser | Strict head parser and canonical serializer | Request/response head bytes, delimiter and single-byte mutations | Assert canonical reparse or bounded rejection |
-| S006 | P001-P003 | Chunked decoder | Chunk size, extensions, data, trailer and EOF states | Assert complete bounded body or typed rejection |
-| S007 | P001-P003 | HTTP/2 frame parser | Incremental nine-byte frame header and payload parser | SETTINGS/PING/RST/WINDOW/GOAWAY frames and mutations | Assert at most bounded frames or typed protocol rejection |
-| S008 | P001-P003 | HPACK decoder | Integer, string, static/dynamic table and list limits | RFC-style header blocks and mutations | Assert bounded header list or typed HPACK rejection |
-| S009 | P001-P003 | URL authority parser | Scheme, authority, host, port and request-target parser | IPv4, IPv6 and DNS URL seeds with delimiter mutations | Assert canonical identity or bounded rejection |
-| S010 | P001-P003 | Proxy parser | no-proxy rule and proxy authorization validation | DNS/wildcard/IPv6 rules and invalid authorization bytes | Assert deterministic match or rejection before DNS/connect |
+| S001 | P001,P002,P003 | TLS record parser | TLS provider record ingestion | Valid and malformed record bytes, truncation, length and bit mutations | Assert bounded acceptance or typed TLS rejection |
+| S002 | P001,P002,P003 | TLS handshake parser | ClientHello handshake ingestion | Valid and malformed handshake bytes, truncation, length and bit mutations | Assert bounded handshake step or typed TLS rejection |
+| S003 | P001,P002,P003 | Hostname verifier | SAN/reference identity matching | DNS, wildcard, A-label and malformed hostname seeds | Assert deterministic match or typed identity/input rejection |
+| S004 | P001,P002,P003 | Certificate input adapter | DER certificate construction and provider adapter | DER seed with truncation, length and bit mutations | Assert accepted adapter input or typed certificate/provider rejection |
+| S005 | P001,P002,P003 | HTTP/1.1 request/response parser | Strict head parser and canonical serializer | Request/response head bytes, delimiter and single-byte mutations | Assert canonical reparse or bounded rejection |
+| S006 | P001,P002,P003 | Chunked decoder | Chunk size, extensions, data, trailer and EOF states | Assert complete bounded body or typed rejection |
+| S007 | P001,P002,P003 | HTTP/2 frame parser | Incremental nine-byte frame header and payload parser | SETTINGS/PING/RST/WINDOW/GOAWAY frames and mutations | Assert at most bounded frames or typed protocol rejection |
+| S008 | P001,P002,P003 | HPACK decoder | Integer, string, static/dynamic table and list limits | RFC-style header blocks and mutations | Assert bounded header list or typed HPACK rejection |
+| S009 | P001,P002,P003 | URL authority parser | Scheme, authority, host, port and request-target parser | IPv4, IPv6 and DNS URL seeds with delimiter mutations | Assert canonical identity or bounded rejection |
+| S010 | P001,P002,P003 | Proxy parser | no-proxy rule and proxy authorization validation | DNS/wildcard/IPv6 rules and invalid authorization bytes | Assert deterministic match or rejection before DNS/connect |
+| S011 | P004,P006 | Campaign failure terminal | Target process and marker classifier | Exit, signal, timeout, missing marker and threshold miss | Retain one bounded replayable artifact and fail the aggregate decision |
+| S012 | P005,P006 | Crash replay | Checked-in manifest coordinates | Valid, corrupt, escaping, unknown-target and stale-digest artifacts | Reconstruct only trusted commands; reject invalid coordinates before execution |
+| S013 | P006,P007 | Native release decision | Aggregate report and environment | Ten passing campaigns, current-run crash inventory and Linux metadata | PASS only for all targets with zero current crash and complete native evidence |
 
-## Gate and failure scenario matrix
+## Test-plan matrix
 
-| ID | Preconditions | Stimulus | Assertions / expected result | Traces |
-|---|---|---|---|---|
-| T001 | Valid manifest and all ten corpus files | Run the default gate in an isolated native `-O2` snapshot | Assert ten campaigns execute once, meet thresholds, and aggregate to PASS | P001, P002, P003, P006, P007; S001-S010 |
-| T002 | One manifest target is absent, duplicated, or renamed | Validate manifest | Assert the gate exits nonzero before compiling or running targets | P001, P006; S001-S010 |
-| T003 | Corpus path escapes the repository, is missing, empty, or has the wrong digest | Validate corpus inventory | Assert the gate exits nonzero and identifies the affected target | P002, P006; S001-S010 |
-| T004 | Target exits nonzero or by signal | Execute campaign through a stubbed process result | Assert the gate writes one bounded crash JSON containing target, seed, corpus digest, command and captured output | P004, P006; S001 |
-| T005 | Target exceeds its timeout | Execute campaign through a stubbed timed-out result | Assert the process group is terminated and a replayable timeout artifact is saved | P004, P006; S002 |
-| T006 | Target exits zero but omits, duplicates, or corrupts its marker | Classify campaign output | Assert the gate fails closed and saves a crash artifact | P003, P004, P006; S003 |
-| T007 | Marker iteration count is below threshold or names another target/seed | Classify campaign output | Assert the gate fails closed and saves a crash artifact | P003, P004, P006; S004 |
-| T008 | Valid retained failure artifact | Invoke the emitted `--replay-crash` command | Assert the gate validates immutable campaign coordinates and reruns only that target with the same release settings | P005; S005 |
-| T009 | Corrupt, path-escaping, unknown-target, or stale-digest replay artifact | Invoke replay | Assert the gate exits nonzero before executing untrusted coordinates | P005, P006; S006 |
-| T010 | A prior crash exists outside the current run directory | Run a clean campaign | Assert prior files cannot masquerade as current-run failures and the current decision uses only current target results | P004, P006, P007; S007 |
-| T011 | Normal project test run has no M7-023 environment | Run affected Cangjie test classes normally | Assert committed fallback seeds run deterministically and existing regression semantics remain intact | P002, P003; S001-S010 |
-| T012 | Current supported SDK and native provider are present | Inspect report metadata and optimized test binaries | Assert the target triple is Linux GNU, build is `-O2`, and no runtime/std source build or modification occurs | P003, P007; S001-S010 |
+| Test ID | Scenario IDs | Path IDs | Input | Expected result | Assertions | Type |
+|---|---|---|---|---|---|---|
+| T001 | S001,S002,S003,S004,S005,S006,S007,S008,S009,S010,S013 | P001,P002,P003,P006,P007 | Valid manifest and all ten corpus files in an isolated native `-O2` snapshot | Ten campaigns execute once, meet thresholds and aggregate to PASS | Target inventory, corpus digests, markers, thresholds, zero crash and environment metadata | integration,platform |
+| T002 | S001,S002,S003,S004,S005,S006,S007,S008,S009,S010,S013 | P001,P006 | One manifest target absent, duplicated or renamed | Gate exits nonzero before build or target execution | Exact ten-target inventory and fail-closed decision | unit,error |
+| T003 | S001,S002,S003,S004,S005,S006,S007,S008,S009,S010,S013 | P002,P006 | Escaping, missing, empty or digest-mismatched corpus | Gate exits nonzero and identifies the affected target | Resolved path, non-empty bytes and SHA-256 | unit,security |
+| T004 | S001,S011 | P004,P006 | Target exits nonzero or by signal | One bounded replayable crash artifact is retained | Target, seed, corpus digest, process terminal and bounded output | unit,error |
+| T005 | S002,S011 | P004,P006 | Target exceeds its timeout | Process group terminates and a timeout artifact is retained | Timeout terminal, cleanup and replay coordinates | unit,lifecycle |
+| T006 | S003,S011 | P003,P004,P006 | Zero exit with missing, duplicate or malformed marker | Gate fails closed and retains a crash artifact | Marker cardinality and strict field parser | unit,error |
+| T007 | S004,S011 | P003,P004,P006 | Marker below threshold or naming another target or seed | Gate fails closed and retains a crash artifact | Target, seed and minimum iteration equality | unit,boundary |
+| T008 | S005,S012 | P005 | Valid retained failure artifact | Only its checked-in campaign is replayed with identical release settings | Immutable coordinates and reconstructed command | integration,regression |
+| T009 | S006,S012 | P005,P006 | Corrupt, path-escaping, unknown-target or stale-digest artifact | Gate exits nonzero before executing artifact-supplied coordinates | Schema, target, path and digest rejection | unit,security |
+| T010 | S007,S011,S013 | P004,P006,P007 | Prior crash outside the current run directory | Clean current campaigns may PASS without treating old files as current failures | Run-scoped crash inventory and report provenance | unit,regression |
+| T011 | S001,S002,S003,S004,S005,S006,S007,S008,S009,S010 | P002,P003 | Normal test run without M7-023 environment variables | Committed fallback seeds execute deterministically | Existing package tests retain their normal semantics | integration,regression |
+| T012 | S001,S002,S003,S004,S005,S006,S007,S008,S009,S010,S013 | P003,P007 | Current supported SDK and native provider | Report records Linux GNU, `-O2` and toolchain metadata | No runtime, std, stdx or SDK source build or modification | platform,boundary |
 
 ## Assertions and boundaries
 
