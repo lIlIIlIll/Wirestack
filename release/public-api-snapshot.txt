@@ -577,11 +577,11 @@ yjson|src/lib_json_direct_codec.cj|YJson|public static func value<T>(value: T): 
 yjson|src/lib_json_direct_codec.cj|YJson|public static func writeValue(value: JsonNode, writer: JsonCodecWriter, context: JsonEncodeContext): Unit
 yjson|src/lib_json_direct_codec.cj|YJson|public static func writeValue<T>(value: T, writer: JsonCodecWriter, context: JsonEncodeContext): Unit where T <: JsonCodecProvider
 yjson|src/lib_json_direct_reader.cj|<top-level>|public class JsonDirectReader <: JsonCodecReader
-yjson|src/lib_json_direct_reader.cj|<top-level>|public init(objectContext: Bool)
+yjson|src/lib_json_direct_reader.cj|<top-level>|public init(objectContext: Bool, trackDuplicateNames: Bool)
 yjson|src/lib_json_direct_reader.cj|<top-level>|public let objectContext: Bool
-yjson|src/lib_json_direct_reader.cj|<top-level>|public let seenNames = HashSet<String>()
 yjson|src/lib_json_direct_reader.cj|<top-level>|public var expectingFieldValue: Bool = false
 yjson|src/lib_json_direct_reader.cj|<top-level>|public var first: Bool = true
+yjson|src/lib_json_direct_reader.cj|<top-level>|public var seenNames: Option<HashSet<String>>
 yjson|src/lib_json_direct_reader.cj|JsonDirectReader|public func readBoundedValue(maxBytes: Int64): JsonNode
 yjson|src/lib_json_direct_reader.cj|JsonDirectReader|public func readConfig(): JsonReadConfig
 yjson|src/lib_json_direct_reader.cj|JsonDirectReader|public func readReplayValue(maxBytes: Int64): JsonReplayValue
@@ -737,6 +737,7 @@ yjson|src/lib_json_parser_core.cj|<top-level>|public func beginValueBudget(limit
 yjson|src/lib_json_parser_core.cj|<top-level>|public func columnAt(offset: Int64): Int64
 yjson|src/lib_json_parser_core.cj|<top-level>|public func config(): JsonReadConfig
 yjson|src/lib_json_parser_core.cj|<top-level>|public func consume(): Byte
+yjson|src/lib_json_parser_core.cj|<top-level>|public func consumeExpectedByteFast(value: Byte): Bool
 yjson|src/lib_json_parser_core.cj|<top-level>|public func consumeJsonByte(): Byte
 yjson|src/lib_json_parser_core.cj|<top-level>|public func decodeJsonUtf8Rune(first: Byte, start: Int64): Rune
 yjson|src/lib_json_parser_core.cj|<top-level>|public func endValueBudget(): Unit
@@ -758,6 +759,9 @@ yjson|src/lib_json_parser_core.cj|<top-level>|public func readJsonString(): Stri
 yjson|src/lib_json_parser_core.cj|<top-level>|public func readJsonUnicodeEscape(): (Rune, Int64)
 yjson|src/lib_json_parser_core.cj|<top-level>|public func skipJsonWhitespace(): Unit
 yjson|src/lib_json_parser_core.cj|<top-level>|public func skipSpacesFast(): Unit
+yjson|src/lib_json_parser_core.cj|<top-level>|public func tryParseInt64Window(): Option<Int64>
+yjson|src/lib_json_parser_core.cj|<top-level>|public func tryParseNameIdWindow(candidates: Array<String>): Option<Int64>
+yjson|src/lib_json_parser_core.cj|<top-level>|public func tryParseSimpleAsciiStringWindow(): Option<String>
 yjson|src/lib_json_parser_core.cj|<top-level>|public func tryParseSimpleString(): Option<String>
 yjson|src/lib_json_parser_core.cj|<top-level>|public init( input: InputStream, bufferSize!: Int64 = 4096, config!: JsonReadConfig = JsonReadConfig.defaults )
 yjson|src/lib_json_parser_core.cj|<top-level>|public init(data: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults)
