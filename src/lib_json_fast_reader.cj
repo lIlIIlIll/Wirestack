@@ -1,6 +1,7 @@
 package yjson
 
 import std.collection.*
+import std.math.numeric.*
 import std.time.*
 
 private let YJSON_NATIVE_SKIP_MIN_REMAINING_BYTES: Int64 = 128
@@ -599,6 +600,14 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
             fail("Integer literal out of UInt8 range")
         }
         UInt8(value)
+    }
+
+    public func readRawBigInt(): BigInt {
+        BigInt.parse(readRawNumberLiteral())
+    }
+
+    public func readRawDecimal(): Decimal {
+        Decimal.parse(readRawNumberLiteral())
     }
 
     public func readRawNumberLiteral(): String {

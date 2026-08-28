@@ -373,6 +373,38 @@ class JsonCoverageContractsTest {
         GeneratedSupportV1.writeCompactObjectEnd(writer)
         @Expect(writer.finishString(), "{\"s\":\"x\",\"b\":true,\"i\":7}")
 
+        let legacyArrayWriter = GeneratedSupportV1.newWriter()
+        @Expect(GeneratedSupportV1.tryBeginCompactValue(legacyArrayWriter))
+        jsonWriteGeneratedCompactArrayBegin(legacyArrayWriter)
+        legacyArrayWriter.writeRawNull()
+        jsonWriteGeneratedCompactComma(legacyArrayWriter)
+        legacyArrayWriter.writeRawNull()
+        jsonWriteGeneratedCompactArrayEnd(legacyArrayWriter)
+        @Expect(legacyArrayWriter.finishString(), "[null,null]")
+
+        let legacyObjectWriter = GeneratedSupportV1.newWriter()
+        @Expect(GeneratedSupportV1.tryBeginCompactValue(legacyObjectWriter))
+        jsonWriteGeneratedCompactObjectBegin(legacyObjectWriter)
+        @Expect(!jsonWriteGeneratedCompactObjectEntryName(legacyObjectWriter, true, "value"))
+        legacyObjectWriter.writeRawNull()
+        jsonWriteGeneratedCompactObjectEnd(legacyObjectWriter)
+        @Expect(legacyObjectWriter.finishString(), "{\"value\":null}")
+
+        let stringValues = ArrayList<String>()
+        stringValues.add("a")
+        stringValues.add("b")
+        let stringListWriter = JsonDirectWriter()
+        __yJsonWriteStringArrayList(stringValues, stringListWriter,
+            JsonEncodeContext(JsonWriteConfig.compact))
+        @Expect(stringListWriter.finishString(), "[\"a\",\"b\"]")
+
+        let intValues = HashMap<String, Int64>()
+        intValues["value"] = 7
+        let intMapWriter = JsonDirectWriter()
+        __yJsonWriteInt64HashMap(intValues, intMapWriter,
+            JsonEncodeContext(JsonWriteConfig.compact))
+        @Expect(YJson.parse(intMapWriter.finishString()).asObject()["value"].asInt().value, 7)
+
         let cursorWriter = GeneratedSupportV1.newWriter()
         @Expect(GeneratedSupportV1.tryBeginCompactValue(cursorWriter))
         let cursor = GeneratedSupportV1.writeCursor(cursorWriter)

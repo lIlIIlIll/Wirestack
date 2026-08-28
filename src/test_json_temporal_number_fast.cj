@@ -336,11 +336,19 @@ class YJsonTemporalNumberFastTest {
         @Expect(jsonFastReadBigInt(bigReader), BigInt.parse("-1234567890123456789012345678901234567890"))
         bigReader.expectEnd()
 
+        let publicBigReader = JsonFastReader(bytes("9223372036854775808"))
+        @Expect(publicBigReader.readRawBigInt(), BigInt.parse("9223372036854775808"))
+        publicBigReader.expectEnd()
+
         let decimalReader = JsonFastReader(bytes("-987654321012345678901234567890.1250"))
         let decimal = jsonFastReadDecimal(decimalReader)
         @Expect(decimal, Decimal.parse("-987654321012345678901234567890.1250"))
         @Expect(decimal.toString(), "-987654321012345678901234567890.1250")
         decimalReader.expectEnd()
+
+        let publicDecimalReader = JsonFastReader(bytes("1.250e2"))
+        @Expect(publicDecimalReader.readRawDecimal(), Decimal.parse("1.250e2"))
+        publicDecimalReader.expectEnd()
     }
 
     @TestCase

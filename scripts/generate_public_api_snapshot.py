@@ -92,8 +92,8 @@ def sanitize_lines(text: str) -> list[str]:
             current.extend("   ")
             i += 3
             continue
-        if ch == '"':
-            string_quote = '"'
+        if ch in {'"', "'"}:
+            string_quote = ch
             current.append(" ")
             i += 1
             continue
