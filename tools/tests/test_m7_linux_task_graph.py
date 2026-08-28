@@ -72,6 +72,7 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("| M7-023 | COMPLETE |", status)
         self.assertIn("| M7-023 Linux release fuzz gate | COMPLETE |", linux)
         self.assertIn("| M7-024 | COMPLETE |", status)
+        self.assertIn("| M7-024 Linux performance gate | COMPLETE |", linux)
         self.assertIn("| M7-025 | COMPLETE |", status)
         self.assertIn("| M7-026 | COMPLETE |", status)
         self.assertIn("| M3-029 | COMPLETE |", status)
