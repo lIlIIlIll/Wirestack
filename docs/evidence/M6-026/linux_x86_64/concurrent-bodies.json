@@ -1,0 +1,37 @@
+{
+  "acceptance_status": "PASS",
+  "checks": {
+    "orderedInitialHeaders": "PASS",
+    "publicRealTlsProfile": "PASS",
+    "skippedAsPass": false,
+    "unpublishedCancellation": "PASS"
+  },
+  "commands": [
+    "cjpm test src/internal/http2 --filter=Http2ClientConnectionTest",
+    "cjpm test src/http --filter=Http2ConcurrentResponseBodyProfileTest.oneThousandOverlappingBatchesCompleteAndTerminate"
+  ],
+  "decision": "PASS",
+  "platform": "linux-x86_64-glibc",
+  "result": {
+    "activeHandlers": 0,
+    "batches": 1000,
+    "bytes": 4000,
+    "failures": 0,
+    "responses": 2000,
+    "timeouts": 0
+  },
+  "schemaVersion": 1,
+  "source_sha256": {
+    "src/http/facade_test.cj": "84a41d25ce0eada077152e81cef06eb48e956ffbc2fbe58f48ffbb50a305bf44",
+    "src/internal/http2/client_connection.cj": "88e705041e8ac304f49c10ee521a9aa71f4c22aca07c7950a42f3ed2efa6dede",
+    "src/internal/http2/client_connection_test.cj": "3c82b461858747eb2a72d897530f4d4708772f0652d85c36a5ed6447fc9f9a27",
+    "tools/m6_026_http2_concurrent_bodies.py": "f01a8cd1bd9541f0f8976d788b1d0ea896e2b790321b01721cf100983807d622"
+  },
+  "source_task": "M6-026",
+  "status": "PASS",
+  "taskId": "M6-026",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}

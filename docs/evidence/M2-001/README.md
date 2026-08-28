@@ -99,5 +99,7 @@ declaration changes, so that test-only result is not used as an API verdict.
 ## Remaining boundary
 
 M2-001 does not implement DNS resolution, route selection, IDNA U-label to
-A-label conversion or HTTP URL parsing. The Linux production resolver remains
-blocked on the bounded non-carrier backend tracked by M2-003/UP-007.
+A-label conversion or HTTP URL parsing. At M2-001 completion, the Linux
+production resolver still awaited the bounded non-carrier backend in M2-003.
+M2-003 is now complete. UP-007 remains an optional future upstream enhancement
+and was never a dependency of M2-001 or the Linux release.

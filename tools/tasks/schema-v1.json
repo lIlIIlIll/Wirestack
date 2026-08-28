@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wirestack://tools/tasks/schema-v1.json",
+  "additionalProperties": false,
+  "properties": {
+    "acceptance_commands": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "argv": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
+          "gate": {"enum": ["fast", "task", "full", "long"]},
+          "id": {"minLength": 1, "type": "string"},
+          "long_running": {"type": "boolean"},
+          "timeout_seconds": {"exclusiveMinimum": 0, "maximum": 172800, "type": "number"}
+        },
+        "required": ["id", "argv", "timeout_seconds", "long_running", "gate"],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "allowed_paths": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
+    "dependencies": {"items": {"pattern": "^[A-Z][A-Z0-9]*-[0-9]{3}$", "type": "string"}, "type": "array"},
+    "long_running_gate": {"type": "boolean"},
+    "platforms": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
+    "required_evidence": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
+    "schema_version": {"const": 1},
+    "source_paths": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
+    "task_id": {"pattern": "^[A-Z][A-Z0-9]*-[0-9]{3}$", "type": "string"},
+    "timeout_seconds": {"exclusiveMinimum": 0, "maximum": 172800, "type": "number"}
+  },
+  "required": ["schema_version", "task_id", "dependencies", "allowed_paths", "platforms", "acceptance_commands", "required_evidence", "timeout_seconds", "long_running_gate", "source_paths"],
+  "type": "object"
+}

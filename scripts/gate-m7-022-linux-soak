@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export DISABLE_ZOXIDE=1
+exec python3 "$repo_root/tools/m7_022_linux_release_soak.py" "$@"

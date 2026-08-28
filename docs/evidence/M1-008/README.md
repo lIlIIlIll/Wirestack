@@ -2,10 +2,17 @@
 
 - Task: `M1-008`
 - Profile: Linux x86_64 glibc
-- Result: **PASS**
-- Date: 2026-08-27 (UTC+8)
+- Linux x86_64 glibc: **COMPLETE**
+- Other platforms: **NOT RUN**
+- Date: 2026-08-28 (UTC+8)
 - Compiler: Cangjie `1.1.0-alpha.20260817040003` (`cjnative`)
 - Target: `x86_64-unknown-linux-gnu`
+
+## Dependencies
+
+M1-003 through M1-007 have retained Linux evidence. Together they provide the
+monotonic Deadline, cancellation registration, immutable operation context,
+trace context and structured error contracts required by this task.
 
 ## Acceptance mapping
 
@@ -29,41 +36,28 @@ order is intentionally unspecified.
 Focused test:
 
 ```text
-env DISABLE_ZOXIDE=1 /home/elliot/.codex/scripts/codex_cangjie_env \
-  --cwd /home/elliot/playground/Wirestack \
-  cjpm test --filter OperationCompletionTest --no-color --no-progress
+/home/elliot/.codex/scripts/codex_cangjie_env \
+  cjpm test --filter='OperationCompletionTest.*' --no-color --no-progress
 ```
 
-Result: exit `0`; `OperationCompletionTest` passed `9/9`. Project summary:
-`PASSED 9`, `SKIPPED 456`, `FAILED 0`, `ERROR 0`. The first sandboxed
-invocation exited `1` before test execution because the unittest runner could
-not create its local control socket; the identical authorized run passed.
-
-Complete serialized regression:
-
-```text
-cjpm test --parallel 1 --no-color --no-progress
-```
-
-Result: exit `0`; `PASSED 465`, `SKIPPED 0`, `FAILED 0`, `ERROR 0`.
+Result: exit `0`. `OperationCompletionTest` passed `9/9`. The project summary
+was `TOTAL 569`, `PASSED 9`, `SKIPPED 560`, `FAILED 0`, `ERROR 0`.
 
 Canonical repository gate:
 
 ```text
-scripts/check
+/home/elliot/.codex/scripts/codex_cangjie_env scripts/check
 ```
 
-Result: exit `1`. Python suites passed `50/50`, `84/84` and `8/8`;
-architecture guard, `cjpm check` and `cjpm build` passed. The parallel Cangjie
-run finished `464/465` with the pre-existing five-second timeout in
-`HttpFacadeTest.tlsHttp2StreamLimitIsAppliedAcrossConcurrentPublicRequests`.
-That HTTP test passed in the complete serialized run. The build also retained
-one pre-existing unused-function warning for `waitUntilWaiters` in
-`src/internal/http1/connection_pool.cj`.
+Result: exit `0`. The repository Python suites passed `57/57`, `114/114` and
+`23/23`. The architecture guard, `cjpm check` and `cjpm build` passed. The
+Cangjie project summary was `TOTAL 569`, `PASSED 549`, `SKIPPED 20`, `FAILED 0`,
+`ERROR 0`. The build retained pre-existing unused-function warnings for
+`metrics`, `waitUntilAcceptActive` and `waitUntilWaiters`.
 
 ## Scope boundary
 
-This task adds the shared bounded completion/cleanup primitive and its Linux
-race matrix. It does not refactor later transport, TLS or HTTP lifecycle owners
-to consume the primitive; those integrations remain owned by their dependent
-backlog tasks, beginning with M1-009.
+The current source already contains the shared bounded completion/cleanup
+primitive and its Linux race matrix. This qualification changes no production
+declaration or behavior. Later transport, TLS and HTTP lifecycle integration
+remains owned by the dependent backlog tasks, beginning with M1-009.

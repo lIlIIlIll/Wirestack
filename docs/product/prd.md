@@ -26,7 +26,7 @@
 2. 新增独立的内部 Transport SPI，TLS/HTTP 核心不直接导入 `std.net`。
 3. 第一版通过 `StdNetTransport` 适配器复用仓颉运行时已有的 socket AIO 与协程调度。
 4. 不使用现有 `std.net` 的域名解析和字符串地址连接路径；Resolver 与 Happy Eyeballs Connector 单独实现。
-5. 仅当跨平台采纳门禁失败时，才对 `std.net` 或 runtime 做定向补强。
+5. 采纳门禁失败时，记录独立的远期 `std.net` 或 runtime 增强候选。Wirestack 发布不依赖这些源码修改。
 6. 禁止 Wirestack 直接调用 `CJ_MRT_Sock*` 私有 ABI，也不自行实现六套 epoll/kqueue/IOCP 网络循环。
 7. 当前 Linux 发布目标只包含仓颉 SDK 支持的 glibc target。musl 延后到仓颉 SDK 提供受支持的 target、标准库和 runtime 后再采纳。
 
@@ -34,9 +34,9 @@
 
 - Wirestack 是独立绿地仓库，不是 `cangjie_stdx` 的子目录，也不复用旧 `stdx.net.tls/http` 包名作为新 API 命名空间。
 - 新公共包统一使用 `wirestack.*`；内部实现使用 `wirestack.internal.*`，具体物理目录与 `cjpm` target 在 M0-002 根据实际仓颉工具链冻结。
-- `cangjie_stdx`、仓颉 SDK、`std.net` 与 runtime 源码是外部参考/上游依赖，不属于 Wirestack 工作树。
+- `cangjie_stdx`、`std.net` 与 runtime 源码仓库仅作为外部参考，不属于 Wirestack 工作树，也不是 Wirestack 的源码或发布前置依赖。Wirestack 只依赖受支持 SDK 已公开的能力。
 - 文档中出现的 `stdx.net.tls`、`stdx.net.http` 若用于描述“当前/旧实现”，仍保留原名；迁移目标与新实现一律称为 Wirestack。
-- `std.net`/runtime 的修改必须在对应上游仓库单独提交，并由 Wirestack 的失败门禁证据解锁；Wirestack 仓库不得通过复制私有实现绕过上游接口。
+- `std.net`/runtime 的修改是远期上游工作，不在 Wirestack 发布依赖图中。如果未来启动，必须由失败门禁证据和已批准的最小接口 RFC 解锁，并在对应上游仓库单独提交。Wirestack 不得通过复制私有实现绕过公开 SDK。
 
 ---
 
@@ -102,11 +102,11 @@ CJThread socket AIO
 | D-002 | TLS/HTTP Core 不直接依赖 `std.net` | Core 只能依赖内部 Transport SPI |
 | D-003 | 公共 API 不暴露 `TcpSocket`、`StreamingSocket`、`SocketException` | 防止现有语义成为长期兼容包袱 |
 | D-004 | 不使用 `TcpSocket(String, port)` 和现有默认 DNS 连接路径 | Resolver 与 Connector 独立实现 |
-| D-005 | 不直接调用 `CJ_MRT_Sock*` 私有 ABI | 若适配器能力不足，优先修改 `std.net`/runtime 的正式接口 |
+| D-005 | 不直接调用 `CJ_MRT_Sock*` 私有 ABI | 公开 SDK 能力不足时，适配器报告稳定能力或错误；上游接口只作为远期候选 |
 | D-006 | 不为六个平台重写网络事件循环 | 继续复用 CJThread socket AIO |
 | D-007 | OpenSSL 降为可选兼容 provider | 官方默认产物不搜索或依赖系统 OpenSSL |
 | D-008 | 首版优先单一可移植 TLS Engine | 平台差异集中在 Trust、Key、Random 和诊断适配器 |
-| D-009 | `std.net` 修改采用门禁驱动 | 只有采纳门禁失败的能力才进入上游改造范围 |
+| D-009 | `std.net`/runtime 修改是独立的远期工作 | 只有采纳门禁失败的能力才可进入候选范围；候选项不阻塞 Wirestack 发布 |
 | D-010 | Deadline、取消、错误和 EOF 语义由新 Transport 层定义 | 不继承现有 socket API 的模糊语义 |
 
 ### 2.1 决策的直接结果
@@ -134,7 +134,7 @@ CJThread socket AIO
     ↓
 实现 HTTP/1.1、HTTP/2
     ↓
-只对失败门禁做定向 runtime 改造
+把失败门禁记录为独立的远期上游候选
 ```
 
 ---
@@ -433,7 +433,7 @@ Wirestack → CJ_MRT_Sock*
 
 ### 8.4 修改 `std.net` 的原则
 
-仅当采纳门禁表明适配器无法正确实现 P0 语义时，才允许新增正式能力，例如：
+runtime 或 `std.net` 的正式能力属于远期增强，不是 Wirestack 发布依赖。门禁可以提出以下增强：
 
 - 可取消的 runtime wait；
 - 明确的 `shutdownRead` / `shutdownWrite`；
@@ -444,6 +444,10 @@ Wirestack → CJ_MRT_Sock*
 - Windows 更低复制的数据路径。
 
 禁止为了便利而在 Wirestack 内复制 runtime socket 实现。
+
+当前公共 SDK 缺少某项增强时，适配器必须公开能力状态，并返回稳定的
+`Unsupported` 或通用错误。不得访问 private handle，不得解析异常消息，也不得
+把未支持的能力记为已经实现。
 
 ---
 
@@ -514,7 +518,7 @@ Wirestack → CJ_MRT_Sock*
 验收：
 
 - 适配器能够稳定区分 peer EOF 与本地主动终止；
-- 若无法区分，必须进入 `std.net`/runtime 改造范围，不能在 TLS 层猜测。
+- 若无法区分，该平台门禁失败，不进入当前支持矩阵。可以记录远期上游增强，但不得在 TLS 层猜测，也不得让该增强阻塞已支持平台的发布。
 
 ### GATE-NET-05：大块数据和复制
 
@@ -577,12 +581,12 @@ Android、iOS、HarmonyOS 验证：
 
 | 失败项 | 首选修复位置 | 禁止方案 |
 |---|---|---|
-| close 不能唤醒等待 | runtime/`std.net` 增加正式 cancel/wakeup | Wirestack 自己轮询 sleep |
-| 无法区分 local close 与 peer EOF | `std.net` 暴露结构化终态 | TLS 根据时间顺序猜测 |
-| 无半关闭 | `std.net` 增加 typed shutdown | 直接调用私有 native handle |
-| Windows 复制过重 | `std.net`/runtime 改进 buffer API | 在 TLS 层叠加更多大缓冲 |
-| 错误无法分类 | `std.net` 增加稳定 error code | 解析异常 message 文本 |
-| DNS 阻塞 carrier thread | 新 Resolver/runtime resolver API | 无界线程池 |
+| close 不能唤醒等待 | 该平台 gate 失败；保留远期 cancel/wakeup 增强 | Wirestack 自己轮询 sleep |
+| 无法区分 local close 与 peer EOF | 该平台 gate 失败；保留远期结构化终态增强 | TLS 根据时间顺序猜测 |
+| 无半关闭 | `supportsHalfClose=false`；保留远期 typed shutdown 增强 | 直接调用私有 native handle |
+| Windows 复制过重 | 该平台性能 gate 失败；保留远期 buffer API 增强 | 在 TLS 层叠加更多大缓冲 |
+| 错误无法细分 | 稳定映射为 `SystemFailure/Unknown`；保留远期 error code 增强 | 解析异常 message 文本 |
+| DNS 阻塞 carrier thread | 使用有界 Resolver pool；保留远期 runtime resolver 增强 | 无界线程池 |
 
 ---
 
@@ -700,7 +704,9 @@ public interface DuplexTransport <: Resource {
 
 **TR-STREAM-006 · P0**
 
-`shutdown(Write)` 禁止新写入，但保留读取；`shutdown(Read)` 禁止新读取但不自动关闭写方向。
+`TransportInfo.supportsHalfClose` 表示适配器是否支持 directional shutdown。
+支持时，`shutdown(Write)` 禁止新写入但保留读取，`shutdown(Read)` 禁止新读取但
+不自动关闭写方向。不支持时，两个操作返回稳定的 `Unsupported`，且不改变连接状态。
 
 **TR-STREAM-007 · P0**
 
@@ -732,7 +738,7 @@ Transport 状态：
 Created
   → Connecting / Accepted
   → Open
-  → ReadHalfClosed / WriteHalfClosed
+  → ReadHalfClosed / WriteHalfClosed（仅当适配器支持）
   → Closing
   → Closed
 
@@ -770,11 +776,14 @@ TcpSocket.close()
 
 但只有在 GATE-NET-01/03/04 全部通过时才能接受。
 
-若 close 无法可靠唤醒某类操作，必须增加正式 runtime/std.net cancellation 原语。
+若 close 无法可靠唤醒某类操作，该平台的取消门禁失败。未来可以增加正式
+runtime 或 `std.net` cancellation 原语，但 Wirestack 不访问私有 ABI 作为旁路。
 
 ### 11.3 错误映射
 
-适配器内部可以读取 `std.net` 异常和 native code，但对上只返回稳定错误：
+适配器只使用公共 `std.net` 异常信息。若 SDK 提供稳定 native code，适配器保留
+该值。若 SDK 不提供，`nativeCode` 为 `None`，适配器仍返回稳定的 Wirestack
+category、phase、code 和 retryability：
 
 ```text
 Resolve
@@ -792,6 +801,10 @@ ResourceExhausted
 Unsupported
 SystemFailure
 ```
+
+适配器先依据 `OperationContext` 和 Wirestack 所有的 lifecycle 状态区分 timeout、
+cancel 和 local close。无法可靠细分的 socket 失败映射为 `SystemFailure` 和
+`Retryability.Unknown`。禁止解析 `SocketException.message`。
 
 禁止：
 
@@ -1333,6 +1346,8 @@ public class NetworkException <: IOException {
 }
 ```
 
+`nativeCode` 是可选诊断字段。发布验收不要求公共 SDK 暴露该值。
+
 Category：
 
 ```text
@@ -1554,7 +1569,7 @@ buildFingerprint: ...
 - cancellation races；
 - transport state；
 - exactly-once completion；
-- half-close；
+- half-close capability、支持路径和 `Unsupported` 路径；
 - error mapping；
 - pool key；
 - body replayability；
@@ -1787,7 +1802,7 @@ StreamingSocket 作为公开 TLS 类型
 退出条件：
 
 - 明确哪些需求可由适配器完成；
-- 明确需要上游修改的最小集合；
+- 记录有失败证据的远期上游候选，并明确它们不是 Wirestack 发布依赖；
 - TLS provider 选择完成；
 - 所有权、取消和 EOF 语义评审通过。
 
@@ -1942,7 +1957,7 @@ StreamingSocket 作为公开 TLS 类型
 19. 所有资源集合有界；
 20. 所有错误有稳定 category、phase 和 retryability；
 21. Wirestack 未直接调用 `CJ_MRT_Sock*` 私有 ABI；
-22. 所有 `std.net` 上游修改都有对应失败门禁和回归测试。
+22. Wirestack 发布不依赖 `std.net` 或 runtime 源码修改；未来采用上游增强时，该增强必须有失败门禁和回归证据。
 
 ---
 
@@ -1950,9 +1965,11 @@ StreamingSocket 作为公开 TLS 类型
 
 | 风险 | 影响 | 缓解 |
 |---|---|---|
-| `std.net` close 不能可靠唤醒某平台等待 | 取消语义无法实现 | M0 门禁；定向增加 runtime cancellation API |
-| `read() == 0` 无法区分 local/peer close | TLS 截断判断错误 | 增加正式结构化终态，不在 TLS 层猜测 |
-| Windows staging copy 性能差 | HTTPS 吞吐下降 | 改进 `std.net` buffer API；建立 copied-bytes 指标 |
+| `std.net` close 不能可靠唤醒某平台等待 | 该平台的取消门禁失败 | 不声明支持该平台；保留远期 UP-001，不阻塞已支持平台 |
+| `read() == 0` 无法区分 local/peer close | 该平台的 TLS 截断门禁失败 | 不在 TLS 层猜测；保留远期 UP-002，不阻塞已支持平台 |
+| 公共 SDK 不支持 directional TCP shutdown | Transport 无法提供 TCP half-close | 公开 `supportsHalfClose=false` 并稳定返回 `Unsupported`；保留远期 UP-003 |
+| 公共 SDK 不暴露 native socket code | 无法细分部分系统错误 | 保留稳定 category/phase；未知错误使用 `SystemFailure`；保留远期 UP-005 |
+| Windows staging copy 性能差 | Windows 性能门禁失败 | 保留远期 UP-006 和 copied-bytes 证据；不阻塞已支持平台 |
 | DNS 解析阻塞 carrier thread | 高并发连接拖垮调度器 | 平台 async resolver 或有界 resolver pool |
 | 可移植 TLS provider 跨平台能力不足 | 被迫多后端分叉 | M0 provider gate 验证 external signer/trust/cross-build |
 | 平台信任结果不完全一致 | 跨平台行为差异 | 定义 System policy；返回验证证据；做平台矩阵测试 |
@@ -1973,7 +1990,7 @@ StreamingSocket 作为公开 TLS 类型
 2. CryptoProvider 的默认实现；
 3. 六平台最低 OS/API 版本；
 4. `ByteSpan` 是否进入 `std.io` 或仅为内部类型；
-5. `std.net` 是否需要正式 per-operation cancellation ABI；
+5. 哪些失败证据需要记录为远期 `std.net`/runtime 候选，而不进入 Wirestack 发布依赖；
 6. Windows direct/low-copy buffer 路径；
 7. Linux system trust 搜索规则；
 8. 移动平台 listener 的正式支持级别；
@@ -2083,8 +2100,8 @@ server.serve(context: context)
 验证 std.net：
     通过六平台采纳门禁确认 close、取消、性能和生命周期
 
-定向修改 std.net：
-    只修复适配器无法正确实现的阻断能力
+记录远期上游需求：
+    仅保留有失败门禁和最小接口证据的候选，Wirestack 发布不等待这些修改
 
 禁止旁路：
     Wirestack 不直接调用 runtime 私有 ABI，也不重写六套事件循环
@@ -2092,4 +2109,4 @@ server.serve(context: context)
 
 因此，本 PRD 的项目边界是：
 
-> 以 `std.net` 和 CJThread socket AIO 为默认网络底座，通过独立 Transport SPI 重写仓颉跨平台 TLS、HTTPS、HTTP/1.1 和 HTTP/2 语义；在不泄漏 `std.net` 现有公共语义的前提下，复用其运行时价值，并用门禁驱动最小化上游改造。
+> 以 `std.net` 和 CJThread socket AIO 为默认网络底座，通过独立 Transport SPI 重写仓颉跨平台 TLS、HTTPS、HTTP/1.1 和 HTTP/2 语义。Wirestack 只依赖公开 SDK，用门禁记录远期上游候选，不让 `std.net` 或 runtime 源码修改进入发布依赖图。

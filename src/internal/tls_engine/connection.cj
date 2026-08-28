@@ -69,6 +69,7 @@ public class TlsConnection <: DuplexTransport {
                 case value: HandshakeInfoTlsEngine => Some(value.handshakeInfo())
                 case _ => None<TlsHandshakeInfo>
             }
+            pump.releaseIdleBuffers()
             TlsConnection(engine, transport, pump, info)
         } catch (error: NetworkException) {
             try { transport.abort(reason: abortReason(error)) }
@@ -277,7 +278,8 @@ public class TlsConnection <: DuplexTransport {
             }
         }
         if (release) {
-            engine.close()
+            try { engine.close() }
+            finally { pump.releaseIdleBuffers() }
         }
     }
 

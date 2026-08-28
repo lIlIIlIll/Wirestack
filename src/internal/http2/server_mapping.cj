@@ -322,6 +322,8 @@ private class Http2ServerBodyChannel <: HttpBodyStream {
 
     public func read(destination: Array<Byte>): Int64 {
         if (destination.isEmpty()) { return 0 }
+        let stalledUpdates = flow.flushStalledConnectionReceiveCredit()
+        if (!stalledUpdates.isEmpty()) { sink.submit(stalledUpdates) }
         let registration = context.cancellation.register { => wake() }
         var updates = Array<Http2Frame>()
         try {

@@ -1,9 +1,11 @@
 # Wirestack：仓颉跨平台 TLS/HTTPS 网络栈仓库实施任务分解
 
-**依据：**《Wirestack：仓颉跨平台 TLS/HTTPS 网络栈重写 PRD》v2.0（2026-08-22）  
+**依据：**《Wirestack：仓颉跨平台 TLS/HTTPS 网络栈重写 PRD》v2.1（2026-08-27）  
 **文档类型：** Issue/PR 级实施 backlog  
-**主线任务数：** 174  
-**条件上游任务数：** 7  
+**全平台主线任务数：** 183  
+**Linux 稳定版收口任务数：** 14  
+**远期上游任务数：** 7  
+**当前发布任务数：** 197  
 **目标：** 将 PRD 转换为可排期、可并行、可验收、可追踪的仓库任务；不在此文档中改变 PRD 已冻结的产品边界。
 
 > 仓库事实：Wirestack 是独立仓颉绿地网络库仓库，GitHub 为 `lIlIIlIll/Wirestack`。新公共包默认使用 `wirestack.*`，内部实现使用 `wirestack.internal.*`。`cangjie_stdx`、仓颉 SDK、`std.net` 与 runtime 源码均为外部参考或上游仓库，不属于 Wirestack 工作树。实际物理目录与 `cjpm` target 由 M0-002 根据当前仓颉工具链冻结；本 backlog 在此之前只约束逻辑模块边界、依赖方向和验收语义。
@@ -12,7 +14,7 @@
 
 ## 1. 实施总原则
 
-1. **先证据、后上游修改。** `std.net`/runtime 改造只由 M0 门禁失败解锁，禁止为了便利预先扩范围。
+1. **Wirestack 发布不依赖上游源码修改。** `std.net`/runtime 改造只作为远期候选。候选项必须有失败门禁和已批准的最小接口 RFC。
 2. **Core 与默认实现分离。** TLS/HTTP Core 只能依赖内部 Transport SPI；只有 `transport-stdnet` 可以导入 `std.net`。
 3. **公共 API 不泄漏底层。** 不暴露 `TcpSocket`、`StreamingSocket`、`SocketException`、provider native 类型、OpenSSL cipher string 或 `SSL_CTX/SSL*`。
 4. **统一操作语义。** DNS、connect、proxy、TLS、HTTP headers/body 只使用单调绝对 Deadline、CancellationToken、结构化错误、trace 和 exactly-once completion。
@@ -104,7 +106,7 @@ M0 门禁与 provider PoC
   ├─→ Transport SPI 冻结 ─→ M1 Transport/StdNet ─→ M2 Resolver/Connector
   │                                               ├─→ M3 TLS desktop ─→ M4 mobile/Harmony
   │                                               └─→ M5 HTTP/1 codec/pool/server ─→ M6 HTTP/2
-  └─→ 条件 UP-* 上游补强（只在门禁失败时插入）
+  └─→ 记录远期 UP-* 候选（不插入 Wirestack 发布关键路径）
 
 M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 ```
@@ -120,7 +122,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 
 - 未完成 M0-016/M0-020，不进入正式 provider 集成。
 - 未完成 M0-019，不实现会固化 EOF、取消、half-close 的 Transport 代码。
-- 未完成 M1-019/M1-020 的终态语义，不实现 TLS truncation 与 graceful close。
+- 未完成 M1-020 的 close/abort 终态语义，不实现 TLS truncation 与 graceful close。
 - 未完成 M5-005 的 replayability/commit 证据，不实现 retry/redirect。
 - 未完成 M6-011/M6-012，不接入 HTTP/2 client/server/pool。
 
@@ -128,7 +130,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 
 ## 5.1 M0：`std.net` 采纳验证与架构冻结
 
-**目标：** 先用证据确认 `std.net` 能否承载新 Transport 语义，冻结 Transport SPI、TLS provider、平台基线和最小上游改造集合。
+**目标：** 先用证据确认公开 `std.net` 能力，冻结 Transport SPI、TLS provider、平台基线和稳定 fallback。失败证据可以形成远期上游候选，但不成为发布依赖。
 
 **退出条件：**
 
@@ -136,7 +138,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 - raw TCP、DNS carrier-thread、Windows copy profile 均有基线；
 - TLS provider 选择完成，并通过外部字节流、external signer、external trust、六平台交叉构建 PoC；
 - Transport SPI、所有权、取消、EOF、错误语义和 threat model 评审通过；
-- 所有需要修改 `std.net`/runtime 的项目都有失败门禁证据。
+- 所有远期 `std.net`/runtime 候选都有失败门禁证据，并明确排除在 Wirestack 发布依赖之外。
 
 | ID | 任务 | 责任域 | 复杂度 | 依赖 | PRD 追踪 | 合并/验收条件 |
 |---|---|---|---:|---|---|---|
@@ -148,7 +150,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M0-006 | 执行 GATE-NET-01：关闭唤醒 | 测试 | C3 | M0-004 | PRD §9 GATE-NET-01 | blocked read/write/connect/accept 在 close/cancel 后 exactly-once 完成；P99 唤醒满足门槛；无死锁、UAF、double-close。 |
 | M0-007 | 执行 GATE-NET-02：全双工与关闭竞态 | 测试 | C4 | M0-004 | PRD §9 GATE-NET-02 | 百万级随机 interleaving；一读一写可并行，同方向并发被拒绝，close/abort 后 waiter 全部退出。 |
 | M0-008 | 执行 GATE-NET-03：绝对 Deadline | 测试 | C3 | M0-004 | PRD §9 GATE-NET-03 | connect、partial write、idle read、accept 不因内部循环重置预算；偏差满足 PRD 门槛。 |
-| M0-009 | 执行 GATE-NET-04：EOF 与关闭证据 | 测试 | C4 | M0-004 | PRD §9 GATE-NET-04 | peer FIN/RST、local close/abort、cancel/read race 可稳定分类；不能分类的平台形成上游阻断项。 |
+| M0-009 | 执行 GATE-NET-04：EOF 与关闭证据 | 测试 | C4 | M0-004 | PRD §9 GATE-NET-04 | peer FIN/RST、local close/abort、cancel/read race 可稳定分类；不能分类的平台门禁失败，并可记录为远期上游候选。 |
 | M0-010 | 执行 GATE-NET-05：大块数据、复制与 Windows 4KiB 问题 | 性能 | C4 | M0-005 | PRD §9 GATE-NET-05 | 记录各 payload 的 read 次数和 copied bytes；证明新适配路径可达到 raw TCP 门槛；定位 Windows 固定 4KiB 限制。 |
 | M0-011 | 执行 GATE-NET-06：泄漏与长时间运行 | 可靠性 | C4 | M0-004 | PRD §9 GATE-NET-06 | 完成 100k connect/cancel/close、100k reset、100k cleanup 和 24h soak；handle/timer/waiter/buffer/GC root 无单调增长。 |
 | M0-012 | 执行 GATE-NET-07：移动网络变化 | 平台 | C4 | M0-004 | PRD §9 GATE-NET-07 | Android/iOS/Harmony 真机覆盖 Wi-Fi/蜂窝/飞行模式/前后台/休眠；旧连接可诊断、新连接可重选路、无旧绑定泄漏。 |
@@ -160,9 +162,10 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M0-018 | 完成网络栈 threat model | 安全 | C3 | M0-001,M0-015 | PRD §18/§27 | 覆盖供应链、证书/主机名、parser、smuggling、资源耗尽、密钥边界、日志泄密、取消竞态、C ABI；每项映射缓解任务。 |
 | M0-019 | 冻结 Transport SPI RFC | 架构 | C4 | M0-006..M0-014 | PRD §10–12/§16–17 | 冻结 ByteSpan、OperationContext、DuplexTransport、Listener、状态机、错误、所有权、EOF、half-close、exactly-once；标注需要上游能力的接口。 |
 | M0-020 | 冻结 TLS provider 选择与构建策略 ADR | 架构 | C3 | M0-016,M0-018 | D-007/D-008；PRD §13/§23 | 记录 provider、版本锁定、构建时选择、无运行时 fallback、补丁/回滚责任、许可证与 SBOM 方案。 |
-| M0-021 | 形成最小 `std.net`/runtime 改造清单 | 架构 | C2 | M0-006..M0-014,M0-019 | PRD §8.4/§9.1 | 每项必须包含失败门禁、影响平台、最小正式接口、回归测试和禁止旁路方案；无证据项不得进入清单。 |
-| M0-022 | 建立 M0 持续门禁 CI | 基础设施 | C3 | M0-004..M0-021 | PRD §21.5 | 平台可用时自动运行短门禁；长 soak/真机任务可手动触发但产出同一结果格式；架构守卫为必过项。 |
+| M0-021 | 记录远期 `std.net`/runtime 增强候选 | 架构 | C2 | M0-006..M0-014,M0-019 | PRD §8.4/§9.1 | 每项必须包含失败门禁、影响平台、最小正式接口、回归测试和禁止旁路方案；无证据项不得进入清单，清单不阻塞 Wirestack 发布。 |
+| M0-022 | 建立 M0 持续门禁 CI | 基础设施 | C3 | M0-004..M0-020,M0-024 | PRD §21.5 | 平台可用时自动运行短门禁；长 soak/真机任务可手动触发但产出同一结果格式；架构守卫为必过项。 |
 | M0-023 | 冻结当前 Linux glibc 支持范围并延后 musl | 架构 | C2 | M0-001,M0-004 | PRD §0.1/§21.5；ADR-0004 | PRD、ADR、backlog、status 和证据一致声明当前 Linux 仅支持 glibc；musl 不记为失败或通过，由 SDK 支持条件触发 P1-011。 |
+| M0-024 | 冻结不依赖上游改造的 Transport 能力策略 | 架构 | C2 | M0-009,M0-023 | PRD §8.4/§10.3/§11.3；ADR-0005 | 当前 release 只依赖公共 SDK；half-close、native error code 和精确 runtime backend 缺失时有稳定能力或错误表示；UP-003/UP-005 保留为远期增强。 |
 
 ---
 
@@ -173,7 +176,8 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 **退出条件：**
 
 - Transport Core 不依赖 `std.net`；
-- 一读一写、half-close、close/abort、Deadline、取消、exactly-once 和结构化错误全部通过；
+- 一读一写、close/abort、Deadline、取消、exactly-once 和结构化错误全部通过；
+- half-close 在支持的 adapter 上通过，不支持的 adapter 稳定报告能力并返回 `Unsupported`；
 - 六平台 `StdNetTransport` close/cancel 门禁通过；
 - raw TCP 吞吐、延迟和泄漏满足 PRD 门槛。
 
@@ -185,7 +189,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M1-004 | 接入/实现网络取消原语 | Core | C3 | M1-001,M0-019 | TR-CTX-001/004/005 | 确定复用现有 CancellationToken 或提供内部适配；支持注册、解除、已取消 fast-fail、竞态 exactly-once。 |
 | M1-005 | 实现 `OperationContext` | Core | C2 | M1-003,M1-004 | TR-CTX-001–005 | 组合 Deadline、CancellationToken、trace；提供继承/缩短 helper；操作前取消不产生网络副作用。 |
 | M1-006 | 实现 `NetworkTraceContext` 与空操作事件入口 | 可观测性 | C2 | M1-001 | PRD §20 | trace 只读传播；默认无分配/低开销；不得自动记录敏感数据。 |
-| M1-007 | 实现 Transport `NetworkException`/错误枚举 | Core | C3 | M1-001,M0-019 | PRD §16.1 | category、phase、code、retryability、nativeCode、endpoints、cause 可表达；HTTP 4xx/5xx 不进入该模型。 |
+| M1-007 | 实现 Transport `NetworkException`/错误枚举 | Core | C3 | M1-001,M0-019 | PRD §16.1 | category、phase、code、retryability、可选 nativeCode、endpoints、cause 可表达；HTTP 4xx/5xx 不进入该模型。 |
 | M1-008 | 实现 exactly-once completion 与资源注销原语 | Core | C3 | M1-003..M1-007 | PRD §17 | 取消注册、timer、waiter、callback 在终态只清理一次；race/property test 覆盖。 |
 | M1-009 | 实现 Transport 生命周期状态机 | Core | C3 | M1-008 | PRD §10.5/§17 | Created→Open→half-closed→Closing→Closed 及 Aborted/Failed 转移受控；非法操作返回稳定错误。 |
 | M1-010 | 定义并实现 `DuplexTransport` 公共内部契约 | Core | C3 | M1-002,M1-005,M1-007..M1-009 | TR-STREAM-001–007 | readSome/writeSome/shutdown/close/abort 语义冻结；空 buffer 不伪造 EOF；同方向并发失败。 |
@@ -193,19 +197,19 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M1-012 | 定义并实现 `TransportListener` 契约 | Core | C2 | M1-005,M1-007..M1-009 | TR-LISTEN-001 | accept 可取消/超时；close 唤醒；backlog 和错误结构化。 |
 | M1-013 | 实现 `MemoryTransport` | 测试 | C3 | M1-010,M1-012 | PRD §6.2/§21.2 | 支持成对端点、partial I/O、half-close、EOF、背压、虚拟调度；用于 TLS/HTTP 确定性测试。 |
 | M1-014 | 实现 fault/scripted transport 与虚拟 waiter | 测试 | C3 | M1-013 | PRD §21.2 | 可脚本化延迟、短读写、RST、EOF、cancel race、错误 phase；测试脚本可复现。 |
-| M1-015 | 实现 `StdNetTransport` 所有权与构造边界 | StdNet | C3 | M1-010,M0-021 | PRD §8.3/§11.1 | 只接受已解析 IP endpoint；独占 TcpSocket；不缓存 private handle；包装后调用方不可再用 socket。 |
+| M1-015 | 实现 `StdNetTransport` 所有权与构造边界 | StdNet | C3 | M1-010,M0-019,M0-024 | PRD §8.3/§11.1 | 只接受已解析 IP endpoint；独占 TcpSocket；不缓存 private handle；包装后调用方不可再用 socket。 |
 | M1-016 | 实现基于 IP 的 connect attempt | StdNet | C3 | M1-005,M1-015 | PRD §11.1/§11.2 | 不调用 `TcpSocket(String,port)`；记录 local/remote endpoint；Deadline/cancel 通过已验证路径终止。 |
 | M1-017 | 实现 `StdNetTransport.readSome` | StdNet | C4 | M1-002,M1-008..M1-010,M1-015 | PRD §11.2–11.4 | 映射 Data/EndOfStream/Cancelled/Closed；不将 local close 伪装为 EOF；支持一个并发 reader。 |
 | M1-018 | 实现 `StdNetTransport.writeSome` 与有界 staging buffer | StdNet | C4 | M1-002,M1-008..M1-010,M1-015 | PRD §11.2–11.4 | 允许 partial write；buffer 连接级复用、不随 body 增长；至少容纳典型 TLS record；copy 可计量。 |
-| M1-019 | 实现 typed half-close | StdNet | C3 | M1-015,M0-021 | TR-STREAM-006 | shutdown(Read/Write) 行为独立；不直接调用 private native handle；能力不足时依赖 UP-003。 |
-| M1-020 | 实现幂等 `close`/`abort` 与等待唤醒 | StdNet | C4 | M1-008,M1-009,M1-015..M1-019 | TR-STREAM-007；PRD §11.2 | graceful/abort 区分；所有 waiter 最终退出；native dispose 最多一次；finalizer 不执行网络 cleanup。 |
+| M1-019 | 实现 typed half-close 能力协商 | StdNet | C3 | M1-015,M0-024 | TR-STREAM-006 | 支持时 shutdown(Read/Write) 行为独立；不支持时 `supportsHalfClose=false` 且稳定返回 `Unsupported`；不得访问 private native handle；UP-003 不阻塞 release。 |
+| M1-020 | 实现幂等 `close`/`abort` 与等待唤醒 | StdNet | C4 | M1-008,M1-009,M1-015..M1-018 | TR-STREAM-007；PRD §11.2 | graceful/abort 区分；所有 waiter 最终退出；native dispose 最多一次；finalizer 不执行网络 cleanup。 |
 | M1-021 | 实现 `StdNetTransportListener` | StdNet | C3 | M1-012,M1-015,M1-020 | PRD §10.4/§11 | accept 的 Deadline/cancel/close 唤醒、backlog、endpoint 和错误映射完整。 |
-| M1-022 | 实现稳定的 `std.net` 错误映射层 | StdNet | C3 | M1-007,M1-016..M1-021 | PRD §11.3 | 不匹配 message；保留 operation phase/native code；覆盖 refused/unreachable/reset/broken pipe/timeout/cancel/closed 等。 |
-| M1-023 | 实现 `TransportInfo`、endpoint 与运行时诊断 | 可观测性 | C2 | M1-006,M1-015..M1-022 | PRD §20 | 公开 transport backend、runtime IO backend、local/remote endpoint、能力；不泄漏 std.net 类型。 |
-| M1-024 | 完成 Transport 确定性竞态测试 | 测试 | C4 | M1-013..M1-023 | PRD §17/§21.2 | read+close、write+abort、success+cancel、half-close、重复 close/abort、registration cleanup 全覆盖。 |
+| M1-022 | 实现稳定的 `std.net` 错误映射层 | StdNet | C3 | M1-007,M1-016..M1-018,M1-020,M1-021,M0-024 | PRD §11.3 | 不匹配 message；保留 operation phase；native code 可用时保留，不可用时为 `None`；稳定覆盖 timeout/cancel/closed，并把无法细分的 socket 错误映射为 `SystemFailure/Unknown`。 |
+| M1-023 | 实现 `TransportInfo`、endpoint 与运行时诊断 | 可观测性 | C2 | M1-006,M1-015..M1-022 | PRD §20 | 公开 transport backend、runtime family、local/remote endpoint 和能力；公共 SDK 不提供精确 IO backend 时不得猜测；不泄漏 std.net 类型。 |
+| M1-024 | 完成 Transport 确定性竞态测试 | 测试 | C4 | M1-013..M1-023 | PRD §17/§21.2 | read+close、write+abort、success+cancel、支持的 half-close、`Unsupported` fallback、重复 close/abort 和 registration cleanup 全覆盖。 |
 | M1-025 | 完成 Transport 泄漏、soak 与 benchmark | 性能 | C4 | M1-024 | PRD §19.1/§22 | 对比现有 std.net；达到吞吐≥95%、P95 恶化≤10%、取消 P99≤50ms；无 handle/waiter 单调增长。 |
 | M1-027 | 分析并优化 background `OperationContext` 的每调用成本 | 性能 | C4 | M0-010,M1-005,M1-017,M1-018 | TR-CTX-001–005；GATE-NET-05；PRD §19.1/§22 | 按[任务说明](m1-027-background-operation-context-performance.md)先量化 context、取消/Deadline、lifecycle、operation gate 与 native I/O 的增量成本，再仅对无取消、无 Deadline 的 background 路径实施 Wirestack 内部 fast path；不得削弱取消、Deadline、同方向并发拒绝或 exactly-once；同一 `-O2` binary 的 5 payload × 11 轮正式门禁全部达到吞吐≥95%、P95 恶化≤10%，且 staging copy 保持 0。 |
-| M1-026 | 六平台复跑采纳门禁并关闭 M1 | 测试 | C4 | M1-025,M1-027,UP-*（按需） | PRD M1 exit | GATE-NET-01～06 全平台通过，GATE-NET-07 移动平台通过；所有上游补丁具备回归证据。 |
+| M1-026 | 六平台复跑采纳门禁并关闭 M1 | 测试 | C4 | M1-025,M1-027 | PRD M1 exit | GATE-NET-01～06 全平台通过，GATE-NET-07 移动平台通过；公开 SDK 能力、稳定 fallback 和平台限制都有证据，远期 UP 任务不阻塞。 |
 
 ---
 
@@ -283,6 +287,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M3-026 | 实现 `close_notify`、truncation evidence 与 TLS abort | TLS | C4 | M3-005,M3-021,M3-022 | PRD §13.8 | graceful close 在 Deadline 内发送/处理 close_notify；peer TCP EOF 无 close_notify 保留证据；最终总释放资源。 |
 | M3-027 | 实现 TLS 结构化错误与 runtime info | 可观测性 | C3 | M1-007,M3-002..M3-026 | PRD §16.2/§20 | 覆盖协议、版本、cipher、ALPN、证书、identity、key、alert、truncation、provider；phase/重试性稳定。 |
 | M3-028 | 完成 TLS 确定性、互操作、fuzz、依赖扫描与 benchmark | 测试 | C4 | M3-001..M3-027 | PRD §19.2/§21/§22/§23 | 协议向量、主机名、session、close、truncated、外部实现互操作、fuzz 无崩溃；吞吐/握手/内存达标；无系统 OpenSSL 依赖。 |
+| M3-029 | 实现并冻结 provider-neutral 公共 TLS facade | TLS/API | C4 | M3-028,M7-026 | PRD §6.2/§7/§13/§17/§29 | `wirestack.tls` 公开不可变 client/server context、existing-transport handshake、`TlsConnection`/`TlsListener`、协商结果和稳定错误；成功后转移 transport 所有权，失败/取消/Deadline abort，close/abort 幂等；公共声明无 `std.net`、native provider、OpenSSL 配置或旧 socket 类型；public-only 测试与干净 consumer 原生运行通过，并有意更新 API baseline。 |
 
 ---
 
@@ -400,6 +405,9 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M6-021 | 实现 HTTP/2 server facade、ALPN dispatch 与端到端验收 | HTTP2 | C4 | M3-023,M5-025..M5-027,M6-014..M6-019 | PRD §15.7–15.8/§21 | 同一公共 `HttpServer` 在真实 TLS loopback 上只依据已协商 ALPN 分派 `h2`/`http/1.1`；H2 request/body/trailer/response、并发限制、GOAWAY graceful shutdown 与结构化错误端到端通过；无协商协议稳定失败；公共 API 不暴露内部 H2/TLS 类型。 |
 | M6-022 | 公开 request/connection/stream cancellation handle | API | C4 | M5-020,M5-025..M5-027,M6-015,M6-018,M6-021 | PRD §10.2/§15.1–15.2/§15.7/§17 | 公共 handle 明确 request、connection、stream 作用域且 `cancel` 幂等；request cancel 覆盖 DNS→body 全路径，H1 connection cancel 唤醒并终止所属请求，H2 stream cancel 只发该流 RST 且不影响 sibling，H2 connection cancel 唤醒全部流；成功/EOF/close/cancel/GOAWAY 竞态 exactly-once 且 registration、waiter、buffer 及时释放。 |
 | M6-023 | 完成 SSE/无限累计 streaming profile | 可靠性 | C4 | M5-004,M5-020,M6-018,M6-021,M6-022 | PRD §15.1–15.2/§15.7/§19.3/§22 | 真实 H1/H2 `text/event-stream` 各连续运行至少 1 小时且消费不少于 1,000,000 个带序号事件；不全量累计，应用/协议队列、flow-control、RSS 与 heavy-GC heap 在预热后保持显式上限/稳态；slow consumer 触发背压而非增长，公开 cancel 在预算内退出，H2 sibling stream 不受影响；保留原始样本、环境和 PASS/FAIL 报告，不要求重复 24h soak。 |
+| M6-024 | 消除 connection window 耗尽时的 sibling starvation | HTTP2/可靠性 | C4 | M6-010,M6-012,M6-019,M6-021,M6-022 | PRD §15.7/§19.3/§22 | 在真实 TLS loopback 上，256 KiB 慢流占满 65,535-byte connection window 且 client 仅消费 4 KiB 后，不 cancel/close 该流，随后 1/10/100 个 2-byte sibling 均在各自单调绝对 Deadline 内完成；DATA 调度和 coalesced WINDOW_UPDATE 保证所有 ready stream 有界进展，且控制帧数、write queue、window、body buffer 保持现有上限；保留 pre-fix FAIL、post-fix raw latency/flow-control stall 和 100-run race evidence；Linux 原生通过只关闭 Linux cell，公共 API 不变。 |
+| M6-025 | 修复 `wirestack.http` facade 并发回归和失败后不退出 | HTTP2/可靠性 | C4 | M3-028,M6-021..M6-024 | PRD §15.7–15.8/§17/§21.3 | 在原生 Linux 上保留全包串行复现的首个异常、活动 task、连接、stream、waiter 和进程终态证据；修复产品生命周期或测试清理的实际根因，包括经证据确认的 TLS transport 跨层缺陷，不过滤用例、不提高 5 秒请求 Deadline、不新增 timeout owner；三个相关 facade 用例按原顺序连续运行 100 轮且零失败、零超时、零残留资源，`src/http` 非 Performance 全包和 `scripts/check` 均在硬上限内退出 0。 |
+| M6-026 | 修复公共 HTTP/2 并发响应体的连接级协议失败 | HTTP2/可靠性 | C4 | M6-025 | PRD §15.2/§15.7/§17/§21.2–21.3 | 保留 M7-022 安装产物失败和首个结构化协议终态；在真实 TLS loopback 上预热一个公共 `HttpClient` 后，以服务端双流屏障连续执行至少 1,000 个并发批次、读取并关闭 2,000 个 2-byte H2 响应体，零 `ProtocolViolation`、零 stream/connection 误终止、零超时且进程在硬上限内退出；不得串行化请求、重试隐藏失败、放宽 5 秒 Deadline 或新增 timeout owner；修复后 `src/http` 非 Performance 全包、架构守卫和 `scripts/check` 通过。 |
 
 ---
 
@@ -419,41 +427,82 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 |---|---|---|---:|---|---|---|
 | M7-001 | 执行 P0 需求与不变量追踪审计 | 质量 | C3 | M1..M6 | PRD §17/§26 | 每个 P0、15 条生命周期不变量、22 条发布验收均映射测试/报告/代码；缺口形成阻断 issue。 |
 | M7-002 | 执行最终架构依赖与私有 ABI 审计 | 架构 | C2 | M0-003,M7-001 | PRD §7.2/§26 | Core 无 std.net；公共 API 无底层类型；Wirestack 无 `CJ_MRT_Sock*`；新 HTTP/TLS 无旧 bridge/global provider。 |
-| M7-003 | 执行全平台动态依赖/OpenSSL 扫描 | 发布 | C3 | M3-028,M4-014,M6-020..M6-023 | PRD §4 G-001/§23/§26 | 每个平台 artifact 生成依赖清单；默认产物不搜索/链接系统 libssl/libcrypto/OpenSSL DLL。 |
-| M7-004 | 建立全平台 release CI 与真机/原生 VM 门禁 | 基础设施 | C4 | M1-026,M2-015,M3-028,M4-014,M5-030,M6-020..M6-023 | PRD §21.5/§26；ADR-0004 | Windows、Linux glibc、macOS、Android、iOS、Harmony 均完成 compile/unit/integration/native gate；仅交叉编译不算通过。 |
+| M7-003 | 执行全平台动态依赖/OpenSSL 扫描 | 发布 | C3 | M3-028,M4-014,M6-020..M6-024 | PRD §4 G-001/§23/§26 | 每个平台 artifact 生成依赖清单；默认产物不搜索/链接系统 libssl/libcrypto/OpenSSL DLL。 |
+| M7-004 | 建立全平台 release CI 与真机/原生 VM 门禁 | 基础设施 | C4 | M1-026,M2-015,M3-028,M4-014,M5-030,M6-020..M6-024 | PRD §21.5/§26；ADR-0004 | Windows、Linux glibc、macOS、Android、iOS、Harmony 均完成 compile/unit/integration/native gate；仅交叉编译不算通过。 |
 | M7-005 | 完成最终 24h+ soak 与资源上限报告 | 可靠性 | C4 | M7-004 | PRD §9/§17/§19 | idle/active、10k idle（目标平台）、connect/reset/cancel、H1 pool、H2 multiplex 混合；所有集合有界且无单调泄漏。 |
 | M7-006 | 建立持续 fuzz 任务与发布阈值 | 安全 | C4 | M3-028,M5-029,M6-019 | PRD §18/§21.4 | TLS record/handshake/hostname/cert/H1/chunked/H2/HPACK/URL/proxy targets 持续运行；崩溃可复现并阻断发布。 |
-| M7-007 | 建立性能回归基线与 CI gate | 性能 | C4 | M1-025,M2-016,M3-028,M5-030,M6-020..M6-023 | PRD §19/§22 | raw TCP/TLS/H1/H2/取消/SSE 长流/内存基线版本化；门槛自动判定，平台抖动单独记录。 |
+| M7-007 | 建立性能回归基线与 CI gate | 性能 | C4 | M1-025,M2-016,M3-028,M5-030,M6-020..M6-024 | PRD §19/§22 | raw TCP/TLS/H1/H2/取消/SSE 长流/内存基线版本化；门槛自动判定，平台抖动单独记录。 |
 | M7-008 | 准备独立安全审查材料 | 安全 | C3 | M0-018,M7-001..M7-007 | PRD §18/§27 | 提供 threat model、架构、provider、C ABI、parser、key/trust、fuzz、SBOM、已知限制和复现环境。 |
 | M7-009 | 完成独立安全审查与修复闭环 | 安全 | C4 | M7-008 | PRD §18/§26 | 所有发现分级、复现、修复、回归；High/Critical 未关闭时 release gate 必失败。 |
 | M7-010 | 生成 SBOM、provider manifest 与 build fingerprint | 发布 | C3 | M3-002,M7-003 | PRD §13.1/§18/§23 | 每个 artifact 可查询 provider/crypto/trust/capability/patch level/target/features；SBOM 与构建产物绑定。 |
 | M7-011 | 实现发布 artifact 签名与验证流程 | 发布 | C3 | M7-010 | PRD §23 | 所有 release artifact、SBOM、manifest 有签名；发布和消费侧验证步骤文档化并在 CI 演练。 |
-| M7-012 | 执行公共 API freeze 与兼容性检查 | API | C4 | M5-030,M6-020..M6-023,M7-001 | PRD §24/§28/§29 | 冻结包名/major/API 和公开 cancellation handle；无 global TlsKit/TrustAll/OpenSSL string/StreamingSocket/旧适配器；生成 API baseline。 |
+| M7-012 | 执行公共 API freeze 与兼容性检查 | API | C4 | M5-030,M6-020..M6-024,M7-001 | PRD §24/§28/§29 | 冻结包名/major/API 和公开 cancellation handle；无 global TlsKit/TrustAll/OpenSSL string/StreamingSocket/旧适配器；生成 API baseline。 |
 | M7-013 | 编写迁移指南与 API mapping | 文档 | C3 | M7-012 | PRD §24.3 | 覆盖 timeout→Deadline、cancel、CA、mTLS、stream body、retry、errors、移除 OpenSSL 配置；旧新包共存边界明确。 |
-| M7-014 | 完成用户与协议开发者示例 | 文档 | C3 | M5-030,M6-020..M6-023,M7-012 | PRD §6/§29 | HTTPS client、已有 transport TLS、CONNECT+TLS、H1/H2 server、SSE、mTLS、自定义 CA、分作用域取消/Deadline 示例可构建运行。 |
+| M7-014 | 完成用户与协议开发者示例 | 文档 | C3 | M5-030,M6-020..M6-024,M7-012 | PRD §6/§29 | HTTPS client、已有 transport TLS、CONNECT+TLS、H1/H2 server、SSE、mTLS、自定义 CA、分作用域取消/Deadline 示例可构建运行。 |
 | M7-015 | 建立安全更新 SLA、provider 升级与回滚手册 | 发布 | C3 | M0-020,M7-010,M7-011 | PRD §18/§23/§27 | 漏洞分级、补丁窗口、版本发布、回滚、公告、SBOM 更新和兼容验证流程可演练。 |
 | M7-016 | 构建六平台 release artifact 与安装验证 | 发布 | C4 | M7-003..M7-015 | PRD §23/§26 | 每个平台包可安装、运行、查询 runtime info；文档不要求安装 OpenSSL；旧 global provider 不影响新栈。 |
 | M7-017 | 生成稳定版验收矩阵与发布候选报告 | 质量 | C3 | M7-001..M7-016 | PRD §26 | 22 条验收逐项给出 PASS/FAIL、证据链接、artifact digest、平台、已知限制；任一 P0 FAIL 阻断稳定版。 |
 
 ---
 
-## 6. 条件上游任务：仅由门禁失败解锁
+## 5.9 M7：Linux glibc 稳定版收口
 
-这些任务默认状态为 **Blocked / Do not start**。只有对应 M0 失败报告、最小接口 RFC 和回归测试计划同时存在时，才允许转为 Ready。
+ADR-0002 允许 Linux 在其原生依赖完成后独立交付。以下任务只关闭
+Linux x86_64 glibc 单元，不改变 M7-001～M7-017 的六平台状态。每项都使用
+公开 SDK、Wirestack 内部有界方案或稳定 capability fallback。`UP-*` 和
+runtime、`std.net` 源码修改不得成为依赖。
+
+**Linux 退出条件：**
+
+- PRD 的 15 条生命周期不变量和 22 条发布验收均完成适用性判定；
+- 所有适用于 Linux 的 P0 项都有原生执行证据；
+- Linux artifact 可安装、可查询、可验证，且不依赖系统 OpenSSL；
+- fuzz、性能、24 小时以上最终 soak、安全审查、SBOM、签名和 API freeze 通过；
+- 非 Linux 条目明确记为 `NOT_APPLICABLE_TO_LINUX_PROFILE`，不得记为全局 PASS。
+
+| ID | 任务 | 责任域 | 复杂度 | 依赖 | PRD 追踪 | 合并/验收条件 |
+|---|---|---|---:|---|---|---|
+| M7-018 | 冻结 Linux M7 任务图与证据边界 | 质量 | C2 | M1-025,M2-016,M3-028,M5-030,M6-025 | ADR-0002/0004/0005；PRD §21.5/§25–26 | Linux 任务逐项覆盖追踪、架构、artifact、安装、soak、fuzz、性能、SBOM、API、文档、安全、签名和候选报告；依赖图不包含 M1-026、M4 或 `UP-*`；全局 M7 状态不变。 |
+| M7-019 | 执行 Linux P0、不变量与发布验收追踪审计 | 质量 | C3 | M7-018 | PRD §17/§26 | 逐项映射所有 P0、15 条不变量和 22 条发布验收；Linux 适用项链接代码、测试和报告，非 Linux 项标记 `NOT_APPLICABLE_TO_LINUX_PROFILE`；任一证据缺口形成阻断项。 |
+| M7-020 | 执行 Linux 最终架构与私有 ABI 审计 | 架构 | C2 | M7-019 | PRD §7.2/§24.1/§26 | Core 无 `std.net`，公共 API 无底层类型，仓库无 `CJ_MRT_Sock*`，新 HTTP/TLS 无旧 bridge、global provider 或系统 OpenSSL loader；审计可重复运行。 |
+| M7-021 | 构建、扫描并安装 Linux release artifact | 发布 | C4 | M7-020,M3-028 | PRD §21.5/§23/§26 | 原生 release 构建生成可复现 digest 和依赖清单；干净 consumer 安装并运行 HTTPS client/server 与 runtime-info smoke；产物不搜索或链接系统 `libssl`/`libcrypto`，且 `externalOpenSslDependency=false`。 |
+| M7-022 | 完成 Linux 最终 24h+ soak 与资源上限报告 | 可靠性 | C4 | M7-021,M6-023,M6-026 | PRD §9/§17/§19 | 原生 release artifact 连续运行至少 24 小时，混合 idle/active、connect/reset/cancel、H1 pool、H2 multiplex 和 SSE；记录 RSS、FD、socket、timer、waiter、buffer、GC root、task 和线程，所有集合有界且无单调泄漏。 |
+| M7-023 | 建立 Linux 持续 fuzz 门禁与发布阈值 | 安全 | C4 | M7-018,M3-028,M5-029,M6-019 | PRD §18/§21.4 | 十个 PRD fuzz target 均有版本化 corpus、seed、时间或迭代阈值、崩溃保存和重放命令；原生 release 门禁达到阈值且无未修复崩溃。 |
+| M7-024 | 建立 Linux 性能回归基线与发布门禁 | 性能 | C4 | M7-018,M1-025,M2-016,M3-028,M5-030,M6-020..M6-025 | PRD §19/§22 | 版本化 raw TCP、DNS-to-connected、TLS、H1、H2、取消、SSE 和内存基线；固定环境、轮次和阈值，保留原始输出并自动给出 PASS/FAIL。 |
+| M7-025 | 生成 Linux SBOM、provider manifest 与 build fingerprint | 发布 | C3 | M7-021,M3-002 | PRD §13.1/§18/§23/§26 | SBOM 与 artifact digest 绑定；manifest 可查询 provider、crypto、trust、capability、patch level、target 和 features；fingerprint 对同一输入稳定，对依赖变化敏感。 |
+| M7-026 | 冻结 Linux 公共 API 并执行兼容性检查 | API | C4 | M7-019,M5-030,M6-020..M6-025 | PRD §24/§28/§29 | 生成版本化 API baseline；冻结包名、major 和 cancellation handle；兼容性门禁通过，且公共声明不含 global TlsKit、TrustAll、OpenSSL string、StreamingSocket 或旧适配器。 |
+| M7-027 | 完成 Linux 迁移指南与可运行示例 | 文档 | C3 | M7-026,M3-029 | PRD §6/§24.3/§29 | 文档覆盖 timeout 到 Deadline、取消、CA、mTLS、stream body、retry、errors 和移除 OpenSSL 配置；HTTPS client、已有 transport TLS、CONNECT+TLS、H1/H2 server、SSE、mTLS、自定义 CA 和分作用域取消示例在干净 consumer 中构建运行。 |
+| M7-028 | 准备 Linux 独立安全审查材料 | 安全 | C3 | M7-019..M7-025 | PRD §18/§27 | 材料包含 threat model、架构、provider、C ABI、parser、key/trust、fuzz、SBOM、已知限制、复现环境和证据 digest；不含密钥、secret 或敏感请求数据。 |
+| M7-029 | 完成 Linux 独立安全审查与修复闭环 | 安全 | C4 | M7-028 | PRD §18/§26 | 独立审查者记录范围、方法和发现；所有发现分级并可复现，修复带回归；任何未关闭 High/Critical 使任务失败。 |
+| M7-030 | 实现 Linux artifact 签名与安全更新流程 | 发布 | C3 | M7-025,M7-029 | PRD §18/§23/§27 | artifact、SBOM 和 manifest 均有可验证签名；干净 consumer 演练验证、拒绝篡改、provider 升级、回滚、公告和 SBOM 更新。 |
+| M7-031 | 生成 Linux 稳定版验收矩阵与候选报告 | 质量 | C4 | M7-019..M7-030 | PRD §26 | 22 条验收逐项记录 PASS、FAIL 或 `NOT_APPLICABLE_TO_LINUX_PROFILE`，并链接 artifact digest、原生平台证据和已知限制；任一 Linux P0 FAIL、缺失证据或未关闭 High/Critical 阻断 Linux 稳定版。 |
+
+---
+
+## 6. 远期上游增强
+
+这些任务不属于 Wirestack release 依赖。只有对应失败报告、最小接口 RFC 和
+回归测试计划同时存在时，才允许转为 Ready。当前公共 SDK 缺少能力时，
+Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
+
+`UP-*` 只能由 Wirestack 任务产出证据或 tracking 记录，不能出现在任何当前
+里程碑任务的“依赖”列中，也不能作为 READY、COMPLETE 或发布门禁的前置条件。
+当前实现必须使用公开 SDK 能力、稳定 capability fallback 或 Wirestack 内部的
+有界方案完成验收。
 
 | ID | 条件任务 | 解锁条件 | 证据来源 | 完成条件 |
 |---|---|---|---|---|
-| UP-001 | 增加可取消的 runtime/`std.net` wait/wakeup 正式接口 | 仅当 GATE-NET-01/03 失败 | M0-006/M0-008 | close/cancel 能唤醒 connect/read/write/accept；exactly-once；六平台回归；Wirestack 不轮询 sleep。 |
-| UP-002 | 暴露结构化 peer EOF/local close/RST/abort 终态 | 仅当 GATE-NET-04 失败 | M0-009 | 上层无需时间顺序猜测；错误/EOF 证据跨平台稳定；TLS truncation 测试可依赖。 |
-| UP-003 | 增加 typed `shutdownRead`/`shutdownWrite` | 仅当 half-close 无法通过正式接口实现 | M0-009/M1-019 | 半关闭不依赖 private handle；与 concurrent read/write/close 的竞态测试通过。 |
-| UP-004 | 增加 offset/length/span I/O 与 `writeSome` | 仅当 GATE-NET-05 性能或语义失败 | M0-010/M0-014 | 支持 partial I/O、减少 staging copy；raw TCP 门槛通过；保持现有 API 兼容策略明确。 |
-| UP-005 | 暴露稳定 native error code/operation phase | 仅当错误无法可靠分类 | M0-006..M0-010 | 不解析 exception message；连接池/retry 可基于稳定 code；平台回归完整。 |
-| UP-006 | 改进 Windows 低复制 socket buffer 路径 | 仅当 Windows copy profile 未达标 | M0-014 | 取消固定 4KiB 有效读取；copy 指标与吞吐/延迟门槛通过；不在 TLS 层叠加无界大 buffer。 |
-| UP-007 | 增加 runtime-native async resolver 或正式 resolver API | 仅当 DNS 阻塞 carrier 且平台 async/有界 pool 不足 | M0-013 | 高并发解析不占满 carrier；取消/Deadline/结构化错误通过；禁止无界线程池。 |
+| UP-001 | 增加可取消的 runtime/`std.net` wait/wakeup 正式接口 | 远期增强，不阻塞 Wirestack release；需 GATE-NET-01/03 失败证据 | M0-006/M0-008 | close/cancel 能唤醒 connect/read/write/accept；exactly-once；六平台回归；Wirestack 不轮询 sleep。 |
+| UP-002 | 暴露结构化 peer EOF/local close/RST/abort 终态 | 远期增强，不阻塞 Wirestack release；需 GATE-NET-04 失败证据 | M0-009 | 上层无需时间顺序猜测；错误/EOF 证据跨平台稳定；TLS truncation 测试可依赖。 |
+| UP-003 | 增加 typed `shutdownRead`/`shutdownWrite` | 远期增强，不阻塞 Wirestack release | M0-009/M1-019 | 半关闭不依赖 private handle；与 concurrent read/write/close 的竞态测试通过。 |
+| UP-004 | 增加 offset/length/span I/O 与 `writeSome` | 远期增强，不阻塞 Wirestack release；需 GATE-NET-05 性能或语义失败证据 | M0-010/M0-014 | 支持 partial I/O、减少 staging copy；raw TCP 门槛通过；保持现有 API 兼容策略明确。 |
+| UP-005 | 暴露稳定 native error code/operation phase | 远期增强，不阻塞 Wirestack release | M0-006..M0-010 | 不解析 exception message；连接池/retry 可基于稳定 code；平台回归完整。 |
+| UP-006 | 改进 Windows 低复制 socket buffer 路径 | 远期增强，不阻塞 Wirestack release；需 Windows copy profile 未达标证据 | M0-014 | 取消固定 4KiB 有效读取；copy 指标与吞吐/延迟门槛通过；不在 TLS 层叠加无界大 buffer。 |
+| UP-007 | 增加 runtime-native async resolver 或正式 resolver API | 远期增强，不阻塞 Wirestack release；需 DNS 阻塞 carrier 且平台 async/有界 pool 不足的证据 | M0-013 | 高并发解析不占满 carrier；取消/Deadline/结构化错误通过；禁止无界线程池。 |
 
 这些 `UP-*` 任务在 Wirestack 中只保留 tracking issue、失败门禁证据与回归要求；真正的 `std.net`/runtime 修改必须在对应上游仓库单独实现和提交，不得从 Wirestack 工作树跨仓库直接提交上游改动。
 
-条件任务合并规则：
+远期上游任务合并规则：
 
 1. 上游改造 PR 只实现门禁要求的最小正式能力，不顺带重构 `std.net`。
 2. 必须先在 `std.net`/runtime 自身增加回归测试，再更新 `StdNetTransport`。
@@ -479,6 +528,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | P1-009 | 0-RTT | PRD §5/§13.9 | 需单独重放安全模型；P0 明确关闭。 |
 | P1-010 | HTTP/3/QUIC | PRD §5 | 独立项目，不复用 TCP Transport 假设；不得提前侵入本项目公共 API。 |
 | P1-011 | Linux musl 采纳 | ADR-0004 | 仓颉 SDK 发布受支持的 musl target、标准库、runtime 和构建说明后启动；必须补齐 native compile/unit/integration、resolver、trust、依赖、性能和安装证据。 |
+| P1-012 | AI 友好型仓库基础设施 | Repository control plane | M7-024 已完成；提供诚实的环境诊断、机器可读任务契约、分层验证入口和源码绑定的证据新鲜度检查。长时间门禁只能显式运行，不得由 fast/full 隐式触发。 |
 
 ---
 
@@ -508,8 +558,8 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 
 ## 背景与 PRD 追踪
 - PRD：<章节/Requirement ID>
-- 上游任务：<依赖 ID>
-- 阻断的里程碑：<M0–M7>
+- 关联的远期上游候选（非依赖，可选）：<UP-ID 或无>
+- 受影响的能力或场景：<能力/平台/门禁>
 
 ## 范围
 - ...
@@ -566,9 +616,11 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 
 ## 11. 任务统计
 
-- 主线任务：**173**
-- 条件上游任务：**7**
-- 稳定版后 P1/独立项目：**10**
-- 主线 + 条件任务总数：**180**
+- 全平台主线任务：**183**
+- Linux 稳定版收口任务：**14**
+- 远期上游任务：**7**
+- 稳定版后 P1/独立项目：**12**
+- 当前发布相关任务总数：**197**
+- 全部已记录任务总数：**216**
 
 该数量代表 Issue/PR 级工作项，不代表必须串行执行；关键是保持里程碑退出门禁和依赖方向。
