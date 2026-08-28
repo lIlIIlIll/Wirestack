@@ -56,6 +56,31 @@ class ArchitectureGuardTests(unittest.TestCase):
                        "package wirestack.tls\n\npublic func wrap(value: std.net.StreamingSocket): Unit {}\n")
             self.assertIn("std-net-boundary", self.rules(root))
 
+    def test_unqualified_low_level_and_native_types_in_public_api_are_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "src/http/api.cj",
+                "package wirestack.http\n\n"
+                "public func socket(value: StreamingSocket): SSL_CTX {}\n",
+            )
+            rules = self.rules(root)
+            self.assertIn("public-low-level-socket-type", rules)
+            self.assertIn("public-native-provider-type", rules)
+
+    def test_low_level_names_in_public_comments_and_literals_do_not_trigger(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "src/http/api.cj",
+                "package wirestack.http\n\n"
+                "// StreamingSocket and SSL_CTX are forbidden public types.\n"
+                "let note = \"TcpSocket X509\"\n",
+            )
+            self.assertEqual([], guard.run_guard(root))
+
     def test_private_runtime_and_legacy_stack_are_rejected(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)
@@ -70,6 +95,17 @@ class ArchitectureGuardTests(unittest.TestCase):
             self.assertIn("private-runtime-socket-abi", rules)
             self.assertIn("legacy-stdx-network-stack", rules)
             self.assertIn("legacy-tls-dynamic-bridge", rules)
+
+    def test_legacy_global_tls_provider_is_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "src/internal/tls_engine/global.cj",
+                "package wirestack.internal.tls_engine\n\n"
+                "func setGlobalTlsKit(value: Int64): Unit {}\n",
+            )
+            self.assertIn("legacy-global-tls-provider", self.rules(root))
 
     def test_source_comments_and_literals_do_not_trigger(self) -> None:
         with self.fixture() as directory:
@@ -99,6 +135,18 @@ class ArchitectureGuardTests(unittest.TestCase):
             self.write(root, "CMakeLists.txt",
                        "target_link_options(wirestack PRIVATE -lssl -lcrypto)\n")
             self.assertIn("system-openssl-link", self.rules(root))
+
+    def test_native_code_rejects_system_openssl_runtime_loader(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "native/tls/loader.c",
+                'void *load(void) { return dlopen("libssl.so", 1); }\n',
+            )
+            rules = self.rules(root)
+            self.assertIn("system-openssl-loader", rules)
+            self.assertIn("system-openssl-link", rules)
 
     def test_pinned_static_provider_archive_is_allowed(self) -> None:
         with self.fixture() as directory:

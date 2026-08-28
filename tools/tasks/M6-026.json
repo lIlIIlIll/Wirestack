@@ -1,0 +1,61 @@
+{
+  "acceptance_commands": [
+    {
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/M6-026/test-plan.md", "--json"],
+      "gate": "task",
+      "id": "test-plan-matrix",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["scripts/check-m6-026-http2-concurrent-bodies"],
+      "gate": "task",
+      "id": "public-http2-concurrent-bodies",
+      "long_running": false,
+      "timeout_seconds": 600
+    }
+  ],
+  "allowed_paths": [
+    ".gitignore",
+    "docs/evidence/M6-026",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/linux-status.md",
+    "docs/planning/status.md",
+    "scripts/check-m6-026-http2-concurrent-bodies",
+    "src/http",
+    "src/internal/http2",
+    "tools/m6_026_http2_concurrent_bodies.py",
+    "tools/tasks/M6-026.json",
+    "tools/tasks/M7-022.json",
+    "tools/tests/test_m6_026_http2_concurrent_bodies.py",
+    "tools/tests/test_m7_linux_task_graph.py"
+  ],
+  "dependencies": ["M6-025"],
+  "long_running_gate": false,
+  "platforms": ["linux-x86_64-glibc"],
+  "required_evidence": [
+    "docs/evidence/M6-026/evidence.json",
+    "docs/evidence/M6-026/linux_x86_64/concurrent-bodies.json",
+    "docs/evidence/M6-026/task-check.json"
+  ],
+  "schema_version": 1,
+  "source_paths": [
+    ".gitignore",
+    "docs/evidence/M6-026/test-plan.md",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/linux-status.md",
+    "docs/planning/status.md",
+    "src/http/facade_test.cj",
+    "src/internal/http2/client_connection.cj",
+    "src/internal/http2/client_connection_test.cj",
+    "src/internal/http2/reader_loop.cj",
+    "src/internal/http2/server_connection.cj",
+    "tools/tasks/M6-026.json",
+    "tools/tasks/M7-022.json",
+    "tools/m6_026_http2_concurrent_bodies.py",
+    "tools/tests/test_m6_026_http2_concurrent_bodies.py",
+    "tools/tests/test_m7_linux_task_graph.py"
+  ],
+  "task_id": "M6-026",
+  "timeout_seconds": 1200
+}

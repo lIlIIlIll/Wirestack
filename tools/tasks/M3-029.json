@@ -1,0 +1,87 @@
+{
+  "acceptance_commands": [
+    {
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/M3-029/test-plan.md", "--json"],
+      "gate": "task",
+      "id": "test-plan-matrix",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["scripts/check-m3-029-linux-tls-facade"],
+      "gate": "task",
+      "id": "public-tls-facade",
+      "long_running": false,
+      "timeout_seconds": 900
+    },
+    {
+      "argv": ["scripts/check-m7-026-linux-api"],
+      "gate": "task",
+      "id": "api-compatibility",
+      "long_running": false,
+      "timeout_seconds": 120
+    }
+  ],
+  "allowed_paths": [
+    ".gitignore",
+    "src/tls",
+    "scripts/check-m3-029-linux-tls-facade",
+    "tools/m3_029_linux_tls_facade.py",
+    "tools/tests/test_m3_029_linux_tls_facade.py",
+    "tools/release_smoke/main.cj",
+    "tools/tasks/M3-029.json",
+    "docs/api/baselines/wirestack-linux-v0.json",
+    "docs/evidence/M3-029",
+    "docs/evidence/M7-026/linux_x86_64/api-compatibility.json",
+    "docs/evidence/M7-019/linux_x86_64/audit.data",
+    "docs/evidence/M7-020/linux_x86_64/audit.data",
+    "docs/evidence/M7-021/linux_x86_64/qualification.json",
+    "docs/evidence/M7-025/README.md",
+    "docs/evidence/M7-025/linux_x86_64/build-fingerprint.json",
+    "docs/evidence/M7-025/linux_x86_64/bundle.json",
+    "docs/evidence/M7-025/linux_x86_64/provider-manifest.json",
+    "docs/evidence/M7-025/linux_x86_64/sbom.spdx.json",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/linux-status.md",
+    "docs/planning/status.md",
+    "tools/tests/test_m7_linux_task_graph.py"
+  ],
+  "dependencies": ["M3-028", "M7-026"],
+  "long_running_gate": false,
+  "platforms": ["linux-x86_64-glibc"],
+  "required_evidence": [
+    "docs/evidence/M3-029/evidence.json",
+    "docs/evidence/M3-029/linux_x86_64/public-tls-facade.json",
+    "docs/evidence/M3-029/task-check.json"
+  ],
+  "schema_version": 1,
+  "source_paths": [
+    ".gitignore",
+    "src/tls/package.cj",
+    "src/tls/facade.cj",
+    "src/tls/facade_test.cj",
+    "scripts/check-m3-029-linux-tls-facade",
+    "tools/m3_029_linux_tls_facade.py",
+    "tools/tests/test_m3_029_linux_tls_facade.py",
+    "tools/release_smoke/main.cj",
+    "tools/tasks/M3-029.json",
+    "docs/api/baselines/wirestack-linux-v0.json",
+    "docs/evidence/M3-029/test-plan.md",
+    "docs/evidence/M3-029/README.md",
+    "docs/evidence/M7-026/linux_x86_64/api-compatibility.json",
+    "docs/evidence/M7-019/linux_x86_64/audit.data",
+    "docs/evidence/M7-020/linux_x86_64/audit.data",
+    "docs/evidence/M7-021/linux_x86_64/qualification.json",
+    "docs/evidence/M7-025/README.md",
+    "docs/evidence/M7-025/linux_x86_64/build-fingerprint.json",
+    "docs/evidence/M7-025/linux_x86_64/bundle.json",
+    "docs/evidence/M7-025/linux_x86_64/provider-manifest.json",
+    "docs/evidence/M7-025/linux_x86_64/sbom.spdx.json",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/linux-status.md",
+    "docs/planning/status.md",
+    "tools/tests/test_m7_linux_task_graph.py"
+  ],
+  "task_id": "M3-029",
+  "timeout_seconds": 1200
+}
