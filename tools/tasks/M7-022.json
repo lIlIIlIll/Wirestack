@@ -44,7 +44,7 @@
     "tools/tests/test_m7_022_linux_release_soak.py",
     "tools/tests/test_m7_linux_task_graph.py"
   ],
-  "dependencies": ["M7-021", "M6-023"],
+  "dependencies": ["M7-021", "M6-023", "M6-026"],
   "long_running_gate": true,
   "platforms": ["linux-x86_64-glibc"],
   "required_evidence": [
