@@ -27,6 +27,7 @@ __pycache__/
 !docs/evidence/M2-016/linux_glibc_x86_64/*.json
 !docs/evidence/M3-028/linux_glibc_x86_64/*.json
 !docs/evidence/M7-021/linux_x86_64/*.json
+!docs/evidence/M7-023/linux_glibc_x86_64/*.json
 !docs/evidence/M7-025/linux_x86_64/*.json
 !docs/evidence/M7-026/linux_x86_64/*.json
 !docs/api/baselines/*.json

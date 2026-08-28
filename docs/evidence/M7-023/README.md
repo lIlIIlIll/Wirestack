@@ -23,7 +23,8 @@ artifacts, and a checked-in-coordinate replay mode.
 | Total deterministic iterations | 6,465 |
 | Current-run crash artifacts | 0 |
 | Gate report | [`linux_glibc_x86_64/fuzz-report.json`](linux_glibc_x86_64/fuzz-report.json) |
-| Gate report SHA-256 | `4780aa638b42fc0eb9878946277e96278383652a69203094cd3a1d8c3854092a` |
+| Gate report SHA-256 | `1e8000ed913a0f5c3138f31ee80b6c53d9ab026b672486f6f88e0c1ff392cf8b` |
+| Qualified source SHA-256 | `d36ddd00c3d4845af380c79396eee6add9a84f245a882cd7d25878fa2533d4a9` |
 
 ## Target thresholds
 
@@ -46,6 +47,11 @@ pins the corpus path, raw-file SHA-256, test filter, seed, threshold, package,
 and timeout for every target. Each target consumes the corpus bytes supplied by
 the gate and emits exactly one independently checked `M7023_FUZZ` marker.
 
+The formal campaign was rerun after M6-026 changed HTTP/2 and public HTTP test
+sources. The previous report's source fingerprint no longer matched the
+working tree, so it was not reused. The unchanged manifest, corpora, seed and
+thresholds passed again with the source fingerprint recorded above.
+
 ## Crash retention and replay
 
 A nonzero exit, signal, timeout, missing or duplicate marker, target/seed
@@ -67,13 +73,15 @@ A native replay of the chunked-decoder campaign passed 127/100 iterations. Its
 report is
 [`linux_glibc_x86_64/replay-report.json`](linux_glibc_x86_64/replay-report.json)
 with SHA-256
-`0d054b2ee6c4a320c065519e65821dc2e4f2460b9cbd9fbca83af60822e1a278`.
+`fb26ba61f168ebc0ae41c78ac13cd90e13245172b15037032eb8c375d0a1c0f7`.
+The replay report carries the same current source and manifest fingerprints as
+the formal campaign report.
 
 ## Verification
 
 | Command | Result |
 |---|---|
-| `python3 .../validate_test_plan_matrix.py docs/evidence/M7-023/test-plan.md` | PASS; P=7, S=10, T=12 |
+| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-023/test-plan.md --json` | PASS; P=7, S=13, T=12 |
 | `python3 -m py_compile tools/gates/m7_023_linux_fuzz.py tools/gates/tests/test_m7_023_linux_fuzz.py` | PASS |
 | `python3 -m unittest tools.gates.tests.test_m7_023_linux_fuzz` | 6 passed |
 | `cjpm test -j 1 --no-run --no-progress --no-color` | PASS; all test packages compiled |
