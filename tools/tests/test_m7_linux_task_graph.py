@@ -67,7 +67,7 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("| M7-019 | COMPLETE |", status)
         self.assertIn("| M7-020 | COMPLETE |", status)
         self.assertIn("| M7-021 | COMPLETE |", status)
-        self.assertIn("| M7-022 | BLOCKED |", status)
+        self.assertIn("| M7-022 | IN_PROGRESS |", status)
         self.assertIn("| M6-026 | COMPLETE |", status)
         self.assertIn("| M7-023 | COMPLETE |", status)
         self.assertIn("| M7-024 | COMPLETE |", status)
