@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-28T05:37:02.450098Z",
+  "generated_at_utc": "2026-08-28T05:46:11.827436Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -21,10 +21,10 @@
       "source_task": "M3-029"
     }
   ],
-  "revision": "492c13dfb26532f0be7e75df838c0edb36e5f101",
+  "revision": "1d4d8fd3f5f0f4170c22a0a6340e0cdd7d0f3357",
   "schema_version": 1,
   "source_sha256": {
-    ".gitignore": "e09286a746cd8cba718f97d5bc3c0de373b9cb3e115d67b2c61b2e2e3b7f2361",
+    ".gitignore": "1d21fa66de181f7e9e55cdc096641c2c3eb99a757f284e58293d3964b1ae08b3",
     "docs/api/baselines/wirestack-linux-v0.json": "50e8aa855857319c4841be8880f973c5702a2be4490acf07b6076ad48085efd6",
     "docs/evidence/M3-029/README.md": "f213099c6c321004db80b6a39e2226342c500235d965925f5e1541ecd2df63c8",
     "docs/evidence/M3-029/test-plan.md": "b04ecbf52c750aedc39196936ed6191405fb7f0c1573d464c180195c84e1b313",
