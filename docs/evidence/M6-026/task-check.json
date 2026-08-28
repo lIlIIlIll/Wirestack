@@ -1,0 +1,54 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M6-026/test-plan.md",
+        "--json"
+      ],
+      "duration_ms": 113.718,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-28T05:39:05.600888Z",
+      "id": "test-plan-matrix",
+      "started_at_utc": "2026-08-28T05:39:05.487170Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M6-026/test-plan-matrix.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"counts\": {\"paths\": 16, \"scenarios\": 8, \"tests\": 5}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+      "stdout_path": "build/repository-tooling/M6-026/test-plan-matrix.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "scripts/check-m6-026-http2-concurrent-bodies"
+      ],
+      "duration_ms": 14975.284,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-28T05:39:20.576264Z",
+      "id": "public-http2-concurrent-bodies",
+      "started_at_utc": "2026-08-28T05:39:05.600993Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M6-026/public-http2-concurrent-bodies.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "M6-026 PASS: 1000 concurrent H2 batches\n",
+      "stdout_path": "build/repository-tooling/M6-026/public-http2-concurrent-bodies.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "task",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M6-026"
+}
