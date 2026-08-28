@@ -33,7 +33,7 @@
   "long_running_gate": false,
   "platforms": ["linux-x86_64-glibc"],
   "required_evidence": [
-    "docs/evidence/M6-026/README.md",
+    "docs/evidence/M6-026/evidence.json",
     "docs/evidence/M6-026/linux_x86_64/concurrent-bodies.json",
     "docs/evidence/M6-026/task-check.json"
   ],
