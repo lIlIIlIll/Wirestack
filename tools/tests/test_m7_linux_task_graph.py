@@ -45,20 +45,20 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("NOT_APPLICABLE_TO_LINUX_PROFILE", rows["M7-019"][6])
         self.assertIn("任一 Linux P0 FAIL", rows["M7-031"][6])
 
-    def test_task_counts_include_linux_profile_without_changing_global_count(self) -> None:
+    def test_task_counts_include_linux_profile_and_formal_follow_up_work(self) -> None:
         backlog = self.read("docs/planning/implementation-backlog.md")
         milestone_ids = set(re.findall(r"^\| (M\d+-\d{3}) \|", backlog, re.MULTILINE))
         upstream_ids = set(re.findall(r"^\| (UP-\d{3}) \|", backlog, re.MULTILINE))
         p1_ids = set(re.findall(r"^\| (P1-\d{3}) \|", backlog, re.MULTILINE))
-        self.assertEqual(196, len(milestone_ids))
-        self.assertEqual(182, len(milestone_ids - EXPECTED_IDS))
+        self.assertEqual(197, len(milestone_ids))
+        self.assertEqual(183, len(milestone_ids - EXPECTED_IDS))
         self.assertEqual(7, len(upstream_ids))
         self.assertEqual(12, len(p1_ids))
-        self.assertIn("**全平台主线任务数：** 181", backlog)
+        self.assertIn("**全平台主线任务数：** 183", backlog)
         self.assertIn("**Linux 稳定版收口任务数：** 14", backlog)
-        self.assertIn("**当前发布任务数：** 195", backlog)
-        self.assertIn("当前发布相关任务总数：**195**", backlog)
-        self.assertIn("全部已记录任务总数：**214**", backlog)
+        self.assertIn("**当前发布任务数：** 197", backlog)
+        self.assertIn("当前发布相关任务总数：**197**", backlog)
+        self.assertIn("全部已记录任务总数：**216**", backlog)
 
     def test_status_exposes_ready_work_without_a_global_completion_claim(self) -> None:
         status = self.read("docs/planning/status.md")
@@ -68,6 +68,7 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("| M7-020 | COMPLETE |", status)
         self.assertIn("| M7-021 | COMPLETE |", status)
         self.assertIn("| M7-022 | BLOCKED |", status)
+        self.assertIn("| M6-026 | IN_PROGRESS |", status)
         self.assertIn("| M7-023 | COMPLETE |", status)
         self.assertIn("| M7-024 | COMPLETE |", status)
         self.assertIn("| M7-025 | COMPLETE |", status)
@@ -77,7 +78,8 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("docs/evidence/M7-027/README.md", status)
         self.assertIn("do not\nchange the status of the six-platform M7-001 through M7-017 tasks", status)
         self.assertIn("Resume M7-022's explicit 24-hour mixed release soak", linux)
-        self.assertIn("HTTP/2 concurrent response-body failure", linux)
+        self.assertIn("M6-026 HTTP/2 concurrent response bodies", linux)
+        self.assertIn("Complete M6-026", linux)
         self.assertIn("runtime/std source changes are not dependencies", linux)
 
     def test_evidence_rejects_upstream_and_non_linux_completion_inference(self) -> None:

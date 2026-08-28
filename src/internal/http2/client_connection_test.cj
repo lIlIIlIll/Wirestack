@@ -41,6 +41,92 @@ class Http2ClientConnectionTest {
     }
 
     @TestCase
+    func claimedStreamsPublishInitialHeadersInStreamIdOrder(): Unit {
+        let (clientTransport, serverTransport) = MemoryTransport.pair(
+            capacity: 64 * 1024, maxChunk: 23
+        )
+        let server = TestHttp2Peer(serverTransport)
+        let serving = spawn { server.serveOutOfOrder(2) }
+        let connection = Http2ClientConnection.connect(clientTransport)
+        let lowerRequest = HttpRequest.get("https://example.test/lower")
+        let higherRequest = HttpRequest.get("https://example.test/higher")
+        let lowerPlan = mapHttp2ClientRequest(lowerRequest)
+        let higherPlan = mapHttp2ClientRequest(higherRequest)
+        let lowerSignal = Http2ClientExecutionSignal()
+        let higherSignal = Http2ClientExecutionSignal()
+        let lower = connection.openStream(lowerSignal, lowerPlan.endStreamOnHeaders)
+        let higher = connection.openStream(higherSignal, higherPlan.endStreamOnHeaders)
+        @Expect(lower.stream.id.value, 1u32)
+        @Expect(higher.stream.id.value, 3u32)
+
+        let higherResponse = spawn {
+            connection.executeAdmitted(
+                higherRequest, higherPlan, higher.stream, higher.registration, higherSignal
+            )
+        }
+        let lowerResponse = connection.executeAdmitted(
+            lowerRequest, lowerPlan, lower.stream, lower.registration, lowerSignal
+        )
+        let openedHigher = higherResponse.get(Duration.second * 5)
+        try {
+            @Expect(readClientBody(lowerResponse.body), "/lower")
+            @Expect(readClientBody(openedHigher.body), "/higher")
+        } finally {
+            lowerResponse.close()
+            openedHigher.close()
+        }
+        @Expect(serving.get(Duration.second * 5), 2)
+        @Expect(connection.activeStreamCount, 0)
+        connection.abort()
+        serverTransport.abort()
+    }
+
+    @TestCase
+    func cancelledUnpublishedStreamDoesNotBlockNextClaim(): Unit {
+        let (clientTransport, serverTransport) = MemoryTransport.pair(
+            capacity: 64 * 1024, maxChunk: 29
+        )
+        let server = TestHttp2Peer(serverTransport)
+        let serving = spawn { server.serveOutOfOrder(1, advertisedStreams: 2u32) }
+        let connection = Http2ClientConnection.connect(clientTransport)
+        let cancelledRequest = HttpRequest.get("https://example.test/cancelled")
+        let nextRequest = HttpRequest.get("https://example.test/next")
+        let cancelledPlan = mapHttp2ClientRequest(cancelledRequest)
+        let nextPlan = mapHttp2ClientRequest(nextRequest)
+        let cancelledSignal = Http2ClientExecutionSignal()
+        let nextSignal = Http2ClientExecutionSignal()
+        let cancelled = connection.openStream(
+            cancelledSignal, cancelledPlan.endStreamOnHeaders
+        )
+        let next = connection.openStream(nextSignal, nextPlan.endStreamOnHeaders)
+        let source = CancellationSource()
+        let _ = source.cancel()
+
+        var observedCancellation = false
+        try {
+            let response = connection.executeAdmitted(
+                cancelledRequest, cancelledPlan, cancelled.stream,
+                cancelled.registration, cancelledSignal,
+                context: OperationContext(cancellation: source.token)
+            )
+            response.close()
+        } catch (_: NetworkException) {
+            observedCancellation = true
+        }
+        @Expect(observedCancellation)
+
+        let response = connection.executeAdmitted(
+            nextRequest, nextPlan, next.stream, next.registration, nextSignal
+        )
+        try { @Expect(readClientBody(response.body), "/next") }
+        finally { response.close() }
+        @Expect(serving.get(Duration.second * 5), 1)
+        @Expect(connection.activeStreamCount, 0)
+        connection.abort()
+        serverTransport.abort()
+    }
+
+    @TestCase
     func declaredLengthDoesNotReleaseStreamBeforeWireEndStream(): Unit {
         let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 64 * 1024, maxChunk: 17)
         let peer = DelayedEndHttp2Peer(serverTransport)
@@ -330,12 +416,15 @@ private class TestHttp2Peer {
 
     init(transport: DuplexTransport) { this.transport = transport }
 
-    func serveOutOfOrder(expected: Int64): Int64 {
+    func serveOutOfOrder(
+        expected: Int64,
+        advertisedStreams!: UInt32 = UInt32(expected)
+    ): Int64 {
         let preface = Array<Byte>(http2ClientPreface().size, repeat: 0u8)
         readExact(transport, MutableByteSpan(preface))
         let _ = machine.acceptClientPreface(preface)
         let settings = machine.start(settings: [
-            Http2Setting(Http2SettingId.MaxConcurrentStreams, UInt32(expected))
+            Http2Setting(Http2SettingId.MaxConcurrentStreams, advertisedStreams)
         ])
         writeAll(transport, ByteSpan(settings))
 

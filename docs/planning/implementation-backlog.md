@@ -2,10 +2,10 @@
 
 **依据：**《Wirestack：仓颉跨平台 TLS/HTTPS 网络栈重写 PRD》v2.1（2026-08-27）  
 **文档类型：** Issue/PR 级实施 backlog  
-**全平台主线任务数：** 181  
+**全平台主线任务数：** 183  
 **Linux 稳定版收口任务数：** 14  
 **远期上游任务数：** 7  
-**当前发布任务数：** 195  
+**当前发布任务数：** 197  
 **目标：** 将 PRD 转换为可排期、可并行、可验收、可追踪的仓库任务；不在此文档中改变 PRD 已冻结的产品边界。
 
 > 仓库事实：Wirestack 是独立仓颉绿地网络库仓库，GitHub 为 `lIlIIlIll/Wirestack`。新公共包默认使用 `wirestack.*`，内部实现使用 `wirestack.internal.*`。`cangjie_stdx`、仓颉 SDK、`std.net` 与 runtime 源码均为外部参考或上游仓库，不属于 Wirestack 工作树。实际物理目录与 `cjpm` target 由 M0-002 根据当前仓颉工具链冻结；本 backlog 在此之前只约束逻辑模块边界、依赖方向和验收语义。
@@ -407,6 +407,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M6-023 | 完成 SSE/无限累计 streaming profile | 可靠性 | C4 | M5-004,M5-020,M6-018,M6-021,M6-022 | PRD §15.1–15.2/§15.7/§19.3/§22 | 真实 H1/H2 `text/event-stream` 各连续运行至少 1 小时且消费不少于 1,000,000 个带序号事件；不全量累计，应用/协议队列、flow-control、RSS 与 heavy-GC heap 在预热后保持显式上限/稳态；slow consumer 触发背压而非增长，公开 cancel 在预算内退出，H2 sibling stream 不受影响；保留原始样本、环境和 PASS/FAIL 报告，不要求重复 24h soak。 |
 | M6-024 | 消除 connection window 耗尽时的 sibling starvation | HTTP2/可靠性 | C4 | M6-010,M6-012,M6-019,M6-021,M6-022 | PRD §15.7/§19.3/§22 | 在真实 TLS loopback 上，256 KiB 慢流占满 65,535-byte connection window 且 client 仅消费 4 KiB 后，不 cancel/close 该流，随后 1/10/100 个 2-byte sibling 均在各自单调绝对 Deadline 内完成；DATA 调度和 coalesced WINDOW_UPDATE 保证所有 ready stream 有界进展，且控制帧数、write queue、window、body buffer 保持现有上限；保留 pre-fix FAIL、post-fix raw latency/flow-control stall 和 100-run race evidence；Linux 原生通过只关闭 Linux cell，公共 API 不变。 |
 | M6-025 | 修复 `wirestack.http` facade 并发回归和失败后不退出 | HTTP2/可靠性 | C4 | M3-028,M6-021..M6-024 | PRD §15.7–15.8/§17/§21.3 | 在原生 Linux 上保留全包串行复现的首个异常、活动 task、连接、stream、waiter 和进程终态证据；修复产品生命周期或测试清理的实际根因，包括经证据确认的 TLS transport 跨层缺陷，不过滤用例、不提高 5 秒请求 Deadline、不新增 timeout owner；三个相关 facade 用例按原顺序连续运行 100 轮且零失败、零超时、零残留资源，`src/http` 非 Performance 全包和 `scripts/check` 均在硬上限内退出 0。 |
+| M6-026 | 修复公共 HTTP/2 并发响应体的连接级协议失败 | HTTP2/可靠性 | C4 | M6-025 | PRD §15.2/§15.7/§17/§21.2–21.3 | 保留 M7-022 安装产物失败和首个结构化协议终态；在真实 TLS loopback 上预热一个公共 `HttpClient` 后，以服务端双流屏障连续执行至少 1,000 个并发批次、读取并关闭 2,000 个 2-byte H2 响应体，零 `ProtocolViolation`、零 stream/connection 误终止、零超时且进程在硬上限内退出；不得串行化请求、重试隐藏失败、放宽 5 秒 Deadline 或新增 timeout owner；修复后 `src/http` 非 Performance 全包、架构守卫和 `scripts/check` 通过。 |
 
 ---
 
@@ -465,7 +466,7 @@ runtime、`std.net` 源码修改不得成为依赖。
 | M7-019 | 执行 Linux P0、不变量与发布验收追踪审计 | 质量 | C3 | M7-018 | PRD §17/§26 | 逐项映射所有 P0、15 条不变量和 22 条发布验收；Linux 适用项链接代码、测试和报告，非 Linux 项标记 `NOT_APPLICABLE_TO_LINUX_PROFILE`；任一证据缺口形成阻断项。 |
 | M7-020 | 执行 Linux 最终架构与私有 ABI 审计 | 架构 | C2 | M7-019 | PRD §7.2/§24.1/§26 | Core 无 `std.net`，公共 API 无底层类型，仓库无 `CJ_MRT_Sock*`，新 HTTP/TLS 无旧 bridge、global provider 或系统 OpenSSL loader；审计可重复运行。 |
 | M7-021 | 构建、扫描并安装 Linux release artifact | 发布 | C4 | M7-020,M3-028 | PRD §21.5/§23/§26 | 原生 release 构建生成可复现 digest 和依赖清单；干净 consumer 安装并运行 HTTPS client/server 与 runtime-info smoke；产物不搜索或链接系统 `libssl`/`libcrypto`，且 `externalOpenSslDependency=false`。 |
-| M7-022 | 完成 Linux 最终 24h+ soak 与资源上限报告 | 可靠性 | C4 | M7-021,M6-023 | PRD §9/§17/§19 | 原生 release artifact 连续运行至少 24 小时，混合 idle/active、connect/reset/cancel、H1 pool、H2 multiplex 和 SSE；记录 RSS、FD、socket、timer、waiter、buffer、GC root、task 和线程，所有集合有界且无单调泄漏。 |
+| M7-022 | 完成 Linux 最终 24h+ soak 与资源上限报告 | 可靠性 | C4 | M7-021,M6-023,M6-026 | PRD §9/§17/§19 | 原生 release artifact 连续运行至少 24 小时，混合 idle/active、connect/reset/cancel、H1 pool、H2 multiplex 和 SSE；记录 RSS、FD、socket、timer、waiter、buffer、GC root、task 和线程，所有集合有界且无单调泄漏。 |
 | M7-023 | 建立 Linux 持续 fuzz 门禁与发布阈值 | 安全 | C4 | M7-018,M3-028,M5-029,M6-019 | PRD §18/§21.4 | 十个 PRD fuzz target 均有版本化 corpus、seed、时间或迭代阈值、崩溃保存和重放命令；原生 release 门禁达到阈值且无未修复崩溃。 |
 | M7-024 | 建立 Linux 性能回归基线与发布门禁 | 性能 | C4 | M7-018,M1-025,M2-016,M3-028,M5-030,M6-020..M6-025 | PRD §19/§22 | 版本化 raw TCP、DNS-to-connected、TLS、H1、H2、取消、SSE 和内存基线；固定环境、轮次和阈值，保留原始输出并自动给出 PASS/FAIL。 |
 | M7-025 | 生成 Linux SBOM、provider manifest 与 build fingerprint | 发布 | C3 | M7-021,M3-002 | PRD §13.1/§18/§23/§26 | SBOM 与 artifact digest 绑定；manifest 可查询 provider、crypto、trust、capability、patch level、target 和 features；fingerprint 对同一输入稳定，对依赖变化敏感。 |
@@ -615,11 +616,11 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 
 ## 11. 任务统计
 
-- 全平台主线任务：**181**
+- 全平台主线任务：**183**
 - Linux 稳定版收口任务：**14**
 - 远期上游任务：**7**
 - 稳定版后 P1/独立项目：**12**
-- 当前发布相关任务总数：**195**
-- 全部已记录任务总数：**214**
+- 当前发布相关任务总数：**197**
+- 全部已记录任务总数：**216**
 
 该数量代表 Issue/PR 级工作项，不代表必须串行执行；关键是保持里程碑退出门禁和依赖方向。

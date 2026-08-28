@@ -701,6 +701,115 @@ class Http2FacadeTerminationProfileTest {
     }
 }
 
+@Test
+class Http2ConcurrentResponseBodyTest {
+    @TestCase
+    func twoPublicHttp2BodiesCompleteIndependently(): Unit {
+        runPublicHttp2ConcurrentBodyBatches(1, false)
+    }
+}
+
+/** Explicit M6-026 stability gate. Ordinary repository checks exclude this profile. */
+@Test
+@Tag[Performance]
+class Http2ConcurrentResponseBodyProfileTest {
+    @TestCase
+    func oneThousandOverlappingBatchesCompleteAndTerminate(): Unit {
+        runPublicHttp2ConcurrentBodyBatches(1000, true)
+    }
+}
+
+private func runPublicHttp2ConcurrentBodyBatches(rounds: Int64, emitProgress: Bool): Unit {
+    if (rounds <= 0) { throw IllegalArgumentException("M6-026 rounds must be positive") }
+    let certificate = publicTlsTestCertificateDer()
+    let serverTls = HttpServerTlsConfig([certificate], publicTlsTestPrivateKeyDer())
+    let handler = PublicConcurrentBodyHandler()
+    let server = HttpServer.builder()
+        .listen(publicLoopback(0))
+        .handler(handler)
+        .tls(serverTls)
+        .http2StreamLimit(8u32)
+        .build()
+    let serving: Future<Unit> = spawn { server.serve() }
+    let host = HostName("example.com")
+    let clientTls = HttpClientTlsConfig([certificate])
+    let client = HttpClient.builder()
+        .resolver(StaticResolver(ResolveResult(
+            [server.localEndpoint.address], host, ResolverSource.Static
+        )))
+        .tls(clientTls)
+        .requestTimeout(5 * Duration.second)
+        .build()
+    let base = "https://example.com:${server.localEndpoint.port}"
+    try {
+        @Assert(fetchPublicHttp2Ok(client, "${base}/warm", 0, "warm"))
+        for (round in 1..=rounds) {
+            let first: Future<Bool> = spawn {
+                fetchPublicHttp2Ok(client, "${base}/barrier", round, "first")
+            }
+            let second: Future<Bool> = spawn {
+                fetchPublicHttp2Ok(client, "${base}/barrier", round, "second")
+            }
+            @Assert(first.get(5 * Duration.second))
+            @Assert(second.get(5 * Duration.second))
+            if (emitProgress && round % 100 == 0) {
+                println("M6_026_PROGRESS batches=${round} responses=${round * 2}")
+            }
+        }
+        @Expect(handler.barrierArrivals, rounds * 2)
+        @Expect(handler.maximumActive >= 2)
+        @Expect(handler.active, 0)
+        println(
+            "M6_026_RESULT batches=${rounds} responses=${rounds * 2} " +
+            "bytes=${rounds * 4} failures=0 timeouts=0 activeHandlers=${handler.active}"
+        )
+    } finally {
+        client.close()
+        clientTls.close()
+        if (!server.isClosed()) {
+            let result = server.shutdown(context: OperationContext(
+                deadline: Some(Deadline.after(5 * Duration.second))
+            ))
+            @Expect(result.activeAtReturn, 0)
+            serving.get(5 * Duration.second)
+        }
+        serverTls.close()
+    }
+}
+
+private func fetchPublicHttp2Ok(
+    client: HttpClient,
+    url: String,
+    batch: Int64,
+    caller: String
+): Bool {
+    try {
+        let response = client.get(url)
+        try {
+            response.status == 200 && response.version == HttpVersion.Http2 &&
+                readPublicBody(response.body) == "ok"
+        } finally {
+            response.close()
+        }
+    } catch (error: Exception) {
+        println(
+            "M6_026_FAILURE batch=${batch} caller=${caller} " +
+            "terminal=${describePublicHttpFailure(error)}"
+        )
+        throw error
+    }
+}
+
+private func describePublicHttpFailure(error: Exception): String {
+    match (error) {
+        case value: HttpException => match (value.cause) {
+            case Some(cause) => "${value.message}; cause=${cause.message}"
+            case None => "${value.message}; cause=<none>"
+        }
+        case _ => "${error.message}"
+    }
+}
+
 private class PublicHttp2LimitHandler <: HttpServerHandler {
     private let mutex = Mutex()
     private let changed = synchronized(mutex) { mutex.condition() }
@@ -728,6 +837,51 @@ private class PublicHttp2LimitHandler <: HttpServerHandler {
             204, "No Content", ResponseBody.empty()
         ))
         synchronized(mutex) { active--; changed.notifyAll() }
+        response
+    }
+}
+
+private class PublicConcurrentBodyHandler <: HttpServerHandler {
+    private let mutex = Mutex()
+    private let changed = synchronized(mutex) { mutex.condition() }
+    private var arrivals: Int64 = 0
+    private var activeHandlers: Int64 = 0
+    private var maximumActiveHandlers: Int64 = 0
+
+    prop barrierArrivals: Int64 { get() { synchronized(mutex) { arrivals } } }
+    prop active: Int64 { get() { synchronized(mutex) { activeHandlers } } }
+    prop maximumActive: Int64 { get() { synchronized(mutex) { maximumActiveHandlers } } }
+
+    public func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse {
+        let _ = context
+        @Expect(request.version, HttpVersion.Http2)
+        let _ = request.body.read(Array<Byte>(1, repeat: 0u8))
+        if (request.target == "/barrier") {
+            synchronized(mutex) {
+                arrivals++
+                activeHandlers++
+                maximumActiveHandlers = max(maximumActiveHandlers, activeHandlers)
+                let target = ((arrivals + 1) / 2) * 2
+                changed.notifyAll()
+                while (arrivals < target) {
+                    changed.wait(timeout: 5 * Duration.second)
+                    if (arrivals < target) {
+                        activeHandlers--
+                        throw IllegalStateException("M6-026 sibling did not reach the server barrier")
+                    }
+                }
+            }
+        } else {
+            @Expect(request.target, "/warm")
+        }
+        let bytes = "ok".toArray()
+        let response = HttpServerResponse(HttpResponse(
+            200, "OK", ResponseBody(RequestBody.bytes(bytes).open()),
+            headers: HttpHeaders.builder().add("Content-Length", "2").build()
+        ))
+        if (request.target == "/barrier") {
+            synchronized(mutex) { activeHandlers--; changed.notifyAll() }
+        }
         response
     }
 }
