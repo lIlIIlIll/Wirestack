@@ -7,6 +7,7 @@ import wirestack.internal.http2 as http2
 import wirestack.internal.tls_engine as tls
 import wirestack.internal.transport as transport
 import wirestack.internal.transport_stdnet as stdnet
+import wirestack as api
 
 public enum HttpServerClientAuthentication {
     | None
@@ -134,7 +135,7 @@ public interface HttpServerHandler {
     func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse
 }
 
-public type HttpServerShutdownResult = http1.Http1ServerShutdownResult
+public type HttpServerShutdownResult = api.HttpServerShutdownResult
 
 public class HttpServerBuilder {
     private var endpoint: ?SocketEndpoint = None<SocketEndpoint>

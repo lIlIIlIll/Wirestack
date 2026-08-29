@@ -112,22 +112,32 @@ class StdNetTransportListenerTest {
     }
 
     @TestCase
-    func listenerCancellationWakesActiveAcceptWithStructuredError(): Unit {
+    func listenerCancellationWakesActiveAcceptAndListenerRemainsUsable(): Unit {
         let listener = StdNetTransportListener.bind(listenerLoopback(0), backlog: 1)
-        let source = CancellationSource()
-        let result: Future<Bool> = spawn {
-            try {
-                let _ = listener.accept(OperationContext(cancellation: source.token))
-                false
-            } catch (error: NetworkException) {
-                listenerCancelled(error)
+        try {
+            let source = CancellationSource()
+            let result: Future<Bool> = spawn {
+                try {
+                    let _ = listener.accept(OperationContext(cancellation: source.token))
+                    false
+                } catch (error: NetworkException) {
+                    listenerCancelled(error)
+                }
             }
+            @Assert(listener.waitUntilAcceptActive(Duration.second))
+            source.cancel()
+            @Expect(result.get(Duration.second), true)
+            @Expect(!listener.isClosed())
+
+            let accepted = spawn { listener.accept() }
+            @Assert(listener.waitUntilAcceptActive(Duration.second))
+            let client = StdNetTransport.connect(listener.localEndpoint)
+            let server = accepted.get(Duration.second)
+            client.close()
+            server.close()
+        } finally {
+            listener.close()
         }
-        @Assert(listener.waitUntilAcceptActive(Duration.second))
-        source.cancel()
-        @Expect(result.get(Duration.second), true)
-        @Expect(listener.isClosed())
-        listener.close()
     }
 
     @TestCase

@@ -4,6 +4,7 @@ import std.collection.ArrayList
 import std.sync.*
 import wirestack.internal.http_model.*
 import wirestack.internal.transport.*
+import wirestack as api
 
 public class Http1ServerConfig {
     public let maximumConnections: Int64
@@ -23,17 +24,7 @@ public class Http1ServerConfig {
     }
 }
 
-public struct Http1ServerShutdownResult {
-    public let gracefullyCompleted: Int64
-    public let aborted: Int64
-    public let activeAtReturn: Int64
-
-    public init(gracefullyCompleted: Int64, aborted: Int64, activeAtReturn: Int64) {
-        this.gracefullyCompleted = gracefullyCompleted
-        this.aborted = aborted
-        this.activeAtReturn = activeAtReturn
-    }
-}
+public type Http1ServerShutdownResult = api.HttpServerShutdownResult
 
 /** Protocol-neutral owner for one accepted transport. */
 public interface HttpServerConnectionHandler <: Resource {
