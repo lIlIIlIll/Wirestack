@@ -6,6 +6,7 @@ work=$(mktemp -d "${TMPDIR:-/tmp}/yjson-coverage.XXXXXX")
 trap 'rm -rf "$work"' EXIT
 
 cd "$root"
+python3 scripts/test_cjcov_to_lcov.py
 python3 -c 'import shutil; shutil.rmtree("coverage", ignore_errors=True); shutil.rmtree("cov_output", ignore_errors=True)' \
     </dev/null
 cp "$root/cjpm.toml" "$root/cjpm.lock" "$work/"

@@ -19,25 +19,27 @@ repository_root = args.root.resolve()
 source_root = repository_root / "src"
 
 
-def semantic_branch_lines(source: Path) -> set[int]:
-    """Return lines whose branches are explicit in the Cangjie source.
+def semantic_branch_slots(source: Path) -> dict[int, int]:
+    """Return the number of source-selectable branch outcomes per line.
 
     cjcov's gcov stream also reports compiler-generated edges for checked
     arithmetic, bounds checks, calls, and exception propagation. Those edges
-    are useful to the compiler, but they are not source branch coverage and
-    many cannot be selected by a test input. Keep only explicit control-flow
-    headers and boolean short-circuit expressions.
+    are useful to the compiler, but they are not source branch coverage. A
+    single Cangjie ``for`` can otherwise appear as 8 to 20 branches. Normalize
+    each explicit decision to its source-level outcomes instead of retaining
+    every compiler edge attached to the same line.
     """
 
-    result: set[int] = set()
+    result: dict[int, int] = {}
     continuation = False
-    control = re.compile(r"(^|\W)(if|while|for|match|case)(\W|$)")
+    control = re.compile(r"(^|\W)(if|while|for|match|case)(?=\W|$)")
     for number, raw in enumerate(source.read_text(encoding="utf-8").splitlines(), 1):
         text = raw.strip()
-        starts_control = bool(control.search(text))
-        explicit_boolean = "&&" in text or "||" in text
-        if starts_control or explicit_boolean or continuation:
-            result.add(number)
+        decisions = len(control.findall(text))
+        boolean_terms = text.count("&&") + text.count("||")
+        starts_control = decisions > 0
+        if starts_control or boolean_terms > 0 or continuation:
+            result[number] = 2 * max(1, decisions + boolean_terms)
         if starts_control:
             continuation = "{" not in text and "=>" not in text
         elif continuation and ("{" in text or "=>" in text):
@@ -68,7 +70,7 @@ for gcov_root in args.gcov_root:
         relative = str(resolved.relative_to(repository_root))
         target = records.setdefault(relative, {})
         branch_target = branch_records.setdefault(relative, {})
-        source_branch_lines = semantic_branch_lines(resolved)
+        source_branch_slots = semantic_branch_slots(resolved)
         current_number = 0
         branch_index = 0
         for line in lines:
@@ -80,7 +82,7 @@ for gcov_root in args.gcov_root:
                 branch_match = re.match(
                     r"branch\s+\d+\s+(?:taken\s+(\d+)|never executed)$", line
                 )
-                if branch_match and current_number in source_branch_lines:
+                if branch_match and current_number in source_branch_slots:
                     count = int(branch_match.group(1) or 0)
                     key = (current_number, branch_index)
                     branch_target[key] = max(branch_target.get(key, 0), count)
@@ -92,6 +94,25 @@ for gcov_root in args.gcov_root:
             count = 0 if count_text.startswith("#") else int(count_text)
             number = int(match.group(2))
             target[number] = max(target.get(number, 0), count)
+
+# Collapse compiler-level branch fan-out to source-level decisions. cjcov does
+# not identify which raw edge belongs to a source condition, so retain the
+# strongest observed semantic outcomes up to the number expressible in source.
+# This prevents checked arithmetic, bounds, call, and exception edges from
+# making an otherwise fully exercised loop impossible to cover.
+for source, branches in list(branch_records.items()):
+    slots = semantic_branch_slots(repository_root / source)
+    normalized: dict[tuple[int, int], int] = {}
+    by_line: dict[int, list[int]] = {}
+    for (number, _index), count in branches.items():
+        by_line.setdefault(number, []).append(count)
+    for number, counts in by_line.items():
+        limit = slots[number]
+        ordered = sorted(counts, reverse=True)[:limit]
+        ordered.extend([0] * (limit - len(ordered)))
+        for index, count in enumerate(ordered):
+            normalized[(number, index)] = count
+    branch_records[source] = normalized
 
 if not records:
     raise SystemExit("no src/lib_*.cj coverage records were found")
