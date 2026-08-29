@@ -41,12 +41,13 @@ EVIDENCE = (
     ("public-api", "M7-032", "docs/evidence/M7-032/linux_x86_64/public-api.json", "CURRENT_PASS", True),
     ("clean-consumer", "M7-032", "docs/evidence/M7-032/linux_x86_64/clean-consumer.json", "CURRENT_PASS", True),
     ("installed-audit", "M7-019", "docs/evidence/M7-019/linux_x86_64/audit.data", "STALE_AFTER_M7_032", False),
-    ("artifact-audit", "M7-020", "docs/evidence/M7-020/linux_x86_64/audit.data", "STALE_AFTER_M7_032", False),
-    ("installation", "M7-021", "docs/evidence/M7-021/linux_x86_64/qualification.json", "STALE_AFTER_M7_032", False),
-    ("performance", "M7-024", "docs/evidence/M7-024/linux_glibc_x86_64/performance-gate.json", "STALE_AFTER_M7_032", False),
-    ("sbom", "M7-025", "docs/evidence/M7-025/linux_x86_64/sbom.spdx.json", "STALE_AFTER_M7_032", False),
-    ("provider-manifest", "M7-025", "docs/evidence/M7-025/linux_x86_64/provider-manifest.json", "STALE_AFTER_M7_032", False),
-    ("build-fingerprint", "M7-025", "docs/evidence/M7-025/linux_x86_64/build-fingerprint.json", "STALE_AFTER_M7_032", False),
+    ("artifact-audit", "M7-020", "docs/evidence/M7-020/linux_x86_64/audit.data", "CURRENT_PASS", True),
+    ("installation", "M7-021", "docs/evidence/M7-021/linux_x86_64/qualification.json", "CURRENT_PASS", True),
+    ("performance", "M7-024", "docs/evidence/M7-024/linux_glibc_x86_64/performance-gate.json", "CURRENT_PASS", True),
+    ("supply-chain-validation", "M7-025", "docs/evidence/M7-025/linux_x86_64/bundle.json", "CURRENT_PASS", True),
+    ("sbom", "M7-025", "docs/evidence/M7-025/linux_x86_64/sbom.spdx.json", "CURRENT_BOUND_INPUT", False),
+    ("provider-manifest", "M7-025", "docs/evidence/M7-025/linux_x86_64/provider-manifest.json", "CURRENT_BOUND_INPUT", False),
+    ("build-fingerprint", "M7-025", "docs/evidence/M7-025/linux_x86_64/build-fingerprint.json", "CURRENT_BOUND_INPUT", False),
     ("api-history", "M7-026", "docs/evidence/M7-026/linux_x86_64/api-compatibility.json", "HISTORICAL_NON_GATING", False),
 )
 
@@ -161,14 +162,14 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
     require(isinstance(index["evidence"], list), "SCHEMA", "evidence must be a list")
 
     topics: set[str] = set()
-    scanned_documents: set[Path] = set()
+    scanned_files: set[Path] = set()
     for position, item in enumerate(index["documents"]):
         require(isinstance(item, dict), "SCHEMA", f"documents[{position}]")
         exact_keys(item, {"topic", "path", "sha256"}, f"documents[{position}]")
         path = safe_path(root, item["path"])
         require(sha256_path(path) == item["sha256"], "DIGEST_MISMATCH", item["path"])
         topics.add(item["topic"])
-        scanned_documents.add(path)
+        scanned_files.add(path)
 
     state_counts: dict[str, int] = {}
     for position, item in enumerate(index["evidence"]):
@@ -176,8 +177,9 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
         exact_keys(item, {"topic", "sourceTask", "path", "sha256", "state", "gating"}, f"evidence[{position}]")
         path = safe_path(root, item["path"])
         require(sha256_path(path) == item["sha256"], "DIGEST_MISMATCH", item["path"])
+        scanned_files.add(path)
         state = item["state"]
-        require(state in {"CURRENT_PASS", "STALE_AFTER_M7_032", "HISTORICAL_NON_GATING"}, "EVIDENCE_STATE", str(state))
+        require(state in {"CURRENT_PASS", "CURRENT_BOUND_INPUT", "STALE_AFTER_M7_032", "HISTORICAL_NON_GATING"}, "EVIDENCE_STATE", str(state))
         require(isinstance(item["gating"], bool), "SCHEMA", f"evidence[{position}].gating")
         if state == "CURRENT_PASS":
             require(item["gating"], "FALSE_PASS", item["path"])
@@ -189,9 +191,32 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
         topics.add(item["topic"])
         state_counts[state] = state_counts.get(state, 0) + 1
 
+    supply_chain = next(
+        (item for item in index["evidence"] if item["topic"] == "supply-chain-validation"),
+        None,
+    )
+    require(supply_chain is not None, "TOPIC_MISSING", "supply-chain-validation")
+    require(
+        supply_chain["state"] == "CURRENT_PASS" and supply_chain["gating"],
+        "BOUND_INPUT_ATTESTATION",
+        supply_chain["path"],
+    )
+    bundle = load_json(safe_path(root, supply_chain["path"]))
+    documents = bundle.get("documents")
+    require(isinstance(documents, dict), "BOUND_INPUT_ATTESTATION", supply_chain["path"])
+    for item in index["evidence"]:
+        if item["state"] != "CURRENT_BOUND_INPUT":
+            continue
+        document = documents.get(Path(item["path"]).name)
+        require(
+            isinstance(document, dict) and document.get("sha256") == item["sha256"],
+            "BOUND_INPUT_MISMATCH",
+            item["path"],
+        )
+
     missing_topics = sorted(REQUIRED_TOPICS - topics)
     require(not missing_topics, "TOPIC_MISSING", ",".join(missing_topics))
-    for path in sorted(scanned_documents):
+    for path in sorted(scanned_files):
         text = path.read_text(encoding="utf-8")
         for category, pattern in SECRET_PATTERNS:
             require(pattern.search(text) is None, "SENSITIVE_DATA", f"{path.relative_to(root)}:{category}")
