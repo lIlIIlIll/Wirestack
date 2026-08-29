@@ -143,7 +143,7 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
             workflow,
         )
         self.assertIn("version: ${{ steps.cangjie-nightly.outputs.version }}", workflow)
-        self.assertIn("sudo apt-get install --yes clang cmake ninja-build", workflow)
+        self.assertIn("sudo apt-get install --yes clang llvm cmake ninja-build", workflow)
         for command in (
             "scripts/repo-doctor --json",
             "scripts/check-code",

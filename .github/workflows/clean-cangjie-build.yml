@@ -37,7 +37,7 @@ jobs:
       - name: Install native build prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get install --yes clang cmake ninja-build
+          sudo apt-get install --yes clang llvm cmake ninja-build
 
       - name: Verify Linux toolchain readiness
         shell: bash
