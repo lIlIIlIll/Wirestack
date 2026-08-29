@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-29T09:40:40.093765Z",
+  "generated_at_utc": "2026-08-29T10:45:40.808464Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,34 +11,34 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M7-028/linux_x86_64/review-package.json",
-      "sha256": "2edf1e77cebfe79daa9d746a93a51326da2e99f09fff0199dd38782b3cf18ca3",
+      "sha256": "32e58d94359c0e2fa865f5ad94c745eb0e43c8152801f74e37afa909ad5e0d26",
       "source_task": "M7-028"
     },
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M7-028/task-check.json",
-      "sha256": "804a92cdb42e082a46081035e4175652af6ef551a8c0df6ae7c46ec15bcd1673",
+      "sha256": "5f66ecff0391c88a616a9cad3a65b2ae192e0a365ce07c56cc673d9726ede169",
       "source_task": "M7-028"
     }
   ],
-  "revision": "38b58ec2fbaa0779011a70992e86ffc4bbd88e17",
+  "revision": "1c274fe9734466661806c9ea2cf4cc59f3bcc8cb",
   "schema_version": 1,
   "source_sha256": {
-    ".gitignore": "a597755755bb3087cec35cf2a83b5519f196281cf5f70b870e10bc496faf063c",
-    "docs/evidence/M7-028/README.md": "78c5f2167776531ecf7631847dfd2c7f5f80dc9e5f61a5514e418cc90a7b25d9",
-    "docs/evidence/M7-028/test-plan.md": "1756b18b04d8421549164531ef7c615d13d66879488f92ef45857c10cb084617",
+    ".gitignore": "f9cdaed3952d02b7f9e83699a56d50f6a7a167665b4099ae3ea8089273b727bf",
+    "docs/evidence/M7-028/README.md": "9a4b691e5004778d29d477a0e5b29db659db8342e5e03665ebb9b086b6b423b1",
+    "docs/evidence/M7-028/test-plan.md": "1ab9e78a8ba1ccf3512b05b5dfe88efa494abb7de80a5c9cc39cf038b3f704f0",
     "docs/security/review/linux-1.0/README.md": "86d93dde06874bef309a7f3cf3444ab5924fb4ebaa08c3963cc0d8fb93ee950e",
     "docs/security/review/linux-1.0/architecture.md": "a80494d72365ccd17a1514010e432ea80654ac06d1298002c29dc1dd25a10090",
-    "docs/security/review/linux-1.0/evidence-index.json": "9d4c4676cd52883aa002e20946b474ac2777d7fcee2bcfe9c232436c44aeaf82",
+    "docs/security/review/linux-1.0/evidence-index.json": "47da664a9d0e9450a9fe38c0a7fea3f39f4afba721f064a4a5fd917f2d3ea70e",
     "docs/security/review/linux-1.0/keys-trust-and-data.md": "522114ac5b4362bfb2b3b319c6e0495466a65cce17ed341b2e6775527c957324",
     "docs/security/review/linux-1.0/known-limitations.md": "77701f7233c060fdf75c2332eba2c89fb287b8c00fe9c6bb8d0cbd20c0bfcba1",
     "docs/security/review/linux-1.0/parsers-and-limits.md": "1596462c6250b7613a000b24c411999204a2b6d0daade916fb19aad8973880ee",
     "docs/security/review/linux-1.0/provider-and-native-boundary.md": "6fcc8f22e8a42379e5394d5a3aae7db1be36510700dd626b6804116f5af0feca",
     "docs/security/review/linux-1.0/reproduce.md": "95694987355a9543402ebc9a553619b4e7927a093b3193f2bbfb2192457a662a",
     "scripts/check-m7-028-security-review": "db26c2c3988fdcfd377e1cf82606f108f40c78b59c785f05a71245ec6365eddc",
-    "tools/m7_028_security_review_package.py": "969945b701f57f763391ae810cac53ff6dfe304d05ae31db4f5aa383c771e648",
+    "tools/m7_028_security_review_package.py": "8c4d582918fa27530cb575f0c6f0a6b6380da3f418522e5f6393981487486674",
     "tools/tasks/M7-028.json": "f1374e73261232ec2acc43218139dc8695a880c70ab78e8106b10d5724fe615f",
-    "tools/tests/test_m7_028_security_review_package.py": "a8a2b7de392703d6ba00994cde9ff04aa54d7730652a458b765e670490b4ca7c"
+    "tools/tests/test_m7_028_security_review_package.py": "c92f28c6958716fd1bc7d704add010b6d827200631f44e46d3ca6a0d86d19c72"
   },
   "source_task": "M7-028",
   "toolchain": {
