@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "provider_id": "aws-lc",
+  "provider_version": "5.5.0",
+  "source": {
+    "kind": "git",
+    "url": "https://github.com/aws/aws-lc.git",
+    "tag": "v5.5.0",
+    "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+    "tree": "ae54cd9455f9630451d505855afe808a9f028b25",
+    "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478"
+  },
+  "license_expression": "Apache-2.0 OR ISC",
+  "patches": [],
+  "cmake_options": [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DBUILD_SHARED_LIBS=OFF",
+    "-DBUILD_TESTING=OFF",
+    "-DBUILD_TOOL=OFF",
+    "-DDISABLE_GO=ON",
+    "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+  ],
+  "abi": {
+    "name": "wirestack_tls_provider",
+    "version": 1,
+    "backend": "aws-lc-static"
+  },
+  "capabilities": [
+    "customRoots",
+    "clientCert",
+    "server",
+    "tls12",
+    "tls13",
+    "http2",
+    "externalSigner",
+    "sessionResumption",
+    "secureRandom"
+  ]
+}

@@ -26,21 +26,8 @@ public class TlsCapabilities {
     internal init(value: engine.TlsCapabilities) { this.value = value }
 
     public func supports(capability: TlsCapability): Bool {
-        value.supports(toInternalCapability(capability))
+        value.supports(capability)
     }
-}
-
-/** Capability names do not expose provider implementation details. */
-public enum TlsCapability {
-    | SystemTrust
-    | CustomRoots
-    | HardwareKeys
-    | ClientCertificate
-    | ServerMode
-    | Tls12
-    | Tls13
-    | Http2
-    | NetworkBinding
 }
 
 /** Immutable negotiated TLS facts retained before engine ownership transfers. */
@@ -84,7 +71,6 @@ public class TlsClientContext {
     public prop minimumVersion: TlsVersion { get() { value.security.minimumVersion } }
     public prop maximumVersion: TlsVersion { get() { value.security.maximumVersion } }
     public prop trust: TrustPolicy { get() { value.trust } }
-    public prop identity: ?LocalIdentity { get() { value.identity } }
     public func alpnProtocols(): Array<String> { value.alpnProtocols() }
 
     /** Uses one canonical DNS name for both SNI and reference-identity verification. */
@@ -149,7 +135,7 @@ public class TlsClientContextBuilder {
     }
 
     public func identity(identity: LocalIdentity): TlsClientContextBuilder {
-        let _ = value.identity(identity)
+        let _ = value.identity(identity.value)
         this
     }
 
@@ -178,7 +164,6 @@ public class TlsServerContext {
     public prop securityProfile: TlsSecurityProfile { get() { value.security.profile } }
     public prop minimumVersion: TlsVersion { get() { value.security.minimumVersion } }
     public prop maximumVersion: TlsVersion { get() { value.security.maximumVersion } }
-    public prop identity: LocalIdentity { get() { value.identity } }
     public prop clientAuthentication: ClientAuthentication { get() { value.clientAuthentication } }
     public prop clientTrust: ?TrustPolicy { get() { value.clientTrust } }
     public func alpnProtocols(): Array<String> { value.alpnProtocols() }
@@ -221,7 +206,7 @@ public class TlsServerContextBuilder {
     }
 
     public func identity(identity: LocalIdentity): TlsServerContextBuilder {
-        let _ = value.identity(identity)
+        let _ = value.identity(identity.value)
         this
     }
 
@@ -295,18 +280,4 @@ public class TlsListener <: Resource {
 
     public func close(): Unit { listener.close() }
     public func isClosed(): Bool { listener.isClosed() }
-}
-
-private func toInternalCapability(value: TlsCapability): engine.TlsCapability {
-    match (value) {
-        case TlsCapability.SystemTrust => engine.TlsCapability.SystemTrust
-        case TlsCapability.CustomRoots => engine.TlsCapability.CustomRoots
-        case TlsCapability.HardwareKeys => engine.TlsCapability.HardwareKeys
-        case TlsCapability.ClientCertificate => engine.TlsCapability.ClientCertificate
-        case TlsCapability.ServerMode => engine.TlsCapability.ServerMode
-        case TlsCapability.Tls12 => engine.TlsCapability.Tls12
-        case TlsCapability.Tls13 => engine.TlsCapability.Tls13
-        case TlsCapability.Http2 => engine.TlsCapability.Http2
-        case TlsCapability.NetworkBinding => engine.TlsCapability.NetworkBinding
-    }
 }
