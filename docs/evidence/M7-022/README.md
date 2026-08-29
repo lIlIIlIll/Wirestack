@@ -33,6 +33,24 @@ meet the formal 86,400-second parameter. The machine report is
 and the non-long task report is
 [`task-check-after-m6-026.json`](task-check-after-m6-026.json).
 
+### Retained overlapping-run failure
+
+Two formal invocations were found writing the same `soak.log`. The first
+runner started at 2026-08-28 13:48 CST. A second systemd runner started at
+2026-08-28 19:04 CST. Both opened the same inode and held different write
+offsets, so neither output could prove one uninterrupted run. Both process
+trees were stopped after their PIDs, process groups and file descriptors were
+confirmed. The mixed file is retained as
+[`linux_x86_64/soak-overlap-failed-20260829.log`](linux_x86_64/soak-overlap-failed-20260829.log)
+and is not acceptance evidence.
+
+The runner now holds a Linux advisory lock for the complete invocation. A
+second invocation returns `SOAK_ALREADY_RUNNING` before it builds or starts a
+consumer, and it does not replace the active JSON report. Each accepted
+invocation also writes a unique log under `build/gates/m7-022-runs/`; the gate
+publishes the requested raw-log path only after the child exits cleanly and the
+strict output parser accepts the complete stream.
+
 ### Retained first formal failure
 
 The 60-second native preflight completed 307 cycles, 614 joined concurrent
@@ -72,5 +90,6 @@ report.
 - No SDK component was built.
 - No non-Linux platform was tested.
 - No remote branch was pushed.
-- The formal 24-hour run was not restarted in this update.
+- The two overlapping formal runs were stopped because their shared log could
+  not prove either run. A new formal run requires the single-owner gate.
 - M7-028 and the later Linux release tasks remain blocked by M7-022 completion.

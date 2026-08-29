@@ -49,6 +49,7 @@ fails closed.
 | P022 | A long command is selected by task/full/fast rather than long mode | task-contract validator | Reachable error path | Long work never enters implicit gates. |
 | P023 | Task or command timeout cannot cover 24 hours plus bounded teardown | repository timeout validation | Reachable error path | Long-task limit must exceed 86,400 seconds. |
 | P024 | Source or report digest changes after acceptance | P1-012 evidence verifier | Reachable error path | Old PASS becomes STALE. |
+| P025 | A second M7-022 invocation starts while one invocation holds the task lock | Linux advisory lock and isolated raw log | Reachable error path | The second invocation returns `SOAK_ALREADY_RUNNING` and cannot replace the active report or log. |
 
 ## Input and state domains
 
@@ -64,6 +65,7 @@ fails closed.
 | Trend | falling; flat; bounded jitter; exact limit; over limit; monotonic growth | Equality passes; growth over a limit fails. |
 | Report write | new target; replace target; injected replace failure | Writes are atomic and retain the old target on failure. |
 | Gate routing | fast; task; full; long | The formal command appears only in long mode. |
+| Run ownership | no owner; one owner; concurrent second invocation; stale lock file | Only the process holding the advisory lock may execute; process exit releases the lock. |
 
 ## Semantic scenario matrix
 
@@ -85,6 +87,7 @@ fails closed.
 | S014 | Atomic replace succeeds and injected replacement fails | Existing report | P021 | Valid JSON replaces atomically; injected failure preserves old bytes | target bytes and no temporary residue | error,regression | P0 |
 | S015 | Long command is routed into fast/task/full | Repository contract validation | P022,P023 | Contract is INVALID before execution | stable long-gate and timeout error codes | error,regression | P0 |
 | S016 | Accepted source or report changes | Sealed PASS evidence | P024 | Evidence verifier returns STALE | changed path and nonzero exit | regression | P0 |
+| S017 | A formal run or preflight starts while another M7-022 invocation is active | First invocation holds the advisory lock | P025 | The second invocation fails before build and preserves the active output files | stable error code, unchanged report bytes, independent temporary logs | concurrency,regression | P0 |
 
 ## Test-plan matrix
 
@@ -102,6 +105,7 @@ fails closed.
 | T010 | S016 | P024 | mutate one sealed source/report | STALE | changed digest cannot reuse PASS | integration,regression |
 | T011 | S001,S010 | P004,P015,P020 | internal import and oversized output injection | FAIL with bounded report | import guard and tail length | unit,security |
 | T012 | S001,S002 | P002,P005,P006 | raw child and parent timing reconciliation | short is INCOMPLETE, formal duration may PASS | monotonic duration agreement and no partial-run stitching | unit,long |
+| T013 | S017 | P025 | same-process and separate-process lock contention plus injected log promotion failure | second invocation FAIL; prior output remains unchanged | `SOAK_ALREADY_RUNNING`, canonical log/report bytes, unique run log | unit,concurrency,regression |
 
 ## Coverage and reverse review
 
