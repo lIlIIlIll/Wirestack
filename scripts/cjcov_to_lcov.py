@@ -48,6 +48,47 @@ def semantic_branch_slots(source: Path) -> dict[int, int]:
             continuation = False
     return result
 
+
+def semantic_loop_body_lines(source: Path) -> dict[int, int]:
+    """Map multiline loop headers to their first executable body line."""
+
+    lines = source.read_text(encoding="utf-8").splitlines()
+    loop = re.compile(r"(^|\W)(for|while)(?=\W|$)")
+    result: dict[int, int] = {}
+    for index, raw in enumerate(lines):
+        text = raw.strip()
+        if not loop.search(text) or "{" not in text:
+            continue
+        after_open = text.split("{", 1)[1].strip()
+        if after_open:
+            continue
+        depth = 1
+        for body_index in range(index + 1, len(lines)):
+            body = lines[body_index].strip()
+            if depth == 1 and body.startswith("}"):
+                break
+            if body and not body.startswith("//"):
+                result[index + 1] = body_index + 1
+                break
+            depth += body.count("{") - body.count("}")
+            if depth <= 0:
+                break
+    return result
+
+
+def covered_loop_outcomes(counts: list[int], header_count: int, body_count: int) -> int:
+    """Use cjcov's raw condition pair to prove loop entry and normal exit."""
+
+    exit_count = header_count - body_count
+    if exit_count < 0:
+        return int(body_count > 0)
+    expected = sorted((body_count, exit_count))
+    for index in range(0, len(counts) - 1, 2):
+        pair = sorted((counts[index], counts[index + 1]))
+        if pair == expected:
+            return int(body_count > 0) + int(exit_count > 0)
+    return int(body_count > 0)
+
 records: dict[str, dict[int, int]] = {}
 branch_records: dict[str, dict[tuple[int, int], int]] = {}
 for gcov_root in args.gcov_root:
@@ -85,7 +126,7 @@ for gcov_root in args.gcov_root:
                 if branch_match and current_number in source_branch_slots:
                     count = int(branch_match.group(1) or 0)
                     key = (current_number, branch_index)
-                    branch_target[key] = max(branch_target.get(key, 0), count)
+                    branch_target[key] = branch_target.get(key, 0) + count
                     branch_index += 1
                 continue
             if not match or match.group(1).strip() == "-":
@@ -93,7 +134,7 @@ for gcov_root in args.gcov_root:
             count_text = match.group(1).strip().rstrip("*")
             count = 0 if count_text.startswith("#") else int(count_text)
             number = int(match.group(2))
-            target[number] = max(target.get(number, 0), count)
+            target[number] = target.get(number, 0) + count
 
 # Collapse compiler-level branch fan-out to source-level decisions. cjcov does
 # not identify which raw edge belongs to a source condition, so preserve at
@@ -101,16 +142,27 @@ for gcov_root in args.gcov_root:
 # uncovered. This remains conservative while preventing checked arithmetic,
 # bounds, call, and exception edges from multiplying the denominator.
 for source, branches in list(branch_records.items()):
-    slots = semantic_branch_slots(repository_root / source)
+    source_path = repository_root / source
+    slots = semantic_branch_slots(source_path)
+    loop_bodies = semantic_loop_body_lines(source_path)
     normalized: dict[tuple[int, int], int] = {}
-    by_line: dict[int, list[int]] = {}
-    for (number, _index), count in branches.items():
-        by_line.setdefault(number, []).append(count)
-    for number, counts in by_line.items():
+    by_line: dict[int, list[tuple[int, int]]] = {}
+    for (number, index), count in branches.items():
+        by_line.setdefault(number, []).append((index, count))
+    for number, indexed_counts in by_line.items():
+        counts = [count for _index, count in sorted(indexed_counts)]
         limit = slots[number]
-        hit = min(sum(count > 0 for count in counts), limit)
-        if any(count == 0 for count in counts):
-            hit = min(hit, limit - 1)
+        body_line = loop_bodies.get(number)
+        if body_line is not None and limit == 2:
+            hit = covered_loop_outcomes(
+                counts,
+                records[source].get(number, 0),
+                records[source].get(body_line, 0),
+            )
+        else:
+            hit = min(sum(count > 0 for count in counts), limit)
+            if any(count == 0 for count in counts):
+                hit = min(hit, limit - 1)
         representative = max(counts, default=1)
         for index in range(limit):
             normalized[(number, index)] = representative if index < hit else 0

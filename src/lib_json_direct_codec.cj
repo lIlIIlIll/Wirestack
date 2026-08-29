@@ -983,11 +983,11 @@ private class ArrayListJsonCodec<T> <: JsonFastCodec<ArrayList<T>> & JsonCompact
             if (!value.isEmpty()) {
                 context.pushIndex(0)
                 try {
-                    for (item in value) {
+                    for (position in 0..value.size) {
                         if (index > 0) {
                             context.updateLastIndex(index)
                         }
-                        inner.write(item, writer, context)
+                        inner.write(value[position], writer, context)
                         index++
                     }
                 } finally {
@@ -1012,13 +1012,13 @@ private class ArrayListJsonCodec<T> <: JsonFastCodec<ArrayList<T>> & JsonCompact
             if (!value.isEmpty()) {
                 context.pushIndex(0)
                 try {
-                    for (item in value) {
+                    for (position in 0..value.size) {
                         if (index > 0) {
                             context.updateLastIndex(index)
                         }
                         match (directInner) {
-                            case Some(direct) => direct.writeDirect(item, writer, context)
-                            case None => inner.write(item, writer, context)
+                            case Some(direct) => direct.writeDirect(value[position], writer, context)
+                            case None => inner.write(value[position], writer, context)
                         }
                         index++
                     }
@@ -1056,12 +1056,12 @@ private class ArrayListJsonCodec<T> <: JsonFastCodec<ArrayList<T>> & JsonCompact
                 let raw = compactRawInner.getOrThrow()
                 context.pushIndex(0)
                 try {
-                    for (item in value) {
+                    for (position in 0..value.size) {
                         if (index > 0) {
                             rawWriter.writeRawByte(b',')
                             context.updateLastIndex(index)
                         }
-                        raw.writeCompactRaw(item, writer, context)
+                        raw.writeCompactRaw(value[position], writer, context)
                         index++
                     }
                 } finally {
@@ -1147,8 +1147,8 @@ private class Int64ArrayListJsonCodec <: JsonFastCodec<ArrayList<Int64>> {
                 return
             }
             writer.startArray()
-            for (item in value) {
-                writer.writeInt64(item)
+            for (index in 0..value.size) {
+                writer.writeInt64(value[index])
             }
             writer.endArray()
         } finally {
@@ -1192,8 +1192,8 @@ private class StringArrayListJsonCodec <: JsonFastCodec<ArrayList<String>> {
                 return
             }
             writer.startArray()
-            for (item in value) {
-                writer.writeString(item)
+            for (index in 0..value.size) {
+                writer.writeString(value[index])
             }
             writer.endArray()
         } finally {

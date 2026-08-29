@@ -18,7 +18,17 @@ with tempfile.TemporaryDirectory(prefix="yjson-cjcov-test.") as temporary:
     (source / "lib_sample.cj").write_text(
         "package sample\n"
         "func sample(values: Array<Int64>, left: Bool, right: Bool): Unit {\n"
-        "    for (value in values) { let _ = value }\n"
+        "    for (value in values) {\n"
+        "        let _ = value\n"
+        "    }\n"
+        "    for (value in values) {\n"
+        "        let _ = value\n"
+        "    }\n"
+        "    for (value in values) {\n"
+        "        break\n"
+        "    }\n"
+        "    for (value in values) {\n"
+        "    }\n"
         "    if (left && right) { return }\n"
         "}\n",
         encoding="utf-8",
@@ -31,15 +41,40 @@ with tempfile.TemporaryDirectory(prefix="yjson-cjcov-test.") as temporary:
         f"branch {index} {'taken 1' if index < 4 else 'never executed'}\n"
         for index in range(8)
     )
+    completed_loop_branches = "".join(
+        f"branch {index} taken {count}\n"
+        for index, count in enumerate((1, 0, 0, 1, 0, 3, 2, 1, 0, 2))
+    )
+    broken_loop_branches = "".join(
+        f"branch {index} taken {count}\n"
+        for index, count in enumerate((1, 0, 0, 1, 0, 1, 1, 0, 0, 1))
+    )
+    skipped_loop_branches = "".join(
+        f"branch {index} taken {count}\n"
+        for index, count in enumerate((1, 0, 0, 1, 0, 1, 0, 1, 0, 0))
+    )
     (gcov / "sample.gcov").write_text(
         "        -:    0:Source:lib_sample.cj\n"
         "        1:    1:package sample\n"
         "        1:    2:func sample(values: Array<Int64>, left: Bool, right: Bool): Unit {\n"
-        "        1:    3:    for (value in values) { let _ = value }\n"
+        "        3:    3:    for (value in values) {\n"
+        + completed_loop_branches
+        + "        2:    4:        let _ = value\n"
+        + "        1:    5:    }\n"
+        + "        1:    6:    for (value in values) {\n"
+        + skipped_loop_branches
+        + "    #####:    7:        let _ = value\n"
+        + "        1:    8:    }\n"
+        + "        1:    9:    for (value in values) {\n"
+        + broken_loop_branches
+        + "        1:   10:        break\n"
+        + "        1:   11:    }\n"
+        + "        1:   12:    for (value in values) {\n"
         + raw_branches
-        + "        1:    4:    if (left && right) { return }\n"
+        + "        1:   13:    }\n"
+        + "        1:   14:    if (left && right) { return }\n"
         + boolean_branches
-        + "        1:    5:}\n",
+        + "        1:   15:}\n",
         encoding="utf-8",
     )
     baseline = work / "baseline.toml"
@@ -70,7 +105,7 @@ with tempfile.TemporaryDirectory(prefix="yjson-cjcov-test.") as temporary:
         for line in output.read_text(encoding="utf-8").splitlines()
         if line.startswith("BRDA:")
     ]
-    assert len(records) == 6, records
-    assert sum(not line.endswith(",-") for line in records) == 4, records
+    assert len(records) == 12, records
+    assert sum(not line.endswith(",-") for line in records) == 8, records
 
 print("cjcov source branch normalization tests passed")

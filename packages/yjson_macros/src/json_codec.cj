@@ -488,7 +488,7 @@ private func directScalarWrite(field: CodecField, value: String): String {
         case "Float32" | "Float16" => "writer.writeFloat64(Float64(${value}))"
         case "String" => "writer.writeString(${value})"
         case "ArrayList<String>" =>
-            "context.enterValue(); try { if (!jsonTryWriteCompactStringArrayList(writer, ${value})) { writer.startArray(); for (__fastItem in ${value}) { writer.writeString(__fastItem) }; writer.endArray() } } finally { context.leaveValue() }"
+            "context.enterValue(); try { if (!jsonTryWriteCompactStringArrayList(writer, ${value})) { writer.startArray(); for (__fastIndex in 0..${value}.size) { writer.writeString(${value}[__fastIndex]) }; writer.endArray() } } finally { context.leaveValue() }"
         case "HashMap<String,Int64>" =>
             "context.enterValue(); try { if (!jsonTryWriteCompactInt64Map(writer, ${value})) { writer.startObject(); for ((__fastName, __fastItem) in ${value}) { writer.writeName(__fastName); writer.writeInt64(__fastItem) }; writer.endObject() } } finally { context.leaveValue() }"
         case "Option<String>" => "__yJsonWriteStringOption(${value}, writer, context)"
@@ -916,10 +916,9 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         appendLine(sb, 3, "if (!value.isEmpty()) {")
         appendLine(sb, 4, "context.pushIndex(0)")
         appendLine(sb, 4, "try {")
-        appendLine(sb, 5, "for (__item in value) {")
+        appendLine(sb, 5, "for (__index in 0..value.size) {")
         appendLine(sb, 6, "if (__index > 0) { __writer.writeRawByte(b','); context.updateLastIndex(__index) }")
-        appendLine(sb, 6, "writeCompactRawWithCursor(__item, writer, __writer, context)")
-        appendLine(sb, 6, "__index++")
+        appendLine(sb, 6, "writeCompactRawWithCursor(value[__index], writer, __writer, context)")
         appendLine(sb, 5, "}")
         appendLine(sb, 4, "} finally { context.popPath() }")
         appendLine(sb, 3, "}")
@@ -1187,7 +1186,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         // a generated object element/value to stay on a concrete call chain.
         appendLine(sb, 0, "private class __YJsonStaticArrayList_${name} <: JsonFastCodec<YJsonArrayList<${name}>> {")
         appendLine(sb, 1, "public func write(value: YJsonArrayList<${name}>, writer: JsonCodecWriter, context: JsonEncodeContext): Unit {")
-        appendLine(sb, 2, "context.enterValue(); try { writer.startArray(); if (!value.isEmpty()) { var __index: Int64 = 0; context.pushIndex(0); try { for (__item in value) { if (__index > 0) { context.updateLastIndex(__index) }; __yJsonWrite_${name}(__item, writer, context); __index++ } } finally { context.popPath() } }; writer.endArray() } finally { context.leaveValue() }")
+        appendLine(sb, 2, "context.enterValue(); try { writer.startArray(); if (!value.isEmpty()) { context.pushIndex(0); try { for (__index in 0..value.size) { if (__index > 0) { context.updateLastIndex(__index) }; __yJsonWrite_${name}(value[__index], writer, context) } } finally { context.popPath() } }; writer.endArray() } finally { context.leaveValue() }")
         appendLine(sb, 1, "}")
         appendLine(sb, 1, "public func read(reader: JsonCodecReader, context: JsonDecodeContext): YJsonArrayList<${name}> {")
         appendLine(sb, 2, "context.enterValue(); try { let __result = YJsonArrayList<${name}>(); reader.startArray(); var __index: Int64 = 0; while (reader.hasArrayItem()) { context.pushIndex(__index); try { __result.add(__yJsonRead_${name}(reader, context)) } finally { context.popPath() }; __index++ }; reader.endArray(); return __result } finally { context.leaveValue() }")
