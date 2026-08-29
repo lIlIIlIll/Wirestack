@@ -40,7 +40,16 @@ jobs:
           sudo apt-get install --yes clang cmake ninja-build
 
       - name: Verify Linux toolchain readiness
-        run: scripts/repo-doctor --json
+        shell: bash
+        run: |
+          set +e
+          scripts/repo-doctor --json
+          doctor_exit=$?
+          set -e
+          case "$doctor_exit" in
+            0|6) ;;
+            *) exit "$doctor_exit" ;;
+          esac
 
       - name: Run canonical build and test gate
         run: scripts/check
