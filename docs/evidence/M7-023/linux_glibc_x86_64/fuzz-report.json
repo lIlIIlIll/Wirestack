@@ -14,10 +14,10 @@
       "--no-progress",
       "--no-color"
     ],
-    "duration_ms": 121249.345,
+    "duration_ms": 106834.935,
     "exit_code": 0,
-    "stderr": "",
-    "stdout": "   Finished `test` profile compilation\n   Executable files at `/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin`\ncjpm test success\n",
+    "stderr": "\u001b[33mwarning\u001b[0m: unused import 'wirestack.internal.http_model.*'\n \u001b[36m==>\u001b[0m /tmp/wirestack-m7-023-9h5xqtcu/wirestack/src/internal/http2/stream_reset_test.cj:7:1:\n  \u001b[36m| \u001b[0m\n\u001b[36m7\u001b[0m \u001b[36m| \u001b[0mimport wirestack.internal.http_model.*\u001b[0m\n  \u001b[36m| \u001b[0m\u001b[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import\u001b[0m\n  \u001b[36m| \u001b[0m\n  \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n\u001b[33mwarning\u001b[0m: unused expression\n   \u001b[36m| \u001b[0m\n   \u001b[36m| \u001b[0m/* 10.29 */                    None < TlsProviderException >\u001b[0m\n   \u001b[36m| \u001b[0m                               \u001b[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression\u001b[0m\n   \u001b[36m| \u001b[0m\n   \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: the code after the macro is expanded as follows\n    \u001b[36m| \u001b[0m\n    \u001b[36m| \u001b[0m  /* 10.1 */@Attribute[TEST_GENERATED] class TlsProviderSubstitutionTest <: TestClass {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m^\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.2 */    @Attribute[TestCase_62]\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.3 */    func testProviderUsesTheProductionFactoryContract(): Unit {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.4 */        let provider = TestTlsProviderFactory(\"test-one\").create()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.5 */        try {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.6 */            expectEqual(\"provider.manifest().providerId\", \"\\\"wirestack-test\\\"\", provider.manifest().providerId, \"wirestack-test\", isDelta: false)\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.7 */            expectEqual(\"provider.manifest().fingerprint\", \"\\\"test-one\\\"\", provider.manifest().fingerprint, \"test-one\", isDelta: false)\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.8 */            expectEqual(\"provider.capabilities().supports(TlsCapability.Tls13)\", \"true\", provider.capabilities().supports(TlsCapability.Tls13), true, isDelta: false)\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.9 */            let context = TlsClientContext.builder(provider.manifest(), provider.capabilities()).trust(TrustPolicy.customRoots(CertificateChain([DerCertificate(tlsTestCertificateDer())]))).build()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.10 */            let engine = provider.createClientEngine(context, ReferenceIdentity.Dns(HostName(\"example.com\")), serverName: None < HostName >)\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.11 */            expectEqual(\"isComplete(engine.handshakeStep())\", \"true\", isComplete(engine.handshakeStep()), true, isDelta: false)\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.12 */            engine.close()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.13 */        } finally {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.14 */            provider.close()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.15 */        }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.16 */    }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.17 */    \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.18 */    @Attribute[TestCase_63]\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.19 */    func objectsFromDifferentProviderInstancesCannotMix(): Unit {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.20 */        let first = TestTlsProvider(\"first\")\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.21 */        let second = TestTlsProvider(\"second\")\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.22 */        try {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.23 */            let context = TlsClientContext.builder(first.manifest(), first.capabilities()).trust(TrustPolicy.customRoots(CertificateChain([DerCertificate(tlsTestCertificateDer())]))).build()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.24 */            try {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.25 */                try {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.26 */                    assertEqual(\"true\", \"true\", true, true)\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.27 */                    second.createClientEngine(context, ReferenceIdentity.Dns(HostName(\"example.com\")), serverName: None < HostName >)\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.28 */                    failExpect(\"@ExpectThrows: Expected 'TlsProviderException' was not caught.\")\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.29 */                    None < TlsProviderException >\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.30 */                } catch(e: TlsProviderException) {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.31 */                    if(e is AssertException) {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.32 */                        throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.33 */                    }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.34 */                    if(e is AssertIntermediateException) {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.35 */                        throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.36 */                    }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.37 */                    if(e is UnittestTimeoutException) {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.38 */                        throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.39 */                    }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.40 */                    e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.41 */                }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.42 */            } catch(e: Exception) {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.43 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.44 */                    throw e\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.45 */                }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.46 */                expectCaughtUnexpectedE(\"@ExpectThrows(TlsProviderException)\", \"TlsProviderException\", e.toString())\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.47 */                None < TlsProviderException >\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.48 */            }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.49 */        } finally {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.50 */            first.close()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.51 */            second.close()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.52 */        }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.53 */    }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.54 */    \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.55 */    @Attribute[TestCase_64]\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.56 */    func activeEngineRetainsProviderUntilItCloses(): Unit {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.57 */        let provider = TestTlsProvider(\"lifetime\")\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.58 */        let engine = provider.createEngine(TlsEngineRole.Client, TlsSecurityPolicy.forProfile(TlsSecurityProfile.Modern))\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.59 */        provider.close()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.60 */        expectEqual(\"provider.closeRequested()\", \"true\", provider.closeRequested(), true, isDelta: false)\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.61 */        expectEqual(\"! provider.resourcesReleased()\", \"true\", ! provider.resourcesReleased(), true, isDelta: false)\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.62 */        expectEqual(\"isComplete(engine.handshakeStep())\", \"true\", isComplete(engine.handshakeStep()), true, isDelta: false)\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.63 */        engine.close()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.64 */        expectEqual(\"provider.resourcesReleased()\", \"true\", provider.resourcesReleased(), true, isDelta: false)\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.65 */        engine.close()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.66 */        expectEqual(\"provider.resourcesReleased()\", \"true\", provider.resourcesReleased(), true, isDelta: false)\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.67 */    }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.68 */    \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.69 */    init() {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.70 */    }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.71 */    private func classConfiguration(): Configuration {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.72 */        let configuration = Configuration()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.73 */        \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.74 */        return configuration\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.75 */    }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.76 */    public override func asTestSuite(): TestSuite {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.77 */        \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.78 */        let suiteConfiguration = classConfiguration()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.79 */        let suiteBuilder = TestSuite.builder(\"TlsProviderSubstitutionTest\").configure(suiteConfiguration)\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.80 */        \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.81 */        { => let caseConfig = Configuration()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.82 */            \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.83 */            let testProviderUsesTheProductionFactoryContractTestFunc = { => testProviderUsesTheProductionFactoryContract();() }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.84 */            suiteBuilder.add(\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.85 */            UnitTestCase.create(\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.86 */            \"testProviderUsesTheProductionFactoryContract\",\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.87 */            configuration: caseConfig,\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.88 */            body: testProviderUsesTheProductionFactoryContractTestFunc\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.89 */            )\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.90 */            )\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.91 */            \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.92 */        }()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.93 */        \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.94 */        \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.95 */        { => let caseConfig = Configuration()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.96 */            \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.97 */            let objectsFromDifferentProviderInstancesCannotMixTestFunc = { => objectsFromDifferentProviderInstancesCannotMix();() }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.98 */            suiteBuilder.add(\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.99 */            UnitTestCase.create(\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.100 */            \"objectsFromDifferentProviderInstancesCannotMix\",\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.101 */            configuration: caseConfig,\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.102 */            body: objectsFromDifferentProviderInstancesCannotMixTestFunc\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.103 */            )\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.104 */            )\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.105 */            \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.106 */        }()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.107 */        \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.108 */        \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.109 */        { => let caseConfig = Configuration()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.110 */            \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.111 */            let activeEngineRetainsProviderUntilItClosesTestFunc = { => activeEngineRetainsProviderUntilItCloses();() }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.112 */            suiteBuilder.add(\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.113 */            UnitTestCase.create(\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.114 */            \"activeEngineRetainsProviderUntilItCloses\",\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.115 */            configuration: caseConfig,\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.116 */            body: activeEngineRetainsProviderUntilItClosesTestFunc\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.117 */            )\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.118 */            )\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.119 */            \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.120 */        }()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.121 */        \u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.122 */        return suiteBuilder.build()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.123 */    }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.124 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.125 */        throw Exception(\"Unreachable code\")\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.126 */    }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.127 */}\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.128 */\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.129 */\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.130 */interface TestPackageExtension_TlsProviderSubstitutionTest {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.131 */    func registerTlsProviderSubstitutionTest(): Unit\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.132 */}\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.133 */extend TestPackage <: TestPackageExtension_TlsProviderSubstitutionTest {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.134 */    @Attribute[TEST_REGISTER]\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.135 */    public func registerTlsProviderSubstitutionTest() {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.136 */        registerSuite({ => TlsProviderSubstitutionTest().asTestSuite() })\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.137 */    }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.138 */}\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m /* 10.139 */\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m___________^\u001b[0m\n    \u001b[36m| \u001b[0m\n\u001b[34mnote\u001b[0m: the warning occurs after the macro is expanded\n  \u001b[36m==>\u001b[0m /tmp/wirestack-m7-023-9h5xqtcu/wirestack/src/internal/tls_engine/provider_test.cj:10:1:\n   \u001b[36m| \u001b[0m\n\u001b[36m10\u001b[0m \u001b[36m| \u001b[0m  @Test\u001b[0m\n   \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m^\u001b[0m\n\u001b[36m11\u001b[0m \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m class TlsProviderSubstitutionTest {\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m ...\u001b[0m\n\u001b[36m79\u001b[0m \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m }\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m^\u001b[0m\n   \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: unreachable block in 'if' expression\n   \u001b[36m| \u001b[0m\n   \u001b[36m| \u001b[0m  /* 10.31 */                    if(e is AssertException) {\u001b[0m\n   \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m________________________________________________________^\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m /* 10.32 */                        throw e\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m /* 10.33 */                    }\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m_______________________________^ unreachable block in 'if' expression\u001b[0m\n   \u001b[36m| \u001b[0m\n   \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: the warning occurs after the macro is expanded\n  \u001b[36m==>\u001b[0m /tmp/wirestack-m7-023-9h5xqtcu/wirestack/src/internal/tls_engine/provider_test.cj:10:1:\n   \u001b[36m| \u001b[0m\n\u001b[36m10\u001b[0m \u001b[36m| \u001b[0m  @Test\u001b[0m\n   \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m^\u001b[0m\n\u001b[36m11\u001b[0m \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m class TlsProviderSubstitutionTest {\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m ...\u001b[0m\n\u001b[36m79\u001b[0m \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m }\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m^\u001b[0m\n   \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: unreachable block in 'if' expression\n   \u001b[36m| \u001b[0m\n   \u001b[36m| \u001b[0m  /* 10.34 */                    if(e is AssertIntermediateException) {\u001b[0m\n   \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____________________________________________________________________^\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m /* 10.35 */                        throw e\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m /* 10.36 */                    }\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m_______________________________^ unreachable block in 'if' expression\u001b[0m\n   \u001b[36m| \u001b[0m\n   \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: the warning occurs after the macro is expanded\n  \u001b[36m==>\u001b[0m /tmp/wirestack-m7-023-9h5xqtcu/wirestack/src/internal/tls_engine/provider_test.cj:10:1:\n   \u001b[36m| \u001b[0m\n\u001b[36m10\u001b[0m \u001b[36m| \u001b[0m  @Test\u001b[0m\n   \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m^\u001b[0m\n\u001b[36m11\u001b[0m \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m class TlsProviderSubstitutionTest {\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m ...\u001b[0m\n\u001b[36m79\u001b[0m \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m }\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m^\u001b[0m\n   \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: unreachable block in 'if' expression\n   \u001b[36m| \u001b[0m\n   \u001b[36m| \u001b[0m  /* 10.37 */                    if(e is UnittestTimeoutException) {\u001b[0m\n   \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m_________________________________________________________________^\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m /* 10.38 */                        throw e\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m /* 10.39 */                    }\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m_______________________________^ unreachable block in 'if' expression\u001b[0m\n   \u001b[36m| \u001b[0m\n   \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: the warning occurs after the macro is expanded\n  \u001b[36m==>\u001b[0m /tmp/wirestack-m7-023-9h5xqtcu/wirestack/src/internal/tls_engine/provider_test.cj:10:1:\n   \u001b[36m| \u001b[0m\n\u001b[36m10\u001b[0m \u001b[36m| \u001b[0m  @Test\u001b[0m\n   \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m^\u001b[0m\n\u001b[36m11\u001b[0m \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m class TlsProviderSubstitutionTest {\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m ...\u001b[0m\n\u001b[36m79\u001b[0m \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m }\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m^\u001b[0m\n   \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: unused expression\n   \u001b[36m| \u001b[0m\n   \u001b[36m| \u001b[0m/* 10.47 */                None < TlsProviderException >\u001b[0m\n   \u001b[36m| \u001b[0m                           \u001b[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused expression\u001b[0m\n   \u001b[36m| \u001b[0m\n   \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\u001b[34mnote\u001b[0m: the warning occurs after the macro is expanded\n  \u001b[36m==>\u001b[0m /tmp/wirestack-m7-023-9h5xqtcu/wirestack/src/internal/tls_engine/provider_test.cj:10:1:\n   \u001b[36m| \u001b[0m\n\u001b[36m10\u001b[0m \u001b[36m| \u001b[0m  @Test\u001b[0m\n   \u001b[36m| \u001b[0m \u001b[34m_\u001b[0m\u001b[34m^\u001b[0m\n\u001b[36m11\u001b[0m \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m class TlsProviderSubstitutionTest {\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m ...\u001b[0m\n\u001b[36m79\u001b[0m \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m }\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[34m|\u001b[0m\u001b[34m_\u001b[0m\u001b[34m^\u001b[0m\n   \u001b[36m| \u001b[0m\n\n\u001b[33mwarning\u001b[0m: unused variable:'serverName'\n   \u001b[36m==>\u001b[0m /tmp/wirestack-m7-023-9h5xqtcu/wirestack/src/internal/tls_engine/provider_test.cj:141:9:\n    \u001b[36m| \u001b[0m\n\u001b[36m141\u001b[0m \u001b[36m| \u001b[0m        serverName!: ?HostName\u001b[0m\n    \u001b[36m| \u001b[0m        \u001b[33m^^^^^^^^^^ unused variable\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n6 warnings generated, 6 warnings printed.\n",
+    "stdout": "   Finished `test` profile compilation\n   Executable files at `/tmp/wirestack-m7-023-9h5xqtcu/wirestack/target/release/unittest_bin`\ncjpm test success\n",
     "timed_out": false
   },
   "corpus_version": "m7-023-v1",
@@ -28,10 +28,10 @@
     "cjpm": "Cangjie Project Manager: 1.1.3",
     "libc": "glibc 2.44",
     "machine": "x86_64",
-    "release": "7.1.9-arch1-2",
+    "release": "7.2.0-1-mainline",
     "system": "Linux"
   },
-  "finished_at_utc": "2026-08-28T05:16:51.583351Z",
+  "finished_at_utc": "2026-08-29T10:15:01.677077Z",
   "gate_id": "M7-023-LINUX-FUZZ",
   "manifest": "tools/gates/manifests/m7-023-linux-fuzz.json",
   "manifest_sha256": "a3bce21dc697a5d307b1fc451d8ee6d929bac38bd610ed6fe6839d7cd0739e41",
@@ -39,8 +39,8 @@
   "profile": "linux_glibc_x86_64",
   "release_compile_option": "-O2",
   "schema_version": 1,
-  "source_sha256": "d36ddd00c3d4845af380c79396eee6add9a84f245a882cd7d25878fa2533d4a9",
-  "started_at_utc": "2026-08-28T05:14:43.664380Z",
+  "source_sha256": "9707d1454f279a1688e1602e722385cc52b86e7e0feb01474210f29543789a7f",
+  "started_at_utc": "2026-08-29T10:12:52.606706Z",
   "target_count": 10,
   "targets": [
     {
@@ -56,16 +56,16 @@
       "minimum_iterations": 512,
       "process": {
         "command": [
-          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.tls_engine",
+          "/tmp/wirestack-m7-023-9h5xqtcu/wirestack/target/release/unittest_bin/wirestack.internal.tls_engine",
           "--filter=M3028TlsFuzzTest.recordMutationsHaveDeterministicTypedTerminals",
           "--show-all-output",
           "--no-progress",
           "--no-color"
         ],
-        "duration_ms": 877.71,
+        "duration_ms": 8116.165,
         "exit_code": 0,
         "stderr": "",
-        "stdout": "M7023_FUZZ target=tls-record seed=7023 iterations=512 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.tls_engine, time elapsed: 822829857 ns, RESULT:\n    TCS: M3028TlsFuzzTest, time elapsed: 821887941 ns, RESULT:\n    [ PASSED ] CASE: recordMutationsHaveDeterministicTypedTerminals (821533778 ns)\nSummary: TOTAL: 61\n    PASSED: 1, SKIPPED: 60, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "stdout": "M7023_FUZZ target=tls-record seed=7023 iterations=512 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.tls_engine, time elapsed: 8090802620 ns, RESULT:\n    TCS: M3028TlsFuzzTest, time elapsed: 8090307873 ns, RESULT:\n    [ PASSED ] CASE: recordMutationsHaveDeterministicTypedTerminals (8090070364 ns)\nSummary: TOTAL: 61\n    PASSED: 1, SKIPPED: 60, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
         "timed_out": false
       },
       "reasons": [],
@@ -85,16 +85,16 @@
       "minimum_iterations": 512,
       "process": {
         "command": [
-          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.tls_engine",
+          "/tmp/wirestack-m7-023-9h5xqtcu/wirestack/target/release/unittest_bin/wirestack.internal.tls_engine",
           "--filter=M3028TlsFuzzTest.handshakeMutationsHaveDeterministicTypedTerminals",
           "--show-all-output",
           "--no-progress",
           "--no-color"
         ],
-        "duration_ms": 881.294,
+        "duration_ms": 7993.725,
         "exit_code": 0,
         "stderr": "",
-        "stdout": "M7023_FUZZ target=tls-handshake seed=7023 iterations=512 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.tls_engine, time elapsed: 860917672 ns, RESULT:\n    TCS: M3028TlsFuzzTest, time elapsed: 860401621 ns, RESULT:\n    [ PASSED ] CASE: handshakeMutationsHaveDeterministicTypedTerminals (860158892 ns)\nSummary: TOTAL: 61\n    PASSED: 1, SKIPPED: 60, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "stdout": "M7023_FUZZ target=tls-handshake seed=7023 iterations=512 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.tls_engine, time elapsed: 7971642396 ns, RESULT:\n    TCS: M3028TlsFuzzTest, time elapsed: 7971127362 ns, RESULT:\n    [ PASSED ] CASE: handshakeMutationsHaveDeterministicTypedTerminals (7970848322 ns)\nSummary: TOTAL: 61\n    PASSED: 1, SKIPPED: 60, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
         "timed_out": false
       },
       "reasons": [],
@@ -114,16 +114,16 @@
       "minimum_iterations": 2048,
       "process": {
         "command": [
-          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.trust",
+          "/tmp/wirestack-m7-023-9h5xqtcu/wirestack/target/release/unittest_bin/wirestack.internal.trust",
           "--filter=M3028HostnameFuzzTest.hostnameMutationsHaveDeterministicTypedTerminals",
           "--show-all-output",
           "--no-progress",
           "--no-color"
         ],
-        "duration_ms": 63.462,
+        "duration_ms": 33.635,
         "exit_code": 0,
         "stderr": "",
-        "stdout": "M7023_FUZZ target=hostname-verifier seed=7023 iterations=2048 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.trust, time elapsed: 35332341 ns, RESULT:\n    TCS: M3028HostnameFuzzTest, time elapsed: 35133972 ns, RESULT:\n    [ PASSED ] CASE: hostnameMutationsHaveDeterministicTypedTerminals (34835294 ns)\nSummary: TOTAL: 10\n    PASSED: 1, SKIPPED: 9, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "stdout": "M7023_FUZZ target=hostname-verifier seed=7023 iterations=2048 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.trust, time elapsed: 17007811 ns, RESULT:\n    TCS: M3028HostnameFuzzTest, time elapsed: 16853984 ns, RESULT:\n    [ PASSED ] CASE: hostnameMutationsHaveDeterministicTypedTerminals (16602335 ns)\nSummary: TOTAL: 10\n    PASSED: 1, SKIPPED: 9, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
         "timed_out": false
       },
       "reasons": [],
@@ -143,16 +143,16 @@
       "minimum_iterations": 512,
       "process": {
         "command": [
-          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.tls_engine",
+          "/tmp/wirestack-m7-023-9h5xqtcu/wirestack/target/release/unittest_bin/wirestack.internal.tls_engine",
           "--filter=M3028TlsFuzzTest.certificateAdapterMutationsHaveDeterministicTypedTerminals",
           "--show-all-output",
           "--no-progress",
           "--no-color"
         ],
-        "duration_ms": 39.584,
+        "duration_ms": 28.265,
         "exit_code": 0,
         "stderr": "",
-        "stdout": "M7023_FUZZ target=certificate-adapter seed=7023 iterations=512 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.tls_engine, time elapsed: 10873903 ns, RESULT:\n    TCS: M3028TlsFuzzTest, time elapsed: 10009575 ns, RESULT:\n    [ PASSED ] CASE: certificateAdapterMutationsHaveDeterministicTypedTerminals (9692150 ns)\nSummary: TOTAL: 61\n    PASSED: 1, SKIPPED: 60, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "stdout": "M7023_FUZZ target=certificate-adapter seed=7023 iterations=512 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.tls_engine, time elapsed: 7189141 ns, RESULT:\n    TCS: M3028TlsFuzzTest, time elapsed: 6707886 ns, RESULT:\n    [ PASSED ] CASE: certificateAdapterMutationsHaveDeterministicTypedTerminals (6484222 ns)\nSummary: TOTAL: 61\n    PASSED: 1, SKIPPED: 60, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
         "timed_out": false
       },
       "reasons": [],
@@ -172,16 +172,16 @@
       "minimum_iterations": 800,
       "process": {
         "command": [
-          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.http1",
+          "/tmp/wirestack-m7-023-9h5xqtcu/wirestack/target/release/unittest_bin/wirestack.internal.http1",
           "--filter=Http1SmugglingCorpusTest.everyAcceptedSingleByteMutationHasACanonicalReparse",
           "--show-all-output",
           "--no-progress",
           "--no-color"
         ],
-        "duration_ms": 53.268,
+        "duration_ms": 37.483,
         "exit_code": 0,
         "stderr": "",
-        "stdout": "M7023_FUZZ target=http1-parser seed=7023 iterations=870 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http1, time elapsed: 25950127 ns, RESULT:\n    TCS: Http1SmugglingCorpusTest, time elapsed: 24710991 ns, RESULT:\n    [ PASSED ] CASE: everyAcceptedSingleByteMutationHasACanonicalReparse (24261474 ns)\nSummary: TOTAL: 115\n    PASSED: 1, SKIPPED: 114, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "stdout": "M7023_FUZZ target=http1-parser seed=7023 iterations=870 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http1, time elapsed: 12180645 ns, RESULT:\n    TCS: Http1SmugglingCorpusTest, time elapsed: 11093081 ns, RESULT:\n    [ PASSED ] CASE: everyAcceptedSingleByteMutationHasACanonicalReparse (10830789 ns)\nSummary: TOTAL: 115\n    PASSED: 1, SKIPPED: 114, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
         "timed_out": false
       },
       "reasons": [],
@@ -201,16 +201,16 @@
       "minimum_iterations": 100,
       "process": {
         "command": [
-          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.http1",
+          "/tmp/wirestack-m7-023-9h5xqtcu/wirestack/target/release/unittest_bin/wirestack.internal.http1",
           "--filter=Http1SmugglingCorpusTest.chunkedMutationsHaveDeterministicBoundedTerminals",
           "--show-all-output",
           "--no-progress",
           "--no-color"
         ],
-        "duration_ms": 34.391,
+        "duration_ms": 26.461,
         "exit_code": 0,
         "stderr": "",
-        "stdout": "M7023_FUZZ target=chunked-decoder seed=7023 iterations=127 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http1, time elapsed: 2708492 ns, RESULT:\n    TCS: Http1SmugglingCorpusTest, time elapsed: 1703901 ns, RESULT:\n    [ PASSED ] CASE: chunkedMutationsHaveDeterministicBoundedTerminals (1346456 ns)\nSummary: TOTAL: 115\n    PASSED: 1, SKIPPED: 114, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "stdout": "M7023_FUZZ target=chunked-decoder seed=7023 iterations=127 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http1, time elapsed: 3470078 ns, RESULT:\n    TCS: Http1SmugglingCorpusTest, time elapsed: 2179649 ns, RESULT:\n    [ PASSED ] CASE: chunkedMutationsHaveDeterministicBoundedTerminals (1817471 ns)\nSummary: TOTAL: 115\n    PASSED: 1, SKIPPED: 114, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
         "timed_out": false
       },
       "reasons": [],
@@ -230,16 +230,16 @@
       "minimum_iterations": 200,
       "process": {
         "command": [
-          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.http2",
+          "/tmp/wirestack-m7-023-9h5xqtcu/wirestack/target/release/unittest_bin/wirestack.internal.http2",
           "--filter=Http2DeterministicFuzzTest.frameParserDeterministicMutationCorpusStaysBounded",
           "--show-all-output",
           "--no-progress",
           "--no-color"
         ],
-        "duration_ms": 39.938,
+        "duration_ms": 36.34,
         "exit_code": 0,
         "stderr": "",
-        "stdout": "M7023_FUZZ target=http2-frame seed=7023 iterations=289 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http2, time elapsed: 7464178 ns, RESULT:\n    TCS: Http2DeterministicFuzzTest, time elapsed: 5974759 ns, RESULT:\n    [ PASSED ] CASE: frameParserDeterministicMutationCorpusStaysBounded (5687754 ns)\nSummary: TOTAL: 152\n    PASSED: 1, SKIPPED: 151, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "stdout": "M7023_FUZZ target=http2-frame seed=7023 iterations=289 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http2, time elapsed: 7933788 ns, RESULT:\n    TCS: Http2DeterministicFuzzTest, time elapsed: 6092411 ns, RESULT:\n    [ PASSED ] CASE: frameParserDeterministicMutationCorpusStaysBounded (5802250 ns)\nSummary: TOTAL: 155\n    PASSED: 1, SKIPPED: 154, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
         "timed_out": false
       },
       "reasons": [],
@@ -259,16 +259,16 @@
       "minimum_iterations": 250,
       "process": {
         "command": [
-          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.internal.http2",
+          "/tmp/wirestack-m7-023-9h5xqtcu/wirestack/target/release/unittest_bin/wirestack.internal.http2",
           "--filter=Http2DeterministicFuzzTest.hpackDecoderDeterministicMutationCorpusFailsClosed",
           "--show-all-output",
           "--no-progress",
           "--no-color"
         ],
-        "duration_ms": 37.138,
+        "duration_ms": 24.936,
         "exit_code": 0,
         "stderr": "",
-        "stdout": "M7023_FUZZ target=hpack-decoder seed=7023 iterations=290 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http2, time elapsed: 7926858 ns, RESULT:\n    TCS: Http2DeterministicFuzzTest, time elapsed: 5749305 ns, RESULT:\n    [ PASSED ] CASE: hpackDecoderDeterministicMutationCorpusFailsClosed (5417225 ns)\nSummary: TOTAL: 152\n    PASSED: 1, SKIPPED: 151, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "stdout": "M7023_FUZZ target=hpack-decoder seed=7023 iterations=290 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.http2, time elapsed: 6424002 ns, RESULT:\n    TCS: Http2DeterministicFuzzTest, time elapsed: 4669093 ns, RESULT:\n    [ PASSED ] CASE: hpackDecoderDeterministicMutationCorpusFailsClosed (4337132 ns)\nSummary: TOTAL: 155\n    PASSED: 1, SKIPPED: 154, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
         "timed_out": false
       },
       "reasons": [],
@@ -288,16 +288,16 @@
       "minimum_iterations": 500,
       "process": {
         "command": [
-          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.http",
+          "/tmp/wirestack-m7-023-9h5xqtcu/wirestack/target/release/unittest_bin/wirestack.http",
           "--filter=Http1DeterministicFuzzTest.acceptedUrlMutationsRoundTripToOneCanonicalIdentity",
           "--show-all-output",
           "--no-progress",
           "--no-color"
         ],
-        "duration_ms": 26.949,
+        "duration_ms": 23.039,
         "exit_code": 0,
         "stderr": "",
-        "stdout": "M7023_FUZZ target=url-authority seed=7023 iterations=825 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.http, time elapsed: 4692875 ns, RESULT:\n    TCS: Http1DeterministicFuzzTest, time elapsed: 4050657 ns, RESULT:\n    [ PASSED ] CASE: acceptedUrlMutationsRoundTripToOneCanonicalIdentity (3754550 ns)\nSummary: TOTAL: 70\n    PASSED: 1, SKIPPED: 69, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "stdout": "M7023_FUZZ target=url-authority seed=7023 iterations=825 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.http, time elapsed: 4099165 ns, RESULT:\n    TCS: Http1DeterministicFuzzTest, time elapsed: 3280579 ns, RESULT:\n    [ PASSED ] CASE: acceptedUrlMutationsRoundTripToOneCanonicalIdentity (3070413 ns)\nSummary: TOTAL: 71\n    PASSED: 1, SKIPPED: 70, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
         "timed_out": false
       },
       "reasons": [],
@@ -317,16 +317,16 @@
       "minimum_iterations": 300,
       "process": {
         "command": [
-          "/tmp/wirestack-m7-023-twesqeiz/wirestack/target/release/unittest_bin/wirestack.http",
+          "/tmp/wirestack-m7-023-9h5xqtcu/wirestack/target/release/unittest_bin/wirestack.http",
           "--filter=Http1DeterministicFuzzTest.acceptedNoProxyMutationsRemainDeterministicAcrossTargets",
           "--show-all-output",
           "--no-progress",
           "--no-color"
         ],
-        "duration_ms": 30.053,
+        "duration_ms": 25.587,
         "exit_code": 0,
         "stderr": "",
-        "stdout": "M7023_FUZZ target=proxy-parser seed=7023 iterations=480 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.http, time elapsed: 4950068 ns, RESULT:\n    TCS: Http1DeterministicFuzzTest, time elapsed: 3946529 ns, RESULT:\n    [ PASSED ] CASE: acceptedNoProxyMutationsRemainDeterministicAcrossTargets (3613574 ns)\nSummary: TOTAL: 70\n    PASSED: 1, SKIPPED: 69, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
+        "stdout": "M7023_FUZZ target=proxy-parser seed=7023 iterations=480 decision=PASS\n--------------------------------------------------------------------------------------------------\nTP: wirestack.http, time elapsed: 2590755 ns, RESULT:\n    TCS: Http1DeterministicFuzzTest, time elapsed: 2046960 ns, RESULT:\n    [ PASSED ] CASE: acceptedNoProxyMutationsRemainDeterministicAcrossTargets (1854916 ns)\nSummary: TOTAL: 71\n    PASSED: 1, SKIPPED: 70, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\n",
         "timed_out": false
       },
       "reasons": [],
