@@ -2,20 +2,12 @@ package wirestack.internal.tls_engine
 
 import std.sync.*
 import wirestack.internal.transport.*
+import wirestack as api
 
-public enum TlsConnectionState {
-    | Open
-    | Closing
-    | Closed
-    | Aborted
-}
+public type TlsConnectionState = api.TlsConnectionState
 
 /** Stable evidence explaining how the TLS byte stream terminated. */
-public enum TlsClosureEvidence {
-    | CloseNotify
-    | PeerClosedWithoutCloseNotify
-    | LocalAbort
-}
+public type TlsClosureEvidence = api.TlsClosureEvidence
 
 /**
  * Owns one TLS engine and the sole reference to its ciphertext transport.

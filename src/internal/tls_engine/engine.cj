@@ -5,6 +5,7 @@ import wirestack.internal.common.*
 import wirestack.internal.platform.linux.*
 import wirestack.internal.transport.*
 import wirestack.internal.trust.*
+import wirestack as api
 
 private let ENGINE_CLIENT: Int32 = 0
 private let ENGINE_SERVER: Int32 = 1
@@ -295,82 +296,8 @@ public class TlsHandshakeInfo {
     }
 }
 
-public enum TlsEngineErrorCode {
-    | ProtocolViolation
-    | UnsupportedVersion
-    | NoSharedCipher
-    | NoSharedAlpn
-    | CertificateUntrusted
-    | IdentityMismatch
-    | CertificateExpired
-    | CertificateRevoked
-    | ClientCertificateRequired
-    | HandshakeTimeout
-    | HandshakeCancelled
-    | PeerAlert
-    | PeerClosedWithoutCloseNotify
-    | InvalidRecord
-    | BadMac
-    | SessionFailure
-    | ProviderFailure
-    | UnsupportedCapability
-    | Closed
-    | NoProgress
-    | UnexpectedTransportEof
-    | PrivateKeyFailure
-    | ServerNameSelectionFailure
-}
-
-/** Stable TLS-pump failure without provider-native types or secret material. */
-public class TlsEngineException <: NetworkException {
-    public let tlsCode: TlsEngineErrorCode
-    /** X.509 verification result, when certificate verification failed. */
-    public let verificationCode: ?Int64
-    /** TLS alert description received from the peer, without provider text. */
-    public let peerAlert: ?Int32
-
-    public init(
-        code: TlsEngineErrorCode,
-        message: String,
-        phase!: NetworkPhase = NetworkPhase.TlsHandshake,
-        nativeCode!: ?Int64 = None<Int64>,
-        verificationCode!: ?Int64 = None<Int64>,
-        peerAlert!: ?Int32 = None<Int32>,
-        cause!: ?Exception = None<Exception>
-    ) {
-        super(
-            match (code) {
-                case TlsEngineErrorCode.HandshakeCancelled => NetworkErrorCategory.Cancelled
-                case TlsEngineErrorCode.HandshakeTimeout => NetworkErrorCategory.DeadlineExceeded
-                case _ => NetworkErrorCategory.System
-            },
-            phase,
-            match (code) {
-                case TlsEngineErrorCode.Closed => NetworkErrorCode.Closed
-                case TlsEngineErrorCode.UnexpectedTransportEof => NetworkErrorCode.UnexpectedEof
-                case TlsEngineErrorCode.PeerClosedWithoutCloseNotify => NetworkErrorCode.UnexpectedEof
-                case TlsEngineErrorCode.HandshakeTimeout => NetworkErrorCode.TimedOut
-                case TlsEngineErrorCode.HandshakeCancelled => NetworkErrorCode.Cancelled
-                case TlsEngineErrorCode.UnsupportedCapability => NetworkErrorCode.Unsupported
-                case _ => NetworkErrorCode.SystemFailure
-            },
-            message,
-            retryability: match (code) {
-                case TlsEngineErrorCode.HandshakeTimeout => Retryability.SafeBeforeWrite
-                case TlsEngineErrorCode.HandshakeCancelled => Retryability.Never
-                case TlsEngineErrorCode.ProviderFailure => Retryability.Unknown
-                case _ => Retryability.Never
-            },
-            nativeCode: nativeCode,
-            cause: cause
-        )
-        tlsCode = code
-        this.verificationCode = verificationCode
-        this.peerAlert = peerAlert
-    }
-
-    protected override func getClassName(): String { "TlsEngineException" }
-}
+public type TlsEngineErrorCode = api.TlsEngineErrorCode
+public type TlsEngineException = api.TlsEngineException
 
 private func nativeRole(role: TlsEngineRole): Int32 {
     match (role) {
