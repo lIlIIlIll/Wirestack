@@ -24,7 +24,7 @@ It does not accept a component's top-level `PASS` value by itself.
 | Manifest | [`tools/gates/manifests/m7-024-linux-performance.json`](../../../tools/gates/manifests/m7-024-linux-performance.json) |
 | Manifest SHA-256 | `4e5d3425fd2b31794b44d72d75c245f40bc96ed318ca8aba2eaf373ee46eab0d` |
 | Aggregate report | [`linux_glibc_x86_64/performance-gate.json`](linux_glibc_x86_64/performance-gate.json) |
-| Aggregate report SHA-256 | `cca8545809c8ac0583d3a29bce626c605f740b3e2c782dabd01fa4d622f537d6` |
+| Aggregate report SHA-256 | `a354e448489fe3680f68c5298fd79a4ab0555dbf135ebe84ae5c1c0e5e6be65e` |
 
 ## Release baselines
 
