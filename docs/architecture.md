@@ -71,9 +71,10 @@ Utf8Cursor  StreamInputCursor  String/bytes   stream target
 duplicate key、number 和 resource-limit 语义。`YJson.fastDecoder(codec)` 复用 codec 选择，
 每次调用仍创建本次输入的 reader，不持有调用方输入。
 
-writer 结构状态只存在于 core direct writer：separator、object/array 顺序、path、depth、
-cycle、`maxBytes` 和 NaN/Infinity 在选择 target 前后含义不变。stream writer 只适配输出
-target，不再维护另一套结构控制。
+writer 结构状态只存在于 core direct writer：separator、object/array 顺序、单根值、path、
+depth、`maxBytes` 和 NaN/Infinity 在选择 target 前后含义不变。可修改 AST 的递归写出、复制
+和语义比较使用祖先路径检测 cycle，同时允许共享子节点。stream writer 只适配输出 target，
+不再维护另一套结构控制。
 
 默认 stream API 真正增量读取并由同一 reader/writer 驱动，不读取到 EOF。高级
 WholeDocument backend 只通过 `YJsonAdvanced.*WithBackend` 显式使用。

@@ -51,10 +51,11 @@ public func decodeDecimalLike(value: JsonNode): Decimal {
 }
 
 func decodeRuneText(text: String): Rune {
-    for (r in text.toRuneArray()) {
-        return r
+    let runes = text.toRuneArray()
+    if (runes.size != 1) {
+        throw JsonException("Rune requires exactly one Unicode scalar", code: "invalid_value")
     }
-    throw JsonException("Cannot decode empty string as Rune")
+    runes[0]
 }
 
 public let BoolJson: JsonCodec<Bool> = LambdaFastRawJsonCodec<Bool>(

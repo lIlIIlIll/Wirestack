@@ -233,8 +233,10 @@ public class CompactJsonDocument {
     // String HashMap probing entirely; exact duplicate semantics are handled
     // by the parse-time byte-aware object index below.
     private let keyDictionary = HashMap<String, UInt64>()
-    // Cache only queried entries for large objects. A full permanent key index
-    // would reintroduce the memory amplification this document API avoids.
+    // Cache only successful queried entries for large objects. Misses are not
+    // retained, so unique absent-key probes cannot grow this map. A full
+    // permanent key index would reintroduce the memory amplification this
+    // document API avoids.
     private let lookupCache = HashMap<String, Int64>()
     var rootIndex: Int64 = -1
     var duplicateLogicalBytes: Int64 = 0
@@ -499,7 +501,6 @@ public class CompactJsonDocument {
         if (second[index] > COMPACT_LINEAR_OBJECT_LIMIT) {
             let cacheKey = index.toString() + "\u{0000}" + name
             if (let Some(position) <- lookupCache.get(cacheKey)) {
-                if (position < 0) { return None<CompactJsonValue> }
                 if (objectKinds[position] == COMPACT_OBJECT_NODE) {
                     return Some(CompactJsonValue(this, objectValues[position]))
                 }
@@ -515,7 +516,6 @@ public class CompactJsonDocument {
                     return Some(CompactJsonValue(this, -1, Int64(objectKinds[position]), objectValues[position]))
                 }
             }
-            lookupCache[cacheKey] = -1
             return None<CompactJsonValue>
         }
         for (offset in 0..second[index]) {

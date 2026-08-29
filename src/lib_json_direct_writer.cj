@@ -657,12 +657,17 @@ class DirectBufferWriterTarget <: JsonDirectWriterTarget {
 class DirectStreamWriterTarget <: JsonDirectWriterTarget {
     private let out: OutputStream
     private let buffer: Array<Byte>
+    private let maxBytes: Int64
+    private let includeErrorLocation: Bool
     private var used: Int64 = 0
     private var committed: Int64 = 0
+    private var limitFailed: Bool = false
 
-    public init(out: OutputStream) {
+    public init(out: OutputStream, config: JsonWriteConfig) {
         this.out = out
         this.buffer = Array<Byte>(JSON_STREAM_BUFFER_CAPACITY, repeat: 0)
+        this.maxBytes = config.maxBytes
+        this.includeErrorLocation = config.includeErrorLocation
     }
 
     public func writeText(value: String): Unit {
@@ -674,6 +679,7 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
         if (size <= 0) {
             return
         }
+        ensureAdditionalOutput(size)
         if (size >= JSON_STREAM_DIRECT_WRITE_THRESHOLD) {
             flushBuffer()
             unsafe {
@@ -700,6 +706,7 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
 
     public func writeBytes(value: Array<Byte>): Unit {
         if (value.isEmpty()) { return }
+        ensureAdditionalOutput(value.size)
         if (value.size >= JSON_STREAM_DIRECT_WRITE_THRESHOLD) {
             flushBuffer()
             out.write(value)
@@ -714,6 +721,7 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
     public func writeBytesRange(value: Array<Byte>, start: Int64, end: Int64): Unit {
         let size = end - start
         if (size <= 0) { return }
+        ensureAdditionalOutput(size)
         if (size >= JSON_STREAM_DIRECT_WRITE_THRESHOLD) {
             flushBuffer()
             out.write(value[start..end])
@@ -944,6 +952,7 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
     }
 
     private func writeRawByte(value: Byte): Unit {
+        ensureAdditionalOutput(1)
         ensureBufferedCapacity(1)
         buffer[used] = value
         used++
@@ -953,12 +962,13 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
     }
 
     private func writeUInt64Digits(value: UInt64): Unit {
+        ensureAdditionalOutput(jsonRawUInt64Size(value))
         if (value == 0u64) {
-            writeRawByte(b'0')
+            writeRawByteNoLimit(b'0')
             return
         }
         if (value < 10u64) {
-            writeRawByte(UInt8(48u64 + value))
+            writeRawByteNoLimit(UInt8(48u64 + value))
             return
         }
         if (value < 100u64) {
@@ -1014,6 +1024,34 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
         let size = end - cursor
         buffer.copyTo(buffer, cursor, used, size)
         used += size
+    }
+
+    private func writeRawByteNoLimit(value: Byte): Unit {
+        ensureBufferedCapacity(1)
+        buffer[used] = value
+        used++
+        if (used == buffer.size) {
+            flushBuffer()
+        }
+    }
+
+    private func ensureAdditionalOutput(additional: Int64): Unit {
+        if (limitFailed) {
+            throwOutputLimit()
+        }
+        let written = bytesWritten()
+        if (maxBytes > 0 && (written > maxBytes || additional > maxBytes - written)) {
+            limitFailed = true
+            throwOutputLimit()
+        }
+    }
+
+    private func throwOutputLimit(): Nothing {
+        throw JsonException(
+            "Encoded JSON exceeds ${maxBytes} bytes",
+            code: "output_too_large",
+            byteOffset: if (includeErrorLocation) { maxBytes } else { -1 }
+        )
     }
 
     private func shouldEscapeAsciiForConfig(byte: Int64, htmlSafe: Bool): Bool {
@@ -1082,6 +1120,9 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
     }
 
     public func finish(): Unit {
+        if (limitFailed) {
+            throwOutputLimit()
+        }
         flushBuffer()
         out.flush()
     }
@@ -1105,6 +1146,9 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     private let multiline: Bool
     private let resultKind: UInt8
     private var contexts: Option<ArrayList<UInt8>> = None<ArrayList<UInt8>>
+    private var rootWritten: Bool = false
+    private var rawDepth: Int64 = 0
+    private var rawRootPreclaimed: Bool = false
 
     public init(pretty!: Bool = false) {
         let writerConfig = if (pretty) { JsonWriteConfig.pretty } else { JsonWriteConfig.compact }
@@ -1122,7 +1166,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     }
 
     public init(out: OutputStream, config!: JsonWriteConfig = JsonWriteConfig.compact) {
-        target = DirectStreamWriterTarget(out)
+        target = DirectStreamWriterTarget(out, config)
         this.config = config
         multiline = !config.newline.isEmpty()
         resultKind = 2
@@ -1186,8 +1230,8 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     }
 
     private func ensureCompleteWriterState(): Unit {
-        if (!contextsAreEmpty()) {
-            throw JsonException("Unbalanced JSON writer state")
+        if (!rootWritten || !contextsAreEmpty() || rawDepth != 0 || rawRootPreclaimed) {
+            throw JsonException("JSON writer requires exactly one complete root value", code: "writer_state")
         }
     }
 
@@ -1209,7 +1253,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     }
 
     func canWriteRawCompactValue(): Bool {
-        contextsAreEmpty() && !multiline && !config.useSpaceAfterSeparators && !config.htmlSafe
+        contextsAreEmpty() && !rootWritten && !multiline && !config.useSpaceAfterSeparators && !config.htmlSafe
     }
 
     public func tryBeginGeneratedCompactRawValue(): Bool {
@@ -1217,26 +1261,32 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
             return false
         }
         beforeValue()
+        rawRootPreclaimed = true
         true
     }
 
     public func writeRawByte(value: Byte): Unit {
+        consumeRawRootPreclaim()
         target.writeByte(value)
     }
 
     public func writeRawBeginArray(): Unit {
+        beginRawContainer()
         target.writeByte(b'[')
     }
 
     public func writeRawEndArray(): Unit {
+        endRawContainer()
         target.writeByte(b']')
     }
 
     public func writeRawBeginObject(): Unit {
+        beginRawContainer()
         target.writeByte(b'{')
     }
 
     public func writeRawEndObject(): Unit {
+        endRawContainer()
         target.writeByte(b'}')
     }
 
@@ -1339,25 +1389,32 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
         if (!canWriteRawCompactValue()) {
             return false
         }
-        target.reserveCapacity(jsonRawInt64MapReserveHint(0, values.size))
-        target.writeByte(b'{')
-        var first = true
-        for ((name, item) in values) {
-            if (first) {
-                first = false
-            } else {
-                target.writeByte(b',')
+        ensureContainerDepth()
+        beforeValue()
+        rawDepth++
+        try {
+            target.reserveCapacity(jsonRawInt64MapReserveHint(0, values.size))
+            target.writeByte(b'{')
+            var first = true
+            for ((name, item) in values) {
+                if (first) {
+                    first = false
+                } else {
+                    target.writeByte(b',')
+                }
+                let firstEscape = jsonRawCompactStringEscapeIndex(name)
+                if (firstEscape < 0) {
+                    target.writeStringLiteralNoEscapeName(name)
+                } else {
+                    target.writeEscapedStringLiteralFromFirstEscape(name, firstEscape, false)
+                    target.writeByte(b':')
+                }
+                codec.writeRaw(item, this)
             }
-            let firstEscape = jsonRawCompactStringEscapeIndex(name)
-            if (firstEscape < 0) {
-                target.writeStringLiteralNoEscapeName(name)
-            } else {
-                target.writeEscapedStringLiteralFromFirstEscape(name, firstEscape, false)
-                target.writeByte(b':')
-            }
-            codec.writeRaw(item, this)
+            target.writeByte(b'}')
+        } finally {
+            rawDepth--
         }
-        target.writeByte(b'}')
         true
     }
 
@@ -1365,22 +1422,28 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
         if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
             return false
         }
+        ensureContainerDepth()
         beforeValue()
-        if (target.tryWriteNativeInt64Array(values)) { return true }
-        var totalValueSize: Int64 = 0
-        for (item in values) {
-            totalValueSize += jsonRawInt64Size(item)
-        }
-        target.reserveCapacity(totalValueSize + values.size + 1)
-        target.writeByte(b'[')
-        if (!values.isEmpty()) {
-            target.writeInt64Text(values[0])
-            for (index in 1..values.size) {
-                target.writeByte(b',')
-                target.writeInt64Text(values[index])
+        rawDepth++
+        try {
+            if (target.tryWriteNativeInt64Array(values)) { return true }
+            var totalValueSize: Int64 = 0
+            for (item in values) {
+                totalValueSize += jsonRawInt64Size(item)
             }
+            target.reserveCapacity(totalValueSize + values.size + 1)
+            target.writeByte(b'[')
+            if (!values.isEmpty()) {
+                target.writeInt64Text(values[0])
+                for (index in 1..values.size) {
+                    target.writeByte(b',')
+                    target.writeInt64Text(values[index])
+                }
+            }
+            target.writeByte(b']')
+        } finally {
+            rawDepth--
         }
-        target.writeByte(b']')
         true
     }
 
@@ -1388,8 +1451,14 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
         if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
             return false
         }
+        ensureContainerDepth()
         beforeValue()
-        writeRawStringArrayList("", values)
+        rawDepth++
+        try {
+            writeRawStringArrayList("", values)
+        } finally {
+            rawDepth--
+        }
         true
     }
 
@@ -1397,12 +1466,19 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
         if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
             return false
         }
+        ensureContainerDepth()
         beforeValue()
-        writeRawInt64Map("", values)
+        rawDepth++
+        try {
+            writeRawInt64Map("", values)
+        } finally {
+            rawDepth--
+        }
         true
     }
 
     func writeRawString(value: String): Unit {
+        beginRawScalar()
         let firstEscape = firstStringEscapeIndex(value)
         if (firstEscape < 0) {
             target.writeStringLiteralNoEscape(value)
@@ -1412,26 +1488,68 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     }
 
     public func writeRawNull(): Unit {
+        beginRawScalar()
         target.writeText("null")
     }
 
     func writeRawBool(value: Bool): Unit {
+        beginRawScalar()
         target.writeBoolText(value)
     }
 
     func writeRawInt64(value: Int64): Unit {
+        beginRawScalar()
         target.writeInt64Text(value)
     }
 
     func writeRawUInt64(value: UInt64): Unit {
+        beginRawScalar()
         target.writeUInt64Text(value)
     }
 
     func writeRawNumberValue(value: String): Unit {
+        beginRawScalar()
         target.writeText(value)
     }
 
+    private func beginRawScalar(): Unit {
+        if (rawDepth != 0) { return }
+        if (rawRootPreclaimed) {
+            rawRootPreclaimed = false
+            return
+        }
+        beforeValue()
+    }
+
+    private func beginRawContainer(): Unit {
+        if (rawDepth == 0) {
+            if (rawRootPreclaimed) {
+                rawRootPreclaimed = false
+            } else {
+                beforeValue()
+            }
+        }
+        if (currentContainerDepth() >= config.maxDepth) {
+            throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
+        }
+        rawDepth++
+    }
+
+    private func endRawContainer(): Unit {
+        if (rawDepth <= 0) {
+            throw JsonException("Unbalanced JSON writer state", code: "writer_state")
+        }
+        rawDepth--
+    }
+
+    private func consumeRawRootPreclaim(): Unit {
+        if (rawDepth == 0 && rawRootPreclaimed) {
+            rawRootPreclaimed = false
+        }
+    }
+
     public func startObject(): Unit {
+        ensureContainerDepth()
         beforeValue()
         target.writeByte(b'{')
         contextValues().add(OBJECT_FIRST)
@@ -1447,6 +1565,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     }
 
     public func startArray(): Unit {
+        ensureContainerDepth()
         beforeValue()
         target.writeByte(b'[')
         contextValues().add(ARRAY_FIRST)
@@ -1526,6 +1645,10 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
 
     private func beforeValue(): Unit {
         if (contextsAreEmpty()) {
+            if (rootWritten) {
+                throw JsonException("JSON writer accepts exactly one root value", code: "writer_state")
+            }
+            rootWritten = true
             return
         }
         let values = contextValues()
@@ -1545,6 +1668,20 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
         }
         target.writeByte(b',')
         writeEntryPrefix(values.size)
+    }
+
+    private func ensureContainerDepth(): Unit {
+        if (currentContainerDepth() >= config.maxDepth) {
+            throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
+        }
+    }
+
+    private func currentContainerDepth(): Int64 {
+        let semanticDepth = match (contexts) {
+            case Some(value) => value.size
+            case None => 0
+        }
+        semanticDepth + rawDepth
     }
 
     private func popContext(expectedObject: Bool): UInt8 {

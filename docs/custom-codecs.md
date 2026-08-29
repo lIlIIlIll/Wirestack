@@ -60,5 +60,9 @@ extend UserId <: JsonCodecProvider {
   `codec_contract`。
 - `YJson.optionCodec`、`arrayCodec`、`arrayListCodec` 和 `hashMapCodec` 可组合已有 codec。
 
+旧式 `JsonValueCodec<T>` 仅用于 AST 兼容入口。`YJsonAst.encodeWith/decodeWith` 的 config
+参数只接受默认 `JsonCodecConfig.compact`，非默认配置以 `unsupported_config` 明确失败。
+需要自定义读写策略时实现本页的 `JsonCodec<T>`。
+
 遵守 backend-neutral contract 后，同一 codec 可以由默认 Pure stream 或显式 Native
 whole-document backend 驱动。
