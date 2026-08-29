@@ -1744,6 +1744,11 @@ HTTP proxy
 
 ## 24. 兼容与迁移
 
+Wirestack 当前处于绿色开发和 pre-1.0 阶段。为满足本 PRD 的架构、生命周期、
+安全和公开类型所有权要求，仓库不承诺保留现有实验性声明的 source、API、ABI
+或语义兼容性。不得为此增加 alias、adapter、deprecated wrapper 或双轨实现。
+每次正式候选发布只冻结并验证该候选自身的公开 API inventory。
+
 ### 24.1 不进入新 API 的旧设计
 
 ```text

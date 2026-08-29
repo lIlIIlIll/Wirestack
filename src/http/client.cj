@@ -2,7 +2,6 @@ package wirestack.http
 
 import std.sync.Mutex
 import wirestack.internal.http1 as http1
-import wirestack.internal.resolver as resolver
 import wirestack.internal.transport as transport
 import wirestack.internal.transport_stdnet as stdnet
 
@@ -23,7 +22,7 @@ public class HttpClientCapabilityException <: Exception {
 }
 
 public class HttpClientBuilder {
-    private var configuredResolver: ?resolver.Resolver = None<resolver.Resolver>
+    private var configuredResolver: ?Resolver = None<Resolver>
     private var configuredRequestTimeout: ?Duration = None<Duration>
     private var configuredLimits = HttpLimits()
     private var configuredRedirectPolicy = HttpRedirectPolicy()
@@ -72,8 +71,8 @@ public class HttpClientBuilder {
     }
 
     public func build(): HttpClient {
-        var ownedSystemResolver = None<resolver.SystemResolver>
-        let selected: resolver.Resolver = match (configuredResolver) {
+        var ownedSystemResolver = None<SystemResolver>
+        let selected: Resolver = match (configuredResolver) {
             case Some(value) => value
             case None =>
                 let value = SystemResolver(workerCount: 4, queueCapacity: 64)
@@ -103,8 +102,8 @@ public class HttpClientBuilder {
 
 /** Linux HTTP/1 facade. HTTPS initializes the AWS-LC handshaker lazily. */
 public class HttpClient <: Resource {
-    private let resolver: resolver.Resolver
-    private let ownedSystemResolver: ?resolver.SystemResolver
+    private let resolver: Resolver
+    private let ownedSystemResolver: ?SystemResolver
     private let requestTimeout: ?Duration
     private let limits: HttpLimits
     private let redirectPolicy: HttpRedirectPolicy
@@ -118,12 +117,12 @@ public class HttpClient <: Resource {
     private var httpsProxy: ?http1.Http1HttpsProxyClient = None<http1.Http1HttpsProxyClient>
     private var closed = false
 
-    init(resolver: resolver.Resolver, requestTimeout: ?Duration, limits: HttpLimits,
+    init(resolver: Resolver, requestTimeout: ?Duration, limits: HttpLimits,
         redirectPolicy: HttpRedirectPolicy, retryPolicy: HttpRetryPolicy,
         proxy: ?HttpProxyConfig,
         directTlsHandshaker: ?http1.HttpAlpnTlsHandshaker,
         proxyTlsHandshaker: ?http1.Http1TlsHandshaker,
-        ownedSystemResolver: ?resolver.SystemResolver) {
+        ownedSystemResolver: ?SystemResolver) {
         this.resolver = resolver
         this.ownedSystemResolver = ownedSystemResolver
         this.requestTimeout = requestTimeout
