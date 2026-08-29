@@ -18,6 +18,17 @@
 完整矩阵见[测试指南](docs/maintainers/testing.md)。成功退出不总等于应用成功；检查输出中
 是否存在未处理异常。
 
+只修改文档、API inventory 或发布 staging 时，至少运行：
+
+```terminal
+python3 scripts/check_api_inventory.py
+python3 scripts/test_stage_source_tree.py
+```
+
+修改 runtime 或 codec 时还要运行 `cjpm test --no-color`，并按受影响 package 增加 external
+consumer。修改 Markdown 链接时，把所有改动的 Markdown 文件路径传给
+`scripts/check_local_markdown_links.py`。
+
 ## Public API 与性能
 
 - public declaration、C ABI 或 package pairing 变化必须同步 machine-readable inventory

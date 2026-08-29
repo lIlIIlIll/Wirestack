@@ -20,6 +20,17 @@
 
 Benchmark 不能替代 correctness test；root white-box pass 也不能替代 staged external consumer。
 
+提交前可先运行不依赖 Cangjie SDK 的结构检查：
+
+```terminal
+python3 scripts/check_api_inventory.py
+python3 scripts/test_stage_source_tree.py
+```
+
+第一条命令包含快照生成器回归测试，确保 private/internal 类型的成员不会泄漏到 public API
+快照。第二条命令验证 source-only staging 会排除 build output、cache、benchmark result 和
+symlink。两条命令成功时均返回 0；它们不能替代 core 或 external consumer 测试。
+
 ## CI job mapping
 
 GitHub Actions 的 `CI` workflow 在 GitHub-hosted Linux x86_64 runner 上执行每日 correctness

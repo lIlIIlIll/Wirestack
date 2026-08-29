@@ -27,6 +27,13 @@ yjson 2.0 默认使用跨平台、GC 管理的 Pure 引擎。普通应用只需�
 `YJson.toJson`、`YJson.fromJson<T>` 与 `YJson.parseDocument`；不需要选择 backend，
 也不需要管理 scanner、whole-document 资源或 `close()`。
 
+<p align="center">
+  <a href="#快速开始">快速开始</a> ·
+  <a href="#按任务选择-api">API 选择</a> ·
+  <a href="#性能">性能</a> ·
+  <a href="docs/README.md">完整文档</a>
+</p>
+
 ## 适合什么场景
 
 - class、struct、enum 与 JSON 之间的类型安全转换；
@@ -87,48 +94,15 @@ main(): Unit {
 }
 ```
 
+运行后输出：
+
+```text
+Alice
+```
+
 `@JsonCodec` 在调用方编译时生成 `UserJson: JsonCodec<User>` 和
 `JsonCodecProvider` 实现。它不扫描源码目录，也不依赖运行时反射。可运行的完整示例位于
 [`packages/examples`](packages/examples/README.md)。
-
-## 性能
-
-2.0.0 的发布门禁在固定的 Linux x86_64 Server CPU 8、128 MiB 环境中执行，每个
-workload 交替测量 11 轮。下表只展示发布门槛 workload；数值是中位数，比例越低越快。
-
-| Workload | yjson / Native | 对照 | 比例 | 胜出轮次 |
-| --- | ---: | ---: | ---: | ---: |
-| Large Array encode / string | 46.080 µs | cjfast_json 76.117 µs | 0.608x | 11/11 |
-| ProfileBundle encode / bytes | 10.344 µs | cjfast_json 12.546 µs | 0.816x | 11/11 |
-| ProfileBundle encode / string | 10.767 µs | cjfast_json 12.338 µs | 0.845x | 11/11 |
-| Deep Nested encode / string | 63.552 µs | cjfast_json 74.500 µs | 0.856x | 11/11 |
-| Native writeNumericBytes | 0.559 ms | Pure 2.354 ms | 0.238x | 11/11 |
-| Native readNumericDocument | 1.211 ms | Pure 2.148 ms | 0.564x | 11/11 |
-
-这些结果只适用于对应源码、SDK、主机、workload 和测量方法。完整 36-workload 结果、
-CV、原始样本、checksum 与复现边界见
-[2.0.0 性能报告](docs/performance/results/2026-08-27-yjson-2.0.0.md)。
-
-Stream protocol v1 把 stream、chunk plan 和 sink 构造移出计时区，并为每个单元格启动独立
-进程。当前开发批次的稳定 previous-yjson A/B 行如下。它没有通过完整稳定性和内部 scratch
-生命周期门槛，因此上方 badge 标为 incomplete。
-
-| Stream workload | Previous-yjson | Candidate | 改善 | 胜出轮次 | CV B/C |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Decode 1 MiB / 64-byte chunks | 152.078 ms | 91.110 ms | 40.51% | 11/11 | 0.57% / 4.66% |
-| Decode 64 KiB / deterministic chunks | 8.922 ms | 3.432 ms | 62.45% | 11/11 | 2.96% / 1.71% |
-| Encode 1 MiB / counting sink | 14.963 ms | 13.750 ms | 7.61% | 11/11 | 1.57% / 2.08% |
-
-同一 Server 上的 yjson/stdx.json incremental Stream 配对有三个稳定行：
-
-| Stream workload | yjson | stdx.json | Y/S | yjson 胜出 | CV Y/S |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Decode 1 MiB / 64-byte chunks | 93.447 ms | 191.492 ms | 0.488x | 11/11 | 3.41% / 3.01% |
-| Decode 1 MiB / deterministic chunks | 76.646 ms | 179.626 ms | 0.427x | 11/11 | 1.83% / 2.57% |
-| Encode 1 MiB / counting sink | 14.737 ms | 110.584 ms | 0.133x | 11/11 | 2.30% / 0.83% |
-
-完整矩阵、workload JSON、peer 资格和原始证据见
-[2026-08-28 Stream protocol v1 结果](docs/performance/results/2026-08-28-stream-protocol-v1.md)。
 
 ## 按任务选择 API
 
@@ -144,6 +118,27 @@ Stream protocol v1 把 stream、chunk plan 和 sink 构造移出计时区，并�
 | 定位、查询或更新节点 | `yjson_algorithms` 的 Pointer / Path / Patch | 默认有限预算 |
 
 不知道从哪里开始时，阅读 [API 选择指南](docs/choosing-an-api.md)。
+
+## 性能
+
+2.0.0 的发布门禁在固定的 Linux x86_64 Server CPU 8、128 MiB 环境中执行。每个
+workload 交替测量 11 轮。下表展示发布门槛中的代表行；数值是中位数，比例越低越快。
+
+| Workload | yjson / Native | 对照 | 比例 | 胜出轮次 |
+| --- | ---: | ---: | ---: | ---: |
+| Large Array encode / string | 46.080 µs | cjfast_json 76.117 µs | 0.608x | 11/11 |
+| ProfileBundle encode / bytes | 10.344 µs | cjfast_json 12.546 µs | 0.816x | 11/11 |
+| Deep Nested encode / string | 63.552 µs | cjfast_json 74.500 µs | 0.856x | 11/11 |
+| Native writeNumericBytes | 0.559 ms | Pure 2.354 ms | 0.238x | 11/11 |
+| Native readNumericDocument | 1.211 ms | Pure 2.148 ms | 0.564x | 11/11 |
+
+这些数字只适用于报告记录的源码、SDK、主机、workload 和测量方法。完整 36-workload 表、
+CV、原始样本、checksum 与复现边界见
+[2.0.0 性能报告](docs/performance/results/2026-08-27-yjson-2.0.0.md)。
+
+Stream protocol v1 的当前开发批次包含稳定提升行，但没有通过完整稳定性和内部 scratch
+生命周期门槛，因此不能作为发布性能声明。完整矩阵、workload JSON 和原始证据见
+[2026-08-28 Stream protocol v1 结果](docs/performance/results/2026-08-28-stream-protocol-v1.md)。
 
 ## 两种 JSON 字面量
 

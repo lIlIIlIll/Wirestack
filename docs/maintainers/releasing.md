@@ -21,7 +21,7 @@ identity。发布期间不混入未评审 public API 或生成代码 bridge 变�
 7. manifest、source staging、license、C ABI 或 symbol isolation 失败；
 8. external consumer 或 documented lifecycle 失败；
 9. source archive 包含 build output 或未声明 artifact；
-10. qualified platform 上存在未处置的 correctness/security blocker。
+10. qualified platform 上存在未处置的 correctness/security blocker；
 11. GitHub Actions correctness、Core Coverage 或 Codecov upload 失败。
 
 高 CV 不自动阻断，也不能成为隐藏结果的理由；标记 noisy 后由 release owner 结合配对方向、
@@ -50,7 +50,27 @@ qualified。源码看起来可移植，只能支持 `unverified / potentially su
 
 ## 5. Stage 与 rehearsal
 
-- 生成 source-only package layout。
+先创建完整的 source-only 工作树，并验证其中没有 build output、cache、benchmark result 或
+symlink：
+
+```terminal
+python3 scripts/stage_source_tree.py /tmp/yjson-source-stage
+python3 scripts/stage_source_tree.py --check /tmp/yjson-source-stage
+```
+
+目标目录必须为空，且不能与源码目录重叠。第一个命令成功时输出复制文件数和目标路径，第二个
+命令输出 `source-only tree verified`。`scripts/test_stage_source_tree.py` 覆盖排除规则、非空目标
+和违规内容检测。
+
+然后按 release manifest 创建候选树：
+
+```terminal
+python3 scripts/release_temp_tree.py /tmp/yjson-release-stage
+```
+
+候选目录也必须为空。该命令只复制 `release/release-files.txt` 中列出的文件，并再次执行
+source-only 检查。后续 rehearsal 在候选树中完成：
+
 - 检查 release manifest 不含 path dependency。
 - 独立构建 core、macros、aggregate 与 optional packages。
 - 运行 registry-style external consumers。

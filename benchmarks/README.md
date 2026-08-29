@@ -43,6 +43,18 @@ representation 或 lifecycle 拼成统一排名。
 | `decode*Chunk4k` | `YJson.fromStream`，输入由 4096-byte chunk 提供 |
 | `encode*Memory` | `YJson.toStream` 写入 caller-owned memory stream |
 
+同一 benchmark class 还包含三个 XL scale workload，用于观察输入规模扩大后的热点：
+
+| Case | 数据形状 | API |
+| --- | --- | --- |
+| `*XlProfileArray` | 1024 个 `ProfileRecord` | `encodeStringWith` / `decodeStringWith` 与一次解析的 typed list codec |
+| `*XlInt64Map` | 一个包含 1024 个 entry 的 `HashMap<String, Int64>` | `encodeStringWith` / `decodeStringWith` 与专用 Int64 map codec |
+| `*XlDeepNestedProfiles` | 64 组 × 每组 16 条记录，共 1024 条 | `encodeStringWith` / `decodeStringWith` 与递归 typed codec |
+
+XL case 使用构造阶段解析一次的具体 codec，元素循环内不做 codec resolution。它们是 yjson
+内部规模分析 workload。只有 peer 提供等语义数据形状和对应最优 typed API 时，才能进入
+跨库共同结果表。
+
 在 Linux Server 上运行完整矩阵：
 
 ```terminal
