@@ -153,6 +153,9 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
             "git status --porcelain --untracked-files=all",
         ):
             self.assertIn(command, workflow)
+        self.assertIn('case "$doctor_exit" in', workflow)
+        self.assertIn("0|6) ;;", workflow)
+        self.assertIn('*) exit "$doctor_exit" ;;', workflow)
         self.assertNotIn("continue-on-error", workflow)
         self.assertNotIn("|| true", workflow)
 

@@ -56,6 +56,9 @@ the M7-029 contract.
   resolves the latest complete Linux x64 nightly, validates its release/tag and
   required asset, then passes that exact version to the setup action for the
   run. A missing or malformed release fails closed instead of falling back.
+  `repo-doctor` retains `DEGRADED` when optional GitButler/rp-rg capabilities
+  are absent on the hosted runner; CI accepts only its stable READY or DEGRADED
+  exit codes and still rejects BLOCKED.
 
 The first process-isolated review is preserved unchanged under
 [`initial-isolated-review/`](initial-isolated-review/). It reviewed the clean
