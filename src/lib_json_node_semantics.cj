@@ -49,15 +49,17 @@ private func jsonNodesEquivalentGuarded(
     leftAncestors: ArrayList<JsonNode>,
     rightAncestors: ArrayList<JsonNode>
 ): Bool {
+    ensureJsonNodeNotAncestor(left, leftAncestors)
+    ensureJsonNodeNotAncestor(right, rightAncestors)
     match ((left, right)) {
         case (_: JsonNullValue, _: JsonNullValue) => true
         case (a: JsonBoolValue, b: JsonBoolValue) => a.value == b.value
         case (a: JsonStringValue, b: JsonStringValue) => a.value == b.value
         case (a: JsonArrayValue, b: JsonArrayValue) =>
             if (a.size() != b.size()) { return false }
-            enterJsonNodeAncestor(a, leftAncestors)
+            leftAncestors.add(a)
             try {
-                enterJsonNodeAncestor(b, rightAncestors)
+                rightAncestors.add(b)
                 try {
                     for (index in 0..a.size()) {
                         if (!jsonNodesEquivalentGuarded(a[index], b[index], leftAncestors, rightAncestors)) {
@@ -73,9 +75,9 @@ private func jsonNodesEquivalentGuarded(
             true
         case (a: JsonObjectValue, b: JsonObjectValue) =>
             if (a.size() != b.size()) { return false }
-            enterJsonNodeAncestor(a, leftAncestors)
+            leftAncestors.add(a)
             try {
-                enterJsonNodeAncestor(b, rightAncestors)
+                rightAncestors.add(b)
                 try {
                     for ((key, value) in a.entries()) {
                         match (b.get(key)) {

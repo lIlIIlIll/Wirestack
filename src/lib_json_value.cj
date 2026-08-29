@@ -847,10 +847,14 @@ private func writeJsonNodeToCodecWriterGuarded(
 }
 
 func enterJsonNodeAncestor(value: JsonNode, ancestors: ArrayList<JsonNode>): Unit {
+    ensureJsonNodeNotAncestor(value, ancestors)
+    ancestors.add(value)
+}
+
+func ensureJsonNodeNotAncestor(value: JsonNode, ancestors: ArrayList<JsonNode>): Unit {
     for (ancestor in ancestors) {
         if (refEq(value, ancestor)) {
             throw JsonException("Cyclic JsonNode graph is not supported", code: "cyclic_json_node")
         }
     }
-    ancestors.add(value)
 }
