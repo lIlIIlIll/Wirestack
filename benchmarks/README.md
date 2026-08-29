@@ -18,6 +18,7 @@ API，也不能单独证明语义正确。
 | `scripts/json_stream_protocol_run.py` | previous-yjson 与候选的生命周期配对采集 |
 | `scripts/json_stream_peer_run.py` | yjson 与 stdx.json 的 incremental Stream 配对采集 |
 | `scripts/json_pure_perf_compare.py` | Pure baseline/candidate 内部优化配对采集 |
+| `results/full-seven-library/<date>` | 当前开发版七库同批次对比的原始证据与 checksum |
 
 Typed codec、DOM backend、typed stream 和跨 runtime adapter 必须分别报告，不能把不同
 representation 或 lifecycle 拼成统一排名。

@@ -21,6 +21,10 @@ benchmarks/java_fastjson2/build/
 !benchmarks/results/stream-v1/2026-08-28/peer-cell-1/*.json
 !benchmarks/results/stream-v1/2026-08-28/peer-cell-1/payloads/*.json
 
+# Frozen current-dev seven-library evidence overrides developer-wide ignores.
+!benchmarks/results/full-seven-library/2026-08-30/checksums.txt
+!benchmarks/results/full-seven-library/2026-08-30/optimal-api-overlay-current.patch
+
 # Audited RC evidence overrides the developer-wide *.json / *.txt ignores.
 !release/public-api-snapshot.txt
 !release/1.0.0-rc.1/artifacts/environment.json

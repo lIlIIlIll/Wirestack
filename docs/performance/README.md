@@ -11,6 +11,10 @@ AST、Pure Compact、Native DOM 与 typed stream 是不同问题，不能拼成�
 
 ## 当前开发结果
 
+- [2026-08-30 当前 dev 七库完整对比](results/2026-08-30-current-dev-seven-library.md)：绑定
+  `1dedf2a`，覆盖 yjson、stdx.json、cangjieJSON、json4cj、cjfast_json、Jackson 与
+  fastjson2 的 10 个 encode 和 decode workload。两批各运行 11 轮并保留全部 raw evidence；
+  第二批所有行仍为 noisy，因此只提供当前延迟快照，不发布精确比例。
 - [2026-08-28 Stream protocol v1](results/2026-08-28-stream-protocol-v1.md)：typed
   incremental encode/decode、三种 payload、三种 chunk、两种 sink 和内部 scratch 生命周期。
   结果包含 previous-yjson A/B 与 yjson/stdx.json peer 表，并保留完整 Server 原始数据。
@@ -45,7 +49,8 @@ AST、Pure Compact、Native DOM 与 typed stream 是不同问题，不能拼成�
 - latency 不能推导 allocation、RSS、峰值内存或吞吐。
 
 每个 release 必须给出 yjson、stdx.json、cjfast_json 的同批次完整共同 workload 表。README
-和选型指南不复制会快速过期的绝对数字，只链接可审计结果。
+可以展示最新完整批次的观察值，但必须链接可审计结果，并明确源码身份与 `stable` 或 `noisy`
+状态。选型指南不复制绝对数字。
 
 采集、稳定性和回滚规则见[性能方法](methodology.md)；已采纳和拒绝的设计方向见
 [性能研究结论](../performance.md)。
