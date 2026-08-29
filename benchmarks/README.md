@@ -24,9 +24,9 @@ representation 或 lifecycle 拼成统一排名。
 
 ## Pure baseline/candidate workload
 
-`scripts/json_pure_perf_compare.py` 用于判断内部优化是否值得保留。它不构建源码。运行前需要
-准备两个独立源码目录，并分别构建 `packages/benchmarks`。两个目录中的 benchmark manifest
-必须相同。
+`scripts/json_pure_perf_compare.py` 用于判断内部优化是否值得保留。准备两个独立、clean 的
+源码目录；正式运行通过 `--rebuild --enforce` 在两侧清理并重建 `packages/benchmarks`。结果
+目录必须位于两个源码目录之外。两个目录中的 benchmark harness 必须相同，产品源码可以不同。
 
 语料目录必须包含 `person.json`、`records-64k.json` 和 `records-1m.json`。各 workload 测量
 以下操作：
@@ -53,6 +53,7 @@ scripts/json_pure_perf_compare.py \
   --output /path/to/result \
   --rounds 11 \
   --target-case yjsonStringDecodeLargeProfileArray \
+  --rebuild \
   --enforce
 ```
 
@@ -60,9 +61,11 @@ scripts/json_pure_perf_compare.py \
 的 core。每次测量固定到其中一个 thread，另一个由 `scripts/monitor_cpu_pair.py` 记录。runner
 把 heap 固定为 128 MiB，并在奇偶轮反转 baseline/candidate 顺序。
 
-成功运行会生成 `summary.json`、`summary.md`、`cpu-selection.json`、CPU 监控 CSV，以及每轮
-原始 benchmark report 和日志。`--enforce` 固定要求 11 轮；任一 case 回退超过 5%、任一方
-CV 超过 5%，或 `--target-case` 指定的目标未提升 5% 或少于 5/11 轮胜出时，命令返回非零状态。
+成功运行会生成 `provenance.json`、`summary.json`、`summary.md`、`cpu-selection.json`、两侧
+build log、CPU 监控 CSV，以及每轮原始 benchmark report 和日志。provenance 包含共同 harness
+摘要、两侧源码和 executable 身份、工具链、语料与调用参数。`--enforce` 固定要求 11 轮、
+`--rebuild` 和 clean 源码树；任一 case 回退超过 5%、任一方 CV 超过 5%，或
+`--target-case` 指定的目标未提升 5% 或少于 5/11 轮胜出时，命令返回非零状态。
 
 ## 发布结果要求
 

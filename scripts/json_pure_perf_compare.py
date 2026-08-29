@@ -9,6 +9,8 @@ import hashlib
 import json
 import os
 import pathlib
+import platform
+import shutil
 import statistics
 import subprocess
 import time
@@ -56,6 +58,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cpu", type=int)
     parser.add_argument("--idle-sample-seconds", type=int, default=30)
     parser.add_argument("--enforce", action="store_true")
+    parser.add_argument(
+        "--rebuild", action="store_true",
+        help="clean and rebuild both benchmark binaries before measurement",
+    )
     parser.add_argument("--case", action="append", choices=CASES,
                         help="run only this case; repeat for a diagnostic subset")
     parser.add_argument("--target-case", action="append", choices=CASES,
@@ -144,16 +150,154 @@ def binary(root: pathlib.Path) -> pathlib.Path:
     return root / "packages/benchmarks/target/release/unittest_bin/yjson_benchmarks"
 
 
+def path_is_within(path: pathlib.Path, root: pathlib.Path) -> bool:
+    try:
+        path.relative_to(root)
+        return True
+    except ValueError:
+        return False
+
+
+def sha256_file(path: pathlib.Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        while chunk := stream.read(1024 * 1024):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def manifest_digest(manifest: dict[str, str]) -> str:
+    digest = hashlib.sha256()
+    for name, value in sorted(manifest.items()):
+        digest.update(name.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(value.encode("ascii"))
+        digest.update(b"\n")
+    return digest.hexdigest()
+
+
+def files_manifest(root: pathlib.Path, paths: list[pathlib.Path]) -> dict[str, str]:
+    result: dict[str, str] = {}
+    for path in sorted(set(paths)):
+        if not path.is_file():
+            raise SystemExit(f"benchmark input file not found: {path}")
+        result[str(path.relative_to(root))] = sha256_file(path)
+    return result
+
+
 def harness_manifest(root: pathlib.Path) -> dict[str, str]:
     package = root / "packages/benchmarks"
-    paths = [package / "cjpm.toml", *sorted((package / "src").rglob("*.cj"))]
-    result: dict[str, str] = {}
-    for path in paths:
-        if not path.is_file():
-            raise SystemExit(f"benchmark harness file not found: {path}")
-        relative = str(path.relative_to(package))
-        result[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
-    return result
+    paths = [
+        root / "cjpm.toml",
+        root / "cjpm.lock",
+        package / "cjpm.toml",
+        package / "cjpm.lock",
+        package / "build.cj",
+        root / "packages/yjson_all/cjpm.toml",
+        root / "packages/yjson_all/cjpm.lock",
+        root / "packages/yjson_macros/cjpm.toml",
+        root / "packages/yjson_macros/cjpm.lock",
+        root / "scripts/build_native_scanner.py",
+        root / "native/yjson_scanner.c",
+        root / "native/yjson_scanner.h",
+        root / "native/yjson_compact.c",
+        root / "native/yjson_compact.h",
+        *sorted((package / "src").rglob("*.cj")),
+    ]
+    return files_manifest(root, paths)
+
+
+def product_manifest(root: pathlib.Path) -> dict[str, str]:
+    paths = [
+        *sorted((root / "src").rglob("*.cj")),
+        *sorted((root / "packages/yjson_macros/src").rglob("*.cj")),
+        *sorted((root / "packages/yjson_all/src").rglob("*.cj")),
+    ]
+    return files_manifest(root, paths)
+
+
+def git_output(root: pathlib.Path, *args: str) -> str:
+    completed = subprocess.run(
+        ["git", "-C", str(root), *args], check=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+    )
+    return completed.stdout.strip()
+
+
+def source_identity(root: pathlib.Path) -> dict[str, object]:
+    dirty = git_output(root, "status", "--porcelain=v1", "--untracked-files=all").splitlines()
+    manifest = product_manifest(root)
+    return {
+        "commit": git_output(root, "rev-parse", "HEAD"),
+        "tree": git_output(root, "rev-parse", "HEAD^{tree}"),
+        "dirty": bool(dirty),
+        "dirty_paths": dirty,
+        "product_source_sha256": manifest_digest(manifest),
+        "product_source_manifest": manifest,
+    }
+
+
+def command_identity(command: str) -> dict[str, object]:
+    resolved = shutil.which(command)
+    if resolved is None:
+        raise SystemExit(f"required build tool not found: {command}")
+    path = pathlib.Path(resolved).resolve()
+    completed = subprocess.run(
+        [str(path), "--version"], check=True,
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+    )
+    return {
+        "command": command,
+        "path": str(path),
+        "sha256": sha256_file(path),
+        "version": completed.stdout.strip(),
+    }
+
+
+def toolchain_identity() -> dict[str, object]:
+    cc = os.environ.get("CC", "clang")
+    ar = os.environ.get("AR", "ar")
+    return {
+        "host": {"system": platform.system(), "machine": platform.machine()},
+        "tools": {
+            "cjc": command_identity("cjc"),
+            "cjpm": command_identity("cjpm"),
+            "cc": command_identity(cc),
+            "ar": command_identity(ar),
+        },
+        "build_environment": {
+            name: os.environ.get(name)
+            for name in ("CC", "AR", "CANGJIE_HOME", "LD_LIBRARY_PATH")
+        },
+    }
+
+
+def artifact_identity(root: pathlib.Path) -> dict[str, object]:
+    path = binary(root)
+    if path.is_symlink():
+        raise SystemExit(f"benchmark binary must not be a symlink: {path}")
+    if not path.is_file():
+        raise SystemExit(f"benchmark binary not found: {path}")
+    stat = path.stat()
+    return {
+        "path": str(path),
+        "size_bytes": stat.st_size,
+        "sha256": sha256_file(path),
+    }
+
+
+def rebuild_variant(name: str, root: pathlib.Path, output: pathlib.Path) -> None:
+    package = root / "packages/benchmarks"
+    log = output / f"build-{name}.log"
+    with log.open("w", encoding="utf-8") as stream:
+        subprocess.run(
+            ["cjpm", "clean"], cwd=package, stdout=stream,
+            stderr=subprocess.STDOUT, check=True,
+        )
+        subprocess.run(
+            ["cjpm", "bench", "--no-color", "--no-run"],
+            cwd=package, stdout=stream, stderr=subprocess.STDOUT, check=True,
+        )
 
 
 def verify_equal_harness(baseline: pathlib.Path, candidate: pathlib.Path) -> str:
@@ -164,13 +308,7 @@ def verify_equal_harness(baseline: pathlib.Path, candidate: pathlib.Path) -> str
         differences = [name for name in names
                        if baseline_manifest.get(name) != candidate_manifest.get(name)]
         raise SystemExit("baseline/candidate benchmark harness differs: " + ", ".join(differences))
-    digest = hashlib.sha256()
-    for name, value in sorted(baseline_manifest.items()):
-        digest.update(name.encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(value.encode("ascii"))
-        digest.update(b"\n")
-    return digest.hexdigest()
+    return manifest_digest(baseline_manifest)
 
 
 def run_variant(
@@ -244,25 +382,77 @@ def write_markdown(summary: dict[str, object], path: pathlib.Path) -> None:
 
 def main() -> int:
     args = parse_args()
+    args.baseline = args.baseline.resolve()
+    args.candidate = args.candidate.resolve()
+    args.corpus = args.corpus.resolve()
+    args.output = args.output.resolve()
     cases = tuple(args.case) if args.case else CASES
     target_cases = tuple(args.target_case) if args.target_case else ()
     if args.rounds < 2:
         raise SystemExit("--rounds must be at least 2")
     if args.enforce and args.rounds != 11:
         raise SystemExit("--enforce requires --rounds 11")
+    if args.enforce and not args.rebuild:
+        raise SystemExit("--enforce requires --rebuild to bind binaries to source")
     if args.target_improvement_percent < 0.0:
         raise SystemExit("--target-improvement-percent must be non-negative")
     missing_targets = [case for case in target_cases if case not in cases]
     if missing_targets:
         raise SystemExit("target cases are not selected: " + ", ".join(missing_targets))
+    if args.baseline == args.candidate:
+        raise SystemExit("baseline and candidate must be different source directories")
     for root in (args.baseline, args.candidate):
-        if not binary(root).is_file():
-            raise SystemExit(f"benchmark binary not found: {binary(root)}")
+        if path_is_within(args.output, root):
+            raise SystemExit("output directory must be outside both source directories")
     harness_digest = verify_equal_harness(args.baseline, args.candidate)
-    for name in ("person.json", "records-64k.json", "records-1m.json"):
-        if not (args.corpus / name).is_file():
-            raise SystemExit(f"corpus file not found: {args.corpus / name}")
+    sources = {
+        "baseline": source_identity(args.baseline),
+        "candidate": source_identity(args.candidate),
+    }
+    if args.enforce:
+        dirty = [name for name, identity in sources.items() if identity["dirty"]]
+        if dirty:
+            raise SystemExit("--enforce requires clean source trees: " + ", ".join(dirty))
+    corpus_paths = [args.corpus / name for name in (
+        "person.json", "records-64k.json", "records-1m.json"
+    )]
+    corpus_manifest = files_manifest(args.corpus, corpus_paths)
+    toolchain = toolchain_identity()
     args.output.mkdir(parents=True, exist_ok=False)
+    if args.rebuild:
+        rebuild_variant("baseline", args.baseline, args.output)
+        rebuild_variant("candidate", args.candidate, args.output)
+    artifacts = {
+        "baseline": artifact_identity(args.baseline),
+        "candidate": artifact_identity(args.candidate),
+    }
+    provenance = {
+        "runner": {
+            "path": str(pathlib.Path(__file__).resolve()),
+            "sha256": sha256_file(pathlib.Path(__file__).resolve()),
+        },
+        "harness_sha256": harness_digest,
+        "sources": sources,
+        "toolchain": toolchain,
+        "artifacts": artifacts,
+        "corpus": {
+            "path": str(args.corpus),
+            "sha256": manifest_digest(corpus_manifest),
+            "manifest": corpus_manifest,
+        },
+        "invocation": {
+            "rounds": args.rounds,
+            "cases": list(cases),
+            "target_cases": list(target_cases),
+            "target_improvement_percent": args.target_improvement_percent,
+            "cpu": args.cpu,
+            "idle_sample_seconds": args.idle_sample_seconds,
+            "enforce": args.enforce,
+            "rebuild": args.rebuild,
+            "heap": "128MB",
+        },
+    }
+    (args.output / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
     selection = explicit_cpu(args.cpu) if args.cpu is not None else choose_idle_cpu(args.idle_sample_seconds)
     (args.output / "cpu-selection.json").write_text(json.dumps(selection, indent=2) + "\n")
     if args.cpu is None and not selection["acceptable_both_threads_below_1_percent"]:
@@ -310,6 +500,7 @@ def main() -> int:
         "rounds": args.rounds,
         "heap": "128MB",
         "harness_sha256": harness_digest,
+        "provenance": provenance,
         "cpu": selection,
         "cases": list(cases),
         "target_cases": list(target_cases),
