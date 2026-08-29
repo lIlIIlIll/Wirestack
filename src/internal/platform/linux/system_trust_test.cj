@@ -67,6 +67,35 @@ class LinuxSystemTrustAdapterTest {
             remove(directory, recursive: true)
         }
     }
+
+    @TestCase
+    func sourceIdentityChangesWhenSameSizeTrustContentChanges(): Unit {
+        let bundle = File.createTemp("/tmp")
+        let bundlePath = bundle.info.path.toString()
+        bundle.close()
+        let directoryFile = File.createTemp("/tmp")
+        let directory = directoryFile.info.path.toString()
+        directoryFile.close()
+        remove(directory)
+        Directory.create(directory)
+        try {
+            File.writeTo(bundlePath, "abc".toArray())
+            let firstBundle = LinuxSystemTrustAdapter.discoverFrom([bundlePath], [])
+            File.writeTo(bundlePath, "xyz".toArray())
+            let secondBundle = LinuxSystemTrustAdapter.discoverFrom([bundlePath], [])
+            @Expect(firstBundle.sourceIdentity != secondBundle.sourceIdentity)
+
+            let hashed = "${directory}/0123abcd.0"
+            File.writeTo(hashed, "one".toArray())
+            let firstDirectory = LinuxSystemTrustAdapter.discoverFrom([], [directory])
+            File.writeTo(hashed, "two".toArray())
+            let secondDirectory = LinuxSystemTrustAdapter.discoverFrom([], [directory])
+            @Expect(firstDirectory.sourceIdentity != secondDirectory.sourceIdentity)
+        } finally {
+            remove(bundlePath)
+            remove(directory, recursive: true)
+        }
+    }
 }
 
 private func discoveryFailsForDirectory(directory: String): Bool {

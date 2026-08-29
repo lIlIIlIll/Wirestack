@@ -36,11 +36,31 @@ EXPECTED_SMOKE_LINES = {
     "tlsProviderVersion=5.5.0",
     "externalOpenSslDependency=false",
 }
+PROJECT_LICENSE_EXPRESSION = "Apache-2.0"
+RELEASE_METADATA_FILES = (
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "third_party/aws-lc/LICENSE",
+    "third_party/aws-lc/NOTICE",
+)
 QUALIFICATION_INPUTS = (
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "build.cj",
+    "cjpm.lock",
     "cjpm.toml",
     "docs/planning/implementation-backlog.md",
+    "native/resolver/linux/wirestack_resolver.c",
+    "native/resolver/linux/wirestack_resolver.h",
+    "native/tls/aws_lc/provider.json",
+    "native/tls/aws_lc/wirestack_tls_provider.c",
+    "native/tls/aws_lc/wirestack_tls_provider.h",
+    "tools/build_linux_resolver.py",
+    "tools/build_linux_tls_provider.py",
     "tools/m7_021_linux_release.py",
     "tools/release_smoke/main.cj",
+    "third_party/aws-lc/LICENSE",
+    "third_party/aws-lc/NOTICE",
 )
 EXCLUDED_PLATFORM_PARTS = {
     ("src", "internal", "platform", "android"),
@@ -159,7 +179,7 @@ def _native_payload(root: Path, relative_root: str, current: Path) -> dict[str, 
 
 def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
     payload: dict[str, bytes] = {}
-    for relative in ("cjpm.toml", "cjpm.lock", "README.md"):
+    for relative in ("cjpm.toml", "cjpm.lock", "README.md", *RELEASE_METADATA_FILES):
         path = root / relative
         if not path.is_file():
             raise ReleaseError(f"release input is absent: {relative}")
@@ -196,6 +216,21 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
         "payload": entries,
         "payload_sha256": payload_digest,
         "artifactBuildFingerprint": payload_digest,
+        "license": {
+            "expression": PROJECT_LICENSE_EXPRESSION,
+            "file": "LICENSE",
+            "sha256": sha256_bytes(payload["LICENSE"]),
+        },
+        "thirdPartyNotices": {
+            "index": "THIRD_PARTY_NOTICES.md",
+            "files": [
+                {
+                    "path": relative,
+                    "sha256": sha256_bytes(payload[relative]),
+                }
+                for relative in RELEASE_METADATA_FILES[1:]
+            ],
+        },
         "provider": {
             "id": provider_manifest.get("providerId"),
             "version": provider_manifest.get("providerVersion"),

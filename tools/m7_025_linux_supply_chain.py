@@ -25,6 +25,13 @@ OUTPUT_NAMES = (
     "build-fingerprint.json",
     "bundle.json",
 )
+PROJECT_LICENSE_EXPRESSION = "Apache-2.0"
+LICENSE_MEMBERS = (
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "third_party/aws-lc/LICENSE",
+    "third_party/aws-lc/NOTICE",
+)
 FEATURES = [
     "client-certificate",
     "custom-roots",
@@ -93,6 +100,21 @@ def _member_bytes(archive: tarfile.TarFile, suffix: str) -> bytes:
     return stream.read()
 
 
+def _relative_member_bytes(archive: tarfile.TarFile, relative: str) -> bytes:
+    matches = [
+        member
+        for member in archive.getmembers()
+        if "/" in member.name and member.name.split("/", 1)[1] == relative
+    ]
+    _require(len(matches) == 1, f"artifact must contain exactly one {relative}")
+    member = matches[0]
+    _require(member.isfile(), f"artifact member is not a file: {member.name}")
+    _require(member.size <= 8 * 1024 * 1024, f"artifact metadata is too large: {member.name}")
+    stream = archive.extractfile(member)
+    _require(stream is not None, f"cannot read artifact member: {member.name}")
+    return stream.read()
+
+
 def _json_bytes(value: bytes, name: str) -> dict[str, Any]:
     try:
         decoded = json.loads(value.decode("utf-8"))
@@ -113,6 +135,10 @@ def artifact_metadata(path: Path) -> dict[str, Any]:
             resolver_raw = _member_bytes(
                 archive, "/target/native/resolver/current/resolver-manifest.json"
             )
+            license_files = {
+                relative: _relative_member_bytes(archive, relative)
+                for relative in LICENSE_MEMBERS
+            }
     except (OSError, tarfile.TarError) as error:
         raise SupplyChainError(f"cannot inspect release artifact: {error}") from error
     return {
@@ -123,6 +149,10 @@ def artifact_metadata(path: Path) -> dict[str, Any]:
         "provider_manifest_sha256": sha256_bytes(provider_raw),
         "resolver": _json_bytes(resolver_raw, "resolver-manifest.json"),
         "resolver_manifest_sha256": sha256_bytes(resolver_raw),
+        "license_sha256": {
+            relative: sha256_bytes(content)
+            for relative, content in license_files.items()
+        },
     }
 
 
@@ -162,6 +192,25 @@ def validate_artifact_inputs(
     _require(release.get("package") == "wirestack", "release package identity is invalid")
     _require(release.get("payload_sha256") == artifact.get("payload_sha256"), "payload digest mismatch")
     _require(release.get("externalOpenSslDependency") is False, "release depends on system OpenSSL")
+    release_license = release.get("license")
+    _require(isinstance(release_license, dict), "release license identity is absent")
+    _require(
+        release_license.get("expression") == PROJECT_LICENSE_EXPRESSION,
+        "release license expression is invalid",
+    )
+    _require(release_license.get("file") == "LICENSE", "release license path is invalid")
+    _require(
+        release_license.get("sha256") == metadata["license_sha256"]["LICENSE"],
+        "embedded project license digest mismatch",
+    )
+    notices = release.get("thirdPartyNotices")
+    _require(isinstance(notices, dict), "release third-party notices are absent")
+    _require(notices.get("index") == "THIRD_PARTY_NOTICES.md", "notice index is invalid")
+    expected_notice_files = [
+        {"path": relative, "sha256": metadata["license_sha256"][relative]}
+        for relative in LICENSE_MEMBERS[1:]
+    ]
+    _require(notices.get("files") == expected_notice_files, "notice inventory mismatch")
     _require(provider.get("externalOpenSslDependency") is False, "provider depends on system OpenSSL")
     _require(provider.get("runtimeLoaderLibraryStrings") == [], "provider has runtime loader strings")
     release_provider = release.get("provider")
@@ -205,6 +254,10 @@ def fingerprint_inputs(
     return {
         "schemaVersion": SCHEMA_VERSION,
         "package": {"name": "wirestack", "version": release["version"]},
+        "license": {
+            "expression": release["license"]["expression"],
+            "files": metadata["license_sha256"],
+        },
         "artifact": {
             "sha256": metadata["artifact_sha256"],
             "payloadSha256": release["payload_sha256"],
@@ -259,7 +312,11 @@ def release_provider_manifest(
             "sha256": metadata["artifact_sha256"],
             "payloadSha256": release["payload_sha256"],
         },
-        "package": {"name": "wirestack", "version": release["version"]},
+        "package": {
+            "name": "wirestack",
+            "version": release["version"],
+            "licenseExpression": release["license"]["expression"],
+        },
         "buildFingerprint": build_fingerprint,
         "provider": {
             "providerId": provider["providerId"],
@@ -317,8 +374,8 @@ def spdx_document(
             "downloadLocation": "NOASSERTION",
             "filesAnalyzed": False,
             "checksums": [{"algorithm": "SHA256", "checksumValue": artifact["sha256"]}],
-            "licenseConcluded": "NOASSERTION",
-            "licenseDeclared": "NOASSERTION",
+            "licenseConcluded": PROJECT_LICENSE_EXPRESSION,
+            "licenseDeclared": PROJECT_LICENSE_EXPRESSION,
             "copyrightText": "NOASSERTION",
             "primaryPackagePurpose": "LIBRARY",
             "comment": (
@@ -357,8 +414,8 @@ def spdx_document(
             "checksums": [
                 {"algorithm": "SHA256", "checksumValue": resolver["archive"]["sha256"]}
             ],
-            "licenseConcluded": "NOASSERTION",
-            "licenseDeclared": "NOASSERTION",
+            "licenseConcluded": PROJECT_LICENSE_EXPRESSION,
+            "licenseDeclared": PROJECT_LICENSE_EXPRESSION,
             "copyrightText": "NOASSERTION",
         },
         {

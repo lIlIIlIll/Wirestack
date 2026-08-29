@@ -69,7 +69,35 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
                 {name: supply.canonical_json(value) for name, value in second.items()},
             )
 
-    def fixture(self, root: Path):
+    def test_project_and_resolver_sbom_packages_use_apache_2_0(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            artifact, qualification, provider_pin = self.fixture(Path(temporary))
+            documents = supply.build_documents(
+                artifact, qualification, provider_pin, generator_sha256="f" * 64
+            )
+            packages = {
+                package["SPDXID"]: package
+                for package in documents["sbom.spdx.json"]["packages"]
+            }
+            for package_id in (
+                "SPDXRef-Package-Wirestack-Artifact",
+                "SPDXRef-Package-Wirestack-Resolver",
+            ):
+                self.assertEqual("Apache-2.0", packages[package_id]["licenseDeclared"])
+                self.assertEqual("Apache-2.0", packages[package_id]["licenseConcluded"])
+
+    def test_wrong_project_license_expression_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            artifact, qualification, provider_pin = self.fixture(
+                Path(temporary), license_expression="MIT"
+            )
+            metadata = supply.artifact_metadata(artifact)
+            with self.assertRaisesRegex(
+                supply.SupplyChainError, "release license expression is invalid"
+            ):
+                supply.validate_artifact_inputs(metadata, qualification, provider_pin)
+
+    def fixture(self, root: Path, *, license_expression: str = "Apache-2.0"):
         provider_pin = supply.load_json(supply.PROVIDER_PIN)
         provider = {
             "abiVersion": 1,
@@ -99,6 +127,19 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             "version": "0.1.0",
             "payload_sha256": "5" * 64,
             "externalOpenSslDependency": False,
+            "license": {
+                "expression": license_expression,
+                "file": "LICENSE",
+                "sha256": supply.sha256_bytes(b"project license\n"),
+            },
+            "thirdPartyNotices": {
+                "index": "THIRD_PARTY_NOTICES.md",
+                "files": [
+                    {"path": "THIRD_PARTY_NOTICES.md", "sha256": supply.sha256_bytes(b"notices\n")},
+                    {"path": "third_party/aws-lc/LICENSE", "sha256": supply.sha256_bytes(b"aws license\n")},
+                    {"path": "third_party/aws-lc/NOTICE", "sha256": supply.sha256_bytes(b"aws notice\n")},
+                ],
+            },
             "provider": {
                 "archive_sha256": provider["archive"]["sha256"],
                 "manifest_sha256": supply.sha256_bytes(provider_raw),
@@ -117,6 +158,10 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
         artifact = root / "wirestack.tar.gz"
         members = {
             "wirestack/release-manifest.json": supply.canonical_json(release),
+            "wirestack/LICENSE": b"project license\n",
+            "wirestack/THIRD_PARTY_NOTICES.md": b"notices\n",
+            "wirestack/third_party/aws-lc/LICENSE": b"aws license\n",
+            "wirestack/third_party/aws-lc/NOTICE": b"aws notice\n",
             "wirestack/target/native/current/provider-manifest.json": provider_raw,
             "wirestack/target/native/resolver/current/resolver-manifest.json": resolver_raw,
         }

@@ -262,9 +262,7 @@ public class StdNetTransport <: DuplexTransport {
                     socket.write(payload)
                     return finishWrite(count, direct)
                 } catch (error: SocketTimeoutException) {
-                    throw timedOut(
-                        NetworkErrorCategory.Write,
-                        NetworkPhase.TcpWrite,
+                    throw writeTimedOut(
                         error,
                         localEndpoint: localEndpoint,
                         remoteEndpoint: remoteEndpoint
@@ -286,9 +284,7 @@ public class StdNetTransport <: DuplexTransport {
                 finishWrite(count, direct)
             } catch (error: SocketTimeoutException) {
                 let _ = gate.complete()
-                throw timedOut(
-                    NetworkErrorCategory.Write,
-                    NetworkPhase.TcpWrite,
+                throw writeTimedOut(
                     error,
                     localEndpoint: localEndpoint,
                     remoteEndpoint: remoteEndpoint
@@ -657,6 +653,7 @@ private func configureAbortiveClose(socket: TcpSocket): Unit {
 
 /** Linux TCP listener using the public std.net accept timeout/close surface. */
 public class StdNetTransportListener <: TransportListener {
+    private static let ACCEPT_WAIT_QUANTUM = 20 * Duration.millisecond
     private let server: TcpServerSocket
     private let stagingBufferSize: Int64
     private let mutex = Mutex()
@@ -708,72 +705,74 @@ public class StdNetTransportListener <: TransportListener {
                 localEndpoint: Some(localEndpoint)
             )
         }
-        let gate = OperationGate()
         beginAccept()
-        let registration = context.cancellation.register { => gate.interrupt { => close() } }
         try {
-            let accepted = server.accept(timeout: remaining(context))
-            if (!gate.complete()) {
-                accepted.close()
-                throw cancelled(
+            while (true) {
+                checkContext(
+                    context,
                     NetworkErrorCategory.Accept,
                     NetworkPhase.ServerAccept,
                     localEndpoint: Some(localEndpoint)
                 )
+                try {
+                    let accepted = server.accept(timeout: acceptWait(context))
+                    try {
+                        checkContext(
+                            context,
+                            NetworkErrorCategory.Accept,
+                            NetworkPhase.ServerAccept,
+                            localEndpoint: Some(localEndpoint)
+                        )
+                        return StdNetTransport.fromAccepted(
+                            accepted,
+                            stagingBufferSize: stagingBufferSize
+                        )
+                    } catch (error: Exception) {
+                        accepted.close()
+                        throw error
+                    }
+                } catch (_: SocketTimeoutException) {
+                    // The quantum only wakes the adapter to observe the one
+                    // canonical OperationContext; it is not a second deadline.
+                    continue
+                } catch (error: SocketException) {
+                    if (context.isCancellationRequested()) {
+                        throw cancelled(
+                            NetworkErrorCategory.Accept,
+                            NetworkPhase.ServerAccept,
+                            cause: Some(error),
+                            localEndpoint: Some(localEndpoint)
+                        )
+                    }
+                    if (context.isDeadlineExceeded()) {
+                        throw deadlineExceeded(
+                            NetworkErrorCategory.Accept,
+                            NetworkPhase.ServerAccept,
+                            cause: Some(error),
+                            localEndpoint: Some(localEndpoint)
+                        )
+                    }
+                    if (isClosed()) {
+                        throw closedError(
+                            NetworkErrorCategory.Accept,
+                            NetworkPhase.ServerAccept,
+                            cause: Some(error),
+                            localEndpoint: Some(localEndpoint)
+                        )
+                    }
+                    throw NetworkException(
+                        NetworkErrorCategory.Accept,
+                        NetworkPhase.ServerAccept,
+                        NetworkErrorCode.SystemFailure,
+                        "std.net accept failed without a public native error code",
+                        retryability: Retryability.Unknown,
+                        localEndpoint: Some(localEndpoint),
+                        cause: Some(error)
+                    )
+                }
             }
-            StdNetTransport.fromAccepted(accepted, stagingBufferSize: stagingBufferSize)
-        } catch (error: SocketTimeoutException) {
-            if (!gate.complete()) {
-                throw cancelled(
-                    NetworkErrorCategory.Accept,
-                    NetworkPhase.ServerAccept,
-                    cause: Some(error),
-                    localEndpoint: Some(localEndpoint)
-                )
-            }
-            throw timedOut(
-                NetworkErrorCategory.Accept,
-                NetworkPhase.ServerAccept,
-                error,
-                localEndpoint: Some(localEndpoint)
-            )
-        } catch (error: SocketException) {
-            let _ = gate.complete()
-            if (context.isCancellationRequested()) {
-                throw cancelled(
-                    NetworkErrorCategory.Accept,
-                    NetworkPhase.ServerAccept,
-                    cause: Some(error),
-                    localEndpoint: Some(localEndpoint)
-                )
-            }
-            if (context.isDeadlineExceeded()) {
-                throw deadlineExceeded(
-                    NetworkErrorCategory.Accept,
-                    NetworkPhase.ServerAccept,
-                    cause: Some(error),
-                    localEndpoint: Some(localEndpoint)
-                )
-            }
-            if (isClosed()) {
-                throw closedError(
-                    NetworkErrorCategory.Accept,
-                    NetworkPhase.ServerAccept,
-                    cause: Some(error),
-                    localEndpoint: Some(localEndpoint)
-                )
-            }
-            throw NetworkException(
-                NetworkErrorCategory.Accept,
-                NetworkPhase.ServerAccept,
-                NetworkErrorCode.SystemFailure,
-                "std.net accept failed without a public native error code",
-                retryability: Retryability.Unknown,
-                localEndpoint: Some(localEndpoint),
-                cause: Some(error)
-            )
+            throw IllegalStateException("unreachable std.net accept loop exit")
         } finally {
-            registration.unregister()
             endAccept()
         }
     }
@@ -825,6 +824,13 @@ public class StdNetTransportListener <: TransportListener {
 
     private func endAccept(): Unit {
         activeAccepts.fetchSub(1)
+    }
+
+    private func acceptWait(context: OperationContext): ?Duration {
+        match (context.deadline) {
+            case Some(value) => Some(min(value.remaining(), ACCEPT_WAIT_QUANTUM))
+            case None => Some(ACCEPT_WAIT_QUANTUM)
+        }
     }
 }
 
@@ -987,6 +993,24 @@ private func timedOut(
         NetworkErrorCode.TimedOut,
         "std.net operation timed out",
         retryability: Retryability.Temporary,
+        localEndpoint: localEndpoint,
+        remoteEndpoint: remoteEndpoint,
+        cause: Some(cause)
+    )
+}
+
+/** A write timeout cannot prove that the kernel committed zero bytes. */
+internal func writeTimedOut(
+    cause: Exception,
+    localEndpoint!: ?SocketEndpoint = None<SocketEndpoint>,
+    remoteEndpoint!: ?SocketEndpoint = None<SocketEndpoint>
+): NetworkException {
+    NetworkException(
+        NetworkErrorCategory.Write,
+        NetworkPhase.TcpWrite,
+        NetworkErrorCode.TimedOut,
+        "std.net write timed out with unknown physical commit state",
+        retryability: Retryability.Never,
         localEndpoint: localEndpoint,
         remoteEndpoint: remoteEndpoint,
         cause: Some(cause)
