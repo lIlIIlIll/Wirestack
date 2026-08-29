@@ -75,6 +75,18 @@ class LinuxTlsProviderBuildTests(unittest.TestCase):
             library.write_bytes(b"tampered")
             self.assertIsNone(builder.validate_cached_build(final, fingerprint))
 
+    def test_multicall_tool_symlink_name_is_preserved(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            multicall = root / "llvm-ar"
+            multicall.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+            multicall.chmod(0o755)
+            ranlib = root / "llvm-ranlib"
+            ranlib.symlink_to(multicall.name)
+            resolved = builder.resolve_tool(str(ranlib), "/missing", "missing")
+            self.assertEqual(str(ranlib.absolute()), resolved)
+            self.assertEqual("llvm-ranlib", Path(resolved).name)
+
 
 if __name__ == "__main__":
     unittest.main()
