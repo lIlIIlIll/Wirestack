@@ -35,6 +35,26 @@ class ArchitectureGuardTests(unittest.TestCase):
                        "package wirestack.internal.transport_stdnet\n\nimport std.net.*\n")
             self.assertEqual([], guard.run_guard(root))
 
+    def test_concrete_provider_is_rejected_from_generic_tls_and_http(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(root, "src/internal/tls_engine/core.cj",
+                       "package wirestack.internal.tls_engine\nlet value: AwsLcTlsProvider\n")
+            self.assertIn("generic-provider-specific-type", self.rules(root))
+
+    def test_root_build_rejects_provider_specific_paths(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(root, "build.cj", 'let path = "native/tls/aws_lc"\n')
+            self.assertIn("provider-specific-root-build", self.rules(root))
+
+    def test_test_provider_is_rejected_from_production_source(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(root, "src/internal/tls_engine/core.cj",
+                       "package wirestack.internal.tls_engine\nlet value: TestTlsProvider\n")
+            self.assertIn("test-provider-in-production", self.rules(root))
+
     def test_package_must_match_source_path(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)

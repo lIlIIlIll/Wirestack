@@ -100,7 +100,7 @@ public class HttpClientBuilder {
     }
 }
 
-/** Linux HTTP/1 facade. HTTPS initializes the AWS-LC handshaker lazily. */
+/** HTTP facade. HTTPS initializes the build-selected TLS handshaker lazily. */
 public class HttpClient <: Resource {
     private let resolver: Resolver
     private let ownedSystemResolver: ?SystemResolver
@@ -324,7 +324,7 @@ public class HttpClient <: Resource {
                     let value = http1.HttpAutomaticHttpsClient(
                         resolver,
                         transportFactory,
-                        http1.AwsLcHttp1TlsHandshaker.systemDefaultAlpn(),
+                        http1.DefaultHttp1TlsHandshaker.systemDefaultAlpn(),
                         limits: limits
                     )
                     https = Some(value)
@@ -343,7 +343,7 @@ public class HttpClient <: Resource {
                         toInternalProxyEndpoint(value.endpoint),
                         value.resolver,
                         transportFactory,
-                        http1.AwsLcHttp1TlsHandshaker.systemDefault(),
+                        http1.DefaultHttp1TlsHandshaker.systemDefault(),
                         limits: limits
                     )
                     httpsProxy = Some(client)

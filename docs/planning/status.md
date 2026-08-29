@@ -98,6 +98,7 @@ global six-platform M3 milestone.
 |---|---|---|---|
 | M3-028 | COMPLETE | [`docs/evidence/M3-028/README.md`](../evidence/M3-028/README.md) | Native Linux qualification passes 70 deterministic TLS/trust tests, four bounded fuzz targets, TLS 1.2/1.3 OpenSSL interoperability, dependency scanning, body and idle-memory limits, 11-round full/resumed handshake gates, and 1.2125 times the pinned stdx bulk throughput. |
 | M3-029 | COMPLETE | [`docs/evidence/M3-029/README.md`](../evidence/M3-029/README.md) | Provider-neutral public client/server contexts, existing-transport handshake, TLS connection/listener ownership, negotiated metadata and stable errors pass public-package tests, clean-consumer Linux TLS acceptance and current pre-1.0 ownership guards; historical experimental API compatibility is not required. |
+| M3-030 | COMPLETE | [`docs/evidence/M3-030/README.md`](../evidence/M3-030/README.md), [`platform-provider-matrix.json`](../evidence/M3-030/platform-provider-matrix.json), [`native-abi-report.json`](../evidence/M3-030/native-abi-report.json), [`release-validation.json`](../evidence/M3-030/release-validation.json), [`sbom-validation.json`](../evidence/M3-030/sbom-validation.json) | The final six-command Linux gate passes. The provider ABI v1 contract records and validates 56 C signatures, Cangjie FFI declarations, native header prototypes and archive symbols; M7-029 independently closes both ABI High findings. Only Linux x86_64 glibc with AWS-LC 5.5.0 is implemented. |
 
 ## Future upstream enhancements
 

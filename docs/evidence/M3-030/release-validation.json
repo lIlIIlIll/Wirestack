@@ -1,0 +1,26 @@
+{
+  "acceptance_status": "PASS",
+  "artifact": {
+    "bytes": 2499451,
+    "name": "wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
+    "payload_sha256": "45ca196866697b568d33894bf3673aaec63fee01ee661bc5fc8319cd27c09e22",
+    "production_source_files": 108,
+    "reproducibility": {
+      "builds": 2,
+      "byte_identical": true,
+      "digests": [
+        "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee",
+        "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee"
+      ]
+    },
+    "sha256": "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee"
+  },
+  "decision": "PASS",
+  "externalOpenSslDependency": false,
+  "platform": "linux-x86_64-glibc",
+  "provider": "aws-lc",
+  "schemaVersion": 1,
+  "source_task": "M3-030",
+  "status": "PASS",
+  "taskId": "M3-030"
+}

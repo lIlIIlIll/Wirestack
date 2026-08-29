@@ -1,0 +1,111 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-08-29T09:46:36.321014Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-030/platform-provider-matrix.json",
+      "sha256": "3abed15b99fb7ad74412de20571bb03a7caf0562677953087e74791391d18833",
+      "source_task": "M3-030"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-030/native-abi-report.json",
+      "sha256": "03881988db42d4e32579fa1fff2ff6e4ab045ed2fab3eedee26ccae0a2d91d35",
+      "source_task": "M3-030"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-030/architecture-guard.json",
+      "sha256": "2d689b2e0ed6ba92cd4ff817d1654c6f7c32b296a809cf29be6e810e9254a656",
+      "source_task": "M3-030"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-030/test-provider-results.json",
+      "sha256": "f57e6ac10d7a4977ea427fef1b69ed8649a2a3133187e566fdc455090263e69a",
+      "source_task": "M3-030"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-030/linux-aws-lc-results.json",
+      "sha256": "0c4f2361a168a66abaf3c33adbaac47755cd778b649eed0bdad6ec7663038fab",
+      "source_task": "M3-030"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-030/clean-consumer.json",
+      "sha256": "37346a90039970f699f25eb635e1226d7c16754c9f7b266019aa56c9d9ad85be",
+      "source_task": "M3-030"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-030/release-validation.json",
+      "sha256": "3c50fabdbcd64918b0cdef8a147613fc015b418b201fd851b6765b6949b04223",
+      "source_task": "M3-030"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-030/sbom-validation.json",
+      "sha256": "3e66df1d8c8952a60a50389bdaee132f24a423bc81e06397e64be7304ee29de5",
+      "source_task": "M3-030"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-030/task-check.json",
+      "sha256": "20d8509d3104369903e074044dde893b4ed18622ef47d4acb9bc87850b505610",
+      "source_task": "M3-030"
+    }
+  ],
+  "revision": "38b58ec2fbaa0779011a70992e86ffc4bbd88e17",
+  "schema_version": 1,
+  "source_sha256": {
+    ".gitignore": "a597755755bb3087cec35cf2a83b5519f196281cf5f70b870e10bc496faf063c",
+    "build.cj": "58d6706fbd8f36b0715798d8f3b725ea81604f95390b550d9fca6dc4d0083eb9",
+    "cjpm.toml": "47fa86311bacf7f092f4a6641f200a7e11196d6ed020c7f1f914e8d51650ae17",
+    "docs/evidence/M3-030/README.md": "5274876a5dbf5c078deb5451dba6b2241a0c6195b08b9c0db0618f1da3bfaa83",
+    "docs/evidence/M3-030/provider-contract.md": "bfee89334ac1cace003772d8f74434cd024c765bff5230ffbde4625a18a1e6f5",
+    "docs/evidence/M3-030/test-plan.md": "6fb251504069044fb6544317e13eb17f29124ffc9cd9af37820f9644d29668bd",
+    "docs/planning/implementation-backlog.md": "930b08c926a7c3744e0a7ffc73d67620ec2a8112d413247c95b9a8831e7d6f6a",
+    "docs/planning/linux-status.md": "3b972099653574dbbf5e857e6e8873c736c9c32ce1083f7bd51acceea99bdd72",
+    "docs/planning/status.md": "5c701a8dd3bbf97f07fa9aae5e8f63f18a2caffd681ea9bab047bbd64e441a58",
+    "docs/references/tls-provider-development.md": "a68c1dfff03db1e03d80fe6ef1ede4568f2a19eaba513e0625186a868e09865f",
+    "native/tls/aws_lc/provider.json": "ff4d39359a8ef49ede8272698fe306b7421df2fea04b44744483245f34f619b4",
+    "native/tls/aws_lc/wirestack_tls_provider.c": "9b57dee65da7ecd8510999ea46f8437b7f7eb5e3c5234d2359ff8215f3d60a94",
+    "native/tls/aws_lc/wirestack_tls_provider.h": "41e5f8d58937c87e4cfd357a10a9ca7066e2db8ff02c180c9e0120610c05eff1",
+    "scripts/check-m3-030-tls-provider-architecture": "67bdcef22fcbf8eac2cdc172a009351bcb641788f51ac42c14b510e50b556a0f",
+    "src/internal/http1/tls_client_pipeline.cj": "22cd4c8da83f07b6081edf7ef768aa71da3ac94492d52833cbc4c0eac4d4929f",
+    "src/internal/http1/tls_server.cj": "38d2dad9d5b5b0cde4130d10f35c628f44b71693c5d9791365cf678e5b26a780",
+    "src/internal/tls_engine/context.cj": "d8a18a1f97df822dfa84ad6031f4a389e37bf32ee34db405e161948d0d01991d",
+    "src/internal/tls_engine/engine.cj": "86d663507421629a54d238e22b95b723bbf99aadbe153665d38f60067b6ed4f7",
+    "src/internal/tls_engine/package.cj": "74bd11c9983dd04cf3b9637f66eb589039006a8821c6142dc684a096ab97c7e6",
+    "src/internal/tls_engine/provider_test.cj": "b0c634ce8c9de9b0fa2164e38499da374b4b5d3761c4138795827a6b9936eddd",
+    "src/tls/facade.cj": "a9c43792c8770a89bead598aa2dc1690b46060c60f45f233187e8b0a9cd8f98c",
+    "src/tls/package.cj": "71e106dedf7e34890015f32204592a5e2371df3bb7d8aa3a8bae2b67cd590339",
+    "tools/architecture_guard.py": "871e3db83eccc6be2e88e9191a1bfc4810c74c79bd3d1a47b63bfab1be5d553d",
+    "tools/build_linux_tls_provider.py": "e1cabf4571f48380d9c6d5ce600ef5b467e90a0f4fe35201a704602231b04311",
+    "tools/build_tls_provider.py": "f389f418a8f1de7195c4469a8427b8a11c0d80e0fcc221f403c87f05ca878ed7",
+    "tools/m3_030_tls_provider_architecture.py": "2494a8a41e07f9fb4c520868cb2b73aac67da547c202e8e24d089abfb996f462",
+    "tools/m7_021_linux_release.py": "686a603531930e721fb29440e822774a21524bcd522e6b66b7dca2bcb10aae48",
+    "tools/m7_025_linux_supply_chain.py": "42e064cf1a11276c4360ec99c155626182872bba042b9d2d66657cd381b8238e",
+    "tools/tasks/M3-030.json": "b7f92cdea31ff103e9cf76b439301d8381999dd45b1aa5978ec19376fd5716c0",
+    "tools/tests/test_architecture_guard.py": "d77704861e677029ff52b7f7324d89cb53fe7e1c7e3b7fd35ecf83d8e3b21cf8",
+    "tools/tests/test_linux_tls_provider_build.py": "75906f9aa2fd24b3edbd135c29c4ca6bb0f48a688da7a4f7461817e13155037b",
+    "tools/tests/test_m3_030_tls_provider_architecture.py": "7b3bb9b9717bdd43f29a3abbfeaf8d014fb16fd4523c7f9d6e92a3733a01bc2a",
+    "tools/tls_provider/abi-v1.json": "4f6756852e89203938ab964461993edde8dccc220bab7e5f8862e4f2b8bb3943",
+    "tools/tls_provider/provider-manifest-schema-v1.json": "1ffac8ad5d475c906c177e600635f7450b3da10954535f47e5388d092d6bece9",
+    "tools/tls_provider/selection.json": "de802ea6839e42327a6d30df4ac5fcdca6f60205f04ed223082346833203dc0b",
+    "tools/tls_provider/selection.py": "7a680ad296f10d2f5036e895f292765b3d5eabcc70cedcfbd851319e969143f3"
+  },
+  "source_task": "M3-030",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}

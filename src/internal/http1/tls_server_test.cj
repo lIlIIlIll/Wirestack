@@ -13,12 +13,12 @@ import wirestack.internal.trust.*
 class Http1TlsServerTest {
     @TestCase
     func alpnServerRejectsAClientWithNoSharedHttpProtocol(): Unit {
-        let server = AwsLcHttp1ServerTlsHandshaker.createAlpn(
+        let server = DefaultHttp1ServerTlsHandshaker.createAlpn(
             [http1TlsTestCertificateDer()], http1TlsTestPrivateKeyDer()
         )
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let clientContext = TlsClientContext.builder(
-            provider.manifest(), provider.linuxCapabilities()
+            provider.manifest(), provider.capabilities()
         ).trust(TrustPolicy.pinnedPublicKeys([http1TlsServerPin()]))
             .alpn(["wirestack.invalid"])
             .build()
@@ -37,7 +37,7 @@ class Http1TlsServerTest {
         }
         var clientRejected = false
         try {
-            let engine = provider.createClientEngine(
+            let engine = provider.createClientEngineWithTrustLocation(
                 clientContext,
                 ReferenceIdentity.Dns(HostName("example.com")),
                 serverName: Some(HostName("example.com"))
@@ -55,10 +55,10 @@ class Http1TlsServerTest {
 
     @TestCase
     func automaticClientOffersH2FirstAndFallsBackToServerHttp11(): Unit {
-        let server = AwsLcHttp1ServerTlsHandshaker.create(
+        let server = DefaultHttp1ServerTlsHandshaker.create(
             [http1TlsTestCertificateDer()], http1TlsTestPrivateKeyDer()
         )
-        let client = AwsLcHttp1TlsHandshaker.createAlpn(
+        let client = DefaultHttp1TlsHandshaker.createAlpn(
             TrustPolicy.pinnedPublicKeys([http1TlsServerPin()])
         )
         let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 64 * 1024)
@@ -82,12 +82,12 @@ class Http1TlsServerTest {
     @TestCase
     func requiredMutualTlsCarriesAuthenticatedHttp1Exchange(): Unit {
         let certificate = http1TlsTestCertificateDer()
-        let server = AwsLcHttp1ServerTlsHandshaker.create(
+        let server = DefaultHttp1ServerTlsHandshaker.create(
             [certificate], http1TlsTestPrivateKeyDer(),
             clientAuthentication: ClientAuthentication.Required,
             clientTrustRootsDer: [certificate]
         )
-        let client = AwsLcHttp1TlsHandshaker.createWithDer(
+        let client = DefaultHttp1TlsHandshaker.createWithDer(
             [certificate],
             clientCertificateChainDer: [certificate],
             clientPrivateKeyPkcs8Der: http1TlsTestPrivateKeyDer()
@@ -102,10 +102,10 @@ class Http1TlsServerTest {
 
     @TestCase
     func realAwsLcHandshakeCarriesOneHttp1Exchange(): Unit {
-        let server = AwsLcHttp1ServerTlsHandshaker.create(
+        let server = DefaultHttp1ServerTlsHandshaker.create(
             [http1TlsTestCertificateDer()], http1TlsTestPrivateKeyDer()
         )
-        let client = AwsLcHttp1TlsHandshaker.create(
+        let client = DefaultHttp1TlsHandshaker.create(
             TrustPolicy.pinnedPublicKeys([http1TlsServerPin()])
         )
         try {
@@ -122,8 +122,8 @@ private func isTlsFallbackHttp11(value: HttpNegotiatedProtocol): Bool {
 }
 
 private func runTlsHttp1Exchange(
-    server: AwsLcHttp1ServerTlsHandshaker,
-    client: AwsLcHttp1TlsHandshaker
+    server: DefaultHttp1ServerTlsHandshaker,
+    client: DefaultHttp1TlsHandshaker
 ): Unit {
         let (clientTransport, serverTransport) = MemoryTransport.pair(capacity: 64 * 1024)
         let context = OperationContext(deadline: Some(Deadline.after(3 * Duration.second)))

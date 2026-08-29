@@ -6,17 +6,25 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
+import sys
 import tarfile
 from pathlib import Path
 from typing import Any, Mapping
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.tls_provider.selection import select_provider
+
+SELECTED_PROVIDER = select_provider(ROOT)
 TASK_ID = "M7-025"
 SCHEMA_VERSION = 1
 CREATED_UTC = "2026-08-28T00:00:00Z"
 QUALIFICATION = ROOT / "docs/evidence/M7-021/linux_x86_64/qualification.json"
-PROVIDER_PIN = ROOT / "native/tls/aws_lc/provider.json"
+PROVIDER_PIN = SELECTED_PROVIDER.manifest_path
 DEFAULT_ARTIFACT = ROOT / "dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
 DEFAULT_OUTPUT = ROOT / "docs/evidence/M7-025/linux_x86_64"
 OUTPUT_NAMES = (
@@ -29,8 +37,8 @@ PROJECT_LICENSE_EXPRESSION = "Apache-2.0"
 LICENSE_MEMBERS = (
     "LICENSE",
     "THIRD_PARTY_NOTICES.md",
-    "third_party/aws-lc/LICENSE",
-    "third_party/aws-lc/NOTICE",
+    f"third_party/{SELECTED_PROVIDER.provider}/LICENSE",
+    f"third_party/{SELECTED_PROVIDER.provider}/NOTICE",
 )
 FEATURES = [
     "client-certificate",
@@ -57,6 +65,11 @@ TRUST_POLICIES = [
 
 class SupplyChainError(RuntimeError):
     """Raised when supply-chain evidence is incomplete or inconsistent."""
+
+
+def provider_spdx_id(provider_id: str) -> str:
+    stable = re.sub(r"[^A-Za-z0-9.-]", "-", provider_id)
+    return f"SPDXRef-Package-TlsProvider-{stable}"
 
 
 def canonical_json(value: Any) -> bytes:
@@ -384,8 +397,8 @@ def spdx_document(
             ),
         },
         {
-            "name": "AWS-LC",
-            "SPDXID": "SPDXRef-Package-AWS-LC",
+            "name": provider["providerId"],
+            "SPDXID": provider_spdx_id(provider["providerId"]),
             "versionInfo": provider["providerVersion"],
             "downloadLocation": "NOASSERTION",
             "filesAnalyzed": False,
@@ -399,9 +412,8 @@ def spdx_document(
                 {
                     "referenceCategory": "PACKAGE-MANAGER",
                     "referenceType": "purl",
-                    "referenceLocator": (
-                        "pkg:github/aws/aws-lc@" + provider["source"]["commit"]
-                    ),
+                    "referenceLocator": provider["source"]["url"] +
+                        "@" + provider["source"]["commit"],
                 }
             ],
         },
@@ -473,7 +485,7 @@ def spdx_document(
         {
             "spdxElementId": artifact_id,
             "relationshipType": "CONTAINS",
-            "relatedSpdxElement": "SPDXRef-Package-AWS-LC",
+            "relatedSpdxElement": provider_spdx_id(provider["providerId"]),
         },
         {
             "spdxElementId": artifact_id,
@@ -620,7 +632,7 @@ def validate_documents(
         "manifest is not bound to the M7-021 artifact",
     )
     artifact_id = "SPDXRef-Package-Wirestack-Artifact"
-    provider_id = "SPDXRef-Package-AWS-LC"
+    provider_id = provider_spdx_id(provider_pin["provider_id"])
     resolver_id = "SPDXRef-Package-Wirestack-Resolver"
     dependency_ids = {
         "SPDXRef-Package-Cangjie-Runtime",
