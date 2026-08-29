@@ -284,7 +284,9 @@ def doctor(root: Path, which: Callable[[str], str | None] = shutil.which,
     add("repository-prd", True, (root / "docs/product/prd.md").is_file(), "docs/product/prd.md")
     add("repository-check", True, os.access(root / "scripts/check", os.X_OK), "scripts/check")
     try:
-        with tempfile.NamedTemporaryFile(prefix="wirestack-doctor-", dir=root / "build", delete=True):
+        report_staging = root / "build"
+        report_staging.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(prefix="wirestack-doctor-", dir=report_staging, delete=True):
             pass
         writable = True
     except OSError:

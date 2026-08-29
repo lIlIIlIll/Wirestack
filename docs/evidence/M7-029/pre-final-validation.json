@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "task_id": "M7-029",
+  "generated_at_utc": "2026-08-29T03:23:48Z",
+  "overall_status": "INCOMPLETE",
+  "source_tree_state": "uncommitted current-tree validation; not final digest-bound release evidence",
+  "checks": [
+    {
+      "id": "test-plan",
+      "command": "python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-029/test-plan.md --json",
+      "exit_code": 0,
+      "status": "PASS",
+      "counts": {"paths": 32, "scenarios": 30, "tests": 28}
+    },
+    {
+      "id": "release-license-sbom-and-hosted-ci-contracts",
+      "command": "python3 -m unittest <six focused M7-021/M7-025 tests> tools.tests.test_m7_029_independent_security_review -v",
+      "exit_code": 0,
+      "status": "PASS",
+      "passed": 19
+    },
+    {
+      "id": "resolver-and-review-python-tests",
+      "command": "python3 -m unittest tools.tests.test_linux_resolver_build tools.tests.test_m7_029_independent_security_review -v",
+      "exit_code": 0,
+      "status": "PASS",
+      "passed": 14
+    },
+    {
+      "id": "resolver-delayed-getaddrinfo",
+      "command": "python3 tools/gates/m2_003_resolver_pool.py --output-dir /tmp/wirestack-m7-029-resolver-gate --delay-ms 250",
+      "exit_code": 0,
+      "status": "PASS",
+      "focused_cases_passed": 9,
+      "intercepted_getaddrinfo_calls": 14,
+      "maximum_concurrent_calls": 3
+    },
+    {
+      "id": "architecture-guard",
+      "command": "scripts/architecture-guard --format json",
+      "exit_code": 0,
+      "status": "PASS",
+      "violations": 0
+    },
+    {
+      "id": "cangjie-non-performance",
+      "command": "/home/elliot/.codex/scripts/codex_cangjie_env --cwd /home/elliot/playground/Wirestack cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color",
+      "exit_code": 0,
+      "status": "PASS",
+      "total": 593,
+      "passed": 570,
+      "skipped": 23,
+      "failed": 0,
+      "errors": 0
+    },
+    {
+      "id": "current-task-check",
+      "command": "scripts/check-task M7-029 --json --output docs/evidence/M7-029/task-check.json",
+      "exit_code": 1,
+      "status": "BLOCKED",
+      "local_commands_passed": 6,
+      "blocking_command": "independent-review",
+      "blocking_code": "REQUEST_STALE"
+    },
+    {
+      "id": "repository-check",
+      "command": "scripts/check",
+      "exit_code": 1,
+      "status": "FAIL",
+      "python_tests_run_before_stop": 178,
+      "failures": 9,
+      "errors": 6,
+      "reason": "previous Linux audit, architecture, artifact, SBOM and API evidence is stale after current production and release-input changes; the check stopped before Cangjie execution"
+    }
+  ],
+  "prior_failures": [
+    {
+      "check": "cangjie-non-performance",
+      "result": "one stale listener test expected cancellation to close the listener; the test was corrected to assert listener reuse and the identical suite then passed"
+    },
+    {
+      "check": "tls-identity-regression",
+      "result": "the restricted runner denied the unittest transport socket before tests started; the identical command passed 25 focused cases in the authorized environment"
+    },
+    {
+      "check": "repository-check M7-022 lock diagnostic",
+      "result": "the test process emitted SOAK_ALREADY_RUNNING while exercising the lock contract; a post-run process inspection found no active M7-022 or Wirestack soak process"
+    }
+  ],
+  "release_blockers": [
+    "Apache-2.0 and AWS-LC notices are present but the final release artifact and SBOM have not been regenerated",
+    "the GitHub-hosted workflow has not run remotely and protected-main required checks are not configured",
+    "release artifact, qualification, SBOM, API and security-review package need regeneration after final source changes",
+    "the independent reviewer has not retargeted and signed the final package"
+  ],
+  "deliberately_not_run": [
+    "one-hour SSE profile",
+    "86,400-second M7-022 final release soak",
+    "non-Linux platform gates"
+  ]
+}
