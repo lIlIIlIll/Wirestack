@@ -23,7 +23,8 @@
   "abi": {
     "name": "wirestack_tls_provider",
     "version": 1,
-    "backend": "aws-lc-static"
+    "backend": "aws-lc-static",
+    "header": "native/tls/aws_lc/wirestack_tls_provider.h"
   },
   "capabilities": [
     "customRoots",

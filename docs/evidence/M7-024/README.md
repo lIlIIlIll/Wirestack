@@ -22,9 +22,9 @@ It does not accept a component's top-level `PASS` value by itself.
 | Field-level checks | 254/254 PASS |
 | Failed domains | 0 |
 | Manifest | [`tools/gates/manifests/m7-024-linux-performance.json`](../../../tools/gates/manifests/m7-024-linux-performance.json) |
-| Manifest SHA-256 | `7d5dc59e221bfc7715861acde453461a444cb6d7aa37c09b6ce876512a8b65be` |
+| Manifest SHA-256 | `4e5d3425fd2b31794b44d72d75c245f40bc96ed318ca8aba2eaf373ee46eab0d` |
 | Aggregate report | [`linux_glibc_x86_64/performance-gate.json`](linux_glibc_x86_64/performance-gate.json) |
-| Aggregate report SHA-256 | `2456b4e7fa5b4074236ba1c1c1a8976b36b43f22b08e8fa061e12746b8df1fb8` |
+| Aggregate report SHA-256 | `cca8545809c8ac0583d3a29bce626c605f740b3e2c782dabd01fa4d622f537d6` |
 
 ## Release baselines
 
@@ -34,7 +34,7 @@ It does not accept a component's top-level `PASS` value by itself.
 | DNS-to-connected | Six profiles, 11 rounds and 88 samples each; IPv6 blackhole P95 272.736 ms; cancellation P99 3.908 ms | complete profile matrix; cancellation P99 at most 50 ms | PASS |
 | TLS | Bulk ratio 1.4494; full-handshake P50 ratio 0.1112 and P95 ratio 0.1326; 11 resumed rounds | bulk at least 0.90; handshake P50 at most 1.10 and P95 at most 1.20 | PASS |
 | HTTP/1.1 | Seven alternating rounds; 10,073.727 req/s versus 4,829.858 req/s, ratio 2.0857 | keep-alive throughput ratio at least 0.90 | PASS |
-| HTTP/2 | Post-M6-026 1, 10 and 100 streams, 20 rounds in forward and reverse order; one connection; 739.806, 1,376.700 and 1,286.515 req/s; connection ratio 0.01 | exact concurrency matrix; ratio at most 0.25; bounded queues, zero outstanding flow permits and current production-source fingerprint | PASS |
+| HTTP/2 | Post-M3-030 1, 10 and 100 streams, 20 rounds in forward and reverse order; one connection; 854.426, 1,517.105 and 1,245.926 req/s; connection ratio 0.01 | exact concurrency matrix; ratio at most 0.25; bounded queues, zero outstanding flow permits and current production-source fingerprint | PASS |
 | Cancellation | 100 measured blocked-read and blocked-write samples; P99 9.098 ms and 4.118 ms | P99 at most 50 ms | PASS |
 | SSE | H1 95,935,756 events and H2 90,877,593 events, one hour each | at least one hour and one million events per protocol; cancellation at most 50 ms | PASS |
 | Memory | Eight Transport resource classes; TLS body growth 4,788 KiB and idle slope 45.597 KiB/connection; H1 and SSE RSS trends non-growing | component memory limits, bounded H2 queues and steady SSE resources | PASS |
@@ -45,16 +45,17 @@ because all operations completed, the configured impairment was observed and
 the acceptance contract does not impose an invented latency ceiling on packet
 loss.
 
-## Post-M6-026 HTTP/2 requalification
+## Post-M3-030 HTTP/2 requalification
 
-M6-026 changed the HTTP/2 client connection, so the earlier M6-020 raw report
-was not reused as current performance evidence. The original 2-warmup,
+M3-030 changed the provider-neutral HTTP/TLS path covered by the HTTP/2 source
+fingerprint, so the earlier M6-026 raw report was not reused as current
+performance evidence. The original 2-warmup,
 20-measured-round, forward/reverse 1/10/100-stream matrix was rerun and saved as
 [`linux_glibc_x86_64/http2-benchmark-after-m6-026.json`](linux_glibc_x86_64/http2-benchmark-after-m6-026.json),
 SHA-256
-`b4261bd1568e28afc123ff0f249f2eb1a54ca3a38be107c5da1966a496fe2226`.
+`ca9cbf1710cffdae0d75361cbc6796c69d5459e15146a1ddc8dcbd5a41b145c6`.
 It records production-source SHA-256
-`add5239e12407e259efd13f00404cbdd1444f020708a06a109f8f5e1da762bbe`.
+`2450fe679d91e0dd51c735a969f71351c6b378b76525a4b6d1a8b88248cd9b07`.
 The release gate now requires the raw report, manifest and current production
 tree to carry that exact digest; source drift fails the HTTP/2 domain.
 

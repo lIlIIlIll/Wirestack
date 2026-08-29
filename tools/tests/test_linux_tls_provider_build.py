@@ -41,20 +41,27 @@ class LinuxTlsProviderBuildTests(unittest.TestCase):
             root = Path(directory)
             source = root / "shim.c"
             header = root / "shim.h"
+            abi = root / "abi.json"
             source.write_text("one", encoding="utf-8")
             header.write_text("header", encoding="utf-8")
+            abi.write_text("contract-one", encoding="utf-8")
             first, _ = builder.build_input_fingerprint(
-                manifest, source, header, {"cc": "clang"}, {"libc": "glibc"}
+                manifest, source, header, abi, {"cc": "clang"}, {"libc": "glibc"}
             )
             source.write_text("two", encoding="utf-8")
             second, _ = builder.build_input_fingerprint(
-                manifest, source, header, {"cc": "clang"}, {"libc": "glibc"}
+                manifest, source, header, abi, {"cc": "clang"}, {"libc": "glibc"}
             )
             third, _ = builder.build_input_fingerprint(
-                manifest, source, header, {"cc": "clang"}, {"libc": "musl"}
+                manifest, source, header, abi, {"cc": "clang"}, {"libc": "musl"}
+            )
+            abi.write_text("contract-two", encoding="utf-8")
+            fourth, _ = builder.build_input_fingerprint(
+                manifest, source, header, abi, {"cc": "clang"}, {"libc": "musl"}
             )
             self.assertNotEqual(first, second)
             self.assertNotEqual(second, third)
+            self.assertNotEqual(third, fourth)
 
     def test_cached_archive_digest_is_revalidated(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

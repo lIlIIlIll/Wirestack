@@ -1,0 +1,17 @@
+{
+  "default_platform": "linux-x86_64-glibc",
+  "platforms": {
+    "linux-x86_64-glibc": {
+      "default_provider": "aws-lc",
+      "providers": {
+        "aws-lc": {
+          "abi_contract": "tools/tls_provider/abi-v1.json",
+          "adapter": "linux-aws-lc",
+          "manifest": "native/tls/aws_lc/provider.json",
+          "production": true
+        }
+      }
+    }
+  },
+  "schema_version": 1
+}

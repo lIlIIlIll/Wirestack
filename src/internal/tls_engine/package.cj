@@ -7,6 +7,7 @@ import wirestack.internal.platform.linux.*
 import wirestack.internal.trust.*
 
 private let PROVIDER_OK: Int32 = 0
+private let PROVIDER_ABI_VERSION: UInt32 = 1u32
 
 private let CAP_CUSTOM_ROOTS: UInt64 = 1u64 << 0
 private let CAP_CLIENT_CERT: UInt64 = 1u64 << 1
@@ -18,6 +19,7 @@ private let CAP_EXTERNAL_SIGNER: UInt64 = 1u64 << 6
 private let CAP_SESSION_RESUMPTION: UInt64 = 1u64 << 7
 private let CAP_SECURE_RANDOM: UInt64 = 1u64 << 8
 
+foreign func wirestack_tls_provider_abi_version(): UInt32
 foreign func wirestack_tls_provider_create(outHandle: CPointer<UInt64>): Int32
 foreign func wirestack_tls_provider_destroy(handle: UInt64): Unit
 foreign func wirestack_tls_provider_id(handle: UInt64): CString
@@ -50,16 +52,27 @@ public enum TlsProviderCapability {
 public enum TlsProviderErrorCode {
     | InitializationFailed
     | InvalidManifest
+    | ProviderMismatch
+    | InvalidNativeState
     | Closed
     | SecureRandomFailed
 }
 
 public class TlsProviderException <: Exception {
     public let code: TlsProviderErrorCode
+    public let nativeStatus: ?Int64
+    public let cause: ?Exception
 
-    public init(code: TlsProviderErrorCode, message: String) {
+    public init(
+        code: TlsProviderErrorCode,
+        message: String,
+        nativeStatus!: ?Int64 = None<Int64>,
+        cause!: ?Exception = None<Exception>
+    ) {
         super(message)
         this.code = code
+        this.nativeStatus = nativeStatus
+        this.cause = cause
     }
 
     protected override func getClassName(): String { "TlsProviderException" }
@@ -87,6 +100,7 @@ public struct TlsProviderManifest {
     public let backend: String
     public let patchLevel: String
     private let capabilityBits: UInt64
+    private let bindingIdentity: String
 
     public init(
         providerId: String,
@@ -94,10 +108,11 @@ public struct TlsProviderManifest {
         fingerprint: String,
         backend: String,
         patchLevel: String,
-        capabilityBits: UInt64
+        capabilityBits: UInt64,
+        bindingIdentity!: String = "detached"
     ) {
         if (providerId.isEmpty() || version.isEmpty() || fingerprint.isEmpty() ||
-            backend.isEmpty() || patchLevel.isEmpty()) {
+            backend.isEmpty() || patchLevel.isEmpty() || bindingIdentity.isEmpty()) {
             throw IllegalArgumentException("TLS provider manifest fields must not be empty")
         }
         this.providerId = providerId
@@ -106,10 +121,16 @@ public struct TlsProviderManifest {
         this.backend = backend
         this.patchLevel = patchLevel
         this.capabilityBits = capabilityBits
+        this.bindingIdentity = bindingIdentity
     }
 
     public func supports(capability: TlsProviderCapability): Bool {
         (capabilityBits & capabilityMask(capability)) != 0u64
+    }
+
+    internal func sameProviderInstance(other: TlsProviderManifest): Bool {
+        providerId == other.providerId && fingerprint == other.fingerprint &&
+        bindingIdentity == other.bindingIdentity
     }
 }
 
@@ -158,10 +179,31 @@ public class TlsRuntimeSnapshot {
 /** Internal provider SPI. No native handle crosses this boundary. */
 public interface TlsProvider {
     func manifest(): TlsProviderManifest
+    func capabilities(): TlsCapabilities
+    func runtimeSnapshot(): TlsRuntimeSnapshot
     func fillSecureRandom(output: Array<Byte>): Unit
     func createEngine(role: TlsEngineRole, security: TlsSecurityPolicy): TlsEngine
+    func createClientEngine(
+        context: TlsClientContext,
+        referenceIdentity: ReferenceIdentity,
+        serverName!: ?HostName
+    ): TlsEngine
+    func createServerEngine(context: TlsServerContext): TlsEngine
+    func createServerEngine(selector: TlsServerContextSelector): TlsEngine
     func close(): Unit
 }
+
+/** Build-selected provider factory. Tests use the same contract without entering release builds. */
+public interface TlsProviderFactory {
+    func create(): TlsProvider
+}
+
+public class SelectedTlsProviderFactory <: TlsProviderFactory {
+    public init() {}
+    public func create(): TlsProvider { NativeTlsProvider() }
+}
+
+public func selectedTlsProvider(): TlsProvider { SelectedTlsProviderFactory().create() }
 
 private func requiredString(value: CString, field: String): String {
     if (value.getChars().isNull()) {
@@ -173,14 +215,22 @@ private func requiredString(value: CString, field: String): String {
     value.toString()
 }
 
-/** Instance-owned Linux AWS-LC provider. */
-public class AwsLcTlsProvider <: TlsProvider {
+/** Instance-owned adapter for the provider-neutral native ABI selected by the build. */
+public class NativeTlsProvider <: TlsProvider {
     private let mutex = Mutex()
     private var handle: UInt64
     private let providerManifest: TlsProviderManifest
     private let sessionStore = TlsSessionStore()
 
     public init() {
+        let abiVersion = unsafe { wirestack_tls_provider_abi_version() }
+        if (abiVersion != PROVIDER_ABI_VERSION) {
+            throw TlsProviderException(
+                TlsProviderErrorCode.InvalidManifest,
+                "TLS provider ABI version mismatch",
+                nativeStatus: Some(Int64(abiVersion))
+            )
+        }
         let out = Array<UInt64>(1, repeat: 0u64)
         let status = unsafe {
             let raw = acquireArrayRawData(out)
@@ -190,7 +240,8 @@ public class AwsLcTlsProvider <: TlsProvider {
         if (status != PROVIDER_OK || out[0] == 0u64) {
             throw TlsProviderException(
                 TlsProviderErrorCode.InitializationFailed,
-                "failed to create Linux TLS provider: ${status}"
+                "failed to create selected TLS provider",
+                nativeStatus: Some(Int64(status))
             )
         }
         handle = out[0]
@@ -202,7 +253,8 @@ public class AwsLcTlsProvider <: TlsProvider {
                     requiredString(wirestack_tls_provider_fingerprint(handle), "fingerprint"),
                     requiredString(wirestack_tls_provider_backend(handle), "backend"),
                     requiredString(wirestack_tls_provider_patch_level(handle), "patch level"),
-                    wirestack_tls_provider_capabilities(handle)
+                    wirestack_tls_provider_capabilities(handle),
+                    bindingIdentity: "native-${handle}"
                 )
             }
         } catch (error: Exception) {
@@ -323,11 +375,11 @@ public class AwsLcTlsProvider <: TlsProvider {
                     "TLS provider is closed"
                 )
             }
-            createAwsLcTlsEngine(handle, role, security, providerManifest)
+            createNativeTlsEngine(handle, role, security, providerManifest)
         }
     }
 
-    public func linuxCapabilities(): TlsCapabilities {
+    public func capabilities(): TlsCapabilities {
         try {
             let _ = LinuxSystemTrustAdapter.discover()
             TlsCapabilities.fromProvider(providerManifest, systemTrustAvailable: true)
@@ -343,6 +395,18 @@ public class AwsLcTlsProvider <: TlsProvider {
     public func createClientEngine(
         context: TlsClientContext,
         referenceIdentity: ReferenceIdentity,
+        serverName!: ?HostName
+    ): TlsEngine {
+        createClientEngineWithTrustLocation(
+            context,
+            referenceIdentity,
+            serverName: serverName
+        )
+    }
+
+    public func createClientEngineWithTrustLocation(
+        context: TlsClientContext,
+        referenceIdentity: ReferenceIdentity,
         serverName!: ?HostName = None<HostName>,
         systemTrustLocation!: ?LinuxSystemTrustLocation = None<LinuxSystemTrustLocation>
     ): TlsEngine {
@@ -353,10 +417,9 @@ public class AwsLcTlsProvider <: TlsProvider {
                     "TLS provider is closed"
                 )
             }
-            if (context.providerManifest.providerId != providerManifest.providerId ||
-                context.providerManifest.fingerprint != providerManifest.fingerprint) {
+            if (!context.providerManifest.sameProviderInstance(providerManifest)) {
                 throw TlsProviderException(
-                    TlsProviderErrorCode.InvalidManifest,
+                    TlsProviderErrorCode.ProviderMismatch,
                     "TLS context was built for a different provider instance identity"
                 )
             }
@@ -366,7 +429,7 @@ public class AwsLcTlsProvider <: TlsProvider {
             } else {
                 systemTrustLocation
             }
-            let engine = AwsLcTlsEngine(
+            let engine = NativeTlsEngine(
                 handle,
                 TlsEngineRole.Client,
                 context.security,
@@ -396,7 +459,11 @@ public class AwsLcTlsProvider <: TlsProvider {
     }
 
     /** Creates a server engine with an already validated immutable local identity. */
-    public func createServerEngine(
+    public func createServerEngine(context: TlsServerContext): TlsEngine {
+        createServerEngineWithTrustLocation(context)
+    }
+
+    public func createServerEngineWithTrustLocation(
         context: TlsServerContext,
         systemTrustLocation!: ?LinuxSystemTrustLocation = None<LinuxSystemTrustLocation>
     ): TlsEngine {
@@ -407,10 +474,9 @@ public class AwsLcTlsProvider <: TlsProvider {
                     "TLS provider is closed"
                 )
             }
-            if (context.providerManifest.providerId != providerManifest.providerId ||
-                context.providerManifest.fingerprint != providerManifest.fingerprint) {
+            if (!context.providerManifest.sameProviderInstance(providerManifest)) {
                 throw TlsProviderException(
-                    TlsProviderErrorCode.InvalidManifest,
+                    TlsProviderErrorCode.ProviderMismatch,
                     "TLS context was built for a different provider instance identity"
                 )
             }
@@ -423,7 +489,7 @@ public class AwsLcTlsProvider <: TlsProvider {
                 }
                 case None => systemTrustLocation
             }
-            let engine = AwsLcTlsEngine(
+            let engine = NativeTlsEngine(
                 handle,
                 TlsEngineRole.Server,
                 context.security,
@@ -457,14 +523,13 @@ public class AwsLcTlsProvider <: TlsProvider {
                     "TLS provider is closed"
                 )
             }
-            if (selector.providerId != providerManifest.providerId ||
-                selector.providerFingerprint != providerManifest.fingerprint) {
+            if (!selector.providerManifest.sameProviderInstance(providerManifest)) {
                 throw TlsProviderException(
-                    TlsProviderErrorCode.InvalidManifest,
+                    TlsProviderErrorCode.ProviderMismatch,
                     "TLS SNI selector was built for a different provider identity"
                 )
             }
-            let engine = AwsLcTlsEngine(
+            let engine = NativeTlsEngine(
                 handle,
                 TlsEngineRole.Server,
                 selector.initialSecurityPolicy(),

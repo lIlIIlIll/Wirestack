@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wirestack://tls-provider/manifest-v1",
+  "additionalProperties": false,
+  "properties": {
+    "abi": {
+      "additionalProperties": false,
+      "properties": {
+        "backend": {"minLength": 1, "type": "string"},
+        "name": {"const": "wirestack_tls_provider"},
+        "version": {"const": 1}
+      },
+      "required": ["name", "version", "backend"],
+      "type": "object"
+    },
+    "capabilities": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
+    "cmake_options": {"items": {"type": "string"}, "type": "array"},
+    "license_expression": {"minLength": 1, "type": "string"},
+    "patches": {"items": {"type": "object"}, "type": "array"},
+    "provider_id": {"minLength": 1, "type": "string"},
+    "provider_version": {"minLength": 1, "type": "string"},
+    "schema_version": {"const": 1},
+    "source": {
+      "additionalProperties": false,
+      "properties": {
+        "commit": {"pattern": "^[0-9a-f]{40}$", "type": "string"},
+        "content_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "kind": {"const": "git"},
+        "tag": {"minLength": 1, "type": "string"},
+        "tree": {"pattern": "^[0-9a-f]{40}$", "type": "string"},
+        "url": {"minLength": 1, "type": "string"}
+      },
+      "required": ["kind", "url", "tag", "commit", "tree", "content_sha256"],
+      "type": "object"
+    }
+  },
+  "required": ["schema_version", "provider_id", "provider_version", "source", "license_expression", "patches", "cmake_options", "abi", "capabilities"],
+  "type": "object"
+}

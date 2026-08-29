@@ -32,15 +32,15 @@ public interface HttpServerAlpnHandshaker <: Resource {
     ): HttpServerNegotiatedTransport
 }
 
-/** Linux AWS-LC TLS 1.2/1.3 server restricted to HTTP/1.1 ALPN. */
-public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker & HttpServerAlpnHandshaker {
-    private let provider: AwsLcTlsProvider
+/** Selected TLS 1.2/1.3 server restricted to HTTP/1.1 ALPN. */
+public class DefaultHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker & HttpServerAlpnHandshaker {
+    private let provider: TlsProvider
     private let serverContext: TlsServerContext
     private let privateKey: PrivateKeyRef
     private let mutex = Mutex()
     private var closed = false
 
-    private init(provider: AwsLcTlsProvider, serverContext: TlsServerContext,
+    private init(provider: TlsProvider, serverContext: TlsServerContext,
         privateKey: PrivateKeyRef) {
         this.provider = provider
         this.serverContext = serverContext
@@ -53,7 +53,7 @@ public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker & HttpSer
         clientAuthentication!: ClientAuthentication = ClientAuthentication.None,
         clientTrustRootsDer!: Array<Array<Byte>> = Array<Array<Byte>>(),
         securityProfile!: TlsSecurityProfile = TlsSecurityProfile.Modern
-    ): AwsLcHttp1ServerTlsHandshaker {
+    ): DefaultHttp1ServerTlsHandshaker {
         createWithProtocols(
             certificateChainDer, privateKeyPkcs8Der, ["http/1.1"],
             clientAuthentication, clientTrustRootsDer, securityProfile
@@ -66,7 +66,7 @@ public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker & HttpSer
         clientAuthentication!: ClientAuthentication = ClientAuthentication.None,
         clientTrustRootsDer!: Array<Array<Byte>> = Array<Array<Byte>>(),
         securityProfile!: TlsSecurityProfile = TlsSecurityProfile.Modern
-    ): AwsLcHttp1ServerTlsHandshaker {
+    ): DefaultHttp1ServerTlsHandshaker {
         createWithProtocols(
             certificateChainDer, privateKeyPkcs8Der, ["h2", "http/1.1"],
             clientAuthentication, clientTrustRootsDer, securityProfile
@@ -80,18 +80,18 @@ public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker & HttpSer
         clientAuthentication: ClientAuthentication,
         clientTrustRootsDer: Array<Array<Byte>>,
         securityProfile: TlsSecurityProfile
-    ): AwsLcHttp1ServerTlsHandshaker {
+    ): DefaultHttp1ServerTlsHandshaker {
         let certificates = ArrayList<DerCertificate>()
         for (encoded in certificateChainDer) { certificates.add(DerCertificate(encoded)) }
         let chain = CertificateChain(certificates.toArray())
         let key = PrivateKeyRef.pkcs8(privateKeyPkcs8Der)
-        var provider: ?AwsLcTlsProvider = None<AwsLcTlsProvider>
+        var provider: ?TlsProvider = None<TlsProvider>
         try {
             let identity = LocalIdentity(chain, key)
-            let created = AwsLcTlsProvider()
+            let created = selectedTlsProvider()
             provider = Some(created)
             let builder = TlsServerContext.builder(
-                created.manifest(), created.linuxCapabilities()
+                created.manifest(), created.capabilities()
             ).securityProfile(securityProfile).identity(identity).alpn(protocols)
                 .clientAuthentication(clientAuthentication)
             match (clientAuthentication) {
@@ -106,7 +106,7 @@ public class AwsLcHttp1ServerTlsHandshaker <: Http1ServerTlsHandshaker & HttpSer
                     for (encoded in clientTrustRootsDer) { roots.add(DerCertificate(encoded)) }
                     builder.clientTrust(TrustPolicy.customRoots(CertificateChain(roots.toArray())))
             }
-            AwsLcHttp1ServerTlsHandshaker(created, builder.build(), key)
+            DefaultHttp1ServerTlsHandshaker(created, builder.build(), key)
         } catch (error: Exception) {
             key.close()
             match (provider) { case Some(value) => value.close(); case None => () }
