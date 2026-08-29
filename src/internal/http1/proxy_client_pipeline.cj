@@ -127,20 +127,29 @@ public class Http1HttpsProxyClient <: Resource {
         if (request.url.scheme != "https") {
             throw IllegalArgumentException("HTTPS proxy client accepts only https URLs")
         }
+        // The public authorization hook supplies a header value, not a stable
+        // credential identity. Authenticated CONNECT tunnels therefore fail
+        // closed to one lease and never enter the reusable pool.
+        let authenticated = proxyAuthorization.isSome()
+        let routeIdentity = if (authenticated) {
+            "${endpoint.identity}|authenticated-no-reuse"
+        } else {
+            endpoint.identity
+        }
         let key = HttpConnectionPoolKey(
-            "https", request.url.host, request.url.port, Some(endpoint.identity), "default",
+            "https", request.url.host, request.url.port, Some(routeIdentity), "default",
             handshaker.tlsContextIdentity, handshaker.trustContextIdentity,
             handshaker.clientIdentity, handshaker.providerIdentity, handshaker.alpnPolicy
         )
         let factory = Http1HttpsProxyConnectionFactory(
-            endpoint, resolver, transportFactory, handshaker, request.url, proxyAuthorization,
+            endpoint, routeIdentity, resolver, transportFactory, handshaker, request.url, proxyAuthorization,
             limits, attemptDelay, continueTimeout
         )
         let lease = pool.acquire(key, factory, context: context)
         try {
             let result = lease.connection.executeTracked(request, context: context, trailer: trailer,
                 onTerminated: { reusable =>
-                    if (reusable) {
+                    if (reusable && !authenticated) {
                         pool.release(lease, context: context)
                     } else {
                         pool.discard(lease, context: context)
@@ -196,6 +205,7 @@ private class Http1ForwardProxyConnectionFactory <: Http1ConnectionFactory {
 
 private class Http1HttpsProxyConnectionFactory <: Http1ConnectionFactory {
     private let endpoint: Http1ProxyEndpoint
+    private let routeIdentity: String
     private let connector: HappyEyeballsConnector
     private let transportFactory: TransportFactory
     private let handshaker: Http1TlsHandshaker
@@ -204,10 +214,12 @@ private class Http1HttpsProxyConnectionFactory <: Http1ConnectionFactory {
     private let limits: HttpLimits
     private let continueTimeout: Duration
 
-    init(endpoint: Http1ProxyEndpoint, resolver: Resolver, transportFactory: TransportFactory,
+    init(endpoint: Http1ProxyEndpoint, routeIdentity: String,
+        resolver: Resolver, transportFactory: TransportFactory,
         handshaker: Http1TlsHandshaker, target: HttpUrl, proxyAuthorization: ?String,
         limits: HttpLimits, attemptDelay: Duration, continueTimeout: Duration) {
         this.endpoint = endpoint
+        this.routeIdentity = routeIdentity
         connector = HappyEyeballsConnector(resolver, transportFactory, attemptDelay: attemptDelay)
         this.transportFactory = transportFactory
         this.handshaker = handshaker
@@ -220,7 +232,7 @@ private class Http1HttpsProxyConnectionFactory <: Http1ConnectionFactory {
     }
 
     public func create(key: HttpConnectionPoolKey, context: OperationContext): Http1ClientConnection {
-        if (key.scheme != "https" || key.proxyRoute != Some(endpoint.identity) ||
+        if (key.scheme != "https" || key.proxyRoute != Some(routeIdentity) ||
             key.originHost != target.host || key.originPort != target.port) {
             throw IllegalArgumentException("HTTPS proxy factory received a mismatched route key")
         }

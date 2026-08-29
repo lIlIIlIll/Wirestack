@@ -1,0 +1,64 @@
+name: Clean Cangjie Build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: clean-cangjie-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  clean-cangjie-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out a clean source tree
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Resolve the latest complete Cangjie nightly
+        id: cangjie-nightly
+        run: python3 tools/latest_cangjie_nightly.py --github-output "$GITHUB_OUTPUT"
+
+      - name: Install the resolved Cangjie toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ steps.cangjie-nightly.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie.tar.gz
+
+      - name: Install native build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang llvm cmake ninja-build
+
+      - name: Verify Linux toolchain readiness
+        shell: bash
+        run: |
+          set +e
+          scripts/repo-doctor --json
+          doctor_exit=$?
+          set -e
+          case "$doctor_exit" in
+            0|6) ;;
+            *) exit "$doctor_exit" ;;
+          esac
+
+      - name: Run current-source build and test gate
+        run: scripts/check-code
+
+      - name: Build and run the installed public consumer
+        run: scripts/check-m7-027-linux-examples --json
+
+      - name: Reject build-time source-tree mutation
+        shell: bash
+        run: |
+          git diff --exit-code
+          test -z "$(git status --porcelain --untracked-files=all)"

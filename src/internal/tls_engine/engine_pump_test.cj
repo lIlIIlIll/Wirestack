@@ -167,6 +167,45 @@ class TlsEnginePumpTest {
     }
 
     @TestCase
+    func matchingSpkiPinDoesNotBypassReferenceIdentityVerification(): Unit {
+        let provider = AwsLcTlsProvider()
+        let identity = tlsTestLocalIdentity()
+        let capabilities = provider.linuxCapabilities()
+        let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
+            .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
+            .build()
+        let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
+            .identity(identity)
+            .build()
+        let client = provider.createClientEngine(
+            clientContext,
+            ReferenceIdentity.Dns(HostName("wrong.example")),
+            serverName: Some(HostName("example.com"))
+        )
+        let server = provider.createServerEngine(serverContext)
+        var rejected = false
+        try {
+            try {
+                drivePairedMemoryHandshake(client, server)
+            } catch (error: TlsEngineException) {
+                match (error.tlsCode) {
+                    case TlsEngineErrorCode.IdentityMismatch =>
+                        rejected = isTlsHandshakePhase(error.phase) &&
+                            isNeverRetryable(error.retryability) &&
+                            error.verificationCode.isSome()
+                    case _ => ()
+                }
+            }
+            @Expect(rejected)
+        } finally {
+            client.close()
+            server.close()
+            identity.privateKeyRef.close()
+            provider.close()
+        }
+    }
+
+    @TestCase
     func realAwsLcEnginesExchangeCloseNotifyInBothDirections(): Unit {
         let provider = AwsLcTlsProvider()
         let identity = tlsTestLocalIdentity()

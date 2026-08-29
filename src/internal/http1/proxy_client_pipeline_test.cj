@@ -11,7 +11,7 @@ import wirestack.internal.transport.*
 @Test
 class Http1ProxyClientPipelineTest {
     @TestCase
-    func connectAuthenticatesProxyThenHandshakesTheOriginAndReusesTunnel(): Unit {
+    func dynamicConnectCredentialsNeverReuseAnAuthenticatedTunnel(): Unit {
         let proxyHost = HostName("proxy.test")
         let resolver = StaticResolver(ResolveResult(
             [IpAddress(IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8])],
@@ -34,10 +34,10 @@ class Http1ProxyClientPipelineTest {
         )
         @Expect(readProxyPipelineBody(second.body), "tunnel-two")
 
-        @Expect(transports.connectCount, 1)
-        @Expect(connectHandler.calls.load(), 1)
+        @Expect(transports.connectCount, 2)
+        @Expect(connectHandler.calls.load(), 2)
         @Expect(connectHandler.valid.load(), 1)
-        @Expect(handshaker.handshakeCount, 1)
+        @Expect(handshaker.handshakeCount, 2)
         @Expect(handshaker.originWasUsed.load(), 1)
         client.close()
         @Expect(handshaker.isClosed())

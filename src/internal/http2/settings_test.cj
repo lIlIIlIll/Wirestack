@@ -22,7 +22,7 @@ class Http2SettingsTest {
 
     @TestCase
     func peerBatchAppliesAtomicallyAndReturnsAckAndWindowDelta(): Unit {
-        let state = Http2SettingsState()
+        let state = Http2SettingsState(Http2ConnectionRole.Server)
         let result = state.receive(encodeHttp2Settings([
             Http2Setting(Http2SettingId.InitialWindowSize, 70000u32),
             Http2Setting(Http2SettingId.MaxConcurrentStreams, 8u32),
@@ -39,7 +39,7 @@ class Http2SettingsTest {
 
     @TestCase
     func invalidPeerBatchLeavesEffectiveStateUnchanged(): Unit {
-        let state = Http2SettingsState()
+        let state = Http2SettingsState(Http2ConnectionRole.Server)
         let before = state.peer.initialWindowSize
         let invalidWire: Array<Byte> = [0, 0, 6, 4, 0, 0, 0, 0, 0, 0, 4, 0x80, 0, 0, 0]
         let frame = Http2FrameParser().feed(invalidWire)[0]
@@ -53,7 +53,7 @@ class Http2SettingsTest {
 
     @TestCase
     func localBatchesAreAcknowledgedInFifoOrder(): Unit {
-        let state = Http2SettingsState()
+        let state = Http2SettingsState(Http2ConnectionRole.Server)
         let _ = state.sendLocal([Http2Setting(Http2SettingId.MaxConcurrentStreams, 10u32)])
         let _ = state.sendLocal([Http2Setting(Http2SettingId.MaxConcurrentStreams, 20u32)])
         @Expect(state.pendingLocalCount, 2)
@@ -64,7 +64,10 @@ class Http2SettingsTest {
 
     @TestCase
     func unexpectedAckAndPendingBatchOverflowFailClosed(): Unit {
-        let state = Http2SettingsState(limits: Http2Limits(maxPendingSettings: 1u32))
+        let state = Http2SettingsState(
+            Http2ConnectionRole.Server,
+            limits: Http2Limits(maxPendingSettings: 1u32)
+        )
         var unexpected = false
         try { let _ = state.receive(http2SettingsAck()) } catch (error: Http2ProtocolException) {
             unexpected = sameSettingsError(error.code, Http2ErrorCode.ProtocolError)
@@ -84,7 +87,7 @@ class Http2SettingsTest {
             maxHeaderListBytes: 1024u32,
             maxConcurrentStreams: 4u32
         )
-        let state = Http2SettingsState(limits: limits)
+        let state = Http2SettingsState(Http2ConnectionRole.Server, limits: limits)
         let update = applied(state.receive(encodeHttp2Settings([
             Http2Setting(Http2SettingId.HeaderTableSize, 9999u32),
             Http2Setting(Http2SettingId.MaxHeaderListSize, 9999u32),
@@ -113,6 +116,74 @@ class Http2SettingsTest {
         }
         @Expect(badAck)
     }
+
+    @TestCase
+    func peerDefaultsAreRfcValuesCappedSeparatelyFromLocalAdvertisement(): Unit {
+        let limits = Http2Limits(
+            maxHeaderTableBytes: 128u32,
+            maxHeaderListBytes: 1024u32,
+            maxConcurrentStreams: 7u32,
+            initialWindowSize: 12345u32,
+            maxFrameSize: 32768u32
+        )
+        let client = Http2SettingsState(Http2ConnectionRole.Client, limits: limits)
+        @Expect(client.peer.headerTableSize, 128u32)
+        @Expect(client.peer.maxConcurrentStreams, 7u32)
+        @Expect(client.peer.initialWindowSize, 65535u32)
+        @Expect(client.peer.maxFrameSize, 16384u32)
+        @Expect(client.peer.maxHeaderListSize, 1024u32)
+
+        let clientInitial = decodeHttp2Settings(client.sendLocal(
+            initialHttp2Settings(Http2ConnectionRole.Client, limits)
+        )).settings
+        @Expect(hasSetting(clientInitial, Http2SettingId.EnablePush, 0u32))
+        @Expect(hasSetting(clientInitial, Http2SettingId.InitialWindowSize, 12345u32))
+        @Expect(hasSetting(clientInitial, Http2SettingId.MaxFrameSize, 32768u32))
+        @Expect(hasSetting(clientInitial, Http2SettingId.MaxHeaderListSize, 1024u32))
+
+        let serverInitial = initialHttp2Settings(Http2ConnectionRole.Server, limits)
+        @Expect(!hasSettingId(serverInitial, Http2SettingId.EnablePush))
+    }
+
+    @TestCase
+    func serverEnablePushSettingIsRejectedInBothDirections(): Unit {
+        let server = Http2SettingsState(Http2ConnectionRole.Server)
+        var sendRejected = false
+        try {
+            let _ = server.sendLocal([Http2Setting(Http2SettingId.EnablePush, 0u32)])
+        } catch (_: IllegalArgumentException) { sendRejected = true }
+        @Expect(sendRejected)
+
+        let client = Http2SettingsState(Http2ConnectionRole.Client)
+        var receiveRejected = false
+        try {
+            let _ = client.receive(encodeHttp2Settings([
+                Http2Setting(Http2SettingId.EnablePush, 0u32)
+            ]))
+        } catch (error: Http2ProtocolException) {
+            receiveRejected = sameSettingsError(error.code, Http2ErrorCode.ProtocolError)
+        }
+        @Expect(receiveRejected)
+    }
+}
+
+private func hasSetting(
+    settings: Array<Http2Setting>,
+    identifier: Http2SettingId,
+    value: UInt32
+): Bool {
+    for (setting in settings) {
+        if (http2SettingIdToWire(setting.identifier) == http2SettingIdToWire(identifier) &&
+            setting.value == value) { return true }
+    }
+    false
+}
+
+private func hasSettingId(settings: Array<Http2Setting>, identifier: Http2SettingId): Bool {
+    for (setting in settings) {
+        if (http2SettingIdToWire(setting.identifier) == http2SettingIdToWire(identifier)) { return true }
+    }
+    false
 }
 
 private func applied(result: Http2SettingsReceiveResult): Http2SettingsUpdate {

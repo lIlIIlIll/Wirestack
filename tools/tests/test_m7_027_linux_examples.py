@@ -99,6 +99,24 @@ class M7027LinuxExamplesTest(unittest.TestCase):
         self.assertIn("wirestack = { path =", manifest)
         self.assertNotIn("wirestack.internal", manifest)
 
+    def test_tool_command_uses_hosted_path_without_local_wrapper(self) -> None:
+        missing = Path("/definitely/missing/codex_cangjie_env")
+        command = gate.tool_command(
+            ["cjpm", "build"],
+            Path("/tmp/consumer"),
+            wrapper=missing,
+            which=lambda name: "/usr/bin/cjpm" if name == "cjpm" else None,
+        )
+        self.assertEqual(["cjpm", "build"], command)
+        with self.assertRaises(gate.ExampleGateError) as caught:
+            gate.tool_command(
+                ["cjpm", "build"],
+                Path("/tmp/consumer"),
+                wrapper=missing,
+                which=lambda _name: None,
+            )
+        self.assertEqual("MISSING_TOOLCHAIN", caught.exception.code)
+
     @staticmethod
     def write_source_fixture(root: Path) -> None:
         root.mkdir(parents=True, exist_ok=True)

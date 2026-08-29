@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "task_id": "M7-029",
+  "generated_at_utc": "2026-08-29T06:17:27Z",
+  "platform": "linux-x86_64-glibc",
+  "status": "PASS",
+  "checks": [
+    {
+      "id": "review-contract-tests",
+      "status": "PASS",
+      "exit_code": 0,
+      "passed": 13,
+      "evidence_path": "docs/evidence/M7-029/regressions/review-contract-tests.log",
+      "sha256": "98d2e5ff32fab95df91a403da8938190f4e96f9b0d8fc42220c7acd086a12088"
+    },
+    {
+      "id": "release-license-sbom-tests",
+      "status": "PASS",
+      "exit_code": 0,
+      "passed": 6,
+      "evidence_path": "docs/evidence/M7-029/regressions/release-license-sbom-tests.log",
+      "sha256": "e72d54ed0b5e1fc421331872ce24e3c3d37785fa1aef7b062cf9011bf1033190"
+    },
+    {
+      "id": "tls-identity-regression",
+      "status": "PASS",
+      "exit_code": 0,
+      "passed": 25,
+      "skipped": 568,
+      "evidence_path": "docs/evidence/M7-029/regressions/tls-identity-regression.log",
+      "sha256": "24ccfad48d0b054c47ac934df46a7082c63d15ab00afbd2269ae7f588674ac13"
+    },
+    {
+      "id": "non-performance-cangjie",
+      "status": "PASS",
+      "exit_code": 0,
+      "total": 593,
+      "passed": 570,
+      "skipped": 23,
+      "failed": 0,
+      "errors": 0,
+      "evidence_path": "docs/evidence/M7-029/regressions/non-performance-cangjie.log",
+      "sha256": "1bce6c7d81fd8a22c7aec3bf73b4b03c5b3a295c06447a38de8ff1f66f58b348"
+    },
+    {
+      "id": "resolver-global-bound",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "focused_cangjie_passed": 9,
+      "live_pool_limit": 8,
+      "live_worker_limit": 64,
+      "evidence_path": "docs/evidence/M7-029/final-review-regressions/resolver-global-bound.json",
+      "sha256": "21da8589d19b27f11283d1bebc674e7b72e0de3d4fd33bcdf44973a2254a3659"
+    },
+    {
+      "id": "github-required-check",
+      "status": "PASS",
+      "run_id": 33233671568,
+      "job_id": 99050772214,
+      "head_sha": "bd7f11bee8756ac70f74bbe5bb8d08eb492f09bf",
+      "ruleset_id": 21787899,
+      "required_context": "clean-cangjie-build",
+      "evidence_path": "docs/evidence/M7-029/github-required-check.json",
+      "sha256": "433da1568b650abf9a990fa89c9ef74d2236692e984b64b7aee2154c3e93cce2"
+    }
+  ],
+  "initial_isolated_review": {
+    "target_commit": "e19cd8e4a07e84e4da0a0a8648919b86e08684f8",
+    "conclusion": "FAIL",
+    "critical": 1,
+    "high": 10,
+    "medium": 9,
+    "report_path": "docs/evidence/M7-029/initial-isolated-review/independent-review.json",
+    "report_sha256": "cd8cf0bd3c2988f443ec8c9e3f70230c84dde1dc5115a2bbe6a9e6bb79fac481",
+    "summary_path": "docs/evidence/M7-029/initial-isolated-review/review-summary.md",
+    "summary_sha256": "bb799414e790db40865c9be88ca6c6a79418d8f3e775813d2516a4c289a8ee15"
+  },
+  "second_isolated_review": {
+    "target_commit": "8e4a0e82f040b1befba1ecaff443069af4b85825",
+    "conclusion": "FAIL",
+    "open_critical": ["WS-CI-001"],
+    "open_high": ["WS-RES-001"],
+    "report_path": "docs/evidence/M7-029/second-isolated-review/independent-review.json",
+    "report_sha256": "ca7e07c77bb2400acca31ae7ac554f812f4869ff34ba3f847871c88a555a8b61",
+    "summary_path": "docs/evidence/M7-029/second-isolated-review/review-summary.md",
+    "summary_sha256": "7638911ec234fd6b67d03113dcbaf01e6c2de5cd720de90dfc588e0a0e5f9097"
+  },
+  "final_review": {
+    "target_commit": "ea493f13fefa520e9c1f2e08b9b068dc26c28082",
+    "conclusion": "PASS",
+    "critical_fixed": 2,
+    "high_fixed": 12,
+    "medium_open": 8,
+    "open_critical_or_high": 0,
+    "report_path": "docs/evidence/M7-029/independent-review.json",
+    "report_sha256": "8b43d2359c37456bfeb17e311e6462b8b00be375a0ab62133d1e13baa4c3cc56",
+    "summary_path": "docs/evidence/M7-029/final-isolated-review/review-summary.md",
+    "summary_sha256": "ea7363b4233e4fa2292bc00cecc5d75622ac3527c6fed6ffd754eb6d5c44aaa9",
+    "validation_path": "docs/evidence/M7-029/linux_x86_64/review-validation.json",
+    "validation_sha256": "e60c466389a88ac2ca9832c4a8cecae348a7845de6acacf18cad2c3c7f67bd90"
+  },
+  "non_claims": [
+    "The initial and second isolated reviews predate the final candidate and are remediation inputs, not the final PASS.",
+    "Eight Medium findings remain Open and are not represented as fixed.",
+    "The repository-wide scripts/check remains non-PASS because prior release evidence is intentionally stale after production changes.",
+    "No one-hour SSE profile or 86,400-second release soak was run."
+  ]
+}

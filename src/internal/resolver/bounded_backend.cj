@@ -21,7 +21,8 @@ private const RESOLVER_FAMILY_IPV4: Int32 = 4
 private const RESOLVER_FAMILY_IPV6: Int32 = 6
 private const RESOLVER_METRIC_COUNT: Int64 = 10
 private const RESOLVER_ADDRESS_BYTES: Int64 = 16
-private let RESOLVER_WAIT_QUANTUM = Duration.millisecond
+private let RESOLVER_INITIAL_WAIT = Duration.millisecond
+private let RESOLVER_MAXIMUM_WAIT = 16 * Duration.millisecond
 
 foreign func wirestack_resolver_pool_create(
     workerCount: UInt64,
@@ -87,6 +88,9 @@ internal struct ResolverPoolMetrics {
 
 /**
  * Linux blocking resolver backend isolated on a fixed native worker pool.
+ * close() stops admission and quarantines any libc/NSS call that has not yet
+ * returned; a native reaper releases the bounded pool only after all workers
+ * and caller-held jobs have finished.
  *
  * This type is intentionally internal. M2-005 owns the public SystemResolver
  * adapter and its platform error mapping.
@@ -134,13 +138,15 @@ internal class LinuxBoundedResolverBackend {
         let startedAt = MonoTime.now()
         let jobHandle = submit(host, service, options)
         let output = ResolverPollOutput(options.maxResults)
+        var waitDelay = RESOLVER_INITIAL_WAIT
         try {
             while (true) {
                 checkResolveContext(context)
                 if (let Some(result) <- poll(jobHandle, host, options, startedAt, output)) {
                     return result
                 }
-                waitForNextPoll(context)
+                waitForNextPoll(context, waitDelay)
+                waitDelay = nextResolverWaitDelay(waitDelay)
             }
         } finally {
             unsafe { wirestack_resolver_job_release(jobHandle) }
@@ -317,17 +323,17 @@ internal class LinuxBoundedResolverBackend {
         }
         let addresses = ArrayList<IpAddress>()
         for (index in 0..Int64(output.count[0])) {
-            let size = if (output.families[index] == RESOLVER_FAMILY_IPV4) { 4 } else { 16 }
+            let family = nativeResolverResultFamily(output.families[index])
+            let size = match (family) {
+                case IpAddressFamily.Ipv4 => 4
+                case IpAddressFamily.Ipv6 => 16
+            }
             let octets = Array<Byte>(size, repeat: 0)
             for (offset in 0..size) {
                 octets[offset] = output.packed[index * RESOLVER_ADDRESS_BYTES + offset]
             }
             addresses.add(IpAddress(
-                if (output.families[index] == RESOLVER_FAMILY_IPV4) {
-                    IpAddressFamily.Ipv4
-                } else {
-                    IpAddressFamily.Ipv6
-                },
+                family,
                 octets
             ))
         }
@@ -383,7 +389,25 @@ private func resolveError(value: Int32): ResolveErrorCode {
     }
 }
 
-private func waitForNextPoll(context: OperationContext): Unit {
+internal func nativeResolverResultFamily(value: Int32): IpAddressFamily {
+    if (value == RESOLVER_FAMILY_IPV4) {
+        return IpAddressFamily.Ipv4
+    }
+    if (value == RESOLVER_FAMILY_IPV6) {
+        return IpAddressFamily.Ipv6
+    }
+    throw ResolveException(
+        ResolveErrorCode.SystemFailure,
+        "Linux resolver returned an unknown address family"
+    )
+}
+
+internal func nextResolverWaitDelay(current: Duration): Duration {
+    let doubled = current + current
+    if (doubled < RESOLVER_MAXIMUM_WAIT) { doubled } else { RESOLVER_MAXIMUM_WAIT }
+}
+
+private func waitForNextPoll(context: OperationContext, requested: Duration): Unit {
     checkResolveContext(context)
     let delay = match (context.deadline) {
         case Some(value) =>
@@ -391,12 +415,12 @@ private func waitForNextPoll(context: OperationContext): Unit {
             if (remaining <= Duration.Zero) {
                 checkResolveContext(context)
                 Duration.nanosecond
-            } else if (remaining < RESOLVER_WAIT_QUANTUM) {
+            } else if (remaining < requested) {
                 remaining
             } else {
-                RESOLVER_WAIT_QUANTUM
+                requested
             }
-        case None => RESOLVER_WAIT_QUANTUM
+        case None => requested
     }
     sleep(delay)
 }

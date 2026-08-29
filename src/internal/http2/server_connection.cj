@@ -52,10 +52,9 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
 
     public func serve(context!: OperationContext = OperationContext.background()): Unit {
         try {
-            let settings = machine.start(settings: [
-                Http2Setting(Http2SettingId.EnablePush, 0u32),
-                Http2Setting(Http2SettingId.MaxConcurrentStreams, http2Limits.maxConcurrentStreams)
-            ])
+            let settings = machine.start(settings: initialHttp2Settings(
+                Http2ConnectionRole.Server, http2Limits
+            ))
             writeAll(transport, ByteSpan(settings), context: context)
             let _ = spawn { writer.run() }
             let _ = reader.getOrThrow().run(context: context)
@@ -214,8 +213,7 @@ public class Http2ServerConnection <: Http2InboundFrameHandler & Http2ServerCont
                 let event = body.next()
                 match (event.kind) {
                     case Http2ServerBodyEventKind.Data =>
-                        if (!event.beginData()) { throw IllegalStateException("HTTP/2 DATA permit was cancelled") }
-                        waitWrite(writer.enqueue(event.frame.getOrThrow()))
+                        waitWrite(event.enqueueData(writer))
                     case Http2ServerBodyEventKind.EndData =>
                         waitWrite(writer.enqueue(Http2Frame(
                             Http2FrameHeader(
