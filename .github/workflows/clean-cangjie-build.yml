@@ -23,11 +23,15 @@ jobs:
           clean: true
           fetch-depth: 1
 
-      - name: Install the pinned Cangjie toolchain
+      - name: Resolve the latest complete Cangjie nightly
+        id: cangjie-nightly
+        run: python3 tools/latest_cangjie_nightly.py --github-output "$GITHUB_OUTPUT"
+
+      - name: Install the resolved Cangjie toolchain
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
           channel: nightly
-          version: "1.1.0-alpha.20260817040003"
+          version: ${{ steps.cangjie-nightly.outputs.version }}
           archive-path: ${{ runner.temp }}/cangjie.tar.gz
 
       - name: Install native build prerequisites
