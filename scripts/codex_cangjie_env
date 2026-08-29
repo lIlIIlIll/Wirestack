@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 set -uo pipefail
 
-source "${HOME}/.codex/zshrc" || true
+source "${HOME}/.codex/.zshenv" || true
 set -e
 cangjie_env
 export DISABLE_ZOXIDE="${DISABLE_ZOXIDE:-1}"
