@@ -95,7 +95,7 @@ public class Http2ConnectionStateMachine {
     public init(role: Http2ConnectionRole, limits!: Http2Limits = Http2Limits()) {
         this.role = role
         this.limits = limits
-        settingsState = Http2SettingsState(limits: limits)
+        settingsState = Http2SettingsState(role, limits: limits)
         headerAssembler = Http2HeaderBlockAssembler(limits: limits)
         prefaceReceived = if (isClient(role)) { http2ClientPreface().size } else { 0 }
     }
