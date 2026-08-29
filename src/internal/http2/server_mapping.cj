@@ -444,6 +444,20 @@ public class Http2ServerBodyEvent {
         }
     }
 
+    /** Transfers the reserved permit to the single writer before any flow credit is consumed. */
+    internal func enqueueData(writer: Http2WriteScheduler): Http2WriteTicket {
+        let dataFrame = match (frame) {
+            case Some(value) => value
+            case None => throw IllegalStateException("HTTP/2 terminal body event has no DATA frame")
+        }
+        let dataPermit = match (permit) {
+            case Some(value) => value
+            case None => throw IllegalStateException("HTTP/2 terminal body event has no DATA permit")
+        }
+        try { writer.enqueueReservedData(dataFrame, dataPermit) }
+        finally { if (let Some(body) <- owner) { body.completePermit(dataPermit) } }
+    }
+
     public func cancelData(): Bool {
         match (permit) {
             case Some(value) =>

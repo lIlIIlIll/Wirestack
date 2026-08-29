@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "taskId": "M7-029",
+  "target": {
+    "packagePath": "docs/security/review/linux-1.0/evidence-index.json",
+    "packageSha256": "COPY_FROM_REVIEW_REQUEST"
+  },
+  "reviewer": {
+    "identity": "REVIEWER_IDENTITY",
+    "affiliation": "REVIEWER_AFFILIATION",
+    "reviewMode": "External_OR_ProcessIsolatedAgent",
+    "independent": true,
+    "independenceStatement": "STATE_IMPLEMENTATION_INDEPENDENCE",
+    "conflicts": [],
+    "startedAtUtc": "YYYY-MM-DDTHH:MM:SSZ",
+    "completedAtUtc": "YYYY-MM-DDTHH:MM:SSZ"
+  },
+  "scope": [
+    "certificate-identity",
+    "dns-proxy-routing",
+    "http1-smuggling",
+    "http2-hpack",
+    "lifecycle-cancellation",
+    "linux-platform",
+    "native-c-abi",
+    "pool-isolation",
+    "private-keys",
+    "release-evidence",
+    "resource-bounds",
+    "sensitive-data",
+    "supply-chain",
+    "tls-protocol"
+  ],
+  "methods": ["evidence-audit", "native-c-abi", "source-review"],
+  "compatibilityPolicy": "NO_BACKWARD_COMPATIBILITY_PRE_1_0",
+  "findings": [],
+  "conclusion": "PASS"
+}

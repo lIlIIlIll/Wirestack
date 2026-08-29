@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_root"
+
+python3 tools/architecture_guard.py --root . --format text
+scripts/build-linux-resolver --quiet
+
+command -v cjc >/dev/null
+command -v cjpm >/dev/null
+cjpm check
+cjpm build
+cjpm test --exclude-tags=Performance --parallel 1 --no-progress --no-color

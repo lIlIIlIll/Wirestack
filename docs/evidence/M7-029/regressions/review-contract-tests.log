@@ -1,0 +1,18 @@
+test_cjpm_build_hook_builds_both_native_dependencies (tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_cjpm_build_hook_builds_both_native_dependencies) ... ok
+test_clean_cangjie_workflow_covers_the_release_critical_gates (tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_clean_cangjie_workflow_covers_the_release_critical_gates) ... ok
+test_complete_no_finding_report_passes (tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_complete_no_finding_report_passes) ... ok
+test_duplicate_and_unknown_finding_fields_fail (tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_duplicate_and_unknown_finding_fields_fail) ... ok
+test_fixed_finding_requires_executed_digest_bound_regression (tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_fixed_finding_requires_executed_digest_bound_regression) ... ok
+test_missing_review_is_blocked_and_atomic_failure_preserves_file (tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_missing_review_is_blocked_and_atomic_failure_preserves_file) ... ok
+test_open_high_and_critical_findings_block_release (tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_open_high_and_critical_findings_block_release) ... ok
+test_process_isolated_agent_requires_conflict_disclosure (tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_process_isolated_agent_requires_conflict_disclosure) ... ok
+test_provider_manifest_is_a_repository_input (tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_provider_manifest_is_a_repository_input) ... ok
+test_reviewer_dates_conflicts_and_set_fields_are_strict (tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_reviewer_dates_conflicts_and_set_fields_are_strict) ... ok
+test_reviewer_independence_is_required (tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_reviewer_independence_is_required) ... ok
+test_sensitive_value_and_compatibility_gate_fail (tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_sensitive_value_and_compatibility_gate_fail) ... ok
+test_stale_target_and_incomplete_scope_fail (tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_stale_target_and_incomplete_scope_fail) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.016s
+
+OK
