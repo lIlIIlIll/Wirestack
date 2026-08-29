@@ -15,6 +15,11 @@ println(YJson.stringifyPretty(object))
 需要增删字段、替换数组元素、组合多棵树、应用 Patch 或 Schema 校验时使用 AST。节点包括
 null、bool、integer、float、保留字面量的 number、string、array 和 object。
 
+多个父节点可以共享同一子节点。不要把 array/object 直接或间接放回自己的祖先路径；递归
+序列化、`deepCopy()` 和语义等价比较遇到这种环时抛出
+`JsonException(code: "cyclic_json_node")`。`JsonFloatValue` 可以暂存 NaN 或 Infinity，但所有
+JSON 写出入口都会拒绝非有限数。
+
 ## 只读 Compact DOM
 
 ```cangjie

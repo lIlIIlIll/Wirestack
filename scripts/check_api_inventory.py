@@ -82,6 +82,8 @@ def main() -> int:
         fail("inventory release_version must match the 2.0 release line")
     check_versions(inventory)
     check_declarations(inventory)
+    subprocess.run([sys.executable, str(ROOT / "scripts/test_generate_public_api_snapshot.py")],
+        cwd=ROOT, check=True)
     subprocess.run([sys.executable, str(ROOT / "scripts/generate_public_api_snapshot.py")],
         cwd=ROOT, check=True)
     print(f"public API inventory passed: {len(inventory['api'])} reviewed deltas")

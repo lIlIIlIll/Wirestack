@@ -18,15 +18,16 @@ API，也不能单独证明语义正确。
 | `scripts/json_stream_protocol_run.py` | previous-yjson 与候选的生命周期配对采集 |
 | `scripts/json_stream_peer_run.py` | yjson 与 stdx.json 的 incremental Stream 配对采集 |
 | `scripts/json_pure_perf_compare.py` | Pure baseline/candidate 内部优化配对采集 |
+| `results/full-seven-library/<date>` | 当前开发版七库同批次对比的原始证据与 checksum |
 
 Typed codec、DOM backend、typed stream 和跨 runtime adapter 必须分别报告，不能把不同
 representation 或 lifecycle 拼成统一排名。
 
 ## Pure baseline/candidate workload
 
-`scripts/json_pure_perf_compare.py` 用于判断内部优化是否值得保留。它不构建源码。运行前需要
-准备两个独立源码目录，并分别构建 `packages/benchmarks`。两个目录中的 benchmark manifest
-必须相同。
+`scripts/json_pure_perf_compare.py` 用于判断内部优化是否值得保留。准备两个独立、clean 的
+源码目录；正式运行通过 `--rebuild --enforce` 在两侧清理并重建 `packages/benchmarks`。结果
+目录必须位于两个源码目录之外。两个目录中的 benchmark harness 必须相同，产品源码可以不同。
 
 语料目录必须包含 `person.json`、`records-64k.json` 和 `records-1m.json`。各 workload 测量
 以下操作：
@@ -43,6 +44,18 @@ representation 或 lifecycle 拼成统一排名。
 | `decode*Chunk4k` | `YJson.fromStream`，输入由 4096-byte chunk 提供 |
 | `encode*Memory` | `YJson.toStream` 写入 caller-owned memory stream |
 
+同一 benchmark class 还包含三个 XL scale workload，用于观察输入规模扩大后的热点：
+
+| Case | 数据形状 | API |
+| --- | --- | --- |
+| `*XlProfileArray` | 1024 个 `ProfileRecord` | `encodeStringWith` / `decodeStringWith` 与一次解析的 typed list codec |
+| `*XlInt64Map` | 一个包含 1024 个 entry 的 `HashMap<String, Int64>` | `encodeStringWith` / `decodeStringWith` 与专用 Int64 map codec |
+| `*XlDeepNestedProfiles` | 64 组 × 每组 16 条记录，共 1024 条 | `encodeStringWith` / `decodeStringWith` 与递归 typed codec |
+
+XL case 使用构造阶段解析一次的具体 codec，元素循环内不做 codec resolution。它们是 yjson
+内部规模分析 workload。只有 peer 提供等语义数据形状和对应最优 typed API 时，才能进入
+跨库共同结果表。
+
 在 Linux Server 上运行完整矩阵：
 
 ```terminal
@@ -53,6 +66,7 @@ scripts/json_pure_perf_compare.py \
   --output /path/to/result \
   --rounds 11 \
   --target-case yjsonStringDecodeLargeProfileArray \
+  --rebuild \
   --enforce
 ```
 
@@ -60,9 +74,11 @@ scripts/json_pure_perf_compare.py \
 的 core。每次测量固定到其中一个 thread，另一个由 `scripts/monitor_cpu_pair.py` 记录。runner
 把 heap 固定为 128 MiB，并在奇偶轮反转 baseline/candidate 顺序。
 
-成功运行会生成 `summary.json`、`summary.md`、`cpu-selection.json`、CPU 监控 CSV，以及每轮
-原始 benchmark report 和日志。`--enforce` 固定要求 11 轮；任一 case 回退超过 5%、任一方
-CV 超过 5%，或 `--target-case` 指定的目标未提升 5% 或少于 5/11 轮胜出时，命令返回非零状态。
+成功运行会生成 `provenance.json`、`summary.json`、`summary.md`、`cpu-selection.json`、两侧
+build log、CPU 监控 CSV，以及每轮原始 benchmark report 和日志。provenance 包含共同 harness
+摘要、两侧源码和 executable 身份、工具链、语料与调用参数。`--enforce` 固定要求 11 轮、
+`--rebuild` 和 clean 源码树；任一 case 回退超过 5%、任一方 CV 超过 5%，或
+`--target-case` 指定的目标未提升 5% 或少于 5/11 轮胜出时，命令返回非零状态。
 
 ## 发布结果要求
 

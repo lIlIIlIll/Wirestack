@@ -1,11 +1,22 @@
 # Changelog
 
-本文件记录已发布版本的用户可见变化。`1.0.0-rc.1` release notes 见
-[RELEASE_NOTES.md](RELEASE_NOTES.md)，预发布快照迁移步骤见
-[pre-1.0 → 1.0](docs/migration/pre-1.0-to-1.0.md)，验证记录见
+本文件记录已发布版本和后续开发的用户可见变化。最新稳定版说明见
+[RELEASE_NOTES.md](RELEASE_NOTES.md)。历史 `1.0.0-rc.1` 的迁移步骤和验收记录分别保存在
+[pre-1.0 → 1.0](docs/migration/pre-1.0-to-1.0.md) 与
 [release evidence](release/1.0.0-rc.1/evidence.md)。
 
 ## [Unreleased]
+
+- mutable `JsonNode` 的序列化、复制和等价比较现在检测祖先环，并允许共享 DAG 节点。
+- direct writer 现在强制单一 root、统一 semantic/raw depth 预算，并在 stream sink 写出前检查
+  `maxBytes`。
+- Rune codec 只接受一个 Unicode scalar。legacy AST codec 对无法执行的非默认配置返回
+  `unsupported_config`。
+- JSONPath singularity 使用解析后的 selector 类型判定，不再根据表达式中的标点猜测。
+- formal performance runner 记录源码、工具链、语料与最终 binary 身份，并要求 clean、隔离的
+  baseline 与 candidate rebuild。
+
+## [2.0.0] - 2026-08-27
 
 - 2.0 默认产品面收敛为单一 semantic engine；普通应用只使用 `YJson`，默认
   `JsonDocument` 为 GC 管理的只读 Compact representation，不再暴露 backend、资源生命周期
@@ -23,7 +34,7 @@
   `UriResolver` 解析。
 - release performance gate 固定输出 yjson、stdx.json、cjfast_json 的完整共同 workload 表；
   高 CV 行保留并标记为 noisy，不再被稳定性筛选隐藏。
-- 新增 JSON Pointer（RFC 6901）、JSON Patch（RFC 6902）、JSON Merge Patch（RFC 7386）
+- 新增 JSON Pointer（RFC 6901）、JSON Patch（RFC 6902）、JSON Merge Patch（RFC 7396）
   与 JSONPath（RFC 9535）API；Patch 的 copy 和 in-place 入口均为原子操作。
 - JSON Schema 固定为 draft 2020-12，扩展 validation/applicator keyword，新增无网络
   `UriResolver` / `JsonSchemaRegistry`、format registry/provider，以及

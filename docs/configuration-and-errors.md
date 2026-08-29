@@ -33,7 +33,11 @@ let config = JsonReadConfig(
 
 自定义配置还控制 newline、indent、separator space、HTML-safe escaping、错误位置、最大
 深度与 `maxBytes`。写出预算超限使用 `output_too_large`。Stream 失败可能已写出前缀，
-不要继续复用该 document 的输出。
+但已提交长度不会超过 `maxBytes`；失败后不要继续复用该 writer。writer 只接受一个完整根值。
+
+旧式 `JsonValueCodec<T>` 的 `YJsonAst.encodeWith/decodeWith` 只支持默认
+`JsonCodecConfig.compact`。传入非默认 read/write 配置会抛出 `unsupported_config`；需要配置
+生效时使用 `JsonCodec<T>` 与 `YJson` 的显式入口。
 
 ## 按稳定错误码处理
 
@@ -51,6 +55,10 @@ let config = JsonReadConfig(
 | `string_too_large` | decoded UTF-8 string 超出预算 |
 | `polymorphic_object_too_large` | 根多态对象 replay budget 触发 |
 | `output_too_large` | 写出超过 byte budget |
+| `writer_state` | writer 没有根值、存在多个根值或结构未闭合 |
+| `cyclic_json_node` | 递归 AST 操作遇到祖先环 |
+| `invalid_value` | typed scalar 值不满足 codec contract，例如 Rune 不是一个 Unicode scalar |
+| `unsupported_config` | API 收到无法执行的非默认配置 |
 | `codec_type_mismatch` / `codec_contract` | erased 类型或 fast contract 错误 |
 | `missing_key` / `index_out_of_bounds` | AST 查询失败 |
 | `invalid_json_pointer` / `json_pointer_not_found` | Pointer 错误 |

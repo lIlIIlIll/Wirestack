@@ -34,6 +34,16 @@ let writeConfig = JsonWriteConfig("", "", false, false,
 `maxStringBytes` 结果。超大 number token 由 `maxBytes` 或多态根预算约束，不计入 string
 预算。
 
+写出端对所有 direct、generated raw、AST 和 stream 路径使用同一容器深度定义。writer 必须
+完成且只完成一个根值；没有根值、第二个根值或未闭合容器使用 `writer_state`。Stream
+`maxBytes` 在向调用方 sink 提交下一段 bytes 前检查，触发 `output_too_large` 后该 writer
+进入终止状态，sink 中已提交的前缀不会超过配置值。内存 String/bytes 入口在返回结果前执行
+同一预算检查。
+
+可修改 `JsonNode` 允许共享同一子节点形成 DAG，但递归序列化、`deepCopy()` 和语义等价比较
+会拒绝祖先环，错误码为 `cyclic_json_node`。序列化按遍历顺序发现环，因此 Stream sink 在
+报错前可能已有不超过预算的 JSON 前缀。
+
 ## 覆盖路径
 
 预算覆盖 `YJson.parse`、String/bytes typed decode、stream decode、Pure Compact、Custom

@@ -86,6 +86,17 @@ public class JsonPath {
         let matches = query(root, limits: limits)
         if (matches.isEmpty()) { None<JsonPathMatch> } else { Some(matches[0]) }
     }
+
+    func isSingular(): Bool {
+        for (segment in segments) {
+            if (segment.descendant || segment.selectors.size != 1) { return false }
+            match (segment.selectors[0].kind) {
+                case JsonPathSelectorKind.Name | JsonPathSelectorKind.Index => ()
+                case _ => return false
+            }
+        }
+        true
+    }
 }
 
 class JsonPathWork {
@@ -404,8 +415,9 @@ private func validateJsonPathFunctionCall(text: String, source: String,
 }
 
 private func jsonPathQueryIsSingular(text: String): Bool {
-    !(text.contains("..") || text.contains("*") || text.contains(":") ||
-        text.contains(",") || text.contains("?[" ) || text.contains("[?"))
+    let normalized = removeJsonPathQueryWhitespace(text)
+    let rootQuery = if (normalized.startsWith("@")) { "$" + normalized[1..normalized.size] } else { normalized }
+    JsonPathParser(rootQuery).parse().isSingular()
 }
 
 private func applyJsonPathAtEveryDescendant(segment: JsonPathSegment, candidate: JsonPathMatch,

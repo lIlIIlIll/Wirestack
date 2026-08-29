@@ -133,7 +133,7 @@ public class YJsonAst {
         value: T,
         config!: JsonCodecConfig = JsonCodecConfig.compact
     ): JsonNode {
-        let _ = config
+        requireDefaultAstCodecConfig(config)
         codec.encode(value)
     }
 
@@ -142,7 +142,7 @@ public class YJsonAst {
         value: JsonNode,
         config!: JsonCodecConfig = JsonCodecConfig.compact
     ): T {
-        let _ = config
+        requireDefaultAstCodecConfig(config)
         codec.decode(value)
     }
 
@@ -249,6 +249,19 @@ public class YJsonAst {
                 }
                 result
             }
+        )
+    }
+}
+
+private func requireDefaultAstCodecConfig(config: JsonCodecConfig): Unit {
+    let write = config.write
+    let defaultWrite = write.newline.isEmpty() && write.indent.isEmpty() &&
+        !write.useSpaceAfterSeparators && !write.htmlSafe && write.includeErrorLocation &&
+        write.maxDepth == 256 && write.maxBytes == 0
+    if (!jsonReadConfigUsesDefaultFastPath(config.read) || !defaultWrite) {
+        throw JsonException(
+            "YJsonAst JsonValueCodec does not support non-default JsonCodecConfig; use JsonCodec with YJson",
+            code: "unsupported_config"
         )
     }
 }

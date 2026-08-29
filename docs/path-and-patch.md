@@ -47,7 +47,7 @@ let updated = patch.apply(root)
 `invalid_json_patch`，test 不成立使用 `json_patch_test_failed`。调用方应把 Patch 应用结果
 当作新的文档状态，不依赖失败过程中的局部修改。
 
-## JSON Merge Patch（RFC 7386）
+## JSON Merge Patch（RFC 7396）
 
 Merge Patch 适合按对象形状表达更新：object 中的 `null` 表示删除对应成员，其他值替换或
 递归合并。数组不做逐元素 merge，而是整体替换。

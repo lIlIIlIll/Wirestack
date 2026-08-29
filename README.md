@@ -13,6 +13,7 @@
   <a href="https://codecov.io/gh/lIlIIlIll/yjson"><img src="https://codecov.io/gh/lIlIIlIll/yjson/branch/main/graph/badge.svg?flag=core" alt="Core Coverage" /></a>
   <a href="https://github.com/lIlIIlIll/yjson/releases/latest"><img src="https://img.shields.io/github/v/release/lIlIIlIll/yjson?display_name=tag&sort=semver" alt="Release" /></a>
   <a href="docs/performance/results/2026-08-27-yjson-2.0.0.md"><img src="https://img.shields.io/badge/Performance-qualified-10B981" alt="Performance qualified" /></a>
+  <a href="docs/performance/results/2026-08-30-current-dev-seven-library.md"><img src="https://img.shields.io/badge/dev%20benchmark-current%20%7C%20noisy-F59E0B" alt="Current dev benchmark is noisy" /></a>
   <a href="docs/performance/results/2026-08-28-stream-protocol-v1.md"><img src="https://img.shields.io/badge/Stream%20protocol-v1%20incomplete-F59E0B" alt="Stream protocol v1 incomplete" /></a>
 </p>
 
@@ -26,6 +27,13 @@
 yjson 2.0 默认使用跨平台、GC 管理的 Pure 引擎。普通应用只需要
 `YJson.toJson`、`YJson.fromJson<T>` 与 `YJson.parseDocument`；不需要选择 backend，
 也不需要管理 scanner、whole-document 资源或 `close()`。
+
+<p align="center">
+  <a href="#快速开始">快速开始</a> ·
+  <a href="#按任务选择-api">API 选择</a> ·
+  <a href="#性能">性能</a> ·
+  <a href="docs/README.md">完整文档</a>
+</p>
 
 ## 适合什么场景
 
@@ -87,48 +95,15 @@ main(): Unit {
 }
 ```
 
+运行后输出：
+
+```text
+Alice
+```
+
 `@JsonCodec` 在调用方编译时生成 `UserJson: JsonCodec<User>` 和
 `JsonCodecProvider` 实现。它不扫描源码目录，也不依赖运行时反射。可运行的完整示例位于
 [`packages/examples`](packages/examples/README.md)。
-
-## 性能
-
-2.0.0 的发布门禁在固定的 Linux x86_64 Server CPU 8、128 MiB 环境中执行，每个
-workload 交替测量 11 轮。下表只展示发布门槛 workload；数值是中位数，比例越低越快。
-
-| Workload | yjson / Native | 对照 | 比例 | 胜出轮次 |
-| --- | ---: | ---: | ---: | ---: |
-| Large Array encode / string | 46.080 µs | cjfast_json 76.117 µs | 0.608x | 11/11 |
-| ProfileBundle encode / bytes | 10.344 µs | cjfast_json 12.546 µs | 0.816x | 11/11 |
-| ProfileBundle encode / string | 10.767 µs | cjfast_json 12.338 µs | 0.845x | 11/11 |
-| Deep Nested encode / string | 63.552 µs | cjfast_json 74.500 µs | 0.856x | 11/11 |
-| Native writeNumericBytes | 0.559 ms | Pure 2.354 ms | 0.238x | 11/11 |
-| Native readNumericDocument | 1.211 ms | Pure 2.148 ms | 0.564x | 11/11 |
-
-这些结果只适用于对应源码、SDK、主机、workload 和测量方法。完整 36-workload 结果、
-CV、原始样本、checksum 与复现边界见
-[2.0.0 性能报告](docs/performance/results/2026-08-27-yjson-2.0.0.md)。
-
-Stream protocol v1 把 stream、chunk plan 和 sink 构造移出计时区，并为每个单元格启动独立
-进程。当前开发批次的稳定 previous-yjson A/B 行如下。它没有通过完整稳定性和内部 scratch
-生命周期门槛，因此上方 badge 标为 incomplete。
-
-| Stream workload | Previous-yjson | Candidate | 改善 | 胜出轮次 | CV B/C |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Decode 1 MiB / 64-byte chunks | 152.078 ms | 91.110 ms | 40.51% | 11/11 | 0.57% / 4.66% |
-| Decode 64 KiB / deterministic chunks | 8.922 ms | 3.432 ms | 62.45% | 11/11 | 2.96% / 1.71% |
-| Encode 1 MiB / counting sink | 14.963 ms | 13.750 ms | 7.61% | 11/11 | 1.57% / 2.08% |
-
-同一 Server 上的 yjson/stdx.json incremental Stream 配对有三个稳定行：
-
-| Stream workload | yjson | stdx.json | Y/S | yjson 胜出 | CV Y/S |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Decode 1 MiB / 64-byte chunks | 93.447 ms | 191.492 ms | 0.488x | 11/11 | 3.41% / 3.01% |
-| Decode 1 MiB / deterministic chunks | 76.646 ms | 179.626 ms | 0.427x | 11/11 | 1.83% / 2.57% |
-| Encode 1 MiB / counting sink | 14.737 ms | 110.584 ms | 0.133x | 11/11 | 2.30% / 0.83% |
-
-完整矩阵、workload JSON、peer 资格和原始证据见
-[2026-08-28 Stream protocol v1 结果](docs/performance/results/2026-08-28-stream-protocol-v1.md)。
 
 ## 按任务选择 API
 
@@ -144,6 +119,33 @@ Stream protocol v1 把 stream、chunk plan 和 sink 构造移出计时区，并�
 | 定位、查询或更新节点 | `yjson_algorithms` 的 Pointer / Path / Patch | 默认有限预算 |
 
 不知道从哪里开始时，阅读 [API 选择指南](docs/choosing-an-api.md)。
+
+## 性能
+
+当前开发数据绑定 `dev` 提交 `1dedf2a`。下表是第二批 11 轮完整重跑的中位数，单位为 µs/op。
+每个 workload 都至少有一个实现的 CV 超过 5%，因此所有行标记 noisy，只表示本次观察值。
+
+| Workload | yjson | stdx.json | cangjieJSON | json4cj | cjfast_json | Jackson | fastjson2 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Address encode | 1.564 | 92.127 | 2.836 | 3.398 | 2.946 | 0.170 | 0.064 |
+| Address decode | 0.944 | 37.182 | 3.098 | 3.449 | 2.042 | 0.304 | 0.067 |
+| Person encode | 3.836 | 123.469 | 16.211 | 5.465 | 10.058 | 0.584 | 0.264 |
+| Person decode | 10.356 | 124.353 | 24.933 | 19.891 | 15.228 | 1.134 | 0.427 |
+| Large Array encode | 72.185 | 633.995 | 265.352 | 92.306 | 76.370 | 8.927 | 3.961 |
+| Large Array decode | 66.086 | 1100.139 | 316.129 | 211.037 | 80.198 | 18.932 | 5.107 |
+| Large Map encode | 7.733 | 370.841 | 169.543 | 121.402 | 117.848 | 1.781 | 1.752 |
+| Large Map decode | 33.637 | 716.636 | 293.737 | 222.504 | 202.004 | 5.277 | 3.933 |
+| Deep Nested encode | 84.492 | 426.165 | 172.341 | 84.366 | 72.480 | 4.520 | 2.508 |
+| Deep Nested decode | 94.873 | 784.964 | 222.617 | 144.320 | 93.575 | 10.533 | 3.395 |
+
+完整两批数据、各库 CV、API 路径、metadata、raw report 和 checksum 见
+[2026-08-30 当前 dev 七库完整对比](docs/performance/results/2026-08-30-current-dev-seven-library.md)。
+这份开发快照没有通过稳定性门槛，不能发布精确倍数。最近一次通过完整门禁的结果仍是
+[2.0.0 性能报告](docs/performance/results/2026-08-27-yjson-2.0.0.md)。
+
+Stream protocol v1 的当前开发批次包含稳定提升行，但没有通过完整稳定性和内部 scratch
+生命周期门槛，因此不能作为发布性能声明。完整矩阵、workload JSON 和原始证据见
+[2026-08-28 Stream protocol v1 结果](docs/performance/results/2026-08-28-stream-protocol-v1.md)。
 
 ## 两种 JSON 字面量
 

@@ -15,6 +15,15 @@
 仓库内可运行示例见 [`packages/examples`](../packages/examples/README.md)。如果示例与文档
 冲突，以 package manifest、公开声明和可运行测试为准。
 
+## 推荐阅读路径
+
+| 你的目标 | 阅读顺序 |
+| --- | --- |
+| 第一次接入 | [API 选择](choosing-an-api.md) → [`@JsonCodec`](codec-generation.md) → [配置与错误](configuration-and-errors.md) |
+| 处理大型或分块输入 | [Stream I/O](streams.md) → [资源限制](resource-limits.md) → [Stream 性能](performance/stream.md) |
+| 启用可选能力 | [Backend](backends.md) 或 [Schema](schema.md) → 对应 package 示例 |
+| 维护和发布 | [仓库布局](maintainers/repository-layout.md) → [测试](maintainers/testing.md) → [发布](maintainers/releasing.md) |
+
 ## 常用任务
 
 | 任务 | 入口文档 |

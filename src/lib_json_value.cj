@@ -644,7 +644,7 @@ public class JsonStringValue <: JsonNode {
 
     public func toString(): String {
         let writer = JsonDirectWriter()
-        writer.writeRawString(value)
+        writer.writeString(value)
         writer.finishString()
     }
 
@@ -722,9 +722,7 @@ public class JsonArrayValue <: JsonNode {
     }
 
     public func toString(): String {
-        let writer = JsonDirectWriter()
-        writeJsonValueCompact(writer, this)
-        writer.finishString()
+        writeJsonValueToString(this, JsonWriteConfig.compact)
     }
 
     public func toPrettyString(indent: String): String {
@@ -777,9 +775,7 @@ public class JsonObjectValue <: JsonNode {
     }
 
     public func toString(): String {
-        let writer = JsonDirectWriter()
-        writeJsonValueCompact(writer, this)
-        writer.finishString()
+        writeJsonValueToString(this, JsonWriteConfig.compact)
     }
 
     public func toPrettyString(indent: String): String {
@@ -807,63 +803,15 @@ func ensureFiniteJsonFloat(value: Float64): Unit {
 }
 
 
-func writeJsonValueCompact(writer: JsonDirectWriter, value: JsonNode): Unit {
-    match (value) {
-        case _: JsonNullValue => writer.writeRawNull()
-        case boolValue: JsonBoolValue => writer.writeRawBool(boolValue.value)
-        case intValue: JsonIntValue => writer.writeRawInt64(intValue.value)
-        case floatValue: JsonFloatValue =>
-            ensureFiniteJsonFloat(floatValue.value)
-            writer.writeRawNumberValue(floatValue.value.toString())
-        case numberValue: JsonNumberLiteralValue => writer.writeRawNumberValue(numberValue.literal)
-        case stringValue: JsonStringValue => writer.writeRawString(stringValue.value)
-        case arrayValue: JsonArrayValue => writeJsonArrayValueCompact(writer, arrayValue)
-        case objectValue: JsonObjectValue => writeJsonObjectValueCompact(writer, objectValue)
-        case _ => throw JsonException("Unsupported JsonNode implementation")
-    }
-}
-
-func writeJsonArrayValueCompact(writer: JsonDirectWriter, arrayValue: JsonArrayValue): Unit {
-    writer.writeRawBeginArray()
-    var first = true
-    for (item in arrayValue.values()) {
-        if (!first) {
-            writer.writeRawByte(b',')
-        }
-        writeJsonValueCompact(writer, item)
-        first = false
-    }
-    writer.writeRawEndArray()
-}
-
-func writeJsonObjectValueCompact(writer: JsonDirectWriter, objectValue: JsonObjectValue): Unit {
-    writer.writeRawBeginObject()
-    var first = true
-    for ((key, item) in objectValue.entries()) {
-        first = writeJsonObjectEntryCompact(writer, first, key, item)
-    }
-    writer.writeRawEndObject()
-}
-
-func writeJsonObjectEntryCompact(writer: JsonDirectWriter, first: Bool, key: String, item: JsonNode): Bool {
-    match (item) {
-        case _: JsonNullValue => writer.writeRawObjectEntryNameNull(first, key)
-        case boolValue: JsonBoolValue => writer.writeRawObjectEntryNameBool(first, key, boolValue.value)
-        case intValue: JsonIntValue => writer.writeRawObjectEntryNameInt64(first, key, intValue.value)
-        case floatValue: JsonFloatValue =>
-            ensureFiniteJsonFloat(floatValue.value)
-            writer.writeRawObjectEntryNameNumberValue(first, key, floatValue.value.toString())
-        case numberValue: JsonNumberLiteralValue => writer.writeRawObjectEntryNameNumberValue(first, key,
-            numberValue.literal)
-        case stringValue: JsonStringValue => writer.writeRawObjectEntryNameString(first, key, stringValue.value)
-        case _ =>
-            let nextFirst = writer.writeRawObjectEntryName(first, key)
-            writeJsonValueCompact(writer, item)
-            nextFirst
-    }
-}
-
 func writeJsonNodeToCodecWriter(writer: JsonCodecWriter, value: JsonNode): Unit {
+    writeJsonNodeToCodecWriterGuarded(writer, value, ArrayList<JsonNode>())
+}
+
+private func writeJsonNodeToCodecWriterGuarded(
+    writer: JsonCodecWriter,
+    value: JsonNode,
+    ancestors: ArrayList<JsonNode>
+): Unit {
     match (value) {
         case _: JsonNullValue => writer.writeNull()
         case boolValue: JsonBoolValue => writer.writeBool(boolValue.value)
@@ -872,18 +820,41 @@ func writeJsonNodeToCodecWriter(writer: JsonCodecWriter, value: JsonNode): Unit 
         case numberValue: JsonNumberLiteralValue => writer.writeRawNumber(numberValue.literal)
         case stringValue: JsonStringValue => writer.writeString(stringValue.value)
         case arrayValue: JsonArrayValue =>
+            enterJsonNodeAncestor(arrayValue, ancestors)
             writer.startArray()
-            for (item in arrayValue.values()) {
-                writeJsonNodeToCodecWriter(writer, item)
+            try {
+                for (item in arrayValue.values()) {
+                    writeJsonNodeToCodecWriterGuarded(writer, item, ancestors)
+                }
+                writer.endArray()
+            } finally {
+                ancestors.remove(at: ancestors.size - 1)
             }
-            writer.endArray()
         case objectValue: JsonObjectValue =>
+            enterJsonNodeAncestor(objectValue, ancestors)
             writer.startObject()
-            for ((key, item) in objectValue.entries()) {
-                writer.writeName(key)
-                writeJsonNodeToCodecWriter(writer, item)
+            try {
+                for ((key, item) in objectValue.entries()) {
+                    writer.writeName(key)
+                    writeJsonNodeToCodecWriterGuarded(writer, item, ancestors)
+                }
+                writer.endObject()
+            } finally {
+                ancestors.remove(at: ancestors.size - 1)
             }
-            writer.endObject()
         case _ => throw JsonException("Unsupported JsonNode implementation")
+    }
+}
+
+func enterJsonNodeAncestor(value: JsonNode, ancestors: ArrayList<JsonNode>): Unit {
+    ensureJsonNodeNotAncestor(value, ancestors)
+    ancestors.add(value)
+}
+
+func ensureJsonNodeNotAncestor(value: JsonNode, ancestors: ArrayList<JsonNode>): Unit {
+    for (ancestor in ancestors) {
+        if (refEq(value, ancestor)) {
+            throw JsonException("Cyclic JsonNode graph is not supported", code: "cyclic_json_node")
+        }
     }
 }
