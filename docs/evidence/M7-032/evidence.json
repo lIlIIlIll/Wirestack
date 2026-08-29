@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-29T10:03:27.611091Z",
+  "generated_at_utc": "2026-08-29T11:03:00.277966Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,7 +11,7 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M7-032/task-check.json",
-      "sha256": "52784387980da48009beeb3f8a9159a2241a021418a192003bcbf224752bd889",
+      "sha256": "9b0778d7fda764fcb1a74ba3c845b5be5a98295f60286d766e8e4fda6af213e6",
       "source_task": "M7-032"
     },
     {
@@ -27,10 +27,10 @@
       "source_task": "M7-032"
     }
   ],
-  "revision": "87710724839d6080981fb1b8b9b099d414170292",
+  "revision": "1816323cb2e87221e9b55d390aa1a42d9e5e98fa",
   "schema_version": 1,
   "source_sha256": {
-    ".gitignore": "a597755755bb3087cec35cf2a83b5519f196281cf5f70b870e10bc496faf063c",
+    ".gitignore": "f9cdaed3952d02b7f9e83699a56d50f6a7a167665b4099ae3ea8089273b727bf",
     "docs/api/README.md": "10a6352e59878a471f4e437cfe48f0c17c9e1c06b35c6e18425a575136a020b7",
     "docs/api/baselines/wirestack-linux-pre1-m7-032.json": "82d21d2aed88441d74218dae66546fbf3947d9a8516bef684a81afbe86ee4fb7",
     "docs/architecture/adr/0006-public-contract-ownership.md": "e59c1671b64bba9641e7f59e82032b5e7ae66c6e35614fb0711a59b98434ccf7",
@@ -39,7 +39,7 @@
     "docs/guides/migrate-to-wirestack-linux.md": "957153c20ab8d6b7f67c6fd449ff2ed0b9e9a8a785c238899476941889c9695c",
     "docs/planning/implementation-backlog.md": "930b08c926a7c3744e0a7ffc73d67620ec2a8112d413247c95b9a8831e7d6f6a",
     "docs/planning/linux-status.md": "3b972099653574dbbf5e857e6e8873c736c9c32ce1083f7bd51acceea99bdd72",
-    "docs/planning/status.md": "5c701a8dd3bbf97f07fa9aae5e8f63f18a2caffd681ea9bab047bbd64e441a58",
+    "docs/planning/status.md": "cf247427edceffd2f600670c1045083c479ffef2f8cef1107f26678e8187a668",
     "docs/product/prd.md": "7af7d0812c6775fe088675ef72643a61d1048e15c86436427460597341aea1e4",
     "examples/linux/m7_027/fixtures.cj": "860752218df930ebc3aa6f194a6d2dfdd339e85c2008b727b702f965d9dbf91f",
     "examples/linux/m7_027/http_examples.cj": "cdee1b4bd1e5645fe156dba8429123e3bd9035ecec3007173ce25f03154c499e",
