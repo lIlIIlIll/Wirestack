@@ -126,7 +126,9 @@ public class Http2ClientConnection <: Resource {
         )
         dispatcher.attach(connection, registry, goAway, reset, health)
         try {
-            let preface = machine.start(settings: [Http2Setting(Http2SettingId.EnablePush, 0u32)])
+            let preface = machine.start(settings: initialHttp2Settings(
+                Http2ConnectionRole.Client, http2Limits
+            ))
             writeAll(transport, ByteSpan(preface), context: context)
             let _ = spawn { writer.run() }
             let _ = spawn { reader.run() }

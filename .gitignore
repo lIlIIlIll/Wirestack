@@ -15,6 +15,11 @@ __pycache__/
 !docs/evidence/M7-027/linux_x86_64/*.json
 !docs/evidence/M7-022/*.json
 !docs/evidence/M7-022/linux_x86_64/*.json
+!docs/evidence/M7-032/*.json
+!docs/evidence/M7-032/linux_x86_64/*.json
+!docs/evidence/M7-028/*.json
+!docs/evidence/M7-028/linux_x86_64/*.json
+!docs/security/review/linux-1.0/*.json
 *.py[cod]
 
 # Durable, checksum-pinned evidence overrides user-level *.json ignores.
@@ -34,6 +39,8 @@ __pycache__/
 !docs/evidence/M7-025/linux_x86_64/*.json
 !docs/evidence/M7-026/linux_x86_64/*.json
 !docs/api/baselines/*.json
+!native/tls/aws_lc/provider.json
+!docs/evidence/M7-029/**/*.json
 
 # Local tool state
 .cjpm/
@@ -53,6 +60,7 @@ Thumbs.db
 !docs/evidence/M2-003/linux_x86_64/*.log
 !docs/evidence/M2-005/linux_glibc_x86_64/*.log
 !docs/evidence/M7-022/linux_x86_64/*.log
+!docs/evidence/M7-029/**/*.log
 *.tmp
 *.prof
 *.trace

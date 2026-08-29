@@ -1,18 +1,9 @@
 package wirestack.internal.tls_engine
 
 import wirestack.internal.trust.*
+import wirestack as api
 
-public enum TlsCapability {
-    | SystemTrust
-    | CustomRoots
-    | HardwareKeys
-    | ClientCertificate
-    | ServerMode
-    | Tls12
-    | Tls13
-    | Http2
-    | NetworkBinding
-}
+public type TlsCapability = api.TlsCapability
 
 private let PLATFORM_SYSTEM_TRUST: UInt64 = 1u64 << 0
 private let PLATFORM_CUSTOM_ROOTS: UInt64 = 1u64 << 1
@@ -80,16 +71,8 @@ public struct TlsCapabilities {
     }
 }
 
-public enum TlsVersion {
-    | Tls12
-    | Tls13
-}
-
-public enum TlsSecurityProfile {
-    | Compatible
-    | Modern
-    | StrictTls13
-}
+public type TlsVersion = api.TlsVersion
+public type TlsSecurityProfile = api.TlsSecurityProfile
 
 /** Frozen protocol policy. No provider-specific cipher string is accepted. */
 public struct TlsSecurityPolicy {
@@ -124,36 +107,9 @@ public struct TlsSecurityPolicy {
     }
 }
 
-public enum ClientAuthentication {
-    | None
-    | Optional
-    | Required
-}
-
-public enum TlsContextErrorCode {
-    | MissingTrust
-    | MissingIdentity
-    | InvalidVersionRange
-    | InvalidAlpn
-    | UnsupportedCapability
-}
-
-public class TlsContextException <: Exception {
-    public let code: TlsContextErrorCode
-    public let capability: ?TlsCapability
-
-    public init(
-        code: TlsContextErrorCode,
-        message: String,
-        capability!: ?TlsCapability = None<TlsCapability>
-    ) {
-        super(message)
-        this.code = code
-        this.capability = capability
-    }
-
-    protected override func getClassName(): String { "TlsContextException" }
-}
+public type ClientAuthentication = api.ClientAuthentication
+public type TlsContextErrorCode = api.TlsContextErrorCode
+public type TlsContextException = api.TlsContextException
 
 /** Immutable, concurrently shareable client configuration. */
 public class TlsClientContext {

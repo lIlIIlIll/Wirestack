@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "task_id": "M7-029",
+  "status": "TRIAGE_REQUIRED",
+  "classification": "independent fixed-commit static audit input",
+  "repository": "lIlIIlIll/Wirestack",
+  "audited_baseline_commit": "49f30940875bd76876b4b46f1b115e5a9f31fd76",
+  "current_review_target": {
+    "kind": "M7-028 evidence-index SHA-256",
+    "sha256": "155f067110625b5d316f6bb6255836c17c080da560098b5150646bfd39698f0b"
+  },
+  "finding_counts": {
+    "Critical": 2,
+    "High": 11,
+    "Medium": 22,
+    "Low": 6,
+    "Advisory": 1
+  },
+  "sources": [
+    {
+      "path": "docs/evidence/M7-029/independent-review-source/wirestack-full-audit-49f3094.md",
+      "source_path": "/home/elliot/Downloads/wirestack-full-audit-49f3094.md",
+      "source_sha256": "bff5b6f424cf30f9a063a0f0814f0be1e45e7566e7c43e7026ae69d0b0529b04",
+      "repository_sha256": "bff5b6f424cf30f9a063a0f0814f0be1e45e7566e7c43e7026ae69d0b0529b04",
+      "normalization": "none"
+    },
+    {
+      "path": "docs/evidence/M7-029/independent-review-source/wirestack-findings-register-49f3094.json",
+      "source_path": "/home/elliot/Downloads/wirestack-findings-register-49f3094.json",
+      "source_sha256": "884443de8316bf00cd0cbadcbfe8c77d6a2eb8743dd48c0003b1af726e745e39",
+      "repository_sha256": "cb002b14938a45e63f67ad09a2b8baee6b363a26eb04e044b465d2ed40e87623",
+      "normalization": "one terminal LF added; parsed JSON is semantically identical"
+    }
+  ],
+  "independent_execution": {
+    "status": "not_completed",
+    "reason": "audit environment could not resolve github.com; clone/build/test could not be independently run"
+  },
+  "acceptance_boundary": {
+    "is_final_m7_029_report": false,
+    "reasons": [
+      "the audited baseline predates the current M7-028 review target",
+      "the report does not bind itself to the current M7-028 evidence-index digest",
+      "the report does not contain the M7-029 reviewer identity, affiliation, UTC interval, conflicts and independence-attestation fields",
+      "the report records no independent build or test execution",
+      "Critical and High findings require current-tree disposition and executed regression evidence"
+    ]
+  }
+}

@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-EXPECTED_IDS = {f"M7-{number:03d}" for number in range(18, 32)}
+EXPECTED_IDS = {f"M7-{number:03d}" for number in range(18, 33)}
 
 
 class M7LinuxTaskGraphTests(unittest.TestCase):
@@ -40,7 +40,9 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
     def test_task_graph_has_fail_closed_audit_and_release_edges(self) -> None:
         rows = self.linux_rows()
         self.assertEqual("M7-018", rows["M7-019"][4])
-        self.assertEqual("M7-019..M7-030", rows["M7-031"][4])
+        self.assertEqual("M7-019..M7-030,M7-032", rows["M7-031"][4])
+        self.assertEqual("M7-026,M7-027", rows["M7-032"][4])
+        self.assertIn("M7-032 和 M7-029 后", rows["M7-022"][6])
         self.assertIn("22 条发布验收", rows["M7-019"][6])
         self.assertIn("NOT_APPLICABLE_TO_LINUX_PROFILE", rows["M7-019"][6])
         self.assertIn("任一 Linux P0 FAIL", rows["M7-031"][6])
@@ -50,15 +52,15 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         milestone_ids = set(re.findall(r"^\| (M\d+-\d{3}) \|", backlog, re.MULTILINE))
         upstream_ids = set(re.findall(r"^\| (UP-\d{3}) \|", backlog, re.MULTILINE))
         p1_ids = set(re.findall(r"^\| (P1-\d{3}) \|", backlog, re.MULTILINE))
-        self.assertEqual(197, len(milestone_ids))
+        self.assertEqual(198, len(milestone_ids))
         self.assertEqual(183, len(milestone_ids - EXPECTED_IDS))
         self.assertEqual(7, len(upstream_ids))
         self.assertEqual(12, len(p1_ids))
         self.assertIn("**全平台主线任务数：** 183", backlog)
-        self.assertIn("**Linux 稳定版收口任务数：** 14", backlog)
-        self.assertIn("**当前发布任务数：** 197", backlog)
-        self.assertIn("当前发布相关任务总数：**197**", backlog)
-        self.assertIn("全部已记录任务总数：**216**", backlog)
+        self.assertIn("**Linux 稳定版收口任务数：** 15", backlog)
+        self.assertIn("**当前发布任务数：** 198", backlog)
+        self.assertIn("当前发布相关任务总数：**198**", backlog)
+        self.assertIn("全部已记录任务总数：**217**", backlog)
 
     def test_status_exposes_ready_work_without_a_global_completion_claim(self) -> None:
         status = self.read("docs/planning/status.md")
@@ -67,7 +69,7 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("| M7-019 | COMPLETE |", status)
         self.assertIn("| M7-020 | COMPLETE |", status)
         self.assertIn("| M7-021 | COMPLETE |", status)
-        self.assertIn("| M7-022 | IN_PROGRESS |", status)
+        self.assertIn("| M7-022 | BLOCKED |", status)
         self.assertIn("| M6-026 | COMPLETE |", status)
         self.assertIn("| M7-023 | COMPLETE |", status)
         self.assertIn("| M7-023 Linux release fuzz gate | COMPLETE |", linux)
@@ -78,8 +80,11 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("| M3-029 | COMPLETE |", status)
         self.assertIn("| M7-027 | COMPLETE |", status)
         self.assertIn("docs/evidence/M7-027/README.md", status)
+        self.assertIn("| M7-032 | COMPLETE |", status)
+        self.assertIn("| M7-028 | READY |", status)
+        self.assertIn("docs/evidence/M7-032/README.md", status)
         self.assertIn("do not\nchange the status of the six-platform M7-001 through M7-017 tasks", status)
-        self.assertIn("Resume M7-022's explicit 24-hour mixed release soak", linux)
+        self.assertIn("run M7-022's explicit 24-hour mixed release soak once", linux)
         self.assertIn("M6-026 HTTP/2 concurrent response bodies", linux)
         self.assertIn("1,000 two-stream batches", linux)
         self.assertIn("runtime/std source changes are not dependencies", linux)

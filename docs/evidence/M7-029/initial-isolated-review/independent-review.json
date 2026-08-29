@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "taskId": "M7-029",
+  "target": {
+    "packagePath": "docs/security/review/linux-1.0/evidence-index.json",
+    "packageSha256": "19257a4f9d8571cdaea069beb571efa0e36e660563b25d90a83ce54345078b6c"
+  },
+  "reviewer": {
+    "identity": "OpenAI Codex isolated reviewer /root/m7_029_independent_review",
+    "affiliation": "OpenAI Codex",
+    "independent": true,
+    "independenceStatement": "OpenAI Codex isolated review subagent commissioned by the same repository owner. I reviewed a clean detached snapshot, did not participate in implementation, did not obtain conclusions from the implementation agent, and reached findings from source and executed evidence.",
+    "conflicts": [
+      "The reviewer is an OpenAI Codex subagent commissioned by the same repository owner and is not an organizationally independent external firm; process isolation and no implementation participation are disclosed."
+    ],
+    "startedAtUtc": "2026-08-29T02:25:00Z",
+    "completedAtUtc": "2026-08-29T03:08:14Z"
+  },
+  "scope": [
+    "certificate-identity", "dns-proxy-routing", "http1-smuggling", "http2-hpack",
+    "lifecycle-cancellation", "linux-platform", "native-c-abi", "pool-isolation",
+    "private-keys", "release-evidence", "resource-bounds", "sensitive-data",
+    "supply-chain", "tls-protocol"
+  ],
+  "methods": ["evidence-audit", "native-c-abi", "source-review"],
+  "compatibilityPolicy": "NO_BACKWARD_COMPATIBILITY_PRE_1_0",
+  "findings": [
+    {
+      "id": "WS-CI-001", "severity": "Critical", "affectedLocation": ".github/workflows/architecture-guard.yml; .github/workflows/gate-harness.yml",
+      "reproductionSteps": ["Inspect workflows triggered for ordinary pull requests.", "Compare their steps with a clean resolver/provider build and full cjpm test."],
+      "impact": "A pull request can merge without the complete Cangjie build and test surface that exposed failures in this exact snapshot.",
+      "evidence": "The ordinary architecture workflow runs Python architecture checks and mutable setup actions but no clean native resolver/provider build plus full cjpm test. The local scripts/check and M7-032 task gate both failed on this snapshot.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-BUILD-002", "severity": "High", "affectedLocation": "build.cj:5-32; cjpm.toml:22",
+      "reproductionSteps": ["Remove target/native/resolver from a clean checkout while retaining the pinned provider cache.", "Run cangjie_env dynamic followed by cjpm check."],
+      "impact": "A standard clean CJPM check/build cannot produce the Linux package because a required native resolver archive is absent.",
+      "evidence": "The clean command fetched and built the pinned AWS-LC provider, then failed: can not find the library 'wirestack_resolver'. build.cj invokes only build_linux_tls_provider.py. Running python3 tools/build_linux_resolver.py --root . made cjpm check exit 0.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-H2-SERVER-FLOW-001", "severity": "High", "affectedLocation": "src/internal/http2/server_connection.cj:217-218; src/internal/http2/server_mapping.cj:438-443",
+      "reproductionSteps": ["Reserve a server DATA permit.", "Fill or close the writer queue before enqueue.", "Call the response event path and observe beginData consumes the permit before writer.enqueue fails."],
+      "impact": "Failed queue admission can permanently consume stream and connection flow-control credit and starve unrelated streams.",
+      "evidence": "The server calls event.beginData() before writer.enqueue(frame); beginData completes the reserved permit. The existing enqueueReservedData atomic API cancels a permit on enqueue failure but is not used here.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-H2-SETTINGS-001", "severity": "High", "affectedLocation": "src/internal/http2/settings.cj:71-74,184-226; src/internal/http2/client_connection.cj:129; src/internal/http2/server_connection.cj:55-58",
+      "reproductionSteps": ["Configure non-RFC local receive limits.", "Start client or server preface.", "Inspect emitted SETTINGS and peer initial state."],
+      "impact": "Endpoints can enforce limits they did not advertise and initialize peer limits from local policy rather than RFC defaults, causing interoperability failures or incorrect resource accounting.",
+      "evidence": "peer, advertised-local, and acknowledged-local settings are all initialized from defaultHttp2Settings(limits); the initial client/server SETTINGS omit several configured non-default limits.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-H2-WRAP-001", "severity": "High", "affectedLocation": "src/http/cancellation.cj:113-126; src/internal/http2/client_connection.cj:548-552; src/http_message.cj:75-81",
+      "reproductionSteps": ["Return an HTTP/2 response with Content-Length and delayed trailers/END_STREAM.", "Wrap it with public scoped cancellation.", "Read exactly Content-Length bytes before trailers arrive."],
+      "impact": "The wrapper may complete early, detach cancellation, and lose trailer or protocol-completion semantics before END_STREAM.",
+      "evidence": "The H2 body explicitly sets completeAtDeclaredLength:false, but the public wrapper reconstructs ResponseBody without copying that property, so the default true applies.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-PROXY-001", "severity": "High", "affectedLocation": "src/internal/http1/pool_key.cj; src/internal/http1/proxy_client_pipeline.cj:124-137,208-216",
+      "reproductionSteps": ["Send HTTPS requests through one proxy endpoint using two different Proxy-Authorization values.", "Compare generated connection keys and tunnel reuse."],
+      "impact": "Connections authenticated as one proxy principal can be reused for another, violating tenant and credential isolation.",
+      "evidence": "The CONNECT pool key includes proxy endpoint and TLS identities but not proxy credential identity; raw authorization is used only during tunnel creation.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-RES-001", "severity": "High", "affectedLocation": "native/resolver/linux/wirestack_resolver.c:148-193,302-325",
+      "reproductionSteps": ["Block a resolver worker inside getaddrinfo using a slow NSS/DNS backend.", "Cancel/release the job and destroy the pool."],
+      "impact": "Cancellation and shutdown duration depend on an unbounded external resolver call, allowing stuck shutdown and exhausted bounded workers.",
+      "evidence": "resolve_job performs synchronous getaddrinfo with no cancellation mechanism; pool_destroy waits for active_jobs to reach zero and joins every worker.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-RETRY-001", "severity": "High", "affectedLocation": "src/internal/transport_stdnet/package.cj:976-994; src/internal/http1/request_writer.cj:249-251; src/http/retry.cj:49-50",
+      "reproductionSteps": ["Cause a socket write to partially reach the peer and then raise SocketTimeoutException.", "Observe request write accounting and retry classification."],
+      "impact": "A replayable request can be sent twice when the physical commit state is unknown.",
+      "evidence": "Socket timeout is classified Temporary; written-byte accounting advances only after write returns successfully; retry accepts Temporary with zero recorded bytes.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-STDNET-001", "severity": "High", "affectedLocation": "src/internal/transport_stdnet/package.cj:695-716",
+      "reproductionSteps": ["Start accept with a cancellation token.", "Cancel that one operation.", "Attempt another accept on the same server."],
+      "impact": "Cancellation of one operation permanently terminates a shared listener, enabling cross-request denial of service.",
+      "evidence": "The accept cancellation interrupt invokes close() on the listener rather than interrupting only the pending accept.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-TLS-TRUST-001", "severity": "High", "affectedLocation": "src/internal/platform/linux/package.cj:54-75; src/internal/tls_engine/session.cj:280-289",
+      "reproductionSteps": ["Load a system trust bundle or hashed directory.", "Replace the bundle with same-size content or alter directory entries.", "Compare the session partition key."],
+      "impact": "A TLS session established under old trust material may be resumed after trust changes.",
+      "evidence": "Bundle identity is path plus size and directory identity is path only; that identity is used for trust/session partitioning.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-LIC-001", "severity": "High", "affectedLocation": "repository root; docs/product/prd.md",
+      "reproductionSteps": ["List tracked root licensing files and inspect package/release metadata."],
+      "impact": "The intended public release has no explicit project license grant, creating a release and downstream supply-chain blocker.",
+      "evidence": "The exact tracked snapshot contains no LICENSE or COPYING file and no equivalent formal distribution grant for Wirestack.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-API-001", "severity": "Medium", "affectedLocation": "src/byte_span.cj:3-18,65-68",
+      "reproductionSteps": ["Construct ByteSpan over an array.", "Mutate the public bytes array through either the original reference or span.bytes."],
+      "impact": "Callers cannot rely on the documented immutable view, which can invalidate parser and cryptographic input assumptions.",
+      "evidence": "ByteSpan publicly exposes Array<Byte>; Array elements remain mutable and MutableByteSpan.asByteSpan retains the same backing.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-CANCEL-001", "severity": "Medium", "affectedLocation": "src/cancellation.cj:75-130",
+      "reproductionSteps": ["Repeatedly register callbacks on one live token without cancelling or closing handles.", "Observe callback storage growth."],
+      "impact": "A public registry can grow without the hard bound required by the product resource invariant.",
+      "evidence": "Callbacks are stored in a HashMap with no configured maximum or registration rejection threshold.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-CI-SUPPLY-001", "severity": "Medium", "affectedLocation": ".github/workflows/*.yml",
+      "reproductionSteps": ["Inspect uses entries in checked-in workflows."],
+      "impact": "Mutable third-party action tags can change executed CI code without a repository commit.",
+      "evidence": "Workflows use actions/checkout@v4, actions/setup-python@v5, and actions/upload-artifact@v4 rather than immutable commit SHAs.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-H2-BUFFER-001", "severity": "Medium", "affectedLocation": "src/internal/http2/client_connection.cj:679-710; src/internal/http2/server_mapping.cj:230-266",
+      "reproductionSteps": ["Open an inbound H2 body and queue maximum-size DATA segments without consuming them."],
+      "impact": "Inbound memory policy is indirectly coupled to an outbound write-count limit and lacks an independently stated byte cap.",
+      "evidence": "Both body channels derive maxSegments from limits.maxPendingWrites; no separate inbound byte ceiling is enforced.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-H2-SETTINGS-002", "severity": "Medium", "affectedLocation": "src/internal/http2/settings.cj:205-226",
+      "reproductionSteps": ["As an H2 client, receive server SETTINGS_ENABLE_PUSH=1.", "Observe generic setting application."],
+      "impact": "Role-invalid SETTINGS can be accepted instead of causing the required protocol error.",
+      "evidence": "Settings application has no endpoint-role parameter and accepts ENABLE_PUSH generically.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-IPV6-001", "severity": "Medium", "affectedLocation": "src/http_url.cj:90-120; src/internal/http1/client_pipeline.cj:78; src/internal/http1/tls_client_pipeline.cj:463,685",
+      "reproductionSteps": ["Create an http or https URL with a bracketed IPv6 literal.", "Execute the direct client pipeline."],
+      "impact": "Public URL parsing accepts an address form that the client connection path cannot use.",
+      "evidence": "The URL parser supports bracketed literals, but factories convert the colon-containing origin host to HostName.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-TLS-KEY-001", "severity": "Medium", "affectedLocation": "src/tls/identity.cj:149-177",
+      "reproductionSteps": ["Replace or redirect a key path with same-size content between FileInfo and File.readFrom."],
+      "impact": "A different private key can be read than the file whose metadata was validated.",
+      "evidence": "Metadata check and read use separate path-based operations; only resulting size is compared, with no same-handle identity or no-follow guarantee.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-TLS-OWN-001", "severity": "Medium", "affectedLocation": "src/tls/identity.cj:61-67; src/tls/context.cj",
+      "reproductionSteps": ["Build a TLS context from LocalIdentity.", "Close the caller-held PrivateKeyRef.", "Attempt a later handshake."],
+      "impact": "A built, shareable context can fail later because its key lifetime remains controlled by the caller.",
+      "evidence": "LocalIdentity retains the same PrivateKeyRef and context construction does not acquire an independent lease or copy.",
+      "disposition": "Open"
+    },
+    {
+      "id": "WS-EVID-002", "severity": "Medium", "affectedLocation": "docs/security/review/linux-1.0/evidence-index.json; docs/planning/status.md; tools/tests/test_m7_linux_task_graph.py:84",
+      "reproductionSteps": ["Run scripts/check on the exact target commit.", "Run scripts/check-task M7-032 --json."],
+      "impact": "The exact snapshot is not backed by a green repository gate or current release artifact/performance/SBOM evidence.",
+      "evidence": "The package reports 7 STALE_AFTER_M7_032 entries. scripts/check exited 1 with 9 failures and 4 errors. M7-032 task check also failed its status expectation and Cangjie profile tests; the independently rerun clean-consumer gate passed only after loopback permission was granted.",
+      "disposition": "Open"
+    }
+  ],
+  "conclusion": "FAIL"
+}

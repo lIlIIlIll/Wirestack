@@ -1,72 +1,69 @@
 package wirestack.tls
 
-import wirestack.internal.common as common
 import wirestack.internal.tls_engine as engine
-import wirestack.internal.transport as transport
-import wirestack.internal.trust as trust
+import wirestack as api
 
 // Provider-neutral primitives needed to implement or wrap an existing
 // transport. The resolved declarations contain no std.net or native provider
 // type.
-public type IpAddressFamily = common.IpAddressFamily
-public type IpAddress = common.IpAddress
-public type SocketEndpoint = common.SocketEndpoint
-public type HostName = common.HostName
+public type IpAddressFamily = api.IpAddressFamily
+public type IpAddress = api.IpAddress
+public type SocketEndpoint = api.SocketEndpoint
+public type HostName = api.HostName
 
-public type ByteSpan = transport.ByteSpan
-public type MutableByteSpan = transport.MutableByteSpan
-public type ReadResult = transport.ReadResult
-public type ShutdownDirection = transport.ShutdownDirection
-public type AbortReason = transport.AbortReason
-public type TransportInfo = transport.TransportInfo
-public type DuplexTransport = transport.DuplexTransport
-public type TransportListener = transport.TransportListener
-public type OperationContext = transport.OperationContext
-public type Deadline = transport.Deadline
-public type CancellationToken = transport.CancellationToken
-public type CancellationSource = transport.CancellationSource
-public type NetworkTraceContext = transport.NetworkTraceContext
-public type NetworkErrorCategory = transport.NetworkErrorCategory
-public type NetworkPhase = transport.NetworkPhase
-public type NetworkErrorCode = transport.NetworkErrorCode
-public type Retryability = transport.Retryability
-public type NetworkException = transport.NetworkException
+public type ByteSpan = api.ByteSpan
+public type MutableByteSpan = api.MutableByteSpan
+public type ReadResult = api.ReadResult
+public type ShutdownDirection = api.ShutdownDirection
+public type AbortReason = api.AbortReason
+public type TransportInfo = api.TransportInfo
+public type DuplexTransport = api.DuplexTransport
+public type TransportListener = api.TransportListener
+public type OperationContext = api.OperationContext
+public type Deadline = api.Deadline
+public type CancellationToken = api.CancellationToken
+public type CancellationSource = api.CancellationSource
+public type NetworkTraceContext = api.NetworkTraceContext
+public type NetworkErrorCategory = api.NetworkErrorCategory
+public type NetworkPhase = api.NetworkPhase
+public type NetworkErrorCode = api.NetworkErrorCode
+public type Retryability = api.Retryability
+public type NetworkException = api.NetworkException
 
-public type TlsVersion = engine.TlsVersion
-public type TlsSecurityProfile = engine.TlsSecurityProfile
-public type TlsContextErrorCode = engine.TlsContextErrorCode
-public type TlsContextException = engine.TlsContextException
-public type TlsEngineErrorCode = engine.TlsEngineErrorCode
-public type TlsEngineException = engine.TlsEngineException
-public type TlsConnectionState = engine.TlsConnectionState
-public type TlsClosureEvidence = engine.TlsClosureEvidence
-public type ClientAuthentication = engine.ClientAuthentication
+public type TlsCapability = api.TlsCapability
+public type TlsVersion = api.TlsVersion
+public type TlsSecurityProfile = api.TlsSecurityProfile
+public type TlsContextErrorCode = api.TlsContextErrorCode
+public type TlsContextException = api.TlsContextException
+public type TlsEngineErrorCode = api.TlsEngineErrorCode
+public type TlsEngineException = api.TlsEngineException
+public type TlsConnectionState = api.TlsConnectionState
+public type TlsClosureEvidence = api.TlsClosureEvidence
+public type ClientAuthentication = api.ClientAuthentication
 
-public type TrustPolicyKind = trust.TrustPolicyKind
-public type TrustAnchorSource = trust.TrustAnchorSource
-public type TrustVerificationStatus = trust.TrustVerificationStatus
-public type TrustVerificationEvidence = trust.TrustVerificationEvidence
-public type TrustPolicy = trust.TrustPolicy
-public type CertificateInputLimits = trust.CertificateInputLimits
-public type CertificateInputErrorCode = trust.CertificateInputErrorCode
-public type CertificateInputException = trust.CertificateInputException
-public type DerCertificate = trust.DerCertificate
-public type CertificateChain = trust.CertificateChain
-public type PinScope = trust.PinScope
-public type SpkiSha256Pin = trust.SpkiSha256Pin
-public type ReferenceIdentity = trust.ReferenceIdentity
-public type IdentityVerificationErrorCode = trust.IdentityVerificationErrorCode
-public type IdentityVerificationException = trust.IdentityVerificationException
-public type IdentityVerificationEvidence = trust.IdentityVerificationEvidence
+public type TrustPolicyKind = api.TrustPolicyKind
+public type TrustAnchorSource = api.TrustAnchorSource
+public type TrustVerificationStatus = api.TrustVerificationStatus
+public type TrustVerificationEvidence = api.TrustVerificationEvidence
+public type TrustPolicy = api.TrustPolicy
+public type CertificateInputLimits = api.CertificateInputLimits
+public type CertificateInputErrorCode = api.CertificateInputErrorCode
+public type CertificateInputException = api.CertificateInputException
+public type DerCertificate = api.DerCertificate
+public type CertificateChain = api.CertificateChain
+public type PinScope = api.PinScope
+public type SpkiSha256Pin = api.SpkiSha256Pin
+public type ReferenceIdentity = api.ReferenceIdentity
+public type IdentityVerificationErrorCode = api.IdentityVerificationErrorCode
+public type IdentityVerificationException = api.IdentityVerificationException
+public type IdentityVerificationEvidence = api.IdentityVerificationEvidence
 
-public type PrivateKeyKind = engine.PrivateKeyKind
-public type PrivateKeyErrorCode = engine.PrivateKeyErrorCode
-public type PrivateKeyException = engine.PrivateKeyException
-public type TlsSignatureAlgorithm = engine.TlsSignatureAlgorithm
-public type ExternalSignatureRequest = engine.ExternalSignatureRequest
-public type ExternalSigner = engine.ExternalSigner
-public type PrivateKeyRef = engine.PrivateKeyRef
-public type LocalIdentity = engine.LocalIdentity
+public type PrivateKeyKind = api.PrivateKeyKind
+public type PrivateKeyErrorCode = api.PrivateKeyErrorCode
+public type PrivateKeyException = api.PrivateKeyException
+public type TlsSignatureAlgorithm = api.TlsSignatureAlgorithm
+public type ExternalSignatureRequest = api.ExternalSignatureRequest
+public type ExternalSigner = api.ExternalSigner
 
 /** Runtime/build identity for the active Linux TLS implementation. */
 public class TlsRuntimeInfo {

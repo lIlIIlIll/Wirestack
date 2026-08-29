@@ -69,6 +69,124 @@ class ArchitectureGuardTests(unittest.TestCase):
             self.assertIn("public-low-level-socket-type", rules)
             self.assertIn("public-native-provider-type", rules)
 
+    def test_public_alias_to_internal_import_is_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "src/http/api.cj",
+                "package wirestack.http\n\n"
+                "import wirestack.internal.transport as transport\n\n"
+                "public type Deadline = transport.Deadline\n",
+            )
+            self.assertIn("public-internal-alias", self.rules(root))
+
+    def test_public_header_with_internal_import_is_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "src/tls/api.cj",
+                "package wirestack.tls\n\n"
+                "import wirestack.internal.transport as transport\n\n"
+                "public func wrap(value: transport.DuplexTransport): Unit {}\n",
+            )
+            self.assertIn("public-internal-type", self.rules(root))
+
+    def test_public_member_of_public_class_with_internal_type_is_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "src/http/api.cj",
+                "package wirestack.http\n\n"
+                "import wirestack.internal.transport as transport\n\n"
+                "public class Client {\n"
+                "    public func use(value: transport.DuplexTransport): Unit {}\n"
+                "}\n",
+            )
+            self.assertIn("public-internal-type", self.rules(root))
+
+    def test_public_member_of_private_class_is_not_exported(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "src/http/adapter.cj",
+                "package wirestack.http\n\n"
+                "import wirestack.internal.transport as transport\n\n"
+                "private class Adapter {\n"
+                "    public func use(value: transport.DuplexTransport): Unit {}\n"
+                "}\n",
+            )
+            self.assertEqual([], guard.run_guard(root))
+
+    def test_public_alias_to_public_owner_is_allowed(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(root, "src/package.cj", "package wirestack\n\npublic struct Deadline {}\n")
+            self.write(
+                root,
+                "src/http/api.cj",
+                "package wirestack.http\n\nimport wirestack as api\n\n"
+                "public type Deadline = api.Deadline\n",
+            )
+            self.assertEqual([], guard.run_guard(root))
+
+    def test_public_internal_dependency_cycle_is_rejected_deterministically(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "src/http/api.cj",
+                "package wirestack.http\n\n"
+                "import wirestack.internal.connector.ClientConnector\n",
+            )
+            self.write(
+                root,
+                "src/internal/connector/package.cj",
+                "package wirestack.internal.connector\n\n"
+                "import wirestack.http.HttpClient\n",
+            )
+            violations = [
+                item for item in guard.run_guard(root)
+                if item.rule == "public-internal-dependency-cycle"
+            ]
+            self.assertEqual(1, len(violations))
+            self.assertEqual("src/http/api.cj", violations[0].path)
+            self.assertIn(
+                "wirestack.http -> wirestack.internal.connector -> wirestack.http",
+                violations[0].message,
+            )
+
+    def test_one_way_public_to_internal_dependency_is_allowed(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "src/tls/api.cj",
+                "package wirestack.tls\n\n"
+                "import wirestack.internal.tls_engine.Engine\n",
+            )
+            self.write(
+                root,
+                "src/internal/tls_engine/package.cj",
+                "package wirestack.internal.tls_engine\n",
+            )
+            self.assertEqual([], guard.run_guard(root))
+
+    def test_internal_names_in_comments_and_literals_do_not_trigger(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "src/http/api.cj",
+                "package wirestack.http\n\n"
+                "// public type Deadline = wirestack.internal.transport.Deadline\n"
+                "let note = \"wirestack.internal.transport.Deadline\"\n",
+            )
+            self.assertEqual([], guard.run_guard(root))
+
     def test_low_level_names_in_public_comments_and_literals_do_not_trigger(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)
