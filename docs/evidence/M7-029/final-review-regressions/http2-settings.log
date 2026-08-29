@@ -1,0 +1,411 @@
+COMMAND: /home/elliot/.codex/scripts/codex_cangjie_env --cwd /tmp/wirestack-m7029-final-review.t9LCwO/repo cjpm test --filter Http2SettingsTest --parallel 1 --no-progress --no-color
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.10 */                if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m___________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.11 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.12 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the code after the macro is expanded as follows
+    [36m| [0m
+    [36m| [0m  /* 6.1 */@Attribute[TEST_GENERATED] class PublicTlsFacadeTest <: TestClass {[0m
+    [36m| [0m [34m_[0m[34m^[0m
+    [36m| [0m[34m|[0m /* 6.2 */    @Attribute[TestCase_0][0m
+    [36m| [0m[34m|[0m /* 6.3 */    func clientBuilderRejectsReversedVersionRangeBeforeTransportIo(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.4 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.5 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.6 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.7 */                TlsClientContext.builder().versions(TlsVersion.Tls13, TlsVersion.Tls12).build()[0m
+    [36m| [0m[34m|[0m /* 6.8 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.9 */            } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 6.10 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.11 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.12 */                }[0m
+    [36m| [0m[34m|[0m /* 6.13 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.14 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.15 */                }[0m
+    [36m| [0m[34m|[0m /* 6.16 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.17 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.18 */                }[0m
+    [36m| [0m[34m|[0m /* 6.19 */                e[0m
+    [36m| [0m[34m|[0m /* 6.20 */            }[0m
+    [36m| [0m[34m|[0m /* 6.21 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.22 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.23 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.24 */            }[0m
+    [36m| [0m[34m|[0m /* 6.25 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.26 */        }[0m
+    [36m| [0m[34m|[0m /* 6.27 */    }[0m
+    [36m| [0m[34m|[0m /* 6.28 */    [0m
+    [36m| [0m[34m|[0m /* 6.29 */    @Attribute[TestCase_1][0m
+    [36m| [0m[34m|[0m /* 6.30 */    func serverBuilderRequiresAnIdentityBeforeTransportIo(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.31 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.32 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.33 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.34 */                TlsServerContext.builder().build()[0m
+    [36m| [0m[34m|[0m /* 6.35 */                fail("@AssertThrows: Expected 'TlsContextException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.36 */            } catch(e: TlsContextException) {[0m
+    [36m| [0m[34m|[0m /* 6.37 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.38 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.39 */                }[0m
+    [36m| [0m[34m|[0m /* 6.40 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.41 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.42 */                }[0m
+    [36m| [0m[34m|[0m /* 6.43 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.44 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.45 */                }[0m
+    [36m| [0m[34m|[0m /* 6.46 */                e[0m
+    [36m| [0m[34m|[0m /* 6.47 */            }[0m
+    [36m| [0m[34m|[0m /* 6.48 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.49 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.50 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.51 */            }[0m
+    [36m| [0m[34m|[0m /* 6.52 */            assertCaughtUnexpectedE("@AssertThrows(TlsContextException)", "TlsContextException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.53 */        }[0m
+    [36m| [0m[34m|[0m /* 6.54 */    }[0m
+    [36m| [0m[34m|[0m /* 6.55 */    [0m
+    [36m| [0m[34m|[0m /* 6.56 */    @Attribute[TestCase_2][0m
+    [36m| [0m[34m|[0m /* 6.57 */    func clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilities(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.58 */        let protocols =["h2", "http/1.1"][0m
+    [36m| [0m[34m|[0m /* 6.59 */        let context = TlsClientContext.builder().alpn(protocols).build()[0m
+    [36m| [0m[34m|[0m /* 6.60 */        protocols[0] = "mutated"[0m
+    [36m| [0m[34m|[0m /* 6.61 */        expectEqual("context.alpnProtocols()", "[\"h2\", \"http/1.1\"]", context.alpnProtocols(),["h2", "http/1.1"], isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.62 */        expectEqual("context.capabilities.supports(TlsCapability.Tls13)", "true", context.capabilities.supports(TlsCapability.Tls13), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.63 */        expectEqual("context.capabilities.supports(TlsCapability.ServerMode)", "true", context.capabilities.supports(TlsCapability.ServerMode), true, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.64 */    }[0m
+    [36m| [0m[34m|[0m /* 6.65 */    [0m
+    [36m| [0m[34m|[0m /* 6.66 */    @Attribute[TestCase_3][0m
+    [36m| [0m[34m|[0m /* 6.67 */    func preCancelledHandshakeConsumesAndAbortsTheTransport(): Unit {[0m
+    [36m| [0m[34m|[0m /* 6.68 */        let source = CancellationSource()[0m
+    [36m| [0m[34m|[0m /* 6.69 */        source.cancel()[0m
+    [36m| [0m[34m|[0m /* 6.70 */        let transport = CountingTransport()[0m
+    [36m| [0m[34m|[0m /* 6.71 */        let context = OperationContext(cancellation: source.token)[0m
+    [36m| [0m[34m|[0m /* 6.72 */        try {[0m
+    [36m| [0m[34m|[0m /* 6.73 */            try {[0m
+    [36m| [0m[34m|[0m /* 6.74 */                assertEqual("true", "true", true, true)[0m
+    [36m| [0m[34m|[0m /* 6.75 */                TlsClientContext.builder().build().handshake(transport, HostName("example.com"), context: context)[0m
+    [36m| [0m[34m|[0m /* 6.76 */                fail("@AssertThrows: Expected 'NetworkException' was not caught.")[0m
+    [36m| [0m[34m|[0m /* 6.77 */            } catch(e: NetworkException) {[0m
+    [36m| [0m[34m|[0m /* 6.78 */                if(e is AssertException) {[0m
+    [36m| [0m[34m|[0m /* 6.79 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.80 */                }[0m
+    [36m| [0m[34m|[0m /* 6.81 */                if(e is AssertIntermediateException) {[0m
+    [36m| [0m[34m|[0m /* 6.82 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.83 */                }[0m
+    [36m| [0m[34m|[0m /* 6.84 */                if(e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.85 */                    throw e[0m
+    [36m| [0m[34m|[0m /* 6.86 */                }[0m
+    [36m| [0m[34m|[0m /* 6.87 */                e[0m
+    [36m| [0m[34m|[0m /* 6.88 */            }[0m
+    [36m| [0m[34m|[0m /* 6.89 */        } catch(e: Exception) {[0m
+    [36m| [0m[34m|[0m /* 6.90 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {[0m
+    [36m| [0m[34m|[0m /* 6.91 */                throw e[0m
+    [36m| [0m[34m|[0m /* 6.92 */            }[0m
+    [36m| [0m[34m|[0m /* 6.93 */            assertCaughtUnexpectedE("@AssertThrows(NetworkException)", "NetworkException", e.toString())[0m
+    [36m| [0m[34m|[0m /* 6.94 */        }[0m
+    [36m| [0m[34m|[0m /* 6.95 */        expectEqual("transport.abortCalls", "1", transport.abortCalls, 1, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.96 */        expectEqual("transport.closeCalls", "0", transport.closeCalls, 0, isDelta: false)[0m
+    [36m| [0m[34m|[0m /* 6.97 */    }[0m
+    [36m| [0m[34m|[0m /* 6.98 */    [0m
+    [36m| [0m[34m|[0m /* 6.99 */    init() {[0m
+    [36m| [0m[34m|[0m /* 6.100 */    }[0m
+    [36m| [0m[34m|[0m /* 6.101 */    private func classConfiguration(): Configuration {[0m
+    [36m| [0m[34m|[0m /* 6.102 */        let configuration = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.103 */        [0m
+    [36m| [0m[34m|[0m /* 6.104 */        return configuration[0m
+    [36m| [0m[34m|[0m /* 6.105 */    }[0m
+    [36m| [0m[34m|[0m /* 6.106 */    public override func asTestSuite(): TestSuite {[0m
+    [36m| [0m[34m|[0m /* 6.107 */        [0m
+    [36m| [0m[34m|[0m /* 6.108 */        let suiteConfiguration = classConfiguration()[0m
+    [36m| [0m[34m|[0m /* 6.109 */        let suiteBuilder = TestSuite.builder("PublicTlsFacadeTest").configure(suiteConfiguration)[0m
+    [36m| [0m[34m|[0m /* 6.110 */        [0m
+    [36m| [0m[34m|[0m /* 6.111 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.112 */            [0m
+    [36m| [0m[34m|[0m /* 6.113 */            let clientBuilderRejectsReversedVersionRangeBeforeTransportIoTestFunc = { => clientBuilderRejectsReversedVersionRangeBeforeTransportIo();() }[0m
+    [36m| [0m[34m|[0m /* 6.114 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.115 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.116 */            "clientBuilderRejectsReversedVersionRangeBeforeTransportIo",[0m
+    [36m| [0m[34m|[0m /* 6.117 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.118 */            body: clientBuilderRejectsReversedVersionRangeBeforeTransportIoTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.119 */            )[0m
+    [36m| [0m[34m|[0m /* 6.120 */            )[0m
+    [36m| [0m[34m|[0m /* 6.121 */            [0m
+    [36m| [0m[34m|[0m /* 6.122 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.123 */        [0m
+    [36m| [0m[34m|[0m /* 6.124 */        [0m
+    [36m| [0m[34m|[0m /* 6.125 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.126 */            [0m
+    [36m| [0m[34m|[0m /* 6.127 */            let serverBuilderRequiresAnIdentityBeforeTransportIoTestFunc = { => serverBuilderRequiresAnIdentityBeforeTransportIo();() }[0m
+    [36m| [0m[34m|[0m /* 6.128 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.129 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.130 */            "serverBuilderRequiresAnIdentityBeforeTransportIo",[0m
+    [36m| [0m[34m|[0m /* 6.131 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.132 */            body: serverBuilderRequiresAnIdentityBeforeTransportIoTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.133 */            )[0m
+    [36m| [0m[34m|[0m /* 6.134 */            )[0m
+    [36m| [0m[34m|[0m /* 6.135 */            [0m
+    [36m| [0m[34m|[0m /* 6.136 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.137 */        [0m
+    [36m| [0m[34m|[0m /* 6.138 */        [0m
+    [36m| [0m[34m|[0m /* 6.139 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.140 */            [0m
+    [36m| [0m[34m|[0m /* 6.141 */            let clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilitiesTestFunc = { => clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilities();() }[0m
+    [36m| [0m[34m|[0m /* 6.142 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.143 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.144 */            "clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilities",[0m
+    [36m| [0m[34m|[0m /* 6.145 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.146 */            body: clientBuilderCopiesAlpnAndPublishesProviderNeutralCapabilitiesTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.147 */            )[0m
+    [36m| [0m[34m|[0m /* 6.148 */            )[0m
+    [36m| [0m[34m|[0m /* 6.149 */            [0m
+    [36m| [0m[34m|[0m /* 6.150 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.151 */        [0m
+    [36m| [0m[34m|[0m /* 6.152 */        [0m
+    [36m| [0m[34m|[0m /* 6.153 */        { => let caseConfig = Configuration()[0m
+    [36m| [0m[34m|[0m /* 6.154 */            [0m
+    [36m| [0m[34m|[0m /* 6.155 */            let preCancelledHandshakeConsumesAndAbortsTheTransportTestFunc = { => preCancelledHandshakeConsumesAndAbortsTheTransport();() }[0m
+    [36m| [0m[34m|[0m /* 6.156 */            suiteBuilder.add([0m
+    [36m| [0m[34m|[0m /* 6.157 */            UnitTestCase.create([0m
+    [36m| [0m[34m|[0m /* 6.158 */            "preCancelledHandshakeConsumesAndAbortsTheTransport",[0m
+    [36m| [0m[34m|[0m /* 6.159 */            configuration: caseConfig,[0m
+    [36m| [0m[34m|[0m /* 6.160 */            body: preCancelledHandshakeConsumesAndAbortsTheTransportTestFunc[0m
+    [36m| [0m[34m|[0m /* 6.161 */            )[0m
+    [36m| [0m[34m|[0m /* 6.162 */            )[0m
+    [36m| [0m[34m|[0m /* 6.163 */            [0m
+    [36m| [0m[34m|[0m /* 6.164 */        }()[0m
+    [36m| [0m[34m|[0m /* 6.165 */        [0m
+    [36m| [0m[34m|[0m /* 6.166 */        return suiteBuilder.build()[0m
+    [36m| [0m[34m|[0m /* 6.167 */    }[0m
+    [36m| [0m[34m|[0m /* 6.168 */    private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {[0m
+    [36m| [0m[34m|[0m /* 6.169 */        throw Exception("Unreachable code")[0m
+    [36m| [0m[34m|[0m /* 6.170 */    }[0m
+    [36m| [0m[34m|[0m /* 6.171 */}[0m
+    [36m| [0m[34m|[0m /* 6.172 */[0m
+    [36m| [0m[34m|[0m /* 6.173 */[0m
+    [36m| [0m[34m|[0m /* 6.174 */interface TestPackageExtension_PublicTlsFacadeTest {[0m
+    [36m| [0m[34m|[0m /* 6.175 */    func registerPublicTlsFacadeTest(): Unit[0m
+    [36m| [0m[34m|[0m /* 6.176 */}[0m
+    [36m| [0m[34m|[0m /* 6.177 */extend TestPackage <: TestPackageExtension_PublicTlsFacadeTest {[0m
+    [36m| [0m[34m|[0m /* 6.178 */    @Attribute[TEST_REGISTER][0m
+    [36m| [0m[34m|[0m /* 6.179 */    public func registerPublicTlsFacadeTest() {[0m
+    [36m| [0m[34m|[0m /* 6.180 */        registerSuite({ => PublicTlsFacadeTest().asTestSuite() })[0m
+    [36m| [0m[34m|[0m /* 6.181 */    }[0m
+    [36m| [0m[34m|[0m /* 6.182 */}[0m
+    [36m| [0m[34m|[0m /* 6.183 */[0m
+    [36m| [0m[34m|[0m[34m_[0m[34m__________^[0m
+    [36m| [0m
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m /tmp/wirestack-m7029-final-review.t9LCwO/repo/src/tls/facade_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m48[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.13 */                if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.14 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.15 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m /tmp/wirestack-m7029-final-review.t9LCwO/repo/src/tls/facade_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m48[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.16 */                if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m____________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.17 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.18 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m /tmp/wirestack-m7029-final-review.t9LCwO/repo/src/tls/facade_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m48[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.37 */                if(e is AssertException) {[0m
+   [36m| [0m [33m_[0m[33m___________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.38 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.39 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m /tmp/wirestack-m7029-final-review.t9LCwO/repo/src/tls/facade_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m48[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.40 */                if(e is AssertIntermediateException) {[0m
+   [36m| [0m [33m_[0m[33m_______________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.41 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.42 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m /tmp/wirestack-m7029-final-review.t9LCwO/repo/src/tls/facade_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m48[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+[33mwarning[0m: unreachable block in 'if' expression
+   [36m| [0m
+   [36m| [0m  /* 6.43 */                if(e is UnittestTimeoutException) {[0m
+   [36m| [0m [33m_[0m[33m____________________________________________________________^[0m
+   [36m| [0m[33m|[0m /* 6.44 */                    throw e[0m
+   [36m| [0m[33m|[0m /* 6.45 */                }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m__________________________^ unreachable block in 'if' expression[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+[34mnote[0m: the warning occurs after the macro is expanded
+  [36m==>[0m /tmp/wirestack-m7029-final-review.t9LCwO/repo/src/tls/facade_test.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  @Test[0m
+   [36m| [0m [34m_[0m[34m^[0m
+[36m7[0m  [36m| [0m[34m|[0m class PublicTlsFacadeTest {[0m
+   [36m| [0m[34m|[0m ...[0m
+[36m48[0m [36m| [0m[34m|[0m }[0m
+   [36m| [0m[34m|[0m[34m_[0m[34m^[0m
+   [36m| [0m
+
+6 warnings generated, 6 warnings printed.
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m /tmp/wirestack-m7029-final-review.t9LCwO/repo/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 34655588 ns, RESULT:
+Summary: TOTAL: 71
+    PASSED: 0, SKIPPED: 71, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.platform.linux, time elapsed: 6177442 ns, RESULT:
+Summary: TOTAL: 5
+    PASSED: 0, SKIPPED: 5, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.connector, time elapsed: 8814186 ns, RESULT:
+Summary: TOTAL: 17
+    PASSED: 0, SKIPPED: 17, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.tls_engine, time elapsed: 16853083 ns, RESULT:
+Summary: TOTAL: 62
+    PASSED: 0, SKIPPED: 62, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 51074348 ns, RESULT:
+    TCS: Http2SettingsTest, time elapsed: 3574785 ns, RESULT:
+    [ PASSED ] CASE: codecPreservesKnownUnknownAndRepeatedSettingsInOrder (350389 ns)
+    [ PASSED ] CASE: peerBatchAppliesAtomicallyAndReturnsAckAndWindowDelta (82765 ns)
+    [ PASSED ] CASE: invalidPeerBatchLeavesEffectiveStateUnchanged (85778 ns)
+    [ PASSED ] CASE: localBatchesAreAcknowledgedInFifoOrder (45952 ns)
+    [ PASSED ] CASE: unexpectedAckAndPendingBatchOverflowFailClosed (52417 ns)
+    [ PASSED ] CASE: advertisedResourceValuesAreCappedByLocalPolicy (47686 ns)
+    [ PASSED ] CASE: settingsFrameLengthAndAckPayloadAreRejectedByFrameLayer (78554 ns)
+    [ PASSED ] CASE: peerDefaultsAreRfcValuesCappedSeparatelyFromLocalAdvertisement (69587 ns)
+    [ PASSED ] CASE: serverEnablePushSettingIsRejectedInBothDirections (63634 ns)
+Summary: TOTAL: 155
+    PASSED: 9, SKIPPED: 146, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.common, time elapsed: 1805152 ns, RESULT:
+Summary: TOTAL: 9
+    PASSED: 0, SKIPPED: 9, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http1, time elapsed: 53268482 ns, RESULT:
+Summary: TOTAL: 115
+    PASSED: 0, SKIPPED: 115, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport_stdnet, time elapsed: 8766782 ns, RESULT:
+Summary: TOTAL: 50
+    PASSED: 0, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport, time elapsed: 15696782 ns, RESULT:
+Summary: TOTAL: 81
+    PASSED: 0, SKIPPED: 81, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.resolver, time elapsed: 3800181 ns, RESULT:
+Summary: TOTAL: 12
+    PASSED: 0, SKIPPED: 12, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.tls, time elapsed: 1194667 ns, RESULT:
+Summary: TOTAL: 6
+    PASSED: 0, SKIPPED: 6, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.trust, time elapsed: 2340022 ns, RESULT:
+Summary: TOTAL: 10
+    PASSED: 0, SKIPPED: 10, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 413381972 ns, RESULT:
+TP: wirestack.*, time elapsed: 413114515 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.platform.linux, time elapsed: 6177442 ns
+    TP: wirestack.internal.common, time elapsed: 1805152 ns
+    TP: wirestack.internal.transport, time elapsed: 15696782 ns
+    TP: wirestack.internal.trust, time elapsed: 2340022 ns
+    TP: wirestack.internal.http2, time elapsed: 51074348 ns
+    TP: wirestack.internal.resolver, time elapsed: 3800181 ns
+    TP: wirestack.internal.tls_engine, time elapsed: 16853083 ns
+    TP: wirestack.internal.connector, time elapsed: 8814186 ns
+    TP: wirestack.tls, time elapsed: 1194667 ns
+    TP: wirestack.internal.http1, time elapsed: 53268482 ns
+    TP: wirestack.internal.transport_stdnet, time elapsed: 8766782 ns
+    TP: wirestack.http, time elapsed: 34655588 ns
+Summary: TOTAL: 593
+    PASSED: 9, SKIPPED: 584, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
+EXIT_CODE: 0

@@ -1,0 +1,6 @@
+COMMAND: /home/elliot/.codex/scripts/codex_cangjie_env --cwd /tmp/wirestack-m7029-final-review.t9LCwO/repo cjpm check
+PRECONDITION: manifest-validated provider cache present; target/native/resolver absent
+The valid serial compilation order is:
+    wirestack -> wirestack.internal -> wirestack.internal.identity -> wirestack.internal.platform -> wirestack.internal.platform.android -> wirestack.internal.platform.apple -> wirestack.internal.platform.harmony -> wirestack.internal.platform.linux -> wirestack.internal.platform.windows -> wirestack.internal.common -> wirestack.internal.http_model -> wirestack.internal.transport -> wirestack.internal.trust -> wirestack.internal.http2 -> wirestack.internal.resolver -> wirestack.internal.tls_engine -> wirestack.internal.connector -> wirestack.tls -> wirestack.internal.http1 -> wirestack.internal.transport_stdnet -> wirestack.http
+cjpm check success
+EXIT_CODE: 0

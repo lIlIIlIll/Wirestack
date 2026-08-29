@@ -73,6 +73,29 @@ class M2003BoundedResolverBackendTest {
     }
 
     @TestCase
+    func nativeFamilyValidationFailsClosedAndPollingBackoffIsBounded(): Unit {
+        @Expect(m2003IsIpv4(nativeResolverResultFamily(4)))
+        @Expect(m2003IsIpv6(nativeResolverResultFamily(6)))
+        @Expect(m2003ExpectResolveError(
+            {=> let _ = nativeResolverResultFamily(5) },
+            ResolveErrorCode.SystemFailure
+        ))
+
+        var delay = Duration.millisecond
+        let expected = [
+            2 * Duration.millisecond,
+            4 * Duration.millisecond,
+            8 * Duration.millisecond,
+            16 * Duration.millisecond,
+            16 * Duration.millisecond,
+        ]
+        for (value in expected) {
+            delay = nextResolverWaitDelay(delay)
+            @Expect(delay, value)
+        }
+    }
+
+    @TestCase
     func preCancelledContextDoesNotSubmitNativeWork(): Unit {
         let backend = LinuxBoundedResolverBackend(workerCount: 1, queueCapacity: 1)
         let source = CancellationSource()
@@ -147,7 +170,9 @@ class M2003BoundedResolverBackendTest {
         @Expect(m2003ExpectResolveError({=> let _ = resolving.get(Duration.second) }, ResolveErrorCode.Cancelled))
         let latency = MonoTime.now() - started
         @Expect(latency < 50 * Duration.millisecond)
+        let closeStarted = MonoTime.now()
         backend.close()
+        @Expect(MonoTime.now() - closeStarted < 50 * Duration.millisecond)
     }
 
     @TestCase
@@ -235,6 +260,13 @@ private func m2003IsSystemSource(value: ResolverSource): Bool {
 private func m2003IsIpv4(value: IpAddressFamily): Bool {
     match (value) {
         case IpAddressFamily.Ipv4 => true
+        case _ => false
+    }
+}
+
+private func m2003IsIpv6(value: IpAddressFamily): Bool {
+    match (value) {
+        case IpAddressFamily.Ipv6 => true
         case _ => false
     }
 }
