@@ -23,7 +23,7 @@
   `UriResolver` 解析。
 - release performance gate 固定输出 yjson、stdx.json、cjfast_json 的完整共同 workload 表；
   高 CV 行保留并标记为 noisy，不再被稳定性筛选隐藏。
-- 新增 JSON Pointer（RFC 6901）、JSON Patch（RFC 6902）、JSON Merge Patch（RFC 7386）
+- 新增 JSON Pointer（RFC 6901）、JSON Patch（RFC 6902）、JSON Merge Patch（RFC 7396）
   与 JSONPath（RFC 9535）API；Patch 的 copy 和 in-place 入口均为原子操作。
 - JSON Schema 固定为 draft 2020-12，扩展 validation/applicator keyword，新增无网络
   `UriResolver` / `JsonSchemaRegistry`、format registry/provider，以及

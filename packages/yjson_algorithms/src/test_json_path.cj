@@ -48,4 +48,18 @@ class YJsonPathTest {
         @Expect(JsonPath.parse("$.store.book[?match(@.title, '^Z$')]").values(store).size, 0)
         @Expect(JsonPath.parse("$.store.book[?!@.missing]").values(store).size, 2)
     }
+
+    @TestCase
+    func singularQueriesUseParsedSelectorsInsteadOfQuotedPunctuation(): Unit {
+        let punctuation = YJson.parse("""
+        {"items":[{"a,b":"x","a:b":"y","*":1,"?..":2}]}
+        """)
+        @Expect(JsonPath.parse("$.items[?length(@['a,b']) == 1]").values(punctuation).size, 1)
+        @Expect(JsonPath.parse("$.items[?length(@['a:b']) == 1]").values(punctuation).size, 1)
+        @Expect(JsonPath.parse("$.items[?@['*'] == 1]").values(punctuation).size, 1)
+        @Expect(JsonPath.parse("$.items[?@['?..'] == 2]").values(punctuation).size, 1)
+        @AssertThrows[JsonPathException](JsonPath.parse("$.items[?length(@[*]) == 1]"))
+        @AssertThrows[JsonPathException](JsonPath.parse("$.items[?length(@[0,1]) == 1]"))
+        @AssertThrows[JsonPathException](JsonPath.parse("$.items[?length(@[0:1]) == 1]"))
+    }
 }
