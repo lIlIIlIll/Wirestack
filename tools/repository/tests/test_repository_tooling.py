@@ -217,7 +217,6 @@ class RepositoryToolingTests(unittest.TestCase):
         check = self.root / "scripts/check"
         check.write_text("#!/bin/sh\n", encoding="utf-8")
         check.chmod(0o755)
-        (self.root / "build").mkdir()
         actual = shutil.which
         missing_optional = lambda name: None if name in {"but", "rp-rg"} else actual(name)
         with mock.patch.object(tooling, "platform_identity", return_value={
@@ -225,6 +224,12 @@ class RepositoryToolingTests(unittest.TestCase):
              mock.patch.object(tooling, "toolchain_identity", return_value={"cjc": "cjc", "cjpm": "cjpm"}):
             degraded = tooling.doctor(self.root, which=missing_optional)
             self.assertEqual("DEGRADED", degraded["status"])
+            report_write = next(
+                check for check in degraded["checks"]
+                if check["id"] == "workspace-report-write"
+            )
+            self.assertEqual("PASS", report_write["status"])
+            self.assertTrue((self.root / "build").is_dir())
             missing_required = lambda name: None if name == "cjc" else actual(name)
             blocked = tooling.doctor(self.root, which=missing_required)
             self.assertEqual("BLOCKED", blocked["status"])
