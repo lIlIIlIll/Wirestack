@@ -90,6 +90,7 @@
     "src/internal/transport_stdnet/listener_test.cj",
     "src/internal/transport_stdnet/stdnet_transport_test.cj",
     "tools/m7_029_independent_security_review.py",
+    "tools/m7_027_linux_examples.py",
     "tools/latest_cangjie_nightly.py",
     "tools/repository/repository_tooling.py",
     "tools/repository/tests/test_repository_tooling.py",
@@ -103,6 +104,7 @@
     "tools/tasks/M7-029.json",
     "tools/tests/test_m7_021_linux_release.py",
     "tools/tests/test_m7_025_linux_supply_chain.py",
+    "tools/tests/test_m7_027_linux_examples.py",
     "third_party/aws-lc/LICENSE",
     "third_party/aws-lc/NOTICE",
     "tools/tests/test_m7_029_independent_security_review.py"
@@ -177,6 +179,7 @@
     "src/internal/transport_stdnet/listener_test.cj",
     "src/internal/transport_stdnet/stdnet_transport_test.cj",
     "tools/m7_029_independent_security_review.py",
+    "tools/m7_027_linux_examples.py",
     "tools/latest_cangjie_nightly.py",
     "tools/repository/repository_tooling.py",
     "tools/repository/tests/test_repository_tooling.py",
@@ -190,6 +193,7 @@
     "tools/tasks/M7-029.json",
     "tools/tests/test_m7_021_linux_release.py",
     "tools/tests/test_m7_025_linux_supply_chain.py",
+    "tools/tests/test_m7_027_linux_examples.py",
     "third_party/aws-lc/LICENSE",
     "third_party/aws-lc/NOTICE",
     "tools/tests/test_m7_029_independent_security_review.py"
