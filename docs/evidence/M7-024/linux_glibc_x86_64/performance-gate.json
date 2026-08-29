@@ -2272,7 +2272,7 @@
   },
   "failed_domains": [],
   "gate_id": "M7-024-LINUX-PERFORMANCE",
-  "generated_at_utc": "2026-08-29T08:19:39.875196+00:00",
+  "generated_at_utc": "2026-08-29T10:12:14.926415+00:00",
   "manifest_environment": {
     "cangjie": "1.1.0-alpha.20260817040003",
     "cjpm": "1.1.3",
