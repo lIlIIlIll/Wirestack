@@ -119,7 +119,8 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
             ResponseBody(
                 HttpCancellationBodyStream(delegate),
                 observer: this,
-                trailerProvider: { => delegate.trailer }
+                trailerProvider: { => delegate.trailer },
+                completeAtDeclaredLength: delegate.completesAtDeclaredLength
             ),
             version: response.version,
             headers: response.headers
@@ -129,7 +130,8 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
     internal func wrapRequestBody(body: ResponseBody): ResponseBody {
         ResponseBody(
             HttpCancellationBodyStream(body, context: Some(context)),
-            trailerProvider: { => body.trailer }
+            trailerProvider: { => body.trailer },
+            completeAtDeclaredLength: body.completesAtDeclaredLength
         )
     }
 

@@ -55,6 +55,7 @@ public enum Http2SettingsReceiveResult {
  * SETTINGS batch; it never delays enforcement of a received peer batch.
  */
 public class Http2SettingsState {
+    private let role: Http2ConnectionRole
     private let limits: Http2Limits
     private let pendingLocal = ArrayList<Http2SettingsSnapshot>()
     private var peerState: Http2SettingsSnapshot
@@ -66,18 +67,27 @@ public class Http2SettingsState {
     public prop acknowledgedLocal: Http2SettingsSnapshot { get() { acknowledgedLocalState } }
     public prop pendingLocalCount: Int64 { get() { pendingLocal.size } }
 
-    public init(limits!: Http2Limits = Http2Limits()) {
+    public init(role: Http2ConnectionRole, limits!: Http2Limits = Http2Limits()) {
+        this.role = role
         this.limits = limits
-        let defaults = defaultHttp2Settings(limits)
-        peerState = defaults
-        advertisedLocalState = defaults
-        acknowledgedLocalState = defaults
+        peerState = effectivePeerDefaults(limits)
+        advertisedLocalState = rfcHttp2Defaults()
+        acknowledgedLocalState = rfcHttp2Defaults()
     }
 
     /** Encodes and tracks one local batch; ACKs resolve these batches FIFO. */
     public func sendLocal(settings: Array<Http2Setting>): Http2Frame {
         if (pendingLocal.size >= Int64(limits.maxPendingSettings)) {
             throw IllegalStateException("HTTP/2 pending SETTINGS batches reached the configured limit")
+        }
+        if (isServerSettingsRole(role)) {
+            for (setting in settings) {
+                match (setting.identifier) {
+                    case Http2SettingId.EnablePush =>
+                        throw IllegalArgumentException("HTTP/2 servers must not send SETTINGS_ENABLE_PUSH")
+                    case _ => ()
+                }
+            }
         }
         let next = applyHttp2Settings(advertisedLocalState, settings, limits)
         let frame = encodeHttp2Settings(settings)
@@ -104,6 +114,18 @@ public class Http2SettingsState {
 
         // Build the entire next snapshot before mutating state. A malformed
         // entry therefore leaves all previously effective settings unchanged.
+        if (!isServerSettingsRole(role)) {
+            for (setting in decoded.settings) {
+                match (setting.identifier) {
+                    case Http2SettingId.EnablePush => throw Http2ProtocolException(
+                        Http2ErrorCode.ProtocolError,
+                        Http2ErrorScope.Connection,
+                        "HTTP/2 servers must not send SETTINGS_ENABLE_PUSH"
+                    )
+                    case _ => ()
+                }
+            }
+        }
         let next = applyHttp2Settings(peerState, decoded.settings, limits)
         let delta = Int64(next.initialWindowSize) - Int64(peerState.initialWindowSize)
         peerState = next
@@ -181,15 +203,53 @@ public func http2SettingsAck(): Http2Frame {
     )
 }
 
-private func defaultHttp2Settings(limits: Http2Limits): Http2SettingsSnapshot {
+private func rfcHttp2Defaults(): Http2SettingsSnapshot {
     Http2SettingsSnapshot(
-        limits.maxHeaderTableBytes,
+        4096u32,
+        true,
+        4294967295u32,
+        65535u32,
+        16384u32,
+        4294967295u32
+    )
+}
+
+private func effectivePeerDefaults(limits: Http2Limits): Http2SettingsSnapshot {
+    Http2SettingsSnapshot(
+        min(4096u32, limits.maxHeaderTableBytes),
         true,
         limits.maxConcurrentStreams,
-        limits.initialWindowSize,
-        limits.maxFrameSize,
+        65535u32,
+        min(16384u32, limits.maxFrameSize),
         limits.maxHeaderListBytes
     )
+}
+
+/** Every finite local receive limit that differs from an RFC default is advertised. */
+public func initialHttp2Settings(
+    role: Http2ConnectionRole,
+    limits: Http2Limits
+): Array<Http2Setting> {
+    let settings = ArrayList<Http2Setting>()
+    if (limits.maxHeaderTableBytes != 4096u32) {
+        settings.add(Http2Setting(Http2SettingId.HeaderTableSize, limits.maxHeaderTableBytes))
+    }
+    if (!isServerSettingsRole(role)) {
+        settings.add(Http2Setting(Http2SettingId.EnablePush, 0u32))
+    }
+    settings.add(Http2Setting(Http2SettingId.MaxConcurrentStreams, limits.maxConcurrentStreams))
+    if (limits.initialWindowSize != 65535u32) {
+        settings.add(Http2Setting(Http2SettingId.InitialWindowSize, limits.initialWindowSize))
+    }
+    if (limits.maxFrameSize != 16384u32) {
+        settings.add(Http2Setting(Http2SettingId.MaxFrameSize, limits.maxFrameSize))
+    }
+    settings.add(Http2Setting(Http2SettingId.MaxHeaderListSize, limits.maxHeaderListBytes))
+    settings.toArray()
+}
+
+private func isServerSettingsRole(role: Http2ConnectionRole): Bool {
+    match (role) { case Http2ConnectionRole.Server => true; case _ => false }
 }
 
 private func applyHttp2Settings(

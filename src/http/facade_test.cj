@@ -15,6 +15,28 @@ private func publicLoopback(port: UInt16): SocketEndpoint {
 @Test
 class HttpFacadeTest {
     @TestCase
+    func cancellationWrapperPreservesProtocolCompletionPolicy(): Unit {
+        let operation = HttpRequestCancellationOperation(
+            OperationContext.background(),
+            None<HttpRequestCancellationHandle>,
+            None<HttpConnectionCancellationHandle>,
+            None<HttpStreamCancellationHandle>
+        )
+        let delegate = ResponseBody(
+            RequestBody.string("abc").open(),
+            completeAtDeclaredLength: false
+        )
+        let response = operation.wrap(HttpResponse(200, "OK", delegate))
+        let destination = Array<Byte>(3, repeat: 0u8)
+
+        @Expect(response.body.read(destination), 3)
+        @Expect(!response.body.isFullyConsumed())
+        @Expect(response.body.read(destination), 0)
+        @Expect(response.body.isFullyConsumed())
+        response.close()
+    }
+
+    @TestCase
     func typedCancellationHandlesAreScopedIdempotentAndStopBeforeNetworkIo(): Unit {
         let requestCancellation = HttpRequestCancellationHandle()
         let connectionCancellation = HttpConnectionCancellationHandle()

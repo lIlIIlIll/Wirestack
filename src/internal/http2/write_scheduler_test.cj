@@ -193,6 +193,32 @@ class Http2WriteSchedulerTest {
     }
 
     @TestCase
+    func serverDataEventTransfersItsPermitBeforeWriterClaim(): Unit {
+        let flow = Http2FlowController()
+        let streamId = Http2StreamId(1u32)
+        flow.openStream(streamId)
+        let permit = flow.reserveSend(streamId, 3)
+        let scheduler = Http2WriteScheduler(RecordingSchedulerTransport())
+        let event = Http2ServerBodyEvent(
+            Http2ServerBodyEventKind.Data,
+            frame: Some(Http2Frame(
+                Http2FrameHeader(3u32, Http2FrameType.Data, Http2Flags(), streamId),
+                [1u8, 2u8, 3u8]
+            )),
+            permit: Some(permit)
+        )
+
+        let ticket = event.enqueueData(scheduler)
+        @Expect(flow.snapshot(streamId).sendWindow, 65535)
+        @Expect(flow.snapshot(streamId).reservedSendBytes, 3)
+        scheduler.close()
+        @Expect(isSchedulerTestClosed(scheduler.run()))
+        @Expect(isWriteTestWritten(ticket.wait()))
+        @Expect(flow.snapshot(streamId).sendWindow, 65532)
+        @Expect(flow.snapshot(streamId).reservedSendBytes, 0)
+    }
+
+    @TestCase
     func cancellingQueuedReservedDataReturnsAllFlowCapacity(): Unit {
         let flow = Http2FlowController()
         let streamId = Http2StreamId(1u32)

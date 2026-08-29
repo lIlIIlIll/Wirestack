@@ -207,14 +207,17 @@ def resolve_tool(explicit: str | None, preferred: str, fallback: str) -> str:
     if explicit:
         resolved = shutil.which(explicit) if os.sep not in explicit else explicit
         if resolved and Path(resolved).is_file():
-            return str(Path(resolved).resolve())
+            # Preserve argv[0] for multicall tools such as llvm-ar/llvm-ranlib.
+            return str(Path(resolved).absolute())
         raise BuildError(f"required tool not found: {explicit}")
     if Path(preferred).is_file():
         return preferred
     resolved = shutil.which(fallback)
     if resolved is None:
         raise BuildError(f"required tool not found: {fallback}")
-    return str(Path(resolved).resolve())
+    # Resolving the llvm-ranlib symlink to llvm-ar changes argv[0] and makes the
+    # multicall binary parse the archive path as an ar operation.
+    return str(Path(resolved).absolute())
 
 
 def tool_version(command: str) -> str:

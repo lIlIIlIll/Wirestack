@@ -1,0 +1,399 @@
+{
+  "schemaVersion": 1,
+  "taskId": "M7-029",
+  "target": {
+    "packagePath": "docs/security/review/linux-1.0/evidence-index.json",
+    "packageSha256": "19257a4f9d8571cdaea069beb571efa0e36e660563b25d90a83ce54345078b6c"
+  },
+  "reviewer": {
+    "identity": "OpenAI Codex process-isolated reviewer /root/m7_029_final_isolated_review",
+    "affiliation": "OpenAI Codex, commissioned by the Wirestack repository owner",
+    "reviewMode": "ProcessIsolatedAgent",
+    "independent": true,
+    "independenceStatement": "I reviewed the frozen archive without implementation discussion, did not modify product or test sources, and derived dispositions from the candidate source and independently executed evidence.",
+    "conflicts": [
+      "The process-isolated Codex reviewer was commissioned by the same repository owner as the implementation work.",
+      "Process isolation does not provide the organizational independence of an external security firm."
+    ],
+    "startedAtUtc": "2026-08-29T03:20:00Z",
+    "completedAtUtc": "2026-08-29T03:43:15Z"
+  },
+  "scope": [
+    "certificate-identity",
+    "dns-proxy-routing",
+    "http1-smuggling",
+    "http2-hpack",
+    "lifecycle-cancellation",
+    "linux-platform",
+    "native-c-abi",
+    "pool-isolation",
+    "private-keys",
+    "release-evidence",
+    "resource-bounds",
+    "sensitive-data",
+    "supply-chain",
+    "tls-protocol"
+  ],
+  "methods": [
+    "boundary-analysis",
+    "evidence-audit",
+    "lifecycle-concurrency",
+    "native-c-abi",
+    "negative-testing",
+    "source-review"
+  ],
+  "compatibilityPolicy": "NO_BACKWARD_COMPATIBILITY_PRE_1_0",
+  "findings": [
+    {
+      "id": "WS-CI-001",
+      "title": "Release-critical checks are not enforced on ordinary pull requests",
+      "severity": "Critical",
+      "status": "Open",
+      "location": ".github/workflows/clean-cangjie-build.yml; docs/evidence/M7-029/README.md",
+      "reproduction": "Inspect the new clean workflow and the repository's current required-check and protected-main evidence.",
+      "impact": "A change can merge without an enforced clean native build and full Cangjie gate, so release-blocking failures can reach the target branch.",
+      "evidence": "The workflow now declares the appropriate clean checks and its static contract test passes, but docs/evidence/M7-029/README.md states that GitHub has no required checks or protected-main ruleset and that the hosted workflow has not run. Static workflow presence cannot prove merge enforcement or an executed hosted gate.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Open: no executed remote run or branch-protection evidence establishes the original security property."
+    },
+    {
+      "id": "WS-BUILD-002",
+      "title": "CJPM build hook omitted the native resolver",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "build.cj",
+      "reproduction": "With a manifest-validated provider cache retained and target/native/resolver absent, run cjpm check.",
+      "impact": "A standard package build previously failed because the resolver archive was missing.",
+      "evidence": "The build hook invokes both pinned provider and resolver builders for lifecycle operations. The focused precondition test built the missing resolver and cjpm check completed successfully.",
+      "fix": "build.cj now provisions both required native dependencies.",
+      "regressions": [
+        {
+          "command": "/home/elliot/.codex/scripts/codex_cangjie_env --cwd /tmp/wirestack-m7029-final-review.t9LCwO/repo cjpm check",
+          "status": "PASS",
+          "exitCode": 0,
+          "timedOut": false,
+          "evidencePath": "docs/evidence/M7-029/final-review-regressions/cjpm-check-missing-resolver.log",
+          "sha256": "363b722f2c87aa035f61e56f85a7ed2cf54423525feed249f9c68a3f0315fcc1"
+        }
+      ],
+      "dispositionRationale": "Fixed under the original retained-provider-cache reproduction precondition."
+    },
+    {
+      "id": "WS-H2-SERVER-FLOW-001",
+      "title": "Failed HTTP/2 server enqueue could consume reserved flow credit",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "src/internal/http2/server_connection.cj; src/internal/http2/server_mapping.cj",
+      "reproduction": "Reserve DATA credit and force queue admission failure or closure.",
+      "impact": "Leaked connection and stream credit could starve unrelated streams.",
+      "evidence": "The event path now transfers the reservation through enqueueReservedData, which cancels it on enqueue failure; the scheduler regression exercises permit transfer and failure paths.",
+      "fix": "Reserved DATA permits are transferred atomically to the writer and released on failed admission.",
+      "regressions": [
+        {
+          "command": "/home/elliot/.codex/scripts/codex_cangjie_env --cwd /tmp/wirestack-m7029-final-review.t9LCwO/repo cjpm test --filter Http2WriteSchedulerTest --parallel 1 --no-progress --no-color",
+          "status": "PASS",
+          "exitCode": 0,
+          "timedOut": false,
+          "evidencePath": "docs/evidence/M7-029/final-review-regressions/http2-write-scheduler.log",
+          "sha256": "5877f1640e3cfdd3bda3f03d2a2e8d5bead1bbdc1c73af7475fd08bd27740c92"
+        }
+      ],
+      "dispositionRationale": "Fixed by source inspection and the executed scheduler regression."
+    },
+    {
+      "id": "WS-H2-SETTINGS-001",
+      "title": "HTTP/2 local and peer settings were initialized from the same policy",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "src/internal/http2/settings.cj; client_connection.cj; server_connection.cj",
+      "reproduction": "Configure non-default receive limits, emit the preface SETTINGS, and inspect initial peer state.",
+      "impact": "Endpoints could enforce unadvertised limits or account peer state from non-RFC defaults.",
+      "evidence": "Peer RFC defaults and locally advertised settings are now separate and the focused settings suite passed nine cases.",
+      "fix": "The settings state machine separates peer defaults from advertised and acknowledged local policy.",
+      "regressions": [
+        {
+          "command": "/home/elliot/.codex/scripts/codex_cangjie_env --cwd /tmp/wirestack-m7029-final-review.t9LCwO/repo cjpm test --filter Http2SettingsTest --parallel 1 --no-progress --no-color",
+          "status": "PASS",
+          "exitCode": 0,
+          "timedOut": false,
+          "evidencePath": "docs/evidence/M7-029/final-review-regressions/http2-settings.log",
+          "sha256": "4cfe2b9eb70c41dc4a2d76478df783f0a2bfe6a37a09ed4459f55ddf8fe4da34"
+        }
+      ],
+      "dispositionRationale": "Fixed by explicit state separation and executed protocol tests."
+    },
+    {
+      "id": "WS-H2-WRAP-001",
+      "title": "Public cancellation wrapper lost HTTP/2 completion semantics",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "src/http/cancellation.cj",
+      "reproduction": "Wrap an HTTP/2 response whose declared length completes before END_STREAM and inspect wrapper behavior.",
+      "impact": "The wrapper could complete before trailers or protocol completion and detach cancellation early.",
+      "evidence": "The wrapper copies completesAtDeclaredLength from the delegate, and the public facade suite passed fourteen cases.",
+      "fix": "Response-body completion policy is preserved through scoped cancellation wrapping.",
+      "regressions": [
+        {
+          "command": "/home/elliot/.codex/scripts/codex_cangjie_env --cwd /tmp/wirestack-m7029-final-review.t9LCwO/repo cjpm test --filter HttpFacadeTest --parallel 1 --no-progress --no-color",
+          "status": "PASS",
+          "exitCode": 0,
+          "timedOut": false,
+          "evidencePath": "docs/evidence/M7-029/final-review-regressions/http-facade.log",
+          "sha256": "fbf9e0d67eabb396c9b52aab6533916902da27b2694d34b283c85cf81240c619"
+        }
+      ],
+      "dispositionRationale": "Fixed by property preservation and the executed facade regression."
+    },
+    {
+      "id": "WS-PROXY-001",
+      "title": "Authenticated CONNECT tunnels could be reused across credentials",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "src/internal/http1/proxy_client_pipeline.cj; pool_key.cj",
+      "reproduction": "Issue HTTPS proxy requests with different Proxy-Authorization values and inspect tunnel reuse.",
+      "impact": "A tunnel authenticated as one principal could previously cross credential boundaries.",
+      "evidence": "Authenticated CONNECT paths are now marked no-reuse and the focused proxy pipeline suite passed.",
+      "fix": "Authenticated proxy tunnels are excluded from connection reuse.",
+      "regressions": [
+        {
+          "command": "/home/elliot/.codex/scripts/codex_cangjie_env --cwd /tmp/wirestack-m7029-final-review.t9LCwO/repo cjpm test --filter Http1ProxyClientPipelineTest --parallel 1 --no-progress --no-color",
+          "status": "PASS",
+          "exitCode": 0,
+          "timedOut": false,
+          "evidencePath": "docs/evidence/M7-029/final-review-regressions/http1-proxy.log",
+          "sha256": "fed28d4cc7bd3c2f2025909d3a34dabd66573290f2e6c780281128c656759fcd"
+        }
+      ],
+      "dispositionRationale": "Fixed by fail-closed no-reuse semantics and executed tests."
+    },
+    {
+      "id": "WS-RES-001",
+      "title": "Blocking getaddrinfo can accumulate quarantined resolver pools",
+      "severity": "High",
+      "status": "Open",
+      "location": "native/resolver/linux/wirestack_resolver.c; src/internal/resolver/bounded_backend.cj; src/http/resolver.cj",
+      "reproduction": "Block getaddrinfo indefinitely, repeatedly create a public SystemResolver, start a resolve, and close it.",
+      "impact": "Each close can return while its detached reaper, worker threads, jobs, and pool remain alive without a global bound, allowing repeated resolver instances to exhaust process threads and memory.",
+      "evidence": "The remediation bounds one pool and makes close non-blocking, but the native reaper still waits indefinitely for getaddrinfo and the public constructor permits repeated pools. The executed gate delays getaddrinfo for only 250 ms and therefore does not exercise indefinite blocking or repeated accumulation.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Open: the original stuck-shutdown symptom is masked by quarantine, but the exhausted-worker/resource impact remains possible across unbounded public pool instances."
+    },
+    {
+      "id": "WS-RETRY-001",
+      "title": "Ambiguous socket write timeout could be retried",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "src/internal/transport_stdnet/package.cj; src/http/retry.cj",
+      "reproduction": "Cause a socket write timeout after an unknown physical commit and inspect retry classification.",
+      "impact": "The same replayable request could previously be transmitted twice.",
+      "evidence": "Write timeouts now map to Never retryability, and the focused StdNet transport suite passed nineteen cases.",
+      "fix": "Ambiguous write timeout failures are permanently non-retryable.",
+      "regressions": [
+        {
+          "command": "/home/elliot/.codex/scripts/codex_cangjie_env --cwd /tmp/wirestack-m7029-final-review.t9LCwO/repo cjpm test --filter StdNetTransportTest --parallel 1 --no-progress --no-color",
+          "status": "PASS",
+          "exitCode": 0,
+          "timedOut": false,
+          "evidencePath": "docs/evidence/M7-029/final-review-regressions/stdnet-transport.log",
+          "sha256": "c784afa92e16c4b9fd6dec18db4829e7a4c65b1b76e99f7710e33a2fcef73b57"
+        }
+      ],
+      "dispositionRationale": "Fixed by fail-closed retry classification and executed transport tests."
+    },
+    {
+      "id": "WS-STDNET-001",
+      "title": "Cancellation of one accept closed the shared listener",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "src/internal/transport_stdnet/package.cj",
+      "reproduction": "Cancel one pending accept and then attempt a later accept on the same server.",
+      "impact": "One request could previously terminate the listener for all callers.",
+      "evidence": "Accept now uses bounded polling against its operation context instead of closing the listener, and the transport suite passed.",
+      "fix": "Per-operation cancellation no longer owns listener lifetime.",
+      "regressions": [
+        {
+          "command": "/home/elliot/.codex/scripts/codex_cangjie_env --cwd /tmp/wirestack-m7029-final-review.t9LCwO/repo cjpm test --filter StdNetTransportTest --parallel 1 --no-progress --no-color",
+          "status": "PASS",
+          "exitCode": 0,
+          "timedOut": false,
+          "evidencePath": "docs/evidence/M7-029/final-review-regressions/stdnet-transport.log",
+          "sha256": "c784afa92e16c4b9fd6dec18db4829e7a4c65b1b76e99f7710e33a2fcef73b57"
+        }
+      ],
+      "dispositionRationale": "Fixed by operation-scoped polling and executed lifecycle tests."
+    },
+    {
+      "id": "WS-TLS-TRUST-001",
+      "title": "Trust identity did not bind trust-store contents",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "src/internal/platform/linux/package.cj",
+      "reproduction": "Replace a trust bundle with same-size content or modify hashed-directory entries and compare partition identity.",
+      "impact": "A session established under old trust material could previously be resumed after a trust change.",
+      "evidence": "Trust identity now includes bounded SHA-256 content identity for files and directory entries; the focused adapter suite passed five cases.",
+      "fix": "Session partition identity is cryptographically bound to bounded trust-store contents.",
+      "regressions": [
+        {
+          "command": "/home/elliot/.codex/scripts/codex_cangjie_env --cwd /tmp/wirestack-m7029-final-review.t9LCwO/repo cjpm test --filter LinuxSystemTrustAdapterTest --parallel 1 --no-progress --no-color",
+          "status": "PASS",
+          "exitCode": 0,
+          "timedOut": false,
+          "evidencePath": "docs/evidence/M7-029/final-review-regressions/linux-system-trust.log",
+          "sha256": "1a9632510a766ee0588d3bd966eeb10915e22c13e5044f8f6ed19cc83c398004"
+        }
+      ],
+      "dispositionRationale": "Fixed by content-bound identity and executed mutation regressions."
+    },
+    {
+      "id": "WS-LIC-001",
+      "title": "The release lacked a project license grant",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "LICENSE; THIRD_PARTY_NOTICES.md; release metadata",
+      "reproduction": "Inspect root licensing files and generated package metadata.",
+      "impact": "The intended public release previously lacked an explicit distribution grant.",
+      "evidence": "The candidate contains Apache-2.0 LICENSE and third-party notices, and the focused release/SBOM license tests passed.",
+      "fix": "An Apache-2.0 project grant and third-party attribution are included and bound into release metadata.",
+      "regressions": [
+        {
+          "command": "python3 -m unittest tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_cjpm_build_hook_builds_both_native_dependencies tools.tests.test_m7_029_independent_security_review.M7029IndependentSecurityReviewTests.test_clean_cangjie_workflow_covers_the_release_critical_gates tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_qualification_inputs_bind_native_manifests_sources_and_build_logic tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_release_metadata_inventory_is_complete tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_fingerprint_is_stable_and_dependency_sensitive tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_generation_is_byte_deterministic tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_project_and_resolver_sbom_packages_use_apache_2_0 tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_wrong_project_license_expression_fails_closed -v",
+          "status": "PASS",
+          "exitCode": 0,
+          "timedOut": false,
+          "evidencePath": "docs/evidence/M7-029/final-review-regressions/focused-python-security-contracts.log",
+          "sha256": "9d0f601a9c5c1a01a63b854625d3a813568d259c9ab03996d98286a54b261f22"
+        }
+      ],
+      "dispositionRationale": "Fixed by tracked grant, notices, metadata binding, and executed tests."
+    },
+    {
+      "id": "WS-API-001",
+      "title": "ByteSpan exposes mutable backing storage",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "src/byte_span.cj",
+      "reproduction": "Construct ByteSpan over an array and mutate the original array or public bytes member.",
+      "impact": "Consumers cannot rely on the documented immutable-view property.",
+      "evidence": "The public Array backing remains writable and current tests explicitly preserve write-through behavior.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Open and unchanged."
+    },
+    {
+      "id": "WS-CANCEL-001",
+      "title": "Cancellation callback registry has no hard bound",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "src/cancellation.cj",
+      "reproduction": "Register callbacks repeatedly on a live token without cancellation or handle closure.",
+      "impact": "A public registry can grow without the product's required explicit resource bound.",
+      "evidence": "Callback storage remains a HashMap without a maximum or rejection threshold.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Open and unchanged."
+    },
+    {
+      "id": "WS-CI-SUPPLY-001",
+      "title": "Several CI actions use mutable version tags",
+      "severity": "Medium",
+      "status": "Open",
+      "location": ".github/workflows/*.yml",
+      "reproduction": "Inspect every workflow uses entry.",
+      "impact": "Third-party CI code can change without a Wirestack commit.",
+      "evidence": "Multiple workflows still use actions/checkout@v4, actions/setup-python@v5, or actions/upload-artifact@v4; only the new clean workflow is fully pinned.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Open across the workflow set."
+    },
+    {
+      "id": "WS-H2-BUFFER-001",
+      "title": "Inbound HTTP/2 buffering lacks an independent byte cap",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "src/internal/http2/client_connection.cj; server_mapping.cj",
+      "reproduction": "Queue maximum-sized inbound DATA segments without consuming them.",
+      "impact": "Inbound memory remains coupled to an outbound write-count setting rather than an independently declared byte limit.",
+      "evidence": "Body-channel maxSegments still derives from maxPendingWrites and no separate queued-byte cap is enforced.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Open and unchanged."
+    },
+    {
+      "id": "WS-H2-SETTINGS-002",
+      "title": "Role-invalid SETTINGS_ENABLE_PUSH was accepted",
+      "severity": "Medium",
+      "status": "Fixed",
+      "location": "src/internal/http2/settings.cj",
+      "reproduction": "As a client, receive SETTINGS_ENABLE_PUSH from the server.",
+      "impact": "Role-invalid protocol input could previously be accepted.",
+      "evidence": "Settings application now carries endpoint role and rejects server ENABLE_PUSH; the focused settings suite passed.",
+      "fix": "Endpoint-role validation rejects the prohibited setting direction.",
+      "regressions": [
+        {
+          "command": "/home/elliot/.codex/scripts/codex_cangjie_env --cwd /tmp/wirestack-m7029-final-review.t9LCwO/repo cjpm test --filter Http2SettingsTest --parallel 1 --no-progress --no-color",
+          "status": "PASS",
+          "exitCode": 0,
+          "timedOut": false,
+          "evidencePath": "docs/evidence/M7-029/final-review-regressions/http2-settings.log",
+          "sha256": "4cfe2b9eb70c41dc4a2d76478df783f0a2bfe6a37a09ed4459f55ddf8fe4da34"
+        }
+      ],
+      "dispositionRationale": "Fixed by explicit role checking and executed negative tests."
+    },
+    {
+      "id": "WS-IPV6-001",
+      "title": "Accepted IPv6 URL literals are not usable by the client path",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "src/http_url.cj; src/internal/http1/client_pipeline.cj; tls_client_pipeline.cj",
+      "reproduction": "Parse a bracketed IPv6 URL and execute the direct client pipeline.",
+      "impact": "The public parser accepts an origin form that the connection path cannot represent as HostName.",
+      "evidence": "The parser still accepts bracketed literals while the factories pass the colon-containing host through HostName.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Open and unchanged."
+    },
+    {
+      "id": "WS-TLS-KEY-001",
+      "title": "Private-key path validation and read remain vulnerable to replacement",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "src/tls/identity.cj",
+      "reproduction": "Replace or redirect the key path between metadata validation and File.readFrom.",
+      "impact": "The loaded private key can differ from the file whose metadata was validated.",
+      "evidence": "Metadata and content are still obtained through separate path-based operations without same-handle or no-follow identity.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Open and unchanged."
+    },
+    {
+      "id": "WS-TLS-OWN-001",
+      "title": "TLS context private-key lifetime remains caller-controlled",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "src/tls/identity.cj; src/tls/context.cj",
+      "reproduction": "Build a context, close the caller-held PrivateKeyRef, and attempt a later handshake.",
+      "impact": "A built shared context can fail later when its caller closes the retained key.",
+      "evidence": "Context construction still retains the same closeable reference without an independent lease or copy.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Open and unchanged."
+    },
+    {
+      "id": "WS-EVID-002",
+      "title": "Release evidence is stale for the target commit",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "docs/security/review/linux-1.0/evidence-index.json; docs/planning/status.md",
+      "reproduction": "Run scripts/verify-evidence M7-028 and inspect the target package states.",
+      "impact": "The exact candidate is not backed by current release-artifact, performance, SBOM, and hosted-gate evidence.",
+      "evidence": "scripts/verify-evidence M7-028 reports evidence-freshness STALE, and the package contains seven STALE_AFTER_M7_032 entries.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Open; current evidence was not regenerated for this candidate."
+    }
+  ],
+  "conclusion": "FAIL"
+}

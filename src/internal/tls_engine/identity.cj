@@ -3,8 +3,8 @@ package wirestack.internal.tls_engine
 import std.collection.*
 import std.fs.*
 import std.sync.*
-import wirestack.internal.transport.*
 import wirestack.internal.trust.*
+import wirestack as api
 
 private let IDENTITY_NATIVE_OK: Int32 = 0
 private let IDENTITY_NATIVE_INVALID: Int32 = 6
@@ -33,71 +33,12 @@ foreign func wirestack_tls_sha256(
     output: CPointer<UInt8>
 ): Int32
 
-public enum PrivateKeyKind {
-    | Pkcs8
-    | SystemHandle
-    | ExternalSigner
-}
-
-public enum PrivateKeyErrorCode {
-    | InvalidPkcs8
-    | InvalidFile
-    | KeyCertificateMismatch
-    | Closed
-    | UnsupportedKeyKind
-    | InvalidSigner
-    | SignerFailure
-}
-
-public enum TlsSignatureAlgorithm {
-    | RsaPssRsaeSha256
-    | RsaPssRsaeSha384
-    | RsaPssRsaeSha512
-    | RsaPkcs1Sha256
-    | RsaPkcs1Sha384
-    | RsaPkcs1Sha512
-    | EcdsaSecp256r1Sha256
-    | EcdsaSecp384r1Sha384
-    | EcdsaSecp521r1Sha512
-    | Ed25519
-}
-
-/** Immutable request. The input is the exact TLS transcript bytes AWS-LC asks to sign. */
-public struct ExternalSignatureRequest {
-    public let algorithm: TlsSignatureAlgorithm
-    private let message: Array<Byte>
-
-    public init(algorithm: TlsSignatureAlgorithm, message: Array<Byte>) {
-        if (message.isEmpty() || message.size > 64 * 1024) {
-            throw PrivateKeyException(
-                PrivateKeyErrorCode.InvalidSigner,
-                "external signature input must contain 1..65536 bytes"
-            )
-        }
-        this.algorithm = algorithm
-        this.message = message.clone()
-    }
-
-    public func messageBytes(): Array<Byte> { message.clone() }
-}
-
-/** Provider-neutral signer; implementations may wrap aliases or non-exportable handles. */
-public interface ExternalSigner {
-    func supportedAlgorithms(): Array<TlsSignatureAlgorithm>
-    func sign(request: ExternalSignatureRequest, context: OperationContext): Array<Byte>
-}
-
-/** Stable private-key failure which never contains key material or native handles. */
-public class PrivateKeyException <: Exception {
-    public let code: PrivateKeyErrorCode
-
-    public init(code: PrivateKeyErrorCode, message: String) {
-        super(message)
-        this.code = code
-    }
-
-    protected override func getClassName(): String { "PrivateKeyException" }
-}
+public type PrivateKeyKind = api.PrivateKeyKind
+public type PrivateKeyErrorCode = api.PrivateKeyErrorCode
+public type TlsSignatureAlgorithm = api.TlsSignatureAlgorithm
+public type ExternalSignatureRequest = api.ExternalSignatureRequest
+public type ExternalSigner = api.ExternalSigner
+public type PrivateKeyException = api.PrivateKeyException
 
 /**
  * Opaque private-key reference. PKCS#8 bytes remain instance-owned, are copied

@@ -205,6 +205,10 @@ int main(void) {
                 "sha256": sha256_path(archive),
             },
             "worker_model": "fixed pthread pool with bounded FIFO admission",
+            "close_model": (
+                "bounded admission stop with a process-wide cap of eight live pools "
+                "and 64 workers; blocking libc/NSS calls remain quarantined until completion"
+            ),
             "private_runtime_abi": False,
         }
         (artifact / "resolver-manifest.json").write_text(

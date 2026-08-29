@@ -176,6 +176,12 @@ class Net06CancellationGateTest {
 @Test
 class StdNetTransportTest {
     @TestCase
+    func writeTimeoutIsNeverRetryableWithoutZeroCommitProof(): Unit {
+        let error = writeTimedOut(Exception("scripted timeout"))
+        @Expect(stableWriteTimeout(error))
+    }
+
+    @TestCase
     func writeSomeIsPartialAndReusesBoundedConnectionStaging(): Unit {
         let listener = StdNetTransportListener.bind(loopback(0), stagingBufferSize: 3)
         let accepted = spawn { listener.accept() }
@@ -437,6 +443,34 @@ class StdNetTransportTest {
     }
 
     @TestCase
+    func cancellingOneAcceptLeavesListenerReusable(): Unit {
+        let listener = StdNetTransportListener.bind(loopback(0))
+        let source = CancellationSource()
+        let cancelledAccept: Future<Bool> = spawn {
+            try {
+                let _ = listener.accept(OperationContext(cancellation: source.token))
+                false
+            } catch (error: NetworkException) {
+                match (error.code) {
+                    case NetworkErrorCode.Cancelled => true
+                    case _ => false
+                }
+            }
+        }
+        @Expect(listener.waitUntilAcceptActive(Duration.second))
+        source.cancel()
+        @Expect(cancelledAccept.get(Duration.second))
+        @Expect(!listener.isClosed())
+
+        let next = spawn { listener.accept() }
+        let client = StdNetTransport.connect(listener.localEndpoint)
+        let server = next.get(Duration.second)
+        client.close()
+        server.close()
+        listener.close()
+    }
+
+    @TestCase
     func preCancelledConnectDoesNotCreateASocket(): Unit {
         let source = CancellationSource()
         source.cancel()
@@ -659,4 +693,24 @@ class StdNetTransportTest {
             listener.close()
         }
     }
+}
+
+private func stableWriteTimeout(error: NetworkException): Bool {
+    let category = match (error.category) {
+        case NetworkErrorCategory.Write => true
+        case _ => false
+    }
+    let phase = match (error.phase) {
+        case NetworkPhase.TcpWrite => true
+        case _ => false
+    }
+    let code = match (error.code) {
+        case NetworkErrorCode.TimedOut => true
+        case _ => false
+    }
+    let retryability = match (error.retryability) {
+        case Retryability.Never => true
+        case _ => false
+    }
+    category && phase && code && retryability && error.cause.isSome()
 }
