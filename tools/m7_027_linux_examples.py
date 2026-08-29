@@ -8,6 +8,7 @@ import json
 import os
 import platform
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -166,6 +167,27 @@ def run(command: Sequence[str], cwd: Path, timeout: int) -> str:
     return output
 
 
+def tool_command(
+    command: Sequence[str],
+    cwd: Path,
+    wrapper: Path = ENV_WRAPPER,
+    which: Callable[[str], str | None] = shutil.which,
+) -> list[str]:
+    if wrapper.is_file():
+        return [str(wrapper), "--cwd", str(cwd), *command]
+    executable = command[0]
+    if os.sep in executable:
+        available = Path(executable).is_file()
+    else:
+        available = which(executable) is not None
+    if not available:
+        raise ExampleGateError(
+            "MISSING_TOOLCHAIN",
+            f"missing environment wrapper and executable {executable}",
+        )
+    return list(command)
+
+
 def consumer_manifest() -> str:
     dependency = json.dumps(str(ROOT))
     return f'''[package]
@@ -190,8 +212,6 @@ def consumer_manifest() -> str:
 
 def validate() -> dict[str, Any]:
     require_platform()
-    if not ENV_WRAPPER.is_file():
-        raise ExampleGateError("MISSING_TOOLCHAIN_WRAPPER", f"missing {ENV_WRAPPER}")
     sources = load_and_validate_sources()
     validate_guide(GUIDE.read_text(encoding="utf-8"))
     run([sys.executable, "tools/build_linux_tls_provider.py", "--offline"], ROOT, 600)
@@ -203,11 +223,11 @@ def validate() -> dict[str, Any]:
         (consumer / "cjpm.toml").write_text(consumer_manifest(), encoding="utf-8")
         for name, text in sources.items():
             (source_root / name).write_text(text, encoding="utf-8")
-        run([str(ENV_WRAPPER), "--cwd", str(consumer), "cjpm", "build"], consumer, 300)
+        run(tool_command(["cjpm", "build"], consumer), consumer, 300)
         binary = consumer / "target/release/bin/main"
         if not binary.is_file():
             raise ExampleGateError("MISSING_EXECUTABLE", "clean consumer produced no main executable")
-        output = run([str(ENV_WRAPPER), "--cwd", str(consumer), str(binary)], consumer, 60)
+        output = run(tool_command([str(binary)], consumer), consumer, 60)
         validate_markers(output)
     report = {
         "schemaVersion": 1,
@@ -258,4 +278,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
