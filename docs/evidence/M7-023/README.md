@@ -23,8 +23,8 @@ artifacts, and a checked-in-coordinate replay mode.
 | Total deterministic iterations | 6,465 |
 | Current-run crash artifacts | 0 |
 | Gate report | [`linux_glibc_x86_64/fuzz-report.json`](linux_glibc_x86_64/fuzz-report.json) |
-| Gate report SHA-256 | `1e8000ed913a0f5c3138f31ee80b6c53d9ab026b672486f6f88e0c1ff392cf8b` |
-| Qualified source SHA-256 | `d36ddd00c3d4845af380c79396eee6add9a84f245a882cd7d25878fa2533d4a9` |
+| Gate report SHA-256 | `81d056538ed5ac99a1ca33e0ad6fad3c7e62f9b52f699265fd8e9325e3b8a711` |
+| Qualified source SHA-256 | `9707d1454f279a1688e1602e722385cc52b86e7e0feb01474210f29543789a7f` |
 
 ## Target thresholds
 
@@ -73,7 +73,7 @@ A native replay of the chunked-decoder campaign passed 127/100 iterations. Its
 report is
 [`linux_glibc_x86_64/replay-report.json`](linux_glibc_x86_64/replay-report.json)
 with SHA-256
-`fb26ba61f168ebc0ae41c78ac13cd90e13245172b15037032eb8c375d0a1c0f7`.
+`016b02bf365492b7fb230beeefa486221178e5a6905a661e32b1009433dbc7af`.
 The replay report carries the same current source and manifest fingerprints as
 the formal campaign report.
 
