@@ -51,14 +51,11 @@ jobs:
             *) exit "$doctor_exit" ;;
           esac
 
-      - name: Run canonical build and test gate
-        run: scripts/check
+      - name: Run current-source build and test gate
+        run: scripts/check-code
 
       - name: Build and run the installed public consumer
         run: scripts/check-m7-027-linux-examples --json
-
-      - name: Reject stale task evidence
-        run: scripts/verify-evidence --all --json
 
       - name: Reject build-time source-tree mutation
         shell: bash

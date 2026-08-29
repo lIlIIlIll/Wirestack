@@ -59,6 +59,11 @@ the M7-029 contract.
   `repo-doctor` retains `DEGRADED` when optional GitButler/rp-rg capabilities
   are absent on the hosted runner; CI accepts only its stable READY or DEGRADED
   exit codes and still rejects BLOCKED.
+  Hosted CI runs the shared current-source gate used by `scripts/check` for the
+  architecture guard, native resolver build, `cjpm check`, build and
+  non-performance tests. Historical release-evidence freshness remains
+  fail-closed in `scripts/check` and is intentionally regenerated only after
+  the security remediation candidate is frozen.
 
 The first process-isolated review is preserved unchanged under
 [`initial-isolated-review/`](initial-isolated-review/). It reviewed the clean

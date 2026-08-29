@@ -146,9 +146,8 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
         self.assertIn("sudo apt-get install --yes clang cmake ninja-build", workflow)
         for command in (
             "scripts/repo-doctor --json",
-            "scripts/check",
+            "scripts/check-code",
             "scripts/check-m7-027-linux-examples --json",
-            "scripts/verify-evidence --all --json",
             "git diff --exit-code",
             "git status --porcelain --untracked-files=all",
         ):
@@ -158,6 +157,18 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
         self.assertIn('*) exit "$doctor_exit" ;;', workflow)
         self.assertNotIn("continue-on-error", workflow)
         self.assertNotIn("|| true", workflow)
+        self.assertNotIn("scripts/verify-evidence --all", workflow)
+        check = (ROOT / "scripts/check").read_text(encoding="utf-8")
+        code_gate = (ROOT / "scripts/check-code").read_text(encoding="utf-8")
+        self.assertIn("scripts/check-code", check)
+        for command in (
+            "tools/architecture_guard.py",
+            "scripts/build-linux-resolver --quiet",
+            "cjpm check",
+            "cjpm build",
+            "cjpm test --exclude-tags=Performance",
+        ):
+            self.assertIn(command, code_gate)
 
     def test_hosted_ci_nightly_resolution_fails_closed(self) -> None:
         version = "1.3.0-alpha.20260829010011"
