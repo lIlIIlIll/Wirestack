@@ -1,0 +1,78 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M7-028/test-plan.md",
+        "--json"
+      ],
+      "duration_ms": 114.048,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-29T02:37:49.828480Z",
+      "id": "test-plan-matrix",
+      "started_at_utc": "2026-08-29T02:37:49.714429Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-028/test-plan-matrix.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"counts\": {\"paths\": 12, \"scenarios\": 10, \"tests\": 8}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+      "stdout_path": "build/repository-tooling/M7-028/test-plan-matrix.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m7_028_security_review_package",
+        "-v"
+      ],
+      "duration_ms": 216.598,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-29T02:37:50.045183Z",
+      "id": "review-package-fault-injection-tests",
+      "started_at_utc": "2026-08-29T02:37:49.828599Z",
+      "status": "PASS",
+      "stderr_excerpt": "test_atomic_report_failure_preserves_previous_bytes (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_atomic_report_failure_preserves_previous_bytes) ... ok\ntest_checked_in_package_is_valid (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_checked_in_package_is_valid) ... ok\ntest_missing_file_and_digest_drift_are_rejected (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_missing_file_and_digest_drift_are_rejected) ... ok\ntest_path_escape_is_rejected (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_path_escape_is_rejected) ... ok\ntest_required_topic_and_compatibility_gate_are_enforced (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_required_topic_and_compatibility_gate_are_enforced) ... ok\ntest_sensitive_data_is_rejected_without_echoing_value (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_sensitive_data_is_rejected_without_echoing_value) ... ok\ntest_stale_or_skipped_evidence_cannot_claim_pass (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_stale_or_skipped_evidence_cannot_claim_pass) ... ok\ntest_unknown_schema_and_field_are_rejected (tools.tests.test_m7_028_security_review_package.M7028SecurityReviewPackageTests.test_unknown_schema_and_field_are_rejected) ... ok\n\n----------------------------------------------------------------------\nRan 8 tests in 0.113s\n\nOK\n",
+      "stderr_path": "build/repository-tooling/M7-028/review-package-fault-injection-tests.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "",
+      "stdout_path": "build/repository-tooling/M7-028/review-package-fault-injection-tests.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "scripts/check-m7-028-security-review",
+        "--json"
+      ],
+      "duration_ms": 114.161,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-29T02:37:50.159515Z",
+      "id": "security-review-package",
+      "started_at_utc": "2026-08-29T02:37:50.045392Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-028/security-review-package.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"acceptance_status\": \"PASS\", \"checks\": {\"compatibilityGate\": \"DISABLED_PRE_1_0\", \"digests\": \"PASS\", \"evidenceStates\": \"PASS\", \"requiredTopics\": \"PASS\", \"sensitiveData\": \"PASS\", \"skippedAsPass\": false}, \"compatibilityPolicy\": \"NO_BACKWARD_COMPATIBILITY_PRE_1_0\", \"decision\": \"PASS\", \"documentCount\": 11, \"evidenceCount\": 12, \"indexSha256\": \"19257a4f9d8571cdaea069beb571efa0e36e660563b25d90a83ce54345078b6c\", \"platform\": \"linux-x86_64-glibc\", \"schemaVersion\": 1, \"source_task\": \"M7-028\", \"stateCounts\": {\"CURRENT_PASS\": 4, \"HISTORICAL_NON_GATING\": 1, \"STALE_AFTER_M7_032\": 7}, \"status\": \"PASS\", \"taskId\": \"M7-028\"}\n",
+      "stdout_path": "build/repository-tooling/M7-028/security-review-package.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "task",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M7-028"
+}
