@@ -19,6 +19,8 @@
 #define WIRESTACK_RESOLVER_MAXIMUM_HOST_BYTES UINT64_C(253)
 #define WIRESTACK_RESOLVER_MAXIMUM_SERVICE_BYTES UINT64_C(63)
 #define WIRESTACK_RESOLVER_ADDRESS_BYTES UINT64_C(16)
+#define WIRESTACK_RESOLVER_MAXIMUM_LIVE_POOLS UINT64_C(8)
+#define WIRESTACK_RESOLVER_MAXIMUM_LIVE_WORKERS UINT64_C(64)
 
 enum wirestack_resolver_job_state {
     WIRESTACK_RESOLVER_JOB_QUEUED = 0,
@@ -56,6 +58,7 @@ struct wirestack_resolver_pool {
     pthread_cond_t work_available;
     pthread_cond_t idle;
     pthread_t *workers;
+    pthread_t reaper;
     struct wirestack_resolver_job *queue_head;
     struct wirestack_resolver_job *queue_tail;
     uint64_t worker_count;
@@ -70,7 +73,47 @@ struct wirestack_resolver_pool {
     uint64_t rejected_jobs;
     int accepting;
     int stopping;
+    int capacity_reserved;
 };
+
+static pthread_mutex_t resolver_capacity_mutex = PTHREAD_MUTEX_INITIALIZER;
+static uint64_t resolver_live_pools = 0u;
+static uint64_t resolver_live_workers = 0u;
+
+static int reserve_pool_capacity(struct wirestack_resolver_pool *pool) {
+    int reserved = 0;
+    pthread_mutex_lock(&resolver_capacity_mutex);
+    if (resolver_live_pools < WIRESTACK_RESOLVER_MAXIMUM_LIVE_POOLS &&
+        pool->worker_count <= WIRESTACK_RESOLVER_MAXIMUM_LIVE_WORKERS - resolver_live_workers) {
+        resolver_live_pools++;
+        resolver_live_workers += pool->worker_count;
+        pool->capacity_reserved = 1;
+        reserved = 1;
+    }
+    pthread_mutex_unlock(&resolver_capacity_mutex);
+    return reserved;
+}
+
+static void release_pool_capacity(struct wirestack_resolver_pool *pool) {
+    if (!pool->capacity_reserved) {
+        return;
+    }
+    pthread_mutex_lock(&resolver_capacity_mutex);
+    resolver_live_pools--;
+    resolver_live_workers -= pool->worker_count;
+    pool->capacity_reserved = 0;
+    pthread_mutex_unlock(&resolver_capacity_mutex);
+}
+
+static void free_pool(struct wirestack_resolver_pool *pool) {
+    release_pool_capacity(pool);
+    pool->magic = 0u;
+    pthread_cond_destroy(&pool->idle);
+    pthread_cond_destroy(&pool->work_available);
+    pthread_mutex_destroy(&pool->mutex);
+    free(pool->workers);
+    free(pool);
+}
 
 static char *copy_bounded_string(const char *value, uint64_t maximum) {
     if (value == NULL) {
@@ -233,6 +276,34 @@ static void *resolver_worker(void *argument) {
     }
 }
 
+/*
+ * Blocking libc/NSS resolver calls cannot be interrupted portably. Closing a
+ * public resolver therefore quarantines this bounded pool and lets this reaper
+ * reclaim it only after every worker and caller-held job reference is gone.
+ * Process-wide live-pool and worker reservations bound quarantined resources;
+ * new pools fail closed while blocked calls hold that capacity.
+ */
+static void *resolver_reaper(void *argument) {
+    struct wirestack_resolver_pool *pool = (struct wirestack_resolver_pool *)argument;
+    pthread_mutex_lock(&pool->mutex);
+    while (!pool->stopping) {
+        pthread_cond_wait(&pool->idle, &pool->mutex);
+    }
+    pthread_mutex_unlock(&pool->mutex);
+
+    for (uint64_t index = 0u; index < pool->worker_count; index++) {
+        pthread_join(pool->workers[index], NULL);
+    }
+
+    pthread_mutex_lock(&pool->mutex);
+    while (pool->active_jobs != 0u) {
+        pthread_cond_wait(&pool->idle, &pool->mutex);
+    }
+    pthread_mutex_unlock(&pool->mutex);
+    free_pool(pool);
+    return NULL;
+}
+
 int32_t wirestack_resolver_pool_create(
     uint64_t worker_count,
     uint64_t queue_capacity,
@@ -276,6 +347,15 @@ int32_t wirestack_resolver_pool_create(
     pool->worker_count = worker_count;
     pool->queue_capacity = queue_capacity;
     pool->accepting = 1;
+    if (!reserve_pool_capacity(pool)) {
+        pool->magic = 0u;
+        pthread_cond_destroy(&pool->idle);
+        pthread_cond_destroy(&pool->work_available);
+        pthread_mutex_destroy(&pool->mutex);
+        free(pool->workers);
+        free(pool);
+        return WIRESTACK_RESOLVER_OVERLOADED;
+    }
     for (uint64_t index = 0u; index < worker_count; index++) {
         if (pthread_create(&pool->workers[index], NULL, resolver_worker, pool) != 0) {
             pthread_mutex_lock(&pool->mutex);
@@ -286,6 +366,7 @@ int32_t wirestack_resolver_pool_create(
             for (uint64_t joined = 0u; joined < index; joined++) {
                 pthread_join(pool->workers[joined], NULL);
             }
+            release_pool_capacity(pool);
             pool->magic = 0u;
             pthread_cond_destroy(&pool->idle);
             pthread_cond_destroy(&pool->work_available);
@@ -295,6 +376,19 @@ int32_t wirestack_resolver_pool_create(
             return WIRESTACK_RESOLVER_OUT_OF_MEMORY;
         }
     }
+    if (pthread_create(&pool->reaper, NULL, resolver_reaper, pool) != 0) {
+        pthread_mutex_lock(&pool->mutex);
+        pool->accepting = 0;
+        pool->stopping = 1;
+        pthread_cond_broadcast(&pool->work_available);
+        pthread_mutex_unlock(&pool->mutex);
+        for (uint64_t index = 0u; index < worker_count; index++) {
+            pthread_join(pool->workers[index], NULL);
+        }
+        free_pool(pool);
+        return WIRESTACK_RESOLVER_OUT_OF_MEMORY;
+    }
+    pthread_detach(pool->reaper);
     *out_pool_handle = (uint64_t)(uintptr_t)pool;
     return WIRESTACK_RESOLVER_OK;
 }
@@ -307,21 +401,10 @@ int32_t wirestack_resolver_pool_destroy(uint64_t pool_handle) {
     }
     pthread_mutex_lock(&pool->mutex);
     pool->accepting = 0;
-    while (pool->active_jobs != 0u) {
-        pthread_cond_wait(&pool->idle, &pool->mutex);
-    }
     pool->stopping = 1;
     pthread_cond_broadcast(&pool->work_available);
+    pthread_cond_broadcast(&pool->idle);
     pthread_mutex_unlock(&pool->mutex);
-    for (uint64_t index = 0u; index < pool->worker_count; index++) {
-        pthread_join(pool->workers[index], NULL);
-    }
-    pool->magic = 0u;
-    pthread_cond_destroy(&pool->idle);
-    pthread_cond_destroy(&pool->work_available);
-    pthread_mutex_destroy(&pool->mutex);
-    free(pool->workers);
-    free(pool);
     return WIRESTACK_RESOLVER_OK;
 }
 
