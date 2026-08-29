@@ -25,7 +25,7 @@ func profileRecordArrayJson(): JsonCodec<Array<ProfileRecord>> {
 }
 
 func int64HashMapJson(): JsonCodec<HashMap<String, Int64>> {
-    YJson.hashMapCodec(Int64Json)
+    YJson.int64HashMapCodec()
 }
 
 func escapedUnicodeStringJsonText(): String {
@@ -146,6 +146,9 @@ class ComprehensiveJsonCompareBenchmarks {
     let largeProfileArray = largeProfiles.toArray()
     let largeInt64Map = sampleLargeInt64Map()
     let largeStrings = sampleBenchmarkStrings(64)
+    let xlProfiles = sampleLargeProfileRecords(count: 1024)
+    let xlInt64Map = sampleLargeInt64Map(count: 1024)
+    let xlDeepNestedProfiles = sampleDeepNestedProfiles(groupCount: 64, recordCount: 16)
     let deepNestedProfiles = sampleDeepNestedProfiles()
     let escapedUnicodeText = sampleEscapedUnicodeString()
     let stdxAddress: StdxAddress
@@ -160,6 +163,9 @@ class ComprehensiveJsonCompareBenchmarks {
     let staticProfileListCodec = ProfileRecordStaticArrayListJson
     let int64MapCodec = int64HashMapJson()
     let stringListCodec = YJson.stringArrayListCodec()
+    let xlProfileListCodec = profileRecordArrayListJson()
+    let xlInt64MapCodec = int64HashMapJson()
+    let xlDeepNestedCodec = nestedProfilesJson()
     let deepNestedCodec = nestedProfilesJson()
     let addressText: String
     let personText: String
@@ -169,6 +175,9 @@ class ComprehensiveJsonCompareBenchmarks {
     let temporalStatsText: String
     let largeProfilesText: String
     let largeProfileArrayText: String
+    let xlProfilesText: String
+    let xlInt64MapText: String
+    let xlDeepNestedProfilesText: String
     let emptyProfileListText = "[]"
     let largeInt64MapText: String
     let emptyStringListText = "[]"
@@ -222,6 +231,9 @@ class ComprehensiveJsonCompareBenchmarks {
         largeInt64MapText = YJson.encodeStringWith(int64MapCodec, largeInt64Map)
         largeStringListText = YJson.encodeStringWith(stringListCodec, largeStrings)
         deepNestedProfilesText = YJson.encodeStringWith(deepNestedCodec, deepNestedProfiles)
+        xlProfilesText = YJson.encodeStringWith(xlProfileListCodec, xlProfiles)
+        xlInt64MapText = YJson.encodeStringWith(xlInt64MapCodec, xlInt64Map)
+        xlDeepNestedProfilesText = YJson.encodeStringWith(xlDeepNestedCodec, xlDeepNestedProfiles)
         escapedUnicodeJsonText = YJson.encodeStringWith(StringJson, escapedUnicodeText)
 
         addressBytes = encodeYjsonReflectBytesWith(AddressJson, address)
@@ -890,4 +902,37 @@ class ComprehensiveJsonCompareBenchmarks {
     func stdxStringDecodePrettyPerson(): Unit {
         intSink = decodeStdxFromUtf8String<StdxPerson>(prettyPersonText).id
     }
+
+    // ---- XL scale (1024 / 1024 / 64×16=1024 records) ----
+
+    @Bench
+    func yjsonStringEncodeXlProfileArray(): Unit {
+        stringSink = YJson.encodeStringWith(xlProfileListCodec, xlProfiles)
+    }
+
+    @Bench
+    func yjsonStringDecodeXlProfileArray(): Unit {
+        intSink = YJson.decodeStringWith(xlProfileListCodec, xlProfilesText).size
+    }
+
+    @Bench
+    func yjsonStringEncodeXlInt64Map(): Unit {
+        stringSink = YJson.encodeStringWith(xlInt64MapCodec, xlInt64Map)
+    }
+
+    @Bench
+    func yjsonStringDecodeXlInt64Map(): Unit {
+        intSink = YJson.decodeStringWith(xlInt64MapCodec, xlInt64MapText).size
+    }
+
+    @Bench
+    func yjsonStringEncodeXlDeepNestedProfiles(): Unit {
+        stringSink = YJson.encodeStringWith(xlDeepNestedCodec, xlDeepNestedProfiles)
+    }
+
+    @Bench
+    func yjsonStringDecodeXlDeepNestedProfiles(): Unit {
+        intSink = YJson.decodeStringWith(xlDeepNestedCodec, xlDeepNestedProfilesText).size
+    }
+
 }
