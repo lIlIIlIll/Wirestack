@@ -14,9 +14,14 @@ public interface JsonDocument {
 
 private class PureCompactJsonDocument <: JsonDocument {
     private let document: CompactJsonDocument
+    // CompactJsonDocument may borrow a String's UTF-8 storage. Keeping the
+    // owner in the facade makes the borrow valid for the facade's GC lifetime
+    // without adding lifecycle work to the public document API.
+    private let sourceTextOwner: Option<String>
 
-    init(document: CompactJsonDocument) {
+    init(document: CompactJsonDocument, sourceTextOwner!: Option<String> = None<String>) {
         this.document = document
+        this.sourceTextOwner = sourceTextOwner
     }
 
     public func root(): CompactJsonValue { document.root() }
@@ -39,6 +44,13 @@ private class PureCompactJsonDocument <: JsonDocument {
     public func toString(): String {
         document.toString()
     }
+}
+
+func parseManagedJsonDocument(text: String, config: JsonReadConfig): JsonDocument {
+    let compact = unsafe {
+        CompactJsonDocument.parseBorrowed(text.rawData(), config: config)
+    }
+    PureCompactJsonDocument(compact, sourceTextOwner: Some(text))
 }
 
 func parseManagedJsonDocument(bytes: Array<Byte>, config: JsonReadConfig): JsonDocument {

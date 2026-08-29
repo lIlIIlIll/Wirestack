@@ -3,6 +3,12 @@ package yjson
 import std.unittest.*
 import std.unittest.testmacro.*
 
+private func documentFromTemporaryString(): JsonDocument {
+    let prefix = "{\"owner\":\""
+    let suffix = "\",\"items\":[1,2,3]}"
+    YJson.parseDocument(prefix + "kept alive" + suffix)
+}
+
 @Test
 class JsonDocumentFacadeTest {
     @TestCase
@@ -25,5 +31,15 @@ class JsonDocumentFacadeTest {
         for (index in 0..bytes.size) { bytes[index] = b' ' }
         @Expect(document.rootSize(), 3)
         @Expect(document.materialize().asArray().size(), 3)
+    }
+
+    @TestCase
+    func stringInputOwnerLivesWithManagedDocument(): Unit {
+        let document = documentFromTemporaryString()
+        @Expect(document.root().get("owner").getOrThrow().asString(), "kept alive")
+        @Expect(document.root().get("items").getOrThrow().size(), 3)
+        @Expect(document.materialize().asObject().get("owner").getOrThrow().asString().value,
+            "kept alive")
+        @Expect(document.toString(), "{\"owner\":\"kept alive\",\"items\":[1,2,3]}")
     }
 }

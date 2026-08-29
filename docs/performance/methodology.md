@@ -50,6 +50,20 @@ CV 门槛只控制可陈述精度，不是筛选 workload 的工具。
 用户结果页只保留理解结论所需的统计和限制。原始样本、日志、manifest、checksum 与环境
 细节进入不可变 release artifact；开发机绝对路径和临时排障过程不进入稳定文档。
 
+## Pure 内部优化 gate
+
+使用 `scripts/json_pure_perf_compare.py` 比较 Pure baseline 与 candidate。runner 校验两个源码
+目录的 `packages/benchmarks` manifest 相同，然后以独立进程执行相同 case。正式运行使用
+11 轮、128 MiB heap 和固定 CPU affinity。奇数轮先运行 baseline，偶数轮先运行 candidate。
+
+不指定 `--cpu` 时，runner 只选择两个 hardware thread 利用率都低于 1% 的物理 core。运行
+期间必须同时记录被测 thread 和 sibling thread 的利用率。完整命令、语料要求和 case 含义见
+[benchmark 说明](../../benchmarks/README.md#pure-baselinecandidate-workload)。
+
+稳定普通 workload 必须满足 `candidate/baseline <= 1.05`。目标 workload 还必须达到预先规定
+的提升与配对胜出轮次，并通过 `--target-case` 显式记录。任一方 CV 超过 5% 时，丢弃整批并
+完整重跑一次。第二批仍超过门槛时保留结果并标记 noisy，不继续重跑。
+
 ## Native acceleration gate
 
 Pure 与 Native 必须在独立进程中运行，因为首次 `YJson` 调用会冻结引擎。正式 gate 固定
