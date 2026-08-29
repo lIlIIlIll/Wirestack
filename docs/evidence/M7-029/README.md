@@ -52,10 +52,10 @@ the M7-029 contract.
   carries the complete AWS-LC 5.5.0 `LICENSE` and `NOTICE`, and the SBOM binds
   their digests.
 - `Clean Cangjie Build` defines the repository-side fail-closed PR job on
-  GitHub-hosted `ubuntu-latest`. Both actions and Cangjie
-  `1.1.0-alpha.20260817040003` are fixed to exact revisions. Remote execution
-  and required-check enforcement still need the workflow to be pushed and a
-  GitHub ruleset.
+  GitHub-hosted `ubuntu-latest`. Actions use immutable revisions. The workflow
+  resolves the latest complete Linux x64 nightly, validates its release/tag and
+  required asset, then passes that exact version to the setup action for the
+  run. A missing or malformed release fails closed instead of falling back.
 
 The first process-isolated review is preserved unchanged under
 [`initial-isolated-review/`](initial-isolated-review/). It reviewed the clean
@@ -98,7 +98,7 @@ renamed to that path because it targets the pre-remediation snapshot and uses
 the reviewer's original non-gating schema. The implementation agent cannot
 invent final reviewer dispositions, metadata, or independent execution evidence.
 
-GitHub currently has no required checks or protected-main ruleset. The hosted
+GitHub required-check enforcement is not yet recorded as PASS. The hosted
 workflow has not run from the remote repository. These external settings and
 results are not treated as locally completed work.
 
