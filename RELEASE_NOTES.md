@@ -1,88 +1,57 @@
-# Release notes — 1.0.0-rc.1
+# Release notes: 2.0.0
 
-`1.0.0-rc.1` 已创建 tag，尚未发布到 registry。checked-in manifests 使用 `1.0.0`，
-候选阶段应从同一个 `1.0.0-rc.1` source tree 引用全部 yjson package。完整验收状态见
-[release evidence](release/1.0.0-rc.1/evidence.md)。
+yjson 2.0.0 于 2026-08-27 作为稳定版发布。该版本是相对 1.x 的 breaking release，统一了
+默认 JSON 引擎，并将高级算法和 Native 能力拆分为显式 package。发布内容见
+[GitHub Release](https://github.com/lIlIIlIll/yjson/releases/tag/2.0.0)，验收结果见
+[release evidence](release/2.0.0/evidence.md)。
 
-## JSON literal syntax and AST rename
+## 默认 API 与 package 边界
 
-`yjson_macros` now exports expression macros `@Json({...})` for direct compact
-writing and `@JsonValue({...})` for mutable-tree construction. Both accept
-nested object/array literals, trailing commas, value interpolation with `$()`,
-and dynamic String keys. Interpolations run exactly once from left to right;
-dynamic collisions use LastWins, and codecs run only for winning fields.
+- `YJson` 使用 Pure Cangjie semantic engine。普通 API 不接受 backend 参数，也不要求
+  `close()`。
+- `JsonDocument` 是 GC 管理的只读 Compact representation。resource-owning DOM 和
+  WholeDocument stream 位于 `yjson_backends`。
+- `yjson_algorithms` 提供 JSON Pointer、JSON Patch、JSON Merge Patch、JSONPath 和
+  JSON Schema。
+- `yjson_native_accel` 是显式 opt-in package。应用只能在首次 `YJson` 调用前执行一次
+  `YJsonNativeAccel.initialize()`。进程冻结后不能卸载或切换 provider。
 
-The mutable AST root type is now `JsonNode` instead of `JsonValue`. This is an
-intentional source/ABI break: Cangjie macro and type declarations share a name,
-so the old type name cannot coexist with the requested unqualified
-`@JsonValue` macro. New indexing, short scalar properties, fluent array/object
-builders, and `YJson.value` conversion helpers accompany the rename.
+`yjson_all` 聚合 core 与 macro，但不会自动启用 Native backend。所有 yjson package 必须来自
+同一个 release，并一起重新编译。
 
-## Breaking configuration change
+## Stream、codec 与资源限制
 
-`JsonReadConfig` now exposes `maxBytes` and `maxStringBytes`, and
-`maxPolymorphicObjectBytes` applies to public root-container parse paths. All
-three byte limits default to `0` (unlimited). Adding constructor parameters and
-changing the previous 16 MiB default requires applications and all paired yjson
-packages to be rebuilt together for 1.0.0-rc.1.
+- String、bytes 和 stream 输入共享增量 grammar。writer target 共享一个结构状态机。
+- generated codec 使用版本化 `generated_support.v1` SPI。`JsonDirectCodec<T>` 更名为
+  `JsonCodec<T>`，不提供 1.x alias。
+- `JsonWriteConfig.maxBytes` 限制输出大小。算法 API 默认限制 visited、evaluation、match、
+  copy 和 depth 工作量。
+- generated polymorphic decode 使用 capture/replay，不再 serialize/reparse。
 
-Pure Cangjie, Custom Native, and yyjson now produce the same public resource
-error codes. The native C ABI is additive: old parse symbols remain available,
-while the limited entry points validate before DOM allocation.
+## 标准与可选能力
 
-This candidate provides a portable Pure Cangjie JSON library plus two explicit
-native DOM packages:
+2.0.0 增加以下标准 API：
 
-- Pure Cangjie remains the default for AST, typed codecs, streams, schema, and
-  Compact DOM.
-- Custom Native Compact is a supported opt-in path for deterministic native
-  ownership, lower-memory large-document scenarios, and controlled fallback.
-- yyjson Direct is a supported opt-in, vendored yyjson 0.12.0 backend for coarse
-  native query, traversal, and serialization.
+- JSON Pointer（RFC 6901）。
+- JSON Patch（RFC 6902）。
+- JSON Merge Patch（RFC 7396）。
+- JSONPath（RFC 9535）。
+- JSON Schema draft 2020-12。
 
-Native documents require deterministic `close()` and external synchronization.
-They do not automatically accelerate `JsonNode.parse`. `yjson_all` now
-aggregates only the core and AST macros; it no longer silently builds or enables
-Custom Native.
+可选 `yjson_schema_formats` package 通过 libidn2 提供 IDNA2008、Punycode、Bidi、ContextJ、
+URI、IRI 和 RFC 6570 URI Template assertions。
 
-The release candidate adds source-only packaging checks, independent optional
-package gates, warning-clean native builds, sanitizer/differential-fuzz entry
-points, backend-selection documentation, and complete Apache-2.0 / yyjson MIT
-license material.
+## 发布与平台状态
 
-## Migration quick reference
+2.0.0 已发布 Git tag 和 GitHub Release。仓库的 release evidence 不声明 registry publish。
+Linux x86_64 是该版本的 qualified 平台。Windows x86_64 只完成 Pure cross build。macOS
+和 ARM64 未验证。
 
-```cangjie
-// pre-1.0 snapshot
-let value: JsonValue = ...
+完整测试、coverage、standards、Native、sanitizer、fuzz、package rehearsal 和性能结果均绑定
+到 [`release/2.0.0`](release/2.0.0/evidence.md) 中记录的候选源码。后续开发变更见
+[Changelog](CHANGELOG.md) 的 Unreleased 部分。
 
-// 1.0 release candidate
-let value: JsonNode = ...
-```
+## 从 1.x 升级
 
-For untrusted input, add explicit byte budgets when rebuilding the new config:
-
-```cangjie
-let config = JsonReadConfig(
-    maxDepth: 128,
-    maxBytes: 8 * 1024 * 1024,
-    maxStringBytes: 1024 * 1024,
-    maxPolymorphicObjectBytes: 4 * 1024 * 1024
-)
-```
-
-| Package | Pairing requirement |
-| --- | --- |
-| `yjson_macros` | exact `yjson` version |
-| `yjson_all` | internally matched core + macros |
-| `yjson_native` | exact `yjson` version |
-| `yjson_yyjson` | exact `yjson` version |
-
-See the complete [pre-1.0 to 1.0 migration guide](docs/migration/pre-1.0-to-1.0.md).
-Release validation belongs to the [RC evidence snapshot](release/1.0.0-rc.1/evidence.md),
-not to the user migration narrative.
-
-Known limits: Linux x86_64 is the only qualified platform; AArch64 and musl are
-not yet qualified. Native resource access is not thread-safe. Error messages and
-some parse-error categories are semantically compatible but not identical
-between backends.
+2.0 不提供 1.x compatibility shim。请一次升级所有 package，并按
+[1.x → 2.0 migration guide](docs/migration/1.x-to-2.0.md) 更新 API、初始化流程和资源限制。
