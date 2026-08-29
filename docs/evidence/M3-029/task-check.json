@@ -10,12 +10,12 @@
         "docs/evidence/M3-029/test-plan.md",
         "--json"
       ],
-      "duration_ms": 113.981,
+      "duration_ms": 113.994,
       "error_code": null,
       "exit_code": 0,
-      "finished_at_utc": "2026-08-28T05:36:38.027493Z",
+      "finished_at_utc": "2026-08-29T09:59:55.175821Z",
       "id": "test-plan-matrix",
-      "started_at_utc": "2026-08-28T05:36:37.913514Z",
+      "started_at_utc": "2026-08-29T09:59:55.061814Z",
       "status": "PASS",
       "stderr_excerpt": "",
       "stderr_path": "build/repository-tooling/M3-029/test-plan-matrix.stderr.log",
@@ -29,12 +29,12 @@
       "argv": [
         "scripts/check-m3-029-linux-tls-facade"
       ],
-      "duration_ms": 16970.81,
+      "duration_ms": 18164.728,
       "error_code": null,
       "exit_code": 0,
-      "finished_at_utc": "2026-08-28T05:36:54.998453Z",
+      "finished_at_utc": "2026-08-29T10:00:13.340689Z",
       "id": "public-tls-facade",
-      "started_at_utc": "2026-08-28T05:36:38.027651Z",
+      "started_at_utc": "2026-08-29T09:59:55.175970Z",
       "status": "PASS",
       "stderr_excerpt": "",
       "stderr_path": "build/repository-tooling/M3-029/public-tls-facade.stderr.log",
@@ -46,20 +46,22 @@
     },
     {
       "argv": [
-        "scripts/check-m7-026-linux-api"
+        "scripts/architecture-guard",
+        "--format",
+        "json"
       ],
-      "duration_ms": 714.149,
+      "duration_ms": 3217.182,
       "error_code": null,
       "exit_code": 0,
-      "finished_at_utc": "2026-08-28T05:36:55.712721Z",
-      "id": "api-compatibility",
-      "started_at_utc": "2026-08-28T05:36:54.998579Z",
+      "finished_at_utc": "2026-08-29T10:00:16.557971Z",
+      "id": "architecture-guard",
+      "started_at_utc": "2026-08-29T10:00:13.340811Z",
       "status": "PASS",
       "stderr_excerpt": "",
-      "stderr_path": "build/repository-tooling/M3-029/api-compatibility.stderr.log",
+      "stderr_path": "build/repository-tooling/M3-029/architecture-guard.stderr.log",
       "stderr_truncated": false,
-      "stdout_excerpt": "M7-026 Linux API compatibility: PASS\npackage=wirestack@0.1.0\ndeclarations=147\nresolved_aliases=105\ninventory_sha256=9221db662b0c24980a18c12853dba5c5c62bae2f5f7bf3dc1f8924b98fe0b865\n",
-      "stdout_path": "build/repository-tooling/M3-029/api-compatibility.stdout.log",
+      "stdout_excerpt": "{\n  \"ok\": true,\n  \"root\": \"/home/elliot/playground/Wirestack\",\n  \"schema_version\": 1,\n  \"violation_count\": 0,\n  \"violations\": []\n}\n",
+      "stdout_path": "build/repository-tooling/M3-029/architecture-guard.stdout.log",
       "stdout_truncated": false,
       "timed_out": false
     }
