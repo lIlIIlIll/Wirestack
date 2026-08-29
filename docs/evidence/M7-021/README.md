@@ -13,10 +13,10 @@ The clean consumer ran an HTTPS client and server through the public
 | Field | Result |
 |---|---|
 | Name | `wirestack-0.1.0-linux-x86_64-glibc.tar.gz` |
-| Size | 2,478,208 bytes |
-| SHA-256 | `aad5b788d3404f80a5934fa5e156ee653e592820651bcc9f0198512a74ce4a04` |
-| Payload SHA-256 | `a02aaa388356e62a8da8ad8b3b16fda0a1d9bc9767adeb2e0322fd7f58c5b869` |
-| Production Cangjie files | 88 |
+| Size | 2,499,451 bytes |
+| SHA-256 | `c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee` |
+| Payload SHA-256 | `45ca196866697b568d33894bf3673aaec63fee01ee661bc5fc8319cd27c09e22` |
+| Production Cangjie files | 108 |
 | Reproducibility | Two builds were byte-identical |
 
 The artifact contains production Cangjie source, CJPM metadata, the pinned
@@ -45,7 +45,7 @@ runtimeIoBackend=cjnative
 tlsProvider=aws-lc
 tlsProviderVersion=5.5.0
 externalOpenSslDependency=false
-buildFingerprint=bb632e197f6a0b097ddc378e2fa8889a59ecfc0fc7b15bfa2c08a4f4b9901038
+buildFingerprint=030369238045d5710c42d86f16aa7d520573e2a6ef50e4246d5d769bbf66467d
 ```
 
 The `buildFingerprint` line is the provider build fingerprint returned by
@@ -62,8 +62,9 @@ above. M7-025 owns the final release build fingerprint and SBOM bundle.
 - `libm.so.6`
 
 `ldd` resolved the transitive Cangjie runtime and system C/C++ libraries. It
-found no `libssl` or `libcrypto`. The artifact payload and the installed ELF
-also contain no `libssl.so` or `libcrypto.so` loader string.
+resolved the Cangjie libraries from the fixed 20260817 SDK and found no
+`libssl` or `libcrypto`. The artifact payload and the installed ELF also
+contain no `libssl.so` or `libcrypto.so` loader string.
 
 The machine-readable report is
 [`linux_x86_64/qualification.json`](linux_x86_64/qualification.json). Its test
