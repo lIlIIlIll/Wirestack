@@ -162,14 +162,13 @@ replace the six-platform M7-001 through M7-017 tasks.
 | M7-026 Linux API freeze | COMPLETE | The versioned baseline freezes package `wirestack` major 0, 82 declarations, 50 resolved alias targets and the request/connection/stream cancellation handles. The compatibility gate rejects legacy and low-level public surfaces; [evidence](../evidence/M7-026/README.md). |
 | M7-027 Linux migration and examples | COMPLETE | The maintained guide covers every PRD migration topic. A native temporary consumer builds and runs the checked-in public HTTPS, caller-owned transport TLS, CONNECT configuration, H1/H2 server, SSE, custom CA, mTLS and scoped-cancellation examples; [evidence](../evidence/M7-027/README.md). |
 | M7-028 Linux security review package | COMPLETE | The digest-bound review package covers the threat model, architecture, provider/C ABI, parsers, key and trust handling, fuzz, SBOM, known limits, environment and reproduction; [evidence](../evidence/M7-028/README.md). |
-| M7-029 Linux independent security review | BLOCKED | Waits for M7-028 and an independent reviewer. |
+| M7-029 Linux independent security review | COMPLETE | A no-history process-isolated reviewer accepted package `9d4c4676cd52883aa002e20946b474ac2777d7fcee2bcfe9c232436c44aeaf82`; 2 Critical and 14 High findings are Fixed, no Critical or High remains open, and all nine task commands pass; [evidence](../evidence/M7-029/README.md). One Medium final-candidate evidence finding remains for the release sequence. |
 | M7-030 Linux signing and update flow | BLOCKED | Waits for M7-022, M7-025 and M7-029. |
 | M7-031 Linux release candidate | BLOCKED | Waits for M7-019 through M7-030 and M7-032. |
 | M7-032 public API ownership | COMPLETE | Public contracts are owned by public packages, architecture guards reject internal leakage and dependency cycles, the public-only consumer passes, and the new pre-1.0 inventory has zero internal alias targets; [evidence](../evidence/M7-032/README.md). |
 
 ## Next critical path
 
-1. Complete M7-029 independent security review.
-2. Regenerate the final artifact, API inventory, performance, SBOM and install
+1. Regenerate the final artifact, API inventory, performance, SBOM and install
    evidence, then run M7-022's explicit 24-hour mixed release soak once.
-3. Complete M7-030 signing/update rehearsal and M7-031 candidate report.
+2. Complete M7-030 signing/update rehearsal and M7-031 candidate report.

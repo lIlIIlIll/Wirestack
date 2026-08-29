@@ -1,0 +1,351 @@
+{
+  "schemaVersion": 1,
+  "taskId": "M7-029",
+  "target": {
+    "packagePath": "docs/security/review/linux-1.0/evidence-index.json",
+    "packageSha256": "9d4c4676cd52883aa002e20946b474ac2777d7fcee2bcfe9c232436c44aeaf82"
+  },
+  "reviewer": {
+    "identity": "OpenAI Codex process-isolated verifier /root/m7_029_signature_review_persisted",
+    "affiliation": "OpenAI Codex, commissioned by the Wirestack repository owner",
+    "reviewMode": "ProcessIsolatedAgent",
+    "independent": true,
+    "independenceStatement": "I received an immutable source snapshot and preserved review evidence, had no implementation role, made no product or test changes, did not trust existing PASS labels, and reached dispositions from source, exact artifact bytes, bounded execution, and adversarial mutations.",
+    "conflicts": [
+      "The process-isolated Codex verifier was commissioned by the same repository owner through the implementation orchestrator.",
+      "Process isolation does not provide the organizational independence of an external security firm.",
+      "Remote GitHub state was preserved in repository evidence and was not independently queried during this review."
+    ],
+    "startedAtUtc": "2026-08-29T08:30:00Z",
+    "completedAtUtc": "2026-08-29T09:15:57Z"
+  },
+  "scope": [
+    "certificate-identity",
+    "dns-proxy-routing",
+    "http1-smuggling",
+    "http2-hpack",
+    "lifecycle-cancellation",
+    "linux-platform",
+    "native-c-abi",
+    "pool-isolation",
+    "private-keys",
+    "release-evidence",
+    "resource-bounds",
+    "sensitive-data",
+    "supply-chain",
+    "tls-protocol"
+  ],
+  "methods": [
+    "boundary-analysis",
+    "evidence-audit",
+    "lifecycle-concurrency",
+    "native-c-abi",
+    "negative-testing",
+    "source-review"
+  ],
+  "compatibilityPolicy": "NO_BACKWARD_COMPATIBILITY_PRE_1_0",
+  "findings": [
+    {
+      "id": "WS-BUILD-001",
+      "title": "Canonical TLS provider manifest was missing",
+      "severity": "Critical",
+      "status": "Fixed",
+      "location": "native/tls/aws_lc/provider.json; tools/build_linux_tls_provider.py",
+      "reproduction": "Start a standard CJPM lifecycle from a checkout containing only repository inputs.",
+      "impact": "The old tree could not reproduce its provider build without an untracked manifest.",
+      "evidence": "The repository contains the pinned AWS-LC manifest, the build tool validates it, and preserved clean-checkout evidence exercises the provider and current-source build.",
+      "fix": "Track and validate the canonical AWS-LC manifest as a release input.",
+      "regressions": [{
+        "command": "python3 -m unittest focused M7-029 build, release, and supply-chain contracts -v",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M7-029/final-review-regressions/focused-python-security-contracts.log",
+        "sha256": "9d0f601a9c5c1a01a63b854625d3a813568d259c9ab03996d98286a54b261f22"
+      }],
+      "dispositionRationale": "Tracked input, static validation, and clean-checkout regression evidence close the missing-input failure."
+    },
+    {
+      "id": "WS-CI-001",
+      "title": "Pull requests lacked a required clean Cangjie gate",
+      "severity": "Critical",
+      "status": "Fixed",
+      "location": ".github/workflows/clean-cangjie-build.yml; docs/evidence/M7-029/github-required-check.json",
+      "reproduction": "Inspect the pull-request workflow and main ruleset and compare the preserved clean hosted run.",
+      "impact": "Broken native inputs or Cangjie sources could previously merge behind green partial checks.",
+      "evidence": "Preserved evidence records a successful clean hosted job and an active strict main ruleset requiring that status with no bypass actors.",
+      "fix": "Add the canonical hosted clean build and enforce it on main.",
+      "regressions": [{
+        "command": "GitHub API observation recorded in docs/evidence/M7-029/github-required-check.json",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M7-029/github-required-check.json",
+        "sha256": "433da1568b650abf9a990fa89c9ef74d2236692e984b64b7aee2154c3e93cce2"
+      }],
+      "dispositionRationale": "The required hosted context and update protections are recorded as active."
+    },
+    {
+      "id": "WS-BUILD-002",
+      "title": "CJPM hook omitted the resolver archive",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "build.cj",
+      "reproduction": "Run cjpm check with resolver output absent.",
+      "impact": "A clean lifecycle could fail after building only TLS native inputs.",
+      "evidence": "Every CJPM phase calls the combined native builder and the preserved missing-resolver reproduction completes cjpm check.",
+      "fix": "Build provider and resolver inputs from one pre-phase hook.",
+      "regressions": [{
+        "command": "codex_cangjie_env cjpm check with target/native/resolver absent",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M7-029/final-review-regressions/cjpm-check-missing-resolver.log",
+        "sha256": "363b722f2c87aa035f61e56f85a7ed2cf54423525feed249f9c68a3f0315fcc1"
+      }],
+      "dispositionRationale": "The exact prior failure precondition now succeeds."
+    },
+    {
+      "id": "WS-EVID-001",
+      "title": "Qualification freshness omitted native and build inputs",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "tools/m7_021_linux_release.py; tools/m7_025_linux_supply_chain.py",
+      "reproduction": "Mutate a provider or resolver manifest, native source, build script, lockfile, build hook, or ABI contract and validate old qualification.",
+      "impact": "Old release evidence could remain current after a native or build-control change.",
+      "evidence": "Qualification binds release-critical native and build controls; the provider build fingerprint binds the exact ABI contract digest and the release fingerprint binds the provider archive, embedded provider manifest, and provider build fingerprint.",
+      "fix": "Expand qualification inputs and fingerprint propagation to every release-critical native and build control, including the ABI contract.",
+      "regressions": [{
+        "command": "python3 -m unittest focused M7-029 build, release, and supply-chain contracts -v",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M7-029/final-review-regressions/focused-python-security-contracts.log",
+        "sha256": "9d0f601a9c5c1a01a63b854625d3a813568d259c9ab03996d98286a54b261f22"
+      }],
+      "dispositionRationale": "Current code invalidates stale evidence after release-critical input drift; regeneration of final-candidate release evidence remains a separate Medium issue."
+    },
+    {
+      "id": "WS-GOV-001",
+      "title": "Main lacked required checks and protection",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "docs/evidence/M7-029/github-required-check.json",
+      "reproduction": "Query repository rulesets and default-branch protection.",
+      "impact": "Security controls could previously be bypassed by direct or non-fast-forward updates.",
+      "evidence": "Preserved evidence records the active strict required check, deletion and non-fast-forward prohibitions, and no bypass actors.",
+      "fix": "Activate a strict main ruleset requiring the clean hosted gate.",
+      "regressions": [{
+        "command": "GitHub API observation recorded in docs/evidence/M7-029/github-required-check.json",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M7-029/github-required-check.json",
+        "sha256": "433da1568b650abf9a990fa89c9ef74d2236692e984b64b7aee2154c3e93cce2"
+      }],
+      "dispositionRationale": "The required context and update protections are recorded as active with no bypass actor."
+    },
+    {
+      "id": "WS-H2-SERVER-FLOW-001",
+      "title": "Server consumed DATA credit before queue admission",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "src/internal/http2/server_connection.cj; src/internal/http2/server_mapping.cj",
+      "reproduction": "Force reserved DATA enqueue to fail and inspect stream and connection credit.",
+      "impact": "Failed admission could starve sibling streams.",
+      "evidence": "Reservation ownership transfers through enqueueReservedData and is cancelled on failure; the preserved scheduler suite passes.",
+      "fix": "Transfer the permit atomically to the writer.",
+      "regressions": [{
+        "command": "codex_cangjie_env cjpm test --filter Http2WriteSchedulerTest --parallel 1 --no-progress --no-color",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M7-029/final-review-regressions/http2-write-scheduler.log",
+        "sha256": "5877f1640e3cfdd3bda3f03d2a2e8d5bead1bbdc1c73af7475fd08bd27740c92"
+      }],
+      "dispositionRationale": "Ownership and failure cleanup are one writer operation."
+    },
+    {
+      "id": "WS-H2-SETTINGS-001",
+      "title": "Peer defaults and local SETTINGS were conflated",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "src/internal/http2/settings.cj; src/internal/http2/client_connection.cj; src/internal/http2/server_connection.cj",
+      "reproduction": "Start with non-RFC local receive limits and inspect initial peer state and SETTINGS.",
+      "impact": "Peers could disagree on frame, window, table, or stream limits.",
+      "evidence": "RFC peer defaults, local caps, and advertised settings are separate; preserved focused cases pass.",
+      "fix": "Separate settings roles and advertise every finite non-default receive limit.",
+      "regressions": [{
+        "command": "codex_cangjie_env cjpm test --filter Http2SettingsTest --parallel 1 --no-progress --no-color",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M7-029/final-review-regressions/http2-settings.log",
+        "sha256": "4cfe2b9eb70c41dc4a2d76478df783f0a2bfe6a37a09ed4459f55ddf8fe4da34"
+      }],
+      "dispositionRationale": "State and wire advertisement now match their protocol roles."
+    },
+    {
+      "id": "WS-H2-WRAP-001",
+      "title": "Cancellation wrapper changed H2 completion semantics",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "src/http/cancellation.cj",
+      "reproduction": "Read a declared length before delayed H2 END_STREAM or trailers through the public wrapper.",
+      "impact": "The wrapper could detach cancellation and complete too early.",
+      "evidence": "The wrapper preserves completesAtDeclaredLength and the preserved facade cases pass.",
+      "fix": "Copy the delegate completion policy.",
+      "regressions": [{
+        "command": "codex_cangjie_env cjpm test --filter HttpFacadeTest --parallel 1 --no-progress --no-color",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M7-029/final-review-regressions/http-facade.log",
+        "sha256": "fbf9e0d67eabb396c9b52aab6533916902da27b2694d34b283c85cf81240c619"
+      }],
+      "dispositionRationale": "Protocol EOF remains the completion event for wrapped H2 bodies."
+    },
+    {
+      "id": "WS-LIC-001",
+      "title": "Release lacked a project license grant",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "LICENSE; THIRD_PARTY_NOTICES.md; release metadata",
+      "reproduction": "Inspect root licensing files, payload, and SPDX metadata.",
+      "impact": "Downstream use and redistribution rights were unclear.",
+      "evidence": "The Apache-2.0 grant, AWS-LC notices, payload inventory, and SPDX license tests are present.",
+      "fix": "Ship the project grant and exact third-party notices and bind them into metadata.",
+      "regressions": [{
+        "command": "python3 -m unittest focused release license and SBOM tests -v",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M7-029/regressions/release-license-sbom-tests.log",
+        "sha256": "e72d54ed0b5e1fc421331872ce24e3c3d37785fa1aef7b062cf9011bf1033190"
+      }],
+      "dispositionRationale": "The source and release contracts carry an explicit grant and attribution."
+    },
+    {
+      "id": "WS-PROXY-001",
+      "title": "CONNECT pooling omitted proxy credential identity",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "src/internal/http1/proxy_client_pipeline.cj; src/internal/http1/pool_key.cj",
+      "reproduction": "Use rotated dynamic proxy credentials for the same proxy and origin.",
+      "impact": "A tunnel authenticated as one principal could serve another.",
+      "evidence": "Dynamic authenticated CONNECT tunnels are single lease and preserved proxy cases pass.",
+      "fix": "Fail closed to no reuse when no stable credential partition exists.",
+      "regressions": [{
+        "command": "codex_cangjie_env cjpm test --filter Http1ProxyClientPipelineTest --parallel 1 --no-progress --no-color",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M7-029/final-review-regressions/http1-proxy.log",
+        "sha256": "fed28d4cc7bd3c2f2025909d3a34dabd66573290f2e6c780281128c656759fcd"
+      }],
+      "dispositionRationale": "Rotated credentials cannot share an authenticated tunnel."
+    },
+    {
+      "id": "WS-RES-001",
+      "title": "Blocked getaddrinfo could make resolver teardown and quarantine unbounded",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "native/resolver/linux/wirestack_resolver.c; tools/gates/native/resolver_global_bound.c",
+      "reproduction": "Block each bounded pool, release public handles, attempt one pool beyond the process cap, release the calls, and retry admission.",
+      "impact": "Repeated closed pools could retain unbounded workers and memory behind libc or NSS.",
+      "evidence": "The preserved native gate proves bounded overload at the process cap and later admission after safe reaping.",
+      "fix": "Reserve process-wide pool and worker capacity, quarantine stuck pools, fail closed at the cap, and return capacity only after safe reaping.",
+      "regressions": [{
+        "command": "python3 tools/gates/m2_003_resolver_pool.py --output-dir <bounded-output> --delay-ms 250",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M7-029/final-review-regressions/resolver-global-bound.json",
+        "sha256": "21da8589d19b27f11283d1bebc674e7b72e0de3d4fd33bcdf44973a2254a3659"
+      }],
+      "dispositionRationale": "Uninterruptible calls remain quarantined, but the total quarantined pools and workers is bounded process-wide."
+    },
+    {
+      "id": "WS-RETRY-001",
+      "title": "Ambiguous physical write timeout was retryable",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "src/internal/transport_stdnet/package.cj; src/http/retry.cj",
+      "reproduction": "Inject a timeout after entering the physical write without zero-byte commit proof.",
+      "impact": "Automatic retry could duplicate a request.",
+      "evidence": "Write timeout uses Never retryability and the preserved transport suite passes.",
+      "fix": "Treat unknown physical commit state as non-retryable.",
+      "regressions": [{
+        "command": "codex_cangjie_env cjpm test --filter StdNetTransportTest --parallel 1 --no-progress --no-color",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M7-029/final-review-regressions/stdnet-transport.log",
+        "sha256": "c784afa92e16c4b9fd6dec18db4829e7a4c65b1b76e99f7710e33a2fcef73b57"
+      }],
+      "dispositionRationale": "The default cannot resend an ambiguously committed write."
+    },
+    {
+      "id": "WS-STDNET-001",
+      "title": "Cancelling one accept closed the listener",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "src/internal/transport_stdnet/package.cj",
+      "reproduction": "Cancel one pending accept, then accept a later connection on the same listener.",
+      "impact": "One request could terminate the service listener.",
+      "evidence": "Accept uses operation-scoped bounded waits and the preserved transport suite proves listener reuse.",
+      "fix": "Separate operation cancellation from listener lifetime.",
+      "regressions": [{
+        "command": "codex_cangjie_env cjpm test --filter StdNetTransportTest --parallel 1 --no-progress --no-color",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M7-029/final-review-regressions/stdnet-transport.log",
+        "sha256": "c784afa92e16c4b9fd6dec18db4829e7a4c65b1b76e99f7710e33a2fcef73b57"
+      }],
+      "dispositionRationale": "Only explicit close terminates the listener."
+    },
+    {
+      "id": "WS-TLS-TRUST-001",
+      "title": "Trust changes did not alter TLS session partition",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "src/internal/platform/linux/package.cj",
+      "reproduction": "Replace a same-size bundle or modify hashed-directory certificates and compare source identity.",
+      "impact": "Old sessions could be offered after trust replacement.",
+      "evidence": "Bounded deterministic SHA-256 content identities cover bundle and directory entries; the preserved adapter suite passes.",
+      "fix": "Bind the session trust identity to selected trust-store contents.",
+      "regressions": [{
+        "command": "codex_cangjie_env cjpm test --filter LinuxSystemTrustAdapterTest --parallel 1 --no-progress --no-color",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M7-029/final-review-regressions/linux-system-trust.log",
+        "sha256": "1a9632510a766ee0588d3bd966eeb10915e22c13e5044f8f6ed19cc83c398004"
+      }],
+      "dispositionRationale": "Trust replacement changes the session partition."
+    },
+    {
+      "id": "WS-NATIVE-ABI-001",
+      "title": "Native ABI contract omitted production Cangjie imports",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "tools/tls_provider/abi-v1.json; tools/tls_provider/selection.py; tools/tests/test_m3_030_tls_provider_architecture.py",
+      "reproduction": "Delete one production wirestack_tls foreign import from the ABI contract or remove one required archive symbol and run selection validation.",
+      "impact": "A provider could previously pass selection while omitting a function required by production Cangjie code.",
+      "evidence": "The schema-v2 contract inventories all production imports and signatures. Source discovery enforces exact coverage, and archive validation rejects a deliberately omitted symbol with abi-function-missing.",
+      "fix": "Inventory every production TLS import, require exact signature inventory, and compare all required names with the selected archive.",
+      "regressions": [{
+        "command": "python3 -m unittest -v tools.tests.test_m3_030_tls_provider_architecture",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M3-030/task-check.json",
+        "sha256": "96ab08791dcd62d826e1bf6ae7f336d91fa1abdf0d8136e8f5a0156bfb4e8a2e"
+      }],
+      "dispositionRationale": "The current contract has complete production-import coverage, exact signature inventory, and fail-closed archive symbol enforcement."
+    },
+    {
+      "id": "WS-NATIVE-ABI-002",
+      "title": "Name-only ABI validation accepted incompatible native prototypes",
+      "severity": "High",
+      "status": "Fixed",
+      "location": "tools/tls_provider/abi-v1.json; tools/tls_provider/selection.py; tools/tests/test_m3_030_tls_provider_architecture.py",
+      "reproduction": "Mutate Cangjie parameter or return types, a native header prototype, the contract schema, calling convention, or signature inventory and run provider selection validation.",
+      "impact": "An ABI-incompatible provider could corrupt arguments or return values while exporting the expected names.",
+      "evidence": "The contract records return and parameter types plus calling convention. Selection compares Cangjie foreign declarations to the contract and compiles a C11 function-pointer probe against the native header with incompatible-pointer warnings as errors. All requested mutations were independently rejected with distinct stable error codes.",
+      "fix": "Validate full signatures at the Cangjie-contract and contract-header boundaries and reject unknown schema or calling-convention values.",
+      "regressions": [{
+        "command": "python3 -m unittest -v tools.tests.test_m3_030_tls_provider_architecture",
+        "status": "PASS", "exitCode": 0, "timedOut": false,
+        "evidencePath": "docs/evidence/M3-030/task-check.json",
+        "sha256": "96ab08791dcd62d826e1bf6ae7f336d91fa1abdf0d8136e8f5a0156bfb4e8a2e"
+      }],
+      "dispositionRationale": "Independent parameter, return, header, schema, convention, and inventory mutations all fail closed before provider use."
+    },
+    {
+      "id": "WS-EVID-002",
+      "title": "Final candidate release, SBOM, and platform profiles are not regenerated",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "docs/security/review/linux-1.0/evidence-index.json; docs/evidence/M7-021; docs/evidence/M7-025",
+      "reproduction": "Compare the M7-028 package state for M7-021 and M7-025 with the current ABI contract and source revision.",
+      "impact": "The current mechanisms are verified, but historical release and SBOM outputs do not prove final-candidate artifact identity or long-running platform behavior.",
+      "evidence": "M7-028 explicitly classifies affected release, SBOM, and profile rows as STALE_AFTER_M7_032 or HISTORICAL_NON_GATING; dist and target/native/current artifacts are absent from the immutable snapshot.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "This remains open until later release requalification regenerates exact-candidate artifacts and the required bounded platform profiles. It is not a Critical or High blocker under the M7-029 validator policy."
+    }
+  ],
+  "conclusion": "PASS"
+}

@@ -15,6 +15,13 @@
       "timeout_seconds": 120
     },
     {
+      "argv": ["python3", "-m", "unittest", "tools.gates.tests.test_m2_003_resolver_pool", "-v"],
+      "gate": "task",
+      "id": "resolver-gate-contract-tests",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
       "argv": ["python3", "-m", "unittest", "tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_qualification_inputs_bind_native_manifests_sources_and_build_logic", "tools.tests.test_m7_021_linux_release.M7021LinuxReleaseTest.test_release_metadata_inventory_is_complete", "tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_fingerprint_is_stable_and_dependency_sensitive", "tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_generation_is_byte_deterministic", "tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_project_and_resolver_sbom_packages_use_apache_2_0", "tools.tests.test_m7_025_linux_supply_chain.M7025LinuxSupplyChainTest.test_wrong_project_license_expression_fails_closed", "-v"],
       "gate": "task",
       "id": "release-license-and-sbom-tests",
@@ -95,6 +102,7 @@
     "tools/repository/repository_tooling.py",
     "tools/repository/tests/test_repository_tooling.py",
     "tools/gates/m2_003_resolver_pool.py",
+    "tools/gates/tests/test_m2_003_resolver_pool.py",
     "tools/gates/native/resolver_global_bound.c",
     "tools/build_linux_resolver.py",
     "LICENSE",
@@ -130,10 +138,12 @@
     "docs/evidence/M7-029/independent-review-source/wirestack-full-audit-49f3094.md",
     "docs/evidence/M7-029/initial-isolated-review/independent-review.json",
     "docs/evidence/M7-029/github-required-check.json",
+    "docs/evidence/M7-029/independent-review.json",
     "docs/evidence/M7-029/initial-isolated-review/review-summary.md",
     "docs/evidence/M7-029/second-isolated-review/independent-review.json",
     "docs/evidence/M7-029/second-isolated-review/review-summary.md",
     "docs/evidence/M7-029/final-isolated-review/review-summary.md",
+    "docs/evidence/M7-029/m3-030-pinned-sdk-final-review/review-summary.md",
     "docs/evidence/M7-029/final-review-regressions/cjpm-check-missing-resolver.log",
     "docs/evidence/M7-029/final-review-regressions/focused-python-security-contracts.log",
     "docs/evidence/M7-029/final-review-regressions/http-facade.log",
@@ -186,6 +196,7 @@
     "tools/repository/repository_tooling.py",
     "tools/repository/tests/test_repository_tooling.py",
     "tools/gates/m2_003_resolver_pool.py",
+    "tools/gates/tests/test_m2_003_resolver_pool.py",
     "tools/gates/native/resolver_global_bound.c",
     "tools/build_linux_resolver.py",
     "LICENSE",
