@@ -1,0 +1,34 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-tasks",
+        "--json"
+      ],
+      "duration_ms": 113.948,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-29T07:52:41.641316Z",
+      "id": "task-contracts",
+      "started_at_utc": "2026-08-29T07:52:41.527371Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/fast/task-contracts.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"issues\": [], \"kind\": \"task-contract-validation\", \"schema_version\": 1, \"status\": \"PASS\", \"task_ids\": [\"M3-029\", \"M3-030\", \"M6-026\", \"M7-022\", \"M7-027\", \"M7-028\", \"M7-029\", \"M7-032\", \"P1-012\"]}\n",
+      "stdout_path": "build/repository-tooling/fast/task-contracts.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "fast",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": null
+}

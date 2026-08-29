@@ -108,6 +108,8 @@ CONFIG_RULES: tuple[tuple[str, re.Pattern[str], str], ...] = SOURCE_RULES + (
 )
 CONFIG_NAMES = {"CMakeLists.txt", "Makefile", "build.cj", "build.py", "cjpm.toml"}
 CONFIG_SUFFIXES = {".c", ".cc", ".cmake", ".cpp", ".h", ".hpp", ".mk", ".toml"}
+PROVIDER_SPECIFIC_TYPE_RE = re.compile(r"\bAwsLc[A-Za-z0-9_]*\b")
+TEST_PROVIDER_RE = re.compile(r"\bTestTlsProvider(?:Factory)?\b")
 
 
 @dataclass(frozen=True, order=True)
@@ -446,6 +448,51 @@ def dependency_cycle_violations(root: Path, paths: Sequence[Path]) -> list[Viola
     return violations
 
 
+def provider_boundary_violations(root: Path, paths: Sequence[Path]) -> list[Violation]:
+    """Keep provider implementations out of generic TLS, HTTP, build, and payload code."""
+    violations: list[Violation] = []
+    for path in paths:
+        relative = path.relative_to(root).as_posix()
+        text = path.read_text(encoding="utf-8")
+        semantic = strip_cangjie_comments_and_literals(text)
+        is_test = path.name.endswith("_test.cj")
+        is_generic_tls_or_http = relative.startswith(("src/tls/", "src/http/", "src/internal/tls_engine/", "src/internal/http1/", "src/internal/http2/"))
+        if is_generic_tls_or_http and not is_test:
+            for match in PROVIDER_SPECIFIC_TYPE_RE.finditer(semantic):
+                violations.append(_violation(
+                    root, path, text, match.start(), "generic-provider-specific-type",
+                    "Generic TLS and HTTP source must depend only on the TlsProvider contract.",
+                ))
+        if not is_test:
+            for match in TEST_PROVIDER_RE.finditer(semantic):
+                violations.append(_violation(
+                    root, path, text, match.start(), "test-provider-in-production",
+                    "TestTlsProvider is test-only and must not enter production source.",
+                ))
+
+    build_file = root / "build.cj"
+    if build_file.is_file():
+        text = build_file.read_text(encoding="utf-8")
+        for pattern in (r"aws[_-]lc", r"AWS-LC", r"build_linux_tls_provider"):
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                violations.append(_violation(
+                    root, build_file, text, match.start(), "provider-specific-root-build",
+                    "build.cj must call only the provider-neutral TLS build entry.",
+                ))
+
+    generic_builder = root / "tools/build_tls_provider.py"
+    if generic_builder.is_file():
+        text = generic_builder.read_text(encoding="utf-8")
+        match = re.search(r"native/tls/aws_lc", text)
+        if match:
+            violations.append(_violation(
+                root, generic_builder, text, match.start(), "provider-path-in-generic-build",
+                "The provider-neutral builder must not embed an AWS-LC source path.",
+            ))
+    return violations
+
+
 def run_guard(root: Path) -> list[Violation]:
     root = root.resolve()
     violations: list[Violation] = []
@@ -453,6 +500,7 @@ def run_guard(root: Path) -> list[Violation]:
     for path in paths:
         violations.extend(inspect_source(root, path))
     violations.extend(dependency_cycle_violations(root, paths))
+    violations.extend(provider_boundary_violations(root, paths))
     for path in configuration_files(root):
         violations.extend(inspect_configuration(root, path))
     return sorted(set(violations))
