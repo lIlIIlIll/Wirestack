@@ -425,7 +425,7 @@ class HttpFacadeTest {
             let h1Context = OperationContext(
                 deadline: Some(Deadline.after(3 * Duration.second))
             )
-            let h1Handshaker = http1test.AwsLcHttp1TlsHandshaker.createWithDer([certificate])
+            let h1Handshaker = http1test.DefaultHttp1TlsHandshaker.createWithDer([certificate])
             let h1Transport = stdnettest.StdNetTransportFactory().connect(
                 server.localEndpoint, h1Context
             )

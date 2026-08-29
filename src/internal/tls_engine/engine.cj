@@ -379,8 +379,8 @@ private func engineFailure(
     )
 }
 
-/** AWS-LC memory-BIO engine. It never owns or accesses a socket. */
-public class AwsLcTlsEngine <: TlsEngine & ExternalSigningTlsEngine &
+/** Native-ABI memory-BIO engine. It never owns or accesses a socket. */
+public class NativeTlsEngine <: TlsEngine & ExternalSigningTlsEngine &
     HandshakeInfoTlsEngine & ServerNameSelectingTlsEngine {
     private let mutex = Mutex()
     private var handle: UInt64
@@ -1640,13 +1640,13 @@ private func engineRequiresSystemTrust(value: TrustPolicy): Bool {
     }
 }
 
-internal func createAwsLcTlsEngine(
+internal func createNativeTlsEngine(
     providerHandle: UInt64,
     role: TlsEngineRole,
     security: TlsSecurityPolicy,
     providerManifest: TlsProviderManifest
 ): TlsEngine {
-    AwsLcTlsEngine(providerHandle, role, security, providerManifest)
+    NativeTlsEngine(providerHandle, role, security, providerManifest)
 }
 
 private func decodeReadResult(step: Int32, count: Int64): TlsEngineReadResult {

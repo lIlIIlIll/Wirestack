@@ -4,15 +4,15 @@
   "platform": "linux-x86_64-glibc",
   "decision": "PASS",
   "source_sha256": {
-    "docs/product/prd.md": "a201d628d43ca53d925a98f2ee24ade92ba22f0eb5d7e565e1c1ca1792b140cf",
-    "docs/planning/implementation-backlog.md": "b0be7da7b65d299c49d9a8befa862200a161b6f2908624b64d5502488c8776a7",
-    "tools/architecture_guard.py": "e84fb0919d1790c17971a7133c592780c7b3783dfe2753adf34d8d15ce51dd42",
+    "docs/product/prd.md": "7af7d0812c6775fe088675ef72643a61d1048e15c86436427460597341aea1e4",
+    "docs/planning/implementation-backlog.md": "930b08c926a7c3744e0a7ffc73d67620ec2a8112d413247c95b9a8831e7d6f6a",
+    "tools/architecture_guard.py": "871e3db83eccc6be2e88e9191a1bfc4810c74c79bd3d1a47b63bfab1be5d553d",
     "cjpm.toml": "47fa86311bacf7f092f4a6641f200a7e11196d6ed020c7f1f914e8d51650ae17"
   },
   "inventory": {
-    "cangjie_files": 190,
-    "configuration_and_native_files": 11,
-    "public_api_package_files": 26,
+    "cangjie_files": 210,
+    "configuration_and_native_files": 12,
+    "public_api_package_files": 46,
     "semantic_std_net_files": [
       "src/internal/transport_stdnet/benchmark_harness_test.cj",
       "src/internal/transport_stdnet/m1_025_cancellation_profile_test.cj",

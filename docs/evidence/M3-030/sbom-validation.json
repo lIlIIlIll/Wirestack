@@ -1,0 +1,12 @@
+{
+  "acceptance_status": "PASS",
+  "buildFingerprint": "67dcd09f0ab99a33cfb204fb5f2a133a911f8f706ccf85a7a3312b980ddac9d9",
+  "decision": "PASS",
+  "licenseExpression": "Apache-2.0 OR ISC",
+  "platform": "linux-x86_64-glibc",
+  "provider": "aws-lc",
+  "schemaVersion": 1,
+  "source_task": "M3-030",
+  "status": "PASS",
+  "taskId": "M3-030"
+}

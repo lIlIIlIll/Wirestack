@@ -142,6 +142,7 @@ Status values have the same fail-closed meaning as the global status file.
 | M6-025 HTTP/2 facade termination | COMPLETE | Exclusive per-call TLS scratch removes concurrent read/write aliasing; the original three-case sequence passes 100/100 same-process rounds, the repository check passes 538/538 non-Performance cases, and M3-028 performance remains qualified; [Linux acceptance evidence](../evidence/M6-025/README.md) |
 | M6-026 HTTP/2 concurrent response bodies | COMPLETE | Initial client HEADERS are published in increasing stream-ID order even when pool admission and execution race; unpublished cancellation stays local. A real-TLS public gate passes 1,000 two-stream batches, 2,000 exact bodies, zero failure/timeout/residual handler, and the full repository check; [evidence](../evidence/M6-026/README.md). |
 | M3-029 public TLS facade | COMPLETE | Provider-neutral client/server contexts, existing-transport handshake, connection/listener ownership and negotiated metadata pass public-package tests, clean-consumer Linux TLS acceptance and the API/architecture gates; [evidence](../evidence/M3-029/README.md). |
+| M3-030 extensible TLS provider architecture | COMPLETE | The six-command Linux gate passes; provider ABI v1 has a schema-v2 56-signature contract checked against Cangjie FFI, the native header and archive, and the independent M7-029 review closes both ABI High findings; [evidence](../evidence/M3-030/README.md). Future providers remain unimplemented. |
 
 ## Linux M7 stable-release closure
 

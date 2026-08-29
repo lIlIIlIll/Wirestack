@@ -2,16 +2,16 @@ import std.env.*
 import std.fs.*
 import std.process.*
 
-private func buildLinuxTlsProvider(): Int64 {
+private func buildTlsProvider(): Int64 {
     let root = getWorkingDirectory()
-    let script = root.join("tools").join("build_linux_tls_provider.py")
+    let script = root.join("tools").join("build_tls_provider.py")
     let status = execute(
         "python3",
         [script.toString(), "--repo", root.toString()],
         workingDirectory: root
     )
     if (status != 0) {
-        println("failed to build the pinned Linux TLS provider")
+        println("failed to build the selected TLS provider")
     }
     status
 }
@@ -31,7 +31,7 @@ private func buildLinuxResolver(): Int64 {
 }
 
 private func buildLinuxNativeDependencies(): Int64 {
-    let tlsStatus = buildLinuxTlsProvider()
+    let tlsStatus = buildTlsProvider()
     if (tlsStatus != 0) {
         return tlsStatus
     }
