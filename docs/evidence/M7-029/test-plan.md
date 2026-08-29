@@ -139,6 +139,7 @@ with M7-026.
 | T026 | S028 | P030 | Static build-hook contract plus clean `cjpm check` | PASS | Every CJPM lifecycle phase calls the combined native dependency builder and clean check links both archives | regression,build |
 | T027 | S029 | P003,P031 | Synthetic process-isolated reviewer with and without conflict disclosure | PASS/FAIL | Declared isolated mode with disclosure passes; missing disclosure and unknown modes fail closed | unit,policy |
 | T028 | S030 | P024,P032 | Wrapped native `getaddrinfo` blocks eight pools until the probe releases it | PASS | Fixed global pool limit rejects the ninth pool, keeps its handle zero and later admits a pool after reaping | fault-injection,native,lifecycle |
+| T029 | S030 | P024,P032 | Resolver gate unit invokes validation with focused, shim and global-bound results | PASS | The fixture exercises the complete three-input validation contract and still rejects a missing focused case | unit,regression |
 
 ## Coverage and gap review
 

@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "taskId": "M7-029",
+  "target": {
+    "packagePath": "docs/security/review/linux-1.0/evidence-index.json",
+    "packageSha256": "912ac14704efbbd25353ff00bcbc69b0d788d87df3e733ec83d956b48eb95957"
+  },
+  "reviewer": {
+    "identity": "OpenAI Codex process-isolated verifier /root/m7_029_m3_030_fresh_review",
+    "affiliation": "OpenAI Codex, commissioned by the Wirestack repository owner",
+    "reviewMode": "ProcessIsolatedAgent",
+    "independent": true,
+    "independenceStatement": "I received only the frozen snapshot and review task, had no implementation role, made no product or test changes, and derived this verdict from a fresh source, native-ABI, test, and evidence reassessment.",
+    "conflicts": [
+      "The process-isolated Codex verifier was commissioned by the same repository owner through an implementation orchestrator.",
+      "Process isolation does not provide the organizational independence of an external security firm.",
+      "Remote GitHub ruleset and hosted-run state were represented by frozen repository evidence and were not queried independently in this review."
+    ],
+    "startedAtUtc": "2026-08-29T07:20:00Z",
+    "completedAtUtc": "2026-08-29T08:13:46Z"
+  },
+  "scope": [
+    "certificate-identity",
+    "dns-proxy-routing",
+    "http1-smuggling",
+    "http2-hpack",
+    "lifecycle-cancellation",
+    "linux-platform",
+    "native-c-abi",
+    "pool-isolation",
+    "private-keys",
+    "release-evidence",
+    "resource-bounds",
+    "sensitive-data",
+    "supply-chain",
+    "tls-protocol"
+  ],
+  "methods": [
+    "boundary-analysis",
+    "evidence-audit",
+    "lifecycle-concurrency",
+    "native-c-abi",
+    "negative-testing",
+    "source-review"
+  ],
+  "compatibilityPolicy": "NO_BACKWARD_COMPATIBILITY_PRE_1_0",
+  "findings": [
+    {
+      "id": "WS-NATIVE-ABI-001",
+      "title": "Provider ABI contract omits production-imported security functions",
+      "severity": "High",
+      "status": "Open",
+      "location": "tools/tls_provider/abi-v1.json:2-37; tools/tls_provider/selection.py:194-205; src/internal/tls_engine/engine.cj:25-105; src/hostname_verifier.cj:8-16; src/trust.cj:5-15; src/internal/tls_engine/identity.cj:14-34; src/internal/platform/linux/package.cj:10-14",
+      "reproduction": "Enumerate every wirestack_tls_* foreign function declared by production .cj files under src, union required_functions with every capability_functions entry from abi-v1.json, and subtract the contract set from the production-import set. The result is 15 omitted functions. Then call validate_symbol_set with expected_symbols(selection); it returns successfully even though wirestack_tls_engine_enable_peer_verification and the other omitted production imports are absent.",
+      "impact": "A provider archive can pass the declared native ABI gate while omitting functions used to enable peer verification, configure reference identities and trust stores, read the peer chain, apply SPKI pins, parse certificates, validate keys, or hash security inputs. Such an archive cannot satisfy Wirestack's production native linkage and security contract. The current AWS-LC archive is not shown to omit these functions, but the architecture's fail-closed provider qualification and its M3-030 ABI evidence are incomplete.",
+      "evidence": "Fresh static enumeration found 55 distinct production wirestack_tls_* imports but only 40 symbols in the contract union. Missing: wirestack_tls_certificate_subject_alt_names, wirestack_tls_certificate_validate_der, wirestack_tls_engine_add_spki_sha256_pin, wirestack_tls_engine_configure_client_authentication, wirestack_tls_engine_enable_peer_verification, wirestack_tls_engine_load_verify_bundle, wirestack_tls_engine_load_verify_directory, wirestack_tls_engine_peer_chain_der, wirestack_tls_engine_set_dns_reference_identity, wirestack_tls_engine_set_ip_reference_identity, wirestack_tls_engine_set_server_name, wirestack_tls_identity_validate_pkcs8, wirestack_tls_identity_validate_spki, wirestack_tls_private_key_validate_pkcs8, and wirestack_tls_sha256. A focused false-negative reproduction exited 0 with validator_result=PASS and false_negative_reproduced=true.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Unresolved High finding; M7-029 must fail until the canonical ABI contract covers all production imports and a negative test removes each class of required symbol from a candidate set or archive."
+    },
+    {
+      "id": "WS-API-001",
+      "title": "ByteSpan exposes mutable backing storage",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "src/bytespan.cj",
+      "reproduction": "Construct a ByteSpan, obtain the publicly exposed bytes array, mutate it, and observe the span contents change despite the immutable-view contract.",
+      "impact": "Callers can mutate data after validation or across ownership boundaries, weakening assumptions made by parsers and protocol code.",
+      "evidence": "Fresh public-API source review reconfirmed that the backing Array<Byte> remains exposed and mutable.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Retained from the prior register as an unresolved Medium API-integrity issue."
+    },
+    {
+      "id": "WS-CANCEL-001",
+      "title": "Cancellation callback registry has no hard bound",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "src/cancellation.cj",
+      "reproduction": "Register callbacks repeatedly on a long-lived non-cancelled source without disposing registrations and observe unbounded registry growth.",
+      "impact": "Untrusted or buggy callers can retain an unbounded number of callbacks and referenced objects.",
+      "evidence": "Fresh lifecycle review found no explicit maximum callback count or equivalent admission bound.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Retained from the prior register as an unresolved Medium resource-bound issue."
+    },
+    {
+      "id": "WS-CI-SUPPLY-001",
+      "title": "Non-critical workflows retain mutable action tags and rolling environments",
+      "severity": "Medium",
+      "status": "Open",
+      "location": ".github/workflows/",
+      "reproduction": "Inspect workflow uses declarations and environment acquisition outside the clean Cangjie release-critical workflow; mutable tags and rolling nightly or package inputs remain.",
+      "impact": "Some automation remains reproducible only at the discretion of mutable upstream references and rolling toolchain resolution.",
+      "evidence": "The required clean gate is pinned, but fresh workflow review reconfirmed mutable references in other workflows.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Retained as Medium because the release-critical clean gate is hardened while ancillary automation is not fully immutable."
+    },
+    {
+      "id": "WS-H2-BUFFER-001",
+      "title": "Inbound HTTP/2 buffering lacks an independent byte cap",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "src/internal/http2/connection.cj and src/internal/http2/stream.cj",
+      "reproduction": "Send a sequence of admitted DATA frames whose count remains within the queue-entry limit while aggregate payload bytes exceed a separately reasonable body-buffer budget.",
+      "impact": "Frame-count admission can permit substantially more buffered body memory than intended before consumer backpressure takes effect.",
+      "evidence": "Fresh HTTP/2 source review reconfirmed that inbound admission reuses a pending-write count without a separate aggregate byte bound.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Retained from the prior register as an unresolved Medium resource-bound issue."
+    },
+    {
+      "id": "WS-IPV6-001",
+      "title": "Accepted IPv6 URL literals remain unusable in direct client factories",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "src/http/client.cj and URL-to-endpoint conversion paths",
+      "reproduction": "Construct an accepted HTTP URL with an IPv6 literal and pass it through the direct client factory path that requires HostName conversion.",
+      "impact": "A syntactically accepted authority cannot be used by the default client connection path, producing inconsistent routing behavior.",
+      "evidence": "Fresh DNS and routing review found no complete IPv6-literal direct factory path.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Retained from the prior register as an unresolved Medium routing correctness issue."
+    },
+    {
+      "id": "WS-TLS-KEY-001",
+      "title": "Private-key metadata check and read are separate path operations",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "src/internal/tls_engine/identity.cj",
+      "reproduction": "Replace a PKCS#8 file between the metadata or permission validation and the subsequent content read.",
+      "impact": "The bytes consumed can differ from the file object whose metadata was approved, leaving a local TOCTOU window around private-key loading.",
+      "evidence": "Fresh private-key source review reconfirmed separate path-based metadata and read operations rather than one opened-handle validation flow.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Retained from the prior register as an unresolved Medium private-key handling issue."
+    },
+    {
+      "id": "WS-TLS-OWN-001",
+      "title": "TLS context key lifetime remains caller-controlled",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "src/tls/identity.cj and src/internal/tls_engine/identity.cj",
+      "reproduction": "Build a TLS context from a caller-owned PrivateKeyRef, close the reference, then attempt a later connection or server handshake using the built context.",
+      "impact": "A built immutable context can become unusable because its sensitive dependency remains externally closeable.",
+      "evidence": "Fresh lifecycle review reconfirmed that context construction retains a caller-closeable key reference rather than transferring or cloning ownership.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Retained from the prior register as an unresolved Medium ownership issue."
+    },
+    {
+      "id": "WS-EVID-002",
+      "title": "Candidate release qualification remains stale after public-contract and provider-architecture changes",
+      "severity": "Medium",
+      "status": "Open",
+      "location": "docs/security/review/linux-1.0/evidence-index.json; docs/evidence/M3-030/release-validation.json; docs/evidence/M3-030/sbom-validation.json; dist/m7-021/",
+      "reproduction": "Compare the evidence index freshness fields and M3-030 release or SBOM reports with the frozen tree. M7-019, M7-020, M7-021, M7-024, and M7-025 remain stale after M7-032, and the referenced dist/m7-021 release archive is absent from the frozen snapshot.",
+      "impact": "Current source and provider-architecture changes are not backed by a final fresh reproducible release, SBOM, installed-package, long-soak, and cross-platform evidence chain.",
+      "evidence": "The package accurately declares the stale rows, and M3-030 remains BLOCKED, so this is not treated as a false PASS. The M3-030 task-level release and SBOM validation nevertheless reuse the older M7-021 artifact identity rather than a newly built current candidate.",
+      "fix": null,
+      "regressions": [],
+      "dispositionRationale": "Retained as Medium and as a release limitation; it becomes mandatory closure work before release qualification can be current."
+    }
+  ],
+  "conclusion": "FAIL"
+}

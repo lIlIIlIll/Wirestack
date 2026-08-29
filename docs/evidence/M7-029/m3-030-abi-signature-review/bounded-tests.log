@@ -1,0 +1,25 @@
+Wirestack M7-029 bounded independent review commands
+
+1. python3 -m unittest -v tools.tests.test_m3_030_tls_provider_architecture tools.tests.test_architecture_guard tools.tests.test_m7_021_linux_release tools.tests.test_m7_025_linux_supply_chain tools.tests.test_m7_029_independent_security_review
+   result: FAIL, exit 1; 70 run, 69 passed, 1 environment-only failure
+   failure: test_provider_manifest_is_a_repository_input expected git check-ignore return 1 but the frozen snapshot intentionally has no .git and returned 128
+
+2. Python unittest loader for tools.tests.test_m7_029_independent_security_review excluding only test_provider_manifest_is_a_repository_input
+   result: PASS, exit 0; 13 run, 13 passed
+
+3. python3 tools/architecture_guard.py --root . --format json
+   result: PASS, exit 0; violation_count=0
+
+4. M3-030 evidence digest verification
+   result: PASS, exit 0; 36 source bindings and 9 report bindings, 0 mismatches
+
+5. tools.m7_028_security_review_package.validate_index
+   result: PASS, exit 0; 11 documents, 12 evidence rows; CURRENT_PASS=4, STALE_AFTER_M7_032=7, HISTORICAL_NON_GATING=1
+
+6. In-memory ABI signature negative reproduction
+   result: false negative reproduced, exit 0; incompatible declaration kept identical symbol inventory and validate_symbol_set returned PASS
+
+7. PYTHONDONTWRITEBYTECODE=1 python3 tools/m7_029_independent_security_review.py --root /tmp/wirestack-m3-030-final-review.1UwBFf/repo --request /tmp/wirestack-m3-030-final-review.1UwBFf/repo/docs/evidence/M7-029/review-request.json --review /tmp/wirestack-m3-030-final-review.1UwBFf/output/independent-review.json --report /tmp/wirestack-m3-030-final-review.1UwBFf/output/review-validation.json --json
+   result: FAIL, exit 1; {"code":"REVIEW_NOT_PASS","detail":"FAIL","status":"FAIL","taskId":"M7-029"}
+
+Not run: SDK builds, AWS-LC rebuild, Cangjie test rerun, 1-hour SSE, 24-hour soak, platform profiles outside Linux x86_64 glibc. The frozen snapshot has no target/native/current archive and its .local/aws-lc reference lacks .git metadata, so the canonical native rebuild was not reproducible inside this snapshot.
