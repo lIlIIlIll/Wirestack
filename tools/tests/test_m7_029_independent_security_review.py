@@ -189,7 +189,7 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
 
     def test_cjpm_build_hook_builds_both_native_dependencies(self) -> None:
         build_script = (ROOT / "build.cj").read_text(encoding="utf-8")
-        self.assertIn('join("build_linux_tls_provider.py")', build_script)
+        self.assertIn('join("build_tls_provider.py")', build_script)
         self.assertIn('join("build_linux_resolver.py")', build_script)
         self.assertIn("private func buildLinuxNativeDependencies(): Int64", build_script)
         for phase in (
