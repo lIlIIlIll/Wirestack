@@ -415,7 +415,8 @@ private func validateJsonPathFunctionCall(text: String, source: String,
 }
 
 private func jsonPathQueryIsSingular(text: String): Bool {
-    let rootQuery = if (text.startsWith("@")) { "$" + text[1..text.size] } else { text }
+    let normalized = removeJsonPathQueryWhitespace(text)
+    let rootQuery = if (normalized.startsWith("@")) { "$" + normalized[1..normalized.size] } else { normalized }
     JsonPathParser(rootQuery).parse().isSingular()
 }
 

@@ -62,4 +62,15 @@ class YJsonPathTest {
         @AssertThrows[JsonPathException](JsonPath.parse("$.items[?length(@[0,1]) == 1]"))
         @AssertThrows[JsonPathException](JsonPath.parse("$.items[?length(@[0:1]) == 1]"))
     }
+
+    @TestCase
+    func singularFunctionQueriesAllowWhitespaceBetweenSelectors(): Unit {
+        let nested = YJson.parse("""
+        [{"a":{"b":"foo"}},{}]
+        """)
+        @Expect(JsonPath.parse("$[?length(@ .a .b) == 3]").values(nested).size, 1)
+        @Expect(JsonPath.parse("$[?length(@\n.a\n.b) == 3]").values(nested).size, 1)
+        @Expect(JsonPath.parse("$[?length(@\t.a\t.b) == 3]").values(nested).size, 1)
+        @Expect(JsonPath.parse("$[?length(@\r.a\r.b) == 3]").values(nested).size, 1)
+    }
 }
