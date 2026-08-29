@@ -60,10 +60,11 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
         text = "\n".join([
             self.sample(0, 1000, 1),
             self.sample(1, 2000, 2),
+            self.sample(2, 2000, 2),
             self.result(),
         ])
         samples, result = gate.parse_output(text)
-        self.assertEqual(2, len(samples))
+        self.assertEqual(3, len(samples))
         self.assertEqual(8, result["cycles"])
 
     def test_marker_parser_rejects_missing_duplicate_reordered_unknown_and_skipped(self) -> None:
@@ -72,6 +73,16 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
             self.sample(0, 1000, 1),
             valid + "\n" + self.result(),
             self.sample(1, 1000, 1) + "\n" + self.result(),
+            "\n".join([
+                self.sample(0, 2000, 2),
+                self.sample(1, 1999, 2),
+                self.result(),
+            ]),
+            "\n".join([
+                self.sample(0, 1000, 2),
+                self.sample(1, 2000, 1),
+                self.result(),
+            ]),
             valid.replace(" cycles=1", " unknown=1 cycles=1", 1),
             valid + "\nSKIPPED",
         )

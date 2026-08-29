@@ -61,7 +61,7 @@ fails closed.
 | Process terminal | success; nonzero; timeout; signal; descendant leak | Only clean success with no surviving descendant may PASS. |
 | Workload counters | zero; positive; inconsistent totals; overflow boundary | Every required workload must run and totals must reconcile. |
 | Cancellation | H1 request; H2 stream; shared connection; repeated cancel | Typed terminal, idempotence, recovery, and sibling isolation are required. |
-| Samples | missing; too few; sufficient; malformed; reordered | Missing or malformed samples are INCONCLUSIVE/FAIL. |
+| Samples | missing; too few; sufficient; malformed; reordered; equal millisecond timestamp | Missing or malformed samples are INCONCLUSIVE/FAIL; adjacent samples may share a millisecond timestamp, but time and cycle counts may never regress. |
 | Trend | falling; flat; bounded jitter; exact limit; over limit; monotonic growth | Equality passes; growth over a limit fails. |
 | Report write | new target; replace target; injected replace failure | Writes are atomic and retain the old target on failure. |
 | Gate routing | fast; task; full; long | The formal command appears only in long mode. |
@@ -96,7 +96,7 @@ fails closed.
 | T001 | S001,S003,S004,S005,S006 | P001-P018 | 10 to 30 second installed-artifact preflight | INCOMPLETE with every workload and resource sampler operational | public dependency, exact markers, positive counters, clean terminal | integration |
 | T002 | S002,S003,S004,S005,S006,S007 | P001-P018 | formal 86,400 second native run | PASS | uninterrupted durations, all workloads, all trends, zero final counters | long,platform |
 | T003 | S008,S009 | P018 | synthetic equality and over-limit windows | PASS then FAIL | exact median growth and stable metric decision | unit,boundary |
-| T004 | S010 | P005,P015,P019,P020 | short duration and malformed marker variants | INCOMPLETE/FAIL, never PASS | duration, duplicate, order, unknown field, SKIPPED, bounded output | unit,error |
+| T004 | S010 | P005,P015,P019,P020 | short duration and malformed marker variants | INCOMPLETE/FAIL, never PASS | duration, duplicate, index order, equal timestamp acceptance, timestamp/cycle regression rejection, unknown field, SKIPPED, bounded output | unit,error,boundary |
 | T005 | S011 | P002,P003 | missing, digest-changed, and traversal artifact | FAIL before build | stable artifact code and no subprocess | unit,security |
 | T006 | S012 | P001 | other OS/CPU and musl | BLOCKED/FAIL | no PASS and no child start | unit,platform |
 | T007 | S013 | P019 | injected nonzero, timeout, signal, and live descendant | FAIL with full process-group cleanup | terminal fields and orphan check | unit,lifecycle |
