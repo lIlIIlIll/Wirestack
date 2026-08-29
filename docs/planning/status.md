@@ -97,7 +97,7 @@ global six-platform M3 milestone.
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
 | M3-028 | COMPLETE | [`docs/evidence/M3-028/README.md`](../evidence/M3-028/README.md) | Native Linux qualification passes 70 deterministic TLS/trust tests, four bounded fuzz targets, TLS 1.2/1.3 OpenSSL interoperability, dependency scanning, body and idle-memory limits, 11-round full/resumed handshake gates, and 1.2125 times the pinned stdx bulk throughput. |
-| M3-029 | COMPLETE | [`docs/evidence/M3-029/README.md`](../evidence/M3-029/README.md) | Provider-neutral public client/server contexts, existing-transport handshake, TLS connection/listener ownership, negotiated metadata and stable errors pass public-package tests, clean-consumer Linux TLS acceptance, architecture checks and the intentionally updated API baseline. |
+| M3-029 | COMPLETE | [`docs/evidence/M3-029/README.md`](../evidence/M3-029/README.md) | Provider-neutral public client/server contexts, existing-transport handshake, TLS connection/listener ownership, negotiated metadata and stable errors pass public-package tests, clean-consumer Linux TLS acceptance and current pre-1.0 ownership guards; historical experimental API compatibility is not required. |
 
 ## Future upstream enhancements
 
