@@ -115,6 +115,7 @@
   "required_evidence": [
     "docs/evidence/M7-029/evidence.json",
     "docs/evidence/M7-029/independent-review.json",
+    "docs/evidence/M7-029/github-required-check.json",
     "docs/evidence/M7-029/linux_x86_64/review-validation.json",
     "docs/evidence/M7-029/task-check.json"
   ],
@@ -129,6 +130,7 @@
     "docs/evidence/M7-029/independent-review-source/wirestack-findings-register-49f3094.json",
     "docs/evidence/M7-029/independent-review-source/wirestack-full-audit-49f3094.md",
     "docs/evidence/M7-029/initial-isolated-review/independent-review.json",
+    "docs/evidence/M7-029/github-required-check.json",
     "docs/evidence/M7-029/initial-isolated-review/review-summary.md",
     "docs/evidence/M7-029/second-isolated-review/independent-review.json",
     "docs/evidence/M7-029/second-isolated-review/review-summary.md",

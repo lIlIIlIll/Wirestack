@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "task_id": "M7-029",
-  "generated_at_utc": "2026-08-29T03:55:32Z",
+  "generated_at_utc": "2026-08-29T06:09:52Z",
   "platform": "linux-x86_64-glibc",
   "status": "PASS_WITH_FINAL_REVIEW_PENDING",
   "checks": [
@@ -52,6 +52,17 @@
       "live_worker_limit": 64,
       "evidence_path": "docs/evidence/M7-029/final-review-regressions/resolver-global-bound.json",
       "sha256": "21da8589d19b27f11283d1bebc674e7b72e0de3d4fd33bcdf44973a2254a3659"
+    },
+    {
+      "id": "github-required-check",
+      "status": "PASS",
+      "run_id": 33233671568,
+      "job_id": 99050772214,
+      "head_sha": "bd7f11bee8756ac70f74bbe5bb8d08eb492f09bf",
+      "ruleset_id": 21787899,
+      "required_context": "clean-cangjie-build",
+      "evidence_path": "docs/evidence/M7-029/github-required-check.json",
+      "sha256": "433da1568b650abf9a990fa89c9ef74d2236692e984b64b7aee2154c3e93cce2"
     }
   ],
   "initial_isolated_review": {
@@ -79,7 +90,6 @@
   "non_claims": [
     "The initial isolated review predates the remediation candidate and is not a final PASS.",
     "The repository-wide scripts/check remains non-PASS because prior release evidence is intentionally stale after production changes.",
-    "Remote GitHub required-check enforcement remains unverified.",
     "No one-hour SSE profile or 86,400-second release soak was run."
   ]
 }
