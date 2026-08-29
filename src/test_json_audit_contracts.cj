@@ -28,11 +28,17 @@ class JsonAuditContractRegressionTest {
             "cyclic_json_node")
         @Expect(@AssertThrows[JsonException](mismatchedRight.equivalentTo(arrayCycle)).code,
             "cyclic_json_node")
+        @Expect(@AssertThrows[JsonException](arrayCycle.equivalentTo(JsonArrayValue())).code,
+            "cyclic_json_node")
+        @Expect(@AssertThrows[JsonException](JsonArrayValue().equivalentTo(arrayCycle)).code,
+            "cyclic_json_node")
 
         let objectCycle = JsonObjectValue()
         objectCycle.entries()["self"] = objectCycle
         let objectError = @AssertThrows[JsonException](objectCycle.toString())
         @Expect(objectError.code, "cyclic_json_node")
+        @Expect(@AssertThrows[JsonException](objectCycle.equivalentTo(JsonObjectValue())).code,
+            "cyclic_json_node")
 
         let first = JsonObjectValue()
         let second = JsonArrayValue()

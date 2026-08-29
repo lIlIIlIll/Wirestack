@@ -56,7 +56,11 @@ private func jsonNodesEquivalentGuarded(
         case (a: JsonBoolValue, b: JsonBoolValue) => a.value == b.value
         case (a: JsonStringValue, b: JsonStringValue) => a.value == b.value
         case (a: JsonArrayValue, b: JsonArrayValue) =>
-            if (a.size() != b.size()) { return false }
+            if (a.size() != b.size()) {
+                ensureJsonNodeGraphAcyclic(a)
+                ensureJsonNodeGraphAcyclic(b)
+                return false
+            }
             leftAncestors.add(a)
             try {
                 rightAncestors.add(b)
@@ -74,7 +78,11 @@ private func jsonNodesEquivalentGuarded(
             }
             true
         case (a: JsonObjectValue, b: JsonObjectValue) =>
-            if (a.size() != b.size()) { return false }
+            if (a.size() != b.size()) {
+                ensureJsonNodeGraphAcyclic(a)
+                ensureJsonNodeGraphAcyclic(b)
+                return false
+            }
             leftAncestors.add(a)
             try {
                 rightAncestors.add(b)
@@ -85,7 +93,10 @@ private func jsonNodesEquivalentGuarded(
                                 if (!jsonNodesEquivalentGuarded(value, other, leftAncestors, rightAncestors)) {
                                     return false
                                 }
-                            case None => return false
+                            case None =>
+                                ensureJsonNodeGraphAcyclic(a)
+                                ensureJsonNodeGraphAcyclic(b)
+                                return false
                         }
                     }
                 } finally {
@@ -95,7 +106,36 @@ private func jsonNodesEquivalentGuarded(
                 leftAncestors.remove(at: leftAncestors.size - 1)
             }
             true
-        case _ => jsonCoreNumbersEquivalent(left, right)
+        case _ =>
+            ensureJsonNodeGraphAcyclic(left)
+            ensureJsonNodeGraphAcyclic(right)
+            jsonCoreNumbersEquivalent(left, right)
+    }
+}
+
+private func ensureJsonNodeGraphAcyclic(value: JsonNode): Unit {
+    ensureJsonNodeGraphAcyclicGuarded(value, ArrayList<JsonNode>())
+}
+
+private func ensureJsonNodeGraphAcyclicGuarded(value: JsonNode, ancestors: ArrayList<JsonNode>): Unit {
+    match (value) {
+        case arrayValue: JsonArrayValue =>
+            enterJsonNodeAncestor(arrayValue, ancestors)
+            try {
+                for (item in arrayValue.values()) { ensureJsonNodeGraphAcyclicGuarded(item, ancestors) }
+            } finally {
+                ancestors.remove(at: ancestors.size - 1)
+            }
+        case objectValue: JsonObjectValue =>
+            enterJsonNodeAncestor(objectValue, ancestors)
+            try {
+                for ((_key, item) in objectValue.entries()) {
+                    ensureJsonNodeGraphAcyclicGuarded(item, ancestors)
+                }
+            } finally {
+                ancestors.remove(at: ancestors.size - 1)
+            }
+        case _ => ()
     }
 }
 
