@@ -71,6 +71,6 @@ with tempfile.TemporaryDirectory(prefix="yjson-cjcov-test.") as temporary:
         if line.startswith("BRDA:")
     ]
     assert len(records) == 6, records
-    assert sum(not line.endswith(",-") for line in records) == 6, records
+    assert sum(not line.endswith(",-") for line in records) == 4, records
 
 print("cjcov source branch normalization tests passed")

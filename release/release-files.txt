@@ -60,6 +60,7 @@ src/test_json_boundary.cj
 src/test_json_compact_document.cj
 src/test_json_concurrency.cj
 src/test_json_context_path.cj
+src/test_json_audit_contracts.cj
 src/test_json_direct_writer_state.cj
 src/test_json_document.cj
 src/test_json_literal.cj
@@ -105,6 +106,7 @@ scripts/json_perf_baseline.py
 scripts/release_temp_tree.py
 scripts/stage_source_tree.py
 scripts/test_stage_source_tree.py
+scripts/test_generate_public_api_snapshot.py
 scripts/release_package_stage.py
 scripts/check_api_inventory.py
 scripts/generate_public_api_snapshot.py
@@ -118,6 +120,7 @@ scripts/release_registry_rehearsal.py
 scripts/latest_cangjie_nightly.py
 scripts/coverage.sh
 scripts/cjcov_to_lcov.py
+scripts/test_cjcov_to_lcov.py
 scripts/check_patch_coverage.py
 
 # Release performance comparison source

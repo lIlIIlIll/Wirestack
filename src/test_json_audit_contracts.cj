@@ -332,6 +332,16 @@ class JsonAuditContractRegressionTest {
         shallow.writeRawEndObject()
         @Expect(shallow.finishString(), "{}")
 
+        let semantic = JsonDirectWriter(JsonWriteConfig("", "", false, false,
+            limits: JsonWriteLimits(maxDepth: 1)))
+        semantic.startObject()
+        semantic.writeName("x")
+        let semanticDepthError = @AssertThrows[JsonException](semantic.writeRawBeginArray())
+        @Expect(semanticDepthError.code, "max_depth")
+        semantic.writeNull()
+        semantic.endObject()
+        @Expect(semantic.finishString(), "{\"x\":null}")
+
         @Expect(!JsonArrayValue().add(JsonIntValue(1)).equivalentTo(
             JsonArrayValue().add(JsonIntValue(2))))
         @Expect(!JsonArrayValue().equivalentTo(JsonArrayValue().add(JsonIntValue(1))))

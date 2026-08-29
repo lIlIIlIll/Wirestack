@@ -96,10 +96,10 @@ for gcov_root in args.gcov_root:
             target[number] = max(target.get(number, 0), count)
 
 # Collapse compiler-level branch fan-out to source-level decisions. cjcov does
-# not identify which raw edge belongs to a source condition, so retain the
-# strongest observed semantic outcomes up to the number expressible in source.
-# This prevents checked arithmetic, bounds, call, and exception edges from
-# making an otherwise fully exercised loop impossible to cover.
+# not identify which raw edge belongs to a source condition, so preserve at
+# least one uncovered source outcome whenever any attached compiler edge is
+# uncovered. This remains conservative while preventing checked arithmetic,
+# bounds, call, and exception edges from multiplying the denominator.
 for source, branches in list(branch_records.items()):
     slots = semantic_branch_slots(repository_root / source)
     normalized: dict[tuple[int, int], int] = {}
@@ -108,10 +108,12 @@ for source, branches in list(branch_records.items()):
         by_line.setdefault(number, []).append(count)
     for number, counts in by_line.items():
         limit = slots[number]
-        ordered = sorted(counts, reverse=True)[:limit]
-        ordered.extend([0] * (limit - len(ordered)))
-        for index, count in enumerate(ordered):
-            normalized[(number, index)] = count
+        hit = min(sum(count > 0 for count in counts), limit)
+        if any(count == 0 for count in counts):
+            hit = min(hit, limit - 1)
+        representative = max(counts, default=1)
+        for index in range(limit):
+            normalized[(number, index)] = representative if index < hit else 0
     branch_records[source] = normalized
 
 if not records:

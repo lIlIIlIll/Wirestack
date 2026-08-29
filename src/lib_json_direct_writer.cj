@@ -1522,15 +1522,15 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     }
 
     private func beginRawContainer(): Unit {
+        if (currentContainerDepth() >= config.maxDepth) {
+            throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
+        }
         if (rawDepth == 0) {
             if (rawRootPreclaimed) {
                 rawRootPreclaimed = false
             } else {
                 beforeValue()
             }
-        }
-        if (currentContainerDepth() >= config.maxDepth) {
-            throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
         }
         rawDepth++
     }
