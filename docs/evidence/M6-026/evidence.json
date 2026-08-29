@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-29T10:00:58.030551Z",
+  "generated_at_utc": "2026-08-29T11:01:01.504248Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,7 +11,7 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M6-026/task-check.json",
-      "sha256": "1c2635cd2b97cf8351852e7bc0202d284be44b3e2a67c86a83748e6d6c4a6297",
+      "sha256": "6ab02aa8ecc902d22362d4e231d029c0868856828375f4919ae3d371b762549e",
       "source_task": "M6-026"
     },
     {
@@ -21,14 +21,14 @@
       "source_task": "M6-026"
     }
   ],
-  "revision": "d5d19ab84afd07c0abd142e59dde7a93f93c903c",
+  "revision": "d5b17e6ab6b8a94a9d6c6e0fdcc38f39a54e908d",
   "schema_version": 1,
   "source_sha256": {
-    ".gitignore": "a597755755bb3087cec35cf2a83b5519f196281cf5f70b870e10bc496faf063c",
+    ".gitignore": "f9cdaed3952d02b7f9e83699a56d50f6a7a167665b4099ae3ea8089273b727bf",
     "docs/evidence/M6-026/test-plan.md": "0b9ea65f50bbe8b5d9bd0dfccea4aeb1af98ffd5cd911c18f1a14026aed93f5e",
     "docs/planning/implementation-backlog.md": "930b08c926a7c3744e0a7ffc73d67620ec2a8112d413247c95b9a8831e7d6f6a",
     "docs/planning/linux-status.md": "3b972099653574dbbf5e857e6e8873c736c9c32ce1083f7bd51acceea99bdd72",
-    "docs/planning/status.md": "5c701a8dd3bbf97f07fa9aae5e8f63f18a2caffd681ea9bab047bbd64e441a58",
+    "docs/planning/status.md": "cf247427edceffd2f600670c1045083c479ffef2f8cef1107f26678e8187a668",
     "src/http/facade_test.cj": "0aad926017175da1f2dd8233c475e574c4f656368cd0a8325639ed957754c05e",
     "src/internal/http2/client_connection.cj": "fa6495f4639eaec38b0920a5d095b2c0848b08e65af1fbaae913568726659e5e",
     "src/internal/http2/client_connection_test.cj": "3c82b461858747eb2a72d897530f4d4708772f0652d85c36a5ed6447fc9f9a27",
