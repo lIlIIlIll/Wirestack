@@ -1,23 +1,49 @@
 # Wirestack
 
-Wirestack 是一个面向仓颉的跨平台安全网络栈项目，目标是在保留 `std.net` 作为官方默认 TCP/runtime 调度底座的前提下，重新定义并实现独立的 Transport、TLS、HTTPS、HTTP/1.1 与 HTTP/2 语义。
+Wirestack 是面向仓颉的安全网络栈，提供独立的 Transport、TLS、HTTPS、
+HTTP/1.1 和 HTTP/2 语义，同时保留 `std.net` 作为默认 TCP 与 runtime 调度底座。
 
-当前仓库已完成 Linux glibc 上的 Transport、Resolver、Connector、TLS、HTTP/1.1 与 HTTP/2 主体实现和验收。AWS-LC 5.5.0 是 Linux provider。公开 cancellation handles、HTTP/2 server facade、ALPN dispatch 和一小时 SSE profile 已有 native Linux 证据。ADR-0004 将 musl 延后到 SDK 正式支持之后。ADR-0005 规定 Wirestack release 不依赖 runtime 或 `std.net` 源码修改；缺少 typed TCP half-close、native socket code 或精确 runtime backend 时，适配器使用稳定的能力和错误表示。
+当前可验证的产品范围是 **Linux x86_64 glibc**。Transport、DNS、Happy
+Eyeballs、TLS 1.2/1.3、HTTP/1.1、HTTP/2、client/server、ALPN、mTLS、SSE
+长流和公开取消句柄均已有原生 Linux 证据。六平台产品目标尚未完成，Linux
+musl 也要等仓颉 SDK 正式支持后才进入验证。
 
-## 目标
+## 为什么用 Wirestack
 
-- Windows、Linux、macOS、Android、iOS、HarmonyOS/OpenHarmony 的 HTTPS 客户端。
-- 独立 Transport SPI，隔离现有 `std.net` 的 DNS、timeout、EOF、错误和公共类型语义。
-- TLS 1.2/1.3、系统信任、自定义 CA、mTLS、session resumption、ALPN/SNI。
-- HTTP/1.1 与 HTTP/2 client/server。
-- 单调绝对 Deadline、统一 CancellationToken、结构化错误和 exactly-once completion。
-- 官方默认发布产物不要求用户安装或管理系统 OpenSSL。
+- 一个单调绝对 `Deadline` 和一个 `CancellationToken` 贯穿 DNS、连接、TLS、
+  HTTP headers 与 body。
+- request、connection 和 HTTP/2 stream 有独立、幂等的公开取消句柄。
+- TLS provider 在构建时固定为 AWS-LC；默认 Linux 产物不依赖系统 OpenSSL。
+- HTTP/1.1 与 HTTP/2 client/server 共用公开 facade；TLS 服务端根据握手保留的
+  ALPN 结果分发协议。
+- EOF、local close、abort、cancel、deadline、RST 和 TLS truncation 保留不同
+  终态；错误使用稳定 category、phase、code 与 retryability。
+- parser、buffer、pool、queue、HPACK table、flow-control window 和 session store
+  都有明确上限。
 
-## 非目标
+Wirestack 不调用 `CJ_MRT_Sock*` 私有 ABI，不自建 epoll/kqueue/IOCP 事件循环，
+不从异常文本推断控制流，也不在运行时猜测或回退 TLS provider。
 
-P0 不包含 HTTP/3/QUIC、DTLS、TLS 1.0/1.1、0-RTT、PAC/WPAD、DoH/DoT，也不会在第一阶段重写整个 `std.net`。
+## 安装和首次验证
 
-Wirestack 不直接调用 `CJ_MRT_Sock*` 私有 ABI，不自行实现六套 epoll/kqueue/IOCP 事件循环，也不通过运行时猜测动态库来选择 TLS provider。
+要求 Linux x86_64 glibc、Cangjie Compiler
+`1.1.0-alpha.20260817040003` 和 CJPM `1.1.3`。当前包版本是 `0.1.0`。
+
+```toml
+[dependencies]
+wirestack = { git = "https://github.com/lIlIIlIll/Wirestack.git" }
+```
+
+在仓库 checkout 中准备已固定的本地 native provider 输入，然后运行：
+
+```bash
+/home/elliot/.codex/scripts/codex_cangjie_env scripts/repo-doctor
+/home/elliot/.codex/scripts/codex_cangjie_env scripts/check-fast
+```
+
+完整的安装、native 依赖和第一个 client/server 示例见
+[Getting started](docs/getting-started.md)。公开 API 入口见
+[API guide](docs/api/README.md)。
 
 ## 架构边界
 
@@ -25,63 +51,47 @@ Wirestack 不直接调用 `CJ_MRT_Sock*` 私有 ABI，不自行实现六套 epol
 HTTP → TLS → Transport SPI ← StdNetTransport → std.net
 ```
 
-只有 `wirestack.internal.transport_stdnet` 允许依赖 `std.net`。TLS Core、HTTP Core 与公共 API 不得导入或暴露 `std.net` 类型。
+只有 `wirestack.internal.transport_stdnet` 可以依赖 `std.net`。公开包是
+`wirestack.http` 和 `wirestack.tls`；公共 API、TLS Core、HTTP Core 都不暴露
+`std.net` 或 provider-native 类型。详细边界和 accepted ADR 见
+[Architecture](docs/architecture/README.md)。
 
-已冻结的主要包：
-
-```text
-wirestack.tls
-wirestack.http
-wirestack.internal.transport
-wirestack.internal.transport_stdnet
-wirestack.internal.resolver
-wirestack.internal.connector
-wirestack.internal.tls_engine
-wirestack.internal.trust
-wirestack.internal.identity
-wirestack.internal.http1
-wirestack.internal.http2
-wirestack.internal.platform.*
-```
-
-Transport、Resolver、Connector、TLS、HTTP/1.1 与 HTTP/2 包已经包含 Linux glibc 实现。全平台发布矩阵仍未完成。
-
-## 本地验证
-
-已验证工具链：
-
-```text
-Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)
-Cangjie Project Manager: 1.1.3
-```
-
-使用仓颉 SDK：
+## 验证层级
 
 ```bash
-source /path/to/cangjie/envsetup.sh
-./scripts/check
+scripts/check-fast --json
+scripts/check-task P1-013 --json
+scripts/check-full --json
+scripts/check-long M7-022 --json
 ```
 
-当前统一检查执行架构守卫、构建和测试。长期 profile 和部分 native gate 由各任务的证据命令单独运行。
+`scripts/check` 保持兼容，执行 Python 测试、架构守卫、native resolver 构建、
+`cjpm check`、`cjpm build` 和排除 `Performance` 标签的测试。`check-fast`、
+`check-full` 不会隐式启动一小时 SSE、24 小时 soak 或其他长 profile。
 
-SDK 归档、解压后的工具链和 `target/` 构建产物都不进入仓库。
+## 当前状态
 
-## 文档
+- Linux 功能、fuzz、性能、供应链、API freeze 和迁移示例门禁已完成。
+- M7-022 的正式 24 小时最终 soak 正在运行；短 preflight 不能替代它。
+- M7-028 至 M7-031 仍依赖 soak、安全审查、签名和最终候选报告。
+- 全局 Windows、macOS、Android、iOS、HarmonyOS/OpenHarmony 原生矩阵未完成。
+- UP-001 至 UP-007 是远期上游增强，不是 Wirestack 发布依赖。
 
-- [产品 PRD](docs/product/prd.md)
-- [仓库实施 backlog](docs/planning/implementation-backlog.md)
-- [执行状态](docs/planning/status.md)
-- [Linux-first 执行状态](docs/planning/linux-status.md)
-- [架构与 ADR](docs/architecture/README.md)
-- [现有网络栈盘点](docs/architecture/current-network-stack-inventory.md)
-- [CJPM 包布局 ADR](docs/architecture/adr/0001-cjpm-package-layout.md)
-- [采纳与发布门禁](docs/gates/README.md)
-- [任务证据约定](docs/evidence/README.md)
-- [SDK 检查记录](docs/references/cangjie-sdk-1.1.0-alpha.20260817040003.md)
-- [Codex/Agent 仓库规则](AGENTS.md)
+以 [Linux status](docs/planning/linux-status.md) 和
+[task status](docs/planning/status.md) 为当前执行事实；不要从 README 推断发布完成。
 
-## 当前执行点
+## 文档入口
 
-Linux glibc 主体能力已经完成。当前关键路径是 M1-024 确定性竞态测试、M1-025 泄漏与 benchmark 收口，以及 Linux 专用的 M7 发布任务。UP-001 至 UP-007 都是远期上游增强，不在 Wirestack 发布依赖图中。全局六平台状态仍因其他平台的原生证据缺失而保持 fail-closed。
+- [Documentation map](docs/README.md)
+- [Getting started](docs/getting-started.md)
+- [Linux HTTP guide](docs/guides/http1-linux.md)
+- [Linux migration guide](docs/guides/migrate-to-wirestack-linux.md)
+- [Security](SECURITY.md)
+- [Contributing](CONTRIBUTING.md)
+- [Product requirements](docs/product/prd.md)
+- [Implementation backlog](docs/planning/implementation-backlog.md)
 
-不要把“能交叉编译”视为平台支持完成；涉及平台能力的完成声明必须有真机或原生 VM 证据。
+## License and release status
+
+仓库当前版本为 `0.1.0`，尚未通过 Linux 稳定版最终候选门禁。仓库中暂未提供
+顶层许可证文件；在许可证正式发布前，不应把源码可见性解释为已授予分发许可。
