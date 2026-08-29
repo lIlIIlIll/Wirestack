@@ -15,9 +15,9 @@
       "timeout_seconds": 900
     },
     {
-      "argv": ["scripts/check-m7-026-linux-api"],
+      "argv": ["scripts/architecture-guard", "--format", "json"],
       "gate": "task",
-      "id": "api-compatibility",
+      "id": "architecture-guard",
       "long_running": false,
       "timeout_seconds": 120
     }

@@ -31,21 +31,18 @@ configuration strings, or a legacy TLS socket.
 | Real TLS loopback in clean consumer | PASS: HTTP/2 over AWS-LC |
 | Public facade construction in clean consumer | PASS: client/server contexts, custom CA and ALPN |
 | Architecture guard | PASS: zero violations |
-| API baseline | PASS: 147 declarations, 105 resolved aliases |
+| Public API ownership | PASS: current pre-1.0 inventory has zero internal aliases |
 
 The machine-readable facade report is
 [`linux_x86_64/public-tls-facade.json`](linux_x86_64/public-tls-facade.json).
 The traceability matrix is [`test-plan.md`](test-plan.md).
 
-## Compatibility boundary
+## API boundary
 
-This is an intentional additive API expansion while Wirestack remains at major
-version 0. Existing public declarations were not removed. The regenerated
-inventory SHA-256 is
-`9221db662b0c24980a18c12853dba5c5c62bae2f5f7bf3dc1f8924b98fe0b865`.
-The static gate proves the current inventory and package/major policy. It does
-not claim ABI compatibility with an earlier binary release, full runtime
-semantic compatibility, or forward compatibility with a future release.
+M7-032 superseded the historical M7-026 compatibility comparison and moved
+user-owned contracts into public packages. M3-029 now verifies the current
+pre-1.0 ownership inventory and architecture rules. It does not require source,
+API, ABI or semantic compatibility with an earlier experimental snapshot.
 
 ## Commands
 
@@ -53,7 +50,6 @@ semantic compatibility, or forward compatibility with a future release.
 python3 -m unittest tools.tests.test_m3_029_linux_tls_facade tools.tests.test_m7_linux_task_graph
 scripts/check-m3-029-linux-tls-facade --json
 scripts/architecture-guard --format json
-scripts/check-m7-026-linux-api
 scripts/check-task M3-029 --json
 scripts/verify-evidence M3-029
 scripts/check

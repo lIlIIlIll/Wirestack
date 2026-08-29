@@ -287,7 +287,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M3-026 | 实现 `close_notify`、truncation evidence 与 TLS abort | TLS | C4 | M3-005,M3-021,M3-022 | PRD §13.8 | graceful close 在 Deadline 内发送/处理 close_notify；peer TCP EOF 无 close_notify 保留证据；最终总释放资源。 |
 | M3-027 | 实现 TLS 结构化错误与 runtime info | 可观测性 | C3 | M1-007,M3-002..M3-026 | PRD §16.2/§20 | 覆盖协议、版本、cipher、ALPN、证书、identity、key、alert、truncation、provider；phase/重试性稳定。 |
 | M3-028 | 完成 TLS 确定性、互操作、fuzz、依赖扫描与 benchmark | 测试 | C4 | M3-001..M3-027 | PRD §19.2/§21/§22/§23 | 协议向量、主机名、session、close、truncated、外部实现互操作、fuzz 无崩溃；吞吐/握手/内存达标；无系统 OpenSSL 依赖。 |
-| M3-029 | 实现并冻结 provider-neutral 公共 TLS facade | TLS/API | C4 | M3-028,M7-026 | PRD §6.2/§7/§13/§17/§29 | `wirestack.tls` 公开不可变 client/server context、existing-transport handshake、`TlsConnection`/`TlsListener`、协商结果和稳定错误；成功后转移 transport 所有权，失败/取消/Deadline abort，close/abort 幂等；公共声明无 `std.net`、native provider、OpenSSL 配置或旧 socket 类型；public-only 测试与干净 consumer 原生运行通过，并有意更新 API baseline。 |
+| M3-029 | 实现并冻结 provider-neutral 公共 TLS facade | TLS/API | C4 | M3-028,M7-026 | PRD §6.2/§7/§13/§17/§29 | `wirestack.tls` 公开不可变 client/server context、existing-transport handshake、`TlsConnection`/`TlsListener`、协商结果和稳定错误；成功后转移 transport 所有权，失败/取消/Deadline abort，close/abort 幂等；公共声明无 `std.net`、native provider、OpenSSL 配置或旧 socket 类型；public-only 测试与干净 consumer 原生运行通过，当前 pre-1.0 公开所有权和架构守卫通过，不要求兼容历史实验性 API。 |
 
 ---
 
