@@ -9,6 +9,37 @@ from tools import m7_021_linux_release as release
 
 
 class M7021LinuxReleaseTest(unittest.TestCase):
+    def test_qualification_inputs_bind_native_manifests_sources_and_build_logic(self) -> None:
+        required = {
+            "LICENSE",
+            "THIRD_PARTY_NOTICES.md",
+            "build.cj",
+            "cjpm.lock",
+            "cjpm.toml",
+            "native/resolver/linux/wirestack_resolver.c",
+            "native/resolver/linux/wirestack_resolver.h",
+            "native/tls/aws_lc/provider.json",
+            "native/tls/aws_lc/wirestack_tls_provider.c",
+            "native/tls/aws_lc/wirestack_tls_provider.h",
+            "tools/build_linux_resolver.py",
+            "tools/build_linux_tls_provider.py",
+            "third_party/aws-lc/LICENSE",
+            "third_party/aws-lc/NOTICE",
+        }
+        self.assertTrue(required.issubset(set(release.QUALIFICATION_INPUTS)))
+
+    def test_release_metadata_inventory_is_complete(self) -> None:
+        self.assertEqual("Apache-2.0", release.PROJECT_LICENSE_EXPRESSION)
+        self.assertEqual(
+            {
+                "LICENSE",
+                "THIRD_PARTY_NOTICES.md",
+                "third_party/aws-lc/LICENSE",
+                "third_party/aws-lc/NOTICE",
+            },
+            set(release.RELEASE_METADATA_FILES),
+        )
+
     def test_production_sources_exclude_every_test_file(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

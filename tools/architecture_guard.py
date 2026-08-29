@@ -14,7 +14,8 @@ import re
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterator, Sequence
+from collections import deque
+from typing import Iterator, Mapping, Sequence
 
 SCHEMA_VERSION = 1
 ALLOWED_STD_NET_PACKAGE = "wirestack.internal.transport_stdnet"
@@ -30,6 +31,14 @@ STD_NET_RE = re.compile(r"(?<![A-Za-z0-9_])std\s*\.\s*net\b")
 PUBLIC_DECLARATION_RE = re.compile(
     r"^\s*public\s+(?P<kind>class|struct|interface|enum|func|prop|let|var|type)\b"
 )
+TYPE_CONTAINER_RE = re.compile(
+    r"^\s*(?P<public>public\s+)?(?:open\s+)?(?:class|struct|interface|enum)\b"
+)
+IMPORT_RE = re.compile(
+    r"(?m)^\s*import\s+(?P<path>[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_*][A-Za-z0-9_*]*)*)"
+    r"(?:\s+as\s+(?P<alias>[A-Za-z_][A-Za-z0-9_]*))?\s*$"
+)
+INTERNAL_PACKAGE_PREFIX = "wirestack.internal."
 
 SOURCE_RULES: tuple[tuple[str, re.Pattern[str], str], ...] = (
     (
@@ -183,7 +192,7 @@ def expected_package(source_root: Path, path: Path) -> str:
 
 
 def public_declaration_spans(text: str) -> Iterator[tuple[int, str]]:
-    """Yield public declaration headers with offsets into stripped source."""
+    """Yield exported declaration headers with offsets into stripped source."""
     lines = text.splitlines(keepends=True)
     offsets: list[int] = []
     offset = 0
@@ -192,9 +201,19 @@ def public_declaration_spans(text: str) -> Iterator[tuple[int, str]]:
         offset += len(line)
 
     index = 0
+    brace_depth = 0
+    top_level_container_public = False
     while index < len(lines):
         match = PUBLIC_DECLARATION_RE.match(lines[index])
-        if match is None:
+        exported = brace_depth == 0 or top_level_container_public
+        if match is None or not exported:
+            if brace_depth == 0:
+                container = TYPE_CONTAINER_RE.match(lines[index])
+                if container is not None and "{" in lines[index]:
+                    top_level_container_public = container.group("public") is not None
+            brace_depth += lines[index].count("{") - lines[index].count("}")
+            if brace_depth == 0:
+                top_level_container_public = False
             index += 1
             continue
         start = offsets[index]
@@ -213,7 +232,54 @@ def public_declaration_spans(text: str) -> Iterator[tuple[int, str]]:
             end_index += 1
         end = offsets[end_index] + len(lines[end_index])
         yield start, text[start:end]
+        if brace_depth == 0 and kind in {"class", "struct", "interface", "enum"}:
+            top_level_container_public = True
+        for consumed in lines[index:end_index + 1]:
+            brace_depth += consumed.count("{") - consumed.count("}")
+        if brace_depth == 0:
+            top_level_container_public = False
         index = end_index + 1
+
+
+def internal_import_names(text: str) -> set[str]:
+    """Return names that resolve directly to an internal import."""
+    names: set[str] = set()
+    for match in IMPORT_RE.finditer(text):
+        path = match.group("path")
+        if not path.startswith(INTERNAL_PACKAGE_PREFIX):
+            continue
+        alias = match.group("alias")
+        if alias is not None:
+            names.add(alias)
+            continue
+        final = path.rsplit(".", 1)[-1]
+        if final != "*":
+            names.add(final)
+    return names
+
+
+def resolved_imports(text: str, packages: set[str]) -> Iterator[tuple[str, int]]:
+    """Yield imported packages and source offsets using the longest known prefix."""
+    for match in IMPORT_RE.finditer(text):
+        path = match.group("path").removesuffix(".*")
+        candidates = [package for package in packages
+                      if path == package or path.startswith(package + ".")]
+        if candidates:
+            yield max(candidates, key=len), match.start("path")
+
+
+def public_internal_references(declaration: str, imported_names: set[str]) -> Iterator[tuple[int, str]]:
+    direct = re.compile(r"\bwirestack\s*\.\s*internal(?:\s*\.\s*[A-Za-z_][A-Za-z0-9_]*)+")
+    for match in direct.finditer(declaration):
+        yield match.start(), "wirestack.internal"
+    for name in sorted(imported_names):
+        pattern = re.compile(rf"\b{re.escape(name)}\s*\.")
+        for match in pattern.finditer(declaration):
+            yield match.start(), name
+
+
+def is_public_type_alias(declaration: str) -> bool:
+    return re.match(r"^\s*public\s+type\b", declaration) is not None
 
 
 def _position(text: str, offset: int) -> tuple[int, int, str]:
@@ -287,7 +353,18 @@ def inspect_source(root: Path, path: Path) -> list[Violation]:
                 f"Only {ALLOWED_STD_NET_PACKAGE} may reference std.net.",
             ))
     if actual_package in PUBLIC_API_PACKAGES:
+        imported_internal_names = internal_import_names(semantic)
         for start, declaration in public_declaration_spans(semantic):
+            for offset, _ in public_internal_references(declaration, imported_internal_names):
+                alias = is_public_type_alias(declaration)
+                violations.append(_violation(
+                    root,
+                    path,
+                    text,
+                    start + offset,
+                    "public-internal-alias" if alias else "public-internal-type",
+                    "Wirestack public declarations must not expose wirestack.internal.* types.",
+                ))
             for rule, pattern, message in PUBLIC_API_RULES:
                 for match in pattern.finditer(declaration):
                     violations.append(_violation(
@@ -308,11 +385,74 @@ def inspect_configuration(root: Path, path: Path) -> list[Violation]:
     return violations
 
 
+def dependency_cycle_violations(root: Path, paths: Sequence[Path]) -> list[Violation]:
+    """Reject import cycles that cross from a public package into internal code."""
+    sources: list[tuple[Path, str, str]] = []
+    packages: set[str] = set()
+    for path in paths:
+        text = path.read_text(encoding="utf-8")
+        semantic = strip_cangjie_comments_and_literals(text)
+        match = PACKAGE_RE.search(semantic)
+        if match is None:
+            continue
+        package = match.group(1)
+        packages.add(package)
+        sources.append((path, text, semantic))
+
+    graph: dict[str, set[str]] = {package: set() for package in packages}
+    edges: list[tuple[str, str, Path, str, int]] = []
+    for path, text, semantic in sources:
+        match = PACKAGE_RE.search(semantic)
+        if match is None:
+            continue
+        source = match.group(1)
+        for target, offset in resolved_imports(semantic, packages):
+            if target == source:
+                continue
+            graph[source].add(target)
+            edges.append((source, target, path, text, offset))
+
+    def path_between(start: str, wanted: str) -> list[str] | None:
+        queue: deque[tuple[str, list[str]]] = deque([(start, [start])])
+        seen = {start}
+        while queue:
+            current, route = queue.popleft()
+            for target in sorted(graph.get(current, ())):
+                if target == wanted:
+                    return route + [target]
+                if target not in seen:
+                    seen.add(target)
+                    queue.append((target, route + [target]))
+        return None
+
+    violations: list[Violation] = []
+    for source, target, path, text, offset in sorted(
+        edges, key=lambda item: (item[0], item[1], item[2].as_posix(), item[4])
+    ):
+        if source not in PUBLIC_API_PACKAGES or not target.startswith(INTERNAL_PACKAGE_PREFIX):
+            continue
+        route = path_between(target, source)
+        if route is None:
+            continue
+        cycle = " -> ".join([source, *route])
+        violations.append(_violation(
+            root,
+            path,
+            text,
+            offset,
+            "public-internal-dependency-cycle",
+            f"Public and internal packages must not form an import cycle: {cycle}",
+        ))
+    return violations
+
+
 def run_guard(root: Path) -> list[Violation]:
     root = root.resolve()
     violations: list[Violation] = []
-    for path in source_files(root):
+    paths = list(source_files(root))
+    for path in paths:
         violations.extend(inspect_source(root, path))
+    violations.extend(dependency_cycle_violations(root, paths))
     for path in configuration_files(root):
         violations.extend(inspect_configuration(root, path))
     return sorted(set(violations))

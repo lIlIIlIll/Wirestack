@@ -1,0 +1,107 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.platform.linux, time elapsed: 847567 ns, RESULT:
+Summary: TOTAL: 5
+    PASSED: 0, SKIPPED: 5, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.trust, time elapsed: 1711957 ns, RESULT:
+Summary: TOTAL: 10
+    PASSED: 0, SKIPPED: 10, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.http, time elapsed: 9217967 ns, RESULT:
+Summary: TOTAL: 71
+    PASSED: 0, SKIPPED: 71, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.common, time elapsed: 1348562 ns, RESULT:
+Summary: TOTAL: 9
+    PASSED: 0, SKIPPED: 9, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport, time elapsed: 9174876 ns, RESULT:
+Summary: TOTAL: 81
+    PASSED: 0, SKIPPED: 81, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http2, time elapsed: 32540906 ns, RESULT:
+Summary: TOTAL: 155
+    PASSED: 0, SKIPPED: 155, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.resolver, time elapsed: 6218643 ns, RESULT:
+Summary: TOTAL: 12
+    PASSED: 0, SKIPPED: 12, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.http1, time elapsed: 38112038 ns, RESULT:
+Summary: TOTAL: 115
+    PASSED: 0, SKIPPED: 115, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.tls, time elapsed: 911822 ns, RESULT:
+Summary: TOTAL: 6
+    PASSED: 0, SKIPPED: 6, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport_stdnet, time elapsed: 15500514 ns, RESULT:
+Summary: TOTAL: 50
+    PASSED: 0, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.tls_engine, time elapsed: 490334240 ns, RESULT:
+    TCS: TlsEnginePumpTest, time elapsed: 475534049 ns, RESULT:
+    [ PASSED ] CASE: awsLcClientEngineProducesAClientHelloWithoutSocketIo (65775861 ns)
+    [ PASSED ] CASE: strictTls13PolicyIsAcceptedByTheNativeEngine (204660 ns)
+    [ PASSED ] CASE: LinuxSystemTrustLoadsExplicitlyAndSniStaysSeparateFromReferenceIdentity (27715751 ns)
+    [ PASSED ] CASE: customRootChainIsLoadedIntoARealAwsLcClientEngine (760431 ns)
+    [ PASSED ] CASE: spkiPinPolicyConfiguresTheNativeVerificationPathBeforeHandshake (269768 ns)
+    [ PASSED ] CASE: matchingSpkiPinCompletesARealClientServerHandshake (28609277 ns)
+    [ PASSED ] CASE: matchingSpkiPinDoesNotBypassReferenceIdentityVerification (22275415 ns)
+    [ PASSED ] CASE: realAwsLcEnginesExchangeCloseNotifyInBothDirections (22196603 ns)
+    [ PASSED ] CASE: handshakeInfoReportsNegotiatedAlpnPeerChainAndVerificationEvidence (22208315 ns)
+    [ PASSED ] CASE: tls13TicketResumesAcrossFreshEnginesWithoutEarlyData (45278857 ns)
+    [ PASSED ] CASE: tls12TicketResumesAcrossFreshEngines (24597294 ns)
+    [ PASSED ] CASE: sniSelectsTheCompleteImmutableContextAndItsCertificate (24640178 ns)
+    [ PASSED ] CASE: sniSelectorRejectsMissingAndUnknownNamesWithStableEvidence (47970134 ns)
+    [ PASSED ] CASE: noSharedAlpnFailsTheHandshakeInsteadOfSilentlySelectingNothing (23308102 ns)
+    [ PASSED ] CASE: requiredMutualTlsUsesClientIdentityAndReturnsServerVerificationEvidence (19169505 ns)
+    [ PASSED ] CASE: requiredMutualTlsRejectsMissingClientIdentityButOptionalAllowsIt (18379690 ns)
+    [ PASSED ] CASE: mismatchedSpkiPinFailsARealClientServerHandshake (13539596 ns)
+    [ PASSED ] CASE: externalSignerCompletesARealHandshakeOutsideTheNativeCallback (29370252 ns)
+    [ PASSED ] CASE: externalSignerExceptionFailsClosedWithoutCrossingTheCAbi (15160642 ns)
+    [ PASSED ] CASE: cancellationBeforeSignerInvocationFailsThePendingNativeOperation (15584785 ns)
+    [ PASSED ] CASE: pumpHandlesWantReadWriteAndPartialIoWithBoundedBuffers (85251 ns)
+    [ PASSED ] CASE: wantWriteWithoutCiphertextFailsInsteadOfSpinning (171077 ns)
+    [ PASSED ] CASE: eofDuringWantReadRetainsTlsHandshakeEvidence (133025 ns)
+    [ PASSED ] CASE: preCancellationStopsBeforeCallingProviderOrTransport (170114 ns)
+    [ PASSED ] CASE: expiredDeadlineStopsBeforeCallingProviderOrTransport (180030 ns)
+Summary: TOTAL: 62
+    PASSED: 25, SKIPPED: 37, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.connector, time elapsed: 2494237 ns, RESULT:
+Summary: TOTAL: 17
+    PASSED: 0, SKIPPED: 17, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 755356501 ns, RESULT:
+TP: wirestack.*, time elapsed: 755276576 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.platform.linux, time elapsed: 847567 ns
+    TP: wirestack.internal.common, time elapsed: 1348562 ns
+    TP: wirestack.internal.transport, time elapsed: 9174876 ns
+    TP: wirestack.internal.trust, time elapsed: 1711957 ns
+    TP: wirestack.internal.http2, time elapsed: 32540906 ns
+    TP: wirestack.internal.resolver, time elapsed: 6218643 ns
+    TP: wirestack.internal.tls_engine, time elapsed: 490334240 ns
+    TP: wirestack.internal.connector, time elapsed: 2494237 ns
+    TP: wirestack.tls, time elapsed: 911822 ns
+    TP: wirestack.internal.http1, time elapsed: 38112038 ns
+    TP: wirestack.internal.transport_stdnet, time elapsed: 15500514 ns
+    TP: wirestack.http, time elapsed: 9217967 ns
+Summary: TOTAL: 593
+    PASSED: 25, SKIPPED: 568, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
