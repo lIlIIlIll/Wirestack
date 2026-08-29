@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import datetime as dt
+import fcntl
 import hashlib
 import json
 import os
@@ -62,6 +64,8 @@ FIXTURE = ROOT / "examples/linux/m7_027/fixtures.cj"
 QUALIFICATION = ROOT / "docs/evidence/M7-021/linux_x86_64/qualification.json"
 ARTIFACT = ROOT / "dist/m7-021" / release.ARTIFACT_NAME
 ENV_RUNNER = Path("/home/elliot/.codex/scripts/codex_cangjie_env")
+LOCK_PATH = ROOT / "build/gates/m7-022.lock"
+RUN_LOG_DIRECTORY = ROOT / "build/gates/m7-022-runs"
 
 
 class SoakError(RuntimeError):
@@ -69,6 +73,55 @@ class SoakError(RuntimeError):
         super().__init__(detail)
         self.code = code
         self.detail = detail
+
+
+@contextmanager
+def exclusive_task_run(lock_path: Path = LOCK_PATH):
+    """Hold the Linux M7-022 process lock for one complete invocation."""
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("a+", encoding="utf-8") as stream:
+        try:
+            fcntl.flock(stream.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            raise SoakError(
+                "SOAK_ALREADY_RUNNING",
+                "another M7-022 invocation holds the process lock",
+            ) from error
+        stream.seek(0)
+        stream.truncate()
+        stream.write(f"pid={os.getpid()}\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+        try:
+            yield
+        finally:
+            fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
+
+
+def isolated_raw_log(
+    target: Path,
+    directory: Path = RUN_LOG_DIRECTORY,
+) -> Path:
+    """Create a unique log that cannot overlap another invocation."""
+    directory.mkdir(parents=True, exist_ok=True)
+    descriptor, name = tempfile.mkstemp(
+        prefix=f"{target.name}.", suffix=".running", dir=directory
+    )
+    os.close(descriptor)
+    return Path(name)
+
+
+def promote_raw_log(
+    running: Path,
+    target: Path,
+    replace: Callable[[str | bytes | os.PathLike[str] | os.PathLike[bytes],
+                       str | bytes | os.PathLike[str] | os.PathLike[bytes]], None] = os.replace,
+) -> None:
+    """Durably and atomically publish one complete invocation log."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with running.open("rb") as stream:
+        os.fsync(stream.fileno())
+    replace(running, target)
 
 
 def sha256_path(path: Path) -> str:
@@ -504,62 +557,76 @@ def execute(args: argparse.Namespace) -> dict[str, Any]:
     validate_consumer_sources(source, fixture)
     raw_log = args.raw_log.resolve()
     raw_log.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="wirestack-m7-022-") as temporary:
-        work = Path(temporary)
-        try:
-            installed = release.extract_archive(args.artifact.resolve(), work / "install")
-        except release.ReleaseError as error:
-            raise SoakError("ARTIFACT_EXTRACT", str(error)) from error
-        consumer = work / "consumer"
-        consumer_source = consumer / "src"
-        consumer_source.mkdir(parents=True)
-        (consumer / "cjpm.toml").write_text(consumer_manifest(installed), encoding="utf-8")
-        (consumer_source / "main.cj").write_text(source, encoding="utf-8")
-        (consumer_source / "fixtures.cj").write_text(fixture, encoding="utf-8")
-        build_output = run_build(
-            [str(ENV_RUNNER), "--cwd", str(consumer), "cjpm", "build"], consumer
-        )
-        binary = consumer / "target/release/bin/main"
-        if not binary.is_file():
-            raise SoakError("BINARY_MISSING", "clean consumer produced no executable")
-        command = [
-            str(ENV_RUNNER), "--cwd", str(consumer), str(binary),
-            str(args.duration_seconds), str(int(args.application_sample_seconds * 1000)),
-            str(args.idle_milliseconds),
-        ]
-        started = time.monotonic_ns()
-        with raw_log.open("w", encoding="utf-8") as output:
-            process = subprocess.Popen(
-                command, cwd=consumer, stdout=output, stderr=subprocess.STDOUT,
-                text=True, errors="replace", start_new_session=True,
-            )
-            sampler = ProcessSampler(args.resource_sample_seconds)
-            sampler.start(process.pid)
-            timed_out = False
+    running_log = isolated_raw_log(raw_log)
+    try:
+        with tempfile.TemporaryDirectory(prefix="wirestack-m7-022-") as temporary:
+            work = Path(temporary)
             try:
-                process.wait(timeout=args.duration_seconds + args.teardown_seconds)
-            except subprocess.TimeoutExpired:
-                timed_out = True
-                terminate_process_group(process)
-            finally:
-                sampler.stop()
-        wall_elapsed_ms = (time.monotonic_ns() - started) // 1_000_000
-        exit_code = process.returncode
-        if timed_out:
-            raise SoakError("SOAK_TIMEOUT", f"child exceeded {args.duration_seconds + args.teardown_seconds}s")
-        if exit_code != 0:
-            raise SoakError("SOAK_EXIT", f"child exited {exit_code}: {bounded_tail(raw_log)}")
-    raw_text = raw_log.read_text(encoding="utf-8", errors="replace")
-    application_samples, result = parse_output(raw_text)
-    formal = args.duration_seconds >= FORMAL_SECONDS
-    minimum_samples = 20 if formal else 5
-    process_trend = resource_trend(sampler.samples, minimum_samples=minimum_samples)
-    app_trend = application_trend(application_samples, minimum_samples=minimum_samples)
-    workload = validate_workload(result, args.duration_seconds, wall_elapsed_ms)
-    all_semantics = all(workload.values())
-    trends_pass = process_trend["decision"] == "PASS" and app_trend["decision"] == "PASS"
-    decision = "PASS" if formal and all_semantics and trends_pass else "INCOMPLETE"
-    preflight_status = "PASS" if all_semantics and trends_pass else "FAIL"
+                installed = release.extract_archive(args.artifact.resolve(), work / "install")
+            except release.ReleaseError as error:
+                raise SoakError("ARTIFACT_EXTRACT", str(error)) from error
+            consumer = work / "consumer"
+            consumer_source = consumer / "src"
+            consumer_source.mkdir(parents=True)
+            (consumer / "cjpm.toml").write_text(consumer_manifest(installed), encoding="utf-8")
+            (consumer_source / "main.cj").write_text(source, encoding="utf-8")
+            (consumer_source / "fixtures.cj").write_text(fixture, encoding="utf-8")
+            build_output = run_build(
+                [str(ENV_RUNNER), "--cwd", str(consumer), "cjpm", "build"], consumer
+            )
+            binary = consumer / "target/release/bin/main"
+            if not binary.is_file():
+                raise SoakError("BINARY_MISSING", "clean consumer produced no executable")
+            command = [
+                str(ENV_RUNNER), "--cwd", str(consumer), str(binary),
+                str(args.duration_seconds), str(int(args.application_sample_seconds * 1000)),
+                str(args.idle_milliseconds),
+            ]
+            started = time.monotonic_ns()
+            with running_log.open("w", encoding="utf-8") as output:
+                process = subprocess.Popen(
+                    command, cwd=consumer, stdout=output, stderr=subprocess.STDOUT,
+                    text=True, errors="replace", start_new_session=True,
+                )
+                sampler = ProcessSampler(args.resource_sample_seconds)
+                sampler.start(process.pid)
+                timed_out = False
+                try:
+                    process.wait(timeout=args.duration_seconds + args.teardown_seconds)
+                except subprocess.TimeoutExpired:
+                    timed_out = True
+                    terminate_process_group(process)
+                finally:
+                    sampler.stop()
+            wall_elapsed_ms = (time.monotonic_ns() - started) // 1_000_000
+            exit_code = process.returncode
+            if timed_out:
+                raise SoakError(
+                    "SOAK_TIMEOUT",
+                    f"child exceeded {args.duration_seconds + args.teardown_seconds}s",
+                )
+            if exit_code != 0:
+                raise SoakError(
+                    "SOAK_EXIT", f"child exited {exit_code}: {bounded_tail(running_log)}"
+                )
+        raw_text = running_log.read_text(encoding="utf-8", errors="replace")
+        application_samples, result = parse_output(raw_text)
+        formal = args.duration_seconds >= FORMAL_SECONDS
+        minimum_samples = 20 if formal else 5
+        process_trend = resource_trend(sampler.samples, minimum_samples=minimum_samples)
+        app_trend = application_trend(application_samples, minimum_samples=minimum_samples)
+        workload = validate_workload(result, args.duration_seconds, wall_elapsed_ms)
+        all_semantics = all(workload.values())
+        trends_pass = (
+            process_trend["decision"] == "PASS"
+            and app_trend["decision"] == "PASS"
+        )
+        decision = "PASS" if formal and all_semantics and trends_pass else "INCOMPLETE"
+        preflight_status = "PASS" if all_semantics and trends_pass else "FAIL"
+        promote_raw_log(running_log, raw_log)
+    except Exception:
+        # The unique log stays under build/gates for post-failure diagnosis.
+        raise
     return {
         "schema_version": 1,
         "source_task": TASK_ID,
@@ -656,7 +723,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser().parse_args(argv)
     output = args.output.resolve()
     try:
-        report = execute(args)
+        with exclusive_task_run():
+            report = execute(args)
     except (SoakError, OSError, ValueError) as error:
         code = error.code if isinstance(error, SoakError) else type(error).__name__
         failure = {
@@ -668,10 +736,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             "generated_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
             "error": {"code": code, "detail": str(error)[:4096]},
         }
-        try:
-            atomic_json(output, failure)
-        except OSError:
-            pass
+        if code != "SOAK_ALREADY_RUNNING":
+            try:
+                atomic_json(output, failure)
+            except OSError:
+                pass
         print(f"M7-022 Linux release soak: FAIL: {code}: {error}")
         return 1
     atomic_json(output, report)

@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -193,6 +194,74 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
                 gate.atomic_json(path, {"decision": "FAIL"}, replace=fail_replace)
             self.assertEqual(before, path.read_bytes())
             self.assertEqual([path], list(path.parent.iterdir()))
+
+    def test_exclusive_task_run_rejects_a_second_invocation(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            lock = Path(directory) / "m7-022.lock"
+            with gate.exclusive_task_run(lock):
+                with self.assertRaises(gate.SoakError) as caught:
+                    with gate.exclusive_task_run(lock):
+                        self.fail("second invocation acquired the lock")
+                self.assertEqual("SOAK_ALREADY_RUNNING", caught.exception.code)
+
+                script = """
+import sys
+from pathlib import Path
+from tools import m7_022_linux_release_soak as gate
+try:
+    with gate.exclusive_task_run(Path(sys.argv[1])):
+        print("ACQUIRED")
+except gate.SoakError as error:
+    print(error.code)
+    raise SystemExit(7)
+"""
+                child = subprocess.run(
+                    [sys.executable, "-c", script, str(lock)],
+                    cwd=gate.ROOT,
+                    text=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    check=False,
+                )
+                self.assertEqual(7, child.returncode)
+                self.assertEqual("SOAK_ALREADY_RUNNING", child.stdout.strip())
+
+    def test_isolated_raw_log_promotes_atomically_and_preserves_old_on_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "soak.log"
+            target.write_text("old\n")
+            running = gate.isolated_raw_log(target, root / "runs")
+            running.write_text("complete\n")
+            gate.promote_raw_log(running, target)
+            self.assertEqual("complete\n", target.read_text())
+            self.assertFalse(running.exists())
+
+            failed = gate.isolated_raw_log(target, root / "runs")
+            failed.write_text("partial\n")
+
+            def fail_replace(_source: object, _target: object) -> None:
+                raise OSError("injected log promotion failure")
+
+            with self.assertRaises(OSError):
+                gate.promote_raw_log(failed, target, replace=fail_replace)
+            self.assertEqual("complete\n", target.read_text())
+            self.assertEqual("partial\n", failed.read_text())
+
+    def test_lock_failure_does_not_replace_active_run_report(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "report.json"
+            output.write_text('{"decision":"RUNNING"}\n')
+            with mock.patch.object(
+                gate,
+                "exclusive_task_run",
+                side_effect=gate.SoakError(
+                    "SOAK_ALREADY_RUNNING", "another invocation is active"
+                ),
+            ):
+                result = gate.main(["--output", str(output)])
+            self.assertEqual(1, result)
+            self.assertEqual('{"decision":"RUNNING"}\n', output.read_text())
 
     def test_bounded_tail_keeps_only_the_configured_suffix(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
