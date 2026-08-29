@@ -4,10 +4,12 @@ Status: **COMPLETE**
 
 Decision: **PASS**
 
-M7-026 freezes the Linux x86_64 glibc public API in a deterministic JSON
-baseline and adds a fail-closed compatibility gate. The baseline covers the
+M7-026 records the current Linux x86_64 glibc public API in a deterministic JSON
+baseline and adds a fail-closed inventory gate. The baseline covers the
 `wirestack`, `wirestack.http`, and `wirestack.tls` packages, including public
-members and the internal declaration behind every public type alias.
+members and the declaration behind every public type alias. Under ADR-0006 it
+is the current pre-1.0 candidate inventory, not a compatibility target for the
+earlier experimental API.
 
 ## Frozen identity and inventory
 
@@ -17,10 +19,10 @@ members and the internal declaration behind every public type alias.
 | Version recorded by the baseline | `0.1.0` |
 | Frozen major | `0` |
 | Public packages | `wirestack`, `wirestack.http`, `wirestack.tls` |
-| Public declarations | 82 |
-| Resolved public alias targets | 50 |
-| Inventory SHA-256 | `99dcdb3866ea70b07bb5c228364e8aae7c170b3fb81cd48be12e2d8464f713e6` |
-| Baseline SHA-256 | `9fc60b9fc62ad20a97c3d4db860a2d1d4eed45f27bd7e143f8b29e9a92c412c0` |
+| Public declarations | 243 |
+| Resolved public alias targets | 103 |
+| Inventory SHA-256 | `474014b6ca7eeec65b454f45cf7d882e41562926864f571610afb937fb802e1f` |
+| Baseline SHA-256 | `aa01d2d70903abf2ad5d09e3f5d6e8b1d22de8837a9a37e86c8cabe44cf347a4` |
 
 The versioned baseline is
 [`docs/api/baselines/wirestack-linux-v0.json`](../../api/baselines/wirestack-linux-v0.json).
@@ -64,11 +66,11 @@ so this task supplies a dedicated package-name and major-version gate. It does
 not label ABI, semantic, or forward compatibility as passed without an old/new
 release matrix.
 
-An intentional public API change must be reviewed as its own task. The change
-must state whether it is compatible within major 0 or requires a new major,
-update the baseline deliberately, and rerun this gate plus the relevant public
-consumer tests. Do not regenerate the baseline merely to make an unexplained
-diff pass.
+An intentional public API change must be reviewed as its own task. During the
+current pre-1.0 phase it may deliberately replace the candidate inventory
+without a compatibility shim or verdict, but it must rerun this gate and the
+relevant public-consumer tests. Do not regenerate the baseline merely to make
+an unexplained diff pass.
 
 ## Repeat the gate
 
@@ -90,7 +92,7 @@ scripts/check-m7-026-linux-api --write-baseline --write-report
 | Command | Result |
 |---|---|
 | `python3 -m py_compile tools/m7_026_linux_api_freeze.py tools/tests/test_m7_026_linux_api_freeze.py` | PASS |
-| `python3 tools/m7_026_linux_api_freeze.py --write-baseline --write-report` | PASS; 82 declarations and 50 aliases |
+| `python3 tools/m7_026_linux_api_freeze.py --write-baseline --write-report` | PASS; 243 declarations and 103 aliases |
 | `python3 -m unittest tools.tests.test_m7_026_linux_api_freeze` | 6 passed |
 | `scripts/check-m7-026-linux-api` | PASS; exact baseline and report match |
 | Python repository tests invoked by `scripts/check` | 99 passed |
@@ -117,7 +119,7 @@ release.
 
 ## Evidence boundary
 
-This evidence applies only to Linux x86_64 glibc and to the first Wirestack API
-baseline. It does not claim a previous-release ABI comparison, compatibility
-for a non-Linux artifact, or completion of M7-022 through M7-024 and M7-027
-through M7-031.
+This evidence applies only to Linux x86_64 glibc and the post-M7-032 pre-1.0
+candidate inventory. It does not claim backward, ABI, semantic, or forward
+compatibility, compatibility for a non-Linux artifact, or completion of the
+remaining release tasks.
