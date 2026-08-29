@@ -1,48 +1,52 @@
 # Architecture
 
-Wirestack architecture is governed by the PRD plus accepted Architecture
-Decision Records (ADRs).
-
-The mandatory dependency direction is:
+Wirestack separates protocol semantics from the default Cangjie socket adapter:
 
 ```text
 HTTP → TLS → Transport SPI ← StdNetTransport → std.net
 ```
 
-Core rules:
+Only `wirestack.internal.transport_stdnet` may import `std.net`. Public packages
+and protocol Core must not expose `std.net`, AWS-LC or platform-native types.
+Wirestack does not call `CJ_MRT_Sock*`, build a second socket event loop, parse
+exception messages as control flow, or introduce a second timeout owner.
 
-- only the StdNet adapter may import `std.net`;
-- public API and Core must not expose `std.net` or provider-native types;
-- no direct `CJ_MRT_Sock*` use;
-- no independent six-platform socket event-loop implementation;
-- one absolute monotonic Deadline and one cancellation model across all phases;
-- all resource collections and protocol limits are bounded.
+All waiting phases share one monotonic absolute `Deadline` and cancellation
+model. EOF, local close, abort, cancel, deadline, RST and TLS truncation remain
+different terminal evidence. Every queue, buffer, pool, cache, table, window and
+session store is bounded.
 
-## Accepted ADRs
+## Public and internal packages
 
-- [ADR-0001: CJPM Package and Source Layout](adr/0001-cjpm-package-layout.md)
-- [ADR-0002: Linux-first delivery profile](adr/0002-linux-first-delivery-profile.md)
-- [ADR-0003: Linux TLS provider selection](adr/0003-linux-tls-provider.md)
-- [ADR-0004: Current Linux libc support](adr/0004-linux-glibc-support.md)
-- [ADR-0005: Upstream-independent transport capabilities](adr/0005-upstream-independent-transport-capabilities.md)
+- `wirestack.http`: public HTTP/1.1 and HTTP/2 facade.
+- `wirestack.tls`: public provider-neutral TLS facade and Transport contract.
+- `wirestack.internal.transport_stdnet`: the only default adapter for `std.net`.
+- `wirestack.internal.resolver` and `.connector`: bounded DNS and route setup.
+- `wirestack.internal.tls_engine`, `.trust`, `.identity`: provider-neutral TLS
+  state, trust and key boundaries.
+- `wirestack.internal.http1` and `.http2`: strict bounded protocol engines.
 
-## Supporting architecture records
+The exact physical mapping is frozen by ADR-0001 and checked by
+[`scripts/architecture-guard`](architecture-guard.md).
 
-- [Current Cangjie TLS/HTTP/std.net inventory](current-network-stack-inventory.md)
+## Accepted decisions
+
+1. [ADR-0001: CJPM package and source layout](adr/0001-cjpm-package-layout.md)
+2. [ADR-0002: Linux-first delivery profile](adr/0002-linux-first-delivery-profile.md)
+3. [ADR-0003: Linux TLS provider selection](adr/0003-linux-tls-provider.md)
+4. [ADR-0004: Current Linux libc support](adr/0004-linux-glibc-support.md)
+5. [ADR-0005: Upstream-independent transport capabilities](adr/0005-upstream-independent-transport-capabilities.md)
+
+Accepted ADRs refine the [PRD](../product/prd.md) but may not silently weaken
+it. Use [the ADR template](adr/0000-template.md) for a new decision.
+
+## Design records
+
+- [Network-stack inventory](current-network-stack-inventory.md)
 - [Linux TLS provider build and ABI](linux-tls-provider-build.md)
+- [Provider candidate matrix](tls-provider-candidate-matrix.md)
+- [Provider PoC contract](tls-provider-poc-contract.md)
+- [P0 threat model](../security/threat-model.md)
 
-## ADR policy
-
-Use [`adr/0000-template.md`](adr/0000-template.md).
-
-An ADR may refine an implementation choice but may not silently weaken a PRD
-requirement. If a proposed ADR conflicts with the PRD, update/review the PRD
-explicitly before accepting the ADR.
-
-M0 is expected to freeze at least:
-
-- actual repository/package/target layout;
-- Transport SPI semantics;
-- TLS provider and build strategy;
-- minimum OS/API/SDK matrix;
-- capability behavior when the public SDK lacks an optional transport feature.
+These records describe the evidence and decisions available at their recorded
+date. Current execution state lives in the [status index](../planning/status.md).
