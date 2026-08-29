@@ -48,6 +48,27 @@ def semantic_branch_slots(source: Path) -> dict[int, int]:
             continuation = False
     return result
 
+
+def semantic_loop_body_lines(source: Path) -> dict[int, int]:
+    """Map multiline loop headers to their first executable body line."""
+
+    lines = source.read_text(encoding="utf-8").splitlines()
+    loop = re.compile(r"(^|\W)(for|while)(?=\W|$)")
+    result: dict[int, int] = {}
+    for index, raw in enumerate(lines):
+        text = raw.strip()
+        if not loop.search(text) or "{" not in text:
+            continue
+        after_open = text.split("{", 1)[1].strip()
+        if after_open and after_open != "}":
+            continue
+        for body_index in range(index + 1, len(lines)):
+            body = lines[body_index].strip()
+            if body and body != "}" and not body.startswith("//"):
+                result[index + 1] = body_index + 1
+                break
+    return result
+
 records: dict[str, dict[int, int]] = {}
 branch_records: dict[str, dict[tuple[int, int], int]] = {}
 for gcov_root in args.gcov_root:
@@ -101,16 +122,24 @@ for gcov_root in args.gcov_root:
 # uncovered. This remains conservative while preventing checked arithmetic,
 # bounds, call, and exception edges from multiplying the denominator.
 for source, branches in list(branch_records.items()):
-    slots = semantic_branch_slots(repository_root / source)
+    source_path = repository_root / source
+    slots = semantic_branch_slots(source_path)
+    loop_bodies = semantic_loop_body_lines(source_path)
     normalized: dict[tuple[int, int], int] = {}
     by_line: dict[int, list[int]] = {}
     for (number, _index), count in branches.items():
         by_line.setdefault(number, []).append(count)
     for number, counts in by_line.items():
         limit = slots[number]
-        hit = min(sum(count > 0 for count in counts), limit)
-        if any(count == 0 for count in counts):
-            hit = min(hit, limit - 1)
+        body_line = loop_bodies.get(number)
+        if body_line is not None and limit == 2:
+            header_hit = records[source].get(number, 0) > 0
+            body_hit = records[source].get(body_line, 0) > 0
+            hit = int(header_hit) + int(header_hit and body_hit)
+        else:
+            hit = min(sum(count > 0 for count in counts), limit)
+            if any(count == 0 for count in counts):
+                hit = min(hit, limit - 1)
         representative = max(counts, default=1)
         for index in range(limit):
             normalized[(number, index)] = representative if index < hit else 0

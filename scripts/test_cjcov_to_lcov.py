@@ -18,7 +18,12 @@ with tempfile.TemporaryDirectory(prefix="yjson-cjcov-test.") as temporary:
     (source / "lib_sample.cj").write_text(
         "package sample\n"
         "func sample(values: Array<Int64>, left: Bool, right: Bool): Unit {\n"
-        "    for (value in values) { let _ = value }\n"
+        "    for (value in values) {\n"
+        "        let _ = value\n"
+        "    }\n"
+        "    for (value in values) {\n"
+        "        let _ = value\n"
+        "    }\n"
         "    if (left && right) { return }\n"
         "}\n",
         encoding="utf-8",
@@ -35,11 +40,17 @@ with tempfile.TemporaryDirectory(prefix="yjson-cjcov-test.") as temporary:
         "        -:    0:Source:lib_sample.cj\n"
         "        1:    1:package sample\n"
         "        1:    2:func sample(values: Array<Int64>, left: Bool, right: Bool): Unit {\n"
-        "        1:    3:    for (value in values) { let _ = value }\n"
+        "        1:    3:    for (value in values) {\n"
         + raw_branches
-        + "        1:    4:    if (left && right) { return }\n"
+        + "        1:    4:        let _ = value\n"
+        + "        1:    5:    }\n"
+        + "        1:    6:    for (value in values) {\n"
+        + raw_branches
+        + "    #####:    7:        let _ = value\n"
+        + "        1:    8:    }\n"
+        + "        1:    9:    if (left && right) { return }\n"
         + boolean_branches
-        + "        1:    5:}\n",
+        + "        1:   10:}\n",
         encoding="utf-8",
     )
     baseline = work / "baseline.toml"
@@ -70,7 +81,7 @@ with tempfile.TemporaryDirectory(prefix="yjson-cjcov-test.") as temporary:
         for line in output.read_text(encoding="utf-8").splitlines()
         if line.startswith("BRDA:")
     ]
-    assert len(records) == 6, records
-    assert sum(not line.endswith(",-") for line in records) == 4, records
+    assert len(records) == 8, records
+    assert sum(not line.endswith(",-") for line in records) == 6, records
 
 print("cjcov source branch normalization tests passed")
