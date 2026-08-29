@@ -8,12 +8,4 @@ python3 -m unittest discover -s tools/gates/tests -p 'test_*.py' -v
 if [[ -d tools/benchmarks/tests ]]; then
   python3 -m unittest discover -s tools/benchmarks/tests -p 'test_*.py' -v
 fi
-python3 tools/architecture_guard.py --root . --format text
-
-scripts/build-linux-resolver --quiet
-
-command -v cjc >/dev/null
-command -v cjpm >/dev/null
-cjpm check
-cjpm build
-cjpm test --exclude-tags=Performance
+scripts/check-code
