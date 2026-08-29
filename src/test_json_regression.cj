@@ -859,9 +859,13 @@ class YJsonRegressionTest {
         @Expect(bytesText, text)
         @Expect(streamText, text)
         @Expect(YJson.encodeStringWith(YJson.int64HashMapCodec(), values), text)
+        @Expect(YJson.toJson(values), text)
 
         let decoded = YJson.decodeStringWith(codec, text)
+        let providerDecoded = YJson.fromJson<HashMap<String, Int64>>(text)
         @Expect(decoded.size, values.size)
+        @Expect(providerDecoded.size, values.size)
+        @Expect(providerDecoded["maximum"], Int64.Max)
         @Expect(decoded["minimum"], -9223372036854775808)
         @Expect(decoded["maximum"], Int64.Max)
         @Expect(decoded["escaped\"key"], 41)

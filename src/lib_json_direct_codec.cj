@@ -1828,6 +1828,11 @@ public class YJson {
         StringArrayListJsonCodec()
     }
     public static func hashMapCodec<T>(inner: JsonCodec<T>): JsonCodec<HashMap<String, T>> {
+        match (inner) {
+            case _: LambdaFastRawJsonCodec<Int64> =>
+                return (Int64HashMapJsonCodec() as JsonCodec<HashMap<String, T>>).getOrThrow()
+            case _ => ()
+        }
         HashMapJsonCodec(inner)
     }
     public static func int64HashMapCodec(): JsonCodec<HashMap<String, Int64>> {
