@@ -5,6 +5,7 @@ import wirestack.internal.common.*
 import wirestack.internal.connector.*
 import wirestack.internal.resolver.*
 import wirestack.internal.transport.*
+import wirestack as api
 
 /** DNS and typed-address proxy endpoint forms retained without string reparsing. */
 public class Http1ProxyEndpoint {
@@ -86,25 +87,7 @@ public class Http1ForwardProxyClient <: Resource {
     public func isClosed(): Bool { pool.isClosed() }
 }
 
-/** A non-2xx proxy CONNECT response. Credentials and response bodies are never retained. */
-public class Http1ProxyConnectException <: NetworkException {
-    public let status: Int64
-    public let reason: String
-
-    public init(status: Int64, reason: String) {
-        super(
-            NetworkErrorCategory.Connect,
-            NetworkPhase.ProxyConnect,
-            NetworkErrorCode.ConnectRefused,
-            "HTTP proxy rejected CONNECT with status ${status}",
-            retryability: Retryability.Never
-        )
-        this.status = status
-        this.reason = reason
-    }
-
-    protected override func getClassName(): String { "Http1ProxyConnectException" }
-}
+public type Http1ProxyConnectException = api.HttpProxyConnectException
 
 /** HTTPS-over-CONNECT pipeline. Proxy routing never changes TLS reference identity or SNI. */
 public class Http1HttpsProxyClient <: Resource {

@@ -15,6 +15,8 @@ __pycache__/
 !docs/evidence/M7-027/linux_x86_64/*.json
 !docs/evidence/M7-022/*.json
 !docs/evidence/M7-022/linux_x86_64/*.json
+!docs/evidence/M7-032/*.json
+!docs/evidence/M7-032/linux_x86_64/*.json
 *.py[cod]
 
 # Durable, checksum-pinned evidence overrides user-level *.json ignores.
@@ -34,6 +36,7 @@ __pycache__/
 !docs/evidence/M7-025/linux_x86_64/*.json
 !docs/evidence/M7-026/linux_x86_64/*.json
 !docs/api/baselines/*.json
+!native/tls/aws_lc/provider.json
 
 # Local tool state
 .cjpm/
