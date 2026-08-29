@@ -161,7 +161,7 @@ replace the six-platform M7-001 through M7-017 tasks.
 | M7-025 Linux SBOM and fingerprint | COMPLETE | The SPDX 2.3 SBOM, provider manifest and deterministic fingerprint bind the qualified artifact to pinned native inputs, target, toolchain, trust, capabilities and features; runtime/std source changes are not dependencies; [evidence](../evidence/M7-025/README.md). |
 | M7-026 Linux API freeze | COMPLETE | The versioned baseline freezes package `wirestack` major 0, 82 declarations, 50 resolved alias targets and the request/connection/stream cancellation handles. The compatibility gate rejects legacy and low-level public surfaces; [evidence](../evidence/M7-026/README.md). |
 | M7-027 Linux migration and examples | COMPLETE | The maintained guide covers every PRD migration topic. A native temporary consumer builds and runs the checked-in public HTTPS, caller-owned transport TLS, CONNECT configuration, H1/H2 server, SSE, custom CA, mTLS and scoped-cancellation examples; [evidence](../evidence/M7-027/README.md). |
-| M7-028 Linux security review package | READY | M7-032 is complete; prepare the review package before final artifact rebuild and soak. |
+| M7-028 Linux security review package | COMPLETE | The digest-bound review package covers the threat model, architecture, provider/C ABI, parsers, key and trust handling, fuzz, SBOM, known limits, environment and reproduction; [evidence](../evidence/M7-028/README.md). |
 | M7-029 Linux independent security review | BLOCKED | Waits for M7-028 and an independent reviewer. |
 | M7-030 Linux signing and update flow | BLOCKED | Waits for M7-022, M7-025 and M7-029. |
 | M7-031 Linux release candidate | BLOCKED | Waits for M7-019 through M7-030 and M7-032. |
@@ -169,7 +169,7 @@ replace the six-platform M7-001 through M7-017 tasks.
 
 ## Next critical path
 
-1. Prepare M7-028 and close M7-029 independent security review findings.
+1. Complete M7-029 independent security review.
 2. Regenerate the final artifact, API inventory, performance, SBOM and install
    evidence, then run M7-022's explicit 24-hour mixed release soak once.
 3. Complete M7-030 signing/update rehearsal and M7-031 candidate report.
