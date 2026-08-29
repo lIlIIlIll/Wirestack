@@ -6,6 +6,8 @@ import pathlib
 import shutil
 import sys
 
+from stage_source_tree import assert_source_only
+
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "release" / "release-files.txt"
@@ -50,9 +52,7 @@ def main() -> int:
             print(f"  {path}", file=sys.stderr)
         return 1
 
-    forbidden = [destination / "target", destination / "build-script-cache"]
-    if any(path.exists() for path in forbidden):
-        raise RuntimeError("release tree unexpectedly contains build artifacts")
+    assert_source_only(destination)
     print(f"release tree copied files={copied} destination={destination}")
     return 0
 

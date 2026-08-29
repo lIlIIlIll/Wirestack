@@ -103,6 +103,8 @@ scripts/json_cjfast_perf_summary.py
 scripts/json_native_accel_perf_run.py
 scripts/json_perf_baseline.py
 scripts/release_temp_tree.py
+scripts/stage_source_tree.py
+scripts/test_stage_source_tree.py
 scripts/release_package_stage.py
 scripts/check_api_inventory.py
 scripts/generate_public_api_snapshot.py

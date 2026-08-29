@@ -67,6 +67,7 @@ stage_modules() {
 
 case "$job" in
     stream-docs)
+        python3 "$repo/scripts/test_stage_source_tree.py"
         evidence="$repo/benchmarks/results/stream-v1/2026-08-28"
         extracted="$modules/stream-evidence"
         peer_extracted="$modules/stream-peer-evidence"
