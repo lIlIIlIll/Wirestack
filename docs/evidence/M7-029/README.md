@@ -106,9 +106,13 @@ renamed to that path because it targets the pre-remediation snapshot and uses
 the reviewer's original non-gating schema. The implementation agent cannot
 invent final reviewer dispositions, metadata, or independent execution evidence.
 
-GitHub required-check enforcement is not yet recorded as PASS. The hosted
-workflow has not run from the remote repository. These external settings and
-results are not treated as locally completed work.
+GitHub required-check enforcement is now recorded as PASS in
+[`github-required-check.json`](github-required-check.json). PR #94 ran the
+GitHub-hosted clean checkout on exact head
+`bd7f11bee8756ac70f74bbe5bb8d08eb492f09bf`; `clean-cangjie-build` completed
+successfully in run `33233671568`. Active ruleset `21787899` protects main,
+requires that exact check under a strict policy, prohibits deletion and
+non-fast-forward updates, and has no bypass actors.
 
 M7-029 becomes COMPLETE only after an independent reviewer submits a report for
 the current package and every High or Critical finding is Fixed or proven Not
