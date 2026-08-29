@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
 
 import m7_029_independent_security_review as review  # noqa: E402
+import latest_cangjie_nightly as nightly  # noqa: E402
 
 
 class M7029IndependentSecurityReviewTests(unittest.TestCase):
@@ -137,7 +138,11 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
             "Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7",
             workflow,
         )
-        self.assertIn('version: "1.1.0-alpha.20260817040003"', workflow)
+        self.assertIn(
+            'python3 tools/latest_cangjie_nightly.py --github-output "$GITHUB_OUTPUT"',
+            workflow,
+        )
+        self.assertIn("version: ${{ steps.cangjie-nightly.outputs.version }}", workflow)
         self.assertIn("sudo apt-get install --yes clang cmake ninja-build", workflow)
         for command in (
             "scripts/repo-doctor --json",
@@ -150,6 +155,23 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
             self.assertIn(command, workflow)
         self.assertNotIn("continue-on-error", workflow)
         self.assertNotIn("|| true", workflow)
+
+    def test_hosted_ci_nightly_resolution_fails_closed(self) -> None:
+        version = "1.3.0-alpha.20260829010011"
+        release = {
+            "name": f"Nightly Build {version}",
+            "tag_name": version,
+            "assets": [{"name": f"cangjie-sdk-linux-x64-{version}.tar.gz"}],
+        }
+        self.assertEqual(version, nightly.resolve_release(release))
+
+        for mutation in (
+            {**release, "tag_name": "different"},
+            {**release, "assets": []},
+            {**release, "schema_version": 2, "name": "unknown"},
+        ):
+            with self.assertRaises(ValueError):
+                nightly.resolve_release(mutation)
 
     def test_cjpm_build_hook_builds_both_native_dependencies(self) -> None:
         build_script = (ROOT / "build.cj").read_text(encoding="utf-8")
