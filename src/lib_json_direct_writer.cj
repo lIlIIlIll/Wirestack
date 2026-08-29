@@ -663,7 +663,7 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
     private var committed: Int64 = 0
     private var limitFailed: Bool = false
 
-    public init(out: OutputStream, config: JsonWriteConfig) {
+    init(out: OutputStream, config: JsonWriteConfig) {
         this.out = out
         this.buffer = Array<Byte>(JSON_STREAM_BUFFER_CAPACITY, repeat: 0)
         this.maxBytes = config.maxBytes

@@ -26,7 +26,8 @@ PACKAGE_ROOTS = {
     "yjson_all": ROOT / "packages/yjson_all/src",
 }
 TYPE_RE = re.compile(
-    r"^public\s+(?:(?:abstract|open|sealed)\s+)*(class|interface|struct|enum)\s+([A-Za-z_]\w*)"
+    r"^(?:(public|private|protected|internal)\s+)?"
+    r"(?:(?:abstract|open|sealed)\s+)*(class|interface|struct|enum)\s+([A-Za-z_]\w*)"
 )
 PUBLIC_DECL_RE = re.compile(
     r"^public\s+(?:(?:static|open|abstract|override|operator|unsafe)\s+)*"
@@ -126,7 +127,8 @@ def normalized_header(lines: list[str], sanitized: list[str], start: int) -> str
                 text = text[: text.find("{")]
                 return re.sub(r"\s+", " ", text).strip()
         if parens == 0 and brackets == 0:
-            if clean.endswith(",") or clean.endswith("&") or clean.endswith("where"):
+            if (clean.endswith(",") or clean.endswith("&") or clean.endswith("where")
+                    or clean.endswith("<:")):
                 continue
             return re.sub(r"\s+", " ", " ".join(parts)).strip()
     raise ValueError(f"unterminated declaration near line {start + 1}")
@@ -138,35 +140,51 @@ def cangjie_declarations(package: str, path: pathlib.Path) -> list[str]:
     sanitized = sanitize_lines(text)
     declarations: list[str] = []
     depth = 0
-    public_scopes: list[tuple[int, str, str]] = []
+    # Track every type, not only public types. Otherwise an explicitly public
+    # interface implementation inside a private class looks like a top-level
+    # declaration and leaks into the API snapshot.
+    type_scopes: list[tuple[int, str, str, bool]] = []
+    pending_type: tuple[str, str, bool] | None = None
     for index, clean_line in enumerate(sanitized[: len(lines)]):
         stripped = clean_line.strip()
-        while public_scopes and depth < public_scopes[-1][0]:
-            public_scopes.pop()
-        owner = public_scopes[-1] if public_scopes else None
-        is_explicit_public = PUBLIC_DECL_RE.match(stripped) is not None
+        while type_scopes and depth < type_scopes[-1][0]:
+            type_scopes.pop()
+        owner = type_scopes[-1] if type_scopes else None
+        is_direct_type_member = owner is not None and depth == owner[0]
+        is_public_owner = is_direct_type_member and owner[3]
+        is_explicit_public = (
+            PUBLIC_DECL_RE.match(stripped) is not None
+            and (owner is None or is_public_owner)
+        )
         is_interface_member = (
-            owner is not None
+            is_public_owner
             and owner[1] == "interface"
-            and depth == owner[0]
             and INTERFACE_MEMBER_RE.match(stripped) is not None
         )
         is_enum_case = (
-            owner is not None
+            is_public_owner
             and owner[1] == "enum"
-            and depth == owner[0]
             and stripped.startswith("|")
         )
         if is_explicit_public or is_interface_member or is_enum_case:
             signature = normalized_header(lines, sanitized, index)
-            owner_name = owner[2] if owner is not None and depth == owner[0] else "<top-level>"
+            owner_name = owner[2] if is_direct_type_member else "<top-level>"
             declarations.append(f"{package}|{path.relative_to(ROOT)}|{owner_name}|{signature}")
 
-        type_match = TYPE_RE.match(stripped)
         opens = clean_line.count("{")
         closes = clean_line.count("}")
-        if type_match and opens > 0:
-            public_scopes.append((depth + 1, type_match.group(1), type_match.group(2)))
+        type_match = TYPE_RE.match(stripped)
+        declared_type: tuple[str, str, bool] | None = None
+        if type_match:
+            declared_public = type_match.group(1) == "public"
+            externally_visible = declared_public and (owner is None or is_public_owner)
+            declared_type = (type_match.group(2), type_match.group(3), externally_visible)
+        opening_type = declared_type if declared_type is not None else pending_type
+        if opening_type is not None and opens > 0:
+            type_scopes.append((depth + 1, opening_type[0], opening_type[1], opening_type[2]))
+            pending_type = None
+        elif declared_type is not None:
+            pending_type = declared_type
         depth += opens - closes
     return declarations
 
