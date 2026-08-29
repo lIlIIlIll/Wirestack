@@ -1,0 +1,48 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-08-29T02:38:10.325167Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M7-028/linux_x86_64/review-package.json",
+      "sha256": "5bebbc83660e56aea1b68d2276003c64b2cd9f74daf65c951ea62ebe01161545",
+      "source_task": "M7-028"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M7-028/task-check.json",
+      "sha256": "610b90f65a049ff6b6f21a4f9e56651d7d311a8889a3d8d323b6cf78cc64b08f",
+      "source_task": "M7-028"
+    }
+  ],
+  "revision": "1985913178631b001e8079313400b7855cd06f01",
+  "schema_version": 1,
+  "source_sha256": {
+    ".gitignore": "69c23ae454002268818e451619c260fd589b3c395dceaf5386f56f6fd39e48c9",
+    "docs/evidence/M7-028/README.md": "78c5f2167776531ecf7631847dfd2c7f5f80dc9e5f61a5514e418cc90a7b25d9",
+    "docs/evidence/M7-028/test-plan.md": "1756b18b04d8421549164531ef7c615d13d66879488f92ef45857c10cb084617",
+    "docs/security/review/linux-1.0/README.md": "86d93dde06874bef309a7f3cf3444ab5924fb4ebaa08c3963cc0d8fb93ee950e",
+    "docs/security/review/linux-1.0/architecture.md": "a80494d72365ccd17a1514010e432ea80654ac06d1298002c29dc1dd25a10090",
+    "docs/security/review/linux-1.0/evidence-index.json": "19257a4f9d8571cdaea069beb571efa0e36e660563b25d90a83ce54345078b6c",
+    "docs/security/review/linux-1.0/keys-trust-and-data.md": "522114ac5b4362bfb2b3b319c6e0495466a65cce17ed341b2e6775527c957324",
+    "docs/security/review/linux-1.0/known-limitations.md": "77701f7233c060fdf75c2332eba2c89fb287b8c00fe9c6bb8d0cbd20c0bfcba1",
+    "docs/security/review/linux-1.0/parsers-and-limits.md": "1596462c6250b7613a000b24c411999204a2b6d0daade916fb19aad8973880ee",
+    "docs/security/review/linux-1.0/provider-and-native-boundary.md": "6fcc8f22e8a42379e5394d5a3aae7db1be36510700dd626b6804116f5af0feca",
+    "docs/security/review/linux-1.0/reproduce.md": "95694987355a9543402ebc9a553619b4e7927a093b3193f2bbfb2192457a662a",
+    "scripts/check-m7-028-security-review": "db26c2c3988fdcfd377e1cf82606f108f40c78b59c785f05a71245ec6365eddc",
+    "tools/m7_028_security_review_package.py": "969945b701f57f763391ae810cac53ff6dfe304d05ae31db4f5aa383c771e648",
+    "tools/tasks/M7-028.json": "f1374e73261232ec2acc43218139dc8695a880c70ab78e8106b10d5724fe615f",
+    "tools/tests/test_m7_028_security_review_package.py": "a8a2b7de392703d6ba00994cde9ff04aa54d7730652a458b765e670490b4ca7c"
+  },
+  "source_task": "M7-028",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}
