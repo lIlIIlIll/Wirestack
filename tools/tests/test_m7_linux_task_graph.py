@@ -62,7 +62,7 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("当前发布相关任务总数：**198**", backlog)
         self.assertIn("全部已记录任务总数：**217**", backlog)
 
-    def test_status_exposes_ready_work_without_a_global_completion_claim(self) -> None:
+    def test_status_exposes_remaining_linux_work_without_a_global_completion_claim(self) -> None:
         status = self.read("docs/planning/status.md")
         linux = self.read("docs/planning/linux-status.md")
         self.assertIn("| M7-018 | COMPLETE |", status)
@@ -81,7 +81,9 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("| M7-027 | COMPLETE |", status)
         self.assertIn("docs/evidence/M7-027/README.md", status)
         self.assertIn("| M7-032 | COMPLETE |", status)
-        self.assertIn("| M7-028 | READY |", status)
+        self.assertIn("| M7-028 | COMPLETE |", status)
+        self.assertIn("| M7-029 | COMPLETE |", status)
+        self.assertIn("| M7-030 | BLOCKED |", status)
         self.assertIn("docs/evidence/M7-032/README.md", status)
         self.assertIn("do not\nchange the status of the six-platform M7-001 through M7-017 tasks", status)
         self.assertIn("run M7-022's explicit 24-hour mixed release soak once", linux)
