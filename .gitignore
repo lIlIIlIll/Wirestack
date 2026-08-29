@@ -17,6 +17,9 @@ __pycache__/
 !docs/evidence/M7-022/linux_x86_64/*.json
 !docs/evidence/M7-032/*.json
 !docs/evidence/M7-032/linux_x86_64/*.json
+!docs/evidence/M7-028/*.json
+!docs/evidence/M7-028/linux_x86_64/*.json
+!docs/security/review/linux-1.0/*.json
 *.py[cod]
 
 # Durable, checksum-pinned evidence overrides user-level *.json ignores.
