@@ -2,7 +2,7 @@
 
 ## Status
 
-INCOMPLETE
+COMPLETE
 
 ## Independent audit intake
 
@@ -13,8 +13,8 @@ acceptance boundary are recorded in [`audit-intake.json`](audit-intake.json).
 [`current-release-blockers.json`](current-release-blockers.json) carries the two
 Critical and eleven High findings forward against the current review target.
 
-The audit is valid independent static-analysis input. It is not renamed to
-`independent-review.json` and is not treated as a final PASS: its baseline is
+The audit is valid independent static-analysis input. It was not renamed to
+`independent-review.json` or treated as the final PASS: its baseline is
 `49f3094`, it records that independent build/test execution was not completed,
 and it lacks the reviewer metadata and current M7-028 digest binding required by
 the M7-029 contract.
@@ -71,7 +71,8 @@ M7-028 commit `e19cd8e4a07e84e4da0a0a8648919b86e08684f8` and returned FAIL with
 one Critical, ten High, and nine Medium findings. That result is remediation
 input, not the final M7-029 report. The current implementation closes the
 Critical and High source findings with focused regressions; a fresh isolated
-review of the frozen candidate must independently confirm those dispositions.
+review of the frozen candidate was therefore required to confirm those
+dispositions.
 
 The second process-isolated review is preserved unchanged under
 [`second-isolated-review/`](second-isolated-review/). It reviewed candidate
@@ -81,32 +82,45 @@ remote GitHub enforcement and `WS-RES-001` still allowed unbounded accumulation
 of quarantined pools. The resolver now reserves process-wide capacity for at
 most eight live pools and 64 workers. A native wrapped-`getaddrinfo` probe proves
 that the ninth quarantined pool fails closed and that capacity returns after
-the blocked calls exit. A fresh review is still required after this source
-change.
+the blocked calls exit.
+
+The final process-isolated review is recorded in
+[`independent-review.json`](independent-review.json), with its unchanged human
+summary under
+[`final-isolated-review/review-summary.md`](final-isolated-review/review-summary.md)
+and the repository validator result under
+[`linux_x86_64/review-validation.json`](linux_x86_64/review-validation.json).
+It reviewed frozen candidate
+`ea493f13fefa520e9c1f2e08b9b068dc26c28082` and returned PASS: both Critical
+and all twelve High findings are Fixed, with no unresolved Critical or High
+finding. Eight Medium findings remain Open and are retained as non-release-
+blocking follow-up risk. The reviewer inherited no implementation history and
+made no repository changes. Its stated limits are also retained: GitHub remote
+state came from the orchestrator, the frozen snapshot had no `.git` metadata,
+and a fresh AWS-LC network fetch was unavailable because DNS resolution failed.
 
 Current validation includes a 32-path, 30-scenario, 28-test plan with no matrix
-issues; 13/13 M7-029 review-contract tests; 6/6 release, license, and SBOM
+issues; 13/13 preserved M7-029 review-contract tests; 6/6 release, license, and SBOM
 tests; a clean-CJPM native dependency hook check; a delayed-`getaddrinfo`
 native gate with 9/9 focused Cangjie cases and a PASS process-wide capacity
 probe; an architecture guard with zero violations;
 and the complete serial non-Performance Cangjie suite with 570 PASS, 23 SKIPPED,
 zero FAIL/ERROR out of 593. SKIPPED cases are not counted as PASS. The final
-independent-review command still returns a non-PASS result because no conforming
-current-target PASS review exists. Digest-bound raw outputs are under
+independent-review command accepts the conforming current-target PASS review.
+Digest-bound raw outputs are under
 [`regressions/`](regressions/), and
 [`remediation-validation.json`](remediation-validation.json) records their
 exact results and SHA-256 values.
 
-## Remaining acceptance blockers
+## Acceptance closure
 
-No conforming final independent reviewer report exists at
-`docs/evidence/M7-029/independent-review.json`. The local gate therefore still
-returns a non-PASS result. The preserved initial review is intentionally not
-renamed to that path because it targets the pre-remediation snapshot and uses
-the reviewer's original non-gating schema. The implementation agent cannot
-invent final reviewer dispositions, metadata, or independent execution evidence.
+The final independent reviewer report exists at
+`docs/evidence/M7-029/independent-review.json`, is bound to the frozen candidate,
+and passes the repository review validator. No Critical or High finding remains
+open. The preserved earlier reviews remain historical remediation inputs and
+are not substituted for the final report.
 
-GitHub required-check enforcement is now recorded as PASS in
+GitHub required-check enforcement is recorded as PASS in
 [`github-required-check.json`](github-required-check.json). PR #94 ran the
 GitHub-hosted clean checkout on exact head
 `bd7f11bee8756ac70f74bbe5bb8d08eb492f09bf`; `clean-cangjie-build` completed
@@ -114,9 +128,27 @@ successfully in run `33233671568`. Active ruleset `21787899` protects main,
 requires that exact check under a strict policy, prohibits deletion and
 non-fast-forward updates, and has no bypass actors.
 
-M7-029 becomes COMPLETE only after an independent reviewer submits a report for
-the current package and every High or Critical finding is Fixed or proven Not
-Applicable. Fixed findings need digest-bound, executed regression evidence.
+The independent review, focused remediation evidence, hosted clean-build check,
+and active required-check ruleset satisfy M7-029. This completion does not make
+stale release-artifact evidence current; those gates remain assigned to the
+subsequent final-candidate sequence.
+
+## Repository-wide gate boundary
+
+The final `scripts/check-task M7-029 --json` report is PASS for all eight task
+commands. One earlier attempt failed closed when concurrent host compilation
+consumed the resolver profile's 60-second budget before the delay shim observed
+any call; the isolated resolver rerun and the complete task rerun both passed,
+so the failed attempt was not reused as acceptance evidence.
+
+The final compatibility entry point `scripts/check` ran and returned exit 1:
+181 Python tests reported 9 failures and 6 errors. The failures are the expected
+fail-closed stale M7-019, M7-020, M7-021, M7-025, M7-026, and M7-028 release-
+evidence checks after M7-032 and M7-029 changed production inputs, plus an old
+M7 graph assertion that still expects M7-028 to be READY. M7-029's own 14
+review-contract tests passed in that run. Regenerating the final artifact,
+release audit, SBOM, API baseline, and review package belongs to the subsequent
+release-candidate sequence and is not claimed by this task.
 
 ## Deliberately unrun gates
 

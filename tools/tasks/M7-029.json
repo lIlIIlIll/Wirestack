@@ -114,7 +114,6 @@
   "platforms": ["linux-x86_64-glibc"],
   "required_evidence": [
     "docs/evidence/M7-029/evidence.json",
-    "docs/evidence/M7-029/independent-review.json",
     "docs/evidence/M7-029/github-required-check.json",
     "docs/evidence/M7-029/linux_x86_64/review-validation.json",
     "docs/evidence/M7-029/task-check.json"
@@ -134,6 +133,7 @@
     "docs/evidence/M7-029/initial-isolated-review/review-summary.md",
     "docs/evidence/M7-029/second-isolated-review/independent-review.json",
     "docs/evidence/M7-029/second-isolated-review/review-summary.md",
+    "docs/evidence/M7-029/final-isolated-review/review-summary.md",
     "docs/evidence/M7-029/final-review-regressions/cjpm-check-missing-resolver.log",
     "docs/evidence/M7-029/final-review-regressions/focused-python-security-contracts.log",
     "docs/evidence/M7-029/final-review-regressions/http-facade.log",

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "task_id": "M7-029",
-  "generated_at_utc": "2026-08-29T06:09:52Z",
+  "generated_at_utc": "2026-08-29T06:17:27Z",
   "platform": "linux-x86_64-glibc",
-  "status": "PASS_WITH_FINAL_REVIEW_PENDING",
+  "status": "PASS",
   "checks": [
     {
       "id": "review-contract-tests",
@@ -86,9 +86,23 @@
     "summary_path": "docs/evidence/M7-029/second-isolated-review/review-summary.md",
     "summary_sha256": "7638911ec234fd6b67d03113dcbaf01e6c2de5cd720de90dfc588e0a0e5f9097"
   },
-  "final_review": "PENDING",
+  "final_review": {
+    "target_commit": "ea493f13fefa520e9c1f2e08b9b068dc26c28082",
+    "conclusion": "PASS",
+    "critical_fixed": 2,
+    "high_fixed": 12,
+    "medium_open": 8,
+    "open_critical_or_high": 0,
+    "report_path": "docs/evidence/M7-029/independent-review.json",
+    "report_sha256": "8b43d2359c37456bfeb17e311e6462b8b00be375a0ab62133d1e13baa4c3cc56",
+    "summary_path": "docs/evidence/M7-029/final-isolated-review/review-summary.md",
+    "summary_sha256": "ea7363b4233e4fa2292bc00cecc5d75622ac3527c6fed6ffd754eb6d5c44aaa9",
+    "validation_path": "docs/evidence/M7-029/linux_x86_64/review-validation.json",
+    "validation_sha256": "e60c466389a88ac2ca9832c4a8cecae348a7845de6acacf18cad2c3c7f67bd90"
+  },
   "non_claims": [
-    "The initial isolated review predates the remediation candidate and is not a final PASS.",
+    "The initial and second isolated reviews predate the final candidate and are remediation inputs, not the final PASS.",
+    "Eight Medium findings remain Open and are not represented as fixed.",
     "The repository-wide scripts/check remains non-PASS because prior release evidence is intentionally stale after production changes.",
     "No one-hour SSE profile or 86,400-second release soak was run."
   ]
