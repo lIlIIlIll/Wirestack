@@ -21,5 +21,11 @@ steps, impact, evidence, and disposition. A Fixed finding must name its fix and
 an executed regression command. Open High or Critical findings block release.
 
 The report must state reviewer identity, review dates, independence from the
-implementation, and any conflicts. Compatibility with experimental pre-1.0 APIs
-is not part of the review or release decision.
+implementation, review mode, and every conflict. `External` is used for a human
+or organization outside the implementation process. `ProcessIsolatedAgent` is
+allowed only when the agent inherits no implementation context, reviews a clean
+detached snapshot, does not implement or modify the reviewed production code,
+and discloses its relationship to the repository owner and implementation
+orchestrator. The implementation agent cannot review its own changes under
+either mode. Compatibility with experimental pre-1.0 APIs is not part of the
+review or release decision.

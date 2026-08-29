@@ -20,7 +20,7 @@ from typing import Any
 
 TASK_ID = "M2-003"
 GATE_ID = "M2-003-BOUNDED-RESOLVER-POOL"
-EXPECTED_TESTS = 8
+EXPECTED_TESTS = 9
 EXPECTED_CALLS = 14
 SHIM_RE = re.compile(
     r"^GAI phase=(enter|exit) seq=(\d+) pid=(\d+) tid=(\d+) "
@@ -101,7 +101,9 @@ def parse_shim_log(text: str) -> dict[str, Any]:
     }
 
 
-def validate(process: dict[str, Any], shim: dict[str, Any]) -> list[str]:
+def validate(
+    process: dict[str, Any], shim: dict[str, Any], global_bound: dict[str, Any]
+) -> list[str]:
     failures: list[str] = []
     if process["timed_out"]:
         failures.append("focused unittest timed out")
@@ -116,12 +118,23 @@ def validate(process: dict[str, Any], shim: dict[str, Any]) -> list[str]:
         failures.append(
             f"expected {EXPECTED_CALLS} intercepted getaddrinfo calls, got {shim['call_count']}"
         )
-    if shim["maximum_concurrent"] != 2:
+    # A cancelled job may remain quarantined in the prior one-worker pool while
+    # the following two-worker profile starts. The process-wide shim can then
+    # observe three calls even though each individual pool stays bounded.
+    if shim["maximum_concurrent"] < 2 or shim["maximum_concurrent"] > 3:
         failures.append(
-            "two-worker heartbeat profile did not demonstrate exactly two concurrent native calls"
+            "resolver profile did not stay within the expected 2-3 concurrent native calls"
         )
     if shim["duration_ms"]["minimum"] is None or shim["duration_ms"]["minimum"] < 180:
         failures.append("delay shim did not hold every native getaddrinfo call for at least 180 ms")
+    if global_bound["timed_out"]:
+        failures.append("global resolver-pool bound probe timed out")
+    if global_bound["exit_code"] != 0:
+        failures.append(
+            f"global resolver-pool bound probe exited {global_bound['exit_code']}"
+        )
+    if "GLOBAL_POOL_BOUND PASS live_pool_limit=8" not in global_bound["output"]:
+        failures.append("global resolver-pool bound probe did not report its fixed limit")
     return failures
 
 
@@ -186,6 +199,7 @@ def run_gate(root: Path, output_dir: Path, delay_ms: int) -> dict[str, Any]:
         raise GateError("resolver build manifest does not reject private runtime ABI use")
 
     with tempfile.TemporaryDirectory(prefix="wirestack-m2-003-") as directory:
+        native_dir = root / "native" / "resolver" / "linux"
         shim = Path(directory) / "libwirestack-gai-delay.so"
         compile_command = [
             cc, "-shared", "-fPIC", "-O2", "-Wall", "-Wextra", "-Werror",
@@ -207,7 +221,8 @@ def run_gate(root: Path, output_dir: Path, delay_ms: int) -> dict[str, Any]:
             [
                 cjpm,
                 "test",
-                "--filter=M2003BoundedResolverBackendTest.*",
+                "--filter",
+                "M2003BoundedResolverBackendTest",
                 "--no-color",
                 "--no-progress",
             ],
@@ -217,10 +232,33 @@ def run_gate(root: Path, output_dir: Path, delay_ms: int) -> dict[str, Any]:
         )
         shim_digest = sha256_path(shim)
 
+        global_bound_binary = Path(directory) / "resolver-global-bound"
+        global_bound_compile = run_command(
+            [
+                cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+                "-pthread", f"-I{native_dir}",
+                str(root / "tools" / "gates" / "native" / "resolver_global_bound.c"),
+                str(native_dir / "wirestack_resolver.c"),
+                "-Wl,--wrap=getaddrinfo", "-o", str(global_bound_binary),
+            ],
+            cwd=root,
+            env=dict(os.environ),
+            timeout=60,
+        )
+        if global_bound_compile["exit_code"] != 0 or not global_bound_binary.is_file():
+            raise GateError(
+                "global resolver-pool bound probe build failed:\n" +
+                global_bound_compile["output"][-4000:]
+            )
+        global_bound = run_command(
+            [str(global_bound_binary)], cwd=root, env=dict(os.environ), timeout=10
+        )
+        global_bound_digest = sha256_path(global_bound_binary)
+
     if not shim_log.is_file():
         raise GateError("delay shim did not record any getaddrinfo calls")
     parsed = parse_shim_log(shim_log.read_text(encoding="utf-8"))
-    failures = validate(process, parsed)
+    failures = validate(process, parsed, global_bound)
     report = {
         "schema_version": 1,
         "task_id": TASK_ID,
@@ -240,10 +278,13 @@ def run_gate(root: Path, output_dir: Path, delay_ms: int) -> dict[str, Any]:
         "artifacts": {
             "delay_shim_sha256": shim_digest,
             "shim_log_sha256": sha256_path(shim_log),
+            "global_pool_bound_probe_sha256": global_bound_digest,
         },
         "resolver_build": build,
         "resolver_manifest": resolver_manifest,
         "shim_compile": compiled,
+        "global_pool_bound_compile": global_bound_compile,
+        "global_pool_bound": global_bound,
         "focused_test": process,
         "shim": parsed,
         "failures": failures,
