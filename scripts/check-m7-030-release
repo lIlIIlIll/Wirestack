@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec python3 "$repo_root/tools/m7_030_linux_release.py" rehearse \
+  --work-dir "$repo_root/build/m7-030" \
+  --output "$repo_root/docs/evidence/M7-030/local-rehearsal.json"
