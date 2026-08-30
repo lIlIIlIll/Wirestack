@@ -1,0 +1,66 @@
+{
+  "build": {
+    "binary_bytes": 5355008,
+    "binary_sha256": "4a4ff40f30424a13032ce8e716559d78ca2d837b0265cad670493c84d0dd27a5",
+    "runtime_loader_library_strings": [],
+    "static_archives": [
+      {
+        "bytes": 10148742,
+        "name": "libssl.lib",
+        "sha256": "e48701f83f4d2c292a9a0a01e3f2577522049ddf11f2ade0e703fce9a1e2097d"
+      },
+      {
+        "bytes": 55264226,
+        "name": "libcrypto.lib",
+        "sha256": "bbb255b3ad6e0e164da3b95d98c4fa2400e1381616363775a22cd1dbda9f3d49"
+      }
+    ],
+    "system_tls_dependencies": []
+  },
+  "build_log_sha256": "b1c2baee87f8aa4321b794642299f3d8ae86d2e800b0dbd604b67f30985b9279",
+  "capabilities": {
+    "caller_cancellation": "PASS",
+    "close_notify": "PASS",
+    "custom_ca": "PASS",
+    "external_signer": "BLOCKED",
+    "mtls": "PASS",
+    "negative_hostname": "PASS",
+    "negative_untrusted_ca": "PASS",
+    "partial_io_backpressure": "PASS",
+    "repeated_cleanup": "PASS",
+    "session_resumption": "PASS",
+    "sni_hostname_alpn": "PASS",
+    "tls12": "PASS",
+    "tls13": "PASS",
+    "truncation": "PASS"
+  },
+  "execution": {
+    "image_os": "win25-vs2026",
+    "image_version": "20260824.214.3",
+    "python": "3.12.10",
+    "repository_revision": "7eccd9042b38000601fd2263bfb0fe8f148333aa",
+    "runner_arch": "X64",
+    "runner_os": "Windows"
+  },
+  "finished_at": "2026-08-30T18:25:12.728448+00:00",
+  "metrics": {
+    "failure_cleanup_cycles": 0,
+    "repeated_cleanup_cycles": 10000
+  },
+  "notes": [
+    "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
+  ],
+  "platform": "windows-x86_64",
+  "poc_exit_code": 0,
+  "provider": "openssl",
+  "schema_version": 2,
+  "source": {
+    "archive": "openssl-3.6.3.tar.gz",
+    "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
+    "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
+    "kind": "archive"
+  },
+  "started_at": "2026-08-30T18:15:37.096052+00:00",
+  "status": "PARTIAL",
+  "task_id": "M0-016"
+}
