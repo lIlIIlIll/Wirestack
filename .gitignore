@@ -46,6 +46,8 @@ __pycache__/
 !tools/tls_provider/*.json
 !docs/evidence/M3-030/*.json
 !docs/evidence/M7-029/**/*.json
+!docs/evidence/M7-030/*.json
+!docs/evidence/M7-030/linux_x86_64/*.json
 
 # Local tool state
 .cjpm/
