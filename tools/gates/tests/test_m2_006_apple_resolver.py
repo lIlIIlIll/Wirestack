@@ -37,6 +37,10 @@ def valid_report(mode: str = "macos") -> dict[str, object]:
             "probe_sha256": "a" * 64,
             "bundle_probe_sha256": "b" * 64,
             "install": {"timed_out": False, "exit_code": 0},
+            "runtime_libraries": [{
+                "path": "Frameworks/libcangjie-runtime.dylib",
+                "sha256": "c" * 64,
+            }],
         } if mode == "ios-simulator" else None,
     }
 
@@ -81,6 +85,7 @@ class M2006AppleResolverGateTests(unittest.TestCase):
             "probe_sha256": "a" * 64,
             "bundle_probe_sha256": "b" * 64,
             "install": {"timed_out": False, "exit_code": 1},
+            "runtime_libraries": [],
         }
         failures = gate.validate_report(report, "abc", "ios-simulator")
         self.assertIn("REPORT:SIMULATOR_DEVICE", failures)
@@ -92,13 +97,30 @@ class M2006AppleResolverGateTests(unittest.TestCase):
         self.assertEqual("launch", command[2])
         self.assertNotIn("spawn", command)
         self.assertIn("--console", command)
-        source = Path(gate.__file__).read_text(encoding="utf-8")
-        self.assertIn('"--static"', source)
+        self.assertIn("-rpath @executable_path/Frameworks", gate.ios_link_options())
         self.assertEqual(
             ["-mios-simulator-version-min=17.5"],
             gate.deployment_flags("ios-simulator-arm64"),
         )
         self.assertEqual([], gate.deployment_flags("macos-arm64"))
+
+    def test_ios_runtime_libraries_use_only_the_simulator_sdk_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            runtime = root / "runtime/lib/ios_simulator_aarch64_cjnative"
+            runtime.mkdir(parents=True)
+            expected = runtime / "libcangjie-runtime.dylib"
+            expected.write_bytes(b"runtime")
+            (runtime / "libcangjie-std-core.dylib").write_bytes(b"std")
+            host = root / "runtime/lib/darwin_aarch64_cjnative"
+            host.mkdir(parents=True)
+            (host / "libcangjie-runtime.dylib").write_bytes(b"host")
+            libraries = gate.ios_runtime_libraries({"CANGJIE_HOME": str(root)})
+            self.assertEqual(
+                ["libcangjie-runtime.dylib", "libcangjie-std-core.dylib"],
+                [path.name for path in libraries],
+            )
+            self.assertIn(expected, libraries)
 
     def test_rejects_skipped_timeout_and_fixture_not_bound(self) -> None:
         report = valid_report()
