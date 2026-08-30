@@ -623,6 +623,10 @@ int32_t wirestack_tls_identity_validate_spki(
         : WIRESTACK_TLS_PROVIDER_CERTIFICATE_INVALID;
 }
 
+uint32_t wirestack_tls_provider_abi_version(void) {
+    return UINT32_C(1);
+}
+
 int32_t wirestack_tls_provider_create(uint64_t *out_handle) {
     struct wirestack_tls_provider *provider;
     time_t created_at;

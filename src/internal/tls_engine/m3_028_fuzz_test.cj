@@ -118,7 +118,7 @@ private func m7023TlsNibble(value: Byte): Byte {
 }
 
 private func m3028ClientHello(): Array<Byte> {
-    let provider = AwsLcTlsProvider()
+    let provider = NativeTlsProvider()
     let engine = provider.createEngine(
         TlsEngineRole.Client,
         TlsSecurityPolicy.forProfile(TlsSecurityProfile.Modern)
@@ -157,12 +157,12 @@ private func m3028Mutate(source: Array<Byte>, target: String, ordinal: Int64): A
 }
 
 private func m3028ClassifyServerInput(input: Array<Byte>): String {
-    let provider = AwsLcTlsProvider()
+    let provider = NativeTlsProvider()
     let identity = tlsTestLocalIdentity()
     let context = TlsServerContext.builder(
-        provider.manifest(), provider.linuxCapabilities()
+        provider.manifest(), provider.capabilities()
     ).identity(identity).build()
-    let engine = provider.createServerEngine(context)
+    let engine = provider.createServerEngineWithTrustLocation(context)
     try {
         let accepted = engine.feedCiphertext(ByteSpan(input))
         if (accepted != input.size) { return "bounded-input" }
@@ -183,15 +183,15 @@ private func m3028ClassifyServerInput(input: Array<Byte>): String {
 }
 
 private func m3028ClassifyCertificate(input: Array<Byte>): String {
-    var provider: ?AwsLcTlsProvider = None<AwsLcTlsProvider>
+    var provider: ?NativeTlsProvider = None<NativeTlsProvider>
     try {
         let certificate = DerCertificate(input)
-        let created = AwsLcTlsProvider()
+        let created = NativeTlsProvider()
         provider = Some(created)
         let context = TlsClientContext.builder(
-            created.manifest(), created.linuxCapabilities()
+            created.manifest(), created.capabilities()
         ).trust(TrustPolicy.customRoots(CertificateChain([certificate]))).build()
-        let engine = created.createClientEngine(
+        let engine = created.createClientEngineWithTrustLocation(
             context,
             ReferenceIdentity.Dns(HostName("example.com")),
             serverName: Some(HostName("example.com"))

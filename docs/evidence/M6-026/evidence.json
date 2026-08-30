@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-28T05:40:44.802713Z",
+  "generated_at_utc": "2026-08-29T10:00:58.030551Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -10,35 +10,35 @@
   "reports": [
     {
       "acceptance_status": "PASS",
-      "path": "docs/evidence/M6-026/linux_x86_64/concurrent-bodies.json",
-      "sha256": "fa2a4bf45f318ace174a03cd2fa51a90afa01de55976822d3316c55afd3a96d7",
+      "path": "docs/evidence/M6-026/task-check.json",
+      "sha256": "1c2635cd2b97cf8351852e7bc0202d284be44b3e2a67c86a83748e6d6c4a6297",
       "source_task": "M6-026"
     },
     {
       "acceptance_status": "PASS",
-      "path": "docs/evidence/M6-026/task-check.json",
-      "sha256": "f9d739bcb51e62db66934762a224c2b2b7e8583a4d7875bb51e90691c0f52f7c",
+      "path": "docs/evidence/M6-026/linux_x86_64/concurrent-bodies.json",
+      "sha256": "4aa1c96906865e69806648416cc4a66ee5320674c7de11180e8b6c8478ea0ae9",
       "source_task": "M6-026"
     }
   ],
-  "revision": "8c88d90bf9341a66d2b1474cd9a74e0af5f6ed22",
+  "revision": "d5d19ab84afd07c0abd142e59dde7a93f93c903c",
   "schema_version": 1,
   "source_sha256": {
-    ".gitignore": "1d21fa66de181f7e9e55cdc096641c2c3eb99a757f284e58293d3964b1ae08b3",
+    ".gitignore": "a597755755bb3087cec35cf2a83b5519f196281cf5f70b870e10bc496faf063c",
     "docs/evidence/M6-026/test-plan.md": "0b9ea65f50bbe8b5d9bd0dfccea4aeb1af98ffd5cd911c18f1a14026aed93f5e",
-    "docs/planning/implementation-backlog.md": "b0be7da7b65d299c49d9a8befa862200a161b6f2908624b64d5502488c8776a7",
-    "docs/planning/linux-status.md": "47a8dabe0955e273bdfb46c2cfd4d5ddb85a27d02bfec33a29779ad19e89c233",
-    "docs/planning/status.md": "bedbc4bc05fd632f1c49166c0c21af9510af0e2be7ad956ed77578cb6b5c04df",
-    "src/http/facade_test.cj": "84a41d25ce0eada077152e81cef06eb48e956ffbc2fbe58f48ffbb50a305bf44",
-    "src/internal/http2/client_connection.cj": "88e705041e8ac304f49c10ee521a9aa71f4c22aca07c7950a42f3ed2efa6dede",
+    "docs/planning/implementation-backlog.md": "930b08c926a7c3744e0a7ffc73d67620ec2a8112d413247c95b9a8831e7d6f6a",
+    "docs/planning/linux-status.md": "3b972099653574dbbf5e857e6e8873c736c9c32ce1083f7bd51acceea99bdd72",
+    "docs/planning/status.md": "5c701a8dd3bbf97f07fa9aae5e8f63f18a2caffd681ea9bab047bbd64e441a58",
+    "src/http/facade_test.cj": "0aad926017175da1f2dd8233c475e574c4f656368cd0a8325639ed957754c05e",
+    "src/internal/http2/client_connection.cj": "fa6495f4639eaec38b0920a5d095b2c0848b08e65af1fbaae913568726659e5e",
     "src/internal/http2/client_connection_test.cj": "3c82b461858747eb2a72d897530f4d4708772f0652d85c36a5ed6447fc9f9a27",
     "src/internal/http2/reader_loop.cj": "62d7de89f47dde4f88509202e964919ad791b8830afa03eb12b4fe31ad208f83",
-    "src/internal/http2/server_connection.cj": "df3130b47de4840b3739d02f9d937d66134e4c8106c3069b3e9f5672aa7e3319",
+    "src/internal/http2/server_connection.cj": "1904a868026365e70c520c89547ed92ec73308f309feb7d5905ebf206abc4672",
     "tools/m6_026_http2_concurrent_bodies.py": "f01a8cd1bd9541f0f8976d788b1d0ea896e2b790321b01721cf100983807d622",
     "tools/tasks/M6-026.json": "a231eaa92efb88bc97e4a889f39e757f6e1f3e5743e0389c351c2f2ad2de1d8a",
     "tools/tasks/M7-022.json": "37e6ae6e84fca4540cef4d43abde09ea6f26892d632cba674763be38ffa2f0e8",
     "tools/tests/test_m6_026_http2_concurrent_bodies.py": "5d025e00ceec5ea8c7a1133f6444dcc8d2632cb0336497bc7cb4e1f4b6f9fabe",
-    "tools/tests/test_m7_linux_task_graph.py": "7c38edf184399998fdd7cb40e03ba8b145ef0e0f83a3959790e1d37bf851da7f"
+    "tools/tests/test_m7_linux_task_graph.py": "43b8820fc7ec6860a9add08b8efc02fa1b89bcf206a35d995ad789d4c79bc779"
   },
   "source_task": "M6-026",
   "toolchain": {

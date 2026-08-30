@@ -37,7 +37,7 @@ public class HttpClientTlsConfig <: Resource {
     internal func createHandshaker(): http1.Http1TlsHandshaker {
         synchronized(mutex) {
             if (closed) { throw IllegalStateException("HTTP client TLS configuration is closed") }
-            http1.AwsLcHttp1TlsHandshaker.createWithDer(
+            http1.DefaultHttp1TlsHandshaker.createWithDer(
                 cloneHttpClientDerChain(trustRoots),
                 clientCertificateChainDer: cloneHttpClientDerChain(clientCertificates),
                 clientPrivateKeyPkcs8Der: clientPrivateKey.clone(),
@@ -52,7 +52,7 @@ public class HttpClientTlsConfig <: Resource {
     internal func createAlpnHandshaker(): http1.HttpAlpnTlsHandshaker {
         synchronized(mutex) {
             if (closed) { throw IllegalStateException("HTTP client TLS configuration is closed") }
-            http1.AwsLcHttp1TlsHandshaker.createWithDerAlpn(
+            http1.DefaultHttp1TlsHandshaker.createWithDerAlpn(
                 cloneHttpClientDerChain(trustRoots),
                 clientCertificateChainDer: cloneHttpClientDerChain(clientCertificates),
                 clientPrivateKeyPkcs8Der: clientPrivateKey.clone(),

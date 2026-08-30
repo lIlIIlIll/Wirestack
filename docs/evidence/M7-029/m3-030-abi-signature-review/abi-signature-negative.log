@@ -1,0 +1,10 @@
+bounded native ABI signature negative reproduction
+root=/tmp/wirestack-m3-030-final-review.1UwBFf/repo
+command=PYTHONDONTWRITEBYTECODE=1 python3 in-memory TLS_FOREIGN_FUNCTION_RE and validate_symbol_set reproduction
+original_declaration=foreign func wirestack_tls_provider_destroy(handle: UInt64): Unit
+incompatible_declaration=foreign func wirestack_tls_provider_destroy(handle: Int32): UInt64
+import_symbol_sets_equal=true
+abi_entries_encode_prototypes=false
+symbol_set_validation=PASS
+false_negative_reproduced=true
+exit_code=0

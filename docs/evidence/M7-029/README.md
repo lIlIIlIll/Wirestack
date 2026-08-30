@@ -84,28 +84,30 @@ most eight live pools and 64 workers. A native wrapped-`getaddrinfo` probe prove
 that the ninth quarantined pool fails closed and that capacity returns after
 the blocked calls exit.
 
-The final process-isolated review is recorded in
+The current final process-isolated review is recorded in
 [`independent-review.json`](independent-review.json), with its unchanged human
 summary under
-[`final-isolated-review/review-summary.md`](final-isolated-review/review-summary.md)
+[`m3-030-pinned-sdk-final-review/review-summary.md`](m3-030-pinned-sdk-final-review/review-summary.md)
 and the repository validator result under
 [`linux_x86_64/review-validation.json`](linux_x86_64/review-validation.json).
-It reviewed frozen candidate
-`ea493f13fefa520e9c1f2e08b9b068dc26c28082` and returned PASS: both Critical
-and all twelve High findings are Fixed, with no unresolved Critical or High
-finding. Eight Medium findings remain Open and are retained as non-release-
-blocking follow-up risk. The reviewer inherited no implementation history and
-made no repository changes. Its stated limits are also retained: GitHub remote
-state came from the orchestrator, the frozen snapshot had no `.git` metadata,
-and a fresh AWS-LC network fetch was unavailable because DNS resolution failed.
+It reviewed immutable package
+`9d4c4676cd52883aa002e20946b474ac2777d7fcee2bcfe9c232436c44aeaf82`
+and returned PASS: both Critical and all fourteen High findings are Fixed, with
+no unresolved Critical or High finding. One Medium finding remains Open and
+retains final-candidate artifact, SBOM and long-profile regeneration for later
+release tasks. The reviewer inherited no implementation history, made no
+repository changes, and independently rejected Cangjie FFI, native header,
+contract schema, calling-convention, signature-inventory and archive-symbol
+mutations.
 
-Current validation includes a 32-path, 30-scenario, 28-test plan with no matrix
-issues; 13/13 preserved M7-029 review-contract tests; 6/6 release, license, and SBOM
+Current validation includes a 32-path, 30-scenario, 29-test plan with no matrix
+issues; 14/14 M7-029 review-contract tests; 6/6 release, license, and SBOM
 tests; a clean-CJPM native dependency hook check; a delayed-`getaddrinfo`
 native gate with 9/9 focused Cangjie cases and a PASS process-wide capacity
 probe; an architecture guard with zero violations;
-and the complete serial non-Performance Cangjie suite with 570 PASS, 23 SKIPPED,
-zero FAIL/ERROR out of 593. SKIPPED cases are not counted as PASS. The final
+and the complete serial non-Performance Cangjie suite with 569 PASS, 23 SKIPPED,
+zero FAIL/ERROR out of 592 on the pinned `20260817` SDK. SKIPPED cases are not
+counted as PASS. The final
 independent-review command accepts the conforming current-target PASS review.
 Digest-bound raw outputs are under
 [`regressions/`](regressions/), and
@@ -135,20 +137,15 @@ subsequent final-candidate sequence.
 
 ## Repository-wide gate boundary
 
-The final `scripts/check-task M7-029 --json` report is PASS for all eight task
-commands. One earlier attempt failed closed when concurrent host compilation
-consumed the resolver profile's 60-second budget before the delay shim observed
-any call; the isolated resolver rerun and the complete task rerun both passed,
-so the failed attempt was not reused as acceptance evidence.
-
-The final compatibility entry point `scripts/check` ran and returned exit 1:
-181 Python tests reported 9 failures and 6 errors. The failures are the expected
-fail-closed stale M7-019, M7-020, M7-021, M7-025, M7-026, and M7-028 release-
-evidence checks after M7-032 and M7-029 changed production inputs, plus an old
-M7 graph assertion that still expects M7-028 to be READY. M7-029's own 14
-review-contract tests passed in that run. Regenerating the final artifact,
-release audit, SBOM, API baseline, and review package belongs to the subsequent
-release-candidate sequence and is not claimed by this task.
+The final `scripts/check-task M7-029 --json --output
+docs/evidence/M7-029/task-check.json` report is PASS for all nine task commands,
+including the resolver fixture contract, native process-wide resolver bound,
+real AWS-LC identity regression, architecture guard and independent review
+validator. The repository-wide `scripts/check` result is recorded separately
+after final evidence sealing: it returned exit 0, including repository, gate,
+benchmark-tool, architecture, CJPM build/check and 592-case non-Performance
+Cangjie validation. No earlier stale or failed run is reused as acceptance
+evidence.
 
 ## Deliberately unrun gates
 

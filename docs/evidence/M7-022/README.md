@@ -1,6 +1,6 @@
 # M7-022 Linux final release soak evidence
 
-Status: IN_PROGRESS
+Status: COMPLETE
 
 ## Scope
 
@@ -16,22 +16,34 @@ The formal command requires one uninterrupted run of at least 86,400 seconds.
 A short run can validate the workload and reporting path, but it cannot produce
 an acceptance PASS.
 
-## Current result
+## Final result
 
-After M6-026 completed and M7-021 produced a newly qualified artifact, the
-non-long task gate passed again. The 10-second installed-artifact preflight
-completed 52 mixed cycles, 52 HTTP/2 multiplex batches, 104 joined concurrent
-tasks, 52 request cancellations, 52 stream resets and 7 connection
-cancellation/recovery cycles. It completed 65 HTTP/1.1 requests, 164 HTTP/2
-requests and 416 numbered SSE events with zero sequence error and zero terminal
-waiter, buffer, background-task or server-task owner. Application heap and all
-sampled process-tree resource trends passed.
+The final run used the M7-021 Linux x86_64 glibc artifact with SHA-256
+`c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee`.
+The installed-artifact workload ran for 86,400.354 seconds and the enclosing
+long gate completed in 86,410.283 seconds without a timeout.
 
-The preflight correctly remains `INCOMPLETE`: its 10-second duration does not
-meet the formal 86,400-second parameter. The machine report is
-[`linux_x86_64/preflight-after-m6-026.json`](linux_x86_64/preflight-after-m6-026.json),
-and the non-long task report is
-[`task-check-after-m6-026.json`](task-check-after-m6-026.json).
+The workload completed 253,704 mixed cycles, 317,130 HTTP/1.1 requests,
+792,826 HTTP/2 requests, 253,704 HTTP/2 multiplex batches and 2,029,838
+numbered SSE events. It exercised 253,704 request cancellations, 253,704 stream
+resets and 31,713 connection cancellation/recovery cycles. All 507,408 spawned
+tasks joined, sequence errors remained zero, and terminal waiter, buffer,
+background-task and server-task counts were zero. Maximum observed cancellation
+latency was 33.315 ms.
+
+The application trend used 289 five-minute samples. Heavy-GC heap changed from
+a first-window median of 3,237,888 bytes to a last-window median of 2,893,824
+bytes and was not monotonic. The process-tree trend used 1,440 one-minute
+samples. FD and socket medians were unchanged, RSS decreased by 9,338 KiB,
+thread median growth was 1 within the limit of 2, and timerfd and process counts
+were unchanged. Every workload, ownership and resource-trend check returned
+`PASS`.
+
+The formal machine reports are
+[`linux_x86_64/soak.json`](linux_x86_64/soak.json) and
+[`long-check.json`](long-check.json). The bounded raw output is
+[`linux_x86_64/soak.log`](linux_x86_64/soak.log), and the current non-long task
+report is [`task-check.json`](task-check.json).
 
 ### Retained overlapping-run failure
 
@@ -51,20 +63,19 @@ invocation also writes a unique log under `build/gates/m7-022-runs/`; the gate
 publishes the requested raw-log path only after the child exits cleanly and the
 strict output parser accepts the complete stream.
 
-### Retained first formal failure
+### Historical first formal failure
 
 The 60-second native preflight completed 307 cycles, 614 joined concurrent
 tasks and 39 connection cancellation and recovery cycles. Its workload and
 resource checks passed. The task, fast and final full non-long gates also
 passed.
 
-The formal gate then failed before the first five-minute application sample.
-Two concurrent public `HttpClient` response-body requests threw
-`HttpException: HTTP protocol violation`. The runner stopped the process group
-and wrote [`linux_x86_64/soak.json`](linux_x86_64/soak.json),
-[`linux_x86_64/soak.log`](linux_x86_64/soak.log) and
-[`long-check.json`](long-check.json). The long check returned exit 1 after
-26.5 seconds, including the clean-consumer build.
+The first formal attempt failed before the first five-minute application sample
+when two concurrent public `HttpClient` response-body requests reported an HTTP
+protocol violation. M6-026 retained the reproducer, added a 1,000-batch public
+regression and fixed the product defect. The current final artifact includes
+that fix, and the formal reports linked above replace the failed attempt as the
+acceptance evidence.
 
 The M7-021 archive contains the same SHA-256 content as the current repository
 for `src/http/client.cj` and the inspected HTTP/2 client, server, reader and
@@ -75,14 +86,10 @@ small response bodies through the public facade.
 
 ## Decision
 
-M7-022 is no longer blocked by the HTTP/2 facade failure. M6-026 supplies the
-1,000-batch public regression and product fix, M7-021 requalified the installed
-artifact, and the unchanged mixed workload now passes the short preflight.
-
-The task remains IN_PROGRESS until one uninterrupted formal run reaches at
-least 86,400 seconds and every semantic and resource bound passes. Do not
-reduce the workload, relabel a preflight or reuse M0-011's transport-only
-report.
+M7-022 is COMPLETE. One uninterrupted formal run met the 86,400-second minimum
+against the final candidate artifact, and every semantic, ownership and
+resource bound passed. Short preflights and M0-011's transport-only report were
+not used as acceptance substitutes.
 
 ## Boundaries
 
@@ -90,6 +97,7 @@ report.
 - No SDK component was built.
 - No non-Linux platform was tested.
 - No remote branch was pushed.
-- The two overlapping formal runs were stopped because their shared log could
-  not prove either run. A new formal run requires the single-owner gate.
-- M7-028 and the later Linux release tasks remain blocked by M7-022 completion.
+- Historical overlapping runs remain non-acceptance evidence; the completed
+  final run used the single-owner gate and an atomically published raw log.
+- Artifact signing, update rehearsal and the final candidate report remain
+  separate M7-030 and M7-031 work.
