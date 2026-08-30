@@ -131,6 +131,30 @@ class M0014ValidatorTests(unittest.TestCase):
             "2, 2.0, 2, 2.0, 0, 2.0, 2.0, TOTAL"
         ))
 
+    def test_instrumentation_retries_one_empty_etw_heap_report(self) -> None:
+        empty = {
+            "allocation_count": None,
+            "allocation_status": "ETW_UNPARSED",
+            "etl_sha256": "a",
+            "heap_report_sha256": "b",
+        }
+        measured = {
+            "allocation_count": 10232,
+            "allocation_status": "MEASURED_BY_ETW_HEAP",
+            "etl_sha256": "c",
+            "heap_report_sha256": "d",
+        }
+        with mock.patch.object(
+            gate, "_instrumented_transfer_attempt", side_effect=[empty, measured]
+        ) as attempt:
+            result = gate.instrumented_transfer(
+                Path("receiver.exe"), 1024, Path("artifacts"), 180.0
+            )
+        self.assertEqual(2, attempt.call_count)
+        self.assertEqual(10232, result["allocation_count"])
+        self.assertEqual(2, result["attempt_count"])
+        self.assertEqual("ETW_UNPARSED", result["attempts"][0]["allocation_status"])
+
     def test_counting_receiver_adds_dynamic_counter_fields_once(self) -> None:
         source = gate.counting_receiver_source()
         self.assertEqual(1, source.count("let copiedBytes = unsafe { WIRESTACK_M0014_CopyBytes() }"))
