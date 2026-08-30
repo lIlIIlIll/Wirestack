@@ -143,6 +143,19 @@ def xcrun(root: Path, env: dict[str, str], sdk: str, *arguments: str) -> str:
     return process["output"].strip()
 
 
+def deployment_flags(selected: str) -> list[str]:
+    if selected == "ios-simulator-arm64":
+        return ["-mios-simulator-version-min=17.5"]
+    return []
+
+
+def ios_launch_command(device: str) -> list[str]:
+    return [
+        "xcrun", "simctl", "launch", "--console", "--terminate-running-process",
+        device, "dev.wirestack.m2-006-tests",
+    ]
+
+
 def build_test_link_stub(
     root: Path, env: dict[str, str], selected: str
 ) -> dict[str, Any]:
@@ -157,10 +170,12 @@ def build_test_link_stub(
     output_dir.mkdir(parents=True, exist_ok=True)
     object_path = output_dir.parent / "m2_006_tls_link_stub.o"
     archive = output_dir / "libwirestack_m2_006_tls_link_stub.a"
+    selected_deployment_flags = deployment_flags(selected)
     compiled = run_command(
         [
             cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
             "-arch", "arm64", "-isysroot", sysroot,
+            *selected_deployment_flags,
             "-c", str(source), "-o", str(object_path),
         ],
         cwd=root,
@@ -216,61 +231,42 @@ def select_ios_device(root: Path, env: dict[str, str]) -> tuple[str, str]:
     raise GateError("no available iOS Simulator device was found")
 
 
-def find_ios_test_binaries(target_dir: Path) -> tuple[Path, Path]:
-    runners = [path for path in target_dir.rglob("std.testrunner") if path.is_file()]
-    packages = [
-        path
-        for path in target_dir.rglob("wirestack.internal.resolver")
-        if path.is_file() and "unittest_bin" in path.parts
-    ]
-    if len(runners) != 1 or len(packages) != 1:
-        raise GateError(
-            f"expected one iOS test runner and resolver package, got {len(runners)} and {len(packages)}"
-        )
-    return runners[0], packages[0]
-
-
 def make_ios_bundle(
     root: Path,
     env: dict[str, str],
-    runner: Path,
-    package: Path,
+    executable: Path,
     bundle: Path,
     device: str,
-) -> tuple[Path, dict[str, Any]]:
+) -> str:
     if bundle.exists():
         shutil.rmtree(bundle)
     bundle.mkdir(parents=True)
-    runner_copy = bundle / "std.testrunner"
-    package_copy = bundle / "wirestack.internal.resolver"
-    shutil.copy2(runner, runner_copy)
-    shutil.copy2(package, package_copy)
-    runner_copy.chmod(runner_copy.stat().st_mode | stat.S_IXUSR)
-    package_copy.chmod(package_copy.stat().st_mode | stat.S_IXUSR)
+    executable_copy = bundle / "wirestack-m2-006"
+    shutil.copy2(executable, executable_copy)
+    executable_copy.chmod(executable_copy.stat().st_mode | stat.S_IXUSR)
     with (bundle / "Info.plist").open("wb") as output:
         plistlib.dump(
             {
                 "CFBundleDevelopmentRegion": "en",
-                "CFBundleExecutable": "std.testrunner",
+                "CFBundleExecutable": executable_copy.name,
                 "CFBundleIdentifier": "dev.wirestack.m2-006-tests",
                 "CFBundleInfoDictionaryVersion": "6.0",
                 "CFBundleName": "Wirestack M2-006",
                 "CFBundlePackageType": "APPL",
                 "CFBundleShortVersionString": "1.0",
                 "CFBundleVersion": "1",
-                "MinimumOSVersion": "11.0",
+                "MinimumOSVersion": "17.5",
                 "UIDeviceFamily": [1, 2],
             },
             output,
         )
-    for target in (runner_copy, package_copy):
-        signed = run_command(
-            ["codesign", "--force", "--sign", "-", str(target)],
-            cwd=root,
-            env=env,
-            timeout=30,
-        )
-        require_success(signed, f"ad-hoc sign {target.name}")
+    signed = run_command(
+        ["codesign", "--force", "--sign", "-", str(executable_copy)],
+        cwd=root,
+        env=env,
+        timeout=30,
+    )
+    require_success(signed, "ad-hoc sign iOS resolver probe")
     signed_bundle = run_command(
         ["codesign", "--force", "--sign", "-", str(bundle)],
         cwd=root,
@@ -285,78 +281,47 @@ def make_ios_bundle(
         timeout=60,
     )
     require_success(installed, "install iOS test bundle")
-    container_process = run_command(
-        ["xcrun", "simctl", "get_app_container", device, "dev.wirestack.m2-006-tests", "app"],
-        cwd=root,
-        env=env,
-        timeout=30,
-    )
-    require_success(container_process, "resolve installed iOS test bundle")
-    container = Path(container_process["output"].strip())
-    configuration = {
-        "apiVersion": 2,
-        "testModules": [{
-            "name": "wirestack",
-            "testPackages": [{
-                "name": "wirestack.internal.resolver",
-                "executeCommand": {
-                    "command": str(container / package_copy.name),
-                    "args": [
-                        "--filter=M2006AppleSystemResolverTest",
-                        "--no-color",
-                        "--show-all-output",
-                        "--parallel=1",
-                        "--no-progress",
-                    ],
-                    "env": {"WIRESTACK_RESOLVER_TEST_FIXTURE": "1"},
-                },
-            }],
-        }],
-    }
-    input_path = bundle / "test-input.json"
-    input_path.write_text(json.dumps(configuration, sort_keys=True), encoding="utf-8")
-    resigned = run_command(
-        ["codesign", "--force", "--sign", "-", str(bundle)],
-        cwd=root,
-        env=env,
-        timeout=30,
-    )
-    require_success(resigned, "re-sign iOS test bundle")
-    updated = run_command(
-        ["xcrun", "simctl", "install", device, str(bundle)],
-        cwd=root,
-        env=env,
-        timeout=60,
-    )
-    require_success(updated, "update iOS test bundle configuration")
-    return container, configuration
+    return sha256_path(executable_copy)
 
 
 def run_ios_test(root: Path, env: dict[str, str]) -> tuple[dict[str, Any], dict[str, Any]]:
     target_dir = root / "target/m2-006-ios-simulator"
-    compile_test = run_command(
+    build = run_command(
         [
-            "cjpm", "test", "src/internal/resolver", "-j", "1", "--parallel", "1",
-            "--target", IOS_TARGET, "--target-dir", str(target_dir), "--no-run",
-            "--filter", "M2006AppleSystemResolverTest", "--no-color", "--no-progress",
-            "-V",
+            "cjpm", "build", "-j", "1", "--target", IOS_TARGET,
+            "--target-dir", str(target_dir), "-V",
         ],
         cwd=root,
         env=env,
         timeout=300,
     )
-    require_success(compile_test, "iOS Simulator Cangjie test compilation")
-    runner, package = find_ios_test_binaries(target_dir)
-    runner_compile = run_command(
+    require_success(build, "iOS Simulator Cangjie package build")
+    release_dir = target_dir / IOS_TARGET / "release"
+    library_dir = release_dir / "wirestack"
+    probe_source = root / "tools/gates/probes/m2_006_apple_resolver.cj"
+    probe = root / "build/gates/m2-006/wirestack-m2-006-ios"
+    probe.parent.mkdir(parents=True, exist_ok=True)
+    link_options = (
+        "-L ./target/native/resolver/current/lib -lwirestack_resolver "
+        "-L ./target/native/test-support/m2-006/lib -lwirestack_m2_006_tls_link_stub"
+    )
+    probe_compile = run_command(
         [
-            "cjc", str(runner.parent / "testrunner.cj"), "-o", str(runner),
+            "cjc", str(probe_source), "-o", str(probe),
+            "--import-path", str(release_dir),
+            "-L", str(library_dir),
+            "-lwirestack.internal.resolver",
+            "-lwirestack.internal.transport",
+            "-lwirestack.internal.common",
+            "-lwirestack",
             f"--target={IOS_TARGET}", "--sysroot", env["WIRESTACK_IOS_SIMULATOR_SYSROOT"],
+            "--link-options", link_options,
         ],
         cwd=root,
         env=env,
         timeout=120,
     )
-    require_success(runner_compile, "iOS Simulator unittest runner compilation")
+    require_success(probe_compile, "iOS Simulator resolver probe compilation")
     device, runtime = select_ios_device(root, env)
     booted = run_command(["xcrun", "simctl", "boot", device], cwd=root, env=env, timeout=60)
     if booted["exit_code"] != 0 and "current state: Booted" not in booted["output"]:
@@ -367,31 +332,22 @@ def run_ios_test(root: Path, env: dict[str, str]) -> tuple[dict[str, Any], dict[
     require_success(boot_status, "wait for iOS Simulator")
     bundle = root / "build/gates/m2-006/WirestackM2006.app"
     try:
-        container, configuration = make_ios_bundle(root, env, runner, package, bundle, device)
-        simulator_env = dict(env)
-        simulator_env["SIMCTL_CHILD_WIRESTACK_RESOLVER_TEST_FIXTURE"] = "1"
+        installed_sha256 = make_ios_bundle(root, env, probe, bundle, device)
         process = run_command(
-            [
-                "xcrun", "simctl", "spawn", device, str(container / "std.testrunner"),
-                "--filter=M2006AppleSystemResolverTest", "--no-color",
-                "--show-all-output", "--parallel=1", "--json-configuration={}",
-                "--no-progress",
-                f"--internal-testrunner-input-path={container / 'test-input.json'}",
-            ],
+            ios_launch_command(device),
             cwd=root,
-            env=simulator_env,
+            env=env,
             timeout=180,
         )
     finally:
         run_command(["xcrun", "simctl", "shutdown", device], cwd=root, env=env, timeout=60)
     return process, {
-        "compile": compile_test,
-        "runner_compile": runner_compile,
+        "build": build,
+        "probe_compile": probe_compile,
         "device_udid": device,
         "runtime": runtime,
-        "runner_sha256": sha256_path(runner),
-        "package_sha256": sha256_path(package),
-        "configuration": configuration,
+        "probe_sha256": sha256_path(probe),
+        "installed_probe_sha256": installed_sha256,
     }
 
 
@@ -430,8 +386,22 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
     link_stub = report.get("test_link_stub")
     if not isinstance(link_stub, dict) or link_stub.get("test_only") is not True:
         failures.append("REPORT:TEST_LINK_STUB")
-    if expected_mode == "ios-simulator" and not isinstance(report.get("simulator"), dict):
-        failures.append("REPORT:SIMULATOR_MISSING")
+    if expected_mode == "ios-simulator":
+        simulator = report.get("simulator")
+        if not isinstance(simulator, dict):
+            failures.append("REPORT:SIMULATOR_MISSING")
+        else:
+            if not isinstance(simulator.get("device_udid"), str) or not simulator["device_udid"]:
+                failures.append("REPORT:SIMULATOR_DEVICE")
+            if not isinstance(simulator.get("runtime"), str) or ".iOS-" not in simulator["runtime"]:
+                failures.append("REPORT:SIMULATOR_RUNTIME")
+            probe_sha = simulator.get("probe_sha256")
+            if (
+                not isinstance(probe_sha, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", probe_sha)
+                or simulator.get("installed_probe_sha256") != probe_sha
+            ):
+                failures.append("REPORT:SIMULATOR_PROBE")
     return failures
 
 
