@@ -1,0 +1,1 @@
+{"commit":"8367a4eae8c4d46600dc1d20e571e9a3ddf5a493","decision":"PASS","hostedReportSha256":"d3f553ca325c5ee7ed90039c6673172be886cbb64680ff9763eac9a66e3f9e35","schemaVersion":1,"status":"PASS","taskId":"M7-030","verifiedSubjects":["artifact","release-manifest","sbom"]}
