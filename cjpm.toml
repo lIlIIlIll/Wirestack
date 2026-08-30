@@ -17,13 +17,9 @@
   documentation = "https://github.com/lIlIIlIll/Wirestack/tree/main/docs"
 
 [target.x86_64-unknown-linux-gnu]
-  link-option = "-lstdc++ -lpthread -ldl -lm"
+  link-option = "-L ./target/native/resolver/current/lib -lwirestack_resolver -L ./target/native/current/lib -lwirestack_tls_provider -lstdc++ -lpthread -ldl -lm"
 
 [target.x86_64-w64-mingw32]
-  link-option = "-lws2_32"
+  link-option = "-L ./target/native/resolver/current/lib -lwirestack_resolver -lws2_32"
 
 [dependencies]
-
-[ffi.c]
-  wirestack_resolver = { path = "./target/native/resolver/current/lib" }
-  wirestack_tls_provider = { path = "./target/native/current/lib" }
