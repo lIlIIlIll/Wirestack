@@ -20,6 +20,6 @@
   link-option = "-L ./target/native/resolver/current/lib -lwirestack_resolver -L ./target/native/current/lib -lwirestack_tls_provider -lstdc++ -lpthread -ldl -lm"
 
 [target.x86_64-w64-mingw32]
-  link-option = "-L ./target/native/resolver/current/lib -lwirestack_resolver -lws2_32"
+  link-option = "-L ./target/native/resolver/current/lib -lwirestack_resolver -L ./target/native/test-support/m2-004/lib -lwirestack_m2_004_tls_link_stub -lws2_32"
 
 [dependencies]

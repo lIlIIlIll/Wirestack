@@ -104,6 +104,47 @@ def process_failures(process: dict[str, Any], expected: int, label: str) -> list
     return failures
 
 
+def build_test_link_stub(root: Path, env: dict[str, str]) -> dict[str, Any]:
+    cc = shutil.which("clang")
+    ar = shutil.which("llvm-ar")
+    if cc is None or ar is None:
+        raise GateError("clang and llvm-ar are required for the test-only TLS link stub")
+    source = root / "tools/gates/native/m2_004_tls_link_stub.c"
+    if not source.is_file():
+        raise GateError("test-only TLS link stub source is missing")
+    output_dir = root / "target/native/test-support/m2-004/lib"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    object_path = output_dir.parent / "m2_004_tls_link_stub.o"
+    archive = output_dir / "libwirestack_m2_004_tls_link_stub.a"
+    compiled = run_command(
+        [
+            cc, "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+            "-c", str(source), "-o", str(object_path),
+        ],
+        cwd=root,
+        env=env,
+        timeout=60,
+    )
+    if compiled["timed_out"] or compiled["exit_code"] != 0:
+        raise GateError("test-only TLS link stub compilation failed: " + compiled["output"][-4000:])
+    archived = run_command(
+        [ar, "rcs", str(archive), str(object_path)],
+        cwd=root,
+        env=env,
+        timeout=60,
+    )
+    if archived["timed_out"] or archived["exit_code"] != 0 or not archive.is_file():
+        raise GateError("test-only TLS link stub archive failed: " + archived["output"][-4000:])
+    return {
+        "archive_sha256": sha256_path(archive),
+        "compile": compiled,
+        "archive": archived,
+        "source_sha256": sha256_path(source),
+        "purpose": "M2-004 resolver-test link support; all functions fail closed",
+        "test_only": True,
+    }
+
+
 def validate_report(report: object, expected_revision: str) -> list[str]:
     failures: list[str] = []
     if not isinstance(report, dict):
@@ -136,6 +177,9 @@ def validate_report(report: object, expected_revision: str) -> list[str]:
             failures.append("REPORT:PRIVATE_RUNTIME_ABI")
         if manifest.get("test_fixture") is not True:
             failures.append("REPORT:FIXTURE_NOT_BOUND")
+    link_stub = report.get("test_link_stub")
+    if not isinstance(link_stub, dict) or link_stub.get("test_only") is not True:
+        failures.append("REPORT:TEST_LINK_STUB")
     return failures
 
 
@@ -160,6 +204,7 @@ def run_gate(root: Path, output: Path, revision: str) -> dict[str, Any]:
     )
     if build["timed_out"] or build["exit_code"] != 0:
         raise GateError("Windows resolver build failed: " + build["output"][-4000:])
+    test_link_stub = build_test_link_stub(root, env)
     manifest_path = root / "target/native/resolver/current/resolver-manifest.json"
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -200,6 +245,7 @@ def run_gate(root: Path, output: Path, revision: str) -> dict[str, Any]:
         "resolver_manifest": manifest,
         "resolver_manifest_sha256": sha256_path(manifest_path),
         "build": build,
+        "test_link_stub": test_link_stub,
         "resolver_test": resolver_test,
         "failures": failures,
         "decision": "PASS" if not failures else "FAIL",
