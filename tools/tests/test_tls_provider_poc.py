@@ -3,15 +3,23 @@ from __future__ import annotations
 import copy
 import importlib.util
 import json
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
-MODULE = ROOT / "tools/tls_provider_poc/validate.py"
-spec = importlib.util.spec_from_file_location("provider_validate", MODULE)
-validator = importlib.util.module_from_spec(spec)
-assert spec.loader
-spec.loader.exec_module(validator)
+VALIDATE_MODULE = ROOT / "tools/tls_provider_poc/validate.py"
+validate_spec = importlib.util.spec_from_file_location("provider_validate", VALIDATE_MODULE)
+validator = importlib.util.module_from_spec(validate_spec)
+assert validate_spec.loader
+validate_spec.loader.exec_module(validator)
+
+RUN_MODULE = ROOT / "tools/tls_provider_poc/run.py"
+run_spec = importlib.util.spec_from_file_location("provider_run", RUN_MODULE)
+runner = importlib.util.module_from_spec(run_spec)
+assert run_spec.loader
+run_spec.loader.exec_module(runner)
 
 
 class ProviderPocValidationTests(unittest.TestCase):
@@ -141,6 +149,159 @@ class ProviderPocValidationTests(unittest.TestCase):
             "external_signer_calls": 2,
         }
         validator.validate_result(result, self.spec)
+
+
+class ProviderPocWindowsTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.spec = json.loads((ROOT / "tools/tls_provider_poc/providers.json").read_text())
+
+    def test_windows_archive_names_cover_all_providers(self):
+        self.assertEqual(
+            (["ssl.lib", "libssl.lib"], ["crypto.lib", "libcrypto.lib"]),
+            runner.provider_archive_names("aws-lc", True),
+        )
+        self.assertEqual(
+            (["mbedtls.lib"], ["mbedx509.lib"], ["tfpsacrypto.lib", "mbedcrypto.lib"]),
+            runner.provider_archive_names("mbedtls", True),
+        )
+        self.assertEqual(
+            (["libssl.lib", "ssl.lib"], ["libcrypto.lib", "crypto.lib"]),
+            runner.provider_archive_names("openssl", True),
+        )
+
+    def test_windows_dependency_scan_rejects_versioned_tls_dll(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            binary = root / "provider-poc.exe"
+            archive = root / "ssl.lib"
+            log = root / "build.log"
+            binary.write_bytes(b"PE fixture")
+            archive.write_bytes(b"archive")
+            completed = runner.subprocess.CompletedProcess(
+                ["dumpbin"], 0, "LIBSSL-3-X64.DLL\nKERNEL32.dll\n", ""
+            )
+            with mock.patch.object(runner, "is_windows", return_value=True), \
+                    mock.patch.object(runner, "run", return_value=completed) as run_mock:
+                result = runner.inspect_binary(binary, [archive], root, log)
+            self.assertEqual(["LIBSSL-3-X64.DLL"], result["system_tls_dependencies"])
+            run_mock.assert_called_once_with(
+                ["dumpbin", "/dependents", str(binary)], cwd=root, log=log, check=False
+            )
+
+    def test_windows_dependency_scan_fails_closed_when_dumpbin_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            binary = root / "provider-poc.exe"
+            archive = root / "ssl.lib"
+            binary.write_bytes(b"PE fixture")
+            archive.write_bytes(b"archive")
+            completed = runner.subprocess.CompletedProcess(["dumpbin"], 1, "error", "")
+            with mock.patch.object(runner, "is_windows", return_value=True), \
+                    mock.patch.object(runner, "run", return_value=completed):
+                with self.assertRaisesRegex(runner.PocError, "dumpbin dependency inspection failed"):
+                    runner.inspect_binary(binary, [archive], root, root / "build.log")
+
+    def test_windows_compile_uses_msvc_and_no_posix_link_flags(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            repo = root / "repo"
+            source_dir = repo / "tools/tls_provider_poc"
+            source_dir.mkdir(parents=True)
+            (source_dir / "openssl_memory_poc.c").write_text("int main(void){return 0;}\n")
+            prefix = root / "prefix"
+            (prefix / "include").mkdir(parents=True)
+            archive = root / "ssl.lib"
+            archive.write_bytes(b"archive")
+            with mock.patch.object(runner, "is_windows", return_value=True), \
+                    mock.patch.object(runner, "run") as run_mock:
+                output = runner.compile_poc(
+                    {"poc_family": "openssl-compatible"}, repo, prefix, [archive],
+                    root / "work", root / "build.log"
+                )
+            command = run_mock.call_args.args[0]
+            self.assertEqual("provider-poc.exe", output.name)
+            self.assertEqual("cl", command[0])
+            self.assertNotIn("-pthread", command)
+            self.assertNotIn("-lm", command)
+            self.assertIn("bcrypt.lib", command)
+
+    def test_windows_openssl_build_uses_vc_target_and_nmake(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            src = root / "source"
+            prefix = root / "prefix"
+            src.mkdir()
+            calls = []
+
+            def fake_run(command, **kwargs):
+                calls.append(list(command))
+                return runner.subprocess.CompletedProcess(command, 0, "", "")
+
+            with mock.patch.object(runner, "is_windows", return_value=True), \
+                    mock.patch.object(runner, "run", side_effect=fake_run), \
+                    mock.patch.object(runner, "find_provider_archives", return_value=[root / "libssl.lib"]):
+                runner.build_provider({"id": "openssl"}, src, root, root / "build.log")
+            self.assertEqual("perl", calls[0][0])
+            self.assertIn("VC-WIN64A", calls[0])
+            self.assertEqual(["nmake"], calls[1])
+            self.assertEqual(["nmake", "install_sw"], calls[2])
+
+    def test_windows_result_requires_native_hosted_runner_identity(self):
+        caps = {name: "PASS" for name in self.spec["required_capabilities"]}
+        result = {
+            "schema_version": 2,
+            "task_id": "M0-016",
+            "provider": "aws-lc",
+            "platform": "windows-x86_64",
+            "status": "PASS",
+            "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
+            "capabilities": caps,
+            "metrics": {"repeated_cleanup_cycles": 10000, "external_signer_calls": 2},
+            "build": {
+                "static_archives": ["ssl.lib"],
+                "system_tls_dependencies": [],
+                "runtime_loader_library_strings": [],
+            },
+            "execution": {
+                "repository_revision": "2" * 40,
+                "runner_os": "Windows",
+                "runner_arch": "X64",
+                "image_os": "win25",
+                "image_version": "20260824.239.3",
+            },
+        }
+        validator.validate_result(result, self.spec, "2" * 40)
+        result["execution"]["runner_os"] = "Linux"
+        with self.assertRaisesRegex(validator.ValidationError, "native Windows runner"):
+            validator.validate_result(result, self.spec, "2" * 40)
+
+    def test_expected_revision_mismatch_fails(self):
+        caps = {name: "PASS" for name in self.spec["required_capabilities"]}
+        result = {
+            "schema_version": 2,
+            "task_id": "M0-016",
+            "provider": "aws-lc",
+            "platform": "windows-x86_64",
+            "status": "PASS",
+            "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
+            "capabilities": caps,
+            "metrics": {"repeated_cleanup_cycles": 10000, "external_signer_calls": 2},
+            "build": {
+                "static_archives": ["ssl.lib"],
+                "system_tls_dependencies": [],
+                "runtime_loader_library_strings": [],
+            },
+            "execution": {
+                "repository_revision": "2" * 40,
+                "runner_os": "Windows",
+                "runner_arch": "X64",
+                "image_os": "win25",
+                "image_version": "20260824.239.3",
+            },
+        }
+        with self.assertRaisesRegex(validator.ValidationError, "revision mismatch"):
+            validator.validate_result(result, self.spec, "3" * 40)
 
 
 if __name__ == "__main__":
