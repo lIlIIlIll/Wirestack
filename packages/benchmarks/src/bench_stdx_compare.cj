@@ -401,16 +401,18 @@ func encodeStdxToUtf8String<T>(
     value: T,
     config!: WriteConfig = WriteConfig.compact
 ): String where T <: JsonSerializable {
-    let out = YJsonMemoryOutputStream()
+    let out = ByteBuffer()
     let writer = JsonWriter(out)
     writer.writeConfig = config
     writer.writeValue<T>(value)
     writer.flush()
-    return out.toUtf8String()
+    return String.fromUtf8(readToEnd(out))
 }
 
 func decodeStdxFromUtf8String<T>(text: String): T where T <: JsonDeserializable<T> {
-    return decodeStdxFromStream<T>(YJsonByteArrayInputStream(text))
+    let input = ByteBuffer()
+    unsafe { input.write(text.rawData()) }
+    return JsonReader(input).readValue<T>()
 }
 
 func encodeStdxToStream<T>(

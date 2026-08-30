@@ -9,12 +9,19 @@ AST、Pure Compact、Native DOM 与 typed stream 是不同问题，不能拼成�
   36-workload 表与 Native 单引擎 7-workload 门禁。两组结果都使用固定 CPU、128 MiB heap
   和 11 轮交替测量，并保留完整 release artifact。
 
+## 当前 main 对比
+
+- [2026-08-30 当前 `main` 七库完整对比](results/2026-08-30-main-seven-library.md)：由
+  [`current-main.json`](../../benchmarks/results/full-seven-library/current-main.json) 绑定到测量提交、
+  产品源码摘要、有效 benchmark 摘要和证据目录。两批各覆盖 10 个 workload、7 个库和 11 个
+  独立进程轮次。两批均为 0/10 stable，因此 README 只展示第二批完整表，不发布精确比例。
+
+CI 会重新计算当前 checkout 的产品源码和 benchmark 输入摘要。性能相关输入变化但 marker
+未更新时，门禁失败。文档或证据校验代码的变化不会单独使性能输入摘要失配，但 marker
+指向的测量提交必须仍是当前提交的祖先。
+
 ## 当前开发结果
 
-- [2026-08-30 当前 dev 七库完整对比](results/2026-08-30-current-dev-seven-library.md)：绑定
-  `1dedf2a`，覆盖 yjson、stdx.json、cangjieJSON、json4cj、cjfast_json、Jackson 与
-  fastjson2 的 10 个 encode 和 decode workload。两批各运行 11 轮并保留全部 raw evidence；
-  第二批所有行仍为 noisy，因此只提供当前延迟快照，不发布精确比例。
 - [2026-08-28 Stream protocol v1](results/2026-08-28-stream-protocol-v1.md)：typed
   incremental encode/decode、三种 payload、三种 chunk、两种 sink 和内部 scratch 生命周期。
   结果包含 previous-yjson A/B 与 yjson/stdx.json peer 表，并保留完整 Server 原始数据。
@@ -22,6 +29,8 @@ AST、Pure Compact、Native DOM 与 typed stream 是不同问题，不能拼成�
 
 ## 历史结果
 
+- [2026-08-30 `dev` 七库完整对比](results/2026-08-30-current-dev-seven-library.md)：绑定
+  `1dedf2a` 的旧开发快照。带日期页面保持不变。
 - [2026-08-26 Native 单引擎加速门禁](results/2026-08-26-native-acceleration.md)：2.0.0
   最终候选之前的固定源码批次。
 - [2026-08-25 Linux rc.2 三库表](results/2026-08-25-linux-rc2-three-library.md)：

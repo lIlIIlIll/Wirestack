@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "evidence_dir": "benchmarks/results/full-seven-library/2026-08-30-main-d2f375c8274e",
+  "result_doc": "docs/performance/results/2026-08-30-main-seven-library.md",
+  "measured_commit": "d2f375c8274e11609fa6f12fd2cb2c9a40da0a2b",
+  "product_source_sha256": "ef4b24f136e2916306e13c6e635e078433160e5c5ca93d50032f8033d8d309a9",
+  "effective_harness_sha256": "db8e1c8a67f64753cc85c40fa31f8b1a7da7c523fdb204ee6581cae7cca5a4ca",
+  "formal_archives": [
+    {
+      "file": "formal-main-11-1.tar.gz",
+      "root": "formal-main-11-1"
+    },
+    {
+      "file": "formal-main-11-2.tar.gz",
+      "root": "formal-main-11-2"
+    }
+  ],
+  "harness_archive": {
+    "file": "harness-source.tar.gz",
+    "root": "harness"
+  },
+  "checksum_files": [
+    "canonical-build-logs.tar.gz",
+    "formal-main-11-1.tar.gz",
+    "formal-main-11-2.tar.gz",
+    "harness-source.tar.gz",
+    "json4cj-source.tar.gz",
+    "optimal-api-overlay-main.patch",
+    "source-identity.json"
+  ]
+}
