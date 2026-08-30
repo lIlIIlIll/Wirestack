@@ -59,26 +59,33 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Run bounded native profile preflight
+      - name: Run bounded native Windows copy profile
         if: always()
         shell: pwsh
         run: |
           python tools/gates/m0_014_windows_copy_profile.py `
-            --run --quick --repetitions 3 `
+            --run --repetitions 5 `
             --repository-revision $env:GITHUB_SHA `
             --artifact-dir build/gates/m0-014/artifacts `
-            --output build/gates/m0-014/preflight.json
-          $profileExit = $LASTEXITCODE
-          if ($profileExit -ne 0 -and $profileExit -ne 3) { exit $profileExit }
-          exit 0
+            --output build/gates/m0-014/result.json
 
-      - name: Upload native preflight
+      - name: Validate exact-revision result
+        if: success()
+        shell: pwsh
+        run: |
+          python tools/gates/m0_014_windows_copy_profile.py `
+            --validate-report build/gates/m0-014/result.json `
+            --expected-revision $env:GITHUB_SHA `
+            --output build/gates/m0-014/validation.json
+
+      - name: Upload native profile
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: m0-014-windows-preflight-${{ github.sha }}
+          name: m0-014-windows-result-${{ github.sha }}
           path: |
-            build/gates/m0-014/preflight.json
+            build/gates/m0-014/result.json
+            build/gates/m0-014/validation.json
             build/gates/m0-014/artifacts/instrumented-*/heap.txt
           if-no-files-found: error
           retention-days: 14
