@@ -101,6 +101,8 @@ class M2006AppleResolverGateTests(unittest.TestCase):
         probe = Path("tools/gates/probes/m2_006_apple_resolver.cj").read_text(encoding="utf-8")
         self.assertIn("import std.env.exit", probe)
         self.assertIn("exit(if (failures == 0)", probe)
+        self.assertIn("wirestack_m2_006_probe_trace(caseId, 0)", probe)
+        self.assertIn("Deadline.after(5 * Duration.second)", probe)
         self.assertEqual(
             ["-mios-simulator-version-min=17.5"],
             gate.deployment_flags("ios-simulator-arm64"),

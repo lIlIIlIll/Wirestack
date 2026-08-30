@@ -8,9 +8,16 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #define WIRESTACK_TLS_TEST_STUB_UNAVAILABLE 6
+
+void wirestack_m2_006_probe_trace(int32_t case_id, int32_t phase) {
+    const char *label = phase == 0 ? "START" : (phase == 1 ? "PASS" : "FAIL");
+    (void)fprintf(stderr, "[ TRACE ] CASE: %d %s\n", case_id, label);
+    (void)fflush(stderr);
+}
 
 int32_t wirestack_tls_sha256(
     const uint8_t *input,

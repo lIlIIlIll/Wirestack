@@ -5,39 +5,49 @@ import std.env.exit
 import wirestack as api
 import wirestack.internal.resolver.SystemResolver
 
+foreign func wirestack_m2_006_probe_trace(caseId: Int32, phase: Int32): Unit
+
 main(): Int64 {
     var failures = 0
-    if (!m2006Run("resolves localhost", m2006Localhost)) { failures++ }
-    if (!m2006Run("returns and deduplicates candidates", m2006Candidates)) { failures++ }
-    if (!m2006Run("applies family and result bounds", m2006Bounds)) { failures++ }
-    if (!m2006Run("maps POSIX resolver failures", m2006Errors)) { failures++ }
-    if (!m2006Run("honors cancellation and Deadline", m2006Cancellation)) { failures++ }
-    if (!m2006Run("observes a new network generation", m2006NetworkChange)) { failures++ }
-    if (!m2006Run("closes idempotently and rejects invalid bounds", m2006Lifecycle)) {
+    if (!m2006Run(1, "resolves localhost", m2006Localhost)) { failures++ }
+    if (!m2006Run(2, "returns and deduplicates candidates", m2006Candidates)) { failures++ }
+    if (!m2006Run(3, "applies family and result bounds", m2006Bounds)) { failures++ }
+    if (!m2006Run(4, "maps POSIX resolver failures", m2006Errors)) { failures++ }
+    if (!m2006Run(5, "honors cancellation and Deadline", m2006Cancellation)) { failures++ }
+    if (!m2006Run(6, "observes a new network generation", m2006NetworkChange)) { failures++ }
+    if (!m2006Run(7, "closes idempotently and rejects invalid bounds", m2006Lifecycle)) {
         failures++
     }
     exit(if (failures == 0) { 0 } else { 1 })
 }
 
-private func m2006Run(name: String, action: () -> Bool): Bool {
+private func m2006Run(caseId: Int32, name: String, action: () -> Bool): Bool {
+    unsafe { wirestack_m2_006_probe_trace(caseId, 0) }
     try {
         if (action()) {
             println("[ PASSED ] CASE: ${name}")
+            unsafe { wirestack_m2_006_probe_trace(caseId, 1) }
             true
         } else {
             println("[ FAILED ] CASE: ${name}")
+            unsafe { wirestack_m2_006_probe_trace(caseId, 2) }
             false
         }
     } catch (_: Exception) {
         println("[ FAILED ] CASE: ${name}")
+        unsafe { wirestack_m2_006_probe_trace(caseId, 2) }
         false
     }
+}
+
+private func m2006Context(): api.OperationContext {
+    api.OperationContext(deadline: Some(api.Deadline.after(5 * Duration.second)))
 }
 
 private func m2006Localhost(): Bool {
     let resolver = SystemResolver(workerCount: 2, queueCapacity: 4)
     try {
-        let result = resolver.resolve(api.HostName("localhost"))
+        let result = resolver.resolve(api.HostName("localhost"), context: m2006Context())
         !result.addresses.isEmpty() && result.expiration.isNone() &&
             result.canonicalHost == api.HostName("localhost") &&
             m2006SystemSource(result.source)
@@ -50,7 +60,7 @@ private func m2006Localhost(): Bool {
 private func m2006Candidates(): Bool {
     let resolver = SystemResolver(workerCount: 2, queueCapacity: 4)
     try {
-        let result = resolver.resolve(api.HostName("all.m2-006.test"))
+        let result = resolver.resolve(api.HostName("all.m2-006.test"), context: m2006Context())
         result.addresses.size == 2 &&
             m2006Ipv6(result.addresses[0].family) &&
             m2006Ipv4(result.addresses[1].family) &&
@@ -69,11 +79,13 @@ private func m2006Bounds(): Bool {
             options: api.ResolveOptions(
                 family: api.ResolveAddressFamily.Ipv4,
                 maxResults: 8
-            )
+            ),
+            context: m2006Context()
         )
         let limited = resolver.resolve(
             api.HostName("all.m2-006.test"),
-            options: api.ResolveOptions(maxResults: 1)
+            options: api.ResolveOptions(maxResults: 1),
+            context: m2006Context()
         )
         ipv4.addresses.size == 1 && m2006Ipv4(ipv4.addresses[0].family) &&
             limited.addresses.size == 1 && m2006Ipv6(limited.addresses[0].family)
@@ -93,7 +105,7 @@ private func m2006Errors(): Bool {
             ("unknown.m2-006.test", api.ResolveErrorCode.SystemFailure)
         ]) {
             let error = m2006Capture({=>
-                let _ = resolver.resolve(api.HostName(name))
+                let _ = resolver.resolve(api.HostName(name), context: m2006Context())
             })
             if (!m2006Code(error.resolveCode, expected) || error.nativeCode.isNone() ||
                 !m2006ResolveDns(error)) {
@@ -142,8 +154,8 @@ private func m2006Cancellation(): Bool {
 private func m2006NetworkChange(): Bool {
     let resolver = SystemResolver(workerCount: 1, queueCapacity: 2)
     try {
-        let first = resolver.resolve(api.HostName("change.m2-006.test"))
-        let second = resolver.resolve(api.HostName("change.m2-006.test"))
+        let first = resolver.resolve(api.HostName("change.m2-006.test"), context: m2006Context())
+        let second = resolver.resolve(api.HostName("change.m2-006.test"), context: m2006Context())
         first.addresses.size == 2 && second.addresses.size == 2 &&
             first.addresses[1] != second.addresses[1]
     } finally {
