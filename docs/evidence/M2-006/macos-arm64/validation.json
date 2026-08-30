@@ -1,0 +1,8 @@
+{
+  "expected_mode": "macos",
+  "expected_revision": "f703e187a0816852b0eb55e7608e950ff03c829a",
+  "failures": [],
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M2-006"
+}
