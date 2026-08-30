@@ -1,0 +1,24 @@
+{
+  "acceptance_status": "PASS",
+  "capabilities": [
+    "customRoots",
+    "clientCert",
+    "server",
+    "tls12",
+    "tls13",
+    "http2",
+    "externalSigner",
+    "sessionResumption",
+    "secureRandom"
+  ],
+  "decision": "PASS",
+  "externalOpenSslDependency": false,
+  "platform": "linux-x86_64-glibc",
+  "providerId": "aws-lc",
+  "providerVersion": "5.5.0",
+  "schemaVersion": 1,
+  "selectionFingerprint": "df7877b47dde097d348795ee87e030fb18e2b6d072c3348326aa8a43b728f344",
+  "source_task": "M3-030",
+  "status": "PASS",
+  "taskId": "M3-030"
+}

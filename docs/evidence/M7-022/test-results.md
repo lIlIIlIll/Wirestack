@@ -2,25 +2,27 @@
 
 | Check | Result |
 |---|---|
-| Repository test-plan validator | PASS, 24 paths, 16 scenarios, 12 tests |
-| M7-022 and repository-tooling unit tests | PASS, 29 tests |
-| Post-M6-026 installed-artifact task preflight | PASS as a 10-second preflight; 52 cycles, 52 H2 multiplex batches, 104/104 joined tasks, 52 request cancellations, 52 stream resets and 7/7 connection recoveries; acceptance remained INCOMPLETE |
-| Installed-artifact task preflight | PASS as a short preflight; acceptance remained INCOMPLETE |
+| Repository test-plan validator | PASS, 25 paths, 17 scenarios, 13 tests |
+| M7-022 and repository-tooling unit tests | PASS, 32 tests |
+| Final installed-artifact task preflight | PASS as a 10-second preflight; 53 cycles, 53 H2 multiplex batches, 106/106 joined tasks, 53 request cancellations, 53 stream resets and 7/7 connection recoveries; acceptance correctly remained INCOMPLETE |
 | 60-second stability preflight | PASS workload and resource classification; 307 cycles, 614 joined tasks, 39 connection recoveries |
 | `scripts/check-fast` | PASS |
 | `scripts/check-task M7-022` | PASS |
 | Focused existing facade concurrency test | PASS |
-| `scripts/check-full` | PASS on final authorized run; `scripts/check` exited 0 |
-| Formal `scripts/check-long M7-022` | FAIL after 26.5 seconds with HTTP/2 `ProtocolViolation`; 24-hour acceptance not run to completion |
+| Final `scripts/check` | PASS, exit 0; Cangjie 569 PASS, 23 SKIPPED, 0 FAILED, 0 ERROR out of 592; SKIPPED was not counted as PASS |
+| Formal `scripts/check-long M7-022` | PASS; 86,410.283 seconds, exit 0, no timeout; workload elapsed 86,400.354 seconds and met all formal parameters |
 
-The post-M6-026 preflight used the requalified M7-021 archive with SHA-256
-`aad5b788d3404f80a5934fa5e156ee653e592820651bcc9f0198512a74ce4a04`.
-It completed with zero sequence errors and zero terminal application-owned
-waiters, buffers, background tasks or server tasks. Heap, RSS, FD, socket,
-timerfd, process and thread trends all classified PASS. This is reachability
-and cleanup evidence only, not a 24-hour resource-stability claim.
+The final preflight and formal run used the requalified M7-021 archive with
+SHA-256
+`c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee`.
+The formal run completed 253,704 cycles, 1,109,956 HTTP requests and 2,029,838
+SSE events. It joined all 507,408 spawned tasks with zero sequence error and
+zero terminal application-owned waiter, buffer, background task or server
+task. Heavy-GC heap, RSS, FD, socket, timerfd, process and thread trends all
+classified PASS across 289 application samples and 1,440 process-tree samples.
 
 The first sandboxed full gate could not create the unittest runner socket. The
 unchanged authorized command then exposed one existing stdnet timing failure.
 That exact test passed when isolated, and the next complete authorized full
-gate passed. Neither event changes the formal M7-022 failure above.
+gate passed. These historical environment events do not change the final
+formal M7-022 PASS.

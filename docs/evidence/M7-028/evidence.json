@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-29T02:38:10.325167Z",
+  "generated_at_utc": "2026-08-29T09:40:40.093765Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,25 +11,25 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M7-028/linux_x86_64/review-package.json",
-      "sha256": "5bebbc83660e56aea1b68d2276003c64b2cd9f74daf65c951ea62ebe01161545",
+      "sha256": "2edf1e77cebfe79daa9d746a93a51326da2e99f09fff0199dd38782b3cf18ca3",
       "source_task": "M7-028"
     },
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M7-028/task-check.json",
-      "sha256": "610b90f65a049ff6b6f21a4f9e56651d7d311a8889a3d8d323b6cf78cc64b08f",
+      "sha256": "804a92cdb42e082a46081035e4175652af6ef551a8c0df6ae7c46ec15bcd1673",
       "source_task": "M7-028"
     }
   ],
-  "revision": "1985913178631b001e8079313400b7855cd06f01",
+  "revision": "38b58ec2fbaa0779011a70992e86ffc4bbd88e17",
   "schema_version": 1,
   "source_sha256": {
-    ".gitignore": "69c23ae454002268818e451619c260fd589b3c395dceaf5386f56f6fd39e48c9",
+    ".gitignore": "a597755755bb3087cec35cf2a83b5519f196281cf5f70b870e10bc496faf063c",
     "docs/evidence/M7-028/README.md": "78c5f2167776531ecf7631847dfd2c7f5f80dc9e5f61a5514e418cc90a7b25d9",
     "docs/evidence/M7-028/test-plan.md": "1756b18b04d8421549164531ef7c615d13d66879488f92ef45857c10cb084617",
     "docs/security/review/linux-1.0/README.md": "86d93dde06874bef309a7f3cf3444ab5924fb4ebaa08c3963cc0d8fb93ee950e",
     "docs/security/review/linux-1.0/architecture.md": "a80494d72365ccd17a1514010e432ea80654ac06d1298002c29dc1dd25a10090",
-    "docs/security/review/linux-1.0/evidence-index.json": "19257a4f9d8571cdaea069beb571efa0e36e660563b25d90a83ce54345078b6c",
+    "docs/security/review/linux-1.0/evidence-index.json": "9d4c4676cd52883aa002e20946b474ac2777d7fcee2bcfe9c232436c44aeaf82",
     "docs/security/review/linux-1.0/keys-trust-and-data.md": "522114ac5b4362bfb2b3b319c6e0495466a65cce17ed341b2e6775527c957324",
     "docs/security/review/linux-1.0/known-limitations.md": "77701f7233c060fdf75c2332eba2c89fb287b8c00fe9c6bb8d0cbd20c0bfcba1",
     "docs/security/review/linux-1.0/parsers-and-limits.md": "1596462c6250b7613a000b24c411999204a2b6d0daade916fb19aad8973880ee",
