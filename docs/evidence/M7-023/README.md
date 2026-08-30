@@ -42,15 +42,24 @@ artifacts, and a checked-in-coordinate replay mode.
 | Proxy parser | 480 | 300 | PASS |
 
 The manifest
-[`tools/gates/manifests/m7-023-linux-fuzz.json`](../../../tools/gates/manifests/m7-023-linux-fuzz.json)
+[`tools/gates/campaigns/m7-023-linux-fuzz.json`](../../../tools/gates/campaigns/m7-023-linux-fuzz.json)
 pins the corpus path, raw-file SHA-256, test filter, seed, threshold, package,
 and timeout for every target. Each target consumes the corpus bytes supplied by
 the gate and emits exactly one independently checked `M7023_FUZZ` marker.
+
+The campaign manifest uses the M7-023-specific schema and therefore lives
+outside `tools/gates/manifests/`, which is reserved for the generic
+`gate_runner` schema validated by CI.
 
 The formal campaign was rerun after M6-026 changed HTTP/2 and public HTTP test
 sources. The previous report's source fingerprint no longer matched the
 working tree, so it was not reused. The unchanged manifest, corpora, seed and
 thresholds passed again with the source fingerprint recorded above.
+The namespace correction does not change the manifest bytes, corpus bytes,
+seed, thresholds, or qualified production source. A verification campaign and
+replay passed after the move with the same manifest and source digests. The
+checked-in reports retain the exact bytes already bound by the M7-028 review
+package instead of replacing reviewed evidence for a path-only correction.
 
 ## Crash retention and replay
 
@@ -81,9 +90,9 @@ the formal campaign report.
 
 | Command | Result |
 |---|---|
-| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-023/test-plan.md --json` | PASS; P=7, S=13, T=12 |
+| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-023/test-plan.md --json` | PASS; P=8, S=14, T=13 |
 | `python3 -m py_compile tools/gates/m7_023_linux_fuzz.py tools/gates/tests/test_m7_023_linux_fuzz.py` | PASS |
-| `python3 -m unittest tools.gates.tests.test_m7_023_linux_fuzz` | 6 passed |
+| `python3 -m unittest tools.gates.tests.test_m7_023_linux_fuzz` | 7 passed |
 | `cjpm test -j 1 --no-run --no-progress --no-color` | PASS; all test packages compiled |
 | Direct normal-mode execution of the five affected package test classes | 17 selected cases passed, 0 failed |
 | `scripts/gate-m7-023-linux-fuzz` | PASS; 10 targets, 6,465 iterations, 0 crashes |
