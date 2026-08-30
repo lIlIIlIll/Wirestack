@@ -353,9 +353,8 @@ def parse_xperf_allocation_count(text: str) -> int | None:
     return int(matches[0].replace(",", ""))
 
 
-def instrumented_transfer(binary: Path, payload: int, artifact_dir: Path,
-                          timeout: float) -> dict[str, Any]:
-    directory = artifact_dir / f"instrumented-{payload}"
+def _instrumented_transfer_attempt(binary: Path, payload: int, directory: Path,
+                                   timeout: float) -> dict[str, Any]:
     directory.mkdir(parents=True, exist_ok=True)
     etl = directory / "heap.etl"
     heap_report = directory / "heap.txt"
@@ -397,6 +396,30 @@ def instrumented_transfer(binary: Path, payload: int, artifact_dir: Path,
         "heap_report_sha256": sha256(heap_report) if heap_report.is_file() else None,
         "commands": commands,
     }
+
+
+def instrumented_transfer(binary: Path, payload: int, artifact_dir: Path,
+                          timeout: float) -> dict[str, Any]:
+    directory = artifact_dir / f"instrumented-{payload}"
+    attempts: list[dict[str, Any]] = []
+    result: dict[str, Any] | None = None
+    for attempt in range(1, 3):
+        result = _instrumented_transfer_attempt(
+            binary, payload, directory / f"attempt-{attempt}", timeout
+        )
+        attempts.append({
+            "attempt": attempt,
+            "allocation_count": result["allocation_count"],
+            "allocation_status": result["allocation_status"],
+            "etl_sha256": result["etl_sha256"],
+            "heap_report_sha256": result["heap_report_sha256"],
+        })
+        if result["allocation_count"] is not None:
+            break
+    assert result is not None
+    result["attempt_count"] = len(attempts)
+    result["attempts"] = attempts
+    return result
 
 
 def aggregate_case(payload: int, samples: Sequence[Mapping[str, Any]],
