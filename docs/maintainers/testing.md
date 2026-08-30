@@ -25,11 +25,14 @@ Benchmark 不能替代 correctness test；root white-box pass 也不能替代 st
 ```terminal
 python3 scripts/check_api_inventory.py
 python3 scripts/test_stage_source_tree.py
+python3 scripts/check_seven_library_evidence.py
 ```
 
 第一条命令包含快照生成器回归测试，确保 private/internal 类型的成员不会泄漏到 public API
-快照。第二条命令验证 source-only staging 会排除 build output、cache、benchmark result 和
-symlink。两条命令成功时均返回 0；它们不能替代 core 或 external consumer 测试。
+快照和 release manifest 依赖闭包。第二条命令验证 source-only staging 只复制 Git 跟踪文件，
+并排除 build output、可执行二进制、coverage/profile、嵌套归档和 symlink。第三条命令校验七库
+性能归档的 checksum、manifest、源码/工具链身份和可再生摘要。这些命令不能替代 core 或
+external consumer 测试。
 
 ## CI job mapping
 
@@ -37,11 +40,18 @@ GitHub Actions 的 `CI` workflow 在 GitHub-hosted Linux x86_64 runner 上执行
 门禁。`scripts/ci_job.sh` 提供 `api-inventory`、`runtime-freeze`、`core`、
 `standards-conformance`、`schema-formats-conformance`、`examples`、`macro-consumer`、
 `algorithms-consumer`、`registry-rehearsal`、`custom-native`、`yyjson-native`、`native-clang`、
-`native-gcc`、`sanitizer`、`fuzz-short` 和 `yyjson-colink` 等 job。
+`native-gcc`、`sanitizer`、`fuzz-short` 和 `yyjson-colink` 等 job。独立的
+`perf-evidence-drift` job 校验冻结的七库性能证据。workflow 在 `main` 和 `dev` push、目标为
+`main` 的 pull request、定时任务和手工触发时运行。
 
 workflow 在每个七天窗口首次运行时解析最新完整 Cangjie nightly，并缓存所选版本。Tests 与
 Core Coverage 必须使用同一个版本；窗口内重跑不会切换 SDK。Server performance、50,000-case
 扩展 fuzz 与 Windows cross build 仍属于发布资格验证，不进入日常 hosted CI。
+
+七天滚动 nightly 是兼容性 canary，不是可重建的发布资格身份。发布候选使用
+`workflow_dispatch` 的 `cangjie_version` 固定 exact SDK，并在日志中保留 runner image、SDK
+archive checksum、编译器版本和已安装 native package 版本。checkout、cache 和 setup action
+使用完整 commit SHA；发布证据还必须记录该次 run id 和所有 artifact checksum。
 
 若某个已确认的 nightly compiler 只在外部 dependency codegen 阶段崩溃，workflow 可以按完整
 SDK 版本对受影响的 dependency-boundary job 设置较低优化级别。例外不得使用版本范围，Core
