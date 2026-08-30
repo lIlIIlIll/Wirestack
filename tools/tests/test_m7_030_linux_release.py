@@ -263,12 +263,37 @@ class M7030LinuxReleaseTest(unittest.TestCase):
         workflow = release.inspect_workflow()
         self.assertEqual("PASS", workflow["decision"])
         self.assertEqual("frozen", workflow["artifactMode"])
+        self.assertEqual(release.FROZEN_ARTIFACT_TAG, workflow["artifactSource"]["tag"])
+        self.assertEqual(release.FROZEN_ARTIFACT_SHA256,
+                         workflow["artifactSource"]["sha256"])
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "workflow.yml"
             text = (release.ROOT / release.WORKFLOW).read_text(encoding="utf-8")
             path.write_text(text + "\n      - uses: Zxilly/setup-cangjie@" + "a" * 40 + "\n",
                             encoding="utf-8")
             with self.assertRaisesRegex(release.ReleaseError, "WORKFLOW_ARTIFACT_REBUILD"):
+                release.inspect_workflow(path)
+            path.write_text(
+                text.replace(release.FROZEN_ARTIFACT_TAG, "m7-030-wrong-artifact"),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(release.ReleaseError, "WORKFLOW_ARTIFACT_SOURCE"):
+                release.inspect_workflow(path)
+            path.write_text(
+                text.replace(release.FROZEN_ARTIFACT_SHA256, "0" * 64),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(release.ReleaseError, "WORKFLOW_ARTIFACT_DIGEST"):
+                release.inspect_workflow(path)
+            path.write_text(text.replace("$FROZEN_ARTIFACT_TAG", "--latest"),
+                            encoding="utf-8")
+            with self.assertRaisesRegex(release.ReleaseError,
+                                       "WORKFLOW_ARTIFACT_SOURCE|WORKFLOW_ARTIFACT_FALLBACK"):
+                release.inspect_workflow(path)
+            validation = "scripts/generate-m7-025-linux-supply-chain --validate-only"
+            path.write_text(text.replace(validation, "true", 1) + f"\n      - run: {validation}\n",
+                            encoding="utf-8")
+            with self.assertRaisesRegex(release.ReleaseError, "WORKFLOW_SUPPLY_CHAIN"):
                 release.inspect_workflow(path)
             path.write_text(
                 text + "\n      - run: scripts/qualify-m7-021-linux-release\n",
