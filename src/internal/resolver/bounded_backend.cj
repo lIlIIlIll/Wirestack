@@ -87,15 +87,15 @@ internal struct ResolverPoolMetrics {
 }
 
 /**
- * Linux blocking resolver backend isolated on a fixed native worker pool.
- * close() stops admission and quarantines any libc/NSS call that has not yet
- * returned; a native reaper releases the bounded pool only after all workers
- * and caller-held jobs have finished.
+ * Platform system resolver backend isolated on a fixed native worker pool.
+ * close() stops admission and quarantines any platform resolver call that has
+ * not yet returned; a native reaper releases the bounded pool only after all
+ * workers and caller-held jobs have finished.
  *
  * This type is intentionally internal. M2-005 owns the public SystemResolver
  * adapter and its platform error mapping.
  */
-internal class LinuxBoundedResolverBackend {
+internal class BoundedSystemResolverBackend {
     private let mutex = Mutex()
     private var poolHandle: UInt64 = 0u64
 
@@ -122,7 +122,7 @@ internal class LinuxBoundedResolverBackend {
         if (status != RESOLVER_OK || output[0] == 0u64) {
             throw ResolveException(
                 ResolveErrorCode.SystemFailure,
-                "failed to create bounded Linux resolver pool: ${status}"
+                "failed to create bounded system resolver pool: ${status}"
             )
         }
         poolHandle = output[0]
@@ -223,19 +223,19 @@ internal class LinuxBoundedResolverBackend {
         if (status == RESOLVER_OVERLOADED) {
             throw ResolveException(
                 ResolveErrorCode.TemporaryFailure,
-                "bounded Linux resolver pool is full"
+                "bounded system resolver pool is full"
             )
         }
         if (status == RESOLVER_CLOSED) {
-            throw ResolveException(ResolveErrorCode.SystemFailure, "Linux resolver pool is closed")
+            throw ResolveException(ResolveErrorCode.SystemFailure, "system resolver pool is closed")
         }
         if (status == RESOLVER_OUT_OF_MEMORY) {
-            throw ResolveException(ResolveErrorCode.SystemFailure, "Linux resolver pool allocation failed")
+            throw ResolveException(ResolveErrorCode.SystemFailure, "system resolver pool allocation failed")
         }
         if (status != RESOLVER_OK || output[0] == 0u64) {
             throw ResolveException(
                 ResolveErrorCode.InvalidName,
-                "Linux resolver rejected the request: ${status}"
+                "system resolver rejected the request: ${status}"
             )
         }
         output[0]
@@ -313,7 +313,7 @@ internal class LinuxBoundedResolverBackend {
             let code = resolveError(output.result[0])
             throw ResolveException(
                 code,
-                "Linux system resolver failed",
+                "system resolver failed",
                 if (output.nativeCode[0] == 0) {
                     None<Int64>
                 } else {
@@ -338,7 +338,7 @@ internal class LinuxBoundedResolverBackend {
             ))
         }
         if (addresses.isEmpty()) {
-            throw ResolveException(ResolveErrorCode.NoData, "Linux resolver returned no addresses")
+            throw ResolveException(ResolveErrorCode.NoData, "system resolver returned no addresses")
         }
         Some(ResolveResult(
             addresses.toArray(),
@@ -351,7 +351,7 @@ internal class LinuxBoundedResolverBackend {
 
     private func requireOpen(): UInt64 {
         if (poolHandle == 0u64) {
-            throw ResolveException(ResolveErrorCode.SystemFailure, "Linux resolver pool is closed")
+            throw ResolveException(ResolveErrorCode.SystemFailure, "system resolver pool is closed")
         }
         poolHandle
     }
@@ -398,7 +398,7 @@ internal func nativeResolverResultFamily(value: Int32): IpAddressFamily {
     }
     throw ResolveException(
         ResolveErrorCode.SystemFailure,
-        "Linux resolver returned an unknown address family"
+        "system resolver returned an unknown address family"
     )
 }
 
