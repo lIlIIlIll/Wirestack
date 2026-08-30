@@ -1,0 +1,417 @@
+{
+  "build": {
+    "command": [
+      "python3",
+      "/Users/runner/work/Wirestack/Wirestack/tools/build_resolver.py",
+      "--root",
+      "/Users/runner/work/Wirestack/Wirestack",
+      "--platform",
+      "ios-simulator-arm64",
+      "--test-fixture",
+      "--quiet"
+    ],
+    "diagnostics": "",
+    "duration_ms": 2678.169,
+    "exit_code": 0,
+    "output": "",
+    "timed_out": false
+  },
+  "decision": "PASS",
+  "failures": [],
+  "gate_id": "M2-006-APPLE-SYSTEM-RESOLVER",
+  "generated_at_utc": "2026-08-30T21:09:12.961145Z",
+  "mode": "ios-simulator",
+  "platform": {
+    "machine": "arm64",
+    "release": "24.6.0",
+    "runner_image": "macos15",
+    "runner_image_version": "20260727.0256.1",
+    "system": "Darwin",
+    "toolchain": {
+      "command": [
+        "cjc",
+        "-v"
+      ],
+      "diagnostics": "",
+      "duration_ms": 414.216,
+      "exit_code": 0,
+      "output": "Cangjie Compiler: 1.3.0-alpha.20260831010012 (cjnative)\nTarget: aarch64-apple-darwin\n",
+      "timed_out": false
+    }
+  },
+  "resolver_manifest": {
+    "archive": {
+      "path": "lib/libwirestack_resolver.a",
+      "sha256": "28d2e0e51877a46b4eb274260c06d9ff4c1909134d5ddb2efcedc83972810aab"
+    },
+    "build_fingerprint": "fcaff21a6c116ce7c22cf1f307064f2a0dfd89dfc09c8a8b1524ef8c07f1b2c2",
+    "build_smoke": "not-run-cross-target",
+    "close_model": "bounded quarantine with process-wide pool and worker caps",
+    "inputs": {
+      "compiler": "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+      "compiler_version": "Apple clang version 17.0.0 (clang-1700.0.13.5)",
+      "flags": [
+        "-std=c11",
+        "-O2",
+        "-fPIC",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-arch",
+        "arm64",
+        "-isysroot",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk",
+        "-mios-simulator-version-min=17.5",
+        "-DWIRESTACK_RESOLVER_TEST_FIXTURE=1"
+      ],
+      "platform": "ios-simulator-arm64",
+      "schema": 1,
+      "sources": {
+        "/Users/runner/work/Wirestack/Wirestack/native/resolver/apple/wirestack_resolver.c": "8638fbd65614b6c82f2f0212f5918553f6e9a46fac2b4d07c82d076b9e2802c5",
+        "/Users/runner/work/Wirestack/Wirestack/native/resolver/apple/wirestack_resolver.h": "47815e3f7fdc59335ce7aa7026a0faad0b0e12549d0f9729191f9c5d182259f4",
+        "/Users/runner/work/Wirestack/Wirestack/native/resolver/linux/wirestack_resolver.c": "6fa127bd1138b68c01f20d229529ec8d6028048c718dec441262a696b0c5b424",
+        "/Users/runner/work/Wirestack/Wirestack/native/resolver/linux/wirestack_resolver.h": "3e3e11c847283c846b96630fc97b4640844d56a765c51056551142d9f088873d"
+      },
+      "test_fixture": true
+    },
+    "platform": "ios-simulator-arm64",
+    "private_runtime_abi": false,
+    "schema_version": 1,
+    "test_fixture": true,
+    "worker_model": "fixed pthread pool with bounded FIFO admission"
+  },
+  "resolver_manifest_sha256": "49d4ed561e55ea5205023740e823dc1c23b4943cdd6826d09083b726aa15b789",
+  "resolver_test": {
+    "command": [
+      "xcrun",
+      "simctl",
+      "launch",
+      "--console",
+      "--terminate-running-process",
+      "59CB1C13-DDB8-49AB-92B3-627735A34147",
+      "dev.wirestack.m2-006-tests"
+    ],
+    "diagnostics": "",
+    "duration_ms": 5747.22,
+    "exit_code": 0,
+    "output": "[ TRACE ] CASE: 1 START\n[ TRACE ] CASE: 1 PASS\n[ TRACE ] CASE: 2 START\n[ TRACE ] CASE: 2 PASS\n[ TRACE ] CASE: 3 START\n[ TRACE ] CASE: 3 PASS\n[ TRACE ] CASE: 4 START\n[ TRACE ] CASE: 4 PASS\n[ TRACE ] CASE: 5 START\nAn exception has occurred:\nResolveException: resolution cancelled\n\t at wirestack.internal.resolver::checkResolveContext(wirestack::OperationContext)(/Users/runner/work/Wirestack/Wirestack/src/internal/resolver/package.cj:17)\n\t at wirestack.internal.resolver::BoundedSystemResolverBackend::resolve(wirestack::HostName, std.core::Option<...>, wirestack::ResolveOptions, wirestack::OperationContext)(/Users/runner/work/Wirestack/Wirestack/src/internal/resolver/bounded_backend.cj:144)\n\t at wirestack.internal.resolver::SystemResolver::resolve(wirestack::HostName, std.core::Option<...>, wirestack::ResolveOptions, wirestack::OperationContext)(/Users/runner/work/Wirestack/Wirestack/src/internal/resolver/system_resolver.cj:29)\n\t at wirestack.internal.resolver::SystemResolver::resolve(wirestack::HostName, wirestack::ResolveOptions, wirestack::OperationContext)(/Users/runner/work/Wirestack/Wirestack/src/internal/resolver/system_resolver.cj:38)\n\t at wirestack.m2_006_probe::m2006Cancellation::lambda.0()(/Users/runner/work/Wirestack/Wirestack/tools/gates/probes/m2_006_apple_resolver.cj:126)\n[ TRACE ] CASE: 5 PASS\n[ TRACE ] CASE: 6 START\n[ TRACE ] CASE: 6 PASS\n[ TRACE ] CASE: 7 START\n[ TRACE ] CASE: 7 PASS\n[ PASSED ] CASE: resolves localhost\n[ PASSED ] CASE: returns and deduplicates candidates\n[ PASSED ] CASE: applies family and result bounds\n[ PASSED ] CASE: maps POSIX resolver failures\n[ PASSED ] CASE: honors cancellation and Deadline\n[ PASSED ] CASE: observes a new network generation\n[ PASSED ] CASE: closes idempotently and rejects invalid bounds\ndev.wirestack.m2-006-tests: 10894\n",
+    "timed_out": false
+  },
+  "revision": "f703e187a0816852b0eb55e7608e950ff03c829a",
+  "schema_version": 1,
+  "scope": "native iOS Simulator arm64",
+  "simulator": {
+    "build": {
+      "command": [
+        "cjpm",
+        "build",
+        "-j",
+        "1",
+        "--target",
+        "arm64-apple-ios11-simulator",
+        "--target-dir",
+        "/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator",
+        "-V"
+      ],
+      "diagnostics": "",
+      "duration_ms": 18557.101,
+      "exit_code": 0,
+      "output": "Compiling build script of `wirestack`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc /Users/runner/work/Wirestack/Wirestack/build.cj -o /Users/runner/work/Wirestack/Wirestack/build-script-cache/arm64-apple-ios11-simulator/release/wirestack/bin/build-script --cfg target=arm64-apple-ios11-simulator\nRun build script: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH /Users/runner/work/Wirestack/Wirestack/build-script-cache/arm64-apple-ios11-simulator/release/wirestack/bin/build-script pre-build\nCompiling package `wirestack.internal.platform.windows`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/platform/windows --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.platform.windows.a\nCompiling package `wirestack.internal.platform.linux`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/platform/linux --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.platform.linux.a\nCompiling package `wirestack.internal.platform.android`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/platform/android --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.platform.android.a\nCompiling package `wirestack.internal.identity`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/identity --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.identity.a\nCompiling package `wirestack.internal.platform.apple`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/platform/apple --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.platform.apple.a\nCompiling package `wirestack.internal`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.a\nCompiling package `wirestack.internal.platform`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/platform --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.platform.a\nCompiling package `wirestack`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.a\nCompiling package `wirestack.internal.platform.harmony`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/platform/harmony --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.platform.harmony.a\nCompiling package `wirestack.internal.trust`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/trust --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.trust.a\nCompiling package `wirestack.internal.http_model`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/http_model --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.http_model.a\nCompiling package `wirestack.internal.transport`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/transport --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.transport.a\nCompiling package `wirestack.internal.common`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/common --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.common.a\nCompiling package `wirestack.internal.http2`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/http2 --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.http2.a\nCompiling package `wirestack.internal.tls_engine`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/tls_engine --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.tls_engine.a\n\u001b[33mwarning\u001b[0m: unused function:'metrics'\n   \u001b[36m==>\u001b[0m /Users/runner/work/Wirestack/Wirestack/src/internal/resolver/bounded_backend.cj:157:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m157\u001b[0m \u001b[36m| \u001b[0m      internal func metrics(): ResolverPoolMetrics {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m158\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         synchronized(mutex) {\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m181\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\nCompiling package `wirestack.internal.resolver`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/resolver --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.resolver.a\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilWriteActive'\n   \u001b[36m==>\u001b[0m /Users/runner/work/Wirestack/Wirestack/src/internal/transport_stdnet/package.cj:502:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m502\u001b[0m \u001b[36m| \u001b[0m      internal func waitUntilWriteActive(timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m503\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m515\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilAcceptActive'\n   \u001b[36m==>\u001b[0m /Users/runner/work/Wirestack/Wirestack/src/internal/transport_stdnet/package.cj:803:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m803\u001b[0m \u001b[36m| \u001b[0m      func waitUntilAcceptActive(timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m804\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m812\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n2 warnings generated, 2 warnings printed.\nCompiling package `wirestack.internal.transport_stdnet`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/transport_stdnet --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.transport_stdnet.a\nCompiling package `wirestack.tls`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/tls --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.tls.a\nCompiling package `wirestack.internal.connector`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/connector --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.connector.a\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilWaiters'\n   \u001b[36m==>\u001b[0m /Users/runner/work/Wirestack/Wirestack/src/internal/http1/connection_pool.cj:374:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m374\u001b[0m \u001b[36m| \u001b[0m      internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m375\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m384\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\nCompiling package `wirestack.internal.http1`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/internal/http1 --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.internal.http1.a\nCompiling package `wirestack.http`: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH cjc -p /Users/runner/work/Wirestack/Wirestack/src/http --import-path=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release --target=arm64-apple-ios11-simulator --no-sub-pkg --output-dir=/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack/ --sysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk --output-type=staticlib -o=libwirestack.http.a\nRun build script: DYLD_FALLBACK_LIBRARY_PATH=/Users/runner/work/_temp/cangjie-ios/cangjie/runtime/lib/darwin_aarch64_cjnative:$DYLD_FALLBACK_LIBRARY_PATH /Users/runner/work/Wirestack/Wirestack/build-script-cache/arm64-apple-ios11-simulator/release/wirestack/bin/build-script post-build\ncjpm build success\n",
+      "timed_out": false
+    },
+    "bundle_probe_sha256": "c3e37bd90a9322c979377141ae649bcf36614c816944c4b59d47f52cd7e195db",
+    "device_udid": "59CB1C13-DDB8-49AB-92B3-627735A34147",
+    "install": {
+      "command": [
+        "xcrun",
+        "simctl",
+        "install",
+        "59CB1C13-DDB8-49AB-92B3-627735A34147",
+        "/Users/runner/work/Wirestack/Wirestack/build/gates/m2-006/WirestackM2006.app"
+      ],
+      "diagnostics": "",
+      "duration_ms": 20438.02,
+      "exit_code": 0,
+      "output": "",
+      "timed_out": false
+    },
+    "probe_compile": {
+      "command": [
+        "cjc",
+        "/Users/runner/work/Wirestack/Wirestack/tools/gates/probes/m2_006_apple_resolver.cj",
+        "-o",
+        "/Users/runner/work/Wirestack/Wirestack/build/gates/m2-006/wirestack-m2-006-ios",
+        "--import-path",
+        "/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release",
+        "-L",
+        "/Users/runner/work/Wirestack/Wirestack/target/m2-006-ios-simulator/arm64-apple-ios11-simulator/release/wirestack",
+        "-lwirestack.internal.resolver",
+        "-lwirestack.internal.transport",
+        "-lwirestack.internal.common",
+        "-lwirestack",
+        "--target=arm64-apple-ios11-simulator",
+        "--sysroot",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk",
+        "--link-options",
+        "-L ./target/native/resolver/current/lib -lwirestack_resolver -L ./target/native/test-support/m2-006/lib -lwirestack_m2_006_tls_link_stub -rpath @executable_path/Frameworks"
+      ],
+      "diagnostics": "",
+      "duration_ms": 595.078,
+      "exit_code": 0,
+      "output": "",
+      "timed_out": false
+    },
+    "probe_sha256": "cf7613e92ca29236b4043d280545758004e7feac0c07e5ac6ea4f0f04aac55bd",
+    "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-2",
+    "runtime_libraries": [
+      {
+        "path": "Frameworks/libboundscheck.dylib",
+        "sha256": "843207024d3578eecb3e0079720b0fc2a4e9affaa98133242670026955489ef1"
+      },
+      {
+        "path": "Frameworks/libcangjie-runtime.dylib",
+        "sha256": "63e04966eae97a43085a81a5059d450717382bd4bc8a7cde4416510d33000cf8"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-argopt.dylib",
+        "sha256": "b80695ff1dbd15c37468bf2d2a00f68b1a2b5f3cbc61798551620a9c19ab2f03"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-ast.dylib",
+        "sha256": "2666b30b5c89d6bd0da51ca7b1e3df20b96816f6ea7437c98ad1d4d1791f0166"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-binary.dylib",
+        "sha256": "e3f882cdf1dbba466ec60adfa936bbef064864784dee8e0fc90af7036b39de00"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-collection.concurrent.dylib",
+        "sha256": "73afc0f5e5f642efed95771791925f5771a745bef7a2d62a6d6fb79e5aa47a86"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-collection.dylib",
+        "sha256": "b20286f74e26f075026012d53aa77e4c0f5d8b867982c0692cc4e3a9a3e484e8"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-console.dylib",
+        "sha256": "de1348771fcb0c9c08d3313ed6d06502b26a4fb8ad8b3dbd1edb1cfaf69d3d36"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-convert.dylib",
+        "sha256": "03f87567f025ab15b16f4ca8e51eb4fcd9988add988a548d1bf589e508c5cab0"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-core.dylib",
+        "sha256": "0b90cf559ef865ebc62eae9bfd518e2cec296159b3bd85d0d8fa35f201af26bd"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-crypto.cipher.dylib",
+        "sha256": "f90e1baf207ba97a17b76a99880090fde11b40a3e7276405c883e171c5e0d494"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-crypto.digest.dylib",
+        "sha256": "c5b13c442019da2ac1af9a481c08a232fa8419d6b570d26ce373c600fd59d6ac"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-crypto.dylib",
+        "sha256": "9f3b555378e6fa0e535195e998b7de83e8fe7936cd2548a1f7208c1e0aa76a17"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-database.dylib",
+        "sha256": "47e4edaee1d21edf9b46f3ae306a9f9c712edf2274a4fa263c1cd14c2eb5012c"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-database.sql.dylib",
+        "sha256": "86c8d47f39f93c0d141b38d8bfd29762b3a5d3b180e404d7e8782df7257cc291"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-deriving.api.dylib",
+        "sha256": "aeea86ca733fac38d4493654793e99545053167d675578b1b0b11a5bf8ca9dcc"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-deriving.builtins.dylib",
+        "sha256": "f9f5bb748eda1dffb153628048dfc52fb7d3888b5e323cd888188a3ee7853af1"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-deriving.impl.dylib",
+        "sha256": "3bf59f49ff9817fb963c3f0875b99cf5d50f67c9fcf4f5feb0b7cd0290e2e61b"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-deriving.resolve.dylib",
+        "sha256": "04bde13abc72b6d2a4acf52c95ddf78340b82de600995cb3619b0ad8546ad091"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-env.dylib",
+        "sha256": "0a45659c390c33e963f7e1d0951be90c6f9985a84909009f6d3f20348212ab3f"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-fs.dylib",
+        "sha256": "df2f0e78683e9d6c1780b47c86f1bbe4c017fb86482ebdcaa119298f6c63d07f"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-interop.dylib",
+        "sha256": "db5456fcd71528981993e749544419c574390da0a393a7093311b1c61326a5df"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-io.dylib",
+        "sha256": "f680cc7f359f66819c05f8e69cc9867cfe8bcacf6b68f1524cc8cb870c1d774b"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-math.dylib",
+        "sha256": "106687e2d416aee26accaa6c6a03fd84b684927fa9af191aa408b82f8b073591"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-math.numeric.dylib",
+        "sha256": "775d8118a95f6770547ea183c2f22a26a2fca452314ab9ea94ca66ed6fcde482"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-net.dylib",
+        "sha256": "1a1745a0436ac2723e3519023625b85a8c7613b1aa089a013aca0e478fa9a92a"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-objectpool.dylib",
+        "sha256": "4bde5dfe3c58690ebe3256b233ea098ba206c3deeaaebf63d3fc095bfd963e49"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-overflow.dylib",
+        "sha256": "b26555423af1e1e98621ba41621274d92652b6723d14d7844cebebe74718e197"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-posix.dylib",
+        "sha256": "039fc5ebd78ddbc62d1ccdb4e4d248481826ba5807fc5c18bc9b03b5703d4126"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-process.dylib",
+        "sha256": "2739fb202bf95dfc3d1e1b0ed31fd1a6c12107f7927a755a7d1f685224a71ca1"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-random.dylib",
+        "sha256": "a8d51fc7c21a5be6b3b1c2bd82486230a89138391b93abde3ea63ad05b7cef52"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-ref.dylib",
+        "sha256": "00a056037ecc9b6c4e37ff73d21939660b86ba8106445dd4f24805bab8fe8c5a"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-regex.dylib",
+        "sha256": "63b37d4a8889819782ae7a20e76abed5b8c2065746aaf690634bc405dd8aef89"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-runtime.dylib",
+        "sha256": "15263ddd40fd3382cb9805dc7e2fc27538b7be60e7a165e7a39ca4c0195c0b13"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-sort.dylib",
+        "sha256": "35dc201d82c82e4408b853ae75152fad2fea495dee429302da2c225ab35ac2f1"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-sync.dylib",
+        "sha256": "f607b2e3ad1848c3523463116da693e2cebc2d15e1e47e417df6b0c2e4a9d2d7"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-time.dylib",
+        "sha256": "d5be620e4ecbe0c97842e096e36c9da71c460a7a563b10d50b58811c9e11ac45"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-unicode.dylib",
+        "sha256": "b4e6b7afcd1f0e3aff53ee10ebf8335bfd1f5936e3f0eb0248a201b3829f1cd3"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-unittest.common.dylib",
+        "sha256": "a7fd3bed2fa2e60f1161d3aa3afe964881afabb9c56b8a187351a92ddf39e022"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-unittest.diff.dylib",
+        "sha256": "6176caca65c5a2f7c92f7797a5abb89343ef7162f4f3dacd04d9bfd02fa1cbed"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-unittest.dylib",
+        "sha256": "06270690c97fdc0493f832bb2291396af923a21cf89aa2248b1f270901e75599"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-unittest.mock.dylib",
+        "sha256": "d40aad1001cfb3f804165ba045cc4fba19dc037ec306655a082053ffea1b5833"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-unittest.mock.internal.dylib",
+        "sha256": "7f39375254d1977118b4fee87aef38d189fc44651eed31f76644b2ca2c6ea904"
+      },
+      {
+        "path": "Frameworks/libcangjie-std-unittest.prop_test.dylib",
+        "sha256": "372b1ae5d24dfd2f0737d29f51aeab00fc1c4b6a116e1fe75b106a136d48da9a"
+      },
+      {
+        "path": "Frameworks/libcangjie-std.dylib",
+        "sha256": "60f69b93f7afc15bae5c1335f9e015d918f961afd2d380da57259df8ee14541a"
+      },
+      {
+        "path": "Frameworks/libobjc.internal.dylib",
+        "sha256": "d5c523f9ba9ef76ba1787d814f52e9f59ff2649ce3fc61afde228ae89ed1c04a"
+      },
+      {
+        "path": "Frameworks/libobjc.lang.dylib",
+        "sha256": "d3c65337ba02013861e8b0311f392f6e2fd783b99b394e24c46ed46d01eb07df"
+      },
+      {
+        "path": "Frameworks/libpcre2-8.0.14.0.dylib",
+        "sha256": "29ad67003b68842b58c4abb81330132c771896198f21ac93484295aa1332cff4"
+      },
+      {
+        "path": "Frameworks/libpcre2-8.0.dylib",
+        "sha256": "29ad67003b68842b58c4abb81330132c771896198f21ac93484295aa1332cff4"
+      },
+      {
+        "path": "Frameworks/libpcre2-8.dylib",
+        "sha256": "29ad67003b68842b58c4abb81330132c771896198f21ac93484295aa1332cff4"
+      },
+      {
+        "path": "Frameworks/libsecurec.dylib",
+        "sha256": "39a01f003965c6e843a3b2dc98f3a50232b1895bbef91a9424592dab7e7cf350"
+      }
+    ]
+  },
+  "task_id": "M2-006",
+  "test_link_stub": {
+    "archive": {
+      "command": [
+        "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar",
+        "rcs",
+        "/Users/runner/work/Wirestack/Wirestack/target/native/test-support/m2-006/lib/libwirestack_m2_006_tls_link_stub.a",
+        "/Users/runner/work/Wirestack/Wirestack/target/native/test-support/m2-006/m2_006_tls_link_stub.o"
+      ],
+      "diagnostics": "",
+      "duration_ms": 7.117,
+      "exit_code": 0,
+      "output": "",
+      "timed_out": false
+    },
+    "archive_sha256": "3855300f81130f9b544a26213adfb4a4e35e699be41a49bb9f09bc35f13b52a8",
+    "compile": {
+      "command": [
+        "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-arch",
+        "arm64",
+        "-isysroot",
+        "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.5.sdk",
+        "-mios-simulator-version-min=17.5",
+        "-c",
+        "/Users/runner/work/Wirestack/Wirestack/tools/gates/native/m2_006_tls_link_stub.c",
+        "-o",
+        "/Users/runner/work/Wirestack/Wirestack/target/native/test-support/m2-006/m2_006_tls_link_stub.o"
+      ],
+      "diagnostics": "",
+      "duration_ms": 39.665,
+      "exit_code": 0,
+      "output": "",
+      "timed_out": false
+    },
+    "source_sha256": "9aebb19d64f2fc35db1547e9b2d2da774447a8756d4118fc44f0fcfb217f6970",
+    "target": "ios-simulator-arm64",
+    "test_only": true
+  }
+}
