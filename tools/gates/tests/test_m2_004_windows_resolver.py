@@ -29,6 +29,7 @@ def valid_report() -> dict[str, object]:
             "private_runtime_abi": False,
             "test_fixture": True,
         },
+        "test_link_stub": {"test_only": True},
     }
 
 
@@ -69,6 +70,11 @@ class M2004WindowsResolverGateTests(unittest.TestCase):
         failures = gate.validate_report(report, "abc")
         self.assertIn("RESOLVER_TEST:TIMEOUT", failures)
         self.assertIn("REPORT:FIXTURE_NOT_BOUND", failures)
+
+    def test_rejects_missing_test_only_link_stub_marker(self) -> None:
+        report = valid_report()
+        report["test_link_stub"] = {"test_only": False}
+        self.assertIn("REPORT:TEST_LINK_STUB", gate.validate_report(report, "abc"))
 
     def test_atomic_json_replaces_complete_document_without_temp_residue(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
