@@ -13,10 +13,10 @@ Hosted signing mode: frozen artifact; no compiler or artifact rebuild
 | Command | Result |
 |---|---|
 | `python3 tools/repository/repository_tooling.py --root . validate-tasks --json` | PASS; M7-030 task contract accepted. |
-| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-030/test-plan.md --json` | PASS; 24 paths, 21 scenarios and 17 planned tests. |
+| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-030/test-plan.md --json` | PASS; 25 paths, 22 scenarios and 18 planned tests. |
 | `python3 -m unittest tools.tests.test_m7_030_linux_release -v` | PASS; 12/12 tests. |
 | `scripts/generate-m7-025-linux-supply-chain --validate-only` | PASS; artifact `c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee`, build fingerprint `67dcd09f0ab99a33cfb204fb5f2a133a911f8f706ccf85a7a3312b980ddac9d9`. |
-| `scripts/release-m7-030-linux validate-workflow --output docs/evidence/M7-030/workflow-contract.json` | PASS; exact frozen tag and SHA-256, three attestation subjects and five immutable action references. |
+| `scripts/release-m7-030-linux validate-workflow --output docs/evidence/M7-030/workflow-contract.json` | PASS; exact frozen tag and SHA-256, isolated staging and attestation permissions, three attestation subjects and seven immutable action references. |
 | `scripts/check-m7-030-release` | PASS as `REHEARSAL`; three detached signatures, clean consumer, update, advisory and authorized rollback passed. Production attestation remains BLOCKED. |
 | `scripts/check-fast --json --output build/m7-030/check-fast.json` | PASS; task-contract fast gate. |
 | fixed-SDK `scripts/check` outside the restricted socket sandbox | PASS; Python tool tests, gate tests and benchmark tests passed; `cjpm check`, `cjpm build` and `cjpm test` passed. Cangjie summary: 592 total, 569 passed, 23 skipped by the repository's non-Performance selection, 0 error, 0 failed. The skipped cases are not reported as PASS. |
@@ -53,6 +53,13 @@ requires a fixed tag, asset name and SHA-256 before validation or signing.
 The draft Release upload and an independent download both reported 2,499,451
 bytes and SHA-256
 `c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee`.
+
+Run `33317478966` on merge commit
+`fcb50e00286cbff50711f871e2818901163134ea` failed in the exact asset download
+step with `release not found`. The job used `contents: read`; every signing,
+verification, report and upload step was skipped. The next workflow revision
+isolates draft access in a `contents: write` staging job with no OIDC, then
+reverifies the transferred bytes in the read-only attestation job.
 
 ## Task-level result
 
