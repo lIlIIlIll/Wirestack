@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-29T10:55:22.022554Z",
+  "generated_at_utc": "2026-08-30T11:57:54.614627Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -17,7 +17,7 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M7-029/task-check.json",
-      "sha256": "f403223c709103bc7e02d55bbce12cbc89135c6da7df3bb0e26ca357562ed4c3",
+      "sha256": "c49c7256ae9c4c774caad377cbffeef34d495db407c9a83dce9afeef239c6ee1",
       "source_task": "M7-029"
     },
     {
@@ -27,7 +27,7 @@
       "source_task": "M7-029"
     }
   ],
-  "revision": "6c546e8d2b12c5b83cd82db8ac2b267ad7a503ee",
+  "revision": "8c08fe85db5f5af711907629464311997051a2c7",
   "schema_version": 1,
   "source_sha256": {
     ".github/workflows/clean-cangjie-build.yml": "8e26e535f97829e47d7d5c05da6087794945b9fd097b92cd2a3805d0b6761bff",
@@ -67,7 +67,7 @@
     "docs/evidence/M7-029/second-isolated-review/independent-review.json": "ca7e07c77bb2400acca31ae7ac554f812f4869ff34ba3f847871c88a555a8b61",
     "docs/evidence/M7-029/second-isolated-review/review-summary.md": "7638911ec234fd6b67d03113dcbaf01e6c2de5cd720de90dfc588e0a0e5f9097",
     "docs/evidence/M7-029/test-plan.md": "839c5a7acc443a319cfb579746bdf61da252876cb5bff9a9306fae852bd99763",
-    "docs/planning/status.md": "cf247427edceffd2f600670c1045083c479ffef2f8cef1107f26678e8187a668",
+    "docs/planning/status.md": "9e7ceda7d7fddda0eaae6ba49800c72784d430ea0dc194b5d41d61f62f86c0bb",
     "docs/security/review/linux-1.0/evidence-index.json": "47da664a9d0e9450a9fe38c0a7fea3f39f4afba721f064a4a5fd917f2d3ea70e",
     "docs/security/review/linux-1.0/reviewer-instructions.md": "964763939ab0f2efd5b8b7e8ab00ade9a7e2e9585cdc87205353724ea4d37bc8",
     "native/resolver/linux/wirestack_resolver.c": "6fa127bd1138b68c01f20d229529ec8d6028048c718dec441262a696b0c5b424",
