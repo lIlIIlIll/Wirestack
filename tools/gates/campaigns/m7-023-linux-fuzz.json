@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "gate_id": "M7-023-LINUX-FUZZ",
+  "profile": "linux_glibc_x86_64",
+  "corpus_version": "m7-023-v1",
+  "seed": 7023,
+  "targets": [
+    {
+      "name": "tls-record",
+      "package": "wirestack.internal.tls_engine",
+      "filter": "M3028TlsFuzzTest.recordMutationsHaveDeterministicTypedTerminals",
+      "corpus": "fuzz/corpus/m7-023/v1/tls-record.hex",
+      "corpus_sha256": "a870c9ad0be02ddf5a92afa86028e9d20d21cbe399208472d0386803f45b945c",
+      "minimum_iterations": 512,
+      "timeout_seconds": 180
+    },
+    {
+      "name": "tls-handshake",
+      "package": "wirestack.internal.tls_engine",
+      "filter": "M3028TlsFuzzTest.handshakeMutationsHaveDeterministicTypedTerminals",
+      "corpus": "fuzz/corpus/m7-023/v1/tls-handshake.hex",
+      "corpus_sha256": "a870c9ad0be02ddf5a92afa86028e9d20d21cbe399208472d0386803f45b945c",
+      "minimum_iterations": 512,
+      "timeout_seconds": 180
+    },
+    {
+      "name": "hostname-verifier",
+      "package": "wirestack.internal.trust",
+      "filter": "M3028HostnameFuzzTest.hostnameMutationsHaveDeterministicTypedTerminals",
+      "corpus": "fuzz/corpus/m7-023/v1/hostname.hex",
+      "corpus_sha256": "1719b83d2eee012d2b4d6241b449e483ec4095462079a0231de5c6cb70d234a7",
+      "minimum_iterations": 2048,
+      "timeout_seconds": 120
+    },
+    {
+      "name": "certificate-adapter",
+      "package": "wirestack.internal.tls_engine",
+      "filter": "M3028TlsFuzzTest.certificateAdapterMutationsHaveDeterministicTypedTerminals",
+      "corpus": "fuzz/corpus/m7-023/v1/certificate.hex",
+      "corpus_sha256": "4e6b307323500f1c590c96d892d5459fa4857d70485a7e3c161823a2d515614b",
+      "minimum_iterations": 512,
+      "timeout_seconds": 180
+    },
+    {
+      "name": "http1-parser",
+      "package": "wirestack.internal.http1",
+      "filter": "Http1SmugglingCorpusTest.everyAcceptedSingleByteMutationHasACanonicalReparse",
+      "corpus": "fuzz/corpus/m7-023/v1/http1-head.hex",
+      "corpus_sha256": "5856acca97866d8dca66c3296d55106f8da3155e2ed4c78d3cb9325cb3e3ed9c",
+      "minimum_iterations": 800,
+      "timeout_seconds": 120
+    },
+    {
+      "name": "chunked-decoder",
+      "package": "wirestack.internal.http1",
+      "filter": "Http1SmugglingCorpusTest.chunkedMutationsHaveDeterministicBoundedTerminals",
+      "corpus": "fuzz/corpus/m7-023/v1/chunked.hex",
+      "corpus_sha256": "cb3c0b3cb27e94f45cba1ec3bba68a95e7e507061dcfde682ebac22931a4a734",
+      "minimum_iterations": 100,
+      "timeout_seconds": 120
+    },
+    {
+      "name": "http2-frame",
+      "package": "wirestack.internal.http2",
+      "filter": "Http2DeterministicFuzzTest.frameParserDeterministicMutationCorpusStaysBounded",
+      "corpus": "fuzz/corpus/m7-023/v1/http2-frame.hex",
+      "corpus_sha256": "65926b0e8eaa97070404c40cccbe81d3e0dc48f271e562a384981d0bdc717196",
+      "minimum_iterations": 200,
+      "timeout_seconds": 120
+    },
+    {
+      "name": "hpack-decoder",
+      "package": "wirestack.internal.http2",
+      "filter": "Http2DeterministicFuzzTest.hpackDecoderDeterministicMutationCorpusFailsClosed",
+      "corpus": "fuzz/corpus/m7-023/v1/hpack.hex",
+      "corpus_sha256": "086e0e279a7f0317ec53ec916dad52f685e7853097663fde6dcb0b4eef2ab511",
+      "minimum_iterations": 250,
+      "timeout_seconds": 120
+    },
+    {
+      "name": "url-authority",
+      "package": "wirestack.http",
+      "filter": "Http1DeterministicFuzzTest.acceptedUrlMutationsRoundTripToOneCanonicalIdentity",
+      "corpus": "fuzz/corpus/m7-023/v1/url.hex",
+      "corpus_sha256": "b8c3f5b3b76887c848ae397d71c9cdafa0cab47807150fc4a34aa1f212e62766",
+      "minimum_iterations": 500,
+      "timeout_seconds": 120
+    },
+    {
+      "name": "proxy-parser",
+      "package": "wirestack.http",
+      "filter": "Http1DeterministicFuzzTest.acceptedNoProxyMutationsRemainDeterministicAcrossTargets",
+      "corpus": "fuzz/corpus/m7-023/v1/proxy.hex",
+      "corpus_sha256": "1a50d7d7bee3bd74b6198f8c573ccb15c51d3cf7bf8c91ad0d5551e39c4a54e0",
+      "minimum_iterations": 300,
+      "timeout_seconds": 120
+    }
+  ]
+}
