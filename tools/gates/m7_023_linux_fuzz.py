@@ -351,7 +351,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--manifest", type=Path,
-        default=root / "tools/gates/manifests/m7-023-linux-fuzz.json",
+        default=root / "tools/gates/campaigns/m7-023-linux-fuzz.json",
     )
     parser.add_argument(
         "--output", type=Path,

@@ -23,8 +23,8 @@ artifacts, and a checked-in-coordinate replay mode.
 | Total deterministic iterations | 6,465 |
 | Current-run crash artifacts | 0 |
 | Gate report | [`linux_glibc_x86_64/fuzz-report.json`](linux_glibc_x86_64/fuzz-report.json) |
-| Gate report SHA-256 | `1e8000ed913a0f5c3138f31ee80b6c53d9ab026b672486f6f88e0c1ff392cf8b` |
-| Qualified source SHA-256 | `d36ddd00c3d4845af380c79396eee6add9a84f245a882cd7d25878fa2533d4a9` |
+| Gate report SHA-256 | `81d056538ed5ac99a1ca33e0ad6fad3c7e62f9b52f699265fd8e9325e3b8a711` |
+| Qualified source SHA-256 | `9707d1454f279a1688e1602e722385cc52b86e7e0feb01474210f29543789a7f` |
 
 ## Target thresholds
 
@@ -42,15 +42,24 @@ artifacts, and a checked-in-coordinate replay mode.
 | Proxy parser | 480 | 300 | PASS |
 
 The manifest
-[`tools/gates/manifests/m7-023-linux-fuzz.json`](../../../tools/gates/manifests/m7-023-linux-fuzz.json)
+[`tools/gates/campaigns/m7-023-linux-fuzz.json`](../../../tools/gates/campaigns/m7-023-linux-fuzz.json)
 pins the corpus path, raw-file SHA-256, test filter, seed, threshold, package,
 and timeout for every target. Each target consumes the corpus bytes supplied by
 the gate and emits exactly one independently checked `M7023_FUZZ` marker.
+
+The campaign manifest uses the M7-023-specific schema and therefore lives
+outside `tools/gates/manifests/`, which is reserved for the generic
+`gate_runner` schema validated by CI.
 
 The formal campaign was rerun after M6-026 changed HTTP/2 and public HTTP test
 sources. The previous report's source fingerprint no longer matched the
 working tree, so it was not reused. The unchanged manifest, corpora, seed and
 thresholds passed again with the source fingerprint recorded above.
+The namespace correction does not change the manifest bytes, corpus bytes,
+seed, thresholds, or qualified production source. A verification campaign and
+replay passed after the move with the same manifest and source digests. The
+checked-in reports retain the exact bytes already bound by the M7-028 review
+package instead of replacing reviewed evidence for a path-only correction.
 
 ## Crash retention and replay
 
@@ -73,7 +82,7 @@ A native replay of the chunked-decoder campaign passed 127/100 iterations. Its
 report is
 [`linux_glibc_x86_64/replay-report.json`](linux_glibc_x86_64/replay-report.json)
 with SHA-256
-`fb26ba61f168ebc0ae41c78ac13cd90e13245172b15037032eb8c375d0a1c0f7`.
+`016b02bf365492b7fb230beeefa486221178e5a6905a661e32b1009433dbc7af`.
 The replay report carries the same current source and manifest fingerprints as
 the formal campaign report.
 
@@ -81,9 +90,9 @@ the formal campaign report.
 
 | Command | Result |
 |---|---|
-| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-023/test-plan.md --json` | PASS; P=7, S=13, T=12 |
+| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-023/test-plan.md --json` | PASS; P=8, S=14, T=13 |
 | `python3 -m py_compile tools/gates/m7_023_linux_fuzz.py tools/gates/tests/test_m7_023_linux_fuzz.py` | PASS |
-| `python3 -m unittest tools.gates.tests.test_m7_023_linux_fuzz` | 6 passed |
+| `python3 -m unittest tools.gates.tests.test_m7_023_linux_fuzz` | 7 passed |
 | `cjpm test -j 1 --no-run --no-progress --no-color` | PASS; all test packages compiled |
 | Direct normal-mode execution of the five affected package test classes | 17 selected cases passed, 0 failed |
 | `scripts/gate-m7-023-linux-fuzz` | PASS; 10 targets, 6,465 iterations, 0 crashes |
