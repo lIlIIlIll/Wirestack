@@ -162,6 +162,10 @@ def find_provider_archives(prefix: Path, provider: str, windows: bool) -> list[P
     return [find_one(prefix, names) for names in provider_archive_names(provider, windows)]
 
 
+def cmake_runtime_args(windows: bool) -> list[str]:
+    return ["-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"] if windows else []
+
+
 def source_provider(spec: Mapping[str, Any], work: Path, log: Path) -> tuple[Path, dict[str, Any]]:
     source_root = work / "source"
     source_root.mkdir(parents=True, exist_ok=True)
@@ -212,6 +216,7 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
             "cmake", "-S", str(src), "-B", str(build), "-GNinja",
             "-DCMAKE_BUILD_TYPE=Release", "-DBUILD_SHARED_LIBS=OFF",
             "-DBUILD_TESTING=OFF", "-DDISABLE_GO=ON",
+            *cmake_runtime_args(is_windows()),
             f"-DCMAKE_INSTALL_PREFIX={prefix}",
         ], cwd=work, log=log)
         run(["cmake", "--build", str(build), "--target", "install", "--parallel", jobs], cwd=work, log=log)
@@ -221,6 +226,7 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
             "cmake", "-S", str(src), "-B", str(build), "-GNinja",
             "-DCMAKE_BUILD_TYPE=Release", "-DENABLE_TESTING=OFF",
             "-DENABLE_PROGRAMS=OFF", "-DUSE_SHARED_MBEDTLS_LIBRARY=OFF",
+            *cmake_runtime_args(is_windows()),
             f"-DCMAKE_INSTALL_PREFIX={prefix}",
         ], cwd=work, log=log)
         run(["cmake", "--build", str(build), "--parallel", jobs], cwd=work, log=log)
@@ -301,7 +307,7 @@ def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
     if is_windows():
         run([
             os.environ.get("CC", "cl"), "/nologo", "/std:c11", "/O2", "/W3", "/WX",
-            "/D_CRT_SECURE_NO_WARNINGS", f"/I{include}", *extra_cflags,
+            "/MT", "/D_CRT_SECURE_NO_WARNINGS", f"/I{include}", *extra_cflags,
             str(source), *[str(archive) for archive in archives],
             "bcrypt.lib", "crypt32.lib", "advapi32.lib", "user32.lib", "ws2_32.lib",
             f"/Fe:{output}",

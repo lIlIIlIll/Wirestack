@@ -170,6 +170,13 @@ class ProviderPocWindowsTests(unittest.TestCase):
             runner.provider_archive_names("openssl", True),
         )
 
+    def test_windows_cmake_and_poc_use_static_crt(self):
+        self.assertEqual(
+            ["-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"],
+            runner.cmake_runtime_args(True),
+        )
+        self.assertEqual([], runner.cmake_runtime_args(False))
+
     def test_atomic_json_has_platform_stable_lf(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "result.json"
@@ -230,6 +237,7 @@ class ProviderPocWindowsTests(unittest.TestCase):
             command = run_mock.call_args.args[0]
             self.assertEqual("provider-poc.exe", output.name)
             self.assertEqual("cl", command[0])
+            self.assertIn("/MT", command)
             self.assertNotIn("-pthread", command)
             self.assertNotIn("-lm", command)
             self.assertIn("bcrypt.lib", command)
