@@ -1,0 +1,131 @@
+name: Linux Release Attestation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+jobs:
+  attest-linux-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out exact release source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Install the pinned Cangjie toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: 1.1.0-alpha.20260817040003
+          archive-path: ${{ runner.temp }}/cangjie.tar.gz
+
+      - name: Install native build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang llvm cmake ninja-build
+
+      - name: Build and qualify the Linux release artifact
+        run: scripts/qualify-m7-021-linux-release
+
+      - name: Validate the frozen supply-chain documents
+        run: scripts/generate-m7-025-linux-supply-chain --validate-only
+
+      - name: Generate the signed release manifest subject
+        run: >-
+          python3 tools/m7_030_linux_release.py manifest
+          --output build/m7-030/release-manifest.json
+
+      - name: Attest artifact with its SBOM
+        id: attest-artifact
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d
+        with:
+          subject-path: dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz
+          sbom-path: docs/evidence/M7-025/linux_x86_64/sbom.spdx.json
+
+      - name: Attest the SBOM subject
+        id: attest-sbom
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d
+        with:
+          subject-path: docs/evidence/M7-025/linux_x86_64/sbom.spdx.json
+
+      - name: Attest the release manifest subject
+        id: attest-release-manifest
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d
+        with:
+          subject-path: build/m7-030/release-manifest.json
+
+      - name: Verify artifact attestation
+        id: verify-artifact
+        run: >-
+          gh attestation verify dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz
+          --bundle '${{ steps.attest-artifact.outputs.bundle-path }}'
+          --repo lIlIIlIll/Wirestack
+          --signer-workflow .github/workflows/linux-release-attestation.yml
+          --predicate-type https://spdx.dev/Document/v2.3
+          --deny-self-hosted-runners
+          --format json --jq '{verified: length}' > build/m7-030/artifact-verification.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Verify SBOM attestation
+        id: verify-sbom
+        run: >-
+          gh attestation verify docs/evidence/M7-025/linux_x86_64/sbom.spdx.json
+          --bundle '${{ steps.attest-sbom.outputs.bundle-path }}'
+          --repo lIlIIlIll/Wirestack
+          --signer-workflow .github/workflows/linux-release-attestation.yml
+          --deny-self-hosted-runners
+          --format json --jq '{verified: length}' > build/m7-030/sbom-verification.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Verify release manifest attestation
+        id: verify-release-manifest
+        run: >-
+          gh attestation verify build/m7-030/release-manifest.json
+          --bundle '${{ steps.attest-release-manifest.outputs.bundle-path }}'
+          --repo lIlIIlIll/Wirestack
+          --signer-workflow .github/workflows/linux-release-attestation.yml
+          --deny-self-hosted-runners
+          --format json --jq '{verified: length}' > build/m7-030/release-manifest-verification.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Produce the bounded hosted-attestation report
+        run: |
+          python3 tools/m7_030_linux_release.py hosted-report \
+            --commit "$GITHUB_SHA" \
+            --artifact dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz \
+            --artifact-bundle '${{ steps.attest-artifact.outputs.bundle-path }}' \
+            --artifact-verification build/m7-030/artifact-verification.json \
+            --sbom docs/evidence/M7-025/linux_x86_64/sbom.spdx.json \
+            --sbom-bundle '${{ steps.attest-sbom.outputs.bundle-path }}' \
+            --sbom-verification build/m7-030/sbom-verification.json \
+            --release-manifest build/m7-030/release-manifest.json \
+            --release-manifest-bundle '${{ steps.attest-release-manifest.outputs.bundle-path }}' \
+            --release-manifest-verification build/m7-030/release-manifest-verification.json \
+            --output build/m7-030/github-attestation.json
+
+      - name: Upload release subjects, bundles, and verification report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: wirestack-linux-release-attestation-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz
+            docs/evidence/M7-025/linux_x86_64/sbom.spdx.json
+            build/m7-030/release-manifest.json
+            build/m7-030/*-verification.json
+            build/m7-030/github-attestation.json
+            ${{ steps.attest-artifact.outputs.bundle-path }}
+            ${{ steps.attest-sbom.outputs.bundle-path }}
+            ${{ steps.attest-release-manifest.outputs.bundle-path }}

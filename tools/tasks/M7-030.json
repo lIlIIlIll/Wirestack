@@ -1,0 +1,94 @@
+{
+  "acceptance_commands": [
+    {
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/M7-030/test-plan.md", "--json"],
+      "gate": "task",
+      "id": "test-plan-matrix",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["python3", "-m", "unittest", "tools.tests.test_m7_030_linux_release", "-v"],
+      "gate": "task",
+      "id": "signing-update-fault-injection",
+      "long_running": false,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": ["scripts/generate-m7-025-linux-supply-chain", "--validate-only"],
+      "gate": "task",
+      "id": "supply-chain-inputs",
+      "long_running": false,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": ["scripts/release-m7-030-linux", "validate-workflow", "--output", "docs/evidence/M7-030/workflow-contract.json"],
+      "gate": "task",
+      "id": "hosted-workflow-contract",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["scripts/check-m7-030-release"],
+      "gate": "task",
+      "id": "local-signing-update-rehearsal",
+      "long_running": false,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": ["scripts/release-m7-030-linux", "validate-hosted", "--report", "docs/evidence/M7-030/github-attestation.json"],
+      "gate": "task",
+      "id": "github-hosted-attestations",
+      "long_running": false,
+      "timeout_seconds": 30
+    }
+  ],
+  "allowed_paths": [
+    ".github/workflows/linux-release-attestation.yml",
+    ".gitignore",
+    "docs/evidence/M7-030",
+    "docs/planning/linux-status.md",
+    "docs/planning/status.md",
+    "docs/security/update-policy.md",
+    "scripts/check-m7-030-release",
+    "scripts/release-m7-030-linux",
+    "tools/m7_030_linux_release.py",
+    "tools/tasks/M7-030.json",
+    "tools/tests/test_m7_030_linux_release.py",
+    "tools/tests/test_m7_linux_task_graph.py"
+  ],
+  "dependencies": ["M7-022", "M7-025", "M7-029"],
+  "long_running_gate": false,
+  "platforms": ["linux-x86_64-glibc"],
+  "required_evidence": [
+    "docs/evidence/M7-030/evidence.json",
+    "docs/evidence/M7-030/local-rehearsal.json",
+    "docs/evidence/M7-030/workflow-contract.json",
+    "docs/evidence/M7-030/github-attestation.json",
+    "docs/evidence/M7-030/task-check.json"
+  ],
+  "schema_version": 1,
+  "source_paths": [
+    ".github/workflows/linux-release-attestation.yml",
+    ".gitignore",
+    "docs/evidence/M7-021/linux_x86_64/qualification.json",
+    "docs/evidence/M7-025/linux_x86_64/build-fingerprint.json",
+    "docs/evidence/M7-025/linux_x86_64/bundle.json",
+    "docs/evidence/M7-025/linux_x86_64/provider-manifest.json",
+    "docs/evidence/M7-025/linux_x86_64/sbom.spdx.json",
+    "docs/evidence/M7-030/README.md",
+    "docs/evidence/M7-030/test-plan.md",
+    "docs/evidence/M7-030/test-results.md",
+    "docs/planning/linux-status.md",
+    "docs/planning/status.md",
+    "docs/security/update-policy.md",
+    "scripts/check-m7-030-release",
+    "scripts/release-m7-030-linux",
+    "tools/m7_030_linux_release.py",
+    "tools/tasks/M7-030.json",
+    "tools/tests/test_m7_030_linux_release.py",
+    "tools/tests/test_m7_linux_task_graph.py"
+  ],
+  "task_id": "M7-030",
+  "timeout_seconds": 420
+}
