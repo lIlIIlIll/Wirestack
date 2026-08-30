@@ -104,6 +104,16 @@ class M0014ValidatorTests(unittest.TestCase):
             self.assertIn('"READY"', target.read_text(encoding="utf-8"))
             self.assertEqual([target], list(Path(directory).iterdir()))
 
+    def test_xperf_parser_is_bounded_and_fail_closed(self) -> None:
+        self.assertEqual(
+            1234,
+            gate.parse_xperf_allocation_count("Heap Total Allocation Count: 1,234"),
+        )
+        self.assertIsNone(gate.parse_xperf_allocation_count("unrecognized output"))
+        self.assertIsNone(gate.parse_xperf_allocation_count(
+            "Total Allocation Count: 1\nTotal Allocation Count: 2"
+        ))
+
 
 if __name__ == "__main__":
     unittest.main()
