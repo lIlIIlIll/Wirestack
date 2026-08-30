@@ -65,6 +65,7 @@ def run_command(
     cwd: Path,
     env: dict[str, str],
     timeout: int,
+    output_limit: int = 20000,
 ) -> dict[str, Any]:
     started = time.monotonic_ns()
     try:
@@ -104,7 +105,7 @@ def run_command(
         "duration_ms": round((time.monotonic_ns() - started) / 1_000_000, 3),
         "exit_code": exit_code,
         "diagnostics": "\n".join(diagnostic_lines[-200:])[-30000:],
-        "output": output[-20000:],
+        "output": output[-output_limit:],
         "timed_out": timed_out,
     }
 
@@ -185,6 +186,7 @@ def select_ios_device(root: Path, env: dict[str, str]) -> tuple[str, str]:
         cwd=root,
         env=env,
         timeout=30,
+        output_limit=2 * 1024 * 1024,
     )
     require_success(listed, "iOS Simulator device discovery")
     try:
