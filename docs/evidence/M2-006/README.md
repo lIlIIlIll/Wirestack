@@ -32,10 +32,9 @@ The `M2-006 Apple SystemResolver` GitHub workflow has two independent jobs:
 
 Both jobs must run seven selected Cangjie cases and retain exact-revision
 reports. The iOS job compiles a statically linked standalone Cangjie resolver
-probe, packages it as the Simulator app executable, installs it, checks the
-installed executable digest, and launches it in the booted Simulator. This
-avoids a child-process test runner, which the app sandbox cannot launch.
-Compilation alone cannot satisfy the task.
+probe, records the signed bundle digest, installs it, and launches it in the
+booted Simulator. This avoids a child-process test runner, which the app sandbox
+cannot launch. Compilation alone cannot satisfy the task.
 
 ## Test-only link support
 
