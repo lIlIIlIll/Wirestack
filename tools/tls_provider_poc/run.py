@@ -163,7 +163,10 @@ def find_provider_archives(prefix: Path, provider: str, windows: bool) -> list[P
 
 
 def cmake_runtime_args(windows: bool) -> list[str]:
-    return ["-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"] if windows else []
+    return [
+        "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW",
+        "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
+    ] if windows else []
 
 
 def mbedtls_runtime_args(windows: bool) -> list[str]:

@@ -172,7 +172,10 @@ class ProviderPocWindowsTests(unittest.TestCase):
 
     def test_windows_cmake_and_poc_use_static_crt(self):
         self.assertEqual(
-            ["-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"],
+            [
+                "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW",
+                "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
+            ],
             runner.cmake_runtime_args(True),
         )
         self.assertEqual([], runner.cmake_runtime_args(False))
