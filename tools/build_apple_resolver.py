@@ -147,6 +147,8 @@ def build(
         "-std=c11", "-O2", "-fPIC", "-Wall", "-Wextra", "-Werror",
         "-arch", "arm64", "-isysroot", run(["xcrun", "--sdk", sdk, "--show-sdk-path"]).strip(),
     ]
+    if selected == "ios-simulator-arm64":
+        flags.append("-mios-simulator-version-min=17.5")
     if test_fixture:
         flags.append("-DWIRESTACK_RESOLVER_TEST_FIXTURE=1")
     fingerprint, inputs = build_fingerprint(sources, tools, selected, flags, test_fixture)
