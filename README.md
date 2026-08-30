@@ -5,26 +5,26 @@
 <p align="center">
   <strong>面向仓颉的类型安全 JSON 库</strong>
   <br />
-  <em>编译期 Codec · JSON 字面量 · Mutable AST · Compact DOM · Stream I/O</em>
+  <em>编译期 Codec · Mutable AST · Compact DOM · Stream I/O</em>
 </p>
 
 <p align="center">
   <a href="https://github.com/lIlIIlIll/yjson/actions/workflows/ci.yml"><img src="https://github.com/lIlIIlIll/yjson/actions/workflows/ci.yml/badge.svg?branch=main" alt="Tests" /></a>
   <a href="https://codecov.io/gh/lIlIIlIll/yjson"><img src="https://codecov.io/gh/lIlIIlIll/yjson/branch/main/graph/badge.svg?flag=core" alt="Core Coverage" /></a>
   <a href="https://github.com/lIlIIlIll/yjson/releases/latest"><img src="https://img.shields.io/github/v/release/lIlIIlIll/yjson?display_name=tag&sort=semver" alt="Release" /></a>
-  <a href="docs/performance/results/2026-08-27-yjson-2.0.0.md"><img src="https://img.shields.io/badge/Performance-qualified-10B981" alt="Performance qualified" /></a>
+  <img src="https://img.shields.io/badge/current%20line-0.1.0-F59E0B" alt="Current development line 0.1.0" />
   <a href="benchmarks/results/full-seven-library/current-main.json"><img src="https://img.shields.io/badge/main%20benchmark-current%20%7C%20noisy-F59E0B" alt="Current main benchmark is noisy" /></a>
   <a href="docs/performance/results/2026-08-28-stream-protocol-v1.md"><img src="https://img.shields.io/badge/Stream%20protocol-v1%20incomplete-F59E0B" alt="Stream protocol v1 incomplete" /></a>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Cangjie-%3E%3D1.1.0-3B82F6" alt="Cangjie 1.1.0 or later" />
-  <a href="release/2.0.0/evidence.md"><img src="https://img.shields.io/badge/Linux%20x86__64-qualified-10B981" alt="Linux x86_64 qualified" /></a>
   <a href="docs/architecture.md"><img src="https://img.shields.io/badge/engine-Pure%20default-8B5CF6" alt="Pure engine by default" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-yellow" alt="Apache License 2.0" /></a>
 </p>
 
-yjson 2.0 默认使用跨平台、GC 管理的 Pure 引擎。普通应用只需要
+yjson 当前从 `0.1.0` 重新开始成熟度版本线，并保留既有 1.x/2.0 tag 与证据作为历史记录。
+默认路径使用 GC 管理的 Pure 引擎。普通应用只需要
 `YJson.toJson`、`YJson.fromJson<T>` 与 `YJson.parseDocument`；不需要选择 backend，
 也不需要管理 scanner、whole-document 资源或 `close()`。
 
@@ -51,31 +51,35 @@ yjson 2.0 默认使用跨平台、GC 管理的 Pure 引擎。普通应用只需�
 要求仓颉 SDK 1.1.0，且 `cjc`、`cjpm` 位于 `PATH`。当前仓库示例使用 path
 dependency，不假定任何 registry 包已经发布。
 
-普通应用推荐依赖聚合包：
+使用生成式 codec 的应用显式依赖 runtime 与 macro package：
 
 ```toml
 [dependencies]
-yjson_all = { path = "../yjson/packages/yjson_all" }
+yjson = { path = "../yjson" }
+yjson_macros = { path = "../yjson/packages/yjson_macros" }
 ```
 
-`yjson_all` 同时导出 runtime 与 `@JsonCodec`、`@Json`、`@JsonValue`。它不会隐式启用
-Native backend。只使用 parser、AST 或内置 codec 时，可以仅依赖 core：
+只使用 parser、AST 或手写/内置 codec 时，可以仅依赖 `yjson`。`yjson_macros` 明确依赖同版本
+`yjson`，但应用仍应把自己直接使用的两个 package 都写入 manifest。Native 加速不会由 import
+或依赖关系自动启用；初始化和平台要求见 [Backend 使用指南](docs/backends.md)。
+
+所有九个发布包使用同一版本和同一候选 SHA。发布顺序与依赖闭包由
+[`release/release-graph.toml`](release/release-graph.toml) 唯一定义。
+
+只使用 runtime 时：
 
 ```toml
 [dependencies]
 yjson = { path = "../yjson" }
 ```
 
-`yjson` 与 `yjson_macros` 作为一个发行单元升级；generated codec 通过 v1 protocol
-检查兼容性，不要求应用人工匹配 exact commit。Native 加速与高级 backend 的依赖和
-构建要求见 [Backend 使用指南](docs/backends.md)。
-
 ## 快速开始
 
 ```cangjie
 package yjson_demo
 
-import yjson_all.*
+import yjson.*
+import yjson_macros.*
 
 @JsonCodec
 class User {
@@ -170,14 +174,15 @@ println(YJson.stringify(node))
 
 ```mermaid
 flowchart LR
-    App[应用代码] --> All[yjson_all]
-    All --> Core[yjson runtime]
-    All --> Macros[yjson_macros]
+    App[应用代码] --> Core[yjson]
+    App --> Macros[yjson_macros]
+    Macros --> Core
     Macros --> Codec[generated JsonCodec]
     Codec --> Core
     Core --> Pure[单一 reader / writer semantic engine]
     App -. 启动时一次 initialize .-> Accel[yjson_native_accel]
-    Accel --> Core
+    Accel --> Primitives[yjson_native_primitives]
+    Primitives --> Core
     App -. 高级显式资源 .-> Backends[yjson_backends]
 ```
 
@@ -195,8 +200,8 @@ flowchart LR
 - 默认 `JsonDocument` 由 GC 管理。只有 `yjson_backends.BackendJsonDocument` 是显式资源。
 - JSONPath、Patch/Merge Patch 与 Schema 位于 `yjson_algorithms`，默认预算耗尽统一抛出
   `JsonWorkLimitException(code: "work_limit_exceeded")`；可信离线任务可显式使用 `.unlimited`。
-- 当前 release qualification 以 Linux x86_64 为阻断平台；其他平台不得从源码可移植性
-  推断为已验证支持。
+- Pure 平台支持只由该版本的完整 GitHub runner 证据确认；Native package 初始资格范围限定为
+  Linux x86_64。不得从源码可移植性推断未验证平台已受支持。
 - 性能结果只适用于对应源码、SDK、主机、workload 和测量方法，不代表普遍排名。
 
 配置、安全边界和错误码分别见[配置与错误](docs/configuration-and-errors.md)与
@@ -212,7 +217,7 @@ flowchart LR
 - [Backend 使用指南](docs/backends.md)
 - [JSON Schema](docs/schema.md)
 - [性能方法与结果](docs/performance/README.md)
-- [1.x → 2.0 迁移](docs/migration/1.x-to-2.0.md)
+- [历史 1.x → 2.0 迁移记录](docs/migration/1.x-to-2.0.md)
 - [Release notes](RELEASE_NOTES.md) · [Changelog](CHANGELOG.md)
 
 维护者请从[测试策略](docs/maintainers/testing.md)、

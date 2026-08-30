@@ -23,8 +23,6 @@ class PurePerfProvenanceTest(unittest.TestCase):
             "packages/benchmarks/cjpm.lock": "benchmark lock\n",
             "packages/benchmarks/build.cj": "main() {}\n",
             "packages/benchmarks/src/bench.cj": "package bench\n",
-            "packages/yjson_all/cjpm.toml": "aggregate manifest\n",
-            "packages/yjson_all/cjpm.lock": "aggregate lock\n",
             "packages/yjson_macros/cjpm.toml": "macro manifest\n",
             "packages/yjson_macros/cjpm.lock": "macro lock\n",
             "scripts/build_native_scanner.py": "pass\n",

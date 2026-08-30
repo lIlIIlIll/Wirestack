@@ -15,3 +15,4 @@ package-configuration = {}
 [dependencies]
   yjson = { path = "../.." }
   yjson_backends = { path = "../yjson_backends" }
+  yjson_native_primitives = { path = "../yjson_native_primitives" }

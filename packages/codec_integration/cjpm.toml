@@ -13,4 +13,5 @@ link-option = ""
 package-configuration = {}
 
 [dependencies]
-yjson_all = { path = "../yjson_all" }
+yjson = { path = "../.." }
+yjson_macros = { path = "../yjson_macros" }

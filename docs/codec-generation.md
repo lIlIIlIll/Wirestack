@@ -7,7 +7,8 @@
 ## 最小声明
 
 ```cangjie
-import yjson_all.*
+import yjson.*
+import yjson_macros.*
 
 @JsonCodec
 class User {
@@ -101,6 +102,5 @@ discriminator 后把同一值 replay 给 subtype codec；Native tape 不会先�
 源码不依赖 `JsonDirectReader`、`JsonDirectWriter` 或公开 raw helper。v1 SPI 不变时允许
 runtime 与宏跨 patch 版本使用；协议不匹配会在编译或初始化边界明确失败。
 
-普通应用推荐只依赖 `yjson_all`，由 aggregate 管理 runtime 与 macro 的配套版本。直接组合
-`yjson` 与 `yjson_macros` 时，应选择声明相同 generated-support protocol 的发行版本，不再
-需要人工匹配 exact commit。
+应用应显式依赖 `yjson` 与 `yjson_macros`。两个 package 随同一个 lockstep release 发布，
+并声明相同 generated-support protocol；不要混用不同 release 的 runtime 与 macro artifact。

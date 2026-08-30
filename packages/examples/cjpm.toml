@@ -12,4 +12,5 @@ link-option = ""
 package-configuration = {}
 
 [dependencies]
-  "yjson_all" = { path = "../yjson_all", output-type = "static" }
+  yjson = { path = "../..", output-type = "static" }
+  yjson_macros = { path = "../yjson_macros", output-type = "static" }

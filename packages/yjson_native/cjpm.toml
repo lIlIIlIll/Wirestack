@@ -2,7 +2,7 @@
   cjc-version = "1.1.0"
   name = "yjson_native"
   organization = ""
-  description = "Optional Linux x86_64 native facade for yjson"
+  description = "Optional Linux x86_64 native DOM and stream backends for yjson"
   version = "0.1.0"
   target-dir = ""
   script-dir = ""
@@ -16,3 +16,4 @@
 # The native facade and its public backend seam require the matching core.
   yjson = { path = "../.." }
   yjson_backends = { path = "../yjson_backends" }
+  yjson_native_primitives = { path = "../yjson_native_primitives" }

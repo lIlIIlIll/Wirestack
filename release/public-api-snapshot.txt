@@ -210,12 +210,12 @@ yjson_macros|packages/yjson_macros/src/json_literal.cj|<top-level>|public macro 
 yjson_macros|packages/yjson_macros/src/json_literal.cj|<top-level>|public macro JsonValue(input: Tokens): Tokens
 yjson_native_accel|packages/yjson_native_accel/src/native_accel.cj|<top-level>|public class YJsonNativeAccel
 yjson_native_accel|packages/yjson_native_accel/src/native_accel.cj|YJsonNativeAccel|public static func initialize(): Unit
+yjson_native_primitives|packages/yjson_native_primitives/src/native_primitives.cj|<top-level>|public func initializeYJsonNativePrimitivesV1(): Unit
 yjson_native|packages/yjson_native/src/document_backend.cj|<top-level>|public class NativeCompactJsonBackend <: JsonDocumentBackend
 yjson_native|packages/yjson_native/src/document_backend.cj|<top-level>|public let NativeCompactDocumentBackend: JsonDocumentBackend = NativeCompactJsonBackend()
 yjson_native|packages/yjson_native/src/document_backend.cj|NativeCompactJsonBackend|public func name(): String
 yjson_native|packages/yjson_native/src/document_backend.cj|NativeCompactJsonBackend|public func parse(bytes: Array<Byte>, config: JsonReadConfig): BackendJsonDocument
 yjson_native|packages/yjson_native/src/document_backend.cj|NativeCompactJsonBackend|public init( sourceOwnership!: NativeCompactSourceOwnership = NativeCompactSourceOwnership.CopySource, duplicateStrategy!: NativeCompactDuplicateStrategy = NativeCompactDuplicateStrategy.Baseline, collectDuplicateStats!: Bool = false )
-yjson_native|packages/yjson_native/src/native_backend.cj|<top-level>|public func customNativeAccelerationProviderV1(): JsonAccelerationProviderV1
 yjson_native|packages/yjson_native/src/native_compact.cj|<top-level>|public class NativeCompactJsonDocument <: Resource
 yjson_native|packages/yjson_native/src/native_compact.cj|<top-level>|public enum NativeCompactDuplicateStrategy
 yjson_native|packages/yjson_native/src/native_compact.cj|<top-level>|public enum NativeCompactSourceOwnership

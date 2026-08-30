@@ -34,7 +34,7 @@ benchmarks/README.md
 release/release-files.txt
 
 # Pure Cangjie core, including its owned test suite
-src/example_support.cj
+src/example_support_test.cj
 src/lib_json_bind.cj
 src/lib_json_builtin_codecs.cj
 src/lib_json_compact_document.cj
@@ -56,27 +56,27 @@ src/lib_json_stream_tape.cj
 src/lib_json_stream_writer.cj
 src/lib_json_temporal_number_fast.cj
 src/lib_json_value.cj
-src/test_json_boundary.cj
-src/test_json_compact_document.cj
-src/test_json_concurrency.cj
-src/test_json_context_path.cj
-src/test_json_audit_contracts.cj
-src/test_json_coverage_contracts.cj
-src/test_json_direct_writer_state.cj
-src/test_json_document.cj
-src/test_json_literal.cj
-src/test_json_memory.cj
-src/test_json_parser_compliance.cj
-src/test_json_performance.cj
-src/test_json_reader.cj
-src/test_json_regression.cj
-src/test_json_resource_limits.cj
-src/test_json_semantic_vectors.cj
-src/test_json_serializer.cj
-src/test_json_special_cases.cj
-src/test_json_stream.cj
-src/test_json_stream_support.cj
-src/test_json_temporal_number_fast.cj
+src/json_audit_contracts_test.cj
+src/json_boundary_test.cj
+src/json_compact_document_test.cj
+src/json_concurrency_test.cj
+src/json_context_path_test.cj
+src/json_coverage_contracts_test.cj
+src/json_direct_writer_state_test.cj
+src/json_document_test.cj
+src/json_literal_test.cj
+src/json_memory_test.cj
+src/json_parser_compliance_test.cj
+src/json_performance_test.cj
+src/json_reader_test.cj
+src/json_regression_test.cj
+src/json_resource_limits_test.cj
+src/json_semantic_vectors_test.cj
+src/json_serializer_test.cj
+src/json_special_cases_test.cj
+src/json_stream_support_test.cj
+src/json_stream_test.cj
+src/json_temporal_number_fast_test.cj
 
 # Native implementation and low-level validation
 native/yjson_scanner.c
@@ -153,7 +153,7 @@ packages/benchmarks/src/bench_yjson.cj
 # Registry-ready package manifests (development manifests remain path-based)
 release/package-manifests/yjson_macros.toml
 release/package-manifests/yjson.toml
-release/package-manifests/yjson_all.toml
+release/package-manifests/yjson_native_primitives.toml
 release/package-manifests/yjson_native.toml
 release/package-manifests/yjson_native_accel.toml
 release/package-manifests/yjson_backends.toml
@@ -165,20 +165,20 @@ release/release-graph.toml
 release/public-api-inventory.toml
 release/public-api-snapshot.txt
 
-# Macro, aggregate, optional backend, examples, and consumer fixtures
+# Macro, native primitives, optional backends, examples, and consumer fixtures
 packages/yjson_macros/cjpm.toml
 packages/yjson_macros/cjpm.lock
 packages/yjson_macros/src/json_codec.cj
 packages/yjson_macros/src/json_literal.cj
 packages/yjson_macros/README.md
-packages/yjson_all/cjpm.toml
-packages/yjson_all/cjpm.lock
-packages/yjson_all/src/all.cj
-packages/yjson_all/README.md
+packages/yjson_native_primitives/cjpm.toml
+packages/yjson_native_primitives/cjpm.lock
+packages/yjson_native_primitives/build.cj
+packages/yjson_native_primitives/src/native_primitives.cj
+packages/yjson_native_primitives/src/native_primitives_test.cj
+packages/yjson_native_primitives/README.md
 packages/yjson_native/cjpm.toml
 packages/yjson_native/cjpm.lock
-packages/yjson_native/build.cj
-packages/yjson_native/src/native_backend.cj
 packages/yjson_native/src/native_compact.cj
 packages/yjson_native/src/document_backend.cj
 packages/yjson_native/src/stream_backend.cj
@@ -189,7 +189,7 @@ packages/yjson_native/README.md
 packages/yjson_native_accel/cjpm.toml
 packages/yjson_native_accel/cjpm.lock
 packages/yjson_native_accel/src/native_accel.cj
-packages/yjson_native_accel/src/test_native_accel.cj
+packages/yjson_native_accel/src/native_accel_test.cj
 packages/yjson_native_accel/README.md
 packages/yjson_backends/cjpm.toml
 packages/yjson_backends/cjpm.lock

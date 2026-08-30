@@ -1,7 +1,7 @@
 [package]
 cjc-version = "1.1.0"
-name = "yjson_native"
-description = "Optional Linux x86_64 native DOM and stream backends for yjson"
+name = "yjson_native_primitives"
+description = "Closed Linux x86_64 native primitive SPI for yjson"
 version = "0.1.0"
 script-dir = ""
 output-type = "dynamic"
@@ -10,5 +10,3 @@ link-option = "-L target/native -lyjson_scanner"
 
 [dependencies]
 yjson = "0.1.0"
-yjson_backends = "0.1.0"
-yjson_native_primitives = "0.1.0"

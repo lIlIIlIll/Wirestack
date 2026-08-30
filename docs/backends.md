@@ -1,13 +1,13 @@
 # Native 加速与高级 Backend
 
-yjson 2.0 的普通 API 没有 backend 参数。默认 Pure 引擎跨平台、GC 管理；可选 Native
+yjson `0.1.x` 的普通 API 没有 backend 参数。默认 Pure 引擎由 GC 管理；可选 Native
 加速只改变同一 semantic engine 的 primitive，不改变应用调用方式。
 
 ## 启动时启用 Custom Native
 
 ```toml
 [dependencies]
-yjson_all = { path = "../yjson/packages/yjson_all" }
+yjson = { path = "../yjson" }
 yjson_native_accel = { path = "../yjson/packages/yjson_native_accel" }
 ```
 
@@ -24,6 +24,9 @@ let document = YJson.parseDocument(text)
 第一次普通 `YJson` 调用会冻结 Pure；成功初始化会冻结 Native。相同 Native 初始化可幂等
 重复。晚初始化、不同 provider 竞争、ABI/protocol 不匹配或缺少 Native 能力都会抛出
 `JsonAccelerationException`。不支持 uninstall、运行期切换或静默回退。
+
+`yjson_native_accel` 通过内部 `yjson_native_primitives` 闭合 scanner 原生链接。应用不得直接
+调用 primitives provider 或安装函数；它们是第一方 lockstep package 之间的 closed SPI。
 
 默认 `JsonDocument` 始终是 managed Compact representation；Native 临时资源在
 `parseDocument` 返回前释放，调用方不需要 `close()`。

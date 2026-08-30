@@ -7,6 +7,11 @@
 
 ## [Unreleased]
 
+- 当前成熟度版本线重置为 `0.1.0`；既有 1.x/2.0 tag 与 evidence 只作为不可变历史保留。
+- 发布图固定为九个 lockstep package；删除 `yjson_all`，新增第一方 closed SPI
+  `yjson_native_primitives`，并将依赖方向改为 `yjson_macros → yjson`。
+- 全部同包测试改用 cjpm 的 `*_test.cj` 约定；release staging 复制 graph 声明的完整 source
+  root，不再用 `lib_*`/`test_*` 文件名前缀决定产品源码。
 - mutable `JsonNode` 的序列化、复制和等价比较现在检测祖先环，并允许共享 DAG 节点。
 - direct writer 现在强制单一 root、统一 semantic/raw depth 预算，并在 stream sink 写出前检查
   `maxBytes`。

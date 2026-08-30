@@ -5,17 +5,8 @@ status = "migration"
 # This file is the only ordered inventory of published yjson packages. Release
 # tooling must derive package names, versions, manifests, source roots, and
 # dependency pairing from this graph instead of maintaining private lists.
-
-[[packages]]
-name = "yjson_macros"
-role = "macros"
-development_manifest = "packages/yjson_macros/cjpm.toml"
-release_manifest = "release/package-manifests/yjson_macros.toml"
-source_root = "packages/yjson_macros/src"
-stage_kind = "package"
-stability = "stable"
-leaf_bundle = true
-dependencies = []
+# Dependencies must appear before their consumers so this is also the registry
+# publication order.
 
 [[packages]]
 name = "yjson"
@@ -27,49 +18,16 @@ stage_kind = "core"
 stability = "stable"
 leaf_bundle = true
 dependencies = []
-development_dependencies = ["yjson_macros"]
+test_dependencies = ["yjson_macros"]
 
 [[packages]]
-name = "yjson_all"
-role = "legacy-aggregate"
-development_manifest = "packages/yjson_all/cjpm.toml"
-release_manifest = "release/package-manifests/yjson_all.toml"
-source_root = "packages/yjson_all/src"
+name = "yjson_macros"
+role = "macros"
+development_manifest = "packages/yjson_macros/cjpm.toml"
+release_manifest = "release/package-manifests/yjson_macros.toml"
+source_root = "packages/yjson_macros/src"
 stage_kind = "package"
-stability = "experimental"
-leaf_bundle = false
-dependencies = ["yjson", "yjson_macros"]
-
-[[packages]]
-name = "yjson_native"
-role = "native-backend"
-development_manifest = "packages/yjson_native/cjpm.toml"
-release_manifest = "release/package-manifests/yjson_native.toml"
-source_root = "packages/yjson_native/src"
-stage_kind = "native"
-stability = "advanced"
-leaf_bundle = false
-dependencies = ["yjson", "yjson_backends"]
-
-[[packages]]
-name = "yjson_native_accel"
-role = "native-acceleration"
-development_manifest = "packages/yjson_native_accel/cjpm.toml"
-release_manifest = "release/package-manifests/yjson_native_accel.toml"
-source_root = "packages/yjson_native_accel/src"
-stage_kind = "package"
-stability = "advanced"
-leaf_bundle = false
-dependencies = ["yjson", "yjson_native"]
-
-[[packages]]
-name = "yjson_backends"
-role = "backend-api"
-development_manifest = "packages/yjson_backends/cjpm.toml"
-release_manifest = "release/package-manifests/yjson_backends.toml"
-source_root = "packages/yjson_backends/src"
-stage_kind = "package"
-stability = "advanced"
+stability = "stable"
 leaf_bundle = false
 dependencies = ["yjson"]
 
@@ -85,15 +43,49 @@ leaf_bundle = false
 dependencies = ["yjson"]
 
 [[packages]]
-name = "yjson_schema_formats"
-role = "schema-formats"
-development_manifest = "packages/yjson_schema_formats/cjpm.toml"
-release_manifest = "release/package-manifests/yjson_schema_formats.toml"
-source_root = "packages/yjson_schema_formats/src"
-stage_kind = "schema-formats"
-stability = "experimental"
+name = "yjson_backends"
+role = "backend-api"
+development_manifest = "packages/yjson_backends/cjpm.toml"
+release_manifest = "release/package-manifests/yjson_backends.toml"
+source_root = "packages/yjson_backends/src"
+stage_kind = "package"
+stability = "advanced"
 leaf_bundle = false
-dependencies = ["yjson", "yjson_algorithms"]
+dependencies = ["yjson"]
+
+[[packages]]
+name = "yjson_native_primitives"
+role = "native-primitives"
+development_manifest = "packages/yjson_native_primitives/cjpm.toml"
+release_manifest = "release/package-manifests/yjson_native_primitives.toml"
+source_root = "packages/yjson_native_primitives/src"
+stage_kind = "native-primitives"
+stability = "internal"
+leaf_bundle = false
+dependencies = ["yjson"]
+
+[[packages]]
+name = "yjson_native_accel"
+role = "native-acceleration"
+development_manifest = "packages/yjson_native_accel/cjpm.toml"
+release_manifest = "release/package-manifests/yjson_native_accel.toml"
+source_root = "packages/yjson_native_accel/src"
+stage_kind = "package"
+stability = "advanced"
+leaf_bundle = false
+dependencies = ["yjson_native_primitives"]
+test_dependencies = ["yjson"]
+
+[[packages]]
+name = "yjson_native"
+role = "native-backend"
+development_manifest = "packages/yjson_native/cjpm.toml"
+release_manifest = "release/package-manifests/yjson_native.toml"
+source_root = "packages/yjson_native/src"
+stage_kind = "package"
+stability = "advanced"
+leaf_bundle = false
+dependencies = ["yjson", "yjson_backends", "yjson_native_primitives"]
 
 [[packages]]
 name = "yjson_yyjson"
@@ -104,4 +96,15 @@ source_root = "packages/yjson_yyjson/src"
 stage_kind = "yyjson"
 stability = "advanced"
 leaf_bundle = false
-dependencies = ["yjson", "yjson_backends"]
+dependencies = ["yjson", "yjson_backends", "yjson_native_primitives"]
+
+[[packages]]
+name = "yjson_schema_formats"
+role = "schema-formats"
+development_manifest = "packages/yjson_schema_formats/cjpm.toml"
+release_manifest = "release/package-manifests/yjson_schema_formats.toml"
+source_root = "packages/yjson_schema_formats/src"
+stage_kind = "schema-formats"
+stability = "experimental"
+leaf_bundle = false
+dependencies = ["yjson", "yjson_algorithms"]

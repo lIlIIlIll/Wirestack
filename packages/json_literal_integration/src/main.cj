@@ -1,7 +1,8 @@
 package yjson_json_literal_integration
 
 import std.collection.*
-import yjson_all.*
+import yjson.*
+import yjson_macros.*
 
 private func require(condition: Bool, message: String): Unit {
     if (!condition) {

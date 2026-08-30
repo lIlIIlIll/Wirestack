@@ -12,6 +12,8 @@ link-option = ""
 package-configuration = {}
 
 [dependencies]
+
+[test-dependencies]
 yjson_macros = { path = "packages/yjson_macros" }
 
 [profile.bench]

@@ -18,16 +18,18 @@ cp "$root/scripts/build_native_scanner.py" "$work/scripts/build_native_scanner.p
 cp -R "$root/packages/yjson_macros" "$work/packages/yjson_macros"
 cp -R "$root/packages/runtime_freeze_contract" "$work/packages/runtime_freeze_contract"
 cp -R "$root/packages/yjson_backends" "$work/packages/yjson_backends"
+cp -R "$root/packages/yjson_native_primitives" "$work/packages/yjson_native_primitives"
 cp -R "$root/packages/yjson_native" "$work/packages/yjson_native"
 cp -R "$root/packages/yjson_native_accel" "$work/packages/yjson_native_accel"
 python3 -c 'import shutil; shutil.rmtree("'"$work"'/packages/runtime_freeze_contract/target", ignore_errors=True); shutil.rmtree("'"$work"'/packages/runtime_freeze_contract/cov_output", ignore_errors=True)' \
     </dev/null
-python3 -c 'import shutil; [shutil.rmtree("'"$work"'/packages/" + name + "/" + child, ignore_errors=True) for name in ("yjson_backends", "yjson_native", "yjson_native_accel") for child in ("target", "cov_output", "build-script-cache")]' \
+python3 -c 'import shutil; [shutil.rmtree("'"$work"'/packages/" + name + "/" + child, ignore_errors=True) for name in ("yjson_backends", "yjson_native_primitives", "yjson_native", "yjson_native_accel") for child in ("target", "cov_output", "build-script-cache")]' \
     </dev/null
 perl -0pi -e 's/compile-option = "-O2"/compile-option = "-O0"/' "$work/cjpm.toml"
 perl -0pi -e 's/compile-option = "-O2"/compile-option = "-O0"/' \
     "$work/packages/runtime_freeze_contract/cjpm.toml" \
     "$work/packages/yjson_backends/cjpm.toml" \
+    "$work/packages/yjson_native_primitives/cjpm.toml" \
     "$work/packages/yjson_native/cjpm.toml" \
     "$work/packages/yjson_native_accel/cjpm.toml"
 grep -F 'compile-option = "-O0"' "$work/cjpm.toml" >/dev/null

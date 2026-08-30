@@ -218,12 +218,14 @@ case "$job" in
         ;;
     custom-native)
         require_cangjie
+        run_with_dependency_override "$repo/packages/yjson_native_primitives" cjpm test --no-color
+        run_with_dependency_override "$repo/packages/yjson_native_accel" cjpm test --no-color
         run_with_dependency_override "$repo/packages/yjson_native" cjpm test --no-color
         stage_modules
         mapfile -t override_args < <(dependency_override_args)
         python3 "$repo/scripts/release_consumer_checks.py" \
             --modules-root "$modules" --only native "${override_args[@]}"
-        if nm -g --defined-only "$repo/packages/yjson_native/target/native/libyjson_scanner.a" | \
+        if nm -g --defined-only "$repo/packages/yjson_native_primitives/target/native/libyjson_scanner.a" | \
                 awk '{print $3}' | grep -E '^(yyjson_|unsafe_yyjson_)' >/dev/null; then
             echo 'custom native archive unexpectedly contains yyjson symbols' >&2
             exit 1

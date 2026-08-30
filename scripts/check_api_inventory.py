@@ -35,12 +35,13 @@ def check_versions(inventory: dict) -> None:
             if manifest["package"]["version"] != graph.version:
                 fail(f"{kind} {package.name} version is not {graph.version}")
             dependencies = manifest.get("dependencies", {})
-            expected_dependencies = (
-                package.development_dependencies if kind == "development"
-                else package.dependencies
-            )
+            expected_dependencies = package.dependencies
             if set(dependencies) != set(expected_dependencies):
                 fail(f"{kind} {package.name} dependencies do not match release graph")
+            if kind == "development":
+                test_dependencies = manifest.get("test-dependencies", {})
+                if set(test_dependencies) != set(package.test_dependencies):
+                    fail(f"development {package.name} test dependencies do not match release graph")
         for dependency in package.dependencies:
             if released["dependencies"][dependency] != graph.version:
                 fail(f"release {package.name} dependency {dependency} is not pinned to {graph.version}")

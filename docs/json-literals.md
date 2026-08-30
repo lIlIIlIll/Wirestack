@@ -40,6 +40,6 @@ println(YJson.stringify(root))
 - 只要对象含动态 key，运行时冲突采用 LastWins。
 - 即使字段最终被覆盖，其 key/value 插值表达式仍会执行；不要依赖 codec 写出副作用。
 
-macro 需要 `yjson_all`，或 protocol 兼容的 `yjson` 与 `yjson_macros` 依赖。默认 aggregate
-负责版本配套；v1 SPI 不变时允许跨 patch 版本，协议不匹配会明确失败。仓库中的
+macro 需要显式的 `yjson` 与 `yjson_macros` 依赖。两个 package 由同一 lockstep release
+配套；协议不匹配会明确失败。仓库中的
 `packages/json_literal_integration` 验证语法、求值顺序、动态冲突和可修改节点行为。

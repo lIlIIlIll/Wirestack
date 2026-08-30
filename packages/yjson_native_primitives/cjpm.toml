@@ -1,0 +1,16 @@
+[package]
+cjc-version = "1.1.0"
+name = "yjson_native_primitives"
+organization = ""
+description = "Closed Linux x86_64 native primitive SPI for yjson"
+version = "0.1.0"
+target-dir = ""
+script-dir = ""
+output-type = "dynamic"
+compile-option = "-O2"
+override-compile-option = ""
+link-option = "-L target/native -lyjson_scanner"
+package-configuration = {}
+
+[dependencies]
+yjson = { path = "../.." }

@@ -26,7 +26,7 @@ class ReleasePackage:
     stability: str
     leaf_bundle: bool
     dependencies: tuple[str, ...]
-    development_dependencies: tuple[str, ...]
+    test_dependencies: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -87,16 +87,16 @@ def load_release_graph(path: pathlib.Path = GRAPH_PATH) -> ReleaseGraph:
             raise ValueError(f"{name}.dependencies must be an array of package names")
         if len(dependencies) != len(set(dependencies)) or name in dependencies:
             raise ValueError(f"{name}.dependencies contains a duplicate or self edge")
-        development_dependencies = raw.get("development_dependencies", dependencies)
-        if not isinstance(development_dependencies, list) or not all(
-            isinstance(item, str) for item in development_dependencies
+        test_dependencies = raw.get("test_dependencies", [])
+        if not isinstance(test_dependencies, list) or not all(
+            isinstance(item, str) for item in test_dependencies
         ):
             raise ValueError(
-                f"{name}.development_dependencies must be an array of package names")
-        if (len(development_dependencies) != len(set(development_dependencies)) or
-                name in development_dependencies):
+                f"{name}.test_dependencies must be an array of package names")
+        if (len(test_dependencies) != len(set(test_dependencies)) or
+                name in test_dependencies):
             raise ValueError(
-                f"{name}.development_dependencies contains a duplicate or self edge")
+                f"{name}.test_dependencies contains a duplicate or self edge")
         role = raw.get("role")
         stage_kind = raw.get("stage_kind")
         stability = raw.get("stability")
@@ -117,14 +117,21 @@ def load_release_graph(path: pathlib.Path = GRAPH_PATH) -> ReleaseGraph:
             stability=stability,
             leaf_bundle=leaf_bundle,
             dependencies=tuple(dependencies),
-            development_dependencies=tuple(development_dependencies),
+            test_dependencies=tuple(test_dependencies),
         ))
 
     for package in packages:
         missing = sorted(
-            (set(package.dependencies) | set(package.development_dependencies)) - seen)
+            (set(package.dependencies) | set(package.test_dependencies)) - seen)
         if missing:
             raise ValueError(f"{package.name} depends on unknown packages: {', '.join(missing)}")
+    positions = {package.name: index for index, package in enumerate(packages)}
+    for package in packages:
+        forward = [dependency for dependency in package.dependencies
+                   if positions[dependency] >= positions[package.name]]
+        if forward:
+            raise ValueError(
+                f"{package.name} dependencies must precede it: {', '.join(forward)}")
     return ReleaseGraph(version=version, status=status, packages=tuple(packages))
 
 

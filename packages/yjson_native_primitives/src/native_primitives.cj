@@ -1,4 +1,4 @@
-package yjson_native
+package yjson_native_primitives
 
 import yjson.*
 
@@ -137,7 +137,7 @@ private class CustomNativeAccelerationProviderV1 <: JsonAccelerationProviderV1 {
     }
 }
 
-/// Versioned package seam consumed only by yjson_native_accel.
-public func customNativeAccelerationProviderV1(): JsonAccelerationProviderV1 {
-    CustomNativeAccelerationProviderV1()
+/// Versioned closed SPI consumed by yjson_native_accel during startup.
+public func initializeYJsonNativePrimitivesV1(): Unit {
+    initializeYJsonAccelerationV1(CustomNativeAccelerationProviderV1())
 }

@@ -127,6 +127,25 @@ public class PublicOuter {
                 generated,
             )
 
+    def test_generate_excludes_cjpm_suffix_test_files(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            source = root / "src"
+            source.mkdir(parents=True)
+            (source / "runtime.cj").write_text(
+                "package fixture\npublic func runtimeApi(): Unit {}\n",
+                encoding="utf-8",
+            )
+            (source / "runtime_test.cj").write_text(
+                "package fixture\npublic func testFixture(): Unit {}\n",
+                encoding="utf-8",
+            )
+            with mock.patch.object(SNAPSHOT, "ROOT", root), \
+                    mock.patch.object(SNAPSHOT, "PACKAGE_ROOTS", {"fixture": source}):
+                generated = SNAPSHOT.generate()
+            self.assertIn("runtimeApi", generated)
+            self.assertNotIn("testFixture", generated)
+
 
 if __name__ == "__main__":
     unittest.main()

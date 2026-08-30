@@ -1,7 +1,8 @@
 package yjson_codec_integration
 
 import std.collection.*
-import yjson_all.*
+import yjson.*
+import yjson_macros.*
 
 private func require(condition: Bool, message: String): Unit {
     if (!condition) { throw Exception(message) }

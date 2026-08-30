@@ -11,3 +11,4 @@ link-option = "-L target/native -lyjson_yyjson -lyjson_scanner"
 [dependencies]
 yjson = "0.1.0"
 yjson_backends = "0.1.0"
+yjson_native_primitives = "0.1.0"

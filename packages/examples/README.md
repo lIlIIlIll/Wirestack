@@ -15,6 +15,6 @@
 cjpm run
 ```
 
-示例只依赖 `yjson_all`，因此不会构建或启用 Native backend。Stream、Schema 与 Native
+示例显式依赖 `yjson` 与 `yjson_macros`，因此不会构建或启用 Native backend。Stream、Schema 与 Native
 分别见 [Stream I/O](../../docs/streams.md)、[JSON Schema](../../docs/schema.md)和
 [Backend 使用指南](../../docs/backends.md)。

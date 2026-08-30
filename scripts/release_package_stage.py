@@ -18,7 +18,9 @@ GRAPH = load_release_graph()
 
 def copy_path(source: pathlib.Path, target: pathlib.Path) -> None:
     if source.is_dir():
-        shutil.copytree(source, target, ignore=shutil.ignore_patterns("target", "build-script-cache", "*.o", "*.a", "*.so"))
+        shutil.copytree(source, target, ignore=shutil.ignore_patterns(
+            "target", "build-script-cache", "*.o", "*.a", "*.so",
+        ))
     else:
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
@@ -39,30 +41,29 @@ def stage(package, destination: pathlib.Path, development: bool) -> None:
         manifest = development_manifest(manifest)
     (module / "cjpm.toml").write_text(manifest, encoding="utf-8")
 
-    if name == "yjson":
-        for source in sorted((ROOT / "src").glob("lib_*.cj")):
-            copy_path(source, module / "src" / source.name)
+    if package.stage_kind == "core":
+        copy_path(ROOT / package.source_root, module / "src")
         for relative in ("README.md", "LICENSE", "THIRD_PARTY_NOTICES.md"):
             copy_path(ROOT / relative, module / relative)
         return
 
-    package = ROOT / "packages" / name
-    copy_path(package / "src", module / "src")
-    if (package / "README.md").exists():
-        copy_path(package / "README.md", module / "README.md")
+    package_root = (ROOT / package.source_root).parent
+    copy_path(ROOT / package.source_root, module / "src")
+    if (package_root / "README.md").exists():
+        copy_path(package_root / "README.md", module / "README.md")
     copy_path(ROOT / "LICENSE", module / "LICENSE")
-    if name == "yjson_schema_formats":
-        copy_path(package / "build.cj", module / "build.cj")
-        copy_path(package / "native", module / "native")
-    if name in ("yjson_native", "yjson_yyjson"):
-        copy_path(package / "build.cj", module / "build.cj")
+    if package.stage_kind == "schema-formats":
+        copy_path(package_root / "build.cj", module / "build.cj")
+        copy_path(package_root / "native", module / "native")
+    if package.stage_kind in ("native-primitives", "yyjson"):
+        copy_path(package_root / "build.cj", module / "build.cj")
         copy_path(ROOT / "scripts" / "build_native_scanner.py", module / "scripts" / "build_native_scanner.py")
         native_files = ["yjson_scanner.c", "yjson_scanner.h", "yjson_compact.c", "yjson_compact.h"]
-        if name == "yjson_yyjson":
+        if package.stage_kind == "yyjson":
             native_files += ["yjson_yyjson.c", "yjson_yyjson.h"]
         for filename in native_files:
             copy_path(ROOT / "native" / filename, module / "native" / filename)
-    if name == "yjson_yyjson":
+    if package.stage_kind == "yyjson":
         copy_path(ROOT / "native" / "vendor" / "yyjson", module / "native" / "vendor" / "yyjson")
         copy_path(ROOT / "THIRD_PARTY_NOTICES.md", module / "THIRD_PARTY_NOTICES.md")
 

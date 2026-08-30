@@ -210,7 +210,8 @@ def generate() -> str:
         if not root.exists():
             continue
         for path in sorted(root.rglob("*.cj"), key=lambda item: item.relative_to(root).as_posix()):
-            if path.name.startswith("test_") or path.name.startswith("example_"):
+            if (path.name.startswith(("test_", "example_")) or
+                    path.name.endswith("_test.cj")):
                 continue
             declarations.extend(cangjie_declarations(package, path))
     for path in sorted((ROOT / "native").glob("*.h")):

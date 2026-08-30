@@ -14,5 +14,5 @@ package-configuration = {}
 
 [dependencies]
   "yjson" = { path = "../..", output-type = "static" }
-  "yjson_all" = { path = "../yjson_all" }
+  "yjson_macros" = { path = "../yjson_macros" }
   "stdx" = "0.0.3"

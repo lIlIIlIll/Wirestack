@@ -8,5 +8,7 @@
   compile-option = "-O2"
 
 [dependencies]
+  yjson_native_primitives = { path = "../yjson_native_primitives" }
+
+[test-dependencies]
   yjson = { path = "../.." }
-  yjson_native = { path = "../yjson_native" }

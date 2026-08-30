@@ -66,7 +66,7 @@ def main() -> int:
     base = pathlib.Path(tempfile.mkdtemp(prefix="yjson-consumers-"))
     try:
         core = quote(modules / "yjson" if modules else ROOT)
-        aggregate = quote(modules / "yjson_all" if modules else ROOT / "packages" / "yjson_all")
+        macros = quote(modules / "yjson_macros" if modules else ROOT / "packages" / "yjson_macros")
         native = quote(modules / "yjson_native" if modules else ROOT / "packages" / "yjson_native")
         native_accel = quote(modules / "yjson_native_accel" if modules else ROOT / "packages" / "yjson_native_accel")
         backends = quote(modules / "yjson_backends" if modules else ROOT / "packages" / "yjson_backends")
@@ -98,8 +98,10 @@ main(): Unit {
 }
 ''', base, args.override_compile_option)
         if "macro" in selected:
-            run_fixture("macro", f'yjson_all = {{ path = "{aggregate}" }}', '''package yjson_release_macro
-import yjson_all.*
+            run_fixture("macro", f'''yjson = {{ path = "{core}" }}
+yjson_macros = {{ path = "{macros}" }}''', '''package yjson_release_macro
+import yjson.*
+import yjson_macros.*
 @JsonCodec
 class Person {
     public let id: Int64

@@ -1,6 +1,7 @@
 package yjson_benchmarks
 
-import yjson_all.*
+import yjson.*
+import yjson_macros.*
 import std.unittest.*
 import std.unittest.testmacro.*
 

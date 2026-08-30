@@ -26,7 +26,7 @@ def main() -> int:
     machine = platform.machine().lower()
     if system != SUPPORTED_SYSTEM or machine not in SUPPORTED_MACHINES:
         raise SystemExit(
-            "yjson_native_accel supports Linux x86_64 only; "
+            "yjson native primitives support Linux x86_64 only; "
             f"current build host is {system} {platform.machine()}"
         )
     out_dir = DEFAULT_OUT_DIR

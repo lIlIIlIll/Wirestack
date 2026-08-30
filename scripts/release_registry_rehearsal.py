@@ -104,11 +104,16 @@ def inspect_artifact(name: str, archive_path: pathlib.Path) -> None:
             raise RuntimeError(f"release artifact contains build output: {name}")
         if name == "yjson" and any("/native/" in member or "yyjson" in member for member in members):
             raise RuntimeError("core artifact contains native or yyjson input")
-        if name == "yjson_native":
+        if name == "yjson_native_primitives":
             required = ("native/yjson_scanner.c", "native/yjson_compact.c",
                         "scripts/build_native_scanner.py", "build.cj")
             if not all(any(member.endswith(item) for member in members) for item in required):
-                raise RuntimeError("Custom Native artifact is incomplete")
+                raise RuntimeError("Native primitives artifact is incomplete")
+        if name == "yjson_native":
+            required = ("src/native_compact.cj", "src/document_backend.cj",
+                        "src/stream_backend.cj", "README.md")
+            if not all(any(member.endswith(item) for member in members) for item in required):
+                raise RuntimeError("Custom Native backend artifact is incomplete")
         if name == "yjson_native_accel":
             required = ("src/native_accel.cj", "README.md")
             if not all(any(member.endswith(item) for member in members) for item in required):

@@ -86,7 +86,7 @@ needle = "public interface JsonNativeWriterBackend"
 stability = "protocol-v1"
 compatibility = "0.1.0 internal cross-package acceleration seam"
 contract = "Native code provides bounded string and Int64 read/write primitives; core retains cursor/state, separators, limits, normalized errors, and failure policy."
-consumer = "yjson_native implementation only"
+consumer = "yjson_native_primitives implementation only"
 
 [[api]]
 package = "yjson_backends"

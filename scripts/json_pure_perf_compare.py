@@ -193,8 +193,6 @@ def harness_manifest(root: pathlib.Path) -> dict[str, str]:
         package / "cjpm.toml",
         package / "cjpm.lock",
         package / "build.cj",
-        root / "packages/yjson_all/cjpm.toml",
-        root / "packages/yjson_all/cjpm.lock",
         root / "packages/yjson_macros/cjpm.toml",
         root / "packages/yjson_macros/cjpm.lock",
         root / "scripts/build_native_scanner.py",
@@ -211,7 +209,6 @@ def product_manifest(root: pathlib.Path) -> dict[str, str]:
     paths = [
         *sorted((root / "src").rglob("*.cj")),
         *sorted((root / "packages/yjson_macros/src").rglob("*.cj")),
-        *sorted((root / "packages/yjson_all/src").rglob("*.cj")),
     ]
     return files_manifest(root, paths)
 

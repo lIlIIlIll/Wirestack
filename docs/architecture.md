@@ -6,25 +6,27 @@
 ## Package graph
 
 ```text
-application
-└── yjson_all
-    ├── yjson          # runtime、typed API、AST、Compact、generated support v1
-    └── yjson_macros   # @JsonCodec、@Json、@JsonValue
-
-explicit optional packages
-├── yjson_native_accel   # 启动时一次初始化，同一 YJson API
-├── yjson_algorithms     # Schema、Pointer、Path、Patch 与有限预算
-├── yjson_backends       # 显式 resource-owning 高级 API
-├── yjson_native         # Custom Native primitives / advanced backend
-├── yjson_yyjson         # vendored yyjson advanced backend
-└── yjson_schema_formats # libidn2-backed Schema formats
+yjson
+├── yjson_macros ────────────────> yjson
+├── yjson_algorithms ────────────> yjson
+├── yjson_backends ──────────────> yjson
+├── yjson_native_primitives ─────> yjson       # first-party closed SPI
+├── yjson_native_accel ──────────> yjson_native_primitives
+├── yjson_native ────────────────> yjson + yjson_backends
+│                                  + yjson_native_primitives
+├── yjson_yyjson ────────────────> yjson + yjson_backends
+│                                  + yjson_native_primitives
+└── yjson_schema_formats ────────> yjson + yjson_algorithms
 ```
 
-`yjson_all` 只聚合 runtime 和 macros，不构建或启用 Native。optional package 显式依赖同
-版本 core，应用声明它们后才进入对应 build hook。
+箭头表示“左侧 package 依赖右侧 package”。九个 package 使用同一 `0.1.x` 版本和候选 SHA；
+[`release/release-graph.toml`](../release/release-graph.toml) 是发布顺序、源码 root 和依赖闭包的
+唯一清单。仓库不再发布 umbrella package，应用只声明自己直接使用的 runtime、macro 或
+optional package。
 
-根 development manifest 因 white-box fixture 使用 `@JsonCodec` 而依赖 macros；发布态
-core 只包含 `src/lib_*.cj`，没有 runtime → macro 依赖。
+根 development manifest 通过 `[test-dependencies]` 使用 macros；正常 core build 没有
+runtime → macro 依赖。每个 package 的完整 `src/` 进入候选 staging，`*_test.cj` 由 cjpm
+测试约定隔离，不靠发布脚本的文件名前缀过滤。
 
 ## 编译期路径
 
@@ -100,6 +102,10 @@ Native read primitive 覆盖 structural scan、string validation/unescape 与 nu
 scan/conversion；write primitive 覆盖 escaping、数字格式化和 buffer copy。它们只替换当前
 连续窗口或 target 的 primitive，配置、错误和 writer 状态仍由 core 解释。底层 contract 见
 [Native internals](maintainers/native-internals.md)。
+
+`yjson_native_primitives` 独占 scanner archive、原生链接和 provider 实现。应用只通过
+`yjson_native_accel` 启用默认 façade 加速；`yjson_native` 与 `yjson_yyjson` 则为高级 backend
+复用同一 primitives package。closed SPI 可生成 API reference，但不进入普通用户导航。
 
 ## 稳定边界
 

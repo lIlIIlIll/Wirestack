@@ -6,5 +6,4 @@ version = "0.1.0"
 output-type = "static"
 
 [dependencies]
-yjson = "0.1.0"
-yjson_native = "0.1.0"
+yjson_native_primitives = "0.1.0"

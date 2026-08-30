@@ -1,57 +1,49 @@
-# Release notes: 2.0.0
+# Release notes: 0.1.0
 
-yjson 2.0.0 于 2026-08-27 作为稳定版发布。该版本是相对 1.x 的 breaking release，统一了
-默认 JSON 引擎，并将高级算法和 Native 能力拆分为显式 package。发布内容见
-[GitHub Release](https://github.com/lIlIIlIll/yjson/releases/tag/2.0.0)，验收结果见
-[release evidence](release/2.0.0/evidence.md)。
+`0.1.0` 开启 yjson 当前的实验版本线。版本号降低是有意的成熟度重置：仓库没有已知的 package
+registry 用户，项目将在 `0.x` 阶段继续简化 API，再冻结未来的稳定 `1.0.0` 契约。
 
-## 默认 API 与 package 边界
+既有 `1.0.0-rc.1`、`2.0.0` tag、GitHub Release、带日期的性能报告和 evidence 保持不可变，
+作为历史原型保留；它们不定义 `0.1.x` 的兼容性。[2.0.0 release evidence](release/2.0.0/evidence.md)
+继续用于审计和性能基线。
 
-- `YJson` 使用 Pure Cangjie semantic engine。普通 API 不接受 backend 参数，也不要求
-  `close()`。
-- `JsonDocument` 是 GC 管理的只读 Compact representation。resource-owning DOM 和
-  WholeDocument stream 位于 `yjson_backends`。
-- `yjson_algorithms` 提供 JSON Pointer、JSON Patch、JSON Merge Patch、JSONPath 和
-  JSON Schema。
-- `yjson_native_accel` 是显式 opt-in package。应用只能在首次 `YJson` 调用前执行一次
-  `YJsonNativeAccel.initialize()`。进程冻结后不能卸载或切换 provider。
+## Package graph
 
-`yjson_all` 聚合 core 与 macro，但不会自动启用 Native backend。所有 yjson package 必须来自
-同一个 release，并一起重新编译。
+本版本包含九个使用同一版本号和候选 SHA 的 lockstep package：
 
-## Stream、codec 与资源限制
+| Package | 职责 |
+| --- | --- |
+| `yjson` | Pure runtime、typed API、mutable AST 与 managed document |
+| `yjson_macros` | 编译期 codec 生成 |
+| `yjson_algorithms` | Pointer、Path、Patch 与 Schema 算法 |
+| `yjson_backends` | 高级 backend API |
+| `yjson_native_primitives` | 第一方 closed Native primitives SPI |
+| `yjson_native_accel` | 默认 façade 的一次性加速初始化 |
+| `yjson_native` | Custom Native 高级 backend |
+| `yjson_yyjson` | vendored yyjson 高级 backend |
+| `yjson_schema_formats` | 可选的国际化 Schema formats |
 
-- String、bytes 和 stream 输入共享增量 grammar。writer target 共享一个结构状态机。
-- generated codec 使用版本化 `generated_support.v1` SPI。`JsonDirectCodec<T>` 更名为
-  `JsonCodec<T>`，不提供 1.x alias。
-- `JsonWriteConfig.maxBytes` 限制输出大小。算法 API 默认限制 visited、evaluation、match、
-  copy 和 depth 工作量。
-- generated polymorphic decode 使用 capture/replay，不再 serialize/reparse。
+`yjson_all` 已删除。使用 generated codec 的应用显式声明 runtime 与 macros：
 
-## 标准与可选能力
+```toml
+[dependencies]
+yjson = { path = "../yjson" }
+yjson_macros = { path = "../yjson/packages/yjson_macros" }
+```
 
-2.0.0 增加以下标准 API：
+有序依赖图由 [`release/release-graph.toml`](release/release-graph.toml) 唯一定义。examples、
+benchmarks、conformance package 和 consumer fixture 都是仓库测试资产，不进入发布包。
 
-- JSON Pointer（RFC 6901）。
-- JSON Patch（RFC 6902）。
-- JSON Merge Patch（RFC 7396）。
-- JSONPath（RFC 9535）。
-- JSON Schema draft 2020-12。
+## 兼容规则
 
-可选 `yjson_schema_formats` package 通过 libidn2 提供 IDNA2008、Punycode、Bidi、ContextJ、
-URI、IRI 和 RFC 6570 URI Template assertions。
+- `0.1.y` patch 保持已记录的 stable、advanced 和 experimental 应用 API 兼容。
+- 后续 `0.x.0` minor 可以破坏 API，但必须提供 API diff、迁移指南和版本化行为变更。
+- generated/native closed SPI 是第一方 lockstep 契约，不是应用扩展点；protocol 或 ABI 不匹配
+  必须明确失败。
 
-## 发布与平台状态
+## 发布证据
 
-2.0.0 已发布 Git tag 和 GitHub Release。仓库的 release evidence 不声明 registry publish。
-Linux x86_64 是该版本的 qualified 平台。Windows x86_64 只完成 Pure cross build。macOS
-和 ARM64 未验证。
-
-完整测试、coverage、standards、Native、sanitizer、fuzz、package rehearsal 和性能结果均绑定
-到 [`release/2.0.0`](release/2.0.0/evidence.md) 中记录的候选源码。后续开发变更见
-[Changelog](CHANGELOG.md) 的 Unreleased 部分。
-
-## 从 1.x 升级
-
-2.0 不提供 1.x compatibility shim。请一次升级所有 package，并按
-[1.x → 2.0 migration guide](docs/migration/1.x-to-2.0.md) 更新 API、初始化流程和资源限制。
+manifest 版本号本身不能证明发布。只有 annotated tag、GitHub Release、九个 artifact、checksum、
+SBOM、API diff、迁移指南、平台矩阵、API 文档和 digest-bound evidence 全部指向同一 clean commit
+时，`0.1.0` 才算发布。若 evidence 没有记录 registry publish，本版本只能声明为 GitHub artifacts
+可用。

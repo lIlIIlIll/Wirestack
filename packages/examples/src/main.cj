@@ -1,6 +1,7 @@
 package yjson_examples
 
-import yjson_all.*
+import yjson.*
+import yjson_macros.*
 
 @JsonCodec
 class ExampleUser {
