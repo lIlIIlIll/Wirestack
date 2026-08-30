@@ -101,7 +101,7 @@ public class TlsRuntimeInfo {
 /** Diagnostics only; each call returns a handle-free immutable snapshot. */
 public class TlsRuntime {
     public static func info(): TlsRuntimeInfo {
-        let provider = engine.AwsLcTlsProvider()
+        let provider = engine.selectedTlsProvider()
         try {
             TlsRuntimeInfo(provider.runtimeSnapshot())
         } finally {

@@ -57,6 +57,10 @@ QUALIFICATION_INPUTS = (
     "native/tls/aws_lc/wirestack_tls_provider.h",
     "tools/build_linux_resolver.py",
     "tools/build_linux_tls_provider.py",
+    "tools/build_tls_provider.py",
+    "tools/tls_provider/abi-v1.json",
+    "tools/tls_provider/selection.json",
+    "tools/tls_provider/selection.py",
     "tools/m7_021_linux_release.py",
     "tools/release_smoke/main.cj",
     "third_party/aws-lc/LICENSE",
@@ -160,7 +164,7 @@ def platform_identity() -> dict[str, str]:
 
 
 def prepare_native_dependencies(root: Path, *, offline: bool) -> None:
-    provider = [sys.executable, str(root / "tools/build_linux_tls_provider.py")]
+    provider = [sys.executable, str(root / "tools/build_tls_provider.py")]
     if offline:
         provider.append("--offline")
     run(provider, cwd=root)
@@ -234,6 +238,10 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
         "provider": {
             "id": provider_manifest.get("providerId"),
             "version": provider_manifest.get("providerVersion"),
+            "platform": "linux-x86_64-glibc",
+            "adapter": "linux-aws-lc",
+            "abi_version": provider_manifest.get("abiVersion"),
+            "build_fingerprint": provider_manifest.get("build_fingerprint"),
             "archive_sha256": provider_manifest.get("archive", {}).get("sha256"),
             "manifest_sha256": sha256_bytes(payload["target/native/current/provider-manifest.json"]),
         },

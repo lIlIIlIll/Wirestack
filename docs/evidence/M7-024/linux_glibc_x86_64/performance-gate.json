@@ -36,11 +36,11 @@
       "sha256": "8521871dedd09f2439abbf4cbfa27edb9048db839f87dd2a71042937d8db19e1"
     },
     {
-      "bytes": 107129,
+      "bytes": 107217,
       "decision": "PASS",
       "name": "http2",
       "path": "docs/evidence/M7-024/linux_glibc_x86_64/http2-benchmark-after-m6-026.json",
-      "sha256": "b4261bd1568e28afc123ff0f249f2eb1a54ca3a38be107c5da1966a496fe2226"
+      "sha256": "ca9cbf1710cffdae0d75361cbc6796c69d5459e15146a1ddc8dcbd5a41b145c6"
     },
     {
       "bytes": 167269,
@@ -1358,16 +1358,16 @@
           "operator": "eq"
         },
         {
-          "actual": "add5239e12407e259efd13f00404cbdd1444f020708a06a109f8f5e1da762bbe",
+          "actual": "2450fe679d91e0dd51c735a969f71351c6b378b76525a4b6d1a8b88248cd9b07",
           "decision": "PASS",
-          "expected": "add5239e12407e259efd13f00404cbdd1444f020708a06a109f8f5e1da762bbe",
+          "expected": "2450fe679d91e0dd51c735a969f71351c6b378b76525a4b6d1a8b88248cd9b07",
           "name": "HTTP/2 report production source digest",
           "operator": "eq"
         },
         {
-          "actual": "add5239e12407e259efd13f00404cbdd1444f020708a06a109f8f5e1da762bbe",
+          "actual": "2450fe679d91e0dd51c735a969f71351c6b378b76525a4b6d1a8b88248cd9b07",
           "decision": "PASS",
-          "expected": "add5239e12407e259efd13f00404cbdd1444f020708a06a109f8f5e1da762bbe",
+          "expected": "2450fe679d91e0dd51c735a969f71351c6b378b76525a4b6d1a8b88248cd9b07",
           "name": "HTTP/2 current production source digest",
           "operator": "eq"
         },
@@ -1457,7 +1457,7 @@
           "operator": "eq"
         },
         {
-          "actual": 0,
+          "actual": 1,
           "decision": "PASS",
           "expected": 256,
           "name": "streams_1 pass 1 bounded writes",
@@ -1478,7 +1478,7 @@
           "operator": "eq"
         },
         {
-          "actual": 0,
+          "actual": 1,
           "decision": "PASS",
           "expected": 256,
           "name": "streams_1 pass 2 bounded writes",
@@ -1569,7 +1569,7 @@
           "operator": "eq"
         },
         {
-          "actual": 1,
+          "actual": 0,
           "decision": "PASS",
           "expected": 256,
           "name": "streams_10 pass 2 bounded writes",
@@ -1611,14 +1611,14 @@
           "operator": "eq"
         },
         {
-          "actual": 50,
+          "actual": 37,
           "decision": "PASS",
           "expected": 256,
           "name": "streams_100 queue writes",
           "operator": "le"
         },
         {
-          "actual": 979,
+          "actual": 733,
           "decision": "PASS",
           "expected": 1048576,
           "name": "streams_100 queue bytes",
@@ -1679,27 +1679,27 @@
         "cases": {
           "streams_1": {
             "connections": 1,
-            "p50_latency_ns": 1135016,
-            "p95_latency_ns": 2123926,
-            "p99_latency_ns": 4386664,
-            "peak_rss_kib": 1095988,
-            "requests_per_second": 739.806
+            "p50_latency_ns": 1229313,
+            "p95_latency_ns": 1502719,
+            "p99_latency_ns": 1749572,
+            "peak_rss_kib": 1085308,
+            "requests_per_second": 854.426
           },
           "streams_10": {
             "connections": 1,
-            "p50_latency_ns": 6338278,
-            "p95_latency_ns": 10826553,
-            "p99_latency_ns": 11730100,
-            "peak_rss_kib": 1234364,
-            "requests_per_second": 1376.7
+            "p50_latency_ns": 5836360,
+            "p95_latency_ns": 9940226,
+            "p99_latency_ns": 13247418,
+            "peak_rss_kib": 1259960,
+            "requests_per_second": 1517.105
           },
           "streams_100": {
             "connections": 1,
-            "p50_latency_ns": 68656519,
-            "p95_latency_ns": 110471019,
-            "p99_latency_ns": 120186695,
-            "peak_rss_kib": 1102952,
-            "requests_per_second": 1286.515
+            "p50_latency_ns": 66728179,
+            "p95_latency_ns": 125033755,
+            "p99_latency_ns": 179027672,
+            "peak_rss_kib": 1226108,
+            "requests_per_second": 1245.926
           }
         },
         "connection_ratio": 0.01
@@ -2194,14 +2194,14 @@
           "operator": "le"
         },
         {
-          "actual": 50,
+          "actual": 37,
           "decision": "PASS",
           "expected": 256,
           "name": "streams_100 pending writes",
           "operator": "le"
         },
         {
-          "actual": 979,
+          "actual": 733,
           "decision": "PASS",
           "expected": 1048576,
           "name": "streams_100 pending bytes",
@@ -2247,9 +2247,9 @@
       "metrics": {
         "http1_rss_growth_kib": -948,
         "http2_peak_rss_kib": {
-          "streams_1": 1095988,
-          "streams_10": 1234364,
-          "streams_100": 1102952
+          "streams_1": 1085308,
+          "streams_10": 1259960,
+          "streams_100": 1226108
         },
         "sse_rss_growth_kib": {
           "h1": -30864,
@@ -2272,7 +2272,7 @@
   },
   "failed_domains": [],
   "gate_id": "M7-024-LINUX-PERFORMANCE",
-  "generated_at_utc": "2026-08-28T05:31:03.035221+00:00",
+  "generated_at_utc": "2026-08-29T08:19:39.875196+00:00",
   "manifest_environment": {
     "cangjie": "1.1.0-alpha.20260817040003",
     "cjpm": "1.1.3",
