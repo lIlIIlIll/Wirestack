@@ -14,10 +14,10 @@ committed sidecars disagree.
 | Field | Result |
 |---|---|
 | Name | `wirestack-0.1.0-linux-x86_64-glibc.tar.gz` |
-| Size | 2,478,208 bytes |
-| SHA-256 | `aad5b788d3404f80a5934fa5e156ee653e592820651bcc9f0198512a74ce4a04` |
-| Payload SHA-256 | `a02aaa388356e62a8da8ad8b3b16fda0a1d9bc9767adeb2e0322fd7f58c5b869` |
-| Release build fingerprint | `d25a4747887c34b835669f580ec47325c4b3cee926318135d0f6309dd17007ba` |
+| Size | 2,499,451 bytes |
+| SHA-256 | `c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee` |
+| Payload SHA-256 | `45ca196866697b568d33894bf3673aaec63fee01ee661bc5fc8319cd27c09e22` |
+| Release build fingerprint | `67dcd09f0ab99a33cfb204fb5f2a133a911f8f706ccf85a7a3312b980ddac9d9` |
 
 The release fingerprint uses canonical JSON and SHA-256. Its inputs include
 the artifact and payload digests, target and toolchain identity, feature and
@@ -30,16 +30,16 @@ dependency digest or fingerprint change the result.
 
 | Document | SHA-256 | Purpose |
 |---|---|---|
-| [`provider-manifest.json`](linux_x86_64/provider-manifest.json) | `dc081ce783cec65d1c6f1e2f89b53a64ae5b80f93d35ed891a5f286eadb858e1` | Provider, crypto, trust, capability, patch-level, target, feature, resolver, and runtime dependency inventory |
-| [`sbom.spdx.json`](linux_x86_64/sbom.spdx.json) | `c30601af48c237f6c287f7535cdd6b1120120cafef5393cf77b9119b891b5998` | SPDX 2.3 package inventory and containment/dependency relationships |
-| [`build-fingerprint.json`](linux_x86_64/build-fingerprint.json) | `87cba146a6f3f26a077a88c283c8c635689e1fadef02e2cfef165a978f43d8a0` | Canonical fingerprint inputs and result |
-| [`bundle.json`](linux_x86_64/bundle.json) | `58c31f352624a77d3de0b8d9721c5aac27bcbadbd77fe7852bd385b01948d96c` | PASS decision and sidecar digests |
+| [`provider-manifest.json`](linux_x86_64/provider-manifest.json) | `1576f659b5a95763b8827a3f5468ab8b08c910509877a44d9b1b2c90aed7c016` | Provider, crypto, trust, capability, patch-level, target, feature, resolver, and runtime dependency inventory |
+| [`sbom.spdx.json`](linux_x86_64/sbom.spdx.json) | `49df6442eaceb13f413c9b5b330b3855eee559c896532d30eb6de5d4e892bc6c` | SPDX 2.3 package inventory and containment/dependency relationships |
+| [`build-fingerprint.json`](linux_x86_64/build-fingerprint.json) | `5ba2bae96fc52d7a0a5eda9335cfba9ba7cb16e1ac15e3c6b9b676084ca69b82` | Canonical fingerprint inputs and result |
+| [`bundle.json`](linux_x86_64/bundle.json) | `638919d7fd44193781914fb889fb95bb616f02f34dcda3dbf652ad2a079cfc87` | PASS decision and sidecar digests |
 
 The SBOM marks AWS-LC and the bounded native resolver bridge as contained in
 the artifact. It records the Cangjie runtime, glibc, libstdc++, and libgcc as
-runtime environment dependencies that are not bundled. Wirestack has no
-repository license declaration, so Wirestack-owned packages use
-`NOASSERTION`; the pinned AWS-LC package records `Apache-2.0 OR ISC`.
+runtime environment dependencies that are not bundled. Wirestack-owned
+packages record `Apache-2.0`; the pinned AWS-LC package records
+`Apache-2.0 OR ISC`.
 
 ## Upstream boundary
 
