@@ -13,12 +13,29 @@ jobs:
   attest-linux-release:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    env:
+      FROZEN_ARTIFACT_TAG: m7-030-frozen-artifact-c0988f62
+      FROZEN_ARTIFACT_SHA256: c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee
     steps:
       - name: Check out exact release source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
           fetch-depth: 1
+
+      - name: Download the exact frozen release artifact
+        run: |
+          mkdir -p dist/m7-021
+          gh release download "$FROZEN_ARTIFACT_TAG" \
+            --repo lIlIIlIll/Wirestack \
+            --pattern wirestack-0.1.0-linux-x86_64-glibc.tar.gz \
+            --dir dist/m7-021
+          printf '%s  %s\n' \
+            "$FROZEN_ARTIFACT_SHA256" \
+            dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz \
+            | sha256sum --check --strict
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Validate the frozen supply-chain documents
         run: scripts/generate-m7-025-linux-supply-chain --validate-only

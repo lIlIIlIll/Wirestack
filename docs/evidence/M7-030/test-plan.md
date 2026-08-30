@@ -47,6 +47,7 @@ synthetic provider fixture is a released AWS-LC update.
 | P021 | Signing or provider input changes after a prior report | Evidence freshness | Reachable | Prior report becomes STALE |
 | P022 | Signing workflow depends on a Cangjie version that the hosted installer cannot resolve | Toolchain installation | Hosted failure | FAIL before signing; hosted signing must not depend on a compiler because it consumes the already frozen artifact |
 | P023 | Signing workflow rebuilds and overwrites the frozen M7-021 artifact | Frozen subject binding | Hosted failure | M7-025 digest validation fails; remove the rebuild and attest only the exact reviewed artifact |
+| P024 | Frozen artifact is absent from source checkout and must cross the hosted-runner boundary | Frozen asset retrieval | Reachable/hosted error | Download one exact draft Release asset by fixed tag, verify its fixed SHA-256, then validate the M7-025 bundle; missing, mismatched, latest or fallback selection fails closed |
 
 ## Input and state domains
 
@@ -60,6 +61,7 @@ synthetic provider fixture is a released AWS-LC update.
 | Advisory | signed current notice; missing; expired; wrong update; unsupported severity | Only the signed notice bound to the transition is accepted. |
 | Archive entry | regular file; directory; absolute path; `..`; symlink; hard link; second root | Only bounded files and directories below the one expected root are extracted. |
 | Execution mode | local rehearsal; external-key offline release; GitHub OIDC attestation | Rehearsal is never promoted to production PASS. |
+| Hosted artifact source | exact staging tag and digest; missing asset; wrong tag; wrong digest; latest or fallback lookup | Only the exact tag, asset name and SHA-256 may supply the frozen artifact. |
 
 ## State and side effects
 
@@ -100,6 +102,7 @@ synthetic provider fixture is a released AWS-LC update.
 | S018 | Signing policy, provider manifest, SBOM or workflow changes | Prior M7-030 evidence exists | P021 | STALE | Old PASS cannot be reused | evidence,regression | P0 |
 | S019 | Configured Cangjie pin is absent from the setup action nightly index | Hosted workflow checked out | P022 | FAIL closed before attestations | No skipped signing step is recorded as PASS; final signing workflow has no compiler dependency | CI,negative,regression | P0 |
 | S020 | Hosted workflow rebuilds the artifact with another toolchain or host | Frozen M7-021 artifact checked out | P023 | FAIL at M7-025 digest validation | Rebuilt bytes cannot inherit soak, SBOM or review evidence; final workflow validates and attests the checked-in frozen bytes | CI,supply-chain,regression | P0 |
+| S021 | Source checkout lacks the ignored artifact, or hosted retrieval selects missing, latest, fallback or digest-mismatched bytes | Frozen artifact exists only in the draft Release | P024 | FAIL closed before supply-chain validation or attestations | Workflow downloads once by exact tag and name, checks the fixed SHA-256, then validates M7-025; no other asset is accepted | CI,supply-chain,negative | P0 |
 
 ## Test-plan matrix
 
@@ -121,6 +124,7 @@ synthetic provider fixture is a released AWS-LC update.
 | T014 | S007,S009,S012 | P010,P012,P015 | Clean consumer install, upgrade and rollback sequence | PASS rehearsal | Version history, provider identity and SBOM digest are exact | integration,rehearsal |
 | T015 | S015,S019 | P018,P022 | Hosted workflow with compiler installer injected | FAIL | Static contract rejects `setup-cangjie`; unavailable installer run is retained as failed evidence only | CI,regression |
 | T016 | S015,S020 | P018,P023 | Hosted workflow with release rebuild command injected | FAIL | Static contract rejects artifact regeneration and requires supply-chain validation before attestation | CI,supply-chain,regression |
+| T017 | S015,S021 | P018,P024 | Wrong tag, digest, latest selector and download/validation order injected into hosted workflow | FAIL | Static contract binds one exact draft asset retrieval and requires digest check before supply-chain validation | CI,supply-chain,fault-injection |
 
 ## Coverage and gap review
 

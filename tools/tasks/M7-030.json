@@ -62,6 +62,7 @@
   "platforms": ["linux-x86_64-glibc"],
   "required_evidence": [
     "docs/evidence/M7-030/evidence.json",
+    "docs/evidence/M7-030/draft-release.json",
     "docs/evidence/M7-030/local-rehearsal.json",
     "docs/evidence/M7-030/workflow-contract.json",
     "docs/evidence/M7-030/github-attestation.json",
@@ -77,6 +78,7 @@
     "docs/evidence/M7-025/linux_x86_64/provider-manifest.json",
     "docs/evidence/M7-025/linux_x86_64/sbom.spdx.json",
     "docs/evidence/M7-030/README.md",
+    "docs/evidence/M7-030/draft-release.json",
     "docs/evidence/M7-030/test-plan.md",
     "docs/evidence/M7-030/test-results.md",
     "docs/planning/linux-status.md",
