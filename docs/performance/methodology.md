@@ -60,7 +60,10 @@ C/H 输入相同，然后以独立进程执行相同 case。正式 `--enforce` �
 
 结果目录中的 `provenance.json` 记录两侧 commit/tree、dirty state、产品源码 manifest、Cangjie
 与 C 工具链路径/版本/摘要、构建环境、语料摘要、调用参数，以及最终 executable 的 SHA-256
-和长度。候选产品源码和二进制可以与 baseline 不同；共同 benchmark harness 不得不同。
+和长度。runner 在 rebuild 前后分别记录源码身份；`--enforce` 要求 commit、tree、产品 manifest
+保持一致，且构建后工作树仍为 clean。任一 tracked 输入被 build script 或 macro 改写都会在
+采集 executable hash 前失败。候选产品源码和二进制可以与 baseline 不同；共同 benchmark
+harness 不得不同。
 
 不指定 `--cpu` 时，runner 只选择两个 hardware thread 利用率都低于 1% 的物理 core。运行
 期间必须同时记录被测 thread 和 sibling thread 的利用率。完整命令、语料要求和 case 含义见
