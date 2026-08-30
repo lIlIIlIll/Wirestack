@@ -4,14 +4,16 @@ Date: 2026-08-30
 
 Platform: Linux x86_64 glibc 2.44
 
-Toolchain: Cangjie `1.1.0-alpha.20260817040003`, CJPM `1.1.3`
+Local validation toolchain: Cangjie `1.1.0-alpha.20260817040003`, CJPM `1.1.3`
+
+Hosted release toolchain pin: Cangjie `1.3.0-alpha.20260830010011`
 
 ## Local results
 
 | Command | Result |
 |---|---|
 | `python3 tools/repository/repository_tooling.py --root . validate-tasks --json` | PASS; M7-030 task contract accepted. |
-| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-030/test-plan.md --json` | PASS; 21 paths, 18 scenarios and 14 planned tests. |
+| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-030/test-plan.md --json` | PASS; 22 paths, 19 scenarios and 15 planned tests. |
 | `python3 -m unittest tools.tests.test_m7_030_linux_release -v` | PASS; 12/12 tests. |
 | `scripts/generate-m7-025-linux-supply-chain --validate-only` | PASS; artifact `c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee`, build fingerprint `67dcd09f0ab99a33cfb204fb5f2a133a911f8f706ccf85a7a3312b980ddac9d9`. |
 | `scripts/release-m7-030-linux validate-workflow --output docs/evidence/M7-030/workflow-contract.json` | PASS; three attestation subjects and six immutable action references. |
@@ -24,6 +26,16 @@ test execution because `std.unittest` could not create its local socket and
 returned `SocketException: Operation not permitted`. The same command then ran
 outside that socket restriction and passed. This was an environment failure,
 not a source or assertion failure.
+
+## Hosted failure injection
+
+GitHub-hosted run `33315568568` on merge commit
+`f9753199daf1d6869e46971785eb8d80d1fbad3d` failed in the toolchain install
+step with `Nightly version not available: 1.1.0-alpha.20260817040003`. Every
+build, signing, verification, report and upload step was skipped, so the run is
+recorded as FAIL and supplied no production evidence. The corrected workflow
+freezes `1.3.0-alpha.20260830010011`, which the repository's existing hosted
+nightly resolver and Clean Build path had already resolved and installed.
 
 ## Task-level result
 
@@ -39,8 +51,9 @@ before the hosted attestation and all task commands pass.
 
 ## Gates not run
 
-- The GitHub-hosted OIDC/Sigstore workflow has not run because the task branch
-  has not been pushed.
+- A successful GitHub-hosted OIDC/Sigstore workflow has not yet run. The first
+  hosted run failed closed at the unavailable toolchain pin and produced no
+  attestations.
 - The one-hour SSE profile was not run.
 - A second 86,400-second soak was not run; M7-022 already owns and completed the
   final artifact soak.
