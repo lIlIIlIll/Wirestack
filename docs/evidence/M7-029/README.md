@@ -84,21 +84,18 @@ most eight live pools and 64 workers. A native wrapped-`getaddrinfo` probe prove
 that the ninth quarantined pool fails closed and that capacity returns after
 the blocked calls exit.
 
-The current final process-isolated review is recorded in
-[`independent-review.json`](independent-review.json), with its unchanged human
-summary under
-[`m3-030-pinned-sdk-final-review/review-summary.md`](m3-030-pinned-sdk-final-review/review-summary.md)
+The final process-isolated review is recorded in
+[`independent-review.json`](independent-review.json), with its review summary
+under [`detached-final-review/review-summary.md`](detached-final-review/review-summary.md)
 and the repository validator result under
 [`linux_x86_64/review-validation.json`](linux_x86_64/review-validation.json).
-It reviewed immutable package
-`9d4c4676cd52883aa002e20946b474ac2777d7fcee2bcfe9c232436c44aeaf82`
-and returned PASS: both Critical and all fourteen High findings are Fixed, with
-no unresolved Critical or High finding. One Medium finding remains Open and
-retains final-candidate artifact, SBOM and long-profile regeneration for later
-release tasks. The reviewer inherited no implementation history, made no
-repository changes, and independently rejected Cangjie FFI, native header,
-contract schema, calling-convention, signature-inventory and archive-symbol
-mutations.
+It reviewed clean detached HEAD
+`6c546e8d2b12c5b83cd82db8ac2b267ad7a503ee` and immutable package
+`47da664a9d0e9450a9fe38c0a7fea3f39f4afba721f064a4a5fd917f2d3ea70e`.
+The reviewer returned PASS with all 17 findings Fixed: two Critical, fourteen
+High, and one Medium. The reviewer inherited no implementation history, made
+no repository changes, and confirmed that the two gate manifests and all ten
+fuzz corpus files exist in a clean checkout.
 
 Current validation includes a 32-path, 30-scenario, 29-test plan with no matrix
 issues; 14/14 M7-029 review-contract tests; 6/6 release, license, and SBOM
@@ -130,10 +127,9 @@ successfully in run `33233671568`. Active ruleset `21787899` protects main,
 requires that exact check under a strict policy, prohibits deletion and
 non-fast-forward updates, and has no bypass actors.
 
-The independent review, focused remediation evidence, hosted clean-build check,
-and active required-check ruleset satisfy M7-029. This completion does not make
-stale release-artifact evidence current; those gates remain assigned to the
-subsequent final-candidate sequence.
+The independent review, focused remediation evidence, current final-candidate
+evidence, hosted clean-build check, and active required-check ruleset satisfy
+M7-029. M7-022 still owns the final 86,400-second soak.
 
 ## Repository-wide gate boundary
 
