@@ -62,7 +62,7 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("当前发布相关任务总数：**199**", backlog)
         self.assertIn("全部已记录任务总数：**218**", backlog)
 
-    def test_status_exposes_remaining_linux_work_without_a_global_completion_claim(self) -> None:
+    def test_status_exposes_linux_completion_without_a_global_completion_claim(self) -> None:
         status = self.read("docs/planning/status.md")
         linux = self.read("docs/planning/linux-status.md")
         self.assertIn("| M7-018 | COMPLETE |", status)
@@ -85,9 +85,12 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("| M7-028 | COMPLETE |", status)
         self.assertIn("| M7-029 | COMPLETE |", status)
         self.assertIn("| M7-030 | COMPLETE |", status)
+        self.assertIn("| M7-031 | COMPLETE |", status)
+        self.assertIn("| M7-031 Linux release candidate | COMPLETE |", linux)
         self.assertIn("docs/evidence/M7-032/README.md", status)
         self.assertIn("do not\nchange the status of the six-platform M7-001 through M7-017 tasks", status)
-        self.assertIn("Complete the M7-031 candidate report", linux)
+        self.assertIn("Linux x86_64 glibc M7 closure has no remaining task", linux)
+        self.assertIn("Global non-Linux M7", linux)
         self.assertIn("M6-026 HTTP/2 concurrent response bodies", linux)
         self.assertIn("1,000 two-stream batches", linux)
         self.assertIn("runtime/std source changes are not dependencies", linux)
