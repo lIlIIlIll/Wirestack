@@ -399,7 +399,7 @@ def parse_output(text: str) -> tuple[list[dict[str, int]], dict[str, int]]:
     for index, sample in enumerate(samples):
         if sample["index"] != index:
             raise SoakError("SAMPLE_ORDER", f"sample index {sample['index']} != {index}")
-        if sample["elapsedMs"] <= previous_elapsed or sample["cycles"] < previous_cycles:
+        if sample["elapsedMs"] < previous_elapsed or sample["cycles"] < previous_cycles:
             raise SoakError("SAMPLE_ORDER", "sample time or cycle counter regressed")
         previous_elapsed = sample["elapsedMs"]
         previous_cycles = sample["cycles"]
