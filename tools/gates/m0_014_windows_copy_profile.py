@@ -272,7 +272,8 @@ def compile_receiver(root: Path, artifact_dir: Path,
     )
     if (shim_compile["timed_out"] or shim_compile["exit_code"] != 0
             or not shim_object.is_file()):
-        raise GateError("SHIM_COMPILE", "copy-counter shim compilation failed")
+        detail = (shim_compile["stdout"] + "\n" + shim_compile["stderr"]).strip()[:CAPTURE_LIMIT]
+        raise GateError("SHIM_COMPILE", f"copy-counter shim compilation failed: {detail}")
     command = [
         "cjc", "-O2", str(source), "-o", str(binary),
         "--link-option", str(shim_object),
@@ -280,7 +281,8 @@ def compile_receiver(root: Path, artifact_dir: Path,
     ]
     process = run_process(command, artifact_dir, timeout)
     if process["timed_out"] or process["exit_code"] != 0 or not binary.is_file():
-        raise GateError("COMPILE", "native Windows Cangjie receiver compilation failed")
+        detail = (process["stdout"] + "\n" + process["stderr"]).strip()[:CAPTURE_LIMIT]
+        raise GateError("COMPILE", f"native Windows Cangjie receiver compilation failed: {detail}")
     return binary, {
         "source_sha256": hashlib.sha256(receiver_source.encode()).hexdigest(),
         "shim_source_sha256": sha256(shim_source),
