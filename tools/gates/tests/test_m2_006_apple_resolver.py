@@ -36,7 +36,7 @@ def valid_report(mode: str = "macos") -> dict[str, object]:
             "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-2",
             "probe_sha256": "a" * 64,
             "bundle_probe_sha256": "b" * 64,
-            "installed_probe_sha256": "b" * 64,
+            "install": {"timed_out": False, "exit_code": 0},
         } if mode == "ios-simulator" else None,
     }
 
@@ -80,7 +80,7 @@ class M2006AppleResolverGateTests(unittest.TestCase):
             "runtime": "macOS",
             "probe_sha256": "a" * 64,
             "bundle_probe_sha256": "b" * 64,
-            "installed_probe_sha256": "c" * 64,
+            "install": {"timed_out": False, "exit_code": 1},
         }
         failures = gate.validate_report(report, "abc", "ios-simulator")
         self.assertIn("REPORT:SIMULATOR_DEVICE", failures)

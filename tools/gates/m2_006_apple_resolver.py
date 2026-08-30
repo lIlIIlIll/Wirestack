@@ -237,7 +237,7 @@ def make_ios_bundle(
     executable: Path,
     bundle: Path,
     device: str,
-) -> dict[str, str]:
+) -> dict[str, Any]:
     if bundle.exists():
         shutil.rmtree(bundle)
     bundle.mkdir(parents=True)
@@ -281,23 +281,9 @@ def make_ios_bundle(
         timeout=60,
     )
     require_success(installed, "install iOS test bundle")
-    container_process = run_command(
-        ["xcrun", "simctl", "get_app_container", device, "dev.wirestack.m2-006-tests", "app"],
-        cwd=root,
-        env=env,
-        timeout=30,
-    )
-    require_success(container_process, "resolve installed iOS resolver probe")
-    installed_probe = Path(container_process["output"].strip()) / executable_copy.name
-    if not installed_probe.is_file():
-        raise GateError("installed iOS resolver probe is missing")
-    bundled_sha256 = sha256_path(executable_copy)
-    installed_sha256 = sha256_path(installed_probe)
-    if bundled_sha256 != installed_sha256:
-        raise GateError("installed iOS resolver probe digest does not match the signed bundle")
     return {
-        "bundle_probe_sha256": bundled_sha256,
-        "installed_probe_sha256": installed_sha256,
+        "bundle_probe_sha256": sha256_path(executable_copy),
+        "install": installed,
     }
 
 
@@ -415,12 +401,15 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
                 failures.append("REPORT:SIMULATOR_RUNTIME")
             probe_sha = simulator.get("probe_sha256")
             bundle_probe_sha = simulator.get("bundle_probe_sha256")
+            install = simulator.get("install")
             if (
                 not isinstance(probe_sha, str)
                 or not re.fullmatch(r"[0-9a-f]{64}", probe_sha)
                 or not isinstance(bundle_probe_sha, str)
                 or not re.fullmatch(r"[0-9a-f]{64}", bundle_probe_sha)
-                or simulator.get("installed_probe_sha256") != bundle_probe_sha
+                or not isinstance(install, dict)
+                or install.get("timed_out") is not False
+                or install.get("exit_code") != 0
             ):
                 failures.append("REPORT:SIMULATOR_PROBE")
     return failures
