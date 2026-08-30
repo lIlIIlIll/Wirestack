@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-29T09:45:38.248377Z",
+  "generated_at_utc": "2026-08-29T10:55:22.022554Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,13 +11,13 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M7-029/linux_x86_64/review-validation.json",
-      "sha256": "a87cfc9337f97e028373e5a1f71d78aad7fa69249a6dc22badd8e292bb8b6044",
+      "sha256": "22d1321a0e549c54536a030a8398658caebcc4db07a686b0061af11a0728dad0",
       "source_task": "M7-029"
     },
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M7-029/task-check.json",
-      "sha256": "a6f5151fbb8621033b88f867514a8d19cc076a9e1de2d30ae86a3fb82c0a8016",
+      "sha256": "f403223c709103bc7e02d55bbce12cbc89135c6da7df3bb0e26ca357562ed4c3",
       "source_task": "M7-029"
     },
     {
@@ -27,17 +27,18 @@
       "source_task": "M7-029"
     }
   ],
-  "revision": "38b58ec2fbaa0779011a70992e86ffc4bbd88e17",
+  "revision": "6c546e8d2b12c5b83cd82db8ac2b267ad7a503ee",
   "schema_version": 1,
   "source_sha256": {
     ".github/workflows/clean-cangjie-build.yml": "8e26e535f97829e47d7d5c05da6087794945b9fd097b92cd2a3805d0b6761bff",
-    ".gitignore": "a597755755bb3087cec35cf2a83b5519f196281cf5f70b870e10bc496faf063c",
+    ".gitignore": "f9cdaed3952d02b7f9e83699a56d50f6a7a167665b4099ae3ea8089273b727bf",
     "LICENSE": "ff2bfac16f9884d002e66b1b2c75c20c626bc41ff31cdf411c5acdf224288295",
     "THIRD_PARTY_NOTICES.md": "544379bcaa5a6b2cbe7eb5bebff5743f28039bb43ee8f93276a34f4176db5db4",
     "build.cj": "58d6706fbd8f36b0715798d8f3b725ea81604f95390b550d9fca6dc4d0083eb9",
-    "docs/evidence/M7-029/README.md": "9665460ee1c2af949c2eaf2c0de7f9b8885cbd116867ce3d17f7460bb0d300c6",
+    "docs/evidence/M7-029/README.md": "249de0dcd07e2bfdae297b13e71515cb5716371a2c8f44d069c2fc466af0e53f",
     "docs/evidence/M7-029/audit-intake.json": "b687ca6d27f62c6173137637f8aff0548b5580dbb6b25975b517a56cb75b05b5",
     "docs/evidence/M7-029/current-release-blockers.json": "57fe4be402616d6c5a1d1136ca8367abbf83d5b38bb943699d215d2414395165",
+    "docs/evidence/M7-029/detached-final-review/review-summary.md": "74b0f4d1b7ce82ce75c867dceb515581e46db19ebf86f14381d4d7e45753f4f5",
     "docs/evidence/M7-029/final-isolated-review/review-summary.md": "ea7363b4233e4fa2292bc00cecc5d75622ac3527c6fed6ffd754eb6d5c44aaa9",
     "docs/evidence/M7-029/final-review-regressions/cjpm-check-missing-resolver.log": "363b722f2c87aa035f61e56f85a7ed2cf54423525feed249f9c68a3f0315fcc1",
     "docs/evidence/M7-029/final-review-regressions/focused-python-security-contracts.log": "9d0f601a9c5c1a01a63b854625d3a813568d259c9ab03996d98286a54b261f22",
@@ -52,7 +53,7 @@
     "docs/evidence/M7-029/github-required-check.json": "433da1568b650abf9a990fa89c9ef74d2236692e984b64b7aee2154c3e93cce2",
     "docs/evidence/M7-029/independent-review-source/wirestack-findings-register-49f3094.json": "cb002b14938a45e63f67ad09a2b8baee6b363a26eb04e044b465d2ed40e87623",
     "docs/evidence/M7-029/independent-review-source/wirestack-full-audit-49f3094.md": "bff5b6f424cf30f9a063a0f0814f0be1e45e7566e7c43e7026ae69d0b0529b04",
-    "docs/evidence/M7-029/independent-review.json": "40a9df1789c34ee6dc2233a554b595831ebc5727840fd992863a6f83901cda80",
+    "docs/evidence/M7-029/independent-review.json": "6731b647b736c4bd2d40a5275bf21d62711aa9c9cda5b155365127696d19f2ac",
     "docs/evidence/M7-029/initial-isolated-review/independent-review.json": "cd8cf0bd3c2988f443ec8c9e3f70230c84dde1dc5115a2bbe6a9e6bb79fac481",
     "docs/evidence/M7-029/initial-isolated-review/review-summary.md": "bb799414e790db40865c9be88ca6c6a79418d8f3e775813d2516a4c289a8ee15",
     "docs/evidence/M7-029/m3-030-pinned-sdk-final-review/review-summary.md": "f0389e94c73a551c761560bc4c9758d2d69a06a3e31b04de9695b1ea004c56e4",
@@ -62,12 +63,12 @@
     "docs/evidence/M7-029/regressions/review-contract-tests.log": "98d2e5ff32fab95df91a403da8938190f4e96f9b0d8fc42220c7acd086a12088",
     "docs/evidence/M7-029/regressions/tls-identity-regression.log": "24ccfad48d0b054c47ac934df46a7082c63d15ab00afbd2269ae7f588674ac13",
     "docs/evidence/M7-029/remediation-validation.json": "f404de54a1d44f6f5e5ba6ccab06e0544bc84ccb58f1847628c4fce03c1df7c7",
-    "docs/evidence/M7-029/review-request.json": "fcb02ea86aa50ed691fd4f8dbd7c3846bf7bbb325691cd378b04c9fdf67b8956",
+    "docs/evidence/M7-029/review-request.json": "fb2844e25d0fb3b1676be6304e9e4117bd813f92a0539974d7ca9000865679f7",
     "docs/evidence/M7-029/second-isolated-review/independent-review.json": "ca7e07c77bb2400acca31ae7ac554f812f4869ff34ba3f847871c88a555a8b61",
     "docs/evidence/M7-029/second-isolated-review/review-summary.md": "7638911ec234fd6b67d03113dcbaf01e6c2de5cd720de90dfc588e0a0e5f9097",
     "docs/evidence/M7-029/test-plan.md": "839c5a7acc443a319cfb579746bdf61da252876cb5bff9a9306fae852bd99763",
-    "docs/planning/status.md": "5c701a8dd3bbf97f07fa9aae5e8f63f18a2caffd681ea9bab047bbd64e441a58",
-    "docs/security/review/linux-1.0/evidence-index.json": "9d4c4676cd52883aa002e20946b474ac2777d7fcee2bcfe9c232436c44aeaf82",
+    "docs/planning/status.md": "cf247427edceffd2f600670c1045083c479ffef2f8cef1107f26678e8187a668",
+    "docs/security/review/linux-1.0/evidence-index.json": "47da664a9d0e9450a9fe38c0a7fea3f39f4afba721f064a4a5fd917f2d3ea70e",
     "docs/security/review/linux-1.0/reviewer-instructions.md": "964763939ab0f2efd5b8b7e8ab00ade9a7e2e9585cdc87205353724ea4d37bc8",
     "native/resolver/linux/wirestack_resolver.c": "6fa127bd1138b68c01f20d229529ec8d6028048c718dec441262a696b0c5b424",
     "native/tls/aws_lc/provider.json": "ff4d39359a8ef49ede8272698fe306b7421df2fea04b44744483245f34f619b4",
@@ -107,7 +108,7 @@
     "tools/m7_029_independent_security_review.py": "a9cb480d4f6ca18e143ac852f71ed8fd41b58154f11414ebca6b8286f4fe01b8",
     "tools/repository/repository_tooling.py": "6df2e851944b8a12889082d5ea7c5bbc6b041563c42b86a80cde3ed540525ba9",
     "tools/repository/tests/test_repository_tooling.py": "8f8938c59defed4547eb0f962bd64dab2a5fc4205a4a1b1c8fbededf80566ea5",
-    "tools/tasks/M7-029.json": "91c4b214e6a396b29b4e5dd14a043bbc63bb8518d54c438b21b03f109d704e78",
+    "tools/tasks/M7-029.json": "0595c3996419c565c0216473b3cb244e867ecdb30716bb945647b4bd01e043e4",
     "tools/tests/test_m7_021_linux_release.py": "7a5b843833dd652b1e5df15dfac194e9c0bafdebbe59d50be589c0e9d3ea8b05",
     "tools/tests/test_m7_025_linux_supply_chain.py": "147b1409c5ca902cf4acb7c9c5a2344f2aba2a0f5e3abcd7ecec8b9ecbce2791",
     "tools/tests/test_m7_027_linux_examples.py": "2421a6172627fa7b839239cb86367b3056de0e561440742883a6182c7dc78d14",
