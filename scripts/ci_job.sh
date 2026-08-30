@@ -3,6 +3,7 @@ set -euo pipefail
 
 repo=$(cd "$(dirname "$0")/.." && pwd)
 job=${1:-}
+mode=${2:-}
 modules=$(mktemp -d "${TMPDIR:-/tmp}/yjson-ci-modules.XXXXXX")
 trap 'rm -rf "$modules"' EXIT
 
@@ -124,7 +125,20 @@ case "$job" in
         cmp "$regenerated/peer-summary.md" "$evidence/peer-cell-1/peer-summary.md"
         ;;
     perf-evidence-drift)
-        python3 "$repo/scripts/check_seven_library_evidence.py"
+        case "${mode:-strict}" in
+            strict)
+                evidence_args=()
+                ;;
+            integrity-only)
+                evidence_args=(--integrity-only)
+                ;;
+            *)
+                echo 'perf-evidence-drift mode must be strict or integrity-only' >&2
+                exit 2
+                ;;
+        esac
+        python3 "$repo/scripts/test_check_seven_library_evidence.py"
+        python3 "$repo/scripts/check_seven_library_evidence.py" "${evidence_args[@]}"
         ;;
     api-inventory)
         python3 "$repo/scripts/check_api_inventory.py"
@@ -243,7 +257,7 @@ case "$job" in
         "$repo/scripts/release_yyjson_colink_check.sh"
         ;;
     *)
-        echo 'usage: scripts/ci_job.sh {stream-docs|perf-evidence-drift|api-inventory|runtime-freeze|core|standards-conformance|schema-formats-conformance|performance-comparison|examples|macro-consumer|algorithms-consumer|registry-rehearsal|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
+        echo 'usage: scripts/ci_job.sh {stream-docs|perf-evidence-drift [strict|integrity-only]|api-inventory|runtime-freeze|core|standards-conformance|schema-formats-conformance|performance-comparison|examples|macro-consumer|algorithms-consumer|registry-rehearsal|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
         exit 2
         ;;
 esac

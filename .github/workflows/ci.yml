@@ -25,8 +25,14 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
-      - name: Verify frozen seven-library evidence
-        run: scripts/ci_job.sh perf-evidence-drift
+          fetch-depth: 0
+      - name: Verify current seven-library evidence
+        env:
+          # Development may contain unmeasured performance-input changes. The
+          # main contract remains strict for PRs, pushes, scheduled runs, and
+          # manual dispatches.
+          YJSON_EVIDENCE_MODE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' && 'integrity-only' || 'strict' }}
+        run: scripts/ci_job.sh perf-evidence-drift "$YJSON_EVIDENCE_MODE"
 
   stream-docs:
     name: Stream evidence drift
