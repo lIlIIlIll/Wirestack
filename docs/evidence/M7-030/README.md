@@ -15,12 +15,13 @@ signature. M7-030 remains incomplete until
 and `github-attestation.json` records three verified Sigstore subjects for the
 exact repository, workflow and commit.
 
-The hosted workflow freezes Cangjie
-`1.3.0-alpha.20260830010011`, the exact complete Linux x64 nightly already
-resolved and installed by the repository's hosted Clean Build path. Hosted run
-`33315568568` proved that the earlier local baseline pin
-`1.1.0-alpha.20260817040003` was absent from the setup action nightly index;
-that run failed before build and produced no attestation evidence.
+The hosted workflow does not rebuild the release artifact. It validates the
+frozen M7-021 artifact and M7-025 supply-chain bundle before attestation, then
+signs those exact reviewed bytes. Hosted run `33315568568` proved that a
+compiler dependency can block signing before any attestation. Run
+`33316074236` proved that rebuilding with another hosted toolchain produces an
+artifact outside the frozen M7-025 digest. Both runs failed closed and produced
+no attestation evidence.
 
 ## Bound inputs
 
@@ -35,7 +36,7 @@ that run failed before build and produced no attestation evidence.
 
 ## Evidence
 
-- [`test-plan.md`](test-plan.md) defines 22 paths, 19 scenarios and 15 tests.
+- [`test-plan.md`](test-plan.md) defines 23 paths, 20 scenarios and 16 tests.
 - `local-rehearsal.json` records local signing, clean-consumer, update and
   rollback results without private key material.
 - `workflow-contract.json` records the pinned hosted workflow contract.
