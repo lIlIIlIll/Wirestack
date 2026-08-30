@@ -314,7 +314,7 @@ def instrumented_transfer(binary: Path, payload: int, artifact_dir: Path,
     if kernel["exit_code"] != 0:
         raise GateError("ETW_START", "xperf kernel session failed")
     heap = run_xperf([
-        "-start", "HeapSession", "-heap", "-PidNewProcess", binary.name,
+        "-start", "HeapSession", "-heap", "-PidNewProcess", str(binary.resolve()),
         "-stackwalk", "HeapAlloc+HeapRealloc", "-BufferSize", "64",
         "-MinBuffers", "256", "-MaxBuffers", "256",
     ], directory, 60)
