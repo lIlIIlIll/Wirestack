@@ -266,6 +266,9 @@ class M7030LinuxReleaseTest(unittest.TestCase):
         self.assertEqual(release.FROZEN_ARTIFACT_TAG, workflow["artifactSource"]["tag"])
         self.assertEqual(release.FROZEN_ARTIFACT_SHA256,
                          workflow["artifactSource"]["sha256"])
+        self.assertEqual("none", workflow["artifactStaging"]["idTokenPermission"])
+        self.assertEqual("read",
+                         workflow["artifactStaging"]["attestationContentsPermission"])
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "workflow.yml"
             text = (release.ROOT / release.WORKFLOW).read_text(encoding="utf-8")
@@ -294,6 +297,18 @@ class M7030LinuxReleaseTest(unittest.TestCase):
             path.write_text(text.replace(validation, "true", 1) + f"\n      - run: {validation}\n",
                             encoding="utf-8")
             with self.assertRaisesRegex(release.ReleaseError, "WORKFLOW_SUPPLY_CHAIN"):
+                release.inspect_workflow(path)
+            stage_permissions = "permissions:\n      contents: write"
+            path.write_text(text.replace(stage_permissions,
+                                         stage_permissions + "\n      id-token: write", 1),
+                            encoding="utf-8")
+            with self.assertRaisesRegex(release.ReleaseError, "WORKFLOW_STAGE_PERMISSION"):
+                release.inspect_workflow(path)
+            attest_permissions = "permissions:\n      contents: read\n      id-token: write"
+            path.write_text(text.replace(attest_permissions,
+                                         "permissions:\n      contents: write\n      id-token: write", 1),
+                            encoding="utf-8")
+            with self.assertRaisesRegex(release.ReleaseError, "WORKFLOW_ATTEST_PERMISSION"):
                 release.inspect_workflow(path)
             path.write_text(
                 text + "\n      - run: scripts/qualify-m7-021-linux-release\n",

@@ -3,27 +3,20 @@ name: Linux Release Attestation
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  id-token: write
-  attestations: write
-  artifact-metadata: write
+permissions: {}
+
+env:
+  FROZEN_ARTIFACT_TAG: m7-030-frozen-artifact-c0988f62
+  FROZEN_ARTIFACT_SHA256: c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee
 
 jobs:
-  attest-linux-release:
+  stage-frozen-artifact:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
-    env:
-      FROZEN_ARTIFACT_TAG: m7-030-frozen-artifact-c0988f62
-      FROZEN_ARTIFACT_SHA256: c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
-      - name: Check out exact release source
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          clean: true
-          fetch-depth: 1
-
-      - name: Download the exact frozen release artifact
+      - name: Download and verify the exact draft Release asset
         run: |
           mkdir -p dist/m7-021
           gh release download "$FROZEN_ARTIFACT_TAG" \
@@ -36,6 +29,43 @@ jobs:
             | sha256sum --check --strict
         env:
           GH_TOKEN: ${{ github.token }}
+
+      - name: Pass the verified frozen bytes to the attestation job
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: wirestack-m7-030-frozen-artifact
+          if-no-files-found: error
+          retention-days: 1
+          path: dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz
+
+  attest-linux-release:
+    needs: stage-frozen-artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - name: Check out exact release source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Receive and reverify the frozen release artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: wirestack-m7-030-frozen-artifact
+          path: dist/m7-021
+
+      - name: Verify the frozen artifact after job transfer
+        run: |
+          printf '%s  %s\n' \
+            "$FROZEN_ARTIFACT_SHA256" \
+            dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz \
+            | sha256sum --check --strict
 
       - name: Validate the frozen supply-chain documents
         run: scripts/generate-m7-025-linux-supply-chain --validate-only
