@@ -101,6 +101,50 @@ def environment_report(revision: str) -> dict[str, Any]:
             "dumpbin", "llvm-objdump", "llvm-nm", "objdump", "nm",
         )
     }
+    cjc = command_version(["cjc", "--version"])
+    cjpm = command_version(["cjpm", "--version"])
+    blockers: list[dict[str, str]] = []
+    if not is_windows:
+        blockers.append({"code": "NON_NATIVE_WINDOWS", "detail": platform.platform()})
+    if cjc is None:
+        blockers.append({"code": "CJC_UNAVAILABLE", "detail": "cjc --version unavailable"})
+    if cjpm is None:
+        blockers.append({"code": "CJPM_UNAVAILABLE", "detail": "cjpm --version unavailable"})
+    if tools["wpr"] is None:
+        blockers.append({"code": "WPR_UNAVAILABLE", "detail": "heap trace collector unavailable"})
+    if tools["xperf"] is None and tools["wpaexporter"] is None:
+        blockers.append({
+            "code": "HEAP_EXPORTER_UNAVAILABLE",
+            "detail": "neither xperf nor wpaexporter can export allocation events",
+        })
+    status = "READY" if not blockers else "BLOCKED"
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "task_id": "M0-014",
+        "report_kind": "environment-capabilities",
+        "status": status,
+        "generated_at_utc": utc_now(),
+        "repository_revision": revision,
+        "runner": {
+            "os": platform.platform(),
+            "system": platform.system(),
+            "machine": platform.machine(),
+            "python": sys.version.splitlines()[0],
+            "github_actions": os.environ.get("GITHUB_ACTIONS") == "true",
+            "runner_name": os.environ.get("RUNNER_NAME"),
+            "runner_environment": os.environ.get("RUNNER_ENVIRONMENT"),
+            "runner_arch": os.environ.get("RUNNER_ARCH"),
+            "runner_os": os.environ.get("RUNNER_OS"),
+        },
+        "toolchain": {"cjc": cjc, "cjpm": cjpm, "cangjie_home": os.environ.get("CANGJIE_HOME")},
+        "tools": tools,
+        "blockers": blockers,
+        "non_claims": [
+            "environment readiness is not copy-profile acceptance",
+            "cross-compilation is not native Windows evidence",
+            "missing allocation or copy instrumentation cannot be recorded as PASS",
+        ],
+    }
 
 
 class WindowsMemorySampler:
@@ -277,7 +321,8 @@ def instrumented_transfer(binary: Path, payload: int, artifact_dir: Path,
     commands.append(heap)
     if heap["exit_code"] != 0:
         run_xperf(["-stop", "NT Kernel Logger"], directory, 30)
-        raise GateError("ETW_START", "xperf heap session failed")
+        detail = (heap["stdout"] + "\n" + heap["stderr"]).strip()[:CAPTURE_LIMIT]
+        raise GateError("ETW_START", f"xperf heap session failed: {detail}")
     sample: dict[str, Any] | None = None
     try:
         sample = transfer_sample(binary, payload, timeout)
@@ -377,52 +422,6 @@ def execute_profile(artifact_dir: Path, revision: str, repetitions: int,
         "blockers": blockers,
         "non_claims": ["preflight is not M0-014 completion", "source-bound copied bytes are not measured copy events"],
     }
-    cjc = command_version(["cjc", "--version"])
-    cjpm = command_version(["cjpm", "--version"])
-    blockers: list[dict[str, str]] = []
-    if not is_windows:
-        blockers.append({"code": "NON_NATIVE_WINDOWS", "detail": platform.platform()})
-    if cjc is None:
-        blockers.append({"code": "CJC_UNAVAILABLE", "detail": "cjc --version unavailable"})
-    if cjpm is None:
-        blockers.append({"code": "CJPM_UNAVAILABLE", "detail": "cjpm --version unavailable"})
-    if tools["wpr"] is None:
-        blockers.append({"code": "WPR_UNAVAILABLE", "detail": "heap trace collector unavailable"})
-    if tools["xperf"] is None and tools["wpaexporter"] is None:
-        blockers.append({
-            "code": "HEAP_EXPORTER_UNAVAILABLE",
-            "detail": "neither xperf nor wpaexporter can export allocation events",
-        })
-    status = "READY" if not blockers else "BLOCKED"
-    return {
-        "schema_version": SCHEMA_VERSION,
-        "task_id": "M0-014",
-        "report_kind": "environment-capabilities",
-        "status": status,
-        "generated_at_utc": utc_now(),
-        "repository_revision": revision,
-        "runner": {
-            "os": platform.platform(),
-            "system": platform.system(),
-            "machine": platform.machine(),
-            "python": sys.version.splitlines()[0],
-            "github_actions": os.environ.get("GITHUB_ACTIONS") == "true",
-            "runner_name": os.environ.get("RUNNER_NAME"),
-            "runner_environment": os.environ.get("RUNNER_ENVIRONMENT"),
-            "runner_arch": os.environ.get("RUNNER_ARCH"),
-            "runner_os": os.environ.get("RUNNER_OS"),
-        },
-        "toolchain": {"cjc": cjc, "cjpm": cjpm, "cangjie_home": os.environ.get("CANGJIE_HOME")},
-        "tools": tools,
-        "blockers": blockers,
-        "non_claims": [
-            "environment readiness is not copy-profile acceptance",
-            "cross-compilation is not native Windows evidence",
-            "missing allocation or copy instrumentation cannot be recorded as PASS",
-        ],
-    }
-
-
 def _expect(condition: bool, code: str, detail: str) -> None:
     if not condition:
         raise GateError(code, detail)

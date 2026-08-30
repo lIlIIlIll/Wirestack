@@ -4,6 +4,7 @@ import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 MODULE = Path(__file__).parents[1] / "m0_014_windows_copy_profile.py"
@@ -53,6 +54,18 @@ def valid_report() -> dict:
 
 
 class M0014ValidatorTests(unittest.TestCase):
+    def test_environment_report_always_returns_structured_status(self) -> None:
+        with (
+            mock.patch.object(gate.platform, "system", return_value="Windows"),
+            mock.patch.object(gate.platform, "machine", return_value="AMD64"),
+            mock.patch.object(gate.os, "name", "nt"),
+            mock.patch.object(gate.shutil, "which", return_value="C:/tool.exe"),
+            mock.patch.object(gate, "command_version", return_value="version"),
+        ):
+            report = gate.environment_report("a" * 40)
+        self.assertEqual("READY", report["status"])
+        self.assertEqual("windows-x86_64".split("-")[0].capitalize(), report["runner"]["system"])
+
     def assert_code(self, report: dict, code: str) -> None:
         with self.assertRaises(gate.GateError) as raised:
             gate.validate_result(report)
