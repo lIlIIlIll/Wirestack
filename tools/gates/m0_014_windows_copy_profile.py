@@ -37,9 +37,8 @@ EXIT = {"READY": 0, "PASS": 0, "FAIL": 1, "INVALID": 2, "BLOCKED": 3}
 REQUIRED_PAYLOADS = (1024, 16 * 1024, 64 * 1024, 1024 * 1024, 100 * 1024 * 1024)
 CAPTURE_LIMIT = 8192
 XPERF_TOTAL_RE = re.compile(
-    r"(?:heap\s+total\s+allocation\s+count|total\s+allocation\s+count)"
-    r"\s*[:=]\s*([0-9][0-9,]*)",
-    re.IGNORECASE,
+    r"^\s*([0-9][0-9,]*)\s*,(?:[^\r\n]*,){6}\s*TOTAL\s*$",
+    re.IGNORECASE | re.MULTILINE,
 )
 
 
@@ -98,7 +97,7 @@ def environment_report(revision: str) -> dict[str, Any]:
         name: shutil.which(name)
         for name in (
             "cjc", "cjpm", "wpr", "xperf", "wpaexporter", "tracerpt",
-            "dumpbin", "llvm-objdump", "llvm-nm", "objdump", "nm",
+            "clang", "dumpbin", "llvm-objdump", "llvm-nm", "objdump", "nm",
         )
     }
     cjc = command_version(["cjc", "--version"])
@@ -231,19 +230,63 @@ class WindowsMemorySampler:
         return max(values) if values else None
 
 
-def compile_receiver(artifact_dir: Path, timeout: float) -> tuple[Path, dict[str, Any]]:
+def counting_receiver_source() -> str:
+    import_marker = "import std.convert.*\n"
+    result_marker = (
+        'println("RESULT bytes=${total} readCalls=${reads} invalid=${invalid} '
+        'eof=${eof} durationNs=${durationNs} closeCode=${closeCode} bufferSize=${bufferSize}")'
+    )
+    if RECEIVE_SOURCE.count(import_marker) != 1 or RECEIVE_SOURCE.count(result_marker) != 1:
+        raise GateError("SOURCE_TEMPLATE", "receiver source markers changed")
+    foreign = (
+        "\nforeign {\n"
+        "    func WIRESTACK_M0014_CopyBytes(): UInt64\n"
+        "    func WIRESTACK_M0014_CopyCalls(): UInt64\n"
+        "}\n"
+    )
+    result = (
+        "let copiedBytes = WIRESTACK_M0014_CopyBytes()\n"
+        "    let copyCalls = WIRESTACK_M0014_CopyCalls()\n"
+        "    println(\"RESULT bytes=${total} readCalls=${reads} invalid=${invalid} "
+        "eof=${eof} durationNs=${durationNs} closeCode=${closeCode} "
+        "bufferSize=${bufferSize} copiedBytes=${copiedBytes} copyCalls=${copyCalls}\")"
+    )
+    return RECEIVE_SOURCE.replace(import_marker, import_marker + foreign).replace(
+        result_marker, result
+    )
+
+
+def compile_receiver(root: Path, artifact_dir: Path,
+                     timeout: float) -> tuple[Path, dict[str, Any]]:
     artifact_dir.mkdir(parents=True, exist_ok=True)
     source = artifact_dir / "wirestack_m0_014_receive.cj"
+    shim_source = root / "tools/gates/native/m0_014_copy_counter.c"
+    shim_object = artifact_dir / "m0_014_copy_counter.o"
     binary = artifact_dir / "wirestack_m0_014_receive.exe"
-    source.write_text(RECEIVE_SOURCE, encoding="utf-8")
-    process = run_process(
-        ["cjc", "-O2", str(source), "-o", str(binary)], artifact_dir, timeout
+    receiver_source = counting_receiver_source()
+    source.write_text(receiver_source, encoding="utf-8")
+    shim_compile = run_process(
+        ["clang", "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+         "-c", str(shim_source), "-o", str(shim_object)],
+        artifact_dir, timeout,
     )
+    if (shim_compile["timed_out"] or shim_compile["exit_code"] != 0
+            or not shim_object.is_file()):
+        raise GateError("SHIM_COMPILE", "copy-counter shim compilation failed")
+    command = [
+        "cjc", "-O2", str(source), "-o", str(binary),
+        "--link-option", str(shim_object),
+        "--link-option", "-Wl,--wrap=CJ_SOCKET_BufferRCopy",
+    ]
+    process = run_process(command, artifact_dir, timeout)
     if process["timed_out"] or process["exit_code"] != 0 or not binary.is_file():
         raise GateError("COMPILE", "native Windows Cangjie receiver compilation failed")
     return binary, {
-        "source_sha256": hashlib.sha256(RECEIVE_SOURCE.encode()).hexdigest(),
+        "source_sha256": hashlib.sha256(receiver_source.encode()).hexdigest(),
+        "shim_source_sha256": sha256(shim_source),
+        "shim_object_sha256": sha256(shim_object),
         "binary_sha256": sha256(binary),
+        "shim_compile": shim_compile,
         "process": process,
     }
 
@@ -280,6 +323,8 @@ def transfer_sample(binary: Path, payload: int, timeout: float) -> dict[str, Any
         ) if duration_ns > 0 else None,
         "peak_private_bytes": sampler.peak_private,
         "peak_working_set_bytes": sampler.peak_working_set,
+        "copied_bytes": int(fields["copiedBytes"]),
+        "copy_calls": int(fields["copyCalls"]),
         "memory_samples": {
             "private_bytes": sampler.private_bytes,
             "working_set_bytes": sampler.working_set_bytes,
@@ -291,6 +336,10 @@ def transfer_sample(binary: Path, payload: int, timeout: float) -> dict[str, Any
 
 def run_xperf(command: Sequence[str], cwd: Path, timeout: float) -> dict[str, Any]:
     return run_process(["xperf", *command], cwd, timeout)
+
+
+def run_wpr(command: Sequence[str], cwd: Path, timeout: float) -> dict[str, Any]:
+    return run_process(["wpr", *command], cwd, timeout)
 
 
 def parse_xperf_allocation_count(text: str) -> int | None:
@@ -307,30 +356,26 @@ def instrumented_transfer(binary: Path, payload: int, artifact_dir: Path,
     etl = directory / "heap.etl"
     heap_report = directory / "heap.txt"
     commands: list[dict[str, Any]] = []
-    run_xperf(["-stop", "HeapSession"], directory, 30)
-    run_xperf(["-stop", "NT Kernel Logger"], directory, 30)
-    kernel = run_xperf(["-on", "base"], directory, 60)
-    commands.append(kernel)
-    if kernel["exit_code"] != 0:
-        raise GateError("ETW_START", "xperf kernel session failed")
-    heap = run_xperf([
-        "-start", "HeapSession", "-heap", "-PidNewProcess", str(binary.resolve()),
-        "-stackwalk", "HeapAlloc+HeapRealloc", "-BufferSize", "64",
-        "-MinBuffers", "256", "-MaxBuffers", "256",
-    ], directory, 60)
-    commands.append(heap)
-    if heap["exit_code"] != 0:
-        run_xperf(["-stop", "NT Kernel Logger"], directory, 30)
-        detail = (heap["stdout"] + "\n" + heap["stderr"]).strip()[:CAPTURE_LIMIT]
-        raise GateError("ETW_START", f"xperf heap session failed: {detail}")
+    run_wpr(["-cancel"], directory, 30)
+    configure = run_wpr(["-HeapTracingConfig", binary.name, "enable"], directory, 60)
+    commands.append(configure)
+    if configure["exit_code"] != 0:
+        detail = (configure["stdout"] + "\n" + configure["stderr"]).strip()[:CAPTURE_LIMIT]
+        raise GateError("ETW_CONFIG", f"WPR heap tracing config failed: {detail}")
+    start = run_wpr(["-start", "Heap", "-filemode"], directory, 60)
+    commands.append(start)
+    if start["exit_code"] != 0:
+        run_wpr(["-HeapTracingConfig", binary.name, "disable"], directory, 30)
+        detail = (start["stdout"] + "\n" + start["stderr"]).strip()[:CAPTURE_LIMIT]
+        raise GateError("ETW_START", f"WPR heap session failed: {detail}")
     sample: dict[str, Any] | None = None
     try:
         sample = transfer_sample(binary, payload, timeout)
     finally:
-        stop = run_xperf([
-            "-stop", "NT Kernel Logger", "-stop", "HeapSession", "-d", str(etl),
-        ], directory, 120)
+        stop = run_wpr(["-stop", str(etl)], directory, 120)
         commands.append(stop)
+        disable = run_wpr(["-HeapTracingConfig", binary.name, "disable"], directory, 60)
+        commands.append(disable)
     if stop["exit_code"] != 0 or not etl.is_file():
         raise GateError("ETW_STOP", "xperf did not produce heap trace")
     analyze = run_xperf([
@@ -355,6 +400,10 @@ def aggregate_case(payload: int, samples: Sequence[Mapping[str, Any]],
     latency = [float(sample["duration_ms"]) for sample in samples]
     throughput = [float(sample["throughput_mib_per_second"]) for sample in samples]
     representative = instrumented["sample"]
+    copy_measured = (
+        representative["copied_bytes"] == payload
+        and representative["copy_calls"] == len(representative["read_sizes"])
+    )
     return {
         "payload_bytes": payload,
         "decision": "PASS" if all(sample["decision"] == "PASS" for sample in samples) else "FAIL",
@@ -365,8 +414,9 @@ def aggregate_case(payload: int, samples: Sequence[Mapping[str, Any]],
         "allocation_status": instrumented["allocation_status"],
         "peak_private_bytes": max(int(sample["peak_private_bytes"]) for sample in samples),
         "peak_working_set_bytes": max(int(sample["peak_working_set_bytes"]) for sample in samples),
-        "copied_bytes_per_operation": payload,
-        "copied_bytes_status": "SOURCE_BOUND_DERIVATION",
+        "copied_bytes_per_operation": representative["copied_bytes"],
+        "copy_calls_per_operation": representative["copy_calls"],
+        "copied_bytes_status": "MEASURED_BY_LINK_WRAP" if copy_measured else "COPY_COUNTER_INVALID",
         "latency_ms": {key: percentile(latency, value) for key, value in (("p50", 50), ("p95", 95), ("p99", 99))},
         "throughput_mib_per_second": {key: percentile(throughput, value) for key, value in (("p50", 50), ("p95", 95), ("p99", 99))},
         "samples": list(samples),
@@ -374,16 +424,16 @@ def aggregate_case(payload: int, samples: Sequence[Mapping[str, Any]],
     }
 
 
-def execute_profile(artifact_dir: Path, revision: str, repetitions: int,
+def execute_profile(root: Path, artifact_dir: Path, revision: str, repetitions: int,
                     timeout: float, quick: bool) -> dict[str, Any]:
     if platform.system() != "Windows" or os.name != "nt":
         raise GateError("NON_NATIVE_WINDOWS", platform.platform())
     if platform.machine().upper() not in {"AMD64", "X86_64"}:
         raise GateError("ARCHITECTURE", platform.machine())
-    for tool in ("cjc", "cjpm", "xperf"):
+    for tool in ("cjc", "cjpm", "clang", "wpr", "xperf"):
         if shutil.which(tool) is None:
             raise GateError("TOOL_UNAVAILABLE", tool)
-    binary, compile_report = compile_receiver(artifact_dir / "receiver", timeout)
+    binary, compile_report = compile_receiver(root, artifact_dir / "receiver", timeout)
     payloads = (1024 * 1024,) if quick else REQUIRED_PAYLOADS
     cases = []
     for payload in payloads:
@@ -391,18 +441,21 @@ def execute_profile(artifact_dir: Path, revision: str, repetitions: int,
         instrumented = instrumented_transfer(binary, payload, artifact_dir, timeout)
         cases.append(aggregate_case(payload, samples, instrumented))
     allocations_measured = all(case["allocation_status"] == "MEASURED_BY_ETW_HEAP" for case in cases)
-    blockers = [{
-        "code": "COPY_COUNTER_UNAVAILABLE",
-        "detail": "copy bytes are source-bound derivation, not a dynamic counter",
-    }]
+    copies_measured = all(case["copied_bytes_status"] == "MEASURED_BY_LINK_WRAP" for case in cases)
+    blockers = []
     if not allocations_measured:
         blockers.append({"code": "ETW_HEAP_UNPARSED", "detail": "allocation count was not parsed"})
+    if not copies_measured:
+        blockers.append({"code": "COPY_COUNTER_INVALID", "detail": "link-wrap copy count did not match reads"})
+    cases_pass = all(case["decision"] == "PASS" for case in cases)
+    complete = not quick and len(cases) == len(REQUIRED_PAYLOADS)
+    status = "PASS" if complete and cases_pass and not blockers else "BLOCKED"
     environment = environment_report(revision)
     return {
         "schema_version": SCHEMA_VERSION,
         "task_id": "M0-014",
         "report_kind": "windows-copy-profile-preflight" if quick else "windows-copy-profile",
-        "status": "BLOCKED",
+        "status": status,
         "platform": "windows-x86_64",
         "native_execution": True,
         "repository_revision": revision,
@@ -415,12 +468,12 @@ def execute_profile(artifact_dir: Path, revision: str, repetitions: int,
             "application_visible_read_sizes": "MEASURED",
             "allocation_count": "MEASURED_BY_ETW_HEAP" if allocations_measured else "ETW_UNPARSED",
             "peak_private_bytes": "MEASURED_BY_WIN32",
-            "copied_bytes_per_operation": "SOURCE_BOUND_DERIVATION",
+            "copied_bytes_per_operation": "MEASURED_BY_LINK_WRAP" if copies_measured else "COPY_COUNTER_INVALID",
         },
         "cases": cases,
         "cleanup": {"decision": "PASS", "bounded_process_timeout_seconds": timeout},
         "blockers": blockers,
-        "non_claims": ["preflight is not M0-014 completion", "source-bound copied bytes are not measured copy events"],
+        "non_claims": ["quick preflight is not M0-014 completion"] if quick else [],
     }
 def _expect(condition: bool, code: str, detail: str) -> None:
     if not condition:
@@ -443,7 +496,7 @@ def validate_result(report: Any, expected_revision: str | None = None) -> dict[s
     _expect(metrics.get("application_visible_read_sizes") == "MEASURED", "READ_SIZES", "read sizes not measured")
     _expect(metrics.get("allocation_count") == "MEASURED_BY_ETW_HEAP", "ALLOCATIONS", "allocation count not measured")
     _expect(metrics.get("peak_private_bytes") == "MEASURED_BY_WIN32", "PRIVATE_BYTES", "private bytes not measured")
-    _expect(metrics.get("copied_bytes_per_operation") == "MEASURED", "COPY_BYTES", "copy bytes not measured")
+    _expect(metrics.get("copied_bytes_per_operation") == "MEASURED_BY_LINK_WRAP", "COPY_BYTES", "copy bytes not measured")
     cases = report.get("cases")
     _expect(isinstance(cases, list) and len(cases) == len(REQUIRED_PAYLOADS), "CASES", "payload matrix incomplete")
     by_payload = {item.get("payload_bytes"): item for item in cases if isinstance(item, dict)}
@@ -458,6 +511,7 @@ def validate_result(report: Any, expected_revision: str | None = None) -> dict[s
         _expect(isinstance(case.get("allocation_count"), int) and case["allocation_count"] > 0, "ALLOCATIONS", f"payload {payload} allocation count invalid")
         _expect(isinstance(case.get("peak_private_bytes"), int) and case["peak_private_bytes"] > 0, "PRIVATE_BYTES", f"payload {payload} private bytes invalid")
         _expect(case.get("copied_bytes_per_operation") == payload, "COPY_BYTES", f"payload {payload} copied bytes invalid")
+        _expect(case.get("copied_bytes_status") == "MEASURED_BY_LINK_WRAP", "COPY_BYTES", f"payload {payload} copy counter unavailable")
         latency = case.get("latency_ms")
         throughput = case.get("throughput_mib_per_second")
         _expect(isinstance(latency, dict) and all(latency.get(key) is not None for key in ("p50", "p95", "p99")), "LATENCY", f"payload {payload} latency incomplete")
@@ -504,7 +558,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.run:
         try:
             report = execute_profile(
-                args.artifact_dir.resolve(), args.repository_revision,
+                Path(__file__).resolve().parents[2], args.artifact_dir.resolve(), args.repository_revision,
                 args.repetitions, args.timeout_seconds, args.quick,
             )
             atomic_json(args.output.resolve(), report)

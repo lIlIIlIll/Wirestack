@@ -70,6 +70,7 @@ jobs:
             --output build/gates/m0-014/preflight.json
           $profileExit = $LASTEXITCODE
           if ($profileExit -ne 0 -and $profileExit -ne 3) { exit $profileExit }
+          exit 0
 
       - name: Upload native preflight
         if: always()
