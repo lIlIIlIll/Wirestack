@@ -31,10 +31,10 @@ The `M2-006 Apple SystemResolver` GitHub workflow has two independent jobs:
   `cangjie-sdk-mac-aarch64-ios` nightly.
 
 Both jobs must run seven selected Cangjie cases and retain exact-revision
-reports. The iOS job packages the generated Cangjie unittest runner and
-resolver test executable into a Simulator app, installs it, then executes the
-runner inside the booted Simulator. `cjpm test --no-run` alone cannot satisfy
-the task.
+reports. The iOS job compiles a standalone Cangjie resolver probe, packages it
+as the Simulator app executable, installs it, and launches that executable in
+the booted Simulator. This avoids a child-process test runner, which the app
+sandbox cannot launch. Compilation alone cannot satisfy the task.
 
 ## Test-only link support
 
