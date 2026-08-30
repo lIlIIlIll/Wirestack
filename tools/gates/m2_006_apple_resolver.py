@@ -89,10 +89,21 @@ def run_command(
         output = (stdout or "") + (stderr or "")
         exit_code = None
         timed_out = True
+    diagnostic_lines = [
+        line
+        for line in output.splitlines()
+        if re.search(
+            r"(?:^|\b)(?:error|fatal|undefined|duplicate|ld(?:64)?(?:\.lld)?):|"
+            r"symbol\(s\) not found|linker command failed",
+            line,
+            re.IGNORECASE,
+        )
+    ]
     return {
         "command": command,
         "duration_ms": round((time.monotonic_ns() - started) / 1_000_000, 3),
         "exit_code": exit_code,
+        "diagnostics": "\n".join(diagnostic_lines[-200:])[-30000:],
         "output": output[-20000:],
         "timed_out": timed_out,
     }
@@ -100,7 +111,11 @@ def run_command(
 
 def require_success(process: dict[str, Any], label: str) -> None:
     if process["timed_out"] or process["exit_code"] != 0:
-        raise GateError(f"{label} failed: {process['output'][-4000:]}")
+        diagnostics = process.get("diagnostics", "")
+        raise GateError(
+            f"{label} failed\ndiagnostics:\n{diagnostics}\noutput tail:\n"
+            f"{process['output'][-4000:]}"
+        )
 
 
 def process_failures(process: dict[str, Any], expected: int, label: str) -> list[str]:
