@@ -10,11 +10,17 @@
   output-type = "static"
   compile-option = ""
   override-compile-option = ""
-  link-option = "-lstdc++ -lpthread -ldl -lm"
+  link-option = ""
   package-configuration = {}
   repository = "https://github.com/lIlIIlIll/Wirestack.git"
   homepage = "https://github.com/lIlIIlIll/Wirestack"
   documentation = "https://github.com/lIlIIlIll/Wirestack/tree/main/docs"
+
+[target.x86_64-unknown-linux-gnu]
+  link-option = "-lstdc++ -lpthread -ldl -lm"
+
+[target.x86_64-w64-mingw32]
+  link-option = "-lws2_32"
 
 [dependencies]
 
