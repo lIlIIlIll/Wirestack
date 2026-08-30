@@ -127,6 +127,52 @@ func prettyPersonJsonText(): String {
         "}"
 }
 
+func canonicalAddressJsonText(): String {
+    "{\"street_name\":\"Nanshan Road\",\"zipcode\":518000}"
+}
+
+func canonicalPersonJsonText(): String {
+    "{" +
+        "\"user_id\":42,\"name\":\"Lin\",\"age\":28," +
+        "\"tags\":[\"cangjie\",\"json\",\"reflect\"]," +
+        "\"scores\":{\"math\":95,\"english\":88}," +
+        "\"address\":" + canonicalAddressJsonText() + ",\"nick\":null}"
+}
+
+func canonicalLargeProfilesJsonText(): String {
+    var text = "["
+    for (index in 0..64) {
+        if (index > 0) { text += "," }
+        text += "{\"profile_id\":${10000 + index},\"alias\":\"alias-${index % 16}-json-escape\",\"level\":${index % 10}}"
+    }
+    text + "]"
+}
+
+func canonicalLargeInt64MapJsonText(): String {
+    var text = "{"
+    for (index in 0..64) {
+        if (index > 0) { text += "," }
+        text += "\"metric_${index}\":${index * 17 + 3}"
+    }
+    text + "}"
+}
+
+func canonicalDeepNestedProfilesJsonText(): String {
+    var text = "["
+    for (groupIndex in 0..8) {
+        if (groupIndex > 0) { text += "," }
+        text += "{\"group_${groupIndex}\":["
+        for (recordIndex in 0..4) {
+            if (recordIndex > 0) { text += "," }
+            text += "{\"profile_id\":${groupIndex * 100 + recordIndex}," +
+                "\"alias\":\"group-${groupIndex}-profile-${recordIndex}\"," +
+                "\"level\":${(groupIndex + recordIndex) % 10}}"
+        }
+        text += "]}"
+    }
+    text + "]"
+}
+
 @Test
 @Configure[
     warmup: Duration.millisecond * 200,
@@ -167,6 +213,7 @@ class ComprehensiveJsonCompareBenchmarks {
     let xlInt64MapCodec = int64HashMapJson()
     let xlDeepNestedCodec = nestedProfilesJson()
     let deepNestedCodec = nestedProfilesJson()
+    let addressFastDecoder = YJson.fastDecoder(AddressJson)
     let addressText: String
     let personText: String
     let profileText: String
@@ -220,17 +267,17 @@ class ComprehensiveJsonCompareBenchmarks {
         stdxLargeProfiles = toStdxProfileList(largeProfiles)
         stdxDeepNestedProfiles = toStdxNestedProfiles(deepNestedProfiles)
 
-        addressText = YJson.encodeStringWith(AddressJson, address)
-        personText = YJson.encodeStringWith(PersonJson, person)
+        addressText = canonicalAddressJsonText()
+        personText = canonicalPersonJsonText()
         profileText = YJson.encodeStringWith(ProfileRecordJson, profile)
         profileBundleText = YJson.encodeStringWith(ProfileBundleJson, profileBundle)
         uint64EnvelopeText = YJson.encodeStringWith(UInt64EnvelopeJson, uint64Envelope)
         temporalStatsText = YJson.encodeStringWith(TemporalStatsJson, temporalStats)
-        largeProfilesText = YJson.encodeStringWith(profileListCodec, largeProfiles)
+        largeProfilesText = canonicalLargeProfilesJsonText()
         largeProfileArrayText = YJson.encodeStringWith(profileArrayCodec, largeProfileArray)
-        largeInt64MapText = YJson.encodeStringWith(int64MapCodec, largeInt64Map)
+        largeInt64MapText = canonicalLargeInt64MapJsonText()
         largeStringListText = YJson.encodeStringWith(stringListCodec, largeStrings)
-        deepNestedProfilesText = YJson.encodeStringWith(deepNestedCodec, deepNestedProfiles)
+        deepNestedProfilesText = canonicalDeepNestedProfilesJsonText()
         xlProfilesText = YJson.encodeStringWith(xlProfileListCodec, xlProfiles)
         xlInt64MapText = YJson.encodeStringWith(xlInt64MapCodec, xlInt64Map)
         xlDeepNestedProfilesText = YJson.encodeStringWith(xlDeepNestedCodec, xlDeepNestedProfiles)
@@ -306,7 +353,7 @@ class ComprehensiveJsonCompareBenchmarks {
 
     @Bench
     func yjsonStringDecodeAddress(): Unit {
-        intSink = YJson.decodeStringWith(AddressJson, addressText).zipcode
+        intSink = addressFastDecoder.decodeString(addressText).zipcode
     }
 
     @Bench
@@ -326,7 +373,7 @@ class ComprehensiveJsonCompareBenchmarks {
 
     @Bench
     func yjsonStringDecodePerson(): Unit {
-        intSink = YJson.decodeStringWith(PersonJson, personText).id
+        intSink = personFastDecoder.decodeString(personText).id
     }
 
     @Bench

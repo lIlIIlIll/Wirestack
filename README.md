@@ -13,7 +13,7 @@
   <a href="https://codecov.io/gh/lIlIIlIll/yjson"><img src="https://codecov.io/gh/lIlIIlIll/yjson/branch/main/graph/badge.svg?flag=core" alt="Core Coverage" /></a>
   <a href="https://github.com/lIlIIlIll/yjson/releases/latest"><img src="https://img.shields.io/github/v/release/lIlIIlIll/yjson?display_name=tag&sort=semver" alt="Release" /></a>
   <a href="docs/performance/results/2026-08-27-yjson-2.0.0.md"><img src="https://img.shields.io/badge/Performance-qualified-10B981" alt="Performance qualified" /></a>
-  <a href="docs/performance/results/2026-08-30-current-dev-seven-library.md"><img src="https://img.shields.io/badge/dev%20benchmark-current%20%7C%20noisy-F59E0B" alt="Current dev benchmark is noisy" /></a>
+  <a href="benchmarks/results/full-seven-library/current-main.json"><img src="https://img.shields.io/badge/main%20benchmark-current%20%7C%20noisy-F59E0B" alt="Current main benchmark is noisy" /></a>
   <a href="docs/performance/results/2026-08-28-stream-protocol-v1.md"><img src="https://img.shields.io/badge/Stream%20protocol-v1%20incomplete-F59E0B" alt="Stream protocol v1 incomplete" /></a>
 </p>
 
@@ -122,25 +122,27 @@ Alice
 
 ## 性能
 
-当前开发数据绑定 `dev` 提交 `1dedf2a`。下表是第二批 11 轮完整重跑的中位数，单位为 µs/op。
-每个 workload 都至少有一个实现的 CV 超过 5%，因此所有行标记 noisy，只表示本次观察值。
+[`current-main.json`](benchmarks/results/full-seven-library/current-main.json) 将当前性能输入绑定到
+测量提交 `d2f375c`、产品源码摘要和有效 benchmark 摘要。下表只展示第二批完整重跑，单位为
+µs/op，越小越好。两批各有 10/10 行的最大 CV 超过 5%，因此这些数字都是 noisy 观察值，
+不能作为 release qualification 或精确倍数声明。
 
 | Workload | yjson | stdx.json | cangjieJSON | json4cj | cjfast_json | Jackson | fastjson2 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Address encode | 1.564 | 92.127 | 2.836 | 3.398 | 2.946 | 0.170 | 0.064 |
-| Address decode | 0.944 | 37.182 | 3.098 | 3.449 | 2.042 | 0.304 | 0.067 |
-| Person encode | 3.836 | 123.469 | 16.211 | 5.465 | 10.058 | 0.584 | 0.264 |
-| Person decode | 10.356 | 124.353 | 24.933 | 19.891 | 15.228 | 1.134 | 0.427 |
-| Large Array encode | 72.185 | 633.995 | 265.352 | 92.306 | 76.370 | 8.927 | 3.961 |
-| Large Array decode | 66.086 | 1100.139 | 316.129 | 211.037 | 80.198 | 18.932 | 5.107 |
-| Large Map encode | 7.733 | 370.841 | 169.543 | 121.402 | 117.848 | 1.781 | 1.752 |
-| Large Map decode | 33.637 | 716.636 | 293.737 | 222.504 | 202.004 | 5.277 | 3.933 |
-| Deep Nested encode | 84.492 | 426.165 | 172.341 | 84.366 | 72.480 | 4.520 | 2.508 |
-| Deep Nested decode | 94.873 | 784.964 | 222.617 | 144.320 | 93.575 | 10.533 | 3.395 |
+| Address encode | 1.611 | 56.948 | 3.097 | 3.471 | 2.471 | 0.170 | 0.067 |
+| Address decode | 0.776 | 37.205 | 3.433 | 3.438 | 2.041 | 0.321 | 0.069 |
+| Person encode | 3.922 | 95.700 | 16.788 | 5.425 | 10.284 | 0.566 | 0.256 |
+| Person decode | 10.167 | 93.739 | 29.100 | 20.003 | 15.707 | 1.133 | 0.430 |
+| Large Array encode | 33.536 | 552.568 | 249.626 | 91.447 | 75.910 | 8.921 | 3.720 |
+| Large Array decode | 50.432 | 1035.366 | 415.140 | 175.467 | 78.027 | 18.998 | 5.053 |
+| Large Map encode | 7.109 | 304.432 | 161.078 | 128.235 | 131.101 | 1.752 | 1.728 |
+| Large Map decode | 28.564 | 584.020 | 337.328 | 222.829 | 232.171 | 5.404 | 4.118 |
+| Deep Nested encode | 46.592 | 366.702 | 171.247 | 84.907 | 74.496 | 4.487 | 2.596 |
+| Deep Nested decode | 81.797 | 628.928 | 253.308 | 142.592 | 95.616 | 10.598 | 3.470 |
 
-完整两批数据、各库 CV、API 路径、metadata、raw report 和 checksum 见
-[2026-08-30 当前 dev 七库完整对比](docs/performance/results/2026-08-30-current-dev-seven-library.md)。
-这份开发快照没有通过稳定性门槛，不能发布精确倍数。最近一次通过完整门禁的结果仍是
+完整 workload 形状、两批数据、各库 CV、API 路径、metadata、raw report 和 checksum 见
+[2026-08-30 当前 `main` 七库完整对比](docs/performance/results/2026-08-30-main-seven-library.md)。
+这份 `main` 快照没有通过稳定性门槛。最近一次通过完整门禁的结果仍是
 [2.0.0 性能报告](docs/performance/results/2026-08-27-yjson-2.0.0.md)。
 
 Stream protocol v1 的当前开发批次包含稳定提升行，但没有通过完整稳定性和内部 scratch
