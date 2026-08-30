@@ -16,6 +16,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -36,6 +37,7 @@ SCHEMA_VERSION = 1
 EXIT = {"READY": 0, "PASS": 0, "FAIL": 1, "INVALID": 2, "BLOCKED": 3}
 REQUIRED_PAYLOADS = (1024, 16 * 1024, 64 * 1024, 1024 * 1024, 100 * 1024 * 1024)
 CAPTURE_LIMIT = 8192
+ETW_SETTLE_SECONDS = 1.0
 XPERF_TOTAL_RE = re.compile(
     r"^\s*([0-9][0-9,]*)\s*,(?:[^\r\n]*,){6}\s*TOTAL\s*$",
     re.IGNORECASE | re.MULTILINE,
@@ -371,6 +373,7 @@ def _instrumented_transfer_attempt(binary: Path, payload: int, directory: Path,
         run_wpr(["-HeapTracingConfig", binary.name, "disable"], directory, 30)
         detail = (start["stdout"] + "\n" + start["stderr"]).strip()[:CAPTURE_LIMIT]
         raise GateError("ETW_START", f"WPR heap session failed: {detail}")
+    time.sleep(ETW_SETTLE_SECONDS)
     sample: dict[str, Any] | None = None
     try:
         sample = transfer_sample(binary, payload, timeout)
@@ -403,7 +406,7 @@ def instrumented_transfer(binary: Path, payload: int, artifact_dir: Path,
     directory = artifact_dir / f"instrumented-{payload}"
     attempts: list[dict[str, Any]] = []
     result: dict[str, Any] | None = None
-    for attempt in range(1, 3):
+    for attempt in range(1, 4):
         result = _instrumented_transfer_attempt(
             binary, payload, directory / f"attempt-{attempt}", timeout
         )

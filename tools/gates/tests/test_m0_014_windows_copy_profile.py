@@ -131,7 +131,7 @@ class M0014ValidatorTests(unittest.TestCase):
             "2, 2.0, 2, 2.0, 0, 2.0, 2.0, TOTAL"
         ))
 
-    def test_instrumentation_retries_one_empty_etw_heap_report(self) -> None:
+    def test_instrumentation_retries_empty_etw_heap_reports_with_a_bound(self) -> None:
         empty = {
             "allocation_count": None,
             "allocation_status": "ETW_UNPARSED",
@@ -145,14 +145,14 @@ class M0014ValidatorTests(unittest.TestCase):
             "heap_report_sha256": "d",
         }
         with mock.patch.object(
-            gate, "_instrumented_transfer_attempt", side_effect=[empty, measured]
+            gate, "_instrumented_transfer_attempt", side_effect=[empty, empty, measured]
         ) as attempt:
             result = gate.instrumented_transfer(
                 Path("receiver.exe"), 1024, Path("artifacts"), 180.0
             )
-        self.assertEqual(2, attempt.call_count)
+        self.assertEqual(3, attempt.call_count)
         self.assertEqual(10232, result["allocation_count"])
-        self.assertEqual(2, result["attempt_count"])
+        self.assertEqual(3, result["attempt_count"])
         self.assertEqual("ETW_UNPARSED", result["attempts"][0]["allocation_status"])
 
     def test_counting_receiver_adds_dynamic_counter_fields_once(self) -> None:
