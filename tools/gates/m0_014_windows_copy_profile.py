@@ -260,11 +260,13 @@ def compile_receiver(root: Path, artifact_dir: Path,
                      timeout: float) -> tuple[Path, dict[str, Any]]:
     artifact_dir.mkdir(parents=True, exist_ok=True)
     source = artifact_dir / "wirestack_m0_014_receive.cj"
-    shim_source = root / "tools/gates/native/m0_014_copy_counter.c"
+    shim_template = root / "tools/gates/native/m0_014_copy_counter.c.in"
+    shim_source = artifact_dir / "m0_014_copy_counter.c"
     shim_object = artifact_dir / "m0_014_copy_counter.o"
     binary = artifact_dir / "wirestack_m0_014_receive.exe"
     receiver_source = counting_receiver_source()
     source.write_text(receiver_source, encoding="utf-8")
+    shim_source.write_bytes(shim_template.read_bytes())
     shim_compile = run_process(
         ["clang", "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
          "-c", str(shim_source), "-o", str(shim_object)],

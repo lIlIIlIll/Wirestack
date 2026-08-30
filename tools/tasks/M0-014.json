@@ -13,6 +13,13 @@
       "id": "strict-report-validator",
       "long_running": false,
       "timeout_seconds": 60
+    },
+    {
+      "argv": ["python3", "tools/gates/m0_014_windows_copy_profile.py", "--validate-report", "docs/evidence/M0-014/windows-x86_64/result.json", "--output", "build/gates/m0-014/local-validation.json"],
+      "gate": "task",
+      "id": "stored-native-result",
+      "long_running": false,
+      "timeout_seconds": 60
     }
   ],
   "allowed_paths": [
@@ -21,7 +28,7 @@
     "docs/planning/status.md",
     "scripts/gate-m0-014-windows-copy-profile",
     "tools/gates/m0_014_windows_copy_profile.py",
-    "tools/gates/native/m0_014_copy_counter.c",
+    "tools/gates/native/m0_014_copy_counter.c.in",
     "tools/gates/tests/test_m0_014_windows_copy_profile.py",
     "tools/tasks/M0-014.json"
   ],
@@ -30,16 +37,16 @@
   "platforms": ["windows-x86_64"],
   "required_evidence": [
     "docs/evidence/M0-014/evidence.json",
-    "docs/evidence/M0-014/windows-x86_64/result.json"
+    "docs/evidence/M0-014/windows-x86_64/result.json",
+    "docs/evidence/M0-014/windows-x86_64/validation.json"
   ],
   "schema_version": 1,
   "source_paths": [
     ".github/workflows/m0-014-windows-copy-profile.yml",
-    "docs/evidence/M0-014/README.md",
     "docs/evidence/M0-014/test-plan.md",
     "scripts/gate-m0-014-windows-copy-profile",
     "tools/gates/m0_014_windows_copy_profile.py",
-    "tools/gates/native/m0_014_copy_counter.c",
+    "tools/gates/native/m0_014_copy_counter.c.in",
     "tools/gates/tests/test_m0_014_windows_copy_profile.py",
     "tools/tasks/M0-014.json"
   ],
