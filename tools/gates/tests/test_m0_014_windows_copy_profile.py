@@ -133,7 +133,7 @@ class M0014ValidatorTests(unittest.TestCase):
 
     def test_counting_receiver_adds_dynamic_counter_fields_once(self) -> None:
         source = gate.counting_receiver_source()
-        self.assertEqual(1, source.count("let copiedBytes = WIRESTACK_M0014_CopyBytes()"))
+        self.assertEqual(1, source.count("let copiedBytes = unsafe { WIRESTACK_M0014_CopyBytes() }"))
         self.assertEqual(1, source.count("copiedBytes=${copiedBytes}"))
 
 
