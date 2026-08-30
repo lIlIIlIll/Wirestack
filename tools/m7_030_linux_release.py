@@ -26,6 +26,7 @@ NAMESPACE = "wirestack-release"
 SIGNER_IDENTITY = "wirestack-release"
 REPOSITORY = "lIlIIlIll/Wirestack"
 WORKFLOW = ".github/workflows/linux-release-attestation.yml"
+SIGNER_WORKFLOW_IDENTITY = f"{REPOSITORY}/{WORKFLOW}"
 ARTIFACT = ROOT / "dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
 FROZEN_ARTIFACT_TAG = "m7-030-frozen-artifact-c0988f62"
 FROZEN_ARTIFACT_SHA256 = "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee"
@@ -697,7 +698,7 @@ def inspect_workflow(path: Path = ROOT / WORKFLOW) -> dict[str, Any]:
     require(text.count("--deny-self-hosted-runners") == 3, "WORKFLOW_VERIFY", "runner policy")
     require(text.count(f"--repo {REPOSITORY}") == 4,
             "WORKFLOW_VERIFY", "one download and three verifications")
-    require(text.count(f"--signer-workflow {WORKFLOW}") == 3,
+    require(text.count(f"--signer-workflow {SIGNER_WORKFLOW_IDENTITY}") == 3,
             "WORKFLOW_VERIFY", "workflow identity")
     require(text.count("--predicate-type https://spdx.dev/Document/v2.3") == 1,
             "WORKFLOW_VERIFY", "SPDX predicate")
