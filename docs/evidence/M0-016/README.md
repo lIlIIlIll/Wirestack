@@ -3,22 +3,22 @@
 ## Current status
 
 - Task: **BLOCKED**
-- AWS-LC on Linux glibc and Linux musl: **PASS — native results retained**
-- Remaining retained Linux/macOS candidate cells: **PARTIAL**
-- Windows x86_64: **NOT_RUN — no native job exists yet**
-- Android, iOS and HarmonyOS/OpenHarmony native execution: **BLOCKED — no device runner connected**
+- AWS-LC on Linux glibc, Linux musl and Windows x86_64: **PASS; native results retained**
+- Remaining retained Linux/macOS/Windows candidate cells: **PARTIAL**
+- Windows x86_64: **VALIDATED; AWS-LC PASS, Mbed TLS and OpenSSL PARTIAL**
+- Android, iOS and HarmonyOS/OpenHarmony native execution: **BLOCKED; no device runner connected**
 - AWS-LC external/non-exportable signer callback on Linux: **PASS for TLS 1.2 and TLS 1.3**
 - Mbed TLS session resumption: **BLOCKED**
 - Linux provider selection: **READY for M0-020**
 - Global provider selection: **out of scope; M0-020**
 
 The fail-closed runner executed AWS-LC, Mbed TLS and vendored OpenSSL from pinned
-source on native Linux glibc, native Alpine musl and native macOS arm64 runners.
-AWS-LC now passes every required capability on native Linux glibc and musl,
-including two executed external-signing handshakes and 10,000 repeated
-handshake/close cycles per result. The other seven retained results remain
-`PARTIAL`. Global M0-016 is therefore still incomplete, but its Linux AWS-LC
-selection prerequisite is closed.
+source on native Linux glibc, native Alpine musl, native macOS arm64 and GitHub's
+native Windows x86_64 runners. AWS-LC passes every required capability on Linux
+glibc, Linux musl and Windows, including two executed external-signing
+handshakes and 10,000 repeated handshake/close cycles per result. Nine retained
+results remain `PARTIAL`. Global M0-016 is therefore still incomplete, but its
+Linux AWS-LC selection prerequisite and Windows provider PoC are closed.
 
 ## Retained native results
 
@@ -48,6 +48,20 @@ the named CI artifacts. Every committed JSON is checksum-pinned by
 | macOS arm64 | AWS-LC | [`results/macos-arm64/aws-lc.json`](results/macos-arm64/aws-lc.json) | `9493021992` | `64a34c167194de3e4437f0d9841ef53deb4942add30bc42e233fc0ca530016b8` |
 | macOS arm64 | Mbed TLS | [`results/macos-arm64/mbedtls.json`](results/macos-arm64/mbedtls.json) | `9493016597` | `cbda50da907c30dbb30224c857e7e548c5dabc28bf922dd5657027e6252115a5` |
 | macOS arm64 | OpenSSL | [`results/macos-arm64/openssl.json`](results/macos-arm64/openssl.json) | `9493025915` | `05b8b1aeddaaf3107fd2cb2d92bbcb50cb0fd254a778c54f281d44b17a578091` |
+
+The Windows results came from [GitHub Actions run 33327534815](https://github.com/lIlIIlIll/Wirestack/actions/runs/33327534815)
+at exact repository revision `7eccd9042b38000601fd2263bfb0fe8f148333aa`.
+All three jobs ran on `windows-2025`, image `win25-vs2026` version
+`20260824.214.3`, with runner OS `Windows` and architecture `X64`. The retained
+JSON records the runner identity and exact revision; the CI artifacts are
+supporting evidence and expire on 2026-09-13. The durable run index is
+[`windows-x86_64-run.json`](windows-x86_64-run.json).
+
+| Platform | Provider | Result | CI artifact ID | Artifact SHA-256 |
+|---|---|---|---:|---|
+| Windows x86_64 | AWS-LC | [`results/windows-x86_64/aws-lc.json`](results/windows-x86_64/aws-lc.json) | `9736694258` | `f8315b79ec332a7f76c2b23dc18d2f38002eec9a67fe066d0f41d3b85c255c07` |
+| Windows x86_64 | Mbed TLS | [`results/windows-x86_64/mbedtls.json`](results/windows-x86_64/mbedtls.json) | `9736705902` | `3ec03d92fa9ce34890822e70013f13c57a60439d4ed1ee7adc3727e0393a091d` |
+| Windows x86_64 | OpenSSL | [`results/windows-x86_64/openssl.json`](results/windows-x86_64/openssl.json) | `9736798657` | `935fd8f593dc070713950c63d203ff46145997da31eaff1b1d7062719294620e` |
 
 ## Pinned sources
 
@@ -83,3 +97,4 @@ Use `aws-lc`, `mbedtls` or `openssl`. Network access, CMake/Ninja, a C/C++ toolc
 - System TLS-library discovery or runtime fallback makes the result `FAIL`.
 - Cross-compilation does not change a native platform cell to `PASS`.
 - CI artifacts are supporting evidence; retained result JSON is checksum-pinned under this directory.
+- This PoC does not select or claim a production Windows TLS provider.

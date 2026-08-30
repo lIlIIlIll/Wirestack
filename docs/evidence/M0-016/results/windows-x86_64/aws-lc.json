@@ -1,0 +1,67 @@
+{
+  "build": {
+    "binary_bytes": 2001408,
+    "binary_sha256": "33c7b345af12c29e70bacc17dfd15471a13c06996ac2ca6545d80809598011b9",
+    "runtime_loader_library_strings": [],
+    "static_archives": [
+      {
+        "bytes": 3187390,
+        "name": "ssl.lib",
+        "sha256": "68b82acd24779d339cfa16d270d8bcc02d738f1c87da4eec21516998ed8d53e3"
+      },
+      {
+        "bytes": 6788546,
+        "name": "crypto.lib",
+        "sha256": "587bf2081ad021152177ef6e63f0ffb26f9a2b92fff8ed444d4e45b386ae0110"
+      }
+    ],
+    "system_tls_dependencies": []
+  },
+  "build_log_sha256": "848690a1ca44a9aea0555e9dd9ebb17c9830c8d54a177a28b5e204b4bae161f7",
+  "capabilities": {
+    "caller_cancellation": "PASS",
+    "close_notify": "PASS",
+    "custom_ca": "PASS",
+    "external_signer": "PASS",
+    "mtls": "PASS",
+    "negative_hostname": "PASS",
+    "negative_untrusted_ca": "PASS",
+    "partial_io_backpressure": "PASS",
+    "repeated_cleanup": "PASS",
+    "session_resumption": "PASS",
+    "sni_hostname_alpn": "PASS",
+    "tls12": "PASS",
+    "tls13": "PASS",
+    "truncation": "PASS"
+  },
+  "execution": {
+    "image_os": "win25-vs2026",
+    "image_version": "20260824.214.3",
+    "python": "3.12.10",
+    "repository_revision": "7eccd9042b38000601fd2263bfb0fe8f148333aa",
+    "runner_arch": "X64",
+    "runner_os": "Windows"
+  },
+  "finished_at": "2026-08-30T18:17:43.656659+00:00",
+  "metrics": {
+    "external_signer_calls": 2,
+    "failure_cleanup_cycles": 0,
+    "repeated_cleanup_cycles": 10000
+  },
+  "notes": [
+    "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
+  ],
+  "platform": "windows-x86_64",
+  "poc_exit_code": 0,
+  "provider": "aws-lc",
+  "schema_version": 2,
+  "source": {
+    "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+    "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+    "kind": "git",
+    "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
+  },
+  "started_at": "2026-08-30T18:15:42.967518+00:00",
+  "status": "PASS",
+  "task_id": "M0-016"
+}

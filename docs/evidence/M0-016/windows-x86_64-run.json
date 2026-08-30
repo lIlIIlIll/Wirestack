@@ -1,0 +1,45 @@
+{
+  "artifacts": [
+    {
+      "artifact_id": 9736694258,
+      "artifact_sha256": "f8315b79ec332a7f76c2b23dc18d2f38002eec9a67fe066d0f41d3b85c255c07",
+      "build_log_sha256": "848690a1ca44a9aea0555e9dd9ebb17c9830c8d54a177a28b5e204b4bae161f7",
+      "expires_on": "2026-09-13",
+      "provider": "aws-lc",
+      "result_sha256": "b42b43a150dcd97227dba45adaccdea2e38cd6152518119e44a5452e22619af1",
+      "status": "PASS"
+    },
+    {
+      "artifact_id": 9736705902,
+      "artifact_sha256": "3ec03d92fa9ce34890822e70013f13c57a60439d4ed1ee7adc3727e0393a091d",
+      "build_log_sha256": "506e5bb29fee3a3ee8fc0e8c88b89bd3eba00a2adaa4e9062d1d5b1bd92a552e",
+      "expires_on": "2026-09-13",
+      "provider": "mbedtls",
+      "result_sha256": "2f6730aa9a5e3f45dd447012af3856f8975bc1bea3b406df88fa47c0f20858ed",
+      "status": "PARTIAL"
+    },
+    {
+      "artifact_id": 9736798657,
+      "artifact_sha256": "935fd8f593dc070713950c63d203ff46145997da31eaff1b1d7062719294620e",
+      "build_log_sha256": "b1c2baee87f8aa4321b794642299f3d8ae86d2e800b0dbd604b67f30985b9279",
+      "expires_on": "2026-09-13",
+      "provider": "openssl",
+      "result_sha256": "b195926ab8c68a7538020ece5dc31e556c1c14f7829dc920748827240e24e4a2",
+      "status": "PARTIAL"
+    }
+  ],
+  "conclusion": "success",
+  "repository_revision": "7eccd9042b38000601fd2263bfb0fe8f148333aa",
+  "run_id": 33327534815,
+  "run_url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33327534815",
+  "runner": {
+    "arch": "X64",
+    "image_os": "win25-vs2026",
+    "image_version": "20260824.214.3",
+    "label": "windows-2025",
+    "os": "Windows",
+    "python": "3.12.10"
+  },
+  "schema_version": 1,
+  "task_id": "M0-016"
+}
