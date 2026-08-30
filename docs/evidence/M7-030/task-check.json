@@ -1,0 +1,141 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M7-030/test-plan.md",
+        "--json"
+      ],
+      "duration_ms": 113.88,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T12:24:49.542964Z",
+      "id": "test-plan-matrix",
+      "started_at_utc": "2026-08-30T12:24:49.429086Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-030/test-plan-matrix.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"counts\": {\"paths\": 21, \"scenarios\": 18, \"tests\": 14}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+      "stdout_path": "build/repository-tooling/M7-030/test-plan-matrix.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m7_030_linux_release",
+        "-v"
+      ],
+      "duration_ms": 864.466,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T12:24:50.407584Z",
+      "id": "signing-update-fault-injection",
+      "started_at_utc": "2026-08-30T12:24:49.543129Z",
+      "status": "PASS",
+      "stderr_excerpt": "test_atomic_report_failure_preserves_previous_bytes (tools.tests.test_m7_030_linux_release.M7030LinuxReleaseTest.test_atomic_report_failure_preserves_previous_bytes) ... ok\ntest_clean_consumer_and_malicious_archives (tools.tests.test_m7_030_linux_release.M7030LinuxReleaseTest.test_clean_consumer_and_malicious_archives) ... ok\ntest_current_inputs_build_strict_deterministic_manifest (tools.tests.test_m7_030_linux_release.M7030LinuxReleaseTest.test_current_inputs_build_strict_deterministic_manifest) ... ok\ntest_hosted_report_binds_three_verified_subjects (tools.tests.test_m7_030_linux_release.M7030LinuxReleaseTest.test_hosted_report_binds_three_verified_subjects) ... ok\ntest_json_duplicates_unknown_schema_paths_and_subjects_are_rejected (tools.tests.test_m7_030_linux_release.M7030LinuxReleaseTest.test_json_duplicates_unknown_schema_paths_and_subjects_are_rejected) ... ok\ntest_key_type_identity_and_location_fail_closed_without_secret_output (tools.tests.test_m7_030_linux_release.M7030LinuxReleaseTest.test_key_type_identity_and_location_fail_closed_without_secret_output) ... ok\ntest_missing_or_stale_supply_chain_input_fails_closed (tools.tests.test_m7_030_linux_release.M7030LinuxReleaseTest.test_missing_or_stale_supply_chain_input_fails_closed) ... ok\ntest_offline_rehearsal_verifies_and_all_subject_or_signature_mutations_fail (tools.tests.test_m7_030_linux_release.M7030LinuxReleaseTest.test_offline_rehearsal_verifies_and_all_subject_or_signature_mutations_fail) ... ok\ntest_rehearsal_is_bounded_and_does_not_promote_hosted_gate (tools.tests.test_m7_030_linux_release.M7030LinuxReleaseTest.test_rehearsal_is_bounded_and_does_not_promote_hosted_gate) ... ok\ntest_rollback_requires_exact_signed_unexpired_authorization (tools.tests.test_m7_030_linux_release.M7030LinuxReleaseTest.test_rollback_requires_exact_signed_unexpired_authorization) ... ok\ntest_upgrade_requires_matching_signed_advisory_and_sbom (tools.tests.test_m7_030_linux_release.M7030LinuxReleaseTest.test_upgrade_requires_matching_signed_advisory_and_sbom) ... ok\ntest_workflow_is_pinned_and_missing_or_wrong_hosted_report_never_passes (tools.tests.test_m7_030_linux_release.M7030LinuxReleaseTest.test_workflow_is_pinned_and_missing_or_wrong_hosted_report_never_passes) ... ok\n\n----------------------------------------------------------------------\nRan 12 tests in 0.746s\n\nOK\n",
+      "stderr_path": "build/repository-tooling/M7-030/signing-update-fault-injection.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "",
+      "stdout_path": "build/repository-tooling/M7-030/signing-update-fault-injection.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "scripts/generate-m7-025-linux-supply-chain",
+        "--validate-only"
+      ],
+      "duration_ms": 213.768,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T12:24:50.621498Z",
+      "id": "supply-chain-inputs",
+      "started_at_utc": "2026-08-30T12:24:50.407735Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-030/supply-chain-inputs.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "M7-025 Linux supply-chain bundle: PASS\nartifact_sha256=c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee\nbuild_fingerprint=67dcd09f0ab99a33cfb204fb5f2a133a911f8f706ccf85a7a3312b980ddac9d9\noutput=/home/elliot/playground/Wirestack/docs/evidence/M7-025/linux_x86_64\n",
+      "stdout_path": "build/repository-tooling/M7-030/supply-chain-inputs.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "scripts/release-m7-030-linux",
+        "validate-workflow",
+        "--output",
+        "docs/evidence/M7-030/workflow-contract.json"
+      ],
+      "duration_ms": 113.636,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T12:24:50.735226Z",
+      "id": "hosted-workflow-contract",
+      "started_at_utc": "2026-08-30T12:24:50.621601Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-030/hosted-workflow-contract.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"attestationSubjects\":3,\"decision\":\"PASS\",\"uses\":[\"actions/checkout@11d5960a326750d5838078e36cf38b85af677262\",\"Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7\",\"actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d\",\"actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d\",\"actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d\",\"actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02\"]}\n",
+      "stdout_path": "build/repository-tooling/M7-030/hosted-workflow-contract.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "scripts/check-m7-030-release"
+      ],
+      "duration_ms": 463.888,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T12:24:51.199258Z",
+      "id": "local-signing-update-rehearsal",
+      "started_at_utc": "2026-08-30T12:24:50.735379Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-030/local-signing-update-rehearsal.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"classification\":\"REHEARSAL\",\"consumer\":{\"decision\":\"PASS\",\"root\":\"wirestack-0.1.0\"},\"decision\":\"PASS\",\"nonClaims\":[\"Temporary-key signatures are not production release signatures.\",\"The synthetic update is not an AWS-LC security release.\",\"Production completion requires the GitHub-hosted attestation report.\"],\"offlineSigning\":{\"classification\":\"REHEARSAL\",\"namespace\":\"wirestack-release\",\"scheme\":\"OpenSSH-Ed25519\",\"subjectSha256\":{\"artifact\":\"c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee\",\"release-manifest\":\"9205ae0166a6e94ba291afb51774b85617705ed85f21d682cb05287f9b316dd9\",\"sbom\":\"49df6442eaceb13f413c9b5b330b3855eee559c896532d30eb6de5d4e892bc6c\"},\"verifiedSubjects\":[\"artifact\",\"release-manifest\",\"sbom\"]},\"productionAttestation\":{\"decision\":\"BLOCKED\",\"detail\":\"HOSTED_ATTESTATION_BLOCKED\"},\"schemaVersion\":1,\"taskId\":\"M7-030\",\"updateFlow\":{\"advisoryIds\":[\"WSA-REHEARSAL-0001\",\"WSA-REHEARSAL-0002\"],\"classification\":\"REHEARSAL\",\"decision\":\"PASS\",\"rollback\":{\"fromSequence\":101,\"toSequence\":100},\"sbomUpdated\":true,\"upgrade\":{\"fromSequence\":100,\"toSequence\":101}},\"workflow\":{\"attestationSubjects\":3,\"decision\":\"PASS\",\"uses\":[\"actions/checkout@11d5960a326750d5838078e36cf38b85af677262\",\"Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7\",\"actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d\",\"actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d\",\"actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d\",\"actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02\"]}}\n",
+      "stdout_path": "build/repository-tooling/M7-030/local-signing-update-rehearsal.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "scripts/release-m7-030-linux",
+        "validate-hosted",
+        "--report",
+        "docs/evidence/M7-030/github-attestation.json"
+      ],
+      "duration_ms": 113.734,
+      "error_code": null,
+      "exit_code": 2,
+      "finished_at_utc": "2026-08-30T12:24:51.313134Z",
+      "id": "github-hosted-attestations",
+      "started_at_utc": "2026-08-30T12:24:51.199408Z",
+      "status": "FAIL",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-030/github-hosted-attestations.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"code\":\"HOSTED_ATTESTATION_BLOCKED\",\"decision\":\"BLOCKED\",\"detail\":\"docs/evidence/M7-030/github-attestation.json\",\"schemaVersion\":1,\"taskId\":\"M7-030\"}\n",
+      "stdout_path": "build/repository-tooling/M7-030/github-hosted-attestations.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "task",
+  "schema_version": 1,
+  "status": "FAIL",
+  "task_id": "M7-030"
+}
