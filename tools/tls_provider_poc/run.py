@@ -20,7 +20,11 @@ from typing import Any, Mapping, Sequence
 
 CAP_RE = re.compile(r"^CAP\s+([a-z0-9_]+)=(PASS|FAIL|BLOCKED|NOT_RUN)$", re.M)
 METRIC_RE = re.compile(r"^METRIC\s+([a-z0-9_]+)=([0-9]+)$", re.M)
-FORBIDDEN_DEP_RE = re.compile(r"(?:libssl|libcrypto|libmbedtls|libmbedx509|libtfpsacrypto|libmbedcrypto)\.(?:so|dylib|dll)", re.I)
+FORBIDDEN_DEP_RE = re.compile(
+    r"(?:libssl|libcrypto|libmbedtls|libmbedx509|libtfpsacrypto|libmbedcrypto)"
+    r"[^\s/\\]*\.(?:so(?:\.[0-9]+)*|dylib|dll)",
+    re.I,
+)
 
 
 class PocError(RuntimeError):
@@ -139,6 +143,25 @@ def find_one(root: Path, names: Sequence[str]) -> Path:
     raise PocError(f"missing required file: {names}")
 
 
+def is_windows() -> bool:
+    return os.name == "nt"
+
+
+def provider_archive_names(provider: str, windows: bool) -> list[list[str]]:
+    if provider == "aws-lc":
+        return (["ssl.lib", "libssl.lib"], ["crypto.lib", "libcrypto.lib"]) if windows else (
+            ["libssl.a"], ["libcrypto.a"])
+    if provider == "mbedtls":
+        return (["mbedtls.lib"], ["mbedx509.lib"], ["tfpsacrypto.lib", "mbedcrypto.lib"]) if windows else (
+            ["libmbedtls.a"], ["libmbedx509.a"], ["libtfpsacrypto.a", "libmbedcrypto.a"])
+    return (["libssl.lib", "ssl.lib"], ["libcrypto.lib", "crypto.lib"]) if windows else (
+        ["libssl.a"], ["libcrypto.a"])
+
+
+def find_provider_archives(prefix: Path, provider: str, windows: bool) -> list[Path]:
+    return [find_one(prefix, names) for names in provider_archive_names(provider, windows)]
+
+
 def source_provider(spec: Mapping[str, Any], work: Path, log: Path) -> tuple[Path, dict[str, Any]]:
     source_root = work / "source"
     source_root.mkdir(parents=True, exist_ok=True)
@@ -192,7 +215,7 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
             f"-DCMAKE_INSTALL_PREFIX={prefix}",
         ], cwd=work, log=log)
         run(["cmake", "--build", str(build), "--target", "install", "--parallel", jobs], cwd=work, log=log)
-        archives = [find_one(prefix, ["libssl.a"]), find_one(prefix, ["libcrypto.a"])]
+        archives = find_provider_archives(prefix, pid, is_windows())
     elif pid == "mbedtls":
         run([
             "cmake", "-S", str(src), "-B", str(build), "-GNinja",
@@ -202,21 +225,28 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
         ], cwd=work, log=log)
         run(["cmake", "--build", str(build), "--parallel", jobs], cwd=work, log=log)
         run(["cmake", "--install", str(build)], cwd=work, log=log)
-        archives = [
-            find_one(prefix, ["libmbedtls.a"]),
-            find_one(prefix, ["libmbedx509.a"]),
-            find_one(prefix, ["libtfpsacrypto.a", "libmbedcrypto.a"]),
-        ]
+        archives = find_provider_archives(prefix, pid, is_windows())
     else:
         env = os.environ.copy()
-        env["CFLAGS"] = "-O2 -fPIC"
-        run([
-            str(src / "Configure"), "no-shared", "no-module", "no-tests",
-            "no-zlib", "no-zstd", f"--prefix={prefix}", "--libdir=lib",
-        ], cwd=src, log=log, env=env)
-        run(["make", f"-j{jobs}"], cwd=src, log=log, env=env)
-        run(["make", "install_sw"], cwd=src, log=log, env=env)
-        archives = [find_one(prefix, ["libssl.a"]), find_one(prefix, ["libcrypto.a"])]
+        configure = [
+            "perl", str(src / "Configure")
+        ] if is_windows() else [str(src / "Configure")]
+        if is_windows():
+            configure.append("VC-WIN64A")
+        else:
+            env["CFLAGS"] = "-O2 -fPIC"
+        configure += [
+            "no-shared", "no-module", "no-tests", "no-zlib", "no-zstd",
+            f"--prefix={prefix}", "--libdir=lib",
+        ]
+        run(configure, cwd=src, log=log, env=env)
+        if is_windows():
+            run(["nmake"], cwd=src, log=log, env=env)
+            run(["nmake", "install_sw"], cwd=src, log=log, env=env)
+        else:
+            run(["make", f"-j{jobs}"], cwd=src, log=log, env=env)
+            run(["make", "install_sw"], cwd=src, log=log, env=env)
+        archives = find_provider_archives(prefix, pid, is_windows())
     return prefix, archives
 
 
@@ -262,10 +292,22 @@ def generate_fixtures(work: Path, log: Path) -> Path:
 def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
                 archives: Sequence[Path], work: Path, log: Path,
                 extra_cflags: Sequence[str] = ()) -> Path:
-    output = work / "provider-poc"
+    output = work / ("provider-poc.exe" if is_windows() else "provider-poc")
     include = prefix / "include"
+    source = repo / "tools/tls_provider_poc" / (
+        "openssl_memory_poc.c" if spec["poc_family"] == "openssl-compatible"
+        else "mbedtls_memory_poc.c"
+    )
+    if is_windows():
+        run([
+            os.environ.get("CC", "cl"), "/nologo", "/std:c11", "/O2", "/W3", "/WX",
+            "/D_CRT_SECURE_NO_WARNINGS", f"/I{include}", *extra_cflags,
+            str(source), *[str(archive) for archive in archives],
+            "bcrypt.lib", "crypt32.lib", "advapi32.lib", "user32.lib", "ws2_32.lib",
+            f"/Fe:{output}",
+        ], cwd=work, log=log)
+        return output
     if spec["poc_family"] == "openssl-compatible":
-        source = repo / "tools/tls_provider_poc/openssl_memory_poc.c"
         obj = work / "poc.o"
         run([
             os.environ.get("CC", "cc"), "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
@@ -277,7 +319,6 @@ def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
         command += ["-o", str(output)]
         run(command, cwd=work, log=log)
     else:
-        source = repo / "tools/tls_provider_poc/mbedtls_memory_poc.c"
         run([
             os.environ.get("CC", "cc"), "-std=c99", "-O2", "-Wall", "-Wextra", "-Werror",
             f"-I{include}", str(source), *[str(a) for a in archives], "-pthread", "-lm",
@@ -288,17 +329,21 @@ def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
 
 def inspect_binary(binary: Path, archives: Sequence[Path], work: Path, log: Path) -> dict[str, Any]:
     dependencies: list[str] = []
-    if sys.platform.startswith("linux"):
+    if is_windows():
+        completed = run(["dumpbin", "/dependents", str(binary)], cwd=work, log=log, check=False)
+        if completed.returncode != 0:
+            raise PocError("dumpbin dependency inspection failed")
+        dependencies = sorted(set(FORBIDDEN_DEP_RE.findall(completed.stdout)))
+    elif sys.platform.startswith("linux"):
         completed = run(["ldd", str(binary)], cwd=work, log=log, check=False)
         dependencies = sorted(set(FORBIDDEN_DEP_RE.findall(completed.stdout)))
     elif sys.platform == "darwin":
         completed = run(["otool", "-L", str(binary)], cwd=work, log=log, check=False)
+        if completed.returncode != 0:
+            raise PocError("otool dependency inspection failed")
         dependencies = sorted(set(FORBIDDEN_DEP_RE.findall(completed.stdout)))
     data = binary.read_bytes()
-    forbidden_strings = []
-    for needle in (b"libssl.so", b"libcrypto.so", b"libssl.dylib", b"libcrypto.dylib"):
-        if needle in data:
-            forbidden_strings.append(needle.decode())
+    forbidden_strings = sorted(set(FORBIDDEN_DEP_RE.findall(data.decode("latin-1", errors="ignore"))))
     return {
         "binary_bytes": binary.stat().st_size,
         "binary_sha256": sha256_path(binary),
@@ -355,6 +400,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         "platform": platform_id(),
         "status": "FAIL",
         "started_at": started.isoformat(),
+        "execution": {
+            "repository_revision": os.environ.get("GITHUB_SHA", ""),
+            "runner_os": os.environ.get("RUNNER_OS", platform.system()),
+            "runner_arch": os.environ.get("RUNNER_ARCH", platform.machine()),
+            "image_os": os.environ.get("ImageOS", ""),
+            "image_version": os.environ.get("ImageVersion", ""),
+            "python": platform.python_version(),
+        },
         "source": {},
         "capabilities": {name: "NOT_RUN" for name in spec_all["required_capabilities"]},
         "build": {"static_archives": [], "system_tls_dependencies": []},
