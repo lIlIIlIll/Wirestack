@@ -1140,6 +1140,8 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     private static let OBJECT_MASK: UInt8 = 0x2
     private static let FIRST_MASK: UInt8 = 0x1
     private static let EXPECTING_VALUE_MASK: UInt8 = 0x4
+    private static let RAW_ARRAY: UInt8 = 0x1
+    private static let RAW_OBJECT: UInt8 = 0x2
 
     private let target: JsonDirectWriterTarget
     private let config: JsonWriteConfig
@@ -1149,6 +1151,11 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     private var rootWritten: Bool = false
     private var rawDepth: Int64 = 0
     private var rawRootPreclaimed: Bool = false
+    // Keep the common generated path allocation-free. The overflow stack is
+    // allocated only for raw nesting deeper than 64 containers.
+    private var rawKnownKinds: UInt64 = 0u64
+    private var rawObjectKinds: UInt64 = 0u64
+    private var rawOverflowKinds: Option<ArrayList<UInt8>> = None<ArrayList<UInt8>>
 
     public init(pretty!: Bool = false) {
         let writerConfig = if (pretty) { JsonWriteConfig.pretty } else { JsonWriteConfig.compact }
@@ -1271,22 +1278,22 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
     }
 
     public func writeRawBeginArray(): Unit {
-        beginRawContainer()
+        beginRawContainer(RAW_ARRAY)
         target.writeByte(b'[')
     }
 
     public func writeRawEndArray(): Unit {
-        endRawContainer()
+        endRawContainer(RAW_ARRAY)
         target.writeByte(b']')
     }
 
     public func writeRawBeginObject(): Unit {
-        beginRawContainer()
+        beginRawContainer(RAW_OBJECT)
         target.writeByte(b'{')
     }
 
     public func writeRawEndObject(): Unit {
-        endRawContainer()
+        endRawContainer(RAW_OBJECT)
         target.writeByte(b'}')
     }
 
@@ -1521,7 +1528,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
         beforeValue()
     }
 
-    private func beginRawContainer(): Unit {
+    private func beginRawContainer(kind: UInt8): Unit {
         if (currentContainerDepth() >= config.maxDepth) {
             throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
         }
@@ -1532,14 +1539,70 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer {
                 beforeValue()
             }
         }
+        rememberRawContainerKind(kind)
         rawDepth++
     }
 
-    private func endRawContainer(): Unit {
+    private func endRawContainer(expectedKind: UInt8): Unit {
         if (rawDepth <= 0) {
             throw JsonException("Unbalanced JSON writer state", code: "writer_state")
         }
+        let index = rawDepth - 1
+        if (rawContainerKind(index) != expectedKind) {
+            throw JsonException("Mismatched raw JSON container close", code: "writer_state")
+        }
+        forgetRawContainerKind(index)
         rawDepth--
+    }
+
+    private func rememberRawContainerKind(kind: UInt8): Unit {
+        if (rawDepth < 64) {
+            let mask = 1u64 << rawDepth
+            rawKnownKinds |= mask
+            if (kind == RAW_OBJECT) {
+                rawObjectKinds |= mask
+            }
+            return
+        }
+        let position = rawDepth - 64
+        let values = match (rawOverflowKinds) {
+            case Some(existing) => existing
+            case None =>
+                let created = ArrayList<UInt8>()
+                rawOverflowKinds = Some(created)
+                created
+        }
+        if (values.size != position) {
+            throw JsonException("Invalid raw JSON container stack", code: "writer_state")
+        }
+        values.add(kind)
+    }
+
+    private func rawContainerKind(index: Int64): UInt8 {
+        if (index < 64) {
+            let mask = 1u64 << index
+            if ((rawKnownKinds & mask) == 0u64) { return 0u8 }
+            if ((rawObjectKinds & mask) == 0u64) { RAW_ARRAY } else { RAW_OBJECT }
+        } else {
+            let position = index - 64
+            match (rawOverflowKinds) {
+                case Some(values) => values[position]
+                case None => 0u8
+            }
+        }
+    }
+
+    private func forgetRawContainerKind(index: Int64): Unit {
+        if (index < 64) {
+            let mask = 1u64 << index
+            rawKnownKinds ^= mask
+            if ((rawObjectKinds & mask) != 0u64) { rawObjectKinds ^= mask }
+            return
+        }
+        match (rawOverflowKinds) {
+            case Some(values) => values.remove(at: values.size - 1)
+            case None => ()
+        }
     }
 
     private func consumeRawRootPreclaim(): Unit {
