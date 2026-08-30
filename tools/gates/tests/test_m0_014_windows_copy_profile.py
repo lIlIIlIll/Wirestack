@@ -31,6 +31,7 @@ def valid_report() -> dict:
             "allocation_count": 100,
             "peak_private_bytes": 1000,
             "copied_bytes_per_operation": payload,
+            "copied_bytes_status": "MEASURED_BY_LINK_WRAP",
             "latency_ms": {"p50": 1.0, "p95": 2.0, "p99": 3.0},
             "throughput_mib_per_second": {"p50": 1.0, "p95": 2.0, "p99": 3.0},
         })
@@ -45,7 +46,7 @@ def valid_report() -> dict:
             "application_visible_read_sizes": "MEASURED",
             "allocation_count": "MEASURED_BY_ETW_HEAP",
             "peak_private_bytes": "MEASURED_BY_WIN32",
-            "copied_bytes_per_operation": "MEASURED",
+            "copied_bytes_per_operation": "MEASURED_BY_LINK_WRAP",
         },
         "cases": cases,
         "cleanup": {"decision": "PASS"},
@@ -119,13 +120,21 @@ class M0014ValidatorTests(unittest.TestCase):
 
     def test_xperf_parser_is_bounded_and_fail_closed(self) -> None:
         self.assertEqual(
-            1234,
-            gate.parse_xperf_allocation_count("Heap Total Allocation Count: 1,234"),
+            11246,
+            gate.parse_xperf_allocation_count(
+                "   11246, 1128.8, 5238, 657.7, 3, 1108.0, 1108.0, TOTAL"
+            ),
         )
         self.assertIsNone(gate.parse_xperf_allocation_count("unrecognized output"))
         self.assertIsNone(gate.parse_xperf_allocation_count(
-            "Total Allocation Count: 1\nTotal Allocation Count: 2"
+            "1, 1.0, 1, 1.0, 0, 1.0, 1.0, TOTAL\n"
+            "2, 2.0, 2, 2.0, 0, 2.0, 2.0, TOTAL"
         ))
+
+    def test_counting_receiver_adds_dynamic_counter_fields_once(self) -> None:
+        source = gate.counting_receiver_source()
+        self.assertEqual(1, source.count("let copiedBytes = WIRESTACK_M0014_CopyBytes()"))
+        self.assertEqual(1, source.count("copiedBytes=${copiedBytes}"))
 
 
 if __name__ == "__main__":
