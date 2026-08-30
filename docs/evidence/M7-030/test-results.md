@@ -13,7 +13,7 @@ Hosted signing mode: frozen artifact; no compiler or artifact rebuild
 | Command | Result |
 |---|---|
 | `python3 tools/repository/repository_tooling.py --root . validate-tasks --json` | PASS; M7-030 task contract accepted. |
-| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-030/test-plan.md --json` | PASS; 25 paths, 22 scenarios and 18 planned tests. |
+| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-030/test-plan.md --json` | PASS; 26 paths, 23 scenarios and 19 planned tests. |
 | `python3 -m unittest tools.tests.test_m7_030_linux_release -v` | PASS; 12/12 tests. |
 | `scripts/generate-m7-025-linux-supply-chain --validate-only` | PASS; artifact `c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee`, build fingerprint `67dcd09f0ab99a33cfb204fb5f2a133a911f8f706ccf85a7a3312b980ddac9d9`. |
 | `scripts/release-m7-030-linux validate-workflow --output docs/evidence/M7-030/workflow-contract.json` | PASS; exact frozen tag and SHA-256, isolated staging and attestation permissions, three attestation subjects and seven immutable action references. |
@@ -60,6 +60,15 @@ step with `release not found`. The job used `contents: read`; every signing,
 verification, report and upload step was skipped. The next workflow revision
 isolates draft access in a `contents: write` staging job with no OIDC, then
 reverifies the transferred bytes in the read-only attestation job.
+
+Run `33317831996` on merge commit
+`decedefa5e9638032838ca414e47f85e3cb3bc84` passed draft download, both
+SHA-256 checks, M7-025 validation, manifest generation and all three
+attestation steps. The first `gh attestation verify` failed because the signer
+workflow was supplied as a relative path. Downloading the published artifact
+bundle and verifying it offline with the repository-qualified identity returned
+one verified attestation. No bounded hosted report was produced by this failed
+run.
 
 ## Task-level result
 
