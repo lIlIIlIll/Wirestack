@@ -31,7 +31,12 @@ def valid_report(mode: str = "macos") -> dict[str, object]:
             "test_fixture": True,
         },
         "test_link_stub": {"test_only": True},
-        "simulator": {"runtime": "iOS"} if mode == "ios-simulator" else None,
+        "simulator": {
+            "device_udid": "00000000-0000-0000-0000-000000000000",
+            "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-2",
+            "probe_sha256": "a" * 64,
+            "installed_probe_sha256": "a" * 64,
+        } if mode == "ios-simulator" else None,
     }
 
 
@@ -66,6 +71,30 @@ class M2006AppleResolverGateTests(unittest.TestCase):
         failures = gate.validate_report(report, "abc", "ios-simulator")
         self.assertIn("REPORT:SIMULATOR_MISSING", failures)
         self.assertIn("RESOLVER_TEST:CASE_COUNT", failures)
+
+    def test_rejects_incomplete_or_changed_simulator_probe(self) -> None:
+        report = valid_report("ios-simulator")
+        report["simulator"] = {
+            "device_udid": "",
+            "runtime": "macOS",
+            "probe_sha256": "a" * 64,
+            "installed_probe_sha256": "b" * 64,
+        }
+        failures = gate.validate_report(report, "abc", "ios-simulator")
+        self.assertIn("REPORT:SIMULATOR_DEVICE", failures)
+        self.assertIn("REPORT:SIMULATOR_RUNTIME", failures)
+        self.assertIn("REPORT:SIMULATOR_PROBE", failures)
+
+    def test_ios_uses_single_process_app_launch_and_fixed_deployment_target(self) -> None:
+        command = gate.ios_launch_command("device")
+        self.assertEqual("launch", command[2])
+        self.assertNotIn("spawn", command)
+        self.assertIn("--console", command)
+        self.assertEqual(
+            ["-mios-simulator-version-min=17.5"],
+            gate.deployment_flags("ios-simulator-arm64"),
+        )
+        self.assertEqual([], gate.deployment_flags("macos-arm64"))
 
     def test_rejects_skipped_timeout_and_fixture_not_bound(self) -> None:
         report = valid_report()

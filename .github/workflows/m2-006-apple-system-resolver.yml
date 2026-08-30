@@ -16,6 +16,7 @@ on:
       - "tools/download_cangjie_nightly.py"
       - "tools/gates/m2_006_apple_resolver.py"
       - "tools/gates/native/m2_006_tls_link_stub.c"
+      - "tools/gates/probes/m2_006_apple_resolver.cj"
       - "tools/gates/tests/test_m2_006_apple_resolver.py"
       - ".github/workflows/m2-006-apple-system-resolver.yml"
   workflow_dispatch:
