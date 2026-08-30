@@ -36,7 +36,7 @@
       "timeout_seconds": 120
     },
     {
-      "argv": ["scripts/release-m7-030-linux", "validate-hosted", "--report", "docs/evidence/M7-030/github-attestation.json"],
+      "argv": ["scripts/release-m7-030-linux", "validate-hosted", "--report", "docs/evidence/M7-030/github-attestation.json", "--output", "docs/evidence/M7-030/hosted-validation.json"],
       "gate": "task",
       "id": "github-hosted-attestations",
       "long_running": false,
@@ -62,10 +62,7 @@
   "platforms": ["linux-x86_64-glibc"],
   "required_evidence": [
     "docs/evidence/M7-030/evidence.json",
-    "docs/evidence/M7-030/draft-release.json",
-    "docs/evidence/M7-030/local-rehearsal.json",
-    "docs/evidence/M7-030/workflow-contract.json",
-    "docs/evidence/M7-030/github-attestation.json",
+    "docs/evidence/M7-030/hosted-validation.json",
     "docs/evidence/M7-030/task-check.json"
   ],
   "schema_version": 1,
@@ -79,8 +76,11 @@
     "docs/evidence/M7-025/linux_x86_64/sbom.spdx.json",
     "docs/evidence/M7-030/README.md",
     "docs/evidence/M7-030/draft-release.json",
+    "docs/evidence/M7-030/github-attestation.json",
+    "docs/evidence/M7-030/local-rehearsal.json",
     "docs/evidence/M7-030/test-plan.md",
     "docs/evidence/M7-030/test-results.md",
+    "docs/evidence/M7-030/workflow-contract.json",
     "docs/planning/linux-status.md",
     "docs/planning/status.md",
     "docs/security/update-policy.md",

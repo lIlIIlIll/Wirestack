@@ -1,0 +1,56 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-08-30T15:02:21.527291Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M7-030/hosted-validation.json",
+      "sha256": "5f7a503ef513a736285ce76ffd7c33c75c2d9c15017be0359e63cff0dd6a55e7",
+      "source_task": "M7-030"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M7-030/task-check.json",
+      "sha256": "6c3c75b848f525b571502b7441a20279e70b2d18bb52f2ab905f4d400a6120b2",
+      "source_task": "M7-030"
+    }
+  ],
+  "revision": "6280d2f67eab40961c32f5e53107caff9a409407",
+  "schema_version": 1,
+  "source_sha256": {
+    ".github/workflows/linux-release-attestation.yml": "53a67622ec619a65a00300eb432deeaf8d48c84511e129e54d4ff0c55e0edeeb",
+    ".gitignore": "dfef5c5967c6030ed2ea9d196e2c46be54c940fb8bcf00f2fd1501af5b7e09fd",
+    "docs/evidence/M7-021/linux_x86_64/qualification.json": "c6a463895c20960229242d6ea11419d45704de37209f361d1d7b60426c58a01c",
+    "docs/evidence/M7-025/linux_x86_64/build-fingerprint.json": "5ba2bae96fc52d7a0a5eda9335cfba9ba7cb16e1ac15e3c6b9b676084ca69b82",
+    "docs/evidence/M7-025/linux_x86_64/bundle.json": "638919d7fd44193781914fb889fb95bb616f02f34dcda3dbf652ad2a079cfc87",
+    "docs/evidence/M7-025/linux_x86_64/provider-manifest.json": "1576f659b5a95763b8827a3f5468ab8b08c910509877a44d9b1b2c90aed7c016",
+    "docs/evidence/M7-025/linux_x86_64/sbom.spdx.json": "49df6442eaceb13f413c9b5b330b3855eee559c896532d30eb6de5d4e892bc6c",
+    "docs/evidence/M7-030/README.md": "3868cffd3f53de12c3c5edac780631e3bf03677e5564ba43c1a7ee80fcfbcd5d",
+    "docs/evidence/M7-030/draft-release.json": "5a01cdb80225dac459f058ff4dcb81bf35f64a5c90db60de9b29438ab929e6e6",
+    "docs/evidence/M7-030/github-attestation.json": "d3f553ca325c5ee7ed90039c6673172be886cbb64680ff9763eac9a66e3f9e35",
+    "docs/evidence/M7-030/local-rehearsal.json": "5be141e7679e820a0eddecad313c656415dd97ced8227ca72c5df0a42e273762",
+    "docs/evidence/M7-030/test-plan.md": "fe98a44ded868428c15743b3949032103ed95da1a4a8bf31c2e376705bc15151",
+    "docs/evidence/M7-030/test-results.md": "979dfbdd7c66749e0f44c94a6104b7c332136a9e86a259b9981fbd4ea615b75d",
+    "docs/evidence/M7-030/workflow-contract.json": "9e973ce59d098fcfcc782cae41de0e96bc95465cb0adcc0c7bab50104492cc83",
+    "docs/planning/linux-status.md": "8090b1b979cc5f2ff8ac5bd87fcb652b1ecb492419a3756059c2618ad1cd8202",
+    "docs/planning/status.md": "72ac0bf6e8539e1b36c321c35f8dc354394d91b1d14bc775c4a6124b62517690",
+    "docs/security/update-policy.md": "aeee3abea28e75b2d1f83b9a4f05677b13ad0385f7add85c786a5c68e681f40c",
+    "scripts/check-m7-030-release": "8b26a09b02148ef72f462ebf35e3abb3079a2dcb5aed8b1689f38367e9bb4aef",
+    "scripts/release-m7-030-linux": "80f2474002f81e2c961d194ba6d81d3981f0006bd82d098ea4041f803a64ce42",
+    "tools/m7_030_linux_release.py": "3b5960242eb9c9a75003a0c5834b22ed3897c1fd4812bd4aca2a03de02264402",
+    "tools/tasks/M7-030.json": "8cef030d380ce0d390929741b9407c0809717475a43b794c1efa09eec996d23e",
+    "tools/tests/test_m7_030_linux_release.py": "3ca1c07076bae477a21a7a77b9458c55468b26d073bb2710e4e82a11c0004e5b",
+    "tools/tests/test_m7_linux_task_graph.py": "acd2180a97c766a808e429f06d1012cffe917dc234d2c1f9e6fc1c23bebd0b99"
+  },
+  "source_task": "M7-030",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}
