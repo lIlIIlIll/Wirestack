@@ -1,0 +1,83 @@
+{
+  "acceptance_commands": [
+    {
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/M2-006/test-plan.md", "--json"],
+      "gate": "task",
+      "id": "test-plan-matrix",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["python3", "-m", "unittest", "tools.tests.test_build_resolver", "tools.tests.test_download_cangjie_nightly", "tools.gates.tests.test_m2_006_apple_resolver", "-v"],
+      "gate": "task",
+      "id": "build-and-report-fault-injection",
+      "long_running": false,
+      "timeout_seconds": 60
+    },
+    {
+      "argv": ["python3", "tools/gates/m2_006_apple_resolver.py", "--validate-report", "docs/evidence/M2-006/macos-arm64/report.json", "--expected-revision", "PENDING", "--expected-mode", "macos"],
+      "gate": "task",
+      "id": "stored-native-macos-result",
+      "long_running": false,
+      "timeout_seconds": 60
+    },
+    {
+      "argv": ["python3", "tools/gates/m2_006_apple_resolver.py", "--validate-report", "docs/evidence/M2-006/ios-simulator-arm64/report.json", "--expected-revision", "PENDING", "--expected-mode", "ios-simulator"],
+      "gate": "task",
+      "id": "stored-native-ios-simulator-result",
+      "long_running": false,
+      "timeout_seconds": 60
+    }
+  ],
+  "allowed_paths": [
+    ".github/workflows/m2-006-apple-system-resolver.yml",
+    "cjpm.toml",
+    "docs/evidence/M2-006",
+    "docs/planning/status.md",
+    "native/resolver/apple",
+    "src/internal/resolver/apple_system_resolver_test.cj",
+    "tools/build_apple_resolver.py",
+    "tools/build_native_dependencies.py",
+    "tools/build_resolver.py",
+    "tools/download_cangjie_nightly.py",
+    "tools/gates/m2_006_apple_resolver.py",
+    "tools/gates/native/m2_006_tls_link_stub.c",
+    "tools/gates/tests/test_m2_006_apple_resolver.py",
+    "tools/tasks/M2-006.json",
+    "tools/tests/test_build_resolver.py",
+    "tools/tests/test_download_cangjie_nightly.py"
+  ],
+  "dependencies": ["M2-002", "M2-003"],
+  "long_running_gate": false,
+  "platforms": ["macos-arm64", "ios-simulator-arm64", "linux-x86_64-glibc"],
+  "required_evidence": [
+    "docs/evidence/M2-006/evidence.json",
+    "docs/evidence/M2-006/macos-arm64/validation.json",
+    "docs/evidence/M2-006/ios-simulator-arm64/validation.json"
+  ],
+  "schema_version": 1,
+  "source_paths": [
+    ".github/workflows/m2-006-apple-system-resolver.yml",
+    "cjpm.toml",
+    "docs/evidence/M2-006/README.md",
+    "docs/evidence/M2-006/test-plan.md",
+    "docs/planning/status.md",
+    "native/resolver/apple/wirestack_resolver.c",
+    "native/resolver/apple/wirestack_resolver.h",
+    "native/resolver/linux/wirestack_resolver.c",
+    "native/resolver/linux/wirestack_resolver.h",
+    "src/internal/resolver/apple_system_resolver_test.cj",
+    "tools/build_apple_resolver.py",
+    "tools/build_native_dependencies.py",
+    "tools/build_resolver.py",
+    "tools/download_cangjie_nightly.py",
+    "tools/gates/m2_006_apple_resolver.py",
+    "tools/gates/native/m2_006_tls_link_stub.c",
+    "tools/gates/tests/test_m2_006_apple_resolver.py",
+    "tools/tasks/M2-006.json",
+    "tools/tests/test_build_resolver.py",
+    "tools/tests/test_download_cangjie_nightly.py"
+  ],
+  "task_id": "M2-006",
+  "timeout_seconds": 2700
+}

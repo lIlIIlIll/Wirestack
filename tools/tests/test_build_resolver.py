@@ -15,11 +15,20 @@ class BuildResolverSelectionTests(unittest.TestCase):
             "windows-x86_64",
             build_resolver.normalize_platform("Windows"),
         )
+        self.assertEqual(
+            "macos-arm64",
+            build_resolver.normalize_platform("Darwin"),
+        )
+        self.assertEqual(
+            "ios-simulator-arm64",
+            build_resolver.normalize_platform("ios-simulator-arm64"),
+        )
         with self.assertRaisesRegex(build_resolver.SelectionError, "unsupported"):
-            build_resolver.normalize_platform("Darwin")
+            build_resolver.normalize_platform("Plan9")
 
     def test_native_dependency_plan_does_not_build_linux_tls_on_windows(self) -> None:
         self.assertEqual(["resolver"], build_native_dependencies.plan("Windows"))
+        self.assertEqual(["resolver"], build_native_dependencies.plan("Darwin"))
         self.assertEqual(
             ["tls-provider", "resolver"],
             build_native_dependencies.plan("Linux"),
