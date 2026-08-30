@@ -1,0 +1,82 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M0-014/test-plan.md",
+        "--json"
+      ],
+      "duration_ms": 113.829,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T17:18:40.314640Z",
+      "id": "test-plan-matrix",
+      "started_at_utc": "2026-08-30T17:18:40.200807Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M0-014/test-plan-matrix.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"counts\": {\"paths\": 7, \"scenarios\": 6, \"tests\": 7}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+      "stdout_path": "build/repository-tooling/M0-014/test-plan-matrix.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.gates.tests.test_m0_014_windows_copy_profile",
+        "-v"
+      ],
+      "duration_ms": 163.825,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T17:18:40.478557Z",
+      "id": "strict-report-validator",
+      "started_at_utc": "2026-08-30T17:18:40.314741Z",
+      "status": "PASS",
+      "stderr_excerpt": "test_accepts_complete_native_windows_report (tools.gates.tests.test_m0_014_windows_copy_profile.M0014ValidatorTests.test_accepts_complete_native_windows_report) ... ok\ntest_atomic_report_replaces_target_without_temp_residue (tools.gates.tests.test_m0_014_windows_copy_profile.M0014ValidatorTests.test_atomic_report_replaces_target_without_temp_residue) ... ok\ntest_counting_receiver_adds_dynamic_counter_fields_once (tools.gates.tests.test_m0_014_windows_copy_profile.M0014ValidatorTests.test_counting_receiver_adds_dynamic_counter_fields_once) ... ok\ntest_environment_report_always_returns_structured_status (tools.gates.tests.test_m0_014_windows_copy_profile.M0014ValidatorTests.test_environment_report_always_returns_structured_status) ... ok\ntest_instrumentation_retries_empty_etw_heap_reports_with_a_bound (tools.gates.tests.test_m0_014_windows_copy_profile.M0014ValidatorTests.test_instrumentation_retries_empty_etw_heap_reports_with_a_bound) ... ok\ntest_rejects_cross_compile_and_incomplete_payloads (tools.gates.tests.test_m0_014_windows_copy_profile.M0014ValidatorTests.test_rejects_cross_compile_and_incomplete_payloads) ... ok\ntest_rejects_missing_four_k_cap_and_cleanup_failure (tools.gates.tests.test_m0_014_windows_copy_profile.M0014ValidatorTests.test_rejects_missing_four_k_cap_and_cleanup_failure) ... ok\ntest_rejects_skipped_or_derived_metrics_as_pass (tools.gates.tests.test_m0_014_windows_copy_profile.M0014ValidatorTests.test_rejects_skipped_or_derived_metrics_as_pass) ... ok\ntest_rejects_unknown_schema_and_stale_revision (tools.gates.tests.test_m0_014_windows_copy_profile.M0014ValidatorTests.test_rejects_unknown_schema_and_stale_revision) ... ok\ntest_xperf_parser_is_bounded_and_fail_closed (tools.gates.tests.test_m0_014_windows_copy_profile.M0014ValidatorTests.test_xperf_parser_is_bounded_and_fail_closed) ... ok\n\n----------------------------------------------------------------------\nRan 10 tests in 0.010s\n\nOK\n",
+      "stderr_path": "build/repository-tooling/M0-014/strict-report-validator.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "",
+      "stdout_path": "build/repository-tooling/M0-014/strict-report-validator.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/gates/m0_014_windows_copy_profile.py",
+        "--validate-report",
+        "docs/evidence/M0-014/windows-x86_64/result.json",
+        "--output",
+        "build/gates/m0-014/local-validation.json"
+      ],
+      "duration_ms": 163.884,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T17:18:40.642540Z",
+      "id": "stored-native-result",
+      "started_at_utc": "2026-08-30T17:18:40.478666Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M0-014/stored-native-result.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "M0-014 report validation: PASS\n",
+      "stdout_path": "build/repository-tooling/M0-014/stored-native-result.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "task",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M0-014"
+}
