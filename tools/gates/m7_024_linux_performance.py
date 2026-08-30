@@ -672,7 +672,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--manifest",
         type=Path,
-        default=root / "tools/gates/manifests/m7-024-linux-performance.json",
+        default=root / "tools/gates/campaigns/m7-024-linux-performance.json",
     )
     parser.add_argument(
         "--output",

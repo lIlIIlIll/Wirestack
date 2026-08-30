@@ -36,6 +36,7 @@ modify a source report, build an SDK component, or access another repository.
 | P010 | A metric misses its threshold or the source report decision is not PASS | Mark the domain FAIL with actual and required values | reachable |
 | P011 | All eight domains PASS and every pinned artifact passes shared validation | Write aggregate PASS and exit zero | reachable |
 | P012 | Any domain or shared validation fails | Write aggregate FAIL and exit nonzero | reachable |
+| P013 | Specialized performance manifest is stored outside the generic gate-runner manifest namespace | Generic manifest discovery ignores it while the M7-024 gate loads it explicitly | reachable |
 
 ## Input domains and state
 
@@ -61,6 +62,7 @@ modify a source report, build an SDK component, or access another repository.
 | S006 | Valid SSE and memory reports | P003,P005,P007,P009 | H1 and H2 each run at least one hour and one million events with bounded application flow, cancellation under 50 ms and steady RSS/FD/socket/thread trends | Assert protocol inventory, duration, events, sequence, cancellation, samples, trend limits and PASS | normal,resource | P0 |
 | S007 | Digest, schema, environment, workload or threshold mutation | P002,P004,P006,P008,P010,P012 | Gate fails closed and identifies the exact failed check | Assert nonzero exit, aggregate FAIL, domain FAIL and actual/expected values | error,regression | P0 |
 | S008 | Same valid inputs run twice | P001,P003,P011 | Decisions and extracted baseline metrics are stable; source artifacts remain byte-identical | Assert two PASS decisions, equal normalized domains and unchanged input digests | repeated-call | P1 |
+| S009 | Checked-in M7-024 manifest is discovered by the specialized gate only | P013 | Generic gate-runner manifest validation does not parse the incompatible performance schema | Assert the file is under `campaigns/` and absent from `manifests/` | regression,structure | P0 |
 
 ## Test-plan matrix
 
@@ -74,6 +76,7 @@ modify a source report, build an SDK component, or access another repository.
 | T006 | S007 | P010,P012 | Each comparison operator at equality and just beyond its limit | Equality passes and threshold miss fails | Assert `ge`, `le` and `eq` boundary semantics | boundary |
 | T007 | S008 | P001,P003,P011 | Two runs with identical inputs | Both PASS with stable normalized domain results | Assert input digests unchanged and volatile timestamps are the only permitted report difference | repeated-call |
 | T008 | S001,S002,S003,S004,S005,S006 | P003,P005,P007,P009 | Native glibc release evidence inspection | Platform-specific PASS only | Assert Linux/x86_64/glibc and pinned compiler/CJPM; make no musl or global claim | platform |
+| T009 | S009 | P013 | Checked-in performance manifest path | Specialized namespace only | Assert `campaigns/m7-024-linux-performance.json` exists and the generic namespace path does not | regression |
 
 ## Evidence and gaps
 

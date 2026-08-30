@@ -16,7 +16,7 @@ assert SPEC is not None and SPEC.loader is not None
 gate = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = gate
 SPEC.loader.exec_module(gate)
-MANIFEST_PATH = ROOT / "tools/gates/manifests/m7-024-linux-performance.json"
+MANIFEST_PATH = ROOT / "tools/gates/campaigns/m7-024-linux-performance.json"
 
 
 class M7024LinuxPerformanceGateTest(unittest.TestCase):
@@ -129,6 +129,13 @@ class M7024LinuxPerformanceGateTest(unittest.TestCase):
             self.assertEqual("FAIL", parsed["decision"])
             self.assertEqual(list(gate.EXPECTED_DOMAINS), parsed["failed_domains"])
             self.assertFalse(output.with_name(output.name + ".tmp").exists())
+
+    def test_campaign_manifest_is_not_in_generic_gate_runner_namespace(self):
+        self.assertTrue(MANIFEST_PATH.is_file())
+        self.assertEqual("campaigns", MANIFEST_PATH.parent.name)
+        self.assertFalse(
+            (ROOT / "tools/gates/manifests/m7-024-linux-performance.json").exists()
+        )
 
 
 if __name__ == "__main__":
