@@ -1,0 +1,60 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-08-30T15:38:56.728611Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M7-031/linux_x86_64/release-candidate.json",
+      "sha256": "a6d3f84275a5b8020f106ddd1c47f73eea08373cbafeda4bd3bef71bfd10f81f",
+      "source_task": "M7-031"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M7-031/task-check.json",
+      "sha256": "58235b1928890e7f52aeb634a83eaa626dc67fb8e619e0df4c893cd5166ab4e5",
+      "source_task": "M7-031"
+    }
+  ],
+  "revision": "20891a74e71e7c1ad9280bd96a749435300a9cff",
+  "schema_version": 1,
+  "source_sha256": {
+    ".gitignore": "492a2c5acfb769e262bd91035aa2e7acdb1e0f9bccc19b3417a649e1b5ea273d",
+    "docs/evidence/M7-019/linux_x86_64/audit.data": "5974f3d5b4cf91403559e5fac4a335b9d1ff72c721c82a5e01af3624f04e3f59",
+    "docs/evidence/M7-020/linux_x86_64/audit.data": "a75e0adec81c4691b1fd29d62268da6605b9b04dfc710c203db26a144c4f571f",
+    "docs/evidence/M7-021/linux_x86_64/qualification.json": "c6a463895c20960229242d6ea11419d45704de37209f361d1d7b60426c58a01c",
+    "docs/evidence/M7-022/linux_x86_64/soak.json": "2e804f19f4bdf7bbf1804d619425650a56658d41e51bf183ce574a741ff2e429",
+    "docs/evidence/M7-023/linux_glibc_x86_64/fuzz-report.json": "81d056538ed5ac99a1ca33e0ad6fad3c7e62f9b52f699265fd8e9325e3b8a711",
+    "docs/evidence/M7-024/linux_glibc_x86_64/performance-gate.json": "a354e448489fe3680f68c5298fd79a4ab0555dbf135ebe84ae5c1c0e5e6be65e",
+    "docs/evidence/M7-025/linux_x86_64/bundle.json": "638919d7fd44193781914fb889fb95bb616f02f34dcda3dbf652ad2a079cfc87",
+    "docs/evidence/M7-026/linux_x86_64/api-compatibility.json": "c3438dcc78591b64d6436a30fd3d58fbb423c96e8239a31b9c701ee70bbcd6f0",
+    "docs/evidence/M7-027/linux_x86_64/examples.json": "4a40d948af012adab70da881daefc960e8bd5b5e173283bff23109b411224de5",
+    "docs/evidence/M7-028/linux_x86_64/review-package.json": "32e58d94359c0e2fa865f5ad94c745eb0e43c8152801f74e37afa909ad5e0d26",
+    "docs/evidence/M7-029/independent-review.json": "6731b647b736c4bd2d40a5275bf21d62711aa9c9cda5b155365127696d19f2ac",
+    "docs/evidence/M7-029/linux_x86_64/review-validation.json": "22d1321a0e549c54536a030a8398658caebcc4db07a686b0061af11a0728dad0",
+    "docs/evidence/M7-030/hosted-validation.json": "5f7a503ef513a736285ce76ffd7c33c75c2d9c15017be0359e63cff0dd6a55e7",
+    "docs/evidence/M7-031/README.md": "1326831087b52c97ad4cc7ddf7935203dba21607909a713d0387325f1d38b20b",
+    "docs/evidence/M7-031/linux_x86_64/release-candidate.json": "a6d3f84275a5b8020f106ddd1c47f73eea08373cbafeda4bd3bef71bfd10f81f",
+    "docs/evidence/M7-031/test-plan.md": "5bd68a7c3d2f620034993b7825c808d43406e9985ead2ec754975213e7f1751b",
+    "docs/evidence/M7-031/test-results.md": "e26900ce76382792454c4fab875acaaf25dfd5ea7d16cc7050600a3ff563cfc1",
+    "docs/evidence/M7-032/linux_x86_64/clean-consumer.json": "140e6415af1245934d6ec1f3103beb1c6b9253862a54f23405357aff14048685",
+    "docs/evidence/M7-032/linux_x86_64/public-api.json": "8d39e524ed6306b9efe28a800a28780a442f7e8e1e013a121d8e12fd8fef3f66",
+    "docs/planning/linux-status.md": "80f5325eddc9e5a1e2f937d9acd541eae7aa45945d0bdb89d87df60839f6e0cc",
+    "docs/planning/status.md": "b37bc8ad3f26470d84c10afbd8c5628ffc4768b1623e9b01cd3517a0b7d78ca6",
+    "scripts/check-m7-031-release": "e55c48b9da338c23b5310a944c73f156b0f50c5ef0f439e32525a125a6eed66f",
+    "tools/m7_031_linux_candidate.py": "8a524dd77cd45f6350e56412bf3b0d9d8db1f71ebe45cf80be7eb0ec7df38139",
+    "tools/tasks/M7-031.json": "6e67717b365c9741b38cb8093e3cc52a572763dd09b14f9a94531e9868b0e57b",
+    "tools/tests/test_m7_031_linux_candidate.py": "7e5ba2e4fe8d5a3319fa8ab18a0e0e63de67d6a83644051e1c12a05ea4492e91",
+    "tools/tests/test_m7_linux_task_graph.py": "581850768e78b1bf49e4072e804aabbf80f942d9438ae43058de3c6603893b51"
+  },
+  "source_task": "M7-031",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}
