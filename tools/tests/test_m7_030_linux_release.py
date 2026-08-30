@@ -260,7 +260,19 @@ class M7030LinuxReleaseTest(unittest.TestCase):
                 )
 
     def test_workflow_is_pinned_and_missing_or_wrong_hosted_report_never_passes(self) -> None:
-        self.assertEqual("PASS", release.inspect_workflow()["decision"])
+        workflow = release.inspect_workflow()
+        self.assertEqual("PASS", workflow["decision"])
+        self.assertEqual(release.HOSTED_CANGJIE_VERSION, workflow["toolchainVersion"])
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "workflow.yml"
+            text = (release.ROOT / release.WORKFLOW).read_text(encoding="utf-8")
+            path.write_text(
+                text.replace(release.HOSTED_CANGJIE_VERSION,
+                             "1.1.0-alpha.20260817040003"),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(release.ReleaseError, "WORKFLOW_TOOLCHAIN"):
+                release.inspect_workflow(path)
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "missing.json"
             with self.assertRaisesRegex(release.ReleaseError, "HOSTED_ATTESTATION_BLOCKED"):

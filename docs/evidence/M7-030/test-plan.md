@@ -45,6 +45,7 @@ synthetic provider fixture is a released AWS-LC update.
 | P019 | Hosted workflow attests the artifact, SBOM and release manifest and publishes bounded bundles | Hosted signing | Remote-only | PASS only with run evidence |
 | P020 | Hosted attestation is absent, failed, from a self-hosted runner, another repository or another workflow | Hosted verification | Reachable error | BLOCKED or FAIL, never PASS |
 | P021 | Signing or provider input changes after a prior report | Evidence freshness | Reachable | Prior report becomes STALE |
+| P022 | Workflow pins a Cangjie version that the hosted installer cannot resolve | Toolchain installation | Hosted failure | FAIL before signing; replace only with an exact version proven installable by the repository's hosted CI path |
 
 ## Input and state domains
 
@@ -96,6 +97,7 @@ synthetic provider fixture is a released AWS-LC update.
 | S016 | Hosted run generates three attestations | Merged release commit | P019 | PASS | Three Sigstore bundles verify against `lIlIIlIll/Wirestack` and the exact workflow | CI,remote | P0 |
 | S017 | Hosted run or attestation evidence is missing or has another identity | Local implementation complete | P020 | BLOCKED or FAIL | Task cannot report production signing PASS | CI,negative | P0 |
 | S018 | Signing policy, provider manifest, SBOM or workflow changes | Prior M7-030 evidence exists | P021 | STALE | Old PASS cannot be reused | evidence,regression | P0 |
+| S019 | Exact Cangjie pin is absent from the setup action nightly index | Hosted workflow checked out | P022 | FAIL closed before build and attestations | No skipped signing step is recorded as PASS; corrected workflow freezes an exact version already proven by hosted Clean Build | CI,negative,regression | P0 |
 
 ## Test-plan matrix
 
@@ -115,6 +117,7 @@ synthetic provider fixture is a released AWS-LC update.
 | T012 | S018 | P021 | Source digest mutation | STALE | Evidence verifier names the changed path | evidence,regression |
 | T013 | S001,S005 | P005,P007,P008 | End-to-end temporary Ed25519 key rehearsal | PASS | Artifact, SBOM and manifest verify; tampered copy fails | integration,rehearsal |
 | T014 | S007,S009,S012 | P010,P012,P015 | Clean consumer install, upgrade and rollback sequence | PASS rehearsal | Version history, provider identity and SBOM digest are exact | integration,rehearsal |
+| T015 | S015,S019 | P018,P022 | Hosted workflow and exact toolchain pin | PASS/FAIL | Static contract requires the exact proven hosted version; unavailable pin produces a recorded failed run and no attestation evidence | CI,regression |
 
 ## Coverage and gap review
 
