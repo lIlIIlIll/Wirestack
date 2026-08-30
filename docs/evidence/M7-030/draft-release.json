@@ -1,0 +1,16 @@
+{
+  "artifact": {
+    "digest": "sha256:c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee",
+    "name": "wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
+    "size": 2499451,
+    "state": "uploaded"
+  },
+  "draft": true,
+  "prerelease": true,
+  "releaseDatabaseId": 379306547,
+  "repository": "lIlIIlIll/Wirestack",
+  "schemaVersion": 1,
+  "tag": "m7-030-frozen-artifact-c0988f62",
+  "targetCommit": "6d14c5ae3f05a63ae93f026c9a2862854434a3b7",
+  "transportOnly": true
+}
