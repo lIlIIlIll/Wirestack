@@ -181,7 +181,7 @@ def build_test_link_stub(
 
 def select_ios_device(root: Path, env: dict[str, str]) -> tuple[str, str]:
     listed = run_command(
-        ["xcrun", "simctl", "list", "devices", "available", "-j"],
+        ["xcrun", "simctl", "list", "-j", "devices", "available"],
         cwd=root,
         env=env,
         timeout=30,
@@ -190,7 +190,9 @@ def select_ios_device(root: Path, env: dict[str, str]) -> tuple[str, str]:
     try:
         payload = json.loads(listed["output"])
     except json.JSONDecodeError as error:
-        raise GateError(f"invalid simctl device response: {error}") from error
+        raise GateError(
+            f"invalid simctl device response: {error}; output={listed['output'][-2000:]}"
+        ) from error
     devices = payload.get("devices")
     if not isinstance(devices, dict):
         raise GateError("simctl did not return a device map")
