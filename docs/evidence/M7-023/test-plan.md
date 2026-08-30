@@ -25,6 +25,7 @@ be rerun from that artifact. A Linux PASS does not imply global M7 completion.
 | P005 | A retained crash is replayable | `--replay-crash` command recorded in each artifact | Replay validates artifact schema and target identity, then reruns the same corpus, seed, build mode, filter, and threshold |
 | P006 | Release decision fails closed | Aggregate JSON report and unit tests | PASS requires ten target PASS decisions and zero unresolved crash artifacts from the current run |
 | P007 | Native Linux evidence is durable | Evidence README, raw report, environment metadata, and digests | Report identifies kernel, glibc, architecture, compiler, CJPM, source/corpus digests, commands, exit codes, durations, and final decision |
+| P008 | Specialized campaign schemas cannot enter the generic gate-runner namespace | Manifest location and regression test | The M7-023 manifest lives under `tools/gates/campaigns/`; `tools/gates/manifests/` remains reserved for generic `gate_runner` manifests |
 
 ## Target path matrix
 
@@ -43,6 +44,7 @@ be rerun from that artifact. A Linux PASS does not imply global M7 completion.
 | S011 | P004,P006 | Campaign failure terminal | Target process and marker classifier | Exit, signal, timeout, missing marker and threshold miss | Retain one bounded replayable artifact and fail the aggregate decision |
 | S012 | P005,P006 | Crash replay | Checked-in manifest coordinates | Valid, corrupt, escaping, unknown-target and stale-digest artifacts | Reconstruct only trusted commands; reject invalid coordinates before execution |
 | S013 | P006,P007 | Native release decision | Aggregate report and environment | Ten passing campaigns, current-run crash inventory and Linux metadata | PASS only for all targets with zero current crash and complete native evidence |
+| S014 | P008 | Manifest namespace isolation | M7-023 campaign manifest and generic gate manifest discovery | Specialized top-level fields must not be discovered by the generic runner | CI generic-manifest validation and the M7-023 loader both accept only their own schemas |
 
 ## Test-plan matrix
 
@@ -60,6 +62,7 @@ be rerun from that artifact. A Linux PASS does not imply global M7 completion.
 | T010 | S007,S011,S013 | P004,P006,P007 | Prior crash outside the current run directory | Clean current campaigns may PASS without treating old files as current failures | Run-scoped crash inventory and report provenance | unit,regression |
 | T011 | S001,S002,S003,S004,S005,S006,S007,S008,S009,S010 | P002,P003 | Normal test run without M7-023 environment variables | Committed fallback seeds execute deterministically | Existing package tests retain their normal semantics | integration,regression |
 | T012 | S001,S002,S003,S004,S005,S006,S007,S008,S009,S010,S013 | P003,P007 | Current supported SDK and native provider | Report records Linux GNU, `-O2` and toolchain metadata | No runtime, std, stdx or SDK source build or modification | platform,boundary |
+| T013 | S014 | P008 | Enumerate `tools/gates/manifests/*.json` and load the M7-023 campaign from its dedicated path | Generic discovery excludes the specialized manifest while the M7-023 loader accepts it | Directory separation, stable filename and schema ownership | unit,regression |
 
 ## Assertions and boundaries
 

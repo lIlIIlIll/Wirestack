@@ -13,7 +13,8 @@ SPEC = importlib.util.spec_from_file_location("m7_023_linux_fuzz", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
 gate = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(gate)
-MANIFEST = ROOT / "tools/gates/manifests/m7-023-linux-fuzz.json"
+MANIFEST = ROOT / "tools/gates/campaigns/m7-023-linux-fuzz.json"
+GENERIC_MANIFESTS = ROOT / "tools/gates/manifests"
 
 
 class M7023LinuxFuzzGateTest(unittest.TestCase):
@@ -38,6 +39,12 @@ class M7023LinuxFuzzGateTest(unittest.TestCase):
         for target in targets:
             self.assertEqual(target["corpus_sha256"], target["actual_corpus_sha256"])
             self.assertTrue(target["corpus_hex"])
+
+    def test_campaign_manifest_is_not_in_generic_gate_runner_namespace(self):
+        self.assertEqual("campaigns", MANIFEST.parent.name)
+        self.assertNotIn(MANIFEST.name, {
+            path.name for path in GENERIC_MANIFESTS.glob("*.json")
+        })
 
     def test_classification_requires_one_exact_marker_and_threshold(self):
         _, targets = self.targets()

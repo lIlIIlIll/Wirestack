@@ -7,6 +7,7 @@ out/
 __pycache__/
 !tools/tasks/*.json
 !tools/gates/manifests/*.json
+!tools/gates/campaigns/*.json
 !fuzz/corpus/m7-023/v1/*.hex
 !docs/evidence/P1-012/*.json
 !docs/evidence/M3-029/*.json
