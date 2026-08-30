@@ -288,12 +288,14 @@ public abstract class JsonNode <: ToString {
     public func kind(): JsonKind
 
     /// Returns a detached JSON tree. Shared children are copied per occurrence.
+    /// Manual trees are limited to 256 levels and 100,000 visited nodes.
     public func deepCopy(): JsonNode {
         deepCopyJsonNode(this)
     }
 
     /// JSON data-model equality. Numerically equal JSON numbers compare equal
-    /// even when their lexical representations differ.
+    /// even when their lexical representations differ. Manual trees use the
+    /// same 256-level and 100,000-node operation budget as deepCopy().
     public func equivalentTo(other: JsonNode): Bool {
         jsonNodesEquivalent(this, other)
     }

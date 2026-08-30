@@ -4,20 +4,35 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main]
+    branches: [main, dev]
   schedule:
     - cron: "17 2 * * *"
   workflow_dispatch:
+    inputs:
+      cangjie_version:
+        description: Exact Cangjie nightly version for release qualification
+        required: false
+        type: string
 
 permissions:
   contents: read
 
 jobs:
+  perf-evidence-drift:
+    name: Seven-library evidence drift
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+      - name: Verify frozen seven-library evidence
+        run: scripts/ci_job.sh perf-evidence-drift
+
   stream-docs:
     name: Stream evidence drift
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
       - name: Verify frozen Stream evidence and generated documentation
@@ -25,11 +40,11 @@ jobs:
 
   nightly:
     name: Cangjie nightly (7-day window)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.version.outputs.value }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
       - name: Select seven-day cache window
@@ -37,23 +52,30 @@ jobs:
         run: echo "value=$(( $(date -u +%s) / 604800 ))" >> "$GITHUB_OUTPUT"
       - name: Restore nightly selection
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: .ci/cangjie-nightly-version
           key: cangjie-nightly-linux-x64-${{ steps.window.outputs.value }}
       - name: Resolve latest complete nightly
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache.outputs.cache-hit != 'true' && inputs.cangjie_version == ''
         run: |
           mkdir -p .ci
           python3 scripts/latest_cangjie_nightly.py > .ci/cangjie-nightly-version
       - name: Export shared nightly version
         id: version
-        run: echo "value=$(cat .ci/cangjie-nightly-version)" >> "$GITHUB_OUTPUT"
+        env:
+          REQUESTED_VERSION: ${{ inputs.cangjie_version }}
+        run: |
+          if [[ -n "$REQUESTED_VERSION" ]]; then
+            echo "value=$REQUESTED_VERSION" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=$(cat .ci/cangjie-nightly-version)" >> "$GITHUB_OUTPUT"
+          fi
 
   tests:
     name: Tests (${{ matrix.gate }})
     needs: nightly
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     strategy:
       fail-fast: false
@@ -76,7 +98,7 @@ jobs:
           - fuzz-short
           - yyjson-colink
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
       - name: Setup Cangjie
@@ -87,7 +109,10 @@ jobs:
           archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
       - name: Install native prerequisites
         if: contains(fromJSON('["standards-conformance","schema-formats-conformance","algorithms-consumer","registry-rehearsal","custom-native","yyjson-native","native-clang","native-gcc","sanitizer","fuzz-short","yyjson-colink"]'), matrix.gate)
-        run: sudo apt-get update && sudo apt-get install -y clang gcc libidn2-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang gcc libidn2-dev
+          dpkg-query -W -f='${Package}=${Version}\n' clang gcc libidn2-dev
       - name: Fetch pinned yyjson co-link fixture
         if: matrix.gate == 'yyjson-colink'
         run: |
@@ -97,8 +122,12 @@ jobs:
           tar -xzf /tmp/yyjson-0.11.1.tar.gz -C /tmp/yjson-yyjson-second
       - name: Record toolchain
         run: |
+          echo "runner_image=${ImageOS:-unknown} runner_image_version=${ImageVersion:-unknown}"
           cjc -v
           cjpm --version
+          if [[ -f "$RUNNER_TEMP/cangjie-nightly.tar.gz" ]]; then
+            sha256sum "$RUNNER_TEMP/cangjie-nightly.tar.gz"
+          fi
       - name: Run gate
         env:
           YJSON_SECOND_YYJSON_ROOT: ${{ matrix.gate == 'yyjson-colink' && '/tmp/yjson-yyjson-second/yyjson-0.11.1' || '' }}
@@ -117,13 +146,13 @@ jobs:
   coverage:
     name: Core Coverage
     needs: nightly
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
           fetch-depth: 0

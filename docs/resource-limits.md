@@ -38,11 +38,17 @@ let writeConfig = JsonWriteConfig("", "", false, false,
 完成且只完成一个根值；没有根值、第二个根值或未闭合容器使用 `writer_state`。Stream
 `maxBytes` 在向调用方 sink 提交下一段 bytes 前检查，触发 `output_too_large` 后该 writer
 进入终止状态，sink 中已提交的前缀不会超过配置值。内存 String/bytes 入口在返回结果前执行
-同一预算检查。
+同一预算检查。内存入口的 `maxBytes` 是结果大小限制，不是峰值分配限制：writer 可能先扩展
+内部 buffer，再在返回 String 或 bytes 前拒绝结果。需要提交前硬边界时使用 Stream 入口。
 
 可修改 `JsonNode` 允许共享同一子节点形成 DAG，但递归序列化、`deepCopy()` 和语义等价比较
 会拒绝祖先环，错误码为 `cyclic_json_node`。序列化按遍历顺序发现环，因此 Stream sink 在
 报错前可能已有不超过预算的 JSON 前缀。
+
+手工构造的 AST 不受 `JsonReadLimits` 保护。`deepCopy()` 和 `equivalentTo()` 因此使用固定的
+操作预算：最多 256 层、访问 100,000 个节点。越过深度时返回 `max_depth`，耗尽工作量时返回
+`work_limit_exceeded`。该限制同时约束无环深链、共享 DAG 和循环检测，避免递归栈耗尽或无界
+祖先扫描。
 
 ## 覆盖路径
 

@@ -110,6 +110,23 @@ public class PublicOuter {
             ],
         )
 
+    def test_generate_discovers_public_api_in_nested_source_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            nested = root / "src" / "nested"
+            nested.mkdir(parents=True)
+            (nested / "public_api.cj").write_text(
+                "package fixture\npublic func nestedApi(): Int64 { 1 }\n",
+                encoding="utf-8",
+            )
+            with mock.patch.object(SNAPSHOT, "ROOT", root), \
+                    mock.patch.object(SNAPSHOT, "PACKAGE_ROOTS", {"fixture": root / "src"}):
+                generated = SNAPSHOT.generate()
+            self.assertIn(
+                "fixture|src/nested/public_api.cj|<top-level>|public func nestedApi(): Int64",
+                generated,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -237,6 +237,22 @@ def source_identity(root: pathlib.Path) -> dict[str, object]:
     }
 
 
+def verify_post_build_source_identity(
+    name: str,
+    before: dict[str, object],
+    after: dict[str, object],
+    enforce: bool,
+) -> None:
+    stable_keys = ("commit", "tree", "product_source_sha256", "product_source_manifest")
+    changed = [key for key in stable_keys if before[key] != after[key]]
+    if after["dirty"]:
+        changed.append("dirty")
+    if enforce and changed:
+        raise SystemExit(
+            f"--enforce detected post-build source drift for {name}: " + ", ".join(changed)
+        )
+
+
 def command_identity(command: str) -> dict[str, object]:
     resolved = shutil.which(command)
     if resolved is None:
@@ -422,6 +438,14 @@ def main() -> int:
     if args.rebuild:
         rebuild_variant("baseline", args.baseline, args.output)
         rebuild_variant("candidate", args.candidate, args.output)
+    post_build_sources = {
+        "baseline": source_identity(args.baseline),
+        "candidate": source_identity(args.candidate),
+    }
+    for name in ("baseline", "candidate"):
+        verify_post_build_source_identity(
+            name, sources[name], post_build_sources[name], args.enforce
+        )
     artifacts = {
         "baseline": artifact_identity(args.baseline),
         "candidate": artifact_identity(args.candidate),
@@ -433,6 +457,7 @@ def main() -> int:
         },
         "harness_sha256": harness_digest,
         "sources": sources,
+        "post_build_sources": post_build_sources,
         "toolchain": toolchain,
         "artifacts": artifacts,
         "corpus": {

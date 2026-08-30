@@ -330,6 +330,29 @@ class JsonAuditContractRegressionTest {
         let unbalancedError = @AssertThrows[JsonException](unbalanced.writeRawEndObject())
         @Expect(unbalancedError.code, "writer_state")
 
+        let mismatchedArray = JsonDirectWriter()
+        mismatchedArray.writeRawBeginArray()
+        let arrayCloseError = @AssertThrows[JsonException](mismatchedArray.writeRawEndObject())
+        @Expect(arrayCloseError.code, "writer_state")
+        mismatchedArray.writeRawEndArray()
+        @Expect(mismatchedArray.finishString(), "[]")
+
+        let mismatchedObject = JsonDirectWriter.bytes()
+        @Expect(mismatchedObject.tryBeginGeneratedCompactRawValue())
+        mismatchedObject.writeRawBeginObject()
+        let objectCloseError = @AssertThrows[JsonException](mismatchedObject.writeRawEndArray())
+        @Expect(objectCloseError.code, "writer_state")
+        mismatchedObject.writeRawEndObject()
+        @Expect(String.fromUtf8(mismatchedObject.finishBytes()), "{}")
+
+        let deepRaw = JsonDirectWriter(JsonWriteConfig("", "", false, false,
+            limits: JsonWriteLimits(maxDepth: 80)))
+        for (_ in 0..66) { deepRaw.writeRawBeginArray() }
+        let deepCloseError = @AssertThrows[JsonException](deepRaw.writeRawEndObject())
+        @Expect(deepCloseError.code, "writer_state")
+        for (_ in 0..66) { deepRaw.writeRawEndArray() }
+        @Expect(deepRaw.finishString().size, 132)
+
         let shallow = JsonDirectWriter(JsonWriteConfig("", "", false, false,
             limits: JsonWriteLimits(maxDepth: 1)))
         shallow.writeRawBeginObject()
@@ -363,5 +386,23 @@ class JsonAuditContractRegressionTest {
         @Expect(equalObject.deepCopy().equivalentTo(equalObject))
         @Expect(JsonArrayValue().deepCopy().equivalentTo(JsonArrayValue()))
         @Expect(JsonObjectValue().deepCopy().equivalentTo(JsonObjectValue()))
+
+        var deepManualTree: JsonNode = JsonNullValue()
+        for (_ in 0..257) { deepManualTree = JsonArrayValue().add(deepManualTree) }
+        @Expect(@AssertThrows[JsonException](deepManualTree.deepCopy()).code, "max_depth")
+        @Expect(@AssertThrows[JsonException](deepManualTree.equivalentTo(deepManualTree)).code,
+            "max_depth")
+
+        let withinWorkBudget = JsonArrayValue()
+        let beyondWorkBudget = JsonArrayValue()
+        let sharedNull = JsonNullValue()
+        for (_ in 0..99999) {
+            withinWorkBudget.add(sharedNull)
+            beyondWorkBudget.add(sharedNull)
+        }
+        beyondWorkBudget.add(sharedNull)
+        @Expect(withinWorkBudget.deepCopy().asArray().size(), 99999)
+        @Expect(@AssertThrows[JsonException](beyondWorkBudget.deepCopy()).code,
+            "work_limit_exceeded")
     }
 }

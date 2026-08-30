@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import pathlib
+import os
 import sys
 import tempfile
 import unittest
@@ -55,6 +56,39 @@ class StageSourceTreeTest(unittest.TestCase):
             stage = pathlib.Path(temporary)
             (stage / "nested" / "build-script-cache").mkdir(parents=True)
             with self.assertRaisesRegex(ValueError, "build-script-cache"):
+                assert_source_only(stage)
+
+    def test_rejects_adversarial_generated_artifacts(self) -> None:
+        samples = {
+            "native-tool": b"\x7fELFpayload",
+            "tool.exe": b"MZpayload",
+            "library.jar": b"PK\x03\x04payload",
+            "nested.zip": b"PK\x03\x04payload",
+            "coverage.profraw": b"profile",
+            "coverage.lcov": b"TN:\n",
+            "nested.tar.gz": b"archive",
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = pathlib.Path(temporary)
+            for name, content in samples.items():
+                path = stage / name
+                path.write_bytes(content)
+                if name == "native-tool":
+                    os.chmod(path, 0o755)
+            with self.assertRaises(ValueError) as error:
+                assert_source_only(stage)
+            for name in samples:
+                self.assertIn(name, str(error.exception))
+
+    def test_allows_text_scripts_but_rejects_unknown_executable(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = pathlib.Path(temporary)
+            script = stage / "tool"
+            script.write_text("#!/usr/bin/env python3\nprint('ok')\n", encoding="utf-8")
+            os.chmod(script, 0o755)
+            assert_source_only(stage)
+            script.write_text("opaque executable\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "tool"):
                 assert_source_only(stage)
 
 

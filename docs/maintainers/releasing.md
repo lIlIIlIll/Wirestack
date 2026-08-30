@@ -59,8 +59,9 @@ python3 scripts/stage_source_tree.py --check /tmp/yjson-source-stage
 ```
 
 目标目录必须为空，且不能与源码目录重叠。第一个命令成功时输出复制文件数和目标路径，第二个
-命令输出 `source-only tree verified`。`scripts/test_stage_source_tree.py` 覆盖排除规则、非空目标
-和违规内容检测。
+命令输出 `source-only tree verified`。stage 从 Git index 导出允许文件，并拒绝 build 目录、
+可执行二进制、archive、profile/coverage 文件和 symlink。`scripts/test_stage_source_tree.py`
+覆盖排除规则、非空目标和对抗样本。
 
 然后按 release manifest 创建候选树：
 
@@ -69,7 +70,9 @@ python3 scripts/release_temp_tree.py /tmp/yjson-release-stage
 ```
 
 候选目录也必须为空。该命令只复制 `release/release-files.txt` 中列出的文件，并再次执行
-source-only 检查。后续 rehearsal 在候选树中完成：
+source-only 检查。它还要求 manifest 包含全部 `src/test_*.cj` 和被收录脚本引用的本地脚本；
+新增测试或脚本依赖未入清单时立即失败。CI 的 `registry-rehearsal` 从该候选树实际执行
+`check_api_inventory.py` 和 `cjpm test`，再继续 package rehearsal：
 
 - 检查 release manifest 不含 path dependency。
 - 独立构建 core、macros、aggregate 与 optional packages。
