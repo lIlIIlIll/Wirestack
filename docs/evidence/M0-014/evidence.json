@@ -1,0 +1,40 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-08-30T17:18:31.787316Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M0-014/windows-x86_64/result.json",
+      "sha256": "0123ceae59d473734d19dc36d5cd431feb41053c02880f22bf271896cf83c95b",
+      "source_task": "M0-014"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M0-014/windows-x86_64/validation.json",
+      "sha256": "4f2982c990e8592447a5e933974c463330e05cd6416e3beab8874f84d8ccbe7c",
+      "source_task": "M0-014"
+    }
+  ],
+  "revision": "09a8e506983e1309c4752379c060ff5918123415",
+  "schema_version": 1,
+  "source_sha256": {
+    ".github/workflows/m0-014-windows-copy-profile.yml": "da59d5eaca5b9bcc29f53fb7e20d086dc26784ba550e83e5ca161356c0fea8c1",
+    "docs/evidence/M0-014/test-plan.md": "7d176664e583792e36cd6733f5110cc1367c2251a96798cc2ad90f9146edacfb",
+    "scripts/gate-m0-014-windows-copy-profile": "5084e80c42c99ac5e8c375cdaa4f85c2fe941656d7b93dcf190a591fca10c311",
+    "tools/gates/m0_014_windows_copy_profile.py": "518491c943860c7155c0d6838590334ad544092c077ca92b20297bce14c1f10e",
+    "tools/gates/native/m0_014_copy_counter.c.in": "146b2263796eba7fd73ec232b7e867eab2a41aa9b1c5b1d8a5c974b9f3c0d05a",
+    "tools/gates/tests/test_m0_014_windows_copy_profile.py": "49efc9241ab7696d2f010137031c6c0a065559b528cec81f35550c593133db12",
+    "tools/tasks/M0-014.json": "15af8cedaa89d48f0c4bc3dd7726926841f2e1d19eceb0bfbcdf01e59204c864"
+  },
+  "source_task": "M0-014",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}

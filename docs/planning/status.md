@@ -33,7 +33,7 @@ Status values:
 | M0-011 | BLOCKED | [`docs/evidence/M0-011/README.md`](../evidence/M0-011/README.md) | Linux GATE-NET-06 acceptance passes, including production cancellation/TLS cleanup and all resource classes; Windows, macOS and mobile native profiles remain outstanding. |
 | M0-012 | BLOCKED | — | Requires M0-011 evidence completion and Android/iOS/Harmony native-device execution. |
 | M0-013 | COMPLETE | [`docs/evidence/M0-013/README.md`](../evidence/M0-013/README.md) | Native Linux evidence shows carrier-thread starvation at 16+ delayed DNS resolutions. Wirestack uses a bounded resolver pool; the failure remains evidence for the future UP-007 candidate, which does not block release. |
-| M0-014 | BLOCKED | — | Requires a native Windows SDK/runner and copied-byte instrumentation. |
+| M0-014 | COMPLETE | [`docs/evidence/M0-014/README.md`](../evidence/M0-014/README.md) | Native `windows-2025` evidence passes all five payloads with dynamic `CJ_SOCKET_BufferRCopy` byte/call counts, ETW allocation totals, Win32 memory counters, performance percentiles and bounded cleanup. |
 | M0-015 | COMPLETE | [`docs/evidence/M0-015/README.md`](../evidence/M0-015/README.md) | Provider matrix and M0-016 PoC contract frozen; ADR-0003 selects AWS-LC for Linux only. |
 | M0-016 | BLOCKED | [`docs/evidence/M0-016/README.md`](../evidence/M0-016/README.md) | All 12 desktop schema-v11 cells are current: AWS-LC passes on Linux glibc, Linux musl, Windows and macOS; Mbed TLS and OpenSSL retain explicit PARTIAL results. Android, iOS and HarmonyOS or OpenHarmony native-device evidence remains missing. |
 | M0-017 | BLOCKED | — | Depends on M0-012 and M0-016 native evidence. |
