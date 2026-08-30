@@ -156,6 +156,25 @@ def ios_launch_command(device: str) -> list[str]:
     ]
 
 
+def ios_link_options() -> str:
+    return (
+        "-L ./target/native/resolver/current/lib -lwirestack_resolver "
+        "-L ./target/native/test-support/m2-006/lib -lwirestack_m2_006_tls_link_stub "
+        "-rpath @executable_path/Frameworks"
+    )
+
+
+def ios_runtime_libraries(env: dict[str, str]) -> list[Path]:
+    cangjie_home = env.get("CANGJIE_HOME")
+    if not cangjie_home:
+        raise GateError("CANGJIE_HOME is required to package the iOS Simulator runtime")
+    runtime_dir = Path(cangjie_home) / "runtime/lib/ios_simulator_aarch64_cjnative"
+    libraries = sorted(path for path in runtime_dir.glob("*.dylib") if path.is_file())
+    if not libraries or not any(path.name == "libcangjie-runtime.dylib" for path in libraries):
+        raise GateError("the official iOS Simulator Cangjie runtime is incomplete")
+    return libraries
+
+
 def build_test_link_stub(
     root: Path, env: dict[str, str], selected: str
 ) -> dict[str, Any]:
@@ -244,6 +263,13 @@ def make_ios_bundle(
     executable_copy = bundle / "wirestack-m2-006"
     shutil.copy2(executable, executable_copy)
     executable_copy.chmod(executable_copy.stat().st_mode | stat.S_IXUSR)
+    frameworks = bundle / "Frameworks"
+    frameworks.mkdir()
+    runtime_copies: list[Path] = []
+    for library in ios_runtime_libraries(env):
+        copied = frameworks / library.name
+        shutil.copy2(library, copied)
+        runtime_copies.append(copied)
     with (bundle / "Info.plist").open("wb") as output:
         plistlib.dump(
             {
@@ -260,6 +286,14 @@ def make_ios_bundle(
             },
             output,
         )
+    for runtime_copy in runtime_copies:
+        signed_runtime = run_command(
+            ["codesign", "--force", "--sign", "-", str(runtime_copy)],
+            cwd=root,
+            env=env,
+            timeout=30,
+        )
+        require_success(signed_runtime, f"ad-hoc sign {runtime_copy.name}")
     signed = run_command(
         ["codesign", "--force", "--sign", "-", str(executable_copy)],
         cwd=root,
@@ -284,6 +318,13 @@ def make_ios_bundle(
     return {
         "bundle_probe_sha256": sha256_path(executable_copy),
         "install": installed,
+        "runtime_libraries": [
+            {
+                "path": f"Frameworks/{runtime_copy.name}",
+                "sha256": sha256_path(runtime_copy),
+            }
+            for runtime_copy in runtime_copies
+        ],
     }
 
 
@@ -304,14 +345,9 @@ def run_ios_test(root: Path, env: dict[str, str]) -> tuple[dict[str, Any], dict[
     probe_source = root / "tools/gates/probes/m2_006_apple_resolver.cj"
     probe = root / "build/gates/m2-006/wirestack-m2-006-ios"
     probe.parent.mkdir(parents=True, exist_ok=True)
-    link_options = (
-        "-L ./target/native/resolver/current/lib -lwirestack_resolver "
-        "-L ./target/native/test-support/m2-006/lib -lwirestack_m2_006_tls_link_stub"
-    )
     probe_compile = run_command(
         [
             "cjc", str(probe_source), "-o", str(probe),
-            "--static",
             "--import-path", str(release_dir),
             "-L", str(library_dir),
             "-lwirestack.internal.resolver",
@@ -319,7 +355,7 @@ def run_ios_test(root: Path, env: dict[str, str]) -> tuple[dict[str, Any], dict[
             "-lwirestack.internal.common",
             "-lwirestack",
             f"--target={IOS_TARGET}", "--sysroot", env["WIRESTACK_IOS_SIMULATOR_SYSROOT"],
-            "--link-options", link_options,
+            "--link-options", ios_link_options(),
         ],
         cwd=root,
         env=env,
@@ -402,6 +438,12 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
             probe_sha = simulator.get("probe_sha256")
             bundle_probe_sha = simulator.get("bundle_probe_sha256")
             install = simulator.get("install")
+            runtime_libraries = simulator.get("runtime_libraries")
+            runtime_names = {
+                entry.get("path")
+                for entry in runtime_libraries
+                if isinstance(entry, dict)
+            } if isinstance(runtime_libraries, list) else set()
             if (
                 not isinstance(probe_sha, str)
                 or not re.fullmatch(r"[0-9a-f]{64}", probe_sha)
@@ -410,6 +452,7 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
                 or not isinstance(install, dict)
                 or install.get("timed_out") is not False
                 or install.get("exit_code") != 0
+                or "Frameworks/libcangjie-runtime.dylib" not in runtime_names
             ):
                 failures.append("REPORT:SIMULATOR_PROBE")
     return failures
