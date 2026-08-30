@@ -15,6 +15,7 @@ from pathlib import Path
 SUPPORTED = {
     "Linux": "linux-x86_64-glibc",
     "Windows": "windows-x86_64",
+    "Darwin": "macos-arm64",
 }
 
 
@@ -22,6 +23,8 @@ def plan(system: str) -> list[str]:
     if system == "Linux":
         return ["tls-provider", "resolver"]
     if system == "Windows":
+        return ["resolver"]
+    if system == "Darwin":
         return ["resolver"]
     raise ValueError(f"unsupported native dependency platform: {system}")
 
@@ -62,11 +65,26 @@ def main() -> int:
         )
         if status != 0:
             return status
+    selected_resolver = os.environ.get("WIRESTACK_RESOLVER_PLATFORM", SUPPORTED[system])
+    if system != "Darwin" and selected_resolver != SUPPORTED[system]:
+        print(json.dumps({
+            "code": "platform-override-not-allowed",
+            "detail": f"{system} cannot build resolver target {selected_resolver}",
+            "status": "FAIL",
+        }))
+        return 2
+    if system == "Darwin" and selected_resolver not in {"macos-arm64", "ios-simulator-arm64"}:
+        print(json.dumps({
+            "code": "unsupported-apple-resolver-platform",
+            "detail": selected_resolver,
+            "status": "FAIL",
+        }))
+        return 2
     resolver = [
         sys.executable,
         str(root / "tools" / "build_resolver.py"),
         "--root", str(root),
-        "--platform", SUPPORTED[system],
+        "--platform", selected_resolver,
         "--quiet",
     ]
     if os.environ.get("WIRESTACK_RESOLVER_TEST_FIXTURE") == "1":

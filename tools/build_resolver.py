@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools import build_linux_resolver, build_windows_resolver
+from tools import build_apple_resolver, build_linux_resolver, build_windows_resolver
 
 
 class SelectionError(RuntimeError):
@@ -29,6 +29,11 @@ def normalize_platform(value: str | None) -> str:
         "Windows": "windows-x86_64",
         "windows": "windows-x86_64",
         "windows-x86_64": "windows-x86_64",
+        "Darwin": "macos-arm64",
+        "macOS": "macos-arm64",
+        "macos": "macos-arm64",
+        "macos-arm64": "macos-arm64",
+        "ios-simulator-arm64": "ios-simulator-arm64",
     }
     try:
         return aliases[selected]
@@ -72,12 +77,23 @@ def main() -> int:
         except build_linux_resolver.BuildError as error:
             print(f"resolver build failed: {error}")
             return 1
-    else:
+    elif selected == "windows-x86_64":
         try:
             final_dir, manifest = build_windows_resolver.build(
                 root, output_root, test_fixture=args.test_fixture
             )
         except build_windows_resolver.BuildError as error:
+            print(f"resolver build failed: {error}")
+            return 1
+    else:
+        try:
+            final_dir, manifest = build_apple_resolver.build(
+                root,
+                output_root,
+                selected=selected,
+                test_fixture=args.test_fixture,
+            )
+        except build_apple_resolver.BuildError as error:
             print(f"resolver build failed: {error}")
             return 1
     if not args.quiet:
