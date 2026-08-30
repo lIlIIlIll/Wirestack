@@ -450,6 +450,11 @@ def execute_profile(root: Path, artifact_dir: Path, revision: str, repetitions: 
     if not copies_measured:
         blockers.append({"code": "COPY_COUNTER_INVALID", "detail": "link-wrap copy count did not match reads"})
     cases_pass = all(case["decision"] == "PASS" for case in cases)
+    cap_measured = all(
+        case["fixed_4k_cap"] for case in cases if case["payload_bytes"] > 4096
+    )
+    if not cap_measured:
+        blockers.append({"code": "FOUR_K_CAP", "detail": "fixed 4 KiB cap was not reproduced"})
     complete = not quick and len(cases) == len(REQUIRED_PAYLOADS)
     status = "PASS" if complete and cases_pass and not blockers else "BLOCKED"
     environment = environment_report(revision)
