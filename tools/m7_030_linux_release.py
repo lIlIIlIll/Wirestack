@@ -747,6 +747,19 @@ def validate_hosted_report(path: Path) -> dict[str, Any]:
     return report
 
 
+def hosted_validation_report(path: Path) -> dict[str, Any]:
+    report = validate_hosted_report(path)
+    return {
+        "schemaVersion": 1,
+        "taskId": TASK_ID,
+        "status": "PASS",
+        "decision": "PASS",
+        "commit": report["commit"],
+        "hostedReportSha256": sha256_path(path),
+        "verifiedSubjects": sorted(subject["name"] for subject in report["subjects"]),
+    }
+
+
 def build_hosted_report(
     commit: str,
     subjects: Sequence[tuple[str, Path, Path, Path]],
@@ -874,7 +887,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             if args.output:
                 atomic_json(args.output, result)
         elif args.command == "validate-hosted":
-            result = validate_hosted_report(args.report)
+            result = hosted_validation_report(args.report)
             if args.output:
                 atomic_json(args.output, result)
         else:

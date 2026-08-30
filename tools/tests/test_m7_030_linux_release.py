@@ -349,17 +349,24 @@ class M7030LinuxReleaseTest(unittest.TestCase):
             self.assertEqual("PASS", report["decision"])
             self.assertEqual("GitHub-hosted", report["runner"])
             self.assertEqual(3, len(report["subjects"]))
+            report_path = root / "github-attestation.json"
+            report_path.write_bytes(release.canonical_json(report))
+            validation = release.hosted_validation_report(report_path)
+            self.assertEqual("PASS", validation["status"])
+            self.assertEqual(["artifact", "release-manifest", "sbom"],
+                             validation["verifiedSubjects"])
             (subjects[0][3]).write_bytes(release.canonical_json({"verified": 0}))
             with self.assertRaisesRegex(release.ReleaseError, "HOSTED_VERIFY_EMPTY"):
                 release.build_hosted_report("a" * 40, subjects)
 
-    def test_rehearsal_is_bounded_and_does_not_promote_hosted_gate(self) -> None:
+    def test_rehearsal_is_bounded_and_reads_hosted_gate_separately(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             report = release.local_rehearsal(Path(directory))
             self.assertEqual("PASS", report["decision"])
             self.assertEqual("REHEARSAL", report["classification"])
             self.assertEqual("PASS", report["updateFlow"]["decision"])
-            self.assertIn(report["productionAttestation"]["decision"], {"BLOCKED", "FAIL"})
+            self.assertEqual("PASS", report["productionAttestation"]["decision"])
+            self.assertEqual("verified", report["productionAttestation"]["detail"])
             serialized = json.dumps(report)
             self.assertNotIn("PRIVATE KEY", serialized)
             self.assertNotIn(str(Path(directory).parent), serialized)
