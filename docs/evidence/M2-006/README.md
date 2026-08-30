@@ -1,6 +1,6 @@
 # M2-006 Apple SystemResolver evidence
 
-Status: INCOMPLETE
+Status: COMPLETE
 
 M2-006 adds a build-time Apple resolver adapter for macOS arm64 and iOS
 Simulator arm64. The adapter reuses the bounded POSIX worker implementation,
@@ -17,12 +17,20 @@ Deadline policy.
 - Python fault-injection tests reject wrong platforms, stale revisions,
   unknown schemas, cross-compile-only output, SKIPPED cases, timeout, missing
   simulator evidence, and a missing fixture binding.
-- The Apple C adapter compiles with strict C11 warnings in a local structural
-  probe. This is not Apple platform evidence.
-- The selected Cangjie test package compiles locally. Local Linux execution is
-  not counted as Apple platform evidence.
+- GitHub Actions run
+  [`33335383201`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33335383201)
+  passed both hosted jobs at exact revision
+  `f703e187a0816852b0eb55e7608e950ff03c829a`.
+- The native `macos-15` arm64 job ran all seven selected Cangjie resolver cases
+  with zero failures and stored its exact-revision report and validation.
+- The native iOS Simulator arm64 job built the standalone Cangjie probe,
+  bundled and signed the official simulator runtime, installed the app, and
+  ran all seven cases with zero failures on the booted iOS 26.2 Simulator.
+- Both reports record Cangjie
+  `1.3.0-alpha.20260831010012`, Apple clang, runner image identity, adapter
+  source digests, build fingerprint, platform, and exact repository revision.
 
-## Pending hosted evidence
+## Hosted Apple evidence
 
 The `M2-006 Apple SystemResolver` GitHub workflow has two independent jobs:
 
@@ -30,14 +38,14 @@ The `M2-006 Apple SystemResolver` GitHub workflow has two independent jobs:
 - iOS Simulator arm64 execution on `macos-15` with the official prebuilt
   `cangjie-sdk-mac-aarch64-ios` nightly.
 
-Both jobs must run seven selected Cangjie cases and retain exact-revision
-reports. The iOS job compiles a standalone Cangjie resolver probe, packages the
+Both jobs ran seven selected Cangjie cases and retained exact-revision reports.
+The iOS job compiles a standalone Cangjie resolver probe, packages the
 official `ios_simulator_aarch64_cjnative` runtime under the app's `Frameworks`
 directory, records the signed bundle inputs, installs the app, and launches it
 in the booted Simulator. This avoids a child-process test runner, which the app
 sandbox cannot launch. The probe terminates with `std.env.exit` after emitting
 all seven case records so process-wide resolver workers cannot keep the test app
-alive. Compilation alone cannot satisfy the task.
+alive. Compilation alone does not satisfy the task.
 
 ## Test-only link support
 
