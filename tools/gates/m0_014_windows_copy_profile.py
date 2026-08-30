@@ -245,8 +245,8 @@ def counting_receiver_source() -> str:
         "}\n"
     )
     result = (
-        "let copiedBytes = WIRESTACK_M0014_CopyBytes()\n"
-        "    let copyCalls = WIRESTACK_M0014_CopyCalls()\n"
+        "let copiedBytes = unsafe { WIRESTACK_M0014_CopyBytes() }\n"
+        "    let copyCalls = unsafe { WIRESTACK_M0014_CopyCalls() }\n"
         "    println(\"RESULT bytes=${total} readCalls=${reads} invalid=${invalid} "
         "eof=${eof} durationNs=${durationNs} closeCode=${closeCode} "
         "bufferSize=${bufferSize} copiedBytes=${copiedBytes} copyCalls=${copyCalls}\")"
