@@ -1,0 +1,100 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M7-031/test-plan.md",
+        "--json"
+      ],
+      "duration_ms": 113.973,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T15:32:02.574570Z",
+      "id": "test-plan-matrix",
+      "started_at_utc": "2026-08-30T15:32:02.460597Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-031/test-plan-matrix.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"counts\": {\"paths\": 20, \"scenarios\": 12, \"tests\": 10}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+      "stdout_path": "build/repository-tooling/M7-031/test-plan-matrix.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m7_031_linux_candidate",
+        "-v"
+      ],
+      "duration_ms": 6040.413,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T15:32:08.615124Z",
+      "id": "candidate-fault-injection",
+      "started_at_utc": "2026-08-30T15:32:02.574722Z",
+      "status": "PASS",
+      "stderr_excerpt": "test_artifact_identity_rejects_each_cross_report_mismatch (tools.tests.test_m7_031_linux_candidate.M7031LinuxCandidateTests.test_artifact_identity_rejects_each_cross_report_mismatch) ... ok\ntest_atomic_replace_failure_preserves_previous_bytes (tools.tests.test_m7_031_linux_candidate.M7031LinuxCandidateTests.test_atomic_replace_failure_preserves_previous_bytes) ... ok\ntest_committed_report_matches_deterministic_generator (tools.tests.test_m7_031_linux_candidate.M7031LinuxCandidateTests.test_committed_report_matches_deterministic_generator) ... ok\ntest_criterion_inventory_rejects_missing_duplicate_unknown_and_skipped (tools.tests.test_m7_031_linux_candidate.M7031LinuxCandidateTests.test_criterion_inventory_rejects_missing_duplicate_unknown_and_skipped) ... ok\ntest_current_repository_generates_exact_go_report (tools.tests.test_m7_031_linux_candidate.M7031LinuxCandidateTests.test_current_repository_generates_exact_go_report) ... ok\ntest_historical_or_internal_public_api_cannot_pass (tools.tests.test_m7_031_linux_candidate.M7031LinuxCandidateTests.test_historical_or_internal_public_api_cannot_pass) ... ok\ntest_hosted_report_requires_all_three_verified_subjects (tools.tests.test_m7_031_linux_candidate.M7031LinuxCandidateTests.test_hosted_report_requires_all_three_verified_subjects) ... ok\ntest_json_schema_duplicate_key_and_path_escape_fail_closed (tools.tests.test_m7_031_linux_candidate.M7031LinuxCandidateTests.test_json_schema_duplicate_key_and_path_escape_fail_closed) ... ok\ntest_open_high_or_critical_finding_blocks_release (tools.tests.test_m7_031_linux_candidate.M7031LinuxCandidateTests.test_open_high_or_critical_finding_blocks_release) ... ok\ntest_soak_rejects_short_preflight_interruption_and_wrong_artifact (tools.tests.test_m7_031_linux_candidate.M7031LinuxCandidateTests.test_soak_rejects_short_preflight_interruption_and_wrong_artifact) ... ok\ntest_source_digest_drift_is_stale (tools.tests.test_m7_031_linux_candidate.M7031LinuxCandidateTests.test_source_digest_drift_is_stale) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 5.878s\n\nOK\n",
+      "stderr_path": "build/repository-tooling/M7-031/candidate-fault-injection.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "",
+      "stdout_path": "build/repository-tooling/M7-031/candidate-fault-injection.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m7_linux_task_graph",
+        "-v"
+      ],
+      "duration_ms": 113.883,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T15:32:08.729158Z",
+      "id": "linux-task-graph",
+      "started_at_utc": "2026-08-30T15:32:08.615288Z",
+      "status": "PASS",
+      "stderr_excerpt": "test_evidence_rejects_upstream_and_non_linux_completion_inference (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_evidence_rejects_upstream_and_non_linux_completion_inference) ... ok\ntest_linux_dependencies_exclude_global_and_upstream_blockers (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_linux_dependencies_exclude_global_and_upstream_blockers) ... ok\ntest_linux_graph_has_the_exact_frozen_task_set (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_linux_graph_has_the_exact_frozen_task_set) ... ok\ntest_status_exposes_linux_completion_without_a_global_completion_claim (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_status_exposes_linux_completion_without_a_global_completion_claim) ... ok\ntest_task_counts_include_linux_profile_and_formal_follow_up_work (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_task_counts_include_linux_profile_and_formal_follow_up_work) ... ok\ntest_task_graph_has_fail_closed_audit_and_release_edges (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_task_graph_has_fail_closed_audit_and_release_edges) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 0.005s\n\nOK\n",
+      "stderr_path": "build/repository-tooling/M7-031/linux-task-graph.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "",
+      "stdout_path": "build/repository-tooling/M7-031/linux-task-graph.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "scripts/check-m7-031-release"
+      ],
+      "duration_ms": 10836.94,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T15:32:19.566292Z",
+      "id": "linux-release-candidate",
+      "started_at_utc": "2026-08-30T15:32:08.729363Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-031/linux-release-candidate.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "M7-031 candidate: PASS\ndecision=GO_FOR_LINUX_STABLE_RELEASE\nartifact_sha256=c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee\ncriteria={'total': 22, 'pass': 21, 'fail': 0, 'notApplicable': 1}\n",
+      "stdout_path": "build/repository-tooling/M7-031/linux-release-candidate.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "task",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M7-031"
+}

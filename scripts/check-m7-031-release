@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+set -eu
+
+repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+exec python3 "$repo_root/tools/m7_031_linux_candidate.py" \
+  --root "$repo_root" \
+  --report "$repo_root/docs/evidence/M7-031/linux_x86_64/release-candidate.json" \
+  "$@"
