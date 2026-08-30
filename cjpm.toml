@@ -29,4 +29,10 @@
 [target.x86_64-w64-mingw32.ffi.c]
   wirestack_resolver = { path = "./target/native/resolver/current/lib" }
 
+[target.aarch64-apple-darwin]
+  link-option = "-L ./target/native/resolver/current/lib -lwirestack_resolver -L ./target/native/test-support/m2-006/lib -lwirestack_m2_006_tls_link_stub"
+
+[target.arm64-apple-ios11-simulator]
+  link-option = "-L ./target/native/resolver/current/lib -lwirestack_resolver -L ./target/native/test-support/m2-006/lib -lwirestack_m2_006_tls_link_stub"
+
 [dependencies]
