@@ -60,7 +60,8 @@ def validate_spec(spec: Mapping[str, Any]) -> None:
     require(isinstance(caps, list) and len(caps) >= 14 and len(caps) == len(set(caps)), "required capabilities invalid")
     require(isinstance(platforms, list) and len(platforms) >= 7 and len(platforms) == len(set(platforms)), "required platforms invalid")
 
-def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any]) -> None:
+def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
+                    expected_revision: str | None = None) -> None:
     validate_spec(spec)
     schema_version = result.get("schema_version")
     require(schema_version in {1, 2}, "unsupported result schema")
@@ -68,6 +69,24 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any]) -> None:
     require(result.get("provider") in REQUIRED_PROVIDER_IDS, "result provider")
     require(result.get("platform") in set(spec["required_platforms"]), "result platform")
     require(result.get("status") in RESULT_STATUSES, "result status")
+    if result.get("platform") == "windows-x86_64" and result.get("status") in {"PASS", "PARTIAL"}:
+        execution = result.get("execution")
+        require(isinstance(execution, dict), "Windows result requires execution metadata")
+        require(execution.get("runner_os") == "Windows", "Windows result requires native Windows runner")
+        require(str(execution.get("runner_arch", "")).upper() in {"X64", "AMD64"},
+                "Windows result requires native x86_64 runner")
+        require(COMMIT_RE.fullmatch(str(execution.get("repository_revision", ""))) is not None,
+                "Windows result requires exact repository revision")
+        require(isinstance(execution.get("image_os"), str) and execution["image_os"],
+                "Windows result requires hosted image identity")
+        require(isinstance(execution.get("image_version"), str) and execution["image_version"],
+                "Windows result requires hosted image version")
+    if expected_revision is not None:
+        require(COMMIT_RE.fullmatch(expected_revision) is not None, "expected revision must be an exact commit")
+        execution = result.get("execution")
+        require(isinstance(execution, dict) and
+                execution.get("repository_revision") == expected_revision,
+                "result repository revision mismatch")
     source = result.get("source")
     require(isinstance(source, dict), "source object required")
     require(SHA256_RE.fullmatch(str(source.get("content_sha256", ""))) is not None, "source content digest required")
@@ -140,12 +159,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--spec", type=Path, default=Path(__file__).resolve().parent / "providers.json")
     parser.add_argument("--result", type=Path)
     parser.add_argument("--matrix", type=Path)
+    parser.add_argument("--expected-revision")
     args = parser.parse_args(argv)
     try:
         spec = load(args.spec)
         validate_spec(spec)
         if args.result:
-            validate_result(load(args.result), spec)
+            validate_result(load(args.result), spec, args.expected_revision)
+        elif args.expected_revision:
+            raise ValidationError("--expected-revision requires --result")
         if args.matrix:
             matrix = load(args.matrix)
             validate_matrix(matrix, spec)
