@@ -21,7 +21,7 @@ It does not accept a component's top-level `PASS` value by itself.
 | Performance domains | 8/8 PASS |
 | Field-level checks | 254/254 PASS |
 | Failed domains | 0 |
-| Manifest | [`tools/gates/manifests/m7-024-linux-performance.json`](../../../tools/gates/manifests/m7-024-linux-performance.json) |
+| Manifest | [`tools/gates/campaigns/m7-024-linux-performance.json`](../../../tools/gates/campaigns/m7-024-linux-performance.json) |
 | Manifest SHA-256 | `4e5d3425fd2b31794b44d72d75c245f40bc96ed318ca8aba2eaf373ee46eab0d` |
 | Aggregate report | [`linux_glibc_x86_64/performance-gate.json`](linux_glibc_x86_64/performance-gate.json) |
 | Aggregate report SHA-256 | `a354e448489fe3680f68c5298fd79a4ab0555dbf135ebe84ae5c1c0e5e6be65e` |
@@ -80,13 +80,19 @@ The gate writes its report atomically and exits nonzero on any failure. Raw
 component reports remain unchanged and continue to hold every benchmark sample
 and subprocess output.
 
+The performance campaign manifest has a specialized schema and therefore lives
+under `tools/gates/campaigns/`. The generic gate runner only discovers files in
+`tools/gates/manifests/`; this separation prevents CI from parsing the
+performance schema as a generic command manifest.
+
 ## Verification
 
 | Command | Result |
 |---|---|
-| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-024/test-plan.md --json` | PASS; P=12, S=8, T=8 |
+| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-024/test-plan.md --json` | PASS; P=13, S=9, T=9 |
 | `python3 -m py_compile tools/gates/m7_024_linux_performance.py tools/gates/tests/test_m7_024_linux_performance.py` | PASS |
-| `python3 -m unittest tools.benchmarks.tests.test_http2_benchmark tools.gates.tests.test_m7_024_linux_performance tools.tests.test_m7_linux_task_graph` | PASS; 19/19 tests |
+| `python3 -m unittest tools.benchmarks.tests.test_http2_benchmark tools.gates.tests.test_m7_024_linux_performance tools.tests.test_m7_linux_task_graph` | PASS; 20/20 tests |
+| `python3 -c '... gate_runner.load_manifest(...) ...'` over `tools/gates/manifests/*.json` | PASS; the specialized M7-024 campaign is excluded from generic discovery |
 | `scripts/gate-m7-024-linux-performance` | PASS; 7 artifacts, 8 domains, 254 checks, 0 failures |
 | `scripts/check` | PASS; exit 0; 132 repository tests, 132 gate tests, 24 benchmark tests, architecture/check/build PASS, 561 Cangjie tests passed, 23 skipped, 0 failed |
 
