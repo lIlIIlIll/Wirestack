@@ -35,6 +35,28 @@ class M7028SecurityReviewPackageTests(unittest.TestCase):
         report = review.validate(ROOT, review.DEFAULT_INDEX, review.DEFAULT_REPORT)
         self.assertEqual("PASS", report["status"])
         self.assertEqual("DISABLED_PRE_1_0", report["checks"]["compatibilityGate"])
+        self.assertEqual(
+            {
+                "CURRENT_PASS": 8,
+                "CURRENT_BOUND_INPUT": 3,
+                "STALE_AFTER_M7_032": 1,
+                "HISTORICAL_NON_GATING": 1,
+            },
+            report["stateCounts"],
+        )
+
+    def test_current_bound_inputs_require_pass_bundle_digest(self) -> None:
+        temporary, root, index = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        bound = next(
+            item for item in index["evidence"] if item["state"] == "CURRENT_BOUND_INPUT"
+        )
+        target = root / bound["path"]
+        target.write_bytes(target.read_bytes() + b"\n")
+        bound["sha256"] = self.digest(target)
+        with self.assertRaises(review.ReviewPackageError) as caught:
+            review.validate_index(root, index)
+        self.assertEqual("BOUND_INPUT_MISMATCH", caught.exception.code)
 
     def test_path_escape_is_rejected(self) -> None:
         temporary, root, index = self.fixture()
@@ -104,6 +126,23 @@ class M7028SecurityReviewPackageTests(unittest.TestCase):
         self.assertEqual("SENSITIVE_DATA", caught.exception.code)
         self.assertNotIn("synthetic-secret-value", caught.exception.detail)
 
+        temporary2, root2, index2 = self.fixture()
+        self.addCleanup(temporary2.cleanup)
+        stale = next(
+            item for item in index2["evidence"] if item["state"] == "STALE_AFTER_M7_032"
+        )
+        evidence = root2 / stale["path"]
+        evidence.write_text(
+            evidence.read_text(encoding="utf-8")
+            + "\nAuthorization: Bearer synthetic-evidence-secret\n",
+            encoding="utf-8",
+        )
+        stale["sha256"] = self.digest(evidence)
+        with self.assertRaises(review.ReviewPackageError) as caught:
+            review.validate_index(root2, index2)
+        self.assertEqual("SENSITIVE_DATA", caught.exception.code)
+        self.assertNotIn("synthetic-evidence-secret", caught.exception.detail)
+
     def test_required_topic_and_compatibility_gate_are_enforced(self) -> None:
         temporary, root, index = self.fixture()
         self.addCleanup(temporary.cleanup)
@@ -137,4 +176,3 @@ class M7028SecurityReviewPackageTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
