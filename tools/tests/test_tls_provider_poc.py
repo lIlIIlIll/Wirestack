@@ -170,6 +170,14 @@ class ProviderPocWindowsTests(unittest.TestCase):
             runner.provider_archive_names("openssl", True),
         )
 
+    def test_atomic_json_has_platform_stable_lf(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "result.json"
+            runner.atomic_json(output, {"status": "PASS"})
+            data = output.read_bytes()
+            self.assertTrue(data.endswith(b"\n"))
+            self.assertNotIn(b"\r\n", data)
+
     def test_windows_dependency_scan_rejects_versioned_tls_dll(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
