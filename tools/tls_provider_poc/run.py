@@ -166,6 +166,10 @@ def cmake_runtime_args(windows: bool) -> list[str]:
     return ["-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"] if windows else []
 
 
+def mbedtls_runtime_args(windows: bool) -> list[str]:
+    return ["-DMSVC_STATIC_RUNTIME=ON"] if windows else []
+
+
 def source_provider(spec: Mapping[str, Any], work: Path, log: Path) -> tuple[Path, dict[str, Any]]:
     source_root = work / "source"
     source_root.mkdir(parents=True, exist_ok=True)
@@ -227,6 +231,7 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
             "-DCMAKE_BUILD_TYPE=Release", "-DENABLE_TESTING=OFF",
             "-DENABLE_PROGRAMS=OFF", "-DUSE_SHARED_MBEDTLS_LIBRARY=OFF",
             *cmake_runtime_args(is_windows()),
+            *mbedtls_runtime_args(is_windows()),
             f"-DCMAKE_INSTALL_PREFIX={prefix}",
         ], cwd=work, log=log)
         run(["cmake", "--build", str(build), "--parallel", jobs], cwd=work, log=log)

@@ -176,6 +176,8 @@ class ProviderPocWindowsTests(unittest.TestCase):
             runner.cmake_runtime_args(True),
         )
         self.assertEqual([], runner.cmake_runtime_args(False))
+        self.assertEqual(["-DMSVC_STATIC_RUNTIME=ON"], runner.mbedtls_runtime_args(True))
+        self.assertEqual([], runner.mbedtls_runtime_args(False))
 
     def test_atomic_json_has_platform_stable_lf(self):
         with tempfile.TemporaryDirectory() as directory:
