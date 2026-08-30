@@ -277,7 +277,7 @@ def compile_receiver(root: Path, artifact_dir: Path,
     command = [
         "cjc", "-O2", str(source), "-o", str(binary),
         "--link-option", str(shim_object),
-        "--link-option", "-Wl,--wrap=CJ_SOCKET_BufferRCopy",
+        "--link-option", "--wrap=CJ_SOCKET_BufferRCopy",
     ]
     process = run_process(command, artifact_dir, timeout)
     if process["timed_out"] or process["exit_code"] != 0 or not binary.is_file():
