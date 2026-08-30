@@ -117,6 +117,10 @@ scripts/release_temp_tree.py
 scripts/stage_source_tree.py
 scripts/test_stage_source_tree.py
 scripts/test_generate_public_api_snapshot.py
+scripts/check_cjdoc_qualification.py
+scripts/test_check_cjdoc_qualification.py
+scripts/release_graph.py
+scripts/test_release_graph.py
 scripts/test_release_temp_tree.py
 scripts/release_package_stage.py
 scripts/check_api_inventory.py
@@ -156,6 +160,8 @@ release/package-manifests/yjson_backends.toml
 release/package-manifests/yjson_algorithms.toml
 release/package-manifests/yjson_schema_formats.toml
 release/package-manifests/yjson_yyjson.toml
+release/cjdoc-tool.toml
+release/release-graph.toml
 release/public-api-inventory.toml
 release/public-api-snapshot.txt
 

@@ -2,9 +2,9 @@
 """Create and exercise isolated registry-style release artifacts.
 
 cjpm 1.1.3 has no local-registry or publish dry-run command. Leaf packages are
-bundled with cjpm itself. Packages whose exact 2.0.1 dependencies are not yet in
+bundled with cjpm itself. Packages whose exact release dependencies are not yet in
 the central repository are archived in the same source layout, then extracted
-and resolved to sibling artifact directories only for the 2.0 consumer rehearsal.
+and resolved to sibling artifact directories only for the release consumer rehearsal.
 The original artifact manifests remain central-version-only.
 """
 
@@ -16,21 +16,14 @@ import subprocess
 import sys
 import tarfile
 
+from release_graph import load_release_graph, local_dependency_replacements
+
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-VERSION = "2.0.1"
-MODULES = (
-    "yjson_macros",
-    "yjson",
-    "yjson_all",
-    "yjson_native",
-    "yjson_native_accel",
-    "yjson_backends",
-    "yjson_algorithms",
-    "yjson_schema_formats",
-    "yjson_yyjson",
-)
-LEAF_BUNDLES = ("yjson_macros", "yjson")
+GRAPH = load_release_graph()
+VERSION = GRAPH.version
+MODULES = GRAPH.names
+LEAF_BUNDLES = tuple(package.name for package in GRAPH.packages if package.leaf_bundle)
 SUPPORTED_COMPILE_OVERRIDES = ("-O0", "-O1")
 
 
@@ -141,13 +134,7 @@ def inspect_artifact(name: str, archive_path: pathlib.Path) -> None:
 
 
 def rewrite_for_local_resolution(modules: pathlib.Path) -> None:
-    replacements = {
-        'yjson_macros = "2.0.1"': 'yjson_macros = { path = "../yjson_macros" }',
-        'yjson_native = "2.0.1"': 'yjson_native = { path = "../yjson_native" }',
-        'yjson_backends = "2.0.1"': 'yjson_backends = { path = "../yjson_backends" }',
-        'yjson_algorithms = "2.0.1"': 'yjson_algorithms = { path = "../yjson_algorithms" }',
-        'yjson = "2.0.1"': 'yjson = { path = "../yjson" }',
-    }
+    replacements = local_dependency_replacements(GRAPH)
     for module in modules.iterdir():
         manifest = module / "cjpm.toml"
         text = manifest.read_text(encoding="utf-8")

@@ -50,6 +50,7 @@ run() {
 require_consistent_sdk
 
 run api-inventory python3 "$repo/scripts/check_api_inventory.py"
+run cjdoc-qualification python3 "$repo/scripts/check_cjdoc_qualification.py"
 run runtime-freeze "$repo/scripts/runtime_freeze_contract_checks.sh"
 run core bash -c 'cd "$1" && cjpm test --no-color' _ "$repo"
 run examples "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/examples"

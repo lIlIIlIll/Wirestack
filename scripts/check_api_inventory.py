@@ -8,8 +8,9 @@ import subprocess
 import sys
 import tomllib
 
+from release_graph import ROOT, load_release_graph
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+
 INVENTORY = ROOT / "release" / "public-api-inventory.toml"
 
 
@@ -22,47 +23,34 @@ def fail(message: str) -> None:
 
 
 def check_versions(inventory: dict) -> None:
-    pairing = inventory["package_pairing"]
-    manifest_version = inventory["package_manifest_version"]
-    manifests = {
-        "core": ROOT / "cjpm.toml",
-        "macros": ROOT / "packages/yjson_macros/cjpm.toml",
-        "aggregate": ROOT / "packages/yjson_all/cjpm.toml",
-        "native": ROOT / "packages/yjson_native/cjpm.toml",
-        "native_accel": ROOT / "packages/yjson_native_accel/cjpm.toml",
-        "backends": ROOT / "packages/yjson_backends/cjpm.toml",
-        "algorithms": ROOT / "packages/yjson_algorithms/cjpm.toml",
-        "schema_formats": ROOT / "packages/yjson_schema_formats/cjpm.toml",
-        "yyjson": ROOT / "packages/yjson_yyjson/cjpm.toml",
-    }
-    expected = {name: load_toml(path)["package"]["version"]
-                for name, path in manifests.items()}
-    for name, actual in expected.items():
-        if actual != manifest_version:
-            fail(f"{name} development version {actual!r} != package manifest version {manifest_version!r}")
-        if actual != pairing[name]:
-            fail(f"{name} development version {actual!r} != inventory {pairing[name]!r}")
-
-    release_names = {
-        "core": "yjson", "macros": "yjson_macros", "aggregate": "yjson_all",
-        "native": "yjson_native", "native_accel": "yjson_native_accel",
-        "backends": "yjson_backends", "algorithms": "yjson_algorithms",
-        "schema_formats": "yjson_schema_formats", "yyjson": "yjson_yyjson",
-    }
-    released = {name: load_toml(ROOT / f"release/package-manifests/{module}.toml")
-                for name, module in release_names.items()}
-    for name, manifest in released.items():
-        if manifest["package"]["version"] != pairing[name]:
-            fail(f"release {release_names[name]} version must match inventory")
-        for dependency, version in manifest.get("dependencies", {}).items():
-            dependency_key = next((key for key, module in release_names.items()
-                                   if module == dependency), None)
-            if dependency_key is None or version != pairing[dependency_key]:
-                fail(f"release {release_names[name]} dependency {dependency} is not pinned to inventory")
+    graph = load_release_graph()
+    if inventory.get("release_version") is not None or inventory.get("package_pairing") is not None:
+        fail("release version and package pairing must come only from release/release-graph.toml")
+    for package in graph.packages:
+        development = load_toml(ROOT / package.development_manifest)
+        released = load_toml(ROOT / package.release_manifest)
+        for kind, manifest in (("development", development), ("release", released)):
+            if manifest["package"]["name"] != package.name:
+                fail(f"{kind} manifest name does not match graph package {package.name}")
+            if manifest["package"]["version"] != graph.version:
+                fail(f"{kind} {package.name} version is not {graph.version}")
+            dependencies = manifest.get("dependencies", {})
+            expected_dependencies = (
+                package.development_dependencies if kind == "development"
+                else package.dependencies
+            )
+            if set(dependencies) != set(expected_dependencies):
+                fail(f"{kind} {package.name} dependencies do not match release graph")
+        for dependency in package.dependencies:
+            if released["dependencies"][dependency] != graph.version:
+                fail(f"release {package.name} dependency {dependency} is not pinned to {graph.version}")
 
 
 def check_declarations(inventory: dict) -> None:
+    package_names = set(load_release_graph().names)
     for entry in inventory["api"]:
+        if entry["package"] not in package_names:
+            fail(f"{entry['symbol']} uses unknown package {entry['package']}")
         sources = entry["source"]
         if isinstance(sources, str):
             sources = [sources]
@@ -78,17 +66,19 @@ def main() -> int:
     inventory = load_toml(INVENTORY)
     if inventory.get("inventory_version") != 1:
         fail("unsupported inventory_version")
-    if inventory.get("release_version") != "2.0.1":
-        fail("inventory release_version must match the 2.0 release line")
     check_versions(inventory)
     check_declarations(inventory)
+    subprocess.run([sys.executable, str(ROOT / "scripts/test_release_graph.py")],
+        cwd=ROOT, check=True)
     subprocess.run([sys.executable, str(ROOT / "scripts/test_generate_public_api_snapshot.py")],
         cwd=ROOT, check=True)
     subprocess.run([sys.executable, str(ROOT / "scripts/test_release_temp_tree.py")],
         cwd=ROOT, check=True)
     subprocess.run([sys.executable, str(ROOT / "scripts/generate_public_api_snapshot.py")],
         cwd=ROOT, check=True)
-    print(f"public API inventory passed: {len(inventory['api'])} reviewed deltas")
+    graph = load_release_graph()
+    print(f"public API inventory passed: version={graph.version} packages={len(graph.packages)} "
+          f"reviewed_deltas={len(inventory['api'])}")
     return 0
 
 

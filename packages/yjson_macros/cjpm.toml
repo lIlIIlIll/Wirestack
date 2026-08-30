@@ -3,7 +3,7 @@
   name = "yjson_macros"
   organization = ""
   description = "AST codec macros for yjson"
-  version = "2.0.1"
+  version = "0.1.0"
   target-dir = ""
   script-dir = ""
   output-type = "static"

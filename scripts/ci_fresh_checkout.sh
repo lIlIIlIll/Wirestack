@@ -6,7 +6,7 @@ tree=$(mktemp -d "${TMPDIR:-/tmp}/yjson-ci-source.XXXXXX")
 trap 'rm -rf "$tree"' EXIT
 
 python3 "$repo/scripts/release_temp_tree.py" "$tree"
-jobs=${YJSON_CI_JOBS:-"api-inventory runtime-freeze core standards-conformance schema-formats-conformance examples macro-consumer algorithms-consumer registry-rehearsal custom-native yyjson-native native-clang native-gcc sanitizer fuzz-short"}
+jobs=${YJSON_CI_JOBS:-"api-inventory cjdoc-qualification runtime-freeze core standards-conformance schema-formats-conformance examples macro-consumer algorithms-consumer registry-rehearsal custom-native yyjson-native native-clang native-gcc sanitizer fuzz-short"}
 for job in $jobs; do
     printf '\n== fresh CI job: %s ==\n' "$job"
     "$tree/scripts/ci_job.sh" "$job"

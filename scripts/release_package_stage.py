@@ -10,20 +10,10 @@ import argparse
 import pathlib
 import shutil
 
+from release_graph import ROOT, load_release_graph, local_dependency_replacements
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
-TEMPLATES = ROOT / "release" / "package-manifests"
-MODULES = (
-    "yjson_macros",
-    "yjson",
-    "yjson_all",
-    "yjson_native",
-    "yjson_native_accel",
-    "yjson_backends",
-    "yjson_algorithms",
-    "yjson_schema_formats",
-    "yjson_yyjson",
-)
+
+GRAPH = load_release_graph()
 
 
 def copy_path(source: pathlib.Path, target: pathlib.Path) -> None:
@@ -34,25 +24,19 @@ def copy_path(source: pathlib.Path, target: pathlib.Path) -> None:
         shutil.copy2(source, target)
 
 
-def development_manifest(name: str, text: str) -> str:
-    replacements = {
-        'yjson_macros = "2.0.1"': 'yjson_macros = { path = "../yjson_macros" }',
-        'yjson_native = "2.0.1"': 'yjson_native = { path = "../yjson_native" }',
-        'yjson_backends = "2.0.1"': 'yjson_backends = { path = "../yjson_backends" }',
-        'yjson_algorithms = "2.0.1"': 'yjson_algorithms = { path = "../yjson_algorithms" }',
-        'yjson = "2.0.1"': 'yjson = { path = "../yjson" }',
-    }
-    for release_value, path_value in replacements.items():
+def development_manifest(text: str) -> str:
+    for release_value, path_value in local_dependency_replacements(GRAPH).items():
         text = text.replace(release_value, path_value)
     return text
 
 
-def stage(name: str, destination: pathlib.Path, development: bool) -> None:
-    module = destination / name
+def stage(package, destination: pathlib.Path, development: bool) -> None:
+    name = package.name
+    module = destination / package.name
     module.mkdir(parents=True)
-    manifest = (TEMPLATES / f"{name}.toml").read_text(encoding="utf-8")
+    manifest = (ROOT / package.release_manifest).read_text(encoding="utf-8")
     if development:
-        manifest = development_manifest(name, manifest)
+        manifest = development_manifest(manifest)
     (module / "cjpm.toml").write_text(manifest, encoding="utf-8")
 
     if name == "yjson":
@@ -92,9 +76,10 @@ def main() -> int:
     if destination.exists() and any(destination.iterdir()):
         raise SystemExit(f"destination is not empty: {destination}")
     destination.mkdir(parents=True, exist_ok=True)
-    for name in MODULES:
-        stage(name, destination, args.development)
-    print(f"staged modules={len(MODULES)} mode={'development' if args.development else 'release'} destination={destination}")
+    for package in GRAPH.packages:
+        stage(package, destination, args.development)
+    print(f"staged modules={len(GRAPH.packages)} version={GRAPH.version} "
+          f"mode={'development' if args.development else 'release'} destination={destination}")
     return 0
 
 

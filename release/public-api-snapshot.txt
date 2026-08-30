@@ -54,12 +54,162 @@ c-abi|native/yjson_yyjson.h|<top-level>|uint32_t YJ_Yyjson_TestVendoredVersion(v
 c-abi|native/yjson_yyjson.h|<top-level>|uint64_t YJ_Yyjson_TraversalChecksum(uint64_t handle);
 c-abi|native/yjson_yyjson.h|<top-level>|void YJ_Yyjson_Free(uint64_t handle);
 c-abi|native/yjson_yyjson.h|<top-level>|void YJ_Yyjson_FreeOwnedBuffer(uint64_t buffer_handle);
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|<top-level>|public class JsonMergePatch
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|<top-level>|public class JsonPatch
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|<top-level>|public class JsonPatchException <: JsonException
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|<top-level>|public class JsonPatchOperation
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|<top-level>|public enum JsonPatchOperationKind <: Equatable<JsonPatchOperationKind> & ToString
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonMergePatch|public static func apply(target: JsonNode, patch: JsonNode, limits!: JsonPatchLimits = JsonPatchLimits.defaults): JsonNode
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonMergePatch|public static func applyInPlace(target: JsonNode, patch: JsonNode, limits!: JsonPatchLimits = JsonPatchLimits.defaults): JsonNode
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatchException|public init(message: String, operationIndex!: Int64 = -1, code!: String = "invalid_json_patch", path!: String = "")
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatchException|public let operationIndex: Int64
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatchOperationKind|public func toString(): String
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatchOperationKind|public operator func !=(other: JsonPatchOperationKind): Bool
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatchOperationKind|public operator func ==(other: JsonPatchOperationKind): Bool
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatchOperation|public init(kind: JsonPatchOperationKind, path: JsonPointer, source!: Option<JsonPointer> = None<JsonPointer>, value!: Option<JsonNode> = None<JsonNode>)
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatchOperation|public let kind: JsonPatchOperationKind
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatchOperation|public let path: JsonPointer
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatchOperation|public let source: Option<JsonPointer>
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatchOperation|public let value: Option<JsonNode>
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatch|public func apply(target: JsonNode, limits!: JsonPatchLimits = JsonPatchLimits.defaults): JsonNode
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatch|public func applyInPlace(target: JsonNode, limits!: JsonPatchLimits = JsonPatchLimits.defaults): JsonNode
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatch|public func operations(): Array<JsonPatchOperation>
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatch|public init(operations: Array<JsonPatchOperation>)
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatch|public static func fromValue(value: JsonNode): JsonPatch
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_patch.cj|JsonPatch|public static func parse(text: String, config!: JsonReadConfig = JsonReadConfig(duplicateKeyPolicy: JsonDuplicateKeyPolicy.Reject)): JsonPatch
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|<top-level>|public class JsonPath
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|<top-level>|public class JsonPathException <: JsonException
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|<top-level>|public class JsonPathMatch
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPathException|public init(message: String, expression: String, expressionOffset!: Int64 = -1)
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPathException|public let expression: String
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPathException|public let expressionOffset: Int64
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPathMatch|public init(value: JsonNode, normalizedPath: String)
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPathMatch|public let normalizedPath: String
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPathMatch|public let value: JsonNode
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPath|public func first(root: JsonNode, limits!: JsonPathLimits = JsonPathLimits.defaults): Option<JsonPathMatch>
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPath|public func query(root: JsonNode, limits!: JsonPathLimits = JsonPathLimits.defaults): ArrayList<JsonPathMatch>
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPath|public func values(root: JsonNode, limits!: JsonPathLimits = JsonPathLimits.defaults): ArrayList<JsonNode>
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPath|public let expression: String
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPath|public static func parse(expression: String): JsonPath
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPath|public static func select(expression: String, root: JsonNode, limits!: JsonPathLimits = JsonPathLimits.defaults): ArrayList<JsonPathMatch>
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|<top-level>|public class JsonPointer <: ToString
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|<top-level>|public class JsonPointerException <: JsonException
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|JsonPointerException|public init(message: String, pointer: String, code!: String = "invalid_json_pointer")
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|JsonPointerException|public let pointer: String
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|JsonPointer|public func evaluate(root: JsonNode): JsonNode
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|JsonPointer|public func find(root: JsonNode): Option<JsonNode>
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|JsonPointer|public func isRoot(): Bool
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|JsonPointer|public func toString(): String
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|JsonPointer|public func toUriFragment(): String
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|JsonPointer|public func tokens(): Array<String>
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|JsonPointer|public static func parse(pointer: String): JsonPointer
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|JsonPointer|public static func parseUriFragment(fragment: String): JsonPointer
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|<top-level>|public class JsonSchema
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|<top-level>|public class JsonSchemaConfig
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|<top-level>|public class JsonSchemaFormatRegistry
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|<top-level>|public class JsonSchemaRegistry <: UriResolver
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|<top-level>|public class JsonSchemaValidator
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|<top-level>|public class JsonValidationError <: JsonException
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|<top-level>|public enum JsonSchemaFormatMode
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|<top-level>|public interface JsonSchemaFormat
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|<top-level>|public interface JsonSchemaFormatProvider
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|<top-level>|public interface UriResolver
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaConfig|public init(resolver!: Option<UriResolver> = None<UriResolver>, formatMode!: JsonSchemaFormatMode = JsonSchemaFormatMode.Annotation, formats!: JsonSchemaFormatRegistry = JsonSchemaFormatRegistry.withCoreFormats(), limits!: JsonSchemaLimits = JsonSchemaLimits.defaults)
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaConfig|public let formatMode: JsonSchemaFormatMode
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaConfig|public let formats: JsonSchemaFormatRegistry
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaConfig|public let limits: JsonSchemaLimits
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaConfig|public let resolver: Option<UriResolver>
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaConfig|public static let defaults = JsonSchemaConfig( formats: JsonSchemaFormatRegistry.withCoreFormats().frozenCopy())
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaFormatProvider|func installInto(registry: JsonSchemaFormatRegistry): Unit
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaFormatRegistry|public func install(provider: JsonSchemaFormatProvider): Unit
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaFormatRegistry|public func register(name: String, format: JsonSchemaFormat, replace!: Bool = false): Unit
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaFormatRegistry|public func resolve(name: String): Option<JsonSchemaFormat>
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaFormatRegistry|public static func withCoreFormats(): JsonSchemaFormatRegistry
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaFormat|func validate(value: String): Bool
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaRegistry|public func register(uri: String, schema: JsonNode): Unit
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaRegistry|public func register(uri: String, schemaText: String): Unit
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaRegistry|public func resolve(uri: String): Option<JsonNode>
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaValidator|public func isValid(instance: JsonNode): Bool
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaValidator|public func validate(instance: JsonNode): ArrayList<JsonValidationError>
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaValidator|public func validateOrThrow(instance: JsonNode): Unit
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchemaValidator|public init(schema: JsonSchema)
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchema|public func validate(instance: JsonNode): ArrayList<JsonValidationError>
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchema|public func validateOrThrow(instance: JsonNode): Unit
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchema|public func validator(): JsonSchemaValidator
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchema|public init(document: JsonNode, draft!: String = "https://json-schema.org/draft/2020-12/schema", config!: JsonSchemaConfig = JsonSchemaConfig.defaults)
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchema|public let config: JsonSchemaConfig
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchema|public let draft: String
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchema|public prop document: JsonNode
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchema|public static func fromValue(value: JsonNode, config!: JsonSchemaConfig = JsonSchemaConfig.defaults): JsonSchema
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchema|public static func parse(text: String, config!: JsonSchemaConfig = JsonSchemaConfig.defaults): JsonSchema
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonValidationError|public init(jsonPath: String, schemaPath: String, message: String, code!: String = "schema_validation")
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonValidationError|public let jsonPath: String
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonValidationError|public let schemaPath: String
+yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|UriResolver|func resolve(uri: String): Option<JsonNode>
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|<top-level>|public class JsonPatchLimits
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|<top-level>|public class JsonPathLimits
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|<top-level>|public class JsonSchemaLimits
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|<top-level>|public class JsonWorkLimitException <: JsonException
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPatchLimits|public init(maxOperations!: Int64 = 10000, maxPointerSegments!: Int64 = 256, maxCopiedNodes!: Int64 = 100000)
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPatchLimits|public let maxCopiedNodes: Int64
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPatchLimits|public let maxOperations: Int64
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPatchLimits|public let maxPointerSegments: Int64
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPatchLimits|public static let defaults = JsonPatchLimits()
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPatchLimits|public static let unlimited = JsonPatchLimits(maxOperations: 0, maxPointerSegments: 0, maxCopiedNodes: 0)
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public init(maxVisitedNodes!: Int64 = 100000, maxFilterSteps!: Int64 = 100000, maxMatches!: Int64 = 10000, maxDepth!: Int64 = 256)
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public let maxDepth: Int64
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public let maxFilterSteps: Int64
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public let maxMatches: Int64
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public let maxVisitedNodes: Int64
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public static let defaults = JsonPathLimits()
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public static let unlimited = JsonPathLimits(maxVisitedNodes: 0, maxFilterSteps: 0, maxMatches: 0, maxDepth: 0)
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonSchemaLimits|public init(maxEvaluations!: Int64 = 100000, maxRefResolutions!: Int64 = 1000, maxErrors!: Int64 = 100, maxDepth!: Int64 = 256)
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonSchemaLimits|public let maxDepth: Int64
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonSchemaLimits|public let maxErrors: Int64
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonSchemaLimits|public let maxEvaluations: Int64
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonSchemaLimits|public let maxRefResolutions: Int64
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonSchemaLimits|public static let defaults = JsonSchemaLimits()
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonSchemaLimits|public static let unlimited = JsonSchemaLimits(maxEvaluations: 0, maxRefResolutions: 0, maxErrors: 0, maxDepth: 0)
+yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonWorkLimitException|public init(message: String)
+yjson_backends|packages/yjson_backends/src/backends.cj|<top-level>|public class YJsonAdvanced
+yjson_backends|packages/yjson_backends/src/backends.cj|<top-level>|public enum JsonStreamBufferingMode
+yjson_backends|packages/yjson_backends/src/backends.cj|<top-level>|public func readJsonWholeDocumentStream(input: InputStream, config: JsonReadConfig): Array<Byte>
+yjson_backends|packages/yjson_backends/src/backends.cj|<top-level>|public interface BackendJsonDocument <: Resource
+yjson_backends|packages/yjson_backends/src/backends.cj|<top-level>|public interface JsonDocumentBackend
+yjson_backends|packages/yjson_backends/src/backends.cj|<top-level>|public interface JsonStreamBackend
+yjson_backends|packages/yjson_backends/src/backends.cj|<top-level>|public interface JsonStreamDecodeSession <: Resource
+yjson_backends|packages/yjson_backends/src/backends.cj|<top-level>|public interface JsonStreamEncodeSession <: Resource
+yjson_backends|packages/yjson_backends/src/backends.cj|BackendJsonDocument|func backendName(): String
+yjson_backends|packages/yjson_backends/src/backends.cj|BackendJsonDocument|func close(): Unit
+yjson_backends|packages/yjson_backends/src/backends.cj|BackendJsonDocument|func getRootInt(name: String): Option<Int64>
+yjson_backends|packages/yjson_backends/src/backends.cj|BackendJsonDocument|func isClosed(): Bool
+yjson_backends|packages/yjson_backends/src/backends.cj|BackendJsonDocument|func materialize(): JsonNode
+yjson_backends|packages/yjson_backends/src/backends.cj|BackendJsonDocument|func rootSize(): Int64
+yjson_backends|packages/yjson_backends/src/backends.cj|BackendJsonDocument|func toString(): String
+yjson_backends|packages/yjson_backends/src/backends.cj|JsonDocumentBackend|func name(): String
+yjson_backends|packages/yjson_backends/src/backends.cj|JsonDocumentBackend|func parse(bytes: Array<Byte>, config: JsonReadConfig): BackendJsonDocument
+yjson_backends|packages/yjson_backends/src/backends.cj|JsonStreamBackend|func decodeBuffering(): JsonStreamBufferingMode
+yjson_backends|packages/yjson_backends/src/backends.cj|JsonStreamBackend|func encodeBuffering(): JsonStreamBufferingMode
+yjson_backends|packages/yjson_backends/src/backends.cj|JsonStreamBackend|func name(): String
+yjson_backends|packages/yjson_backends/src/backends.cj|JsonStreamBackend|func openDecoder(input: InputStream, config: JsonReadConfig): JsonStreamDecodeSession
+yjson_backends|packages/yjson_backends/src/backends.cj|JsonStreamBackend|func openEncoder(output: OutputStream, config: JsonWriteConfig): JsonStreamEncodeSession
+yjson_backends|packages/yjson_backends/src/backends.cj|JsonStreamBufferingMode|| Incremental
+yjson_backends|packages/yjson_backends/src/backends.cj|JsonStreamBufferingMode|| WholeDocument
+yjson_backends|packages/yjson_backends/src/backends.cj|JsonStreamDecodeSession|func reader(): JsonCodecReader
+yjson_backends|packages/yjson_backends/src/backends.cj|JsonStreamEncodeSession|func finish(): Unit
+yjson_backends|packages/yjson_backends/src/backends.cj|JsonStreamEncodeSession|func writer(): JsonCodecWriter
+yjson_backends|packages/yjson_backends/src/backends.cj|YJsonAdvanced|public static func decodeFromStreamWithBackend<T>(codec: JsonCodec<T>, input: InputStream, backend: JsonStreamBackend, config!: JsonReadConfig = JsonReadConfig.defaults): T
+yjson_backends|packages/yjson_backends/src/backends.cj|YJsonAdvanced|public static func encodeToStreamWithBackend<T>(codec: JsonCodec<T>, value: T, output: OutputStream, backend: JsonStreamBackend, config!: JsonWriteConfig = JsonWriteConfig.compact): Unit
+yjson_backends|packages/yjson_backends/src/backends.cj|YJsonAdvanced|public static func parseDocumentWithBackend(bytes: Array<Byte>, backend: JsonDocumentBackend, config!: JsonReadConfig = JsonReadConfig.defaults): BackendJsonDocument
+yjson_backends|packages/yjson_backends/src/backends.cj|YJsonAdvanced|public static func parseDocumentWithBackend(text: String, backend: JsonDocumentBackend, config!: JsonReadConfig = JsonReadConfig.defaults): BackendJsonDocument
 yjson_macros|packages/yjson_macros/src/json_codec.cj|<top-level>|public macro JsonCodec(input: Tokens): Tokens
 yjson_macros|packages/yjson_macros/src/json_codec.cj|<top-level>|public macro JsonStatic(input: Tokens): Tokens
 yjson_macros|packages/yjson_macros/src/json_codec.cj|<top-level>|public macro JsonSubtype(attrs: Tokens, input: Tokens): Tokens
 yjson_macros|packages/yjson_macros/src/json_codec.cj|<top-level>|public macro JsonUsing(attrs: Tokens, input: Tokens): Tokens
 yjson_macros|packages/yjson_macros/src/json_literal.cj|<top-level>|public macro Json(input: Tokens): Tokens
 yjson_macros|packages/yjson_macros/src/json_literal.cj|<top-level>|public macro JsonValue(input: Tokens): Tokens
+yjson_native_accel|packages/yjson_native_accel/src/native_accel.cj|<top-level>|public class YJsonNativeAccel
+yjson_native_accel|packages/yjson_native_accel/src/native_accel.cj|YJsonNativeAccel|public static func initialize(): Unit
 yjson_native|packages/yjson_native/src/document_backend.cj|<top-level>|public class NativeCompactJsonBackend <: JsonDocumentBackend
 yjson_native|packages/yjson_native/src/document_backend.cj|<top-level>|public let NativeCompactDocumentBackend: JsonDocumentBackend = NativeCompactJsonBackend()
 yjson_native|packages/yjson_native/src/document_backend.cj|NativeCompactJsonBackend|public func name(): String

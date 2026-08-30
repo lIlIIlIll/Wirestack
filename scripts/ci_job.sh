@@ -143,6 +143,10 @@ case "$job" in
     api-inventory)
         python3 "$repo/scripts/check_api_inventory.py"
         ;;
+    cjdoc-qualification)
+        python3 "$repo/scripts/test_check_cjdoc_qualification.py"
+        python3 "$repo/scripts/check_cjdoc_qualification.py"
+        ;;
     runtime-freeze)
         require_cangjie
         run_with_dependency_override "$repo/packages/runtime_freeze_contract" \
@@ -257,7 +261,7 @@ case "$job" in
         "$repo/scripts/release_yyjson_colink_check.sh"
         ;;
     *)
-        echo 'usage: scripts/ci_job.sh {stream-docs|perf-evidence-drift [strict|integrity-only]|api-inventory|runtime-freeze|core|standards-conformance|schema-formats-conformance|performance-comparison|examples|macro-consumer|algorithms-consumer|registry-rehearsal|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
+        echo 'usage: scripts/ci_job.sh {stream-docs|perf-evidence-drift [strict|integrity-only]|api-inventory|cjdoc-qualification|runtime-freeze|core|standards-conformance|schema-formats-conformance|performance-comparison|examples|macro-consumer|algorithms-consumer|registry-rehearsal|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
         exit 2
         ;;
 esac

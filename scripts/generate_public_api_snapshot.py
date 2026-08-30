@@ -14,16 +14,14 @@ import pathlib
 import re
 import sys
 
+from release_graph import load_release_graph
+
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SNAPSHOT = ROOT / "release" / "public-api-snapshot.txt"
 PACKAGE_ROOTS = {
-    "yjson": ROOT / "src",
-    "yjson_macros": ROOT / "packages/yjson_macros/src",
-    "yjson_native": ROOT / "packages/yjson_native/src",
-    "yjson_yyjson": ROOT / "packages/yjson_yyjson/src",
-    "yjson_schema_formats": ROOT / "packages/yjson_schema_formats/src",
-    "yjson_all": ROOT / "packages/yjson_all/src",
+    package.name: ROOT / package.source_root
+    for package in load_release_graph().packages
 }
 TYPE_RE = re.compile(
     r"^(?:(public|private|protected|internal)\s+)?"
