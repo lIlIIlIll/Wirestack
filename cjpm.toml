@@ -33,6 +33,7 @@
   link-option = "-L ./target/native/resolver/current/lib -lwirestack_resolver -L ./target/native/test-support/m2-006/lib -lwirestack_m2_006_tls_link_stub"
 
 [target.arm64-apple-ios11-simulator]
+  override-compile-option = "--sysroot ${WIRESTACK_IOS_SIMULATOR_SYSROOT}"
   link-option = "-L ./target/native/resolver/current/lib -lwirestack_resolver -L ./target/native/test-support/m2-006/lib -lwirestack_m2_006_tls_link_stub"
 
 [dependencies]
