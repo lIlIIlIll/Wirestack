@@ -6,14 +6,14 @@ Platform: Linux x86_64 glibc 2.44
 
 Local validation toolchain: Cangjie `1.1.0-alpha.20260817040003`, CJPM `1.1.3`
 
-Hosted release toolchain pin: Cangjie `1.3.0-alpha.20260830010011`
+Hosted signing mode: frozen artifact; no compiler or artifact rebuild
 
 ## Local results
 
 | Command | Result |
 |---|---|
 | `python3 tools/repository/repository_tooling.py --root . validate-tasks --json` | PASS; M7-030 task contract accepted. |
-| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-030/test-plan.md --json` | PASS; 22 paths, 19 scenarios and 15 planned tests. |
+| `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M7-030/test-plan.md --json` | PASS; 23 paths, 20 scenarios and 16 planned tests. |
 | `python3 -m unittest tools.tests.test_m7_030_linux_release -v` | PASS; 12/12 tests. |
 | `scripts/generate-m7-025-linux-supply-chain --validate-only` | PASS; artifact `c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee`, build fingerprint `67dcd09f0ab99a33cfb204fb5f2a133a911f8f706ccf85a7a3312b980ddac9d9`. |
 | `scripts/release-m7-030-linux validate-workflow --output docs/evidence/M7-030/workflow-contract.json` | PASS; three attestation subjects and six immutable action references. |
@@ -33,9 +33,15 @@ GitHub-hosted run `33315568568` on merge commit
 `f9753199daf1d6869e46971785eb8d80d1fbad3d` failed in the toolchain install
 step with `Nightly version not available: 1.1.0-alpha.20260817040003`. Every
 build, signing, verification, report and upload step was skipped, so the run is
-recorded as FAIL and supplied no production evidence. The corrected workflow
-freezes `1.3.0-alpha.20260830010011`, which the repository's existing hosted
-nightly resolver and Clean Build path had already resolved and installed.
+recorded as FAIL and supplied no production evidence.
+
+Run `33316074236` on merge commit
+`4bd302dd50e310474c66bf3d412f47044e6fd5c5` installed Cangjie
+`1.3.0-alpha.20260830010011` and passed release qualification, then failed
+M7-025 validation because the hosted rebuild overwrote the frozen artifact with
+different bytes. Every attestation, verification, report and upload step was
+again skipped. The final workflow removes compiler installation and artifact
+rebuilding; it validates and attests the exact M7-021/M7-025 bytes instead.
 
 ## Task-level result
 
@@ -51,9 +57,8 @@ before the hosted attestation and all task commands pass.
 
 ## Gates not run
 
-- A successful GitHub-hosted OIDC/Sigstore workflow has not yet run. The first
-  hosted run failed closed at the unavailable toolchain pin and produced no
-  attestations.
+- A successful GitHub-hosted OIDC/Sigstore workflow has not yet run. The two
+  hosted failure-injection runs produced no attestations.
 - The one-hour SSE profile was not run.
 - A second 86,400-second soak was not run; M7-022 already owns and completed the
   final artifact soak.

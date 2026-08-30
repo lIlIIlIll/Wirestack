@@ -262,16 +262,19 @@ class M7030LinuxReleaseTest(unittest.TestCase):
     def test_workflow_is_pinned_and_missing_or_wrong_hosted_report_never_passes(self) -> None:
         workflow = release.inspect_workflow()
         self.assertEqual("PASS", workflow["decision"])
-        self.assertEqual(release.HOSTED_CANGJIE_VERSION, workflow["toolchainVersion"])
+        self.assertEqual("frozen", workflow["artifactMode"])
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "workflow.yml"
             text = (release.ROOT / release.WORKFLOW).read_text(encoding="utf-8")
+            path.write_text(text + "\n      - uses: Zxilly/setup-cangjie@" + "a" * 40 + "\n",
+                            encoding="utf-8")
+            with self.assertRaisesRegex(release.ReleaseError, "WORKFLOW_ARTIFACT_REBUILD"):
+                release.inspect_workflow(path)
             path.write_text(
-                text.replace(release.HOSTED_CANGJIE_VERSION,
-                             "1.1.0-alpha.20260817040003"),
+                text + "\n      - run: scripts/qualify-m7-021-linux-release\n",
                 encoding="utf-8",
             )
-            with self.assertRaisesRegex(release.ReleaseError, "WORKFLOW_TOOLCHAIN"):
+            with self.assertRaisesRegex(release.ReleaseError, "WORKFLOW_ARTIFACT_REBUILD"):
                 release.inspect_workflow(path)
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "missing.json"
