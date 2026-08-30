@@ -49,6 +49,7 @@ synthetic provider fixture is a released AWS-LC update.
 | P023 | Signing workflow rebuilds and overwrites the frozen M7-021 artifact | Frozen subject binding | Hosted failure | M7-025 digest validation fails; remove the rebuild and attest only the exact reviewed artifact |
 | P024 | Frozen artifact is absent from source checkout and must cross the hosted-runner boundary | Frozen asset retrieval | Reachable/hosted error | Download one exact draft Release asset by fixed tag, verify its fixed SHA-256, then validate the M7-025 bundle; missing, mismatched, latest or fallback selection fails closed |
 | P025 | Read-only GitHub Actions token cannot see the unpublished draft Release | Hosted token boundary | Hosted error | A separate staging job gets only `contents: write`, downloads and checks the draft asset, then passes it to an attestation job that has no contents write permission; OIDC and draft-write permission never coexist in one job |
+| P026 | `gh attestation verify` receives a relative signer workflow path | Hosted identity verification | Reachable/hosted error | FAIL; signer identity must be the exact `owner/repository/.github/workflows/file.yml` value for all three subjects |
 
 ## Input and state domains
 
@@ -64,6 +65,7 @@ synthetic provider fixture is a released AWS-LC update.
 | Execution mode | local rehearsal; external-key offline release; GitHub OIDC attestation | Rehearsal is never promoted to production PASS. |
 | Hosted artifact source | exact staging tag and digest; missing asset; wrong tag; wrong digest; latest or fallback lookup | Only the exact tag, asset name and SHA-256 may supply the frozen artifact. |
 | Hosted token | staging contents write without OIDC; attestation contents read with OIDC; combined contents write and OIDC | Only the two isolated permission sets pass. The combined token is forbidden. |
+| Signer workflow identity | exact owner/repository/path; relative path; another repository; another workflow | Only the exact full workflow identity passes. |
 
 ## State and side effects
 
@@ -106,6 +108,7 @@ synthetic provider fixture is a released AWS-LC update.
 | S020 | Hosted workflow rebuilds the artifact with another toolchain or host | Frozen M7-021 artifact checked out | P023 | FAIL at M7-025 digest validation | Rebuilt bytes cannot inherit soak, SBOM or review evidence; final workflow validates and attests the checked-in frozen bytes | CI,supply-chain,regression | P0 |
 | S021 | Source checkout lacks the ignored artifact, or hosted retrieval selects missing, latest, fallback or digest-mismatched bytes | Frozen artifact exists only in the draft Release | P024 | FAIL closed before supply-chain validation or attestations | Workflow downloads once by exact tag and name, checks the fixed SHA-256, then validates M7-025; no other asset is accepted | CI,supply-chain,negative | P0 |
 | S022 | Read-only job queries the draft tag, or one job holds both contents write and OIDC | Unpublished draft Release | P025 | FAIL closed or static rejection | Staging and attestation permissions stay in separate jobs; both sides verify the fixed artifact digest | CI,permissions,security | P0 |
+| S023 | Attestations exist but verification uses `.github/workflows/linux-release-attestation.yml` without repository identity | Three signed subjects | P026 | FAIL closed | All verification commands use `lIlIIlIll/Wirestack/.github/workflows/linux-release-attestation.yml`; relative or foreign identity is rejected | CI,identity,regression | P0 |
 
 ## Test-plan matrix
 
@@ -129,6 +132,7 @@ synthetic provider fixture is a released AWS-LC update.
 | T016 | S015,S020 | P018,P023 | Hosted workflow with release rebuild command injected | FAIL | Static contract rejects artifact regeneration and requires supply-chain validation before attestation | CI,supply-chain,regression |
 | T017 | S015,S021 | P018,P024 | Wrong tag, digest, latest selector and download/validation order injected into hosted workflow | FAIL | Static contract binds one exact draft asset retrieval and requires digest check before supply-chain validation | CI,supply-chain,fault-injection |
 | T018 | S015,S022 | P018,P025 | Inject OIDC into staging job or contents write into attestation job | FAIL | Static contract requires two jobs, isolated permissions and SHA-256 checks before and after bounded transfer | CI,permissions,fault-injection |
+| T019 | S016,S023 | P019,P026 | Replace full signer workflow identity with a relative path | FAIL | Static contract requires the exact repository-qualified identity three times; published artifact bundle verifies with that identity | CI,identity,fault-injection |
 
 ## Coverage and gap review
 

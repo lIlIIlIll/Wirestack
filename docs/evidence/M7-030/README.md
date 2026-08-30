@@ -38,6 +38,12 @@ the draft tag. The final workflow isolates that privilege: a staging job has
 OIDC and `contents: read` but no contents write. Both jobs verify the same fixed
 artifact digest around a one-day GitHub Actions artifact transfer.
 
+Run `33317831996` then downloaded and transferred the frozen bytes, validated
+M7-025, and created all three attestations. Its first verification failed
+because `--signer-workflow` used a relative path. Offline verification of the
+published artifact bundle passed after binding the full identity
+`lIlIIlIll/Wirestack/.github/workflows/linux-release-attestation.yml`.
+
 ## Bound inputs
 
 - artifact:
@@ -51,7 +57,7 @@ artifact digest around a one-day GitHub Actions artifact transfer.
 
 ## Evidence
 
-- [`test-plan.md`](test-plan.md) defines 25 paths, 22 scenarios and 18 tests.
+- [`test-plan.md`](test-plan.md) defines 26 paths, 23 scenarios and 19 tests.
 - `draft-release.json` binds the unpublished staging release and frozen asset.
 - `local-rehearsal.json` records local signing, clean-consumer, update and
   rollback results without private key material.
