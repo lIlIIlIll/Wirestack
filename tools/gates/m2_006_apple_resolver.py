@@ -343,6 +343,16 @@ def run_ios_test(root: Path, env: dict[str, str]) -> tuple[dict[str, Any], dict[
     )
     require_success(compile_test, "iOS Simulator Cangjie test compilation")
     runner, package = find_ios_test_binaries(target_dir)
+    runner_compile = run_command(
+        [
+            "cjc", str(runner.parent / "testrunner.cj"), "-o", str(runner),
+            f"--target={IOS_TARGET}", "--sysroot", env["WIRESTACK_IOS_SIMULATOR_SYSROOT"],
+        ],
+        cwd=root,
+        env=env,
+        timeout=120,
+    )
+    require_success(runner_compile, "iOS Simulator unittest runner compilation")
     device, runtime = select_ios_device(root, env)
     booted = run_command(["xcrun", "simctl", "boot", device], cwd=root, env=env, timeout=60)
     if booted["exit_code"] != 0 and "current state: Booted" not in booted["output"]:
@@ -372,6 +382,7 @@ def run_ios_test(root: Path, env: dict[str, str]) -> tuple[dict[str, Any], dict[
         run_command(["xcrun", "simctl", "shutdown", device], cwd=root, env=env, timeout=60)
     return process, {
         "compile": compile_test,
+        "runner_compile": runner_compile,
         "device_udid": device,
         "runtime": runtime,
         "runner_sha256": sha256_path(runner),
@@ -430,6 +441,10 @@ def run_gate(root: Path, output: Path, revision: str, mode: str) -> dict[str, An
     env = dict(os.environ)
     env["WIRESTACK_RESOLVER_TEST_FIXTURE"] = "1"
     env["WIRESTACK_RESOLVER_PLATFORM"] = MODES[mode]
+    if mode == "ios-simulator":
+        env["WIRESTACK_IOS_SIMULATOR_SYSROOT"] = xcrun(
+            root, env, "iphonesimulator", "--show-sdk-path"
+        )
     build = run_command(
         [
             "python3", str(root / "tools/build_resolver.py"), "--root", str(root),
