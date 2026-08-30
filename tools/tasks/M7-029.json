@@ -144,6 +144,7 @@
     "docs/evidence/M7-029/second-isolated-review/review-summary.md",
     "docs/evidence/M7-029/final-isolated-review/review-summary.md",
     "docs/evidence/M7-029/m3-030-pinned-sdk-final-review/review-summary.md",
+    "docs/evidence/M7-029/detached-final-review/review-summary.md",
     "docs/evidence/M7-029/final-review-regressions/cjpm-check-missing-resolver.log",
     "docs/evidence/M7-029/final-review-regressions/focused-python-security-contracts.log",
     "docs/evidence/M7-029/final-review-regressions/http-facade.log",
