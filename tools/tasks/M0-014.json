@@ -21,6 +21,7 @@
     "docs/planning/status.md",
     "scripts/gate-m0-014-windows-copy-profile",
     "tools/gates/m0_014_windows_copy_profile.py",
+    "tools/gates/native/m0_014_copy_counter.c",
     "tools/gates/tests/test_m0_014_windows_copy_profile.py",
     "tools/tasks/M0-014.json"
   ],
@@ -38,6 +39,7 @@
     "docs/evidence/M0-014/test-plan.md",
     "scripts/gate-m0-014-windows-copy-profile",
     "tools/gates/m0_014_windows_copy_profile.py",
+    "tools/gates/native/m0_014_copy_counter.c",
     "tools/gates/tests/test_m0_014_windows_copy_profile.py",
     "tools/tasks/M0-014.json"
   ],
