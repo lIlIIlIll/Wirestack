@@ -32,6 +32,8 @@ __pycache__/
 !docs/evidence/M0-011/linux_x86_64/*.json
 !docs/evidence/M6-023/linux_x86_64/*.json
 !docs/evidence/M2-003/linux_x86_64/*.json
+!docs/evidence/M2-004/*.json
+!docs/evidence/M2-004/windows-x86_64/*.json
 !docs/evidence/M2-006/*.json
 !docs/evidence/M2-006/macos-arm64/*.json
 !docs/evidence/M2-006/ios-simulator-arm64/*.json

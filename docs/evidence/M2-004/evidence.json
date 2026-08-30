@@ -1,0 +1,49 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-08-30T21:23:24.265547Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M2-004/windows-x86_64/validation.json",
+      "sha256": "db95213fe40c36bf7b9c4ea603d6092cf1f4f8de97fa8fce077b258eb30da6cb",
+      "source_task": "M2-004"
+    }
+  ],
+  "revision": "bb135c6406a2858c5cd9973a72a5368de2767117",
+  "schema_version": 1,
+  "source_sha256": {
+    ".github/workflows/m2-004-windows-system-resolver.yml": "af9425e4aa0f5ddb35fc6e8c42365fed80c35d4041dad2e68a6b127ca4f38c7f",
+    ".gitignore": "7e2f2ae74ced04c7f735dc8b027f1d0096c8d9a91b1d0b64e79eec7ea15acb02",
+    "build.cj": "4e93df00760389beb0c9b4f5446326db17c55fbb7ada41d21e105b8444d45634",
+    "cjpm.toml": "23eed9e28617945a7e2689a437b9939b88c6461c2ce7418628f2a0b8e0cfd1f9",
+    "docs/evidence/M2-004/test-plan.md": "4dcb7b274b1332197fd4bbab3546ee9323a94a3d7f5bb6edb5ccf5e8ca9ff0bc",
+    "native/resolver/windows/wirestack_resolver.c": "3aca817ba728f0c0e5006b602a7b27c6f6b887adeebd413685a74b60cbf01cec",
+    "native/resolver/windows/wirestack_resolver.h": "3e3e11c847283c846b96630fc97b4640844d56a765c51056551142d9f088873d",
+    "scripts/build-resolver": "e58e18c61f4d78bcdc56e0ed9f40759dbaf5b661958963192e188728d3e7f968",
+    "src/http/resolver.cj": "84192fdc26d9e064ca8d5c8d2441832d1d88d52b4b514a5d685d0e725e39ae9f",
+    "src/internal/resolver/bounded_backend.cj": "e067f3793e5b81bfeb2ba1533e9b62dc14d91e5250a8acbb12256bb85a902755",
+    "src/internal/resolver/bounded_backend_test.cj": "1740d853befd9fa967cea86fd6b6cd25ba654fdb49b6517f57f52f595138c71b",
+    "src/internal/resolver/system_resolver.cj": "992c327434891de1ad56a9c2b77011ad3984dadd2d86acb42428d7319f94e69d",
+    "src/internal/resolver/windows_system_resolver_test.cj": "2038fb81e39c3335bd9a625d29c821a2bf26a98fbac4510ea0a6365edac93b55",
+    "tools/build_native_dependencies.py": "4a0a4560c0da98de7aac86700759f509217d35ecc84cb57518b6459ff09a159e",
+    "tools/build_resolver.py": "2ca5f6b82335ac7d1a1494815cb8b980314d0c3d9480167ad7b3010b1c05e351",
+    "tools/build_windows_resolver.py": "ca130c9f6306980b3c9d97ee8f13028a80825b2395b5f4db3a3b9bfaa232bde6",
+    "tools/gates/m2_004_windows_resolver.py": "0acfc8df23cc90fa3acdb676840f882ca31985703431a5086f9da3eb5717685c",
+    "tools/gates/native/m2_004_tls_link_stub.c": "ddd4eb317c861351e91b085310bbe6702962e966bd227b4520b23facceb278c3",
+    "tools/gates/tests/test_m2_004_windows_resolver.py": "bf4c032df95e36b885a37c8a372f4f62df68db67fde1721a087caf175206e3ab",
+    "tools/tasks/M2-004.json": "c905da300b3f93e7a70089eae69f7d5995fd6667310f9efc3784d04187fc8e5e",
+    "tools/tests/test_build_resolver.py": "12622c1600857d1f03b847c63123f1364f042860912eed3e245ae6c7494c9c3e",
+    "tools/tests/test_m7_029_independent_security_review.py": "0e05471bc7603e0c2c666a869dc1f808799d64c761de8a577ac1455602d5f5c5"
+  },
+  "source_task": "M2-004",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}

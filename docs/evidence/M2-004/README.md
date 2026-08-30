@@ -10,9 +10,9 @@ resolution off Cangjie scheduler carriers.
 
 ## Native Windows acceptance
 
-- GitHub Actions run: `33330412542`
+- GitHub Actions run: `33336104695`
 - workflow: `M2-004 Windows SystemResolver`
-- tested revision: `bc75e64aab2ae830a8e45a422616f0c935900dbe`
+- tested revision: `a46a6e9e78701a74d01f988e34ba5a2b5896f1fe`
 - runner: `windows-2025` / `win25-vs2026` image
 - Cangjie: `1.3.0-alpha.20260831010012`, target
   `x86_64-w64-mingw32`
@@ -21,10 +21,10 @@ resolution off Cangjie scheduler carriers.
 
 The retained machine reports are:
 
-- [`windows_x86_64/report.json`](windows-x86_64/report.json)
-- [`windows_x86_64/validation.json`](windows-x86_64/validation.json)
+- [`windows-x86_64/report.json`](windows-x86_64/report.json)
+- [`windows-x86_64/validation.json`](windows-x86_64/validation.json)
 
-The 17 skipped cases in the raw unittest package summary are test cases outside
+The 24 skipped cases in the raw unittest package summary are test cases outside
 the selected `M2004WindowsSystemResolverTest` class. All six selected cases are
 listed as `[ PASSED ] CASE`; the gate requires exactly six and rejects selected
 SKIPPED, timeout, nonzero exit, stale SHA, wrong platform, unknown schema, or a
@@ -34,7 +34,7 @@ missing test fixture binding.
 
 | Requirement | Evidence | Result |
 |---|---|---|
-| Native Windows integration | GitHub `windows-2025` run `33330412542` | PASS |
+| Native Windows integration | GitHub `windows-2025` run `33336104695` | PASS |
 | All bounded candidates and family filtering | `fixtureReturnsAllCandidatesWithoutInventingTtl`, `fixtureAppliesFamilyAndResultBounds` | PASS |
 | No invented TTL | `ResolveResult.expiration.isNone()` on system and fixture paths | PASS |
 | Stable Winsock error mapping | six injected error paths including unknown native code | PASS |
