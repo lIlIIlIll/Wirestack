@@ -27,6 +27,8 @@ SIGNER_IDENTITY = "wirestack-release"
 REPOSITORY = "lIlIIlIll/Wirestack"
 WORKFLOW = ".github/workflows/linux-release-attestation.yml"
 ARTIFACT = ROOT / "dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
+FROZEN_ARTIFACT_TAG = "m7-030-frozen-artifact-c0988f62"
+FROZEN_ARTIFACT_SHA256 = "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee"
 SUPPLY_CHAIN = ROOT / "docs/evidence/M7-025/linux_x86_64"
 SBOM = SUPPLY_CHAIN / "sbom.spdx.json"
 PROVIDER_MANIFEST = SUPPLY_CHAIN / "provider-manifest.json"
@@ -650,18 +652,34 @@ def inspect_workflow(path: Path = ROOT / WORKFLOW) -> dict[str, Any]:
     require("setup-cangjie@" not in text and
             "scripts/qualify-m7-021-linux-release" not in text,
             "WORKFLOW_ARTIFACT_REBUILD", "hosted signing must consume frozen artifact")
+    require(f"FROZEN_ARTIFACT_TAG: {FROZEN_ARTIFACT_TAG}" in text,
+            "WORKFLOW_ARTIFACT_SOURCE", "exact draft release tag required")
+    require(f"FROZEN_ARTIFACT_SHA256: {FROZEN_ARTIFACT_SHA256}" in text,
+            "WORKFLOW_ARTIFACT_DIGEST", "exact frozen artifact digest required")
+    download = f'gh release download "$FROZEN_ARTIFACT_TAG"'
+    require(text.count(download) == 1 and
+            f"--repo {REPOSITORY}" in text and
+            "--pattern wirestack-0.1.0-linux-x86_64-glibc.tar.gz" in text and
+            "--dir dist/m7-021" in text,
+            "WORKFLOW_ARTIFACT_SOURCE", "single exact release asset download required")
+    require("sha256sum --check --strict" in text,
+            "WORKFLOW_ARTIFACT_DIGEST", "downloaded bytes must be checked")
+    require("--latest" not in text and "releases/latest" not in text,
+            "WORKFLOW_ARTIFACT_FALLBACK", "latest or fallback lookup forbidden")
     require("scripts/generate-m7-025-linux-supply-chain --validate-only" in text,
             "WORKFLOW_SUPPLY_CHAIN", "frozen bundle validation")
-    require(text.index("scripts/generate-m7-025-linux-supply-chain --validate-only") <
+    require(text.index(download) <
+            text.index("scripts/generate-m7-025-linux-supply-chain --validate-only") <
             text.index("id: attest-artifact"),
-            "WORKFLOW_SUPPLY_CHAIN", "validate frozen inputs before attestation")
+            "WORKFLOW_SUPPLY_CHAIN", "download, validate, then attest")
     for subject in ("artifact", "sbom", "release-manifest"):
         require(f"id: attest-{subject}" in text, "WORKFLOW_ATTEST", subject)
         require(f"id: verify-{subject}" in text, "WORKFLOW_VERIFY", subject)
         require(text.count(f"steps.attest-{subject}.outputs.bundle-path") == 3,
                 "WORKFLOW_BUNDLE", subject)
     require(text.count("--deny-self-hosted-runners") == 3, "WORKFLOW_VERIFY", "runner policy")
-    require(text.count(f"--repo {REPOSITORY}") == 3, "WORKFLOW_VERIFY", "repository identity")
+    require(text.count(f"--repo {REPOSITORY}") == 4,
+            "WORKFLOW_VERIFY", "one download and three verifications")
     require(text.count(f"--signer-workflow {WORKFLOW}") == 3,
             "WORKFLOW_VERIFY", "workflow identity")
     require(text.count("--predicate-type https://spdx.dev/Document/v2.3") == 1,
@@ -671,6 +689,10 @@ def inspect_workflow(path: Path = ROOT / WORKFLOW) -> dict[str, Any]:
         "uses": uses,
         "attestationSubjects": 3,
         "artifactMode": "frozen",
+        "artifactSource": {
+            "tag": FROZEN_ARTIFACT_TAG,
+            "sha256": FROZEN_ARTIFACT_SHA256,
+        },
     }
 
 

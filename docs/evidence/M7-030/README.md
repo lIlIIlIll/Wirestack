@@ -21,7 +21,16 @@ signs those exact reviewed bytes. Hosted run `33315568568` proved that a
 compiler dependency can block signing before any attestation. Run
 `33316074236` proved that rebuilding with another hosted toolchain produces an
 artifact outside the frozen M7-025 digest. Both runs failed closed and produced
-no attestation evidence.
+no attestation evidence. Run `33316521268` then proved that a clean source
+checkout does not contain the intentionally ignored artifact, so validation
+failed before attestation.
+
+The frozen bytes now live in an unpublished, prerelease draft GitHub Release
+under the exact staging tag `m7-030-frozen-artifact-c0988f62`. The workflow
+downloads that one asset, checks SHA-256
+`c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee`,
+and only then validates the M7-025 supply-chain bundle. The tag is a transport
+locator for hosted attestation, not a public or stable release.
 
 ## Bound inputs
 
@@ -36,7 +45,8 @@ no attestation evidence.
 
 ## Evidence
 
-- [`test-plan.md`](test-plan.md) defines 23 paths, 20 scenarios and 16 tests.
+- [`test-plan.md`](test-plan.md) defines 24 paths, 21 scenarios and 17 tests.
+- `draft-release.json` binds the unpublished staging release and frozen asset.
 - `local-rehearsal.json` records local signing, clean-consumer, update and
   rollback results without private key material.
 - `workflow-contract.json` records the pinned hosted workflow contract.
