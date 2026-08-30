@@ -1,0 +1,70 @@
+{
+  "build": {
+    "binary_bytes": 757248,
+    "binary_sha256": "951e57fb4a9099e91ba0bd2f9a74cd9cdedf6008fc35c82b6adc6b686b24a447",
+    "runtime_loader_library_strings": [],
+    "static_archives": [
+      {
+        "bytes": 1208884,
+        "name": "mbedtls.lib",
+        "sha256": "571112ceaf5635e30861bb1393d7ac571de19863ae91324d597277de6dadbe86"
+      },
+      {
+        "bytes": 391948,
+        "name": "mbedx509.lib",
+        "sha256": "5a5fe3889686232d8d41ef955314d8303477aa2a8c6f7efa8e9e824a91b29078"
+      },
+      {
+        "bytes": 1687036,
+        "name": "tfpsacrypto.lib",
+        "sha256": "b43da931749c348cf867dc565466c6f7766b0aac3d67f143df56b8ab4260a246"
+      }
+    ],
+    "system_tls_dependencies": []
+  },
+  "build_log_sha256": "506e5bb29fee3a3ee8fc0e8c88b89bd3eba00a2adaa4e9062d1d5b1bd92a552e",
+  "capabilities": {
+    "caller_cancellation": "PASS",
+    "close_notify": "PASS",
+    "custom_ca": "PASS",
+    "external_signer": "BLOCKED",
+    "mtls": "PASS",
+    "negative_hostname": "PASS",
+    "negative_untrusted_ca": "PASS",
+    "partial_io_backpressure": "PASS",
+    "repeated_cleanup": "PASS",
+    "session_resumption": "BLOCKED",
+    "sni_hostname_alpn": "PASS",
+    "tls12": "PASS",
+    "tls13": "PASS",
+    "truncation": "PASS"
+  },
+  "execution": {
+    "image_os": "win25-vs2026",
+    "image_version": "20260824.214.3",
+    "python": "3.12.10",
+    "repository_revision": "7eccd9042b38000601fd2263bfb0fe8f148333aa",
+    "runner_arch": "X64",
+    "runner_os": "Windows"
+  },
+  "finished_at": "2026-08-30T18:18:36.146467+00:00",
+  "metrics": {
+    "repeated_cleanup_cycles": 10000
+  },
+  "notes": [
+    "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
+  ],
+  "platform": "windows-x86_64",
+  "poc_exit_code": 0,
+  "provider": "mbedtls",
+  "schema_version": 2,
+  "source": {
+    "archive": "mbedtls-4.2.0.tar.bz2",
+    "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
+    "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
+    "kind": "archive"
+  },
+  "started_at": "2026-08-30T18:15:37.402311+00:00",
+  "status": "PARTIAL",
+  "task_id": "M0-016"
+}
