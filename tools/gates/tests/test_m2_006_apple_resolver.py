@@ -35,7 +35,8 @@ def valid_report(mode: str = "macos") -> dict[str, object]:
             "device_udid": "00000000-0000-0000-0000-000000000000",
             "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-2",
             "probe_sha256": "a" * 64,
-            "installed_probe_sha256": "a" * 64,
+            "bundle_probe_sha256": "b" * 64,
+            "installed_probe_sha256": "b" * 64,
         } if mode == "ios-simulator" else None,
     }
 
@@ -78,7 +79,8 @@ class M2006AppleResolverGateTests(unittest.TestCase):
             "device_udid": "",
             "runtime": "macOS",
             "probe_sha256": "a" * 64,
-            "installed_probe_sha256": "b" * 64,
+            "bundle_probe_sha256": "b" * 64,
+            "installed_probe_sha256": "c" * 64,
         }
         failures = gate.validate_report(report, "abc", "ios-simulator")
         self.assertIn("REPORT:SIMULATOR_DEVICE", failures)
@@ -90,6 +92,8 @@ class M2006AppleResolverGateTests(unittest.TestCase):
         self.assertEqual("launch", command[2])
         self.assertNotIn("spawn", command)
         self.assertIn("--console", command)
+        source = Path(gate.__file__).read_text(encoding="utf-8")
+        self.assertIn('"--static"', source)
         self.assertEqual(
             ["-mios-simulator-version-min=17.5"],
             gate.deployment_flags("ios-simulator-arm64"),
