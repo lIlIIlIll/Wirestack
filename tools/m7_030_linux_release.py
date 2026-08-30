@@ -639,9 +639,23 @@ def run_update_rehearsal(private: Path, public: bytes, output: Path) -> dict[str
 
 def inspect_workflow(path: Path = ROOT / WORKFLOW) -> dict[str, Any]:
     text = path.read_text(encoding="utf-8")
-    require("runs-on: ubuntu-latest" in text, "WORKFLOW_RUNNER", "GitHub-hosted Linux required")
+    require(text.count("runs-on: ubuntu-latest") == 2,
+            "WORKFLOW_RUNNER", "two GitHub-hosted Linux jobs required")
+    require("permissions: {}" in text, "WORKFLOW_PERMISSION", "default token permissions disabled")
+    stage_start = text.index("  stage-frozen-artifact:")
+    attest_start = text.index("  attest-linux-release:")
+    require(stage_start < attest_start, "WORKFLOW_STAGE_PERMISSION", "stage job order")
+    stage_text = text[stage_start:attest_start]
+    attest_text = text[attest_start:]
+    require("permissions:\n      contents: write" in stage_text and
+            "id-token: write" not in stage_text and
+            "attestations: write" not in stage_text,
+            "WORKFLOW_STAGE_PERMISSION", "isolated draft-reader token required")
     for permission in ("contents: read", "id-token: write", "attestations: write"):
-        require(permission in text, "WORKFLOW_PERMISSION", permission)
+        require(permission in attest_text, "WORKFLOW_ATTEST_PERMISSION", permission)
+    require("contents: write" not in attest_text and
+            "needs: stage-frozen-artifact" in attest_text,
+            "WORKFLOW_ATTEST_PERMISSION", "attestation job must be read-only for contents")
     uses = re.findall(r"^\s*uses:\s*([^\s#]+)", text, re.MULTILINE)
     require(bool(uses), "WORKFLOW_ACTION", "none")
     for action in uses:
@@ -649,6 +663,9 @@ def inspect_workflow(path: Path = ROOT / WORKFLOW) -> dict[str, Any]:
                 "WORKFLOW_ACTION_PIN", action)
     require(uses.count("actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d") == 3,
             "WORKFLOW_ATTEST", "three immutable attest calls required")
+    require(uses.count("actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02") == 2 and
+            uses.count("actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093") == 1,
+            "WORKFLOW_TRANSFER", "one bounded cross-job artifact transfer required")
     require("setup-cangjie@" not in text and
             "scripts/qualify-m7-021-linux-release" not in text,
             "WORKFLOW_ARTIFACT_REBUILD", "hosted signing must consume frozen artifact")
@@ -662,8 +679,8 @@ def inspect_workflow(path: Path = ROOT / WORKFLOW) -> dict[str, Any]:
             "--pattern wirestack-0.1.0-linux-x86_64-glibc.tar.gz" in text and
             "--dir dist/m7-021" in text,
             "WORKFLOW_ARTIFACT_SOURCE", "single exact release asset download required")
-    require("sha256sum --check --strict" in text,
-            "WORKFLOW_ARTIFACT_DIGEST", "downloaded bytes must be checked")
+    require(text.count("sha256sum --check --strict") == 2,
+            "WORKFLOW_ARTIFACT_DIGEST", "download and job transfer bytes must be checked")
     require("--latest" not in text and "releases/latest" not in text,
             "WORKFLOW_ARTIFACT_FALLBACK", "latest or fallback lookup forbidden")
     require("scripts/generate-m7-025-linux-supply-chain --validate-only" in text,
@@ -692,6 +709,11 @@ def inspect_workflow(path: Path = ROOT / WORKFLOW) -> dict[str, Any]:
         "artifactSource": {
             "tag": FROZEN_ARTIFACT_TAG,
             "sha256": FROZEN_ARTIFACT_SHA256,
+        },
+        "artifactStaging": {
+            "contentsPermission": "write",
+            "idTokenPermission": "none",
+            "attestationContentsPermission": "read",
         },
     }
 

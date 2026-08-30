@@ -32,6 +32,12 @@ downloads that one asset, checks SHA-256
 and only then validates the M7-025 supply-chain bundle. The tag is a transport
 locator for hosted attestation, not a public or stable release.
 
+Run `33317478966` showed that a `contents: read` Actions token cannot resolve
+the draft tag. The final workflow isolates that privilege: a staging job has
+`contents: write` but no OIDC or attestation permission; the signing job has
+OIDC and `contents: read` but no contents write. Both jobs verify the same fixed
+artifact digest around a one-day GitHub Actions artifact transfer.
+
 ## Bound inputs
 
 - artifact:
@@ -45,7 +51,7 @@ locator for hosted attestation, not a public or stable release.
 
 ## Evidence
 
-- [`test-plan.md`](test-plan.md) defines 24 paths, 21 scenarios and 17 tests.
+- [`test-plan.md`](test-plan.md) defines 25 paths, 22 scenarios and 18 tests.
 - `draft-release.json` binds the unpublished staging release and frozen asset.
 - `local-rehearsal.json` records local signing, clean-consumer, update and
   rollback results without private key material.
