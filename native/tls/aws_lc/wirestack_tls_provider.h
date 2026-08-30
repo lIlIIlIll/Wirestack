@@ -71,6 +71,7 @@ enum wirestack_tls_provider_capability {
     WIRESTACK_TLS_CAP_SECURE_RANDOM = UINT64_C(1) << 8
 };
 
+uint32_t wirestack_tls_provider_abi_version(void);
 int32_t wirestack_tls_provider_create(uint64_t *out_handle);
 void wirestack_tls_provider_destroy(uint64_t handle);
 const char *wirestack_tls_provider_id(uint64_t handle);

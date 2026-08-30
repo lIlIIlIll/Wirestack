@@ -40,6 +40,8 @@ __pycache__/
 !docs/evidence/M7-026/linux_x86_64/*.json
 !docs/api/baselines/*.json
 !native/tls/aws_lc/provider.json
+!tools/tls_provider/*.json
+!docs/evidence/M3-030/*.json
 !docs/evidence/M7-029/**/*.json
 
 # Local tool state

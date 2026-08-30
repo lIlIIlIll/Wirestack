@@ -1,0 +1,18 @@
+{
+  "acceptance_status": "PASS",
+  "decision": "PASS",
+  "failed": 0,
+  "passed": 3,
+  "platform": "linux-x86_64-glibc",
+  "properties": [
+    "factory-substitution",
+    "instance-mismatch",
+    "retained-lifetime"
+  ],
+  "releasePayload": false,
+  "schemaVersion": 1,
+  "skippedAsPass": false,
+  "source_task": "M3-030",
+  "status": "PASS",
+  "taskId": "M3-030"
+}

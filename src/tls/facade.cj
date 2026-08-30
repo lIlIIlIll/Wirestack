@@ -55,11 +55,11 @@ public class TlsHandshakeInfo {
 
 /** Immutable, concurrently shareable Linux TLS client context. */
 public class TlsClientContext {
-    private let provider: engine.AwsLcTlsProvider
+    private let provider: engine.TlsProvider
     private let value: engine.TlsClientContext
     public let capabilities: TlsCapabilities
 
-    internal init(provider: engine.AwsLcTlsProvider, value: engine.TlsClientContext) {
+    internal init(provider: engine.TlsProvider, value: engine.TlsClientContext) {
         this.provider = provider
         this.value = value
         capabilities = TlsCapabilities(value.capabilities)
@@ -110,13 +110,19 @@ public class TlsClientContext {
 
 /** Mutable builder state never enters a built client context. */
 public class TlsClientContextBuilder {
-    private let provider: engine.AwsLcTlsProvider
+    private let provider: engine.TlsProvider
     private let value: engine.TlsClientContextBuilder
 
     public init() {
-        let selected = engine.AwsLcTlsProvider()
+        let selected = engine.selectedTlsProvider()
         provider = selected
-        value = engine.TlsClientContext.builder(selected.manifest(), selected.linuxCapabilities())
+        value = engine.TlsClientContext.builder(selected.manifest(), selected.capabilities())
+    }
+
+    internal init(factory: engine.TlsProviderFactory) {
+        let selected = factory.create()
+        provider = selected
+        value = engine.TlsClientContext.builder(selected.manifest(), selected.capabilities())
     }
 
     public func securityProfile(profile: TlsSecurityProfile): TlsClientContextBuilder {
@@ -149,11 +155,11 @@ public class TlsClientContextBuilder {
 
 /** Immutable, concurrently shareable Linux TLS server context. */
 public class TlsServerContext {
-    private let provider: engine.AwsLcTlsProvider
+    private let provider: engine.TlsProvider
     private let value: engine.TlsServerContext
     public let capabilities: TlsCapabilities
 
-    internal init(provider: engine.AwsLcTlsProvider, value: engine.TlsServerContext) {
+    internal init(provider: engine.TlsProvider, value: engine.TlsServerContext) {
         this.provider = provider
         this.value = value
         capabilities = TlsCapabilities(value.capabilities)
@@ -186,13 +192,19 @@ public class TlsServerContext {
 
 /** Mutable builder state never enters a built server context. */
 public class TlsServerContextBuilder {
-    private let provider: engine.AwsLcTlsProvider
+    private let provider: engine.TlsProvider
     private let value: engine.TlsServerContextBuilder
 
     public init() {
-        let selected = engine.AwsLcTlsProvider()
+        let selected = engine.selectedTlsProvider()
         provider = selected
-        value = engine.TlsServerContext.builder(selected.manifest(), selected.linuxCapabilities())
+        value = engine.TlsServerContext.builder(selected.manifest(), selected.capabilities())
+    }
+
+    internal init(factory: engine.TlsProviderFactory) {
+        let selected = factory.create()
+        provider = selected
+        value = engine.TlsServerContext.builder(selected.manifest(), selected.capabilities())
     }
 
     public func securityProfile(profile: TlsSecurityProfile): TlsServerContextBuilder {
@@ -231,10 +243,10 @@ public class TlsServerContextBuilder {
 /** Public provider-neutral TLS stream that retains its provider for its lifetime. */
 public class TlsConnection <: DuplexTransport {
     private let value: engine.TlsConnection
-    private let provider: engine.AwsLcTlsProvider
+    private let provider: engine.TlsProvider
     public let handshakeInfo: TlsHandshakeInfo
 
-    internal init(value: engine.TlsConnection, provider: engine.AwsLcTlsProvider) {
+    internal init(value: engine.TlsConnection, provider: engine.TlsProvider) {
         this.value = value
         this.provider = provider
         handshakeInfo = TlsHandshakeInfo(value.handshakeInfo.getOrThrow())

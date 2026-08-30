@@ -46,26 +46,26 @@ public interface HttpAlpnTlsHandshaker <: Resource {
     ): HttpNegotiatedTlsTransport
 }
 
-/** Linux AWS-LC HTTPS handshaker. It owns its provider and closes it after every pooled connection. */
-public class AwsLcHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandshaker {
-    private let provider: AwsLcTlsProvider
+/** Selected TLS HTTPS handshaker. It owns its provider and closes it after every pooled connection. */
+public class DefaultHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandshaker {
+    private let provider: TlsProvider
     private let context: TlsClientContext
     private let ownedPrivateKey: ?PrivateKeyRef
     private let mutex = Mutex()
     private var closed = false
 
-    private init(provider: AwsLcTlsProvider, context: TlsClientContext,
+    private init(provider: TlsProvider, context: TlsClientContext,
         ownedPrivateKey: ?PrivateKeyRef) {
         this.provider = provider
         this.context = context
         this.ownedPrivateKey = ownedPrivateKey
     }
 
-    public static func systemDefault(): AwsLcHttp1TlsHandshaker {
+    public static func systemDefault(): DefaultHttp1TlsHandshaker {
         create(TrustPolicy.system())
     }
 
-    public static func systemDefaultAlpn(): AwsLcHttp1TlsHandshaker {
+    public static func systemDefaultAlpn(): DefaultHttp1TlsHandshaker {
         createAlpn(TrustPolicy.system())
     }
 
@@ -73,7 +73,7 @@ public class AwsLcHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandshak
         trust: TrustPolicy,
         identity!: ?LocalIdentity = None<LocalIdentity>,
         securityProfile!: TlsSecurityProfile = TlsSecurityProfile.Modern
-    ): AwsLcHttp1TlsHandshaker {
+    ): DefaultHttp1TlsHandshaker {
         createOwned(trust, identity, None<PrivateKeyRef>, securityProfile, ["http/1.1"])
     }
 
@@ -81,7 +81,7 @@ public class AwsLcHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandshak
         trust: TrustPolicy,
         identity!: ?LocalIdentity = None<LocalIdentity>,
         securityProfile!: TlsSecurityProfile = TlsSecurityProfile.Modern
-    ): AwsLcHttp1TlsHandshaker {
+    ): DefaultHttp1TlsHandshaker {
         createOwned(
             trust, identity, None<PrivateKeyRef>, securityProfile, httpClientAlpnProtocols()
         )
@@ -93,7 +93,7 @@ public class AwsLcHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandshak
         clientCertificateChainDer!: Array<Array<Byte>> = Array<Array<Byte>>(),
         clientPrivateKeyPkcs8Der!: Array<Byte> = Array<Byte>(),
         securityProfile!: TlsSecurityProfile = TlsSecurityProfile.Modern
-    ): AwsLcHttp1TlsHandshaker {
+    ): DefaultHttp1TlsHandshaker {
         let roots = ArrayList<DerCertificate>()
         for (encoded in customTrustRootsDer) { roots.add(DerCertificate(encoded)) }
         let trust = TrustPolicy.customRoots(CertificateChain(roots.toArray()))
@@ -124,7 +124,7 @@ public class AwsLcHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandshak
         clientCertificateChainDer!: Array<Array<Byte>> = Array<Array<Byte>>(),
         clientPrivateKeyPkcs8Der!: Array<Byte> = Array<Byte>(),
         securityProfile!: TlsSecurityProfile = TlsSecurityProfile.Modern
-    ): AwsLcHttp1TlsHandshaker {
+    ): DefaultHttp1TlsHandshaker {
         let roots = ArrayList<DerCertificate>()
         for (encoded in customTrustRootsDer) { roots.add(DerCertificate(encoded)) }
         let trust = TrustPolicy.customRoots(CertificateChain(roots.toArray()))
@@ -155,16 +155,16 @@ public class AwsLcHttp1TlsHandshaker <: Http1TlsHandshaker & HttpAlpnTlsHandshak
         ownedPrivateKey: ?PrivateKeyRef,
         securityProfile: TlsSecurityProfile,
         alpnProtocols: Array<String>
-    ): AwsLcHttp1TlsHandshaker {
-        let provider = AwsLcTlsProvider()
+    ): DefaultHttp1TlsHandshaker {
+        let provider = selectedTlsProvider()
         try {
-            let builder = TlsClientContext.builder(provider.manifest(), provider.linuxCapabilities())
+            let builder = TlsClientContext.builder(provider.manifest(), provider.capabilities())
                 .securityProfile(securityProfile)
                 .alpn(alpnProtocols)
             builder.trust(trust)
             if (let Some(value) <- identity) { builder.identity(value) }
             let context = builder.build()
-            AwsLcHttp1TlsHandshaker(provider, context, ownedPrivateKey)
+            DefaultHttp1TlsHandshaker(provider, context, ownedPrivateKey)
         } catch (error: Exception) {
             provider.close()
             match (ownedPrivateKey) { case Some(value) => value.close(); case None => () }

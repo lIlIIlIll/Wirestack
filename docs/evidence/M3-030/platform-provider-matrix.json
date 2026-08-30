@@ -1,0 +1,19 @@
+{
+  "acceptance_status": "PASS",
+  "decision": "PASS",
+  "futureAdaptersImplemented": [],
+  "platform": "linux-x86_64-glibc",
+  "productionCombinations": [
+    "linux-x86_64-glibc+aws-lc"
+  ],
+  "schemaVersion": 1,
+  "selected": {
+    "adapter": "linux-aws-lc",
+    "fallback": false,
+    "platform": "linux-x86_64-glibc",
+    "provider": "aws-lc"
+  },
+  "source_task": "M3-030",
+  "status": "PASS",
+  "taskId": "M3-030"
+}

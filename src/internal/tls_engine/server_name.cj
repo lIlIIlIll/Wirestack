@@ -48,6 +48,7 @@ public class TlsServerContextSelector {
     private let entries: Array<TlsServerNameRoute>
     public let providerId: String
     public let providerFingerprint: String
+    internal let providerManifest: TlsProviderManifest
 
     public init(routes: Array<TlsServerNameRoute>) {
         if (routes.isEmpty()) {
@@ -65,8 +66,7 @@ public class TlsServerContextSelector {
         let firstManifest = routes[0].context.providerManifest
         for (index in 0..routes.size) {
             let route = routes[index]
-            if (route.context.providerManifest.providerId != firstManifest.providerId ||
-                route.context.providerManifest.fingerprint != firstManifest.fingerprint) {
+            if (!route.context.providerManifest.sameProviderInstance(firstManifest)) {
                 throw TlsServerNameSelectionException(
                     TlsServerNameSelectionErrorCode.MixedProviderIdentity,
                     "all TLS SNI routes must use the same provider identity"
@@ -83,6 +83,7 @@ public class TlsServerContextSelector {
             }
         }
         entries = routes.clone()
+        providerManifest = firstManifest
         providerId = firstManifest.providerId
         providerFingerprint = firstManifest.fingerprint
     }

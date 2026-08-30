@@ -24,25 +24,25 @@ private func m3028Loopback(port: UInt16): SocketEndpoint {
 }
 
 private struct M3028Contexts {
-    let clientProvider: AwsLcTlsProvider
-    let serverProvider: AwsLcTlsProvider
+    let clientProvider: NativeTlsProvider
+    let serverProvider: NativeTlsProvider
     let client: TlsClientContext
     let server: TlsServerContext
     let key: PrivateKeyRef
 
     init(version: String, certificate: Array<Byte>, keyBytes: Array<Byte>) {
-        clientProvider = AwsLcTlsProvider()
-        serverProvider = AwsLcTlsProvider()
+        clientProvider = NativeTlsProvider()
+        serverProvider = NativeTlsProvider()
         key = PrivateKeyRef.pkcs8(keyBytes)
         let minimum = if (version == "tls12") { TlsVersion.Tls12 } else { TlsVersion.Tls13 }
         let maximum = minimum
         client = TlsClientContext.builder(
-            clientProvider.manifest(), clientProvider.linuxCapabilities()
+            clientProvider.manifest(), clientProvider.capabilities()
         ).trust(TrustPolicy.customRoots(CertificateChain([DerCertificate(certificate)])))
             .versions(minimum, maximum)
             .build()
         server = TlsServerContext.builder(
-            serverProvider.manifest(), serverProvider.linuxCapabilities()
+            serverProvider.manifest(), serverProvider.capabilities()
         ).identity(LocalIdentity(
             CertificateChain([DerCertificate(certificate)]), key
         )).versions(minimum, maximum).build()
@@ -70,12 +70,12 @@ private func m3028HandshakePair(
     serverRaw: DuplexTransport,
     context: OperationContext
 ): (TlsConnection, TlsConnection, Int64) {
-    let clientEngine = contexts.clientProvider.createClientEngine(
+    let clientEngine = contexts.clientProvider.createClientEngineWithTrustLocation(
         contexts.client,
         ReferenceIdentity.Dns(HostName("example.com")),
         serverName: Some(HostName("example.com"))
     )
-    let serverEngine = contexts.serverProvider.createServerEngine(contexts.server)
+    let serverEngine = contexts.serverProvider.createServerEngineWithTrustLocation(contexts.server)
     let accepting = spawn {
         TlsConnection.handshake(serverEngine, serverRaw, context: context)
     }
@@ -200,7 +200,7 @@ private func m3028InteropClient(
     let raw = StdNetTransport.connect(m3028Loopback(port), context: context)
     let started = MonoTime.now()
     let secured = TlsConnection.handshake(
-        contexts.clientProvider.createClientEngine(
+        contexts.clientProvider.createClientEngineWithTrustLocation(
             contexts.client,
             ReferenceIdentity.Dns(HostName("example.com")),
             serverName: Some(HostName("example.com"))
@@ -226,7 +226,7 @@ private func m3028InteropServer(
     let raw = listener.accept(context)
     let started = MonoTime.now()
     let secured = TlsConnection.handshake(
-        contexts.serverProvider.createServerEngine(contexts.server),
+        contexts.serverProvider.createServerEngineWithTrustLocation(contexts.server),
         raw,
         context: context
     )

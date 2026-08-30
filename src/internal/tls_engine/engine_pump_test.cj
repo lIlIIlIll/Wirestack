@@ -13,7 +13,7 @@ import wirestack.internal.trust.*
 class TlsEnginePumpTest {
     @TestCase
     func awsLcClientEngineProducesAClientHelloWithoutSocketIo(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let engine = provider.createEngine(
             TlsEngineRole.Client,
             TlsSecurityPolicy.forProfile(TlsSecurityProfile.Modern)
@@ -38,7 +38,7 @@ class TlsEnginePumpTest {
 
     @TestCase
     func strictTls13PolicyIsAcceptedByTheNativeEngine(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let engine = provider.createEngine(
             TlsEngineRole.Client,
             TlsSecurityPolicy.forProfile(TlsSecurityProfile.StrictTls13)
@@ -59,11 +59,11 @@ class TlsEnginePumpTest {
 
     @TestCase
     func LinuxSystemTrustLoadsExplicitlyAndSniStaysSeparateFromReferenceIdentity(): Unit {
-        let provider = AwsLcTlsProvider()
-        let context = TlsClientContext.builder(provider.manifest(), provider.linuxCapabilities())
+        let provider = NativeTlsProvider()
+        let context = TlsClientContext.builder(provider.manifest(), provider.capabilities())
             .trust(TrustPolicy.system())
             .build()
-        let engine = provider.createClientEngine(
+        let engine = provider.createClientEngineWithTrustLocation(
             context,
             ReferenceIdentity.Dns(HostName("verify.example")),
             serverName: Some(HostName("sni.example"))
@@ -87,13 +87,13 @@ class TlsEnginePumpTest {
 
     @TestCase
     func customRootChainIsLoadedIntoARealAwsLcClientEngine(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let roots = CertificateChain([DerCertificate(tlsTestCertificateDer())])
         let context = TlsClientContext.builder(
             provider.manifest(),
             TlsCapabilities.fromProvider(provider.manifest())
         ).trust(TrustPolicy.customRoots(roots)).build()
-        let engine = provider.createClientEngine(
+        let engine = provider.createClientEngineWithTrustLocation(
             context,
             ReferenceIdentity.Dns(HostName("example.com")),
             serverName: Some(HostName("example.com"))
@@ -114,13 +114,13 @@ class TlsEnginePumpTest {
 
     @TestCase
     func spkiPinPolicyConfiguresTheNativeVerificationPathBeforeHandshake(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let pin = tlsTestSpkiPin()
         let context = TlsClientContext.builder(
             provider.manifest(),
             TlsCapabilities.fromProvider(provider.manifest())
         ).trust(TrustPolicy.pinnedPublicKeys([pin])).build()
-        let engine = provider.createClientEngine(
+        let engine = provider.createClientEngineWithTrustLocation(
             context,
             ReferenceIdentity.Dns(HostName("example.com")),
             serverName: Some(HostName("example.com"))
@@ -141,21 +141,21 @@ class TlsEnginePumpTest {
 
     @TestCase
     func matchingSpkiPinCompletesARealClientServerHandshake(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let identity = tlsTestLocalIdentity()
-        let capabilities = provider.linuxCapabilities()
+        let capabilities = provider.capabilities()
         let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
             .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
             .build()
         let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
             .identity(identity)
             .build()
-        let client = provider.createClientEngine(
+        let client = provider.createClientEngineWithTrustLocation(
             clientContext,
             ReferenceIdentity.Dns(HostName("example.com")),
             serverName: Some(HostName("example.com"))
         )
-        let server = provider.createServerEngine(serverContext)
+        let server = provider.createServerEngineWithTrustLocation(serverContext)
         try {
             drivePairedMemoryHandshake(client, server)
         } finally {
@@ -168,21 +168,21 @@ class TlsEnginePumpTest {
 
     @TestCase
     func matchingSpkiPinDoesNotBypassReferenceIdentityVerification(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let identity = tlsTestLocalIdentity()
-        let capabilities = provider.linuxCapabilities()
+        let capabilities = provider.capabilities()
         let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
             .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
             .build()
         let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
             .identity(identity)
             .build()
-        let client = provider.createClientEngine(
+        let client = provider.createClientEngineWithTrustLocation(
             clientContext,
             ReferenceIdentity.Dns(HostName("wrong.example")),
             serverName: Some(HostName("example.com"))
         )
-        let server = provider.createServerEngine(serverContext)
+        let server = provider.createServerEngineWithTrustLocation(serverContext)
         var rejected = false
         try {
             try {
@@ -207,21 +207,21 @@ class TlsEnginePumpTest {
 
     @TestCase
     func realAwsLcEnginesExchangeCloseNotifyInBothDirections(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let identity = tlsTestLocalIdentity()
-        let capabilities = provider.linuxCapabilities()
+        let capabilities = provider.capabilities()
         let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
             .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
             .build()
         let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
             .identity(identity)
             .build()
-        let client = provider.createClientEngine(
+        let client = provider.createClientEngineWithTrustLocation(
             clientContext,
             ReferenceIdentity.Dns(HostName("example.com")),
             serverName: Some(HostName("example.com"))
         )
-        let server = provider.createServerEngine(serverContext)
+        let server = provider.createServerEngineWithTrustLocation(serverContext)
         try {
             drivePairedMemoryHandshake(client, server)
             match (client.shutdownStep()) {
@@ -252,9 +252,9 @@ class TlsEnginePumpTest {
 
     @TestCase
     func handshakeInfoReportsNegotiatedAlpnPeerChainAndVerificationEvidence(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let identity = tlsTestLocalIdentity()
-        let capabilities = provider.linuxCapabilities()
+        let capabilities = provider.capabilities()
         let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
             .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
             .alpn(["http/1.1", "h2"])
@@ -263,12 +263,12 @@ class TlsEnginePumpTest {
             .identity(identity)
             .alpn(["h2", "http/1.1"])
             .build()
-        let client = provider.createClientEngine(
+        let client = provider.createClientEngineWithTrustLocation(
             clientContext,
             ReferenceIdentity.Dns(HostName("example.com")),
             serverName: Some(HostName("example.com"))
         )
-        let server = provider.createServerEngine(serverContext)
+        let server = provider.createServerEngineWithTrustLocation(serverContext)
         try {
             drivePairedMemoryHandshake(client, server)
             let clientInfo = requireHandshakeInfo(client)
@@ -318,10 +318,10 @@ class TlsEnginePumpTest {
 
     @TestCase
     func sniSelectsTheCompleteImmutableContextAndItsCertificate(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let primaryIdentity = tlsTestLocalIdentity()
         let alternateIdentity = tlsAltTestLocalIdentity()
-        let capabilities = provider.linuxCapabilities()
+        let capabilities = provider.capabilities()
         let primaryContext = TlsServerContext.builder(provider.manifest(), capabilities)
             .identity(primaryIdentity)
             .alpn(["http/1.1"])
@@ -341,7 +341,7 @@ class TlsEnginePumpTest {
             ])))
             .alpn(["http/1.1", "h2"])
             .build()
-        let client = provider.createClientEngine(
+        let client = provider.createClientEngineWithTrustLocation(
             clientContext,
             ReferenceIdentity.Dns(HostName("alt.example.com")),
             serverName: Some(HostName("alt.example.com"))
@@ -375,9 +375,9 @@ class TlsEnginePumpTest {
     @TestCase
     func sniSelectorRejectsMissingAndUnknownNamesWithStableEvidence(): Unit {
         for (name in [None<HostName>, Some(HostName("unknown.example.com"))]) {
-            let provider = AwsLcTlsProvider()
+            let provider = NativeTlsProvider()
             let identity = tlsTestLocalIdentity()
-            let capabilities = provider.linuxCapabilities()
+            let capabilities = provider.capabilities()
             let context = TlsServerContext.builder(provider.manifest(), capabilities)
                 .identity(identity)
                 .build()
@@ -387,7 +387,7 @@ class TlsEnginePumpTest {
             let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
                 .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
                 .build()
-            let client = provider.createClientEngine(
+            let client = provider.createClientEngineWithTrustLocation(
                 clientContext,
                 ReferenceIdentity.Dns(HostName("example.com")),
                 serverName: name
@@ -420,9 +420,9 @@ class TlsEnginePumpTest {
 
     @TestCase
     func noSharedAlpnFailsTheHandshakeInsteadOfSilentlySelectingNothing(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let identity = tlsTestLocalIdentity()
-        let capabilities = provider.linuxCapabilities()
+        let capabilities = provider.capabilities()
         let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
             .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
             .alpn(["http/1.1"])
@@ -431,11 +431,11 @@ class TlsEnginePumpTest {
             .identity(identity)
             .alpn(["h2"])
             .build()
-        let client = provider.createClientEngine(
+        let client = provider.createClientEngineWithTrustLocation(
             clientContext,
             ReferenceIdentity.Dns(HostName("example.com"))
         )
-        let server = provider.createServerEngine(serverContext)
+        let server = provider.createServerEngineWithTrustLocation(serverContext)
         var failed = false
         try {
             try {
@@ -459,9 +459,9 @@ class TlsEnginePumpTest {
 
     @TestCase
     func requiredMutualTlsUsesClientIdentityAndReturnsServerVerificationEvidence(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let identity = tlsTestLocalIdentity()
-        let capabilities = provider.linuxCapabilities()
+        let capabilities = provider.capabilities()
         let pinned = TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()])
         let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
             .trust(pinned)
@@ -472,11 +472,11 @@ class TlsEnginePumpTest {
             .clientAuthentication(ClientAuthentication.Required)
             .clientTrust(pinned)
             .build()
-        let client = provider.createClientEngine(
+        let client = provider.createClientEngineWithTrustLocation(
             clientContext,
             ReferenceIdentity.Dns(HostName("example.com"))
         )
-        let server = provider.createServerEngine(serverContext)
+        let server = provider.createServerEngineWithTrustLocation(serverContext)
         try {
             drivePairedMemoryHandshake(client, server)
             let serverInfo = requireHandshakeInfo(server)
@@ -500,9 +500,9 @@ class TlsEnginePumpTest {
 
     @TestCase
     func requiredMutualTlsRejectsMissingClientIdentityButOptionalAllowsIt(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let identity = tlsTestLocalIdentity()
-        let capabilities = provider.linuxCapabilities()
+        let capabilities = provider.capabilities()
         let pinned = TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()])
         let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
             .trust(pinned)
@@ -512,11 +512,11 @@ class TlsEnginePumpTest {
             .clientAuthentication(ClientAuthentication.Required)
             .clientTrust(pinned)
             .build()
-        let requiredClient = provider.createClientEngine(
+        let requiredClient = provider.createClientEngineWithTrustLocation(
             clientContext,
             ReferenceIdentity.Dns(HostName("example.com"))
         )
-        let requiredServer = provider.createServerEngine(requiredContext)
+        let requiredServer = provider.createServerEngineWithTrustLocation(requiredContext)
         var rejected = false
         try {
             try {
@@ -540,11 +540,11 @@ class TlsEnginePumpTest {
             .clientAuthentication(ClientAuthentication.Optional)
             .clientTrust(pinned)
             .build()
-        let optionalClient = provider.createClientEngine(
+        let optionalClient = provider.createClientEngineWithTrustLocation(
             clientContext,
             ReferenceIdentity.Dns(HostName("example.com"))
         )
-        let optionalServer = provider.createServerEngine(optionalContext)
+        let optionalServer = provider.createServerEngineWithTrustLocation(optionalContext)
         try {
             drivePairedMemoryHandshake(optionalClient, optionalServer)
             let info = requireHandshakeInfo(optionalServer)
@@ -560,9 +560,9 @@ class TlsEnginePumpTest {
 
     @TestCase
     func mismatchedSpkiPinFailsARealClientServerHandshake(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let identity = tlsTestLocalIdentity()
-        let capabilities = provider.linuxCapabilities()
+        let capabilities = provider.capabilities()
         let wrongPin = SpkiSha256Pin(Array<Byte>(32, repeat: 0))
         let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
             .trust(TrustPolicy.pinnedPublicKeys([wrongPin]))
@@ -570,12 +570,12 @@ class TlsEnginePumpTest {
         let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
             .identity(identity)
             .build()
-        let client = provider.createClientEngine(
+        let client = provider.createClientEngineWithTrustLocation(
             clientContext,
             ReferenceIdentity.Dns(HostName("example.com")),
             serverName: Some(HostName("example.com"))
         )
-        let server = provider.createServerEngine(serverContext)
+        let server = provider.createServerEngineWithTrustLocation(serverContext)
         var rejected = false
         try {
             try {
@@ -600,7 +600,7 @@ class TlsEnginePumpTest {
 
     @TestCase
     func externalSignerCompletesARealHandshakeOutsideTheNativeCallback(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let signer = OpenSslProcessTestSigner()
         let key = PrivateKeyRef.externalSigner(
             "test-process-signer",
@@ -611,19 +611,19 @@ class TlsEnginePumpTest {
             CertificateChain([DerCertificate(tlsTestCertificateDer())]),
             key
         )
-        let capabilities = provider.linuxCapabilities()
+        let capabilities = provider.capabilities()
         let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
             .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
             .build()
         let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
             .identity(identity)
             .build()
-        let client = provider.createClientEngine(
+        let client = provider.createClientEngineWithTrustLocation(
             clientContext,
             ReferenceIdentity.Dns(HostName("example.com")),
             serverName: Some(HostName("example.com"))
         )
-        let server = provider.createServerEngine(serverContext)
+        let server = provider.createServerEngineWithTrustLocation(serverContext)
         try {
             drivePairedMemoryHandshake(client, server)
             @Expect(signer.calls > 0)
@@ -637,7 +637,7 @@ class TlsEnginePumpTest {
 
     @TestCase
     func externalSignerExceptionFailsClosedWithoutCrossingTheCAbi(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let key = PrivateKeyRef.externalSigner(
             "throwing-signer",
             tlsTestSubjectPublicKeyInfoDer(),
@@ -647,18 +647,18 @@ class TlsEnginePumpTest {
             CertificateChain([DerCertificate(tlsTestCertificateDer())]),
             key
         )
-        let capabilities = provider.linuxCapabilities()
+        let capabilities = provider.capabilities()
         let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
             .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
             .build()
         let serverContext = TlsServerContext.builder(provider.manifest(), capabilities)
             .identity(identity)
             .build()
-        let client = provider.createClientEngine(
+        let client = provider.createClientEngineWithTrustLocation(
             clientContext,
             ReferenceIdentity.Dns(HostName("example.com"))
         )
-        let server = provider.createServerEngine(serverContext)
+        let server = provider.createServerEngineWithTrustLocation(serverContext)
         var rejected = false
         try {
             try {
@@ -681,7 +681,7 @@ class TlsEnginePumpTest {
 
     @TestCase
     func cancellationBeforeSignerInvocationFailsThePendingNativeOperation(): Unit {
-        let provider = AwsLcTlsProvider()
+        let provider = NativeTlsProvider()
         let signer = OpenSslProcessTestSigner()
         let key = PrivateKeyRef.externalSigner(
             "cancelled-signer",
@@ -692,14 +692,14 @@ class TlsEnginePumpTest {
             CertificateChain([DerCertificate(tlsTestCertificateDer())]),
             key
         )
-        let capabilities = provider.linuxCapabilities()
-        let client = provider.createClientEngine(
+        let capabilities = provider.capabilities()
+        let client = provider.createClientEngineWithTrustLocation(
             TlsClientContext.builder(provider.manifest(), capabilities)
                 .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
                 .build(),
             ReferenceIdentity.Dns(HostName("example.com"))
         )
-        let server = provider.createServerEngine(
+        let server = provider.createServerEngineWithTrustLocation(
             TlsServerContext.builder(provider.manifest(), capabilities)
                 .identity(identity)
                 .build()
@@ -891,9 +891,9 @@ private func proveRealSessionResumption(
     maximum: TlsVersion,
     expectSingleUse: Bool
 ): Unit {
-    let provider = AwsLcTlsProvider()
+    let provider = NativeTlsProvider()
     let identity = tlsTestLocalIdentity()
-    let capabilities = provider.linuxCapabilities()
+    let capabilities = provider.capabilities()
     let clientContext = TlsClientContext.builder(provider.manifest(), capabilities)
         .trust(TrustPolicy.pinnedPublicKeys([tlsTestSpkiPin()]))
         .versions(minimum, maximum)
@@ -904,12 +904,12 @@ private func proveRealSessionResumption(
         .versions(minimum, maximum)
         .alpn(["h2"])
         .build()
-    let firstClient = provider.createClientEngine(
+    let firstClient = provider.createClientEngineWithTrustLocation(
         clientContext,
         ReferenceIdentity.Dns(HostName("example.com")),
         serverName: Some(HostName("example.com"))
     )
-    let firstServer = provider.createServerEngine(serverContext)
+    let firstServer = provider.createServerEngineWithTrustLocation(serverContext)
     try {
         drivePairedMemoryHandshake(firstClient, firstServer)
         let scratch = Array<Byte>(1, repeat: 0)
@@ -919,13 +919,13 @@ private func proveRealSessionResumption(
         firstClient.close()
         firstServer.close()
     }
-    let resumedClient = provider.createClientEngine(
+    let resumedClient = provider.createClientEngineWithTrustLocation(
         clientContext,
         ReferenceIdentity.Dns(HostName("example.com")),
         serverName: Some(HostName("example.com"))
     )
     @Expect(provider.sessionStoreSnapshot().entries, if (expectSingleUse) { 0 } else { 1 })
-    let resumedServer = provider.createServerEngine(serverContext)
+    let resumedServer = provider.createServerEngineWithTrustLocation(serverContext)
     try {
         drivePairedMemoryHandshake(resumedClient, resumedServer)
         @Expect(requireHandshakeInfo(resumedClient).resumed)

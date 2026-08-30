@@ -2,10 +2,10 @@
 
 **依据：**《Wirestack：仓颉跨平台 TLS/HTTPS 网络栈重写 PRD》v2.1（2026-08-27）  
 **文档类型：** Issue/PR 级实施 backlog  
-**全平台主线任务数：** 183  
+**全平台主线任务数：** 184  
 **Linux 稳定版收口任务数：** 15  
 **远期上游任务数：** 7  
-**当前发布任务数：** 198  
+**当前发布任务数：** 199  
 **目标：** 将 PRD 转换为可排期、可并行、可验收、可追踪的仓库任务；不在此文档中改变 PRD 已冻结的产品边界。
 
 > 仓库事实：Wirestack 是独立仓颉绿地网络库仓库，GitHub 为 `lIlIIlIll/Wirestack`。新公共包默认使用 `wirestack.*`，内部实现使用 `wirestack.internal.*`。`cangjie_stdx`、仓颉 SDK、`std.net` 与 runtime 源码均为外部参考或上游仓库，不属于 Wirestack 工作树。实际物理目录与 `cjpm` target 由 M0-002 根据当前仓颉工具链冻结；本 backlog 在此之前只约束逻辑模块边界、依赖方向和验收语义。
@@ -287,7 +287,8 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M3-026 | 实现 `close_notify`、truncation evidence 与 TLS abort | TLS | C4 | M3-005,M3-021,M3-022 | PRD §13.8 | graceful close 在 Deadline 内发送/处理 close_notify；peer TCP EOF 无 close_notify 保留证据；最终总释放资源。 |
 | M3-027 | 实现 TLS 结构化错误与 runtime info | 可观测性 | C3 | M1-007,M3-002..M3-026 | PRD §16.2/§20 | 覆盖协议、版本、cipher、ALPN、证书、identity、key、alert、truncation、provider；phase/重试性稳定。 |
 | M3-028 | 完成 TLS 确定性、互操作、fuzz、依赖扫描与 benchmark | 测试 | C4 | M3-001..M3-027 | PRD §19.2/§21/§22/§23 | 协议向量、主机名、session、close、truncated、外部实现互操作、fuzz 无崩溃；吞吐/握手/内存达标；无系统 OpenSSL 依赖。 |
-| M3-029 | 实现并冻结 provider-neutral 公共 TLS facade | TLS/API | C4 | M3-028,M7-026 | PRD §6.2/§7/§13/§17/§29 | `wirestack.tls` 公开不可变 client/server context、existing-transport handshake、`TlsConnection`/`TlsListener`、协商结果和稳定错误；成功后转移 transport 所有权，失败/取消/Deadline abort，close/abort 幂等；公共声明无 `std.net`、native provider、OpenSSL 配置或旧 socket 类型；public-only 测试与干净 consumer 原生运行通过，并有意更新 API baseline。 |
+| M3-029 | 实现并冻结 provider-neutral 公共 TLS facade | TLS/API | C4 | M3-028,M7-026 | PRD §6.2/§7/§13/§17/§29 | `wirestack.tls` 公开不可变 client/server context、existing-transport handshake、`TlsConnection`/`TlsListener`、协商结果和稳定错误；成功后转移 transport 所有权，失败/取消/Deadline abort，close/abort 幂等；公共声明无 `std.net`、native provider、OpenSSL 配置或旧 socket 类型；public-only 测试与干净 consumer 原生运行通过，当前 pre-1.0 公开所有权和架构守卫通过，不要求兼容历史实验性 API。 |
+| M3-030 | 建立跨平台可扩展的 TLS provider 架构 | TLS/构建 | C4 | M3-029,M7-032 | PRD §7/§13/§17/§18/§23；ADR-0003/0006 | 通用 TLS Core、HTTP 和公开 API 只依赖 Wirestack provider-neutral 契约；平台和 provider 在构建期正交选择，未知或不允许组合 fail closed；Linux x86_64 glibc 固定 AWS-LC 5.5.0，具体类型和路径只留在 adapter；test provider 通过统一 factory 证明替换性和实例隔离；native ABI、architecture guard、release manifest、SBOM、许可证、clean consumer 与真实 TLS 门禁通过，不声明其他平台支持。 |
 
 ---
 
@@ -617,11 +618,11 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 
 ## 11. 任务统计
 
-- 全平台主线任务：**183**
+- 全平台主线任务：**184**
 - Linux 稳定版收口任务：**15**
 - 远期上游任务：**7**
 - 稳定版后 P1/独立项目：**12**
-- 当前发布相关任务总数：**198**
-- 全部已记录任务总数：**217**
+- 当前发布相关任务总数：**199**
+- 全部已记录任务总数：**218**
 
 该数量代表 Issue/PR 级工作项，不代表必须串行执行；关键是保持里程碑退出门禁和依赖方向。

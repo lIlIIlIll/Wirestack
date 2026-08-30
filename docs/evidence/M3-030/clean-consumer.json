@@ -1,0 +1,14 @@
+{
+  "acceptance_status": "PASS",
+  "checks": {
+    "build": "PASS",
+    "httpsLoopback": "PASS",
+    "publicApiOnly": "PASS"
+  },
+  "decision": "PASS",
+  "platform": "linux-x86_64-glibc",
+  "schemaVersion": 1,
+  "source_task": "M3-030",
+  "status": "PASS",
+  "taskId": "M3-030"
+}

@@ -33,14 +33,25 @@ class M2003ResolverPoolGateTests(unittest.TestCase):
 
     def test_validation_rejects_missing_focused_cases(self) -> None:
         failures = gate.validate(
-            {"timed_out": False, "exit_code": 0, "output": "[ PASSED ] CASE:\n" * 7},
+            {
+                "timed_out": False,
+                "exit_code": 0,
+                "output": "[ PASSED ] CASE:\n" * (gate.EXPECTED_TESTS - 1),
+            },
             {
                 "call_count": gate.EXPECTED_CALLS,
                 "maximum_concurrent": 2,
                 "duration_ms": {"minimum": 200.0},
             },
+            {
+                "timed_out": False,
+                "exit_code": 0,
+                "output": "GLOBAL_POOL_BOUND PASS live_pool_limit=8\n",
+            },
         )
-        self.assertTrue(any("8 passed" in failure for failure in failures))
+        self.assertTrue(any(
+            f"{gate.EXPECTED_TESTS} passed" in failure for failure in failures
+        ))
 
 
 if __name__ == "__main__":

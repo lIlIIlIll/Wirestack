@@ -50,7 +50,7 @@ public class HttpServerTlsConfig <: Resource {
     internal func createHandshaker(): http1.HttpServerAlpnHandshaker {
         synchronized(mutex) {
             if (closed) { throw IllegalStateException("HTTP server TLS configuration is closed") }
-            http1.AwsLcHttp1ServerTlsHandshaker.createAlpn(
+            http1.DefaultHttp1ServerTlsHandshaker.createAlpn(
                 cloneHttpServerDerChain(certificateChain),
                 privateKey.clone(),
                 clientAuthentication: toInternalClientAuthentication(authentication),

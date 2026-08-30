@@ -1,0 +1,11 @@
+{
+  "acceptance_status": "PASS",
+  "decision": "PASS",
+  "platform": "linux-x86_64-glibc",
+  "schemaVersion": 1,
+  "source_task": "M3-030",
+  "status": "PASS",
+  "taskId": "M3-030",
+  "violationCount": 0,
+  "violations": []
+}

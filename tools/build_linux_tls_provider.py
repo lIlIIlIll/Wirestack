@@ -244,6 +244,7 @@ def build_input_fingerprint(
     manifest: Mapping[str, Any],
     shim_source: Path,
     shim_header: Path,
+    abi_contract: Path,
     tools: Mapping[str, str],
     target: Mapping[str, str],
 ) -> tuple[str, dict[str, Any]]:
@@ -254,6 +255,7 @@ def build_input_fingerprint(
             "source_sha256": sha256_path(shim_source),
             "header_sha256": sha256_path(shim_header),
         },
+        "abi_contract_sha256": sha256_path(abi_contract),
         "tools": dict(tools),
         "target": dict(target),
     }
@@ -301,6 +303,7 @@ def build_provider(
     source: Path,
     source_identity: Mapping[str, str],
     manifest: Mapping[str, Any],
+    abi_contract: Path,
     output_root: Path,
     tools: Mapping[str, str],
     target: Mapping[str, str],
@@ -309,7 +312,7 @@ def build_provider(
     shim_source = shim_dir / "wirestack_tls_provider.c"
     shim_header = shim_dir / "wirestack_tls_provider.h"
     fingerprint, build_inputs = build_input_fingerprint(
-        manifest, shim_source, shim_header, tools, target
+        manifest, shim_source, shim_header, abi_contract, tools, target
     )
     final_dir = output_root / "cache" / fingerprint
     cached = validate_cached_build(final_dir, fingerprint)
@@ -393,6 +396,7 @@ int main(void) {
   uint64_t handle = 0; unsigned char data[32] = {0};
   uint64_t engine = 0, invalid_engine = 0, pending = 0, drained = 0;
   int32_t step = -1;
+  if (wirestack_tls_provider_abi_version() != 1) return 13;
   if (wirestack_tls_provider_create(&handle) != 0) return 1;
   if (wirestack_tls_provider_random(handle, data, sizeof(data)) != 0) return 2;
   if (wirestack_tls_provider_capabilities(handle) == 0) return 3;
@@ -496,6 +500,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--out-dir", type=Path)
     parser.add_argument("--cache-dir", type=Path)
     parser.add_argument("--offline", action="store_true")
+    parser.add_argument("--abi-contract", type=Path)
     parser.add_argument("--print-manifest", action="store_true")
     parser.add_argument("--cc")
     parser.add_argument("--cxx")
@@ -510,6 +515,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     repo = args.repo.resolve()
     provider_dir = repo / "native" / "tls" / "aws_lc"
     manifest = load_provider_manifest(provider_dir / "provider.json")
+    abi_contract = (
+        args.abi_contract or repo / "tools" / "tls_provider" / "abi-v1.json"
+    ).resolve()
     output_root = (args.out_dir or repo / "target" / "native").resolve()
     cache_root = (args.cache_dir or repo / ".local" / "tls-provider").resolve()
     source_override = args.source_dir
@@ -533,6 +541,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         manifest,
         provider_dir / "wirestack_tls_provider.c",
         provider_dir / "wirestack_tls_provider.h",
+        abi_contract,
         tools_with_versions,
         target,
     )
@@ -553,6 +562,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         source,
         source_identity,
         manifest,
+        abi_contract,
         output_root,
         tools_with_versions,
         target,

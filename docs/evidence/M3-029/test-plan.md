@@ -79,7 +79,7 @@ architecture guard.
 | S012 | peer transport EOF without close_notify | open TLS pair | P013 | truncation remains distinguishable | `PeerClosedWithoutCloseNotify` and stable error | security,lifecycle | P0 |
 | S013 | repeated abort and close/abort ordering | open or terminal connection | P014 | first terminal wins and cleanup is idempotent | terminal state/evidence and one underlying abort/close | concurrency,lifecycle | P0 |
 | S014 | TLS listener accept then close | open caller listener | P015,P016,P017 | accepted transport is secured; close is idempotent | data exchange, accept wake/terminal, no leak | integration,lifecycle | P0 |
-| S015 | public API baseline and architecture scan | completed source tree | P018 | intended additive API accepted, forbidden types absent | baseline delta reviewed; guards PASS | compatibility | P0 |
+| S015 | public API ownership and architecture scan | completed source tree | P018 | forbidden internal, native, `std.net` and legacy types are absent | current pre-1.0 inventory and guards PASS | architecture | P0 |
 
 ## Test-plan matrix
 
@@ -96,12 +96,13 @@ architecture guard.
 | T009 | S012 | P013 | peer EOF without close_notify | truncation retained | typed unexpected EOF and truncation evidence | security,lifecycle |
 | T010 | S013 | P014 | repeated/racing close and abort | at-most-once cleanup | state, evidence and counters | concurrency |
 | T011 | S014 | P015,P016,P017 | public listener over consumer listener | secured accept and idempotent close | exchange, wakeup and terminal assertions | integration |
-| T012 | S015 | P018 | API generator, architecture guard and clean consumer | additive API is intentional and forbidden surface absent | exact baseline diff, guard result and executable PASS markers | compatibility |
+| T012 | S015 | P018 | current API inventory, architecture guard and clean consumer | public ownership is explicit and forbidden surface absent | zero internal aliases, guard result and executable PASS markers | architecture |
 
 ## Evidence boundary
 
 No coverage, mutation or long-duration claim is made by this plan. M3-029 must
 produce native Linux glibc public-package tests, a clean-consumer report, the
-updated M7-026 API baseline/report and the canonical repository gate result.
+current pre-1.0 public-ownership inventory and the architecture-guard result.
+Historical M7-026 compatibility is not an M3-029 acceptance gate after M7-032.
 The 24-hour soak, one-hour SSE profile and all non-Linux platforms remain
 outside this task.
