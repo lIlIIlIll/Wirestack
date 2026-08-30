@@ -1,6 +1,6 @@
 # M7-030 Linux signing and update flow
 
-Status: **INCOMPLETE**
+Status: **COMPLETE**
 
 M7-030 now has a fail-closed local signing and update rehearsal plus a pinned
 GitHub OIDC/Sigstore workflow. The local gate signs the exact M7-021 artifact,
@@ -9,11 +9,11 @@ verifies all three detached signatures; rejects subject and signature
 tampering; safely extracts the artifact in a clean consumer; and rehearses a
 signed provider upgrade and explicitly authorized rollback.
 
-The local result is classified `REHEARSAL`. It is not a production release
-signature. M7-030 remains incomplete until
-`.github/workflows/linux-release-attestation.yml` runs on a GitHub-hosted runner
-and `github-attestation.json` records three verified Sigstore subjects for the
-exact repository, workflow and commit.
+The local result remains classified `REHEARSAL`; it is not a production release
+signature. GitHub-hosted run `33318194490` completed on merge commit
+`8367a4eae8c4d46600dc1d20e571e9a3ddf5a493`. `github-attestation.json`
+records three verified Sigstore subjects for the exact repository, workflow and
+commit.
 
 The hosted workflow does not rebuild the release artifact. It validates the
 frozen M7-021 artifact and M7-025 supply-chain bundle before attestation, then
@@ -62,8 +62,9 @@ published artifact bundle passed after binding the full identity
 - `local-rehearsal.json` records local signing, clean-consumer, update and
   rollback results without private key material.
 - `workflow-contract.json` records the pinned hosted workflow contract.
-- `github-attestation.json` is intentionally absent until the hosted workflow
-  succeeds.
+- `github-attestation.json` is the byte-identical bounded report downloaded from
+  successful GitHub-hosted run `33318194490`.
+- `hosted-validation.json` binds that report digest and its three subjects.
 - [`test-results.md`](test-results.md) records exact local commands and the
   remaining production gate.
 
