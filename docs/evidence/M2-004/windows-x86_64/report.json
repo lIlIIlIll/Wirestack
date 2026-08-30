@@ -1,0 +1,131 @@
+{
+  "build": {
+    "command": [
+      "python",
+      "D:\\a\\Wirestack\\Wirestack\\tools\\build_resolver.py",
+      "--root",
+      "D:\\a\\Wirestack\\Wirestack",
+      "--platform",
+      "windows-x86_64",
+      "--test-fixture",
+      "--quiet"
+    ],
+    "duration_ms": 8718.0,
+    "exit_code": 0,
+    "output": "",
+    "timed_out": false
+  },
+  "decision": "PASS",
+  "failures": [],
+  "gate_id": "M2-004-WINDOWS-SYSTEM-RESOLVER",
+  "generated_at_utc": "2026-08-30T21:20:58.411499Z",
+  "platform": {
+    "machine": "AMD64",
+    "release": "2025Server",
+    "runner_image": "win25-vs2026",
+    "runner_image_version": "20260824.214.3",
+    "system": "Windows",
+    "toolchain": {
+      "command": [
+        "C:\\hostedtoolcache\\windows\\cangjie\\1.3.0-alpha.20260831010012-win32-x64\\x64\\cangjie\\bin\\cjc.EXE",
+        "-v"
+      ],
+      "duration_ms": 109.0,
+      "exit_code": 0,
+      "output": "Cangjie Compiler: 1.3.0-alpha.20260831010012 (cjnative)\nTarget: x86_64-w64-mingw32\n",
+      "timed_out": false
+    }
+  },
+  "resolver_manifest": {
+    "archive": {
+      "path": "lib/libwirestack_resolver.a",
+      "sha256": "e25f9385afbe9826ca62c28816d5322d6f0548501f97a29b189e36c0808e651a"
+    },
+    "build_fingerprint": "7963fb8c59914334c84f93d6b9071b06ea8a8f830b1ef635d79a63ec93812004",
+    "close_model": "asynchronous reaper with a process-wide cap of eight live pools and 64 workers; blocking Winsock resolver calls remain quarantined",
+    "inputs": {
+      "compiler": "C:\\Program Files\\LLVM\\bin\\clang.EXE",
+      "compiler_version": "clang version 20.1.8",
+      "flags": [
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-D_WIN32_WINNT=0x0602",
+        "-DWIRESTACK_RESOLVER_TEST_FIXTURE=1"
+      ],
+      "header_sha256": "47407b4eec15bb447bafcf59dce89825d24c6cd255d9172fdd9c7d684fda7caf",
+      "schema": 1,
+      "source_sha256": "08c9b2e95c357865e9e8d5dd1dbe00071add085f44c7c81af5e1217c161423d1",
+      "target": "x86_64-pc-windows-msvc",
+      "test_fixture": true
+    },
+    "platform": "windows-x86_64",
+    "private_runtime_abi": false,
+    "schema_version": 1,
+    "test_fixture": true,
+    "worker_model": "fixed Win32 worker pool with bounded FIFO admission"
+  },
+  "resolver_manifest_sha256": "c89fa111f9562689ee15f98392e7b9988640c4d3959761100d9524874a354af0",
+  "resolver_test": {
+    "command": [
+      "C:\\hostedtoolcache\\windows\\cangjie\\1.3.0-alpha.20260831010012-win32-x64\\x64\\cangjie\\tools\\bin\\cjpm.EXE",
+      "test",
+      "src/internal/resolver",
+      "-j",
+      "1",
+      "--parallel",
+      "1",
+      "--filter",
+      "M2004WindowsSystemResolverTest",
+      "--show-all-output",
+      "--no-color",
+      "--no-progress"
+    ],
+    "duration_ms": 36547.0,
+    "exit_code": 0,
+    "output": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.resolver, time elapsed: 180294900 ns, RESULT:\n    TCS: M2004WindowsSystemResolverTest, time elapsed: 177500300 ns, RESULT:\n    [ PASSED ] CASE: resolvesLocalhostThroughTheProviderNeutralContract (18484400 ns)\n    [ PASSED ] CASE: fixtureReturnsAllCandidatesWithoutInventingTtl (15241500 ns)\n    [ PASSED ] CASE: fixtureAppliesFamilyAndResultBounds (25688100 ns)\n    [ PASSED ] CASE: fixtureMapsWinsockFailuresAndUnknownCodes (52836300 ns)\n    [ PASSED ] CASE: fixtureCancellationAndDeadlineReturnBeforeNativeCleanup (62757300 ns)\n    STDERR:\n    An exception has occurred:\n    ResolveException: resolution cancelled\n    \t at wirestack.internal.resolver::checkResolveContext(wirestack::OperationContext)(D:\\a\\Wirestack\\Wirestack\\src\\internal\\resolver\\package.cj:17)\n    \t at wirestack.internal.resolver::BoundedSystemResolverBackend::resolve(wirestack::HostName, std.core::Option<...>, wirestack::ResolveOptions, wirestack::OperationContext)(D:\\a\\Wirestack\\Wirestack\\src\\internal\\resolver\\bounded_backend.cj:144)\n    \t at wirestack.internal.resolver::SystemResolver::resolve(wirestack::HostName, std.core::Option<...>, wirestack::ResolveOptions, wirestack::OperationContext)(D:\\a\\Wirestack\\Wirestack\\src\\internal\\resolver\\system_resolver.cj:29)\n    \t at wirestack.internal.resolver::SystemResolver::resolve(wirestack::HostName, wirestack::ResolveOptions, wirestack::OperationContext)(D:\\a\\Wirestack\\Wirestack\\src\\internal\\resolver\\system_resolver.cj:38)\n    \t at wirestack.internal.resolver/test::M2004WindowsSystemResolverTest::fixtureCancellationAndDeadlineReturnBeforeNativeCleanup::lambda.0()(D:\\a\\Wirestack\\Wirestack\\src\\internal\\resolver\\windows_system_resolver_test.cj:99)\n    [ PASSED ] CASE: validatesBoundsAndRejectsUseAfterClose (204200 ns)\nSummary: TOTAL: 30\n    PASSED: 6, SKIPPED: 24, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 190301900 ns, RESULT:\nTP: wirestack.*, time elapsed: 190170700 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.resolver, time elapsed: 180294900 ns\nSummary: TOTAL: 30\n    PASSED: 6, SKIPPED: 24, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+    "timed_out": false
+  },
+  "revision": "a46a6e9e78701a74d01f988e34ba5a2b5896f1fe",
+  "schema_version": 1,
+  "scope": "native Windows x86_64 resolver only",
+  "task_id": "M2-004",
+  "test_link_stub": {
+    "archive": {
+      "command": [
+        "C:\\Program Files\\LLVM\\bin\\llvm-ar.EXE",
+        "rcs",
+        "D:\\a\\Wirestack\\Wirestack\\target\\native\\test-support\\m2-004\\lib\\libwirestack_m2_004_tls_link_stub.a",
+        "D:\\a\\Wirestack\\Wirestack\\target\\native\\test-support\\m2-004\\m2_004_tls_link_stub.o"
+      ],
+      "duration_ms": 16.0,
+      "exit_code": 0,
+      "output": "",
+      "timed_out": false
+    },
+    "archive_sha256": "8e1a487598a8561d739f3c49778663c952955f60b1c8f9e70a5e5e8aa5a2a1b9",
+    "compile": {
+      "command": [
+        "C:\\Program Files\\LLVM\\bin\\clang.EXE",
+        "-std=c11",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-c",
+        "D:\\a\\Wirestack\\Wirestack\\tools\\gates\\native\\m2_004_tls_link_stub.c",
+        "-o",
+        "D:\\a\\Wirestack\\Wirestack\\target\\native\\test-support\\m2-004\\m2_004_tls_link_stub.o"
+      ],
+      "duration_ms": 62.0,
+      "exit_code": 0,
+      "output": "",
+      "timed_out": false
+    },
+    "purpose": "M2-004 resolver-test link support; all functions fail closed",
+    "source_sha256": "65989671e90af6fa3a3fd30f32e25e5d1a3bf8cb8adf656a01b74331e8022688",
+    "test_only": true
+  }
+}
