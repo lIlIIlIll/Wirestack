@@ -320,6 +320,7 @@ def run_ios_test(root: Path, env: dict[str, str]) -> tuple[dict[str, Any], dict[
             "cjpm", "test", "src/internal/resolver", "-j", "1", "--parallel", "1",
             "--target", IOS_TARGET, "--target-dir", str(target_dir), "--no-run",
             "--filter", "M2006AppleSystemResolverTest", "--no-color", "--no-progress",
+            "-V",
         ],
         cwd=root,
         env=env,
@@ -521,6 +522,15 @@ def main() -> int:
     try:
         report = run_gate(args.repo_root.resolve(), args.output.resolve(), args.revision, args.mode)
     except GateError as error:
+        atomic_json(args.output.resolve(), {
+            "schema_version": SCHEMA_VERSION,
+            "task_id": TASK_ID,
+            "revision": args.revision,
+            "mode": args.mode,
+            "decision": "FAIL",
+            "failures": ["GATE:ERROR"],
+            "error": str(error)[-12000:],
+        })
         print(f"M2-006-APPLE-SYSTEM-RESOLVER: ERROR: {error}")
         return 2
     print(json.dumps({
