@@ -17,7 +17,7 @@ Hosted signing mode: frozen artifact; no compiler or artifact rebuild
 | `python3 -m unittest tools.tests.test_m7_030_linux_release -v` | PASS; 12/12 tests. |
 | `scripts/generate-m7-025-linux-supply-chain --validate-only` | PASS; artifact `c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee`, build fingerprint `67dcd09f0ab99a33cfb204fb5f2a133a911f8f706ccf85a7a3312b980ddac9d9`. |
 | `scripts/release-m7-030-linux validate-workflow --output docs/evidence/M7-030/workflow-contract.json` | PASS; exact frozen tag and SHA-256, isolated staging and attestation permissions, three attestation subjects and seven immutable action references. |
-| `scripts/check-m7-030-release` | PASS as `REHEARSAL`; three detached signatures, clean consumer, update, advisory and authorized rollback passed. Production attestation remains BLOCKED. |
+| `scripts/check-m7-030-release` | PASS as `REHEARSAL`; three detached signatures, clean consumer, update, advisory and authorized rollback passed. The separately validated production attestation is PASS. |
 | `scripts/check-fast --json --output build/m7-030/check-fast.json` | PASS; task-contract fast gate. |
 | fixed-SDK `scripts/check` outside the restricted socket sandbox | PASS; Python tool tests, gate tests and benchmark tests passed; `cjpm check`, `cjpm build` and `cjpm test` passed. Cangjie summary: 592 total, 569 passed, 23 skipped by the repository's non-Performance selection, 0 error, 0 failed. The skipped cases are not reported as PASS. |
 
@@ -70,22 +70,32 @@ bundle and verifying it offline with the repository-qualified identity returned
 one verified attestation. No bounded hosted report was produced by this failed
 run.
 
+## Hosted success
+
+Run `33318194490` on merge commit
+`8367a4eae8c4d46600dc1d20e571e9a3ddf5a493` completed both jobs. It
+downloaded the exact draft asset, verified its SHA-256 before and after job
+transfer, validated M7-025, created and verified the artifact, SBOM and release
+manifest attestations, produced the bounded report and uploaded all evidence.
+The downloaded artifact digest is
+`c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee`.
+The byte-identical downloaded `github-attestation.json` has SHA-256
+`d3f553ca325c5ee7ed90039c6673172be886cbb64680ff9763eac9a66e3f9e35`
+and passes `scripts/release-m7-030-linux validate-hosted`.
+
 ## Task-level result
 
 `scripts/check-task M7-030 --json --output
-docs/evidence/M7-030/task-check.json` ran all six commands. The first five
-passed. `github-hosted-attestations` returned exit 2 with
-`HOSTED_ATTESTATION_BLOCKED` because `github-attestation.json` does not yet
-exist. The overall task result is therefore FAIL/INCOMPLETE, not PASS.
+docs/evidence/M7-030/task-check.json` ran all six commands. All six passed,
+including `github-hosted-attestations`; the overall task result is PASS.
 
-`scripts/verify-evidence M7-030 --json` also returned FAIL with
-`PATH_MISSING` for `docs/evidence/M7-030/evidence.json`. Evidence is not sealed
-before the hosted attestation and all task commands pass.
+`hosted-validation.json` binds the hosted report SHA-256, commit and all three
+verified subjects. `task-check.json` binds the six acceptance commands.
+`scripts/verify-evidence M7-030 --json` returns PASS with two indexed reports,
+23 source digests and no stale path.
 
 ## Gates not run
 
-- A successful GitHub-hosted OIDC/Sigstore workflow has not yet run. The two
-  hosted failure-injection runs produced no attestations.
 - The one-hour SSE profile was not run.
 - A second 86,400-second soak was not run; M7-022 already owns and completed the
   final artifact soak.
