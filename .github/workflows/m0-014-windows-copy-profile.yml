@@ -1,0 +1,60 @@
+name: M0-014 Windows Copy Profile
+
+on:
+  push:
+    branches:
+      - task/M0-014-windows-copy-profile
+    paths:
+      - "tools/gates/m0_014_windows_copy_profile.py"
+      - "tools/gates/tests/test_m0_014_windows_copy_profile.py"
+      - "scripts/gate-m0-014-windows-copy-profile"
+      - ".github/workflows/m0-014-windows-copy-profile.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-environment:
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Resolve the latest complete Cangjie nightly
+        id: cangjie-nightly
+        shell: pwsh
+        run: python tools/latest_cangjie_nightly.py --github-output $env:GITHUB_OUTPUT
+
+      - name: Install the resolved Cangjie toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ steps.cangjie-nightly.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie.zip
+
+      - name: Run validator unit tests
+        shell: pwsh
+        run: python -m unittest tools.gates.tests.test_m0_014_windows_copy_profile -v
+
+      - name: Record native Windows capabilities
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build/gates/m0-014 | Out-Null
+          python tools/gates/m0_014_windows_copy_profile.py `
+            --environment-only `
+            --repository-revision $env:GITHUB_SHA `
+            --output build/gates/m0-014/environment.json
+
+      - name: Upload capability report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m0-014-windows-environment-${{ github.sha }}
+          path: build/gates/m0-014/environment.json
+          if-no-files-found: error
+          retention-days: 14
