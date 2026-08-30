@@ -1,0 +1,90 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M7-022/test-plan.md",
+        "--json"
+      ],
+      "duration_ms": 168.178,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T11:07:32.010940Z",
+      "id": "test-plan-matrix",
+      "started_at_utc": "2026-08-30T11:07:31.842767Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-022/test-plan-matrix.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"counts\": {\"paths\": 25, \"scenarios\": 17, \"tests\": 13}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+      "stdout_path": "build/repository-tooling/M7-022/test-plan-matrix.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m7_022_linux_release_soak",
+        "tools.repository.tests.test_repository_tooling"
+      ],
+      "duration_ms": 3897.513,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T11:07:35.908613Z",
+      "id": "gate-fault-injection",
+      "started_at_utc": "2026-08-30T11:07:32.011106Z",
+      "status": "PASS",
+      "stderr_excerpt": "................................\n----------------------------------------------------------------------\nRan 32 tests in 3.680s\n\nOK\n",
+      "stderr_path": "build/repository-tooling/M7-022/gate-fault-injection.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "M7-022 Linux release soak: FAIL: SOAK_ALREADY_RUNNING: another invocation is active\n",
+      "stdout_path": "build/repository-tooling/M7-022/gate-fault-injection.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "scripts/gate-m7-022-linux-soak",
+        "--preflight",
+        "--duration-seconds",
+        "10",
+        "--application-sample-seconds",
+        "2",
+        "--resource-sample-seconds",
+        "1",
+        "--idle-milliseconds",
+        "100",
+        "--raw-log",
+        "build/gates/m7-022-preflight.log",
+        "--output",
+        "build/gates/m7-022-preflight.json"
+      ],
+      "duration_ms": 25966.562,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-30T11:08:01.875310Z",
+      "id": "installed-artifact-preflight",
+      "started_at_utc": "2026-08-30T11:07:35.908761Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M7-022/installed-artifact-preflight.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "M7-022 Linux release soak: INCOMPLETE preflight=PASS output=/home/elliot/playground/Wirestack/build/gates/m7-022-preflight.json\n",
+      "stdout_path": "build/repository-tooling/M7-022/installed-artifact-preflight.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "task",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M7-022"
+}

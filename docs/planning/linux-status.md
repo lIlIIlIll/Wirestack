@@ -155,7 +155,7 @@ replace the six-platform M7-001 through M7-017 tasks.
 | M7-019 Linux requirement audit | COMPLETE | The machine-checked audit covers 32 P0 requirements, 15 lifecycle invariants and 22 release criteria. Seven requirement gaps map to M7-021 through M7-025 and M7-029; Android/iOS listener acceptance is `NOT_APPLICABLE_TO_LINUX_PROFILE`; [evidence](../evidence/M7-019/README.md). |
 | M7-020 Linux architecture audit | COMPLETE | The repeatable guard finds zero violations across 188 Cangjie files and 11 build/native files. It covers dependency direction, public low-level types, private ABI, old bridges, global providers and system OpenSSL loaders; [evidence](../evidence/M7-020/README.md). |
 | M7-021 Linux artifact and installation | COMPLETE | Two normalized builds produce the same SHA-256. A clean installed consumer runs HTTPS client/server and runtime-info smoke, and its ELF has no system OpenSSL dependency; [evidence](../evidence/M7-021/README.md). |
-| M7-022 Linux final 24h+ soak | BLOCKED | The 10-second installed-artifact preflight passes. The uninterrupted 86,400-second run is deferred until M7-032 and M7-029 finish and all source-sensitive release evidence is regenerated; [evidence](../evidence/M7-022/README.md). |
+| M7-022 Linux final 24h+ soak | COMPLETE | The final candidate artifact completed one uninterrupted 86,400.354-second mixed H1, H2, SSE, cancellation, reset, churn and idle run. All workload, lifecycle and bounded-resource trends passed across 289 application and 1,440 process-tree samples; [evidence](../evidence/M7-022/README.md). |
 | M7-023 Linux release fuzz gate | COMPLETE | The post-M6-026 native `-O2` requalification consumes digest-pinned corpora for all ten PRD targets and passes 6,465 deterministic iterations with zero current-run crash artifact; its report source fingerprint matches the current tree; [evidence](../evidence/M7-023/README.md). |
 | M7-024 Linux performance gate | COMPLETE | The post-M6-026 H2 matrix was rerun with the original controls and bound to the current production-source fingerprint. The aggregate gate verifies seven raw reports and passes 254/254 checks across raw TCP, DNS, TLS, H1, H2, cancellation, SSE and memory; [evidence](../evidence/M7-024/README.md). |
 | M7-025 Linux SBOM and fingerprint | COMPLETE | The SPDX 2.3 SBOM, provider manifest and deterministic fingerprint bind the qualified artifact to pinned native inputs, target, toolchain, trust, capabilities and features; runtime/std source changes are not dependencies; [evidence](../evidence/M7-025/README.md). |
@@ -169,6 +169,5 @@ replace the six-platform M7-001 through M7-017 tasks.
 
 ## Next critical path
 
-1. Regenerate the final artifact, API inventory, performance, SBOM and install
-   evidence, then run M7-022's explicit 24-hour mixed release soak once.
-2. Complete M7-030 signing/update rehearsal and M7-031 candidate report.
+1. Complete M7-030 signing and update rehearsal.
+2. Complete the M7-031 candidate report.
