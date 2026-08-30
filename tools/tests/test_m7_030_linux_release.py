@@ -310,6 +310,10 @@ class M7030LinuxReleaseTest(unittest.TestCase):
                             encoding="utf-8")
             with self.assertRaisesRegex(release.ReleaseError, "WORKFLOW_ATTEST_PERMISSION"):
                 release.inspect_workflow(path)
+            path.write_text(text.replace(release.SIGNER_WORKFLOW_IDENTITY,
+                                         release.WORKFLOW), encoding="utf-8")
+            with self.assertRaisesRegex(release.ReleaseError, "WORKFLOW_VERIFY"):
+                release.inspect_workflow(path)
             path.write_text(
                 text + "\n      - run: scripts/qualify-m7-021-linux-release\n",
                 encoding="utf-8",
