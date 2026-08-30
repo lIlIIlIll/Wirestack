@@ -100,7 +100,7 @@ jobs:
           gh attestation verify dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz
           --bundle '${{ steps.attest-artifact.outputs.bundle-path }}'
           --repo lIlIIlIll/Wirestack
-          --signer-workflow .github/workflows/linux-release-attestation.yml
+          --signer-workflow lIlIIlIll/Wirestack/.github/workflows/linux-release-attestation.yml
           --predicate-type https://spdx.dev/Document/v2.3
           --deny-self-hosted-runners
           --format json --jq '{verified: length}' > build/m7-030/artifact-verification.json
@@ -113,7 +113,7 @@ jobs:
           gh attestation verify docs/evidence/M7-025/linux_x86_64/sbom.spdx.json
           --bundle '${{ steps.attest-sbom.outputs.bundle-path }}'
           --repo lIlIIlIll/Wirestack
-          --signer-workflow .github/workflows/linux-release-attestation.yml
+          --signer-workflow lIlIIlIll/Wirestack/.github/workflows/linux-release-attestation.yml
           --deny-self-hosted-runners
           --format json --jq '{verified: length}' > build/m7-030/sbom-verification.json
         env:
@@ -125,7 +125,7 @@ jobs:
           gh attestation verify build/m7-030/release-manifest.json
           --bundle '${{ steps.attest-release-manifest.outputs.bundle-path }}'
           --repo lIlIIlIll/Wirestack
-          --signer-workflow .github/workflows/linux-release-attestation.yml
+          --signer-workflow lIlIIlIll/Wirestack/.github/workflows/linux-release-attestation.yml
           --deny-self-hosted-runners
           --format json --jq '{verified: length}' > build/m7-030/release-manifest-verification.json
         env:
