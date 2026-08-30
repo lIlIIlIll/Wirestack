@@ -35,7 +35,9 @@ reports. The iOS job compiles a standalone Cangjie resolver probe, packages the
 official `ios_simulator_aarch64_cjnative` runtime under the app's `Frameworks`
 directory, records the signed bundle inputs, installs the app, and launches it
 in the booted Simulator. This avoids a child-process test runner, which the app
-sandbox cannot launch. Compilation alone cannot satisfy the task.
+sandbox cannot launch. The probe terminates with `std.env.exit` after emitting
+all seven case records so process-wide resolver workers cannot keep the test app
+alive. Compilation alone cannot satisfy the task.
 
 ## Test-only link support
 

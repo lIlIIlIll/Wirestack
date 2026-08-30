@@ -1,6 +1,7 @@
 package wirestack.m2_006_probe
 
 import std.time.*
+import std.env.exit
 import wirestack as api
 import wirestack.internal.resolver.SystemResolver
 
@@ -15,7 +16,7 @@ main(): Int64 {
     if (!m2006Run("closes idempotently and rejects invalid bounds", m2006Lifecycle)) {
         failures++
     }
-    if (failures == 0) { 0 } else { 1 }
+    exit(if (failures == 0) { 0 } else { 1 })
 }
 
 private func m2006Run(name: String, action: () -> Bool): Bool {
