@@ -1,0 +1,97 @@
+{
+  "acceptance_commands": [
+    {
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/M7-031/test-plan.md", "--json"],
+      "gate": "task",
+      "id": "test-plan-matrix",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["python3", "-m", "unittest", "tools.tests.test_m7_031_linux_candidate", "-v"],
+      "gate": "task",
+      "id": "candidate-fault-injection",
+      "long_running": false,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": ["python3", "-m", "unittest", "tools.tests.test_m7_linux_task_graph", "-v"],
+      "gate": "task",
+      "id": "linux-task-graph",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["scripts/check-m7-031-release"],
+      "gate": "task",
+      "id": "linux-release-candidate",
+      "long_running": false,
+      "timeout_seconds": 120
+    }
+  ],
+  "allowed_paths": [
+    ".gitignore",
+    "docs/evidence/M7-031",
+    "docs/planning/linux-status.md",
+    "docs/planning/status.md",
+    "scripts/check-m7-031-release",
+    "tools/m7_031_linux_candidate.py",
+    "tools/tasks/M7-031.json",
+    "tools/tests/test_m7_031_linux_candidate.py",
+    "tools/tests/test_m7_linux_task_graph.py"
+  ],
+  "dependencies": [
+    "M7-019",
+    "M7-020",
+    "M7-021",
+    "M7-022",
+    "M7-023",
+    "M7-024",
+    "M7-025",
+    "M7-026",
+    "M7-027",
+    "M7-028",
+    "M7-029",
+    "M7-030",
+    "M7-032"
+  ],
+  "long_running_gate": false,
+  "platforms": ["linux-x86_64-glibc"],
+  "required_evidence": [
+    "docs/evidence/M7-031/evidence.json",
+    "docs/evidence/M7-031/linux_x86_64/release-candidate.json",
+    "docs/evidence/M7-031/task-check.json"
+  ],
+  "schema_version": 1,
+  "source_paths": [
+    ".gitignore",
+    "docs/evidence/M7-019/linux_x86_64/audit.data",
+    "docs/evidence/M7-020/linux_x86_64/audit.data",
+    "docs/evidence/M7-021/linux_x86_64/qualification.json",
+    "docs/evidence/M7-022/linux_x86_64/soak.json",
+    "docs/evidence/M7-023/linux_glibc_x86_64/fuzz-report.json",
+    "docs/evidence/M7-024/linux_glibc_x86_64/performance-gate.json",
+    "docs/evidence/M7-025/linux_x86_64/bundle.json",
+    "docs/evidence/M7-026/linux_x86_64/api-compatibility.json",
+    "docs/evidence/M7-027/linux_x86_64/examples.json",
+    "docs/evidence/M7-028/linux_x86_64/review-package.json",
+    "docs/evidence/M7-029/independent-review.json",
+    "docs/evidence/M7-029/linux_x86_64/review-validation.json",
+    "docs/evidence/M7-030/hosted-validation.json",
+    "docs/evidence/M7-031/README.md",
+    "docs/evidence/M7-031/linux_x86_64/release-candidate.json",
+    "docs/evidence/M7-031/test-plan.md",
+    "docs/evidence/M7-031/test-results.md",
+    "docs/evidence/M7-032/linux_x86_64/public-api.json",
+    "docs/evidence/M7-032/linux_x86_64/clean-consumer.json",
+    "docs/planning/linux-status.md",
+    "docs/planning/status.md",
+    "scripts/check-m7-031-release",
+    "tools/m7_031_linux_candidate.py",
+    "tools/tasks/M7-031.json",
+    "tools/tests/test_m7_031_linux_candidate.py",
+    "tools/tests/test_m7_linux_task_graph.py"
+  ],
+  "task_id": "M7-031",
+  "timeout_seconds": 360
+}
