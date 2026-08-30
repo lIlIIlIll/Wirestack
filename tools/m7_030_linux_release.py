@@ -26,7 +26,6 @@ NAMESPACE = "wirestack-release"
 SIGNER_IDENTITY = "wirestack-release"
 REPOSITORY = "lIlIIlIll/Wirestack"
 WORKFLOW = ".github/workflows/linux-release-attestation.yml"
-HOSTED_CANGJIE_VERSION = "1.3.0-alpha.20260830010011"
 ARTIFACT = ROOT / "dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz"
 SUPPLY_CHAIN = ROOT / "docs/evidence/M7-025/linux_x86_64"
 SBOM = SUPPLY_CHAIN / "sbom.spdx.json"
@@ -648,10 +647,14 @@ def inspect_workflow(path: Path = ROOT / WORKFLOW) -> dict[str, Any]:
                 "WORKFLOW_ACTION_PIN", action)
     require(uses.count("actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d") == 3,
             "WORKFLOW_ATTEST", "three immutable attest calls required")
-    require(f"version: {HOSTED_CANGJIE_VERSION}" in text,
-            "WORKFLOW_TOOLCHAIN", "fixed Cangjie release toolchain")
+    require("setup-cangjie@" not in text and
+            "scripts/qualify-m7-021-linux-release" not in text,
+            "WORKFLOW_ARTIFACT_REBUILD", "hosted signing must consume frozen artifact")
     require("scripts/generate-m7-025-linux-supply-chain --validate-only" in text,
             "WORKFLOW_SUPPLY_CHAIN", "frozen bundle validation")
+    require(text.index("scripts/generate-m7-025-linux-supply-chain --validate-only") <
+            text.index("id: attest-artifact"),
+            "WORKFLOW_SUPPLY_CHAIN", "validate frozen inputs before attestation")
     for subject in ("artifact", "sbom", "release-manifest"):
         require(f"id: attest-{subject}" in text, "WORKFLOW_ATTEST", subject)
         require(f"id: verify-{subject}" in text, "WORKFLOW_VERIFY", subject)
@@ -667,7 +670,7 @@ def inspect_workflow(path: Path = ROOT / WORKFLOW) -> dict[str, Any]:
         "decision": "PASS",
         "uses": uses,
         "attestationSubjects": 3,
-        "toolchainVersion": HOSTED_CANGJIE_VERSION,
+        "artifactMode": "frozen",
     }
 
 
