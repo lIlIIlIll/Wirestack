@@ -7,6 +7,8 @@ import argparse
 import os
 import pathlib
 import shutil
+import stat
+import subprocess
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -39,18 +41,54 @@ EXCLUDED_FILE_SUFFIXES = frozenset({
     ".o",
     ".pyc",
     ".so",
+    ".class",
+    ".exe",
+    ".jar",
+    ".lcov",
+    ".profdata",
+    ".profraw",
+    ".wasm",
+    ".zip",
+    ".gz",
 })
+GENERATED_MAGIC_PREFIXES = (b"\x7fELF", b"MZ", b"PK\x03\x04", b"\xca\xfe\xba\xbe")
 
 
 def is_excluded_directory(relative: pathlib.PurePath) -> bool:
     if relative.name in EXCLUDED_DIRECTORY_NAMES:
         return True
     parts = relative.parts
+    if len(parts) >= 3 and parts[0] == "release" and parts[2] == "artifacts":
+        return True
     return any(parts[:len(prefix)] == prefix for prefix in EXCLUDED_DIRECTORY_PREFIXES)
 
 
 def is_excluded_file(relative: pathlib.PurePath) -> bool:
     return relative.suffix in EXCLUDED_FILE_SUFFIXES
+
+
+def is_generated_file(path: pathlib.Path, relative: pathlib.PurePath) -> bool:
+    if is_excluded_file(relative):
+        return True
+    with path.open("rb") as stream:
+        prefix = stream.read(128)
+    mode = path.stat().st_mode
+    if mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH):
+        if not prefix.startswith((b"#!/usr/bin/env python", b"#!/usr/bin/env bash", b"#!/bin/bash")):
+            return True
+    return prefix.startswith(GENERATED_MAGIC_PREFIXES)
+
+
+def git_tracked_files(source: pathlib.Path) -> list[pathlib.Path] | None:
+    result = subprocess.run(
+        ["git", "-C", str(source), "ls-files", "-z"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return [pathlib.Path(value.decode("utf-8")) for value in result.stdout.split(b"\0") if value]
 
 
 def source_only_violations(root: pathlib.Path) -> list[str]:
@@ -71,7 +109,7 @@ def source_only_violations(root: pathlib.Path) -> list[str]:
         for name in files:
             path = current_path / name
             relative = relative_current / name
-            if is_excluded_file(relative) or path.is_symlink():
+            if path.is_symlink() or is_generated_file(path, relative):
                 violations.append(relative.as_posix())
     return sorted(violations)
 
@@ -96,6 +134,25 @@ def stage_source_tree(source: pathlib.Path, destination: pathlib.Path) -> int:
         raise ValueError(f"destination is not empty: {destination}")
     destination.mkdir(parents=True, exist_ok=True)
 
+    tracked = git_tracked_files(source)
+    if tracked is not None:
+        copied = 0
+        for relative in tracked:
+            source_file = source / relative
+            if any(is_excluded_directory(pathlib.PurePath(*relative.parts[:index]))
+                   for index in range(1, len(relative.parts))):
+                continue
+            if source_file.is_symlink():
+                raise ValueError(f"source tree contains unsupported symlink: {relative.as_posix()}")
+            if is_generated_file(source_file, relative):
+                continue
+            target = destination / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source_file, target)
+            copied += 1
+        assert_source_only(destination)
+        return copied
+
     copied = 0
     for current, directories, files in os.walk(source, followlinks=False):
         current_path = pathlib.Path(current)
@@ -116,7 +173,7 @@ def stage_source_tree(source: pathlib.Path, destination: pathlib.Path) -> int:
         for name in sorted(files):
             source_file = current_path / name
             relative = relative_current / name
-            if is_excluded_file(relative):
+            if is_generated_file(source_file, relative):
                 continue
             if source_file.is_symlink():
                 raise ValueError(f"source tree contains unsupported symlink: {relative.as_posix()}")

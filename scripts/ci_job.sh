@@ -123,6 +123,9 @@ case "$job" in
             "$evidence/peer-cell-1/peer-summary.json" "$regenerated/peer-summary.json"
         cmp "$regenerated/peer-summary.md" "$evidence/peer-cell-1/peer-summary.md"
         ;;
+    perf-evidence-drift)
+        python3 "$repo/scripts/check_seven_library_evidence.py"
+        ;;
     api-inventory)
         python3 "$repo/scripts/check_api_inventory.py"
         ;;
@@ -181,6 +184,10 @@ case "$job" in
         ;;
     registry-rehearsal)
         require_cangjie
+        candidate="$modules/release-candidate"
+        python3 "$repo/scripts/release_temp_tree.py" "$candidate"
+        python3 "$candidate/scripts/check_api_inventory.py"
+        run_with_dependency_override "$candidate" cjpm test --no-color
         rehearsal="$modules/registry-rehearsal"
         registry_args=()
         if [[ -n "${YJSON_CI_DEPENDENCY_OVERRIDE:-}" ]]; then
@@ -236,7 +243,7 @@ case "$job" in
         "$repo/scripts/release_yyjson_colink_check.sh"
         ;;
     *)
-        echo 'usage: scripts/ci_job.sh {stream-docs|api-inventory|runtime-freeze|core|standards-conformance|schema-formats-conformance|performance-comparison|examples|macro-consumer|algorithms-consumer|registry-rehearsal|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
+        echo 'usage: scripts/ci_job.sh {stream-docs|perf-evidence-drift|api-inventory|runtime-freeze|core|standards-conformance|schema-formats-conformance|performance-comparison|examples|macro-consumer|algorithms-consumer|registry-rehearsal|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
         exit 2
         ;;
 esac

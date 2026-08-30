@@ -2,6 +2,7 @@
 
 import importlib.util
 import pathlib
+import subprocess
 import tempfile
 import unittest
 
@@ -75,6 +76,28 @@ class PurePerfProvenanceTest(unittest.TestCase):
             path.symlink_to(target)
             with self.assertRaises(SystemExit):
                 MODULE.artifact_identity(root)
+
+    def test_enforce_rejects_tracked_build_time_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            self.make_tree(root)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.name", "Fixture"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "config", "user.email", "fixture@example.invalid"],
+                check=True,
+            )
+            subprocess.run(["git", "-C", str(root), "add", "."], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "-c", "core.hooksPath=/dev/null", "commit", "-q",
+                 "-m", "test(provenance): create fixture"],
+                check=True,
+            )
+            before = MODULE.source_identity(root)
+            (root / "cjpm.toml").write_text("mutated during build\n", encoding="utf-8")
+            after = MODULE.source_identity(root)
+            with self.assertRaisesRegex(SystemExit, "post-build source drift"):
+                MODULE.verify_post_build_source_identity("candidate", before, after, True)
 
 
 if __name__ == "__main__":

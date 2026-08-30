@@ -84,6 +84,8 @@ def main() -> int:
     check_declarations(inventory)
     subprocess.run([sys.executable, str(ROOT / "scripts/test_generate_public_api_snapshot.py")],
         cwd=ROOT, check=True)
+    subprocess.run([sys.executable, str(ROOT / "scripts/test_release_temp_tree.py")],
+        cwd=ROOT, check=True)
     subprocess.run([sys.executable, str(ROOT / "scripts/generate_public_api_snapshot.py")],
         cwd=ROOT, check=True)
     print(f"public API inventory passed: {len(inventory['api'])} reviewed deltas")
