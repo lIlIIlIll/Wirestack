@@ -1,0 +1,81 @@
+{
+  "acceptance_commands": [
+    {
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/M2-004/test-plan.md", "--json"],
+      "gate": "task",
+      "id": "test-plan-matrix",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["python3", "-m", "unittest", "tools.tests.test_build_resolver", "tools.gates.tests.test_m2_004_windows_resolver", "-v"],
+      "gate": "task",
+      "id": "build-and-report-fault-injection",
+      "long_running": false,
+      "timeout_seconds": 60
+    },
+    {
+      "argv": ["python3", "tools/gates/m2_004_windows_resolver.py", "--validate-report", "docs/evidence/M2-004/windows-x86_64/report.json", "--expected-revision", "bc75e64aab2ae830a8e45a422616f0c935900dbe"],
+      "gate": "task",
+      "id": "stored-native-windows-result",
+      "long_running": false,
+      "timeout_seconds": 60
+    }
+  ],
+  "allowed_paths": [
+    ".github/workflows/m2-004-windows-system-resolver.yml",
+    "build.cj",
+    "cjpm.toml",
+    "docs/evidence/M2-004",
+    "docs/planning/status.md",
+    "native/resolver/windows",
+    "scripts/build-resolver",
+    "src/http/resolver.cj",
+    "src/internal/resolver/bounded_backend.cj",
+    "src/internal/resolver/bounded_backend_test.cj",
+    "src/internal/resolver/system_resolver.cj",
+    "src/internal/resolver/windows_system_resolver_test.cj",
+    "tools/build_native_dependencies.py",
+    "tools/build_resolver.py",
+    "tools/build_windows_resolver.py",
+    "tools/gates/m2_004_windows_resolver.py",
+    "tools/gates/native/m2_004_tls_link_stub.c",
+    "tools/gates/tests/test_m2_004_windows_resolver.py",
+    "tools/tasks/M2-004.json",
+    "tools/tests/test_build_resolver.py",
+    "tools/tests/test_m7_029_independent_security_review.py"
+  ],
+  "dependencies": ["M2-002", "M2-003"],
+  "long_running_gate": false,
+  "platforms": ["windows-x86_64", "linux-x86_64-glibc"],
+  "required_evidence": [
+    "docs/evidence/M2-004/evidence.json",
+    "docs/evidence/M2-004/windows-x86_64/validation.json"
+  ],
+  "schema_version": 1,
+  "source_paths": [
+    ".github/workflows/m2-004-windows-system-resolver.yml",
+    "build.cj",
+    "cjpm.toml",
+    "docs/evidence/M2-004/test-plan.md",
+    "native/resolver/windows/wirestack_resolver.c",
+    "native/resolver/windows/wirestack_resolver.h",
+    "scripts/build-resolver",
+    "src/http/resolver.cj",
+    "src/internal/resolver/bounded_backend.cj",
+    "src/internal/resolver/bounded_backend_test.cj",
+    "src/internal/resolver/system_resolver.cj",
+    "src/internal/resolver/windows_system_resolver_test.cj",
+    "tools/build_native_dependencies.py",
+    "tools/build_resolver.py",
+    "tools/build_windows_resolver.py",
+    "tools/gates/m2_004_windows_resolver.py",
+    "tools/gates/native/m2_004_tls_link_stub.c",
+    "tools/gates/tests/test_m2_004_windows_resolver.py",
+    "tools/tasks/M2-004.json",
+    "tools/tests/test_build_resolver.py",
+    "tools/tests/test_m7_029_independent_security_review.py"
+  ],
+  "task_id": "M2-004",
+  "timeout_seconds": 1800
+}

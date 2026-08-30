@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 import m7_029_independent_security_review as review  # noqa: E402
 import latest_cangjie_nightly as nightly  # noqa: E402
+import build_native_dependencies  # noqa: E402
 
 
 class M7029IndependentSecurityReviewTests(unittest.TestCase):
@@ -187,19 +188,28 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 nightly.resolve_release(mutation)
 
-    def test_cjpm_build_hook_builds_both_native_dependencies(self) -> None:
+    def test_cjpm_build_hook_uses_fail_closed_platform_selection(self) -> None:
         build_script = (ROOT / "build.cj").read_text(encoding="utf-8")
-        self.assertIn('join("build_tls_provider.py")', build_script)
-        self.assertIn('join("build_linux_resolver.py")', build_script)
-        self.assertIn("private func buildLinuxNativeDependencies(): Int64", build_script)
+        self.assertIn('join("build_native_dependencies.py")', build_script)
+        self.assertIn("private func buildNativeDependencies(): Int64", build_script)
+        self.assertNotIn('join("build_linux_resolver.py")', build_script)
+        self.assertNotIn('join("build_tls_provider.py")', build_script)
         for phase in (
             "pre-build", "pre-check", "pre-test", "pre-bench",
             "pre-run", "pre-install", "pre-publish",
         ):
             self.assertIn(
-                f'case "{phase}" => buildLinuxNativeDependencies()',
+                f'case "{phase}" => buildNativeDependencies()',
                 build_script,
             )
+
+        self.assertEqual(
+            ["tls-provider", "resolver"],
+            build_native_dependencies.plan("Linux"),
+        )
+        self.assertEqual(["resolver"], build_native_dependencies.plan("Windows"))
+        with self.assertRaisesRegex(ValueError, "unsupported"):
+            build_native_dependencies.plan("Darwin")
 
     def test_reviewer_dates_conflicts_and_set_fields_are_strict(self) -> None:
         temporary, root, request = self.fixture()
