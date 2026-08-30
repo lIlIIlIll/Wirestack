@@ -237,7 +237,7 @@ def make_ios_bundle(
     executable: Path,
     bundle: Path,
     device: str,
-) -> str:
+) -> dict[str, str]:
     if bundle.exists():
         shutil.rmtree(bundle)
     bundle.mkdir(parents=True)
@@ -281,7 +281,24 @@ def make_ios_bundle(
         timeout=60,
     )
     require_success(installed, "install iOS test bundle")
-    return sha256_path(executable_copy)
+    container_process = run_command(
+        ["xcrun", "simctl", "get_app_container", device, "dev.wirestack.m2-006-tests", "app"],
+        cwd=root,
+        env=env,
+        timeout=30,
+    )
+    require_success(container_process, "resolve installed iOS resolver probe")
+    installed_probe = Path(container_process["output"].strip()) / executable_copy.name
+    if not installed_probe.is_file():
+        raise GateError("installed iOS resolver probe is missing")
+    bundled_sha256 = sha256_path(executable_copy)
+    installed_sha256 = sha256_path(installed_probe)
+    if bundled_sha256 != installed_sha256:
+        raise GateError("installed iOS resolver probe digest does not match the signed bundle")
+    return {
+        "bundle_probe_sha256": bundled_sha256,
+        "installed_probe_sha256": installed_sha256,
+    }
 
 
 def run_ios_test(root: Path, env: dict[str, str]) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -308,6 +325,7 @@ def run_ios_test(root: Path, env: dict[str, str]) -> tuple[dict[str, Any], dict[
     probe_compile = run_command(
         [
             "cjc", str(probe_source), "-o", str(probe),
+            "--static",
             "--import-path", str(release_dir),
             "-L", str(library_dir),
             "-lwirestack.internal.resolver",
@@ -332,7 +350,7 @@ def run_ios_test(root: Path, env: dict[str, str]) -> tuple[dict[str, Any], dict[
     require_success(boot_status, "wait for iOS Simulator")
     bundle = root / "build/gates/m2-006/WirestackM2006.app"
     try:
-        installed_sha256 = make_ios_bundle(root, env, probe, bundle, device)
+        installed_metadata = make_ios_bundle(root, env, probe, bundle, device)
         process = run_command(
             ios_launch_command(device),
             cwd=root,
@@ -347,7 +365,7 @@ def run_ios_test(root: Path, env: dict[str, str]) -> tuple[dict[str, Any], dict[
         "device_udid": device,
         "runtime": runtime,
         "probe_sha256": sha256_path(probe),
-        "installed_probe_sha256": installed_sha256,
+        **installed_metadata,
     }
 
 
@@ -396,10 +414,13 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
             if not isinstance(simulator.get("runtime"), str) or ".iOS-" not in simulator["runtime"]:
                 failures.append("REPORT:SIMULATOR_RUNTIME")
             probe_sha = simulator.get("probe_sha256")
+            bundle_probe_sha = simulator.get("bundle_probe_sha256")
             if (
                 not isinstance(probe_sha, str)
                 or not re.fullmatch(r"[0-9a-f]{64}", probe_sha)
-                or simulator.get("installed_probe_sha256") != probe_sha
+                or not isinstance(bundle_probe_sha, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", bundle_probe_sha)
+                or simulator.get("installed_probe_sha256") != bundle_probe_sha
             ):
                 failures.append("REPORT:SIMULATOR_PROBE")
     return failures
