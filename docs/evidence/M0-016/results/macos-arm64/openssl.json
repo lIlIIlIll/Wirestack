@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 5366624,
-    "binary_sha256": "0053089f4957294088cac8d51fa29fafe9817ead368b9550831707b92efbdec3",
+    "binary_bytes": 5366752,
+    "binary_sha256": "78ee96ad195daa9c4f1940e570d9501a13029c673a2947ec9f73b8a9da256f2d",
     "exported_symbol_inventory": {
       "count": 9534,
       "scope": "final-artifact-exports",
@@ -9544,22 +9544,28 @@
       ],
       "tool": "nm -gU"
     },
+    "license_bundle": {
+      "file_count": 3,
+      "path": "license-bundle/manifest.json",
+      "sha256": "045d956dc9b5cc1ab3346c0d3c4924e07a2e3095af72096c181922033ae5e1d0",
+      "total_bytes": 29732
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 1536312,
         "name": "libssl.a",
-        "sha256": "76c8d4270b1d5f9465946b215209942503a9165c11de6a18bae5803e0755dd53"
+        "sha256": "8c710773012ee063e243f2c086335ac1b710d730b7686c53f40c343a972251c0"
       },
       {
         "bytes": 8813056,
         "name": "libcrypto.a",
-        "sha256": "ee3f019bdb5621a04a2ae54eabef54d2810ce05a39a22600ea30d6e6205aa702"
+        "sha256": "cb0fd58b33dd0bfe6d981713ef37534ad3d4be15d9fb46be70ae410b83a6abd9"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "6bc80c5ce0723cee53ec85eda766e0ccaf29786941ed6621fe86f724d5e3ecbf",
+  "build_log_sha256": "ef3635d4e9d186aada21c94e28afe82c75a2bcce0c856dc3bab50683db9ff8f4",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -9580,20 +9586,28 @@
     "truncation": "PASS"
   },
   "execution": {
+    "container_image": "",
     "image_os": "macos15",
     "image_version": "20260727.0256.1",
     "python": "3.12.10",
-    "repository_revision": "837a63df942d67e77154c3127e2b917dfc1190cb",
+    "repository_revision": "4c7ddea51e9e73600b39be7938566ea6300ab5cd",
     "runner_arch": "ARM64",
     "runner_os": "macOS"
   },
-  "finished_at": "2026-08-31T10:57:42.245212+00:00",
+  "finished_at": "2026-08-31T12:21:54.764202+00:00",
   "metrics": {
+    "allocation_profile_bound_bytes": 1073741824,
+    "allocation_profile_bytes": 655949824,
+    "allocation_profile_calls": 20018,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
+    "memory_profile_bound_bytes": 536870912,
+    "memory_profile_peak_resident_bytes": 7127040,
+    "mtls_optional_handshakes": 2,
+    "mtls_required_handshakes": 1,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -9602,17 +9616,38 @@
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
+  "operational_evidence": {
+    "memory_profile": {
+      "allocation_bound_bytes": 1073741824,
+      "allocation_bytes": 655949824,
+      "allocation_calls": 20018,
+      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "payload_bytes_per_transfer": 32768,
+      "peak_resident_bytes": 7127040,
+      "resident_bound_bytes": 536870912
+    },
+    "native_memory_diagnostic": {
+      "cleanup_cycles": 10,
+      "leak_detection": {
+        "reason": "static OpenSSL 3.6.3 retains process-global allocations after thread and global cleanup; broad allocator suppression is forbidden",
+        "status": "UNSUPPORTED"
+      },
+      "output_sha256": "d59ce90a16e2760351c0c5737a486dbe8968c6d3c2e657206d846b1f5e514785",
+      "status": "PASS",
+      "tool": "address+undefined-sanitizer"
+    }
+  },
   "platform": "macos-arm64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 4,
+  "schema_version": 5,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T10:55:33.136999+00:00",
+  "started_at": "2026-08-31T12:20:15.074197+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
