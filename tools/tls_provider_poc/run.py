@@ -110,24 +110,29 @@ def run(command: Sequence[str], *, cwd: Path, log: Path,
 
 
 def execution_identity(repo: Path, log: Path) -> dict[str, str]:
+    status = run(
+        ["git", "status", "--porcelain", "--untracked-files=no"],
+        cwd=repo, log=log, check=False)
+    if status.returncode != 0:
+        raise PocError("unable to inspect local repository state")
+    if status.stdout.strip():
+        raise PocError("local repository has tracked modifications")
+    resolved = run(
+        ["git", "rev-parse", "--verify", "HEAD"],
+        cwd=repo, log=log, check=False)
+    checkout_revision = resolved.stdout.strip().lower()
+    if (resolved.returncode != 0 or
+            COMMIT_RE.fullmatch(checkout_revision) is None):
+        raise PocError("unable to resolve an exact local repository revision")
+
     revision = os.environ.get("GITHUB_SHA", "").lower()
     if revision:
         if COMMIT_RE.fullmatch(revision) is None:
             raise PocError("GITHUB_SHA is not an exact commit")
+        if revision != checkout_revision:
+            raise PocError("GITHUB_SHA does not match the checked-out revision")
     else:
-        status = run(
-            ["git", "status", "--porcelain", "--untracked-files=no"],
-            cwd=repo, log=log, check=False)
-        if status.returncode != 0:
-            raise PocError("unable to inspect local repository state")
-        if status.stdout.strip():
-            raise PocError("local repository has tracked modifications")
-        resolved = run(
-            ["git", "rev-parse", "--verify", "HEAD"],
-            cwd=repo, log=log, check=False)
-        revision = resolved.stdout.strip().lower()
-        if resolved.returncode != 0 or COMMIT_RE.fullmatch(revision) is None:
-            raise PocError("unable to resolve an exact local repository revision")
+        revision = checkout_revision
 
     runner_os = os.environ.get("RUNNER_OS", "") or platform.system()
     runner_arch = os.environ.get("RUNNER_ARCH", "") or platform.machine()
