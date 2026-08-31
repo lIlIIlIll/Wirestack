@@ -18,11 +18,12 @@ Version changes require a reviewed change to `tools/tls_provider_poc/providers.j
 - `BLOCKED`: the native platform or required environment is unavailable.
 
 `NOT_RUN`, missing cells and cross-compilation never count as native evidence.
-Schema versions 1 through 6 are no longer accepted because they cannot carry
+Schema versions 1 through 8 are no longer accepted because they cannot carry
 the complete callback, protocol-negative, certificate-negative, export,
 execution, durable build-provenance, license, provider-allocation,
-provider-instrumentation, bounded join, live-allocation-growth and cancellation
-evidence. Schema v7 is required for retained `PASS` and `PARTIAL` results. It requires an
+provider-instrumentation, bounded join, live-allocation-growth, monotonic
+cancellation and advisory-disposition evidence. Schema v9 is required for
+retained `PASS` and `PARTIAL` results. It requires an
 exact, bounded inventory of the final artifact's exported symbols and exactly
 10,000 measured cleanup
 cycles. When session resumption passes, the result must record four measured
@@ -64,7 +65,7 @@ must record `UNSUPPORTED`; they may not report a skipped diagnostic as `PASS`.
 
 Leak detection is a separate field. Linux glibc Mbed TLS requires
 LeakSanitizer `PASS`. AWS-LC 5.5.0 exposes no process-global cleanup API, and
-static OpenSSL 3.6.3 retains process-global allocations even after explicit
+static OpenSSL 3.6.4 retains process-global allocations even after explicit
 thread and global cleanup. Broad allocator suppression would also hide real
 provider leaks, so AWS-LC, OpenSSL, and the configured macOS runs record leak
 detection as `UNSUPPORTED`. The ASan/UBSan run and 10,000-cycle
@@ -74,13 +75,18 @@ A caller-cancellation `PASS` starts the provider handshake step on a worker,
 observes a native WANT state, blocks the caller-owned wait, sends an explicit
 cancel signal, and measures the wake and join against a 250,000-microsecond
 bound. Merely freeing a WANT-state connection is not cancellation evidence.
-The join is part of the same absolute bound and may not use an infinite wait.
+The join is part of the same absolute monotonic bound and may not use an
+infinite wait. Wall-clock adjustments cannot extend or shorten the bound.
 
 Each provider pin records its upstream commit timestamp, a maximum acceptable
-age and official advisory intake URLs. `validate.py` fails closed when a pin is
-too old. A known affected pin blocks promotion even when it is within the age
-limit; `docs/security/provider-update-workflow.md` defines the review cadence
-and rerun boundary.
+age and official advisory intake URLs. It also records a machine-readable
+advisory disposition containing the exact pin commit, review timestamp, sorted
+reviewed advisory IDs, affected subset and `affected` or `not-affected` status.
+Every successful result retains that exact disposition. `validate.py` fails
+closed when the source pin or disposition is stale, the disposition targets a
+different pin, the retained result drifts, or a reviewed advisory affects the
+pin. `docs/security/provider-update-workflow.md` defines the review cadence and
+rerun boundary.
 
 An external-trust `PASS` requires at least four callback invocations. The PoC
 must accept and reject an otherwise-untrusted valid chain through the callback

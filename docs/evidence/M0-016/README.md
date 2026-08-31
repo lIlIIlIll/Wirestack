@@ -2,17 +2,22 @@
 
 ## Status
 
-M0-016 remains **BLOCKED** because Android, iOS, and HarmonyOS or
-OpenHarmony do not have native-device evidence. Cross-compilation does not
-satisfy those cells.
+M0-016 remains **BLOCKED**. The 12 desktop schema-v8 results are stale after
+schema-v9 introduced monotonic cancellation waits and an exact, pin-bound
+advisory disposition. OpenSSL 3.6.3 was also affected by upstream advisories
+fixed in 3.6.4, so the control pin and all of its native results must be
+rebuilt. Android, iOS, and HarmonyOS or OpenHarmony still lack native-device
+evidence; cross-compilation does not satisfy those cells.
 
-All 12 desktop cells have current schema-v8 native evidence. AWS-LC passes
-every required capability on Linux glibc x86_64, Linux musl x86_64, macOS
-arm64, and Windows x86_64. Mbed TLS is PARTIAL because external signing and
-session resumption are not implemented by this PoC. The vendored OpenSSL
-control is PARTIAL because external signing is not implemented.
+Schema v9 retains all prior native evidence plus:
 
-Schema v8 retains:
+- monotonic cancellation and join deadlines that are unaffected by wall-clock
+  changes;
+- a fresh advisory review timestamp, exact pin commit, reviewed advisory IDs,
+  affected subset, and an explicit affected/not-affected disposition; and
+- the exact security-update object in every successful result.
+
+The complete evidence set includes:
 
 - required and optional client authentication;
 - negative certificate, hostname, trust, and ALPN cases;
@@ -35,14 +40,15 @@ LeakSanitizer as unsupported by the hosted toolchain. Linux musl and Windows
 record the configured sanitizer diagnostic as unsupported; they do not report
 a skipped diagnostic as PASS.
 
-## Current schema-v8 desktop runs
+## Superseded schema-v8 desktop runs
 
 [TLS Provider PoC run
 33416731896](https://github.com/lIlIIlIll/Wirestack/actions/runs/33416731896)
 produced the Linux glibc, Linux musl, and macOS results. [M0-016 Windows
 Provider PoC run
 33416731695](https://github.com/lIlIIlIll/Wirestack/actions/runs/33416731695)
-produced the Windows results. Both run records identify pull-request head
+produced the Windows results. These runs are retained as historical evidence
+only and do not satisfy schema v9. Both run records identify pull-request head
 47732d984d439bf7b4f700cf4f8d9ad8bc913da8. GitHub executed synthetic merge
 revision 67c519b3d406912378a18bd15da28d5b1f0cdf6a; every retained result binds
 that exact execution revision.
@@ -79,7 +85,7 @@ identity.
 |---|---:|---|
 | AWS-LC | 5.5.0 | commit 991e67ff4cf04df4dd89e407f8b920c6936cb56a |
 | Mbed TLS | 4.2.0 | commit ece41aa84d7879d7e55c59e955a5884b541f7f3b plus archive SHA-256 |
-| OpenSSL control | 3.6.3 | official archive SHA-256 and peeled tag commit |
+| OpenSSL control | 3.6.4 | official archive SHA-256 and peeled tag commit |
 
 tools/tls_provider_poc/providers.json contains the machine-readable source
 pins.
@@ -102,7 +108,7 @@ capabilities presented as PASS all fail validation.
 ## Evidence rules
 
 - A retained incomplete native result is PARTIAL only when it satisfies schema
-  v8.
+  v9.
 - A missing external-signer or session test prevents PASS.
 - A runtime provider fallback or system TLS dependency produces FAIL.
 - Cross-compilation does not satisfy a native platform cell.

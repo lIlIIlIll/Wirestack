@@ -88,6 +88,8 @@ def build_provenance_fixture(provider, platform, *, diagnostic=False):
 
 def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
                     status="PASS"):
+    provider_spec = next(item for item in spec["providers"]
+                         if item["id"] == provider)
     caps = {name: "PASS" for name in spec["required_capabilities"]}
     if status == "PARTIAL":
         caps["external_signer"] = "BLOCKED"
@@ -142,7 +144,11 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
         "provider": provider,
         "platform": platform,
         "status": status,
-        "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
+        "source": {
+            "content_sha256": "0" * 64,
+            "commit": provider_spec["commit"],
+            "security_update": copy.deepcopy(provider_spec["security_update"]),
+        },
         "capabilities": caps,
         "metrics": metrics,
         "build": {
@@ -251,6 +257,43 @@ class ProviderPocValidationTests(unittest.TestCase):
                                     "advisory intake channels"):
             validator.validate_spec(value)
 
+        value = copy.deepcopy(self.spec)
+        value["providers"][0]["security_update"]["advisory_disposition"][
+            "reviewed_through"
+        ] = "2020-01-01T00:00:00Z"
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "advisory disposition is stale"):
+            validator.validate_spec(value)
+
+        value = copy.deepcopy(self.spec)
+        value["providers"][0]["security_update"]["advisory_disposition"][
+            "pin_commit"
+        ] = "f" * 40
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "advisory disposition pin mismatch"):
+            validator.validate_spec(value)
+
+        value = copy.deepcopy(self.spec)
+        disposition = value["providers"][0]["security_update"][
+            "advisory_disposition"
+        ]
+        disposition["status"] = "affected"
+        disposition["affected_advisory_ids"] = [
+            disposition["reviewed_advisory_ids"][0]
+        ]
+        validator.validate_spec(value)
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "known affected provider pin"):
+            validator.validate_result(complete_result(value), value)
+
+        result = complete_result(self.spec)
+        result["source"]["security_update"]["advisory_disposition"][
+            "reviewed_advisory_ids"
+        ] = ["GHSA-0000-0000-0000"]
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "source security-update disposition mismatch"):
+            validator.validate_result(result, self.spec)
+
     def test_exported_symbol_inventory_is_bounded_and_digest_bound(self):
         self.assertEqual(runner.MAX_EXPORTED_SYMBOLS, validator.MAX_EXPORTED_SYMBOLS)
         validator.validate_exported_symbols({
@@ -303,7 +346,7 @@ class ProviderPocValidationTests(unittest.TestCase):
         value = copy.deepcopy(self.spec)
         value["providers"][2].pop("commit")
         value["providers"][2]["commit_resolution_url"] = (
-            "https://api.github.com/repos/openssl/openssl/git/ref/tags/openssl-3.6.3"
+            "https://api.github.com/repos/openssl/openssl/git/ref/tags/openssl-3.6.4"
         )
         with self.assertRaises(validator.ValidationError):
             validator.validate_spec(value)
@@ -929,6 +972,10 @@ class ProviderPocValidationTests(unittest.TestCase):
         self.assertIn('"-std=c11", *diagnostic_flags', RUN_MODULE.read_text())
         cancel_header = (ROOT / "tools/tls_provider_poc/poc_cancel.h").read_text()
         self.assertNotIn("WaitForSingleObject(thread, INFINITE)", cancel_header)
+        self.assertNotIn("CLOCK_REALTIME", cancel_header)
+        self.assertIn("pthread_condattr_setclock(&attributes, CLOCK_MONOTONIC)",
+                      cancel_header)
+        self.assertIn("pthread_cond_timedwait_relative_np", cancel_header)
         self.assertIn("gate->joined", cancel_header)
 
 

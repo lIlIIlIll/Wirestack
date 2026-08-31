@@ -20,7 +20,7 @@ MEMORY_PROFILE_BOUND_BYTES = 512 * 1024 * 1024
 PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES = 64 * 1024 * 1024 * 1024
 PROVIDER_ALLOCATION_CALL_BOUND = 150_000_000
 CANCELLATION_WAKE_BOUND_US = 250_000
-RESULT_SCHEMA_VERSION = 8
+RESULT_SCHEMA_VERSION = 9
 MAX_TOOL_VERSION_BYTES = 16 * 1024
 MAX_BUILD_ENVIRONMENT_VALUE_BYTES = 64 * 1024
 MAX_BUILD_ENVIRONMENT_TOTAL_BYTES = 256 * 1024
@@ -37,6 +37,8 @@ FAILURE_STAGES = {
     "fixture-generation", "poc-build", "binary-inspection",
     "poc-execution", "native-diagnostic",
 }
+ADVISORY_DISPOSITIONS = {"not-affected", "affected"}
+ADVISORY_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$")
 
 class ValidationError(RuntimeError):
     pass
@@ -201,6 +203,34 @@ def validate_spec(spec: Mapping[str, Any]) -> None:
         require(isinstance(advisory_urls, list) and advisory_urls and all(
             isinstance(url, str) and url.startswith("https://")
             for url in advisory_urls), f"{pid}: advisory intake channels")
+        disposition = security.get("advisory_disposition")
+        require(isinstance(disposition, dict),
+                f"{pid}: advisory disposition required")
+        require(disposition.get("status") in ADVISORY_DISPOSITIONS,
+                f"{pid}: advisory disposition status")
+        require(disposition.get("pin_commit") == provider["commit"],
+                f"{pid}: advisory disposition pin mismatch")
+        try:
+            reviewed_through = dt.datetime.fromisoformat(
+                str(disposition.get("reviewed_through", "")).replace("Z", "+00:00"))
+        except ValueError as error:
+            raise ValidationError(f"{pid}: advisory review timestamp") from error
+        review_age = (dt.datetime.now(dt.timezone.utc) - reviewed_through).days
+        require(-1 <= review_age <= 31, f"{pid}: advisory disposition is stale")
+        reviewed_ids = disposition.get("reviewed_advisory_ids")
+        affected_ids = disposition.get("affected_advisory_ids")
+        require(isinstance(reviewed_ids, list) and reviewed_ids and
+                len(reviewed_ids) <= 256 and reviewed_ids == sorted(set(reviewed_ids)) and
+                all(isinstance(advisory_id, str) and
+                    ADVISORY_ID_RE.fullmatch(advisory_id) is not None
+                    for advisory_id in reviewed_ids),
+                f"{pid}: reviewed advisory IDs")
+        require(isinstance(affected_ids, list) and
+                affected_ids == sorted(set(affected_ids)) and
+                set(affected_ids).issubset(reviewed_ids),
+                f"{pid}: affected advisory IDs")
+        require((disposition["status"] == "affected") == bool(affected_ids),
+                f"{pid}: advisory disposition consistency")
         require(security.get("update_workflow") ==
                 "docs/security/provider-update-workflow.md",
                 f"{pid}: security-update workflow")
@@ -257,6 +287,13 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
     if successful or source:
         require(SHA256_RE.fullmatch(str(source.get("content_sha256", ""))) is not None, "source content digest required")
         require(COMMIT_RE.fullmatch(str(source.get("commit", ""))) is not None, "resolved upstream commit required")
+        provider_spec = next(
+            provider for provider in spec["providers"]
+            if provider["id"] == result["provider"])
+        require(source.get("security_update") == provider_spec["security_update"],
+                "source security-update disposition mismatch")
+        require(provider_spec["security_update"]["advisory_disposition"]["status"] ==
+                "not-affected", "known affected provider pin blocks promotion")
     elif result.get("status") == "FAIL":
         require(result["failure"]["stage"] == "source-acquisition",
                 "post-source FAIL requires source identity")
@@ -270,20 +307,20 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
     require(isinstance(build, dict), "build object required")
     metrics = result.get("metrics")
     if successful or metrics is not None:
-        require(isinstance(metrics, dict), "schema v8 metrics object required")
+        require(isinstance(metrics, dict), "schema v9 metrics object required")
         require(metrics.get("repeated_cleanup_cycles") == 10000,
-                "schema v8 requires exactly 10,000 repeated cleanup cycles")
+                "schema v9 requires exactly 10,000 repeated cleanup cycles")
         if result["provider"] == "aws-lc" and caps.get("external_signer") == "PASS":
             require(isinstance(metrics.get("external_signer_calls"), int) and
                     metrics["external_signer_calls"] >= 2,
                     "AWS-LC external signer must serve TLS 1.2 and TLS 1.3")
         if caps.get("session_resumption") == "PASS":
             require(metrics.get("session_resumption_handshakes") == 4,
-                    "schema v8 session resumption requires four measured handshakes")
+                    "schema v9 session resumption requires four measured handshakes")
             require(metrics.get("session_resumption_tls12_handshakes") == 2,
-                    "schema v8 requires a TLS 1.2 resumed session")
+                    "schema v9 requires a TLS 1.2 resumed session")
             require(metrics.get("session_resumption_tls13_handshakes") == 2,
-                    "schema v8 requires a TLS 1.3 resumed ticket")
+                    "schema v9 requires a TLS 1.3 resumed ticket")
         if caps.get("external_trust") == "PASS":
             require(isinstance(metrics.get("external_trust_calls"), int) and
                     metrics["external_trust_calls"] >= 4,
@@ -415,7 +452,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
         require(all(value != "FAIL" for value in caps.values()), "PARTIAL/PASS result contains failed capability")
     if result["status"] == "PASS":
         require(schema_version == RESULT_SCHEMA_VERSION,
-                "PASS requires schema v8 evidence")
+                "PASS requires schema v9 evidence")
         require(all(value == "PASS" for value in caps.values()), "PASS requires all capabilities PASS")
     if any(value == "BLOCKED" for value in caps.values()):
         require(result["status"] != "PASS", "blocked capability cannot yield PASS")

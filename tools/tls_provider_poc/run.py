@@ -38,7 +38,7 @@ MEMORY_PROFILE_BOUND_BYTES = 512 * 1024 * 1024
 PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES = 64 * 1024 * 1024 * 1024
 PROVIDER_ALLOCATION_CALL_BOUND = 150_000_000
 CANCELLATION_WAKE_BOUND_US = 250_000
-RESULT_SCHEMA_VERSION = 8
+RESULT_SCHEMA_VERSION = 9
 MAX_TOOL_VERSION_BYTES = 16 * 1024
 MAX_BUILD_ENVIRONMENT_VALUE_BYTES = 64 * 1024
 MAX_BUILD_ENVIRONMENT_TOTAL_BYTES = 256 * 1024
@@ -298,7 +298,13 @@ def source_provider(spec: Mapping[str, Any], work: Path, log: Path) -> tuple[Pat
         tree = run(["git", "-C", str(src), "rev-parse", "HEAD^{tree}"],
                    cwd=work, log=log, env=git_env).stdout.strip()
         digest = hashlib.sha256((commit + "\n" + tree + "\n").encode()).hexdigest()
-        return src, {"commit": commit, "tree": tree, "content_sha256": digest, "kind": "git"}
+        return src, {
+            "commit": commit,
+            "tree": tree,
+            "content_sha256": digest,
+            "kind": "git",
+            "security_update": spec["security_update"],
+        }
 
     archive = source_root / Path(spec["url"]).name
     download(spec["url"], archive)
@@ -307,7 +313,13 @@ def source_provider(spec: Mapping[str, Any], work: Path, log: Path) -> tuple[Pat
         raise PocError(f"archive digest mismatch: {digest}")
     src = safe_extract(archive, source_root / "unpacked")
     commit = spec.get("commit") or resolve_git_tag(spec["commit_resolution_url"])
-    return src, {"commit": commit, "content_sha256": digest, "archive": archive.name, "kind": "archive"}
+    return src, {
+        "commit": commit,
+        "content_sha256": digest,
+        "archive": archive.name,
+        "kind": "archive",
+        "security_update": spec["security_update"],
+    }
 
 
 def is_license_file(path: Path) -> bool:
