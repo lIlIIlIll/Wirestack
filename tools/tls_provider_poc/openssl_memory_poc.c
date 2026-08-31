@@ -724,19 +724,24 @@ static int cancellation_case(const char *ca, uint64_t *latency_us) {
     if (!client || !in || !out) fail("cancel setup");
     SSL_set_bio(client, in, out);
     SSL_set_connect_state(client);
-    CancellationWorker worker;
-    memset(&worker, 0, sizeof(worker));
-    worker.client = client;
-    if (!poc_cancel_gate_init(&worker.gate)) fail("cancel gate");
+    CancellationWorker *worker = calloc(1, sizeof(CancellationWorker));
+    if (worker == NULL) fail("cancel worker");
+    worker->client = client;
+    if (!poc_cancel_gate_init(&worker->gate)) fail("cancel gate");
     PocThread thread;
-    int started = poc_thread_start(&thread, cancellation_worker, &worker);
-    int woke = started && poc_cancel_trigger_and_wait(&worker.gate, latency_us);
-    int joined = started && poc_thread_join(thread);
-    poc_cancel_gate_destroy(&worker.gate);
-    SSL_free(client);
-    SSL_CTX_free(client_ctx);
-    ERR_clear_error();
-    return worker.observed_want && woke && joined;
+    int started = poc_thread_start(&thread, cancellation_worker, worker);
+    int joined = started &&
+        poc_cancel_trigger_and_join(&worker->gate, thread, latency_us);
+    int cleanup_safe = !started || poc_cancel_join_complete(&worker->gate);
+    int observed_want = worker->observed_want;
+    if (cleanup_safe) {
+        poc_cancel_gate_destroy(&worker->gate);
+        free(worker);
+        SSL_free(client);
+        SSL_CTX_free(client_ctx);
+        ERR_clear_error();
+    }
+    return observed_want && joined;
 }
 
 #if defined(OPENSSL_IS_AWSLC)
@@ -823,6 +828,7 @@ int main(int argc, char **argv) {
         if (value < 1 || value > CLEANUP_CYCLES) return 2;
         cleanup_cycles = (int)value;
     }
+    uint64_t cleanup_live_before = provider_allocation_live_bytes;
     int cleanup = 1;
     for (int i = 0; i < cleanup_cycles && cleanup; ++i) {
         cleanup = basic_case(server_cert, server_key, ca, client_cert, client_key,
@@ -833,6 +839,9 @@ int main(int argc, char **argv) {
         failure_cleanup = negative_case(
             server_cert, server_key, ca, "not-localhost", 1);
     }
+    uint64_t cleanup_live_after = provider_allocation_live_bytes;
+    cleanup = cleanup && failure_cleanup &&
+        cleanup_live_after <= cleanup_live_before;
 
     printf("CAP tls12=%s\n", tls12 ? "PASS" : "FAIL");
     printf("CAP tls13=%s\n", tls13 ? "PASS" : "FAIL");
@@ -886,6 +895,10 @@ int main(int argc, char **argv) {
            (unsigned long long)PROVIDER_ALLOCATION_BOUND_BYTES);
     printf("METRIC provider_allocation_peak_live_bytes=%llu\n",
            (unsigned long long)provider_allocation_peak_live_bytes);
+    printf("METRIC provider_allocation_live_before_cleanup_bytes=%llu\n",
+           (unsigned long long)cleanup_live_before);
+    printf("METRIC provider_allocation_live_after_cleanup_bytes=%llu\n",
+           (unsigned long long)cleanup_live_after);
     printf("METRIC cancellation_wakeups=%d\n", cancel ? 1 : 0);
     printf("METRIC cancellation_latency_us=%llu\n",
            (unsigned long long)cancellation_latency_us);
@@ -906,6 +919,7 @@ int main(int argc, char **argv) {
             provider_allocation_bytes <= PROVIDER_ALLOCATION_BOUND_BYTES &&
             provider_allocation_peak_live_bytes > 0 &&
             provider_allocation_peak_live_bytes <= MEMORY_PROFILE_BOUND_BYTES &&
+            cleanup_live_after <= cleanup_live_before &&
 #if defined(OPENSSL_IS_AWSLC)
             external_signer &&
 #endif

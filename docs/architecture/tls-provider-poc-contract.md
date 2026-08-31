@@ -18,11 +18,11 @@ Version changes require a reviewed change to `tools/tls_provider_poc/providers.j
 - `BLOCKED`: the native platform or required environment is unavailable.
 
 `NOT_RUN`, missing cells and cross-compilation never count as native evidence.
-Schema versions 1 through 5 are no longer accepted because they cannot carry
+Schema versions 1 through 6 are no longer accepted because they cannot carry
 the complete callback, protocol-negative, certificate-negative, export,
 execution, durable build-provenance, license, provider-allocation,
-provider-instrumentation, and cancellation evidence.
-Schema v6 is required for retained `PASS` and `PARTIAL` results. It requires an
+provider-instrumentation, bounded join, live-allocation-growth and cancellation
+evidence. Schema v7 is required for retained `PASS` and `PARTIAL` results. It requires an
 exact, bounded inventory of the final artifact's exported symbols and exactly
 10,000 measured cleanup
 cycles. When session resumption passes, the result must record four measured
@@ -50,7 +50,9 @@ client certificate. A required-only result is incomplete.
 Every successful result records a process peak-resident measurement bounded by
 512 MiB. Provider allocation hooks separately record cumulative provider
 allocation calls and bytes plus peak live provider bytes across the complete
-profile; fixed harness payload buffers do not satisfy this field. Linux glibc
+profile. The profile records live bytes before and after the 10,000 cleanup
+cycles and rejects any increase; fixed harness payload buffers do not satisfy
+this field. Linux glibc
 and macOS also require a passing ASan and UBSan diagnostic run built from newly
 instrumented provider archives, not an instrumented harness linked to ordinary
 Release archives. Platforms where that configured diagnostic is unavailable
@@ -68,6 +70,13 @@ A caller-cancellation `PASS` starts the provider handshake step on a worker,
 observes a native WANT state, blocks the caller-owned wait, sends an explicit
 cancel signal, and measures the wake and join against a 250,000-microsecond
 bound. Merely freeing a WANT-state connection is not cancellation evidence.
+The join is part of the same absolute bound and may not use an infinite wait.
+
+Each provider pin records its upstream commit timestamp, a maximum acceptable
+age and official advisory intake URLs. `validate.py` fails closed when a pin is
+too old. A known affected pin blocks promotion even when it is within the age
+limit; `docs/security/provider-update-workflow.md` defines the review cadence
+and rerun boundary.
 
 An external-trust `PASS` requires at least four callback invocations. The PoC
 must accept and reject an otherwise-untrusted valid chain through the callback
