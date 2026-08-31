@@ -20,7 +20,7 @@ MEMORY_PROFILE_BOUND_BYTES = 512 * 1024 * 1024
 PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES = 64 * 1024 * 1024 * 1024
 PROVIDER_ALLOCATION_CALL_BOUND = 150_000_000
 CANCELLATION_WAKE_BOUND_US = 250_000
-RESULT_SCHEMA_VERSION = 10
+RESULT_SCHEMA_VERSION = 11
 MAX_TOOL_VERSION_BYTES = 16 * 1024
 MAX_BUILD_ENVIRONMENT_VALUE_BYTES = 64 * 1024
 MAX_BUILD_ENVIRONMENT_TOTAL_BYTES = 256 * 1024
@@ -129,6 +129,12 @@ def validate_build_provenance(provenance: Any, provider: str,
     validate_tool_identity(provenance.get("compiler"), "C compiler")
     validate_tool_identity(provenance.get("cxx_compiler"), "C++ compiler")
     validate_tool_identity(provenance.get("build_tool"), "provider build tool")
+    if (provider == "aws-lc" and result_platform == "windows-x86_64" and
+            not diagnostic):
+        validate_tool_identity(provenance.get("assembler"), "NASM assembler")
+    else:
+        require(provenance.get("assembler") is None,
+                "unexpected provider assembler identity")
     if provider in {"aws-lc", "mbedtls"}:
         validate_tool_identity(provenance.get("cmake"), "CMake")
     else:
@@ -354,20 +360,20 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
     require(isinstance(build, dict), "build object required")
     metrics = result.get("metrics")
     if successful or metrics is not None:
-        require(isinstance(metrics, dict), "schema v10 metrics object required")
+        require(isinstance(metrics, dict), "schema v11 metrics object required")
         require(metrics.get("repeated_cleanup_cycles") == 10000,
-                "schema v10 requires exactly 10,000 repeated cleanup cycles")
+                "schema v11 requires exactly 10,000 repeated cleanup cycles")
         if result["provider"] == "aws-lc" and caps.get("external_signer") == "PASS":
             require(isinstance(metrics.get("external_signer_calls"), int) and
                     metrics["external_signer_calls"] >= 2,
                     "AWS-LC external signer must serve TLS 1.2 and TLS 1.3")
         if caps.get("session_resumption") == "PASS":
             require(metrics.get("session_resumption_handshakes") == 4,
-                    "schema v10 session resumption requires four measured handshakes")
+                    "schema v11 session resumption requires four measured handshakes")
             require(metrics.get("session_resumption_tls12_handshakes") == 2,
-                    "schema v10 requires a TLS 1.2 resumed session")
+                    "schema v11 requires a TLS 1.2 resumed session")
             require(metrics.get("session_resumption_tls13_handshakes") == 2,
-                    "schema v10 requires a TLS 1.3 resumed ticket")
+                    "schema v11 requires a TLS 1.3 resumed ticket")
         if caps.get("external_trust") == "PASS":
             require(isinstance(metrics.get("external_trust_calls"), int) and
                     metrics["external_trust_calls"] >= 4,
@@ -507,7 +513,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                 "PARTIAL/PASS result contains failed or unexecuted capability")
     if result["status"] == "PASS":
         require(schema_version == RESULT_SCHEMA_VERSION,
-                "PASS requires schema v10 evidence")
+                "PASS requires schema v11 evidence")
         require(all(value == "PASS" for value in caps.values()), "PASS requires all capabilities PASS")
     if any(value == "BLOCKED" for value in caps.values()):
         require(result["status"] != "PASS", "blocked capability cannot yield PASS")
