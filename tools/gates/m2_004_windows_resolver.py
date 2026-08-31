@@ -55,6 +55,19 @@ def atomic_json(path: Path, payload: dict[str, Any]) -> None:
         raise
 
 
+def validation_payload(
+    report_path: Path, expected_revision: str, failures: list[str]
+) -> dict[str, Any]:
+    return {
+        "schema_version": 1,
+        "task_id": TASK_ID,
+        "expected_revision": expected_revision,
+        "report_sha256": sha256_path(report_path),
+        "failures": failures,
+        "status": "PASS" if not failures else "FAIL",
+    }
+
+
 def run_command(
     command: list[str], *, cwd: Path, env: dict[str, str], timeout: int
 ) -> dict[str, Any]:
@@ -313,13 +326,9 @@ def main() -> int:
             print(f"M2-004: invalid report: {error}")
             return 2
         failures = validate_report(payload, args.expected_revision)
-        validation = {
-            "schema_version": 1,
-            "task_id": TASK_ID,
-            "expected_revision": args.expected_revision,
-            "failures": failures,
-            "status": "PASS" if not failures else "FAIL",
-        }
+        validation = validation_payload(
+            args.validate_report, args.expected_revision, failures
+        )
         if args.validation_output:
             atomic_json(args.validation_output, validation)
         print(json.dumps(validation, sort_keys=True))
