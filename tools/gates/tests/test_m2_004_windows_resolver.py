@@ -101,16 +101,47 @@ class M2004WindowsResolverGateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             report_path = Path(directory) / "report.json"
             report_path.write_text(json.dumps(valid_report()), encoding="utf-8")
-            validation = gate.validation_payload(report_path, "abc", [])
+            _, report_sha256 = gate.load_report(report_path)
+            validation = gate.validation_payload(report_sha256, "abc", [])
             self.assertEqual(gate.sha256_path(report_path), validation["report_sha256"])
             original_digest = validation["report_sha256"]
 
             report_path.write_text(json.dumps({"decision": "FAIL"}), encoding="utf-8")
             self.assertNotEqual(
                 original_digest,
-                gate.validation_payload(report_path, "abc", ["REPORT:FAIL"])[
-                    "report_sha256"
-                ],
+                gate.load_report(report_path)[1],
+            )
+
+    def test_loaded_report_digest_cannot_follow_an_atomic_replacement(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "report.json"
+            report_path.write_text(json.dumps(valid_report()), encoding="utf-8")
+            payload, report_sha256 = gate.load_report(report_path)
+            report_path.write_text(json.dumps({"decision": "FAIL"}), encoding="utf-8")
+            validation = gate.validation_payload(
+                report_sha256, "abc", gate.validate_report(payload, "abc")
+            )
+            self.assertEqual("PASS", validation["status"])
+            self.assertNotEqual(gate.sha256_path(report_path), validation["report_sha256"])
+
+    def test_stored_validation_must_match_the_validated_report(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            validation_path = Path(directory) / "validation.json"
+            expected = gate.validation_payload("a" * 64, "abc", [])
+            validation_path.write_text(json.dumps(expected), encoding="utf-8")
+            self.assertEqual(
+                [], gate.stored_validation_failures(validation_path, expected)
+            )
+            changed = dict(expected)
+            changed["report_sha256"] = "b" * 64
+            self.assertEqual(
+                ["VALIDATION:MISMATCH"],
+                gate.stored_validation_failures(validation_path, changed),
+            )
+            validation_path.unlink()
+            self.assertEqual(
+                ["VALIDATION:MISSING"],
+                gate.stored_validation_failures(validation_path, expected),
             )
 
     def test_rejects_unknown_schema_stale_revision_and_wrong_platform(self) -> None:
