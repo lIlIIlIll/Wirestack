@@ -1,3 +1,4 @@
+import copy
 import io
 import json
 import tarfile
@@ -135,6 +136,16 @@ class M7021LinuxReleaseTest(unittest.TestCase):
         with mock.patch.object(release, "source_tree_sha256", return_value="0" * 64):
             with self.assertRaisesRegex(release.ReleaseError, "source tree fingerprint is stale"):
                 release.validate_report(report, release.ROOT)
+
+    def test_structural_validation_accepts_frozen_input_keys_but_rejects_escape(self) -> None:
+        report_path = release.ROOT / "docs/evidence/M7-021/linux_x86_64/qualification.json"
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        changed = copy.deepcopy(report)
+        changed["qualification_inputs"] = {"historical/input.txt": "0" * 64}
+        release.validate_report(changed, release.ROOT, verify_current_sources=False)
+        changed["qualification_inputs"] = {"../escape": "0" * 64}
+        with self.assertRaisesRegex(release.ReleaseError, "fingerprint is invalid"):
+            release.validate_report(changed, release.ROOT, verify_current_sources=False)
 
 
 if __name__ == "__main__":
