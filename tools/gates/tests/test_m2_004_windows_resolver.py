@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 
@@ -34,6 +35,32 @@ def valid_report() -> dict[str, object]:
 
 
 class M2004WindowsResolverGateTests(unittest.TestCase):
+    def test_target_native_libraries_propagate_to_path_consumers(self) -> None:
+        manifest = tomllib.loads(Path("cjpm.toml").read_text(encoding="utf-8"))
+        targets = manifest["target"]
+
+        linux = targets["x86_64-unknown-linux-gnu"]
+        self.assertEqual(
+            {"path": "./target/native/resolver/current/lib"},
+            linux["ffi"]["c"]["wirestack_resolver"],
+        )
+        self.assertEqual(
+            {"path": "./target/native/current/lib"},
+            linux["ffi"]["c"]["wirestack_tls_provider"],
+        )
+        self.assertNotIn("-lwirestack_", linux["link-option"])
+
+        windows = targets["x86_64-w64-mingw32"]
+        self.assertEqual(
+            {"path": "./target/native/resolver/current/lib"},
+            windows["ffi"]["c"]["wirestack_resolver"],
+        )
+        self.assertEqual(
+            {"path": "./target/native/test-support/m2-004/lib"},
+            windows["ffi"]["c"]["wirestack_m2_004_tls_link_stub"],
+        )
+        self.assertNotIn("-lwirestack_", windows["link-option"])
+
     def test_valid_report_passes(self) -> None:
         self.assertEqual([], gate.validate_report(valid_report(), "abc"))
 
