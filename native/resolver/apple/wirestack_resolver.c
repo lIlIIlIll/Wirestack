@@ -66,6 +66,7 @@ static struct addrinfo *fixture_node(int family, const uint8_t *bytes, size_t si
     } else {
         struct sockaddr_in6 *address = (struct sockaddr_in6 *)&node->address;
         address->sin6_family = AF_INET6;
+        address->sin6_scope_id = 11u;
         memcpy(&address->sin6_addr, bytes, size);
         node->info.ai_addrlen = (socklen_t)sizeof(*address);
     }

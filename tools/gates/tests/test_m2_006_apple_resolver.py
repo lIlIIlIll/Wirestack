@@ -22,7 +22,11 @@ def valid_report(mode: str = "macos") -> dict[str, object]:
         "task_id": "M2-006",
         "revision": "abc",
         "mode": mode,
-        "platform": {"system": "Darwin"},
+        "platform": {
+            "system": "Darwin",
+            "machine": "arm64",
+            "toolchain": {"output": "Target: aarch64-apple-darwin\n"},
+        },
         "decision": "PASS",
         "failures": [],
         "resolver_test": valid_process(),
@@ -30,6 +34,7 @@ def valid_report(mode: str = "macos") -> dict[str, object]:
             "platform": gate.MODES[mode],
             "private_runtime_abi": False,
             "test_fixture": True,
+            "inputs": {"flags": gate.deployment_flags(gate.MODES[mode])},
         },
         "test_link_stub": {"test_only": True},
         "simulator": {
@@ -42,6 +47,7 @@ def valid_report(mode: str = "macos") -> dict[str, object]:
                 "path": "Frameworks/libcangjie-runtime.dylib",
                 "sha256": "c" * 64,
             }],
+            "probe_compile": {"command": ["cjc", "--target", gate.IOS_TARGET]},
         } if mode == "ios-simulator" else None,
     }
 
@@ -60,11 +66,15 @@ class M2006AppleResolverGateTests(unittest.TestCase):
                 {"path": "./target/native/resolver/current/lib"},
                 configuration["ffi"]["c"]["wirestack_resolver"],
             )
-            self.assertEqual(
-                {"path": "./target/native/test-support/m2-006/lib"},
-                configuration["ffi"]["c"]["wirestack_m2_006_tls_link_stub"],
-            )
+            self.assertNotIn("wirestack_m2_006_tls_link_stub", configuration["ffi"]["c"])
             self.assertNotIn("-lwirestack_", configuration["link-option"])
+
+    def test_gate_injects_test_stub_only_into_selected_workspace_target(self) -> None:
+        original = Path("cjpm.toml").read_text(encoding="utf-8")
+        self.assertNotIn("wirestack_m2_006_tls_link_stub", original)
+        for selected in gate.MODES.values():
+            bound = gate.bind_test_link_stub(original, selected)
+            self.assertEqual(1, bound.count("wirestack_m2_006_tls_link_stub"))
 
     def test_valid_native_macos_report_passes(self) -> None:
         self.assertEqual([], gate.validate_report(valid_report(), "abc", "macos"))
@@ -79,7 +89,7 @@ class M2006AppleResolverGateTests(unittest.TestCase):
         report = valid_report()
         report["schema_version"] = 9
         report["revision"] = "old"
-        report["platform"] = {"system": "Linux"}
+        report["platform"] = {"system": "Linux", "machine": "x86_64"}
         failures = gate.validate_report(report, "abc", "macos")
         self.assertIn("REPORT:UNKNOWN_SCHEMA", failures)
         self.assertIn("REPORT:STALE_REVISION", failures)
@@ -127,7 +137,10 @@ class M2006AppleResolverGateTests(unittest.TestCase):
             ["-mios-simulator-version-min=17.5"],
             gate.deployment_flags("ios-simulator-arm64"),
         )
-        self.assertEqual([], gate.deployment_flags("macos-arm64"))
+        self.assertEqual(
+            ["-mmacosx-version-min=12.0"],
+            gate.deployment_flags("macos-arm64"),
+        )
 
     def test_ios_runtime_libraries_use_only_the_simulator_sdk_directory(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

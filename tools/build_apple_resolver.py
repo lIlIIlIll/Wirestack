@@ -147,7 +147,9 @@ def build(
         "-std=c11", "-O2", "-fPIC", "-Wall", "-Wextra", "-Werror",
         "-arch", "arm64", "-isysroot", run(["xcrun", "--sdk", sdk, "--show-sdk-path"]).strip(),
     ]
-    if selected == "ios-simulator-arm64":
+    if selected == "macos-arm64":
+        flags.append("-mmacosx-version-min=12.0")
+    else:
         flags.append("-mios-simulator-version-min=17.5")
     if test_fixture:
         flags.append("-DWIRESTACK_RESOLVER_TEST_FIXTURE=1")
@@ -182,7 +184,8 @@ def build(
 #include <stdint.h>
 int main(void) {
   uint64_t pool = 0;
-  if (wirestack_resolver_pool_create(1, 2, &pool) != WIRESTACK_RESOLVER_OK) return 1;
+  int64_t native_code = 0;
+  if (wirestack_resolver_pool_create(1, 2, &pool, &native_code) != WIRESTACK_RESOLVER_OK) return 1;
   return wirestack_resolver_pool_destroy(pool);
 }
 """,
