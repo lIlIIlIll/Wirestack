@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-31T05:21:07.376302Z",
+  "generated_at_utc": "2026-08-31T05:33:57.619307Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,11 +11,11 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M2-004/windows-x86_64/validation.json",
-      "sha256": "89b1b9683285f7176607c81f610ee42aaed9795fab980f026aa733480200b84f",
+      "sha256": "8fb814d69d69bde73d691bdaa6d2ec8d9d262e0517f5b574befcb58b9ee35b9b",
       "source_task": "M2-004"
     }
   ],
-  "revision": "20dad5539397514eefc64da5dab0c2a048e610ea",
+  "revision": "64651485e7f326b8e69d18ec0ace6180d7868e48",
   "schema_version": 1,
   "source_sha256": {
     ".github/workflows/m2-004-windows-system-resolver.yml": "af9425e4aa0f5ddb35fc6e8c42365fed80c35d4041dad2e68a6b127ca4f38c7f",
@@ -37,7 +37,7 @@
     "tools/gates/m2_004_windows_resolver.py": "0c51410f068bee9eee14ff265b92a06ca01ead3fd417b573a76512e0deb4bb85",
     "tools/gates/native/m2_004_tls_link_stub.c": "ddd4eb317c861351e91b085310bbe6702962e966bd227b4520b23facceb278c3",
     "tools/gates/tests/test_m2_004_windows_resolver.py": "00333c58c7a64697cb35cfc02679f7aed23daec8c7b5c7db5d58e17bc5947ce3",
-    "tools/tasks/M2-004.json": "f5b5944c3587dc3ec7977d1aaba227221a62239e183e59826ddabfcca7977922",
+    "tools/tasks/M2-004.json": "c6dfb87a0f990ee1867f360954fb3c00d666d110de4cdaba7d28af855ac8191c",
     "tools/tests/test_build_resolver.py": "ebd0913c7d0d1190c274af8c362eee1fd9c61ed2690c09106650b32f3befb9f5",
     "tools/tests/test_m7_029_independent_security_review.py": "a72c29da4e5394aa1175808f5633d552d1a1feabf23444518b9f7bf7e9e56a64"
   },
