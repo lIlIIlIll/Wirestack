@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tempfile
 import tomllib
 import unittest
@@ -95,6 +96,22 @@ class M2004WindowsResolverGateTests(unittest.TestCase):
 
     def test_valid_report_passes(self) -> None:
         self.assertEqual([], gate.validate_report(valid_report(), "abc"))
+
+    def test_validation_payload_binds_the_exact_native_report(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "report.json"
+            report_path.write_text(json.dumps(valid_report()), encoding="utf-8")
+            validation = gate.validation_payload(report_path, "abc", [])
+            self.assertEqual(gate.sha256_path(report_path), validation["report_sha256"])
+            original_digest = validation["report_sha256"]
+
+            report_path.write_text(json.dumps({"decision": "FAIL"}), encoding="utf-8")
+            self.assertNotEqual(
+                original_digest,
+                gate.validation_payload(report_path, "abc", ["REPORT:FAIL"])[
+                    "report_sha256"
+                ],
+            )
 
     def test_rejects_unknown_schema_stale_revision_and_wrong_platform(self) -> None:
         report = valid_report()
