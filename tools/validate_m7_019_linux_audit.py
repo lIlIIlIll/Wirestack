@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,7 @@ P0_IDS = [
 INVARIANT_IDS = [f"INV-{index:02d}" for index in range(1, 16)]
 RELEASE_IDS = [f"REL-{index:02d}" for index in range(1, 23)]
 ALLOWED_STATUSES = {"PASS", "GAP", "NOT_APPLICABLE_TO_LINUX_PROFILE"}
+DIGEST_RE = re.compile(r"[0-9a-f]{64}")
 
 EXPECTED_GAPS = {
     "TLS-PROV-004": "M7-025",
@@ -97,7 +99,12 @@ def _validate_items(
     return items
 
 
-def validate_audit(path: Path = DEFAULT_AUDIT, repo_root: Path = ROOT) -> dict[str, Any]:
+def validate_audit(
+    path: Path = DEFAULT_AUDIT,
+    repo_root: Path = ROOT,
+    *,
+    verify_current_sources: bool = True,
+) -> dict[str, Any]:
     try:
         audit = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
@@ -114,10 +121,16 @@ def validate_audit(path: Path = DEFAULT_AUDIT, repo_root: Path = ROOT) -> dict[s
     source_hashes = audit.get("source_sha256")
     _require(isinstance(source_hashes, dict), "source_sha256 must be an object")
     for relative in ("docs/product/prd.md", "docs/planning/implementation-backlog.md"):
+        digest = source_hashes.get(relative)
         _require(
-            source_hashes.get(relative) == _sha256(repo_root / relative),
-            f"source hash is stale for {relative}",
+            isinstance(digest, str) and DIGEST_RE.fullmatch(digest) is not None,
+            f"source hash is invalid for {relative}",
         )
+        if verify_current_sources:
+            _require(
+                digest == _sha256(repo_root / relative),
+                f"source hash is stale for {relative}",
+            )
 
     p0 = _validate_items("p0_requirements", audit.get("p0_requirements"), P0_IDS, repo_root)
     invariants = _validate_items(

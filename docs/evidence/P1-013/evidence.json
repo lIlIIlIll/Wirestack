@@ -1,0 +1,44 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-08-31T01:31:07.915407Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-013/task-check.json",
+      "sha256": "4fe15f2f4b4e8f30bd575ee9e3103c6b46599cc373be6a03ceb91743a9709293",
+      "source_task": "P1-013"
+    }
+  ],
+  "revision": "d48a5336f6b54d2ed1442ef374f49d3b4e0c5897",
+  "schema_version": 1,
+  "source_sha256": {
+    ".gitignore": "dd41c411cb7958e7cc9e9899594400619535fffcfca02e03c8709bc1a173f4f2",
+    "docs/evidence/P1-013/README.md": "80a4a201d4309cadcaa9bf382ac64d117631d7c648fb03d586fc70bd47e1ca81",
+    "docs/evidence/P1-013/test-plan.md": "aff34ee7af58b75c83cd30ec1b1cfa6404557835eaf726c66abc8b2b33309d81",
+    "docs/planning/implementation-backlog.md": "18a0d59c84fd461cb0c536921dd2314ab0f65e82d17cfaab48403863f2c7934d",
+    "docs/planning/status.md": "7df8ff33cc3cf2b8d7985c055817bbb514dcbaf9b44d63b855f7a6b723b71910",
+    "tools/m7_021_linux_release.py": "5f95febc22ca469113dd4658cb45016c9d1fceaf2a151d471186ae1e2898d6ab",
+    "tools/m7_031_linux_candidate.py": "828f06a39f3f56f5ba999fe2bc1bc253f697785ee9208151f29f40caf0ceb491",
+    "tools/tasks/P1-013.json": "41f1a276157c385a47ffb39139536a84c0615d90323e17d549f59dfd4164269a",
+    "tools/tests/test_m7_019_linux_audit.py": "eb1873b698aa3a3a4c879e40b0d3e28a1146d01cb32294603754a955450627da",
+    "tools/tests/test_m7_020_architecture_audit.py": "c0c7d5b58a063a5b3aa57e3b95ffcb92616ef56e30d747218f45889b0775181b",
+    "tools/tests/test_m7_021_linux_release.py": "c56be37e11fe0bc47add9c469257fe5c59a717677fd15098756276aecb48842b",
+    "tools/tests/test_m7_029_independent_security_review.py": "30e07573bcfd578e409323234d05e7e76e77e2f39017261ada2e42c5b693d7af",
+    "tools/tests/test_m7_031_linux_candidate.py": "41f1f63b6c45ec8a4719bddfe12b275a89172f2089e3abbf550b34030408fe01",
+    "tools/tests/test_m7_linux_task_graph.py": "d732e470decf8df6fba7e5483d4bb64d512046dcfdd3d60c534e49a40a80905b",
+    "tools/tests/test_p1_013_development_release_gate.py": "c0e5049a13c14a5a9f111983656fe4cd23ed770eab9746b21028c89d04b3eea4",
+    "tools/validate_m7_019_linux_audit.py": "a85776269d8ea99e937c53c1dbd4ebe05aabb444dbae608e4b1080b9bae12422",
+    "tools/validate_m7_020_architecture_audit.py": "0d954ae9f01e3ac8ace529c546205eb1d6408bc8e2959b8e449651a305d8ec8d"
+  },
+  "source_task": "P1-013",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}

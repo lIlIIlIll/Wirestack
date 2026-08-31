@@ -380,6 +380,33 @@ def validate_current_sources(
     }
 
 
+def validate_recorded_sources(
+    root: Path,
+    documents: Mapping[str, Mapping[str, Any]],
+) -> dict[str, str]:
+    qualification = documents["m7_021"]
+    m7_021_linux_release.validate_report(
+        qualification,
+        root,
+        verify_current_sources=False,
+    )
+    release_source = strict_digest(
+        qualification.get("source_tree_sha256"), "M7-021 production source tree"
+    )
+    fuzz_source = strict_digest(
+        documents["m7_023"].get("source_sha256"), "M7-023 fuzz source"
+    )
+    http2_source = strict_digest(
+        documents["m7_024_h2"].get("source", {}).get("production_source_sha256"),
+        "M7-024 HTTP/2 production source",
+    )
+    return {
+        "releaseSourceTreeSha256": release_source,
+        "fuzzSourceSha256": fuzz_source,
+        "http2PerformanceSourceSha256": http2_source,
+    }
+
+
 def validate_criteria(criteria: Sequence[Mapping[str, Any]]) -> dict[str, int]:
     expected_ids = [f"REL-{number:02d}" for number in range(1, 23)]
     actual_ids = [item.get("id") for item in criteria]
@@ -424,6 +451,7 @@ def build_candidate(
     root: Path = ROOT,
     *,
     documents: Mapping[str, Mapping[str, Any]] | None = None,
+    verify_current_sources: bool = True,
 ) -> dict[str, Any]:
     root = root.resolve()
     validate_dependency_status(root)
@@ -446,7 +474,11 @@ def build_candidate(
     soak = validate_soak(root, values["m7_022"], artifact["sha256"])
     security = validate_security(values["m7_029"], values["m7_029_review"])
     public_api = validate_public_api(root, values["m7_032"])
-    sources = validate_current_sources(root, values)
+    sources = (
+        validate_current_sources(root, values)
+        if verify_current_sources
+        else validate_recorded_sources(root, values)
+    )
     hosted = m7_030_linux_release.validate_hosted_report(
         safe_path(root, DOCUMENT_PATHS["m7_030_hosted"])
     )

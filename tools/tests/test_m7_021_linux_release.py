@@ -4,6 +4,7 @@ import tarfile
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from tools import m7_021_linux_release as release
 
@@ -118,11 +119,22 @@ class M7021LinuxReleaseTest(unittest.TestCase):
         self.assertIn('wirestack = { path = "/tmp/installed wirestack" }', manifest)
         self.assertNotIn(str(release.ROOT), manifest)
 
-    def test_committed_qualification_report_is_current(self) -> None:
+    def test_committed_qualification_report_is_structurally_valid(self) -> None:
         report_path = release.ROOT / "docs/evidence/M7-021/linux_x86_64/qualification.json"
         if not report_path.is_file():
             self.skipTest("M7-021 qualification evidence is not committed yet")
-        release.validate_report(json.loads(report_path.read_text(encoding="utf-8")), release.ROOT)
+        release.validate_report(
+            json.loads(report_path.read_text(encoding="utf-8")),
+            release.ROOT,
+            verify_current_sources=False,
+        )
+
+    def test_strict_validation_rejects_source_drift(self) -> None:
+        report_path = release.ROOT / "docs/evidence/M7-021/linux_x86_64/qualification.json"
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        with mock.patch.object(release, "source_tree_sha256", return_value="0" * 64):
+            with self.assertRaisesRegex(release.ReleaseError, "source tree fingerprint is stale"):
+                release.validate_report(report, release.ROOT)
 
 
 if __name__ == "__main__":

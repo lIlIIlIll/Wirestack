@@ -187,3 +187,4 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
 | P1-012 | COMPLETE | [`docs/evidence/P1-012/README.md`](../evidence/P1-012/README.md) | Fail-closed repository diagnostics, task contracts, layered checks and source-bound evidence freshness validation pass on Linux glibc; no long-duration gate ran. |
+| P1-013 | COMPLETE | [`docs/evidence/P1-013/README.md`](../evidence/P1-013/README.md) | Development regression checks now validate frozen release records structurally, while all production M7 release validators remain strict by default and reject stale source or artifact evidence. `scripts/check` passes; no long-duration gate ran. |

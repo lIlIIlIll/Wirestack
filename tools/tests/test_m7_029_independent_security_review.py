@@ -209,8 +209,9 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
             build_native_dependencies.plan("Linux"),
         )
         self.assertEqual(["resolver"], build_native_dependencies.plan("Windows"))
+        self.assertEqual(["resolver"], build_native_dependencies.plan("Darwin"))
         with self.assertRaisesRegex(ValueError, "unsupported"):
-            build_native_dependencies.plan("Darwin")
+            build_native_dependencies.plan("Plan9")
 
     def test_reviewer_dates_conflicts_and_set_fields_are_strict(self) -> None:
         temporary, root, request = self.fixture()
