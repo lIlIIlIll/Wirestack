@@ -16,11 +16,15 @@ private-key isolation, native callbacks and deterministic cleanup.
 
 AWS-LC 5.5.0 at commit
 `991e67ff4cf04df4dd89e407f8b920c6936cb56a` was originally selected from the
-earlier PoC evidence and has since been requalified with retained schema-v5
-`PASS` results on Linux glibc x86_64 and Linux musl x86_64. GitHub Actions run
+earlier PoC evidence and was later requalified with schema-v5 `PASS` results on
+Linux glibc x86_64 and Linux musl x86_64. Schema v6 has now superseded those
+results, so the canonical matrix marks both cells `NOT_RUN` until the native
+rerun supplies provider-instrumented diagnostics, provider allocation hooks,
+durable build provenance, committed license bundles and real cancellation
+wakeup evidence. GitHub Actions run
 `33391223747` reports head `22ae52c7b277c1d6c83afc0ac0dd73dc7e9c83a6`
 and executed merge revision `4c7ddea51e9e73600b39be7938566ea6300ab5cd`.
-Both results prove:
+The superseded schema-v5 results recorded:
 
 - TLS 1.2 and TLS 1.3 client/server handshakes over caller-owned bounded BIOs;
 - SNI, reference-identity verification, ALPN, custom CA, required mTLS,
@@ -87,8 +91,9 @@ artifact is withdrawn rather than silently downgraded.
 
 ## Consequences
 
-- Linux TLS integration tasks M3-001 and later may begin against one frozen
-  provider and C ABI boundary.
+- Existing Linux TLS integration retains the frozen provider and C ABI
+  decision, but current qualification must not cite M0-016 as PASS until the
+  schema-v6 native rerun is retained.
 - AWS-LC-specific code remains internal to the native provider adapter.
 - The global six-platform provider decision remains open. This ADR does not
   claim Windows, macOS, Android, iOS or HarmonyOS/OpenHarmony support.

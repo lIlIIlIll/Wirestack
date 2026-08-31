@@ -30,6 +30,58 @@ EMPTY_SYMBOL_INVENTORY = {
 }
 
 
+def tool_identity_fixture(name="fixture-tool"):
+    output = f"{name} 1.0"
+    return {
+        "argv": [name, "--version"],
+        "exit_code": 0,
+        "output": output,
+        "output_sha256": validator.hashlib.sha256(output.encode()).hexdigest(),
+    }
+
+
+def build_provenance_fixture(provider, platform, *, diagnostic=False):
+    triples = {
+        "linux-glibc-x86_64": "x86_64-unknown-linux-gnu",
+        "linux-musl-x86_64": "x86_64-unknown-linux-musl",
+        "windows-x86_64": "x86_64-pc-windows-msvc",
+        "macos-arm64": "arm64-apple-darwin",
+    }
+    if provider == "aws-lc":
+        configure = [
+            "cmake", "-DBUILD_SHARED_LIBS=OFF", "-DBUILD_TESTING=OFF",
+            "-DDISABLE_GO=ON", "<SOURCE>", "<BUILD>", "<PREFIX>",
+        ]
+    elif provider == "mbedtls":
+        configure = [
+            "cmake", "-DENABLE_TESTING=OFF", "-DENABLE_PROGRAMS=OFF",
+            "-DUSE_SHARED_MBEDTLS_LIBRARY=OFF",
+            "-DTF_PSA_CRYPTO_USER_CONFIG_FILE=<REPOSITORY>/tools/tls_provider_poc/mbedtls_provider_profile_config.h",
+            "<SOURCE>", "<BUILD>", "<PREFIX>",
+        ]
+    else:
+        configure = [
+            "Configure", "no-shared", "no-module", "no-tests", "no-zlib",
+            "no-zstd", "<SOURCE>", "<BUILD>", "<PREFIX>",
+        ]
+    return {
+        "target_triple": triples[platform],
+        "compiler": tool_identity_fixture("cc"),
+        "cxx_compiler": tool_identity_fixture("c++"),
+        "cmake": tool_identity_fixture("cmake") if provider != "openssl" else None,
+        "build_tool": tool_identity_fixture("build-tool"),
+        "configure_argv": configure,
+        "build_argv": [["build-tool", "<BUILD>"], ["build-tool", "<PREFIX>"]],
+        "environment": {},
+        "patches": [],
+        "patch_set_sha256": validator.hashlib.sha256(b"[]\n").hexdigest(),
+        "instrumentation": (
+            "address+undefined-sanitizer" if diagnostic else "none"
+        ),
+        "provider_instrumented": diagnostic,
+    }
+
+
 def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
                     status="PASS"):
     caps = {name: "PASS" for name in spec["required_capabilities"]}
@@ -65,16 +117,21 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
         "mtls_optional_handshakes": 2,
         "memory_profile_peak_resident_bytes": 64 * 1024 * 1024,
         "memory_profile_bound_bytes": validator.MEMORY_PROFILE_BOUND_BYTES,
-        "allocation_profile_calls": 20,
-        "allocation_profile_bytes": 1024 * 1024,
-        "allocation_profile_bound_bytes": validator.ALLOCATION_PROFILE_BOUND_BYTES,
+        "provider_allocation_calls": 200,
+        "provider_allocation_call_bound": validator.PROVIDER_ALLOCATION_CALL_BOUND,
+        "provider_allocation_bytes": 1024 * 1024,
+        "provider_allocation_bound_bytes": validator.PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES,
+        "provider_allocation_peak_live_bytes": 512 * 1024,
+        "cancellation_wakeups": 1,
+        "cancellation_latency_us": 1000,
+        "cancellation_bound_us": validator.CANCELLATION_WAKE_BOUND_US,
     }
     diagnostic_status = (
         "PASS" if platform.startswith(("linux-glibc-", "macos-"))
         else "UNSUPPORTED"
     )
     return {
-        "schema_version": 5,
+        "schema_version": 6,
         "task_id": "M0-016",
         "provider": provider,
         "platform": platform,
@@ -93,6 +150,7 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
                 "file_count": 1,
                 "total_bytes": 100,
             },
+            "provenance": build_provenance_fixture(provider, platform),
         },
         "execution": execution,
         "operational_evidence": {
@@ -106,15 +164,33 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
                         else "UNSUPPORTED"
                     ),
                 },
+                **({
+                    "provider_instrumented": True,
+                    "provider_static_archives": [{
+                        "name": "libprovider.a",
+                        "bytes": 1,
+                        "sha256": "5" * 64,
+                    }],
+                    "provider_build_provenance": build_provenance_fixture(
+                        provider, platform, diagnostic=True),
+                } if diagnostic_status == "PASS" else {}),
             },
             "memory_profile": {
-                "method": "fixture",
+                "method": "native-process-peak-resident-and-provider-allocation-hooks",
                 "peak_resident_bytes": metrics["memory_profile_peak_resident_bytes"],
                 "resident_bound_bytes": metrics["memory_profile_bound_bytes"],
-                "allocation_calls": metrics["allocation_profile_calls"],
-                "allocation_bytes": metrics["allocation_profile_bytes"],
-                "allocation_bound_bytes": metrics["allocation_profile_bound_bytes"],
+                "provider_allocation_calls": metrics["provider_allocation_calls"],
+                "provider_allocation_call_bound": metrics["provider_allocation_call_bound"],
+                "provider_allocation_bytes": metrics["provider_allocation_bytes"],
+                "provider_allocation_bound_bytes": metrics["provider_allocation_bound_bytes"],
+                "provider_allocation_peak_live_bytes": metrics["provider_allocation_peak_live_bytes"],
                 "payload_bytes_per_transfer": 32768,
+            },
+            "cancellation": {
+                "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+                "wakeups": metrics["cancellation_wakeups"],
+                "latency_us": metrics["cancellation_latency_us"],
+                "bound_us": metrics["cancellation_bound_us"],
             },
         },
     }
@@ -124,9 +200,14 @@ def required_profile_metrics() -> list[str]:
     return [
         "METRIC memory_profile_peak_resident_bytes=67108864",
         f"METRIC memory_profile_bound_bytes={runner.MEMORY_PROFILE_BOUND_BYTES}",
-        "METRIC allocation_profile_calls=20",
-        "METRIC allocation_profile_bytes=1048576",
-        f"METRIC allocation_profile_bound_bytes={runner.ALLOCATION_PROFILE_BOUND_BYTES}",
+        "METRIC provider_allocation_calls=200",
+        f"METRIC provider_allocation_call_bound={runner.PROVIDER_ALLOCATION_CALL_BOUND}",
+        "METRIC provider_allocation_bytes=1048576",
+        f"METRIC provider_allocation_bound_bytes={runner.PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES}",
+        "METRIC provider_allocation_peak_live_bytes=524288",
+        "METRIC cancellation_wakeups=1",
+        "METRIC cancellation_latency_us=1000",
+        f"METRIC cancellation_bound_us={runner.CANCELLATION_WAKE_BOUND_US}",
     ]
 
 
@@ -446,30 +527,96 @@ class ProviderPocValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             binary = root / "provider-poc-diagnostic"
+            archive = root / "libprovider.a"
+            archive.write_bytes(b"instrumented archive")
             fixtures = root / "fixtures"
             completed = runner.subprocess.CompletedProcess(
                 [str(binary)], 0, "diagnostic pass\n", ""
             )
             with mock.patch.object(runner, "compile_poc", return_value=binary), \
+                    mock.patch.object(runner, "build_provider") as build_mock, \
                     mock.patch.object(runner, "run", return_value=completed) as run_mock:
+                def diagnostic_build(spec, *_args, **_kwargs):
+                    return (
+                        root,
+                        [archive],
+                        build_provenance_fixture(
+                            spec["id"], "linux-glibc-x86_64", diagnostic=True),
+                    )
+                build_mock.side_effect = diagnostic_build
                 aws = runner.run_native_memory_diagnostic(
-                    {"id": "aws-lc"}, root, root, [], root, root / "log",
+                    {"id": "aws-lc"}, root, root / "src", root, root / "log",
                     fixtures, "linux-glibc-x86_64",
                 )
                 self.assertEqual("UNSUPPORTED", aws["leak_detection"]["status"])
                 self.assertIn("detect_leaks=0", run_mock.call_args.kwargs["env"]["ASAN_OPTIONS"])
                 openssl = runner.run_native_memory_diagnostic(
-                    {"id": "openssl"}, root, root, [], root, root / "log",
+                    {"id": "openssl"}, root, root / "src", root, root / "log",
                     fixtures, "linux-glibc-x86_64",
                 )
                 self.assertEqual("UNSUPPORTED", openssl["leak_detection"]["status"])
                 self.assertIn("detect_leaks=0", run_mock.call_args.kwargs["env"]["ASAN_OPTIONS"])
                 mbedtls = runner.run_native_memory_diagnostic(
-                    {"id": "mbedtls"}, root, root, [], root, root / "log",
+                    {"id": "mbedtls"}, root, root / "src", root, root / "log",
                     fixtures, "linux-glibc-x86_64",
                 )
                 self.assertEqual("PASS", mbedtls["leak_detection"]["status"])
                 self.assertIn("detect_leaks=1", run_mock.call_args.kwargs["env"]["ASAN_OPTIONS"])
+
+    def test_diagnostic_build_instruments_provider_sources(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            source.mkdir()
+            calls = []
+
+            def fake_run(command, **_kwargs):
+                calls.append(list(command))
+                output = "fixture tool 1.0" if "--version" in command else ""
+                return runner.subprocess.CompletedProcess(command, 0, output, "")
+
+            with mock.patch.object(runner, "is_windows", return_value=False), \
+                    mock.patch.object(runner, "platform_id", return_value="linux-glibc-x86_64"), \
+                    mock.patch.object(runner, "run", side_effect=fake_run), \
+                    mock.patch.object(runner, "find_provider_archives",
+                                      return_value=[root / "libssl.a"]):
+                _prefix, _archives, provenance = runner.build_provider(
+                    {"id": "aws-lc"}, source, root / "work", root / "build.log",
+                    repo=ROOT, diagnostic=True)
+            configure = calls[0]
+            self.assertIn("-DOPENSSL_NO_ASM=ON", configure)
+            self.assertIn(
+                "-DCMAKE_C_FLAGS=-O1 -g -fsanitize=address,undefined "
+                "-fno-omit-frame-pointer -Wno-error=array-bounds",
+                configure,
+            )
+            self.assertTrue(provenance["provider_instrumented"])
+            self.assertEqual("address+undefined-sanitizer", provenance["instrumentation"])
+
+    def test_supported_diagnostic_requires_instrumented_provider_archives(self):
+        result = complete_result(self.spec)
+        result["operational_evidence"]["native_memory_diagnostic"][
+            "provider_instrumented"] = False
+        with self.assertRaisesRegex(validator.ValidationError, "instrument provider"):
+            validator.validate_result(result, self.spec)
+
+    def test_provider_allocation_and_cancellation_metrics_fail_closed(self):
+        result = complete_result(self.spec)
+        result["metrics"]["provider_allocation_calls"] = 0
+        with self.assertRaisesRegex(validator.ValidationError, "provider allocation call"):
+            validator.validate_result(result, self.spec)
+        result = complete_result(self.spec)
+        result["metrics"]["cancellation_latency_us"] = (
+            validator.CANCELLATION_WAKE_BOUND_US + 1)
+        with self.assertRaisesRegex(validator.ValidationError, "wake latency"):
+            validator.validate_result(result, self.spec)
+
+    def test_build_provenance_is_durable_and_fail_closed(self):
+        result = complete_result(self.spec, platform="windows-x86_64")
+        validator.validate_result(result, self.spec)
+        result["build"]["provenance"]["configure_argv"] = []
+        with self.assertRaisesRegex(validator.ValidationError, "configure argv"):
+            validator.validate_result(result, self.spec)
 
     def test_license_bundle_rejects_escape_and_stale_digest(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -526,6 +673,55 @@ class ProviderPocValidationTests(unittest.TestCase):
             manifest = json.loads((output / info["path"]).read_text())
             self.assertEqual(["LICENSE"], [entry["path"] for entry in manifest["files"]])
 
+    def test_matrix_retained_result_validates_durable_license_bundle(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            result_path = root / "results/aws-lc.json"
+            result_path.parent.mkdir(parents=True)
+            result = complete_result(self.spec)
+            files = root / "licenses/aws-lc/files"
+            files.mkdir(parents=True)
+            license_path = files / "LICENSE"
+            license_path.write_text("fixture license\n", encoding="utf-8")
+            entry = {
+                "path": "LICENSE",
+                "bytes": license_path.stat().st_size,
+                "sha256": validator.sha256_path(license_path),
+            }
+            manifest = {
+                "schema_version": 1,
+                "task_id": "M0-016",
+                "provider": "aws-lc",
+                "source_content_sha256": result["source"]["content_sha256"],
+                "file_count": 1,
+                "total_bytes": entry["bytes"],
+                "files": [entry],
+            }
+            manifest_path = root / "licenses/aws-lc/manifest.json"
+            runner.atomic_json(manifest_path, manifest)
+            manifest_digest = validator.sha256_path(manifest_path)
+            result["build"]["license_bundle"].update({
+                "sha256": manifest_digest,
+                "file_count": 1,
+                "total_bytes": entry["bytes"],
+            })
+            runner.atomic_json(result_path, result)
+            matrix = {"cells": [{
+                "provider": "aws-lc",
+                "platform": "linux-glibc-x86_64",
+                "status": "PASS",
+                "result": "results/aws-lc.json",
+                "sha256": validator.sha256_path(result_path),
+                "license_bundle": {
+                    "manifest": "licenses/aws-lc/manifest.json",
+                    "sha256": manifest_digest,
+                },
+            }]}
+            validator.validate_retained_results(matrix, self.spec, root)
+            license_path.write_text("tampered\n", encoding="utf-8")
+            with self.assertRaisesRegex(validator.ValidationError, "mismatch"):
+                validator.validate_retained_results(matrix, self.spec, root)
+
     def test_native_pocs_drive_provider_specific_session_and_trust_callbacks(self):
         openssl_source = (ROOT / "tools/tls_provider_poc/openssl_memory_poc.c").read_text()
         mbedtls_source = (ROOT / "tools/tls_provider_poc/mbedtls_memory_poc.c").read_text()
@@ -567,6 +763,13 @@ class ProviderPocValidationTests(unittest.TestCase):
             self.assertIn("METRIC mtls_required_handshakes=%d", source)
             self.assertIn("METRIC mtls_optional_handshakes=%d", source)
             self.assertIn("METRIC memory_profile_peak_resident_bytes=%llu", source)
+            self.assertIn("METRIC provider_allocation_calls=%llu", source)
+            self.assertIn("METRIC provider_allocation_peak_live_bytes=%llu", source)
+            self.assertIn("METRIC cancellation_latency_us=%llu", source)
+            self.assertIn("poc_cancel_trigger_and_wait", source)
+            self.assertIn("provider_allocation_calls", source)
+        self.assertIn("CRYPTO_set_mem_functions", openssl_source)
+        self.assertIn("mbedtls_platform_set_calloc_free", mbedtls_source)
         self.assertIn("char overlong_protocol[257]", openssl_source)
         self.assertNotIn("static const unsigned char truncated[]", openssl_source)
         self.assertIn("OPENSSL_thread_stop();", openssl_source)
@@ -747,7 +950,10 @@ class ProviderPocWindowsTests(unittest.TestCase):
 
             def fake_run(command, **kwargs):
                 calls.append(list(command))
-                return runner.subprocess.CompletedProcess(command, 0, "", "")
+                output = "fixture tool 1.0" if (
+                    "--version" in command or "/Bv" in command or "/?" in command
+                ) else ""
+                return runner.subprocess.CompletedProcess(command, 0, output, "")
 
             with mock.patch.object(runner, "is_windows", return_value=True), \
                     mock.patch.object(runner, "run", side_effect=fake_run), \

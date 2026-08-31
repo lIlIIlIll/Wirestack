@@ -1,12 +1,19 @@
+#if !defined(_WIN32)
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include <mbedtls/ssl.h>
 #include <mbedtls/x509_crt.h>
 #include <mbedtls/pk.h>
 #include <mbedtls/error.h>
+#include <mbedtls/platform.h>
 #include <psa/crypto.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "poc_allocation_profile.h"
+#include "poc_cancel.h"
 #if defined(_WIN32)
 #include <windows.h>
 #include <psapi.h>
@@ -19,7 +26,8 @@
 #define PAYLOAD_SIZE 32768
 #define CLEANUP_CYCLES 10000
 #define MEMORY_PROFILE_BOUND_BYTES 536870912ULL
-#define ALLOCATION_PROFILE_BOUND_BYTES 1073741824ULL
+#define PROVIDER_ALLOCATION_BOUND_BYTES 68719476736ULL
+#define PROVIDER_ALLOCATION_CALL_BOUND 100000000ULL
 
 typedef struct {
     unsigned char data[RING_CAPACITY];
@@ -53,8 +61,6 @@ typedef struct {
 static int sni_seen = 0;
 static int external_trust_decision = 0;
 static unsigned int external_trust_calls = 0;
-static uint64_t profile_allocation_calls = 0;
-static uint64_t profile_allocation_bytes = 0;
 
 static uint64_t peak_resident_bytes(void) {
 #if defined(_WIN32)
@@ -207,8 +213,6 @@ static int transfer_payload(Pair *p) {
         free(dst);
         return 0;
     }
-    profile_allocation_calls += 2;
-    profile_allocation_bytes += 2ULL * PAYLOAD_SIZE;
     for (int i = 0; i < PAYLOAD_SIZE; ++i) src[i] = (unsigned char)(i * 17u + 13u);
     size_t sent = 0;
     size_t received = 0;
@@ -478,7 +482,21 @@ static int external_trust_case(Material *m) {
            external_trust_calls >= 4;
 }
 
-static int cancellation_case(Material *m) {
+typedef struct CancellationWorker {
+    PocCancelGate gate;
+    mbedtls_ssl_context *ssl;
+    int observed_want;
+} CancellationWorker;
+
+static POC_THREAD_RETURN cancellation_worker(POC_THREAD_ARGUMENT opaque) {
+    CancellationWorker *worker = (CancellationWorker *)opaque;
+    int result = mbedtls_ssl_handshake(worker->ssl);
+    worker->observed_want = allowed_progress(result);
+    poc_cancel_worker_wait(&worker->gate);
+    POC_THREAD_DONE;
+}
+
+static int cancellation_case(Material *m, uint64_t *latency_us) {
     mbedtls_ssl_config conf;
     mbedtls_ssl_context ssl;
     Ring rx = {0};
@@ -495,11 +513,17 @@ static int cancellation_case(Material *m) {
         ret = mbedtls_ssl_setup(&ssl, &conf);
     }
     if (ret == 0) ret = mbedtls_ssl_set_hostname(&ssl, "localhost");
-    if (ret == 0) {
-        mbedtls_ssl_set_bio(&ssl, &ep, ring_send, ring_recv, NULL);
-        ret = mbedtls_ssl_handshake(&ssl);
-    }
-    int ok = allowed_progress(ret);
+    CancellationWorker worker;
+    memset(&worker, 0, sizeof(worker));
+    PocThread thread;
+    int gate_ready = ret == 0 && poc_cancel_gate_init(&worker.gate);
+    worker.ssl = &ssl;
+    if (gate_ready) mbedtls_ssl_set_bio(&ssl, &ep, ring_send, ring_recv, NULL);
+    int started = gate_ready && poc_thread_start(&thread, cancellation_worker, &worker);
+    int woke = started && poc_cancel_trigger_and_wait(&worker.gate, latency_us);
+    int joined = started && poc_thread_join(thread);
+    if (gate_ready) poc_cancel_gate_destroy(&worker.gate);
+    int ok = worker.observed_want && woke && joined;
     mbedtls_ssl_free(&ssl);
     mbedtls_ssl_config_free(&conf);
     return ok;
@@ -531,6 +555,13 @@ int main(int argc, char **argv) {
         fprintf(stderr, "usage: %s SERVER_CERT SERVER_KEY CA CLIENT_CERT CLIENT_KEY EXPIRED_CERT MALFORMED_CERT\n", argv[0]);
         return 2;
     }
+    provider_allocation_diagnostic_mode =
+        getenv("WIRESTACK_POC_DIAGNOSTIC_CYCLES") != NULL;
+    if (mbedtls_platform_set_calloc_free(
+            poc_profile_calloc, poc_profile_free) != 0) {
+        fprintf(stderr, "provider allocator hook initialization failed\n");
+        return 2;
+    }
     if (psa_crypto_init() != PSA_SUCCESS) return 2;
     Material m;
     material_init(&m);
@@ -557,7 +588,8 @@ int main(int argc, char **argv) {
         argv[6], argv[2], argv[3], argv[4], argv[5]);
     int malformed = malformed_certificate_case(argv[7]);
     int trunc = truncation_case(&m);
-    int cancel = cancellation_case(&m);
+    uint64_t cancellation_latency_us = 0;
+    int cancel = cancellation_case(&m, &cancellation_latency_us);
     int cleanup_cycles = CLEANUP_CYCLES;
     const char *diagnostic_cycles = getenv("WIRESTACK_POC_DIAGNOSTIC_CYCLES");
     if (diagnostic_cycles != NULL) {
@@ -599,17 +631,31 @@ int main(int argc, char **argv) {
            (unsigned long long)peak_bytes);
     printf("METRIC memory_profile_bound_bytes=%llu\n",
            (unsigned long long)MEMORY_PROFILE_BOUND_BYTES);
-    printf("METRIC allocation_profile_calls=%llu\n",
-           (unsigned long long)profile_allocation_calls);
-    printf("METRIC allocation_profile_bytes=%llu\n",
-           (unsigned long long)profile_allocation_bytes);
-    printf("METRIC allocation_profile_bound_bytes=%llu\n",
-           (unsigned long long)ALLOCATION_PROFILE_BOUND_BYTES);
+    printf("METRIC provider_allocation_calls=%llu\n",
+           (unsigned long long)provider_allocation_calls);
+    printf("METRIC provider_allocation_call_bound=%llu\n",
+           (unsigned long long)PROVIDER_ALLOCATION_CALL_BOUND);
+    printf("METRIC provider_allocation_bytes=%llu\n",
+           (unsigned long long)provider_allocation_bytes);
+    printf("METRIC provider_allocation_bound_bytes=%llu\n",
+           (unsigned long long)PROVIDER_ALLOCATION_BOUND_BYTES);
+    printf("METRIC provider_allocation_peak_live_bytes=%llu\n",
+           (unsigned long long)provider_allocation_peak_live_bytes);
+    printf("METRIC cancellation_wakeups=%d\n", cancel ? 1 : 0);
+    printf("METRIC cancellation_latency_us=%llu\n",
+           (unsigned long long)cancellation_latency_us);
+    printf("METRIC cancellation_bound_us=%llu\n",
+           (unsigned long long)POC_CANCELLATION_WAKE_BOUND_US);
 
     material_free(&m);
     mbedtls_psa_crypto_free();
     return (tls12 && tls13 && alpn_negative && mtls && external_trust && wrong_host &&
             untrusted && expired && malformed && trunc && cancel && cleanup &&
             peak_bytes > 0 && peak_bytes <= MEMORY_PROFILE_BOUND_BYTES &&
-            profile_allocation_bytes <= ALLOCATION_PROFILE_BOUND_BYTES) ? 0 : 1;
+            provider_allocation_calls > 0 &&
+            provider_allocation_calls <= PROVIDER_ALLOCATION_CALL_BOUND &&
+            provider_allocation_bytes > 0 &&
+            provider_allocation_bytes <= PROVIDER_ALLOCATION_BOUND_BYTES &&
+            provider_allocation_peak_live_bytes > 0 &&
+            provider_allocation_peak_live_bytes <= MEMORY_PROFILE_BOUND_BYTES) ? 0 : 1;
 }
