@@ -722,6 +722,106 @@ class JsonCoverageContractsTest {
     }
 
     @TestCase
+    func fastSemanticFallbackPreservesTheCompleteReaderContract(): Unit {
+        let scalars = FastSemanticReaderAdapter(JsonFastReader(
+            "[null,true,\"text\",-7,9,1.5,12345678901234567890,12.375,6e2]"))
+        scalars.startArray()
+        @Expect(scalars.hasArrayItem())
+        @Expect(scalars.tryReadNull())
+        @Expect(scalars.readBool())
+        @Expect(scalars.readString(), "text")
+        @Expect(scalars.readInt64(), -7)
+        @Expect(scalars.readUInt64(), 9u64)
+        @Expect(scalars.readFloat64(), 1.5)
+        @Expect(scalars.readBigInt().toString(), "12345678901234567890")
+        @Expect(scalars.readDecimal().toString(), "12.375")
+        @Expect(scalars.readNumberLiteral(), "6e2")
+        @Expect(!scalars.hasArrayItem())
+        scalars.endArray()
+        scalars.expectEnd()
+
+        let prefix = FastSemanticReaderAdapter(JsonFastReader("[1]"))
+        prefix.startArray()
+        @Expect(!prefix.tryReadNull())
+        @Expect(prefix.readInt64(), 1)
+        prefix.endArray()
+
+        let nodeReader = FastSemanticReaderAdapter(JsonFastReader(
+            "{\"n\":null,\"b\":false,\"s\":\"x\",\"i\":1,\"a\":[2],\"o\":{\"k\":\"v\"}}"))
+        let node = nodeReader.readNode().asObject()
+        @Expect(node["n"].isNull)
+        @Expect(!node["b"].asBool())
+        @Expect(node["s"].asString(), "x")
+        @Expect(node["i"].asInt64(), 1)
+        @Expect(node["a"].asArray()[0].asInt64(), 2)
+        @Expect(node["o"].asObject()["k"].asString(), "v")
+        nodeReader.expectEnd()
+
+        let skipped = FastSemanticReaderAdapter(JsonFastReader("[{\"drop\":[1,2]},7]"))
+        skipped.startArray()
+        skipped.skipValue()
+        @Expect(skipped.readInt64(), 7)
+        skipped.endArray()
+
+        let nested = FastSemanticReaderAdapter(JsonFastReader("{\"items\":[1]}"))
+        nested.startObject()
+        @Expect(nested.hasObjectField())
+        @Expect(nested.readName(), "items")
+        nested.startArray()
+        @Expect(nested.hasArrayItem())
+        @Expect(nested.readInt64(), 1)
+        nested.endArray()
+        @Expect(!nested.hasObjectField())
+        nested.endObject()
+
+        let replayReader = FastSemanticReaderAdapter(JsonFastReader("{\"kind\":\"cat\"}"))
+        @Expect(GeneratedSupportV1.readOptions(replayReader).maxDepth,
+            JsonReadOptions.defaults.maxDepth)
+        @Expect(replayReader.path(), "")
+        @Expect(replayReader.location().isSome())
+        @Expect(replayReader.error("expected", "coverage").code, "coverage")
+        let replay = GeneratedSupportV1.captureValue(replayReader, 64)
+        @Expect(replay.materialize().asObject()["kind"].asString(), "cat")
+        GeneratedSupportV1.finishReader(replayReader)
+        replay.close()
+
+        @AssertThrows[IllegalArgumentException](
+            FastSemanticReaderAdapter(JsonFastReader("null")).readReplayValue(-1))
+        @AssertThrows[JsonException](
+            FastSemanticReaderAdapter(JsonFastReader("{\"long\":true}")).readReplayValue(2))
+        @AssertThrows[JsonException](
+            FastSemanticReaderAdapter(JsonFastReader("1")).readNull())
+
+        @AssertThrows[JsonException](
+            FastSemanticReaderAdapter(JsonFastReader("{}")).endObject())
+        @AssertThrows[JsonException](
+            FastSemanticReaderAdapter(JsonFastReader("{}")).hasObjectField())
+        @AssertThrows[JsonException](
+            FastSemanticReaderAdapter(JsonFastReader("{}")).readName())
+        @AssertThrows[JsonException](
+            FastSemanticReaderAdapter(JsonFastReader("[]")).endArray())
+        @AssertThrows[JsonException](
+            FastSemanticReaderAdapter(JsonFastReader("[]")).hasArrayItem())
+
+        let arrayWrongClose = FastSemanticReaderAdapter(JsonFastReader("[]"))
+        arrayWrongClose.startArray()
+        @AssertThrows[JsonException](arrayWrongClose.endObject())
+        let objectWrongClose = FastSemanticReaderAdapter(JsonFastReader("{}"))
+        objectWrongClose.startObject()
+        @AssertThrows[JsonException](objectWrongClose.endArray())
+
+        let nameRequired = FastSemanticReaderAdapter(JsonFastReader("{}"))
+        nameRequired.startObject()
+        @AssertThrows[JsonException](nameRequired.readInt64())
+        let valueRequired = FastSemanticReaderAdapter(JsonFastReader("{\"x\":1}"))
+        valueRequired.startObject()
+        @Expect(valueRequired.readName(), "x")
+        @AssertThrows[JsonException](valueRequired.hasObjectField())
+        @AssertThrows[JsonException](valueRequired.readName())
+        @AssertThrows[JsonException](valueRequired.endObject())
+    }
+
+    @TestCase
     func builtInScalarCodecsCoverRangeAndAlternateNumberForms(): Unit {
         @Expect(YJson.fromJson("127", codec: JsonCodecs.int8), 127i8)
         @AssertThrows[JsonException](YJson.fromJson("128", codec: JsonCodecs.int8))

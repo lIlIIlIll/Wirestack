@@ -7,6 +7,7 @@ import csv
 import importlib.util
 import json
 import pathlib
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -62,6 +63,85 @@ class RunnerSelectionTest(unittest.TestCase):
             7, "jacksonDecodePerson", pathlib.Path("/tmp/report/jmh.json")
         )
         self.assertIn(r"^bench\.OptimalJsonBench\.jacksonDecodePerson$", command)
+
+
+class FixturePreflightContractTest(unittest.TestCase):
+    def fixture_workspace(self, root: pathlib.Path, marked: bool = True) -> pathlib.Path:
+        required_dirs = (
+            "repo/packages/benchmarks",
+            "harness/cjjson",
+            "harness/json4cj",
+            "cjfast-json",
+            "harness/java",
+            "json4cj",
+            "cangjieJSON-upstream",
+        )
+        for relative in required_dirs:
+            (root / relative).mkdir(parents=True, exist_ok=True)
+        (root / "cpu-selection.json").write_text("{}\n", encoding="utf-8")
+        for relative in RUNNER.PREFLIGHT_FIXTURES:
+            path = root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(
+                (RUNNER.PREFLIGHT_MARKER if marked else "missing") + "\n",
+                encoding="utf-8",
+            )
+        return root
+
+    def test_complete_fixture_preflight_contract_is_accepted(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            RUNNER.require_workspace_layout(
+                self.fixture_workspace(pathlib.Path(directory))
+            )
+
+    def test_any_fixture_without_preflight_marker_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = self.fixture_workspace(pathlib.Path(directory))
+            missing = workspace / RUNNER.PREFLIGHT_FIXTURES[2]
+            missing.write_text("no assertions\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "omit the canonical encode/decode"):
+                RUNNER.require_workspace_layout(workspace)
+
+    def test_fixture_overlay_applies_and_freezes_java_wire_shape(self) -> None:
+        archive = (
+            ROOT
+            / "benchmarks/results/full-seven-library/2026-08-30-main-d2f375c8274e"
+            / "harness-source.tar.gz"
+        )
+        overlay = HARNESS / "fixture-preflight-overlay.patch"
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            subprocess.run(
+                ["tar", "-xzf", str(archive), "-C", str(root)],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
+            subprocess.run(
+                ["patch", "-p1", "-i", str(overlay)],
+                cwd=root,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
+            java = (
+                root / "harness/java/src/main/java/bench/OptimalJsonBench.java"
+            ).read_text(encoding="utf-8")
+            self.assertIn("YJSON_SEVEN_LIBRARY_PREFLIGHT_V1", java)
+            self.assertIn(
+                '@com.fasterxml.jackson.annotation.JsonPropertyOrder('
+                '{"user_id", "name", "age", "tags", '
+                '"scores", "address", "nick"})',
+                java,
+            )
+            self.assertIn('@JSONField(name = "user_id", ordinal = 1)', java)
+            self.assertIn(
+                "@JSONField(ordinal = 7, serializeFeatures = "
+                "JSONWriter.Feature.WriteNulls)",
+                java,
+            )
 
 
 class CangjieReportBindingTest(unittest.TestCase):

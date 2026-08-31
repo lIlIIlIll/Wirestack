@@ -772,7 +772,7 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
     }
 }
 
-private class JsonNodeReplayValue <: GeneratedReplayValueV1 {
+class JsonNodeReplayValue <: GeneratedReplayValueV1 {
     private let value: JsonNode
     private let config: JsonReadOptions
     private var closed: Bool = false

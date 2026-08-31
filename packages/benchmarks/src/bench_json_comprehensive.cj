@@ -298,6 +298,56 @@ class ComprehensiveJsonCompareBenchmarks {
         personAst = JsonNode.parse(personText)
         stdxPersonAst = stdxjson.JsonValue.fromStr(personText)
 
+        // YJSON_SEVEN_LIBRARY_PREFLIGHT_V1
+        // This constructor runs before the benchmark framework starts timing.
+        // Fail closed unless every advertised yjson workload uses the canonical
+        // payload and round-trips through the same public typed API as its case.
+        assertJson(YJson.toJson(address, codec: AddressJson) == addressText,
+            "yjson address encode preflight")
+        assertJson(YJson.fromJson(addressText, codec: AddressJson).zipcode == 518000,
+            "yjson address decode preflight")
+        assertJson(YJson.toJson(person, codec: PersonJson) == personText,
+            "yjson person encode preflight")
+        assertJson(YJson.fromJson(personText, codec: PersonJson).scores["math"] == 95,
+            "yjson person decode preflight")
+        assertJson(YJson.toJson(largeProfiles, codec: profileListCodec) == largeProfilesText,
+            "yjson large array-list encode preflight")
+        assertJson(YJson.toJson(largeProfileArray, codec: profileArrayCodec) == largeProfileArrayText,
+            "yjson large array encode preflight")
+        assertJson(largeProfileArrayText == largeProfilesText,
+            "yjson large array canonical payload preflight")
+        assertJson(YJson.fromJson(largeProfilesText, codec: profileListCodec)[63].id == 10063,
+            "yjson large array-list decode preflight")
+        assertJson(YJson.fromJson(largeProfileArrayText, codec: profileArrayCodec)[63].id == 10063,
+            "yjson large array decode preflight")
+        assertJson(YJson.toJson(largeInt64Map, codec: int64MapCodec) == largeInt64MapText,
+            "yjson large map encode preflight")
+        assertJson(YJson.fromJson(largeInt64MapText, codec: int64MapCodec)["metric_63"] == 1074,
+            "yjson large map decode preflight")
+        assertJson(YJson.toJson(deepNestedProfiles, codec: deepNestedCodec) == deepNestedProfilesText,
+            "yjson deep nested encode preflight")
+        assertJson(YJson.fromJson(deepNestedProfilesText, codec: deepNestedCodec)[7]["group_7"][3].id == 703,
+            "yjson deep nested decode preflight")
+        assertJson(encodeStdxToUtf8String<StdxAddress>(stdxAddress) == addressText,
+            "stdx address encode preflight")
+        assertJson(decodeStdxFromUtf8String<StdxAddress>(addressText).zipcode == 518000,
+            "stdx address decode preflight")
+        assertJson(encodeStdxToUtf8String<StdxPerson>(stdxPerson) == personText,
+            "stdx person encode preflight")
+        assertJson(decodeStdxFromUtf8String<StdxPerson>(personText).scores["math"] == 95,
+            "stdx person decode preflight")
+        assertJson(encodeStdxToUtf8String<ArrayList<StdxProfileRecord>>(stdxLargeProfiles) == largeProfilesText,
+            "stdx large array encode preflight")
+        assertJson(decodeStdxFromUtf8String<ArrayList<StdxProfileRecord>>(largeProfilesText)[63].id == 10063,
+            "stdx large array decode preflight")
+        assertJson(encodeStdxToUtf8String<HashMap<String, Int64>>(largeInt64Map) == largeInt64MapText,
+            "stdx large map encode preflight")
+        assertJson(decodeStdxFromUtf8String<HashMap<String, Int64>>(largeInt64MapText)["metric_63"] == 1074,
+            "stdx large map decode preflight")
+        assertJson(encodeStdxToUtf8String<ArrayList<HashMap<String, ArrayList<StdxProfileRecord>>>>(
+            stdxDeepNestedProfiles) == deepNestedProfilesText, "stdx deep nested encode preflight")
+        assertJson(decodeStdxFromUtf8String<ArrayList<HashMap<String, ArrayList<StdxProfileRecord>>>>(
+            deepNestedProfilesText)[7]["group_7"][3].id == 703, "stdx deep nested decode preflight")
         assertJson(decodeStdxFromUtf8String<StdxPerson>(unorderedPersonText).id == person.id, "stdx unordered person")
         assertJson(decodeStdxFromUtf8String<StdxPerson>(unknownPersonText).id == person.id, "stdx unknown person")
         assertJson(decodeStdxFromUtf8String<StdxPerson>(prettyPersonText).id == person.id, "stdx pretty person")

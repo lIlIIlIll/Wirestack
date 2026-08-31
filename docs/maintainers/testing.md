@@ -62,6 +62,12 @@ Linux x86_64 的 `tests` matrix 包含：
 它们不构建 Native package。`api-docs` 生成 Pages artifact；只有 `main` push 执行部署。
 `coverage`、七库 evidence drift 和 stream evidence drift 是独立 job。
 
+`generated-change-risk` 是独立的源码变更门禁。pull request 或 push 修改
+`packages/yjson_macros/`、`generated_support.v1` 或 direct reader/writer/codec 时，同一变更集
+必须增加 `packages/codec_integration/src/*_test.cj` 外部运行时测试。`macro-consumer` 随后同时
+执行该 package 的 `cjpm test` 和 executable smoke check。宏源码不纳入 core 行覆盖率分母；
+生成代码能否编译、运行和 round-trip 由外部消费者行为测试证明。
+
 本地 Linux fresh candidate 使用：
 
 ```terminal
@@ -108,7 +114,9 @@ project gate。LCOV 以 `core` flag 上传 Codecov，上传失败阻断 workflow
   不能替代这项证明。
 - writer 对比 String、bytes、stream 和 view，并覆盖非法状态、cycle、depth、output budget 和
   非有限浮点。
-- generated external consumer检查 protocol v1、递归容器、custom codec、enum 和多态 replay。
+- generated external consumer 检查 protocol v1、递归容器、custom codec、enum 和多态 replay。
+  collection 字段矩阵覆盖顶层与字段、空与非空、compact 与 pretty，以及 Array、ArrayList、
+  HashMap 的嵌套组合。
 - acceleration lifecycle 覆盖 Pure freeze、Native freeze、幂等、晚初始化、并发竞争、缺库、
   ABI/protocol 错误和 reentrant use；故障不得静默 fallback。
 - backend document 覆盖打开期并发读、与 close 的线性化竞争和关闭后的 root view。

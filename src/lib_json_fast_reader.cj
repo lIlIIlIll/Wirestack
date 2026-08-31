@@ -97,6 +97,16 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         index
     }
 
+    func semanticLocation(): Option<JsonLocation> {
+        Some(JsonLocation(index, jsonLineFromUtf8Bytes(data, index),
+            jsonColumnFromUtf8Bytes(data, index)))
+    }
+
+    func semanticError(message: String, code: String): JsonException {
+        JsonException(message, code: code, path: generatedState.currentPath(),
+            location: semanticLocation())
+    }
+
     func rewind(position: Int64): Unit {
         index = position
     }

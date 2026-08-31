@@ -19,6 +19,17 @@
 baseline/candidate 或多库比较使用等语义 workload，并交替或反转执行顺序以降低热状态、
 频率和后台负载偏差。先验证输出/checksum，再记录时间；错误结果即使更快也不计入性能。
 
+七库 runner 在创建正式 manifest 前为每个库执行一次独立 correctness preflight。fixture 的
+setup 必须用计时 case 相同的公开 API 验证 canonical encode、decode 和 round-trip；任一断言、
+进程或 report binding 失败都会在记录第一条正式样本前终止。preflight 日志和完成标记属于
+结果证据。benchmark case 内的 sink 或耗时不能替代这些语义断言。
+
+外部 cangjieJSON、json4cj、Jackson 和 fastjson2 fixture 必须先应用
+`benchmarks/full-seven-library/fixture-preflight-overlay.patch`，然后再构建。runner 会检查
+五个实际 fixture（包含 yjson/stdx.json 与 cjfast_json）中的
+`YJSON_SEVEN_LIBRARY_PREFLIGHT_V1` 标记；缺少任一标记时 fail closed。标记只证明 fixture
+版本正确，真正的门禁仍是 setup 中五种 workload 两侧的 encode/decode 断言成功执行。
+
 ## 统计与展示
 
 - 以 process median 为主要延迟统计。

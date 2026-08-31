@@ -209,6 +209,8 @@ case "$job" in
     macro-consumer)
         require_cangjie
         run_with_dependency_override "$repo/packages/codec_integration" \
+            cjpm test --no-color
+        run_with_dependency_override "$repo/packages/codec_integration" \
             "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/codec_integration"
         stage_modules
         mapfile -t override_args < <(dependency_override_args)

@@ -102,6 +102,7 @@ main(): Unit {
         if "macro" in selected:
             run_fixture("macro", f'''yjson = {{ path = "{core}" }}
 yjson_macros = {{ path = "{macros}" }}''', '''package yjson_release_macro
+import std.collection.*
 import yjson.*
 import yjson_macros.*
 @JsonCodec
@@ -111,6 +112,12 @@ class Person {
     public init(id: Int64, name: String) { this.id = id; this.name = name }
 }
 main(): Unit {
+    let arrays = HashMap<String, Array<Int64>>()
+    arrays.add("team", [1, 2])
+    let arraysText = YJson.toJson(arrays)
+    if (arraysText != "{\\\"team\\\":[1,2]}") { throw Exception("macro nested compact") }
+    let arraysRoundTrip = YJson.fromJson<HashMap<String, Array<Int64>>>(arraysText)
+    if (arraysRoundTrip["team"][1] != 2) { throw Exception("macro nested roundtrip") }
     let text = YJson.toJson(Person(7, "Alice"))
     let value = YJson.fromJson<Person>(text)
     if (value.id != 7 || value.name != "Alice") { throw Exception("macro") }

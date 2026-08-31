@@ -206,6 +206,53 @@ private func escapedText(): String {
     "Cangjie JSON \"escape\" \\ slash / line\n tab\t unicode 仓颉 Δ ✓"
 }
 
+private func canonicalAddressText(): String {
+    "{\"street_name\":\"Nanshan Road\",\"zipcode\":518000}"
+}
+
+private func canonicalPersonText(): String {
+    "{" +
+        "\"user_id\":42,\"name\":\"Lin\",\"age\":28," +
+        "\"tags\":[\"cangjie\",\"json\",\"reflect\"]," +
+        "\"scores\":{\"math\":95,\"english\":88}," +
+        "\"address\":" + canonicalAddressText() + ",\"nick\":null}"
+}
+
+private func canonicalProfilesText(): String {
+    var text = "["
+    for (index in 0..64) {
+        if (index > 0) { text += "," }
+        text += "{\"profile_id\":${10000 + index},\"alias\":\"alias-${index % 16}-json-escape\"," +
+            "\"level\":${index % 10}}"
+    }
+    text + "]"
+}
+
+private func canonicalMapText(): String {
+    var text = "{"
+    for (index in 0..64) {
+        if (index > 0) { text += "," }
+        text += "\"metric_${index}\":${index * 17 + 3}"
+    }
+    text + "}"
+}
+
+private func canonicalDeepProfilesText(): String {
+    var text = "["
+    for (groupIndex in 0..8) {
+        if (groupIndex > 0) { text += "," }
+        text += "{\"group_${groupIndex}\":["
+        for (recordIndex in 0..4) {
+            if (recordIndex > 0) { text += "," }
+            text += "{\"profile_id\":${groupIndex * 100 + recordIndex}," +
+                "\"alias\":\"group-${groupIndex}-profile-${recordIndex}\"," +
+                "\"level\":${(groupIndex + recordIndex) % 10}}"
+        }
+        text += "]}"
+    }
+    text + "]"
+}
+
 @Test
 @Configure[
     warmup: Duration.millisecond * 200,
@@ -243,14 +290,15 @@ class CjFastJsonComprehensiveBenchmarks {
     var bytesSink: Array<Byte> = Array<Byte>()
 
     init() {
-        addressText = address.toJson()
-        personText = person.toJson()
+        // YJSON_SEVEN_LIBRARY_PREFLIGHT_V1
+        addressText = canonicalAddressText()
+        personText = canonicalPersonText()
         profileBundleText = profileBundle.toJson()
         uint64EnvelopeText = uint64Envelope.toJson()
         temporalStatsText = temporalStats.toJson()
-        profilesText = profiles.toJson()
-        mapText = intMap.toJson()
-        deepProfilesText = deepProfiles.toJson()
+        profilesText = canonicalProfilesText()
+        mapText = canonicalMapText()
+        deepProfilesText = canonicalDeepProfilesText()
         unicodeJsonText = unicodeText.toJson()
         addressBytes = encodeBytes(address)
         personBytes = encodeBytes(person)
@@ -258,13 +306,21 @@ class CjFastJsonComprehensiveBenchmarks {
         uint64EnvelopeBytes = encodeBytes(uint64Envelope)
         temporalStatsBytes = encodeBytes(temporalStats)
         unicodeBytes = encodeBytes(unicodeText)
-        if (ComparePerson.fromJson(personText).id != 42 ||
+        if (address.toJson() != addressText ||
+            person.toJson() != personText ||
+            profiles.toJson() != profilesText ||
+            intMap.toJson() != mapText ||
+            deepProfiles.toJson() != deepProfilesText ||
+            CompareAddress.fromJson(addressText).zipcode != 518000 ||
+            ComparePerson.fromJson(personText).id != 42 ||
+            ComparePerson.fromJson(personText).address.zipcode != 518000 ||
             CompareProfileBundle.fromJson(profileBundleText).groups["platform"][0].id != 11 ||
             CompareUInt64Envelope.fromJson(uint64EnvelopeText).shardIds.size != 3 ||
             CompareTemporalStats.fromJson(temporalStatsText).totalEvents.toString() != "123456789012345678901234567890" ||
-            ArrayList<CompareProfileRecord>.fromJson(profilesText).size != 64 ||
-            HashMap<String, Int64>.fromJson(mapText).size != 64 ||
-            ArrayList<HashMap<String, ArrayList<CompareProfileRecord>>>.fromJson(deepProfilesText).size != 8 ||
+            ArrayList<CompareProfileRecord>.fromJson(profilesText)[63].id != 10063 ||
+            HashMap<String, Int64>.fromJson(mapText)["metric_63"] != 1074 ||
+            ArrayList<HashMap<String, ArrayList<CompareProfileRecord>>>.fromJson(
+                deepProfilesText)[7]["group_7"][3].id != 703 ||
             ComparePerson.fromJson(unorderedPersonText()).id != 42 ||
             ComparePerson.fromJson(unknownPersonText()).address.zipcode != 518000 ||
             ComparePerson.fromJson(prettyPersonText()).id != 42 ||

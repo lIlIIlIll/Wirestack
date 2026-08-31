@@ -62,6 +62,8 @@ run api-docs python3 "$repo/scripts/generate_api_docs.py" \
 run runtime-freeze "$repo/scripts/runtime_freeze_contract_checks.sh"
 run core bash -c 'cd "$1" && cjpm test --no-color' _ "$repo"
 run examples "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/examples"
+run macro-consumer-tests bash -c 'cd "$1" && cjpm test --no-color' _ \
+    "$repo/packages/codec_integration"
 run macro-consumer "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/codec_integration"
 run custom-native-primitives bash -c 'cd "$1/packages/yjson_native_primitives" && cjpm test --no-color' _ "$repo"
 run custom-native-accel bash -c 'cd "$1/packages/yjson_native_accel" && cjpm test --no-color' _ "$repo"

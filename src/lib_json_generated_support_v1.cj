@@ -1,6 +1,7 @@
 package yjson
 
 import std.collection.*
+import std.math.numeric.*
 
 /// Narrow semantic reader contract consumed by generated codecs. Implementors
 /// remain runtime-owned; generated source never names a concrete parser class.
@@ -83,6 +84,189 @@ public struct GeneratedSupportV1WriteCursor {
     }
 }
 
+private class FastSemanticReadContext {
+    let objectContext: Bool
+    var first = true
+    var expectingValue = false
+
+    init(objectContext: Bool) {
+        this.objectContext = objectContext
+    }
+}
+
+// Ordinary/custom codecs reached from a generated fast path keep consuming
+// the same runtime-owned cursor. This adapter is internal: it preserves the
+// public generated_support.v1 surface while allowing nested capabilities to
+// fall back without copying or reparsing the current JSON value.
+class FastSemanticReaderAdapter <: JsonReader & GeneratedReadStateV1Owner {
+    private let reader: JsonFastReader
+    private let contexts = ArrayList<FastSemanticReadContext>()
+    private var valuePrefixReady = false
+
+    init(reader: JsonFastReader) {
+        this.reader = reader
+    }
+
+    public func generatedReadStateV1(): GeneratedReadStateV1 {
+        reader.generatedReadStateV1()
+    }
+
+    func readConfig(): JsonReadOptions { JsonReadOptions.defaults }
+
+    public func path(): String { generatedReadStateV1().currentPath() }
+    public func location(): Option<JsonLocation> { reader.semanticLocation() }
+    public func error(message: String, code: String): JsonException {
+        reader.semanticError(message, code)
+    }
+
+    private func beforeValue(): Unit {
+        if (valuePrefixReady) {
+            valuePrefixReady = false
+            return
+        }
+        if (contexts.isEmpty()) { return }
+        let context = contexts[contexts.size - 1]
+        if (context.objectContext) {
+            if (!context.expectingValue) {
+                throw error("Expected an object field name", "parse_error")
+            }
+            context.expectingValue = false
+        } else {
+            reader.beforeRawArrayItem(context.first)
+            context.first = false
+        }
+    }
+
+    public func startObject(): Unit {
+        beforeValue()
+        reader.startRawObject()
+        contexts.add(FastSemanticReadContext(true))
+    }
+
+    public func endObject(): Unit {
+        if (contexts.isEmpty() || !contexts[contexts.size - 1].objectContext) {
+            throw error("Not reading an object", "parse_error")
+        }
+        if (contexts[contexts.size - 1].expectingValue) {
+            throw error("Expected object field value", "parse_error")
+        }
+        reader.endRawObject()
+        contexts.remove(at: contexts.size - 1)
+    }
+
+    public func hasObjectField(): Bool {
+        if (contexts.isEmpty() || !contexts[contexts.size - 1].objectContext) {
+            throw error("Not reading an object", "parse_error")
+        }
+        let context = contexts[contexts.size - 1]
+        if (context.expectingValue) {
+            throw error("Expected object field value", "parse_error")
+        }
+        reader.hasRawObjectField(context.first)
+    }
+
+    public func readName(): String {
+        if (contexts.isEmpty() || !contexts[contexts.size - 1].objectContext) {
+            throw error("Not reading an object", "parse_error")
+        }
+        let context = contexts[contexts.size - 1]
+        if (context.expectingValue) {
+            throw error("Expected object field value", "parse_error")
+        }
+        let name = reader.readRawName(context.first)
+        context.first = false
+        context.expectingValue = true
+        name
+    }
+
+    public func startArray(): Unit {
+        beforeValue()
+        reader.startRawArray()
+        contexts.add(FastSemanticReadContext(false))
+    }
+
+    public func endArray(): Unit {
+        if (contexts.isEmpty() || contexts[contexts.size - 1].objectContext) {
+            throw error("Not reading an array", "parse_error")
+        }
+        reader.endRawArray()
+        contexts.remove(at: contexts.size - 1)
+    }
+
+    public func hasArrayItem(): Bool {
+        if (contexts.isEmpty() || contexts[contexts.size - 1].objectContext) {
+            throw error("Not reading an array", "parse_error")
+        }
+        let context = contexts[contexts.size - 1]
+        reader.hasRawArrayItem(context.first)
+    }
+
+    public func tryReadNull(): Bool {
+        beforeValue()
+        if (reader.tryReadRawNull()) { return true }
+        valuePrefixReady = true
+        false
+    }
+
+    public func readNull(): Unit {
+        beforeValue()
+        if (!reader.tryReadRawNull()) {
+            throw error("Expected null", "parse_error")
+        }
+    }
+
+    public func readBool(): Bool { beforeValue(); reader.readRawBool() }
+    public func readString(): String { beforeValue(); reader.readRawString() }
+    public func readInt64(): Int64 { beforeValue(); reader.readRawInt64() }
+    public func readUInt64(): UInt64 { beforeValue(); reader.readRawUInt64() }
+    public func readFloat64(): Float64 { beforeValue(); jsonFastReadFloat64(reader) }
+    public func readBigInt(): BigInt { beforeValue(); reader.readRawBigInt() }
+    public func readDecimal(): Decimal { beforeValue(); reader.readRawDecimal() }
+    public func readNumberLiteral(): String { beforeValue(); reader.readRawNumberLiteral() }
+
+    public func skipValue(): Unit {
+        beforeValue()
+        reader.skipRawWithDepth(generatedReadStateV1().remainingDepth())
+    }
+
+    public func readNode(): JsonNode {
+        match (reader.peekRawKind()) {
+            case JsonKind.Null => readNull(); JsonNullValue()
+            case JsonKind.Boolean => JsonBoolValue(readBool())
+            case JsonKind.String => JsonStringValue(readString())
+            case JsonKind.Number => JsonNumberLiteralValue.fromParsedLiteral(readNumberLiteral())
+            case JsonKind.Array =>
+                let items = ArrayList<JsonNode>()
+                startArray()
+                while (hasArrayItem()) { items.add(readNode()) }
+                endArray()
+                JsonArray(items)
+            case JsonKind.Object =>
+                let fields = HashMap<String, JsonNode>()
+                startObject()
+                while (hasObjectField()) {
+                    let name = readName()
+                    fields[name] = readNode()
+                }
+                endObject()
+                JsonObject(fields)
+        }
+    }
+
+    func readReplayValue(maxBytes: Int64): GeneratedReplayValueV1 {
+        if (maxBytes < 0) { throw IllegalArgumentException("maxBytes must not be negative") }
+        let start = reader.position()
+        let value = readNode()
+        if (maxBytes > 0 && reader.position() - start > maxBytes) {
+            throw JsonException("Polymorphic JSON object exceeds ${maxBytes} bytes",
+                code: "buffered_value_too_large", path: path(), location: location())
+        }
+        JsonNodeReplayValue(value, readConfig())
+    }
+
+    func expectEnd(): Unit { reader.expectEnd() }
+}
+
 public class GeneratedSupportV1 {
     public static func protocolVersion(): Int64 { yJsonGeneratedProtocolVersion() }
 
@@ -145,6 +329,7 @@ public class GeneratedSupportV1 {
         match (reader) {
             case direct: JsonDirectReader => direct.readConfig()
             case tape: BackendTapeReaderV1 => tape.readConfig()
+            case fast: FastSemanticReaderAdapter => fast.readConfig()
             case _ => throw JsonException(
                 "JsonReader is not owned by the yjson runtime",
                 code: "codec_contract"
@@ -156,6 +341,7 @@ public class GeneratedSupportV1 {
         match (reader) {
             case direct: JsonDirectReader => direct.readReplayValue(maxBytes)
             case tape: BackendTapeReaderV1 => tape.readReplayValue(maxBytes)
+            case fast: FastSemanticReaderAdapter => fast.readReplayValue(maxBytes)
             case _ => throw JsonException(
                 "JsonReader does not support generated replay",
                 code: "codec_contract",
@@ -169,6 +355,7 @@ public class GeneratedSupportV1 {
         match (reader) {
             case direct: JsonDirectReader => direct.expectEnd()
             case tape: BackendTapeReaderV1 => tape.expectEnd()
+            case fast: FastSemanticReaderAdapter => fast.expectEnd()
             case _ => throw JsonException(
                 "JsonReader is not owned by the yjson runtime",
                 code: "codec_contract"
@@ -209,7 +396,7 @@ public class GeneratedSupportV1 {
     }
 
     public static func readWith<T>(codec: JsonCodec<T>, reader: GeneratedSupportV1Reader): T {
-        readJsonFastWith(codec, reader)
+        readJsonNestedFastWith(codec, reader)
     }
 
     public static func tryBeginCompactValue(writer: GeneratedSupportV1Writer): Bool {
@@ -238,6 +425,14 @@ public class GeneratedSupportV1 {
 func yJsonGeneratedReaderV1(reader: GeneratedSupportV1Reader): JsonFastReader {
     match (reader) {
         case concrete: JsonFastReader => concrete
+        case _ => throw JsonException("Unsupported generated reader implementation",
+            code: "generated_protocol_mismatch", path: "")
+    }
+}
+
+func yJsonSemanticReaderV1(reader: GeneratedSupportV1Reader): JsonReader {
+    match (reader) {
+        case concrete: JsonFastReader => FastSemanticReaderAdapter(concrete)
         case _ => throw JsonException("Unsupported generated reader implementation",
             code: "generated_protocol_mismatch", path: "")
     }

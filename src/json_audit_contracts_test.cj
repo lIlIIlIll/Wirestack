@@ -304,10 +304,18 @@ class JsonAuditContractRegressionTest {
         @Expect(String.fromUtf8(mismatchedObject.finishBytes()), "{}")
 
         let deepRaw = JsonDirectWriter(JsonWriteOptions(maxDepth: 80))
-        for (_ in 0..66) { deepRaw.writeRawBeginArray() }
+        var opened: Int64 = 0
+        while (opened < 66) {
+            deepRaw.writeRawBeginArray()
+            opened++
+        }
         let deepCloseError = @AssertThrows[JsonException](deepRaw.writeRawEndObject())
         @Expect(deepCloseError.code, "writer_state")
-        for (_ in 0..66) { deepRaw.writeRawEndArray() }
+        var closed: Int64 = 0
+        while (closed < opened) {
+            deepRaw.writeRawEndArray()
+            closed++
+        }
         @Expect(deepRaw.finishString().size, 132)
 
         let shallow = JsonDirectWriter(JsonWriteOptions(maxDepth: 1))

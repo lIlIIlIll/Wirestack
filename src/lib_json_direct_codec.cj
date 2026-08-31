@@ -476,8 +476,15 @@ public func readJsonFastWith<T>(codec: JsonCodec<T>, reader: GeneratedSupportV1R
     let context = GeneratedSupportV1.readState(reader)
     match (codec) {
         case fast: GeneratedCodecV1<T> => fast.readFast(reader)
-        case _ => throw JsonException("Codec does not provide a fast-reader implementation", code: "codec_contract",
-            path: context.currentPath())
+        case _ => throw JsonException("Codec does not provide a fast-reader implementation",
+            code: "codec_contract", path: context.currentPath())
+    }
+}
+
+func readJsonNestedFastWith<T>(codec: JsonCodec<T>, reader: GeneratedSupportV1Reader): T {
+    match (codec) {
+        case fast: GeneratedCodecV1<T> => fast.readFast(reader)
+        case _ => codec.read(yJsonSemanticReaderV1(reader))
     }
 }
 
@@ -509,7 +516,7 @@ private class ContractFastCodecAdapter<T> <: GeneratedCodecV1<T> {
         let context = GeneratedSupportV1.readState(reader)
 
         let _ = context
-        readJsonFastWith(inner, reader)
+        readJsonNestedFastWith(inner, reader)
     }
 }
 
@@ -614,7 +621,7 @@ private class OptionJsonCodec<T> <: GeneratedCodecV1<Option<T>> & GeneratedCompa
         if (reader.tryReadRawNull()) {
             return None<T>
         }
-        Some(readJsonFastWith(inner, reader))
+        Some(readJsonNestedFastWith(inner, reader))
     }
 }
 

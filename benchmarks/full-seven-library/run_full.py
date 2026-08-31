@@ -112,6 +112,14 @@ CANGJIE = {
 }
 
 JAVA = {"jackson": "jackson", "fastjson2": "fastjson2"}
+PREFLIGHT_MARKER = "YJSON_SEVEN_LIBRARY_PREFLIGHT_V1"
+PREFLIGHT_FIXTURES = (
+    "repo/packages/benchmarks/src/bench_json_comprehensive.cj",
+    "harness/cjjson/src/bench.cj",
+    "harness/json4cj/src/bench.cj",
+    "cjfast-json/src/bench/cjfast_comprehensive_bench.cj",
+    "harness/java/src/main/java/bench/OptimalJsonBench.java",
+)
 
 
 def source_digest(root: Path) -> str:
@@ -240,6 +248,72 @@ def require_workspace_layout(workspace: Path) -> None:
     missing = [str(path) for path in required if not path.exists()]
     if missing:
         raise ValueError("workspace omits required benchmark inputs: " + ", ".join(missing))
+    missing_preflight = []
+    for relative in PREFLIGHT_FIXTURES:
+        path = workspace / relative
+        try:
+            source = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            missing_preflight.append(relative)
+            continue
+        if PREFLIGHT_MARKER not in source:
+            missing_preflight.append(relative)
+    if missing_preflight:
+        raise ValueError(
+            "benchmark fixtures omit the canonical encode/decode preflight marker: "
+            + ", ".join(missing_preflight)
+            + "; apply benchmarks/full-seven-library/fixture-preflight-overlay.patch "
+            "before rebuilding external harnesses"
+        )
+
+
+def run_correctness_preflight(
+    workspace: Path,
+    output: Path,
+    stdx_sdk_root: Path,
+    cpu: int,
+    env: dict[str, str],
+) -> None:
+    """Run every library fixture once before any formal sample is recorded."""
+    preflight = output / "preflight"
+    preflight.mkdir()
+    for library in LIBRARIES:
+        source_case: str
+        if library in CANGJIE:
+            relative_cwd, suite, prefix = CANGJIE[library]
+            cwd = workspace / relative_cwd
+            source_case = prefix + "EncodeAddress"
+            report = preflight / library / "report"
+            report.mkdir(parents=True)
+            command = cangjie_command(cpu, suite, source_case, report, 1)
+        else:
+            cwd = workspace / "harness/java"
+            source_case = JAVA[library] + "EncodeAddress"
+            report = preflight / library / "report"
+            report.mkdir(parents=True)
+            command = java_command(cpu, source_case, report / "jmh.json")
+        command_env = env.copy()
+        if library == "cangjieJSON":
+            command_env["CANGJIE_STDX_PATH"] = str(stdx_sdk_root)
+        result = subprocess.run(
+            command,
+            cwd=cwd,
+            env=command_env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+        (preflight / library / "run.log").write_text(
+            result.stdout, encoding="utf-8"
+        )
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"correctness preflight failed for {library}: exit {result.returncode}"
+            )
+        validate_report(library, report, source_case)
+    (preflight / "COMPLETE").write_text(
+        datetime.now(timezone.utc).isoformat() + "\n", encoding="utf-8"
+    )
 
 
 def metadata(
@@ -264,6 +338,10 @@ def metadata(
         "jmh": "1 fork per outer round, 3x500ms warmup, 1x1s measurement, avgt ns/op",
         "cangjie_bench": "200ms warmup, >=1s duration, >=12 batches, csv-raw",
         "case_selection": "exact fully-qualified benchmark method; report Case validated before manifest commit",
+        "correctness_preflight": (
+            "all seven fixtures execute and validate one exact case before formal timing; "
+            "fixture setup assertions cover canonical encode/decode payloads"
+        ),
         "api_policy": (
             "fastest semantically equivalent public typed API; no DOM fallback when a direct "
             "typed path exists"
@@ -382,6 +460,13 @@ def main(argv: list[str] | None = None) -> int:
         or not cpu_selection.get("acceptable_both_threads_below_1_percent")
     ):
         parser.error("selected CPU does not match an acceptable 30-second idle-core sample")
+
+    try:
+        run_correctness_preflight(
+            workspace, output, stdx_sdk_root, args.cpu, env
+        )
+    except (OSError, UnicodeError, ValueError, RuntimeError) as error:
+        parser.error(f"benchmark correctness preflight failed: {error}")
 
     try:
         run_metadata = metadata(

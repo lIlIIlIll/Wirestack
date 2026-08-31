@@ -18,6 +18,27 @@ permissions:
   contents: read
 
 jobs:
+  generated-change-risk:
+    name: Generated code change risk
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 0
+      - name: Require external runtime tests for macro and SPI changes
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
+        run: |
+          base="$PR_BASE_SHA"
+          if [[ -z "$base" ]]; then base="$PUSH_BASE_SHA"; fi
+          if [[ -n "$base" && "$base" != "0000000000000000000000000000000000000000" ]]; then
+            python3 scripts/check_generated_change_risk.py --base "$base"
+          else
+            python3 scripts/check_generated_change_risk.py
+          fi
+
   perf-evidence-drift:
     name: Seven-library evidence drift
     runs-on: ubuntu-24.04

@@ -6,6 +6,8 @@ import std.collection.*
 import std.convert.Parsable
 import std.math.numeric.*
 import std.time.*
+import std.unittest.*
+import std.unittest.testmacro.*
 
 @JsonCodec
 public struct Address {
@@ -389,7 +391,9 @@ public func benchmark(label: String, iterations: Int64, action: () -> Unit): Uni
     println("${label}: total=${totalMillis} ms, ns/op=${perOp}")
 }
 
-public func runChecks(person: Person): String {
+@Test
+func generatedExampleSupportContracts(): Unit {
+    let person = samplePerson()
     let profileOptionCodec = profileRecordOptionJson()
     let nestedCodec = nestedProfilesJson()
     let codecText = YJson.toJson(person, codec: PersonJson)
@@ -409,7 +413,7 @@ public func runChecks(person: Person): String {
     assertJson(streamDecoded.id == person.id, "stream id mismatch after decode")
     assertJson(streamDecoded.address.zipcode == person.address.zipcode, "stream nested object mismatch")
     let htmlSafeText = encodeToUtf8String(JsonCodecs.string, "<tag attr='x'>&payload</tag>", config: htmlSafeCompactConfig())
-    assertJson(htmlSafeText.contains("\\u003C"), "htmlSafe should escape <")
+    assertJson(htmlSafeText.contains("\\u003c"), "htmlSafe should escape <")
     assertJson(htmlSafeText.contains("\\u0026"), "htmlSafe should escape &")
     let dateTimeText = YJson.toJson(sampleDateTime(), codec: JsonCodecs.rfc3339DateTime)
     assertJson(dateTimeText.contains("2024-06-20T14:42:33+08:00"), "DateTime codec output mismatch")
@@ -469,9 +473,10 @@ public func runChecks(person: Person): String {
     assertJson(profileDecoded.alias == "ops", "post-construction mutable field assignment failed")
     assertJson(profileDecoded.level == 3, "post-construction Int32 assignment failed")
 
-    let zeroPreferred = YJson.fromJson("{\"enabled\":true}", codec: ZeroPreferredJson)
-    assertJson(zeroPreferred.createdBy == "zero-ctor", "zero-arg constructor should be preferred when available")
-    assertJson(zeroPreferred.enabled, "zero-arg constructor path should still apply mutable field updates")
+    let zeroPreferred = YJson.fromJson(
+        "{\"createdBy\":\"decoded\",\"enabled\":true}", codec: ZeroPreferredJson)
+    assertJson(zeroPreferred.createdBy == "decoded", "zero-arg constructor should apply mutable string fields")
+    assertJson(zeroPreferred.enabled, "zero-arg constructor should apply mutable bool fields")
 
     let bundle = sampleProfileBundle()
     let bundleText = YJson.toJson(bundle, codec: ProfileBundleJson)
@@ -507,7 +512,6 @@ public func runChecks(person: Person): String {
     assertProfileRecord(codecOpsProfiles[1], 9, "infra", 4, "nested codec second ops profile")
     assertProfileRecord(codecPlatformProfiles[0], 11, "platform", 5, "nested codec platform profile")
 
-    codecText
 }
 
 public func runBenchmarks(person: Person, jsonText: String): Unit {

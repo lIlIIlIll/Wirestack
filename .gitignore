@@ -25,6 +25,7 @@ benchmarks/java_fastjson2/build/
 # Frozen current-dev seven-library evidence overrides developer-wide ignores.
 !benchmarks/results/full-seven-library/2026-08-30/checksums.txt
 !benchmarks/results/full-seven-library/2026-08-30/optimal-api-overlay-current.patch
+!benchmarks/full-seven-library/fixture-preflight-overlay.patch
 
 # Current main seven-library marker and immutable evidence.
 !benchmarks/results/full-seven-library/current-main.json

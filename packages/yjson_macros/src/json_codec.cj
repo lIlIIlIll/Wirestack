@@ -126,6 +126,15 @@ private func optionInner(typeNode: TypeNode): Option<String> {
     None<String>
 }
 
+private func optionInnerText(typeText: String): Option<String> {
+    let normalized = typeText.replace(" ", "")
+    if (normalized.startsWith("Option<") && normalized.endsWith(">") &&
+        normalized.size > 8) {
+        return Some(normalized[7..normalized.size - 1])
+    }
+    None<String>
+}
+
 private func unwrapField(decl: Decl): Decl {
     match (decl) {
         case wrapper: MacroExpandDecl =>
@@ -241,7 +250,11 @@ private func collectFields(body: Body): ArrayList<CodecField> {
                 if (seenJsonNames.contains(alias)) { throw Exception("duplicate JSON name or alias ${alias}") }
                 seenJsonNames.add(alias)
             }
-            let inner = optionInner(typeNode)
+            let fieldTypeText = typeNode.toTokens().toString().trimAscii()
+            let astInner = optionInner(typeNode)
+            let inner = if (astInner.isSome()) { astInner } else {
+                optionInnerText(fieldTypeText)
+            }
             let customCodecs = collectFieldArguments(member, field, "JsonUsing")
             for (encoded in collectFieldArguments(member, field, "JsonUsingMetadata")) {
                 customCodecs.add(retainedExpression(encoded))
@@ -249,7 +262,6 @@ private func collectFields(body: Body): ArrayList<CodecField> {
             if (customCodecs.size > 1) {
                 throw Exception("@JsonUsing accepts exactly one codec expression for `${field.identifier.value}`")
             }
-            let fieldTypeText = typeNode.toTokens().toString().trimAscii()
             result.add(CodecField(
                 field.identifier.value,
                 fieldTypeText,
@@ -865,7 +877,8 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             if (!field.writeField) { continue }
             if (compactRawScalarFieldWrite(field, "__value", "__first").isEmpty() &&
                 directScalarWrite(field, "__value").isEmpty()) {
-                rawChecks.add("${compactRawCodecName(field)}.isSome()")
+                rawChecks.add("match (${compactRawCodecName(field)}) { " +
+                    "case Some(__raw) => __raw.supportsCompactRaw(); case None => false }")
             }
         }
         appendLine(sb, 1, "public func supportsCompactRaw(): Bool { " +
