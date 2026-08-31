@@ -409,7 +409,12 @@ def scan_binary(binary: Path) -> dict[str, Any]:
     }
 
 
-def validate_report(report: Mapping[str, Any], root: Path) -> None:
+def validate_report(
+    report: Mapping[str, Any],
+    root: Path,
+    *,
+    verify_current_sources: bool = True,
+) -> None:
     if report.get("schema_version") != 1 or report.get("task_id") != "M7-021":
         raise ReleaseError("qualification report identity is invalid")
     if report.get("decision") != "PASS":
@@ -428,14 +433,27 @@ def validate_report(report: Mapping[str, Any], root: Path) -> None:
         or reproducibility.get("digests") != [digest, digest]
     ):
         raise ReleaseError("artifact reproducibility evidence is invalid")
-    if report.get("source_tree_sha256") != source_tree_sha256(root):
-        raise ReleaseError("qualification source tree fingerprint is stale")
+    source_digest = report.get("source_tree_sha256")
+    if not isinstance(source_digest, str) or re.fullmatch(r"[0-9a-f]{64}", source_digest) is None:
+        raise ReleaseError("qualification source tree fingerprint is invalid")
     inputs = report.get("qualification_inputs")
-    expected_inputs = {
-        relative: sha256_path(root / relative) for relative in QUALIFICATION_INPUTS
-    }
-    if inputs != expected_inputs:
-        raise ReleaseError("qualification input fingerprint is stale")
+    if (
+        not isinstance(inputs, dict)
+        or set(inputs) != set(QUALIFICATION_INPUTS)
+        or any(
+            not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None
+            for value in inputs.values()
+        )
+    ):
+        raise ReleaseError("qualification input fingerprint is invalid")
+    if verify_current_sources:
+        if source_digest != source_tree_sha256(root):
+            raise ReleaseError("qualification source tree fingerprint is stale")
+        expected_inputs = {
+            relative: sha256_path(root / relative) for relative in QUALIFICATION_INPUTS
+        }
+        if inputs != expected_inputs:
+            raise ReleaseError("qualification input fingerprint is stale")
     installation = report.get("installation")
     if not isinstance(installation, dict):
         raise ReleaseError("qualification report has no installation object")
