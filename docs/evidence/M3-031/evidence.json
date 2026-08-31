@@ -1,0 +1,81 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-08-31T00:55:19.857557Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-031/core-prerequisite-audit.json",
+      "sha256": "7176594b116322a38c2a771510243537f9a0da4f4405b35a58e7b4357e59948d",
+      "source_task": "M3-031"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-031/windows-x86_64/provider-result.json",
+      "sha256": "8197fa90bafbe5794c70dc1e118901ff72bf8b38fcf5ba5fa24c67adbabf9b6b",
+      "source_task": "M3-031"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-031/windows-x86_64/validation.json",
+      "sha256": "cca5287bc12c1662c9eb90ff88e18167c8ce1e47a7a6ce587c6f8501b9d34400",
+      "source_task": "M3-031"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-031/macos-arm64/provider-result.json",
+      "sha256": "066aa623e47359993d7df10025c04f6b32eae261d24e51d4cad1023d40389525",
+      "source_task": "M3-031"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-031/macos-arm64/validation.json",
+      "sha256": "91a4924db1f401cac98fe0b52afff479191cefc52ca38ef3bfc9feaf65689d57",
+      "source_task": "M3-031"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-031/desktop-provider-matrix.json",
+      "sha256": "1492312150bd6abe58c24cc798bf52626a4919f2ed8d1c52a4a9c528216bc32f",
+      "source_task": "M3-031"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-031/hosted-run.json",
+      "sha256": "e13994261eca97b26f8aa6f1ae948f6f0f850c83c9c07da6dd63d649427fe51d",
+      "source_task": "M3-031"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M3-031/task-check.json",
+      "sha256": "61aede177d524275ebf7ad1dde6fc4ce5626e9163b50a0e659a40dfc79776b8b",
+      "source_task": "M3-031"
+    }
+  ],
+  "revision": "a78e1742cfa2b4b9844f72f0891a73f417278332",
+  "schema_version": 1,
+  "source_sha256": {
+    ".github/workflows/m3-031-desktop-tls-adoption.yml": "958a221cf44ae477359e851fd533ab0b3d304f3f2d0ff313a15171a705e662d4",
+    ".gitignore": "03ca0222acd807d3a0b2e7e4f0cdb80c4a60cf8c46ced0f06dbbac677fae7192",
+    "docs/architecture/adr/0007-desktop-tls-adoption.md": "7f91f8f31a58df005c6bccbe6679f843ec4998b9e7772d35636ae6b8e0608dc4",
+    "docs/evidence/M3-031/README.md": "ce1cf4fde8c6fb04f7fe051afb07150479f4ca89ed1ed2a0598fb30ee97fc392",
+    "docs/evidence/M3-031/test-plan.md": "c4cd7ad964c264d49c78449548c5298a517592b3416772c37d5caf9720c4787b",
+    "docs/planning/implementation-backlog.md": "3aebc8e039c552e386274aa4b98dbe5b41d953c5e9c4ec3924f7fd0377cdc79d",
+    "docs/planning/status.md": "ddf3f00dc1059e74a0bc428fb3456b46e593f6d85763400a24ac300b594c7459",
+    "scripts/check-m3-031-desktop-tls-adoption": "a6faea3d001ad53b3dce95abf735b847e8fd7d7a057911d15530c4a87ad91d6d",
+    "tools/m3_031_desktop_tls_adoption.py": "83c930f4d01428e65a22e991c04b0de5c5d30a9d2b0163aee33b9f7354f7e2d3",
+    "tools/tasks/M3-031.json": "01968168e443eb0fcdb246d5e204dbadd1438b54535fd051c49fc333f2c14ad4",
+    "tools/tests/test_m3_031_desktop_tls_adoption.py": "f85b8fe500c7a2efe97a2d5ec2ec79106207dc0c58895a56a6d0ed39e5001248",
+    "tools/tests/test_m7_linux_task_graph.py": "c6bd40cceac15ffe35f737d5e63daee1021b682f4aa6887dd46c9ed068b7f38c"
+  },
+  "source_task": "M3-031",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}
