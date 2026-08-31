@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -107,18 +108,6 @@ RETAINED_EVIDENCE = (
     "docs/evidence/M3-030/test-provider-results.json",
 )
 HISTORICAL_REFERENCES = ("docs/evidence/M3-028/README.md",)
-RETAINED_SOURCE_PREFIXES = (
-    "native/tls/aws_lc/",
-    "src/internal/tls_engine/",
-    "src/tls/",
-    "tools/tls_provider/",
-)
-RETAINED_SOURCE_PATHS = {
-    "tools/architecture_guard.py",
-    "tools/build_linux_tls_provider.py",
-    "tools/build_tls_provider.py",
-    "tools/m3_030_tls_provider_architecture.py",
-}
 HOSTED_INPUT_PATHS = (
     "tools/tls_provider_poc/openssl_memory_poc.c",
     "tools/tls_provider_poc/providers.json",
@@ -272,6 +261,10 @@ def validate_hosted_run(root: Path, raw: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def validate_retained_evidence(root: Path) -> dict[str, Any]:
+    try:
+        task = repository_tooling.load_task(root / "tools/tasks/M3-030.json", root)
+    except repository_tooling.ContractError as error:
+        raise AdoptionError("RETAINED_EVIDENCE", f"M3-030 task contract: {error.code}") from error
     evidence_path = root / "docs/evidence/M3-030/evidence.json"
     evidence = load_json(evidence_path)
     if evidence.get("schema_version") != 1 or evidence.get("source_task") != "M3-030":
@@ -297,22 +290,27 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
         if payload.get("source_task") != "M3-030" or payload.get("status") != "PASS":
             raise AdoptionError("RETAINED_EVIDENCE", f"{relative}: report does not provide PASS")
     source_sha256 = evidence.get("source_sha256")
-    if not isinstance(source_sha256, dict):
-        raise AdoptionError("RETAINED_EVIDENCE", "M3-030 source inventory is missing")
-    checked: dict[str, str] = {}
+    expected_paths = set(task["source_paths"])
+    if not isinstance(source_sha256, dict) or set(source_sha256) != expected_paths:
+        raise AdoptionError("RETAINED_EVIDENCE", "M3-030 source inventory is incomplete")
+    recorded: dict[str, str] = {}
+    current: dict[str, str] = {}
     for relative, expected in source_sha256.items():
-        if not isinstance(relative, str) or not (
-                relative in RETAINED_SOURCE_PATHS or
-                any(relative.startswith(prefix) for prefix in RETAINED_SOURCE_PREFIXES)):
-            continue
+        if not isinstance(expected, str) or re.fullmatch(r"[0-9a-f]{64}", expected) is None:
+            raise AdoptionError("RETAINED_EVIDENCE", f"{relative}: invalid retained digest")
         path = root / relative
-        if not path.is_file() or expected != repository_text_sha256(path):
-            raise AdoptionError("STALE_SOURCE", f"{relative}: retained TLS source changed")
-        checked[relative] = expected
-    if not checked:
-        raise AdoptionError("RETAINED_EVIDENCE", "no retained TLS source was validated")
+        if not path.is_file():
+            raise AdoptionError("STALE_SOURCE", f"{relative}: retained M3-030 source is missing")
+        recorded[relative] = expected
+        current[relative] = repository_text_sha256(path)
     return {"task_id": "M3-030", "reports": list(RETAINED_EVIDENCE),
-            "source_sha256": dict(sorted(checked.items())), "status": "PASS"}
+            "recorded_source_sha256": dict(sorted(recorded.items())),
+            "source_sha256": dict(sorted(current.items())),
+            "changed_since_m3_030": sorted(
+                relative for relative in expected_paths
+                if recorded[relative] != current[relative]
+            ),
+            "status": "PASS"}
 
 
 def validate_native_source_binding(
