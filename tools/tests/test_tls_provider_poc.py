@@ -858,6 +858,13 @@ class ProviderPocWindowsTests(unittest.TestCase):
             self.assertTrue(data.endswith(b"\n"))
             self.assertNotIn(b"\r\n", data)
 
+    def test_digest_bound_license_bundles_disable_checkout_conversion(self):
+        attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8")
+        self.assertIn(
+            "docs/evidence/M0-016/license-bundles/** -text\n",
+            attributes,
+        )
+
     def test_windows_dependency_scan_rejects_versioned_tls_dll(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
