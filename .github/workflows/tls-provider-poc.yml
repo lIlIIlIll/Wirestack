@@ -84,15 +84,15 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
-      - name: Build and execute in native Alpine musl userspace
+      - name: Provision native Alpine musl userspace
         env:
           PROVIDER: ${{ matrix.provider }}
           ALPINE_IMAGE: alpine:3.22@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
-          WIRESTACK_GITHUB_TOKEN: ${{ github.token }}
+          CONTAINER_NAME: wirestack-m0-016-${{ matrix.provider }}-${{ github.run_id }}
         run: |
-          docker run --rm \
+          docker run --detach \
+            --name "$CONTAINER_NAME" \
             -e PROVIDER \
-            -e WIRESTACK_GITHUB_TOKEN \
             -e GITHUB_SHA="$GITHUB_SHA" \
             -e ImageOS=alpine \
             -e ImageVersion=3.22.5 \
@@ -100,17 +100,33 @@ jobs:
             -v "$GITHUB_WORKSPACE:/work" \
             -w /work \
             "$ALPINE_IMAGE" \
+            sh -c 'while :; do sleep 3600; done'
+          docker exec "$CONTAINER_NAME" apk add --no-cache \
+            build-base cmake ninja perl git openssl ca-certificates python3 linux-headers
+      - name: Build and execute in provisioned Alpine musl userspace
+        env:
+          PROVIDER: ${{ matrix.provider }}
+          CONTAINER_NAME: wirestack-m0-016-${{ matrix.provider }}-${{ github.run_id }}
+          WIRESTACK_GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          docker exec \
+            -e WIRESTACK_GITHUB_TOKEN \
+            "$CONTAINER_NAME" \
             sh -euxc '
               output="build/tls-provider-poc/$PROVIDER"
               trap '\''test ! -e "$output" || chmod -R a+rX "$output"'\'' EXIT
-              apk add --no-cache \
-                build-base cmake ninja perl git openssl ca-certificates python3 linux-headers
               python3 tools/tls_provider_poc/run_musl.py \
                 --provider "$PROVIDER" \
                 --output "$output/result.json"
+              unset WIRESTACK_GITHUB_TOKEN
               python3 tools/tls_provider_poc/validate.py \
                 --result "$output/result.json"
             '
+      - name: Remove Alpine musl container
+        if: always()
+        env:
+          CONTAINER_NAME: wirestack-m0-016-${{ matrix.provider }}-${{ github.run_id }}
+        run: docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
