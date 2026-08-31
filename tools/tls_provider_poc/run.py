@@ -21,7 +21,7 @@ from typing import Any, Mapping, Sequence
 CAP_RE = re.compile(r"^CAP\s+([a-z0-9_]+)=(PASS|FAIL|BLOCKED|NOT_RUN)$", re.M)
 METRIC_RE = re.compile(r"^METRIC\s+([a-z0-9_]+)=([0-9]+)$", re.M)
 FORBIDDEN_DEP_RE = re.compile(
-    r"(?:libssl|libcrypto|libmbedtls|libmbedx509|libtfpsacrypto|libmbedcrypto)"
+    r"(?:lib(?:ssl|crypto)|(?:lib)?(?:mbedtls|mbedx509|tfpsacrypto|mbedcrypto))"
     r"[^\s/\\]*\.(?:so(?:\.[0-9]+)*|dylib|dll)",
     re.I,
 )
@@ -408,7 +408,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     log = work / "build.log"
     started = dt.datetime.now(dt.timezone.utc)
     result: dict[str, Any] = {
-        "schema_version": 2,
+        "schema_version": 3,
         "task_id": "M0-016",
         "provider": args.provider,
         "platform": platform_id(),
