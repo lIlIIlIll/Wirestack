@@ -848,6 +848,7 @@ int main(int argc, char **argv) {
         captured_session = NULL;
     }
 #if !defined(OPENSSL_IS_AWSLC)
+    OPENSSL_thread_stop();
     OPENSSL_cleanup();
 #endif
     return passed ? 0 : 1;

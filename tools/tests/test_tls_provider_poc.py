@@ -563,6 +563,8 @@ class ProviderPocValidationTests(unittest.TestCase):
             self.assertIn("METRIC memory_profile_peak_resident_bytes=%llu", source)
         self.assertIn("char overlong_protocol[257]", openssl_source)
         self.assertNotIn("static const unsigned char truncated[]", openssl_source)
+        self.assertIn("OPENSSL_thread_stop();", openssl_source)
+        self.assertIn("OPENSSL_cleanup();", openssl_source)
 
 
 class ProviderPocWindowsTests(unittest.TestCase):
