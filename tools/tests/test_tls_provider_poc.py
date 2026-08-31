@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import datetime as dt
 import importlib.util
 import json
 import tempfile
@@ -121,6 +122,7 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
         "session_resumption_tls13_handshakes": 2,
         "mtls_required_handshakes": 1,
         "mtls_optional_handshakes": 2,
+        "local_close_operations": 2,
         "memory_profile_peak_resident_bytes": 64 * 1024 * 1024,
         "memory_profile_bound_bytes": validator.MEMORY_PROFILE_BOUND_BYTES,
         "provider_allocation_calls": 200,
@@ -145,14 +147,22 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
         "platform": platform,
         "status": status,
         "source": {
-            "content_sha256": "0" * 64,
+            "content_sha256": provider_spec.get(
+                "sha256", provider_spec.get("content_sha256")),
             "commit": provider_spec["commit"],
+            "kind": provider_spec["source_kind"],
             "security_update": copy.deepcopy(provider_spec["security_update"]),
+            **({"tree": provider_spec["tree"]}
+               if provider_spec["source_kind"] == "git" else {}),
         },
         "capabilities": caps,
         "metrics": metrics,
         "build": {
-            "static_archives": ["libssl.a"],
+            "static_archives": [{
+                "name": "libssl.a",
+                "bytes": 1,
+                "sha256": "6" * 64,
+            }],
             "exported_symbol_inventory": EMPTY_SYMBOL_INVENTORY,
             "system_tls_dependencies": [],
             "runtime_loader_library_strings": [],
@@ -169,6 +179,8 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
             "native_memory_diagnostic": {
                 "status": diagnostic_status,
                 "tool": "address+undefined-sanitizer",
+                "cleanup_cycles": 10,
+                "output_sha256": "7" * 64,
                 "leak_detection": {
                     "status": (
                         "PASS"
@@ -224,6 +236,7 @@ def required_profile_metrics() -> list[str]:
         "METRIC cancellation_wakeups=1",
         "METRIC cancellation_latency_us=1000",
         f"METRIC cancellation_bound_us={runner.CANCELLATION_WAKE_BOUND_US}",
+        "METRIC local_close_operations=2",
     ]
 
 
@@ -292,6 +305,46 @@ class ProviderPocValidationTests(unittest.TestCase):
         ] = ["GHSA-0000-0000-0000"]
         with self.assertRaisesRegex(validator.ValidationError,
                                     "source security-update disposition mismatch"):
+            validator.validate_result(result, self.spec)
+
+        value = copy.deepcopy(self.spec)
+        maximum_age = value["providers"][0]["security_update"][
+            "maximum_source_pin_age_days"]
+        value["providers"][0]["security_update"]["source_committed_at"] = (
+            dt.datetime.now(dt.timezone.utc) -
+            dt.timedelta(days=maximum_age, hours=1)
+        ).isoformat()
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "source pin is stale"):
+            validator.validate_spec(value)
+
+        value = copy.deepcopy(self.spec)
+        value["providers"][0]["security_update"]["advisory_disposition"][
+            "reviewed_through"] = (
+                dt.datetime.now(dt.timezone.utc) -
+                dt.timedelta(days=31, hours=1)
+            ).isoformat()
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "advisory disposition is stale"):
+            validator.validate_spec(value)
+
+    def test_retained_source_identity_matches_provider_pin(self):
+        result = complete_result(self.spec)
+        result["source"]["commit"] = "f" * 40
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "source commit does not match"):
+            validator.validate_result(result, self.spec)
+
+        result = complete_result(self.spec)
+        result["source"]["tree"] = "f" * 40
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "source tree does not match"):
+            validator.validate_result(result, self.spec)
+
+        result = complete_result(self.spec, provider="openssl")
+        result["source"]["content_sha256"] = "f" * 64
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "archive digest does not match"):
             validator.validate_result(result, self.spec)
 
     def test_exported_symbol_inventory_is_bounded_and_digest_bound(self):
@@ -718,6 +771,54 @@ class ProviderPocValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(validator.ValidationError, "instrument provider"):
             validator.validate_result(result, self.spec)
 
+        result = complete_result(self.spec)
+        result["operational_evidence"]["native_memory_diagnostic"].pop(
+            "cleanup_cycles")
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "diagnostic execution cycles"):
+            validator.validate_result(result, self.spec)
+
+        result = complete_result(self.spec)
+        result["operational_evidence"]["native_memory_diagnostic"].pop(
+            "output_sha256")
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "diagnostic output digest"):
+            validator.validate_result(result, self.spec)
+
+    def test_static_archive_inventory_is_structured_and_bounded(self):
+        source = RUN_MODULE.read_text(encoding="utf-8")
+        self.assertGreaterEqual(
+            source.count("for archive in sorted(archives, key=lambda path: path.name)"),
+            2,
+        )
+        result = complete_result(self.spec)
+        result["build"]["static_archives"] = [True]
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "static archive inventory entry invalid"):
+            validator.validate_result(result, self.spec)
+
+        result = complete_result(self.spec)
+        result["build"]["static_archives"].append(copy.deepcopy(
+            result["build"]["static_archives"][0]))
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "sorted and unique"):
+            validator.validate_result(result, self.spec)
+
+    def test_partial_rejects_not_run_and_requires_blocked_capability(self):
+        result = complete_result(self.spec, status="PARTIAL")
+        result["capabilities"]["tls12"] = "NOT_RUN"
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "failed or unexecuted capability"):
+            validator.validate_result(result, self.spec)
+
+        result = complete_result(self.spec, status="PARTIAL")
+        result["capabilities"] = {
+            name: "PASS" for name in self.spec["required_capabilities"]
+        }
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "requires at least one blocked"):
+            validator.validate_result(result, self.spec)
+
     def test_provider_allocation_and_cancellation_metrics_fail_closed(self):
         result = complete_result(self.spec)
         result["metrics"]["provider_allocation_calls"] = 0
@@ -950,6 +1051,8 @@ class ProviderPocValidationTests(unittest.TestCase):
             self.assertIn("CAP negative_expired_certificate=%s", source)
             self.assertIn("CAP negative_malformed_certificate=%s", source)
             self.assertIn("METRIC certificate_negative_cases_rejected=%d", source)
+            self.assertIn("CAP local_close=%s", source)
+            self.assertIn("METRIC local_close_operations=%d", source)
             self.assertIn("METRIC mtls_required_handshakes=%d", source)
             self.assertIn("METRIC mtls_optional_handshakes=%d", source)
             self.assertIn("METRIC memory_profile_peak_resident_bytes=%llu", source)

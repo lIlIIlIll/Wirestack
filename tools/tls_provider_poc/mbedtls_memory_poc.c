@@ -564,6 +564,29 @@ static int truncation_case(Material *m) {
     return ok;
 }
 
+static int local_close_version_case(Material *m, int version) {
+    mbedtls_ssl_config client_conf;
+    mbedtls_ssl_config server_conf;
+    Pair p;
+    int ret = configure(m, &client_conf, &server_conf, version, 0, 1);
+    if (ret != 0) return 0;
+    ret = setup_pair(&p, &client_conf, &server_conf, "localhost");
+    int ok = ret == 0 && drive_handshake(&p, 1);
+    if (ok) {
+        mbedtls_ssl_free(&p.client);
+        mbedtls_ssl_init(&p.client);
+    }
+    pair_free(&p);
+    mbedtls_ssl_config_free(&client_conf);
+    mbedtls_ssl_config_free(&server_conf);
+    return ok;
+}
+
+static int local_close_case(Material *m) {
+    return local_close_version_case(m, MBEDTLS_SSL_VERSION_TLS1_2) &&
+           local_close_version_case(m, MBEDTLS_SSL_VERSION_TLS1_3);
+}
+
 int main(int argc, char **argv) {
     if (argc != 8) {
         fprintf(stderr, "usage: %s SERVER_CERT SERVER_KEY CA CLIENT_CERT CLIENT_KEY EXPIRED_CERT MALFORMED_CERT\n", argv[0]);
@@ -601,6 +624,7 @@ int main(int argc, char **argv) {
     int expired = expired_certificate_case(
         argv[6], argv[2], argv[3], argv[4], argv[5]);
     int malformed = malformed_certificate_case(argv[7]);
+    int local_close = local_close_case(&m);
     int trunc = truncation_case(&m);
     uint64_t cancellation_latency_us = 0;
     int cancel = cancellation_case(&m, &cancellation_latency_us);
@@ -632,6 +656,7 @@ int main(int argc, char **argv) {
     printf("CAP negative_expired_certificate=%s\n", expired ? "PASS" : "FAIL");
     printf("CAP negative_malformed_certificate=%s\n", malformed ? "PASS" : "FAIL");
     printf("CAP close_notify=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
+    printf("CAP local_close=%s\n", local_close ? "PASS" : "FAIL");
     printf("CAP truncation=%s\n", trunc ? "PASS" : "FAIL");
     printf("CAP caller_cancellation=%s\n", cancel ? "PASS" : "FAIL");
     printf("CAP external_signer=BLOCKED\n");
@@ -641,6 +666,7 @@ int main(int argc, char **argv) {
     printf("METRIC alpn_no_overlap_handshakes=%d\n", alpn_negative ? 2 : 0);
     printf("METRIC alpn_malformed_inputs_rejected=%d\n", alpn_negative ? 2 : 0);
     printf("METRIC certificate_negative_cases_rejected=%d\n", expired + malformed);
+    printf("METRIC local_close_operations=%d\n", local_close ? 2 : 0);
     printf("METRIC mtls_required_handshakes=%d\n", mtls_required ? 1 : 0);
     printf("METRIC mtls_optional_handshakes=%d\n", mtls_optional ? 2 : 0);
     uint64_t peak_bytes = peak_resident_bytes();

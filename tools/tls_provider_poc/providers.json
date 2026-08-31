@@ -10,6 +10,8 @@
       "url": "https://github.com/aws/aws-lc.git",
       "tag": "v5.5.0",
       "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+      "tree": "ae54cd9455f9630451d505855afe808a9f028b25",
+      "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
       "license_expression": "Apache-2.0 OR ISC",
       "security_update": {
         "maximum_source_pin_age_days": 180,
@@ -140,6 +142,7 @@
     "negative_expired_certificate",
     "negative_malformed_certificate",
     "close_notify",
+    "local_close",
     "truncation",
     "caller_cancellation",
     "external_signer",

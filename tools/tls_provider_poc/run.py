@@ -38,7 +38,7 @@ MEMORY_PROFILE_BOUND_BYTES = 512 * 1024 * 1024
 PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES = 64 * 1024 * 1024 * 1024
 PROVIDER_ALLOCATION_CALL_BOUND = 150_000_000
 CANCELLATION_WAKE_BOUND_US = 250_000
-RESULT_SCHEMA_VERSION = 9
+RESULT_SCHEMA_VERSION = 10
 MAX_TOOL_VERSION_BYTES = 16 * 1024
 MAX_BUILD_ENVIRONMENT_VALUE_BYTES = 64 * 1024
 MAX_BUILD_ENVIRONMENT_TOTAL_BYTES = 256 * 1024
@@ -703,7 +703,7 @@ def run_native_memory_diagnostic(spec: Mapping[str, Any], repo: Path, src: Path,
                 "bytes": archive.stat().st_size,
                 "sha256": sha256_path(archive),
             }
-            for archive in archives
+            for archive in sorted(archives, key=lambda path: path.name)
         ],
         "provider_build_provenance": provenance,
         "leak_detection": {
@@ -786,7 +786,7 @@ def inspect_binary(binary: Path, archives: Sequence[Path], work: Path, log: Path
         "binary_sha256": sha256_path(binary),
         "static_archives": [
             {"name": archive.name, "bytes": archive.stat().st_size, "sha256": sha256_path(archive)}
-            for archive in archives
+            for archive in sorted(archives, key=lambda path: path.name)
         ],
         "exported_symbol_inventory": exported_symbol_inventory(binary, work, log),
         "system_tls_dependencies": dependencies,
@@ -839,6 +839,9 @@ def parse_metrics(stdout: str, provider: str, caps: Mapping[str, str]) -> dict[s
         > CANCELLATION_WAKE_BOUND_US
     ):
         raise PocError("caller cancellation did not wake a blocked provider wait within its bound")
+    if (caps.get("local_close") == "PASS" and
+            metrics.get("local_close_operations") != 2):
+        raise PocError("local close did not cover TLS 1.2 and TLS 1.3 teardown")
     peak = metrics.get("memory_profile_peak_resident_bytes", 0)
     if (metrics.get("memory_profile_bound_bytes") != MEMORY_PROFILE_BOUND_BYTES
             or peak <= 0 or peak > MEMORY_PROFILE_BOUND_BYTES):

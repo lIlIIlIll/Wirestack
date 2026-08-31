@@ -18,11 +18,12 @@ Version changes require a reviewed change to `tools/tls_provider_poc/providers.j
 - `BLOCKED`: the native platform or required environment is unavailable.
 
 `NOT_RUN`, missing cells and cross-compilation never count as native evidence.
-Schema versions 1 through 8 are no longer accepted because they cannot carry
+Schema versions 1 through 9 are no longer accepted because they cannot carry
 the complete callback, protocol-negative, certificate-negative, export,
 execution, durable build-provenance, license, provider-allocation,
 provider-instrumentation, bounded join, live-allocation-growth, monotonic
-cancellation and advisory-disposition evidence. Schema v9 is required for
+cancellation, advisory-disposition, source-pin, archive-inventory, diagnostic
+execution and distinct local-close evidence. Schema v10 is required for
 retained `PASS` and `PARTIAL` results. It requires an
 exact, bounded inventory of the final artifact's exported symbols and exactly
 10,000 measured cleanup
@@ -47,6 +48,11 @@ bounded bundle. Its manifest binds the provider, source digest, relative file
 paths, byte counts, and file digests, and the result binds the manifest digest.
 The canonical matrix also references a committed copy of that exact manifest;
 matrix validation reads and hashes every referenced license file.
+The source object must match the selected provider's exact commit and source
+kind. Archive providers must match the pinned archive SHA-256. Git providers
+must match the pinned tree and deterministic content SHA-256. Static archive
+inventories contain bounded, sorted, unique objects with name, byte count and
+SHA-256; a truthy placeholder is not evidence.
 
 An mTLS `PASS` records one required-client-auth handshake and two optional
 client-auth handshakes: one without a client certificate and one with a valid
@@ -62,6 +68,8 @@ and macOS also require a passing ASan and UBSan diagnostic run built from newly
 instrumented provider archives, not an instrumented harness linked to ordinary
 Release archives. Platforms where that configured diagnostic is unavailable
 must record `UNSUPPORTED`; they may not report a skipped diagnostic as `PASS`.
+Each passing diagnostic records its exact tool, 10 executed cleanup cycles,
+bounded output digest and structured instrumented-archive inventory.
 
 Leak detection is a separate field. Linux glibc Mbed TLS requires
 LeakSanitizer `PASS`. AWS-LC 5.5.0 exposes no process-global cleanup API, and
@@ -100,7 +108,10 @@ accept callback runs does not prove external trust. An AWS-LC external-signer
 The PoC exercises TLS 1.2/1.3, SNI/reference identity/ALPN, caller-supplied CA,
 mTLS, dual-version session resumption, negative certificate cases,
 caller-driven partial I/O and backpressure, bounded cancellation, clean
-`close_notify`, truncation classification and repeated cleanup.
+`close_notify`, local close, truncation classification and repeated cleanup.
+Local close destroys the local TLS endpoint without sending `close_notify` and
+is executed independently for TLS 1.2 and TLS 1.3. It is not inferred from the
+peer-truncation case or from a graceful shutdown.
 External/non-exportable signing must be executed or remain explicitly
 `BLOCKED`; it may not be inferred from a header or marketing claim.
 An ALPN `PASS` requires successful negotiation plus no-overlap rejection in TLS

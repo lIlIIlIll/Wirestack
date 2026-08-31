@@ -700,6 +700,34 @@ static int truncation_case(const char *server_cert, const char *server_key, cons
     return ok;
 }
 
+static int local_close_version_case(const char *server_cert, const char *server_key,
+                                    const char *ca, int version) {
+    sni_seen = alpn_seen = 0;
+    SSL_CTX *server_ctx = make_server_ctx(
+        server_cert, server_key, ca, version, 0, 0);
+    SSL_CTX *client_ctx = make_client_ctx(ca, NULL, NULL, version, 1);
+    Pair p = new_pair(client_ctx, server_ctx, "localhost", NULL);
+    int ok = drive_handshake(&p, 1, MAX_STEPS) &&
+             verify_negotiation(&p, version);
+    if (ok) {
+        SSL_free(p.client);
+        p.client = NULL;
+    }
+    free_pair(&p);
+    SSL_CTX_free(client_ctx);
+    SSL_CTX_free(server_ctx);
+    ERR_clear_error();
+    return ok;
+}
+
+static int local_close_case(const char *server_cert, const char *server_key,
+                            const char *ca) {
+    return local_close_version_case(
+               server_cert, server_key, ca, TLS1_2_VERSION) &&
+           local_close_version_case(
+               server_cert, server_key, ca, TLS1_3_VERSION);
+}
+
 typedef struct CancellationWorker {
     PocCancelGate gate;
     SSL *client;
@@ -817,6 +845,7 @@ int main(int argc, char **argv) {
     int untrusted = negative_case(server_cert, server_key, ca, "localhost", 0);
     int expired = expired_certificate_case(expired_cert, server_key, ca);
     int malformed = malformed_certificate_case(malformed_cert);
+    int local_close = local_close_case(server_cert, server_key, ca);
     int trunc = truncation_case(server_cert, server_key, ca);
     uint64_t cancellation_latency_us = 0;
     int cancel = cancellation_case(ca, &cancellation_latency_us);
@@ -859,6 +888,7 @@ int main(int argc, char **argv) {
     printf("CAP negative_expired_certificate=%s\n", expired ? "PASS" : "FAIL");
     printf("CAP negative_malformed_certificate=%s\n", malformed ? "PASS" : "FAIL");
     printf("CAP close_notify=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
+    printf("CAP local_close=%s\n", local_close ? "PASS" : "FAIL");
     printf("CAP truncation=%s\n", trunc ? "PASS" : "FAIL");
     printf("CAP caller_cancellation=%s\n", cancel ? "PASS" : "FAIL");
 #if defined(OPENSSL_IS_AWSLC)
@@ -880,6 +910,7 @@ int main(int argc, char **argv) {
     printf("METRIC alpn_no_overlap_handshakes=%d\n", alpn_negative ? 2 : 0);
     printf("METRIC alpn_malformed_inputs_rejected=%d\n", alpn_negative ? 2 : 0);
     printf("METRIC certificate_negative_cases_rejected=%d\n", expired + malformed);
+    printf("METRIC local_close_operations=%d\n", local_close ? 2 : 0);
     printf("METRIC mtls_required_handshakes=%d\n", mtls_required ? 1 : 0);
     printf("METRIC mtls_optional_handshakes=%d\n", mtls_optional ? 2 : 0);
     uint64_t peak_bytes = peak_resident_bytes();
