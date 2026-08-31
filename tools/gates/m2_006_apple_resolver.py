@@ -424,6 +424,7 @@ def make_ios_bundle(
     executable_copy = bundle / "wirestack-m2-006"
     shutil.copy2(executable, executable_copy)
     executable_copy.chmod(executable_copy.stat().st_mode | stat.S_IXUSR)
+    bundle_source_probe_sha256 = sha256_path(executable_copy)
     frameworks = bundle / "Frameworks"
     frameworks.mkdir()
     runtime_copies: list[Path] = []
@@ -477,6 +478,7 @@ def make_ios_bundle(
     )
     require_success(installed, "install iOS test bundle")
     return {
+        "bundle_source_probe_sha256": bundle_source_probe_sha256,
         "bundle_probe_sha256": sha256_path(executable_copy),
         "install": installed,
         "runtime_libraries": [
@@ -613,6 +615,7 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
             if not isinstance(simulator.get("runtime"), str) or ".iOS-" not in simulator["runtime"]:
                 failures.append("REPORT:SIMULATOR_RUNTIME")
             probe_sha = simulator.get("probe_sha256")
+            bundle_source_probe_sha = simulator.get("bundle_source_probe_sha256")
             bundle_probe_sha = simulator.get("bundle_probe_sha256")
             install = simulator.get("install")
             runtime_libraries = simulator.get("runtime_libraries")
@@ -627,9 +630,11 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
             if (
                 not isinstance(probe_sha, str)
                 or not re.fullmatch(r"[0-9a-f]{64}", probe_sha)
+                or not isinstance(bundle_source_probe_sha, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", bundle_source_probe_sha)
+                or probe_sha != bundle_source_probe_sha
                 or not isinstance(bundle_probe_sha, str)
                 or not re.fullmatch(r"[0-9a-f]{64}", bundle_probe_sha)
-                or probe_sha != bundle_probe_sha
                 or not isinstance(install, dict)
                 or install.get("timed_out") is not False
                 or install.get("exit_code") != 0
