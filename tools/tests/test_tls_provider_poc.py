@@ -82,6 +82,8 @@ class ProviderPocValidationTests(unittest.TestCase):
             "metrics": {
                 "repeated_cleanup_cycles": 10000,
                 "external_trust_calls": 4,
+                "alpn_no_overlap_handshakes": 2,
+                "alpn_malformed_inputs_rejected": 2,
                 "session_resumption_handshakes": 4,
                 "session_resumption_tls12_handshakes": 2,
                 "session_resumption_tls13_handshakes": 2,
@@ -111,6 +113,26 @@ class ProviderPocValidationTests(unittest.TestCase):
             "build": {"static_archives": ["libssl.a"], "system_tls_dependencies": []},
         }
         with self.assertRaises(validator.ValidationError):
+            validator.validate_result(result, self.spec)
+
+    def test_schema_v1_partial_cannot_claim_unmeasured_external_trust(self):
+        caps = {name: "BLOCKED" for name in self.spec["required_capabilities"]}
+        caps["external_trust"] = "PASS"
+        result = {
+            "schema_version": 1,
+            "task_id": "M0-016",
+            "provider": "mbedtls",
+            "platform": "linux-glibc-x86_64",
+            "status": "PARTIAL",
+            "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
+            "capabilities": caps,
+            "build": {
+                "static_archives": ["libmbedtls.a"],
+                "system_tls_dependencies": [],
+                "runtime_loader_library_strings": [],
+            },
+        }
+        with self.assertRaisesRegex(validator.ValidationError, "unsupported result schema"):
             validator.validate_result(result, self.spec)
 
     def test_system_tls_dependency_fails(self):
@@ -177,6 +199,8 @@ class ProviderPocValidationTests(unittest.TestCase):
             "repeated_cleanup_cycles": 10000,
             "external_signer_calls": 2,
             "external_trust_calls": 4,
+            "alpn_no_overlap_handshakes": 2,
+            "alpn_malformed_inputs_rejected": 2,
         }
         with self.assertRaisesRegex(validator.ValidationError, "schema v3"):
             validator.validate_result(result, self.spec)
@@ -198,6 +222,8 @@ class ProviderPocValidationTests(unittest.TestCase):
                 "session_resumption_tls12_handshakes": 2,
                 "session_resumption_tls13_handshakes": 2,
                 "external_trust_calls": 4,
+                "alpn_no_overlap_handshakes": 2,
+                "alpn_malformed_inputs_rejected": 2,
             },
             "build": {
                 "static_archives": ["libssl.a"],
@@ -238,6 +264,23 @@ class ProviderPocValidationTests(unittest.TestCase):
                 caps,
             )
 
+    def test_metrics_require_negative_alpn_coverage(self):
+        caps = {name: "BLOCKED" for name in self.spec["required_capabilities"]}
+        caps["sni_hostname_alpn"] = "PASS"
+        complete = "\n".join([
+            "METRIC repeated_cleanup_cycles=10000",
+            "METRIC alpn_no_overlap_handshakes=2",
+            "METRIC alpn_malformed_inputs_rejected=2",
+        ])
+        metrics = runner.parse_metrics(complete, "openssl", caps)
+        self.assertEqual(2, metrics["alpn_no_overlap_handshakes"])
+        with self.assertRaisesRegex(runner.PocError, "ALPN evidence"):
+            runner.parse_metrics(
+                complete.replace("alpn_malformed_inputs_rejected=2",
+                                 "alpn_malformed_inputs_rejected=1"),
+                "openssl",
+                caps,
+            )
     def test_native_pocs_expose_external_trust_as_a_distinct_capability(self):
         openssl_source = (ROOT / "tools/tls_provider_poc/openssl_memory_poc.c").read_text()
         mbedtls_source = (ROOT / "tools/tls_provider_poc/mbedtls_memory_poc.c").read_text()
@@ -258,19 +301,28 @@ class ProviderPocValidationTests(unittest.TestCase):
             "        if (captured_session != NULL)",
             openssl_source,
         )
+        external_trust_source = mbedtls_source[
+            mbedtls_source.index("static int external_trust_version_case"):
+            mbedtls_source.index("static int external_trust_case")
+        ]
         self.assertIn(
             "configure(m, &client_conf, &server_conf, version, 0, 0)",
-            mbedtls_source,
+            external_trust_source,
         )
         self.assertNotIn(
             "configure(m, &client_conf, &server_conf, version, 0, 1)",
-            mbedtls_source,
+            external_trust_source,
         )
         self.assertIn(
             "mbedtls_ssl_conf_ca_chain(&client_conf, &m->client_cert, NULL);",
             mbedtls_source,
         )
         self.assertIn("Pair provider_rejected;", mbedtls_source)
+        for source in (openssl_source, mbedtls_source):
+            self.assertIn("alpn_no_overlap_version_case", source)
+            self.assertIn("alpn_malformed_case", source)
+            self.assertIn("METRIC alpn_no_overlap_handshakes=%d", source)
+            self.assertIn("METRIC alpn_malformed_inputs_rejected=%d", source)
 
 
 class ProviderPocWindowsTests(unittest.TestCase):
@@ -418,6 +470,8 @@ class ProviderPocWindowsTests(unittest.TestCase):
                 "repeated_cleanup_cycles": 10000,
                 "external_signer_calls": 2,
                 "external_trust_calls": 4,
+                "alpn_no_overlap_handshakes": 2,
+                "alpn_malformed_inputs_rejected": 2,
                 "session_resumption_handshakes": 4,
                 "session_resumption_tls12_handshakes": 2,
                 "session_resumption_tls13_handshakes": 2,
@@ -454,6 +508,8 @@ class ProviderPocWindowsTests(unittest.TestCase):
                 "repeated_cleanup_cycles": 10000,
                 "external_signer_calls": 2,
                 "external_trust_calls": 4,
+                "alpn_no_overlap_handshakes": 2,
+                "alpn_malformed_inputs_rejected": 2,
                 "session_resumption_handshakes": 4,
                 "session_resumption_tls12_handshakes": 2,
                 "session_resumption_tls13_handshakes": 2,

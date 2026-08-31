@@ -392,6 +392,11 @@ def parse_metrics(stdout: str, provider: str, caps: Mapping[str, str]) -> dict[s
             raise PocError("AWS-LC external signer did not serve both TLS versions")
     if caps.get("external_trust") == "PASS" and metrics.get("external_trust_calls", 0) < 4:
         raise PocError("external trust callback did not serve accept/reject on both TLS versions")
+    if caps.get("sni_hostname_alpn") == "PASS" and (
+        metrics.get("alpn_no_overlap_handshakes") != 2
+        or metrics.get("alpn_malformed_inputs_rejected") != 2
+    ):
+        raise PocError("ALPN evidence did not cover no-overlap and malformed inputs")
     if caps.get("session_resumption") == "PASS" and (
         metrics.get("session_resumption_handshakes") != 4
         or metrics.get("session_resumption_tls12_handshakes") != 2
