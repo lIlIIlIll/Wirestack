@@ -14,6 +14,9 @@
       "task_id": "M3-001..M3-018"
     }
   ],
+  "historical_references": [
+    "docs/evidence/M3-028/README.md"
+  ],
   "historical_task_status_changed": false,
   "kind": "provider-neutral-core-adoption",
   "prerequisites": {
@@ -90,18 +93,42 @@
     }
   },
   "retained_evidence": [
-    "docs/evidence/M3-028/README.md",
-    "docs/evidence/M3-030/README.md",
     "docs/evidence/M3-030/native-abi-report.json",
     "docs/evidence/M3-030/test-provider-results.json"
   ],
+  "retained_evidence_validation": {
+    "reports": [
+      "docs/evidence/M3-030/native-abi-report.json",
+      "docs/evidence/M3-030/test-provider-results.json"
+    ],
+    "source_sha256": {
+      "native/tls/aws_lc/provider.json": "ff4d39359a8ef49ede8272698fe306b7421df2fea04b44744483245f34f619b4",
+      "native/tls/aws_lc/wirestack_tls_provider.c": "9b57dee65da7ecd8510999ea46f8437b7f7eb5e3c5234d2359ff8215f3d60a94",
+      "native/tls/aws_lc/wirestack_tls_provider.h": "41e5f8d58937c87e4cfd357a10a9ca7066e2db8ff02c180c9e0120610c05eff1",
+      "src/internal/tls_engine/context.cj": "d8a18a1f97df822dfa84ad6031f4a389e37bf32ee34db405e161948d0d01991d",
+      "src/internal/tls_engine/engine.cj": "86d663507421629a54d238e22b95b723bbf99aadbe153665d38f60067b6ed4f7",
+      "src/internal/tls_engine/package.cj": "74bd11c9983dd04cf3b9637f66eb589039006a8821c6142dc684a096ab97c7e6",
+      "src/internal/tls_engine/provider_test.cj": "b0c634ce8c9de9b0fa2164e38499da374b4b5d3761c4138795827a6b9936eddd",
+      "src/tls/facade.cj": "a9c43792c8770a89bead598aa2dc1690b46060c60f45f233187e8b0a9cd8f98c",
+      "src/tls/package.cj": "71e106dedf7e34890015f32204592a5e2371df3bb7d8aa3a8bae2b67cd590339",
+      "tools/architecture_guard.py": "871e3db83eccc6be2e88e9191a1bfc4810c74c79bd3d1a47b63bfab1be5d553d",
+      "tools/build_linux_tls_provider.py": "e1cabf4571f48380d9c6d5ce600ef5b467e90a0f4fe35201a704602231b04311",
+      "tools/build_tls_provider.py": "f389f418a8f1de7195c4469a8427b8a11c0d80e0fcc221f403c87f05ca878ed7",
+      "tools/m3_030_tls_provider_architecture.py": "2494a8a41e07f9fb4c520868cb2b73aac67da547c202e8e24d089abfb996f462",
+      "tools/tls_provider/abi-v1.json": "4f6756852e89203938ab964461993edde8dccc220bab7e5f8862e4f2b8bb3943",
+      "tools/tls_provider/provider-manifest-schema-v1.json": "1ffac8ad5d475c906c177e600635f7450b3da10954535f47e5388d092d6bece9",
+      "tools/tls_provider/selection.json": "de802ea6839e42327a6d30df4ac5fcdca6f60205f04ed223082346833203dc0b",
+      "tools/tls_provider/selection.py": "7a680ad296f10d2f5036e895f292765b3d5eabcc70cedcfbd851319e969143f3"
+    },
+    "status": "PASS",
+    "task_id": "M3-030"
+  },
   "schema_version": 1,
   "source_sha256": {
     "docs/evidence/M3-028/README.md": "6c82678dfb3e31285896f3df31127422a4c4ff338d2c18cf4a08cd5ea648e9b5",
-    "docs/evidence/M3-030/README.md": "5274876a5dbf5c078deb5451dba6b2241a0c6195b08b9c0db0618f1da3bfaa83",
     "docs/evidence/M3-030/native-abi-report.json": "03881988db42d4e32579fa1fff2ff6e4ab045ed2fab3eedee26ccae0a2d91d35",
     "docs/evidence/M3-030/test-provider-results.json": "f57e6ac10d7a4977ea427fef1b69ed8649a2a3133187e566fdc455090263e69a",
-    "docs/planning/implementation-backlog.md": "3aebc8e039c552e386274aa4b98dbe5b41d953c5e9c4ec3924f7fd0377cdc79d",
+    "docs/planning/implementation-backlog.md": "18a0d59c84fd461cb0c536921dd2314ab0f65e82d17cfaab48403863f2c7934d",
     "native/tls/aws_lc/provider.json": "ff4d39359a8ef49ede8272698fe306b7421df2fea04b44744483245f34f619b4",
     "src/hostname_verifier.cj": "44769311cc3f97b34d033727d0b16661cbdcf63a69a2c6512569b550970dfca3",
     "src/internal/tls_engine/context.cj": "d8a18a1f97df822dfa84ad6031f4a389e37bf32ee34db405e161948d0d01991d",
