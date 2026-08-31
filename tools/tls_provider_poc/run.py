@@ -29,6 +29,8 @@ FORBIDDEN_DEP_RE = re.compile(
     r")",
     re.I,
 )
+MAX_EXPORTED_SYMBOLS = 16384
+MAX_EXPORTED_SYMBOL_LENGTH = 256
 
 
 class PocError(RuntimeError):
@@ -403,7 +405,8 @@ def exported_symbol_inventory(binary: Path, work: Path, log: Path) -> dict[str, 
                          "Summary" not in completed.stdout):
         raise PocError("dumpbin export output was not recognized")
     symbols = sorted(set(pattern.findall(completed.stdout)))
-    if len(symbols) > 4096 or any(len(symbol) > 256 for symbol in symbols):
+    if (len(symbols) > MAX_EXPORTED_SYMBOLS or
+            any(len(symbol) > MAX_EXPORTED_SYMBOL_LENGTH for symbol in symbols)):
         raise PocError("exported-symbol inventory exceeds its bound")
     encoded = "".join(f"{symbol}\n" for symbol in symbols).encode("utf-8")
     return {
