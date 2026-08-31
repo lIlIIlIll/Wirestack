@@ -159,7 +159,8 @@ def require_success(process: dict[str, Any], label: str) -> None:
 
 
 def process_failures(
-    process: dict[str, Any], expected_cases: tuple[str, ...], label: str
+    process: dict[str, Any], expected_cases: tuple[str, ...], label: str,
+    *, trace_ids: tuple[int, ...] = (),
 ) -> list[str]:
     failures: list[str] = []
     if process.get("timed_out"):
@@ -175,11 +176,30 @@ def process_failures(
             re.MULTILINE,
         )
     )
-    if len(passed_cases) != len(expected_cases):
-        failures.append(f"{label}:CASE_COUNT")
-    if len(passed_cases) != len(set(passed_cases)) or set(passed_cases) != set(expected_cases):
-        failures.append(f"{label}:CASE_INVENTORY")
-    if "[ SKIPPED ] CASE:" in output or "[ FAILED ] CASE:" in output:
+    if trace_ids:
+        trace_events = tuple(
+            (int(match.group(1)), match.group(2))
+            for match in re.finditer(
+                r"^\s*\[ TRACE \] CASE:\s*([0-9]+)\s+(START|PASS|FAIL)\s*$",
+                output,
+                re.MULTILINE,
+            )
+        )
+        expected_trace = tuple(
+            event for case_id in trace_ids
+            for event in ((case_id, "START"), (case_id, "PASS"))
+        )
+        if len(trace_events) != len(expected_trace):
+            failures.append(f"{label}:CASE_COUNT")
+        if trace_events != expected_trace:
+            failures.append(f"{label}:CASE_INVENTORY")
+    else:
+        if len(passed_cases) != len(expected_cases):
+            failures.append(f"{label}:CASE_COUNT")
+        if len(passed_cases) != len(set(passed_cases)) or set(passed_cases) != set(expected_cases):
+            failures.append(f"{label}:CASE_INVENTORY")
+    if ("[ SKIPPED ] CASE:" in output or "[ FAILED ] CASE:" in output or
+            re.search(r"^\s*\[ TRACE \] CASE:\s*[0-9]+\s+FAIL\s*$", output, re.MULTILINE)):
         failures.append(f"{label}:NON_PASS_CASE")
     if re.search(r"(?:FAILED|ERROR): [1-9]", output):
         failures.append(f"{label}:SUMMARY_FAILURE")
@@ -584,7 +604,9 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
         failures.append("REPORT:TEST_MISSING")
     else:
         failures.extend(process_failures(
-            test_process, EXPECTED_CASES[expected_mode], "RESOLVER_TEST"
+            test_process, EXPECTED_CASES[expected_mode], "RESOLVER_TEST",
+            trace_ids=(tuple(range(1, EXPECTED_TESTS + 1))
+                       if expected_mode == "ios-simulator" else ()),
         ))
     manifest = report.get("resolver_manifest")
     if not isinstance(manifest, dict):
@@ -717,7 +739,9 @@ def run_gate(root: Path, output: Path, revision: str, mode: str) -> dict[str, An
         toolchain = run_command(["cjc", "-v"], cwd=workspace, env=env, timeout=15)
         manifest_sha256 = sha256_path(manifest_path)
     failures = process_failures(
-        resolver_test, EXPECTED_CASES[mode], "RESOLVER_TEST"
+        resolver_test, EXPECTED_CASES[mode], "RESOLVER_TEST",
+        trace_ids=(tuple(range(1, EXPECTED_TESTS + 1))
+                   if mode == "ios-simulator" else ()),
     )
     if manifest.get("platform") != MODES[mode]:
         failures.append("MANIFEST:PLATFORM")
