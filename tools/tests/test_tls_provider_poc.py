@@ -73,7 +73,10 @@ def build_provenance_fixture(provider, platform, *, diagnostic=False):
         "build_tool": tool_identity_fixture("build-tool"),
         "configure_argv": configure,
         "build_argv": [["build-tool", "<BUILD>"], ["build-tool", "<PREFIX>"]],
-        "environment": {},
+        "environment": {
+            key: ("/usr/bin:/bin" if key == "PATH" else "")
+            for key in runner.BUILD_ENVIRONMENT_KEYS
+        },
         "patches": [],
         "patch_set_sha256": validator.hashlib.sha256(b"[]\n").hexdigest(),
         "instrumentation": (
@@ -134,7 +137,7 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
         else "UNSUPPORTED"
     )
     return {
-        "schema_version": 7,
+        "schema_version": validator.RESULT_SCHEMA_VERSION,
         "task_id": "M0-016",
         "provider": provider,
         "platform": platform,
@@ -696,6 +699,41 @@ class ProviderPocValidationTests(unittest.TestCase):
         result["build"]["provenance"]["compiler"]["exit_code"] = 1
         with self.assertRaisesRegex(validator.ValidationError, "identity command failed"):
             validator.validate_result(result, self.spec)
+        result = complete_result(self.spec, platform="windows-x86_64")
+        result["build"]["provenance"]["environment"].pop("PATH")
+        with self.assertRaisesRegex(validator.ValidationError, "environment key set"):
+            validator.validate_result(result, self.spec)
+        result = complete_result(self.spec, platform="windows-x86_64")
+        result["build"]["provenance"]["environment"]["PATH"] = ""
+        with self.assertRaisesRegex(validator.ValidationError, "PATH required"):
+            validator.validate_result(result, self.spec)
+
+    def test_build_environment_captures_inherited_and_override_values(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            work = root / "work"
+            repo = root / "repo"
+            inherited = {
+                "PATH": f"{work}/bin:/usr/bin",
+                "CC": "clang",
+                "INCLUDE": r"C:\\SDK\\include",
+            }
+            captured = runner.capture_build_environment(
+                inherited,
+                {"CFLAGS": "-O2 -fPIC"},
+                {work: "<WORK>", repo: "<REPOSITORY>"},
+            )
+        self.assertEqual(set(runner.BUILD_ENVIRONMENT_KEYS), set(captured))
+        self.assertEqual("<WORK>/bin:/usr/bin", captured["PATH"])
+        self.assertEqual("clang", captured["CC"])
+        self.assertEqual("-O2 -fPIC", captured["CFLAGS"])
+        self.assertEqual(r"C:\\SDK\\include", captured["INCLUDE"])
+        self.assertEqual("", captured["CXX"])
+
+    def test_build_environment_snapshot_is_bounded(self):
+        environment = {"PATH": "x" * (runner.MAX_BUILD_ENVIRONMENT_VALUE_BYTES + 1)}
+        with self.assertRaisesRegex(runner.PocError, "value exceeds its bound"):
+            runner.capture_build_environment(environment, {}, {})
 
     def test_pre_execution_fail_result_is_retained_without_metrics(self):
         result = complete_result(self.spec)

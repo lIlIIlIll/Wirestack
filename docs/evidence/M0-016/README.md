@@ -6,24 +6,22 @@ M0-016 remains **BLOCKED** because Android, iOS, and HarmonyOS or
 OpenHarmony do not have native-device evidence. Cross-compilation does not
 satisfy those cells.
 
-All 12 desktop cells have current schema-v7 native evidence. AWS-LC passes
-every required capability on Linux glibc x86_64, Linux musl x86_64, macOS
-arm64, and Windows x86_64. Mbed TLS is PARTIAL because external signing and
-session resumption are not implemented by this PoC. The vendored OpenSSL
-control is PARTIAL because external signing is not implemented.
+Schema v8 supersedes all 12 retained schema-v7 desktop results. Native reruns
+must retain the bounded allowlisted snapshot of inherited and overridden build
+environment values before any desktop cell can be promoted again.
 
-Schema v7 retains:
+Schema v8 retains:
 
 - required and optional client authentication;
 - negative certificate, hostname, trust, and ALPN cases;
-- exact repository, runner, toolchain, target, configure/build argv,
-  environment, patch-set, source, and archive identity;
+- exact repository, runner, toolchain, target, configure/build argv, bounded
+  effective build environment, patch-set, source, and archive identity;
 - complete bounded final-artifact symbol inventories;
 - committed, digest-bound provider license bundles;
 - 10,000-cycle resident-memory, provider allocation-call, cumulative-byte,
   peak-live and before/after-cleanup live-allocation profiles;
 - an explicit caller-owned wait, cancellation signal, wakeup, join, and
--  latency bound covering the complete join;
+  latency bound covering the complete join;
 - source-pin ages, official advisory channels and the provider update
   workflow; and
 - provider-instrumented ASan and UBSan diagnostics on Linux glibc and macOS.
@@ -35,7 +33,7 @@ LeakSanitizer as unsupported by the hosted toolchain. Linux musl and Windows
 record the configured sanitizer diagnostic as unsupported; they do not report
 a skipped diagnostic as PASS.
 
-## Current schema-v7 desktop runs
+## Superseded schema-v7 desktop runs
 
 [TLS Provider PoC run
 33411959747](https://github.com/lIlIIlIll/Wirestack/actions/runs/33411959747)
@@ -102,7 +100,7 @@ capabilities presented as PASS all fail validation.
 ## Evidence rules
 
 - A retained incomplete native result is PARTIAL only when it satisfies schema
-  v7.
+  v8.
 - A missing external-signer or session test prevents PASS.
 - A runtime provider fallback or system TLS dependency produces FAIL.
 - Cross-compilation does not satisfy a native platform cell.

@@ -20,8 +20,18 @@ MEMORY_PROFILE_BOUND_BYTES = 512 * 1024 * 1024
 PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES = 64 * 1024 * 1024 * 1024
 PROVIDER_ALLOCATION_CALL_BOUND = 150_000_000
 CANCELLATION_WAKE_BOUND_US = 250_000
-RESULT_SCHEMA_VERSION = 7
+RESULT_SCHEMA_VERSION = 8
 MAX_TOOL_VERSION_BYTES = 16 * 1024
+MAX_BUILD_ENVIRONMENT_VALUE_BYTES = 64 * 1024
+MAX_BUILD_ENVIRONMENT_TOTAL_BYTES = 256 * 1024
+BUILD_ENVIRONMENT_KEYS = {
+    "CC", "CFLAGS", "CMAKE_BUILD_PARALLEL_LEVEL", "CMAKE_GENERATOR",
+    "CMAKE_GENERATOR_PLATFORM", "CMAKE_GENERATOR_TOOLSET",
+    "CMAKE_PREFIX_PATH", "CMAKE_TOOLCHAIN_FILE", "CXX", "CXXFLAGS",
+    "INCLUDE", "LDFLAGS", "LIB", "LIBPATH", "PATH",
+    "UniversalCRTSdkDir", "UCRTVersion", "VCINSTALLDIR",
+    "VCToolsInstallDir", "WindowsSdkDir", "WindowsSDKVersion",
+}
 FAILURE_STAGES = {
     "source-acquisition", "license-bundle", "provider-build",
     "fixture-generation", "poc-build", "binary-inspection",
@@ -119,9 +129,17 @@ def validate_build_provenance(provenance: Any, provider: str,
                 for command in [configure, *builds] for item in command),
             "provider build argv must use normalized paths")
     environment = provenance.get("environment")
-    require(isinstance(environment, dict) and all(
-        isinstance(key, str) and isinstance(value, str)
-        for key, value in environment.items()), "provider build environment")
+    require(isinstance(environment, dict), "provider build environment")
+    require(set(environment) == BUILD_ENVIRONMENT_KEYS,
+            "provider build environment key set")
+    require(all(isinstance(value, str) and
+                len(value.encode("utf-8")) <= MAX_BUILD_ENVIRONMENT_VALUE_BYTES
+                for value in environment.values()),
+            "provider build environment value bound")
+    require(sum(len(value.encode("utf-8")) for value in environment.values()) <=
+            MAX_BUILD_ENVIRONMENT_TOTAL_BYTES,
+            "provider build environment total bound")
+    require(bool(environment["PATH"]), "provider build PATH required")
     require(provenance.get("patches") == [], "provider patch set must be explicit")
     require(provenance.get("patch_set_sha256") == hashlib.sha256(b"[]\n").hexdigest(),
             "provider patch-set digest")
@@ -252,20 +270,20 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
     require(isinstance(build, dict), "build object required")
     metrics = result.get("metrics")
     if successful or metrics is not None:
-        require(isinstance(metrics, dict), "schema v7 metrics object required")
+        require(isinstance(metrics, dict), "schema v8 metrics object required")
         require(metrics.get("repeated_cleanup_cycles") == 10000,
-                "schema v7 requires exactly 10,000 repeated cleanup cycles")
+                "schema v8 requires exactly 10,000 repeated cleanup cycles")
         if result["provider"] == "aws-lc" and caps.get("external_signer") == "PASS":
             require(isinstance(metrics.get("external_signer_calls"), int) and
                     metrics["external_signer_calls"] >= 2,
                     "AWS-LC external signer must serve TLS 1.2 and TLS 1.3")
         if caps.get("session_resumption") == "PASS":
             require(metrics.get("session_resumption_handshakes") == 4,
-                    "schema v7 session resumption requires four measured handshakes")
+                    "schema v8 session resumption requires four measured handshakes")
             require(metrics.get("session_resumption_tls12_handshakes") == 2,
-                    "schema v7 requires a TLS 1.2 resumed session")
+                    "schema v8 requires a TLS 1.2 resumed session")
             require(metrics.get("session_resumption_tls13_handshakes") == 2,
-                    "schema v7 requires a TLS 1.3 resumed ticket")
+                    "schema v8 requires a TLS 1.3 resumed ticket")
         if caps.get("external_trust") == "PASS":
             require(isinstance(metrics.get("external_trust_calls"), int) and
                     metrics["external_trust_calls"] >= 4,
@@ -397,7 +415,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
         require(all(value != "FAIL" for value in caps.values()), "PARTIAL/PASS result contains failed capability")
     if result["status"] == "PASS":
         require(schema_version == RESULT_SCHEMA_VERSION,
-                "PASS requires schema v7 evidence")
+                "PASS requires schema v8 evidence")
         require(all(value == "PASS" for value in caps.values()), "PASS requires all capabilities PASS")
     if any(value == "BLOCKED" for value in caps.values()):
         require(result["status"] != "PASS", "blocked capability cannot yield PASS")
