@@ -5,7 +5,7 @@
     "tasks": {
       "M2-004": {
         "native_reports": {
-          "docs/evidence/M2-004/windows-x86_64/report.json": "1ceb5761ac282181d319773c1d73f97e50938b62aceb01734892821d4c68d1dc"
+          "docs/evidence/M2-004/windows-x86_64/report.json": "5d8ba504bc883223ff8c7aff72def24ba27026b5f5d59cf023fb6e499bf1372d"
         },
         "source_count": 22,
         "source_verification": "SEALED_INVENTORY",
@@ -13,10 +13,10 @@
       },
       "M2-006": {
         "native_reports": {
-          "docs/evidence/M2-006/ios-simulator-arm64/report.json": "bfeb74a1784f786f949d6d65501a93debf0afc870892272190c8331c8b7f95df",
-          "docs/evidence/M2-006/macos-arm64/report.json": "eee6d5c7818a8b324d14562ac03df7b9e173a12794bd1ab5827f325391731835"
+          "docs/evidence/M2-006/ios-simulator-arm64/report.json": "5e597a358bf8871638bb6e87e5bb42961abb9399a785ab5f28ea3409235e58f2",
+          "docs/evidence/M2-006/macos-arm64/report.json": "ac81fdfe25cd4d622a9ff97aae25e3f9ebb1767c70aceb67684a3b1b9040138f"
         },
-        "source_count": 23,
+        "source_count": 26,
         "source_verification": "SEALED_INVENTORY",
         "status": "PASS"
       }
@@ -150,7 +150,7 @@
     "docs/evidence/M3-028/README.md": "6c82678dfb3e31285896f3df31127422a4c4ff338d2c18cf4a08cd5ea648e9b5",
     "docs/evidence/M3-030/native-abi-report.json": "03881988db42d4e32579fa1fff2ff6e4ab045ed2fab3eedee26ccae0a2d91d35",
     "docs/evidence/M3-030/test-provider-results.json": "f57e6ac10d7a4977ea427fef1b69ed8649a2a3133187e566fdc455090263e69a",
-    "docs/planning/implementation-backlog.md": "18a0d59c84fd461cb0c536921dd2314ab0f65e82d17cfaab48403863f2c7934d",
+    "docs/planning/implementation-backlog.md": "b4d4b87731ef2b134afebbb6f2d94d06a633134370646ea03089d1ccaa5b4a02",
     "native/tls/aws_lc/provider.json": "ff4d39359a8ef49ede8272698fe306b7421df2fea04b44744483245f34f619b4",
     "src/hostname_verifier.cj": "44769311cc3f97b34d033727d0b16661cbdcf63a69a2c6512569b550970dfca3",
     "src/internal/tls_engine/context.cj": "d8a18a1f97df822dfa84ad6031f4a389e37bf32ee34db405e161948d0d01991d",
@@ -186,7 +186,7 @@
         "status": "PASS"
       }
     },
-    "mobile_rows_checked": 7,
+    "mobile_rows_checked": 14,
     "status": "PASS"
   },
   "task_id": "M3-031"
