@@ -301,7 +301,7 @@ static int external_trust_version_case(Material *m, int version) {
     mbedtls_ssl_config client_conf;
     mbedtls_ssl_config server_conf;
     Pair accepted;
-    int ret = configure(m, &client_conf, &server_conf, version, 0, 0);
+    int ret = configure(m, &client_conf, &server_conf, version, 0, 1);
     if (ret != 0) return 0;
     mbedtls_ssl_conf_verify(&client_conf, external_trust_callback, NULL);
     external_trust_decision = 1;
