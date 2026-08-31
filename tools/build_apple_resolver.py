@@ -63,9 +63,13 @@ def find_tool(name: str, candidates: tuple[str, ...]) -> str:
     raise BuildError(f"required tool is unavailable: {', '.join(candidates)}")
 
 
-def xcrun_find(tool: str, sdk: str) -> str:
+def xcrun_query(sdk: str, *arguments: str) -> str:
     xcrun = find_tool("XCRUN", ("xcrun",))
-    return run([xcrun, "--sdk", sdk, "--find", tool]).strip()
+    return run([xcrun, "--sdk", sdk, *arguments]).strip()
+
+
+def xcrun_find(tool: str, sdk: str) -> str:
+    return xcrun_query(sdk, "--find", tool)
 
 
 def build_fingerprint(
@@ -167,7 +171,7 @@ def _build_unlocked(
         "ar": xcrun_find("ar", sdk),
         "ranlib": xcrun_find("ranlib", sdk),
     }
-    sdk_path = Path(run(["xcrun", "--sdk", sdk, "--show-sdk-path"]).strip()).resolve()
+    sdk_path = Path(xcrun_query(sdk, "--show-sdk-path")).resolve()
     flags = [
         "-std=c11", "-O2", "-fPIC", "-Wall", "-Wextra", "-Werror",
         "-arch", "arm64", "-isysroot", str(sdk_path),

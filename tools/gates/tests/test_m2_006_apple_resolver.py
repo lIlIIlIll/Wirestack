@@ -4,6 +4,7 @@ import tempfile
 import tomllib
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from tools import build_apple_resolver
 from tools.gates import m2_006_apple_resolver as gate
@@ -93,6 +94,27 @@ class M2006AppleResolverGateTests(unittest.TestCase):
             option,
         )
         self.assertNotIn("WIRESTACK_IOS_SIMULATOR_SYSROOT", option)
+
+    def test_sdk_discovery_uses_the_configured_xcrun(self) -> None:
+        commands = []
+
+        def capture(command: list[str], *, cwd=None) -> str:
+            commands.append(command)
+            return "/configured/Simulator.sdk\n"
+
+        with mock.patch.object(
+            build_apple_resolver, "find_tool", return_value="/configured/xcrun"
+        ), mock.patch.object(build_apple_resolver, "run", side_effect=capture):
+            self.assertEqual(
+                "/configured/Simulator.sdk",
+                build_apple_resolver.xcrun_query(
+                    "iphonesimulator", "--show-sdk-path"
+                ),
+            )
+        self.assertEqual(
+            [["/configured/xcrun", "--sdk", "iphonesimulator", "--show-sdk-path"]],
+            commands,
+        )
 
     def test_atomic_links_and_bounded_cache(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
