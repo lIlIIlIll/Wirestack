@@ -72,6 +72,15 @@ class M2006AppleResolverGateTests(unittest.TestCase):
             )
             self.assertNotIn("wirestack_m2_006_tls_link_stub", configuration["ffi"]["c"])
             self.assertNotIn("-lwirestack_", configuration["link-option"])
+        build_driver = Path("tools/build_native_dependencies.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("selected_resolvers = [selected_resolver]", build_driver)
+        self.assertIn('if system == "Darwin"', build_driver)
+        apple_builder = Path("tools/build_apple_resolver.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("fcntl.LOCK_EX", apple_builder)
 
     def test_gate_injects_test_stub_only_into_selected_workspace_target(self) -> None:
         original = Path("cjpm.toml").read_text(encoding="utf-8")

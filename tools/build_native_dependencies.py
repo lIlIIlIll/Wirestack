@@ -104,16 +104,27 @@ def main() -> int:
             "status": "FAIL",
         }))
         return 2
-    resolver = [
-        sys.executable,
-        str(root / "tools" / "build_resolver.py"),
-        "--root", str(root),
-        "--platform", selected_resolver,
-        "--quiet",
-    ]
-    if os.environ.get("WIRESTACK_RESOLVER_TEST_FIXTURE") == "1":
-        resolver.append("--test-fixture")
-    return run(resolver, root=root)
+    selected_resolvers = [selected_resolver]
+    if system == "Darwin":
+        selected_resolvers.append(
+            "ios-simulator-arm64"
+            if selected_resolver == "macos-arm64"
+            else "macos-arm64"
+        )
+    for selected in selected_resolvers:
+        resolver = [
+            sys.executable,
+            str(root / "tools" / "build_resolver.py"),
+            "--root", str(root),
+            "--platform", selected,
+            "--quiet",
+        ]
+        if os.environ.get("WIRESTACK_RESOLVER_TEST_FIXTURE") == "1":
+            resolver.append("--test-fixture")
+        status = run(resolver, root=root)
+        if status != 0:
+            return status
+    return 0
 
 
 if __name__ == "__main__":
