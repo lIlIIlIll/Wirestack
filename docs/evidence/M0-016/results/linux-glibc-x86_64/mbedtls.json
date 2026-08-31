@@ -1250,7 +1250,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "560da12a10c5cac8b926a288a289cad510b02a43d83bbf2160037f5f26ce22fc",
+  "build_log_sha256": "31428245b0fe2664e9f9650c1c5639174eb2a75f94598d5c0e740e2a71d6ea25",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -1276,31 +1276,31 @@
     "image_os": "ubuntu24",
     "image_version": "20260823.283.1",
     "python": "3.12.14",
-    "repository_revision": "91d82dbea7f2353445c7a495659cd425b9ae5c15",
+    "repository_revision": "427385f29e6ae64e003caf7a539a5343761c8318",
     "runner_arch": "X64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T21:05:37.320536+00:00",
+  "finished_at": "2026-08-31T21:47:56.481098+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 75,
+    "cancellation_latency_us": 82,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 35708928,
+    "memory_profile_peak_resident_bytes": 36069376,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 8204574193,
+    "provider_allocation_bytes": 8203592267,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 133240991,
-    "provider_allocation_live_after_cleanup_bytes": 7642,
-    "provider_allocation_live_before_cleanup_bytes": 7642,
-    "provider_allocation_peak_live_bytes": 117636,
+    "provider_allocation_calls": 133233320,
+    "provider_allocation_live_after_cleanup_bytes": 7641,
+    "provider_allocation_live_before_cleanup_bytes": 7641,
+    "provider_allocation_peak_live_bytes": 117635,
     "repeated_cleanup_cycles": 10000
   },
   "notes": [
@@ -1309,21 +1309,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 75,
+      "latency_us": 82,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 35708928,
+      "peak_resident_bytes": 36069376,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 8204574193,
+      "provider_allocation_bytes": 8203592267,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 133240991,
-      "provider_allocation_live_after_cleanup_bytes": 7642,
-      "provider_allocation_live_before_cleanup_bytes": 7642,
-      "provider_allocation_peak_live_bytes": 117636,
+      "provider_allocation_calls": 133233320,
+      "provider_allocation_live_after_cleanup_bytes": 7641,
+      "provider_allocation_live_before_cleanup_bytes": 7641,
+      "provider_allocation_peak_live_bytes": 117635,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -1331,7 +1331,7 @@
       "leak_detection": {
         "status": "PASS"
       },
-      "output_sha256": "55e670ec43e35ecaa0f1b60b5f8448f4a0196a27d20fdd47a71b66f80c0774a1",
+      "output_sha256": "9c5ad8346c4d3ba4af8db1054e1697ce6aecb358cff557ae5bb782da5e737f20",
       "provider_build_provenance": {
         "assembler": null,
         "build_argv": [
@@ -1512,7 +1512,7 @@
     "tag": "mbedtls-4.2.0",
     "tag_resolved_commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b"
   },
-  "started_at": "2026-08-31T21:03:38.687676+00:00",
+  "started_at": "2026-08-31T21:45:57.436231+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
