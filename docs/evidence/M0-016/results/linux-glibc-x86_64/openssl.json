@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 7282536,
-    "binary_sha256": "eaba6f934f97db956e146ab0f1c8161ff8c94bd8c5154327bf4c2c6658635d82",
+    "binary_bytes": 7283080,
+    "binary_sha256": "6669548290eee57bfdae540b9a672657aa3a1a918a7a8336d2ef6ecd25183cde",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
@@ -12,17 +12,18 @@
       {
         "bytes": 12195000,
         "name": "libcrypto.a",
-        "sha256": "fea022aebbb90d21bb7baa22484c176cf142d605b6dd9e0d4843e14b07616ab0"
+        "sha256": "02aab7dced3b95f7d464c1037ed91c6b306eca1a0baf489dfb41e2de407e4f3a"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "4323bb4e0bfad0bac5832a790b74dcb9519d1ea20253821b79ec71684ae7b3cf",
+  "build_log_sha256": "3687d9e313e2daf2b138386809059e9ab53cd44a737695554c0dc1a58cc1dc68",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
     "custom_ca": "PASS",
     "external_signer": "BLOCKED",
+    "external_trust": "PASS",
     "mtls": "PASS",
     "negative_hostname": "PASS",
     "negative_untrusted_ca": "PASS",
@@ -34,21 +35,37 @@
     "tls13": "PASS",
     "truncation": "PASS"
   },
-  "finished_at": "2026-08-23T12:14:18.847427+00:00",
+  "execution": {
+    "image_os": "ubuntu24",
+    "image_version": "20260823.283.1",
+    "python": "3.12.14",
+    "repository_revision": "9611abb32c9e790fe893aa9ea4f25ec5ae0d8fba",
+    "runner_arch": "X64",
+    "runner_os": "Linux"
+  },
+  "finished_at": "2026-08-31T08:30:14.675084+00:00",
+  "metrics": {
+    "external_trust_calls": 4,
+    "failure_cleanup_cycles": 0,
+    "repeated_cleanup_cycles": 10000,
+    "session_resumption_handshakes": 4,
+    "session_resumption_tls12_handshakes": 2,
+    "session_resumption_tls13_handshakes": 2
+  },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "platform": "linux-glibc-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 1,
+  "schema_version": 3,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-23T12:12:44.622289+00:00",
+  "started_at": "2026-08-31T08:28:52.131706+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 859112,
-    "binary_sha256": "71c1b9984596b0a87c6d9a591f1c06e92a76871215a3ba3a0d6e7e8b4f343a69",
+    "binary_bytes": 859312,
+    "binary_sha256": "6eb557b7ba2fa44510c91ac34fd7d4b8a724823a390a1e270cf611c1eeeb4dfd",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
@@ -22,12 +22,13 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "c40049eff0195e636e31b90ffd6a7d6c43680251d9aae4ec3528824acd32f225",
+  "build_log_sha256": "ac9a238c830c6043b93863e10bc256ffd1a2aae63cbcd9ea4485b11e27e0eee7",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
     "custom_ca": "PASS",
     "external_signer": "BLOCKED",
+    "external_trust": "PASS",
     "mtls": "PASS",
     "negative_hostname": "PASS",
     "negative_untrusted_ca": "PASS",
@@ -39,21 +40,33 @@
     "tls13": "PASS",
     "truncation": "PASS"
   },
-  "finished_at": "2026-08-23T12:13:00.762830+00:00",
+  "execution": {
+    "image_os": "ubuntu24",
+    "image_version": "20260823.283.1",
+    "python": "3.12.14",
+    "repository_revision": "9611abb32c9e790fe893aa9ea4f25ec5ae0d8fba",
+    "runner_arch": "X64",
+    "runner_os": "Linux"
+  },
+  "finished_at": "2026-08-31T08:30:33.880918+00:00",
+  "metrics": {
+    "external_trust_calls": 8,
+    "repeated_cleanup_cycles": 10000
+  },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "platform": "linux-glibc-x86_64",
   "poc_exit_code": 0,
   "provider": "mbedtls",
-  "schema_version": 1,
+  "schema_version": 3,
   "source": {
     "archive": "mbedtls-4.2.0.tar.bz2",
     "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
     "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
     "kind": "archive"
   },
-  "started_at": "2026-08-23T12:12:47.424628+00:00",
+  "started_at": "2026-08-31T08:29:13.471113+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

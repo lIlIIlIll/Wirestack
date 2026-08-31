@@ -1,28 +1,29 @@
 {
   "build": {
-    "binary_bytes": 5366032,
-    "binary_sha256": "12c9f32481cfb5c4c62d2edf4cf70e48c703dc7b82f07508884ad7c2cfb73ee5",
+    "binary_bytes": 5366576,
+    "binary_sha256": "81ab7505003dbe43343bdd8f71326db7c347e11c808ac73e7e470ce04cab0893",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 1536312,
         "name": "libssl.a",
-        "sha256": "d67fa074222b41e112f4827a18ebd1289352c1cc3d02c0a1e11696b42995e8e9"
+        "sha256": "4d087a6f8b9c87e418ac8438634a8b28cc4c6f17ec77735dc7406925d7d7b2da"
       },
       {
         "bytes": 8813056,
         "name": "libcrypto.a",
-        "sha256": "6b4c72154b5d7ef1754f64752036531fb2a36776c2dac25c1f1e9ca2243218c2"
+        "sha256": "de7d44bdef49c28960a2aa22d5b328c33a42e037be98fd445c8b0c07588a8450"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "a85d9637d5f52df948941c32a8a3688d25e7edd5e97dfad5f6f1b9feb0b44048",
+  "build_log_sha256": "6a41cea73d62751161e2b6073ce8644d1e16382239a4735247c25442de909cf6",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
     "custom_ca": "PASS",
     "external_signer": "BLOCKED",
+    "external_trust": "PASS",
     "mtls": "PASS",
     "negative_hostname": "PASS",
     "negative_untrusted_ca": "PASS",
@@ -34,21 +35,37 @@
     "tls13": "PASS",
     "truncation": "PASS"
   },
-  "finished_at": "2026-08-23T12:13:32.222752+00:00",
+  "execution": {
+    "image_os": "macos15",
+    "image_version": "20260727.0256.1",
+    "python": "3.12.10",
+    "repository_revision": "9611abb32c9e790fe893aa9ea4f25ec5ae0d8fba",
+    "runner_arch": "ARM64",
+    "runner_os": "macOS"
+  },
+  "finished_at": "2026-08-31T08:30:34.525294+00:00",
+  "metrics": {
+    "external_trust_calls": 4,
+    "failure_cleanup_cycles": 0,
+    "repeated_cleanup_cycles": 10000,
+    "session_resumption_handshakes": 4,
+    "session_resumption_tls12_handshakes": 2,
+    "session_resumption_tls13_handshakes": 2
+  },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "platform": "macos-arm64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 1,
+  "schema_version": 3,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-23T12:12:34.379370+00:00",
+  "started_at": "2026-08-31T08:28:41.024234+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

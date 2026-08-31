@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 7339232,
-    "binary_sha256": "5342b78b89ad3976b5cd1d347f63166fb09efd9315126f6727c9752ba0ae9fdc",
+    "binary_bytes": 7348000,
+    "binary_sha256": "833de0c75012b1546c9d21a3dc1f23f37e9dc415f7734cf366ae1d25bd526375",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
@@ -12,17 +12,18 @@
       {
         "bytes": 12293540,
         "name": "libcrypto.a",
-        "sha256": "c5f763563c0f2bf3a60cbf50426de3ac92c1a3608d8acaefa97fef8c24ff0a28"
+        "sha256": "b13f288bc11c6b334943796dffe067479b8e4fba962aa45470db5bf21007a226"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "f789347a08d130449919011dfbe91ba3dace9ac7d4a9eac0dc6eb45d299075f1",
+  "build_log_sha256": "2d9bbec7d6618d010fa86af0813ae76e555d81b4598bd35c44bcdec29d2e46a4",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
     "custom_ca": "PASS",
     "external_signer": "BLOCKED",
+    "external_trust": "PASS",
     "mtls": "PASS",
     "negative_hostname": "PASS",
     "negative_untrusted_ca": "PASS",
@@ -34,21 +35,37 @@
     "tls13": "PASS",
     "truncation": "PASS"
   },
-  "finished_at": "2026-08-23T12:14:43.736477+00:00",
+  "execution": {
+    "image_os": "",
+    "image_version": "",
+    "python": "3.12.14",
+    "repository_revision": "",
+    "runner_arch": "x86_64",
+    "runner_os": "Linux"
+  },
+  "finished_at": "2026-08-31T08:31:08.292073+00:00",
+  "metrics": {
+    "external_trust_calls": 4,
+    "failure_cleanup_cycles": 0,
+    "repeated_cleanup_cycles": 10000,
+    "session_resumption_handshakes": 4,
+    "session_resumption_tls12_handshakes": 2,
+    "session_resumption_tls13_handshakes": 2
+  },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "platform": "linux-musl-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 1,
+  "schema_version": 3,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-23T12:12:37.290028+00:00",
+  "started_at": "2026-08-31T08:29:30.801928+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

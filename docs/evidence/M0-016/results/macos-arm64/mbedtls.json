@@ -1,33 +1,34 @@
 {
   "build": {
-    "binary_bytes": 742752,
-    "binary_sha256": "6a9732666c33bb1e2cd62e77094af5e44fa16aa9491492e2b18066bb43aa5a4b",
+    "binary_bytes": 742928,
+    "binary_sha256": "a056c4b4eec0f8fb13cc3148acbda0fd3b620821f3deffad81437c770749dd88",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 427384,
         "name": "libmbedtls.a",
-        "sha256": "9039b8576e16ec6652e3788c266e69ca5e2fc95924c242a90b4a026fe4b267ac"
+        "sha256": "758c02b17f08946acfe80c24307db69ae0ffe11ccd3b157d3eb668d65302e062"
       },
       {
         "bytes": 127528,
         "name": "libmbedx509.a",
-        "sha256": "4b8f845acdc3b06c3d684540d431d8aa56cb059a91db4f8a9caa5b0a2bfa915e"
+        "sha256": "4081f02762746371f0a94ea98a9a6c12a86687de55b3e5ab4fec2433256670d5"
       },
       {
         "bytes": 670520,
         "name": "libtfpsacrypto.a",
-        "sha256": "cf5424a33b915fdafe51fe2d09b01a6f614ffc983e88bc8a1cc37d26d2c17f61"
+        "sha256": "94074d1f837be319401c4777fb1e39d364060e1eb35214ee546d5fe61fb26397"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "e3c8ab7f1440fdc661eebd8944feb2314daa1da009abf01d68cd017def3a09c6",
+  "build_log_sha256": "83b00d801a52b3ea3601d90267f6cce14bce1f1124f7e7a0ebb38a60b70d002b",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
     "custom_ca": "PASS",
     "external_signer": "BLOCKED",
+    "external_trust": "PASS",
     "mtls": "PASS",
     "negative_hostname": "PASS",
     "negative_untrusted_ca": "PASS",
@@ -39,21 +40,33 @@
     "tls13": "PASS",
     "truncation": "PASS"
   },
-  "finished_at": "2026-08-23T12:12:49.027310+00:00",
+  "execution": {
+    "image_os": "macos15",
+    "image_version": "20260727.0256.1",
+    "python": "3.12.10",
+    "repository_revision": "9611abb32c9e790fe893aa9ea4f25ec5ae0d8fba",
+    "runner_arch": "ARM64",
+    "runner_os": "macOS"
+  },
+  "finished_at": "2026-08-31T08:30:56.525975+00:00",
+  "metrics": {
+    "external_trust_calls": 8,
+    "repeated_cleanup_cycles": 10000
+  },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "platform": "macos-arm64",
   "poc_exit_code": 0,
   "provider": "mbedtls",
-  "schema_version": 1,
+  "schema_version": 3,
   "source": {
     "archive": "mbedtls-4.2.0.tar.bz2",
     "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
     "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
     "kind": "archive"
   },
-  "started_at": "2026-08-23T12:12:36.753294+00:00",
+  "started_at": "2026-08-31T08:29:43.016622+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
