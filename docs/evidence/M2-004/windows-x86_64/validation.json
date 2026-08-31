@@ -1,7 +1,7 @@
 {
-  "expected_revision": "ed5b2dc13c6a3af6fadc658e373bc3dbfdb47b71",
+  "expected_revision": "c80be395d67523efaed28b35d139a8e36aad5610",
   "failures": [],
-  "report_sha256": "db76e3995ce08a96326e524d198e03a7c69a61b62084e69e8218877ea52df22d",
+  "report_sha256": "5d8ba504bc883223ff8c7aff72def24ba27026b5f5d59cf023fb6e499bf1372d",
   "schema_version": 1,
   "status": "PASS",
   "task_id": "M2-004"
