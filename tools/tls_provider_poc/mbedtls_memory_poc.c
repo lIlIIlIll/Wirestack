@@ -282,6 +282,46 @@ static int basic_case(Material *m, int version, int mtls) {
     return ok;
 }
 
+static int alpn_no_overlap_version_case(Material *m, int version) {
+    static const char *no_overlap[] = {"foo", NULL};
+    mbedtls_ssl_config client_conf;
+    mbedtls_ssl_config server_conf;
+    Pair p;
+    int ret = configure(m, &client_conf, &server_conf, version, 0, 1);
+    if (ret != 0) return 0;
+    ret = mbedtls_ssl_conf_alpn_protocols(&client_conf, no_overlap);
+    if (ret == 0) ret = setup_pair(&p, &client_conf, &server_conf, "localhost");
+    int ok = ret == 0 && drive_handshake(&p, 0);
+    if (ret == 0) pair_free(&p);
+    mbedtls_ssl_config_free(&client_conf);
+    mbedtls_ssl_config_free(&server_conf);
+    return ok;
+}
+
+static int alpn_malformed_case(Material *m) {
+    static const char *empty[] = {"", NULL};
+    char too_long_protocol[257];
+    memset(too_long_protocol, 'x', sizeof(too_long_protocol) - 1);
+    too_long_protocol[sizeof(too_long_protocol) - 1] = '\0';
+    const char *too_long[] = {too_long_protocol, NULL};
+    mbedtls_ssl_config client_conf;
+    mbedtls_ssl_config server_conf;
+    int ret = configure(
+        m, &client_conf, &server_conf, MBEDTLS_SSL_VERSION_TLS1_2, 0, 1);
+    if (ret != 0) return 0;
+    int ok = mbedtls_ssl_conf_alpn_protocols(&client_conf, empty) != 0 &&
+             mbedtls_ssl_conf_alpn_protocols(&client_conf, too_long) != 0;
+    mbedtls_ssl_config_free(&client_conf);
+    mbedtls_ssl_config_free(&server_conf);
+    return ok;
+}
+
+static int alpn_negative_case(Material *m) {
+    return alpn_no_overlap_version_case(m, MBEDTLS_SSL_VERSION_TLS1_2) &&
+           alpn_no_overlap_version_case(m, MBEDTLS_SSL_VERSION_TLS1_3) &&
+           alpn_malformed_case(m);
+}
+
 static int negative_case(Material *m, const char *hostname, int trusted) {
     mbedtls_ssl_config client_conf;
     mbedtls_ssl_config server_conf;
@@ -405,6 +445,7 @@ int main(int argc, char **argv) {
 
     int tls12 = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_2, 0);
     int tls13 = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_3, 0);
+    int alpn_negative = alpn_negative_case(&m);
     int mtls = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_2, 1);
     int external_trust = external_trust_case(&m);
     int wrong_host = negative_case(&m, "not-localhost", 1);
@@ -417,7 +458,8 @@ int main(int argc, char **argv) {
 
     printf("CAP tls12=%s\n", tls12 ? "PASS" : "FAIL");
     printf("CAP tls13=%s\n", tls13 ? "PASS" : "FAIL");
-    printf("CAP sni_hostname_alpn=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
+    printf("CAP sni_hostname_alpn=%s\n",
+           (tls12 && tls13 && alpn_negative) ? "PASS" : "FAIL");
     printf("CAP custom_ca=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
     printf("CAP external_trust=%s\n", external_trust ? "PASS" : "FAIL");
     printf("CAP partial_io_backpressure=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
@@ -432,8 +474,10 @@ int main(int argc, char **argv) {
     printf("CAP repeated_cleanup=%s\n", cleanup ? "PASS" : "FAIL");
     printf("METRIC repeated_cleanup_cycles=%d\n", CLEANUP_CYCLES);
     printf("METRIC external_trust_calls=%u\n", external_trust_calls);
+    printf("METRIC alpn_no_overlap_handshakes=%d\n", alpn_negative ? 2 : 0);
+    printf("METRIC alpn_malformed_inputs_rejected=%d\n", alpn_negative ? 2 : 0);
 
     material_free(&m);
     mbedtls_psa_crypto_free();
-    return (tls12 && tls13 && mtls && external_trust && wrong_host && untrusted && trunc && cancel && cleanup) ? 0 : 1;
+    return (tls12 && tls13 && alpn_negative && mtls && external_trust && wrong_host && untrusted && trunc && cancel && cleanup) ? 0 : 1;
 }

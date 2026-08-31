@@ -137,7 +137,7 @@ static int alpn_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen,
         alpn_seen = 1;
         return SSL_TLSEXT_ERR_OK;
     }
-    return SSL_TLSEXT_ERR_NOACK;
+    return SSL_TLSEXT_ERR_ALERT_FATAL;
 }
 
 static SSL_CTX *make_server_ctx(const char *cert, const char *key, const char *ca,
@@ -370,6 +370,55 @@ static int basic_case(const char *server_cert, const char *server_key, const cha
     SSL_CTX_free(client_ctx);
     SSL_CTX_free(server_ctx);
     return ok;
+}
+
+static int alpn_no_overlap_version_case(
+    const char *server_cert, const char *server_key, const char *ca, int version) {
+    static const unsigned char no_overlap[] = {3, 'f', 'o', 'o'};
+    SSL_CTX *server_ctx = make_server_ctx(
+        server_cert, server_key, ca, version, 0, 0);
+    SSL_CTX *client_ctx = make_client_ctx(ca, NULL, NULL, version, 1);
+    Pair p = new_pair(client_ctx, server_ctx, "localhost", NULL);
+    alpn_seen = 0;
+    int ok = SSL_set_alpn_protos(
+                 p.client, no_overlap, (unsigned int)sizeof(no_overlap)) == 0 &&
+             drive_handshake(&p, 0, MAX_STEPS) && !alpn_seen;
+    free_pair(&p);
+    SSL_CTX_free(client_ctx);
+    SSL_CTX_free(server_ctx);
+    ERR_clear_error();
+    return ok;
+}
+
+static int alpn_malformed_case(void) {
+    static const unsigned char zero_length[] = {0};
+    static const unsigned char truncated[] = {3, 'h', '2'};
+    SSL_CTX *client_ctx = SSL_CTX_new(TLS_method());
+    if (client_ctx == NULL) return 0;
+    SSL *client = SSL_new(client_ctx);
+    if (client == NULL) {
+        SSL_CTX_free(client_ctx);
+        return 0;
+    }
+    int ok = SSL_set_alpn_protos(
+                 client, zero_length,
+                 (unsigned int)sizeof(zero_length)) != 0 &&
+             SSL_set_alpn_protos(
+                 client, truncated,
+                 (unsigned int)sizeof(truncated)) != 0;
+    SSL_free(client);
+    SSL_CTX_free(client_ctx);
+    ERR_clear_error();
+    return ok;
+}
+
+static int alpn_negative_case(
+    const char *server_cert, const char *server_key, const char *ca) {
+    return alpn_no_overlap_version_case(
+               server_cert, server_key, ca, TLS1_2_VERSION) &&
+           alpn_no_overlap_version_case(
+               server_cert, server_key, ca, TLS1_3_VERSION) &&
+           alpn_malformed_case();
 }
 
 static SSL_SESSION *session_after_handshake(Pair *p, SSL_CTX *client_ctx,
@@ -606,6 +655,7 @@ int main(int argc, char **argv) {
                            TLS1_2_VERSION, 0);
     int tls13 = basic_case(server_cert, server_key, ca, client_cert, client_key,
                            TLS1_3_VERSION, 0);
+    int alpn_negative = alpn_negative_case(server_cert, server_key, ca);
     int mtls = basic_case(server_cert, server_key, ca, client_cert, client_key,
                           TLS1_2_VERSION, 1);
     int session_resumption = session_resumption_case(server_cert, server_key, ca);
@@ -630,7 +680,8 @@ int main(int argc, char **argv) {
 
     printf("CAP tls12=%s\n", tls12 ? "PASS" : "FAIL");
     printf("CAP tls13=%s\n", tls13 ? "PASS" : "FAIL");
-    printf("CAP sni_hostname_alpn=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
+    printf("CAP sni_hostname_alpn=%s\n",
+           (tls12 && tls13 && alpn_negative) ? "PASS" : "FAIL");
     printf("CAP custom_ca=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
     printf("CAP external_trust=%s\n", external_trust ? "PASS" : "FAIL");
     printf("CAP partial_io_backpressure=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
@@ -657,11 +708,13 @@ int main(int argc, char **argv) {
     printf("METRIC session_resumption_tls13_handshakes=%u\n",
            session_resumption_tls13_handshakes);
     printf("METRIC external_trust_calls=%u\n", external_trust_calls);
+    printf("METRIC alpn_no_overlap_handshakes=%d\n", alpn_negative ? 2 : 0);
+    printf("METRIC alpn_malformed_inputs_rejected=%d\n", alpn_negative ? 2 : 0);
 #if defined(OPENSSL_IS_AWSLC)
     printf("METRIC external_signer_calls=%u\n", external_signer_calls);
 #endif
 
-    return (tls12 && tls13 && mtls && session_resumption && external_trust && wrong_host &&
+    return (tls12 && tls13 && alpn_negative && mtls && session_resumption && external_trust && wrong_host &&
             untrusted && trunc && cancel &&
             cleanup && failure_cleanup &&
 #if defined(OPENSSL_IS_AWSLC)

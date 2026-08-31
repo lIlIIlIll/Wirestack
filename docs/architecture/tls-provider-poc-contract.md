@@ -18,6 +18,8 @@ Version changes require a reviewed change to `tools/tls_provider_poc/providers.j
 - `BLOCKED`: the native platform or required environment is unavailable.
 
 `NOT_RUN`, missing cells and cross-compilation never count as native evidence.
+Schema v1 results are no longer accepted because they cannot carry the required
+callback and protocol-negative metrics.
 Schema v3 is required for `PASS`. It requires exactly 10,000 measured cleanup
 cycles. When session resumption passes, the result must record four measured
 handshakes: a fresh and resumed TLS 1.2 handshake, plus a fresh and resumed TLS
@@ -39,6 +41,9 @@ caller-driven partial I/O and backpressure, bounded cancellation, clean
 `close_notify`, truncation classification and repeated cleanup.
 External/non-exportable signing must be executed or remain explicitly
 `BLOCKED`; it may not be inferred from a header or marketing claim.
+An ALPN `PASS` requires successful negotiation plus no-overlap rejection in TLS
+1.2 and TLS 1.3. It also requires rejection of zero-length and overlong protocol
+identifiers before a handshake starts.
 
 OpenSSL-compatible candidates use a bounded BIO pair so the caller owns transport progress. Mbed TLS uses caller-provided send/receive callbacks backed by bounded ring buffers. The PoCs never open a socket.
 

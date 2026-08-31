@@ -64,7 +64,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                     expected_revision: str | None = None) -> None:
     validate_spec(spec)
     schema_version = result.get("schema_version")
-    require(schema_version in {1, 2, 3}, "unsupported result schema")
+    require(schema_version in {2, 3}, "unsupported result schema")
     require(result.get("task_id") == "M0-016", "result task_id")
     require(result.get("provider") in REQUIRED_PROVIDER_IDS, "result provider")
     require(result.get("platform") in set(spec["required_platforms"]), "result platform")
@@ -119,6 +119,11 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
             require(isinstance(metrics.get("external_trust_calls"), int) and
                     metrics["external_trust_calls"] >= 4,
                     "external trust must accept and reject both TLS versions")
+        if caps.get("sni_hostname_alpn") == "PASS":
+            require(metrics.get("alpn_no_overlap_handshakes") == 2,
+                    "ALPN PASS requires TLS 1.2 and TLS 1.3 no-overlap handshakes")
+            require(metrics.get("alpn_malformed_inputs_rejected") == 2,
+                    "ALPN PASS requires two rejected malformed inputs")
     if result["status"] in {"PASS", "PARTIAL"}:
         require(build.get("static_archives"), "successful result requires static archives")
         require(build.get("system_tls_dependencies") == [], "system TLS dependency detected")
