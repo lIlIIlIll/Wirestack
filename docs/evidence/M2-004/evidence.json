@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-31T05:33:57.619307Z",
+  "generated_at_utc": "2026-08-31T05:39:20.064542Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,11 +11,11 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M2-004/windows-x86_64/validation.json",
-      "sha256": "8fb814d69d69bde73d691bdaa6d2ec8d9d262e0517f5b574befcb58b9ee35b9b",
+      "sha256": "9d1e27703172abc87c7731c3b5a71e3309dd5bb0b8f307516caa785f84e2f0dc",
       "source_task": "M2-004"
     }
   ],
-  "revision": "64651485e7f326b8e69d18ec0ace6180d7868e48",
+  "revision": "0ba33f094fcf26b424a1a29455456ad5772d2536",
   "schema_version": 1,
   "source_sha256": {
     ".github/workflows/m2-004-windows-system-resolver.yml": "af9425e4aa0f5ddb35fc6e8c42365fed80c35d4041dad2e68a6b127ca4f38c7f",
@@ -33,12 +33,12 @@
     "src/internal/resolver/windows_system_resolver_test.cj": "968ab3bebef3d8963e10e626f6d04392a46dc5d84f64cc8025b0dca9a8a4b8dc",
     "tools/build_native_dependencies.py": "fbd9be4dee9066245387f269f263024ff90e036d594a27255883b458e03a54eb",
     "tools/build_resolver.py": "ac3852722b5495d0115e2a475547e7dcfa30d7457555276a291372b23afa2980",
-    "tools/build_windows_resolver.py": "494f91c327abeea34ccb1bca0f7e380ffa306d5c6e283da1272aedbce1a826d2",
+    "tools/build_windows_resolver.py": "128c310abe1cc5c62d5c13e7688adc98ec2f78fcddcb827683553bbd6ed91aad",
     "tools/gates/m2_004_windows_resolver.py": "0c51410f068bee9eee14ff265b92a06ca01ead3fd417b573a76512e0deb4bb85",
     "tools/gates/native/m2_004_tls_link_stub.c": "ddd4eb317c861351e91b085310bbe6702962e966bd227b4520b23facceb278c3",
     "tools/gates/tests/test_m2_004_windows_resolver.py": "00333c58c7a64697cb35cfc02679f7aed23daec8c7b5c7db5d58e17bc5947ce3",
-    "tools/tasks/M2-004.json": "c6dfb87a0f990ee1867f360954fb3c00d666d110de4cdaba7d28af855ac8191c",
-    "tools/tests/test_build_resolver.py": "ebd0913c7d0d1190c274af8c362eee1fd9c61ed2690c09106650b32f3befb9f5",
+    "tools/tasks/M2-004.json": "6baeb6d662ad3fb9b47ee81ef94733edc3c537d312656b94c83f915579fff9c2",
+    "tools/tests/test_build_resolver.py": "ae903b4a93a32b50208b7a6ac4e66defc6914b3d9a3d6984bbe513a65a1fafec",
     "tools/tests/test_m7_029_independent_security_review.py": "a72c29da4e5394aa1175808f5633d552d1a1feabf23444518b9f7bf7e9e56a64"
   },
   "source_task": "M2-004",
