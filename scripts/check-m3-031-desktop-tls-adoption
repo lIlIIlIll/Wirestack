@@ -2,7 +2,9 @@
 set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 hosted="$repo_root/docs/evidence/M3-031/hosted-run.json"
-revision="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["revision"])' "$hosted")"
+python3 "$repo_root/tools/m3_031_desktop_tls_adoption.py" --root "$repo_root" validate-hosted \
+  --input "$hosted" --output "$repo_root/build/gates/m3-031/hosted-validation.json"
+revision="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["revision"])' "$repo_root/build/gates/m3-031/hosted-validation.json")"
 python3 "$repo_root/tools/m3_031_desktop_tls_adoption.py" --root "$repo_root" audit-core \
   --output "$repo_root/build/gates/m3-031/core-prerequisite-audit.json"
 python3 "$repo_root/tools/m3_031_desktop_tls_adoption.py" --root "$repo_root" validate-provider \
