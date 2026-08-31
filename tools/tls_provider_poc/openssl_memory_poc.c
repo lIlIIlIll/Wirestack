@@ -712,8 +712,13 @@ static int local_close_version_case(const char *server_cert, const char *server_
     int ok = drive_handshake(&p, 1, MAX_STEPS) &&
              verify_negotiation(&p, version);
     if (ok) {
-        SSL_free(p.client);
-        p.client = NULL;
+        int close_result = SSL_shutdown(p.client);
+        unsigned char byte;
+        int peer_result = SSL_read(p.server, &byte, 1);
+        int peer_error = SSL_get_error(p.server, peer_result);
+        ok = close_result == 0 &&
+             (SSL_get_shutdown(p.client) & SSL_SENT_SHUTDOWN) != 0 &&
+             peer_result == 0 && peer_error == SSL_ERROR_ZERO_RETURN;
     }
     free_pair(&p);
     SSL_CTX_free(client_ctx);
