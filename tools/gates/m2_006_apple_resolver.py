@@ -151,6 +151,12 @@ def deployment_flags(selected: str) -> list[str]:
     raise GateError(f"unsupported Apple deployment target: {selected}")
 
 
+def command_has_target(command: object, target: str) -> bool:
+    if not isinstance(command, list) or not all(isinstance(item, str) for item in command):
+        return False
+    return target in command or f"--target={target}" in command
+
+
 def bind_test_link_stub(manifest: str, selected: str) -> str:
     table = {
         "macos-arm64": "[target.aarch64-apple-darwin.ffi.c]",
@@ -514,7 +520,7 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
                 or install.get("exit_code") != 0
                 or "Frameworks/libcangjie-runtime.dylib" not in runtime_names
                 or not isinstance(probe_compile, dict)
-                or IOS_TARGET not in probe_compile.get("command", [])
+                or not command_has_target(probe_compile.get("command"), IOS_TARGET)
             ):
                 failures.append("REPORT:SIMULATOR_PROBE")
     return failures
