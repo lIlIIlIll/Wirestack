@@ -85,6 +85,15 @@ class M2006AppleResolverGateTests(unittest.TestCase):
             gate.validate_report(valid_report("ios-simulator"), "abc", "ios-simulator"),
         )
 
+    def test_ios_probe_accepts_cjc_equals_form_target_argument(self) -> None:
+        report = valid_report("ios-simulator")
+        report["simulator"]["probe_compile"]["command"] = [
+            "cjc", f"--target={gate.IOS_TARGET}"
+        ]
+        self.assertEqual(
+            [], gate.validate_report(report, "abc", "ios-simulator")
+        )
+
     def test_rejects_unknown_schema_stale_revision_and_wrong_platform(self) -> None:
         report = valid_report()
         report["schema_version"] = 9
