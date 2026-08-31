@@ -1,23 +1,23 @@
 {
   "build": {
     "binary_bytes": 3106000,
-    "binary_sha256": "56edbaf811a5fd27feeb7fa6499804b8f7e70c416a773a144e936e679d1ab354",
+    "binary_sha256": "734a5359443cd5cbf08fd89dfe6c7a3674981117dafcb92e7addd9df532d15c1",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 668872,
         "name": "libssl.a",
-        "sha256": "9b56ac4eec7cf3b74a19819b73c85080ec11f1fa8bd925e894095e44a49be409"
+        "sha256": "d856bb084f160007c461ef67459f464770ac1ae4a507e831a611ee00e39b1bd3"
       },
       {
         "bytes": 4090424,
         "name": "libcrypto.a",
-        "sha256": "78973e6113816440cbae5fda78f0bf62c0f1dd82b5ce1aab89b378a363e27a16"
+        "sha256": "d0564475329591d9058516a760fa213653a9d1d6482c68b10faf0ffa149828b7"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "8c54f2aac77bb480470189ccf2a2df2afe1daab25c169e76f5e8ef1465787f05",
+  "build_log_sha256": "267cea9520e8a533128c922bd4fe3937ee50874d778ed601572fea10e6dc19d4",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -38,15 +38,16 @@
     "image_os": "macos15",
     "image_version": "20260727.0256.1",
     "python": "3.14.6",
-    "repository_revision": "787a6210a245e8cb65757ef2f639db20ca3e2025",
+    "repository_revision": "4a7f0c4d46a197c98d48e1f4fab5298c27be5896",
     "runner_arch": "ARM64",
     "runner_os": "macOS"
   },
-  "finished_at": "2026-08-31T00:57:22.051895+00:00",
+  "finished_at": "2026-08-31T03:10:02.327890+00:00",
   "metrics": {
     "external_signer_calls": 2,
     "failure_cleanup_cycles": 0,
-    "repeated_cleanup_cycles": 10000
+    "repeated_cleanup_cycles": 10000,
+    "session_resumption_handshakes": 2
   },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
@@ -54,14 +55,14 @@
   "platform": "macos-arm64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 2,
+  "schema_version": 3,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
     "kind": "git",
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T00:56:22.526919+00:00",
+  "started_at": "2026-08-31T03:09:09.820923+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }

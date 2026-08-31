@@ -1,23 +1,23 @@
 {
   "build": {
-    "binary_bytes": 2001408,
-    "binary_sha256": "66e83eb02c91bdf29fdba55b5b1ecfc2382f72044fcb7eb25cb428d109fbe42e",
+    "binary_bytes": 2001920,
+    "binary_sha256": "b2e863468ca3db77930e9b19df6797c5c566b296f1b22ee9b82990ff8aa10442",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 3187390,
         "name": "ssl.lib",
-        "sha256": "846d42f9ff8c25a87ddbd1897ccffa7499d16be482d31ba3ee1c7ef118abb9aa"
+        "sha256": "1349cba4b970be0718a1e96ee367cd070e65eb376c8b442cf98fc6ec74c3e4ba"
       },
       {
         "bytes": 6788546,
         "name": "crypto.lib",
-        "sha256": "02d592d2d6be2bd7b4cf30949459fd462d35b16dc37e4c94c8c78dad184d7b12"
+        "sha256": "927d0d08ec5cd8c9ceeafc4e3a3fef1982b7a9bf7b1dbb618767a9f5a70f955b"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "c791a6c66256c7bb0d1317ccbeb88c7a76d4980246571cec2550aad9dedc7f2b",
+  "build_log_sha256": "70605cfef10acea36bc55724244b4dc8619400b59492c2e4a559471ad2d5019f",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -38,15 +38,16 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "787a6210a245e8cb65757ef2f639db20ca3e2025",
+    "repository_revision": "4a7f0c4d46a197c98d48e1f4fab5298c27be5896",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T00:58:30.713867+00:00",
+  "finished_at": "2026-08-31T03:10:18.021067+00:00",
   "metrics": {
     "external_signer_calls": 2,
     "failure_cleanup_cycles": 0,
-    "repeated_cleanup_cycles": 10000
+    "repeated_cleanup_cycles": 10000,
+    "session_resumption_handshakes": 2
   },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
@@ -54,14 +55,14 @@
   "platform": "windows-x86_64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 2,
+  "schema_version": 3,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
     "kind": "git",
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T00:56:31.769617+00:00",
+  "started_at": "2026-08-31T03:08:22.816001+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }
