@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 7378240,
-    "binary_sha256": "2796bf9d3c30ab9dd8463b46c1663b319a35076c8fdd0a8c284ff6a4d379a80a",
+    "binary_sha256": "ec5638c83e05c38a5621cf7393ba4069cb98e3883dba812ce1d72cd313cf4078",
     "exported_symbol_inventory": {
       "count": 9575,
       "scope": "final-artifact-exports",
@@ -9676,7 +9676,7 @@
       {
         "bytes": 12369700,
         "name": "libcrypto.a",
-        "sha256": "74ac48ad130dd46c8763841160aa71cd167bdac8c7174da27d1aef790f0b4b78"
+        "sha256": "c76df078fe29e3e655de8faee891bd09104969f0974c53735d71d1769d4cf0b5"
       },
       {
         "bytes": 2100726,
@@ -9686,7 +9686,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "cea05b93d659a258faaa7b012141d10fbaf8c5f41290f941917973a6e11b6d25",
+  "build_log_sha256": "cfcff7b863dccfc724c518184077aa92283f55de17c145bd3382c317f00b89eb",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -9712,29 +9712,29 @@
     "image_os": "alpine",
     "image_version": "3.22.5",
     "python": "3.14.7",
-    "repository_revision": "88584c91602b25e4c35cd4cf9a1431c220897cec",
+    "repository_revision": "e53f79325617559514ff35e5be1f1ca979960e91",
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T22:16:54.327593+00:00",
+  "finished_at": "2026-08-31T22:38:46.497787+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 84,
+    "cancellation_latency_us": 75,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 40701952,
+    "memory_profile_peak_resident_bytes": 41684992,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 6176920743,
+    "provider_allocation_bytes": 6178560761,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 28485762,
+    "provider_allocation_calls": 28528823,
     "provider_allocation_live_after_cleanup_bytes": 559202,
     "provider_allocation_live_before_cleanup_bytes": 559202,
     "provider_allocation_peak_live_bytes": 800083,
@@ -9749,18 +9749,18 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 84,
+      "latency_us": 75,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 40701952,
+      "peak_resident_bytes": 41684992,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 6176920743,
+      "provider_allocation_bytes": 6178560761,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 28485762,
+      "provider_allocation_calls": 28528823,
       "provider_allocation_live_after_cleanup_bytes": 559202,
       "provider_allocation_live_before_cleanup_bytes": 559202,
       "provider_allocation_peak_live_bytes": 800083,
@@ -9811,7 +9811,7 @@
     "tag": "openssl-3.6.4",
     "tag_resolved_commit": "d3c1b1169b3569ff3069e5b399f47b2b28e03d79"
   },
-  "started_at": "2026-08-31T22:14:12.403180+00:00",
+  "started_at": "2026-08-31T22:35:54.740589+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
