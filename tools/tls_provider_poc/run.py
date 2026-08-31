@@ -290,6 +290,40 @@ def generate_fixtures(work: Path, log: Path) -> Path:
         "-CAkey", str(out / "ca.key"), "-CAcreateserial", "-days", "2", "-sha256",
         "-extfile", str(out / "server.ext"), "-out", str(out / "server.pem"),
     ], cwd=work, log=log)
+    (out / "index.txt").write_text("", encoding="utf-8")
+    (out / "serial").write_text("1000\n", encoding="utf-8")
+    (out / "certs").mkdir()
+    (out / "ca.cnf").write_text(
+        "[ca]\n"
+        "default_ca=wirestack_ca\n"
+        "[wirestack_ca]\n"
+        "database=index.txt\n"
+        "new_certs_dir=certs\n"
+        "certificate=ca.pem\n"
+        "private_key=ca.key\n"
+        "serial=serial\n"
+        "default_md=sha256\n"
+        "default_days=2\n"
+        "policy=wirestack_policy\n"
+        "[wirestack_policy]\n"
+        "commonName=supplied\n"
+        "[server_cert]\n"
+        "subjectAltName=DNS:localhost\n"
+        "extendedKeyUsage=serverAuth\n"
+        "basicConstraints=CA:FALSE\n"
+        "keyUsage=digitalSignature,keyEncipherment\n",
+        encoding="utf-8",
+    )
+    run([
+        "openssl", "ca", "-batch", "-config", "ca.cnf",
+        "-in", "server.csr", "-out", "expired.pem",
+        "-startdate", "20000101000000Z", "-enddate", "20000102000000Z",
+        "-extensions", "server_cert",
+    ], cwd=out, log=log)
+    (out / "malformed.pem").write_text(
+        "-----BEGIN CERTIFICATE-----\nAAAA\n-----END CERTIFICATE-----\n",
+        encoding="ascii",
+    )
     (out / "client.ext").write_text(
         "extendedKeyUsage=clientAuth\nbasicConstraints=CA:FALSE\n"
         "keyUsage=digitalSignature,keyEncipherment\n"
@@ -345,6 +379,40 @@ def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
     return output
 
 
+def exported_symbol_inventory(binary: Path, work: Path, log: Path) -> dict[str, Any]:
+    if is_windows():
+        command = ["dumpbin", "/exports", str(binary)]
+        tool = "dumpbin /exports"
+        pattern = re.compile(r"^\s*\d+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+(\S+)\s*$")
+    elif sys.platform.startswith("linux"):
+        command = ["nm", "-g", "--defined-only", str(binary)]
+        tool = "nm -g --defined-only"
+        pattern = re.compile(r"^\s*[0-9A-Fa-f]+\s+[A-Za-z]\s+(\S+)\s*$")
+    elif sys.platform == "darwin":
+        command = ["nm", "-gU", str(binary)]
+        tool = "nm -gU"
+        pattern = re.compile(r"^\s*[0-9A-Fa-f]+\s+[A-Za-z]\s+(\S+)\s*$")
+    else:
+        raise PocError("unsupported platform for exported-symbol inspection")
+    completed = run(command, cwd=work, log=log, check=False)
+    if completed.returncode != 0:
+        raise PocError("exported-symbol inspection failed")
+    if is_windows() and ("Dump of file" not in completed.stdout or
+                         "Summary" not in completed.stdout):
+        raise PocError("dumpbin export output was not recognized")
+    symbols = sorted(set(pattern.findall(completed.stdout)))
+    if len(symbols) > 4096 or any(len(symbol) > 256 for symbol in symbols):
+        raise PocError("exported-symbol inventory exceeds its bound")
+    encoded = "".join(f"{symbol}\n" for symbol in symbols).encode("utf-8")
+    return {
+        "scope": "final-artifact-exports",
+        "tool": tool,
+        "count": len(symbols),
+        "sha256": hashlib.sha256(encoded).hexdigest(),
+        "symbols": symbols,
+    }
+
+
 def inspect_binary(binary: Path, archives: Sequence[Path], work: Path, log: Path) -> dict[str, Any]:
     dependencies: list[str] = []
     if is_windows():
@@ -369,6 +437,7 @@ def inspect_binary(binary: Path, archives: Sequence[Path], work: Path, log: Path
             {"name": archive.name, "bytes": archive.stat().st_size, "sha256": sha256_path(archive)}
             for archive in archives
         ],
+        "exported_symbol_inventory": exported_symbol_inventory(binary, work, log),
         "system_tls_dependencies": dependencies,
         "runtime_loader_library_strings": forbidden_strings,
     }
@@ -397,6 +466,10 @@ def parse_metrics(stdout: str, provider: str, caps: Mapping[str, str]) -> dict[s
         or metrics.get("alpn_malformed_inputs_rejected") != 2
     ):
         raise PocError("ALPN evidence did not cover no-overlap and malformed inputs")
+    if (caps.get("negative_expired_certificate") == "PASS" and
+            caps.get("negative_malformed_certificate") == "PASS" and
+            metrics.get("certificate_negative_cases_rejected") != 2):
+        raise PocError("certificate evidence did not cover expired and malformed inputs")
     if caps.get("session_resumption") == "PASS" and (
         metrics.get("session_resumption_handshakes") != 4
         or metrics.get("session_resumption_tls12_handshakes") != 2
@@ -425,7 +498,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     log = work / "build.log"
     started = dt.datetime.now(dt.timezone.utc)
     result: dict[str, Any] = {
-        "schema_version": 3,
+        "schema_version": 4,
         "task_id": "M0-016",
         "provider": args.provider,
         "platform": platform_id(),
@@ -457,6 +530,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         completed = run([
             str(binary), str(fixtures / "server.pem"), str(fixtures / "server.key"),
             str(fixtures / "ca.pem"), str(fixtures / "client.pem"), str(fixtures / "client.key"),
+            str(fixtures / "expired.pem"), str(fixtures / "malformed.pem"),
         ], cwd=work, log=log, check=False)
         result["poc_exit_code"] = completed.returncode
         result["capabilities"] = parse_caps(completed.stdout, spec_all["required_capabilities"])

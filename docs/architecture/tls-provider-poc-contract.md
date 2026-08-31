@@ -18,9 +18,12 @@ Version changes require a reviewed change to `tools/tls_provider_poc/providers.j
 - `BLOCKED`: the native platform or required environment is unavailable.
 
 `NOT_RUN`, missing cells and cross-compilation never count as native evidence.
-Schema v1 results are no longer accepted because they cannot carry the required
-callback and protocol-negative metrics.
-Schema v3 is required for `PASS`. It requires exactly 10,000 measured cleanup
+Schema versions 1 through 3 are no longer accepted because they cannot carry
+the complete callback, protocol-negative, certificate-negative and export
+inventory evidence.
+Schema v4 is required for retained `PASS` and `PARTIAL` results. It requires an
+exact, bounded inventory of the final artifact's exported symbols and exactly
+10,000 measured cleanup
 cycles. When session resumption passes, the result must record four measured
 handshakes: a fresh and resumed TLS 1.2 handshake, plus a fresh and resumed TLS
 1.3 handshake after ticket delivery. A provider cannot infer resumption from a
@@ -45,11 +48,18 @@ An ALPN `PASS` requires successful negotiation plus no-overlap rejection in TLS
 1.2 and TLS 1.3. It also requires rejection of zero-length and overlong protocol
 identifiers before a handshake starts.
 
+The certificate-negative register has separate expired and malformed
+capabilities. An expired certificate must reach native chain verification and
+fail with the provider's expiry classification. A malformed certificate must
+be rejected while loading provider material, before any handshake starts. A
+result that passes both cases records exactly two rejected certificate-negative
+cases.
+
 OpenSSL-compatible candidates use a bounded BIO pair so the caller owns transport progress. Mbed TLS uses caller-provided send/receive callbacks backed by bounded ring buffers. The PoCs never open a socket.
 
 ## Static dependency boundary
 
-Each provider is built from vendored source with shared libraries disabled. The final PoC binary is linked to the resulting archives. The run retains archive SHA-256 values and inspects the executable with the native dependency tool (`ldd` or `otool`). A dependency or runtime-library string for system `libssl`, `libcrypto` or Mbed TLS libraries is a failure.
+Each provider is built from vendored source with shared libraries disabled. The final PoC binary is linked to the resulting archives. The run retains archive SHA-256 values, inspects the executable with the native dependency tool (`ldd`, `otool` or `dumpbin /dependents`) and records the sorted, bounded final-artifact export inventory from `nm` or `dumpbin /exports`. A dependency or runtime-library string for system `libssl`, `libcrypto` or Mbed TLS libraries is a failure.
 
 The host `openssl` command is allowed only to create ephemeral test certificates. It is not used by the PoC data path and does not satisfy any provider capability.
 
