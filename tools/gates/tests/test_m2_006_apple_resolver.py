@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 
@@ -46,6 +47,25 @@ def valid_report(mode: str = "macos") -> dict[str, object]:
 
 
 class M2006AppleResolverGateTests(unittest.TestCase):
+    def test_target_native_libraries_propagate_to_path_consumers(self) -> None:
+        manifest = tomllib.loads(Path("cjpm.toml").read_text(encoding="utf-8"))
+        targets = manifest["target"]
+
+        for target in (
+            "aarch64-apple-darwin",
+            "arm64-apple-ios11-simulator",
+        ):
+            configuration = targets[target]
+            self.assertEqual(
+                {"path": "./target/native/resolver/current/lib"},
+                configuration["ffi"]["c"]["wirestack_resolver"],
+            )
+            self.assertEqual(
+                {"path": "./target/native/test-support/m2-006/lib"},
+                configuration["ffi"]["c"]["wirestack_m2_006_tls_link_stub"],
+            )
+            self.assertNotIn("-lwirestack_", configuration["link-option"])
+
     def test_valid_native_macos_report_passes(self) -> None:
         self.assertEqual([], gate.validate_report(valid_report(), "abc", "macos"))
 
