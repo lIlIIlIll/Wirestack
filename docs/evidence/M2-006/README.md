@@ -18,9 +18,9 @@ Deadline policy.
   unknown schemas, cross-compile-only output, SKIPPED cases, timeout, missing
   simulator evidence, and a missing fixture binding.
 - GitHub Actions run
-  [`33360106375`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33360106375)
+  [`33362343275`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33362343275)
   passed both hosted jobs at exact revision
-  `a1062bf8bff10cbf62a57f27f3bc28b46981fab8`.
+  `bf59aa28f1bc3cc75efe5ede33a14c39bfd665ba`.
 - The native `macos-15` arm64 job ran all eight selected Cangjie resolver cases
   with zero failures and stored its exact-revision report and validation.
 - The native iOS Simulator arm64 job built the standalone Cangjie probe,
