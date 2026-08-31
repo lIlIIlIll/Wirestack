@@ -451,6 +451,41 @@ class ProviderPocWindowsTests(unittest.TestCase):
                 with self.assertRaisesRegex(runner.PocError, "not recognized"):
                     runner.exported_symbol_inventory(binary, root, root / "build.log")
 
+    def test_linux_export_scan_retains_symbols_from_multiline_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            binary = root / "provider-poc"
+            completed = runner.subprocess.CompletedProcess(
+                ["nm"], 0,
+                "0000000000001000 T main\n0000000000002000 T wirestack_export\n", "",
+            )
+            with mock.patch.object(runner, "is_windows", return_value=False), \
+                    mock.patch.object(runner.sys, "platform", "linux"), \
+                    mock.patch.object(runner, "run", return_value=completed):
+                inventory = runner.exported_symbol_inventory(
+                    binary, root, root / "build.log"
+                )
+            self.assertEqual(2, inventory["count"])
+            self.assertEqual(["main", "wirestack_export"], inventory["symbols"])
+
+    def test_windows_export_scan_retains_symbols_from_multiline_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            binary = root / "provider-poc.exe"
+            completed = runner.subprocess.CompletedProcess(
+                ["dumpbin"], 0,
+                "Dump of file provider-poc.exe\n\n"
+                "          1    0 00011000 wirestack_export\n\n"
+                "  Summary\n", "",
+            )
+            with mock.patch.object(runner, "is_windows", return_value=True), \
+                    mock.patch.object(runner, "run", return_value=completed):
+                inventory = runner.exported_symbol_inventory(
+                    binary, root, root / "build.log"
+                )
+            self.assertEqual(1, inventory["count"])
+            self.assertEqual(["wirestack_export"], inventory["symbols"])
+
     def test_windows_dependency_scan_rejects_prefixless_mbedtls_dlls(self):
         text = "mbedtls.dll\nMBEDX509.DLL\ntfpsacrypto.dll\nmbedcrypto.dll\n"
         self.assertEqual(

@@ -383,15 +383,17 @@ def exported_symbol_inventory(binary: Path, work: Path, log: Path) -> dict[str, 
     if is_windows():
         command = ["dumpbin", "/exports", str(binary)]
         tool = "dumpbin /exports"
-        pattern = re.compile(r"^\s*\d+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+(\S+)\s*$")
+        pattern = re.compile(
+            r"^\s*\d+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+(\S+)\s*$", re.M
+        )
     elif sys.platform.startswith("linux"):
         command = ["nm", "-g", "--defined-only", str(binary)]
         tool = "nm -g --defined-only"
-        pattern = re.compile(r"^\s*[0-9A-Fa-f]+\s+[A-Za-z]\s+(\S+)\s*$")
+        pattern = re.compile(r"^\s*[0-9A-Fa-f]+\s+[A-Za-z]\s+(\S+)\s*$", re.M)
     elif sys.platform == "darwin":
         command = ["nm", "-gU", str(binary)]
         tool = "nm -gU"
-        pattern = re.compile(r"^\s*[0-9A-Fa-f]+\s+[A-Za-z]\s+(\S+)\s*$")
+        pattern = re.compile(r"^\s*[0-9A-Fa-f]+\s+[A-Za-z]\s+(\S+)\s*$", re.M)
     else:
         raise PocError("unsupported platform for exported-symbol inspection")
     completed = run(command, cwd=work, log=log, check=False)
