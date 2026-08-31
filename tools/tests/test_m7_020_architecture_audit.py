@@ -1,12 +1,16 @@
 import copy
+import hashlib
 import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from tools.validate_m7_020_architecture_audit import (
     AuditError,
     DEFAULT_AUDIT,
+    ROOT,
+    guard,
     validate_audit,
 )
 
@@ -74,6 +78,23 @@ class M7020ArchitectureAuditTest(unittest.TestCase):
         changed["inventory"]["semantic_std_net_files"] = ["../outside.cj"]
         with self.assertRaisesRegex(AuditError, "inventory path is invalid"):
             self.validate_changed(changed)
+
+    def test_structural_mode_does_not_consult_current_guard_rules(self) -> None:
+        with mock.patch.object(guard, "SOURCE_RULES", []), mock.patch.object(
+            guard, "PUBLIC_API_RULES", []
+        ), mock.patch.object(guard, "CONFIG_RULES", []):
+            self.validate_changed(copy.deepcopy(self.audit))
+
+            strict = copy.deepcopy(self.audit)
+            for relative in strict["source_sha256"]:
+                strict["source_sha256"][relative] = hashlib.sha256(
+                    (ROOT / relative).read_bytes()
+                ).hexdigest()
+            with tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / "audit.data"
+                path.write_text(json.dumps(strict), encoding="utf-8")
+                with self.assertRaisesRegex(AuditError, "required guard rule is absent"):
+                    validate_audit(path)
 
 
 if __name__ == "__main__":

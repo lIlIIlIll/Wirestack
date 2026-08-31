@@ -115,13 +115,6 @@ def validate_audit(
             _require((repo_root / relative).exists(), f"{check_id}: missing {relative}")
 
     _require(audit.get("guard_rules") == REQUIRED_RULES, "guard rule inventory changed")
-    available_rules = {"std-net-boundary"} | {
-        rule
-        for rule, _pattern, _message in (
-            guard.SOURCE_RULES + guard.PUBLIC_API_RULES + guard.CONFIG_RULES
-        )
-    }
-    _require(set(REQUIRED_RULES).issubset(available_rules), "required guard rule is absent")
 
     inventory = audit.get("inventory")
     inventory_keys = {
@@ -160,6 +153,16 @@ def validate_audit(
         )
 
     if verify_current_sources:
+        available_rules = {"std-net-boundary"} | {
+            rule
+            for rule, _pattern, _message in (
+                guard.SOURCE_RULES + guard.PUBLIC_API_RULES + guard.CONFIG_RULES
+            )
+        }
+        _require(
+            set(REQUIRED_RULES).issubset(available_rules),
+            "required guard rule is absent",
+        )
         source_paths = list(guard.source_files(repo_root))
         config_paths = list(guard.configuration_files(repo_root))
         public_count = sum(_package(path) in guard.PUBLIC_API_PACKAGES for path in source_paths)
