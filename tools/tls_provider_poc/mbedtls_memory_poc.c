@@ -42,6 +42,19 @@ typedef struct {
 } Material;
 
 static int sni_seen = 0;
+static int external_trust_decision = 0;
+static unsigned int external_trust_calls = 0;
+
+static int external_trust_callback(void *opaque, mbedtls_x509_crt *cert,
+                                   int depth, uint32_t *flags) {
+    (void)opaque;
+    (void)cert;
+    (void)depth;
+    external_trust_calls++;
+    if (external_trust_decision) *flags = 0;
+    else *flags |= MBEDTLS_X509_BADCERT_NOT_TRUSTED;
+    return 0;
+}
 
 static int ring_send(void *opaque, const unsigned char *buf, size_t len) {
     Endpoint *ep = (Endpoint *)opaque;
@@ -284,6 +297,39 @@ static int negative_case(Material *m, const char *hostname, int trusted) {
     return ok;
 }
 
+static int external_trust_version_case(Material *m, int version) {
+    mbedtls_ssl_config client_conf;
+    mbedtls_ssl_config server_conf;
+    Pair accepted;
+    int ret = configure(m, &client_conf, &server_conf, version, 0, 0);
+    if (ret != 0) return 0;
+    mbedtls_ssl_conf_verify(&client_conf, external_trust_callback, NULL);
+    external_trust_decision = 1;
+    unsigned int calls_before = external_trust_calls;
+    ret = setup_pair(&accepted, &client_conf, &server_conf, "localhost");
+    int ok = ret == 0 && drive_handshake(&accepted, 1) &&
+             external_trust_calls > calls_before;
+    pair_free(&accepted);
+
+    external_trust_decision = 0;
+    calls_before = external_trust_calls;
+    Pair rejected;
+    ret = setup_pair(&rejected, &client_conf, &server_conf, "localhost");
+    ok = ok && ret == 0 && drive_handshake(&rejected, 0) &&
+         external_trust_calls > calls_before;
+    pair_free(&rejected);
+    mbedtls_ssl_config_free(&client_conf);
+    mbedtls_ssl_config_free(&server_conf);
+    return ok;
+}
+
+static int external_trust_case(Material *m) {
+    external_trust_calls = 0;
+    return external_trust_version_case(m, MBEDTLS_SSL_VERSION_TLS1_2) &&
+           external_trust_version_case(m, MBEDTLS_SSL_VERSION_TLS1_3) &&
+           external_trust_calls >= 4;
+}
+
 static int cancellation_case(Material *m) {
     mbedtls_ssl_config conf;
     mbedtls_ssl_context ssl;
@@ -353,6 +399,7 @@ int main(int argc, char **argv) {
     int tls12 = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_2, 0);
     int tls13 = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_3, 0);
     int mtls = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_2, 1);
+    int external_trust = external_trust_case(&m);
     int wrong_host = negative_case(&m, "not-localhost", 1);
     int untrusted = negative_case(&m, "localhost", 0);
     int trunc = truncation_case(&m);
@@ -365,6 +412,7 @@ int main(int argc, char **argv) {
     printf("CAP tls13=%s\n", tls13 ? "PASS" : "FAIL");
     printf("CAP sni_hostname_alpn=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
     printf("CAP custom_ca=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
+    printf("CAP external_trust=%s\n", external_trust ? "PASS" : "FAIL");
     printf("CAP partial_io_backpressure=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
     printf("CAP mtls=%s\n", mtls ? "PASS" : "FAIL");
     printf("CAP session_resumption=BLOCKED\n");
@@ -376,8 +424,9 @@ int main(int argc, char **argv) {
     printf("CAP external_signer=BLOCKED\n");
     printf("CAP repeated_cleanup=%s\n", cleanup ? "PASS" : "FAIL");
     printf("METRIC repeated_cleanup_cycles=%d\n", CLEANUP_CYCLES);
+    printf("METRIC external_trust_calls=%u\n", external_trust_calls);
 
     material_free(&m);
     mbedtls_psa_crypto_free();
-    return (tls12 && tls13 && mtls && wrong_host && untrusted && trunc && cancel && cleanup) ? 0 : 1;
+    return (tls12 && tls13 && mtls && external_trust && wrong_host && untrusted && trunc && cancel && cleanup) ? 0 : 1;
 }
