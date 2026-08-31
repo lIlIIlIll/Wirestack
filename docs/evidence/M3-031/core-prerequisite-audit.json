@@ -13,8 +13,8 @@
       },
       "M2-006": {
         "native_reports": {
-          "docs/evidence/M2-006/ios-simulator-arm64/report.json": "5e597a358bf8871638bb6e87e5bb42961abb9399a785ab5f28ea3409235e58f2",
-          "docs/evidence/M2-006/macos-arm64/report.json": "ac81fdfe25cd4d622a9ff97aae25e3f9ebb1767c70aceb67684a3b1b9040138f"
+          "docs/evidence/M2-006/ios-simulator-arm64/report.json": "773ee61fb7eeb1a2d12e1556e8eb31c9da268dae2d03a8c6fe866be7ddbab008",
+          "docs/evidence/M2-006/macos-arm64/report.json": "d7b3ac40493905701c97082ee52d3bc3477514d9e979480ad169aa06c5cfb79c"
         },
         "source_count": 26,
         "source_verification": "SEALED_INVENTORY",
