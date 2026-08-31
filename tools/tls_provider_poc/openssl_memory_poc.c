@@ -17,7 +17,6 @@
 #define FAILURE_CLEANUP_CYCLES 0
 #endif
 
-static const unsigned char ALPN_WIRE[] = {2, 'h', '2', 8, 'h','t','t','p','/','1','.','1'};
 static int sni_seen = 0;
 static int alpn_seen = 0;
 static int external_trust_decision = 0;
@@ -116,6 +115,22 @@ static void fail(const char *what) {
     fprintf(stderr, "FAIL %s\n", what);
     ERR_print_errors_fp(stderr);
     exit(2);
+}
+
+static int set_alpn_identifiers(SSL *ssl, const char *const *protocols,
+                                size_t protocol_count) {
+    unsigned char wire[1024];
+    size_t used = 0;
+    if (protocol_count == 0) return 0;
+    for (size_t i = 0; i < protocol_count; ++i) {
+        size_t length = protocols[i] == NULL ? 0 : strlen(protocols[i]);
+        if (length == 0 || length > 255 || used + 1 + length > sizeof(wire))
+            return 0;
+        wire[used++] = (unsigned char)length;
+        memcpy(wire + used, protocols[i], length);
+        used += length;
+    }
+    return SSL_set_alpn_protos(ssl, wire, (unsigned int)used) == 0;
 }
 
 static int sni_cb(SSL *ssl, int *alert, void *arg) {
@@ -223,6 +238,7 @@ typedef struct {
 
 static Pair new_pair(SSL_CTX *client_ctx, SSL_CTX *server_ctx, const char *hostname,
                      SSL_SESSION *session) {
+    static const char *const alpn[] = {"h2", "http/1.1"};
     Pair p = {0};
     BIO *cbio = NULL;
     BIO *sbio = NULL;
@@ -243,7 +259,7 @@ static Pair new_pair(SSL_CTX *client_ctx, SSL_CTX *server_ctx, const char *hostn
         if (!param || X509_VERIFY_PARAM_set1_host(param, hostname, 0) != 1)
             fail("set hostname verification");
     }
-    if (SSL_set_alpn_protos(p.client, ALPN_WIRE, sizeof(ALPN_WIRE)) != 0)
+    if (!set_alpn_identifiers(p.client, alpn, 2))
         fail("set client ALPN");
     if (session && SSL_set_session(p.client, session) != 1) fail("set session");
     return p;
@@ -374,14 +390,13 @@ static int basic_case(const char *server_cert, const char *server_key, const cha
 
 static int alpn_no_overlap_version_case(
     const char *server_cert, const char *server_key, const char *ca, int version) {
-    static const unsigned char no_overlap[] = {3, 'f', 'o', 'o'};
+    static const char *const no_overlap[] = {"foo"};
     SSL_CTX *server_ctx = make_server_ctx(
         server_cert, server_key, ca, version, 0, 0);
     SSL_CTX *client_ctx = make_client_ctx(ca, NULL, NULL, version, 1);
     Pair p = new_pair(client_ctx, server_ctx, "localhost", NULL);
     alpn_seen = 0;
-    int ok = SSL_set_alpn_protos(
-                 p.client, no_overlap, (unsigned int)sizeof(no_overlap)) == 0 &&
+    int ok = set_alpn_identifiers(p.client, no_overlap, 1) &&
              drive_handshake(&p, 0, MAX_STEPS) && !alpn_seen;
     free_pair(&p);
     SSL_CTX_free(client_ctx);
@@ -391,8 +406,11 @@ static int alpn_no_overlap_version_case(
 }
 
 static int alpn_malformed_case(void) {
-    static const unsigned char zero_length[] = {0};
-    static const unsigned char truncated[] = {3, 'h', '2'};
+    static const char *const zero_length[] = {""};
+    char overlong_protocol[257];
+    memset(overlong_protocol, 'x', sizeof(overlong_protocol) - 1);
+    overlong_protocol[sizeof(overlong_protocol) - 1] = '\0';
+    const char *const overlong[] = {overlong_protocol};
     SSL_CTX *client_ctx = SSL_CTX_new(TLS_method());
     if (client_ctx == NULL) return 0;
     SSL *client = SSL_new(client_ctx);
@@ -400,12 +418,8 @@ static int alpn_malformed_case(void) {
         SSL_CTX_free(client_ctx);
         return 0;
     }
-    int ok = SSL_set_alpn_protos(
-                 client, zero_length,
-                 (unsigned int)sizeof(zero_length)) != 0 &&
-             SSL_set_alpn_protos(
-                 client, truncated,
-                 (unsigned int)sizeof(truncated)) != 0;
+    int ok = !set_alpn_identifiers(client, zero_length, 1) &&
+             !set_alpn_identifiers(client, overlong, 1);
     SSL_free(client);
     SSL_CTX_free(client_ctx);
     ERR_clear_error();
@@ -562,6 +576,30 @@ static int negative_case(const char *server_cert, const char *server_key, const 
     return ok;
 }
 
+static int expired_certificate_case(const char *expired_cert, const char *server_key,
+                                    const char *ca) {
+    SSL_CTX *server_ctx = make_server_ctx(
+        expired_cert, server_key, ca, TLS1_2_VERSION, 0, 0);
+    SSL_CTX *client_ctx = make_client_ctx(ca, NULL, NULL, TLS1_2_VERSION, 1);
+    Pair p = new_pair(client_ctx, server_ctx, "localhost", NULL);
+    int ok = drive_handshake(&p, 0, MAX_STEPS) &&
+             SSL_get_verify_result(p.client) == X509_V_ERR_CERT_HAS_EXPIRED;
+    free_pair(&p);
+    SSL_CTX_free(client_ctx);
+    SSL_CTX_free(server_ctx);
+    ERR_clear_error();
+    return ok;
+}
+
+static int malformed_certificate_case(const char *malformed_cert) {
+    SSL_CTX *ctx = SSL_CTX_new(TLS_method());
+    if (ctx == NULL) return 0;
+    int ok = SSL_CTX_use_certificate_chain_file(ctx, malformed_cert) != 1;
+    SSL_CTX_free(ctx);
+    ERR_clear_error();
+    return ok;
+}
+
 static int truncation_case(const char *server_cert, const char *server_key, const char *ca) {
     SSL_CTX *server_ctx = make_server_ctx(
         server_cert, server_key, ca, TLS1_2_VERSION, 0, 0);
@@ -640,8 +678,8 @@ static int external_signer_case(const char *server_cert, const char *server_key,
 #endif
 
 int main(int argc, char **argv) {
-    if (argc != 6) {
-        fprintf(stderr, "usage: %s SERVER_CERT SERVER_KEY CA CLIENT_CERT CLIENT_KEY\n", argv[0]);
+    if (argc != 8) {
+        fprintf(stderr, "usage: %s SERVER_CERT SERVER_KEY CA CLIENT_CERT CLIENT_KEY EXPIRED_CERT MALFORMED_CERT\n", argv[0]);
         return 2;
     }
     OPENSSL_init_ssl(0, NULL);
@@ -650,6 +688,8 @@ int main(int argc, char **argv) {
     const char *ca = argv[3];
     const char *client_cert = argv[4];
     const char *client_key = argv[5];
+    const char *expired_cert = argv[6];
+    const char *malformed_cert = argv[7];
 
     int tls12 = basic_case(server_cert, server_key, ca, client_cert, client_key,
                            TLS1_2_VERSION, 0);
@@ -662,6 +702,8 @@ int main(int argc, char **argv) {
     int external_trust = external_trust_case(server_cert, server_key);
     int wrong_host = negative_case(server_cert, server_key, ca, "not-localhost", 1);
     int untrusted = negative_case(server_cert, server_key, ca, "localhost", 0);
+    int expired = expired_certificate_case(expired_cert, server_key, ca);
+    int malformed = malformed_certificate_case(malformed_cert);
     int trunc = truncation_case(server_cert, server_key, ca);
     int cancel = cancellation_case(ca);
 #if defined(OPENSSL_IS_AWSLC)
@@ -689,6 +731,8 @@ int main(int argc, char **argv) {
     printf("CAP session_resumption=%s\n", session_resumption ? "PASS" : "FAIL");
     printf("CAP negative_hostname=%s\n", wrong_host ? "PASS" : "FAIL");
     printf("CAP negative_untrusted_ca=%s\n", untrusted ? "PASS" : "FAIL");
+    printf("CAP negative_expired_certificate=%s\n", expired ? "PASS" : "FAIL");
+    printf("CAP negative_malformed_certificate=%s\n", malformed ? "PASS" : "FAIL");
     printf("CAP close_notify=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
     printf("CAP truncation=%s\n", trunc ? "PASS" : "FAIL");
     printf("CAP caller_cancellation=%s\n", cancel ? "PASS" : "FAIL");
@@ -710,12 +754,13 @@ int main(int argc, char **argv) {
     printf("METRIC external_trust_calls=%u\n", external_trust_calls);
     printf("METRIC alpn_no_overlap_handshakes=%d\n", alpn_negative ? 2 : 0);
     printf("METRIC alpn_malformed_inputs_rejected=%d\n", alpn_negative ? 2 : 0);
+    printf("METRIC certificate_negative_cases_rejected=%d\n", expired + malformed);
 #if defined(OPENSSL_IS_AWSLC)
     printf("METRIC external_signer_calls=%u\n", external_signer_calls);
 #endif
 
     return (tls12 && tls13 && alpn_negative && mtls && session_resumption && external_trust && wrong_host &&
-            untrusted && trunc && cancel &&
+            untrusted && expired && malformed && trunc && cancel &&
             cleanup && failure_cleanup &&
 #if defined(OPENSSL_IS_AWSLC)
             external_signer &&

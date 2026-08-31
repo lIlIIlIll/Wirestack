@@ -337,6 +337,44 @@ static int negative_case(Material *m, const char *hostname, int trusted) {
     return ok;
 }
 
+static int expired_certificate_case(const char *expired_cert, const char *server_key,
+                                    const char *ca, const char *client_cert,
+                                    const char *client_key) {
+    Material expired;
+    material_init(&expired);
+    int ret = load_material(
+        &expired, expired_cert, server_key, ca, client_cert, client_key);
+    int ok = ret == 0;
+    if (ok) {
+        mbedtls_ssl_config client_conf;
+        mbedtls_ssl_config server_conf;
+        Pair p;
+        int pair_initialized = 0;
+        ret = configure(&expired, &client_conf, &server_conf,
+                        MBEDTLS_SSL_VERSION_TLS1_2, 0, 1);
+        if (ret == 0) {
+            ret = setup_pair(&p, &client_conf, &server_conf, "localhost");
+            pair_initialized = 1;
+        }
+        ok = ret == 0 && drive_handshake(&p, 0) &&
+             (mbedtls_ssl_get_verify_result(&p.client) &
+              MBEDTLS_X509_BADCERT_EXPIRED) != 0;
+        if (pair_initialized) pair_free(&p);
+        mbedtls_ssl_config_free(&client_conf);
+        mbedtls_ssl_config_free(&server_conf);
+    }
+    material_free(&expired);
+    return ok;
+}
+
+static int malformed_certificate_case(const char *malformed_cert) {
+    mbedtls_x509_crt cert;
+    mbedtls_x509_crt_init(&cert);
+    int ok = mbedtls_x509_crt_parse_file(&cert, malformed_cert) != 0;
+    mbedtls_x509_crt_free(&cert);
+    return ok;
+}
+
 static int external_trust_version_case(Material *m, int version) {
     mbedtls_ssl_config client_conf;
     mbedtls_ssl_config server_conf;
@@ -426,8 +464,8 @@ static int truncation_case(Material *m) {
 }
 
 int main(int argc, char **argv) {
-    if (argc != 6) {
-        fprintf(stderr, "usage: %s SERVER_CERT SERVER_KEY CA CLIENT_CERT CLIENT_KEY\n", argv[0]);
+    if (argc != 8) {
+        fprintf(stderr, "usage: %s SERVER_CERT SERVER_KEY CA CLIENT_CERT CLIENT_KEY EXPIRED_CERT MALFORMED_CERT\n", argv[0]);
         return 2;
     }
     if (psa_crypto_init() != PSA_SUCCESS) return 2;
@@ -450,6 +488,9 @@ int main(int argc, char **argv) {
     int external_trust = external_trust_case(&m);
     int wrong_host = negative_case(&m, "not-localhost", 1);
     int untrusted = negative_case(&m, "localhost", 0);
+    int expired = expired_certificate_case(
+        argv[6], argv[2], argv[3], argv[4], argv[5]);
+    int malformed = malformed_certificate_case(argv[7]);
     int trunc = truncation_case(&m);
     int cancel = cancellation_case(&m);
     int cleanup = 1;
@@ -467,6 +508,8 @@ int main(int argc, char **argv) {
     printf("CAP session_resumption=BLOCKED\n");
     printf("CAP negative_hostname=%s\n", wrong_host ? "PASS" : "FAIL");
     printf("CAP negative_untrusted_ca=%s\n", untrusted ? "PASS" : "FAIL");
+    printf("CAP negative_expired_certificate=%s\n", expired ? "PASS" : "FAIL");
+    printf("CAP negative_malformed_certificate=%s\n", malformed ? "PASS" : "FAIL");
     printf("CAP close_notify=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
     printf("CAP truncation=%s\n", trunc ? "PASS" : "FAIL");
     printf("CAP caller_cancellation=%s\n", cancel ? "PASS" : "FAIL");
@@ -476,8 +519,10 @@ int main(int argc, char **argv) {
     printf("METRIC external_trust_calls=%u\n", external_trust_calls);
     printf("METRIC alpn_no_overlap_handshakes=%d\n", alpn_negative ? 2 : 0);
     printf("METRIC alpn_malformed_inputs_rejected=%d\n", alpn_negative ? 2 : 0);
+    printf("METRIC certificate_negative_cases_rejected=%d\n", expired + malformed);
 
     material_free(&m);
     mbedtls_psa_crypto_free();
-    return (tls12 && tls13 && alpn_negative && mtls && external_trust && wrong_host && untrusted && trunc && cancel && cleanup) ? 0 : 1;
+    return (tls12 && tls13 && alpn_negative && mtls && external_trust && wrong_host &&
+            untrusted && expired && malformed && trunc && cancel && cleanup) ? 0 : 1;
 }

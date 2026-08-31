@@ -21,6 +21,14 @@ runner = importlib.util.module_from_spec(run_spec)
 assert run_spec.loader
 run_spec.loader.exec_module(runner)
 
+EMPTY_SYMBOL_INVENTORY = {
+    "scope": "final-artifact-exports",
+    "tool": "fixture-tool",
+    "count": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "symbols": [],
+}
+
 
 class ProviderPocValidationTests(unittest.TestCase):
     @classmethod
@@ -32,6 +40,20 @@ class ProviderPocValidationTests(unittest.TestCase):
         validator.validate_spec(self.spec)
         validator.validate_matrix(self.matrix, self.spec)
         validator.validate_retained_results(self.matrix, self.spec, ROOT)
+
+    def test_exported_symbol_inventory_is_bounded_and_digest_bound(self):
+        validator.validate_exported_symbols({
+            "exported_symbol_inventory": EMPTY_SYMBOL_INVENTORY,
+        })
+        bad = copy.deepcopy(EMPTY_SYMBOL_INVENTORY)
+        bad["count"] = 1
+        with self.assertRaisesRegex(validator.ValidationError, "count mismatch"):
+            validator.validate_exported_symbols({"exported_symbol_inventory": bad})
+        bad = copy.deepcopy(EMPTY_SYMBOL_INVENTORY)
+        bad["symbols"] = ["wirestack_export"]
+        bad["count"] = 1
+        with self.assertRaisesRegex(validator.ValidationError, "digest mismatch"):
+            validator.validate_exported_symbols({"exported_symbol_inventory": bad})
 
     def test_missing_archive_digest_fails(self):
         value = copy.deepcopy(self.spec)
@@ -72,7 +94,7 @@ class ProviderPocValidationTests(unittest.TestCase):
         caps = {name: "PASS" for name in self.spec["required_capabilities"]}
         caps["external_signer"] = "BLOCKED"
         result = {
-            "schema_version": 3,
+            "schema_version": 4,
             "task_id": "M0-016",
             "provider": cell["provider"],
             "platform": cell["platform"],
@@ -84,12 +106,14 @@ class ProviderPocValidationTests(unittest.TestCase):
                 "external_trust_calls": 4,
                 "alpn_no_overlap_handshakes": 2,
                 "alpn_malformed_inputs_rejected": 2,
+                "certificate_negative_cases_rejected": 2,
                 "session_resumption_handshakes": 4,
                 "session_resumption_tls12_handshakes": 2,
                 "session_resumption_tls13_handshakes": 2,
             },
             "build": {
                 "static_archives": ["libssl.a"],
+                "exported_symbol_inventory": EMPTY_SYMBOL_INVENTORY,
                 "system_tls_dependencies": [],
                 "runtime_loader_library_strings": [],
             },
@@ -202,13 +226,13 @@ class ProviderPocValidationTests(unittest.TestCase):
             "alpn_no_overlap_handshakes": 2,
             "alpn_malformed_inputs_rejected": 2,
         }
-        with self.assertRaisesRegex(validator.ValidationError, "schema v3"):
+        with self.assertRaisesRegex(validator.ValidationError, "unsupported result schema"):
             validator.validate_result(result, self.spec)
 
-    def test_schema_v3_requires_measured_session_resumption(self):
+    def test_schema_v4_requires_measured_session_resumption(self):
         caps = {name: "PASS" for name in self.spec["required_capabilities"]}
         result = {
-            "schema_version": 3,
+            "schema_version": 4,
             "task_id": "M0-016",
             "provider": "aws-lc",
             "platform": "linux-glibc-x86_64",
@@ -224,9 +248,11 @@ class ProviderPocValidationTests(unittest.TestCase):
                 "external_trust_calls": 4,
                 "alpn_no_overlap_handshakes": 2,
                 "alpn_malformed_inputs_rejected": 2,
+                "certificate_negative_cases_rejected": 2,
             },
             "build": {
                 "static_archives": ["libssl.a"],
+                "exported_symbol_inventory": EMPTY_SYMBOL_INVENTORY,
                 "system_tls_dependencies": [],
                 "runtime_loader_library_strings": [],
             },
@@ -281,6 +307,25 @@ class ProviderPocValidationTests(unittest.TestCase):
                 "openssl",
                 caps,
             )
+
+    def test_metrics_require_expired_and_malformed_certificate_coverage(self):
+        caps = {name: "BLOCKED" for name in self.spec["required_capabilities"]}
+        caps["negative_expired_certificate"] = "PASS"
+        caps["negative_malformed_certificate"] = "PASS"
+        complete = "\n".join([
+            "METRIC repeated_cleanup_cycles=10000",
+            "METRIC certificate_negative_cases_rejected=2",
+        ])
+        metrics = runner.parse_metrics(complete, "openssl", caps)
+        self.assertEqual(2, metrics["certificate_negative_cases_rejected"])
+        with self.assertRaisesRegex(runner.PocError, "certificate evidence"):
+            runner.parse_metrics(
+                complete.replace("certificate_negative_cases_rejected=2",
+                                 "certificate_negative_cases_rejected=1"),
+                "openssl",
+                caps,
+            )
+
     def test_native_pocs_expose_external_trust_as_a_distinct_capability(self):
         openssl_source = (ROOT / "tools/tls_provider_poc/openssl_memory_poc.c").read_text()
         mbedtls_source = (ROOT / "tools/tls_provider_poc/mbedtls_memory_poc.c").read_text()
@@ -323,6 +368,11 @@ class ProviderPocValidationTests(unittest.TestCase):
             self.assertIn("alpn_malformed_case", source)
             self.assertIn("METRIC alpn_no_overlap_handshakes=%d", source)
             self.assertIn("METRIC alpn_malformed_inputs_rejected=%d", source)
+            self.assertIn("CAP negative_expired_certificate=%s", source)
+            self.assertIn("CAP negative_malformed_certificate=%s", source)
+            self.assertIn("METRIC certificate_negative_cases_rejected=%d", source)
+        self.assertIn("char overlong_protocol[257]", openssl_source)
+        self.assertNotIn("static const unsigned char truncated[]", openssl_source)
 
 
 class ProviderPocWindowsTests(unittest.TestCase):
@@ -372,16 +422,34 @@ class ProviderPocWindowsTests(unittest.TestCase):
             log = root / "build.log"
             binary.write_bytes(b"PE fixture")
             archive.write_bytes(b"archive")
-            completed = runner.subprocess.CompletedProcess(
+            dependents = runner.subprocess.CompletedProcess(
                 ["dumpbin"], 0, "LIBSSL-3-X64.DLL\nKERNEL32.dll\n", ""
             )
+            exports = runner.subprocess.CompletedProcess(
+                ["dumpbin"], 0, "Dump of file provider-poc.exe\n\n  Summary\n", ""
+            )
             with mock.patch.object(runner, "is_windows", return_value=True), \
-                    mock.patch.object(runner, "run", return_value=completed) as run_mock:
+                    mock.patch.object(runner, "run", side_effect=[dependents, exports]) as run_mock:
                 result = runner.inspect_binary(binary, [archive], root, log)
             self.assertEqual(["LIBSSL-3-X64.DLL"], result["system_tls_dependencies"])
-            run_mock.assert_called_once_with(
+            self.assertEqual(2, run_mock.call_count)
+            run_mock.assert_any_call(
                 ["dumpbin", "/dependents", str(binary)], cwd=root, log=log, check=False
             )
+            run_mock.assert_any_call(
+                ["dumpbin", "/exports", str(binary)], cwd=root, log=log, check=False
+            )
+
+    def test_windows_export_scan_rejects_unrecognized_success_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            binary = root / "provider-poc.exe"
+            binary.write_bytes(b"PE fixture")
+            completed = runner.subprocess.CompletedProcess(["dumpbin"], 0, "", "")
+            with mock.patch.object(runner, "is_windows", return_value=True), \
+                    mock.patch.object(runner, "run", return_value=completed):
+                with self.assertRaisesRegex(runner.PocError, "not recognized"):
+                    runner.exported_symbol_inventory(binary, root, root / "build.log")
 
     def test_windows_dependency_scan_rejects_prefixless_mbedtls_dlls(self):
         text = "mbedtls.dll\nMBEDX509.DLL\ntfpsacrypto.dll\nmbedcrypto.dll\n"
@@ -459,7 +527,7 @@ class ProviderPocWindowsTests(unittest.TestCase):
     def test_windows_result_requires_native_hosted_runner_identity(self):
         caps = {name: "PASS" for name in self.spec["required_capabilities"]}
         result = {
-            "schema_version": 3,
+            "schema_version": 4,
             "task_id": "M0-016",
             "provider": "aws-lc",
             "platform": "windows-x86_64",
@@ -472,12 +540,14 @@ class ProviderPocWindowsTests(unittest.TestCase):
                 "external_trust_calls": 4,
                 "alpn_no_overlap_handshakes": 2,
                 "alpn_malformed_inputs_rejected": 2,
+                "certificate_negative_cases_rejected": 2,
                 "session_resumption_handshakes": 4,
                 "session_resumption_tls12_handshakes": 2,
                 "session_resumption_tls13_handshakes": 2,
             },
             "build": {
                 "static_archives": ["ssl.lib"],
+                "exported_symbol_inventory": EMPTY_SYMBOL_INVENTORY,
                 "system_tls_dependencies": [],
                 "runtime_loader_library_strings": [],
             },
@@ -497,7 +567,7 @@ class ProviderPocWindowsTests(unittest.TestCase):
     def test_expected_revision_mismatch_fails(self):
         caps = {name: "PASS" for name in self.spec["required_capabilities"]}
         result = {
-            "schema_version": 3,
+            "schema_version": 4,
             "task_id": "M0-016",
             "provider": "aws-lc",
             "platform": "windows-x86_64",
@@ -510,12 +580,14 @@ class ProviderPocWindowsTests(unittest.TestCase):
                 "external_trust_calls": 4,
                 "alpn_no_overlap_handshakes": 2,
                 "alpn_malformed_inputs_rejected": 2,
+                "certificate_negative_cases_rejected": 2,
                 "session_resumption_handshakes": 4,
                 "session_resumption_tls12_handshakes": 2,
                 "session_resumption_tls13_handshakes": 2,
             },
             "build": {
                 "static_archives": ["ssl.lib"],
+                "exported_symbol_inventory": EMPTY_SYMBOL_INVENTORY,
                 "system_tls_dependencies": [],
                 "runtime_loader_library_strings": [],
             },

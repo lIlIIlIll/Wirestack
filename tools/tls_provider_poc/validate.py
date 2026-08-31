@@ -34,6 +34,26 @@ def sha256_path(path: Path) -> str:
             digest.update(chunk)
     return digest.hexdigest()
 
+def validate_exported_symbols(build: Mapping[str, Any]) -> None:
+    inventory = build.get("exported_symbol_inventory")
+    require(isinstance(inventory, dict), "exported-symbol inventory required")
+    require(inventory.get("scope") == "final-artifact-exports",
+            "exported-symbol inventory scope")
+    require(isinstance(inventory.get("tool"), str) and inventory["tool"],
+            "exported-symbol inventory tool")
+    symbols = inventory.get("symbols")
+    require(isinstance(symbols, list), "exported-symbol list required")
+    require(len(symbols) <= 4096, "exported-symbol inventory exceeds its bound")
+    require(all(isinstance(symbol, str) and 0 < len(symbol) <= 256
+                for symbol in symbols), "exported-symbol entry invalid")
+    require(symbols == sorted(set(symbols)),
+            "exported-symbol inventory must be sorted and unique")
+    require(inventory.get("count") == len(symbols),
+            "exported-symbol count mismatch")
+    encoded = "".join(f"{symbol}\n" for symbol in symbols).encode("utf-8")
+    require(inventory.get("sha256") == hashlib.sha256(encoded).hexdigest(),
+            "exported-symbol digest mismatch")
+
 def validate_spec(spec: Mapping[str, Any]) -> None:
     require(spec.get("schema_version") == 1, "unsupported provider spec schema")
     require(spec.get("task_id") == "M0-016", "provider spec task_id must be M0-016")
@@ -64,7 +84,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                     expected_revision: str | None = None) -> None:
     validate_spec(spec)
     schema_version = result.get("schema_version")
-    require(schema_version in {2, 3}, "unsupported result schema")
+    require(schema_version == 4, "unsupported result schema")
     require(result.get("task_id") == "M0-016", "result task_id")
     require(result.get("provider") in REQUIRED_PROVIDER_IDS, "result provider")
     require(result.get("platform") in set(spec["required_platforms"]), "result platform")
@@ -99,22 +119,22 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
         require(status in CAPABILITY_STATUSES, f"{name}: invalid status")
     build = result.get("build")
     require(isinstance(build, dict), "build object required")
-    if schema_version in {2, 3}:
+    if schema_version == 4:
         metrics = result.get("metrics")
-        require(isinstance(metrics, dict), "schema v2 metrics object required")
+        require(isinstance(metrics, dict), "schema v4 metrics object required")
         require(metrics.get("repeated_cleanup_cycles") == 10000,
-                "schema v2 requires exactly 10,000 repeated cleanup cycles")
+                "schema v4 requires exactly 10,000 repeated cleanup cycles")
         if result["provider"] == "aws-lc" and caps.get("external_signer") == "PASS":
             require(isinstance(metrics.get("external_signer_calls"), int) and
                     metrics["external_signer_calls"] >= 2,
                     "AWS-LC external signer must serve TLS 1.2 and TLS 1.3")
-        if schema_version == 3 and caps.get("session_resumption") == "PASS":
+        if caps.get("session_resumption") == "PASS":
             require(metrics.get("session_resumption_handshakes") == 4,
-                    "schema v3 session resumption requires four measured handshakes")
+                    "schema v4 session resumption requires four measured handshakes")
             require(metrics.get("session_resumption_tls12_handshakes") == 2,
-                    "schema v3 requires a TLS 1.2 resumed session")
+                    "schema v4 requires a TLS 1.2 resumed session")
             require(metrics.get("session_resumption_tls13_handshakes") == 2,
-                    "schema v3 requires a TLS 1.3 resumed ticket")
+                    "schema v4 requires a TLS 1.3 resumed ticket")
         if caps.get("external_trust") == "PASS":
             require(isinstance(metrics.get("external_trust_calls"), int) and
                     metrics["external_trust_calls"] >= 4,
@@ -124,14 +144,19 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                     "ALPN PASS requires TLS 1.2 and TLS 1.3 no-overlap handshakes")
             require(metrics.get("alpn_malformed_inputs_rejected") == 2,
                     "ALPN PASS requires two rejected malformed inputs")
+        if (caps.get("negative_expired_certificate") == "PASS" and
+                caps.get("negative_malformed_certificate") == "PASS"):
+            require(metrics.get("certificate_negative_cases_rejected") == 2,
+                    "certificate negatives require expired and malformed rejection")
     if result["status"] in {"PASS", "PARTIAL"}:
         require(build.get("static_archives"), "successful result requires static archives")
+        validate_exported_symbols(build)
         require(build.get("system_tls_dependencies") == [], "system TLS dependency detected")
         require(build.get("runtime_loader_library_strings") == [],
                 "runtime TLS loader string detected")
         require(all(value != "FAIL" for value in caps.values()), "PARTIAL/PASS result contains failed capability")
     if result["status"] == "PASS":
-        require(schema_version == 3, "PASS requires schema v3 dual-version session evidence")
+        require(schema_version == 4, "PASS requires schema v4 evidence")
         require(all(value == "PASS" for value in caps.values()), "PASS requires all capabilities PASS")
     if any(value == "BLOCKED" for value in caps.values()):
         require(result["status"] != "PASS", "blocked capability cannot yield PASS")
