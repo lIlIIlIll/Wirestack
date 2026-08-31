@@ -54,6 +54,8 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             build-essential cmake ninja-build perl git openssl ca-certificates
       - name: Build pinned provider and execute caller-driven PoC
+        env:
+          WIRESTACK_GITHUB_TOKEN: ${{ github.token }}
         run: |
           python3 tools/tls_provider_poc/run.py \
             --provider "${{ matrix.provider }}" \
@@ -86,9 +88,11 @@ jobs:
         env:
           PROVIDER: ${{ matrix.provider }}
           ALPINE_IMAGE: alpine:3.22@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
+          WIRESTACK_GITHUB_TOKEN: ${{ github.token }}
         run: |
           docker run --rm \
             -e PROVIDER \
+            -e WIRESTACK_GITHUB_TOKEN \
             -e GITHUB_SHA="$GITHUB_SHA" \
             -e ImageOS=alpine \
             -e ImageVersion=3.22.5 \
@@ -135,6 +139,7 @@ jobs:
       - name: Build pinned provider and execute caller-driven PoC
         env:
           PATH: /opt/homebrew/opt/openssl@3/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin
+          WIRESTACK_GITHUB_TOKEN: ${{ github.token }}
         run: |
           test "$(uname -m)" = "arm64"
           python3 tools/tls_provider_poc/run.py \
