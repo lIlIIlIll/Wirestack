@@ -1,28 +1,29 @@
 {
   "build": {
-    "binary_bytes": 2001408,
-    "binary_sha256": "33c7b345af12c29e70bacc17dfd15471a13c06996ac2ca6545d80809598011b9",
+    "binary_bytes": 2003456,
+    "binary_sha256": "fb0a6fc763f71ed27f10653ea6129ddc06dbf8ee266a5c65c14674d5ef23db1a",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 3187390,
         "name": "ssl.lib",
-        "sha256": "68b82acd24779d339cfa16d270d8bcc02d738f1c87da4eec21516998ed8d53e3"
+        "sha256": "930092809acb4b16a15e811a62a3bb9da7b0cd98bed9ee5176ea1acf9856c9b4"
       },
       {
         "bytes": 6788546,
         "name": "crypto.lib",
-        "sha256": "587bf2081ad021152177ef6e63f0ffb26f9a2b92fff8ed444d4e45b386ae0110"
+        "sha256": "b5b21d0142b2f6be268068baecb488205659104140566fa22190a724175767af"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "848690a1ca44a9aea0555e9dd9ebb17c9830c8d54a177a28b5e204b4bae161f7",
+  "build_log_sha256": "c4f6e8e61620d0eee0179926287668cd13682ca25e03f2df111a20a2b81a1d8a",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
     "custom_ca": "PASS",
     "external_signer": "PASS",
+    "external_trust": "PASS",
     "mtls": "PASS",
     "negative_hostname": "PASS",
     "negative_untrusted_ca": "PASS",
@@ -38,15 +39,19 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "7eccd9042b38000601fd2263bfb0fe8f148333aa",
+    "repository_revision": "9611abb32c9e790fe893aa9ea4f25ec5ae0d8fba",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-30T18:17:43.656659+00:00",
+  "finished_at": "2026-08-31T08:30:19.230128+00:00",
   "metrics": {
     "external_signer_calls": 2,
+    "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
-    "repeated_cleanup_cycles": 10000
+    "repeated_cleanup_cycles": 10000,
+    "session_resumption_handshakes": 4,
+    "session_resumption_tls12_handshakes": 2,
+    "session_resumption_tls13_handshakes": 2
   },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
@@ -54,14 +59,14 @@
   "platform": "windows-x86_64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 2,
+  "schema_version": 3,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
     "kind": "git",
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-30T18:15:42.967518+00:00",
+  "started_at": "2026-08-31T08:28:19.965515+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }
