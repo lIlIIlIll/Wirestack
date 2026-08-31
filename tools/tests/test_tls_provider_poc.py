@@ -56,16 +56,45 @@ class ProviderPocValidationTests(unittest.TestCase):
 
     def test_partial_matrix_cell_requires_retained_result(self):
         value = copy.deepcopy(self.matrix)
-        cell = next(cell for cell in value["cells"] if cell["status"] == "PARTIAL")
-        cell.pop("result")
+        cell = value["cells"][0]
+        cell["status"] = "PARTIAL"
+        cell.pop("result", None)
+        cell.pop("sha256", None)
         with self.assertRaises(validator.ValidationError):
             validator.validate_matrix(value, self.spec)
 
     def test_retained_result_digest_must_match(self):
         value = copy.deepcopy(self.matrix)
-        cell = next(cell for cell in value["cells"] if cell["status"] == "PARTIAL")
+        cell = value["cells"][0]
+        cell["status"] = "PARTIAL"
+        cell["result"] = "synthetic-result.json"
         cell["sha256"] = "0" * 64
-        with self.assertRaises(validator.ValidationError):
+        caps = {name: "PASS" for name in self.spec["required_capabilities"]}
+        caps["external_signer"] = "BLOCKED"
+        result = {
+            "schema_version": 3,
+            "task_id": "M0-016",
+            "provider": cell["provider"],
+            "platform": cell["platform"],
+            "status": "PARTIAL",
+            "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
+            "capabilities": caps,
+            "metrics": {
+                "repeated_cleanup_cycles": 10000,
+                "external_trust_calls": 4,
+                "session_resumption_handshakes": 4,
+                "session_resumption_tls12_handshakes": 2,
+                "session_resumption_tls13_handshakes": 2,
+            },
+            "build": {
+                "static_archives": ["libssl.a"],
+                "system_tls_dependencies": [],
+                "runtime_loader_library_strings": [],
+            },
+        }
+        with mock.patch.object(validator, "load", return_value=result), \
+             mock.patch.object(validator, "sha256_path", return_value="1" * 64), \
+             self.assertRaisesRegex(validator.ValidationError, "sha256 mismatch"):
             validator.validate_retained_results(value, self.spec, ROOT)
 
     def test_blocked_capability_cannot_pass(self):
