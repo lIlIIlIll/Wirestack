@@ -939,6 +939,7 @@ class ProviderPocValidationTests(unittest.TestCase):
         )
         self.assertIn("Pair provider_rejected;", mbedtls_source)
         for source in (openssl_source, mbedtls_source):
+            self.assertIn("#define _DARWIN_C_SOURCE", source)
             self.assertIn("alpn_no_overlap_version_case", source)
             self.assertIn("alpn_malformed_case", source)
             self.assertIn("METRIC alpn_no_overlap_handshakes=%d", source)
