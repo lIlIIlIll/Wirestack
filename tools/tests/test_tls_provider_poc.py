@@ -458,6 +458,24 @@ class ProviderPocValidationTests(unittest.TestCase):
                     runner.source_provider(
                         provider, root / "mismatch", root / "mismatch.log")
 
+    def test_github_tag_resolution_uses_bounded_ephemeral_token(self):
+        with mock.patch.dict(runner.os.environ,
+                             {"WIRESTACK_GITHUB_TOKEN": "fixture-secret"}):
+            headers = runner.github_api_headers()
+        self.assertEqual("Bearer fixture-secret", headers["Authorization"])
+        self.assertNotIn("WIRESTACK_GITHUB_TOKEN",
+                         runner.BUILD_ENVIRONMENT_KEYS)
+
+        with mock.patch.dict(runner.os.environ,
+                             {"WIRESTACK_GITHUB_TOKEN": ""}):
+            self.assertNotIn("Authorization", runner.github_api_headers())
+
+        with mock.patch.dict(runner.os.environ,
+                             {"WIRESTACK_GITHUB_TOKEN": "x" * 4097}):
+            with self.assertRaisesRegex(runner.PocError,
+                                        "token exceeds its bound"):
+                runner.github_api_headers()
+
     def test_missing_platform_cell_fails(self):
         value = copy.deepcopy(self.matrix)
         value["cells"].pop()
@@ -946,6 +964,14 @@ class ProviderPocValidationTests(unittest.TestCase):
     def test_windows_workflow_pins_nasm_fallback(self):
         workflow = (ROOT / ".github/workflows/m0-016-windows-provider-poc.yml").read_text()
         self.assertIn("choco install nasm --version=2.16.3 --no-progress -y", workflow)
+
+    def test_hosted_workflows_supply_read_only_tag_resolution_token(self):
+        for path in (
+                ".github/workflows/tls-provider-poc.yml",
+                ".github/workflows/m0-016-windows-provider-poc.yml"):
+            workflow = (ROOT / path).read_text()
+            self.assertIn("WIRESTACK_GITHUB_TOKEN: ${{ github.token }}",
+                          workflow)
 
     def test_build_environment_captures_inherited_and_override_values(self):
         with tempfile.TemporaryDirectory() as directory:

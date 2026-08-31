@@ -59,6 +59,7 @@ jobs:
         shell: pwsh
         env:
           WIRESTACK_PROVIDER: ${{ matrix.provider }}
+          WIRESTACK_GITHUB_TOKEN: ${{ github.token }}
         run: |
           $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
           $vsPath = & $vswhere -latest -products * `

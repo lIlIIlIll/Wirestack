@@ -62,6 +62,9 @@ without resolving the tag is not source evidence. Git providers must match the
 pinned tree and deterministic content SHA-256. Static archive
 inventories contain bounded, sorted, unique objects with name, byte count and
 SHA-256; a truthy placeholder is not evidence.
+Hosted CI supplies its read-only GitHub token only to GitHub API tag-resolution
+requests. The token is bounded, never logged or retained, and excluded from
+build provenance.
 
 An mTLS `PASS` records one required-client-auth handshake and two optional
 client-auth handshakes: one without a client certificate and one with a valid
