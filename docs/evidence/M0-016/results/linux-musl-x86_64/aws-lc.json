@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 4443280,
-    "binary_sha256": "bc2f5aa5e808e4a6e536be87d63ff395ae1dab22df2193ad95939d0d9b99abe3",
+    "binary_sha256": "a5b289f6da31e197e9bfc823cbcb23509002d6a57368e25f5cc6b706b735baf0",
     "exported_symbol_inventory": {
       "count": 3794,
       "scope": "final-artifact-exports",
@@ -3915,7 +3915,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "874d439edb5a1a30ead9b91197e7bc93f2fd20b273f2f4a822890ef263702864",
+  "build_log_sha256": "bb2e45eb6ecf1f6fc0ec4dd6d87efa2aeae6b8fb074493716766cb305c4c074f",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -3941,16 +3941,16 @@
     "image_os": "alpine",
     "image_version": "3.22.5",
     "python": "3.14.7",
-    "repository_revision": "72ac887eb974b177b9af09529c09166ec8db6303",
+    "repository_revision": "1c21f3bdb8176846d94450595c47c1bf4526efba",
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T19:28:46.638691+00:00",
+  "finished_at": "2026-08-31T20:20:38.517852+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 92,
+    "cancellation_latency_us": 84,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
@@ -3958,16 +3958,16 @@
     "failure_cleanup_cycles": 0,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 30982144,
+    "memory_profile_peak_resident_bytes": 30822400,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 1267070724,
+    "provider_allocation_bytes": 1256779540,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 10276595,
+    "provider_allocation_calls": 10267076,
     "provider_allocation_live_after_cleanup_bytes": 152884,
     "provider_allocation_live_before_cleanup_bytes": 152884,
-    "provider_allocation_peak_live_bytes": 214702,
+    "provider_allocation_peak_live_bytes": 214214,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -3979,21 +3979,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 92,
+      "latency_us": 84,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 30982144,
+      "peak_resident_bytes": 30822400,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 1267070724,
+      "provider_allocation_bytes": 1256779540,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 10276595,
+      "provider_allocation_calls": 10267076,
       "provider_allocation_live_after_cleanup_bytes": 152884,
       "provider_allocation_live_before_cleanup_bytes": 152884,
-      "provider_allocation_peak_live_bytes": 214702,
+      "provider_allocation_peak_live_bytes": 214214,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -4033,7 +4033,7 @@
     },
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T19:27:09.410036+00:00",
+  "started_at": "2026-08-31T20:19:05.391140+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }
