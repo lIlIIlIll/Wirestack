@@ -16,14 +16,13 @@ private-key isolation, native callbacks and deterministic cleanup.
 
 AWS-LC 5.5.0 at commit
 `991e67ff4cf04df4dd89e407f8b920c6936cb56a` was originally selected from the
-earlier PoC evidence. The retained schema-v10 native evidence validated
-monotonic cancellation waits, the pin-bound advisory disposition, exact source
-identity, structured static archives and distinct local-close behavior, but it
-predates explicit fresh-handshake cache-miss assertions and is superseded
-pending a native rerun. GitHub Actions
-run `33430599975` reports pull-request head
-`74985fb2c506cea3e007258878a038e0dc6c0c34` and executed synthetic merge
-revision `72ac887eb974b177b9af09529c09166ec8db6303`. The retained results
+earlier PoC evidence. Current schema-v10 native evidence validates monotonic
+cancellation waits, the pin-bound advisory disposition, exact source identity,
+structured static archives, distinct local-close behavior, explicit fresh
+cache misses and resumed cache hits. GitHub Actions run `33435335010` reports
+pull-request head `3f2d225b5108441835c6f7e471bda8fbf9a8e046` and executed
+synthetic merge revision `1c21f3bdb8176846d94450595c47c1bf4526efba`.
+The retained results
 bind that execution revision and record:
 
 - TLS 1.2 and TLS 1.3 client/server handshakes over caller-owned bounded BIOs;
@@ -102,9 +101,8 @@ artifact is withdrawn rather than silently downgraded.
 ## Consequences
 
 - Existing Linux TLS integration retains the frozen provider and C ABI
-  decision. Schema-v10 Linux glibc and musl AWS-LC qualification is pending a
-  native rerun with explicit fresh-handshake cache-miss assertions; older
-  evidence is not reused.
+  decision. Schema-v10 Linux glibc and musl AWS-LC qualification is current;
+  older evidence is not reused.
 - M0-016 as a global task remains `BLOCKED` because Android, iOS and HarmonyOS
   or OpenHarmony still lack native-device evidence.
 - AWS-LC-specific code remains internal to the native provider adapter.
