@@ -59,7 +59,8 @@ def _require(condition: bool, message: str) -> None:
 
 
 def _validate_items(
-    section: str, items: Any, expected_ids: list[str], repo_root: Path
+    section: str, items: Any, expected_ids: list[str], repo_root: Path,
+    *, verify_current_sources: bool,
 ) -> list[dict[str, Any]]:
     _require(isinstance(items, list), f"{section} must be a list")
     ids = [item.get("id") for item in items if isinstance(item, dict)]
@@ -76,8 +77,18 @@ def _validate_items(
         evidence = item.get("evidence")
         _require(isinstance(evidence, list) and evidence, f"{item_id}: missing evidence")
         for relative in evidence:
-            _require(isinstance(relative, str), f"{item_id}: evidence path is not text")
-            _require((repo_root / relative).exists(), f"{item_id}: missing evidence path {relative}")
+            _require(isinstance(relative, str) and relative, f"{item_id}: evidence path is not text")
+            candidate = Path(relative)
+            _require(
+                not candidate.is_absolute() and ".." not in candidate.parts
+                and candidate.as_posix() == relative,
+                f"{item_id}: invalid evidence path {relative}",
+            )
+            if verify_current_sources:
+                _require(
+                    (repo_root / relative).exists(),
+                    f"{item_id}: missing evidence path {relative}",
+                )
 
         expected_owner = EXPECTED_GAPS.get(item_id)
         if expected_owner is not None:
@@ -132,12 +143,17 @@ def validate_audit(
                 f"source hash is stale for {relative}",
             )
 
-    p0 = _validate_items("p0_requirements", audit.get("p0_requirements"), P0_IDS, repo_root)
+    p0 = _validate_items(
+        "p0_requirements", audit.get("p0_requirements"), P0_IDS, repo_root,
+        verify_current_sources=verify_current_sources,
+    )
     invariants = _validate_items(
-        "lifecycle_invariants", audit.get("lifecycle_invariants"), INVARIANT_IDS, repo_root
+        "lifecycle_invariants", audit.get("lifecycle_invariants"), INVARIANT_IDS,
+        repo_root, verify_current_sources=verify_current_sources,
     )
     release = _validate_items(
-        "release_acceptance", audit.get("release_acceptance"), RELEASE_IDS, repo_root
+        "release_acceptance", audit.get("release_acceptance"), RELEASE_IDS,
+        repo_root, verify_current_sources=verify_current_sources,
     )
     all_items = p0 + invariants + release
 
