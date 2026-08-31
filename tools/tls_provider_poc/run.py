@@ -435,8 +435,8 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
 
     compiler = os.environ.get("CC", "cl" if is_windows() else "cc")
     cxx = os.environ.get("CXX", "cl" if is_windows() else "c++")
-    compiler_args = [compiler, "/Bv"] if is_windows() else [compiler, "--version"]
-    cxx_args = [cxx, "/Bv"] if is_windows() else [cxx, "--version"]
+    compiler_args = [compiler, "/?"] if is_windows() else [compiler, "--version"]
+    cxx_args = [cxx, "/?"] if is_windows() else [cxx, "--version"]
     if pid in {"aws-lc", "mbedtls"}:
         build_tool_args = ["ninja", "--version"]
         cmake_identity: dict[str, Any] | None = tool_identity(
