@@ -48,6 +48,8 @@
     "session_resumption",
     "negative_hostname",
     "negative_untrusted_ca",
+    "negative_expired_certificate",
+    "negative_malformed_certificate",
     "close_notify",
     "truncation",
     "caller_cancellation",
