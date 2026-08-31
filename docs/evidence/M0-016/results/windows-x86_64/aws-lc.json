@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 2013696,
-    "binary_sha256": "af702b1ba867eb300e3ef932e287476e7a4992ce06add7a222b549617efa798f",
+    "binary_sha256": "8c406b10c742b81c77fc5e67fbeedf1740c2eb9f8b2e638cac91c481b0baaba7",
     "exported_symbol_inventory": {
       "count": 9,
       "scope": "final-artifact-exports",
@@ -122,17 +122,17 @@
       {
         "bytes": 3187390,
         "name": "ssl.lib",
-        "sha256": "6f9889598c325e6b3251b66417a81e31aecb8175e5e03777d5ffdf08bbcf6baa"
+        "sha256": "ad1011161a6feabeb4008d29ce5916955b02f6985ecd74e2d891721b065a8da7"
       },
       {
         "bytes": 6788546,
         "name": "crypto.lib",
-        "sha256": "6499ec0a574878cb14354e4c146b5c4716ab92e47b73b9614e38d6e04be0bf32"
+        "sha256": "4d9145a7146863a99d3d866d458aca2903636f0e3334b267e97554f9a9d7e124"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "091e1608f4ef8350795c360b0124751f6198bcfec3cce1c9a797543ad7972e47",
+  "build_log_sha256": "3def62db4b3b7f20b94a79e1ccb06eb485dddbf64565144e4da6a243f70882f3",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -157,32 +157,32 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "67c519b3d406912378a18bd15da28d5b1f0cdf6a",
+    "repository_revision": "45e16233d373854243966b10bbef012a66566641",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T16:57:44.471338+00:00",
+  "finished_at": "2026-08-31T18:42:44.027654+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 77,
+    "cancellation_latency_us": 85,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 6356992,
+    "memory_profile_peak_resident_bytes": 6377472,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 1245566176,
+    "provider_allocation_bytes": 1245284544,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 10265206,
+    "provider_allocation_calls": 10264749,
     "provider_allocation_live_after_cleanup_bytes": 152420,
     "provider_allocation_live_before_cleanup_bytes": 152420,
-    "provider_allocation_peak_live_bytes": 212037,
+    "provider_allocation_peak_live_bytes": 212021,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -194,21 +194,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 77,
+      "latency_us": 85,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 6356992,
+      "peak_resident_bytes": 6377472,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 1245566176,
+      "provider_allocation_bytes": 1245284544,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 10265206,
+      "provider_allocation_calls": 10264749,
       "provider_allocation_live_after_cleanup_bytes": 152420,
       "provider_allocation_live_before_cleanup_bytes": 152420,
-      "provider_allocation_peak_live_bytes": 212037,
+      "provider_allocation_peak_live_bytes": 212021,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -220,14 +220,35 @@
   "platform": "windows-x86_64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 8,
+  "schema_version": 9,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
     "kind": "git",
+    "security_update": {
+      "advisory_disposition": {
+        "affected_advisory_ids": [],
+        "pin_commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+        "reviewed_advisory_ids": [
+          "GHSA-3jrg-j22w-mpmc",
+          "GHSA-cfwj-9wp5-wqvp",
+          "GHSA-frmv-5gcm-jwxh",
+          "GHSA-jchq-39cv-q4wj",
+          "GHSA-q87m-xr7j-vrww"
+        ],
+        "reviewed_through": "2026-08-31T17:30:00Z",
+        "status": "not-affected"
+      },
+      "advisory_urls": [
+        "https://github.com/aws/aws-lc/security/advisories"
+      ],
+      "maximum_source_pin_age_days": 180,
+      "source_committed_at": "2026-08-05T18:59:47Z",
+      "update_workflow": "docs/security/provider-update-workflow.md"
+    },
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T16:55:40.305309+00:00",
+  "started_at": "2026-08-31T18:40:40.552033+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }

@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 4443128,
-    "binary_sha256": "bcc4dda061ffe8c39415182e2794133d73046333a473d1ed97f4b6382ff2edc8",
+    "binary_bytes": 4443224,
+    "binary_sha256": "214007e12460d39461b0bbf48ef297c8af9b514fc15c0a4b329f0f23cef3edd8",
     "exported_symbol_inventory": {
       "count": 3794,
       "scope": "final-artifact-exports",
@@ -3915,7 +3915,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "8ad72572fc85d021d496e919105bfe56dfcfef89f1d372e9110a82fc4de7c56e",
+  "build_log_sha256": "d397c42da1e28baf25c5b29ca561dbfc4cb8e0bdd73e34dec564b0681275be3c",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -3940,32 +3940,32 @@
     "image_os": "alpine",
     "image_version": "3.22.5",
     "python": "3.14.7",
-    "repository_revision": "67c519b3d406912378a18bd15da28d5b1f0cdf6a",
+    "repository_revision": "45e16233d373854243966b10bbef012a66566641",
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T16:58:20.362917+00:00",
+  "finished_at": "2026-08-31T18:42:12.734057+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 69,
+    "cancellation_latency_us": 79,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 30855168,
+    "memory_profile_peak_resident_bytes": 30941184,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 1266683436,
+    "provider_allocation_bytes": 1266838636,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 10275094,
+    "provider_allocation_calls": 10274917,
     "provider_allocation_live_after_cleanup_bytes": 152884,
     "provider_allocation_live_before_cleanup_bytes": 152884,
-    "provider_allocation_peak_live_bytes": 213301,
+    "provider_allocation_peak_live_bytes": 213317,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -3977,21 +3977,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 69,
+      "latency_us": 79,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 30855168,
+      "peak_resident_bytes": 30941184,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 1266683436,
+      "provider_allocation_bytes": 1266838636,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 10275094,
+      "provider_allocation_calls": 10274917,
       "provider_allocation_live_after_cleanup_bytes": 152884,
       "provider_allocation_live_before_cleanup_bytes": 152884,
-      "provider_allocation_peak_live_bytes": 213301,
+      "provider_allocation_peak_live_bytes": 213317,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -4003,14 +4003,35 @@
   "platform": "linux-musl-x86_64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 8,
+  "schema_version": 9,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
     "kind": "git",
+    "security_update": {
+      "advisory_disposition": {
+        "affected_advisory_ids": [],
+        "pin_commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+        "reviewed_advisory_ids": [
+          "GHSA-3jrg-j22w-mpmc",
+          "GHSA-cfwj-9wp5-wqvp",
+          "GHSA-frmv-5gcm-jwxh",
+          "GHSA-jchq-39cv-q4wj",
+          "GHSA-q87m-xr7j-vrww"
+        ],
+        "reviewed_through": "2026-08-31T17:30:00Z",
+        "status": "not-affected"
+      },
+      "advisory_urls": [
+        "https://github.com/aws/aws-lc/security/advisories"
+      ],
+      "maximum_source_pin_age_days": 180,
+      "source_committed_at": "2026-08-05T18:59:47Z",
+      "update_workflow": "docs/security/provider-update-workflow.md"
+    },
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T16:56:40.677276+00:00",
+  "started_at": "2026-08-31T18:40:38.681767+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }

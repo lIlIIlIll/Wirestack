@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 769024,
-    "binary_sha256": "05dbdf66ea49dffcafc86a62a10085449bd82e4443bb1c62953dc33f931f6fd2",
+    "binary_sha256": "65fcd05ea15749154d529354be48c3e78331fdec06adcd8c83eccf6e009d1cd2",
     "exported_symbol_inventory": {
       "count": 0,
       "scope": "final-artifact-exports",
@@ -118,22 +118,22 @@
       {
         "bytes": 1209388,
         "name": "mbedtls.lib",
-        "sha256": "8f4e9a59420d588216abff1a93b9828e7510e8b2a5050022e728f6cdcb2e9144"
+        "sha256": "c1cbf6be1c9c32070abf5b86db3d1ece14097aa20a8c32acde2324eb5fe4e667"
       },
       {
         "bytes": 392146,
         "name": "mbedx509.lib",
-        "sha256": "8142f98642a29adc19f1edeadafee19596059f2cd0162d37ee2af6037160b51d"
+        "sha256": "751a5b07789c573b2c669cbd2602ded93a6f489b2314bb87095c21052520dbfe"
       },
       {
         "bytes": 1688370,
         "name": "tfpsacrypto.lib",
-        "sha256": "d2f7130f7017e84ad920d215623b3d23849e6d9db1fd88e217218cdc1ace5da6"
+        "sha256": "80262b3352b4e482c1e044073f547762d40325c65b0a3a7917275a39bfd45495"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "40c0e1685956d5b5fa377312ba1f916a9b01724cc438cbc563f86e21e5678be7",
+  "build_log_sha256": "b559db6fc9da58f68e23bcaaefb0cf07f6baebee23ccf6e9d96273f308dbd2cb",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -158,30 +158,30 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "67c519b3d406912378a18bd15da28d5b1f0cdf6a",
+    "repository_revision": "45e16233d373854243966b10bbef012a66566641",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T16:58:46.370752+00:00",
+  "finished_at": "2026-08-31T18:44:09.937399+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 79,
+    "cancellation_latency_us": 83,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 5636096,
+    "memory_profile_peak_resident_bytes": 5644288,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 8202736292,
+    "provider_allocation_bytes": 8202412250,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 133211842,
-    "provider_allocation_live_after_cleanup_bytes": 7640,
-    "provider_allocation_live_before_cleanup_bytes": 7640,
-    "provider_allocation_peak_live_bytes": 117634,
+    "provider_allocation_calls": 133208058,
+    "provider_allocation_live_after_cleanup_bytes": 7641,
+    "provider_allocation_live_before_cleanup_bytes": 7641,
+    "provider_allocation_peak_live_bytes": 117635,
     "repeated_cleanup_cycles": 10000
   },
   "notes": [
@@ -190,21 +190,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 79,
+      "latency_us": 83,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 5636096,
+      "peak_resident_bytes": 5644288,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 8202736292,
+      "provider_allocation_bytes": 8202412250,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 133211842,
-      "provider_allocation_live_after_cleanup_bytes": 7640,
-      "provider_allocation_live_before_cleanup_bytes": 7640,
-      "provider_allocation_peak_live_bytes": 117634,
+      "provider_allocation_calls": 133208058,
+      "provider_allocation_live_after_cleanup_bytes": 7641,
+      "provider_allocation_live_before_cleanup_bytes": 7641,
+      "provider_allocation_peak_live_bytes": 117635,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -216,14 +216,61 @@
   "platform": "windows-x86_64",
   "poc_exit_code": 0,
   "provider": "mbedtls",
-  "schema_version": 8,
+  "schema_version": 9,
   "source": {
     "archive": "mbedtls-4.2.0.tar.bz2",
     "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
     "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
-    "kind": "archive"
+    "kind": "archive",
+    "security_update": {
+      "advisory_disposition": {
+        "affected_advisory_ids": [],
+        "pin_commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
+        "reviewed_advisory_ids": [
+          "CVE-2025-54764",
+          "CVE-2025-59438",
+          "CVE-2025-66442",
+          "CVE-2026-25832",
+          "CVE-2026-25833",
+          "CVE-2026-25834",
+          "CVE-2026-25835",
+          "CVE-2026-34871",
+          "CVE-2026-34872",
+          "CVE-2026-34873",
+          "CVE-2026-34874",
+          "CVE-2026-34875",
+          "CVE-2026-34876",
+          "CVE-2026-34877",
+          "CVE-2026-35336",
+          "CVE-2026-49300",
+          "CVE-2026-50579",
+          "CVE-2026-50580",
+          "CVE-2026-50581",
+          "CVE-2026-50583",
+          "CVE-2026-50584",
+          "CVE-2026-50585",
+          "CVE-2026-50586",
+          "CVE-2026-50587",
+          "CVE-2026-50588",
+          "CVE-2026-50640",
+          "CVE-2026-50713",
+          "CVE-2026-54434",
+          "CVE-2026-54435",
+          "CVE-2026-54441",
+          "CVE-2026-73064"
+        ],
+        "reviewed_through": "2026-08-31T17:30:00Z",
+        "status": "not-affected"
+      },
+      "advisory_urls": [
+        "https://mbed-tls.readthedocs.io/en/latest/security-advisories/"
+      ],
+      "maximum_source_pin_age_days": 180,
+      "source_committed_at": "2026-07-01T11:00:14Z",
+      "update_workflow": "docs/security/provider-update-workflow.md"
+    }
   },
-  "started_at": "2026-08-31T16:55:43.641043+00:00",
+  "started_at": "2026-08-31T18:40:31.896540+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
