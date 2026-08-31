@@ -33,7 +33,7 @@ class M2004WindowsSystemResolverTest {
             @Expect(m2004IsIpv6(result.addresses[0].family))
             @Expect(result.addresses[0].zone, Some("7"))
             @Expect(m2004IsIpv4(result.addresses[1].family))
-            @Expect(result.diagnostics.duplicatesRemoved, 1)
+            @Expect(result.diagnostics.duplicatesRemoved, 0)
             @Expect(result.expiration.isNone())
             @Expect(result.canonicalHost, api.HostName("all.m2-004.test"))
         } finally {
@@ -57,10 +57,11 @@ class M2004WindowsSystemResolverTest {
             @Expect(m2004IsIpv4(ipv4.addresses[0].family))
             let limited = resolver.resolve(
                 api.HostName("all.m2-004.test"),
-                options: api.ResolveOptions(maxResults: 1)
+                options: api.ResolveOptions(maxResults: 2)
             )
-            @Expect(limited.addresses.size, 1)
+            @Expect(limited.addresses.size, 2)
             @Expect(m2004IsIpv6(limited.addresses[0].family))
+            @Expect(m2004IsIpv4(limited.addresses[1].family))
         } finally {
             resolver.close()
         }

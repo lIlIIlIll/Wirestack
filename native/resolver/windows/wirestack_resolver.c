@@ -205,6 +205,27 @@ static int32_t classify_winsock_error(int code) {
     }
 }
 
+static int resolver_addresses_equal(
+    const struct wirestack_resolver_address *left,
+    const struct wirestack_resolver_address *right
+) {
+    return left->family == right->family && left->scope_id == right->scope_id &&
+        memcmp(left->bytes, right->bytes, WIRESTACK_RESOLVER_ADDRESS_BYTES) == 0;
+}
+
+static int resolver_address_is_present(
+    const struct wirestack_resolver_job *job,
+    const struct wirestack_resolver_address *candidate
+) {
+    uint64_t index;
+    for (index = 0u; index < job->result_count; index++) {
+        if (resolver_addresses_equal(&job->addresses[index], candidate)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 static void free_job_locked(struct wirestack_resolver_job *job) {
     struct wirestack_resolver_pool *pool = job->pool;
     job->magic = 0u;
@@ -312,23 +333,27 @@ static void resolve_job(struct wirestack_resolver_job *job) {
         for (current = results;
              current != NULL && job->result_count < job->maximum_results;
              current = current->ai_next) {
-            struct wirestack_resolver_address *destination =
-                &job->addresses[job->result_count];
-            memset(destination, 0, sizeof(*destination));
+            struct wirestack_resolver_address candidate;
+            int usable = 0;
+            memset(&candidate, 0, sizeof(candidate));
             if (current->ai_family == AF_INET &&
                 current->ai_addrlen >= (socklen_t)sizeof(struct sockaddr_in)) {
                 const struct sockaddr_in *address =
                     (const struct sockaddr_in *)current->ai_addr;
-                destination->family = WIRESTACK_RESOLVER_FAMILY_IPV4;
-                memcpy(destination->bytes, &address->sin_addr, 4u);
-                job->result_count++;
+                candidate.family = WIRESTACK_RESOLVER_FAMILY_IPV4;
+                memcpy(candidate.bytes, &address->sin_addr, 4u);
+                usable = 1;
             } else if (current->ai_family == AF_INET6 &&
                        current->ai_addrlen >= (socklen_t)sizeof(struct sockaddr_in6)) {
                 const struct sockaddr_in6 *address =
                     (const struct sockaddr_in6 *)current->ai_addr;
-                destination->family = WIRESTACK_RESOLVER_FAMILY_IPV6;
-                destination->scope_id = address->sin6_scope_id;
-                memcpy(destination->bytes, &address->sin6_addr, 16u);
+                candidate.family = WIRESTACK_RESOLVER_FAMILY_IPV6;
+                candidate.scope_id = address->sin6_scope_id;
+                memcpy(candidate.bytes, &address->sin6_addr, 16u);
+                usable = 1;
+            }
+            if (usable && !resolver_address_is_present(job, &candidate)) {
+                job->addresses[job->result_count] = candidate;
                 job->result_count++;
             }
         }
@@ -457,6 +482,7 @@ int32_t wirestack_resolver_pool_create(
     for (index = 0u; index < worker_count; index++) {
         pool->workers[index] = CreateThread(NULL, 0u, resolver_worker, pool, 0u, NULL);
         if (pool->workers[index] == NULL) {
+            DWORD thread_error = GetLastError();
             uint64_t joined;
             AcquireSRWLockExclusive(&pool->lock);
             pool->accepting = 0;
@@ -467,11 +493,13 @@ int32_t wirestack_resolver_pool_create(
                 WaitForSingleObject(pool->workers[joined], INFINITE);
             }
             free_pool(pool);
-            return WIRESTACK_RESOLVER_OUT_OF_MEMORY;
+            *out_native_code = (int64_t)thread_error;
+            return WIRESTACK_RESOLVER_SYSTEM_FAILURE;
         }
     }
     reaper = CreateThread(NULL, 0u, resolver_reaper, pool, 0u, NULL);
     if (reaper == NULL) {
+        DWORD thread_error = GetLastError();
         AcquireSRWLockExclusive(&pool->lock);
         pool->accepting = 0;
         pool->stopping = 1;
@@ -481,7 +509,8 @@ int32_t wirestack_resolver_pool_create(
             WaitForSingleObject(pool->workers[index], INFINITE);
         }
         free_pool(pool);
-        return WIRESTACK_RESOLVER_OUT_OF_MEMORY;
+        *out_native_code = (int64_t)thread_error;
+        return WIRESTACK_RESOLVER_SYSTEM_FAILURE;
     }
     CloseHandle(reaper);
     *out_pool_handle = (uint64_t)(uintptr_t)pool;
@@ -516,21 +545,34 @@ int32_t wirestack_resolver_submit(
     struct wirestack_resolver_job *job;
     char *host_copy;
     char *service_copy = NULL;
+    size_t host_length;
+    size_t service_length;
     if (pool == NULL || pool->magic != WIRESTACK_RESOLVER_POOL_MAGIC ||
         out_job_handle == NULL || host == NULL || !valid_family(family) ||
         maximum_results == 0u || maximum_results > WIRESTACK_RESOLVER_MAXIMUM_RESULTS) {
         return WIRESTACK_RESOLVER_INVALID_ARGUMENT;
     }
     *out_job_handle = 0u;
-    host_copy = copy_bounded_string(host, WIRESTACK_RESOLVER_MAXIMUM_HOST_BYTES);
-    if (host_copy == NULL) {
+    host_length = bounded_length(host, (size_t)WIRESTACK_RESOLVER_MAXIMUM_HOST_BYTES);
+    if (host_length == 0u || host_length > (size_t)WIRESTACK_RESOLVER_MAXIMUM_HOST_BYTES) {
         return WIRESTACK_RESOLVER_INVALID_ARGUMENT;
     }
+    host_copy = copy_bounded_string(host, WIRESTACK_RESOLVER_MAXIMUM_HOST_BYTES);
+    if (host_copy == NULL) {
+        return WIRESTACK_RESOLVER_OUT_OF_MEMORY;
+    }
     if (service != NULL && service[0] != '\0') {
+        service_length = bounded_length(
+            service, (size_t)WIRESTACK_RESOLVER_MAXIMUM_SERVICE_BYTES);
+        if (service_length == 0u ||
+            service_length > (size_t)WIRESTACK_RESOLVER_MAXIMUM_SERVICE_BYTES) {
+            free(host_copy);
+            return WIRESTACK_RESOLVER_INVALID_ARGUMENT;
+        }
         service_copy = copy_bounded_string(service, WIRESTACK_RESOLVER_MAXIMUM_SERVICE_BYTES);
         if (service_copy == NULL) {
             free(host_copy);
-            return WIRESTACK_RESOLVER_INVALID_ARGUMENT;
+            return WIRESTACK_RESOLVER_OUT_OF_MEMORY;
         }
     }
     job = (struct wirestack_resolver_job *)calloc(1u, sizeof(*job));
