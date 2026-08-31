@@ -6,11 +6,10 @@ M0-016 remains **BLOCKED** because Android, iOS, and HarmonyOS or
 OpenHarmony do not have native-device evidence. Cross-compilation does not
 satisfy those cells.
 
-All 12 desktop cells have current schema-v6 native evidence. AWS-LC passes
-every required capability on Linux glibc x86_64, Linux musl x86_64, macOS
-arm64, and Windows x86_64. Mbed TLS is PARTIAL because external signing and
-session resumption are not implemented by this PoC. The vendored OpenSSL
-control is PARTIAL because external signing is not implemented.
+The 12 retained schema-v6 desktop results are superseded by schema v7 and no
+longer count as current PASS or PARTIAL evidence. Native reruns must retain the
+bounded worker join, cleanup live-allocation baselines and validated
+security-update intake before the desktop cells can be promoted again.
 
 Schema v6 retains:
 
@@ -33,7 +32,7 @@ LeakSanitizer as unsupported by the hosted toolchain. Linux musl and Windows
 record the configured sanitizer diagnostic as unsupported; they do not report
 a skipped diagnostic as PASS.
 
-## Current schema-v6 desktop runs
+## Superseded schema-v6 desktop runs
 
 [TLS Provider PoC run
 33401994988](https://github.com/lIlIIlIll/Wirestack/actions/runs/33401994988)

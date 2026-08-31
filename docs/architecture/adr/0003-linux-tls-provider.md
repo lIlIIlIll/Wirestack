@@ -16,12 +16,14 @@ private-key isolation, native callbacks and deterministic cleanup.
 
 AWS-LC 5.5.0 at commit
 `991e67ff4cf04df4dd89e407f8b920c6936cb56a` was originally selected from the
-earlier PoC evidence and is now requalified with schema-v6 `PASS` results on
+earlier PoC evidence and was requalified with schema-v6 `PASS` results on
 Linux glibc x86_64 and Linux musl x86_64. GitHub Actions run `33401994988`
 reports pull-request head `0b8e3181a82f8eb062e24e63edf57fc05850d859`
 and executed synthetic merge revision
 `0970f3984eb523cc1571b864e72bfdddef10f3d8`. The retained results bind that
-execution revision and record:
+execution revision and record the now-superseded evidence below. Schema v7
+requires a bounded worker join and zero cleanup live-allocation growth, so the
+canonical cells remain `NOT_RUN` until native reruns are retained:
 
 - TLS 1.2 and TLS 1.3 client/server handshakes over caller-owned bounded BIOs;
 - SNI, reference-identity verification, ALPN, custom CA, required mTLS,
@@ -93,7 +95,7 @@ artifact is withdrawn rather than silently downgraded.
 ## Consequences
 
 - Existing Linux TLS integration retains the frozen provider and C ABI
-  decision. The current schema-v6 Linux AWS-LC qualification is `PASS`.
+  decision, but the schema-v7 Linux AWS-LC qualification is pending rerun.
 - M0-016 as a global task remains `BLOCKED` because Android, iOS and HarmonyOS
   or OpenHarmony still lack native-device evidence.
 - AWS-LC-specific code remains internal to the native provider adapter.
