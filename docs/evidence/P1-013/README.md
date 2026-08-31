@@ -23,9 +23,9 @@ part of P1-013.
 
 ## Verification
 
-- The focused P1-013 regression suite passed 68 tests with no failures or
+- The focused P1-013 regression suite passed 69 tests with no failures or
   errors.
-- The complete repository Python suites passed 257 tooling tests, 169 gate
+- The complete repository Python suites passed 265 tooling tests, 176 gate
   tests and 24 benchmark tests.
 - `scripts/check` passed the architecture guard, `cjpm check`, `cjpm build` and
   611 Cangjie tests: 588 passed, 23 were explicitly skipped, and none failed or
