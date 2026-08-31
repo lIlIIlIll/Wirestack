@@ -99,6 +99,13 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
             "native_memory_diagnostic": {
                 "status": diagnostic_status,
                 "tool": "address+undefined-sanitizer",
+                "leak_detection": {
+                    "status": (
+                        "PASS"
+                        if platform.startswith("linux-glibc-") and provider != "aws-lc"
+                        else "UNSUPPORTED"
+                    ),
+                },
             },
             "memory_profile": {
                 "method": "fixture",
@@ -434,6 +441,29 @@ class ProviderPocValidationTests(unittest.TestCase):
         result["execution"]["container_image"] = "alpine:3.22"
         with self.assertRaisesRegex(validator.ValidationError, "immutable Alpine"):
             validator.validate_result(result, self.spec, "2" * 40)
+
+    def test_memory_diagnostic_records_provider_leak_detection_boundary(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            binary = root / "provider-poc-diagnostic"
+            fixtures = root / "fixtures"
+            completed = runner.subprocess.CompletedProcess(
+                [str(binary)], 0, "diagnostic pass\n", ""
+            )
+            with mock.patch.object(runner, "compile_poc", return_value=binary), \
+                    mock.patch.object(runner, "run", return_value=completed) as run_mock:
+                aws = runner.run_native_memory_diagnostic(
+                    {"id": "aws-lc"}, root, root, [], root, root / "log",
+                    fixtures, "linux-glibc-x86_64",
+                )
+                self.assertEqual("UNSUPPORTED", aws["leak_detection"]["status"])
+                self.assertIn("detect_leaks=0", run_mock.call_args.kwargs["env"]["ASAN_OPTIONS"])
+                openssl = runner.run_native_memory_diagnostic(
+                    {"id": "openssl"}, root, root, [], root, root / "log",
+                    fixtures, "linux-glibc-x86_64",
+                )
+                self.assertEqual("PASS", openssl["leak_detection"]["status"])
+                self.assertIn("detect_leaks=1", run_mock.call_args.kwargs["env"]["ASAN_OPTIONS"])
 
     def test_license_bundle_rejects_escape_and_stale_digest(self):
         with tempfile.TemporaryDirectory() as directory:

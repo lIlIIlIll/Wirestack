@@ -28,7 +28,9 @@ native run must retain:
 - exact repository, hosted-runner, and immutable musl container identity;
 - bounded resident-memory and harness-allocation measurements;
 - ASan and UBSan diagnostics on Linux glibc and macOS, with an explicit
-  unsupported result on the other current desktop targets.
+  unsupported result on the other current desktop targets; LeakSanitizer must
+  pass where the provider and platform expose the required cleanup support,
+  otherwise the result records that sub-gate as unsupported.
 
 ## Superseded desktop runs
 
