@@ -1,23 +1,23 @@
 {
   "build": {
     "binary_bytes": 5362176,
-    "binary_sha256": "ccef064da669efc7bde5a9c84244567c793960a0539f45148108aee31540079f",
+    "binary_sha256": "2ddbc13f5b1c948c2214abad856b7303cce089bf87f1ed0b25fb40f998a24828",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 10148742,
         "name": "libssl.lib",
-        "sha256": "b54ac39c5480a11884eb1cc8975026784fcc39200e70609bb572da2fe7e00398"
+        "sha256": "aa914f06d8aa383371d8feec463dccf46cc808842d2fcd0be5cf54e2e7f79190"
       },
       {
         "bytes": 55264226,
         "name": "libcrypto.lib",
-        "sha256": "8d7b93d5b10949f786662118652928240726ab8350546688d9869b96bee6133d"
+        "sha256": "721840a69bbe36568ce326d4d04b89342a70ff88b69ee204e7fd236b576109c3"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "0a5895a78c8f11f27f331376958589131c1c40064f2b845456cf9baa29ba3311",
+  "build_log_sha256": "e6a4a49319d36b408a9fbc9af56c6174ad11e5aec32c1ce2c68483e32150a04a",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -39,11 +39,11 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "9611abb32c9e790fe893aa9ea4f25ec5ae0d8fba",
+    "repository_revision": "dd9a7f248ec2c60d9a9d965d08af0ac359806f23",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T08:39:10.239894+00:00",
+  "finished_at": "2026-08-31T09:25:02.096369+00:00",
   "metrics": {
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
@@ -65,7 +65,7 @@
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T08:28:23.359367+00:00",
+  "started_at": "2026-08-31T09:15:13.540794+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

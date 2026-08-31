@@ -15,13 +15,13 @@ session resumption and 10,000 cleanup cycles. AWS-LC passes the full contract on
 the four executed platforms. M0-016 stays blocked because the task requires
 native execution on the three mobile platforms as well.
 
-The Linux and macOS results came from [GitHub Actions run 33373024032](https://github.com/lIlIIlIll/Wirestack/actions/runs/33373024032).
-The Windows results came from [GitHub Actions run 33373024046](https://github.com/lIlIIlIll/Wirestack/actions/runs/33373024046).
+The Linux and macOS results came from [GitHub Actions run 33376714398](https://github.com/lIlIIlIll/Wirestack/actions/runs/33376714398).
+The Windows results came from [GitHub Actions run 33376714550](https://github.com/lIlIIlIll/Wirestack/actions/runs/33376714550).
 Both pull-request runs report head revision
-`80f3a7bca5380b3addb4fbcbe99df7d75f5dd955`; GitHub executed merge revision
-`9611abb32c9e790fe893aa9ea4f25ec5ae0d8fba`. The musl runner executes inside
+`cc62416bdab6c7b9a090f830a757d896ffacb231`; GitHub executed merge revision
+`dd9a7f248ec2c60d9a9d965d08af0ac359806f23`. The musl runner executes inside
 an isolated Alpine minirootfs, so its retained JSON does not repeat the
-repository revision; its artifact remains bound to run 33373024032.
+repository revision; its artifact remains bound to run 33376714398.
 
 ## Retained native results
 
@@ -30,18 +30,18 @@ digests below identify the archived build log and result pair.
 
 | Platform | Provider | Status | Result SHA-256 | Artifact ID | Artifact SHA-256 |
 |---|---|---|---|---:|---|
-| Linux glibc x86_64 | AWS-LC | PASS | `eb45863f412c8781b6fbdafb591605e35a2650e175d3c6ba9a125a3b78987ccf` | `9750831416` | `0910088e041c9154c1f25687e92c0275bbf0df0f6f6c63687635ab36d6af8ab1` |
-| Linux glibc x86_64 | Mbed TLS | PARTIAL | `a885d150f3f97922e210c10abdce6f422aa95bf2e270377da451369d861a13d8` | `9750859361` | `891c6e06f69b2060af57b657843ac917d9d61a806d1e25e34f28548851d8f581` |
-| Linux glibc x86_64 | OpenSSL | PARTIAL | `1867cfeceaa4f932189726bc0b75b8cff96789967598fc73ad5028172c951eec` | `9750849774` | `3687d0340b38847939d88f26f80508e0bc4ec54c59b59b02d9f855d92d2262df` |
-| Linux musl x86_64 | AWS-LC | PASS | `5c38f9ac9ad47dfd24eebe336e90dcf54a502f667187e13bebab6dcb89215a13` | `9750828338` | `7dfc5bf5488c460336b99070c344936d7714469a79b41ca3b994b388935d4b92` |
-| Linux musl x86_64 | Mbed TLS | PARTIAL | `c10c6139a5964b7543db4833bef753ec907e31b02f2d326aeb2abceeda71500d` | `9750859618` | `73334ad0f69191629d7a5176540e85d624aa29ac7be1b433ce2fb4b17780b7f3` |
-| Linux musl x86_64 | OpenSSL | PARTIAL | `f49439d38d035a96b6d39d991c0dc87bd605718a6a08c4f02d0bd3dca0497e2d` | `9750877047` | `fe44bc5b77098eb60b990ad7d56bbc822ca0748b9485b07c0081232638e6c7ed` |
-| macOS arm64 | AWS-LC | PASS | `3a6c0e45fdc853cccd403bb0e6c259b28af71b5080b0697055b957ee14418bec` | `9750834724` | `db8fce552c87a21fdb85ef60ba42ca31396f17fdd75a94502e07a771cee99b5d` |
-| macOS arm64 | Mbed TLS | PARTIAL | `c690346f6be6e02d8973944e1b199ab6480dd6df4e99a0c7e64a97d7bf6a3cfa` | `9750871146` | `2519d3d1fd37520d71a7bcb213ea9eddb2391b7623175c2b311f5390a4bad2ce` |
-| macOS arm64 | OpenSSL | PARTIAL | `5a962af1db9316ef615d9aad50ba287d4b9eea605705b10eb52d06a995ef9d43` | `9750860360` | `38953ef079fb58fdd09121a082a790ff0f409cec0e3be8fb086f032afd6f7430` |
-| Windows x86_64 | AWS-LC | PASS | `84bb46f15c4271691203b3bf30f35ae8a4b9f0b126a535f97ba2d1323ba3b530` | `9750852232` | `f474ee013136f907d2567f5f62df6967bed1e741e16f94425d8e4e0a28dfef1d` |
-| Windows x86_64 | Mbed TLS | PARTIAL | `5b64a8bec8080d38891be497c0aee0bfb5f5bc59bae62bbd717d6f2ded5f5cc6` | `9750895589` | `ebf6a9a378ea57017299e4ab1694765aed7554538d4bf6b8d664442fa050e739` |
-| Windows x86_64 | OpenSSL | PARTIAL | `f3a0aaeba2d3f8ee1c17527cd98e60742d191f71ebe9314c4dc30574ad97a1d3` | `9751108355` | `35cfadb0053798f3bc764be6c487b1db9e1ab157bb87b6fbea9835128cf5053b` |
+| Linux glibc x86_64 | AWS-LC | PASS | `453846edf24a89fab2ef9a0c9b1bbebe6e9cb2648185492d2f96d073997b775a` | `9752199848` | `43e052fcd269856f59707f7406baa393849abbd323ac822ae8f56105fc7b6279` |
+| Linux glibc x86_64 | Mbed TLS | PARTIAL | `f30c0c9ce5571c6b9ac54a768419ee02d0ff274901dca5aa18d290b8e71d928c` | `9752207980` | `fde4689a50d0d7b8d908649afcad998c12bfd82eeed232d6a350166fc7619fc7` |
+| Linux glibc x86_64 | OpenSSL | PARTIAL | `fb06c53bdc4992e94004521825653f5ad99e54443423612b56a34473b4824ed5` | `9752193526` | `374ddb83fbee46c7b55ac65e719fea3a569b252e2e77075a003f73dd5fd7dd1c` |
+| Linux musl x86_64 | AWS-LC | PASS | `cce81e4cb20a5099a99c9ce005b476c0870bdd1051b7a1d2ba72b4859f974834` | `9752199339` | `308655cc73c9b9a133233ed7245c8da47207fc7fa1fe64c4f7b14bc841bbffea` |
+| Linux musl x86_64 | Mbed TLS | PARTIAL | `a005e3d670f67bf4a563e988e12d61964906c9a647eb8699e05d508b5f4a28ef` | `9752207104` | `12ab2daffdfb3968c8e0e3e223766a6205810d0b13f672b596467431d7922c4b` |
+| Linux musl x86_64 | OpenSSL | PARTIAL | `406b3ebd79583b7c7d3ca51cc8885375081f9691a18caf798c945d89f13c6075` | `9752218636` | `ebe8800d30892ee29f1464966b5ab4aab21c7675d15061c638f08bef5f148ac6` |
+| macOS arm64 | AWS-LC | PASS | `3716824385649737a4447160ee1fd0a26749d8fc18abd284ab1cf68c8f2857a1` | `9752192064` | `1e1518e37289865716664c84c3e352c88af894c5a1bccbb53b3a240d73db3f81` |
+| macOS arm64 | Mbed TLS | PARTIAL | `8616ae8131fc2a971bb8cc7c1d0b4bc2899db8e4e0ac0a3827e25927a1bc9016` | `9752199977` | `ae0ce0a4cc1e7c9e98b6c34a89c784a74ef0e9dbf801a2c55d9512aede198d38` |
+| macOS arm64 | OpenSSL | PARTIAL | `5195dca0d53f6acf0fc3b2ef8747b066ad9791302f200b6549709441ce27bb7a` | `9752206574` | `1e25a6d6f88cada7fe503ff26ce3c042439775af08d8f7ff0a8d53ea1beb7ea6` |
+| Windows x86_64 | AWS-LC | PASS | `47e0ae7433b0bf25a70ea8c048f411488537ad7218029763f73989f101d81d95` | `9752197413` | `3d34931460e00445f8c1c575ee34f704bf878641dadad55090ecbbff05c0a823` |
+| Windows x86_64 | Mbed TLS | PARTIAL | `18267e413cd443992a837fe80243df0897f99ce7857dd4d70199cc8facc6dd78` | `9752254052` | `a7221c3b172870b3443fdb60d5067bdd870782022dc2d6c0975a96acab753e0b` |
+| Windows x86_64 | OpenSSL | PARTIAL | `4cdbc31baf559a95abbac242b8cbcd6cfaa8a365281db0406f1f19878f283b3b` | `9752436045` | `6abd91a3622912aad81e27bad9d874c6f7c900483241dd6c8e1de648da860577` |
 
 The Windows run metadata and build-log digests are retained in
 [`windows-x86_64-run.json`](windows-x86_64-run.json). CI artifacts are
