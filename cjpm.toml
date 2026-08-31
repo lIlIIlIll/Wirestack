@@ -34,7 +34,6 @@
 
 [target.aarch64-apple-darwin.ffi.c]
   wirestack_resolver = { path = "./target/native/resolver/current/lib" }
-  wirestack_m2_006_tls_link_stub = { path = "./target/native/test-support/m2-006/lib" }
 
 [target.arm64-apple-ios11-simulator]
   override-compile-option = "--sysroot ${WIRESTACK_IOS_SIMULATOR_SYSROOT}"
@@ -42,6 +41,5 @@
 
 [target.arm64-apple-ios11-simulator.ffi.c]
   wirestack_resolver = { path = "./target/native/resolver/current/lib" }
-  wirestack_m2_006_tls_link_stub = { path = "./target/native/test-support/m2-006/lib" }
 
 [dependencies]
