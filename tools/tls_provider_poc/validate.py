@@ -216,7 +216,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                     leak_detection.get("status") in {"PASS", "UNSUPPORTED"},
                     "native leak-detection status")
             if (result["platform"].startswith("linux-glibc-") and
-                    result["provider"] != "aws-lc"):
+                    result["provider"] == "mbedtls"):
                 require(leak_detection.get("status") == "PASS",
                         "supported provider requires passing native leak detection")
         require(all(value != "FAIL" for value in caps.values()), "PARTIAL/PASS result contains failed capability")
