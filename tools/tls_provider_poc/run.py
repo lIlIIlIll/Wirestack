@@ -31,6 +31,11 @@ FORBIDDEN_DEP_RE = re.compile(
 )
 MAX_EXPORTED_SYMBOLS = 16384
 MAX_EXPORTED_SYMBOL_LENGTH = 256
+MAX_LICENSE_FILES = 512
+MAX_LICENSE_FILE_BYTES = 512 * 1024
+MAX_LICENSE_TOTAL_BYTES = 8 * 1024 * 1024
+MEMORY_PROFILE_BOUND_BYTES = 512 * 1024 * 1024
+ALLOCATION_PROFILE_BOUND_BYTES = 1024 * 1024 * 1024
 
 
 class PocError(RuntimeError):
@@ -218,6 +223,63 @@ def source_provider(spec: Mapping[str, Any], work: Path, log: Path) -> tuple[Pat
     return src, {"commit": commit, "content_sha256": digest, "archive": archive.name, "kind": "archive"}
 
 
+def is_license_file(path: Path) -> bool:
+    name = path.name.lower()
+    return name.startswith(("license", "copying", "notice", "copyright"))
+
+
+def create_license_bundle(src: Path, output_dir: Path, provider: str,
+                          source_info: Mapping[str, Any]) -> dict[str, Any]:
+    bundle = output_dir / "license-bundle"
+    shutil.rmtree(bundle, ignore_errors=True)
+    files_root = bundle / "files"
+    entries: list[dict[str, Any]] = []
+    total_bytes = 0
+    candidates = sorted(
+        path for path in src.rglob("*")
+        if path.is_file() and not path.is_symlink()
+        and ".git" not in path.relative_to(src).parts
+        and is_license_file(path)
+    )
+    if not candidates:
+        raise PocError("provider source contains no license files")
+    if len(candidates) > MAX_LICENSE_FILES:
+        raise PocError("provider license bundle exceeds its file-count bound")
+    for path in candidates:
+        relative = path.relative_to(src)
+        size = path.stat().st_size
+        if size > MAX_LICENSE_FILE_BYTES:
+            raise PocError("provider license file exceeds its size bound")
+        total_bytes += size
+        if total_bytes > MAX_LICENSE_TOTAL_BYTES:
+            raise PocError("provider license bundle exceeds its total-size bound")
+        destination = files_root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, destination)
+        entries.append({
+            "path": relative.as_posix(),
+            "bytes": size,
+            "sha256": sha256_path(path),
+        })
+    manifest = {
+        "schema_version": 1,
+        "task_id": "M0-016",
+        "provider": provider,
+        "source_content_sha256": source_info["content_sha256"],
+        "file_count": len(entries),
+        "total_bytes": total_bytes,
+        "files": entries,
+    }
+    manifest_path = bundle / "manifest.json"
+    atomic_json(manifest_path, manifest)
+    return {
+        "path": "license-bundle/manifest.json",
+        "sha256": sha256_path(manifest_path),
+        "file_count": len(entries),
+        "total_bytes": total_bytes,
+    }
+
+
 def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
                    log: Path) -> tuple[Path, list[Path]]:
     build = work / "build"
@@ -345,8 +407,11 @@ def generate_fixtures(work: Path, log: Path) -> Path:
 
 def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
                 archives: Sequence[Path], work: Path, log: Path,
-                extra_cflags: Sequence[str] = ()) -> Path:
-    output = work / ("provider-poc.exe" if is_windows() else "provider-poc")
+                extra_cflags: Sequence[str] = (), diagnostic: bool = False) -> Path:
+    if diagnostic and is_windows():
+        raise PocError("sanitizer diagnostic is unsupported on this Windows toolchain")
+    stem = "provider-poc-diagnostic" if diagnostic else "provider-poc"
+    output = work / (f"{stem}.exe" if is_windows() else stem)
     include = prefix / "include"
     source = repo / "tools/tls_provider_poc" / (
         "openssl_memory_poc.c" if spec["poc_family"] == "openssl-compatible"
@@ -358,27 +423,82 @@ def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
             "/MT", "/D_CRT_SECURE_NO_WARNINGS", f"/I{include}", *extra_cflags,
             str(source), *[str(archive) for archive in archives],
             "bcrypt.lib", "crypt32.lib", "advapi32.lib", "user32.lib", "ws2_32.lib",
+            "psapi.lib",
             f"/Fe:{output}",
         ], cwd=work, log=log)
         return output
     if spec["poc_family"] == "openssl-compatible":
-        obj = work / "poc.o"
+        obj = work / ("poc-diagnostic.o" if diagnostic else "poc.o")
+        diagnostic_flags = (
+            ["-O1", "-g", "-fsanitize=address,undefined", "-fno-omit-frame-pointer"]
+            if diagnostic else ["-O2"]
+        )
         run([
-            os.environ.get("CC", "cc"), "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+            os.environ.get("CC", "cc"), "-std=c11", *diagnostic_flags,
+            "-Wall", "-Wextra", "-Werror",
             f"-I{include}", *extra_cflags, "-c", str(source), "-o", str(obj),
         ], cwd=work, log=log)
         command = [os.environ.get("CXX", "c++"), str(obj), *[str(a) for a in archives], "-pthread", "-lm"]
         if sys.platform.startswith("linux"):
             command.append("-ldl")
+        if diagnostic:
+            command.append("-fsanitize=address,undefined")
         command += ["-o", str(output)]
         run(command, cwd=work, log=log)
     else:
+        diagnostic_flags = (
+            ["-O1", "-g", "-fsanitize=address,undefined", "-fno-omit-frame-pointer"]
+            if diagnostic else ["-O2"]
+        )
         run([
-            os.environ.get("CC", "cc"), "-std=c99", "-O2", "-Wall", "-Wextra", "-Werror",
+            os.environ.get("CC", "cc"), "-std=c99", *diagnostic_flags,
+            "-Wall", "-Wextra", "-Werror",
             f"-I{include}", str(source), *[str(a) for a in archives], "-pthread", "-lm",
+            *(["-fsanitize=address,undefined"] if diagnostic else []),
             "-o", str(output),
         ], cwd=work, log=log)
     return output
+
+
+def fixture_command(binary: Path, fixtures: Path) -> list[str]:
+    return [
+        str(binary), str(fixtures / "server.pem"), str(fixtures / "server.key"),
+        str(fixtures / "ca.pem"), str(fixtures / "client.pem"),
+        str(fixtures / "client.key"), str(fixtures / "expired.pem"),
+        str(fixtures / "malformed.pem"),
+    ]
+
+
+def run_native_memory_diagnostic(spec: Mapping[str, Any], repo: Path, prefix: Path,
+                                 archives: Sequence[Path], work: Path, log: Path,
+                                 fixtures: Path, current_platform: str) -> dict[str, Any]:
+    if not (current_platform.startswith("linux-glibc-") or
+            current_platform.startswith("macos-")):
+        return {
+            "status": "UNSUPPORTED",
+            "tool": "address+undefined-sanitizer",
+            "reason": "the selected native toolchain does not provide the configured diagnostic",
+        }
+    binary = compile_poc(
+        spec, repo, prefix, archives, work, log, diagnostic=True)
+    env = os.environ.copy()
+    env["WIRESTACK_POC_DIAGNOSTIC_CYCLES"] = "10"
+    env["ASAN_OPTIONS"] = (
+        "detect_leaks=0:halt_on_error=1:abort_on_error=1"
+        if current_platform.startswith("macos-")
+        else "detect_leaks=1:halt_on_error=1:abort_on_error=1"
+    )
+    env["UBSAN_OPTIONS"] = "halt_on_error=1:abort_on_error=1"
+    completed = run(
+        fixture_command(binary, fixtures), cwd=work, log=log, env=env, check=False)
+    if completed.returncode != 0:
+        raise PocError("native sanitizer diagnostic failed")
+    return {
+        "status": "PASS",
+        "tool": "address+undefined-sanitizer",
+        "cleanup_cycles": 10,
+        "output_sha256": hashlib.sha256(completed.stdout.encode("utf-8")).hexdigest(),
+    }
 
 
 def exported_symbol_inventory(binary: Path, work: Path, log: Path) -> dict[str, Any]:
@@ -481,6 +601,20 @@ def parse_metrics(stdout: str, provider: str, caps: Mapping[str, str]) -> dict[s
         or metrics.get("session_resumption_tls13_handshakes") != 2
     ):
         raise PocError("session resumption did not cover TLS 1.2 and TLS 1.3")
+    if caps.get("mtls") == "PASS" and (
+        metrics.get("mtls_required_handshakes") != 1
+        or metrics.get("mtls_optional_handshakes") != 2
+    ):
+        raise PocError("mTLS evidence did not cover required and optional client authentication")
+    peak = metrics.get("memory_profile_peak_resident_bytes", 0)
+    if (metrics.get("memory_profile_bound_bytes") != MEMORY_PROFILE_BOUND_BYTES
+            or peak <= 0 or peak > MEMORY_PROFILE_BOUND_BYTES):
+        raise PocError("native memory profile exceeded or omitted its resident bound")
+    allocated = metrics.get("allocation_profile_bytes", 0)
+    if (metrics.get("allocation_profile_bound_bytes") != ALLOCATION_PROFILE_BOUND_BYTES
+            or metrics.get("allocation_profile_calls", 0) <= 0
+            or allocated <= 0 or allocated > ALLOCATION_PROFILE_BOUND_BYTES):
+        raise PocError("native allocation profile exceeded or omitted its bound")
     return metrics
 
 
@@ -502,11 +636,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     output = (args.output or work / "result.json").resolve()
     log = work / "build.log"
     started = dt.datetime.now(dt.timezone.utc)
+    current_platform = platform_id()
     result: dict[str, Any] = {
-        "schema_version": 4,
+        "schema_version": 5,
         "task_id": "M0-016",
         "provider": args.provider,
-        "platform": platform_id(),
+        "platform": current_platform,
         "status": "FAIL",
         "started_at": started.isoformat(),
         "execution": {
@@ -515,6 +650,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "runner_arch": os.environ.get("RUNNER_ARCH", platform.machine()),
             "image_os": os.environ.get("ImageOS", ""),
             "image_version": os.environ.get("ImageVersion", ""),
+            "container_image": os.environ.get("WIRESTACK_CONTAINER_IMAGE", ""),
             "python": platform.python_version(),
         },
         "source": {},
@@ -528,19 +664,33 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         src, source_info = source_provider(spec, work, log)
         result["source"] = source_info
+        license_bundle = create_license_bundle(
+            src, output.parent, args.provider, source_info)
         prefix, archives = build_provider(spec, src, work, log)
         fixtures = generate_fixtures(work, log)
         binary = compile_poc(spec, repo, prefix, archives, work, log)
         result["build"] = inspect_binary(binary, archives, work, log)
-        completed = run([
-            str(binary), str(fixtures / "server.pem"), str(fixtures / "server.key"),
-            str(fixtures / "ca.pem"), str(fixtures / "client.pem"), str(fixtures / "client.key"),
-            str(fixtures / "expired.pem"), str(fixtures / "malformed.pem"),
-        ], cwd=work, log=log, check=False)
+        result["build"]["license_bundle"] = license_bundle
+        completed = run(
+            fixture_command(binary, fixtures), cwd=work, log=log, check=False)
         result["poc_exit_code"] = completed.returncode
         result["capabilities"] = parse_caps(completed.stdout, spec_all["required_capabilities"])
         result["metrics"] = parse_metrics(
             completed.stdout, args.provider, result["capabilities"])
+        diagnostic = run_native_memory_diagnostic(
+            spec, repo, prefix, archives, work, log, fixtures, current_platform)
+        result["operational_evidence"] = {
+            "native_memory_diagnostic": diagnostic,
+            "memory_profile": {
+                "method": "native-process-peak-resident-and-harness-allocation-counters",
+                "peak_resident_bytes": result["metrics"]["memory_profile_peak_resident_bytes"],
+                "resident_bound_bytes": result["metrics"]["memory_profile_bound_bytes"],
+                "allocation_calls": result["metrics"]["allocation_profile_calls"],
+                "allocation_bytes": result["metrics"]["allocation_profile_bytes"],
+                "allocation_bound_bytes": result["metrics"]["allocation_profile_bound_bytes"],
+                "payload_bytes_per_transfer": 32768,
+            },
+        }
         failed = [name for name, status in result["capabilities"].items() if status == "FAIL"]
         blocked = [name for name, status in result["capabilities"].items() if status == "BLOCKED"]
         forbidden = result["build"]["system_tls_dependencies"] or result["build"]["runtime_loader_library_strings"]

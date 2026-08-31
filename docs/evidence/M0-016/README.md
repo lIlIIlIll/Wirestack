@@ -5,34 +5,44 @@
 M0-016 is **BLOCKED** because Android, iOS, and HarmonyOS or OpenHarmony do
 not have native-device evidence.
 
-The current schema-v4 desktop evidence covers Linux glibc x86_64, Linux musl
-x86_64, macOS arm64, and Windows x86_64. AWS-LC passes every required PoC
-capability on all four targets. Mbed TLS remains PARTIAL because external
-signer and session resumption are BLOCKED. OpenSSL remains PARTIAL because
-external signer is BLOCKED.
+The previous schema-v4 desktop evidence is superseded. All desktop cells are
+`NOT_RUN` until native runners produce schema-v5 results. Schema v5 adds
+evidence that schema v4 could not represent: required and optional client
+authentication, provider license payloads, exact repository and execution
+identity, bounded resident/allocation profiles, and native memory diagnostics
+where supported.
 
-Schema v4 adds these retained checks:
+The superseded schema-v4 results remain in the repository for audit history,
+but the platform matrix no longer treats them as passing evidence. The next
+native run must retain:
 
 - expired certificate rejection;
 - malformed certificate rejection;
 - adapter rejection of an empty ALPN identifier and a 256-byte ALPN
   identifier;
 - a complete final-artifact symbol inventory, capped at 16,384 symbols and
-  256 bytes per symbol.
+  256 bytes per symbol;
+- mTLS with required client authentication and optional client authentication
+  both with and without a certificate;
+- a digest-bound provider license bundle;
+- exact repository, hosted-runner, and immutable musl container identity;
+- bounded resident-memory and harness-allocation measurements;
+- ASan and UBSan diagnostics on Linux glibc and macOS, with an explicit
+  unsupported result on the other current desktop targets.
 
-## Native desktop runs
+## Superseded desktop runs
 
 The Linux and macOS results came from [GitHub Actions run
 33384563625](https://github.com/lIlIIlIll/Wirestack/actions/runs/33384563625).
 The Windows results came from [GitHub Actions run
 33384563633](https://github.com/lIlIIlIll/Wirestack/actions/runs/33384563633).
 Both pull-request runs report head revision
-`0513ded006334d1c14f79b1b7c8b128b9d263d51). GitHub executed merge revision
+`0513ded006334d1c14f79b1b7c8b128b9d263d51`. GitHub executed merge revision
 `837a63df942d67e77154c3127e2b917dfc1190cb`.
 
-The musl jobs run inside an isolated Alpine minirootfs. Their result JSON files
-do not repeat the repository revision. The GitHub run and artifact metadata
-bind each musl result to the pull-request head revision.
+These runs do not satisfy schema v5 and must not be used as current PASS or
+PARTIAL evidence. In particular, their musl results lack an embedded exact
+repository revision and immutable container identity.
 
 | Platform | Provider | Status | Symbols | Result SHA-256 | Artifact ID | Artifact SHA-256 |
 |---|---|---|---:|---|---:|---|
@@ -67,7 +77,7 @@ evidence.
 `tools/tls_provider_poc/providers.json` contains the machine-readable source
 pins.
 
-## Validate the retained evidence
+## Validate the current matrix
 
 Run the validator and the fault-injection tests from the repository root:
 
@@ -86,7 +96,8 @@ system TLS runtime dependencies.
 
 ## Evidence rules
 
-- A retained incomplete native result is PARTIAL.
+- A retained incomplete native result is PARTIAL only when it satisfies the
+  current schema.
 - A missing external-signer or session test prevents PASS.
 - A runtime provider fallback or a system TLS dependency produces FAIL.
 - Cross-compilation does not satisfy a native platform cell.

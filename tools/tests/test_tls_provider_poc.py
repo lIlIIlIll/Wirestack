@@ -30,6 +30,99 @@ EMPTY_SYMBOL_INVENTORY = {
 }
 
 
+def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
+                    status="PASS"):
+    caps = {name: "PASS" for name in spec["required_capabilities"]}
+    if status == "PARTIAL":
+        caps["external_signer"] = "BLOCKED"
+    runner_os = "Windows" if platform == "windows-x86_64" else "Linux"
+    image_os = "win25" if platform == "windows-x86_64" else "ubuntu24"
+    execution = {
+        "repository_revision": "2" * 40,
+        "runner_os": runner_os,
+        "runner_arch": "X64",
+        "image_os": image_os,
+        "image_version": "fixture-image",
+        "container_image": "",
+    }
+    if platform == "linux-musl-x86_64":
+        execution["image_os"] = "alpine"
+        execution["image_version"] = "3.22.5"
+        execution["container_image"] = (
+            "alpine:3.22@sha256:" + "3" * 64
+        )
+    metrics = {
+        "repeated_cleanup_cycles": 10000,
+        "external_signer_calls": 2,
+        "external_trust_calls": 4,
+        "alpn_no_overlap_handshakes": 2,
+        "alpn_malformed_inputs_rejected": 2,
+        "certificate_negative_cases_rejected": 2,
+        "session_resumption_handshakes": 4,
+        "session_resumption_tls12_handshakes": 2,
+        "session_resumption_tls13_handshakes": 2,
+        "mtls_required_handshakes": 1,
+        "mtls_optional_handshakes": 2,
+        "memory_profile_peak_resident_bytes": 64 * 1024 * 1024,
+        "memory_profile_bound_bytes": validator.MEMORY_PROFILE_BOUND_BYTES,
+        "allocation_profile_calls": 20,
+        "allocation_profile_bytes": 1024 * 1024,
+        "allocation_profile_bound_bytes": validator.ALLOCATION_PROFILE_BOUND_BYTES,
+    }
+    diagnostic_status = (
+        "PASS" if platform.startswith(("linux-glibc-", "macos-"))
+        else "UNSUPPORTED"
+    )
+    return {
+        "schema_version": 5,
+        "task_id": "M0-016",
+        "provider": provider,
+        "platform": platform,
+        "status": status,
+        "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
+        "capabilities": caps,
+        "metrics": metrics,
+        "build": {
+            "static_archives": ["libssl.a"],
+            "exported_symbol_inventory": EMPTY_SYMBOL_INVENTORY,
+            "system_tls_dependencies": [],
+            "runtime_loader_library_strings": [],
+            "license_bundle": {
+                "path": "license-bundle/manifest.json",
+                "sha256": "4" * 64,
+                "file_count": 1,
+                "total_bytes": 100,
+            },
+        },
+        "execution": execution,
+        "operational_evidence": {
+            "native_memory_diagnostic": {
+                "status": diagnostic_status,
+                "tool": "address+undefined-sanitizer",
+            },
+            "memory_profile": {
+                "method": "fixture",
+                "peak_resident_bytes": metrics["memory_profile_peak_resident_bytes"],
+                "resident_bound_bytes": metrics["memory_profile_bound_bytes"],
+                "allocation_calls": metrics["allocation_profile_calls"],
+                "allocation_bytes": metrics["allocation_profile_bytes"],
+                "allocation_bound_bytes": metrics["allocation_profile_bound_bytes"],
+                "payload_bytes_per_transfer": 32768,
+            },
+        },
+    }
+
+
+def required_profile_metrics() -> list[str]:
+    return [
+        "METRIC memory_profile_peak_resident_bytes=67108864",
+        f"METRIC memory_profile_bound_bytes={runner.MEMORY_PROFILE_BOUND_BYTES}",
+        "METRIC allocation_profile_calls=20",
+        "METRIC allocation_profile_bytes=1048576",
+        f"METRIC allocation_profile_bound_bytes={runner.ALLOCATION_PROFILE_BOUND_BYTES}",
+    ]
+
+
 class ProviderPocValidationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -119,33 +212,10 @@ class ProviderPocValidationTests(unittest.TestCase):
         cell["status"] = "PARTIAL"
         cell["result"] = "synthetic-result.json"
         cell["sha256"] = "0" * 64
-        caps = {name: "PASS" for name in self.spec["required_capabilities"]}
-        caps["external_signer"] = "BLOCKED"
-        result = {
-            "schema_version": 4,
-            "task_id": "M0-016",
-            "provider": cell["provider"],
-            "platform": cell["platform"],
-            "status": "PARTIAL",
-            "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
-            "capabilities": caps,
-            "metrics": {
-                "repeated_cleanup_cycles": 10000,
-                "external_trust_calls": 4,
-                "alpn_no_overlap_handshakes": 2,
-                "alpn_malformed_inputs_rejected": 2,
-                "certificate_negative_cases_rejected": 2,
-                "session_resumption_handshakes": 4,
-                "session_resumption_tls12_handshakes": 2,
-                "session_resumption_tls13_handshakes": 2,
-            },
-            "build": {
-                "static_archives": ["libssl.a"],
-                "exported_symbol_inventory": EMPTY_SYMBOL_INVENTORY,
-                "system_tls_dependencies": [],
-                "runtime_loader_library_strings": [],
-            },
-        }
+        result = complete_result(
+            self.spec, provider=cell["provider"], platform=cell["platform"],
+            status="PARTIAL",
+        )
         with mock.patch.object(validator, "load", return_value=result), \
              mock.patch.object(validator, "sha256_path", return_value="1" * 64), \
              self.assertRaisesRegex(validator.ValidationError, "sha256 mismatch"):
@@ -257,34 +327,9 @@ class ProviderPocValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(validator.ValidationError, "unsupported result schema"):
             validator.validate_result(result, self.spec)
 
-    def test_schema_v4_requires_measured_session_resumption(self):
-        caps = {name: "PASS" for name in self.spec["required_capabilities"]}
-        result = {
-            "schema_version": 4,
-            "task_id": "M0-016",
-            "provider": "aws-lc",
-            "platform": "linux-glibc-x86_64",
-            "status": "PASS",
-            "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
-            "capabilities": caps,
-            "metrics": {
-                "repeated_cleanup_cycles": 10000,
-                "external_signer_calls": 2,
-                "session_resumption_handshakes": 1,
-                "session_resumption_tls12_handshakes": 2,
-                "session_resumption_tls13_handshakes": 2,
-                "external_trust_calls": 4,
-                "alpn_no_overlap_handshakes": 2,
-                "alpn_malformed_inputs_rejected": 2,
-                "certificate_negative_cases_rejected": 2,
-            },
-            "build": {
-                "static_archives": ["libssl.a"],
-                "exported_symbol_inventory": EMPTY_SYMBOL_INVENTORY,
-                "system_tls_dependencies": [],
-                "runtime_loader_library_strings": [],
-            },
-        }
+    def test_schema_v5_requires_measured_session_resumption(self):
+        result = complete_result(self.spec)
+        result["metrics"]["session_resumption_handshakes"] = 1
         with self.assertRaisesRegex(
             validator.ValidationError, "four measured handshakes"):
             validator.validate_result(result, self.spec)
@@ -301,6 +346,7 @@ class ProviderPocValidationTests(unittest.TestCase):
             "METRIC session_resumption_handshakes=4",
             "METRIC session_resumption_tls12_handshakes=2",
             "METRIC session_resumption_tls13_handshakes=2",
+            *required_profile_metrics(),
         ])
         metrics = runner.parse_metrics(complete, "openssl", caps)
         self.assertEqual(4, metrics["session_resumption_handshakes"])
@@ -325,6 +371,7 @@ class ProviderPocValidationTests(unittest.TestCase):
             "METRIC repeated_cleanup_cycles=10000",
             "METRIC alpn_no_overlap_handshakes=2",
             "METRIC alpn_malformed_inputs_rejected=2",
+            *required_profile_metrics(),
         ])
         metrics = runner.parse_metrics(complete, "openssl", caps)
         self.assertEqual(2, metrics["alpn_no_overlap_handshakes"])
@@ -343,6 +390,7 @@ class ProviderPocValidationTests(unittest.TestCase):
         complete = "\n".join([
             "METRIC repeated_cleanup_cycles=10000",
             "METRIC certificate_negative_cases_rejected=2",
+            *required_profile_metrics(),
         ])
         metrics = runner.parse_metrics(complete, "openssl", caps)
         self.assertEqual(2, metrics["certificate_negative_cases_rejected"])
@@ -360,6 +408,87 @@ class ProviderPocValidationTests(unittest.TestCase):
         for source in (openssl_source, mbedtls_source):
             self.assertIn("CAP external_trust=%s", source)
             self.assertIn("external_trust_calls", source)
+
+    def test_metrics_require_required_and_optional_client_auth(self):
+        caps = {name: "BLOCKED" for name in self.spec["required_capabilities"]}
+        caps["mtls"] = "PASS"
+        complete = "\n".join([
+            "METRIC repeated_cleanup_cycles=10000",
+            "METRIC mtls_required_handshakes=1",
+            "METRIC mtls_optional_handshakes=2",
+            *required_profile_metrics(),
+        ])
+        self.assertEqual(2, runner.parse_metrics(complete, "openssl", caps)[
+            "mtls_optional_handshakes"
+        ])
+        with self.assertRaisesRegex(runner.PocError, "required and optional"):
+            runner.parse_metrics(
+                complete.replace("mtls_optional_handshakes=2",
+                                 "mtls_optional_handshakes=1"),
+                "openssl", caps,
+            )
+
+    def test_musl_result_requires_immutable_container_identity(self):
+        result = complete_result(self.spec, platform="linux-musl-x86_64")
+        validator.validate_result(result, self.spec, "2" * 40)
+        result["execution"]["container_image"] = "alpine:3.22"
+        with self.assertRaisesRegex(validator.ValidationError, "immutable Alpine"):
+            validator.validate_result(result, self.spec, "2" * 40)
+
+    def test_license_bundle_rejects_escape_and_stale_digest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            files = root / "license-bundle/files"
+            files.mkdir(parents=True)
+            license_path = files / "LICENSE"
+            license_path.write_text("fixture license\n", encoding="utf-8")
+            result = complete_result(self.spec)
+            entry = {
+                "path": "LICENSE",
+                "bytes": license_path.stat().st_size,
+                "sha256": validator.sha256_path(license_path),
+            }
+            manifest = {
+                "schema_version": 1,
+                "task_id": "M0-016",
+                "provider": result["provider"],
+                "source_content_sha256": result["source"]["content_sha256"],
+                "file_count": 1,
+                "total_bytes": entry["bytes"],
+                "files": [entry],
+            }
+            manifest_path = root / "license-bundle/manifest.json"
+            runner.atomic_json(manifest_path, manifest)
+            result["build"]["license_bundle"] = {
+                "path": "license-bundle/manifest.json",
+                "sha256": validator.sha256_path(manifest_path),
+                "file_count": 1,
+                "total_bytes": entry["bytes"],
+            }
+            result_path = root / "result.json"
+            validator.validate_license_bundle(result_path, result)
+            result["build"]["license_bundle"]["path"] = "../manifest.json"
+            with self.assertRaisesRegex(validator.ValidationError, "escapes"):
+                validator.validate_license_bundle(result_path, result)
+            result["build"]["license_bundle"]["path"] = "license-bundle/manifest.json"
+            result["build"]["license_bundle"]["sha256"] = "f" * 64
+            with self.assertRaisesRegex(validator.ValidationError, "digest mismatch"):
+                validator.validate_license_bundle(result_path, result)
+
+    def test_license_bundle_ignores_symlinks_outside_provider_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            source.mkdir()
+            (source / "LICENSE").write_text("inside\n", encoding="utf-8")
+            outside = root / "NOTICE"
+            outside.write_text("outside\n", encoding="utf-8")
+            (source / "NOTICE").symlink_to(outside)
+            output = root / "output"
+            info = runner.create_license_bundle(
+                source, output, "aws-lc", {"content_sha256": "0" * 64})
+            manifest = json.loads((output / info["path"]).read_text())
+            self.assertEqual(["LICENSE"], [entry["path"] for entry in manifest["files"]])
 
     def test_native_pocs_drive_provider_specific_session_and_trust_callbacks(self):
         openssl_source = (ROOT / "tools/tls_provider_poc/openssl_memory_poc.c").read_text()
@@ -399,6 +528,9 @@ class ProviderPocValidationTests(unittest.TestCase):
             self.assertIn("CAP negative_expired_certificate=%s", source)
             self.assertIn("CAP negative_malformed_certificate=%s", source)
             self.assertIn("METRIC certificate_negative_cases_rejected=%d", source)
+            self.assertIn("METRIC mtls_required_handshakes=%d", source)
+            self.assertIn("METRIC mtls_optional_handshakes=%d", source)
+            self.assertIn("METRIC memory_profile_peak_resident_bytes=%llu", source)
         self.assertIn("char overlong_protocol[257]", openssl_source)
         self.assertNotIn("static const unsigned char truncated[]", openssl_source)
 
@@ -565,6 +697,7 @@ class ProviderPocWindowsTests(unittest.TestCase):
             self.assertNotIn("-pthread", command)
             self.assertNotIn("-lm", command)
             self.assertIn("bcrypt.lib", command)
+            self.assertIn("psapi.lib", command)
 
     def test_windows_openssl_build_uses_vc_target_and_nmake(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -588,80 +721,14 @@ class ProviderPocWindowsTests(unittest.TestCase):
             self.assertEqual(["nmake", "install_sw"], calls[2])
 
     def test_windows_result_requires_native_hosted_runner_identity(self):
-        caps = {name: "PASS" for name in self.spec["required_capabilities"]}
-        result = {
-            "schema_version": 4,
-            "task_id": "M0-016",
-            "provider": "aws-lc",
-            "platform": "windows-x86_64",
-            "status": "PASS",
-            "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
-            "capabilities": caps,
-            "metrics": {
-                "repeated_cleanup_cycles": 10000,
-                "external_signer_calls": 2,
-                "external_trust_calls": 4,
-                "alpn_no_overlap_handshakes": 2,
-                "alpn_malformed_inputs_rejected": 2,
-                "certificate_negative_cases_rejected": 2,
-                "session_resumption_handshakes": 4,
-                "session_resumption_tls12_handshakes": 2,
-                "session_resumption_tls13_handshakes": 2,
-            },
-            "build": {
-                "static_archives": ["ssl.lib"],
-                "exported_symbol_inventory": EMPTY_SYMBOL_INVENTORY,
-                "system_tls_dependencies": [],
-                "runtime_loader_library_strings": [],
-            },
-            "execution": {
-                "repository_revision": "2" * 40,
-                "runner_os": "Windows",
-                "runner_arch": "X64",
-                "image_os": "win25",
-                "image_version": "20260824.239.3",
-            },
-        }
+        result = complete_result(self.spec, platform="windows-x86_64")
         validator.validate_result(result, self.spec, "2" * 40)
         result["execution"]["runner_os"] = "Linux"
         with self.assertRaisesRegex(validator.ValidationError, "native Windows runner"):
             validator.validate_result(result, self.spec, "2" * 40)
 
     def test_expected_revision_mismatch_fails(self):
-        caps = {name: "PASS" for name in self.spec["required_capabilities"]}
-        result = {
-            "schema_version": 4,
-            "task_id": "M0-016",
-            "provider": "aws-lc",
-            "platform": "windows-x86_64",
-            "status": "PASS",
-            "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
-            "capabilities": caps,
-            "metrics": {
-                "repeated_cleanup_cycles": 10000,
-                "external_signer_calls": 2,
-                "external_trust_calls": 4,
-                "alpn_no_overlap_handshakes": 2,
-                "alpn_malformed_inputs_rejected": 2,
-                "certificate_negative_cases_rejected": 2,
-                "session_resumption_handshakes": 4,
-                "session_resumption_tls12_handshakes": 2,
-                "session_resumption_tls13_handshakes": 2,
-            },
-            "build": {
-                "static_archives": ["ssl.lib"],
-                "exported_symbol_inventory": EMPTY_SYMBOL_INVENTORY,
-                "system_tls_dependencies": [],
-                "runtime_loader_library_strings": [],
-            },
-            "execution": {
-                "repository_revision": "2" * 40,
-                "runner_os": "Windows",
-                "runner_arch": "X64",
-                "image_os": "win25",
-                "image_version": "20260824.239.3",
-            },
-        }
+        result = complete_result(self.spec, platform="windows-x86_64")
         with self.assertRaisesRegex(validator.ValidationError, "revision mismatch"):
             validator.validate_result(result, self.spec, "3" * 40)
 
