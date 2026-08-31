@@ -1,23 +1,40 @@
 {
   "build": {
-    "binary_bytes": 2003968,
-    "binary_sha256": "e2c2cf00d283baede4d485da45bf885e5d10b45d2d9dba577c40b7c787fdd526",
+    "binary_bytes": 2006528,
+    "binary_sha256": "139c531b234936402a53fbd4239b38f102543198684e6cac390c271f1b0bf288",
+    "exported_symbol_inventory": {
+      "count": 9,
+      "scope": "final-artifact-exports",
+      "sha256": "40cac5432608bb9e3bbae166daa4b482a3c40f52385b2905be1ebe4bd8910571",
+      "symbols": [
+        "jent_entropy_collector_alloc",
+        "jent_entropy_collector_free",
+        "jent_entropy_init",
+        "jent_entropy_init_ex",
+        "jent_entropy_switch_notime_impl",
+        "jent_read_entropy",
+        "jent_read_entropy_safe",
+        "jent_set_fips_failure_callback",
+        "jent_version"
+      ],
+      "tool": "dumpbin /exports"
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 3187390,
         "name": "ssl.lib",
-        "sha256": "0aa719d5b1bc546c5ff73e7344225fb3a81caf894e91ee9aa5f192a0e606620d"
+        "sha256": "e502ce0296fa568eed7a0d7f913cea311a0e750f30fcdf46d7cbab57526016f3"
       },
       {
         "bytes": 6788546,
         "name": "crypto.lib",
-        "sha256": "04d5cf32126640839b79d192fc8fbb4f2afec3a32a390991f67180eba6ef4fd5"
+        "sha256": "9627d5f2bd0be35c6abce6257c8c035421ab622442886aef61ecc6790d56f26e"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "6e70e138cb69d05ec4c7813badfeb297c069d858a8ed3585d07851b03447b455",
+  "build_log_sha256": "dd80b530faca93aca035beb0f66476afaac1f0356f8839de2eedad8258d92578",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -25,7 +42,9 @@
     "external_signer": "PASS",
     "external_trust": "PASS",
     "mtls": "PASS",
+    "negative_expired_certificate": "PASS",
     "negative_hostname": "PASS",
+    "negative_malformed_certificate": "PASS",
     "negative_untrusted_ca": "PASS",
     "partial_io_backpressure": "PASS",
     "repeated_cleanup": "PASS",
@@ -39,14 +58,15 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "dc0e4d54e5f35d32a6b974f96a0006595729dbfe",
+    "repository_revision": "837a63df942d67e77154c3127e2b917dfc1190cb",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T09:57:46.151633+00:00",
+  "finished_at": "2026-08-31T10:57:27.508266+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
+    "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
@@ -61,14 +81,14 @@
   "platform": "windows-x86_64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 3,
+  "schema_version": 4,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
     "kind": "git",
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T09:55:22.884908+00:00",
+  "started_at": "2026-08-31T10:55:27.211930+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }
