@@ -1,0 +1,67 @@
+{
+  "build": {
+    "binary_bytes": 3106000,
+    "binary_sha256": "56edbaf811a5fd27feeb7fa6499804b8f7e70c416a773a144e936e679d1ab354",
+    "runtime_loader_library_strings": [],
+    "static_archives": [
+      {
+        "bytes": 668872,
+        "name": "libssl.a",
+        "sha256": "0aa5c4bf7dcb9c508e50d6dc61ad98d567ae13b9722614e8c13728b678859cb2"
+      },
+      {
+        "bytes": 4090424,
+        "name": "libcrypto.a",
+        "sha256": "5762272306c81b3b7ed3009eceafa77dcfec77849a5cf83f80803329dc8d007c"
+      }
+    ],
+    "system_tls_dependencies": []
+  },
+  "build_log_sha256": "478737f57ba01b1315c155a6475acf58aa04eee15f028984ad34485fa4184f54",
+  "capabilities": {
+    "caller_cancellation": "PASS",
+    "close_notify": "PASS",
+    "custom_ca": "PASS",
+    "external_signer": "PASS",
+    "mtls": "PASS",
+    "negative_hostname": "PASS",
+    "negative_untrusted_ca": "PASS",
+    "partial_io_backpressure": "PASS",
+    "repeated_cleanup": "PASS",
+    "session_resumption": "PASS",
+    "sni_hostname_alpn": "PASS",
+    "tls12": "PASS",
+    "tls13": "PASS",
+    "truncation": "PASS"
+  },
+  "execution": {
+    "image_os": "macos15",
+    "image_version": "20260727.0256.1",
+    "python": "3.14.6",
+    "repository_revision": "bc251b44aa08f65937042f48686d7dcd88ef293b",
+    "runner_arch": "ARM64",
+    "runner_os": "macOS"
+  },
+  "finished_at": "2026-08-31T00:46:41.708901+00:00",
+  "metrics": {
+    "external_signer_calls": 2,
+    "failure_cleanup_cycles": 0,
+    "repeated_cleanup_cycles": 10000
+  },
+  "notes": [
+    "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
+  ],
+  "platform": "macos-arm64",
+  "poc_exit_code": 0,
+  "provider": "aws-lc",
+  "schema_version": 2,
+  "source": {
+    "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
+    "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+    "kind": "git",
+    "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
+  },
+  "started_at": "2026-08-31T00:45:33.961000+00:00",
+  "status": "PASS",
+  "task_id": "M0-016"
+}
