@@ -151,9 +151,11 @@ def bind_test_link_stub(manifest: str) -> str:
         raise GateError("Windows resolver FFI binding is missing from cjpm.toml")
     windows_table = "[target.x86_64-w64-mingw32.ffi.c]"
     start = manifest.find(windows_table)
-    end = manifest.find("\n[target.", start + len(windows_table))
-    if start < 0 or end < 0:
+    if start < 0:
         raise GateError("Windows target FFI table is missing from cjpm.toml")
+    end = manifest.find("\n[", start + len(windows_table))
+    if end < 0:
+        end = len(manifest)
     section = manifest[start:end]
     if "wirestack_m2_004_tls_link_stub" in section:
         raise GateError("test-only TLS link stub leaked into the normal Windows target")
