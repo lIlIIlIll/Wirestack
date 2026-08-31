@@ -508,7 +508,13 @@ class ProviderPocValidationTests(unittest.TestCase):
         clean = mock.Mock(returncode=0, stdout="")
         revision = mock.Mock(returncode=0, stdout="a" * 40 + "\n")
         with mock.patch.dict(
-                runner.os.environ, {"GITHUB_SHA": ""}, clear=True), \
+                runner.os.environ, {
+                    "GITHUB_SHA": "",
+                    "RUNNER_OS": "fixture-os",
+                    "RUNNER_ARCH": "fixture-arch",
+                    "ImageOS": "",
+                    "ImageVersion": "",
+                }, clear=False), \
                 mock.patch.object(
                     runner, "run", side_effect=[clean, revision]):
             identity = runner.execution_identity(ROOT, ROOT / "unused.log")
@@ -519,7 +525,7 @@ class ProviderPocValidationTests(unittest.TestCase):
     def test_local_execution_identity_rejects_dirty_checkout(self):
         dirty = mock.Mock(returncode=0, stdout=" M tracked-file\n")
         with mock.patch.dict(
-                runner.os.environ, {"GITHUB_SHA": ""}, clear=True), \
+                runner.os.environ, {"GITHUB_SHA": ""}, clear=False), \
                 mock.patch.object(runner, "run", return_value=dirty):
             with self.assertRaisesRegex(
                     runner.PocError, "local repository has tracked modifications"):
