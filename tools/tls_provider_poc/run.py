@@ -312,12 +312,16 @@ def source_provider(spec: Mapping[str, Any], work: Path, log: Path) -> tuple[Pat
     if digest != spec["sha256"]:
         raise PocError(f"archive digest mismatch: {digest}")
     src = safe_extract(archive, source_root / "unpacked")
-    commit = spec.get("commit") or resolve_git_tag(spec["commit_resolution_url"])
+    resolved_commit = resolve_git_tag(spec["commit_resolution_url"])
+    if resolved_commit != spec["commit"]:
+        raise PocError(f"release tag commit mismatch: {resolved_commit}")
     return src, {
-        "commit": commit,
+        "commit": resolved_commit,
         "content_sha256": digest,
         "archive": archive.name,
         "kind": "archive",
+        "tag": spec["tag"],
+        "tag_resolved_commit": resolved_commit,
         "security_update": spec["security_update"],
     }
 
