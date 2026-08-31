@@ -16,9 +16,11 @@ private-key isolation, native callbacks and deterministic cleanup.
 
 AWS-LC 5.5.0 at commit
 `991e67ff4cf04df4dd89e407f8b920c6936cb56a` was originally selected from the
-earlier PoC evidence. Schema v8 supersedes the retained schema-v7 Linux results
-until native reruns retain the bounded allowlisted effective build environment.
-The superseded results record:
+earlier PoC evidence and is requalified with schema-v8 `PASS` results on Linux
+glibc x86_64 and Linux musl x86_64. GitHub Actions run `33416731896` reports
+pull-request head `47732d984d439bf7b4f700cf4f8d9ad8bc913da8` and executed
+synthetic merge revision `67c519b3d406912378a18bd15da28d5b1f0cdf6a`.
+The retained results bind that execution revision and record:
 
 - TLS 1.2 and TLS 1.3 client/server handshakes over caller-owned bounded BIOs;
 - SNI, reference-identity verification, ALPN, custom CA, required mTLS,
@@ -37,8 +39,9 @@ The superseded results record:
   suppressed;
 - committed, digest-bound provider license payloads, bounded source-pin age,
   official advisory intake channels, exact repository, runner,
-  toolchain, target, configure/build arguments, environment, patch-set, source
-  and archive identity, and complete bounded symbol inventories; and
+  toolchain, target, configure/build arguments, bounded effective build
+  environment, patch-set, source and archive identity, and complete bounded
+  symbol inventories; and
 - static archives with no system TLS-library dependency or runtime-loader
   library string.
 
@@ -93,7 +96,7 @@ artifact is withdrawn rather than silently downgraded.
 ## Consequences
 
 - Existing Linux TLS integration retains the frozen provider and C ABI
-  decision, but schema-v8 Linux AWS-LC qualification is pending native rerun.
+  decision. The current schema-v8 Linux AWS-LC qualification is `PASS`.
 - M0-016 as a global task remains `BLOCKED` because Android, iOS and HarmonyOS
   or OpenHarmony still lack native-device evidence.
 - AWS-LC-specific code remains internal to the native provider adapter.

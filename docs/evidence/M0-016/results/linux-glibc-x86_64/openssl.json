@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 7308488,
-    "binary_sha256": "8c035b2f66356db4015ca912d8ecc3a4bcf647c562807f27ee6abb0f4398f4c0",
+    "binary_sha256": "cdd3d0eaf51288c578bfb6f7c3b9f6fd3206ea77ccecbdab6b0ea7cb788bc56e",
     "exported_symbol_inventory": {
       "count": 9576,
       "scope": "final-artifact-exports",
@@ -9642,8 +9642,27 @@
         "output_sha256": "9af6d86c05168cb15779093011133ec1892819c8a687a3ee24c3377aad1521f9"
       },
       "environment": {
+        "CC": "",
         "CFLAGS": "-O2 -fPIC",
-        "CXXFLAGS": "-O2"
+        "CMAKE_BUILD_PARALLEL_LEVEL": "",
+        "CMAKE_GENERATOR": "",
+        "CMAKE_GENERATOR_PLATFORM": "",
+        "CMAKE_GENERATOR_TOOLSET": "",
+        "CMAKE_PREFIX_PATH": "",
+        "CMAKE_TOOLCHAIN_FILE": "",
+        "CXX": "",
+        "CXXFLAGS": "-O2",
+        "INCLUDE": "",
+        "LDFLAGS": "",
+        "LIB": "",
+        "LIBPATH": "",
+        "PATH": "/opt/hostedtoolcache/Python/3.12.14/x64/bin:/opt/hostedtoolcache/Python/3.12.14/x64:/snap/bin:/home/runner/.local/bin:/opt/pipx_bin:/home/runner/.cargo/bin:/home/runner/.config/composer/vendor/bin:/usr/local/.ghcup/bin:/home/runner/.dotnet/tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+        "UCRTVersion": "",
+        "UniversalCRTSdkDir": "",
+        "VCINSTALLDIR": "",
+        "VCToolsInstallDir": "",
+        "WindowsSDKVersion": "",
+        "WindowsSdkDir": ""
       },
       "instrumentation": "none",
       "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
@@ -9661,12 +9680,12 @@
       {
         "bytes": 12229968,
         "name": "libcrypto.a",
-        "sha256": "69a286b5d7c1be184d7f31aa27e66d8d899e3f9d0d48b1bef2b3f1e1c0ca6a91"
+        "sha256": "fb4c655e3035d521724e53288b3b2054b587e1609d0aa64c356982b94f87b7d8"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "e16ef84062a0350320e441eeb0a639bcac77099cd33dde99f9438a9183bf2ee5",
+  "build_log_sha256": "18ecf04b5903b382116af8e120fe30d936e0c19f89dff9173dc24dd17b5594d8",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -9691,28 +9710,28 @@
     "image_os": "ubuntu24",
     "image_version": "20260823.283.1",
     "python": "3.12.14",
-    "repository_revision": "bbd2b22404d47f674842c50eabe2debd12d79787",
+    "repository_revision": "67c519b3d406912378a18bd15da28d5b1f0cdf6a",
     "runner_arch": "X64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T16:07:53.931504+00:00",
+  "finished_at": "2026-08-31T16:58:48.926157+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 84,
+    "cancellation_latency_us": 71,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 47198208,
+    "memory_profile_peak_resident_bytes": 46919680,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 6209852071,
+    "provider_allocation_bytes": 6211001875,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 28479070,
+    "provider_allocation_calls": 28519576,
     "provider_allocation_live_after_cleanup_bytes": 559146,
     "provider_allocation_live_before_cleanup_bytes": 559146,
     "provider_allocation_peak_live_bytes": 804838,
@@ -9727,18 +9746,18 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 84,
+      "latency_us": 71,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 47198208,
+      "peak_resident_bytes": 46919680,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 6209852071,
+      "provider_allocation_bytes": 6211001875,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 28479070,
+      "provider_allocation_calls": 28519576,
       "provider_allocation_live_after_cleanup_bytes": 559146,
       "provider_allocation_live_before_cleanup_bytes": 559146,
       "provider_allocation_peak_live_bytes": 804838,
@@ -9750,7 +9769,7 @@
         "reason": "static OpenSSL 3.6.3 retains process-global allocations after thread and global cleanup; broad allocator suppression is forbidden",
         "status": "UNSUPPORTED"
       },
-      "output_sha256": "65044df8f650a14e94eaf891dfd33dc0cda479492036cd9dd76878ca849524c3",
+      "output_sha256": "f4c0b4e920ed9b3da69485e2bc8c71cc3991c437f067f9f2ff3ef66174104e0b",
       "provider_build_provenance": {
         "build_argv": [
           [
@@ -9802,9 +9821,27 @@
           "output_sha256": "9af6d86c05168cb15779093011133ec1892819c8a687a3ee24c3377aad1521f9"
         },
         "environment": {
+          "CC": "",
           "CFLAGS": "-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -fPIC",
+          "CMAKE_BUILD_PARALLEL_LEVEL": "",
+          "CMAKE_GENERATOR": "",
+          "CMAKE_GENERATOR_PLATFORM": "",
+          "CMAKE_GENERATOR_TOOLSET": "",
+          "CMAKE_PREFIX_PATH": "",
+          "CMAKE_TOOLCHAIN_FILE": "",
+          "CXX": "",
           "CXXFLAGS": "-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer",
-          "LDFLAGS": "-fsanitize=address,undefined"
+          "INCLUDE": "",
+          "LDFLAGS": "-fsanitize=address,undefined",
+          "LIB": "",
+          "LIBPATH": "",
+          "PATH": "/opt/hostedtoolcache/Python/3.12.14/x64/bin:/opt/hostedtoolcache/Python/3.12.14/x64:/snap/bin:/home/runner/.local/bin:/opt/pipx_bin:/home/runner/.cargo/bin:/home/runner/.config/composer/vendor/bin:/usr/local/.ghcup/bin:/home/runner/.dotnet/tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+          "UCRTVersion": "",
+          "UniversalCRTSdkDir": "",
+          "VCINSTALLDIR": "",
+          "VCToolsInstallDir": "",
+          "WindowsSDKVersion": "",
+          "WindowsSdkDir": ""
         },
         "instrumentation": "address+undefined-sanitizer",
         "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
@@ -9822,7 +9859,7 @@
         {
           "bytes": 95823796,
           "name": "libcrypto.a",
-          "sha256": "11f7a69d08896f4cab0c34d0f6b3bb947024c64075861ae18fcbca380f45c8af"
+          "sha256": "7fa0584d8ac843b600ed3cefc6b37bc7cfee3c9474a3ca6bd0efbecc40c3cc91"
         }
       ],
       "status": "PASS",
@@ -9832,14 +9869,14 @@
   "platform": "linux-glibc-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 7,
+  "schema_version": 8,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T16:04:19.630687+00:00",
+  "started_at": "2026-08-31T16:56:18.681689+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
