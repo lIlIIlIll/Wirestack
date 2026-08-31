@@ -1,0 +1,83 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M2-004/test-plan.md",
+        "--json"
+      ],
+      "duration_ms": 217.505,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-31T07:55:05.108240Z",
+      "id": "test-plan-matrix",
+      "started_at_utc": "2026-08-31T07:55:04.890731Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M2-004/test-plan-matrix.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"counts\": {\"paths\": 8, \"scenarios\": 8, \"tests\": 8}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+      "stdout_path": "build/repository-tooling/M2-004/test-plan-matrix.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_build_resolver",
+        "tools.gates.tests.test_m2_004_windows_resolver",
+        "-v"
+      ],
+      "duration_ms": 217.365,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-31T07:55:05.325793Z",
+      "id": "build-and-report-fault-injection",
+      "started_at_utc": "2026-08-31T07:55:05.108427Z",
+      "status": "PASS",
+      "stderr_excerpt": "test_darwin_resolver_selection_uses_the_cjpm_target_path (tools.tests.test_build_resolver.BuildResolverSelectionTests.test_darwin_resolver_selection_uses_the_cjpm_target_path) ... ok\ntest_native_dependency_plan_does_not_build_linux_tls_on_windows (tools.tests.test_build_resolver.BuildResolverSelectionTests.test_native_dependency_plan_does_not_build_linux_tls_on_windows) ... ok\ntest_normalizes_only_implemented_platforms (tools.tests.test_build_resolver.BuildResolverSelectionTests.test_normalizes_only_implemented_platforms) ... ok\ntest_windows_source_digest_is_line_ending_stable_and_content_bound (tools.tests.test_build_resolver.BuildResolverSelectionTests.test_windows_source_digest_is_line_ending_stable_and_content_bound) ... ok\ntest_atomic_json_replaces_complete_document_without_temp_residue (tools.gates.tests.test_m2_004_windows_resolver.M2004WindowsResolverGateTests.test_atomic_json_replaces_complete_document_without_temp_residue) ... ok\ntest_gate_injects_test_stub_only_into_its_workspace_manifest (tools.gates.tests.test_m2_004_windows_resolver.M2004WindowsResolverGateTests.test_gate_injects_test_stub_only_into_its_workspace_manifest) ... ok\ntest_loaded_report_digest_cannot_follow_an_atomic_replacement (tools.gates.tests.test_m2_004_windows_resolver.M2004WindowsResolverGateTests.test_loaded_report_digest_cannot_follow_an_atomic_replacement) ... ok\ntest_rejects_missing_test_only_link_stub_marker (tools.gates.tests.test_m2_004_windows_resolver.M2004WindowsResolverGateTests.test_rejects_missing_test_only_link_stub_marker) ... ok\ntest_rejects_skipped_case_even_with_zero_exit (tools.gates.tests.test_m2_004_windows_resolver.M2004WindowsResolverGateTests.test_rejects_skipped_case_even_with_zero_exit) ... ok\ntest_rejects_timeout_and_missing_fixture_binding (tools.gates.tests.test_m2_004_windows_resolver.M2004WindowsResolverGateTests.test_rejects_timeout_and_missing_fixture_binding) ... ok\ntest_rejects_unknown_schema_stale_revision_and_wrong_platform (tools.gates.tests.test_m2_004_windows_resolver.M2004WindowsResolverGateTests.test_rejects_unknown_schema_stale_revision_and_wrong_platform) ... ok\ntest_stored_validation_must_match_the_validated_report (tools.gates.tests.test_m2_004_windows_resolver.M2004WindowsResolverGateTests.test_stored_validation_must_match_the_validated_report) ... ok\ntest_target_native_libraries_propagate_to_path_consumers (tools.gates.tests.test_m2_004_windows_resolver.M2004WindowsResolverGateTests.test_target_native_libraries_propagate_to_path_consumers) ... ok\ntest_test_stub_binding_accepts_windows_as_last_target (tools.gates.tests.test_m2_004_windows_resolver.M2004WindowsResolverGateTests.test_test_stub_binding_accepts_windows_as_last_target) ... ok\ntest_valid_report_passes (tools.gates.tests.test_m2_004_windows_resolver.M2004WindowsResolverGateTests.test_valid_report_passes) ... ok\ntest_validation_payload_binds_the_exact_native_report (tools.gates.tests.test_m2_004_windows_resolver.M2004WindowsResolverGateTests.test_validation_payload_binds_the_exact_native_report) ... ok\ntest_windows_native_source_preserves_distinct_results_and_native_errors (tools.gates.tests.test_m2_004_windows_resolver.M2004WindowsResolverGateTests.test_windows_native_source_preserves_distinct_results_and_native_errors) ... ok\n\n----------------------------------------------------------------------\nRan 17 tests in 0.005s\n\nOK\n",
+      "stderr_path": "build/repository-tooling/M2-004/build-and-report-fault-injection.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "",
+      "stdout_path": "build/repository-tooling/M2-004/build-and-report-fault-injection.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/gates/m2_004_windows_resolver.py",
+        "--validate-report",
+        "docs/evidence/M2-004/windows-x86_64/report.json",
+        "--expected-revision",
+        "c80be395d67523efaed28b35d139a8e36aad5610"
+      ],
+      "duration_ms": 165.745,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-08-31T07:55:05.491725Z",
+      "id": "stored-native-windows-result",
+      "started_at_utc": "2026-08-31T07:55:05.325989Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "build/repository-tooling/M2-004/stored-native-windows-result.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "{\"expected_revision\": \"c80be395d67523efaed28b35d139a8e36aad5610\", \"failures\": [], \"report_sha256\": \"5d8ba504bc883223ff8c7aff72def24ba27026b5f5d59cf023fb6e499bf1372d\", \"schema_version\": 1, \"status\": \"PASS\", \"task_id\": \"M2-004\"}\n",
+      "stdout_path": "build/repository-tooling/M2-004/stored-native-windows-result.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false
+    }
+  ],
+  "issues": [],
+  "kind": "repository-check",
+  "mode": "task",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M2-004"
+}
