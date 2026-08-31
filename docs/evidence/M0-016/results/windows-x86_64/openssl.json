@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 5386240,
-    "binary_sha256": "11f78ba005c2fabafeabfd24fe096990b9c8c3d0d31d33ed485a448b7825d8ec",
+    "binary_sha256": "d80fe37192cfaa349c63c33367fbf7c1e358857ae90465c02671bf96c8d64352",
     "exported_symbol_inventory": {
       "count": 0,
       "scope": "final-artifact-exports",
@@ -16,6 +16,7 @@
       "total_bytes": 29732
     },
     "provenance": {
+      "assembler": null,
       "build_argv": [
         [
           "nmake"
@@ -97,19 +98,19 @@
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 55053476,
+        "bytes": 55053470,
         "name": "libcrypto.lib",
-        "sha256": "8fc00752e1bd164f0d202a2260fdeaf5902a73186be418f4b7d33f7e31a96e19"
+        "sha256": "abb67a25b277346879efca0862fb3929505d70d23c0dffc8bfc72e0664d30550"
       },
       {
         "bytes": 10120650,
         "name": "libssl.lib",
-        "sha256": "c18d8f7848c79893e1d5c4b4956a6481e0a8750189889f3434a177d9548db531"
+        "sha256": "9847fb02e0bd2649cf8e477885daf178064d9b9bc6ee3a955c96a7a08755ab80"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "b90a556afbac229fa1ddf5ca135bf95ba82bde491aa35c7366b5b1ccd322089a",
+  "build_log_sha256": "485fa3e543dbc75c1e2ad2948e7b7f045a93fc98b295521ddaef031035695f56",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -135,32 +136,32 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "1c21f3bdb8176846d94450595c47c1bf4526efba",
+    "repository_revision": "91d82dbea7f2353445c7a495659cd425b9ae5c15",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T20:28:34.916207+00:00",
+  "finished_at": "2026-08-31T21:13:11.832042+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 119,
+    "cancellation_latency_us": 96,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 11747328,
+    "memory_profile_peak_resident_bytes": 11603968,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 6172168824,
+    "provider_allocation_bytes": 6140039292,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 28325830,
+    "provider_allocation_calls": 28366510,
     "provider_allocation_live_after_cleanup_bytes": 563571,
     "provider_allocation_live_before_cleanup_bytes": 563571,
-    "provider_allocation_peak_live_bytes": 797615,
+    "provider_allocation_peak_live_bytes": 795787,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -172,21 +173,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 119,
+      "latency_us": 96,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 11747328,
+      "peak_resident_bytes": 11603968,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 6172168824,
+      "provider_allocation_bytes": 6140039292,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 28325830,
+      "provider_allocation_calls": 28366510,
       "provider_allocation_live_after_cleanup_bytes": 563571,
       "provider_allocation_live_before_cleanup_bytes": 563571,
-      "provider_allocation_peak_live_bytes": 797615,
+      "provider_allocation_peak_live_bytes": 795787,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -198,7 +199,7 @@
   "platform": "windows-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 10,
+  "schema_version": 11,
   "source": {
     "archive": "openssl-3.6.4.tar.gz",
     "commit": "d3c1b1169b3569ff3069e5b399f47b2b28e03d79",
@@ -234,7 +235,7 @@
     "tag": "openssl-3.6.4",
     "tag_resolved_commit": "d3c1b1169b3569ff3069e5b399f47b2b28e03d79"
   },
-  "started_at": "2026-08-31T20:18:58.496846+00:00",
+  "started_at": "2026-08-31T21:03:28.210982+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
