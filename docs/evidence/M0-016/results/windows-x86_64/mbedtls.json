@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 762880,
-    "binary_sha256": "c7c26366e085aba66e6c19df19e90dc929b96eaa7c79834d44886e01304d1f13",
+    "binary_bytes": 766464,
+    "binary_sha256": "9c0a0184e11de06d8c78223eab0452a2184bfd276c0b8238c7c36b5e096e78b5",
     "exported_symbol_inventory": {
       "count": 0,
       "scope": "final-artifact-exports",
@@ -9,27 +9,33 @@
       "symbols": [],
       "tool": "dumpbin /exports"
     },
+    "license_bundle": {
+      "file_count": 6,
+      "path": "license-bundle/manifest.json",
+      "sha256": "ffc7d119c232428afa5e656557ab1fdb0166f102a51cc9515addf7f6cf82497d",
+      "total_bytes": 135878
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 1208884,
         "name": "mbedtls.lib",
-        "sha256": "b201fee3c142c82eedeb9210ca2ce612b88ecff7af89db5fa8a8500d7a6eb079"
+        "sha256": "2a0f4480c5ebe0099a3b4510c61379c37111f744dcd67cd43245d7f04a7a9fb9"
       },
       {
         "bytes": 391948,
         "name": "mbedx509.lib",
-        "sha256": "ddf3af59323150af22e2554e98f6d167b18dea6163ac1f6b54f099399d7b6394"
+        "sha256": "43f853bd3d1661777ac97b772379100d5c1ceba4e9ced0650868244d3e8b87ea"
       },
       {
         "bytes": 1687036,
         "name": "tfpsacrypto.lib",
-        "sha256": "56a3c474637c6487bf4c7feee92480424a3756eb652c3d1345d7b3f89acaef10"
+        "sha256": "0c5b7ab0d2913e131ded94236565e98ead8d0af4d6c81a5a434cbfb3c7b2c0a9"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "4d1fdf67982df57c060548e2cc4c6eee6b35b46ee0626b00aa4a73c12342cc64",
+  "build_log_sha256": "9c844dcd7dc290974326743a8c8c3a341fed09c67bdbfe7fd2bc4dbb699695da",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -50,35 +56,59 @@
     "truncation": "PASS"
   },
   "execution": {
+    "container_image": "",
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "837a63df942d67e77154c3127e2b917dfc1190cb",
+    "repository_revision": "22ae52c7b277c1d6c83afc0ac0dd73dc7e9c83a6",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T10:59:23.597246+00:00",
+  "finished_at": "2026-08-31T12:23:55.155763+00:00",
   "metrics": {
+    "allocation_profile_bound_bytes": 1073741824,
+    "allocation_profile_bytes": 655687680,
+    "allocation_profile_calls": 20010,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
+    "memory_profile_bound_bytes": 536870912,
+    "memory_profile_peak_resident_bytes": 5726208,
+    "mtls_optional_handshakes": 2,
+    "mtls_required_handshakes": 1,
     "repeated_cleanup_cycles": 10000
   },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
+  "operational_evidence": {
+    "memory_profile": {
+      "allocation_bound_bytes": 1073741824,
+      "allocation_bytes": 655687680,
+      "allocation_calls": 20010,
+      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "payload_bytes_per_transfer": 32768,
+      "peak_resident_bytes": 5726208,
+      "resident_bound_bytes": 536870912
+    },
+    "native_memory_diagnostic": {
+      "reason": "the selected native toolchain does not provide the configured diagnostic",
+      "status": "UNSUPPORTED",
+      "tool": "address+undefined-sanitizer"
+    }
+  },
   "platform": "windows-x86_64",
   "poc_exit_code": 0,
   "provider": "mbedtls",
-  "schema_version": 4,
+  "schema_version": 5,
   "source": {
     "archive": "mbedtls-4.2.0.tar.bz2",
     "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
     "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T10:55:37.510467+00:00",
+  "started_at": "2026-08-31T12:20:06.695674+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

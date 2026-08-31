@@ -1,11 +1,11 @@
 {
   "build": {
-    "binary_bytes": 4445928,
-    "binary_sha256": "f75bcb887465c761c2bf891ba803da92d0044bfc69bdb6f43e55e6b1828820b6",
+    "binary_bytes": 4433896,
+    "binary_sha256": "5ca26302183e2faa38fe071ca06ce775e3983d6637815f36077f7291c4192a46",
     "exported_symbol_inventory": {
-      "count": 3795,
+      "count": 3794,
       "scope": "final-artifact-exports",
-      "sha256": "cf112cebc2fb35be3b0ea50fff30b98cc874e2e6e1678ea723e74f20e68d256d",
+      "sha256": "5ee3abf418f1ffb5b2bf1aa4124a671e4649baa697351f10d9180c93a4d95d04",
       "symbols": [
         "ACCESS_DESCRIPTION_free",
         "ACCESS_DESCRIPTION_it",
@@ -3144,7 +3144,6 @@
         "_fini",
         "_init",
         "_start",
-        "_start_c",
         "a2i_ASN1_INTEGER",
         "a2i_IPADDRESS",
         "a2i_IPADDRESS_NC",
@@ -3805,22 +3804,28 @@
       ],
       "tool": "nm -g --defined-only"
     },
+    "license_bundle": {
+      "file_count": 11,
+      "path": "license-bundle/manifest.json",
+      "sha256": "a42cbc822fa76edd34cbd276ccb1d1eb2e915864610a76f33bc341f5edffc94f",
+      "total_bytes": 79058
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 1265816,
+        "bytes": 1276080,
         "name": "libssl.a",
-        "sha256": "128e0d0b40f705f5fab2e99f1e030d53e6a2848cfa0bacfbb2646d4c9e1c586b"
+        "sha256": "7dea604cfd13dfa83cf5b054292618df3753016e41064a7ff28205d4fc7bb4f0"
       },
       {
-        "bytes": 7104546,
+        "bytes": 7079610,
         "name": "libcrypto.a",
-        "sha256": "6a74e705b8657a45fbe6980cab7448cdc0fd51caa2f39774f490708dfdfe8c32"
+        "sha256": "b4ecd406df48251312b2e3fd0162cf78a7020d907b84e8d302288fc469ad6ba6"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "e6a241e8f20c6e5f303bd8a774b77d2ff8a599fdf94bef82ed3a142c508ef3e8",
+  "build_log_sha256": "a84c2db7f03f2f50e605fb9d7a9f54524e0df93a73224bc670b8bec66198fe9f",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -3841,21 +3846,29 @@
     "truncation": "PASS"
   },
   "execution": {
-    "image_os": "",
-    "image_version": "",
-    "python": "3.12.14",
-    "repository_revision": "",
+    "container_image": "alpine:3.22@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b",
+    "image_os": "alpine",
+    "image_version": "3.22.5",
+    "python": "3.14.7",
+    "repository_revision": "4c7ddea51e9e73600b39be7938566ea6300ab5cd",
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T10:57:10.668646+00:00",
+  "finished_at": "2026-08-31T12:22:02.516468+00:00",
   "metrics": {
+    "allocation_profile_bound_bytes": 1073741824,
+    "allocation_profile_bytes": 656080896,
+    "allocation_profile_calls": 20022,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
+    "memory_profile_bound_bytes": 536870912,
+    "memory_profile_peak_resident_bytes": 30863360,
+    "mtls_optional_handshakes": 2,
+    "mtls_required_handshakes": 1,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -3864,17 +3877,33 @@
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
+  "operational_evidence": {
+    "memory_profile": {
+      "allocation_bound_bytes": 1073741824,
+      "allocation_bytes": 656080896,
+      "allocation_calls": 20022,
+      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "payload_bytes_per_transfer": 32768,
+      "peak_resident_bytes": 30863360,
+      "resident_bound_bytes": 536870912
+    },
+    "native_memory_diagnostic": {
+      "reason": "the selected native toolchain does not provide the configured diagnostic",
+      "status": "UNSUPPORTED",
+      "tool": "address+undefined-sanitizer"
+    }
+  },
   "platform": "linux-musl-x86_64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 4,
+  "schema_version": 5,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
     "kind": "git",
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T10:55:29.405836+00:00",
+  "started_at": "2026-08-31T12:20:19.315398+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }

@@ -5,16 +5,14 @@
 M0-016 is **BLOCKED** because Android, iOS, and HarmonyOS or OpenHarmony do
 not have native-device evidence.
 
-The previous schema-v4 desktop evidence is superseded. All desktop cells are
-`NOT_RUN` until native runners produce schema-v5 results. Schema v5 adds
-evidence that schema v4 could not represent: required and optional client
-authentication, provider license payloads, exact repository and execution
-identity, bounded resident/allocation profiles, and native memory diagnostics
-where supported.
+All 12 desktop cells now have current schema-v5 native-runner evidence. Schema
+v5 records required and optional client authentication, provider license
+payloads, exact repository and execution identity, bounded resident/allocation
+profiles, and native memory diagnostics where supported. The platform matrix
+treats these cells as PASS or PARTIAL according to the provider capability
+contract; it does not convert the missing mobile-device evidence into a pass.
 
-The superseded schema-v4 results remain in the repository for audit history,
-but the platform matrix no longer treats them as passing evidence. The next
-native run must retain:
+Every current native run retains:
 
 - expired certificate rejection;
 - malformed certificate rejection;
@@ -33,41 +31,53 @@ native run must retain:
   sub-gate as unsupported with an explicit reason instead of using broad leak
   suppressions.
 
-## Superseded desktop runs
+## Current desktop runs
 
-The Linux and macOS results came from [GitHub Actions run
-33384563625](https://github.com/lIlIIlIll/Wirestack/actions/runs/33384563625).
-The Windows results came from [GitHub Actions run
-33384563633](https://github.com/lIlIIlIll/Wirestack/actions/runs/33384563633).
-Both pull-request runs report head revision
-`0513ded006334d1c14f79b1b7c8b128b9d263d51`. GitHub executed merge revision
-`837a63df942d67e77154c3127e2b917dfc1190cb`.
+The Linux glibc, Linux musl, and macOS results came from [GitHub Actions run
+33391223747](https://github.com/lIlIIlIll/Wirestack/actions/runs/33391223747).
+That pull-request run reports head revision
+`22ae52c7b277c1d6c83afc0ac0dd73dc7e9c83a6`; GitHub executed merge revision
+`4c7ddea51e9e73600b39be7938566ea6300ab5cd` and every retained result records
+that exact execution revision. The Windows results came from [GitHub Actions
+run 33391216138](https://github.com/lIlIIlIll/Wirestack/actions/runs/33391216138)
+and executed the exact head revision
+`22ae52c7b277c1d6c83afc0ac0dd73dc7e9c83a6`.
 
-These runs do not satisfy schema v5 and must not be used as current PASS or
-PARTIAL evidence. In particular, their musl results lack an embedded exact
-repository revision and immutable container identity.
+All 12 artifacts were downloaded and independently revalidated with
+`validate.py --result ... --expected-revision ...`. Each artifact contains the
+schema-v5 `result.json`, a bounded `build.log`, and the digest-bound provider
+license bundle.
 
 | Platform | Provider | Status | Symbols | Result SHA-256 | Artifact ID | Artifact SHA-256 |
 |---|---|---|---:|---|---:|---|
-| Linux glibc x86_64 | AWS-LC | PASS | 3,802 | `f9e7c6b5273fe34766457fa5d545fac46bb747a1aa37e1581c5e0798b94e34f2` | `9755083574` | `d7c5cb1466ecfe5215f1432b2f96778905de43966bbdebfc502047a805024855` |
-| Linux glibc x86_64 | Mbed TLS | PARTIAL | 1,113 | `eaf597ec40e027149c16ebfe559f808e0f2637cc57581a0bb3fea1ea38500c39` | `9755098794` | `162f0d9d4354c8bfc45251545df73197672516f2cb0fc041f42a415dd4dbda15` |
-| Linux glibc x86_64 | OpenSSL | PARTIAL | 9,576 | `7727db37b56fce645879432d50f23f94d4de8eeac226a251298be518acc87b44` | `9755104142` | `9b290d50e62f7d1e91098d4bc13c6cc677a65e5297230ccf831fbe553454bfdd` |
-| Linux musl x86_64 | AWS-LC | PASS | 3,795 | `3afcf04b08be421d02575c4b1433411d5fc314452ba9b137c5ecb7503a54823a` | `9755097629` | `fd3ce11a44e64b35f81790f5af5ab2f77ffe281f0c04dae3033d8d33da519aa8` |
-| Linux musl x86_64 | Mbed TLS | PARTIAL | 1,111 | `548f0114cb5048c74ba0c47dbde127441b85e579329ae61458e957cc3b2310b3` | `9755107115` | `689937c29063c2084d8c77b3c64f95e742e658b6928feeb919cb8a40edc8b0b4` |
-| Linux musl x86_64 | OpenSSL | PARTIAL | 9,571 | `1544a851073d005510aa5eb9f61642b567b91a7804d1affd26dbdae013bcfea8` | `9755129394` | `77e3c7d245d491806dfd98914808372c40860822fe9cbef970b6e6defb6121da` |
-| macOS arm64 | AWS-LC | PASS | 3,368 | `1cbfbc0ba36979fe1c6bdd28bdbaa90104918678a16ae7f4588b1825a35d56bd` | `9755084289` | `fb323068d5e15fcd1fa86b9a9be547b3f7190495d58611d3a9474234c857286e` |
-| macOS arm64 | Mbed TLS | PARTIAL | 1,101 | `b0869b2c00cace869066f2d232e744dfea30d192e46d851670d7ceef4253cbc2` | `9755089166` | `fe6a653a992bd32fc7fc35be21f08980e3e32830f7afebbc0f1d66734b5435d4` |
-| macOS arm64 | OpenSSL | PARTIAL | 9,534 | `b09ed3a4a015656c612a1a3f429f10adfa4c4cc82ba25975822fe07412896a2b` | `9755113459` | `f744ac9829d7df28f428c4a69be7254d88b59f9904f7928a2645eb7c751c6a78` |
-| Windows x86_64 | AWS-LC | PASS | 9 | `d01de77bffd1760a36455e86e5f82cc6ea3903f000cb0e7eef4a43ab212460f1` | `9755105791` | `a2a8bf9f28ebcfb31b87ed6454716052ae3c64d3eec70879a7afaf7d43a94e8d` |
-| Windows x86_64 | Mbed TLS | PARTIAL | 0 | `346ddb0ea8278c5c2f05ff8a56d3a989a2eb71e7937da30fc4ccb50c3a64a48a` | `9755162465` | `8505a46f34e2251e46280677e3a0b62cb22cbdb59201ebe9a7a4100dba46a52f` |
-| Windows x86_64 | OpenSSL | PARTIAL | 0 | `d37a949c14f150147031d338bb0f39391d155d3a47ba652f9a53f1ecbeb59e45` | `9755348468` | `d9dd5255934c1d89321efea8ac55eb5c74dad5b67b10e85521bcc8033bf94ef2` |
+| Linux glibc x86_64 | AWS-LC | PASS | 3,802 | `9524d15071e64663f522ddbd0220bf5b61bf36e783b7ea9328a78f0a76f217b7` | `9757564639` | `ce4ac7a71b548521629061553119d5d5c9cbc706376d9dc029f5de90b2a7a6f7` |
+| Linux glibc x86_64 | Mbed TLS | PARTIAL | 1,113 | `23af305e38bbc505eda3036526e33ff490e4004fb5d758b6c505b5d19098c88b` | `9757574141` | `eafc48e60e05097cac148c7d098f1ac0c06ba6c3dedc6469136535c3e79bb69a` |
+| Linux glibc x86_64 | OpenSSL | PARTIAL | 9,576 | `6e5788f57b91f063849e658605b539ee40aa085dcd39f3cee772868a97ecc1ae` | `9757583727` | `ebd328b95fc5b5d3037054beef86b4deeb9652405752414199770c05ec52b34a` |
+| Linux musl x86_64 | AWS-LC | PASS | 3,794 | `aecae7d56baaea20791970d93a7788be57381650f8a92111d81475f01db613de` | `9757576287` | `0960d3344bbba82620e2e7c010b5e0795c5d3e7782846ca86110f16823c2ab32` |
+| Linux musl x86_64 | Mbed TLS | PARTIAL | 1,110 | `3862ee400034be101610fa7eb1c5431ff5ab89440f3625f183dca45a2370cf57` | `9757581463` | `c08edf102574d24cc8c2e42e07f6d66aa06d2921133752793958ae3734145732` |
+| Linux musl x86_64 | OpenSSL | PARTIAL | 9,570 | `28d4e9c83e6f95370243e58543685934aaa38b91acfc71a57f430343be1f256a` | `9757611094` | `f06327d60e5a102cff5a37e374f28db744b3de2f7ff60631a2ef4cf7905a707d` |
+| macOS arm64 | AWS-LC | PASS | 3,368 | `b28b9ec72f84882c6add3ab47c105ae4d5730b5f55211a3af660799980964a1e` | `9757555502` | `33f5e2073193729984785342fe608b5758e47606f7b76c33736718870ca1e3dd` |
+| macOS arm64 | Mbed TLS | PARTIAL | 1,101 | `8d13de4eb0fe79003a4e7f076b55249963f80c93f5bc34b0e52e824e09340b01` | `9757573523` | `083b96921d8bbf29df562e6ea283063196097083a0769f884187a5d7ab4c62488` |
+| macOS arm64 | OpenSSL | PARTIAL | 9,534 | `0a656043966adfb978289a818b6cccd1be1b91376d349553ff5f1eeb76f650a3` | `9757572359` | `b6972e02ed4165875074dd25b1aa3ecb12a253566128709328312441c84a30ff` |
+| Windows x86_64 | AWS-LC | PASS | 9 | `bbd1770f2a55892b6ce8ffcaee65ce95f4651f1278294098f4c708e1dc344fbb` | `9757576438` | `1b9193bd502dbf539d698c08354d081abf5a38fa4e20620d9c6bb49641eb22ab` |
+| Windows x86_64 | Mbed TLS | PARTIAL | 0 | `e887a8671d27ec08b75ac6ac8a4a467b13b8721ea6cc60394b85d4559bcfb2e1` | `9757636596` | `ab0a3c02553ee28e0e60b43c4ff613b062d2005af4070e631e6844479d3eb0fd` |
+| Windows x86_64 | OpenSSL | PARTIAL | 0 | `c3aa77a6174880de0faf4bc52538532ad13729a7d641b1b239f16465882b59fa` | `9757835820` | `3a875853d8d4f9ce0f6c6cd397533e1a13ad2d5f5b3859388f390102b943cbac` |
 
-Each result contains `build_log_sha256`. The platform matrix records the
-result path and SHA-256. The Windows run metadata, artifact digests, and build
-log digests are in
+Each result contains `build_log_sha256`, provider license-manifest metadata,
+and the bounded memory profile. The platform matrix records the result path and
+SHA-256. The Windows run metadata, artifact digests, and build log digests are in
 [`windows-x86_64-run.json`](windows-x86_64-run.json). GitHub artifacts can
 expire, so the committed result JSON files and matrix digests are the durable
-evidence.
+evidence. Schema-v4 artifacts remain available through their historical runs,
+but they are not referenced by the current matrix.
+
+LeakSanitizer is a required PASS only for Linux glibc Mbed TLS. AWS-LC and
+static OpenSSL retain process-global allocations that cannot be separated from
+provider-cycle leaks by this harness, so leak detection is explicitly
+`UNSUPPORTED` for those providers; broad suppressions are forbidden. macOS
+records LeakSanitizer as unsupported by the hosted toolchain. All Linux glibc
+and macOS cells still pass ASan and UBSan, and every desktop cell passes the
+bounded 10,000-cycle resident-memory and allocation profile.
 
 ## Pinned sources
 

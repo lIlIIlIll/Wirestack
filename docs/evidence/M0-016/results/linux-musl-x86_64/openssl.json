@@ -1,11 +1,11 @@
 {
   "build": {
-    "binary_bytes": 7348264,
-    "binary_sha256": "76bb379b5c7321d8ab6414a4728bcb35428a4b59d0cb0dc0f61e06c15e571db5",
+    "binary_bytes": 7348472,
+    "binary_sha256": "6c857051a97599bcb2a0658ee118036ad82d99e9780015938cf7bca92500eeb5",
     "exported_symbol_inventory": {
-      "count": 9571,
+      "count": 9570,
       "scope": "final-artifact-exports",
-      "sha256": "929c7c04bd724a6e45d8e62b4d3a59c4918b44cab37b1f43f653dfda130d596c",
+      "sha256": "5a73232494fc432e71e04a28d9e5d567bd453e9cdb1f7ece5bfcf41323ff9f0a",
       "symbols": [
         "ACCESS_DESCRIPTION_free",
         "ACCESS_DESCRIPTION_it",
@@ -5142,7 +5142,6 @@
         "_fini",
         "_init",
         "_start",
-        "_start_c",
         "a2d_ASN1_OBJECT",
         "a2i_ASN1_ENUMERATED",
         "a2i_ASN1_INTEGER",
@@ -9581,22 +9580,28 @@
       ],
       "tool": "nm -g --defined-only"
     },
+    "license_bundle": {
+      "file_count": 3,
+      "path": "license-bundle/manifest.json",
+      "sha256": "045d956dc9b5cc1ab3346c0d3c4924e07a2e3095af72096c181922033ae5e1d0",
+      "total_bytes": 29732
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 2078662,
+        "bytes": 2094382,
         "name": "libssl.a",
-        "sha256": "f79df5ad8deb02a202e88a9c633824b0b4254d61a36c34439be8aa43bd53ab7f"
+        "sha256": "582b0438dae41063328a228084a3dc91d91f317b188d5b61753b51d70810cbf4"
       },
       {
-        "bytes": 12293540,
+        "bytes": 12326948,
         "name": "libcrypto.a",
-        "sha256": "85645f020f702246841ec1b6a06ee5d8dd68431160e6d449f44d9fcca63a1ae0"
+        "sha256": "3c178e4974579c302e2b2a0cfb1c90ce054c4b6d4bed95091556120fc7d507eb"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "f8f147b98aa83fa7203965ff6aedff3abc8e406091127eea2bf7ba4ee90ac6e7",
+  "build_log_sha256": "4928c9cd47fde4b30ae7f7f1a29bfbc78c449e718b09049a5efb89fccfd3621a",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -9617,20 +9622,28 @@
     "truncation": "PASS"
   },
   "execution": {
-    "image_os": "",
-    "image_version": "",
-    "python": "3.12.14",
-    "repository_revision": "",
+    "container_image": "alpine:3.22@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b",
+    "image_os": "alpine",
+    "image_version": "3.22.5",
+    "python": "3.14.7",
+    "repository_revision": "4c7ddea51e9e73600b39be7938566ea6300ab5cd",
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T10:58:16.745927+00:00",
+  "finished_at": "2026-08-31T12:23:08.643716+00:00",
   "metrics": {
+    "allocation_profile_bound_bytes": 1073741824,
+    "allocation_profile_bytes": 655949824,
+    "allocation_profile_calls": 20018,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
+    "memory_profile_bound_bytes": 536870912,
+    "memory_profile_peak_resident_bytes": 40685568,
+    "mtls_optional_handshakes": 2,
+    "mtls_required_handshakes": 1,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -9639,17 +9652,33 @@
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
+  "operational_evidence": {
+    "memory_profile": {
+      "allocation_bound_bytes": 1073741824,
+      "allocation_bytes": 655949824,
+      "allocation_calls": 20018,
+      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "payload_bytes_per_transfer": 32768,
+      "peak_resident_bytes": 40685568,
+      "resident_bound_bytes": 536870912
+    },
+    "native_memory_diagnostic": {
+      "reason": "the selected native toolchain does not provide the configured diagnostic",
+      "status": "UNSUPPORTED",
+      "tool": "address+undefined-sanitizer"
+    }
+  },
   "platform": "linux-musl-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 4,
+  "schema_version": 5,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T10:55:31.425186+00:00",
+  "started_at": "2026-08-31T12:20:16.344554+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 859536,
-    "binary_sha256": "50c8bf98ae9e43dd7fb2e89a85a1967954dbf9096017cfedb65331b83e623b3f",
+    "binary_bytes": 859904,
+    "binary_sha256": "6acfeacd977efe2fa01e9dba2cc7aa8fd1d8c1b8d54978c08db53f9b581ec4ab",
     "exported_symbol_inventory": {
       "count": 1113,
       "scope": "final-artifact-exports",
@@ -1123,6 +1123,12 @@
       ],
       "tool": "nm -g --defined-only"
     },
+    "license_bundle": {
+      "file_count": 6,
+      "path": "license-bundle/manifest.json",
+      "sha256": "dd441476ef6a6d4afbfb641ac870bcfd162a773e218422c13c44e35164270c4e",
+      "total_bytes": 135878
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
@@ -1143,7 +1149,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "9b9ded8e432b60674c005f4e3496c0ddfeb1bdb86a823ba97a439158c9024ab1",
+  "build_log_sha256": "3e047375f7e11c6a6947c6834c8975b413ff3390188a96141e09ad1797360457",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -1164,35 +1170,63 @@
     "truncation": "PASS"
   },
   "execution": {
+    "container_image": "",
     "image_os": "ubuntu24",
     "image_version": "20260823.283.1",
     "python": "3.12.14",
-    "repository_revision": "837a63df942d67e77154c3127e2b917dfc1190cb",
+    "repository_revision": "4c7ddea51e9e73600b39be7938566ea6300ab5cd",
     "runner_arch": "X64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T10:57:13.533714+00:00",
+  "finished_at": "2026-08-31T12:21:59.138747+00:00",
   "metrics": {
+    "allocation_profile_bound_bytes": 1073741824,
+    "allocation_profile_bytes": 655687680,
+    "allocation_profile_calls": 20010,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
+    "memory_profile_bound_bytes": 536870912,
+    "memory_profile_peak_resident_bytes": 35164160,
+    "mtls_optional_handshakes": 2,
+    "mtls_required_handshakes": 1,
     "repeated_cleanup_cycles": 10000
   },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
+  "operational_evidence": {
+    "memory_profile": {
+      "allocation_bound_bytes": 1073741824,
+      "allocation_bytes": 655687680,
+      "allocation_calls": 20010,
+      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "payload_bytes_per_transfer": 32768,
+      "peak_resident_bytes": 35164160,
+      "resident_bound_bytes": 536870912
+    },
+    "native_memory_diagnostic": {
+      "cleanup_cycles": 10,
+      "leak_detection": {
+        "status": "PASS"
+      },
+      "output_sha256": "5aab05ae312ea62bde973893453f371ba2b0ca04ec0cc5fa968a7073fd54a897",
+      "status": "PASS",
+      "tool": "address+undefined-sanitizer"
+    }
+  },
   "platform": "linux-glibc-x86_64",
   "poc_exit_code": 0,
   "provider": "mbedtls",
-  "schema_version": 4,
+  "schema_version": 5,
   "source": {
     "archive": "mbedtls-4.2.0.tar.bz2",
     "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
     "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T10:55:35.266096+00:00",
+  "started_at": "2026-08-31T12:20:26.056159+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
