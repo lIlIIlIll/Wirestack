@@ -43,7 +43,8 @@ def valid_report(mode: str = "macos") -> dict[str, object]:
             "device_udid": "00000000-0000-0000-0000-000000000000",
             "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-2",
             "probe_sha256": "a" * 64,
-            "bundle_probe_sha256": "a" * 64,
+            "bundle_source_probe_sha256": "a" * 64,
+            "bundle_probe_sha256": "b" * 64,
             "install": {"timed_out": False, "exit_code": 0},
             "runtime_libraries": [{
                 "path": "Frameworks/libcangjie-runtime.dylib",
@@ -151,6 +152,7 @@ class M2006AppleResolverGateTests(unittest.TestCase):
             "device_udid": "",
             "runtime": "macOS",
             "probe_sha256": "a" * 64,
+            "bundle_source_probe_sha256": "b" * 64,
             "bundle_probe_sha256": "b" * 64,
             "install": {"timed_out": False, "exit_code": 1},
             "runtime_libraries": [],
@@ -231,7 +233,7 @@ class M2006AppleResolverGateTests(unittest.TestCase):
             "exit_code": 0,
             "output": "[ PASSED ] CASE: resolves localhost\n" * gate.EXPECTED_TESTS,
         }
-        report["simulator"]["bundle_probe_sha256"] = "b" * 64
+        report["simulator"]["bundle_source_probe_sha256"] = "c" * 64
         failures = gate.validate_report(report, "abc", "ios-simulator")
         self.assertIn("RESOLVER_TEST:CASE_INVENTORY", failures)
         self.assertIn("REPORT:SIMULATOR_PROBE", failures)
