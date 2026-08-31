@@ -1,23 +1,23 @@
 {
   "build": {
-    "binary_bytes": 5366576,
-    "binary_sha256": "3f54825d6a1bdae42b28301e6fb282b2961cb892fd0c2dea4d88b86582041964",
+    "binary_bytes": 5366800,
+    "binary_sha256": "17d85437599724f60b3c1d7b6dd9e82993497acd76ae45ac27cafbb096a1d5a1",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 1536312,
         "name": "libssl.a",
-        "sha256": "5610cd1b626910d71123cee85110334e69f4e00db92b2d857f49170d5d9b86be"
+        "sha256": "5e2e34b1543bca4e1a2622989c8a5c7e9cddca2367e7c6280ec9bb8f919c9879"
       },
       {
         "bytes": 8813056,
         "name": "libcrypto.a",
-        "sha256": "f6b0715768b027038e5b68739cda134e8d786927439823a7ca71f8800b2c1102"
+        "sha256": "8ec9c8dc6fbdf11217a1728e3f4d211c29e0c6fde680a4fd4244233d4e7e1ff5"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "e94f670d9935347a507b1be237fe8fe53ca711930c678df81dec15a53789a720",
+  "build_log_sha256": "9d2a5aa428535900d041e5b41f7b75b125791d70dcaddeb2d3231e3c28ecd05e",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -39,12 +39,14 @@
     "image_os": "macos15",
     "image_version": "20260727.0256.1",
     "python": "3.12.10",
-    "repository_revision": "dd9a7f248ec2c60d9a9d965d08af0ac359806f23",
+    "repository_revision": "dc0e4d54e5f35d32a6b974f96a0006595729dbfe",
     "runner_arch": "ARM64",
     "runner_os": "macOS"
   },
-  "finished_at": "2026-08-31T09:17:18.910356+00:00",
+  "finished_at": "2026-08-31T09:57:47.162131+00:00",
   "metrics": {
+    "alpn_malformed_inputs_rejected": 2,
+    "alpn_no_overlap_handshakes": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "repeated_cleanup_cycles": 10000,
@@ -65,7 +67,7 @@
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T09:15:35.983105+00:00",
+  "started_at": "2026-08-31T09:55:31.280789+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
