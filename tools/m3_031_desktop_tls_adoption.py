@@ -142,6 +142,13 @@ def sha256_path(path: Path) -> str:
     return digest.hexdigest()
 
 
+def repository_text_sha256(path: Path) -> str:
+    data = path.read_bytes()
+    if b"\x00" not in data:
+        data = data.replace(b"\r\n", b"\n")
+    return hashlib.sha256(data).hexdigest()
+
+
 def load_json(path: Path) -> dict[str, Any]:
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
@@ -193,7 +200,10 @@ def _backlog_row(backlog: str, task_id: str) -> str:
 
 
 def hosted_input_sha256(root: Path) -> dict[str, str]:
-    return {relative: sha256_path(root / relative) for relative in HOSTED_INPUT_PATHS}
+    return {
+        relative: repository_text_sha256(root / relative)
+        for relative in HOSTED_INPUT_PATHS
+    }
 
 
 def validate_hosted_run(root: Path, raw: Mapping[str, Any]) -> dict[str, Any]:
@@ -246,7 +256,7 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
         path = root / relative
         if entry.get("source_task") != "M3-030" or entry.get("acceptance_status") != "PASS":
             raise AdoptionError("RETAINED_EVIDENCE", f"{relative}: index does not record PASS")
-        if entry.get("sha256") != sha256_path(path):
+        if entry.get("sha256") != repository_text_sha256(path):
             raise AdoptionError("STALE_SOURCE", f"{relative}: report digest changed")
         payload = load_json(path)
         if payload.get("source_task") != "M3-030" or payload.get("status") != "PASS":
@@ -261,7 +271,7 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
                 any(relative.startswith(prefix) for prefix in RETAINED_SOURCE_PREFIXES)):
             continue
         path = root / relative
-        if not path.is_file() or expected != sha256_path(path):
+        if not path.is_file() or expected != repository_text_sha256(path):
             raise AdoptionError("STALE_SOURCE", f"{relative}: retained TLS source changed")
         checked[relative] = expected
     if not checked:
