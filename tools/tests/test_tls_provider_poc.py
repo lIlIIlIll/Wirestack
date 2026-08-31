@@ -1085,6 +1085,7 @@ class ProviderPocWindowsTests(unittest.TestCase):
             self.assertIn("VC-WIN64A", calls[0])
             self.assertEqual(["nmake"], calls[1])
             self.assertEqual(["nmake", "install_sw"], calls[2])
+            self.assertEqual(2, calls.count(["cl", "/?"]))
 
     def test_windows_result_requires_native_hosted_runner_identity(self):
         result = complete_result(self.spec, platform="windows-x86_64")
