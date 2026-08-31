@@ -30,6 +30,7 @@
     }
   ],
   "allowed_paths": [
+    ".gitattributes",
     ".github/workflows/m3-031-desktop-tls-adoption.yml",
     ".gitignore",
     "docs/architecture/adr/0007-desktop-tls-adoption.md",
@@ -62,6 +63,7 @@
   ],
   "schema_version": 1,
   "source_paths": [
+    ".gitattributes",
     ".github/workflows/m3-031-desktop-tls-adoption.yml",
     ".gitignore",
     "docs/architecture/adr/0007-desktop-tls-adoption.md",
