@@ -150,7 +150,7 @@ def build(
     if selected == "macos-arm64":
         flags.append("-mmacosx-version-min=12.0")
     else:
-        flags.append("-mios-simulator-version-min=17.5")
+        flags.append("-mios-simulator-version-min=11.0")
     if test_fixture:
         flags.append("-DWIRESTACK_RESOLVER_TEST_FIXTURE=1")
     fingerprint, inputs = build_fingerprint(sources, tools, selected, flags, test_fixture)
