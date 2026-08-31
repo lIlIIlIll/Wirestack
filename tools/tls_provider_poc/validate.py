@@ -16,6 +16,7 @@ MAX_EXPORTED_SYMBOLS = 16384
 MAX_EXPORTED_SYMBOL_LENGTH = 256
 MAX_LICENSE_FILES = 512
 MAX_LICENSE_TOTAL_BYTES = 8 * 1024 * 1024
+MAX_BINARY_BYTES = 512 * 1024 * 1024
 MEMORY_PROFILE_BOUND_BYTES = 512 * 1024 * 1024
 PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES = 64 * 1024 * 1024 * 1024
 PROVIDER_ALLOCATION_CALL_BOUND = 150_000_000
@@ -419,6 +420,11 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
             require(metrics.get("local_close_operations") == 2,
                     "local close requires TLS 1.2 and TLS 1.3 teardown")
     if result["status"] in {"PASS", "PARTIAL"}:
+        require(isinstance(build.get("binary_bytes"), int) and
+                0 < build["binary_bytes"] <= MAX_BINARY_BYTES,
+                "successful result requires bounded final binary size")
+        require(SHA256_RE.fullmatch(str(build.get("binary_sha256", ""))) is not None,
+                "successful result requires final binary digest")
         validate_archive_inventory(
             build.get("static_archives"), "static archive inventory")
         validate_exported_symbols(build)
