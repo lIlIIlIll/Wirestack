@@ -91,11 +91,13 @@ def run(command: Sequence[str], *, cwd: Path, log: Path,
         env: Mapping[str, str] | None = None,
         check: bool = True) -> subprocess.CompletedProcess[str]:
     rendered = " ".join(command)
+    child_env = dict(os.environ if env is None else env)
+    child_env.pop("WIRESTACK_GITHUB_TOKEN", None)
     with log.open("a", encoding="utf-8") as stream:
         stream.write(f"\n$ {rendered}\n")
         stream.flush()
         completed = subprocess.run(
-            list(command), cwd=cwd, env=dict(env) if env else None,
+            list(command), cwd=cwd, env=child_env,
             stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, text=True, errors="replace", check=False,
         )

@@ -20,12 +20,12 @@ Version changes require a reviewed change to `tools/tls_provider_poc/providers.j
 - `BLOCKED`: the native platform or required environment is unavailable.
 
 `NOT_RUN`, missing cells and cross-compilation never count as native evidence.
-Schema versions 1 through 9 are no longer accepted because they cannot carry
+Schema versions 1 through 10 are no longer accepted because they cannot carry
 the complete callback, protocol-negative, certificate-negative, export,
 execution, durable build-provenance, license, provider-allocation,
 provider-instrumentation, bounded join, live-allocation-growth, monotonic
 cancellation, advisory-disposition, source-pin, archive-inventory, diagnostic
-execution and distinct local-close evidence. Schema v10 is required for
+execution and distinct local-close evidence. Schema v11 is required for
 retained `PASS` and `PARTIAL` results. It requires an
 exact, bounded inventory of the final artifact's exported symbols and exactly
 10,000 measured cleanup
@@ -34,6 +34,10 @@ handshakes: a fresh and resumed TLS 1.2 handshake, plus a fresh and resumed TLS
 1.3 handshake after ticket delivery. A provider cannot infer resumption from a
 successful fresh handshake. Both endpoints must report a cache miss for each
 fresh handshake and a cache hit for each resumed handshake.
+
+Schema v11 also requires the exact successful NASM command identity for native
+Windows AWS-LC builds. Other platform/provider cells must retain a null
+assembler identity.
 
 Every successful native result records the exact repository revision and
 hosted-runner image identity. A musl result additionally records the immutable
