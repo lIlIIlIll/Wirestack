@@ -103,6 +103,16 @@ global six-platform M3 milestone.
 | M3-029 | COMPLETE | [`docs/evidence/M3-029/README.md`](../evidence/M3-029/README.md) | Provider-neutral public client/server contexts, existing-transport handshake, TLS connection/listener ownership, negotiated metadata and stable errors pass public-package tests, clean-consumer Linux TLS acceptance and current pre-1.0 ownership guards; historical experimental API compatibility is not required. |
 | M3-030 | COMPLETE | [`docs/evidence/M3-030/README.md`](../evidence/M3-030/README.md), [`platform-provider-matrix.json`](../evidence/M3-030/platform-provider-matrix.json), [`native-abi-report.json`](../evidence/M3-030/native-abi-report.json), [`release-validation.json`](../evidence/M3-030/release-validation.json), [`sbom-validation.json`](../evidence/M3-030/sbom-validation.json) | The final six-command Linux gate passes. The provider ABI v1 contract records and validates 56 C signatures, Cangjie FFI declarations, native header prototypes and archive symbols; M7-029 independently closes both ABI High findings. Only Linux x86_64 glibc with AWS-LC 5.5.0 is implemented. |
 
+## Desktop M3 adoption work
+
+This table tracks the one-time dependency adoption gate for Windows and macOS.
+It does not complete either platform adapter or the global six-platform M3
+milestone.
+
+| ID | Status | Evidence | Notes |
+|---|---|---|---|
+| M3-031 | IN_PROGRESS | [`docs/evidence/M3-031/README.md`](../evidence/M3-031/README.md) | Core prerequisite mapping and exact-revision native Windows/macOS AWS-LC evidence are in progress. No desktop trust or key adapter is claimed. |
+
 ## Future upstream enhancements
 
 `UP-001` through `UP-007` are not Wirestack release dependencies. They remain

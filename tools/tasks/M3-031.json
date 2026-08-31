@@ -1,0 +1,74 @@
+{
+  "acceptance_commands": [
+    {
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/M3-031/test-plan.md", "--json"],
+      "gate": "task",
+      "id": "test-plan-matrix",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["python3", "-m", "unittest", "tools.tests.test_m3_031_desktop_tls_adoption", "tools.tests.test_tls_provider_poc", "tools.tests.test_m3_030_tls_provider_architecture", "-v"],
+      "gate": "task",
+      "id": "desktop-adoption-fault-injection",
+      "long_running": false,
+      "timeout_seconds": 180
+    },
+    {
+      "argv": ["scripts/check-m3-031-desktop-tls-adoption"],
+      "gate": "task",
+      "id": "stored-desktop-provider-results",
+      "long_running": false,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": ["cjpm", "test", "src/internal/tls_engine", "src/internal/trust", "--exclude-tags=Performance", "--parallel", "1", "--no-progress", "--no-color"],
+      "gate": "task",
+      "id": "provider-neutral-core-tests",
+      "long_running": false,
+      "timeout_seconds": 1200
+    }
+  ],
+  "allowed_paths": [
+    ".github/workflows/m3-031-desktop-tls-adoption.yml",
+    ".gitignore",
+    "docs/architecture/adr/0007-desktop-tls-adoption.md",
+    "docs/evidence/M3-031",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "scripts/check-m3-031-desktop-tls-adoption",
+    "tools/m3_031_desktop_tls_adoption.py",
+    "tools/tasks/M3-031.json",
+    "tools/tests/test_m3_031_desktop_tls_adoption.py"
+  ],
+  "dependencies": ["M2-004", "M2-006", "M3-030"],
+  "long_running_gate": false,
+  "platforms": ["linux-x86_64-glibc", "windows-x86_64", "macos-arm64"],
+  "required_evidence": [
+    "docs/evidence/M3-031/evidence.json",
+    "docs/evidence/M3-031/core-prerequisite-audit.json",
+    "docs/evidence/M3-031/windows-x86_64/provider-result.json",
+    "docs/evidence/M3-031/windows-x86_64/validation.json",
+    "docs/evidence/M3-031/macos-arm64/provider-result.json",
+    "docs/evidence/M3-031/macos-arm64/validation.json",
+    "docs/evidence/M3-031/desktop-provider-matrix.json",
+    "docs/evidence/M3-031/hosted-run.json",
+    "docs/evidence/M3-031/task-check.json"
+  ],
+  "schema_version": 1,
+  "source_paths": [
+    ".github/workflows/m3-031-desktop-tls-adoption.yml",
+    ".gitignore",
+    "docs/architecture/adr/0007-desktop-tls-adoption.md",
+    "docs/evidence/M3-031/README.md",
+    "docs/evidence/M3-031/test-plan.md",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "scripts/check-m3-031-desktop-tls-adoption",
+    "tools/m3_031_desktop_tls_adoption.py",
+    "tools/tasks/M3-031.json",
+    "tools/tests/test_m3_031_desktop_tls_adoption.py"
+  ],
+  "task_id": "M3-031",
+  "timeout_seconds": 1800
+}
