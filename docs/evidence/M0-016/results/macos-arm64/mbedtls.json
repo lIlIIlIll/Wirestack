@@ -1,28 +1,28 @@
 {
   "build": {
-    "binary_bytes": 742928,
-    "binary_sha256": "4735343f31cce57b3e06fd5c6f549654fbd7373e10f0b583ced208b79f6c43da",
+    "binary_bytes": 743072,
+    "binary_sha256": "4a35c5b0f1c7c2573f34218dfe714d6590a3158f20d0d93c17a5bd48cab909bb",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 427384,
         "name": "libmbedtls.a",
-        "sha256": "0f0cd3a5ea9cdb17ee47f86993b63739f7c7ba2da2705c26df7332c27acc0a09"
+        "sha256": "4030e18ecd4839b50e7f023229b58dd967d57cd59a35e6169152c67d29293b0d"
       },
       {
         "bytes": 127528,
         "name": "libmbedx509.a",
-        "sha256": "d69e52c7572ed676e762055f6e386d65cfca7686b4962b39ce9423efcf8b2ac1"
+        "sha256": "b8f43633af90d17d1750b9115606442cecd4600261898c402d7a3b4c99b76cd6"
       },
       {
         "bytes": 670520,
         "name": "libtfpsacrypto.a",
-        "sha256": "3da8446bc52473320b6f15f3b642c11108a95552d5e8f44be077a555a8da9487"
+        "sha256": "55af194a9ba577ae26ce9026d438e05364c9786705ebdfb22941cea97acf8ca2"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "6c4eb1136692bd035aacefb7dd75831bb75c1c5510baeccb66035c0297a41cfc",
+  "build_log_sha256": "23b8dd07b270097cb40d07c2fe6206b414f26583836cbf12f334ce0a3348894e",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -44,12 +44,14 @@
     "image_os": "macos15",
     "image_version": "20260727.0256.1",
     "python": "3.12.10",
-    "repository_revision": "dd9a7f248ec2c60d9a9d965d08af0ac359806f23",
+    "repository_revision": "dc0e4d54e5f35d32a6b974f96a0006595729dbfe",
     "runner_arch": "ARM64",
     "runner_os": "macOS"
   },
-  "finished_at": "2026-08-31T09:17:05.596540+00:00",
+  "finished_at": "2026-08-31T09:56:58.375031+00:00",
   "metrics": {
+    "alpn_malformed_inputs_rejected": 2,
+    "alpn_no_overlap_handshakes": 2,
     "external_trust_calls": 4,
     "repeated_cleanup_cycles": 10000
   },
@@ -66,7 +68,7 @@
     "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T09:15:29.552566+00:00",
+  "started_at": "2026-08-31T09:55:28.096168+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 932616,
-    "binary_sha256": "ac7bf597cd0fcf6b592d994d26f506d188b5bdab348a164e41c59145daa668dd",
+    "binary_bytes": 936864,
+    "binary_sha256": "b22a0fdcce5bed7e6f391bd8c9cea1c95962d9e336004100b514f5fa2a5e8ec4",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
@@ -22,7 +22,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "09a17cc0ffe174d86ceae92827a59ca9711e1549e211d6166176e5f8b12d41e8",
+  "build_log_sha256": "9246eae250fd201c4550757ebcc5b8d055a2cb6b8135e67305313b19af67a205",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -48,8 +48,10 @@
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T09:17:21.040448+00:00",
+  "finished_at": "2026-08-31T09:57:04.254473+00:00",
   "metrics": {
+    "alpn_malformed_inputs_rejected": 2,
+    "alpn_no_overlap_handshakes": 2,
     "external_trust_calls": 4,
     "repeated_cleanup_cycles": 10000
   },
@@ -66,7 +68,7 @@
     "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T09:15:23.187202+00:00",
+  "started_at": "2026-08-31T09:55:34.492421+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

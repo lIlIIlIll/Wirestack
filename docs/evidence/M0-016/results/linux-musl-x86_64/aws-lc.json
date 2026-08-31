@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 4445664,
-    "binary_sha256": "5c188dce1f90362ec32c3beafa53fa5c06a165ad1af93165d81fee55f0dd2ac4",
+    "binary_bytes": 4445824,
+    "binary_sha256": "1ef57525ccc6b31309f3035f73b8935aae9421808416f93e1bce3c009460500b",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
@@ -17,7 +17,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "ae6889d1995e62312c269f36f26d4bc1d1b31ac021f705fd1c60acdc8436a79b",
+  "build_log_sha256": "a8ec2392b36ff37116d8432fe52c364ce5f4f8e7e7fa69760f4ecf4b5b2e0881",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -43,8 +43,10 @@
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T09:17:04.964725+00:00",
+  "finished_at": "2026-08-31T09:57:16.956936+00:00",
   "metrics": {
+    "alpn_malformed_inputs_rejected": 2,
+    "alpn_no_overlap_handshakes": 2,
     "external_signer_calls": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
@@ -66,7 +68,7 @@
     "kind": "git",
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T09:15:21.792481+00:00",
+  "started_at": "2026-08-31T09:55:35.562175+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }
