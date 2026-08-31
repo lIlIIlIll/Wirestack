@@ -5,8 +5,10 @@ M0-016 compares the three candidates frozen by M0-015 without selecting the fina
 ## Candidates
 
 - `aws-lc`: primary candidate, pinned by exact Git commit.
-- `mbedtls`: secondary candidate, pinned by the official release archive SHA-256 and release commit.
-- `openssl`: vendored control, pinned by the official release archive SHA-256; the run resolves the annotated release tag to its exact commit.
+- `mbedtls`: secondary candidate, pinned by the official release archive
+  SHA-256 and independently resolved annotated release-tag commit.
+- `openssl`: vendored control, pinned by the official release archive SHA-256
+  and independently resolved annotated release-tag commit.
 
 Version changes require a reviewed change to `tools/tls_provider_poc/providers.json`; a floating branch, unverified archive or package-manager “latest” is rejected.
 
@@ -30,7 +32,8 @@ exact, bounded inventory of the final artifact's exported symbols and exactly
 cycles. When session resumption passes, the result must record four measured
 handshakes: a fresh and resumed TLS 1.2 handshake, plus a fresh and resumed TLS
 1.3 handshake after ticket delivery. A provider cannot infer resumption from a
-successful fresh handshake.
+successful fresh handshake. Both endpoints must report a cache miss for each
+fresh handshake and a cache hit for each resumed handshake.
 
 Every successful native result records the exact repository revision and
 hosted-runner image identity. A musl result additionally records the immutable
@@ -49,8 +52,10 @@ paths, byte counts, and file digests, and the result binds the manifest digest.
 The canonical matrix also references a committed copy of that exact manifest;
 matrix validation reads and hashes every referenced license file.
 The source object must match the selected provider's exact commit and source
-kind. Archive providers must match the pinned archive SHA-256. Git providers
-must match the pinned tree and deterministic content SHA-256. Static archive
+kind. Archive providers must match the pinned archive SHA-256 and record the
+release tag plus its independently resolved commit; a configured commit copied
+without resolving the tag is not source evidence. Git providers must match the
+pinned tree and deterministic content SHA-256. Static archive
 inventories contain bounded, sorted, unique objects with name, byte count and
 SHA-256; a truthy placeholder is not evidence.
 

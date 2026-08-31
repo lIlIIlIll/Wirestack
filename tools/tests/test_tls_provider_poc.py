@@ -153,7 +153,10 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
             "kind": provider_spec["source_kind"],
             "security_update": copy.deepcopy(provider_spec["security_update"]),
             **({"tree": provider_spec["tree"]}
-               if provider_spec["source_kind"] == "git" else {}),
+               if provider_spec["source_kind"] == "git" else {
+                   "tag": provider_spec["tag"],
+                   "tag_resolved_commit": provider_spec["commit"],
+               }),
         },
         "capabilities": caps,
         "metrics": metrics,
@@ -398,11 +401,57 @@ class ProviderPocValidationTests(unittest.TestCase):
     def test_archive_provider_requires_exact_commit(self):
         value = copy.deepcopy(self.spec)
         value["providers"][2].pop("commit")
-        value["providers"][2]["commit_resolution_url"] = (
-            "https://api.github.com/repos/openssl/openssl/git/ref/tags/openssl-3.6.4"
-        )
         with self.assertRaises(validator.ValidationError):
             validator.validate_spec(value)
+
+    def test_archive_provider_requires_release_tag_resolution(self):
+        value = copy.deepcopy(self.spec)
+        value["providers"][1].pop("tag")
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "release tag required"):
+            validator.validate_spec(value)
+
+        value = copy.deepcopy(self.spec)
+        value["providers"][1].pop("commit_resolution_url")
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "release tag resolution URL required"):
+            validator.validate_spec(value)
+
+    def test_archive_source_resolves_and_matches_release_tag_commit(self):
+        provider = copy.deepcopy(self.spec["providers"][1])
+        payload = b"archive fixture"
+        provider["sha256"] = validator.hashlib.sha256(payload).hexdigest()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            extracted = root / "extracted"
+            extracted.mkdir()
+
+            def write_archive(_url, destination):
+                destination.write_bytes(payload)
+
+            with mock.patch.object(runner, "download", side_effect=write_archive), \
+                    mock.patch.object(runner, "safe_extract",
+                                      return_value=extracted), \
+                    mock.patch.object(runner, "resolve_git_tag",
+                                      return_value=provider["commit"]) as resolve:
+                source, identity = runner.source_provider(
+                    provider, root / "work", root / "build.log")
+
+            self.assertEqual(extracted, source)
+            self.assertEqual(provider["tag"], identity["tag"])
+            self.assertEqual(provider["commit"],
+                             identity["tag_resolved_commit"])
+            resolve.assert_called_once_with(provider["commit_resolution_url"])
+
+            with mock.patch.object(runner, "download", side_effect=write_archive), \
+                    mock.patch.object(runner, "safe_extract",
+                                      return_value=extracted), \
+                    mock.patch.object(runner, "resolve_git_tag",
+                                      return_value="0" * 40):
+                with self.assertRaisesRegex(runner.PocError,
+                                            "release tag commit mismatch"):
+                    runner.source_provider(
+                        provider, root / "mismatch", root / "mismatch.log")
 
     def test_missing_platform_cell_fails(self):
         value = copy.deepcopy(self.matrix)
@@ -576,6 +625,21 @@ class ProviderPocValidationTests(unittest.TestCase):
                 "openssl",
                 caps,
             )
+
+    def test_openssl_resumption_requires_fresh_cache_miss(self):
+        source = (ROOT / "tools/tls_provider_poc/openssl_memory_poc.c").read_text(
+            encoding="utf-8")
+        self.assertIn("SSL_session_reused(first.client) == 0", source)
+        self.assertIn("SSL_session_reused(first.server) == 0", source)
+        self.assertIn("SSL_session_reused(resumed.client) == 1", source)
+        self.assertIn("SSL_session_reused(resumed.server) == 1", source)
+
+    def test_archive_result_binds_release_tag_resolution(self):
+        result = complete_result(self.spec, provider="mbedtls", status="PARTIAL")
+        result["source"]["tag_resolved_commit"] = "0" * 40
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "release tag commit"):
+            validator.validate_result(result, self.spec)
 
     def test_metrics_require_negative_alpn_coverage(self):
         caps = {name: "BLOCKED" for name in self.spec["required_capabilities"]}
