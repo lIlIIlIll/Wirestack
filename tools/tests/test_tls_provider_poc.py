@@ -626,6 +626,10 @@ class ProviderPocValidationTests(unittest.TestCase):
             self.assertIn("GetProcessMemoryInfo", source)
             self.assertIn("mach_task_basic_info_data_t", source)
             self.assertIn("getrusage(RUSAGE_SELF", source)
+            self.assertIn("PROVIDER_ALLOCATION_CALL_BOUND 150000000ULL", source)
+        self.assertEqual(150_000_000, runner.PROVIDER_ALLOCATION_CALL_BOUND)
+        self.assertEqual(runner.PROVIDER_ALLOCATION_CALL_BOUND,
+                         validator.PROVIDER_ALLOCATION_CALL_BOUND)
         self.assertIn("repo=repo, diagnostic=diagnostic", musl_runner)
         self.assertIn('extra_configure_args=("no-secure-memory",)', musl_runner)
         self.assertIn("typedef DWORD (WINAPI *PocThreadRoutine)(LPVOID);",
