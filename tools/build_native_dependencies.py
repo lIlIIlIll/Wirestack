@@ -104,7 +104,17 @@ def main() -> int:
             "status": "FAIL",
         }))
         return 2
-    for selected in [selected_resolver]:
+    # CJPM validates every Darwin target FFI table before compiling the selected
+    # target, so both target-specific archives must exist even though it links
+    # only the requested one.
+    required_resolvers = [selected_resolver]
+    if system == "Darwin":
+        required_resolvers.append(
+            "ios-simulator-arm64"
+            if selected_resolver == "macos-arm64"
+            else "macos-arm64"
+        )
+    for selected in required_resolvers:
         resolver = [
             sys.executable,
             str(root / "tools" / "build_resolver.py"),
