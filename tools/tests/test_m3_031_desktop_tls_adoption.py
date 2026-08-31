@@ -74,10 +74,10 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             report = root / report_relative
             validation = root / validation_relative
             report.parent.mkdir(parents=True)
-            report.write_text(json.dumps({
+            report.write_bytes((json.dumps({
                 "schema_version": 1, "task_id": "M2-004", "revision": "a" * 40,
                 "decision": "PASS",
-            }), encoding="utf-8")
+            }, indent=2) + "\n").replace("\n", "\r\n").encode("utf-8"))
             validation.write_text(json.dumps({
                 "schema_version": 1, "task_id": "M2-004",
                 "expected_revision": "a" * 40, "failures": [], "status": "PASS",
@@ -114,6 +114,14 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                     "STALE_SOURCE",
                     lambda: adoption.validate_dependency_evidence(root, bindings),
                 )
+                structural = adoption.validate_dependency_evidence(
+                    root, bindings, verify_current_sources=False
+                )
+                self.assertEqual("PASS", structural["status"])
+                self.assertEqual(
+                    "SEALED_INVENTORY",
+                    structural["tasks"]["M2-004"]["source_verification"],
+                )
                 source.write_text("source", encoding="utf-8")
                 report.write_text(json.dumps({
                     "schema_version": 1, "task_id": "M2-004",
@@ -121,7 +129,9 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 }), encoding="utf-8")
                 self.assert_code(
                     "DEPENDENCY_EVIDENCE",
-                    lambda: adoption.validate_dependency_evidence(root, bindings),
+                    lambda: adoption.validate_dependency_evidence(
+                        root, bindings, verify_current_sources=False
+                    ),
                 )
 
     def test_retained_report_and_tls_source_drift_fail_closed(self) -> None:
