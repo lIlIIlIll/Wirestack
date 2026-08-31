@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 766464,
-    "binary_sha256": "9c0a0184e11de06d8c78223eab0452a2184bfd276c0b8238c7c36b5e096e78b5",
+    "binary_bytes": 768512,
+    "binary_sha256": "717a11768a99bf5c7f59963558f6c7337571856d1d10e349704cf09c285c1c56",
     "exported_symbol_inventory": {
       "count": 0,
       "scope": "final-artifact-exports",
@@ -15,27 +15,102 @@
       "sha256": "ffc7d119c232428afa5e656557ab1fdb0166f102a51cc9515addf7f6cf82497d",
       "total_bytes": 135878
     },
+    "provenance": {
+      "build_argv": [
+        [
+          "cmake",
+          "--build",
+          "<BUILD>",
+          "--parallel",
+          "4"
+        ],
+        [
+          "cmake",
+          "--install",
+          "<BUILD>"
+        ]
+      ],
+      "build_tool": {
+        "argv": [
+          "ninja",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "1.13.2",
+        "output_sha256": "87729f1910e8eb02719463db46083e0f1a4c3cbade23b357806338b25df16a6a"
+      },
+      "cmake": {
+        "argv": [
+          "cmake",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "cmake version 4.4.2\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+        "output_sha256": "25ccfac39d8920de7c484efdef450aebbe777449e219398e3c76851eecdd721c"
+      },
+      "compiler": {
+        "argv": [
+          "cl",
+          "/Bv"
+        ],
+        "exit_code": 2,
+        "output": "Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36256 for x64\nCopyright (C) Microsoft Corporation.  All rights reserved.\n\nCompiler Passes:\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe:        Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c1.dll:        Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c1xx.dll:      Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c2.dll:        Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c1xx.dll:      Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe:      Version 14.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\mspdb140.dll:  Version 14.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\1033\\clui.dll: Version 19.51.36256.0\n\ncl : Command line error D8003 : missing source filename",
+        "output_sha256": "497bf05bb0c5fd03aef774d80d8fdf22f9d2c63adc39f4246fb5b37236c4c5c5"
+      },
+      "configure_argv": [
+        "cmake",
+        "-S",
+        "<SOURCE>",
+        "-B",
+        "<BUILD>",
+        "-GNinja",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DENABLE_TESTING=OFF",
+        "-DENABLE_PROGRAMS=OFF",
+        "-DUSE_SHARED_MBEDTLS_LIBRARY=OFF",
+        "-DTF_PSA_CRYPTO_USER_CONFIG_FILE=<REPOSITORY>/tools/tls_provider_poc/mbedtls_provider_profile_config.h",
+        "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW",
+        "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
+        "-DMSVC_STATIC_RUNTIME=ON",
+        "-DCMAKE_INSTALL_PREFIX=<PREFIX>"
+      ],
+      "cxx_compiler": {
+        "argv": [
+          "cl",
+          "/Bv"
+        ],
+        "exit_code": 2,
+        "output": "Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36256 for x64\nCopyright (C) Microsoft Corporation.  All rights reserved.\n\nCompiler Passes:\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe:        Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c1.dll:        Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c1xx.dll:      Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c2.dll:        Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c1xx.dll:      Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe:      Version 14.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\mspdb140.dll:  Version 14.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\1033\\clui.dll: Version 19.51.36256.0\n\ncl : Command line error D8003 : missing source filename",
+        "output_sha256": "497bf05bb0c5fd03aef774d80d8fdf22f9d2c63adc39f4246fb5b37236c4c5c5"
+      },
+      "environment": {},
+      "instrumentation": "none",
+      "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "patches": [],
+      "provider_instrumented": false,
+      "target_triple": "x86_64-pc-windows-msvc"
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 1208884,
+        "bytes": 1209136,
         "name": "mbedtls.lib",
-        "sha256": "2a0f4480c5ebe0099a3b4510c61379c37111f744dcd67cd43245d7f04a7a9fb9"
+        "sha256": "81770140741a16fb9142c6e8b921789d930ddd49edca51667738864c35d72e5c"
       },
       {
-        "bytes": 391948,
+        "bytes": 392146,
         "name": "mbedx509.lib",
-        "sha256": "43f853bd3d1661777ac97b772379100d5c1ceba4e9ced0650868244d3e8b87ea"
+        "sha256": "48a8ab38957dcdf31d199c09db6462eba3e084becf9030150745ca5107fd6f93"
       },
       {
-        "bytes": 1687036,
+        "bytes": 1688370,
         "name": "tfpsacrypto.lib",
-        "sha256": "0c5b7ab0d2913e131ded94236565e98ead8d0af4d6c81a5a434cbfb3c7b2c0a9"
+        "sha256": "557895eee3598af677083a51e524c04ce5185ad2efeac3ac6838d72049831188"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "9c844dcd7dc290974326743a8c8c3a341fed09c67bdbfe7fd2bc4dbb699695da",
+  "build_log_sha256": "06e79d7a897d702733520efe5d32fff31c045e629cf7f8fc4bfaa87bdbb5633e",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -60,36 +135,49 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "22ae52c7b277c1d6c83afc0ac0dd73dc7e9c83a6",
+    "repository_revision": "0970f3984eb523cc1571b864e72bfdddef10f3d8",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T12:23:55.155763+00:00",
+  "finished_at": "2026-08-31T14:23:46.443099+00:00",
   "metrics": {
-    "allocation_profile_bound_bytes": 1073741824,
-    "allocation_profile_bytes": 655687680,
-    "allocation_profile_calls": 20010,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
+    "cancellation_bound_us": 250000,
+    "cancellation_latency_us": 31,
+    "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 5726208,
+    "memory_profile_peak_resident_bytes": 5758976,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
+    "provider_allocation_bound_bytes": 68719476736,
+    "provider_allocation_bytes": 8202407052,
+    "provider_allocation_call_bound": 150000000,
+    "provider_allocation_calls": 133208644,
+    "provider_allocation_peak_live_bytes": 117634,
     "repeated_cleanup_cycles": 10000
   },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "operational_evidence": {
+    "cancellation": {
+      "bound_us": 250000,
+      "latency_us": 31,
+      "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+      "wakeups": 1
+    },
     "memory_profile": {
-      "allocation_bound_bytes": 1073741824,
-      "allocation_bytes": 655687680,
-      "allocation_calls": 20010,
-      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 5726208,
+      "peak_resident_bytes": 5758976,
+      "provider_allocation_bound_bytes": 68719476736,
+      "provider_allocation_bytes": 8202407052,
+      "provider_allocation_call_bound": 150000000,
+      "provider_allocation_calls": 133208644,
+      "provider_allocation_peak_live_bytes": 117634,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -101,14 +189,14 @@
   "platform": "windows-x86_64",
   "poc_exit_code": 0,
   "provider": "mbedtls",
-  "schema_version": 5,
+  "schema_version": 6,
   "source": {
     "archive": "mbedtls-4.2.0.tar.bz2",
     "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
     "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T12:20:06.695674+00:00",
+  "started_at": "2026-08-31T14:20:10.293107+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

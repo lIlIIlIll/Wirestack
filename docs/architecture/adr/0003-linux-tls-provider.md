@@ -16,30 +16,31 @@ private-key isolation, native callbacks and deterministic cleanup.
 
 AWS-LC 5.5.0 at commit
 `991e67ff4cf04df4dd89e407f8b920c6936cb56a` was originally selected from the
-earlier PoC evidence and was later requalified with schema-v5 `PASS` results on
-Linux glibc x86_64 and Linux musl x86_64. Schema v6 has now superseded those
-results, so the canonical matrix marks both cells `NOT_RUN` until the native
-rerun supplies provider-instrumented diagnostics, provider allocation hooks,
-durable build provenance, committed license bundles and real cancellation
-wakeup evidence. GitHub Actions run
-`33391223747` reports head `22ae52c7b277c1d6c83afc0ac0dd73dc7e9c83a6`
-and executed merge revision `4c7ddea51e9e73600b39be7938566ea6300ab5cd`.
-The superseded schema-v5 results recorded:
+earlier PoC evidence and is now requalified with schema-v6 `PASS` results on
+Linux glibc x86_64 and Linux musl x86_64. GitHub Actions run `33401994988`
+reports pull-request head `0b8e3181a82f8eb062e24e63edf57fc05850d859`
+and executed synthetic merge revision
+`0970f3984eb523cc1571b864e72bfdddef10f3d8`. The retained results bind that
+execution revision and record:
 
 - TLS 1.2 and TLS 1.3 client/server handshakes over caller-owned bounded BIOs;
 - SNI, reference-identity verification, ALPN, custom CA, required mTLS,
   optional client authentication with and without a certificate, and session
   reuse;
 - negative hostname and trust cases, clean `close_notify` and truncation;
-- caller cancellation and partial-I/O/backpressure behavior;
+- an explicit caller-owned wait, cancellation signal, wakeup and join with a
+  measured latency bound, plus partial-I/O/backpressure behavior;
 - an external signing callback invoked by both TLS 1.2 and TLS 1.3 without
   installing the private key into the TLS context;
-- 10,000 repeated handshake/close cycles with bounded resident-memory and
-  harness-allocation profiles;
-- ASan and UBSan on Linux glibc, with the process-global AWS-LC leak-detection
-  limitation recorded as unsupported rather than suppressed;
-- digest-bound provider license payloads, exact repository/runner/container
-  identity, and complete bounded symbol inventories; and
+- 10,000 repeated handshake/close cycles with bounded resident memory,
+  provider allocation-call count, cumulative allocated bytes and peak live
+  bytes;
+- provider-instrumented ASan and UBSan on Linux glibc, with the process-global
+  AWS-LC leak-detection limitation recorded as unsupported rather than
+  suppressed;
+- committed, digest-bound provider license payloads, exact repository, runner,
+  toolchain, target, configure/build arguments, environment, patch-set, source
+  and archive identity, and complete bounded symbol inventories; and
 - static archives with no system TLS-library dependency or runtime-loader
   library string.
 
@@ -92,8 +93,9 @@ artifact is withdrawn rather than silently downgraded.
 ## Consequences
 
 - Existing Linux TLS integration retains the frozen provider and C ABI
-  decision, but current qualification must not cite M0-016 as PASS until the
-  schema-v6 native rerun is retained.
+  decision. The current schema-v6 Linux AWS-LC qualification is `PASS`.
+- M0-016 as a global task remains `BLOCKED` because Android, iOS and HarmonyOS
+  or OpenHarmony still lack native-device evidence.
 - AWS-LC-specific code remains internal to the native provider adapter.
 - The global six-platform provider decision remains open. This ADR does not
   claim Windows, macOS, Android, iOS or HarmonyOS/OpenHarmony support.

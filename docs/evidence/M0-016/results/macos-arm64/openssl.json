@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 5366752,
-    "binary_sha256": "78ee96ad195daa9c4f1940e570d9501a13029c673a2947ec9f73b8a9da256f2d",
+    "binary_bytes": 5383680,
+    "binary_sha256": "c71391994e3441e9422147520ffbaecd6ef2a4aedfcd4c0b5e554cca94ceffc9",
     "exported_symbol_inventory": {
       "count": 9534,
       "scope": "final-artifact-exports",
@@ -9550,22 +9550,81 @@
       "sha256": "045d956dc9b5cc1ab3346c0d3c4924e07a2e3095af72096c181922033ae5e1d0",
       "total_bytes": 29732
     },
+    "provenance": {
+      "build_argv": [
+        [
+          "make",
+          "-j3"
+        ],
+        [
+          "make",
+          "install_sw"
+        ]
+      ],
+      "build_tool": {
+        "argv": [
+          "make",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "GNU Make 3.81\nCopyright (C) 2006  Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.\nThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\nPARTICULAR PURPOSE.\n\nThis program built for i386-apple-darwin11.3.0",
+        "output_sha256": "6100fc13dd4a26c41f71b3a2ffb7c70b3859364733cfe269c384cc4e2f79cfe0"
+      },
+      "cmake": null,
+      "compiler": {
+        "argv": [
+          "cc",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "Apple clang version 17.0.0 (clang-1700.0.13.5)\nTarget: arm64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
+        "output_sha256": "e90749cef1d809b7d6c11405b894f0232baaee1f1b9f5e21c89da561d7998a42"
+      },
+      "configure_argv": [
+        "<SOURCE>/Configure",
+        "no-shared",
+        "no-module",
+        "no-tests",
+        "no-zlib",
+        "no-zstd",
+        "--prefix=<PREFIX>",
+        "--libdir=lib"
+      ],
+      "cxx_compiler": {
+        "argv": [
+          "c++",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "Apple clang version 17.0.0 (clang-1700.0.13.5)\nTarget: arm64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
+        "output_sha256": "e90749cef1d809b7d6c11405b894f0232baaee1f1b9f5e21c89da561d7998a42"
+      },
+      "environment": {
+        "CFLAGS": "-O2 -fPIC",
+        "CXXFLAGS": "-O2"
+      },
+      "instrumentation": "none",
+      "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "patches": [],
+      "provider_instrumented": false,
+      "target_triple": "arm64-apple-darwin"
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 1536312,
+        "bytes": 1539048,
         "name": "libssl.a",
-        "sha256": "8c710773012ee063e243f2c086335ac1b710d730b7686c53f40c343a972251c0"
+        "sha256": "9ae97c17898c23c6bb2307d3fbce6150c79469191ec2fc73e25c37427c5e2fb0"
       },
       {
-        "bytes": 8813056,
+        "bytes": 8831416,
         "name": "libcrypto.a",
-        "sha256": "cb0fd58b33dd0bfe6d981713ef37534ad3d4be15d9fb46be70ae410b83a6abd9"
+        "sha256": "6ffb2e78e395d9071e44941dd2ac7b1360e7cbc0cab0f5b782a5670b9845a4d5"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "ef3635d4e9d186aada21c94e28afe82c75a2bcce0c856dc3bab50683db9ff8f4",
+  "build_log_sha256": "50fe1a90d36a9ae423cb1b1ec18dc0101d5daf2e3b67599e1bd832bbcc4c734b",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -9590,24 +9649,29 @@
     "image_os": "macos15",
     "image_version": "20260727.0256.1",
     "python": "3.12.10",
-    "repository_revision": "4c7ddea51e9e73600b39be7938566ea6300ab5cd",
+    "repository_revision": "0970f3984eb523cc1571b864e72bfdddef10f3d8",
     "runner_arch": "ARM64",
     "runner_os": "macOS"
   },
-  "finished_at": "2026-08-31T12:21:54.764202+00:00",
+  "finished_at": "2026-08-31T14:23:50.933949+00:00",
   "metrics": {
-    "allocation_profile_bound_bytes": 1073741824,
-    "allocation_profile_bytes": 655949824,
-    "allocation_profile_calls": 20018,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
+    "cancellation_bound_us": 250000,
+    "cancellation_latency_us": 26,
+    "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 7127040,
+    "memory_profile_peak_resident_bytes": 7258112,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
+    "provider_allocation_bound_bytes": 68719476736,
+    "provider_allocation_bytes": 6306629720,
+    "provider_allocation_call_bound": 150000000,
+    "provider_allocation_calls": 28459544,
+    "provider_allocation_peak_live_bytes": 813791,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -9617,13 +9681,21 @@
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "operational_evidence": {
+    "cancellation": {
+      "bound_us": 250000,
+      "latency_us": 26,
+      "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+      "wakeups": 1
+    },
     "memory_profile": {
-      "allocation_bound_bytes": 1073741824,
-      "allocation_bytes": 655949824,
-      "allocation_calls": 20018,
-      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 7127040,
+      "peak_resident_bytes": 7258112,
+      "provider_allocation_bound_bytes": 68719476736,
+      "provider_allocation_bytes": 6306629720,
+      "provider_allocation_call_bound": 150000000,
+      "provider_allocation_calls": 28459544,
+      "provider_allocation_peak_live_bytes": 813791,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -9632,7 +9704,81 @@
         "reason": "static OpenSSL 3.6.3 retains process-global allocations after thread and global cleanup; broad allocator suppression is forbidden",
         "status": "UNSUPPORTED"
       },
-      "output_sha256": "d59ce90a16e2760351c0c5737a486dbe8968c6d3c2e657206d846b1f5e514785",
+      "output_sha256": "3cd3d2996056a5495b5f0f75d5f9844e5ee5512961cfc824a9bd60d71200e391",
+      "provider_build_provenance": {
+        "build_argv": [
+          [
+            "make",
+            "-j3"
+          ],
+          [
+            "make",
+            "install_sw"
+          ]
+        ],
+        "build_tool": {
+          "argv": [
+            "make",
+            "--version"
+          ],
+          "exit_code": 0,
+          "output": "GNU Make 3.81\nCopyright (C) 2006  Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.\nThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\nPARTICULAR PURPOSE.\n\nThis program built for i386-apple-darwin11.3.0",
+          "output_sha256": "6100fc13dd4a26c41f71b3a2ffb7c70b3859364733cfe269c384cc4e2f79cfe0"
+        },
+        "cmake": null,
+        "compiler": {
+          "argv": [
+            "cc",
+            "--version"
+          ],
+          "exit_code": 0,
+          "output": "Apple clang version 17.0.0 (clang-1700.0.13.5)\nTarget: arm64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
+          "output_sha256": "e90749cef1d809b7d6c11405b894f0232baaee1f1b9f5e21c89da561d7998a42"
+        },
+        "configure_argv": [
+          "<SOURCE>/Configure",
+          "no-asm",
+          "no-shared",
+          "no-module",
+          "no-tests",
+          "no-zlib",
+          "no-zstd",
+          "--prefix=<PREFIX>",
+          "--libdir=lib"
+        ],
+        "cxx_compiler": {
+          "argv": [
+            "c++",
+            "--version"
+          ],
+          "exit_code": 0,
+          "output": "Apple clang version 17.0.0 (clang-1700.0.13.5)\nTarget: arm64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
+          "output_sha256": "e90749cef1d809b7d6c11405b894f0232baaee1f1b9f5e21c89da561d7998a42"
+        },
+        "environment": {
+          "CFLAGS": "-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -fPIC",
+          "CXXFLAGS": "-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer",
+          "LDFLAGS": "-fsanitize=address,undefined"
+        },
+        "instrumentation": "address+undefined-sanitizer",
+        "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "patches": [],
+        "provider_instrumented": true,
+        "target_triple": "arm64-apple-darwin"
+      },
+      "provider_instrumented": true,
+      "provider_static_archives": [
+        {
+          "bytes": 16419160,
+          "name": "libssl.a",
+          "sha256": "3cc7310b8ef3509472e7a2160cab10fce95687c900e5a9d058154ad14f8a1a9d"
+        },
+        {
+          "bytes": 56610224,
+          "name": "libcrypto.a",
+          "sha256": "a718836d72c6d9345c8c9dbbab3ecfbfd6cd40cb1568248800fca96023044fcd"
+        }
+      ],
       "status": "PASS",
       "tool": "address+undefined-sanitizer"
     }
@@ -9640,14 +9786,14 @@
   "platform": "macos-arm64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 5,
+  "schema_version": 6,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T12:20:15.074197+00:00",
+  "started_at": "2026-08-31T14:20:13.547824+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
