@@ -35,7 +35,11 @@ MAX_LICENSE_FILES = 512
 MAX_LICENSE_FILE_BYTES = 512 * 1024
 MAX_LICENSE_TOTAL_BYTES = 8 * 1024 * 1024
 MEMORY_PROFILE_BOUND_BYTES = 512 * 1024 * 1024
-ALLOCATION_PROFILE_BOUND_BYTES = 1024 * 1024 * 1024
+PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES = 64 * 1024 * 1024 * 1024
+PROVIDER_ALLOCATION_CALL_BOUND = 100_000_000
+CANCELLATION_WAKE_BOUND_US = 250_000
+RESULT_SCHEMA_VERSION = 6
+MAX_TOOL_VERSION_BYTES = 16 * 1024
 
 
 class PocError(RuntimeError):
@@ -184,6 +188,52 @@ def mbedtls_runtime_args(windows: bool) -> list[str]:
     return ["-DMSVC_STATIC_RUNTIME=ON"] if windows else []
 
 
+def mbedtls_profile_config(repo: Path) -> Path:
+    return repo / "tools/tls_provider_poc/mbedtls_provider_profile_config.h"
+
+
+def target_triple(current_platform: str) -> str:
+    triples = {
+        "linux-glibc-x86_64": "x86_64-unknown-linux-gnu",
+        "linux-musl-x86_64": "x86_64-unknown-linux-musl",
+        "windows-x86_64": "x86_64-pc-windows-msvc",
+        "macos-arm64": "arm64-apple-darwin",
+    }
+    try:
+        return triples[current_platform]
+    except KeyError as error:
+        raise PocError(f"unsupported native provider target: {current_platform}") from error
+
+
+def normalized_argv(command: Sequence[str], replacements: Mapping[Path, str]) -> list[str]:
+    normalized: list[str] = []
+    ordered = sorted(
+        ((str(path.resolve()), marker) for path, marker in replacements.items()),
+        key=lambda item: len(item[0]), reverse=True,
+    )
+    for argument in command:
+        value = str(argument)
+        for raw_path, marker in ordered:
+            value = value.replace(raw_path, marker)
+            value = value.replace(raw_path.replace("\\", "/"), marker)
+        normalized.append(value)
+    return normalized
+
+
+def tool_identity(command: Sequence[str], *, cwd: Path, log: Path) -> dict[str, Any]:
+    completed = run(command, cwd=cwd, log=log, check=False)
+    output = completed.stdout.strip()
+    encoded = output.encode("utf-8")
+    if not output or len(encoded) > MAX_TOOL_VERSION_BYTES:
+        raise PocError(f"tool identity output is missing or exceeds its bound: {command[0]}")
+    return {
+        "argv": list(command),
+        "exit_code": completed.returncode,
+        "output": output,
+        "output_sha256": hashlib.sha256(encoded).hexdigest(),
+    }
+
+
 def source_provider(spec: Mapping[str, Any], work: Path, log: Path) -> tuple[Path, dict[str, Any]]:
     source_root = work / "source"
     source_root.mkdir(parents=True, exist_ok=True)
@@ -281,55 +331,135 @@ def create_license_bundle(src: Path, output_dir: Path, provider: str,
 
 
 def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
-                   log: Path) -> tuple[Path, list[Path]]:
+                   log: Path, *, repo: Path | None = None,
+                   diagnostic: bool = False) -> tuple[Path, list[Path], dict[str, Any]]:
+    repo = (repo or Path(__file__).resolve().parents[2]).resolve()
     build = work / "build"
     prefix = work / "prefix"
+    build.mkdir(parents=True, exist_ok=True)
     jobs = str(max(2, min(os.cpu_count() or 2, 4)))
     pid = spec["id"]
+    sanitizer_flags = "-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer"
+    if diagnostic and pid == "aws-lc" and sys.platform.startswith("linux"):
+        # GCC reports false-positive array-bounds diagnostics while compiling
+        # AWS-LC 5.5.0's generated ML-DSA amalgamation. Keep every other AWS-LC
+        # warning fatal while preserving sanitizer instrumentation.
+        sanitizer_flags += " -Wno-error=array-bounds"
+    cmake_diagnostic_args = [
+        f"-DCMAKE_C_FLAGS={sanitizer_flags}",
+        f"-DCMAKE_CXX_FLAGS={sanitizer_flags}",
+        "-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined",
+    ] if diagnostic else []
+    configure_command: list[str]
+    build_commands: list[list[str]] = []
+    environment_overrides: dict[str, str] = {}
     if pid == "aws-lc":
-        run([
+        configure_command = [
             "cmake", "-S", str(src), "-B", str(build), "-GNinja",
-            "-DCMAKE_BUILD_TYPE=Release", "-DBUILD_SHARED_LIBS=OFF",
+            f"-DCMAKE_BUILD_TYPE={'RelWithDebInfo' if diagnostic else 'Release'}",
+            "-DBUILD_SHARED_LIBS=OFF",
             "-DBUILD_TESTING=OFF", "-DDISABLE_GO=ON",
+            *(["-DOPENSSL_NO_ASM=ON"] if diagnostic else []),
+            *cmake_diagnostic_args,
             *cmake_runtime_args(is_windows()),
             f"-DCMAKE_INSTALL_PREFIX={prefix}",
-        ], cwd=work, log=log)
-        run(["cmake", "--build", str(build), "--target", "install", "--parallel", jobs], cwd=work, log=log)
+        ]
+        build_commands = [[
+            "cmake", "--build", str(build), "--target", "install",
+            "--parallel", jobs,
+        ]]
+        run(configure_command, cwd=work, log=log)
+        for command in build_commands:
+            run(command, cwd=work, log=log)
         archives = find_provider_archives(prefix, pid, is_windows())
     elif pid == "mbedtls":
-        run([
+        profile_config = mbedtls_profile_config(repo)
+        configure_command = [
             "cmake", "-S", str(src), "-B", str(build), "-GNinja",
-            "-DCMAKE_BUILD_TYPE=Release", "-DENABLE_TESTING=OFF",
+            f"-DCMAKE_BUILD_TYPE={'RelWithDebInfo' if diagnostic else 'Release'}",
+            "-DENABLE_TESTING=OFF",
             "-DENABLE_PROGRAMS=OFF", "-DUSE_SHARED_MBEDTLS_LIBRARY=OFF",
+            f"-DTF_PSA_CRYPTO_USER_CONFIG_FILE={profile_config.as_posix()}",
+            *cmake_diagnostic_args,
             *cmake_runtime_args(is_windows()),
             *mbedtls_runtime_args(is_windows()),
             f"-DCMAKE_INSTALL_PREFIX={prefix}",
-        ], cwd=work, log=log)
-        run(["cmake", "--build", str(build), "--parallel", jobs], cwd=work, log=log)
-        run(["cmake", "--install", str(build)], cwd=work, log=log)
+        ]
+        build_commands = [
+            ["cmake", "--build", str(build), "--parallel", jobs],
+            ["cmake", "--install", str(build)],
+        ]
+        run(configure_command, cwd=work, log=log)
+        for command in build_commands:
+            run(command, cwd=work, log=log)
         archives = find_provider_archives(prefix, pid, is_windows())
     else:
         env = os.environ.copy()
-        configure = [
+        configure_command = [
             "perl", str(src / "Configure")
         ] if is_windows() else [str(src / "Configure")]
         if is_windows():
-            configure.append("VC-WIN64A")
+            configure_command.append("VC-WIN64A")
         else:
-            env["CFLAGS"] = "-O2 -fPIC"
-        configure += [
+            environment_overrides = {
+                "CFLAGS": f"{sanitizer_flags} -fPIC" if diagnostic else "-O2 -fPIC",
+                "CXXFLAGS": sanitizer_flags if diagnostic else "-O2",
+                "LDFLAGS": "-fsanitize=address,undefined" if diagnostic else "",
+            }
+            env.update(environment_overrides)
+        configure_command += [
+            *(["no-asm"] if diagnostic else []),
             "no-shared", "no-module", "no-tests", "no-zlib", "no-zstd",
             f"--prefix={prefix}", "--libdir=lib",
         ]
-        run(configure, cwd=src, log=log, env=env)
+        run(configure_command, cwd=build, log=log, env=env)
         if is_windows():
-            run(["nmake"], cwd=src, log=log, env=env)
-            run(["nmake", "install_sw"], cwd=src, log=log, env=env)
+            build_commands = [["nmake"], ["nmake", "install_sw"]]
         else:
-            run(["make", f"-j{jobs}"], cwd=src, log=log, env=env)
-            run(["make", "install_sw"], cwd=src, log=log, env=env)
+            build_commands = [["make", f"-j{jobs}"], ["make", "install_sw"]]
+        for command in build_commands:
+            run(command, cwd=build, log=log, env=env)
         archives = find_provider_archives(prefix, pid, is_windows())
-    return prefix, archives
+
+    compiler = os.environ.get("CC", "cl" if is_windows() else "cc")
+    cxx = os.environ.get("CXX", "cl" if is_windows() else "c++")
+    compiler_args = [compiler, "/Bv"] if is_windows() else [compiler, "--version"]
+    cxx_args = [cxx, "/Bv"] if is_windows() else [cxx, "--version"]
+    if pid in {"aws-lc", "mbedtls"}:
+        build_tool_args = ["ninja", "--version"]
+        cmake_identity: dict[str, Any] | None = tool_identity(
+            ["cmake", "--version"], cwd=work, log=log)
+    else:
+        build_tool_args = ["nmake", "/?"] if is_windows() else ["make", "--version"]
+        cmake_identity = None
+    replacements = {
+        src: "<SOURCE>",
+        build: "<BUILD>",
+        prefix: "<PREFIX>",
+        repo: "<REPOSITORY>",
+    }
+    normalized_environment = {
+        key: normalized_argv([value], replacements)[0]
+        for key, value in sorted(environment_overrides.items())
+        if value
+    }
+    provenance = {
+        "target_triple": target_triple(platform_id()),
+        "compiler": tool_identity(compiler_args, cwd=work, log=log),
+        "cxx_compiler": tool_identity(cxx_args, cwd=work, log=log),
+        "cmake": cmake_identity,
+        "build_tool": tool_identity(build_tool_args, cwd=work, log=log),
+        "configure_argv": normalized_argv(configure_command, replacements),
+        "build_argv": [normalized_argv(command, replacements) for command in build_commands],
+        "environment": normalized_environment,
+        "patches": [],
+        "patch_set_sha256": hashlib.sha256(b"[]\n").hexdigest(),
+        "instrumentation": (
+            "address+undefined-sanitizer" if diagnostic else "none"
+        ),
+        "provider_instrumented": diagnostic,
+    }
+    return prefix, archives, provenance
 
 
 def generate_fixtures(work: Path, log: Path) -> Path:
@@ -410,6 +540,7 @@ def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
                 extra_cflags: Sequence[str] = (), diagnostic: bool = False) -> Path:
     if diagnostic and is_windows():
         raise PocError("sanitizer diagnostic is unsupported on this Windows toolchain")
+    work.mkdir(parents=True, exist_ok=True)
     stem = "provider-poc-diagnostic" if diagnostic else "provider-poc"
     output = work / (f"{stem}.exe" if is_windows() else stem)
     include = prefix / "include"
@@ -417,10 +548,15 @@ def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
         "openssl_memory_poc.c" if spec["poc_family"] == "openssl-compatible"
         else "mbedtls_memory_poc.c"
     )
+    mbedtls_definition = (
+        f'TF_PSA_CRYPTO_USER_CONFIG_FILE="{mbedtls_profile_config(repo).as_posix()}"'
+    )
     if is_windows():
         run([
             os.environ.get("CC", "cl"), "/nologo", "/std:c11", "/O2", "/W3", "/WX",
-            "/MT", "/D_CRT_SECURE_NO_WARNINGS", f"/I{include}", *extra_cflags,
+            "/MT", "/D_CRT_SECURE_NO_WARNINGS",
+            *([f"/D{mbedtls_definition}"] if spec.get("id") == "mbedtls" else []),
+            f"/I{include}", *extra_cflags,
             str(source), *[str(archive) for archive in archives],
             "bcrypt.lib", "crypt32.lib", "advapi32.lib", "user32.lib", "ws2_32.lib",
             "psapi.lib",
@@ -453,6 +589,7 @@ def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
         run([
             os.environ.get("CC", "cc"), "-std=c99", *diagnostic_flags,
             "-Wall", "-Wextra", "-Werror",
+            *([f"-D{mbedtls_definition}"] if spec.get("id") == "mbedtls" else []),
             f"-I{include}", str(source), *[str(a) for a in archives], "-pthread", "-lm",
             *(["-fsanitize=address,undefined"] if diagnostic else []),
             "-o", str(output),
@@ -469,8 +606,8 @@ def fixture_command(binary: Path, fixtures: Path) -> list[str]:
     ]
 
 
-def run_native_memory_diagnostic(spec: Mapping[str, Any], repo: Path, prefix: Path,
-                                 archives: Sequence[Path], work: Path, log: Path,
+def run_native_memory_diagnostic(spec: Mapping[str, Any], repo: Path, src: Path,
+                                 work: Path, log: Path,
                                  fixtures: Path, current_platform: str) -> dict[str, Any]:
     if not (current_platform.startswith("linux-glibc-") or
             current_platform.startswith("macos-")):
@@ -479,8 +616,11 @@ def run_native_memory_diagnostic(spec: Mapping[str, Any], repo: Path, prefix: Pa
             "tool": "address+undefined-sanitizer",
             "reason": "the selected native toolchain does not provide the configured diagnostic",
         }
+    diagnostic_work = work / "diagnostic-provider"
+    prefix, archives, provenance = build_provider(
+        spec, src, diagnostic_work, log, repo=repo, diagnostic=True)
     binary = compile_poc(
-        spec, repo, prefix, archives, work, log, diagnostic=True)
+        spec, repo, prefix, archives, diagnostic_work, log, diagnostic=True)
     env = os.environ.copy()
     env["WIRESTACK_POC_DIAGNOSTIC_CYCLES"] = "10"
     leak_detection_supported = (
@@ -501,6 +641,16 @@ def run_native_memory_diagnostic(spec: Mapping[str, Any], repo: Path, prefix: Pa
         "tool": "address+undefined-sanitizer",
         "cleanup_cycles": 10,
         "output_sha256": hashlib.sha256(completed.stdout.encode("utf-8")).hexdigest(),
+        "provider_instrumented": True,
+        "provider_static_archives": [
+            {
+                "name": archive.name,
+                "bytes": archive.stat().st_size,
+                "sha256": sha256_path(archive),
+            }
+            for archive in archives
+        ],
+        "provider_build_provenance": provenance,
         "leak_detection": {
             "status": "PASS" if leak_detection_supported else "UNSUPPORTED",
         },
@@ -627,15 +777,30 @@ def parse_metrics(stdout: str, provider: str, caps: Mapping[str, str]) -> dict[s
         or metrics.get("mtls_optional_handshakes") != 2
     ):
         raise PocError("mTLS evidence did not cover required and optional client authentication")
+    if caps.get("caller_cancellation") == "PASS" and (
+        metrics.get("cancellation_wakeups") != 1
+        or metrics.get("cancellation_bound_us") != CANCELLATION_WAKE_BOUND_US
+        or metrics.get("cancellation_latency_us", CANCELLATION_WAKE_BOUND_US + 1)
+        > CANCELLATION_WAKE_BOUND_US
+    ):
+        raise PocError("caller cancellation did not wake a blocked provider wait within its bound")
     peak = metrics.get("memory_profile_peak_resident_bytes", 0)
     if (metrics.get("memory_profile_bound_bytes") != MEMORY_PROFILE_BOUND_BYTES
             or peak <= 0 or peak > MEMORY_PROFILE_BOUND_BYTES):
         raise PocError("native memory profile exceeded or omitted its resident bound")
-    allocated = metrics.get("allocation_profile_bytes", 0)
-    if (metrics.get("allocation_profile_bound_bytes") != ALLOCATION_PROFILE_BOUND_BYTES
-            or metrics.get("allocation_profile_calls", 0) <= 0
-            or allocated <= 0 or allocated > ALLOCATION_PROFILE_BOUND_BYTES):
-        raise PocError("native allocation profile exceeded or omitted its bound")
+    allocated = metrics.get("provider_allocation_bytes", 0)
+    if (metrics.get("provider_allocation_bound_bytes") !=
+            PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES
+            or metrics.get("provider_allocation_call_bound") !=
+            PROVIDER_ALLOCATION_CALL_BOUND
+            or metrics.get("provider_allocation_calls", 0) <= 0
+            or metrics.get("provider_allocation_calls", 0) >
+            PROVIDER_ALLOCATION_CALL_BOUND
+            or allocated <= 0 or allocated > PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES
+            or metrics.get("provider_allocation_peak_live_bytes", 0) <= 0
+            or metrics.get("provider_allocation_peak_live_bytes", 0) >
+            MEMORY_PROFILE_BOUND_BYTES):
+        raise PocError("provider allocation profile exceeded or omitted its bound")
     return metrics
 
 
@@ -659,7 +824,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     started = dt.datetime.now(dt.timezone.utc)
     current_platform = platform_id()
     result: dict[str, Any] = {
-        "schema_version": 5,
+        "schema_version": RESULT_SCHEMA_VERSION,
         "task_id": "M0-016",
         "provider": args.provider,
         "platform": current_platform,
@@ -687,11 +852,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         result["source"] = source_info
         license_bundle = create_license_bundle(
             src, output.parent, args.provider, source_info)
-        prefix, archives = build_provider(spec, src, work, log)
+        prefix, archives, build_provenance = build_provider(
+            spec, src, work, log, repo=repo)
         fixtures = generate_fixtures(work, log)
         binary = compile_poc(spec, repo, prefix, archives, work, log)
         result["build"] = inspect_binary(binary, archives, work, log)
         result["build"]["license_bundle"] = license_bundle
+        result["build"]["provenance"] = build_provenance
         completed = run(
             fixture_command(binary, fixtures), cwd=work, log=log, check=False)
         result["poc_exit_code"] = completed.returncode
@@ -699,17 +866,25 @@ def main(argv: Sequence[str] | None = None) -> int:
         result["metrics"] = parse_metrics(
             completed.stdout, args.provider, result["capabilities"])
         diagnostic = run_native_memory_diagnostic(
-            spec, repo, prefix, archives, work, log, fixtures, current_platform)
+            spec, repo, src, work, log, fixtures, current_platform)
         result["operational_evidence"] = {
             "native_memory_diagnostic": diagnostic,
             "memory_profile": {
-                "method": "native-process-peak-resident-and-harness-allocation-counters",
+                "method": "native-process-peak-resident-and-provider-allocation-hooks",
                 "peak_resident_bytes": result["metrics"]["memory_profile_peak_resident_bytes"],
                 "resident_bound_bytes": result["metrics"]["memory_profile_bound_bytes"],
-                "allocation_calls": result["metrics"]["allocation_profile_calls"],
-                "allocation_bytes": result["metrics"]["allocation_profile_bytes"],
-                "allocation_bound_bytes": result["metrics"]["allocation_profile_bound_bytes"],
+                "provider_allocation_calls": result["metrics"]["provider_allocation_calls"],
+                "provider_allocation_call_bound": result["metrics"]["provider_allocation_call_bound"],
+                "provider_allocation_bytes": result["metrics"]["provider_allocation_bytes"],
+                "provider_allocation_bound_bytes": result["metrics"]["provider_allocation_bound_bytes"],
+                "provider_allocation_peak_live_bytes": result["metrics"]["provider_allocation_peak_live_bytes"],
                 "payload_bytes_per_transfer": 32768,
+            },
+            "cancellation": {
+                "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+                "wakeups": result["metrics"]["cancellation_wakeups"],
+                "latency_us": result["metrics"]["cancellation_latency_us"],
+                "bound_us": result["metrics"]["cancellation_bound_us"],
             },
         }
         failed = [name for name, status in result["capabilities"].items() if status == "FAIL"]

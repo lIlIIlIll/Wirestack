@@ -18,10 +18,11 @@ Version changes require a reviewed change to `tools/tls_provider_poc/providers.j
 - `BLOCKED`: the native platform or required environment is unavailable.
 
 `NOT_RUN`, missing cells and cross-compilation never count as native evidence.
-Schema versions 1 through 4 are no longer accepted because they cannot carry
+Schema versions 1 through 5 are no longer accepted because they cannot carry
 the complete callback, protocol-negative, certificate-negative, export,
-execution, license, and operational evidence.
-Schema v5 is required for retained `PASS` and `PARTIAL` results. It requires an
+execution, durable build-provenance, license, provider-allocation,
+provider-instrumentation, and cancellation evidence.
+Schema v6 is required for retained `PASS` and `PARTIAL` results. It requires an
 exact, bounded inventory of the final artifact's exported symbols and exactly
 10,000 measured cleanup
 cycles. When session resumption passes, the result must record four measured
@@ -32,19 +33,28 @@ successful fresh handshake.
 Every successful native result records the exact repository revision and
 hosted-runner image identity. A musl result additionally records the immutable
 container name and digest; a mutable tag or artifact-level association is not
-sufficient. Provider license files are copied from the pinned source into a
+sufficient. The result retains normalized configure/build argv, compiler,
+C++ compiler, CMake when used, build-tool version output, target triple,
+environment overrides, and an explicit digest-bound patch set. Temporary build
+paths are replaced by stable markers; a build-log digest alone is not durable
+provenance. Provider license files are copied from the pinned source into a
 bounded bundle. Its manifest binds the provider, source digest, relative file
 paths, byte counts, and file digests, and the result binds the manifest digest.
+The canonical matrix also references a committed copy of that exact manifest;
+matrix validation reads and hashes every referenced license file.
 
 An mTLS `PASS` records one required-client-auth handshake and two optional
 client-auth handshakes: one without a client certificate and one with a valid
 client certificate. A required-only result is incomplete.
 
 Every successful result records a process peak-resident measurement bounded by
-512 MiB and cumulative harness allocations bounded by 1 GiB. Linux glibc and
-macOS also require a passing ASan and UBSan diagnostic run. Platforms where
-that configured diagnostic is unavailable must record `UNSUPPORTED`; they may
-not report a skipped diagnostic as `PASS`.
+512 MiB. Provider allocation hooks separately record cumulative provider
+allocation calls and bytes plus peak live provider bytes across the complete
+profile; fixed harness payload buffers do not satisfy this field. Linux glibc
+and macOS also require a passing ASan and UBSan diagnostic run built from newly
+instrumented provider archives, not an instrumented harness linked to ordinary
+Release archives. Platforms where that configured diagnostic is unavailable
+must record `UNSUPPORTED`; they may not report a skipped diagnostic as `PASS`.
 
 Leak detection is a separate field. Linux glibc Mbed TLS requires
 LeakSanitizer `PASS`. AWS-LC 5.5.0 exposes no process-global cleanup API, and
@@ -53,6 +63,11 @@ thread and global cleanup. Broad allocator suppression would also hide real
 provider leaks, so AWS-LC, OpenSSL, and the configured macOS runs record leak
 detection as `UNSUPPORTED`. The ASan/UBSan run and 10,000-cycle
 resident/allocation profile remain mandatory.
+
+A caller-cancellation `PASS` starts the provider handshake step on a worker,
+observes a native WANT state, blocks the caller-owned wait, sends an explicit
+cancel signal, and measures the wake and join against a 250,000-microsecond
+bound. Merely freeing a WANT-state connection is not cancellation evidence.
 
 An external-trust `PASS` requires at least four callback invocations. The PoC
 must accept and reject an otherwise-untrusted valid chain through the callback

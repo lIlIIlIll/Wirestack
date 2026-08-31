@@ -17,7 +17,11 @@ MAX_EXPORTED_SYMBOL_LENGTH = 256
 MAX_LICENSE_FILES = 512
 MAX_LICENSE_TOTAL_BYTES = 8 * 1024 * 1024
 MEMORY_PROFILE_BOUND_BYTES = 512 * 1024 * 1024
-ALLOCATION_PROFILE_BOUND_BYTES = 1024 * 1024 * 1024
+PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES = 64 * 1024 * 1024 * 1024
+PROVIDER_ALLOCATION_CALL_BOUND = 100_000_000
+CANCELLATION_WAKE_BOUND_US = 250_000
+RESULT_SCHEMA_VERSION = 6
+MAX_TOOL_VERSION_BYTES = 16 * 1024
 
 class ValidationError(RuntimeError):
     pass
@@ -62,6 +66,81 @@ def validate_exported_symbols(build: Mapping[str, Any]) -> None:
     require(inventory.get("sha256") == hashlib.sha256(encoded).hexdigest(),
             "exported-symbol digest mismatch")
 
+def validate_tool_identity(value: Any, name: str) -> None:
+    require(isinstance(value, dict), f"{name} identity required")
+    argv = value.get("argv")
+    require(isinstance(argv, list) and argv and
+            all(isinstance(item, str) and 0 < len(item) <= 1024 for item in argv),
+            f"{name} argv")
+    require(isinstance(value.get("exit_code"), int), f"{name} exit code")
+    output = value.get("output")
+    require(isinstance(output, str) and output and
+            len(output.encode("utf-8")) <= MAX_TOOL_VERSION_BYTES,
+            f"{name} bounded version output")
+    require(value.get("output_sha256") ==
+            hashlib.sha256(output.encode("utf-8")).hexdigest(),
+            f"{name} version digest")
+
+def validate_build_provenance(provenance: Any, provider: str,
+                              result_platform: str,
+                              *, diagnostic: bool) -> None:
+    require(isinstance(provenance, dict), "provider build provenance required")
+    triples = {
+        "linux-glibc-x86_64": "x86_64-unknown-linux-gnu",
+        "linux-musl-x86_64": "x86_64-unknown-linux-musl",
+        "windows-x86_64": "x86_64-pc-windows-msvc",
+        "macos-arm64": "arm64-apple-darwin",
+    }
+    require(provenance.get("target_triple") == triples.get(result_platform),
+            "provider build target triple")
+    validate_tool_identity(provenance.get("compiler"), "C compiler")
+    validate_tool_identity(provenance.get("cxx_compiler"), "C++ compiler")
+    validate_tool_identity(provenance.get("build_tool"), "provider build tool")
+    if provider in {"aws-lc", "mbedtls"}:
+        validate_tool_identity(provenance.get("cmake"), "CMake")
+    else:
+        require(provenance.get("cmake") is None,
+                "non-CMake provider must not invent CMake identity")
+    configure = provenance.get("configure_argv")
+    builds = provenance.get("build_argv")
+    require(isinstance(configure, list) and configure and
+            all(isinstance(item, str) and 0 < len(item) <= 2048 for item in configure),
+            "provider configure argv")
+    require(isinstance(builds, list) and builds and all(
+        isinstance(command, list) and command and
+        all(isinstance(item, str) and 0 < len(item) <= 2048 for item in command)
+        for command in builds), "provider build argv")
+    require(all(not item.startswith(("/tmp/", "C:\\Users\\"))
+                for command in [configure, *builds] for item in command),
+            "provider build argv must use normalized paths")
+    environment = provenance.get("environment")
+    require(isinstance(environment, dict) and all(
+        isinstance(key, str) and isinstance(value, str)
+        for key, value in environment.items()), "provider build environment")
+    require(provenance.get("patches") == [], "provider patch set must be explicit")
+    require(provenance.get("patch_set_sha256") == hashlib.sha256(b"[]\n").hexdigest(),
+            "provider patch-set digest")
+    expected_instrumentation = "address+undefined-sanitizer" if diagnostic else "none"
+    require(provenance.get("instrumentation") == expected_instrumentation,
+            "provider build instrumentation")
+    require(provenance.get("provider_instrumented") is diagnostic,
+            "provider instrumentation marker")
+    joined = "\n".join(configure)
+    if provider == "aws-lc":
+        require(all(flag in joined for flag in (
+            "-DBUILD_SHARED_LIBS=OFF", "-DBUILD_TESTING=OFF", "-DDISABLE_GO=ON")),
+            "AWS-LC build flags")
+    elif provider == "mbedtls":
+        require(all(flag in joined for flag in (
+            "-DENABLE_TESTING=OFF", "-DENABLE_PROGRAMS=OFF",
+            "-DUSE_SHARED_MBEDTLS_LIBRARY=OFF",
+            "-DTF_PSA_CRYPTO_USER_CONFIG_FILE=<REPOSITORY>/tools/tls_provider_poc/mbedtls_provider_profile_config.h")),
+            "Mbed TLS build flags")
+    else:
+        require(all(flag in configure for flag in (
+            "no-shared", "no-module", "no-tests", "no-zlib", "no-zstd")),
+            "OpenSSL build flags")
+
 def validate_spec(spec: Mapping[str, Any]) -> None:
     require(spec.get("schema_version") == 1, "unsupported provider spec schema")
     require(spec.get("task_id") == "M0-016", "provider spec task_id must be M0-016")
@@ -92,7 +171,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                     expected_revision: str | None = None) -> None:
     validate_spec(spec)
     schema_version = result.get("schema_version")
-    require(schema_version == 5, "unsupported result schema")
+    require(schema_version == RESULT_SCHEMA_VERSION, "unsupported result schema")
     require(result.get("task_id") == "M0-016", "result task_id")
     require(result.get("provider") in REQUIRED_PROVIDER_IDS, "result provider")
     require(result.get("platform") in set(spec["required_platforms"]), "result platform")
@@ -132,22 +211,22 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
         require(status in CAPABILITY_STATUSES, f"{name}: invalid status")
     build = result.get("build")
     require(isinstance(build, dict), "build object required")
-    if schema_version == 5:
+    if schema_version == RESULT_SCHEMA_VERSION:
         metrics = result.get("metrics")
-        require(isinstance(metrics, dict), "schema v5 metrics object required")
+        require(isinstance(metrics, dict), "schema v6 metrics object required")
         require(metrics.get("repeated_cleanup_cycles") == 10000,
-                "schema v5 requires exactly 10,000 repeated cleanup cycles")
+                "schema v6 requires exactly 10,000 repeated cleanup cycles")
         if result["provider"] == "aws-lc" and caps.get("external_signer") == "PASS":
             require(isinstance(metrics.get("external_signer_calls"), int) and
                     metrics["external_signer_calls"] >= 2,
                     "AWS-LC external signer must serve TLS 1.2 and TLS 1.3")
         if caps.get("session_resumption") == "PASS":
             require(metrics.get("session_resumption_handshakes") == 4,
-                    "schema v5 session resumption requires four measured handshakes")
+                    "schema v6 session resumption requires four measured handshakes")
             require(metrics.get("session_resumption_tls12_handshakes") == 2,
-                    "schema v5 requires a TLS 1.2 resumed session")
+                    "schema v6 requires a TLS 1.2 resumed session")
             require(metrics.get("session_resumption_tls13_handshakes") == 2,
-                    "schema v5 requires a TLS 1.3 resumed ticket")
+                    "schema v6 requires a TLS 1.3 resumed ticket")
         if caps.get("external_trust") == "PASS":
             require(isinstance(metrics.get("external_trust_calls"), int) and
                     metrics["external_trust_calls"] >= 4,
@@ -166,12 +245,23 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                     "mTLS requires one required-client-auth handshake")
             require(metrics.get("mtls_optional_handshakes") == 2,
                     "mTLS requires optional client auth with and without a certificate")
+        if caps.get("caller_cancellation") == "PASS":
+            require(metrics.get("cancellation_wakeups") == 1,
+                    "caller cancellation requires one explicit wakeup")
+            require(metrics.get("cancellation_bound_us") == CANCELLATION_WAKE_BOUND_US,
+                    "caller cancellation wake bound")
+            require(isinstance(metrics.get("cancellation_latency_us"), int) and
+                    0 <= metrics["cancellation_latency_us"] <= CANCELLATION_WAKE_BOUND_US,
+                    "caller cancellation wake latency")
     if result["status"] in {"PASS", "PARTIAL"}:
         require(build.get("static_archives"), "successful result requires static archives")
         validate_exported_symbols(build)
         require(build.get("system_tls_dependencies") == [], "system TLS dependency detected")
         require(build.get("runtime_loader_library_strings") == [],
                 "runtime TLS loader string detected")
+        validate_build_provenance(
+            build.get("provenance"), result["provider"], result["platform"],
+            diagnostic=False)
         license_bundle = build.get("license_bundle")
         require(isinstance(license_bundle, dict), "provider license bundle required")
         require(license_bundle.get("path") == "license-bundle/manifest.json",
@@ -194,15 +284,40 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                 "peak resident memory profile")
         require(memory.get("resident_bound_bytes") == MEMORY_PROFILE_BOUND_BYTES,
                 "resident memory bound")
-        require(memory.get("allocation_calls") == metrics.get("allocation_profile_calls") and
-                isinstance(memory.get("allocation_calls"), int) and memory["allocation_calls"] > 0,
-                "allocation call profile")
-        require(memory.get("allocation_bytes") == metrics.get("allocation_profile_bytes") and
-                isinstance(memory.get("allocation_bytes"), int) and
-                0 < memory["allocation_bytes"] <= ALLOCATION_PROFILE_BOUND_BYTES,
-                "allocation byte profile")
-        require(memory.get("allocation_bound_bytes") == ALLOCATION_PROFILE_BOUND_BYTES,
-                "allocation byte bound")
+        require(memory.get("method") ==
+                "native-process-peak-resident-and-provider-allocation-hooks",
+                "provider allocation profile method")
+        require(memory.get("provider_allocation_calls") ==
+                metrics.get("provider_allocation_calls") and
+                isinstance(memory.get("provider_allocation_calls"), int) and
+                0 < memory["provider_allocation_calls"] <= PROVIDER_ALLOCATION_CALL_BOUND,
+                "provider allocation call profile")
+        require(memory.get("provider_allocation_call_bound") ==
+                PROVIDER_ALLOCATION_CALL_BOUND,
+                "provider allocation call bound")
+        require(memory.get("provider_allocation_bytes") ==
+                metrics.get("provider_allocation_bytes") and
+                isinstance(memory.get("provider_allocation_bytes"), int) and
+                0 < memory["provider_allocation_bytes"] <=
+                PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES,
+                "provider allocation byte profile")
+        require(memory.get("provider_allocation_bound_bytes") ==
+                PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES,
+                "provider allocation byte bound")
+        require(memory.get("provider_allocation_peak_live_bytes") ==
+                metrics.get("provider_allocation_peak_live_bytes") and
+                isinstance(memory.get("provider_allocation_peak_live_bytes"), int) and
+                0 < memory["provider_allocation_peak_live_bytes"] <=
+                MEMORY_PROFILE_BOUND_BYTES,
+                "provider peak live allocation profile")
+        cancellation = operational.get("cancellation")
+        require(isinstance(cancellation, dict) and
+                cancellation.get("method") ==
+                "caller-owned-wait-thread-and-explicit-cancel-signal" and
+                cancellation.get("wakeups") == metrics.get("cancellation_wakeups") and
+                cancellation.get("latency_us") == metrics.get("cancellation_latency_us") and
+                cancellation.get("bound_us") == metrics.get("cancellation_bound_us"),
+                "caller cancellation operational evidence")
         diagnostic = operational.get("native_memory_diagnostic")
         require(isinstance(diagnostic, dict) and
                 diagnostic.get("status") in {"PASS", "UNSUPPORTED"},
@@ -211,6 +326,18 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                 result["platform"].startswith("macos-")):
             require(diagnostic.get("status") == "PASS",
                     "supported platform requires passing native memory diagnostic")
+            require(diagnostic.get("provider_instrumented") is True,
+                    "native diagnostic must instrument provider archives")
+            archives = diagnostic.get("provider_static_archives")
+            require(isinstance(archives, list) and archives and all(
+                isinstance(archive, dict) and
+                isinstance(archive.get("name"), str) and archive["name"] and
+                isinstance(archive.get("bytes"), int) and archive["bytes"] > 0 and
+                SHA256_RE.fullmatch(str(archive.get("sha256", ""))) is not None
+                for archive in archives), "instrumented provider archive inventory")
+            validate_build_provenance(
+                diagnostic.get("provider_build_provenance"), result["provider"],
+                result["platform"], diagnostic=True)
             leak_detection = diagnostic.get("leak_detection")
             require(isinstance(leak_detection, dict) and
                     leak_detection.get("status") in {"PASS", "UNSUPPORTED"},
@@ -221,20 +348,27 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                         "supported provider requires passing native leak detection")
         require(all(value != "FAIL" for value in caps.values()), "PARTIAL/PASS result contains failed capability")
     if result["status"] == "PASS":
-        require(schema_version == 5, "PASS requires schema v5 evidence")
+        require(schema_version == RESULT_SCHEMA_VERSION,
+                "PASS requires schema v6 evidence")
         require(all(value == "PASS" for value in caps.values()), "PASS requires all capabilities PASS")
     if any(value == "BLOCKED" for value in caps.values()):
         require(result["status"] != "PASS", "blocked capability cannot yield PASS")
 
 
-def validate_license_bundle(result_path: Path, result: Mapping[str, Any]) -> None:
+def validate_license_bundle(result_path: Path, result: Mapping[str, Any],
+                            manifest_override: Path | None = None) -> None:
     if result.get("status") not in {"PASS", "PARTIAL"}:
         return
     info = result["build"]["license_bundle"]
     root = result_path.parent.resolve()
-    manifest_path = (root / info["path"]).resolve()
-    require(root == manifest_path or root in manifest_path.parents,
-            "provider license bundle path escapes result directory")
+    manifest_path = (
+        manifest_override.resolve()
+        if manifest_override is not None
+        else (root / info["path"]).resolve()
+    )
+    if manifest_override is None:
+        require(root == manifest_path or root in manifest_path.parents,
+                "provider license bundle path escapes result directory")
     require(manifest_path.is_file(), "provider license bundle manifest is missing")
     require(sha256_path(manifest_path) == info["sha256"],
             "provider license bundle manifest digest mismatch")
@@ -260,8 +394,8 @@ def validate_license_bundle(result_path: Path, result: Mapping[str, Any]) -> Non
         require(relative.as_posix() not in observed_paths,
                 "duplicate provider license file path")
         observed_paths.add(relative.as_posix())
-        file_path = (root / "license-bundle/files" / relative).resolve()
-        files_root = (root / "license-bundle/files").resolve()
+        files_root = (manifest_path.parent / "files").resolve()
+        file_path = (files_root / relative).resolve()
         require(files_root in file_path.parents, "provider license file path escapes bundle")
         require(file_path.is_file(), "provider license file is missing")
         size = file_path.stat().st_size
@@ -292,6 +426,14 @@ def validate_matrix(matrix: Mapping[str, Any], spec: Mapping[str, Any]) -> None:
                     f"{key}: retained result path required")
             require(SHA256_RE.fullmatch(str(cell.get("sha256", ""))) is not None,
                     f"{key}: retained result sha256 required")
+            if status in {"PASS", "PARTIAL"}:
+                bundle = cell.get("license_bundle")
+                require(isinstance(bundle, dict),
+                        f"{key}: retained license bundle required")
+                require(isinstance(bundle.get("manifest"), str) and bundle["manifest"],
+                        f"{key}: retained license manifest path required")
+                require(SHA256_RE.fullmatch(str(bundle.get("sha256", ""))) is not None,
+                        f"{key}: retained license manifest sha256 required")
     require(observed == expected, f"matrix coverage mismatch: missing={sorted(expected-observed)}, extra={sorted(observed-expected)}")
 
 def validate_retained_results(matrix: Mapping[str, Any], spec: Mapping[str, Any], repo: Path) -> None:
@@ -305,6 +447,19 @@ def validate_retained_results(matrix: Mapping[str, Any], spec: Mapping[str, Any]
         require(result["platform"] == cell["platform"], f"{result_path}: platform mismatch")
         require(result["status"] == cell["status"], f"{result_path}: status mismatch")
         require(sha256_path(result_path) == cell["sha256"], f"{result_path}: sha256 mismatch")
+        if cell["status"] in {"PASS", "PARTIAL"}:
+            repo_root = repo.resolve()
+            manifest_path = (repo_root / cell["license_bundle"]["manifest"]).resolve()
+            require(repo_root == manifest_path or repo_root in manifest_path.parents,
+                    f"{result_path}: provider license manifest path escapes repository")
+            require(manifest_path.is_file(),
+                    f"{result_path}: provider license manifest is missing")
+            require(sha256_path(manifest_path) == cell["license_bundle"]["sha256"],
+                    f"{result_path}: provider license manifest matrix digest mismatch")
+            require(result["build"]["license_bundle"]["sha256"] ==
+                    cell["license_bundle"]["sha256"],
+                    f"{result_path}: provider license manifest result digest mismatch")
+            validate_license_bundle(result_path, result, manifest_path)
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)

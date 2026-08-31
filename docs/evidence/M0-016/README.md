@@ -5,14 +5,14 @@
 M0-016 is **BLOCKED** because Android, iOS, and HarmonyOS or OpenHarmony do
 not have native-device evidence.
 
-All 12 desktop cells now have current schema-v5 native-runner evidence. Schema
-v5 records required and optional client authentication, provider license
-payloads, exact repository and execution identity, bounded resident/allocation
-profiles, and native memory diagnostics where supported. The platform matrix
-treats these cells as PASS or PARTIAL according to the provider capability
-contract; it does not convert the missing mobile-device evidence into a pass.
+The schema-v5 desktop evidence is superseded. All 12 desktop cells are
+`NOT_RUN` until native runners produce schema-v6 results. Schema v6 additionally
+requires provider-instrumented diagnostics, provider allocation hooks, durable
+normalized build provenance, committed matrix-validated license bundles, and a
+real bounded cancellation wakeup. The old results remain audit history and are
+not current PASS or PARTIAL evidence.
 
-Every current native run retains:
+The next current native run must retain:
 
 - expired certificate rejection;
 - malformed certificate rejection;
@@ -31,7 +31,7 @@ Every current native run retains:
   sub-gate as unsupported with an explicit reason instead of using broad leak
   suppressions.
 
-## Current desktop runs
+## Superseded schema-v5 desktop runs
 
 The Linux glibc, Linux musl, and macOS results came from [GitHub Actions run
 33391223747](https://github.com/lIlIIlIll/Wirestack/actions/runs/33391223747).
@@ -43,10 +43,10 @@ run 33391216138](https://github.com/lIlIIlIll/Wirestack/actions/runs/33391216138
 and executed the exact head revision
 `22ae52c7b277c1d6c83afc0ac0dd73dc7e9c83a6`.
 
-All 12 artifacts were downloaded and independently revalidated with
+All 12 artifacts were downloaded and independently revalidated under schema v5 with
 `validate.py --result ... --expected-revision ...`. Each artifact contains the
 schema-v5 `result.json`, a bounded `build.log`, and the digest-bound provider
-license bundle.
+license bundle. They do not satisfy schema v6 and must not advance M0-020.
 
 | Platform | Provider | Status | Symbols | Result SHA-256 | Artifact ID | Artifact SHA-256 |
 |---|---|---|---:|---|---:|---|

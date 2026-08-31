@@ -88,7 +88,8 @@ Each candidate run must retain:
 ### Build and artifact evidence
 
 - exact upstream commit, recursive dependency digests and license bundle;
-- compiler, CMake/build-system and target triple;
+- compiler, C++ compiler, CMake when used, build-system and target triple;
+- normalized configure/build argv, environment overrides and explicit patch-set digest;
 - static archive/shared-object dependency scan;
 - final artifact size and exported-symbol inventory;
 - proof that the default executable does not load system `libssl`/`libcrypto`;
@@ -126,9 +127,9 @@ PASS.
 
 ### Operational evidence
 
-- sanitizer or equivalent native memory diagnostics where supported;
-- bounded handshake/read/write memory and allocation profile;
-- cancellation/Deadline wakeup behavior;
+- sanitizer or equivalent native memory diagnostics built into the provider and harness where supported;
+- bounded handshake/read/write resident memory plus provider allocator-call, byte and peak-live profiles;
+- explicit caller-owned wait cancellation/Deadline wakeup latency;
 - 10,000 repeated handshake/close cycles for the PoC stage;
 - security-update workflow and maximum acceptable source-pin age;
 - known CVE/advisory intake channels.
