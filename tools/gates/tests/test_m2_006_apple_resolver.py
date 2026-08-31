@@ -77,8 +77,9 @@ class M2006AppleResolverGateTests(unittest.TestCase):
         build_driver = Path("tools/build_native_dependencies.py").read_text(
             encoding="utf-8"
         )
-        self.assertIn("for selected in [selected_resolver]", build_driver)
-        self.assertNotIn("selected_resolvers.append", build_driver)
+        self.assertIn("required_resolvers = [selected_resolver]", build_driver)
+        self.assertIn("required_resolvers.append", build_driver)
+        self.assertIn("CJPM validates every Darwin target FFI table", build_driver)
         apple_builder = Path("tools/build_apple_resolver.py").read_text(
             encoding="utf-8"
         )
