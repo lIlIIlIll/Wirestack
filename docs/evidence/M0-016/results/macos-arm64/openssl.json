@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 5383728,
-    "binary_sha256": "f7ed148d64c54cde5141bec57dc137226b3edbfa87dc05cd64efdc113ccf351d",
+    "binary_sha256": "d0073a6efbb1cc389f25dc3fb558bfe63c723988bb588afb4df43c2070363658",
     "exported_symbol_inventory": {
       "count": 9534,
       "scope": "final-artifact-exports",
@@ -9600,8 +9600,27 @@
         "output_sha256": "e90749cef1d809b7d6c11405b894f0232baaee1f1b9f5e21c89da561d7998a42"
       },
       "environment": {
+        "CC": "",
         "CFLAGS": "-O2 -fPIC",
-        "CXXFLAGS": "-O2"
+        "CMAKE_BUILD_PARALLEL_LEVEL": "",
+        "CMAKE_GENERATOR": "",
+        "CMAKE_GENERATOR_PLATFORM": "",
+        "CMAKE_GENERATOR_TOOLSET": "",
+        "CMAKE_PREFIX_PATH": "",
+        "CMAKE_TOOLCHAIN_FILE": "",
+        "CXX": "",
+        "CXXFLAGS": "-O2",
+        "INCLUDE": "",
+        "LDFLAGS": "",
+        "LIB": "",
+        "LIBPATH": "",
+        "PATH": "/Users/runner/hostedtoolcache/Python/3.12.10/arm64/bin:/Users/runner/hostedtoolcache/Python/3.12.10/arm64:/opt/homebrew/opt/openssl@3/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+        "UCRTVersion": "",
+        "UniversalCRTSdkDir": "",
+        "VCINSTALLDIR": "",
+        "VCToolsInstallDir": "",
+        "WindowsSDKVersion": "",
+        "WindowsSdkDir": ""
       },
       "instrumentation": "none",
       "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
@@ -9614,17 +9633,17 @@
       {
         "bytes": 1539048,
         "name": "libssl.a",
-        "sha256": "5832f9436cb02f20ff452f262a1ad2cf79948371c96ebbe3e779236ff8af128a"
+        "sha256": "faf082e97c1757328c8cf6dd214a4a9e7e176295112aed43f0413ea67e3dec81"
       },
       {
         "bytes": 8831416,
         "name": "libcrypto.a",
-        "sha256": "ba84b4b7d4e871742a647a277fd31577ccd21923d1f1e427f8ee93647788b3d4"
+        "sha256": "969fb7b2e954d494bcabb8906c63ec38becb55f31e313524115275201b88d3e5"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "8fb3e38ff1270154215c178929ddf8e9fb5268dab1a1364e2e49d15d48071877",
+  "build_log_sha256": "9104d340c3e608dccf15a8708d130ab9acb8fd3dea23e66c286a0f5af68df849",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -9649,31 +9668,31 @@
     "image_os": "macos15",
     "image_version": "20260727.0256.1",
     "python": "3.12.10",
-    "repository_revision": "bbd2b22404d47f674842c50eabe2debd12d79787",
+    "repository_revision": "67c519b3d406912378a18bd15da28d5b1f0cdf6a",
     "runner_arch": "ARM64",
     "runner_os": "macOS"
   },
-  "finished_at": "2026-08-31T16:08:17.618090+00:00",
+  "finished_at": "2026-08-31T16:59:33.534132+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 62,
+    "cancellation_latency_us": 60,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 7258112,
+    "memory_profile_peak_resident_bytes": 7208960,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 6307204294,
+    "provider_allocation_bytes": 6306969570,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 28462047,
+    "provider_allocation_calls": 28460652,
     "provider_allocation_live_after_cleanup_bytes": 570038,
     "provider_allocation_live_before_cleanup_bytes": 570038,
-    "provider_allocation_peak_live_bytes": 813791,
+    "provider_allocation_peak_live_bytes": 813799,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -9685,21 +9704,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 62,
+      "latency_us": 60,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 7258112,
+      "peak_resident_bytes": 7208960,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 6307204294,
+      "provider_allocation_bytes": 6306969570,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 28462047,
+      "provider_allocation_calls": 28460652,
       "provider_allocation_live_after_cleanup_bytes": 570038,
       "provider_allocation_live_before_cleanup_bytes": 570038,
-      "provider_allocation_peak_live_bytes": 813791,
+      "provider_allocation_peak_live_bytes": 813799,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -9708,7 +9727,7 @@
         "reason": "static OpenSSL 3.6.3 retains process-global allocations after thread and global cleanup; broad allocator suppression is forbidden",
         "status": "UNSUPPORTED"
       },
-      "output_sha256": "aa9dcb66cd8252f96871eb1776d0c6471df20c7b56e1013422f8faeb4ae2fd7f",
+      "output_sha256": "2480588bf6210646535f1ff902c16ddd71d01381d91f6d8873b1f233c964b276",
       "provider_build_provenance": {
         "build_argv": [
           [
@@ -9760,9 +9779,27 @@
           "output_sha256": "e90749cef1d809b7d6c11405b894f0232baaee1f1b9f5e21c89da561d7998a42"
         },
         "environment": {
+          "CC": "",
           "CFLAGS": "-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -fPIC",
+          "CMAKE_BUILD_PARALLEL_LEVEL": "",
+          "CMAKE_GENERATOR": "",
+          "CMAKE_GENERATOR_PLATFORM": "",
+          "CMAKE_GENERATOR_TOOLSET": "",
+          "CMAKE_PREFIX_PATH": "",
+          "CMAKE_TOOLCHAIN_FILE": "",
+          "CXX": "",
           "CXXFLAGS": "-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer",
-          "LDFLAGS": "-fsanitize=address,undefined"
+          "INCLUDE": "",
+          "LDFLAGS": "-fsanitize=address,undefined",
+          "LIB": "",
+          "LIBPATH": "",
+          "PATH": "/Users/runner/hostedtoolcache/Python/3.12.10/arm64/bin:/Users/runner/hostedtoolcache/Python/3.12.10/arm64:/opt/homebrew/opt/openssl@3/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+          "UCRTVersion": "",
+          "UniversalCRTSdkDir": "",
+          "VCINSTALLDIR": "",
+          "VCToolsInstallDir": "",
+          "WindowsSDKVersion": "",
+          "WindowsSdkDir": ""
         },
         "instrumentation": "address+undefined-sanitizer",
         "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
@@ -9775,12 +9812,12 @@
         {
           "bytes": 16419160,
           "name": "libssl.a",
-          "sha256": "3e894707f2e3d01ff7ce54f23ddeaa6661bb2e932d07e123878d2aca9bb8bd42"
+          "sha256": "cb444af3cce9b279d98438e7abebd5ac7fc423a2763ceaef0a90744b4b13498c"
         },
         {
           "bytes": 56610224,
           "name": "libcrypto.a",
-          "sha256": "ada4d3b4b7549ac5f26616a4a2d5896ef118f1b6a834d12af9d00ccdb0f7bc81"
+          "sha256": "c306eb38e51bd10963bdb5f0a6b4b676fb2aa3c8bc9c51af3de676d97411b69b"
         }
       ],
       "status": "PASS",
@@ -9790,14 +9827,14 @@
   "platform": "macos-arm64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 7,
+  "schema_version": 8,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T16:03:59.832274+00:00",
+  "started_at": "2026-08-31T16:56:04.811932+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

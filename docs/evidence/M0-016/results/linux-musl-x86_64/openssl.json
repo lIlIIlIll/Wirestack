@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 7369424,
-    "binary_sha256": "5c40926c5700be516c016b4e53ab4284cd7a88b1a9e1b0b5714938f96f199973",
+    "binary_sha256": "ce3b61fcdc7510bf9ac1676fed75fa65d2eb7f62513ac22bc907b0efb1f52521",
     "exported_symbol_inventory": {
       "count": 9570,
       "scope": "final-artifact-exports",
@@ -9637,8 +9637,27 @@
         "output_sha256": "b4257ffe96f7e42fb1b71901b1086a8e2d629980bf81a1795e92cc3a63b8c7d1"
       },
       "environment": {
+        "CC": "",
         "CFLAGS": "-O2 -fPIC",
-        "CXXFLAGS": "-O2"
+        "CMAKE_BUILD_PARALLEL_LEVEL": "",
+        "CMAKE_GENERATOR": "",
+        "CMAKE_GENERATOR_PLATFORM": "",
+        "CMAKE_GENERATOR_TOOLSET": "",
+        "CMAKE_PREFIX_PATH": "",
+        "CMAKE_TOOLCHAIN_FILE": "",
+        "CXX": "",
+        "CXXFLAGS": "-O2",
+        "INCLUDE": "",
+        "LDFLAGS": "",
+        "LIB": "",
+        "LIBPATH": "",
+        "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "UCRTVersion": "",
+        "UniversalCRTSdkDir": "",
+        "VCINSTALLDIR": "",
+        "VCToolsInstallDir": "",
+        "WindowsSDKVersion": "",
+        "WindowsSdkDir": ""
       },
       "instrumentation": "none",
       "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
@@ -9656,12 +9675,12 @@
       {
         "bytes": 12362020,
         "name": "libcrypto.a",
-        "sha256": "801edcfa960e6a32fedcad807ec1440851809cf5782bbbd001183d3551117d30"
+        "sha256": "6f726bab65e1c7041e9e8bfaba56f8a789231ffb6f457350af4a6e947a37e873"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "c1db56c8395031559a6a8a62aaef93b72b55a0b0894064ce13047fa90a105ea8",
+  "build_log_sha256": "d61cd294ff90ed9f1896cdbd9f2a2e353a23cf7044fd4b30ea31c010a5a79418",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -9686,31 +9705,31 @@
     "image_os": "alpine",
     "image_version": "3.22.5",
     "python": "3.14.7",
-    "repository_revision": "bbd2b22404d47f674842c50eabe2debd12d79787",
+    "repository_revision": "67c519b3d406912378a18bd15da28d5b1f0cdf6a",
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T16:06:50.526273+00:00",
+  "finished_at": "2026-08-31T16:59:16.962071+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 91,
+    "cancellation_latency_us": 83,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 40636416,
+    "memory_profile_peak_resident_bytes": 40644608,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 6178111213,
+    "provider_allocation_bytes": 6178520600,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 28520414,
+    "provider_allocation_calls": 28522883,
     "provider_allocation_live_after_cleanup_bytes": 559146,
     "provider_allocation_live_before_cleanup_bytes": 559146,
-    "provider_allocation_peak_live_bytes": 800075,
+    "provider_allocation_peak_live_bytes": 800067,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -9722,21 +9741,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 91,
+      "latency_us": 83,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 40636416,
+      "peak_resident_bytes": 40644608,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 6178111213,
+      "provider_allocation_bytes": 6178520600,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 28520414,
+      "provider_allocation_calls": 28522883,
       "provider_allocation_live_after_cleanup_bytes": 559146,
       "provider_allocation_live_before_cleanup_bytes": 559146,
-      "provider_allocation_peak_live_bytes": 800075,
+      "provider_allocation_peak_live_bytes": 800067,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -9748,14 +9767,14 @@
   "platform": "linux-musl-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 7,
+  "schema_version": 8,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T16:04:00.093975+00:00",
+  "started_at": "2026-08-31T16:56:27.692565+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

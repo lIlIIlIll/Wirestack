@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 2013696,
-    "binary_sha256": "3be1eefa4b921360c7af6bbd8ca57c1c93c44d75cc5d162b3f0e5a5e00ea726c",
+    "binary_sha256": "af702b1ba867eb300e3ef932e287476e7a4992ce06add7a222b549617efa798f",
     "exported_symbol_inventory": {
       "count": 9,
       "scope": "final-artifact-exports",
@@ -88,7 +88,29 @@
         "output": "Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36256 for x64\nCopyright (C) Microsoft Corporation.  All rights reserved.\n\n                         C/C++ COMPILER OPTIONS\n\n\n                              -OPTIMIZATION-\n\n/O1 maximum optimizations (favor space) /O2 maximum optimizations (favor speed)\n/Ob<n> inline expansion (default n=0)   /Od disable optimizations (default)\n/Og enable global optimization          /Oi[-] enable intrinsic functions\n/Os favor code space                    /Ot favor code speed\n/Ox optimizations (favor speed)         \n/favor:<blend|AMD64|INTEL64|ATOM> select processor to optimize for, one of:\n    blend - a combination of optimizations for several different x64 processors\n    AMD64 - 64-bit AMD processors\n    INTEL64 - Intel(R)64 architecture processors\n    ATOM - Intel(R) Atom(TM) processors\n\n                             -CODE GENERATION-\n\n/Gu[-] ensure distinct functions have distinct addresses\n/Gw[-] separate global variables for linker\n/GF enable read-only string pooling     /Gy[-] separate functions for linker\n/GS[-] enable security checks           /GR[-] enable C++ RTTI\n/guard:cf[-] enable CFG (control flow guard)\n/guard:ehcont[-] enable EH continuation metadata (CET)\n/EHs enable C++ EH (no SEH exceptions)  /EHa enable C++ EH (w/ SEH exceptions)\n/EHc extern \"C\" defaults to nothrow     \n/EHr always generate noexcept runtime termination checks\n/fp:<contract|except[-]|fast|precise|strict> choose floating-point model:\n    contract - consider floating-point contractions when generating code\n    except[-] - consider floating-point exceptions when generating code\n    fast - \"fast\" floating-point model; results are less predictable\n    precise - \"precise\" floating-point model; results are predictable\n    strict - \"strict\" floating-point model (implies /fp:except)\n/Qfast_transcendentals generate inline FP intrinsics even with /fp:except\n/Qspectre[-] enable mitigations for CVE 2017-5753\n/Qpar[-] enable parallel code generation\n/Qpar-report:1 auto-parallelizer diagnostic; indicate parallelized loops\n/Qpar-report:2 auto-parallelizer diagnostic; indicate loops not parallelized\n/Qvec-report:1 auto-vectorizer diagnostic; indicate vectorized loops\n/Qvec-report:2 auto-vectorizer diagnostic; indicate loops not vectorized\n/GL[-] enable link-time code generation \n/volatile:<iso|ms> choose volatile model:\n    iso - Acquire/release semantics not guaranteed on volatile accesses\n    ms  - Acquire/release semantics guaranteed on volatile accesses\n/GA optimize for Windows Application    /Ge force stack checking for all funcs\n/Gs[num] control stack checking calls   /Gh enable _penter function call\n/GH enable _pexit function call         /GT generate fiber-safe TLS accesses\n/RTC1 Enable fast checks (/RTCsu)       /RTCc Convert to smaller type checks\n/RTCs Stack Frame runtime checking      /RTCu Uninitialized local usage checks\n/clr[:option] compile for common language runtime, where option is:\n    pure : produce IL-only output file (no native executable code)\n    safe : produce IL-only verifiable output file\n    netcore : produce assemblies targeting .NET Core runtime\n    noAssembly : do not produce an assembly\n    nostdlib : ignore the system .NET framework directory when searching for assemblies\n    nostdimport : do not import any required assemblies implicitly\n    initialAppDomain : enable initial AppDomain behavior of Visual C++ 2002\n    implicitKeepAlive- : turn off implicit emission of System::GC::KeepAlive(this)\n    char_t- : turn off metadata support for char8_t, char16_t and char32_t\n    ECMAParamArray : use rules specified in ECMA-372/14.6 for overloads with parameter arrays (implied by /clr)\n    ECMAParamArray- : use new rules for overloads with parameter arrays (implied by /clr:netcore)\n/fsanitize=address Enable address sanitizer codegen\n/homeparams Force parameters passed in registers to be written to the stack\n/GZ Enable stack checks (/RTCs)         /Gv __vectorcall calling convention\n(Preview) /dynamicdeopt Enable dynamic debugging; place deoptimized breakpoints and step in anywhere with on-demand function deoptimization\n(Preview) /dynamicdeopt:suffix <suffix> File extension suffix for deoptimized output (default: .alt)\n(Preview) /dynamicdeopt:sync Build deoptimized output after optimized output instead of in parallel\n/arch:<SSE2|SSE4.2|AVX|AVX2|AVX512|AVX10.x> minimum CPU architecture requirements, one of:\n   SSE2 - (default) enable use of instructions available with SSE2-enabled CPUs\n   SSE4.2 - enable use of instructions available with SSE 4.2-enabled CPUs\n   AVX - enable use of instructions available with AVX-enabled CPUs\n   AVX2 - enable use of instructions available with AVX2-enabled CPUs\n   AVX512 - enable use of instructions available with AVX-512-enabled CPUs\n   AVX10.x - enable use of instructions available with AVX10.x-enabled CPUs. Valid values of x are 1 and 2\n/QIntel-jcc-erratum enable mitigations for Intel JCC erratum\n/Qspectre-load Enable spectre mitigations for all instructions which load memory\n/Qspectre-load-cf Enable spectre mitigations for all control-flow instructions which load memory\n/Qspectre-jmp[-] Enable spectre mitigations for unconditional jump instructions\n/fpcvt:<IA|BC> FP to unsigned integer conversion compatibility\n   IA - results compatible with VCVTTSD2USI instruction\n   BC - results compatible with VS2017 and earlier compiler\n/jumptablerdata Place jump tables for switch case statements in .rdata section\n/vlen=<256|512> Choose vector length of either 256 or 512 for automatic code-generation\n/vlen Choose default vector length based on /arch setting\n(Preview) /feature:APX - enable use of instructions available with APX-enabled CPUs.\n\n                              -OUTPUT FILES-\n\n/Fa[file] name assembly listing file    /FA[scu] configure assembly listing\n/Fd[file] name .PDB file                /Fe<file> name executable file\n/Fm[file] name map file                 /Fo<file> name object file\n/Fp<file> name precompiled header file  /Fr[file] name source browser file\n/FR[file] name extended .SBR file       /Fi[file] name preprocessed file\n/Fd: <file> name .PDB file              /Fe: <file> name executable file\n/Fm: <file> name map file               /Fo: <file> name object file\n/Fp: <file> name .PCH file              /FR: <file> name extended .SBR file\n/Fi: <file> name preprocessed file      \n/Ft<dir> location of the header files generated for #import\n/doc[file] process XML documentation comments and optionally name the .xdc file\n\n                              -PREPROCESSOR-\n\n/AI<dir> add to assembly search path    /FU<file> import .NET assembly/module\n/FU:asFriend<file> import .NET assembly/module as friend\n/C don't strip comments                 /D<name>{=|#}<text> define macro\n/E preprocess to stdout                 /EP preprocess to stdout, no #line\n/P preprocess to file                   /Fx merge injected code to file\n/FI<file> name forced include file      /U<name> remove predefined macro\n/u remove all predefined macros         /I<dir> add to include search path\n/X ignore \"standard places\"             \n/PH generate #pragma file_hash when preprocessing\n/PD print all macro definitions         \n\n                                -LANGUAGE-\n\n/std:<c++14|c++17|c++20|c++latest> C++ standard version\n    c++14 - ISO/IEC 14882:2014 (default)\n    c++17 - ISO/IEC 14882:2017\n    c++20 - ISO/IEC 14882:2020\n    c++latest - latest draft standard (feature set subject to change)\n/std:<c11|c17|clatest> C standard version\n    c11 - ISO/IEC 9899:2011\n    c17 - ISO/IEC 9899:2018\n    clatest - latest draft standard (feature set subject to change)\n/permissive[-] enable some nonconforming code to compile\n               (feature set subject to change) (off by default in C++20 and later)\n/Za disable extensions (not recommended for C++)\n/ZW enable WinRT language extensions    /Zs syntax check only\n/await enable resumable functions extension\n/await:strict enable standard C++20 coroutine support with earlier language versions\n/constexpr:depth<N>     recursion depth limit for constexpr evaluation (default: 512)\n/constexpr:backtrace<N> show N constexpr evaluations in diagnostics (default: 10)\n/constexpr:steps<N>     terminate constexpr evaluation after N steps (default: 1048576)\n/Zi enable debugging information        /Z7 enable old-style debug info\n/Zo[-] generate richer debugging information for optimized code (on by default)\n/ZH:[MD5|SHA1|SHA_256] hash algorithm for calculation of file checksum in debug info (default: SHA_256)\n/Zp[n] pack structs on n-byte boundary  /Zl omit default library name in .OBJ\n/vd{0|1|2} disable/enable vtordisp      /vm<x> type of pointers to members\n/Zc:arg1[,arg2] language conformance, where arguments can be:\n  forScope[-]           enforce Standard C++ for scoping rules\n  wchar_t[-]            wchar_t is the native type, not a typedef\n  auto[-]               enforce the new Standard C++ meaning for auto\n  trigraphs[-]          enable trigraphs (off by default)\n  rvalueCast[-]         enforce Standard C++ explicit type conversion rules\n                        (on by default in C++20 or later, implied by /permissive-)\n  strictStrings[-]      disable string-literal to [char|wchar_t]*\n                        conversion (on by default in C++20 or later, implied by /permissive-)\n  implicitNoexcept[-]   enable implicit noexcept on required functions\n  threadSafeInit[-]     enable thread-safe local static initialization\n  inline[-]             remove unreferenced function or data if it is\n                        COMDAT or has internal linkage only (off by default)\n  sizedDealloc[-]       enable C++14 global sized deallocation\n                        functions (on by default)\n  throwingNew[-]        assume operator new throws on failure (off by default)\n  referenceBinding[-]   a temporary will not bind to a non-const\n                        lvalue reference (on by default in C++20 or later, implied by /permissive-)\n  twoPhase-             disable two-phase name lookup\n  ternary[-]            enforce C++11 rules for conditional operator\n                        (on by default in C++20 or later, implied by /permissive-)\n  noexceptTypes[-]      enforce C++17 noexcept rules (on by default in C++17 or later)\n  alignedNew[-]         enable C++17 alignment of dynamically allocated objects (on by default)\n  hiddenFriend[-]       enforce Standard C++ hidden friend rules\n                        (on by default in C++20 or later, implied by /permissive-)\n  externC[-]            enforce Standard C++ rules for 'extern \"C\"' functions\n                        (on by default in C++20 or later, implied by /permissive-)\n  lambda[-]             better lambda support by using the newer lambda processor\n                        (on by default in C++20 or later, implied by /permissive-)\n  tlsGuards[-]          generate runtime checks for TLS variable initialization (on by default)\n  zeroSizeArrayNew[-]   call member new/delete for 0-size arrays of objects (on by default)\n  static_assert[-]      strict handling of 'static_assert' (on by default in C++20 or later,\n                        implied by /permissive-)\n  gotoScope[-]          cannot jump past the initialization of a variable (implied by /permissive-)\n  templateScope[-]      enforce Standard C++ template parameter shadowing rules\n  enumTypes[-]          enable Standard C++ underlying enum types (off by default)\n  enumEncoding[-]       correctly encode a use of an enumeration as a non-type template\n                        argument (off by default)\n  checkGwOdr[-]         enforce Standard C++ one definition rule violations\n                        when /Gw has been enabled (off by default)\n  nrvo[-]               enable optional copy and move elision (on by default in C++20 or later,\n                        implied by /permissive- or /O2)\n  __STDC__              define __STDC__ to 1 in C\n  __cplusplus[-]        __cplusplus macro reports the supported C++ standard (off by default)\n  char8_t[-]            enable C++20 native `u8` literal support as `const char8_t`\n                        (on by default in C++20 or later)\n  externConstexpr[-]    enable external linkage for constexpr variables in C++\n                        (on by default in C++20 or later, implied by /permissive-)\n  preprocessor[-]       enable standard conforming preprocessor in C/C++\n                        (on by default in C11 or later)\n/ZI enable Edit and Continue debug info \n/openmp enable OpenMP 2.0 language extensions\n/openmp:experimental enable OpenMP 2.0 language extensions plus select OpenMP 3.0+ language extensions\n/openmp:llvm OpenMP language extensions using LLVM runtime\n\n                              -MISCELLANEOUS-\n\n@<file> options response file           /?, /help print this help message\n/bigobj generate extended object format /c compile only, no link\n/FC use full pathnames in diagnostics   /H<num> max external name length\n/J default char type is unsigned        \n/MP[n] use up to 'n' processes for compilation\n/nologo suppress copyright message      /showIncludes show include file names\n/Tc<source file> compile file as .c     /Tp<source file> compile file as .cpp\n/TC compile all files as .c             /TP compile all files as .cpp\n/V<string> set version string           /Yc[file] create .PCH file\n/Yd put debug info in every .OBJ        /Yl[sym] inject .PCH ref for debug lib\n/Yu[file] use .PCH file                 /Y- disable all PCH options\n/Zm<n> max memory alloc (% of default)  /FS force to use MSPDBSRV.EXE\n/source-charset:<iana-name>|.nnnn set source character set\n/execution-charset:<iana-name>|.nnnn set execution character set\n/utf-8 set source and execution character set to UTF-8\n/validate-charset[-] validate UTF-8 files for only legal characters\n/fastfail[-] enable fast-fail mode      /JMC[-] enable native just my code\n/presetPadding[-] zero initialize padding for stack based class types\n/volatileMetadata[-] generate metadata on volatile memory accesses\n/sourcelink [file] file containing source link information\n/templateDepth:N limit the depth of template instantiations (default N=1000)\n\n                                -LINKING-\n\n/LD Create .DLL                         /LDd Create .DLL debug library\n/LN Create a .netmodule                 /F<num> set stack size\n/link [linker options and libraries]    /MD link with MSVCRT.LIB\n/MT link with LIBCMT.LIB                /MDd link with MSVCRTD.LIB debug lib\n/MTd link with LIBCMTD.LIB debug lib    \n\n                              -CODE ANALYSIS-\n\n/analyze[-] Enable native analysis      /analyze:quiet[-] No warning to console\n/analyze:log<name> Warnings to file     /analyze:autolog Log to *.pftlog\n/analyze:autolog:ext<ext> Log to *.<ext>/analyze:autolog- No log file\n/analyze:WX- Warnings not fatal         /analyze:stacksize<num> Max stack frame\n/analyze:max_paths<num> Max paths       /analyze:only Analyze, no code gen\n\n                              -DIAGNOSTICS-\n\n/diagnostics:<args,...> controls the format of diagnostic messages:\n             classic   - retains prior format\n             column[-] - prints column information\n             caret[-]  - prints column and the indicated line of source\n/Wall enable all warnings               /w   disable all warnings\n/W<n> set warning level (default n=1)   \n/Wv:xx[.yy[.zzzzz]] disable warnings introduced after version xx.yy.zzzzz\n/WX treat warnings as errors            /WL enable one line diagnostics\n/wd<n> disable warning n                /we<n> treat warning n as an error\n/wo<n> issue warning n once             /w<l><n> set warning level 1-4 for n\n/external:I <path>      - location of external headers\n/external:env:<var>     - environment variable with locations of external headers\n/external:anglebrackets - treat all headers included via <> as external\n/external:W<n>          - warning level for external headers\n/external:templates[-]  - evaluate warning level across template instantiation chain\n/sdl enable additional security features and warnings\n/options:strict unrecognized compiler options are an error\n/limitTemplateNotes:N limit the number of context messages when the compiler\n                      detects a runaway template instantiation (default N=25)",
         "output_sha256": "47af27788e7635750709eb6726066d03de7b7a757af13e91efeb06fa5e96c086"
       },
-      "environment": {},
+      "environment": {
+        "CC": "",
+        "CFLAGS": "",
+        "CMAKE_BUILD_PARALLEL_LEVEL": "",
+        "CMAKE_GENERATOR": "",
+        "CMAKE_GENERATOR_PLATFORM": "",
+        "CMAKE_GENERATOR_TOOLSET": "",
+        "CMAKE_PREFIX_PATH": "",
+        "CMAKE_TOOLCHAIN_FILE": "",
+        "CXX": "",
+        "CXXFLAGS": "",
+        "INCLUDE": "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\ATLMFC\\include;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Auxiliary\\VS\\include;C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.26100.0\\\\um;C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.26100.0\\\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.26100.0\\\\winrt;C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.26100.0\\\\cppwinrt;C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.8.1\\include\\um",
+        "LDFLAGS": "",
+        "LIB": "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\ATLMFC\\lib\\x64;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.8.1\\lib\\um\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\\\lib\\10.0.26100.0\\\\um\\x64",
+        "LIBPATH": "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\ATLMFC\\lib\\x64;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x86\\store\\references;C:\\Program Files (x86)\\Windows Kits\\10\\UnionMetadata\\10.0.26100.0;C:\\Program Files (x86)\\Windows Kits\\10\\References\\10.0.26100.0;C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319",
+        "PATH": "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\VC\\VCPackages;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\TeamFoundation\\Team Explorer;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\MSBuild\\Current\\bin\\Roslyn;C:\\Program Files (x86)\\Microsoft SDKs\\Windows\\v10.0A\\bin\\NETFX 4.8.1 Tools\\x64\\;C:\\Program Files (x86)\\HTML Help Workshop;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\FSharp\\Tools;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Team Tools\\DiagnosticsHub\\Collector;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\Extensions\\Microsoft\\CodeCoverage.Console;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\\\x64;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\\\MSBuild\\Current\\Bin\\amd64;C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\Tools\\;C:\\Program Files\\PowerShell\\7;C:\\Program Files\\MongoDB\\Server\\7.0\\bin;C:\\vcpkg;C:\\tools\\zstd;C:\\hostedtoolcache\\windows\\stack\\3.11.1\\x64;C:\\cabal\\bin;C:\\\\ghcup\\bin;C:\\mingw64\\bin;C:\\Program Files\\dotnet;C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin;C:\\Program Files\\R\\R-4.6.1\\bin\\x64;C:\\SeleniumWebDrivers\\GeckoDriver;C:\\SeleniumWebDrivers\\EdgeDriver\\;C:\\SeleniumWebDrivers\\ChromeDriver;C:\\Program Files (x86)\\sbt\\bin;C:\\Program Files (x86)\\GitHub CLI;C:\\Program Files\\Git\\bin;C:\\Program Files (x86)\\pipx_bin;C:\\npm\\prefix;C:\\hostedtoolcache\\windows\\go\\1.24.13\\x64\\bin;C:\\hostedtoolcache\\windows\\Python\\3.12.10\\x64\\Scripts;C:\\hostedtoolcache\\windows\\Python\\3.12.10\\x64;C:\\hostedtoolcache\\windows\\Ruby\\3.3.12\\x64\\bin;C:\\Program Files\\OpenSSL\\bin;C:\\tools\\kotlinc\\bin;C:\\hostedtoolcache\\windows\\Java_Temurin-Hotspot_jdk\\17.0.20-101\\x64\\bin;C:\\Program Files\\ImageMagick-7.1.2-Q16-HDRI;C:\\Program Files\\Microsoft SDKs\\Azure\\CLI2\\wbin;C:\\ProgramData\\kind;C:\\ProgramData\\Chocolatey\\bin;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Windows\\System32\\OpenSSH\\;C:\\Program Files\\Microsoft\\Web Platform Installer\\;C:\\Program Files\\Microsoft SQL Server\\170\\Tools\\Binn\\;C:\\Program Files\\Microsoft SQL Server\\Client SDK\\ODBC\\170\\Tools\\Binn\\;C:\\Program Files\\dotnet\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files (x86)\\WiX Toolset v3.14\\bin;C:\\Program Files\\Microsoft SQL Server\\130\\DTS\\Binn\\;C:\\Program Files\\Microsoft SQL Server\\140\\DTS\\Binn\\;C:\\Program Files\\Microsoft SQL Server\\150\\DTS\\Binn\\;C:\\Program Files\\Microsoft SQL Server\\160\\DTS\\Binn\\;C:\\Program Files\\Microsoft SQL Server\\170\\DTS\\Binn\\;C:\\ProgramData\\chocolatey\\lib\\pulumi\\tools\\Pulumi\\bin;C:\\Program Files\\CMake\\bin;C:\\Strawberry\\c\\bin;C:\\Strawberry\\perl\\site\\bin;C:\\Strawberry\\perl\\bin;C:\\ProgramData\\chocolatey\\lib\\maven\\apache-maven-3.9.16\\bin;C:\\Program Files\\Microsoft Service Fabric\\bin\\Fabric\\Fabric.Code;C:\\Program Files\\Microsoft SDKs\\Service Fabric\\Tools\\ServiceFabricLocalClusterManager;C:\\Program Files\\nodejs\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\Git\\mingw64\\bin;C:\\Program Files\\Git\\usr\\bin;C:\\Program Files\\GitHub CLI\\;c:\\tools\\php;C:\\Program Files (x86)\\sbt\\bin;C:\\Program Files\\Amazon\\AWSCLIV2\\;C:\\Program Files\\Amazon\\SessionManagerPlugin\\bin\\;C:\\Program Files\\Amazon\\AWSSAMCLI\\bin\\;C:\\Program Files\\Microsoft SQL Server\\130\\Tools\\Binn\\;C:\\Program Files\\mongosh\\;C:\\Program Files\\PowerShell\\7\\;C:\\Program Files\\LLVM\\bin;C:\\Program Files (x86)\\LLVM\\bin;C:\\Users\\runneradmin\\.dotnet\\tools;C:\\Users\\runneradmin\\.cargo\\bin;C:\\Users\\runneradmin\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\Llvm\\x64\\bin;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\Ninja;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\Common7\\IDE\\VC\\Linux\\bin\\ConnectionManagerExe;C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\vcpkg",
+        "UCRTVersion": "",
+        "UniversalCRTSdkDir": "",
+        "VCINSTALLDIR": "C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\",
+        "VCToolsInstallDir": "",
+        "WindowsSDKVersion": "",
+        "WindowsSdkDir": ""
+      },
       "instrumentation": "none",
       "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
       "patches": [],
@@ -100,17 +122,17 @@
       {
         "bytes": 3187390,
         "name": "ssl.lib",
-        "sha256": "fc23a677d699b0e8967e7b0c15eeb54f30fa1a7ebd5d68d12318b77f2abcb1cf"
+        "sha256": "6f9889598c325e6b3251b66417a81e31aecb8175e5e03777d5ffdf08bbcf6baa"
       },
       {
         "bytes": 6788546,
         "name": "crypto.lib",
-        "sha256": "69734ac3eb8d4f112ac7bcaf4c964eebc1a62aa4e2e69949f559d4c86ce3df07"
+        "sha256": "6499ec0a574878cb14354e4c146b5c4716ab92e47b73b9614e38d6e04be0bf32"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "f05662077ee499a0ff1f9db67ca4f44be2602133909beafdbd930f8a5b537e83",
+  "build_log_sha256": "091e1608f4ef8350795c360b0124751f6198bcfec3cce1c9a797543ad7972e47",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -135,32 +157,32 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "bbd2b22404d47f674842c50eabe2debd12d79787",
+    "repository_revision": "67c519b3d406912378a18bd15da28d5b1f0cdf6a",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T16:05:47.342787+00:00",
+  "finished_at": "2026-08-31T16:57:44.471338+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 88,
+    "cancellation_latency_us": 77,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 6434816,
+    "memory_profile_peak_resident_bytes": 6356992,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 1379869304,
+    "provider_allocation_bytes": 1245566176,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 10294766,
+    "provider_allocation_calls": 10265206,
     "provider_allocation_live_after_cleanup_bytes": 152420,
     "provider_allocation_live_before_cleanup_bytes": 152420,
-    "provider_allocation_peak_live_bytes": 222454,
+    "provider_allocation_peak_live_bytes": 212037,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -172,21 +194,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 88,
+      "latency_us": 77,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 6434816,
+      "peak_resident_bytes": 6356992,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 1379869304,
+      "provider_allocation_bytes": 1245566176,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 10294766,
+      "provider_allocation_calls": 10265206,
       "provider_allocation_live_after_cleanup_bytes": 152420,
       "provider_allocation_live_before_cleanup_bytes": 152420,
-      "provider_allocation_peak_live_bytes": 222454,
+      "provider_allocation_peak_live_bytes": 212037,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -198,14 +220,14 @@
   "platform": "windows-x86_64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 7,
+  "schema_version": 8,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
     "kind": "git",
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T16:03:56.211038+00:00",
+  "started_at": "2026-08-31T16:55:40.305309+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }
