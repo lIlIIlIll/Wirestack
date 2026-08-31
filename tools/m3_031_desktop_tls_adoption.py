@@ -89,10 +89,27 @@ CORE_REQUIREMENTS: dict[str, tuple[tuple[str, str], ...]] = {
     ),
 }
 RETAINED_EVIDENCE = (
-    "docs/evidence/M3-028/README.md",
-    "docs/evidence/M3-030/README.md",
     "docs/evidence/M3-030/native-abi-report.json",
     "docs/evidence/M3-030/test-provider-results.json",
+)
+HISTORICAL_REFERENCES = ("docs/evidence/M3-028/README.md",)
+RETAINED_SOURCE_PREFIXES = (
+    "native/tls/aws_lc/",
+    "src/internal/tls_engine/",
+    "src/tls/",
+    "tools/tls_provider/",
+)
+RETAINED_SOURCE_PATHS = {
+    "tools/architecture_guard.py",
+    "tools/build_linux_tls_provider.py",
+    "tools/build_tls_provider.py",
+    "tools/m3_030_tls_provider_architecture.py",
+}
+HOSTED_INPUT_PATHS = (
+    "tools/tls_provider_poc/openssl_memory_poc.c",
+    "tools/tls_provider_poc/providers.json",
+    "tools/tls_provider_poc/run.py",
+    "tools/tls_provider_poc/validate.py",
 )
 EXCLUDED_GLOBAL_CONDITIONS = (
     {
@@ -175,6 +192,84 @@ def _backlog_row(backlog: str, task_id: str) -> str:
     return rows[0]
 
 
+def hosted_input_sha256(root: Path) -> dict[str, str]:
+    return {relative: sha256_path(root / relative) for relative in HOSTED_INPUT_PATHS}
+
+
+def validate_hosted_run(root: Path, raw: Mapping[str, Any]) -> dict[str, Any]:
+    if raw.get("schema_version") != 2 or raw.get("task_id") != "M3-031":
+        raise AdoptionError("UNKNOWN_SCHEMA", "hosted-run schema or task mismatch")
+    if raw.get("status") != "PASS" or raw.get("conclusion") != "success":
+        raise AdoptionError("INCOMPLETE_RESULT", "hosted-run is not successful")
+    revision = raw.get("revision")
+    if not isinstance(revision, str) or len(revision) != 40 or any(
+            value not in "0123456789abcdef" for value in revision):
+        raise AdoptionError("STALE_REVISION", "hosted-run revision is not an exact SHA")
+    expected = hosted_input_sha256(root)
+    if raw.get("source_sha256") != expected:
+        raise AdoptionError("STALE_SOURCE", "hosted provider inputs differ from retained run")
+    artifacts = raw.get("artifacts")
+    if not isinstance(artifacts, list) or len(artifacts) != 2:
+        raise AdoptionError("INCOMPLETE_RESULT", "hosted-run requires two native artifacts")
+    expected_names = {
+        f"m3-031-windows-x86_64-{revision}",
+        f"m3-031-macos-arm64-{revision}",
+    }
+    if {item.get("name") for item in artifacts if isinstance(item, dict)} != expected_names:
+        raise AdoptionError("STALE_REVISION", "hosted artifacts are not bound to revision")
+    return {
+        "schema_version": 1,
+        "task_id": "M3-031",
+        "revision": revision,
+        "source_sha256": expected,
+        "status": "PASS",
+    }
+
+
+def validate_retained_evidence(root: Path) -> dict[str, Any]:
+    evidence_path = root / "docs/evidence/M3-030/evidence.json"
+    evidence = load_json(evidence_path)
+    if evidence.get("schema_version") != 1 or evidence.get("source_task") != "M3-030":
+        raise AdoptionError("RETAINED_EVIDENCE", "M3-030 evidence index identity is invalid")
+    if evidence.get("acceptance_status") != "PASS":
+        raise AdoptionError("RETAINED_EVIDENCE", "M3-030 evidence is not PASS")
+    reports = evidence.get("reports")
+    if not isinstance(reports, list):
+        raise AdoptionError("RETAINED_EVIDENCE", "M3-030 reports are missing")
+    by_path = {
+        item.get("path"): item for item in reports if isinstance(item, dict)
+    }
+    for relative in RETAINED_EVIDENCE:
+        entry = by_path.get(relative)
+        if not isinstance(entry, dict):
+            raise AdoptionError("RETAINED_EVIDENCE", f"{relative}: absent from evidence index")
+        path = root / relative
+        if entry.get("source_task") != "M3-030" or entry.get("acceptance_status") != "PASS":
+            raise AdoptionError("RETAINED_EVIDENCE", f"{relative}: index does not record PASS")
+        if entry.get("sha256") != sha256_path(path):
+            raise AdoptionError("STALE_SOURCE", f"{relative}: report digest changed")
+        payload = load_json(path)
+        if payload.get("source_task") != "M3-030" or payload.get("status") != "PASS":
+            raise AdoptionError("RETAINED_EVIDENCE", f"{relative}: report does not provide PASS")
+    source_sha256 = evidence.get("source_sha256")
+    if not isinstance(source_sha256, dict):
+        raise AdoptionError("RETAINED_EVIDENCE", "M3-030 source inventory is missing")
+    checked: dict[str, str] = {}
+    for relative, expected in source_sha256.items():
+        if not isinstance(relative, str) or not (
+                relative in RETAINED_SOURCE_PATHS or
+                any(relative.startswith(prefix) for prefix in RETAINED_SOURCE_PREFIXES)):
+            continue
+        path = root / relative
+        if not path.is_file() or expected != sha256_path(path):
+            raise AdoptionError("STALE_SOURCE", f"{relative}: retained TLS source changed")
+        checked[relative] = expected
+    if not checked:
+        raise AdoptionError("RETAINED_EVIDENCE", "no retained TLS source was validated")
+    return {"task_id": "M3-030", "reports": list(RETAINED_EVIDENCE),
+            "source_sha256": dict(sorted(checked.items())), "status": "PASS"}
+
+
 def audit_task_graph(root: Path) -> dict[str, Any]:
     backlog_path = root / "docs/planning/implementation-backlog.md"
     try:
@@ -215,7 +310,8 @@ def audit_core(root: Path) -> dict[str, Any]:
             "paths": sorted(set(paths)),
             "status": "PASS",
         }
-    for relative in RETAINED_EVIDENCE:
+    retained = validate_retained_evidence(root)
+    for relative in RETAINED_EVIDENCE + HISTORICAL_REFERENCES:
         path = root / relative
         if not path.is_file():
             raise AdoptionError("CORE_REQUIREMENT", f"{relative}: retained evidence missing")
@@ -232,6 +328,8 @@ def audit_core(root: Path) -> dict[str, Any]:
         "excluded_global_conditions": list(EXCLUDED_GLOBAL_CONDITIONS),
         "historical_task_status_changed": False,
         "retained_evidence": list(RETAINED_EVIDENCE),
+        "retained_evidence_validation": retained,
+        "historical_references": list(HISTORICAL_REFERENCES),
         "source_sha256": dict(sorted(source_sha256.items())),
         "task_graph": graph,
         "boundary": "Only the desktop-applicable contract is audited. Global six-platform and mobile conditions are not evaluated, and no desktop trust or system-key adapter is implemented.",
@@ -256,7 +354,7 @@ def validate_provider_result(
         raise AdoptionError("PLATFORM", str(raw.get("platform")))
     if raw.get("status") != "PASS":
         raise AdoptionError("INCOMPLETE_RESULT", str(raw.get("status")))
-    if raw.get("schema_version") != 2:
+    if raw.get("schema_version") not in {2, 3}:
         raise AdoptionError("UNKNOWN_SCHEMA", str(raw.get("schema_version")))
     source = raw.get("source")
     if not isinstance(source, dict) or source.get("commit") != PINNED_COMMIT:
@@ -330,6 +428,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     provider.add_argument("--platform", choices=["windows-x86_64", "macos-arm64"], required=True)
     provider.add_argument("--expected-revision", required=True)
     provider.add_argument("--output", type=Path)
+    hosted = sub.add_parser("validate-hosted")
+    hosted.add_argument("--input", type=Path, required=True)
+    hosted.add_argument("--output", type=Path)
     matrix = sub.add_parser("aggregate")
     matrix.add_argument("--core", type=Path, required=True)
     matrix.add_argument("--windows", type=Path, required=True)
@@ -346,6 +447,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 raw, expected_platform=args.platform,
                 expected_revision=args.expected_revision,
             )
+        elif args.command == "validate-hosted":
+            value = validate_hosted_run(args.root.resolve(), load_json(args.input))
         else:
             value = aggregate(
                 load_json(args.core), load_json(args.windows), load_json(args.macos),

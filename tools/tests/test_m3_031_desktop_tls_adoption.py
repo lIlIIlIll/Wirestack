@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def provider_result(platform: str, revision: str) -> dict:
     spec = json.loads((ROOT / "tools/tls_provider_poc/providers.json").read_text())
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "task_id": "M0-016",
         "provider": "aws-lc",
         "platform": platform,
@@ -40,7 +40,8 @@ def provider_result(platform: str, revision: str) -> dict:
             "system_tls_dependencies": [],
             "runtime_loader_library_strings": [],
         },
-        "metrics": {"repeated_cleanup_cycles": 10000, "external_signer_calls": 2},
+        "metrics": {"repeated_cleanup_cycles": 10000, "external_signer_calls": 2,
+                    "session_resumption_handshakes": 2},
     }
 
 
@@ -60,6 +61,51 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
         self.assertTrue(all(item["disposition"] == "NOT_EVALUATED" for item in result["excluded_global_conditions"]))
         self.assertIn("docs/planning/implementation-backlog.md", result["source_sha256"])
         self.assertEqual("PASS", result["task_graph"]["status"])
+        self.assertEqual("PASS", result["retained_evidence_validation"]["status"])
+
+    def test_retained_report_and_tls_source_drift_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            evidence_path = root / "docs/evidence/M3-030/evidence.json"
+            evidence_path.parent.mkdir(parents=True)
+            report_paths = adoption.RETAINED_EVIDENCE
+            reports = []
+            for relative in report_paths:
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(json.dumps({
+                    "source_task": "M3-030", "status": "PASS"
+                }), encoding="utf-8")
+                reports.append({"path": relative, "source_task": "M3-030",
+                                "acceptance_status": "PASS",
+                                "sha256": adoption.sha256_path(path)})
+            source = root / "src/internal/tls_engine/package.cj"
+            source.parent.mkdir(parents=True)
+            source.write_text("current", encoding="utf-8")
+            evidence = {"schema_version": 1, "source_task": "M3-030",
+                        "acceptance_status": "PASS", "reports": reports,
+                        "source_sha256": {
+                            "src/internal/tls_engine/package.cj": adoption.sha256_path(source)
+                        }}
+            evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+            self.assertEqual("PASS", adoption.validate_retained_evidence(root)["status"])
+            source.write_text("drift", encoding="utf-8")
+            self.assert_code("STALE_SOURCE", lambda: adoption.validate_retained_evidence(root))
+
+    def test_hosted_run_is_bound_to_current_provider_inputs(self) -> None:
+        revision = "a" * 40
+        raw = {
+            "schema_version": 2, "task_id": "M3-031", "status": "PASS",
+            "conclusion": "success", "revision": revision,
+            "source_sha256": adoption.hosted_input_sha256(ROOT),
+            "artifacts": [
+                {"name": f"m3-031-windows-x86_64-{revision}"},
+                {"name": f"m3-031-macos-arm64-{revision}"},
+            ],
+        }
+        self.assertEqual("PASS", adoption.validate_hosted_run(ROOT, raw)["status"])
+        raw["source_sha256"][adoption.HOSTED_INPUT_PATHS[0]] = "0" * 64
+        self.assert_code("STALE_SOURCE", lambda: adoption.validate_hosted_run(ROOT, raw))
 
     def test_missing_core_declaration_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
