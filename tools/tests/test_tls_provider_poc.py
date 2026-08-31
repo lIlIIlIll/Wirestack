@@ -72,6 +72,11 @@ def build_provenance_fixture(provider, platform, *, diagnostic=False):
         "cxx_compiler": tool_identity_fixture("c++"),
         "cmake": tool_identity_fixture("cmake") if provider != "openssl" else None,
         "build_tool": tool_identity_fixture("build-tool"),
+        "assembler": (
+            tool_identity_fixture("nasm")
+            if provider == "aws-lc" and platform == "windows-x86_64" and
+            not diagnostic else None
+        ),
         "configure_argv": configure,
         "build_argv": [["build-tool", "<BUILD>"], ["build-tool", "<PREFIX>"]],
         "environment": {
@@ -918,6 +923,29 @@ class ProviderPocValidationTests(unittest.TestCase):
         result["build"]["provenance"]["environment"]["PATH"] = ""
         with self.assertRaisesRegex(validator.ValidationError, "PATH required"):
             validator.validate_result(result, self.spec)
+
+    def test_windows_aws_lc_assembler_identity_is_required(self):
+        result = complete_result(self.spec, platform="windows-x86_64")
+        result["build"]["provenance"]["assembler"] = None
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "NASM assembler identity required"):
+            validator.validate_result(result, self.spec)
+        result = complete_result(self.spec, platform="windows-x86_64")
+        result["build"]["provenance"]["assembler"]["exit_code"] = 1
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "NASM assembler identity command failed"):
+            validator.validate_result(result, self.spec)
+
+    def test_non_windows_build_rejects_assembler_identity(self):
+        result = complete_result(self.spec)
+        result["build"]["provenance"]["assembler"] = tool_identity_fixture("nasm")
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "unexpected provider assembler identity"):
+            validator.validate_result(result, self.spec)
+
+    def test_windows_workflow_pins_nasm_fallback(self):
+        workflow = (ROOT / ".github/workflows/m0-016-windows-provider-poc.yml").read_text()
+        self.assertIn("choco install nasm --version=2.16.3 --no-progress -y", workflow)
 
     def test_build_environment_captures_inherited_and_override_values(self):
         with tempfile.TemporaryDirectory() as directory:

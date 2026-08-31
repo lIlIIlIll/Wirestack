@@ -38,7 +38,7 @@ MEMORY_PROFILE_BOUND_BYTES = 512 * 1024 * 1024
 PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES = 64 * 1024 * 1024 * 1024
 PROVIDER_ALLOCATION_CALL_BOUND = 150_000_000
 CANCELLATION_WAKE_BOUND_US = 250_000
-RESULT_SCHEMA_VERSION = 10
+RESULT_SCHEMA_VERSION = 11
 MAX_TOOL_VERSION_BYTES = 16 * 1024
 MAX_BUILD_ENVIRONMENT_VALUE_BYTES = 64 * 1024
 MAX_BUILD_ENVIRONMENT_TOTAL_BYTES = 256 * 1024
@@ -491,6 +491,11 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
     else:
         build_tool_args = ["nmake", "/?"] if is_windows() else ["make", "--version"]
         cmake_identity = None
+    assembler_identity = (
+        tool_identity(["nasm", "--version"], cwd=work, log=log)
+        if pid == "aws-lc" and is_windows() and not diagnostic
+        else None
+    )
     replacements = {
         src: "<SOURCE>",
         build: "<BUILD>",
@@ -505,6 +510,7 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
         "cxx_compiler": tool_identity(cxx_args, cwd=work, log=log),
         "cmake": cmake_identity,
         "build_tool": tool_identity(build_tool_args, cwd=work, log=log),
+        "assembler": assembler_identity,
         "configure_argv": normalized_argv(configure_command, replacements),
         "build_argv": [normalized_argv(command, replacements) for command in build_commands],
         "environment": normalized_environment,

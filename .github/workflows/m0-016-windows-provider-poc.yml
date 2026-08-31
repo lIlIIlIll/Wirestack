@@ -49,7 +49,7 @@ jobs:
             throw 'runner is not Windows Server 2025'
           }
           if (-not (Get-Command nasm -ErrorAction SilentlyContinue)) {
-            choco install nasm --no-progress -y
+            choco install nasm --version=2.16.3 --no-progress -y
           }
           if (-not (Get-Command nasm -ErrorAction SilentlyContinue)) {
             throw 'NASM is required by the AWS-LC Windows build'

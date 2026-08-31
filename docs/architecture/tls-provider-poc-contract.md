@@ -40,7 +40,11 @@ hosted-runner image identity. A musl result additionally records the immutable
 container name and digest; a mutable tag or artifact-level association is not
 sufficient. The result retains normalized configure/build argv, compiler,
 C++ compiler, CMake when used, build-tool version output, target triple, and an
-allowlisted snapshot of the effective build environment. The snapshot includes
+allowlisted snapshot of the effective build environment. A Windows AWS-LC
+native build also retains the successful bounded `nasm --version` identity;
+the workflow pins Chocolatey's NASM fallback instead of installing a moving
+latest package. Builds configured with assembly disabled must not invent an
+assembler identity. The snapshot includes
 inherited compiler, CMake, SDK, search-path and MSVC DevShell variables as well
 as runner-supplied overrides; absent allowlisted variables are recorded as
 empty values. Each value and the complete snapshot are bounded. Temporary build
