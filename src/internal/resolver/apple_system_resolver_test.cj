@@ -31,6 +31,7 @@ class M2006AppleSystemResolverTest {
             let result = resolver.resolve(api.HostName("all.m2-006.test"))
             @Expect(result.addresses.size, 2)
             @Expect(m2006IsIpv6(result.addresses[0].family))
+            @Expect(result.addresses[0].zone, Some("11"))
             @Expect(m2006IsIpv4(result.addresses[1].family))
             @Expect(result.diagnostics.duplicatesRemoved, 1)
             @Expect(result.expiration.isNone())

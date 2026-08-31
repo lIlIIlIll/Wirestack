@@ -146,7 +146,51 @@ def xcrun(root: Path, env: dict[str, str], sdk: str, *arguments: str) -> str:
 def deployment_flags(selected: str) -> list[str]:
     if selected == "ios-simulator-arm64":
         return ["-mios-simulator-version-min=17.5"]
-    return []
+    if selected == "macos-arm64":
+        return ["-mmacosx-version-min=12.0"]
+    raise GateError(f"unsupported Apple deployment target: {selected}")
+
+
+def bind_test_link_stub(manifest: str, selected: str) -> str:
+    table = {
+        "macos-arm64": "[target.aarch64-apple-darwin.ffi.c]",
+        "ios-simulator-arm64": "[target.arm64-apple-ios11-simulator.ffi.c]",
+    }.get(selected)
+    if table is None:
+        raise GateError(f"unsupported Apple resolver platform: {selected}")
+    start = manifest.find(table)
+    end = manifest.find("\n[target.", start + len(table))
+    if start < 0:
+        raise GateError("Apple target FFI table is missing from cjpm.toml")
+    if end < 0:
+        end = manifest.find("\n[dependencies]", start + len(table))
+    if end < 0:
+        raise GateError("Apple target FFI table is unterminated in cjpm.toml")
+    section = manifest[start:end]
+    marker = '  wirestack_resolver = { path = "./target/native/resolver/current/lib" }'
+    if section.count(marker) != 1:
+        raise GateError("Apple resolver FFI binding is missing from cjpm.toml")
+    if "wirestack_m2_006_tls_link_stub" in section:
+        raise GateError("test-only TLS link stub leaked into the normal Apple target")
+    bound = section.replace(
+        marker,
+        marker + '\n  wirestack_m2_006_tls_link_stub = { path = "./target/native/test-support/m2-006/lib" }',
+        1,
+    )
+    return manifest[:start] + bound + manifest[end:]
+
+
+def prepare_test_workspace(root: Path, destination: Path, selected: str) -> None:
+    shutil.copytree(
+        root,
+        destination,
+        ignore=shutil.ignore_patterns(".git", "target", "build", "dist", "__pycache__"),
+    )
+    manifest_path = destination / "cjpm.toml"
+    manifest_path.write_text(
+        bind_test_link_stub(manifest_path.read_text(encoding="utf-8"), selected),
+        encoding="utf-8",
+    )
 
 
 def ios_launch_command(device: str) -> list[str]:
@@ -404,8 +448,17 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
     if report.get("mode") != expected_mode:
         failures.append("REPORT:MODE")
     platform_data = report.get("platform")
-    if not isinstance(platform_data, dict) or platform_data.get("system") != "Darwin":
+    if (
+        not isinstance(platform_data, dict)
+        or platform_data.get("system") != "Darwin"
+        or str(platform_data.get("machine", "")).lower() not in {"arm64", "aarch64"}
+    ):
         failures.append("REPORT:NON_NATIVE_APPLE")
+    elif "Target: aarch64-apple-darwin" not in str(
+        platform_data.get("toolchain", {}).get("output", "")
+        if isinstance(platform_data.get("toolchain"), dict) else ""
+    ):
+        failures.append("REPORT:TOOLCHAIN_TARGET")
     if report.get("decision") != "PASS" or report.get("failures") != []:
         failures.append("REPORT:DECISION")
     test_process = report.get("resolver_test")
@@ -423,6 +476,12 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
             failures.append("REPORT:PRIVATE_RUNTIME_ABI")
         if manifest.get("test_fixture") is not True:
             failures.append("REPORT:FIXTURE_NOT_BOUND")
+        inputs = manifest.get("inputs")
+        flags = inputs.get("flags") if isinstance(inputs, dict) else None
+        if not isinstance(flags, list) or any(
+            flag not in flags for flag in deployment_flags(MODES[expected_mode])
+        ):
+            failures.append("REPORT:DEPLOYMENT_TARGET")
     link_stub = report.get("test_link_stub")
     if not isinstance(link_stub, dict) or link_stub.get("test_only") is not True:
         failures.append("REPORT:TEST_LINK_STUB")
@@ -439,6 +498,7 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
             bundle_probe_sha = simulator.get("bundle_probe_sha256")
             install = simulator.get("install")
             runtime_libraries = simulator.get("runtime_libraries")
+            probe_compile = simulator.get("probe_compile")
             runtime_names = {
                 entry.get("path")
                 for entry in runtime_libraries
@@ -453,6 +513,8 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
                 or install.get("timed_out") is not False
                 or install.get("exit_code") != 0
                 or "Frameworks/libcangjie-runtime.dylib" not in runtime_names
+                or not isinstance(probe_compile, dict)
+                or IOS_TARGET not in probe_compile.get("command", [])
             ):
                 failures.append("REPORT:SIMULATOR_PROBE")
     return failures
@@ -472,38 +534,46 @@ def run_gate(root: Path, output: Path, revision: str, mode: str) -> dict[str, An
         env["WIRESTACK_IOS_SIMULATOR_SYSROOT"] = xcrun(
             root, env, "iphonesimulator", "--show-sdk-path"
         )
-    build = run_command(
+    with tempfile.TemporaryDirectory(prefix="wirestack-m2-006-") as temporary:
+        workspace = Path(temporary) / "repo"
+        prepare_test_workspace(root, workspace, MODES[mode])
+        if mode == "ios-simulator":
+            env["WIRESTACK_IOS_SIMULATOR_SYSROOT"] = xcrun(
+                workspace, env, "iphonesimulator", "--show-sdk-path"
+            )
+        build = run_command(
         [
-            "python3", str(root / "tools/build_resolver.py"), "--root", str(root),
+            "python3", str(workspace / "tools/build_resolver.py"), "--root", str(workspace),
             "--platform", MODES[mode], "--test-fixture", "--quiet",
         ],
-        cwd=root,
+        cwd=workspace,
         env=env,
         timeout=120,
-    )
-    require_success(build, f"{mode} resolver build")
-    test_link_stub = build_test_link_stub(root, env, MODES[mode])
-    manifest_path = root / "target/native/resolver/current/resolver-manifest.json"
-    try:
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as error:
-        raise GateError(f"resolver manifest is unavailable: {error}") from error
+        )
+        require_success(build, f"{mode} resolver build")
+        test_link_stub = build_test_link_stub(workspace, env, MODES[mode])
+        manifest_path = workspace / "target/native/resolver/current/resolver-manifest.json"
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise GateError(f"resolver manifest is unavailable: {error}") from error
 
-    simulator: dict[str, Any] | None = None
-    if mode == "macos":
-        resolver_test = run_command(
+        simulator: dict[str, Any] | None = None
+        if mode == "macos":
+            resolver_test = run_command(
             [
                 "cjpm", "test", "src/internal/resolver", "-j", "1", "--parallel", "1",
                 "--filter", "M2006AppleSystemResolverTest", "--show-all-output",
                 "--no-color", "--no-progress",
             ],
-            cwd=root,
+            cwd=workspace,
             env=env,
             timeout=240,
-        )
-    else:
-        resolver_test, simulator = run_ios_test(root, env)
-    toolchain = run_command(["cjc", "-v"], cwd=root, env=env, timeout=15)
+            )
+        else:
+            resolver_test, simulator = run_ios_test(workspace, env)
+        toolchain = run_command(["cjc", "-v"], cwd=workspace, env=env, timeout=15)
+        manifest_sha256 = sha256_path(manifest_path)
     failures = process_failures(resolver_test, EXPECTED_TESTS, "RESOLVER_TEST")
     if manifest.get("platform") != MODES[mode]:
         failures.append("MANIFEST:PLATFORM")
@@ -527,7 +597,7 @@ def run_gate(root: Path, output: Path, revision: str, mode: str) -> dict[str, An
             "toolchain": toolchain,
         },
         "resolver_manifest": manifest,
-        "resolver_manifest_sha256": sha256_path(manifest_path),
+        "resolver_manifest_sha256": manifest_sha256,
         "build": build,
         "test_link_stub": test_link_stub,
         "resolver_test": resolver_test,
