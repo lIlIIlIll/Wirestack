@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 2014208,
-    "binary_sha256": "6beaf2bd634be270ae9220f1d82f3703fc77977c77ac55bce5c07b64b2adeac6",
+    "binary_bytes": 2014720,
+    "binary_sha256": "9df1a0117c9be1d41b9e9444c5d2e492ae42a2a3836f7bfa67dd31e2f91d15c1",
     "exported_symbol_inventory": {
       "count": 9,
       "scope": "final-artifact-exports",
@@ -131,17 +131,17 @@
       {
         "bytes": 6788546,
         "name": "crypto.lib",
-        "sha256": "5f83ba8d957cc2cb7b12867897200f39c3c5572f0b30b65668c8545864db4530"
+        "sha256": "0011cb040239e9804f76dc8a2088e737f88af3fe093ef3ede54afa1e98886536"
       },
       {
         "bytes": 3187390,
         "name": "ssl.lib",
-        "sha256": "b9e646bdd3d583bd88e9ce6293f8e5d199221313c3b5f4c0dd7e8113336067cc"
+        "sha256": "1c98fda5ea5d0da10a36aa70fb20a6d25225bcb9a283f89195e1dada21fe9811"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "c3c95bf06e03ec9ea8df4f857ecba6d5d955e83d9fbb87b8052cb535a2bd0aa5",
+  "build_log_sha256": "de9b69b299ec53f3a8722783d2bf33b6014b24dc501b00b56e7a7832d827a084",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -167,16 +167,16 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "427385f29e6ae64e003caf7a539a5343761c8318",
+    "repository_revision": "88584c91602b25e4c35cd4cf9a1431c220897cec",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T21:47:33.722834+00:00",
+  "finished_at": "2026-08-31T22:16:10.847634+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 77,
+    "cancellation_latency_us": 68,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
@@ -184,16 +184,16 @@
     "failure_cleanup_cycles": 0,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 6348800,
+    "memory_profile_peak_resident_bytes": 6443008,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 1255875088,
+    "provider_allocation_bytes": 1369671192,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 10277542,
+    "provider_allocation_calls": 10286768,
     "provider_allocation_live_after_cleanup_bytes": 152420,
     "provider_allocation_live_before_cleanup_bytes": 152420,
-    "provider_allocation_peak_live_bytes": 213558,
+    "provider_allocation_peak_live_bytes": 223574,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -205,21 +205,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 77,
+      "latency_us": 68,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 6348800,
+      "peak_resident_bytes": 6443008,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 1255875088,
+      "provider_allocation_bytes": 1369671192,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 10277542,
+      "provider_allocation_calls": 10286768,
       "provider_allocation_live_after_cleanup_bytes": 152420,
       "provider_allocation_live_before_cleanup_bytes": 152420,
-      "provider_allocation_peak_live_bytes": 213558,
+      "provider_allocation_peak_live_bytes": 223574,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -259,7 +259,7 @@
     },
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T21:45:34.182371+00:00",
+  "started_at": "2026-08-31T22:14:12.202942+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }

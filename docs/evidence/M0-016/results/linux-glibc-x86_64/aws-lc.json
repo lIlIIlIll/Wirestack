@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 4343016,
-    "binary_sha256": "eb4ccbd7090b844744bf79945769a252b9fa6bcd19823d868e8177a998e7f099",
+    "binary_sha256": "1ee04ccd8dac714bd06cfa5f4ea62464e828b0186613b8941e417eb86734eec6",
     "exported_symbol_inventory": {
       "count": 3802,
       "scope": "final-artifact-exports",
@@ -3924,7 +3924,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "0fc597510860aa99cf7debfa2f15f2de339a27a696d0d8625a615be746a84190",
+  "build_log_sha256": "9e21f75bd5bd2916dd7b30188eb76899e4e0c2fe73c2501507e5542fe86ccefa",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -3950,16 +3950,16 @@
     "image_os": "ubuntu24",
     "image_version": "20260823.283.1",
     "python": "3.12.14",
-    "repository_revision": "427385f29e6ae64e003caf7a539a5343761c8318",
+    "repository_revision": "88584c91602b25e4c35cd4cf9a1431c220897cec",
     "runner_arch": "X64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T21:49:08.769037+00:00",
+  "finished_at": "2026-08-31T22:17:08.190152+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 85,
+    "cancellation_latency_us": 84,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
@@ -3967,16 +3967,16 @@
     "failure_cleanup_cycles": 0,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 34496512,
+    "memory_profile_peak_resident_bytes": 34607104,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 1267331236,
+    "provider_allocation_bytes": 1266985380,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 10277178,
+    "provider_allocation_calls": 10277290,
     "provider_allocation_live_after_cleanup_bytes": 152884,
     "provider_allocation_live_before_cleanup_bytes": 152884,
-    "provider_allocation_peak_live_bytes": 214718,
+    "provider_allocation_peak_live_bytes": 214038,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -3988,21 +3988,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 85,
+      "latency_us": 84,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 34496512,
+      "peak_resident_bytes": 34607104,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 1267331236,
+      "provider_allocation_bytes": 1266985380,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 10277178,
+      "provider_allocation_calls": 10277290,
       "provider_allocation_live_after_cleanup_bytes": 152884,
       "provider_allocation_live_before_cleanup_bytes": 152884,
-      "provider_allocation_peak_live_bytes": 214718,
+      "provider_allocation_peak_live_bytes": 214038,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -4011,7 +4011,7 @@
         "reason": "AWS-LC 5.5.0 exposes no process-global cleanup API; the bounded 10,000-cycle resident/allocation profile remains mandatory",
         "status": "UNSUPPORTED"
       },
-      "output_sha256": "006e9d34a2b2023f6fd022846bbcd62b0ce1fd729d1d948bcacb7f3aa51d509d",
+      "output_sha256": "90d8bbc35268a33398d760a0166ebcd57b8e82e665b89fe39622258c922bc1a4",
       "provider_build_provenance": {
         "assembler": null,
         "build_argv": [
@@ -4155,7 +4155,7 @@
     },
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T21:46:14.933463+00:00",
+  "started_at": "2026-08-31T22:14:18.290781+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }
