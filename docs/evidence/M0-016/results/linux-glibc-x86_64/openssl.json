@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 7287392,
-    "binary_sha256": "54b197d6072d41ba25bb8171d13699c19b41bc5927f6516599a8d782e8fd6429",
+    "binary_bytes": 7287536,
+    "binary_sha256": "0e35527a166f890aa104fa6c7107b0e90175a4350f1d8819f3610c82c0b50b97",
     "exported_symbol_inventory": {
       "count": 9576,
       "scope": "final-artifact-exports",
@@ -9586,6 +9586,12 @@
       ],
       "tool": "nm -g --defined-only"
     },
+    "license_bundle": {
+      "file_count": 3,
+      "path": "license-bundle/manifest.json",
+      "sha256": "045d956dc9b5cc1ab3346c0d3c4924e07a2e3095af72096c181922033ae5e1d0",
+      "total_bytes": 29732
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
@@ -9596,12 +9602,12 @@
       {
         "bytes": 12195000,
         "name": "libcrypto.a",
-        "sha256": "f10d50c40fadbff8ee161bce949d0b4c00d9bede104d91fd3e2f06c4d556d87f"
+        "sha256": "ae23154db6d93bfe1aacc9ba2c55b900acae09bdbd036191d9cbddf241ebc6b7"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "5f0729cb87c950debeb6c850286bf61fde3bdef172af123f7576b70978175b44",
+  "build_log_sha256": "05aaf6b26d0b07825dfb6b64e15494fb2a2fbafbfb24abd6c894f295a4d83c78",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -9622,20 +9628,28 @@
     "truncation": "PASS"
   },
   "execution": {
+    "container_image": "",
     "image_os": "ubuntu24",
     "image_version": "20260823.283.1",
     "python": "3.12.14",
-    "repository_revision": "837a63df942d67e77154c3127e2b917dfc1190cb",
+    "repository_revision": "4c7ddea51e9e73600b39be7938566ea6300ab5cd",
     "runner_arch": "X64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T10:57:25.063191+00:00",
+  "finished_at": "2026-08-31T12:22:17.428540+00:00",
   "metrics": {
+    "allocation_profile_bound_bytes": 1073741824,
+    "allocation_profile_bytes": 655949824,
+    "allocation_profile_calls": 20018,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
+    "memory_profile_bound_bytes": 536870912,
+    "memory_profile_peak_resident_bytes": 46190592,
+    "mtls_optional_handshakes": 2,
+    "mtls_required_handshakes": 1,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -9644,17 +9658,38 @@
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
+  "operational_evidence": {
+    "memory_profile": {
+      "allocation_bound_bytes": 1073741824,
+      "allocation_bytes": 655949824,
+      "allocation_calls": 20018,
+      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "payload_bytes_per_transfer": 32768,
+      "peak_resident_bytes": 46190592,
+      "resident_bound_bytes": 536870912
+    },
+    "native_memory_diagnostic": {
+      "cleanup_cycles": 10,
+      "leak_detection": {
+        "reason": "static OpenSSL 3.6.3 retains process-global allocations after thread and global cleanup; broad allocator suppression is forbidden",
+        "status": "UNSUPPORTED"
+      },
+      "output_sha256": "c2953f723918ecce5fa71f27e2f1d9dd0de4f0f7d1d7c98dc51e7bcc40fdf4dc",
+      "status": "PASS",
+      "tool": "address+undefined-sanitizer"
+    }
+  },
   "platform": "linux-glibc-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 4,
+  "schema_version": 5,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T10:55:36.961384+00:00",
+  "started_at": "2026-08-31T12:20:24.783087+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
