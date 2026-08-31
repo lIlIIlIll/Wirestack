@@ -46,11 +46,13 @@ macOS also require a passing ASan and UBSan diagnostic run. Platforms where
 that configured diagnostic is unavailable must record `UNSUPPORTED`; they may
 not report a skipped diagnostic as `PASS`.
 
-Leak detection is a separate field. Linux glibc providers with a supported
-process-global cleanup API require LeakSanitizer `PASS`. AWS-LC 5.5.0 does not
-expose that cleanup API, and the configured macOS sanitizer does not provide
-the leak gate, so those cells record leak detection as `UNSUPPORTED` while the
-10,000-cycle resident/allocation profile remains mandatory.
+Leak detection is a separate field. Linux glibc Mbed TLS requires
+LeakSanitizer `PASS`. AWS-LC 5.5.0 exposes no process-global cleanup API, and
+static OpenSSL 3.6.3 retains process-global allocations even after explicit
+thread and global cleanup. Broad allocator suppression would also hide real
+provider leaks, so AWS-LC, OpenSSL, and the configured macOS runs record leak
+detection as `UNSUPPORTED`. The ASan/UBSan run and 10,000-cycle
+resident/allocation profile remain mandatory.
 
 An external-trust `PASS` requires at least four callback invocations. The PoC
 must accept and reject an otherwise-untrusted valid chain through the callback

@@ -484,8 +484,8 @@ def run_native_memory_diagnostic(spec: Mapping[str, Any], repo: Path, prefix: Pa
     env = os.environ.copy()
     env["WIRESTACK_POC_DIAGNOSTIC_CYCLES"] = "10"
     leak_detection_supported = (
-        spec["id"] != "aws-lc" and
-        not current_platform.startswith("macos-")
+        spec["id"] == "mbedtls" and
+        current_platform.startswith("linux-glibc-")
     )
     env["ASAN_OPTIONS"] = (
         f"detect_leaks={1 if leak_detection_supported else 0}:"
@@ -509,6 +509,11 @@ def run_native_memory_diagnostic(spec: Mapping[str, Any], repo: Path, prefix: Pa
         diagnostic["leak_detection"]["reason"] = (
             "AWS-LC 5.5.0 exposes no process-global cleanup API; the bounded "
             "10,000-cycle resident/allocation profile remains mandatory"
+        )
+    elif spec["id"] == "openssl":
+        diagnostic["leak_detection"]["reason"] = (
+            "static OpenSSL 3.6.3 retains process-global allocations after "
+            "thread and global cleanup; broad allocator suppression is forbidden"
         )
     elif current_platform.startswith("macos-"):
         diagnostic["leak_detection"]["reason"] = (

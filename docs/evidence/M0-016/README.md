@@ -29,8 +29,9 @@ native run must retain:
 - bounded resident-memory and harness-allocation measurements;
 - ASan and UBSan diagnostics on Linux glibc and macOS, with an explicit
   unsupported result on the other current desktop targets; LeakSanitizer must
-  pass where the provider and platform expose the required cleanup support,
-  otherwise the result records that sub-gate as unsupported.
+  pass for Linux glibc Mbed TLS; AWS-LC, static OpenSSL, and macOS record that
+  sub-gate as unsupported with an explicit reason instead of using broad leak
+  suppressions.
 
 ## Superseded desktop runs
 

@@ -102,7 +102,7 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
                 "leak_detection": {
                     "status": (
                         "PASS"
-                        if platform.startswith("linux-glibc-") and provider != "aws-lc"
+                        if platform.startswith("linux-glibc-") and provider == "mbedtls"
                         else "UNSUPPORTED"
                     ),
                 },
@@ -462,7 +462,13 @@ class ProviderPocValidationTests(unittest.TestCase):
                     {"id": "openssl"}, root, root, [], root, root / "log",
                     fixtures, "linux-glibc-x86_64",
                 )
-                self.assertEqual("PASS", openssl["leak_detection"]["status"])
+                self.assertEqual("UNSUPPORTED", openssl["leak_detection"]["status"])
+                self.assertIn("detect_leaks=0", run_mock.call_args.kwargs["env"]["ASAN_OPTIONS"])
+                mbedtls = runner.run_native_memory_diagnostic(
+                    {"id": "mbedtls"}, root, root, [], root, root / "log",
+                    fixtures, "linux-glibc-x86_64",
+                )
+                self.assertEqual("PASS", mbedtls["leak_detection"]["status"])
                 self.assertIn("detect_leaks=1", run_mock.call_args.kwargs["env"]["ASAN_OPTIONS"])
 
     def test_license_bundle_rejects_escape_and_stale_digest(self):
