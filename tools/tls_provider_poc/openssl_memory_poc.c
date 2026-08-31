@@ -310,7 +310,7 @@ static int clean_shutdown(Pair *p) {
 
 static int basic_case(const char *server_cert, const char *server_key, const char *ca,
                       const char *client_cert, const char *client_key, int version,
-                      int mtls, int do_session) {
+                      int mtls) {
     sni_seen = alpn_seen = 0;
     SSL_CTX *server_ctx = make_server_ctx(server_cert, server_key, ca, version, mtls, 0);
     SSL_CTX *client_ctx = make_client_ctx(ca, mtls ? client_cert : NULL,
@@ -318,15 +318,36 @@ static int basic_case(const char *server_cert, const char *server_key, const cha
     Pair p = new_pair(client_ctx, server_ctx, "localhost", NULL);
     int ok = drive_handshake(&p, 1, MAX_STEPS) && verify_negotiation(&p, version) &&
              transfer_payload(&p);
-    SSL_SESSION *session = NULL;
-    if (ok && do_session) session = SSL_get1_session(p.client);
     if (ok) ok = clean_shutdown(&p);
     free_pair(&p);
-    if (ok && do_session) {
-        Pair p2 = new_pair(client_ctx, server_ctx, "localhost", session);
-        ok = drive_handshake(&p2, 1, MAX_STEPS) && SSL_session_reused(p2.client) == 1;
-        if (ok) ok = clean_shutdown(&p2);
-        free_pair(&p2);
+    SSL_CTX_free(client_ctx);
+    SSL_CTX_free(server_ctx);
+    return ok;
+}
+
+static int session_resumption_case(const char *server_cert, const char *server_key,
+                                   const char *ca) {
+    SSL_CTX *server_ctx = make_server_ctx(
+        server_cert, server_key, ca, TLS1_2_VERSION, 0, 0);
+    SSL_CTX *client_ctx = make_client_ctx(ca, NULL, NULL, TLS1_2_VERSION, 1);
+    Pair first = new_pair(client_ctx, server_ctx, "localhost", NULL);
+    int ok = drive_handshake(&first, 1, MAX_STEPS) &&
+             verify_negotiation(&first, TLS1_2_VERSION) &&
+             transfer_payload(&first);
+    SSL_SESSION *session = ok ? SSL_get1_session(first.client) : NULL;
+    ok = ok && session != NULL;
+    if (ok) ok = clean_shutdown(&first);
+    free_pair(&first);
+
+    if (ok) {
+        Pair resumed = new_pair(client_ctx, server_ctx, "localhost", session);
+        ok = drive_handshake(&resumed, 1, MAX_STEPS) &&
+             SSL_session_reused(resumed.client) == 1 &&
+             SSL_session_reused(resumed.server) == 1 &&
+             verify_negotiation(&resumed, TLS1_2_VERSION) &&
+             transfer_payload(&resumed);
+        if (ok) ok = clean_shutdown(&resumed);
+        free_pair(&resumed);
     }
     if (session) SSL_SESSION_free(session);
     SSL_CTX_free(client_ctx);
@@ -439,11 +460,12 @@ int main(int argc, char **argv) {
     const char *client_key = argv[5];
 
     int tls12 = basic_case(server_cert, server_key, ca, client_cert, client_key,
-                           TLS1_2_VERSION, 0, 1);
+                           TLS1_2_VERSION, 0);
     int tls13 = basic_case(server_cert, server_key, ca, client_cert, client_key,
-                           TLS1_3_VERSION, 0, 0);
+                           TLS1_3_VERSION, 0);
     int mtls = basic_case(server_cert, server_key, ca, client_cert, client_key,
-                          TLS1_2_VERSION, 1, 0);
+                          TLS1_2_VERSION, 1);
+    int session_resumption = session_resumption_case(server_cert, server_key, ca);
     int wrong_host = negative_case(server_cert, server_key, ca, "not-localhost", 1);
     int untrusted = negative_case(server_cert, server_key, ca, "localhost", 0);
     int trunc = truncation_case(server_cert, server_key, ca);
@@ -454,7 +476,7 @@ int main(int argc, char **argv) {
     int cleanup = 1;
     for (int i = 0; i < CLEANUP_CYCLES && cleanup; ++i) {
         cleanup = basic_case(server_cert, server_key, ca, client_cert, client_key,
-                             TLS1_2_VERSION, 0, 0);
+                             TLS1_2_VERSION, 0);
     }
     int failure_cleanup = 1;
     for (int i = 0; i < FAILURE_CLEANUP_CYCLES && failure_cleanup; ++i) {
@@ -468,7 +490,7 @@ int main(int argc, char **argv) {
     printf("CAP custom_ca=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
     printf("CAP partial_io_backpressure=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
     printf("CAP mtls=%s\n", mtls ? "PASS" : "FAIL");
-    printf("CAP session_resumption=%s\n", tls12 ? "PASS" : "FAIL");
+    printf("CAP session_resumption=%s\n", session_resumption ? "PASS" : "FAIL");
     printf("CAP negative_hostname=%s\n", wrong_host ? "PASS" : "FAIL");
     printf("CAP negative_untrusted_ca=%s\n", untrusted ? "PASS" : "FAIL");
     printf("CAP close_notify=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
@@ -482,11 +504,14 @@ int main(int argc, char **argv) {
     printf("CAP repeated_cleanup=%s\n", cleanup ? "PASS" : "FAIL");
     printf("METRIC repeated_cleanup_cycles=%d\n", CLEANUP_CYCLES);
     printf("METRIC failure_cleanup_cycles=%d\n", FAILURE_CLEANUP_CYCLES);
+    printf("METRIC session_resumption_handshakes=%d\n",
+           session_resumption ? 2 : 0);
 #if defined(OPENSSL_IS_AWSLC)
     printf("METRIC external_signer_calls=%u\n", external_signer_calls);
 #endif
 
-    return (tls12 && tls13 && mtls && wrong_host && untrusted && trunc && cancel &&
+    return (tls12 && tls13 && mtls && session_resumption && wrong_host &&
+            untrusted && trunc && cancel &&
             cleanup && failure_cleanup &&
 #if defined(OPENSSL_IS_AWSLC)
             external_signer &&

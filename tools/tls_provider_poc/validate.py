@@ -64,7 +64,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                     expected_revision: str | None = None) -> None:
     validate_spec(spec)
     schema_version = result.get("schema_version")
-    require(schema_version in {1, 2}, "unsupported result schema")
+    require(schema_version in {1, 2, 3}, "unsupported result schema")
     require(result.get("task_id") == "M0-016", "result task_id")
     require(result.get("provider") in REQUIRED_PROVIDER_IDS, "result provider")
     require(result.get("platform") in set(spec["required_platforms"]), "result platform")
@@ -99,7 +99,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
         require(status in CAPABILITY_STATUSES, f"{name}: invalid status")
     build = result.get("build")
     require(isinstance(build, dict), "build object required")
-    if schema_version == 2:
+    if schema_version in {2, 3}:
         metrics = result.get("metrics")
         require(isinstance(metrics, dict), "schema v2 metrics object required")
         require(metrics.get("repeated_cleanup_cycles") == 10000,
@@ -108,6 +108,9 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
             require(isinstance(metrics.get("external_signer_calls"), int) and
                     metrics["external_signer_calls"] >= 2,
                     "AWS-LC external signer must serve TLS 1.2 and TLS 1.3")
+        if schema_version == 3 and caps.get("session_resumption") == "PASS":
+            require(metrics.get("session_resumption_handshakes") == 2,
+                    "schema v3 session resumption requires two measured handshakes")
     if result["status"] in {"PASS", "PARTIAL"}:
         require(build.get("static_archives"), "successful result requires static archives")
         require(build.get("system_tls_dependencies") == [], "system TLS dependency detected")
@@ -115,7 +118,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                 "runtime TLS loader string detected")
         require(all(value != "FAIL" for value in caps.values()), "PARTIAL/PASS result contains failed capability")
     if result["status"] == "PASS":
-        require(schema_version == 2, "PASS requires schema v2 measured cleanup evidence")
+        require(schema_version in {2, 3}, "PASS requires measured cleanup evidence")
         require(all(value == "PASS" for value in caps.values()), "PASS requires all capabilities PASS")
     if any(value == "BLOCKED" for value in caps.values()):
         require(result["status"] != "PASS", "blocked capability cannot yield PASS")

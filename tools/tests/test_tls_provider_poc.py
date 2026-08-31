@@ -150,6 +150,33 @@ class ProviderPocValidationTests(unittest.TestCase):
         }
         validator.validate_result(result, self.spec)
 
+    def test_schema_v3_requires_measured_session_resumption(self):
+        caps = {name: "PASS" for name in self.spec["required_capabilities"]}
+        result = {
+            "schema_version": 3,
+            "task_id": "M0-016",
+            "provider": "aws-lc",
+            "platform": "linux-glibc-x86_64",
+            "status": "PASS",
+            "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
+            "capabilities": caps,
+            "metrics": {
+                "repeated_cleanup_cycles": 10000,
+                "external_signer_calls": 2,
+                "session_resumption_handshakes": 1,
+            },
+            "build": {
+                "static_archives": ["libssl.a"],
+                "system_tls_dependencies": [],
+                "runtime_loader_library_strings": [],
+            },
+        }
+        with self.assertRaisesRegex(
+                validator.ValidationError, "two measured handshakes"):
+            validator.validate_result(result, self.spec)
+        result["metrics"]["session_resumption_handshakes"] = 2
+        validator.validate_result(result, self.spec)
+
 
 class ProviderPocWindowsTests(unittest.TestCase):
     @classmethod
@@ -208,6 +235,13 @@ class ProviderPocWindowsTests(unittest.TestCase):
             run_mock.assert_called_once_with(
                 ["dumpbin", "/dependents", str(binary)], cwd=root, log=log, check=False
             )
+
+    def test_windows_dependency_scan_rejects_prefixless_mbedtls_dlls(self):
+        text = "mbedtls.dll\nMBEDX509.DLL\ntfpsacrypto.dll\nmbedcrypto.dll\n"
+        self.assertEqual(
+            ["MBEDX509.DLL", "mbedcrypto.dll", "mbedtls.dll", "tfpsacrypto.dll"],
+            sorted(set(runner.FORBIDDEN_DEP_RE.findall(text))),
+        )
 
     def test_windows_dependency_scan_fails_closed_when_dumpbin_fails(self):
         with tempfile.TemporaryDirectory() as directory:
