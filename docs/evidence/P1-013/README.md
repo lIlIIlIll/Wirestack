@@ -36,7 +36,8 @@ part of P1-013.
 
 ## Long-duration gates
 
-The one-hour SSE profile and 86,400-second soak were not run by P1-013. The
-canonical development gate observed a separately active M7-022 soak and did not
-wait for or qualify it. These long gates are not part of this repository-tooling
-correction and cannot be inferred from the passing development gate.
+The one-hour SSE profile and 86,400-second soak were not run by P1-013. A
+`SOAK_ALREADY_RUNNING` line in the canonical log comes from the M7-022 lock
+fault-injection unit test; it is not evidence that a real soak process was
+observed. These long gates are not part of this repository-tooling correction
+and cannot be inferred from the passing development gate.

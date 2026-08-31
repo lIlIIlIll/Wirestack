@@ -67,6 +67,18 @@ class M7020ArchitectureAuditTest(unittest.TestCase):
         with self.assertRaisesRegex(AuditError, "inventory field is invalid"):
             self.validate_changed(changed)
 
+    def test_structural_inventory_rejects_boolean_counts(self) -> None:
+        changed = copy.deepcopy(self.audit)
+        changed["inventory"]["cangjie_files"] = True
+        with self.assertRaisesRegex(AuditError, "inventory field is invalid"):
+            self.validate_changed(changed)
+
+    def test_structural_inventory_rejects_non_text_std_net_entry(self) -> None:
+        changed = copy.deepcopy(self.audit)
+        changed["inventory"]["semantic_std_net_files"] = [{"path": "bad"}]
+        with self.assertRaisesRegex(AuditError, "std.net inventory is invalid"):
+            self.validate_changed(changed)
+
     def test_structural_inventory_rejects_std_net_outside_adapter(self) -> None:
         changed = copy.deepcopy(self.audit)
         changed["inventory"]["semantic_std_net_files"] = ["src/http/client.cj"]

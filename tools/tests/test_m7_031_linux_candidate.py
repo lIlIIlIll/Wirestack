@@ -162,6 +162,19 @@ class M7031LinuxCandidateTests(unittest.TestCase):
         self.assertEqual(self.report, committed)
         self.assertEqual(candidate.canonical_json(self.report), path.read_bytes())
 
+    def test_structural_candidate_reuses_recorded_evidence_without_live_hashing(self) -> None:
+        with mock.patch.object(
+            candidate, "build_evidence_index",
+            side_effect=AssertionError("structural mode hashed live evidence"),
+        ), mock.patch.object(
+            candidate.m7_032_public_api_inventory, "validate",
+            side_effect=AssertionError("structural mode inspected live public API"),
+        ):
+            report = candidate.build_candidate(
+                ROOT, documents=self.documents, verify_current_sources=False
+            )
+        self.assertEqual(self.report, report)
+
 
 if __name__ == "__main__":
     unittest.main()

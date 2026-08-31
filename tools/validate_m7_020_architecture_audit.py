@@ -34,6 +34,7 @@ REQUIRED_RULES = [
     "system-openssl-link",
 ]
 DIGEST_RE = re.compile(r"[0-9a-f]{64}")
+ALLOWED_STD_NET_PATH = Path("src/internal/transport_stdnet")
 
 
 class AuditError(ValueError):
@@ -112,7 +113,15 @@ def validate_audit(
         evidence = check.get("evidence")
         _require(isinstance(evidence, list) and evidence, f"{check_id}: missing evidence")
         for relative in evidence:
-            _require((repo_root / relative).exists(), f"{check_id}: missing {relative}")
+            _require(isinstance(relative, str) and relative, f"{check_id}: invalid evidence path")
+            candidate = Path(relative)
+            _require(
+                not candidate.is_absolute() and ".." not in candidate.parts
+                and candidate.as_posix() == relative,
+                f"{check_id}: invalid evidence path {relative}",
+            )
+            if verify_current_sources:
+                _require((repo_root / relative).exists(), f"{check_id}: missing {relative}")
 
     _require(audit.get("guard_rules") == REQUIRED_RULES, "guard rule inventory changed")
 
@@ -126,14 +135,17 @@ def validate_audit(
     _require(isinstance(inventory, dict) and set(inventory) == inventory_keys,
              "scanned file inventory schema is invalid")
     for field in inventory_keys - {"semantic_std_net_files"}:
-        _require(isinstance(inventory[field], int) and inventory[field] > 0,
+        _require(type(inventory[field]) is int and inventory[field] > 0,
                  f"scanned file inventory field is invalid: {field}")
     recorded_std_net = inventory["semantic_std_net_files"]
     _require(
         isinstance(recorded_std_net, list)
         and bool(recorded_std_net)
-        and len(recorded_std_net) == len(set(recorded_std_net))
         and all(isinstance(relative, str) and relative for relative in recorded_std_net),
+        "scanned std.net inventory is invalid",
+    )
+    _require(
+        len(recorded_std_net) == len(set(recorded_std_net)),
         "scanned std.net inventory is invalid",
     )
     for relative in recorded_std_net:
@@ -145,12 +157,17 @@ def validate_audit(
             and candidate.suffix == ".cj",
             f"std.net inventory path is invalid: {relative}",
         )
-        source = repo_root / candidate
-        _require(source.is_file(), f"std.net inventory source is missing: {relative}")
         _require(
-            _package(source) == guard.ALLOWED_STD_NET_PACKAGE,
+            candidate.is_relative_to(ALLOWED_STD_NET_PATH),
             f"std.net escaped the adapter package in {relative}",
         )
+        if verify_current_sources:
+            source = repo_root / candidate
+            _require(source.is_file(), f"std.net inventory source is missing: {relative}")
+            _require(
+                _package(source) == guard.ALLOWED_STD_NET_PACKAGE,
+                f"std.net escaped the adapter package in {relative}",
+            )
 
     if verify_current_sources:
         available_rules = {"std-net-boundary"} | {
