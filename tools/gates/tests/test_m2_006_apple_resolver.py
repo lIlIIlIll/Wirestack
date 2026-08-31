@@ -8,11 +8,13 @@ from pathlib import Path
 from tools.gates import m2_006_apple_resolver as gate
 
 
-def valid_process() -> dict[str, object]:
+def valid_process(mode: str = "macos") -> dict[str, object]:
     return {
         "timed_out": False,
         "exit_code": 0,
-        "output": "[ PASSED ] CASE:\n" * gate.EXPECTED_TESTS + "FAILED: 0\nERROR: 0\n",
+        "output": "".join(
+            f"[ PASSED ] CASE: {name}\n" for name in gate.EXPECTED_CASES[mode]
+        ) + "FAILED: 0\nERROR: 0\n",
     }
 
 
@@ -29,7 +31,7 @@ def valid_report(mode: str = "macos") -> dict[str, object]:
         },
         "decision": "PASS",
         "failures": [],
-        "resolver_test": valid_process(),
+        "resolver_test": valid_process(mode),
         "resolver_manifest": {
             "platform": gate.MODES[mode],
             "private_runtime_abi": False,
@@ -41,14 +43,14 @@ def valid_report(mode: str = "macos") -> dict[str, object]:
             "device_udid": "00000000-0000-0000-0000-000000000000",
             "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-2",
             "probe_sha256": "a" * 64,
-            "bundle_probe_sha256": "b" * 64,
+            "bundle_probe_sha256": "a" * 64,
             "install": {"timed_out": False, "exit_code": 0},
             "runtime_libraries": [{
                 "path": "Frameworks/libcangjie-runtime.dylib",
                 "sha256": "c" * 64,
             }],
             "probe_compile": {"command": ["cjc", "--target", gate.IOS_TARGET]},
-            "launch_attempts": [valid_process()],
+            "launch_attempts": [valid_process("ios-simulator")],
             "launch_recovery": [],
         } if mode == "ios-simulator" else None,
     }
@@ -59,13 +61,13 @@ class M2006AppleResolverGateTests(unittest.TestCase):
         manifest = tomllib.loads(Path("cjpm.toml").read_text(encoding="utf-8"))
         targets = manifest["target"]
 
-        for target in (
-            "aarch64-apple-darwin",
-            "arm64-apple-ios11-simulator",
+        for target, selected in (
+            ("aarch64-apple-darwin", "macos-arm64"),
+            ("arm64-apple-ios11-simulator", "ios-simulator-arm64"),
         ):
             configuration = targets[target]
             self.assertEqual(
-                {"path": "./target/native/resolver/current/lib"},
+                {"path": gate.resolver_ffi_path(selected)},
                 configuration["ffi"]["c"]["wirestack_resolver"],
             )
             self.assertNotIn("wirestack_m2_006_tls_link_stub", configuration["ffi"]["c"])
@@ -212,6 +214,38 @@ class M2006AppleResolverGateTests(unittest.TestCase):
         self.assertIn("RESOLVER_TEST:TIMEOUT", failures)
         self.assertIn("RESOLVER_TEST:NON_PASS_CASE", failures)
         self.assertIn("REPORT:FIXTURE_NOT_BOUND", failures)
+
+    def test_rejects_duplicate_case_names_and_unbound_probe_copy(self) -> None:
+        report = valid_report("ios-simulator")
+        report["resolver_test"] = {
+            "timed_out": False,
+            "exit_code": 0,
+            "output": "[ PASSED ] CASE: resolves localhost\n" * gate.EXPECTED_TESTS,
+        }
+        report["simulator"]["bundle_probe_sha256"] = "b" * 64
+        failures = gate.validate_report(report, "abc", "ios-simulator")
+        self.assertIn("RESOLVER_TEST:CASE_INVENTORY", failures)
+        self.assertIn("REPORT:SIMULATOR_PROBE", failures)
+
+    def test_retry_requires_empty_timeout_and_complete_recovery(self) -> None:
+        report = valid_report("ios-simulator")
+        report["simulator"]["launch_attempts"] = [
+            {"timed_out": True, "exit_code": None, "output": "partial"},
+            valid_process("ios-simulator"),
+        ]
+        report["simulator"]["launch_recovery"] = []
+        failures = gate.validate_report(report, "abc", "ios-simulator")
+        self.assertIn("REPORT:SIMULATOR_RECOVERY", failures)
+
+        report["simulator"]["launch_attempts"][0]["output"] = ""
+        report["simulator"]["launch_recovery"] = [
+            {"command": ["xcrun", "simctl", operation], "timed_out": False,
+             "exit_code": 0}
+            for operation in ("terminate", "shutdown", "boot", "bootstatus")
+        ]
+        self.assertEqual(
+            [], gate.validate_report(report, "abc", "ios-simulator")
+        )
 
     def test_atomic_json_replaces_complete_document_without_temp_residue(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

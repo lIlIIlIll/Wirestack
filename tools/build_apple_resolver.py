@@ -230,7 +230,10 @@ def main() -> int:
     parser.add_argument("--quiet", action="store_true")
     args = parser.parse_args()
     root = args.root.resolve()
-    output_root = (args.output_root or root / "target/native/resolver").resolve()
+    output_root = (
+        args.output_root
+        or root / "target" / "native" / "resolver" / args.platform
+    ).resolve()
     try:
         final_dir, manifest = build(
             root, output_root, selected=args.platform, test_fixture=args.test_fixture
