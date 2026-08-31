@@ -17,11 +17,12 @@ Deadline policy.
 - Python fault-injection tests reject wrong platforms, stale revisions,
   unknown schemas, cross-compile-only output, SKIPPED cases, timeout, missing
   simulator evidence, incomplete or duplicated native trace sequences, and a
-  missing fixture binding. All 27 focused tests pass.
+  missing fixture binding, unsafe cache eviction, stale leases, malformed lease
+  metadata, and cache saturation by active builds. All 30 focused tests pass.
 - GitHub Actions run
-  [`33364933354`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33364933354)
+  [`33369108722`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33369108722)
   passed both hosted jobs at exact revision
-  `d02358cd233b009f1a2e6994e3aa71b75d8a9b62`.
+  `451af03abba6a511c2504e3280be9c1c88b0d337`.
 - The native `macos-15` arm64 job ran all eight selected Cangjie resolver cases
   with zero failures and stored its exact-revision report and validation.
 - The native iOS Simulator arm64 job built the standalone Cangjie probe,

@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-31T06:47:05.938785Z",
+  "generated_at_utc": "2026-08-31T07:50:17.610301Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,26 +11,26 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M2-006/macos-arm64/validation.json",
-      "sha256": "00416b7f125a7fe0cb3fc576d8cd6c16a7ed1206f1866049151697086088055b",
+      "sha256": "e5b30901c18f3c4d6806ee84fa7aa2fdac0157fbce679295beadeede534b6ff8",
       "source_task": "M2-006"
     },
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M2-006/ios-simulator-arm64/validation.json",
-      "sha256": "7fe7a4fe1a6ae7c62f38be9e077348cf898e78ed5445bfbcba7b83e7242251d8",
+      "sha256": "05791db621572a7853d0bebe11792c983d9a448439aecd55e448c6ac25e01a1c",
       "source_task": "M2-006"
     }
   ],
-  "revision": "cb7617d489cf74c49da9e42429afa65e87482dec",
+  "revision": "451af03abba6a511c2504e3280be9c1c88b0d337",
   "schema_version": 1,
   "source_sha256": {
     ".github/workflows/m2-006-apple-system-resolver.yml": "9b8008223963306df945d322fcd65338f7a0be6a27ed4992e0e12b613affb1cc",
-    ".gitignore": "dd41c411cb7958e7cc9e9899594400619535fffcfca02e03c8709bc1a173f4f2",
+    ".gitignore": "8e323ae4fbcb37de75f3158261574eb2c2620a6591f82563e0a1ea73205ddb51",
     "build.cj": "64a28c71b2e9f0b610286142f41dc1651adfbb5c3b3098bef90f2c36aad2e2a0",
     "cjpm.toml": "3724af5054d6fa877327b3972ef3ef8d21454143f0446babbadb4923a411a6e6",
-    "docs/evidence/M2-006/README.md": "9253d46a7ac8b2b1961274c504b4674b675b8e5f3cd2eb4b427b7d0385b60c61",
+    "docs/evidence/M2-006/README.md": "570fb6e0e9f5fb37ddf9841539be5980b29630db883b5b28df4c1e71489775a3",
     "docs/evidence/M2-006/test-plan.md": "c3c2bd52dc251ce7a736cb6e9cee2e6b715940b1b360e92ccbc7501340044dae",
-    "docs/planning/status.md": "09113f0f4112807cfd43787d6363de1eefd61b13c423213549a49ce5e3b75963",
+    "docs/planning/status.md": "3422bc46fc72a71e43f6ba3bb3e4f9f474339ad7a01b916150a646cf0970c227",
     "native/resolver/apple/wirestack_resolver.c": "4a16cd95025daefcd9808a9c3d4348ebfdf54ef67f7eef0208fdf7a98d27da89",
     "native/resolver/apple/wirestack_resolver.h": "47815e3f7fdc59335ce7aa7026a0faad0b0e12549d0f9729191f9c5d182259f4",
     "native/resolver/linux/wirestack_resolver.c": "6562244643cff8ddda28a99563040f4e1eeb9580409ee9d6c51e17b3e1cff78a",
@@ -38,18 +38,19 @@
     "src/internal/resolver/apple_system_resolver_test.cj": "fb866004632785ea6e04c96113cb7f2b7b79e278c0f6c719d9cd07d42f97d959",
     "src/internal/resolver/bounded_backend.cj": "6ee96864ad9ecddb69c64eb8a727e704fa423ee93152ab45514db3191316660c",
     "src/internal/resolver/system_resolver.cj": "8ce2ebefecba3db208125f7b3f12405606a17358225f95b7fc492f80e12b832b",
-    "tools/build_apple_resolver.py": "ad3344578c3b89112ce863d7dde2ea4a5541254803207c626125a59ba7a6fecc",
-    "tools/build_native_dependencies.py": "f565574498adeb3b98ffc95d4bfd97a9784a84d24918776d3dba13f24bdd8cf9",
+    "tools/build_apple_resolver.py": "19889e18964146c82094ddb30068ded3235961f290521d89c08129d2a0ae7473",
+    "tools/build_native_dependencies.py": "55d3d697ed49e35d0b801341ea584e627f6eb33bbc5f242e82a2ce44342f7cb3",
     "tools/build_resolver.py": "ac3852722b5495d0115e2a475547e7dcfa30d7457555276a291372b23afa2980",
     "tools/download_cangjie_nightly.py": "5a6fa6f569eb91bbd0514b0961fd023afb04597e2c956cca3f6f5b9c58dd1841",
     "tools/gates/m2_006_apple_resolver.py": "965fa4d4b39a02bd4be8cb9a3e1183caf2af2cdd6dbc3a360d7116f67f0e946e",
     "tools/gates/native/m2_006_tls_link_stub.c": "9aebb19d64f2fc35db1547e9b2d2da774447a8756d4118fc44f0fcfb217f6970",
     "tools/gates/probes/m2_006_apple_resolver.cj": "d54c0a73f12430a50f2d30f63807b5012ec6652887e7aab7e46d1ffc6294548e",
     "tools/gates/tests/test_m2_006_apple_resolver.py": "19ba882ef095cb9287b153dc25c2ee0e8bf256be983c525adb72d88e42436b98",
-    "tools/tasks/M2-006.json": "e4ba76f838f1e4b80e20b8993fd67316e73e6d733f9c2719755db1d1f8c15e36",
-    "tools/tests/test_build_resolver.py": "ae903b4a93a32b50208b7a6ac4e66defc6914b3d9a3d6984bbe513a65a1fafec",
+    "tools/tasks/M2-006.json": "41aea4935ef444048e246593770b88bc6eef9fc963c70fbb8c8179ffb0fd37c5",
+    "tools/tests/test_build_apple_resolver.py": "b9999787687f393c549779a79a2bd264a17426e87c81f69621262a0b80dda3cc",
+    "tools/tests/test_build_resolver.py": "ebd0913c7d0d1190c274af8c362eee1fd9c61ed2690c09106650b32f3befb9f5",
     "tools/tests/test_download_cangjie_nightly.py": "24d503060eb97c98a4d1b4dad273651109e1c1a771942e73fd1abe393b7ea27d",
-    "tools/tests/test_m7_029_independent_security_review.py": "a72c29da4e5394aa1175808f5633d552d1a1feabf23444518b9f7bf7e9e56a64"
+    "tools/tests/test_m7_029_independent_security_review.py": "48a03f98a3f900fe1923c38d1c5aefc500d57d856bddf3d469c64ed90a7417b5"
   },
   "source_task": "M2-006",
   "toolchain": {

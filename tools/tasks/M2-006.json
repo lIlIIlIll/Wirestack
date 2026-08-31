@@ -15,14 +15,14 @@
       "timeout_seconds": 60
     },
     {
-      "argv": ["python3", "tools/gates/m2_006_apple_resolver.py", "--validate-report", "docs/evidence/M2-006/macos-arm64/report.json", "--expected-revision", "d02358cd233b009f1a2e6994e3aa71b75d8a9b62", "--expected-mode", "macos"],
+      "argv": ["python3", "tools/gates/m2_006_apple_resolver.py", "--validate-report", "docs/evidence/M2-006/macos-arm64/report.json", "--expected-revision", "451af03abba6a511c2504e3280be9c1c88b0d337", "--expected-mode", "macos"],
       "gate": "task",
       "id": "stored-native-macos-result",
       "long_running": false,
       "timeout_seconds": 60
     },
     {
-      "argv": ["python3", "tools/gates/m2_006_apple_resolver.py", "--validate-report", "docs/evidence/M2-006/ios-simulator-arm64/report.json", "--expected-revision", "d02358cd233b009f1a2e6994e3aa71b75d8a9b62", "--expected-mode", "ios-simulator"],
+      "argv": ["python3", "tools/gates/m2_006_apple_resolver.py", "--validate-report", "docs/evidence/M2-006/ios-simulator-arm64/report.json", "--expected-revision", "451af03abba6a511c2504e3280be9c1c88b0d337", "--expected-mode", "ios-simulator"],
       "gate": "task",
       "id": "stored-native-ios-simulator-result",
       "long_running": false,
