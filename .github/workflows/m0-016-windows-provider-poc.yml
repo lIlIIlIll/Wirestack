@@ -92,5 +92,6 @@ jobs:
           path: |
             build/tls-provider-poc/${{ matrix.provider }}/result.json
             build/tls-provider-poc/${{ matrix.provider }}/build.log
+            build/tls-provider-poc/${{ matrix.provider }}/license-bundle
           if-no-files-found: error
           retention-days: 14

@@ -4,13 +4,22 @@
 #include <mbedtls/error.h>
 #include <psa/crypto.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(_WIN32)
+#include <windows.h>
+#include <psapi.h>
+#else
+#include <sys/resource.h>
+#endif
 
 #define MAX_STEPS 300000
 #define RING_CAPACITY 2048
 #define PAYLOAD_SIZE 32768
 #define CLEANUP_CYCLES 10000
+#define MEMORY_PROFILE_BOUND_BYTES 536870912ULL
+#define ALLOCATION_PROFILE_BOUND_BYTES 1073741824ULL
 
 typedef struct {
     unsigned char data[RING_CAPACITY];
@@ -44,6 +53,26 @@ typedef struct {
 static int sni_seen = 0;
 static int external_trust_decision = 0;
 static unsigned int external_trust_calls = 0;
+static uint64_t profile_allocation_calls = 0;
+static uint64_t profile_allocation_bytes = 0;
+
+static uint64_t peak_resident_bytes(void) {
+#if defined(_WIN32)
+    PROCESS_MEMORY_COUNTERS counters;
+    memset(&counters, 0, sizeof(counters));
+    counters.cb = sizeof(counters);
+    if (!GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters))) return 0;
+    return (uint64_t)counters.PeakWorkingSetSize;
+#else
+    struct rusage usage;
+    if (getrusage(RUSAGE_SELF, &usage) != 0) return 0;
+#if defined(__APPLE__)
+    return (uint64_t)usage.ru_maxrss;
+#else
+    return (uint64_t)usage.ru_maxrss * 1024ULL;
+#endif
+#endif
+}
 
 static int external_trust_callback(void *opaque, mbedtls_x509_crt *cert,
                                    int depth, uint32_t *flags) {
@@ -178,6 +207,8 @@ static int transfer_payload(Pair *p) {
         free(dst);
         return 0;
     }
+    profile_allocation_calls += 2;
+    profile_allocation_bytes += 2ULL * PAYLOAD_SIZE;
     for (int i = 0; i < PAYLOAD_SIZE; ++i) src[i] = (unsigned char)(i * 17u + 13u);
     size_t sent = 0;
     size_t received = 0;
@@ -280,6 +311,38 @@ static int basic_case(Material *m, int version, int mtls) {
     mbedtls_ssl_config_free(&client_conf);
     mbedtls_ssl_config_free(&server_conf);
     return ok;
+}
+
+static int optional_client_auth_version_case(Material *m, int with_client_cert) {
+    mbedtls_ssl_config client_conf;
+    mbedtls_ssl_config server_conf;
+    Pair p;
+    int ret = configure(
+        m, &client_conf, &server_conf, MBEDTLS_SSL_VERSION_TLS1_2, 0, 1);
+    if (ret != 0) return 0;
+    mbedtls_ssl_conf_authmode(&server_conf, MBEDTLS_SSL_VERIFY_OPTIONAL);
+    if (with_client_cert) {
+        ret = mbedtls_ssl_conf_own_cert(
+            &client_conf, &m->client_cert, &m->client_key);
+    }
+    if (ret == 0) ret = setup_pair(&p, &client_conf, &server_conf, "localhost");
+    int ok = ret == 0 && drive_handshake(&p, 1);
+    if (ok) {
+        const mbedtls_x509_crt *peer = mbedtls_ssl_get_peer_cert(&p.server);
+        ok = with_client_cert
+            ? peer != NULL && mbedtls_ssl_get_verify_result(&p.server) == 0
+            : peer == NULL;
+    }
+    if (ok) ok = transfer_payload(&p) && clean_shutdown(&p);
+    if (ret == 0) pair_free(&p);
+    mbedtls_ssl_config_free(&client_conf);
+    mbedtls_ssl_config_free(&server_conf);
+    return ok;
+}
+
+static int optional_client_auth_case(Material *m) {
+    return optional_client_auth_version_case(m, 0) &&
+           optional_client_auth_version_case(m, 1);
 }
 
 static int alpn_no_overlap_version_case(Material *m, int version) {
@@ -484,7 +547,9 @@ int main(int argc, char **argv) {
     int tls12 = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_2, 0);
     int tls13 = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_3, 0);
     int alpn_negative = alpn_negative_case(&m);
-    int mtls = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_2, 1);
+    int mtls_required = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_2, 1);
+    int mtls_optional = optional_client_auth_case(&m);
+    int mtls = mtls_required && mtls_optional;
     int external_trust = external_trust_case(&m);
     int wrong_host = negative_case(&m, "not-localhost", 1);
     int untrusted = negative_case(&m, "localhost", 0);
@@ -493,8 +558,15 @@ int main(int argc, char **argv) {
     int malformed = malformed_certificate_case(argv[7]);
     int trunc = truncation_case(&m);
     int cancel = cancellation_case(&m);
+    int cleanup_cycles = CLEANUP_CYCLES;
+    const char *diagnostic_cycles = getenv("WIRESTACK_POC_DIAGNOSTIC_CYCLES");
+    if (diagnostic_cycles != NULL) {
+        long value = strtol(diagnostic_cycles, NULL, 10);
+        if (value < 1 || value > CLEANUP_CYCLES) return 2;
+        cleanup_cycles = (int)value;
+    }
     int cleanup = 1;
-    for (int i = 0; i < CLEANUP_CYCLES && cleanup; ++i)
+    for (int i = 0; i < cleanup_cycles && cleanup; ++i)
         cleanup = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_2, 0);
 
     printf("CAP tls12=%s\n", tls12 ? "PASS" : "FAIL");
@@ -515,14 +587,29 @@ int main(int argc, char **argv) {
     printf("CAP caller_cancellation=%s\n", cancel ? "PASS" : "FAIL");
     printf("CAP external_signer=BLOCKED\n");
     printf("CAP repeated_cleanup=%s\n", cleanup ? "PASS" : "FAIL");
-    printf("METRIC repeated_cleanup_cycles=%d\n", CLEANUP_CYCLES);
+    printf("METRIC repeated_cleanup_cycles=%d\n", cleanup_cycles);
     printf("METRIC external_trust_calls=%u\n", external_trust_calls);
     printf("METRIC alpn_no_overlap_handshakes=%d\n", alpn_negative ? 2 : 0);
     printf("METRIC alpn_malformed_inputs_rejected=%d\n", alpn_negative ? 2 : 0);
     printf("METRIC certificate_negative_cases_rejected=%d\n", expired + malformed);
+    printf("METRIC mtls_required_handshakes=%d\n", mtls_required ? 1 : 0);
+    printf("METRIC mtls_optional_handshakes=%d\n", mtls_optional ? 2 : 0);
+    uint64_t peak_bytes = peak_resident_bytes();
+    printf("METRIC memory_profile_peak_resident_bytes=%llu\n",
+           (unsigned long long)peak_bytes);
+    printf("METRIC memory_profile_bound_bytes=%llu\n",
+           (unsigned long long)MEMORY_PROFILE_BOUND_BYTES);
+    printf("METRIC allocation_profile_calls=%llu\n",
+           (unsigned long long)profile_allocation_calls);
+    printf("METRIC allocation_profile_bytes=%llu\n",
+           (unsigned long long)profile_allocation_bytes);
+    printf("METRIC allocation_profile_bound_bytes=%llu\n",
+           (unsigned long long)ALLOCATION_PROFILE_BOUND_BYTES);
 
     material_free(&m);
     mbedtls_psa_crypto_free();
     return (tls12 && tls13 && alpn_negative && mtls && external_trust && wrong_host &&
-            untrusted && expired && malformed && trunc && cancel && cleanup) ? 0 : 1;
+            untrusted && expired && malformed && trunc && cancel && cleanup &&
+            peak_bytes > 0 && peak_bytes <= MEMORY_PROFILE_BOUND_BYTES &&
+            profile_allocation_bytes <= ALLOCATION_PROFILE_BOUND_BYTES) ? 0 : 1;
 }

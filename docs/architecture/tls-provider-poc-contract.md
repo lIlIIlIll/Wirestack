@@ -18,16 +18,33 @@ Version changes require a reviewed change to `tools/tls_provider_poc/providers.j
 - `BLOCKED`: the native platform or required environment is unavailable.
 
 `NOT_RUN`, missing cells and cross-compilation never count as native evidence.
-Schema versions 1 through 3 are no longer accepted because they cannot carry
-the complete callback, protocol-negative, certificate-negative and export
-inventory evidence.
-Schema v4 is required for retained `PASS` and `PARTIAL` results. It requires an
+Schema versions 1 through 4 are no longer accepted because they cannot carry
+the complete callback, protocol-negative, certificate-negative, export,
+execution, license, and operational evidence.
+Schema v5 is required for retained `PASS` and `PARTIAL` results. It requires an
 exact, bounded inventory of the final artifact's exported symbols and exactly
 10,000 measured cleanup
 cycles. When session resumption passes, the result must record four measured
 handshakes: a fresh and resumed TLS 1.2 handshake, plus a fresh and resumed TLS
 1.3 handshake after ticket delivery. A provider cannot infer resumption from a
 successful fresh handshake.
+
+Every successful native result records the exact repository revision and
+hosted-runner image identity. A musl result additionally records the immutable
+container name and digest; a mutable tag or artifact-level association is not
+sufficient. Provider license files are copied from the pinned source into a
+bounded bundle. Its manifest binds the provider, source digest, relative file
+paths, byte counts, and file digests, and the result binds the manifest digest.
+
+An mTLS `PASS` records one required-client-auth handshake and two optional
+client-auth handshakes: one without a client certificate and one with a valid
+client certificate. A required-only result is incomplete.
+
+Every successful result records a process peak-resident measurement bounded by
+512 MiB and cumulative harness allocations bounded by 1 GiB. Linux glibc and
+macOS also require a passing ASan and UBSan diagnostic run. Platforms where
+that configured diagnostic is unavailable must record `UNSUPPORTED`; they may
+not report a skipped diagnostic as `PASS`.
 
 An external-trust `PASS` requires at least four callback invocations. The PoC
 must accept and reject an otherwise-untrusted valid chain through the callback
