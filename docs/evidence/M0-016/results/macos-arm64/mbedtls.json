@@ -1188,7 +1188,29 @@
         "output": "Apple clang version 17.0.0 (clang-1700.0.13.5)\nTarget: arm64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
         "output_sha256": "e90749cef1d809b7d6c11405b894f0232baaee1f1b9f5e21c89da561d7998a42"
       },
-      "environment": {},
+      "environment": {
+        "CC": "",
+        "CFLAGS": "",
+        "CMAKE_BUILD_PARALLEL_LEVEL": "",
+        "CMAKE_GENERATOR": "",
+        "CMAKE_GENERATOR_PLATFORM": "",
+        "CMAKE_GENERATOR_TOOLSET": "",
+        "CMAKE_PREFIX_PATH": "",
+        "CMAKE_TOOLCHAIN_FILE": "",
+        "CXX": "",
+        "CXXFLAGS": "",
+        "INCLUDE": "",
+        "LDFLAGS": "",
+        "LIB": "",
+        "LIBPATH": "",
+        "PATH": "/Users/runner/hostedtoolcache/Python/3.12.10/arm64/bin:/Users/runner/hostedtoolcache/Python/3.12.10/arm64:/opt/homebrew/opt/openssl@3/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+        "UCRTVersion": "",
+        "UniversalCRTSdkDir": "",
+        "VCINSTALLDIR": "",
+        "VCToolsInstallDir": "",
+        "WindowsSDKVersion": "",
+        "WindowsSdkDir": ""
+      },
       "instrumentation": "none",
       "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
       "patches": [],
@@ -1200,22 +1222,22 @@
       {
         "bytes": 427616,
         "name": "libmbedtls.a",
-        "sha256": "14063048938b6b25c2c33b38a969afd5aa11f2a80ce3481a978ca4da4a64843d"
+        "sha256": "0a6b922e413ecf50426ba347636ed6e8222ea259eedb59ab5bb5cd5bc7e22b0b"
       },
       {
         "bytes": 127672,
         "name": "libmbedx509.a",
-        "sha256": "14e1783cdea1d1dda3d690bb14c5b09b0e16b32bd5566244aa6fc07a8c276448"
+        "sha256": "19ac20ae8046176582a664f45eeba5a611f928193ff5e1b2bf752570e863edd9"
       },
       {
         "bytes": 670816,
         "name": "libtfpsacrypto.a",
-        "sha256": "173a46f8f9e4fc5f2f646ccea4f5d2afb08ce81f4544cb1a6a789a43cd1b0414"
+        "sha256": "4646977566f880c9be34c0da30ce9755e97f4d58b5c18d0adc682eac77e09f18"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "732a6de813e4b617ec73bc0e8ca60dd12f68fa3afea345182eeae8865cbcb86b",
+  "build_log_sha256": "1966b4edba1b314ac25a6ed5c72aae2586f3805b5a0a325975e75a3ba5481a1d",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -1240,16 +1262,16 @@
     "image_os": "macos15",
     "image_version": "20260727.0256.1",
     "python": "3.12.10",
-    "repository_revision": "bbd2b22404d47f674842c50eabe2debd12d79787",
+    "repository_revision": "67c519b3d406912378a18bd15da28d5b1f0cdf6a",
     "runner_arch": "ARM64",
     "runner_os": "macOS"
   },
-  "finished_at": "2026-08-31T16:05:26.088611+00:00",
+  "finished_at": "2026-08-31T16:57:48.301647+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 41,
+    "cancellation_latency_us": 43,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
@@ -1258,12 +1280,12 @@
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 8203045970,
+    "provider_allocation_bytes": 8202776972,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 133213012,
-    "provider_allocation_live_after_cleanup_bytes": 7637,
-    "provider_allocation_live_before_cleanup_bytes": 7637,
-    "provider_allocation_peak_live_bytes": 117631,
+    "provider_allocation_calls": 133210910,
+    "provider_allocation_live_after_cleanup_bytes": 7640,
+    "provider_allocation_live_before_cleanup_bytes": 7640,
+    "provider_allocation_peak_live_bytes": 117634,
     "repeated_cleanup_cycles": 10000
   },
   "notes": [
@@ -1272,7 +1294,7 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 41,
+      "latency_us": 43,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
@@ -1281,12 +1303,12 @@
       "payload_bytes_per_transfer": 32768,
       "peak_resident_bytes": 3194880,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 8203045970,
+      "provider_allocation_bytes": 8202776972,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 133213012,
-      "provider_allocation_live_after_cleanup_bytes": 7637,
-      "provider_allocation_live_before_cleanup_bytes": 7637,
-      "provider_allocation_peak_live_bytes": 117631,
+      "provider_allocation_calls": 133210910,
+      "provider_allocation_live_after_cleanup_bytes": 7640,
+      "provider_allocation_live_before_cleanup_bytes": 7640,
+      "provider_allocation_peak_live_bytes": 117634,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -1295,7 +1317,7 @@
         "reason": "leak detection is unavailable in the configured macOS sanitizer run",
         "status": "UNSUPPORTED"
       },
-      "output_sha256": "b0f1fe863a1105e3de0a2f39760b12fb923b826d35f24ae77ed6f80b40e93a4b",
+      "output_sha256": "9235e5bce24bf473e113c0c15ef242c5b1ed1c1554da5caf3c30eb8e50cfde88",
       "provider_build_provenance": {
         "build_argv": [
           [
@@ -1365,7 +1387,29 @@
           "output": "Apple clang version 17.0.0 (clang-1700.0.13.5)\nTarget: arm64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
           "output_sha256": "e90749cef1d809b7d6c11405b894f0232baaee1f1b9f5e21c89da561d7998a42"
         },
-        "environment": {},
+        "environment": {
+          "CC": "",
+          "CFLAGS": "",
+          "CMAKE_BUILD_PARALLEL_LEVEL": "",
+          "CMAKE_GENERATOR": "",
+          "CMAKE_GENERATOR_PLATFORM": "",
+          "CMAKE_GENERATOR_TOOLSET": "",
+          "CMAKE_PREFIX_PATH": "",
+          "CMAKE_TOOLCHAIN_FILE": "",
+          "CXX": "",
+          "CXXFLAGS": "",
+          "INCLUDE": "",
+          "LDFLAGS": "",
+          "LIB": "",
+          "LIBPATH": "",
+          "PATH": "/Users/runner/hostedtoolcache/Python/3.12.10/arm64/bin:/Users/runner/hostedtoolcache/Python/3.12.10/arm64:/opt/homebrew/opt/openssl@3/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+          "UCRTVersion": "",
+          "UniversalCRTSdkDir": "",
+          "VCINSTALLDIR": "",
+          "VCToolsInstallDir": "",
+          "WindowsSDKVersion": "",
+          "WindowsSdkDir": ""
+        },
         "instrumentation": "address+undefined-sanitizer",
         "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
         "patches": [],
@@ -1377,17 +1421,17 @@
         {
           "bytes": 4101176,
           "name": "libmbedtls.a",
-          "sha256": "6a1af3b3789a7054dd3dae3be6476dc38d6be427078fd5dd08bf141b788b6744"
+          "sha256": "a6f91b1da2f3ae429ea4e728070b42d56ee90f229002b06cca116e07a9cf512c"
         },
         {
           "bytes": 1057488,
           "name": "libmbedx509.a",
-          "sha256": "6b1c2e76643f3a54f24d40d5127f0877b8875e2bd92a0c70dde9826130e0257d"
+          "sha256": "0b473ecd17332f7da446a0c914c3b242e98a35319ccb2c6ead7757dd2b244f7d"
         },
         {
           "bytes": 5550640,
           "name": "libtfpsacrypto.a",
-          "sha256": "366045567981655e6ea875dac4983e3b2704f8d43bbcdaadafd793faa51119a5"
+          "sha256": "756294a1fe60d2a3552587a4a7123236d5a4df510cd0f767bbd7c9d1595c546d"
         }
       ],
       "status": "PASS",
@@ -1397,14 +1441,14 @@
   "platform": "macos-arm64",
   "poc_exit_code": 0,
   "provider": "mbedtls",
-  "schema_version": 7,
+  "schema_version": 8,
   "source": {
     "archive": "mbedtls-4.2.0.tar.bz2",
     "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
     "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T16:03:59.229583+00:00",
+  "started_at": "2026-08-31T16:56:16.314159+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
