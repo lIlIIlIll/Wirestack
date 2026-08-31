@@ -486,7 +486,18 @@ private func directScalarWrite(field: CodecField, value: String): String {
 }
 
 private func compactRawScalarFieldWrite(field: CodecField, value: String, first: String): String {
-    if (!field.codecExpr.isEmpty() || field.isOption) { return "" }
+    if (!field.codecExpr.isEmpty()) { return "" }
+    if (field.typeText.replace(" ", "") == "Option<String>") {
+        let someWrite = "${first} = __writer.writeRawObjectEntryNameString(${first}, " +
+            "${field.jsonNameExpr}, __rawItem)"
+        if (!field.includeNull) {
+            return "if (let Some(__rawItem) <- ${value}) { ${someWrite} }"
+        }
+        return "match (${value}) { case Some(__rawItem) => ${someWrite}; " +
+            "case None => ${first} = __writer.writeRawObjectEntryName(${first}, ${field.jsonNameExpr}); " +
+            "writer.writeRawNull() }"
+    }
+    if (field.isOption) { return "" }
     match (field.typeText.replace(" ", "")) {
         case "String" =>
             "${first} = __writer.writeRawObjectEntryNameString(${first}, ${field.jsonNameExpr}, ${value})"
@@ -496,6 +507,18 @@ private func compactRawScalarFieldWrite(field: CodecField, value: String, first:
             "${first} = __writer.writeRawObjectEntryNameInt64(${first}, ${field.jsonNameExpr}, ${value})"
         case "Int32" | "Int16" | "Int8" =>
             "${first} = __writer.writeRawObjectEntryNameInt64(${first}, ${field.jsonNameExpr}, Int64(${value}))"
+        case "ArrayList<Int64>" =>
+            "${first} = __writer.writeRawObjectEntryName(${first}, ${field.jsonNameExpr}); " +
+            "if (!jsonTryWriteCompactInt64ArrayList(writer, ${value})) { " +
+            "throw JsonException(\"Compact raw codec is unavailable\") }"
+        case "ArrayList<String>" =>
+            "${first} = __writer.writeRawObjectEntryName(${first}, ${field.jsonNameExpr}); " +
+            "if (!jsonTryWriteCompactStringArrayList(writer, ${value})) { " +
+            "throw JsonException(\"Compact raw codec is unavailable\") }"
+        case "HashMap<String,Int64>" =>
+            "${first} = __writer.writeRawObjectEntryName(${first}, ${field.jsonNameExpr}); " +
+            "if (!jsonTryWriteCompactInt64Map(writer, ${value})) { " +
+            "throw JsonException(\"Compact raw codec is unavailable\") }"
         case _ => ""
     }
 }

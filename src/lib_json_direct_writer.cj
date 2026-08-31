@@ -980,7 +980,8 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
     private let multiline: Bool
     private let resultKind: UInt8
     private var contexts: Option<ArrayList<UInt8>> = None<ArrayList<UInt8>>
-    private let semanticPathContexts = ArrayList<JsonDirectSemanticPathContext>()
+    private var semanticPathContexts: Option<ArrayList<JsonDirectSemanticPathContext>> =
+        None<ArrayList<JsonDirectSemanticPathContext>>
     private var rootWritten: Bool = false
     private var rawDepth: Int64 = 0
     private var rawRootPreclaimed: Bool = false
@@ -1100,6 +1101,16 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         match (contexts) {
             case Some(value) => value.isEmpty()
             case None => true
+        }
+    }
+
+    private func semanticPathContextValues(): ArrayList<JsonDirectSemanticPathContext> {
+        match (semanticPathContexts) {
+            case Some(value) => value
+            case None =>
+                let value = ArrayList<JsonDirectSemanticPathContext>()
+                semanticPathContexts = Some(value)
+                value
         }
     }
 
@@ -1256,7 +1267,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
             return false
         }
         ensureContainerDepth()
-        beforeValue()
+        if (rawDepth == 0) { beforeValue() }
         rawDepth++
         try {
             if (target.tryWriteNativeInt64Array(values)) { return true }
@@ -1285,7 +1296,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
             return false
         }
         ensureContainerDepth()
-        beforeValue()
+        if (rawDepth == 0) { beforeValue() }
         rawDepth++
         try {
             writeRawStringArrayList("", values)
@@ -1300,7 +1311,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
             return false
         }
         ensureContainerDepth()
-        beforeValue()
+        if (rawDepth == 0) { beforeValue() }
         rawDepth++
         try {
             writeRawInt64Map("", values)
@@ -1442,7 +1453,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         let pathPushed = beforeValue()
         target.writeByte(b'{')
         contextValues().add(OBJECT_FIRST)
-        semanticPathContexts.add(JsonDirectSemanticPathContext(generatedState.pathDepth(), pathPushed))
+        semanticPathContextValues().add(JsonDirectSemanticPathContext(generatedState.pathDepth(), pathPushed))
     }
 
     public func endObject(): Unit {
@@ -1452,7 +1463,8 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
             writeNewlineAndIndent(values.size)
         }
         target.writeByte(b'}')
-        let pathContext = semanticPathContexts.remove(at: semanticPathContexts.size - 1)
+        let pathContexts = semanticPathContextValues()
+        let pathContext = pathContexts.remove(at: pathContexts.size - 1)
         generatedState.completeAutoValue(pathContext.entryPathPushed)
     }
 
@@ -1461,7 +1473,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         let pathPushed = beforeValue()
         target.writeByte(b'[')
         contextValues().add(ARRAY_FIRST)
-        semanticPathContexts.add(JsonDirectSemanticPathContext(generatedState.pathDepth(), pathPushed))
+        semanticPathContextValues().add(JsonDirectSemanticPathContext(generatedState.pathDepth(), pathPushed))
     }
 
     public func endArray(): Unit {
@@ -1471,7 +1483,8 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
             writeNewlineAndIndent(values.size)
         }
         target.writeByte(b']')
-        let pathContext = semanticPathContexts.remove(at: semanticPathContexts.size - 1)
+        let pathContexts = semanticPathContextValues()
+        let pathContext = pathContexts.remove(at: pathContexts.size - 1)
         generatedState.completeAutoValue(pathContext.entryPathPushed)
     }
 
@@ -1481,7 +1494,8 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         if (config.useSpaceAfterSeparators) {
             target.writeText(" ")
         }
-        let pathContext = semanticPathContexts[semanticPathContexts.size - 1]
+        let pathContexts = semanticPathContextValues()
+        let pathContext = pathContexts[pathContexts.size - 1]
         pathContext.pendingObjectPathPushed = generatedState.pushAutoField(name, pathContext.pathDepth)
     }
 
@@ -1563,13 +1577,13 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
                 throw JsonException("Object values must be preceded by a field name")
             }
             values[index] = OBJECT_NEXT
-            let pathContext = semanticPathContexts[index]
+            let pathContext = semanticPathContextValues()[index]
             let pathPushed = pathContext.pendingObjectPathPushed
             pathContext.pendingObjectPathPushed = false
             generatedState.beginAutoValue(pathPushed)
             return pathPushed
         }
-        let pathContext = semanticPathContexts[index]
+        let pathContext = semanticPathContextValues()[index]
         let pathPushed = generatedState.pushAutoIndex(pathContext.nextArrayIndex, pathContext.pathDepth)
         pathContext.nextArrayIndex++
         if ((context & FIRST_MASK) != 0) {

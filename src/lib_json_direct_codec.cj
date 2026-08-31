@@ -256,113 +256,135 @@ private const GENERATED_PATH_MANUAL: UInt8 = 0u8
 private const GENERATED_PATH_AUTO_CLAIMABLE: UInt8 = 1u8
 private const GENERATED_PATH_AUTO_ACTIVE: UInt8 = 2u8
 
-private class GeneratedPathStateV1 {
-    private let values = ArrayList<String>()
-    private let indexes = ArrayList<Int64>()
-    private let origins = ArrayList<UInt8>()
+private struct GeneratedPathEntryV1 {
+    let value: String
+    let index: Int64
+    let origin: UInt8
 
-    func size(): Int64 { values.size }
+    init(value: String, index: Int64, origin: UInt8) {
+        this.value = value
+        this.index = index
+        this.origin = origin
+    }
+}
+
+private class GeneratedPathStateV1 {
+    private let entries = ArrayList<GeneratedPathEntryV1>()
+
+    func size(): Int64 { entries.size }
 
     func pushField(name: String): Unit {
-        if (!values.isEmpty() && origins[origins.size - 1] == GENERATED_PATH_AUTO_CLAIMABLE &&
-            indexes[indexes.size - 1] < 0 && values[values.size - 1] == name) {
-            origins[origins.size - 1] = GENERATED_PATH_MANUAL
-            return
+        if (!entries.isEmpty()) {
+            let position = entries.size - 1
+            let last = entries[position]
+            if (last.origin == GENERATED_PATH_AUTO_CLAIMABLE && last.index < 0 && last.value == name) {
+                entries[position] = GeneratedPathEntryV1(last.value, last.index, GENERATED_PATH_MANUAL)
+                return
+            }
         }
         append(name, -1, GENERATED_PATH_MANUAL)
     }
 
     func pushIndex(index: Int64): Unit {
-        if (!values.isEmpty() && origins[origins.size - 1] == GENERATED_PATH_AUTO_CLAIMABLE &&
-            indexes[indexes.size - 1] == index) {
-            origins[origins.size - 1] = GENERATED_PATH_MANUAL
-            return
+        if (!entries.isEmpty()) {
+            let position = entries.size - 1
+            let last = entries[position]
+            if (last.origin == GENERATED_PATH_AUTO_CLAIMABLE && last.index == index) {
+                entries[position] = GeneratedPathEntryV1(last.value, last.index, GENERATED_PATH_MANUAL)
+                return
+            }
         }
         append("", index, GENERATED_PATH_MANUAL)
     }
 
     func pushAutoField(name: String, baseDepth: Int64): Bool {
-        if (values.size > baseDepth) { return false }
+        if (entries.size > baseDepth) { return false }
         append(name, -1, GENERATED_PATH_AUTO_CLAIMABLE)
         true
     }
 
     func pushAutoIndex(index: Int64, baseDepth: Int64): Bool {
-        if (values.size > baseDepth) { return false }
+        if (entries.size > baseDepth) { return false }
         append("", index, GENERATED_PATH_AUTO_CLAIMABLE)
         true
     }
 
     func beginAutoValue(pushed: Bool): Unit {
-        if (pushed && !origins.isEmpty() &&
-            origins[origins.size - 1] == GENERATED_PATH_AUTO_CLAIMABLE) {
-            origins[origins.size - 1] = GENERATED_PATH_AUTO_ACTIVE
+        if (pushed && !entries.isEmpty()) {
+            let position = entries.size - 1
+            let last = entries[position]
+            if (last.origin == GENERATED_PATH_AUTO_CLAIMABLE) {
+                entries[position] = GeneratedPathEntryV1(last.value, last.index, GENERATED_PATH_AUTO_ACTIVE)
+            }
         }
     }
 
     func completeAutoValue(pushed: Bool): Unit {
-        if (pushed && !origins.isEmpty() &&
-            origins[origins.size - 1] == GENERATED_PATH_AUTO_ACTIVE) {
+        if (pushed && !entries.isEmpty() && entries[entries.size - 1].origin == GENERATED_PATH_AUTO_ACTIVE) {
             pop()
         }
     }
 
     func pop(): Unit {
-        if (values.isEmpty()) { return }
-        values.remove(at: values.size - 1)
-        indexes.remove(at: indexes.size - 1)
-        origins.remove(at: origins.size - 1)
+        if (!entries.isEmpty()) { entries.remove(at: entries.size - 1) }
     }
 
     func updateLastField(name: String): Unit {
-        if (values.isEmpty()) { return }
-        values[values.size - 1] = name
-        indexes[indexes.size - 1] = -1
+        if (entries.isEmpty()) { return }
+        let position = entries.size - 1
+        let last = entries[position]
+        entries[position] = GeneratedPathEntryV1(name, -1, last.origin)
     }
 
     func updateLastIndex(index: Int64): Unit {
-        if (values.isEmpty()) { return }
-        values[values.size - 1] = ""
-        indexes[indexes.size - 1] = index
+        if (entries.isEmpty()) { return }
+        let position = entries.size - 1
+        let last = entries[position]
+        entries[position] = GeneratedPathEntryV1("", index, last.origin)
     }
 
     func pointer(): String {
-        if (values.isEmpty()) { return "" }
+        if (entries.isEmpty()) { return "" }
         let result = StringBuilder()
-        for (position in 0..values.size) {
+        for (entry in entries) {
             result.append("/")
-            let index = indexes[position]
-            if (index >= 0) { result.append(index.toString()) }
-            else { result.append(jsonPointerEscape(values[position])) }
+            if (entry.index >= 0) { result.append(entry.index.toString()) }
+            else { result.append(jsonPointerEscape(entry.value)) }
         }
         result.toString()
     }
 
     private func append(value: String, index: Int64, origin: UInt8): Unit {
-        values.add(value)
-        indexes.add(index)
-        origins.add(origin)
+        entries.add(GeneratedPathEntryV1(value, index, origin))
     }
 }
 
 public class GeneratedWriteStateV1 {
     private let maxDepth: Int64
     private var depth: Int64 = 0
-    private let path = GeneratedPathStateV1()
+    private var path: Option<GeneratedPathStateV1> = None<GeneratedPathStateV1>
 
     init(config: JsonWriteOptions) { maxDepth = config.maxDepth }
 
-    public func pushField(name: String): Unit { path.pushField(name) }
-    public func pushIndex(index: Int64): Unit { path.pushIndex(index) }
-    public func popPath(): Unit { path.pop() }
-    public func updateLastField(name: String): Unit { path.updateLastField(name) }
-    public func updateLastIndex(index: Int64): Unit { path.updateLastIndex(index) }
+    public func pushField(name: String): Unit { pathState().pushField(name) }
+    public func pushIndex(index: Int64): Unit { pathState().pushIndex(index) }
+    public func popPath(): Unit { if (let Some(value) <- path) { value.pop() } }
+    public func updateLastField(name: String): Unit {
+        if (let Some(value) <- path) { value.updateLastField(name) }
+    }
+    public func updateLastIndex(index: Int64): Unit {
+        if (let Some(value) <- path) { value.updateLastIndex(index) }
+    }
 
-    func pathDepth(): Int64 { path.size() }
-    func pushAutoField(name: String, baseDepth: Int64): Bool { path.pushAutoField(name, baseDepth) }
-    func pushAutoIndex(index: Int64, baseDepth: Int64): Bool { path.pushAutoIndex(index, baseDepth) }
-    func beginAutoValue(pushed: Bool): Unit { path.beginAutoValue(pushed) }
-    func completeAutoValue(pushed: Bool): Unit { path.completeAutoValue(pushed) }
+    func pathDepth(): Int64 { match (path) { case Some(value) => value.size(); case None => 0 } }
+    func pushAutoField(name: String, baseDepth: Int64): Bool { pathState().pushAutoField(name, baseDepth) }
+    func pushAutoIndex(index: Int64, baseDepth: Int64): Bool { pathState().pushAutoIndex(index, baseDepth) }
+    func beginAutoValue(pushed: Bool): Unit {
+        if (let Some(value) <- path) { value.beginAutoValue(pushed) }
+    }
+    func completeAutoValue(pushed: Bool): Unit {
+        if (let Some(value) <- path) { value.completeAutoValue(pushed) }
+    }
 
     public func enterValue(): Unit {
         if (depth >= maxDepth) {
@@ -373,27 +395,47 @@ public class GeneratedWriteStateV1 {
     public func leaveValue(): Unit { if (depth > 0) { depth-- } }
     public func enterObject<T>(value: T): Unit { let _ = value; enterValue() }
     public func leaveObject(): Unit { leaveValue() }
-    public func currentPath(): String { path.pointer() }
+    public func currentPath(): String {
+        match (path) { case Some(value) => value.pointer(); case None => "" }
+    }
+
+    private func pathState(): GeneratedPathStateV1 {
+        match (path) {
+            case Some(value) => value
+            case None =>
+                let value = GeneratedPathStateV1()
+                path = Some(value)
+                value
+        }
+    }
 }
 
 public class GeneratedReadStateV1 {
     private let maxDepth: Int64
     private var depth: Int64 = 0
-    private let path = GeneratedPathStateV1()
+    private var path: Option<GeneratedPathStateV1> = None<GeneratedPathStateV1>
 
     init(config: JsonReadOptions) { maxDepth = config.maxDepth }
 
-    public func pushField(name: String): Unit { path.pushField(name) }
-    public func pushIndex(index: Int64): Unit { path.pushIndex(index) }
-    public func popPath(): Unit { path.pop() }
-    func updateLastField(name: String): Unit { path.updateLastField(name) }
-    func updateLastIndex(index: Int64): Unit { path.updateLastIndex(index) }
+    public func pushField(name: String): Unit { pathState().pushField(name) }
+    public func pushIndex(index: Int64): Unit { pathState().pushIndex(index) }
+    public func popPath(): Unit { if (let Some(value) <- path) { value.pop() } }
+    func updateLastField(name: String): Unit {
+        if (let Some(value) <- path) { value.updateLastField(name) }
+    }
+    func updateLastIndex(index: Int64): Unit {
+        if (let Some(value) <- path) { value.updateLastIndex(index) }
+    }
 
-    func pathDepth(): Int64 { path.size() }
-    func pushAutoField(name: String, baseDepth: Int64): Bool { path.pushAutoField(name, baseDepth) }
-    func pushAutoIndex(index: Int64, baseDepth: Int64): Bool { path.pushAutoIndex(index, baseDepth) }
-    func beginAutoValue(pushed: Bool): Unit { path.beginAutoValue(pushed) }
-    func completeAutoValue(pushed: Bool): Unit { path.completeAutoValue(pushed) }
+    func pathDepth(): Int64 { match (path) { case Some(value) => value.size(); case None => 0 } }
+    func pushAutoField(name: String, baseDepth: Int64): Bool { pathState().pushAutoField(name, baseDepth) }
+    func pushAutoIndex(index: Int64, baseDepth: Int64): Bool { pathState().pushAutoIndex(index, baseDepth) }
+    func beginAutoValue(pushed: Bool): Unit {
+        if (let Some(value) <- path) { value.beginAutoValue(pushed) }
+    }
+    func completeAutoValue(pushed: Bool): Unit {
+        if (let Some(value) <- path) { value.completeAutoValue(pushed) }
+    }
 
     public func enterValue(): Unit {
         if (depth >= maxDepth) {
@@ -403,7 +445,19 @@ public class GeneratedReadStateV1 {
     }
     public func leaveValue(): Unit { if (depth > 0) { depth-- } }
     public func remainingDepth(): Int64 { maxDepth - depth }
-    public func currentPath(): String { path.pointer() }
+    public func currentPath(): String {
+        match (path) { case Some(value) => value.pointer(); case None => "" }
+    }
+
+    private func pathState(): GeneratedPathStateV1 {
+        match (path) {
+            case Some(value) => value
+            case None =>
+                let value = GeneratedPathStateV1()
+                path = Some(value)
+                value
+        }
+    }
 }
 
 private func jsonPointerEscape(value: String): String {

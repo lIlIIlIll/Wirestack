@@ -152,6 +152,15 @@ private func externalEmptyEnvelope(): ExternalCollectionEnvelope {
     )
 }
 
+private func externalFastReadError(text: String): JsonException {
+    try {
+        let _ = YJson.fromJson<ExternalFastReadEnvelope>(text)
+        throw Exception("expected generated fast-read failure")
+    } catch (error: JsonException) {
+        error
+    }
+}
+
 @Test
 class GeneratedCollectionConsumerTest {
     @TestCase
@@ -504,6 +513,58 @@ class GeneratedCollectionConsumerTest {
         @Expect(prettyDecoded.metrics["count"], 3)
         @Expect(prettyDecoded.members[0].id, 7)
         @Expect(prettyDecoded.customNumbers[0], 9)
+    }
+
+    @TestCase
+    func specializedFieldsShareCompactRawObjectAndPreservePrettyFallback(): Unit {
+        let metrics = HashMap<String, Int64>()
+        metrics.add("count", 3)
+        let populated = ExternalFastReadEnvelope(
+            ArrayList<String>(["alpha", "仓颉"]), metrics, Some("neo"))
+
+        let compact = YJson.toJson(populated)
+        @Assert(compact,
+            "{\"tags\":[\"alpha\",\"仓颉\"],\"metrics\":{\"count\":3},\"nickname\":\"neo\"}")
+        let decoded = YJson.fromJson<ExternalFastReadEnvelope>(compact)
+        @Expect(decoded.tags[1], "仓颉")
+        @Expect(decoded.metrics["count"], 3)
+        @Expect(decoded.nickname.getOrThrow(), "neo")
+
+        let empty = ExternalFastReadEnvelope(
+            ArrayList<String>(), HashMap<String, Int64>(), None<String>)
+        let emptyCompact = YJson.toJson(empty)
+        @Assert(emptyCompact, "{\"tags\":[],\"metrics\":{}}")
+        let emptyDecoded = YJson.fromJson<ExternalFastReadEnvelope>(emptyCompact)
+        @Expect(emptyDecoded.tags.isEmpty())
+        @Expect(emptyDecoded.metrics.isEmpty())
+        @Expect(emptyDecoded.nickname.isNone())
+
+        let pretty = YJson.toJson(populated, options: JsonWriteOptions.pretty())
+        @Expect(pretty.contains("\n  \"tags\""))
+        @Expect(YJson.fromJson<ExternalFastReadEnvelope>(pretty).nickname.getOrThrow(), "neo")
+    }
+
+    @TestCase
+    func specializedFastReadPreservesFailureCodesAndPaths(): Unit {
+        let tagsError = externalFastReadError(
+            "{\"tags\":[\"ok\",1],\"metrics\":{},\"nickname\":\"neo\"}")
+        @Expect(tagsError.code, "parse_error")
+        @Expect(tagsError.path, "")
+
+        let metricsError = externalFastReadError(
+            "{\"tags\":[],\"metrics\":{\"count\":\"bad\"},\"nickname\":null}")
+        @Expect(metricsError.code, "parse_error")
+        @Expect(metricsError.path, "")
+
+        let optionError = externalFastReadError(
+            "{\"tags\":[],\"metrics\":{},\"nickname\":1}")
+        @Expect(optionError.code, "parse_error")
+        @Expect(optionError.path, "")
+
+        let duplicateError = externalFastReadError(
+            "{\"tags\":[],\"tags\":[],\"metrics\":{},\"nickname\":null}")
+        @Expect(duplicateError.code, "duplicate_key")
+        @Expect(duplicateError.path, "/tags")
     }
 
     @TestCase

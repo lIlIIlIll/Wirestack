@@ -317,6 +317,7 @@ public class GeneratedSupportV1 {
 
     public static func readState(reader: GeneratedSupportV1Reader): GeneratedReadStateV1 {
         match (reader) {
+            case fast: JsonFastReader => fast.generatedReadStateV1()
             case owner: GeneratedReadStateV1Owner => owner.generatedReadStateV1()
             case _ => throw JsonException(
                 "Generated reader is not owned by the yjson runtime",
