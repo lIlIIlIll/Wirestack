@@ -2,16 +2,16 @@
   "build": {
     "command": [
       "python3",
-      "/Users/runner/work/Wirestack/Wirestack/tools/build_resolver.py",
+      "/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo/tools/build_resolver.py",
       "--root",
-      "/Users/runner/work/Wirestack/Wirestack",
+      "/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo",
       "--platform",
       "macos-arm64",
       "--test-fixture",
       "--quiet"
     ],
     "diagnostics": "",
-    "duration_ms": 2702.345,
+    "duration_ms": 2939.899,
     "exit_code": 0,
     "output": "",
     "timed_out": false
@@ -19,7 +19,7 @@
   "decision": "PASS",
   "failures": [],
   "gate_id": "M2-006-APPLE-SYSTEM-RESOLVER",
-  "generated_at_utc": "2026-08-30T21:05:03.654593Z",
+  "generated_at_utc": "2026-08-31T03:06:55.796330Z",
   "mode": "macos",
   "platform": {
     "machine": "arm64",
@@ -33,7 +33,7 @@
         "-v"
       ],
       "diagnostics": "",
-      "duration_ms": 60.369,
+      "duration_ms": 66.191,
       "exit_code": 0,
       "output": "Cangjie Compiler: 1.3.0-alpha.20260831010012 (cjnative)\nTarget: aarch64-apple-darwin\n",
       "timed_out": false
@@ -42,9 +42,9 @@
   "resolver_manifest": {
     "archive": {
       "path": "lib/libwirestack_resolver.a",
-      "sha256": "b30cfb8edaa7ecd2cfeb7f1c53a61727b544cb00bb811efc7c3563a9bc833bcc"
+      "sha256": "aeb3b3d7852ce3d7ac04d3c3fd34ca2e303a8bb63f4fc744fca418312b3b5b15"
     },
-    "build_fingerprint": "08f15625e73472fbd1bf4656048a78a34b164e620aa089c61da00b396dfd9d04",
+    "build_fingerprint": "6ed7a6e3aa821e5123e198d43cd18cb96be7b346ae4534a7bdddb4fa9653a2de",
     "build_smoke": "PASS",
     "close_model": "bounded quarantine with process-wide pool and worker caps",
     "inputs": {
@@ -61,15 +61,16 @@
         "arm64",
         "-isysroot",
         "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+        "-mmacosx-version-min=12.0",
         "-DWIRESTACK_RESOLVER_TEST_FIXTURE=1"
       ],
       "platform": "macos-arm64",
       "schema": 1,
       "sources": {
-        "/Users/runner/work/Wirestack/Wirestack/native/resolver/apple/wirestack_resolver.c": "8638fbd65614b6c82f2f0212f5918553f6e9a46fac2b4d07c82d076b9e2802c5",
-        "/Users/runner/work/Wirestack/Wirestack/native/resolver/apple/wirestack_resolver.h": "47815e3f7fdc59335ce7aa7026a0faad0b0e12549d0f9729191f9c5d182259f4",
-        "/Users/runner/work/Wirestack/Wirestack/native/resolver/linux/wirestack_resolver.c": "6fa127bd1138b68c01f20d229529ec8d6028048c718dec441262a696b0c5b424",
-        "/Users/runner/work/Wirestack/Wirestack/native/resolver/linux/wirestack_resolver.h": "3e3e11c847283c846b96630fc97b4640844d56a765c51056551142d9f088873d"
+        "/private/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo/native/resolver/apple/wirestack_resolver.c": "4a16cd95025daefcd9808a9c3d4348ebfdf54ef67f7eef0208fdf7a98d27da89",
+        "/private/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo/native/resolver/apple/wirestack_resolver.h": "47815e3f7fdc59335ce7aa7026a0faad0b0e12549d0f9729191f9c5d182259f4",
+        "/private/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo/native/resolver/linux/wirestack_resolver.c": "6562244643cff8ddda28a99563040f4e1eeb9580409ee9d6c51e17b3e1cff78a",
+        "/private/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo/native/resolver/linux/wirestack_resolver.h": "20d07f4585a1785f631f67b83b7cfd7ae94ee8dc19ffd7487c43dbfa57bcdbbe"
       },
       "test_fixture": true
     },
@@ -79,7 +80,7 @@
     "test_fixture": true,
     "worker_model": "fixed pthread pool with bounded FIFO admission"
   },
-  "resolver_manifest_sha256": "89b3fa620a460a4b3649655b1e4379549631136f70f1d7c069b87f6c741e0f7a",
+  "resolver_manifest_sha256": "d0beab4e0347b1c36337555173641e626b3d1fdd721bd8f065e51df069163f87",
   "resolver_test": {
     "command": [
       "cjpm",
@@ -95,13 +96,13 @@
       "--no-color",
       "--no-progress"
     ],
-    "diagnostics": "ld64.lld: warning: ./target/native/resolver/current/lib/libwirestack_resolver.a(wirestack_resolver.o) has version 15.0.0, which is newer than target minimum of 12.0.0\nld64.lld: warning: ./target/native/test-support/m2-006/lib/libwirestack_m2_006_tls_link_stub.a(m2_006_tls_link_stub.o) has version 15.0.0, which is newer than target minimum of 12.0.0\n    PASSED: 7, SKIPPED: 23, ERROR: 0\n    PASSED: 7, SKIPPED: 23, ERROR: 0",
-    "duration_ms": 21742.215,
+    "diagnostics": "    PASSED: 7, SKIPPED: 23, ERROR: 0\n    PASSED: 7, SKIPPED: 23, ERROR: 0",
+    "duration_ms": 20739.594,
     "exit_code": 0,
-    "output": "ld64.lld: warning: ./target/native/resolver/current/lib/libwirestack_resolver.a(wirestack_resolver.o) has version 15.0.0, which is newer than target minimum of 12.0.0\nld64.lld: warning: ./target/native/test-support/m2-006/lib/libwirestack_m2_006_tls_link_stub.a(m2_006_tls_link_stub.o) has version 15.0.0, which is newer than target minimum of 12.0.0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.resolver, time elapsed: 183891000 ns, RESULT:\n    TCS: M2006AppleSystemResolverTest, time elapsed: 182543000 ns, RESULT:\n    [ PASSED ] CASE: resolvesLocalhostThroughTheProviderNeutralContract (12588000 ns)\n    [ PASSED ] CASE: fixtureReturnsAllCandidatesWithoutInventingTtl (230000 ns)\n    [ PASSED ] CASE: fixtureAppliesFamilyAndResultBounds (28196000 ns)\n    [ PASSED ] CASE: fixtureMapsPosixFailuresAndUnknownCodes (61175000 ns)\n    [ PASSED ] CASE: fixtureCancellationAndDeadlineReturnBeforeNativeCleanup (52439000 ns)\n    STDERR:\n    An exception has occurred:\n    ResolveException: resolution cancelled\n    \t at wirestack.internal.resolver::checkResolveContext(wirestack::OperationContext)(/Users/runner/work/Wirestack/Wirestack/src/internal/resolver/package.cj:17)\n    \t at wirestack.internal.resolver::BoundedSystemResolverBackend::resolve(wirestack::HostName, std.core::Option<...>, wirestack::ResolveOptions, wirestack::OperationContext)(/Users/runner/work/Wirestack/Wirestack/src/internal/resolver/bounded_backend.cj:144)\n    \t at wirestack.internal.resolver::SystemResolver::resolve(wirestack::HostName, std.core::Option<...>, wirestack::ResolveOptions, wirestack::OperationContext)(/Users/runner/work/Wirestack/Wirestack/src/internal/resolver/system_resolver.cj:29)\n    \t at wirestack.internal.resolver::SystemResolver::resolve(wirestack::HostName, wirestack::ResolveOptions, wirestack::OperationContext)(/Users/runner/work/Wirestack/Wirestack/src/internal/resolver/system_resolver.cj:38)\n    \t at wirestack.internal.resolver/test::M2006AppleSystemResolverTest::fixtureCancellationAndDeadlineReturnBeforeNativeCleanup::lambda.0()(/Users/runner/work/Wirestack/Wirestack/src/internal/resolver/apple_system_resolver_test.cj:97)\n    [ PASSED ] CASE: newResolutionObservesNetworkGenerationChange (24945000 ns)\n    [ PASSED ] CASE: validatesBoundsAndRejectsUseAfterClose (147000 ns)\nSummary: TOTAL: 30\n    PASSED: 7, SKIPPED: 23, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 185214000 ns, RESULT:\nTP: wirestack.*, time elapsed: 185065000 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.resolver, time elapsed: 183891000 ns\nSummary: TOTAL: 30\n    PASSED: 7, SKIPPED: 23, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+    "output": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.resolver, time elapsed: 144770000 ns, RESULT:\n    TCS: M2006AppleSystemResolverTest, time elapsed: 142737000 ns, RESULT:\n    [ PASSED ] CASE: resolvesLocalhostThroughTheProviderNeutralContract (12162000 ns)\n    [ PASSED ] CASE: fixtureReturnsAllCandidatesWithoutInventingTtl (14746000 ns)\n    [ PASSED ] CASE: fixtureAppliesFamilyAndResultBounds (31427000 ns)\n    [ PASSED ] CASE: fixtureMapsPosixFailuresAndUnknownCodes (554000 ns)\n    [ PASSED ] CASE: fixtureCancellationAndDeadlineReturnBeforeNativeCleanup (80306000 ns)\n    STDERR:\n    An exception has occurred:\n    ResolveException: resolution cancelled\n    \t at wirestack.internal.resolver::checkResolveContext(wirestack::OperationContext)(/private/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo/src/internal/resolver/package.cj:17)\n    \t at wirestack.internal.resolver::BoundedSystemResolverBackend::resolve(wirestack::HostName, std.core::Option<...>, wirestack::ResolveOptions, wirestack::OperationContext)(/private/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo/src/internal/resolver/bounded_backend.cj:151)\n    \t at wirestack.internal.resolver::SystemResolver::resolve(wirestack::HostName, std.core::Option<...>, wirestack::ResolveOptions, wirestack::OperationContext)(/private/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo/src/internal/resolver/system_resolver.cj:29)\n    \t at wirestack.internal.resolver::SystemResolver::resolve(wirestack::HostName, wirestack::ResolveOptions, wirestack::OperationContext)(/private/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo/src/internal/resolver/system_resolver.cj:38)\n    \t at wirestack.internal.resolver/test::M2006AppleSystemResolverTest::fixtureCancellationAndDeadlineReturnBeforeNativeCleanup::lambda.0()(/private/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo/src/internal/resolver/apple_system_resolver_test.cj:98)\n    [ PASSED ] CASE: newResolutionObservesNetworkGenerationChange (146000 ns)\n    [ PASSED ] CASE: validatesBoundsAndRejectsUseAfterClose (62000 ns)\nSummary: TOTAL: 30\n    PASSED: 7, SKIPPED: 23, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 146457000 ns, RESULT:\nTP: wirestack.*, time elapsed: 146344000 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.resolver, time elapsed: 144770000 ns\nSummary: TOTAL: 30\n    PASSED: 7, SKIPPED: 23, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
     "timed_out": false
   },
-  "revision": "f703e187a0816852b0eb55e7608e950ff03c829a",
+  "revision": "843cec9644d3fb4ae844045fca7f56cc6ed0a1a4",
   "schema_version": 1,
   "scope": "native macOS arm64",
   "simulator": null,
@@ -111,16 +112,16 @@
       "command": [
         "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar",
         "rcs",
-        "/Users/runner/work/Wirestack/Wirestack/target/native/test-support/m2-006/lib/libwirestack_m2_006_tls_link_stub.a",
-        "/Users/runner/work/Wirestack/Wirestack/target/native/test-support/m2-006/m2_006_tls_link_stub.o"
+        "/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo/target/native/test-support/m2-006/lib/libwirestack_m2_006_tls_link_stub.a",
+        "/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo/target/native/test-support/m2-006/m2_006_tls_link_stub.o"
       ],
       "diagnostics": "",
-      "duration_ms": 7.074,
+      "duration_ms": 8.334,
       "exit_code": 0,
       "output": "",
       "timed_out": false
     },
-    "archive_sha256": "5c29b531e842aa1fc5001927055914401aee1820e1d4bc61a77b412911e4cca4",
+    "archive_sha256": "c99cb9642a0fb0758363b46b246c96828515a62a07c431d26356666281a0e8e9",
     "compile": {
       "command": [
         "/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
@@ -133,13 +134,14 @@
         "arm64",
         "-isysroot",
         "/Applications/Xcode_16.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk",
+        "-mmacosx-version-min=12.0",
         "-c",
-        "/Users/runner/work/Wirestack/Wirestack/tools/gates/native/m2_006_tls_link_stub.c",
+        "/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo/tools/gates/native/m2_006_tls_link_stub.c",
         "-o",
-        "/Users/runner/work/Wirestack/Wirestack/target/native/test-support/m2-006/m2_006_tls_link_stub.o"
+        "/var/folders/_5/zjnzxgh147qcg3bb5cg2wvqw0000gn/T/wirestack-m2-006-67zob5jw/repo/target/native/test-support/m2-006/m2_006_tls_link_stub.o"
       ],
       "diagnostics": "",
-      "duration_ms": 73.649,
+      "duration_ms": 41.924,
       "exit_code": 0,
       "output": "",
       "timed_out": false
