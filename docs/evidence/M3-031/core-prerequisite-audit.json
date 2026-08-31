@@ -1,5 +1,27 @@
 {
   "boundary": "Only the desktop-applicable contract is audited. Global six-platform and mobile conditions are not evaluated, and no desktop trust or system-key adapter is implemented.",
+  "dependency_evidence_validation": {
+    "status": "PASS",
+    "tasks": {
+      "M2-004": {
+        "native_reports": {
+          "docs/evidence/M2-004/windows-x86_64/report.json": "1ceb5761ac282181d319773c1d73f97e50938b62aceb01734892821d4c68d1dc"
+        },
+        "source_count": 22,
+        "source_verification": "SEALED_INVENTORY",
+        "status": "PASS"
+      },
+      "M2-006": {
+        "native_reports": {
+          "docs/evidence/M2-006/ios-simulator-arm64/report.json": "bfeb74a1784f786f949d6d65501a93debf0afc870892272190c8331c8b7f95df",
+          "docs/evidence/M2-006/macos-arm64/report.json": "eee6d5c7818a8b324d14562ac03df7b9e173a12794bd1ab5827f325391731835"
+        },
+        "source_count": 23,
+        "source_verification": "SEALED_INVENTORY",
+        "status": "PASS"
+      }
+    }
+  },
   "excluded_global_conditions": [
     {
       "condition": "six-platform target build",
