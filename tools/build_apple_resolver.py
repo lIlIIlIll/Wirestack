@@ -117,7 +117,7 @@ def validate_cached(final_dir: Path, fingerprint: str) -> dict[str, object] | No
     return manifest
 
 
-def build(
+def _build_unlocked(
     repo: Path,
     output_root: Path,
     *,
@@ -219,6 +219,27 @@ int main(void) {
         return final_dir, manifest
     finally:
         shutil.rmtree(staging, ignore_errors=True)
+
+
+def build(
+    repo: Path,
+    output_root: Path,
+    *,
+    selected: str,
+    test_fixture: bool = False,
+) -> tuple[Path, dict[str, object]]:
+    if platform.system() != "Darwin":
+        return _build_unlocked(
+            repo, output_root, selected=selected, test_fixture=test_fixture
+        )
+    import fcntl
+
+    output_root.mkdir(parents=True, exist_ok=True)
+    with (output_root / ".build.lock").open("a+", encoding="utf-8") as lock:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        return _build_unlocked(
+            repo, output_root, selected=selected, test_fixture=test_fixture
+        )
 
 
 def main() -> int:
