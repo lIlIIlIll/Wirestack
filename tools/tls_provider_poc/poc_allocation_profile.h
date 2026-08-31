@@ -6,12 +6,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(_MSC_VER)
+typedef union __declspec(align(16)) PocAllocationHeader {
+    struct {
+        size_t size;
+    } metadata;
+    unsigned char alignment[16];
+} PocAllocationHeader;
+#else
 typedef union PocAllocationHeader {
     struct {
         size_t size;
     } metadata;
     max_align_t alignment;
 } PocAllocationHeader;
+#endif
 
 static uint64_t provider_allocation_calls = 0;
 static uint64_t provider_allocation_bytes = 0;
