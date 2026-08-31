@@ -573,11 +573,13 @@ static int local_close_version_case(Material *m, int version) {
     ret = setup_pair(&p, &client_conf, &server_conf, "localhost");
     int ok = ret == 0 && drive_handshake(&p, 1);
     if (ok) {
-        int close_result = mbedtls_ssl_close_notify(&p.client);
+        mbedtls_ssl_free(&p.client);
+        mbedtls_ssl_init(&p.client);
+        p.c2s.closed = 1;
         unsigned char byte;
         int peer_result = mbedtls_ssl_read(&p.server, &byte, 1);
-        ok = close_result == 0 &&
-             peer_result == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY;
+        ok = peer_result <= 0 &&
+             peer_result != MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY;
     }
     pair_free(&p);
     mbedtls_ssl_config_free(&client_conf);
