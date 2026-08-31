@@ -78,11 +78,11 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 "schema_version": 1, "task_id": "M2-004", "revision": "a" * 40,
                 "decision": "PASS",
             }, indent=2) + "\n").replace("\n", "\r\n").encode("utf-8"))
-            validation.write_text(json.dumps({
+            validation.write_bytes((json.dumps({
                 "schema_version": 1, "task_id": "M2-004",
                 "expected_revision": "a" * 40, "failures": [], "status": "PASS",
                 "report_sha256": adoption.sha256_path(report),
-            }), encoding="utf-8")
+            }, indent=2) + "\n").replace("\n", "\r\n").encode("utf-8"))
             evidence_path = root / "docs/evidence/M2-004/evidence.json"
             evidence_path.parent.mkdir(parents=True, exist_ok=True)
             evidence_path.write_text(json.dumps({
@@ -91,7 +91,7 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 "generated_at_utc": "2026-08-31T00:00:00Z", "revision": "a" * 40,
                 "reports": [{
                     "path": validation_relative,
-                    "sha256": adoption.sha256_path(validation),
+                    "sha256": adoption.repository_text_sha256(validation),
                     "source_task": "M2-004", "acceptance_status": "PASS",
                 }],
                 "source_sha256": {"source.txt": adoption.sha256_path(source)},
