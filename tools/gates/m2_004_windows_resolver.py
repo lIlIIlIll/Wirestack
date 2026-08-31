@@ -145,6 +145,39 @@ def build_test_link_stub(root: Path, env: dict[str, str]) -> dict[str, Any]:
     }
 
 
+def bind_test_link_stub(manifest: str) -> str:
+    marker = '  wirestack_resolver = { path = "./target/native/resolver/current/lib" }'
+    if manifest.count(marker) < 2:
+        raise GateError("Windows resolver FFI binding is missing from cjpm.toml")
+    windows_table = "[target.x86_64-w64-mingw32.ffi.c]"
+    start = manifest.find(windows_table)
+    end = manifest.find("\n[target.", start + len(windows_table))
+    if start < 0 or end < 0:
+        raise GateError("Windows target FFI table is missing from cjpm.toml")
+    section = manifest[start:end]
+    if "wirestack_m2_004_tls_link_stub" in section:
+        raise GateError("test-only TLS link stub leaked into the normal Windows target")
+    bound = section.replace(
+        marker,
+        marker + '\n  wirestack_m2_004_tls_link_stub = { path = "./target/native/test-support/m2-004/lib" }',
+        1,
+    )
+    return manifest[:start] + bound + manifest[end:]
+
+
+def prepare_test_workspace(root: Path, destination: Path) -> None:
+    shutil.copytree(
+        root,
+        destination,
+        ignore=shutil.ignore_patterns(".git", "target", "build", "dist", "__pycache__"),
+    )
+    manifest_path = destination / "cjpm.toml"
+    manifest_path.write_text(
+        bind_test_link_stub(manifest_path.read_text(encoding="utf-8")),
+        encoding="utf-8",
+    )
+
+
 def validate_report(report: object, expected_revision: str) -> list[str]:
     failures: list[str] = []
     if not isinstance(report, dict):
@@ -192,35 +225,39 @@ def run_gate(root: Path, output: Path, revision: str) -> dict[str, Any]:
         raise GateError("cjc and cjpm are required")
     env = dict(os.environ)
     env["WIRESTACK_RESOLVER_TEST_FIXTURE"] = "1"
-    build = run_command(
+    with tempfile.TemporaryDirectory(prefix="wirestack-m2-004-") as temporary:
+        workspace = Path(temporary) / "repo"
+        prepare_test_workspace(root, workspace)
+        build = run_command(
         [
-            "python", str(root / "tools" / "build_resolver.py"),
-            "--root", str(root), "--platform", "windows-x86_64",
+            "python", str(workspace / "tools" / "build_resolver.py"),
+            "--root", str(workspace), "--platform", "windows-x86_64",
             "--test-fixture", "--quiet",
         ],
-        cwd=root,
+        cwd=workspace,
         env=env,
         timeout=120,
-    )
-    if build["timed_out"] or build["exit_code"] != 0:
-        raise GateError("Windows resolver build failed: " + build["output"][-4000:])
-    test_link_stub = build_test_link_stub(root, env)
-    manifest_path = root / "target/native/resolver/current/resolver-manifest.json"
-    try:
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as error:
-        raise GateError(f"resolver manifest is unavailable: {error}") from error
-    resolver_test = run_command(
+        )
+        if build["timed_out"] or build["exit_code"] != 0:
+            raise GateError("Windows resolver build failed: " + build["output"][-4000:])
+        test_link_stub = build_test_link_stub(workspace, env)
+        manifest_path = workspace / "target/native/resolver/current/resolver-manifest.json"
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise GateError(f"resolver manifest is unavailable: {error}") from error
+        resolver_test = run_command(
         [
             cjpm, "test", "src/internal/resolver", "-j", "1", "--parallel", "1",
             "--filter", "M2004WindowsSystemResolverTest", "--show-all-output",
             "--no-color", "--no-progress",
         ],
-        cwd=root,
+        cwd=workspace,
         env=env,
         timeout=180,
-    )
-    toolchain = run_command([cjc, "-v"], cwd=root, env=env, timeout=15)
+        )
+        toolchain = run_command([cjc, "-v"], cwd=workspace, env=env, timeout=15)
+        manifest_sha256 = sha256_path(manifest_path)
     failures = process_failures(resolver_test, EXPECTED_TESTS, "RESOLVER_TEST")
     if manifest.get("platform") != "windows-x86_64":
         failures.append("MANIFEST:PLATFORM")
@@ -243,7 +280,7 @@ def run_gate(root: Path, output: Path, revision: str) -> dict[str, Any]:
             "toolchain": toolchain,
         },
         "resolver_manifest": manifest,
-        "resolver_manifest_sha256": sha256_path(manifest_path),
+        "resolver_manifest_sha256": manifest_sha256,
         "build": build,
         "test_link_stub": test_link_stub,
         "resolver_test": resolver_test,

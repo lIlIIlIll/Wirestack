@@ -28,6 +28,5 @@
 
 [target.x86_64-w64-mingw32.ffi.c]
   wirestack_resolver = { path = "./target/native/resolver/current/lib" }
-  wirestack_m2_004_tls_link_stub = { path = "./target/native/test-support/m2-004/lib" }
 
 [dependencies]

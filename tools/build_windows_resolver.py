@@ -172,8 +172,9 @@ def build(
 #include <stdint.h>
 int main(void) {
   uint64_t pool = 0;
+  int64_t native_code = 0;
   uint64_t metrics[WIRESTACK_RESOLVER_METRIC_COUNT] = {0};
-  if (wirestack_resolver_pool_create(2, 4, &pool) != WIRESTACK_RESOLVER_OK) return 1;
+  if (wirestack_resolver_pool_create(2, 4, &pool, &native_code) != WIRESTACK_RESOLVER_OK) return 1;
   if (wirestack_resolver_pool_metrics(pool, metrics, WIRESTACK_RESOLVER_METRIC_COUNT) != WIRESTACK_RESOLVER_OK) return 2;
   if (metrics[WIRESTACK_RESOLVER_METRIC_WORKERS] != 2 ||
       metrics[WIRESTACK_RESOLVER_METRIC_QUEUE_CAPACITY] != 4) return 3;

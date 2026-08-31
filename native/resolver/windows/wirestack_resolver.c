@@ -30,6 +30,7 @@ enum wirestack_resolver_job_state {
 
 struct wirestack_resolver_address {
     int32_t family;
+    uint32_t scope_id;
     uint8_t bytes[WIRESTACK_RESOLVER_ADDRESS_BYTES];
 };
 
@@ -227,7 +228,8 @@ static void append_fixture_address(
     struct wirestack_resolver_job *job,
     int32_t family,
     const uint8_t *bytes,
-    size_t size
+    size_t size,
+    uint32_t scope_id
 ) {
     struct wirestack_resolver_address *destination;
     if (job->result_count >= job->maximum_results ||
@@ -237,6 +239,7 @@ static void append_fixture_address(
     destination = &job->addresses[job->result_count++];
     memset(destination, 0, sizeof(*destination));
     destination->family = family;
+    destination->scope_id = scope_id;
     memcpy(destination->bytes, bytes, size);
 }
 
@@ -246,12 +249,12 @@ static int resolve_fixture(struct wirestack_resolver_job *job) {
                                      0u, 0u, 0u, 0u, 0u, 0u, 0u, 1u};
     int code = 0;
     if (strcmp(job->host, "all.m2-004.test") == 0) {
-        append_fixture_address(job, WIRESTACK_RESOLVER_FAMILY_IPV6, ipv6, sizeof(ipv6));
-        append_fixture_address(job, WIRESTACK_RESOLVER_FAMILY_IPV4, ipv4, sizeof(ipv4));
-        append_fixture_address(job, WIRESTACK_RESOLVER_FAMILY_IPV6, ipv6, sizeof(ipv6));
+        append_fixture_address(job, WIRESTACK_RESOLVER_FAMILY_IPV6, ipv6, sizeof(ipv6), 7u);
+        append_fixture_address(job, WIRESTACK_RESOLVER_FAMILY_IPV4, ipv4, sizeof(ipv4), 0u);
+        append_fixture_address(job, WIRESTACK_RESOLVER_FAMILY_IPV6, ipv6, sizeof(ipv6), 7u);
     } else if (strcmp(job->host, "delay.m2-004.test") == 0) {
         Sleep(250u);
-        append_fixture_address(job, WIRESTACK_RESOLVER_FAMILY_IPV4, ipv4, sizeof(ipv4));
+        append_fixture_address(job, WIRESTACK_RESOLVER_FAMILY_IPV4, ipv4, sizeof(ipv4), 0u);
     } else if (strcmp(job->host, "noname.m2-004.test") == 0) {
         code = WSAHOST_NOT_FOUND;
     } else if (strcmp(job->host, "nodata.m2-004.test") == 0) {
@@ -302,7 +305,6 @@ static void resolve_job(struct wirestack_resolver_job *job) {
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = native_family(job->family);
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_ADDRCONFIG;
     status = GetAddrInfoW(host, service, &hints, &results);
     job->result = classify_winsock_error(status);
     job->native_code = (int64_t)status;
@@ -325,6 +327,7 @@ static void resolve_job(struct wirestack_resolver_job *job) {
                 const struct sockaddr_in6 *address =
                     (const struct sockaddr_in6 *)current->ai_addr;
                 destination->family = WIRESTACK_RESOLVER_FAMILY_IPV6;
+                destination->scope_id = address->sin6_scope_id;
                 memcpy(destination->bytes, &address->sin6_addr, 16u);
                 job->result_count++;
             }
@@ -405,18 +408,20 @@ static DWORD WINAPI resolver_reaper(LPVOID argument) {
 int32_t wirestack_resolver_pool_create(
     uint64_t worker_count,
     uint64_t queue_capacity,
-    uint64_t *out_pool_handle
+    uint64_t *out_pool_handle,
+    int64_t *out_native_code
 ) {
     struct wirestack_resolver_pool *pool;
     WSADATA winsock;
     uint64_t index;
     HANDLE reaper;
-    if (out_pool_handle == NULL || worker_count == 0u ||
+    if (out_pool_handle == NULL || out_native_code == NULL || worker_count == 0u ||
         worker_count > WIRESTACK_RESOLVER_MAXIMUM_WORKERS || queue_capacity == 0u ||
         queue_capacity > WIRESTACK_RESOLVER_MAXIMUM_QUEUE) {
         return WIRESTACK_RESOLVER_INVALID_ARGUMENT;
     }
     *out_pool_handle = 0u;
+    *out_native_code = 0;
     pool = (struct wirestack_resolver_pool *)calloc(1u, sizeof(*pool));
     if (pool == NULL) {
         return WIRESTACK_RESOLVER_OUT_OF_MEMORY;
@@ -433,10 +438,14 @@ int32_t wirestack_resolver_pool_create(
     pool->worker_count = worker_count;
     pool->queue_capacity = queue_capacity;
     pool->accepting = 1;
-    if (WSAStartup(MAKEWORD(2, 2), &winsock) != 0) {
-        free(pool->workers);
-        free(pool);
-        return WIRESTACK_RESOLVER_OUT_OF_MEMORY;
+    {
+        int startup_status = WSAStartup(MAKEWORD(2, 2), &winsock);
+        if (startup_status != 0) {
+            *out_native_code = (int64_t)startup_status;
+            free(pool->workers);
+            free(pool);
+            return WIRESTACK_RESOLVER_SYSTEM_FAILURE;
+        }
     }
     pool->winsock_started = 1;
     if (!reserve_pool_capacity(pool)) {
@@ -593,6 +602,7 @@ int32_t wirestack_resolver_poll(
     uint64_t job_handle,
     int32_t *out_families,
     uint8_t *out_addresses,
+    uint32_t *out_scope_ids,
     uint64_t output_capacity,
     uint64_t *out_count,
     int32_t *out_result,
@@ -616,12 +626,14 @@ int32_t wirestack_resolver_poll(
     *out_result = job->result;
     *out_native_code = job->native_code;
     if (job->result == WIRESTACK_RESOLVER_RESULT_SUCCESS) {
-        if (output_capacity < job->result_count || out_families == NULL || out_addresses == NULL) {
+        if (output_capacity < job->result_count || out_families == NULL ||
+            out_addresses == NULL || out_scope_ids == NULL) {
             ReleaseSRWLockExclusive(&pool->lock);
             return WIRESTACK_RESOLVER_OUTPUT_TOO_SMALL;
         }
         for (index = 0u; index < job->result_count; index++) {
             out_families[index] = job->addresses[index].family;
+            out_scope_ids[index] = job->addresses[index].scope_id;
             memcpy(out_addresses + index * WIRESTACK_RESOLVER_ADDRESS_BYTES,
                    job->addresses[index].bytes, WIRESTACK_RESOLVER_ADDRESS_BYTES);
         }

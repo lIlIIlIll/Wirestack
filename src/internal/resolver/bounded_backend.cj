@@ -27,7 +27,8 @@ private let RESOLVER_MAXIMUM_WAIT = 16 * Duration.millisecond
 foreign func wirestack_resolver_pool_create(
     workerCount: UInt64,
     queueCapacity: UInt64,
-    outPoolHandle: CPointer<UInt64>
+    outPoolHandle: CPointer<UInt64>,
+    outNativeCode: CPointer<Int64>
 ): Int32
 
 foreign func wirestack_resolver_pool_destroy(poolHandle: UInt64): Int32
@@ -45,6 +46,7 @@ foreign func wirestack_resolver_poll(
     jobHandle: UInt64,
     outFamilies: CPointer<Int32>,
     outAddresses: CPointer<Byte>,
+    outScopeIds: CPointer<UInt32>,
     outputCapacity: UInt64,
     outCount: CPointer<UInt64>,
     outResult: CPointer<Int32>,
@@ -107,22 +109,27 @@ internal class BoundedSystemResolverBackend {
             throw IllegalArgumentException("resolver queueCapacity must be between 1 and 1024")
         }
         let output = Array<UInt64>(1, repeat: 0u64)
+        let nativeCode = Array<Int64>(1, repeat: 0)
         let status = unsafe {
             let raw = acquireArrayRawData(output)
+            let nativeRaw = acquireArrayRawData(nativeCode)
             try {
                 wirestack_resolver_pool_create(
                     UInt64(workerCount),
                     UInt64(queueCapacity),
-                    raw.pointer
+                    raw.pointer,
+                    nativeRaw.pointer
                 )
             } finally {
+                releaseArrayRawData(nativeRaw)
                 releaseArrayRawData(raw)
             }
         }
         if (status != RESOLVER_OK || output[0] == 0u64) {
             throw ResolveException(
                 ResolveErrorCode.SystemFailure,
-                "failed to create bounded system resolver pool: ${status}"
+                "failed to create bounded system resolver pool: ${status}",
+                if (nativeCode[0] == 0) { None<Int64> } else { Some(nativeCode[0]) }
             )
         }
         poolHandle = output[0]
@@ -276,6 +283,7 @@ internal class BoundedSystemResolverBackend {
         let status = unsafe {
             let familiesRaw = acquireArrayRawData(output.families)
             let packedRaw = acquireArrayRawData(output.packed)
+            let scopeIdsRaw = acquireArrayRawData(output.scopeIds)
             let countRaw = acquireArrayRawData(output.count)
             let resultRaw = acquireArrayRawData(output.result)
             let nativeRaw = acquireArrayRawData(output.nativeCode)
@@ -284,6 +292,7 @@ internal class BoundedSystemResolverBackend {
                     jobHandle,
                     familiesRaw.pointer,
                     packedRaw.pointer,
+                    scopeIdsRaw.pointer,
                     UInt64(maximum),
                     countRaw.pointer,
                     resultRaw.pointer,
@@ -293,6 +302,7 @@ internal class BoundedSystemResolverBackend {
                 releaseArrayRawData(nativeRaw)
                 releaseArrayRawData(resultRaw)
                 releaseArrayRawData(countRaw)
+                releaseArrayRawData(scopeIdsRaw)
                 releaseArrayRawData(packedRaw)
                 releaseArrayRawData(familiesRaw)
             }
@@ -332,10 +342,12 @@ internal class BoundedSystemResolverBackend {
             for (offset in 0..size) {
                 octets[offset] = output.packed[index * RESOLVER_ADDRESS_BYTES + offset]
             }
-            addresses.add(IpAddress(
-                family,
-                octets
-            ))
+            let zone = if (family == IpAddressFamily.Ipv6 && output.scopeIds[index] != 0u32) {
+                Some(output.scopeIds[index].toString())
+            } else {
+                None<String>
+            }
+            addresses.add(IpAddress(family, octets, zone: zone))
         }
         if (addresses.isEmpty()) {
             throw ResolveException(ResolveErrorCode.NoData, "system resolver returned no addresses")
@@ -360,6 +372,7 @@ internal class BoundedSystemResolverBackend {
 private class ResolverPollOutput {
     let families: Array<Int32>
     let packed: Array<Byte>
+    let scopeIds: Array<UInt32>
     let count = Array<UInt64>(1, repeat: 0u64)
     let result = Array<Int32>(1, repeat: RESOLVER_RESULT_SYSTEM_FAILURE)
     let nativeCode = Array<Int64>(1, repeat: 0)
@@ -367,6 +380,7 @@ private class ResolverPollOutput {
     init(maximum: Int64) {
         families = Array<Int32>(maximum, repeat: 0i32)
         packed = Array<Byte>(maximum * RESOLVER_ADDRESS_BYTES, repeat: 0)
+        scopeIds = Array<UInt32>(maximum, repeat: 0u32)
     }
 }
 

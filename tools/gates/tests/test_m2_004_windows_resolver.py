@@ -55,11 +55,22 @@ class M2004WindowsResolverGateTests(unittest.TestCase):
             {"path": "./target/native/resolver/current/lib"},
             windows["ffi"]["c"]["wirestack_resolver"],
         )
-        self.assertEqual(
-            {"path": "./target/native/test-support/m2-004/lib"},
-            windows["ffi"]["c"]["wirestack_m2_004_tls_link_stub"],
-        )
+        self.assertNotIn("wirestack_m2_004_tls_link_stub", windows["ffi"]["c"])
         self.assertNotIn("-lwirestack_", windows["link-option"])
+
+    def test_gate_injects_test_stub_only_into_its_workspace_manifest(self) -> None:
+        original = Path("cjpm.toml").read_text(encoding="utf-8")
+        bound = gate.bind_test_link_stub(original)
+        self.assertNotIn("wirestack_m2_004_tls_link_stub", original)
+        self.assertEqual(1, bound.count("wirestack_m2_004_tls_link_stub"))
+
+    def test_windows_native_source_preserves_scope_and_startup_error(self) -> None:
+        source = Path("native/resolver/windows/wirestack_resolver.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("hints.ai_flags = AI_ADDRCONFIG", source)
+        self.assertIn("destination->scope_id = address->sin6_scope_id", source)
+        self.assertIn("*out_native_code = (int64_t)startup_status", source)
 
     def test_valid_report_passes(self) -> None:
         self.assertEqual([], gate.validate_report(valid_report(), "abc"))

@@ -31,6 +31,7 @@ class M2004WindowsSystemResolverTest {
             let result = resolver.resolve(api.HostName("all.m2-004.test"))
             @Expect(result.addresses.size, 2)
             @Expect(m2004IsIpv6(result.addresses[0].family))
+            @Expect(result.addresses[0].zone, Some("7"))
             @Expect(m2004IsIpv4(result.addresses[1].family))
             @Expect(result.diagnostics.duplicatesRemoved, 1)
             @Expect(result.expiration.isNone())
