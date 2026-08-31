@@ -2,12 +2,12 @@
 
 ## Status
 
-M0-016 remains **BLOCKED** globally because Android, iOS, and HarmonyOS or
-OpenHarmony still lack native-device evidence; cross-compilation does not
-satisfy those cells. All 12 desktop cells now have current schema-v9 native
-evidence. AWS-LC passes all required desktop capabilities. Mbed TLS and the
-OpenSSL control remain explicit PARTIAL results for their documented missing
-capabilities.
+M0-016 remains **BLOCKED**. The 12 desktop schema-v9 results are retained as
+historical evidence but are superseded by schema v10, which adds distinct
+TLS 1.2/TLS 1.3 local-close execution and strengthens source-pin, archive,
+diagnostic and PARTIAL-state validation. Native schema-v10 reruns are pending.
+Android, iOS, and HarmonyOS or OpenHarmony also still lack native-device
+evidence; cross-compilation does not satisfy those cells.
 
 Schema v9 retains all prior native evidence plus:
 
@@ -40,14 +40,15 @@ LeakSanitizer as unsupported by the hosted toolchain. Linux musl and Windows
 record the configured sanitizer diagnostic as unsupported; they do not report
 a skipped diagnostic as PASS.
 
-## Current schema-v9 desktop runs
+## Superseded schema-v9 desktop runs
 
 [TLS Provider PoC run
 33426302574](https://github.com/lIlIIlIll/Wirestack/actions/runs/33426302574)
 produced the Linux glibc, Linux musl, and macOS results. [M0-016 Windows
 Provider PoC run
 33426302474](https://github.com/lIlIIlIll/Wirestack/actions/runs/33426302474)
-produced the Windows results. Both pull-request runs identify head
+produced the Windows results. These results no longer satisfy the schema-v10
+contract. Both pull-request runs identify head
 `0620a1336cbdc98b6b1c37144e94a692f6e82cf7`. GitHub executed synthetic merge
 revision `45e16233d373854243966b10bbef012a66566641`; every retained result binds
 that exact execution revision.
@@ -107,7 +108,8 @@ capabilities presented as PASS all fail validation.
 ## Evidence rules
 
 - A retained incomplete native result is PARTIAL only when it satisfies schema
-  v9.
+  v10, has no `NOT_RUN` or `FAIL` capability, and has at least one explicit
+  `BLOCKED` capability.
 - A missing external-signer or session test prevents PASS.
 - A runtime provider fallback or system TLS dependency produces FAIL.
 - Cross-compilation does not satisfy a native platform cell.
