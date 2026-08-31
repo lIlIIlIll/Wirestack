@@ -111,7 +111,7 @@ milestone.
 
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
-| M3-031 | IN_PROGRESS | [`docs/evidence/M3-031/README.md`](../evidence/M3-031/README.md) | Core prerequisite mapping and exact-revision native Windows/macOS AWS-LC evidence are in progress. No desktop trust or key adapter is claimed. |
+| M3-031 | COMPLETE | [`docs/evidence/M3-031/README.md`](../evidence/M3-031/README.md), [`hosted-run.json`](../evidence/M3-031/hosted-run.json), [`desktop-provider-matrix.json`](../evidence/M3-031/desktop-provider-matrix.json), [`task-check.json`](../evidence/M3-031/task-check.json) | The desktop-scoped Core audit and exact-revision native Windows Server 2025 x86_64/macOS 15 arm64 AWS-LC 5.5.0 schema-v2 PoCs pass. Global six-platform and mobile conditions remain NOT_EVALUATED; no trust or key adapter is claimed. |
 
 ## Future upstream enhancements
 

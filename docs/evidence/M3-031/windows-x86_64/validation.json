@@ -1,0 +1,27 @@
+{
+  "capabilities": {
+    "caller_cancellation": "PASS",
+    "close_notify": "PASS",
+    "custom_ca": "PASS",
+    "external_signer": "PASS",
+    "mtls": "PASS",
+    "negative_hostname": "PASS",
+    "negative_untrusted_ca": "PASS",
+    "partial_io_backpressure": "PASS",
+    "repeated_cleanup": "PASS",
+    "session_resumption": "PASS",
+    "sni_hostname_alpn": "PASS",
+    "tls12": "PASS",
+    "tls13": "PASS",
+    "truncation": "PASS"
+  },
+  "external_signer_calls": 2,
+  "platform": "windows-x86_64",
+  "provider": "aws-lc",
+  "provider_version": "5.5.0",
+  "repeated_cleanup_cycles": 10000,
+  "repository_revision": "bc251b44aa08f65937042f48686d7dcd88ef293b",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M3-031"
+}

@@ -58,6 +58,7 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
         self.assertEqual(set(adoption.CORE_REQUIREMENTS), set(result["prerequisites"]))
         self.assertFalse(result["historical_task_status_changed"])
         self.assertTrue(all(item["disposition"] == "NOT_EVALUATED" for item in result["excluded_global_conditions"]))
+        self.assertIn("docs/planning/implementation-backlog.md", result["source_sha256"])
         self.assertEqual("PASS", result["task_graph"]["status"])
 
     def test_missing_core_declaration_fails_closed(self) -> None:

@@ -221,6 +221,8 @@ def audit_core(root: Path) -> dict[str, Any]:
             raise AdoptionError("CORE_REQUIREMENT", f"{relative}: retained evidence missing")
         source_sha256[relative] = sha256_path(path)
     graph = audit_task_graph(root)
+    backlog_relative = "docs/planning/implementation-backlog.md"
+    source_sha256[backlog_relative] = sha256_path(root / backlog_relative)
     return {
         "schema_version": 1,
         "task_id": "M3-031",
