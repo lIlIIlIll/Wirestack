@@ -34,9 +34,9 @@ claim mobile device support.
 ## Acceptance result
 
 GitHub Actions run
-[`33345515063`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33345515063)
+[`33346040908`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33346040908)
 executed both jobs at repository revision
-`bc251b44aa08f65937042f48686d7dcd88ef293b`:
+`787a6210a245e8cb65757ef2f639db20ca3e2025`:
 
 - `windows-aws-lc` passed on Windows Server 2025 x86_64, image
   `win25-vs2026` version `20260824.214.3`.
@@ -58,7 +58,10 @@ The first hosted run, `33344864914`, failed before a provider build because the
 independent M3-031 branch omitted the in-flight M0-016 PoC implementation. The
 GitButler stack was corrected without changing M2 commit identities. That run
 is retained as a superseded failure in [`hosted-run.json`](hosted-run.json), not
-as acceptance evidence.
+as acceptance evidence. The first successful run, `33345515063`, was then
+superseded because the source and evidence commit changed the repository
+revision. Run `33346040908` repeated both native jobs at the final source
+revision and is the sole acceptance run.
 
 ## Boundaries and remaining work
 

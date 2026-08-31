@@ -1,20 +1,20 @@
 {
   "artifacts": [
     {
-      "artifact_id": 9741891761,
-      "archive_digest": "sha256:cc78bf07cf599f1bce45ae21abb50c6bda867edbe879094b75a4789231a096f1",
-      "expires_at": "2026-09-14T00:48:37Z",
-      "name": "m3-031-windows-x86_64-bc251b44aa08f65937042f48686d7dcd88ef293b",
-      "provider_result_sha256": "8197fa90bafbe5794c70dc1e118901ff72bf8b38fcf5ba5fa24c67adbabf9b6b",
-      "validation_sha256": "cca5287bc12c1662c9eb90ff88e18167c8ce1e47a7a6ce587c6f8501b9d34400"
+      "artifact_id": 9742043455,
+      "archive_digest": "sha256:96b58e7c3e3b2729770d22a6ff496264e2b88afdaf1768f70fc927dde0876b0f",
+      "expires_at": "2026-09-14T00:58:31Z",
+      "name": "m3-031-windows-x86_64-787a6210a245e8cb65757ef2f639db20ca3e2025",
+      "provider_result_sha256": "5fa3bef760af551783a4388249ed9d21e405ab8e67710d90d20bd26336f01a0c",
+      "validation_sha256": "39cc3ec9cf777ef71a201507f3a736238f419c90e44f14db2e60c99c0974b5db"
     },
     {
-      "artifact_id": 9741863644,
-      "archive_digest": "sha256:5046336fe1665b827e8479fc586ea43adcfe602e40de724688a5ac43334de799",
-      "expires_at": "2026-09-14T00:46:42Z",
-      "name": "m3-031-macos-arm64-bc251b44aa08f65937042f48686d7dcd88ef293b",
-      "provider_result_sha256": "066aa623e47359993d7df10025c04f6b32eae261d24e51d4cad1023d40389525",
-      "validation_sha256": "91a4924db1f401cac98fe0b52afff479191cefc52ca38ef3bfc9feaf65689d57"
+      "artifact_id": 9742024926,
+      "archive_digest": "sha256:786b3b30e4be753bee76a354859ffb7a8a3a664570ac934297227b2d5f847926",
+      "expires_at": "2026-09-14T00:57:22Z",
+      "name": "m3-031-macos-arm64-787a6210a245e8cb65757ef2f639db20ca3e2025",
+      "provider_result_sha256": "ba0707c386f337a687ba77d370a03ea0dff801583d6342464b82b5ac77ea6139",
+      "validation_sha256": "fec6cc2f4edd2d52223d6571c72217f6e0cfb2ef10d24d810ce224b6217cbd0f"
     }
   ],
   "branch": "task/M3-031-desktop-tls-adoption",
@@ -22,27 +22,33 @@
   "event": "push",
   "jobs": [
     {
-      "completed_at": "2026-08-31T00:48:42Z",
-      "job_id": 99348753917,
+      "completed_at": "2026-08-31T00:58:36Z",
+      "job_id": 99350234833,
       "name": "windows-aws-lc",
-      "started_at": "2026-08-31T00:45:30Z",
+      "started_at": "2026-08-31T00:56:18Z",
       "status": "PASS",
-      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33345515063/job/99348753917"
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33346040908/job/99350234833"
     },
     {
-      "completed_at": "2026-08-31T00:46:46Z",
-      "job_id": 99348753726,
+      "completed_at": "2026-08-31T00:57:26Z",
+      "job_id": 99350234843,
       "name": "macos-aws-lc",
-      "started_at": "2026-08-31T00:45:27Z",
+      "started_at": "2026-08-31T00:56:17Z",
       "status": "PASS",
-      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33345515063/job/99348753726"
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33346040908/job/99350234843"
     }
   ],
-  "revision": "bc251b44aa08f65937042f48686d7dcd88ef293b",
-  "run_id": 33345515063,
+  "revision": "787a6210a245e8cb65757ef2f639db20ca3e2025",
+  "run_id": 33346040908,
   "schema_version": 1,
   "status": "PASS",
   "superseded_runs": [
+    {
+      "reason": "Superseded by the final source and evidence commit; the final workflow reran both native providers at the new exact revision.",
+      "revision": "bc251b44aa08f65937042f48686d7dcd88ef293b",
+      "run_id": 33345515063,
+      "status": "PASS"
+    },
     {
       "reason": "The independent M3-031 branch omitted the in-flight M0-016 PoC implementation; preflight failed before either provider build.",
       "revision": "b361ebbb1eac01042958ca9fbb579420dec9a7b9",
@@ -51,5 +57,5 @@
     }
   ],
   "task_id": "M3-031",
-  "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33345515063"
+  "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33346040908"
 }
