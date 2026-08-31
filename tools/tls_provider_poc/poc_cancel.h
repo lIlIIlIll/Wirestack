@@ -18,6 +18,7 @@ typedef struct PocCancelGate {
 } PocCancelGate;
 
 typedef HANDLE PocThread;
+typedef DWORD (WINAPI *PocThreadRoutine)(LPVOID);
 #define POC_THREAD_RETURN DWORD WINAPI
 #define POC_THREAD_ARGUMENT LPVOID
 #define POC_THREAD_DONE return 0
@@ -83,7 +84,7 @@ static int poc_cancel_trigger_and_wait(PocCancelGate *gate, uint64_t *latency_us
 }
 
 static int poc_thread_start(PocThread *thread,
-                            POC_THREAD_RETURN (*routine)(POC_THREAD_ARGUMENT),
+                            PocThreadRoutine routine,
                             void *argument) {
     *thread = CreateThread(NULL, 0, routine, argument, 0, NULL);
     return *thread != NULL;
@@ -109,6 +110,7 @@ typedef struct PocCancelGate {
 } PocCancelGate;
 
 typedef pthread_t PocThread;
+typedef void *(*PocThreadRoutine)(void *);
 #define POC_THREAD_RETURN void *
 #define POC_THREAD_ARGUMENT void *
 #define POC_THREAD_DONE return NULL
@@ -198,7 +200,7 @@ static int poc_cancel_trigger_and_wait(PocCancelGate *gate, uint64_t *latency_us
 }
 
 static int poc_thread_start(PocThread *thread,
-                            POC_THREAD_RETURN (*routine)(POC_THREAD_ARGUMENT),
+                            PocThreadRoutine routine,
                             void *argument) {
     return pthread_create(thread, NULL, routine, argument) == 0;
 }
