@@ -15,16 +15,27 @@ decision must still preserve the threat-model controls for supply chain,
 private-key isolation, native callbacks and deterministic cleanup.
 
 AWS-LC 5.5.0 at commit
-`991e67ff4cf04df4dd89e407f8b920c6936cb56a` now has retained schema-v2 `PASS`
-results on Linux glibc x86_64 and Linux musl x86_64. Both results prove:
+`991e67ff4cf04df4dd89e407f8b920c6936cb56a` was originally selected from the
+earlier PoC evidence and has since been requalified with retained schema-v5
+`PASS` results on Linux glibc x86_64 and Linux musl x86_64. GitHub Actions run
+`33391223747` reports head `22ae52c7b277c1d6c83afc0ac0dd73dc7e9c83a6`
+and executed merge revision `4c7ddea51e9e73600b39be7938566ea6300ab5cd`.
+Both results prove:
 
 - TLS 1.2 and TLS 1.3 client/server handshakes over caller-owned bounded BIOs;
-- SNI, reference-identity verification, ALPN, custom CA, mTLS and session reuse;
+- SNI, reference-identity verification, ALPN, custom CA, required mTLS,
+  optional client authentication with and without a certificate, and session
+  reuse;
 - negative hostname and trust cases, clean `close_notify` and truncation;
 - caller cancellation and partial-I/O/backpressure behavior;
 - an external signing callback invoked by both TLS 1.2 and TLS 1.3 without
   installing the private key into the TLS context;
-- 10,000 repeated handshake/close cycles; and
+- 10,000 repeated handshake/close cycles with bounded resident-memory and
+  harness-allocation profiles;
+- ASan and UBSan on Linux glibc, with the process-global AWS-LC leak-detection
+  limitation recorded as unsupported rather than suppressed;
+- digest-bound provider license payloads, exact repository/runner/container
+  identity, and complete bounded symbol inventories; and
 - static archives with no system TLS-library dependency or runtime-loader
   library string.
 

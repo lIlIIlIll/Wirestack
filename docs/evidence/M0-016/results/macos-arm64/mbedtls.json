@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 743072,
-    "binary_sha256": "e04b38f5ac77531b0ac192ff1bbabaa161e5725c0af36f71dabc55d6c249c0f9",
+    "binary_bytes": 743424,
+    "binary_sha256": "6ddd8e5bd4900c75917dfad7f14d4c5430a8080f5ed24b41dbe8ceaccc2d641e",
     "exported_symbol_inventory": {
       "count": 1101,
       "scope": "final-artifact-exports",
@@ -1111,27 +1111,33 @@
       ],
       "tool": "nm -gU"
     },
+    "license_bundle": {
+      "file_count": 6,
+      "path": "license-bundle/manifest.json",
+      "sha256": "dd441476ef6a6d4afbfb641ac870bcfd162a773e218422c13c44e35164270c4e",
+      "total_bytes": 135878
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 427384,
         "name": "libmbedtls.a",
-        "sha256": "c375d4341c8d544216b168a7b7da10c1433b9ed99f22bbd36e6f7ed491e0716c"
+        "sha256": "f96d77813601a42f93ed663ff64cc74eb74c4f93480b34add39b2b603aa8925d"
       },
       {
         "bytes": 127528,
         "name": "libmbedx509.a",
-        "sha256": "bb0c5f73067921e5e5d357315b862a8b36850f2d9245f70b5a252d1f75afbbac"
+        "sha256": "e40b04082fae5086d8aeec8ef7d535365bd7064c519b1d4df5c595bc1ec72ab8"
       },
       {
         "bytes": 670520,
         "name": "libtfpsacrypto.a",
-        "sha256": "a4de9fc6a997ca29121b8908201fa0c1b7ed7cea3f92cfc53eb60765ee0c950d"
+        "sha256": "7508e8bd06557537c1f98c824d8801a4ee8ee2736adab77060b64f37a1f379f4"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "93bf01de1d30dc3a98e436431a85bec72838b397970eaa3f3f0a1e7fbd033e1d",
+  "build_log_sha256": "b3c460154353ae03994fb58b74cd0d00e515c8d5b997879abad371e8511aa58b",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -1152,35 +1158,64 @@
     "truncation": "PASS"
   },
   "execution": {
+    "container_image": "",
     "image_os": "macos15",
     "image_version": "20260727.0256.1",
     "python": "3.12.10",
-    "repository_revision": "837a63df942d67e77154c3127e2b917dfc1190cb",
+    "repository_revision": "4c7ddea51e9e73600b39be7938566ea6300ab5cd",
     "runner_arch": "ARM64",
     "runner_os": "macOS"
   },
-  "finished_at": "2026-08-31T10:56:51.417613+00:00",
+  "finished_at": "2026-08-31T12:21:56.616354+00:00",
   "metrics": {
+    "allocation_profile_bound_bytes": 1073741824,
+    "allocation_profile_bytes": 655687680,
+    "allocation_profile_calls": 20010,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
+    "memory_profile_bound_bytes": 536870912,
+    "memory_profile_peak_resident_bytes": 3227648,
+    "mtls_optional_handshakes": 2,
+    "mtls_required_handshakes": 1,
     "repeated_cleanup_cycles": 10000
   },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
+  "operational_evidence": {
+    "memory_profile": {
+      "allocation_bound_bytes": 1073741824,
+      "allocation_bytes": 655687680,
+      "allocation_calls": 20010,
+      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "payload_bytes_per_transfer": 32768,
+      "peak_resident_bytes": 3227648,
+      "resident_bound_bytes": 536870912
+    },
+    "native_memory_diagnostic": {
+      "cleanup_cycles": 10,
+      "leak_detection": {
+        "reason": "leak detection is unavailable in the configured macOS sanitizer run",
+        "status": "UNSUPPORTED"
+      },
+      "output_sha256": "9c9d73410e19ddefe647290d58a9ad9b61a01005e3aa37273d6d278e9c8b0e88",
+      "status": "PASS",
+      "tool": "address+undefined-sanitizer"
+    }
+  },
   "platform": "macos-arm64",
   "poc_exit_code": 0,
   "provider": "mbedtls",
-  "schema_version": 4,
+  "schema_version": 5,
   "source": {
     "archive": "mbedtls-4.2.0.tar.bz2",
     "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
     "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T10:55:29.198508+00:00",
+  "started_at": "2026-08-31T12:20:17.744019+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
