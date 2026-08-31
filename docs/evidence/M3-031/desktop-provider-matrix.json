@@ -22,7 +22,7 @@
       "provider": "aws-lc",
       "provider_version": "5.5.0",
       "repeated_cleanup_cycles": 10000,
-      "repository_revision": "4a7f0c4d46a197c98d48e1f4fab5298c27be5896",
+      "repository_revision": "ca87467b7a4396179f2b5b1833f5d550884b7481",
       "schema_version": 1,
       "status": "PASS",
       "task_id": "M3-031"
@@ -49,13 +49,13 @@
       "provider": "aws-lc",
       "provider_version": "5.5.0",
       "repeated_cleanup_cycles": 10000,
-      "repository_revision": "4a7f0c4d46a197c98d48e1f4fab5298c27be5896",
+      "repository_revision": "ca87467b7a4396179f2b5b1833f5d550884b7481",
       "schema_version": 1,
       "status": "PASS",
       "task_id": "M3-031"
     }
   ],
-  "repository_revision": "4a7f0c4d46a197c98d48e1f4fab5298c27be5896",
+  "repository_revision": "ca87467b7a4396179f2b5b1833f5d550884b7481",
   "runtime_fallback": false,
   "schema_version": 1,
   "selection": {

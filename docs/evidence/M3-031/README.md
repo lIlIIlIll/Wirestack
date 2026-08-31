@@ -34,9 +34,9 @@ claim mobile device support.
 ## Acceptance result
 
 GitHub Actions run
-[`33352810108`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33352810108)
+[`33357763565`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33357763565)
 executed both jobs at repository revision
-`4a7f0c4d46a197c98d48e1f4fab5298c27be5896`:
+`ca87467b7a4396179f2b5b1833f5d550884b7481`:
 
 - `windows-aws-lc` passed on Windows Server 2025 x86_64, image
   `win25-vs2026` version `20260824.214.3`.
@@ -50,15 +50,15 @@ executed both jobs at repository revision
 - Both binaries used vendored static provider archives and reported no system
   TLS dependency or runtime TLS-loader string.
 
-The local task gate passed all four commands. The Python suites passed 46 tests.
+The local task gate passed all four commands. The Python suites passed 54 tests.
 The focused Cangjie Core suites passed 71 tests with zero skipped, failed or
 errored cases. The complete machine-readable command report is
 [`task-check.json`](task-check.json).
 
-Run `33352810108` repeated both native jobs after review remediation. The
+Run `33357763565` repeated both native jobs after review remediation. The
 committed hosted report binds that exact revision to the PoC source, provider
 pins, validator digests, artifact digests and job identities. Earlier schema-v2
-results remain listed only as superseded history.
+and pre-byte-preservation results remain listed only as superseded history.
 
 ## Boundaries and remaining work
 
