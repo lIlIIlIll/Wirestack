@@ -1214,10 +1214,22 @@ class ProviderPocValidationTests(unittest.TestCase):
         self.assertNotIn("static const unsigned char truncated[]", openssl_source)
         self.assertIn("OPENSSL_thread_stop();", openssl_source)
         self.assertIn("OPENSSL_cleanup();", openssl_source)
-        self.assertIn("SSL_shutdown(p.client)", openssl_source)
-        self.assertIn("SSL_ERROR_ZERO_RETURN", openssl_source)
-        self.assertIn("mbedtls_ssl_close_notify(&p.client)", mbedtls_source)
-        self.assertIn("MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY", mbedtls_source)
+        openssl_local_close = openssl_source[
+            openssl_source.index("static int local_close_version_case"):
+            openssl_source.index("static int local_close_case")
+        ]
+        self.assertNotIn("SSL_shutdown(", openssl_local_close)
+        self.assertIn("SSL_free(p.client)", openssl_local_close)
+        self.assertIn("peer_error != SSL_ERROR_ZERO_RETURN", openssl_local_close)
+        self.assertIn("BIO_shutdown_wr(SSL_get_wbio(p.client))", openssl_source)
+        mbedtls_local_close = mbedtls_source[
+            mbedtls_source.index("static int local_close_version_case"):
+            mbedtls_source.index("static int local_close_case")
+        ]
+        self.assertNotIn("mbedtls_ssl_close_notify", mbedtls_local_close)
+        self.assertIn("mbedtls_ssl_free(&p.client)", mbedtls_local_close)
+        self.assertIn("peer_result != MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY",
+                      mbedtls_local_close)
 
         allocation_header = (
             ROOT / "tools/tls_provider_poc/poc_allocation_profile.h"
