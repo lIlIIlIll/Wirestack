@@ -1,0 +1,25 @@
+{
+  "file_count": 3,
+  "files": [
+    {
+      "bytes": 18412,
+      "path": "external/perl/Text-Template-1.56/LICENSE",
+      "sha256": "9837f05336ef3cbacb6a96e1672a0426d81ad01191f214b8d48e22ca62338181"
+    },
+    {
+      "bytes": 10175,
+      "path": "LICENSE.txt",
+      "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a"
+    },
+    {
+      "bytes": 1145,
+      "path": "util/perl/OpenSSL/copyright.pm",
+      "sha256": "04213b69dbebc8ba0dd8a6216af1d9422f9b63619c1cf2f1d8aa107b83bbb608"
+    }
+  ],
+  "provider": "openssl",
+  "schema_version": 1,
+  "source_content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
+  "task_id": "M0-016",
+  "total_bytes": 29732
+}
