@@ -3,19 +3,15 @@
 ## Current status
 
 - Task: **BLOCKED**
-- Native desktop results: **12 retained schema-v3 results**
-- AWS-LC: **PASS** on Linux glibc x86_64, Linux musl x86_64, macOS arm64 and Windows x86_64
-- Mbed TLS: **PARTIAL** on all four platforms because external signer and session resumption remain blocked
-- OpenSSL control: **PARTIAL** on all four platforms because external signer remains blocked
+- Native desktop results: **NOT_RUN after schema-v4 contract expansion**
+- Previous 12 schema-v3 results: **superseded; they lack certificate-negative and durable symbol-inventory evidence**
 - Android, iOS and HarmonyOS/OpenHarmony: **BLOCKED** because no native device runner is connected
 
-The PoC exercises TLS 1.2, TLS 1.3, external transport, external trust,
-external signer, ALPN/SNI, mTLS, cancellation, close notification, truncation,
-session resumption and 10,000 cleanup cycles. It also requires two ALPN
-no-overlap handshake failures and two malformed ALPN input rejections per
-result. AWS-LC passes the full contract on the four executed platforms. M0-016
-stays blocked because the task requires native execution on the three mobile
-platforms as well.
+The current PoC adds deterministic expired and malformed certificate rejection,
+adapter-level rejection of an overlong ALPN identifier and a bounded export
+inventory for the final artifact. The previous native results predate those
+checks, so the canonical matrix does not accept them. M0-016 remains blocked
+while desktop reruns and the three mobile platform runs are missing.
 
 The Linux and macOS results came from [GitHub Actions run 33379997844](https://github.com/lIlIIlIll/Wirestack/actions/runs/33379997844).
 The Windows results came from [GitHub Actions run 33379997896](https://github.com/lIlIIlIll/Wirestack/actions/runs/33379997896).
@@ -25,10 +21,11 @@ Both pull-request runs report head revision
 an isolated Alpine minirootfs, so its retained JSON does not repeat the
 repository revision; its artifact remains bound to run 33379997844.
 
-## Retained native results
+## Superseded native results
 
-`platform-matrix.json` binds each result path to its SHA-256. GitHub artifact
-digests below identify the archived build log and result pair.
+These results remain for audit history but do not count as current matrix
+evidence. Their artifact digests identify the archived build log and result
+pair.
 
 | Platform | Provider | Status | Result SHA-256 | Artifact ID | Artifact SHA-256 |
 |---|---|---|---|---:|---|
