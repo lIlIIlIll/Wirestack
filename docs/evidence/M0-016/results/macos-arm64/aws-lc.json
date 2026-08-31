@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 3108096,
-    "binary_sha256": "b28490b4c40c394c96afbcc9eb4916443a8fca6f7831f9e38548bb47a70149da",
+    "binary_bytes": 3108144,
+    "binary_sha256": "5636c3c55ecc8d94fcfc59bfd9dbfa4e21d0baec6ca75f25dc815af7a0869150",
     "exported_symbol_inventory": {
       "count": 3368,
       "scope": "final-artifact-exports",
@@ -3477,25 +3477,26 @@
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 668872,
-        "name": "libssl.a",
-        "sha256": "da9e33d12f63c84cec47429065eee875a441c8ff0538148f17a60c84490b01c9"
-      },
-      {
         "bytes": 4090424,
         "name": "libcrypto.a",
-        "sha256": "8193a13e62fac2cd0eef9eeabd91b7fad891945bcb55d99a90f1665f99573823"
+        "sha256": "8f7aae459570a0eba41b7a4abb37401b3bc33fc13c328144f684ae56d6c306d6"
+      },
+      {
+        "bytes": 668872,
+        "name": "libssl.a",
+        "sha256": "42d79ad607e1d165944887e2ce93a8244ef3ef40f02f1a83345573947222fe28"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "e509901b92d0f9a56ecb17a490e396b9781c613bf1abe775adfc21d33fec2506",
+  "build_log_sha256": "af3f579e8fed7b36fcebe999a0ef0d8ad0754a6b158c403ce99a02155422379f",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
     "custom_ca": "PASS",
     "external_signer": "PASS",
     "external_trust": "PASS",
+    "local_close": "PASS",
     "mtls": "PASS",
     "negative_expired_certificate": "PASS",
     "negative_hostname": "PASS",
@@ -3514,32 +3515,33 @@
     "image_os": "macos15",
     "image_version": "20260727.0256.1",
     "python": "3.12.10",
-    "repository_revision": "45e16233d373854243966b10bbef012a66566641",
+    "repository_revision": "72ac887eb974b177b9af09529c09166ec8db6303",
     "runner_arch": "ARM64",
     "runner_os": "macOS"
   },
-  "finished_at": "2026-08-31T18:43:22.778344+00:00",
+  "finished_at": "2026-08-31T19:29:09.715382+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 118,
+    "cancellation_latency_us": 56,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
+    "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 4177920,
+    "memory_profile_peak_resident_bytes": 4161536,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 1375404020,
+    "provider_allocation_bytes": 1385779460,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 10284612,
+    "provider_allocation_calls": 10297260,
     "provider_allocation_live_after_cleanup_bytes": 154180,
     "provider_allocation_live_before_cleanup_bytes": 154180,
-    "provider_allocation_peak_live_bytes": 218630,
+    "provider_allocation_peak_live_bytes": 221238,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -3551,21 +3553,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 118,
+      "latency_us": 56,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 4177920,
+      "peak_resident_bytes": 4161536,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 1375404020,
+      "provider_allocation_bytes": 1385779460,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 10284612,
+      "provider_allocation_calls": 10297260,
       "provider_allocation_live_after_cleanup_bytes": 154180,
       "provider_allocation_live_before_cleanup_bytes": 154180,
-      "provider_allocation_peak_live_bytes": 218630,
+      "provider_allocation_peak_live_bytes": 221238,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -3574,7 +3576,7 @@
         "reason": "AWS-LC 5.5.0 exposes no process-global cleanup API; the bounded 10,000-cycle resident/allocation profile remains mandatory",
         "status": "UNSUPPORTED"
       },
-      "output_sha256": "79be8fdef400e9cc76a4ee07259e8756ba615118953360849b367fe3f9acba4f",
+      "output_sha256": "380f02d3f30d4c59e3d3e2af17257e591479df3dcf302d4fd30509ef1073b2f2",
       "provider_build_provenance": {
         "build_argv": [
           [
@@ -3672,14 +3674,14 @@
       "provider_instrumented": true,
       "provider_static_archives": [
         {
-          "bytes": 16586408,
-          "name": "libssl.a",
-          "sha256": "7d1e811fd5310ce4209d389bfa7cba581d5a2e275f010eeb563fe12cc1703ba8"
-        },
-        {
           "bytes": 21200184,
           "name": "libcrypto.a",
-          "sha256": "5a7a0815355245a3aa6a9de466855dea394bcdb7b194160109788434996686aa"
+          "sha256": "e2a341f07f80c476b9b1815c9b3981bb4a14ff4637ef56a8b57b66f33e2a3eee"
+        },
+        {
+          "bytes": 16586408,
+          "name": "libssl.a",
+          "sha256": "288ea498b75b18ffa97e854e3f6f5774033f48643c347e3f467d7fd71e60a64a"
         }
       ],
       "status": "PASS",
@@ -3689,7 +3691,7 @@
   "platform": "macos-arm64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 9,
+  "schema_version": 10,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
@@ -3717,7 +3719,7 @@
     },
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T18:40:40.946701+00:00",
+  "started_at": "2026-08-31T19:27:08.883138+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }
