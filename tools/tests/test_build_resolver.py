@@ -1,12 +1,23 @@
 from __future__ import annotations
 
 import unittest
+import tempfile
 from pathlib import Path
 
-from tools import build_native_dependencies, build_resolver
+from tools import build_native_dependencies, build_resolver, build_windows_resolver
 
 
 class BuildResolverSelectionTests(unittest.TestCase):
+    def test_windows_source_digest_is_line_ending_stable_and_content_bound(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "resolver.c"
+            source.write_bytes(b"one\ntwo\n")
+            lf_digest = build_windows_resolver.canonical_text_sha256(source)
+            source.write_bytes(b"one\r\ntwo\r\n")
+            self.assertEqual(lf_digest, build_windows_resolver.canonical_text_sha256(source))
+            source.write_bytes(b"one\r\nchanged\r\n")
+            self.assertNotEqual(lf_digest, build_windows_resolver.canonical_text_sha256(source))
+
     def test_normalizes_only_implemented_platforms(self) -> None:
         self.assertEqual(
             "linux-x86_64-glibc",
