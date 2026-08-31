@@ -5,6 +5,7 @@ import tomllib
 import unittest
 from pathlib import Path
 
+from tools import build_apple_resolver
 from tools.gates import m2_006_apple_resolver as gate
 
 
@@ -76,12 +77,59 @@ class M2006AppleResolverGateTests(unittest.TestCase):
         build_driver = Path("tools/build_native_dependencies.py").read_text(
             encoding="utf-8"
         )
-        self.assertIn("selected_resolvers = [selected_resolver]", build_driver)
-        self.assertIn('if system == "Darwin"', build_driver)
+        self.assertIn("for selected in [selected_resolver]", build_driver)
+        self.assertNotIn("selected_resolvers.append", build_driver)
         apple_builder = Path("tools/build_apple_resolver.py").read_text(
             encoding="utf-8"
         )
         self.assertIn("fcntl.LOCK_EX", apple_builder)
+
+    def test_ios_target_uses_builder_published_sysroot(self) -> None:
+        manifest = tomllib.loads(Path("cjpm.toml").read_text(encoding="utf-8"))
+        option = manifest["target"][gate.IOS_TARGET]["override-compile-option"]
+        self.assertEqual(
+            "--sysroot ./target/native/resolver/ios-simulator-arm64/sdk",
+            option,
+        )
+        self.assertNotIn("WIRESTACK_IOS_SIMULATOR_SYSROOT", option)
+
+    def test_atomic_links_and_bounded_cache(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cache = root / "cache"
+            cache.mkdir()
+            entries = []
+            for index in range(build_apple_resolver.MAX_CACHE_ENTRIES + 3):
+                entry = cache / f"digest-{index}"
+                entry.mkdir()
+                entries.append(entry)
+
+            build_apple_resolver.activate(root, entries[-1])
+            self.assertTrue((root / "current").is_symlink())
+            self.assertEqual(entries[-1].resolve(), (root / "current").resolve())
+            build_apple_resolver.prune_cache(root, entries[-1])
+            self.assertLessEqual(
+                len([path for path in cache.iterdir() if path.is_dir()]),
+                build_apple_resolver.MAX_CACHE_ENTRIES,
+            )
+            self.assertTrue(entries[-1].is_dir())
+
+            sdk = root / "Simulator.sdk"
+            sdk.mkdir()
+            build_apple_resolver.publish_symlink(root / "sdk", sdk)
+            self.assertEqual(sdk.resolve(), (root / "sdk").resolve())
+
+    def test_cancellation_waits_for_native_job_readiness(self) -> None:
+        for path in (
+            Path("tools/gates/probes/m2_006_apple_resolver.cj"),
+            Path("src/internal/resolver/apple_system_resolver_test.cj"),
+        ):
+            source = path.read_text(encoding="utf-8")
+            start = source.index("let resolving = spawn")
+            cancel = source.index("source.cancel()", start)
+            setup = source[start:cancel]
+            self.assertIn("metrics.runningJobs == 1", setup)
+            self.assertNotIn("sleep(20 * Duration.millisecond)", setup)
 
     def test_gate_injects_test_stub_only_into_selected_workspace_target(self) -> None:
         original = Path("cjpm.toml").read_text(encoding="utf-8")

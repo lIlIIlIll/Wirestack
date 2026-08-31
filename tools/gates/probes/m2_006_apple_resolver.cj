@@ -131,7 +131,7 @@ private func m2006Cancellation(): Bool {
                 context: api.OperationContext(cancellation: source.token)
             )
         }
-        sleep(20 * Duration.millisecond)
+        m2006WaitForMetrics(resolver, {metrics => metrics.runningJobs == 1})
         let cancelStarted = MonoTime.now()
         source.cancel()
         let cancelled = m2006Capture({=> let _ = resolving.get(Duration.second) })

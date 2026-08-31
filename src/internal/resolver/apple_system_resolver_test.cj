@@ -100,7 +100,7 @@ class M2006AppleSystemResolverTest {
                 context: api.OperationContext(cancellation: source.token)
             )
         }
-        sleep(20 * Duration.millisecond)
+        m2006WaitForMetrics(resolver, {metrics => metrics.runningJobs == 1})
         let cancelStarted = MonoTime.now()
         source.cancel()
         let cancelled = m2006ResolveError({=> let _ = resolving.get(Duration.second) })
