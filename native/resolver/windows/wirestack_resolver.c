@@ -252,16 +252,19 @@ static void append_fixture_address(
     size_t size,
     uint32_t scope_id
 ) {
-    struct wirestack_resolver_address *destination;
-    if (job->result_count >= job->maximum_results ||
-        (job->family != WIRESTACK_RESOLVER_FAMILY_ANY && job->family != family)) {
+    struct wirestack_resolver_address candidate;
+    if (job->family != WIRESTACK_RESOLVER_FAMILY_ANY && job->family != family) {
         return;
     }
-    destination = &job->addresses[job->result_count++];
-    memset(destination, 0, sizeof(*destination));
-    destination->family = family;
-    destination->scope_id = scope_id;
-    memcpy(destination->bytes, bytes, size);
+    memset(&candidate, 0, sizeof(candidate));
+    candidate.family = family;
+    candidate.scope_id = scope_id;
+    memcpy(candidate.bytes, bytes, size);
+    if (resolver_address_is_present(job, &candidate) ||
+        job->result_count >= job->maximum_results) {
+        return;
+    }
+    job->addresses[job->result_count++] = candidate;
 }
 
 static int resolve_fixture(struct wirestack_resolver_job *job) {
@@ -271,8 +274,8 @@ static int resolve_fixture(struct wirestack_resolver_job *job) {
     int code = 0;
     if (strcmp(job->host, "all.m2-004.test") == 0) {
         append_fixture_address(job, WIRESTACK_RESOLVER_FAMILY_IPV6, ipv6, sizeof(ipv6), 7u);
-        append_fixture_address(job, WIRESTACK_RESOLVER_FAMILY_IPV4, ipv4, sizeof(ipv4), 0u);
         append_fixture_address(job, WIRESTACK_RESOLVER_FAMILY_IPV6, ipv6, sizeof(ipv6), 7u);
+        append_fixture_address(job, WIRESTACK_RESOLVER_FAMILY_IPV4, ipv4, sizeof(ipv4), 0u);
     } else if (strcmp(job->host, "delay.m2-004.test") == 0) {
         Sleep(250u);
         append_fixture_address(job, WIRESTACK_RESOLVER_FAMILY_IPV4, ipv4, sizeof(ipv4), 0u);
