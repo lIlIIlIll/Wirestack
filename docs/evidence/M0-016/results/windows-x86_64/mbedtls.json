@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 770048,
-    "binary_sha256": "59c788c08cff1eb981dd27d4fb55eca743f229bce7e4774c281038961bce9b34",
+    "binary_sha256": "79840ee5b4693e91149ca874b5ba7c889e074f9b162fa5f041717f33efd7bc5f",
     "exported_symbol_inventory": {
       "count": 0,
       "scope": "final-artifact-exports",
@@ -119,22 +119,22 @@
       {
         "bytes": 1209388,
         "name": "mbedtls.lib",
-        "sha256": "f6ebd66738744142da91658f4f40219e1c80527fcb934c4dec592cceeab2ac48"
+        "sha256": "d9f641615c1cd522119ba882929292f681290be2fbf11b2694bc5b2a03943849"
       },
       {
         "bytes": 392146,
         "name": "mbedx509.lib",
-        "sha256": "132cf36c808b30d11da6cf8c8d7a7d084441ff6582a04ce67fa7c586e6978715"
+        "sha256": "0c878f3f3c16b877bd72995c9d833324d44d88845701ecd98bd952c0c7bdb049"
       },
       {
         "bytes": 1688370,
         "name": "tfpsacrypto.lib",
-        "sha256": "90871a57b5a6820a8123d502ec240a77c8641b2ceca561146f81882b5ce1796d"
+        "sha256": "6eeaf53525810aee0d0234fd40e622ba92b425b3a99b5b7c28ef78b6316fe6ef"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "75e570927e6b4a208b0f8c8e69a01c74748e173142d6f1fa16fccaa053773a46",
+  "build_log_sha256": "c5022a97d54aae8191a7245d1ff96491b7f771f61f9d85601cfb37eaac26d194",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -160,31 +160,31 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "e53f79325617559514ff35e5be1f1ca979960e91",
+    "repository_revision": "9e2c4d10197720d7299f4ab1a7e0cbf6f38ac4ff",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T22:39:29.195548+00:00",
+  "finished_at": "2026-08-31T23:07:01.529225+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 78,
+    "cancellation_latency_us": 98,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 5640192,
+    "memory_profile_peak_resident_bytes": 5636096,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 8203932403,
+    "provider_allocation_bytes": 8204283853,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 133235975,
-    "provider_allocation_live_after_cleanup_bytes": 7641,
-    "provider_allocation_live_before_cleanup_bytes": 7641,
-    "provider_allocation_peak_live_bytes": 117635,
+    "provider_allocation_calls": 133238721,
+    "provider_allocation_live_after_cleanup_bytes": 7640,
+    "provider_allocation_live_before_cleanup_bytes": 7640,
+    "provider_allocation_peak_live_bytes": 117634,
     "repeated_cleanup_cycles": 10000
   },
   "notes": [
@@ -193,21 +193,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 78,
+      "latency_us": 98,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 5640192,
+      "peak_resident_bytes": 5636096,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 8203932403,
+      "provider_allocation_bytes": 8204283853,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 133235975,
-      "provider_allocation_live_after_cleanup_bytes": 7641,
-      "provider_allocation_live_before_cleanup_bytes": 7641,
-      "provider_allocation_peak_live_bytes": 117635,
+      "provider_allocation_calls": 133238721,
+      "provider_allocation_live_after_cleanup_bytes": 7640,
+      "provider_allocation_live_before_cleanup_bytes": 7640,
+      "provider_allocation_peak_live_bytes": 117634,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -275,7 +275,7 @@
     "tag": "mbedtls-4.2.0",
     "tag_resolved_commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b"
   },
-  "started_at": "2026-08-31T22:35:47.451314+00:00",
+  "started_at": "2026-08-31T23:03:12.559456+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
