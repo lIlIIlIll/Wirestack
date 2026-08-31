@@ -62,6 +62,67 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
         self.assertIn("docs/planning/implementation-backlog.md", result["source_sha256"])
         self.assertEqual("PASS", result["task_graph"]["status"])
         self.assertEqual("PASS", result["retained_evidence_validation"]["status"])
+        self.assertEqual("PASS", result["dependency_evidence_validation"]["status"])
+
+    def test_dependency_evidence_rejects_source_and_native_report_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.txt"
+            source.write_text("source", encoding="utf-8")
+            report_relative = "docs/evidence/M2-004/windows-x86_64/report.json"
+            validation_relative = "docs/evidence/M2-004/windows-x86_64/validation.json"
+            report = root / report_relative
+            validation = root / validation_relative
+            report.parent.mkdir(parents=True)
+            report.write_text(json.dumps({
+                "schema_version": 1, "task_id": "M2-004", "revision": "a" * 40,
+                "decision": "PASS",
+            }), encoding="utf-8")
+            validation.write_text(json.dumps({
+                "schema_version": 1, "task_id": "M2-004",
+                "expected_revision": "a" * 40, "failures": [], "status": "PASS",
+                "report_sha256": adoption.sha256_path(report),
+            }), encoding="utf-8")
+            evidence_path = root / "docs/evidence/M2-004/evidence.json"
+            evidence_path.parent.mkdir(parents=True, exist_ok=True)
+            evidence_path.write_text(json.dumps({
+                "schema_version": 1, "source_task": "M2-004",
+                "platform": {}, "toolchain": {}, "acceptance_status": "PASS",
+                "generated_at_utc": "2026-08-31T00:00:00Z", "revision": "a" * 40,
+                "reports": [{
+                    "path": validation_relative,
+                    "sha256": adoption.sha256_path(validation),
+                    "source_task": "M2-004", "acceptance_status": "PASS",
+                }],
+                "source_sha256": {"source.txt": adoption.sha256_path(source)},
+            }), encoding="utf-8")
+            task = {
+                "task_id": "M2-004", "source_paths": ["source.txt"],
+                "required_evidence": [
+                    "docs/evidence/M2-004/evidence.json", validation_relative,
+                ],
+            }
+            bindings = {"M2-004": ((validation_relative, report_relative, None),)}
+            with mock.patch.object(
+                adoption.repository_tooling, "load_task", return_value=task
+            ):
+                self.assertEqual(
+                    "PASS", adoption.validate_dependency_evidence(root, bindings)["status"]
+                )
+                source.write_text("drift", encoding="utf-8")
+                self.assert_code(
+                    "STALE_SOURCE",
+                    lambda: adoption.validate_dependency_evidence(root, bindings),
+                )
+                source.write_text("source", encoding="utf-8")
+                report.write_text(json.dumps({
+                    "schema_version": 1, "task_id": "M2-004",
+                    "revision": "a" * 40, "decision": "FAIL",
+                }), encoding="utf-8")
+                self.assert_code(
+                    "DEPENDENCY_EVIDENCE",
+                    lambda: adoption.validate_dependency_evidence(root, bindings),
+                )
 
     def test_retained_report_and_tls_source_drift_fail_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

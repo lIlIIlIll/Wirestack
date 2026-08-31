@@ -17,6 +17,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tools.tls_provider_poc import validate as poc_validate
+from tools.repository import repository_tooling
 
 
 PINNED_PROVIDER = "aws-lc"
@@ -125,6 +126,27 @@ EXCLUDED_GLOBAL_CONDITIONS = (
         "owner": "historical global or M4 task",
     },
 )
+DEPENDENCY_EVIDENCE_BINDINGS = {
+    "M2-004": (
+        (
+            "docs/evidence/M2-004/windows-x86_64/validation.json",
+            "docs/evidence/M2-004/windows-x86_64/report.json",
+            None,
+        ),
+    ),
+    "M2-006": (
+        (
+            "docs/evidence/M2-006/macos-arm64/validation.json",
+            "docs/evidence/M2-006/macos-arm64/report.json",
+            "macos",
+        ),
+        (
+            "docs/evidence/M2-006/ios-simulator-arm64/validation.json",
+            "docs/evidence/M2-006/ios-simulator-arm64/report.json",
+            "ios-simulator",
+        ),
+    ),
+}
 
 
 class AdoptionError(RuntimeError):
@@ -280,6 +302,101 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
             "source_sha256": dict(sorted(checked.items())), "status": "PASS"}
 
 
+def validate_dependency_evidence(
+    root: Path,
+    bindings: Mapping[str, Sequence[tuple[str, str, str | None]]] = DEPENDENCY_EVIDENCE_BINDINGS,
+) -> dict[str, Any]:
+    validated: dict[str, Any] = {}
+    for task_id, report_bindings in bindings.items():
+        try:
+            task = repository_tooling.load_task(root / f"tools/tasks/{task_id}.json", root)
+        except repository_tooling.ContractError as error:
+            raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: {error.code}") from error
+        evidence = load_json(root / f"docs/evidence/{task_id}/evidence.json")
+        if set(evidence) != repository_tooling.EVIDENCE_KEYS:
+            raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: evidence fields")
+        if (
+            evidence.get("schema_version") != repository_tooling.EVIDENCE_SCHEMA_VERSION
+            or evidence.get("source_task") != task_id
+            or evidence.get("acceptance_status") != "PASS"
+        ):
+            raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: evidence identity or status")
+        if not isinstance(evidence.get("platform"), dict) or not isinstance(
+            evidence.get("toolchain"), dict
+        ):
+            raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: environment identity")
+
+        source_sha256 = evidence.get("source_sha256")
+        if not isinstance(source_sha256, dict) or set(source_sha256) != set(task["source_paths"]):
+            raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: source inventory")
+        for relative, expected in source_sha256.items():
+            try:
+                path = repository_tooling.safe_path(
+                    root, relative, "source_sha256", must_exist=True, file_only=True
+                )
+            except repository_tooling.ContractError as error:
+                raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: {error.code}") from error
+            if expected != repository_text_sha256(path):
+                raise AdoptionError("STALE_SOURCE", f"{task_id}: {relative}")
+
+        reports = evidence.get("reports")
+        if not isinstance(reports, list) or not reports:
+            raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: reports")
+        report_paths: set[str] = set()
+        for item in reports:
+            if not isinstance(item, dict) or set(item) != repository_tooling.REPORT_KEYS:
+                raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: report fields")
+            relative = item.get("path")
+            if not isinstance(relative, str) or relative in report_paths:
+                raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: report path")
+            report_paths.add(relative)
+            try:
+                path = repository_tooling.safe_path(
+                    root, relative, "report", must_exist=True, file_only=True
+                )
+            except repository_tooling.ContractError as error:
+                raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: {error.code}") from error
+            if (
+                item.get("source_task") != task_id
+                or item.get("acceptance_status") != "PASS"
+                or item.get("sha256") != repository_text_sha256(path)
+                or load_json(path).get("status") != "PASS"
+            ):
+                raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: report not PASS or stale")
+        evidence_path = f"docs/evidence/{task_id}/evidence.json"
+        if set(task["required_evidence"]) - ({evidence_path} | report_paths):
+            raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: required evidence")
+
+        native_reports: dict[str, str] = {}
+        for validation_relative, report_relative, expected_mode in report_bindings:
+            if validation_relative not in report_paths:
+                raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: validation not sealed")
+            validation = load_json(root / validation_relative)
+            report_path = root / report_relative
+            report = load_json(report_path)
+            if (
+                validation.get("schema_version") != 1
+                or validation.get("task_id") != task_id
+                or validation.get("status") != "PASS"
+                or validation.get("failures") != []
+                or validation.get("report_sha256") != repository_text_sha256(report_path)
+                or report.get("schema_version") != 1
+                or report.get("task_id") != task_id
+                or report.get("decision") != "PASS"
+                or validation.get("expected_revision") != report.get("revision")
+                or (expected_mode is not None and validation.get("expected_mode") != expected_mode)
+                or (expected_mode is not None and report.get("mode") != expected_mode)
+            ):
+                raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: native report binding")
+            native_reports[report_relative] = repository_text_sha256(report_path)
+        validated[task_id] = {
+            "native_reports": dict(sorted(native_reports.items())),
+            "source_count": len(source_sha256),
+            "status": "PASS",
+        }
+    return {"tasks": validated, "status": "PASS"}
+
+
 def audit_task_graph(root: Path) -> dict[str, Any]:
     backlog_path = root / "docs/planning/implementation-backlog.md"
     try:
@@ -321,6 +438,7 @@ def audit_core(root: Path) -> dict[str, Any]:
             "status": "PASS",
         }
     retained = validate_retained_evidence(root)
+    dependency_evidence = validate_dependency_evidence(root)
     for relative in RETAINED_EVIDENCE + HISTORICAL_REFERENCES:
         path = root / relative
         if not path.is_file():
@@ -339,6 +457,7 @@ def audit_core(root: Path) -> dict[str, Any]:
         "historical_task_status_changed": False,
         "retained_evidence": list(RETAINED_EVIDENCE),
         "retained_evidence_validation": retained,
+        "dependency_evidence_validation": dependency_evidence,
         "historical_references": list(HISTORICAL_REFERENCES),
         "source_sha256": dict(sorted(source_sha256.items())),
         "task_graph": graph,
