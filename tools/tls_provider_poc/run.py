@@ -38,8 +38,18 @@ MEMORY_PROFILE_BOUND_BYTES = 512 * 1024 * 1024
 PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES = 64 * 1024 * 1024 * 1024
 PROVIDER_ALLOCATION_CALL_BOUND = 150_000_000
 CANCELLATION_WAKE_BOUND_US = 250_000
-RESULT_SCHEMA_VERSION = 7
+RESULT_SCHEMA_VERSION = 8
 MAX_TOOL_VERSION_BYTES = 16 * 1024
+MAX_BUILD_ENVIRONMENT_VALUE_BYTES = 64 * 1024
+MAX_BUILD_ENVIRONMENT_TOTAL_BYTES = 256 * 1024
+BUILD_ENVIRONMENT_KEYS = (
+    "CC", "CFLAGS", "CMAKE_BUILD_PARALLEL_LEVEL", "CMAKE_GENERATOR",
+    "CMAKE_GENERATOR_PLATFORM", "CMAKE_GENERATOR_TOOLSET",
+    "CMAKE_PREFIX_PATH", "CMAKE_TOOLCHAIN_FILE", "CXX", "CXXFLAGS",
+    "INCLUDE", "LDFLAGS", "LIB", "LIBPATH", "PATH",
+    "UniversalCRTSdkDir", "UCRTVersion", "VCINSTALLDIR",
+    "VCToolsInstallDir", "WindowsSdkDir", "WindowsSDKVersion",
+)
 MAX_FAILURE_MESSAGE_BYTES = 2048
 
 
@@ -226,6 +236,25 @@ def normalized_argv(command: Sequence[str], replacements: Mapping[Path, str]) ->
     return normalized
 
 
+def capture_build_environment(environment: Mapping[str, str],
+                              overrides: Mapping[str, str],
+                              replacements: Mapping[Path, str]) -> dict[str, str]:
+    effective = dict(environment)
+    effective.update(overrides)
+    captured: dict[str, str] = {}
+    total_bytes = 0
+    for key in BUILD_ENVIRONMENT_KEYS:
+        value = normalized_argv([effective.get(key, "")], replacements)[0]
+        value_bytes = len(value.encode("utf-8"))
+        if value_bytes > MAX_BUILD_ENVIRONMENT_VALUE_BYTES:
+            raise PocError(f"build environment value exceeds its bound: {key}")
+        total_bytes += value_bytes
+        captured[key] = value
+    if total_bytes > MAX_BUILD_ENVIRONMENT_TOTAL_BYTES:
+        raise PocError("build environment snapshot exceeds its bound")
+    return captured
+
+
 def tool_identity(command: Sequence[str], *, cwd: Path, log: Path) -> dict[str, Any]:
     completed = run(command, cwd=cwd, log=log, check=False)
     output = completed.stdout.strip()
@@ -363,6 +392,7 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
     configure_command: list[str]
     build_commands: list[list[str]] = []
     environment_overrides: dict[str, str] = {}
+    effective_environment = os.environ.copy()
     if pid == "aws-lc":
         configure_command = [
             "cmake", "-S", str(src), "-B", str(build), "-GNinja",
@@ -405,7 +435,7 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
             run(command, cwd=work, log=log)
         archives = find_provider_archives(prefix, pid, is_windows())
     else:
-        env = os.environ.copy()
+        env = effective_environment.copy()
         configure_command = [
             "perl", str(src / "Configure")
         ] if is_windows() else [str(src / "Configure")]
@@ -418,6 +448,7 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
                 "LDFLAGS": "-fsanitize=address,undefined" if diagnostic else "",
             }
             env.update(environment_overrides)
+            effective_environment.update(environment_overrides)
         configure_command += [
             *(["no-asm"] if diagnostic else []),
             *extra_configure_args,
@@ -450,11 +481,8 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
         prefix: "<PREFIX>",
         repo: "<REPOSITORY>",
     }
-    normalized_environment = {
-        key: normalized_argv([value], replacements)[0]
-        for key, value in sorted(environment_overrides.items())
-        if value
-    }
+    normalized_environment = capture_build_environment(
+        effective_environment, environment_overrides, replacements)
     provenance = {
         "target_triple": target_triple(platform_id()),
         "compiler": tool_identity(compiler_args, cwd=work, log=log),
