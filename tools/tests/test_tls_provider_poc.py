@@ -593,6 +593,41 @@ class ProviderPocValidationTests(unittest.TestCase):
             self.assertTrue(provenance["provider_instrumented"])
             self.assertEqual("address+undefined-sanitizer", provenance["instrumentation"])
 
+    def test_openssl_build_retains_musl_secure_heap_override_in_provenance(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            source.mkdir()
+            calls = []
+
+            def fake_run(command, **_kwargs):
+                calls.append(list(command))
+                output = "fixture tool 1.0" if "--version" in command else ""
+                return runner.subprocess.CompletedProcess(command, 0, output, "")
+
+            with mock.patch.object(runner, "is_windows", return_value=False), \
+                    mock.patch.object(runner, "platform_id",
+                                      return_value="linux-musl-x86_64"), \
+                    mock.patch.object(runner, "run", side_effect=fake_run), \
+                    mock.patch.object(runner, "find_provider_archives",
+                                      return_value=[root / "libssl.a"]):
+                _prefix, _archives, provenance = runner.build_provider(
+                    {"id": "openssl"}, source, root / "work", root / "build.log",
+                    repo=ROOT, extra_configure_args=("no-secure-memory",))
+            self.assertIn("no-secure-memory", calls[0])
+            self.assertIn("no-secure-memory", provenance["configure_argv"])
+
+    def test_platform_peak_resident_probes_are_native(self):
+        openssl_source = (ROOT / "tools/tls_provider_poc/openssl_memory_poc.c").read_text()
+        mbedtls_source = (ROOT / "tools/tls_provider_poc/mbedtls_memory_poc.c").read_text()
+        musl_runner = (ROOT / "tools/tls_provider_poc/run_musl.py").read_text()
+        for source in (openssl_source, mbedtls_source):
+            self.assertIn("GetProcessMemoryInfo", source)
+            self.assertIn("mach_task_basic_info_data_t", source)
+            self.assertIn("getrusage(RUSAGE_SELF", source)
+        self.assertIn("repo=repo, diagnostic=diagnostic", musl_runner)
+        self.assertIn('extra_configure_args=("no-secure-memory",)', musl_runner)
+
     def test_supported_diagnostic_requires_instrumented_provider_archives(self):
         result = complete_result(self.spec)
         result["operational_evidence"]["native_memory_diagnostic"][
