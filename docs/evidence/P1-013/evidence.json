@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-31T06:10:57.993050Z",
+  "generated_at_utc": "2026-08-31T06:56:02.818070Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,26 +11,26 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/P1-013/task-check.json",
-      "sha256": "835fd36657a25a68f85530be51c8a0b174d95c7ef9c890b8305d1195c3399cbe",
+      "sha256": "56f0ab9314bc017335c04dceeb07e4f4e52f99075e51a07d37e805ecc3a7404b",
       "source_task": "P1-013"
     }
   ],
-  "revision": "96fd7f36e5ce6844be43cfdedcc77b43827a1738",
+  "revision": "b60609ff8948702b4b8dd5270c428e35ab61e824",
   "schema_version": 1,
   "source_sha256": {
     ".gitignore": "dd41c411cb7958e7cc9e9899594400619535fffcfca02e03c8709bc1a173f4f2",
-    "docs/evidence/P1-013/README.md": "180350eb6a2fd7f63b245462cadcd8a759f4158f279f11332bdd940b62d13f35",
+    "docs/evidence/P1-013/README.md": "6df393ee2bcf32238dc4cbd7d4f5005048e8830c7cd76627683930f6b3827216",
     "docs/evidence/P1-013/test-plan.md": "aff34ee7af58b75c83cd30ec1b1cfa6404557835eaf726c66abc8b2b33309d81",
     "docs/planning/implementation-backlog.md": "b4d4b87731ef2b134afebbb6f2d94d06a633134370646ea03089d1ccaa5b4a02",
-    "docs/planning/status.md": "9781f51572b374567fb1a191bd4a5fcd162052928480486bd2a488642f3fc895",
+    "docs/planning/status.md": "09113f0f4112807cfd43787d6363de1eefd61b13c423213549a49ce5e3b75963",
     "tools/m7_021_linux_release.py": "a16419dc2eaca578af64ff5ead1039e2294515c0e67db9dead835cea12432538",
-    "tools/m7_031_linux_candidate.py": "4146b0a25d21f489d4405a68f480385d982b7da991d8def94b407847d03b05f1",
+    "tools/m7_031_linux_candidate.py": "e2b3e14ea11a157f1dfb976f1c706a637754a7702f120ae5c089cdaf62f0c7d9",
     "tools/tasks/P1-013.json": "41f1a276157c385a47ffb39139536a84c0615d90323e17d549f59dfd4164269a",
     "tools/tests/test_m7_019_linux_audit.py": "504e7401ab5253d5add51da99aec7abad6e23a50486020a2449674d313fd803a",
     "tools/tests/test_m7_020_architecture_audit.py": "ad285a68ddc75d22ea4141fcb430642986ab6158ac50ce2bcf65f5e6bc00e919",
     "tools/tests/test_m7_021_linux_release.py": "9dbb52d879e83384f92fbde8656a6eeab1566da34834996aa04085ef4a532106",
     "tools/tests/test_m7_029_independent_security_review.py": "a72c29da4e5394aa1175808f5633d552d1a1feabf23444518b9f7bf7e9e56a64",
-    "tools/tests/test_m7_031_linux_candidate.py": "96057506178c990bdd78f26f23fd40847e31442fc1da0e6eab06fbc7049fe3b4",
+    "tools/tests/test_m7_031_linux_candidate.py": "14aa4d29f6ac9598c81d0609d2b1249ae95529ab18a44915f75332ff75bd80a5",
     "tools/tests/test_m7_linux_task_graph.py": "d732e470decf8df6fba7e5483d4bb64d512046dcfdd3d60c534e49a40a80905b",
     "tools/tests/test_p1_013_development_release_gate.py": "0340eeda0fccd3bbb40bb5039638f5a4eed24ad1f2895bcc5f2e2313e9e64722",
     "tools/validate_m7_019_linux_audit.py": "1be1d79ef00afaff78954093a50b9447386ebceb15d76d60bbaf48e6e5f2bae9",
