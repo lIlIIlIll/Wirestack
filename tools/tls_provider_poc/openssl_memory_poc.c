@@ -833,13 +833,22 @@ int main(int argc, char **argv) {
     printf("METRIC external_signer_calls=%u\n", external_signer_calls);
 #endif
 
-    return (tls12 && tls13 && alpn_negative && mtls && session_resumption && external_trust && wrong_host &&
-            untrusted && expired && malformed && trunc && cancel &&
-            cleanup && failure_cleanup &&
-            peak_bytes > 0 && peak_bytes <= MEMORY_PROFILE_BOUND_BYTES &&
+    int passed = tls12 && tls13 && alpn_negative && mtls &&
+            session_resumption && external_trust && wrong_host && untrusted &&
+            expired && malformed && trunc && cancel && cleanup &&
+            failure_cleanup && peak_bytes > 0 &&
+            peak_bytes <= MEMORY_PROFILE_BOUND_BYTES &&
             profile_allocation_bytes <= ALLOCATION_PROFILE_BOUND_BYTES &&
 #if defined(OPENSSL_IS_AWSLC)
             external_signer &&
 #endif
-            1) ? 0 : 1;
+            1;
+    if (captured_session != NULL) {
+        SSL_SESSION_free(captured_session);
+        captured_session = NULL;
+    }
+#if !defined(OPENSSL_IS_AWSLC)
+    OPENSSL_cleanup();
+#endif
+    return passed ? 0 : 1;
 }

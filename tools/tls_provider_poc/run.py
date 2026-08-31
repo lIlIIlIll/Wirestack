@@ -483,22 +483,38 @@ def run_native_memory_diagnostic(spec: Mapping[str, Any], repo: Path, prefix: Pa
         spec, repo, prefix, archives, work, log, diagnostic=True)
     env = os.environ.copy()
     env["WIRESTACK_POC_DIAGNOSTIC_CYCLES"] = "10"
+    leak_detection_supported = (
+        spec["id"] != "aws-lc" and
+        not current_platform.startswith("macos-")
+    )
     env["ASAN_OPTIONS"] = (
-        "detect_leaks=0:halt_on_error=1:abort_on_error=1"
-        if current_platform.startswith("macos-")
-        else "detect_leaks=1:halt_on_error=1:abort_on_error=1"
+        f"detect_leaks={1 if leak_detection_supported else 0}:"
+        "halt_on_error=1:abort_on_error=1"
     )
     env["UBSAN_OPTIONS"] = "halt_on_error=1:abort_on_error=1"
     completed = run(
         fixture_command(binary, fixtures), cwd=work, log=log, env=env, check=False)
     if completed.returncode != 0:
         raise PocError("native sanitizer diagnostic failed")
-    return {
+    diagnostic = {
         "status": "PASS",
         "tool": "address+undefined-sanitizer",
         "cleanup_cycles": 10,
         "output_sha256": hashlib.sha256(completed.stdout.encode("utf-8")).hexdigest(),
+        "leak_detection": {
+            "status": "PASS" if leak_detection_supported else "UNSUPPORTED",
+        },
     }
+    if spec["id"] == "aws-lc":
+        diagnostic["leak_detection"]["reason"] = (
+            "AWS-LC 5.5.0 exposes no process-global cleanup API; the bounded "
+            "10,000-cycle resident/allocation profile remains mandatory"
+        )
+    elif current_platform.startswith("macos-"):
+        diagnostic["leak_detection"]["reason"] = (
+            "leak detection is unavailable in the configured macOS sanitizer run"
+        )
+    return diagnostic
 
 
 def exported_symbol_inventory(binary: Path, work: Path, log: Path) -> dict[str, Any]:
