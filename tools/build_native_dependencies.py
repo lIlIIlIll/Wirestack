@@ -104,14 +104,7 @@ def main() -> int:
             "status": "FAIL",
         }))
         return 2
-    selected_resolvers = [selected_resolver]
-    if system == "Darwin":
-        selected_resolvers.append(
-            "ios-simulator-arm64"
-            if selected_resolver == "macos-arm64"
-            else "macos-arm64"
-        )
-    for selected in selected_resolvers:
+    for selected in [selected_resolver]:
         resolver = [
             sys.executable,
             str(root / "tools" / "build_resolver.py"),
