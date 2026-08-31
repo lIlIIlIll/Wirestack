@@ -1,0 +1,40 @@
+{
+  "file_count": 6,
+  "files": [
+    {
+      "bytes": 29861,
+      "path": "framework/LICENSE",
+      "sha256": "11402351e38392230bb8934ba1095c0c0049a296c0f8821f76e4672dff54b490"
+    },
+    {
+      "bytes": 29852,
+      "path": "LICENSE",
+      "sha256": "9b405ef4c89342f5eae1dd828882f931747f71001cfba7d114801039b52ad09b"
+    },
+    {
+      "bytes": 1138,
+      "path": "tf-psa-crypto/drivers/pqcp/mldsa-native/examples/custom_backend/mldsa_native/src/fips202/native/custom/src/LICENSE",
+      "sha256": "c5ebc5c092628cbb9018d4b73d7330ffc84e3f44576c1bddcd884c3e5158a18c"
+    },
+    {
+      "bytes": 15310,
+      "path": "tf-psa-crypto/drivers/pqcp/mldsa-native/LICENSE",
+      "sha256": "26ee68617256be39e12fbbb0fb0c8c7087980a2020ded46e3ef3c3810c35d847"
+    },
+    {
+      "bytes": 29861,
+      "path": "tf-psa-crypto/framework/LICENSE",
+      "sha256": "11402351e38392230bb8934ba1095c0c0049a296c0f8821f76e4672dff54b490"
+    },
+    {
+      "bytes": 29856,
+      "path": "tf-psa-crypto/LICENSE",
+      "sha256": "da8c58f05f135a9d15e9ffad4ecf854cfcc1f014c8abfd75ba05f62630ccc118"
+    }
+  ],
+  "provider": "mbedtls",
+  "schema_version": 1,
+  "source_content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
+  "task_id": "M0-016",
+  "total_bytes": 135878
+}
