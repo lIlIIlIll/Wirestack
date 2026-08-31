@@ -1,7 +1,8 @@
 {
   "expected_mode": "ios-simulator",
-  "expected_revision": "843cec9644d3fb4ae844045fca7f56cc6ed0a1a4",
+  "expected_revision": "fdb95009681393bae3dd3f001468cb9e468199c7",
   "failures": [],
+  "report_sha256": "bfeb74a1784f786f949d6d65501a93debf0afc870892272190c8331c8b7f95df",
   "schema_version": 1,
   "status": "PASS",
   "task_id": "M2-006"

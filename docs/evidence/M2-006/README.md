@@ -18,14 +18,14 @@ Deadline policy.
   unknown schemas, cross-compile-only output, SKIPPED cases, timeout, missing
   simulator evidence, and a missing fixture binding.
 - GitHub Actions run
-  [`33352734478`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33352734478)
+  [`33356299341`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33356299341)
   passed both hosted jobs at exact revision
-  `843cec9644d3fb4ae844045fca7f56cc6ed0a1a4`.
-- The native `macos-15` arm64 job ran all seven selected Cangjie resolver cases
+  `fdb95009681393bae3dd3f001468cb9e468199c7`.
+- The native `macos-15` arm64 job ran all eight selected Cangjie resolver cases
   with zero failures and stored its exact-revision report and validation.
 - The native iOS Simulator arm64 job built the standalone Cangjie probe,
   bundled and signed the official simulator runtime, installed the app, and
-  ran all seven cases with zero failures on the booted iOS 26.2 Simulator.
+  ran all eight cases with zero failures on the booted iOS 26.2 Simulator.
 - The iOS gate permits one recorded Simulator restart only when the first
   `simctl launch --console` attempt times out before producing any app output.
   Partial protocol execution, case output, and nonzero exits are never retried.
@@ -41,13 +41,13 @@ The `M2-006 Apple SystemResolver` GitHub workflow has two independent jobs:
 - iOS Simulator arm64 execution on `macos-15` with the official prebuilt
   `cangjie-sdk-mac-aarch64-ios` nightly.
 
-Both jobs ran seven selected Cangjie cases and retained exact-revision reports.
+Both jobs ran eight selected Cangjie cases and retained exact-revision reports.
 The iOS job compiles a standalone Cangjie resolver probe, packages the
 official `ios_simulator_aarch64_cjnative` runtime under the app's `Frameworks`
 directory, records the signed bundle inputs, installs the app, and launches it
 in the booted Simulator. This avoids a child-process test runner, which the app
 sandbox cannot launch. The probe terminates with `std.env.exit` after emitting
-all seven case records so process-wide resolver workers cannot keep the test app
+all eight case records so process-wide resolver workers cannot keep the test app
 alive. Compilation alone does not satisfy the task.
 
 ## Test-only link support
