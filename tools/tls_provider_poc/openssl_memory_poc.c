@@ -4,12 +4,21 @@
 #include <openssl/rsa.h>
 #include <openssl/x509_vfy.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(_WIN32)
+#include <windows.h>
+#include <psapi.h>
+#else
+#include <sys/resource.h>
+#endif
 
 #define MAX_STEPS 200000
 #define BIO_CAPACITY 4096
 #define PAYLOAD_SIZE 32768
+#define MEMORY_PROFILE_BOUND_BYTES 536870912ULL
+#define ALLOCATION_PROFILE_BOUND_BYTES 1073741824ULL
 #ifndef CLEANUP_CYCLES
 #define CLEANUP_CYCLES 10000
 #endif
@@ -24,6 +33,26 @@ static unsigned int external_trust_calls = 0;
 static SSL_SESSION *captured_session = NULL;
 static unsigned int session_resumption_tls12_handshakes = 0;
 static unsigned int session_resumption_tls13_handshakes = 0;
+static uint64_t profile_allocation_calls = 0;
+static uint64_t profile_allocation_bytes = 0;
+
+static uint64_t peak_resident_bytes(void) {
+#if defined(_WIN32)
+    PROCESS_MEMORY_COUNTERS counters;
+    memset(&counters, 0, sizeof(counters));
+    counters.cb = sizeof(counters);
+    if (!GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters))) return 0;
+    return (uint64_t)counters.PeakWorkingSetSize;
+#else
+    struct rusage usage;
+    if (getrusage(RUSAGE_SELF, &usage) != 0) return 0;
+#if defined(__APPLE__)
+    return (uint64_t)usage.ru_maxrss;
+#else
+    return (uint64_t)usage.ru_maxrss * 1024ULL;
+#endif
+#endif
+}
 
 #if defined(OPENSSL_IS_AWSLC)
 static enum ssl_verify_result_t external_trust_callback(
@@ -156,7 +185,7 @@ static int alpn_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen,
 }
 
 static SSL_CTX *make_server_ctx(const char *cert, const char *key, const char *ca,
-                                int version, int require_client, int use_external_signer) {
+                                int version, int client_auth, int use_external_signer) {
     SSL_CTX *ctx = SSL_CTX_new(TLS_method());
     if (!ctx) fail("SSL_CTX_new server");
     if (!SSL_CTX_set_min_proto_version(ctx, version) ||
@@ -187,8 +216,10 @@ static SSL_CTX *make_server_ctx(const char *cert, const char *key, const char *c
         if (SSL_CTX_check_private_key(ctx) != 1) fail("server key check");
     }
     if (ca && SSL_CTX_load_verify_locations(ctx, ca, NULL) != 1) fail("server CA");
-    if (require_client) {
+    if (client_auth == 2) {
         SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
+    } else if (client_auth == 1) {
+        SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
     }
     SSL_CTX_set_tlsext_servername_callback(ctx, sni_cb);
     SSL_CTX_set_alpn_select_cb(ctx, alpn_cb, NULL);
@@ -312,6 +343,8 @@ static int transfer_payload(Pair *p) {
     unsigned char *src = malloc(PAYLOAD_SIZE);
     unsigned char *dst = malloc(PAYLOAD_SIZE);
     if (!src || !dst) fail("malloc payload");
+    profile_allocation_calls += 2;
+    profile_allocation_bytes += 2ULL * PAYLOAD_SIZE;
     for (int i = 0; i < PAYLOAD_SIZE; ++i) src[i] = (unsigned char)(i * 31u + 7u);
     size_t sent = 0;
     size_t received = 0;
@@ -373,19 +406,37 @@ static int clean_shutdown(Pair *p) {
 
 static int basic_case(const char *server_cert, const char *server_key, const char *ca,
                       const char *client_cert, const char *client_key, int version,
-                      int mtls) {
+                      int client_auth, int client_cert_present) {
     sni_seen = alpn_seen = 0;
-    SSL_CTX *server_ctx = make_server_ctx(server_cert, server_key, ca, version, mtls, 0);
-    SSL_CTX *client_ctx = make_client_ctx(ca, mtls ? client_cert : NULL,
-                                         mtls ? client_key : NULL, version, 1);
+    SSL_CTX *server_ctx = make_server_ctx(
+        server_cert, server_key, ca, version, client_auth, 0);
+    SSL_CTX *client_ctx = make_client_ctx(
+        ca, client_cert_present ? client_cert : NULL,
+        client_cert_present ? client_key : NULL, version, 1);
     Pair p = new_pair(client_ctx, server_ctx, "localhost", NULL);
     int ok = drive_handshake(&p, 1, MAX_STEPS) && verify_negotiation(&p, version) &&
              transfer_payload(&p);
+    if (ok && client_auth != 0) {
+        X509 *peer = SSL_get_peer_certificate(p.server);
+        ok = client_cert_present
+            ? peer != NULL && SSL_get_verify_result(p.server) == X509_V_OK
+            : peer == NULL;
+        X509_free(peer);
+    }
     if (ok) ok = clean_shutdown(&p);
     free_pair(&p);
     SSL_CTX_free(client_ctx);
     SSL_CTX_free(server_ctx);
     return ok;
+}
+
+static int optional_client_auth_case(
+    const char *server_cert, const char *server_key, const char *ca,
+    const char *client_cert, const char *client_key) {
+    return basic_case(server_cert, server_key, ca, client_cert, client_key,
+                      TLS1_2_VERSION, 1, 0) &&
+           basic_case(server_cert, server_key, ca, client_cert, client_key,
+                      TLS1_2_VERSION, 1, 1);
 }
 
 static int alpn_no_overlap_version_case(
@@ -692,12 +743,15 @@ int main(int argc, char **argv) {
     const char *malformed_cert = argv[7];
 
     int tls12 = basic_case(server_cert, server_key, ca, client_cert, client_key,
-                           TLS1_2_VERSION, 0);
+                           TLS1_2_VERSION, 0, 0);
     int tls13 = basic_case(server_cert, server_key, ca, client_cert, client_key,
-                           TLS1_3_VERSION, 0);
+                           TLS1_3_VERSION, 0, 0);
     int alpn_negative = alpn_negative_case(server_cert, server_key, ca);
-    int mtls = basic_case(server_cert, server_key, ca, client_cert, client_key,
-                          TLS1_2_VERSION, 1);
+    int mtls_required = basic_case(
+        server_cert, server_key, ca, client_cert, client_key, TLS1_2_VERSION, 2, 1);
+    int mtls_optional = optional_client_auth_case(
+        server_cert, server_key, ca, client_cert, client_key);
+    int mtls = mtls_required && mtls_optional;
     int session_resumption = session_resumption_case(server_cert, server_key, ca);
     int external_trust = external_trust_case(server_cert, server_key);
     int wrong_host = negative_case(server_cert, server_key, ca, "not-localhost", 1);
@@ -709,10 +763,17 @@ int main(int argc, char **argv) {
 #if defined(OPENSSL_IS_AWSLC)
     int external_signer = external_signer_case(server_cert, server_key, ca);
 #endif
+    int cleanup_cycles = CLEANUP_CYCLES;
+    const char *diagnostic_cycles = getenv("WIRESTACK_POC_DIAGNOSTIC_CYCLES");
+    if (diagnostic_cycles != NULL) {
+        long value = strtol(diagnostic_cycles, NULL, 10);
+        if (value < 1 || value > CLEANUP_CYCLES) return 2;
+        cleanup_cycles = (int)value;
+    }
     int cleanup = 1;
-    for (int i = 0; i < CLEANUP_CYCLES && cleanup; ++i) {
+    for (int i = 0; i < cleanup_cycles && cleanup; ++i) {
         cleanup = basic_case(server_cert, server_key, ca, client_cert, client_key,
-                             TLS1_2_VERSION, 0);
+                             TLS1_2_VERSION, 0, 0);
     }
     int failure_cleanup = 1;
     for (int i = 0; i < FAILURE_CLEANUP_CYCLES && failure_cleanup; ++i) {
@@ -742,7 +803,7 @@ int main(int argc, char **argv) {
     printf("CAP external_signer=BLOCKED\n");
 #endif
     printf("CAP repeated_cleanup=%s\n", cleanup ? "PASS" : "FAIL");
-    printf("METRIC repeated_cleanup_cycles=%d\n", CLEANUP_CYCLES);
+    printf("METRIC repeated_cleanup_cycles=%d\n", cleanup_cycles);
     printf("METRIC failure_cleanup_cycles=%d\n", FAILURE_CLEANUP_CYCLES);
     printf("METRIC session_resumption_handshakes=%u\n",
            session_resumption_tls12_handshakes +
@@ -755,6 +816,19 @@ int main(int argc, char **argv) {
     printf("METRIC alpn_no_overlap_handshakes=%d\n", alpn_negative ? 2 : 0);
     printf("METRIC alpn_malformed_inputs_rejected=%d\n", alpn_negative ? 2 : 0);
     printf("METRIC certificate_negative_cases_rejected=%d\n", expired + malformed);
+    printf("METRIC mtls_required_handshakes=%d\n", mtls_required ? 1 : 0);
+    printf("METRIC mtls_optional_handshakes=%d\n", mtls_optional ? 2 : 0);
+    uint64_t peak_bytes = peak_resident_bytes();
+    printf("METRIC memory_profile_peak_resident_bytes=%llu\n",
+           (unsigned long long)peak_bytes);
+    printf("METRIC memory_profile_bound_bytes=%llu\n",
+           (unsigned long long)MEMORY_PROFILE_BOUND_BYTES);
+    printf("METRIC allocation_profile_calls=%llu\n",
+           (unsigned long long)profile_allocation_calls);
+    printf("METRIC allocation_profile_bytes=%llu\n",
+           (unsigned long long)profile_allocation_bytes);
+    printf("METRIC allocation_profile_bound_bytes=%llu\n",
+           (unsigned long long)ALLOCATION_PROFILE_BOUND_BYTES);
 #if defined(OPENSSL_IS_AWSLC)
     printf("METRIC external_signer_calls=%u\n", external_signer_calls);
 #endif
@@ -762,6 +836,8 @@ int main(int argc, char **argv) {
     return (tls12 && tls13 && alpn_negative && mtls && session_resumption && external_trust && wrong_host &&
             untrusted && expired && malformed && trunc && cancel &&
             cleanup && failure_cleanup &&
+            peak_bytes > 0 && peak_bytes <= MEMORY_PROFILE_BOUND_BYTES &&
+            profile_allocation_bytes <= ALLOCATION_PROFILE_BOUND_BYTES &&
 #if defined(OPENSSL_IS_AWSLC)
             external_signer &&
 #endif
