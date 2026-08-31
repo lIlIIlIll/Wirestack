@@ -29,9 +29,26 @@ def plan(system: str) -> list[str]:
     raise ValueError(f"unsupported native dependency platform: {system}")
 
 
-def run(command: list[str], *, root: Path) -> int:
-    completed = subprocess.run(command, cwd=root, check=False)
+def run(command: list[str], *, root: Path, env: dict[str, str] | None = None) -> int:
+    completed = subprocess.run(command, cwd=root, env=env, check=False)
     return completed.returncode
+
+
+def process_parent_pid(pid: int) -> int | None:
+    completed = subprocess.run(
+        ["ps", "-o", "ppid=", "-p", str(pid)],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        errors="replace",
+        check=False,
+    )
+    value = completed.stdout.strip()
+    if completed.returncode != 0 or not value.isdigit():
+        return None
+    parent = int(value)
+    return parent if parent > 1 else None
 
 
 def parse_args() -> argparse.Namespace:
@@ -84,10 +101,24 @@ def main() -> int:
         }, sort_keys=True))
         return 0
     root = args.root.resolve()
+    child_env = os.environ.copy()
+    if system == "Darwin":
+        # Python is launched by build.cj; its parent is the CJPM process that
+        # will consume the selected archive after the pre-build hook returns.
+        cjpm_pid = process_parent_pid(os.getppid())
+        if cjpm_pid is None:
+            print(json.dumps({
+                "code": "cache-lease-owner-unavailable",
+                "detail": "cannot identify the parent CJPM process",
+                "status": "FAIL",
+            }))
+            return 2
+        child_env["WIRESTACK_APPLE_CACHE_LEASE_PID"] = str(cjpm_pid)
     if "tls-provider" in steps:
         status = run(
             [sys.executable, str(root / "tools" / "build_tls_provider.py"), "--repo", str(root)],
             root=root,
+            env=child_env,
         )
         if status != 0:
             return status
@@ -124,7 +155,7 @@ def main() -> int:
         ]
         if os.environ.get("WIRESTACK_RESOLVER_TEST_FIXTURE") == "1":
             resolver.append("--test-fixture")
-        status = run(resolver, root=root)
+        status = run(resolver, root=root, env=child_env)
         if status != 0:
             return status
     return 0
