@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 7348472,
-    "binary_sha256": "6c857051a97599bcb2a0658ee118036ad82d99e9780015938cf7bca92500eeb5",
+    "binary_bytes": 7369384,
+    "binary_sha256": "8d88f15844ad3d25324ae530c4cf30ed2921803ae4f828436a18a39106305ce0",
     "exported_symbol_inventory": {
       "count": 9570,
       "scope": "final-artifact-exports",
@@ -9586,22 +9586,82 @@
       "sha256": "045d956dc9b5cc1ab3346c0d3c4924e07a2e3095af72096c181922033ae5e1d0",
       "total_bytes": 29732
     },
+    "provenance": {
+      "build_argv": [
+        [
+          "make",
+          "-j4"
+        ],
+        [
+          "make",
+          "install_sw"
+        ]
+      ],
+      "build_tool": {
+        "argv": [
+          "make",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "GNU Make 4.4.1\nBuilt for x86_64-alpine-linux-musl\nCopyright (C) 1988-2023 Free Software Foundation, Inc.\nLicense GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.",
+        "output_sha256": "c986ab9691e2ba50de43b81a9dfc3f6abe117a5a75af73e09a7b04cc66e71378"
+      },
+      "cmake": null,
+      "compiler": {
+        "argv": [
+          "cc",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "cc (Alpine 15.2.0) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+        "output_sha256": "98380490e2e4490daae00b47ff1a922d8a5e000db1e1083d2c6543aa6864da87"
+      },
+      "configure_argv": [
+        "<SOURCE>/Configure",
+        "no-secure-memory",
+        "no-shared",
+        "no-module",
+        "no-tests",
+        "no-zlib",
+        "no-zstd",
+        "--prefix=<PREFIX>",
+        "--libdir=lib"
+      ],
+      "cxx_compiler": {
+        "argv": [
+          "c++",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "c++ (Alpine 15.2.0) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+        "output_sha256": "b4257ffe96f7e42fb1b71901b1086a8e2d629980bf81a1795e92cc3a63b8c7d1"
+      },
+      "environment": {
+        "CFLAGS": "-O2 -fPIC",
+        "CXXFLAGS": "-O2"
+      },
+      "instrumentation": "none",
+      "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "patches": [],
+      "provider_instrumented": false,
+      "target_triple": "x86_64-unknown-linux-musl"
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 2094382,
+        "bytes": 2099014,
         "name": "libssl.a",
-        "sha256": "582b0438dae41063328a228084a3dc91d91f317b188d5b61753b51d70810cbf4"
+        "sha256": "aa254a4c4f2b36f28e93cd47f25e4c6a8697c9d8359cfca76621a2be5f751f26"
       },
       {
-        "bytes": 12326948,
+        "bytes": 12362020,
         "name": "libcrypto.a",
-        "sha256": "3c178e4974579c302e2b2a0cfb1c90ce054c4b6d4bed95091556120fc7d507eb"
+        "sha256": "bf6f6b365973b6c9d13e22aea1dfefa6dd9038d089b15c2f34a751839996d819"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "4928c9cd47fde4b30ae7f7f1a29bfbc78c449e718b09049a5efb89fccfd3621a",
+  "build_log_sha256": "180476187fd8c524fe44fbf3dbac6a494c61d13e83929b61737a8127e36d289c",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -9626,24 +9686,29 @@
     "image_os": "alpine",
     "image_version": "3.22.5",
     "python": "3.14.7",
-    "repository_revision": "4c7ddea51e9e73600b39be7938566ea6300ab5cd",
+    "repository_revision": "0970f3984eb523cc1571b864e72bfdddef10f3d8",
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T12:23:08.643716+00:00",
+  "finished_at": "2026-08-31T14:21:54.745059+00:00",
   "metrics": {
-    "allocation_profile_bound_bytes": 1073741824,
-    "allocation_profile_bytes": 655949824,
-    "allocation_profile_calls": 20018,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
+    "cancellation_bound_us": 250000,
+    "cancellation_latency_us": 15,
+    "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 40685568,
+    "memory_profile_peak_resident_bytes": 40820736,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
+    "provider_allocation_bound_bytes": 68719476736,
+    "provider_allocation_bytes": 6211595550,
+    "provider_allocation_call_bound": 150000000,
+    "provider_allocation_calls": 28521822,
+    "provider_allocation_peak_live_bytes": 804838,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -9653,13 +9718,21 @@
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "operational_evidence": {
+    "cancellation": {
+      "bound_us": 250000,
+      "latency_us": 15,
+      "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+      "wakeups": 1
+    },
     "memory_profile": {
-      "allocation_bound_bytes": 1073741824,
-      "allocation_bytes": 655949824,
-      "allocation_calls": 20018,
-      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 40685568,
+      "peak_resident_bytes": 40820736,
+      "provider_allocation_bound_bytes": 68719476736,
+      "provider_allocation_bytes": 6211595550,
+      "provider_allocation_call_bound": 150000000,
+      "provider_allocation_calls": 28521822,
+      "provider_allocation_peak_live_bytes": 804838,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -9671,14 +9744,14 @@
   "platform": "linux-musl-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 5,
+  "schema_version": 6,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T12:20:16.344554+00:00",
+  "started_at": "2026-08-31T14:20:20.936462+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

@@ -1,11 +1,11 @@
 {
   "build": {
-    "binary_bytes": 859904,
-    "binary_sha256": "6acfeacd977efe2fa01e9dba2cc7aa8fd1d8c1b8d54978c08db53f9b581ec4ab",
+    "binary_bytes": 873560,
+    "binary_sha256": "512c1d892526e25a7434a07cb487d2c38e1f19e6e1bb176c962d89c205ef8728",
     "exported_symbol_inventory": {
-      "count": 1113,
+      "count": 1118,
       "scope": "final-artifact-exports",
-      "sha256": "33d39f615ebe01c3d026a35bca68e5cd4b906c492a8af990ec6896a9768f6fc8",
+      "sha256": "56385a7932fc8c0a48475bba02c64fbbee829731e25760a59ff8340b18ea7da7",
       "symbols": [
         "_IO_stdin_used",
         "__TMC_END__",
@@ -86,6 +86,7 @@
         "mbedtls_base64_decode",
         "mbedtls_base64_encode",
         "mbedtls_base64_self_test",
+        "mbedtls_calloc",
         "mbedtls_camellia_crypt_cbc",
         "mbedtls_camellia_crypt_cfb128",
         "mbedtls_camellia_crypt_ctr",
@@ -273,6 +274,7 @@
         "mbedtls_entropy_update_manual",
         "mbedtls_entropy_update_seed_file",
         "mbedtls_entropy_write_seed_file",
+        "mbedtls_free",
         "mbedtls_gcm_auth_decrypt",
         "mbedtls_gcm_crypt_and_tag",
         "mbedtls_gcm_finish",
@@ -473,6 +475,9 @@
         "mbedtls_platform_dev_random",
         "mbedtls_platform_get_entropy",
         "mbedtls_platform_gmtime_r",
+        "mbedtls_platform_set_calloc_free",
+        "mbedtls_platform_setup",
+        "mbedtls_platform_teardown",
         "mbedtls_platform_zeroize",
         "mbedtls_poly1305_finish",
         "mbedtls_poly1305_free",
@@ -1129,27 +1134,99 @@
       "sha256": "dd441476ef6a6d4afbfb641ac870bcfd162a773e218422c13c44e35164270c4e",
       "total_bytes": 135878
     },
+    "provenance": {
+      "build_argv": [
+        [
+          "cmake",
+          "--build",
+          "<BUILD>",
+          "--parallel",
+          "4"
+        ],
+        [
+          "cmake",
+          "--install",
+          "<BUILD>"
+        ]
+      ],
+      "build_tool": {
+        "argv": [
+          "ninja",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "1.13.2",
+        "output_sha256": "87729f1910e8eb02719463db46083e0f1a4c3cbade23b357806338b25df16a6a"
+      },
+      "cmake": {
+        "argv": [
+          "cmake",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+        "output_sha256": "37a5984b993c40a43dac1f1cc111591316a05e429a01c3194f4634282b7b4cab"
+      },
+      "compiler": {
+        "argv": [
+          "cc",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+        "output_sha256": "ea1166dac9d42d8eabfaac765e3107bf938a62d972849601cc318cbe1a04ed08"
+      },
+      "configure_argv": [
+        "cmake",
+        "-S",
+        "<SOURCE>",
+        "-B",
+        "<BUILD>",
+        "-GNinja",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DENABLE_TESTING=OFF",
+        "-DENABLE_PROGRAMS=OFF",
+        "-DUSE_SHARED_MBEDTLS_LIBRARY=OFF",
+        "-DTF_PSA_CRYPTO_USER_CONFIG_FILE=<REPOSITORY>/tools/tls_provider_poc/mbedtls_provider_profile_config.h",
+        "-DCMAKE_INSTALL_PREFIX=<PREFIX>"
+      ],
+      "cxx_compiler": {
+        "argv": [
+          "c++",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+        "output_sha256": "9af6d86c05168cb15779093011133ec1892819c8a687a3ee24c3377aad1521f9"
+      },
+      "environment": {},
+      "instrumentation": "none",
+      "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "patches": [],
+      "provider_instrumented": false,
+      "target_triple": "x86_64-unknown-linux-gnu"
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 527948,
         "name": "libmbedtls.a",
-        "sha256": "f482953c55b69186fdf4232cf2940d7dece626eb23e848abdb9b53255ab59804"
+        "sha256": "50fa6e3282ed2fc78df2124ad09ee031176b85d1904972cad10c0705c851bbfa"
       },
       {
-        "bytes": 160334,
+        "bytes": 160406,
         "name": "libmbedx509.a",
-        "sha256": "d5d9161982b2f701ce1e23284504f28de78587d36d636c4daf3003a182039380"
+        "sha256": "319dd3258685b0e2124880878db7f0790336234595251c31dbcdb99bbde3f9b8"
       },
       {
-        "bytes": 870918,
+        "bytes": 871832,
         "name": "libtfpsacrypto.a",
-        "sha256": "31f032d2cda4600e3e5249a8ce0596386c977699eccc7facd72274115fe5bb9e"
+        "sha256": "1b31dd11ef7cdd6692cd95f3e4590cf9d681de0f6b0f095a67831ad69d7fee26"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "3e047375f7e11c6a6947c6834c8975b413ff3390188a96141e09ad1797360457",
+  "build_log_sha256": "e373dbfea03a3afb2d687d82a51b96d2e6d06fdf2113720aeaaa0ca48999d9a2",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -1174,36 +1251,49 @@
     "image_os": "ubuntu24",
     "image_version": "20260823.283.1",
     "python": "3.12.14",
-    "repository_revision": "4c7ddea51e9e73600b39be7938566ea6300ab5cd",
+    "repository_revision": "0970f3984eb523cc1571b864e72bfdddef10f3d8",
     "runner_arch": "X64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T12:21:59.138747+00:00",
+  "finished_at": "2026-08-31T14:22:16.963491+00:00",
   "metrics": {
-    "allocation_profile_bound_bytes": 1073741824,
-    "allocation_profile_bytes": 655687680,
-    "allocation_profile_calls": 20010,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
+    "cancellation_bound_us": 250000,
+    "cancellation_latency_us": 69,
+    "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 35164160,
+    "memory_profile_peak_resident_bytes": 36007936,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
+    "provider_allocation_bound_bytes": 68719476736,
+    "provider_allocation_bytes": 8202364492,
+    "provider_allocation_call_bound": 150000000,
+    "provider_allocation_calls": 133207688,
+    "provider_allocation_peak_live_bytes": 117634,
     "repeated_cleanup_cycles": 10000
   },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "operational_evidence": {
+    "cancellation": {
+      "bound_us": 250000,
+      "latency_us": 69,
+      "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+      "wakeups": 1
+    },
     "memory_profile": {
-      "allocation_bound_bytes": 1073741824,
-      "allocation_bytes": 655687680,
-      "allocation_calls": 20010,
-      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 35164160,
+      "peak_resident_bytes": 36007936,
+      "provider_allocation_bound_bytes": 68719476736,
+      "provider_allocation_bytes": 8202364492,
+      "provider_allocation_call_bound": 150000000,
+      "provider_allocation_calls": 133207688,
+      "provider_allocation_peak_live_bytes": 117634,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -1211,7 +1301,100 @@
       "leak_detection": {
         "status": "PASS"
       },
-      "output_sha256": "5aab05ae312ea62bde973893453f371ba2b0ca04ec0cc5fa968a7073fd54a897",
+      "output_sha256": "edb3f86137c6e30eaf3f004e2956e21e08e268a087f29acb7601622c179b9307",
+      "provider_build_provenance": {
+        "build_argv": [
+          [
+            "cmake",
+            "--build",
+            "<BUILD>",
+            "--parallel",
+            "4"
+          ],
+          [
+            "cmake",
+            "--install",
+            "<BUILD>"
+          ]
+        ],
+        "build_tool": {
+          "argv": [
+            "ninja",
+            "--version"
+          ],
+          "exit_code": 0,
+          "output": "1.13.2",
+          "output_sha256": "87729f1910e8eb02719463db46083e0f1a4c3cbade23b357806338b25df16a6a"
+        },
+        "cmake": {
+          "argv": [
+            "cmake",
+            "--version"
+          ],
+          "exit_code": 0,
+          "output": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+          "output_sha256": "37a5984b993c40a43dac1f1cc111591316a05e429a01c3194f4634282b7b4cab"
+        },
+        "compiler": {
+          "argv": [
+            "cc",
+            "--version"
+          ],
+          "exit_code": 0,
+          "output": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+          "output_sha256": "ea1166dac9d42d8eabfaac765e3107bf938a62d972849601cc318cbe1a04ed08"
+        },
+        "configure_argv": [
+          "cmake",
+          "-S",
+          "<SOURCE>",
+          "-B",
+          "<BUILD>",
+          "-GNinja",
+          "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+          "-DENABLE_TESTING=OFF",
+          "-DENABLE_PROGRAMS=OFF",
+          "-DUSE_SHARED_MBEDTLS_LIBRARY=OFF",
+          "-DTF_PSA_CRYPTO_USER_CONFIG_FILE=<REPOSITORY>/tools/tls_provider_poc/mbedtls_provider_profile_config.h",
+          "-DCMAKE_C_FLAGS=-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer",
+          "-DCMAKE_CXX_FLAGS=-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer",
+          "-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined",
+          "-DCMAKE_INSTALL_PREFIX=<PREFIX>"
+        ],
+        "cxx_compiler": {
+          "argv": [
+            "c++",
+            "--version"
+          ],
+          "exit_code": 0,
+          "output": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+          "output_sha256": "9af6d86c05168cb15779093011133ec1892819c8a687a3ee24c3377aad1521f9"
+        },
+        "environment": {},
+        "instrumentation": "address+undefined-sanitizer",
+        "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "patches": [],
+        "provider_instrumented": true,
+        "target_triple": "x86_64-unknown-linux-gnu"
+      },
+      "provider_instrumented": true,
+      "provider_static_archives": [
+        {
+          "bytes": 8160822,
+          "name": "libmbedtls.a",
+          "sha256": "4687138988bfdd57a0e6b8dfb90349409a39f92d9ac85258991cc0bd6ea4aa9b"
+        },
+        {
+          "bytes": 1944952,
+          "name": "libmbedx509.a",
+          "sha256": "856ee80a59afc11a3f647c9a39fa96678cb08c385a6f60ddcc68333f645ce2d9"
+        },
+        {
+          "bytes": 12134456,
+          "name": "libtfpsacrypto.a",
+          "sha256": "79027fe574b07ffad4013b0390c0487b157b3cd8d63e5d47b3acd70042805f99"
+        }
+      ],
       "status": "PASS",
       "tool": "address+undefined-sanitizer"
     }
@@ -1219,14 +1402,14 @@
   "platform": "linux-glibc-x86_64",
   "poc_exit_code": 0,
   "provider": "mbedtls",
-  "schema_version": 5,
+  "schema_version": 6,
   "source": {
     "archive": "mbedtls-4.2.0.tar.bz2",
     "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
     "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T12:20:26.056159+00:00",
+  "started_at": "2026-08-31T14:20:50.542244+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

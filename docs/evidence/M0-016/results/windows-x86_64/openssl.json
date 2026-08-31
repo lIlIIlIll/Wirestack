@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 5366272,
-    "binary_sha256": "d811927e4f951c8fb5577cdb9d47dd95bc8daf9fef395310c87f456bf2289a9a",
+    "binary_bytes": 5382656,
+    "binary_sha256": "26c5841dde48f88e287b3371eb5c040c9bcb2c81fd00dbb2ea4dbf4f34607a87",
     "exported_symbol_inventory": {
       "count": 0,
       "scope": "final-artifact-exports",
@@ -15,22 +15,79 @@
       "sha256": "446a663383facf82a7b2abd2b20c3a262546c9db828b5191f5f611de91d8cfb1",
       "total_bytes": 29732
     },
+    "provenance": {
+      "build_argv": [
+        [
+          "nmake"
+        ],
+        [
+          "nmake",
+          "install_sw"
+        ]
+      ],
+      "build_tool": {
+        "argv": [
+          "nmake",
+          "/?"
+        ],
+        "exit_code": 0,
+        "output": "Microsoft (R) Program Maintenance Utility Version 14.51.36256.0\nCopyright (C) Microsoft Corporation.  All rights reserved.\n\nUsage:  NMAKE @commandfile\n\tNMAKE [options] [/f makefile] [/x stderrfile] [macrodefs] [targets]\n\nOptions:\n\n/A Build all evaluated targets\n/B Build if time stamps are equal\n/C Suppress output messages\n/D Display build information\n/E Override env-var macros\n/ERRORREPORT:{NONE|PROMPT|QUEUE|SEND} Report errors to Microsoft\n/G Display !include filenames\n/HELP Display brief usage message\n/I Ignore exit codes from commands\n/K Build unrelated targets on error\n/N Display commands but do not execute\n/NOLOGO Suppress copyright message\n/P Display NMAKE information\n/Q Check time stamps but do not build\n/R Ignore predefined rules/macros\n/S Suppress executed-commands display\n/T Change time stamps but do not build\n/U Dump inline files\n/Y Disable batch-mode\n/W Display full command of any failed child process\n/? Display brief usage message",
+        "output_sha256": "7690a28b42b567508a431e1c80d87971affe7c9db4adee489ef318be9354cb57"
+      },
+      "cmake": null,
+      "compiler": {
+        "argv": [
+          "cl",
+          "/Bv"
+        ],
+        "exit_code": 2,
+        "output": "Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36256 for x64\nCopyright (C) Microsoft Corporation.  All rights reserved.\n\nCompiler Passes:\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe:        Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c1.dll:        Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c1xx.dll:      Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c2.dll:        Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c1xx.dll:      Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe:      Version 14.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\mspdb140.dll:  Version 14.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\1033\\clui.dll: Version 19.51.36256.0\n\ncl : Command line error D8003 : missing source filename",
+        "output_sha256": "497bf05bb0c5fd03aef774d80d8fdf22f9d2c63adc39f4246fb5b37236c4c5c5"
+      },
+      "configure_argv": [
+        "perl",
+        "<SOURCE>\\Configure",
+        "VC-WIN64A",
+        "no-shared",
+        "no-module",
+        "no-tests",
+        "no-zlib",
+        "no-zstd",
+        "--prefix=<PREFIX>",
+        "--libdir=lib"
+      ],
+      "cxx_compiler": {
+        "argv": [
+          "cl",
+          "/Bv"
+        ],
+        "exit_code": 2,
+        "output": "Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36256 for x64\nCopyright (C) Microsoft Corporation.  All rights reserved.\n\nCompiler Passes:\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.exe:        Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c1.dll:        Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c1xx.dll:      Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c2.dll:        Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\c1xx.dll:      Version 19.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe:      Version 14.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\mspdb140.dll:  Version 14.51.36256.0\n C:\\Program Files\\Microsoft Visual Studio\\18\\Enterprise\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\1033\\clui.dll: Version 19.51.36256.0\n\ncl : Command line error D8003 : missing source filename",
+        "output_sha256": "497bf05bb0c5fd03aef774d80d8fdf22f9d2c63adc39f4246fb5b37236c4c5c5"
+      },
+      "environment": {},
+      "instrumentation": "none",
+      "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "patches": [],
+      "provider_instrumented": false,
+      "target_triple": "x86_64-pc-windows-msvc"
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 10148742,
+        "bytes": 10117676,
         "name": "libssl.lib",
-        "sha256": "a12bdfda923a9e4e94a73a4905b28c63aac29080a458d7c66e365588c6d9aacc"
+        "sha256": "038f9dadf72748a5c5207b898b0d55d5d4b9421664d37260d2bfec8ed54ff228"
       },
       {
-        "bytes": 55264226,
+        "bytes": 55025072,
         "name": "libcrypto.lib",
-        "sha256": "9b10ec9bacca9815991c80d927b54bd4831820589c7c2f7ef921873682510503"
+        "sha256": "eb5f1a0e39cc8a9e989c3f04d010bfddf5f9f3f8f3c080ab21f8c00baac53963"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "844baa6c073c8f345a9d39bfe1168e588259dbb8f68406ec7fe28f70f7270693",
+  "build_log_sha256": "43adb170df2641b1fc6ce77ece2a1c5a90ad4b254377f914a722264621adfd4b",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -55,24 +112,29 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "22ae52c7b277c1d6c83afc0ac0dd73dc7e9c83a6",
+    "repository_revision": "0970f3984eb523cc1571b864e72bfdddef10f3d8",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T12:30:06.996061+00:00",
+  "finished_at": "2026-08-31T14:29:04.828345+00:00",
   "metrics": {
-    "allocation_profile_bound_bytes": 1073741824,
-    "allocation_profile_bytes": 655949824,
-    "allocation_profile_calls": 20018,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
+    "cancellation_bound_us": 250000,
+    "cancellation_latency_us": 37,
+    "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 11403264,
+    "memory_profile_peak_resident_bytes": 11681792,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
+    "provider_allocation_bound_bytes": 68719476736,
+    "provider_allocation_bytes": 6171102610,
+    "provider_allocation_call_bound": 150000000,
+    "provider_allocation_calls": 28342502,
+    "provider_allocation_peak_live_bytes": 797087,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -82,13 +144,21 @@
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "operational_evidence": {
+    "cancellation": {
+      "bound_us": 250000,
+      "latency_us": 37,
+      "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+      "wakeups": 1
+    },
     "memory_profile": {
-      "allocation_bound_bytes": 1073741824,
-      "allocation_bytes": 655949824,
-      "allocation_calls": 20018,
-      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 11403264,
+      "peak_resident_bytes": 11681792,
+      "provider_allocation_bound_bytes": 68719476736,
+      "provider_allocation_bytes": 6171102610,
+      "provider_allocation_call_bound": 150000000,
+      "provider_allocation_calls": 28342502,
+      "provider_allocation_peak_live_bytes": 797087,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -100,14 +170,14 @@
   "platform": "windows-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 5,
+  "schema_version": 6,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T12:20:16.652742+00:00",
+  "started_at": "2026-08-31T14:20:09.632915+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

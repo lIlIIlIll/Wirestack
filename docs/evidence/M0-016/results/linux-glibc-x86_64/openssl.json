@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 7287536,
-    "binary_sha256": "0e35527a166f890aa104fa6c7107b0e90175a4350f1d8819f3610c82c0b50b97",
+    "binary_bytes": 7308448,
+    "binary_sha256": "a60c108425a253e26879162e3102876252a976b6d8a88292646d277055caba70",
     "exported_symbol_inventory": {
       "count": 9576,
       "scope": "final-artifact-exports",
@@ -9592,22 +9592,81 @@
       "sha256": "045d956dc9b5cc1ab3346c0d3c4924e07a2e3095af72096c181922033ae5e1d0",
       "total_bytes": 29732
     },
+    "provenance": {
+      "build_argv": [
+        [
+          "make",
+          "-j4"
+        ],
+        [
+          "make",
+          "install_sw"
+        ]
+      ],
+      "build_tool": {
+        "argv": [
+          "make",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "GNU Make 4.3\nBuilt for x86_64-pc-linux-gnu\nCopyright (C) 1988-2020 Free Software Foundation, Inc.\nLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.",
+        "output_sha256": "80d1c3084576e301b01ddf18f3de9232a66fc1298b1bc8dde39eca8b9aa99645"
+      },
+      "cmake": null,
+      "compiler": {
+        "argv": [
+          "cc",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+        "output_sha256": "ea1166dac9d42d8eabfaac765e3107bf938a62d972849601cc318cbe1a04ed08"
+      },
+      "configure_argv": [
+        "<SOURCE>/Configure",
+        "no-shared",
+        "no-module",
+        "no-tests",
+        "no-zlib",
+        "no-zstd",
+        "--prefix=<PREFIX>",
+        "--libdir=lib"
+      ],
+      "cxx_compiler": {
+        "argv": [
+          "c++",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+        "output_sha256": "9af6d86c05168cb15779093011133ec1892819c8a687a3ee24c3377aad1521f9"
+      },
+      "environment": {
+        "CFLAGS": "-O2 -fPIC",
+        "CXXFLAGS": "-O2"
+      },
+      "instrumentation": "none",
+      "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "patches": [],
+      "provider_instrumented": false,
+      "target_triple": "x86_64-unknown-linux-gnu"
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 2047638,
+        "bytes": 2052182,
         "name": "libssl.a",
-        "sha256": "a7f7634d422c473506e4feafa5050744d02d73a4ad6f8758477f1f74229e23d3"
+        "sha256": "b98f639752fc31f754391ad5a99cd2ce64731c984ecc46806cac6f5a38d46591"
       },
       {
-        "bytes": 12195000,
+        "bytes": 12229968,
         "name": "libcrypto.a",
-        "sha256": "ae23154db6d93bfe1aacc9ba2c55b900acae09bdbd036191d9cbddf241ebc6b7"
+        "sha256": "c25dcc2c01b5f56506fe30a65fffffe7ff4d4eb8a03e840962589742557a6849"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "05aaf6b26d0b07825dfb6b64e15494fb2a2fbafbfb24abd6c894f295a4d83c78",
+  "build_log_sha256": "b29b8df887a183d23e455cced03116a4466bf96e663fabb1c27d630f78bd1601",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -9632,24 +9691,29 @@
     "image_os": "ubuntu24",
     "image_version": "20260823.283.1",
     "python": "3.12.14",
-    "repository_revision": "4c7ddea51e9e73600b39be7938566ea6300ab5cd",
+    "repository_revision": "0970f3984eb523cc1571b864e72bfdddef10f3d8",
     "runner_arch": "X64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T12:22:17.428540+00:00",
+  "finished_at": "2026-08-31T14:23:32.447623+00:00",
   "metrics": {
-    "allocation_profile_bound_bytes": 1073741824,
-    "allocation_profile_bytes": 655949824,
-    "allocation_profile_calls": 20018,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
+    "cancellation_bound_us": 250000,
+    "cancellation_latency_us": 47,
+    "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 46190592,
+    "memory_profile_peak_resident_bytes": 47013888,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
+    "provider_allocation_bound_bytes": 68719476736,
+    "provider_allocation_bytes": 6210959979,
+    "provider_allocation_call_bound": 150000000,
+    "provider_allocation_calls": 28519803,
+    "provider_allocation_peak_live_bytes": 804838,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -9659,13 +9723,21 @@
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "operational_evidence": {
+    "cancellation": {
+      "bound_us": 250000,
+      "latency_us": 47,
+      "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+      "wakeups": 1
+    },
     "memory_profile": {
-      "allocation_bound_bytes": 1073741824,
-      "allocation_bytes": 655949824,
-      "allocation_calls": 20018,
-      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 46190592,
+      "peak_resident_bytes": 47013888,
+      "provider_allocation_bound_bytes": 68719476736,
+      "provider_allocation_bytes": 6210959979,
+      "provider_allocation_call_bound": 150000000,
+      "provider_allocation_calls": 28519803,
+      "provider_allocation_peak_live_bytes": 804838,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -9674,7 +9746,81 @@
         "reason": "static OpenSSL 3.6.3 retains process-global allocations after thread and global cleanup; broad allocator suppression is forbidden",
         "status": "UNSUPPORTED"
       },
-      "output_sha256": "c2953f723918ecce5fa71f27e2f1d9dd0de4f0f7d1d7c98dc51e7bcc40fdf4dc",
+      "output_sha256": "fa2dccd381101e562014241d8af68d7f43da0fffb43cc494a4681d23ebabb16e",
+      "provider_build_provenance": {
+        "build_argv": [
+          [
+            "make",
+            "-j4"
+          ],
+          [
+            "make",
+            "install_sw"
+          ]
+        ],
+        "build_tool": {
+          "argv": [
+            "make",
+            "--version"
+          ],
+          "exit_code": 0,
+          "output": "GNU Make 4.3\nBuilt for x86_64-pc-linux-gnu\nCopyright (C) 1988-2020 Free Software Foundation, Inc.\nLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.",
+          "output_sha256": "80d1c3084576e301b01ddf18f3de9232a66fc1298b1bc8dde39eca8b9aa99645"
+        },
+        "cmake": null,
+        "compiler": {
+          "argv": [
+            "cc",
+            "--version"
+          ],
+          "exit_code": 0,
+          "output": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+          "output_sha256": "ea1166dac9d42d8eabfaac765e3107bf938a62d972849601cc318cbe1a04ed08"
+        },
+        "configure_argv": [
+          "<SOURCE>/Configure",
+          "no-asm",
+          "no-shared",
+          "no-module",
+          "no-tests",
+          "no-zlib",
+          "no-zstd",
+          "--prefix=<PREFIX>",
+          "--libdir=lib"
+        ],
+        "cxx_compiler": {
+          "argv": [
+            "c++",
+            "--version"
+          ],
+          "exit_code": 0,
+          "output": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+          "output_sha256": "9af6d86c05168cb15779093011133ec1892819c8a687a3ee24c3377aad1521f9"
+        },
+        "environment": {
+          "CFLAGS": "-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -fPIC",
+          "CXXFLAGS": "-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer",
+          "LDFLAGS": "-fsanitize=address,undefined"
+        },
+        "instrumentation": "address+undefined-sanitizer",
+        "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "patches": [],
+        "provider_instrumented": true,
+        "target_triple": "x86_64-unknown-linux-gnu"
+      },
+      "provider_instrumented": true,
+      "provider_static_archives": [
+        {
+          "bytes": 29273674,
+          "name": "libssl.a",
+          "sha256": "8df6adb8de850379980214933fe5c83569e513e4f68a6bf759382ab7dc027c36"
+        },
+        {
+          "bytes": 95823796,
+          "name": "libcrypto.a",
+          "sha256": "9162b51e973dff23d37749bef72e3554e8859275494389d67df50dbec8fff70a"
+        }
+      ],
       "status": "PASS",
       "tool": "address+undefined-sanitizer"
     }
@@ -9682,14 +9828,14 @@
   "platform": "linux-glibc-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 5,
+  "schema_version": 6,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T12:20:24.783087+00:00",
+  "started_at": "2026-08-31T14:20:52.456726+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

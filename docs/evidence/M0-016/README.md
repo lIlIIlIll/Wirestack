@@ -2,116 +2,107 @@
 
 ## Status
 
-M0-016 is **BLOCKED** because Android, iOS, and HarmonyOS or OpenHarmony do
-not have native-device evidence.
+M0-016 remains **BLOCKED** because Android, iOS, and HarmonyOS or
+OpenHarmony do not have native-device evidence. Cross-compilation does not
+satisfy those cells.
 
-The schema-v5 desktop evidence is superseded. All 12 desktop cells are
-`NOT_RUN` until native runners produce schema-v6 results. Schema v6 additionally
-requires provider-instrumented diagnostics, provider allocation hooks, durable
-normalized build provenance, committed matrix-validated license bundles, and a
-real bounded cancellation wakeup. The old results remain audit history and are
-not current PASS or PARTIAL evidence.
+All 12 desktop cells have current schema-v6 native evidence. AWS-LC passes
+every required capability on Linux glibc x86_64, Linux musl x86_64, macOS
+arm64, and Windows x86_64. Mbed TLS is PARTIAL because external signing and
+session resumption are not implemented by this PoC. The vendored OpenSSL
+control is PARTIAL because external signing is not implemented.
 
-The next current native run must retain:
+Schema v6 retains:
 
-- expired certificate rejection;
-- malformed certificate rejection;
-- adapter rejection of an empty ALPN identifier and a 256-byte ALPN
-  identifier;
-- a complete final-artifact symbol inventory, capped at 16,384 symbols and
-  256 bytes per symbol;
-- mTLS with required client authentication and optional client authentication
-  both with and without a certificate;
-- a digest-bound provider license bundle;
-- exact repository, hosted-runner, and immutable musl container identity;
-- bounded resident-memory and harness-allocation measurements;
-- ASan and UBSan diagnostics on Linux glibc and macOS, with an explicit
-  unsupported result on the other current desktop targets; LeakSanitizer must
-  pass for Linux glibc Mbed TLS; AWS-LC, static OpenSSL, and macOS record that
-  sub-gate as unsupported with an explicit reason instead of using broad leak
-  suppressions.
+- required and optional client authentication;
+- negative certificate, hostname, trust, and ALPN cases;
+- exact repository, runner, toolchain, target, configure/build argv,
+  environment, patch-set, source, and archive identity;
+- complete bounded final-artifact symbol inventories;
+- committed, digest-bound provider license bundles;
+- 10,000-cycle resident-memory, provider allocation-call, cumulative-byte,
+  and peak-live profiles;
+- an explicit caller-owned wait, cancellation signal, wakeup, join, and
+  latency bound; and
+- provider-instrumented ASan and UBSan diagnostics on Linux glibc and macOS.
 
-## Superseded schema-v5 desktop runs
+Linux glibc Mbed TLS also passes LeakSanitizer. AWS-LC and static OpenSSL
+record leak detection as unsupported because their process-global allocations
+cannot be separated from provider-cycle leaks by this harness. macOS records
+LeakSanitizer as unsupported by the hosted toolchain. Linux musl and Windows
+record the configured sanitizer diagnostic as unsupported; they do not report
+a skipped diagnostic as PASS.
 
-The Linux glibc, Linux musl, and macOS results came from [GitHub Actions run
-33391223747](https://github.com/lIlIIlIll/Wirestack/actions/runs/33391223747).
-That pull-request run reports head revision
-`22ae52c7b277c1d6c83afc0ac0dd73dc7e9c83a6`; GitHub executed merge revision
-`4c7ddea51e9e73600b39be7938566ea6300ab5cd` and every retained result records
-that exact execution revision. The Windows results came from [GitHub Actions
-run 33391216138](https://github.com/lIlIIlIll/Wirestack/actions/runs/33391216138)
-and executed the exact head revision
-`22ae52c7b277c1d6c83afc0ac0dd73dc7e9c83a6`.
+## Current schema-v6 desktop runs
 
-All 12 artifacts were downloaded and independently revalidated under schema v5 with
-`validate.py --result ... --expected-revision ...`. Each artifact contains the
-schema-v5 `result.json`, a bounded `build.log`, and the digest-bound provider
-license bundle. They do not satisfy schema v6 and must not advance M0-020.
+[TLS Provider PoC run
+33401994988](https://github.com/lIlIIlIll/Wirestack/actions/runs/33401994988)
+produced the Linux glibc, Linux musl, and macOS results. [M0-016 Windows
+Provider PoC run
+33401994898](https://github.com/lIlIIlIll/Wirestack/actions/runs/33401994898)
+produced the Windows results. Both run records identify pull-request head
+0b8e3181a82f8eb062e24e63edf57fc05850d859. GitHub executed synthetic merge
+revision 0970f3984eb523cc1571b864e72bfdddef10f3d8; every retained result binds
+that exact execution revision.
 
-| Platform | Provider | Status | Symbols | Result SHA-256 | Artifact ID | Artifact SHA-256 |
-|---|---|---|---:|---|---:|---|
-| Linux glibc x86_64 | AWS-LC | PASS | 3,802 | `9524d15071e64663f522ddbd0220bf5b61bf36e783b7ea9328a78f0a76f217b7` | `9757564639` | `ce4ac7a71b548521629061553119d5d5c9cbc706376d9dc029f5de90b2a7a6f7` |
-| Linux glibc x86_64 | Mbed TLS | PARTIAL | 1,113 | `23af305e38bbc505eda3036526e33ff490e4004fb5d758b6c505b5d19098c88b` | `9757574141` | `eafc48e60e05097cac148c7d098f1ac0c06ba6c3dedc6469136535c3e79bb69a` |
-| Linux glibc x86_64 | OpenSSL | PARTIAL | 9,576 | `6e5788f57b91f063849e658605b539ee40aa085dcd39f3cee772868a97ecc1ae` | `9757583727` | `ebd328b95fc5b5d3037054beef86b4deeb9652405752414199770c05ec52b34a` |
-| Linux musl x86_64 | AWS-LC | PASS | 3,794 | `aecae7d56baaea20791970d93a7788be57381650f8a92111d81475f01db613de` | `9757576287` | `0960d3344bbba82620e2e7c010b5e0795c5d3e7782846ca86110f16823c2ab32` |
-| Linux musl x86_64 | Mbed TLS | PARTIAL | 1,110 | `3862ee400034be101610fa7eb1c5431ff5ab89440f3625f183dca45a2370cf57` | `9757581463` | `c08edf102574d24cc8c2e42e07f6d66aa06d2921133752793958ae3734145732` |
-| Linux musl x86_64 | OpenSSL | PARTIAL | 9,570 | `28d4e9c83e6f95370243e58543685934aaa38b91acfc71a57f430343be1f256a` | `9757611094` | `f06327d60e5a102cff5a37e374f28db744b3de2f7ff60631a2ef4cf7905a707d` |
-| macOS arm64 | AWS-LC | PASS | 3,368 | `b28b9ec72f84882c6add3ab47c105ae4d5730b5f55211a3af660799980964a1e` | `9757555502` | `33f5e2073193729984785342fe608b5758e47606f7b76c33736718870ca1e3dd` |
-| macOS arm64 | Mbed TLS | PARTIAL | 1,101 | `8d13de4eb0fe79003a4e7f076b55249963f80c93f5bc34b0e52e824e09340b01` | `9757573523` | `083b96921d8bbf29df562e6ea283063196097083a0769f884187a5d7ab4c62488` |
-| macOS arm64 | OpenSSL | PARTIAL | 9,534 | `0a656043966adfb978289a818b6cccd1be1b91376d349553ff5f1eeb76f650a3` | `9757572359` | `b6972e02ed4165875074dd25b1aa3ecb12a253566128709328312441c84a30ff` |
-| Windows x86_64 | AWS-LC | PASS | 9 | `bbd1770f2a55892b6ce8ffcaee65ce95f4651f1278294098f4c708e1dc344fbb` | `9757576438` | `1b9193bd502dbf539d698c08354d081abf5a38fa4e20620d9c6bb49641eb22ab` |
-| Windows x86_64 | Mbed TLS | PARTIAL | 0 | `e887a8671d27ec08b75ac6ac8a4a467b13b8721ea6cc60394b85d4559bcfb2e1` | `9757636596` | `ab0a3c02553ee28e0e60b43c4ff613b062d2005af4070e631e6844479d3eb0fd` |
-| Windows x86_64 | OpenSSL | PARTIAL | 0 | `c3aa77a6174880de0faf4bc52538532ad13729a7d641b1b239f16465882b59fa` | `9757835820` | `3a875853d8d4f9ce0f6c6cd397533e1a13ad2d5f5b3859388f390102b943cbac` |
+All 12 artifacts were downloaded and independently validated with:
 
-Each result contains `build_log_sha256`, provider license-manifest metadata,
-and the bounded memory profile. The platform matrix records the result path and
-SHA-256. The Windows run metadata, artifact digests, and build log digests are in
-[`windows-x86_64-run.json`](windows-x86_64-run.json). GitHub artifacts can
-expire, so the committed result JSON files and matrix digests are the durable
-evidence. Schema-v4 artifacts remain available through their historical runs,
-but they are not referenced by the current matrix.
+    python3 tools/tls_provider_poc/validate.py \
+      --result <artifact>/result.json \
+      --expected-revision 0970f3984eb523cc1571b864e72bfdddef10f3d8
 
-LeakSanitizer is a required PASS only for Linux glibc Mbed TLS. AWS-LC and
-static OpenSSL retain process-global allocations that cannot be separated from
-provider-cycle leaks by this harness, so leak detection is explicitly
-`UNSUPPORTED` for those providers; broad suppressions are forbidden. macOS
-records LeakSanitizer as unsupported by the hosted toolchain. All Linux glibc
-and macOS cells still pass ASan and UBSan, and every desktop cell passes the
-bounded 10,000-cycle resident-memory and allocation profile.
+| Platform | Provider | Status | Result SHA-256 | Artifact ID | Artifact SHA-256 |
+|---|---|---|---|---:|---|
+| Linux glibc x86_64 | AWS-LC | PASS | 29bb981c4b426b622eaec843598df19ac4f0de309555774e0fc8ecacf4747be4 | 9761723304 | 51cd0a4f7be0e9c9b31fc90bc43590c0dcc6d20c0601bf45b7dd69e21bd55f9b |
+| Linux glibc x86_64 | Mbed TLS | PARTIAL | 2f5560abd3e630fe766b44343c04b8c6dfcf3dd75f23f4fc3d43cd3cb1fbe96d | 9761673324 | ef1ac48afbd4c60665d6dc482c278ba01bac4b3c345fee64871545636c148916 |
+| Linux glibc x86_64 | OpenSSL | PARTIAL | 8d3dd3d6efce896b664901dd27e9d8b19546b9008285bcc864bfb97b18337abf | 9761720732 | 93d5c6bbaa448bda66046fe4504ee6854123a547b4bfdafe06954cae049d731e |
+| Linux musl x86_64 | AWS-LC | PASS | abddf4c0098695510315dd44ee25d3c94b71b010765233d9347ee09691203e9c | 9761644924 | 540842d5b5f751512a6e9e9850f86b5b3f5b171f5eb5a234b4968266ddba2fb3 |
+| Linux musl x86_64 | Mbed TLS | PARTIAL | aa599c6fc526345e682033f9cbabf1f7779d02adbad6c5b23ceab4058365ab7a | 9761670487 | 4405bc979b7a505b3616cefd32900cce89de25e36000ea926ed82d11bc8a11ca |
+| Linux musl x86_64 | OpenSSL | PARTIAL | f42a5c9994f8a20e5e3a65eb3e0c73200bc74c6d4ede468dbaea9c148fadbe65 | 9761660065 | f746eecb09ea61764764d977056756e09bcbb9420ea7e66b6e729270b6fd12ef |
+| macOS arm64 | AWS-LC | PASS | 294f912a3508ca8ae72f31717b76d46ad7329d00851d0eb75ce106b47524c00d | 9761672812 | 759de851ea2e4c12ab5e2ad2db2f08198e2c81bc113f3920f33e5c369d27eb89 |
+| macOS arm64 | Mbed TLS | PARTIAL | d86287be3d564188ebd8b4c804dc5a7b62b9ecf1d1502d5eea621391157151cc | 9761662174 | a8d8021f377d4bed2527443b3cd4efe0fd2dc2619f29b0bb375570250bbf71ab |
+| macOS arm64 | OpenSSL | PARTIAL | d9fa0b4c8f78dbf6915c24e0fc3213844f1c6a8f6d00e2f57002ad943baeab59 | 9761733139 | 46795cbbf7ca2984c22cddcd8f962295698617ec3e90e679ed62bb07623474a2 |
+| Windows x86_64 | AWS-LC | PASS | a91526d856a207538eed34c6a81844a8c09a36bc6a7b8ddf751bedbd25efb446 | 9761693290 | 060c8cd1c0f91615223cb8a5a21820265d34267a0aed0909a647561b05bc0e76 |
+| Windows x86_64 | Mbed TLS | PARTIAL | 0b0f8f896a6851e0ba0e7c08785134e6711091ac68fa06858a1615837f110486 | 9761730074 | dee4e519d9d07fe3590d9a5161f90523b5af9de7ccfe86ae84b532c843c9fba3 |
+| Windows x86_64 | OpenSSL | PARTIAL | e9a647f3be5d6d7dfb0aa9b78d2cacd350d2a219336b43a9afae31de564f702e | 9761930237 | cffd6b174bace07fbe7dc33aab1144ed12d4c073aafb3f55f0e15eaddb3833b2 |
+
+The Unix artifacts expire on 2026-11-29. The Windows artifacts expire on
+2026-09-14. Artifact expiration does not remove the committed result JSON,
+license payload, matrix digest, normalized build provenance, or source
+identity.
 
 ## Pinned sources
 
 | Provider | Version | Source identity |
 |---|---:|---|
-| AWS-LC | 5.5.0 | commit `991e67ff4cf04df4dd89e407f8b920c6936cb56a` |
-| Mbed TLS | 4.2.0 | commit `ece41aa84d7879d7e55c59e955a5884b541f7f3b` plus archive SHA-256 |
+| AWS-LC | 5.5.0 | commit 991e67ff4cf04df4dd89e407f8b920c6936cb56a |
+| Mbed TLS | 4.2.0 | commit ece41aa84d7879d7e55c59e955a5884b541f7f3b plus archive SHA-256 |
 | OpenSSL control | 3.6.3 | official archive SHA-256 and peeled tag commit |
 
-`tools/tls_provider_poc/providers.json` contains the machine-readable source
+tools/tls_provider_poc/providers.json contains the machine-readable source
 pins.
 
 ## Validate the current matrix
 
-Run the validator and the fault-injection tests from the repository root:
+Run the fail-closed matrix validator and fault-injection tests from the
+repository root:
 
-```bash
-python3 tools/tls_provider_poc/validate.py \
-  --matrix docs/evidence/M0-016/platform-matrix.json
+    python3 tools/tls_provider_poc/validate.py \
+      --matrix docs/evidence/M0-016/platform-matrix.json
 
-python3 -m unittest tools.tests.test_tls_provider_poc
-```
+    python3 -m unittest tools.tests.test_tls_provider_poc
 
-The PoC runner requires network access, CMake, Ninja, a C or C++ toolchain,
-Perl, Git, and a host `openssl` command for fixture generation. The host
-`openssl` command does not provide the TLS implementation under test. The
-runner links the PoC binary against the pinned provider archives and rejects
-system TLS runtime dependencies.
+Matrix validation rehashes every retained result, license manifest, and license
+file. Missing files, path escape, digest drift, unsupported schema, stale
+execution revision, skipped diagnostics presented as PASS, or incomplete
+capabilities presented as PASS all fail validation.
 
 ## Evidence rules
 
-- A retained incomplete native result is PARTIAL only when it satisfies the
-  current schema.
+- A retained incomplete native result is PARTIAL only when it satisfies schema
+  v6.
 - A missing external-signer or session test prevents PASS.
-- A runtime provider fallback or a system TLS dependency produces FAIL.
+- A runtime provider fallback or system TLS dependency produces FAIL.
 - Cross-compilation does not satisfy a native platform cell.
-- This PoC does not select or claim a production provider outside Linux.
+- This PoC qualifies candidates. It selects AWS-LC only for the Linux delivery
+  profile and does not claim production provider support on other platforms.
