@@ -266,6 +266,11 @@ class ProviderPocValidationTests(unittest.TestCase):
             "configure(m, &client_conf, &server_conf, version, 0, 1)",
             mbedtls_source,
         )
+        self.assertIn(
+            "mbedtls_ssl_conf_ca_chain(&client_conf, &m->client_cert, NULL);",
+            mbedtls_source,
+        )
+        self.assertIn("Pair provider_rejected;", mbedtls_source)
 
 
 class ProviderPocWindowsTests(unittest.TestCase):

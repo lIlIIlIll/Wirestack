@@ -303,12 +303,19 @@ static int external_trust_version_case(Material *m, int version) {
     Pair accepted;
     int ret = configure(m, &client_conf, &server_conf, version, 0, 0);
     if (ret != 0) return 0;
+    mbedtls_ssl_conf_ca_chain(&client_conf, &m->client_cert, NULL);
+
+    Pair provider_rejected;
+    ret = setup_pair(&provider_rejected, &client_conf, &server_conf, "localhost");
+    int ok = ret == 0 && drive_handshake(&provider_rejected, 0);
+    pair_free(&provider_rejected);
+
     mbedtls_ssl_conf_verify(&client_conf, external_trust_callback, NULL);
     external_trust_decision = 1;
     unsigned int calls_before = external_trust_calls;
     ret = setup_pair(&accepted, &client_conf, &server_conf, "localhost");
-    int ok = ret == 0 && drive_handshake(&accepted, 1) &&
-             external_trust_calls > calls_before;
+    ok = ok && ret == 0 && drive_handshake(&accepted, 1) &&
+         external_trust_calls > calls_before;
     pair_free(&accepted);
 
     external_trust_decision = 0;
