@@ -572,6 +572,8 @@ static int session_resumption_version_case(
     SSL_CTX_sess_set_new_cb(client_ctx, capture_session_callback);
     Pair first = new_pair(client_ctx, server_ctx, "localhost", NULL);
     int ok = drive_handshake(&first, 1, MAX_STEPS) &&
+             SSL_session_reused(first.client) == 0 &&
+             SSL_session_reused(first.server) == 0 &&
              verify_negotiation(&first, version) &&
              transfer_payload(&first);
     SSL_SESSION *session = ok

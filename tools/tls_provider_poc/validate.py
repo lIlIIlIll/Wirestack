@@ -203,6 +203,12 @@ def validate_spec(spec: Mapping[str, Any]) -> None:
         if provider["source_kind"] == "archive":
             require(SHA256_RE.fullmatch(str(provider.get("sha256", ""))) is not None,
                     f"{pid}: archive sha256 required")
+            require(isinstance(provider.get("tag"), str) and provider["tag"],
+                    f"{pid}: release tag required")
+            require(isinstance(provider.get("commit_resolution_url"), str) and
+                    provider["commit_resolution_url"].startswith(
+                        "https://api.github.com/repos/"),
+                    f"{pid}: release tag resolution URL required")
         else:
             require(COMMIT_RE.fullmatch(str(provider.get("tree", ""))) is not None,
                     f"{pid}: exact source tree required")
@@ -321,6 +327,10 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
         if provider_spec["source_kind"] == "archive":
             require(source.get("content_sha256") == provider_spec["sha256"],
                     "source archive digest does not match provider pin")
+            require(source.get("tag") == provider_spec["tag"],
+                    "source release tag does not match provider pin")
+            require(source.get("tag_resolved_commit") == provider_spec["commit"],
+                    "source release tag commit does not match provider pin")
         else:
             require(source.get("tree") == provider_spec.get("tree"),
                     "source tree does not match provider pin")

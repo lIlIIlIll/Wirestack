@@ -2,11 +2,12 @@
 
 ## Status
 
-M0-016 remains **BLOCKED** only at the full cross-platform task level. All 12
-desktop schema-v10 cells are current: AWS-LC passes on Linux glibc, Linux musl,
-Windows and macOS; Mbed TLS and OpenSSL retain explicit PARTIAL results for
-unsupported capabilities. Android, iOS, and HarmonyOS or OpenHarmony still
-lack native-device evidence; cross-compilation does not satisfy those cells.
+M0-016 remains **BLOCKED**. The 12 retained desktop schema-v10 results predate
+independent release-tag resolution for archive providers and explicit
+fresh-handshake cache-miss assertions for the OpenSSL-compatible PoC. Native
+reruns are pending and the canonical matrix marks those cells `NOT_RUN`.
+Android, iOS, and HarmonyOS or OpenHarmony also still lack native-device
+evidence; cross-compilation does not satisfy those cells.
 
 Schema v10 retains all prior native evidence plus:
 
@@ -45,14 +46,15 @@ LeakSanitizer as unsupported by the hosted toolchain. Linux musl and Windows
 record the configured sanitizer diagnostic as unsupported; they do not report
 a skipped diagnostic as PASS.
 
-## Current schema-v10 desktop runs
+## Superseded schema-v10 desktop runs
 
 [TLS Provider PoC run
 33430599975](https://github.com/lIlIIlIll/Wirestack/actions/runs/33430599975)
 produced the Linux glibc, Linux musl, and macOS results. [M0-016 Windows
 Provider PoC run
 33430600118](https://github.com/lIlIIlIll/Wirestack/actions/runs/33430600118)
-produced the Windows results. Both pull-request runs identify head
+produced the Windows results. They are retained for audit history but no longer
+satisfy the strengthened source and resumption contract. Both pull-request runs identify head
 `74985fb2c506cea3e007258878a038e0dc6c0c34`. GitHub executed synthetic merge
 revision `72ac887eb974b177b9af09529c09166ec8db6303`; every retained result binds
 that exact execution revision.

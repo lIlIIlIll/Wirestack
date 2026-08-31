@@ -40,6 +40,8 @@
       "version": "4.2.0",
       "source_kind": "archive",
       "url": "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-4.2.0/mbedtls-4.2.0.tar.bz2",
+      "tag": "mbedtls-4.2.0",
+      "commit_resolution_url": "https://api.github.com/repos/Mbed-TLS/mbedtls/git/ref/tags/mbedtls-4.2.0",
       "sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
       "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
       "license_expression": "Apache-2.0 OR GPL-2.0-or-later",
@@ -98,6 +100,7 @@
       "url": "https://github.com/openssl/openssl/releases/download/openssl-3.6.4/openssl-3.6.4.tar.gz",
       "sha256": "9bffaa1ad1e07b354c21bd3324ec02fa15579f45a7d0494b3e74bc449b7333ef",
       "tag": "openssl-3.6.4",
+      "commit_resolution_url": "https://api.github.com/repos/openssl/openssl/git/ref/tags/openssl-3.6.4",
       "commit": "d3c1b1169b3569ff3069e5b399f47b2b28e03d79",
       "license_expression": "Apache-2.0",
       "security_update": {
