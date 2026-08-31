@@ -20,6 +20,42 @@
 static const unsigned char ALPN_WIRE[] = {2, 'h', '2', 8, 'h','t','t','p','/','1','.','1'};
 static int sni_seen = 0;
 static int alpn_seen = 0;
+static int external_trust_decision = 0;
+static unsigned int external_trust_calls = 0;
+static SSL_SESSION *captured_session = NULL;
+
+#if defined(OPENSSL_IS_AWSLC)
+static enum ssl_verify_result_t external_trust_callback(
+    SSL *ssl, uint8_t *out_alert) {
+    (void)ssl;
+    external_trust_calls++;
+    if (external_trust_decision) return ssl_verify_ok;
+    *out_alert = SSL_AD_CERTIFICATE_UNKNOWN;
+    return ssl_verify_invalid;
+}
+#else
+static int external_trust_callback(X509_STORE_CTX *store, void *opaque) {
+    (void)opaque;
+    external_trust_calls++;
+    if (external_trust_decision) {
+        X509_STORE_CTX_set_error(store, X509_V_OK);
+        return 1;
+    }
+    X509_STORE_CTX_set_error(store, X509_V_ERR_CERT_REJECTED);
+    return 0;
+}
+#endif
+
+static int capture_session_callback(SSL *ssl, SSL_SESSION *session) {
+    (void)ssl;
+    if (captured_session != NULL) SSL_SESSION_free(captured_session);
+    if (SSL_SESSION_up_ref(session) != 1) {
+        captured_session = NULL;
+        return 0;
+    }
+    captured_session = session;
+    return 1;
+}
 
 #if defined(OPENSSL_IS_AWSLC)
 static EVP_PKEY *external_signer_key = NULL;
@@ -167,6 +203,15 @@ static SSL_CTX *make_client_ctx(const char *ca, const char *cert, const char *ke
     }
     SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_CLIENT);
     return ctx;
+}
+
+static void configure_external_trust(SSL_CTX *ctx) {
+#if defined(OPENSSL_IS_AWSLC)
+    SSL_CTX_set_custom_verify(ctx, SSL_VERIFY_PEER, external_trust_callback);
+#else
+    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+    SSL_CTX_set_cert_verify_callback(ctx, external_trust_callback, NULL);
+#endif
 }
 
 typedef struct {
@@ -325,16 +370,37 @@ static int basic_case(const char *server_cert, const char *server_key, const cha
     return ok;
 }
 
-static int session_resumption_case(const char *server_cert, const char *server_key,
-                                   const char *ca) {
+static SSL_SESSION *session_after_handshake(Pair *p, SSL_CTX *client_ctx, int version) {
+    if (version == TLS1_2_VERSION) return SSL_get1_session(p->client);
+    for (int step = 0; step < MAX_STEPS && captured_session == NULL; ++step) {
+        unsigned char byte = 0;
+        int ret = SSL_read(p->client, &byte, 1);
+        if (ret > 0) return NULL;
+        int error = SSL_get_error(p->client, ret);
+        if (error != SSL_ERROR_WANT_READ && error != SSL_ERROR_WANT_WRITE)
+            return NULL;
+    }
+    SSL_SESSION *session = captured_session;
+    captured_session = NULL;
+    SSL_CTX_sess_set_new_cb(client_ctx, NULL);
+    return session;
+}
+
+static int session_resumption_version_case(
+    const char *server_cert, const char *server_key, const char *ca, int version) {
     SSL_CTX *server_ctx = make_server_ctx(
-        server_cert, server_key, ca, TLS1_2_VERSION, 0, 0);
-    SSL_CTX *client_ctx = make_client_ctx(ca, NULL, NULL, TLS1_2_VERSION, 1);
+        server_cert, server_key, ca, version, 0, 0);
+    SSL_CTX *client_ctx = make_client_ctx(ca, NULL, NULL, version, 1);
+    if (version == TLS1_3_VERSION) {
+        if (captured_session != NULL) SSL_SESSION_free(captured_session);
+        captured_session = NULL;
+        SSL_CTX_sess_set_new_cb(client_ctx, capture_session_callback);
+    }
     Pair first = new_pair(client_ctx, server_ctx, "localhost", NULL);
     int ok = drive_handshake(&first, 1, MAX_STEPS) &&
-             verify_negotiation(&first, TLS1_2_VERSION) &&
+             verify_negotiation(&first, version) &&
              transfer_payload(&first);
-    SSL_SESSION *session = ok ? SSL_get1_session(first.client) : NULL;
+    SSL_SESSION *session = ok ? session_after_handshake(&first, client_ctx, version) : NULL;
     ok = ok && session != NULL;
     if (ok) ok = clean_shutdown(&first);
     free_pair(&first);
@@ -344,7 +410,7 @@ static int session_resumption_case(const char *server_cert, const char *server_k
         ok = drive_handshake(&resumed, 1, MAX_STEPS) &&
              SSL_session_reused(resumed.client) == 1 &&
              SSL_session_reused(resumed.server) == 1 &&
-             verify_negotiation(&resumed, TLS1_2_VERSION) &&
+             verify_negotiation(&resumed, version) &&
              transfer_payload(&resumed);
         if (ok) ok = clean_shutdown(&resumed);
         free_pair(&resumed);
@@ -353,6 +419,46 @@ static int session_resumption_case(const char *server_cert, const char *server_k
     SSL_CTX_free(client_ctx);
     SSL_CTX_free(server_ctx);
     return ok;
+}
+
+static int session_resumption_case(const char *server_cert, const char *server_key,
+                                   const char *ca) {
+    return session_resumption_version_case(
+               server_cert, server_key, ca, TLS1_2_VERSION) &&
+           session_resumption_version_case(
+               server_cert, server_key, ca, TLS1_3_VERSION);
+}
+
+static int external_trust_version_case(
+    const char *server_cert, const char *server_key, int version) {
+    SSL_CTX *server_ctx = make_server_ctx(
+        server_cert, server_key, NULL, version, 0, 0);
+    SSL_CTX *client_ctx = make_client_ctx(NULL, NULL, NULL, version, 0);
+    configure_external_trust(client_ctx);
+    external_trust_decision = 1;
+    unsigned int calls_before = external_trust_calls;
+    Pair accepted = new_pair(client_ctx, server_ctx, "localhost", NULL);
+    int ok = drive_handshake(&accepted, 1, MAX_STEPS) &&
+             external_trust_calls > calls_before;
+    free_pair(&accepted);
+
+    external_trust_decision = 0;
+    calls_before = external_trust_calls;
+    Pair rejected = new_pair(client_ctx, server_ctx, "localhost", NULL);
+    ok = ok && drive_handshake(&rejected, 0, MAX_STEPS) &&
+         external_trust_calls > calls_before;
+    free_pair(&rejected);
+    SSL_CTX_free(client_ctx);
+    SSL_CTX_free(server_ctx);
+    ERR_clear_error();
+    return ok;
+}
+
+static int external_trust_case(const char *server_cert, const char *server_key) {
+    external_trust_calls = 0;
+    return external_trust_version_case(server_cert, server_key, TLS1_2_VERSION) &&
+           external_trust_version_case(server_cert, server_key, TLS1_3_VERSION) &&
+           external_trust_calls >= 4;
 }
 
 static int negative_case(const char *server_cert, const char *server_key, const char *ca,
@@ -466,6 +572,7 @@ int main(int argc, char **argv) {
     int mtls = basic_case(server_cert, server_key, ca, client_cert, client_key,
                           TLS1_2_VERSION, 1);
     int session_resumption = session_resumption_case(server_cert, server_key, ca);
+    int external_trust = external_trust_case(server_cert, server_key);
     int wrong_host = negative_case(server_cert, server_key, ca, "not-localhost", 1);
     int untrusted = negative_case(server_cert, server_key, ca, "localhost", 0);
     int trunc = truncation_case(server_cert, server_key, ca);
@@ -488,6 +595,7 @@ int main(int argc, char **argv) {
     printf("CAP tls13=%s\n", tls13 ? "PASS" : "FAIL");
     printf("CAP sni_hostname_alpn=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
     printf("CAP custom_ca=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
+    printf("CAP external_trust=%s\n", external_trust ? "PASS" : "FAIL");
     printf("CAP partial_io_backpressure=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
     printf("CAP mtls=%s\n", mtls ? "PASS" : "FAIL");
     printf("CAP session_resumption=%s\n", session_resumption ? "PASS" : "FAIL");
@@ -505,12 +613,17 @@ int main(int argc, char **argv) {
     printf("METRIC repeated_cleanup_cycles=%d\n", CLEANUP_CYCLES);
     printf("METRIC failure_cleanup_cycles=%d\n", FAILURE_CLEANUP_CYCLES);
     printf("METRIC session_resumption_handshakes=%d\n",
+           session_resumption ? 4 : 0);
+    printf("METRIC session_resumption_tls12_handshakes=%d\n",
            session_resumption ? 2 : 0);
+    printf("METRIC session_resumption_tls13_handshakes=%d\n",
+           session_resumption ? 2 : 0);
+    printf("METRIC external_trust_calls=%u\n", external_trust_calls);
 #if defined(OPENSSL_IS_AWSLC)
     printf("METRIC external_signer_calls=%u\n", external_signer_calls);
 #endif
 
-    return (tls12 && tls13 && mtls && session_resumption && wrong_host &&
+    return (tls12 && tls13 && mtls && session_resumption && external_trust && wrong_host &&
             untrusted && trunc && cancel &&
             cleanup && failure_cleanup &&
 #if defined(OPENSSL_IS_AWSLC)

@@ -390,6 +390,14 @@ def parse_metrics(stdout: str, provider: str, caps: Mapping[str, str]) -> dict[s
     if provider == "aws-lc" and caps.get("external_signer") == "PASS":
         if metrics.get("external_signer_calls", 0) < 2:
             raise PocError("AWS-LC external signer did not serve both TLS versions")
+    if caps.get("external_trust") == "PASS" and metrics.get("external_trust_calls", 0) < 4:
+        raise PocError("external trust callback did not serve accept/reject on both TLS versions")
+    if caps.get("session_resumption") == "PASS" and (
+        metrics.get("session_resumption_handshakes") != 4
+        or metrics.get("session_resumption_tls12_handshakes") != 2
+        or metrics.get("session_resumption_tls13_handshakes") != 2
+    ):
+        raise PocError("session resumption did not cover TLS 1.2 and TLS 1.3")
     return metrics
 
 

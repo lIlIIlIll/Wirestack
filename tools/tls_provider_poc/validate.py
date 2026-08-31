@@ -109,8 +109,16 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                     metrics["external_signer_calls"] >= 2,
                     "AWS-LC external signer must serve TLS 1.2 and TLS 1.3")
         if schema_version == 3 and caps.get("session_resumption") == "PASS":
-            require(metrics.get("session_resumption_handshakes") == 2,
-                    "schema v3 session resumption requires two measured handshakes")
+            require(metrics.get("session_resumption_handshakes") == 4,
+                    "schema v3 session resumption requires four measured handshakes")
+            require(metrics.get("session_resumption_tls12_handshakes") == 2,
+                    "schema v3 requires a TLS 1.2 resumed session")
+            require(metrics.get("session_resumption_tls13_handshakes") == 2,
+                    "schema v3 requires a TLS 1.3 resumed ticket")
+        if caps.get("external_trust") == "PASS":
+            require(isinstance(metrics.get("external_trust_calls"), int) and
+                    metrics["external_trust_calls"] >= 4,
+                    "external trust must accept and reject both TLS versions")
     if result["status"] in {"PASS", "PARTIAL"}:
         require(build.get("static_archives"), "successful result requires static archives")
         require(build.get("system_tls_dependencies") == [], "system TLS dependency detected")
@@ -118,7 +126,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                 "runtime TLS loader string detected")
         require(all(value != "FAIL" for value in caps.values()), "PARTIAL/PASS result contains failed capability")
     if result["status"] == "PASS":
-        require(schema_version in {2, 3}, "PASS requires measured cleanup evidence")
+        require(schema_version == 3, "PASS requires schema v3 dual-version session evidence")
         require(all(value == "PASS" for value in caps.values()), "PASS requires all capabilities PASS")
     if any(value == "BLOCKED" for value in caps.values()):
         require(result["status"] != "PASS", "blocked capability cannot yield PASS")
