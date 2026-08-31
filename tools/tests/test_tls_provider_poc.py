@@ -623,10 +623,13 @@ class ProviderPocValidationTests(unittest.TestCase):
                 self.assertEqual("UNSUPPORTED", aws["leak_detection"]["status"])
                 self.assertIn("detect_leaks=0", run_mock.call_args.kwargs["env"]["ASAN_OPTIONS"])
                 openssl = runner.run_native_memory_diagnostic(
-                    {"id": "openssl"}, root, root / "src", root, root / "log",
+                    {"id": "openssl", "version": "9.9.9"}, root,
+                    root / "src", root, root / "log",
                     fixtures, "linux-glibc-x86_64",
                 )
                 self.assertEqual("UNSUPPORTED", openssl["leak_detection"]["status"])
+                self.assertIn("OpenSSL 9.9.9", openssl["leak_detection"]["reason"])
+                self.assertNotIn("OpenSSL 3.6.3", openssl["leak_detection"]["reason"])
                 self.assertIn("detect_leaks=0", run_mock.call_args.kwargs["env"]["ASAN_OPTIONS"])
                 mbedtls = runner.run_native_memory_diagnostic(
                     {"id": "mbedtls"}, root, root / "src", root, root / "log",
