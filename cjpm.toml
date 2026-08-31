@@ -36,7 +36,7 @@
   wirestack_resolver = { path = "./target/native/resolver/macos-arm64/current/lib" }
 
 [target.arm64-apple-ios11-simulator]
-  override-compile-option = "--sysroot ${WIRESTACK_IOS_SIMULATOR_SYSROOT}"
+  override-compile-option = "--sysroot ./target/native/resolver/ios-simulator-arm64/sdk"
   link-option = ""
 
 [target.arm64-apple-ios11-simulator.ffi.c]
