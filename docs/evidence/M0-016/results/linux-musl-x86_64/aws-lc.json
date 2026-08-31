@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 4442952,
-    "binary_sha256": "198932deb46221af325cfa11cfe5750eba6863c9496331040d098116a3a8ae00",
+    "binary_bytes": 4443128,
+    "binary_sha256": "bcc4dda061ffe8c39415182e2794133d73046333a473d1ed97f4b6382ff2edc8",
     "exported_symbol_inventory": {
       "count": 3794,
       "scope": "final-artifact-exports",
@@ -3893,7 +3893,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "64edbd48840d4efbfc05be945dd50572cae0285587eab2d76a3f77b1e3284970",
+  "build_log_sha256": "175bdb605009418d1a88eb57e64005fe90d44192d6c0902af9e757d4dde7860f",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -3918,30 +3918,32 @@
     "image_os": "alpine",
     "image_version": "3.22.5",
     "python": "3.14.7",
-    "repository_revision": "0970f3984eb523cc1571b864e72bfdddef10f3d8",
+    "repository_revision": "bbd2b22404d47f674842c50eabe2debd12d79787",
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T14:21:29.512013+00:00",
+  "finished_at": "2026-08-31T16:05:42.607830+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 28,
+    "cancellation_latency_us": 83,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 30924800,
+    "memory_profile_peak_resident_bytes": 30826496,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 1391265408,
+    "provider_allocation_bytes": 1266677576,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 10295027,
-    "provider_allocation_peak_live_bytes": 223598,
+    "provider_allocation_calls": 10275057,
+    "provider_allocation_live_after_cleanup_bytes": 152884,
+    "provider_allocation_live_before_cleanup_bytes": 152884,
+    "provider_allocation_peak_live_bytes": 213301,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -3953,19 +3955,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 28,
-      "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+      "latency_us": 83,
+      "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 30924800,
+      "peak_resident_bytes": 30826496,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 1391265408,
+      "provider_allocation_bytes": 1266677576,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 10295027,
-      "provider_allocation_peak_live_bytes": 223598,
+      "provider_allocation_calls": 10275057,
+      "provider_allocation_live_after_cleanup_bytes": 152884,
+      "provider_allocation_live_before_cleanup_bytes": 152884,
+      "provider_allocation_peak_live_bytes": 213301,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -3977,14 +3981,14 @@
   "platform": "linux-musl-x86_64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 6,
+  "schema_version": 7,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
     "kind": "git",
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T14:20:27.232865+00:00",
+  "started_at": "2026-08-31T16:04:02.214888+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }

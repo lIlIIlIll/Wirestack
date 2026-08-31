@@ -16,14 +16,11 @@ private-key isolation, native callbacks and deterministic cleanup.
 
 AWS-LC 5.5.0 at commit
 `991e67ff4cf04df4dd89e407f8b920c6936cb56a` was originally selected from the
-earlier PoC evidence and was requalified with schema-v6 `PASS` results on
-Linux glibc x86_64 and Linux musl x86_64. GitHub Actions run `33401994988`
-reports pull-request head `0b8e3181a82f8eb062e24e63edf57fc05850d859`
-and executed synthetic merge revision
-`0970f3984eb523cc1571b864e72bfdddef10f3d8`. The retained results bind that
-execution revision and record the now-superseded evidence below. Schema v7
-requires a bounded worker join and zero cleanup live-allocation growth, so the
-canonical cells remain `NOT_RUN` until native reruns are retained:
+earlier PoC evidence and is requalified with schema-v7 `PASS` results on Linux
+glibc x86_64 and Linux musl x86_64. GitHub Actions run `33411959747` reports
+pull-request head `bdad23f7dbf86c91245f64dab029dd75bbad0d56` and executed
+synthetic merge revision `bbd2b22404d47f674842c50eabe2debd12d79787`.
+The retained results bind that execution revision and record:
 
 - TLS 1.2 and TLS 1.3 client/server handshakes over caller-owned bounded BIOs;
 - SNI, reference-identity verification, ALPN, custom CA, required mTLS,
@@ -35,12 +32,13 @@ canonical cells remain `NOT_RUN` until native reruns are retained:
 - an external signing callback invoked by both TLS 1.2 and TLS 1.3 without
   installing the private key into the TLS context;
 - 10,000 repeated handshake/close cycles with bounded resident memory,
-  provider allocation-call count, cumulative allocated bytes and peak live
-  bytes;
+  provider allocation-call count, cumulative allocated bytes, peak live bytes
+  and no increase between the before/after cleanup live-allocation values;
 - provider-instrumented ASan and UBSan on Linux glibc, with the process-global
   AWS-LC leak-detection limitation recorded as unsupported rather than
   suppressed;
-- committed, digest-bound provider license payloads, exact repository, runner,
+- committed, digest-bound provider license payloads, bounded source-pin age,
+  official advisory intake channels, exact repository, runner,
   toolchain, target, configure/build arguments, environment, patch-set, source
   and archive identity, and complete bounded symbol inventories; and
 - static archives with no system TLS-library dependency or runtime-loader
@@ -84,8 +82,10 @@ provider manifest records at least:
 - `externalOpenSslDependency: false`.
 
 The Wirestack maintainers own advisory intake, source-pin updates and downstream
-release publication. M7-015 defines the final severity SLA and operational
-runbook; until then, a known affected pin blocks a release.
+release publication. M0-016 defines the intake channels, maximum pin age and
+rerun boundary in `docs/security/provider-update-workflow.md`. M7-015 defines
+the final severity SLA, notification and downstream publication runbook. A
+known affected pin blocks a release.
 
 Rollback means publishing or restoring a previously reviewed pinned AWS-LC
 build and rerunning its Linux gates. It never means enabling a system library or
@@ -95,7 +95,7 @@ artifact is withdrawn rather than silently downgraded.
 ## Consequences
 
 - Existing Linux TLS integration retains the frozen provider and C ABI
-  decision, but the schema-v7 Linux AWS-LC qualification is pending rerun.
+  decision. The current schema-v7 Linux AWS-LC qualification is `PASS`.
 - M0-016 as a global task remains `BLOCKED` because Android, iOS and HarmonyOS
   or OpenHarmony still lack native-device evidence.
 - AWS-LC-specific code remains internal to the native provider adapter.

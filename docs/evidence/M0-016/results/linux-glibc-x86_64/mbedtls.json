@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 873560,
-    "binary_sha256": "512c1d892526e25a7434a07cb487d2c38e1f19e6e1bb176c962d89c205ef8728",
+    "binary_bytes": 873776,
+    "binary_sha256": "39a0ac2648ad58607e0b3cc1e6b1d17cfffeb58ea73924de87cd5e1fd948c632",
     "exported_symbol_inventory": {
       "count": 1118,
       "scope": "final-artifact-exports",
@@ -1187,6 +1187,7 @@
         "-DENABLE_TESTING=OFF",
         "-DENABLE_PROGRAMS=OFF",
         "-DUSE_SHARED_MBEDTLS_LIBRARY=OFF",
+        "-DMBEDTLS_USER_CONFIG_FILE=<REPOSITORY>/tools/tls_provider_poc/mbedtls_provider_profile_config.h",
         "-DTF_PSA_CRYPTO_USER_CONFIG_FILE=<REPOSITORY>/tools/tls_provider_poc/mbedtls_provider_profile_config.h",
         "-DCMAKE_INSTALL_PREFIX=<PREFIX>"
       ],
@@ -1209,9 +1210,9 @@
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 527948,
+        "bytes": 527980,
         "name": "libmbedtls.a",
-        "sha256": "50fa6e3282ed2fc78df2124ad09ee031176b85d1904972cad10c0705c851bbfa"
+        "sha256": "694dd9fbb24837e9020ed4020f5d8fb65a673c47b71773b64c63d57508960664"
       },
       {
         "bytes": 160406,
@@ -1226,7 +1227,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "e373dbfea03a3afb2d687d82a51b96d2e6d06fdf2113720aeaaa0ca48999d9a2",
+  "build_log_sha256": "e8e11b373dc3cdcb70397c2f3facd8dd4aa0951a3e333fc937d5425eba22fca0",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -1251,11 +1252,11 @@
     "image_os": "ubuntu24",
     "image_version": "20260823.283.1",
     "python": "3.12.14",
-    "repository_revision": "0970f3984eb523cc1571b864e72bfdddef10f3d8",
+    "repository_revision": "bbd2b22404d47f674842c50eabe2debd12d79787",
     "runner_arch": "X64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T14:22:16.963491+00:00",
+  "finished_at": "2026-08-31T16:05:57.345232+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
@@ -1265,14 +1266,16 @@
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 36007936,
+    "memory_profile_peak_resident_bytes": 36233216,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 8202364492,
+    "provider_allocation_bytes": 8202668568,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 133207688,
-    "provider_allocation_peak_live_bytes": 117634,
+    "provider_allocation_calls": 133210063,
+    "provider_allocation_live_after_cleanup_bytes": 7642,
+    "provider_allocation_live_before_cleanup_bytes": 7642,
+    "provider_allocation_peak_live_bytes": 117636,
     "repeated_cleanup_cycles": 10000
   },
   "notes": [
@@ -1282,18 +1285,20 @@
     "cancellation": {
       "bound_us": 250000,
       "latency_us": 69,
-      "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+      "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 36007936,
+      "peak_resident_bytes": 36233216,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 8202364492,
+      "provider_allocation_bytes": 8202668568,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 133207688,
-      "provider_allocation_peak_live_bytes": 117634,
+      "provider_allocation_calls": 133210063,
+      "provider_allocation_live_after_cleanup_bytes": 7642,
+      "provider_allocation_live_before_cleanup_bytes": 7642,
+      "provider_allocation_peak_live_bytes": 117636,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -1301,7 +1306,7 @@
       "leak_detection": {
         "status": "PASS"
       },
-      "output_sha256": "edb3f86137c6e30eaf3f004e2956e21e08e268a087f29acb7601622c179b9307",
+      "output_sha256": "67a918e990bc6a698aebf853f7805d5971ec50baa832e4b5be6d184083574cf5",
       "provider_build_provenance": {
         "build_argv": [
           [
@@ -1355,6 +1360,7 @@
           "-DENABLE_TESTING=OFF",
           "-DENABLE_PROGRAMS=OFF",
           "-DUSE_SHARED_MBEDTLS_LIBRARY=OFF",
+          "-DMBEDTLS_USER_CONFIG_FILE=<REPOSITORY>/tools/tls_provider_poc/mbedtls_provider_profile_config.h",
           "-DTF_PSA_CRYPTO_USER_CONFIG_FILE=<REPOSITORY>/tools/tls_provider_poc/mbedtls_provider_profile_config.h",
           "-DCMAKE_C_FLAGS=-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer",
           "-DCMAKE_CXX_FLAGS=-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer",
@@ -1380,9 +1386,9 @@
       "provider_instrumented": true,
       "provider_static_archives": [
         {
-          "bytes": 8160822,
+          "bytes": 8161078,
           "name": "libmbedtls.a",
-          "sha256": "4687138988bfdd57a0e6b8dfb90349409a39f92d9ac85258991cc0bd6ea4aa9b"
+          "sha256": "666c2b5bdbe8ca7104476d6f8c809155d030f3b3630c11f0a1ec18f57a4151e2"
         },
         {
           "bytes": 1944952,
@@ -1402,14 +1408,14 @@
   "platform": "linux-glibc-x86_64",
   "poc_exit_code": 0,
   "provider": "mbedtls",
-  "schema_version": 6,
+  "schema_version": 7,
   "source": {
     "archive": "mbedtls-4.2.0.tar.bz2",
     "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
     "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T14:20:50.542244+00:00",
+  "started_at": "2026-08-31T16:04:11.017409+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
