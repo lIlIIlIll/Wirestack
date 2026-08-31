@@ -20,6 +20,7 @@ from typing import Any, Mapping, Sequence
 
 CAP_RE = re.compile(r"^CAP\s+([a-z0-9_]+)=(PASS|FAIL|BLOCKED|NOT_RUN)$", re.M)
 METRIC_RE = re.compile(r"^METRIC\s+([a-z0-9_]+)=([0-9]+)$", re.M)
+COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 FORBIDDEN_DEP_RE = re.compile(
     r"(?:"
     r"(?:lib)?(?:mbedtls|mbedx509|tfpsacrypto|mbedcrypto)[^\s/\\]*"
@@ -106,6 +107,50 @@ def run(command: Sequence[str], *, cwd: Path, log: Path,
     if check and completed.returncode != 0:
         raise PocError(f"command failed ({completed.returncode}): {rendered}")
     return completed
+
+
+def execution_identity(repo: Path, log: Path) -> dict[str, str]:
+    revision = os.environ.get("GITHUB_SHA", "").lower()
+    if revision:
+        if COMMIT_RE.fullmatch(revision) is None:
+            raise PocError("GITHUB_SHA is not an exact commit")
+    else:
+        status = run(
+            ["git", "status", "--porcelain", "--untracked-files=no"],
+            cwd=repo, log=log, check=False)
+        if status.returncode != 0:
+            raise PocError("unable to inspect local repository state")
+        if status.stdout.strip():
+            raise PocError("local repository has tracked modifications")
+        resolved = run(
+            ["git", "rev-parse", "--verify", "HEAD"],
+            cwd=repo, log=log, check=False)
+        revision = resolved.stdout.strip().lower()
+        if resolved.returncode != 0 or COMMIT_RE.fullmatch(revision) is None:
+            raise PocError("unable to resolve an exact local repository revision")
+
+    runner_os = os.environ.get("RUNNER_OS", platform.system())
+    runner_arch = os.environ.get("RUNNER_ARCH", platform.machine())
+    image_os = os.environ.get("ImageOS", "")
+    image_version = os.environ.get("ImageVersion", "")
+    if not image_os:
+        image_os = f"local-{platform.system().lower()}"
+    if not image_version:
+        image_version = platform.platform(aliased=True, terse=True)
+    identity = {
+        "repository_revision": revision,
+        "runner_os": bounded_utf8(runner_os, 128),
+        "runner_arch": bounded_utf8(runner_arch, 128),
+        "image_os": bounded_utf8(image_os, 256),
+        "image_version": bounded_utf8(image_version, 512),
+        "container_image": bounded_utf8(
+            os.environ.get("WIRESTACK_CONTAINER_IMAGE", ""), 512),
+        "python": platform.python_version(),
+    }
+    if not all(identity[key] for key in (
+            "runner_os", "runner_arch", "image_os", "image_version")):
+        raise PocError("execution platform identity is incomplete")
+    return identity
 
 
 def safe_extract(archive: Path, destination: Path) -> Path:
@@ -916,15 +961,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "platform": current_platform,
         "status": "FAIL",
         "started_at": started.isoformat(),
-        "execution": {
-            "repository_revision": os.environ.get("GITHUB_SHA", ""),
-            "runner_os": os.environ.get("RUNNER_OS", platform.system()),
-            "runner_arch": os.environ.get("RUNNER_ARCH", platform.machine()),
-            "image_os": os.environ.get("ImageOS", ""),
-            "image_version": os.environ.get("ImageVersion", ""),
-            "container_image": os.environ.get("WIRESTACK_CONTAINER_IMAGE", ""),
-            "python": platform.python_version(),
-        },
+        "execution": {},
         "source": {},
         "capabilities": {name: "NOT_RUN" for name in spec_all["required_capabilities"]},
         "build": {"static_archives": [], "system_tls_dependencies": []},
@@ -935,6 +972,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     }
     phase = "source-acquisition"
     try:
+        result["execution"] = execution_identity(repo, log)
         src, source_info = source_provider(spec, work, log)
         result["source"] = source_info
         phase = "license-bundle"

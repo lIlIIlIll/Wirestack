@@ -504,6 +504,27 @@ class ProviderPocValidationTests(unittest.TestCase):
             self.assertNotIn("WIRESTACK_GITHUB_TOKEN",
                              execute.call_args.kwargs["env"])
 
+    def test_local_execution_identity_uses_clean_exact_checkout(self):
+        clean = mock.Mock(returncode=0, stdout="")
+        revision = mock.Mock(returncode=0, stdout="a" * 40 + "\n")
+        with mock.patch.dict(
+                runner.os.environ, {"GITHUB_SHA": ""}, clear=True), \
+                mock.patch.object(
+                    runner, "run", side_effect=[clean, revision]):
+            identity = runner.execution_identity(ROOT, ROOT / "unused.log")
+        self.assertEqual(identity["repository_revision"], "a" * 40)
+        self.assertTrue(identity["image_os"].startswith("local-"))
+        self.assertTrue(identity["image_version"])
+
+    def test_local_execution_identity_rejects_dirty_checkout(self):
+        dirty = mock.Mock(returncode=0, stdout=" M tracked-file\n")
+        with mock.patch.dict(
+                runner.os.environ, {"GITHUB_SHA": ""}, clear=True), \
+                mock.patch.object(runner, "run", return_value=dirty):
+            with self.assertRaisesRegex(
+                    runner.PocError, "local repository has tracked modifications"):
+                runner.execution_identity(ROOT, ROOT / "unused.log")
+
     def test_missing_platform_cell_fails(self):
         value = copy.deepcopy(self.matrix)
         value["cells"].pop()
@@ -1220,7 +1241,10 @@ class ProviderPocValidationTests(unittest.TestCase):
         ]
         self.assertNotIn("SSL_shutdown(", openssl_local_close)
         self.assertIn("SSL_free(p.client)", openssl_local_close)
-        self.assertIn("peer_error != SSL_ERROR_ZERO_RETURN", openssl_local_close)
+        self.assertIn("peer_error == SSL_ERROR_SSL", openssl_local_close)
+        self.assertIn("peer_error == SSL_ERROR_SYSCALL", openssl_local_close)
+        self.assertNotIn("SSL_ERROR_WANT_READ", openssl_local_close)
+        self.assertNotIn("SSL_ERROR_WANT_WRITE", openssl_local_close)
         self.assertIn("BIO_shutdown_wr(SSL_get_wbio(p.client))", openssl_source)
         mbedtls_local_close = mbedtls_source[
             mbedtls_source.index("static int local_close_version_case"):
@@ -1228,8 +1252,9 @@ class ProviderPocValidationTests(unittest.TestCase):
         ]
         self.assertNotIn("mbedtls_ssl_close_notify", mbedtls_local_close)
         self.assertIn("mbedtls_ssl_free(&p.client)", mbedtls_local_close)
-        self.assertIn("peer_result != MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY",
-                      mbedtls_local_close)
+        self.assertIn("peer_result == 0", mbedtls_local_close)
+        self.assertNotIn("MBEDTLS_ERR_SSL_WANT_READ", mbedtls_local_close)
+        self.assertNotIn("MBEDTLS_ERR_SSL_WANT_WRITE", mbedtls_local_close)
 
         allocation_header = (
             ROOT / "tools/tls_provider_poc/poc_allocation_profile.h"

@@ -720,7 +720,9 @@ static int local_close_version_case(const char *server_cert, const char *server_
         int peer_result = SSL_read(p.server, &byte, 1);
         int peer_error = SSL_get_error(p.server, peer_result);
         ok = (shutdown_state & SSL_SENT_SHUTDOWN) == 0 &&
-             peer_result <= 0 && peer_error != SSL_ERROR_ZERO_RETURN;
+             peer_result <= 0 &&
+             (peer_error == SSL_ERROR_SSL ||
+              peer_error == SSL_ERROR_SYSCALL);
     }
     free_pair(&p);
     SSL_CTX_free(client_ctx);
