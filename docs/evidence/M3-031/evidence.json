@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-31T05:43:06.624593Z",
+  "generated_at_utc": "2026-08-31T06:08:39.362891Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,7 +11,7 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/core-prerequisite-audit.json",
-      "sha256": "57ee7b643e69faa08c3282a3ecedb45eb2096f3847f11aaaa7aca06aa00396ac",
+      "sha256": "81d1e5b0b7e5eee577216103f0fcb5001857e40476ee77174e818602dbc4da05",
       "source_task": "M3-031"
     },
     {
@@ -53,11 +53,11 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/task-check.json",
-      "sha256": "90161e73c2d3f344bfcd1d97861ee70e0acaf72ee6dbc9af09c76e6ffac7b640",
+      "sha256": "9ede0dc37a5c3f37d4ddb29706d0c627f1f5fdd201a734b4e564868af644ab01",
       "source_task": "M3-031"
     }
   ],
-  "revision": "479fdfab77bd1430cbac681e0c6a16ff148d6316",
+  "revision": "c844083538450855b48f8eaba3af8161d7818bbe",
   "schema_version": 1,
   "source_sha256": {
     ".gitattributes": "faf8f88292ca61c9a1ae138b912365c305f4fd0d50cde194da0df8ec4edbbf4a",
@@ -67,11 +67,11 @@
     "docs/evidence/M2-004/evidence.json": "08a835b786a8517fd7e20d69f3cc271fe6f74512876a89524a7ed52a007ff47d",
     "docs/evidence/M2-004/windows-x86_64/report.json": "5d8ba504bc883223ff8c7aff72def24ba27026b5f5d59cf023fb6e499bf1372d",
     "docs/evidence/M2-004/windows-x86_64/validation.json": "9d1e27703172abc87c7731c3b5a71e3309dd5bb0b8f307516caa785f84e2f0dc",
-    "docs/evidence/M2-006/evidence.json": "8a7cff4fcfcbff9ec16bcbe3e689b822289448f1a0e24c7a5ee01bc8ac23d46e",
-    "docs/evidence/M2-006/ios-simulator-arm64/report.json": "5e597a358bf8871638bb6e87e5bb42961abb9399a785ab5f28ea3409235e58f2",
-    "docs/evidence/M2-006/ios-simulator-arm64/validation.json": "77bd3fe851d6bb0eceba6b372a52d4491278bf194f956adf2167bc11f4c075ef",
-    "docs/evidence/M2-006/macos-arm64/report.json": "ac81fdfe25cd4d622a9ff97aae25e3f9ebb1767c70aceb67684a3b1b9040138f",
-    "docs/evidence/M2-006/macos-arm64/validation.json": "ff26188aac4e43ca0f7610f10fbf7097f1a3d7c6ec1c7bfc410dd78b6c7a8ca9",
+    "docs/evidence/M2-006/evidence.json": "68dee005e78844a49e92a79f1659fdf1b7fa31ca460bd82cef5242f1fb1283c4",
+    "docs/evidence/M2-006/ios-simulator-arm64/report.json": "773ee61fb7eeb1a2d12e1556e8eb31c9da268dae2d03a8c6fe866be7ddbab008",
+    "docs/evidence/M2-006/ios-simulator-arm64/validation.json": "c5524e9451b0405ae37a7a8da476f8f299fbeb4e4085ddd4dbd89d5bb2dafc64",
+    "docs/evidence/M2-006/macos-arm64/report.json": "d7b3ac40493905701c97082ee52d3bc3477514d9e979480ad169aa06c5cfb79c",
+    "docs/evidence/M2-006/macos-arm64/validation.json": "2d69cc015a6dd279e2dbe3ad3e432ed9daa49a5cd27118f7cd739ded36c4972b",
     "docs/evidence/M3-028/README.md": "6c82678dfb3e31285896f3df31127422a4c4ff338d2c18cf4a08cd5ea648e9b5",
     "docs/evidence/M3-030/evidence.json": "76ec0141209abca23f498ceae2c8a7368722522fb95386f036c9a8de20089a20",
     "docs/evidence/M3-030/native-abi-report.json": "03881988db42d4e32579fa1fff2ff6e4ab045ed2fab3eedee26ccae0a2d91d35",
@@ -79,7 +79,7 @@
     "docs/evidence/M3-031/README.md": "06f204fcc10121264120b22e4726921b2e26118011bd075e7fea63f94a374d34",
     "docs/evidence/M3-031/test-plan.md": "9556d7ee1d01377098bf3a11056782a1c2e1f8c9a50f70e1c047aacafb5d5b2a",
     "docs/planning/implementation-backlog.md": "b4d4b87731ef2b134afebbb6f2d94d06a633134370646ea03089d1ccaa5b4a02",
-    "docs/planning/status.md": "b236568b70d4be0da6f72d786d6c93719f156a4358a5face6edc9651ceedbea3",
+    "docs/planning/status.md": "9781f51572b374567fb1a191bd4a5fcd162052928480486bd2a488642f3fc895",
     "native/tls/aws_lc/provider.json": "ff4d39359a8ef49ede8272698fe306b7421df2fea04b44744483245f34f619b4",
     "scripts/check-m3-031-desktop-tls-adoption": "b85beab1e5b14840efcf2bc5b71187c1f8ab1c95b4f7d4d3e38446ace3351fd0",
     "src/hostname_verifier.cj": "44769311cc3f97b34d033727d0b16661cbdcf63a69a2c6512569b550970dfca3",
@@ -97,7 +97,7 @@
     "tools/m3_031_desktop_tls_adoption.py": "cadf5a76e87be963aac26910a9520577af483cb3bef82e7513fc7d86243bd12b",
     "tools/repository/repository_tooling.py": "6df2e851944b8a12889082d5ea7c5bbc6b041563c42b86a80cde3ed540525ba9",
     "tools/tasks/M2-004.json": "6baeb6d662ad3fb9b47ee81ef94733edc3c537d312656b94c83f915579fff9c2",
-    "tools/tasks/M2-006.json": "9bea0761cbb83deda3a5068230e0cd87f3d3d9eb8da2e81c56ccb2bfd7595dde",
+    "tools/tasks/M2-006.json": "10a61088c42f3669162780e70e5c062f79e713d79025ed392a70dcb8e966c413",
     "tools/tasks/M3-031.json": "0c1904dc9d8a6445d95549c2e4d25fb23dba49071574405c91d939a832ae3d59",
     "tools/tests/test_m3_031_desktop_tls_adoption.py": "a294aacdc1a035b0fcd3bec8c87903fc5fb48a1e31bf99462ff5f1d957e5c26e",
     "tools/tests/test_m7_linux_task_graph.py": "d732e470decf8df6fba7e5483d4bb64d512046dcfdd3d60c534e49a40a80905b",
