@@ -1,7 +1,8 @@
 {
   "expected_mode": "macos",
-  "expected_revision": "843cec9644d3fb4ae844045fca7f56cc6ed0a1a4",
+  "expected_revision": "fdb95009681393bae3dd3f001468cb9e468199c7",
   "failures": [],
+  "report_sha256": "eee6d5c7818a8b324d14562ac03df7b9e173a12794bd1ab5827f325391731835",
   "schema_version": 1,
   "status": "PASS",
   "task_id": "M2-006"
