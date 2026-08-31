@@ -1,28 +1,28 @@
 {
   "build": {
-    "binary_bytes": 759296,
-    "binary_sha256": "4ac15f2ffef7d5c0f2fc8e584cf26f05c3e848c31f8d9dd17e51566627f4a634",
+    "binary_bytes": 761344,
+    "binary_sha256": "7ae0f63487a03e9261484e5e2179bac33ff5ea0d8b22f0ae4c0efaf8bf716372",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 1208884,
         "name": "mbedtls.lib",
-        "sha256": "65a66bef33b4af4dd2476be5e9de378f9690f4cd4689a7f89f852c35856d0dda"
+        "sha256": "284babb894ecd8c78c936a3ecdd91639c7835485053c1ce4a65288fa58597040"
       },
       {
         "bytes": 391948,
         "name": "mbedx509.lib",
-        "sha256": "d1e35e7bc9a29b96f715b05277a84382f37b5487402b4c99688af5a7d5c77ecd"
+        "sha256": "e3f4f8c0b050401186dd38143f45e1bc9512251ac0e682941f53934cba8c4c90"
       },
       {
         "bytes": 1687036,
         "name": "tfpsacrypto.lib",
-        "sha256": "bc2b3705d42022a351831141ec33c8578409a443272c574985ed0291bf8a6358"
+        "sha256": "049d54e07ad893c5683d4928e8274b1934af343bafd865e2986649eea4f434ef"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "f57d70f50d16de3a5fcc70cac913c5ac7847163cbb8fd1aef8a0b50c866a8353",
+  "build_log_sha256": "c40b43e0219f2b3d9165af1c4c212c7f3299e2720a99797a18efbc19bce087bb",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -44,12 +44,14 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "dd9a7f248ec2c60d9a9d965d08af0ac359806f23",
+    "repository_revision": "dc0e4d54e5f35d32a6b974f96a0006595729dbfe",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T09:18:57.475143+00:00",
+  "finished_at": "2026-08-31T09:59:17.159962+00:00",
   "metrics": {
+    "alpn_malformed_inputs_rejected": 2,
+    "alpn_no_overlap_handshakes": 2,
     "external_trust_calls": 4,
     "repeated_cleanup_cycles": 10000
   },
@@ -66,7 +68,7 @@
     "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T09:15:14.356165+00:00",
+  "started_at": "2026-08-31T09:55:29.107465+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
