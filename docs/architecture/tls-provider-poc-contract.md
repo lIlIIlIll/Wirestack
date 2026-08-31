@@ -18,13 +18,27 @@ Version changes require a reviewed change to `tools/tls_provider_poc/providers.j
 - `BLOCKED`: the native platform or required environment is unavailable.
 
 `NOT_RUN`, missing cells and cross-compilation never count as native evidence.
-Schema-v2 `PASS` additionally requires a measured `repeated_cleanup_cycles`
-value of exactly 10,000. An AWS-LC external-signer `PASS` requires at least two
-observed callback invocations so TLS 1.2 and TLS 1.3 are both exercised.
+Schema v3 is required for `PASS`. It requires exactly 10,000 measured cleanup
+cycles. When session resumption passes, the result must record four measured
+handshakes: a fresh and resumed TLS 1.2 handshake, plus a fresh and resumed TLS
+1.3 handshake after ticket delivery. A provider cannot infer resumption from a
+successful fresh handshake.
+
+An external-trust `PASS` requires at least four callback invocations. The PoC
+must accept and reject an otherwise-untrusted valid chain through the callback
+for both TLS 1.2 and TLS 1.3. Installing the same CA in the provider before the
+accept callback runs does not prove external trust. An AWS-LC external-signer
+`PASS` requires at least two observed callback invocations so TLS 1.2 and TLS
+1.3 are both exercised.
 
 ## Required capability surface
 
-The PoC exercises TLS 1.2/1.3, SNI/reference identity/ALPN, caller-supplied CA, mTLS, session behavior, negative certificate cases, caller-driven partial I/O and backpressure, bounded cancellation, clean `close_notify`, truncation classification and repeated cleanup. External/non-exportable signing must be executed or remain explicitly `BLOCKED`; it may not be inferred from a header or marketing claim.
+The PoC exercises TLS 1.2/1.3, SNI/reference identity/ALPN, caller-supplied CA,
+mTLS, dual-version session resumption, negative certificate cases,
+caller-driven partial I/O and backpressure, bounded cancellation, clean
+`close_notify`, truncation classification and repeated cleanup.
+External/non-exportable signing must be executed or remain explicitly
+`BLOCKED`; it may not be inferred from a header or marketing claim.
 
 OpenSSL-compatible candidates use a bounded BIO pair so the caller owns transport progress. Mbed TLS uses caller-provided send/receive callbacks backed by bounded ring buffers. The PoCs never open a socket.
 
