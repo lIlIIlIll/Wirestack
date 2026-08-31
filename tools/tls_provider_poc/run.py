@@ -129,14 +129,15 @@ def execution_identity(repo: Path, log: Path) -> dict[str, str]:
         if resolved.returncode != 0 or COMMIT_RE.fullmatch(revision) is None:
             raise PocError("unable to resolve an exact local repository revision")
 
-    runner_os = os.environ.get("RUNNER_OS", platform.system())
-    runner_arch = os.environ.get("RUNNER_ARCH", platform.machine())
+    runner_os = os.environ.get("RUNNER_OS", "") or platform.system()
+    runner_arch = os.environ.get("RUNNER_ARCH", "") or platform.machine()
     image_os = os.environ.get("ImageOS", "")
     image_version = os.environ.get("ImageVersion", "")
     if not image_os:
         image_os = f"local-{platform.system().lower()}"
     if not image_version:
-        image_version = platform.platform(aliased=True, terse=True)
+        image_version = (
+            platform.platform(aliased=True, terse=True) or platform.release())
     identity = {
         "repository_revision": revision,
         "runner_os": bounded_utf8(runner_os, 128),
