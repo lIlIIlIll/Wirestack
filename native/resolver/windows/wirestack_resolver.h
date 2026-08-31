@@ -14,7 +14,8 @@ enum wirestack_resolver_status {
     WIRESTACK_RESOLVER_CLOSED = 3,
     WIRESTACK_RESOLVER_OVERLOADED = 4,
     WIRESTACK_RESOLVER_PENDING = 5,
-    WIRESTACK_RESOLVER_OUTPUT_TOO_SMALL = 6
+    WIRESTACK_RESOLVER_OUTPUT_TOO_SMALL = 6,
+    WIRESTACK_RESOLVER_SYSTEM_FAILURE = 7
 };
 
 enum wirestack_resolver_result {
@@ -50,7 +51,8 @@ enum wirestack_resolver_metric {
 int32_t wirestack_resolver_pool_create(
     uint64_t worker_count,
     uint64_t queue_capacity,
-    uint64_t *out_pool_handle
+    uint64_t *out_pool_handle,
+    int64_t *out_native_code
 );
 
 int32_t wirestack_resolver_pool_destroy(uint64_t pool_handle);
@@ -68,6 +70,7 @@ int32_t wirestack_resolver_poll(
     uint64_t job_handle,
     int32_t *out_families,
     uint8_t *out_addresses,
+    uint32_t *out_scope_ids,
     uint64_t output_capacity,
     uint64_t *out_count,
     int32_t *out_result,
