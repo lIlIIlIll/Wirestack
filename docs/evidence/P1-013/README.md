@@ -23,7 +23,7 @@ part of P1-013.
 
 ## Verification
 
-- The focused P1-013 regression suite passed 63 tests with no failures or
+- The focused P1-013 regression suite passed 68 tests with no failures or
   errors.
 - The complete repository Python suites passed 257 tooling tests, 169 gate
   tests and 24 benchmark tests.
