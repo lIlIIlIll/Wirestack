@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fail-closed validator for M0-016 provider specifications and evidence."""
 from __future__ import annotations
-import argparse, hashlib, json, re, sys
+import argparse, datetime as dt, hashlib, json, re, sys
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -20,8 +20,13 @@ MEMORY_PROFILE_BOUND_BYTES = 512 * 1024 * 1024
 PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES = 64 * 1024 * 1024 * 1024
 PROVIDER_ALLOCATION_CALL_BOUND = 150_000_000
 CANCELLATION_WAKE_BOUND_US = 250_000
-RESULT_SCHEMA_VERSION = 6
+RESULT_SCHEMA_VERSION = 7
 MAX_TOOL_VERSION_BYTES = 16 * 1024
+FAILURE_STAGES = {
+    "source-acquisition", "license-bundle", "provider-build",
+    "fixture-generation", "poc-build", "binary-inspection",
+    "poc-execution", "native-diagnostic",
+}
 
 class ValidationError(RuntimeError):
     pass
@@ -72,7 +77,7 @@ def validate_tool_identity(value: Any, name: str) -> None:
     require(isinstance(argv, list) and argv and
             all(isinstance(item, str) and 0 < len(item) <= 1024 for item in argv),
             f"{name} argv")
-    require(isinstance(value.get("exit_code"), int), f"{name} exit code")
+    require(value.get("exit_code") == 0, f"{name} identity command failed")
     output = value.get("output")
     require(isinstance(output, str) and output and
             len(output.encode("utf-8")) <= MAX_TOOL_VERSION_BYTES,
@@ -134,6 +139,7 @@ def validate_build_provenance(provenance: Any, provider: str,
         require(all(flag in joined for flag in (
             "-DENABLE_TESTING=OFF", "-DENABLE_PROGRAMS=OFF",
             "-DUSE_SHARED_MBEDTLS_LIBRARY=OFF",
+            "-DMBEDTLS_USER_CONFIG_FILE=<REPOSITORY>/tools/tls_provider_poc/mbedtls_provider_profile_config.h",
             "-DTF_PSA_CRYPTO_USER_CONFIG_FILE=<REPOSITORY>/tools/tls_provider_poc/mbedtls_provider_profile_config.h")),
             "Mbed TLS build flags")
     else:
@@ -161,6 +167,25 @@ def validate_spec(spec: Mapping[str, Any]) -> None:
         if provider["source_kind"] == "archive":
             require(SHA256_RE.fullmatch(str(provider.get("sha256", ""))) is not None,
                     f"{pid}: archive sha256 required")
+        security = provider.get("security_update")
+        require(isinstance(security, dict), f"{pid}: security-update evidence")
+        maximum_age = security.get("maximum_source_pin_age_days")
+        require(isinstance(maximum_age, int) and 1 <= maximum_age <= 365,
+                f"{pid}: maximum source-pin age")
+        try:
+            committed_at = dt.datetime.fromisoformat(
+                str(security.get("source_committed_at", "")).replace("Z", "+00:00"))
+        except ValueError as error:
+            raise ValidationError(f"{pid}: source commit timestamp") from error
+        age_days = (dt.datetime.now(dt.timezone.utc) - committed_at).days
+        require(0 <= age_days <= maximum_age, f"{pid}: source pin is stale")
+        advisory_urls = security.get("advisory_urls")
+        require(isinstance(advisory_urls, list) and advisory_urls and all(
+            isinstance(url, str) and url.startswith("https://")
+            for url in advisory_urls), f"{pid}: advisory intake channels")
+        require(security.get("update_workflow") ==
+                "docs/security/provider-update-workflow.md",
+                f"{pid}: security-update workflow")
     require(ids == REQUIRED_PROVIDER_IDS, f"provider set mismatch: {ids}")
     caps = spec.get("required_capabilities")
     platforms = spec.get("required_platforms")
@@ -176,6 +201,16 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
     require(result.get("provider") in REQUIRED_PROVIDER_IDS, "result provider")
     require(result.get("platform") in set(spec["required_platforms"]), "result platform")
     require(result.get("status") in RESULT_STATUSES, "result status")
+    successful = result.get("status") in {"PASS", "PARTIAL"}
+    if result.get("status") == "FAIL":
+        failure = result.get("failure")
+        require(isinstance(failure, dict), "FAIL result requires structured failure")
+        require(failure.get("stage") in FAILURE_STAGES, "FAIL result stage")
+        require(isinstance(failure.get("error_type"), str) and
+                0 < len(failure["error_type"]) <= 256, "FAIL result error type")
+        require(isinstance(failure.get("message"), str) and
+                0 < len(failure["message"].encode("utf-8")) <= 2048,
+                "FAIL result bounded message")
     if result.get("status") in {"PASS", "PARTIAL"}:
         execution = result.get("execution")
         require(isinstance(execution, dict), "successful result requires execution metadata")
@@ -201,8 +236,12 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                 "result repository revision mismatch")
     source = result.get("source")
     require(isinstance(source, dict), "source object required")
-    require(SHA256_RE.fullmatch(str(source.get("content_sha256", ""))) is not None, "source content digest required")
-    require(COMMIT_RE.fullmatch(str(source.get("commit", ""))) is not None, "resolved upstream commit required")
+    if successful or source:
+        require(SHA256_RE.fullmatch(str(source.get("content_sha256", ""))) is not None, "source content digest required")
+        require(COMMIT_RE.fullmatch(str(source.get("commit", ""))) is not None, "resolved upstream commit required")
+    elif result.get("status") == "FAIL":
+        require(result["failure"]["stage"] == "source-acquisition",
+                "post-source FAIL requires source identity")
     caps = result.get("capabilities")
     require(isinstance(caps, dict), "capabilities object required")
     required = set(spec["required_capabilities"])
@@ -211,22 +250,22 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
         require(status in CAPABILITY_STATUSES, f"{name}: invalid status")
     build = result.get("build")
     require(isinstance(build, dict), "build object required")
-    if schema_version == RESULT_SCHEMA_VERSION:
-        metrics = result.get("metrics")
-        require(isinstance(metrics, dict), "schema v6 metrics object required")
+    metrics = result.get("metrics")
+    if successful or metrics is not None:
+        require(isinstance(metrics, dict), "schema v7 metrics object required")
         require(metrics.get("repeated_cleanup_cycles") == 10000,
-                "schema v6 requires exactly 10,000 repeated cleanup cycles")
+                "schema v7 requires exactly 10,000 repeated cleanup cycles")
         if result["provider"] == "aws-lc" and caps.get("external_signer") == "PASS":
             require(isinstance(metrics.get("external_signer_calls"), int) and
                     metrics["external_signer_calls"] >= 2,
                     "AWS-LC external signer must serve TLS 1.2 and TLS 1.3")
         if caps.get("session_resumption") == "PASS":
             require(metrics.get("session_resumption_handshakes") == 4,
-                    "schema v6 session resumption requires four measured handshakes")
+                    "schema v7 session resumption requires four measured handshakes")
             require(metrics.get("session_resumption_tls12_handshakes") == 2,
-                    "schema v6 requires a TLS 1.2 resumed session")
+                    "schema v7 requires a TLS 1.2 resumed session")
             require(metrics.get("session_resumption_tls13_handshakes") == 2,
-                    "schema v6 requires a TLS 1.3 resumed ticket")
+                    "schema v7 requires a TLS 1.3 resumed ticket")
         if caps.get("external_trust") == "PASS":
             require(isinstance(metrics.get("external_trust_calls"), int) and
                     metrics["external_trust_calls"] >= 4,
@@ -310,10 +349,19 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                 0 < memory["provider_allocation_peak_live_bytes"] <=
                 MEMORY_PROFILE_BOUND_BYTES,
                 "provider peak live allocation profile")
+        require(memory.get("provider_allocation_live_before_cleanup_bytes") ==
+                metrics.get("provider_allocation_live_before_cleanup_bytes") and
+                memory.get("provider_allocation_live_after_cleanup_bytes") ==
+                metrics.get("provider_allocation_live_after_cleanup_bytes") and
+                isinstance(memory.get("provider_allocation_live_before_cleanup_bytes"), int) and
+                isinstance(memory.get("provider_allocation_live_after_cleanup_bytes"), int) and
+                0 <= memory["provider_allocation_live_after_cleanup_bytes"] <=
+                memory["provider_allocation_live_before_cleanup_bytes"],
+                "provider cleanup live-allocation growth")
         cancellation = operational.get("cancellation")
         require(isinstance(cancellation, dict) and
                 cancellation.get("method") ==
-                "caller-owned-wait-thread-and-explicit-cancel-signal" and
+                "caller-owned-wait-thread-explicit-cancel-and-bounded-join" and
                 cancellation.get("wakeups") == metrics.get("cancellation_wakeups") and
                 cancellation.get("latency_us") == metrics.get("cancellation_latency_us") and
                 cancellation.get("bound_us") == metrics.get("cancellation_bound_us"),
@@ -349,7 +397,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
         require(all(value != "FAIL" for value in caps.values()), "PARTIAL/PASS result contains failed capability")
     if result["status"] == "PASS":
         require(schema_version == RESULT_SCHEMA_VERSION,
-                "PASS requires schema v6 evidence")
+                "PASS requires schema v7 evidence")
         require(all(value == "PASS" for value in caps.values()), "PASS requires all capabilities PASS")
     if any(value == "BLOCKED" for value in caps.values()):
         require(result["status"] != "PASS", "blocked capability cannot yield PASS")

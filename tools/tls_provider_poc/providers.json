@@ -11,6 +11,12 @@
       "tag": "v5.5.0",
       "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
       "license_expression": "Apache-2.0 OR ISC",
+      "security_update": {
+        "maximum_source_pin_age_days": 180,
+        "source_committed_at": "2026-08-05T18:59:47Z",
+        "advisory_urls": ["https://github.com/aws/aws-lc/security/advisories"],
+        "update_workflow": "docs/security/provider-update-workflow.md"
+      },
       "poc_family": "openssl-compatible"
     },
     {
@@ -22,6 +28,12 @@
       "sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
       "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
       "license_expression": "Apache-2.0 OR GPL-2.0-or-later",
+      "security_update": {
+        "maximum_source_pin_age_days": 180,
+        "source_committed_at": "2026-07-01T11:00:14Z",
+        "advisory_urls": ["https://mbed-tls.readthedocs.io/en/latest/security-advisories/"],
+        "update_workflow": "docs/security/provider-update-workflow.md"
+      },
       "poc_family": "mbedtls"
     },
     {
@@ -34,6 +46,12 @@
       "tag": "openssl-3.6.3",
       "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
       "license_expression": "Apache-2.0",
+      "security_update": {
+        "maximum_source_pin_age_days": 180,
+        "source_committed_at": "2026-06-09T11:46:57Z",
+        "advisory_urls": ["https://openssl-library.org/news/vulnerabilities/"],
+        "update_workflow": "docs/security/provider-update-workflow.md"
+      },
       "poc_family": "openssl-compatible"
     }
   ],

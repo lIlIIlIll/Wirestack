@@ -56,6 +56,7 @@ def build_provenance_fixture(provider, platform, *, diagnostic=False):
         configure = [
             "cmake", "-DENABLE_TESTING=OFF", "-DENABLE_PROGRAMS=OFF",
             "-DUSE_SHARED_MBEDTLS_LIBRARY=OFF",
+            "-DMBEDTLS_USER_CONFIG_FILE=<REPOSITORY>/tools/tls_provider_poc/mbedtls_provider_profile_config.h",
             "-DTF_PSA_CRYPTO_USER_CONFIG_FILE=<REPOSITORY>/tools/tls_provider_poc/mbedtls_provider_profile_config.h",
             "<SOURCE>", "<BUILD>", "<PREFIX>",
         ]
@@ -122,6 +123,8 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
         "provider_allocation_bytes": 1024 * 1024,
         "provider_allocation_bound_bytes": validator.PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES,
         "provider_allocation_peak_live_bytes": 512 * 1024,
+        "provider_allocation_live_before_cleanup_bytes": 64 * 1024,
+        "provider_allocation_live_after_cleanup_bytes": 64 * 1024,
         "cancellation_wakeups": 1,
         "cancellation_latency_us": 1000,
         "cancellation_bound_us": validator.CANCELLATION_WAKE_BOUND_US,
@@ -131,7 +134,7 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
         else "UNSUPPORTED"
     )
     return {
-        "schema_version": 6,
+        "schema_version": 7,
         "task_id": "M0-016",
         "provider": provider,
         "platform": platform,
@@ -184,10 +187,12 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
                 "provider_allocation_bytes": metrics["provider_allocation_bytes"],
                 "provider_allocation_bound_bytes": metrics["provider_allocation_bound_bytes"],
                 "provider_allocation_peak_live_bytes": metrics["provider_allocation_peak_live_bytes"],
+                "provider_allocation_live_before_cleanup_bytes": metrics["provider_allocation_live_before_cleanup_bytes"],
+                "provider_allocation_live_after_cleanup_bytes": metrics["provider_allocation_live_after_cleanup_bytes"],
                 "payload_bytes_per_transfer": 32768,
             },
             "cancellation": {
-                "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+                "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
                 "wakeups": metrics["cancellation_wakeups"],
                 "latency_us": metrics["cancellation_latency_us"],
                 "bound_us": metrics["cancellation_bound_us"],
@@ -205,6 +210,8 @@ def required_profile_metrics() -> list[str]:
         "METRIC provider_allocation_bytes=1048576",
         f"METRIC provider_allocation_bound_bytes={runner.PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES}",
         "METRIC provider_allocation_peak_live_bytes=524288",
+        "METRIC provider_allocation_live_before_cleanup_bytes=65536",
+        "METRIC provider_allocation_live_after_cleanup_bytes=65536",
         "METRIC cancellation_wakeups=1",
         "METRIC cancellation_latency_us=1000",
         f"METRIC cancellation_bound_us={runner.CANCELLATION_WAKE_BOUND_US}",
@@ -221,6 +228,25 @@ class ProviderPocValidationTests(unittest.TestCase):
         validator.validate_spec(self.spec)
         validator.validate_matrix(self.matrix, self.spec)
         validator.validate_retained_results(self.matrix, self.spec, ROOT)
+        for provider in self.spec["providers"]:
+            workflow = provider["security_update"]["update_workflow"]
+            self.assertTrue((ROOT / workflow).is_file())
+
+    def test_security_update_evidence_fails_closed(self):
+        value = copy.deepcopy(self.spec)
+        value["providers"][0]["security_update"]["source_committed_at"] = (
+            "2020-01-01T00:00:00Z"
+        )
+        with self.assertRaisesRegex(validator.ValidationError, "source pin is stale"):
+            validator.validate_spec(value)
+
+        value = copy.deepcopy(self.spec)
+        value["providers"][1]["security_update"]["advisory_urls"] = [
+            "http://example.invalid/advisories"
+        ]
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "advisory intake channels"):
+            validator.validate_spec(value)
 
     def test_exported_symbol_inventory_is_bounded_and_digest_bound(self):
         self.assertEqual(runner.MAX_EXPORTED_SYMBOLS, validator.MAX_EXPORTED_SYMBOLS)
@@ -653,6 +679,12 @@ class ProviderPocValidationTests(unittest.TestCase):
             validator.CANCELLATION_WAKE_BOUND_US + 1)
         with self.assertRaisesRegex(validator.ValidationError, "wake latency"):
             validator.validate_result(result, self.spec)
+        result = complete_result(self.spec)
+        result["operational_evidence"]["memory_profile"][
+            "provider_allocation_live_after_cleanup_bytes"] = 65 * 1024
+        result["metrics"]["provider_allocation_live_after_cleanup_bytes"] = 65 * 1024
+        with self.assertRaisesRegex(validator.ValidationError, "live-allocation growth"):
+            validator.validate_result(result, self.spec)
 
     def test_build_provenance_is_durable_and_fail_closed(self):
         result = complete_result(self.spec, platform="windows-x86_64")
@@ -660,6 +692,36 @@ class ProviderPocValidationTests(unittest.TestCase):
         result["build"]["provenance"]["configure_argv"] = []
         with self.assertRaisesRegex(validator.ValidationError, "configure argv"):
             validator.validate_result(result, self.spec)
+        result = complete_result(self.spec, platform="windows-x86_64")
+        result["build"]["provenance"]["compiler"]["exit_code"] = 1
+        with self.assertRaisesRegex(validator.ValidationError, "identity command failed"):
+            validator.validate_result(result, self.spec)
+
+    def test_pre_execution_fail_result_is_retained_without_metrics(self):
+        result = complete_result(self.spec)
+        result["status"] = "FAIL"
+        result["source"] = {}
+        result["capabilities"] = {
+            name: "NOT_RUN" for name in self.spec["required_capabilities"]
+        }
+        result["build"] = {"static_archives": [], "system_tls_dependencies": []}
+        result.pop("metrics")
+        result.pop("operational_evidence")
+        result["failure"] = {
+            "stage": "source-acquisition",
+            "error_type": "PocError",
+            "message": "pinned source digest mismatch",
+        }
+        validator.validate_result(result, self.spec)
+        result["failure"]["stage"] = "provider-build"
+        with self.assertRaisesRegex(validator.ValidationError, "source identity"):
+            validator.validate_result(result, self.spec)
+
+    def test_failure_messages_are_bounded_by_utf8_bytes(self):
+        message = runner.bounded_utf8("雪" * 2048, runner.MAX_FAILURE_MESSAGE_BYTES)
+        self.assertLessEqual(
+            len(message.encode("utf-8")), runner.MAX_FAILURE_MESSAGE_BYTES)
+        self.assertTrue(message)
 
     def test_license_bundle_rejects_escape_and_stale_digest(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -809,14 +871,24 @@ class ProviderPocValidationTests(unittest.TestCase):
             self.assertIn("METRIC provider_allocation_calls=%llu", source)
             self.assertIn("METRIC provider_allocation_peak_live_bytes=%llu", source)
             self.assertIn("METRIC cancellation_latency_us=%llu", source)
-            self.assertIn("poc_cancel_trigger_and_wait", source)
+            self.assertIn("poc_cancel_trigger_and_join", source)
             self.assertIn("provider_allocation_calls", source)
+            self.assertIn("provider_allocation_live_bytes", source)
         self.assertIn("CRYPTO_set_mem_functions", openssl_source)
         self.assertIn("mbedtls_platform_set_calloc_free", mbedtls_source)
         self.assertIn("char overlong_protocol[257]", openssl_source)
         self.assertNotIn("static const unsigned char truncated[]", openssl_source)
         self.assertIn("OPENSSL_thread_stop();", openssl_source)
         self.assertIn("OPENSSL_cleanup();", openssl_source)
+
+        allocation_header = (
+            ROOT / "tools/tls_provider_poc/poc_allocation_profile.h"
+        ).read_text()
+        self.assertIn("max_align_t alignment", allocation_header)
+        self.assertIn('"-std=c11", *diagnostic_flags', RUN_MODULE.read_text())
+        cancel_header = (ROOT / "tools/tls_provider_poc/poc_cancel.h").read_text()
+        self.assertNotIn("WaitForSingleObject(thread, INFINITE)", cancel_header)
+        self.assertIn("gate->joined", cancel_header)
 
 
 class ProviderPocWindowsTests(unittest.TestCase):

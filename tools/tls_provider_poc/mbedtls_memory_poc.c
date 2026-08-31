@@ -517,19 +517,27 @@ static int cancellation_case(Material *m, uint64_t *latency_us) {
         ret = mbedtls_ssl_setup(&ssl, &conf);
     }
     if (ret == 0) ret = mbedtls_ssl_set_hostname(&ssl, "localhost");
-    CancellationWorker worker;
-    memset(&worker, 0, sizeof(worker));
+    CancellationWorker *worker = calloc(1, sizeof(CancellationWorker));
+    if (worker == NULL) {
+        mbedtls_ssl_free(&ssl);
+        mbedtls_ssl_config_free(&conf);
+        return 0;
+    }
     PocThread thread;
-    int gate_ready = ret == 0 && poc_cancel_gate_init(&worker.gate);
-    worker.ssl = &ssl;
+    int gate_ready = ret == 0 && poc_cancel_gate_init(&worker->gate);
+    worker->ssl = &ssl;
     if (gate_ready) mbedtls_ssl_set_bio(&ssl, &ep, ring_send, ring_recv, NULL);
-    int started = gate_ready && poc_thread_start(&thread, cancellation_worker, &worker);
-    int woke = started && poc_cancel_trigger_and_wait(&worker.gate, latency_us);
-    int joined = started && poc_thread_join(thread);
-    if (gate_ready) poc_cancel_gate_destroy(&worker.gate);
-    int ok = worker.observed_want && woke && joined;
-    mbedtls_ssl_free(&ssl);
-    mbedtls_ssl_config_free(&conf);
+    int started = gate_ready && poc_thread_start(&thread, cancellation_worker, worker);
+    int joined = started &&
+        poc_cancel_trigger_and_join(&worker->gate, thread, latency_us);
+    int cleanup_safe = !started || poc_cancel_join_complete(&worker->gate);
+    int ok = worker->observed_want && joined;
+    if (cleanup_safe) {
+        if (gate_ready) poc_cancel_gate_destroy(&worker->gate);
+        free(worker);
+        mbedtls_ssl_free(&ssl);
+        mbedtls_ssl_config_free(&conf);
+    }
     return ok;
 }
 
@@ -601,9 +609,12 @@ int main(int argc, char **argv) {
         if (value < 1 || value > CLEANUP_CYCLES) return 2;
         cleanup_cycles = (int)value;
     }
+    uint64_t cleanup_live_before = provider_allocation_live_bytes;
     int cleanup = 1;
     for (int i = 0; i < cleanup_cycles && cleanup; ++i)
         cleanup = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_2, 0);
+    uint64_t cleanup_live_after = provider_allocation_live_bytes;
+    cleanup = cleanup && cleanup_live_after <= cleanup_live_before;
 
     printf("CAP tls12=%s\n", tls12 ? "PASS" : "FAIL");
     printf("CAP tls13=%s\n", tls13 ? "PASS" : "FAIL");
@@ -645,6 +656,10 @@ int main(int argc, char **argv) {
            (unsigned long long)PROVIDER_ALLOCATION_BOUND_BYTES);
     printf("METRIC provider_allocation_peak_live_bytes=%llu\n",
            (unsigned long long)provider_allocation_peak_live_bytes);
+    printf("METRIC provider_allocation_live_before_cleanup_bytes=%llu\n",
+           (unsigned long long)cleanup_live_before);
+    printf("METRIC provider_allocation_live_after_cleanup_bytes=%llu\n",
+           (unsigned long long)cleanup_live_after);
     printf("METRIC cancellation_wakeups=%d\n", cancel ? 1 : 0);
     printf("METRIC cancellation_latency_us=%llu\n",
            (unsigned long long)cancellation_latency_us);
@@ -661,5 +676,6 @@ int main(int argc, char **argv) {
             provider_allocation_bytes > 0 &&
             provider_allocation_bytes <= PROVIDER_ALLOCATION_BOUND_BYTES &&
             provider_allocation_peak_live_bytes > 0 &&
-            provider_allocation_peak_live_bytes <= MEMORY_PROFILE_BOUND_BYTES) ? 0 : 1;
+            provider_allocation_peak_live_bytes <= MEMORY_PROFILE_BOUND_BYTES &&
+            cleanup_live_after <= cleanup_live_before) ? 0 : 1;
 }

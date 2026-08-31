@@ -2,6 +2,7 @@
 #define WIRESTACK_POC_CANCEL_H
 
 #include <stdint.h>
+#include <stdlib.h>
 
 #define POC_CANCELLATION_WAKE_BOUND_US 250000ULL
 #define POC_CANCELLATION_START_TIMEOUT_MS 5000U
@@ -15,6 +16,8 @@ typedef struct PocCancelGate {
     int waiting;
     int cancelled;
     int finished;
+    int joined;
+    int join_ok;
 } PocCancelGate;
 
 typedef HANDLE PocThread;
@@ -37,6 +40,8 @@ static int poc_cancel_gate_init(PocCancelGate *gate) {
     gate->waiting = 0;
     gate->cancelled = 0;
     gate->finished = 0;
+    gate->joined = 0;
+    gate->join_ok = 0;
     return 1;
 }
 
@@ -56,7 +61,8 @@ static void poc_cancel_worker_wait(PocCancelGate *gate) {
     LeaveCriticalSection(&gate->lock);
 }
 
-static int poc_cancel_trigger_and_wait(PocCancelGate *gate, uint64_t *latency_us) {
+static int poc_cancel_trigger_and_join(PocCancelGate *gate, PocThread thread,
+                                       uint64_t *latency_us) {
     int ok = 1;
     EnterCriticalSection(&gate->lock);
     while (!gate->waiting && !gate->finished) {
@@ -70,17 +76,21 @@ static int poc_cancel_trigger_and_wait(PocCancelGate *gate, uint64_t *latency_us
     uint64_t started = poc_monotonic_us();
     gate->cancelled = 1;
     WakeAllConditionVariable(&gate->changed);
-    while (ok && !gate->finished) {
-        if (!SleepConditionVariableCS(
-                &gate->changed, &gate->lock,
-                (DWORD)(POC_CANCELLATION_WAKE_BOUND_US / 1000ULL))) {
-            ok = 0;
-            break;
-        }
-    }
-    *latency_us = poc_monotonic_us() - started;
     LeaveCriticalSection(&gate->lock);
-    return ok && *latency_us <= POC_CANCELLATION_WAKE_BOUND_US;
+    uint64_t elapsed = poc_monotonic_us() - started;
+    uint64_t remaining = elapsed < POC_CANCELLATION_WAKE_BOUND_US
+        ? POC_CANCELLATION_WAKE_BOUND_US - elapsed : 0;
+    DWORD wait_ms = (DWORD)((remaining + 999ULL) / 1000ULL);
+    DWORD result = remaining > 0
+        ? WaitForSingleObject(thread, wait_ms) : WAIT_TIMEOUT;
+    *latency_us = poc_monotonic_us() - started;
+    CloseHandle(thread);
+    EnterCriticalSection(&gate->lock);
+    gate->joined = result == WAIT_OBJECT_0;
+    gate->join_ok = gate->joined;
+    LeaveCriticalSection(&gate->lock);
+    return ok && gate->join_ok &&
+        *latency_us <= POC_CANCELLATION_WAKE_BOUND_US;
 }
 
 static int poc_thread_start(PocThread *thread,
@@ -90,10 +100,11 @@ static int poc_thread_start(PocThread *thread,
     return *thread != NULL;
 }
 
-static int poc_thread_join(PocThread thread) {
-    DWORD result = WaitForSingleObject(thread, INFINITE);
-    CloseHandle(thread);
-    return result == WAIT_OBJECT_0;
+static int poc_cancel_join_complete(PocCancelGate *gate) {
+    EnterCriticalSection(&gate->lock);
+    int joined = gate->joined;
+    LeaveCriticalSection(&gate->lock);
+    return joined;
 }
 
 #else
@@ -107,6 +118,8 @@ typedef struct PocCancelGate {
     int waiting;
     int cancelled;
     int finished;
+    int joined;
+    int join_ok;
 } PocCancelGate;
 
 typedef pthread_t PocThread;
@@ -142,6 +155,8 @@ static int poc_cancel_gate_init(PocCancelGate *gate) {
     gate->waiting = 0;
     gate->cancelled = 0;
     gate->finished = 0;
+    gate->joined = 0;
+    gate->join_ok = 0;
     return 1;
 }
 
@@ -160,7 +175,27 @@ static void poc_cancel_worker_wait(PocCancelGate *gate) {
     pthread_mutex_unlock(&gate->lock);
 }
 
-static int poc_cancel_trigger_and_wait(PocCancelGate *gate, uint64_t *latency_us) {
+typedef struct PocJoinRequest {
+    PocCancelGate *gate;
+    PocThread target;
+} PocJoinRequest;
+
+static void *poc_join_target(void *opaque) {
+    PocJoinRequest *request = (PocJoinRequest *)opaque;
+    PocCancelGate *gate = request->gate;
+    PocThread target = request->target;
+    free(request);
+    int result = pthread_join(target, NULL);
+    pthread_mutex_lock(&gate->lock);
+    gate->joined = 1;
+    gate->join_ok = result == 0;
+    pthread_cond_broadcast(&gate->changed);
+    pthread_mutex_unlock(&gate->lock);
+    return NULL;
+}
+
+static int poc_cancel_trigger_and_join(PocCancelGate *gate, PocThread thread,
+                                       uint64_t *latency_us) {
     int ok = 1;
     struct timespec start_deadline = poc_realtime_deadline(
         (uint64_t)POC_CANCELLATION_START_TIMEOUT_MS * 1000ULL);
@@ -177,12 +212,30 @@ static int poc_cancel_trigger_and_wait(PocCancelGate *gate, uint64_t *latency_us
             break;
         }
     }
+    PocJoinRequest *request = malloc(sizeof(PocJoinRequest));
+    pthread_attr_t attributes;
+    pthread_t joiner;
+    int joiner_started = 0;
+    if (request != NULL && pthread_attr_init(&attributes) == 0) {
+        request->gate = gate;
+        request->target = thread;
+        if (pthread_attr_setdetachstate(
+                &attributes, PTHREAD_CREATE_DETACHED) == 0 &&
+                pthread_create(&joiner, &attributes, poc_join_target, request) == 0) {
+            joiner_started = 1;
+        }
+        pthread_attr_destroy(&attributes);
+    }
+    if (!joiner_started) {
+        free(request);
+        ok = 0;
+    }
     uint64_t started = poc_monotonic_us();
     gate->cancelled = 1;
     pthread_cond_broadcast(&gate->changed);
     struct timespec finish_deadline = poc_realtime_deadline(
         POC_CANCELLATION_WAKE_BOUND_US);
-    while (ok && !gate->finished) {
+    while (ok && !gate->joined) {
         int result = pthread_cond_timedwait(
             &gate->changed, &gate->lock, &finish_deadline);
         if (result == ETIMEDOUT) {
@@ -196,7 +249,8 @@ static int poc_cancel_trigger_and_wait(PocCancelGate *gate, uint64_t *latency_us
     }
     *latency_us = poc_monotonic_us() - started;
     pthread_mutex_unlock(&gate->lock);
-    return ok && *latency_us <= POC_CANCELLATION_WAKE_BOUND_US;
+    return ok && gate->join_ok &&
+        *latency_us <= POC_CANCELLATION_WAKE_BOUND_US;
 }
 
 static int poc_thread_start(PocThread *thread,
@@ -205,8 +259,11 @@ static int poc_thread_start(PocThread *thread,
     return pthread_create(thread, NULL, routine, argument) == 0;
 }
 
-static int poc_thread_join(PocThread thread) {
-    return pthread_join(thread, NULL) == 0;
+static int poc_cancel_join_complete(PocCancelGate *gate) {
+    pthread_mutex_lock(&gate->lock);
+    int joined = gate->joined;
+    pthread_mutex_unlock(&gate->lock);
+    return joined;
 }
 #endif
 
