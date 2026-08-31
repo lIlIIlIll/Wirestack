@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 7283080,
-    "binary_sha256": "6669548290eee57bfdae540b9a672657aa3a1a918a7a8336d2ef6ecd25183cde",
+    "binary_sha256": "c4a3c590d08bc3870c3252cdb3d0a2300bc40471db15ff19e17f93f6994d2c1c",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
@@ -12,12 +12,12 @@
       {
         "bytes": 12195000,
         "name": "libcrypto.a",
-        "sha256": "02aab7dced3b95f7d464c1037ed91c6b306eca1a0baf489dfb41e2de407e4f3a"
+        "sha256": "ead48239337c9c9a0beeee7e9befa85994a53e508f28c7e87c332181459f1920"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "3687d9e313e2daf2b138386809059e9ab53cd44a737695554c0dc1a58cc1dc68",
+  "build_log_sha256": "b56d4e19c81faba1b816d4c9e52d3115ea995c01bae90c2013fda4dbc72c304e",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -39,11 +39,11 @@
     "image_os": "ubuntu24",
     "image_version": "20260823.283.1",
     "python": "3.12.14",
-    "repository_revision": "9611abb32c9e790fe893aa9ea4f25ec5ae0d8fba",
+    "repository_revision": "dd9a7f248ec2c60d9a9d965d08af0ac359806f23",
     "runner_arch": "X64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T08:30:14.675084+00:00",
+  "finished_at": "2026-08-31T09:16:54.109710+00:00",
   "metrics": {
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
@@ -65,7 +65,7 @@
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T08:28:52.131706+00:00",
+  "started_at": "2026-08-31T09:15:32.399494+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
