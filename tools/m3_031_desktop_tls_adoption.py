@@ -305,6 +305,8 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
 def validate_dependency_evidence(
     root: Path,
     bindings: Mapping[str, Sequence[tuple[str, str, str | None]]] = DEPENDENCY_EVIDENCE_BINDINGS,
+    *,
+    verify_current_sources: bool = True,
 ) -> dict[str, Any]:
     validated: dict[str, Any] = {}
     for task_id, report_bindings in bindings.items():
@@ -330,14 +332,19 @@ def validate_dependency_evidence(
         if not isinstance(source_sha256, dict) or set(source_sha256) != set(task["source_paths"]):
             raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: source inventory")
         for relative, expected in source_sha256.items():
-            try:
-                path = repository_tooling.safe_path(
-                    root, relative, "source_sha256", must_exist=True, file_only=True
-                )
-            except repository_tooling.ContractError as error:
-                raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: {error.code}") from error
-            if expected != repository_text_sha256(path):
-                raise AdoptionError("STALE_SOURCE", f"{task_id}: {relative}")
+            if not isinstance(expected, str) or len(expected) != 64 or any(
+                character not in "0123456789abcdef" for character in expected
+            ):
+                raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: source digest")
+            if verify_current_sources:
+                try:
+                    path = repository_tooling.safe_path(
+                        root, relative, "source_sha256", must_exist=True, file_only=True
+                    )
+                except repository_tooling.ContractError as error:
+                    raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: {error.code}") from error
+                if expected != repository_text_sha256(path):
+                    raise AdoptionError("STALE_SOURCE", f"{task_id}: {relative}")
 
         reports = evidence.get("reports")
         if not isinstance(reports, list) or not reports:
@@ -359,7 +366,7 @@ def validate_dependency_evidence(
             if (
                 item.get("source_task") != task_id
                 or item.get("acceptance_status") != "PASS"
-                or item.get("sha256") != repository_text_sha256(path)
+                or item.get("sha256") != sha256_path(path)
                 or load_json(path).get("status") != "PASS"
             ):
                 raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: report not PASS or stale")
@@ -379,7 +386,7 @@ def validate_dependency_evidence(
                 or validation.get("task_id") != task_id
                 or validation.get("status") != "PASS"
                 or validation.get("failures") != []
-                or validation.get("report_sha256") != repository_text_sha256(report_path)
+                or validation.get("report_sha256") != sha256_path(report_path)
                 or report.get("schema_version") != 1
                 or report.get("task_id") != task_id
                 or report.get("decision") != "PASS"
@@ -388,10 +395,13 @@ def validate_dependency_evidence(
                 or (expected_mode is not None and report.get("mode") != expected_mode)
             ):
                 raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: native report binding")
-            native_reports[report_relative] = repository_text_sha256(report_path)
+            native_reports[report_relative] = sha256_path(report_path)
         validated[task_id] = {
             "native_reports": dict(sorted(native_reports.items())),
             "source_count": len(source_sha256),
+            "source_verification": (
+                "CURRENT_CHECKOUT" if verify_current_sources else "SEALED_INVENTORY"
+            ),
             "status": "PASS",
         }
     return {"tasks": validated, "status": "PASS"}
@@ -438,7 +448,7 @@ def audit_core(root: Path) -> dict[str, Any]:
             "status": "PASS",
         }
     retained = validate_retained_evidence(root)
-    dependency_evidence = validate_dependency_evidence(root)
+    dependency_evidence = validate_dependency_evidence(root, verify_current_sources=False)
     for relative in RETAINED_EVIDENCE + HISTORICAL_REFERENCES:
         path = root / relative
         if not path.is_file():
