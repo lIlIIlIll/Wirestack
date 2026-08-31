@@ -1,11 +1,11 @@
 {
   "build": {
-    "binary_bytes": 7369424,
-    "binary_sha256": "ce3b61fcdc7510bf9ac1676fed75fa65d2eb7f62513ac22bc907b0efb1f52521",
+    "binary_bytes": 7378192,
+    "binary_sha256": "e65e7a5ec242d7cc98542cf572ad897d49a547f434ef37f51213cf50863c0b82",
     "exported_symbol_inventory": {
-      "count": 9570,
+      "count": 9575,
       "scope": "final-artifact-exports",
-      "sha256": "5a73232494fc432e71e04a28d9e5d567bd453e9cdb1f7ece5bfcf41323ff9f0a",
+      "sha256": "d997269df1b0112fba013a4098d6690f66ade608664400d906d862951d84daca",
       "symbols": [
         "ACCESS_DESCRIPTION_free",
         "ACCESS_DESCRIPTION_it",
@@ -6117,6 +6117,7 @@
         "ossl_ackm_on_rx_datagram",
         "ossl_ackm_on_rx_packet",
         "ossl_ackm_on_timeout",
+        "ossl_ackm_on_tx_ack_only_packet",
         "ossl_ackm_on_tx_packet",
         "ossl_ackm_set_ack_deadline_callback",
         "ossl_ackm_set_loss_detection_deadline_callback",
@@ -7820,6 +7821,7 @@
         "ossl_qrx_inject_urxe",
         "ossl_qrx_key_update_timeout",
         "ossl_qrx_new",
+        "ossl_qrx_newref",
         "ossl_qrx_pkt_orphan",
         "ossl_qrx_pkt_release",
         "ossl_qrx_pkt_up_ref",
@@ -8063,6 +8065,7 @@
         "ossl_quic_lcidm_retire_odcid",
         "ossl_quic_leave_blocking_section",
         "ossl_quic_listen",
+        "ossl_quic_listener_get_port",
         "ossl_quic_new",
         "ossl_quic_new_domain",
         "ossl_quic_new_from_listener",
@@ -8087,6 +8090,7 @@
         "ossl_quic_port_get0_mutex",
         "ossl_quic_port_get0_reactor",
         "ossl_quic_port_get_channel_ctx",
+        "ossl_quic_port_get_max_pending_channels",
         "ossl_quic_port_get_net_rbio",
         "ossl_quic_port_get_net_wbio",
         "ossl_quic_port_get_num_incoming_channels",
@@ -8103,6 +8107,7 @@
         "ossl_quic_port_raise_net_error",
         "ossl_quic_port_restore_err_state",
         "ossl_quic_port_set_allow_incoming",
+        "ossl_quic_port_set_max_pending_channels",
         "ossl_quic_port_set_net_rbio",
         "ossl_quic_port_set_net_wbio",
         "ossl_quic_port_subtick",
@@ -9583,7 +9588,7 @@
     "license_bundle": {
       "file_count": 3,
       "path": "license-bundle/manifest.json",
-      "sha256": "045d956dc9b5cc1ab3346c0d3c4924e07a2e3095af72096c181922033ae5e1d0",
+      "sha256": "c5a738eaf91485c7cd5aea2cbb5300e63d837a8d54c85d502a2fa1c7ae88200e",
       "total_bytes": 29732
     },
     "provenance": {
@@ -9668,19 +9673,19 @@
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 2099014,
+        "bytes": 2100726,
         "name": "libssl.a",
-        "sha256": "aa254a4c4f2b36f28e93cd47f25e4c6a8697c9d8359cfca76621a2be5f751f26"
+        "sha256": "2e27f6212fb871bf437ee1ed45cdcf88a21461e5ee8d83fb14883d6c63e822f0"
       },
       {
-        "bytes": 12362020,
+        "bytes": 12369700,
         "name": "libcrypto.a",
-        "sha256": "6f726bab65e1c7041e9e8bfaba56f8a789231ffb6f457350af4a6e947a37e873"
+        "sha256": "511f8c30736e51825b8761f9ddb399f26c7d01a48639c5b50b3ab68463ee0091"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "d61cd294ff90ed9f1896cdbd9f2a2e353a23cf7044fd4b30ea31c010a5a79418",
+  "build_log_sha256": "81161ae7abddaca2508aa9da8dac082c1f13f79b9e2c4c650bd1ee6f0f08b28e",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -9705,31 +9710,31 @@
     "image_os": "alpine",
     "image_version": "3.22.5",
     "python": "3.14.7",
-    "repository_revision": "67c519b3d406912378a18bd15da28d5b1f0cdf6a",
+    "repository_revision": "45e16233d373854243966b10bbef012a66566641",
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T16:59:16.962071+00:00",
+  "finished_at": "2026-08-31T18:43:19.949459+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 83,
+    "cancellation_latency_us": 69,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 40644608,
+    "memory_profile_peak_resident_bytes": 40742912,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 6178520600,
+    "provider_allocation_bytes": 6177049726,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 28522883,
-    "provider_allocation_live_after_cleanup_bytes": 559146,
-    "provider_allocation_live_before_cleanup_bytes": 559146,
-    "provider_allocation_peak_live_bytes": 800067,
+    "provider_allocation_calls": 28521738,
+    "provider_allocation_live_after_cleanup_bytes": 559202,
+    "provider_allocation_live_before_cleanup_bytes": 559202,
+    "provider_allocation_peak_live_bytes": 800083,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -9741,21 +9746,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 83,
+      "latency_us": 69,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 40644608,
+      "peak_resident_bytes": 40742912,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 6178520600,
+      "provider_allocation_bytes": 6177049726,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 28522883,
-      "provider_allocation_live_after_cleanup_bytes": 559146,
-      "provider_allocation_live_before_cleanup_bytes": 559146,
-      "provider_allocation_peak_live_bytes": 800067,
+      "provider_allocation_calls": 28521738,
+      "provider_allocation_live_after_cleanup_bytes": 559202,
+      "provider_allocation_live_before_cleanup_bytes": 559202,
+      "provider_allocation_peak_live_bytes": 800083,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -9767,14 +9772,41 @@
   "platform": "linux-musl-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 8,
+  "schema_version": 9,
   "source": {
-    "archive": "openssl-3.6.3.tar.gz",
-    "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
-    "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
-    "kind": "archive"
+    "archive": "openssl-3.6.4.tar.gz",
+    "commit": "d3c1b1169b3569ff3069e5b399f47b2b28e03d79",
+    "content_sha256": "9bffaa1ad1e07b354c21bd3324ec02fa15579f45a7d0494b3e74bc449b7333ef",
+    "kind": "archive",
+    "security_update": {
+      "advisory_disposition": {
+        "affected_advisory_ids": [],
+        "pin_commit": "d3c1b1169b3569ff3069e5b399f47b2b28e03d79",
+        "reviewed_advisory_ids": [
+          "CVE-2026-14456",
+          "CVE-2026-14457",
+          "CVE-2026-18798",
+          "CVE-2026-54874",
+          "CVE-2026-54876",
+          "CVE-2026-63072",
+          "CVE-2026-63073",
+          "CVE-2026-63074",
+          "CVE-2026-63075",
+          "CVE-2026-63076",
+          "CVE-2026-75803"
+        ],
+        "reviewed_through": "2026-08-31T17:30:00Z",
+        "status": "not-affected"
+      },
+      "advisory_urls": [
+        "https://openssl-library.org/news/vulnerabilities/"
+      ],
+      "maximum_source_pin_age_days": 180,
+      "source_committed_at": "2026-08-25T11:49:21Z",
+      "update_workflow": "docs/security/provider-update-workflow.md"
+    }
   },
-  "started_at": "2026-08-31T16:56:27.692565+00:00",
+  "started_at": "2026-08-31T18:40:40.708437+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

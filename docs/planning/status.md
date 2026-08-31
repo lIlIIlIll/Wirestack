@@ -35,7 +35,7 @@ Status values:
 | M0-013 | COMPLETE | [`docs/evidence/M0-013/README.md`](../evidence/M0-013/README.md) | Native Linux evidence shows carrier-thread starvation at 16+ delayed DNS resolutions. Wirestack uses a bounded resolver pool; the failure remains evidence for the future UP-007 candidate, which does not block release. |
 | M0-014 | BLOCKED | — | Requires a native Windows SDK/runner and copied-byte instrumentation. |
 | M0-015 | COMPLETE | [`docs/evidence/M0-015/README.md`](../evidence/M0-015/README.md) | Provider matrix and M0-016 PoC contract frozen; ADR-0003 selects AWS-LC for Linux only. |
-| M0-016 | BLOCKED | [`docs/evidence/M0-016/README.md`](../evidence/M0-016/README.md) | Schema-v8 desktop evidence is stale. Schema-v9 native reruns are pending for monotonic cancellation waits, pin-bound advisory dispositions and the OpenSSL 3.6.4 control. Android, iOS and HarmonyOS or OpenHarmony native-device evidence remains missing. |
+| M0-016 | BLOCKED | [`docs/evidence/M0-016/README.md`](../evidence/M0-016/README.md) | All 12 desktop schema-v9 native cells are current: AWS-LC passes, while Mbed TLS and the OpenSSL 3.6.4 control retain explicit capability gaps. Android, iOS and HarmonyOS or OpenHarmony native-device evidence remains missing. |
 | M0-017 | BLOCKED | — | Depends on M0-012 and M0-016 native evidence. |
 | M0-018 | COMPLETE | [`docs/evidence/M0-018/README.md`](../evidence/M0-018/README.md) | Versioned threat register, fail-closed validator, tests and CI are active. |
 | M0-019 | BLOCKED | — | Depends on complete M0-006 through M0-014 evidence; M0-010..014 are not all complete. |
