@@ -26,6 +26,12 @@ def sha256_path(path: Path) -> str:
     return digest.hexdigest()
 
 
+def canonical_text_sha256(path: Path) -> str:
+    text = path.read_bytes().decode("utf-8")
+    canonical = text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
 def run(command: list[str], *, cwd: Path | None = None) -> str:
     completed = subprocess.run(
         command,
@@ -76,8 +82,8 @@ def build_fingerprint(
         flags.append("-DWIRESTACK_RESOLVER_TEST_FIXTURE=1")
     inputs: dict[str, object] = {
         "schema": 1,
-        "source_sha256": sha256_path(source),
-        "header_sha256": sha256_path(header),
+        "source_sha256": canonical_text_sha256(source),
+        "header_sha256": canonical_text_sha256(header),
         "compiler": tools["cc"],
         "compiler_version": compiler_version,
         "target": target,
