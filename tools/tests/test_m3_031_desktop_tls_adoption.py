@@ -91,7 +91,7 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 "generated_at_utc": "2026-08-31T00:00:00Z", "revision": "a" * 40,
                 "reports": [{
                     "path": validation_relative,
-                    "sha256": adoption.repository_text_sha256(validation),
+                    "sha256": adoption.sha256_path(validation),
                     "source_task": "M2-004", "acceptance_status": "PASS",
                 }],
                 "source_sha256": {"source.txt": adoption.sha256_path(source)},
@@ -185,6 +185,12 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             windows_digest = adoption.repository_text_sha256(path)
             path.write_bytes(b'{\n  "status": "PASS"\n}\n')
             self.assertEqual(windows_digest, adoption.repository_text_sha256(path))
+
+    def test_dependency_evidence_json_preserves_exact_artifact_bytes(self) -> None:
+        attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8")
+        for task_id in ("M2-004", "M2-006"):
+            self.assertIn(f"docs/evidence/{task_id}/*.json -text", attributes)
+            self.assertIn(f"docs/evidence/{task_id}/**/*.json -text", attributes)
 
     def test_missing_core_declaration_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
