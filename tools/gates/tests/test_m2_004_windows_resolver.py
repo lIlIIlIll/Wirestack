@@ -64,6 +64,19 @@ class M2004WindowsResolverGateTests(unittest.TestCase):
         self.assertNotIn("wirestack_m2_004_tls_link_stub", original)
         self.assertEqual(1, bound.count("wirestack_m2_004_tls_link_stub"))
 
+    def test_test_stub_binding_accepts_windows_as_last_target(self) -> None:
+        manifest = """[target.x86_64-unknown-linux-gnu.ffi.c]
+  wirestack_resolver = { path = \"./target/native/resolver/current/lib\" }
+
+[target.x86_64-w64-mingw32.ffi.c]
+  wirestack_resolver = { path = \"./target/native/resolver/current/lib\" }
+
+[dependencies]
+"""
+        bound = gate.bind_test_link_stub(manifest)
+        self.assertIn("wirestack_m2_004_tls_link_stub", bound)
+        self.assertTrue(bound.endswith("[dependencies]\n"))
+
     def test_windows_native_source_preserves_scope_and_startup_error(self) -> None:
         source = Path("native/resolver/windows/wirestack_resolver.c").read_text(
             encoding="utf-8"
