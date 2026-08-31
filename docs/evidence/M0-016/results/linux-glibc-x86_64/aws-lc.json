@@ -1,28 +1,29 @@
 {
   "build": {
-    "binary_bytes": 4501360,
-    "binary_sha256": "73bbf628c891ec7701fd73ce0b34c2f4072b94c372c322aa3bbd99a4a3b05534",
+    "binary_bytes": 4333096,
+    "binary_sha256": "ac1d0026c8d5e3c3d95a3eea1ad5fba13b1844341359b04fe76bfa0997ad689a",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 1285488,
+        "bytes": 1250064,
         "name": "libssl.a",
-        "sha256": "d396786b2862990555d6f432aac73635df1cc5bf24667e1a46a35a5d131b16ac"
+        "sha256": "473edd0ebd4842c7233de3aca6bbb20dfba511bc7b3183f5bcdfd5fcfa27caa1"
       },
       {
-        "bytes": 7025754,
+        "bytes": 6900314,
         "name": "libcrypto.a",
-        "sha256": "063fc4ba66e8c0d6b7a78053d042ef56fac81f5890f9f2cca0d4406ef0780bc6"
+        "sha256": "bed0ad791c375e42711de06bb85d67440b1b973bd80bed867d956719a5cfbdf0"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "64935e3c19bbf9441232e854420513d342da8ffa03a4b1dd490a1c96b65349c7",
+  "build_log_sha256": "47067003fae87a02260106a242a66665c5f192445cf81feb2bca0b0409f1a357",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
     "custom_ca": "PASS",
     "external_signer": "PASS",
+    "external_trust": "PASS",
     "mtls": "PASS",
     "negative_hostname": "PASS",
     "negative_untrusted_ca": "PASS",
@@ -34,10 +35,23 @@
     "tls13": "PASS",
     "truncation": "PASS"
   },
-  "finished_at": "2026-08-23T18:05:07.646606+00:00",
+  "execution": {
+    "image_os": "ubuntu24",
+    "image_version": "20260823.283.1",
+    "python": "3.12.14",
+    "repository_revision": "9611abb32c9e790fe893aa9ea4f25ec5ae0d8fba",
+    "runner_arch": "X64",
+    "runner_os": "Linux"
+  },
+  "finished_at": "2026-08-31T08:29:36.776472+00:00",
   "metrics": {
     "external_signer_calls": 2,
-    "repeated_cleanup_cycles": 10000
+    "external_trust_calls": 4,
+    "failure_cleanup_cycles": 0,
+    "repeated_cleanup_cycles": 10000,
+    "session_resumption_handshakes": 4,
+    "session_resumption_tls12_handshakes": 2,
+    "session_resumption_tls13_handshakes": 2
   },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
@@ -45,14 +59,14 @@
   "platform": "linux-glibc-x86_64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 2,
+  "schema_version": 3,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
     "kind": "git",
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-23T18:03:08.583928+00:00",
+  "started_at": "2026-08-31T08:28:26.806753+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }

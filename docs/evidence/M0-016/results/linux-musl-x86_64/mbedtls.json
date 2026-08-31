@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 932424,
-    "binary_sha256": "68d69cf354c81838f31b4787754e57fa883e21acd7f4af4958b125dfacabf1d7",
+    "binary_bytes": 932616,
+    "binary_sha256": "0842453800b35216cfaf7182a6d79fb1ce0d7925665c9869ece2fae423dee7d2",
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
@@ -22,12 +22,13 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "0d694e731eb111b41ff84b2a3ba9f95cdd05854fe80cf079d0d6e3979190fd7c",
+  "build_log_sha256": "42564cacc15a1780fba49b52baa3884de79850e16dd2716f73d759e2bf6e4775",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
     "custom_ca": "PASS",
     "external_signer": "BLOCKED",
+    "external_trust": "PASS",
     "mtls": "PASS",
     "negative_hostname": "PASS",
     "negative_untrusted_ca": "PASS",
@@ -39,21 +40,33 @@
     "tls13": "PASS",
     "truncation": "PASS"
   },
-  "finished_at": "2026-08-23T12:13:00.865775+00:00",
+  "execution": {
+    "image_os": "",
+    "image_version": "",
+    "python": "3.12.14",
+    "repository_revision": "",
+    "runner_arch": "x86_64",
+    "runner_os": "Linux"
+  },
+  "finished_at": "2026-08-31T08:30:33.758854+00:00",
+  "metrics": {
+    "external_trust_calls": 8,
+    "repeated_cleanup_cycles": 10000
+  },
   "notes": [
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "platform": "linux-musl-x86_64",
   "poc_exit_code": 0,
   "provider": "mbedtls",
-  "schema_version": 1,
+  "schema_version": 3,
   "source": {
     "archive": "mbedtls-4.2.0.tar.bz2",
     "commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b",
     "content_sha256": "2bed9d713b4668f76553b097e72b8aa30bc8f112a940d7ae228d524bbde6ffea",
     "kind": "archive"
   },
-  "started_at": "2026-08-23T12:12:41.719429+00:00",
+  "started_at": "2026-08-31T08:28:38.006937+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
