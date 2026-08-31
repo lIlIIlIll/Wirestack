@@ -133,7 +133,7 @@ def validate_audit(
     _require(isinstance(inventory, dict) and set(inventory) == inventory_keys,
              "scanned file inventory schema is invalid")
     for field in inventory_keys - {"semantic_std_net_files"}:
-        _require(isinstance(inventory[field], int) and inventory[field] >= 0,
+        _require(isinstance(inventory[field], int) and inventory[field] > 0,
                  f"scanned file inventory field is invalid: {field}")
     recorded_std_net = inventory["semantic_std_net_files"]
     _require(
@@ -143,6 +143,21 @@ def validate_audit(
         and all(isinstance(relative, str) and relative for relative in recorded_std_net),
         "scanned std.net inventory is invalid",
     )
+    for relative in recorded_std_net:
+        candidate = Path(relative)
+        _require(
+            not candidate.is_absolute()
+            and ".." not in candidate.parts
+            and candidate.as_posix() == relative
+            and candidate.suffix == ".cj",
+            f"std.net inventory path is invalid: {relative}",
+        )
+        source = repo_root / candidate
+        _require(source.is_file(), f"std.net inventory source is missing: {relative}")
+        _require(
+            _package(source) == guard.ALLOWED_STD_NET_PACKAGE,
+            f"std.net escaped the adapter package in {relative}",
+        )
 
     if verify_current_sources:
         source_paths = list(guard.source_files(repo_root))
@@ -155,12 +170,6 @@ def validate_audit(
             "semantic_std_net_files": _std_net_files(repo_root),
         }
         _require(inventory == expected_inventory, "scanned file inventory is stale")
-        for relative in expected_inventory["semantic_std_net_files"]:
-            _require(
-                _package(repo_root / relative) == guard.ALLOWED_STD_NET_PACKAGE,
-                f"std.net escaped the adapter package in {relative}",
-            )
-
         violations = guard.run_guard(repo_root)
         _require(not violations, guard.render_text(violations))
 

@@ -57,6 +57,24 @@ class M7020ArchitectureAuditTest(unittest.TestCase):
         with self.assertRaisesRegex(AuditError, "std.net inventory is invalid"):
             self.validate_changed(changed)
 
+    def test_structural_inventory_rejects_zero_counts(self) -> None:
+        changed = copy.deepcopy(self.audit)
+        changed["inventory"]["cangjie_files"] = 0
+        with self.assertRaisesRegex(AuditError, "inventory field is invalid"):
+            self.validate_changed(changed)
+
+    def test_structural_inventory_rejects_std_net_outside_adapter(self) -> None:
+        changed = copy.deepcopy(self.audit)
+        changed["inventory"]["semantic_std_net_files"] = ["src/http/client.cj"]
+        with self.assertRaisesRegex(AuditError, "std.net escaped the adapter package"):
+            self.validate_changed(changed)
+
+    def test_structural_inventory_rejects_escaping_path(self) -> None:
+        changed = copy.deepcopy(self.audit)
+        changed["inventory"]["semantic_std_net_files"] = ["../outside.cj"]
+        with self.assertRaisesRegex(AuditError, "inventory path is invalid"):
+            self.validate_changed(changed)
+
 
 if __name__ == "__main__":
     unittest.main()
