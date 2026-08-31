@@ -99,12 +99,16 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
     caps = {name: "PASS" for name in spec["required_capabilities"]}
     if status == "PARTIAL":
         caps["external_signer"] = "BLOCKED"
-    runner_os = "Windows" if platform == "windows-x86_64" else "Linux"
-    image_os = "win25" if platform == "windows-x86_64" else "ubuntu24"
+    if platform == "windows-x86_64":
+        runner_os, runner_arch, image_os = "Windows", "X64", "win25"
+    elif platform == "macos-arm64":
+        runner_os, runner_arch, image_os = "macOS", "ARM64", "macos15"
+    else:
+        runner_os, runner_arch, image_os = "Linux", "X64", "ubuntu24"
     execution = {
         "repository_revision": "2" * 40,
         "runner_os": runner_os,
-        "runner_arch": "X64",
+        "runner_arch": runner_arch,
         "image_os": image_os,
         "image_version": "fixture-image",
         "container_image": "",
@@ -151,6 +155,7 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
         "provider": provider,
         "platform": platform,
         "status": status,
+        "poc_exit_code": 0,
         "source": {
             "content_sha256": provider_spec.get(
                 "sha256", provider_spec.get("content_sha256")),
@@ -475,6 +480,29 @@ class ProviderPocValidationTests(unittest.TestCase):
             with self.assertRaisesRegex(runner.PocError,
                                         "token exceeds its bound"):
                 runner.github_api_headers()
+
+    def test_provider_subprocesses_cannot_inherit_github_token(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            completed = runner.subprocess.CompletedProcess(
+                ["fixture"], 0, "", "")
+            with mock.patch.dict(runner.os.environ,
+                                 {"WIRESTACK_GITHUB_TOKEN": "fixture-secret"}), \
+                    mock.patch.object(runner.subprocess, "run",
+                                      return_value=completed) as execute:
+                runner.run(["fixture"], cwd=root, log=root / "build.log")
+            self.assertNotIn("WIRESTACK_GITHUB_TOKEN",
+                             execute.call_args.kwargs["env"])
+
+            with mock.patch.object(runner.subprocess, "run",
+                                   return_value=completed) as execute:
+                runner.run(
+                    ["fixture"], cwd=root, log=root / "build.log",
+                    env={"PATH": "/fixture", "WIRESTACK_GITHUB_TOKEN": "secret"},
+                )
+            self.assertEqual("/fixture", execute.call_args.kwargs["env"]["PATH"])
+            self.assertNotIn("WIRESTACK_GITHUB_TOKEN",
+                             execute.call_args.kwargs["env"])
 
     def test_missing_platform_cell_fails(self):
         value = copy.deepcopy(self.matrix)
@@ -1186,6 +1214,10 @@ class ProviderPocValidationTests(unittest.TestCase):
         self.assertNotIn("static const unsigned char truncated[]", openssl_source)
         self.assertIn("OPENSSL_thread_stop();", openssl_source)
         self.assertIn("OPENSSL_cleanup();", openssl_source)
+        self.assertIn("SSL_shutdown(p.client)", openssl_source)
+        self.assertIn("SSL_ERROR_ZERO_RETURN", openssl_source)
+        self.assertIn("mbedtls_ssl_close_notify(&p.client)", mbedtls_source)
+        self.assertIn("MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY", mbedtls_source)
 
         allocation_header = (
             ROOT / "tools/tls_provider_poc/poc_allocation_profile.h"
@@ -1406,6 +1438,30 @@ class ProviderPocWindowsTests(unittest.TestCase):
         result["execution"]["runner_os"] = "Linux"
         with self.assertRaisesRegex(validator.ValidationError, "native Windows runner"):
             validator.validate_result(result, self.spec, "2" * 40)
+
+    def test_linux_and_macos_results_require_native_runner_identity(self):
+        linux = complete_result(self.spec, platform="linux-glibc-x86_64")
+        linux["execution"]["runner_arch"] = "ARM64"
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "native x86_64 runner"):
+            validator.validate_result(linux, self.spec)
+
+        macos = complete_result(self.spec, platform="macos-arm64")
+        macos["execution"]["runner_os"] = "Linux"
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "native macOS runner"):
+            validator.validate_result(macos, self.spec)
+
+    def test_successful_result_requires_zero_poc_exit_code(self):
+        result = complete_result(self.spec)
+        result["poc_exit_code"] = 1
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "zero PoC exit code"):
+            validator.validate_result(result, self.spec)
+        result.pop("poc_exit_code")
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "zero PoC exit code"):
+            validator.validate_result(result, self.spec)
 
     def test_expected_revision_mismatch_fails(self):
         result = complete_result(self.spec, platform="windows-x86_64")

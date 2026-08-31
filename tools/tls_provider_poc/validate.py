@@ -296,6 +296,8 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                 0 < len(failure["message"].encode("utf-8")) <= 2048,
                 "FAIL result bounded message")
     if result.get("status") in {"PASS", "PARTIAL"}:
+        require(result.get("poc_exit_code") == 0,
+                "successful result requires zero PoC exit code")
         execution = result.get("execution")
         require(isinstance(execution, dict), "successful result requires execution metadata")
         require(COMMIT_RE.fullmatch(str(execution.get("repository_revision", ""))) is not None,
@@ -309,6 +311,19 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                     "Windows result requires native Windows runner")
             require(str(execution.get("runner_arch", "")).upper() in {"X64", "AMD64"},
                     "Windows result requires native x86_64 runner")
+        if result.get("platform") in {
+                "linux-glibc-x86_64", "linux-musl-x86_64"}:
+            require(execution.get("runner_os") == "Linux",
+                    "Linux result requires native Linux runner")
+            require(str(execution.get("runner_arch", "")).upper() in
+                    {"X64", "AMD64", "X86_64"},
+                    "Linux result requires native x86_64 runner")
+        if result.get("platform") == "macos-arm64":
+            require(execution.get("runner_os") == "macOS",
+                    "macOS result requires native macOS runner")
+            require(str(execution.get("runner_arch", "")).upper() in
+                    {"ARM64", "AARCH64"},
+                    "macOS result requires native arm64 runner")
         if result.get("platform") == "linux-musl-x86_64":
             require(CONTAINER_RE.fullmatch(str(execution.get("container_image", ""))) is not None,
                     "musl result requires immutable Alpine container identity")
