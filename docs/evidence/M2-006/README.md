@@ -18,14 +18,17 @@ Deadline policy.
   unknown schemas, cross-compile-only output, SKIPPED cases, timeout, missing
   simulator evidence, and a missing fixture binding.
 - GitHub Actions run
-  [`33335383201`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33335383201)
+  [`33352734478`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33352734478)
   passed both hosted jobs at exact revision
-  `f703e187a0816852b0eb55e7608e950ff03c829a`.
+  `843cec9644d3fb4ae844045fca7f56cc6ed0a1a4`.
 - The native `macos-15` arm64 job ran all seven selected Cangjie resolver cases
   with zero failures and stored its exact-revision report and validation.
 - The native iOS Simulator arm64 job built the standalone Cangjie probe,
   bundled and signed the official simulator runtime, installed the app, and
   ran all seven cases with zero failures on the booted iOS 26.2 Simulator.
+- The iOS gate permits one recorded Simulator restart only when the first
+  `simctl launch --console` attempt times out before producing any app output.
+  Partial protocol execution, case output, and nonzero exits are never retried.
 - Both reports record Cangjie
   `1.3.0-alpha.20260831010012`, Apple clang, runner image identity, adapter
   source digests, build fingerprint, platform, and exact repository revision.
