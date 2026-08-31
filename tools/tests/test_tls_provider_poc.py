@@ -259,6 +259,10 @@ class ProviderPocValidationTests(unittest.TestCase):
             openssl_source,
         )
         self.assertIn(
+            "configure(m, &client_conf, &server_conf, version, 0, 0)",
+            mbedtls_source,
+        )
+        self.assertNotIn(
             "configure(m, &client_conf, &server_conf, version, 0, 1)",
             mbedtls_source,
         )
