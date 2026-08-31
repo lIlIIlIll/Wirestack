@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-31T03:29:41.139083Z",
+  "generated_at_utc": "2026-08-31T04:17:48.998652Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,35 +11,35 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M2-004/windows-x86_64/validation.json",
-      "sha256": "c5887c80fdebf170f8da8795ec7374d112fe20a79ae10417e8bbc7b79c4d64ab",
+      "sha256": "86225ced16b988e9d12d75b9bf0b8f410d32a54c4c4a2a48c052dbab1942b5e4",
       "source_task": "M2-004"
     }
   ],
-  "revision": "e91985d20f94d633eff21d245e890e4f26f66870",
+  "revision": "eba9a393c7d983f4dde58a5d4eeea2c1af69459a",
   "schema_version": 1,
   "source_sha256": {
     ".github/workflows/m2-004-windows-system-resolver.yml": "af9425e4aa0f5ddb35fc6e8c42365fed80c35d4041dad2e68a6b127ca4f38c7f",
     ".gitignore": "dd41c411cb7958e7cc9e9899594400619535fffcfca02e03c8709bc1a173f4f2",
-    "build.cj": "4e93df00760389beb0c9b4f5446326db17c55fbb7ada41d21e105b8444d45634",
+    "build.cj": "64a28c71b2e9f0b610286142f41dc1651adfbb5c3b3098bef90f2c36aad2e2a0",
     "cjpm.toml": "2799502c07843692bd408a9d3555f887ce28d12b257650d2abe0c8183304ad54",
     "docs/evidence/M2-004/test-plan.md": "4dcb7b274b1332197fd4bbab3546ee9323a94a3d7f5bb6edb5ccf5e8ca9ff0bc",
-    "native/resolver/windows/wirestack_resolver.c": "8a6b95b1aaff5e1a62ef6192083943c6adcf520550c3883da9ffd3bae2baec3b",
+    "native/resolver/windows/wirestack_resolver.c": "7cba3aa2791c5b98c0deaf3d9cd4772505305fc7dbe106dcbecd4c90eee09cdb",
     "native/resolver/windows/wirestack_resolver.h": "20d07f4585a1785f631f67b83b7cfd7ae94ee8dc19ffd7487c43dbfa57bcdbbe",
     "scripts/build-resolver": "e58e18c61f4d78bcdc56e0ed9f40759dbaf5b661958963192e188728d3e7f968",
     "src/http/resolver.cj": "84192fdc26d9e064ca8d5c8d2441832d1d88d52b4b514a5d685d0e725e39ae9f",
     "src/internal/resolver/bounded_backend.cj": "31096eb46beb3aaed71c7d71fbc939ccbec9191766039b6f222c86d24db27ed5",
     "src/internal/resolver/bounded_backend_test.cj": "1740d853befd9fa967cea86fd6b6cd25ba654fdb49b6517f57f52f595138c71b",
     "src/internal/resolver/system_resolver.cj": "992c327434891de1ad56a9c2b77011ad3984dadd2d86acb42428d7319f94e69d",
-    "src/internal/resolver/windows_system_resolver_test.cj": "6a11412b03a7102311dcd02ad49821b2f659ac696833bc4e8e307b46cf11ab07",
-    "tools/build_native_dependencies.py": "4a0a4560c0da98de7aac86700759f509217d35ecc84cb57518b6459ff09a159e",
+    "src/internal/resolver/windows_system_resolver_test.cj": "968ab3bebef3d8963e10e626f6d04392a46dc5d84f64cc8025b0dca9a8a4b8dc",
+    "tools/build_native_dependencies.py": "21c6d8aaca0bf9167f93a26a73f203a95d5b4b5e9d907c10c7710754d80449d4",
     "tools/build_resolver.py": "2ca5f6b82335ac7d1a1494815cb8b980314d0c3d9480167ad7b3010b1c05e351",
     "tools/build_windows_resolver.py": "494f91c327abeea34ccb1bca0f7e380ffa306d5c6e283da1272aedbce1a826d2",
-    "tools/gates/m2_004_windows_resolver.py": "5291faef35d3efb5843988f72cfd7d121db67ab7d15157520d94a8460ef937cd",
+    "tools/gates/m2_004_windows_resolver.py": "0c51410f068bee9eee14ff265b92a06ca01ead3fd417b573a76512e0deb4bb85",
     "tools/gates/native/m2_004_tls_link_stub.c": "ddd4eb317c861351e91b085310bbe6702962e966bd227b4520b23facceb278c3",
-    "tools/gates/tests/test_m2_004_windows_resolver.py": "16537b658be449b6df7c82f21c9915571f4c0198b3c4f96a1c4a69d824e78498",
-    "tools/tasks/M2-004.json": "37fa00c7b4e0d6e7379563d06d2dd8d06e5037817a2c937567eed638afa66e3d",
-    "tools/tests/test_build_resolver.py": "12622c1600857d1f03b847c63123f1364f042860912eed3e245ae6c7494c9c3e",
-    "tools/tests/test_m7_029_independent_security_review.py": "30e07573bcfd578e409323234d05e7e76e77e2f39017261ada2e42c5b693d7af"
+    "tools/gates/tests/test_m2_004_windows_resolver.py": "e71dd67ec61ef8b81a61da74873a0411f1c99b4b0ebf86c148d3e9009b026609",
+    "tools/tasks/M2-004.json": "05410168e0999d20b34525ffeaf55d8f626ea73a4d74d20ee61e30eacd8699eb",
+    "tools/tests/test_build_resolver.py": "ebd0913c7d0d1190c274af8c362eee1fd9c61ed2690c09106650b32f3befb9f5",
+    "tools/tests/test_m7_029_independent_security_review.py": "a72c29da4e5394aa1175808f5633d552d1a1feabf23444518b9f7bf7e9e56a64"
   },
   "source_task": "M2-004",
   "toolchain": {
