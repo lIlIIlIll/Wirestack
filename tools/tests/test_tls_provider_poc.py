@@ -714,7 +714,7 @@ class ProviderPocValidationTests(unittest.TestCase):
             work = root / "work"
             repo = root / "repo"
             inherited = {
-                "PATH": f"{work}/bin:/usr/bin",
+                "PATH": f"{work.resolve()}/bin:/usr/bin",
                 "CC": "clang",
                 "INCLUDE": r"C:\\SDK\\include",
             }
