@@ -1,23 +1,30 @@
 {
   "build": {
-    "binary_bytes": 5363200,
-    "binary_sha256": "fe1cade470853460ac9b7bf2116ed1e3005b0c1ffda8cf5d9aebcda18e08bd6f",
+    "binary_bytes": 5364224,
+    "binary_sha256": "1a477b1a30be19fdf364c641b3c27945605d89b662687fe4b2df79fa84812a04",
+    "exported_symbol_inventory": {
+      "count": 0,
+      "scope": "final-artifact-exports",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symbols": [],
+      "tool": "dumpbin /exports"
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
         "bytes": 10148742,
         "name": "libssl.lib",
-        "sha256": "d44b44f58f7d5b404550058e63f1815ebeab174154808c10cc88171774cc879f"
+        "sha256": "011994ce89b2d0961f0041bb5e412356ae70753f53cf35915d7f4cf12501f8b3"
       },
       {
         "bytes": 55264226,
         "name": "libcrypto.lib",
-        "sha256": "33786d895d1840617608b0146a9ddd64e59266aff676ea7d2ff82d0b137d954e"
+        "sha256": "059e4c4ca24ff5cf167c447d664ee47d4ee746fbc9e3f0b86ca73de6dd88e476"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "80f50978d1064fdee99ca44a70f612d7dad11a4aef1fbd64a4b5cc62ef32e972",
+  "build_log_sha256": "d22ad8a11f566fbe21808a6ed23b542cccea3f35434acf949cbeb42e63d86749",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -25,7 +32,9 @@
     "external_signer": "BLOCKED",
     "external_trust": "PASS",
     "mtls": "PASS",
+    "negative_expired_certificate": "PASS",
     "negative_hostname": "PASS",
+    "negative_malformed_certificate": "PASS",
     "negative_untrusted_ca": "PASS",
     "partial_io_backpressure": "PASS",
     "repeated_cleanup": "PASS",
@@ -39,14 +48,15 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "dc0e4d54e5f35d32a6b974f96a0006595729dbfe",
+    "repository_revision": "837a63df942d67e77154c3127e2b917dfc1190cb",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T10:03:18.384731+00:00",
+  "finished_at": "2026-08-31T11:05:47.532530+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
+    "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "repeated_cleanup_cycles": 10000,
@@ -60,14 +70,14 @@
   "platform": "windows-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 3,
+  "schema_version": 4,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T09:55:27.484979+00:00",
+  "started_at": "2026-08-31T10:55:28.723599+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

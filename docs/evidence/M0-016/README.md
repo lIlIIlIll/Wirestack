@@ -1,51 +1,60 @@
 # M0-016 evidence: TLS provider PoC
 
-## Current status
+## Status
 
-- Task: **BLOCKED**
-- Native desktop results: **NOT_RUN after schema-v4 contract expansion**
-- Previous 12 schema-v3 results: **superseded; they lack certificate-negative and durable symbol-inventory evidence**
-- Android, iOS and HarmonyOS/OpenHarmony: **BLOCKED** because no native device runner is connected
+M0-016 is **BLOCKED** because Android, iOS, and HarmonyOS or OpenHarmony do
+not have native-device evidence.
 
-The current PoC adds deterministic expired and malformed certificate rejection,
-adapter-level rejection of an overlong ALPN identifier and a bounded export
-inventory for the final artifact. The previous native results predate those
-checks, so the canonical matrix does not accept them. M0-016 remains blocked
-while desktop reruns and the three mobile platform runs are missing.
+The current schema-v4 desktop evidence covers Linux glibc x86_64, Linux musl
+x86_64, macOS arm64, and Windows x86_64. AWS-LC passes every required PoC
+capability on all four targets. Mbed TLS remains PARTIAL because external
+signer and session resumption are BLOCKED. OpenSSL remains PARTIAL because
+external signer is BLOCKED.
 
-The Linux and macOS results came from [GitHub Actions run 33379997844](https://github.com/lIlIIlIll/Wirestack/actions/runs/33379997844).
-The Windows results came from [GitHub Actions run 33379997896](https://github.com/lIlIIlIll/Wirestack/actions/runs/33379997896).
+Schema v4 adds these retained checks:
+
+- expired certificate rejection;
+- malformed certificate rejection;
+- adapter rejection of an empty ALPN identifier and a 256-byte ALPN
+  identifier;
+- a complete final-artifact symbol inventory, capped at 16,384 symbols and
+  256 bytes per symbol.
+
+## Native desktop runs
+
+The Linux and macOS results came from [GitHub Actions run
+33384563625](https://github.com/lIlIIlIll/Wirestack/actions/runs/33384563625).
+The Windows results came from [GitHub Actions run
+33384563633](https://github.com/lIlIIlIll/Wirestack/actions/runs/33384563633).
 Both pull-request runs report head revision
-`e2376b0de9c0f936070f0e473be152a615de7242`; GitHub executed merge revision
-`dc0e4d54e5f35d32a6b974f96a0006595729dbfe`. The musl runner executes inside
-an isolated Alpine minirootfs, so its retained JSON does not repeat the
-repository revision; its artifact remains bound to run 33379997844.
+`0513ded006334d1c14f79b1b7c8b128b9d263d51). GitHub executed merge revision
+`837a63df942d67e77154c3127e2b917dfc1190cb`.
 
-## Superseded native results
+The musl jobs run inside an isolated Alpine minirootfs. Their result JSON files
+do not repeat the repository revision. The GitHub run and artifact metadata
+bind each musl result to the pull-request head revision.
 
-These results remain for audit history but do not count as current matrix
-evidence. Their artifact digests identify the archived build log and result
-pair.
+| Platform | Provider | Status | Symbols | Result SHA-256 | Artifact ID | Artifact SHA-256 |
+|---|---|---|---:|---|---:|---|
+| Linux glibc x86_64 | AWS-LC | PASS | 3,802 | `f9e7c6b5273fe34766457fa5d545fac46bb747a1aa37e1581c5e0798b94e34f2` | `9755083574` | `d7c5cb1466ecfe5215f1432b2f96778905de43966bbdebfc502047a805024855` |
+| Linux glibc x86_64 | Mbed TLS | PARTIAL | 1,113 | `eaf597ec40e027149c16ebfe559f808e0f2637cc57581a0bb3fea1ea38500c39` | `9755098794` | `162f0d9d4354c8bfc45251545df73197672516f2cb0fc041f42a415dd4dbda15` |
+| Linux glibc x86_64 | OpenSSL | PARTIAL | 9,576 | `7727db37b56fce645879432d50f23f94d4de8eeac226a251298be518acc87b44` | `9755104142` | `9b290d50e62f7d1e91098d4bc13c6cc677a65e5297230ccf831fbe553454bfdd` |
+| Linux musl x86_64 | AWS-LC | PASS | 3,795 | `3afcf04b08be421d02575c4b1433411d5fc314452ba9b137c5ecb7503a54823a` | `9755097629` | `fd3ce11a44e64b35f81790f5af5ab2f77ffe281f0c04dae3033d8d33da519aa8` |
+| Linux musl x86_64 | Mbed TLS | PARTIAL | 1,111 | `548f0114cb5048c74ba0c47dbde127441b85e579329ae61458e957cc3b2310b3` | `9755107115` | `689937c29063c2084d8c77b3c64f95e742e658b6928feeb919cb8a40edc8b0b4` |
+| Linux musl x86_64 | OpenSSL | PARTIAL | 9,571 | `1544a851073d005510aa5eb9f61642b567b91a7804d1affd26dbdae013bcfea8` | `9755129394` | `77e3c7d245d491806dfd98914808372c40860822fe9cbef970b6e6defb6121da` |
+| macOS arm64 | AWS-LC | PASS | 3,368 | `1cbfbc0ba36979fe1c6bdd28bdbaa90104918678a16ae7f4588b1825a35d56bd` | `9755084289` | `fb323068d5e15fcd1fa86b9a9be547b3f7190495d58611d3a9474234c857286e` |
+| macOS arm64 | Mbed TLS | PARTIAL | 1,101 | `b0869b2c00cace869066f2d232e744dfea30d192e46d851670d7ceef4253cbc2` | `9755089166` | `fe6a653a992bd32fc7fc35be21f08980e3e32830f7afebbc0f1d66734b5435d4` |
+| macOS arm64 | OpenSSL | PARTIAL | 9,534 | `b09ed3a4a015656c612a1a3f429f10adfa4c4cc82ba25975822fe07412896a2b` | `9755113459` | `f744ac9829d7df28f428c4a69be7254d88b59f9904f7928a2645eb7c751c6a78` |
+| Windows x86_64 | AWS-LC | PASS | 9 | `d01de77bffd1760a36455e86e5f82cc6ea3903f000cb0e7eef4a43ab212460f1` | `9755105791` | `a2a8bf9f28ebcfb31b87ed6454716052ae3c64d3eec70879a7afaf7d43a94e8d` |
+| Windows x86_64 | Mbed TLS | PARTIAL | 0 | `346ddb0ea8278c5c2f05ff8a56d3a989a2eb71e7937da30fc4ccb50c3a64a48a` | `9755162465` | `8505a46f34e2251e46280677e3a0b62cb22cbdb59201ebe9a7a4100dba46a52f` |
+| Windows x86_64 | OpenSSL | PARTIAL | 0 | `d37a949c14f150147031d338bb0f39391d155d3a47ba652f9a53f1ecbeb59e45` | `9755348468` | `d9dd5255934c1d89321efea8ac55eb5c74dad5b67b10e85521bcc8033bf94ef2` |
 
-| Platform | Provider | Status | Result SHA-256 | Artifact ID | Artifact SHA-256 |
-|---|---|---|---|---:|---|
-| Linux glibc x86_64 | AWS-LC | PASS | `c23c56c6e8f21c00343992f2e77cd2849128456a3efabea67f74ee102a4a4cd9` | `9753403303` | `ccb155e4e9cf29fd1a6927b101975bf0db656ddac5567c3db64e929290c0aa40` |
-| Linux glibc x86_64 | Mbed TLS | PARTIAL | `ed5b3d99a8e3698f5994fcc41d0d6ca7eff3919e6225b1ceaafacdefa0f8c02c` | `9753431167` | `c03e497d7e89ff91357dd3a70b02246d94b6e5dab296c6e73b817493d0c58d1d` |
-| Linux glibc x86_64 | OpenSSL | PARTIAL | `de4b761ad1f8098020d56b5cf719b17a4a03f45f4e8b621da9c8336549ad6546` | `9753438762` | `a378ba050b21b32fe7859587058bb51a033bb56859ed77fb6bfd9fbc663639aa` |
-| Linux musl x86_64 | AWS-LC | PASS | `465d7538be0c23060286ba75dd93099c08321b6bc4e566e75d74784bffd22eea` | `9753417277` | `84870828d6fbe2ac48ec0a9711501ce6f7ee31549185f213faabef4ea8c99a9d` |
-| Linux musl x86_64 | Mbed TLS | PARTIAL | `ec67f326642980e559842f249d2dab5280377d46d3cb839e791235ab55281a55` | `9753411107` | `6194bce0c87cd0934ee8750f73f467e83a5049149d02735b674ed27f4cb94bcb` |
-| Linux musl x86_64 | OpenSSL | PARTIAL | `fed4370df3d036aae03c4470c185ae1cd41c85d997b473c50cb8a33d49dfd8e3` | `9753446398` | `f45fb44e6dfd1bcfbb024908ff8e55a3d819662d18acc56a0ff00c45c2d30909` |
-| macOS arm64 | AWS-LC | PASS | `52bfcef9ec1d235588236054f28fb2ffa83be075ab948bb4451be280f13e2d4d` | `9753398248` | `a4aad200f7295638f3efc1353ce47e71ccad3f356e252548b14f2b93822f101c` |
-| macOS arm64 | Mbed TLS | PARTIAL | `3db4f230e1b21da1bbbd6ab6ae10c0ceb556ff40c1f8bda21e2c06f699964b9c` | `9753408506` | `f3bc278474857a62e58b31aa8c39b1947384529e400d42d0b83bc1e6d54f2d74` |
-| macOS arm64 | OpenSSL | PARTIAL | `87c754ba2fa062f42b5be890de8650baf16f24dc582f4b59f6aa960703b85e9a` | `9753433117` | `f02c683394049bdbd4aa8a93823e0fd192d5f8899992b36b5f3ec40dce65292e` |
-| Windows x86_64 | AWS-LC | PASS | `b679aeb5060555507a9ef3536b7070c0ba4ac97d2d88f11860e967b6a0f22587` | `9753432545` | `e7e992339341fc87301f50f64b102c3f83e817d77d01eb8bc0c05064283fbdf3` |
-| Windows x86_64 | Mbed TLS | PARTIAL | `da39a64e175f73b4d0f02225780c99d7820bf39ba8c0246da0a315ecae153500` | `9753476656` | `adb98f8bfa85ef24928d067c4560e0a8ee46ea47fb53baa87691dc2063c3e0d5` |
-| Windows x86_64 | OpenSSL | PARTIAL | `5ff29f56fba5c41d92d59827f47888adb95f2cf5555691b7fbba7e9b142de3f2` | `9753592384` | `03b0efce32f28e50f80d2879862b27c4d5f880b921fc2ddcb9d5eeb652a6971a` |
-
-The Windows run metadata and build-log digests are retained in
-[`windows-x86_64-run.json`](windows-x86_64-run.json). CI artifacts are
-supporting evidence and may expire; the committed result JSON and matrix
-digests are durable.
+Each result contains `build_log_sha256`. The platform matrix records the
+result path and SHA-256. The Windows run metadata, artifact digests, and build
+log digests are in
+[`windows-x86_64-run.json`](windows-x86_64-run.json). GitHub artifacts can
+expire, so the committed result JSON files and matrix digests are the durable
+evidence.
 
 ## Pinned sources
 
@@ -55,10 +64,12 @@ digests are durable.
 | Mbed TLS | 4.2.0 | commit `ece41aa84d7879d7e55c59e955a5884b541f7f3b` plus archive SHA-256 |
 | OpenSSL control | 3.6.3 | official archive SHA-256 and peeled tag commit |
 
-The canonical machine-readable pins are in
-`tools/tls_provider_poc/providers.json`.
+`tools/tls_provider_poc/providers.json` contains the machine-readable source
+pins.
 
-## Reproduction and validation
+## Validate the retained evidence
+
+Run the validator and the fault-injection tests from the repository root:
 
 ```bash
 python3 tools/tls_provider_poc/validate.py \
@@ -67,15 +78,16 @@ python3 tools/tls_provider_poc/validate.py \
 python3 -m unittest tools.tests.test_tls_provider_poc
 ```
 
-The PoC runner requires network access, CMake, Ninja, a C/C++ toolchain, Perl,
-Git and a host `openssl` command for fixture generation. It links the test
-binary against the pinned provider archives and rejects system TLS runtime
-dependencies.
+The PoC runner requires network access, CMake, Ninja, a C or C++ toolchain,
+Perl, Git, and a host `openssl` command for fixture generation. The host
+`openssl` command does not provide the TLS implementation under test. The
+runner links the PoC binary against the pinned provider archives and rejects
+system TLS runtime dependencies.
 
 ## Evidence rules
 
-- A retained incomplete native result is `PARTIAL`, never `PASS`.
-- A missing external-signer or session test makes a result `PARTIAL`.
-- Runtime provider fallback or a system TLS dependency makes the result `FAIL`.
+- A retained incomplete native result is PARTIAL.
+- A missing external-signer or session test prevents PASS.
+- A runtime provider fallback or a system TLS dependency produces FAIL.
 - Cross-compilation does not satisfy a native platform cell.
 - This PoC does not select or claim a production provider outside Linux.
