@@ -34,10 +34,14 @@ Every successful native result records the exact repository revision and
 hosted-runner image identity. A musl result additionally records the immutable
 container name and digest; a mutable tag or artifact-level association is not
 sufficient. The result retains normalized configure/build argv, compiler,
-C++ compiler, CMake when used, build-tool version output, target triple,
-environment overrides, and an explicit digest-bound patch set. Temporary build
-paths are replaced by stable markers; a build-log digest alone is not durable
-provenance. Provider license files are copied from the pinned source into a
+C++ compiler, CMake when used, build-tool version output, target triple, and an
+allowlisted snapshot of the effective build environment. The snapshot includes
+inherited compiler, CMake, SDK, search-path and MSVC DevShell variables as well
+as runner-supplied overrides; absent allowlisted variables are recorded as
+empty values. Each value and the complete snapshot are bounded. Temporary build
+paths are replaced by stable markers. The result also retains an explicit
+digest-bound patch set; a build-log digest alone is not durable provenance.
+Provider license files are copied from the pinned source into a
 bounded bundle. Its manifest binds the provider, source digest, relative file
 paths, byte counts, and file digests, and the result binds the manifest digest.
 The canonical matrix also references a committed copy of that exact manifest;
