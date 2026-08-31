@@ -372,7 +372,40 @@ static int basic_case(const char *server_cert, const char *server_key, const cha
     return ok;
 }
 
-static SSL_SESSION *session_after_handshake(Pair *p, SSL_CTX *client_ctx) {
+static SSL_SESSION *session_after_handshake(Pair *p, SSL_CTX *client_ctx,
+                                            int version) {
+    if (version == TLS1_3_VERSION) {
+        const unsigned char marker = 0xa5;
+        unsigned char received = 0;
+        int sent = 0;
+        int read = 0;
+        for (int step = 0;
+             step < MAX_STEPS && (!sent || !read || captured_session == NULL);
+             ++step) {
+            if (!sent) {
+                int ret = SSL_write(p->server, &marker, 1);
+                if (ret == 1) sent = 1;
+                else {
+                    int error = SSL_get_error(p->server, ret);
+                    if (error != SSL_ERROR_WANT_READ &&
+                        error != SSL_ERROR_WANT_WRITE) break;
+                }
+            }
+            if (!read) {
+                int ret = SSL_read(p->client, &received, 1);
+                if (ret == 1) read = 1;
+                else {
+                    int error = SSL_get_error(p->client, ret);
+                    if (error != SSL_ERROR_WANT_READ &&
+                        error != SSL_ERROR_WANT_WRITE) break;
+                }
+            }
+        }
+        if (!sent || !read || received != marker) {
+            SSL_CTX_sess_set_new_cb(client_ctx, NULL);
+            return NULL;
+        }
+    }
     for (int step = 0; step < MAX_STEPS && captured_session == NULL; ++step) {
         unsigned char byte = 0;
         int ret = SSL_read(p->client, &byte, 1);
@@ -399,7 +432,9 @@ static int session_resumption_version_case(
     int ok = drive_handshake(&first, 1, MAX_STEPS) &&
              verify_negotiation(&first, version) &&
              transfer_payload(&first);
-    SSL_SESSION *session = ok ? session_after_handshake(&first, client_ctx) : NULL;
+    SSL_SESSION *session = ok
+        ? session_after_handshake(&first, client_ctx, version)
+        : NULL;
     ok = ok && session != NULL;
     if (ok) ok = clean_shutdown(&first);
     free_pair(&first);

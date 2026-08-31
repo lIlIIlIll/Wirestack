@@ -252,6 +252,7 @@ class ProviderPocValidationTests(unittest.TestCase):
             "SSL_CTX_sess_set_new_cb(client_ctx, capture_session_callback);",
             openssl_source,
         )
+        self.assertIn("SSL_write(p->server, &marker, 1)", openssl_source)
         self.assertNotIn(
             "if (version == TLS1_3_VERSION) {\n"
             "        if (captured_session != NULL)",
