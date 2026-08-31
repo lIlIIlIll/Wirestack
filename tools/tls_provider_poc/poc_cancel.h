@@ -134,21 +134,44 @@ static uint64_t poc_monotonic_us(void) {
     return (uint64_t)now.tv_sec * 1000000ULL + (uint64_t)now.tv_nsec / 1000ULL;
 }
 
-static struct timespec poc_realtime_deadline(uint64_t timeout_us) {
-    struct timespec deadline;
-    clock_gettime(CLOCK_REALTIME, &deadline);
-    deadline.tv_sec += (time_t)(timeout_us / 1000000ULL);
-    deadline.tv_nsec += (long)((timeout_us % 1000000ULL) * 1000ULL);
-    if (deadline.tv_nsec >= 1000000000L) {
-        deadline.tv_sec++;
-        deadline.tv_nsec -= 1000000000L;
-    }
-    return deadline;
+static struct timespec poc_duration_us(uint64_t duration_us) {
+    struct timespec duration;
+    duration.tv_sec = (time_t)(duration_us / 1000000ULL);
+    duration.tv_nsec = (long)((duration_us % 1000000ULL) * 1000ULL);
+    return duration;
+}
+
+static int poc_cond_timedwait_until(PocCancelGate *gate,
+                                    uint64_t monotonic_deadline_us) {
+    uint64_t now = poc_monotonic_us();
+    if (now >= monotonic_deadline_us) return ETIMEDOUT;
+#if defined(__APPLE__)
+    struct timespec remaining = poc_duration_us(monotonic_deadline_us - now);
+    return pthread_cond_timedwait_relative_np(
+        &gate->changed, &gate->lock, &remaining);
+#else
+    struct timespec deadline = poc_duration_us(monotonic_deadline_us);
+    return pthread_cond_timedwait(&gate->changed, &gate->lock, &deadline);
+#endif
 }
 
 static int poc_cancel_gate_init(PocCancelGate *gate) {
     if (pthread_mutex_init(&gate->lock, NULL) != 0) return 0;
-    if (pthread_cond_init(&gate->changed, NULL) != 0) {
+    pthread_condattr_t attributes;
+    if (pthread_condattr_init(&attributes) != 0) {
+        pthread_mutex_destroy(&gate->lock);
+        return 0;
+    }
+#if !defined(__APPLE__)
+    if (pthread_condattr_setclock(&attributes, CLOCK_MONOTONIC) != 0) {
+        pthread_condattr_destroy(&attributes);
+        pthread_mutex_destroy(&gate->lock);
+        return 0;
+    }
+#endif
+    int cond_result = pthread_cond_init(&gate->changed, &attributes);
+    pthread_condattr_destroy(&attributes);
+    if (cond_result != 0) {
         pthread_mutex_destroy(&gate->lock);
         return 0;
     }
@@ -197,12 +220,11 @@ static void *poc_join_target(void *opaque) {
 static int poc_cancel_trigger_and_join(PocCancelGate *gate, PocThread thread,
                                        uint64_t *latency_us) {
     int ok = 1;
-    struct timespec start_deadline = poc_realtime_deadline(
-        (uint64_t)POC_CANCELLATION_START_TIMEOUT_MS * 1000ULL);
+    uint64_t start_deadline = poc_monotonic_us() +
+        (uint64_t)POC_CANCELLATION_START_TIMEOUT_MS * 1000ULL;
     pthread_mutex_lock(&gate->lock);
     while (!gate->waiting && !gate->finished) {
-        int result = pthread_cond_timedwait(
-            &gate->changed, &gate->lock, &start_deadline);
+        int result = poc_cond_timedwait_until(gate, start_deadline);
         if (result == ETIMEDOUT) {
             ok = 0;
             break;
@@ -233,11 +255,9 @@ static int poc_cancel_trigger_and_join(PocCancelGate *gate, PocThread thread,
     uint64_t started = poc_monotonic_us();
     gate->cancelled = 1;
     pthread_cond_broadcast(&gate->changed);
-    struct timespec finish_deadline = poc_realtime_deadline(
-        POC_CANCELLATION_WAKE_BOUND_US);
+    uint64_t finish_deadline = started + POC_CANCELLATION_WAKE_BOUND_US;
     while (ok && !gate->joined) {
-        int result = pthread_cond_timedwait(
-            &gate->changed, &gate->lock, &finish_deadline);
+        int result = poc_cond_timedwait_until(gate, finish_deadline);
         if (result == ETIMEDOUT) {
             ok = 0;
             break;
