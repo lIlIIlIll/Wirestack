@@ -127,8 +127,21 @@ def download(url: str, destination: Path) -> None:
         shutil.copyfileobj(response, out)
 
 
+def github_api_headers() -> dict[str, str]:
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "Wirestack-M0-016/1",
+    }
+    token = os.environ.get("WIRESTACK_GITHUB_TOKEN", "")
+    if len(token.encode("utf-8")) > 4096:
+        raise PocError("GitHub API token exceeds its bound")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
+
+
 def resolve_git_tag(url: str) -> str:
-    headers = {"Accept": "application/vnd.github+json", "User-Agent": "Wirestack-M0-016/1"}
+    headers = github_api_headers()
     request = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(request, timeout=30) as response:
         obj = json.load(response)["object"]
