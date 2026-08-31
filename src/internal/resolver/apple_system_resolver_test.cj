@@ -157,11 +157,11 @@ class M2006AppleSystemResolverTest {
         let first = spawn {
             resolver.resolve(api.HostName("delay.m2-006.test"))
         }
-        sleep(20 * Duration.millisecond)
+        m2006WaitForMetrics(resolver, {metrics => metrics.runningJobs == 1})
         let second = spawn {
             resolver.resolve(api.HostName("delay.m2-006.test"))
         }
-        sleep(20 * Duration.millisecond)
+        m2006WaitForMetrics(resolver, {metrics => metrics.queuedJobs == 1})
         let overloaded = m2006ResolveError({=>
             let _ = resolver.resolve(api.HostName("delay.m2-006.test"))
         })
@@ -173,6 +173,20 @@ class M2006AppleSystemResolverTest {
         @Expect(first.get(2 * Duration.second).addresses.isEmpty(), false)
         @Expect(second.get(2 * Duration.second).addresses.isEmpty(), false)
     }
+}
+
+private func m2006WaitForMetrics(
+    resolver: SystemResolver,
+    predicate: (ResolverPoolMetrics) -> Bool
+): Unit {
+    let expiresAt = MonoTime.now() + Duration.second
+    while (MonoTime.now() < expiresAt) {
+        if (predicate(resolver.metrics())) {
+            return
+        }
+        sleep(Duration.millisecond)
+    }
+    throw TimeoutException()
 }
 
 private func m2006FixtureEnabled(): Bool {

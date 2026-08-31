@@ -3,7 +3,7 @@ package wirestack.m2_006_probe
 import std.time.*
 import std.env.exit
 import wirestack as api
-import wirestack.internal.resolver.SystemResolver
+import wirestack.internal.resolver.{ResolverPoolMetrics, SystemResolver}
 
 foreign func wirestack_m2_006_probe_trace(caseId: Int32, phase: Int32): Unit
 
@@ -195,11 +195,11 @@ private func m2006AdmissionAndRelease(): Bool {
     let first = spawn {
         resolver.resolve(api.HostName("delay.m2-006.test"), context: m2006Context())
     }
-    sleep(20 * Duration.millisecond)
+    m2006WaitForMetrics(resolver, {metrics => metrics.runningJobs == 1})
     let second = spawn {
         resolver.resolve(api.HostName("delay.m2-006.test"), context: m2006Context())
     }
-    sleep(20 * Duration.millisecond)
+    m2006WaitForMetrics(resolver, {metrics => metrics.queuedJobs == 1})
     let overloaded = m2006Capture({=>
         let _ = resolver.resolve(api.HostName("delay.m2-006.test"), context: m2006Context())
     })
@@ -211,6 +211,20 @@ private func m2006AdmissionAndRelease(): Bool {
     let secondComplete = !second.get(2 * Duration.second).addresses.isEmpty()
     m2006Code(overloaded.resolveCode, api.ResolveErrorCode.TemporaryFailure) &&
         closePrompt && firstComplete && secondComplete
+}
+
+private func m2006WaitForMetrics(
+    resolver: SystemResolver,
+    predicate: (ResolverPoolMetrics) -> Bool
+): Unit {
+    let expiresAt = MonoTime.now() + Duration.second
+    while (MonoTime.now() < expiresAt) {
+        if (predicate(resolver.metrics())) {
+            return
+        }
+        sleep(Duration.millisecond)
+    }
+    throw TimeoutException()
 }
 
 private func m2006Capture(action: () -> Unit): api.ResolveException {

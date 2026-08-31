@@ -62,17 +62,17 @@ foreign func wirestack_resolver_pool_metrics(
 ): Int32
 
 /** Bounded scheduler diagnostics. No hostname or address data is retained. */
-internal struct ResolverPoolMetrics {
-    internal let workerCount: Int64
-    internal let queueCapacity: Int64
-    internal let activeJobs: Int64
-    internal let queuedJobs: Int64
-    internal let runningJobs: Int64
-    internal let peakActiveJobs: Int64
-    internal let peakQueuedJobs: Int64
-    internal let submittedJobs: Int64
-    internal let completedJobs: Int64
-    internal let rejectedJobs: Int64
+public struct ResolverPoolMetrics {
+    public let workerCount: Int64
+    public let queueCapacity: Int64
+    public let activeJobs: Int64
+    public let queuedJobs: Int64
+    public let runningJobs: Int64
+    public let peakActiveJobs: Int64
+    public let peakQueuedJobs: Int64
+    public let submittedJobs: Int64
+    public let completedJobs: Int64
+    public let rejectedJobs: Int64
 
     internal init(values: Array<UInt64>) {
         workerCount = Int64(values[0])

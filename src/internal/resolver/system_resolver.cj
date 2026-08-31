@@ -45,4 +45,9 @@ public class SystemResolver <: Resolver & Resource {
     public func isClosed(): Bool {
         backend.isClosed()
     }
+
+    /** Returns bounded scheduler counters for diagnostics and deterministic tests. */
+    public func metrics(): ResolverPoolMetrics {
+        backend.metrics()
+    }
 }
