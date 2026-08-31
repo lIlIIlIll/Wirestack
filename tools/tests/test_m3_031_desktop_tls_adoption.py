@@ -162,8 +162,18 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
     def test_retained_report_and_tls_source_drift_fail_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            task = json.loads((ROOT / "tools/tasks/M3-030.json").read_text(encoding="utf-8"))
+            for relative in task["source_paths"]:
+                if relative == "tools/tasks/M3-030.json":
+                    continue
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(f"retained {relative}\n", encoding="utf-8")
+            task_path = root / "tools/tasks/M3-030.json"
+            task_path.parent.mkdir(parents=True, exist_ok=True)
+            task_path.write_text(json.dumps(task), encoding="utf-8")
             evidence_path = root / "docs/evidence/M3-030/evidence.json"
-            evidence_path.parent.mkdir(parents=True)
+            evidence_path.parent.mkdir(parents=True, exist_ok=True)
             report_paths = adoption.RETAINED_EVIDENCE
             reports = []
             for relative in report_paths:
@@ -175,18 +185,33 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 reports.append({"path": relative, "source_task": "M3-030",
                                 "acceptance_status": "PASS",
                                 "sha256": adoption.sha256_path(path)})
-            source = root / "src/internal/tls_engine/package.cj"
-            source.parent.mkdir(parents=True)
-            source.write_text("current", encoding="utf-8")
             evidence = {"schema_version": 1, "source_task": "M3-030",
                         "acceptance_status": "PASS", "reports": reports,
                         "source_sha256": {
-                            "src/internal/tls_engine/package.cj": adoption.sha256_path(source)
+                            relative: adoption.repository_text_sha256(root / relative)
+                            for relative in task["source_paths"]
                         }}
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
-            self.assertEqual("PASS", adoption.validate_retained_evidence(root)["status"])
+            retained = adoption.validate_retained_evidence(root)
+            self.assertEqual("PASS", retained["status"])
+            self.assertEqual([], retained["changed_since_m3_030"])
+            evidence["source_sha256"].pop("build.cj")
+            evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+            self.assert_code(
+                "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
+            )
+            evidence["source_sha256"]["build.cj"] = adoption.repository_text_sha256(
+                root / "build.cj"
+            )
+            evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+            source = root / "build.cj"
             source.write_text("drift", encoding="utf-8")
-            self.assert_code("STALE_SOURCE", lambda: adoption.validate_retained_evidence(root))
+            retained = adoption.validate_retained_evidence(root)
+            self.assertEqual(["build.cj"], retained["changed_since_m3_030"])
+            self.assertNotEqual(
+                retained["recorded_source_sha256"]["build.cj"],
+                retained["source_sha256"]["build.cj"],
+            )
 
     def test_hosted_run_is_bound_to_current_provider_inputs(self) -> None:
         revision = "a" * 40
