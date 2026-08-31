@@ -1028,6 +1028,20 @@ class ProviderPocValidationTests(unittest.TestCase):
             self.assertIn("WIRESTACK_GITHUB_TOKEN: ${{ github.token }}",
                           workflow)
 
+    def test_musl_package_installation_has_no_tag_resolution_token(self):
+        workflow = (ROOT / ".github/workflows/tls-provider-poc.yml").read_text()
+        provision_start = workflow.index(
+            "- name: Provision native Alpine musl userspace")
+        runner_start = workflow.index(
+            "- name: Build and execute in provisioned Alpine musl userspace")
+        cleanup_start = workflow.index("- name: Remove Alpine musl container")
+        provision = workflow[provision_start:runner_start]
+        runner_step = workflow[runner_start:cleanup_start]
+        self.assertIn("apk add --no-cache", provision)
+        self.assertNotIn("WIRESTACK_GITHUB_TOKEN", provision)
+        self.assertIn("-e WIRESTACK_GITHUB_TOKEN", runner_step)
+        self.assertIn("unset WIRESTACK_GITHUB_TOKEN", runner_step)
+
     def test_build_environment_captures_inherited_and_override_values(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
