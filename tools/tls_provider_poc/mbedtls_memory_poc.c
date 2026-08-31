@@ -17,6 +17,8 @@
 #if defined(_WIN32)
 #include <windows.h>
 #include <psapi.h>
+#elif defined(__APPLE__)
+#include <mach/mach.h>
 #else
 #include <sys/resource.h>
 #endif
@@ -69,14 +71,16 @@ static uint64_t peak_resident_bytes(void) {
     counters.cb = sizeof(counters);
     if (!GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters))) return 0;
     return (uint64_t)counters.PeakWorkingSetSize;
+#elif defined(__APPLE__)
+    mach_task_basic_info_data_t info;
+    mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
+    if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
+                  (task_info_t)&info, &count) != KERN_SUCCESS) return 0;
+    return (uint64_t)info.resident_size_max;
 #else
     struct rusage usage;
     if (getrusage(RUSAGE_SELF, &usage) != 0) return 0;
-#if defined(__APPLE__)
-    return (uint64_t)usage.ru_maxrss;
-#else
     return (uint64_t)usage.ru_maxrss * 1024ULL;
-#endif
 #endif
 }
 

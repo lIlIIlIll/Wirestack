@@ -332,7 +332,9 @@ def create_license_bundle(src: Path, output_dir: Path, provider: str,
 
 def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
                    log: Path, *, repo: Path | None = None,
-                   diagnostic: bool = False) -> tuple[Path, list[Path], dict[str, Any]]:
+                   diagnostic: bool = False,
+                   extra_configure_args: Sequence[str] = ()) -> tuple[
+                       Path, list[Path], dict[str, Any]]:
     repo = (repo or Path(__file__).resolve().parents[2]).resolve()
     build = work / "build"
     prefix = work / "prefix"
@@ -340,7 +342,7 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
     jobs = str(max(2, min(os.cpu_count() or 2, 4)))
     pid = spec["id"]
     sanitizer_flags = "-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer"
-    if diagnostic and pid == "aws-lc" and sys.platform.startswith("linux"):
+    if diagnostic and pid == "aws-lc" and platform_id().startswith("linux-"):
         # GCC reports false-positive array-bounds diagnostics while compiling
         # AWS-LC 5.5.0's generated ML-DSA amalgamation. Keep every other AWS-LC
         # warning fatal while preserving sanitizer instrumentation.
@@ -409,6 +411,7 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
             env.update(environment_overrides)
         configure_command += [
             *(["no-asm"] if diagnostic else []),
+            *extra_configure_args,
             "no-shared", "no-module", "no-tests", "no-zlib", "no-zstd",
             f"--prefix={prefix}", "--libdir=lib",
         ]
