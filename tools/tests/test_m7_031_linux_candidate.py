@@ -18,7 +18,11 @@ class M7031LinuxCandidateTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.documents = candidate.load_documents(ROOT)
-        cls.report = candidate.build_candidate(ROOT, documents=cls.documents)
+        cls.report = candidate.build_candidate(
+            ROOT,
+            documents=cls.documents,
+            verify_current_sources=False,
+        )
 
     def documents_copy(self):
         return copy.deepcopy(self.documents)

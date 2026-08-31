@@ -532,6 +532,7 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 | P1-010 | HTTP/3/QUIC | PRD §5 | 独立项目，不复用 TCP Transport 假设；不得提前侵入本项目公共 API。 |
 | P1-011 | Linux musl 采纳 | ADR-0004 | 仓颉 SDK 发布受支持的 musl target、标准库、runtime 和构建说明后启动；必须补齐 native compile/unit/integration、resolver、trust、依赖、性能和安装证据。 |
 | P1-012 | AI 友好型仓库基础设施 | Repository control plane | M7-024 已完成；提供诚实的环境诊断、机器可读任务契约、分层验证入口和源码绑定的证据新鲜度检查。长时间门禁只能显式运行，不得由 fast/full 隐式触发。 |
+| P1-013 | 分离开发回归与发布证据新鲜度门禁 | Repository control plane | 依赖 P1-012,M3-031；`scripts/check` 验证当前代码、结构和故障注入，不因预期过期的点时 release evidence 产生级联假失败；M7 release CLI 仍默认校验当前源码并 fail closed；修正 Darwin resolver 已受支持后的过时回归断言；不得刷新、复用或伪造旧 artifact、soak、性能、安全审查、SBOM 或签名 PASS。 |
 
 ---
 
@@ -622,8 +623,8 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 - 全平台主线任务：**185**
 - Linux 稳定版收口任务：**15**
 - 远期上游任务：**7**
-- 稳定版后 P1/独立项目：**12**
+- 稳定版后 P1/独立项目：**13**
 - 当前发布相关任务总数：**200**
-- 全部已记录任务总数：**219**
+- 全部已记录任务总数：**220**
 
 该数量代表 Issue/PR 级工作项，不代表必须串行执行；关键是保持里程碑退出门禁和依赖方向。
