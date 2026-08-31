@@ -6,12 +6,13 @@ M0-016 remains **BLOCKED** because Android, iOS, and HarmonyOS or
 OpenHarmony do not have native-device evidence. Cross-compilation does not
 satisfy those cells.
 
-The 12 retained schema-v6 desktop results are superseded by schema v7 and no
-longer count as current PASS or PARTIAL evidence. Native reruns must retain the
-bounded worker join, cleanup live-allocation baselines and validated
-security-update intake before the desktop cells can be promoted again.
+All 12 desktop cells have current schema-v7 native evidence. AWS-LC passes
+every required capability on Linux glibc x86_64, Linux musl x86_64, macOS
+arm64, and Windows x86_64. Mbed TLS is PARTIAL because external signing and
+session resumption are not implemented by this PoC. The vendored OpenSSL
+control is PARTIAL because external signing is not implemented.
 
-Schema v6 retains:
+Schema v7 retains:
 
 - required and optional client authentication;
 - negative certificate, hostname, trust, and ALPN cases;
@@ -20,9 +21,11 @@ Schema v6 retains:
 - complete bounded final-artifact symbol inventories;
 - committed, digest-bound provider license bundles;
 - 10,000-cycle resident-memory, provider allocation-call, cumulative-byte,
-  and peak-live profiles;
+  peak-live and before/after-cleanup live-allocation profiles;
 - an explicit caller-owned wait, cancellation signal, wakeup, join, and
-  latency bound; and
+-  latency bound covering the complete join;
+- source-pin ages, official advisory channels and the provider update
+  workflow; and
 - provider-instrumented ASan and UBSan diagnostics on Linux glibc and macOS.
 
 Linux glibc Mbed TLS also passes LeakSanitizer. AWS-LC and static OpenSSL
@@ -32,38 +35,38 @@ LeakSanitizer as unsupported by the hosted toolchain. Linux musl and Windows
 record the configured sanitizer diagnostic as unsupported; they do not report
 a skipped diagnostic as PASS.
 
-## Superseded schema-v6 desktop runs
+## Current schema-v7 desktop runs
 
 [TLS Provider PoC run
-33401994988](https://github.com/lIlIIlIll/Wirestack/actions/runs/33401994988)
+33411959747](https://github.com/lIlIIlIll/Wirestack/actions/runs/33411959747)
 produced the Linux glibc, Linux musl, and macOS results. [M0-016 Windows
 Provider PoC run
-33401994898](https://github.com/lIlIIlIll/Wirestack/actions/runs/33401994898)
+33411959615](https://github.com/lIlIIlIll/Wirestack/actions/runs/33411959615)
 produced the Windows results. Both run records identify pull-request head
-0b8e3181a82f8eb062e24e63edf57fc05850d859. GitHub executed synthetic merge
-revision 0970f3984eb523cc1571b864e72bfdddef10f3d8; every retained result binds
+bdad23f7dbf86c91245f64dab029dd75bbad0d56. GitHub executed synthetic merge
+revision bbd2b22404d47f674842c50eabe2debd12d79787; every retained result binds
 that exact execution revision.
 
 All 12 artifacts were downloaded and independently validated with:
 
     python3 tools/tls_provider_poc/validate.py \
       --result <artifact>/result.json \
-      --expected-revision 0970f3984eb523cc1571b864e72bfdddef10f3d8
+      --expected-revision bbd2b22404d47f674842c50eabe2debd12d79787
 
 | Platform | Provider | Status | Result SHA-256 | Artifact ID | Artifact SHA-256 |
 |---|---|---|---|---:|---|
-| Linux glibc x86_64 | AWS-LC | PASS | 29bb981c4b426b622eaec843598df19ac4f0de309555774e0fc8ecacf4747be4 | 9761723304 | 51cd0a4f7be0e9c9b31fc90bc43590c0dcc6d20c0601bf45b7dd69e21bd55f9b |
-| Linux glibc x86_64 | Mbed TLS | PARTIAL | 2f5560abd3e630fe766b44343c04b8c6dfcf3dd75f23f4fc3d43cd3cb1fbe96d | 9761673324 | ef1ac48afbd4c60665d6dc482c278ba01bac4b3c345fee64871545636c148916 |
-| Linux glibc x86_64 | OpenSSL | PARTIAL | 8d3dd3d6efce896b664901dd27e9d8b19546b9008285bcc864bfb97b18337abf | 9761720732 | 93d5c6bbaa448bda66046fe4504ee6854123a547b4bfdafe06954cae049d731e |
-| Linux musl x86_64 | AWS-LC | PASS | abddf4c0098695510315dd44ee25d3c94b71b010765233d9347ee09691203e9c | 9761644924 | 540842d5b5f751512a6e9e9850f86b5b3f5b171f5eb5a234b4968266ddba2fb3 |
-| Linux musl x86_64 | Mbed TLS | PARTIAL | aa599c6fc526345e682033f9cbabf1f7779d02adbad6c5b23ceab4058365ab7a | 9761670487 | 4405bc979b7a505b3616cefd32900cce89de25e36000ea926ed82d11bc8a11ca |
-| Linux musl x86_64 | OpenSSL | PARTIAL | f42a5c9994f8a20e5e3a65eb3e0c73200bc74c6d4ede468dbaea9c148fadbe65 | 9761660065 | f746eecb09ea61764764d977056756e09bcbb9420ea7e66b6e729270b6fd12ef |
-| macOS arm64 | AWS-LC | PASS | 294f912a3508ca8ae72f31717b76d46ad7329d00851d0eb75ce106b47524c00d | 9761672812 | 759de851ea2e4c12ab5e2ad2db2f08198e2c81bc113f3920f33e5c369d27eb89 |
-| macOS arm64 | Mbed TLS | PARTIAL | d86287be3d564188ebd8b4c804dc5a7b62b9ecf1d1502d5eea621391157151cc | 9761662174 | a8d8021f377d4bed2527443b3cd4efe0fd2dc2619f29b0bb375570250bbf71ab |
-| macOS arm64 | OpenSSL | PARTIAL | d9fa0b4c8f78dbf6915c24e0fc3213844f1c6a8f6d00e2f57002ad943baeab59 | 9761733139 | 46795cbbf7ca2984c22cddcd8f962295698617ec3e90e679ed62bb07623474a2 |
-| Windows x86_64 | AWS-LC | PASS | a91526d856a207538eed34c6a81844a8c09a36bc6a7b8ddf751bedbd25efb446 | 9761693290 | 060c8cd1c0f91615223cb8a5a21820265d34267a0aed0909a647561b05bc0e76 |
-| Windows x86_64 | Mbed TLS | PARTIAL | 0b0f8f896a6851e0ba0e7c08785134e6711091ac68fa06858a1615837f110486 | 9761730074 | dee4e519d9d07fe3590d9a5161f90523b5af9de7ccfe86ae84b532c843c9fba3 |
-| Windows x86_64 | OpenSSL | PARTIAL | e9a647f3be5d6d7dfb0aa9b78d2cacd350d2a219336b43a9afae31de564f702e | 9761930237 | cffd6b174bace07fbe7dc33aab1144ed12d4c073aafb3f55f0e15eaddb3833b2 |
+| Linux glibc x86_64 | AWS-LC | PASS | 5e51a933625633934dbc4abb1391d4ac9c4044a38a91b5d7fd59cda52930544e | 9765584693 | b46516fafc8f83aec6b21d60c8dc8a04eff878cd419ce12532a7b403ffbdebdd |
+| Linux glibc x86_64 | Mbed TLS | PARTIAL | a703d1d2379292fafd66c1cb0825de216bf0b2ccdd8818a525d17d4223a31f8d | 9765550769 | 43c0385dc78516cedf4c21b9f18ef84f6f83dbfdb4b65a8bd86749efd89351e0 |
+| Linux glibc x86_64 | OpenSSL | PARTIAL | 136e5163a4d7b08e6f6d7e5e0e700231064fe054c0cfcf4656226493ad45f180 | 9765620613 | 108d03a9ab665c7c487ff37b2fc24ecdfca250dcdb52db241d3a8441487c2fef |
+| Linux musl x86_64 | AWS-LC | PASS | 8dac563cf51edaac8063d583be96d6586c5c5212bb63853080b40983e1985e56 | 9765542198 | b920ed69d36e8d5c432b33c53604f9484904ac7619594d5f60fb797764e2ffb2 |
+| Linux musl x86_64 | Mbed TLS | PARTIAL | eef678d1f9a665dc8d13ede92c9fc85f2d2b8688e01700b691e79a3fa0576377 | 9765527984 | be10728c8fe14624f676581408013749536b275af582394bc50b549268793885 |
+| Linux musl x86_64 | OpenSSL | PARTIAL | 45942de74d714ba8fedbab5abef4149c9560dec12a9b20beb38899719b87f7da | 9765582678 | 0a480fd62a5ee906556d727004dee516d39d6232768054084d4545da7e52c4d9 |
+| macOS arm64 | AWS-LC | PASS | d9a9dccecb1d410f05eb2d2cde62912adb7e55d03aa058415e8b134a6f830f43 | 9765565484 | 3a64bfef7e1c747e6a9f4cbfb4149993bad03ab45a98d0c86e15d226e08095d2 |
+| macOS arm64 | Mbed TLS | PARTIAL | c5d02e3ffa058ba471fef6e3ce556b3d3f746e1f17e7281cf5e7fd5e695c0516 | 9765532480 | 76445ba37813a47d6c95929d5e77781636f471465f947d77845a67b980013770 |
+| macOS arm64 | OpenSSL | PARTIAL | 5f26114b158b8c1f10582032ecffcf1f3cad817ae82c1873e7bdb9e36895c896 | 9765636374 | 0360532d6e2f7eda7895f5fe995328e14171dc9404d9ebbfbc4d3e5bdb043911 |
+| Windows x86_64 | AWS-LC | PASS | f745321f8a84aedbabcedcb7955d17676b4c28a2d0d2c9fba940419c290afed7 | 9765545341 | 1452a68f52c2c083c0003ab28004717306a3d01cf025bd37bf81037793a75814 |
+| Windows x86_64 | Mbed TLS | PARTIAL | cb204d6bcee3b70c84658acc1734ce0e0c3fcfed7456a3a0f82c12ce98dbb137 | 9765617555 | f15b904fe500ff0c7f3a3d23f404deaf4a01b4bf98f56de5a4aa2dc253a79eb4 |
+| Windows x86_64 | OpenSSL | PARTIAL | 44e5d05923eccaf5705fcead83a4aacc81f14bf0fb398f5bb40e2ca934d328bc | 9765856296 | e7766523019ebd458f9c38579ac58ab6b94142d4372c58a1ad7e26a63c8012fa |
 
 The Unix artifacts expire on 2026-11-29. The Windows artifacts expire on
 2026-09-14. Artifact expiration does not remove the committed result JSON,
@@ -99,7 +102,7 @@ capabilities presented as PASS all fail validation.
 ## Evidence rules
 
 - A retained incomplete native result is PARTIAL only when it satisfies schema
-  v6.
+  v7.
 - A missing external-signer or session test prevents PASS.
 - A runtime provider fallback or system TLS dependency produces FAIL.
 - Cross-compilation does not satisfy a native platform cell.

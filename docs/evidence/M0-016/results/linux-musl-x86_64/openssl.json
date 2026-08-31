@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 7369384,
-    "binary_sha256": "8d88f15844ad3d25324ae530c4cf30ed2921803ae4f828436a18a39106305ce0",
+    "binary_bytes": 7369424,
+    "binary_sha256": "5c40926c5700be516c016b4e53ab4284cd7a88b1a9e1b0b5714938f96f199973",
     "exported_symbol_inventory": {
       "count": 9570,
       "scope": "final-artifact-exports",
@@ -9656,12 +9656,12 @@
       {
         "bytes": 12362020,
         "name": "libcrypto.a",
-        "sha256": "bf6f6b365973b6c9d13e22aea1dfefa6dd9038d089b15c2f34a751839996d819"
+        "sha256": "801edcfa960e6a32fedcad807ec1440851809cf5782bbbd001183d3551117d30"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "180476187fd8c524fe44fbf3dbac6a494c61d13e83929b61737a8127e36d289c",
+  "build_log_sha256": "c1db56c8395031559a6a8a62aaef93b72b55a0b0894064ce13047fa90a105ea8",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -9686,29 +9686,31 @@
     "image_os": "alpine",
     "image_version": "3.22.5",
     "python": "3.14.7",
-    "repository_revision": "0970f3984eb523cc1571b864e72bfdddef10f3d8",
+    "repository_revision": "bbd2b22404d47f674842c50eabe2debd12d79787",
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T14:21:54.745059+00:00",
+  "finished_at": "2026-08-31T16:06:50.526273+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 15,
+    "cancellation_latency_us": 91,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 40820736,
+    "memory_profile_peak_resident_bytes": 40636416,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 6211595550,
+    "provider_allocation_bytes": 6178111213,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 28521822,
-    "provider_allocation_peak_live_bytes": 804838,
+    "provider_allocation_calls": 28520414,
+    "provider_allocation_live_after_cleanup_bytes": 559146,
+    "provider_allocation_live_before_cleanup_bytes": 559146,
+    "provider_allocation_peak_live_bytes": 800075,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -9720,19 +9722,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 15,
-      "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+      "latency_us": 91,
+      "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 40820736,
+      "peak_resident_bytes": 40636416,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 6211595550,
+      "provider_allocation_bytes": 6178111213,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 28521822,
-      "provider_allocation_peak_live_bytes": 804838,
+      "provider_allocation_calls": 28520414,
+      "provider_allocation_live_after_cleanup_bytes": 559146,
+      "provider_allocation_live_before_cleanup_bytes": 559146,
+      "provider_allocation_peak_live_bytes": 800075,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -9744,14 +9748,14 @@
   "platform": "linux-musl-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 6,
+  "schema_version": 7,
   "source": {
     "archive": "openssl-3.6.3.tar.gz",
     "commit": "aae016bfd52fcad2bc9657c2c782cfdf73b1ed5f",
     "content_sha256": "243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1",
     "kind": "archive"
   },
-  "started_at": "2026-08-31T14:20:20.936462+00:00",
+  "started_at": "2026-08-31T16:04:00.093975+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
