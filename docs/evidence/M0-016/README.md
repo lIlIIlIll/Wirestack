@@ -2,13 +2,16 @@
 
 ## Status
 
-M0-016 remains **BLOCKED** only at the full cross-platform task level. All 12
-desktop schema-v10 cells are current: AWS-LC passes on Linux glibc, Linux musl,
-Windows and macOS; Mbed TLS and OpenSSL retain explicit PARTIAL results for
-unsupported capabilities. Android, iOS, and HarmonyOS or OpenHarmony still
-lack native-device evidence; cross-compilation does not satisfy those cells.
+M0-016 remains **BLOCKED** at the full cross-platform task level. The previous
+12 desktop schema-v10 results are stale after the schema-v11 build-provenance
+change and are not referenced by the canonical matrix. Native schema-v11
+reruns are required before any desktop cell is current. Android, iOS, and
+HarmonyOS or OpenHarmony still lack native-device evidence; cross-compilation
+does not satisfy those cells.
 
-Schema v10 retains all prior native evidence plus:
+Schema v11 retains all prior native evidence plus the exact successful NASM
+identity for a Windows AWS-LC build. Its workflow fallback is pinned to
+Chocolatey package `nasm` 2.16.3. Schema v11 also retains:
 
 - monotonic cancellation and join deadlines that are unaffected by wall-clock
   changes;
@@ -45,17 +48,18 @@ LeakSanitizer as unsupported by the hosted toolchain. Linux musl and Windows
 record the configured sanitizer diagnostic as unsupported; they do not report
 a skipped diagnostic as PASS.
 
-## Current schema-v10 desktop runs
+## Previous schema-v10 desktop runs (stale)
 
 [TLS Provider PoC run
 33435335010](https://github.com/lIlIIlIll/Wirestack/actions/runs/33435335010)
 produced the Linux glibc, Linux musl, and macOS results. [M0-016 Windows
 Provider PoC run
 33435335035](https://github.com/lIlIIlIll/Wirestack/actions/runs/33435335035)
-produced the Windows results. Both pull-request runs identify head
+produced the now-stale Windows results. Both pull-request runs identify head
 `3f2d225b5108441835c6f7e471bda8fbf9a8e046`. GitHub executed synthetic merge
-revision `1c21f3bdb8176846d94450595c47c1bf4526efba`; every retained result binds
-that exact execution revision.
+revision `1c21f3bdb8176846d94450595c47c1bf4526efba`; every historical result binds
+that exact execution revision. The canonical matrix intentionally marks these
+cells `NOT_RUN` until replacement schema-v11 artifacts are retained.
 
 All 12 artifacts were downloaded and independently validated with:
 
@@ -112,7 +116,7 @@ capabilities presented as PASS all fail validation.
 ## Evidence rules
 
 - A retained incomplete native result is PARTIAL only when it satisfies schema
-  v10, has no `NOT_RUN` or `FAIL` capability, and has at least one explicit
+  v11, has no `NOT_RUN` or `FAIL` capability, and has at least one explicit
   `BLOCKED` capability.
 - A missing external-signer or session test prevents PASS.
 - A runtime provider fallback or system TLS dependency produces FAIL.
