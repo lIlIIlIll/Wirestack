@@ -11,6 +11,8 @@ RESULT_STATUSES = {"PASS", "PARTIAL", "FAIL", "BLOCKED"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 REQUIRED_PROVIDER_IDS = {"aws-lc", "mbedtls", "openssl"}
+MAX_EXPORTED_SYMBOLS = 16384
+MAX_EXPORTED_SYMBOL_LENGTH = 256
 
 class ValidationError(RuntimeError):
     pass
@@ -43,8 +45,9 @@ def validate_exported_symbols(build: Mapping[str, Any]) -> None:
             "exported-symbol inventory tool")
     symbols = inventory.get("symbols")
     require(isinstance(symbols, list), "exported-symbol list required")
-    require(len(symbols) <= 4096, "exported-symbol inventory exceeds its bound")
-    require(all(isinstance(symbol, str) and 0 < len(symbol) <= 256
+    require(len(symbols) <= MAX_EXPORTED_SYMBOLS,
+            "exported-symbol inventory exceeds its bound")
+    require(all(isinstance(symbol, str) and 0 < len(symbol) <= MAX_EXPORTED_SYMBOL_LENGTH
                 for symbol in symbols), "exported-symbol entry invalid")
     require(symbols == sorted(set(symbols)),
             "exported-symbol inventory must be sorted and unique")

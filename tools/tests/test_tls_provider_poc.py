@@ -42,6 +42,7 @@ class ProviderPocValidationTests(unittest.TestCase):
         validator.validate_retained_results(self.matrix, self.spec, ROOT)
 
     def test_exported_symbol_inventory_is_bounded_and_digest_bound(self):
+        self.assertEqual(runner.MAX_EXPORTED_SYMBOLS, validator.MAX_EXPORTED_SYMBOLS)
         validator.validate_exported_symbols({
             "exported_symbol_inventory": EMPTY_SYMBOL_INVENTORY,
         })
@@ -54,6 +55,33 @@ class ProviderPocValidationTests(unittest.TestCase):
         bad["count"] = 1
         with self.assertRaisesRegex(validator.ValidationError, "digest mismatch"):
             validator.validate_exported_symbols({"exported_symbol_inventory": bad})
+
+        static_link_symbols = [f"provider_symbol_{index:05d}" for index in range(10000)]
+        encoded = "".join(f"{symbol}\n" for symbol in static_link_symbols).encode("utf-8")
+        validator.validate_exported_symbols({
+            "exported_symbol_inventory": {
+                "scope": "final-artifact-exports",
+                "tool": "fixture-tool",
+                "count": len(static_link_symbols),
+                "sha256": runner.hashlib.sha256(encoded).hexdigest(),
+                "symbols": static_link_symbols,
+            },
+        })
+
+        too_many_symbols = [
+            f"provider_symbol_{index:05d}"
+            for index in range(validator.MAX_EXPORTED_SYMBOLS + 1)
+        ]
+        with self.assertRaisesRegex(validator.ValidationError, "exceeds its bound"):
+            validator.validate_exported_symbols({
+                "exported_symbol_inventory": {
+                    "scope": "final-artifact-exports",
+                    "tool": "fixture-tool",
+                    "count": len(too_many_symbols),
+                    "sha256": "0" * 64,
+                    "symbols": too_many_symbols,
+                },
+            })
 
     def test_missing_archive_digest_fails(self):
         value = copy.deepcopy(self.spec)
