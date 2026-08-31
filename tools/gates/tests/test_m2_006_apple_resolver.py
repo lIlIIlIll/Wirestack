@@ -11,12 +11,19 @@ from tools.gates import m2_006_apple_resolver as gate
 
 
 def valid_process(mode: str = "macos") -> dict[str, object]:
+    if mode == "ios-simulator":
+        output = "".join(
+            f"[ TRACE ] CASE: {case_id} START\n[ TRACE ] CASE: {case_id} PASS\n"
+            for case_id in range(1, gate.EXPECTED_TESTS + 1)
+        )
+    else:
+        output = "".join(
+            f"[ PASSED ] CASE: {name}\n" for name in gate.EXPECTED_CASES[mode]
+        ) + "FAILED: 0\nERROR: 0\n"
     return {
         "timed_out": False,
         "exit_code": 0,
-        "output": "".join(
-            f"[ PASSED ] CASE: {name}\n" for name in gate.EXPECTED_CASES[mode]
-        ) + "FAILED: 0\nERROR: 0\n",
+        "output": output,
     }
 
 
@@ -308,6 +315,23 @@ class M2006AppleResolverGateTests(unittest.TestCase):
         failures = gate.validate_report(report, "abc", "ios-simulator")
         self.assertIn("RESOLVER_TEST:CASE_INVENTORY", failures)
         self.assertIn("REPORT:SIMULATOR_PROBE", failures)
+
+    def test_rejects_incomplete_duplicate_or_failed_simulator_trace(self) -> None:
+        for output in (
+            "[ TRACE ] CASE: 1 START\n[ TRACE ] CASE: 1 PASS\n",
+            valid_process("ios-simulator")["output"] + "[ TRACE ] CASE: 8 PASS\n",
+            str(valid_process("ios-simulator")["output"]).replace(
+                "[ TRACE ] CASE: 8 PASS", "[ TRACE ] CASE: 8 FAIL"
+            ),
+        ):
+            report = valid_report("ios-simulator")
+            report["resolver_test"]["output"] = output
+            failures = gate.validate_report(report, "abc", "ios-simulator")
+            self.assertTrue(
+                "RESOLVER_TEST:CASE_COUNT" in failures or
+                "RESOLVER_TEST:CASE_INVENTORY" in failures
+            )
+        self.assertIn("RESOLVER_TEST:NON_PASS_CASE", failures)
 
     def test_retry_requires_empty_timeout_and_complete_recovery(self) -> None:
         report = valid_report("ios-simulator")
