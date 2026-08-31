@@ -89,6 +89,9 @@ class M2004WindowsResolverGateTests(unittest.TestCase):
         self.assertEqual(2, source.count("*out_native_code = (int64_t)thread_error"))
         self.assertIn("host_length = bounded_length", source)
         self.assertIn("return WIRESTACK_RESOLVER_OUT_OF_MEMORY;", source)
+        self.assertIn("WIRESTACK_UTF8_CONVERSION_OUT_OF_MEMORY", source)
+        self.assertIn("ERROR_NOT_ENOUGH_MEMORY", source)
+        self.assertIn("job->native_code = conversion_native_code", source)
 
     def test_valid_report_passes(self) -> None:
         self.assertEqual([], gate.validate_report(valid_report(), "abc"))
