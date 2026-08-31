@@ -19,9 +19,9 @@ AWS-LC 5.5.0 at commit
 earlier PoC evidence. Current schema-v11 native evidence validates monotonic
 cancellation waits, the pin-bound advisory disposition, exact source identity,
 structured static archives, distinct local-close behavior, explicit fresh
-cache misses and resumed cache hits. GitHub Actions run `33439283767` reports
-pull-request head `a98a4811dd86592b2ae7514a1d6267e72d8dd8f7` and executed
-synthetic merge revision `91d82dbea7f2353445c7a495659cd425b9ae5c15`.
+cache misses and resumed cache hits. GitHub Actions run `33445220117` reports
+pull-request head `0c128cd05341bf12f5e5aae8d4e58c0ff07198d9` and executed
+synthetic merge revision `88584c91602b25e4c35cd4cf9a1431c220897cec`.
 The retained results
 bind that execution revision and record:
 
