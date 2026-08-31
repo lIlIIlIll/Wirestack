@@ -2,12 +2,11 @@
 
 ## Status
 
-M0-016 remains **BLOCKED**. The 12 retained desktop schema-v10 results predate
-independent release-tag resolution for archive providers and explicit
-fresh-handshake cache-miss assertions for the OpenSSL-compatible PoC. Native
-reruns are pending and the canonical matrix marks those cells `NOT_RUN`.
-Android, iOS, and HarmonyOS or OpenHarmony also still lack native-device
-evidence; cross-compilation does not satisfy those cells.
+M0-016 remains **BLOCKED** only at the full cross-platform task level. All 12
+desktop schema-v10 cells are current: AWS-LC passes on Linux glibc, Linux musl,
+Windows and macOS; Mbed TLS and OpenSSL retain explicit PARTIAL results for
+unsupported capabilities. Android, iOS, and HarmonyOS or OpenHarmony still
+lack native-device evidence; cross-compilation does not satisfy those cells.
 
 Schema v10 retains all prior native evidence plus:
 
@@ -46,39 +45,38 @@ LeakSanitizer as unsupported by the hosted toolchain. Linux musl and Windows
 record the configured sanitizer diagnostic as unsupported; they do not report
 a skipped diagnostic as PASS.
 
-## Superseded schema-v10 desktop runs
+## Current schema-v10 desktop runs
 
 [TLS Provider PoC run
-33430599975](https://github.com/lIlIIlIll/Wirestack/actions/runs/33430599975)
+33435335010](https://github.com/lIlIIlIll/Wirestack/actions/runs/33435335010)
 produced the Linux glibc, Linux musl, and macOS results. [M0-016 Windows
 Provider PoC run
-33430600118](https://github.com/lIlIIlIll/Wirestack/actions/runs/33430600118)
-produced the Windows results. They are retained for audit history but no longer
-satisfy the strengthened source and resumption contract. Both pull-request runs identify head
-`74985fb2c506cea3e007258878a038e0dc6c0c34`. GitHub executed synthetic merge
-revision `72ac887eb974b177b9af09529c09166ec8db6303`; every retained result binds
+33435335035](https://github.com/lIlIIlIll/Wirestack/actions/runs/33435335035)
+produced the Windows results. Both pull-request runs identify head
+`3f2d225b5108441835c6f7e471bda8fbf9a8e046`. GitHub executed synthetic merge
+revision `1c21f3bdb8176846d94450595c47c1bf4526efba`; every retained result binds
 that exact execution revision.
 
 All 12 artifacts were downloaded and independently validated with:
 
     python3 tools/tls_provider_poc/validate.py \
       --result <artifact>/result.json \
-      --expected-revision 72ac887eb974b177b9af09529c09166ec8db6303
+      --expected-revision 1c21f3bdb8176846d94450595c47c1bf4526efba
 
 | Platform | Provider | Status | Result SHA-256 | Artifact ID | Artifact SHA-256 |
 |---|---|---|---|---:|---|
-| Linux glibc x86_64 | AWS-LC | PASS | 7bafa0492dd9c35e73e28e8ab45eaef776f7018ee77f46e4977512f5b540ee36 | 9772559435 | a6d3fd72380a9a898d1f1d8f5eeee573b2dc84e09ac555a88998eae6f4c5bf1d |
-| Linux glibc x86_64 | Mbed TLS | PARTIAL | 1b0d6d00bd306c1edfe5943ad2fb2f388d5b6e4fed77fcd019d6192a6f9ba4c3 | 9772498718 | 67256511ce2112004f97e2ba667c9afd631d37d939d299ee8c49fe8859ae365b |
-| Linux glibc x86_64 | OpenSSL | PARTIAL | ef6f7c0b00e6c68d4016d380e397e77c31f73a8260b3108eaa1f511ce5f05632 | 9772560574 | 4285d77caf0f22bc5f1097f6d3e31089f0c710eceddc3504c6d8278b0974ffcd |
-| Linux musl x86_64 | AWS-LC | PASS | facf425c23c37f51cb3844854c3f00840b1c8c8a989268bf947084402c101505 | 9772484110 | da0935e72b17ec5f20db0912c6df32b4d08ccea9dca6bcc0f7e816eaa04e098c |
-| Linux musl x86_64 | Mbed TLS | PARTIAL | ee87563571cc70a2bee394b459801c5347f43062f5ed5f02f6e4371ed261abd9 | 9772494557 | 8384f6cc2aa3925e7563a4279c3c76121083cf10b360463e0886453f3ec1e8e9 |
-| Linux musl x86_64 | OpenSSL | PARTIAL | 3c60cc2be776e7e17ef3aa9a6c320364c3f182534912adcd8dc36ed543a47b06 | 9772524002 | b34e2fff342e44b479011457c62d94d00cfbf68e8ae5165276db78663edac9da |
-| macOS arm64 | AWS-LC | PASS | b5e72b6f7a26f11c3a918d7ea7472bd65dbcc119f7bd8f5a3c6e75386e85d5ae | 9772497390 | 5849721ffd22c788e178ddf4138d7cb646fa59998b254f0eb31e3f21441ebeca |
-| macOS arm64 | Mbed TLS | PARTIAL | d3513ceb8c03f2a54e51bb0e105b4ba10e0b0ab30462d0d681c1078d813eff2c | 9772493167 | a43b12318bdc4ec1f25e181118014e509c3caa6ad1a83ed7a7b86b5f828b7108 |
-| macOS arm64 | OpenSSL | PARTIAL | eae8d521ccc7a47663d03d044632bf7cb0bfc3edfa4d563ddc91803545ccc8d5 | 9772542908 | ed645897830a8701eb9a65dd61cee090da21ee1b1e8fe35aeedaaa84326c7d79 |
-| Windows x86_64 | AWS-LC | PASS | 4e16402139f6a83ad9a8b6b8b85078fd1b20d9084f0fcf473b674d23dfcb5ac2 | 9772490370 | 7ff23efecf497c74ab855d39038085e382638216a32e7df3377c132ff0c75849 |
-| Windows x86_64 | Mbed TLS | PARTIAL | 91b8aecde1b21e2783dce36f2e6147e7174c23601137d808a96aaec7114812cc | 9772550981 | 4823dc8a8ef88bd76d06dd59e321edf87fea3258795e49933badaec84c93074f |
-| Windows x86_64 | OpenSSL | PARTIAL | 8bb711687683a30f26687b32310a8ab0b973f7846afbd5dc1d0a6add800b2afc | 9772780366 | ae3f48bb74cae5f3964ec7decea5ebf0c0fa5d505832b7046df04d5d422e0311 |
+| Linux glibc x86_64 | AWS-LC | PASS | a4459f7fff75face93b14715a3a2e7ad9a4c7de1eda1b51306750227fd343058 | 9774270791 | 43b39b14d7ca73cbe717c309ab3bebe355a1481ca314b019383d28d002aa7c62 |
+| Linux glibc x86_64 | Mbed TLS | PARTIAL | e3ff929d25226aad3194ac928d573cab636879976ce509ed91eca484612a5aa2 | 9774235506 | 8b04f2fa3208710341e36458369df3b24a59049c18a26c1487ba0e2767dc1c40 |
+| Linux glibc x86_64 | OpenSSL | PARTIAL | 7fcdb0250fca2eebfa6cd117e25585c50d54798a674c855debfef05f524fdc16 | 9774275102 | a20da15b96706f91cc9221a4f7dac8196e7b9643803e52fffc4d974259e1ad6e |
+| Linux musl x86_64 | AWS-LC | PASS | f69665df7d68a41a0562ccc9e639a9b51d057bab825d31594365f1cf0633b5a1 | 9774220025 | 6554702cc5a5830a942728788caa90246bf2dfb444fcfedd15dd65deec74a055 |
+| Linux musl x86_64 | Mbed TLS | PARTIAL | 2c6a5ed6183f08d879175b219145138c27d392b08b795fb897984e999789416f | 9774221991 | 371d493db72c85c6e6c18158f3759caaf85c76dfbf14df2e095915651c46bd88 |
+| Linux musl x86_64 | OpenSSL | PARTIAL | f91345b0dc97d82b9e55f4de129ca0d48a407f79c16d7e9b72f01895f9570f6c | 9774256473 | 2b336feeb74cfdf059ec5b74f20eeba4044b15a66ced6dd77c3a0bc7a7585daf |
+| macOS arm64 | AWS-LC | PASS | 50f2fef0594a9714be524a99abe5035dd124a97d93b08560c30ef2b7cae64d77 | 9774221858 | 9d2387f822d3bf8500d51e76f2fa83b5f327e7a39f61443045a9267b6b6549eb |
+| macOS arm64 | Mbed TLS | PARTIAL | a72bd0a575b26c6203f69d204c5310f17fbddee39a2a6ca2a4c963ffb8049aa6 | 9774236669 | 77e95cb2a05f3e3b8365c6401305b8c679c4a93074cbc91cdc7fa6a7a1f77716 |
+| macOS arm64 | OpenSSL | PARTIAL | fc5f9c745801df32859053103ea3256ac3c705125dbed3368b3ec77260a04929 | 9774293040 | d43b0fdb731dbfa1973b533a94fb58f212b7b07774014feb034048fdd38e2446 |
+| Windows x86_64 | AWS-LC | PASS | a31ccd6ac97be363fba232913f63e28d3ae4ea809a7e4d851220c9ba9423fbda | 9774229187 | e8143efb0ca203bc6b06d2dda9c37b32273891e3d779c41b7485566ae25ab562 |
+| Windows x86_64 | Mbed TLS | PARTIAL | 241b871b7dfed84b558254f8ed534aff26cb06bee59b353e29a4f0a3789bd0a4 | 9774285560 | 300846e10602dca7edd97ee6599efe7607fabb7fa60d82f5427f90cd551acbc4 |
+| Windows x86_64 | OpenSSL | PARTIAL | f430ac64b043c95d8b9576b26eee596ec689e0b992528143bf3d866a0555b343 | 9774480229 | 11e249d4b0d25a69cbb10b919b9c62fd37ee3a50021ccfdf3ef93f0e4ad85bdd |
 
 The Unix artifacts expire on 2026-11-29. The Windows artifacts expire on
 2026-09-14. Artifact expiration does not remove the committed result JSON,

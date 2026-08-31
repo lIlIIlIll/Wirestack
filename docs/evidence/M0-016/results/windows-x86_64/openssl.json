@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 5386240,
-    "binary_sha256": "573c54d72e6c1e5e58d5742ba585bd68cd98dfe0a428ce01f8f53f53377453fd",
+    "binary_sha256": "11f78ba005c2fabafeabfd24fe096990b9c8c3d0d31d33ed485a448b7825d8ec",
     "exported_symbol_inventory": {
       "count": 0,
       "scope": "final-artifact-exports",
@@ -99,17 +99,17 @@
       {
         "bytes": 55053476,
         "name": "libcrypto.lib",
-        "sha256": "7678a5d4684ab8f60dc7717d20f84f02b1c09e87340486da9183e05e8f93e1a9"
+        "sha256": "8fc00752e1bd164f0d202a2260fdeaf5902a73186be418f4b7d33f7e31a96e19"
       },
       {
         "bytes": 10120650,
         "name": "libssl.lib",
-        "sha256": "b889327b35a8c1685fbc9b75d7dd176a1f16f695d4e0e6469ce43cfb70564897"
+        "sha256": "c18d8f7848c79893e1d5c4b4956a6481e0a8750189889f3434a177d9548db531"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "4b7f30ccaf4c7f2cc979d3a2b9706d68072de1150a6141fe76be01ecdf2d2a19",
+  "build_log_sha256": "b90a556afbac229fa1ddf5ca135bf95ba82bde491aa35c7366b5b1ccd322089a",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -135,29 +135,29 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "72ac887eb974b177b9af09529c09166ec8db6303",
+    "repository_revision": "1c21f3bdb8176846d94450595c47c1bf4526efba",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T19:37:25.367032+00:00",
+  "finished_at": "2026-08-31T20:28:34.916207+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 98,
+    "cancellation_latency_us": 119,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 11808768,
+    "memory_profile_peak_resident_bytes": 11747328,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 6172386326,
+    "provider_allocation_bytes": 6172168824,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 28326872,
+    "provider_allocation_calls": 28325830,
     "provider_allocation_live_after_cleanup_bytes": 563571,
     "provider_allocation_live_before_cleanup_bytes": 563571,
     "provider_allocation_peak_live_bytes": 797615,
@@ -172,18 +172,18 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 98,
+      "latency_us": 119,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 11808768,
+      "peak_resident_bytes": 11747328,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 6172386326,
+      "provider_allocation_bytes": 6172168824,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 28326872,
+      "provider_allocation_calls": 28325830,
       "provider_allocation_live_after_cleanup_bytes": 563571,
       "provider_allocation_live_before_cleanup_bytes": 563571,
       "provider_allocation_peak_live_bytes": 797615,
@@ -230,9 +230,11 @@
       "maximum_source_pin_age_days": 180,
       "source_committed_at": "2026-08-25T11:49:21Z",
       "update_workflow": "docs/security/provider-update-workflow.md"
-    }
+    },
+    "tag": "openssl-3.6.4",
+    "tag_resolved_commit": "d3c1b1169b3569ff3069e5b399f47b2b28e03d79"
   },
-  "started_at": "2026-08-31T19:27:08.363718+00:00",
+  "started_at": "2026-08-31T20:18:58.496846+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

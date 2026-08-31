@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 7313240,
-    "binary_sha256": "6c6d2655e8266611e607259188bc0626e7614e173721a61ad3171e86d0ad8e8f",
+    "binary_sha256": "732ef8041f2d2a3e7c8cfba81bf8bb9c1b537526c268d5d7f865bdf3d15a2f8a",
     "exported_symbol_inventory": {
       "count": 9581,
       "scope": "final-artifact-exports",
@@ -9680,7 +9680,7 @@
       {
         "bytes": 12237848,
         "name": "libcrypto.a",
-        "sha256": "2c4e33c0c4c9640d80d454a2016ffac59195dc49d57962ac7e83bd436e224dac"
+        "sha256": "b7458dd204f0c62608603a27f62a815961102b3337b78bb1dcfffbe3beb6cb65"
       },
       {
         "bytes": 2054214,
@@ -9690,7 +9690,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "28d3e7a33f79a888924373739f8ce1b7e60a48f9ef6cd00212cb4bb629e8f008",
+  "build_log_sha256": "b65b7f3c829874c3b7f5838ec8fd5fd86504c5b4fa430ae7abe451e5cbadb1e0",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -9716,32 +9716,32 @@
     "image_os": "ubuntu24",
     "image_version": "20260823.283.1",
     "python": "3.12.14",
-    "repository_revision": "72ac887eb974b177b9af09529c09166ec8db6303",
+    "repository_revision": "1c21f3bdb8176846d94450595c47c1bf4526efba",
     "runner_arch": "X64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T19:31:03.651106+00:00",
+  "finished_at": "2026-08-31T20:22:18.759853+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 101,
+    "cancellation_latency_us": 64,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 46825472,
+    "memory_profile_peak_resident_bytes": 47370240,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 6177712640,
+    "provider_allocation_bytes": 6210039457,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 28525352,
+    "provider_allocation_calls": 28485633,
     "provider_allocation_live_after_cleanup_bytes": 559202,
     "provider_allocation_live_before_cleanup_bytes": 559202,
-    "provider_allocation_peak_live_bytes": 800083,
+    "provider_allocation_peak_live_bytes": 804862,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -9753,21 +9753,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 101,
+      "latency_us": 64,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 46825472,
+      "peak_resident_bytes": 47370240,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 6177712640,
+      "provider_allocation_bytes": 6210039457,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 28525352,
+      "provider_allocation_calls": 28485633,
       "provider_allocation_live_after_cleanup_bytes": 559202,
       "provider_allocation_live_before_cleanup_bytes": 559202,
-      "provider_allocation_peak_live_bytes": 800083,
+      "provider_allocation_peak_live_bytes": 804862,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -9776,7 +9776,7 @@
         "reason": "static OpenSSL 3.6.4 retains process-global allocations after thread and global cleanup; broad allocator suppression is forbidden",
         "status": "UNSUPPORTED"
       },
-      "output_sha256": "af69b165de6119b7c8fc6aa986b5a2ce3dadc95aef6051e482c43abe7d7a7685",
+      "output_sha256": "2427274d6f93372ceda7bda2e4037934353eeed1284b8a94442dd564053a182a",
       "provider_build_provenance": {
         "build_argv": [
           [
@@ -9861,7 +9861,7 @@
         {
           "bytes": 95907284,
           "name": "libcrypto.a",
-          "sha256": "3c366df02cfc750f925eee8b20daef2df9465dc2faeebcc0458f006f1995ee8d"
+          "sha256": "1f98b57a80583c77ecf9f21397a9900d16ab757019965d956bd84e209327c88f"
         },
         {
           "bytes": 29303216,
@@ -9908,9 +9908,11 @@
       "maximum_source_pin_age_days": 180,
       "source_committed_at": "2026-08-25T11:49:21Z",
       "update_workflow": "docs/security/provider-update-workflow.md"
-    }
+    },
+    "tag": "openssl-3.6.4",
+    "tag_resolved_commit": "d3c1b1169b3569ff3069e5b399f47b2b28e03d79"
   },
-  "started_at": "2026-08-31T19:27:19.648029+00:00",
+  "started_at": "2026-08-31T20:19:20.883846+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

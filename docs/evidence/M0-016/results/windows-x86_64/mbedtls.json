@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 770048,
-    "binary_sha256": "a554aca641b80fe5d4263cc378c3927f35ea7ffddaf154eebfb3609eaedbe68c",
+    "binary_sha256": "72141dec30bd72361cea4b4ba49e96aaf18f8dc657cdd1a78372e397abd5fa6d",
     "exported_symbol_inventory": {
       "count": 0,
       "scope": "final-artifact-exports",
@@ -118,22 +118,22 @@
       {
         "bytes": 1209388,
         "name": "mbedtls.lib",
-        "sha256": "6c1f1eff7814c57d8cf57cfd571b45a4b7abd99d9d29ccb1d09d653951bb49fd"
+        "sha256": "f6c3256f9904e7e2d5216623969da08d73eb78e8663be105ffc48d2b1b499df7"
       },
       {
         "bytes": 392146,
         "name": "mbedx509.lib",
-        "sha256": "b8a572f40dfb05cad13e5d85b338bb8261124b790ebae8b5dc09a240d3fd7db4"
+        "sha256": "13edc51c599eaf10da7704ebeb1e354e94a7e3fc6772cec7346399c20ac5c5f8"
       },
       {
         "bytes": 1688370,
         "name": "tfpsacrypto.lib",
-        "sha256": "922beac898d3338fdf440d540fbc0dd808ef022adf07177f6dc623db6b46a8ee"
+        "sha256": "9fd9f679093466d7630ab32a832ae5732e040559acc8845b85a1405c437d3d03"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "f93f48eded31c95e31b2694a6d1087db46934486d27b9352f4ad34c2877bb44f",
+  "build_log_sha256": "5e4e6f0b887f9d973d015376f5d8c5e0b02bbff4f5283c1cac32c907d88811ae",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -159,28 +159,28 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "72ac887eb974b177b9af09529c09166ec8db6303",
+    "repository_revision": "1c21f3bdb8176846d94450595c47c1bf4526efba",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T19:30:46.595762+00:00",
+  "finished_at": "2026-08-31T20:22:36.796638+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 118,
+    "cancellation_latency_us": 94,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 5632000,
+    "memory_profile_peak_resident_bytes": 5636096,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 8204002949,
+    "provider_allocation_bytes": 8204123477,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 133235900,
+    "provider_allocation_calls": 133238094,
     "provider_allocation_live_after_cleanup_bytes": 7640,
     "provider_allocation_live_before_cleanup_bytes": 7640,
     "provider_allocation_peak_live_bytes": 117634,
@@ -192,18 +192,18 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 118,
+      "latency_us": 94,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 5632000,
+      "peak_resident_bytes": 5636096,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 8204002949,
+      "provider_allocation_bytes": 8204123477,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 133235900,
+      "provider_allocation_calls": 133238094,
       "provider_allocation_live_after_cleanup_bytes": 7640,
       "provider_allocation_live_before_cleanup_bytes": 7640,
       "provider_allocation_peak_live_bytes": 117634,
@@ -270,9 +270,11 @@
       "maximum_source_pin_age_days": 180,
       "source_committed_at": "2026-07-01T11:00:14Z",
       "update_workflow": "docs/security/provider-update-workflow.md"
-    }
+    },
+    "tag": "mbedtls-4.2.0",
+    "tag_resolved_commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b"
   },
-  "started_at": "2026-08-31T19:27:17.482194+00:00",
+  "started_at": "2026-08-31T20:18:59.393035+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
