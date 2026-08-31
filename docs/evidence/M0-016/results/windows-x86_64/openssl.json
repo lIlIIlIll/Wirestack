@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 5385728,
-    "binary_sha256": "fece4fa8f6c13d393ef28cc47997adbda8e69689bd24e4882e3220d43c8b62a6",
+    "binary_bytes": 5386240,
+    "binary_sha256": "573c54d72e6c1e5e58d5742ba585bd68cd98dfe0a428ce01f8f53f53377453fd",
     "exported_symbol_inventory": {
       "count": 0,
       "scope": "final-artifact-exports",
@@ -97,25 +97,26 @@
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 10120650,
-        "name": "libssl.lib",
-        "sha256": "9607a9da76253481c2a0c5028713be773b5e5e05b81c6ec9d0fe09f7f69e6148"
-      },
-      {
         "bytes": 55053476,
         "name": "libcrypto.lib",
-        "sha256": "0c5cd893fed426ffa30e287ce2336ed8fcefa0d3891b45415675bcb0f8f75e7a"
+        "sha256": "7678a5d4684ab8f60dc7717d20f84f02b1c09e87340486da9183e05e8f93e1a9"
+      },
+      {
+        "bytes": 10120650,
+        "name": "libssl.lib",
+        "sha256": "b889327b35a8c1685fbc9b75d7dd176a1f16f695d4e0e6469ce43cfb70564897"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "ee52e93dd44e0d7e5eddc9b00147a043ef5f702e81cc4f937cfb61e82f6491c2",
+  "build_log_sha256": "4b7f30ccaf4c7f2cc979d3a2b9706d68072de1150a6141fe76be01ecdf2d2a19",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
     "custom_ca": "PASS",
     "external_signer": "BLOCKED",
     "external_trust": "PASS",
+    "local_close": "PASS",
     "mtls": "PASS",
     "negative_expired_certificate": "PASS",
     "negative_hostname": "PASS",
@@ -134,31 +135,32 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "45e16233d373854243966b10bbef012a66566641",
+    "repository_revision": "72ac887eb974b177b9af09529c09166ec8db6303",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T18:50:40.551099+00:00",
+  "finished_at": "2026-08-31T19:37:25.367032+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 103,
+    "cancellation_latency_us": 98,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
+    "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 11743232,
+    "memory_profile_peak_resident_bytes": 11808768,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 6170129253,
+    "provider_allocation_bytes": 6172386326,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 28343809,
+    "provider_allocation_calls": 28326872,
     "provider_allocation_live_after_cleanup_bytes": 563571,
     "provider_allocation_live_before_cleanup_bytes": 563571,
-    "provider_allocation_peak_live_bytes": 797103,
+    "provider_allocation_peak_live_bytes": 797615,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -170,21 +172,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 103,
+      "latency_us": 98,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 11743232,
+      "peak_resident_bytes": 11808768,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 6170129253,
+      "provider_allocation_bytes": 6172386326,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 28343809,
+      "provider_allocation_calls": 28326872,
       "provider_allocation_live_after_cleanup_bytes": 563571,
       "provider_allocation_live_before_cleanup_bytes": 563571,
-      "provider_allocation_peak_live_bytes": 797103,
+      "provider_allocation_peak_live_bytes": 797615,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -196,7 +198,7 @@
   "platform": "windows-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 9,
+  "schema_version": 10,
   "source": {
     "archive": "openssl-3.6.4.tar.gz",
     "commit": "d3c1b1169b3569ff3069e5b399f47b2b28e03d79",
@@ -230,7 +232,7 @@
       "update_workflow": "docs/security/provider-update-workflow.md"
     }
   },
-  "started_at": "2026-08-31T18:40:36.887764+00:00",
+  "started_at": "2026-08-31T19:27:08.363718+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }

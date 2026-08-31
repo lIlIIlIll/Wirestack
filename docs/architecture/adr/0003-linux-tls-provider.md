@@ -16,12 +16,12 @@ private-key isolation, native callbacks and deterministic cleanup.
 
 AWS-LC 5.5.0 at commit
 `991e67ff4cf04df4dd89e407f8b920c6936cb56a` was originally selected from the
-earlier PoC evidence. Schema-v9 native evidence validated monotonic
-cancellation waits and the pin-bound advisory disposition, but is superseded
-while schema-v10 local-close evidence is rerun. GitHub Actions run
-`33426302574` reports pull-request head
-`0620a1336cbdc98b6b1c37144e94a692f6e82cf7` and executed synthetic merge
-revision `45e16233d373854243966b10bbef012a66566641`. The retained results
+earlier PoC evidence. Current schema-v10 native evidence validates monotonic
+cancellation waits, the pin-bound advisory disposition, exact source identity,
+structured static archives and distinct local-close behavior. GitHub Actions
+run `33430599975` reports pull-request head
+`74985fb2c506cea3e007258878a038e0dc6c0c34` and executed synthetic merge
+revision `72ac887eb974b177b9af09529c09166ec8db6303`. The retained results
 bind that execution revision and record:
 
 - TLS 1.2 and TLS 1.3 client/server handshakes over caller-owned bounded BIOs;
@@ -29,6 +29,8 @@ bind that execution revision and record:
   optional client authentication with and without a certificate, and session
   reuse;
 - negative hostname and trust cases, clean `close_notify` and truncation;
+- distinct TLS 1.2 and TLS 1.3 local close without conflating it with
+  `close_notify`;
 - an explicit caller-owned wait, cancellation signal, wakeup and join with a
   measured latency bound, plus partial-I/O/backpressure behavior;
 - an external signing callback invoked by both TLS 1.2 and TLS 1.3 without
@@ -98,8 +100,8 @@ artifact is withdrawn rather than silently downgraded.
 ## Consequences
 
 - Existing Linux TLS integration retains the frozen provider and C ABI
-  decision. Schema-v10 Linux glibc and musl AWS-LC qualification is pending a
-  native rerun; older schema evidence is not reused.
+  decision. Schema-v10 Linux glibc and musl AWS-LC qualification is current;
+  older schema evidence is not reused.
 - M0-016 as a global task remains `BLOCKED` because Android, iOS and HarmonyOS
   or OpenHarmony still lack native-device evidence.
 - AWS-LC-specific code remains internal to the native provider adapter.
