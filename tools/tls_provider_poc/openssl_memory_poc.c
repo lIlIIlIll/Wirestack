@@ -23,6 +23,8 @@ static int alpn_seen = 0;
 static int external_trust_decision = 0;
 static unsigned int external_trust_calls = 0;
 static SSL_SESSION *captured_session = NULL;
+static unsigned int session_resumption_tls12_handshakes = 0;
+static unsigned int session_resumption_tls13_handshakes = 0;
 
 #if defined(OPENSSL_IS_AWSLC)
 static enum ssl_verify_result_t external_trust_callback(
@@ -370,8 +372,7 @@ static int basic_case(const char *server_cert, const char *server_key, const cha
     return ok;
 }
 
-static SSL_SESSION *session_after_handshake(Pair *p, SSL_CTX *client_ctx, int version) {
-    if (version == TLS1_2_VERSION) return SSL_get1_session(p->client);
+static SSL_SESSION *session_after_handshake(Pair *p, SSL_CTX *client_ctx) {
     for (int step = 0; step < MAX_STEPS && captured_session == NULL; ++step) {
         unsigned char byte = 0;
         int ret = SSL_read(p->client, &byte, 1);
@@ -391,16 +392,14 @@ static int session_resumption_version_case(
     SSL_CTX *server_ctx = make_server_ctx(
         server_cert, server_key, ca, version, 0, 0);
     SSL_CTX *client_ctx = make_client_ctx(ca, NULL, NULL, version, 1);
-    if (version == TLS1_3_VERSION) {
-        if (captured_session != NULL) SSL_SESSION_free(captured_session);
-        captured_session = NULL;
-        SSL_CTX_sess_set_new_cb(client_ctx, capture_session_callback);
-    }
+    if (captured_session != NULL) SSL_SESSION_free(captured_session);
+    captured_session = NULL;
+    SSL_CTX_sess_set_new_cb(client_ctx, capture_session_callback);
     Pair first = new_pair(client_ctx, server_ctx, "localhost", NULL);
     int ok = drive_handshake(&first, 1, MAX_STEPS) &&
              verify_negotiation(&first, version) &&
              transfer_payload(&first);
-    SSL_SESSION *session = ok ? session_after_handshake(&first, client_ctx, version) : NULL;
+    SSL_SESSION *session = ok ? session_after_handshake(&first, client_ctx) : NULL;
     ok = ok && session != NULL;
     if (ok) ok = clean_shutdown(&first);
     free_pair(&first);
@@ -423,10 +422,13 @@ static int session_resumption_version_case(
 
 static int session_resumption_case(const char *server_cert, const char *server_key,
                                    const char *ca) {
-    return session_resumption_version_case(
-               server_cert, server_key, ca, TLS1_2_VERSION) &&
-           session_resumption_version_case(
-               server_cert, server_key, ca, TLS1_3_VERSION);
+    int tls12 = session_resumption_version_case(
+        server_cert, server_key, ca, TLS1_2_VERSION);
+    int tls13 = session_resumption_version_case(
+        server_cert, server_key, ca, TLS1_3_VERSION);
+    session_resumption_tls12_handshakes = tls12 ? 2u : 0u;
+    session_resumption_tls13_handshakes = tls13 ? 2u : 0u;
+    return tls12 && tls13;
 }
 
 static int external_trust_version_case(
@@ -612,12 +614,13 @@ int main(int argc, char **argv) {
     printf("CAP repeated_cleanup=%s\n", cleanup ? "PASS" : "FAIL");
     printf("METRIC repeated_cleanup_cycles=%d\n", CLEANUP_CYCLES);
     printf("METRIC failure_cleanup_cycles=%d\n", FAILURE_CLEANUP_CYCLES);
-    printf("METRIC session_resumption_handshakes=%d\n",
-           session_resumption ? 4 : 0);
-    printf("METRIC session_resumption_tls12_handshakes=%d\n",
-           session_resumption ? 2 : 0);
-    printf("METRIC session_resumption_tls13_handshakes=%d\n",
-           session_resumption ? 2 : 0);
+    printf("METRIC session_resumption_handshakes=%u\n",
+           session_resumption_tls12_handshakes +
+           session_resumption_tls13_handshakes);
+    printf("METRIC session_resumption_tls12_handshakes=%u\n",
+           session_resumption_tls12_handshakes);
+    printf("METRIC session_resumption_tls13_handshakes=%u\n",
+           session_resumption_tls13_handshakes);
     printf("METRIC external_trust_calls=%u\n", external_trust_calls);
 #if defined(OPENSSL_IS_AWSLC)
     printf("METRIC external_signer_calls=%u\n", external_signer_calls);

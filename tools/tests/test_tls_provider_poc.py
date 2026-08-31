@@ -245,6 +245,23 @@ class ProviderPocValidationTests(unittest.TestCase):
             self.assertIn("CAP external_trust=%s", source)
             self.assertIn("external_trust_calls", source)
 
+    def test_native_pocs_drive_provider_specific_session_and_trust_callbacks(self):
+        openssl_source = (ROOT / "tools/tls_provider_poc/openssl_memory_poc.c").read_text()
+        mbedtls_source = (ROOT / "tools/tls_provider_poc/mbedtls_memory_poc.c").read_text()
+        self.assertIn(
+            "SSL_CTX_sess_set_new_cb(client_ctx, capture_session_callback);",
+            openssl_source,
+        )
+        self.assertNotIn(
+            "if (version == TLS1_3_VERSION) {\n"
+            "        if (captured_session != NULL)",
+            openssl_source,
+        )
+        self.assertIn(
+            "configure(m, &client_conf, &server_conf, version, 0, 1)",
+            mbedtls_source,
+        )
+
 
 class ProviderPocWindowsTests(unittest.TestCase):
     @classmethod
