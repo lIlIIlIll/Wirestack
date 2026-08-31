@@ -17,7 +17,7 @@ import subprocess
 import tempfile
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 
 TASK_ID = "M2-006"
@@ -204,6 +204,44 @@ def ios_launch_command(device: str) -> list[str]:
         "xcrun", "simctl", "launch", "--console", "--terminate-running-process",
         device, "dev.wirestack.m2-006-tests",
     ]
+
+
+def retryable_ios_launch_timeout(process: Mapping[str, Any]) -> bool:
+    return process.get("timed_out") is True and process.get("output") == ""
+
+
+def launch_ios_probe(
+    root: Path, env: dict[str, str], device: str
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
+    attempts = [run_command(
+        ios_launch_command(device), cwd=root, env=env, timeout=90
+    )]
+    recovery: list[dict[str, Any]] = []
+    if retryable_ios_launch_timeout(attempts[0]):
+        recovery.append(run_command(
+            ["xcrun", "simctl", "terminate", device, "dev.wirestack.m2-006-tests"],
+            cwd=root, env=env, timeout=30,
+        ))
+        shutdown = run_command(
+            ["xcrun", "simctl", "shutdown", device], cwd=root, env=env, timeout=60
+        )
+        recovery.append(shutdown)
+        require_success(shutdown, "recover iOS Simulator after launch timeout")
+        boot = run_command(
+            ["xcrun", "simctl", "boot", device], cwd=root, env=env, timeout=60
+        )
+        recovery.append(boot)
+        require_success(boot, "reboot iOS Simulator after launch timeout")
+        boot_status = run_command(
+            ["xcrun", "simctl", "bootstatus", device, "-b"],
+            cwd=root, env=env, timeout=300,
+        )
+        recovery.append(boot_status)
+        require_success(boot_status, "wait for recovered iOS Simulator")
+        attempts.append(run_command(
+            ios_launch_command(device), cwd=root, env=env, timeout=90
+        ))
+    return attempts[-1], attempts, recovery
 
 
 def ios_link_options() -> str:
@@ -423,11 +461,8 @@ def run_ios_test(root: Path, env: dict[str, str]) -> tuple[dict[str, Any], dict[
     bundle = root / "build/gates/m2-006/WirestackM2006.app"
     try:
         installed_metadata = make_ios_bundle(root, env, probe, bundle, device)
-        process = run_command(
-            ios_launch_command(device),
-            cwd=root,
-            env=env,
-            timeout=180,
+        process, launch_attempts, launch_recovery = launch_ios_probe(
+            root, env, device
         )
     finally:
         run_command(["xcrun", "simctl", "shutdown", device], cwd=root, env=env, timeout=60)
@@ -437,6 +472,8 @@ def run_ios_test(root: Path, env: dict[str, str]) -> tuple[dict[str, Any], dict[
         "device_udid": device,
         "runtime": runtime,
         "probe_sha256": sha256_path(probe),
+        "launch_attempts": launch_attempts,
+        "launch_recovery": launch_recovery,
         **installed_metadata,
     }
 
@@ -505,6 +542,7 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
             install = simulator.get("install")
             runtime_libraries = simulator.get("runtime_libraries")
             probe_compile = simulator.get("probe_compile")
+            launch_attempts = simulator.get("launch_attempts")
             runtime_names = {
                 entry.get("path")
                 for entry in runtime_libraries
@@ -521,6 +559,11 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
                 or "Frameworks/libcangjie-runtime.dylib" not in runtime_names
                 or not isinstance(probe_compile, dict)
                 or not command_has_target(probe_compile.get("command"), IOS_TARGET)
+                or not isinstance(launch_attempts, list)
+                or len(launch_attempts) not in {1, 2}
+                or not all(isinstance(attempt, dict) for attempt in launch_attempts)
+                or launch_attempts[-1].get("timed_out") is not False
+                or launch_attempts[-1].get("exit_code") != 0
             ):
                 failures.append("REPORT:SIMULATOR_PROBE")
     return failures
