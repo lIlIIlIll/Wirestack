@@ -148,25 +148,43 @@ static char *copy_bounded_string(const char *value, uint64_t maximum) {
     return copy;
 }
 
-static WCHAR *utf8_to_wide(const char *value) {
+enum wirestack_utf8_conversion {
+    WIRESTACK_UTF8_CONVERSION_OK = 0,
+    WIRESTACK_UTF8_CONVERSION_INVALID = 1,
+    WIRESTACK_UTF8_CONVERSION_OUT_OF_MEMORY = 2
+};
+
+static int utf8_to_wide(const char *value, WCHAR **out_value, int64_t *out_native_code) {
     int length;
     WCHAR *result;
+    DWORD native_code;
+    *out_value = NULL;
+    *out_native_code = 0;
     if (value == NULL || value[0] == '\0') {
-        return NULL;
+        *out_native_code = (int64_t)WSAEINVAL;
+        return WIRESTACK_UTF8_CONVERSION_INVALID;
     }
+    SetLastError(ERROR_SUCCESS);
     length = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, value, -1, NULL, 0);
     if (length <= 0) {
-        return NULL;
+        native_code = GetLastError();
+        *out_native_code = (int64_t)(native_code == ERROR_SUCCESS ? WSAEINVAL : native_code);
+        return WIRESTACK_UTF8_CONVERSION_INVALID;
     }
     result = (WCHAR *)calloc((size_t)length, sizeof(WCHAR));
     if (result == NULL) {
-        return NULL;
+        *out_native_code = (int64_t)ERROR_NOT_ENOUGH_MEMORY;
+        return WIRESTACK_UTF8_CONVERSION_OUT_OF_MEMORY;
     }
+    SetLastError(ERROR_SUCCESS);
     if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, value, -1, result, length) != length) {
+        native_code = GetLastError();
         free(result);
-        return NULL;
+        *out_native_code = (int64_t)(native_code == ERROR_SUCCESS ? WSAEINVAL : native_code);
+        return WIRESTACK_UTF8_CONVERSION_INVALID;
     }
-    return result;
+    *out_value = result;
+    return WIRESTACK_UTF8_CONVERSION_OK;
 }
 
 static int valid_family(int32_t family) {
@@ -308,7 +326,10 @@ static void resolve_job(struct wirestack_resolver_job *job) {
     PADDRINFOW results = NULL;
     PADDRINFOW current;
     WCHAR *host;
-    WCHAR *service;
+    WCHAR *service = NULL;
+    int host_conversion;
+    int service_conversion = WIRESTACK_UTF8_CONVERSION_OK;
+    int64_t conversion_native_code = 0;
     int status;
 
     job->result_count = 0u;
@@ -317,13 +338,22 @@ static void resolve_job(struct wirestack_resolver_job *job) {
         return;
     }
 #endif
-    host = utf8_to_wide(job->host);
-    service = utf8_to_wide(job->service);
-    if (host == NULL || (job->service != NULL && job->service[0] != '\0' && service == NULL)) {
+    host_conversion = utf8_to_wide(job->host, &host, &conversion_native_code);
+    if (host_conversion == WIRESTACK_UTF8_CONVERSION_OK &&
+        job->service != NULL && job->service[0] != '\0') {
+        service_conversion = utf8_to_wide(
+            job->service, &service, &conversion_native_code);
+    }
+    if (host_conversion != WIRESTACK_UTF8_CONVERSION_OK ||
+        service_conversion != WIRESTACK_UTF8_CONVERSION_OK) {
         free(service);
         free(host);
-        job->native_code = (int64_t)WSAEINVAL;
-        job->result = WIRESTACK_RESOLVER_RESULT_INVALID_NAME;
+        job->native_code = conversion_native_code;
+        job->result =
+            host_conversion == WIRESTACK_UTF8_CONVERSION_OUT_OF_MEMORY ||
+                service_conversion == WIRESTACK_UTF8_CONVERSION_OUT_OF_MEMORY
+            ? WIRESTACK_RESOLVER_RESULT_SYSTEM_FAILURE
+            : WIRESTACK_RESOLVER_RESULT_INVALID_NAME;
         return;
     }
     memset(&hints, 0, sizeof(hints));
