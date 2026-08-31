@@ -18,6 +18,9 @@ main(): Int64 {
     if (!m2006Run(7, "closes idempotently and rejects invalid bounds", m2006Lifecycle)) {
         failures++
     }
+    if (!m2006Run(8, "bounds admission and releases queued work", m2006AdmissionAndRelease)) {
+        failures++
+    }
     exit(if (failures == 0) { 0 } else { 1 })
 }
 
@@ -185,6 +188,29 @@ private func m2006Lifecycle(): Bool {
     invalidWorkers && invalidQueue &&
         m2006Code(error.resolveCode, api.ResolveErrorCode.SystemFailure) &&
         error.nativeCode.isNone()
+}
+
+private func m2006AdmissionAndRelease(): Bool {
+    let resolver = SystemResolver(workerCount: 1, queueCapacity: 1)
+    let first = spawn {
+        resolver.resolve(api.HostName("delay.m2-006.test"), context: m2006Context())
+    }
+    sleep(20 * Duration.millisecond)
+    let second = spawn {
+        resolver.resolve(api.HostName("delay.m2-006.test"), context: m2006Context())
+    }
+    sleep(20 * Duration.millisecond)
+    let overloaded = m2006Capture({=>
+        let _ = resolver.resolve(api.HostName("delay.m2-006.test"), context: m2006Context())
+    })
+    let closeStarted = MonoTime.now()
+    resolver.close()
+    resolver.close()
+    let closePrompt = MonoTime.now() - closeStarted < 100 * Duration.millisecond
+    let firstComplete = !first.get(2 * Duration.second).addresses.isEmpty()
+    let secondComplete = !second.get(2 * Duration.second).addresses.isEmpty()
+    m2006Code(overloaded.resolveCode, api.ResolveErrorCode.TemporaryFailure) &&
+        closePrompt && firstComplete && secondComplete
 }
 
 private func m2006Capture(action: () -> Unit): api.ResolveException {

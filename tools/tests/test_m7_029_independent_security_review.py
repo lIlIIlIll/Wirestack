@@ -191,7 +191,8 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
     def test_cjpm_build_hook_uses_fail_closed_platform_selection(self) -> None:
         build_script = (ROOT / "build.cj").read_text(encoding="utf-8")
         self.assertIn('join("build_native_dependencies.py")', build_script)
-        self.assertIn("private func buildNativeDependencies(): Int64", build_script)
+        self.assertIn("private func buildNativeDependencies(scriptPath: String): Int64", build_script)
+        self.assertIn('"--cjpm-script-path", scriptPath', build_script)
         self.assertNotIn('join("build_linux_resolver.py")', build_script)
         self.assertNotIn('join("build_tls_provider.py")', build_script)
         for phase in (
@@ -199,7 +200,7 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
             "pre-run", "pre-install", "pre-publish",
         ):
             self.assertIn(
-                f'case "{phase}" => buildNativeDependencies()',
+                f'case "{phase}" => buildNativeDependencies(args[0])',
                 build_script,
             )
 

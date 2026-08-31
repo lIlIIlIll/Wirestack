@@ -22,7 +22,7 @@ from typing import Any, Mapping
 
 TASK_ID = "M2-006"
 SCHEMA_VERSION = 1
-EXPECTED_TESTS = 7
+EXPECTED_TESTS = 8
 MODES = {"macos": "macos-arm64", "ios-simulator": "ios-simulator-arm64"}
 IOS_TARGET = "arm64-apple-ios11-simulator"
 
@@ -57,6 +57,23 @@ def atomic_json(path: Path, payload: dict[str, Any]) -> None:
         except FileNotFoundError:
             pass
         raise
+
+
+def validation_payload(
+    report_path: Path,
+    expected_revision: str,
+    expected_mode: str,
+    failures: list[str],
+) -> dict[str, Any]:
+    return {
+        "schema_version": 1,
+        "task_id": TASK_ID,
+        "expected_revision": expected_revision,
+        "expected_mode": expected_mode,
+        "report_sha256": sha256_path(report_path),
+        "failures": failures,
+        "status": "PASS" if not failures else "FAIL",
+    }
 
 
 def run_command(
@@ -145,7 +162,7 @@ def xcrun(root: Path, env: dict[str, str], sdk: str, *arguments: str) -> str:
 
 def deployment_flags(selected: str) -> list[str]:
     if selected == "ios-simulator-arm64":
-        return ["-mios-simulator-version-min=17.5"]
+        return ["-mios-simulator-version-min=11.0"]
     if selected == "macos-arm64":
         return ["-mmacosx-version-min=12.0"]
     raise GateError(f"unsupported Apple deployment target: {selected}")
@@ -369,7 +386,7 @@ def make_ios_bundle(
                 "CFBundlePackageType": "APPL",
                 "CFBundleShortVersionString": "1.0",
                 "CFBundleVersion": "1",
-                "MinimumOSVersion": "17.5",
+                "MinimumOSVersion": "11.0",
                 "UIDeviceFamily": [1, 2],
             },
             output,
@@ -680,14 +697,12 @@ def main() -> int:
             print(f"M2-006: invalid report: {error}")
             return 2
         failures = validate_report(payload, args.expected_revision, args.expected_mode)
-        validation = {
-            "schema_version": 1,
-            "task_id": TASK_ID,
-            "expected_revision": args.expected_revision,
-            "expected_mode": args.expected_mode,
-            "failures": failures,
-            "status": "PASS" if not failures else "FAIL",
-        }
+        validation = validation_payload(
+            args.validate_report,
+            args.expected_revision,
+            args.expected_mode,
+            failures,
+        )
         if args.validation_output:
             atomic_json(args.validation_output, validation)
         print(json.dumps(validation, sort_keys=True))

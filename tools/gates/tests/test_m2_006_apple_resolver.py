@@ -81,6 +81,22 @@ class M2006AppleResolverGateTests(unittest.TestCase):
     def test_valid_native_macos_report_passes(self) -> None:
         self.assertEqual([], gate.validate_report(valid_report(), "abc", "macos"))
 
+    def test_validation_payload_binds_the_exact_native_report(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "report.json"
+            report_path.write_text('{"decision":"PASS"}\n', encoding="utf-8")
+            validation = gate.validation_payload(report_path, "abc", "macos", [])
+            self.assertEqual(gate.sha256_path(report_path), validation["report_sha256"])
+            original_digest = validation["report_sha256"]
+
+            report_path.write_text('{"decision":"FAIL"}\n', encoding="utf-8")
+            self.assertNotEqual(
+                original_digest,
+                gate.validation_payload(
+                    report_path, "abc", "macos", ["REPORT:FAIL"]
+                )["report_sha256"],
+            )
+
     def test_valid_native_ios_simulator_report_passes(self) -> None:
         self.assertEqual(
             [],
@@ -145,7 +161,7 @@ class M2006AppleResolverGateTests(unittest.TestCase):
         self.assertIn("wirestack_m2_006_probe_trace(caseId, 0)", probe)
         self.assertIn("Deadline.after(5 * Duration.second)", probe)
         self.assertEqual(
-            ["-mios-simulator-version-min=17.5"],
+            ["-mios-simulator-version-min=11.0"],
             gate.deployment_flags("ios-simulator-arm64"),
         )
         self.assertEqual(

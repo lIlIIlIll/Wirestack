@@ -38,8 +38,34 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--platform")
+    parser.add_argument("--cjpm-script-path")
     parser.add_argument("--plan", action="store_true")
     return parser.parse_args()
+
+
+def resolver_platform(system: str, script_path: str | None, override: str | None) -> str:
+    if override is not None:
+        selected = override
+    elif system == "Darwin":
+        parts = Path(script_path or "").parts
+        try:
+            cache_index = parts.index("build-script-cache")
+            cjpm_target = parts[cache_index + 1]
+        except (ValueError, IndexError) as error:
+            raise ValueError("Darwin CJPM target identity is unavailable") from error
+        if cjpm_target == "arm64-apple-ios11-simulator":
+            selected = "ios-simulator-arm64"
+        elif cjpm_target in {"aarch64-apple-darwin", "release"}:
+            selected = "macos-arm64"
+        else:
+            raise ValueError("Darwin CJPM target identity is unavailable")
+    else:
+        selected = SUPPORTED[system]
+    if system != "Darwin" and selected != SUPPORTED[system]:
+        raise ValueError(f"{system} cannot build resolver target {selected}")
+    if system == "Darwin" and selected not in {"macos-arm64", "ios-simulator-arm64"}:
+        raise ValueError(f"unsupported Apple resolver platform: {selected}")
+    return selected
 
 
 def main() -> int:
@@ -65,18 +91,16 @@ def main() -> int:
         )
         if status != 0:
             return status
-    selected_resolver = os.environ.get("WIRESTACK_RESOLVER_PLATFORM", SUPPORTED[system])
-    if system != "Darwin" and selected_resolver != SUPPORTED[system]:
+    try:
+        selected_resolver = resolver_platform(
+            system,
+            args.cjpm_script_path,
+            os.environ.get("WIRESTACK_RESOLVER_PLATFORM"),
+        )
+    except ValueError as error:
         print(json.dumps({
-            "code": "platform-override-not-allowed",
-            "detail": f"{system} cannot build resolver target {selected_resolver}",
-            "status": "FAIL",
-        }))
-        return 2
-    if system == "Darwin" and selected_resolver not in {"macos-arm64", "ios-simulator-arm64"}:
-        print(json.dumps({
-            "code": "unsupported-apple-resolver-platform",
-            "detail": selected_resolver,
+            "code": "unsupported-resolver-platform",
+            "detail": str(error),
             "status": "FAIL",
         }))
         return 2

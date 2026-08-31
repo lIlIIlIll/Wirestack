@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from pathlib import Path
 
 from tools import build_native_dependencies, build_resolver
 
@@ -35,6 +36,35 @@ class BuildResolverSelectionTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "unsupported"):
             build_native_dependencies.plan("Plan9")
+
+    def test_darwin_resolver_selection_uses_the_cjpm_target_path(self) -> None:
+        build_script = Path("build.cj").read_text(encoding="utf-8")
+        self.assertIn('"--cjpm-script-path", scriptPath', build_script)
+        self.assertIn("buildNativeDependencies(args[0])", build_script)
+        self.assertEqual(
+            "ios-simulator-arm64",
+            build_native_dependencies.resolver_platform(
+                "Darwin",
+                "/repo/build-script-cache/arm64-apple-ios11-simulator/release/wirestack/bin/build-script",
+                None,
+            ),
+        )
+        self.assertEqual(
+            "macos-arm64",
+            build_native_dependencies.resolver_platform(
+                "Darwin",
+                "/repo/build-script-cache/release/wirestack/bin/build-script",
+                None,
+            ),
+        )
+        with self.assertRaisesRegex(ValueError, "identity is unavailable"):
+            build_native_dependencies.resolver_platform("Darwin", None, None)
+        with self.assertRaisesRegex(ValueError, "identity is unavailable"):
+            build_native_dependencies.resolver_platform(
+                "Darwin",
+                "/repo/build-script-cache/android-aarch64/release/wirestack/bin/build-script",
+                None,
+            )
 
 
 if __name__ == "__main__":

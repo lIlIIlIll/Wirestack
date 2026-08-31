@@ -149,6 +149,30 @@ class M2006AppleSystemResolverTest {
         @Expect(m2006IsCode(error.resolveCode, api.ResolveErrorCode.SystemFailure))
         @Expect(error.nativeCode.isNone())
     }
+
+    @TestCase
+    func fixtureBoundsAdmissionAndReleasesQueuedWorkAfterClose(): Unit {
+        if (!m2006FixtureEnabled()) { return }
+        let resolver = SystemResolver(workerCount: 1, queueCapacity: 1)
+        let first = spawn {
+            resolver.resolve(api.HostName("delay.m2-006.test"))
+        }
+        sleep(20 * Duration.millisecond)
+        let second = spawn {
+            resolver.resolve(api.HostName("delay.m2-006.test"))
+        }
+        sleep(20 * Duration.millisecond)
+        let overloaded = m2006ResolveError({=>
+            let _ = resolver.resolve(api.HostName("delay.m2-006.test"))
+        })
+        @Expect(m2006IsCode(overloaded.resolveCode, api.ResolveErrorCode.TemporaryFailure))
+        let closeStarted = MonoTime.now()
+        resolver.close()
+        resolver.close()
+        @Expect(MonoTime.now() - closeStarted < 100 * Duration.millisecond)
+        @Expect(first.get(2 * Duration.second).addresses.isEmpty(), false)
+        @Expect(second.get(2 * Duration.second).addresses.isEmpty(), false)
+    }
 }
 
 private func m2006FixtureEnabled(): Bool {
