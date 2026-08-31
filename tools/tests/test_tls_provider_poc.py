@@ -621,12 +621,16 @@ class ProviderPocValidationTests(unittest.TestCase):
         openssl_source = (ROOT / "tools/tls_provider_poc/openssl_memory_poc.c").read_text()
         mbedtls_source = (ROOT / "tools/tls_provider_poc/mbedtls_memory_poc.c").read_text()
         musl_runner = (ROOT / "tools/tls_provider_poc/run_musl.py").read_text()
+        cancel_header = (ROOT / "tools/tls_provider_poc/poc_cancel.h").read_text()
         for source in (openssl_source, mbedtls_source):
             self.assertIn("GetProcessMemoryInfo", source)
             self.assertIn("mach_task_basic_info_data_t", source)
             self.assertIn("getrusage(RUSAGE_SELF", source)
         self.assertIn("repo=repo, diagnostic=diagnostic", musl_runner)
         self.assertIn('extra_configure_args=("no-secure-memory",)', musl_runner)
+        self.assertIn("typedef DWORD (WINAPI *PocThreadRoutine)(LPVOID);",
+                      cancel_header)
+        self.assertIn("typedef void *(*PocThreadRoutine)(void *);", cancel_header)
 
     def test_supported_diagnostic_requires_instrumented_provider_archives(self):
         result = complete_result(self.spec)
