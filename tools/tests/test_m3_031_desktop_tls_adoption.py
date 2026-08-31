@@ -43,7 +43,10 @@ def provider_result(platform: str, revision: str) -> dict:
             "runtime_loader_library_strings": [],
         },
         "metrics": {"repeated_cleanup_cycles": 10000, "external_signer_calls": 2,
-                    "session_resumption_handshakes": 2},
+                    "external_trust_calls": 4,
+                    "session_resumption_handshakes": 4,
+                    "session_resumption_tls12_handshakes": 2,
+                    "session_resumption_tls13_handshakes": 2},
     }
 
 
