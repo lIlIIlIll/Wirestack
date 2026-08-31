@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 4443224,
-    "binary_sha256": "214007e12460d39461b0bbf48ef297c8af9b514fc15c0a4b329f0f23cef3edd8",
+    "binary_bytes": 4443280,
+    "binary_sha256": "bc2f5aa5e808e4a6e536be87d63ff395ae1dab22df2193ad95939d0d9b99abe3",
     "exported_symbol_inventory": {
       "count": 3794,
       "scope": "final-artifact-exports",
@@ -3903,25 +3903,26 @@
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 1276080,
-        "name": "libssl.a",
-        "sha256": "7dea604cfd13dfa83cf5b054292618df3753016e41064a7ff28205d4fc7bb4f0"
-      },
-      {
         "bytes": 7079610,
         "name": "libcrypto.a",
         "sha256": "b4ecd406df48251312b2e3fd0162cf78a7020d907b84e8d302288fc469ad6ba6"
+      },
+      {
+        "bytes": 1276080,
+        "name": "libssl.a",
+        "sha256": "7dea604cfd13dfa83cf5b054292618df3753016e41064a7ff28205d4fc7bb4f0"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "d397c42da1e28baf25c5b29ca561dbfc4cb8e0bdd73e34dec564b0681275be3c",
+  "build_log_sha256": "874d439edb5a1a30ead9b91197e7bc93f2fd20b273f2f4a822890ef263702864",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
     "custom_ca": "PASS",
     "external_signer": "PASS",
     "external_trust": "PASS",
+    "local_close": "PASS",
     "mtls": "PASS",
     "negative_expired_certificate": "PASS",
     "negative_hostname": "PASS",
@@ -3940,32 +3941,33 @@
     "image_os": "alpine",
     "image_version": "3.22.5",
     "python": "3.14.7",
-    "repository_revision": "45e16233d373854243966b10bbef012a66566641",
+    "repository_revision": "72ac887eb974b177b9af09529c09166ec8db6303",
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T18:42:12.734057+00:00",
+  "finished_at": "2026-08-31T19:28:46.638691+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 79,
+    "cancellation_latency_us": 92,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
+    "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 30941184,
+    "memory_profile_peak_resident_bytes": 30982144,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 1266838636,
+    "provider_allocation_bytes": 1267070724,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 10274917,
+    "provider_allocation_calls": 10276595,
     "provider_allocation_live_after_cleanup_bytes": 152884,
     "provider_allocation_live_before_cleanup_bytes": 152884,
-    "provider_allocation_peak_live_bytes": 213317,
+    "provider_allocation_peak_live_bytes": 214702,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -3977,21 +3979,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 79,
+      "latency_us": 92,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 30941184,
+      "peak_resident_bytes": 30982144,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 1266838636,
+      "provider_allocation_bytes": 1267070724,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 10274917,
+      "provider_allocation_calls": 10276595,
       "provider_allocation_live_after_cleanup_bytes": 152884,
       "provider_allocation_live_before_cleanup_bytes": 152884,
-      "provider_allocation_peak_live_bytes": 213317,
+      "provider_allocation_peak_live_bytes": 214702,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -4003,7 +4005,7 @@
   "platform": "linux-musl-x86_64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 9,
+  "schema_version": 10,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
@@ -4031,7 +4033,7 @@
     },
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T18:40:38.681767+00:00",
+  "started_at": "2026-08-31T19:27:09.410036+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }

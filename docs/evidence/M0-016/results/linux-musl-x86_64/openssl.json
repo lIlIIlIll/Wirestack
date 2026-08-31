@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 7378192,
-    "binary_sha256": "e65e7a5ec242d7cc98542cf572ad897d49a547f434ef37f51213cf50863c0b82",
+    "binary_bytes": 7378240,
+    "binary_sha256": "de0537326e9fb02a663a10bce3144af99a69d49b052f07304759dd6a127bbdc4",
     "exported_symbol_inventory": {
       "count": 9575,
       "scope": "final-artifact-exports",
@@ -9673,25 +9673,26 @@
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
+        "bytes": 12369700,
+        "name": "libcrypto.a",
+        "sha256": "b3f1872bc71c99126fd61936f048ea50ec85e4b7ec62f7ecedcacfa31ac66b2e"
+      },
+      {
         "bytes": 2100726,
         "name": "libssl.a",
         "sha256": "2e27f6212fb871bf437ee1ed45cdcf88a21461e5ee8d83fb14883d6c63e822f0"
-      },
-      {
-        "bytes": 12369700,
-        "name": "libcrypto.a",
-        "sha256": "511f8c30736e51825b8761f9ddb399f26c7d01a48639c5b50b3ab68463ee0091"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "81161ae7abddaca2508aa9da8dac082c1f13f79b9e2c4c650bd1ee6f0f08b28e",
+  "build_log_sha256": "dfaa7f50f983ce0022562c0883d8a26104da261408f24ee3630bc07edfcd3f3c",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
     "custom_ca": "PASS",
     "external_signer": "BLOCKED",
     "external_trust": "PASS",
+    "local_close": "PASS",
     "mtls": "PASS",
     "negative_expired_certificate": "PASS",
     "negative_hostname": "PASS",
@@ -9710,28 +9711,29 @@
     "image_os": "alpine",
     "image_version": "3.22.5",
     "python": "3.14.7",
-    "repository_revision": "45e16233d373854243966b10bbef012a66566641",
+    "repository_revision": "72ac887eb974b177b9af09529c09166ec8db6303",
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T18:43:19.949459+00:00",
+  "finished_at": "2026-08-31T19:29:59.156940+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 69,
+    "cancellation_latency_us": 90,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
+    "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 40742912,
+    "memory_profile_peak_resident_bytes": 41852928,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 6177049726,
+    "provider_allocation_bytes": 6178727058,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 28521738,
+    "provider_allocation_calls": 28529239,
     "provider_allocation_live_after_cleanup_bytes": 559202,
     "provider_allocation_live_before_cleanup_bytes": 559202,
     "provider_allocation_peak_live_bytes": 800083,
@@ -9746,18 +9748,18 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 69,
+      "latency_us": 90,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 40742912,
+      "peak_resident_bytes": 41852928,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 6177049726,
+      "provider_allocation_bytes": 6178727058,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 28521738,
+      "provider_allocation_calls": 28529239,
       "provider_allocation_live_after_cleanup_bytes": 559202,
       "provider_allocation_live_before_cleanup_bytes": 559202,
       "provider_allocation_peak_live_bytes": 800083,
@@ -9772,7 +9774,7 @@
   "platform": "linux-musl-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 9,
+  "schema_version": 10,
   "source": {
     "archive": "openssl-3.6.4.tar.gz",
     "commit": "d3c1b1169b3569ff3069e5b399f47b2b28e03d79",
@@ -9806,7 +9808,7 @@
       "update_workflow": "docs/security/provider-update-workflow.md"
     }
   },
-  "started_at": "2026-08-31T18:40:40.708437+00:00",
+  "started_at": "2026-08-31T19:27:08.742243+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
