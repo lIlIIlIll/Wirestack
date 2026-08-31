@@ -121,7 +121,7 @@ class ProviderPocValidationTests(unittest.TestCase):
         with self.assertRaises(validator.ValidationError):
             validator.validate_result(result, self.spec)
 
-    def test_schema_v2_requires_exact_cleanup_and_signer_counts(self):
+    def test_schema_v2_cannot_claim_a_fully_measured_pass(self):
         caps = {name: "PASS" for name in self.spec["required_capabilities"]}
         result = {
             "schema_version": 2,
@@ -147,8 +147,10 @@ class ProviderPocValidationTests(unittest.TestCase):
         result["metrics"] = {
             "repeated_cleanup_cycles": 10000,
             "external_signer_calls": 2,
+            "external_trust_calls": 4,
         }
-        validator.validate_result(result, self.spec)
+        with self.assertRaisesRegex(validator.ValidationError, "schema v3"):
+            validator.validate_result(result, self.spec)
 
     def test_schema_v3_requires_measured_session_resumption(self):
         caps = {name: "PASS" for name in self.spec["required_capabilities"]}
@@ -164,6 +166,9 @@ class ProviderPocValidationTests(unittest.TestCase):
                 "repeated_cleanup_cycles": 10000,
                 "external_signer_calls": 2,
                 "session_resumption_handshakes": 1,
+                "session_resumption_tls12_handshakes": 2,
+                "session_resumption_tls13_handshakes": 2,
+                "external_trust_calls": 4,
             },
             "build": {
                 "static_archives": ["libssl.a"],
@@ -172,10 +177,44 @@ class ProviderPocValidationTests(unittest.TestCase):
             },
         }
         with self.assertRaisesRegex(
-                validator.ValidationError, "two measured handshakes"):
+            validator.ValidationError, "four measured handshakes"):
             validator.validate_result(result, self.spec)
-        result["metrics"]["session_resumption_handshakes"] = 2
+        result["metrics"]["session_resumption_handshakes"] = 4
         validator.validate_result(result, self.spec)
+
+    def test_metrics_require_dual_version_resumption_and_external_trust(self):
+        caps = {name: "BLOCKED" for name in self.spec["required_capabilities"]}
+        caps["external_trust"] = "PASS"
+        caps["session_resumption"] = "PASS"
+        complete = "\n".join([
+            "METRIC repeated_cleanup_cycles=10000",
+            "METRIC external_trust_calls=4",
+            "METRIC session_resumption_handshakes=4",
+            "METRIC session_resumption_tls12_handshakes=2",
+            "METRIC session_resumption_tls13_handshakes=2",
+        ])
+        metrics = runner.parse_metrics(complete, "openssl", caps)
+        self.assertEqual(4, metrics["session_resumption_handshakes"])
+        with self.assertRaisesRegex(runner.PocError, "TLS 1.2 and TLS 1.3"):
+            runner.parse_metrics(
+                complete.replace("session_resumption_tls13_handshakes=2",
+                                 "session_resumption_tls13_handshakes=0"),
+                "openssl",
+                caps,
+            )
+        with self.assertRaisesRegex(runner.PocError, "external trust"):
+            runner.parse_metrics(
+                complete.replace("external_trust_calls=4", "external_trust_calls=3"),
+                "openssl",
+                caps,
+            )
+
+    def test_native_pocs_expose_external_trust_as_a_distinct_capability(self):
+        openssl_source = (ROOT / "tools/tls_provider_poc/openssl_memory_poc.c").read_text()
+        mbedtls_source = (ROOT / "tools/tls_provider_poc/mbedtls_memory_poc.c").read_text()
+        for source in (openssl_source, mbedtls_source):
+            self.assertIn("CAP external_trust=%s", source)
+            self.assertIn("external_trust_calls", source)
 
 
 class ProviderPocWindowsTests(unittest.TestCase):
@@ -312,14 +351,21 @@ class ProviderPocWindowsTests(unittest.TestCase):
     def test_windows_result_requires_native_hosted_runner_identity(self):
         caps = {name: "PASS" for name in self.spec["required_capabilities"]}
         result = {
-            "schema_version": 2,
+            "schema_version": 3,
             "task_id": "M0-016",
             "provider": "aws-lc",
             "platform": "windows-x86_64",
             "status": "PASS",
             "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
             "capabilities": caps,
-            "metrics": {"repeated_cleanup_cycles": 10000, "external_signer_calls": 2},
+            "metrics": {
+                "repeated_cleanup_cycles": 10000,
+                "external_signer_calls": 2,
+                "external_trust_calls": 4,
+                "session_resumption_handshakes": 4,
+                "session_resumption_tls12_handshakes": 2,
+                "session_resumption_tls13_handshakes": 2,
+            },
             "build": {
                 "static_archives": ["ssl.lib"],
                 "system_tls_dependencies": [],
@@ -341,14 +387,21 @@ class ProviderPocWindowsTests(unittest.TestCase):
     def test_expected_revision_mismatch_fails(self):
         caps = {name: "PASS" for name in self.spec["required_capabilities"]}
         result = {
-            "schema_version": 2,
+            "schema_version": 3,
             "task_id": "M0-016",
             "provider": "aws-lc",
             "platform": "windows-x86_64",
             "status": "PASS",
             "source": {"content_sha256": "0" * 64, "commit": "1" * 40},
             "capabilities": caps,
-            "metrics": {"repeated_cleanup_cycles": 10000, "external_signer_calls": 2},
+            "metrics": {
+                "repeated_cleanup_cycles": 10000,
+                "external_signer_calls": 2,
+                "external_trust_calls": 4,
+                "session_resumption_handshakes": 4,
+                "session_resumption_tls12_handshakes": 2,
+                "session_resumption_tls13_handshakes": 2,
+            },
             "build": {
                 "static_archives": ["ssl.lib"],
                 "system_tls_dependencies": [],

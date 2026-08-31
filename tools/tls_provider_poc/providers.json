@@ -42,6 +42,7 @@
     "tls13",
     "sni_hostname_alpn",
     "custom_ca",
+    "external_trust",
     "partial_io_backpressure",
     "mtls",
     "session_resumption",
