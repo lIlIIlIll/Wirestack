@@ -21,8 +21,12 @@ from typing import Any, Mapping, Sequence
 CAP_RE = re.compile(r"^CAP\s+([a-z0-9_]+)=(PASS|FAIL|BLOCKED|NOT_RUN)$", re.M)
 METRIC_RE = re.compile(r"^METRIC\s+([a-z0-9_]+)=([0-9]+)$", re.M)
 FORBIDDEN_DEP_RE = re.compile(
-    r"(?:lib(?:ssl|crypto)|(?:lib)?(?:mbedtls|mbedx509|tfpsacrypto|mbedcrypto))"
-    r"[^\s/\\]*\.(?:so(?:\.[0-9]+)*|dylib|dll)",
+    r"(?:"
+    r"(?:lib)?(?:mbedtls|mbedx509|tfpsacrypto|mbedcrypto)[^\s/\\]*"
+    r"\.(?:so(?:\.[0-9]+)*|dylib|dll)"
+    r"|lib(?:ssl|crypto)[^\s/\\]*\.(?:so(?:\.[0-9]+)*|dylib|dll)"
+    r"|(?:ssl|crypto)[^\s/\\]*\.dll"
+    r")",
     re.I,
 )
 

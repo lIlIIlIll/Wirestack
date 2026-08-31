@@ -243,6 +243,13 @@ class ProviderPocWindowsTests(unittest.TestCase):
             sorted(set(runner.FORBIDDEN_DEP_RE.findall(text))),
         )
 
+    def test_windows_dependency_scan_rejects_prefixless_aws_lc_dlls(self):
+        text = "ssl.dll\nCRYPTO.DLL\nlibssl-3-x64.dll\nKERNEL32.dll\n"
+        self.assertEqual(
+            ["CRYPTO.DLL", "libssl-3-x64.dll", "ssl.dll"],
+            sorted(set(runner.FORBIDDEN_DEP_RE.findall(text))),
+        )
+
     def test_windows_dependency_scan_fails_closed_when_dumpbin_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
