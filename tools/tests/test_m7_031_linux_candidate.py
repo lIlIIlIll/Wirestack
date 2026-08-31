@@ -175,6 +175,30 @@ class M7031LinuxCandidateTests(unittest.TestCase):
             )
         self.assertEqual(self.report, report)
 
+    def test_structural_candidate_requires_complete_recorded_evidence_inventory(self) -> None:
+        for mutate in (
+            lambda report: report["evidenceIndex"].pop(),
+            lambda report: report["evidenceIndex"][0].update({
+                "path": "docs/evidence/M7-999/arbitrary.json",
+                "sourceTask": "M7-999",
+            }),
+            lambda report: report["evidenceIndex"][0].update({"sourceTask": "M7-999"}),
+            lambda report: report["evidenceIndex"][0].update({"acceptanceStatus": "BOUND_INPUT"})
+            if report["evidenceIndex"][0]["acceptanceStatus"] != "BOUND_INPUT"
+            else report["evidenceIndex"][0].update({
+                "acceptanceStatus": "NOT_APPLICABLE_TO_LINUX_PROFILE"
+            }),
+        ):
+            with tempfile.TemporaryDirectory(prefix="wirestack-m7-031-recorded-") as directory:
+                root = Path(directory)
+                path = root / "docs/evidence/M7-031/linux_x86_64/release-candidate.json"
+                path.parent.mkdir(parents=True)
+                report = copy.deepcopy(self.report)
+                mutate(report)
+                path.write_text(json.dumps(report), encoding="utf-8")
+                with self.assertRaisesRegex(candidate.CandidateError, "EVIDENCE_INDEX"):
+                    candidate.recorded_candidate(root)
+
 
 if __name__ == "__main__":
     unittest.main()

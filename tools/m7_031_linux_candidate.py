@@ -459,12 +459,27 @@ def build_evidence_index(root: Path, criteria: Sequence[Mapping[str, Any]]) -> l
     return entries
 
 
+def expected_evidence_metadata() -> dict[str, tuple[str, str]]:
+    metadata: dict[str, tuple[str, str]] = {}
+    for relative in sorted({path for paths in CRITERION_EVIDENCE.values() for path in paths}):
+        match = re.search(r"docs/evidence/([^/]+)/", relative)
+        source_task = match.group(1) if match else TASK_ID
+        acceptance_status = (
+            "NOT_APPLICABLE_TO_LINUX_PROFILE"
+            if relative in CRITERION_EVIDENCE["REL-03"]
+            else "BOUND_INPUT"
+        )
+        metadata[relative] = (source_task, acceptance_status)
+    return metadata
+
+
 def recorded_candidate(root: Path) -> dict[str, Any]:
     report = load_json(
         safe_path(root, "docs/evidence/M7-031/linux_x86_64/release-candidate.json")
     )
     evidence = report.get("evidenceIndex")
     require(isinstance(evidence, list) and evidence, "EVIDENCE_INDEX", "missing")
+    expected = expected_evidence_metadata()
     paths: set[str] = set()
     for item in evidence:
         require(isinstance(item, Mapping), "EVIDENCE_INDEX", "entry must be an object")
@@ -473,13 +488,14 @@ def recorded_candidate(root: Path) -> dict[str, Any]:
         require(relative not in paths, "EVIDENCE_INDEX", f"duplicate {relative}")
         paths.add(relative)
         strict_digest(item.get("sha256"), f"evidence {relative}")
-        require(isinstance(item.get("sourceTask"), str), "EVIDENCE_INDEX", str(relative))
+        require(relative in expected, "EVIDENCE_INDEX", f"unexpected {relative}")
+        source_task, acceptance_status = expected[relative]
+        require(item.get("sourceTask") == source_task, "EVIDENCE_INDEX", str(relative))
         require(
-            item.get("acceptanceStatus") in {
-                "BOUND_INPUT", "NOT_APPLICABLE_TO_LINUX_PROFILE"
-            },
+            item.get("acceptanceStatus") == acceptance_status,
             "EVIDENCE_INDEX", str(relative),
         )
+    require(paths == set(expected), "EVIDENCE_INDEX", "recorded inventory is incomplete")
     return report
 
 
