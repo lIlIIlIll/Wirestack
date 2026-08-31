@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 7378240,
-    "binary_sha256": "ba814d633281e77f546465bd54c90b1493f3824b88c670da4aa7002871ab450e",
+    "binary_sha256": "ebb035f5f400ae6b87c82bc740decf823935560ab76e49e0d37d1778ff8b6eee",
     "exported_symbol_inventory": {
       "count": 9575,
       "scope": "final-artifact-exports",
@@ -9592,6 +9592,7 @@
       "total_bytes": 29732
     },
     "provenance": {
+      "assembler": null,
       "build_argv": [
         [
           "make",
@@ -9675,7 +9676,7 @@
       {
         "bytes": 12369700,
         "name": "libcrypto.a",
-        "sha256": "815711a9a845d407e22c9f81bd7bf6620ef7f58f2e90bb99affa4b419d55e474"
+        "sha256": "dd25e870b673b7deadb704a6c5e01cb323f6c3f91ac9a5eaf7f8697f4038c192"
       },
       {
         "bytes": 2100726,
@@ -9685,7 +9686,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "3b1ca837a5887a598de94916c503e4d4697e3a6230892a329c58727774609704",
+  "build_log_sha256": "8bb47404ecf890f87784408d83dd3a07be0dff9416ef2470153dfa2f51fa9f96",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -9711,29 +9712,29 @@
     "image_os": "alpine",
     "image_version": "3.22.5",
     "python": "3.14.7",
-    "repository_revision": "1c21f3bdb8176846d94450595c47c1bf4526efba",
+    "repository_revision": "91d82dbea7f2353445c7a495659cd425b9ae5c15",
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T20:21:43.861457+00:00",
+  "finished_at": "2026-08-31T21:06:20.592103+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 72,
+    "cancellation_latency_us": 81,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 40841216,
+    "memory_profile_peak_resident_bytes": 40665088,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 6178711718,
+    "provider_allocation_bytes": 6156379596,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 28529453,
+    "provider_allocation_calls": 28518676,
     "provider_allocation_live_after_cleanup_bytes": 559202,
     "provider_allocation_live_before_cleanup_bytes": 559202,
     "provider_allocation_peak_live_bytes": 800083,
@@ -9748,18 +9749,18 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 72,
+      "latency_us": 81,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 40841216,
+      "peak_resident_bytes": 40665088,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 6178711718,
+      "provider_allocation_bytes": 6156379596,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 28529453,
+      "provider_allocation_calls": 28518676,
       "provider_allocation_live_after_cleanup_bytes": 559202,
       "provider_allocation_live_before_cleanup_bytes": 559202,
       "provider_allocation_peak_live_bytes": 800083,
@@ -9774,7 +9775,7 @@
   "platform": "linux-musl-x86_64",
   "poc_exit_code": 0,
   "provider": "openssl",
-  "schema_version": 10,
+  "schema_version": 11,
   "source": {
     "archive": "openssl-3.6.4.tar.gz",
     "commit": "d3c1b1169b3569ff3069e5b399f47b2b28e03d79",
@@ -9810,7 +9811,7 @@
     "tag": "openssl-3.6.4",
     "tag_resolved_commit": "d3c1b1169b3569ff3069e5b399f47b2b28e03d79"
   },
-  "started_at": "2026-08-31T20:19:03.837591+00:00",
+  "started_at": "2026-08-31T21:03:27.096758+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
