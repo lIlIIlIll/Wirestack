@@ -885,6 +885,9 @@ class ProviderPocValidationTests(unittest.TestCase):
             ROOT / "tools/tls_provider_poc/poc_allocation_profile.h"
         ).read_text()
         self.assertIn("max_align_t alignment", allocation_header)
+        self.assertIn("union __declspec(align(16)) PocAllocationHeader",
+                      allocation_header)
+        self.assertIn("unsigned char alignment[16]", allocation_header)
         self.assertIn('"-std=c11", *diagnostic_flags', RUN_MODULE.read_text())
         cancel_header = (ROOT / "tools/tls_provider_poc/poc_cancel.h").read_text()
         self.assertNotIn("WaitForSingleObject(thread, INFINITE)", cancel_header)
