@@ -25,6 +25,28 @@ SCHEMA_VERSION = 1
 EXPECTED_TESTS = 8
 MODES = {"macos": "macos-arm64", "ios-simulator": "ios-simulator-arm64"}
 IOS_TARGET = "arm64-apple-ios11-simulator"
+EXPECTED_CASES = {
+    "macos": (
+        "resolvesLocalhostThroughTheProviderNeutralContract",
+        "fixtureReturnsAllCandidatesWithoutInventingTtl",
+        "fixtureAppliesFamilyAndResultBounds",
+        "fixtureMapsPosixFailuresAndUnknownCodes",
+        "fixtureCancellationAndDeadlineReturnBeforeNativeCleanup",
+        "newResolutionObservesNetworkGenerationChange",
+        "validatesBoundsAndRejectsUseAfterClose",
+        "fixtureBoundsAdmissionAndReleasesQueuedWorkAfterClose",
+    ),
+    "ios-simulator": (
+        "resolves localhost",
+        "returns and deduplicates candidates",
+        "applies family and result bounds",
+        "maps POSIX resolver failures",
+        "honors cancellation and Deadline",
+        "observes a new network generation",
+        "closes idempotently and rejects invalid bounds",
+        "bounds admission and releases queued work",
+    ),
+}
 
 
 class GateError(RuntimeError):
@@ -136,15 +158,27 @@ def require_success(process: dict[str, Any], label: str) -> None:
         )
 
 
-def process_failures(process: dict[str, Any], expected: int, label: str) -> list[str]:
+def process_failures(
+    process: dict[str, Any], expected_cases: tuple[str, ...], label: str
+) -> list[str]:
     failures: list[str] = []
     if process.get("timed_out"):
         failures.append(f"{label}:TIMEOUT")
     if process.get("exit_code") != 0:
         failures.append(f"{label}:EXIT")
     output = process.get("output", "")
-    if output.count("[ PASSED ] CASE:") != expected:
+    passed_cases = tuple(
+        match.group(1).strip()
+        for match in re.finditer(
+            r"^\s*\[ PASSED \] CASE:\s*(.+?)(?:\s+\([0-9]+ ns\))?\s*$",
+            output,
+            re.MULTILINE,
+        )
+    )
+    if len(passed_cases) != len(expected_cases):
         failures.append(f"{label}:CASE_COUNT")
+    if len(passed_cases) != len(set(passed_cases)) or set(passed_cases) != set(expected_cases):
+        failures.append(f"{label}:CASE_INVENTORY")
     if "[ SKIPPED ] CASE:" in output or "[ FAILED ] CASE:" in output:
         failures.append(f"{label}:NON_PASS_CASE")
     if re.search(r"(?:FAILED|ERROR): [1-9]", output):
@@ -174,6 +208,12 @@ def command_has_target(command: object, target: str) -> bool:
     return target in command or f"--target={target}" in command
 
 
+def resolver_ffi_path(selected: str) -> str:
+    if selected not in MODES.values():
+        raise GateError(f"unsupported Apple resolver platform: {selected}")
+    return f"./target/native/resolver/{selected}/current/lib"
+
+
 def bind_test_link_stub(manifest: str, selected: str) -> str:
     table = {
         "macos-arm64": "[target.aarch64-apple-darwin.ffi.c]",
@@ -190,7 +230,7 @@ def bind_test_link_stub(manifest: str, selected: str) -> str:
     if end < 0:
         raise GateError("Apple target FFI table is unterminated in cjpm.toml")
     section = manifest[start:end]
-    marker = '  wirestack_resolver = { path = "./target/native/resolver/current/lib" }'
+    marker = f'  wirestack_resolver = {{ path = "{resolver_ffi_path(selected)}" }}'
     if section.count(marker) != 1:
         raise GateError("Apple resolver FFI binding is missing from cjpm.toml")
     if "wirestack_m2_006_tls_link_stub" in section:
@@ -225,6 +265,22 @@ def ios_launch_command(device: str) -> list[str]:
 
 def retryable_ios_launch_timeout(process: Mapping[str, Any]) -> bool:
     return process.get("timed_out") is True and process.get("output") == ""
+
+
+def valid_ios_launch_recovery(recovery: object) -> bool:
+    if not isinstance(recovery, list) or len(recovery) != 4:
+        return False
+    operations = ("terminate", "shutdown", "boot", "bootstatus")
+    for index, operation in enumerate(operations):
+        process = recovery[index]
+        if not isinstance(process, dict) or process.get("timed_out") is not False:
+            return False
+        command = process.get("command")
+        if not isinstance(command, list) or operation not in command:
+            return False
+        if index > 0 and process.get("exit_code") != 0:
+            return False
+    return True
 
 
 def launch_ios_probe(
@@ -263,7 +319,7 @@ def launch_ios_probe(
 
 def ios_link_options() -> str:
     return (
-        "-L ./target/native/resolver/current/lib -lwirestack_resolver "
+        f"-L {resolver_ffi_path('ios-simulator-arm64')} -lwirestack_resolver "
         "-L ./target/native/test-support/m2-006/lib -lwirestack_m2_006_tls_link_stub "
         "-rpath @executable_path/Frameworks"
     )
@@ -525,7 +581,9 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
     if not isinstance(test_process, dict):
         failures.append("REPORT:TEST_MISSING")
     else:
-        failures.extend(process_failures(test_process, EXPECTED_TESTS, "RESOLVER_TEST"))
+        failures.extend(process_failures(
+            test_process, EXPECTED_CASES[expected_mode], "RESOLVER_TEST"
+        ))
     manifest = report.get("resolver_manifest")
     if not isinstance(manifest, dict):
         failures.append("REPORT:MANIFEST_MISSING")
@@ -560,6 +618,7 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
             runtime_libraries = simulator.get("runtime_libraries")
             probe_compile = simulator.get("probe_compile")
             launch_attempts = simulator.get("launch_attempts")
+            launch_recovery = simulator.get("launch_recovery")
             runtime_names = {
                 entry.get("path")
                 for entry in runtime_libraries
@@ -570,6 +629,7 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
                 or not re.fullmatch(r"[0-9a-f]{64}", probe_sha)
                 or not isinstance(bundle_probe_sha, str)
                 or not re.fullmatch(r"[0-9a-f]{64}", bundle_probe_sha)
+                or probe_sha != bundle_probe_sha
                 or not isinstance(install, dict)
                 or install.get("timed_out") is not False
                 or install.get("exit_code") != 0
@@ -583,6 +643,14 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
                 or launch_attempts[-1].get("exit_code") != 0
             ):
                 failures.append("REPORT:SIMULATOR_PROBE")
+            elif len(launch_attempts) == 1:
+                if launch_recovery != []:
+                    failures.append("REPORT:SIMULATOR_RECOVERY")
+            elif (
+                not retryable_ios_launch_timeout(launch_attempts[0])
+                or not valid_ios_launch_recovery(launch_recovery)
+            ):
+                failures.append("REPORT:SIMULATOR_RECOVERY")
     return failures
 
 
@@ -618,7 +686,10 @@ def run_gate(root: Path, output: Path, revision: str, mode: str) -> dict[str, An
         )
         require_success(build, f"{mode} resolver build")
         test_link_stub = build_test_link_stub(workspace, env, MODES[mode])
-        manifest_path = workspace / "target/native/resolver/current/resolver-manifest.json"
+        manifest_path = (
+            workspace / "target" / "native" / "resolver" / MODES[mode]
+            / "current" / "resolver-manifest.json"
+        )
         try:
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as error:
@@ -640,7 +711,9 @@ def run_gate(root: Path, output: Path, revision: str, mode: str) -> dict[str, An
             resolver_test, simulator = run_ios_test(workspace, env)
         toolchain = run_command(["cjc", "-v"], cwd=workspace, env=env, timeout=15)
         manifest_sha256 = sha256_path(manifest_path)
-    failures = process_failures(resolver_test, EXPECTED_TESTS, "RESOLVER_TEST")
+    failures = process_failures(
+        resolver_test, EXPECTED_CASES[mode], "RESOLVER_TEST"
+    )
     if manifest.get("platform") != MODES[mode]:
         failures.append("MANIFEST:PLATFORM")
     if manifest.get("private_runtime_abi") is not False:

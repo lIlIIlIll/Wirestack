@@ -86,6 +86,7 @@ def main() -> int:
             print(f"resolver build failed: {error}")
             return 1
     else:
+        output_root = output_root / selected
         try:
             final_dir, manifest = build_apple_resolver.build(
                 root,
