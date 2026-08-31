@@ -171,6 +171,8 @@ def complete_result(spec, *, provider="aws-lc", platform="linux-glibc-x86_64",
         "capabilities": caps,
         "metrics": metrics,
         "build": {
+            "binary_bytes": 1,
+            "binary_sha256": "8" * 64,
             "static_archives": [{
                 "name": "libssl.a",
                 "bytes": 1,
@@ -529,6 +531,27 @@ class ProviderPocValidationTests(unittest.TestCase):
                 mock.patch.object(runner, "run", return_value=dirty):
             with self.assertRaisesRegex(
                     runner.PocError, "local repository has tracked modifications"):
+                runner.execution_identity(ROOT, ROOT / "unused.log")
+
+    def test_hosted_execution_identity_matches_clean_checkout(self):
+        clean = mock.Mock(returncode=0, stdout="")
+        revision = mock.Mock(returncode=0, stdout="a" * 40 + "\n")
+        with mock.patch.dict(
+                runner.os.environ, {"GITHUB_SHA": "a" * 40}, clear=False), \
+                mock.patch.object(
+                    runner, "run", side_effect=[clean, revision]):
+            identity = runner.execution_identity(ROOT, ROOT / "unused.log")
+        self.assertEqual(identity["repository_revision"], "a" * 40)
+
+    def test_hosted_execution_identity_rejects_revision_mismatch(self):
+        clean = mock.Mock(returncode=0, stdout="")
+        revision = mock.Mock(returncode=0, stdout="a" * 40 + "\n")
+        with mock.patch.dict(
+                runner.os.environ, {"GITHUB_SHA": "b" * 40}, clear=False), \
+                mock.patch.object(
+                    runner, "run", side_effect=[clean, revision]):
+            with self.assertRaisesRegex(
+                    runner.PocError, "does not match the checked-out revision"):
                 runner.execution_identity(ROOT, ROOT / "unused.log")
 
     def test_missing_platform_cell_fails(self):
@@ -1518,6 +1541,19 @@ class ProviderPocWindowsTests(unittest.TestCase):
         result.pop("poc_exit_code")
         with self.assertRaisesRegex(validator.ValidationError,
                                     "zero PoC exit code"):
+            validator.validate_result(result, self.spec)
+
+    def test_successful_result_requires_final_binary_identity(self):
+        result = complete_result(self.spec)
+        result["build"].pop("binary_bytes")
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "bounded final binary size"):
+            validator.validate_result(result, self.spec)
+
+        result = complete_result(self.spec)
+        result["build"].pop("binary_sha256")
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "final binary digest"):
             validator.validate_result(result, self.spec)
 
     def test_expected_revision_mismatch_fails(self):
