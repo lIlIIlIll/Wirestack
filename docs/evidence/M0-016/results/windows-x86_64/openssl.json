@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 5386240,
-    "binary_sha256": "d80fe37192cfaa349c63c33367fbf7c1e358857ae90465c02671bf96c8d64352",
+    "binary_sha256": "b4ab6bb285b728699f75eb9926461107638335d1a59a827375f182fdca6c21bf",
     "exported_symbol_inventory": {
       "count": 0,
       "scope": "final-artifact-exports",
@@ -98,19 +98,19 @@
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
-        "bytes": 55053470,
+        "bytes": 55053476,
         "name": "libcrypto.lib",
-        "sha256": "abb67a25b277346879efca0862fb3929505d70d23c0dffc8bfc72e0664d30550"
+        "sha256": "40a4e4b9b894058ef1b4aa595075a80ac69745ac7e6a72736e820f33cb8adf13"
       },
       {
         "bytes": 10120650,
         "name": "libssl.lib",
-        "sha256": "9847fb02e0bd2649cf8e477885daf178064d9b9bc6ee3a955c96a7a08755ab80"
+        "sha256": "b0ad7d3c4961da8f2bd57516604fc9fe3eab7ba80018deb6abbdf41da6ec1220"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "485fa3e543dbc75c1e2ad2948e7b7f045a93fc98b295521ddaef031035695f56",
+  "build_log_sha256": "cada5acf36600ab9e06621c53399a1dae5237fa63be9913c61b09b3d568ee96a",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -136,32 +136,32 @@
     "image_os": "win25-vs2026",
     "image_version": "20260824.214.3",
     "python": "3.12.10",
-    "repository_revision": "91d82dbea7f2353445c7a495659cd425b9ae5c15",
+    "repository_revision": "427385f29e6ae64e003caf7a539a5343761c8318",
     "runner_arch": "X64",
     "runner_os": "Windows"
   },
-  "finished_at": "2026-08-31T21:13:11.832042+00:00",
+  "finished_at": "2026-08-31T21:55:32.638138+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 96,
+    "cancellation_latency_us": 131,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 11603968,
+    "memory_profile_peak_resident_bytes": 11624448,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 6140039292,
+    "provider_allocation_bytes": 6140459907,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 28366510,
+    "provider_allocation_calls": 28368353,
     "provider_allocation_live_after_cleanup_bytes": 563571,
     "provider_allocation_live_before_cleanup_bytes": 563571,
-    "provider_allocation_peak_live_bytes": 795787,
+    "provider_allocation_peak_live_bytes": 795779,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -173,21 +173,21 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 96,
+      "latency_us": 131,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 11603968,
+      "peak_resident_bytes": 11624448,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 6140039292,
+      "provider_allocation_bytes": 6140459907,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 28366510,
+      "provider_allocation_calls": 28368353,
       "provider_allocation_live_after_cleanup_bytes": 563571,
       "provider_allocation_live_before_cleanup_bytes": 563571,
-      "provider_allocation_peak_live_bytes": 795787,
+      "provider_allocation_peak_live_bytes": 795779,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -235,7 +235,7 @@
     "tag": "openssl-3.6.4",
     "tag_resolved_commit": "d3c1b1169b3569ff3069e5b399f47b2b28e03d79"
   },
-  "started_at": "2026-08-31T21:03:28.210982+00:00",
+  "started_at": "2026-08-31T21:45:36.690978+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
