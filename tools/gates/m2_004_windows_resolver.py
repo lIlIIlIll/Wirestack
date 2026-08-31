@@ -55,17 +55,39 @@ def atomic_json(path: Path, payload: dict[str, Any]) -> None:
         raise
 
 
+def load_report(report_path: Path) -> tuple[dict[str, Any], str]:
+    raw = report_path.read_bytes()
+    payload = json.loads(raw.decode("utf-8"))
+    if not isinstance(payload, dict):
+        raise json.JSONDecodeError("report root must be an object", raw.decode("utf-8"), 0)
+    return payload, hashlib.sha256(raw).hexdigest()
+
+
 def validation_payload(
-    report_path: Path, expected_revision: str, failures: list[str]
+    report_sha256: str, expected_revision: str, failures: list[str]
 ) -> dict[str, Any]:
     return {
         "schema_version": 1,
         "task_id": TASK_ID,
         "expected_revision": expected_revision,
-        "report_sha256": sha256_path(report_path),
+        "report_sha256": report_sha256,
         "failures": failures,
         "status": "PASS" if not failures else "FAIL",
     }
+
+
+def stored_validation_failures(
+    validation_path: Path, expected: dict[str, Any]
+) -> list[str]:
+    try:
+        stored = json.loads(validation_path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return ["VALIDATION:MISSING"]
+    except (OSError, json.JSONDecodeError):
+        return ["VALIDATION:INVALID"]
+    if stored != expected:
+        return ["VALIDATION:MISMATCH"]
+    return []
 
 
 def run_command(
@@ -321,16 +343,25 @@ def main() -> int:
             print("M2-004: --expected-revision is required")
             return 2
         try:
-            payload = json.loads(args.validate_report.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as error:
+            payload, report_sha256 = load_report(args.validate_report)
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
             print(f"M2-004: invalid report: {error}")
             return 2
         failures = validate_report(payload, args.expected_revision)
         validation = validation_payload(
-            args.validate_report, args.expected_revision, failures
+            report_sha256, args.expected_revision, failures
         )
         if args.validation_output:
             atomic_json(args.validation_output, validation)
+        else:
+            failures.extend(
+                stored_validation_failures(
+                    args.validate_report.with_name("validation.json"), validation
+                )
+            )
+            validation = validation_payload(
+                report_sha256, args.expected_revision, failures
+            )
         print(json.dumps(validation, sort_keys=True))
         return 0 if not failures else 1
     if args.output is None or not args.revision:
