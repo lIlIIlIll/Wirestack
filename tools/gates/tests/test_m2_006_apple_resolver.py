@@ -48,6 +48,8 @@ def valid_report(mode: str = "macos") -> dict[str, object]:
                 "sha256": "c" * 64,
             }],
             "probe_compile": {"command": ["cjc", "--target", gate.IOS_TARGET]},
+            "launch_attempts": [valid_process()],
+            "launch_recovery": [],
         } if mode == "ios-simulator" else None,
     }
 
@@ -150,6 +152,17 @@ class M2006AppleResolverGateTests(unittest.TestCase):
             ["-mmacosx-version-min=12.0"],
             gate.deployment_flags("macos-arm64"),
         )
+
+    def test_ios_launch_retry_is_limited_to_empty_timeout(self) -> None:
+        self.assertTrue(gate.retryable_ios_launch_timeout({
+            "timed_out": True, "output": ""
+        }))
+        self.assertFalse(gate.retryable_ios_launch_timeout({
+            "timed_out": True, "output": "[ TRACE ] CASE: 1 START\n"
+        }))
+        self.assertFalse(gate.retryable_ios_launch_timeout({
+            "timed_out": False, "output": ""
+        }))
 
     def test_ios_runtime_libraries_use_only_the_simulator_sdk_directory(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
