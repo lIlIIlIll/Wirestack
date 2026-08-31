@@ -15,7 +15,7 @@
       "timeout_seconds": 60
     },
     {
-      "argv": ["python3", "tools/gates/m2_004_windows_resolver.py", "--validate-report", "docs/evidence/M2-004/windows-x86_64/report.json", "--expected-revision", "685f874a596aaff7f79105054537539444a1e015"],
+      "argv": ["python3", "tools/gates/m2_004_windows_resolver.py", "--validate-report", "docs/evidence/M2-004/windows-x86_64/report.json", "--expected-revision", "ef9c785ec0b87244ae6c6867857b99bea517146f"],
       "gate": "task",
       "id": "stored-native-windows-result",
       "long_running": false,

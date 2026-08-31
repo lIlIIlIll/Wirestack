@@ -10,9 +10,9 @@ resolution off Cangjie scheduler carriers.
 
 ## Native Windows acceptance
 
-- GitHub Actions run: `33351384248`
+- GitHub Actions run: `33356264816`
 - workflow: `M2-004 Windows SystemResolver`
-- tested revision: `685f874a596aaff7f79105054537539444a1e015`
+- tested revision: `ef9c785ec0b87244ae6c6867857b99bea517146f`
 - runner: `windows-2025` / `win25-vs2026` image
 - Cangjie: `1.3.0-alpha.20260831010012`, target
   `x86_64-w64-mingw32`
@@ -24,7 +24,7 @@ The retained machine reports are:
 - [`windows-x86_64/report.json`](windows-x86_64/report.json)
 - [`windows-x86_64/validation.json`](windows-x86_64/validation.json)
 
-The 24 skipped cases in the raw unittest package summary are test cases outside
+The 17 skipped cases in the raw unittest package summary are test cases outside
 the selected `M2004WindowsSystemResolverTest` class. All six selected cases are
 listed as `[ PASSED ] CASE`; the gate requires exactly six and rejects selected
 SKIPPED, timeout, nonzero exit, stale SHA, wrong platform, unknown schema, or a
@@ -34,7 +34,7 @@ missing test fixture binding.
 
 | Requirement | Evidence | Result |
 |---|---|---|
-| Native Windows integration | GitHub `windows-2025` run `33351384248` | PASS |
+| Native Windows integration | GitHub `windows-2025` run `33356264816` | PASS |
 | All bounded candidates and family filtering | `fixtureReturnsAllCandidatesWithoutInventingTtl`, `fixtureAppliesFamilyAndResultBounds` | PASS |
 | No invented TTL | `ResolveResult.expiration.isNone()` on system and fixture paths | PASS |
 | Stable Winsock error mapping | six injected error paths including unknown native code | PASS |
@@ -61,9 +61,6 @@ facades, macOS/iOS/Android/Harmony resolvers, mobile network-change behavior,
 the one-hour SSE profile, or the 86,400-second soak. Those remain separate
 tasks. GitHub hosted Windows execution is native VM evidence for M2-004 only.
 
-The top-level `scripts/check` intentionally remains nonzero after this
-production/build change because the retained M7-020 architecture audit,
-M7-021 Linux release artifact qualification, and M7-031 release-candidate
-report are digest-bound to the previous source tree. They must be regenerated
-by their owning release tasks after the non-Linux implementation sequence is
-finished; M2-004 does not rewrite historical release evidence.
+Repository-wide release evidence remains owned by its release tasks. This
+task-level report proves the resolver behavior above and does not make a Linux
+release-artifact or release-candidate claim.
