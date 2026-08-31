@@ -717,7 +717,7 @@ def run_native_memory_diagnostic(spec: Mapping[str, Any], repo: Path, src: Path,
         )
     elif spec["id"] == "openssl":
         diagnostic["leak_detection"]["reason"] = (
-            "static OpenSSL 3.6.3 retains process-global allocations after "
+            f"static OpenSSL {spec['version']} retains process-global allocations after "
             "thread and global cleanup; broad allocator suppression is forbidden"
         )
     elif current_platform.startswith("macos-"):
