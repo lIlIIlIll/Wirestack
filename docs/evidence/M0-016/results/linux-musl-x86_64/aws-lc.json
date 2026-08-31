@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 4433896,
-    "binary_sha256": "5ca26302183e2faa38fe071ca06ce775e3983d6637815f36077f7291c4192a46",
+    "binary_bytes": 4442952,
+    "binary_sha256": "198932deb46221af325cfa11cfe5750eba6863c9496331040d098116a3a8ae00",
     "exported_symbol_inventory": {
       "count": 3794,
       "scope": "final-artifact-exports",
@@ -3810,6 +3810,74 @@
       "sha256": "a42cbc822fa76edd34cbd276ccb1d1eb2e915864610a76f33bc341f5edffc94f",
       "total_bytes": 79058
     },
+    "provenance": {
+      "build_argv": [
+        [
+          "cmake",
+          "--build",
+          "<BUILD>",
+          "--target",
+          "install",
+          "--parallel",
+          "4"
+        ]
+      ],
+      "build_tool": {
+        "argv": [
+          "ninja",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "1.9",
+        "output_sha256": "eca06fdd26e513a7b8510c86602285041a916de5491de13373d94fe0d7e04737"
+      },
+      "cmake": {
+        "argv": [
+          "cmake",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "cmake version 4.2.3\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+        "output_sha256": "fa8478a239832cc8384a803241fd06085e9fae49796ff13e9c6d19bdc7af14c0"
+      },
+      "compiler": {
+        "argv": [
+          "cc",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "cc (Alpine 15.2.0) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+        "output_sha256": "98380490e2e4490daae00b47ff1a922d8a5e000db1e1083d2c6543aa6864da87"
+      },
+      "configure_argv": [
+        "cmake",
+        "-S",
+        "<SOURCE>",
+        "-B",
+        "<BUILD>",
+        "-GNinja",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_SHARED_LIBS=OFF",
+        "-DBUILD_TESTING=OFF",
+        "-DDISABLE_GO=ON",
+        "-DCMAKE_INSTALL_PREFIX=<PREFIX>"
+      ],
+      "cxx_compiler": {
+        "argv": [
+          "c++",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "c++ (Alpine 15.2.0) 15.2.0\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+        "output_sha256": "b4257ffe96f7e42fb1b71901b1086a8e2d629980bf81a1795e92cc3a63b8c7d1"
+      },
+      "environment": {},
+      "instrumentation": "none",
+      "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "patches": [],
+      "provider_instrumented": false,
+      "target_triple": "x86_64-unknown-linux-musl"
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
@@ -3825,7 +3893,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "a84c2db7f03f2f50e605fb9d7a9f54524e0df93a73224bc670b8bec66198fe9f",
+  "build_log_sha256": "64edbd48840d4efbfc05be945dd50572cae0285587eab2d76a3f77b1e3284970",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -3850,25 +3918,30 @@
     "image_os": "alpine",
     "image_version": "3.22.5",
     "python": "3.14.7",
-    "repository_revision": "4c7ddea51e9e73600b39be7938566ea6300ab5cd",
+    "repository_revision": "0970f3984eb523cc1571b864e72bfdddef10f3d8",
     "runner_arch": "x86_64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T12:22:02.516468+00:00",
+  "finished_at": "2026-08-31T14:21:29.512013+00:00",
   "metrics": {
-    "allocation_profile_bound_bytes": 1073741824,
-    "allocation_profile_bytes": 656080896,
-    "allocation_profile_calls": 20022,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
+    "cancellation_bound_us": 250000,
+    "cancellation_latency_us": 28,
+    "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 30863360,
+    "memory_profile_peak_resident_bytes": 30924800,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
+    "provider_allocation_bound_bytes": 68719476736,
+    "provider_allocation_bytes": 1391265408,
+    "provider_allocation_call_bound": 150000000,
+    "provider_allocation_calls": 10295027,
+    "provider_allocation_peak_live_bytes": 223598,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -3878,13 +3951,21 @@
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "operational_evidence": {
+    "cancellation": {
+      "bound_us": 250000,
+      "latency_us": 28,
+      "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+      "wakeups": 1
+    },
     "memory_profile": {
-      "allocation_bound_bytes": 1073741824,
-      "allocation_bytes": 656080896,
-      "allocation_calls": 20022,
-      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 30863360,
+      "peak_resident_bytes": 30924800,
+      "provider_allocation_bound_bytes": 68719476736,
+      "provider_allocation_bytes": 1391265408,
+      "provider_allocation_call_bound": 150000000,
+      "provider_allocation_calls": 10295027,
+      "provider_allocation_peak_live_bytes": 223598,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -3896,14 +3977,14 @@
   "platform": "linux-musl-x86_64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 5,
+  "schema_version": 6,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
     "kind": "git",
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T12:20:19.315398+00:00",
+  "started_at": "2026-08-31T14:20:27.232865+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }

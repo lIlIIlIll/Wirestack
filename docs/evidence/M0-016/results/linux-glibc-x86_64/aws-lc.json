@@ -1,7 +1,7 @@
 {
   "build": {
-    "binary_bytes": 4337544,
-    "binary_sha256": "ef42715e808d9cacfe63baa2e10c108fdfae6d79b6538b958609d0fa66c59ab5",
+    "binary_bytes": 4338528,
+    "binary_sha256": "20af4bbc92e1092334f4702b3b95f77bdd0bfabea9d9d4484c37da71d5fafc62",
     "exported_symbol_inventory": {
       "count": 3802,
       "scope": "final-artifact-exports",
@@ -3818,6 +3818,74 @@
       "sha256": "a42cbc822fa76edd34cbd276ccb1d1eb2e915864610a76f33bc341f5edffc94f",
       "total_bytes": 79058
     },
+    "provenance": {
+      "build_argv": [
+        [
+          "cmake",
+          "--build",
+          "<BUILD>",
+          "--target",
+          "install",
+          "--parallel",
+          "4"
+        ]
+      ],
+      "build_tool": {
+        "argv": [
+          "ninja",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "1.13.2",
+        "output_sha256": "87729f1910e8eb02719463db46083e0f1a4c3cbade23b357806338b25df16a6a"
+      },
+      "cmake": {
+        "argv": [
+          "cmake",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+        "output_sha256": "37a5984b993c40a43dac1f1cc111591316a05e429a01c3194f4634282b7b4cab"
+      },
+      "compiler": {
+        "argv": [
+          "cc",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+        "output_sha256": "ea1166dac9d42d8eabfaac765e3107bf938a62d972849601cc318cbe1a04ed08"
+      },
+      "configure_argv": [
+        "cmake",
+        "-S",
+        "<SOURCE>",
+        "-B",
+        "<BUILD>",
+        "-GNinja",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_SHARED_LIBS=OFF",
+        "-DBUILD_TESTING=OFF",
+        "-DDISABLE_GO=ON",
+        "-DCMAKE_INSTALL_PREFIX=<PREFIX>"
+      ],
+      "cxx_compiler": {
+        "argv": [
+          "c++",
+          "--version"
+        ],
+        "exit_code": 0,
+        "output": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+        "output_sha256": "9af6d86c05168cb15779093011133ec1892819c8a687a3ee24c3377aad1521f9"
+      },
+      "environment": {},
+      "instrumentation": "none",
+      "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "patches": [],
+      "provider_instrumented": false,
+      "target_triple": "x86_64-unknown-linux-gnu"
+    },
     "runtime_loader_library_strings": [],
     "static_archives": [
       {
@@ -3833,7 +3901,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "856a148e3c06efe84c23ee94bb4fefa71745d89cb70db98a3dfb3da6936cde8c",
+  "build_log_sha256": "c3949d61b352a33d71513fe9c6031300f19812220108206e8fdf9e5e64538369",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -3858,25 +3926,30 @@
     "image_os": "ubuntu24",
     "image_version": "20260823.283.1",
     "python": "3.12.14",
-    "repository_revision": "4c7ddea51e9e73600b39be7938566ea6300ab5cd",
+    "repository_revision": "0970f3984eb523cc1571b864e72bfdddef10f3d8",
     "runner_arch": "X64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T12:21:40.111627+00:00",
+  "finished_at": "2026-08-31T14:23:35.989443+00:00",
   "metrics": {
-    "allocation_profile_bound_bytes": 1073741824,
-    "allocation_profile_bytes": 656080896,
-    "allocation_profile_calls": 20022,
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
+    "cancellation_bound_us": 250000,
+    "cancellation_latency_us": 25,
+    "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
     "external_trust_calls": 4,
     "failure_cleanup_cycles": 0,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 33644544,
+    "memory_profile_peak_resident_bytes": 34058240,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
+    "provider_allocation_bound_bytes": 68719476736,
+    "provider_allocation_bytes": 1266721924,
+    "provider_allocation_call_bound": 150000000,
+    "provider_allocation_calls": 10275388,
+    "provider_allocation_peak_live_bytes": 213301,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -3886,13 +3959,21 @@
     "System openssl CLI is used only to generate ephemeral test certificates; the PoC executable is linked against vendored static provider archives."
   ],
   "operational_evidence": {
+    "cancellation": {
+      "bound_us": 250000,
+      "latency_us": 25,
+      "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+      "wakeups": 1
+    },
     "memory_profile": {
-      "allocation_bound_bytes": 1073741824,
-      "allocation_bytes": 656080896,
-      "allocation_calls": 20022,
-      "method": "native-process-peak-resident-and-harness-allocation-counters",
+      "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 33644544,
+      "peak_resident_bytes": 34058240,
+      "provider_allocation_bound_bytes": 68719476736,
+      "provider_allocation_bytes": 1266721924,
+      "provider_allocation_call_bound": 150000000,
+      "provider_allocation_calls": 10275388,
+      "provider_allocation_peak_live_bytes": 213301,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -3901,7 +3982,92 @@
         "reason": "AWS-LC 5.5.0 exposes no process-global cleanup API; the bounded 10,000-cycle resident/allocation profile remains mandatory",
         "status": "UNSUPPORTED"
       },
-      "output_sha256": "e6140df2f7f772a6cecc14e1bd3ecf6151b0c6a541127f6211dfa8ee3c036cfb",
+      "output_sha256": "c0083c4e80f0127f338e6c4ce56894ff6abfc728c664bd5cc27a8f0429398405",
+      "provider_build_provenance": {
+        "build_argv": [
+          [
+            "cmake",
+            "--build",
+            "<BUILD>",
+            "--target",
+            "install",
+            "--parallel",
+            "4"
+          ]
+        ],
+        "build_tool": {
+          "argv": [
+            "ninja",
+            "--version"
+          ],
+          "exit_code": 0,
+          "output": "1.13.2",
+          "output_sha256": "87729f1910e8eb02719463db46083e0f1a4c3cbade23b357806338b25df16a6a"
+        },
+        "cmake": {
+          "argv": [
+            "cmake",
+            "--version"
+          ],
+          "exit_code": 0,
+          "output": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+          "output_sha256": "37a5984b993c40a43dac1f1cc111591316a05e429a01c3194f4634282b7b4cab"
+        },
+        "compiler": {
+          "argv": [
+            "cc",
+            "--version"
+          ],
+          "exit_code": 0,
+          "output": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+          "output_sha256": "ea1166dac9d42d8eabfaac765e3107bf938a62d972849601cc318cbe1a04ed08"
+        },
+        "configure_argv": [
+          "cmake",
+          "-S",
+          "<SOURCE>",
+          "-B",
+          "<BUILD>",
+          "-GNinja",
+          "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+          "-DBUILD_SHARED_LIBS=OFF",
+          "-DBUILD_TESTING=OFF",
+          "-DDISABLE_GO=ON",
+          "-DOPENSSL_NO_ASM=ON",
+          "-DCMAKE_C_FLAGS=-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -Wno-error=array-bounds",
+          "-DCMAKE_CXX_FLAGS=-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -Wno-error=array-bounds",
+          "-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined",
+          "-DCMAKE_INSTALL_PREFIX=<PREFIX>"
+        ],
+        "cxx_compiler": {
+          "argv": [
+            "c++",
+            "--version"
+          ],
+          "exit_code": 0,
+          "output": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+          "output_sha256": "9af6d86c05168cb15779093011133ec1892819c8a687a3ee24c3377aad1521f9"
+        },
+        "environment": {},
+        "instrumentation": "address+undefined-sanitizer",
+        "patch_set_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "patches": [],
+        "provider_instrumented": true,
+        "target_triple": "x86_64-unknown-linux-gnu"
+      },
+      "provider_instrumented": true,
+      "provider_static_archives": [
+        {
+          "bytes": 64966488,
+          "name": "libssl.a",
+          "sha256": "2fc53164c8ef12f948a7f35fbd493d5a841688dcfc17ff7f4174c394750009be"
+        },
+        {
+          "bytes": 51677370,
+          "name": "libcrypto.a",
+          "sha256": "75701cf076679e5b9c4ad5cc649573bec15c445297a1442a8e5d367231f09977"
+        }
+      ],
       "status": "PASS",
       "tool": "address+undefined-sanitizer"
     }
@@ -3909,14 +4075,14 @@
   "platform": "linux-glibc-x86_64",
   "poc_exit_code": 0,
   "provider": "aws-lc",
-  "schema_version": 5,
+  "schema_version": 6,
   "source": {
     "commit": "991e67ff4cf04df4dd89e407f8b920c6936cb56a",
     "content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
     "kind": "git",
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T12:20:25.683000+00:00",
+  "started_at": "2026-08-31T14:20:39.557755+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }
