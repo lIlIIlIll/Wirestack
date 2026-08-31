@@ -16,16 +16,19 @@ Deadline policy.
   `ios-simulator-arm64`; unsupported targets fail closed.
 - Python fault-injection tests reject wrong platforms, stale revisions,
   unknown schemas, cross-compile-only output, SKIPPED cases, timeout, missing
-  simulator evidence, and a missing fixture binding.
+  simulator evidence, incomplete or duplicated native trace sequences, and a
+  missing fixture binding. All 27 focused tests pass.
 - GitHub Actions run
-  [`33362343275`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33362343275)
+  [`33364933354`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33364933354)
   passed both hosted jobs at exact revision
-  `bf59aa28f1bc3cc75efe5ede33a14c39bfd665ba`.
+  `d02358cd233b009f1a2e6994e3aa71b75d8a9b62`.
 - The native `macos-15` arm64 job ran all eight selected Cangjie resolver cases
   with zero failures and stored its exact-revision report and validation.
 - The native iOS Simulator arm64 job built the standalone Cangjie probe,
   bundled and signed the official simulator runtime, installed the app, and
-  ran all eight cases with zero failures on the booted iOS 26.2 Simulator.
+  ran all eight cases with zero failures on the booted iOS 26.2 Simulator. The
+  gate validates the unbuffered native `START`/`PASS` trace sequence because
+  `std.env.exit` does not guarantee that Cangjie stdout is flushed.
 - The iOS gate permits one recorded Simulator restart only when the first
   `simctl launch --console` attempt times out before producing any app output.
   Partial protocol execution, case output, and nonzero exits are never retried.
