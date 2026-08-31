@@ -55,7 +55,7 @@ Replacing the dependency list does not remove any product requirement.
 
 Windows x86_64 and macOS arm64 select pinned AWS-LC 5.5.0 for their desktop
 adoption path. The selection becomes effective only after an exact-revision
-schema-v2 PoC reports PASS for every required capability on both GitHub-hosted
+schema-v3 PoC reports PASS for every required capability on both GitHub-hosted
 native runners. Provider selection remains a build-time decision. Unknown
 providers, unsupported platform combinations and any automatic fallback fail
 closed.

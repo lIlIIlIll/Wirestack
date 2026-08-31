@@ -15,6 +15,9 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def provider_result(platform: str, revision: str) -> dict:
     spec = json.loads((ROOT / "tools/tls_provider_poc/providers.json").read_text())
+    provider_manifest = json.loads(
+        (ROOT / "native/tls/aws_lc/provider.json").read_text()
+    )
     return {
         "schema_version": 3,
         "task_id": "M0-016",
@@ -25,15 +28,14 @@ def provider_result(platform: str, revision: str) -> dict:
             "repository_revision": revision,
             "runner_os": "Windows" if platform == "windows-x86_64" else "macOS",
             "runner_arch": "X64" if platform == "windows-x86_64" else "ARM64",
-            "image_os": "test-image",
+            "image_os": adoption.EXPECTED_RUNNER_IMAGES[platform],
             "image_version": "1",
         },
         "source": {
-            "commit": adoption.PINNED_COMMIT,
-            "tree": "a" * 40,
-            "content_sha256": "b" * 64,
-            "kind": "git",
+            key: provider_manifest["source"][key]
+            for key in ("kind", "commit", "tree", "content_sha256")
         },
+        "poc_exit_code": 0,
         "capabilities": {name: "PASS" for name in spec["required_capabilities"]},
         "build": {
             "static_archives": [{"name": "provider", "sha256": "c" * 64}],
@@ -67,8 +69,11 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
     def test_dependency_evidence_rejects_source_and_native_report_drift(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            source = root / "source.txt"
+            source = root / "native/resolver/windows/wirestack_resolver.c"
+            source.parent.mkdir(parents=True)
             source.write_text("source", encoding="utf-8")
+            header = root / "native/resolver/windows/wirestack_resolver.h"
+            header.write_text("header", encoding="utf-8")
             report_relative = "docs/evidence/M2-004/windows-x86_64/report.json"
             validation_relative = "docs/evidence/M2-004/windows-x86_64/validation.json"
             report = root / report_relative
@@ -76,7 +81,21 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             report.parent.mkdir(parents=True)
             report.write_bytes((json.dumps({
                 "schema_version": 1, "task_id": "M2-004", "revision": "a" * 40,
-                "decision": "PASS",
+                "decision": "PASS", "failures": [],
+                "platform": {"system": "Windows"},
+                "resolver_test": {
+                    "timed_out": False, "exit_code": 0,
+                    "output": "[ PASSED ] CASE:\n" * 6 + "FAILED: 0\nERROR: 0\n",
+                },
+                "resolver_manifest": {
+                    "platform": "windows-x86_64", "private_runtime_abi": False,
+                    "test_fixture": True,
+                    "inputs": {
+                        "source_sha256": adoption.sha256_path(source),
+                        "header_sha256": adoption.sha256_path(header),
+                    },
+                },
+                "test_link_stub": {"test_only": True},
             }, indent=2) + "\n").replace("\n", "\r\n").encode("utf-8"))
             validation.write_bytes((json.dumps({
                 "schema_version": 1, "task_id": "M2-004",
@@ -94,10 +113,16 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                     "sha256": adoption.sha256_path(validation),
                     "source_task": "M2-004", "acceptance_status": "PASS",
                 }],
-                "source_sha256": {"source.txt": adoption.sha256_path(source)},
+                "source_sha256": {
+                    "native/resolver/windows/wirestack_resolver.c": adoption.sha256_path(source),
+                    "native/resolver/windows/wirestack_resolver.h": adoption.sha256_path(header),
+                },
             }), encoding="utf-8")
             task = {
-                "task_id": "M2-004", "source_paths": ["source.txt"],
+                "task_id": "M2-004", "source_paths": [
+                    "native/resolver/windows/wirestack_resolver.c",
+                    "native/resolver/windows/wirestack_resolver.h",
+                ],
                 "required_evidence": [
                     "docs/evidence/M2-004/evidence.json", validation_relative,
                 ],
@@ -256,6 +281,35 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             lambda: adoption.validate_provider_result(
                 raw,
                 expected_platform="windows-x86_64",
+                expected_revision=self.revision,
+            ),
+        )
+
+    def test_failed_poc_wrong_runner_and_source_identity_are_rejected(self) -> None:
+        raw = provider_result("windows-x86_64", self.revision)
+        raw["poc_exit_code"] = 1
+        self.assert_code(
+            "INCOMPLETE_RESULT",
+            lambda: adoption.validate_provider_result(
+                raw, expected_platform="windows-x86_64",
+                expected_revision=self.revision,
+            ),
+        )
+        raw = provider_result("windows-x86_64", self.revision)
+        raw["execution"]["image_os"] = "windows-2022"
+        self.assert_code(
+            "PLATFORM",
+            lambda: adoption.validate_provider_result(
+                raw, expected_platform="windows-x86_64",
+                expected_revision=self.revision,
+            ),
+        )
+        raw = provider_result("macos-arm64", self.revision)
+        raw["source"]["tree"] = "0" * 40
+        self.assert_code(
+            "PROVIDER",
+            lambda: adoption.validate_provider_result(
+                raw, expected_platform="macos-arm64",
                 expected_revision=self.revision,
             ),
         )

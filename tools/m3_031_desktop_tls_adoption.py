@@ -18,11 +18,17 @@ if str(ROOT) not in sys.path:
 
 from tools.tls_provider_poc import validate as poc_validate
 from tools.repository import repository_tooling
+from tools.gates import m2_004_windows_resolver, m2_006_apple_resolver
 
 
 PINNED_PROVIDER = "aws-lc"
 PINNED_PROVIDER_VERSION = "5.5.0"
 PINNED_COMMIT = "991e67ff4cf04df4dd89e407f8b920c6936cb56a"
+PROVIDER_RESULT_SCHEMA_VERSION = 3
+EXPECTED_RUNNER_IMAGES = {
+    "windows-x86_64": "win25-vs2026",
+    "macos-arm64": "macos15",
+}
 EXPECTED_DESKTOP_DEPENDENCIES = {
     "M3-014": "M2-004,M3-031",
     "M3-015": "M2-006,M3-031",
@@ -35,15 +41,22 @@ ACCEPTANCE_FRAGMENTS = {
     "M3-019": "系统 key handle 可完成 client/server 签名",
     "M3-020": "SecKey 签名桥通过",
 }
-MOBILE_GRAPH_FRAGMENTS = (
-    "| M4-001 | 实现 Android system/app trust adapter | 平台 | C4 | M3-009..M3-012,M2-007 |",
-    "| M4-002 | 实现 Android Keystore external signer | 平台 | C4 | M3-016,M3-018 |",
-    "| M4-005 | 实现 iOS system trust adapter | 平台 | C4 | M3-009..M3-012,M2-006 |",
-    "| M4-006 | 实现 iOS Keychain/SecKey signer | 平台 | C4 | M3-016,M3-018 |",
-    "| M4-009 | 实现 HarmonyOS/OHOS system trust adapter | 平台 | C4 | M3-009..M3-012,M2-008 |",
-    "| M4-010 | 实现 Harmony system key external signer | 平台 | C4 | M3-016,M3-018 |",
-    "| M4-014 | 建立三平台真机 CI 与 capability matrix |",
-)
+MOBILE_GRAPH_ROWS = {
+    "M4-001": "| M4-001 | 实现 Android system/app trust adapter | 平台 | C4 | M3-009..M3-012,M2-007 | PRD §14.2 | 系统和应用 trust 配置可用；reference identity 不被关闭；结果映射统一。 |",
+    "M4-002": "| M4-002 | 实现 Android Keystore external signer | 平台 | C4 | M3-016,M3-018 | PRD §13.6/§14.2 | alias/key handle 可签名且不可导出；算法、取消、生命周期和错误通过真机测试。 |",
+    "M4-003": "| M4-003 | 完成 Android TLS/HTTPS client 集成 | 平台 | C4 | M4-001,M4-002,M3-021..M3-027 | PRD M4 | TLS1.2/1.3、ALPN、system/custom trust、mTLS、session 在真机通过。 |",
+    "M4-004": "| M4-004 | 完成 Android 前后台与网络切换验证 | 平台 | C4 | M4-003,M0-012 | GATE-NET-07 | 页面退出取消、Wi-Fi/蜂窝/飞行模式/休眠恢复可诊断；旧连接与 network binding 无泄漏。 |",
+    "M4-005": "| M4-005 | 实现 iOS system trust adapter | 平台 | C4 | M3-009..M3-012,M2-006 | PRD §14.2 | 系统 trust 与自定义 roots 组合行为明确；identity 证据统一。 |",
+    "M4-006": "| M4-006 | 实现 iOS Keychain/SecKey signer | 平台 | C4 | M3-016,M3-018 | PRD §13.6/§14.2 | 不可导出 key 完成签名；回调、取消、线程和生命周期安全。 |",
+    "M4-007": "| M4-007 | 完成 iOS TLS/HTTPS client 集成 | 平台 | C4 | M4-005,M4-006,M3-021..M3-027 | PRD M4 | TLS1.2/1.3、ALPN、trust、mTLS、session 在真机通过。 |",
+    "M4-008": "| M4-008 | 完成 iOS 前后台与网络切换验证 | 平台 | C4 | M4-007,M0-012 | GATE-NET-07 | 应用生命周期、Wi-Fi/蜂窝/飞行模式、cancel/Deadline 无泄漏且错误可诊断。 |",
+    "M4-009": "| M4-009 | 实现 HarmonyOS/OHOS system trust adapter | 平台 | C4 | M3-009..M3-012,M2-008 | PRD §14.2 | 系统 trust、自定义 roots、reference identity 和结构化证据在真机通过。 |",
+    "M4-010": "| M4-010 | 实现 Harmony system key external signer | 平台 | C4 | M3-016,M3-018 | PRD §13.6/§14.2 | 不可导出 key handle 完成签名；错误、取消、生命周期一致。 |",
+    "M4-011": "| M4-011 | 完成 Harmony TLS/HTTPS client/server 集成 | 平台 | C4 | M4-009,M4-010,M3-021..M3-027 | PRD §14.2/M4 | client P0 和 server P0 均通过；ALPN/SNI/mTLS/session 可用。 |",
+    "M4-012": "| M4-012 | 完成 Harmony 网络切换与生命周期验证 | 平台 | C4 | M4-011,M0-012 | GATE-NET-07 | 断网/恢复、切网、前后台、休眠无旧绑定泄漏；新连接可重新解析选路。 |",
+    "M4-013": "| M4-013 | 实现 Android/iOS 前台基础 `TlsListener` 能力 | 平台 | C4 | M1-021,M3-022,M4-003,M4-007 | PRD §4 G-003/§14.2 | 明确前台限制；accept/cancel/close/SNI 基础测试通过；不宣称后台常驻能力。 |",
+    "M4-014": "| M4-014 | 建立三平台真机 CI 与 capability matrix | 基础设施 | C4 | M4-003..M4-013 | PRD §14.3/§21.5 | 每次发布可运行 client、key、trust、network-change、listener 门禁；输出只读能力矩阵。 |",
+}
 CORE_REQUIREMENTS: dict[str, tuple[tuple[str, str], ...]] = {
     "M3-001": (
         ("native/tls/aws_lc/provider.json", '"provider_version": "5.5.0"'),
@@ -302,6 +315,48 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
             "source_sha256": dict(sorted(checked.items())), "status": "PASS"}
 
 
+def validate_native_source_binding(
+    task_id: str, report: Mapping[str, Any], source_sha256: Mapping[str, str]
+) -> None:
+    manifest = report.get("resolver_manifest")
+    inputs = manifest.get("inputs") if isinstance(manifest, dict) else None
+    if not isinstance(inputs, dict):
+        raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: native source inputs")
+    if task_id == "M2-004":
+        expected = {
+            "native/resolver/windows/wirestack_resolver.c": inputs.get("source_sha256"),
+            "native/resolver/windows/wirestack_resolver.h": inputs.get("header_sha256"),
+        }
+    elif task_id == "M2-006":
+        raw_sources = inputs.get("sources")
+        if not isinstance(raw_sources, dict):
+            raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: native sources")
+        required = (
+            "native/resolver/apple/wirestack_resolver.c",
+            "native/resolver/apple/wirestack_resolver.h",
+            "native/resolver/linux/wirestack_resolver.c",
+            "native/resolver/linux/wirestack_resolver.h",
+        )
+        expected = {}
+        for relative in required:
+            matches = [
+                digest for path, digest in raw_sources.items()
+                if isinstance(path, str) and path.replace("\\", "/").endswith(relative)
+            ]
+            if len(matches) != 1:
+                raise AdoptionError(
+                    "DEPENDENCY_EVIDENCE", f"{task_id}: {relative} native binding"
+                )
+            expected[relative] = matches[0]
+    else:
+        raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: unsupported binding")
+    for relative, digest in expected.items():
+        if not isinstance(digest, str) or source_sha256.get(relative) != digest:
+            raise AdoptionError(
+                "DEPENDENCY_EVIDENCE", f"{task_id}: {relative} native source drift"
+            )
+
+
 def validate_dependency_evidence(
     root: Path,
     bindings: Mapping[str, Sequence[tuple[str, str, str | None]]] = DEPENDENCY_EVIDENCE_BINDINGS,
@@ -395,6 +450,20 @@ def validate_dependency_evidence(
                 or (expected_mode is not None and report.get("mode") != expected_mode)
             ):
                 raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: native report binding")
+            if task_id == "M2-004":
+                canonical_failures = m2_004_windows_resolver.validate_report(
+                    report, str(report.get("revision", ""))
+                )
+            else:
+                canonical_failures = m2_006_apple_resolver.validate_report(
+                    report, str(report.get("revision", "")), str(expected_mode)
+                )
+            if canonical_failures:
+                raise AdoptionError(
+                    "DEPENDENCY_EVIDENCE",
+                    f"{task_id}: canonical report validation {canonical_failures[0]}",
+                )
+            validate_native_source_binding(task_id, report, source_sha256)
             native_reports[report_relative] = sha256_path(report_path)
         validated[task_id] = {
             "native_reports": dict(sorted(native_reports.items())),
@@ -423,12 +492,12 @@ def audit_task_graph(root: Path) -> dict[str, Any]:
         if fragment not in row:
             raise AdoptionError("TASK_GRAPH", f"{task_id}: acceptance text changed")
         desktop[task_id] = {"dependencies": dependencies, "status": "PASS"}
-    for fragment in MOBILE_GRAPH_FRAGMENTS:
-        if fragment not in backlog:
-            raise AdoptionError("MOBILE_GRAPH_DRIFT", fragment[:80])
+    for task_id, expected_row in MOBILE_GRAPH_ROWS.items():
+        if _backlog_row(backlog, task_id) != expected_row:
+            raise AdoptionError("MOBILE_GRAPH_DRIFT", task_id)
     return {
         "desktop": desktop,
-        "mobile_rows_checked": len(MOBILE_GRAPH_FRAGMENTS),
+        "mobile_rows_checked": len(MOBILE_GRAPH_ROWS),
         "status": "PASS",
     }
 
@@ -493,17 +562,26 @@ def validate_provider_result(
         raise AdoptionError("PLATFORM", str(raw.get("platform")))
     if raw.get("status") != "PASS":
         raise AdoptionError("INCOMPLETE_RESULT", str(raw.get("status")))
-    if raw.get("schema_version") not in {2, 3}:
+    if raw.get("schema_version") != PROVIDER_RESULT_SCHEMA_VERSION:
         raise AdoptionError("UNKNOWN_SCHEMA", str(raw.get("schema_version")))
+    if raw.get("poc_exit_code") != 0:
+        raise AdoptionError("INCOMPLETE_RESULT", "provider PoC did not exit successfully")
     source = raw.get("source")
-    if not isinstance(source, dict) or source.get("commit") != PINNED_COMMIT:
-        raise AdoptionError("PROVIDER", "AWS-LC source commit mismatch")
+    provider_manifest = load_json(ROOT / "native/tls/aws_lc/provider.json")
+    expected_source = provider_manifest.get("source")
+    if not isinstance(source, dict) or not isinstance(expected_source, dict) or any(
+        source.get(field) != expected_source.get(field)
+        for field in ("kind", "commit", "tree", "content_sha256")
+    ):
+        raise AdoptionError("PROVIDER", "AWS-LC source identity mismatch")
     capabilities = raw.get("capabilities")
     if not isinstance(capabilities, dict) or any(value != "PASS" for value in capabilities.values()):
         raise AdoptionError("INCOMPLETE_RESULT", "every capability must be PASS")
     execution = raw.get("execution")
     if not isinstance(execution, dict):
         raise AdoptionError("PLATFORM", "execution metadata missing")
+    if execution.get("image_os") != EXPECTED_RUNNER_IMAGES[expected_platform]:
+        raise AdoptionError("PLATFORM", "required hosted runner image was not used")
     if expected_platform == "windows-x86_64":
         if execution.get("runner_os") != "Windows" or str(execution.get("runner_arch", "")).upper() not in {"X64", "AMD64"}:
             raise AdoptionError("PLATFORM", "native Windows x86_64 runner required")
