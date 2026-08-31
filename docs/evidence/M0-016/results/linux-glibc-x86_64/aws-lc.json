@@ -3924,7 +3924,7 @@
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "5d5f8ef85be2cf56acd18a7b302f3cb201a62daaf2fffd9aabe58700e1a5058b",
+  "build_log_sha256": "175df7b4558c904298740f899376440b31e63e50bb52128f860f4fc0e0f6d50c",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -3950,11 +3950,11 @@
     "image_os": "ubuntu24",
     "image_version": "20260823.283.1",
     "python": "3.12.14",
-    "repository_revision": "9e2c4d10197720d7299f4ab1a7e0cbf6f38ac4ff",
+    "repository_revision": "f329ccdac1130afad7ad5e5fd5665378bb392072",
     "runner_arch": "X64",
     "runner_os": "Linux"
   },
-  "finished_at": "2026-08-31T23:06:20.937271+00:00",
+  "finished_at": "2026-08-31T23:29:33.572447+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
@@ -3967,16 +3967,16 @@
     "failure_cleanup_cycles": 0,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 34529280,
+    "memory_profile_peak_resident_bytes": 34590720,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 1256754000,
+    "provider_allocation_bytes": 1256556276,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 10266880,
+    "provider_allocation_calls": 10266747,
     "provider_allocation_live_after_cleanup_bytes": 152884,
     "provider_allocation_live_before_cleanup_bytes": 152884,
-    "provider_allocation_peak_live_bytes": 214214,
+    "provider_allocation_peak_live_bytes": 214198,
     "repeated_cleanup_cycles": 10000,
     "session_resumption_handshakes": 4,
     "session_resumption_tls12_handshakes": 2,
@@ -3995,14 +3995,14 @@
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 34529280,
+      "peak_resident_bytes": 34590720,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 1256754000,
+      "provider_allocation_bytes": 1256556276,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 10266880,
+      "provider_allocation_calls": 10266747,
       "provider_allocation_live_after_cleanup_bytes": 152884,
       "provider_allocation_live_before_cleanup_bytes": 152884,
-      "provider_allocation_peak_live_bytes": 214214,
+      "provider_allocation_peak_live_bytes": 214198,
       "resident_bound_bytes": 536870912
     },
     "native_memory_diagnostic": {
@@ -4011,7 +4011,7 @@
         "reason": "AWS-LC 5.5.0 exposes no process-global cleanup API; the bounded 10,000-cycle resident/allocation profile remains mandatory",
         "status": "UNSUPPORTED"
       },
-      "output_sha256": "4ee2b6916ebdd476a1d22bd463968e4b0c427b76a1704eb2a20e9b70b98a0223",
+      "output_sha256": "5c7c7cdcbd702ba12b48fe9f7022cf518fcf0ae3ab8efc2a3a10bb10349e09d7",
       "provider_build_provenance": {
         "assembler": null,
         "build_argv": [
@@ -4155,7 +4155,7 @@
     },
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T23:03:29.028332+00:00",
+  "started_at": "2026-08-31T23:26:40.174857+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }
