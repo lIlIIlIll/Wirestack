@@ -1,3 +1,7 @@
+#if !defined(_WIN32)
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
@@ -7,6 +11,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "poc_allocation_profile.h"
+#include "poc_cancel.h"
 #if defined(_WIN32)
 #include <windows.h>
 #include <psapi.h>
@@ -18,7 +24,8 @@
 #define BIO_CAPACITY 4096
 #define PAYLOAD_SIZE 32768
 #define MEMORY_PROFILE_BOUND_BYTES 536870912ULL
-#define ALLOCATION_PROFILE_BOUND_BYTES 1073741824ULL
+#define PROVIDER_ALLOCATION_BOUND_BYTES 68719476736ULL
+#define PROVIDER_ALLOCATION_CALL_BOUND 100000000ULL
 #ifndef CLEANUP_CYCLES
 #define CLEANUP_CYCLES 10000
 #endif
@@ -33,8 +40,25 @@ static unsigned int external_trust_calls = 0;
 static SSL_SESSION *captured_session = NULL;
 static unsigned int session_resumption_tls12_handshakes = 0;
 static unsigned int session_resumption_tls13_handshakes = 0;
-static uint64_t profile_allocation_calls = 0;
-static uint64_t profile_allocation_bytes = 0;
+
+static void *poc_openssl_malloc(size_t size, const char *file, int line) {
+    (void)file;
+    (void)line;
+    return poc_profile_malloc(size);
+}
+
+static void *poc_openssl_realloc(
+    void *pointer, size_t size, const char *file, int line) {
+    (void)file;
+    (void)line;
+    return poc_profile_realloc(pointer, size);
+}
+
+static void poc_openssl_free(void *pointer, const char *file, int line) {
+    (void)file;
+    (void)line;
+    poc_profile_free(pointer);
+}
 
 static uint64_t peak_resident_bytes(void) {
 #if defined(_WIN32)
@@ -343,8 +367,6 @@ static int transfer_payload(Pair *p) {
     unsigned char *src = malloc(PAYLOAD_SIZE);
     unsigned char *dst = malloc(PAYLOAD_SIZE);
     if (!src || !dst) fail("malloc payload");
-    profile_allocation_calls += 2;
-    profile_allocation_bytes += 2ULL * PAYLOAD_SIZE;
     for (int i = 0; i < PAYLOAD_SIZE; ++i) src[i] = (unsigned char)(i * 31u + 7u);
     size_t sent = 0;
     size_t received = 0;
@@ -672,7 +694,25 @@ static int truncation_case(const char *server_cert, const char *server_key, cons
     return ok;
 }
 
-static int cancellation_case(const char *ca) {
+typedef struct CancellationWorker {
+    PocCancelGate gate;
+    SSL *client;
+    int observed_want;
+} CancellationWorker;
+
+static POC_THREAD_RETURN cancellation_worker(POC_THREAD_ARGUMENT opaque) {
+    CancellationWorker *worker = (CancellationWorker *)opaque;
+    int result = SSL_do_handshake(worker->client);
+    if (result != 1) {
+        int error = SSL_get_error(worker->client, result);
+        worker->observed_want =
+            error == SSL_ERROR_WANT_READ || error == SSL_ERROR_WANT_WRITE;
+    }
+    poc_cancel_worker_wait(&worker->gate);
+    POC_THREAD_DONE;
+}
+
+static int cancellation_case(const char *ca, uint64_t *latency_us) {
     SSL_CTX *client_ctx = make_client_ctx(ca, NULL, NULL, TLS1_2_VERSION, 1);
     SSL *client = SSL_new(client_ctx);
     BIO *in = BIO_new(BIO_s_mem());
@@ -680,18 +720,19 @@ static int cancellation_case(const char *ca) {
     if (!client || !in || !out) fail("cancel setup");
     SSL_set_bio(client, in, out);
     SSL_set_connect_state(client);
-    int observed_want = 0;
-    for (int i = 0; i < 8; ++i) {
-        int r = SSL_do_handshake(client);
-        if (r == 1) break;
-        int e = SSL_get_error(client, r);
-        if (e == SSL_ERROR_WANT_READ || e == SSL_ERROR_WANT_WRITE) observed_want = 1;
-        else break;
-    }
+    CancellationWorker worker;
+    memset(&worker, 0, sizeof(worker));
+    worker.client = client;
+    if (!poc_cancel_gate_init(&worker.gate)) fail("cancel gate");
+    PocThread thread;
+    int started = poc_thread_start(&thread, cancellation_worker, &worker);
+    int woke = started && poc_cancel_trigger_and_wait(&worker.gate, latency_us);
+    int joined = started && poc_thread_join(thread);
+    poc_cancel_gate_destroy(&worker.gate);
     SSL_free(client);
     SSL_CTX_free(client_ctx);
     ERR_clear_error();
-    return observed_want;
+    return worker.observed_want && woke && joined;
 }
 
 #if defined(OPENSSL_IS_AWSLC)
@@ -733,6 +774,13 @@ int main(int argc, char **argv) {
         fprintf(stderr, "usage: %s SERVER_CERT SERVER_KEY CA CLIENT_CERT CLIENT_KEY EXPIRED_CERT MALFORMED_CERT\n", argv[0]);
         return 2;
     }
+    provider_allocation_diagnostic_mode =
+        getenv("WIRESTACK_POC_DIAGNOSTIC_CYCLES") != NULL;
+    if (CRYPTO_set_mem_functions(
+            poc_openssl_malloc, poc_openssl_realloc, poc_openssl_free) != 1) {
+        fprintf(stderr, "provider allocator hook initialization failed\n");
+        return 2;
+    }
     OPENSSL_init_ssl(0, NULL);
     const char *server_cert = argv[1];
     const char *server_key = argv[2];
@@ -759,7 +807,8 @@ int main(int argc, char **argv) {
     int expired = expired_certificate_case(expired_cert, server_key, ca);
     int malformed = malformed_certificate_case(malformed_cert);
     int trunc = truncation_case(server_cert, server_key, ca);
-    int cancel = cancellation_case(ca);
+    uint64_t cancellation_latency_us = 0;
+    int cancel = cancellation_case(ca, &cancellation_latency_us);
 #if defined(OPENSSL_IS_AWSLC)
     int external_signer = external_signer_case(server_cert, server_key, ca);
 #endif
@@ -823,12 +872,21 @@ int main(int argc, char **argv) {
            (unsigned long long)peak_bytes);
     printf("METRIC memory_profile_bound_bytes=%llu\n",
            (unsigned long long)MEMORY_PROFILE_BOUND_BYTES);
-    printf("METRIC allocation_profile_calls=%llu\n",
-           (unsigned long long)profile_allocation_calls);
-    printf("METRIC allocation_profile_bytes=%llu\n",
-           (unsigned long long)profile_allocation_bytes);
-    printf("METRIC allocation_profile_bound_bytes=%llu\n",
-           (unsigned long long)ALLOCATION_PROFILE_BOUND_BYTES);
+    printf("METRIC provider_allocation_calls=%llu\n",
+           (unsigned long long)provider_allocation_calls);
+    printf("METRIC provider_allocation_call_bound=%llu\n",
+           (unsigned long long)PROVIDER_ALLOCATION_CALL_BOUND);
+    printf("METRIC provider_allocation_bytes=%llu\n",
+           (unsigned long long)provider_allocation_bytes);
+    printf("METRIC provider_allocation_bound_bytes=%llu\n",
+           (unsigned long long)PROVIDER_ALLOCATION_BOUND_BYTES);
+    printf("METRIC provider_allocation_peak_live_bytes=%llu\n",
+           (unsigned long long)provider_allocation_peak_live_bytes);
+    printf("METRIC cancellation_wakeups=%d\n", cancel ? 1 : 0);
+    printf("METRIC cancellation_latency_us=%llu\n",
+           (unsigned long long)cancellation_latency_us);
+    printf("METRIC cancellation_bound_us=%llu\n",
+           (unsigned long long)POC_CANCELLATION_WAKE_BOUND_US);
 #if defined(OPENSSL_IS_AWSLC)
     printf("METRIC external_signer_calls=%u\n", external_signer_calls);
 #endif
@@ -838,7 +896,12 @@ int main(int argc, char **argv) {
             expired && malformed && trunc && cancel && cleanup &&
             failure_cleanup && peak_bytes > 0 &&
             peak_bytes <= MEMORY_PROFILE_BOUND_BYTES &&
-            profile_allocation_bytes <= ALLOCATION_PROFILE_BOUND_BYTES &&
+            provider_allocation_calls > 0 &&
+            provider_allocation_calls <= PROVIDER_ALLOCATION_CALL_BOUND &&
+            provider_allocation_bytes > 0 &&
+            provider_allocation_bytes <= PROVIDER_ALLOCATION_BOUND_BYTES &&
+            provider_allocation_peak_live_bytes > 0 &&
+            provider_allocation_peak_live_bytes <= MEMORY_PROFILE_BOUND_BYTES &&
 #if defined(OPENSSL_IS_AWSLC)
             external_signer &&
 #endif
