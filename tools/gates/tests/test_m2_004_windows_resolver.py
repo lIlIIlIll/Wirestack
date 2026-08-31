@@ -77,13 +77,18 @@ class M2004WindowsResolverGateTests(unittest.TestCase):
         self.assertIn("wirestack_m2_004_tls_link_stub", bound)
         self.assertTrue(bound.endswith("[dependencies]\n"))
 
-    def test_windows_native_source_preserves_scope_and_startup_error(self) -> None:
+    def test_windows_native_source_preserves_distinct_results_and_native_errors(self) -> None:
         source = Path("native/resolver/windows/wirestack_resolver.c").read_text(
             encoding="utf-8"
         )
         self.assertNotIn("hints.ai_flags = AI_ADDRCONFIG", source)
-        self.assertIn("destination->scope_id = address->sin6_scope_id", source)
+        self.assertIn("candidate.scope_id = address->sin6_scope_id", source)
         self.assertIn("*out_native_code = (int64_t)startup_status", source)
+        self.assertIn("resolver_address_is_present(job, &candidate)", source)
+        self.assertEqual(2, source.count("DWORD thread_error = GetLastError()"))
+        self.assertEqual(2, source.count("*out_native_code = (int64_t)thread_error"))
+        self.assertIn("host_length = bounded_length", source)
+        self.assertIn("return WIRESTACK_RESOLVER_OUT_OF_MEMORY;", source)
 
     def test_valid_report_passes(self) -> None:
         self.assertEqual([], gate.validate_report(valid_report(), "abc"))
