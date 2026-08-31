@@ -10,9 +10,9 @@ resolution off Cangjie scheduler carriers.
 
 ## Native Windows acceptance
 
-- GitHub Actions run: `33336104695`
+- GitHub Actions run: `33351384248`
 - workflow: `M2-004 Windows SystemResolver`
-- tested revision: `a46a6e9e78701a74d01f988e34ba5a2b5896f1fe`
+- tested revision: `685f874a596aaff7f79105054537539444a1e015`
 - runner: `windows-2025` / `win25-vs2026` image
 - Cangjie: `1.3.0-alpha.20260831010012`, target
   `x86_64-w64-mingw32`
@@ -34,7 +34,7 @@ missing test fixture binding.
 
 | Requirement | Evidence | Result |
 |---|---|---|
-| Native Windows integration | GitHub `windows-2025` run `33336104695` | PASS |
+| Native Windows integration | GitHub `windows-2025` run `33351384248` | PASS |
 | All bounded candidates and family filtering | `fixtureReturnsAllCandidatesWithoutInventingTtl`, `fixtureAppliesFamilyAndResultBounds` | PASS |
 | No invented TTL | `ResolveResult.expiration.isNone()` on system and fixture paths | PASS |
 | Stable Winsock error mapping | six injected error paths including unknown native code | PASS |
