@@ -27,7 +27,7 @@ class P1013DevelopmentReleaseGateTests(unittest.TestCase):
             parameter = inspect.signature(function).parameters["verify_current_sources"]
             self.assertIs(True, parameter.default)
 
-    def test_structural_modes_accept_frozen_records_without_relabeling_them(self) -> None:
+    def test_structural_modes_accept_frozen_records_without_local_release_artifact(self) -> None:
         validate_m7_019(verify_current_sources=False)
         validate_m7_020(verify_current_sources=False)
         qualification = json.loads(
@@ -40,11 +40,14 @@ class P1013DevelopmentReleaseGateTests(unittest.TestCase):
             ROOT,
             verify_current_sources=False,
         )
-        report = candidate.build_candidate(
-            ROOT,
-            verify_current_sources=False,
+        documents = candidate.load_documents(ROOT)
+        recorded = candidate.validate_recorded_sources(ROOT, documents)
+        self.assertEqual(
+            {"releaseSourceTreeSha256", "fuzzSourceSha256",
+             "http2PerformanceSourceSha256"},
+            set(recorded),
         )
-        self.assertEqual("GO_FOR_LINUX_STABLE_RELEASE", report["decision"])
+        self.assertTrue(all(len(value) == 64 for value in recorded.values()))
 
     def test_strict_modes_reject_the_same_stale_records(self) -> None:
         with self.assertRaisesRegex(M7019Error, "source hash is stale"):
