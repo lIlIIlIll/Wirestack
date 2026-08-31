@@ -439,7 +439,15 @@ def validate_report(
     inputs = report.get("qualification_inputs")
     if (
         not isinstance(inputs, dict)
-        or set(inputs) != set(QUALIFICATION_INPUTS)
+        or not inputs
+        or any(
+            not isinstance(relative, str)
+            or not relative
+            or Path(relative).is_absolute()
+            or ".." in Path(relative).parts
+            or Path(relative).as_posix() != relative
+            for relative in inputs
+        )
         or any(
             not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None
             for value in inputs.values()
@@ -447,6 +455,8 @@ def validate_report(
     ):
         raise ReleaseError("qualification input fingerprint is invalid")
     if verify_current_sources:
+        if set(inputs) != set(QUALIFICATION_INPUTS):
+            raise ReleaseError("qualification input inventory is stale")
         if source_digest != source_tree_sha256(root):
             raise ReleaseError("qualification source tree fingerprint is stale")
         expected_inputs = {

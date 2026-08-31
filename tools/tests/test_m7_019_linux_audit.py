@@ -30,10 +30,15 @@ class M7019LinuxAuditTest(unittest.TestCase):
         with self.assertRaisesRegex(AuditError, "IDs or order"):
             self.validate_changed(changed)
 
-    def test_missing_evidence_fails(self) -> None:
+    def test_structural_mode_allows_missing_historical_evidence(self) -> None:
         changed = copy.deepcopy(self.audit)
         changed["lifecycle_invariants"][0]["evidence"] = ["missing/evidence"]
-        with self.assertRaisesRegex(AuditError, "missing evidence path"):
+        self.validate_changed(changed)
+
+    def test_structural_evidence_path_must_remain_relative(self) -> None:
+        changed = copy.deepcopy(self.audit)
+        changed["p0_requirements"][0]["evidence"] = ["../outside"]
+        with self.assertRaisesRegex(AuditError, "invalid evidence path"):
             self.validate_changed(changed)
 
     def test_required_gap_cannot_be_weakened(self) -> None:
