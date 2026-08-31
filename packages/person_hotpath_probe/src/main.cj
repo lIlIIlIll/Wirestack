@@ -8,9 +8,6 @@ import std.time.*
 
 private let WARMUP: Int64 = 20000
 private let ITERATIONS: Int64 = 100000
-private let PROFILE_DECODER = YJson.fastDecoder(ProfileRecordJson)
-private let ADDRESS_DECODER = YJson.fastDecoder(AddressJson)
-private let PERSON_DECODER = YJson.fastDecoder(PersonJson)
 private func ownedPersonChecksum(value: Person): Int64 {
     var result = value.id + Int64(value.age) + value.name.size
     for (tag in value.tags) { result += tag.size }
@@ -50,25 +47,25 @@ private func report(action: () -> Int64): Unit {
 main(): Unit {
     let args = getCommandLine()
     let mode = if (args.size > 1) { args[1] } else { "person-string" }
-    let profileText = YJson.encodeStringWith(ProfileRecordJson, sampleProfileRecord())
-    let addressText = YJson.encodeStringWith(AddressJson, samplePerson().address)
-    let personText = YJson.encodeStringWith(PersonJson, samplePerson())
+    let profileText = YJson.toJson(sampleProfileRecord(), codec: ProfileRecordJson)
+    let addressText = YJson.toJson(samplePerson().address, codec: AddressJson)
+    let personText = YJson.toJson(samplePerson(), codec: PersonJson)
     let profileBytes = unsafe { profileText.rawData() }
     let addressBytes = unsafe { addressText.rawData() }
     let personBytes = unsafe { personText.rawData() }
     match (mode) {
-        case "profile-string" => report({ => PROFILE_DECODER.decodeString(profileText).id })
-        case "profile-bytes" => report({ => PROFILE_DECODER.decodeBytes(profileBytes).id })
-        case "address-string" => report({ => ADDRESS_DECODER.decodeString(addressText).zipcode })
-        case "address-bytes" => report({ => ADDRESS_DECODER.decodeBytes(addressBytes).zipcode })
-        case "person-string" => report({ => PERSON_DECODER.decodeString(personText).id })
-        case "person-bytes" => report({ => PERSON_DECODER.decodeBytes(personBytes).id })
-        case "profile-owned-full-string" => report({ => ownedProfileChecksum(PROFILE_DECODER.decodeString(profileText)) })
-        case "profile-owned-full-bytes" => report({ => ownedProfileChecksum(PROFILE_DECODER.decodeBytes(profileBytes)) })
-        case "address-owned-full-string" => report({ => ownedAddressChecksum(ADDRESS_DECODER.decodeString(addressText)) })
-        case "address-owned-full-bytes" => report({ => ownedAddressChecksum(ADDRESS_DECODER.decodeBytes(addressBytes)) })
-        case "person-owned-full-string" => report({ => ownedPersonChecksum(PERSON_DECODER.decodeString(personText)) })
-        case "person-owned-full-bytes" => report({ => ownedPersonChecksum(PERSON_DECODER.decodeBytes(personBytes)) })
+        case "profile-string" => report({ => YJson.fromJson(profileText, codec: ProfileRecordJson).id })
+        case "profile-bytes" => report({ => YJson.fromJson(profileBytes, codec: ProfileRecordJson).id })
+        case "address-string" => report({ => YJson.fromJson(addressText, codec: AddressJson).zipcode })
+        case "address-bytes" => report({ => YJson.fromJson(addressBytes, codec: AddressJson).zipcode })
+        case "person-string" => report({ => YJson.fromJson(personText, codec: PersonJson).id })
+        case "person-bytes" => report({ => YJson.fromJson(personBytes, codec: PersonJson).id })
+        case "profile-owned-full-string" => report({ => ownedProfileChecksum(YJson.fromJson(profileText, codec: ProfileRecordJson)) })
+        case "profile-owned-full-bytes" => report({ => ownedProfileChecksum(YJson.fromJson(profileBytes, codec: ProfileRecordJson)) })
+        case "address-owned-full-string" => report({ => ownedAddressChecksum(YJson.fromJson(addressText, codec: AddressJson)) })
+        case "address-owned-full-bytes" => report({ => ownedAddressChecksum(YJson.fromJson(addressBytes, codec: AddressJson)) })
+        case "person-owned-full-string" => report({ => ownedPersonChecksum(YJson.fromJson(personText, codec: PersonJson)) })
+        case "person-owned-full-bytes" => report({ => ownedPersonChecksum(YJson.fromJson(personBytes, codec: PersonJson)) })
         case _ => throw Exception("unknown probe mode: ${mode}")
     }
 }

@@ -19,13 +19,13 @@ private class SuiteStats {
     }
 }
 
-private func required(objectValue: JsonObjectValue, name: String): JsonNode {
+private func required(objectValue: JsonObject, name: String): JsonNode {
     objectValue.get(name).getOrThrow({ => Exception("manifest is missing '${name}'") })
 }
 
-private func optionalBool(objectValue: JsonObjectValue, name: String): Bool {
+private func optionalBool(objectValue: JsonObject, name: String): Bool {
     match (objectValue.get(name)) {
-        case Some(value) => value.asBool().value
+        case Some(value) => value.asBool()
         case None => false
     }
 }
@@ -34,36 +34,40 @@ private func readJson(path: String): JsonNode {
     var result: Option<JsonNode> = None<JsonNode>
     try (file = File(path, OpenMode.Read)) {
         result = Some(JsonNode.parse(readToEnd(file),
-            config: JsonReadConfig(numberPolicy: JsonNumberPolicy.PreserveLiteral)))
+            config: JsonReadOptions()))
     }
     result.getOrThrow({ => Exception("failed to read manifest ${path}") })
 }
 
-private func runSchema(manifest: JsonObjectValue, stats: SuiteStats): Unit {
+private func runSchema(manifest: JsonObject, stats: SuiteStats): Unit {
     let registry = JsonSchemaRegistry()
     let formats = JsonSchemaFormatRegistry.withCoreFormats()
     if (optionalBool(manifest, "install_format_plugin")) {
         formats.install(StandardInternationalFormats())
     }
-    for ((uri, schema) in required(manifest, "remotes").asObject().entries()) {
-        registry.register(uri, schema)
+    let remotes = required(manifest, "remotes").asObject()
+    for (remoteIndex in 0..remotes.size()) {
+        registry.register(remotes.nameAt(remoteIndex), remotes.valueAt(remoteIndex))
     }
-    for (file in required(manifest, "files").asArray().values()) {
-        let fileObject = file.asObject()
-        let source = required(fileObject, "source").asString().value
+    let files = required(manifest, "files").asArray()
+    for (fileIndex in 0..files.size()) {
+        let fileObject = files[fileIndex].asObject()
+        let source = required(fileObject, "source").asString()
         let formatMode = if (optionalBool(fileObject, "format_assertion")) {
             JsonSchemaFormatMode.Assertion
         } else { JsonSchemaFormatMode.Annotation }
         let config = JsonSchemaConfig(resolver: Some<UriResolver>(registry),
             formatMode: formatMode, formats: formats)
-        for (groupNode in required(fileObject, "groups").asArray().values()) {
-            let group = groupNode.asObject()
-            let groupDescription = required(group, "description").asString().value
+        let groups = required(fileObject, "groups").asArray()
+        for (groupIndex in 0..groups.size()) {
+            let group = groups[groupIndex].asObject()
+            let groupDescription = required(group, "description").asString()
             let schemaNode = required(group, "schema")
-            for (testNode in required(group, "tests").asArray().values()) {
-                let test = testNode.asObject()
-                let description = groupDescription + " / " + required(test, "description").asString().value
-                let expected = required(test, "valid").asBool().value
+            let tests = required(group, "tests").asArray()
+            for (testIndex in 0..tests.size()) {
+                let test = tests[testIndex].asObject()
+                let description = groupDescription + " / " + required(test, "description").asString()
+                let expected = required(test, "valid").asBool()
                 var actual = false
                 var detail = ""
                 try {
@@ -82,7 +86,7 @@ private func runSchema(manifest: JsonObjectValue, stats: SuiteStats): Unit {
     }
 }
 
-private func jsonNodeListsEquivalent(actual: ArrayList<JsonNode>, expected: JsonArrayValue): Bool {
+private func jsonNodeListsEquivalent(actual: ArrayList<JsonNode>, expected: JsonArray): Bool {
     if (actual.size != expected.size()) { return false }
     for (index in 0..actual.size) {
         if (!actual[index].equivalentTo(expected[index])) { return false }
@@ -90,47 +94,51 @@ private func jsonNodeListsEquivalent(actual: ArrayList<JsonNode>, expected: Json
     true
 }
 
-private func jsonPathListsEquivalent(actual: ArrayList<String>, expected: JsonArrayValue): Bool {
+private func jsonPathListsEquivalent(actual: ArrayList<String>, expected: JsonArray): Bool {
     if (actual.size != expected.size()) { return false }
     for (index in 0..actual.size) {
-        if (actual[index] != expected[index].asString().value) { return false }
+        if (actual[index] != expected[index].asString()) { return false }
     }
     true
 }
 
-private func matchesAnyJsonPathValueResult(actual: ArrayList<JsonNode>, test: JsonObjectValue): Bool {
+private func matchesAnyJsonPathValueResult(actual: ArrayList<JsonNode>, test: JsonObject): Bool {
     match (test.get("result")) {
         case Some(expected) => return jsonNodeListsEquivalent(actual, expected.asArray())
         case None => ()
     }
     match (test.get("results")) {
-        case Some(alternatives) => for (expected in alternatives.asArray().values()) {
-            if (jsonNodeListsEquivalent(actual, expected.asArray())) { return true }
-        }
+        case Some(alternatives) =>
+            let expectedValues = alternatives.asArray()
+            for (index in 0..expectedValues.size()) {
+                if (jsonNodeListsEquivalent(actual, expectedValues[index].asArray())) { return true }
+            }
         case None => ()
     }
     false
 }
 
-private func matchesAnyJsonPathPathResult(actual: ArrayList<String>, test: JsonObjectValue): Bool {
+private func matchesAnyJsonPathPathResult(actual: ArrayList<String>, test: JsonObject): Bool {
     match (test.get("result_paths")) {
         case Some(expected) => return jsonPathListsEquivalent(actual, expected.asArray())
         case None => ()
     }
     match (test.get("results_paths")) {
-        case Some(alternatives) => for (expected in alternatives.asArray().values()) {
-            if (jsonPathListsEquivalent(actual, expected.asArray())) { return true }
-        }
+        case Some(alternatives) =>
+            let expectedValues = alternatives.asArray()
+            for (index in 0..expectedValues.size()) {
+                if (jsonPathListsEquivalent(actual, expectedValues[index].asArray())) { return true }
+            }
         case None => return true
     }
     false
 }
 
-private func runJsonPath(tests: JsonArrayValue, stats: SuiteStats): Unit {
-    for (testNode in tests.values()) {
-        let test = testNode.asObject()
-        let name = required(test, "name").asString().value
-        let selector = required(test, "selector").asString().value
+private func runJsonPath(tests: JsonArray, stats: SuiteStats): Unit {
+    for (testIndex in 0..tests.size()) {
+        let test = tests[testIndex].asObject()
+        let name = required(test, "name").asString()
+        let selector = required(test, "selector").asString()
         let invalid = optionalBool(test, "invalid_selector")
         try {
             let path = JsonPath.parse(selector)
@@ -138,15 +146,18 @@ private func runJsonPath(tests: JsonArrayValue, stats: SuiteStats): Unit {
                 stats.fail("jsonpath", "cts.json", name, "invalid selector was accepted")
                 continue
             }
-            let matches = path.query(required(test, "document"))
+            let matches = path.collect(required(test, "document"))
             let values = ArrayList<JsonNode>()
             let paths = ArrayList<String>()
-            for (matched in matches) { values.add(matched.value); paths.add(matched.normalizedPath) }
+            for (matched in matches) {
+                values.add(matched.value.materialize())
+                paths.add(matched.normalizedPath)
+            }
             if (matchesAnyJsonPathValueResult(values, test) && matchesAnyJsonPathPathResult(paths, test)) {
                 stats.pass()
             } else {
                 stats.fail("jsonpath", "cts.json", name,
-                    "selector=${selector}, values=${JsonArrayValue(values).toString()}, paths=${paths}")
+                    "selector=${selector}, values=${JsonArray(values).toString()}, paths=${paths}")
             }
         } catch (error: Exception) {
             if (invalid) { stats.pass() }
@@ -155,12 +166,12 @@ private func runJsonPath(tests: JsonArrayValue, stats: SuiteStats): Unit {
     }
 }
 
-private func runJsonPatch(tests: JsonArrayValue, stats: SuiteStats): Unit {
-    for (testNode in tests.values()) {
-        let test = testNode.asObject()
-        let source = required(test, "source").asString().value
+private func runJsonPatch(tests: JsonArray, stats: SuiteStats): Unit {
+    for (testIndex in 0..tests.size()) {
+        let test = tests[testIndex].asObject()
+        let source = required(test, "source").asString()
         let description = match (test.get("comment")) {
-            case Some(value) => value.asString().value
+            case Some(value) => value.asString()
             case None => "unnamed"
         }
         let expectsError = test.contains("error")

@@ -80,15 +80,15 @@ main(): Unit {
     require(nestedUsers.getOrThrow()[1].name == "Lin",
         "recursive generated container roundtrip failed")
 
-    let userDecoder = YJson.fastDecoder(ExternalUserJson)
-    let fastUser = userDecoder.decodeString(userJson)
-    let fastUserBytes = userDecoder.decodeBytes(unsafe { userJson.rawData() })
+    let fastUser = YJson.fromJson(userJson, codec: ExternalUserJson)
+    let fastUserBytes = YJson.fromJson(unsafe { userJson.rawData() }, codec: ExternalUserJson)
     require(fastUser.id == 7 && fastUser.name == "Alice", "fast string decode failed")
     require(fastUserBytes.id == 7 && fastUserBytes.name == "Alice", "fast bytes decode failed")
     requireJsonError("unknown_field", { =>
-        let _ = userDecoder.decodeString(
+        let _ = YJson.fromJson(
             "{\"id\":7,\"name\":\"Alice\",\"extra\":true}",
-            config: JsonReadConfig(unknownFieldPolicy: JsonUnknownFieldPolicy.Reject)
+            codec: ExternalUserJson,
+            options: JsonReadOptions(unknownFieldPolicy: JsonUnknownFieldPolicy.Reject)
         )
     })
 
@@ -107,13 +107,15 @@ main(): Unit {
             require(dog.id == 41 && dog.bark == "loud", "base-typed subtype data was not preserved")
         case _ => throw Exception("base-typed runtime subtype was not preserved")
     }
-    match (YJson.fromJson<ExternalAnimal>(animalJson, config: JsonReadConfig(limits: JsonReadLimits(maxDepth: 1)))) {
+    match (YJson.fromJson<ExternalAnimal>(animalJson, options: JsonReadOptions(maxDepth: 1))) {
         case dog: ExternalDog =>
             require(dog.id == 41 && dog.bark == "loud", "scalar subtype fields consumed container depth")
         case _ => throw Exception("maxDepth=1 polymorphic subtype was not preserved")
     }
 
     let directDogJson = YJson.toJson(ExternalDog(42, "direct"))
+    require(directDogJson == "{\"id\":42,\"bark\":\"direct\"}",
+        "concrete subtype did not include inherited fields")
     let directDog = YJson.fromJson<ExternalDog>(directDogJson)
     require(directDog.id == 42 && directDog.bark == "direct", "concrete subtype direct API failed")
 
@@ -123,10 +125,10 @@ main(): Unit {
     requireJsonError("unknown_discriminator", { =>
         let _ = YJson.fromJson<ExternalAnimal>("{\"kind\":\"bird\"}")
     })
-    requireJsonError("polymorphic_object_too_large", { =>
+    requireJsonError("buffered_value_too_large", { =>
         let _ = YJson.fromJson<ExternalAnimal>(
             "{\"kind\":\"dog\",\"bark\":\"too large\"}",
-            config: JsonReadConfig(limits: JsonReadLimits(maxPolymorphicObjectBytes: 8))
+            options: JsonReadOptions(maxBufferedValueBytes: 8)
         )
     })
 

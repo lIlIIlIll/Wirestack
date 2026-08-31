@@ -2,9 +2,9 @@ package yjson
 
 class JsonParser {
     private let text: String
-    private let config: JsonReadConfig
+    private let config: JsonReadOptions
 
-    init(text: String, config!: JsonReadConfig = JsonReadConfig.defaults) {
+    init(text: String, config!: JsonReadOptions = JsonReadOptions.defaults) {
         this.text = text
         this.config = config
     }

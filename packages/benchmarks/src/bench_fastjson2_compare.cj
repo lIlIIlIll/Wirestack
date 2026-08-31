@@ -14,11 +14,11 @@ import std.unittest.*
 import std.unittest.testmacro.*
 
 func encodeYjsonReflectBytesWith<T>(codec: JsonCodec<T>, value: T): Array<Byte> {
-    YJson.encodeBytesWith(codec, value)
+    YJson.toJsonBytes(value, codec: codec)
 }
 
 func decodeYjsonReflectBytesWith<T>(codec: JsonCodec<T>, bytes: Array<Byte>): T {
-    YJson.decodeBytesWith(codec, bytes)
+    YJson.fromJson(bytes, codec: codec)
 }
 
 @Test
@@ -41,35 +41,35 @@ class Fastjson2CompareBenchmarks {
     var stringSink = ""
     var intSink: Int64 = 0
     var bytesSink: Array<Byte> = Array<Byte>(0, repeat: 0u8)
-    var astSink: JsonNode = JsonNullValue()
+    var astSink: JsonNode = JsonNode.nullValue
 
     init() {
-        personText = YJson.encodeStringWith(PersonJson, person)
+        personText = YJson.toJson(person, codec: PersonJson)
         personBytes = encodeYjsonReflectBytesWith(PersonJson, person)
-        profileBundleText = YJson.encodeStringWith(ProfileBundleJson, profileBundle)
-        uint64EnvelopeText = YJson.encodeStringWith(UInt64EnvelopeJson, uint64Envelope)
-        temporalStatsText = YJson.encodeStringWith(TemporalStatsJson, temporalStats)
-        personAst = YJson.parse(personText)
+        profileBundleText = YJson.toJson(profileBundle, codec: ProfileBundleJson)
+        uint64EnvelopeText = YJson.toJson(uint64Envelope, codec: UInt64EnvelopeJson)
+        temporalStatsText = YJson.toJson(temporalStats, codec: TemporalStatsJson)
+        personAst = JsonNode.parse(personText)
     }
 
     @Bench
     func parseAstYjsonReflectPerson(): Unit {
-        astSink = YJson.parse(personText)
+        astSink = JsonNode.parse(personText)
     }
 
     @Bench
     func stringifyAstYjsonReflectPerson(): Unit {
-        stringSink = YJson.stringify(personAst)
+        stringSink = (personAst).toJson()
     }
 
     @Bench
     func encodeStringYjsonReflectPerson(): Unit {
-        stringSink = YJson.encodeStringWith(PersonJson, person)
+        stringSink = YJson.toJson(person, codec: PersonJson)
     }
 
     @Bench
     func decodeStringYjsonReflectPerson(): Unit {
-        intSink = YJson.decodeStringWith(PersonJson, personText).id
+        intSink = YJson.fromJson(personText, codec: PersonJson).id
     }
 
     @Bench
@@ -84,31 +84,31 @@ class Fastjson2CompareBenchmarks {
 
     @Bench
     func encodeObjectYjsonReflectProfileBundle(): Unit {
-        stringSink = YJson.encodeStringWith(ProfileBundleJson, profileBundle)
+        stringSink = YJson.toJson(profileBundle, codec: ProfileBundleJson)
     }
 
     @Bench
     func decodeObjectYjsonReflectProfileBundle(): Unit {
-        intSink = YJson.decodeStringWith(ProfileBundleJson, profileBundleText).groups["platform"][0].id
+        intSink = YJson.fromJson(profileBundleText, codec: ProfileBundleJson).groups["platform"][0].id
     }
 
     @Bench
     func encodeObjectYjsonReflectUInt64Envelope(): Unit {
-        stringSink = YJson.encodeStringWith(UInt64EnvelopeJson, uint64Envelope)
+        stringSink = YJson.toJson(uint64Envelope, codec: UInt64EnvelopeJson)
     }
 
     @Bench
     func decodeObjectYjsonReflectUInt64Envelope(): Unit {
-        intSink = Int64(YJson.decodeStringWith(UInt64EnvelopeJson, uint64EnvelopeText).shardIds.size)
+        intSink = Int64(YJson.fromJson(uint64EnvelopeText, codec: UInt64EnvelopeJson).shardIds.size)
     }
 
     @Bench
     func encodeObjectYjsonReflectTemporalStats(): Unit {
-        stringSink = YJson.encodeStringWith(TemporalStatsJson, temporalStats)
+        stringSink = YJson.toJson(temporalStats, codec: TemporalStatsJson)
     }
 
     @Bench
     func decodeObjectYjsonReflectTemporalStats(): Unit {
-        stringSink = YJson.decodeStringWith(TemporalStatsJson, temporalStatsText).totalEvents.toString()
+        stringSink = YJson.fromJson(temporalStatsText, codec: TemporalStatsJson).totalEvents.toString()
     }
 }

@@ -29,11 +29,44 @@ private class ProbeProvider <: JsonAccelerationProviderV1 {
     }
 }
 
+private class ReentrantUseProvider <: JsonAccelerationProviderV1 {
+    public var observedCode: String = "none"
+
+    public func identity(): String { "reentrant" }
+    public func protocolVersion(): Int64 { 1 }
+    public func abiVersion(): Int64 { 1 }
+    public func activate(): Unit {
+        try {
+            let _ = YJson.parseDocument("null")
+        } catch (error: JsonException) {
+            observedCode = error.code
+        }
+    }
+}
+
+private class BlockingProvider <: JsonAccelerationProviderV1 {
+    private let entered: AtomicInt64
+    private let release: AtomicInt64
+
+    init(entered: AtomicInt64, release: AtomicInt64) {
+        this.entered = entered
+        this.release = release
+    }
+
+    public func identity(): String { "blocking" }
+    public func protocolVersion(): Int64 { 1 }
+    public func abiVersion(): Int64 { 1 }
+    public func activate(): Unit {
+        entered.store(1)
+        while (release.load() == 0) {}
+    }
+}
+
 private func accelerationCode(action: () -> Unit): String {
     try {
         action()
         "none"
-    } catch (error: JsonAccelerationException) {
+    } catch (error: JsonException) {
         error.code
     }
 }
@@ -46,7 +79,7 @@ private func requireEqual<T>(actual: T, expected: T, label: String): Unit where 
 
 private func pureLateInitialization(): Unit {
     let activations = AtomicInt64(0)
-    let _ = YJson.parse("null")
+    let _ = YJson.parseDocument("null")
     requireEqual(accelerationCode({ => initializeYJsonAccelerationV1(
         ProbeProvider("A", activations)) }), "acceleration_initialized_too_late", "late initialization")
     requireEqual(activations.load(), 0, "late activation count")
@@ -81,7 +114,7 @@ private func nativeIdempotenceAndConflict(): Unit {
     requireEqual(activations.load(), 1, "idempotent activation count")
     requireEqual(accelerationCode({ => initializeYJsonAccelerationV1(
         ProbeProvider("B", activations)) }), "acceleration_provider_conflict", "provider conflict")
-    requireEqual(YJson.parse("[1]").asArray()[0].asInt().value, 1, "native-frozen YJson API")
+    requireEqual(JsonNode.parse("[1]").asArray()[0].asInt64(), 1, "native-frozen YJson API")
 }
 
 private func failedActivationDoesNotFreeze(): Unit {
@@ -91,7 +124,7 @@ private func failedActivationDoesNotFreeze(): Unit {
         "acceleration_initialization_failed", "activation failure")
     initializeYJsonAccelerationV1(ProbeProvider("working", activations))
     requireEqual(activations.load(), 2, "retry activation count")
-    requireEqual(YJson.stringify(JsonBoolValue(true)), "true", "retry engine")
+    requireEqual((JsonNode.boolean(true)).toJson(), "true", "retry engine")
 }
 
 private func concurrentProviderCompetition(): Unit {
@@ -125,6 +158,36 @@ private func concurrentProviderCompetition(): Unit {
     requireEqual(conflicts, taskCount / 2, "competing-provider conflicts")
 }
 
+private func reentrantUseFailsWithoutDeadlock(): Unit {
+    let provider = ReentrantUseProvider()
+    initializeYJsonAccelerationV1(provider)
+    requireEqual(provider.observedCode, "acceleration_reentrant_use", "reentrant use")
+    requireEqual(YJson.parseDocument("42").root().asInt64(), 42, "post-initialization use")
+}
+
+private func ordinaryUseWaitsForInitialization(): Unit {
+    let entered = AtomicInt64(0)
+    let release = AtomicInt64(0)
+    let started = AtomicInt64(0)
+    let finished = AtomicInt64(0)
+    let initializer = spawn {
+        initializeYJsonAccelerationV1(BlockingProvider(entered, release))
+    }
+    while (entered.load() == 0) {}
+    let reader = spawn {
+        started.store(1)
+        let value = YJson.parseDocument("42").root().asInt64()
+        finished.store(1)
+        value
+    }
+    while (started.load() == 0) {}
+    requireEqual(finished.load(), 0, "ordinary use before initialization commit")
+    release.store(1)
+    initializer.get()
+    requireEqual(reader.get(), 42, "ordinary use after initialization commit")
+    requireEqual(finished.load(), 1, "ordinary use completion")
+}
+
 main(args: Array<String>): Int64 {
     if (args.size != 1) { return 2 }
     match (args[0]) {
@@ -134,6 +197,8 @@ main(args: Array<String>): Int64 {
         case "native-conflict" => nativeIdempotenceAndConflict()
         case "activation-failure" => failedActivationDoesNotFreeze()
         case "concurrent-race" => concurrentProviderCompetition()
+        case "reentrant-use" => reentrantUseFailsWithoutDeadlock()
+        case "initialization-wait" => ordinaryUseWaitsForInitialization()
         case _ => return 2
     }
     println("runtime freeze contract passed: ${args[0]}")

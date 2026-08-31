@@ -4,52 +4,47 @@ import std.collection.*
 import std.unittest.*
 import std.unittest.testmacro.*
 
-private class AuditIntValueCodec <: JsonValueCodec<Int64> {
-    public func encode(value: Int64): JsonNode { JsonIntValue(value) }
-    public func decode(value: JsonNode): Int64 { value.int64 }
-}
-
 @Test
 class JsonAuditContractRegressionTest {
     @TestCase
     func recursiveJsonNodeOperationsRejectCyclesButAcceptSharedDags(): Unit {
-        let arrayCycle = JsonArrayValue()
+        let arrayCycle = JsonArray()
         arrayCycle.add(arrayCycle)
-        let compactError = @AssertThrows[JsonException](YJson.stringify(arrayCycle))
+        let compactError = @AssertThrows[JsonException]((arrayCycle).toJson())
         @Expect(compactError.code, "cyclic_json_node")
-        let prettyError = @AssertThrows[JsonException](YJson.stringifyPretty(arrayCycle))
+        let prettyError = @AssertThrows[JsonException]((arrayCycle).toJson(options: JsonWriteOptions.pretty()))
         @Expect(prettyError.code, "cyclic_json_node")
         let copyError = @AssertThrows[JsonException](arrayCycle.deepCopy())
         @Expect(copyError.code, "cyclic_json_node")
         let equivalentError = @AssertThrows[JsonException](arrayCycle.equivalentTo(arrayCycle))
         @Expect(equivalentError.code, "cyclic_json_node")
-        let mismatchedRight = JsonArrayValue().add(JsonIntValue(0))
+        let mismatchedRight = JsonArray().add(JsonIntValue(0))
         @Expect(@AssertThrows[JsonException](arrayCycle.equivalentTo(mismatchedRight)).code,
             "cyclic_json_node")
         @Expect(@AssertThrows[JsonException](mismatchedRight.equivalentTo(arrayCycle)).code,
             "cyclic_json_node")
-        @Expect(@AssertThrows[JsonException](arrayCycle.equivalentTo(JsonArrayValue())).code,
+        @Expect(@AssertThrows[JsonException](arrayCycle.equivalentTo(JsonArray())).code,
             "cyclic_json_node")
-        @Expect(@AssertThrows[JsonException](JsonArrayValue().equivalentTo(arrayCycle)).code,
+        @Expect(@AssertThrows[JsonException](JsonArray().equivalentTo(arrayCycle)).code,
             "cyclic_json_node")
 
-        let objectCycle = JsonObjectValue()
-        objectCycle.entries()["self"] = objectCycle
+        let objectCycle = JsonObject()
+        objectCycle.put("self", objectCycle)
         let objectError = @AssertThrows[JsonException](objectCycle.toString())
         @Expect(objectError.code, "cyclic_json_node")
-        @Expect(@AssertThrows[JsonException](objectCycle.equivalentTo(JsonObjectValue())).code,
+        @Expect(@AssertThrows[JsonException](objectCycle.equivalentTo(JsonObject())).code,
             "cyclic_json_node")
 
-        let first = JsonObjectValue()
-        let second = JsonArrayValue()
+        let first = JsonObject()
+        let second = JsonArray()
         first.put("next", second)
         second.values().add(first)
         let indirectError = @AssertThrows[JsonException](first.deepCopy())
         @Expect(indirectError.code, "cyclic_json_node")
 
-        let shared = JsonArrayValue().add(JsonIntValue(1))
-        let dag = JsonObjectValue().put("left", shared).put("right", shared)
-        @Expect(YJson.stringify(dag), "{\"left\":[1],\"right\":[1]}")
+        let shared = JsonArray().add(JsonIntValue(1))
+        let dag = JsonObject().put("left", shared).put("right", shared)
+        @Expect((dag).toJson(), "{\"left\":[1],\"right\":[1]}")
         @Expect(dag.deepCopy().equivalentTo(dag))
     }
 
@@ -78,8 +73,7 @@ class JsonAuditContractRegressionTest {
 
     @TestCase
     func directAndAstWritersShareTheContainerDepthBoundary(): Unit {
-        let config = JsonWriteConfig("", "", false, false,
-            limits: JsonWriteLimits(maxDepth: 1))
+        let config = JsonWriteOptions(maxDepth: 1)
 
         let direct = JsonDirectWriter(config)
         direct.startArray()
@@ -88,8 +82,8 @@ class JsonAuditContractRegressionTest {
         direct.endArray()
         @Expect(direct.finishString(), "[]")
 
-        let ast = JsonArrayValue().add(JsonArrayValue())
-        let astError = @AssertThrows[JsonException](YJson.stringify(ast, config: config))
+        let ast = JsonArray().add(JsonArray())
+        let astError = @AssertThrows[JsonException]((ast).toJson(options: config))
         @Expect(astError.code, "max_depth")
 
         let output = MemoryOutputStream()
@@ -102,8 +96,7 @@ class JsonAuditContractRegressionTest {
 
     @TestCase
     func streamByteLimitFailsBeforeCommittingBeyondTheBoundary(): Unit {
-        let limited = JsonWriteConfig("", "", false, false,
-            limits: JsonWriteLimits(maxBytes: 3))
+        let limited = JsonWriteOptions(maxOutputBytes: 3)
         let output = MemoryOutputStream()
         let writer = JsonDirectWriter(output, config: limited)
         let error = @AssertThrows[JsonException](writer.writeString("long"))
@@ -114,8 +107,7 @@ class JsonAuditContractRegressionTest {
         @Expect(output.toByteArray().size <= 3)
 
         let exact = MemoryOutputStream()
-        let exactWriter = JsonDirectWriter(exact, config: JsonWriteConfig("", "", false, false,
-            limits: JsonWriteLimits(maxBytes: 6)))
+        let exactWriter = JsonDirectWriter(exact, config: JsonWriteOptions(maxOutputBytes: 6))
         exactWriter.writeString("long")
         exactWriter.finish()
         @Expect(exact.toUtf8String(), "\"long\"")
@@ -123,47 +115,16 @@ class JsonAuditContractRegressionTest {
 
     @TestCase
     func runeCodecRequiresExactlyOneUnicodeScalarAcrossInputs(): Unit {
-        @Expect(YJson.decodeStringWith(RuneJson, "\"a\"").toString(), "a")
-        @Expect(YJson.decodeStringWith(RuneJson, "\"仓\"").toString(), "仓")
-        @Expect(YJson.decodeStringWith(RuneJson, "\"😀\"").toString(), "😀")
-        @Expect(YJson.decodeStringWith(RuneJson, "\"\\uD83D\\uDE00\"").toString(), "😀")
+        @Expect(YJson.fromJson("\"a\"", codec: JsonCodecs.rune).toString(), "a")
+        @Expect(YJson.fromJson("\"仓\"", codec: JsonCodecs.rune).toString(), "仓")
+        @Expect(YJson.fromJson("\"😀\"", codec: JsonCodecs.rune).toString(), "😀")
+        @Expect(YJson.fromJson("\"\\uD83D\\uDE00\"", codec: JsonCodecs.rune).toString(), "😀")
         for (text in ["\"\"", "\"ab\"", "\"é\"", "\"😀😀\"", "\"a\\u4ed3\""]) {
-            let error = @AssertThrows[JsonException](YJson.decodeStringWith(RuneJson, text))
+            let error = @AssertThrows[JsonException](YJson.fromJson(text, codec: JsonCodecs.rune))
             @Expect(error.code, "invalid_value")
         }
-        let streamError = @AssertThrows[JsonException](YJson.decodeFromStreamWith(
-            RuneJson, ByteArrayInputStream("\"ab\"")))
+        let streamError = @AssertThrows[JsonException](YJson.fromJson(ByteArrayInputStream("\"ab\""), codec: JsonCodecs.rune))
         @Expect(streamError.code, "invalid_value")
-    }
-
-    @TestCase
-    func legacyAstCodecRejectsConfigurationItCannotApply(): Unit {
-        let codec = AuditIntValueCodec()
-        @Expect(YJsonAst.encodeWith(codec, 7).int64, 7)
-        @Expect(YJsonAst.decodeWith(codec, JsonIntValue(8)), 8)
-        let config = JsonCodecConfig(
-            read: JsonReadConfig(limits: JsonReadLimits(maxDepth: 1)),
-            write: JsonWriteConfig("", "", false, false, limits: JsonWriteLimits(maxBytes: 1))
-        )
-        let encodeError = @AssertThrows[JsonException](YJsonAst.encodeWith(codec, 7, config: config))
-        @Expect(encodeError.code, "unsupported_config")
-        let decodeError = @AssertThrows[JsonException](YJsonAst.decodeWith(codec, JsonIntValue(8), config: config))
-        @Expect(decodeError.code, "unsupported_config")
-
-        let nonDefaultWrites = [
-            JsonWriteConfig("\n", "", false, false),
-            JsonWriteConfig("", "  ", false, false),
-            JsonWriteConfig("", "", true, false),
-            JsonWriteConfig("", "", false, true),
-            JsonWriteConfig("", "", false, false, includeErrorLocation: false),
-            JsonWriteConfig("", "", false, false, limits: JsonWriteLimits(maxDepth: 255)),
-            JsonWriteConfig("", "", false, false, limits: JsonWriteLimits(maxBytes: 1))
-        ]
-        for (writeConfig in nonDefaultWrites) {
-            let error = @AssertThrows[JsonException](YJsonAst.encodeWith(codec, 7,
-                config: JsonCodecConfig(write: writeConfig)))
-            @Expect(error.code, "unsupported_config")
-        }
     }
 
     @TestCase
@@ -176,34 +137,34 @@ class JsonAuditContractRegressionTest {
         text += "}"
         let root = YJson.parseDocument(text).root()
         for (index in 0..10000) {
-            @Expect(root.get("missing-${index}").isNone())
+            @Expect(root.member("missing-${index}").isNone())
         }
-        @Expect(root.get("key63").getOrThrow().asInt64(), 63)
-        @Expect(root.get("missing-0").isNone())
+        @Expect(root.member("key63").getOrThrow().asInt64(), 63)
+        @Expect(root.member("missing-0").isNone())
     }
 
     @TestCase
     func genericCompactMapHandlesEmptyPlainAndEscapedKeys(): Unit {
-        let codec = YJson.hashMapCodec(StringJson)
+        let codec = JsonCodecs.stringMap(JsonCodecs.string)
         let empty = HashMap<String, String>()
-        @Expect(YJson.encodeStringWith(codec, empty), "{}")
+        @Expect(YJson.toJson(empty, codec: codec), "{}")
 
         let single = HashMap<String, String>()
         single["only"] = "value"
-        @Expect(YJson.decodeStringWith(codec, YJson.encodeStringWith(codec, single))["only"], "value")
+        @Expect(YJson.fromJson(YJson.toJson(single, codec: codec), codec: codec)["only"], "value")
 
         let values = HashMap<String, String>()
         values["plain"] = "first"
         values["line\nkey"] = "second"
-        let encoded = YJson.encodeStringWith(codec, values)
-        let decoded = YJson.decodeStringWith(codec, encoded)
+        let encoded = YJson.toJson(values, codec: codec)
+        let decoded = YJson.fromJson(encoded, codec: codec)
         @Expect(decoded.size, 2)
         @Expect(decoded["plain"], "first")
         @Expect(decoded["line\nkey"], "second")
 
         let many = HashMap<String, String>()
         for (index in 0..16) { many["key-${index}"] = "value-${index}" }
-        let decodedMany = YJson.decodeStringWith(codec, YJson.encodeStringWith(codec, many))
+        let decodedMany = YJson.fromJson(YJson.toJson(many, codec: codec), codec: codec)
         @Expect(decodedMany.size, 16)
         @Expect(decodedMany["key-15"], "value-15")
     }
@@ -215,18 +176,16 @@ class JsonAuditContractRegressionTest {
         let large = builder.toString()
 
         let exactOutput = MemoryOutputStream()
-        let exact = JsonDirectWriter(exactOutput, config: JsonWriteConfig("", "", false, false,
-            limits: JsonWriteLimits(maxBytes: 10002)))
+        let exact = JsonDirectWriter(exactOutput, config: JsonWriteOptions(maxOutputBytes: 10002))
         exact.writeString(large)
         exact.finish()
         @Expect(exactOutput.toByteArray().size, 10002)
 
         let limitedOutput = MemoryOutputStream()
-        let limited = JsonDirectWriter(limitedOutput, config: JsonWriteConfig("", "", false, false,
-            includeErrorLocation: false, limits: JsonWriteLimits(maxBytes: 10001)))
+        let limited = JsonDirectWriter(limitedOutput, config: JsonWriteOptions(maxOutputBytes: 10001))
         let first = @AssertThrows[JsonException](limited.writeString(large))
         @Expect(first.code, "output_too_large")
-        @Expect(first.byteOffset, -1)
+        @Expect(first.location.isNone())
         let repeated = @AssertThrows[JsonException](limited.finish())
         @Expect(repeated.code, "output_too_large")
         @Expect(limitedOutput.toByteArray().size <= 10001)
@@ -241,33 +200,32 @@ class JsonAuditContractRegressionTest {
 
         let bytes = Array<Byte>(9002, repeat: b'z')
         let bytesOutput = MemoryOutputStream()
-        let bytesTarget = DirectStreamWriterTarget(bytesOutput, JsonWriteConfig.compact)
+        let bytesTarget = DirectStreamWriterTarget(bytesOutput, JsonWriteOptions.compact)
         bytesTarget.writeBytes(bytes[1..9001])
         bytesTarget.finish()
         @Expect(bytesOutput.toByteArray().size, 9000)
 
         let rangeOutput = MemoryOutputStream()
-        let rangeTarget = DirectStreamWriterTarget(rangeOutput, JsonWriteConfig.compact)
+        let rangeTarget = DirectStreamWriterTarget(rangeOutput, JsonWriteOptions.compact)
         rangeTarget.writeBytesRange(bytes, 1, 9001)
         rangeTarget.finish()
         @Expect(rangeOutput.toByteArray().size, 9000)
 
-        let byteLimitTarget = DirectStreamWriterTarget(MemoryOutputStream(), JsonWriteConfig("", "", false,
-            false, includeErrorLocation: false, limits: JsonWriteLimits(maxBytes: 1)))
+        let byteLimitTarget = DirectStreamWriterTarget(MemoryOutputStream(), JsonWriteOptions(maxOutputBytes: 1))
         let byteLimitError = @AssertThrows[JsonException](byteLimitTarget.writeBytes([b'a', b'b']))
         @Expect(byteLimitError.code, "output_too_large")
-        @Expect(byteLimitError.byteOffset, -1)
+        @Expect(byteLimitError.location.isNone())
         let repeatedByteLimitError = @AssertThrows[JsonException](byteLimitTarget.writeByte(b'a'))
         @Expect(repeatedByteLimitError.code, "output_too_large")
 
         let byteByByteOutput = MemoryOutputStream()
-        let byteByByteTarget = DirectStreamWriterTarget(byteByByteOutput, JsonWriteConfig.compact)
+        let byteByByteTarget = DirectStreamWriterTarget(byteByByteOutput, JsonWriteOptions.compact)
         for (_ in 0..8192) { byteByByteTarget.writeByte(b'a') }
         byteByByteTarget.finish()
         @Expect(byteByByteOutput.toByteArray().size, 8192)
 
         let digitOutput = MemoryOutputStream()
-        let digitTarget = DirectStreamWriterTarget(digitOutput, JsonWriteConfig.compact)
+        let digitTarget = DirectStreamWriterTarget(digitOutput, JsonWriteOptions.compact)
         for (_ in 0..4096) { digitTarget.writeInt64Text(1) }
         digitTarget.finish()
         @Expect(digitOutput.toByteArray().size, 4096)
@@ -283,7 +241,7 @@ class JsonAuditContractRegressionTest {
             let arrayWriter = JsonDirectWriter()
             @Expect(arrayWriter.tryWriteCompactInt64ArrayList(values))
             let encoded = arrayWriter.finishString()
-            @Expect(YJson.decodeStringWith(YJson.arrayListCodec(Int64Json), encoded), values)
+            @Expect(YJson.fromJson(encoded, codec: JsonCodecs.arrayList(JsonCodecs.int64)), values)
         }
     }
 
@@ -301,24 +259,24 @@ class JsonAuditContractRegressionTest {
         rawScalar.writeRawNull()
         @Expect(rawScalar.finishString(), "null")
 
-        let lateCycle = JsonArrayValue().add(JsonIntValue(1)).add(JsonStringValue("safe"))
+        let lateCycle = JsonArray().add(JsonIntValue(1)).add(JsonStringValue("safe"))
         lateCycle.add(lateCycle)
         @Expect(@AssertThrows[JsonException](lateCycle.deepCopy()).code, "cyclic_json_node")
         @Expect(@AssertThrows[JsonException](lateCycle.toString()).code, "cyclic_json_node")
         @Expect(@AssertThrows[JsonException](lateCycle.equivalentTo(lateCycle)).code, "cyclic_json_node")
 
-        let lateMismatchLeft = JsonArrayValue().add(JsonIntValue(1)).add(JsonIntValue(2)).add(JsonIntValue(3))
-        let lateMismatchRight = JsonArrayValue().add(JsonIntValue(1)).add(JsonIntValue(2)).add(JsonIntValue(4))
+        let lateMismatchLeft = JsonArray().add(JsonIntValue(1)).add(JsonIntValue(2)).add(JsonIntValue(3))
+        let lateMismatchRight = JsonArray().add(JsonIntValue(1)).add(JsonIntValue(2)).add(JsonIntValue(4))
         @Expect(!lateMismatchLeft.equivalentTo(lateMismatchRight))
 
-        let wideCycle = JsonObjectValue()
+        let wideCycle = JsonObject()
         for (index in 0..16) { wideCycle.put("safe-${index}", JsonIntValue(index)) }
         wideCycle.put("cycle", wideCycle)
         @Expect(@AssertThrows[JsonException](wideCycle.deepCopy()).code, "cyclic_json_node")
         @Expect(@AssertThrows[JsonException](wideCycle.toString()).code, "cyclic_json_node")
 
-        let wideLeft = JsonObjectValue()
-        let wideRight = JsonObjectValue()
+        let wideLeft = JsonObject()
+        let wideRight = JsonObject()
         for (index in 0..16) {
             wideLeft.put("field-${index}", JsonIntValue(index))
             wideRight.put("field-${index}", JsonIntValue(index))
@@ -345,24 +303,21 @@ class JsonAuditContractRegressionTest {
         mismatchedObject.writeRawEndObject()
         @Expect(String.fromUtf8(mismatchedObject.finishBytes()), "{}")
 
-        let deepRaw = JsonDirectWriter(JsonWriteConfig("", "", false, false,
-            limits: JsonWriteLimits(maxDepth: 80)))
+        let deepRaw = JsonDirectWriter(JsonWriteOptions(maxDepth: 80))
         for (_ in 0..66) { deepRaw.writeRawBeginArray() }
         let deepCloseError = @AssertThrows[JsonException](deepRaw.writeRawEndObject())
         @Expect(deepCloseError.code, "writer_state")
         for (_ in 0..66) { deepRaw.writeRawEndArray() }
         @Expect(deepRaw.finishString().size, 132)
 
-        let shallow = JsonDirectWriter(JsonWriteConfig("", "", false, false,
-            limits: JsonWriteLimits(maxDepth: 1)))
+        let shallow = JsonDirectWriter(JsonWriteOptions(maxDepth: 1))
         shallow.writeRawBeginObject()
         let depthError = @AssertThrows[JsonException](shallow.writeRawBeginArray())
         @Expect(depthError.code, "max_depth")
         shallow.writeRawEndObject()
         @Expect(shallow.finishString(), "{}")
 
-        let semantic = JsonDirectWriter(JsonWriteConfig("", "", false, false,
-            limits: JsonWriteLimits(maxDepth: 1)))
+        let semantic = JsonDirectWriter(JsonWriteOptions(maxDepth: 1))
         semantic.startObject()
         semantic.writeName("x")
         let semanticDepthError = @AssertThrows[JsonException](semantic.writeRawBeginArray())
@@ -371,30 +326,30 @@ class JsonAuditContractRegressionTest {
         semantic.endObject()
         @Expect(semantic.finishString(), "{\"x\":null}")
 
-        @Expect(!JsonArrayValue().add(JsonIntValue(1)).equivalentTo(
-            JsonArrayValue().add(JsonIntValue(2))))
-        @Expect(!JsonArrayValue().equivalentTo(JsonArrayValue().add(JsonIntValue(1))))
-        @Expect(!JsonObjectValue().put("a", JsonIntValue(1)).equivalentTo(
-            JsonObjectValue().put("b", JsonIntValue(1))))
-        @Expect(!JsonObjectValue().put("a", JsonIntValue(1)).equivalentTo(
-            JsonObjectValue().put("a", JsonIntValue(2))))
-        @Expect(!JsonObjectValue().equivalentTo(JsonObjectValue().put("a", JsonIntValue(1))))
+        @Expect(!JsonArray().add(JsonIntValue(1)).equivalentTo(
+            JsonArray().add(JsonIntValue(2))))
+        @Expect(!JsonArray().equivalentTo(JsonArray().add(JsonIntValue(1))))
+        @Expect(!JsonObject().put("a", JsonIntValue(1)).equivalentTo(
+            JsonObject().put("b", JsonIntValue(1))))
+        @Expect(!JsonObject().put("a", JsonIntValue(1)).equivalentTo(
+            JsonObject().put("a", JsonIntValue(2))))
+        @Expect(!JsonObject().equivalentTo(JsonObject().put("a", JsonIntValue(1))))
 
-        let equalArray = JsonArrayValue().add(JsonIntValue(1)).add(JsonStringValue("x"))
+        let equalArray = JsonArray().add(JsonIntValue(1)).add(JsonStringValue("x"))
         @Expect(equalArray.deepCopy().equivalentTo(equalArray))
-        let equalObject = JsonObjectValue().put("a", JsonIntValue(1)).put("b", JsonStringValue("x"))
+        let equalObject = JsonObject().put("a", JsonIntValue(1)).put("b", JsonStringValue("x"))
         @Expect(equalObject.deepCopy().equivalentTo(equalObject))
-        @Expect(JsonArrayValue().deepCopy().equivalentTo(JsonArrayValue()))
-        @Expect(JsonObjectValue().deepCopy().equivalentTo(JsonObjectValue()))
+        @Expect(JsonArray().deepCopy().equivalentTo(JsonArray()))
+        @Expect(JsonObject().deepCopy().equivalentTo(JsonObject()))
 
         var deepManualTree: JsonNode = JsonNullValue()
-        for (_ in 0..257) { deepManualTree = JsonArrayValue().add(deepManualTree) }
+        for (_ in 0..257) { deepManualTree = JsonArray().add(deepManualTree) }
         @Expect(@AssertThrows[JsonException](deepManualTree.deepCopy()).code, "max_depth")
         @Expect(@AssertThrows[JsonException](deepManualTree.equivalentTo(deepManualTree)).code,
             "max_depth")
 
-        let withinWorkBudget = JsonArrayValue()
-        let beyondWorkBudget = JsonArrayValue()
+        let withinWorkBudget = JsonArray()
+        let beyondWorkBudget = JsonArray()
         let sharedNull = JsonNullValue()
         for (_ in 0..99999) {
             withinWorkBudget.add(sharedNull)

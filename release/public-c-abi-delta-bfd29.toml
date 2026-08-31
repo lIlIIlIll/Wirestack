@@ -1,0 +1,114 @@
+# Reviewed production C ABI delta from the 0.1.0 package-graph baseline.
+# The baseline digest is SHA-256 over sorted production `c-abi|...` records,
+# each followed by LF. Declarations guarded by YJ_TESTING are excluded.
+schema_version = 1
+domain = "c-abi"
+baseline_commit = "bfd29d85e353e6948e4ac643f1c6e6e071c882ba"
+baseline_production_records = 54
+baseline_production_sha256 = "043904cf818f782e23612a4bad9c0bd7680d69173f421b6c442431ce03139a9b"
+excluded_preprocessor_guard = "YJ_TESTING"
+
+[[changes]]
+direction = "removed"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_ObjectLookupInt(uint64_t handle, const uint8_t *key, uint64_t key_length, int64_t *out_value, uint32_t *out_found);"
+compatibility = "breaking"
+classification = "root-only integer lookup replaced by generic node navigation"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "removed"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_RootSize(uint64_t handle, uint64_t *out_size);"
+compatibility = "breaking"
+classification = "root-only size query replaced by Root plus generic Size"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_Root(uint64_t handle, uint64_t *out_node);"
+compatibility = "additive"
+classification = "generic node navigation"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_Kind(uint64_t handle, uint64_t node, uint32_t *out_kind);"
+compatibility = "additive"
+classification = "generic node navigation"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_Size(uint64_t handle, uint64_t node, uint64_t *out_size);"
+compatibility = "additive"
+classification = "generic node navigation"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_GetInt(uint64_t handle, uint64_t node, int64_t *out_value);"
+compatibility = "additive"
+classification = "generic scalar accessor"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_GetBool(uint64_t handle, uint64_t node, uint32_t *out_value);"
+compatibility = "additive"
+classification = "generic scalar accessor"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_GetTextSize(uint64_t handle, uint64_t node, uint64_t *out_size);"
+compatibility = "additive"
+classification = "generic text accessor"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_CopyText(uint64_t handle, uint64_t node, uint8_t *output, uint64_t output_capacity, uint64_t *out_written);"
+compatibility = "additive"
+classification = "generic text accessor"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_GetInlineTextSize(uint64_t handle, uint64_t reference, uint64_t *out_size);"
+compatibility = "additive"
+classification = "inline text accessor"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_CopyInlineText(uint64_t handle, uint64_t reference, uint8_t *output, uint64_t output_capacity, uint64_t *out_written);"
+compatibility = "additive"
+classification = "inline text accessor"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_ArrayGet(uint64_t handle, uint64_t node, uint64_t index, uint64_t *out_node);"
+compatibility = "additive"
+classification = "generic array navigation"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_ObjectEntry(uint64_t handle, uint64_t node, uint64_t index, uint64_t *out_value_node, uint32_t *out_inline_kind, uint64_t *out_inline_payload, uint64_t *out_key_size);"
+compatibility = "additive"
+classification = "generic object navigation"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_CopyObjectKey(uint64_t handle, uint64_t node, uint64_t index, uint8_t *output, uint64_t output_capacity, uint64_t *out_written);"
+compatibility = "additive"
+classification = "generic object key accessor"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_ObjectLookup(uint64_t handle, uint64_t node, const uint8_t *key, uint64_t key_length, uint64_t *out_value_node, uint32_t *out_inline_kind, uint64_t *out_inline_payload, uint32_t *out_found);"
+compatibility = "additive"
+classification = "generic object navigation"
+review_status = "reviewed-for-0.1.0"

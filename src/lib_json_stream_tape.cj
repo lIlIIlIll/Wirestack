@@ -15,46 +15,64 @@ private let JSON_STREAM_TAPE_OBJECT: Byte = 6u8
 private class JsonStreamTapeWriteContext {
     let objectContext: Bool
     let countPosition: Int64
+    let pathDepth: Int64
+    let entryPathPushed: Bool
     var count: UInt32 = 0u32
     var expectingValue: Bool = false
+    var pendingObjectPathPushed: Bool = false
+    var nextArrayIndex: Int64 = 0
 
-    init(objectContext: Bool, countPosition: Int64) {
+    init(objectContext: Bool, countPosition: Int64, pathDepth: Int64, entryPathPushed: Bool) {
         this.objectContext = objectContext
         this.countPosition = countPosition
+        this.pathDepth = pathDepth
+        this.entryPathPushed = entryPathPushed
     }
 }
 
 /// Matching-version Native bridge writer. Application codecs should depend on
-/// `JsonCodecWriter`, not on this concrete tape representation.
-public class JsonStreamTapeWriter <: JsonCodecWriter & JsonCodecBulkWriter {
+/// `JsonWriter`, not on this concrete tape representation.
+public class BackendTapeWriterV1 <: JsonWriter & GeneratedBulkWriterV1 & GeneratedWriteStateV1Owner {
     private let bytes = ArrayList<Byte>()
     private let contexts = ArrayList<JsonStreamTapeWriteContext>()
     private var rootWritten: Bool = false
     private var finished: Bool = false
+    private let generatedState: GeneratedWriteStateV1
 
-    public init() {
+    public init(config!: JsonWriteOptions = JsonWriteOptions.defaults) {
+        generatedState = GeneratedWriteStateV1(config)
         bytes.add(b'Y')
         bytes.add(b'J')
         bytes.add(b'T')
         bytes.add(b'1')
     }
 
+    public func generatedWriteStateV1(): GeneratedWriteStateV1 { generatedState }
+
+    public func path(): String { generatedState.currentPath() }
+
+    public func error(message: String, code: String): JsonException {
+        JsonException(message, code: code, path: path())
+    }
+
     public func startObject(): Unit {
-        beforeValue()
+        let pathPushed = beforeValue()
         bytes.add(JSON_STREAM_TAPE_OBJECT)
         let countPosition = bytes.size
         appendUInt32(0u32)
-        contexts.add(JsonStreamTapeWriteContext(true, countPosition))
+        contexts.add(JsonStreamTapeWriteContext(true, countPosition,
+            generatedState.pathDepth(), pathPushed))
     }
 
     public func endObject(): Unit { endContainer(true) }
 
     public func startArray(): Unit {
-        beforeValue()
+        let pathPushed = beforeValue()
         bytes.add(JSON_STREAM_TAPE_ARRAY)
         let countPosition = bytes.size
         appendUInt32(0u32)
-        contexts.add(JsonStreamTapeWriteContext(false, countPosition))
+        contexts.add(JsonStreamTapeWriteContext(false, countPosition,
+            generatedState.pathDepth(), pathPushed))
     }
 
     public func endArray(): Unit { endContainer(false) }
@@ -68,48 +86,61 @@ public class JsonStreamTapeWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         }
         appendString(name)
         context.expectingValue = true
+        context.pendingObjectPathPushed = generatedState.pushAutoField(name, context.pathDepth)
     }
 
     public func writeNull(): Unit {
-        beforeValue()
-        bytes.add(JSON_STREAM_TAPE_NULL)
+        let pathPushed = beforeValue()
+        try { bytes.add(JSON_STREAM_TAPE_NULL) }
+        finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func writeBool(value: Bool): Unit {
-        beforeValue()
-        bytes.add(JSON_STREAM_TAPE_BOOL)
-        bytes.add(if (value) { 1u8 } else { 0u8 })
+        let pathPushed = beforeValue()
+        try {
+            bytes.add(JSON_STREAM_TAPE_BOOL)
+            bytes.add(if (value) { 1u8 } else { 0u8 })
+        } finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func writeInt64(value: Int64): Unit {
-        beforeValue()
-        bytes.add(JSON_STREAM_TAPE_INT)
-        appendUInt64(int64Bits(value))
+        let pathPushed = beforeValue()
+        try {
+            bytes.add(JSON_STREAM_TAPE_INT)
+            appendUInt64(int64Bits(value))
+        } finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func writeUInt64(value: UInt64): Unit {
         if (value <= UInt64(0x7FFF_FFFF_FFFF_FFFF)) {
             writeInt64(Int64(value))
         } else {
-            writeRawNumber(value.toString())
+            writeNumberLiteral(value.toString())
         }
     }
 
     public func writeFloat64(value: Float64): Unit {
         ensureFiniteJsonFloat(value)
-        writeRawNumber(value.toString())
+        writeNumberLiteral(value.toString())
     }
 
-    public func writeRawNumber(value: String): Unit {
-        beforeValue()
-        bytes.add(JSON_STREAM_TAPE_NUMBER)
-        appendString(value)
+    public func writeNumberLiteral(value: String): Unit {
+        let pathPushed = beforeValue()
+        try {
+            if (!isValidJsonNumberLiteral(value)) {
+                throw error("Invalid JSON number literal", "invalid_number")
+            }
+            bytes.add(JSON_STREAM_TAPE_NUMBER)
+            appendString(value)
+        } finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func writeString(value: String): Unit {
-        beforeValue()
-        bytes.add(JSON_STREAM_TAPE_STRING)
-        appendString(value)
+        let pathPushed = beforeValue()
+        try {
+            bytes.add(JSON_STREAM_TAPE_STRING)
+            appendString(value)
+        } finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func tryWriteCompactInt64ArrayList(values: ArrayList<Int64>): Bool {
@@ -145,12 +176,12 @@ public class JsonStreamTapeWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         bytes.toArray()
     }
 
-    private func beforeValue(): Unit {
+    private func beforeValue(): Bool {
         requireWritable()
         if (contexts.isEmpty()) {
             if (rootWritten) { throw JsonException("Only one root JSON value may be written") }
             rootWritten = true
-            return
+            return false
         }
         let context = contexts[contexts.size - 1]
         if (context.objectContext) {
@@ -158,11 +189,23 @@ public class JsonStreamTapeWriter <: JsonCodecWriter & JsonCodecBulkWriter {
                 throw JsonException("Object values must be preceded by a field name")
             }
             context.expectingValue = false
+            let pathPushed = context.pendingObjectPathPushed
+            context.pendingObjectPathPushed = false
+            generatedState.beginAutoValue(pathPushed)
+            if (context.count == 0xFFFF_FFFFu32) {
+                throw JsonException("JSON container is too large", code: "output_too_large")
+            }
+            context.count++
+            return pathPushed
         }
+        let pathPushed = generatedState.pushAutoIndex(context.nextArrayIndex, context.pathDepth)
+        context.nextArrayIndex++
+        generatedState.beginAutoValue(pathPushed)
         if (context.count == 0xFFFF_FFFFu32) {
             throw JsonException("JSON container is too large", code: "output_too_large")
         }
         context.count++
+        pathPushed
     }
 
     private func endContainer(expectedObject: Bool): Unit {
@@ -175,6 +218,7 @@ public class JsonStreamTapeWriter <: JsonCodecWriter & JsonCodecBulkWriter {
         }
         patchUInt32(context.countPosition, context.count)
         contexts.remove(at: index)
+        generatedState.completeAutoValue(context.entryPathPushed)
     }
 
     private func appendString(value: String): Unit {
@@ -209,52 +253,73 @@ public class JsonStreamTapeWriter <: JsonCodecWriter & JsonCodecBulkWriter {
 
 private class JsonStreamTapeReadContext {
     let objectContext: Bool
+    let pathDepth: Int64
+    let entryPathPushed: Bool
     var remaining: UInt32
     var expectingValue: Bool = false
+    var pendingObjectPathPushed: Bool = false
+    var nextArrayIndex: Int64 = 0
 
-    init(objectContext: Bool, remaining: UInt32) {
+    init(objectContext: Bool, remaining: UInt32, pathDepth: Int64, entryPathPushed: Bool) {
         this.objectContext = objectContext
         this.remaining = remaining
+        this.pathDepth = pathDepth
+        this.entryPathPushed = entryPathPushed
     }
 }
 
 /// Matching-version Native bridge reader for the compact preorder tape.
-public class JsonStreamTapeReader <: JsonCodecReader {
+public class BackendTapeReaderV1 <: JsonReader & GeneratedReadStateV1Owner {
     private let bytes: Array<Byte>
-    private let config: JsonReadConfig
+    private let config: JsonReadOptions
     private let replayBudgetPrevalidated: Bool
     private let contexts = ArrayList<JsonStreamTapeReadContext>()
     private var position: Int64 = 4
     private var rootConsumed: Bool = false
     private var valuePrefixReady: Bool = false
+    private var valuePrefixPathPushed: Bool = false
+    private let generatedState: GeneratedReadStateV1
 
-    public init(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults,
+    public init(bytes: Array<Byte>, config!: JsonReadOptions = JsonReadOptions.defaults,
         replayBudgetPrevalidated!: Bool = false) {
         this.bytes = bytes
         this.config = config
         this.replayBudgetPrevalidated = replayBudgetPrevalidated
+        generatedState = GeneratedReadStateV1(config)
         if (bytes.size < 5 || bytes[0] != b'Y' || bytes[1] != b'J' ||
             bytes[2] != b'T' || bytes[3] != b'1') {
             throw JsonException("Invalid JSON stream tape", code: "codec_contract")
         }
     }
 
-    public func readConfig(): JsonReadConfig { config }
+    public func readConfig(): JsonReadOptions { config }
 
-    public func readReplayValue(maxBytes: Int64): JsonReplayValue {
+    public func generatedReadStateV1(): GeneratedReadStateV1 { generatedState }
+
+    public func path(): String { generatedState.currentPath() }
+
+    public func location(): Option<JsonLocation> { None<JsonLocation> }
+
+    public func error(message: String, code: String): JsonException {
+        JsonException(message, code: code, path: path())
+    }
+
+    public func readReplayValue(maxBytes: Int64): GeneratedReplayValueV1 {
         if (maxBytes < 0) { throw IllegalArgumentException("maxBytes must not be negative") }
-        beforeValue()
-        let start = position
-        let end = scanValue(position)
-        if (!replayBudgetPrevalidated && maxBytes > 0 && end - start > maxBytes) {
-            throw JsonException("Polymorphic JSON object exceeds ${maxBytes} bytes",
-                code: "polymorphic_object_too_large")
-        }
-        position = end
-        let captured = ArrayList<Byte>()
-        captured.add(b'Y'); captured.add(b'J'); captured.add(b'T'); captured.add(b'1')
-        captured.add(all: bytes[start..end])
-        JsonStreamTapeReplayValue(captured.toArray(), config)
+        let pathPushed = beforeValue()
+        try {
+            let start = position
+            let end = scanValue(position)
+            if (!replayBudgetPrevalidated && maxBytes > 0 && end - start > maxBytes) {
+                throw JsonException("Polymorphic JSON object exceeds ${maxBytes} bytes",
+                    code: "buffered_value_too_large", path: path())
+            }
+            position = end
+            let captured = ArrayList<Byte>()
+            captured.add(b'Y'); captured.add(b'J'); captured.add(b'T'); captured.add(b'1')
+            captured.add(all: bytes[start..end])
+            JsonStreamTapeReplayValue(captured.toArray(), config)
+        } finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func expectEnd(): Unit {
@@ -264,9 +329,10 @@ public class JsonStreamTapeReader <: JsonCodecReader {
     }
 
     public func startObject(): Unit {
-        beforeValue()
+        let pathPushed = beforeValue()
         expectKind(JSON_STREAM_TAPE_OBJECT)
-        contexts.add(JsonStreamTapeReadContext(true, readUInt32Raw()))
+        contexts.add(JsonStreamTapeReadContext(true, readUInt32Raw(),
+            generatedState.pathDepth(), pathPushed))
     }
 
     public func endObject(): Unit { endContainer(true) }
@@ -283,6 +349,7 @@ public class JsonStreamTapeReader <: JsonCodecReader {
         }
         let name = readStringRaw()
         context.expectingValue = true
+        context.pendingObjectPathPushed = generatedState.pushAutoField(name, context.pathDepth)
         name
     }
 
@@ -298,9 +365,10 @@ public class JsonStreamTapeReader <: JsonCodecReader {
     }
 
     public func startArray(): Unit {
-        beforeValue()
+        let pathPushed = beforeValue()
         expectKind(JSON_STREAM_TAPE_ARRAY)
-        contexts.add(JsonStreamTapeReadContext(false, readUInt32Raw()))
+        contexts.add(JsonStreamTapeReadContext(false, readUInt32Raw(),
+            generatedState.pathDepth(), pathPushed))
     }
 
     public func endArray(): Unit { endContainer(false) }
@@ -310,60 +378,71 @@ public class JsonStreamTapeReader <: JsonCodecReader {
     }
 
     public func tryReadNull(): Bool {
-        beforeValue()
+        let pathPushed = beforeValue()
         if (peekByte() != JSON_STREAM_TAPE_NULL) {
             valuePrefixReady = true
+            valuePrefixPathPushed = pathPushed
             return false
         }
         position++
+        generatedState.completeAutoValue(pathPushed)
         true
     }
 
     public func readNull(): Unit {
-        beforeValue()
-        expectKind(JSON_STREAM_TAPE_NULL)
+        let pathPushed = beforeValue()
+        try { expectKind(JSON_STREAM_TAPE_NULL) }
+        finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func readBool(): Bool {
-        beforeValue()
-        expectKind(JSON_STREAM_TAPE_BOOL)
-        readByteRaw() != 0u8
+        let pathPushed = beforeValue()
+        try {
+            expectKind(JSON_STREAM_TAPE_BOOL)
+            readByteRaw() != 0u8
+        } finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func readString(): String {
-        beforeValue()
-        expectKind(JSON_STREAM_TAPE_STRING)
-        readStringRaw()
+        let pathPushed = beforeValue()
+        try {
+            expectKind(JSON_STREAM_TAPE_STRING)
+            readStringRaw()
+        } finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func skipString(): Unit { let _ = readString() }
 
     public func readInt64(): Int64 {
-        beforeValue()
-        match {
-            case peekByte() == JSON_STREAM_TAPE_INT => position++; bitsToInt64(readUInt64Raw())
-            case peekByte() == JSON_STREAM_TAPE_NUMBER =>
-                position++
-                let literal = readStringRaw()
-                try { Int64.parse(literal) } catch (_: Exception) { fail("Expected integer") }
-            case _ => fail("Expected integer")
-        }
+        let pathPushed = beforeValue()
+        try {
+            match {
+                case peekByte() == JSON_STREAM_TAPE_INT => position++; bitsToInt64(readUInt64Raw())
+                case peekByte() == JSON_STREAM_TAPE_NUMBER =>
+                    position++
+                    let literal = readStringRaw()
+                    try { Int64.parse(literal) } catch (_: Exception) { fail("Expected integer") }
+                case _ => fail("Expected integer")
+            }
+        } finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func readUInt64(): UInt64 {
-        beforeValue()
-        match {
-            case peekByte() == JSON_STREAM_TAPE_INT =>
-                position++
-                let value = bitsToInt64(readUInt64Raw())
-                if (value < 0) { fail("Expected unsigned integer") }
-                UInt64(value)
-            case peekByte() == JSON_STREAM_TAPE_NUMBER =>
-                position++
-                let literal = readStringRaw()
-                try { UInt64.parse(literal) } catch (_: Exception) { fail("Expected unsigned integer") }
-            case _ => fail("Expected unsigned integer")
-        }
+        let pathPushed = beforeValue()
+        try {
+            match {
+                case peekByte() == JSON_STREAM_TAPE_INT =>
+                    position++
+                    let value = bitsToInt64(readUInt64Raw())
+                    if (value < 0) { fail("Expected unsigned integer") }
+                    UInt64(value)
+                case peekByte() == JSON_STREAM_TAPE_NUMBER =>
+                    position++
+                    let literal = readStringRaw()
+                    try { UInt64.parse(literal) } catch (_: Exception) { fail("Expected unsigned integer") }
+                case _ => fail("Expected unsigned integer")
+            }
+        } finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func readFloat64(): Float64 { Float64.parse(readNumberLiteral()) }
@@ -371,31 +450,35 @@ public class JsonStreamTapeReader <: JsonCodecReader {
     public func readDecimal(): Decimal { Decimal.parse(readNumberLiteral()) }
 
     public func readNumberLiteral(): String {
-        beforeValue()
-        match {
-            case peekByte() == JSON_STREAM_TAPE_INT => position++; bitsToInt64(readUInt64Raw()).toString()
-            case peekByte() == JSON_STREAM_TAPE_NUMBER => position++; readStringRaw()
-            case _ => fail("Expected number")
-        }
+        let pathPushed = beforeValue()
+        try {
+            match {
+                case peekByte() == JSON_STREAM_TAPE_INT => position++; bitsToInt64(readUInt64Raw()).toString()
+                case peekByte() == JSON_STREAM_TAPE_NUMBER => position++; readStringRaw()
+                case _ => fail("Expected number")
+            }
+        } finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func skipValue(): Unit {
-        beforeValue()
-        position = scanValue(position)
+        let pathPushed = beforeValue()
+        try { position = scanValue(position) }
+        finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func skipValueWithDepth(maxDepth: Int64): Unit {
         if (maxDepth < 0) { throw IllegalArgumentException("maxDepth must not be negative") }
-        beforeValue()
-        position = scanValueBounded(position, 0, maxDepth)
+        let pathPushed = beforeValue()
+        try { position = scanValueBounded(position, 0, maxDepth) }
+        finally { generatedState.completeAutoValue(pathPushed) }
     }
 
-    func copyNextValueTo(writer: JsonCodecWriter): Unit {
+    func copyNextValueTo(writer: JsonWriter): Unit {
         match {
             case peekByte() == JSON_STREAM_TAPE_NULL => readNull(); writer.writeNull()
             case peekByte() == JSON_STREAM_TAPE_BOOL => writer.writeBool(readBool())
             case peekByte() == JSON_STREAM_TAPE_INT => writer.writeInt64(readInt64())
-            case peekByte() == JSON_STREAM_TAPE_NUMBER => writer.writeRawNumber(readNumberLiteral())
+            case peekByte() == JSON_STREAM_TAPE_NUMBER => writer.writeNumberLiteral(readNumberLiteral())
             case peekByte() == JSON_STREAM_TAPE_STRING => writer.writeString(readString())
             case peekByte() == JSON_STREAM_TAPE_ARRAY =>
                 startArray(); writer.startArray()
@@ -413,46 +496,93 @@ public class JsonStreamTapeReader <: JsonCodecReader {
         }
     }
 
-    func readNode(): JsonNode {
+    public func readNode(): JsonNode {
         match {
             case peekByte() == JSON_STREAM_TAPE_NULL => readNull(); JsonNullValue()
             case peekByte() == JSON_STREAM_TAPE_BOOL => JsonBoolValue(readBool())
             case peekByte() == JSON_STREAM_TAPE_INT => JsonIntValue(readInt64())
             case peekByte() == JSON_STREAM_TAPE_NUMBER =>
                 let literal = readNumberLiteral()
-                match (config.numberPolicy) {
-                    case JsonNumberPolicy.Int64WhenExact =>
-                        try { JsonIntValue(Int64.parse(literal)) }
-                        catch (_: Exception) { JsonNumberLiteralValue.fromParsedLiteral(literal) }
-                    case _ => JsonNumberLiteralValue.fromParsedLiteral(literal)
-                }
+                try { JsonIntValue(Int64.parse(literal)) }
+                catch (_: Exception) { JsonNumberLiteralValue.fromParsedLiteral(literal) }
             case peekByte() == JSON_STREAM_TAPE_STRING => JsonStringValue(readString())
             case peekByte() == JSON_STREAM_TAPE_ARRAY =>
-                let value = JsonArrayValue(); startArray()
+                let value = JsonArray(); startArray()
                 while (hasArrayItem()) { value.add(readNode()) }
                 endArray(); value
             case peekByte() == JSON_STREAM_TAPE_OBJECT =>
-                let value = JsonObjectValue(); startObject()
+                let value = JsonObject(); startObject()
                 while (hasObjectField()) { value.put(readName(), readNode()) }
                 endObject(); value
             case _ => fail("Unknown JSON tape value kind")
         }
     }
 
-    private func beforeValue(): Unit {
-        if (valuePrefixReady) { valuePrefixReady = false; return }
+    /// Materializes one value while enforcing a maximum JSON-node budget.
+    public func readNode(maxNodes: Int64): JsonNode {
+        if (maxNodes <= 0) {
+            throw IllegalArgumentException("maxNodes must be positive")
+        }
+        readNodeBounded([maxNodes])
+    }
+
+    private func readNodeBounded(remaining: Array<Int64>): JsonNode {
+        if (remaining[0] <= 0) {
+            throw JsonException("Materialization work limit exceeded",
+                code: "work_limit_exceeded", path: path())
+        }
+        remaining[0]--
+        match {
+            case peekByte() == JSON_STREAM_TAPE_NULL => readNull(); JsonNullValue()
+            case peekByte() == JSON_STREAM_TAPE_BOOL => JsonBoolValue(readBool())
+            case peekByte() == JSON_STREAM_TAPE_INT => JsonIntValue(readInt64())
+            case peekByte() == JSON_STREAM_TAPE_NUMBER =>
+                let literal = readNumberLiteral()
+                try { JsonIntValue(Int64.parse(literal)) }
+                catch (_: Exception) { JsonNumberLiteralValue.fromParsedLiteral(literal) }
+            case peekByte() == JSON_STREAM_TAPE_STRING => JsonStringValue(readString())
+            case peekByte() == JSON_STREAM_TAPE_ARRAY =>
+                let value = JsonArray(); startArray()
+                while (hasArrayItem()) { value.add(readNodeBounded(remaining)) }
+                endArray(); value
+            case peekByte() == JSON_STREAM_TAPE_OBJECT =>
+                let value = JsonObject(); startObject()
+                while (hasObjectField()) {
+                    value.put(readName(), readNodeBounded(remaining))
+                }
+                endObject(); value
+            case _ => fail("Unknown JSON tape value kind")
+        }
+    }
+
+    private func beforeValue(): Bool {
+        if (valuePrefixReady) {
+            valuePrefixReady = false
+            let pathPushed = valuePrefixPathPushed
+            valuePrefixPathPushed = false
+            return pathPushed
+        }
         if (contexts.isEmpty()) {
             if (rootConsumed) { fail("Only one root JSON value may be read") }
             rootConsumed = true
-            return
+            return false
         }
         let context = contexts[contexts.size - 1]
         if (context.remaining == 0u32) { fail("JSON container has no remaining values") }
         if (context.objectContext) {
             if (!context.expectingValue) { fail("Object values must follow a field name") }
             context.expectingValue = false
+            let pathPushed = context.pendingObjectPathPushed
+            context.pendingObjectPathPushed = false
+            context.remaining--
+            generatedState.beginAutoValue(pathPushed)
+            return pathPushed
         }
+        let pathPushed = generatedState.pushAutoIndex(context.nextArrayIndex, context.pathDepth)
+        context.nextArrayIndex++
         context.remaining--
+        generatedState.beginAutoValue(pathPushed)
+        pathPushed
     }
 
     private func endContainer(expectedObject: Bool): Unit {
@@ -461,6 +591,7 @@ public class JsonStreamTapeReader <: JsonCodecReader {
             fail("JSON container was not fully consumed")
         }
         contexts.remove(at: contexts.size - 1)
+        generatedState.completeAutoValue(context.entryPathPushed)
     }
 
     private func currentContext(expectedObject: Bool): JsonStreamTapeReadContext {
@@ -585,19 +716,19 @@ public class JsonStreamTapeReader <: JsonCodecReader {
     }
 
     private func fail(message: String): Nothing {
-        throw JsonException(message, code: "parse_error")
+        throw JsonException(message, code: "parse_error", path: path())
     }
 
     @OverflowWrapping
     private func bitsToInt64(value: UInt64): Int64 { Int64(value) }
 }
 
-private class JsonStreamTapeReplayValue <: JsonReplayValue {
+private class JsonStreamTapeReplayValue <: GeneratedReplayValueV1 {
     private let tape: Array<Byte>
-    private let config: JsonReadConfig
+    private let config: JsonReadOptions
     private var closed: Bool = false
 
-    init(tape: Array<Byte>, config: JsonReadConfig) {
+    init(tape: Array<Byte>, config: JsonReadOptions) {
         this.tape = tape
         this.config = config
     }
@@ -607,7 +738,7 @@ private class JsonStreamTapeReplayValue <: JsonReplayValue {
 
     public func rootStringField(name: String): Option<String> {
         requireOpen()
-        let reader = JsonStreamTapeReader(tape, config: config)
+        let reader = BackendTapeReaderV1(tape, config: config)
         var result = None<String>
         reader.startObject()
         while (reader.hasObjectField()) {
@@ -619,10 +750,10 @@ private class JsonStreamTapeReplayValue <: JsonReplayValue {
         result
     }
 
-    public func openObjectReaderExcluding(name: String): JsonCodecReader {
+    public func openObjectReaderExcluding(name: String): JsonReader {
         requireOpen()
-        let reader = JsonStreamTapeReader(tape, config: config)
-        let writer = JsonStreamTapeWriter()
+        let reader = BackendTapeReaderV1(tape, config: config)
+        let writer = BackendTapeWriterV1()
         reader.startObject(); writer.startObject()
         while (reader.hasObjectField()) {
             let current = reader.readName()
@@ -634,12 +765,12 @@ private class JsonStreamTapeReplayValue <: JsonReplayValue {
             }
         }
         reader.endObject(); reader.expectEnd(); writer.endObject()
-        JsonStreamTapeReader(writer.finishTape(), config: config)
+        BackendTapeReaderV1(writer.finishTape(), config: config)
     }
 
     public func materialize(): JsonNode {
         requireOpen()
-        let reader = JsonStreamTapeReader(tape, config: config)
+        let reader = BackendTapeReaderV1(tape, config: config)
         let value = reader.readNode()
         reader.expectEnd()
         value

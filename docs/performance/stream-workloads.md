@@ -11,7 +11,7 @@ JSON artifact，不是手工估算。测量边界和统计规则见[Stream 性�
 - 实际 UTF-8 大小：`231` bytes
 - SHA-256：`40bd7c1d2a93fa84dca800f996ad6984eb9fb51c2654a008de979ed7f0fd06e5`
 - 生成参数：`record_count=1`
-- API：decode 使用 `YJson.fromStream<T>(stream)`；encode 使用 `YJson.toStream(value, output)`。
+- API：decode 使用 `YJson.fromJson<T>(stream)`；encode 使用 `YJson.writeJson(value, output)`。
 
 完整 JSON：
 
@@ -44,7 +44,7 @@ JSON artifact，不是手工估算。测量边界和统计规则见[Stream 性�
 - 实际 UTF-8 大小：`62,849` bytes
 - SHA-256：`1ef7144ae0eea8731fa173b4b563fd0d13e849ba79560df7a8793fad5812c168`
 - 生成参数：`record_count=1024`
-- API：decode 使用 `YJson.fromStream<T>(stream)`；encode 使用 `YJson.toStream(value, output)`。
+- API：decode 使用 `YJson.fromJson<T>(stream)`；encode 使用 `YJson.writeJson(value, output)`。
 
 结构：顶层是 `ProfileRecord` 数组。下面列出首尾元素；完整 payload 保存在结果 artifact。
 
@@ -74,7 +74,7 @@ JSON artifact，不是手工估算。测量边界和统计规则见[Stream 性�
 - 实际 UTF-8 大小：`1,005,569` bytes
 - SHA-256：`da9a17a1d99e2c870afb800e184b091d2dc0f5c40fd6e193332f13df7ebde40a`
 - 生成参数：`record_count=16384`
-- API：decode 使用 `YJson.fromStream<T>(stream)`；encode 使用 `YJson.toStream(value, output)`。
+- API：decode 使用 `YJson.fromJson<T>(stream)`；encode 使用 `YJson.writeJson(value, output)`。
 
 结构：顶层是 `ProfileRecord` 数组。下面列出首尾元素；完整 payload 保存在结果 artifact。
 

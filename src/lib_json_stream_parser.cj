@@ -4,7 +4,7 @@ import std.io.*
 
 func parseJsonValueFromStream(
     input: InputStream,
-    config!: JsonReadConfig = JsonReadConfig.defaults
+    config!: JsonReadOptions = JsonReadOptions.defaults
 ): JsonNode {
     parseJsonValueFromInputStream(input, config: config)
 }

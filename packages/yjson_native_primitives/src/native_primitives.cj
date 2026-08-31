@@ -123,13 +123,13 @@ private class CustomNativeAccelerationProviderV1 <: JsonAccelerationProviderV1 {
         // process-wide runtime state is frozen.
         let probe = unsafe { YJ_JSON_ProbeV1() }
         if (probe != 0x594A0101u32) {
-            throw JsonAccelerationException(
+            throw JsonException(
                 "Custom Native primitive ABI probe mismatch: expected 0x594A0101, got ${probe}",
                 code: "acceleration_abi_mismatch")
         }
         let caps = nativeScannerCapabilitiesForTesting()
         if ((caps & 1u32) == 0u32) {
-            throw JsonAccelerationException(
+            throw JsonException(
                 "Custom Native primitives do not support this CPU",
                 code: "acceleration_cpu_unsupported")
         }

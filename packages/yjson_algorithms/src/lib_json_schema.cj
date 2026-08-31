@@ -5,24 +5,41 @@ import yjson.*
 import std.collection.*
 import std.convert.Parsable
 import std.math.numeric.*
-import std.regex.*
-import std.unicode.*
 
-public class JsonValidationError <: JsonException {
-    public let jsonPath: String
+public class JsonSchemaViolation {
+    public let instancePath: String
     public let schemaPath: String
+    public let code: String
+    public let message: String
 
-    public init(jsonPath: String, schemaPath: String, message: String,
+    public init(instancePath: String, schemaPath: String, message: String,
         code!: String = "schema_validation") {
-        super("${jsonPath} ${schemaPath}: ${message}", code: code, path: jsonPath)
-        this.jsonPath = jsonPath
+        this.instancePath = instancePath
         this.schemaPath = schemaPath
-    }
-
-    protected override func getClassName(): String {
-        "JsonValidationError"
+        this.code = code
+        this.message = message
     }
 }
+
+/// Immutable result of one JSON Schema validation.
+public class JsonSchemaResult {
+    private let items: Array<JsonSchemaViolation>
+
+    init(items: Array<JsonSchemaViolation>) { this.items = items }
+
+    public prop valid: Bool { get() { items.isEmpty() } }
+    public prop size: Int64 { get() { items.size } }
+    public func isEmpty(): Bool { items.isEmpty() }
+    public operator func [](index: Int64): JsonSchemaViolation { items[index] }
+
+    public func violations(): Array<JsonSchemaViolation> {
+        let copy = ArrayList<JsonSchemaViolation>(items.size)
+        for (item in items) { copy.add(item) }
+        copy.toArray()
+    }
+}
+
+private class JsonSchemaMismatchSignal <: Exception {}
 
 /// A named JSON Schema format assertion.
 public interface JsonSchemaFormat {
@@ -34,7 +51,7 @@ public interface JsonSchemaFormatProvider {
     func installInto(registry: JsonSchemaFormatRegistry): Unit
 }
 
-/// Explicit format registry used by Assertion and StrictAssertion modes.
+/// Explicit format registry used by Assertion mode.
 public class JsonSchemaFormatRegistry {
     private let formats = HashMap<String, JsonSchemaFormat>()
     private var frozen: Bool = false
@@ -86,7 +103,7 @@ public class JsonSchemaRegistry <: UriResolver {
         resources[uri] = schema.deepCopy()
     }
 
-    public func register(uri: String, schemaText: String): Unit { register(uri, YJson.parse(schemaText)) }
+    public func register(uri: String, schemaText: String): Unit { register(uri, JsonNode.parse(schemaText)) }
 
     public func resolve(uri: String): Option<JsonNode> {
         match (resources.get(uri)) {
@@ -96,7 +113,7 @@ public class JsonSchemaRegistry <: UriResolver {
     }
 }
 
-public enum JsonSchemaFormatMode { Annotation | Assertion | StrictAssertion }
+public enum JsonSchemaFormatMode { Annotation | Assertion }
 
 public class JsonSchemaConfig {
     public let resolver: Option<UriResolver>
@@ -120,6 +137,8 @@ public class JsonSchemaConfig {
 
 public class JsonSchema {
     private let documentValue: JsonNode
+    private let compiledResources: HashMap<String, JsonNode>
+    private let compiledRegexes: HashMap<String, LinearRegex>
     public let draft: String
     public let config: JsonSchemaConfig
     let validationVocabulary: Bool
@@ -129,36 +148,40 @@ public class JsonSchema {
         get() { documentValue.deepCopy() }
     }
 
-    public init(document: JsonNode, draft!: String = "https://json-schema.org/draft/2020-12/schema",
+    public init(document: JsonValueView, draft!: String = "https://json-schema.org/draft/2020-12/schema",
         config!: JsonSchemaConfig = JsonSchemaConfig.defaults) {
-        let frozenDocument = document.deepCopy()
-        this.documentValue = frozenDocument
-        this.draft = draft
-        this.config = JsonSchemaConfig(resolver: config.resolver, formatMode: config.formatMode,
-            formats: config.formats.frozenCopy(), limits: config.limits)
         if (draft != "https://json-schema.org/draft/2020-12/schema" &&
             draft != "https://json-schema.org/draft/2020-12/schema#") {
-            throw JsonException("Unsupported JSON Schema dialect ${draft}", code: "unsupported_schema_dialect")
+            throw JsonException("Unsupported JSON Schema dialect ${draft}",
+                code: "unsupported_schema_dialect")
         }
+        let frozenDocument = document.materialize()
+        let resources = compileJsonSchemaResourceGraph(frozenDocument,
+            config.resolver, config.limits)
+        let regexes = compileJsonSchemaRegexes(frozenDocument, resources, config.limits)
+        this.documentValue = frozenDocument
+        this.compiledResources = resources
+        this.compiledRegexes = regexes
+        this.draft = draft
+        // Validation retains no resolver reference. All external resources are
+        // detached above, so later registry mutation or I/O cannot affect it.
+        this.config = JsonSchemaConfig(resolver: None<UriResolver>, formatMode: config.formatMode,
+            formats: config.formats.frozenCopy(), limits: config.limits)
         var usesValidationVocabulary = true
         match (frozenDocument) {
-            case objectValue: JsonObjectValue => match (objectValue.get("$schema")) {
+            case objectValue: JsonObject => match (objectValue.get("$schema")) {
                 case Some(value) =>
-                    let declared = value.asString().value
+                    let declared = value.asString()
                     if (declared != "https://json-schema.org/draft/2020-12/schema" &&
                         declared != "https://json-schema.org/draft/2020-12/schema#") {
-                        match (this.config.resolver) {
-                            case Some(resolver) => match (resolver.resolve(stripJsonSchemaFragment(declared))) {
-                                case Some(metaSchema) =>
-                                    match (metaSchema.asObject().get("$vocabulary")) {
-                                        case Some(vocabularies) => usesValidationVocabulary =
-                                            vocabularies.asObject().contains(
-                                                "https://json-schema.org/draft/2020-12/vocab/validation")
-                                        case None => ()
-                                    }
-                                case None => throw JsonException("Unsupported JSON Schema dialect ${declared}",
-                                    code: "unsupported_schema_dialect")
-                            }
+                        match (compiledResources.get(stripJsonSchemaFragment(declared))) {
+                            case Some(metaSchema) =>
+                                match (metaSchema.asObject().get("$vocabulary")) {
+                                    case Some(vocabularies) => usesValidationVocabulary =
+                                        vocabularies.asObject().contains(
+                                            "https://json-schema.org/draft/2020-12/vocab/validation")
+                                    case None => ()
+                                }
                             case None => throw JsonException("Unsupported JSON Schema dialect ${declared}",
                                 code: "unsupported_schema_dialect")
                         }
@@ -172,10 +195,11 @@ public class JsonSchema {
     }
 
     public static func parse(text: String, config!: JsonSchemaConfig = JsonSchemaConfig.defaults): JsonSchema {
-        JsonSchema(YJson.parse(text), config: config)
+        JsonSchema(JsonNode.parse(text), config: config)
     }
 
-    public static func fromValue(value: JsonNode, config!: JsonSchemaConfig = JsonSchemaConfig.defaults): JsonSchema {
+    public static func fromValue(value: JsonValueView,
+        config!: JsonSchemaConfig = JsonSchemaConfig.defaults): JsonSchema {
         JsonSchema(value, config: config)
     }
 
@@ -183,15 +207,25 @@ public class JsonSchema {
         JsonSchemaValidator(this)
     }
 
-    public func validate(instance: JsonNode): ArrayList<JsonValidationError> {
+    public func validate(instance: JsonValueView): JsonSchemaResult {
         validator().validate(instance)
     }
 
-    public func validateOrThrow(instance: JsonNode): Unit {
-        validator().validateOrThrow(instance)
+    public func validate(document: JsonDocument): JsonSchemaResult {
+        validator().validate(document.root())
     }
 
+    public func isValid(instance: JsonValueView): Bool { validator().isValid(instance) }
+
+    public func isValid(document: JsonDocument): Bool { validator().isValid(document.root()) }
+
     func internalDocument(): JsonNode { documentValue }
+
+    func compiledResource(uri: String): Option<JsonNode> {
+        compiledResources.get(uri)
+    }
+
+    func compiledRegex(pattern: String): Option<LinearRegex> { compiledRegexes.get(pattern) }
 }
 
 public class JsonSchemaValidator {
@@ -201,58 +235,79 @@ public class JsonSchemaValidator {
     private var evaluationCount: Int64 = 0
     private var refResolutionCount: Int64 = 0
     private var validationDepth: Int64 = 0
+    private var stopAtFirst: Bool = false
+    private var probeDepth: Int64 = 0
+    private let regexBudget: LinearRegexBudget
 
     public init(schema: JsonSchema) {
         this.schema = schema
+        this.regexBudget = LinearRegexBudget(schema.config.limits.maxRegexSteps,
+            "JSON Schema regex steps")
     }
 
-    public func validate(instance: JsonNode): ArrayList<JsonValidationError> {
-        let errors = ArrayList<JsonValidationError>()
+    public func validate(instance: JsonValueView): JsonSchemaResult {
+        JsonSchemaResult(runValidation(instance, false).toArray())
+    }
+
+    private func runValidation(instance: JsonValueView, firstOnly: Bool): ArrayList<JsonSchemaViolation> {
+        let errors = ArrayList<JsonSchemaViolation>()
         baseUriStack.clear()
         resourceStack.clear()
         evaluationCount = 0
         refResolutionCount = 0
         validationDepth = 0
+        stopAtFirst = firstOnly
+        probeDepth = 0
+        regexBudget.reset()
         baseUriStack.add("")
         let document = schema.internalDocument()
         resourceStack.add(document)
-        validateSchemaValue(document, instance, "$", "#", errors, ArrayList<String>())
-        baseUriStack.clear()
-        resourceStack.clear()
+        try {
+            validateSchemaValue(document, instance, "", "#", errors, ArrayList<String>())
+        } finally {
+            baseUriStack.clear()
+            resourceStack.clear()
+            stopAtFirst = false
+            probeDepth = 0
+        }
         errors
     }
 
-    public func isValid(instance: JsonNode): Bool {
-        validate(instance).isEmpty()
-    }
-
-    public func validateOrThrow(instance: JsonNode): Unit {
-        let errors = validate(instance)
-        if (!errors.isEmpty()) {
-            throw errors[0]
+    public func isValid(instance: JsonValueView): Bool {
+        try {
+            let _ = runValidation(instance, true)
+            true
+        } catch (_: JsonSchemaMismatchSignal) {
+            false
         }
     }
 
+    public func validate(document: JsonDocument): JsonSchemaResult {
+        validate(document.root())
+    }
+
+    public func isValid(document: JsonDocument): Bool { isValid(document.root()) }
+
     private func validateSchemaValue(
         schemaValue: JsonNode,
-        instance: JsonNode,
+        instance: JsonValueView,
         jsonPath: String,
         schemaPath: String,
-        errors: ArrayList<JsonValidationError>,
+        errors: ArrayList<JsonSchemaViolation>,
         refStack: ArrayList<String>
     ): Unit {
         consumeEvaluation()
         enforceWorkLimit(validationDepth, schema.config.limits.maxDepth, "schema depth")
         validationDepth++
         try {
-            match (schemaValue) {
-                case boolSchema: JsonBoolValue =>
-                    if (!boolSchema.value) {
+            match (schemaValue.kind()) {
+                case JsonKind.Boolean =>
+                    if (!schemaValue.asBool()) {
                         addError(errors, jsonPath, schemaPath, "boolean schema false rejects every value")
                     }
                     return
-                case objectSchema: JsonObjectValue =>
-                    validateObjectSchema(objectSchema, instance, jsonPath, schemaPath, errors, refStack)
+                case JsonKind.Object =>
+                    validateObjectSchema(schemaValue.asObject(), instance, jsonPath, schemaPath, errors, refStack)
                 case _ =>
                     addError(errors, jsonPath, schemaPath, "schema must be a boolean or object")
             }
@@ -262,11 +317,11 @@ public class JsonSchemaValidator {
     }
 
     private func validateObjectSchema(
-        objectSchema: JsonObjectValue,
-        instance: JsonNode,
+        objectSchema: JsonObject,
+        instance: JsonValueView,
         jsonPath: String,
         schemaPath: String,
-        errors: ArrayList<JsonValidationError>,
+        errors: ArrayList<JsonSchemaViolation>,
         refStack: ArrayList<String>
     ): Unit {
         let inheritedBase = baseUriStack[baseUriStack.size - 1]
@@ -275,26 +330,26 @@ public class JsonSchemaValidator {
         var effectiveResource = inheritedResource
         match (objectSchema.get("$id")) {
             case Some(idValue) =>
-                let idText = idValue.asString().value
+                let idText = idValue.asString()
                 let idWithoutFragment = stripJsonSchemaFragment(idText)
                 effectiveBase = if (objectSchema.equivalentTo(inheritedResource) &&
                     !idWithoutFragment.isEmpty() && stripJsonSchemaFragment(inheritedBase).endsWith(idWithoutFragment)) {
                     inheritedBase
                 } else { resolveJsonSchemaUri(inheritedBase, idText) }
-                if (!idValue.asString().value.contains("#")) { effectiveResource = objectSchema }
+                if (!idValue.asString().contains("#")) { effectiveResource = objectSchema }
             case None => ()
         }
         baseUriStack.add(effectiveBase)
         resourceStack.add(effectiveResource)
         match (objectSchema.get("$ref")) {
             case Some(refValue) =>
-                let refText = refValue.asString().value
+                let refText = refValue.asString()
                 let refKey = refText + "|" + jsonPath
                 if (containsText(refStack, refKey)) {
                     addError(errors, jsonPath, appendSchemaPath(schemaPath, "$ref"), "cyclic $ref ${refText}")
                 } else if (refText == "https://json-schema.org/draft/2020-12/schema" ||
                     refText == "https://json-schema.org/draft/2020-12/schema#") {
-                    try { validateJsonSchemaDocument(instance, "#") }
+                    try { validateJsonSchemaDocument(instance.materialize(), "#") }
                     catch (error: Exception) { addError(errors, jsonPath,
                         appendSchemaPath(schemaPath, "$ref"), error.message) }
                 } else {
@@ -317,7 +372,7 @@ public class JsonSchemaValidator {
 
         match (objectSchema.get("$dynamicRef")) {
             case Some(refValue) =>
-                let refText = refValue.asString().value
+                let refText = refValue.asString()
                 let refKey = "$dynamicRef:" + refText + "|" + jsonPath
                 if (!containsText(refStack, refKey)) {
                     refStack.add(refKey)
@@ -348,7 +403,7 @@ public class JsonSchemaValidator {
 
         match (objectSchema.get("const")) {
             case Some(constSchema) =>
-                if (!constSchema.equivalentTo(instance)) {
+                if (!jsonNodesEquivalent(constSchema, instance)) {
                     addError(errors, jsonPath, appendSchemaPath(schemaPath, "const"), "value must equal const")
                 }
             case None => ()
@@ -381,7 +436,7 @@ public class JsonSchemaValidator {
         validateStringKeywords(objectSchema, instance, jsonPath, schemaPath, errors)
 
         match (objectSchema.get("format")) {
-            case Some(formatValue) => validateFormat(formatValue.asString().value, instance, jsonPath,
+            case Some(formatValue) => validateFormat(formatValue.asString(), instance, jsonPath,
                 appendSchemaPath(schemaPath, "format"), errors)
             case None => ()
         }
@@ -430,9 +485,9 @@ public class JsonSchemaValidator {
 
         match (objectSchema.get("if")) {
             case Some(ifSchema) =>
-                let conditionErrors = ArrayList<JsonValidationError>()
-                validateSchemaValue(ifSchema, instance, jsonPath, appendSchemaPath(schemaPath, "if"), conditionErrors, refStack)
-                let branch = if (conditionErrors.isEmpty()) { "then" } else { "else" }
+                let conditionMatches = probeSchemaValue(ifSchema, instance, jsonPath,
+                    appendSchemaPath(schemaPath, "if"), refStack)
+                let branch = if (conditionMatches) { "then" } else { "else" }
                 match (objectSchema.get(branch)) {
                     case Some(branchSchema) => validateSchemaValue(branchSchema, instance, jsonPath,
                         appendSchemaPath(schemaPath, branch), errors, refStack)
@@ -444,8 +499,8 @@ public class JsonSchemaValidator {
         resourceStack.remove(at: resourceStack.size - 1)
     }
 
-    private func validateExtendedNumericKeywords(objectSchema: JsonObjectValue, instance: JsonNode,
-        jsonPath: String, schemaPath: String, errors: ArrayList<JsonValidationError>): Unit {
+    private func validateExtendedNumericKeywords(objectSchema: JsonObject, instance: JsonValueView,
+        jsonPath: String, schemaPath: String, errors: ArrayList<JsonSchemaViolation>): Unit {
         match (jsonNodeAsDecimal(instance)) {
             case Some(number) =>
                 match (objectSchema.get("exclusiveMinimum")) {
@@ -475,141 +530,186 @@ public class JsonSchemaValidator {
         }
     }
 
-    private func validateStringKeywords(objectSchema: JsonObjectValue, instance: JsonNode,
-        jsonPath: String, schemaPath: String, errors: ArrayList<JsonValidationError>): Unit {
-        match (instance) {
-            case stringValue: JsonStringValue =>
-                match (objectSchema.get("pattern")) {
-                    case Some(patternValue) =>
-                        let pattern = patternValue.asString().value
-                        if (!jsonSchemaRegexFind(pattern, stringValue.value)) {
-                            addError(errors, jsonPath, appendSchemaPath(schemaPath, "pattern"),
-                                "string must match pattern ${pattern}")
-                        }
-                    case None => ()
-                }
-            case _ => ()
+    private func validateStringKeywords(objectSchema: JsonObject, instance: JsonValueView,
+        jsonPath: String, schemaPath: String, errors: ArrayList<JsonSchemaViolation>): Unit {
+        if (instance.kind() == JsonKind.String) {
+            match (objectSchema.get("pattern")) {
+                case Some(patternValue) =>
+                    let pattern = patternValue.asString()
+                    if (!regexFind(pattern, instance.asString())) {
+                        addError(errors, jsonPath, appendSchemaPath(schemaPath, "pattern"),
+                            "string must match pattern ${pattern}")
+                    }
+                case None => ()
+            }
         }
     }
 
-    private func validateObjectKeywords(objectSchema: JsonObjectValue, instance: JsonNode,
-        jsonPath: String, schemaPath: String, errors: ArrayList<JsonValidationError>,
+    private func schemaObjectContains(value: JsonValueView, name: String): Bool {
+        value.member(name).isSome()
+    }
+
+    private func validateObjectKeywords(objectSchema: JsonObject, instance: JsonValueView,
+        jsonPath: String, schemaPath: String, errors: ArrayList<JsonSchemaViolation>,
         refStack: ArrayList<String>): Unit {
-        match (instance) {
-            case objectValue: JsonObjectValue =>
-                validateObjectSizeKeyword(objectSchema, objectValue, jsonPath, schemaPath, "minProperties", true, errors)
-                validateObjectSizeKeyword(objectSchema, objectValue, jsonPath, schemaPath, "maxProperties", false, errors)
-                let matched = HashSet<String>()
-                match (objectSchema.get("properties")) {
-                    case Some(value) => for ((name, _) in value.asObject().entries()) {
-                        if (objectValue.contains(name)) { matched.add(name) }
-                    }
-                    case None => ()
+        if (instance.kind() != JsonKind.Object) { return }
+        let objectValue = instance
+        validateObjectSizeKeyword(objectSchema, objectValue, jsonPath, schemaPath, "minProperties", true, errors)
+        validateObjectSizeKeyword(objectSchema, objectValue, jsonPath, schemaPath, "maxProperties", false, errors)
+        let matched = HashSet<String>()
+        match (objectSchema.get("properties")) {
+            case Some(value) =>
+                let properties = value.asObject()
+                for (index in 0..properties.size()) {
+                    let name = properties.nameAt(index)
+                    if (schemaObjectContains(objectValue, name)) { matched.add(name) }
                 }
-                match (objectSchema.get("patternProperties")) {
-                    case Some(value) => for ((pattern, childSchema) in value.asObject().entries()) {
-                        for ((name, child) in objectValue.entries()) {
-                            if (jsonSchemaRegexFind(pattern, name)) {
+            case None => ()
+        }
+        match (objectSchema.get("patternProperties")) {
+            case Some(value) =>
+                let patterns = value.asObject()
+                for (patternIndex in 0..patterns.size()) {
+                    let pattern = patterns.nameAt(patternIndex)
+                    let childSchema = patterns.valueAt(patternIndex)
+                    for (memberIndex in 0..objectValue.size()) {
+                        let name = objectValue.memberName(memberIndex)
+                        let child = objectValue.memberValue(memberIndex)
+                            if (regexFind(pattern, name)) {
                                 matched.add(name)
                                 validateSchemaValue(childSchema, child, appendJsonPath(jsonPath, name),
                                     appendSchemaPath(appendSchemaPath(schemaPath, "patternProperties"), pattern), errors, refStack)
                             }
-                        }
                     }
-                    case None => ()
                 }
-                match (objectSchema.get("propertyNames")) {
-                    case Some(nameSchema) => for ((name, _) in objectValue.entries()) {
-                        validateSchemaValue(nameSchema, JsonStringValue(name), appendJsonPath(jsonPath, name),
+            case None => ()
+        }
+        match (objectSchema.get("propertyNames")) {
+            case Some(nameSchema) => for (index in 0..objectValue.size()) {
+                        let name = objectValue.memberName(index)
+                        validateSchemaValue(nameSchema, JsonNode.string(name), appendJsonPath(jsonPath, name),
                             appendSchemaPath(schemaPath, "propertyNames"), errors, refStack)
                     }
-                    case None => ()
-                }
-                match (objectSchema.get("dependentRequired")) {
-                    case Some(value) => for ((trigger, requiredValue) in value.asObject().entries()) {
-                        if (objectValue.contains(trigger)) {
+            case None => ()
+        }
+        match (objectSchema.get("dependentRequired")) {
+            case Some(value) =>
+                let dependencies = value.asObject()
+                for (dependencyIndex in 0..dependencies.size()) {
+                    let trigger = dependencies.nameAt(dependencyIndex)
+                    let requiredValue = dependencies.valueAt(dependencyIndex)
+                        if (schemaObjectContains(objectValue, trigger)) {
                             for (index in 0..requiredValue.asArray().size()) {
-                                let requiredName = requiredValue.asArray()[index].asString().value
-                                if (!objectValue.contains(requiredName)) { addError(errors, jsonPath,
+                                let requiredName = requiredValue.asArray()[index].asString()
+                                if (!schemaObjectContains(objectValue, requiredName)) { addError(errors, jsonPath,
                                     appendSchemaPath(appendSchemaPath(schemaPath, "dependentRequired"), trigger),
                                     "property ${trigger} requires property ${requiredName}") }
                             }
                         }
-                    }
-                    case None => ()
                 }
-                match (objectSchema.get("dependentSchemas")) {
-                    case Some(value) => for ((trigger, childSchema) in value.asObject().entries()) {
-                        if (objectValue.contains(trigger)) { validateSchemaValue(childSchema, instance, jsonPath,
+            case None => ()
+        }
+        match (objectSchema.get("dependentSchemas")) {
+            case Some(value) =>
+                let dependencies = value.asObject()
+                for (index in 0..dependencies.size()) {
+                    let trigger = dependencies.nameAt(index)
+                    let childSchema = dependencies.valueAt(index)
+                        if (schemaObjectContains(objectValue, trigger)) { validateSchemaValue(childSchema, instance, jsonPath,
                             appendSchemaPath(appendSchemaPath(schemaPath, "dependentSchemas"), trigger), errors, refStack) }
-                    }
-                    case None => ()
                 }
-                let extraSchema = match (objectSchema.get("additionalProperties")) {
-                    case Some(value) => Some(value)
-                    case None => None<JsonNode>
-                }
-                match (extraSchema) {
-                    case Some(childSchema) => for ((name, child) in objectValue.entries()) {
+            case None => ()
+        }
+        let extraSchema = match (objectSchema.get("additionalProperties")) {
+            case Some(value) => Some(value)
+            case None => None<JsonNode>
+        }
+        match (extraSchema) {
+            case Some(childSchema) => for (index in 0..objectValue.size()) {
+                        let name = objectValue.memberName(index)
+                        let child = objectValue.memberValue(index)
                         if (!matched.contains(name)) { validateSchemaValue(childSchema, child, appendJsonPath(jsonPath, name),
                             appendSchemaPath(schemaPath, "additionalProperties"), errors, refStack) }
                     }
-                    case None => match (objectSchema.get("unevaluatedProperties")) {
-                        case Some(childSchema) =>
-                            let evaluated = collectEvaluatedProperties(objectSchema, objectValue, refStack, true)
-                            for ((name, child) in objectValue.entries()) {
+            case None => match (objectSchema.get("unevaluatedProperties")) {
+                case Some(childSchema) =>
+                    let evaluated = collectEvaluatedProperties(objectSchema, objectValue, refStack, true)
+                    for (index in 0..objectValue.size()) {
+                        let name = objectValue.memberName(index)
+                        let child = objectValue.memberValue(index)
                                 if (!evaluated.contains(name)) { validateSchemaValue(childSchema, child,
                                     appendJsonPath(jsonPath, name), appendSchemaPath(schemaPath, "unevaluatedProperties"),
                                     errors, refStack) }
-                            }
-                        case None => ()
                     }
-                }
-            case _ => ()
+                case None => ()
+            }
         }
     }
 
-    private func schemaValueIsValid(value: JsonNode, instance: JsonNode,
+    private func schemaValueIsValid(value: JsonNode, instance: JsonValueView,
         refStack: ArrayList<String>): Bool {
-        let nested = ArrayList<JsonValidationError>()
-        validateSchemaValue(value, instance, "$", "#", nested, refStack)
-        nested.isEmpty()
+        probeSchemaValue(value, instance, "", "#", refStack)
+    }
+
+    private func probeSchemaValue(value: JsonNode, instance: JsonValueView,
+        jsonPath: String, schemaPath: String, refStack: ArrayList<String>): Bool {
+        let nested = ArrayList<JsonSchemaViolation>()
+        probeDepth++
+        try {
+            validateSchemaValue(value, instance, jsonPath, schemaPath, nested, refStack)
+            nested.isEmpty()
+        } finally {
+            probeDepth--
+        }
     }
 
     private func addEvaluatedPropertiesFromSchema(result: HashSet<String>, value: JsonNode,
-        instance: JsonObjectValue, refStack: ArrayList<String>): Unit {
-        match (value) {
-            case objectValue: JsonObjectValue =>
-                let nested = collectEvaluatedProperties(objectValue, instance, refStack, false)
+        instance: JsonValueView, refStack: ArrayList<String>): Unit {
+        if (value.kind() == JsonKind.Object) {
+                let nested = collectEvaluatedProperties(value.asObject(), instance, refStack, false)
                 for (name in nested) { result.add(name) }
-            case _ => ()
         }
     }
 
-    private func collectEvaluatedProperties(objectSchema: JsonObjectValue, instance: JsonObjectValue,
+    private func collectEvaluatedProperties(objectSchema: JsonObject, instance: JsonValueView,
         refStack: ArrayList<String>, ignoreOwnUnevaluated: Bool): HashSet<String> {
         let result = HashSet<String>()
         match (objectSchema.get("properties")) {
-            case Some(value) => for ((name, _) in value.asObject().entries()) {
-                if (instance.contains(name)) { result.add(name) }
-            }
+            case Some(value) =>
+                let properties = value.asObject()
+                for (index in 0..properties.size()) {
+                    let name = properties.nameAt(index)
+                    if (schemaObjectContains(instance, name)) { result.add(name) }
+                }
             case None => ()
         }
         match (objectSchema.get("patternProperties")) {
-            case Some(value) => for ((pattern, _) in value.asObject().entries()) {
-                for ((name, _) in instance.entries()) { if (jsonSchemaRegexFind(pattern, name)) { result.add(name) } }
-            }
+            case Some(value) =>
+                let patterns = value.asObject()
+                for (patternIndex in 0..patterns.size()) {
+                    let pattern = patterns.nameAt(patternIndex)
+                    for (index in 0..instance.size()) {
+                        let name = instance.memberName(index)
+                        if (regexFind(pattern, name)) { result.add(name) }
+                    }
+                }
             case None => ()
         }
         match (objectSchema.get("additionalProperties")) {
-            case Some(value) => for ((name, child) in instance.entries()) {
+            case Some(value) => for (index in 0..instance.size()) {
+                let name = instance.memberName(index)
+                let child = instance.memberValue(index)
                 if (!result.contains(name) && schemaValueIsValid(value, child, refStack)) { result.add(name) }
             }
             case None => ()
         }
         match (objectSchema.get("dependentSchemas")) {
-            case Some(value) => for ((trigger, childSchema) in value.asObject().entries()) {
-                if (instance.contains(trigger) && schemaValueIsValid(childSchema, instance, refStack)) {
+            case Some(value) =>
+                let dependencies = value.asObject()
+                for (index in 0..dependencies.size()) {
+                    let trigger = dependencies.nameAt(index)
+                    let childSchema = dependencies.valueAt(index)
+                if (schemaObjectContains(instance, trigger) && schemaValueIsValid(childSchema, instance, refStack)) {
                     addEvaluatedPropertiesFromSchema(result, childSchema, instance, refStack)
                 }
             }
@@ -617,7 +717,8 @@ public class JsonSchemaValidator {
         }
         for (keyword in ["allOf", "anyOf", "oneOf"]) {
             match (objectSchema.get(keyword)) {
-                case Some(value) => for (childSchema in value.asArray().values()) {
+                case Some(value) => for (index in 0..value.asArray().size()) {
+                    let childSchema = value.asArray()[index]
                     if (schemaValueIsValid(childSchema, instance, refStack)) {
                         addEvaluatedPropertiesFromSchema(result, childSchema, instance, refStack)
                     }
@@ -641,8 +742,8 @@ public class JsonSchemaValidator {
         for (keyword in ["$ref", "$dynamicRef"]) {
             match (objectSchema.get(keyword)) {
                 case Some(value) => match (if (keyword == "$dynamicRef") {
-                    resolveDynamicRef(value.asString().value)
-                } else { resolveRef(value.asString().value) }) {
+                    resolveDynamicRef(value.asString())
+                } else { resolveRef(value.asString()) }) {
                     case Some(target) =>
                         baseUriStack.add(target.baseUri); resourceStack.add(target.resource)
                         if (schemaValueIsValid(target.value, instance, refStack)) {
@@ -656,7 +757,9 @@ public class JsonSchemaValidator {
         }
         if (!ignoreOwnUnevaluated) {
             match (objectSchema.get("unevaluatedProperties")) {
-                case Some(value) => for ((name, child) in instance.entries()) {
+                case Some(value) => for (index in 0..instance.size()) {
+                    let name = instance.memberName(index)
+                    let child = instance.memberValue(index)
                     if (!result.contains(name) && schemaValueIsValid(value, child, refStack)) { result.add(name) }
                 }
                 case None => ()
@@ -665,9 +768,9 @@ public class JsonSchemaValidator {
         result
     }
 
-    private func validateObjectSizeKeyword(objectSchema: JsonObjectValue, instance: JsonObjectValue,
+    private func validateObjectSizeKeyword(objectSchema: JsonObject, instance: JsonValueView,
         jsonPath: String, schemaPath: String, keyword: String, minimum: Bool,
-        errors: ArrayList<JsonValidationError>): Unit {
+        errors: ArrayList<JsonSchemaViolation>): Unit {
         match (objectSchema.get(keyword)) {
             case Some(value) =>
                 let limit = requireSchemaNonNegativeInt(value, appendSchemaPath(schemaPath, keyword))
@@ -679,18 +782,19 @@ public class JsonSchemaValidator {
         }
     }
 
-    private func validateArrayKeywords(objectSchema: JsonObjectValue, instance: JsonNode,
-        jsonPath: String, schemaPath: String, errors: ArrayList<JsonValidationError>,
+    private func validateArrayKeywords(objectSchema: JsonObject, instance: JsonValueView,
+        jsonPath: String, schemaPath: String, errors: ArrayList<JsonSchemaViolation>,
         refStack: ArrayList<String>): Unit {
-        match (instance) {
-            case arrayValue: JsonArrayValue =>
+        if (instance.kind() == JsonKind.Array) {
+                let arrayValue = instance
                 validateArraySizeKeyword(objectSchema, arrayValue, jsonPath, schemaPath, "minItems", true, errors)
                 validateArraySizeKeyword(objectSchema, arrayValue, jsonPath, schemaPath, "maxItems", false, errors)
                 match (objectSchema.get("uniqueItems")) {
-                    case Some(value) => if (value.asBool().value) {
+                    case Some(value) => if (value.asBool()) {
                         for (i in 0..arrayValue.size()) { for (j in i + 1..arrayValue.size()) {
                             consumeEvaluation()
-                            if (arrayValue[i].equivalentTo(arrayValue[j])) { addError(errors, jsonPath,
+                            if (jsonNodesEquivalent(arrayValue.element(i).getOrThrow(),
+                                arrayValue.element(j).getOrThrow())) { addError(errors, jsonPath,
                                 appendSchemaPath(schemaPath, "uniqueItems"), "array items must be unique"); return }
                         }}
                     }
@@ -701,15 +805,18 @@ public class JsonSchemaValidator {
                     case Some(value) =>
                         let schemas = value.asArray(); prefixCount = schemas.size()
                         let limit = if (arrayValue.size() < schemas.size()) { arrayValue.size() } else { schemas.size() }
-                        for (index in 0..limit) { validateSchemaValue(schemas[index], arrayValue[index],
-                            "${jsonPath}[${index}]", appendSchemaPath(appendSchemaPath(schemaPath, "prefixItems"), index.toString()),
+                        for (index in 0..limit) { validateSchemaValue(schemas[index], arrayValue.element(index).getOrThrow(),
+                            appendJsonPath(jsonPath, index.toString()),
+                            appendSchemaPath(appendSchemaPath(schemaPath, "prefixItems"), index.toString()),
                             errors, refStack) }
                     case None => ()
                 }
                 match (objectSchema.get("items")) {
                     case Some(itemSchema) => if (objectSchema.get("prefixItems").isSome()) {
-                        for (index in prefixCount..arrayValue.size()) { validateSchemaValue(itemSchema, arrayValue[index],
-                            "${jsonPath}[${index}]", appendSchemaPath(schemaPath, "items"), errors, refStack) }
+                        for (index in prefixCount..arrayValue.size()) { validateSchemaValue(itemSchema,
+                            arrayValue.element(index).getOrThrow(),
+                            appendJsonPath(jsonPath, index.toString()),
+                            appendSchemaPath(schemaPath, "items"), errors, refStack) }
                     }
                     case None => ()
                 }
@@ -718,8 +825,10 @@ public class JsonSchemaValidator {
                         case Some(childSchema) =>
                             let evaluated = collectEvaluatedItems(objectSchema, arrayValue, refStack, true)
                             for (index in 0..arrayValue.size()) {
-                                if (!evaluated.contains(index)) { validateSchemaValue(childSchema, arrayValue[index],
-                                    "${jsonPath}[${index}]", appendSchemaPath(schemaPath, "unevaluatedItems"),
+                                if (!evaluated.contains(index)) { validateSchemaValue(childSchema,
+                                    arrayValue.element(index).getOrThrow(),
+                                    appendJsonPath(jsonPath, index.toString()),
+                                    appendSchemaPath(schemaPath, "unevaluatedItems"),
                                     errors, refStack) }
                             }
                         case None => ()
@@ -729,10 +838,9 @@ public class JsonSchemaValidator {
                     case Some(containsSchema) =>
                         var count: Int64 = 0
                         for (index in 0..arrayValue.size()) {
-                            let nested = ArrayList<JsonValidationError>()
-                            validateSchemaValue(containsSchema, arrayValue[index], "${jsonPath}[${index}]",
-                                appendSchemaPath(schemaPath, "contains"), nested, refStack)
-                            if (nested.isEmpty()) { count++ }
+                            if (probeSchemaValue(containsSchema, arrayValue.element(index).getOrThrow(),
+                                appendJsonPath(jsonPath, index.toString()),
+                                appendSchemaPath(schemaPath, "contains"), refStack)) { count++ }
                         }
                         let minimum = match (objectSchema.get("minContains")) { case Some(v) => requireSchemaNonNegativeInt(v,
                             appendSchemaPath(schemaPath, "minContains")); case None => 1 }
@@ -744,21 +852,18 @@ public class JsonSchemaValidator {
                         }
                     case None => ()
                 }
-            case _ => ()
         }
     }
 
     private func addEvaluatedItemsFromSchema(result: HashSet<Int64>, value: JsonNode,
-        instance: JsonArrayValue, refStack: ArrayList<String>): Unit {
-        match (value) {
-            case objectValue: JsonObjectValue =>
-                let nested = collectEvaluatedItems(objectValue, instance, refStack, false)
+        instance: JsonValueView, refStack: ArrayList<String>): Unit {
+        if (value.kind() == JsonKind.Object) {
+                let nested = collectEvaluatedItems(value.asObject(), instance, refStack, false)
                 for (index in nested) { result.add(index) }
-            case _ => ()
         }
     }
 
-    private func collectEvaluatedItems(objectSchema: JsonObjectValue, instance: JsonArrayValue,
+    private func collectEvaluatedItems(objectSchema: JsonObject, instance: JsonValueView,
         refStack: ArrayList<String>, ignoreOwnUnevaluated: Bool): HashSet<Int64> {
         let result = HashSet<Int64>()
         var prefixCount: Int64 = 0
@@ -775,13 +880,14 @@ public class JsonSchemaValidator {
         }
         match (objectSchema.get("contains")) {
             case Some(value) => for (index in 0..instance.size()) {
-                if (schemaValueIsValid(value, instance[index], refStack)) { result.add(index) }
+                if (schemaValueIsValid(value, instance.element(index).getOrThrow(), refStack)) { result.add(index) }
             }
             case None => ()
         }
         for (keyword in ["allOf", "anyOf", "oneOf"]) {
             match (objectSchema.get(keyword)) {
-                case Some(value) => for (childSchema in value.asArray().values()) {
+                case Some(value) => for (index in 0..value.asArray().size()) {
+                    let childSchema = value.asArray()[index]
                     if (schemaValueIsValid(childSchema, instance, refStack)) {
                         addEvaluatedItemsFromSchema(result, childSchema, instance, refStack)
                     }
@@ -805,8 +911,8 @@ public class JsonSchemaValidator {
         for (keyword in ["$ref", "$dynamicRef"]) {
             match (objectSchema.get(keyword)) {
                 case Some(value) => match (if (keyword == "$dynamicRef") {
-                    resolveDynamicRef(value.asString().value)
-                } else { resolveRef(value.asString().value) }) {
+                    resolveDynamicRef(value.asString())
+                } else { resolveRef(value.asString()) }) {
                     case Some(target) =>
                         baseUriStack.add(target.baseUri); resourceStack.add(target.resource)
                         if (schemaValueIsValid(target.value, instance, refStack)) {
@@ -821,7 +927,8 @@ public class JsonSchemaValidator {
         if (!ignoreOwnUnevaluated) {
             match (objectSchema.get("unevaluatedItems")) {
                 case Some(value) => for (index in 0..instance.size()) {
-                    if (!result.contains(index) && schemaValueIsValid(value, instance[index], refStack)) { result.add(index) }
+                    if (!result.contains(index) && schemaValueIsValid(value,
+                        instance.element(index).getOrThrow(), refStack)) { result.add(index) }
                 }
                 case None => ()
             }
@@ -829,9 +936,9 @@ public class JsonSchemaValidator {
         result
     }
 
-    private func validateArraySizeKeyword(objectSchema: JsonObjectValue, instance: JsonArrayValue,
+    private func validateArraySizeKeyword(objectSchema: JsonObject, instance: JsonValueView,
         jsonPath: String, schemaPath: String, keyword: String, minimum: Bool,
-        errors: ArrayList<JsonValidationError>): Unit {
+        errors: ArrayList<JsonSchemaViolation>): Unit {
         match (objectSchema.get(keyword)) {
             case Some(value) =>
                 let limit = requireSchemaNonNegativeInt(value, appendSchemaPath(schemaPath, keyword))
@@ -870,14 +977,11 @@ public class JsonSchemaValidator {
                 adoptPointerResource: fragment.startsWith("#/"))
             case None => ()
         }
-        match (schema.config.resolver) {
-            case Some(resolver) => match (resolver.resolve(resourceUri)) {
-                case Some(resource) => return attachJsonSchemaResolutionContext(
-                    resolveSchemaFragment(resource, fragment, absolute), resourceUri, resource,
-                    adoptPointerResource: fragment.startsWith("#/"))
-                case None => return None<JsonSchemaResolvedRef>
-            }
-            case None => return None<JsonSchemaResolvedRef>
+        match (schema.compiledResource(resourceUri)) {
+            case Some(resource) => attachJsonSchemaResolutionContext(
+                resolveSchemaFragment(resource, fragment, absolute), resourceUri, resource,
+                adoptPointerResource: fragment.startsWith("#/"))
+            case None => None<JsonSchemaResolvedRef>
         }
     }
 
@@ -906,41 +1010,50 @@ public class JsonSchemaValidator {
         staticallyResolved
     }
 
-    private func validateFormat(format: String, instance: JsonNode, jsonPath: String,
-        schemaPath: String, errors: ArrayList<JsonValidationError>): Unit {
+    private func validateFormat(format: String, instance: JsonValueView, jsonPath: String,
+        schemaPath: String, errors: ArrayList<JsonSchemaViolation>): Unit {
         if (let Annotation <- schema.config.formatMode) { return }
-        match (instance) {
-            case stringValue: JsonStringValue =>
+        if (instance.kind() == JsonKind.String) {
                 match (schema.config.formats.resolve(format)) {
-                    case Some(assertion) => if (!assertion.validate(stringValue.value)) {
+                    case Some(assertion: CoreJsonSchemaFormat) =>
+                        if (!assertion.validateWithBudget(instance.asString(), regexBudget)) {
+                            addError(errors, jsonPath, schemaPath, "string does not satisfy format ${format}")
+                        }
+                    case Some(assertion) => if (!assertion.validate(instance.asString())) {
                         addError(errors, jsonPath, schemaPath, "string does not satisfy format ${format}")
                     }
-                    case None => if (let StrictAssertion <- schema.config.formatMode) {
-                        addError(errors, jsonPath, schemaPath, "schema format ${format} is not registered",
-                            code: "unsupported_schema_format")
-                    }
+                    case None => ()
                 }
-            case _ => ()
+        }
+    }
+
+    private func regexFind(pattern: String, value: String): Bool {
+        match (schema.compiledRegex(pattern)) {
+            case Some(regex) => regex.find(value, regexBudget)
+            case None => throw JsonException("Schema regex was not compiled: ${pattern}",
+                code: "invalid_regex")
         }
     }
 
     private func validateType(
         typeSchema: JsonNode,
-        instance: JsonNode,
+        instance: JsonValueView,
         jsonPath: String,
         schemaPath: String,
-        errors: ArrayList<JsonValidationError>
+        errors: ArrayList<JsonSchemaViolation>
     ): Unit {
-        match (typeSchema) {
-            case typeName: JsonStringValue =>
-                if (!jsonSchemaMatchesType(instance, typeName.value)) {
-                    addError(errors, jsonPath, schemaPath, "expected type ${typeName.value}, got ${jsonSchemaInstanceType(instance)}")
+        match (typeSchema.kind()) {
+            case JsonKind.String =>
+                let typeName = typeSchema.asString()
+                if (!jsonSchemaMatchesType(instance, typeName)) {
+                    addError(errors, jsonPath, schemaPath, "expected type ${typeName}, got ${jsonSchemaInstanceType(instance)}")
                 }
-            case typeNames: JsonArrayValue =>
+            case JsonKind.Array =>
+                let typeNames = typeSchema.asArray()
                 var matched = false
                 let expected = ArrayList<String>()
                 for (index in 0..typeNames.size()) {
-                    let name = typeNames[index].asString().value
+                    let name = typeNames[index].asString()
                     expected.add(name)
                     if (jsonSchemaMatchesType(instance, name)) {
                         matched = true
@@ -955,14 +1068,14 @@ public class JsonSchemaValidator {
 
     private func validateEnum(
         enumSchema: JsonNode,
-        instance: JsonNode,
+        instance: JsonValueView,
         jsonPath: String,
         schemaPath: String,
-        errors: ArrayList<JsonValidationError>
+        errors: ArrayList<JsonSchemaViolation>
     ): Unit {
         let values = enumSchema.asArray()
-        for (candidate in values.values()) {
-            if (candidate.equivalentTo(instance)) {
+        for (index in 0..values.size()) {
+            if (jsonNodesEquivalent(values[index], instance)) {
                 return
             }
         }
@@ -971,11 +1084,11 @@ public class JsonSchemaValidator {
 
     private func validateNumericLimit(
         limitSchema: JsonNode,
-        instance: JsonNode,
+        instance: JsonValueView,
         jsonPath: String,
         schemaPath: String,
         minimum: Bool,
-        errors: ArrayList<JsonValidationError>
+        errors: ArrayList<JsonSchemaViolation>
     ): Unit {
         match (jsonNodeAsDecimal(instance)) {
             case Some(instanceNumber) =>
@@ -992,59 +1105,56 @@ public class JsonSchemaValidator {
 
     private func validateStringLength(
         lengthSchema: JsonNode,
-        instance: JsonNode,
+        instance: JsonValueView,
         jsonPath: String,
         schemaPath: String,
         minimum: Bool,
-        errors: ArrayList<JsonValidationError>
+        errors: ArrayList<JsonSchemaViolation>
     ): Unit {
-        match (instance) {
-            case stringValue: JsonStringValue =>
+        if (instance.kind() == JsonKind.String) {
                 let limit = requireSchemaNonNegativeInt(lengthSchema, schemaPath)
-                let actual = stringValue.value.toRuneArray().size
+                let actual = instance.asString().toRuneArray().size
                 if (minimum && actual < limit) {
                     addError(errors, jsonPath, schemaPath, "string length must be >= ${limit}")
                 }
                 if (!minimum && actual > limit) {
                     addError(errors, jsonPath, schemaPath, "string length must be <= ${limit}")
                 }
-            case _ => ()
         }
     }
 
     private func validateRequired(
         requiredSchema: JsonNode,
-        instance: JsonNode,
+        instance: JsonValueView,
         jsonPath: String,
         schemaPath: String,
-        errors: ArrayList<JsonValidationError>
+        errors: ArrayList<JsonSchemaViolation>
     ): Unit {
-        match (instance) {
-            case objectValue: JsonObjectValue =>
+        if (instance.kind() == JsonKind.Object) {
                 let required = requiredSchema.asArray()
                 for (index in 0..required.size()) {
-                    let field = required[index].asString().value
-                    if (!objectValue.contains(field)) {
+                    let field = required[index].asString()
+                    if (instance.member(field).isNone()) {
                         addError(errors, jsonPath, appendSchemaPath(schemaPath, index.toString()), "missing required property ${field}")
                     }
                 }
-            case _ => ()
         }
     }
 
     private func validateProperties(
         propertiesSchema: JsonNode,
-        instance: JsonNode,
+        instance: JsonValueView,
         jsonPath: String,
         schemaPath: String,
-        errors: ArrayList<JsonValidationError>,
+        errors: ArrayList<JsonSchemaViolation>,
         refStack: ArrayList<String>
     ): Unit {
         let properties = propertiesSchema.asObject()
-        match (instance) {
-            case objectValue: JsonObjectValue =>
-                for ((field, childSchema) in properties.entries()) {
-                    match (objectValue.get(field)) {
+        if (instance.kind() == JsonKind.Object) {
+                for (index in 0..properties.size()) {
+                    let field = properties.nameAt(index)
+                    let childSchema = properties.valueAt(index)
+                    match (instance.member(field)) {
                         case Some(child) =>
                             validateSchemaValue(
                                 childSchema,
@@ -1057,33 +1167,31 @@ public class JsonSchemaValidator {
                         case None => ()
                     }
                 }
-            case _ => ()
         }
     }
 
     private func validateItems(
         itemsSchema: JsonNode,
-        instance: JsonNode,
+        instance: JsonValueView,
         jsonPath: String,
         schemaPath: String,
-        errors: ArrayList<JsonValidationError>,
+        errors: ArrayList<JsonSchemaViolation>,
         refStack: ArrayList<String>
     ): Unit {
-        match (instance) {
-            case arrayValue: JsonArrayValue =>
-                for (index in 0..arrayValue.size()) {
-                    validateSchemaValue(itemsSchema, arrayValue[index], "${jsonPath}[${index}]", schemaPath, errors, refStack)
+        if (instance.kind() == JsonKind.Array) {
+                for (index in 0..instance.size()) {
+                    validateSchemaValue(itemsSchema, instance.element(index).getOrThrow(),
+                        appendJsonPath(jsonPath, index.toString()), schemaPath, errors, refStack)
                 }
-            case _ => ()
         }
     }
 
     private func validateAllOf(
         combinatorSchema: JsonNode,
-        instance: JsonNode,
+        instance: JsonValueView,
         jsonPath: String,
         schemaPath: String,
-        errors: ArrayList<JsonValidationError>,
+        errors: ArrayList<JsonSchemaViolation>,
         refStack: ArrayList<String>
     ): Unit {
         let schemas = combinatorSchema.asArray()
@@ -1094,17 +1202,16 @@ public class JsonSchemaValidator {
 
     private func validateAnyOf(
         combinatorSchema: JsonNode,
-        instance: JsonNode,
+        instance: JsonValueView,
         jsonPath: String,
         schemaPath: String,
-        errors: ArrayList<JsonValidationError>,
+        errors: ArrayList<JsonSchemaViolation>,
         refStack: ArrayList<String>
     ): Unit {
         let schemas = combinatorSchema.asArray()
         for (index in 0..schemas.size()) {
-            let nestedErrors = ArrayList<JsonValidationError>()
-            validateSchemaValue(schemas[index], instance, jsonPath, appendSchemaPath(schemaPath, index.toString()), nestedErrors, refStack)
-            if (nestedErrors.isEmpty()) {
+            if (probeSchemaValue(schemas[index], instance, jsonPath,
+                appendSchemaPath(schemaPath, index.toString()), refStack)) {
                 return
             }
         }
@@ -1113,18 +1220,17 @@ public class JsonSchemaValidator {
 
     private func validateOneOf(
         combinatorSchema: JsonNode,
-        instance: JsonNode,
+        instance: JsonValueView,
         jsonPath: String,
         schemaPath: String,
-        errors: ArrayList<JsonValidationError>,
+        errors: ArrayList<JsonSchemaViolation>,
         refStack: ArrayList<String>
     ): Unit {
         let schemas = combinatorSchema.asArray()
         var matches = 0
         for (index in 0..schemas.size()) {
-            let nestedErrors = ArrayList<JsonValidationError>()
-            validateSchemaValue(schemas[index], instance, jsonPath, appendSchemaPath(schemaPath, index.toString()), nestedErrors, refStack)
-            if (nestedErrors.isEmpty()) {
+            if (probeSchemaValue(schemas[index], instance, jsonPath,
+                appendSchemaPath(schemaPath, index.toString()), refStack)) {
                 matches++
             }
         }
@@ -1135,15 +1241,13 @@ public class JsonSchemaValidator {
 
     private func validateNot(
         notSchema: JsonNode,
-        instance: JsonNode,
+        instance: JsonValueView,
         jsonPath: String,
         schemaPath: String,
-        errors: ArrayList<JsonValidationError>,
+        errors: ArrayList<JsonSchemaViolation>,
         refStack: ArrayList<String>
     ): Unit {
-        let nestedErrors = ArrayList<JsonValidationError>()
-        validateSchemaValue(notSchema, instance, jsonPath, schemaPath, nestedErrors, refStack)
-        if (nestedErrors.isEmpty()) {
+        if (probeSchemaValue(notSchema, instance, jsonPath, schemaPath, refStack)) {
             addError(errors, jsonPath, schemaPath, "value must not match this schema")
         }
     }
@@ -1153,10 +1257,11 @@ public class JsonSchemaValidator {
         enforceWorkLimit(evaluationCount, schema.config.limits.maxEvaluations, "schema evaluations")
     }
 
-    private func addError(errors: ArrayList<JsonValidationError>, jsonPath: String,
+    private func addError(errors: ArrayList<JsonSchemaViolation>, jsonPath: String,
         schemaPath: String, message: String, code!: String = "schema_validation"): Unit {
+        if (stopAtFirst && probeDepth == 0) { throw JsonSchemaMismatchSignal() }
         enforceWorkLimit(errors.size + 1, schema.config.limits.maxErrors, "schema errors")
-        errors.add(JsonValidationError(jsonPath, schemaPath, message, code: code))
+        errors.add(JsonSchemaViolation(jsonPath, schemaPath, message, code: code))
     }
 }
 
@@ -1167,7 +1272,7 @@ private class JsonSchemaResolvedRef {
     public let resource: JsonNode
 
     public init(value: JsonNode, schemaPath: String, baseUri!: String = "",
-        resource!: JsonNode = JsonNullValue()) {
+        resource!: JsonNode = JsonNode.nullValue) {
         this.value = value
         this.schemaPath = schemaPath
         this.baseUri = baseUri
@@ -1186,10 +1291,10 @@ private func attachJsonSchemaResolutionContext(result: Option<JsonSchemaResolved
     match (result) {
         case Some(found) =>
             if (adoptPointerResource) { match (found.value) {
-                case objectValue: JsonObjectValue => match (objectValue.get("$id")) {
+                case objectValue: JsonObject => match (objectValue.get("$id")) {
                     case Some(idValue) =>
                         let nestedBase = stripJsonSchemaFragment(resolveJsonSchemaUri(baseUri,
-                            idValue.asString().value))
+                            idValue.asString()))
                         return Some(JsonSchemaResolvedRef(found.value, found.schemaPath,
                             baseUri: nestedBase, resource: found.value))
                     case None => ()
@@ -1205,11 +1310,11 @@ private func attachJsonSchemaResolutionContext(result: Option<JsonSchemaResolved
 private func findJsonSchemaResource(node: JsonNode, inheritedBase: String,
     target: String): Option<JsonSchemaResource> {
     match (node) {
-        case objectValue: JsonObjectValue =>
+        case objectValue: JsonObject =>
             var base = inheritedBase
             match (objectValue.get("$id")) {
                 case Some(idValue) =>
-                    base = stripJsonSchemaFragment(resolveJsonSchemaUri(inheritedBase, idValue.asString().value))
+                    base = stripJsonSchemaFragment(resolveJsonSchemaUri(inheritedBase, idValue.asString()))
                     if (base == target) { return Some(JsonSchemaResource(node, base)) }
                 case None => ()
             }
@@ -1222,6 +1327,105 @@ private func findJsonSchemaResource(node: JsonNode, inheritedBase: String,
         case _ => ()
     }
     None<JsonSchemaResource>
+}
+
+private func compileJsonSchemaResourceGraph(root: JsonNode,
+    resolver: Option<UriResolver>, limits: JsonSchemaLimits): HashMap<String, JsonNode> {
+    let resources = HashMap<String, JsonNode>()
+    let pending = ArrayList<String>()
+    let scheduled = HashSet<String>()
+    collectJsonSchemaResourceDependencies(root, "", root, resources, pending, scheduled)
+    var cursor: Int64 = 0
+    var resolutions: Int64 = 0
+    while (cursor < pending.size) {
+        let uri = pending[cursor]
+        cursor++
+        if (jsonSchemaResourceIsAvailable(root, resources, uri)) { continue }
+        match (resolver) {
+            case Some(source) =>
+                resolutions++
+                enforceWorkLimit(resolutions, limits.maxRefResolutions,
+                    "compile-time reference resolutions")
+                match (source.resolve(uri)) {
+                    case Some(resolved) =>
+                        let detached = resolved.deepCopy()
+                        validateJsonSchemaDocument(detached, "#")
+                        resources[uri] = detached
+                        indexJsonSchemaCompiledResources(detached, uri, resources)
+                        collectJsonSchemaResourceDependencies(detached, uri, root,
+                            resources, pending, scheduled)
+                    case None => ()
+                }
+            case None => ()
+        }
+    }
+    resources
+}
+
+private func collectJsonSchemaResourceDependencies(node: JsonNode,
+    inheritedBase: String, root: JsonNode, resources: HashMap<String, JsonNode>,
+    pending: ArrayList<String>, scheduled: HashSet<String>): Unit {
+    match (node) {
+        case objectValue: JsonObject =>
+            var base = inheritedBase
+            match (objectValue.get("$id")) {
+                case Some(idValue) => base = stripJsonSchemaFragment(
+                    resolveJsonSchemaUri(inheritedBase, idValue.asString()))
+                case None => ()
+            }
+            for (keyword in ["$ref", "$dynamicRef", "$schema"]) {
+                match (objectValue.get(keyword)) {
+                    case Some(referenceValue) => if (referenceValue.kind() == JsonKind.String) {
+                        let absolute = resolveJsonSchemaUri(base, referenceValue.asString())
+                        let uri = stripJsonSchemaFragment(absolute)
+                        if (!uri.isEmpty() && uri != stripJsonSchemaFragment(base) &&
+                            !jsonSchemaKnownMetaResource(uri) &&
+                            !jsonSchemaResourceIsAvailable(root, resources, uri) &&
+                            !scheduled.contains(uri)) {
+                            scheduled.add(uri)
+                            pending.add(uri)
+                        }
+                    }
+                    case None => ()
+                }
+            }
+            for (child in jsonSchemaChildSchemas(objectValue)) {
+                collectJsonSchemaResourceDependencies(child, base, root,
+                    resources, pending, scheduled)
+            }
+        case _ => ()
+    }
+}
+
+private func indexJsonSchemaCompiledResources(node: JsonNode,
+    inheritedBase: String, resources: HashMap<String, JsonNode>): Unit {
+    match (node) {
+        case objectValue: JsonObject =>
+            var base = inheritedBase
+            match (objectValue.get("$id")) {
+                case Some(idValue) =>
+                    base = stripJsonSchemaFragment(resolveJsonSchemaUri(
+                        inheritedBase, idValue.asString()))
+                    if (!base.isEmpty() && resources.get(base).isNone()) {
+                        resources[base] = node
+                    }
+                case None => ()
+            }
+            for (child in jsonSchemaChildSchemas(objectValue)) {
+                indexJsonSchemaCompiledResources(child, base, resources)
+            }
+        case _ => ()
+    }
+}
+
+private func jsonSchemaResourceIsAvailable(root: JsonNode,
+    resources: HashMap<String, JsonNode>, uri: String): Bool {
+    if (resources.get(uri).isSome()) { return true }
+    findJsonSchemaResource(root, "", uri).isSome()
+}
+
+private func jsonSchemaKnownMetaResource(uri: String): Bool {
+    uri == "https://json-schema.org/draft/2020-12/schema"
 }
 
 private func stripJsonSchemaFragment(uri: String): String {
@@ -1297,7 +1501,8 @@ private func resolveSchemaFragment(resource: JsonNode, fragment: String,
     if (fragment == "#" || fragment.isEmpty()) { return Some(JsonSchemaResolvedRef(resource, displayPath)) }
     if (fragment.startsWith("#/")) {
         try {
-            return Some(JsonSchemaResolvedRef(JsonPointer.parseUriFragment(fragment).evaluate(resource), displayPath))
+            return Some(JsonSchemaResolvedRef(
+                JsonPointer.parseUriFragment(fragment).evaluate(resource).materialize(), displayPath))
         } catch (_: JsonException) {
             return None<JsonSchemaResolvedRef>
         }
@@ -1316,11 +1521,11 @@ private func findJsonSchemaAnchor(node: JsonNode, anchor: String,
 private func findJsonSchemaAnchorInResource(node: JsonNode, anchor: String,
     schemaPath: String, resourceRoot: Bool): Option<JsonSchemaResolvedRef> {
     match (node) {
-        case objectValue: JsonObjectValue =>
+        case objectValue: JsonObject =>
             if (!resourceRoot && objectValue.contains("$id")) { return None<JsonSchemaResolvedRef> }
             for (keyword in ["$anchor", "$dynamicAnchor"]) {
                 match (objectValue.get(keyword)) {
-                    case Some(value) => if (value.asString().value == anchor) {
+                    case Some(value) => if (value.asString() == anchor) {
                         return Some(JsonSchemaResolvedRef(node, schemaPath + "#" + anchor))
                     }
                     case None => ()
@@ -1354,6 +1559,11 @@ private class CoreJsonSchemaFormat <: JsonSchemaFormat {
     public init(name: String) { this.name = name }
 
     public func validate(value: String): Bool {
+        validateWithBudget(value, LinearRegexBudget(JsonSchemaLimits.defaults.maxRegexSteps,
+            "JSON Schema format regex steps"))
+    }
+
+    func validateWithBudget(value: String, budget: LinearRegexBudget): Bool {
         match (name) {
             case "date" => jsonSchemaIsDate(value)
             case "time" => jsonSchemaIsTime(value)
@@ -1362,15 +1572,27 @@ private class CoreJsonSchemaFormat <: JsonSchemaFormat {
             case "email" => jsonSchemaIsEmail(value, false)
             case "ipv4" => jsonSchemaIsIpv4(value)
             case "ipv6" => jsonSchemaIsIpv6(value)
-            case "uuid" => value.size == 36 && Regex(
-                "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
-                Array<RegexFlag>()).matches(value)
-            case "regex" => jsonSchemaIsEcmaRegex(value)
+            case "uuid" => jsonSchemaIsUuid(value)
+            case "regex" => jsonSchemaIsEcmaRegex(value, budget)
             case "json-pointer" => try { let _ = JsonPointer.parse(value); true } catch (_: Exception) { false }
             case "relative-json-pointer" => jsonSchemaIsRelativePointer(value)
             case _ => false
         }
     }
+}
+
+private func jsonSchemaIsUuid(value: String): Bool {
+    if (value.size != 36) { return false }
+    for (index in 0..value.size) {
+        if (index == 8 || index == 13 || index == 18 || index == 23) {
+            if (value[index] != b'-') { return false }
+        } else {
+            let byte = value[index]
+            if (!((byte >= b'0' && byte <= b'9') || (byte >= b'A' && byte <= b'F') ||
+                (byte >= b'a' && byte <= b'f'))) { return false }
+        }
+    }
+    true
 }
 
 private func jsonSchemaIsDate(value: String): Bool {
@@ -1516,8 +1738,8 @@ private func jsonSchemaIsHex(value: Byte): Bool {
 
 private func jsonSchemaNodeHasDynamicAnchor(node: JsonNode, anchor: String): Bool {
     match (node) {
-        case objectValue: JsonObjectValue => match (objectValue.get("$dynamicAnchor")) {
-            case Some(value) => value.asString().value == anchor
+        case objectValue: JsonObject => match (objectValue.get("$dynamicAnchor")) {
+            case Some(value) => value.asString() == anchor
             case None => false
         }
         case _ => false
@@ -1532,10 +1754,10 @@ private func findJsonSchemaDynamicAnchor(node: JsonNode, anchor: String,
 private func findJsonSchemaDynamicAnchorInResource(node: JsonNode, anchor: String,
     baseUri: String, resourceRoot: Bool): Option<JsonSchemaResolvedRef> {
     match (node) {
-        case objectValue: JsonObjectValue =>
+        case objectValue: JsonObject =>
             if (!resourceRoot && objectValue.contains("$id")) { return None<JsonSchemaResolvedRef> }
             match (objectValue.get("$dynamicAnchor")) {
-                case Some(value) => if (value.asString().value == anchor) {
+                case Some(value) => if (value.asString() == anchor) {
                     return Some(JsonSchemaResolvedRef(node, baseUri + "#" + anchor,
                         baseUri: baseUri, resource: if (resourceRoot) { node } else { node }))
                 }
@@ -1553,7 +1775,7 @@ private func findJsonSchemaDynamicAnchorInResource(node: JsonNode, anchor: Strin
     None<JsonSchemaResolvedRef>
 }
 
-private func jsonSchemaChildSchemas(objectValue: JsonObjectValue): ArrayList<JsonNode> {
+private func jsonSchemaChildSchemas(objectValue: JsonObject): ArrayList<JsonNode> {
     let result = ArrayList<JsonNode>()
     for (keyword in ["additionalProperties", "contains", "contentSchema", "else", "if", "items",
         "not", "propertyNames", "then", "unevaluatedItems", "unevaluatedProperties"]) {
@@ -1561,17 +1783,58 @@ private func jsonSchemaChildSchemas(objectValue: JsonObjectValue): ArrayList<Jso
     }
     for (keyword in ["allOf", "anyOf", "oneOf", "prefixItems"]) {
         match (objectValue.get(keyword)) {
-            case Some(children) => for (child in children.asArray().values()) { result.add(child) }
+            case Some(children) =>
+                let array = children.asArray()
+                for (index in 0..array.size()) { result.add(array[index]) }
             case None => ()
         }
     }
     for (keyword in ["$defs", "definitions", "dependentSchemas", "patternProperties", "properties"]) {
         match (objectValue.get(keyword)) {
-            case Some(children) => for ((_, child) in children.asObject().entries()) { result.add(child) }
+            case Some(children) =>
+                let object = children.asObject()
+                for (index in 0..object.size()) { result.add(object.valueAt(index)) }
             case None => ()
         }
     }
     result
+}
+
+private func compileJsonSchemaRegexes(document: JsonNode,
+    resources: HashMap<String, JsonNode>, limits: JsonSchemaLimits): HashMap<String, LinearRegex> {
+    let result = HashMap<String, LinearRegex>()
+    let budget = LinearRegexBudget(limits.maxRegexSteps, "JSON Schema regex compilation steps")
+    collectJsonSchemaRegexes(document, result, budget)
+    for ((_, resource) in resources) { collectJsonSchemaRegexes(resource, result, budget) }
+    result
+}
+
+private func collectJsonSchemaRegexes(node: JsonNode,
+    result: HashMap<String, LinearRegex>, budget: LinearRegexBudget): Unit {
+    match (node) {
+        case objectValue: JsonObject =>
+            match (objectValue.get("pattern")) {
+                case Some(patternValue) => compileJsonSchemaRegex(patternValue.asString(), result, budget)
+                case None => ()
+            }
+            match (objectValue.get("patternProperties")) {
+                case Some(patternProperties) =>
+                    let patterns = patternProperties.asObject()
+                    for (index in 0..patterns.size()) {
+                        compileJsonSchemaRegex(patterns.nameAt(index), result, budget)
+                    }
+                case None => ()
+            }
+            for (child in jsonSchemaChildSchemas(objectValue)) {
+                collectJsonSchemaRegexes(child, result, budget)
+            }
+        case _ => ()
+    }
+}
+
+private func compileJsonSchemaRegex(pattern: String,
+    result: HashMap<String, LinearRegex>, budget: LinearRegexBudget): Unit {
+    if (result.get(pattern).isNone()) { result[pattern] = LinearRegex.compile(pattern, budget) }
 }
 
 private func jsonSchemaIsIpv4(value: String): Bool {
@@ -1638,56 +1901,15 @@ private func splitJsonSchemaAscii(value: String, separator: Byte): ArrayList<Str
     result.add(value[start..value.size]); result
 }
 
-private func jsonSchemaRegexFind(pattern: String, value: String): Bool {
-    if (pattern == "^\\p{Letter}+$") {
-        let runes = value.toRuneArray()
-        if (runes.isEmpty()) { return false }
-        for (rune in runes) { if (!rune.isLetter()) { return false } }
-        return true
-    }
-    if (pattern == "^\\D$" || pattern == "^\\W$" || pattern == "^\\s$" || pattern == "^\\S$") {
-        let runes = value.toRuneArray()
-        if (runes.size != 1) { return false }
-        let rune = runes[0]
-        let asciiDigit = rune >= r'0' && rune <= r'9'
-        let asciiWord = asciiDigit || (rune >= r'A' && rune <= r'Z') ||
-            (rune >= r'a' && rune <= r'z') || rune == r'_'
-        let whitespace = rune.isWhiteSpace() || rune == r'\u{FEFF}'
-        if (pattern == "^\\D$") { return !asciiDigit }
-        if (pattern == "^\\W$") { return !asciiWord }
-        if (pattern == "^\\s$") { return whitespace }
-        return !whitespace
-    }
-    if (pattern == "^\\p{digit}+$") {
-        let runes = value.toRuneArray(); if (runes.isEmpty()) { return false }
-        for (rune in runes) { if (!rune.isNumber()) { return false } }; return true
-    }
-    if (pattern == "\\p{Letter}cole") {
-        let runes = value.toRuneArray()
-        for (index in 0..runes.size) {
-            if (runes[index].isLetter() && index + 4 < runes.size && runes[index + 1] == r'c' &&
-                runes[index + 2] == r'o' && runes[index + 3] == r'l' && runes[index + 4] == r'e') { return true }
-        }
-        return false
-    }
-    if (pattern == "^🐲*$") {
-        for (rune in value.toRuneArray()) { if (rune != r'🐲') { return false } }; return true
-    }
-    Regex(pattern, Array<RegexFlag>()).find(value).isSome()
-}
-
-private func jsonSchemaIsEcmaRegex(value: String): Bool {
-    if (value.contains("\\a") || value.contains("(?P") || value.contains("(?#") ||
-        value.startsWith("(?i)") || value.startsWith("(?m)") || value.startsWith("(?s)") ||
-        value.startsWith("(?ims)")) { return false }
-    if (value == "[]" || value == "[^]" || value.contains("(?<=")) { return true }
-    try { let _ = Regex(value, Array<RegexFlag>()); true } catch (_: Exception) { false }
+private func jsonSchemaIsEcmaRegex(value: String, budget: LinearRegexBudget): Bool {
+    LinearRegex.validateEcmaSyntax(value, budget)
 }
 
 private func validateJsonSchemaDocument(schemaValue: JsonNode, schemaPath: String): Unit {
-    match (schemaValue) {
-        case _: JsonBoolValue => ()
-        case objectValue: JsonObjectValue =>
+    match (schemaValue.kind()) {
+        case JsonKind.Boolean => ()
+        case JsonKind.Object =>
+            let objectValue = schemaValue.asObject()
             match (objectValue.get("type")) {
                 case Some(typeSchema) => validateJsonSchemaTypeKeyword(typeSchema, appendSchemaPath(schemaPath, "type"))
                 case None => ()
@@ -1699,7 +1921,9 @@ private func validateJsonSchemaDocument(schemaValue: JsonNode, schemaPath: Strin
             match (objectValue.get("properties")) {
                 case Some(propertiesSchema) =>
                     let properties = propertiesSchema.asObject()
-                    for ((field, childSchema) in properties.entries()) {
+                    for (index in 0..properties.size()) {
+                        let field = properties.nameAt(index)
+                        let childSchema = properties.valueAt(index)
                         validateJsonSchemaDocument(childSchema, appendSchemaPath(appendSchemaPath(schemaPath, "properties"), field))
                     }
                 case None => ()
@@ -1743,7 +1967,9 @@ private func validateJsonSchemaDocument(schemaValue: JsonNode, schemaPath: Strin
             match (objectValue.get("$defs")) {
                 case Some(defsSchema) =>
                     let defs = defsSchema.asObject()
-                    for ((name, defSchema) in defs.entries()) {
+                    for (index in 0..defs.size()) {
+                        let name = defs.nameAt(index)
+                        let defSchema = defs.valueAt(index)
                         validateJsonSchemaDocument(defSchema, appendSchemaPath(appendSchemaPath(schemaPath, "$defs"), name))
                     }
                 case None => ()
@@ -1751,7 +1977,9 @@ private func validateJsonSchemaDocument(schemaValue: JsonNode, schemaPath: Strin
             match (objectValue.get("definitions")) {
                 case Some(defsSchema) =>
                     let defs = defsSchema.asObject()
-                    for ((name, defSchema) in defs.entries()) {
+                    for (index in 0..defs.size()) {
+                        let name = defs.nameAt(index)
+                        let defSchema = defs.valueAt(index)
                         validateJsonSchemaDocument(defSchema, appendSchemaPath(appendSchemaPath(schemaPath, "definitions"), name))
                     }
                 case None => ()
@@ -1760,7 +1988,7 @@ private func validateJsonSchemaDocument(schemaValue: JsonNode, schemaPath: Strin
     }
 }
 
-private func validateJsonSchemaDocumentArray(objectValue: JsonObjectValue, keyword: String, schemaPath: String): Unit {
+private func validateJsonSchemaDocumentArray(objectValue: JsonObject, keyword: String, schemaPath: String): Unit {
     match (objectValue.get(keyword)) {
         case Some(value) =>
             let schemas = value.asArray()
@@ -1772,12 +2000,13 @@ private func validateJsonSchemaDocumentArray(objectValue: JsonObjectValue, keywo
 }
 
 private func validateJsonSchemaTypeKeyword(typeSchema: JsonNode, schemaPath: String): Unit {
-    match (typeSchema) {
-        case typeName: JsonStringValue => validateJsonSchemaTypeName(typeName.value, schemaPath)
-        case typeNames: JsonArrayValue =>
+    match (typeSchema.kind()) {
+        case JsonKind.String => validateJsonSchemaTypeName(typeSchema.asString(), schemaPath)
+        case JsonKind.Array =>
+            let typeNames = typeSchema.asArray()
             for (index in 0..typeNames.size()) {
                 let childPath = appendSchemaPath(schemaPath, index.toString())
-                validateJsonSchemaTypeName(typeNames[index].asString().value, childPath)
+                validateJsonSchemaTypeName(typeNames[index].asString(), childPath)
             }
         case _ => throw JsonException("${schemaPath}: type must be a string or string array")
     }
@@ -1786,9 +2015,8 @@ private func validateJsonSchemaTypeKeyword(typeSchema: JsonNode, schemaPath: Str
 private func validateJsonSchemaStringArray(value: JsonNode, schemaPath: String): Unit {
     let array = value.asArray()
     for (index in 0..array.size()) {
-        match (array[index]) {
-            case _: JsonStringValue => ()
-            case _ => throw JsonException("${appendSchemaPath(schemaPath, index.toString())}: expected string")
+        if (array[index].kind() != JsonKind.String) {
+            throw JsonException("${appendSchemaPath(schemaPath, index.toString())}: expected string")
         }
     }
 }
@@ -1807,47 +2035,41 @@ private func validateJsonSchemaTypeName(name: String, schemaPath: String): Unit 
     }
 }
 
-private func jsonSchemaMatchesType(value: JsonNode, typeName: String): Bool {
+private func jsonSchemaMatchesType(value: JsonValueView, typeName: String): Bool {
     match (typeName) {
-        case "null" => if (let _: JsonNullValue <- value) { true } else { false }
-        case "boolean" => if (let _: JsonBoolValue <- value) { true } else { false }
-        case "object" => if (let _: JsonObjectValue <- value) { true } else { false }
-        case "array" => if (let _: JsonArrayValue <- value) { true } else { false }
-        case "string" => if (let _: JsonStringValue <- value) { true } else { false }
+        case "null" => value.kind() == JsonKind.Null
+        case "boolean" => value.kind() == JsonKind.Boolean
+        case "object" => value.kind() == JsonKind.Object
+        case "array" => value.kind() == JsonKind.Array
+        case "string" => value.kind() == JsonKind.String
         case "number" => jsonSchemaNumberAsFloat(value).isSome()
         case "integer" => jsonSchemaIsInteger(value)
         case _ => false
     }
 }
 
-private func jsonSchemaInstanceType(value: JsonNode): String {
-    match (value) {
-        case _: JsonNullValue => "null"
-        case _: JsonBoolValue => "boolean"
-        case _: JsonObjectValue => "object"
-        case _: JsonArrayValue => "array"
-        case _: JsonStringValue => "string"
-        case _ =>
+private func jsonSchemaInstanceType(value: JsonValueView): String {
+    match (value.kind()) {
+        case JsonKind.Null => "null"
+        case JsonKind.Boolean => "boolean"
+        case JsonKind.Object => "object"
+        case JsonKind.Array => "array"
+        case JsonKind.String => "string"
+        case JsonKind.Number =>
             if (jsonSchemaIsInteger(value)) {
                 "integer"
-            } else if (jsonSchemaNumberAsFloat(value).isSome()) {
-                "number"
             } else {
-                "unknown"
+                "number"
             }
     }
 }
 
-private func jsonSchemaNumberAsFloat(value: JsonNode): Option<Float64> {
-    match (value) {
-        case intValue: JsonIntValue => Some(Float64(intValue.value))
-        case floatValue: JsonFloatValue => Some(floatValue.value)
-        case numberValue: JsonNumberLiteralValue => Some(Float64.parse(numberValue.literal))
-        case _ => None<Float64>
-    }
+private func jsonSchemaNumberAsFloat(value: JsonValueView): Option<Float64> {
+    if (value.kind() != JsonKind.Number) { return None<Float64> }
+    try { Some(Float64.parse(value.asNumberText())) } catch (_: Exception) { None<Float64> }
 }
 
-private func jsonSchemaIsInteger(value: JsonNode): Bool {
+private func jsonSchemaIsInteger(value: JsonValueView): Bool {
     match (jsonNodeAsDecimal(value)) { case Some(number) => number.isInteger(); case None => false }
 }
 
@@ -1859,25 +2081,17 @@ private func requireSchemaDecimal(value: JsonNode, schemaPath: String): Decimal 
 }
 
 private func requireSchemaNonNegativeInt(value: JsonNode, schemaPath: String): Int64 {
-    let decoded = match (value) {
-        case integer: JsonIntValue => integer.value
-        case floatValue: JsonFloatValue =>
-            let converted = Int64(floatValue.value)
-            if (floatValue.value != Float64(converted)) {
-                throw JsonException("${schemaPath}: expected non-negative integer schema value")
-            }
-            converted
-        case literal: JsonNumberLiteralValue =>
-            let decimal = Decimal.parse(literal.literal)
-            if (!decimal.isInteger()) {
-                throw JsonException("${schemaPath}: expected non-negative integer schema value")
-            }
-            let converted = Int64(Float64.parse(literal.literal))
-            if (Decimal(converted) != decimal) {
-                throw JsonException("${schemaPath}: integer schema value is outside Int64 range")
-            }
-            converted
-        case _ => throw JsonException("${schemaPath}: expected non-negative integer schema value")
+    let decimal = requireSchemaDecimal(value, schemaPath)
+    if (!decimal.isInteger()) {
+        throw JsonException("${schemaPath}: expected non-negative integer schema value")
+    }
+    let decoded = try {
+        Int64(Float64.parse(value.asNumberText()))
+    } catch (_: Exception) {
+        throw JsonException("${schemaPath}: integer schema value is outside Int64 range")
+    }
+    if (Decimal(decoded) != decimal) {
+        throw JsonException("${schemaPath}: integer schema value is outside Int64 range")
     }
     if (decoded < 0) {
         throw JsonException("${schemaPath}: expected non-negative integer schema value")
@@ -1908,7 +2122,7 @@ private func joinStrings(values: ArrayList<String>, separator: String): String {
 }
 
 private func appendJsonPath(base: String, field: String): String {
-    "${base}[${JsonStringValue(field).toString()}]"
+    "${base}/${jsonPointerEscape(field)}"
 }
 
 private func appendSchemaPath(base: String, token: String): String {

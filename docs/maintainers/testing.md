@@ -1,126 +1,128 @@
 # 测试 yjson
 
-稳定文档定义测试层和发布期望；某次运行的 commit、SDK、日志、case 数与 checksum 写入
-对应 `release/<version>/evidence.md`。
+稳定文档定义测试层和发布期望。某次运行的 commit、SDK、runner、日志、case 数和 checksum 写入
+对应 `release/<version>/evidence.md`，不能回填到通用说明。
 
 ## 测试层
 
 | Layer | 验证内容 | 入口 |
 | --- | --- | --- |
-| Core | parser、writer、codec、AST、Compact、incremental stream、limits | `cjpm test` |
-| External codec consumer | 调用方 macro、enum、多态、fast decoder | `packages/codec_integration` |
-| Literal consumer | `@Json`、`@JsonValue`、插值顺序、LastWins | `packages/json_literal_integration` |
-| Compile-fail | 无效 literal grammar、静态重复 key | `scripts/check_json_literal_compile_fail.sh` |
-| Algorithms / Standards | 有限预算与固定 revision Schema/Path/Patch suites | `packages/yjson_algorithms` / `scripts/run_standards_conformance.py` |
-| Optional packages | Native DOM、stream、lifecycle、limits | 各 package test/consumer |
-| Native C | warnings、sanitizers、differential fuzz | `scripts/release_native_checks.sh` |
-| Packaging | staging、manifest、license、symbols、isolated consumers | release scripts |
-| Performance comparison | 同批次完整三库 workload | `scripts/release_performance_compare.sh` |
-| Native acceleration | Pure/Native 单引擎广告与普通 workload | `scripts/json_native_accel_perf_run.py` |
+| Core | parser、writer、codec、AST、managed document、incremental stream、预算 | `cjpm test` |
+| External codec consumer | 调用方 macro、enum、多态、显式 codec | `packages/codec_integration` |
+| Algorithms / standards | Pointer、Patch、Path、Schema、固定 corpus | `packages/yjson_algorithms` / standards runner |
+| Optional formats | libidn2 provider 和 optional Schema corpus | `packages/yjson_schema_formats` |
+| Backend | named façade、view、close/read concurrency、whole-document I/O | Native/yyjson package tests |
+| Acceleration | Pure/Native freeze、ABI、并发、故障和性能资格 | runtime-freeze / release perf runner |
+| Native C | warnings、ASan、UBSan、LSan、differential fuzz、symbol isolation | release native scripts |
+| Packaging | source-only stage、九包 graph、isolated consumers、license | release scripts |
+| API docs | cjdoc source qualification、九包 Doc IR/HTML、known-gap policy | `api-docs` |
+| Coverage | project 和 patch line/branch | `scripts/coverage.sh` + patch checker |
+| Performance | 固定 CPU 的交替/反转 A/B、checksum、RSS、跨 profile | release performance scripts |
 
-Benchmark 不能替代 correctness test；root white-box pass 也不能替代 staged external consumer。
+benchmark 不能替代 correctness test；root white-box pass 也不能替代 staged external consumer。
 
-提交前可先运行不依赖 Cangjie SDK 的结构检查：
+## 快速结构检查
+
+不依赖 Cangjie 编译的检查包括：
 
 ```terminal
 python3 scripts/check_api_inventory.py
 python3 scripts/test_stage_source_tree.py
-python3 scripts/check_seven_library_evidence.py
+python3 scripts/test_release_temp_tree.py
+python3 scripts/test_check_cjdoc_qualification.py
+python3 scripts/test_generate_api_docs.py
 ```
 
-第一条命令包含快照生成器回归测试，确保 private/internal 类型的成员不会泄漏到 public API
-快照和 release manifest 依赖闭包。第二条命令验证 source-only staging 只复制 Git 跟踪文件，
-并排除 build output、可执行二进制、coverage/profile、嵌套归档和 symlink。第三条命令校验七库
-性能归档的 checksum、manifest、源码/工具链身份和可再生摘要。这些命令不能替代 core 或
-external consumer 测试。
+这些命令验证 API snapshot、source-only staging、release manifest closure 和 cjdoc policy，但
+不能替代 core、consumer、standards 或 Native 测试。
+
+## 工具链选择
+
+Hosted CI 每七天解析一次最新的完整 dated nightly，并缓存这个精确版本。所有需要 Cangjie 的
+job 使用同一解析结果。`workflow_dispatch` 可以显式指定一个完整 nightly，以便重跑一个候选。
+cjdoc 从固定 source revision 构建，但编译时使用同一个 weekly SDK；qualification evidence
+记录实际 `cjc` 和 `cjpm` 输出，并拒绝与 shared weekly version 不一致的编译器。
+
+checkout、setup、Codecov 和 Pages actions 使用完整 commit SHA。发布 evidence 还要记录 SDK
+archive checksum、runner image、workflow run id 和 artifact checksum。
 
 ## CI job mapping
 
-GitHub Actions 的 `CI` workflow 在 GitHub-hosted Linux x86_64 runner 上执行每日 correctness
-门禁。`scripts/ci_job.sh` 提供 `api-inventory`、`runtime-freeze`、`core`、
-`standards-conformance`、`schema-formats-conformance`、`examples`、`macro-consumer`、
-`algorithms-consumer`、`registry-rehearsal`、`custom-native`、`yyjson-native`、`native-clang`、
-`native-gcc`、`sanitizer`、`fuzz-short` 和 `yyjson-colink` 等 job。独立的
-`perf-evidence-drift` job 校验冻结的七库性能证据。workflow 在 `main` 和 `dev` push、目标为
-`main` 的 pull request、定时任务和手工触发时运行。
+GitHub Actions `CI` workflow 在 `main` / `dev` push、目标为 `main` 的 pull request、
+schedule 和手工触发时运行。
 
-workflow 在每个七天窗口首次运行时解析最新完整 Cangjie nightly，并缓存所选版本。Tests 与
-Core Coverage 必须使用同一个版本；窗口内重跑不会切换 SDK。Server performance、50,000-case
-扩展 fuzz 与 Windows cross build 仍属于发布资格验证，不进入日常 hosted CI。
+Linux x86_64 的 `tests` matrix 包含：
 
-七天滚动 nightly 是兼容性 canary，不是可重建的发布资格身份。发布候选使用
-`workflow_dispatch` 的 `cangjie_version` 固定 exact SDK，并在日志中保留 runner image、SDK
-archive checksum、编译器版本和已安装 native package 版本。checkout、cache 和 setup action
-使用完整 commit SHA；发布证据还必须记录该次 run id 和所有 artifact checksum。
+- `api-inventory`、`cjdoc-qualification`、`runtime-freeze`、`core`；
+- `standards-conformance`、`schema-formats-conformance`；
+- `examples`、`macro-consumer`、`algorithms-consumer`、`registry-rehearsal`；
+- `custom-native`、`yyjson-native`、Clang/GCC、sanitizer、short fuzz、yyjson co-link。
 
-若某个已确认的 nightly compiler 只在外部 dependency codegen 阶段崩溃，workflow 可以按完整
-SDK 版本对受影响的 dependency-boundary job 设置较低优化级别。例外不得使用版本范围，Core
-仍须以 `-O2` 通过；下一个七天窗口选择新 nightly 后会自动恢复 external `-O2`，让问题重新
-进入门禁。`registry-rehearsal` 的 staging bundle compile 也使用相同例外；脚本随后恢复 manifest，
-并从恢复后的 staging source 创建检查用 archive。发布 artifact 的 manifest 和本地 release
-qualification 不使用该 hosted workaround。
+`pure-platforms` 在 Windows Server 2022 和 macOS 14 上运行 core 与 algorithms 的 Pure gate。
+它们不构建 Native package。`api-docs` 生成 Pages artifact；只有 `main` push 执行部署。
+`coverage`、七库 evidence drift 和 stream evidence drift 是独立 job。
 
-## Core coverage
+本地 Linux fresh candidate 使用：
 
-运行 `scripts/coverage.sh`。脚本在临时 source tree 中以 `-O0` 编译，生成 cjcov HTML、JSON、
-XML 与 `coverage/lcov.info`，并在结束时清理临时树。脚本合并 root tests、runtime freeze 场景和
-Native acceleration tests 对 `src/lib_*.cj` 的命中。测试源码、package 源码、build output 与
-SDK/runtime 不计入。Branch coverage 只统计 Cangjie 源码中的显式 `if`、`while`、`for`、
-`match`、`case`、`&&` 和 `||` 分支，不统计编译器为溢出检查、边界检查和异常传播生成的边。
-CI 将同一份 LCOV 以 `core` flag 上传到 Codecov，上传失败会阻断 workflow。
+```terminal
+scripts/ci_fresh_checkout.sh
+```
 
-`coverage-baseline.toml` 固定 project line 80%、project branch 70%、patch line 90% 和 patch
-branch 80% 四项门禁。首次引入 baseline 的 bootstrap release 只执行 project gate；baseline
-合并到目标分支后，后续 pull request 才执行 patch gate。
+本地结果不能代表 Windows/macOS hosted result。hosted workflow 未执行时，平台状态必须写
+`NOT RUN`，不能从源码可移植性推断 PASS。
 
-Native acceleration 目前是 release qualification runner，不是 `ci_job.sh` 的短任务。正式执行
-固定 11 轮，详细门槛见[性能方法](../performance/methodology.md)。
+## Coverage
 
-本地 fresh-source、coverage 与 hosted CI 是三份独立证据。一个 PASS 不能自动填充另一个状态。
-当前 release qualification 的阻断平台是 Linux x86_64；未执行的平台必须记录
-`NOT RUN / NON-BLOCKING / potentially supported`。
+`scripts/coverage.sh` 在临时 source tree 中以 `-O0` 编译，合并 root tests、runtime freeze
+和 Native acceleration 场景，生成 HTML、JSON、XML 与 `coverage/lcov.info`。门禁只统计
+`src/lib_*.cj` 产品源码。
 
-## Feature × backend
+[`coverage-baseline.toml`](../../coverage-baseline.toml) 固定：
 
-| Public behavior | Pure | Custom Native | yyjson | External consumer |
+| Gate | Line | Branch |
+| --- | ---: | ---: |
+| Project | 80% | 70% |
+| Patch | 90% | 80% |
+
+project gate 每次阻断。PR 只有在 base 已包含 baseline 时执行 patch gate；bootstrap 不能跳过
+project gate。LCOV 以 `core` flag 上传 Codecov，上传失败阻断 workflow。
+
+## Feature × execution path
+
+| Public behavior | Pure | Native acceleration | Named Native/yyjson façade | External proof |
 | --- | ---: | ---: | ---: | ---: |
-| Parser/serializer semantics | 主实现 | differential | differential | examples |
-| Generated class/struct/enum | 主实现 | 同一 semantic SPI | advanced backend 不替换 generated path | codec consumer |
-| Generated polymorphism | 主实现 | 同一 semantic SPI | advanced backend 不替换 generated path | codec consumer |
-| JSON literals | 是 | n/a | n/a | literal consumer |
-| Stream ownership/limits | 是 | 是 | 是 | package consumers |
-| Mutable AST | 是 | materialize | materialize | examples |
-| Managed Compact query/lifecycle | 是 | primitive 加速；无 `close()` | n/a | release consumers |
-| Advanced DOM lifecycle | n/a | 显式 resource | 显式 resource | package consumers |
-| Duplicate/number/resource policies | 是 | 是 | 是 | release consumers |
-| Schema / Pointer / Patch / Path | 独立 algorithms package | 同一 managed value 语义 | n/a | standards consumer |
+| Generated class/struct/enum | 主实现 | 同一 codec/semantic engine | 同一 `JsonCodec<T>` contract | codec consumer |
+| String/bytes/stream | 主实现 | primitive replacement | whole-document buffering | consumer/package tests |
+| Mutable `JsonNode` | 是 | 不改变 | materialize 后 | core/examples |
+| Managed `JsonDocument` | 是 | 临时 Native resource 已释放 | n/a | core/runtime-freeze |
+| `BackendJsonDocument` lifecycle | n/a | n/a | 显式 resource | close/read race tests |
+| Options/error semantics | 主实现 | 相同 | 相同 | differential vectors |
+| Pointer/Patch/Path/Schema | `JsonValueView` | 相同 view | 相同 view | algorithms/standards |
+| API reference | 九包 cjdoc | closed SPI 标记 | advanced package pages | api-docs gate |
 
-Differential 表示对照 portable semantic oracle，不代表 Native DOM API 与 `JsonNode` 相同。
+## 专项证明
 
-## 单引擎专项证明
-
-- Pure、Native primitive、generated、incremental stream 与高级 backend 复用同一组合法/非法
-  semantic vectors，比较 value、UTF-8/escape/number 行为和稳定 error code/path/offset。
-- incremental reader 对跨 chunk string、escape、number 与 structural token 做 byte split-point
-  测试；一次性 `ByteBuffer` 输入不能替代这项证明。
-- String、bytes、分块 stream 与 Native target 做 byte-for-byte writer 对比，并覆盖非法结构
-  调用、cycle、`maxBytes` 与非有限浮点数。
-- generated external consumer 检查 protocol v1、递归容器、custom codec 与 polymorphic replay，
-  同时扫描生成源码，禁止出现具体 reader/writer class 名称。
-- acceleration lifecycle 覆盖 Pure freeze、Native freeze、幂等重复、晚初始化、并发竞争、缺库、
-  ABI/protocol 错误和 unsupported platform；初始化成功后的 provider 故障不得静默回退。
+- String、bytes、分块 stream 和 backend tape 复用合法/非法 semantic vectors，比较 value、
+  UTF-8、escape、number、error code、path 和 location。
+- stream reader 覆盖跨 chunk string、escape、number 和 structural token；一次性 byte input
+  不能替代这项证明。
+- writer 对比 String、bytes、stream 和 view，并覆盖非法状态、cycle、depth、output budget 和
+  非有限浮点。
+- generated external consumer检查 protocol v1、递归容器、custom codec、enum 和多态 replay。
+- acceleration lifecycle 覆盖 Pure freeze、Native freeze、幂等、晚初始化、并发竞争、缺库、
+  ABI/protocol 错误和 reentrant use；故障不得静默 fallback。
+- backend document 覆盖打开期并发读、与 close 的线性化竞争和关闭后的 root view。
+- Schema 证明 resolver 只在构造时调用，format registry 和 regex 在 compiled schema 中冻结。
+- JSONPath 证明 cursor 创建不遍历，预算在 `next()` 时消耗，`first()` 提前停止。
 
 ## 测试政策
 
-- 一个 case 只写一个确定预期；“接受或拒绝均可”不是 contract。
+- 一个 case 只有一个确定预期；“接受或拒绝均可”不是 contract。
 - 优先验证 public result、error code、lifecycle、package boundary 和 compatibility。
-- 只有 public API 无法安全暴露 regression 时才使用 white-box test。
-- 外部 corpus 固定 revision 和预期 cardinality，不依赖浮动 upstream checkout。
+- 外部 corpus 固定 revision 与预期 cardinality，不依赖浮动 checkout。
 - executable 必须传播应用异常；shell exit 0 但输出含未处理异常仍是失败。
 - 性能只提供性能证据，不证明语义正确。
 
-固定 standards baseline 当前为 Schema required 1299、JSONPath CTS 703、JSON Patch 108；
-optional format provider 增加 964 个适用 cases。具体 PASS 结果属于 release evidence。
-
-早期 parser gap 计划保存在
-[`docs/archive/initial-parser-test-plan.md`](../archive/initial-parser-test-plan.md)，不代表当前 gate。
+standards runner 的预期 cardinality 为 Schema required 1299、JSONPath CTS 703、JSON Patch
+108；optional format provider 增加 964 个适用 cases。某次 PASS 只属于绑定身份的 release
+evidence。

@@ -1,8 +1,26 @@
 #!/usr/bin/env zsh
 set -uo pipefail
 
+export CODEX_DISABLE_CANGJIE_ENV=1
 source "${HOME}/.codex/.zshenv" || true
 set -e
 cangjie_env
+
+# Some SDK archives keep the compiler under cangjie/ while installing stdx
+# beside that directory.  cangjie_env normalizes CANGJIE_SDK_ROOT to the
+# compiler directory, so repair the stdx path for that split layout.
+if [[ ! -d "${CANGJIE_STDX_PATH}" ]]; then
+    old_stdx_path="${CANGJIE_STDX_PATH}"
+    sibling_stdx_path="${CANGJIE_SDK_ROOT:h}/linux_x86_64_cjnative/dynamic/stdx"
+    if [[ -d "${sibling_stdx_path}" ]]; then
+        export CANGJIE_STDX_PATH="${sibling_stdx_path}"
+        export CJ_SDK_LIBPATH="${CJ_SDK_LIBPATH/${old_stdx_path}/${sibling_stdx_path}}"
+        export LD_LIBRARY_PATH="${LD_LIBRARY_PATH/${old_stdx_path}/${sibling_stdx_path}}"
+    else
+        print -u2 -- "stdx installation not found: ${old_stdx_path}"
+        exit 1
+    fi
+fi
+
 export DISABLE_ZOXIDE="${DISABLE_ZOXIDE:-1}"
 exec "$@"

@@ -2,12 +2,11 @@ package yjson_algorithms
 
 import yjson.*
 
-import std.collection.*
 import std.unittest.*
 import std.unittest.testmacro.*
 
-func yJsonSchemaErrors(schemaText: String, instanceText: String): ArrayList<JsonValidationError> {
-    JsonSchema.parse(schemaText).validate(YJson.parse(instanceText))
+func yJsonSchemaErrors(schemaText: String, instanceText: String): JsonSchemaResult {
+    JsonSchema.parse(schemaText).validate(JsonNode.parse(instanceText))
 }
 
 func yJsonSchemaValid(schemaText: String, instanceText: String): Bool {
@@ -24,18 +23,33 @@ private class TestSchemaFormatProvider <: JsonSchemaFormatProvider {
     }
 }
 
+private class OneShotSchemaResolver <: UriResolver {
+    var enabled: Bool = true
+    var calls: Int64 = 0
+    private let resource: JsonNode
+
+    init(resource: JsonNode) { this.resource = resource }
+
+    public func resolve(uri: String): Option<JsonNode> {
+        calls++
+        if (!enabled) { throw Exception("resolver called after schema compilation") }
+        if (uri == "urn:test:frozen") { Some(resource.deepCopy()) }
+        else { None<JsonNode> }
+    }
+}
+
 @Test
 class YJsonSchemaTest {
     @TestCase
     func schemaSnapshotsDocumentAndDefaultFormats(): Unit {
-        let source = YJson.parse("{\"type\":\"string\"}")
+        let source = JsonNode.parse("{\"type\":\"string\"}")
         let schema = JsonSchema.fromValue(source)
-        source.asObject().put("type", JsonStringValue("integer"))
-        @Expect(schema.validate(YJson.parse("\"ok\"")).isEmpty())
+        source.asObject().put("type", JsonNode.string("integer"))
+        @Expect(schema.validate(JsonNode.parse("\"ok\"")).isEmpty())
         let exposed = schema.document
-        exposed.asObject().put("type", JsonStringValue("integer"))
-        @Expect(schema.validate(YJson.parse("\"still a string\"")).isEmpty())
-        @Expect(!schema.validate(YJson.parse("42")).isEmpty())
+        exposed.asObject().put("type", JsonNode.string("integer"))
+        @Expect(schema.validate(JsonNode.parse("\"still a string\"")).isEmpty())
+        @Expect(!schema.validate(JsonNode.parse("42")).isEmpty())
         let _ = @AssertThrows[IllegalStateException](
             JsonSchemaConfig.defaults.formats.register("mutable-default", EvenLengthSchemaFormat()))
     }
@@ -44,7 +58,7 @@ class YJsonSchemaTest {
         @Expect(yJsonSchemaValid("true", "{\"anything\":1}"))
         let errors = yJsonSchemaErrors("false", "null")
         @Expect(errors.size, 1)
-        @Expect(errors[0].jsonPath, "$")
+        @Expect(errors[0].instancePath, "")
         @Expect(errors[0].schemaPath, "#")
     }
 
@@ -66,9 +80,9 @@ class YJsonSchemaTest {
 
         let errors = yJsonSchemaErrors(schema, "{\"id\":\"7\",\"name\":\"L\"}")
         @Expect(errors.size, 2)
-        @Expect(errors[0].jsonPath, "$[\"id\"]")
+        @Expect(errors[0].instancePath, "/id")
         @Expect(errors[0].schemaPath, "#/properties/id/type")
-        @Expect(errors[1].jsonPath, "$[\"name\"]")
+        @Expect(errors[1].instancePath, "/name")
         @Expect(errors[1].schemaPath, "#/properties/name/minLength")
 
         let missing = yJsonSchemaErrors(schema, "{\"id\":1}")
@@ -84,9 +98,9 @@ class YJsonSchemaTest {
 
         let errors = yJsonSchemaErrors(schema, "[0,-1,\"x\"]")
         @Expect(errors.size, 2)
-        @Expect(errors[0].jsonPath, "$[1]")
+        @Expect(errors[0].instancePath, "/1")
         @Expect(errors[0].schemaPath, "#/items/minimum")
-        @Expect(errors[1].jsonPath, "$[2]")
+        @Expect(errors[1].instancePath, "/2")
         @Expect(errors[1].schemaPath, "#/items/type")
     }
 
@@ -149,7 +163,7 @@ class YJsonSchemaTest {
 
         let errors = yJsonSchemaErrors(schema, "{\"id\":0}")
         @Expect(errors.size, 1)
-        @Expect(errors[0].jsonPath, "$[\"id\"]")
+        @Expect(errors[0].instancePath, "/id")
         @Expect(errors[0].schemaPath, "#/$defs/positiveId/minimum")
     }
 
@@ -178,41 +192,75 @@ class YJsonSchemaTest {
     }
 
     @TestCase
+    func schemaRegexesCompileOnceWhileRegexFormatValidatesEcmaSyntax(): Unit {
+        @Expect(@AssertThrows[JsonException](JsonSchema.parse("{\"pattern\":\"(a)\\\\1\"}")).code,
+            "invalid_regex")
+
+        let assertion = JsonSchemaConfig(formatMode: JsonSchemaFormatMode.Assertion)
+        @Expect(JsonSchema.parse("{\"format\":\"regex\"}", config: assertion)
+            .isValid(JsonNode.string("^[A-Z]+$")))
+        let regexFormat = JsonSchema.parse("{\"format\":\"regex\"}", config: assertion)
+        @Expect(regexFormat.isValid(JsonNode.string("(?<name>x)")))
+        @Expect(regexFormat.isValid(JsonNode.string("(?<n>a)\\k<n>")))
+        @Expect(regexFormat.isValid(JsonNode.string("(?<=a+)b")))
+        @Expect(regexFormat.isValid(JsonNode.string("(a)\\1")))
+        @Expect(!regexFormat.isValid(JsonNode.string("\\a")))
+        @Expect(!regexFormat.isValid(JsonNode.string("(?P<name>x)")))
+        @Expect(!regexFormat.isValid(JsonNode.string("(?i)abc")))
+
+        let configured = JsonSchemaConfig(limits: JsonSchemaLimits(maxRegexSteps: 200))
+        let schema = JsonSchema.parse("{\"pattern\":\"^(a+)+$\"}", config: configured)
+        let value = StringBuilder()
+        for (_ in 0..1000) { value.append("a") }
+        value.append("X")
+        @Expect(@AssertThrows[JsonException](schema.isValid(JsonNode.string(value.toString()))).code,
+            "work_limit_exceeded")
+    }
+
+    @TestCase
     func registryResolvesExternalPointersAndAnchors(): Unit {
         let registry = JsonSchemaRegistry()
         registry.register("urn:test:defs", "{\"$defs\":{\"positive\":{\"$anchor\":\"positive\",\"type\":\"integer\",\"minimum\":1}}}")
         let config = JsonSchemaConfig(resolver: Some<UriResolver>(registry))
-        @Expect(JsonSchema.parse("{\"$ref\":\"urn:test:defs#positive\"}", config: config).validator().isValid(JsonIntValue(2)))
-        @Expect(!JsonSchema.parse("{\"$ref\":\"urn:test:defs#/$defs/positive\"}", config: config).validator().isValid(JsonIntValue(0)))
+        @Expect(JsonSchema.parse("{\"$ref\":\"urn:test:defs#positive\"}", config: config).validator().isValid(JsonNode.int64(2)))
+        @Expect(!JsonSchema.parse("{\"$ref\":\"urn:test:defs#/$defs/positive\"}", config: config).validator().isValid(JsonNode.int64(0)))
+    }
+
+    @TestCase
+    func resolverGraphIsDetachedDuringCompilation(): Unit {
+        let resolver = OneShotSchemaResolver(JsonNode.parse("{\"type\":\"integer\"}"))
+        let schema = JsonSchema.parse("{\"$ref\":\"urn:test:frozen\"}",
+            config: JsonSchemaConfig(resolver: Some<UriResolver>(resolver)))
+        @Expect(resolver.calls, 1)
+        @Expect(schema.config.resolver.isNone())
+        resolver.enabled = false
+        @Expect(schema.isValid(JsonNode.int64(7)))
+        @Expect(!schema.isValid(JsonNode.string("7")))
+        @Expect(resolver.calls, 1)
     }
 
     @TestCase
     func unsupportedDialectAndOptInFormatAssertion(): Unit {
         @AssertThrows[JsonException](JsonSchema.parse("{\"$schema\":\"http://json-schema.org/draft-07/schema#\"}"))
-        @Expect(JsonSchema.parse("{\"format\":\"ipv4\"}").validator().isValid(JsonStringValue("999.1.1.1")))
+        @Expect(JsonSchema.parse("{\"format\":\"ipv4\"}").validator().isValid(JsonNode.string("999.1.1.1")))
         let strict = JsonSchemaConfig(formatMode: JsonSchemaFormatMode.Assertion)
-        @Expect(!JsonSchema.parse("{\"format\":\"ipv4\"}", config: strict).validator().isValid(JsonStringValue("999.1.1.1")))
+        @Expect(!JsonSchema.parse("{\"format\":\"ipv4\"}", config: strict).validator().isValid(JsonNode.string("999.1.1.1")))
     }
 
     @TestCase
-    func formatModesAndProviderRegistryHaveExplicitUnknownPolicy(): Unit {
+    func formatModesTreatUnknownFormatsAsAnnotations(): Unit {
         let unknownSchema = "{\"format\":\"application-specific\"}"
-        @Expect(JsonSchema.parse(unknownSchema).validator().isValid(JsonStringValue("value")))
+        @Expect(JsonSchema.parse(unknownSchema).validator().isValid(JsonNode.string("value")))
         let assertion = JsonSchemaConfig(formatMode: JsonSchemaFormatMode.Assertion)
-        @Expect(JsonSchema.parse(unknownSchema, config: assertion).validator().isValid(JsonStringValue("value")))
-
-        let strict = JsonSchemaConfig(formatMode: JsonSchemaFormatMode.StrictAssertion)
-        let unsupported = JsonSchema.parse(unknownSchema, config: strict).validate(JsonStringValue("value"))
-        @Expect(unsupported.size, 1)
-        @Expect(unsupported[0].code, "unsupported_schema_format")
+        @Expect(JsonSchema.parse(unknownSchema, config: assertion).validator().isValid(JsonNode.string("value")))
 
         let formats = JsonSchemaFormatRegistry.withCoreFormats()
         formats.install(TestSchemaFormatProvider())
         let configured = JsonSchemaConfig(formatMode: JsonSchemaFormatMode.Assertion, formats: formats)
         @Expect(JsonSchema.parse("{\"format\":\"even-length\"}", config: configured)
-            .validator().isValid(JsonStringValue("仓颉")))
+            .validator().isValid(JsonNode.string("仓颉")))
         @Expect(!JsonSchema.parse("{\"format\":\"even-length\"}", config: configured)
-            .validator().isValid(JsonStringValue("json!")))
+            .validator().isValid(JsonNode.string("json!")))
         @AssertThrows[IllegalArgumentException](formats.register("even-length", EvenLengthSchemaFormat()))
     }
 }

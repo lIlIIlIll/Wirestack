@@ -322,18 +322,18 @@ private func jsonFastParseRfc3339RawCore(reader: JsonFastReader): DateTime {
     jsonFastRfc3339BuildRawDateTime(reader, year, month, day, hour, minute, second, offsetSeconds)
 }
 
-public func jsonFastParseRfc3339DateTime(text: String): DateTime {
+func jsonFastParseRfc3339DateTime(text: String): DateTime {
     jsonFastParseRfc3339Core(text)
 }
 
-public func jsonFastReadRfc3339DateTime(reader: JsonFastReader): DateTime {
+func jsonFastReadRfc3339DateTime(reader: JsonFastReader): DateTime {
     if (reader.tryReadRawAsciiStringTokenSize2(20, 25)) {
         return jsonFastParseRfc3339RawCore(reader)
     }
     jsonFastParseRfc3339DateTime(reader.readRawString())
 }
 
-public func jsonFastReadArrayListRfc3339DateTime(reader: JsonFastReader): ArrayList<DateTime> {
+func jsonFastReadArrayListRfc3339DateTime(reader: JsonFastReader): ArrayList<DateTime> {
     let start = reader.position()
     if (reader.tryStartRawArrayCompact()) {
         let items = ArrayList<DateTime>(reader.suggestRawArrayCapacity())
@@ -362,38 +362,6 @@ public func jsonFastReadArrayListRfc3339DateTime(reader: JsonFastReader): ArrayL
     }
     reader.endRawArray()
     items
-}
-
-public func jsonFastReadHashMapStringRfc3339DateTime(reader: JsonFastReader): HashMap<String, DateTime> {
-    let start = reader.position()
-    if (reader.tryStartRawObjectCompact()) {
-        let result = HashMap<String, DateTime>(reader.suggestRawObjectCapacity())
-        var first = true
-        while (reader.tryNextRawObjectFieldCompact(first)) {
-            let key = reader.readRawNameAfterSeparator()
-            let value = if (reader.tryReadRawAsciiStringTokenSize2Compact(20, 25)) {
-                jsonFastParseRfc3339RawCore(reader)
-            } else {
-                jsonFastParseRfc3339DateTime(reader.readRawStringCompact())
-            }
-            result.add(key, value)
-            first = false
-        }
-        if (reader.tryEndRawObject()) {
-            return result
-        }
-    }
-    reader.rewind(start)
-    reader.startRawObject()
-    let result = HashMap<String, DateTime>(reader.suggestRawObjectCapacity())
-    var first = true
-    while (reader.nextRawObjectField(first)) {
-        let key = reader.readRawNameAfterSeparator()
-        result.add(key, jsonFastReadRfc3339DateTime(reader))
-        first = false
-    }
-    reader.endRawObject()
-    result
 }
 
 private func jsonFastAppendTwoDigits(builder: StringBuilder, value: Int64): Unit {
@@ -452,14 +420,14 @@ private func jsonFastFormatRfc3339Core(value: DateTime): Option<String> {
     Some(builder.toString())
 }
 
-public func jsonFastFormatRfc3339DateTime(value: DateTime): String {
+func jsonFastFormatRfc3339DateTime(value: DateTime): String {
     match (jsonFastFormatRfc3339Core(value)) {
         case Some(text) => text
         case None => value.format(DateTimeFormat.RFC3339)
     }
 }
 
-public func jsonFastParseBigInt(text: String): BigInt {
+func jsonFastParseBigInt(text: String): BigInt {
     BigInt.parse(text)
 }
 
@@ -553,14 +521,14 @@ private func jsonFastReadRawIntegerToken(reader: JsonFastReader): BigInt {
     jsonFastParseRawDigitsToBigInt(reader, digitsStart, tokenSize, -1, negative, digitCount)
 }
 
-public func jsonFastReadBigInt(reader: JsonFastReader): BigInt {
+func jsonFastReadBigInt(reader: JsonFastReader): BigInt {
     if (reader.tryReadRawNumberToken()) {
         return jsonFastReadRawIntegerToken(reader)
     }
     jsonFastParseBigInt(reader.readRawNumberLiteral())
 }
 
-public func jsonFastReadArrayListBigInt(reader: JsonFastReader): ArrayList<BigInt> {
+func jsonFastReadArrayListBigInt(reader: JsonFastReader): ArrayList<BigInt> {
     let start = reader.position()
     if (reader.tryStartRawArrayCompact()) {
         let items = ArrayList<BigInt>(reader.suggestRawArrayCapacity())
@@ -591,7 +559,7 @@ public func jsonFastReadArrayListBigInt(reader: JsonFastReader): ArrayList<BigIn
     items
 }
 
-public func jsonFastReadHashMapStringBigInt(reader: JsonFastReader): HashMap<String, BigInt> {
+func jsonFastReadHashMapStringBigInt(reader: JsonFastReader): HashMap<String, BigInt> {
     let start = reader.position()
     if (reader.tryStartRawObjectCompact()) {
         let result = HashMap<String, BigInt>(reader.suggestRawObjectCapacity())
@@ -624,11 +592,11 @@ public func jsonFastReadHashMapStringBigInt(reader: JsonFastReader): HashMap<Str
     result
 }
 
-public func jsonFastFormatBigInt(value: BigInt): String {
+func jsonFastFormatBigInt(value: BigInt): String {
     value.toString()
 }
 
-public func jsonFastParseDecimal(text: String): Decimal {
+func jsonFastParseDecimal(text: String): Decimal {
     Decimal.parse(text)
 }
 
@@ -661,14 +629,14 @@ private func jsonFastReadRawDecimalToken(reader: JsonFastReader): Decimal {
     Decimal(unscaled, Int32(scale))
 }
 
-public func jsonFastReadDecimal(reader: JsonFastReader): Decimal {
+func jsonFastReadDecimal(reader: JsonFastReader): Decimal {
     if (reader.tryReadRawNumberToken()) {
         return jsonFastReadRawDecimalToken(reader)
     }
     jsonFastParseDecimal(reader.readRawNumberLiteral())
 }
 
-public func jsonFastReadArrayListDecimal(reader: JsonFastReader): ArrayList<Decimal> {
+func jsonFastReadArrayListDecimal(reader: JsonFastReader): ArrayList<Decimal> {
     let start = reader.position()
     if (reader.tryStartRawArrayCompact()) {
         let items = ArrayList<Decimal>(reader.suggestRawArrayCapacity())
@@ -699,7 +667,7 @@ public func jsonFastReadArrayListDecimal(reader: JsonFastReader): ArrayList<Deci
     items
 }
 
-public func jsonFastReadHashMapStringDecimal(reader: JsonFastReader): HashMap<String, Decimal> {
+func jsonFastReadHashMapStringDecimal(reader: JsonFastReader): HashMap<String, Decimal> {
     let start = reader.position()
     if (reader.tryStartRawObjectCompact()) {
         let result = HashMap<String, Decimal>(reader.suggestRawObjectCapacity())
@@ -732,61 +700,41 @@ public func jsonFastReadHashMapStringDecimal(reader: JsonFastReader): HashMap<St
     result
 }
 
-// Macro-generated codecs live in the consumer package, so keep the temporal
-// and arbitrary-precision container fast paths behind public context-aware
+// Macro-generated codecs live in the consumer package, so keep the
+// arbitrary-precision container fast paths behind public context-aware
 // bridges.  The raw helpers above intentionally do not know about decode-path
 // depth; these wrappers preserve the same max-depth accounting as the existing
 // generated String/Int64 container helpers.
-public func __yJsonReadFastArrayListRfc3339DateTime(
-    reader: JsonFastReader,
-    context: JsonDecodeContext
-): ArrayList<DateTime> {
-    context.enterValue()
-    try { jsonFastReadArrayListRfc3339DateTime(reader) } finally { context.leaveValue() }
-}
-
-public func __yJsonReadFastHashMapStringRfc3339DateTime(
-    reader: JsonFastReader,
-    context: JsonDecodeContext
-): HashMap<String, DateTime> {
-    context.enterValue()
-    try { jsonFastReadHashMapStringRfc3339DateTime(reader) } finally { context.leaveValue() }
-}
-
-public func __yJsonReadFastArrayListBigInt(
-    reader: JsonFastReader,
-    context: JsonDecodeContext
+func __yJsonReadFastArrayListBigInt(
+    reader: JsonFastReader
 ): ArrayList<BigInt> {
+    let context = GeneratedSupportV1.readState(reader)
     context.enterValue()
     try { jsonFastReadArrayListBigInt(reader) } finally { context.leaveValue() }
 }
 
-public func __yJsonReadFastHashMapStringBigInt(
-    reader: JsonFastReader,
-    context: JsonDecodeContext
+func __yJsonReadFastHashMapStringBigInt(
+    reader: JsonFastReader
 ): HashMap<String, BigInt> {
+    let context = GeneratedSupportV1.readState(reader)
     context.enterValue()
     try { jsonFastReadHashMapStringBigInt(reader) } finally { context.leaveValue() }
 }
 
-public func __yJsonReadFastArrayListDecimal(
-    reader: JsonFastReader,
-    context: JsonDecodeContext
+func __yJsonReadFastArrayListDecimal(
+    reader: JsonFastReader
 ): ArrayList<Decimal> {
+    let context = GeneratedSupportV1.readState(reader)
     context.enterValue()
     try { jsonFastReadArrayListDecimal(reader) } finally { context.leaveValue() }
 }
 
-public func __yJsonReadFastHashMapStringDecimal(
-    reader: JsonFastReader,
-    context: JsonDecodeContext
+func __yJsonReadFastHashMapStringDecimal(
+    reader: JsonFastReader
 ): HashMap<String, Decimal> {
+    let context = GeneratedSupportV1.readState(reader)
     context.enterValue()
     try { jsonFastReadHashMapStringDecimal(reader) } finally { context.leaveValue() }
-}
-
-public func jsonFastReadRfc3339DateTime(reader: GeneratedSupportV1Reader): DateTime {
-    jsonFastReadRfc3339DateTime(yJsonGeneratedReaderV1(reader))
 }
 
 public func jsonFastReadBigInt(reader: GeneratedSupportV1Reader): BigInt {
@@ -797,48 +745,30 @@ public func jsonFastReadDecimal(reader: GeneratedSupportV1Reader): Decimal {
     jsonFastReadDecimal(yJsonGeneratedReaderV1(reader))
 }
 
-public func __yJsonReadFastArrayListRfc3339DateTime(
-    reader: GeneratedSupportV1Reader,
-    context: JsonDecodeContext
-): ArrayList<DateTime> {
-    __yJsonReadFastArrayListRfc3339DateTime(yJsonGeneratedReaderV1(reader), context)
-}
-
-public func __yJsonReadFastHashMapStringRfc3339DateTime(
-    reader: GeneratedSupportV1Reader,
-    context: JsonDecodeContext
-): HashMap<String, DateTime> {
-    __yJsonReadFastHashMapStringRfc3339DateTime(yJsonGeneratedReaderV1(reader), context)
-}
-
 public func __yJsonReadFastArrayListBigInt(
-    reader: GeneratedSupportV1Reader,
-    context: JsonDecodeContext
+    reader: GeneratedSupportV1Reader
 ): ArrayList<BigInt> {
-    __yJsonReadFastArrayListBigInt(yJsonGeneratedReaderV1(reader), context)
+    __yJsonReadFastArrayListBigInt(yJsonGeneratedReaderV1(reader))
 }
 
 public func __yJsonReadFastHashMapStringBigInt(
-    reader: GeneratedSupportV1Reader,
-    context: JsonDecodeContext
+    reader: GeneratedSupportV1Reader
 ): HashMap<String, BigInt> {
-    __yJsonReadFastHashMapStringBigInt(yJsonGeneratedReaderV1(reader), context)
+    __yJsonReadFastHashMapStringBigInt(yJsonGeneratedReaderV1(reader))
 }
 
 public func __yJsonReadFastArrayListDecimal(
-    reader: GeneratedSupportV1Reader,
-    context: JsonDecodeContext
+    reader: GeneratedSupportV1Reader
 ): ArrayList<Decimal> {
-    __yJsonReadFastArrayListDecimal(yJsonGeneratedReaderV1(reader), context)
+    __yJsonReadFastArrayListDecimal(yJsonGeneratedReaderV1(reader))
 }
 
 public func __yJsonReadFastHashMapStringDecimal(
-    reader: GeneratedSupportV1Reader,
-    context: JsonDecodeContext
+    reader: GeneratedSupportV1Reader
 ): HashMap<String, Decimal> {
-    __yJsonReadFastHashMapStringDecimal(yJsonGeneratedReaderV1(reader), context)
+    __yJsonReadFastHashMapStringDecimal(yJsonGeneratedReaderV1(reader))
 }
 
-public func jsonFastFormatDecimal(value: Decimal): String {
+func jsonFastFormatDecimal(value: Decimal): String {
     value.toString()
 }

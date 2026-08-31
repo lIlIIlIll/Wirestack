@@ -20,26 +20,17 @@ main(): Unit {
     println("=== Generated typed codec ===")
     println(user.name)
 
-    let literal = @Json({"ok": true, "user": $(user)})
-    println("=== JSON literal ===")
-    println(literal)
-
     let text = "{\"name\":\"Alice\",\"age\":30,\"tags\":[\"cangjie\",\"json\"]}"
-    let limits = JsonReadConfig(limits: JsonReadLimits(
-        maxDepth: 64, maxBytes: 1024 * 1024, maxStringBytes: 256 * 1024))
-    let value = YJson.parse(text, config: limits)
+    let limits = JsonReadOptions(maxDepth: 64, maxInputBytes: 1024 * 1024, maxStringBytes: 256 * 1024)
+    let value = JsonNode.parse(text, config: limits)
     let object = value.asObject()
-    object.put("active", JsonBoolValue(true))
+    object.put("active", JsonNode.boolean(true))
 
     println("=== JsonNode AST ===")
-    println(YJson.stringifyPretty(object))
+    println((object).toJson(options: JsonWriteOptions.pretty()))
 
-    let compact = YJson.parseCompact(unsafe { text.rawData() })
-    println("=== Pure Cangjie Compact query ===")
-    println(compact.root().get("name").getOrThrow().asString())
-
-    let encoded = YJson.encodeStringWith(StringJson, "仓颉 JSON")
-    let decoded = YJson.decodeStringWith(StringJson, encoded)
+    let encoded = YJson.toJson("仓颉 JSON", codec: JsonCodecs.string)
+    let decoded = YJson.fromJson(encoded, codec: JsonCodecs.string)
     println("=== Built-in codec roundtrip ===")
     println(decoded)
 }

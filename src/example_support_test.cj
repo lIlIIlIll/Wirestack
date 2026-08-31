@@ -27,7 +27,6 @@ public class Person {
     public var age: Int32
     public var tags: ArrayList<String>
     public var scores: HashMap<String, Int64>
-    @JsonStatic
     public var address: Address
     @JsonIncludeNull
     public var nick: Option<String>
@@ -106,9 +105,11 @@ public struct ProfileBundle {
 
 @JsonCodec
 public struct TemporalStats {
+    @JsonUsing[JsonCodecs.rfc3339DateTime]
     public var createdAt: DateTime
     public var totalEvents: BigInt
     public var averageLatency: Decimal
+    @JsonUsing[JsonCodecs.arrayList(JsonCodecs.rfc3339DateTime)]
     public var checkpoints: ArrayList<DateTime>
     public var ratios: HashMap<String, Decimal>
 
@@ -344,34 +345,29 @@ public func sampleUInt64Envelope(): UInt64Envelope {
 }
 
 public func profileRecordOptionJson(): JsonCodec<Option<ProfileRecord>> {
-    YJson.optionCodec(ProfileRecordJson)
+    JsonCodecs.option(ProfileRecordJson)
 }
 
 public func nestedProfilesJson(): JsonCodec<ArrayList<HashMap<String, ArrayList<ProfileRecord>>>> {
-    YJson.arrayListCodec(YJson.hashMapCodec(YJson.arrayListCodec(ProfileRecordJson)))
+    JsonCodecs.arrayList(JsonCodecs.stringMap(JsonCodecs.arrayList(ProfileRecordJson)))
 }
 
 public func encodeToUtf8String<T>(
     codec: JsonCodec<T>,
     value: T,
-    config!: JsonWriteConfig = JsonWriteConfig.compact
+    config!: JsonWriteOptions = JsonWriteOptions.compact
 ): String {
     let out = MemoryOutputStream()
-    YJson.encodeToStreamWith(codec, value, out, config: config)
+    YJson.writeJson(value, out, codec: codec, options: config)
     out.toUtf8String()
 }
 
 public func decodeFromUtf8String<T>(codec: JsonCodec<T>, text: String): T {
-    YJson.decodeFromStreamWith(codec, ByteArrayInputStream(text))
+    YJson.fromJson(ByteArrayInputStream(text), codec: codec)
 }
 
-public func htmlSafeCompactConfig(): JsonWriteConfig {
-    JsonWriteConfig(
-        JsonWriteConfig.compact.newline,
-        JsonWriteConfig.compact.indent,
-        JsonWriteConfig.compact.useSpaceAfterSeparators,
-        true
-    )
+public func htmlSafeCompactConfig(): JsonWriteOptions {
+    JsonWriteOptions(indent: JsonWriteOptions.compact.indent, htmlSafe: true)
 }
 
 public func elapsedNanoseconds(start: DateTime): Int64 {
@@ -396,52 +392,52 @@ public func benchmark(label: String, iterations: Int64, action: () -> Unit): Uni
 public func runChecks(person: Person): String {
     let profileOptionCodec = profileRecordOptionJson()
     let nestedCodec = nestedProfilesJson()
-    let codecText = YJson.encodeStringWith(PersonJson, person)
+    let codecText = YJson.toJson(person, codec: PersonJson)
     assertJson(codecText.contains("\"user_id\":42"), "renamed field missing")
     assertJson(!codecText.contains("ignored"), "ignored field leaked into json")
     assertJson(codecText.contains("\"nick\":null"), "include-null field missing")
-    let codecDecoded = YJson.decodeStringWith(PersonJson, codecText)
+    let codecDecoded = YJson.fromJson(codecText, codec: PersonJson)
     assertJson(codecDecoded.id == person.id, "codec id mismatch after decode")
     assertJson(codecDecoded.name == person.name, "codec name mismatch after decode")
     assertJson(codecDecoded.age == person.age, "codec age mismatch after decode")
     assertJson(codecDecoded.address.street == person.address.street, "codec nested object mismatch")
     assertJson(codecDecoded.tags.size == person.tags.size, "codec array size mismatch")
     assertJson(codecDecoded.scores["math"] == 95, "codec hash map mismatch")
-    let streamText = encodeToUtf8String(PersonJson, person, config: JsonWriteConfig.pretty)
+    let streamText = encodeToUtf8String(PersonJson, person, config: JsonWriteOptions.pretty())
     assertJson(streamText.contains("\"user_id\": 42"), "stream pretty output mismatch")
     let streamDecoded = decodeFromUtf8String(PersonJson, streamText)
     assertJson(streamDecoded.id == person.id, "stream id mismatch after decode")
     assertJson(streamDecoded.address.zipcode == person.address.zipcode, "stream nested object mismatch")
-    let htmlSafeText = encodeToUtf8String(StringJson, "<tag attr='x'>&payload</tag>", config: htmlSafeCompactConfig())
+    let htmlSafeText = encodeToUtf8String(JsonCodecs.string, "<tag attr='x'>&payload</tag>", config: htmlSafeCompactConfig())
     assertJson(htmlSafeText.contains("\\u003C"), "htmlSafe should escape <")
     assertJson(htmlSafeText.contains("\\u0026"), "htmlSafe should escape &")
-    let dateTimeText = YJson.encodeStringWith(DateTimeJson, sampleDateTime())
+    let dateTimeText = YJson.toJson(sampleDateTime(), codec: JsonCodecs.rfc3339DateTime)
     assertJson(dateTimeText.contains("2024-06-20T14:42:33+08:00"), "DateTime codec output mismatch")
-    let decodedDateTime = YJson.decodeStringWith(DateTimeJson, dateTimeText)
+    let decodedDateTime = YJson.fromJson(dateTimeText, codec: JsonCodecs.rfc3339DateTime)
     assertJson(decodedDateTime == sampleDateTime(), "DateTime codec roundtrip mismatch")
-    let bigIntText = YJson.encodeStringWith(BigIntJson, BigInt.parse("123456789012345678901234567890"))
+    let bigIntText = YJson.toJson(BigInt.parse("123456789012345678901234567890"), codec: JsonCodecs.bigInt)
     assertJson(bigIntText == "123456789012345678901234567890", "BigInt codec output mismatch")
-    let decimalText = YJson.encodeStringWith(DecimalJson, Decimal.parse("12.375"))
+    let decimalText = YJson.toJson(Decimal.parse("12.375"), codec: JsonCodecs.decimal)
     assertJson(decimalText == "12.375", "Decimal codec output mismatch")
 
     let topLevelUInt64 = UInt64.parse("18446744073709551615")
-    let topLevelUInt64Text = YJson.encodeStringWith(UInt64Json, topLevelUInt64)
-    assertJson(topLevelUInt64Text == "18446744073709551615", "UInt64Json should encode as a bare number")
-    assertJson(YJson.decodeStringWith(UInt64Json, topLevelUInt64Text) == topLevelUInt64, "UInt64Json roundtrip mismatch")
+    let topLevelUInt64Text = YJson.toJson(topLevelUInt64, codec: JsonCodecs.uint64)
+    assertJson(topLevelUInt64Text == "18446744073709551615", "JsonCodecs.uint64 should encode as a bare number")
+    assertJson(YJson.fromJson(topLevelUInt64Text, codec: JsonCodecs.uint64) == topLevelUInt64, "JsonCodecs.uint64 roundtrip mismatch")
     assertJson(
-        YJson.decodeStringWith(UInt64Json, "18446744073709551614") == UInt64.parse("18446744073709551614"),
-        "UInt64Json should decode bare numbers"
+        YJson.fromJson("18446744073709551614", codec: JsonCodecs.uint64) == UInt64.parse("18446744073709551614"),
+        "JsonCodecs.uint64 should decode bare numbers"
     )
     let quotedUInt64Rejected = try {
-        let _ = YJson.decodeStringWith(UInt64Json, "\"18446744073709551614\"")
+        let _ = YJson.fromJson("\"18446744073709551614\"", codec: JsonCodecs.uint64)
         false
     } catch (_: JsonException) {
         true
     }
-    assertJson(quotedUInt64Rejected, "UInt64Json should reject quoted numeric strings")
+    assertJson(quotedUInt64Rejected, "JsonCodecs.uint64 should reject quoted numeric strings")
 
     let uint64Envelope = sampleUInt64Envelope()
-    let uint64EnvelopeText = YJson.encodeStringWith(UInt64EnvelopeJson, uint64Envelope)
+    let uint64EnvelopeText = YJson.toJson(uint64Envelope, codec: UInt64EnvelopeJson)
     assertJson(
         uint64EnvelopeText.contains("\"id\":18446744073709551615"),
         "generated UInt64 field should encode as a bare number"
@@ -458,32 +454,30 @@ public func runChecks(person: Person): String {
         uint64EnvelopeText.contains("\"steady\":42"),
         "generated HashMap<String, UInt64> should encode small bare number values"
     )
-    assertUInt64Envelope(YJson.decodeStringWith(UInt64EnvelopeJson, uint64EnvelopeText), "generated UInt64 envelope roundtrip")
+    assertUInt64Envelope(YJson.fromJson(uint64EnvelopeText, codec: UInt64EnvelopeJson), "generated UInt64 envelope roundtrip")
 
     let batch = sampleAddressBatch()
-    let batchText = YJson.encodeStringWith(AddressBatchJson, batch)
-    let batchDecoded = YJson.decodeStringWith(AddressBatchJson, batchText)
+    let batchText = YJson.toJson(batch, codec: AddressBatchJson)
+    let batchDecoded = YJson.fromJson(batchText, codec: AddressBatchJson)
     assertJson(batchDecoded.homes.size == 2, "codec fixed array size mismatch")
     assertJson(batchDecoded.homes[1].street == "Binjiang Avenue", "codec fixed array nested decode mismatch")
 
     let profile = sampleProfileRecord()
-    let profileText = YJson.encodeStringWith(ProfileRecordJson, profile)
-    let profileDecoded = YJson.decodeStringWith(ProfileRecordJson, profileText)
+    let profileText = YJson.toJson(profile, codec: ProfileRecordJson)
+    let profileDecoded = YJson.fromJson(profileText, codec: ProfileRecordJson)
     assertJson(profileDecoded.id == 7, "constructor parameter fallback to field JsonName failed")
     assertJson(profileDecoded.alias == "ops", "post-construction mutable field assignment failed")
     assertJson(profileDecoded.level == 3, "post-construction Int32 assignment failed")
 
-    let zeroPreferred = YJson.decodeStringWith(ZeroPreferredJson, "{\"enabled\":true}")
+    let zeroPreferred = YJson.fromJson("{\"enabled\":true}", codec: ZeroPreferredJson)
     assertJson(zeroPreferred.createdBy == "zero-ctor", "zero-arg constructor should be preferred when available")
     assertJson(zeroPreferred.enabled, "zero-arg constructor path should still apply mutable field updates")
 
     let bundle = sampleProfileBundle()
-    let bundleText = YJson.encodeStringWith(ProfileBundleJson, bundle)
+    let bundleText = YJson.toJson(bundle, codec: ProfileBundleJson)
     assertJson(bundleText.contains("\"groups\""), "profile bundle nested groups field missing")
-    let bundleFeatured = YJson.decodeWith(
-        profileOptionCodec,
-        YJson.parse(bundleText).asObject().get("featured").getOrThrow()
-    )
+    let bundleFeaturedNode = JsonNode.parse(bundleText).asObject().get("featured").getOrThrow()
+    let bundleFeatured = YJson.fromJson(bundleFeaturedNode.toJson(), codec: profileOptionCodec)
     assertProfileRecord(
         bundleFeatured.getOrThrow(),
         11,
@@ -491,12 +485,12 @@ public func runChecks(person: Person): String {
         5,
         "profile bundle standalone featured"
     )
-    let bundleDecoded = YJson.decodeStringWith(ProfileBundleJson, bundleText)
+    let bundleDecoded = YJson.fromJson(bundleText, codec: ProfileBundleJson)
     assertProfileBundle(bundleDecoded, "profile bundle codec")
 
     let temporalStats = sampleTemporalStats()
-    let temporalText = YJson.encodeStringWith(TemporalStatsJson, temporalStats)
-    let temporalDecoded = YJson.decodeStringWith(TemporalStatsJson, temporalText)
+    let temporalText = YJson.toJson(temporalStats, codec: TemporalStatsJson)
+    let temporalDecoded = YJson.fromJson(temporalText, codec: TemporalStatsJson)
     assertJson(temporalDecoded.createdAt == temporalStats.createdAt, "temporal stats DateTime mismatch")
     assertJson(temporalDecoded.totalEvents == temporalStats.totalEvents, "temporal stats BigInt mismatch")
     assertJson(temporalDecoded.averageLatency == temporalStats.averageLatency, "temporal stats Decimal mismatch")
@@ -504,8 +498,8 @@ public func runChecks(person: Person): String {
     assertJson(temporalDecoded.ratios["p99"] == Decimal.parse("98.25"), "temporal stats nested decimal mismatch")
 
     let nestedProfiles = sampleNestedProfiles()
-    let nestedCodecText = YJson.encodeStringWith(nestedCodec, nestedProfiles)
-    let nestedCodecDecoded = YJson.decodeStringWith(nestedCodec, nestedCodecText)
+    let nestedCodecText = YJson.toJson(nestedProfiles, codec: nestedCodec)
+    let nestedCodecDecoded = YJson.fromJson(nestedCodecText, codec: nestedCodec)
     let codecOpsProfiles = findProfilesByGroup(nestedCodecDecoded, "ops")
     let codecPlatformProfiles = findProfilesByGroup(nestedCodecDecoded, "platform")
     assertJson(nestedCodecDecoded.size == 2, "nested codec outer size mismatch")
@@ -521,44 +515,44 @@ public func runBenchmarks(person: Person, jsonText: String): Unit {
     let bundle = sampleProfileBundleForBench()
     let uint64Value = UInt64.parse("18446744073709551615")
     let uint64Envelope = sampleUInt64Envelope()
-    let dateTimeText = YJson.encodeStringWith(DateTimeJson, sampleDateTime())
+    let dateTimeText = YJson.toJson(sampleDateTime(), codec: JsonCodecs.rfc3339DateTime)
     let nestedCodec = nestedProfilesJson()
-    let addressText = YJson.encodeStringWith(AddressJson, person.address)
-    let bundleText = YJson.encodeStringWith(ProfileBundleJson, bundle)
-    let nestedProfilesText = YJson.encodeStringWith(nestedCodec, sampleNestedProfiles())
-    let uint64EnvelopeText = YJson.encodeStringWith(UInt64EnvelopeJson, uint64Envelope)
+    let addressText = YJson.toJson(person.address, codec: AddressJson)
+    let bundleText = YJson.toJson(bundle, codec: ProfileBundleJson)
+    let nestedProfilesText = YJson.toJson(sampleNestedProfiles(), codec: nestedCodec)
+    let uint64EnvelopeText = YJson.toJson(uint64Envelope, codec: UInt64EnvelopeJson)
     let personStreamText = encodeToUtf8String(PersonJson, person)
     let htmlSample = "<script>alert('yjson & stream')</script>"
     println("\n=== Benchmarks ===")
-    benchmark("encode-codec-uint64", iterations, { => let _ = YJson.encodeStringWith(UInt64Json, uint64Value) })
-    benchmark("decode-codec-uint64", iterations, { => let _ = YJson.decodeStringWith(UInt64Json, "18446744073709551615") })
+    benchmark("encode-codec-uint64", iterations, { => let _ = YJson.toJson(uint64Value, codec: JsonCodecs.uint64) })
+    benchmark("decode-codec-uint64", iterations, { => let _ = YJson.fromJson("18446744073709551615", codec: JsonCodecs.uint64) })
     benchmark("encode-codec-uint64-envelope", iterations, {
-        => let _ = YJson.encodeStringWith(UInt64EnvelopeJson, uint64Envelope)
+        => let _ = YJson.toJson(uint64Envelope, codec: UInt64EnvelopeJson)
     })
     benchmark("decode-codec-uint64-envelope", iterations, {
-        => let _ = YJson.decodeStringWith(UInt64EnvelopeJson, uint64EnvelopeText)
+        => let _ = YJson.fromJson(uint64EnvelopeText, codec: UInt64EnvelopeJson)
     })
-    benchmark("encode-codec-person", iterations, { => let _ = YJson.encodeStringWith(PersonJson, person) })
+    benchmark("encode-codec-person", iterations, { => let _ = YJson.toJson(person, codec: PersonJson) })
     benchmark("encode-codec-person-to-stream", iterations, {
         =>
         let out = MemoryOutputStream()
-        YJson.encodeToStreamWith(PersonJson, person, out)
+        YJson.writeJson(person, out, codec: PersonJson)
     })
-    benchmark("decode-codec-address", iterations, { => let _ = YJson.decodeStringWith(AddressJson, addressText) })
-    benchmark("decode-codec-person", iterations, { => let _ = YJson.decodeStringWith(PersonJson, jsonText) })
+    benchmark("decode-codec-address", iterations, { => let _ = YJson.fromJson(addressText, codec: AddressJson) })
+    benchmark("decode-codec-person", iterations, { => let _ = YJson.fromJson(jsonText, codec: PersonJson) })
     benchmark("decode-codec-person-from-stream", iterations, {
         =>
-        let _ = YJson.decodeFromStreamWith(PersonJson, ByteArrayInputStream(personStreamText))
+        let _ = YJson.fromJson(ByteArrayInputStream(personStreamText), codec: PersonJson)
     })
     benchmark("decode-codec-profile-bundle", iterations, {
-        => let _ = YJson.decodeStringWith(ProfileBundleJson, bundleText)
+        => let _ = YJson.fromJson(bundleText, codec: ProfileBundleJson)
     })
     benchmark("decode-codec-nested-profiles", iterations, {
-        => let _ = YJson.decodeStringWith(nestedCodec, nestedProfilesText)
+        => let _ = YJson.fromJson(nestedProfilesText, codec: nestedCodec)
     })
     benchmark("encode-large-string-html-safe", iterations, {
-        => let _ = encodeToUtf8String(StringJson, htmlSample, config: htmlSafeCompactConfig())
+        => let _ = encodeToUtf8String(JsonCodecs.string, htmlSample, config: htmlSafeCompactConfig())
     })
-    benchmark("decode-codec-datetime", iterations, { => let _ = YJson.decodeStringWith(DateTimeJson, dateTimeText) })
-    benchmark("parse-only-person", iterations, { => let _ = YJson.parse(jsonText) })
+    benchmark("decode-codec-datetime", iterations, { => let _ = YJson.fromJson(dateTimeText, codec: JsonCodecs.rfc3339DateTime) })
+    benchmark("parse-only-person", iterations, { => let _ = JsonNode.parse(jsonText) })
 }

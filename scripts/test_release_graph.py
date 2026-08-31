@@ -131,6 +131,48 @@ class ReleaseGraphTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "0.x.y"):
                 load_release_graph(path)
 
+    def test_rejects_unknown_stage_kind(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "graph.toml"
+            path.write_text(textwrap.dedent('''
+                schema_version = 1
+                release_version = "0.1.0"
+                status = "migration"
+                [[packages]]
+                name = "yjson"
+                role = "core"
+                development_manifest = "cjpm.toml"
+                release_manifest = "release/yjson.toml"
+                source_root = "src"
+                stage_kind = "generic-copy"
+                stability = "stable"
+                leaf_bundle = true
+                dependencies = []
+            '''), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "stage_kind must be one of"):
+                load_release_graph(path)
+
+    def test_rejects_unknown_stability_class(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "graph.toml"
+            path.write_text(textwrap.dedent('''
+                schema_version = 1
+                release_version = "0.1.0"
+                status = "migration"
+                [[packages]]
+                name = "yjson"
+                role = "core"
+                development_manifest = "cjpm.toml"
+                release_manifest = "release/yjson.toml"
+                source_root = "src"
+                stage_kind = "core"
+                stability = "best-effort"
+                leaf_bundle = true
+                dependencies = []
+            '''), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "stability must be one of"):
+                load_release_graph(path)
+
 
 if __name__ == "__main__":
     unittest.main()

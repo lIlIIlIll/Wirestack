@@ -3,7 +3,7 @@
 本文件记录已发布版本和后续开发的用户可见变化。最新稳定版说明见
 [RELEASE_NOTES.md](RELEASE_NOTES.md)。历史 `1.0.0-rc.1` 的迁移步骤和验收记录分别保存在
 [pre-1.0 → 1.0](docs/migration/pre-1.0-to-1.0.md) 与
-[release evidence](release/1.0.0-rc.1/evidence.md)。
+`release/1.0.0-rc.1/evidence.md`。后者是历史仓库路径，不进入 `0.1.0` source archive。
 
 ## [Unreleased]
 
@@ -18,6 +18,17 @@
 - Rune codec 只接受一个 Unicode scalar。legacy AST codec 对无法执行的非默认配置返回
   `unsupported_config`。
 - JSONPath singularity 使用解析后的 selector 类型判定，不再根据表达式中的标点猜测。
+- JSONPath cursor 改为惰性遍历，`first()` 在首个匹配后停止；Schema resolver graph 和 regex
+  在构造阶段冻结，重复 validation 不再解析相同 schema。
+- generated polymorphic codec 通过 concrete subtype 的 typed object provider 读写字段，不再
+  复用从 open base 继承的 provider。
+- generated codec lookup 改为全类型化
+  `GeneratedCodecProviderV1<T> -> JsonCodec<T>`；删除 `GeneratedAnyCodecV1`、erase/reify
+  adapter 和运行时类型转换。零状态 `GeneratedCodecTokenV1<T>` 支持父/子 provider 重载，
+  concrete subtype codec 以类型化方式组合继承字段。
+- 冻结后的普通 `YJson` 调用使用 atomic fast path，避免每次 encode/decode 获取全局 Mutex。
+- Custom Native 与 yyjson 的 root serialization 和 document materialization 使用单次读锁
+  bulk tape 路径；任意 retained 子 view 继续逐操作与 `close()` 线性化。
 - formal performance runner 记录源码、工具链、语料与最终 binary 身份，并要求 clean、隔离的
   baseline 与 candidate rebuild。
 

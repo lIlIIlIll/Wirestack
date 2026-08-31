@@ -2,15 +2,15 @@
 
 ## 支持版本
 
-yjson 仅为最新的 2.0.x 补丁版本提供安全修复。旧补丁版本、1.x 候选版本和 pre-1.0
-快照不再受支持。请从 [GitHub Releases](https://github.com/lIlIIlIll/yjson/releases/latest)
+yjson 仅为最新的 `0.1.x` 补丁版本提供安全修复。旧补丁版本和历史 1.x/2.x 原型版本不再
+受支持。请从 [GitHub Releases](https://github.com/lIlIIlIll/yjson/releases/latest)
 获取最新稳定版，并查看当前的 [release notes](RELEASE_NOTES.md)。
 
 | Version | Security fixes |
 | --- | --- |
-| 最新 2.0.x | 支持 |
-| 较旧 2.0.x | 升级后支持 |
-| 1.x 与 pre-1.0 | 不支持 |
+| 最新 0.1.x | 支持 |
+| 较旧 0.1.x | 升级后支持 |
+| 历史 1.x/2.x | 不支持 |
 
 `main` 和 `dev` 是开发分支，不是已发布版本。安全修复完成后，项目通过新的补丁版本交付。
 
@@ -33,5 +33,6 @@ yjson 仅为最新的 2.0.x 补丁版本提供安全修复。旧补丁版本、1
 ## 处理不可信 JSON
 
 应用应显式配置[资源限制](docs/resource-limits.md)，并在上层提供 framing、并发限流、认证
-与授权。`maxBytes` 限制 JSON 文档，不是严格的进程总内存上限。Native backend 扩大了
-内存安全审计面，只有完成 sanitizer、fuzz 和生命周期 gate 的平台才可声明 qualified。
+与授权。`maxInputBytes`、`maxStringBytes`、`maxBufferedValueBytes`、`maxDepth` 和算法 work
+budget 限制对应操作，不是严格的进程总内存上限。Native backend 扩大了内存安全审计面，
+只有完成 sanitizer、fuzz 和生命周期 gate 的平台才可声明 qualified。

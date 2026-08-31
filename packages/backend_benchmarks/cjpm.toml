@@ -14,5 +14,6 @@ package-configuration = {}
 
 [dependencies]
 yjson = { path = "../..", output-type = "static" }
+yjson_backends = { path = "../yjson_backends" }
 yjson_native = { path = "../yjson_native" }
 yjson_yyjson = { path = "../yjson_yyjson" }

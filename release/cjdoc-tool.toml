@@ -1,7 +1,22 @@
-schema_version = 1
-status = "unqualified"
-reason = "No source-available or checksum-pinned cjdoc build compatible with the fixed Cangjie SDK has been qualified yet."
-manual_url = "https://docs.cangjie-lang.cn/docs/0.53.13/tools/source_zh_cn/tools/cjdoc_manual.html"
+schema_version = 3
+status = "qualified"
+distribution = "source"
+platform = "linux-x86_64"
 
-# A qualified record must additionally pin platform, binary_path, artifact_url,
-# artifact_sha256, version_output, source_url, source_revision, and license_spdx.
+version = "0.6.0"
+version_output = "cjdoc 0.6.0"
+version_args = ["--version"]
+
+source_url = "https://github.com/lIlIIlIll/cjdoc/tree/2e8c8ecc849ba77d5209f4546cdbb2129b7b17fb"
+source_archive_url = "https://github.com/lIlIIlIll/cjdoc/archive/2e8c8ecc849ba77d5209f4546cdbb2129b7b17fb.tar.gz"
+source_archive_sha256 = "665800a497fdaf7ccba0b876ad4cb59db164422156ca78783f432739e19e69a8"
+source_revision = "2e8c8ecc849ba77d5209f4546cdbb2129b7b17fb"
+source_directory = "cjdoc-2e8c8ecc849ba77d5209f4546cdbb2129b7b17fb"
+binary_path = "target/release/bin/main"
+build_command = ["cjpm", "build"]
+
+cjc_channel = "nightly"
+
+license_spdx = "MIT"
+license_url = "https://github.com/lIlIIlIll/cjdoc/blob/2e8c8ecc849ba77d5209f4546cdbb2129b7b17fb/LICENSE"
+manual_url = "https://github.com/lIlIIlIll/cjdoc/blob/2e8c8ecc849ba77d5209f4546cdbb2129b7b17fb/README.md"

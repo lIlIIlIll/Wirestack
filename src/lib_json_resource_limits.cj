@@ -2,12 +2,12 @@ package yjson
 
 private class JsonResourceLimitScanner {
     private let data: Array<Byte>
-    private let config: JsonReadConfig
+    private let config: JsonReadOptions
     private let size: Int64
     private var index: Int64 = 0
     private var depth: Int64 = 0
 
-    init(data: Array<Byte>, config: JsonReadConfig) {
+    init(data: Array<Byte>, config: JsonReadOptions) {
         this.data = data
         this.config = config
         this.size = data.size
@@ -71,7 +71,6 @@ private class JsonResourceLimitScanner {
     }
 
     private func parseString(): Unit {
-        let stringStart = index
         index++
         var decodedBytes: Int64 = 0
         while (index < size) {
@@ -88,7 +87,7 @@ private class JsonResourceLimitScanner {
                         case b'"' | b'\\' | b'/' | b'b' | b'f' | b'n' | b'r' | b't' =>
                             decodedBytes++
                         case b'u' =>
-                            let scalar = parseUnicodeScalar(currentStart)
+                            let scalar = parseUnicodeScalar(index)
                             decodedBytes += jsonUtf8ByteCount(scalar)
                         case _ => fail("Unsupported escape sequence", currentStart)
                     }
@@ -107,7 +106,7 @@ private class JsonResourceLimitScanner {
                     "string_too_large", currentStart)
             }
         }
-        fail("Unterminated string literal", stringStart)
+        fail("Unterminated string literal", index)
     }
 
     private func parseUnicodeScalar(start: Int64): Int64 {
@@ -241,18 +240,18 @@ private class JsonResourceLimitScanner {
     private func leaveContainer(): Unit { depth-- }
 
     private func ensureRootValueBudget(start: Int64): Unit {
-        if (config.maxPolymorphicObjectBytes > 0 && index - start > config.maxPolymorphicObjectBytes) {
-            resourceFail("JSON value exceeds ${config.maxPolymorphicObjectBytes} bytes",
-                "polymorphic_object_too_large", start + config.maxPolymorphicObjectBytes)
+        if (config.maxBufferedValueBytes > 0 && index - start > config.maxBufferedValueBytes) {
+            resourceFail("JSON value exceeds ${config.maxBufferedValueBytes} bytes",
+                "buffered_value_too_large", start + config.maxBufferedValueBytes)
         }
     }
 
     private func fail(message: String, offset: Int64): Nothing {
-        throw jsonResourceLimitException(data, config, message, "parse_error", offset)
+        throw jsonResourceLimitException(data, message, "parse_error", offset)
     }
 
     private func resourceFail(message: String, code: String, offset: Int64): Nothing {
-        throw jsonResourceLimitException(data, config, message, code, offset)
+        throw jsonResourceLimitException(data, message, code, offset)
     }
 }
 
@@ -263,25 +262,22 @@ func jsonUtf8ByteCount(scalar: Int64): Int64 {
     else { 4 }
 }
 
-func jsonResourceLimitException(data: Array<Byte>, config: JsonReadConfig, message: String,
+func jsonResourceLimitException(data: Array<Byte>, message: String,
     code: String, offset: Int64): JsonException {
-    if (!config.includeErrorLocation) { return JsonException(message, code: code) }
-    JsonException(message, code: code, byteOffset: offset,
-        line: jsonLineFromUtf8Bytes(data, offset), column: jsonColumnFromUtf8Bytes(data, offset))
+    JsonException(message, code: code, location: Some(JsonLocation(offset,
+        jsonLineFromUtf8Bytes(data, offset), jsonColumnFromUtf8Bytes(data, offset))))
 }
 
-func jsonResourceLimitException(config: JsonReadConfig, message: String, code: String,
+func jsonResourceLimitException(config: JsonReadOptions, message: String, code: String,
     offset: Int64): JsonException {
-    JsonException(message, code: code,
-        byteOffset: if (config.includeErrorLocation) { offset } else { -1 })
+    let _ = config
+    JsonException(message, code: code, location: Some(JsonLocation(offset, 1, offset + 1)))
 }
 
-func validateJsonResourceLimits(data: Array<Byte>, config: JsonReadConfig): Unit {
-    if (config.maxBytes > 0 && data.size > config.maxBytes) {
-        throw jsonResourceLimitException(data, config,
-            "JSON document exceeds ${config.maxBytes} bytes", "document_too_large", config.maxBytes)
+func validateJsonResourceLimits(data: Array<Byte>, config: JsonReadOptions): Unit {
+    if (data.size > config.maxInputBytes) {
+        throw jsonResourceLimitException(data,
+            "JSON document exceeds ${config.maxInputBytes} bytes", "document_too_large", config.maxInputBytes)
     }
-    if (config.maxStringBytes > 0 || config.maxPolymorphicObjectBytes > 0) {
-        JsonResourceLimitScanner(data, config).validate()
-    }
+    JsonResourceLimitScanner(data, config).validate()
 }

@@ -44,24 +44,24 @@ class LargeArrayFunctionalityTest {
     @TestCase
     func parse10KArrayElements(): Unit {
         let json = generateLargeArray(10000)
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
         let arr = value.asArray()
         @Expect(arr.size() == 10000)
-        @Expect(arr[0].asInt().value == 0)
-        @Expect(arr[9999].asInt().value == 9999)
+        @Expect(arr[0].asInt64() == 0)
+        @Expect(arr[9999].asInt64() == 9999)
     }
 
     @TestCase
     func parse5KArrayElements(): Unit {
         let json = generateLargeArray(5000)
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
         @Expect(value.asArray().size() == 5000)
     }
 
     @TestCase
     func parse2KArrayElements(): Unit {
         let json = generateLargeArray(2000)
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
         @Expect(value.asArray().size() == 2000)
     }
 }
@@ -71,15 +71,15 @@ class LargeStringFunctionalityTest {
     @TestCase
     func parse1KBString(): Unit {
         let json = generateLargeString(1024)
-        let value = YJson.parse(json)
-        @Expect(value.asString().value.size == 1024)
+        let value = JsonNode.parse(json)
+        @Expect(value.asString().size == 1024)
     }
 
     @TestCase
     func parse64KBString(): Unit {
         let json = generateLargeString(65536)
-        let value = YJson.parse(json)
-        @Expect(value.asString().value.size == 65536)
+        let value = JsonNode.parse(json)
+        @Expect(value.asString().size == 65536)
     }
 }
 
@@ -88,7 +88,7 @@ class WideObjectFunctionalityTest {
     @TestCase
     func parse100FieldObject(): Unit {
         let json = generateWideObject(100)
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
         let obj = value.asObject()
         @Expect(obj.size() == 100)
         @Expect(obj.contains("field_0"))
@@ -98,7 +98,7 @@ class WideObjectFunctionalityTest {
     @TestCase
     func parse1000FieldObject(): Unit {
         let json = generateWideObject(1000)
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
         @Expect(value.asObject().size() == 1000)
     }
 }
@@ -108,56 +108,56 @@ class RoundtripLargeInputFunctionalityTest {
     @TestCase
     func roundtripSmallStructure(): Unit {
         let json = "{\"a\":1,\"b\":\"text\",\"c\":true}"
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
         let output = value.toString()
-        let reparsed = YJson.parse(output)
+        let reparsed = JsonNode.parse(output)
         let obj = reparsed.asObject()
         @Expect(obj.size() == 3)
-        @Expect(obj.get("a").getOrThrow().asInt().value == 1)
-        @Expect(obj.get("b").getOrThrow().asString().value == "text")
-        @Expect(obj.get("c").getOrThrow().asBool().value)
+        @Expect(obj.get("a").getOrThrow().asInt64() == 1)
+        @Expect(obj.get("b").getOrThrow().asString() == "text")
+        @Expect(obj.get("c").getOrThrow().asBool())
     }
 
     @TestCase
     func roundtripLargeArray(): Unit {
         let json = generateLargeArray(1000)
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
         let output = value.toString()
-        let reparsed = YJson.parse(output)
+        let reparsed = JsonNode.parse(output)
         let arr = reparsed.asArray()
         @Expect(arr.size() == 1000)
-        @Expect(arr[0].asInt().value == 0)
-        @Expect(arr[999].asInt().value == 999)
+        @Expect(arr[0].asInt64() == 0)
+        @Expect(arr[999].asInt64() == 999)
     }
 
     @TestCase
     func roundtripWideObject(): Unit {
         let json = generateWideObject(200)
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
         let output = value.toString()
-        let reparsed = YJson.parse(output)
+        let reparsed = JsonNode.parse(output)
         let obj = reparsed.asObject()
         @Expect(obj.size() == 200)
-        @Expect(obj.get("field_0").getOrThrow().asInt().value == 0)
-        @Expect(obj.get("field_199").getOrThrow().asInt().value == 199)
+        @Expect(obj.get("field_0").getOrThrow().asInt64() == 0)
+        @Expect(obj.get("field_199").getOrThrow().asInt64() == 199)
     }
 
     @TestCase
     func multipleRoundtripsPreserveSemantics(): Unit {
         let json = "{\"a\":1,\"b\":\"text\",\"c\":[1,2,3]}"
-        var value = YJson.parse(json)
+        var value = JsonNode.parse(json)
         for (_ in 0..10) {
-            value = YJson.parse(value.toString())
+            value = JsonNode.parse(value.toString())
         }
         let obj = value.asObject()
         @Expect(obj.size() == 3)
-        @Expect(obj.get("a").getOrThrow().asInt().value == 1)
-        @Expect(obj.get("b").getOrThrow().asString().value == "text")
+        @Expect(obj.get("a").getOrThrow().asInt64() == 1)
+        @Expect(obj.get("b").getOrThrow().asString() == "text")
         let arr = obj.get("c").getOrThrow().asArray()
         @Expect(arr.size() == 3)
-        @Expect(arr[0].asInt().value == 1)
-        @Expect(arr[1].asInt().value == 2)
-        @Expect(arr[2].asInt().value == 3)
+        @Expect(arr[0].asInt64() == 1)
+        @Expect(arr[1].asInt64() == 2)
+        @Expect(arr[2].asInt64() == 3)
     }
 }
 

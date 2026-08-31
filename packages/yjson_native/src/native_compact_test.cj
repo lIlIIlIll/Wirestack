@@ -17,49 +17,50 @@ class NativeCompactDocumentTest {
             "\"object\":{\"nested\":42}}"
         try (document = NativeCompactJsonDocument.parse(nativeCompactBytes(text))) {
             let root = document.root()
-            @Expect(root.kind(), JsonKind.JsObject)
+            @Expect(root.kind(), JsonKind.Object)
             @Expect(root.size(), 7)
-            @Expect(root.get("bool").getOrThrow().asBool(), true)
-            @Expect(root.get("int").getOrThrow().asInt64(), Int64.Min)
-            @Expect(root.get("number").getOrThrow().asNumberLiteral(), "1.25e-3")
-            @Expect(root.get("text").getOrThrow().asString(), "中😀")
-            @Expect(root.get("array").getOrThrow().get(2).getOrThrow().asString(), "x")
-            @Expect(root.get("object").getOrThrow().get("nested").getOrThrow().asInt64(), 42)
-            @Expect(document.materialize().asObject().get("text").getOrThrow().asString().value, "中😀")
-            @Expect(document.materializeBulk().asObject().get("text").getOrThrow().asString().value, "中😀")
-            @Expect(document.materializeBulk().asObject().get("number").getOrThrow().asNumberLiteral().literal,
+            @Expect(root.member("bool").getOrThrow().asBool(), true)
+            @Expect(root.member("int").getOrThrow().asInt64(), Int64.Min)
+            @Expect(root.member("number").getOrThrow().asNumberText(), "1.25e-3")
+            @Expect(root.member("text").getOrThrow().asString(), "中😀")
+            @Expect(root.member("array").getOrThrow().element(2).getOrThrow().asString(), "x")
+            @Expect(root.member("object").getOrThrow().member("nested").getOrThrow().asInt64(), 42)
+            @Expect(document.materialize().asObject().get("text").getOrThrow().asString(), "中😀")
+            @Expect(document.materializeBulk().asObject().get("text").getOrThrow().asString(), "中😀")
+            @Expect(document.materializeBulk().asObject().get("number").getOrThrow().asNumberText(),
                 "1.25e-3")
-            @Expect(document.materializeViaSerialization().asObject().get("int").getOrThrow().asInt().value,
+            @Expect(document.materializeViaSerialization().asObject().get("int").getOrThrow().asInt64(),
                 Int64.Min)
-            let reparsed = YJson.parse(document.toString())
-            @Expect(reparsed.asObject().get("number").getOrThrow().asNumberLiteral().literal, "1.25e-3")
+            let reparsed = JsonNode.parse(document.toString())
+            @Expect(reparsed.asObject().get("number").getOrThrow().asNumberText(), "1.25e-3")
         }
     }
 
     @TestCase
     func duplicateSemanticEqualityMatchesCompactBackend(): Unit {
         let text = "{\"a\":1,\"\\u0061\":2,\"中\":3,\"\\u4e2d\":4}"
-        try (document = NativeCompactJsonDocument.parse(nativeCompactBytes(text))) {
+        let lastWins = JsonReadOptions(duplicateKeyPolicy: JsonDuplicateKeyPolicy.LastWins)
+        try (document = NativeCompactJsonDocument.parse(nativeCompactBytes(text), config: lastWins)) {
             @Expect(document.root().size(), 2)
-            @Expect(document.root().get("a").getOrThrow().asInt64(), 2)
-            @Expect(document.root().get("中").getOrThrow().asInt64(), 4)
+            @Expect(document.root().member("a").getOrThrow().asInt64(), 2)
+            @Expect(document.root().member("中").getOrThrow().asInt64(), 4)
         }
         let error = @AssertThrows[JsonException](NativeCompactJsonDocument.parse(
-            nativeCompactBytes(text), config: JsonReadConfig(duplicateKeyPolicy: JsonDuplicateKeyPolicy.Reject)))
-        @Expect(error.code, "parse_error")
+            nativeCompactBytes(text), config: JsonReadOptions(duplicateKeyPolicy: JsonDuplicateKeyPolicy.Reject)))
+        @Expect(error.code, "duplicate_key")
     }
 
     @TestCase
     func preserveLiteralAndErrorContracts(): Unit {
         try (document = NativeCompactJsonDocument.parse(nativeCompactBytes("[1,-2,3.0]"),
-            config: JsonReadConfig(numberPolicy: JsonNumberPolicy.PreserveLiteral))) {
-            @Expect(document.root().get(0).getOrThrow().kind(), JsonKind.JsNumberLiteral)
-            @Expect(document.root().get(0).getOrThrow().asNumberLiteral(), "1")
-            @Expect(document.root().get(2).getOrThrow().asNumberLiteral(), "3.0")
+            config: JsonReadOptions())) {
+            @Expect(document.root().element(0).getOrThrow().kind(), JsonKind.Number)
+            @Expect(document.root().element(0).getOrThrow().asNumberText(), "1")
+            @Expect(document.root().element(2).getOrThrow().asNumberText(), "3.0")
         }
         for (invalid in ["01", "1.", "1e", "1e+", "-", "[1,]", "{\"a\" 1}", "\"\\uD800\""]) {
             let error = @AssertThrows[JsonException](NativeCompactJsonDocument.parse(nativeCompactBytes(invalid)))
-            @Expect(error.byteOffset >= 0)
+            @Expect(error.location.getOrThrow().byteOffset >= 0)
         }
         let badUtf8: Array<Byte> = [b'"', 0xC0u8, 0xAFu8, b'"']
         @AssertThrows[JsonException](NativeCompactJsonDocument.parse(badUtf8))
@@ -72,7 +73,8 @@ class NativeCompactDocumentTest {
         document.close()
         document.close()
         @Expect(document.isClosed(), true)
-        @AssertThrows[IllegalStateException](root.kind())
+        let error = @AssertThrows[JsonException](root.kind())
+        @Expect(error.code, "resource_closed")
     }
 
     @TestCase
@@ -84,12 +86,13 @@ class NativeCompactDocumentTest {
         }
         text += ",\"prefix_0\":9999}"
         let bytes = nativeCompactBytes(text)
-        let portable = YJson.parseCompact(bytes)
-        try (native = NativeCompactJsonDocument.parse(bytes)) {
+        let lastWins = JsonReadOptions(duplicateKeyPolicy: JsonDuplicateKeyPolicy.LastWins)
+        let portable = YJson.parseDocument(bytes, config: lastWins)
+        try (native = NativeCompactJsonDocument.parse(bytes, config: lastWins)) {
             @Expect(native.root().size(), portable.root().size())
-            @Expect(native.root().get("prefix_0").getOrThrow().asInt64(), 9999)
-            @Expect(native.root().get("prefix_2047").getOrThrow().asInt64(), 2047)
-            @Expect(YJson.parse(native.toString()).asObject().size(), 2048)
+            @Expect(native.root().member("prefix_0").getOrThrow().asInt64(), 9999)
+            @Expect(native.root().member("prefix_2047").getOrThrow().asInt64(), 2047)
+            @Expect(JsonNode.parse(native.toString()).asObject().size(), 2048)
             let stats = native.storageStats()
             @Expect(stats.scratchCurrent, 0u64)
             @Expect(stats.objectFields, 2048u64)
@@ -104,30 +107,29 @@ class NativeCompactDocumentTest {
         try (document = NativeCompactJsonDocument.parse(nativeCompactBytes(text),
             sourceOwnership: NativeCompactSourceOwnership.MaterializeSlices)) {
             @Expect(document.storageStats().sourceBytes, 0u64)
-            @Expect(document.root().get("plain").getOrThrow().asString(), "value")
-            @Expect(document.root().get("number").getOrThrow().asNumberLiteral(), "1.5")
-            @Expect(document.root().get("escaped").getOrThrow().asString(), "ab")
-            @Expect(YJson.parse(document.toString()).asObject().size(), 3)
+            @Expect(document.root().member("plain").getOrThrow().asString(), "value")
+            @Expect(document.root().member("number").getOrThrow().asNumberText(), "1.5")
+            @Expect(document.root().member("escaped").getOrThrow().asString(), "ab")
+            @Expect(JsonNode.parse(document.toString()).asObject().size(), 3)
         }
     }
 
     @TestCase
     func resourceLimitsMatchPortableBackend(): Unit {
         let documentError = @AssertThrows[JsonException](NativeCompactJsonDocument.parse(
-            nativeCompactBytes("{\"a\":1}"), config: JsonReadConfig(limits: JsonReadLimits(maxBytes: 6))))
+            nativeCompactBytes("{\"a\":1}"), config: JsonReadOptions(maxInputBytes: 6)))
         @Expect(documentError.code, "document_too_large")
         let stringError = @AssertThrows[JsonException](NativeCompactJsonDocument.parse(
-            nativeCompactBytes("\"\\u4E2D\""), config: JsonReadConfig(limits: JsonReadLimits(maxStringBytes: 2))))
+            nativeCompactBytes("\"\\u4E2D\""), config: JsonReadOptions(maxStringBytes: 2)))
         @Expect(stringError.code, "string_too_large")
         let valueError = @AssertThrows[JsonException](NativeCompactJsonDocument.parse(
             nativeCompactBytes("{\"a\":[1,2]}"),
-            config: JsonReadConfig(limits: JsonReadLimits(maxPolymorphicObjectBytes: 10))))
-        @Expect(valueError.code, "polymorphic_object_too_large")
+            config: JsonReadOptions(maxBufferedValueBytes: 10)))
+        @Expect(valueError.code, "buffered_value_too_large")
         let hiddenLocation = @AssertThrows[JsonException](NativeCompactJsonDocument.parse(
             nativeCompactBytes("\"abc\""),
-            config: JsonReadConfig(includeErrorLocation: false,
-                limits: JsonReadLimits(maxStringBytes: 2))))
+            config: JsonReadOptions(maxStringBytes: 2)))
         @Expect(hiddenLocation.code, "string_too_large")
-        @Expect(hiddenLocation.byteOffset, -1)
+        @Expect(hiddenLocation.location.isSome())
     }
 }

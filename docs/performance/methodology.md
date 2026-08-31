@@ -34,7 +34,7 @@ CV 门槛只控制可陈述精度，不是筛选 workload 的工具。
 
 - typed codec 只与等语义 typed codec 比较。
 - DOM parse/query/serialize 按 representation 和 lifecycle 分开。
-- 默认 `YJson.parseDocument` 返回 managed Compact document，不存在 `close()`；Native 临时
+- 默认 `YJson.parseDocument` 返回 managed immutable document，不存在 `close()`；Native 临时
   资源必须在计时操作返回前释放。
 - 只有高级 `BackendJsonDocument` parse/roundtrip 才必须在计时范围内包含 deterministic
   `close()`。

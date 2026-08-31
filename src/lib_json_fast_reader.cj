@@ -31,7 +31,7 @@ struct JsonObjectKeyView {
     func isSource(): Bool { sourceStart >= 0 }
 }
 
-public class JsonFastReader <: GeneratedSupportV1Reader {
+class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
     private let data: Array<Byte>
     private let size: Int64
     private let validateStrings: Bool
@@ -49,6 +49,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
     private var rawDateTimeCacheEpochSecond: Int64 = 0
     private var rawDateTimeCacheOffsetSeconds: Int64 = 0
     private var rawDateTimeCacheValue: Option<DateTime> = None<DateTime>
+    private let generatedState = GeneratedReadStateV1(JsonReadOptions.defaults)
 
     public init(text: String) {
         unsafe {
@@ -73,6 +74,8 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         }
     }
 
+    public func generatedReadStateV1(): GeneratedReadStateV1 { generatedState }
+
     // Package consumers such as CompactJsonDocument need only the semantic
     // token kind; exposing it avoids duplicating whitespace and token-start
     // validation while keeping the reader cursor and source private.
@@ -80,12 +83,12 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         skipSpaces()
         if (!hasMore()) { fail("Unexpected end of JSON input") }
         match (peek()) {
-            case b'n' => JsNull
-            case b't' | b'f' => JsBool
-            case b'"' => JsString
-            case b'[' => JsArray
-            case b'{' => JsObject
-            case b'-' | b'0' | b'1' | b'2' | b'3' | b'4' | b'5' | b'6' | b'7' | b'8' | b'9' => JsNumberLiteral
+            case b'n' => JsonKind.Null
+            case b't' | b'f' => JsonKind.Boolean
+            case b'"' => JsonKind.String
+            case b'[' => JsonKind.Array
+            case b'{' => JsonKind.Object
+            case b'-' | b'0' | b'1' | b'2' | b'3' | b'4' | b'5' | b'6' | b'7' | b'8' | b'9' => JsonKind.Number
             case _ => fail("Unexpected token")
         }
     }
@@ -143,9 +146,9 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
             return false
         }
         if (first) {
-            return true
+            return current == b'"'
         }
-        if (current != b',') {
+        if (current != b',' || index + 1 >= size || data[index + 1] != b'"') {
             return false
         }
         index++
@@ -925,8 +928,8 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
     private func skipRawArrayBounded(depth: Int64, maxDepth: Int64): Unit {
         if (maxDepth >= 0 && depth >= maxDepth) {
             throw JsonException("Maximum JSON depth exceeded", code: "max_depth",
-                byteOffset: index, line: jsonLineFromUtf8Bytes(data, index),
-                column: jsonColumnFromUtf8Bytes(data, index))
+                location: Some(JsonLocation(index, jsonLineFromUtf8Bytes(data, index),
+                    jsonColumnFromUtf8Bytes(data, index))))
         }
         expectByte(b'[')
         skipSpaces()
@@ -948,8 +951,8 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
     private func skipRawObjectBounded(depth: Int64, maxDepth: Int64): Unit {
         if (maxDepth >= 0 && depth >= maxDepth) {
             throw JsonException("Maximum JSON depth exceeded", code: "max_depth",
-                byteOffset: index, line: jsonLineFromUtf8Bytes(data, index),
-                column: jsonColumnFromUtf8Bytes(data, index))
+                location: Some(JsonLocation(index, jsonLineFromUtf8Bytes(data, index),
+                    jsonColumnFromUtf8Bytes(data, index))))
         }
         expectByte(b'{')
         skipSpaces()
@@ -1810,9 +1813,8 @@ public class JsonFastReader <: GeneratedSupportV1Reader {
         throw JsonException(
             "${message} at byte ${offset}",
             code: "parse_error",
-            byteOffset: offset,
-            line: jsonLineFromUtf8Bytes(data, offset),
-            column: jsonColumnFromUtf8Bytes(data, offset)
+            location: Some(JsonLocation(offset, jsonLineFromUtf8Bytes(data, offset),
+                jsonColumnFromUtf8Bytes(data, offset)))
         )
     }
 }

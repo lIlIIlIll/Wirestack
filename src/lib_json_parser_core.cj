@@ -17,7 +17,7 @@ abstract class InputCursor {
 
     public func position(): Int64
 
-    public func config(): JsonReadConfig
+    public func config(): JsonReadOptions
 
     public func lineAt(offset: Int64): Int64
 
@@ -33,12 +33,6 @@ abstract class InputCursor {
         valueBudgetActive = false
     }
 
-    protected func resetValueBudget(): Unit {
-        valueBudgetStart = -1
-        valueBudgetLimit = 0
-        valueBudgetActive = false
-    }
-
     public func isValueBudgetActive(): Bool {
         valueBudgetActive
     }
@@ -48,7 +42,7 @@ abstract class InputCursor {
         if (valueBudgetActive && position() - valueBudgetStart > valueBudgetLimit) {
             throw jsonResourceLimitException(config(),
                 "JSON value exceeds ${valueBudgetLimit} bytes",
-                "polymorphic_object_too_large", valueBudgetStart + valueBudgetLimit)
+                "buffered_value_too_large", valueBudgetStart + valueBudgetLimit)
         }
         value
     }
@@ -95,13 +89,13 @@ abstract class InputCursor {
     public func readJsonString(): String {
         match (this) {
             case cursor: Utf8Cursor =>
-                if (config().maxStringBytes == 0 && !valueBudgetActive) {
+                if (!valueBudgetActive) {
                     if (let Some(value) <- cursor.tryParseSimpleString()) {
                         return value
                     }
                 }
             case cursor: StreamInputCursor =>
-                if (config().maxStringBytes == 0 && !valueBudgetActive) {
+                if (!valueBudgetActive) {
                     if (let Some(value) <- cursor.tryParseSimpleAsciiStringWindow()) {
                         return value
                     }
@@ -132,7 +126,7 @@ abstract class InputCursor {
                             let (r, size) = readJsonUnicodeEscape()
                             builder.append(r)
                             decodedBytes = addDecodedJsonBytes(decodedBytes, size, start)
-                        case _ => failJson("Unsupported escape sequence")
+                        case _ => failJsonAt("Unsupported escape sequence", start)
                     }
                 case _ =>
                     if (current < 0x80) {
@@ -261,10 +255,8 @@ abstract class InputCursor {
     }
 
     private func failJsonAt(message: String, offset: Int64): Nothing {
-        let readConfig = config()
         throw JsonException(message, code: "parse_error",
-            byteOffset: if (readConfig.includeErrorLocation) { offset } else { -1 },
-            line: lineAt(offset), column: columnAt(offset))
+            location: Some(JsonLocation(offset, lineAt(offset), columnAt(offset))))
     }
 }
 
@@ -272,10 +264,10 @@ class Utf8Cursor <: InputCursor {
     private let data: Array<Byte>
     private let size: Int64
     private let sourceText: Option<String>
-    private let readConfig: JsonReadConfig
+    private let readConfig: JsonReadOptions
     private var index: Int64 = 0
 
-    public init(data: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults) {
+    public init(data: Array<Byte>, config!: JsonReadOptions = JsonReadOptions.defaults) {
         this.data = data
         this.size = data.size
         this.sourceText = None<String>
@@ -283,7 +275,7 @@ class Utf8Cursor <: InputCursor {
         validateJsonResourceLimits(data, config)
     }
 
-    public init(text: String, config!: JsonReadConfig = JsonReadConfig.defaults) {
+    public init(text: String, config!: JsonReadOptions = JsonReadOptions.defaults) {
         unsafe {
             this.data = text.rawData()
         }
@@ -311,21 +303,15 @@ class Utf8Cursor <: InputCursor {
         index
     }
 
-    public func config(): JsonReadConfig {
+    public func config(): JsonReadOptions {
         readConfig
     }
 
     public func lineAt(offset: Int64): Int64 {
-        if (!readConfig.includeErrorLocation) {
-            return -1
-        }
         jsonLineFromUtf8Bytes(data, offset)
     }
 
     public func columnAt(offset: Int64): Int64 {
-        if (!readConfig.includeErrorLocation) {
-            return -1
-        }
         jsonColumnFromUtf8Bytes(data, offset)
     }
 
@@ -406,9 +392,6 @@ class Utf8Cursor <: InputCursor {
             if (consumeFractionalOrExponentIfPresent()) {
                 return JsonNumberLiteralValue.fromParsedLiteral(asciiStringFromRange(start, index))
             }
-            if (jsonReadConfigPreservesNumberLiterals(readConfig)) {
-                return JsonNumberLiteralValue.fromParsedLiteral(asciiStringFromRange(start, index))
-            }
             return if (overflow) {
                 JsonNumberLiteralValue.fromParsedLiteral(asciiStringFromRange(start, index))
             } else {
@@ -435,11 +418,13 @@ class Utf8Cursor <: InputCursor {
         if (consumeFractionalOrExponentIfPresent()) {
             return JsonNumberLiteralValue.fromParsedLiteral(asciiStringFromRange(start, index))
         }
-        if (jsonReadConfigPreservesNumberLiterals(readConfig)) {
-            return JsonNumberLiteralValue.fromParsedLiteral(asciiStringFromRange(start, index))
-        }
         if (overflow) {
-            return JsonNumberLiteralValue.fromParsedLiteral(asciiStringFromRange(start, index))
+            let literal = asciiStringFromRange(start, index)
+            return try {
+                JsonUIntValue(UInt64.parse(literal))
+            } catch (_: Exception) {
+                JsonNumberLiteralValue.fromParsedLiteral(literal)
+            }
         }
         JsonIntValue(result)
     }
@@ -761,9 +746,7 @@ class Utf8Cursor <: InputCursor {
         throw JsonException(
             message,
             code: "parse_error",
-            byteOffset: if (readConfig.includeErrorLocation) { offset } else { -1 },
-            line: lineAt(offset),
-            column: columnAt(offset)
+            location: Some(JsonLocation(offset, lineAt(offset), columnAt(offset)))
         )
     }
 }
@@ -771,7 +754,7 @@ class Utf8Cursor <: InputCursor {
 class StreamInputCursor <: InputCursor {
     private let input: InputStream
     private let buffer: Array<Byte>
-    private let readConfig: JsonReadConfig
+    private let readConfig: JsonReadOptions
     private var start: Int64 = 0
     private var end: Int64 = 0
     private var offset: Int64 = 0
@@ -782,7 +765,7 @@ class StreamInputCursor <: InputCursor {
     public init(
         input: InputStream,
         bufferSize!: Int64 = 4096,
-        config!: JsonReadConfig = JsonReadConfig.defaults
+        config!: JsonReadOptions = JsonReadOptions.defaults
     ) {
         this.input = input
         this.buffer = Array<Byte>(bufferSize, repeat: 0)
@@ -809,17 +792,15 @@ class StreamInputCursor <: InputCursor {
         offset
     }
 
-    public func config(): JsonReadConfig {
+    public func config(): JsonReadOptions {
         readConfig
     }
 
     public func lineAt(offset: Int64): Int64 {
-        if (!readConfig.includeErrorLocation) { return -1 }
         jsonStreamLineAt(newlineOffsets, offset)
     }
 
     public func columnAt(offset: Int64): Int64 {
-        if (!readConfig.includeErrorLocation) { return -1 }
         jsonStreamColumnAt(newlineOffsets, offset)
     }
 
@@ -847,6 +828,12 @@ class StreamInputCursor <: InputCursor {
         while (cursor < end) {
             let current = buffer[cursor]
             if (current == b'"') {
+                let length = cursor - contentStart
+                if (length > readConfig.maxStringBytes) {
+                    throw jsonResourceLimitException(readConfig,
+                        "JSON string exceeds ${readConfig.maxStringBytes} decoded UTF-8 bytes",
+                        "string_too_large", offset + 1 + readConfig.maxStringBytes)
+                }
                 let value = unsafe { String.fromUtf8Unchecked(buffer[contentStart..cursor]) }
                 advanceWindow(cursor - start + 1)
                 return Some(value)
@@ -857,45 +844,6 @@ class StreamInputCursor <: InputCursor {
             cursor++
         }
         None<String>
-    }
-
-    // Some(-1) means a complete unknown name. None leaves the cursor intact
-    // for the escape-aware and cross-window matcher.
-    public func tryParseNameIdWindow(candidates: Array<String>): Option<Int64> {
-        if (!ensureAvailable() || buffer[start] != b'"') { return None<Int64> }
-        let contentStart = start + 1
-        var cursor = contentStart
-        while (cursor < end) {
-            let current = buffer[cursor]
-            if (current == b'"') {
-                let length = cursor - contentStart
-                var result: Int64 = -1
-                for (candidateIndex in 0..candidates.size) {
-                    unsafe {
-                        let bytes = candidates[candidateIndex].rawData()
-                        if (bytes.size != length) { continue }
-                        var matches = true
-                        for (index in 0..length) {
-                            if (bytes[index] != buffer[contentStart + index]) {
-                                matches = false
-                                break
-                            }
-                        }
-                        if (matches) {
-                            result = candidateIndex
-                            break
-                        }
-                    }
-                }
-                advanceWindow(cursor - start + 1)
-                return Some(result)
-            }
-            if (current == b'\\' || current < 0x20 || current >= 0x80) {
-                return None<Int64>
-            }
-            cursor++
-        }
-        None<Int64>
     }
 
     // Parse only a complete valid Int64 token visible in this window. Invalid
@@ -954,10 +902,10 @@ class StreamInputCursor <: InputCursor {
             reachedEnd = true
             return false
         }
-        if (readConfig.maxBytes > 0 && loadedBytes + read > readConfig.maxBytes) {
+        if (loadedBytes + read > readConfig.maxInputBytes) {
             throw jsonResourceLimitException(readConfig,
-                "JSON document exceeds ${readConfig.maxBytes} bytes", "document_too_large",
-                readConfig.maxBytes)
+                "JSON document exceeds ${readConfig.maxInputBytes} bytes", "document_too_large",
+                readConfig.maxInputBytes)
         }
         loadedBytes += read
         start = 0
@@ -968,7 +916,7 @@ class StreamInputCursor <: InputCursor {
 
 private class JsonParserCore {
     private let source: InputCursor
-    private let config: JsonReadConfig
+    private let config: JsonReadOptions
     private var containerDepth: Int64 = 0
 
     public init(source: InputCursor) {
@@ -979,15 +927,13 @@ private class JsonParserCore {
     public func parse(): JsonNode {
         match (source) {
             case arraySource: Utf8Cursor =>
-                if (config.maxStringBytes == 0 && config.maxPolymorphicObjectBytes == 0) {
-                    return parseFast(arraySource)
-                }
+                return parseFast(arraySource)
             case _ => ()
         }
         skipSpaces()
-        if (config.maxPolymorphicObjectBytes > 0 && source.hasMore() &&
+        if (config.maxBufferedValueBytes > 0 && source.hasMore() &&
             (source.peek() == b'[' || source.peek() == b'{')) {
-            source.beginValueBudget(config.maxPolymorphicObjectBytes)
+            source.beginValueBudget(config.maxBufferedValueBytes)
         }
         let value = parseValue()
         source.endValueBudget()
@@ -1077,16 +1023,17 @@ private class JsonParserCore {
     }
 
     private func buildParsedNumberValue(literal: String, hasFractionalSyntax: Bool): JsonNode {
-        if (jsonReadConfigPreservesNumberLiterals(config)) {
-            return JsonNumberLiteralValue.fromParsedLiteral(literal)
-        }
         if (hasFractionalSyntax) {
             return JsonNumberLiteralValue.fromParsedLiteral(literal)
         }
         return try {
             JsonIntValue(Int64.parse(literal))
         } catch (_: Exception) {
-            JsonNumberLiteralValue.fromParsedLiteral(literal)
+            try {
+                JsonUIntValue(UInt64.parse(literal))
+            } catch (_: Exception) {
+                JsonNumberLiteralValue.fromParsedLiteral(literal)
+            }
         }
     }
 
@@ -1109,7 +1056,7 @@ private class JsonParserCore {
         let items = ArrayList<JsonNode>(4)
         if (arraySource.peekByteFast(b']')) {
             arraySource.consume()
-            return JsonArrayValue(items)
+            return JsonArray(items)
         }
         while (true) {
             items.add(parseValueFast(arraySource))
@@ -1121,7 +1068,7 @@ private class JsonParserCore {
             arraySource.expectByteFast(b',')
             arraySource.skipSpacesFast()
         }
-        JsonArrayValue(items)
+        JsonArray(items)
         } finally {
             leaveContainer()
         }
@@ -1135,7 +1082,7 @@ private class JsonParserCore {
         let items = ArrayList<JsonNode>()
         if (peekByte(b']')) {
             consumeByte()
-            return JsonArrayValue(items)
+            return JsonArray(items)
         }
         while (true) {
             items.add(parseValue())
@@ -1147,7 +1094,7 @@ private class JsonParserCore {
             expectByte(b',')
             skipSpaces()
         }
-        JsonArrayValue(items)
+        JsonArray(items)
         } finally {
             leaveContainer()
         }
@@ -1161,7 +1108,7 @@ private class JsonParserCore {
         let fields = HashMap<String, JsonNode>(8)
         if (arraySource.peekByteFast(b'}')) {
             arraySource.consume()
-            return JsonObjectValue(fields)
+            return JsonObject(fields)
         }
         while (true) {
             if (!arraySource.peekByteFast(b'"')) {
@@ -1171,7 +1118,7 @@ private class JsonParserCore {
             arraySource.skipSpacesFast()
             arraySource.expectByteFast(b':')
             arraySource.skipSpacesFast()
-            if (jsonReadConfigRejectsDuplicateKeys(config) && fields.contains(key)) {
+            if (jsonReadOptionsRejectsDuplicateKeys(config) && fields.contains(key)) {
                 policyFailAt("Duplicate object key '${key}'", "duplicate_key", arraySource.position())
             }
             fields.add(key, parseValueFast(arraySource))
@@ -1183,7 +1130,7 @@ private class JsonParserCore {
             arraySource.expectByteFast(b',')
             arraySource.skipSpacesFast()
         }
-        JsonObjectValue(fields)
+        JsonObject(fields)
         } finally {
             leaveContainer()
         }
@@ -1197,7 +1144,7 @@ private class JsonParserCore {
         let fields = HashMap<String, JsonNode>()
         if (peekByte(b'}')) {
             consumeByte()
-            return JsonObjectValue(fields)
+            return JsonObject(fields)
         }
         while (true) {
             if (!peekByte(b'"')) {
@@ -1207,7 +1154,7 @@ private class JsonParserCore {
             skipSpaces()
             expectByte(b':')
             skipSpaces()
-            if (jsonReadConfigRejectsDuplicateKeys(config) && fields.contains(key)) {
+            if (jsonReadOptionsRejectsDuplicateKeys(config) && fields.contains(key)) {
                 policyFailAt("Duplicate object key '${key}'", "duplicate_key", source.position())
             }
             fields.add(key, parseValue())
@@ -1219,7 +1166,7 @@ private class JsonParserCore {
             expectByte(b',')
             skipSpaces()
         }
-        JsonObjectValue(fields)
+        JsonObject(fields)
         } finally {
             leaveContainer()
         }
@@ -1241,9 +1188,7 @@ private class JsonParserCore {
         throw JsonException(
             message,
             code: code,
-            byteOffset: if (config.includeErrorLocation) { offset } else { -1 },
-            line: source.lineAt(offset),
-            column: source.columnAt(offset)
+            location: Some(JsonLocation(offset, source.lineAt(offset), source.columnAt(offset)))
         )
     }
 
@@ -1291,24 +1236,22 @@ private class JsonParserCore {
         throw JsonException(
             message,
             code: "parse_error",
-            byteOffset: if (config.includeErrorLocation) { offset } else { -1 },
-            line: source.lineAt(offset),
-            column: source.columnAt(offset)
+            location: Some(JsonLocation(offset, source.lineAt(offset), source.columnAt(offset)))
         )
     }
 }
 
-func parseJsonValueFromText(text: String, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
+func parseJsonValueFromText(text: String, config!: JsonReadOptions = JsonReadOptions.defaults): JsonNode {
     JsonParserCore(Utf8Cursor(text, config: config)).parse()
 }
 
-func parseJsonValueFromBytes(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
+func parseJsonValueFromBytes(bytes: Array<Byte>, config!: JsonReadOptions = JsonReadOptions.defaults): JsonNode {
     JsonParserCore(Utf8Cursor(bytes, config: config)).parse()
 }
 
 func parseJsonValueFromInputStream(
     input: InputStream,
-    config!: JsonReadConfig = JsonReadConfig.defaults
+    config!: JsonReadOptions = JsonReadOptions.defaults
 ): JsonNode {
     JsonParserCore(StreamInputCursor(input, config: config)).parse()
 }

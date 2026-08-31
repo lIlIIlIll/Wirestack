@@ -1,72 +1,97 @@
 # 配置与错误
 
-yjson 的读取与写出策略都通过不可隐式猜测的 config 传入。默认配置适合可信输入和兼容
-行为；服务端接收不可信内容时，应显式设置预算。
+yjson 使用 immutable options 表达读取和写出策略。普通、generated、stream、managed
+document 和显式 backend 入口复用相同的选项类型。
 
-## 读取配置
+## 读取选项
 
 ```cangjie
-let config = JsonReadConfig(
-    unknownFieldPolicy: JsonUnknownFieldPolicy.Ignore,
-    duplicateKeyPolicy: JsonDuplicateKeyPolicy.LastWins,
-    numberPolicy: JsonNumberPolicy.Int64WhenExact,
-    includeErrorLocation: true,
-    limits: JsonReadLimits(
-        maxDepth: 256,
-        maxBytes: 0,
-        maxStringBytes: 0,
-        maxPolymorphicObjectBytes: 0
-    )
+let options = JsonReadOptions(
+    unknownFieldPolicy: JsonUnknownFieldPolicy.Reject,
+    duplicateKeyPolicy: JsonDuplicateKeyPolicy.Reject,
+    maxInputBytes: 8 * 1024 * 1024,
+    maxStringBytes: 1024 * 1024,
+    maxBufferedValueBytes: 4 * 1024 * 1024,
+    maxDepth: 128
 )
 ```
 
-三个 byte limit 的 `0` 都表示 unlimited；`maxDepth` 必须为正数。`PreserveLiteral` 保留
-非结构化 number token 的文本表示。未知 typed 字段与重复 key 可分别切换为 Reject。
+`JsonReadOptions.defaults` 的值为：
 
-具体预算语义、入口覆盖和 Native 一致性见 [资源限制](resource-limits.md)。
+| 选项 | 默认值 | 语义 |
+| --- | ---: | --- |
+| `unknownFieldPolicy` | `Ignore` | typed decode 遇到未知字段时忽略 |
+| `duplicateKeyPolicy` | `Reject` | 拒绝语义重复的 object key |
+| `maxInputBytes` | 64 MiB | 单个输入 document 的 UTF-8 bytes |
+| `maxStringBytes` | 16 MiB | 解码后的 string 或 key UTF-8 bytes |
+| `maxBufferedValueBytes` | 8 MiB | replay/whole-value buffer 的 bytes |
+| `maxDepth` | 256 | array/object 嵌套深度 |
 
-## 写出配置
+四个数值预算必须大于零。读取端没有“0 表示 unlimited”的捷径；需要更大边界时传入明确
+正数。重复 key 的比较使用解码后的 key，因此 `"a"` 与 `"\u0061"` 视为同一个 key。
+`LastWins` 是显式 opt-in。
 
-- `JsonWriteConfig.compact`：紧凑输出。
-- `JsonWriteConfig.pretty`：换行和四空格缩进。
-- `YJson.stringifyPretty(value)`：便利入口，默认两空格缩进。
+## 写出选项
 
-自定义配置还控制 newline、indent、separator space、HTML-safe escaping、错误位置、最大
-深度与 `maxBytes`。写出预算超限使用 `output_too_large`。Stream 失败可能已写出前缀，
-但已提交长度不会超过 `maxBytes`；失败后不要继续复用该 writer。writer 只接受一个完整根值。
+```cangjie
+let compact = JsonWriteOptions.defaults
+let pretty = JsonWriteOptions.pretty()
+let bounded = JsonWriteOptions(
+    indent: "  ",
+    htmlSafe: true,
+    maxOutputBytes: 8 * 1024 * 1024,
+    maxDepth: 128
+)
+```
 
-旧式 `JsonValueCodec<T>` 的 `YJsonAst.encodeWith/decodeWith` 只支持默认
-`JsonCodecConfig.compact`。传入非默认 read/write 配置会抛出 `unsupported_config`；需要配置
-生效时使用 `JsonCodec<T>` 与 `YJson` 的显式入口。
+`indent` 只能包含空格或 tab；空字符串表示紧凑输出。`maxDepth` 必须大于零。
+`maxOutputBytes = 0` 表示不设置输出 byte 上限，其他负数会被拒绝。`htmlSafe` 对需要安全
+嵌入 HTML 的字符使用转义。
 
-## 按稳定错误码处理
+`JsonWriteOptions.compact`、`defaults` 和 `pretty()` 是常用预设。
+`htmlSafePreset` 只启用 HTML-safe escaping。
 
-解析、codec 和预算失败使用 `JsonException`。调用方应匹配 `error.code`，不要解析 message。
+## 一个异常类型
+
+解析、codec、文档、backend 和算法失败统一抛出 `JsonException`：
+
+```cangjie
+try {
+    let value = JsonNode.parse(input)
+} catch (error: JsonException) {
+    println(error.code)
+    println(error.path)
+}
+```
+
+调用方匹配 `error.code`，不要解析 message。`path` 为空或 RFC 6901 JSON Pointer；适用的
+解析失败在 `location` 中携带 byte offset、line 和 column。
+
+常用稳定 code：
 
 | code | 含义 |
 | --- | --- |
-| `parse_error` | JSON token、UTF-8 或文档结构无效 |
+| `parse_error` | JSON token、UTF-8、trailing content 或文档结构无效 |
 | `unknown_field` | Reject 策略遇到未知 typed 字段 |
 | `duplicate_key` | Reject 策略遇到重复 key |
-| `missing_field` | generated codec 必需字段缺失 |
-| `missing_discriminator` / `unknown_discriminator` | 多态 discriminator 错误 |
-| `max_depth` | 读取或写出超过嵌套深度 |
-| `document_too_large` | 文档 byte budget 或表示上限触发 |
-| `string_too_large` | decoded UTF-8 string 超出预算 |
-| `polymorphic_object_too_large` | 根多态对象 replay budget 触发 |
+| `missing_field` | generated codec 的必需字段缺失 |
+| `missing_discriminator` / `unknown_discriminator` | generated polymorphic discriminator 无效 |
+| `max_depth` | 读取、写出或 materialization 超过深度 |
+| `document_too_large` | 输入 document 超过 byte budget |
+| `string_too_large` | 解码后的 string/key 超过预算 |
+| `buffered_value_too_large` | replay 或 whole-value buffer 超过预算 |
 | `output_too_large` | 写出超过 byte budget |
-| `writer_state` | writer 没有根值、存在多个根值或结构未闭合 |
-| `cyclic_json_node` | 递归 AST 操作遇到祖先环 |
-| `invalid_value` | typed scalar 值不满足 codec contract，例如 Rune 不是一个 Unicode scalar |
-| `unsupported_config` | API 收到无法执行的非默认配置 |
-| `codec_type_mismatch` / `codec_contract` | erased 类型或 fast contract 错误 |
-| `missing_key` / `index_out_of_bounds` | AST 查询失败 |
-| `invalid_json_pointer` / `json_pointer_not_found` | Pointer 错误 |
-| `invalid_json_patch` / `json_patch_test_failed` | Patch 错误 |
-| `invalid_json_path` | JSONPath 表达式无效 |
+| `writer_state` | writer 根值数量或容器状态无效 |
+| `cyclic_json_node` | AST 递归操作遇到祖先环 |
+| `type_mismatch` / `number_out_of_range` / `invalid_value` | value 不满足目标类型 |
+| `codec_contract` / `codec_type_mismatch` | custom/generated codec contract 无效 |
+| `resource_closed` | 关闭后访问显式 backend document |
+| `invalid_json_pointer` / `json_pointer_not_found` | Pointer 无效或目标不存在 |
+| `invalid_json_patch` / `json_patch_test_failed` | Patch 无效或 test 失败 |
+| `invalid_json_path` / `invalid_regex` | Path 或受限 regex 无效 |
 | `unsupported_schema_dialect` | Schema 不是 draft 2020-12 |
-| `unsupported_schema_format` | StrictAssertion 遇到未知 format |
-| `work_limit_exceeded` | JSONPath、Patch/Merge Patch 或 Schema 工作预算耗尽 |
+| `work_limit_exceeded` | materialization 或算法预算耗尽 |
 
-`includeErrorLocation` 为 true 时，适用的 parse/limit 错误携带 offset、line 和 column；
-语义错误不保证具有同样的位置粒度。
+acceleration 初始化和运行期失败也使用 `JsonException`，code 以 `acceleration_` 开头。
+具体资源语义见[资源限制](resource-limits.md)。
+

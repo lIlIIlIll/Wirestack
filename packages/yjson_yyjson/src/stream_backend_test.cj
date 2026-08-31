@@ -5,7 +5,6 @@ import std.io.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import yjson.*
-import yjson_backends.*
 
 private class YyjsonBackendTestOutput <: OutputStream {
     private let bytes = ArrayList<Byte>()
@@ -19,40 +18,41 @@ private class YyjsonBackendTestOutput <: OutputStream {
 class YyjsonStreamBackendTest {
     @TestCase
     func encodeIsByteIdenticalToPureForWriteConfigs(): Unit {
-        let codec = YJson.hashMapCodec(StringJson)
+        let codec = JsonCodecs.stringMap(JsonCodecs.string)
         let value = HashMap<String, String>()
         value["<key>"] = "line\n仓颉"
-        for (config in [JsonWriteConfig.compact, JsonWriteConfig.pretty,
-            JsonWriteConfig("\r\n", "  ", true, true)]) {
+        let json = YyjsonBackends.yyjson
+        for (config in [JsonWriteOptions.compact, JsonWriteOptions.pretty(),
+            JsonWriteOptions(indent: "  ", htmlSafe: true)]) {
             let pure = YyjsonBackendTestOutput()
             let native = YyjsonBackendTestOutput()
-            YJson.encodeToStreamWith(codec, value, pure, config: config)
-            YJsonAdvanced.encodeToStreamWithBackend(codec, value, native,
-                YyjsonWholeDocumentStreamBackend, config: config)
+            YJson.writeJson(value, pure, codec: codec, options: config)
+            json.writeJson(value, native, codec: codec, options: config)
             @Expect(native.toString(), pure.toString())
         }
     }
 
     @TestCase
     func decodeSupportsSemanticAndPreservedNumbers(): Unit {
-        let codec = YJson.arrayCodec(Float64Json)
-        let value = YJsonAdvanced.decodeFromStreamWithBackend(codec,
-            YJsonByteArrayInputStream("[1.25,2e2,-0.0]"), YyjsonWholeDocumentStreamBackend)
+        let codec = JsonCodecs.array(JsonCodecs.float64)
+        let json = YyjsonBackends.yyjson
+        let value = json.fromJson(YJsonByteArrayInputStream("[1.25,2e2,-0.0]"),
+            codec: codec)
         @Expect(value.size, 3)
         @Expect(value[0], 1.25)
         @Expect(value[1], 200.0)
         @Expect(value[2], -0.0)
-        let typeError = @AssertThrows[JsonException](YJsonAdvanced.decodeFromStreamWithBackend(Int64Json,
-            YJsonByteArrayInputStream("1.25"), YyjsonWholeDocumentStreamBackend))
+        let typeError = @AssertThrows[JsonException](json.fromJson(
+            YJsonByteArrayInputStream("1.25"), codec: JsonCodecs.int64))
         @Expect(typeError.code, "parse_error")
     }
 
     @TestCase
     func outputLimitFailsBeforeYyjsonWrites(): Unit {
         let output = YyjsonBackendTestOutput()
-        let error = @AssertThrows[JsonException](YJsonAdvanced.encodeToStreamWithBackend(StringJson,
-            "too long", output, YyjsonWholeDocumentStreamBackend,
-            config: JsonWriteConfig("", "", false, false, limits: JsonWriteLimits(maxBytes: 4))))
+        let error = @AssertThrows[JsonException](YyjsonBackends.yyjson.writeJson(
+            "too long", output, codec: JsonCodecs.string,
+            options: JsonWriteOptions(maxOutputBytes: 4)))
         @Expect(error.code, "output_too_large")
         @Expect(output.toBytes().size, 0)
     }

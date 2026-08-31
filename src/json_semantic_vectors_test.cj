@@ -20,27 +20,35 @@ private func semanticError(action: () -> Unit): JsonException {
 private func assertSameSemanticError(expected: JsonException, actual: JsonException,
     label: String): Unit {
     assertJson(actual.code == expected.code, "${label}: code")
-    assertJson(actual.byteOffset == expected.byteOffset, "${label}: byte offset")
-    assertJson(actual.line == expected.line, "${label}: line")
-    assertJson(actual.column == expected.column, "${label}: column")
+    match ((expected.location, actual.location)) {
+        case (Some(expectedLocation), Some(actualLocation)) =>
+            assertJson(actualLocation.byteOffset == expectedLocation.byteOffset,
+                "${label}: byte offset expected ${expectedLocation.byteOffset}, actual ${actualLocation.byteOffset}")
+            assertJson(actualLocation.line == expectedLocation.line,
+                "${label}: line expected ${expectedLocation.line}, actual ${actualLocation.line}")
+            assertJson(actualLocation.column == expectedLocation.column,
+                "${label}: column expected ${expectedLocation.column}, actual ${actualLocation.column}")
+        case (None, None) => ()
+        case _ => assertJson(false, "${label}: location presence")
+    }
 }
 
 private func assertValidSemanticVector(text: String): Unit {
-    let canonical = YJson.stringify(YJson.parse(text))
-    @Expect(YJson.stringify(YJson.parse(semanticBytes(text))), canonical)
-    @Expect(YJson.stringify(YJson.parseDocument(text).materialize()), canonical)
-    @Expect(YJson.stringify(YJson.parseDocument(semanticBytes(text)).materialize()), canonical)
+    let canonical = (JsonNode.parse(text)).toJson()
+    @Expect((JsonNode.parse(semanticBytes(text))).toJson(), canonical)
+    @Expect((YJson.parseDocument(text).materialize()).toJson(), canonical)
+    @Expect((YJson.parseDocument(semanticBytes(text)).materialize()).toJson(), canonical)
 
     for (split in 1..text.size) {
         let streamed = parseJsonValueFromStream(SplitPointInputStream(text, split))
-        assertJson(YJson.stringify(streamed) == canonical,
+        assertJson((streamed).toJson() == canonical,
             "semantic stream split ${split} for ${text}")
     }
 }
 
 private func assertInvalidSemanticVector(text: String): Unit {
-    let expected = semanticError({ => let _ = YJson.parse(text) })
-    let bytesError = semanticError({ => let _ = YJson.parse(semanticBytes(text)) })
+    let expected = semanticError({ => let _ = JsonNode.parse(text) })
+    let bytesError = semanticError({ => let _ = JsonNode.parse(semanticBytes(text)) })
     assertSameSemanticError(expected, bytesError, "bytes ${text}")
 
     for (split in 1..text.size) {
@@ -84,7 +92,7 @@ class JsonSemanticVectorsTest {
     @TestCase
     func invalidUtf8IsRejectedAtEveryByteSplit(): Unit {
         let bytes: Array<Byte> = [b'"', 0xF0, 0x28, 0x8C, 0x28, b'"']
-        let expected = semanticError({ => let _ = YJson.parse(bytes) })
+        let expected = semanticError({ => let _ = JsonNode.parse(bytes) })
         for (split in 1..bytes.size) {
             let actual = semanticError({ =>
                 let _ = parseJsonValueFromStream(SplitPointInputStream(bytes, split))
@@ -101,7 +109,7 @@ class JsonSemanticVectorsTest {
         assertProfileRecord(expected[0]["team"][0], 7, "中🙂", 3, "generated string")
 
         for (split in 1..text.size) {
-            let actual = YJson.fromStream<ArrayList<HashMap<String, ArrayList<ProfileRecord>>>>(
+            let actual = YJson.fromJson<ArrayList<HashMap<String, ArrayList<ProfileRecord>>>>(
                 SplitPointInputStream(text, split))
             assertProfileRecord(actual[0]["team"][0], 7, "中🙂", 3,
                 "generated split ${split}")

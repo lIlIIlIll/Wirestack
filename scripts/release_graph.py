@@ -13,6 +13,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 GRAPH_PATH = ROOT / "release" / "release-graph.toml"
 SEMVER = re.compile(r"0\.[1-9][0-9]*\.[0-9]+")
 PACKAGE_NAME = re.compile(r"yjson(?:_[a-z][a-z0-9_]*)?")
+STAGE_KINDS = frozenset({"core", "package", "native-primitives", "yyjson", "schema-formats"})
+STABILITY_CLASSES = frozenset({"stable", "advanced", "internal", "experimental"})
 
 
 @dataclass(frozen=True)
@@ -103,6 +105,12 @@ def load_release_graph(path: pathlib.Path = GRAPH_PATH) -> ReleaseGraph:
         leaf_bundle = raw.get("leaf_bundle")
         if not all(isinstance(value, str) and value for value in (role, stage_kind, stability)):
             raise ValueError(f"{name} has incomplete role/stage/stability metadata")
+        if stage_kind not in STAGE_KINDS:
+            raise ValueError(
+                f"{name}.stage_kind must be one of: {', '.join(sorted(STAGE_KINDS))}")
+        if stability not in STABILITY_CLASSES:
+            raise ValueError(
+                f"{name}.stability must be one of: {', '.join(sorted(STABILITY_CLASSES))}")
         if not isinstance(leaf_bundle, bool):
             raise ValueError(f"{name}.leaf_bundle must be boolean")
         packages.append(ReleasePackage(

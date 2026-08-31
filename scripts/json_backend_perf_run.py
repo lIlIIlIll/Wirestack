@@ -36,6 +36,12 @@ OPERATIONS = {
         "customNativeTraversal",
         "yyjsonDirectTraversal",
     ),
+    "materialize": (
+        "customNativeFineViewMaterialize",
+        "customNativeBulkMaterialize",
+        "yyjsonFineViewMaterialize",
+        "yyjsonBulkMaterialize",
+    ),
     "serialize": (
         "pureAstSerialize",
         "pureCompactSerialize",

@@ -68,19 +68,36 @@ static void stats36(uint64_t handle, uint64_t stats[36]) {
     assert(YJ_Yyjson_Stats(handle, stats, 36) == YJ_COMPACT_OK);
 }
 
+static int32_t root_lookup_int(uint64_t handle, const char *key,
+                               int64_t *out_value, uint32_t *out_found) {
+    uint64_t root = 0, value_node = 0, inline_payload = 0;
+    uint32_t inline_kind = UINT32_MAX;
+    int32_t status = YJ_Yyjson_Root(handle, &root);
+    if (status != YJ_COMPACT_OK) return status;
+    status = YJ_Yyjson_ObjectLookup(handle, root, (const uint8_t *)key,
+                                    strlen(key), &value_node, &inline_kind,
+                                    &inline_payload, out_found);
+    if (status != YJ_COMPACT_OK || *out_found == 0) return status;
+    if (inline_kind == YJ_COMPACT_INT) {
+        memcpy(out_value, &inline_payload, sizeof(*out_value));
+        return YJ_COMPACT_OK;
+    }
+    return YJ_Yyjson_GetInt(handle, value_node, out_value);
+}
+
 static void test_modes_and_numbers(void) {
     const char *text = "{\"min\":-9223372036854775808,\"max\":9223372036854775807,"
                        "\"overflow\":9223372036854775808,\"decimal\":1.2300,\"exp\":1E-3,"
                        "\"s\":\"普通😀\",\"a\":[true,null]}";
     for (uint32_t mode = YJ_YYJSON_DIRECT; mode <= YJ_YYJSON_TRANSCODE; mode++) {
         uint64_t handle = parse_ok(text, YJ_YYJSON_PRESERVE_NUMBERS, mode);
-        uint64_t root_size = 0;
-        assert(YJ_Yyjson_RootSize(handle, &root_size) == YJ_COMPACT_OK);
+        uint64_t root = 0, root_size = 0;
+        assert(YJ_Yyjson_Root(handle, &root) == YJ_COMPACT_OK);
+        assert(YJ_Yyjson_Size(handle, root, &root_size) == YJ_COMPACT_OK);
         assert(root_size == 7);
         int64_t value = 0;
         uint32_t found = 0;
-        assert(YJ_Yyjson_ObjectLookupInt(handle, (const uint8_t *)"min", 3,
-                                         &value, &found) == YJ_COMPACT_OK);
+        assert(root_lookup_int(handle, "min", &value, &found) == YJ_COMPACT_OK);
         assert(found == 1 && value == INT64_MIN);
         uint64_t size = 0;
         char *written = serialize(handle, &size);
@@ -187,19 +204,16 @@ static void test_lookup_index_modes(void) {
     uint64_t retained = parse_ok(text, YJ_YYJSON_RETAIN_ROOT_INDEX, YJ_YYJSON_DIRECT);
     stats36(retained, stats);
     assert(stats[27] != 0 && stats[28] == 1);
-    assert(YJ_Yyjson_ObjectLookupInt(retained, (const uint8_t *)"k511", 4,
-                                     &value, &found) == YJ_COMPACT_OK);
+    assert(root_lookup_int(retained, "k511", &value, &found) == YJ_COMPACT_OK);
     assert(found == 1 && value == 511);
-    assert(YJ_Yyjson_ObjectLookupInt(retained, (const uint8_t *)"absent", 6,
-                                     &value, &found) == YJ_COMPACT_OK);
+    assert(root_lookup_int(retained, "absent", &value, &found) == YJ_COMPACT_OK);
     assert(found == 0);
     YJ_Yyjson_Free(retained);
 
     uint64_t lazy = parse_ok(text, YJ_YYJSON_LAZY_ROOT_INDEX, YJ_YYJSON_DIRECT);
     stats36(lazy, stats);
     assert(stats[28] == 0);
-    assert(YJ_Yyjson_ObjectLookupInt(lazy, (const uint8_t *)"k256", 4,
-                                     &value, &found) == YJ_COMPACT_OK);
+    assert(root_lookup_int(lazy, "k256", &value, &found) == YJ_COMPACT_OK);
     assert(found == 1 && value == 256);
     stats36(lazy, stats);
     assert(stats[28] == 1 && stats[27] != 0);
@@ -207,13 +221,46 @@ static void test_lookup_index_modes(void) {
     free(text);
 }
 
+static void test_sequential_navigation_reuses_direct_cursors(void) {
+    char *text = make_large_object(512);
+    uint64_t handle = parse_ok(text, 0, YJ_YYJSON_DIRECT);
+    uint64_t root = 0;
+    assert(YJ_Yyjson_Root(handle, &root) == YJ_COMPACT_OK);
+    YJ_Yyjson_TestResetNavigationRestarts();
+    for (uint64_t index = 0; index < 512; index++) {
+        uint64_t value = 0, payload = 0, key_size = 0, written = 0;
+        uint32_t kind = UINT32_MAX;
+        char key[32];
+        assert(YJ_Yyjson_ObjectEntry(handle, root, index, &value, &kind,
+                                     &payload, &key_size) == YJ_COMPACT_OK);
+        assert(key_size < sizeof(key));
+        assert(YJ_Yyjson_CopyObjectKey(handle, root, index, (uint8_t *)key,
+                                       sizeof(key), &written) == YJ_COMPACT_OK);
+        assert(written == key_size);
+    }
+    assert(YJ_Yyjson_TestNavigationRestarts() == 1);
+    YJ_Yyjson_Free(handle);
+    free(text);
+
+    handle = parse_ok("[[0],[1],[2],[3],[4],[5],[6],[7]]", 0,
+                      YJ_YYJSON_DIRECT);
+    assert(YJ_Yyjson_Root(handle, &root) == YJ_COMPACT_OK);
+    YJ_Yyjson_TestResetNavigationRestarts();
+    for (uint64_t index = 0; index < 8; index++) {
+        uint64_t child = 0;
+        assert(YJ_Yyjson_ArrayGet(handle, root, index, &child) == YJ_COMPACT_OK);
+        assert(child != 0);
+    }
+    assert(YJ_Yyjson_TestNavigationRestarts() == 1);
+    YJ_Yyjson_Free(handle);
+}
+
 static void test_duplicates(void) {
     const char *duplicate = "{\"a\":1,\"\\u0061\":2}";
     uint64_t handle = parse_ok(duplicate, 0, YJ_YYJSON_DIRECT);
     int64_t value = 0;
     uint32_t found = 0;
-    assert(YJ_Yyjson_ObjectLookupInt(handle, (const uint8_t *)"a", 1,
-                                     &value, &found) == YJ_COMPACT_OK);
+    assert(root_lookup_int(handle, "a", &value, &found) == YJ_COMPACT_OK);
     assert(found == 1 && value == 2);
     uint64_t size = 0;
     char *written = serialize(handle, &size);
@@ -251,6 +298,7 @@ int main(void) {
     test_modes_and_numbers();
     test_number_strategies();
     test_lookup_index_modes();
+    test_sequential_navigation_reuses_direct_cursors();
     test_duplicates();
     test_errors();
     test_close_loop();

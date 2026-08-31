@@ -49,21 +49,28 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.version.outputs.value }}
+      resolution: ${{ steps.version.outputs.resolution }}
+      window: ${{ steps.window.outputs.value }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
+      - name: Test nightly and candidate wiring
+        run: |
+          python3 scripts/test_latest_cangjie_nightly.py
+          python3 scripts/test_ci_candidate_wiring.py
       - name: Select seven-day cache window
         id: window
         run: echo "value=$(( $(date -u +%s) / 604800 ))" >> "$GITHUB_OUTPUT"
       - name: Restore nightly selection
+        if: inputs.cangjie_version == ''
         id: cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: .ci/cangjie-nightly-version
-          key: cangjie-nightly-linux-x64-${{ steps.window.outputs.value }}
+          key: cangjie-nightly-complete-v2-${{ steps.window.outputs.value }}
       - name: Resolve latest complete nightly
-        if: steps.cache.outputs.cache-hit != 'true' && inputs.cangjie_version == ''
+        if: inputs.cangjie_version == '' && steps.cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p .ci
           python3 scripts/latest_cangjie_nightly.py > .ci/cangjie-nightly-version
@@ -73,10 +80,25 @@ jobs:
           REQUESTED_VERSION: ${{ inputs.cangjie_version }}
         run: |
           if [[ -n "$REQUESTED_VERSION" ]]; then
-            echo "value=$REQUESTED_VERSION" >> "$GITHUB_OUTPUT"
+            value=$(python3 scripts/latest_cangjie_nightly.py \
+              --validate-version "$REQUESTED_VERSION")
+            resolution=workflow-dispatch-exact
           else
-            echo "value=$(cat .ci/cangjie-nightly-version)" >> "$GITHUB_OUTPUT"
+            value=$(cat .ci/cangjie-nightly-version)
+            python3 scripts/latest_cangjie_nightly.py \
+              --validate-version "$value" >/dev/null
+            resolution=seven-day-cache-window
           fi
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+          echo "resolution=$resolution" >> "$GITHUB_OUTPUT"
+          echo "resolved_cangjie_version=$value resolution=$resolution window=${{ steps.window.outputs.value }}"
+          {
+            echo '### Cangjie nightly selection'
+            echo
+            echo "- Version: \`$value\`"
+            echo "- Resolution: \`$resolution\`"
+            echo "- Seven-day window: \`${{ steps.window.outputs.value }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   tests:
     name: Tests (${{ matrix.gate }})
@@ -129,26 +151,107 @@ jobs:
           tar -xzf /tmp/yyjson-0.11.1.tar.gz -C /tmp/yjson-yyjson-second
       - name: Record toolchain
         run: |
+          echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"
           echo "runner_image=${ImageOS:-unknown} runner_image_version=${ImageVersion:-unknown}"
           cjc -v
           cjpm --version
-          if [[ -f "$RUNNER_TEMP/cangjie-nightly.tar.gz" ]]; then
-            sha256sum "$RUNNER_TEMP/cangjie-nightly.tar.gz"
-          fi
+          sha256sum "$RUNNER_TEMP/cangjie-nightly.tar.gz"
       - name: Run gate
         env:
+          YJSON_RESOLVED_NIGHTLY: ${{ needs.nightly.outputs.version }}
           YJSON_SECOND_YYJSON_ROOT: ${{ matrix.gate == 'yyjson-colink' && '/tmp/yjson-yyjson-second/yyjson-0.11.1' || '' }}
-          # Cangjie nightly 20260827010033 crashes in llc when this large
-          # module is optimized as an external path dependency at O2. Core O2
-          # remains blocking; only dependency-boundary gates use O1.
-          YJSON_CI_DEPENDENCY_OVERRIDE: ${{ needs.nightly.outputs.version == '1.3.0-alpha.20260827010033' && contains(fromJSON('["runtime-freeze","standards-conformance","schema-formats-conformance","examples","macro-consumer","algorithms-consumer","registry-rehearsal","custom-native","yyjson-native"]'), matrix.gate) && '-O1' || '' }}
         run: |
-          # The current nightly's LLVM backend can recurse deeply while
-          # optimizing yjson as a path dependency on hosted x86_64 runners.
-          # Match the 128 MiB stack used by the release qualification gate.
           ulimit -s 131072
           ulimit -s
           scripts/ci_job.sh "${{ matrix.gate }}"
+
+  pure-platforms:
+    name: Pure (${{ matrix.os }})
+    needs: nightly
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            archive: cangjie-nightly.zip
+            checksum: sha256sum
+          - os: macos-14
+            archive: cangjie-nightly.tar.gz
+            checksum: shasum -a 256
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+      - name: Setup Cangjie
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ needs.nightly.outputs.version }}
+          archive-path: ${{ runner.temp }}/${{ matrix.archive }}
+      - name: Record toolchain
+        run: |
+          echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"
+          echo "runner_image=${ImageOS:-unknown} runner_image_version=${ImageVersion:-unknown}"
+          cjc -v
+          cjpm --version
+          ${{ matrix.checksum }} "$RUNNER_TEMP/${{ matrix.archive }}"
+      - name: Run Pure package gates
+        run: scripts/ci_job.sh pure-platform
+
+  api-docs:
+    name: API Documentation
+    needs: nightly
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+      - name: Setup Cangjie
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ needs.nightly.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
+      - name: Record toolchain
+        run: |
+          echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"
+          echo "runner_image=${ImageOS:-unknown} runner_image_version=${ImageVersion:-unknown}"
+          cjc -v
+          cjpm --version
+          sha256sum "$RUNNER_TEMP/cangjie-nightly.tar.gz"
+      - name: Generate source-qualified cjdoc site
+        env:
+          YJSON_RESOLVED_NIGHTLY: ${{ needs.nightly.outputs.version }}
+          YJSON_API_DOCS_OUTPUT: target/api-docs
+        run: scripts/ci_job.sh api-docs
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
+      - name: Upload API documentation
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa
+        with:
+          path: target/api-docs
+
+  pages:
+    name: Deploy API Documentation
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: api-docs
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
 
   coverage:
     name: Core Coverage
@@ -169,6 +272,13 @@ jobs:
           channel: nightly
           version: ${{ needs.nightly.outputs.version }}
           archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
+      - name: Record toolchain
+        run: |
+          echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"
+          echo "runner_image=${ImageOS:-unknown} runner_image_version=${ImageVersion:-unknown}"
+          cjc -v
+          cjpm --version
+          sha256sum "$RUNNER_TEMP/cangjie-nightly.tar.gz"
       - name: Generate cjcov and LCOV reports
         run: scripts/coverage.sh
       - name: Detect established coverage baseline

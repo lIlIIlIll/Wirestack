@@ -66,6 +66,7 @@ class StageSourceTreeTest(unittest.TestCase):
             "nested.zip": b"PK\x03\x04payload",
             "coverage.profraw": b"profile",
             "coverage.lcov": b"TN:\n",
+            "coverage.gcov": b"        -:    0:Source:/tmp/source.cj\n",
             "nested.tar.gz": b"archive",
         }
         with tempfile.TemporaryDirectory() as temporary:
@@ -86,6 +87,9 @@ class StageSourceTreeTest(unittest.TestCase):
             script = stage / "tool"
             script.write_text("#!/usr/bin/env python3\nprint('ok')\n", encoding="utf-8")
             os.chmod(script, 0o755)
+            zsh_script = stage / "zsh-tool"
+            zsh_script.write_text("#!/usr/bin/env zsh\nprint ok\n", encoding="utf-8")
+            os.chmod(zsh_script, 0o755)
             assert_source_only(stage)
             script.write_text("opaque executable\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "tool"):

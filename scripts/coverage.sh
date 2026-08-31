@@ -48,11 +48,19 @@ cjcov --root . --source src --include src --output "$root/coverage/cjcov" \
 runtime_package="$work/packages/runtime_freeze_contract"
 cd "$runtime_package"
 cjpm build --coverage
-for scenario in pure-late generated-reader-late version-mismatch native-conflict activation-failure concurrent-race; do
+mkdir -p "$work/runtime-gcov" "$work/runtime-cjcov"
+for scenario in pure-late generated-reader-late version-mismatch native-conflict activation-failure concurrent-race reentrant-use initialization-wait; do
+    # Cangjie's gcda writer cannot reliably merge repeated process runs into
+    # the same file. Collect each contract scenario independently, then merge
+    # the resulting textual gcov records in cjcov_to_lcov.py.
+    rm -f "$runtime_package"/*.gcda "$runtime_package"/*.gcov
     ./target/release/bin/main "$scenario"
+    scenario_gcov="$work/runtime-gcov/$scenario"
+    mkdir -p "$scenario_gcov"
+    cjcov --root "$work" --source "$work/src" --include "$work/src" \
+        --output "$work/runtime-cjcov/$scenario" --branches --json --keep
+    cp "$runtime_package"/*.gcov "$scenario_gcov/"
 done
-cjcov --root "$work" --source "$work/src" --include "$work/src" \
-    --output "$work/runtime-cjcov" --branches --json --keep
 
 native_package="$work/packages/yjson_native_accel"
 cd "$native_package"
@@ -65,7 +73,7 @@ cjcov --root "$work" --source "$work/src" --include "$work/src" \
 python3 "$root/scripts/cjcov_to_lcov.py" \
     --root "$root" \
     --gcov-root "$work/cov_output" \
-    --gcov-root "$runtime_package" \
+    --gcov-root "$work/runtime-gcov" \
     --gcov-root "$native_package/cov_output" \
     --output "$root/coverage/lcov.info" \
     --baseline "$root/coverage-baseline.toml"

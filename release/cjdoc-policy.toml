@@ -1,0 +1,41 @@
+schema_version = 1
+doc_ir_schema = "cjdoc.doc-ir/7"
+audience = "external"
+
+# cjdoc 0.6.0 preserves these source constructs as explicit unsupported entries.
+# The gate requires an exact match, so a new gap or a fixed limitation both force
+# this policy to be reviewed.
+[[allowed_unsupported]]
+package = "yjson"
+kind = "macroInvocation"
+name = "Derive"
+count = 1
+rationale = "cjdoc does not expand std.deriving annotations around JsonKind"
+
+[[allowed_unsupported]]
+package = "yjson_algorithms"
+kind = "macroInvocation"
+name = "Derive"
+count = 1
+rationale = "cjdoc does not expand std.deriving annotations around JsonPatchOperationKind"
+
+[[allowed_unsupported]]
+package = "yjson_macros"
+kind = "macro"
+name = "JsonCodec"
+count = 1
+rationale = "cjdoc does not model public macro declarations"
+
+[[allowed_unsupported]]
+package = "yjson_macros"
+kind = "macro"
+name = "JsonSubtype"
+count = 1
+rationale = "cjdoc does not model public macro declarations"
+
+[[allowed_unsupported]]
+package = "yjson_macros"
+kind = "macro"
+name = "JsonUsing"
+count = 1
+rationale = "cjdoc does not model public macro declarations"

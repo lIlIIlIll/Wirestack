@@ -32,8 +32,8 @@ class NativeAccelerationBenchmarks {
     let numericValues = ArrayList<Int64>()
     let numericText: String
     let plainValues = ArrayList<String>()
-    let escapedCodec = YJson.arrayListCodec(StringJson)
-    let numericCodec = YJson.int64ArrayListCodec()
+    let escapedCodec = JsonCodecs.arrayList(JsonCodecs.string)
+    let numericCodec = JsonCodecs.arrayList(JsonCodecs.int64)
     var stringSink = ""
     var bytesSink: Array<Byte> = Array<Byte>(0, repeat: 0u8)
     var intSink: Int64 = 0
@@ -57,7 +57,7 @@ class NativeAccelerationBenchmarks {
 
     @Bench
     func writeEscapedBytes(): Unit {
-        bytesSink = YJson.encodeBytesWith(escapedCodec, escapedValues)
+        bytesSink = YJson.toJsonBytes(escapedValues, codec: escapedCodec)
     }
 
     @Bench
@@ -67,7 +67,7 @@ class NativeAccelerationBenchmarks {
 
     @Bench
     func writeNumericBytes(): Unit {
-        bytesSink = YJson.encodeBytesWith(numericCodec, numericValues)
+        bytesSink = YJson.toJsonBytes(numericValues, codec: numericCodec)
     }
 
     @Bench
@@ -79,7 +79,7 @@ class NativeAccelerationBenchmarks {
     @Bench
     func readNumericDocument(): Unit {
         let document = YJson.parseDocument(numericText)
-        intSink = document.rootSize()
+        intSink = document.root().size()
     }
 
     @Bench

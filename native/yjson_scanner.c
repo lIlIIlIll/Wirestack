@@ -1183,6 +1183,11 @@ int32_t YJ_JSON_ScanNumericArrayChunk(
             }
             if (emitted) {
                 skip_ws(&parser);
+                // The SIMD run stops before a scalar-only token or a
+                // non-numeric array value. Re-enter the loop so the common
+                // preflight can distinguish those cases before scalar number
+                // parsing starts at the same byte.
+                continue;
             }
         }
         int64_t token_start = parser.pos;

@@ -1,76 +1,69 @@
 # 不可信 JSON 的资源边界
 
-资源限制用于在解析、typed decode、DOM 构建和写出期间尽早拒绝超大输入。它们不能替代
-协议 framing、并发限流、认证授权或进程级内存控制。
+资源限制在解析、typed decode、文档构建、materialization 和写出期间拒绝超大工作量。它们
+不能替代协议 framing、并发限流、认证授权或进程级内存控制。
 
 ## 推荐起点
 
 ```cangjie
-let readConfig = JsonReadConfig(
-    limits: JsonReadLimits(
-        maxDepth: 128,
-        maxBytes: 8 * 1024 * 1024,
-        maxStringBytes: 1024 * 1024,
-        maxPolymorphicObjectBytes: 4 * 1024 * 1024
-    ))
+let readOptions = JsonReadOptions(
+    maxInputBytes: 8 * 1024 * 1024,
+    maxStringBytes: 1024 * 1024,
+    maxBufferedValueBytes: 4 * 1024 * 1024,
+    maxDepth: 128
+)
 
-let writeConfig = JsonWriteConfig("", "", false, false,
-    limits: JsonWriteLimits(maxDepth: 128, maxBytes: 8 * 1024 * 1024))
+let writeOptions = JsonWriteOptions(
+    maxOutputBytes: 8 * 1024 * 1024,
+    maxDepth: 128
+)
 ```
 
-具体数值必须根据协议上限和业务 payload 调整。所有资源参数拒绝负数；byte limit 的
-`0` 表示 unlimited。
+数值必须根据协议上限和 payload 调整。读取预算全部为正数；`maxOutputBytes = 0` 才表示
+不限制输出 bytes。
 
-## 每个预算限制什么
+## 读取和写出预算
 
-| 配置 | 语义 | 错误码 |
+| 选项 | 语义 | 错误码 |
 | --- | --- | --- |
-| `maxDepth` | array/object 嵌套；根容器计 1，scalar 不增加 | `max_depth` |
-| `maxBytes` | 单个输入文档或输出结果的 bytes | `document_too_large` / `output_too_large` |
-| `maxStringBytes` | 解码后 UTF-8 string/key bytes | `string_too_large` |
-| `maxPolymorphicObjectBytes` | generated 多态根容器 replay span | `polymorphic_object_too_large` |
+| `maxInputBytes` | 单个输入 document 的 bytes | `document_too_large` |
+| `maxStringBytes` | 解码后 string/key 的 UTF-8 bytes | `string_too_large` |
+| `maxBufferedValueBytes` | generated replay 或 whole-value buffer | `buffered_value_too_large` |
+| read/write `maxDepth` | array/object 嵌套；根容器计 1 | `max_depth` |
+| `maxOutputBytes` | 已编码 JSON bytes | `output_too_large` |
 
-`\uXXXX` 按解码后的 Unicode scalar 计量，因此原生 UTF-8 与等价转义得到同一
-`maxStringBytes` 结果。超大 number token 由 `maxBytes` 或多态根预算约束，不计入 string
-预算。
+`\uXXXX` 按解码后的 UTF-8 值计入 string budget。String/bytes 输入在完整 DOM 分配前检查
+document 上限；stream 在读取过程中递增检查。stream 可能已经从底层读取了当前 buffer，但不会
+把输入位置伪装成可恢复的消息边界。
 
-写出端对所有 direct、generated raw、AST 和 stream 路径使用同一容器深度定义。writer 必须
-完成且只完成一个根值；没有根值、第二个根值或未闭合容器使用 `writer_state`。Stream
-`maxBytes` 在向调用方 sink 提交下一段 bytes 前检查，触发 `output_too_large` 后该 writer
-进入终止状态，sink 中已提交的前缀不会超过配置值。内存 String/bytes 入口在返回结果前执行
-同一预算检查。内存入口的 `maxBytes` 是结果大小限制，不是峰值分配限制：writer 可能先扩展
-内部 buffer，再在返回 String 或 bytes 前拒绝结果。需要提交前硬边界时使用 Stream 入口。
+stream writer 在提交下一段 bytes 前检查 `maxOutputBytes`。一旦失败，不要复用 writer，也
+不要把已经写出的前缀当作有效 JSON。内存 String/bytes 入口保证返回值不超过预算，但这个
+上限不是峰值分配保证。
 
-可修改 `JsonNode` 允许共享同一子节点形成 DAG，但递归序列化、`deepCopy()` 和语义等价比较
-会拒绝祖先环，错误码为 `cyclic_json_node`。序列化按遍历顺序发现环，因此 Stream sink 在
-报错前可能已有不超过预算的 JSON 前缀。
+## AST 和 materialization
 
-手工构造的 AST 不受 `JsonReadLimits` 保护。`deepCopy()` 和 `equivalentTo()` 因此使用固定的
-操作预算：最多 256 层、访问 100,000 个节点。越过深度时返回 `max_depth`，耗尽工作量时返回
-`work_limit_exceeded`。该限制同时约束无环深链、共享 DAG 和循环检测，避免递归栈耗尽或无界
-祖先扫描。
+手工构造的 `JsonNode` 没有经过读取预算。`deepCopy()`、`equivalentTo()` 和默认
+`materialize()` 因此限制为 256 层和 100,000 个访问节点。深度超限使用 `max_depth`；
+node/work budget 耗尽使用 `work_limit_exceeded`。
 
-## 覆盖路径
+`materialize(maxNodes)` 可以替换 node budget，但不能取消 256 层边界。显式 backend façade
+同样通过统一 `JsonValueView` 和这组 materialization contract 返回 AST。
 
-预算覆盖 `YJson.parse`、String/bytes typed decode、stream decode、Pure Compact、Custom
-Native、yyjson Direct 和 generated polymorphic replay。未知字段 skip 继续遵守剩余深度，
-不会用无法证明子树深度的 shortcut 绕过检查。
+## 算法预算
 
-内存输入在 AST/DOM 分配前预检。普通 stream 无法预知总长度，Pure reader 在 refill 和
-消费 token 时增量检查；底层 stream 可能已多提供一个当前 4096-byte buffer 的数据。
-失败后不保证 stream 位于可恢复消息边界。
+`yjson_algorithms` 使用独立预算：
 
-## Backend 一致性
+| 类型 | 默认值 |
+| --- | --- |
+| `JsonPathLimits` | 100,000 visited、100,000 filter、100,000 regex、10,000 matches、depth 256 |
+| `JsonPatchLimits` | 10,000 operations、256 pointer segments、100,000 copied nodes |
+| `JsonSchemaLimits` | 100,000 evaluations、1,000 ref resolutions、100,000 regex、100 errors、depth 256 |
 
-| Failure | Pure | Custom Native | yyjson Direct |
-| --- | --- | --- | --- |
-| 文档过大 | parse 前或 refill 时拒绝 | DOM 分配前拒绝 | DOM 分配前拒绝 |
-| string/key 过大 | 解码扫描时拒绝 | allocation-free 预检 | allocation-free 预检 |
-| 多态根过大 | replay 前拒绝 | DOM 分配前拒绝 | DOM 分配前拒绝 |
-| 深度过大 | reader/parser 拒绝 | Native parser 拒绝 | semantic validation 拒绝 |
+任一维度耗尽都抛出 `JsonException(code: "work_limit_exceeded")`。算法预算允许 0 表示该
+维度 unlimited，并提供 `.unlimited` 预设；这与读取预算的正数规则不同。只在可信离线任务
+中关闭预算。
 
-`includeErrorLocation` 只控制位置信息，不改变错误码或预算结果。启用限制可能增加线性预检
-或计数成本，不承诺与 unlimited fast path 相同的吞吐量。
+JSONPath 的 `matches()` 返回惰性 cursor，预算在 `next()` 推进时消耗；创建 cursor 本身
+不预先遍历 document。Schema 在构造时解析外部 resolver 图并编译 regex，validation 不再访问
+resolver。
 
-高层算法还具有独立的 `JsonPathLimits`、`JsonPatchLimits` 与 `JsonSchemaLimits`；默认值
-适用于不可信输入，预算耗尽统一使用 `work_limit_exceeded`。

@@ -1,73 +1,93 @@
 # yjson 0.1 公开 API 清单
 
-本页说明 `0.1.x` 当前版本线的发布边界。完整声明列表位于
-[`release/public-api-snapshot.txt`](../release/public-api-snapshot.txt)，经过评审的 breaking 与
-additive 变化位于
-[`release/public-api-inventory.toml`](../release/public-api-inventory.toml)。运行以下命令同时
-检查 package 版本配套、inventory、快照生成器回归测试和当前快照：
+本页说明 `0.1.x` 的发布边界。完整声明列表位于
+[`release/public-api-snapshot.txt`](../release/public-api-snapshot.txt)，经过评审的 breaking
+与 additive 变化位于
+[`release/public-api-inventory.toml`](../release/public-api-inventory.toml)。相对于冻结基线的完整
+Cangjie 声明差异及逐项分类位于
+[`release/public-cangjie-delta-bfd29.toml`](../release/public-cangjie-delta-bfd29.toml)。
+
+运行：
 
 ```terminal
 python3 scripts/check_api_inventory.py
 ```
 
-成功时，命令依次输出快照生成器测试、快照声明数和已评审变化数；任一差异都会返回非零状态。
+命令检查九包版本配套、release graph、inventory、快照生成器回归测试和当前快照。任一未评审
+差异都会返回非零状态。
 
 ## 默认产品面
 
-普通应用通过 GC 管理的跨平台引擎使用以下入口：
+普通应用使用以下入口：
 
 ```cangjie
 YJson.toJson(value)
 YJson.fromJson<T>(text)
 YJson.parseDocument(text)
+JsonNode.parse(text)
 ```
 
-`JsonDocument` 提供只读 view、`materialize()` 和 JSON 输出。它不包含 backend identity、
-`Resource`、`close()` 或 `isClosed()`。默认 stream 入口是增量实现，也没有 backend 参数。
+`JsonDocument` 提供 `root()`、`materialize()` 和 JSON 输出。它不包含 backend identity、
+`Resource`、`close()` 或 `isClosed()`。String、bytes 和 stream overload 使用同一
+`JsonReadOptions`、`JsonWriteOptions`、codec 和 error contract。
 
-`JsonReadConfig` 与 `JsonWriteConfig` 分别组合 `JsonReadLimits` 和 `JsonWriteLimits`。built-in、
-generated、stream 与 accelerated 执行使用相同的 limits、duplicate-field policy、数字规则、
-path 和 error 语义。
+`JsonValueView` 是 read-only interchange boundary。managed document、高级 backend 和
+`JsonNode` 都能交给 serializer 与算法；修改只通过明确的 `JsonNode` API 发生。
 
 ## 快照收集范围
 
-生成器收集顶层公开声明、外部可见公开类型的成员、interface 的隐式公开成员和 enum case。
-private 或默认 internal 类型中的 `public` 成员不会进入快照。多行类型头会被合并为单条规范化
-声明。C ABI 快照还包含 `native/*.h` 中导出的 `YJ_*` prototype。
+生成器收集顶层 public declaration、外部可见 public 类型的成员、interface 的隐式 public
+成员和 enum case。private 或默认 internal 类型中的 public 成员不会进入快照。多行类型头被
+规范化成单条声明。C ABI 快照另含 `native/*.h` 导出的 `YJ_*` prototype。
 
-快照是 fail-closed 差异检测，不替代兼容性评审。公开声明发生变化时，先运行
-`python3 scripts/generate_public_api_snapshot.py --write`，再逐条审查生成差异并同步 inventory。
-不要手工编辑快照文件。
+快照是 fail-closed 差异检测，不替代兼容性评审。公开声明变化时，先运行：
+
+```terminal
+python3 scripts/generate_public_api_snapshot.py --write
+```
+
+随后逐条审查 diff，并同步 inventory。不要手工编辑快照。
+
+差异文件把每条 removed/added declaration 放入且只放入一个 review group。每组记录分类、
+理由和 review status；全局 `approved-for-release` 只有在没有漏项、重复项、未分类声明或 pending
+group 时才有效。`release-ready` graph 会再次执行这项检查。
 
 ## Generated-code protocol
 
-`yjson` 与 `yjson_macros` 属于同一 lockstep 发行单元，且 macro 显式依赖 runtime。macro 输出
-面向 `generated_support.v1` 并嵌入 protocol version 1；protocol 不匹配时明确失败。
+`yjson` 与 `yjson_macros` 是同一个 lockstep release。macro 输出面向
+`generated_support.v1` 并嵌入 protocol version 1；不匹配时明确失败。
 
-实现内部包含供 runtime 与 macro bridge 使用的 direct reader/writer helper，但生成源码只引用
-版本化 support 名称。这些 helper 不是应用入口。
+普通 generated codec bridge 是
+`GeneratedCodecProviderV1<T>.generatedCodecV1(_: GeneratedCodecTokenV1<T>): JsonCodec<T>`。
+`GeneratedCodecTokenV1<T>` 是零状态的重载 token，使继承链上的父类和子类各自返回精确
+`JsonCodec<T>`。宏展开和 runtime dispatch 之间不经过 `Any`、erase/reify adapter 或运行时
+类型转换。
+
+bridge 声明因跨 package 展开而必须 public，但不是普通应用入口。应用使用 `@JsonCodec`、
+`JsonCodec<T>`、`YJson` 和 `JsonCodecs`。
 
 ## 可选 package
 
 | Package | 用途 | 生命周期 |
 | --- | --- | --- |
-| `yjson_macros` | 编译期 generated codec | 与 `yjson` lockstep，不在 runtime 加载 |
-| `yjson_native_accel` | 启动时调用一次 `YJsonNativeAccel.initialize()` | 冻结进程引擎；不能 uninstall 或在运行时切换 |
-| `yjson_native_primitives` | scanner 与 provider closed SPI | 只供第一方 Native package 使用 |
-| `yjson_algorithms` | Pointer、Patch、Merge Patch、JSONPath 和 Schema | 默认使用有限预算；`.unlimited` 必须显式选择 |
-| `yjson_backends` | 高级 Custom Native/yyjson DOM 和 WholeDocument stream adapter | 显式持有 `BackendJsonDocument` 资源 |
-| `yjson_native` | Custom Native 高级 backend | 显式资源生命周期 |
-| `yjson_yyjson` | vendored yyjson 高级 backend | 显式资源生命周期 |
-| `yjson_schema_formats` | 可选的国际化 Schema format | 安装到显式 registry |
+| `yjson_macros` | 编译期 generated codec | 与 runtime lockstep，不在运行期加载 |
+| `yjson_algorithms` | Pointer、Patch、Path 和 Schema | 默认有限预算；cursor 单线程 |
+| `yjson_schema_formats` | 国际化 Schema format | 在 Schema 构造前安装到 registry |
+| `yjson_native_accel` | 启动时初始化 Native primitive | 进程级冻结；不能 uninstall 或切换 |
+| `yjson_native_primitives` | scanner/provider closed SPI | 只供第一方 Native package |
+| `yjson_backends` | metadata 和 explicit-resource interface | 不提供任意 strategy registry |
+| `yjson_native` | `NativeBackends.customNative` | 返回显式 resource |
+| `yjson_yyjson` | `YyjsonBackends.yyjson` | 返回显式 resource |
 
-Schema resource URI 只能通过注入的 `UriResolver` 解析；core 不发起网络访问。
+Schema resource URI 只通过注入的 `UriResolver` 在构造阶段解析。成功构造后，compiled schema
+不再保留 resolver。
 
 ## 兼容性结论
 
 `0.1.0` 有意重置成熟度版本并允许 breaking change，不提供旧 API alias、deprecated shim 或
-`yjson_all` umbrella。`0.1.y` patch 保持已记录的应用 API 兼容；后续 `0.x.0` minor 变更必须
-提供机器 API diff 和迁移指南。
+umbrella package。后续 `0.1.y` patch 应保持已记录的应用 API 兼容；需要 breaking change 时
+提升到新的 `0.x.0` minor，并提供 machine API diff。
 
-历史 1.x/2.0 tag 与 release evidence 保持不可变，只用于历史审计和性能基线，不代表当前
-`0.1.x` API。完整九包顺序与 stability 分类来自
+历史 1.x/2.0 tag 和 release evidence 保持不可变，只用于审计与基线，不代表当前
+`0.1.x` API。九包顺序与 stability 分类来自
 [`release/release-graph.toml`](../release/release-graph.toml)。

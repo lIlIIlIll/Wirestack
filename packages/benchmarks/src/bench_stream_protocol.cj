@@ -141,21 +141,21 @@ class StreamProtocolBenchmarks {
         exportStreamProtocolPayload("records-64k", records64kBytes)
         exportStreamProtocolPayload("records-1m", records1mBytes)
 
-        assertJson(YJson.fromStream<Person>(
+        assertJson(YJson.fromJson<Person>(
             ProtocolChunkInputStream(personBytes, fixedChunks(64))).id == person.id,
             "stream protocol person preflight")
-        assertJson(YJson.fromStream<ArrayList<ProfileRecord>>(
+        assertJson(YJson.fromJson<ArrayList<ProfileRecord>>(
             ProtocolChunkInputStream(records64kBytes, fixedChunks(4096))).size == records64k.size,
             "stream protocol 64 KiB preflight")
-        assertJson(YJson.fromStream<ArrayList<ProfileRecord>>(
+        assertJson(YJson.fromJson<ArrayList<ProfileRecord>>(
             ProtocolChunkInputStream(records1mBytes, randomChunks)).size == records1m.size,
             "stream protocol 1 MiB preflight")
 
         let memory = ProtocolMemoryOutputStream()
-        YJson.toStream(records64k, memory)
+        YJson.writeJson(records64k, memory)
         assertJson(memory.size == records64kBytes.size, "stream protocol memory sink preflight")
         let counting = ProtocolCountingOutputStream()
-        YJson.toStream(records1m, counting)
+        YJson.writeJson(records1m, counting)
         assertJson(counting.size == records1mBytes.size && counting.digest != 0u64,
             "stream protocol counting sink preflight")
     }
@@ -198,34 +198,34 @@ class StreamProtocolBenchmarks {
     }
 
     @Bench[input in person64Input]
-    func decodePersonChunk64(input: PersonDecodeInput): Unit { blackBox(YJson.fromStream<Person>(input.stream)) }
+    func decodePersonChunk64(input: PersonDecodeInput): Unit { blackBox(YJson.fromJson<Person>(input.stream)) }
     @Bench[input in person4kInput]
-    func decodePersonChunk4k(input: PersonDecodeInput): Unit { blackBox(YJson.fromStream<Person>(input.stream)) }
+    func decodePersonChunk4k(input: PersonDecodeInput): Unit { blackBox(YJson.fromJson<Person>(input.stream)) }
     @Bench[input in personRandomInput]
-    func decodePersonChunkRandom(input: PersonDecodeInput): Unit { blackBox(YJson.fromStream<Person>(input.stream)) }
+    func decodePersonChunkRandom(input: PersonDecodeInput): Unit { blackBox(YJson.fromJson<Person>(input.stream)) }
     @Bench[input in records64k64Input]
     func decodeRecords64kChunk64(input: RecordsDecodeInput): Unit {
-        blackBox(YJson.fromStream<ArrayList<ProfileRecord>>(input.stream))
+        blackBox(YJson.fromJson<ArrayList<ProfileRecord>>(input.stream))
     }
     @Bench[input in records64k4kInput]
     func decodeRecords64kChunk4k(input: RecordsDecodeInput): Unit {
-        blackBox(YJson.fromStream<ArrayList<ProfileRecord>>(input.stream))
+        blackBox(YJson.fromJson<ArrayList<ProfileRecord>>(input.stream))
     }
     @Bench[input in records64kRandomInput]
     func decodeRecords64kChunkRandom(input: RecordsDecodeInput): Unit {
-        blackBox(YJson.fromStream<ArrayList<ProfileRecord>>(input.stream))
+        blackBox(YJson.fromJson<ArrayList<ProfileRecord>>(input.stream))
     }
     @Bench[input in records1m64Input]
     func decodeRecords1mChunk64(input: RecordsDecodeInput): Unit {
-        blackBox(YJson.fromStream<ArrayList<ProfileRecord>>(input.stream))
+        blackBox(YJson.fromJson<ArrayList<ProfileRecord>>(input.stream))
     }
     @Bench[input in records1m4kInput]
     func decodeRecords1mChunk4k(input: RecordsDecodeInput): Unit {
-        blackBox(YJson.fromStream<ArrayList<ProfileRecord>>(input.stream))
+        blackBox(YJson.fromJson<ArrayList<ProfileRecord>>(input.stream))
     }
     @Bench[input in records1mRandomInput]
     func decodeRecords1mChunkRandom(input: RecordsDecodeInput): Unit {
-        blackBox(YJson.fromStream<ArrayList<ProfileRecord>>(input.stream))
+        blackBox(YJson.fromJson<ArrayList<ProfileRecord>>(input.stream))
     }
 
     @Strategy
@@ -254,17 +254,17 @@ class StreamProtocolBenchmarks {
     }
 
     @Bench[input in personMemoryOutput]
-    func encodePersonMemory(input: PersonEncodeInput): Unit { YJson.toStream(person, input.output) }
+    func encodePersonMemory(input: PersonEncodeInput): Unit { YJson.writeJson(person, input.output) }
     @Bench[input in personCountingOutput]
-    func encodePersonCounting(input: PersonEncodeInput): Unit { YJson.toStream(person, input.output) }
+    func encodePersonCounting(input: PersonEncodeInput): Unit { YJson.writeJson(person, input.output) }
     @Bench[input in records64kMemoryOutput]
-    func encodeRecords64kMemory(input: RecordsEncodeInput): Unit { YJson.toStream(records64k, input.output) }
+    func encodeRecords64kMemory(input: RecordsEncodeInput): Unit { YJson.writeJson(records64k, input.output) }
     @Bench[input in records64kCountingOutput]
-    func encodeRecords64kCounting(input: RecordsEncodeInput): Unit { YJson.toStream(records64k, input.output) }
+    func encodeRecords64kCounting(input: RecordsEncodeInput): Unit { YJson.writeJson(records64k, input.output) }
     @Bench[input in records1mMemoryOutput]
-    func encodeRecords1mMemory(input: RecordsEncodeInput): Unit { YJson.toStream(records1m, input.output) }
+    func encodeRecords1mMemory(input: RecordsEncodeInput): Unit { YJson.writeJson(records1m, input.output) }
     @Bench[input in records1mCountingOutput]
-    func encodeRecords1mCounting(input: RecordsEncodeInput): Unit { YJson.toStream(records1m, input.output) }
+    func encodeRecords1mCounting(input: RecordsEncodeInput): Unit { YJson.writeJson(records1m, input.output) }
 
     @Bench[input in person64Input]
     func decodeStdxPersonChunk64(input: PersonDecodeInput): Unit {

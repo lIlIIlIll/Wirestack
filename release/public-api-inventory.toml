@@ -1,125 +1,543 @@
 # yjson 0.1 migration API inventory. The complete declaration list is
-# release/public-api-snapshot.txt.
-inventory_version = 1
+# release/public-api-snapshot.txt. Each reviewed item below binds to exact
+# declaration records from that snapshot; it is not a second full snapshot.
+inventory_version = 2
 status = "0.1.0-migration"
 compatibility_policy = "0.x minors may break with an API diff and migration guide; 0.x patches preserve documented stability classes"
+cangjie_delta_artifact = "release/public-cangjie-delta-bfd29.toml"
 
 [[api]]
 package = "yjson"
-kind = "cangjie-limits"
-symbol = "JsonReadLimits / JsonWriteLimits"
-signature = "JsonReadConfig(limits!: JsonReadLimits); JsonWriteConfig(..., limits!: JsonWriteLimits)"
-source = ["src/lib_json_value.cj", "src/lib_json_stream_writer.cj"]
-needle = "public class Json"
+kind = "cangjie-options"
+domain = "cangjie"
+symbol = "JsonReadOptions / JsonWriteOptions"
+signature = "JsonReadOptions(...); JsonWriteOptions(...)"
 stability = "0.1.0-stable"
-compatibility = "breaking composition of resource limits"
-contract = "Pure, generated, stream, native, and advanced backends interpret the same limits objects."
+compatibility = "breaking flattening of the former config and limits composition into option objects"
+contract = "Pure, generated, stream, native, and advanced paths interpret the same option fields and limits."
 consumer = "All readers and writers"
+
+[[api.declarations]]
+source = "src/lib_json_value.cj"
+owner = "<top-level>"
+signature = "public class JsonReadOptions"
+
+[[api.declarations]]
+source = "src/lib_json_value.cj"
+owner = "JsonReadOptions"
+signature = "public init( unknownFieldPolicy!: JsonUnknownFieldPolicy = JsonUnknownFieldPolicy.Ignore, duplicateKeyPolicy!: JsonDuplicateKeyPolicy = JsonDuplicateKeyPolicy.Reject, maxInputBytes!: Int64 = 64 * 1024 * 1024, maxStringBytes!: Int64 = 16 * 1024 * 1024, maxBufferedValueBytes!: Int64 = 8 * 1024 * 1024, maxDepth!: Int64 = 256 )"
+
+[[api.declarations]]
+source = "src/lib_json_stream_writer.cj"
+owner = "<top-level>"
+signature = "public class JsonWriteOptions"
+
+[[api.declarations]]
+source = "src/lib_json_stream_writer.cj"
+owner = "JsonWriteOptions"
+signature = "public init( indent!: String = \"\", htmlSafe!: Bool = false, maxOutputBytes!: Int64 = 0, maxDepth!: Int64 = 256 )"
 
 [[api]]
 package = "yjson"
 kind = "cangjie-interface"
+domain = "cangjie"
 symbol = "JsonDocument"
 signature = "public interface JsonDocument"
-source = "src/lib_json_document.cj"
-needle = "public interface JsonDocument"
 stability = "0.1.0-stable"
 compatibility = "breaking removal of Resource, close, isClosed, and backend identity"
-contract = "The default document is a GC-managed read-only Compact representation."
+contract = "The default document is GC-managed and exposes read-only views, bounded materialization, and JSON text output."
 consumer = "YJson.parseDocument callers"
+
+[[api.declarations]]
+source = "src/lib_json_document.cj"
+owner = "<top-level>"
+signature = "public interface JsonDocument"
+
+[[api.declarations]]
+source = "src/lib_json_document.cj"
+owner = "JsonDocument"
+signature = "func root(): JsonValueView"
+
+[[api.declarations]]
+source = "src/lib_json_document.cj"
+owner = "JsonDocument"
+signature = "func materialize(): JsonNode"
+
+[[api.declarations]]
+source = "src/lib_json_document.cj"
+owner = "JsonDocument"
+signature = "func materialize(maxNodes: Int64): JsonNode"
+
+[[api.declarations]]
+source = "src/lib_json_document.cj"
+owner = "JsonDocument"
+signature = "func toString(): String"
 
 [[api]]
 package = "yjson"
 kind = "cangjie-overload-family"
-symbol = "YJson.parseDocument / toStream / fromStream"
-signature = "Default API has no backend parameter"
-source = "src/lib_json_direct_codec.cj"
-needle = "public static func parseDocument(text: String,"
+domain = "cangjie"
+symbol = "YJson.parseDocument / fromJson(InputStream) / writeJson(OutputStream)"
+signature = "Default API has no backend parameter; streams use fromJson and writeJson overloads"
 stability = "0.1.0-stable"
-compatibility = "breaking removal of backend selection from ordinary APIs"
-contract = "parseDocument returns managed Compact; stream calls remain incremental."
+compatibility = "breaking removal of backend selection and replacement of the former stream method names"
+contract = "parseDocument returns a managed document; InputStream decoding and OutputStream encoding are incremental."
 consumer = "Ordinary applications"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "YJson"
+signature = "public static func parseDocument(text: String, config!: JsonReadOptions = JsonReadOptions.defaults): JsonDocument"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "YJson"
+signature = "public static func parseDocument(bytes: Array<Byte>, config!: JsonReadOptions = JsonReadOptions.defaults): JsonDocument"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "YJson"
+signature = "public static func fromJson<T>(input: InputStream, codec!: JsonCodec<T>, options!: JsonReadOptions = JsonReadOptions.defaults): T"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "YJson"
+signature = "public static func fromJson<T>(input: InputStream, options!: JsonReadOptions = JsonReadOptions.defaults): T where T <: GeneratedCodecProviderV1<T>"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "YJson"
+signature = "public static func writeJson(value: JsonValueView, output: OutputStream, options!: JsonWriteOptions = JsonWriteOptions.defaults): Unit"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "YJson"
+signature = "public static func writeJson<T>(value: T, output: OutputStream, codec!: JsonCodec<T>, options!: JsonWriteOptions = JsonWriteOptions.defaults): Unit"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "YJson"
+signature = "public static func writeJson<T>(value: T, output: OutputStream, options!: JsonWriteOptions = JsonWriteOptions.defaults): Unit where T <: GeneratedCodecProviderV1<T>"
 
 [[api]]
 package = "yjson"
 kind = "generated-protocol"
-symbol = "GeneratedSupportV1"
-signature = "public class GeneratedSupportV1"
-source = "src/lib_json_generated_support_v1.cj"
-needle = "public class GeneratedSupportV1"
+domain = "cangjie"
+symbol = "GeneratedSupportV1 / GeneratedSupportV1Reader / GeneratedSupportV1Writer"
+signature = "GeneratedSupportV1.protocolVersion() with narrow reader and writer interfaces"
 stability = "protocol-v1"
 compatibility = "breaking replacement of concrete generated reader/writer references"
 contract = "Generated source embeds protocol 1 and fails clearly when the runtime protocol differs."
 consumer = "yjson_macros generated codecs"
 
+[[api.declarations]]
+source = "src/lib_json_generated_support_v1.cj"
+owner = "<top-level>"
+signature = "public class GeneratedSupportV1"
+
+[[api.declarations]]
+source = "src/lib_json_generated_support_v1.cj"
+owner = "<top-level>"
+signature = "public interface GeneratedSupportV1Reader"
+
+[[api.declarations]]
+source = "src/lib_json_generated_support_v1.cj"
+owner = "<top-level>"
+signature = "public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1"
+
+[[api.declarations]]
+source = "src/lib_json_generated_support_v1.cj"
+owner = "GeneratedSupportV1"
+signature = "public static func protocolVersion(): Int64"
+
+[[api.declarations]]
+source = "src/lib_json_generated_support_v1.cj"
+owner = "GeneratedSupportV1"
+signature = "public static func requireProtocolVersion(expected: Int64): Unit"
+
+[[api]]
+package = "yjson"
+kind = "generated-codec-provider"
+domain = "cangjie"
+symbol = "GeneratedCodecTokenV1<T> / GeneratedCodecProviderV1<T> / generatedCodecV1Of<T>"
+signature = "GeneratedCodecProviderV1<T>.generatedCodecV1(_: GeneratedCodecTokenV1<T>): JsonCodec<T>"
+stability = "protocol-v1"
+compatibility = "0.1.0 typed replacement of the erased generated-codec provider"
+contract = "The zero-state type token overloads inherited parent and child providers while lookup remains typed, without Any boxing or runtime casts."
+consumer = "yjson_macros generated codecs and built-in codec extensions only"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "<top-level>"
+signature = "public class GeneratedCodecTokenV1<T>"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "<top-level>"
+signature = "public interface GeneratedCodecProviderV1<T>"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "GeneratedCodecProviderV1"
+signature = "static func generatedCodecV1(_: GeneratedCodecTokenV1<T>): JsonCodec<T>"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "<top-level>"
+signature = "public func generatedCodecV1Of<T>(): JsonCodec<T> where T <: GeneratedCodecProviderV1<T>"
+
+[[api]]
+package = "yjson"
+kind = "generated-object-protocol"
+domain = "cangjie"
+symbol = "GeneratedObjectCodecProviderV1 / generatedObjectCodecV1Of"
+signature = "GeneratedObjectCodecProviderV1<T>.generatedObjectCodecV1(_: GeneratedCodecTokenV1<T>): GeneratedObjectCodecV1<T>"
+stability = "protocol-v1"
+compatibility = "0.1.0 split provider contract"
+contract = "Concrete subtype codecs compose inherited and own object fields through typed token overloads instead of an erased polymorphic provider."
+consumer = "yjson_macros generated codecs only"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "<top-level>"
+signature = "public interface GeneratedObjectCodecProviderV1<T>"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "GeneratedObjectCodecProviderV1"
+signature = "static func generatedObjectCodecV1(_: GeneratedCodecTokenV1<T>): GeneratedObjectCodecV1<T>"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "<top-level>"
+signature = "public func generatedObjectCodecV1Of<T>(): GeneratedObjectCodecV1<T>"
+
 [[api]]
 package = "yjson"
 kind = "startup-runtime"
-symbol = "JsonAccelerationException / initializeYJsonAccelerationV1"
-signature = "Process state Unconfigured -> PureFrozen | NativeFrozen"
-source = "src/lib_json_runtime.cj"
-needle = "public func initializeYJsonAccelerationV1"
+domain = "cangjie"
+symbol = "JsonAccelerationProviderV1 / initializeYJsonAccelerationV1"
+signature = "public func initializeYJsonAccelerationV1(provider: JsonAccelerationProviderV1): Unit"
 stability = "protocol-v1"
 compatibility = "0.1.0 startup freeze contract"
-contract = "Late initialization, provider conflicts, and ABI/protocol mismatches fail without fallback."
+contract = "Late initialization, provider conflicts, and ABI/protocol mismatches throw JsonException with acceleration-specific codes and never fall back silently."
 consumer = "yjson_native_accel"
+
+[[api.declarations]]
+source = "src/lib_json_runtime.cj"
+owner = "<top-level>"
+signature = "public interface JsonAccelerationProviderV1"
+
+[[api.declarations]]
+source = "src/lib_json_runtime.cj"
+owner = "JsonAccelerationProviderV1"
+signature = "func identity(): String"
+
+[[api.declarations]]
+source = "src/lib_json_runtime.cj"
+owner = "JsonAccelerationProviderV1"
+signature = "func protocolVersion(): Int64"
+
+[[api.declarations]]
+source = "src/lib_json_runtime.cj"
+owner = "JsonAccelerationProviderV1"
+signature = "func abiVersion(): Int64"
+
+[[api.declarations]]
+source = "src/lib_json_runtime.cj"
+owner = "JsonAccelerationProviderV1"
+signature = "func activate(): Unit"
+
+[[api.declarations]]
+source = "src/lib_json_runtime.cj"
+owner = "<top-level>"
+signature = "public func initializeYJsonAccelerationV1(provider: JsonAccelerationProviderV1): Unit"
 
 [[api]]
 package = "yjson_native_accel"
 kind = "cangjie-static-method"
+domain = "cangjie"
 symbol = "YJsonNativeAccel.initialize"
 signature = "public static func initialize(): Unit"
-source = "packages/yjson_native_accel/src/native_accel.cj"
-needle = "public static func initialize(): Unit"
 stability = "0.1.0-stable"
 compatibility = "new single-option native startup API"
 contract = "Applications call once before any YJson operation and continue using YJson."
 consumer = "Applications opting into Custom Native primitives"
 
+[[api.declarations]]
+source = "packages/yjson_native_accel/src/native_accel.cj"
+owner = "YJsonNativeAccel"
+signature = "public static func initialize(): Unit"
+
 [[api]]
 package = "yjson"
 kind = "native-writer-protocol"
+domain = "cangjie"
 symbol = "JsonNativeWriterBackend / JsonNativeAccelerationPrimitivesV1"
 signature = "escapeString(...); formatInt64Array(...); parseInt64Array(...)"
-source = "src/lib_json_native_scanner.cj"
-needle = "public interface JsonNativeWriterBackend"
 stability = "protocol-v1"
 compatibility = "0.1.0 internal cross-package acceleration seam"
-contract = "Native code provides bounded string and Int64 read/write primitives; core retains cursor/state, separators, limits, normalized errors, and failure policy."
+contract = "Native code provides bounded string and numeric primitives; core retains cursor/state, separators, limits, normalized errors, and failure policy."
 consumer = "yjson_native_primitives implementation only"
+
+[[api.declarations]]
+source = "src/lib_json_native_scanner.cj"
+owner = "<top-level>"
+signature = "public interface JsonNativeWriterBackend"
+
+[[api.declarations]]
+source = "src/lib_json_native_scanner.cj"
+owner = "JsonNativeWriterBackend"
+signature = "func escapeString(input: CPointer<UInt8>, len: Int64, htmlSafe: Bool, output: CPointer<UInt8>, outputCap: Int64, outWritten: CPointer<Int64>): Int32"
+
+[[api.declarations]]
+source = "src/lib_json_native_scanner.cj"
+owner = "JsonNativeWriterBackend"
+signature = "func formatInt64Array(values: CPointer<Int64>, count: Int64, output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64, outWritten: CPointer<Int64>): Int32"
+
+[[api.declarations]]
+source = "src/lib_json_native_scanner.cj"
+owner = "JsonNativeNumericScannerBackend"
+signature = "func parseInt64Array(input: CPointer<UInt8>, len: Int64, start: Int64, values: CPointer<Int64>, valueCap: Int64, outEnd: CPointer<Int64>, outCount: CPointer<Int64>, outError: CPointer<Int64>): Int32"
+
+[[api.declarations]]
+source = "src/lib_json_native_scanner.cj"
+owner = "<top-level>"
+signature = "public interface JsonNativeAccelerationPrimitivesV1 <: JsonNativeScannerBackend & JsonNativeNumericScannerBackend & JsonNativeNumericTapeBackend & JsonNativeFloatParserBackend & JsonNativeWriterBackend"
 
 [[api]]
 package = "yjson_backends"
-kind = "advanced-backend-family"
-symbol = "YJsonAdvanced / BackendJsonDocument"
-signature = "YJsonAdvanced.*WithBackend"
-source = "packages/yjson_backends/src/backends.cj"
-needle = "public class YJsonAdvanced"
+kind = "advanced-backend-document"
+domain = "cangjie"
+symbol = "BackendJsonDocument"
+signature = "public interface BackendJsonDocument <: Resource"
 stability = "0.1.0-advanced"
-compatibility = "breaking relocation from the default product surface"
-contract = "Resource-owning DOM and whole-document stream behavior require explicit advanced APIs."
-consumer = "Advanced native and yyjson users"
+compatibility = "breaking replacement of injectable backend strategies"
+contract = "Resource-owning backend documents expose the same read-only JsonValueView and require deterministic close."
+consumer = "Qualified first-party backend facades"
+
+[[api.declarations]]
+source = "packages/yjson_backends/src/backends.cj"
+owner = "<top-level>"
+signature = "public interface BackendJsonDocument <: Resource"
+
+[[api.declarations]]
+source = "packages/yjson_backends/src/backends.cj"
+owner = "BackendJsonDocument"
+signature = "func close(): Unit"
+
+[[api.declarations]]
+source = "packages/yjson_backends/src/backends.cj"
+owner = "BackendJsonDocument"
+signature = "func isClosed(): Bool"
+
+[[api.declarations]]
+source = "packages/yjson_backends/src/backends.cj"
+owner = "BackendJsonDocument"
+signature = "func root(): JsonValueView"
+
+[[api]]
+package = "yjson_native"
+kind = "qualified-backend-facade"
+domain = "cangjie"
+symbol = "NativeBackends.customNative / NativeBackendFacade"
+signature = "public static prop customNative: NativeBackendFacade"
+stability = "0.1.0-advanced"
+compatibility = "breaking replacement of YJsonAdvanced and public strategy objects"
+contract = "The Custom Native backend is available only through a named, immutable first-party handle."
+consumer = "Applications explicitly opting into the Custom Native whole-document backend"
+
+[[api.declarations]]
+source = "packages/yjson_native/src/document_backend.cj"
+owner = "<top-level>"
+signature = "public class NativeBackendFacade"
+
+[[api.declarations]]
+source = "packages/yjson_native/src/document_backend.cj"
+owner = "<top-level>"
+signature = "public class NativeBackends"
+
+[[api.declarations]]
+source = "packages/yjson_native/src/document_backend.cj"
+owner = "NativeBackends"
+signature = "public static prop customNative: NativeBackendFacade"
+
+[[api]]
+package = "yjson_yyjson"
+kind = "qualified-backend-facade"
+domain = "cangjie"
+symbol = "YyjsonBackends.yyjson / YyjsonBackendFacade"
+signature = "public static prop yyjson: YyjsonBackendFacade"
+stability = "0.1.0-advanced"
+compatibility = "breaking replacement of YJsonAdvanced and public strategy objects"
+contract = "The yyjson backend is available only through a named, immutable first-party handle."
+consumer = "Applications explicitly opting into the yyjson whole-document backend"
+
+[[api.declarations]]
+source = "packages/yjson_yyjson/src/document_backend.cj"
+owner = "<top-level>"
+signature = "public class YyjsonBackendFacade"
+
+[[api.declarations]]
+source = "packages/yjson_yyjson/src/document_backend.cj"
+owner = "<top-level>"
+signature = "public class YyjsonBackends"
+
+[[api.declarations]]
+source = "packages/yjson_yyjson/src/document_backend.cj"
+owner = "YyjsonBackends"
+signature = "public static prop yyjson: YyjsonBackendFacade"
 
 [[api]]
 package = "yjson_algorithms"
 kind = "work-limits"
+domain = "cangjie"
 symbol = "JsonPathLimits / JsonPatchLimits / JsonSchemaLimits"
 signature = "Finite defaults plus explicit unlimited constants"
-source = "packages/yjson_algorithms/src/work_limits.cj"
-needle = "public class JsonPathLimits"
 stability = "0.1.0-stable"
 compatibility = "breaking relocation and finite safe defaults"
-contract = "Budget exhaustion throws JsonWorkLimitException with code work_limit_exceeded."
+contract = "Budget exhaustion throws JsonException with code work_limit_exceeded."
 consumer = "JSONPath, Patch, Merge Patch, and Schema users"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/work_limits.cj"
+owner = "<top-level>"
+signature = "public class JsonPathLimits"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/work_limits.cj"
+owner = "JsonPathLimits"
+signature = "public init(maxVisitedNodes!: Int64 = 100000, maxFilterSteps!: Int64 = 100000, maxRegexSteps!: Int64 = 100000, maxMatches!: Int64 = 10000, maxDepth!: Int64 = 256)"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/work_limits.cj"
+owner = "JsonPathLimits"
+signature = "public static let unlimited = JsonPathLimits(maxVisitedNodes: 0, maxFilterSteps: 0, maxRegexSteps: 0, maxMatches: 0, maxDepth: 0)"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/work_limits.cj"
+owner = "<top-level>"
+signature = "public class JsonPatchLimits"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/work_limits.cj"
+owner = "JsonPatchLimits"
+signature = "public init(maxOperations!: Int64 = 10000, maxPointerSegments!: Int64 = 256, maxCopiedNodes!: Int64 = 100000)"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/work_limits.cj"
+owner = "JsonPatchLimits"
+signature = "public static let unlimited = JsonPatchLimits(maxOperations: 0, maxPointerSegments: 0, maxCopiedNodes: 0)"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/work_limits.cj"
+owner = "<top-level>"
+signature = "public class JsonSchemaLimits"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/work_limits.cj"
+owner = "JsonSchemaLimits"
+signature = "public init(maxEvaluations!: Int64 = 100000, maxRefResolutions!: Int64 = 1000, maxRegexSteps!: Int64 = 100000, maxErrors!: Int64 = 100, maxDepth!: Int64 = 256)"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/work_limits.cj"
+owner = "JsonSchemaLimits"
+signature = "public static let unlimited = JsonSchemaLimits(maxEvaluations: 0, maxRefResolutions: 0, maxRegexSteps: 0, maxErrors: 0, maxDepth: 0)"
 
 [[api]]
 package = "yjson_algorithms"
 kind = "resolver-interface"
+domain = "cangjie"
 symbol = "UriResolver"
 signature = "public interface UriResolver"
-source = "packages/yjson_algorithms/src/lib_json_schema.cj"
-needle = "public interface UriResolver"
 stability = "0.1.0-stable"
 compatibility = "breaking rename and package relocation"
 contract = "External schema URIs resolve only through an injected resolver; no default network access."
 consumer = "JSON Schema applications"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/lib_json_schema.cj"
+owner = "<top-level>"
+signature = "public interface UriResolver"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/lib_json_schema.cj"
+owner = "UriResolver"
+signature = "func resolve(uri: String): Option<JsonNode>"
+
+[[api]]
+domain = "c-abi"
+prefix = "c-abi"
+kind = "reviewed-abi-delta"
+symbol = "YJ_Yyjson generic node navigation ABI"
+signature = "13 generic navigation/get/copy additions replace ObjectLookupInt and RootSize"
+stability = "0.1.0-advanced"
+compatibility = "two breaking removals plus thirteen additive production entry points"
+contract = "The yyjson backend navigates arbitrary document-local nodes; YJ_TESTING probes are excluded from the production ABI."
+consumer = "yjson_yyjson Cangjie FFI bindings"
+delta_artifact = "release/public-c-abi-delta-bfd29.toml"
+
+[[api.declarations]]
+source = "native/yjson_yyjson.h"
+owner = "<top-level>"
+signature = "int32_t YJ_Yyjson_ArrayGet(uint64_t handle, uint64_t node, uint64_t index, uint64_t *out_node);"
+
+[[api.declarations]]
+source = "native/yjson_yyjson.h"
+owner = "<top-level>"
+signature = "int32_t YJ_Yyjson_CopyInlineText(uint64_t handle, uint64_t reference, uint8_t *output, uint64_t output_capacity, uint64_t *out_written);"
+
+[[api.declarations]]
+source = "native/yjson_yyjson.h"
+owner = "<top-level>"
+signature = "int32_t YJ_Yyjson_CopyObjectKey(uint64_t handle, uint64_t node, uint64_t index, uint8_t *output, uint64_t output_capacity, uint64_t *out_written);"
+
+[[api.declarations]]
+source = "native/yjson_yyjson.h"
+owner = "<top-level>"
+signature = "int32_t YJ_Yyjson_CopyText(uint64_t handle, uint64_t node, uint8_t *output, uint64_t output_capacity, uint64_t *out_written);"
+
+[[api.declarations]]
+source = "native/yjson_yyjson.h"
+owner = "<top-level>"
+signature = "int32_t YJ_Yyjson_GetBool(uint64_t handle, uint64_t node, uint32_t *out_value);"
+
+[[api.declarations]]
+source = "native/yjson_yyjson.h"
+owner = "<top-level>"
+signature = "int32_t YJ_Yyjson_GetInlineTextSize(uint64_t handle, uint64_t reference, uint64_t *out_size);"
+
+[[api.declarations]]
+source = "native/yjson_yyjson.h"
+owner = "<top-level>"
+signature = "int32_t YJ_Yyjson_GetInt(uint64_t handle, uint64_t node, int64_t *out_value);"
+
+[[api.declarations]]
+source = "native/yjson_yyjson.h"
+owner = "<top-level>"
+signature = "int32_t YJ_Yyjson_GetTextSize(uint64_t handle, uint64_t node, uint64_t *out_size);"
+
+[[api.declarations]]
+source = "native/yjson_yyjson.h"
+owner = "<top-level>"
+signature = "int32_t YJ_Yyjson_Kind(uint64_t handle, uint64_t node, uint32_t *out_kind);"
+
+[[api.declarations]]
+source = "native/yjson_yyjson.h"
+owner = "<top-level>"
+signature = "int32_t YJ_Yyjson_ObjectEntry(uint64_t handle, uint64_t node, uint64_t index, uint64_t *out_value_node, uint32_t *out_inline_kind, uint64_t *out_inline_payload, uint64_t *out_key_size);"
+
+[[api.declarations]]
+source = "native/yjson_yyjson.h"
+owner = "<top-level>"
+signature = "int32_t YJ_Yyjson_ObjectLookup(uint64_t handle, uint64_t node, const uint8_t *key, uint64_t key_length, uint64_t *out_value_node, uint32_t *out_inline_kind, uint64_t *out_inline_payload, uint32_t *out_found);"
+
+[[api.declarations]]
+source = "native/yjson_yyjson.h"
+owner = "<top-level>"
+signature = "int32_t YJ_Yyjson_Root(uint64_t handle, uint64_t *out_node);"
+
+[[api.declarations]]
+source = "native/yjson_yyjson.h"
+owner = "<top-level>"
+signature = "int32_t YJ_Yyjson_Size(uint64_t handle, uint64_t node, uint64_t *out_size);"

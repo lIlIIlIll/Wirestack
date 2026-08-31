@@ -1,9 +1,22 @@
 package yjson_native_accel
 
+import yjson_macros.*
+
 import std.collection.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import yjson.*
+
+@JsonCodec
+public class NativeAccelSkipRecord {
+    @JsonName["record_id"]
+    public let id: Int64
+    public var tail: String = ""
+
+    public init(id: Int64) {
+        this.id = id
+    }
+}
 
 @Test
 class NativeAccelPublicContractTest {
@@ -21,21 +34,21 @@ class NativeAccelPublicContractTest {
         let value = "0123456789012345678901234567890123456789012345678901234567890123\n\"\\<中🙂"
         let expected = "\"0123456789012345678901234567890123456789012345678901234567890123\\n\\\"\\\\<中🙂\""
         @Expect(YJson.toJson(value), expected)
-        @Expect(String.fromUtf8(YJson.encodeBytesWith(StringJson, value)), expected)
+        @Expect(String.fromUtf8(YJson.toJsonBytes(value, codec: JsonCodecs.string)), expected)
         let stream = YJsonMemoryOutputStream()
-        YJson.toStream(value, stream)
+        YJson.writeJson(value, stream)
         @Expect(stream.toUtf8String(), expected)
 
-        let html = JsonWriteConfig("", "", false, true)
-        @Expect(YJson.toJson(value, config: html),
+        let html = JsonWriteOptions(htmlSafe: true)
+        @Expect(YJson.toJson(value, options: html),
             "\"0123456789012345678901234567890123456789012345678901234567890123\\n\\\"\\\\\\u003c中🙂\"")
 
         let pair = ArrayList<String>(["prefix", value, value])
         let pairExpected = "[\"prefix\",${expected},${expected}]"
         @Expect(YJson.toJson(pair), pairExpected)
-        @Expect(String.fromUtf8(YJson.encodeBytesWith(YJson.arrayListCodec(StringJson), pair)), pairExpected)
+        @Expect(String.fromUtf8(YJson.toJsonBytes(pair, codec: JsonCodecs.arrayList(JsonCodecs.string))), pairExpected)
         let pairStream = YJsonMemoryOutputStream()
-        YJson.toStream(pair, pairStream)
+        YJson.writeJson(pair, pairStream)
         @Expect(pairStream.toUtf8String(), pairExpected)
     }
 
@@ -47,13 +60,11 @@ class NativeAccelPublicContractTest {
         builder.append("\n")
         let value = builder.toString()
         let expectedSize = value.size + 3
-        let exactConfig = JsonWriteConfig("", "", false, false,
-            limits: JsonWriteLimits(maxBytes: expectedSize))
-        @Expect(YJson.toJson(value, config: exactConfig).size, expectedSize)
+        let exactConfig = JsonWriteOptions(maxOutputBytes: expectedSize)
+        @Expect(YJson.toJson(value, options: exactConfig).size, expectedSize)
 
-        let limitedConfig = JsonWriteConfig("", "", false, false,
-            limits: JsonWriteLimits(maxBytes: expectedSize - 1))
-        let error = @AssertThrows[JsonException](YJson.toJson(value, config: limitedConfig))
+        let limitedConfig = JsonWriteOptions(maxOutputBytes: expectedSize - 1)
+        let error = @AssertThrows[JsonException](YJson.toJson(value, options: limitedConfig))
         @Expect(error.code, "output_too_large")
     }
 
@@ -68,12 +79,126 @@ class NativeAccelPublicContractTest {
         @Expect(decoded[0], values[0])
         @Expect(decoded[2048], values[2048])
         @Expect(decoded[4095], values[4095])
-        @Expect(String.fromUtf8(YJson.encodeBytesWith(YJson.int64ArrayListCodec(), values)), text)
+        @Expect(String.fromUtf8(YJson.toJsonBytes(values, codec: JsonCodecs.arrayList(JsonCodecs.int64))), text)
 
         let requiresScalarBoundary = "[${Int64.Min},0,${Int64.Max}]"
         let boundary = YJson.fromJson<ArrayList<Int64>>(requiresScalarBoundary)
         @Expect(boundary[0], Int64.Min)
         @Expect(boundary[2], Int64.Max)
+    }
+
+    @TestCase
+    func nativeFloatParserPreservesEligibleAndOversizedTokens(): Unit {
+        YJsonNativeAccel.initialize()
+        @Expect(YJson.fromJson<Float64>("-125.5"), -125.5)
+        let values = YJson.fromJson<ArrayList<Float64>>("[1.25,-2.5,6.25e3]")
+        @Expect(values[0], 1.25)
+        @Expect(values[1], -2.5)
+        @Expect(values[2], 6250.0)
+
+        let oversized = StringBuilder("0.")
+        for (_ in 0..300) { oversized.append("0") }
+        oversized.append("5")
+        @Expect(YJson.fromJson<Float64>(oversized.toString()), 5e-301)
+    }
+
+    @TestCase
+    func nativeDocumentNumericBulkPreservesIntegerAndNumberModes(): Unit {
+        YJsonNativeAccel.initialize()
+        let integers = StringBuilder("[")
+        for (index in 0..512) {
+            if (index > 0) { integers.append(",") }
+            integers.append("${index - 256}")
+        }
+        integers.append("]")
+        let integerText = integers.toString()
+        let integerDocument = YJson.parseDocument(integerText)
+        @Expect(integerDocument.root().size(), 512)
+        @Expect(integerDocument.root().element(0).getOrThrow().asInt64(), -256)
+        @Expect(integerDocument.root().element(511).getOrThrow().asInt64(), 255)
+        @Expect(integerDocument.materialize().equivalentTo(JsonNode.parse(integerText)))
+
+        let mixed = StringBuilder("[")
+        for (index in 0..400) {
+            if (index > 0) { mixed.append(",") }
+            mixed.append("${index}")
+        }
+        mixed.append(",1.25,6.25e3,9223372036854775808]")
+        let mixedText = mixed.toString()
+        let mixedDocument = YJson.parseDocument(mixedText)
+        @Expect(mixedDocument.root().size(), 403)
+        @Expect(mixedDocument.root().element(399).getOrThrow().asInt64(), 399)
+        @Expect(mixedDocument.root().element(400).getOrThrow().asNumberText(), "1.25")
+        @Expect(mixedDocument.root().element(401).getOrThrow().asNumberText(), "6.25e3")
+        @Expect(mixedDocument.root().element(402).getOrThrow().asNumberText(), "9223372036854775808")
+        @Expect(mixedDocument.materialize().equivalentTo(JsonNode.parse(mixedText)))
+    }
+
+    @TestCase
+    func nativeNumericPrefixFallsBackWithoutLosingStructuralTail(): Unit {
+        YJsonNativeAccel.initialize()
+        let builder = StringBuilder("[")
+        for (index in 0..400) {
+            if (index > 0) { builder.append(",") }
+            builder.append("${index}")
+        }
+        builder.append(",\"tail\",{\"ok\":true},false]")
+        let text = builder.toString()
+        let document = YJson.parseDocument(text)
+        let root = document.root()
+        @Expect(root.size(), 403)
+        @Expect(root.element(399).getOrThrow().asInt64(), 399)
+        @Expect(root.element(400).getOrThrow().asString(), "tail")
+        @Expect(root.element(401).getOrThrow().member("ok").getOrThrow().asBool(), true)
+        @Expect(root.element(402).getOrThrow().asBool(), false)
+        @Expect(document.materialize().equivalentTo(JsonNode.parse(text)))
+    }
+
+    @TestCase
+    func nestedNumericDocumentsUseNativeTapeWithoutChangingValues(): Unit {
+        YJsonNativeAccel.initialize()
+        let builder = StringBuilder("[")
+        for (outer in 0..80) {
+            if (outer > 0) { builder.append(",") }
+            builder.append("[")
+            for (inner in 0..320) {
+                if (inner > 0) { builder.append(",") }
+                builder.append("${inner - 160}")
+            }
+            builder.append("]")
+        }
+        builder.append("]")
+        let text = builder.toString()
+        @Expect(text.size > 64 * 1024)
+        let document = YJson.parseDocument(text)
+        @Expect(document.root().size(), 80)
+        @Expect(document.root().element(79).getOrThrow().element(319).getOrThrow().asInt64(), 159)
+        @Expect(document.materialize().equivalentTo(JsonNode.parse(text)))
+    }
+
+    @TestCase
+    func generatedCodecUsesNativeSkipForLargeUnknownSubtrees(): Unit {
+        YJsonNativeAccel.initialize()
+        let builder = StringBuilder("{\"record_id\":7,\"ignored\":{\"items\":[")
+        for (index in 0..96) {
+            if (index > 0) { builder.append(",") }
+            builder.append("{\"index\":${index},\"text\":\"abcdefghijklmnopqrstuvwxyz\"}")
+        }
+        builder.append("]},\"tail\":\"kept\"}")
+        let decoded = YJson.fromJson(builder.toString(), codec: NativeAccelSkipRecordJson)
+        @Expect(decoded.id, 7)
+        @Expect(decoded.tail, "kept")
+
+        let malformed = StringBuilder("{\"record_id\":8,\"ignored\":{\"items\":[")
+        for (index in 0..96) {
+            if (index > 0) { malformed.append(",") }
+            malformed.append("${index}")
+        }
+        malformed.append("],\"broken\":},\"tail\":\"unreachable\"}")
+        let error = @AssertThrows[JsonException](
+            YJson.fromJson(malformed.toString(), codec: NativeAccelSkipRecordJson)
+        )
+        @Expect(error.code, "parse_error")
     }
 
     @TestCase
@@ -86,12 +211,12 @@ class NativeAccelPublicContractTest {
         }
         objectBuilder.append("}")
         let objectText = objectBuilder.toString()
-        let compact = YJson.parseCompact(unsafe { objectText.rawData().clone() })
+        let compact = YJson.parseDocument(unsafe { objectText.rawData().clone() })
         @Expect(compact.root().size(), 96)
-        @Expect(compact.root().get("field_0").getOrThrow().get("id").getOrThrow().asInt64(), 0)
-        @Expect(compact.root().get("field_95").getOrThrow().get("text").getOrThrow().asString(),
+        @Expect(compact.root().member("field_0").getOrThrow().member("id").getOrThrow().asInt64(), 0)
+        @Expect(compact.root().member("field_95").getOrThrow().member("text").getOrThrow().asString(),
             "value_95_abcdefghijklmnopqrstuvwxyz")
-        @Expect(compact.materialize().equivalentTo(YJson.parse(objectText)))
+        @Expect(compact.materialize().equivalentTo(JsonNode.parse(objectText)))
 
         let arrayBuilder = StringBuilder("[")
         for (index in 0..80) {
@@ -102,9 +227,9 @@ class NativeAccelPublicContractTest {
         let arrayText = arrayBuilder.toString()
         let document = YJson.parseDocument(arrayText)
         @Expect(document.root().size(), 80)
-        @Expect(document.root().get(79).getOrThrow().get("id").getOrThrow().asInt64(), 79)
-        @Expect(document.materialize().equivalentTo(YJson.parse(arrayText)))
-        @Expect(YJson.parse(document.toString()).equivalentTo(document.materialize()))
+        @Expect(document.root().element(79).getOrThrow().member("id").getOrThrow().asInt64(), 79)
+        @Expect(document.materialize().equivalentTo(JsonNode.parse(arrayText)))
+        @Expect(JsonNode.parse(document.toString()).equivalentTo(document.materialize()))
     }
 
     @TestCase
@@ -119,13 +244,13 @@ class NativeAccelPublicContractTest {
         let encoded = "\"" + plain.toString() + "\\n\\t\\\"\\\\\\u4ED3\""
         let expected = plainValue + "\n\t\"\\仓"
         @Expect(YJson.fromJson<String>(encoded), expected)
-        let compact = YJson.parseCompact(unsafe { encoded.rawData().clone() })
+        let compact = YJson.parseDocument(unsafe { encoded.rawData().clone() })
         @Expect(compact.root().asString(), expected)
         @Expect(compact.toString(), YJson.toJson(expected))
 
-        let htmlSafe = JsonWriteConfig("", "", false, true)
+        let htmlSafe = JsonWriteOptions(htmlSafe: true)
         let htmlValue = plainValue + "<&>\u{2028}\u{2029}"
-        let htmlText = YJson.toJson(htmlValue, config: htmlSafe)
+        let htmlText = YJson.toJson(htmlValue, options: htmlSafe)
         @Expect(htmlText.contains("\\u003c"))
         @Expect(htmlText.contains("\\u0026"))
         @Expect(htmlText.contains("\\u003e"))
@@ -140,7 +265,7 @@ class NativeAccelPublicContractTest {
         for (suffix in ["\\x\"", "\\uD800\"", "\\u12\"", ""]) {
             let error = @AssertThrows[JsonException](YJson.fromJson<String>(longPrefix.toString() + suffix))
             @Expect(error.code, "parse_error")
-            @Expect(error.byteOffset >= 0)
+            @Expect(error.location.getOrThrow().byteOffset >= 0)
         }
         let malformedObject = StringBuilder("{")
         for (index in 0..80) {
@@ -148,7 +273,7 @@ class NativeAccelPublicContractTest {
             malformedObject.append("\"field_${index}\":${index}")
         }
         malformedObject.append(",\"broken\":}")
-        let error = @AssertThrows[JsonException](YJson.parseCompact(
+        let error = @AssertThrows[JsonException](YJson.parseDocument(
             unsafe { malformedObject.toString().rawData().clone() }))
         @Expect(error.code, "parse_error")
     }

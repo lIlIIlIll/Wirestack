@@ -13,13 +13,17 @@ class YyjsonCompactTests {
         let text = "{\"i\":-9223372036854775808,\"n\":1.2300,\"s\":\"普通😀\",\"a\":[true,null]}"
         for (mode in [YyjsonCompactMode.Direct, YyjsonCompactMode.Transcode]) {
             let document = YyjsonCompactJsonDocument.parse(yyjsonBytes(text),
-                config: JsonReadConfig(numberPolicy: JsonNumberPolicy.PreserveLiteral), mode: mode)
+                config: JsonReadOptions(), mode: mode)
             try {
-                @Expect(document.rootSize(), 4)
-                @Expect(document.getRootInt("i").getOrThrow(), Int64.Min)
-                let parsed = YJson.parse(document.toBytes()).asObject()
-                @Expect(parsed.get("n").getOrThrow().asNumberLiteral().literal, "1.2300")
-                @Expect(parsed.get("s").getOrThrow().asString().value, "普通😀")
+                let root = document.root()
+                @Expect(root.size(), 4)
+                @Expect(root.member("i").getOrThrow().asInt64(), Int64.Min)
+                @Expect(root.member("n").getOrThrow().asNumberText(), "1.2300")
+                @Expect(root.member("s").getOrThrow().asString(), "普通😀")
+                @Expect(root.member("a").getOrThrow().element(0).getOrThrow().asBool())
+                let parsed = JsonNode.parse(document.toBytes()).asObject()
+                @Expect(parsed.get("n").getOrThrow().asNumberText(), "1.2300")
+                @Expect(parsed.get("s").getOrThrow().asString(), "普通😀")
             } finally { document.close() }
         }
     }
@@ -27,21 +31,25 @@ class YyjsonCompactTests {
     @TestCase
     func escapedEquivalentDuplicateUsesLastWinsOrRejects(): Unit {
         let bytes = yyjsonBytes("{\"a\":1,\"\\u0061\":2}")
-        let document = YyjsonCompactJsonDocument.parse(bytes)
+        let document = YyjsonCompactJsonDocument.parse(bytes,
+            config: JsonReadOptions(duplicateKeyPolicy: JsonDuplicateKeyPolicy.LastWins))
         try {
-            @Expect(document.getRootInt("a").getOrThrow(), 2)
+            @Expect(document.root().member("a").getOrThrow().asInt64(), 2)
             @Expect(document.storageStats().customFallback, true)
         } finally { document.close() }
-        @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(bytes,
-            config: JsonReadConfig(duplicateKeyPolicy: JsonDuplicateKeyPolicy.Reject)))
+        let error = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(bytes,
+            config: JsonReadOptions(duplicateKeyPolicy: JsonDuplicateKeyPolicy.Reject)))
+        @Expect(error.code, "duplicate_key")
     }
 
     @TestCase
     func closeIsIdempotentAndGuardsLaterAccess(): Unit {
         let document = YyjsonCompactJsonDocument.parse(yyjsonBytes("[1,2]"))
+        let root = document.root()
         document.close()
         document.close()
-        @AssertThrows[IllegalStateException](document.rootSize())
+        let error = @AssertThrows[JsonException](root.size())
+        @Expect(error.code, "resource_closed")
     }
 
     @TestCase
@@ -87,13 +95,13 @@ class YyjsonCompactTests {
             lookupIndexMode: YyjsonLookupIndexMode.Retained)
         try {
             @Expect(retained.storageStats().rootIndexBuilds, 1u64)
-            @Expect(retained.getRootInt("k299").getOrThrow(), 299)
+            @Expect(retained.root().member("k299").getOrThrow().asInt64(), 299)
         } finally { retained.close() }
         let lazy = YyjsonCompactJsonDocument.parse(yyjsonBytes(text),
             lookupIndexMode: YyjsonLookupIndexMode.Lazy)
         try {
             @Expect(lazy.storageStats().rootIndexBuilds, 0u64)
-            @Expect(lazy.getRootInt("k150").getOrThrow(), 150)
+            @Expect(lazy.root().member("k150").getOrThrow().asInt64(), 150)
             @Expect(lazy.storageStats().rootIndexBuilds, 1u64)
         } finally { lazy.close() }
     }
@@ -101,20 +109,19 @@ class YyjsonCompactTests {
     @TestCase
     func resourceLimitsMatchPortableBackend(): Unit {
         let documentError = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
-            yyjsonBytes("{\"a\":1}"), config: JsonReadConfig(limits: JsonReadLimits(maxBytes: 6))))
+            yyjsonBytes("{\"a\":1}"), config: JsonReadOptions(maxInputBytes: 6)))
         @Expect(documentError.code, "document_too_large")
         let stringError = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
-            yyjsonBytes("\"\\u4E2D\""), config: JsonReadConfig(limits: JsonReadLimits(maxStringBytes: 2))))
+            yyjsonBytes("\"\\u4E2D\""), config: JsonReadOptions(maxStringBytes: 2)))
         @Expect(stringError.code, "string_too_large")
         let valueError = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
             yyjsonBytes("{\"a\":[1,2]}"),
-            config: JsonReadConfig(limits: JsonReadLimits(maxPolymorphicObjectBytes: 10))))
-        @Expect(valueError.code, "polymorphic_object_too_large")
+            config: JsonReadOptions(maxBufferedValueBytes: 10)))
+        @Expect(valueError.code, "buffered_value_too_large")
         let hiddenLocation = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
             yyjsonBytes("\"abc\""),
-            config: JsonReadConfig(includeErrorLocation: false,
-                limits: JsonReadLimits(maxStringBytes: 2))))
+            config: JsonReadOptions(maxStringBytes: 2)))
         @Expect(hiddenLocation.code, "string_too_large")
-        @Expect(hiddenLocation.byteOffset, -1)
+        @Expect(hiddenLocation.location.isSome())
     }
 }

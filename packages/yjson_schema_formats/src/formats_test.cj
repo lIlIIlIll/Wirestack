@@ -9,9 +9,9 @@ import yjson.*
 private func formatAccepts(name: String, value: String): Bool {
     let formats = JsonSchemaFormatRegistry.withCoreFormats()
     formats.install(StandardInternationalFormats())
-    let config = JsonSchemaConfig(formatMode: JsonSchemaFormatMode.StrictAssertion, formats: formats)
+    let config = JsonSchemaConfig(formatMode: JsonSchemaFormatMode.Assertion, formats: formats)
     JsonSchema.parse("{\"format\":\"${name}\"}", config: config)
-        .validator().isValid(JsonStringValue(value))
+        .validator().isValid(JsonNode.string(value))
 }
 
 @Test

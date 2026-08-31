@@ -33,7 +33,7 @@ def payload_card(item: dict[str, object], artifact_dir: Path, metadata: dict[str
         f"- 实际 UTF-8 大小：`{len(raw):,}` bytes",
         f"- SHA-256：`{digest(path)}`",
         f"- 生成参数：`record_count={item['record_count']}`",
-        "- API：decode 使用 `YJson.fromStream<T>(stream)`；encode 使用 `YJson.toStream(value, output)`。",
+        "- API：decode 使用 `YJson.fromJson<T>(stream)`；encode 使用 `YJson.writeJson(value, output)`。",
         "",
     ]
     if payload_id == "person":

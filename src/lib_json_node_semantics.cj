@@ -7,7 +7,12 @@ private let JSON_NODE_OPERATION_MAX_DEPTH: Int64 = 256
 private let JSON_NODE_OPERATION_MAX_WORK: Int64 = 100000
 
 private class JsonNodeOperationBudget {
-    private var remaining: Int64 = JSON_NODE_OPERATION_MAX_WORK
+    private var remaining: Int64
+
+    init(maxWork: Int64) {
+        if (maxWork <= 0) { throw IllegalArgumentException("maxNodes must be positive") }
+        remaining = maxWork
+    }
 
     func visit(depth: Int64): Unit {
         if (depth > JSON_NODE_OPERATION_MAX_DEPTH) {
@@ -24,7 +29,11 @@ private class JsonNodeOperationBudget {
 }
 
 func deepCopyJsonNode(value: JsonNode): JsonNode {
-    deepCopyJsonNodeGuarded(value, ArrayList<JsonNode>(), JsonNodeOperationBudget(), 0)
+    deepCopyJsonNode(value, JSON_NODE_OPERATION_MAX_WORK)
+}
+
+func deepCopyJsonNode(value: JsonNode, maxNodes: Int64): JsonNode {
+    deepCopyJsonNodeGuarded(value, ArrayList<JsonNode>(), JsonNodeOperationBudget(maxNodes), 0)
 }
 
 private func deepCopyJsonNodeGuarded(
@@ -38,12 +47,13 @@ private func deepCopyJsonNodeGuarded(
         case _: JsonNullValue => JsonNullValue()
         case boolValue: JsonBoolValue => JsonBoolValue(boolValue.value)
         case intValue: JsonIntValue => JsonIntValue(intValue.value)
+        case uintValue: JsonUIntValue => JsonUIntValue(uintValue.value)
         case floatValue: JsonFloatValue => JsonFloatValue(floatValue.value)
         case numberValue: JsonNumberLiteralValue => JsonNumberLiteralValue.fromParsedLiteral(numberValue.literal)
         case stringValue: JsonStringValue => JsonStringValue(stringValue.value)
-        case arrayValue: JsonArrayValue =>
+        case arrayValue: JsonArray =>
             enterJsonNodeAncestor(arrayValue, ancestors)
-            let result = JsonArrayValue()
+            let result = JsonArray()
             try {
                 for (item in arrayValue.values()) {
                     result.add(deepCopyJsonNodeGuarded(item, ancestors, budget, depth + 1))
@@ -52,12 +62,13 @@ private func deepCopyJsonNodeGuarded(
                 ancestors.remove(at: ancestors.size - 1)
             }
             result
-        case objectValue: JsonObjectValue =>
+        case objectValue: JsonObject =>
             enterJsonNodeAncestor(objectValue, ancestors)
-            let result = JsonObjectValue()
+            let result = JsonObject()
             try {
-                for ((key, item) in objectValue.entries()) {
-                    result.put(key, deepCopyJsonNodeGuarded(item, ancestors, budget, depth + 1))
+                for (index in 0..objectValue.size()) {
+                    result.put(objectValue.nameAt(index), deepCopyJsonNodeGuarded(
+                        objectValue.valueAt(index), ancestors, budget, depth + 1))
                 }
             } finally {
                 ancestors.remove(at: ancestors.size - 1)
@@ -69,7 +80,8 @@ private func deepCopyJsonNodeGuarded(
 
 func jsonNodesEquivalent(left: JsonNode, right: JsonNode): Bool {
     jsonNodesEquivalentGuarded(
-        left, right, ArrayList<JsonNode>(), ArrayList<JsonNode>(), JsonNodeOperationBudget(), 0
+        left, right, ArrayList<JsonNode>(), ArrayList<JsonNode>(),
+        JsonNodeOperationBudget(JSON_NODE_OPERATION_MAX_WORK), 0
     )
 }
 
@@ -88,7 +100,7 @@ private func jsonNodesEquivalentGuarded(
         case (_: JsonNullValue, _: JsonNullValue) => true
         case (a: JsonBoolValue, b: JsonBoolValue) => a.value == b.value
         case (a: JsonStringValue, b: JsonStringValue) => a.value == b.value
-        case (a: JsonArrayValue, b: JsonArrayValue) =>
+        case (a: JsonArray, b: JsonArray) =>
             if (a.size() != b.size()) {
                 ensureJsonNodeGraphAcyclic(a, budget, depth)
                 ensureJsonNodeGraphAcyclic(b, budget, depth)
@@ -112,7 +124,7 @@ private func jsonNodesEquivalentGuarded(
                 leftAncestors.remove(at: leftAncestors.size - 1)
             }
             true
-        case (a: JsonObjectValue, b: JsonObjectValue) =>
+        case (a: JsonObject, b: JsonObject) =>
             if (a.size() != b.size()) {
                 ensureJsonNodeGraphAcyclic(a, budget, depth)
                 ensureJsonNodeGraphAcyclic(b, budget, depth)
@@ -122,7 +134,9 @@ private func jsonNodesEquivalentGuarded(
             try {
                 rightAncestors.add(b)
                 try {
-                    for ((key, value) in a.entries()) {
+                    for (index in 0..a.size()) {
+                        let key = a.nameAt(index)
+                        let value = a.valueAt(index)
                         match (b.get(key)) {
                             case Some(other) =>
                                 if (!jsonNodesEquivalentGuarded(
@@ -166,7 +180,7 @@ private func ensureJsonNodeGraphAcyclicGuarded(
 ): Unit {
     budget.visit(depth)
     match (value) {
-        case arrayValue: JsonArrayValue =>
+        case arrayValue: JsonArray =>
             enterJsonNodeAncestor(arrayValue, ancestors)
             try {
                 for (item in arrayValue.values()) {
@@ -175,11 +189,12 @@ private func ensureJsonNodeGraphAcyclicGuarded(
             } finally {
                 ancestors.remove(at: ancestors.size - 1)
             }
-        case objectValue: JsonObjectValue =>
+        case objectValue: JsonObject =>
             enterJsonNodeAncestor(objectValue, ancestors)
             try {
-                for ((_key, item) in objectValue.entries()) {
-                    ensureJsonNodeGraphAcyclicGuarded(item, ancestors, budget, depth + 1)
+                for (index in 0..objectValue.size()) {
+                    ensureJsonNodeGraphAcyclicGuarded(
+                        objectValue.valueAt(index), ancestors, budget, depth + 1)
                 }
             } finally {
                 ancestors.remove(at: ancestors.size - 1)
@@ -199,6 +214,7 @@ private func jsonCoreNodeAsDecimal(value: JsonNode): Option<Decimal> {
     try {
         match (value) {
             case intValue: JsonIntValue => Some(Decimal(intValue.value))
+            case uintValue: JsonUIntValue => Some(Decimal.parse(uintValue.value.toString()))
             case floatValue: JsonFloatValue => Some(Decimal.parse(floatValue.value.toString()))
             case numberValue: JsonNumberLiteralValue => Some(Decimal.parse(numberValue.literal))
             case _ => None<Decimal>

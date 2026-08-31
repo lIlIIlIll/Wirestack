@@ -74,8 +74,8 @@ class JsonInputStreamParseFunctionalityTest {
         let value = parseJsonValueFromStream(stream)
         let obj = value.asObject()
         @Expect(obj.size() == 2)
-        @Expect(obj.get("name").getOrThrow().asString().value == "test")
-        @Expect(obj.get("value").getOrThrow().asInt().value == 42)
+        @Expect(obj.get("name").getOrThrow().asString() == "test")
+        @Expect(obj.get("value").getOrThrow().asInt64() == 42)
     }
 
     /// 测试从 ByteArrayInputStream 解析数组
@@ -86,8 +86,8 @@ class JsonInputStreamParseFunctionalityTest {
         let value = parseJsonValueFromStream(stream)
         let arr = value.asArray()
         @Expect(arr.size() == 5)
-        @Expect(arr[0].asInt().value == 1)
-        @Expect(arr[4].asInt().value == 5)
+        @Expect(arr[0].asInt64() == 1)
+        @Expect(arr[4].asInt64() == 5)
     }
 
     /// 测试从 ByteArrayInputStream 解析大型数组
@@ -98,8 +98,8 @@ class JsonInputStreamParseFunctionalityTest {
         let value = parseJsonValueFromStream(stream)
         let arr = value.asArray()
         @Expect(arr.size() == 1000)
-        @Expect(arr[0].asInt().value == 0)
-        @Expect(arr[999].asInt().value == 999)
+        @Expect(arr[0].asInt64() == 0)
+        @Expect(arr[999].asInt64() == 999)
     }
 
     /// 测试从 ByteArrayInputStream 解析宽对象
@@ -128,7 +128,7 @@ class JsonInputStreamParseFunctionalityTest {
             @Expect(obj.size() == 1)
             current = obj.get("a").getOrThrow()
         }
-        @Expect(current.kind() == JsonKind.JsNull)
+        @Expect(current.kind() == JsonKind.Null)
     }
 
     /// 测试从 ByteArrayInputStream 解析大型字符串
@@ -137,7 +137,7 @@ class JsonInputStreamParseFunctionalityTest {
         let json = generateJsonLargeString(10000)
         let stream = ByteArrayInputStream(json)
         let value = parseJsonValueFromStream(stream)
-        @Expect(value.asString().value.size == 10000)
+        @Expect(value.asString().size == 10000)
     }
 
     /// 测试空流
@@ -178,12 +178,12 @@ class JsonOutputStreamWriteFunctionalityTest {
     /// 测试写入到 MemoryOutputStream
     @TestCase
     func writeToMemoryStream(): Unit {
-        let obj = JsonObjectValue()
+        let obj = JsonObject()
         obj.put("name", JsonStringValue("test"))
         obj.put("value", JsonIntValue(42))
 
         let output = MemoryOutputStream()
-        writeJsonValueToStream(obj, output, JsonWriteConfig.compact)
+        writeJsonValueToStream(obj, output, JsonWriteOptions.compact)
 
         let result = output.toUtf8String()
         @Expect(result.contains("name"))
@@ -195,13 +195,13 @@ class JsonOutputStreamWriteFunctionalityTest {
     /// 测试写入数组到流
     @TestCase
     func writeArrayToMemoryStream(): Unit {
-        let arr = JsonArrayValue()
+        let arr = JsonArray()
         arr.add(JsonIntValue(1))
         arr.add(JsonIntValue(2))
         arr.add(JsonIntValue(3))
 
         let output = MemoryOutputStream()
-        writeJsonValueToStream(arr, output, JsonWriteConfig.compact)
+        writeJsonValueToStream(arr, output, JsonWriteOptions.compact)
 
         let result = output.toUtf8String()
         @Expect(result, "[1,2,3]")
@@ -210,28 +210,28 @@ class JsonOutputStreamWriteFunctionalityTest {
     /// 测试使用 pretty 格式写入
     @TestCase
     func writePrettyToMemoryStream(): Unit {
-        let obj = JsonObjectValue()
+        let obj = JsonObject()
         obj.put("a", JsonIntValue(1))
         obj.put("b", JsonIntValue(2))
 
         let output = MemoryOutputStream()
-        writeJsonValueToStream(obj, output, JsonWriteConfig.pretty)
+        writeJsonValueToStream(obj, output, JsonWriteOptions.pretty())
 
         let result = output.toUtf8String()
         @Expect(result.contains("\n"))
-        @Expect(result.contains("    "))
+        @Expect(result.contains("  "))
     }
 
     /// 测试写入大型数组
     @TestCase
     func writeLargeArrayToMemoryStream(): Unit {
-        let arr = JsonArrayValue()
+        let arr = JsonArray()
         for (i in 0..1000) {
             arr.add(JsonIntValue(i))
         }
 
         let output = MemoryOutputStream()
-        writeJsonValueToStream(arr, output, JsonWriteConfig.compact)
+        writeJsonValueToStream(arr, output, JsonWriteOptions.compact)
 
         let result = output.toUtf8String()
         // 验证输出以 [ 开头，以 ] 结尾
@@ -251,7 +251,7 @@ class JsonOutputStreamWriteFunctionalityTest {
         let value = JsonStringValue(largeString)
 
         let output = MemoryOutputStream()
-        writeJsonValueToStream(value, output, JsonWriteConfig.compact)
+        writeJsonValueToStream(value, output, JsonWriteOptions.compact)
 
         let result = output.toUtf8String()
         @Expect(result.startsWith("\""))
@@ -265,7 +265,7 @@ class JsonOutputStreamWriteFunctionalityTest {
         let value = JsonStringValue("hello\nworld\t\"quoted\"")
 
         let output = MemoryOutputStream()
-        writeJsonValueToStream(value, output, JsonWriteConfig.compact)
+        writeJsonValueToStream(value, output, JsonWriteOptions.compact)
 
         let result = output.toUtf8String()
         @Expect(result.contains("\\n"))
@@ -279,7 +279,7 @@ class JsonOutputStreamWriteFunctionalityTest {
         let value = JsonNullValue()
 
         let output = MemoryOutputStream()
-        writeJsonValueToStream(value, output, JsonWriteConfig.compact)
+        writeJsonValueToStream(value, output, JsonWriteOptions.compact)
 
         let result = output.toUtf8String()
         @Expect(result, "null")
@@ -292,11 +292,11 @@ class JsonOutputStreamWriteFunctionalityTest {
         let falseValue = JsonBoolValue(false)
 
         let output1 = MemoryOutputStream()
-        writeJsonValueToStream(trueValue, output1, JsonWriteConfig.compact)
+        writeJsonValueToStream(trueValue, output1, JsonWriteOptions.compact)
         @Expect(output1.toUtf8String(), "true")
 
         let output2 = MemoryOutputStream()
-        writeJsonValueToStream(falseValue, output2, JsonWriteConfig.compact)
+        writeJsonValueToStream(falseValue, output2, JsonWriteOptions.compact)
         @Expect(output2.toUtf8String(), "false")
     }
 }
@@ -316,14 +316,14 @@ class JsonStreamRoundtripFunctionalityTest {
         let value = parseJsonValueFromStream(stream1)
 
         let output = MemoryOutputStream()
-        writeJsonValueToStream(value, output, JsonWriteConfig.compact)
+        writeJsonValueToStream(value, output, JsonWriteOptions.compact)
 
-        let reparsed = YJson.parse(output.toUtf8String())
+        let reparsed = JsonNode.parse(output.toUtf8String())
         let obj = reparsed.asObject()
         @Expect(obj.size() == 3)
-        @Expect(obj.get("name").getOrThrow().asString().value == "test")
-        @Expect(obj.get("value").getOrThrow().asInt().value == 42)
-        @Expect(obj.get("enabled").getOrThrow().asBool().value)
+        @Expect(obj.get("name").getOrThrow().asString() == "test")
+        @Expect(obj.get("value").getOrThrow().asInt64() == 42)
+        @Expect(obj.get("enabled").getOrThrow().asBool())
     }
 
     /// 测试多次往返转换
@@ -337,35 +337,35 @@ class JsonStreamRoundtripFunctionalityTest {
             let value = parseJsonValueFromStream(stream)
 
             let output = MemoryOutputStream()
-            writeJsonValueToStream(value, output, JsonWriteConfig.compact)
+            writeJsonValueToStream(value, output, JsonWriteOptions.compact)
             current = output.toUtf8String()
         }
 
         // 最终结果应该仍然有效
-        let final = YJson.parse(current)
+        let final = JsonNode.parse(current)
         let obj = final.asObject()
         @Expect(obj.size() == 2)
         let arr = obj.get("a").getOrThrow().asArray()
         @Expect(arr.size() == 3)
-        @Expect(arr[0].asInt().value == 1)
-        @Expect(arr[1].asInt().value == 2)
-        @Expect(arr[2].asInt().value == 3)
-        @Expect(obj.get("b").getOrThrow().asObject().get("c").getOrThrow().asBool().value)
+        @Expect(arr[0].asInt64() == 1)
+        @Expect(arr[1].asInt64() == 2)
+        @Expect(arr[2].asInt64() == 3)
+        @Expect(obj.get("b").getOrThrow().asObject().get("c").getOrThrow().asBool())
     }
 
     /// 测试大型结构的往返转换
     @TestCase
     func roundtripLargeStructure(): Unit {
-        let arr = JsonArrayValue()
+        let arr = JsonArray()
         for (i in 0..500) {
-            let obj = JsonObjectValue()
+            let obj = JsonObject()
             obj.put("id", JsonIntValue(i))
             obj.put("name", JsonStringValue("item_${i}"))
             arr.add(obj)
         }
 
         let output = MemoryOutputStream()
-        writeJsonValueToStream(arr, output, JsonWriteConfig.compact)
+        writeJsonValueToStream(arr, output, JsonWriteOptions.compact)
 
         let stream = ByteArrayInputStream(output.toUtf8String())
         let reparsed = parseJsonValueFromStream(stream)
@@ -411,8 +411,8 @@ class BufferedInputBoundarySmokeTest {
         let value = parseJsonValueFromStream(stream)
 
         let obj = value.asObject()
-        @Expect(obj.get("chinese").getOrThrow().asString().value == "你好世界")
-        @Expect(obj.get("emoji").getOrThrow().asString().value == "🎉")
+        @Expect(obj.get("chinese").getOrThrow().asString() == "你好世界")
+        @Expect(obj.get("emoji").getOrThrow().asString() == "🎉")
     }
 }
 

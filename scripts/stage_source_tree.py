@@ -38,6 +38,7 @@ EXCLUDED_FILE_SUFFIXES = frozenset({
     ".dylib",
     ".gcda",
     ".gcno",
+    ".gcov",
     ".o",
     ".pyc",
     ".so",
@@ -52,6 +53,13 @@ EXCLUDED_FILE_SUFFIXES = frozenset({
     ".gz",
 })
 GENERATED_MAGIC_PREFIXES = (b"\x7fELF", b"MZ", b"PK\x03\x04", b"\xca\xfe\xba\xbe")
+SOURCE_SCRIPT_PREFIXES = (
+    b"#!/usr/bin/env python",
+    b"#!/usr/bin/env bash",
+    b"#!/usr/bin/env zsh",
+    b"#!/bin/bash",
+    b"#!/bin/zsh",
+)
 
 
 def is_excluded_directory(relative: pathlib.PurePath) -> bool:
@@ -74,7 +82,7 @@ def is_generated_file(path: pathlib.Path, relative: pathlib.PurePath) -> bool:
         prefix = stream.read(128)
     mode = path.stat().st_mode
     if mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH):
-        if not prefix.startswith((b"#!/usr/bin/env python", b"#!/usr/bin/env bash", b"#!/bin/bash")):
+        if not prefix.startswith(SOURCE_SCRIPT_PREFIXES):
             return True
     return prefix.startswith(GENERATED_MAGIC_PREFIXES)
 

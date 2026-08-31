@@ -12,3 +12,4 @@
 
 [test-dependencies]
   yjson = { path = "../.." }
+  yjson_macros = { path = "../yjson_macros" }

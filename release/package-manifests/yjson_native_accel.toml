@@ -4,6 +4,7 @@ name = "yjson_native_accel"
 description = "Single-option startup acceleration for yjson"
 version = "0.1.0"
 output-type = "static"
+compile-option = "-O2"
 
 [dependencies]
 yjson_native_primitives = "0.1.0"

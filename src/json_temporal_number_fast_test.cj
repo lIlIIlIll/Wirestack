@@ -45,7 +45,7 @@ class YJsonTemporalNumberFastTest {
 
     private func datetimeDecodeThrows(text: String): Bool {
         try {
-            let _ = YJson.decodeStringWith(DateTimeJson, text)
+            let _ = YJson.fromJson(text, codec: JsonCodecs.rfc3339DateTime)
             return false
         } catch (_: Exception) {
             return true
@@ -55,7 +55,7 @@ class YJsonTemporalNumberFastTest {
     private func assertRfc3339DecodeMatchesStdlib(text: String): Unit {
         let expected = DateTime.parse(text, DateTimeFormat.RFC3339)
         @Expect(jsonFastParseRfc3339DateTime(text), expected)
-        @Expect(YJson.decodeStringWith(DateTimeJson, "\"" + text + "\""), expected)
+        @Expect(YJson.fromJson("\"" + text + "\"", codec: JsonCodecs.rfc3339DateTime), expected)
 
         let reader = JsonFastReader(bytes("\"" + text + "\""))
         @Expect(jsonFastReadRfc3339DateTime(reader), expected)
@@ -83,22 +83,22 @@ class YJsonTemporalNumberFastTest {
     @TestCase
     func datetimeFastPathParsesBenchmarkOffsetShape(): Unit {
         let text = "\"2024-06-20T14:42:33+08:00\""
-        let decoded = YJson.decodeStringWith(DateTimeJson, text)
+        let decoded = YJson.fromJson(text, codec: JsonCodecs.rfc3339DateTime)
         @Expect(decoded, DateTime.parse("2024-06-20T14:42:33+08:00", DateTimeFormat.RFC3339))
-        @Expect(YJson.encodeStringWith(DateTimeJson, decoded), text)
+        @Expect(YJson.toJson(decoded, codec: JsonCodecs.rfc3339DateTime), text)
     }
 
     @TestCase
     func datetimeFastPathKeepsStdlibResults(): Unit {
         let createdAtText = "2024-06-20T14:42:33+08:00"
         let checkpointText = "2024-06-20T15:12:33+08:00"
-        let createdAt = YJson.decodeStringWith(DateTimeJson, "\"" + createdAtText + "\"")
-        let checkpoint = YJson.decodeStringWith(DateTimeJson, "\"" + checkpointText + "\"")
+        let createdAt = YJson.fromJson("\"" + createdAtText + "\"", codec: JsonCodecs.rfc3339DateTime)
+        let checkpoint = YJson.fromJson("\"" + checkpointText + "\"", codec: JsonCodecs.rfc3339DateTime)
 
         @Expect(createdAt, DateTime.parse(createdAtText, DateTimeFormat.RFC3339))
         @Expect(checkpoint, DateTime.parse(checkpointText, DateTimeFormat.RFC3339))
-        @Expect(YJson.encodeStringWith(DateTimeJson, createdAt), "\"" + createdAtText + "\"")
-        @Expect(YJson.encodeStringWith(DateTimeJson, checkpoint), "\"" + checkpointText + "\"")
+        @Expect(YJson.toJson(createdAt, codec: JsonCodecs.rfc3339DateTime), "\"" + createdAtText + "\"")
+        @Expect(YJson.toJson(checkpoint, codec: JsonCodecs.rfc3339DateTime), "\"" + checkpointText + "\"")
     }
 
     @TestCase
@@ -151,14 +151,14 @@ class YJsonTemporalNumberFastTest {
 
     @TestCase
     func datetimeFastPathParsesDifferentOffsets(): Unit {
-        let east = YJson.decodeStringWith(DateTimeJson, "\"2024-06-20T14:42:33+05:30\"")
-        let west = YJson.decodeStringWith(DateTimeJson, "\"2024-06-20T01:12:33-04:00\"")
-        let utc = YJson.decodeStringWith(DateTimeJson, "\"2024-06-20T06:42:33Z\"")
+        let east = YJson.fromJson("\"2024-06-20T14:42:33+05:30\"", codec: JsonCodecs.rfc3339DateTime)
+        let west = YJson.fromJson("\"2024-06-20T01:12:33-04:00\"", codec: JsonCodecs.rfc3339DateTime)
+        let utc = YJson.fromJson("\"2024-06-20T06:42:33Z\"", codec: JsonCodecs.rfc3339DateTime)
 
         @Expect(east, DateTime.parse("2024-06-20T14:42:33+05:30", DateTimeFormat.RFC3339))
         @Expect(west, DateTime.parse("2024-06-20T01:12:33-04:00", DateTimeFormat.RFC3339))
         @Expect(utc, DateTime.parse("2024-06-20T06:42:33Z", DateTimeFormat.RFC3339))
-        @Expect(YJson.encodeStringWith(DateTimeJson, utc), "\"2024-06-20T06:42:33Z\"")
+        @Expect(YJson.toJson(utc, codec: JsonCodecs.rfc3339DateTime), "\"2024-06-20T06:42:33Z\"")
     }
 
     @TestCase
@@ -217,15 +217,15 @@ class YJsonTemporalNumberFastTest {
 
     @TestCase
     func bigIntFastPathPreservesPositiveNegativeAndFallbackValues(): Unit {
-        let positive = YJson.decodeStringWith(BigIntJson, "123456789012345678901234567890")
-        let negative = YJson.decodeStringWith(BigIntJson, "-123456789012345678901234567890")
-        let fallback = YJson.decodeStringWith(BigIntJson, "42")
+        let positive = YJson.fromJson("123456789012345678901234567890", codec: JsonCodecs.bigInt)
+        let negative = YJson.fromJson("-123456789012345678901234567890", codec: JsonCodecs.bigInt)
+        let fallback = YJson.fromJson("42", codec: JsonCodecs.bigInt)
 
         @Expect(positive, BigInt.parse("123456789012345678901234567890"))
         @Expect(negative, BigInt.parse("-123456789012345678901234567890"))
         @Expect(fallback, BigInt.parse("42"))
-        @Expect(YJson.encodeStringWith(BigIntJson, positive), "123456789012345678901234567890")
-        @Expect(YJson.encodeStringWith(BigIntJson, negative), "-123456789012345678901234567890")
+        @Expect(YJson.toJson(positive, codec: JsonCodecs.bigInt), "123456789012345678901234567890")
+        @Expect(YJson.toJson(negative, codec: JsonCodecs.bigInt), "-123456789012345678901234567890")
     }
 
     @TestCase
@@ -241,19 +241,19 @@ class YJsonTemporalNumberFastTest {
 
     @TestCase
     func decimalFastPathPreservesPositiveNegativeAndSmallValues(): Unit {
-        let average = YJson.decodeStringWith(DecimalJson, "12.375")
-        let p99 = YJson.decodeStringWith(DecimalJson, "98.25")
-        let negative = YJson.decodeStringWith(DecimalJson, "-12.5")
-        let small = YJson.decodeStringWith(DecimalJson, "0.001")
+        let average = YJson.fromJson("12.375", codec: JsonCodecs.decimal)
+        let p99 = YJson.fromJson("98.25", codec: JsonCodecs.decimal)
+        let negative = YJson.fromJson("-12.5", codec: JsonCodecs.decimal)
+        let small = YJson.fromJson("0.001", codec: JsonCodecs.decimal)
 
         @Expect(average, Decimal.parse("12.375"))
         @Expect(p99, Decimal.parse("98.25"))
         @Expect(negative, Decimal.parse("-12.5"))
         @Expect(small, Decimal.parse("0.001"))
-        @Expect(YJson.encodeStringWith(DecimalJson, average), "12.375")
-        @Expect(YJson.encodeStringWith(DecimalJson, p99), "98.25")
-        @Expect(YJson.encodeStringWith(DecimalJson, negative), "-12.5")
-        @Expect(YJson.encodeStringWith(DecimalJson, small), "0.001")
+        @Expect(YJson.toJson(average, codec: JsonCodecs.decimal), "12.375")
+        @Expect(YJson.toJson(p99, codec: JsonCodecs.decimal), "98.25")
+        @Expect(YJson.toJson(negative, codec: JsonCodecs.decimal), "-12.5")
+        @Expect(YJson.toJson(small, codec: JsonCodecs.decimal), "0.001")
     }
 
     @TestCase
@@ -407,32 +407,23 @@ class YJsonTemporalNumberFastTest {
 
     @TestCase
     func temporalStatsCompactRatiosAndFallbackKeysKeepSemantics(): Unit {
-        let compact = YJson.decodeStringWith(
-            TemporalStatsJson,
-            compactTemporalStatsText("{\"p50\":12.5,\"p99\":98.25}")
-        )
+        let compact = YJson.fromJson(compactTemporalStatsText("{\"p50\":12.5,\"p99\":98.25}"), codec: TemporalStatsJson)
         @Expect(compact.checkpoints.size, 2)
         @Expect(compact.ratios["p50"], Decimal.parse("12.5"))
         @Expect(compact.ratios["p99"], Decimal.parse("98.25"))
 
-        let escapedKey = YJson.decodeStringWith(
-            TemporalStatsJson,
-            compactTemporalStatsText("{\"p\\u00350\":12.5,\"p99\":98.25}")
-        )
+        let escapedKey = YJson.fromJson(compactTemporalStatsText("{\"p\\u00350\":12.5,\"p99\":98.25}"), codec: TemporalStatsJson)
         @Expect(escapedKey.ratios["p50"], Decimal.parse("12.5"))
         @Expect(escapedKey.ratios["p99"], Decimal.parse("98.25"))
     }
 
     @TestCase
     func temporalStatsOrderedFieldHelpersFallbackForUncachedValues(): Unit {
-        let value = YJson.decodeStringWith(
-            TemporalStatsJson,
-            "{\"createdAt\":\"\\u0032024-06-20T14:42:33+08:00\"," +
+        let value = YJson.fromJson("{\"createdAt\":\"\\u0032024-06-20T14:42:33+08:00\"," +
                 "\"totalEvents\":-42," +
                 "\"averageLatency\":12.50," +
                 "\"checkpoints\":[\"2024-06-20T14:42:33+08:00\",\"2024-06-20T15:12:33+08:00\"]," +
-                "\"ratios\":{\"p50\":12.5,\"p99\":98.25}}"
-        )
+                "\"ratios\":{\"p50\":12.5,\"p99\":98.25}}", codec: TemporalStatsJson)
         @Expect(value.createdAt, DateTime.parse("2024-06-20T14:42:33+08:00", DateTimeFormat.RFC3339))
         @Expect(value.totalEvents, BigInt.parse("-42"))
         @Expect(value.averageLatency, Decimal.parse("12.50"))
@@ -442,24 +433,21 @@ class YJsonTemporalNumberFastTest {
     @TestCase
     func temporalStatsCommonPayloadVariantsCreateFreshContainers(): Unit {
         let p50FirstText = compactTemporalStatsText("{\"p50\":12.5,\"p99\":98.25}")
-        let p50First = YJson.decodeStringWith(TemporalStatsJson, p50FirstText)
+        let p50First = YJson.fromJson(p50FirstText, codec: TemporalStatsJson)
         assertTemporalStatsBenchmarkValue(p50First)
 
         p50First.checkpoints.add(DateTime.parse("2024-06-20T16:12:33+08:00", DateTimeFormat.RFC3339))
         p50First.ratios.add("p01", Decimal.parse("0.001"))
-        let p50FirstAgain = YJson.decodeStringWith(TemporalStatsJson, p50FirstText)
+        let p50FirstAgain = YJson.fromJson(p50FirstText, codec: TemporalStatsJson)
         assertTemporalStatsBenchmarkValue(p50FirstAgain)
 
-        let p50Bytes = YJson.decodeBytesWith(TemporalStatsJson, bytes(p50FirstText))
+        let p50Bytes = YJson.fromJson(bytes(p50FirstText), codec: TemporalStatsJson)
         assertTemporalStatsBenchmarkValue(p50Bytes)
 
-        let p99First = YJson.decodeStringWith(
-            TemporalStatsJson,
-            compactTemporalStatsText("{\"p99\":98.25,\"p50\":12.5}")
-        )
+        let p99First = YJson.fromJson(compactTemporalStatsText("{\"p99\":98.25,\"p50\":12.5}"), codec: TemporalStatsJson)
         assertTemporalStatsBenchmarkValue(p99First)
 
-        let whitespaceFallback = YJson.decodeStringWith(TemporalStatsJson, " " + p50FirstText)
+        let whitespaceFallback = YJson.fromJson(" " + p50FirstText, codec: TemporalStatsJson)
         assertTemporalStatsBenchmarkValue(whitespaceFallback)
     }
 }

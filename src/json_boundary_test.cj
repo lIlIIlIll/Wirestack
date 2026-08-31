@@ -18,7 +18,7 @@ class NumberBoundaryTest {
     // Helper function to check if parsing throws JsonException
     func throwsJsonException(text: String): Bool {
         try {
-            let _ = YJson.parse(text)
+            let _ = JsonNode.parse(text)
             return false
         } catch (_: JsonException) {
             return true
@@ -29,7 +29,7 @@ class NumberBoundaryTest {
 
     // Helper to parse value
     func parseValue(text: String): JsonNode {
-        YJson.parse(text)
+        JsonNode.parse(text)
     }
 
     // ==================== 整数边界测试 ====================
@@ -39,8 +39,8 @@ class NumberBoundaryTest {
         // UInt64 最大值: 18446744073709551615 (2^64 - 1)
         // 超过 Int64 范围，应解析为 NumberLiteral
         let value = parseValue("18446744073709551615")
-        @Expect(value.kind(), JsNumberLiteral)
-        @Expect(value.asNumberLiteral().literal, "18446744073709551615")
+        @Expect(value.kind(), JsonKind.Number)
+        @Expect(value.asNumberText(), "18446744073709551615")
     }
 
     @TestCase
@@ -48,8 +48,8 @@ class NumberBoundaryTest {
         // UInt64 最大值 + 1: 18446744073709551616
         // 完全超出范围，应解析为 NumberLiteral
         let value = parseValue("18446744073709551616")
-        @Expect(value.kind(), JsNumberLiteral)
-        @Expect(value.asNumberLiteral().literal, "18446744073709551616")
+        @Expect(value.kind(), JsonKind.Number)
+        @Expect(value.asNumberText(), "18446744073709551616")
     }
 
     @TestCase
@@ -57,48 +57,48 @@ class NumberBoundaryTest {
         // Int64 最小值 - 1: -9223372036854775809
         // 超出 Int64 范围，应解析为 NumberLiteral
         let value = parseValue("-9223372036854775809")
-        @Expect(value.kind(), JsNumberLiteral)
-        @Expect(value.asNumberLiteral().literal, "-9223372036854775809")
+        @Expect(value.kind(), JsonKind.Number)
+        @Expect(value.asNumberText(), "-9223372036854775809")
     }
 
     @TestCase
     func parseInt64BoundaryNearbyValues(): Unit {
         // Int64 最大值附近测试
         let maxPlus1 = parseValue("9223372036854775808")  // Int64 max + 1
-        @Expect(maxPlus1.kind(), JsNumberLiteral)
+        @Expect(maxPlus1.kind(), JsonKind.Number)
 
         let maxMinus1 = parseValue("9223372036854775806")  // Int64 max - 1
-        @Expect(maxMinus1.kind(), JsInt)
-        @Expect(maxMinus1.asInt().value, 9223372036854775806)
+        @Expect(maxMinus1.kind(), JsonKind.Number)
+        @Expect(maxMinus1.asInt64(), 9223372036854775806)
 
         // Int64 最小值附近测试
         let minMinus1 = parseValue("-9223372036854775809")  // Int64 min - 1
-        @Expect(minMinus1.kind(), JsNumberLiteral)
+        @Expect(minMinus1.kind(), JsonKind.Number)
 
         let minPlus1 = parseValue("-9223372036854775807")  // Int64 min + 1
-        @Expect(minPlus1.kind(), JsInt)
-        @Expect(minPlus1.asInt().value, -9223372036854775807)
+        @Expect(minPlus1.kind(), JsonKind.Number)
+        @Expect(minPlus1.asInt64(), -9223372036854775807)
 
         // 正边界值测试
         let exactlyMax = parseValue("9223372036854775807")  // Int64 exact max
-        @Expect(exactlyMax.kind(), JsInt)
-        @Expect(exactlyMax.asInt().value, 9223372036854775807)
+        @Expect(exactlyMax.kind(), JsonKind.Number)
+        @Expect(exactlyMax.asInt64(), 9223372036854775807)
 
         let exactlyMin = parseValue("-9223372036854775808")  // Int64 exact min
-        @Expect(exactlyMin.kind(), JsInt)
-        @Expect(exactlyMin.asInt().value, -9223372036854775808)
+        @Expect(exactlyMin.kind(), JsonKind.Number)
+        @Expect(exactlyMin.asInt64(), -9223372036854775808)
     }
 
     @TestCase
     func parseVeryLargeNumberAsLiteral(): Unit {
         // 测试非常大的数字
         let largeValue = parseValue("999999999999999999999999999999999")
-        @Expect(largeValue.kind(), JsNumberLiteral)
-        @Expect(largeValue.asNumberLiteral().literal, "999999999999999999999999999999999")
+        @Expect(largeValue.kind(), JsonKind.Number)
+        @Expect(largeValue.asNumberText(), "999999999999999999999999999999999")
 
         // 测试带小数点的超大数字
         let largeFloat = parseValue("999999999999999999999999999999999.999")
-        @Expect(largeFloat.kind(), JsNumberLiteral)
+        @Expect(largeFloat.kind(), JsonKind.Number)
     }
 
     // ==================== 浮点精度边界测试 ====================
@@ -106,89 +106,89 @@ class NumberBoundaryTest {
     @TestCase
     func parseFloatPrecision15Digits(): Unit {
         // 15 位小数精度边界（IEEE 754 double 精度）
-        let v1 = parseValue("0.123456789012345").asFloat()
-        @Expect(v1.value, 0.123456789012345)
+        let v1 = parseValue("0.123456789012345").asFloat64()
+        @Expect(v1, 0.123456789012345)
 
         // 15 位精度应该能正确保持
-        let v2 = parseValue("1.234567890123456").asFloat()
-        @Expect(v2.value, 1.234567890123456)
+        let v2 = parseValue("1.234567890123456").asFloat64()
+        @Expect(v2, 1.234567890123456)
 
         // 边界值测试
-        let v3 = parseValue("3.141592653589793").asFloat()
-        @Expect(v3.value, 3.141592653589793)
+        let v3 = parseValue("3.141592653589793").asFloat64()
+        @Expect(v3, 3.141592653589793)
     }
 
     @TestCase
     func parseFloatPrecision17Digits(): Unit {
         // 17 位小数精度边界（超出 IEEE 754 精度）
         let raw1 = parseValue("0.12345678901234567")
-        @Expect(raw1.kind(), JsNumberLiteral)
-        let v1 = raw1.asFloat()
+        @Expect(raw1.kind(), JsonKind.Number)
+        let v1 = raw1.asFloat64()
         // 17 位可能会有精度损失，但应该接受
-        @Expect(v1.kind(), JsFloat)
+        @Expect(!v1.isNaN())
 
         let raw2 = parseValue("1.234567890123456789")
-        @Expect(raw2.kind(), JsNumberLiteral)
-        let v2 = raw2.asFloat()
-        @Expect(v2.kind(), JsFloat)
+        @Expect(raw2.kind(), JsonKind.Number)
+        let v2 = raw2.asFloat64()
+        @Expect(!v2.isNaN())
     }
 
     @TestCase
     func parseFloatVeryClose(): Unit {
         // 测试非常接近的浮点数
-        let v1 = parseValue("1.000000000000001").asFloat()
-        @Expect(v1.value > 1.0)
-        @Expect(v1.value < 1.0001)
+        let v1 = parseValue("1.000000000000001").asFloat64()
+        @Expect(v1 > 1.0)
+        @Expect(v1 < 1.0001)
 
-        let v2 = parseValue("0.999999999999999").asFloat()
-        @Expect(v2.value < 1.0)
-        @Expect(v2.value > 0.9999)
+        let v2 = parseValue("0.999999999999999").asFloat64()
+        @Expect(v2 < 1.0)
+        @Expect(v2 > 0.9999)
 
         // 测试非常小的差异
         let raw3 = parseValue("1.0000000000000001")
-        @Expect(raw3.kind(), JsNumberLiteral)
-        let v3 = raw3.asFloat()
-        @Expect(v3.kind(), JsFloat)
+        @Expect(raw3.kind(), JsonKind.Number)
+        let v3 = raw3.asFloat64()
+        @Expect(!v3.isNaN())
     }
 
     @TestCase
     func parseFloatRoundingBoundary(): Unit {
         // 测试浮点数舍入边界
-        let v1 = parseValue("0.5").asFloat()
-        @Expect(v1.value, 0.5)
+        let v1 = parseValue("0.5").asFloat64()
+        @Expect(v1, 0.5)
 
-        let v2 = parseValue("0.49999999999999999").asFloat()
+        let v2 = parseValue("0.49999999999999999").asFloat64()
         // 使用 <= 比较，因为 IEEE 754 舍入可能导致值接近 0.5
-        @Expect(v2.value <= 0.5)
+        @Expect(v2 <= 0.5)
 
         // 测试边界附近的舍入
-        let v3 = parseValue("0.50000000000000001").asFloat()
+        let v3 = parseValue("0.50000000000000001").asFloat64()
         // 使用 >= 比较
-        @Expect(v3.value >= 0.5)
+        @Expect(v3 >= 0.5)
 
         // 测试负数舍入边界
-        let v4 = parseValue("-0.5").asFloat()
-        @Expect(v4.value, -0.5)
+        let v4 = parseValue("-0.5").asFloat64()
+        @Expect(v4, -0.5)
 
-        let v5 = parseValue("-0.49999999999999999").asFloat()
+        let v5 = parseValue("-0.49999999999999999").asFloat64()
         // 使用 >= 比较（负数的"大于"意味着更接近零）
-        @Expect(v5.value >= -0.5)
+        @Expect(v5 >= -0.5)
     }
 
     @TestCase
     func parseFloatZeroBoundary(): Unit {
         // 测试各种零的表示
-        let positiveZero = parseValue("0.0").asFloat()
-        @Expect(positiveZero.value, 0.0)
+        let positiveZero = parseValue("0.0").asFloat64()
+        @Expect(positiveZero, 0.0)
 
-        let negativeZero = parseValue("-0.0").asFloat()
-        @Expect(negativeZero.value, -0.0)  // -0.0 在 IEEE 754 中是合法的
+        let negativeZero = parseValue("-0.0").asFloat64()
+        @Expect(negativeZero, -0.0)  // -0.0 在 IEEE 754 中是合法的
 
-        let verySmallPositive = parseValue("0.0000000000000001").asFloat()
-        @Expect(verySmallPositive.value > 0.0)
+        let verySmallPositive = parseValue("0.0000000000000001").asFloat64()
+        @Expect(verySmallPositive > 0.0)
 
-        let verySmallNegative = parseValue("-0.0000000000000001").asFloat()
-        @Expect(verySmallNegative.value < 0.0)
+        let verySmallNegative = parseValue("-0.0000000000000001").asFloat64()
+        @Expect(verySmallNegative < 0.0)
     }
 
     // ==================== 科学计数法边界测试 ====================
@@ -197,120 +197,120 @@ class NumberBoundaryTest {
     func parseExponentLarge308(): Unit {
         // 测试极大指数 (接近 Float64 最大值)
         let raw1 = parseValue("1e308")
-        @Expect(raw1.kind(), JsNumberLiteral)
-        let v1 = raw1.asFloat()
-        @Expect(v1.value, 1e308)
+        @Expect(raw1.kind(), JsonKind.Number)
+        let v1 = raw1.asFloat64()
+        @Expect(v1, 1e308)
 
         let raw2 = parseValue("1.5e308")
-        @Expect(raw2.kind(), JsNumberLiteral)
-        let v2 = raw2.asFloat()
-        @Expect(v2.value, 1.5e308)
+        @Expect(raw2.kind(), JsonKind.Number)
+        let v2 = raw2.asFloat64()
+        @Expect(v2, 1.5e308)
 
         // 接近最大值的边界
         let raw3 = parseValue("1.7e308")
-        @Expect(raw3.kind(), JsNumberLiteral)
-        let v3 = raw3.asFloat()
-        @Expect(v3.kind(), JsFloat)
-        @Expect(v3.value < Float64.Inf)  // 应小于无穷大
+        @Expect(raw3.kind(), JsonKind.Number)
+        let v3 = raw3.asFloat64()
+        @Expect(!v3.isNaN())
+        @Expect(v3 < Float64.Inf)  // 应小于无穷大
     }
 
     @TestCase
     func parseExponentSmall308(): Unit {
         // 测试极小指数 (接近 Float64 最小正值)
         let raw1 = parseValue("1e-308")
-        @Expect(raw1.kind(), JsNumberLiteral)
-        let v1 = raw1.asFloat()
-        @Expect(v1.value, 1e-308)
+        @Expect(raw1.kind(), JsonKind.Number)
+        let v1 = raw1.asFloat64()
+        @Expect(v1, 1e-308)
 
         let raw2 = parseValue("1e-323")
-        @Expect(raw2.kind(), JsNumberLiteral)
-        let v2 = raw2.asFloat()
-        @Expect(v2.kind(), JsFloat)
-        @Expect(v2.value > 0.0)  // 应大于零
+        @Expect(raw2.kind(), JsonKind.Number)
+        let v2 = raw2.asFloat64()
+        @Expect(!v2.isNaN())
+        @Expect(v2 > 0.0)  // 应大于零
 
         // 极小值边界
         let raw3 = parseValue("1.5e-308")
-        @Expect(raw3.kind(), JsNumberLiteral)
-        let v3 = raw3.asFloat()
-        @Expect(v3.value, 1.5e-308)
+        @Expect(raw3.kind(), JsonKind.Number)
+        let v3 = raw3.asFloat64()
+        @Expect(v3, 1.5e-308)
     }
 
     @TestCase
     func parseExponentOverflow309(): Unit {
         // parser 对指数语法保留原始字面量，asFloat() 再体现溢出行为
         let raw1 = parseValue("1e309")
-        @Expect(raw1.kind(), JsNumberLiteral)
-        @Expect(raw1.asNumberLiteral().literal, "1e309")
-        @Expect(raw1.asFloat().value.isInf())
+        @Expect(raw1.kind(), JsonKind.Number)
+        @Expect(raw1.asNumberText(), "1e309")
+        @Expect(raw1.asFloat64().isInf())
 
         let raw2 = parseValue("1.8e308")
-        @Expect(raw2.kind(), JsNumberLiteral)
-        @Expect(raw2.asNumberLiteral().literal, "1.8e308")
-        @Expect(raw2.asFloat().value.isInf())
+        @Expect(raw2.kind(), JsonKind.Number)
+        @Expect(raw2.asNumberText(), "1.8e308")
+        @Expect(raw2.asFloat64().isInf())
 
         let raw3 = parseValue("1e1000")
-        @Expect(raw3.kind(), JsNumberLiteral)
-        @Expect(raw3.asNumberLiteral().literal, "1e1000")
-        @Expect(raw3.asFloat().value.isInf())
+        @Expect(raw3.kind(), JsonKind.Number)
+        @Expect(raw3.asNumberText(), "1e1000")
+        @Expect(raw3.asFloat64().isInf())
 
         let raw4 = parseValue("9.9e999")
-        @Expect(raw4.kind(), JsNumberLiteral)
-        @Expect(raw4.asNumberLiteral().literal, "9.9e999")
-        @Expect(raw4.asFloat().value.isInf())
+        @Expect(raw4.kind(), JsonKind.Number)
+        @Expect(raw4.asNumberText(), "9.9e999")
+        @Expect(raw4.asFloat64().isInf())
     }
 
     @TestCase
     func parseExponentUnderflow324(): Unit {
         // parser 保留原始字面量，asFloat() 再体现下溢后的数值
         let raw1 = parseValue("1e-324")
-        @Expect(raw1.kind(), JsNumberLiteral)
-        @Expect(raw1.asNumberLiteral().literal, "1e-324")
-        @Expect(raw1.asFloat().value, 0.0)
+        @Expect(raw1.kind(), JsonKind.Number)
+        @Expect(raw1.asNumberText(), "1e-324")
+        @Expect(raw1.asFloat64(), 0.0)
 
         let raw2 = parseValue("1e-325")
-        @Expect(raw2.kind(), JsNumberLiteral)
-        @Expect(raw2.asNumberLiteral().literal, "1e-325")
-        @Expect(raw2.asFloat().value, 0.0)
+        @Expect(raw2.kind(), JsonKind.Number)
+        @Expect(raw2.asNumberText(), "1e-325")
+        @Expect(raw2.asFloat64(), 0.0)
 
         let raw3 = parseValue("1e-1000")
-        @Expect(raw3.kind(), JsNumberLiteral)
-        @Expect(raw3.asNumberLiteral().literal, "1e-1000")
-        @Expect(raw3.asFloat().value, 0.0)
+        @Expect(raw3.kind(), JsonKind.Number)
+        @Expect(raw3.asNumberText(), "1e-1000")
+        @Expect(raw3.asFloat64(), 0.0)
     }
 
     @TestCase
     func parseExponentNegativeBoundary(): Unit {
         // 测试负指数边界
         let raw1 = parseValue("-1e308")
-        @Expect(raw1.kind(), JsNumberLiteral)
-        let v1 = raw1.asFloat()
-        @Expect(v1.value, -1e308)
+        @Expect(raw1.kind(), JsonKind.Number)
+        let v1 = raw1.asFloat64()
+        @Expect(v1, -1e308)
 
         let raw2 = parseValue("-1e-308")
-        @Expect(raw2.kind(), JsNumberLiteral)
-        let v2 = raw2.asFloat()
-        @Expect(v2.value, -1e-308)
+        @Expect(raw2.kind(), JsonKind.Number)
+        let v2 = raw2.asFloat64()
+        @Expect(v2, -1e-308)
 
         let raw3 = parseValue("-1e309")
-        @Expect(raw3.kind(), JsNumberLiteral)
-        @Expect(raw3.asNumberLiteral().literal, "-1e309")
-        @Expect(raw3.asFloat().value.isInf())
-        @Expect(raw3.asFloat().value < 0.0)
+        @Expect(raw3.kind(), JsonKind.Number)
+        @Expect(raw3.asNumberText(), "-1e309")
+        @Expect(raw3.asFloat64().isInf())
+        @Expect(raw3.asFloat64() < 0.0)
 
         let raw4 = parseValue("-1e-324")
-        @Expect(raw4.kind(), JsNumberLiteral)
-        @Expect(raw4.asNumberLiteral().literal, "-1e-324")
-        @Expect(raw4.asFloat().value, 0.0)
+        @Expect(raw4.kind(), JsonKind.Number)
+        @Expect(raw4.asNumberText(), "-1e-324")
+        @Expect(raw4.asFloat64(), 0.0)
     }
 
     @TestCase
     func parseExponentWithPlusSign(): Unit {
         // 测试指数中的正号
-        let v1 = parseValue("1e+10").asFloat()
-        @Expect(v1.value, 1e10)
+        let v1 = parseValue("1e+10").asFloat64()
+        @Expect(v1, 1e10)
 
-        let v2 = parseValue("1.5e+308").asFloat()
-        @Expect(v2.value, 1.5e308)
+        let v2 = parseValue("1.5e+308").asFloat64()
+        @Expect(v2, 1.5e308)
     }
 
     @TestCase
@@ -322,21 +322,21 @@ class NumberBoundaryTest {
     @TestCase
     func parseExponentMixedFormats(): Unit {
         // 测试各种指数格式组合
-        let v1 = parseValue("1.23e45").asFloat()
-        @Expect(v1.value, 1.23e45)
+        let v1 = parseValue("1.23e45").asFloat64()
+        @Expect(v1, 1.23e45)
 
-        let v2 = parseValue("1.23E45").asFloat()  // 大写 E
-        @Expect(v2.value, 1.23e45)
+        let v2 = parseValue("1.23E45").asFloat64()  // 大写 E
+        @Expect(v2, 1.23e45)
 
-        let v3 = parseValue("1.23e+45").asFloat()
-        @Expect(v3.value, 1.23e45)
+        let v3 = parseValue("1.23e+45").asFloat64()
+        @Expect(v3, 1.23e45)
 
-        let v4 = parseValue("1.23e-45").asFloat()
-        @Expect(v4.value, 1.23e-45)
+        let v4 = parseValue("1.23e-45").asFloat64()
+        @Expect(v4, 1.23e-45)
 
         // 测试整数指数
-        let v5 = parseValue("123e10").asFloat()
-        @Expect(v5.value, 123e10)
+        let v5 = parseValue("123e10").asFloat64()
+        @Expect(v5, 123e10)
     }
 
     @TestCase
@@ -344,20 +344,20 @@ class NumberBoundaryTest {
         // 测试边界值数字在数组中
         let arr = parseValue("[9223372036854775807, 9223372036854775808, -9223372036854775808, -9223372036854775809]").asArray()
         @Expect(arr.size(), 4)
-        @Expect(arr[0].kind(), JsInt)
-        @Expect(arr[1].kind(), JsNumberLiteral)
-        @Expect(arr[2].kind(), JsInt)
-        @Expect(arr[3].kind(), JsNumberLiteral)
+        @Expect(arr[0].kind(), JsonKind.Number)
+        @Expect(arr[1].kind(), JsonKind.Number)
+        @Expect(arr[2].kind(), JsonKind.Number)
+        @Expect(arr[3].kind(), JsonKind.Number)
     }
 
     @TestCase
     func parseBoundaryNumberInObject(): Unit {
         // 测试边界值数字在对象中
         let obj = parseValue("{\"max\":9223372036854775807,\"overflow\":9223372036854775808,\"min\":-9223372036854775808,\"underflow\":-9223372036854775809}").asObject()
-        @Expect(obj.get("max").getOrThrow().kind(), JsInt)
-        @Expect(obj.get("overflow").getOrThrow().kind(), JsNumberLiteral)
-        @Expect(obj.get("min").getOrThrow().kind(), JsInt)
-        @Expect(obj.get("underflow").getOrThrow().kind(), JsNumberLiteral)
+        @Expect(obj.get("max").getOrThrow().kind(), JsonKind.Number)
+        @Expect(obj.get("overflow").getOrThrow().kind(), JsonKind.Number)
+        @Expect(obj.get("min").getOrThrow().kind(), JsonKind.Number)
+        @Expect(obj.get("underflow").getOrThrow().kind(), JsonKind.Number)
     }
 }
 
@@ -374,7 +374,7 @@ class UnicodeBoundaryTest {
 
     func throwsJsonException(text: String): Bool {
         try {
-            let _ = YJson.parse(text)
+            let _ = JsonNode.parse(text)
             return false
         } catch (_: JsonException) {
             return true
@@ -384,7 +384,7 @@ class UnicodeBoundaryTest {
     }
 
     func parseValue(text: String): JsonNode {
-        YJson.parse(text)
+        JsonNode.parse(text)
     }
 
     // ==================== BOM 处理测试 ====================
@@ -414,7 +414,7 @@ class UnicodeBoundaryTest {
     func parseBomInString(): Unit {
         // BOM 在字符串内部（作为普通字符）
         let value = parseValue("\"test\u{FEFF}value\"").asString()
-        @Expect(value.value.contains("\u{FEFF}"))
+        @Expect(value.contains("\u{FEFF}"))
         // 字符串中的 BOM 应被视为普通字符
     }
 
@@ -430,8 +430,8 @@ class UnicodeBoundaryTest {
         // 字符串内部的 \uFEFF 应解码为单个 U+FEFF 字符
         let escapedBom = "\"\\uFEFF\""
         let value = parseValue(escapedBom).asString()
-        @Expect(value.value, "\u{FEFF}")
-        @Expect(count(value.value.runes()), 1)
+        @Expect(value, "\u{FEFF}")
+        @Expect(count(value.runes()), 1)
     }
 
     // ==================== Unicode 非字符测试 ====================
@@ -439,41 +439,41 @@ class UnicodeBoundaryTest {
     @TestCase
     func parseUnicodeNonCharacterFFFF(): Unit {
         let value = parseValue("\"\\uFFFF\"").asString()
-        @Expect(value.value, "\u{FFFF}")
-        @Expect(count(value.value.runes()), 1)
+        @Expect(value, "\u{FFFF}")
+        @Expect(count(value.runes()), 1)
     }
 
     @TestCase
     func parseUnicodeNonCharacterFFFE(): Unit {
         let value = parseValue("\"\\uFFFE\"").asString()
-        @Expect(value.value, "\u{FFFE}")
-        @Expect(count(value.value.runes()), 1)
+        @Expect(value, "\u{FFFE}")
+        @Expect(count(value.runes()), 1)
     }
 
     @TestCase
     func parseUnicodeReplacementFFFD(): Unit {
         let escaped = parseValue("\"\\uFFFD\"").asString()
-        @Expect(escaped.value, "\u{FFFD}")
-        @Expect(count(escaped.value.runes()), 1)
+        @Expect(escaped, "\u{FFFD}")
+        @Expect(count(escaped.runes()), 1)
 
         let direct = parseValue("\"\u{FFFD}\"").asString()
-        @Expect(direct.value, "\u{FFFD}")
-        @Expect(count(direct.value.runes()), 1)
+        @Expect(direct, "\u{FFFD}")
+        @Expect(count(direct.runes()), 1)
     }
 
     @TestCase
     func parseUnicodeOtherNonCharacters(): Unit {
         let value1 = parseValue("\"\\uFDD0\"").asString()
-        @Expect(value1.value, "\u{FDD0}")
-        @Expect(count(value1.value.runes()), 1)
+        @Expect(value1, "\u{FDD0}")
+        @Expect(count(value1.runes()), 1)
 
         let value2 = parseValue("\"\\uFDEF\"").asString()
-        @Expect(value2.value, "\u{FDEF}")
-        @Expect(count(value2.value.runes()), 1)
+        @Expect(value2, "\u{FDEF}")
+        @Expect(count(value2.runes()), 1)
 
         let value3 = parseValue("\"\\uDBFF\\uDFFE\"").asString()
-        @Expect(value3.value, "\u{10FFFE}")
-        @Expect(count(value3.value.runes()), 1)
+        @Expect(value3, "\u{10FFFE}")
+        @Expect(count(value3.runes()), 1)
     }
 
     @TestCase
@@ -481,7 +481,7 @@ class UnicodeBoundaryTest {
         // U+0000 (null character)
         let escapedNull = "\"\\u0000\""
         let value = parseValue(escapedNull).asString()
-        @Expect(value.value.size, 1)
+        @Expect(value.size, 1)
 
         // null 字符作为转义应被接受，但作为未转义应被拒绝
         let unescapedNull = "\"\u{0000}\""
@@ -493,8 +493,8 @@ class UnicodeBoundaryTest {
     @TestCase
     func parseUnicodeMaxCodePoint(): Unit {
         let value = parseValue("\"\\uDBFF\\uDFFF\"").asString()
-        @Expect(value.value, "\u{10FFFF}")
-        @Expect(count(value.value.runes()), 1)
+        @Expect(value, "\u{10FFFF}")
+        @Expect(count(value.runes()), 1)
     }
 
     @TestCase
@@ -503,12 +503,12 @@ class UnicodeBoundaryTest {
         // 𝄞 (U+1D11E) = \uD834\uDD1E
         let musicSymbol = "\"\\uD834\\uDD1E\""
         let value = parseValue(musicSymbol).asString()
-        @Expect(value.value, "\u{1D11E}")
+        @Expect(value, "\u{1D11E}")
 
         // 😀 (U+1F600) = \uD83D\uDE00
         let emoji = "\"\\uD83D\\uDE00\""
         let value2 = parseValue(emoji).asString()
-        @Expect(value2.value, "\u{1F600}")
+        @Expect(value2, "\u{1F600}")
     }
 
     @TestCase
@@ -535,12 +535,12 @@ class UnicodeBoundaryTest {
     @TestCase
     func parseUnicodeOutOfRangeSurrogate(): Unit {
         let minPair = parseValue("\"\\uD800\\uDC00\"").asString()
-        @Expect(minPair.value, "\u{10000}")
-        @Expect(count(minPair.value.runes()), 1)
+        @Expect(minPair, "\u{10000}")
+        @Expect(count(minPair.runes()), 1)
 
         let maxPair = parseValue("\"\\uDBFF\\uDFFF\"").asString()
-        @Expect(maxPair.value, "\u{10FFFF}")
-        @Expect(count(maxPair.value.runes()), 1)
+        @Expect(maxPair, "\u{10FFFF}")
+        @Expect(count(maxPair.runes()), 1)
     }
 
     @TestCase
@@ -548,9 +548,9 @@ class UnicodeBoundaryTest {
         // 混合 Unicode 字符的字符串
         let mixed = "\"A\\u4e2d\\uD834\\uDD1E\\u0031\""
         let value = parseValue(mixed).asString()
-        @Expect(value.value.size >= 4)
-        @Expect(value.value.contains("A"))
-        @Expect(value.value.contains("\u{1D11E}"))
+        @Expect(value.size >= 4)
+        @Expect(value.contains("A"))
+        @Expect(value.contains("\u{1D11E}"))
     }
 }
 
@@ -568,7 +568,7 @@ class WhitespaceBoundaryTest {
 
     func throwsJsonException(text: String): Bool {
         try {
-            let _ = YJson.parse(text)
+            let _ = JsonNode.parse(text)
             return false
         } catch (_: JsonException) {
             return true
@@ -578,7 +578,7 @@ class WhitespaceBoundaryTest {
     }
 
     func parseValue(text: String): JsonNode {
-        YJson.parse(text)
+        JsonNode.parse(text)
     }
 
     // ==================== 组合空白测试 ====================
@@ -591,27 +591,27 @@ class WhitespaceBoundaryTest {
         // Space
         let space = " null"
         let v1 = parseValue(space)
-        @Expect(v1.kind(), JsNull)
+        @Expect(v1.kind(), JsonKind.Null)
 
         // Tab
         let tab = "\tnull"
         let v2 = parseValue(tab)
-        @Expect(v2.kind(), JsNull)
+        @Expect(v2.kind(), JsonKind.Null)
 
         // LF (newline)
         let lf = "\nnull"
         let v3 = parseValue(lf)
-        @Expect(v3.kind(), JsNull)
+        @Expect(v3.kind(), JsonKind.Null)
 
         // CR (carriage return)
         let cr = "\rnull"
         let v4 = parseValue(cr)
-        @Expect(v4.kind(), JsNull)
+        @Expect(v4.kind(), JsonKind.Null)
 
         // 组合空白
         let combined = "\n\t \rnull"
         let v5 = parseValue(combined)
-        @Expect(v5.kind(), JsNull)
+        @Expect(v5.kind(), JsonKind.Null)
     }
 
     @TestCase
@@ -620,15 +620,15 @@ class WhitespaceBoundaryTest {
 
         // null 前多空白
         let nullValue = parseValue("   \n\t  null")
-        @Expect(nullValue.kind(), JsNull)
+        @Expect(nullValue.kind(), JsonKind.Null)
 
         // 数字前多空白
         let numValue = parseValue("   \n\t  123")
-        @Expect(numValue.asInt().value, 123)
+        @Expect(numValue.asInt64(), 123)
 
         // 字符串前多空白
         let strValue = parseValue("   \n\t  \"hello\"")
-        @Expect(strValue.asString().value, "hello")
+        @Expect(strValue.asString(), "hello")
 
         // 数组前多空白
         let arrValue = parseValue("   \n\t  [1,2]")
@@ -645,15 +645,15 @@ class WhitespaceBoundaryTest {
 
         // null 后多空白
         let nullValue = parseValue("null   \n\t  ")
-        @Expect(nullValue.kind(), JsNull)
+        @Expect(nullValue.kind(), JsonKind.Null)
 
         // 数字后多空白
         let numValue = parseValue("123   \n\t  ")
-        @Expect(numValue.asInt().value, 123)
+        @Expect(numValue.asInt64(), 123)
 
         // 字符串后多空白
         let strValue = parseValue("\"hello\"   \n\t  ")
-        @Expect(strValue.asString().value, "hello")
+        @Expect(strValue.asString(), "hello")
 
         // 数组后多空白
         let arrValue = parseValue("[1,2]   \n\t  ")
@@ -670,23 +670,23 @@ class WhitespaceBoundaryTest {
 
         // 冒号前空白
         let v1 = parseValue("{\"a\" :1}")
-        @Expect(v1.asObject().get("a").getOrThrow().asInt().value, 1)
+        @Expect(v1.asObject().get("a").getOrThrow().asInt64(), 1)
 
         // 冒号后空白
         let v2 = parseValue("{\"a\": 1}")
-        @Expect(v2.asObject().get("a").getOrThrow().asInt().value, 1)
+        @Expect(v2.asObject().get("a").getOrThrow().asInt64(), 1)
 
         // 冠号前后空白
         let v3 = parseValue("{\"a\" : 1}")
-        @Expect(v3.asObject().get("a").getOrThrow().asInt().value, 1)
+        @Expect(v3.asObject().get("a").getOrThrow().asInt64(), 1)
 
         // 多空白
         let v4 = parseValue("{\"a\"  :  1}")
-        @Expect(v4.asObject().get("a").getOrThrow().asInt().value, 1)
+        @Expect(v4.asObject().get("a").getOrThrow().asInt64(), 1)
 
         // 带换行的空白
         let v5 = parseValue("{\"a\"\n:\n1}")
-        @Expect(v5.asObject().get("a").getOrThrow().asInt().value, 1)
+        @Expect(v5.asObject().get("a").getOrThrow().asInt64(), 1)
 
         // 字段间空白
         let v6 = parseValue("{\"a\":1 , \"b\":2}")
@@ -813,7 +813,7 @@ class WhitespaceBoundaryTest {
 
         // Non-breaking space 在字符串内部（应接受）
         let str = parseValue("\"test\u{00A0}value\"")
-        @Expect(str.asString().value.contains("\u{00A0}"))
+        @Expect(str.asString().contains("\u{00A0}"))
     }
 
     @TestCase
@@ -823,17 +823,17 @@ class WhitespaceBoundaryTest {
         // 大量空白
         let lotsOfSpaces = "                                                    null"
         let v1 = parseValue(lotsOfSpaces)
-        @Expect(v1.kind(), JsNull)
+        @Expect(v1.kind(), JsonKind.Null)
 
         // CRLF 组合
         let crlf = "\r\nnull\r\n"
         let v2 = parseValue(crlf)
-        @Expect(v2.kind(), JsNull)
+        @Expect(v2.kind(), JsonKind.Null)
 
         // 多个 CRLF
         let multiCrlf = "\r\n\r\n\r\nnull\r\n\r\n\r\n"
         let v3 = parseValue(multiCrlf)
-        @Expect(v3.kind(), JsNull)
+        @Expect(v3.kind(), JsonKind.Null)
 
         // 空对象前后空白
         let emptyObj = "   {}   "
@@ -855,8 +855,8 @@ class WhitespaceBoundaryTest {
 
         let obj = parseValue(complexWhitespace).asObject()
         @Expect(obj.size(), 2)
-        @Expect(obj.get("key").getOrThrow().asString().value, "value")
-        @Expect(obj.get("num").getOrThrow().asInt().value, 123)
+        @Expect(obj.get("key").getOrThrow().asString(), "value")
+        @Expect(obj.get("num").getOrThrow().asInt64(), 123)
     }
 }
 
@@ -873,7 +873,7 @@ class DeepNestingBoundaryTest {
 
     func canParse(text: String): Bool {
         try {
-            let _ = YJson.parse(text)
+            let _ = JsonNode.parse(text)
             return true
         } catch (_: Exception) {
             return false
@@ -882,7 +882,7 @@ class DeepNestingBoundaryTest {
 
     func throwsJsonException(text: String): Bool {
         try {
-            let _ = YJson.parse(text)
+            let _ = JsonNode.parse(text)
             return false
         } catch (_: JsonException) {
             return true
@@ -892,7 +892,7 @@ class DeepNestingBoundaryTest {
     }
 
     func parseValue(text: String): JsonNode {
-        YJson.parse(text)
+        JsonNode.parse(text)
     }
 
     func dropLastBytes(text: String, count: Int64): String {
@@ -949,17 +949,17 @@ class DeepNestingBoundaryTest {
     }
 
     // Helper to navigate deep nested array
-    func navigateDeepArray(arr: JsonArrayValue, depth: Int64): Int64 {
+    func navigateDeepArray(arr: JsonArray, depth: Int64): Int64 {
         if (depth <= 0) {
-            return arr[0].asInt().value
+            return arr[0].asInt64()
         }
         return navigateDeepArray(arr[0].asArray(), depth - 1)
     }
 
     // Helper to navigate deep nested object
-    func navigateDeepObject(obj: JsonObjectValue, key: String, depth: Int64): Int64 {
+    func navigateDeepObject(obj: JsonObject, key: String, depth: Int64): Int64 {
         if (depth <= 0) {
-            return obj.get(key).getOrThrow().asInt().value
+            return obj.get(key).getOrThrow().asInt64()
         }
         return navigateDeepObject(obj.get(key).getOrThrow().asObject(), key, depth - 1)
     }
@@ -971,7 +971,7 @@ class DeepNestingBoundaryTest {
         // 10 层嵌套数组（基础测试）
         let json = generateDeepNestedArray(10)
         let value = parseValue(json)
-        @Expect(value.kind(), JsArray)
+        @Expect(value.kind(), JsonKind.Array)
         let result = navigateDeepArray(value.asArray(), 9)
         @Expect(result, 1)
     }
@@ -981,7 +981,7 @@ class DeepNestingBoundaryTest {
         // 20 层嵌套数组
         let json = generateDeepNestedArray(20)
         let value = parseValue(json)
-        @Expect(value.kind(), JsArray)
+        @Expect(value.kind(), JsonKind.Array)
         let result = navigateDeepArray(value.asArray(), 19)
         @Expect(result, 1)
     }
@@ -995,7 +995,7 @@ class DeepNestingBoundaryTest {
 
         if (canParseResult) {
             let value = parseValue(json)
-            @Expect(value.kind(), JsArray)
+            @Expect(value.kind(), JsonKind.Array)
             let result = navigateDeepArray(value.asArray(), 49)
             @Expect(result, 1)
         }
@@ -1006,7 +1006,7 @@ class DeepNestingBoundaryTest {
         // 10 层嵌套对象（基础测试）
         let json = generateDeepNestedObject(10)
         let value = parseValue(json)
-        @Expect(value.kind(), JsObject)
+        @Expect(value.kind(), JsonKind.Object)
     }
 
     @TestCase
@@ -1014,7 +1014,7 @@ class DeepNestingBoundaryTest {
         // 20 层嵌套对象
         let json = generateDeepNestedObject(20)
         let value = parseValue(json)
-        @Expect(value.kind(), JsObject)
+        @Expect(value.kind(), JsonKind.Object)
     }
 
     @TestCase
@@ -1026,7 +1026,7 @@ class DeepNestingBoundaryTest {
 
         if (canParseResult) {
             let value = parseValue(json)
-            @Expect(value.kind(), JsObject)
+            @Expect(value.kind(), JsonKind.Object)
         }
     }
 
@@ -1035,7 +1035,7 @@ class DeepNestingBoundaryTest {
         // 10 层混合嵌套（对象包含数组包含对象...）
         let json = generateMixedNesting(10)
         let value = parseValue(json)
-        @Expect(value.kind() == JsArray || value.kind() == JsObject)
+        @Expect(value.kind() == JsonKind.Array || value.kind() == JsonKind.Object)
     }
 
     @TestCase
@@ -1043,7 +1043,7 @@ class DeepNestingBoundaryTest {
         // 20 层混合嵌套
         let json = generateMixedNesting(20)
         let value = parseValue(json)
-        @Expect(value.kind() == JsArray || value.kind() == JsObject)
+        @Expect(value.kind() == JsonKind.Array || value.kind() == JsonKind.Object)
     }
 
     @TestCase
@@ -1055,7 +1055,7 @@ class DeepNestingBoundaryTest {
 
         if (canParseResult) {
             let value = parseValue(json)
-            @Expect(value.kind() == JsArray || value.kind() == JsObject)
+            @Expect(value.kind() == JsonKind.Array || value.kind() == JsonKind.Object)
         }
     }
 
@@ -1072,8 +1072,8 @@ class DeepNestingBoundaryTest {
             @Expect(arr.size(), 1)
             current = arr[0]
         }
-        @Expect(current.kind(), JsInt)
-        @Expect(current.asInt().value, 1)
+        @Expect(current.kind(), JsonKind.Number)
+        @Expect(current.asInt64(), 1)
     }
 
     @TestCase
@@ -1087,8 +1087,8 @@ class DeepNestingBoundaryTest {
             @Expect(arr.size(), 1)
             current = arr[0]
         }
-        @Expect(current.kind(), JsInt)
-        @Expect(current.asInt().value, 1)
+        @Expect(current.kind(), JsonKind.Number)
+        @Expect(current.asInt64(), 1)
     }
 
     // ==================== 性能测试 ====================
@@ -1112,7 +1112,7 @@ class DeepNestingBoundaryTest {
         let json = jsonBuilder.toString()
 
         let value = parseValue(json)
-        @Expect(value.kind(), JsArray)
+        @Expect(value.kind(), JsonKind.Array)
         @Expect(value.asArray().size(), 10)
 
         // 应在合理时间内完成，不超时
@@ -1125,13 +1125,13 @@ class DeepNestingBoundaryTest {
         // 嵌套数组包含多个值
         let deepArray = "[[[[1,2],[3,4]],[[5,6],[7,8]]]]"
         let v1 = parseValue(deepArray).asArray()
-        @Expect(v1[0].asArray()[0].asArray()[0].asArray()[0].asInt().value, 1)
-        @Expect(v1[0].asArray()[1].asArray()[1].asArray()[1].asInt().value, 8)
+        @Expect(v1[0].asArray()[0].asArray()[0].asArray()[0].asInt64(), 1)
+        @Expect(v1[0].asArray()[1].asArray()[1].asArray()[1].asInt64(), 8)
 
         // 嵌套对象包含多个字段
         let deepObject = "{\"a\":{\"b\":{\"c\":{\"d\":1}}}}"
         let v2 = parseValue(deepObject).asObject()
-        @Expect(v2.get("a").getOrThrow().asObject().get("b").getOrThrow().asObject().get("c").getOrThrow().asObject().get("d").getOrThrow().asInt().value, 1)
+        @Expect(v2.get("a").getOrThrow().asObject().get("b").getOrThrow().asObject().get("c").getOrThrow().asObject().get("d").getOrThrow().asInt64(), 1)
     }
 
     @TestCase
@@ -1149,11 +1149,11 @@ class DeepNestingBoundaryTest {
         // 深嵌套中结构错误
         let mismatched1 = "[[[[{}]]]]"  // 数组嵌套对象
         let v1 = parseValue(mismatched1)
-        @Expect(v1.kind(), JsArray)
+        @Expect(v1.kind(), JsonKind.Array)
 
         let mismatched2 = "{\"a\":{\"b\":{\"c\":[]}}}"  // 对象嵌套数组
         let v2 = parseValue(mismatched2)
-        @Expect(v2.kind(), JsObject)
+        @Expect(v2.kind(), JsonKind.Object)
     }
 
     @TestCase

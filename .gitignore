@@ -9,6 +9,7 @@ coverage/
 cov_output/
 *.gcda
 *.gcno
+*.gcov
 benchmarks/java_fastjson2/build/
 
 # Versioned Stream protocol specification and frozen development evidence.

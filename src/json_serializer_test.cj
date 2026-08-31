@@ -9,18 +9,18 @@ func jsonValuesSemanticallyEqual(left: JsonNode, right: JsonNode): Bool {
     }
     match (left) {
         case _: JsonNullValue => true
-        case leftBool: JsonBoolValue => leftBool.value == right.asBool().value
-        case leftInt: JsonIntValue => leftInt.value == right.asInt().value
-        case leftFloat: JsonFloatValue => leftFloat.value == right.asFloat().value
-        case leftNumber: JsonNumberLiteralValue => leftNumber.literal == right.asNumberLiteral().literal
-        case leftString: JsonStringValue => leftString.value == right.asString().value
-        case leftArray: JsonArrayValue => jsonArraysSemanticallyEqual(leftArray, right.asArray())
-        case leftObject: JsonObjectValue => jsonObjectsSemanticallyEqual(leftObject, right.asObject())
+        case leftBool: JsonBoolValue => leftBool.value == right.asBool()
+        case leftInt: JsonIntValue => leftInt.value == right.asInt64()
+        case leftFloat: JsonFloatValue => leftFloat.value == right.asFloat64()
+        case leftNumber: JsonNumberLiteralValue => leftNumber.literal == right.asNumberText()
+        case leftString: JsonStringValue => leftString.value == right.asString()
+        case leftArray: JsonArray => jsonArraysSemanticallyEqual(leftArray, right.asArray())
+        case leftObject: JsonObject => jsonObjectsSemanticallyEqual(leftObject, right.asObject())
         case _ => false
     }
 }
 
-func jsonArraysSemanticallyEqual(left: JsonArrayValue, right: JsonArrayValue): Bool {
+func jsonArraysSemanticallyEqual(left: JsonArray, right: JsonArray): Bool {
     if (left.size() != right.size()) {
         return false
     }
@@ -32,7 +32,7 @@ func jsonArraysSemanticallyEqual(left: JsonArrayValue, right: JsonArrayValue): B
     true
 }
 
-func jsonObjectsSemanticallyEqual(left: JsonObjectValue, right: JsonObjectValue): Bool {
+func jsonObjectsSemanticallyEqual(left: JsonObject, right: JsonObject): Bool {
     if (left.size() != right.size()) {
         return false
     }
@@ -48,7 +48,7 @@ func jsonObjectsSemanticallyEqual(left: JsonObjectValue, right: JsonObjectValue)
 }
 
 func jsonRoundtripSemanticsEqual(input: String, output: String): Bool {
-    jsonValuesSemanticallyEqual(YJson.parse(input), YJson.parse(output))
+    jsonValuesSemanticallyEqual(JsonNode.parse(input), JsonNode.parse(output))
 }
 
 @Test
@@ -215,58 +215,58 @@ class JsonSerializerComplianceTest {
 
     @TestCase
     func serializeEmptyArray(): Unit {
-        let emptyArr = JsonArrayValue()
+        let emptyArr = JsonArray()
         @Expect(emptyArr.toString(), "[]")
         @Expect(emptyArr.toPrettyString(), "[]")
     }
 
     @TestCase
     func serializeSingleElementArray(): Unit {
-        let arr = JsonArrayValue().add(JsonIntValue(1))
+        let arr = JsonArray().add(JsonIntValue(1))
         @Expect(arr.toString(), "[1]")
     }
 
     @TestCase
     func serializeMultipleElementArray(): Unit {
-        let arr = JsonArrayValue().add(JsonIntValue(1)).add(JsonIntValue(2)).add(JsonIntValue(3))
+        let arr = JsonArray().add(JsonIntValue(1)).add(JsonIntValue(2)).add(JsonIntValue(3))
         @Expect(arr.toString(), "[1,2,3]")
     }
 
     @TestCase
     func serializeMixedTypeArray(): Unit {
-        let arr = JsonArrayValue()
+        let arr = JsonArray()
             .add(JsonNullValue())
             .add(JsonBoolValue(true))
             .add(JsonIntValue(1))
             .add(JsonStringValue("a"))
-            .add(JsonArrayValue())
+            .add(JsonArray())
         @Expect(arr.toString(), "[null,true,1,\"a\",[]]")
     }
 
     @TestCase
     func serializeNestedArray(): Unit {
-        let inner = JsonArrayValue().add(JsonIntValue(1)).add(JsonIntValue(2))
-        let outer = JsonArrayValue().add(inner).add(JsonIntValue(3))
+        let inner = JsonArray().add(JsonIntValue(1)).add(JsonIntValue(2))
+        let outer = JsonArray().add(inner).add(JsonIntValue(3))
         @Expect(outer.toString(), "[[1,2],3]")
     }
 
     @TestCase
     func serializeEmptyObject(): Unit {
-        let emptyObj = JsonObjectValue()
+        let emptyObj = JsonObject()
         @Expect(emptyObj.toString(), "{}")
         @Expect(emptyObj.toPrettyString(), "{}")
     }
 
     @TestCase
     func serializeSingleFieldObject(): Unit {
-        let obj = JsonObjectValue()
+        let obj = JsonObject()
         obj.put("a", JsonIntValue(1))
         @Expect(obj.toString(), "{\"a\":1}")
     }
 
     @TestCase
     func serializeMultipleFieldObject(): Unit {
-        let obj = JsonObjectValue()
+        let obj = JsonObject()
         obj.put("a", JsonIntValue(1))
         obj.put("b", JsonIntValue(2))
         obj.put("c", JsonIntValue(3))
@@ -281,23 +281,23 @@ class JsonSerializerComplianceTest {
 
     @TestCase
     func serializeNestedObject(): Unit {
-        let inner = JsonObjectValue()
+        let inner = JsonObject()
         inner.put("b", JsonIntValue(2))
-        let outer = JsonObjectValue()
+        let outer = JsonObject()
         outer.put("a", inner)
         @Expect(outer.toString(), "{\"a\":{\"b\":2}}")
     }
 
     @TestCase
     func serializeObjectWithSpecialKey(): Unit {
-        let obj = JsonObjectValue()
+        let obj = JsonObject()
         obj.put("a\"b", JsonIntValue(1))
         @Expect(obj.toString(), "{\"a\\\"b\":1}")
     }
 
     @TestCase
     func serializeObjectWithChineseKey(): Unit {
-        let obj = JsonObjectValue()
+        let obj = JsonObject()
         obj.put("名字", JsonIntValue(1))
         @Expect(obj.toString(), "{\"名字\":1}")
     }
@@ -305,7 +305,7 @@ class JsonSerializerComplianceTest {
     @TestCase
     func roundtripNull(): Unit {
         let input = "null"
-        let parsed = YJson.parse(input)
+        let parsed = JsonNode.parse(input)
         let output = parsed.toString()
         @Expect(output, input)
     }
@@ -313,7 +313,7 @@ class JsonSerializerComplianceTest {
     @TestCase
     func roundtripTrue(): Unit {
         let input = "true"
-        let parsed = YJson.parse(input)
+        let parsed = JsonNode.parse(input)
         let output = parsed.toString()
         @Expect(output, input)
     }
@@ -321,7 +321,7 @@ class JsonSerializerComplianceTest {
     @TestCase
     func roundtripFalse(): Unit {
         let input = "false"
-        let parsed = YJson.parse(input)
+        let parsed = JsonNode.parse(input)
         let output = parsed.toString()
         @Expect(output, input)
     }
@@ -329,7 +329,7 @@ class JsonSerializerComplianceTest {
     @TestCase
     func roundtripInteger(): Unit {
         let input = "123"
-        let parsed = YJson.parse(input)
+        let parsed = JsonNode.parse(input)
         let output = parsed.toString()
         @Expect(output, input)
     }
@@ -337,7 +337,7 @@ class JsonSerializerComplianceTest {
     @TestCase
     func roundtripFloat(): Unit {
         let input = "1.5"
-        let parsed = YJson.parse(input)
+        let parsed = JsonNode.parse(input)
         let output = parsed.toString()
         @Expect(output, input)
     }
@@ -345,7 +345,7 @@ class JsonSerializerComplianceTest {
     @TestCase
     func roundtripString(): Unit {
         let input = "\"hello\""
-        let parsed = YJson.parse(input)
+        let parsed = JsonNode.parse(input)
         let output = parsed.toString()
         @Expect(output, input)
     }
@@ -353,7 +353,7 @@ class JsonSerializerComplianceTest {
     @TestCase
     func roundtripEmptyArray(): Unit {
         let input = "[]"
-        let parsed = YJson.parse(input)
+        let parsed = JsonNode.parse(input)
         let output = parsed.toString()
         @Expect(output, input)
     }
@@ -361,7 +361,7 @@ class JsonSerializerComplianceTest {
     @TestCase
     func roundtripArray(): Unit {
         let input = "[1,2,3]"
-        let parsed = YJson.parse(input)
+        let parsed = JsonNode.parse(input)
         let output = parsed.toString()
         @Expect(output, input)
     }
@@ -369,7 +369,7 @@ class JsonSerializerComplianceTest {
     @TestCase
     func roundtripEmptyObject(): Unit {
         let input = "{}"
-        let parsed = YJson.parse(input)
+        let parsed = JsonNode.parse(input)
         let output = parsed.toString()
         @Expect(output, input)
     }
@@ -377,7 +377,7 @@ class JsonSerializerComplianceTest {
     @TestCase
     func roundtripSimpleObject(): Unit {
         let input = "{\"a\":1}"
-        let parsed = YJson.parse(input)
+        let parsed = JsonNode.parse(input)
         let output = parsed.toString()
         @Expect(output, input)
     }
@@ -385,7 +385,7 @@ class JsonSerializerComplianceTest {
     @TestCase
     func roundtripNestedStructure(): Unit {
         let input = "{\"arr\":[1,2],\"obj\":{\"x\":3}}"
-        let parsed = YJson.parse(input)
+        let parsed = JsonNode.parse(input)
         let output = parsed.toString()
         @Expect(jsonRoundtripSemanticsEqual(input, output))
     }
@@ -393,7 +393,7 @@ class JsonSerializerComplianceTest {
     @TestCase
     func roundtripComplexStructure(): Unit {
         let input = "{\"null\":null,\"bool\":true,\"int\":123,\"float\":1.5,\"str\":\"hello\",\"arr\":[1,\"a\"],\"obj\":{\"x\":1}}"
-        let parsed = YJson.parse(input)
+        let parsed = JsonNode.parse(input)
         let output = parsed.toString()
         @Expect(jsonRoundtripSemanticsEqual(input, output))
     }
@@ -401,7 +401,7 @@ class JsonSerializerComplianceTest {
     @TestCase
     func roundtripEscapedString(): Unit {
         let input = "\"a\\\"b\\\\c\\n\\t\""
-        let parsed = YJson.parse(input)
+        let parsed = JsonNode.parse(input)
         let output = parsed.toString()
         @Expect(output, input)
     }
@@ -409,9 +409,9 @@ class JsonSerializerComplianceTest {
     @TestCase
     func roundtripUnicodeString(): Unit {
         let input = "\"\\u0041\\u4e2d\""
-        let parsed = YJson.parse(input)
+        let parsed = JsonNode.parse(input)
         let output = parsed.toString()
-        @Expect(parsed.asString().value, "A中")
+        @Expect(parsed.asString(), "A中")
         @Expect(jsonRoundtripSemanticsEqual(input, output))
     }
 
@@ -423,7 +423,7 @@ class JsonSerializerComplianceTest {
 
     @TestCase
     func toPrettyStringArray(): Unit {
-        let arr = JsonArrayValue().add(JsonIntValue(1)).add(JsonIntValue(2))
+        let arr = JsonArray().add(JsonIntValue(1)).add(JsonIntValue(2))
         let pretty = arr.toPrettyString("  ")
         @Expect(pretty.contains("\n"))
         @Expect(pretty.contains("  1"))
@@ -432,7 +432,7 @@ class JsonSerializerComplianceTest {
 
     @TestCase
     func toPrettyStringObject(): Unit {
-        let obj = JsonObjectValue()
+        let obj = JsonObject()
         obj.put("a", JsonIntValue(1))
         obj.put("b", JsonIntValue(2))
         let pretty = obj.toPrettyString("  ")
@@ -446,36 +446,32 @@ class JsonSerializerComplianceTest {
 class JsonValueConversionTest {
     @TestCase
     func asNullConversion(): Unit {
-        let value = YJson.parse("null")
-        let nullValue = value.asNull()
-        @Expect(nullValue.kind(), JsNull)
+        let value = JsonNode.parse("null")
+        @Expect(value.kind(), JsonKind.Null)
+        @Expect(value.isNull)
     }
 
     @TestCase
-    func asNullRejectsNonNull(): Unit {
-        var caughtException = false
-        try {
-            let _ = YJson.parse("true").asNull()
-        } catch (_: JsonException) {
-            caughtException = true
-        }
-        @Expect(caughtException)
+    func nullCheckRejectsNonNull(): Unit {
+        let value = JsonNode.parse("true")
+        @Expect(value.kind(), JsonKind.Boolean)
+        @Expect(!value.isNull)
     }
 
     @TestCase
     func asBoolConversion(): Unit {
-        let trueValue = YJson.parse("true").asBool()
-        @Expect(trueValue.value, true)
+        let trueValue = JsonNode.parse("true").asBool()
+        @Expect(trueValue, true)
 
-        let falseValue = YJson.parse("false").asBool()
-        @Expect(falseValue.value, false)
+        let falseValue = JsonNode.parse("false").asBool()
+        @Expect(falseValue, false)
     }
 
     @TestCase
     func asBoolRejectsNonBool(): Unit {
         var caughtException = false
         try {
-            let _ = YJson.parse("null").asBool()
+            let _ = JsonNode.parse("null").asBool()
         } catch (_: JsonException) {
             caughtException = true
         }
@@ -484,15 +480,15 @@ class JsonValueConversionTest {
 
     @TestCase
     func asIntConversion(): Unit {
-        let intValue = YJson.parse("123").asInt()
-        @Expect(intValue.value, 123)
+        let intValue = JsonNode.parse("123").asInt64()
+        @Expect(intValue, 123)
     }
 
     @TestCase
     func asIntRejectsNonInt(): Unit {
         var caughtException = false
         try {
-            let _ = YJson.parse("\"hello\"").asInt()
+            let _ = JsonNode.parse("\"hello\"").asInt64()
         } catch (_: JsonException) {
             caughtException = true
         }
@@ -502,21 +498,21 @@ class JsonValueConversionTest {
     @TestCase
     func asFloatFromInt(): Unit {
         // Int can be converted to Float
-        let floatValue = YJson.parse("123").asFloat()
-        @Expect(floatValue.value, 123.0)
+        let floatValue = JsonNode.parse("123").asFloat64()
+        @Expect(floatValue, 123.0)
     }
 
     @TestCase
     func asFloatFromFloat(): Unit {
-        let floatValue = YJson.parse("1.5").asFloat()
-        @Expect(floatValue.value, 1.5)
+        let floatValue = JsonNode.parse("1.5").asFloat64()
+        @Expect(floatValue, 1.5)
     }
 
     @TestCase
     func asFloatRejectsNonNumeric(): Unit {
         var caughtException = false
         try {
-            let _ = YJson.parse("true").asFloat()
+            let _ = JsonNode.parse("true").asFloat64()
         } catch (_: JsonException) {
             caughtException = true
         }
@@ -525,15 +521,15 @@ class JsonValueConversionTest {
 
     @TestCase
     func asStringConversion(): Unit {
-        let stringValue = YJson.parse("\"hello\"").asString()
-        @Expect(stringValue.value, "hello")
+        let stringValue = JsonNode.parse("\"hello\"").asString()
+        @Expect(stringValue, "hello")
     }
 
     @TestCase
     func asStringRejectsNonString(): Unit {
         var caughtException = false
         try {
-            let _ = YJson.parse("123").asString()
+            let _ = JsonNode.parse("123").asString()
         } catch (_: JsonException) {
             caughtException = true
         }
@@ -542,7 +538,7 @@ class JsonValueConversionTest {
 
     @TestCase
     func asArrayConversion(): Unit {
-        let arrValue = YJson.parse("[1,2,3]").asArray()
+        let arrValue = JsonNode.parse("[1,2,3]").asArray()
         @Expect(arrValue.size(), 3)
     }
 
@@ -550,7 +546,7 @@ class JsonValueConversionTest {
     func asArrayRejectsNonArray(): Unit {
         var caughtException = false
         try {
-            let _ = YJson.parse("{}").asArray()
+            let _ = JsonNode.parse("{}").asArray()
         } catch (_: JsonException) {
             caughtException = true
         }
@@ -559,7 +555,7 @@ class JsonValueConversionTest {
 
     @TestCase
     func asObjectConversion(): Unit {
-        let objValue = YJson.parse("{\"a\":1}").asObject()
+        let objValue = JsonNode.parse("{\"a\":1}").asObject()
         @Expect(objValue.contains("a"))
     }
 
@@ -567,7 +563,7 @@ class JsonValueConversionTest {
     func asObjectRejectsNonObject(): Unit {
         var caughtException = false
         try {
-            let _ = YJson.parse("[1]").asObject()
+            let _ = JsonNode.parse("[1]").asObject()
         } catch (_: JsonException) {
             caughtException = true
         }
@@ -576,28 +572,28 @@ class JsonValueConversionTest {
 
     @TestCase
     func asNumberLiteralFromInt(): Unit {
-        let literal = YJson.parse("123").asNumberLiteral()
-        @Expect(literal.literal, "123")
+        let literal = JsonNode.parse("123").asNumberText()
+        @Expect(literal, "123")
     }
 
     @TestCase
     func asNumberLiteralFromFloat(): Unit {
-        let literal = YJson.parse("1.5").asNumberLiteral()
-        @Expect(literal.literal, "1.5")
+        let literal = JsonNode.parse("1.5").asNumberText()
+        @Expect(literal, "1.5")
     }
 
     @TestCase
     func asNumberLiteralFromOverflow(): Unit {
         // Overflow number should already be NumberLiteral
-        let literal = YJson.parse("9223372036854775808").asNumberLiteral()
-        @Expect(literal.literal, "9223372036854775808")
+        let literal = JsonNode.parse("9223372036854775808").asNumberText()
+        @Expect(literal, "9223372036854775808")
     }
 
     @TestCase
     func asNumberLiteralRejectsNonNumeric(): Unit {
         var caughtException = false
         try {
-            let _ = YJson.parse("true").asNumberLiteral()
+            let _ = JsonNode.parse("true").asNumberText()
         } catch (_: JsonException) {
             caughtException = true
         }

@@ -198,6 +198,19 @@ static void test_parse_int64_array(void) {
     assert(error >= 0);
 }
 
+static void test_numeric_array_chunk_falls_back_after_integer_prefix(void) {
+    static const char text[] =
+        "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,\"tail\"]";
+    uint64_t tokens[32 * 4] = {0};
+    int64_t next = -1, count = -1, done = -1, error = -1;
+    assert(YJ_JSON_ScanNumericArrayChunk(
+               (const uint8_t *)text, (int64_t)strlen(text), 0,
+               YJ_JSON_SCAN_VALIDATE_STRINGS, tokens, 32,
+               &next, &count, &done, &error) == YJ_JSON_SCAN_FALLBACK);
+    assert(count == 16 && done == 0 && error == -1);
+    assert(next >= 0 && text[next] == '"');
+}
+
 int main(void) {
     assert(YJ_JSON_ProbeV1() == YJ_JSON_ACCEL_PROBE_V1);
     test_skip_nested_value();
@@ -212,6 +225,7 @@ int main(void) {
     test_escape_string_token();
     test_format_int64_array();
     test_parse_int64_array();
+    test_numeric_array_chunk_falls_back_after_integer_prefix();
     puts("yjson scanner targeted tests passed");
     return 0;
 }

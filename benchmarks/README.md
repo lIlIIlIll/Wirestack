@@ -7,8 +7,8 @@ API，也不能单独证明语义正确。
 
 | 路径 | 作用 |
 | --- | --- |
-| `packages/benchmarks` | yjson、stdx.json typed workload |
-| `packages/backend_benchmarks` | AST / Compact / Native DOM workload |
+| `packages/benchmarks` | yjson、stdx.json typed workload，以及 JSONPath/Schema API 对照 |
+| `packages/backend_benchmarks` | AST / managed document / Native/yyjson workload |
 | `cjfast_json` | cjfast_json typed adapter |
 | `java_fastjson2` | fastjson2 adapter |
 | `scripts/json_perf_baseline.py` | 统一采集 schema |
@@ -41,20 +41,25 @@ representation 或 lifecycle 拼成统一排名。
 | `*EscapedUnicodeString` | 含控制字符、反斜杠和非 ASCII 文本的 encode |
 | `parseStringRecords*` | `YJson.parseDocument(String)`，分别使用 64 KiB 和 1 MiB 文档 |
 | `parseBytesRecords*` | `YJson.parseDocument(Array<Byte>)`，使用相同文档 |
-| `decode*Chunk4k` | `YJson.fromStream`，输入由 4096-byte chunk 提供 |
-| `encode*Memory` | `YJson.toStream` 写入 caller-owned memory stream |
+| `decode*Chunk4k` | `YJson.fromJson(InputStream)`，输入由 4096-byte chunk 提供 |
+| `encode*Memory` | `YJson.writeJson` 写入 caller-owned memory stream |
 
 同一 benchmark class 还包含三个 XL scale workload，用于观察输入规模扩大后的热点：
 
 | Case | 数据形状 | API |
 | --- | --- | --- |
-| `*XlProfileArray` | 1024 个 `ProfileRecord` | `encodeStringWith` / `decodeStringWith` 与一次解析的 typed list codec |
-| `*XlInt64Map` | 一个包含 1024 个 entry 的 `HashMap<String, Int64>` | `encodeStringWith` / `decodeStringWith` 与专用 Int64 map codec |
-| `*XlDeepNestedProfiles` | 64 组 × 每组 16 条记录，共 1024 条 | `encodeStringWith` / `decodeStringWith` 与递归 typed codec |
+| `*XlProfileArray` | 1024 个 `ProfileRecord` | `YJson.toJson/fromJson` + 显式 typed list codec |
+| `*XlInt64Map` | 一个包含 1024 个 entry 的 `HashMap<String, Int64>` | `YJson.toJson/fromJson` + Int64 map codec |
+| `*XlDeepNestedProfiles` | 64 组 × 每组 16 条记录，共 1024 条 | `YJson.toJson/fromJson` + 递归 typed codec |
 
 XL case 使用构造阶段解析一次的具体 codec，元素循环内不做 codec resolution。它们是 yjson
 内部规模分析 workload。只有 peer 提供等语义数据形状和对应最优 typed API 时，才能进入
 跨库共同结果表。
+
+`AlgorithmOptimizationBenchmarks` 使用同一输入检查三项设计边界：在 view 上早停、collect
+全部匹配后取首项、materialize 后再查询；以及 Schema compile-once validation 与每次重新
+parse Schema。fixture 在计时前验证结果一致。该组用于回归方向，不与 typed codec 或 DOM
+backend 排名混合。
 
 在 Linux Server 上运行完整矩阵：
 

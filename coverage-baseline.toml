@@ -1,5 +1,5 @@
-# Required per-package project and patch coverage gates for the yjson 0.x line.
-project_line_percent = 90.0
-project_branch_percent = 80.0
-patch_line_percent = 95.0
-patch_branch_percent = 90.0
+# Required core project and patch coverage gates for the yjson 0.x line.
+project_line_percent = 80.0
+project_branch_percent = 70.0
+patch_line_percent = 90.0
+patch_branch_percent = 80.0

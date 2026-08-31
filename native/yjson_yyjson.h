@@ -45,10 +45,41 @@ int32_t YJ_Yyjson_ParseWithLimits(const uint8_t *input, int64_t length,
 void YJ_Yyjson_Free(uint64_t handle);
 
 uint64_t YJ_Yyjson_TraversalChecksum(uint64_t handle);
-int32_t YJ_Yyjson_RootSize(uint64_t handle, uint64_t *out_size);
-int32_t YJ_Yyjson_ObjectLookupInt(uint64_t handle,
-                                 const uint8_t *key, uint64_t key_length,
-                                 int64_t *out_value, uint32_t *out_found);
+/* Generic read-only value ABI. A node token is document-local and remains
+ * valid only while the document handle is open. Object scalar values may be
+ * returned inline; UINT32_MAX in out_inline_kind means out_node is used. */
+int32_t YJ_Yyjson_Root(uint64_t handle, uint64_t *out_node);
+int32_t YJ_Yyjson_Kind(uint64_t handle, uint64_t node, uint32_t *out_kind);
+int32_t YJ_Yyjson_Size(uint64_t handle, uint64_t node, uint64_t *out_size);
+int32_t YJ_Yyjson_GetInt(uint64_t handle, uint64_t node, int64_t *out_value);
+int32_t YJ_Yyjson_GetBool(uint64_t handle, uint64_t node, uint32_t *out_value);
+int32_t YJ_Yyjson_GetTextSize(uint64_t handle, uint64_t node,
+                             uint64_t *out_size);
+int32_t YJ_Yyjson_CopyText(uint64_t handle, uint64_t node,
+                          uint8_t *output, uint64_t output_capacity,
+                          uint64_t *out_written);
+int32_t YJ_Yyjson_GetInlineTextSize(uint64_t handle, uint64_t reference,
+                                   uint64_t *out_size);
+int32_t YJ_Yyjson_CopyInlineText(uint64_t handle, uint64_t reference,
+                                uint8_t *output, uint64_t output_capacity,
+                                uint64_t *out_written);
+int32_t YJ_Yyjson_ArrayGet(uint64_t handle, uint64_t node, uint64_t index,
+                          uint64_t *out_node);
+int32_t YJ_Yyjson_ObjectEntry(uint64_t handle, uint64_t node, uint64_t index,
+                             uint64_t *out_value_node,
+                             uint32_t *out_inline_kind,
+                             uint64_t *out_inline_payload,
+                             uint64_t *out_key_size);
+int32_t YJ_Yyjson_CopyObjectKey(uint64_t handle, uint64_t node,
+                               uint64_t index, uint8_t *output,
+                               uint64_t output_capacity,
+                               uint64_t *out_written);
+int32_t YJ_Yyjson_ObjectLookup(uint64_t handle, uint64_t node,
+                              const uint8_t *key, uint64_t key_length,
+                              uint64_t *out_value_node,
+                              uint32_t *out_inline_kind,
+                              uint64_t *out_inline_payload,
+                              uint32_t *out_found);
 
 int32_t YJ_Yyjson_SerializeAlloc(uint64_t handle,
                                 uint64_t *out_buffer_handle,
@@ -75,6 +106,8 @@ void YJ_Yyjson_FreeOwnedBuffer(uint64_t buffer_handle);
 int32_t YJ_Yyjson_Stats(uint64_t handle, uint64_t *stats, uint64_t capacity);
 
 #if defined(YJ_TESTING)
+void YJ_Yyjson_TestResetNavigationRestarts(void);
+uint64_t YJ_Yyjson_TestNavigationRestarts(void);
 /* Test-only proof that the adapter is bound to its vendored yyjson build. */
 uint32_t YJ_Yyjson_TestVendoredVersion(void);
 #endif

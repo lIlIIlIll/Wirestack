@@ -2,87 +2,58 @@ package yjson
 
 import std.io.*
 
-public class JsonWriteLimits {
-    public let maxDepth: Int64
-    public let maxBytes: Int64
-
-    public init(maxDepth!: Int64 = 256, maxBytes!: Int64 = 0) {
-        if (maxDepth <= 0) { throw IllegalArgumentException("maxDepth must be positive") }
-        if (maxBytes < 0) { throw IllegalArgumentException("maxBytes must not be negative") }
-        this.maxDepth = maxDepth
-        this.maxBytes = maxBytes
-    }
-
-    public static let defaults: JsonWriteLimits = JsonWriteLimits()
-}
-
-public class JsonWriteConfig {
-    public let newline: String
+/// Immutable options for serializing JSON.
+public class JsonWriteOptions {
     public let indent: String
-    public let useSpaceAfterSeparators: Bool
     public let htmlSafe: Bool
-    public let includeErrorLocation: Bool
-    public let limits: JsonWriteLimits
+    public let maxOutputBytes: Int64
     public let maxDepth: Int64
-    public let maxBytes: Int64
+    let newline: String
+    let useSpaceAfterSeparators: Bool
 
     public init(
-        newline: String,
-        indent: String,
-        useSpaceAfterSeparators: Bool,
-        htmlSafe: Bool,
-        includeErrorLocation!: Bool = true,
-        limits!: JsonWriteLimits = JsonWriteLimits.defaults
+        indent!: String = "",
+        htmlSafe!: Bool = false,
+        maxOutputBytes!: Int64 = 0,
+        maxDepth!: Int64 = 256
     ) {
-        this.newline = newline
+        if (maxDepth <= 0) { throw IllegalArgumentException("maxDepth must be positive") }
+        if (maxOutputBytes < 0) { throw IllegalArgumentException("maxOutputBytes must not be negative") }
+        validateJsonIndent(indent)
         this.indent = indent
-        this.useSpaceAfterSeparators = useSpaceAfterSeparators
         this.htmlSafe = htmlSafe
-        this.includeErrorLocation = includeErrorLocation
-        this.limits = limits
-        this.maxDepth = limits.maxDepth
-        this.maxBytes = limits.maxBytes
+        this.maxOutputBytes = maxOutputBytes
+        this.maxDepth = maxDepth
+        this.newline = if (indent.isEmpty()) { "" } else { "\n" }
+        this.useSpaceAfterSeparators = !indent.isEmpty()
     }
 
-    public static let compact: JsonWriteConfig = JsonWriteConfig(
-        "",
-        "",
-        false,
-        false
-    )
+    public static let defaults: JsonWriteOptions = JsonWriteOptions()
+    public static let compact: JsonWriteOptions = JsonWriteOptions()
 
-    public static let pretty: JsonWriteConfig = JsonWriteConfig(
-        "\n",
-        "    ",
-        true,
-        false
-    )
-}
-
-public class JsonCodecConfig {
-    public let read: JsonReadConfig
-    public let write: JsonWriteConfig
-
-    public init(
-        read!: JsonReadConfig = JsonReadConfig.defaults,
-        write!: JsonWriteConfig = JsonWriteConfig.compact
-    ) {
-        this.read = read
-        this.write = write
+    public static func pretty(indent!: String = "  "): JsonWriteOptions {
+        JsonWriteOptions(indent: indent)
     }
 
-    public static let compact: JsonCodecConfig = JsonCodecConfig()
-    public static let pretty: JsonCodecConfig = JsonCodecConfig(write: JsonWriteConfig.pretty)
+    public static let htmlSafePreset: JsonWriteOptions = JsonWriteOptions(htmlSafe: true)
 }
 
-func writeJsonValueToString(value: JsonNode, config: JsonWriteConfig): String {
-    let writer = JsonDirectWriter(config)
+private func validateJsonIndent(indent: String): Unit {
+    for (value in indent.toRuneArray()) {
+        if (value != r' ' && value != r'\t') {
+            throw IllegalArgumentException("indent may contain only spaces or tabs")
+        }
+    }
+}
+
+func writeJsonValueToString(value: JsonNode, options: JsonWriteOptions): String {
+    let writer = JsonDirectWriter(options)
     writeJsonNodeToCodecWriter(writer, value)
     writer.finishString()
 }
 
-func writeJsonValueToStream(value: JsonNode, out: OutputStream, config: JsonWriteConfig): Unit {
-    let writer = JsonDirectWriter(out, config: config)
+func writeJsonValueToStream(value: JsonNode, out: OutputStream, options: JsonWriteOptions): Unit {
+    let writer = JsonDirectWriter(out, config: options)
     writeJsonNodeToCodecWriter(writer, value)
     writer.finish()
 }

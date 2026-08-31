@@ -74,7 +74,7 @@ class JsonHeapObservationTest {
         let before = getAllocatedHeapSize()
 
         let json = "{\"a\":1,\"b\":\"test\"}"
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
 
         let after = getAllocatedHeapSize()
         let delta = after - before
@@ -93,7 +93,7 @@ class JsonHeapObservationTest {
         let before = getAllocatedHeapSize()
 
         let json = generateMemoryTestJson(500)
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
 
         let after = getAllocatedHeapSize()
         let delta = after - before
@@ -109,7 +109,7 @@ class JsonHeapObservationTest {
         let before = getAllocatedHeapSize()
 
         let json = generateMemoryTestJson(2000)
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
 
         let after = getAllocatedHeapSize()
         let delta = after - before
@@ -127,12 +127,12 @@ class JsonHeapObservationTest {
         let before = getAllocatedHeapSize()
 
         let json = generateMemoryTestString(stringSize)
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
 
         let after = getAllocatedHeapSize()
         let delta = after - before
 
-        @Expect(value.asObject().get("largeString").getOrThrow().asString().value.size == stringSize)
+        @Expect(value.asObject().get("largeString").getOrThrow().asString().size == stringSize)
 
         println("Large string (${stringSize} chars) memory delta: ${delta} bytes")
     }
@@ -145,7 +145,7 @@ class JsonHeapObservationTest {
         let before = getAllocatedHeapSize()
 
         let json = generateMemoryTestWideObject(fieldCount)
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
 
         let after = getAllocatedHeapSize()
         let delta = after - before
@@ -163,7 +163,7 @@ class JsonHeapObservationTest {
         let before = getAllocatedHeapSize()
 
         let json = generateMemoryTestDeepNesting(depth)
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
 
         let after = getAllocatedHeapSize()
         let delta = after - before
@@ -173,7 +173,7 @@ class JsonHeapObservationTest {
         for (_ in 0..depth) {
             current = current.asObject().get("nested").getOrThrow()
         }
-        @Expect(current.kind() == JsonKind.JsNull)
+        @Expect(current.kind() == JsonKind.Null)
 
         println("Deep nesting (${depth} levels) memory delta: ${delta} bytes")
     }
@@ -195,7 +195,7 @@ class JsonHeapStabilityObservationTest {
         let before = getAllocatedHeapSize()
 
         for (_ in 0..iterations) {
-            let _ = YJson.parse(json)
+            let _ = JsonNode.parse(json)
         }
 
         let after = getAllocatedHeapSize()
@@ -204,7 +204,7 @@ class JsonHeapStabilityObservationTest {
         println("Repeated parse (${iterations} times) memory delta: ${delta} bytes")
 
         // 验证最后一次解析有效
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
         @Expect(value.asArray().size() == 100)
     }
 
@@ -217,7 +217,7 @@ class JsonHeapStabilityObservationTest {
 
         for (i in 0..iterations) {
             let json = generateMemoryTestJson(i * 5 + 10)
-            let _ = YJson.parse(json)
+            let _ = JsonNode.parse(json)
         }
 
         let after = getAllocatedHeapSize()
@@ -229,7 +229,7 @@ class JsonHeapStabilityObservationTest {
     /// 测试序列化后的内存稳定性
     @TestCase
     func repeatedSerializeSameValue(): Unit {
-        let arr = JsonArrayValue()
+        let arr = JsonArray()
         for (i in 0..200) {
             arr.add(JsonIntValue(i))
         }
@@ -257,7 +257,7 @@ class JsonHeapStabilityObservationTest {
         let before = getAllocatedHeapSize()
 
         for (_ in 0..iterations) {
-            let value = YJson.parse(json)
+            let value = JsonNode.parse(json)
             let _ = value.toString()
         }
 
@@ -266,7 +266,7 @@ class JsonHeapStabilityObservationTest {
 
         println("Repeated roundtrip (${iterations} times) memory delta: ${delta} bytes")
 
-        @Expect(YJson.parse(json).asObject().get("data").getOrThrow().asArray().size() == 5)
+        @Expect(JsonNode.parse(json).asObject().get("data").getOrThrow().asArray().size() == 5)
     }
 
     /// 测试大量小对象创建和释放
@@ -275,7 +275,7 @@ class JsonHeapStabilityObservationTest {
         let before = getAllocatedHeapSize()
 
         for (i in 0..1000) {
-            let obj = JsonObjectValue()
+            let obj = JsonObject()
             obj.put("id", JsonIntValue(i))
             obj.put("name", JsonStringValue("item_${i}"))
             let _ = obj.toString()
@@ -303,7 +303,7 @@ class JsonHeapChangeObservationTest {
         let before = getAllocatedHeapSize()
 
         // 解析大型数组
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
 
         let peak = getAllocatedHeapSize()
 
@@ -316,7 +316,7 @@ class JsonHeapChangeObservationTest {
     /// 测试序列化过程中的峰值
     @TestCase
     func serializeLargeStructurePeak(): Unit {
-        let arr = JsonArrayValue()
+        let arr = JsonArray()
         for (i in 0..2000) {
             arr.add(JsonIntValue(i))
         }
@@ -333,7 +333,7 @@ class JsonHeapChangeObservationTest {
     /// 测试流式写入的内存峰值
     @TestCase
     func streamWritePeak(): Unit {
-        let obj = JsonObjectValue()
+        let obj = JsonObject()
         for (i in 0..1000) {
             obj.put("field_${i}", JsonIntValue(i))
         }
@@ -341,7 +341,7 @@ class JsonHeapChangeObservationTest {
         let before = getAllocatedHeapSize()
 
         let output = MemoryOutputStream()
-        writeJsonValueToStream(obj, output, JsonWriteConfig.compact)
+        writeJsonValueToStream(obj, output, JsonWriteOptions.compact)
 
         let peak = getAllocatedHeapSize()
 
@@ -366,7 +366,7 @@ class JsonInputSizeHeapObservationTest {
             let inputSize = json.size
 
             let before = getAllocatedHeapSize()
-            let value = YJson.parse(json)
+            let value = JsonNode.parse(json)
             let after = getAllocatedHeapSize()
 
             let memoryDelta = after - before
@@ -389,7 +389,7 @@ class JsonInputSizeHeapObservationTest {
             let inputSize = json.size
 
             let before = getAllocatedHeapSize()
-            let value = YJson.parse(json)
+            let value = JsonNode.parse(json)
             let after = getAllocatedHeapSize()
 
             let memoryDelta = after - before
@@ -397,7 +397,7 @@ class JsonInputSizeHeapObservationTest {
 
             println("String ${size}: input ${inputSize} bytes, memory delta ${memoryDelta} bytes, ratio ${ratio}")
 
-            @Expect(value.asObject().get("largeString").getOrThrow().asString().value.size == size)
+            @Expect(value.asObject().get("largeString").getOrThrow().asString().size == size)
         }
     }
 }
@@ -433,7 +433,7 @@ class JsonHeapInfoTest {
         println("  Used: ${getUsedHeapSize()}")
 
         let json = generateMemoryTestJson(1000)
-        let value = YJson.parse(json)
+        let value = JsonNode.parse(json)
 
         println("After parse:")
         println("  Allocated: ${getAllocatedHeapSize()}")
@@ -457,7 +457,7 @@ class JsonRepeatedAllocationSmokeTest {
 
         for (i in 0..50) {
             let json = generateMemoryTestJson(i * 20 + 20)
-            let value = YJson.parse(json)
+            let value = JsonNode.parse(json)
             @Expect(value.asArray().size() == i * 20 + 20)
         }
 
@@ -471,7 +471,7 @@ class JsonRepeatedAllocationSmokeTest {
         let before = getAllocatedHeapSize()
 
         for (i in 0..50) {
-            let arr = JsonArrayValue()
+            let arr = JsonArray()
             for (j in 0..i * 10 + 10) {
                 arr.add(JsonIntValue(j))
             }

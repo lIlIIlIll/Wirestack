@@ -3,6 +3,7 @@ package yjson_backend_benchmarks
 import std.unittest.*
 import std.unittest.testmacro.*
 import yjson.*
+import yjson_backends.*
 import yjson_native.*
 import yjson_yyjson.*
 
@@ -23,35 +24,62 @@ func backendFixtureBytes(entryCount: Int64): Array<Byte> {
 }
 
 func astTarget(root: JsonNode): Int64 {
-    root.asObject().get("target").getOrThrow().asInt().value
+    root.asObject().get("target").getOrThrow().asInt64()
+}
+
+func viewTarget(root: JsonValueView): Int64 {
+    root.member("target").getOrThrow().asInt64()
+}
+
+func traversalChecksum(value: JsonValueView): Int64 {
+    var checksum: Int64 = 0
+    match (value.kind()) {
+        case JsonKind.Array =>
+            for (index in 0..value.size()) {
+                checksum = checksum ^ index ^ traversalChecksum(value.element(index).getOrThrow())
+            }
+        case JsonKind.Object =>
+            for (index in 0..value.size()) {
+                checksum = checksum ^ index ^ Int64(value.memberName(index).hashCode())
+                checksum = checksum ^ traversalChecksum(value.memberValue(index))
+            }
+        case JsonKind.String => checksum = Int64(value.asString().hashCode())
+        case JsonKind.Number => checksum = Int64(value.asNumberText().hashCode())
+        case JsonKind.Boolean => checksum = if (value.asBool()) { 1 } else { 0 }
+        case JsonKind.Null => checksum = -1
+    }
+    checksum
 }
 
 class BackendDomFixture {
     let bytes: Array<Byte>
     let ast: JsonNode
-    let compact: CompactJsonDocument
-    let native: NativeCompactJsonDocument
-    let yyjson: YyjsonCompactJsonDocument
+    let compact: JsonDocument
+    let native: BackendJsonDocument
+    let yyjson: BackendJsonDocument
 
     init(entryCount: Int64) {
         bytes = backendFixtureBytes(entryCount)
-        ast = YJson.parse(bytes)
-        compact = CompactJsonDocument.parse(bytes)
-        native = NativeCompactJsonDocument.parse(bytes)
-        yyjson = YyjsonCompactJsonDocument.parse(bytes)
+        ast = JsonNode.parse(bytes)
+        compact = YJson.parseDocument(bytes)
+        native = NativeBackends.customNative.parseDocument(bytes)
+        yyjson = YyjsonBackends.yyjson.parseDocument(bytes)
+        verify()
     }
 
     func verify(): Unit {
         @Expect(astTarget(ast) == BACKEND_TARGET)
-        @Expect(compact.root().get("target").getOrThrow().asInt64() == BACKEND_TARGET)
-        @Expect(native.root().get("target").getOrThrow().asInt64() == BACKEND_TARGET)
-        @Expect(yyjson.getRootInt("target").getOrThrow() == BACKEND_TARGET)
-        @Expect(compact.traversalChecksum() != 0)
-        @Expect(native.traversalChecksum() != 0)
-        @Expect(yyjson.traversalChecksum() != 0)
-        @Expect(astTarget(YJson.parse(compact.toString())) == BACKEND_TARGET)
-        @Expect(astTarget(YJson.parse(native.toString())) == BACKEND_TARGET)
-        @Expect(astTarget(YJson.parse(yyjson.toString())) == BACKEND_TARGET)
+        @Expect(viewTarget(compact.root()) == BACKEND_TARGET)
+        @Expect(viewTarget(native.root()) == BACKEND_TARGET)
+        @Expect(viewTarget(yyjson.root()) == BACKEND_TARGET)
+        @Expect(traversalChecksum(compact.root()) != 0)
+        @Expect(traversalChecksum(native.root()) != 0)
+        @Expect(traversalChecksum(yyjson.root()) != 0)
+        @Expect(astTarget(native.materialize()) == BACKEND_TARGET)
+        @Expect(astTarget(yyjson.materialize()) == BACKEND_TARGET)
+        @Expect(astTarget(JsonNode.parse(YJson.toJson(compact.root()))) == BACKEND_TARGET)
+        @Expect(astTarget(JsonNode.parse(NativeBackends.customNative.toJson(native.root()))) == BACKEND_TARGET)
+        @Expect(astTarget(JsonNode.parse(YyjsonBackends.yyjson.toJson(yyjson.root()))) == BACKEND_TARGET)
     }
 
     func close(): Unit {
@@ -83,23 +111,23 @@ class BackendDomBenchmarks {
     let fixture = BackendDomFixture(BACKEND_ENTRY_COUNT)
     var intSink: Int64 = 0
     var stringSink: String = ""
+    var nodeSink: JsonNode = JsonNode.nullValue
 
     @Bench
     func pureAstParseLifecycle(): Unit {
-        intSink = astTarget(YJson.parse(fixture.bytes))
+        intSink = astTarget(JsonNode.parse(fixture.bytes))
     }
 
     @Bench
     func pureCompactParseLifecycle(): Unit {
-        intSink = CompactJsonDocument.parse(fixture.bytes).root()
-            .get("target").getOrThrow().asInt64()
+        intSink = viewTarget(YJson.parseDocument(fixture.bytes).root())
     }
 
     @Bench
     func customNativeParseLifecycle(): Unit {
-        let document = NativeCompactJsonDocument.parse(fixture.bytes)
+        let document = NativeBackends.customNative.parseDocument(fixture.bytes)
         try {
-            intSink = document.root().get("target").getOrThrow().asInt64()
+            intSink = viewTarget(document.root())
         } finally {
             document.close()
         }
@@ -107,9 +135,9 @@ class BackendDomBenchmarks {
 
     @Bench
     func yyjsonDirectParseLifecycle(): Unit {
-        let document = YyjsonCompactJsonDocument.parse(fixture.bytes)
+        let document = YyjsonBackends.yyjson.parseDocument(fixture.bytes)
         try {
-            intSink = document.getRootInt("target").getOrThrow()
+            intSink = viewTarget(document.root())
         } finally {
             document.close()
         }
@@ -122,32 +150,52 @@ class BackendDomBenchmarks {
 
     @Bench
     func pureCompactRootLookup(): Unit {
-        intSink = fixture.compact.root().get("target").getOrThrow().asInt64()
+        intSink = viewTarget(fixture.compact.root())
     }
 
     @Bench
     func customNativeRootLookup(): Unit {
-        intSink = fixture.native.root().get("target").getOrThrow().asInt64()
+        intSink = viewTarget(fixture.native.root())
     }
 
     @Bench
     func yyjsonDirectRootLookup(): Unit {
-        intSink = fixture.yyjson.getRootInt("target").getOrThrow()
+        intSink = viewTarget(fixture.yyjson.root())
     }
 
     @Bench
     func pureCompactTraversal(): Unit {
-        intSink = fixture.compact.traversalChecksum()
+        intSink = traversalChecksum(fixture.compact.root())
     }
 
     @Bench
     func customNativeTraversal(): Unit {
-        intSink = fixture.native.traversalChecksum()
+        intSink = traversalChecksum(fixture.native.root())
     }
 
     @Bench
     func yyjsonDirectTraversal(): Unit {
-        intSink = fixture.yyjson.traversalChecksum()
+        intSink = traversalChecksum(fixture.yyjson.root())
+    }
+
+    @Bench
+    func customNativeFineViewMaterialize(): Unit {
+        nodeSink = fixture.native.root().materialize()
+    }
+
+    @Bench
+    func customNativeBulkMaterialize(): Unit {
+        nodeSink = fixture.native.materialize()
+    }
+
+    @Bench
+    func yyjsonFineViewMaterialize(): Unit {
+        nodeSink = fixture.yyjson.root().materialize()
+    }
+
+    @Bench
+    func yyjsonBulkMaterialize(): Unit {
+        nodeSink = fixture.yyjson.materialize()
     }
 
     @Bench
@@ -157,34 +205,34 @@ class BackendDomBenchmarks {
 
     @Bench
     func pureCompactSerialize(): Unit {
-        stringSink = fixture.compact.toString()
+        stringSink = YJson.toJson(fixture.compact.root())
     }
 
     @Bench
     func customNativeSerialize(): Unit {
-        stringSink = fixture.native.toString()
+        stringSink = NativeBackends.customNative.toJson(fixture.native.root())
     }
 
     @Bench
     func yyjsonDirectSerialize(): Unit {
-        stringSink = fixture.yyjson.toString()
+        stringSink = YyjsonBackends.yyjson.toJson(fixture.yyjson.root())
     }
 
     @Bench
     func pureAstRoundTrip(): Unit {
-        stringSink = YJson.parse(fixture.bytes).toString()
+        stringSink = JsonNode.parse(fixture.bytes).toString()
     }
 
     @Bench
     func pureCompactRoundTrip(): Unit {
-        stringSink = CompactJsonDocument.parse(fixture.bytes).toString()
+        stringSink = YJson.toJson(YJson.parseDocument(fixture.bytes).root())
     }
 
     @Bench
     func customNativeRoundTrip(): Unit {
-        let document = NativeCompactJsonDocument.parse(fixture.bytes)
+        let document = NativeBackends.customNative.parseDocument(fixture.bytes)
         try {
-            stringSink = document.toString()
+            stringSink = NativeBackends.customNative.toJson(document.root())
         } finally {
             document.close()
         }
@@ -192,9 +240,9 @@ class BackendDomBenchmarks {
 
     @Bench
     func yyjsonDirectRoundTrip(): Unit {
-        let document = YyjsonCompactJsonDocument.parse(fixture.bytes)
+        let document = YyjsonBackends.yyjson.parseDocument(fixture.bytes)
         try {
-            stringSink = document.toString()
+            stringSink = YyjsonBackends.yyjson.toJson(document.root())
         } finally {
             document.close()
         }

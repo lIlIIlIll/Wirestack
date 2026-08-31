@@ -4,6 +4,7 @@ name = "yjson_algorithms"
 description = "Budgeted JSON Pointer, Patch, JSONPath, and Schema algorithms"
 version = "0.1.0"
 output-type = "static"
+compile-option = "-O2"
 
 [dependencies]
 yjson = "0.1.0"

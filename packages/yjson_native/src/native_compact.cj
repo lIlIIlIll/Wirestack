@@ -1,5 +1,7 @@
 package yjson_native
 
+import std.convert.Parsable
+import std.sync.*
 import yjson.*
 
 private let YJ_COMPACT_OK: Int32 = 0
@@ -24,7 +26,6 @@ private let YJ_COMPACT_ARRAY: Int32 = 5
 private let YJ_COMPACT_OBJECT: Int32 = 6
 
 private let YJ_COMPACT_REJECT_DUPLICATES: UInt32 = 1u32
-private let YJ_COMPACT_PRESERVE_NUMBERS: UInt32 = 2u32
 private let YJ_COMPACT_MATERIALIZE_SOURCE: UInt32 = 4u32
 private let YJ_COMPACT_DUPLICATE_LOAD_50: UInt32 = 8u32
 private let YJ_COMPACT_DUPLICATE_LOAD_625: UInt32 = 16u32
@@ -32,12 +33,12 @@ private let YJ_COMPACT_DUPLICATE_LOAD_875: UInt32 = 32u32
 private let YJ_COMPACT_DUPLICATE_PRESIZE: UInt32 = 64u32
 private let YJ_COMPACT_DUPLICATE_STATS: UInt32 = 128u32
 
-public enum NativeCompactSourceOwnership {
+enum NativeCompactSourceOwnership {
     | CopySource
     | MaterializeSlices
 }
 
-public enum NativeCompactDuplicateStrategy {
+enum NativeCompactDuplicateStrategy {
     | Baseline
     | Load50
     | Load625
@@ -113,8 +114,9 @@ foreign func YJ_Compact_ScalarProbe(value: UInt64, outValue: CPointer<UInt64>): 
 foreign func YJ_Compact_CopyProbe(input: CPointer<UInt8>, length: UInt64,
     iterations: UInt64, outChecksum: CPointer<UInt64>): Int32
 
-func encodeNativeStreamTape(tape: Array<Byte>, config: JsonWriteConfig): Array<Byte> {
-    let newline = unsafe { config.newline.rawData() }
+func encodeNativeStreamTape(tape: Array<Byte>, config: JsonWriteOptions): Array<Byte> {
+    let newlineText = if (config.indent.isEmpty()) { "" } else { "\n" }
+    let newline = unsafe { newlineText.rawData() }
     let indent = unsafe { config.indent.rawData() }
     let buffer = Array<UInt64>(1, repeat: 0u64)
     let size = Array<UInt64>(1, repeat: 0u64)
@@ -129,8 +131,8 @@ func encodeNativeStreamTape(tape: Array<Byte>, config: JsonWriteConfig): Array<B
         try {
             YJ_Stream_EncodeTapeAlloc(tapeHandle.pointer, UInt64(tape.size),
                 newlineHandle.pointer, UInt64(newline.size), indentHandle.pointer,
-                UInt64(indent.size), if (config.useSpaceAfterSeparators) { 1u32 } else { 0u32 },
-                if (config.htmlSafe) { 1u32 } else { 0u32 }, config.maxDepth, config.maxBytes,
+                UInt64(indent.size), if (config.indent.isEmpty()) { 0u32 } else { 1u32 },
+                if (config.htmlSafe) { 1u32 } else { 0u32 }, config.maxDepth, config.maxOutputBytes,
                 bufferHandle.pointer, sizeHandle.pointer, errorHandle.pointer)
         } finally {
             releaseArrayRawData(errorHandle)
@@ -144,7 +146,7 @@ func encodeNativeStreamTape(tape: Array<Byte>, config: JsonWriteConfig): Array<B
     if (status != YJ_COMPACT_OK) {
         match {
             case Int32(error[0]) == YJ_COMPACT_VALUE_TOO_LARGE =>
-                throw JsonException("Encoded JSON exceeds ${config.maxBytes} bytes",
+                throw JsonException("Encoded JSON exceeds ${config.maxOutputBytes} bytes",
                     code: "output_too_large")
             case Int32(error[0]) == YJ_COMPACT_MAX_DEPTH =>
                 throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
@@ -171,7 +173,7 @@ func encodeNativeStreamTape(tape: Array<Byte>, config: JsonWriteConfig): Array<B
 
 /// Native-owned memory counters. `persistentCommitted` includes C-owned input,
 /// POD store capacities, and arena blocks; it is not Cangjie heap usage or RSS.
-public struct NativeCompactStorageStats {
+struct NativeCompactStorageStats {
     public let sourceBytes: UInt64
     public let persistentUsed: UInt64
     public let persistentCommitted: UInt64
@@ -201,7 +203,7 @@ public struct NativeCompactStorageStats {
     }
 }
 
-public struct NativeCompactDuplicateStats {
+struct NativeCompactDuplicateStats {
     public let lookups: UInt64
     public let inserts: UInt64
     public let probes: UInt64
@@ -238,7 +240,7 @@ public struct NativeCompactDuplicateStats {
 }
 
 /// One object entry returned as a document-bound value view.
-public struct NativeCompactObjectEntry {
+struct NativeCompactObjectEntry {
     public let key: String
     public let value: NativeCompactJsonValue
 
@@ -250,15 +252,13 @@ public struct NativeCompactObjectEntry {
 
 /// Supported opt-in immutable Compact DOM backed entirely by C-owned memory.
 ///
-/// Parsing is one coarse FFI call. This resource is not thread-safe: callers
-/// must externally synchronize all access, `close()` requires exclusive
-/// ownership, and it must never race lookup, traversal, or serialization.
-/// Call `close()` (or use try-with-resource) to release large documents
-/// deterministically; the destructor is only a leak safety net. Value views
-/// retain their owner but become unusable after the owner is closed.
-public class NativeCompactJsonDocument <: Resource {
+/// Parsing is one coarse FFI call. Concurrent reads are supported. Explicit
+/// close is idempotent and waits for active reads; each racing read either
+/// completes or fails with resource_closed, without accessing released memory.
+class NativeCompactJsonDocument <: Resource {
     private var handle: UInt64
     private let rootNode: UInt32
+    private let accessLock = ReadWriteLock()
 
     private init(handle: UInt64, rootNode: UInt32) {
         this.handle = handle
@@ -266,7 +266,7 @@ public class NativeCompactJsonDocument <: Resource {
     }
 
     public static func parse(bytes: Array<Byte>,
-        config!: JsonReadConfig = JsonReadConfig.defaults,
+        config!: JsonReadOptions = JsonReadOptions.defaults,
         sourceOwnership!: NativeCompactSourceOwnership = NativeCompactSourceOwnership.CopySource,
         duplicateStrategy!: NativeCompactDuplicateStrategy = NativeCompactDuplicateStrategy.Baseline,
         collectDuplicateStats!: Bool = false
@@ -274,10 +274,6 @@ public class NativeCompactJsonDocument <: Resource {
         var flags: UInt32 = 0u32
         match (config.duplicateKeyPolicy) {
             case JsonDuplicateKeyPolicy.Reject => flags |= YJ_COMPACT_REJECT_DUPLICATES
-            case _ => ()
-        }
-        match (config.numberPolicy) {
-            case JsonNumberPolicy.PreserveLiteral => flags |= YJ_COMPACT_PRESERVE_NUMBERS
             case _ => ()
         }
         match (sourceOwnership) {
@@ -306,16 +302,10 @@ public class NativeCompactJsonDocument <: Resource {
             let errorHandle = acquireArrayRawData(outError)
             let offsetHandle = acquireArrayRawData(outOffset)
             try {
-                if (config.maxBytes == 0 && config.maxStringBytes == 0 &&
-                    config.maxPolymorphicObjectBytes == 0) {
-                    status = YJ_Compact_Parse(inputHandle.pointer, bytes.size, flags, config.maxDepth,
-                        handleHandle.pointer, rootHandle.pointer, errorHandle.pointer, offsetHandle.pointer)
-                } else {
-                    status = YJ_Compact_ParseWithLimits(inputHandle.pointer, bytes.size, flags,
-                        config.maxDepth, config.maxBytes, config.maxStringBytes,
-                        config.maxPolymorphicObjectBytes, handleHandle.pointer, rootHandle.pointer,
-                        errorHandle.pointer, offsetHandle.pointer)
-                }
+                status = YJ_Compact_ParseWithLimits(inputHandle.pointer, bytes.size, flags,
+                    config.maxDepth, config.maxInputBytes, config.maxStringBytes,
+                    config.maxBufferedValueBytes, handleHandle.pointer, rootHandle.pointer,
+                    errorHandle.pointer, offsetHandle.pointer)
             } finally {
                 releaseArrayRawData(offsetHandle)
                 releaseArrayRawData(errorHandle)
@@ -325,68 +315,91 @@ public class NativeCompactJsonDocument <: Resource {
             }
         }
         if (status != YJ_COMPACT_OK) {
-            throw nativeCompactParseError(bytes, Int32(outError[0]), outOffset[0], config.includeErrorLocation)
+            throw nativeCompactParseError(bytes, Int32(outError[0]), outOffset[0])
         }
         NativeCompactJsonDocument(outHandle[0], outRoot[0])
     }
 
-    public func isClosed(): Bool { handle == 0u64 }
+    public func isClosed(): Bool {
+        let lock = accessLock.readLock
+        lock.lock()
+        try { handle == 0u64 } finally { lock.unlock() }
+    }
 
     public func close(): Unit {
-        let current = handle
-        if (current != 0u64) {
+        let lock = accessLock.writeLock
+        lock.lock()
+        try {
+            let current = handle
+            if (current != 0u64) {
+                handle = 0u64
+                unsafe { YJ_Compact_Free(current) }
+            }
+        } finally {
+            lock.unlock()
+        }
+    }
+
+    ~init() {
+        // A view retains this owner, so finalization implies no operation can
+        // still reach the handle. Do not block a GC helper on a lock here.
+        if (handle != 0u64) {
+            let current = handle
             handle = 0u64
             unsafe { YJ_Compact_Free(current) }
         }
     }
 
-    ~init() {
-        if (handle != 0u64) { unsafe { YJ_Compact_Free(handle) } }
-    }
-
     public func root(): NativeCompactJsonValue {
-        requireOpen()
-        NativeCompactJsonValue(this, rootNode)
+        withOpen({ _ => NativeCompactJsonValue(this, rootNode) })
     }
 
     public func traversalChecksum(): Int64 {
-        let current = requireOpen()
         @OverflowWrapping
         func convert(value: UInt64): Int64 { Int64(value) }
-        convert(unsafe { YJ_Compact_TraversalChecksum(current) })
+        withOpen({ current => convert(unsafe { YJ_Compact_TraversalChecksum(current) }) })
     }
 
     public func storageStats(): NativeCompactStorageStats {
-        let current = requireOpen()
-        let values = Array<UInt64>(12, repeat: 0u64)
-        let status = unsafe {
-            let valuesHandle = acquireArrayRawData(values)
-            try { YJ_Compact_Stats(current, valuesHandle.pointer, 12u64) }
-            finally { releaseArrayRawData(valuesHandle) }
-        }
-        checkStatus(status)
-        NativeCompactStorageStats(values)
+        withOpen({ current =>
+            let values = Array<UInt64>(12, repeat: 0u64)
+            let status = unsafe {
+                let valuesHandle = acquireArrayRawData(values)
+                try { YJ_Compact_Stats(current, valuesHandle.pointer, 12u64) }
+                finally { releaseArrayRawData(valuesHandle) }
+            }
+            checkStatus(status)
+            NativeCompactStorageStats(values)
+        })
     }
 
     public func duplicateStats(): NativeCompactDuplicateStats {
-        let current = requireOpen()
-        let values = Array<UInt64>(16, repeat: 0u64)
-        let status = unsafe {
-            let valuesHandle = acquireArrayRawData(values)
-            try { YJ_Compact_DuplicateStats(current, valuesHandle.pointer, 16u64) }
-            finally { releaseArrayRawData(valuesHandle) }
-        }
-        checkStatus(status)
-        NativeCompactDuplicateStats(values)
+        withOpen({ current =>
+            let values = Array<UInt64>(16, repeat: 0u64)
+            let status = unsafe {
+                let valuesHandle = acquireArrayRawData(values)
+                try { YJ_Compact_DuplicateStats(current, valuesHandle.pointer, 16u64) }
+                finally { releaseArrayRawData(valuesHandle) }
+            }
+            checkStatus(status)
+            NativeCompactDuplicateStats(values)
+        })
     }
 
-    public func materialize(): JsonNode { root().materialize() }
+    public func materialize(): JsonNode { materializeBulk(maxNodes: 100000) }
+
+    public func materialize(maxNodes: Int64): JsonNode {
+        materializeBulk(maxNodes: maxNodes)
+    }
 
     /// One native export plus one Cangjie bulk construction. No per-node FFI.
-    public func materializeBulk(): JsonNode {
-        NativeCompactTapeReader(copyOwnedBuffer({ handle, buffer, size =>
+    func materializeBulk(maxNodes!: Int64 = 100000): JsonNode {
+        let reader = BackendTapeReaderV1(copyOwnedBuffer({ handle, buffer, size =>
             unsafe { YJ_Compact_ExportTapeAlloc(handle, buffer, size) }
-        })).readDocument()
+        }))
+        let value = reader.readNode(maxNodes)
+        reader.expectEnd()
+        value
     }
 
     func exportStreamTape(): Array<Byte> {
@@ -395,9 +408,17 @@ public class NativeCompactJsonDocument <: Resource {
         })
     }
 
+    func exportRootStreamTape(node: UInt32, inlineKind: Int32): Option<Array<Byte>> {
+        if (inlineKind >= 0 || node != rootNode) {
+            ensureOpen()
+            return None<Array<Byte>>
+        }
+        Some(exportStreamTape())
+    }
+
     /// Control path for the bulk materialization experiment.
-    public func materializeViaSerialization(): JsonNode {
-        YJson.parse(copyOwnedBuffer({ handle, buffer, size =>
+    func materializeViaSerialization(): JsonNode {
+        JsonNode.parse(copyOwnedBuffer({ handle, buffer, size =>
             unsafe { YJ_Compact_SerializeAlloc(handle, buffer, size) }
         }))
     }
@@ -409,18 +430,19 @@ public class NativeCompactJsonDocument <: Resource {
     }
 
     private func copyOwnedBuffer(allocate: (UInt64, CPointer<UInt64>, CPointer<UInt64>) -> Int32): Array<Byte> {
-        let current = requireOpen()
         let buffer = Array<UInt64>(1, repeat: 0u64)
         let size = Array<UInt64>(1, repeat: 0u64)
-        let status = unsafe {
-            let bufferHandle = acquireArrayRawData(buffer)
-            let sizeHandle = acquireArrayRawData(size)
-            try { allocate(current, bufferHandle.pointer, sizeHandle.pointer) }
-            finally {
-                releaseArrayRawData(sizeHandle)
-                releaseArrayRawData(bufferHandle)
+        let status = withOpen({ current =>
+            unsafe {
+                let bufferHandle = acquireArrayRawData(buffer)
+                let sizeHandle = acquireArrayRawData(size)
+                try { allocate(current, bufferHandle.pointer, sizeHandle.pointer) }
+                finally {
+                    releaseArrayRawData(sizeHandle)
+                    releaseArrayRawData(bufferHandle)
+                }
             }
-        }
+        })
         checkStatus(status)
         let output = Array<Byte>(Int64(size[0]), repeat: 0)
         try {
@@ -436,29 +458,45 @@ public class NativeCompactJsonDocument <: Resource {
         }
     }
 
-    func requireOpen(): UInt64 {
-        if (handle == 0u64) { throw IllegalStateException("Native compact document is closed") }
-        handle
+    func ensureOpen(): Unit {
+        withOpen({ _ => () })
+    }
+
+    private func withOpen<T>(operation: (UInt64) -> T): T {
+        let lock = accessLock.readLock
+        lock.lock()
+        try {
+            if (handle == 0u64) {
+                throw JsonException("Native document is closed", code: "resource_closed")
+            }
+            operation(handle)
+        } finally {
+            lock.unlock()
+        }
     }
 
     func kindAt(node: UInt32): Int32 {
         let out = Array<UInt32>(1, repeat: 0u32)
-        let status = unsafe {
-            let outHandle = acquireArrayRawData(out)
-            try { YJ_Compact_Kind(requireOpen(), node, outHandle.pointer) }
-            finally { releaseArrayRawData(outHandle) }
-        }
+        let status = withOpen({ current =>
+            unsafe {
+                let outHandle = acquireArrayRawData(out)
+                try { YJ_Compact_Kind(current, node, outHandle.pointer) }
+                finally { releaseArrayRawData(outHandle) }
+            }
+        })
         checkStatus(status)
         Int32(out[0])
     }
 
     func sizeAt(node: UInt32): Int64 {
         let out = Array<UInt64>(1, repeat: 0u64)
-        let status = unsafe {
-            let outHandle = acquireArrayRawData(out)
-            try { YJ_Compact_Size(requireOpen(), node, outHandle.pointer) }
-            finally { releaseArrayRawData(outHandle) }
-        }
+        let status = withOpen({ current =>
+            unsafe {
+                let outHandle = acquireArrayRawData(out)
+                try { YJ_Compact_Size(current, node, outHandle.pointer) }
+                finally { releaseArrayRawData(outHandle) }
+            }
+        })
         checkStatus(status)
         Int64(out[0])
     }
@@ -466,11 +504,13 @@ public class NativeCompactJsonDocument <: Resource {
     func arrayAt(node: UInt32, index: Int64): Option<NativeCompactJsonValue> {
         if (index < 0 || index >= sizeAt(node)) { return None<NativeCompactJsonValue> }
         let out = Array<UInt32>(1, repeat: 0u32)
-        let status = unsafe {
-            let outHandle = acquireArrayRawData(out)
-            try { YJ_Compact_ArrayGet(requireOpen(), node, UInt64(index), outHandle.pointer) }
-            finally { releaseArrayRawData(outHandle) }
-        }
+        let status = withOpen({ current =>
+            unsafe {
+                let outHandle = acquireArrayRawData(out)
+                try { YJ_Compact_ArrayGet(current, node, UInt64(index), outHandle.pointer) }
+                finally { releaseArrayRawData(outHandle) }
+            }
+        })
         checkStatus(status)
         Some(NativeCompactJsonValue(this, out[0]))
     }
@@ -480,21 +520,23 @@ public class NativeCompactJsonDocument <: Resource {
         let outKind = Array<UInt32>(1, repeat: 0u32)
         let outPayload = Array<UInt64>(1, repeat: 0u64)
         let found = Array<UInt32>(1, repeat: 0u32)
-        let status = unsafe {
-            let bytesHandle = acquireArrayRawData(bytes)
-            let kindHandle = acquireArrayRawData(outKind)
-            let payloadHandle = acquireArrayRawData(outPayload)
-            let foundHandle = acquireArrayRawData(found)
-            try {
-                YJ_Compact_ObjectLookup(requireOpen(), node, bytesHandle.pointer, UInt64(bytes.size),
-                    kindHandle.pointer, payloadHandle.pointer, foundHandle.pointer)
-            } finally {
-                releaseArrayRawData(foundHandle)
-                releaseArrayRawData(payloadHandle)
-                releaseArrayRawData(kindHandle)
-                releaseArrayRawData(bytesHandle)
+        let status = withOpen({ current =>
+            unsafe {
+                let bytesHandle = acquireArrayRawData(bytes)
+                let kindHandle = acquireArrayRawData(outKind)
+                let payloadHandle = acquireArrayRawData(outPayload)
+                let foundHandle = acquireArrayRawData(found)
+                try {
+                    YJ_Compact_ObjectLookup(current, node, bytesHandle.pointer, UInt64(bytes.size),
+                        kindHandle.pointer, payloadHandle.pointer, foundHandle.pointer)
+                } finally {
+                    releaseArrayRawData(foundHandle)
+                    releaseArrayRawData(payloadHandle)
+                    releaseArrayRawData(kindHandle)
+                    releaseArrayRawData(bytesHandle)
+                }
             }
-        }
+        })
         checkStatus(status)
         if (found[0] == 0u32) { None<NativeCompactJsonValue> }
         else { Some(valueFrom(Int32(outKind[0]), outPayload[0])) }
@@ -505,81 +547,121 @@ public class NativeCompactJsonDocument <: Resource {
         let outKind = Array<UInt32>(1, repeat: 0u32)
         let outPayload = Array<UInt64>(1, repeat: 0u64)
         let keySize = Array<UInt64>(1, repeat: 0u64)
-        var status = unsafe {
-            let kindHandle = acquireArrayRawData(outKind)
-            let payloadHandle = acquireArrayRawData(outPayload)
-            let sizeHandle = acquireArrayRawData(keySize)
-            try { YJ_Compact_ObjectEntry(requireOpen(), node, UInt64(index), kindHandle.pointer,
-                payloadHandle.pointer, sizeHandle.pointer) }
-            finally {
-                releaseArrayRawData(sizeHandle)
-                releaseArrayRawData(payloadHandle)
-                releaseArrayRawData(kindHandle)
+        var status = withOpen({ current =>
+            unsafe {
+                let kindHandle = acquireArrayRawData(outKind)
+                let payloadHandle = acquireArrayRawData(outPayload)
+                let sizeHandle = acquireArrayRawData(keySize)
+                try { YJ_Compact_ObjectEntry(current, node, UInt64(index), kindHandle.pointer,
+                    payloadHandle.pointer, sizeHandle.pointer) }
+                finally {
+                    releaseArrayRawData(sizeHandle)
+                    releaseArrayRawData(payloadHandle)
+                    releaseArrayRawData(kindHandle)
+                }
             }
-        }
+        })
         checkStatus(status)
         let keyBytes = Array<Byte>(Int64(keySize[0]), repeat: 0)
         let written = Array<UInt64>(1, repeat: 0u64)
-        status = unsafe {
-            let keyHandle = acquireArrayRawData(keyBytes)
-            let writtenHandle = acquireArrayRawData(written)
-            try { YJ_Compact_CopyObjectKey(requireOpen(), node, UInt64(index), keyHandle.pointer,
-                UInt64(keyBytes.size), writtenHandle.pointer) }
-            finally {
-                releaseArrayRawData(writtenHandle)
-                releaseArrayRawData(keyHandle)
+        status = withOpen({ current =>
+            unsafe {
+                let keyHandle = acquireArrayRawData(keyBytes)
+                let writtenHandle = acquireArrayRawData(written)
+                try { YJ_Compact_CopyObjectKey(current, node, UInt64(index), keyHandle.pointer,
+                    UInt64(keyBytes.size), writtenHandle.pointer) }
+                finally {
+                    releaseArrayRawData(writtenHandle)
+                    releaseArrayRawData(keyHandle)
+                }
             }
-        }
+        })
         checkStatus(status)
         Some(NativeCompactObjectEntry(unsafe { String.fromUtf8Unchecked(keyBytes) },
             valueFrom(Int32(outKind[0]), outPayload[0])))
     }
 
+    func objectValueAt(node: UInt32, index: Int64): Option<NativeCompactJsonValue> {
+        if (index < 0 || index >= sizeAt(node)) { return None<NativeCompactJsonValue> }
+        let outKind = Array<UInt32>(1, repeat: 0u32)
+        let outPayload = Array<UInt64>(1, repeat: 0u64)
+        let keySize = Array<UInt64>(1, repeat: 0u64)
+        let status = withOpen({ current =>
+            unsafe {
+                let kindHandle = acquireArrayRawData(outKind)
+                let payloadHandle = acquireArrayRawData(outPayload)
+                let sizeHandle = acquireArrayRawData(keySize)
+                try {
+                    YJ_Compact_ObjectEntry(current, node, UInt64(index),
+                        kindHandle.pointer, payloadHandle.pointer, sizeHandle.pointer)
+                } finally {
+                    releaseArrayRawData(sizeHandle)
+                    releaseArrayRawData(payloadHandle)
+                    releaseArrayRawData(kindHandle)
+                }
+            }
+        })
+        checkStatus(status)
+        Some(valueFrom(Int32(outKind[0]), outPayload[0]))
+    }
+
     func intAt(node: UInt32): Int64 {
         let out = Array<Int64>(1, repeat: 0)
-        let status = unsafe {
-            let outHandle = acquireArrayRawData(out)
-            try { YJ_Compact_GetInt(requireOpen(), node, outHandle.pointer) }
-            finally { releaseArrayRawData(outHandle) }
-        }
+        let status = withOpen({ current =>
+            unsafe {
+                let outHandle = acquireArrayRawData(out)
+                try { YJ_Compact_GetInt(current, node, outHandle.pointer) }
+                finally { releaseArrayRawData(outHandle) }
+            }
+        })
         checkStatus(status)
         out[0]
     }
 
     func boolAt(node: UInt32): Bool {
         let out = Array<UInt32>(1, repeat: 0u32)
-        let status = unsafe {
-            let outHandle = acquireArrayRawData(out)
-            try { YJ_Compact_GetBool(requireOpen(), node, outHandle.pointer) }
-            finally { releaseArrayRawData(outHandle) }
-        }
+        let status = withOpen({ current =>
+            unsafe {
+                let outHandle = acquireArrayRawData(out)
+                try { YJ_Compact_GetBool(current, node, outHandle.pointer) }
+                finally { releaseArrayRawData(outHandle) }
+            }
+        })
         checkStatus(status)
         out[0] != 0u32
     }
 
     func textAt(node: UInt32): String {
         let size = Array<UInt64>(1, repeat: 0u64)
-        var status = unsafe {
-            let sizeHandle = acquireArrayRawData(size)
-            try { YJ_Compact_GetTextSize(requireOpen(), node, sizeHandle.pointer) }
-            finally { releaseArrayRawData(sizeHandle) }
-        }
+        var status = withOpen({ current =>
+            unsafe {
+                let sizeHandle = acquireArrayRawData(size)
+                try { YJ_Compact_GetTextSize(current, node, sizeHandle.pointer) }
+                finally { releaseArrayRawData(sizeHandle) }
+            }
+        })
         checkStatus(status)
         copyStringRefOrNode(size[0], { output, capacity, written =>
-            unsafe { YJ_Compact_CopyText(requireOpen(), node, output, capacity, written) }
+            withOpen({ current =>
+                unsafe { YJ_Compact_CopyText(current, node, output, capacity, written) }
+            })
         })
     }
 
     func stringRefAt(reference: UInt64): String {
         let size = Array<UInt64>(1, repeat: 0u64)
-        var status = unsafe {
-            let sizeHandle = acquireArrayRawData(size)
-            try { YJ_Compact_GetStringRefSize(requireOpen(), reference, sizeHandle.pointer) }
-            finally { releaseArrayRawData(sizeHandle) }
-        }
+        var status = withOpen({ current =>
+            unsafe {
+                let sizeHandle = acquireArrayRawData(size)
+                try { YJ_Compact_GetStringRefSize(current, reference, sizeHandle.pointer) }
+                finally { releaseArrayRawData(sizeHandle) }
+            }
+        })
         checkStatus(status)
         copyStringRefOrNode(size[0], { output, capacity, written =>
-            unsafe { YJ_Compact_CopyStringRef(requireOpen(), reference, output, capacity, written) }
+            withOpen({ current =>
+                unsafe { YJ_Compact_CopyStringRef(current, reference, output, capacity, written) }
+            })
         })
     }
 
@@ -611,95 +693,22 @@ public class NativeCompactJsonDocument <: Resource {
     func checkStatus(status: Int32): Unit {
         if (status == YJ_COMPACT_OK) { return }
         match {
-            case status == YJ_COMPACT_CLOSED => throw IllegalStateException("Native compact document is closed")
-            case status == YJ_COMPACT_TYPE_ERROR => throw JsonException("Native compact value type mismatch")
-            case status == YJ_COMPACT_BOUNDS_ERROR => throw IndexOutOfBoundsException("Native compact value index out of bounds")
+            case status == YJ_COMPACT_CLOSED =>
+                throw JsonException("Native document is closed", code: "resource_closed")
+            case status == YJ_COMPACT_TYPE_ERROR =>
+                throw JsonException("Native value type mismatch", code: "type_mismatch")
+            case status == YJ_COMPACT_BOUNDS_ERROR =>
+                throw JsonException("Native value index is out of bounds", code: "index_out_of_bounds")
             case status == YJ_COMPACT_OUT_OF_MEMORY => throw JsonException("Native compact allocation failed", code: "out_of_memory")
             case _ => throw JsonException("Native compact operation failed (${status})")
         }
     }
 }
 
-private class NativeCompactTapeReader {
-    private let bytes: Array<Byte>
-    private var position: Int64 = 0
-
-    init(bytes: Array<Byte>) { this.bytes = bytes }
-
-    func readDocument(): JsonNode {
-        if (bytes.size < 5 || readByte() != b'Y' || readByte() != b'J' ||
-            readByte() != b'T' || readByte() != b'1') {
-            throw JsonException("Invalid native compact transfer tape")
-        }
-        let value = readValue()
-        if (position != bytes.size) { throw JsonException("Trailing native compact transfer data") }
-        value
-    }
-
-    private func readValue(): JsonNode {
-        let kind = readByte()
-        match {
-            case Int32(kind) == YJ_COMPACT_NULL => JsonNullValue()
-            case Int32(kind) == YJ_COMPACT_BOOL => JsonBoolValue(readByte() != b'\0')
-            case Int32(kind) == YJ_COMPACT_INT => JsonIntValue(bitsToInt64(readUInt64()))
-            case Int32(kind) == YJ_COMPACT_NUMBER => JsonNumberLiteralValue(readString())
-            case Int32(kind) == YJ_COMPACT_STRING => JsonStringValue(readString())
-            case Int32(kind) == YJ_COMPACT_ARRAY =>
-                let result = JsonArrayValue()
-                let count = Int64(readUInt32())
-                for (_ in 0..count) { result.add(readValue()) }
-                result
-            case Int32(kind) == YJ_COMPACT_OBJECT =>
-                let result = JsonObjectValue()
-                let count = Int64(readUInt32())
-                for (_ in 0..count) { result.put(readString(), readValue()) }
-                result
-            case _ => throw JsonException("Unknown native compact transfer kind ${kind}")
-        }
-    }
-
-    private func readString(): String {
-        let size = Int64(readUInt32())
-        require(size)
-        let value = Array<Byte>(size, repeat: 0)
-        for (index in 0..size) { value[index] = bytes[position + index] }
-        position += size
-        unsafe { String.fromUtf8Unchecked(value) }
-    }
-
-    private func readByte(): Byte {
-        require(1)
-        let value = bytes[position]
-        position++
-        value
-    }
-
-    private func readUInt32(): UInt32 {
-        var value = 0u32
-        for (shift in 0..4) { value |= UInt32(readByte()) << (shift * 8) }
-        value
-    }
-
-    private func readUInt64(): UInt64 {
-        var value = 0u64
-        for (shift in 0..8) { value |= UInt64(readByte()) << (shift * 8) }
-        value
-    }
-
-    private func require(count: Int64): Unit {
-        if (count < 0 || position > bytes.size - count) {
-            throw JsonException("Truncated native compact transfer tape")
-        }
-    }
-
-    @OverflowWrapping
-    private func bitsToInt64(value: UInt64): Int64 { Int64(value) }
-}
-
 /// A value-like, document-bound native view. It does not allocate a Cangjie
 /// class per JSON node. Container payloads are native node indexes; object
 /// scalar values remain inline in the native object-entry stores.
-public struct NativeCompactJsonValue {
+struct NativeCompactJsonValue <: JsonValueView {
     private let document: NativeCompactJsonDocument
     private let node: UInt32
     private let inlineKind: Int32
@@ -722,28 +731,76 @@ public struct NativeCompactJsonValue {
     public func kind(): JsonKind { nativeCompactKind(code()) }
 
     public func size(): Int64 {
-        if (inlineKind >= 0) { 0 } else { document.sizeAt(node) }
+        if (inlineKind >= 0) {
+            document.ensureOpen()
+            0
+        } else { document.sizeAt(node) }
     }
 
     public func get(index: Int64): Option<NativeCompactJsonValue> {
-        if (inlineKind >= 0) { None<NativeCompactJsonValue> } else { document.arrayAt(node, index) }
+        if (inlineKind >= 0) {
+            document.ensureOpen()
+            None<NativeCompactJsonValue>
+        } else { document.arrayAt(node, index) }
     }
 
     public func get(name: String): Option<NativeCompactJsonValue> {
-        if (inlineKind >= 0) { None<NativeCompactJsonValue> } else { document.objectAt(node, name) }
+        if (inlineKind >= 0) {
+            document.ensureOpen()
+            None<NativeCompactJsonValue>
+        } else { document.objectAt(node, name) }
+    }
+
+    public func element(index: Int64): Option<JsonValueView> {
+        match (get(index)) {
+            case Some(value) => Some<JsonValueView>(value)
+            case None => None<JsonValueView>
+        }
+    }
+
+    public func member(name: String): Option<JsonValueView> {
+        match (get(name)) {
+            case Some(value) => Some<JsonValueView>(value)
+            case None => None<JsonValueView>
+        }
+    }
+
+    public func memberName(index: Int64): String {
+        entryAt(index).getOrThrow({ =>
+            JsonException("Object member index ${index} is out of bounds", code: "index_out_of_bounds")
+        }).key
+    }
+
+    public func memberValue(index: Int64): JsonValueView {
+        if (inlineKind >= 0) {
+            document.ensureOpen()
+            throw JsonException("Expected object value", code: "type_mismatch")
+        }
+        document.objectValueAt(node, index).getOrThrow({ =>
+            JsonException("Object member index is out of bounds", code: "index_out_of_bounds")
+        })
     }
 
     public func entryAt(index: Int64): Option<NativeCompactObjectEntry> {
-        if (inlineKind >= 0) { None<NativeCompactObjectEntry> } else { document.objectEntryAt(node, index) }
+        if (inlineKind >= 0) {
+            document.ensureOpen()
+            None<NativeCompactObjectEntry>
+        } else { document.objectEntryAt(node, index) }
     }
 
     public func asInt64(): Int64 {
-        if (inlineKind == YJ_COMPACT_INT) { nativeCompactBitsToInt64(inlinePayload) }
+        if (inlineKind == YJ_COMPACT_INT) {
+            document.ensureOpen()
+            nativeCompactBitsToInt64(inlinePayload)
+        }
         else { document.intAt(node) }
     }
 
     public func asBool(): Bool {
-        if (inlineKind == YJ_COMPACT_BOOL) { inlinePayload != 0u64 }
+        if (inlineKind == YJ_COMPACT_BOOL) {
+            document.ensureOpen()
+            inlinePayload != 0u64
+        }
         else { document.boolAt(node) }
     }
 
@@ -752,37 +809,97 @@ public struct NativeCompactJsonValue {
         if (inlineKind >= 0) { document.stringRefAt(inlinePayload) } else { document.textAt(node) }
     }
 
-    public func asNumberLiteral(): String {
+    public func asUInt64(): UInt64 {
+        let text = asNumberText()
+        try { UInt64.parse(text) } catch (_: Exception) {
+            throw JsonException("Expected unsigned integer value", code: "type_mismatch")
+        }
+    }
+
+    public func asFloat64(): Float64 {
+        try { Float64.parse(asNumberText()) } catch (_: Exception) {
+            throw JsonException("Expected numeric value", code: "type_mismatch")
+        }
+    }
+
+    public func asNumberText(): String {
         if (code() == YJ_COMPACT_INT) { return asInt64().toString() }
         if (code() != YJ_COMPACT_NUMBER) { throw JsonException("Expected numeric value") }
         if (inlineKind >= 0) { document.stringRefAt(inlinePayload) } else { document.textAt(node) }
     }
 
     public func materialize(): JsonNode {
-        let valueKind = code()
-        match {
-            case valueKind == YJ_COMPACT_NULL => JsonNullValue()
-            case valueKind == YJ_COMPACT_BOOL => JsonBoolValue(asBool())
-            case valueKind == YJ_COMPACT_INT => JsonIntValue(asInt64())
-            case valueKind == YJ_COMPACT_NUMBER => JsonNumberLiteralValue(asNumberLiteral())
-            case valueKind == YJ_COMPACT_STRING => JsonStringValue(asString())
-            case valueKind == YJ_COMPACT_ARRAY =>
-                let result = JsonArrayValue()
-                for (index in 0..size()) { result.add(get(index).getOrThrow().materialize()) }
-                result
-            case _ =>
-                let result = JsonObjectValue()
-                for (index in 0..size()) {
-                    let entry = entryAt(index).getOrThrow()
-                    result.put(entry.key, entry.value.materialize())
-                }
-                result
-        }
+        materializeNativeCompactValue(this, 100000)
+    }
+
+    public func materialize(maxNodes: Int64): JsonNode {
+        materializeNativeCompactValue(this, maxNodes)
+    }
+
+    func exportRootStreamTape(): Option<Array<Byte>> {
+        document.exportRootStreamTape(node, inlineKind)
     }
 
     private func code(): Int32 {
-        if (inlineKind >= 0) { inlineKind } else { document.kindAt(node) }
+        if (inlineKind >= 0) {
+            document.ensureOpen()
+            inlineKind
+        } else { document.kindAt(node) }
     }
+}
+
+private class NativeMaterializationBudget {
+    private var remaining: Int64
+
+    init(maxNodes: Int64) {
+        if (maxNodes <= 0) {
+            throw IllegalArgumentException("maxNodes must be positive")
+        }
+        remaining = maxNodes
+    }
+
+    func consume(depth: Int64): Unit {
+        if (depth > 256) {
+            throw JsonException("Maximum materialization depth exceeded",
+                code: "max_depth")
+        }
+        if (remaining <= 0) {
+            throw JsonException("Materialization work limit exceeded",
+                code: "work_limit_exceeded")
+        }
+        remaining--
+    }
+}
+
+private func materializeNativeCompactValue(value: JsonValueView,
+    maxNodes: Int64): JsonNode {
+    let budget = NativeMaterializationBudget(maxNodes)
+    func copy(current: JsonValueView, depth: Int64): JsonNode {
+        budget.consume(depth)
+        match (current.kind()) {
+            case JsonKind.Null => JsonNode.nullValue
+            case JsonKind.Boolean => JsonNode.boolean(current.asBool())
+            case JsonKind.Number => JsonNode.number(current.asNumberText())
+            case JsonKind.String => JsonNode.string(current.asString())
+            case JsonKind.Array =>
+                let array = JsonArray()
+                for (index in 0..current.size()) {
+                    array.add(copy(current.element(index).getOrThrow({ =>
+                        JsonException("Array view changed during materialization",
+                            code: "view_contract")
+                    }), depth + 1))
+                }
+                array
+            case JsonKind.Object =>
+                let object = JsonObject()
+                for (index in 0..current.size()) {
+                    object.put(current.memberName(index),
+                        copy(current.memberValue(index), depth + 1))
+                }
+                object
+        }
+    }
+    copy(value, 0)
 }
 
 @OverflowWrapping
@@ -790,25 +907,25 @@ private func nativeCompactBitsToInt64(value: UInt64): Int64 { Int64(value) }
 
 private func nativeCompactKind(code: Int32): JsonKind {
     match {
-        case code == YJ_COMPACT_NULL => JsonKind.JsNull
-        case code == YJ_COMPACT_BOOL => JsonKind.JsBool
-        case code == YJ_COMPACT_INT => JsonKind.JsInt
-        case code == YJ_COMPACT_NUMBER => JsonKind.JsNumberLiteral
-        case code == YJ_COMPACT_STRING => JsonKind.JsString
-        case code == YJ_COMPACT_ARRAY => JsonKind.JsArray
-        case code == YJ_COMPACT_OBJECT => JsonKind.JsObject
+        case code == YJ_COMPACT_NULL => JsonKind.Null
+        case code == YJ_COMPACT_BOOL => JsonKind.Boolean
+        case code == YJ_COMPACT_INT => JsonKind.Number
+        case code == YJ_COMPACT_NUMBER => JsonKind.Number
+        case code == YJ_COMPACT_STRING => JsonKind.String
+        case code == YJ_COMPACT_ARRAY => JsonKind.Array
+        case code == YJ_COMPACT_OBJECT => JsonKind.Object
         case _ => throw JsonException("Unknown native compact kind ${code}")
     }
 }
 
-private func nativeCompactParseError(bytes: Array<Byte>, code: Int32, offset: Int64,
-    includeLocation: Bool): JsonException {
+private func nativeCompactParseError(bytes: Array<Byte>, code: Int32, offset: Int64): JsonException {
     let errorCode = match {
         case code == YJ_COMPACT_MAX_DEPTH => "max_depth"
+        case code == YJ_COMPACT_DUPLICATE_KEY => "duplicate_key"
         case code == YJ_COMPACT_OUT_OF_MEMORY => "out_of_memory"
         case code == YJ_COMPACT_DOCUMENT_TOO_LARGE => "document_too_large"
         case code == YJ_COMPACT_STRING_TOO_LARGE => "string_too_large"
-        case code == YJ_COMPACT_VALUE_TOO_LARGE => "polymorphic_object_too_large"
+        case code == YJ_COMPACT_VALUE_TOO_LARGE => "buffered_value_too_large"
         case _ => "parse_error"
     }
     let message = match {
@@ -821,15 +938,14 @@ private func nativeCompactParseError(bytes: Array<Byte>, code: Int32, offset: In
         case code == YJ_COMPACT_VALUE_TOO_LARGE => "Native compact JSON value is too large"
         case _ => "Invalid JSON"
     }
-    if (!includeLocation) { return JsonException(message, code: errorCode) }
     var line: Int64 = 1
     var column: Int64 = 1
     let limit = if (offset < 0) { 0 } else if (offset > bytes.size) { bytes.size } else { offset }
     for (index in 0..limit) {
         if (bytes[index] == b'\n') { line++; column = 1 } else { column++ }
     }
-    JsonException("${message} at byte ${offset}", code: errorCode, byteOffset: offset,
-        line: line, column: column)
+    JsonException("${message} at byte ${offset}", code: errorCode,
+        location: Some(JsonLocation(offset, line, column)))
 }
 
 /// Benchmark-only FFI probes. They do not access provider/network state.

@@ -1,14 +1,10 @@
 package yjson
 
-/// Common bulk operations shared by the Pure Compact and optional Native DOMs.
-///
-/// `materialize()` is the explicit bridge to arbitrary `JsonNode` traversal.
-/// Values returned from it are detached from this document's lifecycle.
+/// Managed, immutable JSON document.
 public interface JsonDocument {
-    func root(): CompactJsonValue
-    func rootSize(): Int64
-    func getRootInt(name: String): Option<Int64>
+    func root(): JsonValueView
     func materialize(): JsonNode
+    func materialize(maxNodes: Int64): JsonNode
     func toString(): String
 }
 
@@ -24,21 +20,12 @@ private class PureCompactJsonDocument <: JsonDocument {
         this.sourceTextOwner = sourceTextOwner
     }
 
-    public func root(): CompactJsonValue { document.root() }
+    public func root(): JsonValueView { document.root() }
 
-    public func rootSize(): Int64 {
-        document.root().size()
-    }
+    public func materialize(): JsonNode { document.root().materialize() }
 
-    public func getRootInt(name: String): Option<Int64> {
-        match (document.root().get(name)) {
-            case Some(value) => Some(value.asInt64())
-            case None => None<Int64>
-        }
-    }
-
-    public func materialize(): JsonNode {
-        document.materialize()
+    public func materialize(maxNodes: Int64): JsonNode {
+        document.root().materialize(maxNodes)
     }
 
     public func toString(): String {
@@ -46,13 +33,13 @@ private class PureCompactJsonDocument <: JsonDocument {
     }
 }
 
-func parseManagedJsonDocument(text: String, config: JsonReadConfig): JsonDocument {
+func parseManagedJsonDocument(text: String, config: JsonReadOptions): JsonDocument {
     let compact = unsafe {
         CompactJsonDocument.parseBorrowed(text.rawData(), config: config)
     }
     PureCompactJsonDocument(compact, sourceTextOwner: Some(text))
 }
 
-func parseManagedJsonDocument(bytes: Array<Byte>, config: JsonReadConfig): JsonDocument {
+func parseManagedJsonDocument(bytes: Array<Byte>, config: JsonReadOptions): JsonDocument {
     PureCompactJsonDocument(CompactJsonDocument.parseOwned(bytes, config: config))
 }

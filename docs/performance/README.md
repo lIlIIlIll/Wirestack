@@ -1,65 +1,45 @@
 # 性能证据
 
-yjson 的性能取决于 API、representation、payload、输入形态和主机。typed codec、mutable
-AST、Pure Compact、Native DOM 与 typed stream 是不同问题，不能拼成一个“最快库”排名。
+yjson 的性能取决于 API、data model、payload、input shape 和 host。typed codec、mutable
+`JsonNode`、managed `JsonDocument`、显式 backend 和 stream 是不同问题，不能拼成一个
+“最快库”排名。
 
-## 当前 release 结果
+## 0.1.0 状态
 
-- [yjson 2.0.0 性能验收](results/2026-08-27-yjson-2.0.0.md)：最终候选源码的三库
-  36-workload 表与 Native 单引擎 7-workload 门禁。两组结果都使用固定 CPU、128 MiB heap
-  和 11 轮交替测量，并保留完整 release artifact。
+`0.1.0` 还没有完成正式 release qualification，因此当前不发布新的性能倍数声明。合格结果
+必须绑定候选 commit、产品源码 digest、benchmark digest、固定 SDK、CPU affinity、heap、
+workload checksum、RSS、原始轮次和 runner version。
 
-## 当前 main 对比
+发布门禁至少包含：
 
-- [2026-08-30 当前 `main` 七库完整对比](results/2026-08-30-main-seven-library.md)：由
-  [`current-main.json`](../../benchmarks/results/full-seven-library/current-main.json) 绑定到测量提交、
-  产品源码摘要、有效 benchmark 摘要和证据目录。两批各覆盖 10 个 workload、7 个库和 11 个
-  独立进程轮次。两批均为 0/10 stable，因此 README 只展示第二批完整表，不发布精确比例。
+- Pure baseline/candidate 的 11 轮交替/反转 A/B；
+- Native/Pure 的独立进程 11 轮资格；
+- yjson、stdx.json、cjfast_json 的同批次共同 workload；
+- DOM、typed codec 和 stream 分表；
+- checksum 正确性、RSS 和跨 profile 重复；
+- 双方 CV 不超过 5%，否则保留完整 noisy 批次。
 
-CI 会重新计算当前 checkout 的产品源码和 benchmark 输入摘要。性能相关输入变化但 marker
-未更新时，门禁失败。文档或证据校验代码的变化不会单独使性能输入摘要失配，但 marker
-指向的测量提交必须仍是当前提交的祖先。
+具体阈值见[性能方法](methodology.md)。实现设计结论见
+[性能设计结论](../performance.md)。
 
-## 当前开发结果
+## 历史证据
 
-- [2026-08-28 Stream protocol v1](results/2026-08-28-stream-protocol-v1.md)：typed
-  incremental encode/decode、三种 payload、三种 chunk、两种 sink 和内部 scratch 生命周期。
-  结果包含 previous-yjson A/B 与 yjson/stdx.json peer 表，并保留完整 Server 原始数据。
-  A/B 稳定性与生命周期门槛未通过，因此不能作为发布性能声明。
+以下页面绑定旧版本或开发快照，只用于审计和新候选的 baseline 选择：
 
-## 历史结果
+- [2.0.0 性能验收](results/2026-08-27-yjson-2.0.0.md)
+- [2026-08-26 Native acceleration](results/2026-08-26-native-acceleration.md)
+- [2026-08-25 Linux release baseline](results/2026-08-25-linux-release-three-library.md)
 
-- [2026-08-30 `dev` 七库完整对比](results/2026-08-30-current-dev-seven-library.md)：绑定
-  `1dedf2a` 的旧开发快照。带日期页面保持不变。
-- [2026-08-26 Native 单引擎加速门禁](results/2026-08-26-native-acceleration.md)：2.0.0
-  最终候选之前的固定源码批次。
-- [2026-08-25 Linux rc.2 三库表](results/2026-08-25-linux-rc2-three-library.md)：
-  `1.0.0-rc.2` 的 36 个共同 workload。
-- [2026-08-25 Linux release baseline](results/2026-08-25-linux-release-three-library.md)：
-  后续 correctness 修改之前的固定源码批次。
-- [yjson / cjfast_json](results/2026-08-21-cjfast-json.md)：typed codec 对比。
-- [Go yyjson DOM](results/2026-08-22-go-yyjson.md)：跨 runtime mutable DOM 对比，不代表
-  generated typed codec。
-- [Typed stream backend](results/2026-08-24-stream-backends.md)：同一 codec 下 Pure、Custom
-  Native 和 yyjson stream。
-
-带日期页面是固定源码和环境的结果，不会因为后续优化而改写。release 原始轮次、manifest、
-日志和 checksum 位于对应 `release/<version>/artifacts`。
-
-未进入 release 的开发结果保存在 `benchmarks/results/<protocol>/<date>/`。这些结果可以解释
-设计取舍，但只有结果页明确写为通过时才能用于发布声明。
+旧页面不会因 `0.1.x` API 或实现变化而改写，也不能直接成为 `0.1.0` claim。
 
 ## 如何读表
 
-- ratio 统一为 `yjson median / peer median`；小于 1 表示 yjson 延迟更低。
-- `stable` 允许讨论精确比例；`noisy` 只提供方向或不确定结论。
-- 高 CV 行仍然保留，不能借稳定性门槛隐藏不利 workload。
-- 不同日期、runtime、SDK、输入或 API 的数字不能合并。
-- latency 不能推导 allocation、RSS、峰值内存或吞吐。
+- ratio 统一为 `yjson median / peer median`；小于 1 表示 yjson 延迟更低；
+- process median 是主要延迟统计；
+- CV 超过门槛的行保留并标为 noisy，不发布精确比例；
+- 高 CV 不能用于隐藏不利 workload；
+- 不同日期、runtime、SDK、input 或 API 的数字不能合并；
+- latency 不能推导 allocation、RSS、peak memory 或 throughput。
 
-每个 release 必须给出 yjson、stdx.json、cjfast_json 的同批次完整共同 workload 表。README
-可以展示最新完整批次的观察值，但必须链接可审计结果，并明确源码身份与 `stable` 或 `noisy`
-状态。选型指南不复制绝对数字。
-
-采集、稳定性和回滚规则见[性能方法](methodology.md)；已采纳和拒绝的设计方向见
-[性能研究结论](../performance.md)。
+原始样本、logs、manifest、checksum 和环境信息属于不可变 release artifact。只有结果页明确
+写为通过，并且能追溯到已发布 commit 时，才能进入用户-facing claim。

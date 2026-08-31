@@ -74,7 +74,7 @@ stage_kind = "package"
 stability = "advanced"
 leaf_bundle = false
 dependencies = ["yjson_native_primitives"]
-test_dependencies = ["yjson"]
+test_dependencies = ["yjson", "yjson_macros"]
 
 [[packages]]
 name = "yjson_native"

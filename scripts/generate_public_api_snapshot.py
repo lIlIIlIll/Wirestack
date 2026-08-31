@@ -190,8 +190,43 @@ def cangjie_declarations(package: str, path: pathlib.Path) -> list[str]:
 def c_prototypes(path: pathlib.Path) -> list[str]:
     declarations: list[str] = []
     pending: list[str] = []
+    # Test probes may use the same YJ_* naming convention as the exported ABI,
+    # but declarations guarded by YJ_TESTING are not present in release builds.
+    # Track that one well-known conditional while continuing to inventory both
+    # branches of unrelated platform conditionals.
+    test_condition_stack: list[tuple[bool, int]] = []
+    test_only_branch = False
     for line in path.read_text(encoding="utf-8").splitlines():
         stripped = line.strip()
+        if re.match(r"#if(?:def|ndef)?\b", stripped):
+            condition = 0
+            if stripped.startswith("#ifdef YJ_TESTING") or re.match(
+                r"#if\s+defined\s*\(\s*YJ_TESTING\s*\)", stripped
+            ):
+                condition = 1
+            elif stripped.startswith("#ifndef YJ_TESTING") or re.match(
+                r"#if\s+!\s*defined\s*\(\s*YJ_TESTING\s*\)", stripped
+            ):
+                condition = -1
+            parent = test_only_branch
+            test_condition_stack.append((parent, condition))
+            test_only_branch = parent or condition == 1
+            continue
+        if stripped.startswith("#else") and test_condition_stack:
+            parent, condition = test_condition_stack[-1]
+            if condition == 1:
+                test_only_branch = parent
+            elif condition == -1:
+                test_only_branch = True
+            else:
+                test_only_branch = parent
+            continue
+        if stripped.startswith("#endif") and test_condition_stack:
+            test_only_branch, _ = test_condition_stack.pop()
+            continue
+        if test_only_branch:
+            pending = []
+            continue
         if not pending and re.search(r"\bYJ_\w+\s*\(", stripped) is None:
             continue
         if stripped.startswith("#") or stripped.startswith("//"):

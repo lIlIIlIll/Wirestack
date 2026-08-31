@@ -33,7 +33,7 @@ class JsonDirectWriterStateTest {
         pretty.endObject()
         @Expect(
             pretty.finishString(),
-            "{\n    \"items\": [\n        1,\n        {\n            \"ok\": true\n        }\n    ]\n}"
+            "{\n  \"items\": [\n    1,\n    {\n      \"ok\": true\n    }\n  ]\n}"
         )
     }
 

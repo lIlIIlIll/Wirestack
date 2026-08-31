@@ -4,6 +4,7 @@ name = "yjson_backends"
 description = "Advanced resource-owning backend APIs for yjson"
 version = "0.1.0"
 output-type = "static"
+compile-option = "-O2"
 
 [dependencies]
 yjson = "0.1.0"

@@ -7,20 +7,16 @@
 
 ```cangjie
 class UserId {
-    let value: Int64
-    init(value: Int64) { this.value = value }
+    public let value: Int64
+    public init(value: Int64) { this.value = value }
 }
 
 class UserIdCodec <: JsonCodec<UserId> {
-    public func write(value: UserId, writer: JsonCodecWriter,
-        context: JsonEncodeContext): Unit {
-        let _ = context
+    public func write(value: UserId, writer: JsonWriter): Unit {
         writer.writeInt64(value.value)
     }
 
-    public func read(reader: JsonCodecReader,
-        context: JsonDecodeContext): UserId {
-        let _ = context
+    public func read(reader: JsonReader): UserId {
         UserId(reader.readInt64())
     }
 }
@@ -28,41 +24,72 @@ class UserIdCodec <: JsonCodec<UserId> {
 let UserIdJson: JsonCodec<UserId> = UserIdCodec()
 ```
 
-显式使用：
+显式传入 codec：
 
 ```cangjie
-let text = YJson.encodeStringWith(UserIdJson, UserId(7))
-let id = YJson.decodeStringWith(UserIdJson, text)
+let text = YJson.toJson(UserId(7), codec: UserIdJson)
+let id = YJson.fromJson(text, codec: UserIdJson)
 ```
 
-## 让类型支持最短入口
+同一形式适用于 String、`Array<Byte>`、`InputStream` 和 `OutputStream`。不需要为 custom
+codec 创建另一组 API 名称。
 
-实现 `JsonCodecProvider` 后，可以使用 `YJson.toJson/fromJson<T>`，也可以把值插入
-`@Json`：
+## Reader 和 writer contract
+
+`JsonReader` 提供 scalar 读取、array/object 边界、field name、skip、path、location 和
+`error(message, code)`。`JsonWriter` 提供对应 scalar、name、container、path 和 error
+方法。
+
+对象 codec 必须完整消费或写出一个值：
 
 ```cangjie
-extend UserId <: JsonCodecProvider {
-    public static func jsonCodec(): JsonAnyCodec {
-        eraseJsonCodec(UserIdJson)
+class PointCodec <: JsonCodec<Point> {
+    public func write(value: Point, writer: JsonWriter): Unit {
+        writer.startObject()
+        writer.writeName("x")
+        writer.writeInt64(value.x)
+        writer.writeName("y")
+        writer.writeInt64(value.y)
+        writer.endObject()
+    }
+
+    public func read(reader: JsonReader): Point {
+        var x: Int64 = 0
+        var y: Int64 = 0
+        reader.startObject()
+        while (reader.hasObjectField()) {
+            let name = reader.readName()
+            match (name) {
+                case "x" => x = reader.readInt64()
+                case "y" => y = reader.readInt64()
+                case _ => reader.skipValue()
+            }
+        }
+        reader.endObject()
+        Point(x, y)
     }
 }
 ```
 
-如果 codec 只用于一个 generated 字段，使用 `@JsonUsing[UserIdJson]` 即可，不必为类型
-提供全局 provider。
+custom codec 应保持 immutable 或自行同步，因为应用可以并发调用同一个 codec instance。
+不要向下转型到 runtime 的具体 reader/writer，不要持有 reader、writer 或 caller input 到调用
+结束之后。需要报告业务格式错误时，使用 `reader.error` 或 `writer.error`，以保留当前
+JSON Pointer path。
 
-## Contract
+## 组合现有 codec
 
-- 只依赖 `JsonCodecReader` / `JsonCodecWriter`；不要向下转型到 direct reader/writer。
-- 使用 `JsonDecodeContext` / `JsonEncodeContext` 传递深度和配置语义。
-- 普通 codec 始终可使用 String、bytes 和 stream 显式入口。
-- `YJson.fastDecoder(codec)` 只适用于提供 fast-reader contract 的 codec；否则产生
-  `codec_contract`。
-- `YJson.optionCodec`、`arrayCodec`、`arrayListCodec` 和 `hashMapCodec` 可组合已有 codec。
+`JsonCodecs` 提供 scalar codec，以及以下容器组合器：
 
-旧式 `JsonValueCodec<T>` 仅用于 AST 兼容入口。`YJsonAst.encodeWith/decodeWith` 的 config
-参数只接受默认 `JsonCodecConfig.compact`，非默认配置以 `unsupported_config` 明确失败。
-需要自定义读写策略时实现本页的 `JsonCodec<T>`。
+```cangjie
+let ids = JsonCodecs.array(UserIdJson)
+let optional = JsonCodecs.option(UserIdJson)
+let list = JsonCodecs.arrayList(UserIdJson)
+let byName = JsonCodecs.stringMap(UserIdJson)
+```
 
-遵守 backend-neutral contract 后，同一 codec 可以由默认 Pure stream 或显式 Native
-whole-document backend 驱动。
+generated 字段只需要专用 codec 时，使用 `@JsonUsing[UserIdJson]`，不必改变字段类型的全局
+行为。
+
+遵守这个 backend-neutral contract 后，同一 codec 可以由 Pure String/bytes/stream 入口，
+以及命名 Native/yyjson façade 驱动。
+

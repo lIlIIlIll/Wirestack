@@ -1,9 +1,7 @@
 # JSON Schema draft 2020-12
 
-yjson 只解释 draft 2020-12。显式 `$schema` 声明其他 dialect 时返回
-`unsupported_schema_dialect`，避免把不同 draft 的同名 keyword 静默解释错。
-
-Schema 位于可选 `yjson_algorithms` package：
+`JsonSchema` 位于可选 `yjson_algorithms` package，只解释 draft 2020-12。显式声明其他
+dialect 时抛出 `JsonException(code: "unsupported_schema_dialect")`。
 
 ```cangjie
 import yjson.*
@@ -23,71 +21,91 @@ let schema = JsonSchema.parse("""
 }
 """)
 
-schema.validateOrThrow(YJson.parse("{\"name\":\"Alice\"}"))
+let result = schema.validate(JsonNode.parse("{\"name\":\"Alice\"}"))
+if (!result.valid) {
+    println(result[0].instancePath)
+    println(result[0].schemaPath)
+}
 ```
 
-- `validate` 返回全部 `JsonValidationError`；错误包含 instance `jsonPath` 和 keyword
-  `schemaPath`。
-- `isValid` 只返回 Bool。
-- `validateOrThrow` 抛出第一个错误。
+`validate` 返回 immutable `JsonSchemaResult`；它提供 `valid`、`size`、索引访问和
+`violations()`。`isValid` 只返回 Bool。`JsonSchemaViolation` 同时记录 instance 的
+`instancePath`、keyword 的 `schemaPath`、code 和 message。
 
-## 支持的语义
+数值比较按 JSON 数值语义，而不是 token 拼写：`1`、`1.0` 与 `1e0` 相等，并且都满足
+integer。
 
-实现覆盖 draft 2020-12 core、validation 与 applicator 的 required suite，包括 reference、
-dynamic reference、对象/数组 applicator、组合关键字、unevaluated 关键字和 Decimal 数值
-比较。annotation keyword 可以保留，但不改变 validation 结果。
+## 外部资源在构造时冻结
 
-数值相等按数值而不是 token 拼写判断：`1`、`1.0` 与 `1e0` 相等且都满足 integer。
-
-## 外部资源
-
-`yjson_algorithms` 不访问网络。应用通过 `UriResolver` 提供资源：
+yjson 不访问网络。应用通过 `UriResolver` 提供外部 resource：
 
 ```cangjie
 let registry = JsonSchemaRegistry()
-registry.register("urn:example:types", """
-{"$defs":{"id":{"$anchor":"id","type":"integer","minimum":1}}}
-""")
+registry.register(
+    "urn:example:types",
+    "{\"$defs\":{\"id\":{\"$anchor\":\"id\",\"type\":\"integer\",\"minimum\":1}}}"
+)
 
 let config = JsonSchemaConfig(resolver: Some<UriResolver>(registry))
-let schema = JsonSchema.parse("{\"$ref\":\"urn:example:types#id\"}", config: config)
+let schema = JsonSchema.parse(
+    "{\"$ref\":\"urn:example:types#id\"}",
+    config: config
+)
 ```
 
-registry key 不含 fragment；fragment 可以是 JSON Pointer 或 `$anchor`。文件、缓存、网络、
-鉴权和超时策略由应用实现。`JsonSchema` 复制 schema document；公开 `document` 每次返回
-独立副本。resolver 仍是实时依赖，需要可重复结果时应冻结其资源集合。
+registry key 是不带 fragment 的 resource URI。构造 `JsonSchema` 时会复制根 schema，遍历并
+解析完整外部引用图，再编译全部 schema regex。成功返回后：
+
+- compiled schema 不再持有 resolver；`schema.config.resolver` 为 `None`；
+- validation 不访问文件、网络、缓存或可变 registry；
+- `schema.document` 每次返回独立副本；
+- schema、validator 和 result 可并发读取。
+
+resolver 的 I/O、鉴权、缓存和超时由应用在构造阶段负责。循环和重复 reference 由编译图处理，
+ref resolution 受 `JsonSchemaLimits.maxRefResolutions` 约束。
 
 ## Format
+
+`JsonSchemaFormatMode` 只有两种：
 
 | 模式 | 已注册 format | 未注册 format |
 | --- | --- | --- |
 | `Annotation` | 不执行 | 不执行；默认 |
 | `Assertion` | 执行 | 保留 annotation 语义 |
-| `StrictAssertion` | 执行 | `unsupported_schema_format` |
 
-core 提供常用日期、时间、IP、UUID、regex 与 pointer formats。国际化 hostname/email、
-URI/IRI 和 RFC 6570 URI Template 由可选 `yjson_schema_formats` 提供：
+core registry 提供 date、time、date-time、duration、email、IPv4/IPv6、UUID、regex、JSON
+Pointer 和 relative JSON Pointer。国际化 hostname/email、URI/IRI 和 RFC 6570 URI Template
+由 `yjson_schema_formats` 提供：
 
 ```cangjie
 let formats = JsonSchemaFormatRegistry.withCoreFormats()
 formats.install(StandardInternationalFormats())
+
 let config = JsonSchemaConfig(
     formatMode: JsonSchemaFormatMode.Assertion,
     formats: formats
 )
+let schema = JsonSchema.parse(schemaText, config: config)
 ```
 
-registry 应在配置阶段完成修改；共享给并发 validation 后不得继续注册或替换 format。
+`JsonSchema` 构造时取得 registry 的 frozen copy。之后修改原 registry 不会改变已编译 schema；
+默认 registry 本身也是 immutable。
 
-## 工作预算
+## Regex 和工作预算
 
-`JsonSchemaConfig` 默认使用 `JsonSchemaLimits.defaults`：100000 evaluations、1000 次 ref
-resolution、100 个 errors、depth 256。任一预算耗尽抛出 `JsonWorkLimitException`，error code
-为 `work_limit_exceeded`。可信离线任务可以显式配置 `JsonSchemaLimits.unlimited`；处理不可信
-schema 或 instance 时不应关闭预算。
+Schema `pattern` 使用内部线性时间、非回溯 regex 引擎。构造阶段拒绝反向引用等不属于
+受支持正则子集的特性，code 为 `invalid_regex`。`regex` format 只进行有界的 ECMAScript
+语法验证，因此接受命名分组、反向引用和 lookbehind，但不会执行这些表达式。解析和匹配
+工作量都受 `maxRegexSteps` 限制。
 
-## Conformance 证据
+`JsonSchemaLimits.defaults` 设置 100,000 evaluations、1,000 ref resolutions、100,000 regex
+steps、100 errors 和 depth 256。预算耗尽抛出
+`JsonException(code: "work_limit_exceeded")`。可信离线任务可以显式使用
+`JsonSchemaLimits.unlimited`。
 
-固定 revision 的公开 consumer 当前记录 required 1299/1299、JSONPath CTS 703/703、JSON
-Patch 108/108。安装 optional format provider 后，适用 optional Schema cases 为 964/964。
-数字属于对应 release evidence；稳定测试政策见[测试指南](maintainers/testing.md)。
+## Conformance 门禁
+
+固定 corpus 的预期 cardinality 为 Schema required 1299、JSONPath CTS 703、JSON Patch 108；
+安装 optional format provider 后增加 964 个适用 Schema cases。数字是 runner 的输入约束，
+实际 PASS/FAIL 必须记录在对应 release evidence。入口和证据规则见
+[测试指南](maintainers/testing.md)。

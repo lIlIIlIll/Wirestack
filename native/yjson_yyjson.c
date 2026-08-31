@@ -7,11 +7,18 @@
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #if defined(__linux__)
 #include <sys/random.h>
+#endif
+
+#if defined(_MSC_VER)
+#define FY_THREAD_LOCAL __declspec(thread)
+#else
+#define FY_THREAD_LOCAL _Thread_local
 #endif
 
 #if UINTPTR_MAX > UINT64_MAX
@@ -68,6 +75,7 @@ typedef struct {
 typedef struct FyDuplicateSet FyDuplicateSet;
 
 typedef struct {
+    uint64_t identity;
     yyjson_doc *yy_doc;
     yyjson_val *root;
     FyFlatDocument *flat;
@@ -106,6 +114,36 @@ typedef struct {
     uint32_t mode;
     uint32_t flags;
 } FyDocument;
+
+typedef struct {
+    uint64_t document_identity;
+    yyjson_val *container;
+    yyjson_val *value;
+    yyjson_val *next;
+    uint64_t index;
+    int valid;
+} FyDirectArrayCursor;
+
+typedef struct {
+    uint64_t document_identity;
+    yyjson_val *container;
+    yyjson_val *key;
+    yyjson_val *value;
+    yyjson_val *next_key;
+    uint64_t index;
+    int valid;
+} FyDirectObjectCursor;
+
+static atomic_uint_fast64_t fy_next_document_identity = ATOMIC_VAR_INIT(1);
+static FY_THREAD_LOCAL FyDirectArrayCursor fy_direct_array_cursor;
+static FY_THREAD_LOCAL FyDirectObjectCursor fy_direct_object_cursor;
+
+#if defined(YJ_TESTING)
+static FY_THREAD_LOCAL uint64_t fy_test_navigation_restarts;
+#define FY_RECORD_NAVIGATION_RESTART() (fy_test_navigation_restarts++)
+#else
+#define FY_RECORD_NAVIGATION_RESTART() ((void)0)
+#endif
 
 typedef struct {
     uint8_t *data;
@@ -875,6 +913,10 @@ int32_t YJ_Yyjson_Parse(const uint8_t *input, int64_t length,
     }
     FyDocument *document = (FyDocument *)calloc(1, sizeof(FyDocument));
     if (document == NULL) { *out_error_code = YJ_COMPACT_OUT_OF_MEMORY; return YJ_COMPACT_OUT_OF_MEMORY; }
+    do {
+        document->identity = atomic_fetch_add_explicit(
+            &fy_next_document_identity, 1, memory_order_relaxed);
+    } while (document->identity == 0);
     document->mode = mode;
     document->flags = flags;
     document->hash_seed = fy_random_seed();
@@ -1084,20 +1126,419 @@ uint64_t YJ_Yyjson_TraversalChecksum(uint64_t handle) {
     return fy_direct_checksum(document->root);
 }
 
-int32_t YJ_Yyjson_RootSize(uint64_t handle, uint64_t *out_size) {
+static int fy_value_int64(yyjson_val *value, int64_t *out);
+
+static int32_t fy_direct_kind(yyjson_val *value, uint32_t *out_kind) {
+    if (value == NULL || out_kind == NULL) return YJ_COMPACT_TYPE_ERROR;
+    if (yyjson_is_null(value)) *out_kind = YJ_COMPACT_NULL;
+    else if (yyjson_is_bool(value)) *out_kind = YJ_COMPACT_BOOL;
+    else if (yyjson_is_sint(value)) *out_kind = YJ_COMPACT_INT;
+    else if (yyjson_is_uint(value)) {
+        *out_kind = yyjson_get_uint(value) <= (uint64_t)INT64_MAX
+            ? YJ_COMPACT_INT : YJ_COMPACT_NUMBER;
+    } else if (yyjson_is_raw(value)) {
+        int64_t integer;
+        *out_kind = fy_raw_int64(yyjson_get_raw(value), yyjson_get_len(value),
+                                 &integer)
+            ? YJ_COMPACT_INT : YJ_COMPACT_NUMBER;
+    } else if (yyjson_is_num(value)) *out_kind = YJ_COMPACT_NUMBER;
+    else if (yyjson_is_str(value)) *out_kind = YJ_COMPACT_STRING;
+    else if (yyjson_is_arr(value)) *out_kind = YJ_COMPACT_ARRAY;
+    else if (yyjson_is_obj(value)) *out_kind = YJ_COMPACT_OBJECT;
+    else return YJ_COMPACT_TYPE_ERROR;
+    return YJ_COMPACT_OK;
+}
+
+static FyNode *fy_flat_node(FyDocument *document, uint64_t node) {
+    if (document == NULL || document->flat == NULL || node > UINT32_MAX ||
+        (uint32_t)node >= document->flat->node_count) return NULL;
+    return &document->flat->nodes[(uint32_t)node];
+}
+
+static yyjson_val *fy_direct_node(FyDocument *document, uint64_t node) {
+    if (document == NULL || document->flat != NULL ||
+        document->fallback_custom_handle != 0 || node == 0) return NULL;
+    return (yyjson_val *)(uintptr_t)node;
+}
+
+static int32_t fy_direct_text(yyjson_val *value, const uint8_t **out_text,
+                              uint64_t *out_size, char scratch[64]) {
+    if (value == NULL || out_text == NULL || out_size == NULL)
+        return YJ_COMPACT_TYPE_ERROR;
+    if (yyjson_is_str(value)) {
+        *out_text = (const uint8_t *)yyjson_get_str(value);
+        *out_size = yyjson_get_len(value);
+        return YJ_COMPACT_OK;
+    }
+    if (yyjson_is_raw(value)) {
+        *out_text = (const uint8_t *)yyjson_get_raw(value);
+        *out_size = yyjson_get_len(value);
+        return YJ_COMPACT_OK;
+    }
+    int length = -1;
+    if (yyjson_is_sint(value))
+        length = snprintf(scratch, 64, "%" PRId64, yyjson_get_sint(value));
+    else if (yyjson_is_uint(value))
+        length = snprintf(scratch, 64, "%" PRIu64, yyjson_get_uint(value));
+    else if (yyjson_is_real(value))
+        length = snprintf(scratch, 64, "%.17g", yyjson_get_real(value));
+    if (length < 0 || length >= 64) return YJ_COMPACT_TYPE_ERROR;
+    *out_text = (const uint8_t *)scratch;
+    *out_size = (uint64_t)length;
+    return YJ_COMPACT_OK;
+}
+
+int32_t YJ_Yyjson_Root(uint64_t handle, uint64_t *out_node) {
+    FyDocument *document = (FyDocument *)(uintptr_t)handle;
+    if (document == NULL) return YJ_COMPACT_CLOSED;
+    if (out_node == NULL) return YJ_COMPACT_PARSE_ERROR;
+    if (document->fallback_custom_handle != 0)
+        *out_node = document->fallback_custom_root;
+    else if (document->flat != NULL)
+        *out_node = document->flat->root;
+    else
+        *out_node = (uint64_t)(uintptr_t)document->root;
+    return YJ_COMPACT_OK;
+}
+
+int32_t YJ_Yyjson_Kind(uint64_t handle, uint64_t node, uint32_t *out_kind) {
+    FyDocument *document = (FyDocument *)(uintptr_t)handle;
+    if (document == NULL) return YJ_COMPACT_CLOSED;
+    if (out_kind == NULL) return YJ_COMPACT_PARSE_ERROR;
+    if (document->fallback_custom_handle != 0) {
+        if (node > UINT32_MAX) return YJ_COMPACT_BOUNDS_ERROR;
+        return YJ_Compact_Kind(document->fallback_custom_handle, (uint32_t)node,
+                               out_kind);
+    }
+    if (document->flat != NULL) {
+        FyNode *value = fy_flat_node(document, node);
+        if (value == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+        *out_kind = value->kind;
+        return YJ_COMPACT_OK;
+    }
+    return fy_direct_kind(fy_direct_node(document, node), out_kind);
+}
+
+int32_t YJ_Yyjson_Size(uint64_t handle, uint64_t node, uint64_t *out_size) {
     FyDocument *document = (FyDocument *)(uintptr_t)handle;
     if (document == NULL) return YJ_COMPACT_CLOSED;
     if (out_size == NULL) return YJ_COMPACT_PARSE_ERROR;
-    if (document->fallback_custom_handle != 0)
-        return YJ_Compact_Size(document->fallback_custom_handle,
-                               document->fallback_custom_root, out_size);
-    if (document->flat != NULL) {
-        FyNode *root = &document->flat->nodes[document->flat->root];
-        *out_size = root->kind == YJ_COMPACT_ARRAY || root->kind == YJ_COMPACT_OBJECT
-            ? root->aux : 0;
-    } else {
-        *out_size = yyjson_get_len(document->root);
+    if (document->fallback_custom_handle != 0) {
+        if (node > UINT32_MAX) return YJ_COMPACT_BOUNDS_ERROR;
+        return YJ_Compact_Size(document->fallback_custom_handle, (uint32_t)node,
+                               out_size);
     }
+    if (document->flat != NULL) {
+        FyNode *value = fy_flat_node(document, node);
+        if (value == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+        *out_size = value->kind == YJ_COMPACT_ARRAY || value->kind == YJ_COMPACT_OBJECT
+            ? value->aux : 0;
+        return YJ_COMPACT_OK;
+    }
+    yyjson_val *value = fy_direct_node(document, node);
+    if (value == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+    *out_size = yyjson_is_arr(value) || yyjson_is_obj(value)
+        ? yyjson_get_len(value) : 0;
+    return YJ_COMPACT_OK;
+}
+
+int32_t YJ_Yyjson_GetInt(uint64_t handle, uint64_t node, int64_t *out_value) {
+    FyDocument *document = (FyDocument *)(uintptr_t)handle;
+    if (document == NULL) return YJ_COMPACT_CLOSED;
+    if (out_value == NULL) return YJ_COMPACT_PARSE_ERROR;
+    if (document->fallback_custom_handle != 0) {
+        if (node > UINT32_MAX) return YJ_COMPACT_BOUNDS_ERROR;
+        return YJ_Compact_GetInt(document->fallback_custom_handle, (uint32_t)node,
+                                 out_value);
+    }
+    if (document->flat != NULL) {
+        FyNode *value = fy_flat_node(document, node);
+        if (value == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+        if (value->kind != YJ_COMPACT_INT) return YJ_COMPACT_TYPE_ERROR;
+        memcpy(out_value, &value->payload, sizeof(*out_value));
+        return YJ_COMPACT_OK;
+    }
+    return fy_value_int64(fy_direct_node(document, node), out_value)
+        ? YJ_COMPACT_OK : YJ_COMPACT_TYPE_ERROR;
+}
+
+int32_t YJ_Yyjson_GetBool(uint64_t handle, uint64_t node, uint32_t *out_value) {
+    FyDocument *document = (FyDocument *)(uintptr_t)handle;
+    if (document == NULL) return YJ_COMPACT_CLOSED;
+    if (out_value == NULL) return YJ_COMPACT_PARSE_ERROR;
+    if (document->fallback_custom_handle != 0) {
+        if (node > UINT32_MAX) return YJ_COMPACT_BOUNDS_ERROR;
+        return YJ_Compact_GetBool(document->fallback_custom_handle, (uint32_t)node,
+                                  out_value);
+    }
+    if (document->flat != NULL) {
+        FyNode *value = fy_flat_node(document, node);
+        if (value == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+        if (value->kind != YJ_COMPACT_BOOL) return YJ_COMPACT_TYPE_ERROR;
+        *out_value = value->payload != 0;
+        return YJ_COMPACT_OK;
+    }
+    yyjson_val *value = fy_direct_node(document, node);
+    if (value == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+    if (!yyjson_is_bool(value)) return YJ_COMPACT_TYPE_ERROR;
+    *out_value = yyjson_get_bool(value) ? 1u : 0u;
+    return YJ_COMPACT_OK;
+}
+
+int32_t YJ_Yyjson_GetTextSize(uint64_t handle, uint64_t node,
+                             uint64_t *out_size) {
+    FyDocument *document = (FyDocument *)(uintptr_t)handle;
+    if (document == NULL) return YJ_COMPACT_CLOSED;
+    if (out_size == NULL) return YJ_COMPACT_PARSE_ERROR;
+    if (document->fallback_custom_handle != 0) {
+        if (node > UINT32_MAX) return YJ_COMPACT_BOUNDS_ERROR;
+        return YJ_Compact_GetTextSize(document->fallback_custom_handle,
+                                      (uint32_t)node, out_size);
+    }
+    if (document->flat != NULL) {
+        FyNode *value = fy_flat_node(document, node);
+        if (value == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+        if (value->kind != YJ_COMPACT_STRING && value->kind != YJ_COMPACT_NUMBER)
+            return YJ_COMPACT_TYPE_ERROR;
+        *out_size = (uint32_t)value->payload;
+        return YJ_COMPACT_OK;
+    }
+    const uint8_t *text;
+    char scratch[64];
+    return fy_direct_text(fy_direct_node(document, node), &text, out_size,
+                          scratch);
+}
+
+int32_t YJ_Yyjson_CopyText(uint64_t handle, uint64_t node,
+                          uint8_t *output, uint64_t output_capacity,
+                          uint64_t *out_written) {
+    FyDocument *document = (FyDocument *)(uintptr_t)handle;
+    if (document == NULL) return YJ_COMPACT_CLOSED;
+    if (out_written == NULL || (output_capacity != 0 && output == NULL))
+        return YJ_COMPACT_PARSE_ERROR;
+    if (document->fallback_custom_handle != 0) {
+        if (node > UINT32_MAX) return YJ_COMPACT_BOUNDS_ERROR;
+        return YJ_Compact_CopyText(document->fallback_custom_handle,
+                                   (uint32_t)node, output, output_capacity,
+                                   out_written);
+    }
+    const uint8_t *text = NULL;
+    uint64_t length = 0;
+    char scratch[64];
+    if (document->flat != NULL) {
+        FyNode *value = fy_flat_node(document, node);
+        if (value == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+        if (value->kind != YJ_COMPACT_STRING && value->kind != YJ_COMPACT_NUMBER)
+            return YJ_COMPACT_TYPE_ERROR;
+        length = (uint32_t)value->payload;
+        text = document->flat->strings + (uint32_t)(value->payload >> 32);
+    } else {
+        int32_t status = fy_direct_text(fy_direct_node(document, node), &text,
+                                        &length, scratch);
+        if (status != YJ_COMPACT_OK) return status;
+    }
+    if (output_capacity < length) return YJ_COMPACT_BOUNDS_ERROR;
+    if (length != 0) memcpy(output, text, (size_t)length);
+    *out_written = length;
+    return YJ_COMPACT_OK;
+}
+
+int32_t YJ_Yyjson_GetInlineTextSize(uint64_t handle, uint64_t reference,
+                                   uint64_t *out_size) {
+    FyDocument *document = (FyDocument *)(uintptr_t)handle;
+    if (document == NULL) return YJ_COMPACT_CLOSED;
+    if (document->fallback_custom_handle == 0) return YJ_COMPACT_TYPE_ERROR;
+    return YJ_Compact_GetStringRefSize(document->fallback_custom_handle,
+                                       reference, out_size);
+}
+
+int32_t YJ_Yyjson_CopyInlineText(uint64_t handle, uint64_t reference,
+                                uint8_t *output, uint64_t output_capacity,
+                                uint64_t *out_written) {
+    FyDocument *document = (FyDocument *)(uintptr_t)handle;
+    if (document == NULL) return YJ_COMPACT_CLOSED;
+    if (document->fallback_custom_handle == 0) return YJ_COMPACT_TYPE_ERROR;
+    return YJ_Compact_CopyStringRef(document->fallback_custom_handle, reference,
+                                    output, output_capacity, out_written);
+}
+
+static yyjson_val *fy_direct_array_entry(FyDocument *document,
+                                         yyjson_val *value,
+                                         uint64_t index) {
+    size_t count = yyjson_arr_size(value);
+    if (index >= count || index > SIZE_MAX) return NULL;
+    FyDirectArrayCursor *cursor = &fy_direct_array_cursor;
+    yyjson_val *entry = NULL;
+    if (cursor->valid && cursor->document_identity == document->identity &&
+        cursor->container == value) {
+        if (index == cursor->index) return cursor->value;
+        if (index == cursor->index + 1u) entry = cursor->next;
+    }
+    if (entry == NULL) {
+        FY_RECORD_NAVIGATION_RESTART();
+        entry = yyjson_arr_get(value, (size_t)index);
+    }
+    if (entry == NULL) return NULL;
+    cursor->document_identity = document->identity;
+    cursor->container = value;
+    cursor->value = entry;
+    cursor->next = index + 1u < count ? unsafe_yyjson_get_next(entry) : NULL;
+    cursor->index = index;
+    cursor->valid = 1;
+    return entry;
+}
+
+int32_t YJ_Yyjson_ArrayGet(uint64_t handle, uint64_t node, uint64_t index,
+                          uint64_t *out_node) {
+    FyDocument *document = (FyDocument *)(uintptr_t)handle;
+    if (document == NULL) return YJ_COMPACT_CLOSED;
+    if (out_node == NULL) return YJ_COMPACT_PARSE_ERROR;
+    if (document->fallback_custom_handle != 0) {
+        uint32_t child = 0;
+        if (node > UINT32_MAX) return YJ_COMPACT_BOUNDS_ERROR;
+        int32_t status = YJ_Compact_ArrayGet(document->fallback_custom_handle,
+            (uint32_t)node, index, &child);
+        *out_node = child;
+        return status;
+    }
+    if (document->flat != NULL) {
+        FyNode *value = fy_flat_node(document, node);
+        if (value == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+        if (value->kind != YJ_COMPACT_ARRAY) return YJ_COMPACT_TYPE_ERROR;
+        if (index >= value->aux) return YJ_COMPACT_BOUNDS_ERROR;
+        *out_node = document->flat->array_entries[(uint32_t)value->payload +
+                                                   (uint32_t)index];
+        return YJ_COMPACT_OK;
+    }
+    yyjson_val *value = fy_direct_node(document, node);
+    if (value == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+    if (!yyjson_is_arr(value)) return YJ_COMPACT_TYPE_ERROR;
+    yyjson_val *child = fy_direct_array_entry(document, value, index);
+    if (child == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+    *out_node = (uint64_t)(uintptr_t)child;
+    return YJ_COMPACT_OK;
+}
+
+static yyjson_val *fy_direct_object_entry(FyDocument *document,
+                                          yyjson_val *value, uint64_t index,
+                                          yyjson_val **out_key) {
+    if (value == NULL || !yyjson_is_obj(value) || index >= yyjson_obj_size(value))
+        return NULL;
+    FyDirectObjectCursor *cursor = &fy_direct_object_cursor;
+    yyjson_val *key = NULL;
+    yyjson_val *entry = NULL;
+    if (cursor->valid && cursor->document_identity == document->identity &&
+        cursor->container == value) {
+        if (index == cursor->index) {
+            *out_key = cursor->key;
+            return cursor->value;
+        }
+        if (index == cursor->index + 1u) key = cursor->next_key;
+    }
+    if (key == NULL) {
+        FY_RECORD_NAVIGATION_RESTART();
+        key = unsafe_yyjson_get_first(value);
+        for (uint64_t current = 0; current < index; current++)
+            key = unsafe_yyjson_get_next(key + 1);
+    }
+    if (key == NULL) return NULL;
+    entry = yyjson_obj_iter_get_val(key);
+    cursor->document_identity = document->identity;
+    cursor->container = value;
+    cursor->key = key;
+    cursor->value = entry;
+    cursor->next_key = index + 1u < yyjson_obj_size(value)
+        ? unsafe_yyjson_get_next(entry) : NULL;
+    cursor->index = index;
+    cursor->valid = 1;
+    *out_key = key;
+    return entry;
+}
+
+int32_t YJ_Yyjson_ObjectEntry(uint64_t handle, uint64_t node, uint64_t index,
+                             uint64_t *out_value_node,
+                             uint32_t *out_inline_kind,
+                             uint64_t *out_inline_payload,
+                             uint64_t *out_key_size) {
+    FyDocument *document = (FyDocument *)(uintptr_t)handle;
+    if (document == NULL) return YJ_COMPACT_CLOSED;
+    if (out_value_node == NULL || out_inline_kind == NULL ||
+        out_inline_payload == NULL || out_key_size == NULL)
+        return YJ_COMPACT_PARSE_ERROR;
+    *out_value_node = 0;
+    *out_inline_kind = UINT32_MAX;
+    *out_inline_payload = 0;
+    if (document->fallback_custom_handle != 0) {
+        uint32_t kind = 0;
+        uint64_t payload = 0;
+        if (node > UINT32_MAX) return YJ_COMPACT_BOUNDS_ERROR;
+        int32_t status = YJ_Compact_ObjectEntry(document->fallback_custom_handle,
+            (uint32_t)node, index, &kind, &payload, out_key_size);
+        if (status != YJ_COMPACT_OK) return status;
+        if (kind == YJ_COMPACT_ARRAY || kind == YJ_COMPACT_OBJECT)
+            *out_value_node = payload;
+        else {
+            *out_inline_kind = kind;
+            *out_inline_payload = payload;
+        }
+        return YJ_COMPACT_OK;
+    }
+    if (document->flat != NULL) {
+        FyNode *value = fy_flat_node(document, node);
+        if (value == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+        if (value->kind != YJ_COMPACT_OBJECT) return YJ_COMPACT_TYPE_ERROR;
+        if (index >= value->aux) return YJ_COMPACT_BOUNDS_ERROR;
+        FyObjectEntry *entry = &document->flat->object_entries[
+            (uint32_t)value->payload + (uint32_t)index];
+        *out_value_node = entry->value;
+        *out_key_size = entry->key.length;
+        return YJ_COMPACT_OK;
+    }
+    yyjson_val *key = NULL;
+    yyjson_val *value = fy_direct_object_entry(document,
+                                               fy_direct_node(document, node),
+                                               index, &key);
+    if (value == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+    *out_value_node = (uint64_t)(uintptr_t)value;
+    *out_key_size = yyjson_get_len(key);
+    return YJ_COMPACT_OK;
+}
+
+int32_t YJ_Yyjson_CopyObjectKey(uint64_t handle, uint64_t node,
+                               uint64_t index, uint8_t *output,
+                               uint64_t output_capacity,
+                               uint64_t *out_written) {
+    FyDocument *document = (FyDocument *)(uintptr_t)handle;
+    if (document == NULL) return YJ_COMPACT_CLOSED;
+    if (out_written == NULL || (output_capacity != 0 && output == NULL))
+        return YJ_COMPACT_PARSE_ERROR;
+    if (document->fallback_custom_handle != 0) {
+        if (node > UINT32_MAX) return YJ_COMPACT_BOUNDS_ERROR;
+        return YJ_Compact_CopyObjectKey(document->fallback_custom_handle,
+            (uint32_t)node, index, output, output_capacity, out_written);
+    }
+    const uint8_t *text = NULL;
+    uint64_t length = 0;
+    if (document->flat != NULL) {
+        FyNode *value = fy_flat_node(document, node);
+        if (value == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+        if (value->kind != YJ_COMPACT_OBJECT) return YJ_COMPACT_TYPE_ERROR;
+        if (index >= value->aux) return YJ_COMPACT_BOUNDS_ERROR;
+        FyObjectEntry *entry = &document->flat->object_entries[
+            (uint32_t)value->payload + (uint32_t)index];
+        text = document->flat->strings + entry->key.offset;
+        length = entry->key.length;
+    } else {
+        yyjson_val *key = NULL;
+        if (fy_direct_object_entry(document, fy_direct_node(document, node),
+                                   index, &key) == NULL)
+            return YJ_COMPACT_BOUNDS_ERROR;
+        text = (const uint8_t *)yyjson_get_str(key);
+        length = yyjson_get_len(key);
+    }
+    if (output_capacity < length) return YJ_COMPACT_BOUNDS_ERROR;
+    if (length != 0) memcpy(output, text, (size_t)length);
+    *out_written = length;
     return YJ_COMPACT_OK;
 }
 
@@ -1162,35 +1603,48 @@ static int fy_value_int64(yyjson_val *value, int64_t *out) {
     return 0;
 }
 
-int32_t YJ_Yyjson_ObjectLookupInt(uint64_t handle,
-                                 const uint8_t *key, uint64_t key_length,
-                                 int64_t *out_value, uint32_t *out_found) {
+int32_t YJ_Yyjson_ObjectLookup(uint64_t handle, uint64_t node,
+                              const uint8_t *key, uint64_t key_length,
+                              uint64_t *out_value_node,
+                              uint32_t *out_inline_kind,
+                              uint64_t *out_inline_payload,
+                              uint32_t *out_found) {
     FyDocument *document = (FyDocument *)(uintptr_t)handle;
     if (document == NULL) return YJ_COMPACT_CLOSED;
     if (key_length > SIZE_MAX || (key_length != 0 && key == NULL) ||
-        out_value == NULL || out_found == NULL) return YJ_COMPACT_TYPE_ERROR;
+        out_value_node == NULL || out_inline_kind == NULL ||
+        out_inline_payload == NULL || out_found == NULL)
+        return YJ_COMPACT_TYPE_ERROR;
+    *out_value_node = 0;
+    *out_inline_kind = UINT32_MAX;
+    *out_inline_payload = 0;
     if (document->fallback_custom_handle != 0) {
         uint32_t kind = 0;
         uint64_t payload = 0;
-        int32_t status = YJ_Compact_ObjectLookup(document->fallback_custom_handle,
-            document->fallback_custom_root, key, key_length, &kind, &payload, out_found);
+        if (node > UINT32_MAX) return YJ_COMPACT_BOUNDS_ERROR;
+        int32_t status = YJ_Compact_ObjectLookup(
+            document->fallback_custom_handle, (uint32_t)node, key, key_length,
+            &kind, &payload, out_found);
         if (status != YJ_COMPACT_OK || *out_found == 0) return status;
-        if (kind != YJ_COMPACT_INT) return YJ_COMPACT_TYPE_ERROR;
-        memcpy(out_value, &payload, sizeof(*out_value));
+        if (kind == YJ_COMPACT_ARRAY || kind == YJ_COMPACT_OBJECT)
+            *out_value_node = payload;
+        else {
+            *out_inline_kind = kind;
+            *out_inline_payload = payload;
+        }
         return YJ_COMPACT_OK;
     }
     if (document->flat != NULL) {
         FyFlatDocument *flat = document->flat;
-        FyNode *root = &flat->nodes[flat->root];
-        if (root->kind != YJ_COMPACT_OBJECT) return YJ_COMPACT_TYPE_ERROR;
-        for (uint32_t i = 0; i < root->aux; i++) {
-            FyObjectEntry *entry = &flat->object_entries[root->payload + i];
+        FyNode *value = fy_flat_node(document, node);
+        if (value == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+        if (value->kind != YJ_COMPACT_OBJECT) return YJ_COMPACT_TYPE_ERROR;
+        for (uint32_t i = 0; i < value->aux; i++) {
+            FyObjectEntry *entry = &flat->object_entries[value->payload + i];
             if (entry->key.length == key_length &&
                 (key_length == 0 || memcmp(flat->strings + entry->key.offset, key,
                                            (size_t)key_length) == 0)) {
-                FyNode *value = &flat->nodes[entry->value];
-                if (value->kind != YJ_COMPACT_INT) return YJ_COMPACT_TYPE_ERROR;
-                memcpy(out_value, &value->payload, sizeof(*out_value));
+                *out_value_node = entry->value;
                 *out_found = 1;
                 return YJ_COMPACT_OK;
             }
@@ -1198,16 +1652,18 @@ int32_t YJ_Yyjson_ObjectLookupInt(uint64_t handle,
         *out_found = 0;
         return YJ_COMPACT_OK;
     }
+    yyjson_val *object = fy_direct_node(document, node);
+    if (object == NULL) return YJ_COMPACT_BOUNDS_ERROR;
+    if (!yyjson_is_obj(object)) return YJ_COMPACT_TYPE_ERROR;
     if ((document->flags & YJ_YYJSON_LAZY_ROOT_INDEX) != 0 &&
-        document->root_index == NULL && yyjson_is_obj(document->root) &&
-        yyjson_obj_size(document->root) >= 256u && !fy_build_root_index(document))
+        object == document->root && document->root_index == NULL &&
+        yyjson_obj_size(object) >= 256u && !fy_build_root_index(document))
         return YJ_COMPACT_OUT_OF_MEMORY;
-    yyjson_val *value = document->root_index == NULL
-        ? yyjson_obj_getn(document->root, (const char *)key, (size_t)key_length)
+    yyjson_val *value = object != document->root || document->root_index == NULL
+        ? yyjson_obj_getn(object, (const char *)key, (size_t)key_length)
         : fy_index_lookup(document, key, (uint32_t)key_length);
     if (value == NULL) { *out_found = 0; return YJ_COMPACT_OK; }
-    if (!fy_value_int64(value, out_value))
-        return YJ_COMPACT_TYPE_ERROR;
+    *out_value_node = (uint64_t)(uintptr_t)value;
     *out_found = 1;
     return YJ_COMPACT_OK;
 }
@@ -1596,6 +2052,14 @@ int32_t YJ_Yyjson_Stats(uint64_t handle, uint64_t *stats, uint64_t capacity) {
 }
 
 #if defined(YJ_TESTING)
+void YJ_Yyjson_TestResetNavigationRestarts(void) {
+    fy_test_navigation_restarts = 0;
+}
+
+uint64_t YJ_Yyjson_TestNavigationRestarts(void) {
+    return fy_test_navigation_restarts;
+}
+
 uint32_t YJ_Yyjson_TestVendoredVersion(void) {
     return yyjson_version();
 }

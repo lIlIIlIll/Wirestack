@@ -1,9 +1,8 @@
 # yjson_native
 
-Custom Native 实现包。普通应用应依赖 `yjson_native_accel` 并在启动时调用一次
-`YJsonNativeAccel.initialize()`；本包中的 DOM 与 whole-document stream 仅供高级 API 使用。
-
-## Document backend
+Custom Native 的显式 backend façade。普通 `YJson` primitive 加速使用
+`yjson_native_accel`；只有需要 backend metadata、resource lifetime 或 whole-document I/O
+时才直接依赖本 package。
 
 ```toml
 [dependencies]
@@ -17,25 +16,19 @@ import yjson.*
 import yjson_backends.*
 import yjson_native.*
 
-let bytes = unsafe { "{\"n\":42}".rawData() }
-try (document = YJsonAdvanced.parseDocumentWithBackend(bytes, NativeCompactDocumentBackend)) {
-    println(document.getRootInt("n").getOrThrow())
+let json = NativeBackends.customNative
+try (document = json.parseDocument("{\"n\":42}")) {
+    println(document.root().member("n").getOrThrow().asInt64())
 }
 ```
 
-Document 是显式 resource、非线程安全，必须确定性 `close()`。需要 per-node view、storage
-统计或 qualification knob 时才直接使用 `NativeCompactJsonDocument`。
+`NativeBackendFacade` 还提供 typed `toJson`、`fromJson`、`toJsonBytes` 和
+`writeJson`。stream 路径按 `WholeDocument` buffering 工作，不关闭 caller-owned stream。
 
-## Typed stream
+document immutable，可并发读取，并以线性化方式与 `close()` 竞争。关闭后访问返回
+`resource_closed`。root serialization 和 document materialization 自动使用单次读锁 bulk
+路径；retained 子 view 保留逐操作读锁。materialization 返回与 resource 分离的 `JsonNode`。
 
-`NativeCompactWholeDocumentStreamBackend` 以 whole-document bulk tape 驱动应用的
-`JsonCodec<T>`。它不逐节点跨 FFI，不关闭 caller stream，也不静默 fallback。
-
-## 普通 API 加速
-
-普通应用不直接安装或移除 scanner seam。`YJsonNativeAccel.initialize()` 在首次 `YJson`
-调用前一次性冻结 Native profile；之后仍使用 `YJson.toJson/fromJson/parseDocument`。
-
-package 与 core 必须版本匹配。完整选择和生命周期见
+`0.1.0` Native qualification 范围是 Linux x86_64。完整契约见
 [Backend 使用指南](../../docs/backends.md)，底层 bridge 见
 [Native internals](../../docs/maintainers/native-internals.md)。

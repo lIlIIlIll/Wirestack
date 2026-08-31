@@ -6,7 +6,7 @@ import std.unittest.testmacro.*
 // Helper function to check if parsing succeeds
 func canParse(text: String): Bool {
     try {
-        let _ = YJson.parse(text)
+        let _ = JsonNode.parse(text)
         return true
     } catch (_: Exception) {
         return false
@@ -16,7 +16,7 @@ func canParse(text: String): Bool {
 // Helper function to check if parsing throws JsonException
 func throwsJsonException(text: String): Bool {
     try {
-        let _ = YJson.parse(text)
+        let _ = JsonNode.parse(text)
         return false
     } catch (_: JsonException) {
         return true
@@ -27,7 +27,7 @@ func throwsJsonException(text: String): Bool {
 
 // Helper function to parse and get value
 func parseValue(text: String): JsonNode {
-    YJson.parse(text)
+    JsonNode.parse(text)
 }
 
 @Test
@@ -35,41 +35,42 @@ class JsonNullComplianceTest {
     @TestCase
     func parseValidNull(): Unit {
         let value = parseValue("null")
-        @Expect(value.kind(), JsNull)
-        @Expect(value.asNull().toString(), "null")
+        @Expect(value.kind(), JsonKind.Null)
+        @Expect(value.isNull)
+        @Expect(value.toString(), "null")
     }
 
     @TestCase
     func parseNullWithLeadingSpaces(): Unit {
         let value = parseValue("  null")
-        @Expect(value.kind(), JsNull)
+        @Expect(value.kind(), JsonKind.Null)
     }
 
     @TestCase
     func parseNullWithTrailingSpaces(): Unit {
         let value = parseValue("null  ")
-        @Expect(value.kind(), JsNull)
+        @Expect(value.kind(), JsonKind.Null)
     }
 
     @TestCase
     func parseNullWithNewlines(): Unit {
         let value = parseValue("\nnull\t")
-        @Expect(value.kind(), JsNull)
+        @Expect(value.kind(), JsonKind.Null)
     }
 
     @TestCase
     func parseNullInObject(): Unit {
         let obj = parseValue("{\"a\":null}").asObject()
         @Expect(obj.contains("a"))
-        @Expect(obj.get("a").getOrThrow().kind(), JsNull)
+        @Expect(obj.get("a").getOrThrow().kind(), JsonKind.Null)
     }
 
     @TestCase
     func parseNullInArray(): Unit {
         let arr = parseValue("[null, 1, null]").asArray()
         @Expect(arr.size(), 3)
-        @Expect(arr[0].kind(), JsNull)
-        @Expect(arr[2].kind(), JsNull)
+        @Expect(arr[0].kind(), JsonKind.Null)
+        @Expect(arr[2].kind(), JsonKind.Null)
     }
 
     @TestCase
@@ -98,27 +99,27 @@ class JsonBooleanComplianceTest {
     @TestCase
     func parseValidTrue(): Unit {
         let value = parseValue("true").asBool()
-        @Expect(value.value, true)
+        @Expect(value, true)
         @Expect(value.toString(), "true")
     }
 
     @TestCase
     func parseValidFalse(): Unit {
         let value = parseValue("false").asBool()
-        @Expect(value.value, false)
+        @Expect(value, false)
         @Expect(value.toString(), "false")
     }
 
     @TestCase
     func parseTrueWithSpaces(): Unit {
         let value = parseValue("  true  ").asBool()
-        @Expect(value.value, true)
+        @Expect(value, true)
     }
 
     @TestCase
     func parseFalseWithSpaces(): Unit {
         let value = parseValue("\tfalse\n").asBool()
-        @Expect(value.value, false)
+        @Expect(value, false)
     }
 
     @TestCase
@@ -156,72 +157,72 @@ class JsonBooleanComplianceTest {
 class JsonNumberComplianceTest {
     @TestCase
     func parsePositiveIntegers(): Unit {
-        let v0 = parseValue("0").asInt()
-        @Expect(v0.value, 0)
+        let v0 = parseValue("0").asInt64()
+        @Expect(v0, 0)
 
-        let v123 = parseValue("123").asInt()
-        @Expect(v123.value, 123)
+        let v123 = parseValue("123").asInt64()
+        @Expect(v123, 123)
 
-        let vMax = parseValue("9223372036854775807").asInt()
-        @Expect(vMax.value, 9223372036854775807)
+        let vMax = parseValue("9223372036854775807").asInt64()
+        @Expect(vMax, 9223372036854775807)
     }
 
     @TestCase
     func parseNegativeIntegers(): Unit {
-        let vNeg0 = parseValue("-0").asInt()
-        @Expect(vNeg0.value, 0)
+        let vNeg0 = parseValue("-0").asInt64()
+        @Expect(vNeg0, 0)
 
-        let vNeg123 = parseValue("-123").asInt()
-        @Expect(vNeg123.value, -123)
+        let vNeg123 = parseValue("-123").asInt64()
+        @Expect(vNeg123, -123)
 
-        let vMin = parseValue("-9223372036854775808").asInt()
-        @Expect(vMin.value, -9223372036854775808)
+        let vMin = parseValue("-9223372036854775808").asInt64()
+        @Expect(vMin, -9223372036854775808)
     }
 
     @TestCase
     func parseIntOverflowAsLiteral(): Unit {
         // Int64 max + 1 should be parsed as NumberLiteral
         let overflow = parseValue("9223372036854775808")
-        @Expect(overflow.kind(), JsNumberLiteral)
-        @Expect(overflow.asNumberLiteral().literal, "9223372036854775808")
+        @Expect(overflow.kind(), JsonKind.Number)
+        @Expect(overflow.asNumberText(), "9223372036854775808")
     }
 
     @TestCase
     func parseNegativeIntOverflowAsLiteral(): Unit {
         // Int64 min - 1 should be parsed as NumberLiteral
         let overflow = parseValue("-9223372036854775809")
-        @Expect(overflow.kind(), JsNumberLiteral)
-        @Expect(overflow.asNumberLiteral().literal, "-9223372036854775809")
+        @Expect(overflow.kind(), JsonKind.Number)
+        @Expect(overflow.asNumberText(), "-9223372036854775809")
     }
 
     @TestCase
     func parseBasicFloats(): Unit {
-        let v1_5 = parseValue("1.5").asFloat()
-        @Expect(v1_5.value, 1.5)
+        let v1_5 = parseValue("1.5").asFloat64()
+        @Expect(v1_5, 1.5)
 
-        let v0_0 = parseValue("0.0").asFloat()
-        @Expect(v0_0.value, 0.0)
+        let v0_0 = parseValue("0.0").asFloat64()
+        @Expect(v0_0, 0.0)
 
-        let vNeg = parseValue("-12.34").asFloat()
-        @Expect(vNeg.value, -12.34)
+        let vNeg = parseValue("-12.34").asFloat64()
+        @Expect(vNeg, -12.34)
     }
 
     @TestCase
     func parseFloatPrecision(): Unit {
-        let v = parseValue("0.123456789012345").asFloat()
-        @Expect(v.value, 0.123456789012345)
+        let v = parseValue("0.123456789012345").asFloat64()
+        @Expect(v, 0.123456789012345)
     }
 
     @TestCase
     func parseExponentFormat(): Unit {
-        let v1e10 = parseValue("1e10").asFloat()
-        @Expect(v1e10.value, 1e10)
+        let v1e10 = parseValue("1e10").asFloat64()
+        @Expect(v1e10, 1e10)
 
-        let v1E_5 = parseValue("1E-5").asFloat()
-        @Expect(v1E_5.value, 1e-5)
+        let v1E_5 = parseValue("1E-5").asFloat64()
+        @Expect(v1E_5, 1e-5)
 
-        let v1_2e3 = parseValue("1.2e+3").asFloat()
-        @Expect(v1_2e3.value, 1200.0)
+        let v1_2e3 = parseValue("1.2e+3").asFloat64()
+        @Expect(v1_2e3, 1200.0)
     }
 
     @TestCase
@@ -271,74 +272,74 @@ class JsonStringComplianceTest {
     @TestCase
     func parseEmptyString(): Unit {
         let value = parseValue("\"\"").asString()
-        @Expect(value.value, "")
-        @Expect(value.toString(), "\"\"")
+        @Expect(value, "")
+        @Expect(JsonNode.parse("\"\"").toString(), "\"\"")
     }
 
     @TestCase
     func parsePlainAsciiString(): Unit {
         let value = parseValue("\"hello\"").asString()
-        @Expect(value.value, "hello")
+        @Expect(value, "hello")
     }
 
     @TestCase
     func parseStringWithEscapeQuote(): Unit {
         let value = parseValue("\"a\\\"b\"").asString()
-        @Expect(value.value, "a\"b")
+        @Expect(value, "a\"b")
     }
 
     @TestCase
     func parseStringWithEscapeBackslash(): Unit {
         let value = parseValue("\"a\\\\b\"").asString()
-        @Expect(value.value, "a\\b")
+        @Expect(value, "a\\b")
     }
 
     @TestCase
     func parseStringWithEscapeBackspace(): Unit {
         let value = parseValue("\"\\b\"").asString()
-        @Expect(value.value, "\b")
+        @Expect(value, "\b")
     }
 
     @TestCase
     func parseStringWithEscapeFormFeed(): Unit {
         let value = parseValue("\"\\f\"").asString()
-        @Expect(value.value, "\f")
+        @Expect(value, "\f")
     }
 
     @TestCase
     func parseStringWithEscapeNewline(): Unit {
         let value = parseValue("\"\\n\"").asString()
-        @Expect(value.value, "\n")
+        @Expect(value, "\n")
     }
 
     @TestCase
     func parseStringWithEscapeCarriageReturn(): Unit {
         let value = parseValue("\"\\r\"").asString()
-        @Expect(value.value, "\r")
+        @Expect(value, "\r")
     }
 
     @TestCase
     func parseStringWithEscapeTab(): Unit {
         let value = parseValue("\"\\t\"").asString()
-        @Expect(value.value, "\t")
+        @Expect(value, "\t")
     }
 
     @TestCase
     func parseStringWithAllEscapes(): Unit {
         let value = parseValue("\"\\\"\\\\\\b\\f\\n\\r\\t\"").asString()
-        @Expect(value.value, "\"\\\b\f\n\r\t")
+        @Expect(value, "\"\\\b\f\n\r\t")
     }
 
     @TestCase
     func parseStringWithUnicodeBasic(): Unit {
         let value = parseValue("\"\\u0041\\u4e2d\"").asString()
-        @Expect(value.value, "A中")
+        @Expect(value, "A中")
     }
 
     @TestCase
     func parseStringWithUnicodeFourDigit(): Unit {
         let value = parseValue("\"\\u0000\"").asString()
-        @Expect(value.value.size, 1)
+        @Expect(value.size, 1)
     }
 
     @TestCase
@@ -350,7 +351,7 @@ class JsonStringComplianceTest {
     @TestCase
     func acceptStringWithEscapedControlChar(): Unit {
         let value = parseValue("\"\\u0001\"").asString()
-        @Expect(value.value.size, 1)
+        @Expect(value.size, 1)
     }
 
     @TestCase
@@ -379,13 +380,13 @@ class JsonStringComplianceTest {
     @TestCase
     func parseStringWithChinese(): Unit {
         let value = parseValue("\"你好世界\"").asString()
-        @Expect(value.value, "你好世界")
+        @Expect(value, "你好世界")
     }
 
     @TestCase
     func parseStringWithEmoji(): Unit {
         let value = parseValue("\"🎉\"").asString()
-        @Expect(value.value, "🎉")
+        @Expect(value, "🎉")
     }
 }
 
@@ -402,27 +403,27 @@ class JsonArrayComplianceTest {
     func parseSingleElementArray(): Unit {
         let arr = parseValue("[1]").asArray()
         @Expect(arr.size(), 1)
-        @Expect(arr[0].asInt().value, 1)
+        @Expect(arr[0].asInt64(), 1)
     }
 
     @TestCase
     func parseMultipleElementArray(): Unit {
         let arr = parseValue("[1, 2, 3]").asArray()
         @Expect(arr.size(), 3)
-        @Expect(arr[0].asInt().value, 1)
-        @Expect(arr[1].asInt().value, 2)
-        @Expect(arr[2].asInt().value, 3)
+        @Expect(arr[0].asInt64(), 1)
+        @Expect(arr[1].asInt64(), 2)
+        @Expect(arr[2].asInt64(), 3)
     }
 
     @TestCase
     func parseMixedTypeArray(): Unit {
         let arr = parseValue("[null, true, 1, \"a\", []]").asArray()
         @Expect(arr.size(), 5)
-        @Expect(arr[0].kind(), JsNull)
-        @Expect(arr[1].kind(), JsBool)
-        @Expect(arr[2].kind(), JsInt)
-        @Expect(arr[3].kind(), JsString)
-        @Expect(arr[4].kind(), JsArray)
+        @Expect(arr[0].kind(), JsonKind.Null)
+        @Expect(arr[1].kind(), JsonKind.Boolean)
+        @Expect(arr[2].kind(), JsonKind.Number)
+        @Expect(arr[3].kind(), JsonKind.String)
+        @Expect(arr[4].kind(), JsonKind.Array)
     }
 
     @TestCase
@@ -430,14 +431,14 @@ class JsonArrayComplianceTest {
         let arr = parseValue("[[1, 2], [3, 4]]").asArray()
         @Expect(arr.size(), 2)
         @Expect(arr[0].asArray().size(), 2)
-        @Expect(arr[0].asArray()[0].asInt().value, 1)
-        @Expect(arr[1].asArray()[1].asInt().value, 4)
+        @Expect(arr[0].asArray()[0].asInt64(), 1)
+        @Expect(arr[1].asArray()[1].asInt64(), 4)
     }
 
     @TestCase
     func parseDeeplyNestedArray(): Unit {
         let arr = parseValue("[[[[1]]]]").asArray()
-        @Expect(arr[0].asArray()[0].asArray()[0].asArray()[0].asInt().value, 1)
+        @Expect(arr[0].asArray()[0].asArray()[0].asArray()[0].asInt64(), 1)
     }
 
     @TestCase
@@ -488,33 +489,33 @@ class JsonObjectComplianceTest {
         let obj = parseValue("{\"a\":1}").asObject()
         @Expect(obj.size(), 1)
         @Expect(obj.contains("a"))
-        @Expect(obj.get("a").getOrThrow().asInt().value, 1)
+        @Expect(obj.get("a").getOrThrow().asInt64(), 1)
     }
 
     @TestCase
     func parseMultipleFieldObject(): Unit {
         let obj = parseValue("{\"a\":1, \"b\":2, \"c\":3}").asObject()
         @Expect(obj.size(), 3)
-        @Expect(obj.get("a").getOrThrow().asInt().value, 1)
-        @Expect(obj.get("b").getOrThrow().asInt().value, 2)
-        @Expect(obj.get("c").getOrThrow().asInt().value, 3)
+        @Expect(obj.get("a").getOrThrow().asInt64(), 1)
+        @Expect(obj.get("b").getOrThrow().asInt64(), 2)
+        @Expect(obj.get("c").getOrThrow().asInt64(), 3)
     }
 
     @TestCase
     func parseNestedObject(): Unit {
         let obj = parseValue("{\"a\":{\"b\":2}}").asObject()
-        @Expect(obj.get("a").getOrThrow().asObject().get("b").getOrThrow().asInt().value, 2)
+        @Expect(obj.get("a").getOrThrow().asObject().get("b").getOrThrow().asInt64(), 2)
     }
 
     @TestCase
     func parseObjectWithDifferentValueTypes(): Unit {
         let obj = parseValue("{\"null\":null, \"bool\":true, \"int\":1, \"str\":\"a\", \"arr\":[], \"obj\":{}}").asObject()
-        @Expect(obj.get("null").getOrThrow().kind(), JsNull)
-        @Expect(obj.get("bool").getOrThrow().kind(), JsBool)
-        @Expect(obj.get("int").getOrThrow().kind(), JsInt)
-        @Expect(obj.get("str").getOrThrow().kind(), JsString)
-        @Expect(obj.get("arr").getOrThrow().kind(), JsArray)
-        @Expect(obj.get("obj").getOrThrow().kind(), JsObject)
+        @Expect(obj.get("null").getOrThrow().kind(), JsonKind.Null)
+        @Expect(obj.get("bool").getOrThrow().kind(), JsonKind.Boolean)
+        @Expect(obj.get("int").getOrThrow().kind(), JsonKind.Number)
+        @Expect(obj.get("str").getOrThrow().kind(), JsonKind.String)
+        @Expect(obj.get("arr").getOrThrow().kind(), JsonKind.Array)
+        @Expect(obj.get("obj").getOrThrow().kind(), JsonKind.Object)
     }
 
     @TestCase
@@ -524,17 +525,18 @@ class JsonObjectComplianceTest {
     }
 
     @TestCase
-    func parseObjectDuplicateKeyCurrentImplementationLastWins(): Unit {
-        // 当前实现保留最后一个值；这里验证实现行为，不把它当作 JSON 规范契约
-        let obj = parseValue("{\"a\":1, \"a\":2}").asObject()
-        @Expect(obj.get("a").getOrThrow().asInt().value, 2)
+    func parseObjectDuplicateKeyRejectsByDefaultAndSupportsLastWins(): Unit {
+        @AssertThrows[JsonException](parseValue("{\"a\":1, \"a\":2}"))
+        let obj = JsonNode.parse("{\"a\":1, \"a\":2}",
+            config: JsonReadOptions(duplicateKeyPolicy: LastWins)).asObject()
+        @Expect(obj.get("a").getOrThrow().asInt64(), 2)
     }
 
     @TestCase
     func parseObjectNonAsciiKey(): Unit {
         let obj = parseValue("{\"名字\":1}").asObject()
         @Expect(obj.contains("名字"))
-        @Expect(obj.get("名字").getOrThrow().asInt().value, 1)
+        @Expect(obj.get("名字").getOrThrow().asInt64(), 1)
     }
 
     @TestCase

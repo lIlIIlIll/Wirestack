@@ -30,12 +30,12 @@ class NativePrimitivesIntegrationTest {
             expected.append("prefix\n\t\"\\")
         }
         expected.append("仓颉\u{1D11E}")
-        @Expect(YJson.decodeBytesWith(StringJson, primitiveBytes(builder.toString())),
+        @Expect(YJson.fromJson(primitiveBytes(builder.toString()), codec: JsonCodecs.string),
             expected.toString())
     }
 
     private func assertNativeFloatMatchesStdlib(text: String): Unit {
-        let reader = JsonFastReader(text)
+        let reader = GeneratedSupportV1.newFastReader(text)
         let actual = jsonFastReadFloat64(reader)
         reader.expectEnd()
         @Expect(actual.toBits(), Float64.parse(text).toBits())

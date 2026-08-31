@@ -8,12 +8,19 @@ import std.math.numeric.*
 
 private class JsonDirectReadContext {
     public let objectContext: Bool
+    public let pathDepth: Int64
+    public let entryPathPushed: Bool
     public var first: Bool = true
     public var expectingFieldValue: Bool = false
+    public var pendingPathPushed: Bool = false
+    public var nextArrayIndex: Int64 = 0
     public var seenNames: Option<HashSet<String>>
 
-    public init(objectContext: Bool, trackDuplicateNames: Bool) {
+    public init(objectContext: Bool, trackDuplicateNames: Bool, pathDepth: Int64,
+        entryPathPushed: Bool) {
         this.objectContext = objectContext
+        this.pathDepth = pathDepth
+        this.entryPathPushed = entryPathPushed
         this.seenNames = if (trackDuplicateNames) {
             Some(HashSet<String>())
         } else {
@@ -22,42 +29,62 @@ private class JsonDirectReadContext {
     }
 }
 
-public class JsonDirectReader <: JsonCodecReader {
+class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
     private let source: InputCursor
-    private let config: JsonReadConfig
+    private let config: JsonReadOptions
     private let streaming: Bool
+    private let generatedState: GeneratedReadStateV1
     private let contexts = ArrayList<JsonDirectReadContext>()
     private var valuePrefixReady: Bool = false
+    private var valuePrefixPathPushed: Bool = false
 
-    public init(text: String, config!: JsonReadConfig = JsonReadConfig.defaults) {
+    public init(text: String, config!: JsonReadOptions = JsonReadOptions.defaults) {
         source = Utf8Cursor(text, config: config)
         this.config = config
         this.streaming = false
+        generatedState = GeneratedReadStateV1(config)
     }
 
-    public init(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults) {
+    public init(bytes: Array<Byte>, config!: JsonReadOptions = JsonReadOptions.defaults) {
         source = Utf8Cursor(bytes, config: config)
         this.config = config
         this.streaming = false
+        generatedState = GeneratedReadStateV1(config)
     }
 
-    public init(input: InputStream, config!: JsonReadConfig = JsonReadConfig.defaults) {
+    public init(input: InputStream, config!: JsonReadOptions = JsonReadOptions.defaults) {
         source = StreamInputCursor(input, config: config)
         this.config = config
         this.streaming = true
+        generatedState = GeneratedReadStateV1(config)
     }
 
-    public func readConfig(): JsonReadConfig {
+    public func readConfig(): JsonReadOptions {
         config
     }
 
-    public func readReplayValue(maxBytes: Int64): JsonReplayValue {
+    public func generatedReadStateV1(): GeneratedReadStateV1 { generatedState }
+
+    public func path(): String { generatedState.currentPath() }
+
+    public func location(): Option<JsonLocation> {
+        let offset = source.position()
+        Some(JsonLocation(offset, source.lineAt(offset), source.columnAt(offset)))
+    }
+
+    public func error(message: String, code: String): JsonException {
+        JsonException(message, code: code, path: path(), location: location())
+    }
+
+    public func readNode(): JsonNode { readBoundedValue(0) }
+
+    public func readReplayValue(maxBytes: Int64): GeneratedReplayValueV1 {
         JsonNodeReplayValue(readBoundedValue(maxBytes), config)
     }
 
     // Materializes exactly one value while enforcing the byte budget against
     // the original input. Zero disables this local budget, matching
-    // JsonReadConfig's public resource-limit semantics. This is reserved for
+    // JsonReadOptions's public resource-limit semantics. This is reserved for
     // discriminator-based decoding, where the subtype is unknown until part
     // of the object has been read.
     public func readBoundedValue(maxBytes: Int64): JsonNode {
@@ -70,16 +97,17 @@ public class JsonDirectReader <: JsonCodecReader {
         if (maxBytes > 0 && source.position() - start > maxBytes) {
             throw JsonException(
                 "Polymorphic JSON object exceeds ${maxBytes} bytes",
-                code: "polymorphic_object_too_large"
+                code: "buffered_value_too_large"
             )
         }
     }
 
     private func readBoundedValueFrom(start: Int64, maxBytes: Int64): JsonNode {
-        beforeValue()
+        let pathPushed = beforeValue()
         ensureValueBudget(start, maxBytes)
         if (!source.hasMore()) { fail("Unexpected end of input") }
         valuePrefixReady = true
+        valuePrefixPathPushed = pathPushed
         let current = source.peek()
         let value: JsonNode = match {
             case current == b'n' => readNull(); JsonNullValue()
@@ -93,7 +121,7 @@ public class JsonDirectReader <: JsonCodecReader {
                     ensureValueBudget(start, maxBytes)
                 }
                 endArray()
-                JsonArrayValue(items)
+                JsonArray(items)
             case current == b'{' =>
                 let fields = HashMap<String, JsonNode>()
                 startObject()
@@ -103,7 +131,7 @@ public class JsonDirectReader <: JsonCodecReader {
                     ensureValueBudget(start, maxBytes)
                 }
                 endObject()
-                JsonObjectValue(fields)
+                JsonObject(fields)
             case current == b'-' || (current >= b'0' && current <= b'9') =>
                 JsonNumberLiteralValue.fromParsedLiteral(readNumberLiteral())
             case _ => fail("Unexpected token")
@@ -120,11 +148,12 @@ public class JsonDirectReader <: JsonCodecReader {
     }
 
     public func startObject(): Unit {
-        beforeValue()
+        let pathPushed = beforeValue()
         requireContainerDepth(source.position())
         beginRootBudgetIfNeeded()
         expectByte(b'{')
-        contexts.add(JsonDirectReadContext(true, jsonReadConfigRejectsDuplicateKeys(config)))
+        contexts.add(JsonDirectReadContext(true, jsonReadOptionsRejectsDuplicateKeys(config),
+            generatedState.pathDepth(), pathPushed))
     }
 
     public func endObject(): Unit {
@@ -136,6 +165,7 @@ public class JsonDirectReader <: JsonCodecReader {
         skipSpaces()
         expectByte(b'}')
         if (wasRoot) { source.endValueBudget() }
+        generatedState.completeAutoValue(context.entryPathPushed)
     }
 
     public func hasObjectField(): Bool {
@@ -151,6 +181,8 @@ public class JsonDirectReader <: JsonCodecReader {
         let name = parseString()
         rejectNameIfConfigured(name)
         afterName()
+        let context = contexts[contexts.size - 1]
+        context.pendingPathPushed = generatedState.pushAutoField(name, context.pathDepth)
         name
     }
 
@@ -158,18 +190,22 @@ public class JsonDirectReader <: JsonCodecReader {
         beforeName()
         let id = parseNameId(candidates)
         if (id < 0) {
-            if (jsonReadConfigRejectsUnknownFields(config)) {
+            if (jsonReadOptionsRejectsUnknownFields(config)) {
                 policyFail("Unknown JSON field", "unknown_field")
             }
         } else {
             rejectNameIfConfigured(candidates[id])
         }
         afterName()
+        if (id >= 0) {
+            let context = contexts[contexts.size - 1]
+            context.pendingPathPushed = generatedState.pushAutoField(candidates[id], context.pathDepth)
+        }
         id
     }
 
     private func rejectNameIfConfigured(name: String): Unit {
-        if (!jsonReadConfigRejectsDuplicateKeys(config)) {
+        if (!jsonReadOptionsRejectsDuplicateKeys(config)) {
             return
         }
         let context = contexts[contexts.size - 1]
@@ -208,19 +244,20 @@ public class JsonDirectReader <: JsonCodecReader {
     }
 
     public func startArray(): Unit {
-        beforeValue()
+        let pathPushed = beforeValue()
         requireContainerDepth(source.position())
         beginRootBudgetIfNeeded()
         expectByte(b'[')
-        contexts.add(JsonDirectReadContext(false, false))
+        contexts.add(JsonDirectReadContext(false, false, generatedState.pathDepth(), pathPushed))
     }
 
     public func endArray(): Unit {
         let wasRoot = contexts.size == 1 && source.isValueBudgetActive()
-        let _ = popContext(false)
+        let context = popContext(false)
         skipSpaces()
         expectByte(b']')
         if (wasRoot) { source.endValueBudget() }
+        generatedState.completeAutoValue(context.entryPathPushed)
     }
 
     public func hasArrayItem(): Bool {
@@ -232,49 +269,65 @@ public class JsonDirectReader <: JsonCodecReader {
     }
 
     public func tryReadNull(): Bool {
-        beforeValue()
+        let pathPushed = beforeValue()
         skipSpaces()
         if (!source.hasMore() || source.peek() != b'n') {
             valuePrefixReady = true
+            valuePrefixPathPushed = pathPushed
             return false
         }
         expectLiteral("null")
+        generatedState.completeAutoValue(pathPushed)
         true
     }
 
     public func readNull(): Unit {
-        beforeValue()
-        expectLiteral("null")
+        let pathPushed = beforeValue()
+        try { expectLiteral("null") }
+        catch (error: JsonException) { throw errorWithCurrentPath(error) }
+        finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func readBool(): Bool {
-        beforeValue()
-        if (source.peek() == b't') {
-            expectLiteral("true")
-            return true
-        }
-        expectLiteral("false")
-        false
+        let pathPushed = beforeValue()
+        try {
+            if (source.peek() == b't') {
+                expectLiteral("true")
+                return true
+            }
+            expectLiteral("false")
+            false
+        } catch (error: JsonException) {
+            throw errorWithCurrentPath(error)
+        } finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func readString(): String {
-        beforeValue()
-        parseString()
+        let pathPushed = beforeValue()
+        try { parseString() }
+        catch (error: JsonException) { throw errorWithCurrentPath(error) }
+        finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func skipString(): Unit {
-        beforeValue()
-        scanRawString()
+        let pathPushed = beforeValue()
+        try { scanRawString() }
+        catch (error: JsonException) { throw errorWithCurrentPath(error) }
+        finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func readInt64(): Int64 {
-        beforeValue()
-        parseInt64Literal()
+        let pathPushed = beforeValue()
+        try { parseInt64Literal() }
+        catch (error: JsonException) { throw errorWithCurrentPath(error) }
+        finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func readUInt64(): UInt64 {
-        beforeValue()
-        parseUInt64Literal()
+        let pathPushed = beforeValue()
+        try { parseUInt64Literal() }
+        catch (error: JsonException) { throw errorWithCurrentPath(error) }
+        finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func readFloat64(): Float64 {
@@ -290,8 +343,10 @@ public class JsonDirectReader <: JsonCodecReader {
     }
 
     public func readNumberLiteral(): String {
-        beforeValue()
-        parseNumberLiteral()
+        let pathPushed = beforeValue()
+        try { parseNumberLiteral() }
+        catch (error: JsonException) { throw errorWithCurrentPath(error) }
+        finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     public func skipValue(): Unit {
@@ -300,12 +355,14 @@ public class JsonDirectReader <: JsonCodecReader {
 
     public func skipValueWithDepth(maxDepth: Int64): Unit {
         if (maxDepth < 0) { throw IllegalArgumentException("maxDepth must not be negative") }
-        beforeValue()
-        if (source.hasMore() && (source.peek() == b'[' || source.peek() == b'{')) {
-            beginRootBudgetIfNeeded()
-        }
-        skipRawValueBounded(0, maxDepth)
-        if (contexts.isEmpty()) { source.endValueBudget() }
+        let pathPushed = beforeValue()
+        try {
+            if (source.hasMore() && (source.peek() == b'[' || source.peek() == b'{')) {
+                beginRootBudgetIfNeeded()
+            }
+            skipRawValueBounded(0, maxDepth)
+            if (contexts.isEmpty()) { source.endValueBudget() }
+        } finally { generatedState.completeAutoValue(pathPushed) }
     }
 
     private func requireContainerDepth(offset: Int64): Unit {
@@ -315,14 +372,16 @@ public class JsonDirectReader <: JsonCodecReader {
         }
     }
 
-    private func beforeValue(): Unit {
+    private func beforeValue(): Bool {
         if (valuePrefixReady) {
             valuePrefixReady = false
-            return
+            let pathPushed = valuePrefixPathPushed
+            valuePrefixPathPushed = false
+            return pathPushed
         }
         if (contexts.isEmpty()) {
             skipSpaces()
-            return
+            return false
         }
         let context = contexts[contexts.size - 1]
         if (context.objectContext) {
@@ -331,21 +390,29 @@ public class JsonDirectReader <: JsonCodecReader {
             }
             context.expectingFieldValue = false
             skipSpaces()
-            return
+            let pathPushed = context.pendingPathPushed
+            context.pendingPathPushed = false
+            generatedState.beginAutoValue(pathPushed)
+            return pathPushed
         }
+        let pathPushed = generatedState.pushAutoIndex(context.nextArrayIndex, context.pathDepth)
+        context.nextArrayIndex++
         skipSpaces()
         if (context.first) {
             context.first = false
-            return
+            generatedState.beginAutoValue(pathPushed)
+            return pathPushed
         }
         expectByte(b',')
         skipSpaces()
+        generatedState.beginAutoValue(pathPushed)
+        pathPushed
     }
 
     private func beginRootBudgetIfNeeded(): Unit {
         if (streaming && !source.isValueBudgetActive() && contexts.isEmpty() &&
-            config.maxPolymorphicObjectBytes > 0) {
-            source.beginValueBudget(config.maxPolymorphicObjectBytes)
+            config.maxBufferedValueBytes > 0) {
+            source.beginValueBudget(config.maxBufferedValueBytes)
         }
     }
 
@@ -542,22 +609,15 @@ public class JsonDirectReader <: JsonCodecReader {
     }
 
     private func parseString(): String {
-        match (source) {
-            case streamSource: StreamInputCursor =>
-                if (config.maxStringBytes == 0 && !source.isValueBudgetActive()) {
-                    if (let Some(value) <- streamSource.tryParseSimpleAsciiStringWindow()) {
-                        return value
-                    }
-                }
-            case _ => ()
-        }
         source.readJsonString()
     }
 
     private func scanRawString(): Unit {
-        if (config.maxStringBytes > 0 || source.isValueBudgetActive()) {
-            let _ = parseString()
-            return
+        match (source) {
+            case _: Utf8Cursor => ()
+            case _ =>
+                let _ = parseString()
+                return
         }
         expectByte(b'"')
         while (source.hasMore()) {
@@ -593,58 +653,17 @@ public class JsonDirectReader <: JsonCodecReader {
     }
 
     private func parseNameId(candidates: Array<String>): Int64 {
-        if (config.maxStringBytes > 0 || source.isValueBudgetActive() || candidates.size > 63 ||
-            !allCandidateNamesAscii(candidates)) {
-            let name = parseString()
-            for (candidateIndex in 0..candidates.size) {
-                if (candidates[candidateIndex] == name) {
-                    return candidateIndex
-                }
+        if (candidates.size <= 63 && allCandidateNamesAscii(candidates)) {
+            match (source) {
+                case arraySource: Utf8Cursor => return arraySource.parseNameIdFast(candidates)
+                case _ => ()
             }
-            return -1
         }
-        match (source) {
-            case arraySource: Utf8Cursor => return arraySource.parseNameIdFast(candidates)
-            case streamSource: StreamInputCursor =>
-                if (let Some(value) <- streamSource.tryParseNameIdWindow(candidates)) {
-                    return value
-                }
-            case _ => ()
+        let name = parseString()
+        for (candidateIndex in 0..candidates.size) {
+            if (candidates[candidateIndex] == name) { return candidateIndex }
         }
-        expectByte(b'"')
-        var active = initialNameMatchMask(candidates.size)
-        var index: Int64 = 0
-        while (source.hasMore()) {
-            let start = source.position()
-            let current = consumeByte()
-            if (current == b'"') {
-                if (active == 0u64) {
-                    return -1
-                }
-                for (candidateIndex in 0..candidates.size) {
-                    if (((active & nameMatchBit(candidateIndex)) != 0u64) && candidates[candidateIndex].size == index) {
-                        return candidateIndex
-                    }
-                }
-                return -1
-            }
-            var code: Int64 = -1
-            if (current == b'\\') {
-                code = consumeEscapedAsciiForName()
-            } else if (current < 0x80) {
-                if (current < 0x20) {
-                    failAt("Unescaped control character in string literal", start)
-                }
-                code = Int64(current)
-            } else {
-                let _ = source.decodeJsonUtf8Rune(current, start)
-            }
-            if (active != 0u64) {
-                active = updateActiveNameCandidates(candidates, active, index, code)
-            }
-            index++
-        }
-        fail("Unterminated string literal")
+        -1
     }
 
     private func allCandidateNamesAscii(candidates: Array<String>): Bool {
@@ -658,70 +677,6 @@ public class JsonDirectReader <: JsonCodecReader {
             }
         }
         true
-    }
-
-    private func initialNameMatchMask(size: Int64): UInt64 {
-        var mask = 0u64
-        for (index in 0..size) {
-            mask |= nameMatchBit(index)
-        }
-        mask
-    }
-
-    private func nameMatchBit(index: Int64): UInt64 {
-        1u64 << index
-    }
-
-    private func updateActiveNameCandidates(
-        candidates: Array<String>,
-        active: UInt64,
-        index: Int64,
-        code: Int64
-    ): UInt64 {
-        if (code < 0 || code > 0x7F) {
-            return 0u64
-        }
-        var next = 0u64
-        let byte = UInt8(code)
-        for (candidateIndex in 0..candidates.size) {
-            let bit = nameMatchBit(candidateIndex)
-            if ((active & bit) == 0u64) {
-                continue
-            }
-            unsafe {
-                let data = candidates[candidateIndex].rawData()
-                if (index < data.size && data[index] == byte) {
-                    next |= bit
-                }
-            }
-        }
-        next
-    }
-
-    private func consumeEscapedAsciiForName(): Int64 {
-        if (!source.hasMore()) {
-            fail("Unexpected end of escape sequence")
-        }
-        let escaped = consumeByte()
-        match (escaped) {
-            case b'"' => return Int64(b'"')
-            case b'\\' => return Int64(b'\\')
-            case b'/' => return Int64(b'/')
-            case b'b' => return Int64(b'\b')
-            case b'f' => return Int64(b'\f')
-            case b'n' => return Int64(b'\n')
-            case b'r' => return Int64(b'\r')
-            case b't' => return Int64(b'\t')
-            case b'u' =>
-                let (r, _) = source.readJsonUnicodeEscape()
-                let code = UInt32(r)
-                return if (code <= 0x7Fu32) {
-                    Int64(code)
-                } else {
-                    -1
-                }
-            case _ => fail("Unsupported escape sequence")
-        }
     }
 
     private func skipSpaces(): Unit {
@@ -795,9 +750,8 @@ public class JsonDirectReader <: JsonCodecReader {
         throw JsonException(
             message,
             code: code,
-            byteOffset: if (config.includeErrorLocation) { offset } else { -1 },
-            line: source.lineAt(offset),
-            column: source.columnAt(offset)
+            path: generatedState.currentPath(),
+            location: Some(JsonLocation(offset, source.lineAt(offset), source.columnAt(offset)))
         )
     }
 
@@ -805,19 +759,25 @@ public class JsonDirectReader <: JsonCodecReader {
         throw JsonException(
             message,
             code: "parse_error",
-            byteOffset: if (config.includeErrorLocation) { offset } else { -1 },
-            line: source.lineAt(offset),
-            column: source.columnAt(offset)
+            path: generatedState.currentPath(),
+            location: Some(JsonLocation(offset, source.lineAt(offset), source.columnAt(offset)))
         )
+    }
+
+    private func errorWithCurrentPath(error: JsonException): JsonException {
+        let current = generatedState.currentPath()
+        if (!error.path.isEmpty() || current.isEmpty()) { return error }
+        JsonException(error.message, error, code: error.code,
+            path: current, location: error.location)
     }
 }
 
-private class JsonNodeReplayValue <: JsonReplayValue {
+private class JsonNodeReplayValue <: GeneratedReplayValueV1 {
     private let value: JsonNode
-    private let config: JsonReadConfig
+    private let config: JsonReadOptions
     private var closed: Bool = false
 
-    init(value: JsonNode, config: JsonReadConfig) {
+    init(value: JsonNode, config: JsonReadOptions) {
         this.value = value
         this.config = config
     }
@@ -829,14 +789,14 @@ private class JsonNodeReplayValue <: JsonReplayValue {
     public func rootStringField(name: String): Option<String> {
         requireOpen()
         match (value.asObject().get(name)) {
-            case Some(field) => Some(field.asString().value)
+            case Some(field) => Some(field.asString())
             case None => None<String>
         }
     }
 
-    public func openObjectReaderExcluding(name: String): JsonCodecReader {
+    public func openObjectReaderExcluding(name: String): JsonReader {
         requireOpen()
-        let filtered = JsonObjectValue()
+        let filtered = JsonObject()
         for ((fieldName, fieldValue) in value.asObject().entries()) {
             if (fieldName != name) { filtered.put(fieldName, fieldValue) }
         }

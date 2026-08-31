@@ -2,93 +2,78 @@ package yjson
 
 import std.collection.*
 import std.convert.Parsable
+import std.deriving.Derive
+import std.io.*
 
-public enum JsonKind <: Equatable<JsonKind> {
-    JsNull | JsBool | JsInt | JsFloat | JsNumberLiteral | JsString | JsArray | JsObject
-
-    public operator func ==(other: JsonKind): Bool {
-        match (this) {
-            case JsNull =>
-                if (let JsNull <- other) {
-                    true
-                } else {
-                    false
-                }
-            case JsBool =>
-                if (let JsBool <- other) {
-                    true
-                } else {
-                    false
-                }
-            case JsInt =>
-                if (let JsInt <- other) {
-                    true
-                } else {
-                    false
-                }
-            case JsFloat =>
-                if (let JsFloat <- other) {
-                    true
-                } else {
-                    false
-                }
-            case JsNumberLiteral =>
-                if (let JsNumberLiteral <- other) {
-                    true
-                } else {
-                    false
-                }
-            case JsString =>
-                if (let JsString <- other) {
-                    true
-                } else {
-                    false
-                }
-            case JsArray =>
-                if (let JsArray <- other) {
-                    true
-                } else {
-                    false
-                }
-            case JsObject =>
-                if (let JsObject <- other) {
-                    true
-                } else {
-                    false
-                }
-        }
-    }
-
-    public operator func !=(other: JsonKind): Bool {
-        !(this == other)
-    }
+@Derive[Equatable]
+public enum JsonKind {
+    Null | Boolean | Number | String | Array | Object
 }
 
-public open class JsonException <: Exception {
-    public let code: String
+/// A UTF-8 source position attached to a JSON failure.
+///
+/// `byteOffset` is zero-based. `line` and `column` are one-based Unicode
+/// scalar positions. A CRLF sequence counts as one newline.
+public struct JsonLocation {
     public let byteOffset: Int64
     public let line: Int64
     public let column: Int64
+
+    public init(byteOffset: Int64, line: Int64, column: Int64) {
+        if (byteOffset < 0) { throw IllegalArgumentException("byteOffset must not be negative") }
+        if (line <= 0) { throw IllegalArgumentException("line must be positive") }
+        if (column <= 0) { throw IllegalArgumentException("column must be positive") }
+        this.byteOffset = byteOffset
+        this.line = line
+        this.column = column
+    }
+}
+
+/// The single public exception type used for JSON data failures.
+///
+/// `code` and `path` are stable machine-readable fields. `path` is an RFC 6901
+/// JSON Pointer; the empty string identifies the root value. Message text is
+/// descriptive and is not a compatibility contract.
+public open class JsonException <: Exception {
+    public let code: String
     public let path: String
+    public let location: Option<JsonLocation>
 
     public init(
         message: String,
         code!: String = "json_error",
-        byteOffset!: Int64 = -1,
-        line!: Int64 = -1,
-        column!: Int64 = -1,
-        path!: String = ""
+        path!: String = "",
+        location!: Option<JsonLocation> = None<JsonLocation>
     ) {
         super(message)
+        validateJsonExceptionPath(path)
         this.code = code
-        this.byteOffset = byteOffset
-        this.line = line
-        this.column = column
         this.path = path
+        this.location = location
+    }
+
+    public init(
+        message: String,
+        causedBy: Exception,
+        code!: String = "json_error",
+        path!: String = "",
+        location!: Option<JsonLocation> = None<JsonLocation>
+    ) {
+        super(message, causedBy)
+        validateJsonExceptionPath(path)
+        this.code = code
+        this.path = path
+        this.location = location
     }
 
     protected open override func getClassName(): String {
         "JsonException"
+    }
+}
+
+private func validateJsonExceptionPath(path: String): Unit {
+    if (!path.isEmpty() && !path.startsWith("/")) {
+        throw IllegalArgumentException("JSON error path must be an RFC 6901 JSON Pointer")
     }
 }
 
@@ -100,76 +85,48 @@ public enum JsonDuplicateKeyPolicy {
     LastWins | Reject
 }
 
-public enum JsonNumberPolicy {
-    Int64WhenExact | PreserveLiteral
-}
-
-public class JsonReadLimits {
-    public let maxDepth: Int64
-    public let maxPolymorphicObjectBytes: Int64
-    public let maxStringBytes: Int64
-    public let maxBytes: Int64
-
-    public init(maxDepth!: Int64 = 256, maxPolymorphicObjectBytes!: Int64 = 0,
-        maxStringBytes!: Int64 = 0, maxBytes!: Int64 = 0) {
-        if (maxDepth <= 0) { throw IllegalArgumentException("maxDepth must be positive") }
-        if (maxPolymorphicObjectBytes < 0) { throw IllegalArgumentException("maxPolymorphicObjectBytes must not be negative") }
-        if (maxStringBytes < 0) { throw IllegalArgumentException("maxStringBytes must not be negative") }
-        if (maxBytes < 0) { throw IllegalArgumentException("maxBytes must not be negative") }
-        this.maxDepth = maxDepth
-        this.maxPolymorphicObjectBytes = maxPolymorphicObjectBytes
-        this.maxStringBytes = maxStringBytes
-        this.maxBytes = maxBytes
-    }
-
-    public static let defaults: JsonReadLimits = JsonReadLimits()
-}
-
-public class JsonReadConfig {
+/// Immutable options for parsing and decoding JSON.
+public class JsonReadOptions {
     public let unknownFieldPolicy: JsonUnknownFieldPolicy
     public let duplicateKeyPolicy: JsonDuplicateKeyPolicy
-    public let numberPolicy: JsonNumberPolicy
-    public let includeErrorLocation: Bool
-    public let limits: JsonReadLimits
-    public let maxDepth: Int64
-    public let maxPolymorphicObjectBytes: Int64
+    public let maxInputBytes: Int64
     public let maxStringBytes: Int64
-    public let maxBytes: Int64
+    public let maxBufferedValueBytes: Int64
+    public let maxDepth: Int64
     let defaultFastPath: Bool
 
     public init(
         unknownFieldPolicy!: JsonUnknownFieldPolicy = JsonUnknownFieldPolicy.Ignore,
-        duplicateKeyPolicy!: JsonDuplicateKeyPolicy = JsonDuplicateKeyPolicy.LastWins,
-        numberPolicy!: JsonNumberPolicy = JsonNumberPolicy.Int64WhenExact,
-        includeErrorLocation!: Bool = true,
-        limits!: JsonReadLimits = JsonReadLimits.defaults
+        duplicateKeyPolicy!: JsonDuplicateKeyPolicy = JsonDuplicateKeyPolicy.Reject,
+        maxInputBytes!: Int64 = 64 * 1024 * 1024,
+        maxStringBytes!: Int64 = 16 * 1024 * 1024,
+        maxBufferedValueBytes!: Int64 = 8 * 1024 * 1024,
+        maxDepth!: Int64 = 256
     ) {
+        if (maxDepth <= 0) { throw IllegalArgumentException("maxDepth must be positive") }
+        if (maxInputBytes <= 0) { throw IllegalArgumentException("maxInputBytes must be positive") }
+        if (maxStringBytes <= 0) { throw IllegalArgumentException("maxStringBytes must be positive") }
+        if (maxBufferedValueBytes <= 0) { throw IllegalArgumentException("maxBufferedValueBytes must be positive") }
         this.unknownFieldPolicy = unknownFieldPolicy
         this.duplicateKeyPolicy = duplicateKeyPolicy
-        this.numberPolicy = numberPolicy
-        this.includeErrorLocation = includeErrorLocation
-        this.limits = limits
-        this.maxDepth = limits.maxDepth
-        this.maxPolymorphicObjectBytes = limits.maxPolymorphicObjectBytes
-        this.maxStringBytes = limits.maxStringBytes
-        this.maxBytes = limits.maxBytes
+        this.maxInputBytes = maxInputBytes
+        this.maxStringBytes = maxStringBytes
+        this.maxBufferedValueBytes = maxBufferedValueBytes
+        this.maxDepth = maxDepth
         let unknownIsDefault = match (unknownFieldPolicy) {
             case Ignore => true
             case _ => false
         }
         let duplicateIsDefault = match (duplicateKeyPolicy) {
-            case LastWins => true
+            case Reject => true
             case _ => false
         }
-        let numberIsDefault = match (numberPolicy) {
-            case Int64WhenExact => true
-            case _ => false
-        }
-        this.defaultFastPath = unknownIsDefault && duplicateIsDefault && numberIsDefault && includeErrorLocation &&
-            limits.maxDepth == 256 && limits.maxPolymorphicObjectBytes == 0 && limits.maxStringBytes == 0 && limits.maxBytes == 0
+        this.defaultFastPath = unknownIsDefault && duplicateIsDefault && maxDepth == 256 &&
+            maxInputBytes == 64 * 1024 * 1024 && maxStringBytes == 16 * 1024 * 1024 &&
+            maxBufferedValueBytes == 8 * 1024 * 1024
     }
 
-    public static let defaults: JsonReadConfig = JsonReadConfig()
+    public static let defaults: JsonReadOptions = JsonReadOptions()
 
     public func rejectsUnknownFields(): Bool {
         match (unknownFieldPolicy) {
@@ -186,27 +143,20 @@ public class JsonReadConfig {
     }
 }
 
-func jsonReadConfigUsesDefaultFastPath(config: JsonReadConfig): Bool {
-    config.defaultFastPath
+func jsonReadOptionsUsesDefaultFastPath(options: JsonReadOptions): Bool {
+    options.defaultFastPath
 }
 
-func jsonReadConfigRejectsUnknownFields(config: JsonReadConfig): Bool {
-    match (config.unknownFieldPolicy) {
+func jsonReadOptionsRejectsUnknownFields(options: JsonReadOptions): Bool {
+    match (options.unknownFieldPolicy) {
         case Reject => true
         case _ => false
     }
 }
 
-func jsonReadConfigRejectsDuplicateKeys(config: JsonReadConfig): Bool {
-    match (config.duplicateKeyPolicy) {
+func jsonReadOptionsRejectsDuplicateKeys(options: JsonReadOptions): Bool {
+    match (options.duplicateKeyPolicy) {
         case Reject => true
-        case _ => false
-    }
-}
-
-func jsonReadConfigPreservesNumberLiterals(config: JsonReadConfig): Bool {
-    match (config.numberPolicy) {
-        case PreserveLiteral => true
         case _ => false
     }
 }
@@ -273,24 +223,72 @@ func jsonStreamColumnAt(newlineOffsets: ArrayList<Int64>, offset: Int64): Int64 
     offset + 1
 }
 
-public abstract class JsonNode <: ToString {
-    public static func parse(text: String, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
+/// Immutable read contract shared by mutable DOM nodes and managed documents.
+///
+/// Implementations may use different storage layouts. A view keeps its owner
+/// alive and never exposes mutable backing storage.
+public interface JsonValueView {
+    func kind(): JsonKind
+    func size(): Int64
+    func element(index: Int64): Option<JsonValueView>
+    func member(name: String): Option<JsonValueView>
+    func memberName(index: Int64): String
+    func memberValue(index: Int64): JsonValueView
+    func asBool(): Bool
+    func asString(): String
+    func asInt64(): Int64
+    func asUInt64(): UInt64
+    func asFloat64(): Float64
+    func asNumberText(): String
+    func materialize(): JsonNode
+    func materialize(maxNodes: Int64): JsonNode
+}
+
+public abstract class JsonNode <: ToString & JsonValueView {
+    public static prop nullValue: JsonNode { get() { JsonNullValue() } }
+    public static func boolean(value: Bool): JsonNode { JsonBoolValue(value) }
+    public static func int64(value: Int64): JsonNode { JsonIntValue(value) }
+    public static func uint64(value: UInt64): JsonNode { JsonUIntValue(value) }
+    public static func float64(value: Float64): JsonNode { JsonFloatValue(value) }
+    public static func number(text: String): JsonNode { JsonNumberLiteralValue(text) }
+    public static func string(value: String): JsonNode { JsonStringValue(value) }
+    public static func array(): JsonArray { JsonArray() }
+    public static func array(items: Array<JsonNode>): JsonArray { JsonArray(items) }
+    public static func object(): JsonObject { JsonObject() }
+
+    public static func parse(text: String, config!: JsonReadOptions = JsonReadOptions.defaults): JsonNode {
         JsonParser(text, config: config).parse()
     }
 
     /// Parses raw UTF-8 JSON without first materializing the complete input as
     /// a String. String values and object keys are still materialized because
     /// they are part of the public JsonNode representation.
-    public static func parse(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): JsonNode {
+    public static func parse(bytes: Array<Byte>, config!: JsonReadOptions = JsonReadOptions.defaults): JsonNode {
         parseJsonValueFromBytes(bytes, config: config)
     }
 
+    public func toJson(options!: JsonWriteOptions = JsonWriteOptions.defaults): String {
+        writeJsonValueToString(this, options)
+    }
+
+    public func writeJson(output: OutputStream,
+        options!: JsonWriteOptions = JsonWriteOptions.defaults): Unit {
+        writeJsonValueToStream(this, output, options)
+    }
+
     public func kind(): JsonKind
+    public func size(): Int64
 
     /// Returns a detached JSON tree. Shared children are copied per occurrence.
     /// Manual trees are limited to 256 levels and 100,000 visited nodes.
     public func deepCopy(): JsonNode {
         deepCopyJsonNode(this)
+    }
+
+    public func materialize(): JsonNode { deepCopyJsonNode(this) }
+
+    public func materialize(maxNodes: Int64): JsonNode {
+        deepCopyJsonNode(this, maxNodes)
     }
 
     /// JSON data-model equality. Numerically equal JSON numbers compare equal
@@ -306,108 +304,102 @@ public abstract class JsonNode <: ToString {
 
     public func toPrettyString(indent: String): String
 
-    public func asNull(): JsonNullValue {
+    public func asBool(): Bool {
         match (this) {
-            case value: JsonNullValue => value
-            case _ => throw JsonException("Expected null value")
+            case value: JsonBoolValue => value.value
+            case _ => throw JsonException("Expected boolean value", code: "type_mismatch")
         }
     }
 
-    public func asBool(): JsonBoolValue {
+    public func asInt64(): Int64 {
         match (this) {
-            case value: JsonBoolValue => value
-            case _ => throw JsonException("Expected bool value")
+            case value: JsonIntValue => value.value
+            case value: JsonUIntValue =>
+                if (value.value > UInt64(Int64.Max)) {
+                    throw JsonException("JSON number is outside Int64 range", code: "number_out_of_range")
+                }
+                Int64(value.value)
+            case value: JsonNumberLiteralValue =>
+                try { Int64.parse(value.literal) } catch (_: Exception) {
+                    throw JsonException("Expected an exact Int64 value", code: "number_out_of_range")
+                }
+            case _ => throw JsonException("Expected number value", code: "type_mismatch")
         }
     }
 
-    public func asInt(): JsonIntValue {
+    public func asUInt64(): UInt64 {
         match (this) {
-            case value: JsonIntValue => value
-            case value: JsonNumberLiteralValue => JsonIntValue(Int64.parse(value.literal))
-            case _ => throw JsonException("Expected int value")
+            case value: JsonUIntValue => value.value
+            case value: JsonIntValue =>
+                if (value.value < 0) {
+                    throw JsonException("JSON number is outside UInt64 range", code: "number_out_of_range")
+                }
+                UInt64(value.value)
+            case value: JsonNumberLiteralValue =>
+                try { UInt64.parse(value.literal) } catch (_: Exception) {
+                    throw JsonException("Expected an exact UInt64 value", code: "number_out_of_range")
+                }
+            case _ => throw JsonException("Expected number value", code: "type_mismatch")
         }
     }
 
-    public func asFloat(): JsonFloatValue {
+    public func asFloat64(): Float64 {
         match (this) {
-            case value: JsonFloatValue => value
-            case intValue: JsonIntValue => JsonFloatValue(Float64(intValue.value))
-            case value: JsonNumberLiteralValue => JsonFloatValue(Float64.parse(value.literal))
-            case _ => throw JsonException("Expected float value")
+            case value: JsonFloatValue => value.value
+            case value: JsonIntValue => Float64(value.value)
+            case value: JsonUIntValue => Float64(value.value)
+            case value: JsonNumberLiteralValue => Float64.parse(value.literal)
+            case _ => throw JsonException("Expected number value", code: "type_mismatch")
         }
     }
 
-    public func asNumberLiteral(): JsonNumberLiteralValue {
+    public func asNumberText(): String {
         match (this) {
-            case value: JsonNumberLiteralValue => value
-            case value: JsonIntValue => JsonNumberLiteralValue(value.value.toString())
-            case value: JsonFloatValue => JsonNumberLiteralValue(value.value.toString())
-            case _ => throw JsonException("Expected numeric value")
+            case value: JsonIntValue => value.value.toString()
+            case value: JsonUIntValue => value.value.toString()
+            case value: JsonFloatValue => ensureFiniteJsonFloat(value.value); value.value.toString()
+            case value: JsonNumberLiteralValue => value.literal
+            case _ => throw JsonException("Expected number value", code: "type_mismatch")
         }
     }
 
-    public func asString(): JsonStringValue {
+    public func asString(): String {
         match (this) {
-            case value: JsonStringValue => value
-            case _ => throw JsonException("Expected string value")
+            case value: JsonStringValue => value.value
+            case _ => throw JsonException("Expected string value", code: "type_mismatch")
         }
     }
 
-    public func asArray(): JsonArrayValue {
+    public func asArray(): JsonArray {
         match (this) {
-            case value: JsonArrayValue => value
-            case _ => throw JsonException("Expected array value")
+            case value: JsonArray => value
+            case _ => throw JsonException("Expected array value", code: "type_mismatch")
         }
     }
 
-    public func asObject(): JsonObjectValue {
+    public func asObject(): JsonObject {
         match (this) {
-            case value: JsonObjectValue => value
-            case _ => throw JsonException("Expected object value")
+            case value: JsonObject => value
+            case _ => throw JsonException("Expected object value", code: "type_mismatch")
         }
     }
 
-    public prop string: String {
-        get() {
-            asString().value
+    public func element(index: Int64): Option<JsonValueView> {
+        match (asArray().get(index)) {
+            case Some(value) => Some<JsonValueView>(value)
+            case None => None<JsonValueView>
         }
     }
 
-    public prop bool: Bool {
-        get() {
-            asBool().value
+    public func member(name: String): Option<JsonValueView> {
+        match (asObject().get(name)) {
+            case Some(value) => Some<JsonValueView>(value)
+            case None => None<JsonValueView>
         }
     }
 
-    public prop int64: Int64 {
-        get() {
-            asInt().value
-        }
-    }
-
-    public prop float64: Float64 {
-        get() {
-            asFloat().value
-        }
-    }
-
-    public prop numberText: String {
-        get() {
-            asNumberLiteral().literal
-        }
-    }
-
-    public prop array: JsonArrayValue {
-        get() {
-            asArray()
-        }
-    }
-
-    public prop object: JsonObjectValue {
-        get() {
-            asObject()
-        }
-    }
+    public func memberName(index: Int64): String { asObject().nameAt(index) }
+    public func memberValue(index: Int64): JsonValueView { asObject().valueAt(index) }
 
     public prop isNull: Bool {
         get() {
@@ -449,7 +441,7 @@ public abstract class JsonNode <: ToString {
     }
 
     public operator func [](key: String, value!: Array<JsonNode>): Unit {
-        asObject().put(key, YJson.value(value))
+        asObject().put(key, jsonNodeValue(value))
     }
 
     public operator func [](index: Int64): JsonNode {
@@ -483,14 +475,28 @@ public abstract class JsonNode <: ToString {
     }
 
     public operator func [](index: Int64, value!: Array<JsonNode>): Unit {
-        asArray().set(index, YJson.value(value))
+        asArray().set(index, jsonNodeValue(value))
     }
 }
 
-public class JsonNullValue <: JsonNode {
+func jsonNodeValue(value: JsonNode): JsonNode { value }
+func jsonNodeValue(value: Bool): JsonNode { JsonBoolValue(value) }
+func jsonNodeValue(value: Int64): JsonNode { JsonIntValue(value) }
+func jsonNodeValue(value: UInt64): JsonNode { JsonUIntValue(value) }
+func jsonNodeValue(value: Float64): JsonNode { JsonFloatValue(value) }
+func jsonNodeValue(value: Rune): JsonNode { JsonStringValue(value.toString()) }
+func jsonNodeValue(value: String): JsonNode { JsonStringValue(value) }
+func jsonNodeValue(value: Array<JsonNode>): JsonNode { JsonArray(value) }
+func jsonNodeValue<T>(value: T): JsonNode where T <: GeneratedCodecProviderV1<T> {
+    JsonNode.parse(YJson.toJson(value))
+}
+
+class JsonNullValue <: JsonNode {
     public func kind(): JsonKind {
-        JsNull
+        JsonKind.Null
     }
+
+    public func size(): Int64 { 0 }
 
     public func toString(): String {
         "null"
@@ -502,7 +508,7 @@ public class JsonNullValue <: JsonNode {
     }
 }
 
-public class JsonBoolValue <: JsonNode {
+class JsonBoolValue <: JsonNode {
     public let value: Bool
 
     public init(value: Bool) {
@@ -510,8 +516,10 @@ public class JsonBoolValue <: JsonNode {
     }
 
     public func kind(): JsonKind {
-        JsBool
+        JsonKind.Boolean
     }
+
+    public func size(): Int64 { 0 }
 
     public func toString(): String {
         value.toString()
@@ -523,7 +531,7 @@ public class JsonBoolValue <: JsonNode {
     }
 }
 
-public class JsonIntValue <: JsonNode {
+class JsonIntValue <: JsonNode {
     public let value: Int64
 
     public init(value: Int64) {
@@ -531,8 +539,10 @@ public class JsonIntValue <: JsonNode {
     }
 
     public func kind(): JsonKind {
-        JsInt
+        JsonKind.Number
     }
+
+    public func size(): Int64 { 0 }
 
     public func toString(): String {
         value.toString()
@@ -544,7 +554,20 @@ public class JsonIntValue <: JsonNode {
     }
 }
 
-public class JsonFloatValue <: JsonNode {
+class JsonUIntValue <: JsonNode {
+    public let value: UInt64
+
+    public init(value: UInt64) {
+        this.value = value
+    }
+
+    public func kind(): JsonKind { JsonKind.Number }
+    public func size(): Int64 { 0 }
+    public func toString(): String { value.toString() }
+    public func toPrettyString(indent: String): String { let _ = indent; toString() }
+}
+
+class JsonFloatValue <: JsonNode {
     public let value: Float64
 
     public init(value: Float64) {
@@ -552,8 +575,10 @@ public class JsonFloatValue <: JsonNode {
     }
 
     public func kind(): JsonKind {
-        JsFloat
+        JsonKind.Number
     }
+
+    public func size(): Int64 { 0 }
 
     public func toString(): String {
         ensureFiniteJsonFloat(value)
@@ -566,7 +591,7 @@ public class JsonFloatValue <: JsonNode {
     }
 }
 
-public class JsonNumberLiteralValue <: JsonNode {
+class JsonNumberLiteralValue <: JsonNode {
     public let literal: String
 
     public init(literal: String) {
@@ -586,8 +611,10 @@ public class JsonNumberLiteralValue <: JsonNode {
     }
 
     public func kind(): JsonKind {
-        JsNumberLiteral
+        JsonKind.Number
     }
+
+    public func size(): Int64 { 0 }
 
     public func toString(): String {
         literal
@@ -599,7 +626,7 @@ public class JsonNumberLiteralValue <: JsonNode {
     }
 }
 
-private func isValidJsonNumberLiteral(literal: String): Bool {
+func isValidJsonNumberLiteral(literal: String): Bool {
     unsafe {
         let bytes = literal.rawData()
         if (bytes.isEmpty()) { return false }
@@ -633,7 +660,7 @@ private func isValidJsonNumberLiteral(literal: String): Bool {
     }
 }
 
-public class JsonStringValue <: JsonNode {
+class JsonStringValue <: JsonNode {
     public let value: String
 
     public init(value: String) {
@@ -641,8 +668,10 @@ public class JsonStringValue <: JsonNode {
     }
 
     public func kind(): JsonKind {
-        JsString
+        JsonKind.String
     }
+
+    public func size(): Int64 { 0 }
 
     public func toString(): String {
         let writer = JsonDirectWriter()
@@ -656,7 +685,7 @@ public class JsonStringValue <: JsonNode {
     }
 }
 
-public class JsonArrayValue <: JsonNode {
+public class JsonArray <: JsonNode {
     private let items: ArrayList<JsonNode>
 
     public init() {
@@ -672,19 +701,19 @@ public class JsonArrayValue <: JsonNode {
     }
 
     public func kind(): JsonKind {
-        JsArray
+        JsonKind.Array
     }
 
-    public func add(value: JsonNode): JsonArrayValue {
+    public func add(value: JsonNode): JsonArray {
         items.add(value)
         this
     }
 
-    public func add<T>(value: T): JsonArrayValue where T <: JsonCodecProvider {
-        add(YJson.value(value))
+    public func add<T>(value: T): JsonArray where T <: GeneratedCodecProviderV1<T> {
+        add(jsonNodeValue(value))
     }
 
-    public func set(index: Int64, value: JsonNode): JsonArrayValue {
+    public func set(index: Int64, value: JsonNode): JsonArray {
         if (index < 0 || index >= items.size) {
             throw JsonException("Array index ${index} is out of bounds", code: "index_out_of_bounds")
         }
@@ -692,11 +721,11 @@ public class JsonArrayValue <: JsonNode {
         this
     }
 
-    public func set<T>(index: Int64, value: T): JsonArrayValue where T <: JsonCodecProvider {
-        set(index, YJson.value(value))
+    public func set<T>(index: Int64, value: T): JsonArray where T <: GeneratedCodecProviderV1<T> {
+        set(index, jsonNodeValue(value))
     }
 
-    public func insert(index: Int64, value: JsonNode): JsonArrayValue {
+    public func insert(index: Int64, value: JsonNode): JsonArray {
         if (index < 0 || index > items.size) {
             throw JsonException("Array index ${index} is out of bounds", code: "index_out_of_bounds")
         }
@@ -715,7 +744,7 @@ public class JsonArrayValue <: JsonNode {
         items.size
     }
 
-    public func values(): ArrayList<JsonNode> {
+    func values(): ArrayList<JsonNode> {
         items
     }
 
@@ -724,27 +753,31 @@ public class JsonArrayValue <: JsonNode {
     }
 
     public func toString(): String {
-        writeJsonValueToString(this, JsonWriteConfig.compact)
+        writeJsonValueToString(this, JsonWriteOptions.compact)
     }
 
     public func toPrettyString(indent: String): String {
-        writeJsonValueToString(this, JsonWriteConfig("\n", indent, true, false))
+        writeJsonValueToString(this, JsonWriteOptions.pretty(indent: indent))
     }
 }
 
-public class JsonObjectValue <: JsonNode {
+public class JsonObject <: JsonNode {
     private let fields: HashMap<String, JsonNode>
+    private let names: ArrayList<String>
 
     public init() {
         fields = HashMap<String, JsonNode>()
+        names = ArrayList<String>()
     }
 
     public init(fields: HashMap<String, JsonNode>) {
-        this.fields = fields
+        this.fields = HashMap<String, JsonNode>()
+        names = ArrayList<String>()
+        for ((name, value) in fields) { put(name, value) }
     }
 
     public func kind(): JsonKind {
-        JsObject
+        JsonKind.Object
     }
 
     public func size(): Int64 {
@@ -755,13 +788,14 @@ public class JsonObjectValue <: JsonNode {
         fields.contains(key)
     }
 
-    public func put(key: String, value: JsonNode): JsonObjectValue {
+    public func put(key: String, value: JsonNode): JsonObject {
+        if (!fields.contains(key)) { names.add(key) }
         fields.add(key, value)
         this
     }
 
-    public func put<T>(key: String, value: T): JsonObjectValue where T <: JsonCodecProvider {
-        put(key, YJson.value(value))
+    public func put<T>(key: String, value: T): JsonObject where T <: GeneratedCodecProviderV1<T> {
+        put(key, jsonNodeValue(value))
     }
 
     public func get(key: String): Option<JsonNode> {
@@ -769,19 +803,37 @@ public class JsonObjectValue <: JsonNode {
     }
 
     public func remove(key: String): Option<JsonNode> {
-        fields.remove(key)
+        let removed = fields.remove(key)
+        if (removed.isSome()) {
+            for (index in 0..names.size) {
+                if (names[index] == key) { names.remove(at: index); break }
+            }
+        }
+        removed
     }
 
-    public func entries(): HashMap<String, JsonNode> {
+    public func nameAt(index: Int64): String {
+        names.get(index).getOrThrow({ =>
+            JsonException("Object member index ${index} is out of bounds", code: "index_out_of_bounds")
+        })
+    }
+
+    public func valueAt(index: Int64): JsonNode {
+        fields.get(nameAt(index)).getOrThrow({ =>
+            JsonException("Object member index ${index} is out of bounds", code: "index_out_of_bounds")
+        })
+    }
+
+    func entries(): HashMap<String, JsonNode> {
         fields
     }
 
     public func toString(): String {
-        writeJsonValueToString(this, JsonWriteConfig.compact)
+        writeJsonValueToString(this, JsonWriteOptions.compact)
     }
 
     public func toPrettyString(indent: String): String {
-        writeJsonValueToString(this, JsonWriteConfig("\n", indent, true, false))
+        writeJsonValueToString(this, JsonWriteOptions.pretty(indent: indent))
     }
 }
 
@@ -805,12 +857,12 @@ func ensureFiniteJsonFloat(value: Float64): Unit {
 }
 
 
-func writeJsonNodeToCodecWriter(writer: JsonCodecWriter, value: JsonNode): Unit {
+func writeJsonNodeToCodecWriter(writer: JsonWriter, value: JsonNode): Unit {
     writeJsonNodeToCodecWriterGuarded(writer, value, ArrayList<JsonNode>())
 }
 
 private func writeJsonNodeToCodecWriterGuarded(
-    writer: JsonCodecWriter,
+    writer: JsonWriter,
     value: JsonNode,
     ancestors: ArrayList<JsonNode>
 ): Unit {
@@ -818,10 +870,11 @@ private func writeJsonNodeToCodecWriterGuarded(
         case _: JsonNullValue => writer.writeNull()
         case boolValue: JsonBoolValue => writer.writeBool(boolValue.value)
         case intValue: JsonIntValue => writer.writeInt64(intValue.value)
+        case uintValue: JsonUIntValue => writer.writeUInt64(uintValue.value)
         case floatValue: JsonFloatValue => writer.writeFloat64(floatValue.value)
-        case numberValue: JsonNumberLiteralValue => writer.writeRawNumber(numberValue.literal)
+        case numberValue: JsonNumberLiteralValue => writer.writeNumberLiteral(numberValue.literal)
         case stringValue: JsonStringValue => writer.writeString(stringValue.value)
-        case arrayValue: JsonArrayValue =>
+        case arrayValue: JsonArray =>
             enterJsonNodeAncestor(arrayValue, ancestors)
             writer.startArray()
             try {
@@ -832,13 +885,13 @@ private func writeJsonNodeToCodecWriterGuarded(
             } finally {
                 ancestors.remove(at: ancestors.size - 1)
             }
-        case objectValue: JsonObjectValue =>
+        case objectValue: JsonObject =>
             enterJsonNodeAncestor(objectValue, ancestors)
             writer.startObject()
             try {
-                for ((key, item) in objectValue.entries()) {
-                    writer.writeName(key)
-                    writeJsonNodeToCodecWriterGuarded(writer, item, ancestors)
+                for (index in 0..objectValue.size()) {
+                    writer.writeName(objectValue.nameAt(index))
+                    writeJsonNodeToCodecWriterGuarded(writer, objectValue.valueAt(index), ancestors)
                 }
                 writer.endObject()
             } finally {

@@ -5,9 +5,9 @@
 
 ## 测量什么
 
-Decode 的计时区从 `YJson.fromStream<T>(stream)` 开始，到完整 typed value 返回为止。stream
+Decode 的计时区从 `YJson.fromJson<T>(stream)` 开始，到完整 typed value 返回为止。stream
 对象和确定性 chunk plan 在计时区外创建。Encode 的计时区只包含
-`YJson.toStream(value, output)`；sink 创建或 reset 在计时区外，最终 byte snapshot 不计入
+`YJson.writeJson(value, output)`；sink 创建或 reset 在计时区外，最终 byte snapshot 不计入
 materializing sink 的时间。
 
 核心矩阵有 30 行：

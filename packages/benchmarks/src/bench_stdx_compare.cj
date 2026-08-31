@@ -19,6 +19,8 @@ import std.unittest.*
 import std.unittest.testmacro.*
 import stdx.encoding.json as stdxjson
 import stdx.encoding.json.stream.*
+import stdx.encoding.json.stream.JsonReader as StdxJsonReader
+import stdx.encoding.json.stream.JsonWriter as StdxJsonWriter
 
 class StdxAddress <: JsonSerializable & JsonDeserializable<StdxAddress> {
     public let street: String
@@ -29,7 +31,7 @@ class StdxAddress <: JsonSerializable & JsonDeserializable<StdxAddress> {
         this.zipcode = zipcode
     }
 
-    public func toJson(w: JsonWriter): Unit {
+    public func toJson(w: StdxJsonWriter): Unit {
         w.startObject()
         w.writeName("street_name")
         w.writeValue<String>(street)
@@ -38,7 +40,7 @@ class StdxAddress <: JsonSerializable & JsonDeserializable<StdxAddress> {
         w.endObject()
     }
 
-    public static func fromJson(r: JsonReader): StdxAddress {
+    public static func fromJson(r: StdxJsonReader): StdxAddress {
         var street = ""
         var zipcode: Int64 = 0
         r.startObject()
@@ -81,7 +83,7 @@ class StdxPerson <: JsonSerializable & JsonDeserializable<StdxPerson> {
         this.nick = nick
     }
 
-    public func toJson(w: JsonWriter): Unit {
+    public func toJson(w: StdxJsonWriter): Unit {
         w.startObject()
         w.writeName("user_id")
         w.writeValue<Int64>(id)
@@ -100,7 +102,7 @@ class StdxPerson <: JsonSerializable & JsonDeserializable<StdxPerson> {
         w.endObject()
     }
 
-    public static func fromJson(r: JsonReader): StdxPerson {
+    public static func fromJson(r: StdxJsonReader): StdxPerson {
         var id: Int64 = 0
         var name = ""
         var age: Int32 = 0
@@ -137,7 +139,7 @@ class StdxProfileRecord <: JsonSerializable & JsonDeserializable<StdxProfileReco
         this.level = level
     }
 
-    public func toJson(w: JsonWriter): Unit {
+    public func toJson(w: StdxJsonWriter): Unit {
         w.startObject()
         w.writeName("profile_id")
         w.writeValue<Int64>(id)
@@ -148,7 +150,7 @@ class StdxProfileRecord <: JsonSerializable & JsonDeserializable<StdxProfileReco
         w.endObject()
     }
 
-    public static func fromJson(r: JsonReader): StdxProfileRecord {
+    public static func fromJson(r: StdxJsonReader): StdxProfileRecord {
         var id: Int64 = 0
         var alias = ""
         var level: Int32 = 0
@@ -175,7 +177,7 @@ class StdxProfileBundle <: JsonSerializable & JsonDeserializable<StdxProfileBund
         this.featured = featured
     }
 
-    public func toJson(w: JsonWriter): Unit {
+    public func toJson(w: StdxJsonWriter): Unit {
         w.startObject()
         w.writeName("groups")
         w.writeValue<HashMap<String, ArrayList<StdxProfileRecord>>>(groups)
@@ -184,7 +186,7 @@ class StdxProfileBundle <: JsonSerializable & JsonDeserializable<StdxProfileBund
         w.endObject()
     }
 
-    public static func fromJson(r: JsonReader): StdxProfileBundle {
+    public static func fromJson(r: StdxJsonReader): StdxProfileBundle {
         var groups = HashMap<String, ArrayList<StdxProfileRecord>>()
         var featured: Option<StdxProfileRecord> = None
         r.startObject()
@@ -211,7 +213,7 @@ class StdxUInt64Envelope <: JsonSerializable & JsonDeserializable<StdxUInt64Enve
         this.quotas = quotas
     }
 
-    public func toJson(w: JsonWriter): Unit {
+    public func toJson(w: StdxJsonWriter): Unit {
         w.startObject()
         w.writeName("id")
         w.writeValue<UInt64>(id)
@@ -222,7 +224,7 @@ class StdxUInt64Envelope <: JsonSerializable & JsonDeserializable<StdxUInt64Enve
         w.endObject()
     }
 
-    public static func fromJson(r: JsonReader): StdxUInt64Envelope {
+    public static func fromJson(r: StdxJsonReader): StdxUInt64Envelope {
         var id: UInt64 = 0
         var shardIds = Array<UInt64>(0, repeat: 0)
         var quotas = HashMap<String, UInt64>()
@@ -261,7 +263,7 @@ class StdxTemporalStats <: JsonSerializable & JsonDeserializable<StdxTemporalSta
         this.ratios = ratios
     }
 
-    public func toJson(w: JsonWriter): Unit {
+    public func toJson(w: StdxJsonWriter): Unit {
         w.startObject()
         w.writeName("createdAt")
         w.writeValue<DateTime>(createdAt)
@@ -276,7 +278,7 @@ class StdxTemporalStats <: JsonSerializable & JsonDeserializable<StdxTemporalSta
         w.endObject()
     }
 
-    public static func fromJson(r: JsonReader): StdxTemporalStats {
+    public static func fromJson(r: StdxJsonReader): StdxTemporalStats {
         var createdAt = sampleDateTime()
         var totalEvents = BigInt.parse("0")
         var averageLatency = Decimal.parse("0")
@@ -402,7 +404,7 @@ func encodeStdxToUtf8String<T>(
     config!: WriteConfig = WriteConfig.compact
 ): String where T <: JsonSerializable {
     let out = ByteBuffer()
-    let writer = JsonWriter(out)
+    let writer = StdxJsonWriter(out)
     writer.writeConfig = config
     writer.writeValue<T>(value)
     writer.flush()
@@ -412,7 +414,7 @@ func encodeStdxToUtf8String<T>(
 func decodeStdxFromUtf8String<T>(text: String): T where T <: JsonDeserializable<T> {
     let input = ByteBuffer()
     unsafe { input.write(text.rawData()) }
-    return JsonReader(input).readValue<T>()
+    return StdxJsonReader(input).readValue<T>()
 }
 
 func encodeStdxToStream<T>(
@@ -420,14 +422,14 @@ func encodeStdxToStream<T>(
     out: OutputStream,
     config!: WriteConfig = WriteConfig.compact
 ): Unit where T <: JsonSerializable {
-    let writer = JsonWriter(out)
+    let writer = StdxJsonWriter(out)
     writer.writeConfig = config
     writer.writeValue<T>(value)
     writer.flush()
 }
 
 func decodeStdxFromStream<T>(input: InputStream): T where T <: JsonDeserializable<T> {
-    let reader = JsonReader(input)
+    let reader = StdxJsonReader(input)
     return reader.readValue<T>()
 }
 
@@ -457,7 +459,7 @@ class StdxCompareBenchmarks {
     let stdxPersonAst: stdxjson.JsonValue
     var stringSink = ""
     var intSink: Int64 = 0
-    var yjsonAstSink: JsonNode = JsonNullValue()
+    var yjsonAstSink: JsonNode = JsonNode.nullValue
     var stdxAstSink: stdxjson.JsonValue = stdxjson.JsonNull()
 
     init() {
@@ -466,12 +468,12 @@ class StdxCompareBenchmarks {
         stdxBundle = toStdxProfileBundle(bundle)
         stdxUInt64Envelope = toStdxUInt64Envelope(uint64Envelope)
         stdxTemporalStats = toStdxTemporalStats(temporalStats)
-        canonicalPersonText = YJson.encodeStringWith(PersonJson, person)
-        canonicalAddressText = YJson.encodeStringWith(AddressJson, address)
-        canonicalBundleText = YJson.encodeStringWith(ProfileBundleJson, bundle)
-        canonicalUInt64EnvelopeText = YJson.encodeStringWith(UInt64EnvelopeJson, uint64Envelope)
-        canonicalTemporalStatsText = YJson.encodeStringWith(TemporalStatsJson, temporalStats)
-        yjsonPersonAst = YJson.parse(canonicalPersonText)
+        canonicalPersonText = YJson.toJson(person, codec: PersonJson)
+        canonicalAddressText = YJson.toJson(address, codec: AddressJson)
+        canonicalBundleText = YJson.toJson(bundle, codec: ProfileBundleJson)
+        canonicalUInt64EnvelopeText = YJson.toJson(uint64Envelope, codec: UInt64EnvelopeJson)
+        canonicalTemporalStatsText = YJson.toJson(temporalStats, codec: TemporalStatsJson)
+        yjsonPersonAst = JsonNode.parse(canonicalPersonText)
         stdxPersonAst = stdxjson.JsonValue.fromStr(canonicalPersonText)
 
         assertJson(
@@ -479,7 +481,7 @@ class StdxCompareBenchmarks {
             "stdx address decode should match canonical yjson text"
         )
         assertJson(
-            YJson.decodeStringWith(AddressJson, encodeStdxToUtf8String<StdxAddress>(stdxAddress)).street == address.street,
+            YJson.fromJson(encodeStdxToUtf8String<StdxAddress>(stdxAddress), codec: AddressJson).street == address.street,
             "stdx address encode should preserve canonical wire shape"
         )
         assertJson(
@@ -487,7 +489,7 @@ class StdxCompareBenchmarks {
             "stdx person decode should match canonical yjson text"
         )
         assertJson(
-            YJson.decodeStringWith(PersonJson, encodeStdxToUtf8String<StdxPerson>(stdxPerson)).scores["math"] == 95,
+            YJson.fromJson(encodeStdxToUtf8String<StdxPerson>(stdxPerson), codec: PersonJson).scores["math"] == 95,
             "stdx person encode should preserve nested map semantics"
         )
         assertJson(
@@ -495,7 +497,7 @@ class StdxCompareBenchmarks {
             "stdx profile bundle decode should match canonical yjson text"
         )
         assertJson(
-            YJson.decodeStringWith(ProfileBundleJson, encodeStdxToUtf8String<StdxProfileBundle>(stdxBundle)).groups["ops"][1].level == 4,
+            YJson.fromJson(encodeStdxToUtf8String<StdxProfileBundle>(stdxBundle), codec: ProfileBundleJson).groups["ops"][1].level == 4,
             "stdx profile bundle encode should preserve nested object semantics"
         )
         assertJson(
@@ -503,7 +505,7 @@ class StdxCompareBenchmarks {
             "stdx UInt64 envelope decode should match canonical yjson text"
         )
         assertJson(
-            YJson.decodeStringWith(UInt64EnvelopeJson, encodeStdxToUtf8String<StdxUInt64Envelope>(stdxUInt64Envelope)).quotas["burst"] ==
+            YJson.fromJson(encodeStdxToUtf8String<StdxUInt64Envelope>(stdxUInt64Envelope), codec: UInt64EnvelopeJson).quotas["burst"] ==
             UInt64.parse("18446744073709551613"),
             "stdx UInt64 envelope encode should preserve bare-number UInt64 values"
         )
@@ -512,7 +514,7 @@ class StdxCompareBenchmarks {
             "stdx temporal stats decode should match canonical yjson text"
         )
         assertJson(
-            YJson.decodeStringWith(TemporalStatsJson, encodeStdxToUtf8String<StdxTemporalStats>(stdxTemporalStats)).averageLatency ==
+            YJson.fromJson(encodeStdxToUtf8String<StdxTemporalStats>(stdxTemporalStats), codec: TemporalStatsJson).averageLatency ==
             temporalStats.averageLatency,
             "stdx temporal stats encode should preserve BigInt/Decimal/DateTime semantics"
         )
@@ -520,7 +522,7 @@ class StdxCompareBenchmarks {
 
     @Bench
     func parseAstYjsonPerson(): Unit {
-        yjsonAstSink = YJson.parse(canonicalPersonText)
+        yjsonAstSink = JsonNode.parse(canonicalPersonText)
     }
 
     @Bench
@@ -530,7 +532,7 @@ class StdxCompareBenchmarks {
 
     @Bench
     func stringifyAstYjsonPerson(): Unit {
-        stringSink = YJson.stringify(yjsonPersonAst)
+        stringSink = (yjsonPersonAst).toJson()
     }
 
     @Bench
@@ -540,7 +542,7 @@ class StdxCompareBenchmarks {
 
     @Bench
     func decodeStreamYjsonPerson(): Unit {
-        intSink = YJson.decodeFromStreamWith(PersonJson, YJsonByteArrayInputStream(canonicalPersonText)).id
+        intSink = YJson.fromJson(YJsonByteArrayInputStream(canonicalPersonText), codec: PersonJson).id
     }
 
     @Bench
@@ -551,7 +553,7 @@ class StdxCompareBenchmarks {
     @Bench
     func encodeStreamYjsonPerson(): Unit {
         let out = YJsonMemoryOutputStream()
-        YJson.encodeToStreamWith(PersonJson, person, out)
+        YJson.writeJson(person, out, codec: PersonJson)
         stringSink = out.toUtf8String()
     }
 
@@ -564,7 +566,7 @@ class StdxCompareBenchmarks {
 
     @Bench
     func encodeObjectYjsonAddress(): Unit {
-        stringSink = YJson.encodeStringWith(AddressJson, address)
+        stringSink = YJson.toJson(address, codec: AddressJson)
     }
 
     @Bench
@@ -574,7 +576,7 @@ class StdxCompareBenchmarks {
 
     @Bench
     func decodeObjectYjsonAddress(): Unit {
-        intSink = YJson.decodeStringWith(AddressJson, canonicalAddressText).zipcode
+        intSink = YJson.fromJson(canonicalAddressText, codec: AddressJson).zipcode
     }
 
     @Bench
@@ -584,7 +586,7 @@ class StdxCompareBenchmarks {
 
     @Bench
     func encodeObjectYjsonPerson(): Unit {
-        stringSink = YJson.encodeStringWith(PersonJson, person)
+        stringSink = YJson.toJson(person, codec: PersonJson)
     }
 
     @Bench
@@ -594,7 +596,7 @@ class StdxCompareBenchmarks {
 
     @Bench
     func decodeObjectYjsonPerson(): Unit {
-        intSink = YJson.decodeStringWith(PersonJson, canonicalPersonText).id
+        intSink = YJson.fromJson(canonicalPersonText, codec: PersonJson).id
     }
 
     @Bench
@@ -604,7 +606,7 @@ class StdxCompareBenchmarks {
 
     @Bench
     func encodeObjectYjsonProfileBundle(): Unit {
-        stringSink = YJson.encodeStringWith(ProfileBundleJson, bundle)
+        stringSink = YJson.toJson(bundle, codec: ProfileBundleJson)
     }
 
     @Bench
@@ -614,7 +616,7 @@ class StdxCompareBenchmarks {
 
     @Bench
     func decodeObjectYjsonProfileBundle(): Unit {
-        intSink = YJson.decodeStringWith(ProfileBundleJson, canonicalBundleText).groups["platform"][0].id
+        intSink = YJson.fromJson(canonicalBundleText, codec: ProfileBundleJson).groups["platform"][0].id
     }
 
     @Bench
@@ -624,7 +626,7 @@ class StdxCompareBenchmarks {
 
     @Bench
     func encodeObjectYjsonUInt64Envelope(): Unit {
-        stringSink = YJson.encodeStringWith(UInt64EnvelopeJson, uint64Envelope)
+        stringSink = YJson.toJson(uint64Envelope, codec: UInt64EnvelopeJson)
     }
 
     @Bench
@@ -634,7 +636,7 @@ class StdxCompareBenchmarks {
 
     @Bench
     func decodeObjectYjsonUInt64Envelope(): Unit {
-        intSink = Int64(YJson.decodeStringWith(UInt64EnvelopeJson, canonicalUInt64EnvelopeText).shardIds.size)
+        intSink = Int64(YJson.fromJson(canonicalUInt64EnvelopeText, codec: UInt64EnvelopeJson).shardIds.size)
     }
 
     @Bench
@@ -644,7 +646,7 @@ class StdxCompareBenchmarks {
 
     @Bench
     func encodeObjectYjsonTemporalStats(): Unit {
-        stringSink = YJson.encodeStringWith(TemporalStatsJson, temporalStats)
+        stringSink = YJson.toJson(temporalStats, codec: TemporalStatsJson)
     }
 
     @Bench
@@ -654,7 +656,7 @@ class StdxCompareBenchmarks {
 
     @Bench
     func decodeObjectYjsonTemporalStats(): Unit {
-        stringSink = YJson.decodeStringWith(TemporalStatsJson, canonicalTemporalStatsText).totalEvents.toString()
+        stringSink = YJson.fromJson(canonicalTemporalStatsText, codec: TemporalStatsJson).totalEvents.toString()
     }
 
     @Bench

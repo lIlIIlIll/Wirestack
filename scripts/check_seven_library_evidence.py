@@ -15,14 +15,16 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import tomllib
 from typing import Any
 
 from json_pure_perf_compare import harness_manifest, manifest_digest, product_manifest
+from release_graph import load_release_graph
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEFAULT_MARKER = "benchmarks/results/full-seven-library/current-main.json"
-MARKER_KEYS = {
+MARKER_V1_KEYS = {
     "schema_version",
     "evidence_dir",
     "result_doc",
@@ -33,9 +35,19 @@ MARKER_KEYS = {
     "harness_archive",
     "checksum_files",
 }
+MARKER_V2_KEYS = MARKER_V1_KEYS | {"candidate"}
+CANDIDATE_KEYS = {
+    "package_version",
+    "root_manifest_sha256",
+    "root_lock_sha256",
+    "release_graph_sha256",
+    "lockstep_manifests_sha256",
+    "identity_sha256",
+}
 ARCHIVE_KEYS = {"file", "root"}
 SHA256_RE = re.compile(r"[0-9a-f]{64}\Z")
 COMMIT_RE = re.compile(r"[0-9a-f]{40}\Z")
+PACKAGE_VERSION_RE = re.compile(r"0\.[1-9][0-9]*\.[0-9]+\Z")
 MARKDOWN_LINK_RE = re.compile(r"\]\(([^\s)]+)(?:\s+[^)]*)?\)")
 HTML_HREF_RE = re.compile(r"\bhref=[\"']([^\"']+)[\"']")
 LIBRARIES = (
@@ -182,6 +194,139 @@ def digest(value: object, label: str) -> str:
     return value
 
 
+def candidate_identity_sha256(
+    candidate: dict[str, Any], product_digest: str, harness_digest: str
+) -> str:
+    payload = {
+        "identity_kind": "yjson-clean-release-candidate-v1",
+        "package_version": candidate["package_version"],
+        "root_manifest_sha256": candidate["root_manifest_sha256"],
+        "root_lock_sha256": candidate["root_lock_sha256"],
+        "release_graph_sha256": candidate["release_graph_sha256"],
+        "lockstep_manifests_sha256": candidate["lockstep_manifests_sha256"],
+        "product_source_sha256": product_digest,
+        "effective_harness_sha256": harness_digest,
+    }
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def parse_toml(path: pathlib.Path, label: str) -> dict[str, Any]:
+    try:
+        value = tomllib.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, tomllib.TOMLDecodeError) as error:
+        raise EvidenceError(f"invalid {label}: {path}: {error}") from error
+    if not isinstance(value, dict):
+        raise EvidenceError(f"{label} must be a TOML table: {path}")
+    return value
+
+
+def validate_release_manifest_pairing(
+    root: pathlib.Path, package: Any, package_version: str
+) -> None:
+    development = parse_toml(
+        root / package.development_manifest,
+        f"development manifest for {package.name}",
+    )
+    released = parse_toml(
+        root / package.release_manifest,
+        f"release manifest for {package.name}",
+    )
+    for kind, manifest in (("development", development), ("release", released)):
+        package_table = manifest.get("package")
+        if not isinstance(package_table, dict):
+            raise EvidenceError(f"{kind} manifest for {package.name} omits [package]")
+        if package_table.get("name") != package.name:
+            raise EvidenceError(f"{kind} manifest name differs for {package.name}")
+        if package_table.get("version") != package_version:
+            raise EvidenceError(
+                f"{kind} manifest version differs for {package.name}: "
+                f"expected {package_version!r}"
+            )
+        dependencies = manifest.get("dependencies", {})
+        if not isinstance(dependencies, dict) or set(dependencies) != set(package.dependencies):
+            raise EvidenceError(
+                f"{kind} manifest dependencies differ from release graph for {package.name}"
+            )
+    development_tests = development.get("test-dependencies", {})
+    if not isinstance(development_tests, dict) or set(development_tests) != set(
+        package.test_dependencies
+    ):
+        raise EvidenceError(
+            f"development test dependencies differ from release graph for {package.name}"
+        )
+    release_dependencies = released.get("dependencies", {})
+    for dependency in package.dependencies:
+        if release_dependencies.get(dependency) != package_version:
+            raise EvidenceError(
+                f"release dependency {package.name}->{dependency} is not pinned to "
+                f"{package_version}"
+            )
+
+
+def release_candidate_binding(
+    root: pathlib.Path, product_digest: str, harness_digest: str
+) -> dict[str, Any]:
+    graph_path = root / "release/release-graph.toml"
+    try:
+        graph = load_release_graph(graph_path)
+    except (OSError, UnicodeError, ValueError) as error:
+        raise EvidenceError(f"invalid release graph: {error}") from error
+    try:
+        core = graph.package("yjson")
+    except KeyError as error:
+        raise EvidenceError("release graph omits the yjson core package") from error
+    if core.development_manifest != pathlib.Path("cjpm.toml"):
+        raise EvidenceError("release graph yjson package must use root cjpm.toml")
+
+    manifest_files: dict[str, str] = {}
+    for package in graph.packages:
+        validate_release_manifest_pairing(root, package, graph.version)
+        for manifest_path in (package.development_manifest, package.release_manifest):
+            path = root / manifest_path
+            if not path.is_file():
+                raise EvidenceError(f"release graph manifest is missing: {manifest_path}")
+            manifest_files[manifest_path.as_posix()] = sha256(path)
+
+    root_manifest = root / "cjpm.toml"
+    root_lock = root / "cjpm.lock"
+    if not root_lock.is_file():
+        raise EvidenceError("root cjpm.lock is missing")
+    candidate: dict[str, Any] = {
+        "package_version": graph.version,
+        "root_manifest_sha256": sha256(root_manifest),
+        "root_lock_sha256": sha256(root_lock),
+        "release_graph_sha256": sha256(graph_path),
+        "lockstep_manifests_sha256": manifest_digest(manifest_files),
+    }
+    candidate["identity_sha256"] = candidate_identity_sha256(
+        candidate, product_digest, harness_digest
+    )
+    return candidate
+
+
+def parse_candidate(value: object, marker: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(value, dict) or set(value) != CANDIDATE_KEYS:
+        raise EvidenceError(
+            "candidate must contain exactly: " + ", ".join(sorted(CANDIDATE_KEYS))
+        )
+    package_version = value.get("package_version")
+    if not isinstance(package_version, str) or PACKAGE_VERSION_RE.fullmatch(
+        package_version
+    ) is None:
+        raise EvidenceError("candidate.package_version must be a stable 0.x.y version")
+    for key in CANDIDATE_KEYS - {"package_version"}:
+        digest(value.get(key), f"candidate.{key}")
+    expected_identity = candidate_identity_sha256(
+        value,
+        marker["product_source_sha256"],
+        marker["effective_harness_sha256"],
+    )
+    if value["identity_sha256"] != expected_identity:
+        raise EvidenceError("candidate.identity_sha256 is inconsistent with marker inputs")
+    return dict(value)
+
+
 def parse_archive(value: object, label: str) -> dict[str, str]:
     if not isinstance(value, dict) or set(value) != ARCHIVE_KEYS:
         raise EvidenceError(f"{label} must contain exactly: file, root")
@@ -190,16 +335,24 @@ def parse_archive(value: object, label: str) -> dict[str, str]:
     return {"file": archive_file, "root": archive_root}
 
 
-def read_marker(root: pathlib.Path, marker_path: pathlib.Path) -> dict[str, Any]:
+def read_marker(
+    root: pathlib.Path, marker_path: pathlib.Path, integrity_only: bool
+) -> dict[str, Any]:
     marker = read_json_object(marker_path, "seven-library marker")
-    if set(marker) != MARKER_KEYS:
-        missing = sorted(MARKER_KEYS - set(marker))
-        unexpected = sorted(set(marker) - MARKER_KEYS)
+    schema_version = marker.get("schema_version")
+    if type(schema_version) is not int or schema_version not in (1, 2):
+        raise EvidenceError("marker schema_version must be integer 1 or 2")
+    if schema_version == 1 and not integrity_only:
+        raise EvidenceError(
+            "marker schema v1 is historical-only; strict freshness requires schema v2"
+        )
+    expected_keys = MARKER_V1_KEYS if schema_version == 1 else MARKER_V2_KEYS
+    if set(marker) != expected_keys:
+        missing = sorted(expected_keys - set(marker))
+        unexpected = sorted(set(marker) - expected_keys)
         raise EvidenceError(
             f"marker schema mismatch; missing={missing}, unexpected={unexpected}"
         )
-    if type(marker["schema_version"]) is not int or marker["schema_version"] != 1:
-        raise EvidenceError("marker schema_version must be integer 1")
 
     evidence_parts = relative_parts(marker["evidence_dir"], "evidence_dir")
     if evidence_parts[:3] != ("benchmarks", "results", "full-seven-library"):
@@ -253,6 +406,8 @@ def read_marker(root: pathlib.Path, marker_path: pathlib.Path) -> dict[str, Any]
     marker["formal_archives"] = formal
     marker["harness_archive"] = harness
     marker["checksum_files"] = checksums
+    if schema_version == 2:
+        marker["candidate"] = parse_candidate(marker["candidate"], marker)
     return marker
 
 
@@ -482,7 +637,9 @@ def canonical_summary_rows(formal_root: pathlib.Path, include_max_cv: bool) -> l
     try:
         summary = json.loads((formal_root / "summary.json").read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
-        raise EvidenceError(f"invalid regenerated summary in {formal_root.name}: {error}") from error
+        raise EvidenceError(
+            f"invalid regenerated summary in {formal_root.name}: {error}"
+        ) from error
     if not isinstance(summary, list) or len(summary) != len(WORKLOADS):
         raise EvidenceError(f"summary in {formal_root.name} must contain 10 workloads")
     by_workload: dict[str, dict[str, Any]] = {}
@@ -543,9 +700,8 @@ def verify_report_rows(
     root_readme: pathlib.Path,
     result_doc: pathlib.Path,
     result_batch_rows: list[list[str]],
-    readme_batch_rows: list[str],
+    readme_batch_rows: list[str] | None,
 ) -> None:
-    readme_text = root_readme.read_text(encoding="utf-8")
     result_text = result_doc.read_text(encoding="utf-8")
     label_set = set(WORKLOAD_LABELS.values())
 
@@ -561,9 +717,11 @@ def verify_report_rows(
                 rows.append(stripped)
         return rows
 
-    readme_rows = actual_rows(readme_text, "性能", root_readme)
-    if readme_rows != readme_batch_rows:
-        raise EvidenceError("README current performance table differs from formal batch 2")
+    if readme_batch_rows is not None:
+        readme_text = root_readme.read_text(encoding="utf-8")
+        readme_rows = actual_rows(readme_text, "性能", root_readme)
+        if readme_rows != readme_batch_rows:
+            raise EvidenceError("README current performance table differs from formal batch 2")
     for heading, expected in (
         ("第一批", result_batch_rows[0]),
         ("第二批", result_batch_rows[1]),
@@ -591,15 +749,19 @@ def verify_documentation_bindings(
     evidence: pathlib.Path,
     result_doc: pathlib.Path,
     marker: dict[str, Any],
+    require_current_links: bool,
 ) -> None:
     root_readme = root / "README.md"
     performance_index = root / "docs/performance/README.md"
     evidence_readme = evidence / "README.md"
-    require_link(root_readme, marker["result_doc"])
-    require_link(
-        performance_index,
-        pathlib.PurePosixPath(os.path.relpath(result_doc, performance_index.parent)).as_posix(),
-    )
+    if require_current_links:
+        require_link(root_readme, marker["result_doc"])
+        require_link(
+            performance_index,
+            pathlib.PurePosixPath(
+                os.path.relpath(result_doc, performance_index.parent)
+            ).as_posix(),
+        )
     require_link(
         evidence_readme,
         pathlib.PurePosixPath(os.path.relpath(result_doc, evidence)).as_posix(),
@@ -614,12 +776,135 @@ def verify_documentation_bindings(
             raise EvidenceError(f"{path} is not bound to measured commit {commit}")
 
 
+def git_blob(root: pathlib.Path, commit: str, relative: pathlib.Path) -> bytes:
+    completed = subprocess.run(
+        ["git", "-C", str(root), "show", f"{commit}:{relative.as_posix()}"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if completed.returncode != 0:
+        detail = completed.stderr.decode("utf-8", errors="replace").strip()
+        raise EvidenceError(
+            f"cannot read {relative.as_posix()} from measured commit: {detail}"
+        )
+    return completed.stdout
+
+
+def bytes_sha256(value: bytes) -> str:
+    return hashlib.sha256(value).hexdigest()
+
+
+def verify_measured_candidate_binding(
+    root: pathlib.Path, marker: dict[str, Any]
+) -> None:
+    candidate = marker["candidate"]
+    commit = marker["measured_commit"]
+    try:
+        graph = load_release_graph(root / "release/release-graph.toml")
+    except (OSError, UnicodeError, ValueError) as error:
+        raise EvidenceError(f"invalid release graph: {error}") from error
+    graph_path = pathlib.Path("release/release-graph.toml")
+    if bytes_sha256(git_blob(root, commit, graph_path)) != candidate["release_graph_sha256"]:
+        raise EvidenceError("measured commit release graph differs from candidate identity")
+
+    root_manifest_bytes = git_blob(root, commit, pathlib.Path("cjpm.toml"))
+    if bytes_sha256(root_manifest_bytes) != candidate["root_manifest_sha256"]:
+        raise EvidenceError("measured commit root manifest differs from candidate identity")
+    try:
+        measured_root = tomllib.loads(root_manifest_bytes.decode("utf-8"))
+    except (UnicodeError, tomllib.TOMLDecodeError) as error:
+        raise EvidenceError(f"invalid measured root manifest: {error}") from error
+    package = measured_root.get("package")
+    if not isinstance(package, dict) or package.get("version") != candidate["package_version"]:
+        raise EvidenceError("measured commit package version differs from candidate identity")
+
+    root_lock_bytes = git_blob(root, commit, pathlib.Path("cjpm.lock"))
+    if bytes_sha256(root_lock_bytes) != candidate["root_lock_sha256"]:
+        raise EvidenceError("measured commit root lock differs from candidate identity")
+
+    measured_manifests: dict[str, str] = {}
+    for release_package in graph.packages:
+        for manifest_path in (
+            release_package.development_manifest,
+            release_package.release_manifest,
+        ):
+            measured_manifests[manifest_path.as_posix()] = bytes_sha256(
+                git_blob(root, commit, manifest_path)
+            )
+    if manifest_digest(measured_manifests) != candidate["lockstep_manifests_sha256"]:
+        raise EvidenceError(
+            "measured commit lockstep package manifests differ from candidate identity"
+        )
+
+
+def verify_clean_checkout(root: pathlib.Path) -> None:
+    completed = subprocess.run(
+        ["git", "-C", str(root), "status", "--porcelain=v1", "--untracked-files=all"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if completed.returncode != 0:
+        raise EvidenceError(
+            "cannot verify clean candidate checkout: " + completed.stderr.strip()
+        )
+    dirty = completed.stdout.splitlines()
+    if dirty:
+        preview = ", ".join(dirty[:5])
+        if len(dirty) > 5:
+            preview += f", ... ({len(dirty)} paths)"
+        raise EvidenceError(f"strict freshness requires a clean candidate checkout: {preview}")
+
+
+def current_head_commit(root: pathlib.Path) -> str:
+    completed = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "--verify", "HEAD^{commit}"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    commit = completed.stdout.strip()
+    if completed.returncode != 0 or COMMIT_RE.fullmatch(commit) is None:
+        detail = completed.stderr.strip() or "HEAD is not a full commit"
+        raise EvidenceError(f"cannot resolve current candidate commit: {detail}")
+    return commit
+
+
+def current_candidate_fragment(root: pathlib.Path) -> dict[str, Any]:
+    """Return the schema-v2 marker identity fields for one clean committed tree."""
+
+    root = root.resolve(strict=True)
+    before_commit = current_head_commit(root)
+    verify_clean_checkout(root)
+    try:
+        product_digest = manifest_digest(product_manifest(root))
+        harness_digest = manifest_digest(harness_manifest(root))
+    except SystemExit as error:
+        raise EvidenceError(
+            f"cannot compute current performance input identity: {error}"
+        ) from error
+    candidate = release_candidate_binding(root, product_digest, harness_digest)
+    verify_clean_checkout(root)
+    after_commit = current_head_commit(root)
+    if after_commit != before_commit:
+        raise EvidenceError("current candidate commit changed while computing identity")
+    return {
+        "schema_version": 2,
+        "measured_commit": before_commit,
+        "product_source_sha256": product_digest,
+        "effective_harness_sha256": harness_digest,
+        "candidate": candidate,
+    }
+
+
 def verify_current_checkout(root: pathlib.Path, marker: dict[str, Any]) -> None:
     try:
         product_digest = manifest_digest(product_manifest(root))
         harness_digest = manifest_digest(harness_manifest(root))
     except SystemExit as error:
-        raise EvidenceError(f"cannot compute current performance input identity: {error}") from error
+        raise EvidenceError(
+            f"cannot compute current performance input identity: {error}"
+        ) from error
     if product_digest != marker["product_source_sha256"]:
         raise EvidenceError(
             "current product source differs from measured evidence: "
@@ -629,6 +914,17 @@ def verify_current_checkout(root: pathlib.Path, marker: dict[str, Any]) -> None:
         raise EvidenceError(
             "current benchmark harness differs from measured evidence: "
             f"expected={marker['effective_harness_sha256']}, actual={harness_digest}"
+        )
+    candidate = release_candidate_binding(root, product_digest, harness_digest)
+    if candidate != marker["candidate"]:
+        differing = sorted(
+            key
+            for key in CANDIDATE_KEYS
+            if candidate.get(key) != marker["candidate"].get(key)
+        )
+        raise EvidenceError(
+            "current release candidate identity differs from measured evidence: "
+            + ", ".join(differing)
         )
     completed = subprocess.run(
         [
@@ -651,14 +947,16 @@ def verify_current_checkout(root: pathlib.Path, marker: dict[str, Any]) -> None:
             "cannot verify measured_commit ancestry; use a complete checkout: "
             + completed.stderr.strip()
         )
+    verify_measured_candidate_binding(root, marker)
+    verify_clean_checkout(root)
 
 
-def verify(root: pathlib.Path, marker_relative: str, integrity_only: bool) -> None:
+def verify(root: pathlib.Path, marker_relative: str, integrity_only: bool) -> int:
     root = root.resolve(strict=True)
     marker_path = repo_path(root, marker_relative, "marker path")
     if not marker_path.is_file():
         raise EvidenceError(f"missing seven-library marker: {marker_relative}")
-    marker = read_marker(root, marker_path)
+    marker = read_marker(root, marker_path, integrity_only)
     evidence = repo_path(
         root,
         marker["evidence_dir"],
@@ -678,7 +976,10 @@ def verify(root: pathlib.Path, marker_relative: str, integrity_only: bool) -> No
     for name in marker["checksum_files"]:
         if name.endswith(".tar.gz"):
             validate_archive(evidence / name)
-    verify_documentation_bindings(root, evidence, result_doc, marker)
+    current_schema = marker["schema_version"] == 2
+    verify_documentation_bindings(
+        root, evidence, result_doc, marker, require_current_links=current_schema
+    )
 
     with tempfile.TemporaryDirectory(prefix="yjson-seven-library-evidence-") as temporary:
         scratch = pathlib.Path(temporary)
@@ -714,11 +1015,15 @@ def verify(root: pathlib.Path, marker_relative: str, integrity_only: bool) -> No
         if readme_batch_rows is None:
             raise EvidenceError("formal batch 2 is missing")
         verify_report_rows(
-            root / "README.md", result_doc, result_batch_rows, readme_batch_rows
+            root / "README.md",
+            result_doc,
+            result_batch_rows,
+            readme_batch_rows if current_schema else None,
         )
 
     if not integrity_only:
         verify_current_checkout(root, marker)
+    return marker["schema_version"]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -734,18 +1039,38 @@ def main(argv: list[str] | None = None) -> int:
         default=DEFAULT_MARKER,
         help=f"repository-relative marker path (default: {DEFAULT_MARKER})",
     )
-    parser.add_argument(
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
         "--integrity-only",
         action="store_true",
         help="skip current checkout digests and ancestry; keep all evidence and docs checks",
     )
+    mode.add_argument(
+        "--print-current-candidate",
+        action="store_true",
+        help=(
+            "print a schema-v2 marker identity fragment for the clean current commit; "
+            "do not read or write evidence"
+        ),
+    )
     args = parser.parse_args(argv)
+    if args.print_current_candidate:
+        try:
+            fragment = current_candidate_fragment(args.root)
+        except (EvidenceError, OSError) as error:
+            print(f"seven-library candidate generation failed: {error}", file=sys.stderr)
+            return 1
+        print(json.dumps(fragment, indent=2, sort_keys=True))
+        return 0
     try:
-        verify(args.root, args.marker, args.integrity_only)
+        schema_version = verify(args.root, args.marker, args.integrity_only)
     except (EvidenceError, OSError) as error:
         print(f"seven-library evidence failed: {error}", file=sys.stderr)
         return 1
-    mode = "integrity" if args.integrity_only else "strict freshness"
+    if args.integrity_only and schema_version == 1:
+        mode = "historical-only integrity (schema v1; not current freshness)"
+    else:
+        mode = "integrity" if args.integrity_only else "strict freshness"
     print(f"seven-library evidence passed: {mode}, checksums, manifests, identities, and summaries")
     return 0
 

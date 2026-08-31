@@ -37,7 +37,7 @@ public interface GeneratedSupportV1Reader {
 
 /// Narrow semantic writer contract consumed by generated codecs. Structural
 /// correctness remains owned by the core writer state machine.
-public interface GeneratedSupportV1Writer <: JsonCodecWriter & JsonCodecBulkWriter {
+public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1 {
     func finishString(): String
     func generatedCursorV1(): GeneratedSupportV1WriteCursor
     func tryBeginGeneratedCompactRawValue(): Bool
@@ -91,7 +91,7 @@ public class GeneratedSupportV1 {
         if (actual != expected) {
             throw JsonException(
                 "Generated codec protocol mismatch: expected ${expected}, runtime provides ${actual}",
-                code: "generated_protocol_mismatch", path: "$")
+                code: "generated_protocol_mismatch", path: "")
         }
     }
 
@@ -110,23 +110,106 @@ public class GeneratedSupportV1 {
     public static func writeCursor(writer: GeneratedSupportV1Writer): GeneratedSupportV1WriteCursor {
         writer.generatedCursorV1()
     }
-    public static func newSemanticReader(text: String, config: JsonReadConfig): JsonCodecReader {
+
+    public static func writeState(writer: JsonWriter): GeneratedWriteStateV1 {
+        match (writer) {
+            case owner: GeneratedWriteStateV1Owner => owner.generatedWriteStateV1()
+            case _ => throw JsonException(
+                "JsonWriter is not owned by the yjson runtime",
+                code: "codec_contract"
+            )
+        }
+    }
+
+    public static func readState(reader: JsonReader): GeneratedReadStateV1 {
+        match (reader) {
+            case owner: GeneratedReadStateV1Owner => owner.generatedReadStateV1()
+            case _ => throw JsonException(
+                "JsonReader is not owned by the yjson runtime",
+                code: "codec_contract"
+            )
+        }
+    }
+
+    public static func readState(reader: GeneratedSupportV1Reader): GeneratedReadStateV1 {
+        match (reader) {
+            case owner: GeneratedReadStateV1Owner => owner.generatedReadStateV1()
+            case _ => throw JsonException(
+                "Generated reader is not owned by the yjson runtime",
+                code: "generated_protocol_mismatch"
+            )
+        }
+    }
+
+    public static func readOptions(reader: JsonReader): JsonReadOptions {
+        match (reader) {
+            case direct: JsonDirectReader => direct.readConfig()
+            case tape: BackendTapeReaderV1 => tape.readConfig()
+            case _ => throw JsonException(
+                "JsonReader is not owned by the yjson runtime",
+                code: "codec_contract"
+            )
+        }
+    }
+
+    public static func captureValue(reader: JsonReader, maxBytes: Int64): GeneratedReplayValueV1 {
+        match (reader) {
+            case direct: JsonDirectReader => direct.readReplayValue(maxBytes)
+            case tape: BackendTapeReaderV1 => tape.readReplayValue(maxBytes)
+            case _ => throw JsonException(
+                "JsonReader does not support generated replay",
+                code: "codec_contract",
+                path: reader.path(),
+                location: reader.location()
+            )
+        }
+    }
+
+    public static func finishReader(reader: JsonReader): Unit {
+        match (reader) {
+            case direct: JsonDirectReader => direct.expectEnd()
+            case tape: BackendTapeReaderV1 => tape.expectEnd()
+            case _ => throw JsonException(
+                "JsonReader is not owned by the yjson runtime",
+                code: "codec_contract"
+            )
+        }
+    }
+    public static func newSemanticReader(text: String, config: JsonReadOptions): JsonReader {
         freezeYJsonRuntime()
         JsonDirectReader(text, config: config)
     }
-    public static func newSemanticReader(bytes: Array<Byte>, config: JsonReadConfig): JsonCodecReader {
+    public static func newSemanticReader(bytes: Array<Byte>, config: JsonReadOptions): JsonReader {
         freezeYJsonRuntime()
         JsonDirectReader(bytes, config: config)
     }
 
-    public static func writeNested<T>(codec: JsonCodec<T>, value: T, writer: GeneratedSupportV1Writer,
-        context: JsonEncodeContext): Unit {
-        writeJsonDirectWith(codec, value, writer, context)
+    public static func writeNested<T>(codec: JsonCodec<T>, value: T, writer: GeneratedSupportV1Writer): Unit {
+        writeJsonDirectWith(codec, value, writer)
     }
 
-    public static func readWith<T>(codec: JsonCodec<T>, reader: GeneratedSupportV1Reader,
-        context: JsonDecodeContext): T {
-        readJsonFastWith(codec, reader, context)
+    public static func writeValue(value: JsonNode, writer: JsonWriter): Unit {
+        writeJsonNodeToCodecWriter(writer, value)
+    }
+
+    public static func writeValue<T>(value: T, writer: JsonWriter): Unit
+        where T <: GeneratedCodecProviderV1<T> {
+        generatedCodecV1Of<T>().write(value, writer)
+    }
+
+    public static func nodeValue(value: JsonNode): JsonNode { value }
+    public static func nodeValue(value: Bool): JsonNode { JsonBoolValue(value) }
+    public static func nodeValue(value: Int64): JsonNode { JsonIntValue(value) }
+    public static func nodeValue(value: Float64): JsonNode { JsonFloatValue(value) }
+    public static func nodeValue(value: Rune): JsonNode { JsonStringValue(value.toString()) }
+    public static func nodeValue(value: String): JsonNode { JsonStringValue(value) }
+    public static func nodeValue(value: Array<JsonNode>): JsonNode { JsonArray(value) }
+    public static func nodeValue<T>(value: T): JsonNode where T <: GeneratedCodecProviderV1<T> {
+        JsonNode.parse(YJson.toJson(value))
+    }
+
+    public static func readWith<T>(codec: JsonCodec<T>, reader: GeneratedSupportV1Reader): T {
+        readJsonFastWith(codec, reader)
     }
 
     public static func tryBeginCompactValue(writer: GeneratedSupportV1Writer): Bool {
@@ -156,7 +239,7 @@ func yJsonGeneratedReaderV1(reader: GeneratedSupportV1Reader): JsonFastReader {
     match (reader) {
         case concrete: JsonFastReader => concrete
         case _ => throw JsonException("Unsupported generated reader implementation",
-            code: "generated_protocol_mismatch", path: "$")
+            code: "generated_protocol_mismatch", path: "")
     }
 }
 
@@ -170,6 +253,6 @@ func yJsonGeneratedWriterV1(writer: GeneratedSupportV1Writer): JsonDirectWriter 
     match (writer) {
         case concrete: JsonDirectWriter => concrete
         case _ => throw JsonException("Unsupported generated writer implementation",
-            code: "generated_protocol_mismatch", path: "$")
+            code: "generated_protocol_mismatch", path: "")
     }
 }

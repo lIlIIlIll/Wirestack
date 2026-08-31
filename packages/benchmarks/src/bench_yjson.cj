@@ -30,92 +30,92 @@ class YJsonBenchmarks {
     let htmlText: String
     var stringSink = ""
     var intSink: Int64 = 0
-    var valueSink: JsonNode = JsonNullValue()
+    var valueSink: JsonNode = JsonNode.nullValue
 
     init() {
         nestedProfilesCodec = nestedProfilesJson()
-        personText = YJson.encodeStringWith(PersonJson, samplePerson())
+        personText = YJson.toJson(samplePerson(), codec: PersonJson)
         personStreamText = encodeToUtf8String(PersonJson, samplePerson())
-        addressText = YJson.encodeStringWith(AddressJson, samplePerson().address)
-        bundleText = YJson.encodeStringWith(ProfileBundleJson, sampleProfileBundleForBench())
-        nestedProfilesText = YJson.encodeStringWith(nestedProfilesCodec, sampleNestedProfiles())
-        uint64EnvelopeText = YJson.encodeStringWith(UInt64EnvelopeJson, uint64Envelope)
-        dateTimeText = YJson.encodeStringWith(DateTimeJson, sampleDateTime())
+        addressText = YJson.toJson(samplePerson().address, codec: AddressJson)
+        bundleText = YJson.toJson(sampleProfileBundleForBench(), codec: ProfileBundleJson)
+        nestedProfilesText = YJson.toJson(sampleNestedProfiles(), codec: nestedProfilesCodec)
+        uint64EnvelopeText = YJson.toJson(uint64Envelope, codec: UInt64EnvelopeJson)
+        dateTimeText = YJson.toJson(sampleDateTime(), codec: JsonCodecs.rfc3339DateTime)
         htmlText = "<script>alert('yjson & stream')</script>"
     }
 
     @Bench
     func encodeCodecUInt64(): Unit {
-        stringSink = YJson.encodeStringWith(UInt64Json, uint64Value)
+        stringSink = YJson.toJson(uint64Value, codec: JsonCodecs.uint64)
     }
 
     @Bench
     func decodeCodecUInt64(): Unit {
-        stringSink = YJson.decodeStringWith(UInt64Json, "18446744073709551615").toString()
+        stringSink = YJson.fromJson("18446744073709551615", codec: JsonCodecs.uint64).toString()
     }
 
     @Bench
     func encodeCodecUInt64Envelope(): Unit {
-        stringSink = YJson.encodeStringWith(UInt64EnvelopeJson, uint64Envelope)
+        stringSink = YJson.toJson(uint64Envelope, codec: UInt64EnvelopeJson)
     }
 
     @Bench
     func decodeCodecUInt64Envelope(): Unit {
-        intSink = Int64(YJson.decodeStringWith(UInt64EnvelopeJson, uint64EnvelopeText).shardIds.size)
+        intSink = Int64(YJson.fromJson(uint64EnvelopeText, codec: UInt64EnvelopeJson).shardIds.size)
     }
 
     @Bench
     func encodeCodecPerson(): Unit {
-        stringSink = YJson.encodeStringWith(PersonJson, person)
+        stringSink = YJson.toJson(person, codec: PersonJson)
     }
 
     @Bench
     func encodeCodecPersonToStream(): Unit {
         let out = YJsonMemoryOutputStream()
-        YJson.encodeToStreamWith(PersonJson, person, out)
+        YJson.writeJson(person, out, codec: PersonJson)
         stringSink = out.toUtf8String()
     }
 
     @Bench
     func decodeCodecAddress(): Unit {
-        intSink = YJson.decodeStringWith(AddressJson, addressText).zipcode
+        intSink = YJson.fromJson(addressText, codec: AddressJson).zipcode
     }
 
     @Bench
     func decodeCodecPerson(): Unit {
-        intSink = YJson.decodeStringWith(PersonJson, personText).id
+        intSink = YJson.fromJson(personText, codec: PersonJson).id
     }
 
     @Bench
     func decodeCodecPersonFromStream(): Unit {
-        intSink = YJson.decodeFromStreamWith(PersonJson, YJsonByteArrayInputStream(personStreamText)).id
+        intSink = YJson.fromJson(YJsonByteArrayInputStream(personStreamText), codec: PersonJson).id
     }
 
     @Bench
     func decodeCodecProfileBundle(): Unit {
-        intSink = YJson.decodeStringWith(ProfileBundleJson, bundleText).groups["platform"][0].id
+        intSink = YJson.fromJson(bundleText, codec: ProfileBundleJson).groups["platform"][0].id
     }
 
     @Bench
     func decodeCodecNestedProfiles(): Unit {
         intSink = findProfilesByGroup(
-            YJson.decodeStringWith(nestedProfilesCodec, nestedProfilesText),
+            YJson.fromJson(nestedProfilesText, codec: nestedProfilesCodec),
             "platform"
         )[0].id
     }
 
     @Bench
     func encodeLargeStringHtmlSafe(): Unit {
-        stringSink = encodeToUtf8String(StringJson, htmlText, config: htmlSafeCompactConfig())
+        stringSink = encodeToUtf8String(JsonCodecs.string, htmlText, config: htmlSafeCompactConfig())
     }
 
     @Bench
     func decodeCodecDateTime(): Unit {
-        stringSink = YJson.decodeStringWith(DateTimeJson, dateTimeText).toString()
+        stringSink = YJson.fromJson(dateTimeText, codec: JsonCodecs.rfc3339DateTime).toString()
     }
 
     @Bench
     func parseOnlyPerson(): Unit {
-        valueSink = YJson.parse(personText)
+        valueSink = JsonNode.parse(personText)
     }
 }

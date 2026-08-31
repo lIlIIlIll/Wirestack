@@ -118,7 +118,7 @@ private func compactWyhashRead8(data: Array<Byte>, position: Int64): UInt64 {
 
 /// Coarse storage counters for representation analysis.  These are logical
 /// entry counts rather than allocated-byte measurements.
-public struct CompactJsonStorageStats {
+struct CompactJsonStorageStats {
     public let nodes: Int64
     public let strings: Int64
     public let objectFields: Int64
@@ -206,7 +206,7 @@ public struct CompactJsonStorageStats {
 /// backing stores rather than one GC class for every JSON node. No-escape
 /// object keys retain source ranges; string values and escaped keys remain
 /// decoded/owned. Retaining the input establishes the source-view lifetime.
-public class CompactJsonDocument {
+class CompactJsonDocument {
     let source: Array<Byte>
     let kinds = ArrayList<Int64>()
     let first = ArrayList<Int64>()
@@ -269,7 +269,7 @@ public class CompactJsonDocument {
     /// Parses without copying `bytes`. The caller must not mutate the array or
     /// write it concurrently while the returned document remains reachable.
     public static func parseBorrowed(bytes: Array<Byte>,
-        config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument {
+        config!: JsonReadOptions = JsonReadOptions.defaults): CompactJsonDocument {
         validateJsonResourceLimits(bytes, config)
         let document = CompactJsonDocument(bytes)
         let parser = CompactJsonParser(document, JsonFastReader(bytes), config)
@@ -280,14 +280,14 @@ public class CompactJsonDocument {
     /// Parses an owned copy of `bytes`; later caller mutation cannot affect the
     /// returned document.
     public static func parseOwned(bytes: Array<Byte>,
-        config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument {
+        config!: JsonReadOptions = JsonReadOptions.defaults): CompactJsonDocument {
         let owned = Array<Byte>(bytes.size, repeat: 0)
         bytes.copyTo(owned, 0, 0, bytes.size)
         parseBorrowed(owned, config: config)
     }
 
     /// Compatibility alias for the zero-copy borrowed-input entry point.
-    public static func parse(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument {
+    public static func parse(bytes: Array<Byte>, config!: JsonReadOptions = JsonReadOptions.defaults): CompactJsonDocument {
         parseBorrowed(bytes, config: config)
     }
 
@@ -459,14 +459,14 @@ public class CompactJsonDocument {
     func kindAt(index: Int64): JsonKind {
         let code = kinds[index]
         match {
-            case code == COMPACT_NULL => JsNull
-            case code == COMPACT_BOOL => JsBool
-            case code == COMPACT_INT => JsInt
-            case code == COMPACT_NUMBER => JsNumberLiteral
-            case code == COMPACT_STRING => JsString
+            case code == COMPACT_NULL => JsonKind.Null
+            case code == COMPACT_BOOL => JsonKind.Boolean
+            case code == COMPACT_INT => JsonKind.Number
+            case code == COMPACT_NUMBER => JsonKind.Number
+            case code == COMPACT_STRING => JsonKind.String
             case code == COMPACT_ARRAY || code == COMPACT_INT_ARRAY || code == COMPACT_STRING_ARRAY ||
-                code == COMPACT_NUMBER_ARRAY => JsArray
-            case _ => JsObject
+                code == COMPACT_NUMBER_ARRAY => JsonKind.Array
+            case _ => JsonKind.Object
         }
     }
 
@@ -530,6 +530,27 @@ public class CompactJsonDocument {
         None<CompactJsonValue>
     }
 
+    func objectNameAt(index: Int64, item: Int64): String {
+        if (kinds[index] != COMPACT_OBJECT || item < 0 || item >= second[index]) {
+            throw JsonException("Object member index ${item} is out of bounds",
+                code: "index_out_of_bounds")
+        }
+        keyText(objectKeys[first[index] + item])
+    }
+
+    func objectValueAt(index: Int64, item: Int64): CompactJsonValue {
+        if (kinds[index] != COMPACT_OBJECT || item < 0 || item >= second[index]) {
+            throw JsonException("Object member index ${item} is out of bounds",
+                code: "index_out_of_bounds")
+        }
+        let position = first[index] + item
+        if (objectKinds[position] == COMPACT_OBJECT_NODE) {
+            CompactJsonValue(this, objectValues[position])
+        } else {
+            CompactJsonValue(this, -1, Int64(objectKinds[position]), objectValues[position])
+        }
+    }
+
     func stringAt(index: Int64): String {
         if (kinds[index] != COMPACT_STRING) { throw JsonException("Expected string value") }
         strings[first[index]]
@@ -545,6 +566,12 @@ public class CompactJsonDocument {
         first[index] != 0
     }
 
+    func numberTextAt(index: Int64): String {
+        if (kinds[index] == COMPACT_INT) { return first[index].toString() }
+        if (kinds[index] == COMPACT_NUMBER) { return strings[first[index]] }
+        throw JsonException("Expected number value", code: "type_mismatch")
+    }
+
     func materializeAt(index: Int64): JsonNode {
         let code = kinds[index]
         match {
@@ -554,20 +581,20 @@ public class CompactJsonDocument {
             case code == COMPACT_NUMBER => JsonNumberLiteralValue.fromParsedLiteral(strings[first[index]])
             case code == COMPACT_STRING => JsonStringValue(strings[first[index]])
             case code == COMPACT_ARRAY =>
-                let result = JsonArrayValue()
+                let result = JsonArray()
                 let start = first[index]
                 for (offset in 0..second[index]) { result.add(materializeAt(arrayChildren[start + offset])) }
                 result
             case code == COMPACT_INT_ARRAY =>
-                let result = JsonArrayValue(); let start = first[index]
+                let result = JsonArray(); let start = first[index]
                 for (offset in 0..second[index]) { result.add(JsonIntValue(intValues[start + offset])) }
                 result
             case code == COMPACT_STRING_ARRAY =>
-                let result = JsonArrayValue(); let start = first[index]
+                let result = JsonArray(); let start = first[index]
                 for (offset in 0..second[index]) { result.add(JsonStringValue(strings[start + offset])) }
                 result
             case code == COMPACT_NUMBER_ARRAY =>
-                let result = JsonArrayValue(); let start = first[index]
+                let result = JsonArray(); let start = first[index]
                 for (offset in 0..second[index]) {
                     let position = start + offset
                     if (numberKinds[position]) { result.add(JsonIntValue(numberPayloads[position])) }
@@ -575,7 +602,7 @@ public class CompactJsonDocument {
                 }
                 result
             case _ =>
-                let result = JsonObjectValue()
+                let result = JsonObject()
                 let start = first[index]
                 for (offset in 0..second[index]) {
                     let position = start + offset
@@ -596,7 +623,7 @@ public class CompactJsonDocument {
             case code == COMPACT_NULL => writer.writeNull()
             case code == COMPACT_BOOL => writer.writeBool(first[index] != 0)
             case code == COMPACT_INT => writer.writeInt64(first[index])
-            case code == COMPACT_NUMBER => writer.writeRawNumber(strings[first[index]])
+            case code == COMPACT_NUMBER => writer.writeNumberLiteral(strings[first[index]])
             case code == COMPACT_STRING => writer.writeString(strings[first[index]])
             case code == COMPACT_ARRAY =>
                 writer.startArray()
@@ -616,7 +643,7 @@ public class CompactJsonDocument {
                 for (offset in 0..second[index]) {
                     let position = start + offset
                     if (numberKinds[position]) { writer.writeInt64(numberPayloads[position]) }
-                    else { writer.writeRawNumber(strings[numberPayloads[position]]) }
+                    else { writer.writeNumberLiteral(strings[numberPayloads[position]]) }
                 }
                 writer.endArray()
             case _ =>
@@ -647,7 +674,7 @@ public class CompactJsonDocument {
             case kind == COMPACT_NULL => writer.writeNull()
             case kind == COMPACT_BOOL => writer.writeBool(payload != 0)
             case kind == COMPACT_INT => writer.writeInt64(payload)
-            case kind == COMPACT_NUMBER => writer.writeRawNumber(strings[payload])
+            case kind == COMPACT_NUMBER => writer.writeNumberLiteral(strings[payload])
             case _ => writer.writeString(strings[payload])
         }
     }
@@ -655,7 +682,7 @@ public class CompactJsonDocument {
 
 /// A cheap value view. It contains only a document reference and node index;
 /// parsing never creates one view per node.
-public struct CompactJsonValue {
+struct CompactJsonValue <: JsonValueView {
     private let document: CompactJsonDocument
     private let index: Int64
     private let inlineKind: Int64
@@ -670,11 +697,11 @@ public struct CompactJsonValue {
     }
 
     public func kind(): JsonKind {
-        if (inlineKind == COMPACT_NULL) { JsNull }
-        else if (inlineKind == COMPACT_BOOL) { JsBool }
-        else if (inlineKind == COMPACT_INT) { JsInt }
-        else if (inlineKind == COMPACT_NUMBER) { JsNumberLiteral }
-        else if (inlineKind == COMPACT_STRING) { JsString }
+        if (inlineKind == COMPACT_NULL) { JsonKind.Null }
+        else if (inlineKind == COMPACT_BOOL) { JsonKind.Boolean }
+        else if (inlineKind == COMPACT_INT) { JsonKind.Number }
+        else if (inlineKind == COMPACT_NUMBER) { JsonKind.Number }
+        else if (inlineKind == COMPACT_STRING) { JsonKind.String }
         else { document.kindAt(index) }
     }
     public func size(): Int64 { if (inlineKind >= 0) { 0 } else { document.sizeAt(index) } }
@@ -684,10 +711,46 @@ public struct CompactJsonValue {
     public func get(name: String): Option<CompactJsonValue> {
         if (inlineKind >= 0) { None<CompactJsonValue> } else { document.objectValueAt(index, name) }
     }
+    public func element(item: Int64): Option<JsonValueView> {
+        match (get(item)) {
+            case Some(value) => Some<JsonValueView>(value)
+            case None => None<JsonValueView>
+        }
+    }
+    public func member(name: String): Option<JsonValueView> {
+        match (get(name)) {
+            case Some(value) => Some<JsonValueView>(value)
+            case None => None<JsonValueView>
+        }
+    }
+    public func memberName(item: Int64): String {
+        if (inlineKind >= 0) {
+            throw JsonException("Expected object value", code: "type_mismatch")
+        }
+        document.objectNameAt(index, item)
+    }
+    public func memberValue(item: Int64): JsonValueView {
+        if (inlineKind >= 0) {
+            throw JsonException("Expected object value", code: "type_mismatch")
+        }
+        document.objectValueAt(index, item)
+    }
     public func asString(): String { if (inlineKind == COMPACT_STRING) { document.strings[inlinePayload] } else { document.stringAt(index) } }
     public func asInt64(): Int64 { if (inlineKind == COMPACT_INT) { inlinePayload } else { document.intAt(index) } }
+    public func asUInt64(): UInt64 {
+        let text = asNumberText()
+        try { UInt64.parse(text) } catch (_: Exception) {
+            throw JsonException("Expected an exact UInt64 value", code: "number_out_of_range")
+        }
+    }
+    public func asFloat64(): Float64 { Float64.parse(asNumberText()) }
+    public func asNumberText(): String {
+        if (inlineKind == COMPACT_INT) { inlinePayload.toString() }
+        else if (inlineKind == COMPACT_NUMBER) { document.strings[inlinePayload] }
+        else { document.numberTextAt(index) }
+    }
     public func asBool(): Bool { if (inlineKind == COMPACT_BOOL) { inlinePayload != 0 } else { document.boolAt(index) } }
-    public func materialize(): JsonNode {
+    private func materializeUnbounded(): JsonNode {
         if (inlineKind == COMPACT_NULL) { JsonNullValue() }
         else if (inlineKind == COMPACT_BOOL) { JsonBoolValue(inlinePayload != 0) }
         else if (inlineKind == COMPACT_INT) { JsonIntValue(inlinePayload) }
@@ -697,16 +760,24 @@ public struct CompactJsonValue {
         else if (inlineKind == COMPACT_STRING) { JsonStringValue(document.strings[inlinePayload]) }
         else { document.materializeAt(index) }
     }
+    public func materialize(): JsonNode { materialize(100000) }
+
+    public func materialize(maxNodes: Int64): JsonNode {
+        let value = materializeUnbounded()
+        // Compact materialization is already detached. Reusing the shared
+        // budget traversal enforces the public node limit and catches depth.
+        deepCopyJsonNode(value, maxNodes)
+    }
 }
 
 private class CompactJsonParser {
     private let document: CompactJsonDocument
     private let reader: JsonFastReader
-    private let config: JsonReadConfig
+    private let config: JsonReadOptions
     private var depth: Int64 = 0
     private var numericTape: Option<JsonNativeNumericTape> = None<JsonNativeNumericTape>
 
-    public init(document: CompactJsonDocument, reader: JsonFastReader, config: JsonReadConfig) {
+    public init(document: CompactJsonDocument, reader: JsonFastReader, config: JsonReadOptions) {
         this.document = document; this.reader = reader; this.config = config
     }
 
@@ -727,11 +798,11 @@ private class CompactJsonParser {
         depth++
         try {
             match (reader.peekRawKind()) {
-                case JsNull => let _ = reader.tryReadRawNull(); document.addNode(COMPACT_NULL)
-                case JsBool => document.addNode(COMPACT_BOOL, firstValue: if (reader.readRawBool()) { 1 } else { 0 })
-                case JsString => document.addNode(COMPACT_STRING, firstValue: document.addString(reader.readRawString()))
-                case JsArray => parseArray()
-                case JsObject => parseObject()
+                case JsonKind.Null => let _ = reader.tryReadRawNull(); document.addNode(COMPACT_NULL)
+                case JsonKind.Boolean => document.addNode(COMPACT_BOOL, firstValue: if (reader.readRawBool()) { 1 } else { 0 })
+                case JsonKind.String => document.addNode(COMPACT_STRING, firstValue: document.addString(reader.readRawString()))
+                case JsonKind.Array => parseArray()
+                case JsonKind.Object => parseObject()
                 case _ => parseNumber()
             }
         } finally { depth-- }
@@ -739,14 +810,14 @@ private class CompactJsonParser {
 
     private func parseNumber(): Int64 {
         if (!reader.tryReadRawNumberToken()) { throw JsonException("Expected number", code: "parse_error") }
-        if (!jsonReadConfigPreservesNumberLiterals(config) && reader.currentRawTokenNumberScale() == 0 &&
+        if (reader.currentRawTokenNumberScale() == 0 &&
             !reader.currentRawTokenNumberHasExponent() && reader.currentRawTokenNumberSmallUnscaledValid()) {
             let magnitude = reader.currentRawTokenNumberSmallUnscaled()
             let value = if (reader.currentRawTokenNumberNegative()) { -magnitude } else { magnitude }
             return document.addNode(COMPACT_INT, firstValue: value)
         }
         let literal = reader.currentRawTokenAsciiString()
-        if (!jsonReadConfigPreservesNumberLiterals(config) && reader.currentRawTokenNumberScale() == 0 &&
+        if (reader.currentRawTokenNumberScale() == 0 &&
             !reader.currentRawTokenNumberHasExponent()) {
             try { return document.addNode(COMPACT_INT, firstValue: Int64.parse(literal)) } catch (_: Exception) {}
         }
@@ -755,7 +826,7 @@ private class CompactJsonParser {
 
     private func tryReadNumberFromTape(): Bool {
         if (document.source.size < COMPACT_TAPE_MIN_BYTES) { return false }
-        if (reader.peekRawKind() != JsNumberLiteral) { return false }
+        if (reader.peekRawKind() != JsonKind.Number) { return false }
         if (numericTape.isNone()) { numericTape = Some(JsonNativeNumericTape(COMPACT_TAPE_CAP)) }
         let position = reader.position()
         match (numericTape) {
@@ -796,7 +867,7 @@ private class CompactJsonParser {
         var first = true
         while (reader.hasRawArrayItem(first)) {
             reader.beforeRawArrayItem(first)
-            if (reader.peekRawKind() != JsString) {
+            if (reader.peekRawKind() != JsonKind.String) {
                 while (document.strings.size > start) { document.strings.remove(at: document.strings.size - 1) }
                 reader.rewind(contentStart); return None<Int64>
             }
@@ -827,7 +898,7 @@ private class CompactJsonParser {
             }
             var storedInt = false
             var payload: Int64 = 0
-            if (!jsonReadConfigPreservesNumberLiterals(config) && reader.currentRawTokenNumberScale() == 0 &&
+            if (reader.currentRawTokenNumberScale() == 0 &&
                 !reader.currentRawTokenNumberHasExponent()) {
                 if (reader.currentRawTokenNumberSmallUnscaledValid()) {
                     let magnitude = reader.currentRawTokenNumberSmallUnscaled()
@@ -872,7 +943,7 @@ private class CompactJsonParser {
         // scalar reader until a future structural scanner can batch many arrays
         // in one call.
         if (depth != 1) { return None<Int64> }
-        if (reader.peekRawKind() != JsNumberLiteral) { return None<Int64> }
+        if (reader.peekRawKind() != JsonKind.Number) { return None<Int64> }
         // The native contract amortizes one FFI call over many tokens. Canada
         // and similar geometry corpora contain millions of two-number arrays;
         // avoid allocating a chunk buffer for those deliberately short arrays.
@@ -910,7 +981,7 @@ private class CompactJsonParser {
                 let exponent = (flags & 2u64) != 0u64
                 var storedInt = false
                 var payload: Int64 = 0
-                if (!jsonReadConfigPreservesNumberLiterals(config) && scale == 0 && !exponent) {
+                if (scale == 0 && !exponent) {
                     if ((flags & 4u64) != 0u64) {
                         let magnitude = chunk.magnitude(offset)
                         payload = if ((flags & 1u64) != 0u64) { -magnitude } else { magnitude }
@@ -1060,7 +1131,7 @@ private class CompactJsonParser {
             }
             if (existing >= 0) {
                 if (config.rejectsDuplicateKeys()) {
-                    throw JsonException("Duplicate object key '${document.keyViewText(keyView)}'", code: "parse_error")
+                    throw JsonException("Duplicate object key '${document.keyViewText(keyView)}'", code: "duplicate_key")
                 }
                 valueKinds[existing] = valueKind
                 values[existing] = valuePayload
@@ -1125,50 +1196,6 @@ private class CompactObjectPositions {
 
     init(document: CompactJsonDocument) { this.document = document }
 
-    func get(name: String, keys: ArrayList<UInt64>): Int64 {
-        lookups++
-        let compactHash = compactHashOf(name)
-        getWithHash(name, compactHash, keys)
-    }
-
-    func getWithHash(name: String, compactHash: Int32, keys: ArrayList<UInt64>): Int64 {
-        var slot = bucketFor(Int64(compactHash), slots.size)
-        while (slots[slot] != COMPACT_OPEN_INDEX_EMPTY) {
-            let packed = slots[slot]
-            let position = Int64(packed & 0xFFFF_FFFFu64)
-            if (Int32(packed >> 32) == compactHash) {
-                if (document.keyEquals(keys[position], name)) {
-                    return position
-                }
-            }
-            slot = (slot + 1) & (slots.size - 1)
-        }
-        -1
-    }
-
-    func getWithHash(view: JsonObjectKeyView, compactHash: Int32, keys: ArrayList<UInt64>): Int64 {
-        lookups++
-        var slot = bucketFor(Int64(compactHash), slots.size)
-        var localProbes: Int64 = 1
-        while (slots[slot] != COMPACT_OPEN_INDEX_EMPTY) {
-            let packed = slots[slot]
-            let position = Int64(packed & 0xFFFF_FFFFu64)
-            if (Int32(packed >> 32) == compactHash) {
-                exactEqualities++
-                if (document.keyEquals(keys[position], view)) {
-                    probes += localProbes
-                    maxProbe = max(maxProbe, localProbes)
-                    return position
-                }
-            }
-            slot = (slot + 1) & (slots.size - 1)
-            localProbes++
-        }
-        probes += localProbes
-        maxProbe = max(maxProbe, localProbes)
-        -1
-    }
-
     // The common unique-key path used to probe once to prove absence and then
     // restart from the same bucket to insert. Retain the discovered empty slot
     // and insert there. A rare grow still needs a second probe in the new table.
@@ -1211,10 +1238,6 @@ private class CompactObjectPositions {
         probes += localProbes
         maxProbe = max(maxProbe, localProbes)
         -1
-    }
-
-    func add(name: String, position: Int64): Unit {
-        addWithHash(compactHashOf(name), position)
     }
 
     func addWithHash(compactHash: Int32, position: Int64): Unit {
@@ -1262,13 +1285,6 @@ private class CompactObjectPositions {
         hash & (count - 1)
     }
 
-    private func compactHashOf(name: String): Int32 {
-        // Equality is always checked against the actual UTF-8 key, so retaining
-        // 31 hash bits changes only collision frequency, never semantics.
-        Int32(name.hashCode() & 0x7FFF_FFFF)
-    }
-
-    func hashOf(name: String): Int32 { compactHashOf(name) }
     func hashOf(view: JsonObjectKeyView): Int32 { document.keyHash(view) }
 
     func logicalBytes(): Int64 { count * 8 }
@@ -1290,19 +1306,3 @@ private class CompactObjectPositions {
 // Small and normal objects retain the compact monolithic table. Huge objects
 // switch once to independently split regions, bounding subsequent allocation
 // overlap without imposing a directory on ordinary JSON objects.
-
-extend YJson {
-    public static func parseCompact(bytes: Array<Byte>, config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument {
-        CompactJsonDocument.parseBorrowed(bytes, config: config)
-    }
-
-    public static func parseCompactBorrowed(bytes: Array<Byte>,
-        config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument {
-        CompactJsonDocument.parseBorrowed(bytes, config: config)
-    }
-
-    public static func parseCompactOwned(bytes: Array<Byte>,
-        config!: JsonReadConfig = JsonReadConfig.defaults): CompactJsonDocument {
-        CompactJsonDocument.parseOwned(bytes, config: config)
-    }
-}

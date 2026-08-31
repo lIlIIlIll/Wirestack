@@ -66,6 +66,15 @@ stage_modules() {
     python3 "$repo/scripts/release_package_stage.py" "$modules" --development
 }
 
+prepare_cjdoc() {
+    require_cangjie
+    local -a args=()
+    if [[ -n "${YJSON_CJDOC_ARCHIVE:-}" ]]; then
+        args+=(--archive "$YJSON_CJDOC_ARCHIVE")
+    fi
+    python3 "$repo/scripts/prepare_cjdoc.py" "${args[@]}"
+}
+
 case "$job" in
     stream-docs)
         python3 "$repo/scripts/test_stage_source_tree.py"
@@ -145,7 +154,18 @@ case "$job" in
         ;;
     cjdoc-qualification)
         python3 "$repo/scripts/test_check_cjdoc_qualification.py"
-        python3 "$repo/scripts/check_cjdoc_qualification.py"
+        cjdoc_binary=$(prepare_cjdoc)
+        python3 "$repo/scripts/check_cjdoc_qualification.py" \
+            --binary "$cjdoc_binary"
+        ;;
+    api-docs)
+        python3 "$repo/scripts/test_generate_api_docs.py"
+        cjdoc_binary=$(prepare_cjdoc)
+        docs_output=${YJSON_API_DOCS_OUTPUT:-"$modules/api-docs"}
+        python3 "$repo/scripts/generate_api_docs.py" \
+            --cjdoc "$cjdoc_binary" --output "$docs_output"
+        test -f "$docs_output/index.html"
+        test -f "$docs_output/api-docs.json"
         ;;
     runtime-freeze)
         require_cangjie
@@ -156,6 +176,11 @@ case "$job" in
         require_cangjie
         (cd "$repo" && cjpm test --no-color)
         ;;
+    pure-platform)
+        require_cangjie
+        (cd "$repo" && cjpm test --no-color)
+        (cd "$repo/packages/yjson_algorithms" && cjpm test --no-color)
+        ;;
     standards-conformance)
         require_cangjie
         mapfile -t override_args < <(dependency_override_args)
@@ -164,6 +189,8 @@ case "$job" in
         ;;
     schema-formats-conformance)
         require_cangjie
+        run_with_dependency_override "$repo/packages/yjson_schema_formats" \
+            cjpm test --no-color
         mapfile -t override_args < <(dependency_override_args)
         python3 "$repo/scripts/run_standards_conformance.py" --quiet-failures \
             --include-schema-optional "${override_args[@]}"
@@ -183,10 +210,6 @@ case "$job" in
         require_cangjie
         run_with_dependency_override "$repo/packages/codec_integration" \
             "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/codec_integration"
-        run_with_dependency_override "$repo/packages/json_literal_integration" \
-            "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/json_literal_integration"
-        run_with_dependency_override "$repo/packages/json_literal_compile_fail" \
-            "$repo/scripts/check_json_literal_compile_fail.sh"
         stage_modules
         mapfile -t override_args < <(dependency_override_args)
         python3 "$repo/scripts/release_consumer_checks.py" \
@@ -194,6 +217,8 @@ case "$job" in
         ;;
     algorithms-consumer)
         require_cangjie
+        run_with_dependency_override "$repo/packages/yjson_algorithms" \
+            cjpm test --no-color
         stage_modules
         mapfile -t override_args < <(dependency_override_args)
         python3 "$repo/scripts/release_consumer_checks.py" \
@@ -202,10 +227,18 @@ case "$job" in
         ;;
     registry-rehearsal)
         require_cangjie
-        candidate="$modules/release-candidate"
-        python3 "$repo/scripts/release_temp_tree.py" "$candidate"
-        python3 "$candidate/scripts/check_api_inventory.py"
-        run_with_dependency_override "$candidate" cjpm test --no-color
+        if [[ ! -e "$repo/.git" && \
+                -f "$repo/release/candidate-provenance.json" ]]; then
+            candidate="$repo"
+        else
+            candidate="$modules/release-candidate"
+            python3 "$repo/scripts/release_temp_tree.py" "$candidate" --enforce-clean
+        fi
+        diagnostic="$modules/release-candidate-diagnostic"
+        cp -a "$candidate" "$diagnostic"
+        PYTHONDONTWRITEBYTECODE=1 \
+            python3 "$diagnostic/scripts/check_api_inventory.py"
+        run_with_dependency_override "$diagnostic" cjpm test --no-color
         rehearsal="$modules/registry-rehearsal"
         registry_args=()
         if [[ -n "${YJSON_CI_DEPENDENCY_OVERRIDE:-}" ]]; then
@@ -213,7 +246,10 @@ case "$job" in
                 "--bundle-override-compile-option=${YJSON_CI_DEPENDENCY_OVERRIDE}"
                 "--consumer-override-compile-option=${YJSON_CI_DEPENDENCY_OVERRIDE}")
         fi
-        python3 "$repo/scripts/release_registry_rehearsal.py" "$rehearsal" \
+        PYTHONDONTWRITEBYTECODE=1 \
+            python3 "$repo/scripts/release_registry_rehearsal.py" "$rehearsal" \
+            --candidate-root "$candidate" \
+            --require-clean-candidate \
             "${registry_args[@]}"
         ;;
     custom-native)
@@ -263,7 +299,7 @@ case "$job" in
         "$repo/scripts/release_yyjson_colink_check.sh"
         ;;
     *)
-        echo 'usage: scripts/ci_job.sh {stream-docs|perf-evidence-drift [strict|integrity-only]|api-inventory|cjdoc-qualification|runtime-freeze|core|standards-conformance|schema-formats-conformance|performance-comparison|examples|macro-consumer|algorithms-consumer|registry-rehearsal|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
+        echo 'usage: scripts/ci_job.sh {stream-docs|perf-evidence-drift [strict|integrity-only]|api-inventory|cjdoc-qualification|api-docs|runtime-freeze|core|pure-platform|standards-conformance|schema-formats-conformance|performance-comparison|examples|macro-consumer|algorithms-consumer|registry-rehearsal|custom-native|yyjson-native|native-clang|native-gcc|sanitizer|fuzz-short|fuzz-extended|yyjson-colink}' >&2
         exit 2
         ;;
 esac

@@ -37,6 +37,21 @@ func generateLargeConcurrentJson(size: Int64): String {
 @Test
 class ParallelParseSmokeTest {
 
+    @TestCase
+    func frozenRuntimeCallsBypassTheMutexSlowPath(): Unit {
+        let _ = YJson.parseDocument("null")
+        let slowEntries = yJsonRuntimeSlowFreezeEntriesForTest.load()
+        for (_ in 0..32) {
+            @Expect(YJson.parseDocument("42").root().asInt64(), 42)
+        }
+        let readers = ArrayList<Future<Int64>>()
+        for (_ in 0..16) {
+            readers.add(spawn { YJson.parseDocument("42").root().asInt64() })
+        }
+        for (reader in readers) { @Expect(reader.get(), 42) }
+        @Expect(yJsonRuntimeSlowFreezeEntriesForTest.load(), slowEntries)
+    }
+
     /// 测试多个线程同时解析不同的 JSON 字符串
     @TestCase
     func concurrentParseDifferentJsonStrings(): Unit {
@@ -46,7 +61,7 @@ class ParallelParseSmokeTest {
         for (i in 0..count) {
             let json = generateConcurrentTestJson(i)
             let future = spawn {
-                YJson.parse(json)
+                JsonNode.parse(json)
             }
             futures.add(future)
         }
@@ -55,9 +70,9 @@ class ParallelParseSmokeTest {
         for (i in 0..count) {
             let value = futures[i].get()
             let obj = value.asObject()
-            @Expect(obj.get("id").getOrThrow().asInt().value == i)
-            @Expect(obj.get("name").getOrThrow().asString().value == "test_${i}")
-            @Expect(obj.get("value").getOrThrow().asInt().value == i * 10)
+            @Expect(obj.get("id").getOrThrow().asInt64() == i)
+            @Expect(obj.get("name").getOrThrow().asString() == "test_${i}")
+            @Expect(obj.get("value").getOrThrow().asInt64() == i * 10)
         }
     }
 
@@ -74,7 +89,7 @@ class ParallelParseSmokeTest {
             let future = spawn {
                 ready.fetchAdd(1)
                 while (start.load() == 0) {}
-                YJson.parse(json)
+                JsonNode.parse(json)
             }
             futures.add(future)
         }
@@ -85,8 +100,8 @@ class ParallelParseSmokeTest {
         for (future in futures) {
             let value = future.get()
             let obj = value.asObject()
-            @Expect(obj.get("shared").getOrThrow().asString().value == "value")
-            @Expect(obj.get("count").getOrThrow().asInt().value == 100)
+            @Expect(obj.get("shared").getOrThrow().asString() == "value")
+            @Expect(obj.get("count").getOrThrow().asInt64() == 100)
         }
     }
 
@@ -99,7 +114,7 @@ class ParallelParseSmokeTest {
 
         for (_ in 0..count) {
             let future = spawn {
-                YJson.parse(json)
+                JsonNode.parse(json)
             }
             futures.add(future)
         }
@@ -120,7 +135,7 @@ class ParallelParseSmokeTest {
         for (i in 0..count) {
             let json = "{\"level\":${i},\"nested\":{\"a\":{\"b\":{\"c\":${i}}}}}"
             let future = spawn {
-                YJson.parse(json)
+                JsonNode.parse(json)
             }
             futures.add(future)
         }
@@ -129,14 +144,14 @@ class ParallelParseSmokeTest {
         for (i in 0..count) {
             let value = futures[i].get()
             let obj = value.asObject()
-            @Expect(obj.get("level").getOrThrow().asInt().value == i)
+            @Expect(obj.get("level").getOrThrow().asInt64() == i)
 
             // 验证嵌套路径
             let nested = obj.get("nested").getOrThrow().asObject()
             let a = nested.get("a").getOrThrow().asObject()
             let b = a.get("b").getOrThrow().asObject()
-            let c = b.get("c").getOrThrow().asInt()
-            @Expect(c.value == i)
+            let c = b.get("c").getOrThrow().asInt64()
+            @Expect(c == i)
         }
     }
 }
@@ -155,7 +170,7 @@ class ParallelSerializeSmokeTest {
         let futures = ArrayList<Future<String>>()
 
         for (i in 0..count) {
-            let obj = JsonObjectValue()
+            let obj = JsonObject()
             obj.put("id", JsonIntValue(i))
             obj.put("data", JsonStringValue("thread_${i}"))
 
@@ -177,7 +192,7 @@ class ParallelSerializeSmokeTest {
     /// 注意：这测试读取安全性，不涉及修改
     @TestCase
     func concurrentSerializeSameValue(): Unit {
-        let arr = JsonArrayValue()
+        let arr = JsonArray()
         for (i in 0..100) {
             arr.add(JsonIntValue(i))
         }
@@ -209,9 +224,9 @@ class ParallelSerializeSmokeTest {
     /// 测试并发序列化大型结构
     @TestCase
     func concurrentSerializeLargeStructure(): Unit {
-        let largeArr = JsonArrayValue()
+        let largeArr = JsonArray()
         for (i in 0..500) {
-            let obj = JsonObjectValue()
+            let obj = JsonObject()
             obj.put("index", JsonIntValue(i))
             largeArr.add(obj)
         }
@@ -246,7 +261,7 @@ class SharedReadSmokeTest {
     /// 这是安全的，因为读取不修改状态
     @TestCase
     func concurrentReadSharedValue(): Unit {
-        let sharedObj = JsonObjectValue()
+        let sharedObj = JsonObject()
         sharedObj.put("name", JsonStringValue("shared"))
         sharedObj.put("value", JsonIntValue(42))
         sharedObj.put("enabled", JsonBoolValue(true))
@@ -257,9 +272,9 @@ class SharedReadSmokeTest {
         for (_ in 0..count) {
             let future = spawn {
                 // 读取操作
-                let name = sharedObj.get("name").getOrThrow().asString().value
-                let value = sharedObj.get("value").getOrThrow().asInt().value
-                let enabled = sharedObj.get("enabled").getOrThrow().asBool().value
+                let name = sharedObj.get("name").getOrThrow().asString()
+                let value = sharedObj.get("value").getOrThrow().asInt64()
+                let enabled = sharedObj.get("enabled").getOrThrow().asBool()
 
                 // 返回验证结果
                 name == "shared" && value == 42 && enabled
@@ -276,7 +291,7 @@ class SharedReadSmokeTest {
     /// 测试多线程读取数组元素
     @TestCase
     func concurrentReadArrayElements(): Unit {
-        let sharedArr = JsonArrayValue()
+        let sharedArr = JsonArray()
         for (i in 0..200) {
             sharedArr.add(JsonIntValue(i))
         }
@@ -287,7 +302,7 @@ class SharedReadSmokeTest {
         for (i in 0..count) {
             let index = i * 10
             let future = spawn {
-                sharedArr[index].asInt().value
+                sharedArr[index].asInt64()
             }
             futures.add(future)
         }
@@ -308,7 +323,7 @@ class SharedReadSmokeTest {
 
         for (_ in 0..count) {
             let future = spawn {
-                sharedValue.asInt().value
+                sharedValue.asInt64()
             }
             futures.add(future)
         }
@@ -338,7 +353,7 @@ class ParallelCounterSmokeTest {
             let json = generateConcurrentTestJson(i)
             let future = spawn {
                 try {
-                    let _ = YJson.parse(json)
+                    let _ = JsonNode.parse(json)
                     successCounter.fetchAdd(1)
                     1  // 成功返回 1
                 } catch (_: Exception) {
@@ -367,7 +382,7 @@ class ParallelCounterSmokeTest {
         for (i in 0..count) {
             let json = generateLargeConcurrentJson(i * 10 + 10)
             let future = spawn {
-                let arr = YJson.parse(json).asArray()
+                let arr = JsonNode.parse(json).asArray()
                 let _ = totalSize.fetchAdd(arr.size())  // fetchAdd 返回旧值，忽略
             }
             futures.add(future)
@@ -402,7 +417,7 @@ class ParallelRoundtripSmokeTest {
         for (index in 0..count) {
             futures.add(spawn {
                 let chunk = index % 7 + 1
-                YJson.fromStream<ArrayList<ProfileRecord>>(
+                YJson.fromJson<ArrayList<ProfileRecord>>(
                     FixedChunkInputStream(text, chunk)).size
             })
         }
@@ -418,13 +433,13 @@ class ParallelRoundtripSmokeTest {
         for (i in 0..count) {
             let original = generateConcurrentTestJson(i)
             let future = spawn {
-                let parsed = YJson.parse(original)
+                let parsed = JsonNode.parse(original)
                 let serialized = parsed.toString()
-                let reparsed = YJson.parse(serialized)
+                let reparsed = JsonNode.parse(serialized)
 
                 // 验证往返后的值
                 let obj = reparsed.asObject()
-                obj.get("id").getOrThrow().asInt().value == i
+                obj.get("id").getOrThrow().asInt64() == i
             }
             futures.add(future)
         }
@@ -443,7 +458,7 @@ class ParallelRoundtripSmokeTest {
 // 注意：以下场景当前可能存在并发问题，标注为已知限制：
 //
 // 1. 写入操作的并发安全：
-//    - JsonObjectValue.put() 和 JsonArrayValue.add() 不是线程安全的
+//    - JsonObject.put() 和 JsonArray.add() 不是线程安全的
 //    - 如果一个线程在修改结构，其他线程读取可能会有问题
 //    - 建议：文档说明或添加并发版本（如 ConcurrentJsonObjectValue）
 //

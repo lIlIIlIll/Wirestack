@@ -146,6 +146,35 @@ public class PublicOuter {
             self.assertIn("runtimeApi", generated)
             self.assertNotIn("testFixture", generated)
 
+    def test_c_prototypes_exclude_yj_testing_guards(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            header = root / "fixture.h"
+            header.write_text(
+                """
+int32_t YJ_Public(void);
+#if defined(YJ_TESTING)
+void YJ_TestOnly(void);
+#else
+uint32_t YJ_ReleaseOnly(void);
+#endif
+#ifndef YJ_TESTING
+uint64_t YJ_AlsoReleaseOnly(void);
+#else
+void YJ_AlsoTestOnly(void);
+#endif
+""",
+                encoding="utf-8",
+            )
+            with mock.patch.object(SNAPSHOT, "ROOT", root):
+                declarations = SNAPSHOT.c_prototypes(header)
+            joined = "\n".join(declarations)
+            self.assertIn("YJ_Public", joined)
+            self.assertIn("YJ_ReleaseOnly", joined)
+            self.assertIn("YJ_AlsoReleaseOnly", joined)
+            self.assertNotIn("YJ_TestOnly", joined)
+            self.assertNotIn("YJ_AlsoTestOnly", joined)
+
 
 if __name__ == "__main__":
     unittest.main()

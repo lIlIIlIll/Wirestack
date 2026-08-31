@@ -2,6 +2,8 @@
 set -euo pipefail
 
 repo=$(cd "$(dirname "$0")/.." && pwd)
+release_tmp=$(mktemp -d "${TMPDIR:-/tmp}/yjson-release-checks.XXXXXX")
+trap 'rm -rf "$release_tmp"' EXIT
 
 require_consistent_sdk() {
     local cjc_path sdk_root variable value entry resolved found
@@ -50,13 +52,17 @@ run() {
 require_consistent_sdk
 
 run api-inventory python3 "$repo/scripts/check_api_inventory.py"
-run cjdoc-qualification python3 "$repo/scripts/check_cjdoc_qualification.py"
+run cjdoc-qualification-tests python3 "$repo/scripts/test_check_cjdoc_qualification.py"
+printf '\n== cjdoc-qualification ==\n'
+cjdoc_binary=$(python3 "$repo/scripts/prepare_cjdoc.py")
+python3 "$repo/scripts/check_cjdoc_qualification.py" --binary "$cjdoc_binary"
+run api-docs-tests python3 "$repo/scripts/test_generate_api_docs.py"
+run api-docs python3 "$repo/scripts/generate_api_docs.py" \
+    --cjdoc "$cjdoc_binary" --output "$release_tmp/api-docs"
 run runtime-freeze "$repo/scripts/runtime_freeze_contract_checks.sh"
 run core bash -c 'cd "$1" && cjpm test --no-color' _ "$repo"
 run examples "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/examples"
 run macro-consumer "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/codec_integration"
-run json-literal-consumer "$repo/scripts/run_cjpm_executable.sh" "$repo/packages/json_literal_integration"
-run json-literal-compile-fail "$repo/scripts/check_json_literal_compile_fail.sh"
 run custom-native-primitives bash -c 'cd "$1/packages/yjson_native_primitives" && cjpm test --no-color' _ "$repo"
 run custom-native-accel bash -c 'cd "$1/packages/yjson_native_accel" && cjpm test --no-color' _ "$repo"
 run custom-native bash -c 'cd "$1/packages/yjson_native" && cjpm test --no-color' _ "$repo"

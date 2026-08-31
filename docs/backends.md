@@ -1,9 +1,10 @@
-# Native 加速与高级 Backend
+# Native 加速与显式 Backend
 
-yjson `0.1.x` 的普通 API 没有 backend 参数。默认 Pure 引擎由 GC 管理；可选 Native
-加速只改变同一 semantic engine 的 primitive，不改变应用调用方式。
+普通 `YJson` API 不接受 backend 参数。默认 Pure 引擎由 GC 管理；可选 Native acceleration
+只替换同一 semantic engine 的 primitive。需要显式 DOM 或 whole-document I/O 时，再选择命名
+backend façade。
 
-## 启动时启用 Custom Native
+## 为普通 `YJson` 启用 Native primitive
 
 ```toml
 [dependencies]
@@ -11,51 +12,91 @@ yjson = { path = "../yjson" }
 yjson_native_accel = { path = "../yjson/packages/yjson_native_accel" }
 ```
 
-在任何 `YJson` 调用前初始化一次：
+在任何普通 `YJson` 调用之前初始化一次：
 
 ```cangjie
+import yjson.*
+import yjson_native_accel.*
+
 YJsonNativeAccel.initialize()
 
 let text = YJson.toJson(value)
-let value = YJson.fromJson<MyType>(text)
+let decoded = YJson.fromJson<MyType>(text)
 let document = YJson.parseDocument(text)
 ```
 
-第一次普通 `YJson` 调用会冻结 Pure；成功初始化会冻结 Native。相同 Native 初始化可幂等
-重复。晚初始化、不同 provider 竞争、ABI/protocol 不匹配或缺少 Native 能力都会抛出
-`JsonAccelerationException`。不支持 uninstall、运行期切换或静默回退。
+第一次普通 `YJson` 调用会冻结 Pure；成功初始化会冻结 Native。相同 provider 的重复初始化
+幂等。晚初始化、不同 provider 竞争、ABI/protocol 不匹配、CPU 不支持和 activation 失败都抛出
+`JsonException`，code 以 `acceleration_` 开头。没有 uninstall、运行期切换或静默回退。
 
-`yjson_native_accel` 通过内部 `yjson_native_primitives` 闭合 scanner 原生链接。应用不得直接
-调用 primitives provider 或安装函数；它们是第一方 lockstep package 之间的 closed SPI。
+`YJson.parseDocument` 仍返回 managed `JsonDocument`。Native 临时资源在返回前释放，调用方
+不需要 `close()`。
 
-默认 `JsonDocument` 始终是 managed Compact representation；Native 临时资源在
-`parseDocument` 返回前释放，调用方不需要 `close()`。
+## 使用命名 backend façade
 
-## 高级显式 Backend
+只有需要 backend metadata、显式 resource lifetime 或 whole-document I/O 的应用才依赖
+`yjson_backends` 和具体实现。
 
-只有确实需要 Native/yyjson DOM 或 whole-document stream 的应用才依赖
-`yjson_backends` 以及对应实现包：
+Custom Native：
 
 ```cangjie
+import yjson.*
 import yjson_backends.*
-import yjson_yyjson.*
+import yjson_native.*
 
-try (document = YJsonAdvanced.parseDocumentWithBackend(bytes, YyjsonDocumentBackend)) {
-    println(document.getRootInt("n").getOrThrow())
+let json = NativeBackends.customNative
+try (document = json.parseDocument("{\"n\":42}")) {
+    println(document.root().member("n").getOrThrow().asInt64())
 }
 ```
 
-高级 document 类型为 `BackendJsonDocument <: Resource`，必须确定性关闭；它不是线程
-安全对象。高级 stream 使用名称明确的 `NativeCompactWholeDocumentStreamBackend` 或
-`YyjsonWholeDocumentStreamBackend`：
+yyjson：
 
 ```cangjie
-YJsonAdvanced.encodeToStreamWithBackend(
-    UserJson, user, output, NativeCompactWholeDocumentStreamBackend)
+import yjson.*
+import yjson_backends.*
+import yjson_yyjson.*
+
+let json = YyjsonBackends.yyjson
+try (document = json.parseDocument("{\"n\":42}")) {
+    println(document.root().member("n").getOrThrow().asInt64())
+}
 ```
 
-WholeDocument backend 会读取到 EOF；普通 `YJson.toStream/fromStream` 不会，它们始终使用
-增量 reader/writer。所有 target 仍共享相同的配置、错误码和 writer 结构状态机。
+façade 提供：
 
-底层 ABI、symbol isolation 与安全契约见
+- `metadata()`
+- `parseDocument(String|Array<Byte>)`
+- `toJson` / `toJsonBytes`
+- `fromJson(String|Array<Byte>|InputStream)`
+- `writeJson(..., OutputStream)`
+
+typed 方法既支持 generated provider，也支持显式 `codec:`。所有方法使用统一
+`JsonReadOptions`、`JsonWriteOptions`、`JsonValueView` 和 `JsonException`。
+
+## 生命周期和并发
+
+`BackendJsonDocument <: Resource` 必须确定性关闭。document 及其 view 在打开期间 immutable，
+支持并发读取；与 `close()` 竞争时，每次操作要么完整成功，要么抛出
+`JsonException(code: "resource_closed")`。关闭幂等。关闭后，先前取得的 root view 也不能再用。
+
+无参数 `materialize()` 使用 100,000 节点和 256 层边界；`materialize(maxNodes)` 可降低或
+提高 node budget。返回的 `JsonNode` 与 backend resource 分离。
+
+对 backend 自己的 root view，façade serialization 和 document materialization 自动在一次
+读锁内导出 immutable tape，再在锁外完成转换。调用方不需要选择 fast-path 参数。任意 retained
+子 view 继续按操作获取读锁，因此大量逐节点扫描应优先使用 root bulk 操作；早停查询则直接在
+view 上执行，避免先 materialize 整棵树。
+
+`metadata()` 公开 engine 名称、版本、是否 Native，以及 decode/encode buffering mode。
+Custom Native 和 yyjson façade 的 stream 模式是 `WholeDocument`；它们会读取到 EOF。普通
+`YJson` stream 入口仍是 incremental single-document parser。
+
+## Package 边界
+
+`yjson_native_primitives` 拥有 scanner archive 和版本化 provider seam，只供第一方 lockstep
+package 使用。应用依赖 `yjson_native_accel`，不要直接安装 primitive provider。
+
+`0.1.0` 的 Native qualification 目标是 Linux x86_64。Pure Windows/macOS gate 不意味着
+Native package 已在这些平台受支持。C ABI、symbol isolation 和 vendored yyjson 规则见
 [Native backend internals](maintainers/native-internals.md)。
