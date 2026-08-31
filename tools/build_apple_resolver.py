@@ -15,6 +15,7 @@ from pathlib import Path
 
 
 SUPPORTED = {"macos-arm64", "ios-simulator-arm64"}
+MAX_CACHE_ENTRIES = 4
 
 
 class BuildError(RuntimeError):
@@ -88,17 +89,40 @@ def build_fingerprint(
     return hashlib.sha256(encoded).hexdigest(), inputs
 
 
+def publish_symlink(link: Path, target: Path) -> None:
+    staging = link.with_name(f".{link.name}-{os.getpid()}")
+    if staging.is_symlink() or staging.is_file():
+        staging.unlink()
+    elif staging.exists():
+        raise BuildError(f"staging link path is not replaceable: {staging}")
+    if link.exists() and not link.is_symlink():
+        raise BuildError(f"published path is not an atomic symlink: {link}")
+    staging.symlink_to(target, target_is_directory=True)
+    try:
+        os.replace(staging, link)
+    finally:
+        if staging.is_symlink():
+            staging.unlink()
+
+
 def activate(output_root: Path, final_dir: Path) -> None:
-    current = output_root / "current"
-    staging = output_root / f".current-{os.getpid()}"
-    if staging.exists():
-        shutil.rmtree(staging)
-    shutil.copytree(final_dir, staging)
-    if current.is_symlink() or current.is_file():
-        current.unlink()
-    elif current.exists():
-        shutil.rmtree(current)
-    os.replace(staging, current)
+    relative_target = Path(os.path.relpath(final_dir, output_root))
+    publish_symlink(output_root / "current", relative_target)
+
+
+def prune_cache(output_root: Path, keep: Path) -> None:
+    cache_root = output_root / "cache"
+    if not cache_root.is_dir():
+        return
+    entries = [path for path in cache_root.iterdir() if path.is_dir()]
+    entries.sort(key=lambda path: path.stat().st_mtime_ns, reverse=True)
+    retained = {keep.resolve()}
+    for path in entries:
+        if len(retained) < MAX_CACHE_ENTRIES:
+            retained.add(path.resolve())
+            continue
+        if path.resolve() not in retained:
+            shutil.rmtree(path)
 
 
 def validate_cached(final_dir: Path, fingerprint: str) -> dict[str, object] | None:
@@ -143,9 +167,10 @@ def _build_unlocked(
         "ar": xcrun_find("ar", sdk),
         "ranlib": xcrun_find("ranlib", sdk),
     }
+    sdk_path = Path(run(["xcrun", "--sdk", sdk, "--show-sdk-path"]).strip()).resolve()
     flags = [
         "-std=c11", "-O2", "-fPIC", "-Wall", "-Wextra", "-Werror",
-        "-arch", "arm64", "-isysroot", run(["xcrun", "--sdk", sdk, "--show-sdk-path"]).strip(),
+        "-arch", "arm64", "-isysroot", str(sdk_path),
     ]
     if selected == "macos-arm64":
         flags.append("-mmacosx-version-min=12.0")
@@ -158,6 +183,9 @@ def _build_unlocked(
     cached = validate_cached(final_dir, fingerprint)
     if cached is not None:
         activate(output_root, final_dir)
+        if selected == "ios-simulator-arm64":
+            publish_symlink(output_root / "sdk", sdk_path)
+        prune_cache(output_root, final_dir)
         return final_dir, cached
 
     work_root = output_root / "work"
@@ -216,6 +244,9 @@ int main(void) {
             shutil.rmtree(final_dir)
         os.replace(artifact, final_dir)
         activate(output_root, final_dir)
+        if selected == "ios-simulator-arm64":
+            publish_symlink(output_root / "sdk", sdk_path)
+        prune_cache(output_root, final_dir)
         return final_dir, manifest
     finally:
         shutil.rmtree(staging, ignore_errors=True)
