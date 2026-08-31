@@ -1,6 +1,7 @@
 #ifndef WIRESTACK_POC_ALLOCATION_PROFILE_H
 #define WIRESTACK_POC_ALLOCATION_PROFILE_H
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,8 +10,7 @@ typedef union PocAllocationHeader {
     struct {
         size_t size;
     } metadata;
-    long double alignment_long_double;
-    void *alignment_pointer;
+    max_align_t alignment;
 } PocAllocationHeader;
 
 static uint64_t provider_allocation_calls = 0;

@@ -38,8 +38,9 @@ MEMORY_PROFILE_BOUND_BYTES = 512 * 1024 * 1024
 PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES = 64 * 1024 * 1024 * 1024
 PROVIDER_ALLOCATION_CALL_BOUND = 150_000_000
 CANCELLATION_WAKE_BOUND_US = 250_000
-RESULT_SCHEMA_VERSION = 6
+RESULT_SCHEMA_VERSION = 7
 MAX_TOOL_VERSION_BYTES = 16 * 1024
+MAX_FAILURE_MESSAGE_BYTES = 2048
 
 
 class PocError(RuntimeError):
@@ -52,6 +53,11 @@ def sha256_path(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def bounded_utf8(value: object, maximum_bytes: int) -> str:
+    encoded = str(value).encode("utf-8", errors="replace")[:maximum_bytes]
+    return encoded.decode("utf-8", errors="ignore")
 
 
 def atomic_json(path: Path, value: Mapping[str, Any]) -> None:
@@ -224,6 +230,8 @@ def tool_identity(command: Sequence[str], *, cwd: Path, log: Path) -> dict[str, 
     completed = run(command, cwd=cwd, log=log, check=False)
     output = completed.stdout.strip()
     encoded = output.encode("utf-8")
+    if completed.returncode != 0:
+        raise PocError(f"tool identity command failed: {command[0]}")
     if not output or len(encoded) > MAX_TOOL_VERSION_BYTES:
         raise PocError(f"tool identity output is missing or exceeds its bound: {command[0]}")
     return {
@@ -381,6 +389,7 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
             f"-DCMAKE_BUILD_TYPE={'RelWithDebInfo' if diagnostic else 'Release'}",
             "-DENABLE_TESTING=OFF",
             "-DENABLE_PROGRAMS=OFF", "-DUSE_SHARED_MBEDTLS_LIBRARY=OFF",
+            f"-DMBEDTLS_USER_CONFIG_FILE={profile_config.as_posix()}",
             f"-DTF_PSA_CRYPTO_USER_CONFIG_FILE={profile_config.as_posix()}",
             *cmake_diagnostic_args,
             *cmake_runtime_args(is_windows()),
@@ -551,14 +560,16 @@ def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
         "openssl_memory_poc.c" if spec["poc_family"] == "openssl-compatible"
         else "mbedtls_memory_poc.c"
     )
-    mbedtls_definition = (
-        f'TF_PSA_CRYPTO_USER_CONFIG_FILE="{mbedtls_profile_config(repo).as_posix()}"'
-    )
+    mbedtls_definitions = [
+        f'MBEDTLS_USER_CONFIG_FILE="{mbedtls_profile_config(repo).as_posix()}"',
+        f'TF_PSA_CRYPTO_USER_CONFIG_FILE="{mbedtls_profile_config(repo).as_posix()}"',
+    ]
     if is_windows():
         run([
             os.environ.get("CC", "cl"), "/nologo", "/std:c11", "/O2", "/W3", "/WX",
             "/MT", "/D_CRT_SECURE_NO_WARNINGS",
-            *([f"/D{mbedtls_definition}"] if spec.get("id") == "mbedtls" else []),
+            *([f"/D{definition}" for definition in mbedtls_definitions]
+              if spec.get("id") == "mbedtls" else []),
             f"/I{include}", *extra_cflags,
             str(source), *[str(archive) for archive in archives],
             "bcrypt.lib", "crypt32.lib", "advapi32.lib", "user32.lib", "ws2_32.lib",
@@ -590,9 +601,10 @@ def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
             if diagnostic else ["-O2"]
         )
         run([
-            os.environ.get("CC", "cc"), "-std=c99", *diagnostic_flags,
+            os.environ.get("CC", "cc"), "-std=c11", *diagnostic_flags,
             "-Wall", "-Wextra", "-Werror",
-            *([f"-D{mbedtls_definition}"] if spec.get("id") == "mbedtls" else []),
+            *([f"-D{definition}" for definition in mbedtls_definitions]
+              if spec.get("id") == "mbedtls" else []),
             f"-I{include}", str(source), *[str(a) for a in archives], "-pthread", "-lm",
             *(["-fsanitize=address,undefined"] if diagnostic else []),
             "-o", str(output),
@@ -792,6 +804,8 @@ def parse_metrics(stdout: str, provider: str, caps: Mapping[str, str]) -> dict[s
             or peak <= 0 or peak > MEMORY_PROFILE_BOUND_BYTES):
         raise PocError("native memory profile exceeded or omitted its resident bound")
     allocated = metrics.get("provider_allocation_bytes", 0)
+    live_before = metrics.get("provider_allocation_live_before_cleanup_bytes", -1)
+    live_after = metrics.get("provider_allocation_live_after_cleanup_bytes", -1)
     if (metrics.get("provider_allocation_bound_bytes") !=
             PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES
             or metrics.get("provider_allocation_call_bound") !=
@@ -802,7 +816,8 @@ def parse_metrics(stdout: str, provider: str, caps: Mapping[str, str]) -> dict[s
             or allocated <= 0 or allocated > PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES
             or metrics.get("provider_allocation_peak_live_bytes", 0) <= 0
             or metrics.get("provider_allocation_peak_live_bytes", 0) >
-            MEMORY_PROFILE_BOUND_BYTES):
+            MEMORY_PROFILE_BOUND_BYTES
+            or live_before < 0 or live_after < 0 or live_after > live_before):
         raise PocError("provider allocation profile exceeded or omitted its bound")
     return metrics
 
@@ -850,24 +865,32 @@ def main(argv: Sequence[str] | None = None) -> int:
             "the PoC executable is linked against vendored static provider archives."
         ],
     }
+    phase = "source-acquisition"
     try:
         src, source_info = source_provider(spec, work, log)
         result["source"] = source_info
+        phase = "license-bundle"
         license_bundle = create_license_bundle(
             src, output.parent, args.provider, source_info)
+        phase = "provider-build"
         prefix, archives, build_provenance = build_provider(
             spec, src, work, log, repo=repo)
+        phase = "fixture-generation"
         fixtures = generate_fixtures(work, log)
+        phase = "poc-build"
         binary = compile_poc(spec, repo, prefix, archives, work, log)
+        phase = "binary-inspection"
         result["build"] = inspect_binary(binary, archives, work, log)
         result["build"]["license_bundle"] = license_bundle
         result["build"]["provenance"] = build_provenance
+        phase = "poc-execution"
         completed = run(
             fixture_command(binary, fixtures), cwd=work, log=log, check=False)
         result["poc_exit_code"] = completed.returncode
         result["capabilities"] = parse_caps(completed.stdout, spec_all["required_capabilities"])
         result["metrics"] = parse_metrics(
             completed.stdout, args.provider, result["capabilities"])
+        phase = "native-diagnostic"
         diagnostic = run_native_memory_diagnostic(
             spec, repo, src, work, log, fixtures, current_platform)
         result["operational_evidence"] = {
@@ -881,10 +904,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "provider_allocation_bytes": result["metrics"]["provider_allocation_bytes"],
                 "provider_allocation_bound_bytes": result["metrics"]["provider_allocation_bound_bytes"],
                 "provider_allocation_peak_live_bytes": result["metrics"]["provider_allocation_peak_live_bytes"],
+                "provider_allocation_live_before_cleanup_bytes": result["metrics"]["provider_allocation_live_before_cleanup_bytes"],
+                "provider_allocation_live_after_cleanup_bytes": result["metrics"]["provider_allocation_live_after_cleanup_bytes"],
                 "payload_bytes_per_transfer": 32768,
             },
             "cancellation": {
-                "method": "caller-owned-wait-thread-and-explicit-cancel-signal",
+                "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
                 "wakeups": result["metrics"]["cancellation_wakeups"],
                 "latency_us": result["metrics"]["cancellation_latency_us"],
                 "bound_us": result["metrics"]["cancellation_bound_us"],
@@ -895,12 +920,26 @@ def main(argv: Sequence[str] | None = None) -> int:
         forbidden = result["build"]["system_tls_dependencies"] or result["build"]["runtime_loader_library_strings"]
         if completed.returncode != 0 or failed or forbidden:
             result["status"] = "FAIL"
+            result["failure"] = {
+                "stage": "poc-execution",
+                "error_type": "PocResultFailure",
+                "message": "provider PoC returned a failed capability, exit code, or forbidden dependency",
+            }
         elif blocked:
             result["status"] = "PARTIAL"
         else:
             result["status"] = "PASS"
     except Exception as error:
-        result["error"] = f"{type(error).__name__}: {error}"
+        message = bounded_utf8(error, MAX_FAILURE_MESSAGE_BYTES)
+        if not message:
+            message = type(error).__name__
+        result["error"] = bounded_utf8(
+            f"{type(error).__name__}: {message}", MAX_FAILURE_MESSAGE_BYTES)
+        result["failure"] = {
+            "stage": phase,
+            "error_type": type(error).__name__,
+            "message": message,
+        }
         result["status"] = "FAIL"
     result["finished_at"] = dt.datetime.now(dt.timezone.utc).isoformat()
     result["build_log_sha256"] = sha256_path(log) if log.exists() else None
