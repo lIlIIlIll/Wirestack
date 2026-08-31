@@ -578,8 +578,7 @@ static int local_close_version_case(Material *m, int version) {
         p.c2s.closed = 1;
         unsigned char byte;
         int peer_result = mbedtls_ssl_read(&p.server, &byte, 1);
-        ok = peer_result <= 0 &&
-             peer_result != MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY;
+        ok = peer_result == 0;
     }
     pair_free(&p);
     mbedtls_ssl_config_free(&client_conf);
