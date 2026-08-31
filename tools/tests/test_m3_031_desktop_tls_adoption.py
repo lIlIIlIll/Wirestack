@@ -107,6 +107,14 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
         raw["source_sha256"][adoption.HOSTED_INPUT_PATHS[0]] = "0" * 64
         self.assert_code("STALE_SOURCE", lambda: adoption.validate_hosted_run(ROOT, raw))
 
+    def test_repository_text_digest_is_checkout_line_ending_stable(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "report.json"
+            path.write_bytes(b'{\r\n  "status": "PASS"\r\n}\r\n')
+            windows_digest = adoption.repository_text_sha256(path)
+            path.write_bytes(b'{\n  "status": "PASS"\n}\n')
+            self.assertEqual(windows_digest, adoption.repository_text_sha256(path))
+
     def test_missing_core_declaration_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
