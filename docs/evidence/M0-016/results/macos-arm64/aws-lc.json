@@ -7,17 +7,17 @@
       {
         "bytes": 668872,
         "name": "libssl.a",
-        "sha256": "83ee9d7e8b01c71c3b5011edd5870b2d595bd4ff279d771307feaf2a551a698b"
+        "sha256": "801d05b01cae54c23febdc9f1a66187541723e1f67c233f371d4196f17b18cbc"
       },
       {
         "bytes": 4090424,
         "name": "libcrypto.a",
-        "sha256": "7fde03ca3e87e8cadce6ac821fb9b715854ef24b6b90c691285d642865490dc9"
+        "sha256": "0c6fded2ecc9e6ceee274b0d6858807e635bd8d26647a34f8d6847ded22c200b"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "67f8f673a6a4552dd311f5ace74754e5f8a3776ae287b153dca937ddd7f0bfca",
+  "build_log_sha256": "07d121874eaec65ec4f9c98eb46c850eaab4f717239155df4a681650ee8b081d",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -39,11 +39,11 @@
     "image_os": "macos15",
     "image_version": "20260727.0256.1",
     "python": "3.12.10",
-    "repository_revision": "9611abb32c9e790fe893aa9ea4f25ec5ae0d8fba",
+    "repository_revision": "dd9a7f248ec2c60d9a9d965d08af0ac359806f23",
     "runner_arch": "ARM64",
     "runner_os": "macOS"
   },
-  "finished_at": "2026-08-31T08:29:43.087158+00:00",
+  "finished_at": "2026-08-31T09:16:50.056108+00:00",
   "metrics": {
     "external_signer_calls": 2,
     "external_trust_calls": 4,
@@ -66,7 +66,7 @@
     "kind": "git",
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T08:28:48.040763+00:00",
+  "started_at": "2026-08-31T09:15:41.707936+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }
