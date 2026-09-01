@@ -122,6 +122,11 @@ def artifact_bytes_sha256(raw: bytes) -> str:
     return artifact_byte_digest_bytes(raw).sha256
 
 
+def signed_payload_sha256(path: Path) -> str:
+    """Return the exact byte digest of a payload whose signature binds raw bytes."""
+    return artifact_byte_sha256(path)
+
+
 def text_evidence_inventory_sha256(root: Path, paths: Iterable[Path]) -> str:
     """Hash a sorted repository text inventory with path framing."""
     base = root.resolve()
@@ -189,6 +194,26 @@ def _revision(root: Path | None) -> str | None:
     except (OSError, subprocess.TimeoutExpired):
         return os.environ.get("GITHUB_SHA")
     return result.stdout.strip() if result.returncode == 0 else os.environ.get("GITHUB_SHA")
+
+
+def _effective_text_attribute(root: Path) -> str:
+    try:
+        result = subprocess.run(
+            ["git", "check-attr", "text", "--", CHECKOUT_FIXTURE.as_posix()],
+            cwd=root, capture_output=True, text=True, timeout=5, check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise DigestError("GITATTRIBUTES_CHECK", type(error).__name__) from error
+    if result.returncode != 0:
+        raise DigestError("GITATTRIBUTES_CHECK", f"exit {result.returncode}")
+    prefix = f"{CHECKOUT_FIXTURE.as_posix()}: text: "
+    output = result.stdout.strip()
+    if not output.startswith(prefix):
+        raise DigestError("GITATTRIBUTES_CHECK", "unexpected output")
+    value = output[len(prefix):]
+    if value not in {"set", "unset", "unspecified"}:
+        raise DigestError("GITATTRIBUTES_CHECK", f"unexpected value {value}")
+    return value
 
 
 def _normalized_architecture(value: str) -> str:
@@ -263,14 +288,16 @@ def crlf_report(expected_platform: str | None = None, root: Path | None = None) 
         fixture["line_endings"] = (
             "CRLF" if b"\r\n" in fixture_bytes else "BARE_CR" if b"\r" in fixture_bytes else "LF"
         )
-    attributes = effective_root / ".gitattributes"
-    attributes_text = attributes.read_text(encoding="utf-8") if attributes.is_file() else ""
-    gitattributes_dependency = any(
-        CHECKOUT_FIXTURE.as_posix() in line and "-text" in line
-        for line in attributes_text.splitlines()
-    )
-    if gitattributes_dependency:
-        issues.append({"code": "GITATTRIBUTES_DEPENDENCY", "detail": CHECKOUT_FIXTURE.as_posix()})
+    gitattributes_dependency = False
+    try:
+        text_attribute = _effective_text_attribute(effective_root)
+    except DigestError as error:
+        text_attribute = "unknown"
+        issues.append({"code": error.code, "detail": error.detail})
+    else:
+        gitattributes_dependency = text_attribute == "unset"
+        if gitattributes_dependency:
+            issues.append({"code": "GITATTRIBUTES_DEPENDENCY", "detail": CHECKOUT_FIXTURE.as_posix()})
     return {
         "schema_version": 1,
         "kind": "p1-014-crlf-fault-injection",
@@ -282,6 +309,7 @@ def crlf_report(expected_platform: str | None = None, root: Path | None = None) 
         "byte_digests": byte_digests,
         "invalid_utf8": invalid_utf8,
         "checkout_fixture": fixture,
+        "effective_text_attribute": text_attribute,
         "gitattributes_dependency": gitattributes_dependency,
         "issues": issues,
     }
@@ -298,6 +326,7 @@ _CALL_DOMAINS = {
     "text_evidence_bytes_sha256": "text-evidence",
     "artifact_byte_sha256": "artifact-bytes",
     "artifact_bytes_sha256": "artifact-bytes",
+    "signed_payload_sha256": "artifact-bytes",
     "text_evidence_inventory_sha256": "text-evidence",
     "sha256_path": "legacy-task-local",
     "canonical_text_sha256": "legacy-task-local-text",
@@ -358,6 +387,71 @@ def _call_contains_raw_digest(node: ast.Call, call_name: str | None) -> bool:
     )
 
 
+class _AssignmentIndex(ast.NodeVisitor):
+    def __init__(self) -> None:
+        self.scope = 0
+        self.node_scopes: dict[int, int] = {}
+        self.assignments: dict[int, dict[str, list[tuple[int, ast.AST]]]] = {}
+
+    def generic_visit(self, node: ast.AST) -> None:
+        self.node_scopes[id(node)] = self.scope
+        super().generic_visit(node)
+
+    def _visit_scope(self, node: ast.AST) -> None:
+        self.node_scopes[id(node)] = self.scope
+        previous = self.scope
+        self.scope = id(node)
+        super().generic_visit(node)
+        self.scope = previous
+
+    visit_FunctionDef = _visit_scope
+    visit_AsyncFunctionDef = _visit_scope
+    visit_Lambda = _visit_scope
+    visit_ClassDef = _visit_scope
+
+    def _record(self, name: str, value: ast.AST, line: int) -> None:
+        self.assignments.setdefault(self.scope, {}).setdefault(name, []).append((line, value))
+
+    def visit_Assign(self, node: ast.Assign) -> None:
+        self.node_scopes[id(node)] = self.scope
+        for target in node.targets:
+            if isinstance(target, ast.Name):
+                self._record(target.id, node.value, node.lineno)
+        self.generic_visit(node)
+
+    def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
+        self.node_scopes[id(node)] = self.scope
+        if isinstance(node.target, ast.Name) and node.value is not None:
+            self._record(node.target.id, node.value, node.lineno)
+        self.generic_visit(node)
+
+
+def _argument_hint(expression: ast.AST, call: ast.Call, index: _AssignmentIndex) -> str:
+    call_line = getattr(call, "lineno", 0)
+    scope = index.node_scopes.get(id(call), 0)
+    pieces: list[str] = [ast.unparse(expression)]
+    seen: set[tuple[int, str]] = set()
+
+    def resolve(node: ast.AST, active_scope: int) -> None:
+        for child in ast.walk(node):
+            if isinstance(child, ast.Constant) and isinstance(child.value, str):
+                pieces.append(child.value)
+            elif isinstance(child, ast.Name):
+                for candidate_scope in (active_scope, 0):
+                    key = (candidate_scope, child.id)
+                    if key in seen:
+                        continue
+                    assignments = index.assignments.get(candidate_scope, {}).get(child.id, [])
+                    prior = [item for item in assignments if item[0] < call_line]
+                    if prior:
+                        seen.add(key)
+                        resolve(max(prior, key=lambda item: item[0])[1], candidate_scope)
+                        break
+
+    resolve(expression, scope)
+    return " ".join(pieces).lower()
+
+
 def _declared_non_python_domains(root: Path) -> dict[tuple[str, str], str]:
     path = root / NON_PYTHON_DOMAIN_MANIFEST
     if not path.is_file():
@@ -412,6 +506,8 @@ def digest_inventory(root: Path) -> dict[str, Any]:
                 issues.append({"code": "INVENTORY_PARSE", "detail": f"{relative}: {type(error).__name__}"})
                 continue
             aliases = _import_aliases(tree)
+            assignment_index = _AssignmentIndex()
+            assignment_index.visit(tree)
             for node in ast.walk(tree):
                 if not (isinstance(node, ast.ImportFrom) and node.module == "hashlib"):
                     continue
@@ -446,8 +542,16 @@ def digest_inventory(root: Path) -> dict[str, Any]:
                     domain = "typed-implementation" if relative == "tools/evidence_digest.py" else "legacy-task-local"
                 else:
                     domain = _CALL_DOMAINS[name]
+                if (domain == "artifact-bytes" and name != "signed_payload_sha256"
+                        and relative != "tools/evidence_digest.py" and node.args):
+                    argument = _argument_hint(node.args[0], node, assignment_index)
+                    if any(marker in argument for marker in (
+                        "evidence", "report", "markdown", "log_path", "source_path",
+                        "validation", "read_text", ".json", ".md", ".cj",
+                    )):
+                        domain = "invalid-artifact-on-text"
                 entries.append({"path": relative, "line": node.lineno, "symbol": name, "classification": domain})
-                if domain.startswith("legacy"):
+                if domain.startswith("legacy") or domain == "invalid-artifact-on-text":
                     issues.append({"code": "UNTYPED_DIGEST", "detail": f"{relative}:{node.lineno}:{name}"})
     non_python_paths: list[Path] = []
     scripts = root / "scripts"

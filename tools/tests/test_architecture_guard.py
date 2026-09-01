@@ -137,6 +137,19 @@ class ArchitectureGuardTests(unittest.TestCase):
             )
             self.assertIn("text-evidence-byte-digest", self.rules(root))
 
+    def test_assigned_text_path_rejects_artifact_byte_digest(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "from pathlib import Path\n"
+                "from tools.evidence_digest import artifact_byte_sha256\n"
+                "path = Path('report.json')\n"
+                "value = artifact_byte_sha256(path)\n",
+            )
+            self.assertIn("text-evidence-byte-digest", self.rules(root))
+
     def test_repository_evidence_rejects_untyped_digest_comparison(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)

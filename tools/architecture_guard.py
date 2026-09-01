@@ -561,6 +561,73 @@ def _python_call_contains_raw_digest(node: ast.Call, call_name: str | None) -> b
     )
 
 
+class _PythonAssignmentIndex(ast.NodeVisitor):
+    def __init__(self) -> None:
+        self.scope = 0
+        self.node_scopes: dict[int, int] = {}
+        self.assignments: dict[int, dict[str, list[tuple[int, ast.AST]]]] = {}
+
+    def generic_visit(self, node: ast.AST) -> None:
+        self.node_scopes[id(node)] = self.scope
+        super().generic_visit(node)
+
+    def _visit_scope(self, node: ast.AST) -> None:
+        self.node_scopes[id(node)] = self.scope
+        previous = self.scope
+        self.scope = id(node)
+        super().generic_visit(node)
+        self.scope = previous
+
+    visit_FunctionDef = _visit_scope
+    visit_AsyncFunctionDef = _visit_scope
+    visit_Lambda = _visit_scope
+    visit_ClassDef = _visit_scope
+
+    def _record(self, name: str, value: ast.AST, line: int) -> None:
+        self.assignments.setdefault(self.scope, {}).setdefault(name, []).append((line, value))
+
+    def visit_Assign(self, node: ast.Assign) -> None:
+        self.node_scopes[id(node)] = self.scope
+        for target in node.targets:
+            if isinstance(target, ast.Name):
+                self._record(target.id, node.value, node.lineno)
+        self.generic_visit(node)
+
+    def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
+        self.node_scopes[id(node)] = self.scope
+        if isinstance(node.target, ast.Name) and node.value is not None:
+            self._record(node.target.id, node.value, node.lineno)
+        self.generic_visit(node)
+
+
+def _python_argument_hint(
+    expression: ast.AST, call: ast.Call, index: _PythonAssignmentIndex,
+) -> str:
+    call_line = getattr(call, "lineno", 0)
+    scope = index.node_scopes.get(id(call), 0)
+    pieces: list[str] = [ast.unparse(expression)]
+    seen: set[tuple[int, str]] = set()
+
+    def resolve(node: ast.AST, active_scope: int) -> None:
+        for child in ast.walk(node):
+            if isinstance(child, ast.Constant) and isinstance(child.value, str):
+                pieces.append(child.value)
+            elif isinstance(child, ast.Name):
+                for candidate_scope in (active_scope, 0):
+                    key = (candidate_scope, child.id)
+                    if key in seen:
+                        continue
+                    assignments = index.assignments.get(candidate_scope, {}).get(child.id, [])
+                    prior = [item for item in assignments if item[0] < call_line]
+                    if prior:
+                        seen.add(key)
+                        resolve(max(prior, key=lambda item: item[0])[1], candidate_scope)
+                        break
+
+    resolve(expression, scope)
+    return " ".join(pieces).lower()
+
+
 def _python_offset(text: str, node: ast.AST) -> int:
     lines = text.splitlines(keepends=True)
     line = max(getattr(node, "lineno", 1) - 1, 0)
@@ -616,6 +683,8 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
         typed_implementation = relative == "tools/evidence_digest.py"
         repository_control_plane = relative.startswith("tools/repository/")
         aliases = _python_import_aliases(tree)
+        assignment_index = _PythonAssignmentIndex()
+        assignment_index.visit(tree)
         for node in ast.walk(tree):
             if isinstance(node, (ast.Import, ast.ImportFrom)) and not typed_implementation:
                 names = [item.name for item in node.names]
@@ -654,11 +723,11 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                         "untyped-evidence-digest",
                         "Repository code must not calculate an untyped SHA-256 digest.",
                     ))
-                if name in {
+                if not typed_implementation and name in {
                     "artifact_byte_digest", "artifact_byte_digest_bytes", "artifact_byte_sha256",
                     "artifact_bytes_sha256", "parse_artifact_digest",
                 }:
-                    argument = ast.unparse(node.args[0]).lower() if node.args else ""
+                    argument = _python_argument_hint(node.args[0], node, assignment_index) if node.args else ""
                     if repository_control_plane or any(
                         marker in argument for marker in (
                             "evidence", "report", "markdown", "log_path", "source_path",
