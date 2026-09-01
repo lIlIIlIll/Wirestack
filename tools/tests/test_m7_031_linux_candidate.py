@@ -17,7 +17,10 @@ import m7_031_linux_candidate as candidate  # noqa: E402
 class M7031LinuxCandidateTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.documents = candidate.load_documents(ROOT)
+        cls.original_documents = candidate.load_documents(ROOT)
+        cls.documents = copy.deepcopy(cls.original_documents)
+        for subject in cls.documents["m7_030_hosted"]["subjects"]:
+            subject["signedPayloadSha256"] = subject["sha256"]
         cls.report = candidate.build_candidate(
             ROOT,
             documents=cls.documents,
@@ -141,6 +144,10 @@ class M7031LinuxCandidateTests(unittest.TestCase):
             mutate(documents["m7_030_hosted"])
             with self.assertRaises(candidate.CandidateError):
                 candidate.validate_artifact_identity(documents, ROOT)
+
+    def test_committed_hosted_report_without_signed_payload_digest_is_stale(self) -> None:
+        with self.assertRaisesRegex(candidate.CandidateError, "DIGEST_INVALID"):
+            candidate.build_candidate(ROOT, verify_current_sources=False)
 
     def test_atomic_replace_failure_preserves_previous_bytes(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-m7-031-atomic-") as directory:

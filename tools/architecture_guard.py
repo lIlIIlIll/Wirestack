@@ -574,7 +574,6 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                 names = [item.name for item in node.names]
                 if "hashlib" in names or (
                     isinstance(node, ast.ImportFrom) and node.module == "hashlib"
-                    and "sha256" in names
                 ):
                     violations.append(_violation(
                         root, path, text, _python_offset(text, node),

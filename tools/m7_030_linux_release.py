@@ -741,14 +741,19 @@ def validate_hosted_report(path: Path) -> dict[str, Any]:
             if isinstance(item, dict)} == {"artifact", "sbom", "release-manifest"},
             "HOSTED_REPORT_SUBJECTS", "exact three subjects required")
     for subject in subjects:
-        expected_keys = {"name", "sha256", "bundleSha256", "verification"}
-        if "signedPayloadSha256" in subject:
-            expected_keys.add("signedPayloadSha256")
+        expected_keys = {
+            "name", "sha256", "signedPayloadSha256", "bundleSha256", "verification",
+        }
         _strict_keys(subject, expected_keys, "HOSTED_REPORT_SUBJECT")
         _strict_digest(subject["sha256"], "hosted subject")
-        if "signedPayloadSha256" in subject:
-            _strict_digest(subject["signedPayloadSha256"], "hosted signed payload")
+        _strict_digest(subject["signedPayloadSha256"], "hosted signed payload")
         _strict_digest(subject["bundleSha256"], "hosted bundle")
+        if subject["name"] == "artifact":
+            require(
+                subject["sha256"] == subject["signedPayloadSha256"],
+                "HOSTED_REPORT_SUBJECT",
+                "artifact text and signed-payload digests must be identical",
+            )
         require(subject["verification"] == "PASS", "HOSTED_REPORT_SUBJECT", subject["name"])
     return report
 
@@ -804,11 +809,11 @@ def build_hosted_report(
     return report
 
 
-def validate_hosted_report_value(report: Mapping[str, Any]) -> None:
+def validate_hosted_report_value(report: Mapping[str, Any]) -> dict[str, Any]:
     with tempfile.TemporaryDirectory(prefix="wirestack-m7-030-hosted-") as directory:
         path = Path(directory) / "report.json"
         path.write_bytes(canonical_json(report))
-        validate_hosted_report(path)
+        return validate_hosted_report(path)
 
 
 def local_rehearsal(output: Path) -> dict[str, Any]:
