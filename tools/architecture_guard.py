@@ -36,10 +36,6 @@ RAW_DIGEST_COMMAND_RE = re.compile(
     r"\b(?:sha256sum|shasum(?:\s+-a\s+256)?|Get-FileHash|certutil(?:\.exe)?\s+-hashfile)\b",
     re.IGNORECASE,
 )
-DIGEST_DOMAIN_MARKERS = {
-    "wirestack-digest-domain: artifact-bytes-v1",
-    "wirestack-digest-domain: text-utf8-lf-v1",
-}
 NON_PYTHON_DOMAIN_MANIFEST = Path("tools/evidence-digest-non-python.json")
 TYPE_CONTAINER_RE = re.compile(
     r"^\s*(?P<public>public\s+)?(?:open\s+)?(?:class|struct|interface|enum)\b"
@@ -504,15 +500,65 @@ def provider_boundary_violations(root: Path, paths: Sequence[Path]) -> list[Viol
     return violations
 
 
-def _python_call_name(node: ast.Call) -> str | None:
-    if isinstance(node.func, ast.Name):
-        return node.func.id
-    if isinstance(node.func, ast.Attribute):
-        if (node.func.attr == "sha256" and isinstance(node.func.value, ast.Name)
-                and node.func.value.id == "hashlib"):
-            return "hashlib.sha256"
-        return node.func.attr
+def _python_import_aliases(tree: ast.AST) -> dict[str, str]:
+    aliases: dict[str, str] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module:
+            for item in node.names:
+                if item.name != "*":
+                    aliases[item.asname or item.name] = f"{node.module}.{item.name}"
+        elif isinstance(node, ast.Import):
+            for item in node.names:
+                local = item.asname or item.name.split(".", 1)[0]
+                aliases[local] = item.name if item.asname else local
+    return aliases
+
+
+def _python_expression_name(node: ast.AST) -> str | None:
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        value = _python_expression_name(node.value)
+        return f"{value}.{node.attr}" if value else node.attr
     return None
+
+
+def _python_call_name(node: ast.Call, aliases: dict[str, str] | None = None) -> str | None:
+    name = _python_expression_name(node.func)
+    if name is None:
+        return None
+    if aliases:
+        root, separator, remainder = name.partition(".")
+        if root in aliases:
+            name = aliases[root] + (separator + remainder if separator else "")
+    if name == "hashlib.sha256":
+        return name
+    final = name.rsplit(".", 1)[-1]
+    if final in {
+        "artifact_byte_digest", "artifact_byte_digest_bytes", "artifact_byte_sha256",
+        "artifact_bytes_sha256", "parse_artifact_digest", "text_evidence_digest",
+        "text_evidence_digest_bytes", "parse_text_digest", "text_evidence_sha256",
+        "text_evidence_bytes_sha256", "text_evidence_inventory_sha256",
+        "sha256_path", "canonical_text_sha256", "repository_text_sha256",
+    }:
+        return final
+    return name
+
+
+def _python_call_contains_raw_digest(node: ast.Call, call_name: str | None) -> bool:
+    if call_name not in {
+        "subprocess.run", "subprocess.call", "subprocess.check_call",
+        "subprocess.check_output", "subprocess.Popen",
+    }:
+        return False
+    candidates = list(node.args)
+    candidates.extend(keyword.value for keyword in node.keywords if keyword.arg in {"args", "command"})
+    return any(
+        RAW_DIGEST_COMMAND_RE.search(value.value) is not None
+        for candidate in candidates
+        for value in ast.walk(candidate)
+        if isinstance(value, ast.Constant) and isinstance(value.value, str)
+    )
 
 
 def _python_offset(text: str, node: ast.AST) -> int:
@@ -569,6 +615,7 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
             continue
         typed_implementation = relative == "tools/evidence_digest.py"
         repository_control_plane = relative.startswith("tools/repository/")
+        aliases = _python_import_aliases(tree)
         for node in ast.walk(tree):
             if isinstance(node, (ast.Import, ast.ImportFrom)) and not typed_implementation:
                 names = [item.name for item in node.names]
@@ -591,7 +638,13 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                         "Repository digest helpers must declare the text or artifact byte domain.",
                     ))
             if isinstance(node, ast.Call):
-                name = _python_call_name(node)
+                name = _python_call_name(node, aliases)
+                if not typed_implementation and _python_call_contains_raw_digest(node, name):
+                    violations.append(_violation(
+                        root, path, text, _python_offset(text, node),
+                        "untyped-evidence-digest-command",
+                        "Python repository tools must not invoke raw SHA-256 commands.",
+                    ))
                 if not typed_implementation and name in {
                     "hashlib.sha256", "sha256_path", "canonical_text_sha256",
                     "repository_text_sha256",
@@ -664,14 +717,24 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
             if match is None:
                 continue
             context = "".join(lines[max(0, index - 4):index + 1]).lower()
-            if any(marker in context for marker in DIGEST_DOMAIN_MARKERS) or (
-                relative, line.strip()
-            ) in declared_non_python:
+            declared_domain = declared_non_python.get((relative, line.strip()))
+            artifact_declared = (
+                "wirestack-digest-domain: artifact-bytes-v1" in context
+                or declared_domain == "artifact-bytes-v1"
+            )
+            text_declared = (
+                "wirestack-digest-domain: text-utf8-lf-v1" in context
+                or declared_domain == "text-utf8-lf-v1"
+            )
+            if artifact_declared:
                 continue
             offset = sum(len(value) for value in lines[:index]) + match.start()
             violations.append(_violation(
-                root, path, text, offset, "untyped-non-python-digest",
-                "Shell and workflow SHA-256 commands must declare an explicit digest domain.",
+                root, path, text, offset,
+                "text-evidence-raw-digest" if text_declared else "untyped-non-python-digest",
+                "Text evidence must use the canonicalizing digest helper."
+                if text_declared else
+                "Shell and workflow SHA-256 commands must declare an explicit artifact-byte domain.",
             ))
     return violations
 
