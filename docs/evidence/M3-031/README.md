@@ -34,31 +34,33 @@ claim mobile device support.
 ## Acceptance result
 
 GitHub Actions run
-[`33357763565`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33357763565)
+[`33458663037`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33458663037)
 executed both jobs at repository revision
-`ca87467b7a4396179f2b5b1833f5d550884b7481`:
+`24a01fb377c57484daf4268e5588f1de74556ba7`:
 
 - `windows-aws-lc` passed on Windows Server 2025 x86_64, image
   `win25-vs2026` version `20260824.214.3`.
 - `macos-aws-lc` passed on macOS 15 arm64, image `macos15` version
   `20260727.0256.1`.
 - Both native jobs built pinned AWS-LC 5.5.0 from commit
-  `991e67ff4cf04df4dd89e407f8b920c6936cb56a`, executed the schema-v3 PoC,
-  passed all 14 capabilities, completed two external-signing handshakes,
-  proved session resumption with a distinct second handshake, and completed
-  10,000 cleanup cycles.
+  `991e67ff4cf04df4dd89e407f8b920c6936cb56a`, executed the schema-v11 PoC,
+  passed all 18 capabilities, completed two external-signing handshakes,
+  proved TLS 1.2 and TLS 1.3 session resumption, and completed 10,000 cleanup
+  cycles.
 - Both binaries used vendored static provider archives and reported no system
   TLS dependency or runtime TLS-loader string.
 
-The local task gate passed all four commands. The Python suites passed 54 tests.
+The local task gate passed all four commands. The Python suites passed 105 tests.
 The focused Cangjie Core suites passed 71 tests with zero skipped, failed or
 errored cases. The complete machine-readable command report is
 [`task-check.json`](task-check.json).
 
-Run `33357763565` repeated both native jobs after review remediation. The
+Run `33458663037` repeated both native jobs after the M0-016 schema-v11 review
+remediation. The
 committed hosted report binds that exact revision to the PoC source, provider
-pins, validator digests, artifact digests and job identities. Earlier schema-v2
-and pre-byte-preservation results remain listed only as superseded history.
+pins, validator digests, final binary digests, artifact digests and job
+identities. Earlier schemas and pre-byte-preservation results remain listed
+only as superseded history.
 
 ## Boundaries and remaining work
 
