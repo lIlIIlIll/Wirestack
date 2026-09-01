@@ -9,6 +9,7 @@ on:
       - ".github/workflows/p1-014-evidence-digest-boundary.yml"
       - "docs/evidence/P1-014/fixtures/line-endings.txt"
       - "tools/evidence_digest.py"
+      - "tools/evidence-digest-non-python.json"
       - "tools/repository/**"
       - "tools/architecture_guard.py"
       - "tools/tests/test_architecture_guard.py"
