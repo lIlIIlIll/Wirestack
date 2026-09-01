@@ -37,6 +37,9 @@ TEXT_COMMAND_OPERAND = re.compile(
     r"(?=$|[\s'\";)])",
     re.IGNORECASE,
 )
+SHELL_VARIABLE_OPERAND = re.compile(
+    r"\$(?:\{[A-Za-z_][A-Za-z0-9_]*\}|[A-Za-z_][A-Za-z0-9_]*)"
+)
 DIGEST_DOMAIN_MARKER = "wirestack-digest-domain:"
 NON_PYTHON_DOMAIN_MANIFEST = Path("tools/evidence-digest-non-python.json")
 
@@ -789,7 +792,10 @@ def digest_inventory(root: Path) -> dict[str, Any]:
                 continue
             context = "\n".join(lines[max(0, index - 4):index + 1]).lower()
             declared_domain = declared_non_python.get((relative, line.strip()))
-            obvious_text = TEXT_COMMAND_OPERAND.search(line) is not None
+            obvious_text = (
+                TEXT_COMMAND_OPERAND.search(line) is not None
+                or SHELL_VARIABLE_OPERAND.search(line) is not None
+            )
             if f"{DIGEST_DOMAIN_MARKER} {ARTIFACT_BYTE_DOMAIN}" in context:
                 domain = "invalid-artifact-on-text" if obvious_text else "artifact-bytes"
             elif f"{DIGEST_DOMAIN_MARKER} {TEXT_EVIDENCE_DOMAIN}" in context:

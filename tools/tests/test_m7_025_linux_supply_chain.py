@@ -9,7 +9,10 @@ import json
 import tarfile
 import tempfile
 import unittest
+from argparse import Namespace
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 from tools import m7_025_linux_supply_chain as supply
 
@@ -101,7 +104,37 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             ):
                 supply.validate_artifact_inputs(metadata, qualification, provider_pin)
 
-    def fixture(self, root: Path, *, license_expression: str = "Apache-2.0"):
+    def test_main_translates_invalid_license_text_to_controlled_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            artifact, qualification, provider_pin = self.fixture(
+                root, license_bytes=b"invalid\xfflicense"
+            )
+            args = Namespace(
+                artifact=artifact,
+                output_dir=root / "output",
+                validate_only=False,
+                allow_missing_artifact=False,
+            )
+            output = io.StringIO()
+            with (
+                mock.patch.object(supply, "parse_args", return_value=args),
+                mock.patch.object(
+                    supply, "load_json", side_effect=[qualification, provider_pin]
+                ),
+                redirect_stdout(output),
+            ):
+                self.assertEqual(1, supply.main())
+            self.assertIn("M7-025 Linux supply-chain bundle: FAIL:", output.getvalue())
+            self.assertNotIn("Traceback", output.getvalue())
+
+    def fixture(
+        self,
+        root: Path,
+        *,
+        license_expression: str = "Apache-2.0",
+        license_bytes: bytes = b"project license\n",
+    ):
         provider_pin = supply.load_json(supply.PROVIDER_PIN)
         provider = {
             "abiVersion": 1,
@@ -125,6 +158,10 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
         }
         provider_raw = supply.canonical_json(provider)
         resolver_raw = supply.canonical_json(resolver)
+        try:
+            license_sha256 = evidence_digest.text_evidence_bytes_sha256(license_bytes)
+        except evidence_digest.DigestError:
+            license_sha256 = "0" * 64
         release = {
             "schema_version": 1,
             "package": "wirestack",
@@ -134,7 +171,7 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             "license": {
                 "expression": license_expression,
                 "file": "LICENSE",
-                "sha256": evidence_digest.text_evidence_bytes_sha256(b"project license\n"),
+                "sha256": license_sha256,
             },
             "thirdPartyNotices": {
                 "index": "THIRD_PARTY_NOTICES.md",
@@ -162,7 +199,7 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
         artifact = root / "wirestack.tar.gz"
         members = {
             "wirestack/release-manifest.json": supply.canonical_json(release),
-            "wirestack/LICENSE": b"project license\n",
+            "wirestack/LICENSE": license_bytes,
             "wirestack/THIRD_PARTY_NOTICES.md": b"notices\n",
             "wirestack/third_party/aws-lc/LICENSE": b"aws license\n",
             "wirestack/third_party/aws-lc/NOTICE": b"aws notice\n",

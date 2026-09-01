@@ -270,6 +270,21 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             self.assertEqual("FAIL", report["status"])
             self.assertEqual("UNTYPED_DIGEST", report["issues"][0]["code"])
 
+    def test_inventory_rejects_artifact_marker_with_shell_variable_operand(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            script = root / "scripts/check-report"
+            script.parent.mkdir(parents=True)
+            script.write_text(
+                "REPORT=docs/evidence/report.json\n"
+                "# wirestack-digest-domain: artifact-bytes-v1\n"
+                "sha256sum \"$REPORT\"\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertIn("invalid-artifact-on-text", report["domain_counts"])
+
     def test_inventory_rejects_alternate_hashlib_constructor_import(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
             root = Path(directory)
