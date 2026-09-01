@@ -4,9 +4,8 @@
 
 P1-014 is complete. Linux and GitHub Windows CRLF fault injection pass, every
 digest callsite has an explicit domain, and the task-level and canonical
-repository checks pass. GitHub Actions run `33481830845` produced the retained
-Windows report from PR #151 head `4f6e9ca5`; run `33482592433` also passed on
-the later pushed head `47e46acd`.
+repository checks pass. GitHub Actions run `33484166766` produced the retained
+Windows report for PR #151 source head `3c1755bf` (merge revision `abaa98f3`).
 
 ## Implemented boundary
 
@@ -41,9 +40,8 @@ entries remain unchanged because they belong to other tasks.
 | Architecture guard | PASS, 0 violations |
 | Linux CRLF probe | PASS |
 | Digest callsite inventory | PASS, 284 calls: 213 text, 68 artifact, 3 typed implementation |
-| GitHub Windows CRLF probe | PASS, run `33481830845`, head `4f6e9ca5`, merge `a0c598ac` |
-| Later hosted Windows CRLF probe | PASS, run `33482592433`, head `47e46acd` |
-| Hosted Gate Harness | PASS, runs `33481830876` and `33482593016` |
+| GitHub Windows CRLF probe | PASS, run `33484166766`, source head `3c1755bf`, merge `abaa98f3` |
+| Hosted Gate Harness | PASS, run `33484166790` |
 | `scripts/check-fast --json` | PASS |
 | `scripts/check` | PASS, including 178 gate Python tests, 24 benchmark Python tests and 611 Cangjie tests |
 | `scripts/check-task P1-014` | PASS, all four commands passed |
