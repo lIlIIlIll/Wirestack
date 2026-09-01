@@ -134,6 +134,30 @@ class ArchitectureGuardTests(unittest.TestCase):
                     for item in violations),
             )
 
+    def test_manifest_cannot_hide_folded_text_operand(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                ".github/workflows/digest.yml",
+                "jobs:\n  digest:\n    steps:\n      - run: >-\n"
+                "          sha256sum\n"
+                "          docs/evidence/report.json\n",
+            )
+            self.write(
+                root,
+                "tools/evidence-digest-non-python.json",
+                json.dumps({
+                    "schema_version": 1,
+                    "entries": [{
+                        "path": ".github/workflows/digest.yml",
+                        "command": "sha256sum",
+                        "domain": "artifact-bytes-v1",
+                    }],
+                }),
+            )
+            self.assertIn("text-evidence-raw-digest", self.rules(root))
+
     def test_invalid_utf8_helper_fails_closed(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)
@@ -312,6 +336,46 @@ class ArchitectureGuardTests(unittest.TestCase):
                 "    return item.get('manifest_sha256') == expected\n",
             )
             self.assertIn("untyped-evidence-digest-comparison", self.rules(root))
+
+    def test_repository_traces_assigned_digest_field_into_comparison(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "def compare(item, expected):\n"
+                "    actual = item.get('source_tree_sha256')\n"
+                "    return actual == expected\n",
+            )
+            self.assertIn("untyped-evidence-digest-comparison", self.rules(root))
+
+    def test_literal_log_path_is_text_evidence(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "from pathlib import Path\n"
+                "from tools.evidence_digest import artifact_byte_sha256\n"
+                "value = artifact_byte_sha256(Path('results.log'))\n",
+            )
+            self.assertIn("text-evidence-byte-digest", self.rules(root))
+
+    def test_powershell_sha256_api_is_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                ".github/workflows/digest.yml",
+                "jobs:\n  digest:\n    steps:\n      - shell: pwsh\n        run: |\n"
+                "          $sha = [System.Security.Cryptography.SHA256]::Create()\n"
+                "          $bytes = [IO.File]::ReadAllBytes('docs/evidence/report.json')\n"
+                "          $sha.ComputeHash($bytes)\n",
+            )
+            rules = self.rules(root)
+            self.assertTrue(
+                {"untyped-non-python-digest", "text-evidence-raw-digest"} & rules
+            )
 
     def test_text_evidence_rejects_artifact_digest_and_utf8_fallback(self) -> None:
         with self.fixture() as directory:

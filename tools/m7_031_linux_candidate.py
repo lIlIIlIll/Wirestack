@@ -392,8 +392,12 @@ def validate_current_sources(
     expected_http2_source = documents["m7_024_h2"].get("source", {}).get(
         "production_source_sha256"
     )
-    require(current_http2_source == expected_http2_source,
-            "SOURCE_STALE", "M7-024 HTTP/2 production source")
+    require(
+        evidence_digest.schema_text_sha256_equal(
+            current_http2_source, expected_http2_source
+        ),
+        "SOURCE_STALE", "M7-024 HTTP/2 production source",
+    )
     require(not architecture_guard.run_guard(root), "ARCHITECTURE_FAIL", "current guard has violations")
 
     m7_025_linux_supply_chain.validate_documents(
