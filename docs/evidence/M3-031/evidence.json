@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-01T03:21:59.572795Z",
+  "generated_at_utc": "2026-09-01T03:28:15.531845Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -53,7 +53,7 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/task-check.json",
-      "sha256": "acb556c33568184f785fe442bb70ab5e90ba0dfe658a96b9ffa974c4561a71e7",
+      "sha256": "4bbaa08b35d7e69683066fb676365b7117f7692becda0767e4a542e381cc4264",
       "source_task": "M3-031"
     }
   ],
@@ -132,7 +132,7 @@
     "tools/tasks/M2-004.json": "6baeb6d662ad3fb9b47ee81ef94733edc3c537d312656b94c83f915579fff9c2",
     "tools/tasks/M2-006.json": "41aea4935ef444048e246593770b88bc6eef9fc963c70fbb8c8179ffb0fd37c5",
     "tools/tasks/M3-031.json": "45d0917ce8831454172f6af0f044b343af9a42b5bd7045a677d322fc704f8b4d",
-    "tools/tests/test_m3_031_desktop_tls_adoption.py": "405390cb1865ac28c1b80f26337057d170374419d658c1cb1b7e68786d2d98a1",
+    "tools/tests/test_m3_031_desktop_tls_adoption.py": "e1ac3f84c500434783a6abccc4c80a88635962d886e502d1667973a13d4d1701",
     "tools/tests/test_m7_linux_task_graph.py": "c6bd40cceac15ffe35f737d5e63daee1021b682f4aa6887dd46c9ed068b7f38c",
     "tools/tls_provider/abi-v1.json": "4f6756852e89203938ab964461993edde8dccc220bab7e5f8862e4f2b8bb3943",
     "tools/tls_provider/provider-manifest-schema-v1.json": "1ffac8ad5d475c906c177e600635f7450b3da10954535f47e5388d092d6bece9",
