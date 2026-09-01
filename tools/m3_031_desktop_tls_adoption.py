@@ -104,7 +104,14 @@ CORE_REQUIREMENTS: dict[str, tuple[tuple[str, str], ...]] = {
     ),
 }
 RETAINED_EVIDENCE = (
+    "docs/evidence/M3-030/architecture-guard.json",
+    "docs/evidence/M3-030/clean-consumer.json",
+    "docs/evidence/M3-030/linux-aws-lc-results.json",
     "docs/evidence/M3-030/native-abi-report.json",
+    "docs/evidence/M3-030/platform-provider-matrix.json",
+    "docs/evidence/M3-030/release-validation.json",
+    "docs/evidence/M3-030/sbom-validation.json",
+    "docs/evidence/M3-030/task-check.json",
     "docs/evidence/M3-030/test-provider-results.json",
 )
 HISTORICAL_REFERENCES = ("docs/evidence/M3-028/README.md",)
@@ -315,7 +322,18 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
     by_path = {
         item.get("path"): item for item in reports if isinstance(item, dict)
     }
-    for relative in RETAINED_EVIDENCE:
+    evidence_relative = "docs/evidence/M3-030/evidence.json"
+    expected_reports = set(task["required_evidence"]) - {evidence_relative}
+    if (
+        evidence_relative not in task["required_evidence"]
+        or expected_reports != set(RETAINED_EVIDENCE)
+        or len(reports) != len(expected_reports)
+        or set(by_path) != expected_reports
+    ):
+        raise AdoptionError(
+            "RETAINED_EVIDENCE", "M3-030 required report inventory is incomplete"
+        )
+    for relative in sorted(expected_reports):
         entry = by_path.get(relative)
         if not isinstance(entry, dict):
             raise AdoptionError("RETAINED_EVIDENCE", f"{relative}: absent from evidence index")
@@ -341,7 +359,7 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
             raise AdoptionError("STALE_SOURCE", f"{relative}: retained M3-030 source is missing")
         recorded[relative] = expected
         current[relative] = repository_text_sha256(path)
-    return {"task_id": "M3-030", "reports": list(RETAINED_EVIDENCE),
+    return {"task_id": "M3-030", "reports": sorted(expected_reports),
             "recorded_source_sha256": dict(sorted(recorded.items())),
             "source_sha256": dict(sorted(current.items())),
             "changed_since_m3_030": sorted(
