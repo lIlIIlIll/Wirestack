@@ -66,6 +66,26 @@ class ArchitectureGuardTests(unittest.TestCase):
             )
             self.assertNotIn("untyped-non-python-digest", self.rules(root))
 
+    def test_non_python_domain_manifest_matches_exact_command(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            path = self.write(root, "scripts/check-report", "sha256sum report.json\n")
+            self.write(
+                root,
+                "tools/evidence-digest-non-python.json",
+                json.dumps({
+                    "schema_version": 1,
+                    "entries": [{
+                        "path": "scripts/check-report",
+                        "command": "sha256sum report.json",
+                        "domain": "artifact-bytes-v1",
+                    }],
+                }),
+            )
+            self.assertNotIn("untyped-non-python-digest", self.rules(root))
+            path.write_text("sha256sum other.json\n", encoding="utf-8")
+            self.assertIn("untyped-non-python-digest", self.rules(root))
+
     def test_repository_rejects_ambiguous_digest_helper(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)

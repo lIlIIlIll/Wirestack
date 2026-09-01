@@ -27,6 +27,7 @@ RAW_DIGEST_COMMAND = re.compile(
     re.IGNORECASE,
 )
 DIGEST_DOMAIN_MARKER = "wirestack-digest-domain:"
+NON_PYTHON_DOMAIN_MANIFEST = Path("tools/evidence-digest-non-python.json")
 
 
 class DigestError(ValueError):
@@ -315,9 +316,47 @@ def _call_name(node: ast.Call) -> str | None:
     return None
 
 
+def _declared_non_python_domains(root: Path) -> dict[tuple[str, str], str]:
+    path = root / NON_PYTHON_DOMAIN_MANIFEST
+    if not path.is_file():
+        return {}
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise DigestError("DOMAIN_MANIFEST_INVALID", type(error).__name__) from error
+    if not isinstance(value, dict) or set(value) != {"schema_version", "entries"}:
+        raise DigestError("DOMAIN_MANIFEST_SCHEMA", "root fields")
+    if value["schema_version"] != 1 or not isinstance(value["entries"], list):
+        raise DigestError("DOMAIN_MANIFEST_SCHEMA", "version or entries")
+    result: dict[tuple[str, str], str] = {}
+    for entry in value["entries"]:
+        if not isinstance(entry, dict) or set(entry) != {"path", "command", "domain"}:
+            raise DigestError("DOMAIN_MANIFEST_SCHEMA", "entry fields")
+        relative = entry["path"]
+        command = entry["command"]
+        domain = entry["domain"]
+        if not all(isinstance(item, str) and item for item in (relative, command, domain)):
+            raise DigestError("DOMAIN_MANIFEST_SCHEMA", "entry values")
+        candidate = Path(relative)
+        if candidate.is_absolute() or ".." in candidate.parts:
+            raise DigestError("DOMAIN_MANIFEST_PATH", relative)
+        if domain not in {TEXT_EVIDENCE_DOMAIN, ARTIFACT_BYTE_DOMAIN}:
+            raise DigestError("DOMAIN_MANIFEST_DOMAIN", domain)
+        key = (candidate.as_posix(), command)
+        if key in result:
+            raise DigestError("DOMAIN_MANIFEST_DUPLICATE", relative)
+        result[key] = domain
+    return result
+
+
 def digest_inventory(root: Path) -> dict[str, Any]:
     entries: list[dict[str, Any]] = []
     issues: list[dict[str, str]] = []
+    try:
+        declared_non_python = _declared_non_python_domains(root)
+    except DigestError as error:
+        declared_non_python = {}
+        issues.append({"code": error.code, "detail": error.detail})
     for base in (root / "tools", root / "scripts"):
         if not base.is_dir():
             continue
@@ -375,6 +414,10 @@ def digest_inventory(root: Path) -> dict[str, Any]:
             if f"{DIGEST_DOMAIN_MARKER} {ARTIFACT_BYTE_DOMAIN}" in context:
                 domain = "artifact-bytes"
             elif f"{DIGEST_DOMAIN_MARKER} {TEXT_EVIDENCE_DOMAIN}" in context:
+                domain = "text-evidence"
+            elif declared_non_python.get((relative, line.strip())) == ARTIFACT_BYTE_DOMAIN:
+                domain = "artifact-bytes"
+            elif declared_non_python.get((relative, line.strip())) == TEXT_EVIDENCE_DOMAIN:
                 domain = "text-evidence"
             else:
                 domain = "legacy-non-python"

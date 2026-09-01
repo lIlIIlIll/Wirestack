@@ -8,6 +8,7 @@ __pycache__/
 !tools/tasks/*.json
 !tools/gates/manifests/*.json
 !tools/gates/campaigns/*.json
+!tools/evidence-digest-non-python.json
 !fuzz/corpus/m7-023/v1/*.hex
 !docs/evidence/P1-012/*.json
 !docs/evidence/P1-013/evidence.json

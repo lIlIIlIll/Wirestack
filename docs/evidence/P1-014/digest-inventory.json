@@ -19,13 +19,13 @@
     },
     {
       "classification": "artifact-bytes",
-      "line": 35,
+      "line": 34,
       "path": ".github/workflows/materialize-m0-009.yml",
       "symbol": "sha256sum"
     },
     {
       "classification": "artifact-bytes",
-      "line": 46,
+      "line": 44,
       "path": ".github/workflows/materialize-m0-009.yml",
       "symbol": "sha256sum"
     },
@@ -253,91 +253,91 @@
     },
     {
       "classification": "typed-implementation",
-      "line": 78,
+      "line": 79,
       "path": "tools/evidence_digest.py",
       "symbol": "hashlib.sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 86,
+      "line": 87,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
     {
       "classification": "typed-implementation",
-      "line": 90,
+      "line": 91,
       "path": "tools/evidence_digest.py",
       "symbol": "hashlib.sha256"
     },
     {
       "classification": "typed-implementation",
-      "line": 94,
+      "line": 95,
       "path": "tools/evidence_digest.py",
       "symbol": "hashlib.sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 106,
+      "line": 107,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest"
     },
     {
       "classification": "text-evidence",
-      "line": 111,
+      "line": 112,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
     {
       "classification": "artifact-bytes",
-      "line": 116,
+      "line": 117,
       "path": "tools/evidence_digest.py",
       "symbol": "artifact_byte_digest"
     },
     {
       "classification": "artifact-bytes",
-      "line": 121,
+      "line": 122,
       "path": "tools/evidence_digest.py",
       "symbol": "artifact_byte_digest_bytes"
     },
     {
       "classification": "text-evidence",
-      "line": 140,
+      "line": 141,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_bytes_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 232,
-      "path": "tools/evidence_digest.py",
-      "symbol": "text_evidence_digest_bytes"
-    },
-    {
-      "classification": "artifact-bytes",
       "line": 233,
       "path": "tools/evidence_digest.py",
+      "symbol": "text_evidence_digest_bytes"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 234,
+      "path": "tools/evidence_digest.py",
       "symbol": "artifact_byte_digest_bytes"
     },
     {
       "classification": "text-evidence",
-      "line": 240,
+      "line": 241,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
     {
       "classification": "artifact-bytes",
-      "line": 252,
+      "line": 253,
       "path": "tools/evidence_digest.py",
       "symbol": "artifact_byte_digest_bytes"
     },
     {
       "classification": "text-evidence",
-      "line": 254,
+      "line": 255,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
     {
       "classification": "text-evidence",
-      "line": 258,
+      "line": 259,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
