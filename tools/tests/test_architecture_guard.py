@@ -185,6 +185,34 @@ class ArchitectureGuardTests(unittest.TestCase):
             self.write(root, "scripts/new_gate.py", "import hashlib\n")
             self.assertIn("untyped-evidence-digest", self.rules(root))
 
+    def test_local_digest_wrapper_cannot_hide_text_path_domain(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "from pathlib import Path\n"
+                "from tools.evidence_digest import artifact_byte_sha256\n"
+                "def digest(path):\n    return artifact_byte_sha256(path)\n"
+                "value = digest(Path('report.json'))\n",
+            )
+            self.assertIn("text-evidence-byte-digest", self.rules(root))
+
+    def test_openssl_and_embedded_python_digest_commands_are_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "scripts/check-report",
+                "openssl dgst -sha256 docs/evidence/report.json\n"
+                "python3 -c 'import hashlib; print(hashlib.sha256(open(\"report.json\", \"rb\").read()))'\n",
+            )
+            violations = guard.run_guard(root)
+            self.assertEqual(
+                2,
+                sum(item.rule == "untyped-non-python-digest" for item in violations),
+            )
+
     def test_repository_evidence_rejects_untyped_digest_comparison(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)

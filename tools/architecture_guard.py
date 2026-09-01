@@ -33,7 +33,13 @@ PUBLIC_DECLARATION_RE = re.compile(
     r"^\s*public\s+(?P<kind>class|struct|interface|enum|func|prop|let|var|type)\b"
 )
 RAW_DIGEST_COMMAND_RE = re.compile(
-    r"\b(?:sha256sum|shasum(?:\s+-a\s+256)?|Get-FileHash|certutil(?:\.exe)?\s+-hashfile)\b",
+    r"(?:"
+    r"\b(?:sha256sum|shasum(?:\s+-a\s+256)?|Get-FileHash|certutil(?:\.exe)?\s+-hashfile)\b"
+    r"|\bopenssl(?:\.exe)?\s+dgst\b[^\r\n]*(?:-sha256|-sha-256)\b"
+    r"|\bhashlib\s*\.\s*(?:sha256|new\s*\([^\r\n]*sha256)"
+    r"|\bfrom\s+hashlib\s+import\s+(?:sha256|new)\b"
+    r"|\b(?:python(?:3(?:\.\d+)*)?|py)\b[^\r\n]*\s-c(?:\s|=)[^\r\n]*\bsha-?256\b"
+    r")",
     re.IGNORECASE,
 )
 NON_PYTHON_DOMAIN_MANIFEST = Path("tools/evidence-digest-non-python.json")
@@ -539,10 +545,85 @@ def _python_call_name(node: ast.Call, aliases: dict[str, str] | None = None) -> 
         "artifact_bytes_sha256", "parse_artifact_digest", "text_evidence_digest",
         "text_evidence_digest_bytes", "parse_text_digest", "text_evidence_sha256",
         "text_evidence_bytes_sha256", "text_evidence_inventory_sha256",
-        "sha256_path", "canonical_text_sha256", "repository_text_sha256",
+        "signed_payload_sha256", "sha256_path", "canonical_text_sha256",
+        "repository_text_sha256",
     }:
         return final
     return name
+
+
+def _python_digest_wrappers(
+    tree: ast.AST, aliases: dict[str, str],
+) -> dict[str, tuple[str, str, int | None]]:
+    typed_calls = {
+        "artifact_byte_digest", "artifact_byte_digest_bytes", "artifact_byte_sha256",
+        "artifact_bytes_sha256", "parse_artifact_digest", "signed_payload_sha256",
+        "text_evidence_digest", "text_evidence_digest_bytes", "parse_text_digest",
+        "text_evidence_sha256", "text_evidence_bytes_sha256",
+        "text_evidence_inventory_sha256",
+    }
+    candidates: list[tuple[ast.FunctionDef | ast.AsyncFunctionDef, ast.Call]] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        body = list(node.body)
+        if (body and isinstance(body[0], ast.Expr)
+                and isinstance(body[0].value, ast.Constant)
+                and isinstance(body[0].value.value, str)):
+            body = body[1:]
+        if len(body) != 1 or not isinstance(body[0], ast.Return) or body[0].value is None:
+            continue
+        if isinstance(body[0].value, ast.Call):
+            candidates.append((node, body[0].value))
+
+    wrappers: dict[str, tuple[str, str, int | None]] = {}
+    pending = list(candidates)
+    while pending:
+        remaining: list[tuple[ast.FunctionDef | ast.AsyncFunctionDef, ast.Call]] = []
+        changed = False
+        for node, call in pending:
+            target = _python_call_name(call, aliases)
+            if target in typed_calls:
+                base_target = target
+                forwarded = _python_primary_argument(call, {"path", "raw", "value"})
+            elif target in wrappers:
+                base_target, target_parameter, target_index = wrappers[target]
+                forwarded = _python_call_argument_for_parameter(
+                    call, target_parameter, target_index,
+                )
+            else:
+                remaining.append((node, call))
+                continue
+            if not isinstance(forwarded, ast.Name):
+                continue
+            positional = list(node.args.posonlyargs) + list(node.args.args)
+            positional_names = [argument.arg for argument in positional]
+            keyword_names = [argument.arg for argument in node.args.kwonlyargs]
+            if forwarded.id in positional_names:
+                parameter_index: int | None = positional_names.index(forwarded.id)
+            elif forwarded.id in keyword_names:
+                parameter_index = None
+            else:
+                continue
+            wrappers[node.name] = (base_target, forwarded.id, parameter_index)
+            changed = True
+        if not changed:
+            break
+        pending = remaining
+    return wrappers
+
+
+def _python_call_argument_for_parameter(
+    node: ast.Call, parameter: str, positional_index: int | None,
+) -> ast.AST | None:
+    keyword = next(
+        (item.value for item in node.keywords if item.arg == parameter), None,
+    )
+    if keyword is not None:
+        return keyword
+    if positional_index is not None and positional_index < len(node.args):
+        return node.args[positional_index]
+    return None
 
 
 def _python_primary_argument(node: ast.Call, keyword_names: set[str]) -> ast.AST | None:
@@ -696,6 +777,7 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
         aliases = _python_import_aliases(tree)
         assignment_index = _PythonAssignmentIndex()
         assignment_index.visit(tree)
+        digest_wrappers = _python_digest_wrappers(tree, aliases)
         for node in ast.walk(tree):
             if isinstance(node, (ast.Import, ast.ImportFrom)) and not typed_implementation:
                 names = [item.name for item in node.names]
@@ -719,6 +801,8 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                     ))
             if isinstance(node, ast.Call):
                 name = _python_call_name(node, aliases)
+                wrapper = digest_wrappers.get(name or "")
+                effective_name = wrapper[0] if wrapper is not None else name
                 if not typed_implementation and _python_call_contains_raw_digest(
                     node, name, assignment_index,
                 ):
@@ -727,7 +811,7 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                         "untyped-evidence-digest-command",
                         "Python repository tools must not invoke raw SHA-256 commands.",
                     ))
-                if not typed_implementation and name in {
+                if not typed_implementation and effective_name in {
                     "hashlib.sha256", "sha256_path", "canonical_text_sha256",
                     "repository_text_sha256",
                 }:
@@ -736,11 +820,15 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                         "untyped-evidence-digest",
                         "Repository code must not calculate an untyped SHA-256 digest.",
                     ))
-                if not typed_implementation and name in {
+                if not typed_implementation and effective_name in {
                     "artifact_byte_digest", "artifact_byte_digest_bytes", "artifact_byte_sha256",
                     "artifact_bytes_sha256", "parse_artifact_digest",
                 }:
-                    digest_argument = _python_primary_argument(node, {"path", "raw", "value"})
+                    digest_argument = (
+                        _python_call_argument_for_parameter(node, wrapper[1], wrapper[2])
+                        if wrapper is not None
+                        else _python_primary_argument(node, {"path", "raw", "value"})
+                    )
                     argument = (
                         _python_argument_hint(digest_argument, node, assignment_index)
                         if digest_argument is not None else ""
