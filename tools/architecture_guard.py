@@ -772,6 +772,46 @@ def _python_offset(text: str, node: ast.AST) -> int:
     return sum(len(value) for value in lines[:line]) + getattr(node, "col_offset", 0)
 
 
+def _python_digest_field_accesses(node: ast.AST) -> set[str]:
+    """Find mapping keys whose names declare a SHA-256 digest field."""
+    fields: set[str] = set()
+    for child in ast.walk(node):
+        key: object = None
+        if isinstance(child, ast.Subscript) and isinstance(child.slice, ast.Constant):
+            key = child.slice.value
+        elif (isinstance(child, ast.Call) and isinstance(child.func, ast.Attribute)
+              and child.func.attr == "get" and child.args
+              and isinstance(child.args[0], ast.Constant)):
+            key = child.args[0].value
+        if isinstance(key, str) and "sha256" in key.lower():
+            fields.add(key)
+    return fields
+
+
+def _logical_non_python_command(lines: Sequence[str], index: int) -> str:
+    """Return the complete YAML block command containing a physical line."""
+    physical = lines[index]
+    physical_indent = len(physical) - len(physical.lstrip())
+    for marker_index in range(index - 1, -1, -1):
+        candidate = lines[marker_index]
+        if not candidate.strip():
+            continue
+        candidate_indent = len(candidate) - len(candidate.lstrip())
+        if candidate_indent >= physical_indent:
+            continue
+        if re.search(r"\brun\s*:\s*[>|][+-]?\s*(?:#.*)?$", candidate.strip()) is None:
+            break
+        block: list[str] = []
+        for block_line in lines[marker_index + 1:]:
+            if block_line.strip():
+                indent = len(block_line) - len(block_line.lstrip())
+                if indent <= candidate_indent:
+                    break
+            block.append(block_line.strip())
+        return " ".join(value for value in block if value)
+    return physical
+
+
 def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
     """Keep repository text evidence on the typed, normalized digest path."""
     violations: list[Violation] = []
@@ -808,7 +848,7 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                 "The non-Python digest domain manifest must use the known fail-closed schema.",
             ))
     python_paths: list[Path] = []
-    for python_root in (root / "tools", root / "scripts"):
+    for python_root in (root / "tools", root / "scripts", root / ".github/actions"):
         if python_root.is_dir():
             python_paths.extend(python_root.rglob("*.py"))
     python_paths = sorted(set(python_paths))
@@ -819,7 +859,12 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
         try:
             text = path.read_text(encoding="utf-8")
             tree = ast.parse(text, filename=relative)
-        except (OSError, UnicodeDecodeError, SyntaxError):
+        except (OSError, UnicodeDecodeError, SyntaxError) as error:
+            fallback = path.read_text(encoding="utf-8", errors="replace") if path.exists() else ""
+            violations.append(_violation(
+                root, path, fallback, 0, "digest-scan-unreadable",
+                f"Repository helper must be readable strict UTF-8 Python: {type(error).__name__}.",
+            ))
             continue
         typed_implementation = relative == "tools/evidence_digest.py"
         repository_control_plane = relative.startswith("tools/repository/")
@@ -894,8 +939,8 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                             "Text evidence must not enter the artifact byte-digest domain.",
                         ))
             if isinstance(node, ast.Compare) and not typed_implementation:
-                expression = ast.unparse(node)
-                if re.search(r"(?:get\(['\"]sha256['\"]\)|\[['\"]sha256['\"]\])", expression):
+                if (any(isinstance(operator, (ast.Eq, ast.NotEq)) for operator in node.ops)
+                        and _python_digest_field_accesses(node)):
                     violations.append(_violation(
                         root, path, text, _python_offset(text, node),
                         "untyped-evidence-digest-comparison",
@@ -940,21 +985,29 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
     if actions_root.is_dir():
         non_python_paths.extend(
             path for path in actions_root.rglob("*")
-            if path.name in {"action.yml", "action.yaml"}
+            if path.is_file() and path.suffix != ".py"
+            and not _is_ignored(path.relative_to(root))
         )
     for path in sorted(set(non_python_paths)):
         relative = path.relative_to(root).as_posix()
         try:
             text = path.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError):
+        except (OSError, UnicodeDecodeError) as error:
+            fallback = path.read_text(encoding="utf-8", errors="replace") if path.exists() else ""
+            violations.append(_violation(
+                root, path, fallback, 0, "digest-scan-unreadable",
+                f"Repository helper must be readable strict UTF-8 text: {type(error).__name__}.",
+            ))
             continue
         lines = text.splitlines(keepends=True)
         for index, line in enumerate(lines):
             match = RAW_DIGEST_COMMAND_RE.search(line)
             if match is None:
                 continue
+            logical_command = _logical_non_python_command(lines, index)
             context = "".join(lines[max(0, index - 4):index + 1]).lower()
             declared_domain = declared_non_python.get((relative, line.strip()))
+            operand_source = line if declared_domain is not None else logical_command
             artifact_declared = (
                 "wirestack-digest-domain: artifact-bytes-v1" in context
                 or declared_domain == "artifact-bytes-v1"
@@ -964,8 +1017,8 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                 or declared_domain == "text-utf8-lf-v1"
             )
             obvious_text = (
-                TEXT_COMMAND_OPERAND_RE.search(line) is not None
-                or SHELL_VARIABLE_OPERAND_RE.search(line) is not None
+                TEXT_COMMAND_OPERAND_RE.search(operand_source) is not None
+                or SHELL_VARIABLE_OPERAND_RE.search(operand_source) is not None
             )
             if artifact_declared and not obvious_text:
                 continue
