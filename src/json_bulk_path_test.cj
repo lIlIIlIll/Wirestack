@@ -157,5 +157,18 @@ class GeneratedBulkPathRegressionTest {
         let text = YJson.toJson(value, codec: PrimitiveContainerBulkMatrixJson)
         let decoded = YJson.fromJson(text, codec: PrimitiveContainerBulkMatrixJson)
         @Expect(YJson.toJson(decoded, codec: PrimitiveContainerBulkMatrixJson), text)
+
+        let bytes = YJson.toJsonBytes(value, codec: PrimitiveContainerBulkMatrixJson)
+        @Expect(String.fromUtf8(bytes), text)
+        let decodedBytes = YJson.fromJson(bytes, codec: PrimitiveContainerBulkMatrixJson)
+        @Expect(YJson.toJson(decodedBytes, codec: PrimitiveContainerBulkMatrixJson), text)
+
+        let input = YJsonByteArrayInputStream(bytes)
+        let decodedStream = YJson.fromJson(input, codec: PrimitiveContainerBulkMatrixJson)
+        @Expect(YJson.toJson(decodedStream, codec: PrimitiveContainerBulkMatrixJson), text)
+
+        let output = YJsonMemoryOutputStream()
+        YJson.writeJson(value, output, codec: PrimitiveContainerBulkMatrixJson)
+        @Expect(output.toUtf8String(), text)
     }
 }

@@ -6,6 +6,7 @@
   version = "0.1.0"
   output-type = "static"
   compile-option = "-O2"
+  link-option = "-L target/native -lyjson_scanner"
 
 [dependencies]
   yjson_native_primitives = { path = "../yjson_native_primitives" }

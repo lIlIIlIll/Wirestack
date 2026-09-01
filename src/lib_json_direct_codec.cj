@@ -235,7 +235,12 @@ public interface GeneratedCompactWriteCodecV1<T> <: GeneratedDirectWriteCodecV1<
     func writeCompactRaw(value: T, writer: GeneratedSupportV1Writer): Unit
 }
 
-
+/// Optional generated-code seam for nested compact objects. Parent codecs use
+/// it to retain one concrete writer cursor across the complete object graph.
+public interface GeneratedCompactCursorWriteCodecV1<T> <: GeneratedCompactWriteCodecV1<T> {
+    func writeCompactRawWithCursor(value: T, writer: GeneratedSupportV1Writer,
+        cursor: GeneratedSupportV1WriteCursor): Unit
+}
 /// Optional generated-code bulk seam. ArrayList resolves it once so an
 /// element codec can reuse one writer cursor across the complete loop.
 public interface GeneratedCompactArrayListElementCodecV1<T> {
@@ -2082,7 +2087,7 @@ public class YJson {
         GeneratedSupportV1.requireProtocolVersion(1)
         freezeYJsonRuntime()
         let writer = JsonDirectWriter(options)
-        codec.write(value, writer)
+        writeEncoded(value, codec, writer)
         writer.finishString()
     }
 
@@ -2103,7 +2108,7 @@ public class YJson {
         GeneratedSupportV1.requireProtocolVersion(1)
         freezeYJsonRuntime()
         let writer = JsonDirectWriter.bytes(config: options)
-        codec.write(value, writer)
+        writeEncoded(value, codec, writer)
         writer.finishBytes()
     }
 
@@ -2112,7 +2117,7 @@ public class YJson {
         GeneratedSupportV1.requireProtocolVersion(1)
         freezeYJsonRuntime()
         let writer = JsonDirectWriter(output, config: options)
-        codec.write(value, writer)
+        writeEncoded(value, codec, writer)
         writer.finish()
     }
 
@@ -2133,6 +2138,18 @@ public class YJson {
         result
     }
 
+    private static func writeEncoded<T>(value: T, codec: JsonCodec<T>,
+        writer: JsonDirectWriter): Unit {
+        match (codec) {
+            case compact: GeneratedCompactCursorWriteCodecV1<T> =>
+                if (writer.tryBeginGeneratedCompactRawValue()) {
+                    compact.writeCompactRawWithCursor(value, writer, writer.generatedCursorV1())
+                    return
+                }
+            case _ => ()
+        }
+        codec.write(value, writer)
+    }
     private static func decodeString<T>(text: String, codec: JsonCodec<T>,
         options: JsonReadOptions): T {
         GeneratedSupportV1.requireProtocolVersion(1)

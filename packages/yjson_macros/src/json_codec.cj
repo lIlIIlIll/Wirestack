@@ -674,6 +674,10 @@ private func compactRawCodecName(field: CodecField): String {
     "__yJsonCompactRaw_${field.name}"
 }
 
+private func compactRawCursorCodecName(field: CodecField): String {
+    "__yJsonCompactRawCursor_${field.name}"
+}
+
 private func compactRawFieldWrite(field: CodecField, value: String, first: String): String {
     let scalar = compactRawScalarFieldWrite(field, value, first)
     if (!scalar.isEmpty()) { return scalar }
@@ -681,14 +685,18 @@ private func compactRawFieldWrite(field: CodecField, value: String, first: Strin
     let nameKind = if (field.jsonNameExpr == "\"${field.name}\"") { "KnownName" } else { "Name" }
     if (field.isOption && !field.includeNull) {
         "if (${value}.isSome()) { ${first} = __writer.writeRawObjectEntry${nameKind}(" +
-            "${first}, ${field.jsonNameExpr}); match (${compactRawCodecName(field)}) { " +
+            "${first}, ${field.jsonNameExpr}); match (${compactRawCursorCodecName(field)}) { " +
+            "case Some(__rawCursor) => __rawCursor.writeCompactRawWithCursor(${value}, writer, __writer); " +
+            "case None => match (${compactRawCodecName(field)}) { " +
             "case Some(__raw) => __raw.writeCompactRaw(${value}, writer); " +
-            "case None => throw JsonException(\"Compact raw codec is unavailable\") } }"
+            "case None => throw JsonException(\"Compact raw codec is unavailable\") } } }"
     } else {
         "${first} = __writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); " +
-            "match (${compactRawCodecName(field)}) { " +
+            "match (${compactRawCursorCodecName(field)}) { " +
+            "case Some(__rawCursor) => __rawCursor.writeCompactRawWithCursor(${value}, writer, __writer); " +
+            "case None => match (${compactRawCodecName(field)}) { " +
             "case Some(__raw) => __raw.writeCompactRaw(${value}, writer); " +
-            "case None => throw JsonException(\"Compact raw codec is unavailable\") }"
+            "case None => throw JsonException(\"Compact raw codec is unavailable\") } }"
     }
 }
 
@@ -821,7 +829,9 @@ private func directScalarCursorFastRead(field: CodecField): String {
 }
 private func directFieldNeedsContext(field: CodecField): Bool {
     let typeText = field.typeText.replace(" ", "")
-    typeText == "ArrayList<String>" || typeText == "HashMap<String,Int64>" ||
+    typeText == "Array<Int64>" || typeText == "Array<String>" ||
+        typeText == "ArrayList<String>" || typeText == "HashMap<String,Int64>" ||
+        typeText == "HashMap<String,String>" || typeText == "HashMap<String,Array<Int64>>" ||
         typeText == "Option<String>" || typeText == "ArrayList<BigInt>" ||
         typeText == "HashMap<String,BigInt>" || typeText == "ArrayList<Decimal>" ||
         typeText == "HashMap<String,Decimal>"
@@ -1024,7 +1034,8 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     }
     let supportsCompactRaw = supportsCompactRawWrite(fields)
     let directInterface = if (supportsCompactRaw) {
-        "GeneratedCompactWriteCodecV1<${targetType}> & GeneratedCompactArrayListElementCodecV1<${targetType}>"
+        "GeneratedCompactCursorWriteCodecV1<${targetType}> & " +
+            "GeneratedCompactArrayListElementCodecV1<${targetType}>"
     } else { "GeneratedDirectWriteCodecV1<${targetType}>" }
     let codecInterfaces = if (supportsFastRead) {
         "GeneratedObjectCodecV1<${targetType}> & GeneratedCodecV1<${targetType}> & ${directInterface}"
@@ -1044,7 +1055,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             if (compactRawScalarFieldWrite(field, "__value", "__first").isEmpty() &&
                 directScalarWrite(field, "__value").isEmpty()) {
                 appendLine(sb, 1, "private let ${compactRawCodecName(field)}: Option<GeneratedCompactWriteCodecV1<${field.typeText}>> = match (${cachedFieldCodecName(field)}) { case __raw: GeneratedCompactWriteCodecV1<${field.typeText}> => Some(__raw); case _ => None<GeneratedCompactWriteCodecV1<${field.typeText}>> }")
-
+                appendLine(sb, 1, "private let ${compactRawCursorCodecName(field)}: Option<GeneratedCompactCursorWriteCodecV1<${field.typeText}>> = match (${cachedFieldCodecName(field)}) { case __rawCursor: GeneratedCompactCursorWriteCodecV1<${field.typeText}> => Some(__rawCursor); case _ => None<GeneratedCompactCursorWriteCodecV1<${field.typeText}>> }")
             }
         }
     }
