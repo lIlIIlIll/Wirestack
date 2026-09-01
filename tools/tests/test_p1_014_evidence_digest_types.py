@@ -177,6 +177,19 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             self.assertEqual(1, len(report["issues"]))
             self.assertIn("artifact-bytes", report["domain_counts"])
 
+    def test_inventory_rejects_alternate_hashlib_constructor_import(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            path = root / "tools/gates/new_tool.py"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "from hashlib import new\nvalue = new('sha256', b'x').hexdigest()\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertEqual("UNTYPED_DIGEST", report["issues"][0]["code"])
+
     def test_current_inventory_has_no_legacy_task_local_digest_calls(self) -> None:
         report = digest_inventory(self.ROOT)
         self.assertEqual("PASS", report["status"])

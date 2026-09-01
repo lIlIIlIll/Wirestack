@@ -240,12 +240,13 @@ def validate_artifact_identity(
     for name in EXPECTED_SUBJECTS:
         require(subject_map[name].get("verification") == "PASS", "HOSTED_NOT_VERIFIED", name)
         strict_digest(subject_map[name].get("sha256"), f"M7-030 {name}")
-        signed_payload = subject_map[name].get("signedPayloadSha256")
-        if signed_payload is not None:
-            strict_digest(signed_payload, f"M7-030 {name} signed payload")
-            if name == "artifact":
-                require(signed_payload == subject_map[name].get("sha256"),
-                        "ARTIFACT_MISMATCH", "M7-030 signed artifact")
+        signed_payload = strict_digest(
+            subject_map[name].get("signedPayloadSha256"),
+            f"M7-030 {name} signed payload",
+        )
+        if name == "artifact":
+            require(signed_payload == subject_map[name].get("sha256"),
+                    "ARTIFACT_MISMATCH", "M7-030 signed artifact")
         strict_digest(subject_map[name].get("bundleSha256"), f"M7-030 {name} bundle")
 
     documents_map = bundle.get("documents", {})
@@ -546,9 +547,7 @@ def build_candidate(
         if verify_current_sources
         else validate_recorded_sources(root, values)
     )
-    hosted = m7_030_linux_release.validate_hosted_report(
-        safe_path(root, DOCUMENT_PATHS["m7_030_hosted"])
-    )
+    hosted = m7_030_linux_release.validate_hosted_report_value(values["m7_030_hosted"])
     require(hosted.get("commit") == values["m7_030"].get("commit"),
             "HOSTED_COMMIT", "validation and hosted report differ")
 

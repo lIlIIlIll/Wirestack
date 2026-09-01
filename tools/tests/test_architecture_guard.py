@@ -55,6 +55,16 @@ class ArchitectureGuardTests(unittest.TestCase):
             )
             self.assertIn("untyped-evidence-digest", self.rules(root))
 
+    def test_repository_rejects_alternate_hashlib_constructor_import(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "from hashlib import new\nvalue = new('sha256', b'evidence').hexdigest()\n",
+            )
+            self.assertIn("untyped-evidence-digest", self.rules(root))
+
     def test_non_python_digest_requires_explicit_domain_marker(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)
