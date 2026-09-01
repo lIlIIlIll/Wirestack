@@ -11,6 +11,7 @@ import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 
+from tools import evidence_digest
 from tools import m7_030_linux_release as release
 
 
@@ -181,7 +182,9 @@ class M7030LinuxReleaseTest(unittest.TestCase):
                           "versionInfo": "5.5.1",
                           "checksums": [{"algorithm": "SHA256", "checksumValue": "4" * 64}]}]
         }
-        candidate["sbomSha256"] = release.sha256_bytes(release.canonical_json(sbom))
+        candidate["sbomSha256"] = evidence_digest.text_evidence_bytes_sha256(
+            release.canonical_json(sbom)
+        )
         advisory = {
             "schemaVersion": 1, "advisoryId": "WSA-TEST", "severity": "HIGH",
             "issuedUtc": "2026-01-01T00:00:00Z", "expiresUtc": "2099-01-01T00:00:00Z",
@@ -222,7 +225,9 @@ class M7030LinuxReleaseTest(unittest.TestCase):
                 "SPDXID": "SPDXRef-Package-TlsProvider-aws-lc", "versionInfo": "5.5.0",
                 "checksums": [{"algorithm": "SHA256", "checksumValue": "1" * 64}],
             }]}
-            old["sbomSha256"] = release.sha256_bytes(release.canonical_json(old_sbom))
+            old["sbomSha256"] = evidence_digest.text_evidence_bytes_sha256(
+                release.canonical_json(old_sbom)
+            )
             advisory = {
                 "schemaVersion": 1, "advisoryId": "WSA-ROLLBACK", "severity": "CRITICAL",
                 "issuedUtc": "2026-01-01T00:00:00Z", "expiresUtc": "2099-01-01T00:00:00Z",

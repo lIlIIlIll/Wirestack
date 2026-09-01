@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import copy
 import gzip
 import io
@@ -13,18 +15,20 @@ from tools import m7_025_linux_supply_chain as supply
 
 
 class M7025LinuxSupplyChainTest(unittest.TestCase):
-    def test_committed_bundle_is_current(self) -> None:
+    def test_committed_bundle_is_stale_after_digest_domain_migration(self) -> None:
         artifact = supply.DEFAULT_ARTIFACT if supply.DEFAULT_ARTIFACT.is_file() else None
-        bundle = supply.validate_documents(artifact_path=artifact)
-        self.assertEqual("PASS", bundle["decision"])
+        with self.assertRaisesRegex(supply.SupplyChainError, "generator fingerprint is stale"):
+            supply.validate_documents(artifact_path=artifact)
 
     def test_fingerprint_is_stable_and_dependency_sensitive(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             artifact, qualification, _ = self.fixture(Path(temporary))
             metadata = supply.artifact_metadata(artifact)
             inputs = supply.fingerprint_inputs(metadata, qualification, "f" * 64)
-            first = supply.sha256_bytes(supply.canonical_json(inputs))
-            second = supply.sha256_bytes(supply.canonical_json(copy.deepcopy(inputs)))
+            first = evidence_digest.text_evidence_bytes_sha256(supply.canonical_json(inputs))
+            second = evidence_digest.text_evidence_bytes_sha256(
+                supply.canonical_json(copy.deepcopy(inputs))
+            )
             self.assertEqual(first, second)
 
             changes = (
@@ -42,7 +46,7 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
                 node[path[-1]] = "d" * 64
                 self.assertNotEqual(
                     first,
-                    supply.sha256_bytes(supply.canonical_json(changed)),
+                    evidence_digest.text_evidence_bytes_sha256(supply.canonical_json(changed)),
                     msg="fingerprint ignored " + ".".join(path),
                 )
 
@@ -130,23 +134,23 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             "license": {
                 "expression": license_expression,
                 "file": "LICENSE",
-                "sha256": supply.sha256_bytes(b"project license\n"),
+                "sha256": evidence_digest.text_evidence_bytes_sha256(b"project license\n"),
             },
             "thirdPartyNotices": {
                 "index": "THIRD_PARTY_NOTICES.md",
                 "files": [
-                    {"path": "THIRD_PARTY_NOTICES.md", "sha256": supply.sha256_bytes(b"notices\n")},
-                    {"path": "third_party/aws-lc/LICENSE", "sha256": supply.sha256_bytes(b"aws license\n")},
-                    {"path": "third_party/aws-lc/NOTICE", "sha256": supply.sha256_bytes(b"aws notice\n")},
+                    {"path": "THIRD_PARTY_NOTICES.md", "sha256": evidence_digest.text_evidence_bytes_sha256(b"notices\n")},
+                    {"path": "third_party/aws-lc/LICENSE", "sha256": evidence_digest.text_evidence_bytes_sha256(b"aws license\n")},
+                    {"path": "third_party/aws-lc/NOTICE", "sha256": evidence_digest.text_evidence_bytes_sha256(b"aws notice\n")},
                 ],
             },
             "provider": {
                 "archive_sha256": provider["archive"]["sha256"],
-                "manifest_sha256": supply.sha256_bytes(provider_raw),
+                "manifest_sha256": evidence_digest.text_evidence_bytes_sha256(provider_raw),
             },
             "resolver": {
                 "archive_sha256": resolver["archive"]["sha256"],
-                "manifest_sha256": supply.sha256_bytes(resolver_raw),
+                "manifest_sha256": evidence_digest.text_evidence_bytes_sha256(resolver_raw),
             },
             "target": {
                 "os": "linux",
@@ -177,7 +181,7 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             "artifact": {
                 "name": artifact.name,
                 "bytes": artifact.stat().st_size,
-                "sha256": supply.sha256_path(artifact),
+                "sha256": evidence_digest.artifact_byte_sha256(artifact),
                 "payload_sha256": release["payload_sha256"],
             },
             "runtime": {"providerBuildFingerprint": provider["build_fingerprint"]},

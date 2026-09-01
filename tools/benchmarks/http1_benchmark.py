@@ -2,8 +2,9 @@
 """Run the pinned Linux HTTP/1 benchmark and emit machine-readable evidence."""
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import os
 import platform
@@ -78,14 +79,6 @@ main(): Int64 {
 
 class BenchmarkError(RuntimeError):
     pass
-
-
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        while chunk := source.read(1024 * 1024):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def terminate_process_group(process: subprocess.Popen[str]) -> None:
@@ -309,12 +302,12 @@ def classify(cases: Mapping[str, Mapping[str, Any]],
 def load_and_verify_stdx(reference_path: Path, archive: Path,
                          extracted_root: Path) -> tuple[dict[str, Any], Path]:
     reference = json.loads(reference_path.read_text(encoding="utf-8"))
-    if sha256(archive) != reference["archive_sha256"]:
+    if evidence_digest.artifact_byte_sha256(archive) != reference["archive_sha256"]:
         raise BenchmarkError("stdx archive digest does not match the pinned reference")
     dynamic_dir = extracted_root / reference["dynamic_directory"]
     for filename, expected in reference["module_sha256"].items():
         path = dynamic_dir / filename
-        if not path.is_file() or sha256(path) != expected:
+        if not path.is_file() or evidence_digest.artifact_byte_sha256(path) != expected:
             raise BenchmarkError(f"stdx module digest mismatch: {filename}")
     return reference, dynamic_dir
 
@@ -471,16 +464,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         },
         "stdx_reference": {
             **reference,
-            "reference_sha256": sha256(reference_path),
+            "reference_sha256": evidence_digest.text_evidence_sha256(reference_path),
             "archive_path": str(args.stdx_archive.resolve()),
             "extracted_root": str(args.stdx_root.resolve()),
             "compile_command": stdx_compile,
-            "driver_source_sha256": hashlib.sha256(STDX_SOURCE.encode()).hexdigest(),
+            "driver_source_sha256": evidence_digest.text_evidence_bytes_sha256(STDX_SOURCE.encode()),
         },
         "source": {
-            "benchmark_runner_sha256": sha256(Path(__file__)),
-            "public_harness_sha256": sha256(repo / "src/http/benchmark_harness_test.cj"),
-            "stream_harness_sha256": sha256(repo / "src/internal/http1/benchmark_harness_test.cj"),
+            "benchmark_runner_sha256": evidence_digest.text_evidence_sha256(Path(__file__)),
+            "public_harness_sha256": evidence_digest.text_evidence_sha256(repo / "src/http/benchmark_harness_test.cj"),
+            "stream_harness_sha256": evidence_digest.text_evidence_sha256(repo / "src/internal/http1/benchmark_harness_test.cj"),
             "build_commands": build_commands,
             "build_working_directory": str(benchmark_repo),
         },

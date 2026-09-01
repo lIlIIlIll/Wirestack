@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Fail-closed validator for M0-016 provider specifications and evidence."""
 from __future__ import annotations
-import argparse, datetime as dt, hashlib, json, re, sys
+
+from tools import evidence_digest
+import argparse, datetime as dt, json, re, sys
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -56,13 +58,6 @@ def load(path: Path) -> dict[str, Any]:
     require(isinstance(value, dict), f"{path}: root must be an object")
     return value
 
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
 def validate_exported_symbols(build: Mapping[str, Any]) -> None:
     inventory = build.get("exported_symbol_inventory")
     require(isinstance(inventory, dict), "exported-symbol inventory required")
@@ -81,7 +76,7 @@ def validate_exported_symbols(build: Mapping[str, Any]) -> None:
     require(inventory.get("count") == len(symbols),
             "exported-symbol count mismatch")
     encoded = "".join(f"{symbol}\n" for symbol in symbols).encode("utf-8")
-    require(inventory.get("sha256") == hashlib.sha256(encoded).hexdigest(),
+    require(inventory.get("sha256") == evidence_digest.text_evidence_bytes_sha256(encoded),
             "exported-symbol digest mismatch")
 
 def validate_archive_inventory(value: Any, name: str) -> None:
@@ -112,7 +107,7 @@ def validate_tool_identity(value: Any, name: str) -> None:
             len(output.encode("utf-8")) <= MAX_TOOL_VERSION_BYTES,
             f"{name} bounded version output")
     require(value.get("output_sha256") ==
-            hashlib.sha256(output.encode("utf-8")).hexdigest(),
+            evidence_digest.text_evidence_bytes_sha256(output.encode("utf-8")),
             f"{name} version digest")
 
 def validate_build_provenance(provenance: Any, provider: str,
@@ -166,7 +161,7 @@ def validate_build_provenance(provenance: Any, provider: str,
             "provider build environment total bound")
     require(bool(environment["PATH"]), "provider build PATH required")
     require(provenance.get("patches") == [], "provider patch set must be explicit")
-    require(provenance.get("patch_set_sha256") == hashlib.sha256(b"[]\n").hexdigest(),
+    require(provenance.get("patch_set_sha256") == evidence_digest.text_evidence_bytes_sha256(b"[]\n"),
             "provider patch-set digest")
     expected_instrumentation = "address+undefined-sanitizer" if diagnostic else "none"
     require(provenance.get("instrumentation") == expected_instrumentation,
@@ -558,7 +553,7 @@ def validate_license_bundle(result_path: Path, result: Mapping[str, Any],
         require(root == manifest_path or root in manifest_path.parents,
                 "provider license bundle path escapes result directory")
     require(manifest_path.is_file(), "provider license bundle manifest is missing")
-    require(sha256_path(manifest_path) == info["sha256"],
+    require(evidence_digest.artifact_byte_sha256(manifest_path) == info["sha256"],
             "provider license bundle manifest digest mismatch")
     manifest = load(manifest_path)
     require(manifest.get("schema_version") == 1, "provider license manifest schema")
@@ -588,7 +583,7 @@ def validate_license_bundle(result_path: Path, result: Mapping[str, Any],
         require(file_path.is_file(), "provider license file is missing")
         size = file_path.stat().st_size
         require(size == entry.get("bytes"), "provider license file size mismatch")
-        require(sha256_path(file_path) == entry.get("sha256"),
+        require(evidence_digest.artifact_byte_sha256(file_path) == entry.get("sha256"),
                 "provider license file digest mismatch")
         observed_bytes += size
     require(observed_bytes == info["total_bytes"],
@@ -634,7 +629,7 @@ def validate_retained_results(matrix: Mapping[str, Any], spec: Mapping[str, Any]
         require(result["provider"] == cell["provider"], f"{result_path}: provider mismatch")
         require(result["platform"] == cell["platform"], f"{result_path}: platform mismatch")
         require(result["status"] == cell["status"], f"{result_path}: status mismatch")
-        require(sha256_path(result_path) == cell["sha256"], f"{result_path}: sha256 mismatch")
+        require(evidence_digest.text_evidence_sha256(result_path) == cell["sha256"], f"{result_path}: sha256 mismatch")
         if cell["status"] in {"PASS", "PARTIAL"}:
             repo_root = repo.resolve()
             manifest_path = (repo_root / cell["license_bundle"]["manifest"]).resolve()
@@ -642,7 +637,7 @@ def validate_retained_results(matrix: Mapping[str, Any], spec: Mapping[str, Any]
                     f"{result_path}: provider license manifest path escapes repository")
             require(manifest_path.is_file(),
                     f"{result_path}: provider license manifest is missing")
-            require(sha256_path(manifest_path) == cell["license_bundle"]["sha256"],
+            require(evidence_digest.artifact_byte_sha256(manifest_path) == cell["license_bundle"]["sha256"],
                     f"{result_path}: provider license manifest matrix digest mismatch")
             require(result["build"]["license_bundle"]["sha256"] ==
                     cell["license_bundle"]["sha256"],
