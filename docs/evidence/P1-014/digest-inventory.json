@@ -1579,25 +1579,25 @@
     },
     {
       "classification": "text-evidence",
-      "line": 185,
+      "line": 186,
       "path": "tools/tests/test_m7_030_linux_release.py",
       "symbol": "text_evidence_bytes_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 228,
+      "line": 229,
       "path": "tools/tests/test_m7_030_linux_release.py",
       "symbol": "text_evidence_bytes_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 387,
+      "line": 388,
       "path": "tools/tests/test_m7_030_linux_release.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "artifact-bytes",
-      "line": 389,
+      "line": 390,
       "path": "tools/tests/test_m7_030_linux_release.py",
       "symbol": "artifact_byte_sha256"
     },

@@ -4,8 +4,8 @@
 
 P1-014 is complete. Linux and GitHub Windows CRLF fault injection pass, every
 digest callsite has an explicit domain, and the task-level and canonical
-repository checks pass. GitHub Actions run `33490131346` produced the retained
-Windows report for PR #151 source head `982bcbfd` (merge revision `1a56133c`).
+repository checks pass. GitHub Actions run `33498863198` produced the retained
+Windows report for PR #151 source head `b3b300e1` (merge revision `40b76be4`).
 
 ## Implemented boundary
 
@@ -18,16 +18,19 @@ Windows report for PR #151 source head `982bcbfd` (merge revision `1a56133c`).
 - `tools/repository/repository_tooling.py` uses only the text-evidence domain for
   JSON reports and manifest source paths.
 - All repository SHA-256 callsites use an explicit text-evidence or artifact-byte
-  entry. Python direct imports and unmarked shell/workflow hash commands fail the
-  guard. The inventory contains 307 classified calls and no legacy entry.
+  entry. Python direct imports, assigned subprocess commands, `os.system`/`os.popen`
+  launches and unmarked shell/workflow hash commands fail the guard. Python files
+  under both `tools/` and `scripts/` are scanned. The inventory contains 308
+  classified calls and no legacy entry.
 - The architecture guard rejects raw SHA-256 outside the typed implementation,
-  ambiguous digest helpers, obvious text paths entering the byte domain,
-  untyped repository-evidence comparisons and UTF-8-to-byte fallback.
+  ambiguous digest helpers, positional, keyword and assigned text paths entering
+  the byte domain, untyped repository-evidence comparisons and UTF-8-to-byte
+  fallback.
 - Native CRLF probes read a tracked checkout fixture, reject a matching `-text`
   override, and compare the complete OS, architecture and libc identity.
 - M7-030 records canonical text and signed-payload byte digests separately for
   SBOM subjects. License bundle manifests and their UTF-8 text files use the
-  text-evidence domain; invalid UTF-8 fails closed.
+  text-evidence domain; invalid UTF-8 fails closed with a structured CLI report.
 - Provider-matrix CI validates pins and matrix structure before producing fresh
   native results. Full retained-result validation remains explicit and rejects
   pre-migration license-file digests.
@@ -43,13 +46,13 @@ entries remain unchanged because they belong to other tasks.
 | Evidence | Result |
 |---|---|
 | Test-plan validator | PASS, 13 paths, 7 scenarios, 11 tests |
-| P1 task-contract unit and fault-injection tests | PASS, 78 tests |
-| Repository-tool Python regressions | PASS, 362 tests |
+| P1 task-contract unit and fault-injection tests | PASS, 83 tests |
+| Repository-tool Python regressions | PASS, 368 tests |
 | Architecture guard | PASS, 0 violations |
 | Linux CRLF probe | PASS |
 | Digest callsite inventory | PASS, 308 explicitly classified calls, 0 issues |
-| GitHub Windows CRLF probe | PASS, run `33495901600`, source head `4380c1ee`, merge `506c1f49`; effective `text` attribute is `unspecified`, tracked fixture checked out as CRLF |
-| Hosted Gate Harness | PASS, run `33495901826` |
+| GitHub Windows CRLF probe | PASS, run `33498863198`, source head `b3b300e1`, merge `40b76be4`; effective `text` attribute is `unspecified`, tracked fixture checked out as CRLF |
+| Hosted Gate Harness | PASS, run `33498863294` |
 | `scripts/check-fast --json` | PASS |
 | `scripts/check` | PASS, including 178 gate Python tests, 24 benchmark Python tests, and 588 passed/23 skipped Cangjie tests |
 | `scripts/check-task P1-014` | PASS, all four commands passed |
