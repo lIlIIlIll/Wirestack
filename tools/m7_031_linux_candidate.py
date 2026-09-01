@@ -240,6 +240,12 @@ def validate_artifact_identity(
     for name in EXPECTED_SUBJECTS:
         require(subject_map[name].get("verification") == "PASS", "HOSTED_NOT_VERIFIED", name)
         strict_digest(subject_map[name].get("sha256"), f"M7-030 {name}")
+        signed_payload = subject_map[name].get("signedPayloadSha256")
+        if signed_payload is not None:
+            strict_digest(signed_payload, f"M7-030 {name} signed payload")
+            if name == "artifact":
+                require(signed_payload == subject_map[name].get("sha256"),
+                        "ARTIFACT_MISMATCH", "M7-030 signed artifact")
         strict_digest(subject_map[name].get("bundleSha256"), f"M7-030 {name} bundle")
 
     documents_map = bundle.get("documents", {})

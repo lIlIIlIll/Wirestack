@@ -45,6 +45,27 @@ class ArchitectureGuardTests(unittest.TestCase):
             )
             self.assertIn("untyped-evidence-digest", self.rules(root))
 
+    def test_repository_rejects_direct_sha256_import(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "from hashlib import sha256\nvalue = sha256(b'evidence').hexdigest()\n",
+            )
+            self.assertIn("untyped-evidence-digest", self.rules(root))
+
+    def test_non_python_digest_requires_explicit_domain_marker(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            path = self.write(root, "scripts/check-report", "sha256sum report.json\n")
+            self.assertIn("untyped-non-python-digest", self.rules(root))
+            path.write_text(
+                "# wirestack-digest-domain: artifact-bytes-v1\nsha256sum report.json\n",
+                encoding="utf-8",
+            )
+            self.assertNotIn("untyped-non-python-digest", self.rules(root))
+
     def test_repository_rejects_ambiguous_digest_helper(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)

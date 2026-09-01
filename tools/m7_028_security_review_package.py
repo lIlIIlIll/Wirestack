@@ -107,9 +107,16 @@ def load_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def text_evidence_sha256(path: Path) -> str:
+    try:
+        return evidence_digest.text_evidence_sha256(path)
+    except evidence_digest.DigestError as error:
+        raise ReviewPackageError(error.code, str(path)) from error
+
+
 def build_index(root: Path = ROOT) -> dict[str, Any]:
     documents = [
-        {"topic": topic, "path": path, "sha256": evidence_digest.text_evidence_sha256(safe_path(root, path))}
+        {"topic": topic, "path": path, "sha256": text_evidence_sha256(safe_path(root, path))}
         for topic, path in DOCUMENTS
     ]
     evidence = [
@@ -117,7 +124,7 @@ def build_index(root: Path = ROOT) -> dict[str, Any]:
             "topic": topic,
             "sourceTask": task,
             "path": path,
-            "sha256": evidence_digest.text_evidence_sha256(safe_path(root, path)),
+            "sha256": text_evidence_sha256(safe_path(root, path)),
             "state": state,
             "gating": gating,
         }
@@ -161,7 +168,7 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
         require(isinstance(item, dict), "SCHEMA", f"documents[{position}]")
         exact_keys(item, {"topic", "path", "sha256"}, f"documents[{position}]")
         path = safe_path(root, item["path"])
-        require(evidence_digest.text_evidence_sha256(path) == item["sha256"], "DIGEST_MISMATCH", item["path"])
+        require(text_evidence_sha256(path) == item["sha256"], "DIGEST_MISMATCH", item["path"])
         topics.add(item["topic"])
         scanned_files.add(path)
 
@@ -170,7 +177,7 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
         require(isinstance(item, dict), "SCHEMA", f"evidence[{position}]")
         exact_keys(item, {"topic", "sourceTask", "path", "sha256", "state", "gating"}, f"evidence[{position}]")
         path = safe_path(root, item["path"])
-        require(evidence_digest.text_evidence_sha256(path) == item["sha256"], "DIGEST_MISMATCH", item["path"])
+        require(text_evidence_sha256(path) == item["sha256"], "DIGEST_MISMATCH", item["path"])
         scanned_files.add(path)
         state = item["state"]
         require(state in {"CURRENT_PASS", "CURRENT_BOUND_INPUT", "STALE_AFTER_M7_032", "HISTORICAL_NON_GATING"}, "EVIDENCE_STATE", str(state))
@@ -231,7 +238,7 @@ def build_report(index_path: Path, summary: Mapping[str, Any]) -> dict[str, Any]
         "decision": "PASS",
         "acceptance_status": "PASS",
         "compatibilityPolicy": COMPATIBILITY_POLICY,
-        "indexSha256": evidence_digest.text_evidence_sha256(index_path),
+        "indexSha256": text_evidence_sha256(index_path),
         **summary,
         "checks": {
             "requiredTopics": "PASS",
