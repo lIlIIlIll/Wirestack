@@ -43,13 +43,13 @@ entries remain unchanged because they belong to other tasks.
 | Evidence | Result |
 |---|---|
 | Test-plan validator | PASS, 13 paths, 7 scenarios, 11 tests |
-| P1 task-contract unit and fault-injection tests | PASS, 76 tests |
-| Repository-tool Python regressions | PASS, 360 tests |
+| P1 task-contract unit and fault-injection tests | PASS, 78 tests |
+| Repository-tool Python regressions | PASS, 362 tests |
 | Architecture guard | PASS, 0 violations |
 | Linux CRLF probe | PASS |
-| Digest callsite inventory | PASS, 307 explicitly classified calls, 0 issues |
-| GitHub Windows CRLF probe | PASS, run `33492057837`, source head `972571f3`, merge `a2228585`; tracked fixture checked out as CRLF |
-| Hosted Gate Harness | PASS, run `33490131631` |
+| Digest callsite inventory | PASS, 308 explicitly classified calls, 0 issues |
+| GitHub Windows CRLF probe | PASS, run `33495901600`, source head `4380c1ee`, merge `506c1f49`; effective `text` attribute is `unspecified`, tracked fixture checked out as CRLF |
+| Hosted Gate Harness | PASS, run `33495901826` |
 | `scripts/check-fast --json` | PASS |
 | `scripts/check` | PASS, including 178 gate Python tests, 24 benchmark Python tests, and 588 passed/23 skipped Cangjie tests |
 | `scripts/check-task P1-014` | PASS, all four commands passed |

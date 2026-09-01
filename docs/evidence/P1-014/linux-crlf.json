@@ -30,6 +30,7 @@
       "sha256": "e49c81e2d2f84e259d40e2fb8192f3bcd198b355184845d76d8f58807d0d78ee"
     }
   },
+  "effective_text_attribute": "unspecified",
   "expected_platform": "linux-x86_64-glibc",
   "gitattributes_dependency": false,
   "invalid_utf8": "REJECTED",
@@ -40,7 +41,7 @@
     "machine": "x86_64",
     "system": "Linux"
   },
-  "revision": "6d1011dfecc33a23e95a6705eecae204c4ef8c37",
+  "revision": "768a89d731e485620f5a2afd2b6fe4f3ba3ce60d",
   "schema_version": 1,
   "status": "PASS",
   "text_digests": {
