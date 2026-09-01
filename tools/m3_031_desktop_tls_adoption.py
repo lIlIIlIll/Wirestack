@@ -245,12 +245,32 @@ def validate_hosted_run(root: Path, raw: Mapping[str, Any]) -> dict[str, Any]:
     artifacts = raw.get("artifacts")
     if not isinstance(artifacts, list) or len(artifacts) != 2:
         raise AdoptionError("INCOMPLETE_RESULT", "hosted-run requires two native artifacts")
-    expected_names = {
-        f"m3-031-windows-x86_64-{revision}",
-        f"m3-031-macos-arm64-{revision}",
+    expected_artifacts = {
+        f"m3-031-windows-x86_64-{revision}": (
+            "docs/evidence/M3-031/windows-x86_64/provider-result.json",
+            "docs/evidence/M3-031/windows-x86_64/validation.json",
+        ),
+        f"m3-031-macos-arm64-{revision}": (
+            "docs/evidence/M3-031/macos-arm64/provider-result.json",
+            "docs/evidence/M3-031/macos-arm64/validation.json",
+        ),
     }
-    if {item.get("name") for item in artifacts if isinstance(item, dict)} != expected_names:
+    by_name = {
+        item.get("name"): item for item in artifacts if isinstance(item, dict)
+    }
+    if set(by_name) != set(expected_artifacts):
         raise AdoptionError("STALE_REVISION", "hosted artifacts are not bound to revision")
+    for name, (result_relative, validation_relative) in expected_artifacts.items():
+        artifact = by_name[name]
+        if (
+            artifact.get("provider_result_sha256")
+            != sha256_path(root / result_relative)
+            or artifact.get("validation_sha256")
+            != sha256_path(root / validation_relative)
+        ):
+            raise AdoptionError(
+                "STALE_SOURCE", f"{name}: retained files differ from hosted artifact"
+            )
     return {
         "schema_version": 1,
         "task_id": "M3-031",
@@ -563,12 +583,29 @@ def validate_provider_result(
     source = raw.get("source")
     provider_manifest = load_json(ROOT / "native/tls/aws_lc/provider.json")
     expected_source = provider_manifest.get("source")
-    if not isinstance(source, dict) or not isinstance(expected_source, dict) or any(
+    if (
+        provider_manifest.get("provider_id") != PINNED_PROVIDER
+        or provider_manifest.get("provider_version") != PINNED_PROVIDER_VERSION
+        or not isinstance(expected_source, dict)
+        or expected_source.get("commit") != PINNED_COMMIT
+    ):
+        raise AdoptionError("PROVIDER", "approved AWS-LC provider pin mismatch")
+    if not isinstance(source, dict) or any(
         source.get(field) != expected_source.get(field)
         for field in ("kind", "commit", "tree", "content_sha256")
     ):
         raise AdoptionError("PROVIDER", "AWS-LC source identity mismatch")
     spec = load_json(ROOT / "tools/tls_provider_poc/providers.json")
+    provider_spec = next(
+        (item for item in spec.get("providers", []) if item.get("id") == PINNED_PROVIDER),
+        None,
+    )
+    if (
+        not isinstance(provider_spec, dict)
+        or provider_spec.get("version") != PINNED_PROVIDER_VERSION
+        or provider_spec.get("commit") != PINNED_COMMIT
+    ):
+        raise AdoptionError("PROVIDER", "approved AWS-LC PoC pin mismatch")
     try:
         poc_validate.validate_result(raw, spec, expected_revision)
     except poc_validate.ValidationError as error:
