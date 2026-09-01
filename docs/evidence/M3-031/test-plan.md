@@ -26,6 +26,8 @@ complete this task.
 | P007 | desktop task dependencies use M3-031 and retain original acceptance text | exact backlog row audit | reachable | Only four desktop rows change dependencies. |
 | P008 | mobile M4 dependencies and device requirements remain unchanged | exact backlog row audit | reachable | M3-031 does not unlock mobile work. |
 | P009 | a report succeeds or fails while writing | same-directory atomic replacement | reachable | A reader sees one complete JSON document or the old file. |
+| P010 | provider validation targets an alternate repository root | root-scoped manifest and provider-spec loading | reachable | Validation never mixes metadata from the tool's own checkout with the selected tree. |
+| P011 | current resolver native source differs from the retained native report | current-tree, evidence-inventory and report-input digest comparison | reachable error | Native dependency drift fails even when unrelated historical inputs use sealed-inventory semantics. |
 
 ## Input-domain partitioning
 
@@ -58,6 +60,8 @@ complete this task.
 | S006 | rewritten desktop dependency rows | current backlog | P007 | accept exact migration | four dependency fields match ADR-0007 and acceptance text is retained | architecture | P0 |
 | S007 | current M4 rows | current backlog | P008 | remain unchanged | mobile prerequisites and native-device wording remain present | regression | P0 |
 | S008 | report write interrupted before replacement | existing report | P009 | preserve complete old report | no temporary file remains after handled failure | lifecycle | P1 |
+| S009 | alternate root has a moved AWS-LC manifest pin | otherwise valid provider result | P010 | reject | selected root controls both manifest and provider-spec validation | fault-injection | P0 |
+| S010 | current native resolver source drifts after retained execution | otherwise valid dependency evidence | P011 | reject | stable `STALE_SOURCE` identifies the native input | fault-injection | P0 |
 
 ## Test-plan matrix
 
@@ -72,6 +76,8 @@ complete this task.
 | T007 | S007 | P008 | M4-001 through M4-014 rows | PASS | original Core dependencies and device language remain | regression |
 | T008 | S008 | P009 | atomic JSON write with replacement failure injection | PASS | old JSON remains complete and temporary path is removed | unit,lifecycle |
 | T009 | S001,S003,S004,S006,S007 | P001,P002,P004,P005,P007,P008 | task-level gate | PASS | zero failed commands, zero skipped acceptance commands | task |
+| T010 | S009 | P010 | valid result plus moved manifest under `--root` | FAIL | `PROVIDER` is derived from the selected tree | fault-injection |
+| T011 | S010 | P011 | mutate the current Windows resolver source after sealing | FAIL | `STALE_SOURCE` applies even when broad historical-source verification is disabled | fault-injection |
 
 ## Excluded gates
 
