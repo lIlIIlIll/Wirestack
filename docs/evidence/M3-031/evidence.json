@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-08-31T06:51:54.448564Z",
+  "generated_at_utc": "2026-09-01T01:45:52.837131Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,75 +11,75 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/core-prerequisite-audit.json",
-      "sha256": "97c8181eb0ba89f2743094e883ab5b86b3081c18e992e531b7e47297659ed0c9",
+      "sha256": "82c60c38f078b9055a9dd068fb67398669fd08903a4e56f032ceb2d64a086e94",
       "source_task": "M3-031"
     },
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/windows-x86_64/provider-result.json",
-      "sha256": "cdbacfb4a90a39ebd27a0621fd31e51a643b8b04264c69c41ac2cdd897e4ecdc",
+      "sha256": "90b3434fe529c5d40a1506218bd59be3ef779e034cd3d6a25fed6af66e3f3385",
       "source_task": "M3-031"
     },
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/windows-x86_64/validation.json",
-      "sha256": "c52367fe3b0f3224c6a8ad701c505f39adfae4392a0096be093d6ce756ec2f8b",
+      "sha256": "0d0cbca2a2f65a4f2d40ff682ac986e65745acc2b68890ab9259b59de87705c7",
       "source_task": "M3-031"
     },
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/macos-arm64/provider-result.json",
-      "sha256": "18b248c92e20ceaf7275a6321f39416178dc3bcecc099a5f3e3970bfe8fac96a",
+      "sha256": "4a75017eaf9df963d0ae5b4181626f50d598c6c921ba226ddac6847b37520ec3",
       "source_task": "M3-031"
     },
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/macos-arm64/validation.json",
-      "sha256": "7085087a98b067acfabdc5df86c53cf434c70454dc73fd63280f92f6ab2fa89a",
+      "sha256": "dd230a4e7a35d2b00bdda3f2cab00c4d488ae5dc567873264643c8c06f26cc6c",
       "source_task": "M3-031"
     },
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/desktop-provider-matrix.json",
-      "sha256": "5a9698dae27b2d7a767e40270946077697d945c95393f2511cfa6d52e0c3db5d",
+      "sha256": "04daf1bf7c83a3b264d5d16a0338ffc3f91c7035d72e9f3dd2065b7a4f57bd6a",
       "source_task": "M3-031"
     },
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/hosted-run.json",
-      "sha256": "3d168ec1ab2b21ef07ccff077d158ebe787883d56bf6b8f108f3dd1420a9eac8",
+      "sha256": "05dd55cbe355cb993e7bd73ec7f0b3e6cf1d84d3d778e2f694a62894bf62224d",
       "source_task": "M3-031"
     },
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/task-check.json",
-      "sha256": "ba775dd3db74f112be494aae5cf404381b212f4f65f9e610b5870bbf99a76d12",
+      "sha256": "4cf026ea6c8a4f60578b532754776d22bb08c0e9fc6ccf5852abe67b3d606be5",
       "source_task": "M3-031"
     }
   ],
-  "revision": "3ac6fb69985c23574efb389c77c4086c86966bec",
+  "revision": "88a0cd21216e4d0869fadd24bbd0c7f6185ddc73",
   "schema_version": 1,
   "source_sha256": {
-    ".gitattributes": "faf8f88292ca61c9a1ae138b912365c305f4fd0d50cde194da0df8ec4edbbf4a",
+    ".gitattributes": "db1f9a77293f64b853a8219c44ea9ab1c49c1268f25efd606b3d0a3b9e8ec3c3",
     ".github/workflows/m3-031-desktop-tls-adoption.yml": "958a221cf44ae477359e851fd533ab0b3d304f3f2d0ff313a15171a705e662d4",
-    ".gitignore": "dd41c411cb7958e7cc9e9899594400619535fffcfca02e03c8709bc1a173f4f2",
-    "docs/architecture/adr/0007-desktop-tls-adoption.md": "0b8e70cf76058d0931ac1005ee12419c77a87165b98ceee8a782b140a3a84fb5",
-    "docs/evidence/M2-004/evidence.json": "08a835b786a8517fd7e20d69f3cc271fe6f74512876a89524a7ed52a007ff47d",
+    ".gitignore": "8d3b6b588606a924185ecf395692951d17595df93c888501d4811942fd749283",
+    "docs/architecture/adr/0007-desktop-tls-adoption.md": "af8c330dbc948666168d4f09332e4328e6face6db80d125db1d5467c72aa08d3",
+    "docs/evidence/M2-004/evidence.json": "5ddf3035770ee4bea5120713cc91538557c682e53707c3eabc6aea1dfdb81459",
     "docs/evidence/M2-004/windows-x86_64/report.json": "5d8ba504bc883223ff8c7aff72def24ba27026b5f5d59cf023fb6e499bf1372d",
     "docs/evidence/M2-004/windows-x86_64/validation.json": "9d1e27703172abc87c7731c3b5a71e3309dd5bb0b8f307516caa785f84e2f0dc",
-    "docs/evidence/M2-006/evidence.json": "59bf4670d09f7b4ec81f3e8fe08c1e066b136cceb4421aae540cc64fedc97db9",
-    "docs/evidence/M2-006/ios-simulator-arm64/report.json": "aaf86ed3456e251dc44d539dc3beabdea714b5c9e917f389079631ad9b87233a",
-    "docs/evidence/M2-006/ios-simulator-arm64/validation.json": "7fe7a4fe1a6ae7c62f38be9e077348cf898e78ed5445bfbcba7b83e7242251d8",
-    "docs/evidence/M2-006/macos-arm64/report.json": "111e471f1f481789d7774b8c36ef65606b943deab93aa65d4464f8409f8c5ce6",
-    "docs/evidence/M2-006/macos-arm64/validation.json": "00416b7f125a7fe0cb3fc576d8cd6c16a7ed1206f1866049151697086088055b",
+    "docs/evidence/M2-006/evidence.json": "8fcf5e5ef799c475f8586ed50e4b013522803391bcecfd90efc117ca05c3aee8",
+    "docs/evidence/M2-006/ios-simulator-arm64/report.json": "0b0a54e864f69f1fee456b91aa5e9f320a0e748baed1eed3ac91ddad74a3179a",
+    "docs/evidence/M2-006/ios-simulator-arm64/validation.json": "05791db621572a7853d0bebe11792c983d9a448439aecd55e448c6ac25e01a1c",
+    "docs/evidence/M2-006/macos-arm64/report.json": "200d0800209c71bc7794af0fc41954297c4c78dc4c9b34e2122fa82c09058b92",
+    "docs/evidence/M2-006/macos-arm64/validation.json": "e5b30901c18f3c4d6806ee84fa7aa2fdac0157fbce679295beadeede534b6ff8",
     "docs/evidence/M3-028/README.md": "6c82678dfb3e31285896f3df31127422a4c4ff338d2c18cf4a08cd5ea648e9b5",
     "docs/evidence/M3-030/evidence.json": "76ec0141209abca23f498ceae2c8a7368722522fb95386f036c9a8de20089a20",
     "docs/evidence/M3-030/native-abi-report.json": "03881988db42d4e32579fa1fff2ff6e4ab045ed2fab3eedee26ccae0a2d91d35",
     "docs/evidence/M3-030/test-provider-results.json": "f57e6ac10d7a4977ea427fef1b69ed8649a2a3133187e566fdc455090263e69a",
-    "docs/evidence/M3-031/README.md": "06f204fcc10121264120b22e4726921b2e26118011bd075e7fea63f94a374d34",
-    "docs/evidence/M3-031/test-plan.md": "9556d7ee1d01377098bf3a11056782a1c2e1f8c9a50f70e1c047aacafb5d5b2a",
-    "docs/planning/implementation-backlog.md": "b4d4b87731ef2b134afebbb6f2d94d06a633134370646ea03089d1ccaa5b4a02",
-    "docs/planning/status.md": "09113f0f4112807cfd43787d6363de1eefd61b13c423213549a49ce5e3b75963",
+    "docs/evidence/M3-031/README.md": "eb761e3dec3de97c08e02af570f65a2e05ee21ee67d5b5ad6e31eb7f5f2ea856",
+    "docs/evidence/M3-031/test-plan.md": "63774ec5b67584f1eb0e73024c6297645dcb32ca43371b5bfeae53a9cc6951f3",
+    "docs/planning/implementation-backlog.md": "e4db77941b5eb54c5cb1f5d3ed896da2635131d5e1ddc5a9f795c95e52dd575a",
+    "docs/planning/status.md": "6a8c7524ec709fcaadf9a5bb52414edce7fbcea9be698e94f07f535efb7e8b1b",
     "native/tls/aws_lc/provider.json": "ff4d39359a8ef49ede8272698fe306b7421df2fea04b44744483245f34f619b4",
     "scripts/check-m3-031-desktop-tls-adoption": "b85beab1e5b14840efcf2bc5b71187c1f8ab1c95b4f7d4d3e38446ace3351fd0",
     "src/hostname_verifier.cj": "44769311cc3f97b34d033727d0b16661cbdcf63a69a2c6512569b550970dfca3",
@@ -94,18 +94,18 @@
     "src/internal/trust/hostname_test.cj": "af8c24a4f0ea856c8afb77aec5c817dd16feb27d1df9f80d1f3263d3bd5de17d",
     "src/internal/trust/trust_test.cj": "ef79ec1366bce927aa4f1aca8718ecd2dba63d1aa2b1014b6623eaceac9ff7b7",
     "src/trust.cj": "893860568a87bdba369a7ef48a955701fcca7354a079461f51e517ed24413268",
-    "tools/m3_031_desktop_tls_adoption.py": "8cbcf2b3257e3ad16e410a28cfc320adde29fd99c170ce87ff10f4a4b90afcf2",
+    "tools/m3_031_desktop_tls_adoption.py": "7b5474222aa587231e62193a792732e8dae7b3cc604bc32ce17b08d416ca0b41",
     "tools/repository/repository_tooling.py": "6df2e851944b8a12889082d5ea7c5bbc6b041563c42b86a80cde3ed540525ba9",
     "tools/tasks/M2-004.json": "6baeb6d662ad3fb9b47ee81ef94733edc3c537d312656b94c83f915579fff9c2",
-    "tools/tasks/M2-006.json": "e4ba76f838f1e4b80e20b8993fd67316e73e6d733f9c2719755db1d1f8c15e36",
+    "tools/tasks/M2-006.json": "41aea4935ef444048e246593770b88bc6eef9fc963c70fbb8c8179ffb0fd37c5",
     "tools/tasks/M3-031.json": "0c1904dc9d8a6445d95549c2e4d25fb23dba49071574405c91d939a832ae3d59",
-    "tools/tests/test_m3_031_desktop_tls_adoption.py": "477588748a57f5d48e0f41f487863b16d2b20ce553b190b8d478d845741eece7",
-    "tools/tests/test_m7_linux_task_graph.py": "d732e470decf8df6fba7e5483d4bb64d512046dcfdd3d60c534e49a40a80905b",
+    "tools/tests/test_m3_031_desktop_tls_adoption.py": "fe374c5da0d7a337212843a62bebe2e573331fd7f563c44dd992c4cf1807ab4a",
+    "tools/tests/test_m7_linux_task_graph.py": "c6bd40cceac15ffe35f737d5e63daee1021b682f4aa6887dd46c9ed068b7f38c",
     "tools/tls_provider/selection.json": "de802ea6839e42327a6d30df4ac5fcdca6f60205f04ed223082346833203dc0b",
-    "tools/tls_provider_poc/openssl_memory_poc.c": "775e11b525f4ecd60a145cc0d47f05e045027b4deb93339cd08abc5a1716db7e",
-    "tools/tls_provider_poc/providers.json": "cdad847dc6699d6b33a2d9e938e235696c6f756e97f660c06a7ea9cb90a9a0bb",
-    "tools/tls_provider_poc/run.py": "53789589ebb863108b10a4790d25fe1904e80c3d13dc3568bbb3565b70a4cbc8",
-    "tools/tls_provider_poc/validate.py": "bdb52facdac94ac596a1c7b2876019e7d75d568461ebf4a79db9b86d0069bc37"
+    "tools/tls_provider_poc/openssl_memory_poc.c": "b46b7e5f3f88edd0879b709f0814bc6cc42391dd1b864523ee8e4d2b9de60933",
+    "tools/tls_provider_poc/providers.json": "600c43738c311f0b7d31f08dbaf66e43ee04155f4b7fb550dd3ed7842429d429",
+    "tools/tls_provider_poc/run.py": "9584507f916463a83a7f0133d791f8cb4e1ac2b090761ad58f94f53e13cc0adf",
+    "tools/tls_provider_poc/validate.py": "e348adeb6ef461c858fff39830add55d7c69f669b097ad9c99aa8fb2c09193ba"
   },
   "source_task": "M3-031",
   "toolchain": {
