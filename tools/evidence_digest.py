@@ -371,20 +371,28 @@ def _call_name(node: ast.Call, aliases: dict[str, str] | None = None) -> str | N
     return final if final in _CALL_DOMAINS else name
 
 
-def _call_contains_raw_digest(node: ast.Call, call_name: str | None) -> bool:
+def _primary_argument(node: ast.Call, keyword_names: set[str]) -> ast.AST | None:
+    if node.args:
+        return node.args[0]
+    return next(
+        (keyword.value for keyword in node.keywords if keyword.arg in keyword_names),
+        None,
+    )
+
+
+def _call_contains_raw_digest(
+    node: ast.Call, call_name: str | None, index: "_AssignmentIndex",
+) -> bool:
     if call_name not in {
         "subprocess.run", "subprocess.call", "subprocess.check_call",
         "subprocess.check_output", "subprocess.Popen",
+        "os.system", "os.popen",
     }:
         return False
-    candidates = list(node.args)
-    candidates.extend(keyword.value for keyword in node.keywords if keyword.arg in {"args", "command"})
-    return any(
-        RAW_DIGEST_COMMAND.search(value.value) is not None
-        for candidate in candidates
-        for value in ast.walk(candidate)
-        if isinstance(value, ast.Constant) and isinstance(value.value, str)
-    )
+    candidate = _primary_argument(node, {"args", "command", "cmd"})
+    return candidate is not None and RAW_DIGEST_COMMAND.search(
+        _argument_hint(candidate, node, index)
+    ) is not None
 
 
 class _AssignmentIndex(ast.NodeVisitor):
@@ -523,7 +531,9 @@ def digest_inventory(root: Path) -> dict[str, Any]:
                 if not isinstance(node, ast.Call):
                     continue
                 name = _call_name(node, aliases)
-                if relative != "tools/evidence_digest.py" and _call_contains_raw_digest(node, name):
+                if relative != "tools/evidence_digest.py" and _call_contains_raw_digest(
+                    node, name, assignment_index,
+                ):
                     entries.append({
                         "path": relative, "line": node.lineno,
                         "symbol": "raw-digest-command", "classification": "legacy-task-local",
@@ -542,9 +552,10 @@ def digest_inventory(root: Path) -> dict[str, Any]:
                     domain = "typed-implementation" if relative == "tools/evidence_digest.py" else "legacy-task-local"
                 else:
                     domain = _CALL_DOMAINS[name]
+                digest_argument = _primary_argument(node, {"path", "raw", "value"})
                 if (domain == "artifact-bytes" and name != "signed_payload_sha256"
-                        and relative != "tools/evidence_digest.py" and node.args):
-                    argument = _argument_hint(node.args[0], node, assignment_index)
+                        and relative != "tools/evidence_digest.py" and digest_argument is not None):
+                    argument = _argument_hint(digest_argument, node, assignment_index)
                     if any(marker in argument for marker in (
                         "evidence", "report", "markdown", "log_path", "source_path",
                         "validation", "read_text", ".json", ".md", ".cj",

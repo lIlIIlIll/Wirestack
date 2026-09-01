@@ -916,7 +916,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             atomic_json(args.output, result)
         print(json.dumps(result, sort_keys=True, separators=(",", ":")))
         return 0
-    except ReleaseError as error:
+    except (ReleaseError, evidence_digest.DigestError) as error:
         decision = "BLOCKED" if error.code == "HOSTED_ATTESTATION_BLOCKED" else "FAIL"
         report = {"schemaVersion": 1, "taskId": TASK_ID, "decision": decision,
                   "code": error.code, "detail": error.detail}
