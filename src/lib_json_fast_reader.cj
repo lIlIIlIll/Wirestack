@@ -31,7 +31,7 @@ struct JsonObjectKeyView {
     func isSource(): Bool { sourceStart >= 0 }
 }
 
-class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
+public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
     private let data: Array<Byte>
     private let size: Int64
     private let validateStrings: Bool
@@ -207,7 +207,21 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
     }
 
     public func suggestRawObjectCapacity(): Int64 {
-        suggestContainerCapacity(48)
+        // Object entries are usually much smaller than the conservative
+        // generic container hint (especially String -> Int64 maps). A
+        // capacity based on the remaining compact bytes avoids repeated
+        // HashMap growth for medium/large generated maps while retaining a
+        // bounded allocation for untrusted input.
+        let remaining = size - index
+        if (remaining <= 16) {
+            return 4
+        }
+        let estimate = remaining / 8 + 1
+        match {
+            case estimate < 4 => 4
+            case estimate > 256 => 256
+            case _ => estimate
+        }
     }
 
     public func endRawObject(): Unit {

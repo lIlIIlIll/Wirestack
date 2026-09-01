@@ -36,6 +36,7 @@ public interface GeneratedSupportV1Reader {
     func skipRawWithDepth(maxDepth: Int64): Unit
 }
 
+
 /// Narrow semantic writer contract consumed by generated codecs. Structural
 /// correctness remains owned by the core writer state machine.
 public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1 {
@@ -61,6 +62,7 @@ public struct GeneratedSupportV1WriteCursor {
     private let writer: JsonDirectWriter
 
     init(writer: JsonDirectWriter) { this.writer = writer }
+
 
     public func writeRawBeginObject(): Unit { writer.writeRawBeginObject() }
     public func writeRawEndObject(): Unit { writer.writeRawEndObject() }
@@ -336,6 +338,15 @@ public class GeneratedSupportV1 {
                 code: "codec_contract"
             )
         }
+    }
+
+    /// Returns whether a generated reader may use the compact fast path
+    /// without constructing the general semantic reader. Generated exact
+    /// overloads use this tiny public seam so they can keep their concrete
+    /// codec call at the application call site instead of routing through a
+    /// type-erased generic YJson wrapper.
+    public static func usesDefaultFastReadOptions(options: JsonReadOptions): Bool {
+        jsonReadOptionsUsesDefaultFastPath(options)
     }
 
     public static func captureValue(reader: JsonReader, maxBytes: Int64): GeneratedReplayValueV1 {

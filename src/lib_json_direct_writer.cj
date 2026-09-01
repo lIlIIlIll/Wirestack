@@ -134,7 +134,7 @@ abstract class JsonDirectWriterTarget {
 
 }
 
-class DirectBufferWriterTarget <: JsonDirectWriterTarget {
+public class DirectBufferWriterTarget <: JsonDirectWriterTarget {
     private var buffer: Array<Byte>
     private var used: Int64 = 0
 
@@ -334,6 +334,7 @@ class DirectBufferWriterTarget <: JsonDirectWriterTarget {
         writeInt64NoEnsure(value)
         false
     }
+
 
     public func writeBoolText(value: Bool): Unit {
         if (value) {
@@ -962,7 +963,7 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
 
 }
 
-class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner {
+public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner {
     private static let ARRAY_FIRST: UInt8 = 0x1
     private static let ARRAY_NEXT: UInt8 = 0x0
     private static let OBJECT_FIRST: UInt8 = 0x3
@@ -984,6 +985,11 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         None<ArrayList<JsonDirectSemanticPathContext>>
     private var rootWritten: Bool = false
     private var rawDepth: Int64 = 0
+    // The generated compact string/bytes path has already established a
+    // single raw root and emits balanced object boundaries from generated
+    // code. Keep a small state bit so those boundaries avoid the general
+    // container-kind stack and result-target dispatch.
+    private var generatedCompactRawFast: Bool = false
     private var rawRootPreclaimed: Bool = false
     // Keep the common generated path allocation-free. The overflow stack is
     // allocated only for raw nesting deeper than 64 containers.
@@ -1059,6 +1065,19 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         }
     }
 
+    /// Finish a generated compact string whose codec has emitted the balanced
+    /// raw root itself.  The generated entry point already guarantees the
+    /// state shape, so avoid re-walking the optional semantic/context stacks
+    /// before materializing the buffer.
+    public func finishGeneratedCompactString(): String {
+        target.finish()
+        enforceOutputLimit()
+        if (resultKind != 0) {
+            throw JsonException("JsonDirectWriter is not a string writer")
+        }
+        bufferTarget.buildString()
+    }
+
     public func finishBytes(): Array<Byte> {
         ensureCompleteWriterState()
         target.finish()
@@ -1123,6 +1142,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
             return false
         }
         beforeValue()
+        generatedCompactRawFast = resultKind != 2
         rawRootPreclaimed = true
         true
     }
@@ -1143,11 +1163,35 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
     }
 
     public func writeRawBeginObject(): Unit {
+        if (generatedCompactRawFast) {
+            if (rawDepth == 0) {
+                if (rawRootPreclaimed) { rawRootPreclaimed = false }
+                else { beforeValue() }
+            }
+            if (rawDepth >= config.maxDepth) {
+                throw JsonException(
+                    "Maximum JSON depth ${config.maxDepth} exceeded",
+                    code: "max_depth",
+                    path: ""
+                )
+            }
+            rawDepth++
+            bufferTarget.writeByte(b'{')
+            return
+        }
         beginRawContainer(RAW_OBJECT)
         target.writeByte(b'{')
     }
 
     public func writeRawEndObject(): Unit {
+        if (generatedCompactRawFast) {
+            if (rawDepth <= 0) {
+                throw JsonException("Unbalanced JSON writer state", code: "writer_state")
+            }
+            rawDepth--
+            bufferTarget.writeByte(b'}')
+            return
+        }
         endRawContainer(RAW_OBJECT)
         target.writeByte(b'}')
     }
@@ -1166,6 +1210,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         writeStringLiteralName(value)
         false
     }
+
 
     public func writeRawObjectEntryNameString(first: Bool, name: String, value: String): Bool {
         if (!first) {
@@ -1661,11 +1706,15 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         if (let Some(required) <- jsonNativeEscapedStringSize(value, config.htmlSafe)) {
             enforceAdditionalOutputLimit(required)
             if (let Some(escaped) <- jsonNativeEscapeString(value, config.htmlSafe, required)) {
-                target.writeBytes(escaped)
+                if (resultKind == 2) { target.writeBytes(escaped) } else { bufferTarget.writeBytes(escaped) }
                 return
             }
         }
-        target.writeEscapedStringLiteralFromFirstEscape(value, firstEscape, config.htmlSafe)
+        if (resultKind == 2) {
+            target.writeEscapedStringLiteralFromFirstEscape(value, firstEscape, config.htmlSafe)
+        } else {
+            bufferTarget.writeEscapedStringLiteralFromFirstEscape(value, firstEscape, config.htmlSafe)
+        }
     }
 
     private func enforceAdditionalOutputLimit(additional: Int64): Unit {

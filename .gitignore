@@ -44,3 +44,8 @@ benchmarks/java_fastjson2/build/
 !release/1.0.0-rc.2/artifacts/performance/summary.json
 !release/1.0.0-rc.2/artifacts/performance/metadata.json
 !release/1.0.0-rc.2/artifacts/performance/checksums.txt
+target/api-docs
+target/cjdoc
+target/doc
+target/native
+target/release

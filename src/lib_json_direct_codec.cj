@@ -136,6 +136,14 @@ public interface GeneratedCodecProviderV1<T> {
     static func generatedCodecV1(_: GeneratedCodecTokenV1<T>): JsonCodec<T>
 }
 
+/// Static dispatch seam for generated compact codecs. The explicit codec
+/// argument remains part of the public overload for source compatibility, but
+/// generated model types can route the hot path through their own static
+/// provider without an erased codec-interface call on every value.
+public interface GeneratedCompactCodecProviderV1<T> {
+    static func generatedCompactRawV1(value: T, writer: JsonDirectWriter): Unit
+}
+
 /// Typed object-codec bridge used by generated polymorphic dispatch.
 ///
 /// This is deliberately separate from GeneratedCodecProviderV1<T>: a
@@ -171,6 +179,7 @@ public interface GeneratedCompactWriteCodecV1<T> <: GeneratedDirectWriteCodecV1<
     func supportsCompactRaw(): Bool
     func writeCompactRaw(value: T, writer: GeneratedSupportV1Writer): Unit
 }
+
 
 /// Optional generated-code bulk seam. ArrayList resolves it once so an
 /// element codec can reuse one writer cursor across the complete loop.
@@ -1753,6 +1762,13 @@ public class YJson {
         encodeString(value, generatedCodecV1Of<T>(), options)
     }
 
+    public static func toJson<T>(value: T,
+        codec!: GeneratedCompactCursorWriteCodecV1<T>,
+        options!: JsonWriteOptions = JsonWriteOptions.defaults): String
+        where T <: GeneratedCompactCodecProviderV1<T> {
+        encodeStringStatic(value, codec, options)
+    }
+
     public static func toJson<T>(value: T, codec!: JsonCodec<T>,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): String {
         encodeString(value, codec, options)
@@ -1761,6 +1777,12 @@ public class YJson {
     public static func toJsonBytes<T>(value: T,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): Array<Byte> where T <: GeneratedCodecProviderV1<T> {
         encodeBytes(value, generatedCodecV1Of<T>(), options)
+    }
+
+    public static func toJsonBytes<T>(value: T,
+        codec!: GeneratedCompactCursorWriteCodecV1<T>,
+        options!: JsonWriteOptions = JsonWriteOptions.defaults): Array<Byte> {
+        encodeBytes(value, codec, options)
     }
 
     public static func toJsonBytes<T>(value: T, codec!: JsonCodec<T>,
@@ -1783,6 +1805,12 @@ public class YJson {
         decodeString(text, generatedCodecV1Of<T>(), options)
     }
 
+    public static func fromJson<T>(text: String,
+        codec!: GeneratedCompactCursorWriteCodecV1<T>,
+        options!: JsonReadOptions = JsonReadOptions.defaults): T {
+        decodeString(text, codec, options)
+    }
+
     public static func fromJson<T>(text: String, codec!: JsonCodec<T>,
         options!: JsonReadOptions = JsonReadOptions.defaults): T {
         decodeString(text, codec, options)
@@ -1791,6 +1819,12 @@ public class YJson {
     public static func fromJson<T>(bytes: Array<Byte>,
         options!: JsonReadOptions = JsonReadOptions.defaults): T where T <: GeneratedCodecProviderV1<T> {
         decodeBytes(bytes, generatedCodecV1Of<T>(), options)
+    }
+
+    public static func fromJson<T>(bytes: Array<Byte>,
+        codec!: GeneratedCompactCursorWriteCodecV1<T>,
+        options!: JsonReadOptions = JsonReadOptions.defaults): T {
+        decodeBytes(bytes, codec, options)
     }
 
     public static func fromJson<T>(bytes: Array<Byte>, codec!: JsonCodec<T>,
@@ -1808,6 +1842,31 @@ public class YJson {
         decodeStream(input, codec, options)
     }
 
+    private static func encodeString<T>(value: T,
+        codec: GeneratedCompactCursorWriteCodecV1<T>,
+        options: JsonWriteOptions): String {
+        let writer = JsonDirectWriter(options)
+        if (writer.tryBeginGeneratedCompactRawValue()) {
+            codec.writeCompactRawWithWriter(value, writer)
+            return writer.finishString()
+        }
+        codec.write(value, writer)
+        writer.finishString()
+    }
+
+    private static func encodeStringStatic<T>(value: T,
+        codec: GeneratedCompactCursorWriteCodecV1<T>,
+        options: JsonWriteOptions): String
+        where T <: GeneratedCompactCodecProviderV1<T> {
+        let writer = JsonDirectWriter(options)
+        if (writer.tryBeginGeneratedCompactRawValue()) {
+            T.generatedCompactRawV1(value, writer)
+            return writer.finishString()
+        }
+        codec.write(value, writer)
+        writer.finishString()
+    }
+
     private static func encodeString<T>(value: T, codec: JsonCodec<T>,
         options: JsonWriteOptions): String {
         GeneratedSupportV1.requireProtocolVersion(1)
@@ -1815,6 +1874,18 @@ public class YJson {
         let writer = JsonDirectWriter(options)
         codec.write(value, writer)
         writer.finishString()
+    }
+
+    private static func encodeBytes<T>(value: T,
+        codec: GeneratedCompactCursorWriteCodecV1<T>,
+        options: JsonWriteOptions): Array<Byte> {
+        let writer = JsonDirectWriter.bytes(config: options)
+        if (writer.tryBeginGeneratedCompactRawValue()) {
+            codec.writeCompactRawWithWriter(value, writer)
+            return writer.finishBytes()
+        }
+        codec.write(value, writer)
+        writer.finishBytes()
     }
 
     private static func encodeBytes<T>(value: T, codec: JsonCodec<T>,
@@ -1835,6 +1906,23 @@ public class YJson {
         writer.finish()
     }
 
+    private static func decodeString<T>(text: String,
+        codec: GeneratedCompactCursorWriteCodecV1<T>,
+        options: JsonReadOptions): T {
+        GeneratedSupportV1.requireProtocolVersion(1)
+        freezeYJsonRuntime()
+        if (jsonReadOptionsUsesDefaultFastPath(options)) {
+            let reader = JsonFastReader(text)
+            let result = codec.readFast(reader)
+            reader.expectEnd()
+            return result
+        }
+        let reader = JsonDirectReader(text, config: options)
+        let result = codec.read(reader)
+        reader.expectEnd()
+        result
+    }
+
     private static func decodeString<T>(text: String, codec: JsonCodec<T>,
         options: JsonReadOptions): T {
         GeneratedSupportV1.requireProtocolVersion(1)
@@ -1850,6 +1938,23 @@ public class YJson {
             }
         }
         let reader = JsonDirectReader(text, config: options)
+        let result = codec.read(reader)
+        reader.expectEnd()
+        result
+    }
+
+    private static func decodeBytes<T>(bytes: Array<Byte>,
+        codec: GeneratedCompactCursorWriteCodecV1<T>,
+        options: JsonReadOptions): T {
+        GeneratedSupportV1.requireProtocolVersion(1)
+        freezeYJsonRuntime()
+        if (jsonReadOptionsUsesDefaultFastPath(options)) {
+            let reader = JsonFastReader(bytes)
+            let result = codec.readFast(reader)
+            reader.expectEnd()
+            return result
+        }
+        let reader = JsonDirectReader(bytes, config: options)
         let result = codec.read(reader)
         reader.expectEnd()
         result

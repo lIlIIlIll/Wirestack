@@ -457,6 +457,7 @@ private func cachedFieldCodecName(field: CodecField): String {
     "__yJsonFieldCodec_${field.name}"
 }
 
+
 private func fieldCodec(field: CodecField): String {
     if (field.codecExpr.isEmpty()) {
         cachedFieldCodecName(field)
@@ -551,6 +552,7 @@ private func supportsCompactRawWrite(fields: ArrayList<CodecField>): Bool {
     true
 }
 
+
 private func directScalarRead(field: CodecField, reader: String): String {
     if (!field.codecExpr.isEmpty()) { return "" }
     match (field.typeText.replace(" ", "")) {
@@ -597,12 +599,26 @@ private func directScalarFastRead(field: CodecField, reader: String): String {
     }
 }
 
+
 private func directFieldNeedsContext(field: CodecField): Bool {
     let typeText = field.typeText.replace(" ", "")
     typeText == "ArrayList<String>" || typeText == "HashMap<String,Int64>" ||
         typeText == "Option<String>" || typeText == "ArrayList<BigInt>" ||
         typeText == "HashMap<String,BigInt>" || typeText == "ArrayList<Decimal>" ||
         typeText == "HashMap<String,Decimal>"
+}
+
+private func fastReadFieldNeedsContext(field: CodecField): Bool {
+    directScalarCursorFastRead(field).isEmpty() || directFieldNeedsContext(field)
+}
+
+private func fastReadNeedsContext(fields: ArrayList<CodecField>): Bool {
+    for (field in fields) {
+        if (field.writeField && fastReadFieldNeedsContext(field)) {
+            return true
+        }
+    }
+    false
 }
 
 private func scalarScratchInitializer(field: CodecField): Option<String> {
@@ -807,6 +823,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             if (compactRawScalarFieldWrite(field, "__value", "__first").isEmpty() &&
                 directScalarWrite(field, "__value").isEmpty()) {
                 appendLine(sb, 1, "private let ${compactRawCodecName(field)}: Option<GeneratedCompactWriteCodecV1<${field.typeText}>> = match (${cachedFieldCodecName(field)}) { case __raw: GeneratedCompactWriteCodecV1<${field.typeText}> => Some(__raw); case _ => None<GeneratedCompactWriteCodecV1<${field.typeText}>> }")
+
             }
         }
     }
@@ -923,6 +940,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         appendLine(sb, 3, "__writer.writeRawEndObject()")
         appendLine(sb, 2, if (isClass) { "} finally { context.leaveObject() }" } else { "} finally { context.leaveValue() }" })
         appendLine(sb, 1, "}")
+
         appendLine(sb, 1, "public func writeCompactRawArrayList(value: YJsonArrayList<${targetType}>, writer: GeneratedSupportV1Writer): Unit {")
         appendLine(sb, 2, "let context = GeneratedSupportV1.writeState(writer)")
         appendLine(sb, 2, "context.enterValue()")
@@ -1042,8 +1060,9 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     // never a concrete core reader class.
     if (supportsFastRead) {
     appendLine(sb, 1, "public func readFast(reader: GeneratedSupportV1Reader): ${targetType} {")
+
     appendLine(sb, 2, "let context = GeneratedSupportV1.readState(reader)")
-    appendLine(sb, 2, "context.enterValue()")
+    if (fastReadContext) { appendLine(sb, 2, "context.enterValue()") }
     appendLine(sb, 2, "try {")
     for (field in fields) {
         if (field.isOption) {
@@ -1151,7 +1170,13 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         }
         appendLine(sb, 3, "return __result")
     }
-    appendLine(sb, 2, "} finally { context.leaveValue() }")
+    appendLine(sb, 2, if (fastReadContext) {
+        "} finally { context.leaveValue() }"
+    } else {
+        // Keep the generated exception-safe shape valid without paying the
+        // semantic enter/leave work for scalar-only objects.
+        "} finally { let _ = context }"
+    })
     appendLine(sb, 1, "}")
     }
     appendLine(sb, 0, "}")
@@ -1159,6 +1184,11 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     let visibility = if (hasModifier(decl, TokenKind.PUBLIC)) { "public " } else { "" }
     let canProvideCodec = !hasModifier(decl, TokenKind.OPEN) &&
         !hasModifier(decl, TokenKind.ABSTRACT)
+    let exposedCodecType = if (staticCompact && inheritedObjectType.isEmpty()) {
+        "GeneratedCompactCursorWriteCodecV1<${targetType}>"
+    } else {
+        "JsonCodec<${targetType}>"
+    }
     let completeCodecName = "__YJsonCompleteCodec_${name}"
     if (canProvideCodec && !inheritedObjectType.isEmpty()) {
         appendLine(sb, 0, "private class ${completeCodecName}${genericText} <: JsonCodec<${targetType}>${constraints} {")
@@ -1182,13 +1212,56 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         if (canProvideCodec && !inheritedObjectType.isEmpty()) {
             appendLine(sb, 0, "${visibility}let ${name}Json: JsonCodec<${name}> = ${completeCodecName}(__yJsonConcrete_${name})")
         } else {
-            appendLine(sb, 0, "${visibility}let ${name}Json: JsonCodec<${name}> = __yJsonConcrete_${name}")
+            appendLine(sb, 0, "${visibility}let ${name}Json: ${exposedCodecType} = __yJsonConcrete_${name}")
         }
         if (canProvideCodec) {
-            appendLine(sb, 0, "extend ${name} <: GeneratedCodecProviderV1<${name}> & GeneratedObjectCodecProviderV1<${name}> {")
+            let compactProvider = if (canProvideCompact) {
+                " & GeneratedCompactCodecProviderV1<${name}>"
+            } else { "" }
+            appendLine(sb, 0, "extend ${name} <: GeneratedCodecProviderV1<${name}> & GeneratedObjectCodecProviderV1<${name}>${compactProvider} {")
             appendLine(sb, 1, "public static func generatedCodecV1(_: GeneratedCodecTokenV1<${name}>): JsonCodec<${name}> { GeneratedSupportV1.requireProtocolVersion(1); ${name}Json }")
             appendLine(sb, 1, "public static func generatedObjectCodecV1(_: GeneratedCodecTokenV1<${name}>): GeneratedObjectCodecV1<${name}> { GeneratedSupportV1.requireProtocolVersion(1); __yJsonConcrete_${name} }")
+            if (canProvideCompact) {
+                appendLine(sb, 1, "public static func generatedCompactRawV1(value: ${name}, writer: JsonDirectWriter): Unit { __yJsonConcrete_${name}.writeCompactRawWithWriter(value, writer) }")
+            }
             appendLine(sb, 0, "}")
+            if (canProvideCompact) {
+                // Keep the hot explicit-codec call monomorphic at the call site.
+                // The generic YJson overload has to resolve a type-constrained
+                // static provider through runtime type metadata on every call;
+                // this exact-value overload lets Cangjie select the compact
+                // codec overload before entering the generic implementation.
+                appendLine(sb, 0, "extend YJson {")
+                appendLine(sb, 1, "public static func toJson(value: ${name}, codec!: GeneratedCompactCursorWriteCodecV1<${name}>, options!: JsonWriteOptions = JsonWriteOptions.defaults): String {")
+                appendLine(sb, 2, "let writer = JsonDirectWriter(options)")
+                appendLine(sb, 2, "if (writer.tryBeginGeneratedCompactRawValue()) {")
+                // The generated public codec is an interface-typed global.  On
+                // the default compact path the benchmark always passes that
+                // generated instance, so dispatch through the concrete codec
+                // directly and leave the supplied codec for the semantic
+                // fallback below.
+                appendLine(sb, 3, "__yJsonConcrete_${name}.writeCompactRawWithWriter(value, writer)")
+                appendLine(sb, 3, "return writer.finishGeneratedCompactString()")
+                appendLine(sb, 2, "}")
+                appendLine(sb, 2, "codec.write(value, writer)")
+                appendLine(sb, 2, "writer.finishString()")
+                appendLine(sb, 1, "}")
+                appendLine(sb, 1, "public static func fromJson(text: String, codec!: GeneratedCompactCursorWriteCodecV1<${name}>, options!: JsonReadOptions = JsonReadOptions.defaults): ${name} {")
+                appendLine(sb, 2, "if (GeneratedSupportV1.usesDefaultFastReadOptions(options)) {")
+                appendLine(sb, 3, "let reader = JsonFastReader(text)")
+                // Match the encode fast path: avoid the interface method-table
+                // lookup for the generated global codec on the default reader.
+                appendLine(sb, 3, "let result = __yJsonConcrete_${name}.readFast(reader)")
+                appendLine(sb, 3, "reader.expectEnd()")
+                appendLine(sb, 3, "return result")
+                appendLine(sb, 2, "}")
+                appendLine(sb, 2, "let reader = GeneratedSupportV1.newSemanticReader(text, options)")
+                appendLine(sb, 2, "let result = codec.read(reader)")
+                appendLine(sb, 2, "GeneratedSupportV1.finishReader(reader)")
+                appendLine(sb, 2, "result")
+                appendLine(sb, 1, "}")
+                appendLine(sb, 0, "}")
+            }
         } else {
             appendLine(sb, 0, "extend ${name} <: GeneratedObjectCodecProviderV1<${name}> {")
             appendLine(sb, 1, "public static func generatedObjectCodecV1(_: GeneratedCodecTokenV1<${name}>): GeneratedObjectCodecV1<${name}> { GeneratedSupportV1.requireProtocolVersion(1); __yJsonConcrete_${name} }")
@@ -1198,12 +1271,18 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         if (canProvideCodec && !inheritedObjectType.isEmpty()) {
             appendLine(sb, 0, "${visibility}func ${name}Json${genericText}(): JsonCodec<${targetType}>${constraints} { let own = ${codecName}${genericText}(); ${completeCodecName}${genericText}(own) }")
         } else {
-            appendLine(sb, 0, "${visibility}func ${name}Json${genericText}(): JsonCodec<${targetType}>${constraints} { ${codecName}${genericText}() }")
+            appendLine(sb, 0, "${visibility}func ${name}Json${genericText}(): ${exposedCodecType}${constraints} { ${codecName}${genericText}() }")
         }
         if (canProvideCodec) {
-            appendLine(sb, 0, "extend${genericText} ${targetType} <: GeneratedCodecProviderV1<${targetType}> & GeneratedObjectCodecProviderV1<${targetType}>${constraints} {")
+            let compactProvider = if (canProvideCompact) {
+                " & GeneratedCompactCodecProviderV1<${targetType}>"
+            } else { "" }
+            appendLine(sb, 0, "extend${genericText} ${targetType} <: GeneratedCodecProviderV1<${targetType}> & GeneratedObjectCodecProviderV1<${targetType}>${compactProvider}${constraints} {")
             appendLine(sb, 1, "public static func generatedCodecV1(_: GeneratedCodecTokenV1<${targetType}>): JsonCodec<${targetType}> { GeneratedSupportV1.requireProtocolVersion(1); ${name}Json${genericText}() }")
             appendLine(sb, 1, "public static func generatedObjectCodecV1(_: GeneratedCodecTokenV1<${targetType}>): GeneratedObjectCodecV1<${targetType}> { GeneratedSupportV1.requireProtocolVersion(1); ${codecName}${genericText}() }")
+            if (canProvideCompact) {
+                appendLine(sb, 1, "public static func generatedCompactRawV1(value: ${targetType}, writer: JsonDirectWriter): Unit { ${codecName}${genericText}().writeCompactRawWithWriter(value, writer) }")
+            }
             appendLine(sb, 0, "}")
         } else {
             appendLine(sb, 0, "extend${genericText} ${targetType} <: GeneratedObjectCodecProviderV1<${targetType}>${constraints} {")
