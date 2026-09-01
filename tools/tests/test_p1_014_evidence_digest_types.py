@@ -20,6 +20,7 @@ from tools.evidence_digest import (
     parse_artifact_digest,
     parse_text_digest,
     text_evidence_digest_bytes,
+    text_evidence_inventory_sha256,
 )
 
 
@@ -34,6 +35,14 @@ class EvidenceDigestTypeTests(unittest.TestCase):
         self.assertEqual(3, len({item.sha256 for item in raw}))
         self.assertEqual(TEXT_EVIDENCE_DOMAIN, text[0].to_json()["domain"])
         self.assertEqual(ARTIFACT_BYTE_DOMAIN, raw[0].to_json()["domain"])
+
+    def test_text_inventory_rejects_nul_framing_ambiguity(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-frame-") as directory:
+            root = Path(directory)
+            (root / "a").write_bytes(b"x\0b\0y")
+            with self.assertRaises(DigestError) as caught:
+                text_evidence_inventory_sha256(root, [root / "a"])
+            self.assertEqual("TEXT_NUL", caught.exception.code)
 
     def test_invalid_utf8_fails_without_byte_fallback(self) -> None:
         with self.assertRaises(DigestError) as caught:
@@ -180,8 +189,37 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             )
             report = digest_inventory(root)
             self.assertEqual("FAIL", report["status"])
+            self.assertEqual(2, len(report["issues"]))
+            self.assertIn("invalid-artifact-on-text", report["domain_counts"])
+            script.write_text(
+                "# wirestack-digest-domain: artifact-bytes-v1\nsha256sum payload.tar.gz\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
             self.assertEqual(1, len(report["issues"]))
             self.assertIn("artifact-bytes", report["domain_counts"])
+
+    def test_inventory_scans_non_python_tools_and_untyped_comparisons(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            shell = root / "tools/new_gate.sh"
+            shell.parent.mkdir(parents=True)
+            shell.write_text("sha256sum report.json\n", encoding="utf-8")
+            python = root / "tools/gates/compare.py"
+            python.parent.mkdir(parents=True)
+            python.write_text(
+                "def matches(report, expected):\n"
+                "    return report.get('sha256') == expected\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertEqual(2, len(report["issues"]))
+            self.assertTrue(any(
+                issue["detail"].endswith("bare-sha256-comparison")
+                for issue in report["issues"]
+            ))
 
     def test_inventory_rejects_alternate_hashlib_constructor_import(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:

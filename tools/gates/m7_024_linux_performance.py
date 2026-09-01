@@ -233,7 +233,9 @@ def load_artifacts(root: Path, manifest: Mapping[str, Any]) -> tuple[dict[str, A
     for name, artifact in manifest["artifacts"].items():
         path = checked_path(root, artifact["path"])
         actual_digest = evidence_digest.text_evidence_sha256(path)
-        if actual_digest != artifact["sha256"]:
+        if not evidence_digest.text_evidence_sha256_equal(
+            actual_digest, artifact["sha256"],
+        ):
             raise GateError(
                 f"artifact digest mismatch for {name}: expected {artifact['sha256']}, "
                 f"actual {actual_digest}"

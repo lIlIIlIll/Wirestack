@@ -138,14 +138,16 @@ def build_release_manifest(
     require(bundle.get("decision") == "PASS" and bundle.get("unsigned") is True,
             "SUPPLY_CHAIN_INVALID", "M7-025 bundle decision")
     artifact_digest = evidence_digest.artifact_byte_sha256(artifact)
-    require(artifact_digest == bundle.get("artifact", {}).get("sha256"),
+    require(evidence_digest.artifact_byte_sha256_equal(
+                artifact_digest, bundle.get("artifact", {}).get("sha256")),
             "ARTIFACT_STALE", artifact.name)
     document_digests = bundle.get("documents")
     require(isinstance(document_digests, dict), "SUPPLY_CHAIN_INVALID", "documents")
     for name in ("provider-manifest.json", "sbom.spdx.json", "build-fingerprint.json"):
         actual = evidence_digest.text_evidence_sha256(supply_chain / name)
         expected = document_digests.get(name, {}).get("sha256")
-        require(actual == expected, "SUPPLY_CHAIN_STALE", name)
+        require(evidence_digest.text_evidence_sha256_equal(actual, expected),
+                "SUPPLY_CHAIN_STALE", name)
     provider_data = provider.get("provider")
     target = provider.get("target")
     package = provider.get("package")
@@ -249,7 +251,8 @@ def validate_release_manifest(manifest: Mapping[str, Any]) -> None:
         _strict_digest(subject["sha256"], f"subjects.{name}.sha256")
         _strict_digest(subject["signedPayloadSha256"], f"subjects.{name}.signedPayloadSha256")
         if name == "artifact":
-            require(subject["sha256"] == subject["signedPayloadSha256"],
+            require(evidence_digest.artifact_byte_sha256_equal(
+                        subject["sha256"], subject["signedPayloadSha256"]),
                     "MANIFEST_SUBJECT", "artifact digest domains must agree")
     require(names == {"artifact", "sbom"}, "MANIFEST_SUBJECTS", "incomplete")
     require(policy.get("repository") == REPOSITORY and policy.get("workflow") == WORKFLOW,
@@ -396,11 +399,16 @@ def verify_offline_bundle(
     manifest = load_json(output / "release-manifest.json")
     validate_release_manifest(manifest)
     subject_map = {subject["name"]: subject for subject in manifest["subjects"]}
-    require(evidence_digest.artifact_byte_sha256(artifact) == subject_map["artifact"]["signedPayloadSha256"],
+    require(evidence_digest.artifact_byte_sha256_equal(
+                evidence_digest.artifact_byte_sha256(artifact),
+                subject_map["artifact"]["signedPayloadSha256"]),
             "SUBJECT_DIGEST", "artifact")
-    require(evidence_digest.signed_payload_sha256(sbom) == subject_map["sbom"]["signedPayloadSha256"],
+    require(evidence_digest.artifact_byte_sha256_equal(
+                evidence_digest.signed_payload_sha256(sbom),
+                subject_map["sbom"]["signedPayloadSha256"]),
             "SUBJECT_DIGEST", "sbom")
-    require(evidence_digest.text_evidence_sha256(sbom) == subject_map["sbom"]["sha256"],
+    require(evidence_digest.text_evidence_sha256_equal(
+                evidence_digest.text_evidence_sha256(sbom), subject_map["sbom"]["sha256"]),
             "SUBJECT_TEXT_DIGEST", "sbom")
     subjects = _subject_paths(output, artifact, sbom)
     for name, subject in subjects.items():
@@ -750,7 +758,9 @@ def validate_hosted_report(path: Path) -> dict[str, Any]:
         _strict_digest(subject["bundleSha256"], "hosted bundle")
         if subject["name"] == "artifact":
             require(
-                subject["sha256"] == subject["signedPayloadSha256"],
+                evidence_digest.artifact_byte_sha256_equal(
+                    subject["sha256"], subject["signedPayloadSha256"],
+                ),
                 "HOSTED_REPORT_SUBJECT",
                 "artifact text and signed-payload digests must be identical",
             )

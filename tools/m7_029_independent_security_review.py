@@ -143,7 +143,12 @@ def validate_regression(root: Path, value: Mapping[str, Any], where: str) -> Non
     require(value["status"] == "PASS", "REGRESSION_NOT_PASS", where)
     require(value["exitCode"] == 0 and value["timedOut"] is False, "REGRESSION_NOT_PASS", where)
     path = safe_path(root, value["evidencePath"])
-    require(evidence_digest.text_evidence_sha256(path) == value["sha256"], "DIGEST_MISMATCH", value["evidencePath"])
+    require(
+        evidence_digest.text_evidence_sha256_equal(
+            evidence_digest.text_evidence_sha256(path), value["sha256"],
+        ),
+        "DIGEST_MISMATCH", value["evidencePath"],
+    )
 
 
 def validate_finding(root: Path, value: Mapping[str, Any], position: int) -> tuple[str, str]:
@@ -318,7 +323,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             atomic_json(args.request, build_request(args.root))
         report = validate(args.root, args.request, args.review)
         atomic_json(args.report, report)
-    except IndependentReviewError as error:
+    except (IndependentReviewError, evidence_digest.DigestError) as error:
         status = "BLOCKED" if error.code == "REVIEW_REQUIRED" else "FAIL"
         payload = {"taskId": TASK_ID, "status": status, "code": error.code, "detail": error.detail[:512]}
         print(json.dumps(payload, sort_keys=True) if args.json else f"M7-029 independent review: {status} [{error.code}] {error.detail[:512]}")

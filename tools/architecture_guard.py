@@ -42,6 +42,11 @@ RAW_DIGEST_COMMAND_RE = re.compile(
     r")",
     re.IGNORECASE,
 )
+TEXT_COMMAND_OPERAND_RE = re.compile(
+    r"\.(?:json|md|markdown|log|txt|yaml|yml|cj|py|c|cc|cpp|h|hpp|sh)"
+    r"(?=$|[\s'\";)])",
+    re.IGNORECASE,
+)
 NON_PYTHON_DOMAIN_MANIFEST = Path("tools/evidence-digest-non-python.json")
 TYPE_CONTAINER_RE = re.compile(
     r"^\s*(?P<public>public\s+)?(?:open\s+)?(?:class|struct|interface|enum)\b"
@@ -844,7 +849,7 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                             "text-evidence-byte-digest",
                             "Text evidence must not enter the artifact byte-digest domain.",
                         ))
-            if isinstance(node, ast.Compare) and repository_control_plane:
+            if isinstance(node, ast.Compare) and not typed_implementation:
                 expression = ast.unparse(node)
                 if re.search(r"(?:get\(['\"]sha256['\"]\)|\[['\"]sha256['\"]\])", expression):
                     violations.append(_violation(
@@ -874,6 +879,14 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
         non_python_paths.extend(
             path for path in scripts_root.rglob("*") if path.is_file() and path.suffix != ".py"
         )
+    tools_root = root / "tools"
+    if tools_root.is_dir():
+        non_python_paths.extend(
+            path for path in tools_root.rglob("*")
+            if path.is_file() and path.suffix != ".py"
+            and path.name != "evidence-digest-non-python.json"
+            and not _is_ignored(path.relative_to(root))
+        )
     workflows_root = root / ".github/workflows"
     if workflows_root.is_dir():
         non_python_paths.extend(
@@ -900,14 +913,17 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                 "wirestack-digest-domain: text-utf8-lf-v1" in context
                 or declared_domain == "text-utf8-lf-v1"
             )
-            if artifact_declared:
+            obvious_text = TEXT_COMMAND_OPERAND_RE.search(line) is not None
+            if artifact_declared and not obvious_text:
                 continue
             offset = sum(len(value) for value in lines[:index]) + match.start()
             violations.append(_violation(
                 root, path, text, offset,
-                "text-evidence-raw-digest" if text_declared else "untyped-non-python-digest",
+                "text-evidence-raw-digest"
+                if text_declared or (artifact_declared and obvious_text)
+                else "untyped-non-python-digest",
                 "Text evidence must use the canonicalizing digest helper."
-                if text_declared else
+                if text_declared or (artifact_declared and obvious_text) else
                 "Shell and workflow SHA-256 commands must declare an explicit artifact-byte domain.",
             ))
     return violations

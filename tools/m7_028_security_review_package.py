@@ -168,7 +168,12 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
         require(isinstance(item, dict), "SCHEMA", f"documents[{position}]")
         exact_keys(item, {"topic", "path", "sha256"}, f"documents[{position}]")
         path = safe_path(root, item["path"])
-        require(text_evidence_sha256(path) == item["sha256"], "DIGEST_MISMATCH", item["path"])
+        require(
+            evidence_digest.text_evidence_sha256_equal(
+                text_evidence_sha256(path), item["sha256"],
+            ),
+            "DIGEST_MISMATCH", item["path"],
+        )
         topics.add(item["topic"])
         scanned_files.add(path)
 
@@ -177,7 +182,12 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
         require(isinstance(item, dict), "SCHEMA", f"evidence[{position}]")
         exact_keys(item, {"topic", "sourceTask", "path", "sha256", "state", "gating"}, f"evidence[{position}]")
         path = safe_path(root, item["path"])
-        require(text_evidence_sha256(path) == item["sha256"], "DIGEST_MISMATCH", item["path"])
+        require(
+            evidence_digest.text_evidence_sha256_equal(
+                text_evidence_sha256(path), item["sha256"],
+            ),
+            "DIGEST_MISMATCH", item["path"],
+        )
         scanned_files.add(path)
         state = item["state"]
         require(state in {"CURRENT_PASS", "CURRENT_BOUND_INPUT", "STALE_AFTER_M7_032", "HISTORICAL_NON_GATING"}, "EVIDENCE_STATE", str(state))
@@ -210,7 +220,9 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
             continue
         document = documents.get(Path(item["path"]).name)
         require(
-            isinstance(document, dict) and document.get("sha256") == item["sha256"],
+            isinstance(document, dict) and evidence_digest.text_evidence_sha256_equal(
+                document.get("sha256"), item["sha256"],
+            ),
             "BOUND_INPUT_MISMATCH",
             item["path"],
         )

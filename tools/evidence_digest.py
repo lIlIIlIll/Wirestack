@@ -32,6 +32,11 @@ RAW_DIGEST_COMMAND = re.compile(
     r")",
     re.IGNORECASE,
 )
+TEXT_COMMAND_OPERAND = re.compile(
+    r"\.(?:json|md|markdown|log|txt|yaml|yml|cj|py|c|cc|cpp|h|hpp|sh)"
+    r"(?=$|[\s'\";)])",
+    re.IGNORECASE,
+)
 DIGEST_DOMAIN_MARKER = "wirestack-digest-domain:"
 NON_PYTHON_DOMAIN_MANIFEST = Path("tools/evidence-digest-non-python.json")
 
@@ -128,13 +133,29 @@ def artifact_bytes_sha256(raw: bytes) -> str:
     return artifact_byte_digest_bytes(raw).sha256
 
 
+def text_evidence_sha256_equal(left: Any, right: Any) -> bool:
+    """Compare two legacy string-schema values in the text-evidence domain."""
+    try:
+        return TextEvidenceDigest(left) == TextEvidenceDigest(right)
+    except DigestError:
+        return False
+
+
+def artifact_byte_sha256_equal(left: Any, right: Any) -> bool:
+    """Compare two legacy string-schema values in the artifact-byte domain."""
+    try:
+        return ArtifactByteDigest(left) == ArtifactByteDigest(right)
+    except DigestError:
+        return False
+
+
 def signed_payload_sha256(path: Path) -> str:
     """Return the exact byte digest of a payload whose signature binds raw bytes."""
     return artifact_byte_sha256(path)
 
 
 def text_evidence_inventory_sha256(root: Path, paths: Iterable[Path]) -> str:
-    """Hash a sorted repository text inventory with path framing."""
+    """Hash a sorted repository text inventory and reject ambiguous NUL framing."""
     base = root.resolve()
     payload = bytearray()
     for path in sorted((value.resolve() for value in paths), key=lambda value: value.as_posix()):
@@ -142,12 +163,16 @@ def text_evidence_inventory_sha256(root: Path, paths: Iterable[Path]) -> str:
             relative = path.relative_to(base).as_posix()
         except ValueError as error:
             raise DigestError("PATH_ESCAPE", f"text evidence path escapes repository: {path}") from error
-        payload.extend(relative.encode("utf-8"))
-        payload.extend(b"\0")
+        relative_bytes = relative.encode("utf-8")
         try:
-            payload.extend(canonical_text_bytes(path.read_bytes()))
+            content = canonical_text_bytes(path.read_bytes())
         except OSError as error:
             raise DigestError("DIGEST_READ", f"cannot read text evidence: {path}") from error
+        if b"\0" in relative_bytes or b"\0" in content:
+            raise DigestError("TEXT_NUL", f"text evidence inventory contains NUL: {relative}")
+        payload.extend(relative_bytes)
+        payload.extend(b"\0")
+        payload.extend(content)
         payload.extend(b"\0")
     return text_evidence_bytes_sha256(bytes(payload))
 
@@ -644,11 +669,32 @@ def digest_inventory(root: Path) -> dict[str, Any]:
                 entries.append({"path": relative, "line": node.lineno, "symbol": name, "classification": domain})
                 if domain.startswith("legacy") or domain == "invalid-artifact-on-text":
                     issues.append({"code": "UNTYPED_DIGEST", "detail": f"{relative}:{node.lineno}:{name}"})
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Compare) or relative == "tools/evidence_digest.py":
+                    continue
+                expression = ast.unparse(node)
+                if re.search(r"(?:get\(['\"]sha256['\"]\)|\[['\"]sha256['\"]\])", expression):
+                    entries.append({
+                        "path": relative, "line": node.lineno,
+                        "symbol": "bare-sha256-comparison", "classification": "legacy-task-local",
+                    })
+                    issues.append({
+                        "code": "UNTYPED_DIGEST",
+                        "detail": f"{relative}:{node.lineno}:bare-sha256-comparison",
+                    })
     non_python_paths: list[Path] = []
     scripts = root / "scripts"
     if scripts.is_dir():
         non_python_paths.extend(
             path for path in scripts.rglob("*") if path.is_file() and path.suffix != ".py"
+        )
+    tools_root = root / "tools"
+    if tools_root.is_dir():
+        non_python_paths.extend(
+            path for path in tools_root.rglob("*")
+            if path.is_file() and path.suffix != ".py"
+            and path.name != "evidence-digest-non-python.json"
+            and not any(part in {"__pycache__", "build", "dist"} for part in path.parts)
         )
     workflows = root / ".github/workflows"
     if workflows.is_dir():
@@ -665,12 +711,13 @@ def digest_inventory(root: Path) -> dict[str, Any]:
                 continue
             context = "\n".join(lines[max(0, index - 4):index + 1]).lower()
             declared_domain = declared_non_python.get((relative, line.strip()))
+            obvious_text = TEXT_COMMAND_OPERAND.search(line) is not None
             if f"{DIGEST_DOMAIN_MARKER} {ARTIFACT_BYTE_DOMAIN}" in context:
-                domain = "artifact-bytes"
+                domain = "invalid-artifact-on-text" if obvious_text else "artifact-bytes"
             elif f"{DIGEST_DOMAIN_MARKER} {TEXT_EVIDENCE_DOMAIN}" in context:
                 domain = "invalid-text-command"
             elif declared_domain == ARTIFACT_BYTE_DOMAIN:
-                domain = "artifact-bytes"
+                domain = "invalid-artifact-on-text" if obvious_text else "artifact-bytes"
             elif declared_domain == TEXT_EVIDENCE_DOMAIN:
                 domain = "invalid-text-command"
             else:
@@ -679,7 +726,9 @@ def digest_inventory(root: Path) -> dict[str, Any]:
                 "path": relative, "line": index + 1,
                 "symbol": RAW_DIGEST_COMMAND.search(line).group(0), "classification": domain,
             })
-            if domain.startswith("legacy") or domain == "invalid-text-command":
+            if domain.startswith("legacy") or domain in {
+                "invalid-text-command", "invalid-artifact-on-text",
+            }:
                 issues.append({"code": "UNTYPED_DIGEST", "detail": f"{relative}:{index + 1}:raw-command"})
     entries.sort(key=lambda item: (item["path"], item["line"], item["symbol"]))
     domain_counts: dict[str, int] = {}

@@ -3,12 +3,14 @@ from __future__ import annotations
 from tools import evidence_digest
 
 import copy
+import io
 import json
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from contextlib import redirect_stdout
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -59,6 +61,29 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         summary = review.validate_review(root, request, self.valid_report(request))
         self.assertEqual(0, summary["findingCount"])
+
+    def test_prepare_cli_returns_structured_invalid_utf8_failure(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-m7-029-utf8-") as directory:
+            root = Path(directory)
+            package = root / review.PACKAGE_PATH
+            package.parent.mkdir(parents=True)
+            package.write_bytes(b"invalid\xff")
+            request = root / "request.json"
+            request.write_bytes(b"previous\n")
+            output = io.StringIO()
+            with redirect_stdout(output):
+                result = review.main([
+                    "--root", str(root),
+                    "--request", str(request),
+                    "--review", str(root / "review.json"),
+                    "--report", str(root / "report.json"),
+                    "--prepare", "--json",
+                ])
+            payload = json.loads(output.getvalue())
+            self.assertEqual(1, result)
+            self.assertEqual("FAIL", payload["status"])
+            self.assertEqual("TEXT_UTF8", payload["code"])
+            self.assertEqual(b"previous\n", request.read_bytes())
 
     def test_stale_target_and_incomplete_scope_fail(self) -> None:
         temporary, root, request = self.fixture()

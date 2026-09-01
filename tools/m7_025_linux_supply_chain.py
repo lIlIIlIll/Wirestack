@@ -189,14 +189,24 @@ def validate_artifact_inputs(
 ) -> None:
     artifact = qualification.get("artifact")
     _require(isinstance(artifact, dict), "M7-021 artifact evidence is absent")
-    _require(metadata["artifact_sha256"] == artifact.get("sha256"), "artifact digest mismatch")
+    _require(
+        evidence_digest.artifact_byte_sha256_equal(
+            metadata["artifact_sha256"], artifact.get("sha256"),
+        ),
+        "artifact digest mismatch",
+    )
     _require(metadata["artifact_bytes"] == artifact.get("bytes"), "artifact size mismatch")
     release = metadata["release"]
     provider = metadata["provider"]
     resolver = metadata["resolver"]
     _require(release.get("schema_version") == 1, "release manifest schema is unsupported")
     _require(release.get("package") == "wirestack", "release package identity is invalid")
-    _require(release.get("payload_sha256") == artifact.get("payload_sha256"), "payload digest mismatch")
+    _require(
+        evidence_digest.artifact_byte_sha256_equal(
+            release.get("payload_sha256"), artifact.get("payload_sha256"),
+        ),
+        "payload digest mismatch",
+    )
     _require(release.get("externalOpenSslDependency") is False, "release depends on system OpenSSL")
     release_license = release.get("license")
     _require(isinstance(release_license, dict), "release license identity is absent")
@@ -206,7 +216,9 @@ def validate_artifact_inputs(
     )
     _require(release_license.get("file") == "LICENSE", "release license path is invalid")
     _require(
-        release_license.get("sha256") == metadata["license_sha256"]["LICENSE"],
+        evidence_digest.text_evidence_sha256_equal(
+            release_license.get("sha256"), metadata["license_sha256"]["LICENSE"],
+        ),
         "embedded project license digest mismatch",
     )
     notices = release.get("thirdPartyNotices")
@@ -224,19 +236,27 @@ def validate_artifact_inputs(
     _require(isinstance(release_provider, dict), "release provider identity is absent")
     _require(isinstance(release_resolver, dict), "release resolver identity is absent")
     _require(
-        release_provider.get("manifest_sha256") == metadata["provider_manifest_sha256"],
+        evidence_digest.text_evidence_sha256_equal(
+            release_provider.get("manifest_sha256"), metadata["provider_manifest_sha256"],
+        ),
         "embedded provider manifest digest mismatch",
     )
     _require(
-        release_provider.get("archive_sha256") == provider.get("archive", {}).get("sha256"),
+        evidence_digest.artifact_byte_sha256_equal(
+            release_provider.get("archive_sha256"), provider.get("archive", {}).get("sha256"),
+        ),
         "embedded provider archive digest mismatch",
     )
     _require(
-        release_resolver.get("manifest_sha256") == metadata["resolver_manifest_sha256"],
+        evidence_digest.text_evidence_sha256_equal(
+            release_resolver.get("manifest_sha256"), metadata["resolver_manifest_sha256"],
+        ),
         "embedded resolver manifest digest mismatch",
     )
     _require(
-        release_resolver.get("archive_sha256") == resolver.get("archive", {}).get("sha256"),
+        evidence_digest.artifact_byte_sha256_equal(
+            release_resolver.get("archive_sha256"), resolver.get("archive", {}).get("sha256"),
+        ),
         "embedded resolver archive digest mismatch",
     )
     build_pin = provider.get("build_inputs", {}).get("provider")
@@ -612,18 +632,35 @@ def validate_documents(
         canonical_json(fingerprint.get("inputs"))
     )
     _require(
-        fingerprint.get("buildFingerprint") == expected_fingerprint,
+        evidence_digest.text_evidence_sha256_equal(
+            fingerprint.get("buildFingerprint"), expected_fingerprint,
+        ),
         "build fingerprint does not match its canonical inputs",
     )
-    _require(manifest.get("buildFingerprint") == expected_fingerprint, "manifest fingerprint mismatch")
-    _require(bundle.get("buildFingerprint") == expected_fingerprint, "bundle fingerprint mismatch")
     _require(
-        fingerprint.get("inputs", {}).get("generator", {}).get("sha256") == evidence_digest.text_evidence_sha256(generator),
+        evidence_digest.text_evidence_sha256_equal(
+            manifest.get("buildFingerprint"), expected_fingerprint,
+        ),
+        "manifest fingerprint mismatch",
+    )
+    _require(
+        evidence_digest.text_evidence_sha256_equal(
+            bundle.get("buildFingerprint"), expected_fingerprint,
+        ),
+        "bundle fingerprint mismatch",
+    )
+    _require(
+        evidence_digest.text_evidence_sha256_equal(
+            fingerprint.get("inputs", {}).get("generator", {}).get("sha256"),
+            evidence_digest.text_evidence_sha256(generator),
+        ),
         "generator fingerprint is stale",
     )
     qualified_artifact = qualification.get("artifact", {})
     _require(
-        manifest.get("artifact", {}).get("sha256") == qualified_artifact.get("sha256"),
+        evidence_digest.artifact_byte_sha256_equal(
+            manifest.get("artifact", {}).get("sha256"), qualified_artifact.get("sha256"),
+        ),
         "manifest is not bound to the M7-021 artifact",
     )
     artifact_id = "SPDXRef-Package-Wirestack-Artifact"
@@ -642,7 +679,9 @@ def validate_documents(
     _require(len(package_ids) == len(set(package_ids)), "SPDX package ids are not unique")
     _require(set(package_ids) == required_package_ids, "SPDX package inventory is incomplete")
     _require(
-        _package_checksum(sbom, artifact_id) == qualified_artifact.get("sha256"),
+        evidence_digest.artifact_byte_sha256_equal(
+            _package_checksum(sbom, artifact_id), qualified_artifact.get("sha256"),
+        ),
         "SPDX artifact digest mismatch",
     )
     _require(sbom.get("spdxVersion") == "SPDX-2.3", "SPDX version is invalid")
@@ -655,12 +694,16 @@ def validate_documents(
     _require(provider.get("securityPatchLevel") == "abi-1;patches=none", "patch level is incomplete")
     _require(provider.get("externalOpenSslDependency") is False, "OpenSSL dependency flag is invalid")
     _require(
-        _package_checksum(sbom, provider_id) == provider.get("archive", {}).get("sha256"),
+        evidence_digest.artifact_byte_sha256_equal(
+            _package_checksum(sbom, provider_id), provider.get("archive", {}).get("sha256"),
+        ),
         "SPDX provider digest mismatch",
     )
     _require(
-        _package_checksum(sbom, resolver_id)
-        == manifest.get("resolver", {}).get("archive", {}).get("sha256"),
+        evidence_digest.artifact_byte_sha256_equal(
+            _package_checksum(sbom, resolver_id),
+            manifest.get("resolver", {}).get("archive", {}).get("sha256"),
+        ),
         "SPDX resolver digest mismatch",
     )
     relationships = sbom.get("relationships")
