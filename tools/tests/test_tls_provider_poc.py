@@ -1061,6 +1061,8 @@ class ProviderPocValidationTests(unittest.TestCase):
         provision = workflow[provision_start:runner_start]
         runner_step = workflow[runner_start:cleanup_start]
         self.assertIn("apk add --no-cache", provision)
+        self.assertIn("git config --global --add safe.directory /work",
+                      provision)
         self.assertNotIn("WIRESTACK_GITHUB_TOKEN", provision)
         self.assertIn("-e WIRESTACK_GITHUB_TOKEN", runner_step)
         self.assertIn("unset WIRESTACK_GITHUB_TOKEN", runner_step)
