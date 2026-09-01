@@ -327,9 +327,14 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             for relative in report_paths:
                 path = root / relative
                 path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(json.dumps({
-                    "source_task": "M3-030", "status": "PASS"
-                }), encoding="utf-8")
+                identity = (
+                    {"task_id": "M3-030"}
+                    if relative.endswith("/task-check.json")
+                    else {"source_task": "M3-030"}
+                )
+                path.write_text(
+                    json.dumps({**identity, "status": "PASS"}), encoding="utf-8"
+                )
                 reports.append({"path": relative, "source_task": "M3-030",
                                 "acceptance_status": "PASS",
                                 "sha256": adoption.sha256_path(path)})

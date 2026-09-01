@@ -343,7 +343,10 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
         if entry.get("sha256") != repository_text_sha256(path):
             raise AdoptionError("STALE_SOURCE", f"{relative}: report digest changed")
         payload = load_json(path)
-        if payload.get("source_task") != "M3-030" or payload.get("status") != "PASS":
+        payload_task = payload.get("source_task")
+        if payload_task is None:
+            payload_task = payload.get("task_id")
+        if payload_task != "M3-030" or payload.get("status") != "PASS":
             raise AdoptionError("RETAINED_EVIDENCE", f"{relative}: report does not provide PASS")
     source_sha256 = evidence.get("source_sha256")
     expected_paths = set(task["source_paths"])
