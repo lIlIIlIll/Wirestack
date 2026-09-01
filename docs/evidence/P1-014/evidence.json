@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-01T08:33:04.674452Z",
+  "generated_at_utc": "2026-09-01T08:45:05.055736Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -22,7 +22,7 @@
       "path": "docs/evidence/P1-014/digest-inventory.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "0aa45f28f1352dccd0bb2e80bf39b2cb669fb62b1424f3fcc04e08c03ebf6996"
+        "sha256": "9eb7f8962a27958f812d78fd2e2cc0f1d072e6ff05c5cfb36cf80f2dd03efb4e"
       },
       "source_task": "P1-014"
     },
@@ -40,7 +40,7 @@
       "path": "docs/evidence/P1-014/linux-crlf.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "8da0d8b9a9445308e4856d27f69e18258b1948556be63a39e6ede3a66d6bd433"
+        "sha256": "327d840c2a29393ea52257a933a61b11350e95f03dffee2df262627f5b12cb75"
       },
       "source_task": "P1-014"
     },
@@ -49,12 +49,12 @@
       "path": "docs/evidence/P1-014/windows-crlf.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "7b8861d16fbba0b7c0d407b0736c343b54b8d228291529ce464466e008ac15f2"
+        "sha256": "138ccfe2f177c699c53a32d37c0c9619caf1b76f55a89db2c1dbbca924ed1c74"
       },
       "source_task": "P1-014"
     }
   ],
-  "revision": "8d34cf06866a6a97636f0add8a822492aa7c3695",
+  "revision": "c51e61199986b4ee022e497cfe41c0bec41e3e6f",
   "schema_version": 2,
   "source_sha256": {
     ".github/workflows/linux-release-attestation.yml": {
@@ -91,7 +91,7 @@
     },
     "tools/architecture_guard.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "4d6a4edf45ee134aadfd8d404e5b1822a04f32e0d1ec12d1e9a21a165945d6c3"
+      "sha256": "ab8411545b9b103fc276d54ee9dcb0d640773f7d9e39f16dbbe8e4ec877f7f62"
     },
     "tools/benchmarks/http1_benchmark.py": {
       "domain": "text-utf8-lf-v1",
@@ -135,7 +135,7 @@
     },
     "tools/evidence_digest.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "c49b3c9397b4489ceb1bdb53bb58bd6f892ccff8270173306d5c7fb0bd44d022"
+      "sha256": "282c3627bf56c7f72ad48c3948b08ff6226f4c752770d8e185f3e6989b569cee"
     },
     "tools/gates/dns_carrier_thread.py": {
       "domain": "text-utf8-lf-v1",
@@ -271,11 +271,11 @@
     },
     "tools/m7_030_linux_release.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "40a3740c1772da818c937f3e636abb21172aca68cb65fc861b1ad0198717a2e2"
+      "sha256": "9a8058dc2fb7d56de9c6ab3761a91c8deb730cd55aa266b7b24e7d017c7d15bb"
     },
     "tools/m7_031_linux_candidate.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "a33110a66602d9fe10cdde76d876cf1fa262337f6825d8c46a86731d9c50b171"
+      "sha256": "383e93c5dc1072905ccee49fe511ead5178526e1a7c91a0d9cb087f35a8ae870"
     },
     "tools/m7_032_public_api_inventory.py": {
       "domain": "text-utf8-lf-v1",
@@ -291,11 +291,11 @@
     },
     "tools/tasks/P1-014.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "d9d889a2b3706b171e538326140d6775da68be27c70fcdecdba68e189412e69a"
+      "sha256": "d9eef2ea0bf520c721471411899821d3b811fbcb35d89c8cb9e89fe54c6fd7eb"
     },
     "tools/tests/test_architecture_guard.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "b26ae30ffc40758c599d1dade48d57e74b75f18bd993e7f4c3bdb7133cfe44a4"
+      "sha256": "63e1280e2266c50f8359f97f99b95ad95b5f1b9144bf020d285601f9a4e324cb"
     },
     "tools/tests/test_build_resolver.py": {
       "domain": "text-utf8-lf-v1",
@@ -343,15 +343,19 @@
     },
     "tools/tests/test_m7_030_linux_release.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "c44759a0fa50d77bec6bf5a551ab500719b15611fa7be87b632a597ce8c1f93d"
+      "sha256": "fc0905dfb821d1bf9f508f2d79fbd946c2ed1e0828dc1cc43a476464f4a3a9c0"
+    },
+    "tools/tests/test_m7_031_linux_candidate.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ce0cb6e16f84d977f7212b2f1730c309019c1fe058ac787a7e37c0bc240c8219"
     },
     "tools/tests/test_p1_013_development_release_gate.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "ef2f9bd5d7e6302aa68c1c5db16bdba7ebd733961d9d14250e9a5d3e6c957b56"
+      "sha256": "4bdfd984a172efc268c8c22d1ff99e473abcbd3b108577aa8bccad6a720cf3a1"
     },
     "tools/tests/test_p1_014_evidence_digest_types.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "1ef450a58c0a5471f2ff6e38ebfda819a512f4e72bc53da4651626e6b314a7c4"
+      "sha256": "2c454b01ea9b2db09fc601c42623ecfce7db80f5122f1799c53d058ec832a251"
     },
     "tools/tests/test_tls_provider_poc.py": {
       "domain": "text-utf8-lf-v1",

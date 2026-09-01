@@ -1165,61 +1165,61 @@
     },
     {
       "classification": "text-evidence",
-      "line": 764,
+      "line": 769,
       "path": "tools/m7_030_linux_release.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "artifact-bytes",
-      "line": 786,
+      "line": 791,
       "path": "tools/m7_030_linux_release.py",
       "symbol": "artifact_byte_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 787,
+      "line": 792,
       "path": "tools/m7_030_linux_release.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "artifact-bytes",
-      "line": 789,
+      "line": 794,
       "path": "tools/m7_030_linux_release.py",
       "symbol": "artifact_byte_sha256"
     },
     {
       "classification": "artifact-bytes",
-      "line": 790,
+      "line": 795,
       "path": "tools/m7_030_linux_release.py",
       "symbol": "artifact_byte_sha256"
     },
     {
       "classification": "artifact-bytes",
-      "line": 259,
+      "line": 260,
       "path": "tools/m7_031_linux_candidate.py",
       "symbol": "artifact_byte_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 302,
+      "line": 303,
       "path": "tools/m7_031_linux_candidate.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 372,
+      "line": 373,
       "path": "tools/m7_031_linux_candidate.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 455,
+      "line": 456,
       "path": "tools/m7_031_linux_candidate.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 593,
+      "line": 592,
       "path": "tools/m7_031_linux_candidate.py",
       "symbol": "text_evidence_sha256"
     },
@@ -1573,13 +1573,13 @@
     },
     {
       "classification": "text-evidence",
-      "line": 382,
+      "line": 387,
       "path": "tools/tests/test_m7_030_linux_release.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "artifact-bytes",
-      "line": 384,
+      "line": 389,
       "path": "tools/tests/test_m7_030_linux_release.py",
       "symbol": "artifact_byte_sha256"
     },
