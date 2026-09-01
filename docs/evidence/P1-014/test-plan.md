@@ -23,8 +23,8 @@ than rewritten or silently promoted.
 | P005 | Evidence uses schema v1, a bare digest string or an unknown domain | Validation rejects the document without migration or fallback |
 | P006 | A sealed text source or report changes semantically | Verification returns stale/fail and does not retain the old PASS |
 | P007 | A sealed text source changes only line-ending encoding | Verification remains current because its normalized text is unchanged |
-| P008 | Python, shell, workflow or composite-action code hashes evidence through an untyped/raw-byte helper, folded command, adjacent action helper, unresolved shell operand, direct SHA-256 import, untyped digest-field comparison or UTF-8 fallback | Architecture guard reports a stable violation |
-| P009 | The digest-callsite inventory finds a new unclassified Python or non-Python SHA-256 implementation, unreadable helper or digest-bearing field comparison | Inventory and architecture validation fail closed |
+| P008 | Python, shell, PowerShell, workflow or composite-action code hashes evidence through an untyped/raw-byte helper, folded command, manifest-declared partial command, adjacent action helper, unresolved shell operand, direct SHA-256 import, assigned digest-field comparison, text-suffix byte digest or UTF-8 fallback | Architecture guard reports a stable violation |
+| P009 | The digest-callsite inventory finds a new unclassified Python or non-Python SHA-256 implementation, unreadable helper, PowerShell/.NET SHA-256 API, incomplete logical operand classification or direct/assigned digest-bearing field comparison | Inventory and architecture validation fail closed |
 | P010 | Linux fault injection exercises LF, CRLF, bare CR, invalid UTF-8 and a tracked checkout fixture | The bounded Linux report records exact OS, architecture and libc identity and PASS |
 | P011 | GitHub Windows fault injection exercises the same inputs | The bounded Windows report records actual Windows platform and PASS |
 | P012 | A report is written atomically and replacement fails before commit | The previous report remains intact and no temporary file is retained |
@@ -38,7 +38,7 @@ than rewritten or silently promoted.
 | S002 | Invalid UTF-8 and a simulated fallback implementation | P002,P008 | Strict rejection | No raw-byte recovery path executes | fault-injection,safety |
 | S003 | Text and binary digest objects plus serialized values | P003,P004,P005 | Only matching explicit domains parse | Types compare unequal and old/untyped input is invalid | unit,schema |
 | S004 | Sealed evidence followed by semantic and line-ending-only source changes | P006,P007 | Semantic drift is stale; encoding-only drift is current | Old PASS is neither rewritten nor silently reused | regression,freshness |
-| S005 | Repository digest implementation and Python, shell, workflow and composite-action callsite inventory | P008,P009 | Every implementation is classified; evidence tooling is text-only | Direct imports and unmarked raw commands fail the guard | architecture,inventory |
+| S005 | Repository digest implementation and Python, shell, PowerShell, workflow and composite-action callsite inventory | P008,P009 | Every implementation and complete command operand is classified; evidence tooling is text-only | Direct imports, assigned digest fields, manifest-declared folded commands, text-suffix byte digests and raw PowerShell APIs fail the guard | architecture,inventory |
 | S006 | Native Linux and hosted Windows CRLF probes over a tracked checkout fixture | P010,P011 | Both platforms prove identical canonical behavior | Reports derive complete platform identity from the runner and reject `-text` dependence | platform,integration |
 | S007 | Atomic JSON report replacement and repository gates | P012,P013 | Failure preserves prior file; short gates remain bounded | No partial report and no long gate | reliability,integration |
 
@@ -51,8 +51,8 @@ than rewritten or silently promoted.
 | T003 | S003 | P003,P004 | Typed digest objects and opposite-domain parser | PASS by rejecting mismatch | Non-interchangeable types and `DIGEST_DOMAIN` failure | unit |
 | T004 | S003 | P005 | Schema v1, bare string, unknown domain and malformed digest | PASS by rejecting every input | Stable schema/type/domain/format failures | unit,fault-injection |
 | T005 | S004 | P006,P007 | Sealed report and source mutations | PASS | Semantic drift is stale; CRLF-only drift remains current | unit,regression |
-| T006 | S005 | P008 | Injected raw-byte text helper, named digest-field comparison, invalid UTF-8 helper and UnicodeDecodeError fallback | PASS by detecting violations | Stable architecture rule IDs and fail-closed unreadable input | architecture,fault-injection |
-| T007 | S005 | P009 | Injected direct SHA-256 import plus unmarked, variable-operand, folded-YAML and adjacent composite-action helper commands | PASS by detecting violations | Inventory cannot omit Python, non-Python or action helper implementations | architecture,inventory |
+| T006 | S005 | P008 | Injected raw-byte `.log` helper, direct and assigned digest-field comparison, invalid UTF-8 helper and UnicodeDecodeError fallback | PASS by detecting violations | Stable architecture rule IDs, assignment provenance and fail-closed unreadable input | architecture,fault-injection |
+| T007 | S005 | P009 | Injected direct SHA-256 import plus unmarked, variable-operand, manifest-declared folded-YAML, PowerShell/.NET SHA-256 and adjacent composite-action helper commands | PASS by detecting violations | Inventory cannot omit Python, non-Python, PowerShell or action helper implementations and always classifies the complete executed operand | architecture,inventory |
 | T008 | S006 | P010 | Native Linux CRLF probe and tracked fixture | PASS | Exact Linux architecture/libc identity, checkout bytes and no `-text` dependency | integration,platform |
 | T009 | S006 | P011 | GitHub Windows CRLF workflow | PASS on hosted runner | Actual Windows identity and uploaded report | integration,platform |
 | T010 | S007 | P012 | Failure before atomic replace | PASS | Original bytes preserved and temporary file removed | unit,fault-injection |

@@ -199,7 +199,7 @@ def load_qualified_artifact(
         raise SoakError("ARTIFACT_MISSING", f"missing {artifact_path}")
     expected = report["artifact"]["sha256"]
     actual = evidence_digest.artifact_byte_sha256(artifact_path)
-    if actual != expected:
+    if not evidence_digest.schema_artifact_sha256_equal(actual, expected):
         raise SoakError("ARTIFACT_DIGEST", f"artifact digest {actual} != {expected}")
     return report, actual
 
