@@ -273,6 +273,18 @@ class ProviderPocValidationTests(unittest.TestCase):
             workflow = provider["security_update"]["update_workflow"]
             self.assertTrue((ROOT / workflow).is_file())
 
+    def test_matrix_contract_only_does_not_promote_stale_retained_results(self):
+        matrix = ROOT / "docs/evidence/M0-016/platform-matrix.json"
+        self.assertEqual(
+            0, validator.main(["--matrix", str(matrix), "--matrix-contract-only"]))
+        self.assertEqual(1, validator.main(["--matrix-contract-only"]))
+
+        for workflow in (
+                ROOT / ".github/workflows/tls-provider-poc.yml",
+                ROOT / ".github/workflows/m0-016-windows-provider-poc.yml"):
+            text = workflow.read_text(encoding="utf-8")
+            self.assertIn("--matrix-contract-only", text)
+
     def test_security_update_evidence_fails_closed(self):
         value = copy.deepcopy(self.spec)
         value["providers"][0]["security_update"]["source_committed_at"] = (
