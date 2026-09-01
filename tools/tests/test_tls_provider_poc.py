@@ -1291,6 +1291,14 @@ class ProviderPocValidationTests(unittest.TestCase):
         self.assertNotIn("SSL_ERROR_WANT_READ", openssl_local_close)
         self.assertNotIn("SSL_ERROR_WANT_WRITE", openssl_local_close)
         self.assertIn("BIO_shutdown_wr(SSL_get_wbio(p.client))", openssl_source)
+        openssl_truncation = openssl_source[
+            openssl_source.index("static int truncation_case"):
+            openssl_source.index("static int local_close_version_case")
+        ]
+        self.assertIn("e == SSL_ERROR_SSL", openssl_truncation)
+        self.assertIn("e == SSL_ERROR_SYSCALL", openssl_truncation)
+        self.assertNotIn("SSL_ERROR_WANT_READ", openssl_truncation)
+        self.assertNotIn("SSL_ERROR_WANT_WRITE", openssl_truncation)
         mbedtls_local_close = mbedtls_source[
             mbedtls_source.index("static int local_close_version_case"):
             mbedtls_source.index("static int local_close_case")
@@ -1300,6 +1308,13 @@ class ProviderPocValidationTests(unittest.TestCase):
         self.assertIn("peer_result == 0", mbedtls_local_close)
         self.assertNotIn("MBEDTLS_ERR_SSL_WANT_READ", mbedtls_local_close)
         self.assertNotIn("MBEDTLS_ERR_SSL_WANT_WRITE", mbedtls_local_close)
+        mbedtls_truncation = mbedtls_source[
+            mbedtls_source.index("static int truncation_case"):
+            mbedtls_source.index("static int local_close_version_case")
+        ]
+        self.assertIn("ok = ret == 0", mbedtls_truncation)
+        self.assertNotIn("MBEDTLS_ERR_SSL_WANT_READ", mbedtls_truncation)
+        self.assertNotIn("MBEDTLS_ERR_SSL_WANT_WRITE", mbedtls_truncation)
 
         allocation_header = (
             ROOT / "tools/tls_provider_poc/poc_allocation_profile.h"

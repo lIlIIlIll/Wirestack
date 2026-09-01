@@ -694,7 +694,8 @@ static int truncation_case(const char *server_cert, const char *server_key, cons
         unsigned char byte;
         int r = SSL_read(p.server, &byte, 1);
         int e = SSL_get_error(p.server, r);
-        ok = r <= 0 && e != SSL_ERROR_ZERO_RETURN;
+        ok = r <= 0 &&
+             (e == SSL_ERROR_SSL || e == SSL_ERROR_SYSCALL);
     }
     free_pair(&p);
     SSL_CTX_free(client_ctx);
