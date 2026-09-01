@@ -30,6 +30,7 @@
       "sha256": "e49c81e2d2f84e259d40e2fb8192f3bcd198b355184845d76d8f58807d0d78ee"
     }
   },
+  "effective_text_attribute": "unspecified",
   "expected_platform": "windows-x86_64",
   "gitattributes_dependency": false,
   "invalid_utf8": "REJECTED",
@@ -40,7 +41,7 @@
     "machine": "AMD64",
     "system": "Windows"
   },
-  "revision": "a2228585eab5a738ab6b0ba6eca878b488e46feb",
+  "revision": "506c1f499be10afe7f1941a3aec609f4869a511d",
   "schema_version": 1,
   "status": "PASS",
   "text_digests": {
