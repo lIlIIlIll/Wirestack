@@ -21,12 +21,14 @@ Windows report for PR #151 source head `a731e0a8` (merge revision `43802b06`).
   entry. Python direct imports, assigned subprocess commands, `os.system`/`os.popen`
   launches, `openssl dgst`, embedded Python SHA-256 and unmarked shell/workflow
   hash commands fail the guard. Python files under both `tools/` and `scripts/`
-  and non-Python files under `tools/` are scanned. Pure local wrappers propagate
+  non-Python files under `tools/`, and composite actions under `.github/actions/`
+  are scanned. Pure local wrappers propagate
   their digest domain and forwarded argument through arbitrary wrapper depth;
   assigned callable aliases are resolved to the same typed operation.
-  Typed equality helpers restore text or artifact-byte domains before comparing
-  legacy string-schema fields. The inventory contains 310 classified calls and
-  no legacy entry.
+  Typed equality helpers parse both serialized domains and reject bare strings;
+  fixed string fields owned by pre-existing task or protocol schemas use
+  separately named schema-domain comparators. The inventory is required to
+  contain no legacy entry.
 - The architecture guard rejects raw SHA-256 outside the typed implementation,
   ambiguous digest helpers, positional, keyword and assigned text paths entering
   the byte domain, untyped repository-evidence comparisons and UTF-8-to-byte
