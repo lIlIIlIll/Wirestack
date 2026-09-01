@@ -5,13 +5,24 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import math
 from pathlib import Path
 
+from run_t9_throughput import CASES
 
-def load(root: Path) -> tuple[list[str], dict[str, float]]:
+
+def load(root: Path) -> tuple[list[str], dict[str, float], dict[str, object]]:
     if not (root / "COMPLETE").is_file():
         raise RuntimeError(f"incomplete result directory: {root}")
+    with (root / "metadata.json").open(encoding="utf-8") as stream:
+        metadata = json.load(stream)
+    if metadata.get("suite") != "T9ThroughputBench":
+        raise RuntimeError(f"unexpected benchmark suite in {root}: {metadata.get('suite')!r}")
+    if metadata.get("cases") != list(CASES):
+        raise RuntimeError(f"metadata case contract differs in {root}")
+    if metadata.get("runs") != 1:
+        raise RuntimeError(f"comparison requires metadata runs=1: {root}")
     with (root / "summary.csv").open(newline="", encoding="utf-8") as stream:
         rows = list(csv.DictReader(stream))
     if len(rows) != 22:
@@ -19,7 +30,25 @@ def load(root: Path) -> tuple[list[str], dict[str, float]]:
     if any(int(row["runs"]) != 1 for row in rows):
         raise RuntimeError(f"comparison requires exactly one run per case: {root}")
     order = [row["case"] for row in rows]
-    return order, {row["case"]: float(row["median_us"]) for row in rows}
+    if order != list(CASES):
+        raise RuntimeError(f"summary case contract differs in {root}")
+    with (root / "manifest.csv").open(newline="", encoding="utf-8") as stream:
+        manifest = list(csv.DictReader(stream))
+    if len(manifest) != len(CASES) or [row["case"] for row in manifest] != list(CASES):
+        raise RuntimeError(f"raw manifest case contract differs in {root}")
+    for row in manifest:
+        report = root / row["report"]
+        log = root / row["log"]
+        if not report.is_dir() or not log.is_file():
+            raise RuntimeError(f"raw evidence is missing for {row['case']} in {root}")
+    return order, {row["case"]: float(row["median_us"]) for row in rows}, metadata
+
+
+def require_same(label: str, values: list[object]) -> None:
+    if any(value is None or value == "" for value in values):
+        raise RuntimeError(f"{label} identity is missing: {values!r}")
+    if any(value != values[0] for value in values[1:]):
+        raise RuntimeError(f"{label} differs between result directories: {values!r}")
 
 
 def geomean(values: list[float]) -> float:
@@ -34,11 +63,24 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
-    order, json4cj = load(args.json4cj_server)
-    yjson_server_order, yjson_server = load(args.yjson_server)
-    yjson_daily_order, yjson_daily = load(args.yjson_server_daily)
+    order, json4cj, json4cj_meta = load(args.json4cj_server)
+    yjson_server_order, yjson_server, yjson_server_meta = load(args.yjson_server)
+    yjson_daily_order, yjson_daily, yjson_daily_meta = load(args.yjson_server_daily)
     if order != yjson_server_order or order != yjson_daily_order:
         raise RuntimeError("case order or case set differs between result directories")
+    all_meta = [json4cj_meta, yjson_server_meta, yjson_daily_meta]
+    require_same("host", [meta.get("host") for meta in all_meta])
+    require_same("platform", [meta.get("platform") for meta in all_meta])
+    require_same("CPU", [meta.get("cpu") for meta in all_meta])
+    msgc_meta = [json4cj_meta, yjson_server_meta]
+    require_same("MSGC compiler", [meta.get("cjc") for meta in msgc_meta])
+    require_same("MSGC cjpm", [meta.get("cjpm") for meta in msgc_meta])
+    require_same("MSGC heap", [meta.get("cj_heap_size") for meta in msgc_meta])
+    require_same("MSGC stdx path", [meta.get("cangjie_stdx_path") for meta in msgc_meta])
+    if json4cj_meta.get("cfg") is not True or yjson_server_meta.get("cfg") is not True:
+        raise RuntimeError("json4cj and yjson MSGC results must use --cfg")
+    if yjson_server_meta.get("skip_script") is not True:
+        raise RuntimeError("yjson MSGC result must use --skip-script")
 
     args.output.mkdir(parents=True, exist_ok=True)
     csv_path = args.output / "comparison.csv"
@@ -78,6 +120,8 @@ def main() -> int:
             ])
 
     markdown = [
+        "> One-run snapshot (`--runs 1`); this is not release performance qualification.",
+        "",
         "| Workload | json4cj us/op | yjson msgc us/op | yjson daily us/op | msgc/json4cj | daily/json4cj | daily/msgc |",
         "|---|---:|---:|---:|---:|---:|---:|",
     ]

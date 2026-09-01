@@ -51,6 +51,19 @@ def source_digest(root: Path) -> str:
     return digest.hexdigest()
 
 
+def git_capture(root: Path, *args: str) -> str | None:
+    try:
+        return subprocess.run(
+            ["git", "-C", str(root), *args],
+            check=True,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+
 def remote_env(sdk: str) -> str:
     q = shlex.quote(sdk)
     return (
@@ -127,6 +140,10 @@ def main() -> int:
         f"{shlex.quote(args.json4cj_url)} {shlex.quote(remote + '/json4cj')} && "
         f"python3 {shlex.quote(remote + '/prepare_t9_json4cj_copy.py')} {shlex.quote(remote + '/json4cj')}",
         dry_run=args.dry_run)
+    json4cj_sha = "<dry-run>" if args.dry_run else ssh(
+        args.server,
+        f"git -C {shlex.quote(remote + '/json4cj')} rev-parse HEAD",
+    )
 
     env = remote_env(args.server_sdk)
     ssh(args.server,
@@ -166,8 +183,13 @@ def main() -> int:
     if not args.dry_run:
         provenance = {
             "yjson_source_sha256": source_digest(local_copy),
+            "yjson_git_head": git_capture(args.yjson_root.resolve(), "rev-parse", "HEAD"),
+            "yjson_git_status_porcelain": git_capture(
+                args.yjson_root.resolve(), "status", "--porcelain=v1"
+            ),
             "json4cj_url": args.json4cj_url,
             "json4cj_branch": args.json4cj_branch,
+            "json4cj_git_head": json4cj_sha,
             "server": args.server,
             "server_sdk": args.server_sdk,
             "daily_sdk_source": str(args.daily_sdk_root.resolve()),
