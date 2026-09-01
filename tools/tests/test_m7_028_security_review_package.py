@@ -97,6 +97,16 @@ class M7028SecurityReviewPackageTests(unittest.TestCase):
             review.validate_index(root2, index2)
         self.assertEqual("DIGEST_MISMATCH", caught.exception.code)
 
+    def test_invalid_utf8_has_stable_structured_digest_error(self) -> None:
+        temporary, root, index = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        target = root / index["documents"][0]["path"]
+        target.write_bytes(b"valid\n\xff")
+        with self.assertRaises(review.ReviewPackageError) as caught:
+            review.validate_index(root, index)
+        self.assertEqual("TEXT_UTF8", caught.exception.code)
+        self.assertEqual(str(target), caught.exception.detail)
+
     def test_stale_or_skipped_evidence_cannot_claim_pass(self) -> None:
         temporary, root, index = self.fixture()
         self.addCleanup(temporary.cleanup)

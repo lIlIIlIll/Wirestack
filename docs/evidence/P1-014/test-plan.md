@@ -23,9 +23,9 @@ than rewritten or silently promoted.
 | P005 | Evidence uses schema v1, a bare digest string or an unknown domain | Validation rejects the document without migration or fallback |
 | P006 | A sealed text source or report changes semantically | Verification returns stale/fail and does not retain the old PASS |
 | P007 | A sealed text source changes only line-ending encoding | Verification remains current because its normalized text is unchanged |
-| P008 | Repository code hashes evidence through an untyped/raw-byte helper or catches UTF-8 failure to fall back | Architecture guard reports a stable violation |
-| P009 | The digest-callsite inventory finds a new unclassified SHA-256 implementation | Inventory and architecture validation fail closed |
-| P010 | Linux fault injection exercises LF, CRLF, bare CR and invalid UTF-8 | The bounded Linux report records actual platform and PASS |
+| P008 | Python, shell or workflow code hashes evidence through an untyped/raw-byte helper, direct SHA-256 import or UTF-8 fallback | Architecture guard reports a stable violation |
+| P009 | The digest-callsite inventory finds a new unclassified Python or non-Python SHA-256 implementation | Inventory and architecture validation fail closed |
+| P010 | Linux fault injection exercises LF, CRLF, bare CR, invalid UTF-8 and a tracked checkout fixture | The bounded Linux report records exact OS, architecture and libc identity and PASS |
 | P011 | GitHub Windows fault injection exercises the same inputs | The bounded Windows report records actual Windows platform and PASS |
 | P012 | A report is written atomically and replacement fails before commit | The previous report remains intact and no temporary file is retained |
 | P013 | A fast, full or canonical repository gate runs | No long profile is selected or recorded as PASS |
@@ -38,8 +38,8 @@ than rewritten or silently promoted.
 | S002 | Invalid UTF-8 and a simulated fallback implementation | P002,P008 | Strict rejection | No raw-byte recovery path executes | fault-injection,safety |
 | S003 | Text and binary digest objects plus serialized values | P003,P004,P005 | Only matching explicit domains parse | Types compare unequal and old/untyped input is invalid | unit,schema |
 | S004 | Sealed evidence followed by semantic and line-ending-only source changes | P006,P007 | Semantic drift is stale; encoding-only drift is current | Old PASS is neither rewritten nor silently reused | regression,freshness |
-| S005 | Repository digest implementation and callsite inventory | P008,P009 | Every implementation is classified; evidence tooling is text-only | New ambiguous callsites fail the guard | architecture,inventory |
-| S006 | Native Linux and hosted Windows CRLF probes | P010,P011 | Both platforms prove identical canonical behavior | Reports derive platform identity from the runner | platform,integration |
+| S005 | Repository digest implementation and Python, shell and workflow callsite inventory | P008,P009 | Every implementation is classified; evidence tooling is text-only | Direct imports and unmarked raw commands fail the guard | architecture,inventory |
+| S006 | Native Linux and hosted Windows CRLF probes over a tracked checkout fixture | P010,P011 | Both platforms prove identical canonical behavior | Reports derive complete platform identity from the runner and reject `-text` dependence | platform,integration |
 | S007 | Atomic JSON report replacement and repository gates | P012,P013 | Failure preserves prior file; short gates remain bounded | No partial report and no long gate | reliability,integration |
 
 ## Test-plan matrix
@@ -52,8 +52,8 @@ than rewritten or silently promoted.
 | T004 | S003 | P005 | Schema v1, bare string, unknown domain and malformed digest | PASS by rejecting every input | Stable schema/type/domain/format failures | unit,fault-injection |
 | T005 | S004 | P006,P007 | Sealed report and source mutations | PASS | Semantic drift is stale; CRLF-only drift remains current | unit,regression |
 | T006 | S005 | P008 | Injected raw-byte text helper and UnicodeDecodeError fallback | PASS by detecting violations | Stable architecture rule IDs | architecture,fault-injection |
-| T007 | S005 | P009 | Injected unclassified SHA-256 callsite | PASS by detecting violation | Inventory cannot omit a new implementation | architecture,inventory |
-| T008 | S006 | P010 | Native Linux CRLF probe | PASS | Actual Linux identity and bounded machine-readable report | integration,platform |
+| T007 | S005 | P009 | Injected direct SHA-256 import and unmarked shell hash command | PASS by detecting violations | Inventory cannot omit Python or non-Python implementations | architecture,inventory |
+| T008 | S006 | P010 | Native Linux CRLF probe and tracked fixture | PASS | Exact Linux architecture/libc identity, checkout bytes and no `-text` dependency | integration,platform |
 | T009 | S006 | P011 | GitHub Windows CRLF workflow | PASS on hosted runner | Actual Windows identity and uploaded report | integration,platform |
 | T010 | S007 | P012 | Failure before atomic replace | PASS | Original bytes preserved and temporary file removed | unit,fault-injection |
 | T011 | S004,S007 | P005,P006,P013 | P1-014 task gate, fast gate and `scripts/check` | PASS | Schema v2 enforced, short tests pass, no long command starts | integration |
