@@ -6,6 +6,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tools import evidence_digest
+
 
 ROOT = Path(__file__).resolve().parents[3]
 MODULE_PATH = ROOT / "tools/gates/m7_023_linux_fuzz.py"
@@ -85,7 +87,7 @@ class M7023LinuxFuzzGateTest(unittest.TestCase):
 
     def test_crash_artifact_replays_only_checked_in_coordinates(self):
         manifest, targets = self.targets()
-        manifest_digest = text_evidence_sha256ha256(MANIFEST)
+        manifest_digest = evidence_digest.text_evidence_sha256(MANIFEST)
         target = targets[4]
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -594,14 +594,20 @@ def validate_dependency_evidence(
         ):
             raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: environment identity")
 
-        source_sha256 = evidence.get("source_sha256")
-        if not isinstance(source_sha256, dict) or set(source_sha256) != set(task["source_paths"]):
+        raw_source_sha256 = evidence.get("source_sha256")
+        if not isinstance(raw_source_sha256, dict) or set(raw_source_sha256) != set(task["source_paths"]):
             raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: source inventory")
-        for relative, expected in source_sha256.items():
-            if not isinstance(expected, str) or len(expected) != 64 or any(
-                character not in "0123456789abcdef" for character in expected
-            ):
-                raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: source digest")
+        source_sha256: dict[str, str] = {}
+        for relative, raw_expected in raw_source_sha256.items():
+            try:
+                expected = evidence_digest.parse_text_digest(
+                    raw_expected, f"{task_id} source_sha256[{relative}]"
+                ).sha256
+            except evidence_digest.DigestError as error:
+                raise AdoptionError(
+                    "DEPENDENCY_EVIDENCE", f"{task_id}: {error.code}"
+                ) from error
+            source_sha256[relative] = expected
             if verify_current_sources:
                 try:
                     path = repository_tooling.safe_path(
@@ -629,10 +635,18 @@ def validate_dependency_evidence(
                 )
             except repository_tooling.ContractError as error:
                 raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: {error.code}") from error
+            try:
+                sealed_digest = evidence_digest.parse_text_digest(
+                    item.get("sha256"), f"{task_id} report[{relative}]"
+                ).sha256
+            except evidence_digest.DigestError as error:
+                raise AdoptionError(
+                    "DEPENDENCY_EVIDENCE", f"{task_id}: {error.code}"
+                ) from error
             if (
                 item.get("source_task") != task_id
                 or item.get("acceptance_status") != "PASS"
-                or item.get("sha256") != evidence_digest.text_evidence_sha256(path)
+                or sealed_digest != evidence_digest.text_evidence_sha256(path)
                 or load_json(path).get("status") != "PASS"
             ):
                 raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: report not PASS or stale")
