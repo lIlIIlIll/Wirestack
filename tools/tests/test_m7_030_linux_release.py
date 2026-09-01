@@ -364,6 +364,26 @@ class M7030LinuxReleaseTest(unittest.TestCase):
             with self.assertRaisesRegex(release.ReleaseError, "HOSTED_VERIFY_EMPTY"):
                 release.build_hosted_report("a" * 40, subjects)
 
+    def test_hosted_text_subject_separates_canonical_and_signed_payload_digests(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subjects = []
+            for name in ("artifact", "sbom", "release-manifest"):
+                subject = root / name
+                bundle = root / f"{name}.bundle"
+                verification = root / f"{name}.verification.json"
+                subject.write_bytes(b"alpha\r\nbeta\r\n" if name == "sbom" else name.encode())
+                bundle.write_text(f"bundle:{name}", encoding="utf-8")
+                verification.write_bytes(release.canonical_json({"verified": 1}))
+                subjects.append((name, subject, bundle, verification))
+            report = release.build_hosted_report("a" * 40, subjects)
+            sbom = next(item for item in report["subjects"] if item["name"] == "sbom")
+            self.assertEqual(
+                evidence_digest.text_evidence_sha256(root / "sbom"), sbom["sha256"])
+            self.assertEqual(
+                evidence_digest.artifact_byte_sha256(root / "sbom"), sbom["signedPayloadSha256"])
+            self.assertNotEqual(sbom["sha256"], sbom["signedPayloadSha256"])
+
     def test_rehearsal_is_bounded_and_reads_hosted_gate_separately(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             report = release.local_rehearsal(Path(directory))

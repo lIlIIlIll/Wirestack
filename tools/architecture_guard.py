@@ -32,6 +32,14 @@ STD_NET_RE = re.compile(r"(?<![A-Za-z0-9_])std\s*\.\s*net\b")
 PUBLIC_DECLARATION_RE = re.compile(
     r"^\s*public\s+(?P<kind>class|struct|interface|enum|func|prop|let|var|type)\b"
 )
+RAW_DIGEST_COMMAND_RE = re.compile(
+    r"\b(?:sha256sum|shasum(?:\s+-a\s+256)?|Get-FileHash|certutil(?:\.exe)?\s+-hashfile)\b",
+    re.IGNORECASE,
+)
+DIGEST_DOMAIN_MARKERS = {
+    "wirestack-digest-domain: artifact-bytes-v1",
+    "wirestack-digest-domain: text-utf8-lf-v1",
+}
 TYPE_CONTAINER_RE = re.compile(
     r"^\s*(?P<public>public\s+)?(?:open\s+)?(?:class|struct|interface|enum)\b"
 )
@@ -516,9 +524,8 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
     """Keep repository text evidence on the typed, normalized digest path."""
     violations: list[Violation] = []
     tools_root = root / "tools"
-    if not tools_root.is_dir():
-        return violations
-    for path in sorted(tools_root.rglob("*.py")):
+    python_paths = sorted(tools_root.rglob("*.py")) if tools_root.is_dir() else []
+    for path in python_paths:
         relative = path.relative_to(root).as_posix()
         if _is_ignored(path.relative_to(root)):
             continue
@@ -532,7 +539,10 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
         for node in ast.walk(tree):
             if isinstance(node, (ast.Import, ast.ImportFrom)) and not typed_implementation:
                 names = [item.name for item in node.names]
-                if "hashlib" in names:
+                if "hashlib" in names or (
+                    isinstance(node, ast.ImportFrom) and node.module == "hashlib"
+                    and "sha256" in names
+                ):
                     violations.append(_violation(
                         root, path, text, _python_offset(text, node),
                         "untyped-evidence-digest",
@@ -599,6 +609,35 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                         "text-evidence-byte-fallback",
                         "Invalid UTF-8 must fail closed and must not fall back to a byte digest.",
                     ))
+    non_python_paths: list[Path] = []
+    scripts_root = root / "scripts"
+    if scripts_root.is_dir():
+        non_python_paths.extend(
+            path for path in scripts_root.rglob("*") if path.is_file() and path.suffix != ".py"
+        )
+    workflows_root = root / ".github/workflows"
+    if workflows_root.is_dir():
+        non_python_paths.extend(
+            path for path in workflows_root.rglob("*") if path.suffix in {".yml", ".yaml"}
+        )
+    for path in sorted(set(non_python_paths)):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        lines = text.splitlines(keepends=True)
+        for index, line in enumerate(lines):
+            match = RAW_DIGEST_COMMAND_RE.search(line)
+            if match is None:
+                continue
+            context = "".join(lines[max(0, index - 4):index + 1]).lower()
+            if any(marker in context for marker in DIGEST_DOMAIN_MARKERS):
+                continue
+            offset = sum(len(value) for value in lines[:index]) + match.start()
+            violations.append(_violation(
+                root, path, text, offset, "untyped-non-python-digest",
+                "Shell and workflow SHA-256 commands must declare an explicit digest domain.",
+            ))
     return violations
 
 
