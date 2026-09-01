@@ -2,6 +2,10 @@
 """Run the M6-023 Linux H1/H2 SSE steady-state profile in parallel."""
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from tools import evidence_digest
 
 import argparse

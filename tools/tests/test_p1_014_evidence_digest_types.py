@@ -95,6 +95,26 @@ class EvidenceDigestTypeTests(unittest.TestCase):
         self.assertNotIn("cjpm", workflow.lower())
         self.assertNotIn("soak", workflow.lower())
 
+    def test_production_digest_imports_bootstrap_direct_cli_execution(self) -> None:
+        marker = "from tools import " + "evidence_digest"
+        checked: list[str] = []
+        violations: list[str] = []
+        for path in sorted((self.ROOT / "tools").rglob("*.py")):
+            relative = path.relative_to(self.ROOT)
+            if "tests" in relative.parts:
+                continue
+            source = path.read_text(encoding="utf-8")
+            if marker not in source:
+                continue
+            checked.append(relative.as_posix())
+            prefix = source.split(marker, 1)[0]
+            parent_index = len(relative.parents) - 1
+            expected_root = f"Path(__file__).resolve().parents[{parent_index}]"
+            if "if __package__ in {None, \"\"}:" not in prefix or expected_root not in prefix:
+                violations.append(relative.as_posix())
+        self.assertGreater(len(checked), 40)
+        self.assertEqual([], violations)
+
     def test_inventory_rejects_untyped_digest_anywhere_in_repository_tools(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
             root = Path(directory)

@@ -2,6 +2,10 @@
 """Capture the measurable Linux M0-005 raw std.net loopback baseline."""
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from tools import evidence_digest
 
 import argparse
