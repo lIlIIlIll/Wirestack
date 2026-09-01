@@ -42,7 +42,7 @@
     "machine": "x86_64",
     "system": "Linux"
   },
-  "revision": "7c46a7134f01bdb708a3916968fc7f8c7c70af9c",
+  "revision": "deff38d7387ffa6d30678184d11b5757b8b9f77c",
   "schema_version": 1,
   "status": "PASS",
   "text_digests": {
