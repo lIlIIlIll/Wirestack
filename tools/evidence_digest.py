@@ -305,15 +305,57 @@ _CALL_DOMAINS = {
 }
 
 
-def _call_name(node: ast.Call) -> str | None:
-    if isinstance(node.func, ast.Name):
-        return node.func.id
-    if isinstance(node.func, ast.Attribute):
-        if (node.func.attr == "sha256" and isinstance(node.func.value, ast.Name)
-                and node.func.value.id == "hashlib"):
-            return "hashlib.sha256"
-        return node.func.attr
+def _import_aliases(tree: ast.AST) -> dict[str, str]:
+    aliases: dict[str, str] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module:
+            for item in node.names:
+                if item.name != "*":
+                    aliases[item.asname or item.name] = f"{node.module}.{item.name}"
+        elif isinstance(node, ast.Import):
+            for item in node.names:
+                local = item.asname or item.name.split(".", 1)[0]
+                aliases[local] = item.name if item.asname else local
+    return aliases
+
+
+def _expression_name(node: ast.AST) -> str | None:
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        value = _expression_name(node.value)
+        return f"{value}.{node.attr}" if value else node.attr
     return None
+
+
+def _call_name(node: ast.Call, aliases: dict[str, str] | None = None) -> str | None:
+    name = _expression_name(node.func)
+    if name is None:
+        return None
+    if aliases:
+        root, separator, remainder = name.partition(".")
+        if root in aliases:
+            name = aliases[root] + (separator + remainder if separator else "")
+    if name == "hashlib.sha256":
+        return name
+    final = name.rsplit(".", 1)[-1]
+    return final if final in _CALL_DOMAINS else name
+
+
+def _call_contains_raw_digest(node: ast.Call, call_name: str | None) -> bool:
+    if call_name not in {
+        "subprocess.run", "subprocess.call", "subprocess.check_call",
+        "subprocess.check_output", "subprocess.Popen",
+    }:
+        return False
+    candidates = list(node.args)
+    candidates.extend(keyword.value for keyword in node.keywords if keyword.arg in {"args", "command"})
+    return any(
+        RAW_DIGEST_COMMAND.search(value.value) is not None
+        for candidate in candidates
+        for value in ast.walk(candidate)
+        if isinstance(value, ast.Constant) and isinstance(value.value, str)
+    )
 
 
 def _declared_non_python_domains(root: Path) -> dict[tuple[str, str], str]:
@@ -369,6 +411,7 @@ def digest_inventory(root: Path) -> dict[str, Any]:
             except (OSError, UnicodeDecodeError, SyntaxError) as error:
                 issues.append({"code": "INVENTORY_PARSE", "detail": f"{relative}: {type(error).__name__}"})
                 continue
+            aliases = _import_aliases(tree)
             for node in ast.walk(tree):
                 if not (isinstance(node, ast.ImportFrom) and node.module == "hashlib"):
                     continue
@@ -383,7 +426,20 @@ def digest_inventory(root: Path) -> dict[str, Any]:
             for node in ast.walk(tree):
                 if not isinstance(node, ast.Call):
                     continue
-                name = _call_name(node)
+                name = _call_name(node, aliases)
+                if relative != "tools/evidence_digest.py" and _call_contains_raw_digest(node, name):
+                    entries.append({
+                        "path": relative, "line": node.lineno,
+                        "symbol": "raw-digest-command", "classification": "legacy-task-local",
+                    })
+                    issues.append({
+                        "code": "UNTYPED_DIGEST",
+                        "detail": f"{relative}:{node.lineno}:raw-digest-command",
+                    })
+                if (name == "hashlib.sha256" and isinstance(node.func, ast.Name)
+                        and aliases.get(node.func.id) == "hashlib.sha256"):
+                    # The direct import is already a fail-closed inventory entry.
+                    continue
                 if name not in _CALL_DOMAINS and name != "hashlib.sha256":
                     continue
                 if name == "hashlib.sha256":
@@ -413,21 +469,22 @@ def digest_inventory(root: Path) -> dict[str, Any]:
             if RAW_DIGEST_COMMAND.search(line) is None:
                 continue
             context = "\n".join(lines[max(0, index - 4):index + 1]).lower()
+            declared_domain = declared_non_python.get((relative, line.strip()))
             if f"{DIGEST_DOMAIN_MARKER} {ARTIFACT_BYTE_DOMAIN}" in context:
                 domain = "artifact-bytes"
             elif f"{DIGEST_DOMAIN_MARKER} {TEXT_EVIDENCE_DOMAIN}" in context:
-                domain = "text-evidence"
-            elif declared_non_python.get((relative, line.strip())) == ARTIFACT_BYTE_DOMAIN:
+                domain = "invalid-text-command"
+            elif declared_domain == ARTIFACT_BYTE_DOMAIN:
                 domain = "artifact-bytes"
-            elif declared_non_python.get((relative, line.strip())) == TEXT_EVIDENCE_DOMAIN:
-                domain = "text-evidence"
+            elif declared_domain == TEXT_EVIDENCE_DOMAIN:
+                domain = "invalid-text-command"
             else:
                 domain = "legacy-non-python"
             entries.append({
                 "path": relative, "line": index + 1,
                 "symbol": RAW_DIGEST_COMMAND.search(line).group(0), "classification": domain,
             })
-            if domain.startswith("legacy"):
+            if domain.startswith("legacy") or domain == "invalid-text-command":
                 issues.append({"code": "UNTYPED_DIGEST", "detail": f"{relative}:{index + 1}:raw-command"})
     entries.sort(key=lambda item: (item["path"], item["line"], item["symbol"]))
     domain_counts: dict[str, int] = {}
