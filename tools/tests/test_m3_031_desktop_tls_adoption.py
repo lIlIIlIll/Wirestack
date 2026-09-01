@@ -194,16 +194,8 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             callback()
         self.assertEqual(code, caught.exception.code)
 
-    def test_repository_core_and_task_graph_audit_passes(self) -> None:
-        result = adoption.audit_core(ROOT)
-        self.assertEqual("PASS", result["status"])
-        self.assertEqual(set(adoption.CORE_REQUIREMENTS), set(result["prerequisites"]))
-        self.assertFalse(result["historical_task_status_changed"])
-        self.assertTrue(all(item["disposition"] == "NOT_EVALUATED" for item in result["excluded_global_conditions"]))
-        self.assertIn("docs/planning/implementation-backlog.md", result["source_sha256"])
-        self.assertEqual("PASS", result["task_graph"]["status"])
-        self.assertEqual("PASS", result["retained_evidence_validation"]["status"])
-        self.assertEqual("PASS", result["dependency_evidence_validation"]["status"])
+    def test_repository_core_audit_rejects_legacy_dependency_evidence(self) -> None:
+        self.assert_code("DEPENDENCY_EVIDENCE", lambda: adoption.audit_core(ROOT))
 
     def test_dependency_evidence_rejects_source_and_native_report_drift(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -244,17 +236,18 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             evidence_path = root / "docs/evidence/M2-004/evidence.json"
             evidence_path.parent.mkdir(parents=True, exist_ok=True)
             evidence_path.write_text(json.dumps({
-                "schema_version": 1, "source_task": "M2-004",
+                "schema_version": adoption.repository_tooling.EVIDENCE_SCHEMA_VERSION,
+                "source_task": "M2-004",
                 "platform": {}, "toolchain": {}, "acceptance_status": "PASS",
                 "generated_at_utc": "2026-08-31T00:00:00Z", "revision": "a" * 40,
                 "reports": [{
                     "path": validation_relative,
-                    "sha256": evidence_digest.text_evidence_sha256(validation),
+                    "sha256": evidence_digest.text_evidence_digest(validation).to_json(),
                     "source_task": "M2-004", "acceptance_status": "PASS",
                 }],
                 "source_sha256": {
-                    "native/resolver/windows/wirestack_resolver.c": evidence_digest.text_evidence_sha256(source),
-                    "native/resolver/windows/wirestack_resolver.h": evidence_digest.text_evidence_sha256(header),
+                    "native/resolver/windows/wirestack_resolver.c": evidence_digest.text_evidence_digest(source).to_json(),
+                    "native/resolver/windows/wirestack_resolver.h": evidence_digest.text_evidence_digest(header).to_json(),
                 },
             }), encoding="utf-8")
             task = {
