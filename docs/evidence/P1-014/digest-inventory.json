@@ -1,6 +1,6 @@
 {
   "domain_counts": {
-    "artifact-bytes": 71,
+    "artifact-bytes": 72,
     "text-evidence": 234,
     "typed-implementation": 3
   },
@@ -253,97 +253,97 @@
     },
     {
       "classification": "typed-implementation",
-      "line": 79,
+      "line": 85,
       "path": "tools/evidence_digest.py",
       "symbol": "hashlib.sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 87,
+      "line": 93,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
     {
       "classification": "typed-implementation",
-      "line": 91,
+      "line": 97,
       "path": "tools/evidence_digest.py",
       "symbol": "hashlib.sha256"
     },
     {
       "classification": "typed-implementation",
-      "line": 95,
+      "line": 101,
       "path": "tools/evidence_digest.py",
       "symbol": "hashlib.sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 107,
+      "line": 113,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest"
     },
     {
       "classification": "text-evidence",
-      "line": 112,
+      "line": 118,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
     {
       "classification": "artifact-bytes",
-      "line": 117,
+      "line": 123,
       "path": "tools/evidence_digest.py",
       "symbol": "artifact_byte_digest"
     },
     {
       "classification": "artifact-bytes",
-      "line": 122,
+      "line": 128,
       "path": "tools/evidence_digest.py",
       "symbol": "artifact_byte_digest_bytes"
     },
     {
       "classification": "artifact-bytes",
-      "line": 127,
+      "line": 133,
       "path": "tools/evidence_digest.py",
       "symbol": "artifact_byte_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 146,
+      "line": 152,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_bytes_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 258,
+      "line": 264,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
     {
       "classification": "artifact-bytes",
-      "line": 259,
+      "line": 265,
       "path": "tools/evidence_digest.py",
       "symbol": "artifact_byte_digest_bytes"
     },
     {
       "classification": "text-evidence",
-      "line": 266,
+      "line": 272,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
     {
       "classification": "artifact-bytes",
-      "line": 278,
-      "path": "tools/evidence_digest.py",
-      "symbol": "artifact_byte_digest_bytes"
-    },
-    {
-      "classification": "text-evidence",
-      "line": 280,
-      "path": "tools/evidence_digest.py",
-      "symbol": "text_evidence_digest_bytes"
-    },
-    {
-      "classification": "text-evidence",
       "line": 284,
+      "path": "tools/evidence_digest.py",
+      "symbol": "artifact_byte_digest_bytes"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 286,
+      "path": "tools/evidence_digest.py",
+      "symbol": "text_evidence_digest_bytes"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 290,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
@@ -838,6 +838,12 @@
       "line": 146,
       "path": "tools/m7_021_linux_release.py",
       "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 205,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "artifact_payload_sha256"
     },
     {
       "classification": "text-evidence",
@@ -1854,7 +1860,7 @@
       "symbol": "text_evidence_sha256"
     }
   ],
-  "entry_count": 308,
+  "entry_count": 309,
   "issues": [],
   "kind": "p1-014-digest-inventory",
   "schema_version": 1,
