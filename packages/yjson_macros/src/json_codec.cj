@@ -477,10 +477,20 @@ private func directScalarWrite(field: CodecField, value: String): String {
         case "Float64" => "writer.writeFloat64(${value})"
         case "Float32" | "Float16" => "writer.writeFloat64(Float64(${value}))"
         case "String" => "writer.writeString(${value})"
+        case "Array<Int64>" =>
+            "context.enterValue(); try { if (!jsonTryWriteCompactInt64Array(writer, ${value})) { writer.startArray(); for (__fastIndex in 0..${value}.size) { writer.writeInt64(${value}[__fastIndex]) }; writer.endArray() } } finally { context.leaveValue() }"
+        case "Array<Float64>" =>
+            "context.enterValue(); try { if (!jsonTryWriteCompactFloat64Array(writer, ${value})) { writer.startArray(); for (__fastIndex in 0..${value}.size) { writer.writeFloat64(${value}[__fastIndex]) }; writer.endArray() } } finally { context.leaveValue() }"
+        case "Array<String>" =>
+            "context.enterValue(); try { if (!jsonTryWriteCompactStringArray(writer, ${value})) { writer.startArray(); for (__fastIndex in 0..${value}.size) { writer.writeString(${value}[__fastIndex]) }; writer.endArray() } } finally { context.leaveValue() }"
         case "ArrayList<String>" =>
             "context.enterValue(); try { if (!jsonTryWriteCompactStringArrayList(writer, ${value})) { writer.startArray(); for (__fastIndex in 0..${value}.size) { writer.writeString(${value}[__fastIndex]) }; writer.endArray() } } finally { context.leaveValue() }"
         case "HashMap<String,Int64>" =>
             "context.enterValue(); try { if (!jsonTryWriteCompactInt64Map(writer, ${value})) { writer.startObject(); for ((__fastName, __fastItem) in ${value}) { writer.writeName(__fastName); writer.writeInt64(__fastItem) }; writer.endObject() } } finally { context.leaveValue() }"
+        case "HashMap<String,String>" =>
+            "context.enterValue(); try { if (!jsonTryWriteCompactStringMap(writer, ${value})) { writer.startObject(); for ((__fastName, __fastItem) in ${value}) { writer.writeName(__fastName); writer.writeString(__fastItem) }; writer.endObject() } } finally { context.leaveValue() }"
+        case "HashMap<String,Array<Int64>>" =>
+            "context.enterValue(); try { if (!jsonTryWriteCompactInt64ArrayMap(writer, ${value})) { writer.startObject(); for ((__fastName, __fastItems) in ${value}) { writer.writeName(__fastName); writer.startArray(); for (__fastItem in __fastItems) { writer.writeInt64(__fastItem) }; writer.endArray() }; writer.endObject() } } finally { context.leaveValue() }"
         case "Option<String>" => "__yJsonWriteStringOption(${value}, writer)"
         case _ => ""
     }
@@ -488,40 +498,174 @@ private func directScalarWrite(field: CodecField, value: String): String {
 
 private func compactRawScalarFieldWrite(field: CodecField, value: String, first: String): String {
     if (!field.codecExpr.isEmpty()) { return "" }
+    let nameKind = if (field.jsonNameExpr == "\"${field.name}\"") { "KnownName" } else { "Name" }
     if (field.typeText.replace(" ", "") == "Option<String>") {
-        let someWrite = "${first} = __writer.writeRawObjectEntryNameString(${first}, " +
+        let someWrite = "${first} = __writer.writeRawObjectEntry${nameKind}String(${first}, " +
             "${field.jsonNameExpr}, __rawItem)"
         if (!field.includeNull) {
             return "if (let Some(__rawItem) <- ${value}) { ${someWrite} }"
         }
         return "match (${value}) { case Some(__rawItem) => ${someWrite}; " +
-            "case None => ${first} = __writer.writeRawObjectEntryName(${first}, ${field.jsonNameExpr}); " +
+            "case None => ${first} = __writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); " +
             "writer.writeRawNull() }"
     }
     if (field.isOption) { return "" }
     match (field.typeText.replace(" ", "")) {
         case "String" =>
-            "${first} = __writer.writeRawObjectEntryNameString(${first}, ${field.jsonNameExpr}, ${value})"
+            "${first} = __writer.writeRawObjectEntry${nameKind}String(${first}, ${field.jsonNameExpr}, ${value})"
         case "Bool" =>
-            "${first} = __writer.writeRawObjectEntryNameBool(${first}, ${field.jsonNameExpr}, ${value})"
+            "${first} = __writer.writeRawObjectEntry${nameKind}Bool(${first}, ${field.jsonNameExpr}, ${value})"
         case "Int64" =>
-            "${first} = __writer.writeRawObjectEntryNameInt64(${first}, ${field.jsonNameExpr}, ${value})"
+            "${first} = __writer.writeRawObjectEntry${nameKind}Int64(${first}, ${field.jsonNameExpr}, ${value})"
         case "Int32" | "Int16" | "Int8" =>
-            "${first} = __writer.writeRawObjectEntryNameInt64(${first}, ${field.jsonNameExpr}, Int64(${value}))"
+            "${first} = __writer.writeRawObjectEntry${nameKind}Int64(${first}, ${field.jsonNameExpr}, Int64(${value}))"
+        case "UInt64" =>
+            "${first} = __writer.writeRawObjectEntry${nameKind}UInt64(${first}, ${field.jsonNameExpr}, ${value})"
+        case "UInt32" | "UInt16" | "UInt8" =>
+            "${first} = __writer.writeRawObjectEntry${nameKind}UInt64(${first}, ${field.jsonNameExpr}, UInt64(${value}))"
+        case "Float64" =>
+            "${first} = __writer.writeRawObjectEntry${nameKind}Float64(${first}, ${field.jsonNameExpr}, ${value})"
+        case "Float32" | "Float16" =>
+            "${first} = __writer.writeRawObjectEntry${nameKind}Float64(${first}, ${field.jsonNameExpr}, Float64(${value}))"
+        case "Array<Int64>" =>
+            if (nameKind == "KnownName") {
+                return "${first} = __writer.writeRawObjectEntryKnownNameInt64Array(" +
+                    "${first}, ${field.jsonNameExpr}, ${value})"
+            }
+            "${first} = __writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); " +
+            "if (!jsonTryWriteCompactInt64Array(writer, ${value})) { " +
+            "throw JsonException(\"Compact raw codec is unavailable\") }"
+        case "Array<Float64>" =>
+            if (nameKind == "KnownName") {
+                return "${first} = __writer.writeRawObjectEntryKnownNameFloat64Array(" +
+                    "${first}, ${field.jsonNameExpr}, ${value})"
+            }
+            "${first} = __writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); " +
+            "if (!jsonTryWriteCompactFloat64Array(writer, ${value})) { " +
+            "throw JsonException(\"Compact raw codec is unavailable\") }"
+        case "Array<String>" =>
+            if (nameKind == "KnownName") {
+                return "${first} = __writer.writeRawObjectEntryKnownNameStringArray(" +
+                    "${first}, ${field.jsonNameExpr}, ${value})"
+            }
+            "${first} = __writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); " +
+            "if (!jsonTryWriteCompactStringArray(writer, ${value})) { " +
+            "throw JsonException(\"Compact raw codec is unavailable\") }"
         case "ArrayList<Int64>" =>
-            "${first} = __writer.writeRawObjectEntryName(${first}, ${field.jsonNameExpr}); " +
+            "${first} = __writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); " +
             "if (!jsonTryWriteCompactInt64ArrayList(writer, ${value})) { " +
             "throw JsonException(\"Compact raw codec is unavailable\") }"
         case "ArrayList<String>" =>
-            "${first} = __writer.writeRawObjectEntryName(${first}, ${field.jsonNameExpr}); " +
+            "${first} = __writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); " +
             "if (!jsonTryWriteCompactStringArrayList(writer, ${value})) { " +
             "throw JsonException(\"Compact raw codec is unavailable\") }"
         case "HashMap<String,Int64>" =>
-            "${first} = __writer.writeRawObjectEntryName(${first}, ${field.jsonNameExpr}); " +
+            if (nameKind == "KnownName") {
+                return "${first} = __writer.writeRawObjectEntryKnownNameInt64Map(" +
+                    "${first}, ${field.jsonNameExpr}, ${value})"
+            }
+            "${first} = __writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); " +
             "if (!jsonTryWriteCompactInt64Map(writer, ${value})) { " +
             "throw JsonException(\"Compact raw codec is unavailable\") }"
+        case "HashMap<String,String>" =>
+            if (nameKind == "KnownName") {
+                return "${first} = __writer.writeRawObjectEntryKnownNameStringMap(" +
+                    "${first}, ${field.jsonNameExpr}, ${value})"
+            }
+            "${first} = __writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); " +
+            "if (!jsonTryWriteCompactStringMap(writer, ${value})) { " +
+            "throw JsonException(\"Compact raw codec is unavailable\") }"
+        case "HashMap<String,Array<Int64>>" =>
+            if (nameKind == "KnownName") {
+                return "${first} = __writer.writeRawObjectEntryKnownNameInt64ArrayMap(" +
+                    "${first}, ${field.jsonNameExpr}, ${value})"
+            }
+            "${first} = __writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); " +
+            "if (!jsonTryWriteCompactInt64ArrayMap(writer, ${value})) { " +
+            "throw JsonException(\"Compact raw codec is unavailable\") }"
+        case _ => compactRawPrimitiveContainerFieldWrite(field, value, first, nameKind)
+    }
+}
+
+private func primitiveRawValueWrite(typeText: String, value: String): String {
+    match (typeText.replace(" ", "")) {
+        case "Bool" => "__writer.writeRawBool(${value})"
+        case "Int8" | "Int16" | "Int32" | "Int64" =>
+            "__writer.writeRawInt64(Int64(${value}))"
+        case "UInt8" | "UInt16" | "UInt32" | "UInt64" =>
+            "__writer.writeRawUInt64(UInt64(${value}))"
+        case "Float16" | "Float32" | "Float64" =>
+            "__writer.writeRawFloat64(Float64(${value}))"
+        case "String" => "__writer.writeRawString(${value})"
         case _ => ""
     }
+}
+
+private func collectionInnerType(typeText: String): String {
+    let normalized = typeText.replace(" ", "")
+    if (normalized.startsWith("Array<") && normalized.endsWith(">")) {
+        return normalized[6..normalized.size - 1]
+    }
+    if (normalized.startsWith("ArrayList<") && normalized.endsWith(">")) {
+        return normalized[10..normalized.size - 1]
+    }
+    ""
+}
+
+private func compactRawPrimitiveArrayValue(
+    value: String,
+    innerType: String,
+    stem: String
+): String {
+    let itemWrite = primitiveRawValueWrite(innerType, "${value}[__rawIndex_${stem}]")
+    if (itemWrite.isEmpty()) { return "" }
+    "__writer.writeRawBeginArray(); " +
+        "for (__rawIndex_${stem} in 0..${value}.size) { " +
+        "if (__rawIndex_${stem} > 0) { __writer.writeRawByte(b',') }; " +
+        "${itemWrite} }; __writer.writeRawEndArray()"
+}
+
+private func compactRawPrimitiveContainerFieldWrite(
+    field: CodecField,
+    value: String,
+    first: String,
+    nameKind: String
+): String {
+    let normalized = field.typeText.replace(" ", "")
+    let innerType = collectionInnerType(normalized)
+    if (!innerType.isEmpty()) {
+        let body = compactRawPrimitiveArrayValue(value, innerType, field.name)
+        if (!body.isEmpty()) {
+            return "${first} = __writer.writeRawObjectEntry${nameKind}(${first}, " +
+                "${field.jsonNameExpr}); ${body}"
+        }
+    }
+
+    let mapPrefix = "HashMap<String,"
+    if (!normalized.startsWith(mapPrefix) || !normalized.endsWith(">")) { return "" }
+    let mapValueType = normalized[mapPrefix.size..normalized.size - 1]
+    let scalarWrite = primitiveRawValueWrite(mapValueType, "__rawMapItem_${field.name}")
+    if (!scalarWrite.isEmpty()) {
+        return "${first} = __writer.writeRawObjectEntry${nameKind}(${first}, " +
+            "${field.jsonNameExpr}); __writer.writeRawBeginObject(); " +
+            "var __rawMapFirst_${field.name} = true; " +
+            "for ((__rawMapName_${field.name}, __rawMapItem_${field.name}) in ${value}) { " +
+            "__rawMapFirst_${field.name} = __writer.writeRawObjectEntryName(" +
+            "__rawMapFirst_${field.name}, __rawMapName_${field.name}); ${scalarWrite} }; " +
+            "__writer.writeRawEndObject()"
+    }
+
+    let mapInnerType = collectionInnerType(mapValueType)
+    if (mapInnerType.isEmpty()) { return "" }
+    let arrayBody = compactRawPrimitiveArrayValue(
+        "__rawMapItems_${field.name}", mapInnerType, "map_${field.name}")
+    if (arrayBody.isEmpty()) { return "" }
+    "${first} = __writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); " +
+        "__writer.writeRawBeginObject(); var __rawMapFirst_${field.name} = true; " +
+        "for ((__rawMapName_${field.name}, __rawMapItems_${field.name}) in ${value}) { " +
+        "__rawMapFirst_${field.name} = __writer.writeRawObjectEntryName(" +
+        "__rawMapFirst_${field.name}, __rawMapName_${field.name}); ${arrayBody} }; " +
+        "__writer.writeRawEndObject()"
 }
 
 private func compactRawCodecName(field: CodecField): String {
@@ -532,14 +676,17 @@ private func compactRawFieldWrite(field: CodecField, value: String, first: Strin
     let scalar = compactRawScalarFieldWrite(field, value, first)
     if (!scalar.isEmpty()) { return scalar }
     if (!field.codecExpr.isEmpty() || !directScalarWrite(field, value).isEmpty()) { return "" }
-    let write = "${first} = __writer.writeRawObjectEntryName(${first}, ${field.jsonNameExpr}); " +
-        "context.pushField(${field.jsonNameExpr}); try { match (${compactRawCodecName(field)}) { " +
-        "case Some(__raw) => __raw.writeCompactRaw(${value}, writer); " +
-        "case None => throw JsonException(\"Compact raw codec is unavailable\") } } finally { context.popPath() }"
+    let nameKind = if (field.jsonNameExpr == "\"${field.name}\"") { "KnownName" } else { "Name" }
     if (field.isOption && !field.includeNull) {
-        "if (${value}.isSome()) { ${write} }"
+        "if (${value}.isSome()) { ${first} = __writer.writeRawObjectEntry${nameKind}(" +
+            "${first}, ${field.jsonNameExpr}); match (${compactRawCodecName(field)}) { " +
+            "case Some(__raw) => __raw.writeCompactRaw(${value}, writer); " +
+            "case None => throw JsonException(\"Compact raw codec is unavailable\") } }"
     } else {
-        write
+        "${first} = __writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); " +
+            "match (${compactRawCodecName(field)}) { " +
+            "case Some(__raw) => __raw.writeCompactRaw(${value}, writer); " +
+            "case None => throw JsonException(\"Compact raw codec is unavailable\") }"
     }
 }
 
@@ -874,7 +1021,6 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             }
         }
     }
-
     let supportsCompactRaw = supportsCompactRawWrite(fields)
     let directInterface = if (supportsCompactRaw) {
         "GeneratedCompactWriteCodecV1<${targetType}> & GeneratedCompactArrayListElementCodecV1<${targetType}>"
@@ -903,8 +1049,8 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             joinStrings(fastLabelBytes, ", ") + "] }")
     }
     appendLine(sb, 1, "public func write(value: ${targetType}, writer: JsonWriter): Unit {")
-    appendLine(sb, 2, "let context = GeneratedSupportV1.writeState(writer)")
     appendLine(sb, 2, "match (writer) { case __direct: GeneratedSupportV1Writer => writeDirect(value, __direct); return; case _ => () }")
+    appendLine(sb, 2, "let context = GeneratedSupportV1.writeState(writer)")
     if (isClass) { appendLine(sb, 2, "context.enterObject(value)") } else { appendLine(sb, 2, "context.enterValue()") }
     appendLine(sb, 2, "try {")
     appendLine(sb, 3, "writer.startObject()")
@@ -944,10 +1090,10 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     }
     appendLine(sb, 1, "}")
     appendLine(sb, 1, "public func writeDirect(value: ${targetType}, writer: GeneratedSupportV1Writer): Unit {")
-    appendLine(sb, 2, "let context = GeneratedSupportV1.writeState(writer)")
     if (supportsCompactRaw) {
-        appendLine(sb, 2, "if (supportsCompactRaw() && writer.tryBeginGeneratedCompactRawValue()) { writeCompactRaw(value, writer); return }")
+        appendLine(sb, 2, "if (writer.tryBeginGeneratedCompactRawValue()) { writeCompactRaw(value, writer); return }")
     }
+    appendLine(sb, 2, "let context = GeneratedSupportV1.writeState(writer)")
     if (isClass) { appendLine(sb, 2, "context.enterObject(value)") } else { appendLine(sb, 2, "context.enterValue()") }
     appendLine(sb, 2, "try {")
     appendLine(sb, 3, "writer.startObject()")
@@ -1096,8 +1242,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
                 appendLine(sb, 2, concreteRawWrite)
             }
         }
-        appendLine(sb, 3, "__writer.writeRawEndObject()")
-        appendLine(sb, 2, if (isClass) { "} finally { context.leaveObject() }" } else { "} finally { context.leaveValue() }" })
+        appendLine(sb, 2, "__writer.writeRawEndObject()")
         appendLine(sb, 1, "}")
 
         appendLine(sb, 1, "public func writeCompactRawArrayList(value: YJsonArrayList<${targetType}>, writer: GeneratedSupportV1Writer): Unit {")

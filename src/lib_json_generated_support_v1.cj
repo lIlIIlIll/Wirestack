@@ -242,6 +242,8 @@ public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1 
     func writeRawObjectEntryNameString(first: Bool, name: String, value: String): Bool
     func writeRawObjectEntryNameBool(first: Bool, name: String, value: Bool): Bool
     func writeRawObjectEntryNameInt64(first: Bool, name: String, value: Int64): Bool
+    func writeRawObjectEntryNameUInt64(first: Bool, name: String, value: UInt64): Bool
+    func writeRawObjectEntryNameFloat64(first: Bool, name: String, value: Float64): Bool
 }
 
 /// Versioned, allocation-free view used after the runtime writer has been
@@ -258,6 +260,11 @@ public struct GeneratedSupportV1WriteCursor {
     public func writeRawBeginArray(): Unit { writer.writeRawBeginArray() }
     public func writeRawEndArray(): Unit { writer.writeRawEndArray() }
     public func writeRawByte(value: Byte): Unit { writer.writeRawByte(value) }
+    public func writeRawString(value: String): Unit { writer.writeRawString(value) }
+    public func writeRawBool(value: Bool): Unit { writer.writeRawBool(value) }
+    public func writeRawInt64(value: Int64): Unit { writer.writeRawInt64(value) }
+    public func writeRawUInt64(value: UInt64): Unit { writer.writeRawUInt64(value) }
+    public func writeRawFloat64(value: Float64): Unit { writer.writeRawFloat64(value) }
     public func reserveRawCollectionCapacity(count: Int64): Unit {
         writer.reserveRawCollectionCapacity(count)
     }
@@ -273,6 +280,48 @@ public struct GeneratedSupportV1WriteCursor {
     public func writeRawObjectEntryNameInt64(first: Bool, name: String, value: Int64): Bool {
         writer.writeRawObjectEntryNameInt64(first, name, value)
     }
+    public func writeRawObjectEntryNameUInt64(first: Bool, name: String, value: UInt64): Bool {
+        writer.writeRawObjectEntryNameUInt64(first, name, value)
+    }
+    public func writeRawObjectEntryNameFloat64(first: Bool, name: String, value: Float64): Bool {
+        writer.writeRawObjectEntryNameFloat64(first, name, value)
+    }
+    public func writeRawObjectEntryKnownName(first: Bool, name: String): Bool {
+        writer.writeRawObjectEntryKnownName(first, name)
+    }
+    public func writeRawObjectEntryKnownNameString(first: Bool, name: String, value: String): Bool {
+        writer.writeRawObjectEntryKnownNameString(first, name, value)
+    }
+    public func writeRawObjectEntryKnownNameBool(first: Bool, name: String, value: Bool): Bool {
+        writer.writeRawObjectEntryKnownNameBool(first, name, value)
+    }
+    public func writeRawObjectEntryKnownNameInt64(first: Bool, name: String, value: Int64): Bool {
+        writer.writeRawObjectEntryKnownNameInt64(first, name, value)
+    }
+    public func writeRawObjectEntryKnownNameUInt64(first: Bool, name: String, value: UInt64): Bool {
+        writer.writeRawObjectEntryKnownNameUInt64(first, name, value)
+    }
+    public func writeRawObjectEntryKnownNameFloat64(first: Bool, name: String, value: Float64): Bool {
+        writer.writeRawObjectEntryKnownNameFloat64(first, name, value)
+    }
+    public func writeRawObjectEntryKnownNameInt64Array(
+        first: Bool, name: String, values: Array<Int64>
+    ): Bool { writer.writeRawObjectEntryKnownNameInt64Array(first, name, values) }
+    public func writeRawObjectEntryKnownNameFloat64Array(
+        first: Bool, name: String, values: Array<Float64>
+    ): Bool { writer.writeRawObjectEntryKnownNameFloat64Array(first, name, values) }
+    public func writeRawObjectEntryKnownNameStringArray(
+        first: Bool, name: String, values: Array<String>
+    ): Bool { writer.writeRawObjectEntryKnownNameStringArray(first, name, values) }
+    public func writeRawObjectEntryKnownNameInt64Map(
+        first: Bool, name: String, values: HashMap<String, Int64>
+    ): Bool { writer.writeRawObjectEntryKnownNameInt64Map(first, name, values) }
+    public func writeRawObjectEntryKnownNameStringMap(
+        first: Bool, name: String, values: HashMap<String, String>
+    ): Bool { writer.writeRawObjectEntryKnownNameStringMap(first, name, values) }
+    public func writeRawObjectEntryKnownNameInt64ArrayMap(
+        first: Bool, name: String, values: HashMap<String, Array<Int64>>
+    ): Bool { writer.writeRawObjectEntryKnownNameInt64ArrayMap(first, name, values) }
 }
 
 private class FastSemanticReadContext {
@@ -620,6 +669,14 @@ public class GeneratedSupportV1 {
     public static func writeCompactEntryInt64(writer: GeneratedSupportV1Writer, first: Bool,
         name: String, value: Int64): Bool {
         jsonWriteGeneratedCompactObjectEntryInt64(writer, first, name, value)
+    }
+    public static func writeCompactEntryUInt64(writer: GeneratedSupportV1Writer, first: Bool,
+        name: String, value: UInt64): Bool {
+        jsonWriteGeneratedCompactObjectEntryUInt64(writer, first, name, value)
+    }
+    public static func writeCompactEntryFloat64(writer: GeneratedSupportV1Writer, first: Bool,
+        name: String, value: Float64): Bool {
+        jsonWriteGeneratedCompactObjectEntryFloat64(writer, first, name, value)
     }
 }
 

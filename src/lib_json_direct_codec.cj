@@ -81,9 +81,44 @@ interface GeneratedReadStateV1Owner {
 /// Optional bulk hooks used by generated and built-in codecs. Returning false
 /// asks the codec to use the structural `JsonWriter` fallback.
 public interface GeneratedBulkWriterV1 {
+    func tryWriteCompactInt64Array(values: Array<Int64>): Bool
+    func tryWriteCompactFloat64Array(values: Array<Float64>): Bool
+    func tryWriteCompactStringArray(values: Array<String>): Bool
     func tryWriteCompactInt64ArrayList(values: ArrayList<Int64>): Bool
     func tryWriteCompactStringArrayList(values: ArrayList<String>): Bool
     func tryWriteCompactInt64Map(values: HashMap<String, Int64>): Bool
+    func tryWriteCompactStringMap(values: HashMap<String, String>): Bool
+    func tryWriteCompactInt64ArrayMap(values: HashMap<String, Array<Int64>>): Bool
+}
+
+public func jsonTryWriteCompactInt64Array(
+    writer: JsonWriter,
+    values: Array<Int64>
+): Bool {
+    match (writer) {
+        case bulk: GeneratedBulkWriterV1 => bulk.tryWriteCompactInt64Array(values)
+        case _ => false
+    }
+}
+
+public func jsonTryWriteCompactFloat64Array(
+    writer: JsonWriter,
+    values: Array<Float64>
+): Bool {
+    match (writer) {
+        case bulk: GeneratedBulkWriterV1 => bulk.tryWriteCompactFloat64Array(values)
+        case _ => false
+    }
+}
+
+public func jsonTryWriteCompactStringArray(
+    writer: JsonWriter,
+    values: Array<String>
+): Bool {
+    match (writer) {
+        case bulk: GeneratedBulkWriterV1 => bulk.tryWriteCompactStringArray(values)
+        case _ => false
+    }
 }
 
 public func jsonTryWriteCompactInt64ArrayList(
@@ -112,6 +147,26 @@ public func jsonTryWriteCompactInt64Map(
 ): Bool {
     match (writer) {
         case bulk: GeneratedBulkWriterV1 => bulk.tryWriteCompactInt64Map(values)
+        case _ => false
+    }
+}
+
+public func jsonTryWriteCompactStringMap(
+    writer: JsonWriter,
+    values: HashMap<String, String>
+): Bool {
+    match (writer) {
+        case bulk: GeneratedBulkWriterV1 => bulk.tryWriteCompactStringMap(values)
+        case _ => false
+    }
+}
+
+public func jsonTryWriteCompactInt64ArrayMap(
+    writer: JsonWriter,
+    values: HashMap<String, Array<Int64>>
+): Bool {
+    match (writer) {
+        case bulk: GeneratedBulkWriterV1 => bulk.tryWriteCompactInt64ArrayMap(values)
         case _ => false
     }
 }
@@ -255,6 +310,24 @@ public func jsonWriteGeneratedCompactObjectEntryInt64(
     value: Int64
 ): Bool {
     writer.writeRawObjectEntryNameInt64(first, name, value)
+}
+
+public func jsonWriteGeneratedCompactObjectEntryUInt64(
+    writer: GeneratedSupportV1Writer,
+    first: Bool,
+    name: String,
+    value: UInt64
+): Bool {
+    writer.writeRawObjectEntryNameUInt64(first, name, value)
+}
+
+public func jsonWriteGeneratedCompactObjectEntryFloat64(
+    writer: GeneratedSupportV1Writer,
+    first: Bool,
+    name: String,
+    value: Float64
+): Bool {
+    writer.writeRawObjectEntryNameFloat64(first, name, value)
 }
 
 interface JsonRawWriteCodec<T> <: JsonCodec<T> {
@@ -721,6 +794,85 @@ private class StringOptionJsonCodec <: GeneratedCodecV1<Option<String>> {
             return None<String>
         }
         Some(reader.readRawString())
+    }
+}
+
+private class Int64ArrayJsonCodec <: GeneratedCodecV1<Array<Int64>> &
+    GeneratedCompactWriteCodecV1<Array<Int64>> {
+    public func write(value: Array<Int64>, writer: JsonWriter): Unit {
+        match (writer) {
+            case direct: GeneratedSupportV1Writer => writeDirect(value, direct)
+            case _ => writeStructural(value, writer)
+        }
+    }
+
+    private func writeStructural(value: Array<Int64>, writer: JsonWriter): Unit {
+        let context = GeneratedSupportV1.writeState(writer)
+        context.enterValue()
+        try {
+            writer.startArray()
+            for (item in value) { writer.writeInt64(item) }
+            writer.endArray()
+        } finally {
+            context.leaveValue()
+        }
+    }
+
+    public func writeDirect(value: Array<Int64>, writer: GeneratedSupportV1Writer): Unit {
+        if (jsonTryWriteCompactInt64Array(writer, value)) { return }
+        let context = GeneratedSupportV1.writeState(writer)
+        context.enterValue()
+        try {
+            writer.startArray()
+            for (item in value) { writer.writeInt64(item) }
+            writer.endArray()
+        } finally {
+            context.leaveValue()
+        }
+    }
+
+    public func supportsCompactRaw(): Bool { true }
+
+    public func writeCompactRaw(value: Array<Int64>, writer: GeneratedSupportV1Writer): Unit {
+        let context = GeneratedSupportV1.writeState(writer)
+        context.enterValue()
+        try {
+            if (!jsonTryWriteCompactInt64Array(writer, value)) {
+                throw JsonException("Compact raw codec is unavailable")
+            }
+        } finally {
+            context.leaveValue()
+        }
+    }
+
+    public func read(reader: JsonReader): Array<Int64> {
+        ArrayJsonCodec<Int64>(Int64Json).read(reader)
+    }
+
+    public func readFast(reader: GeneratedSupportV1Reader): Array<Int64> {
+        let context = GeneratedSupportV1.readState(reader)
+        context.enterValue()
+        try {
+            if (let Some(result) <- yJsonTryReadNativeInt64ArrayListV1(reader)) {
+                return result.toArray()
+            }
+            reader.startRawArray()
+            if (!reader.hasRawArrayItem(true)) {
+                reader.endRawArray()
+                return Array<Int64>()
+            }
+            let result = ArrayList<Int64>(reader.suggestRawArrayCapacity())
+            var first = true
+            while (reader.hasRawArrayItem(first)) {
+                reader.beforeRawArrayItem(first)
+                result.add(reader.readRawInt64())
+                first = false
+            }
+            reader.endRawArray()
+            return result.toArray()
+        } finally {
+            context.leaveValue()
+        }
     }
 }
 
@@ -1563,6 +1715,64 @@ private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> & Gene
     }
 }
 
+private class Int64ArrayHashMapJsonCodec <: GeneratedCodecV1<HashMap<String, Array<Int64>>> &
+    GeneratedCompactWriteCodecV1<HashMap<String, Array<Int64>>> {
+    private let fallback = HashMapJsonCodec<Array<Int64>>(Int64ArrayJsonCodec())
+
+    public func write(value: HashMap<String, Array<Int64>>, writer: JsonWriter): Unit {
+        match (writer) {
+            case direct: GeneratedSupportV1Writer => writeDirect(value, direct)
+            case _ => fallback.write(value, writer)
+        }
+    }
+
+    public func writeDirect(
+        value: HashMap<String, Array<Int64>>,
+        writer: GeneratedSupportV1Writer
+    ): Unit {
+        if (jsonTryWriteCompactInt64ArrayMap(writer, value)) { return }
+        let context = GeneratedSupportV1.writeState(writer)
+        context.enterValue()
+        try {
+            writer.startObject()
+            for ((name, items) in value) {
+                writer.writeName(name)
+                writer.startArray()
+                for (item in items) { writer.writeInt64(item) }
+                writer.endArray()
+            }
+            writer.endObject()
+        } finally {
+            context.leaveValue()
+        }
+    }
+
+    public func supportsCompactRaw(): Bool { true }
+
+    public func writeCompactRaw(
+        value: HashMap<String, Array<Int64>>,
+        writer: GeneratedSupportV1Writer
+    ): Unit {
+        let context = GeneratedSupportV1.writeState(writer)
+        context.enterValue()
+        try {
+            if (!jsonTryWriteCompactInt64ArrayMap(writer, value)) {
+                throw JsonException("Compact raw codec is unavailable")
+            }
+        } finally {
+            context.leaveValue()
+        }
+    }
+
+    public func read(reader: JsonReader): HashMap<String, Array<Int64>> {
+        fallback.read(reader)
+    }
+
+    public func readFast(reader: GeneratedSupportV1Reader): HashMap<String, Array<Int64>> {
+        fallback.readFast(reader)
+    }
+}
+
 private class Int64HashMapJsonCodec <: GeneratedCodecV1<HashMap<String, Int64>> {
     public func write(value: HashMap<String, Int64>, writer: JsonWriter): Unit {
         let context = GeneratedSupportV1.writeState(writer)
@@ -2019,7 +2229,13 @@ public class JsonCodecs {
         }
     }
 
-    public static func array<T>(inner: JsonCodec<T>): JsonCodec<Array<T>> { ArrayJsonCodec(inner) }
+    public static func array<T>(inner: JsonCodec<T>): JsonCodec<Array<T>> {
+        match (inner) {
+            case _: LambdaFastRawJsonCodec<Int64> =>
+                return (Int64ArrayJsonCodec() as JsonCodec<Array<T>>).getOrThrow()
+            case _ => ArrayJsonCodec(inner)
+        }
+    }
 
     public static func arrayList<T>(inner: JsonCodec<T>): JsonCodec<ArrayList<T>> {
         match (inner) {
@@ -2035,6 +2251,8 @@ public class JsonCodecs {
         match (inner) {
             case _: LambdaFastRawJsonCodec<Int64> =>
                 return (Int64HashMapJsonCodec() as JsonCodec<HashMap<String, T>>).getOrThrow()
+            case _: Int64ArrayJsonCodec =>
+                return (Int64ArrayHashMapJsonCodec() as JsonCodec<HashMap<String, T>>).getOrThrow()
             case _ => ()
         }
         HashMapJsonCodec(inner)

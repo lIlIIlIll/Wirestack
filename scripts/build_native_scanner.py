@@ -51,15 +51,17 @@ def main() -> int:
     lib = out_dir / "libyjson_scanner.a"
     scanner_obj = out_dir / "yjson_scanner.o"
     compact_obj = out_dir / "yjson_compact.o"
+    float_format_obj = out_dir / "yjson_float_format.o"
     yyjson_adapter_obj = out_dir / "yjson_yyjson.o"
     yyjson_obj = out_dir / "yyjson.o"
     yyjson_lib = out_dir / "libyjson_yyjson.a"
     out_dir.mkdir(parents=True, exist_ok=True)
     cc = find_tool("CC", "clang")
     ar = find_tool("AR", "ar")
-    sources = [NATIVE_DIR / "yjson_scanner.c", NATIVE_DIR / "yjson_compact.c"]
+    sources = [NATIVE_DIR / "yjson_scanner.c", NATIVE_DIR / "yjson_compact.c",
+               NATIVE_DIR / "yjson_float_format.c"]
     headers = [NATIVE_DIR / "yjson_scanner.h", NATIVE_DIR / "yjson_compact.h"]
-    objects = [scanner_obj, compact_obj]
+    objects = [scanner_obj, compact_obj, float_format_obj]
 
     needs_build = not lib.exists() or not all(obj.exists() for obj in objects)
     if not needs_build:

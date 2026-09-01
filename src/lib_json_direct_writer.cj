@@ -118,6 +118,10 @@ abstract class JsonDirectWriterTarget {
 
     protected func writeCompactInt64Map(prefix: String, values: HashMap<String, Int64>): Unit
 
+    protected func writeCompactInt64Array(values: Array<Int64>): Unit
+
+    protected func writeCompactFloat64Array(values: Array<Float64>): Unit
+
     protected func writeNewlineAndIndent(newline: String, indent: String, depth: Int64): Unit
 
     protected func writeObjectEntryNameInt64NoEscape(first: Bool, name: String, value: Int64): Bool
@@ -324,6 +328,46 @@ public class DirectBufferWriterTarget <: JsonDirectWriterTarget {
             first = false
         }
         writeByte(b'}')
+    }
+
+    public func writeCompactInt64Array(values: Array<Int64>): Unit {
+        ensureCapacity(used + values.size * 4 + 2)
+        if (let Some(written) <- jsonNativeFormatInt64ArrayInto(values, buffer, used)) {
+            used += written
+            return
+        }
+        ensureCapacity(used + values.size * 21 + 1)
+        writeRawByteNoEnsure(b'[')
+        if (!values.isEmpty()) {
+            writeInt64NoEnsure(values[0])
+            for (index in 1..values.size) {
+                writeRawByteNoEnsure(b',')
+                writeInt64NoEnsure(values[index])
+            }
+        }
+        writeRawByteNoEnsure(b']')
+    }
+
+    public func writeCompactFloat64Array(values: Array<Float64>): Unit {
+        reserveCapacity(values.size * 20 + 2)
+        if (let Some(written) <- jsonNativeFormatFloat64ArrayInto(values, buffer, used)) {
+            used += written
+            return
+        }
+        reserveCapacity(values.size * 42 + 2)
+        writeRawByteNoEnsure(b'[')
+        if (!values.isEmpty()) {
+            var text = values[0].toString()
+            ensureCapacity(used + text.size)
+            copyTextNoEnsure(text)
+            for (index in 1..values.size) {
+                writeRawByteNoEnsure(b',')
+                text = values[index].toString()
+                ensureCapacity(used + text.size)
+                copyTextNoEnsure(text)
+            }
+        }
+        writeRawByteNoEnsure(b']')
     }
 
     public func writeNewlineAndIndent(newline: String, indent: String, depth: Int64): Unit {
@@ -948,7 +992,6 @@ public class DirectBufferWriterTarget <: JsonDirectWriterTarget {
         writeRawByteNoEnsure(b'}')
         false
     }
-
     public func writeBoolText(value: Bool): Unit {
         if (value) {
             writeText("true")
@@ -1333,6 +1376,32 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
         writeRawByte(b'}')
     }
 
+    public func writeCompactInt64Array(values: Array<Int64>): Unit {
+        reserveCapacity(values.size * 21 + 1)
+        writeRawByte(b'[')
+        if (!values.isEmpty()) {
+            writeInt64Text(values[0])
+            for (index in 1..values.size) {
+                writeRawByte(b',')
+                writeInt64Text(values[index])
+            }
+        }
+        writeRawByte(b']')
+    }
+
+    public func writeCompactFloat64Array(values: Array<Float64>): Unit {
+        reserveCapacity(values.size * 24 + 2)
+        writeRawByte(b'[')
+        if (!values.isEmpty()) {
+            writeFloat64Text(values[0])
+            for (index in 1..values.size) {
+                writeRawByte(b',')
+                writeFloat64Text(values[index])
+            }
+        }
+        writeRawByte(b']')
+    }
+
     public func writeNewlineAndIndent(newline: String, indent: String, depth: Int64): Unit {
         writeText(newline)
         for (_ in 0..depth) {
@@ -1589,8 +1658,12 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
     private static let RAW_OBJECT: UInt8 = 0x2
 
     private let target: JsonDirectWriterTarget
+    // String/bytes encoding is the dominant generated-code path. Keep its
+    // concrete target alongside the polymorphic stream target so compact raw
+    // field writes do not pay runtime method-table lookup for every token.
+    private let bufferTarget: DirectBufferWriterTarget
     private let config: JsonWriteOptions
-    private let generatedState: GeneratedWriteStateV1
+    private var generatedState: Option<GeneratedWriteStateV1> = None<GeneratedWriteStateV1>
     private let multiline: Bool
     private let resultKind: UInt8
     private var contexts: Option<ArrayList<UInt8>> = None<ArrayList<UInt8>>
@@ -1609,36 +1682,38 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
     private var rawKnownKinds: UInt64 = 0u64
     private var rawObjectKinds: UInt64 = 0u64
     private var rawOverflowKinds: Option<ArrayList<UInt8>> = None<ArrayList<UInt8>>
+    private var lastRawString: Option<String> = None<String>
+    private var lastRawStringEscapeIndex: Int64 = -1
 
     public init(pretty!: Bool = false) {
         let writerConfig = if (pretty) { JsonWriteOptions.pretty() } else { JsonWriteOptions.compact }
-        target = DirectBufferWriterTarget(capacity: directStringWriterInitialCapacity(writerConfig))
+        bufferTarget = DirectBufferWriterTarget(capacity: directStringWriterInitialCapacity(writerConfig))
+        target = bufferTarget
         config = writerConfig
-        generatedState = GeneratedWriteStateV1(writerConfig)
         multiline = !config.newline.isEmpty()
         resultKind = 0
     }
 
     public init(config: JsonWriteOptions) {
-        target = DirectBufferWriterTarget(capacity: directStringWriterInitialCapacity(config))
+        bufferTarget = DirectBufferWriterTarget(capacity: directStringWriterInitialCapacity(config))
+        target = bufferTarget
         this.config = config
-        generatedState = GeneratedWriteStateV1(config)
         multiline = !config.newline.isEmpty()
         resultKind = 0
     }
 
     public init(out: OutputStream, config!: JsonWriteOptions = JsonWriteOptions.compact) {
+        bufferTarget = DirectBufferWriterTarget(capacity: 0)
         target = DirectStreamWriterTarget(out, config)
         this.config = config
-        generatedState = GeneratedWriteStateV1(config)
         multiline = !config.newline.isEmpty()
         resultKind = 2
     }
 
-    private init(target: JsonDirectWriterTarget, config: JsonWriteOptions, resultKind: UInt8) {
+    private init(target: DirectBufferWriterTarget, config: JsonWriteOptions, resultKind: UInt8) {
+        bufferTarget = target
         this.target = target
         this.config = config
-        generatedState = GeneratedWriteStateV1(config)
         multiline = !config.newline.isEmpty()
         this.resultKind = resultKind
     }
@@ -1647,13 +1722,63 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         JsonDirectWriter(DirectBufferWriterTarget(), config, 1)
     }
 
+    private func rawTargetWriteByte(value: Byte): Unit {
+        if (resultKind == 2) { target.writeByte(value) } else { bufferTarget.writeByte(value) }
+    }
+
+    private func rawTargetWriteText(value: String): Unit {
+        if (resultKind == 2) { target.writeText(value) } else { bufferTarget.writeText(value) }
+    }
+
+    private func rawTargetWriteStringNoEscape(value: String): Unit {
+        if (resultKind == 2) {
+            target.writeStringLiteralNoEscape(value)
+        } else {
+            bufferTarget.writeStringLiteralNoEscape(value)
+        }
+    }
+
+    private func rawTargetWriteNameNoEscape(value: String): Unit {
+        if (resultKind == 2) {
+            target.writeStringLiteralNoEscapeName(value)
+        } else {
+            bufferTarget.writeStringLiteralNoEscapeName(value)
+        }
+    }
+
+    private func rawTargetWriteInt64(value: Int64): Unit {
+        if (resultKind == 2) { target.writeInt64Text(value) } else { bufferTarget.writeInt64Text(value) }
+    }
+
+    private func rawTargetWriteUInt64(value: UInt64): Unit {
+        if (resultKind == 2) { target.writeUInt64Text(value) } else { bufferTarget.writeUInt64Text(value) }
+    }
+
+    private func rawTargetWriteFloat64(value: Float64): Unit {
+        if (resultKind == 2) { target.writeFloat64Text(value) } else { bufferTarget.writeFloat64Text(value) }
+    }
+
+    private func rawTargetWriteBool(value: Bool): Unit {
+        if (resultKind == 2) { target.writeBoolText(value) } else { bufferTarget.writeBoolText(value) }
+    }
+
     public func generatedCursorV1(): GeneratedSupportV1WriteCursor {
         GeneratedSupportV1WriteCursor(this)
     }
 
-    public func generatedWriteStateV1(): GeneratedWriteStateV1 { generatedState }
+    private func writeState(): GeneratedWriteStateV1 {
+        match (generatedState) {
+            case Some(value) => value
+            case None =>
+                let value = GeneratedWriteStateV1(config)
+                generatedState = Some(value)
+                value
+        }
+    }
 
-    public func path(): String { generatedState.currentPath() }
+    public func generatedWriteStateV1(): GeneratedWriteStateV1 { writeState() }
+
+    public func path(): String { writeState().currentPath() }
 
     public func error(message: String, code: String): JsonException {
         JsonException(message, code: code, path: path())
@@ -1762,17 +1887,17 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
 
     public func writeRawByte(value: Byte): Unit {
         consumeRawRootPreclaim()
-        target.writeByte(value)
+        rawTargetWriteByte(value)
     }
 
     public func writeRawBeginArray(): Unit {
         beginRawContainer(RAW_ARRAY)
-        target.writeByte(b'[')
+        rawTargetWriteByte(b'[')
     }
 
     public func writeRawEndArray(): Unit {
         endRawContainer(RAW_ARRAY)
-        target.writeByte(b']')
+        rawTargetWriteByte(b']')
     }
 
     public func writeRawBeginObject(): Unit {
@@ -1793,7 +1918,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
             return
         }
         beginRawContainer(RAW_OBJECT)
-        target.writeByte(b'{')
+        rawTargetWriteByte(b'{')
     }
 
     public func writeRawEndObject(): Unit {
@@ -1806,7 +1931,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
             return
         }
         endRawContainer(RAW_OBJECT)
-        target.writeByte(b'}')
+        rawTargetWriteByte(b'}')
     }
 
     func reserveRawCollectionCapacity(count: Int64): Unit {
@@ -1816,9 +1941,10 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         target.reserveCapacity(hint)
     }
 
+
     public func writeRawObjectEntryName(first: Bool, value: String): Bool {
         if (!first) {
-            target.writeByte(b',')
+            rawTargetWriteByte(b',')
         }
         writeStringLiteralName(value)
         false
@@ -2136,10 +2262,9 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         rawTargetWriteByte(b'}')
         next
     }
-
     public func writeRawObjectEntryNameString(first: Bool, name: String, value: String): Bool {
         if (!first) {
-            target.writeByte(b',')
+            rawTargetWriteByte(b',')
         }
         writeStringLiteralName(name)
         writeRawString(value)
@@ -2149,22 +2274,38 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
     public func writeRawObjectEntryNameInt64(first: Bool, name: String, value: Int64): Bool {
         let firstEscape = firstStringEscapeIndex(name)
         if (firstEscape < 0) {
-            return target.writeObjectEntryNameInt64NoEscape(first, name, value)
+            if (resultKind == 2) {
+                return target.writeObjectEntryNameInt64NoEscape(first, name, value)
+            }
+            return bufferTarget.writeObjectEntryNameInt64NoEscape(first, name, value)
         }
         if (!first) {
-            target.writeByte(b',')
+            rawTargetWriteByte(b',')
         }
         writeStringLiteralName(name)
-        target.writeInt64Text(value)
+        rawTargetWriteInt64(value)
         false
+    }
+
+    public func writeRawObjectEntryNameUInt64(first: Bool, name: String, value: UInt64): Bool {
+        let next = writeRawObjectEntryName(first, name)
+        rawTargetWriteUInt64(value)
+        next
+    }
+
+    public func writeRawObjectEntryNameFloat64(first: Bool, name: String, value: Float64): Bool {
+        ensureFiniteJsonFloat(value)
+        let next = writeRawObjectEntryName(first, name)
+        rawTargetWriteFloat64(value)
+        next
     }
 
     public func writeRawObjectEntryNameBool(first: Bool, name: String, value: Bool): Bool {
         if (!first) {
-            target.writeByte(b',')
+            rawTargetWriteByte(b',')
         }
         writeStringLiteralName(name)
-        target.writeBoolText(value)
+        rawTargetWriteBool(value)
         false
     }
 
@@ -2232,6 +2373,67 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         true
     }
 
+    public func tryWriteCompactInt64Array(values: Array<Int64>): Bool {
+        if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
+            return false
+        }
+        ensureContainerDepth()
+        if (rawDepth == 0) { beforeValue() }
+        rawDepth++
+        try {
+            if (resultKind == 2) {
+                target.writeCompactInt64Array(values)
+            } else {
+                bufferTarget.writeCompactInt64Array(values)
+            }
+        } finally {
+            rawDepth--
+        }
+        true
+    }
+
+    public func tryWriteCompactFloat64Array(values: Array<Float64>): Bool {
+        if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
+            return false
+        }
+        for (value in values) {
+            if (value.isNaN() || value.isInf()) { return false }
+        }
+        ensureContainerDepth()
+        if (rawDepth == 0) { beforeValue() }
+        rawDepth++
+        try {
+            if (resultKind == 2) {
+                target.writeCompactFloat64Array(values)
+            } else {
+                bufferTarget.writeCompactFloat64Array(values)
+            }
+        } finally {
+            rawDepth--
+        }
+        true
+    }
+
+    public func tryWriteCompactStringArray(values: Array<String>): Bool {
+        if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
+            return false
+        }
+        ensureContainerDepth()
+        if (rawDepth == 0) { beforeValue() }
+        rawDepth++
+        try {
+            target.writeByte(b'[')
+            for (index in 0..values.size) {
+                if (index > 0) { target.writeByte(b',') }
+                writeRawString(values[index])
+            }
+            target.writeByte(b']')
+        } finally {
+            rawDepth--
+        }
+        true
+    }
+
     public func tryWriteCompactInt64ArrayList(values: ArrayList<Int64>): Bool {
         if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
             return false
@@ -2291,11 +2493,56 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         true
     }
 
+    public func tryWriteCompactStringMap(values: HashMap<String, String>): Bool {
+        if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
+            return false
+        }
+        ensureContainerDepth()
+        if (rawDepth == 0) { beforeValue() }
+        rawDepth++
+        try {
+            target.writeByte(b'{')
+            var first = true
+            for ((name, value) in values) {
+                first = writeRawObjectEntryNameString(first, name, value)
+            }
+            target.writeByte(b'}')
+        } finally {
+            rawDepth--
+        }
+        true
+    }
+
+    public func tryWriteCompactInt64ArrayMap(values: HashMap<String, Array<Int64>>): Bool {
+        if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
+            return false
+        }
+        ensureContainerDepth()
+        if (rawDepth == 0) { beforeValue() }
+        rawDepth++
+        try {
+            target.writeByte(b'{')
+            var first = true
+            for ((name, value) in values) {
+                first = writeRawObjectEntryName(first, name)
+                if (resultKind == 2) {
+                    target.writeCompactInt64Array(value)
+                } else {
+                    bufferTarget.writeCompactInt64Array(value)
+                }
+            }
+            target.writeByte(b'}')
+        } finally {
+            rawDepth--
+        }
+        true
+    }
+
     func writeRawString(value: String): Unit {
         beginRawScalar()
-        let firstEscape = firstStringEscapeIndex(value)
+        let firstEscape = firstRawStringEscapeIndex(value)
         if (firstEscape < 0) {
-            target.writeStringLiteralNoEscape(value)
+            rawTargetWriteStringNoEscape(value)
             return
         }
         writeStringLiteralFromFirstEscape(value, firstEscape)
@@ -2303,27 +2550,33 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
 
     public func writeRawNull(): Unit {
         beginRawScalar()
-        target.writeText("null")
+        rawTargetWriteText("null")
     }
 
     func writeRawBool(value: Bool): Unit {
         beginRawScalar()
-        target.writeBoolText(value)
+        rawTargetWriteBool(value)
     }
 
     func writeRawInt64(value: Int64): Unit {
         beginRawScalar()
-        target.writeInt64Text(value)
+        rawTargetWriteInt64(value)
     }
 
     public func writeRawUInt64(value: UInt64): Unit {
         beginRawScalar()
-        target.writeUInt64Text(value)
+        rawTargetWriteUInt64(value)
+    }
+
+    func writeRawFloat64(value: Float64): Unit {
+        ensureFiniteJsonFloat(value)
+        beginRawScalar()
+        rawTargetWriteFloat64(value)
     }
 
     func writeRawNumberValue(value: String): Unit {
         beginRawScalar()
-        target.writeText(value)
+        rawTargetWriteText(value)
     }
 
     private func beginRawScalar(): Unit {
@@ -2337,7 +2590,11 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
 
     private func beginRawContainer(kind: UInt8): Unit {
         if (currentContainerDepth() >= config.maxDepth) {
-            throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
+            throw JsonException(
+                "Maximum JSON depth ${config.maxDepth} exceeded",
+                code: "max_depth",
+                path: path()
+            )
         }
         if (rawDepth == 0) {
             if (rawRootPreclaimed) {
@@ -2423,7 +2680,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         let pathPushed = beforeValue()
         target.writeByte(b'{')
         contextValues().add(OBJECT_FIRST)
-        semanticPathContextValues().add(JsonDirectSemanticPathContext(generatedState.pathDepth(), pathPushed))
+        semanticPathContextValues().add(JsonDirectSemanticPathContext(writeState().pathDepth(), pathPushed))
     }
 
     public func endObject(): Unit {
@@ -2435,7 +2692,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         target.writeByte(b'}')
         let pathContexts = semanticPathContextValues()
         let pathContext = pathContexts.remove(at: pathContexts.size - 1)
-        generatedState.completeAutoValue(pathContext.entryPathPushed)
+        writeState().completeAutoValue(pathContext.entryPathPushed)
     }
 
     public func startArray(): Unit {
@@ -2443,7 +2700,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         let pathPushed = beforeValue()
         target.writeByte(b'[')
         contextValues().add(ARRAY_FIRST)
-        semanticPathContextValues().add(JsonDirectSemanticPathContext(generatedState.pathDepth(), pathPushed))
+        semanticPathContextValues().add(JsonDirectSemanticPathContext(writeState().pathDepth(), pathPushed))
     }
 
     public func endArray(): Unit {
@@ -2455,7 +2712,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         target.writeByte(b']')
         let pathContexts = semanticPathContextValues()
         let pathContext = pathContexts.remove(at: pathContexts.size - 1)
-        generatedState.completeAutoValue(pathContext.entryPathPushed)
+        writeState().completeAutoValue(pathContext.entryPathPushed)
     }
 
     public func writeName(name: String): Unit {
@@ -2466,7 +2723,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         }
         let pathContexts = semanticPathContextValues()
         let pathContext = pathContexts[pathContexts.size - 1]
-        pathContext.pendingObjectPathPushed = generatedState.pushAutoField(name, pathContext.pathDepth)
+        pathContext.pendingObjectPathPushed = writeState().pushAutoField(name, pathContext.pathDepth)
     }
 
     private func beforeName(): Unit {
@@ -2490,22 +2747,22 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
 
     public func writeNull(): Unit {
         let pathPushed = beforeValue()
-        try { target.writeText("null") } finally { generatedState.completeAutoValue(pathPushed) }
+        try { target.writeText("null") } finally { writeState().completeAutoValue(pathPushed) }
     }
 
     public func writeBool(value: Bool): Unit {
         let pathPushed = beforeValue()
-        try { target.writeBoolText(value) } finally { generatedState.completeAutoValue(pathPushed) }
+        try { target.writeBoolText(value) } finally { writeState().completeAutoValue(pathPushed) }
     }
 
     public func writeInt64(value: Int64): Unit {
         let pathPushed = beforeValue()
-        try { target.writeInt64Text(value) } finally { generatedState.completeAutoValue(pathPushed) }
+        try { target.writeInt64Text(value) } finally { writeState().completeAutoValue(pathPushed) }
     }
 
     public func writeUInt64(value: UInt64): Unit {
         let pathPushed = beforeValue()
-        try { target.writeUInt64Text(value) } finally { generatedState.completeAutoValue(pathPushed) }
+        try { target.writeUInt64Text(value) } finally { writeState().completeAutoValue(pathPushed) }
     }
 
     public func writeFloat64(value: Float64): Unit {
@@ -2513,7 +2770,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         try {
             ensureFiniteJsonFloat(value)
             target.writeFloat64Text(value)
-        } finally { generatedState.completeAutoValue(pathPushed) }
+        } finally { writeState().completeAutoValue(pathPushed) }
     }
 
     public func writeNumberLiteral(value: String): Unit {
@@ -2523,12 +2780,12 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
                 throw error("Invalid JSON number literal", "invalid_number")
             }
             target.writeText(value)
-        } finally { generatedState.completeAutoValue(pathPushed) }
+        } finally { writeState().completeAutoValue(pathPushed) }
     }
 
     public func writeString(value: String): Unit {
         let pathPushed = beforeValue()
-        try { writeStringLiteral(value) } finally { generatedState.completeAutoValue(pathPushed) }
+        try { writeStringLiteral(value) } finally { writeState().completeAutoValue(pathPushed) }
     }
 
     private func beforeValue(): Bool {
@@ -2550,27 +2807,31 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
             let pathContext = semanticPathContextValues()[index]
             let pathPushed = pathContext.pendingObjectPathPushed
             pathContext.pendingObjectPathPushed = false
-            generatedState.beginAutoValue(pathPushed)
+            writeState().beginAutoValue(pathPushed)
             return pathPushed
         }
         let pathContext = semanticPathContextValues()[index]
-        let pathPushed = generatedState.pushAutoIndex(pathContext.nextArrayIndex, pathContext.pathDepth)
+        let pathPushed = writeState().pushAutoIndex(pathContext.nextArrayIndex, pathContext.pathDepth)
         pathContext.nextArrayIndex++
         if ((context & FIRST_MASK) != 0) {
             writeEntryPrefix(values.size)
             values[index] = ARRAY_NEXT
-            generatedState.beginAutoValue(pathPushed)
+            writeState().beginAutoValue(pathPushed)
             return pathPushed
         }
         target.writeByte(b',')
         writeEntryPrefix(values.size)
-        generatedState.beginAutoValue(pathPushed)
+        writeState().beginAutoValue(pathPushed)
         pathPushed
     }
 
     private func ensureContainerDepth(): Unit {
         if (currentContainerDepth() >= config.maxDepth) {
-            throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
+            throw JsonException(
+                "Maximum JSON depth ${config.maxDepth} exceeded",
+                code: "max_depth",
+                path: path()
+            )
         }
     }
 
@@ -2611,7 +2872,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
     private func writeStringLiteral(value: String): Unit {
         let firstEscape = firstStringEscapeIndex(value)
         if (firstEscape < 0) {
-            target.writeStringLiteralNoEscape(value)
+            rawTargetWriteStringNoEscape(value)
             return
         }
         writeStringLiteralFromFirstEscape(value, firstEscape)
@@ -2620,11 +2881,11 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
     private func writeStringLiteralName(value: String): Unit {
         let firstEscape = firstStringEscapeIndex(value)
         if (firstEscape < 0) {
-            target.writeStringLiteralNoEscapeName(value)
+            rawTargetWriteNameNoEscape(value)
             return
         }
         writeStringLiteralFromFirstEscape(value, firstEscape)
-        target.writeByte(b':')
+        rawTargetWriteByte(b':')
     }
 
     private func writeStringLiteralFromFirstEscape(value: String, firstEscape: Int64): Unit {
@@ -2663,6 +2924,17 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
             }
         }
         -1
+    }
+
+    private func firstRawStringEscapeIndex(value: String): Int64 {
+        if (value.size < 256) { return firstStringEscapeIndex(value) }
+        if (let Some(previous) <- lastRawString) {
+            if (previous == value) { return lastRawStringEscapeIndex }
+        }
+        let result = firstStringEscapeIndex(value)
+        lastRawString = Some(value)
+        lastRawStringEscapeIndex = result
+        result
     }
 
     private func shouldEscapeAscii(byte: Int64): Bool {

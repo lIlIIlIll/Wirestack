@@ -68,7 +68,7 @@ public class CollectionBean {
 
 @JsonCodec
 public class NestedCollBean {
-    public var data: HashMap<String, ArrayList<Int64>> = HashMap<String, ArrayList<Int64>>()
+    public var data: HashMap<String, Array<Int64>> = HashMap<String, Array<Int64>>()
     public init() {}
 }
 
@@ -636,7 +636,7 @@ class T9ThroughputBench {
         collLargeMapJson = YJson.toJson(collLargeMap, codec: CollectionBeanJson)
 
         nestedColl = NestedCollBean()
-        for (i in 0..10) { nestedColl.data.add("k${i}", ArrayList<Int64>(t9BuildIntArray(10))) }
+        for (i in 0..10) { nestedColl.data.add("k${i}", t9BuildIntArray(10)) }
         nestedCollJson = YJson.toJson(nestedColl, codec: NestedCollBeanJson)
 
         collLargeFloatArr = FloatArrayBean()

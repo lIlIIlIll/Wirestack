@@ -15,6 +15,7 @@ const YJSON_NATIVE_MIN_DECODE_BYTES = 16
 const YJSON_NATIVE_MIN_READER_DECODE_BYTES = 256
 const YJSON_NATIVE_MIN_WRITER_ESCAPE_BYTES = 4096
 const YJSON_NATIVE_MIN_WRITER_INT64_COUNT = 256
+const YJSON_NATIVE_MIN_WRITER_FLOAT64_COUNT = 32
 const YJSON_NATIVE_MIN_ARRAY_ELEMENT_COUNT = 16
 
 // Cross-package seam used by the optional native package. The core package has
@@ -64,6 +65,9 @@ public interface JsonNativeWriterBackend {
     func formatInt64Array(values: CPointer<Int64>, count: Int64,
         output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64,
         outWritten: CPointer<Int64>): Int32
+    func formatFloat64Array(values: CPointer<Float64>, count: Int64,
+        output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64,
+        outWritten: CPointer<Int64>): Int32
 }
 
 /// Versioned internal product bundle consumed by yjson_native. Applications
@@ -92,9 +96,8 @@ func jsonNativeFormatInt64ArrayInto(values: ArrayList<Int64>, output: Array<Byte
             code: "acceleration_writer_failure")
     }
     let contiguous = values.toArray()
-    let required = values.size * 21 + 1
     if (outputOffset < 0 || outputOffset > output.size ||
-        required > output.size - outputOffset) {
+        output.size - outputOffset < 2) {
         throw JsonException("Native JSON integer output buffer is too small",
             code: "acceleration_writer_failure")
     }
@@ -108,8 +111,89 @@ func jsonNativeFormatInt64ArrayInto(values: ArrayList<Int64>, output: Array<Byte
         releaseArrayRawData(writtenHandle)
         releaseArrayRawData(outputHandle)
         releaseArrayRawData(valuesHandle)
+        if (status == YJ_JSON_SCAN_CAPACITY) {
+            return None<Int64>
+        }
         if (status != YJ_JSON_SCAN_OK || written[0] < 2 || written[0] > output.size) {
             throw JsonException("Native JSON integer formatting failed",
+                code: "acceleration_writer_failure")
+        }
+    }
+    Some(written[0])
+}
+
+func jsonNativeFormatInt64ArrayInto(values: Array<Int64>, output: Array<Byte>,
+    outputOffset: Int64): Option<Int64> {
+    if (values.size < YJSON_NATIVE_MIN_WRITER_INT64_COUNT) {
+        return None<Int64>
+    }
+    let backend = match (jsonNativeAccelerationPrimitives) {
+        case Some(item) => item
+        case None => return None<Int64>
+    }
+    if (values.size > (Int64.Max - 1) / 21) {
+        throw JsonException("JSON integer array is too large for native formatting",
+            code: "acceleration_writer_failure")
+    }
+    if (outputOffset < 0 || outputOffset > output.size ||
+        output.size - outputOffset < 2) {
+        throw JsonException("Native JSON integer output buffer is too small",
+            code: "acceleration_writer_failure")
+    }
+    let written = Array<Int64>(1, repeat: 0)
+    unsafe {
+        let valuesHandle = acquireArrayRawData(values)
+        let outputHandle = acquireArrayRawData(output)
+        let writtenHandle = acquireArrayRawData(written)
+        let status = backend.formatInt64Array(valuesHandle.pointer, values.size,
+            outputHandle.pointer, output.size, outputOffset, writtenHandle.pointer)
+        releaseArrayRawData(writtenHandle)
+        releaseArrayRawData(outputHandle)
+        releaseArrayRawData(valuesHandle)
+        if (status == YJ_JSON_SCAN_CAPACITY) {
+            return None<Int64>
+        }
+        if (status != YJ_JSON_SCAN_OK || written[0] < 2 || written[0] > output.size) {
+            throw JsonException("Native JSON integer formatting failed",
+                code: "acceleration_writer_failure")
+        }
+    }
+    Some(written[0])
+}
+
+func jsonNativeFormatFloat64ArrayInto(values: Array<Float64>, output: Array<Byte>,
+    outputOffset: Int64): Option<Int64> {
+    if (values.size < YJSON_NATIVE_MIN_WRITER_FLOAT64_COUNT) {
+        return None<Int64>
+    }
+    let backend = match (jsonNativeAccelerationPrimitives) {
+        case Some(item) => item
+        case None => return None<Int64>
+    }
+    if (values.size > (Int64.Max - 2) / 42) {
+        throw JsonException("JSON float array is too large for native formatting",
+            code: "acceleration_writer_failure")
+    }
+    if (outputOffset < 0 || outputOffset > output.size ||
+        output.size - outputOffset < 2) {
+        throw JsonException("Native JSON float output buffer is too small",
+            code: "acceleration_writer_failure")
+    }
+    let written = Array<Int64>(1, repeat: 0)
+    unsafe {
+        let valuesHandle = acquireArrayRawData(values)
+        let outputHandle = acquireArrayRawData(output)
+        let writtenHandle = acquireArrayRawData(written)
+        let status = backend.formatFloat64Array(valuesHandle.pointer, values.size,
+            outputHandle.pointer, output.size, outputOffset, writtenHandle.pointer)
+        releaseArrayRawData(writtenHandle)
+        releaseArrayRawData(outputHandle)
+        releaseArrayRawData(valuesHandle)
+        if (status == YJ_JSON_SCAN_CAPACITY) {
+            return None<Int64>
+        }
+        if (status != YJ_JSON_SCAN_OK || written[0] < 2 || written[0] > output.size) {
+            throw JsonException("Native JSON float formatting failed",
                 code: "acceleration_writer_failure")
         }
     }

@@ -1,0 +1,11 @@
+[package]
+cjc-version = "1.1.0"
+name = "yjson_bulk_path_mock_tests"
+organization = ""
+description = "Isolated unittest mock checks for generated bulk writer hooks"
+version = "0.1.0"
+output-type = "static"
+compile-option = "-Woff unused"
+
+[dependencies]
+yjson = { path = "../.." }

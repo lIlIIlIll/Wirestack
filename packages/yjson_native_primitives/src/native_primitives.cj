@@ -42,6 +42,11 @@ foreign func YJ_JSON_FormatInt64Array(values: CPointer<Int64>, count: Int64,
     outWritten: CPointer<Int64>): Int32
 
 @FastNative
+foreign func YJ_JSON_FormatFloat64Array(values: CPointer<Float64>, count: Int64,
+    output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64,
+    outWritten: CPointer<Int64>): Int32
+
+@FastNative
 foreign func YJ_JSON_ParseInt64Array(input: CPointer<UInt8>, len: Int64, start: Int64,
     values: CPointer<Int64>, valueCap: Int64, outEnd: CPointer<Int64>,
     outCount: CPointer<Int64>, outError: CPointer<Int64>): Int32
@@ -97,6 +102,14 @@ private class CJsonNativeScannerBackend <: JsonNativeAccelerationPrimitivesV1 {
         unsafe { YJ_JSON_FormatInt64Array(values, count, output, outputCap, outputOffset,
             outWritten) }
     }
+
+    public func formatFloat64Array(values: CPointer<Float64>, count: Int64,
+        output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64,
+        outWritten: CPointer<Int64>): Int32 {
+        unsafe { YJ_JSON_FormatFloat64Array(values, count, output, outputCap, outputOffset,
+            outWritten) }
+    }
+
 }
 
 private var yJsonNativeEnabled: Bool = false
