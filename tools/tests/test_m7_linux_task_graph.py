@@ -55,12 +55,12 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertEqual(200, len(milestone_ids))
         self.assertEqual(185, len(milestone_ids - EXPECTED_IDS))
         self.assertEqual(7, len(upstream_ids))
-        self.assertEqual(13, len(p1_ids))
+        self.assertEqual(14, len(p1_ids))
         self.assertIn("**全平台主线任务数：** 185", backlog)
         self.assertIn("**Linux 稳定版收口任务数：** 15", backlog)
         self.assertIn("**当前发布任务数：** 200", backlog)
         self.assertIn("当前发布相关任务总数：**200**", backlog)
-        self.assertIn("全部已记录任务总数：**220**", backlog)
+        self.assertIn("全部已记录任务总数：**221**", backlog)
 
     def test_status_exposes_linux_completion_without_a_global_completion_claim(self) -> None:
         status = self.read("docs/planning/status.md")
