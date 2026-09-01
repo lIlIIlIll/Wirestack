@@ -2,9 +2,14 @@
 """Run the native Linux M7-023 deterministic release fuzz gate."""
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import platform
@@ -45,10 +50,6 @@ class GateError(RuntimeError):
 
 def utc_now() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z")
-
-
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def bounded(value: bytes) -> str:
@@ -161,8 +162,8 @@ def load_manifest(root: Path, manifest_path: Path) -> tuple[dict[str, Any], list
             raise GateError(f"invalid timeout: {name}")
         corpus = checked_path(root, corpus_value)
         compact = decode_hex_corpus(corpus)
-        actual_digest = sha256(corpus)
-        if actual_digest != expected_digest:
+        actual_digest = evidence_digest.text_evidence_sha256(corpus)
+        if not evidence_digest.schema_text_sha256_equal(actual_digest, expected_digest):
             raise GateError(f"corpus digest mismatch: {name}")
         targets.append({
             **item,
@@ -276,19 +277,13 @@ def save_crash(root: Path, crash_dir: Path, target: Mapping[str, Any], seed: int
 
 
 def source_fingerprint(root: Path) -> str:
-    digest = hashlib.sha256()
     paths: list[Path] = []
     for directory in (
         "src/internal/tls_engine", "src/internal/trust", "src/internal/http1",
         "src/internal/http2", "src/http",
     ):
         paths.extend((root / directory).glob("*.cj"))
-    for path in sorted(paths):
-        digest.update(path.relative_to(root).as_posix().encode())
-        digest.update(b"\0")
-        digest.update(path.read_bytes())
-        digest.update(b"\0")
-    return digest.hexdigest()
+    return evidence_digest.text_evidence_inventory_sha256(root, paths)
 
 
 def version(command: Sequence[str], root: Path) -> str:
@@ -365,7 +360,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         manifest_path = args.manifest.resolve()
         manifest, targets = load_manifest(root, manifest_path)
-        manifest_digest = sha256(manifest_path)
+        manifest_digest = evidence_digest.text_evidence_sha256(manifest_path)
         selected = targets
         mode = "campaign"
         if args.replay_crash is not None:

@@ -1,0 +1,8 @@
+docs/evidence/M0-016/**/*.json text eol=lf
+docs/evidence/M0-016/license-bundles/** -text
+tools/tls_provider_poc/*.json text eol=lf
+docs/evidence/M2-004/*.json -text
+docs/evidence/M2-004/**/*.json -text
+docs/evidence/M2-006/*.json -text
+docs/evidence/M2-006/**/*.json -text
+docs/evidence/M3-031/**/license-bundle/** -text

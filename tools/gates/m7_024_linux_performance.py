@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import math
 import platform
@@ -48,16 +53,7 @@ def utc_now() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat()
 
 
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def http2_source_sha256(root: Path) -> str:
-    digest = hashlib.sha256()
     paths: list[Path] = []
     for directory in HTTP2_SOURCE_DIRECTORIES:
         paths.extend(
@@ -66,13 +62,7 @@ def http2_source_sha256(root: Path) -> str:
         )
     if not paths:
         raise GateError("HTTP/2 production source inventory is empty")
-    for path in sorted(paths):
-        relative = path.relative_to(root).as_posix()
-        digest.update(relative.encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(path.read_bytes())
-        digest.update(b"\0")
-    return digest.hexdigest()
+    return evidence_digest.text_evidence_inventory_sha256(root, paths)
 
 
 def checked_path(root: Path, relative: str) -> Path:
@@ -242,8 +232,10 @@ def load_artifacts(root: Path, manifest: Mapping[str, Any]) -> tuple[dict[str, A
     inventory: list[dict[str, Any]] = []
     for name, artifact in manifest["artifacts"].items():
         path = checked_path(root, artifact["path"])
-        actual_digest = sha256(path)
-        if actual_digest != artifact["sha256"]:
+        actual_digest = evidence_digest.text_evidence_sha256(path)
+        if not evidence_digest.schema_text_sha256_equal(
+            actual_digest, artifact["sha256"],
+        ):
             raise GateError(
                 f"artifact digest mismatch for {name}: expected {artifact['sha256']}, "
                 f"actual {actual_digest}"

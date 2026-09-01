@@ -2,8 +2,13 @@
 """Run reproducible Linux HTTP/2 1/10/100-stream benchmarks."""
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import os
 import platform
@@ -265,12 +270,7 @@ def classify(cases: Mapping[str, Mapping[str, Any]], baseline: Mapping[str, Any]
             "connection_reduction": reduction}
 
 
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
 def production_source_sha256(repo: Path) -> str:
-    digest = hashlib.sha256()
     paths: list[Path] = []
     for directory in PRODUCTION_SOURCE_DIRECTORIES:
         paths.extend(
@@ -279,13 +279,7 @@ def production_source_sha256(repo: Path) -> str:
         )
     if not paths:
         raise BenchmarkError("HTTP/2 production source inventory is empty")
-    for path in sorted(paths):
-        relative = path.relative_to(repo).as_posix()
-        digest.update(relative.encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(path.read_bytes())
-        digest.update(b"\0")
-    return digest.hexdigest()
+    return evidence_digest.text_evidence_inventory_sha256(repo, paths)
 
 
 def tool_version(command: Sequence[str], repo: Path) -> str:
@@ -325,8 +319,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "toolchain": {"cjc": tool_version(["cjc", "-v"], repo),
                       "cjpm": tool_version(["cjpm", "-v"], repo)},
         "source": {
-            "benchmark_runner_sha256": sha256(Path(__file__)),
-            "harness_sha256": sha256(repo / "src/internal/http1/http2_benchmark_harness_test.cj"),
+            "benchmark_runner_sha256": evidence_digest.text_evidence_sha256(Path(__file__)),
+            "harness_sha256": evidence_digest.text_evidence_sha256(repo / "src/internal/http1/http2_benchmark_harness_test.cj"),
             "production_source_sha256": production_source_sha256(repo),
         },
         "method": {"warmup_rounds_per_pass": 2, "measured_rounds_per_pass": 20,

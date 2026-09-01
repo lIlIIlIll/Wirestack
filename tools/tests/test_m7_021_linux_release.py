@@ -1,9 +1,11 @@
+import copy
 import io
 import json
 import tarfile
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from tools import m7_021_linux_release as release
 
@@ -39,6 +41,29 @@ class M7021LinuxReleaseTest(unittest.TestCase):
             },
             set(release.RELEASE_METADATA_FILES),
         )
+
+    def test_text_metadata_digest_is_line_ending_stable_while_payload_digest_is_exact(self) -> None:
+        variants = (
+            b"line one\nline two\n",
+            b"line one\r\nline two\r\n",
+            b"line one\rline two\r",
+        )
+        text_digests = {
+            release.evidence_digest.text_evidence_bytes_sha256(value) for value in variants
+        }
+        payload_digests = {release.artifact_payload_sha256(value) for value in variants}
+        self.assertEqual(1, len(text_digests))
+        self.assertEqual(3, len(payload_digests))
+
+    def test_main_translates_invalid_text_digest_to_controlled_failure(self) -> None:
+        error = release.evidence_digest.DigestError("TEXT_UTF8", "license is not valid UTF-8")
+        args = mock.Mock(root=release.ROOT, output_dir=None, offline=True)
+        with mock.patch.object(release, "parse_args", return_value=args), \
+                mock.patch.object(release, "qualify", side_effect=error), \
+                mock.patch("sys.stdout", new_callable=io.StringIO) as stdout:
+            self.assertEqual(1, release.main())
+        self.assertIn("M7-021 Linux release qualification: FAIL", stdout.getvalue())
+        self.assertNotIn("Traceback", stdout.getvalue())
 
     def test_production_sources_exclude_every_test_file(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -118,11 +143,32 @@ class M7021LinuxReleaseTest(unittest.TestCase):
         self.assertIn('wirestack = { path = "/tmp/installed wirestack" }', manifest)
         self.assertNotIn(str(release.ROOT), manifest)
 
-    def test_committed_qualification_report_is_current(self) -> None:
+    def test_committed_qualification_report_is_structurally_valid(self) -> None:
         report_path = release.ROOT / "docs/evidence/M7-021/linux_x86_64/qualification.json"
         if not report_path.is_file():
             self.skipTest("M7-021 qualification evidence is not committed yet")
-        release.validate_report(json.loads(report_path.read_text(encoding="utf-8")), release.ROOT)
+        release.validate_report(
+            json.loads(report_path.read_text(encoding="utf-8")),
+            release.ROOT,
+            verify_current_sources=False,
+        )
+
+    def test_strict_validation_rejects_source_drift(self) -> None:
+        report_path = release.ROOT / "docs/evidence/M7-021/linux_x86_64/qualification.json"
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        with mock.patch.object(release, "source_tree_sha256", return_value="0" * 64):
+            with self.assertRaisesRegex(release.ReleaseError, "source tree fingerprint is stale"):
+                release.validate_report(report, release.ROOT)
+
+    def test_structural_validation_accepts_frozen_input_keys_but_rejects_escape(self) -> None:
+        report_path = release.ROOT / "docs/evidence/M7-021/linux_x86_64/qualification.json"
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        changed = copy.deepcopy(report)
+        changed["qualification_inputs"] = {"historical/input.txt": "0" * 64}
+        release.validate_report(changed, release.ROOT, verify_current_sources=False)
+        changed["qualification_inputs"] = {"../escape": "0" * 64}
+        with self.assertRaisesRegex(release.ReleaseError, "fingerprint is invalid"):
+            release.validate_report(changed, release.ROOT, verify_current_sources=False)
 
 
 if __name__ == "__main__":

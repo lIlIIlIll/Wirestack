@@ -27,7 +27,8 @@ private let RESOLVER_MAXIMUM_WAIT = 16 * Duration.millisecond
 foreign func wirestack_resolver_pool_create(
     workerCount: UInt64,
     queueCapacity: UInt64,
-    outPoolHandle: CPointer<UInt64>
+    outPoolHandle: CPointer<UInt64>,
+    outNativeCode: CPointer<Int64>
 ): Int32
 
 foreign func wirestack_resolver_pool_destroy(poolHandle: UInt64): Int32
@@ -45,6 +46,7 @@ foreign func wirestack_resolver_poll(
     jobHandle: UInt64,
     outFamilies: CPointer<Int32>,
     outAddresses: CPointer<Byte>,
+    outScopeIds: CPointer<UInt32>,
     outputCapacity: UInt64,
     outCount: CPointer<UInt64>,
     outResult: CPointer<Int32>,
@@ -60,17 +62,17 @@ foreign func wirestack_resolver_pool_metrics(
 ): Int32
 
 /** Bounded scheduler diagnostics. No hostname or address data is retained. */
-internal struct ResolverPoolMetrics {
-    internal let workerCount: Int64
-    internal let queueCapacity: Int64
-    internal let activeJobs: Int64
-    internal let queuedJobs: Int64
-    internal let runningJobs: Int64
-    internal let peakActiveJobs: Int64
-    internal let peakQueuedJobs: Int64
-    internal let submittedJobs: Int64
-    internal let completedJobs: Int64
-    internal let rejectedJobs: Int64
+public struct ResolverPoolMetrics {
+    public let workerCount: Int64
+    public let queueCapacity: Int64
+    public let activeJobs: Int64
+    public let queuedJobs: Int64
+    public let runningJobs: Int64
+    public let peakActiveJobs: Int64
+    public let peakQueuedJobs: Int64
+    public let submittedJobs: Int64
+    public let completedJobs: Int64
+    public let rejectedJobs: Int64
 
     internal init(values: Array<UInt64>) {
         workerCount = Int64(values[0])
@@ -87,15 +89,15 @@ internal struct ResolverPoolMetrics {
 }
 
 /**
- * Linux blocking resolver backend isolated on a fixed native worker pool.
- * close() stops admission and quarantines any libc/NSS call that has not yet
- * returned; a native reaper releases the bounded pool only after all workers
- * and caller-held jobs have finished.
+ * Platform system resolver backend isolated on a fixed native worker pool.
+ * close() stops admission and quarantines any platform resolver call that has
+ * not yet returned; a native reaper releases the bounded pool only after all
+ * workers and caller-held jobs have finished.
  *
  * This type is intentionally internal. M2-005 owns the public SystemResolver
  * adapter and its platform error mapping.
  */
-internal class LinuxBoundedResolverBackend {
+internal class BoundedSystemResolverBackend {
     private let mutex = Mutex()
     private var poolHandle: UInt64 = 0u64
 
@@ -107,22 +109,27 @@ internal class LinuxBoundedResolverBackend {
             throw IllegalArgumentException("resolver queueCapacity must be between 1 and 1024")
         }
         let output = Array<UInt64>(1, repeat: 0u64)
+        let nativeCode = Array<Int64>(1, repeat: 0)
         let status = unsafe {
             let raw = acquireArrayRawData(output)
+            let nativeRaw = acquireArrayRawData(nativeCode)
             try {
                 wirestack_resolver_pool_create(
                     UInt64(workerCount),
                     UInt64(queueCapacity),
-                    raw.pointer
+                    raw.pointer,
+                    nativeRaw.pointer
                 )
             } finally {
+                releaseArrayRawData(nativeRaw)
                 releaseArrayRawData(raw)
             }
         }
         if (status != RESOLVER_OK || output[0] == 0u64) {
             throw ResolveException(
                 ResolveErrorCode.SystemFailure,
-                "failed to create bounded Linux resolver pool: ${status}"
+                "failed to create bounded system resolver pool: ${status}",
+                if (nativeCode[0] == 0) { None<Int64> } else { Some(nativeCode[0]) }
             )
         }
         poolHandle = output[0]
@@ -223,19 +230,19 @@ internal class LinuxBoundedResolverBackend {
         if (status == RESOLVER_OVERLOADED) {
             throw ResolveException(
                 ResolveErrorCode.TemporaryFailure,
-                "bounded Linux resolver pool is full"
+                "bounded system resolver pool is full"
             )
         }
         if (status == RESOLVER_CLOSED) {
-            throw ResolveException(ResolveErrorCode.SystemFailure, "Linux resolver pool is closed")
+            throw ResolveException(ResolveErrorCode.SystemFailure, "system resolver pool is closed")
         }
         if (status == RESOLVER_OUT_OF_MEMORY) {
-            throw ResolveException(ResolveErrorCode.SystemFailure, "Linux resolver pool allocation failed")
+            throw ResolveException(ResolveErrorCode.SystemFailure, "system resolver pool allocation failed")
         }
         if (status != RESOLVER_OK || output[0] == 0u64) {
             throw ResolveException(
                 ResolveErrorCode.InvalidName,
-                "Linux resolver rejected the request: ${status}"
+                "system resolver rejected the request: ${status}"
             )
         }
         output[0]
@@ -276,6 +283,7 @@ internal class LinuxBoundedResolverBackend {
         let status = unsafe {
             let familiesRaw = acquireArrayRawData(output.families)
             let packedRaw = acquireArrayRawData(output.packed)
+            let scopeIdsRaw = acquireArrayRawData(output.scopeIds)
             let countRaw = acquireArrayRawData(output.count)
             let resultRaw = acquireArrayRawData(output.result)
             let nativeRaw = acquireArrayRawData(output.nativeCode)
@@ -284,6 +292,7 @@ internal class LinuxBoundedResolverBackend {
                     jobHandle,
                     familiesRaw.pointer,
                     packedRaw.pointer,
+                    scopeIdsRaw.pointer,
                     UInt64(maximum),
                     countRaw.pointer,
                     resultRaw.pointer,
@@ -293,6 +302,7 @@ internal class LinuxBoundedResolverBackend {
                 releaseArrayRawData(nativeRaw)
                 releaseArrayRawData(resultRaw)
                 releaseArrayRawData(countRaw)
+                releaseArrayRawData(scopeIdsRaw)
                 releaseArrayRawData(packedRaw)
                 releaseArrayRawData(familiesRaw)
             }
@@ -313,7 +323,7 @@ internal class LinuxBoundedResolverBackend {
             let code = resolveError(output.result[0])
             throw ResolveException(
                 code,
-                "Linux system resolver failed",
+                "system resolver failed",
                 if (output.nativeCode[0] == 0) {
                     None<Int64>
                 } else {
@@ -332,13 +342,15 @@ internal class LinuxBoundedResolverBackend {
             for (offset in 0..size) {
                 octets[offset] = output.packed[index * RESOLVER_ADDRESS_BYTES + offset]
             }
-            addresses.add(IpAddress(
-                family,
-                octets
-            ))
+            let zone = if (family == IpAddressFamily.Ipv6 && output.scopeIds[index] != 0u32) {
+                Some(output.scopeIds[index].toString())
+            } else {
+                None<String>
+            }
+            addresses.add(IpAddress(family, octets, zone: zone))
         }
         if (addresses.isEmpty()) {
-            throw ResolveException(ResolveErrorCode.NoData, "Linux resolver returned no addresses")
+            throw ResolveException(ResolveErrorCode.NoData, "system resolver returned no addresses")
         }
         Some(ResolveResult(
             addresses.toArray(),
@@ -351,7 +363,7 @@ internal class LinuxBoundedResolverBackend {
 
     private func requireOpen(): UInt64 {
         if (poolHandle == 0u64) {
-            throw ResolveException(ResolveErrorCode.SystemFailure, "Linux resolver pool is closed")
+            throw ResolveException(ResolveErrorCode.SystemFailure, "system resolver pool is closed")
         }
         poolHandle
     }
@@ -360,6 +372,7 @@ internal class LinuxBoundedResolverBackend {
 private class ResolverPollOutput {
     let families: Array<Int32>
     let packed: Array<Byte>
+    let scopeIds: Array<UInt32>
     let count = Array<UInt64>(1, repeat: 0u64)
     let result = Array<Int32>(1, repeat: RESOLVER_RESULT_SYSTEM_FAILURE)
     let nativeCode = Array<Int64>(1, repeat: 0)
@@ -367,6 +380,7 @@ private class ResolverPollOutput {
     init(maximum: Int64) {
         families = Array<Int32>(maximum, repeat: 0i32)
         packed = Array<Byte>(maximum * RESOLVER_ADDRESS_BYTES, repeat: 0)
+        scopeIds = Array<UInt32>(maximum, repeat: 0u32)
     }
 }
 
@@ -398,7 +412,7 @@ internal func nativeResolverResultFamily(value: Int32): IpAddressFamily {
     }
     throw ResolveException(
         ResolveErrorCode.SystemFailure,
-        "Linux resolver returned an unknown address family"
+        "system resolver returned an unknown address family"
     )
 }
 

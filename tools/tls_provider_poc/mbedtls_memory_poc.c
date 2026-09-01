@@ -1,16 +1,37 @@
+#if defined(__APPLE__)
+#define _DARWIN_C_SOURCE
+#elif !defined(_WIN32)
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include <mbedtls/ssl.h>
 #include <mbedtls/x509_crt.h>
 #include <mbedtls/pk.h>
 #include <mbedtls/error.h>
+#include <mbedtls/platform.h>
 #include <psa/crypto.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "poc_allocation_profile.h"
+#include "poc_cancel.h"
+#if defined(_WIN32)
+#include <windows.h>
+#include <psapi.h>
+#elif defined(__APPLE__)
+#include <mach/mach.h>
+#else
+#include <sys/resource.h>
+#endif
 
 #define MAX_STEPS 300000
 #define RING_CAPACITY 2048
 #define PAYLOAD_SIZE 32768
 #define CLEANUP_CYCLES 10000
+#define MEMORY_PROFILE_BOUND_BYTES 536870912ULL
+#define PROVIDER_ALLOCATION_BOUND_BYTES 68719476736ULL
+#define PROVIDER_ALLOCATION_CALL_BOUND 150000000ULL
 
 typedef struct {
     unsigned char data[RING_CAPACITY];
@@ -42,6 +63,39 @@ typedef struct {
 } Material;
 
 static int sni_seen = 0;
+static int external_trust_decision = 0;
+static unsigned int external_trust_calls = 0;
+
+static uint64_t peak_resident_bytes(void) {
+#if defined(_WIN32)
+    PROCESS_MEMORY_COUNTERS counters;
+    memset(&counters, 0, sizeof(counters));
+    counters.cb = sizeof(counters);
+    if (!GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters))) return 0;
+    return (uint64_t)counters.PeakWorkingSetSize;
+#elif defined(__APPLE__)
+    mach_task_basic_info_data_t info;
+    mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
+    if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
+                  (task_info_t)&info, &count) != KERN_SUCCESS) return 0;
+    return (uint64_t)info.resident_size_max;
+#else
+    struct rusage usage;
+    if (getrusage(RUSAGE_SELF, &usage) != 0) return 0;
+    return (uint64_t)usage.ru_maxrss * 1024ULL;
+#endif
+}
+
+static int external_trust_callback(void *opaque, mbedtls_x509_crt *cert,
+                                   int depth, uint32_t *flags) {
+    (void)opaque;
+    (void)cert;
+    (void)depth;
+    external_trust_calls++;
+    if (external_trust_decision) *flags = 0;
+    else *flags |= MBEDTLS_X509_BADCERT_NOT_TRUSTED;
+    return 0;
+}
 
 static int ring_send(void *opaque, const unsigned char *buf, size_t len) {
     Endpoint *ep = (Endpoint *)opaque;
@@ -269,6 +323,78 @@ static int basic_case(Material *m, int version, int mtls) {
     return ok;
 }
 
+static int optional_client_auth_version_case(Material *m, int with_client_cert) {
+    mbedtls_ssl_config client_conf;
+    mbedtls_ssl_config server_conf;
+    Pair p;
+    int ret = configure(
+        m, &client_conf, &server_conf, MBEDTLS_SSL_VERSION_TLS1_2, 0, 1);
+    if (ret != 0) return 0;
+    mbedtls_ssl_conf_authmode(&server_conf, MBEDTLS_SSL_VERIFY_OPTIONAL);
+    if (with_client_cert) {
+        ret = mbedtls_ssl_conf_own_cert(
+            &client_conf, &m->client_cert, &m->client_key);
+    }
+    if (ret == 0) ret = setup_pair(&p, &client_conf, &server_conf, "localhost");
+    int ok = ret == 0 && drive_handshake(&p, 1);
+    if (ok) {
+        const mbedtls_x509_crt *peer = mbedtls_ssl_get_peer_cert(&p.server);
+        ok = with_client_cert
+            ? peer != NULL && mbedtls_ssl_get_verify_result(&p.server) == 0
+            : peer == NULL;
+    }
+    if (ok) ok = transfer_payload(&p) && clean_shutdown(&p);
+    if (ret == 0) pair_free(&p);
+    mbedtls_ssl_config_free(&client_conf);
+    mbedtls_ssl_config_free(&server_conf);
+    return ok;
+}
+
+static int optional_client_auth_case(Material *m) {
+    return optional_client_auth_version_case(m, 0) &&
+           optional_client_auth_version_case(m, 1);
+}
+
+static int alpn_no_overlap_version_case(Material *m, int version) {
+    static const char *no_overlap[] = {"foo", NULL};
+    mbedtls_ssl_config client_conf;
+    mbedtls_ssl_config server_conf;
+    Pair p;
+    int ret = configure(m, &client_conf, &server_conf, version, 0, 1);
+    if (ret != 0) return 0;
+    ret = mbedtls_ssl_conf_alpn_protocols(&client_conf, no_overlap);
+    if (ret == 0) ret = setup_pair(&p, &client_conf, &server_conf, "localhost");
+    int ok = ret == 0 && drive_handshake(&p, 0);
+    if (ret == 0) pair_free(&p);
+    mbedtls_ssl_config_free(&client_conf);
+    mbedtls_ssl_config_free(&server_conf);
+    return ok;
+}
+
+static int alpn_malformed_case(Material *m) {
+    static const char *empty[] = {"", NULL};
+    char too_long_protocol[257];
+    memset(too_long_protocol, 'x', sizeof(too_long_protocol) - 1);
+    too_long_protocol[sizeof(too_long_protocol) - 1] = '\0';
+    const char *too_long[] = {too_long_protocol, NULL};
+    mbedtls_ssl_config client_conf;
+    mbedtls_ssl_config server_conf;
+    int ret = configure(
+        m, &client_conf, &server_conf, MBEDTLS_SSL_VERSION_TLS1_2, 0, 1);
+    if (ret != 0) return 0;
+    int ok = mbedtls_ssl_conf_alpn_protocols(&client_conf, empty) != 0 &&
+             mbedtls_ssl_conf_alpn_protocols(&client_conf, too_long) != 0;
+    mbedtls_ssl_config_free(&client_conf);
+    mbedtls_ssl_config_free(&server_conf);
+    return ok;
+}
+
+static int alpn_negative_case(Material *m) {
+    return alpn_no_overlap_version_case(m, MBEDTLS_SSL_VERSION_TLS1_2) &&
+           alpn_no_overlap_version_case(m, MBEDTLS_SSL_VERSION_TLS1_3) &&
+           alpn_malformed_case(m);
+}
+
 static int negative_case(Material *m, const char *hostname, int trusted) {
     mbedtls_ssl_config client_conf;
     mbedtls_ssl_config server_conf;
@@ -284,7 +410,99 @@ static int negative_case(Material *m, const char *hostname, int trusted) {
     return ok;
 }
 
-static int cancellation_case(Material *m) {
+static int expired_certificate_case(const char *expired_cert, const char *server_key,
+                                    const char *ca, const char *client_cert,
+                                    const char *client_key) {
+    Material expired;
+    material_init(&expired);
+    int ret = load_material(
+        &expired, expired_cert, server_key, ca, client_cert, client_key);
+    int ok = ret == 0;
+    if (ok) {
+        mbedtls_ssl_config client_conf;
+        mbedtls_ssl_config server_conf;
+        Pair p;
+        int pair_initialized = 0;
+        ret = configure(&expired, &client_conf, &server_conf,
+                        MBEDTLS_SSL_VERSION_TLS1_2, 0, 1);
+        if (ret == 0) {
+            ret = setup_pair(&p, &client_conf, &server_conf, "localhost");
+            pair_initialized = 1;
+        }
+        ok = ret == 0 && drive_handshake(&p, 0) &&
+             (mbedtls_ssl_get_verify_result(&p.client) &
+              MBEDTLS_X509_BADCERT_EXPIRED) != 0;
+        if (pair_initialized) pair_free(&p);
+        mbedtls_ssl_config_free(&client_conf);
+        mbedtls_ssl_config_free(&server_conf);
+    }
+    material_free(&expired);
+    return ok;
+}
+
+static int malformed_certificate_case(const char *malformed_cert) {
+    mbedtls_x509_crt cert;
+    mbedtls_x509_crt_init(&cert);
+    int ok = mbedtls_x509_crt_parse_file(&cert, malformed_cert) != 0;
+    mbedtls_x509_crt_free(&cert);
+    return ok;
+}
+
+static int external_trust_version_case(Material *m, int version) {
+    mbedtls_ssl_config client_conf;
+    mbedtls_ssl_config server_conf;
+    Pair accepted;
+    int ret = configure(m, &client_conf, &server_conf, version, 0, 0);
+    if (ret != 0) return 0;
+    mbedtls_ssl_conf_ca_chain(&client_conf, &m->client_cert, NULL);
+
+    Pair provider_rejected;
+    ret = setup_pair(&provider_rejected, &client_conf, &server_conf, "localhost");
+    int ok = ret == 0 && drive_handshake(&provider_rejected, 0);
+    pair_free(&provider_rejected);
+
+    mbedtls_ssl_conf_verify(&client_conf, external_trust_callback, NULL);
+    external_trust_decision = 1;
+    unsigned int calls_before = external_trust_calls;
+    ret = setup_pair(&accepted, &client_conf, &server_conf, "localhost");
+    ok = ok && ret == 0 && drive_handshake(&accepted, 1) &&
+         external_trust_calls > calls_before;
+    pair_free(&accepted);
+
+    external_trust_decision = 0;
+    calls_before = external_trust_calls;
+    Pair rejected;
+    ret = setup_pair(&rejected, &client_conf, &server_conf, "localhost");
+    ok = ok && ret == 0 && drive_handshake(&rejected, 0) &&
+         external_trust_calls > calls_before;
+    pair_free(&rejected);
+    mbedtls_ssl_config_free(&client_conf);
+    mbedtls_ssl_config_free(&server_conf);
+    return ok;
+}
+
+static int external_trust_case(Material *m) {
+    external_trust_calls = 0;
+    return external_trust_version_case(m, MBEDTLS_SSL_VERSION_TLS1_2) &&
+           external_trust_version_case(m, MBEDTLS_SSL_VERSION_TLS1_3) &&
+           external_trust_calls >= 4;
+}
+
+typedef struct CancellationWorker {
+    PocCancelGate gate;
+    mbedtls_ssl_context *ssl;
+    int observed_want;
+} CancellationWorker;
+
+static POC_THREAD_RETURN cancellation_worker(POC_THREAD_ARGUMENT opaque) {
+    CancellationWorker *worker = (CancellationWorker *)opaque;
+    int result = mbedtls_ssl_handshake(worker->ssl);
+    worker->observed_want = allowed_progress(result);
+    poc_cancel_worker_wait(&worker->gate);
+    POC_THREAD_DONE;
+}
+
+static int cancellation_case(Material *m, uint64_t *latency_us) {
     mbedtls_ssl_config conf;
     mbedtls_ssl_context ssl;
     Ring rx = {0};
@@ -301,13 +519,27 @@ static int cancellation_case(Material *m) {
         ret = mbedtls_ssl_setup(&ssl, &conf);
     }
     if (ret == 0) ret = mbedtls_ssl_set_hostname(&ssl, "localhost");
-    if (ret == 0) {
-        mbedtls_ssl_set_bio(&ssl, &ep, ring_send, ring_recv, NULL);
-        ret = mbedtls_ssl_handshake(&ssl);
+    CancellationWorker *worker = calloc(1, sizeof(CancellationWorker));
+    if (worker == NULL) {
+        mbedtls_ssl_free(&ssl);
+        mbedtls_ssl_config_free(&conf);
+        return 0;
     }
-    int ok = allowed_progress(ret);
-    mbedtls_ssl_free(&ssl);
-    mbedtls_ssl_config_free(&conf);
+    PocThread thread;
+    int gate_ready = ret == 0 && poc_cancel_gate_init(&worker->gate);
+    worker->ssl = &ssl;
+    if (gate_ready) mbedtls_ssl_set_bio(&ssl, &ep, ring_send, ring_recv, NULL);
+    int started = gate_ready && poc_thread_start(&thread, cancellation_worker, worker);
+    int joined = started &&
+        poc_cancel_trigger_and_join(&worker->gate, thread, latency_us);
+    int cleanup_safe = !started || poc_cancel_join_complete(&worker->gate);
+    int ok = worker->observed_want && joined;
+    if (cleanup_safe) {
+        if (gate_ready) poc_cancel_gate_destroy(&worker->gate);
+        free(worker);
+        mbedtls_ssl_free(&ssl);
+        mbedtls_ssl_config_free(&conf);
+    }
     return ok;
 }
 
@@ -324,7 +556,7 @@ static int truncation_case(Material *m) {
         p.c2s.closed = 1;
         unsigned char byte;
         ret = mbedtls_ssl_read(&p.server, &byte, 1);
-        ok = ret != MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY;
+        ok = ret == 0;
     }
     pair_free(&p);
     mbedtls_ssl_config_free(&client_conf);
@@ -332,9 +564,43 @@ static int truncation_case(Material *m) {
     return ok;
 }
 
+static int local_close_version_case(Material *m, int version) {
+    mbedtls_ssl_config client_conf;
+    mbedtls_ssl_config server_conf;
+    Pair p;
+    int ret = configure(m, &client_conf, &server_conf, version, 0, 1);
+    if (ret != 0) return 0;
+    ret = setup_pair(&p, &client_conf, &server_conf, "localhost");
+    int ok = ret == 0 && drive_handshake(&p, 1);
+    if (ok) {
+        mbedtls_ssl_free(&p.client);
+        mbedtls_ssl_init(&p.client);
+        p.c2s.closed = 1;
+        unsigned char byte;
+        int peer_result = mbedtls_ssl_read(&p.server, &byte, 1);
+        ok = peer_result == 0;
+    }
+    pair_free(&p);
+    mbedtls_ssl_config_free(&client_conf);
+    mbedtls_ssl_config_free(&server_conf);
+    return ok;
+}
+
+static int local_close_case(Material *m) {
+    return local_close_version_case(m, MBEDTLS_SSL_VERSION_TLS1_2) &&
+           local_close_version_case(m, MBEDTLS_SSL_VERSION_TLS1_3);
+}
+
 int main(int argc, char **argv) {
-    if (argc != 6) {
-        fprintf(stderr, "usage: %s SERVER_CERT SERVER_KEY CA CLIENT_CERT CLIENT_KEY\n", argv[0]);
+    if (argc != 8) {
+        fprintf(stderr, "usage: %s SERVER_CERT SERVER_KEY CA CLIENT_CERT CLIENT_KEY EXPIRED_CERT MALFORMED_CERT\n", argv[0]);
+        return 2;
+    }
+    provider_allocation_diagnostic_mode =
+        getenv("WIRESTACK_POC_DIAGNOSTIC_CYCLES") != NULL;
+    if (mbedtls_platform_set_calloc_free(
+            poc_profile_calloc, poc_profile_free) != 0) {
+        fprintf(stderr, "provider allocator hook initialization failed\n");
         return 2;
     }
     if (psa_crypto_init() != PSA_SUCCESS) return 2;
@@ -352,32 +618,96 @@ int main(int argc, char **argv) {
 
     int tls12 = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_2, 0);
     int tls13 = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_3, 0);
-    int mtls = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_2, 1);
+    int alpn_negative = alpn_negative_case(&m);
+    int mtls_required = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_2, 1);
+    int mtls_optional = optional_client_auth_case(&m);
+    int mtls = mtls_required && mtls_optional;
+    int external_trust = external_trust_case(&m);
     int wrong_host = negative_case(&m, "not-localhost", 1);
     int untrusted = negative_case(&m, "localhost", 0);
+    int expired = expired_certificate_case(
+        argv[6], argv[2], argv[3], argv[4], argv[5]);
+    int malformed = malformed_certificate_case(argv[7]);
+    int local_close = local_close_case(&m);
     int trunc = truncation_case(&m);
-    int cancel = cancellation_case(&m);
+    uint64_t cancellation_latency_us = 0;
+    int cancel = cancellation_case(&m, &cancellation_latency_us);
+    int cleanup_cycles = CLEANUP_CYCLES;
+    const char *diagnostic_cycles = getenv("WIRESTACK_POC_DIAGNOSTIC_CYCLES");
+    if (diagnostic_cycles != NULL) {
+        long value = strtol(diagnostic_cycles, NULL, 10);
+        if (value < 1 || value > CLEANUP_CYCLES) return 2;
+        cleanup_cycles = (int)value;
+    }
+    uint64_t cleanup_live_before = provider_allocation_live_bytes;
     int cleanup = 1;
-    for (int i = 0; i < CLEANUP_CYCLES && cleanup; ++i)
+    for (int i = 0; i < cleanup_cycles && cleanup; ++i)
         cleanup = basic_case(&m, MBEDTLS_SSL_VERSION_TLS1_2, 0);
+    uint64_t cleanup_live_after = provider_allocation_live_bytes;
+    cleanup = cleanup && cleanup_live_after <= cleanup_live_before;
 
     printf("CAP tls12=%s\n", tls12 ? "PASS" : "FAIL");
     printf("CAP tls13=%s\n", tls13 ? "PASS" : "FAIL");
-    printf("CAP sni_hostname_alpn=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
+    printf("CAP sni_hostname_alpn=%s\n",
+           (tls12 && tls13 && alpn_negative) ? "PASS" : "FAIL");
     printf("CAP custom_ca=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
+    printf("CAP external_trust=%s\n", external_trust ? "PASS" : "FAIL");
     printf("CAP partial_io_backpressure=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
     printf("CAP mtls=%s\n", mtls ? "PASS" : "FAIL");
     printf("CAP session_resumption=BLOCKED\n");
     printf("CAP negative_hostname=%s\n", wrong_host ? "PASS" : "FAIL");
     printf("CAP negative_untrusted_ca=%s\n", untrusted ? "PASS" : "FAIL");
+    printf("CAP negative_expired_certificate=%s\n", expired ? "PASS" : "FAIL");
+    printf("CAP negative_malformed_certificate=%s\n", malformed ? "PASS" : "FAIL");
     printf("CAP close_notify=%s\n", (tls12 && tls13) ? "PASS" : "FAIL");
+    printf("CAP local_close=%s\n", local_close ? "PASS" : "FAIL");
     printf("CAP truncation=%s\n", trunc ? "PASS" : "FAIL");
     printf("CAP caller_cancellation=%s\n", cancel ? "PASS" : "FAIL");
     printf("CAP external_signer=BLOCKED\n");
     printf("CAP repeated_cleanup=%s\n", cleanup ? "PASS" : "FAIL");
-    printf("METRIC repeated_cleanup_cycles=%d\n", CLEANUP_CYCLES);
+    printf("METRIC repeated_cleanup_cycles=%d\n", cleanup_cycles);
+    printf("METRIC external_trust_calls=%u\n", external_trust_calls);
+    printf("METRIC alpn_no_overlap_handshakes=%d\n", alpn_negative ? 2 : 0);
+    printf("METRIC alpn_malformed_inputs_rejected=%d\n", alpn_negative ? 2 : 0);
+    printf("METRIC certificate_negative_cases_rejected=%d\n", expired + malformed);
+    printf("METRIC local_close_operations=%d\n", local_close ? 2 : 0);
+    printf("METRIC mtls_required_handshakes=%d\n", mtls_required ? 1 : 0);
+    printf("METRIC mtls_optional_handshakes=%d\n", mtls_optional ? 2 : 0);
+    uint64_t peak_bytes = peak_resident_bytes();
+    printf("METRIC memory_profile_peak_resident_bytes=%llu\n",
+           (unsigned long long)peak_bytes);
+    printf("METRIC memory_profile_bound_bytes=%llu\n",
+           (unsigned long long)MEMORY_PROFILE_BOUND_BYTES);
+    printf("METRIC provider_allocation_calls=%llu\n",
+           (unsigned long long)provider_allocation_calls);
+    printf("METRIC provider_allocation_call_bound=%llu\n",
+           (unsigned long long)PROVIDER_ALLOCATION_CALL_BOUND);
+    printf("METRIC provider_allocation_bytes=%llu\n",
+           (unsigned long long)provider_allocation_bytes);
+    printf("METRIC provider_allocation_bound_bytes=%llu\n",
+           (unsigned long long)PROVIDER_ALLOCATION_BOUND_BYTES);
+    printf("METRIC provider_allocation_peak_live_bytes=%llu\n",
+           (unsigned long long)provider_allocation_peak_live_bytes);
+    printf("METRIC provider_allocation_live_before_cleanup_bytes=%llu\n",
+           (unsigned long long)cleanup_live_before);
+    printf("METRIC provider_allocation_live_after_cleanup_bytes=%llu\n",
+           (unsigned long long)cleanup_live_after);
+    printf("METRIC cancellation_wakeups=%d\n", cancel ? 1 : 0);
+    printf("METRIC cancellation_latency_us=%llu\n",
+           (unsigned long long)cancellation_latency_us);
+    printf("METRIC cancellation_bound_us=%llu\n",
+           (unsigned long long)POC_CANCELLATION_WAKE_BOUND_US);
 
     material_free(&m);
     mbedtls_psa_crypto_free();
-    return (tls12 && tls13 && mtls && wrong_host && untrusted && trunc && cancel && cleanup) ? 0 : 1;
+    return (tls12 && tls13 && alpn_negative && mtls && external_trust && wrong_host &&
+            untrusted && expired && malformed && trunc && cancel && cleanup &&
+            peak_bytes > 0 && peak_bytes <= MEMORY_PROFILE_BOUND_BYTES &&
+            provider_allocation_calls > 0 &&
+            provider_allocation_calls <= PROVIDER_ALLOCATION_CALL_BOUND &&
+            provider_allocation_bytes > 0 &&
+            provider_allocation_bytes <= PROVIDER_ALLOCATION_BOUND_BYTES &&
+            provider_allocation_peak_live_bytes > 0 &&
+            provider_allocation_peak_live_bytes <= MEMORY_PROFILE_BOUND_BYTES &&
+            cleanup_live_after <= cleanup_live_before) ? 0 : 1;
 }

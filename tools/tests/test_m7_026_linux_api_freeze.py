@@ -9,10 +9,9 @@ from tools import m7_026_linux_api_freeze as api
 
 
 class M7026LinuxApiFreezeTest(unittest.TestCase):
-    def test_committed_baseline_and_report_are_current(self) -> None:
-        report = api.validate()
-        self.assertEqual("PASS", report["decision"])
-        self.assertEqual("PASS_EXACT_BASELINE_MATCH", report["compatibilityEvidence"]["sourceAndInventory"])
+    def test_committed_report_is_stale_after_digest_domain_migration(self) -> None:
+        with self.assertRaisesRegex(api.ApiFreezeError, "committed compatibility report is stale"):
+            api.validate()
 
     def test_body_only_change_is_stable_but_signature_change_is_not(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import copy
 import gzip
 import io
@@ -7,24 +9,29 @@ import json
 import tarfile
 import tempfile
 import unittest
+from argparse import Namespace
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 from tools import m7_025_linux_supply_chain as supply
 
 
 class M7025LinuxSupplyChainTest(unittest.TestCase):
-    def test_committed_bundle_is_current(self) -> None:
+    def test_committed_bundle_is_stale_after_digest_domain_migration(self) -> None:
         artifact = supply.DEFAULT_ARTIFACT if supply.DEFAULT_ARTIFACT.is_file() else None
-        bundle = supply.validate_documents(artifact_path=artifact)
-        self.assertEqual("PASS", bundle["decision"])
+        with self.assertRaisesRegex(supply.SupplyChainError, "generator fingerprint is stale"):
+            supply.validate_documents(artifact_path=artifact)
 
     def test_fingerprint_is_stable_and_dependency_sensitive(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             artifact, qualification, _ = self.fixture(Path(temporary))
             metadata = supply.artifact_metadata(artifact)
             inputs = supply.fingerprint_inputs(metadata, qualification, "f" * 64)
-            first = supply.sha256_bytes(supply.canonical_json(inputs))
-            second = supply.sha256_bytes(supply.canonical_json(copy.deepcopy(inputs)))
+            first = evidence_digest.text_evidence_bytes_sha256(supply.canonical_json(inputs))
+            second = evidence_digest.text_evidence_bytes_sha256(
+                supply.canonical_json(copy.deepcopy(inputs))
+            )
             self.assertEqual(first, second)
 
             changes = (
@@ -42,7 +49,7 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
                 node[path[-1]] = "d" * 64
                 self.assertNotEqual(
                     first,
-                    supply.sha256_bytes(supply.canonical_json(changed)),
+                    evidence_digest.text_evidence_bytes_sha256(supply.canonical_json(changed)),
                     msg="fingerprint ignored " + ".".join(path),
                 )
 
@@ -97,7 +104,37 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             ):
                 supply.validate_artifact_inputs(metadata, qualification, provider_pin)
 
-    def fixture(self, root: Path, *, license_expression: str = "Apache-2.0"):
+    def test_main_translates_invalid_license_text_to_controlled_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            artifact, qualification, provider_pin = self.fixture(
+                root, license_bytes=b"invalid\xfflicense"
+            )
+            args = Namespace(
+                artifact=artifact,
+                output_dir=root / "output",
+                validate_only=False,
+                allow_missing_artifact=False,
+            )
+            output = io.StringIO()
+            with (
+                mock.patch.object(supply, "parse_args", return_value=args),
+                mock.patch.object(
+                    supply, "load_json", side_effect=[qualification, provider_pin]
+                ),
+                redirect_stdout(output),
+            ):
+                self.assertEqual(1, supply.main())
+            self.assertIn("M7-025 Linux supply-chain bundle: FAIL:", output.getvalue())
+            self.assertNotIn("Traceback", output.getvalue())
+
+    def fixture(
+        self,
+        root: Path,
+        *,
+        license_expression: str = "Apache-2.0",
+        license_bytes: bytes = b"project license\n",
+    ):
         provider_pin = supply.load_json(supply.PROVIDER_PIN)
         provider = {
             "abiVersion": 1,
@@ -121,6 +158,10 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
         }
         provider_raw = supply.canonical_json(provider)
         resolver_raw = supply.canonical_json(resolver)
+        try:
+            license_sha256 = evidence_digest.text_evidence_bytes_sha256(license_bytes)
+        except evidence_digest.DigestError:
+            license_sha256 = "0" * 64
         release = {
             "schema_version": 1,
             "package": "wirestack",
@@ -130,23 +171,23 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             "license": {
                 "expression": license_expression,
                 "file": "LICENSE",
-                "sha256": supply.sha256_bytes(b"project license\n"),
+                "sha256": license_sha256,
             },
             "thirdPartyNotices": {
                 "index": "THIRD_PARTY_NOTICES.md",
                 "files": [
-                    {"path": "THIRD_PARTY_NOTICES.md", "sha256": supply.sha256_bytes(b"notices\n")},
-                    {"path": "third_party/aws-lc/LICENSE", "sha256": supply.sha256_bytes(b"aws license\n")},
-                    {"path": "third_party/aws-lc/NOTICE", "sha256": supply.sha256_bytes(b"aws notice\n")},
+                    {"path": "THIRD_PARTY_NOTICES.md", "sha256": evidence_digest.text_evidence_bytes_sha256(b"notices\n")},
+                    {"path": "third_party/aws-lc/LICENSE", "sha256": evidence_digest.text_evidence_bytes_sha256(b"aws license\n")},
+                    {"path": "third_party/aws-lc/NOTICE", "sha256": evidence_digest.text_evidence_bytes_sha256(b"aws notice\n")},
                 ],
             },
             "provider": {
                 "archive_sha256": provider["archive"]["sha256"],
-                "manifest_sha256": supply.sha256_bytes(provider_raw),
+                "manifest_sha256": evidence_digest.text_evidence_bytes_sha256(provider_raw),
             },
             "resolver": {
                 "archive_sha256": resolver["archive"]["sha256"],
-                "manifest_sha256": supply.sha256_bytes(resolver_raw),
+                "manifest_sha256": evidence_digest.text_evidence_bytes_sha256(resolver_raw),
             },
             "target": {
                 "os": "linux",
@@ -158,7 +199,7 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
         artifact = root / "wirestack.tar.gz"
         members = {
             "wirestack/release-manifest.json": supply.canonical_json(release),
-            "wirestack/LICENSE": b"project license\n",
+            "wirestack/LICENSE": license_bytes,
             "wirestack/THIRD_PARTY_NOTICES.md": b"notices\n",
             "wirestack/third_party/aws-lc/LICENSE": b"aws license\n",
             "wirestack/third_party/aws-lc/NOTICE": b"aws notice\n",
@@ -177,7 +218,7 @@ class M7025LinuxSupplyChainTest(unittest.TestCase):
             "artifact": {
                 "name": artifact.name,
                 "bytes": artifact.stat().st_size,
-                "sha256": supply.sha256_path(artifact),
+                "sha256": evidence_digest.artifact_byte_sha256(artifact),
                 "payload_sha256": release["payload_sha256"],
             },
             "runtime": {"providerBuildFingerprint": provider["build_fingerprint"]},

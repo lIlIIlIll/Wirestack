@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+hosted="$repo_root/docs/evidence/M3-031/hosted-run.json"
+python3 "$repo_root/tools/m3_031_desktop_tls_adoption.py" --root "$repo_root" validate-hosted \
+  --input "$hosted" --output "$repo_root/build/gates/m3-031/hosted-validation.json"
+revision="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["revision"])' "$repo_root/build/gates/m3-031/hosted-validation.json")"
+python3 "$repo_root/tools/m3_031_desktop_tls_adoption.py" --root "$repo_root" audit-core \
+  --output "$repo_root/build/gates/m3-031/core-prerequisite-audit.json"
+python3 "$repo_root/tools/m3_031_desktop_tls_adoption.py" --root "$repo_root" validate-provider \
+  --input "$repo_root/docs/evidence/M3-031/windows-x86_64/provider-result.json" \
+  --platform windows-x86_64 --expected-revision "$revision" \
+  --output "$repo_root/build/gates/m3-031/windows-validation.json"
+python3 "$repo_root/tools/m3_031_desktop_tls_adoption.py" --root "$repo_root" validate-provider \
+  --input "$repo_root/docs/evidence/M3-031/macos-arm64/provider-result.json" \
+  --platform macos-arm64 --expected-revision "$revision" \
+  --output "$repo_root/build/gates/m3-031/macos-validation.json"
+python3 "$repo_root/tools/m3_031_desktop_tls_adoption.py" --root "$repo_root" aggregate \
+  --core "$repo_root/build/gates/m3-031/core-prerequisite-audit.json" \
+  --windows "$repo_root/docs/evidence/M3-031/windows-x86_64/provider-result.json" \
+  --macos "$repo_root/docs/evidence/M3-031/macos-arm64/provider-result.json" \
+  --expected-revision "$revision" \
+  --output "$repo_root/build/gates/m3-031/desktop-provider-matrix.json"

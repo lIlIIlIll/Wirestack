@@ -2,40 +2,21 @@ import std.env.*
 import std.fs.*
 import std.process.*
 
-private func buildTlsProvider(): Int64 {
+private func buildNativeDependencies(scriptPath: String): Int64 {
     let root = getWorkingDirectory()
-    let script = root.join("tools").join("build_tls_provider.py")
+    let script = root.join("tools").join("build_native_dependencies.py")
     let status = execute(
         "python3",
-        [script.toString(), "--repo", root.toString()],
+        [
+            script.toString(), "--root", root.toString(),
+            "--cjpm-script-path", scriptPath
+        ],
         workingDirectory: root
     )
     if (status != 0) {
-        println("failed to build the selected TLS provider")
+        println("failed to build native dependencies for the selected platform")
     }
     status
-}
-
-private func buildLinuxResolver(): Int64 {
-    let root = getWorkingDirectory()
-    let script = root.join("tools").join("build_linux_resolver.py")
-    let status = execute(
-        "python3",
-        [script.toString(), "--root", root.toString(), "--quiet"],
-        workingDirectory: root
-    )
-    if (status != 0) {
-        println("failed to build the pinned Linux resolver bridge")
-    }
-    status
-}
-
-private func buildLinuxNativeDependencies(): Int64 {
-    let tlsStatus = buildTlsProvider()
-    if (tlsStatus != 0) {
-        return tlsStatus
-    }
-    buildLinuxResolver()
 }
 
 main(): Int64 {
@@ -44,13 +25,13 @@ main(): Int64 {
         return 0
     }
     match (args[1]) {
-        case "pre-build" => buildLinuxNativeDependencies()
-        case "pre-check" => buildLinuxNativeDependencies()
-        case "pre-test" => buildLinuxNativeDependencies()
-        case "pre-bench" => buildLinuxNativeDependencies()
-        case "pre-run" => buildLinuxNativeDependencies()
-        case "pre-install" => buildLinuxNativeDependencies()
-        case "pre-publish" => buildLinuxNativeDependencies()
+        case "pre-build" => buildNativeDependencies(args[0])
+        case "pre-check" => buildNativeDependencies(args[0])
+        case "pre-test" => buildNativeDependencies(args[0])
+        case "pre-bench" => buildNativeDependencies(args[0])
+        case "pre-run" => buildNativeDependencies(args[0])
+        case "pre-install" => buildNativeDependencies(args[0])
+        case "pre-publish" => buildNativeDependencies(args[0])
         case _ => 0
     }
 }

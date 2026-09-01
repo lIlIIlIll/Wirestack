@@ -25,7 +25,8 @@ jobs:
       - name: Validate provider pins and platform matrix
         run: |
           python3 tools/tls_provider_poc/validate.py \
-            --matrix docs/evidence/M0-016/platform-matrix.json
+            --matrix docs/evidence/M0-016/platform-matrix.json \
+            --matrix-contract-only
       - name: Run fail-closed validator tests
         run: python3 -m unittest discover -s tools/tests -p 'test_tls_provider_poc.py' -v
       - name: Compile Python tools
@@ -54,6 +55,8 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             build-essential cmake ninja-build perl git openssl ca-certificates
       - name: Build pinned provider and execute caller-driven PoC
+        env:
+          WIRESTACK_GITHUB_TOKEN: ${{ github.token }}
         run: |
           python3 tools/tls_provider_poc/run.py \
             --provider "${{ matrix.provider }}" \
@@ -69,6 +72,7 @@ jobs:
           path: |
             build/tls-provider-poc/${{ matrix.provider }}/result.json
             build/tls-provider-poc/${{ matrix.provider }}/build.log
+            build/tls-provider-poc/${{ matrix.provider }}/license-bundle
           if-no-files-found: warn
 
   linux-musl:
@@ -81,26 +85,51 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
-      - name: Build and execute in native Alpine musl userspace
+      - name: Provision native Alpine musl userspace
         env:
           PROVIDER: ${{ matrix.provider }}
+          ALPINE_IMAGE: alpine:3.22@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
+          CONTAINER_NAME: wirestack-m0-016-${{ matrix.provider }}-${{ github.run_id }}
         run: |
-          docker run --rm \
+          docker run --detach \
+            --name "$CONTAINER_NAME" \
             -e PROVIDER \
+            -e GITHUB_SHA="$GITHUB_SHA" \
+            -e ImageOS=alpine \
+            -e ImageVersion=3.22.5 \
+            -e WIRESTACK_CONTAINER_IMAGE="$ALPINE_IMAGE" \
             -v "$GITHUB_WORKSPACE:/work" \
             -w /work \
-            alpine:3.22 \
+            "$ALPINE_IMAGE" \
+            sh -c 'while :; do sleep 3600; done'
+          docker exec "$CONTAINER_NAME" apk add --no-cache \
+            build-base cmake ninja perl git openssl ca-certificates python3 linux-headers
+          docker exec "$CONTAINER_NAME" \
+            git config --global --add safe.directory /work
+      - name: Build and execute in provisioned Alpine musl userspace
+        env:
+          PROVIDER: ${{ matrix.provider }}
+          CONTAINER_NAME: wirestack-m0-016-${{ matrix.provider }}-${{ github.run_id }}
+          WIRESTACK_GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          docker exec \
+            -e WIRESTACK_GITHUB_TOKEN \
+            "$CONTAINER_NAME" \
             sh -euxc '
               output="build/tls-provider-poc/$PROVIDER"
               trap '\''test ! -e "$output" || chmod -R a+rX "$output"'\'' EXIT
-              apk add --no-cache \
-                build-base cmake ninja perl git openssl ca-certificates python3 linux-headers
               python3 tools/tls_provider_poc/run_musl.py \
                 --provider "$PROVIDER" \
                 --output "$output/result.json"
+              unset WIRESTACK_GITHUB_TOKEN
               python3 tools/tls_provider_poc/validate.py \
                 --result "$output/result.json"
             '
+      - name: Remove Alpine musl container
+        if: always()
+        env:
+          CONTAINER_NAME: wirestack-m0-016-${{ matrix.provider }}-${{ github.run_id }}
+        run: docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -108,6 +137,7 @@ jobs:
           path: |
             build/tls-provider-poc/${{ matrix.provider }}/result.json
             build/tls-provider-poc/${{ matrix.provider }}/build.log
+            build/tls-provider-poc/${{ matrix.provider }}/license-bundle
           if-no-files-found: warn
 
   macos-arm64:
@@ -128,6 +158,7 @@ jobs:
       - name: Build pinned provider and execute caller-driven PoC
         env:
           PATH: /opt/homebrew/opt/openssl@3/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin
+          WIRESTACK_GITHUB_TOKEN: ${{ github.token }}
         run: |
           test "$(uname -m)" = "arm64"
           python3 tools/tls_provider_poc/run.py \
@@ -144,4 +175,5 @@ jobs:
           path: |
             build/tls-provider-poc/${{ matrix.provider }}/result.json
             build/tls-provider-poc/${{ matrix.provider }}/build.log
+            build/tls-provider-poc/${{ matrix.provider }}/license-bundle
           if-no-files-found: warn

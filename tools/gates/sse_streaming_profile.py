@@ -2,10 +2,15 @@
 """Run the M6-023 Linux H1/H2 SSE steady-state profile in parallel."""
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
 import argparse
 import concurrent.futures
 import datetime as dt
-import hashlib
 import json
 import os
 import platform
@@ -281,10 +286,6 @@ def run_profile(protocol: str, test_class: str, env: Mapping[str, str], timeout:
             "stdout": stdout[-1_048_576:], "stderr": stderr[-1_048_576:]}
 
 
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
 def command_text(command: Sequence[str]) -> str | None:
     try:
         result = subprocess.run(command, capture_output=True, text=True, errors="replace", timeout=10)
@@ -318,7 +319,7 @@ def execute(args: argparse.Namespace) -> dict[str, Any]:
             "environment": {"platform": platform.platform(), "python": sys.version.splitlines()[0],
                             "cjc": command_text(["cjc", "--version"]),
                             "cjpm": command_text(["cjpm", "--version"])},
-            "source": {"path": str(source.relative_to(ROOT)), "sha256": sha256(source)},
+            "source": {"path": str(source.relative_to(ROOT)), "sha256": evidence_digest.text_evidence_sha256(source)},
             "preflight": preparation, "profiles": profiles,
             "acceptance": {"one_hour_each": formal, "one_million_events_each": formal,
                            "numbered_sequence": all(int(p["result"]["sequenceErrors"]) == 0 for p in profiles),
