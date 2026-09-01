@@ -222,11 +222,15 @@ def validate_artifact_identity(
             "ARTIFACT_SIZE", "invalid frozen artifact size")
 
     soak_artifact = soak.get("artifact", {})
-    require(soak_artifact.get("sha256") == digest, "ARTIFACT_MISMATCH", "M7-022")
-    require(soak_artifact.get("payload_sha256") == payload, "PAYLOAD_MISMATCH", "M7-022")
+    require(evidence_digest.artifact_byte_sha256_equal(
+                soak_artifact.get("sha256"), digest), "ARTIFACT_MISMATCH", "M7-022")
+    require(evidence_digest.artifact_byte_sha256_equal(
+                soak_artifact.get("payload_sha256"), payload), "PAYLOAD_MISMATCH", "M7-022")
     supply_artifact = bundle.get("artifact", {})
-    require(supply_artifact.get("sha256") == digest, "ARTIFACT_MISMATCH", "M7-025")
-    require(supply_artifact.get("payloadSha256") == payload, "PAYLOAD_MISMATCH", "M7-025")
+    require(evidence_digest.artifact_byte_sha256_equal(
+                supply_artifact.get("sha256"), digest), "ARTIFACT_MISMATCH", "M7-025")
+    require(evidence_digest.artifact_byte_sha256_equal(
+                supply_artifact.get("payloadSha256"), payload), "PAYLOAD_MISMATCH", "M7-025")
 
     subjects = hosted.get("subjects")
     require(isinstance(subjects, list), "HOSTED_SUBJECTS", "subjects must be an array")
@@ -235,7 +239,8 @@ def validate_artifact_identity(
     }
     require(tuple(item.get("name") for item in subjects) == EXPECTED_SUBJECTS,
             "HOSTED_SUBJECTS", "artifact, release-manifest, and sbom are required in order")
-    require(subject_map["artifact"].get("sha256") == digest,
+    require(evidence_digest.artifact_byte_sha256_equal(
+                subject_map["artifact"].get("sha256"), digest),
             "ARTIFACT_MISMATCH", "M7-030 hosted artifact")
     for name in EXPECTED_SUBJECTS:
         require(subject_map[name].get("verification") == "PASS", "HOSTED_NOT_VERIFIED", name)
@@ -245,7 +250,8 @@ def validate_artifact_identity(
             f"M7-030 {name} signed payload",
         )
         if name == "artifact":
-            require(signed_payload == subject_map[name].get("sha256"),
+            require(evidence_digest.artifact_byte_sha256_equal(
+                        signed_payload, subject_map[name].get("sha256")),
                     "ARTIFACT_MISMATCH", "M7-030 signed artifact")
         strict_digest(subject_map[name].get("bundleSha256"), f"M7-030 {name} bundle")
 
@@ -253,11 +259,14 @@ def validate_artifact_identity(
     sbom_digest = strict_digest(
         documents_map.get("sbom.spdx.json", {}).get("sha256"), "M7-025 SBOM"
     )
-    require(subject_map["sbom"].get("sha256") == sbom_digest,
+    require(evidence_digest.text_evidence_sha256_equal(
+                subject_map["sbom"].get("sha256"), sbom_digest),
             "SBOM_MISMATCH", "M7-030 hosted SBOM")
     if verify_local_artifact:
         local_artifact = safe_path(root, f"dist/m7-021/{artifact.get('name')}")
-        require(evidence_digest.artifact_byte_sha256(local_artifact) == digest, "ARTIFACT_BYTES_STALE", str(local_artifact))
+        require(evidence_digest.artifact_byte_sha256_equal(
+                    evidence_digest.artifact_byte_sha256(local_artifact), digest),
+                "ARTIFACT_BYTES_STALE", str(local_artifact))
         require(local_artifact.stat().st_size == artifact.get("bytes"), "ARTIFACT_SIZE", str(local_artifact))
 
     return {
@@ -289,7 +298,8 @@ def validate_soak(
     require(process.get("wall_elapsed_ms", 0) >= 86400000, "SOAK_TOO_SHORT", "wall duration")
     require(process.get("exit_code") == 0 and process.get("timed_out") is False,
             "SOAK_INTERRUPTED", "process did not complete normally")
-    require(soak.get("artifact", {}).get("sha256") == artifact_digest,
+    require(evidence_digest.artifact_byte_sha256_equal(
+                soak.get("artifact", {}).get("sha256"), artifact_digest),
             "ARTIFACT_MISMATCH", "M7-022 soak")
     workload = soak.get("workload", {})
     require(workload.get("decision") == "PASS", "SOAK_WORKLOAD", "workload decision")

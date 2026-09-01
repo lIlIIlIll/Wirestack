@@ -100,7 +100,10 @@ def validate_cached(final_dir: Path, fingerprint: str) -> dict[str, object] | No
         return None
     if manifest.get("build_fingerprint") != fingerprint:
         return None
-    if manifest.get("archive", {}).get("sha256") != evidence_digest.artifact_byte_sha256(archive):
+    if not evidence_digest.artifact_byte_sha256_equal(
+        manifest.get("archive", {}).get("sha256"),
+        evidence_digest.artifact_byte_sha256(archive),
+    ):
         return None
     return manifest
 

@@ -74,7 +74,20 @@ class ArchitectureGuardTests(unittest.TestCase):
                 "# wirestack-digest-domain: artifact-bytes-v1\nsha256sum report.json\n",
                 encoding="utf-8",
             )
-            self.assertNotIn("untyped-non-python-digest", self.rules(root))
+            rules = self.rules(root)
+            self.assertNotIn("untyped-non-python-digest", rules)
+            self.assertIn("text-evidence-raw-digest", rules)
+            path.write_text(
+                "# wirestack-digest-domain: artifact-bytes-v1\nsha256sum payload.tar.gz\n",
+                encoding="utf-8",
+            )
+            self.assertNotIn("text-evidence-raw-digest", self.rules(root))
+
+    def test_non_python_tool_digest_is_scanned(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(root, "tools/new_gate.sh", "sha256sum report.json\n")
+            self.assertIn("untyped-non-python-digest", self.rules(root))
 
     def test_text_domain_marker_cannot_approve_raw_digest_command(self) -> None:
         with self.fixture() as directory:
@@ -218,7 +231,7 @@ class ArchitectureGuardTests(unittest.TestCase):
             root = Path(directory)
             self.write(
                 root,
-                "tools/repository/evidence.py",
+                "tools/gates/evidence.py",
                 "def compare(item, expected):\n    return item.get('sha256') == expected\n",
             )
             self.assertIn("untyped-evidence-digest-comparison", self.rules(root))

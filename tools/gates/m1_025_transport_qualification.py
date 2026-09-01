@@ -107,7 +107,9 @@ def validate_net06(
     if soak.get("seconds", 0) < 86_400 or soak.get("decision") != "PASS":
         raise QualificationError("NET-06 retained soak is shorter than 24 hours")
     retained_soak = cleanup.get("reused_24_hour_soak", {})
-    if retained_soak.get("sha256") != evidence_digest.text_evidence_sha256(soak_path):
+    if not evidence_digest.text_evidence_sha256_equal(
+        retained_soak.get("sha256"), evidence_digest.text_evidence_sha256(soak_path),
+    ):
         raise QualificationError("NET-06 retained soak digest does not match")
     cancellation = cleanup.get("production_cancellation", {})
     marker = cancellation.get("marker", {})
