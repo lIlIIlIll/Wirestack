@@ -367,13 +367,13 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 item for item in reports
                 if item["path"] == "docs/evidence/M3-030/release-validation.json"
             )
-            release_entry["sha256"] = adoption.sha256_path(release_path)
+            release_entry["sha256"] = adoption.repository_text_sha256(release_path)
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             self.assert_code(
                 "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
             )
             shutil.copy2(ROOT / "docs/evidence/M3-030/release-validation.json", release_path)
-            release_entry["sha256"] = adoption.sha256_path(release_path)
+            release_entry["sha256"] = adoption.repository_text_sha256(release_path)
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             abi_path = root / "docs/evidence/M3-030/native-abi-report.json"
             abi = json.loads(abi_path.read_text(encoding="utf-8"))
@@ -383,13 +383,13 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 item for item in reports
                 if item["path"] == "docs/evidence/M3-030/native-abi-report.json"
             )
-            abi_entry["sha256"] = adoption.sha256_path(abi_path)
+            abi_entry["sha256"] = adoption.repository_text_sha256(abi_path)
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             self.assert_code(
                 "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
             )
             shutil.copy2(ROOT / "docs/evidence/M3-030/native-abi-report.json", abi_path)
-            abi_entry["sha256"] = adoption.sha256_path(abi_path)
+            abi_entry["sha256"] = adoption.repository_text_sha256(abi_path)
             task_check_path = root / "docs/evidence/M3-030/task-check.json"
             task_check = json.loads(task_check_path.read_text(encoding="utf-8"))
             task_check["commands"][0]["status"] = "SKIPPED"
@@ -398,13 +398,13 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 item for item in reports
                 if item["path"] == "docs/evidence/M3-030/task-check.json"
             )
-            task_check_entry["sha256"] = adoption.sha256_path(task_check_path)
+            task_check_entry["sha256"] = adoption.repository_text_sha256(task_check_path)
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             self.assert_code(
                 "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
             )
             shutil.copy2(ROOT / "docs/evidence/M3-030/task-check.json", task_check_path)
-            task_check_entry["sha256"] = adoption.sha256_path(task_check_path)
+            task_check_entry["sha256"] = adoption.repository_text_sha256(task_check_path)
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             evidence["source_sha256"].pop("build.cj")
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
