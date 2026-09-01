@@ -1,20 +1,20 @@
 {
   "artifacts": [
     {
-      "artifact_id": 9782403627,
-      "archive_digest": "sha256:d75b284794c1a7601aa81d8d8d2a6c3fb313686d736b4221ccb88644eff3b353",
-      "expires_at": "2026-09-15T01:27:39Z",
-      "name": "m3-031-windows-x86_64-24a01fb377c57484daf4268e5588f1de74556ba7",
-      "provider_result_sha256": "1f5fddce0be0eed1ba5ddffac71ffd89b00fc91ff92c281714546b631b28b869",
-      "validation_sha256": "9b264f1c306c43118b354e55d7c9b8bc5f473a2c33fee1a0c855766a5c775497"
+      "artifact_id": 9782652760,
+      "archive_digest": "sha256:46a010715f3e4e9cce52024d4af7a1e8558a3cf2e9bdd762357f6de896298408",
+      "expires_at": "2026-09-15T01:38:30Z",
+      "name": "m3-031-windows-x86_64-88a0cd21216e4d0869fadd24bbd0c7f6185ddc73",
+      "provider_result_sha256": "90b3434fe529c5d40a1506218bd59be3ef779e034cd3d6a25fed6af66e3f3385",
+      "validation_sha256": "0d0cbca2a2f65a4f2d40ff682ac986e65745acc2b68890ab9259b59de87705c7"
     },
     {
-      "artifact_id": 9782405738,
-      "archive_digest": "sha256:5c326ff1d95595d3f2ac9ea8a898f44dc2fb2f3da81a6eeb4b9e4454b9043e4a",
-      "expires_at": "2026-09-15T01:27:45Z",
-      "name": "m3-031-macos-arm64-24a01fb377c57484daf4268e5588f1de74556ba7",
-      "provider_result_sha256": "26f67e38173b8d588d30c678ee9538b88f17a0b0703e7d991bdfc7cbc49ba68c",
-      "validation_sha256": "25c07218efaee4adc09cefc2fb4c8237b2a5df7c50d86d217d6d1859696b4e77"
+      "artifact_id": 9782647547,
+      "archive_digest": "sha256:9974f52daf56eb5e29c30866a4d8d788163d82df2ac990a21648137bfe14d330",
+      "expires_at": "2026-09-15T01:38:15Z",
+      "name": "m3-031-macos-arm64-88a0cd21216e4d0869fadd24bbd0c7f6185ddc73",
+      "provider_result_sha256": "4a75017eaf9df963d0ae5b4181626f50d598c6c921ba226ddac6847b37520ec3",
+      "validation_sha256": "dd230a4e7a35d2b00bdda3f2cab00c4d488ae5dc567873264643c8c06f26cc6c"
     }
   ],
   "branch": "task/M3-031-desktop-tls-adoption",
@@ -22,24 +22,24 @@
   "event": "push",
   "jobs": [
     {
-      "completed_at": "2026-09-01T01:27:43Z",
-      "job_id": 99703959482,
+      "completed_at": "2026-09-01T01:38:34Z",
+      "job_id": 99706043650,
       "name": "windows-aws-lc",
-      "started_at": "2026-09-01T01:25:15Z",
+      "started_at": "2026-09-01T01:35:55Z",
       "status": "PASS",
-      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33458663037/job/99703959482"
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33459353992/job/99706043650"
     },
     {
-      "completed_at": "2026-09-01T01:27:49Z",
-      "job_id": 99703959721,
+      "completed_at": "2026-09-01T01:38:20Z",
+      "job_id": 99706043895,
       "name": "macos-aws-lc",
-      "started_at": "2026-09-01T01:25:16Z",
+      "started_at": "2026-09-01T01:35:56Z",
       "status": "PASS",
-      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33458663037/job/99703959721"
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33459353992/job/99706043895"
     }
   ],
-  "revision": "24a01fb377c57484daf4268e5588f1de74556ba7",
-  "run_id": 33458663037,
+  "revision": "88a0cd21216e4d0869fadd24bbd0c7f6185ddc73",
+  "run_id": 33459353992,
   "schema_version": 2,
   "source_sha256": {
     "tools/tls_provider_poc/openssl_memory_poc.c": "b46b7e5f3f88edd0879b709f0814bc6cc42391dd1b864523ee8e4d2b9de60933",
@@ -49,6 +49,12 @@
   },
   "status": "PASS",
   "superseded_runs": [
+    {
+      "reason": "Superseded by the final adoption-validator pin and hosted-artifact digest bindings.",
+      "revision": "24a01fb377c57484daf4268e5588f1de74556ba7",
+      "run_id": 33458663037,
+      "status": "PASS"
+    },
     {
       "reason": "Superseded by schema-v11 exact-binary and terminal truncation evidence.",
       "revision": "ca87467b7a4396179f2b5b1833f5d550884b7481",
@@ -69,5 +75,5 @@
     }
   ],
   "task_id": "M3-031",
-  "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33458663037"
+  "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33459353992"
 }
