@@ -250,8 +250,9 @@ class RepositoryToolingTests(unittest.TestCase):
         check = self.root / "scripts/check"
         check.write_text("#!/bin/sh\n", encoding="utf-8")
         check.chmod(0o755)
-        actual = shutil.which
-        missing_optional = lambda name: None if name in {"but", "rp-rg"} else actual(name)
+        missing_optional = lambda name: (
+            None if name in {"but", "rp-rg"} else f"/mock-tools/{name}"
+        )
         with mock.patch.object(tooling, "platform_identity", return_value={
             "system": "Linux", "machine": "x86_64", "libc": "glibc", "libc_version": "test"}), \
              mock.patch.object(tooling, "toolchain_identity", return_value={"cjc": "cjc", "cjpm": "cjpm"}):
@@ -263,7 +264,9 @@ class RepositoryToolingTests(unittest.TestCase):
             )
             self.assertEqual("PASS", report_write["status"])
             self.assertTrue((self.root / "build").is_dir())
-            missing_required = lambda name: None if name == "cjc" else actual(name)
+            missing_required = lambda name: (
+                None if name in {"but", "rp-rg", "cjc"} else f"/mock-tools/{name}"
+            )
             blocked = tooling.doctor(self.root, which=missing_required)
             self.assertEqual("BLOCKED", blocked["status"])
 
