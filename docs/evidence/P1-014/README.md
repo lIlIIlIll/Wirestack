@@ -4,8 +4,8 @@
 
 P1-014 is complete. Linux and GitHub Windows CRLF fault injection pass, every
 digest callsite has an explicit domain, and the task-level and canonical
-repository checks pass. GitHub Actions run `33505815670` produced the retained
-Windows report for PR #151 source head `a72e254d` (merge revision `6ff889fd`).
+repository checks pass. GitHub Actions run `33508797862` produced the retained
+Windows report for PR #151 source head `a731e0a8` (merge revision `43802b06`).
 
 ## Implemented boundary
 
@@ -22,7 +22,8 @@ Windows report for PR #151 source head `a72e254d` (merge revision `6ff889fd`).
   launches, `openssl dgst`, embedded Python SHA-256 and unmarked shell/workflow
   hash commands fail the guard. Python files under both `tools/` and `scripts/`
   and non-Python files under `tools/` are scanned. Pure local wrappers propagate
-  their digest domain and forwarded argument through arbitrary wrapper depth.
+  their digest domain and forwarded argument through arbitrary wrapper depth;
+  assigned callable aliases are resolved to the same typed operation.
   Typed equality helpers restore text or artifact-byte domains before comparing
   legacy string-schema fields. The inventory contains 310 classified calls and
   no legacy entry.
@@ -31,8 +32,10 @@ Windows report for PR #151 source head `a72e254d` (merge revision `6ff889fd`).
   the byte domain, untyped repository-evidence comparisons and UTF-8-to-byte
   fallback. Text inventories reject NUL bytes to keep multi-file framing
   unambiguous, and artifact-domain markers cannot approve obvious text operands.
-- Native CRLF probes read a tracked checkout fixture, reject a matching `-text`
-  override, and compare the complete OS, architecture and libc identity.
+- Native CRLF probes read a tracked checkout fixture, reject matching `-text`
+  and `eol=lf` attributes, require actual CRLF bytes on Windows, and compare the
+  complete OS, architecture and libc identity. `.gitattributes` changes trigger
+  the hosted Windows probe.
 - M7-030 records canonical text and signed-payload byte digests separately for
   SBOM subjects. License bundle manifests and their UTF-8 text files use the
   text-evidence domain; invalid UTF-8 fails closed with a structured CLI report.
@@ -51,13 +54,13 @@ entries remain unchanged because they belong to other tasks.
 | Evidence | Result |
 |---|---|
 | Test-plan validator | PASS, 13 paths, 7 scenarios, 11 tests |
-| P1 task-contract unit and fault-injection tests | PASS, 90 tests |
-| Repository-tool Python regressions | PASS, 376 tests |
+| P1 task-contract unit and fault-injection tests | PASS, 93 tests |
+| Repository-tool Python regressions | PASS, 380 tests |
 | Architecture guard | PASS, 0 violations |
 | Linux CRLF probe | PASS |
 | Digest callsite inventory | PASS, 310 explicitly classified calls, 0 issues |
-| GitHub Windows CRLF probe | PASS, run `33505815670`, source head `a72e254d`, merge `6ff889fd`; effective `text` attribute is `unspecified`, tracked fixture checked out as CRLF |
-| Hosted exact-SHA CI | PASS, all 26 checks at `a72e254d`, including Gate Harness, Windows CRLF and provider matrix |
+| GitHub Windows CRLF probe | PASS, run `33508797862`, source head `a731e0a8`, merge `43802b06`; effective `text` and `eol` attributes are `unspecified`, tracked fixture checked out as CRLF |
+| Hosted exact-SHA CI | PASS, all 26 checks at `a731e0a8`, including Gate Harness, Windows CRLF and provider matrix |
 | `scripts/check-fast --json` | PASS |
 | `scripts/check` | PASS, including 178 gate Python tests, 24 benchmark Python tests, and 588 passed/23 skipped Cangjie tests |
 | `scripts/check-task P1-014` | PASS, all four commands passed |

@@ -313,37 +313,37 @@
     },
     {
       "classification": "text-evidence",
-      "line": 289,
-      "path": "tools/evidence_digest.py",
-      "symbol": "text_evidence_digest_bytes"
-    },
-    {
-      "classification": "artifact-bytes",
-      "line": 290,
-      "path": "tools/evidence_digest.py",
-      "symbol": "artifact_byte_digest_bytes"
-    },
-    {
-      "classification": "text-evidence",
       "line": 297,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
     {
       "classification": "artifact-bytes",
-      "line": 309,
+      "line": 298,
       "path": "tools/evidence_digest.py",
       "symbol": "artifact_byte_digest_bytes"
     },
     {
       "classification": "text-evidence",
-      "line": 311,
+      "line": 305,
+      "path": "tools/evidence_digest.py",
+      "symbol": "text_evidence_digest_bytes"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 317,
+      "path": "tools/evidence_digest.py",
+      "symbol": "artifact_byte_digest_bytes"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 319,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
     {
       "classification": "text-evidence",
-      "line": 315,
+      "line": 323,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
