@@ -20,6 +20,7 @@ if str(ROOT) not in sys.path:
 from tools.tls_provider_poc import validate as poc_validate
 from tools.repository import repository_tooling
 from tools.gates import m2_004_windows_resolver, m2_006_apple_resolver
+from tools.tls_provider.selection import expected_symbols, select_provider
 
 
 PINNED_PROVIDER = "aws-lc"
@@ -113,6 +114,12 @@ RETAINED_EVIDENCE = (
     "docs/evidence/M3-030/sbom-validation.json",
     "docs/evidence/M3-030/task-check.json",
     "docs/evidence/M3-030/test-provider-results.json",
+)
+M3_030_PROFILE = "linux-x86_64-glibc"
+M3_030_TEST_PROVIDER_PROPERTIES = (
+    "factory-substitution",
+    "instance-mismatch",
+    "retained-lifetime",
 )
 HISTORICAL_REFERENCES = ("docs/evidence/M3-028/README.md",)
 HOSTED_INPUT_PATHS = (
@@ -304,6 +311,144 @@ def validate_hosted_run(root: Path, raw: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _m3_030_base(**values: Any) -> dict[str, Any]:
+    return {
+        "schemaVersion": 1,
+        "taskId": "M3-030",
+        "source_task": "M3-030",
+        "platform": M3_030_PROFILE,
+        "acceptance_status": "PASS",
+        "status": "PASS",
+        "decision": "PASS",
+        **values,
+    }
+
+
+def expected_m3_030_reports(root: Path) -> dict[str, dict[str, Any]]:
+    try:
+        selected = select_provider(root)
+    except Exception as error:
+        raise AdoptionError(
+            "RETAINED_EVIDENCE", f"M3-030 provider selection: {type(error).__name__}"
+        ) from error
+    qualification = load_json(
+        root / "docs/evidence/M7-021/linux_x86_64/qualification.json"
+    )
+    if qualification.get("task_id") != "M7-021" or qualification.get("decision") != "PASS":
+        raise AdoptionError("RETAINED_EVIDENCE", "M7-021 qualification is not PASS")
+    artifact = qualification.get("artifact")
+    if not isinstance(artifact, dict):
+        raise AdoptionError("RETAINED_EVIDENCE", "M7-021 artifact identity is missing")
+    bundle = load_json(root / "docs/evidence/M7-025/linux_x86_64/bundle.json")
+    if (
+        bundle.get("schemaVersion") != 1
+        or bundle.get("taskId") != "M7-025"
+        or bundle.get("decision") != "PASS"
+    ):
+        raise AdoptionError("RETAINED_EVIDENCE", "M7-025 supply-chain bundle is not PASS")
+    build_fingerprint = bundle.get("buildFingerprint")
+    if not isinstance(build_fingerprint, str) or re.fullmatch(
+        r"[0-9a-f]{64}", build_fingerprint
+    ) is None:
+        raise AdoptionError("RETAINED_EVIDENCE", "M7-025 build fingerprint is invalid")
+    return {
+        "architecture-guard.json": _m3_030_base(
+            violationCount=0,
+            violations=[],
+        ),
+        "clean-consumer.json": _m3_030_base(
+            checks={
+                "publicApiOnly": "PASS",
+                "build": "PASS",
+                "httpsLoopback": "PASS",
+            },
+        ),
+        "linux-aws-lc-results.json": _m3_030_base(
+            providerId=selected.provider,
+            providerVersion=selected.manifest["provider_version"],
+            selectionFingerprint=selected.fingerprint,
+            capabilities=selected.manifest["capabilities"],
+            externalOpenSslDependency=False,
+        ),
+        "native-abi-report.json": _m3_030_base(
+            abiVersion=selected.manifest["abi"]["version"],
+            requiredFunctions=sorted(expected_symbols(selected)),
+            signatureCount=len(selected.abi_contract["signatures"]),
+            callingConventions=["c"],
+            signatureChecks={
+                "cangjieForeignDeclarations": "PASS",
+                "nativeHeaderProbe": "PASS",
+            },
+            archive="target/native/current/lib/libwirestack_tls_provider.a",
+            missingFunctions=[],
+        ),
+        "platform-provider-matrix.json": _m3_030_base(
+            selected={
+                "platform": selected.platform,
+                "provider": selected.provider,
+                "adapter": selected.adapter,
+                "fallback": False,
+            },
+            productionCombinations=[f"{selected.platform}+{selected.provider}"],
+            futureAdaptersImplemented=[],
+        ),
+        "release-validation.json": _m3_030_base(
+            artifact=artifact,
+            provider=selected.provider,
+            externalOpenSslDependency=False,
+        ),
+        "sbom-validation.json": _m3_030_base(
+            buildFingerprint=build_fingerprint,
+            provider=selected.provider,
+            licenseExpression=selected.manifest["license_expression"],
+        ),
+        "test-provider-results.json": _m3_030_base(
+            passed=3,
+            failed=0,
+            skippedAsPass=False,
+            properties=list(M3_030_TEST_PROVIDER_PROPERTIES),
+            releasePayload=False,
+        ),
+    }
+
+
+def validate_m3_030_task_check(
+    payload: Mapping[str, Any], task: Mapping[str, Any]
+) -> None:
+    if (
+        payload.get("schema_version") != 1
+        or payload.get("task_id") != "M3-030"
+        or payload.get("kind") != "repository-check"
+        or payload.get("mode") != "task"
+        or payload.get("status") != "PASS"
+        or payload.get("issues") != []
+    ):
+        raise AdoptionError("RETAINED_EVIDENCE", "M3-030 task report identity or status")
+    commands = payload.get("commands")
+    expected_commands = task.get("acceptance_commands")
+    if not isinstance(commands, list) or not isinstance(expected_commands, list):
+        raise AdoptionError("RETAINED_EVIDENCE", "M3-030 task commands are missing")
+    if [item.get("id") for item in commands if isinstance(item, dict)] != [
+        item.get("id") for item in expected_commands if isinstance(item, dict)
+    ] or len(commands) != len(expected_commands):
+        raise AdoptionError("RETAINED_EVIDENCE", "M3-030 task command inventory changed")
+    for observed, expected in zip(commands, expected_commands):
+        if not isinstance(observed, dict) or not isinstance(expected, dict):
+            raise AdoptionError("RETAINED_EVIDENCE", "M3-030 task command entry")
+        if (
+            observed.get("id") != expected.get("id")
+            or observed.get("argv") != expected.get("argv")
+            or observed.get("status") != "PASS"
+            or observed.get("exit_code") != 0
+            or observed.get("timed_out") is not False
+            or observed.get("skipped") not in {None, False}
+        ):
+            raise AdoptionError(
+                "RETAINED_EVIDENCE",
+                f"M3-030 task command is not an executed PASS: {expected.get('id')}",
+            )
+
+
 def validate_retained_evidence(root: Path) -> dict[str, Any]:
     require_complete_status(root, "M3-030", "RETAINED_EVIDENCE")
     try:
@@ -333,6 +478,7 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
         raise AdoptionError(
             "RETAINED_EVIDENCE", "M3-030 required report inventory is incomplete"
         )
+    semantic_reports = expected_m3_030_reports(root)
     for relative in sorted(expected_reports):
         entry = by_path.get(relative)
         if not isinstance(entry, dict):
@@ -348,6 +494,13 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
             payload_task = payload.get("task_id")
         if payload_task != "M3-030" or payload.get("status") != "PASS":
             raise AdoptionError("RETAINED_EVIDENCE", f"{relative}: report does not provide PASS")
+        name = Path(relative).name
+        if name == "task-check.json":
+            validate_m3_030_task_check(payload, task)
+        elif semantic_reports.get(name) != payload:
+            raise AdoptionError(
+                "RETAINED_EVIDENCE", f"{relative}: report semantics are invalid"
+            )
     source_sha256 = evidence.get("source_sha256")
     expected_paths = set(task["source_paths"])
     if not isinstance(source_sha256, dict) or set(source_sha256) != expected_paths:
@@ -363,6 +516,7 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
         recorded[relative] = expected
         current[relative] = repository_text_sha256(path)
     return {"task_id": "M3-030", "reports": sorted(expected_reports),
+            "semantic_report_count": len(expected_reports),
             "recorded_source_sha256": dict(sorted(recorded.items())),
             "source_sha256": dict(sorted(current.items())),
             "changed_since_m3_030": sorted(
@@ -612,7 +766,7 @@ def audit_core(root: Path) -> dict[str, Any]:
 
 def validate_provider_result(
     raw: Mapping[str, Any], *, expected_platform: str, expected_revision: str,
-    root: Path = ROOT,
+    root: Path = ROOT, result_path: Path | None = None,
 ) -> dict[str, Any]:
     if len(expected_revision) != 40 or any(value not in "0123456789abcdef" for value in expected_revision):
         raise AdoptionError("STALE_REVISION", "expected revision must be an exact lowercase SHA")
@@ -661,6 +815,14 @@ def validate_provider_result(
         detail = str(error)
         code = "STALE_REVISION" if "revision" in detail else "RAW_RESULT"
         raise AdoptionError(code, detail) from error
+    if result_path is None:
+        result_path = (
+            root / f"docs/evidence/M3-031/{expected_platform}/provider-result.json"
+        )
+    try:
+        poc_validate.validate_license_bundle(result_path, raw)
+    except poc_validate.ValidationError as error:
+        raise AdoptionError("LICENSE_BUNDLE", str(error)) from error
     capabilities = raw.get("capabilities")
     if not isinstance(capabilities, dict) or any(value != "PASS" for value in capabilities.values()):
         raise AdoptionError("INCOMPLETE_RESULT", "every capability must be PASS")
@@ -685,6 +847,9 @@ def validate_provider_result(
         "capabilities": capabilities,
         "external_signer_calls": raw.get("metrics", {}).get("external_signer_calls"),
         "repeated_cleanup_cycles": raw.get("metrics", {}).get("repeated_cleanup_cycles"),
+        "license_bundle_manifest_sha256": raw.get("build", {}).get(
+            "license_bundle", {}
+        ).get("sha256"),
         "status": "PASS",
     }
 
@@ -692,16 +857,17 @@ def validate_provider_result(
 def aggregate(
     core: Mapping[str, Any], windows: Mapping[str, Any], macos: Mapping[str, Any],
     expected_revision: str, *, root: Path = ROOT,
+    windows_path: Path | None = None, macos_path: Path | None = None,
 ) -> dict[str, Any]:
     if core.get("schema_version") != 1 or core.get("status") != "PASS":
         raise AdoptionError("CORE_REQUIREMENT", "Core audit is not PASS")
     win = validate_provider_result(
         windows, expected_platform="windows-x86_64", expected_revision=expected_revision,
-        root=root,
+        root=root, result_path=windows_path,
     )
     mac = validate_provider_result(
         macos, expected_platform="macos-arm64", expected_revision=expected_revision,
-        root=root,
+        root=root, result_path=macos_path,
     )
     return {
         "schema_version": 1,
@@ -753,6 +919,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 raw, expected_platform=args.platform,
                 expected_revision=args.expected_revision,
                 root=args.root.resolve(),
+                result_path=args.input.resolve(),
             )
         elif args.command == "validate-hosted":
             value = validate_hosted_run(args.root.resolve(), load_json(args.input))
@@ -761,6 +928,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 load_json(args.core), load_json(args.windows), load_json(args.macos),
                 args.expected_revision,
                 root=args.root.resolve(),
+                windows_path=args.windows.resolve(),
+                macos_path=args.macos.resolve(),
             )
         _write_or_print(value, args.output)
         return 0

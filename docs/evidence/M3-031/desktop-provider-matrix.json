@@ -22,6 +22,7 @@
         "truncation": "PASS"
       },
       "external_signer_calls": 2,
+      "license_bundle_manifest_sha256": "8b9587ca33ad3f6023cf56c3f744e7e2e65191ace8eb6ff54d1b23435aaad176",
       "platform": "windows-x86_64",
       "provider": "aws-lc",
       "provider_version": "5.5.0",
@@ -53,6 +54,7 @@
         "truncation": "PASS"
       },
       "external_signer_calls": 2,
+      "license_bundle_manifest_sha256": "a42cbc822fa76edd34cbd276ccb1d1eb2e915864610a76f33bc341f5edffc94f",
       "platform": "macos-arm64",
       "provider": "aws-lc",
       "provider_version": "5.5.0",

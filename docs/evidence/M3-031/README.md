@@ -24,8 +24,10 @@ claim mobile device support.
 - `core-prerequisite-audit.json`
 - `windows-x86_64/provider-result.json`
 - `windows-x86_64/validation.json`
+- `windows-x86_64/license-bundle/manifest.json` and its 11 digest-bound files
 - `macos-arm64/provider-result.json`
 - `macos-arm64/validation.json`
+- `macos-arm64/license-bundle/manifest.json` and its 11 digest-bound files
 - `desktop-provider-matrix.json`
 - `hosted-run.json`
 - `task-check.json`
@@ -49,8 +51,14 @@ executed both jobs at repository revision
   cycles.
 - Both binaries used vendored static provider archives and reported no system
   TLS dependency or runtime TLS-loader string.
+- Both hosted provider license bundles are retained verbatim. Validation checks
+  the manifest digest, source identity, path confinement, file count, total
+  bytes, and every listed file digest before accepting either provider result.
+- All nine retained M3-030 reports are validated against report-specific
+  invariants. A fresh digest cannot hide a missing ABI function, changed
+  provider selection, release/SBOM mismatch, or a skipped task command.
 
-The local task gate passed all four commands. The Python suites passed 107 tests.
+The local task gate passed all four commands. The Python suites passed 108 tests.
 The focused Cangjie Core suites passed 71 tests with zero skipped, failed or
 errored cases. The complete machine-readable command report is
 [`task-check.json`](task-check.json).
