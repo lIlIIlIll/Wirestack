@@ -36,11 +36,11 @@ EXPECTED_DESKTOP_DEPENDENCIES = {
     "M3-019": "M3-014,M3-031",
     "M3-020": "M3-015,M3-031",
 }
-ACCEPTANCE_FRAGMENTS = {
-    "M3-014": "使用系统证书链与策略",
-    "M3-015": "使用系统信任评估",
-    "M3-019": "系统 key handle 可完成 client/server 签名",
-    "M3-020": "SecKey 签名桥通过",
+EXPECTED_DESKTOP_ACCEPTANCE = {
+    "M3-014": "使用系统证书链与策略；返回 identity/chain 证据；不导出 native provider 对象。",
+    "M3-015": "使用系统信任评估；行为、错误、证据与统一模型对齐。",
+    "M3-019": "系统 key handle 可完成 client/server 签名；私钥不导出；错误和取消稳定。",
+    "M3-020": "SecKey 签名桥通过；私钥不导出；生命周期与线程/回调安全。",
 }
 MOBILE_GRAPH_ROWS = {
     "M4-001": "| M4-001 | 实现 Android system/app trust adapter | 平台 | C4 | M3-009..M3-012,M2-007 | PRD §14.2 | 系统和应用 trust 配置可用；reference identity 不被关闭；结果映射统一。 |",
@@ -391,7 +391,21 @@ def validate_dependency_evidence(
     verify_current_sources: bool = True,
 ) -> dict[str, Any]:
     validated: dict[str, Any] = {}
+    status_path = root / "docs/planning/status.md"
+    try:
+        status_text = status_path.read_text(encoding="utf-8")
+    except OSError as error:
+        raise AdoptionError("DEPENDENCY_EVIDENCE", "status file missing") from error
     for task_id, report_bindings in bindings.items():
+        status_rows = [
+            line for line in status_text.splitlines()
+            if line.startswith(f"| {task_id} |")
+        ]
+        if len(status_rows) != 1:
+            raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: status row")
+        status_columns = [part.strip() for part in status_rows[0].strip("|").split("|")]
+        if len(status_columns) < 2 or status_columns[1] != "COMPLETE":
+            raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: status is not COMPLETE")
         try:
             task = repository_tooling.load_task(root / f"tools/tasks/{task_id}.json", root)
         except repository_tooling.ContractError as error:
@@ -515,8 +529,7 @@ def audit_task_graph(root: Path) -> dict[str, Any]:
         columns = [part.strip() for part in row.strip("|").split("|")]
         if len(columns) < 7 or columns[4] != dependencies:
             raise AdoptionError("TASK_GRAPH", f"{task_id}: dependency mismatch")
-        fragment = ACCEPTANCE_FRAGMENTS[task_id]
-        if fragment not in row:
+        if columns[6] != EXPECTED_DESKTOP_ACCEPTANCE[task_id]:
             raise AdoptionError("TASK_GRAPH", f"{task_id}: acceptance text changed")
         desktop[task_id] = {"dependencies": dependencies, "status": "PASS"}
     for task_id, expected_row in MOBILE_GRAPH_ROWS.items():

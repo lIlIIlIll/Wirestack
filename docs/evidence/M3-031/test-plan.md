@@ -28,6 +28,8 @@ complete this task.
 | P009 | a report succeeds or fails while writing | same-directory atomic replacement | reachable | A reader sees one complete JSON document or the old file. |
 | P010 | provider validation targets an alternate repository root | root-scoped manifest and provider-spec loading | reachable | Validation never mixes metadata from the tool's own checkout with the selected tree. |
 | P011 | current resolver native source differs from the retained native report | current-tree, evidence-inventory and report-input digest comparison | reachable error | Native dependency drift fails even when unrelated historical inputs use sealed-inventory semantics. |
+| P012 | M2-004 or M2-006 status is no longer COMPLETE | exact current status-row validation | reachable error | Retained PASS evidence cannot override a corrected dependency status. |
+| P013 | a desktop backlog row keeps one phrase but drops another acceptance requirement | exact full acceptance-column comparison | reachable error | Dependency migration cannot weaken any pre-existing desktop criterion. |
 
 ## Input-domain partitioning
 
@@ -62,6 +64,8 @@ complete this task.
 | S008 | report write interrupted before replacement | existing report | P009 | preserve complete old report | no temporary file remains after handled failure | lifecycle | P1 |
 | S009 | alternate root has a moved AWS-LC manifest pin | otherwise valid provider result | P010 | reject | selected root controls both manifest and provider-spec validation | fault-injection | P0 |
 | S010 | current native resolver source drifts after retained execution | otherwise valid dependency evidence | P011 | reject | stable `STALE_SOURCE` identifies the native input | fault-injection | P0 |
+| S011 | M2 dependency status changes from COMPLETE to BLOCKED | retained evidence remains PASS | P012 | reject | stable dependency-evidence failure identifies non-COMPLETE status | fault-injection | P0 |
+| S012 | M3-014 retains its first acceptance phrase but drops identity/chain or non-exposure requirements | dependencies remain exact | P013 | reject | complete acceptance column must match the frozen contract | fault-injection | P0 |
 
 ## Test-plan matrix
 
@@ -78,6 +82,8 @@ complete this task.
 | T009 | S001,S003,S004,S006,S007 | P001,P002,P004,P005,P007,P008 | task-level gate | PASS | zero failed commands, zero skipped acceptance commands | task |
 | T010 | S009 | P010 | valid result plus moved manifest under `--root` | FAIL | `PROVIDER` is derived from the selected tree | fault-injection |
 | T011 | S010 | P011 | mutate the current Windows resolver source after sealing | FAIL | `STALE_SOURCE` applies even when broad historical-source verification is disabled | fault-injection |
+| T012 | S011 | P012 | mutate the M2-004 status row to BLOCKED while retaining evidence | FAIL | dependency evidence cannot pass without current COMPLETE status | fault-injection |
+| T013 | S012 | P013 | retain only the first M3-014 acceptance phrase | FAIL | `TASK_GRAPH` rejects the weakened full column | fault-injection |
 
 ## Excluded gates
 
