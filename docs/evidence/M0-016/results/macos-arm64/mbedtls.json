@@ -1,7 +1,7 @@
 {
   "build": {
     "binary_bytes": 745408,
-    "binary_sha256": "c8a968ac05fdd279dde35e828c7cf3ff7c543ca3b1b9ebd0d5ba83aa2c3fcaf0",
+    "binary_sha256": "51128d081563e527e11de66ac2bfa0080388f2a297c9d70dd03e98c132f69b5f",
     "exported_symbol_inventory": {
       "count": 1106,
       "scope": "final-artifact-exports",
@@ -1223,22 +1223,22 @@
       {
         "bytes": 427616,
         "name": "libmbedtls.a",
-        "sha256": "dea453c8a226447ea61fb1185ff1556e695e767ad0c888d824022c450216c350"
+        "sha256": "084c24f012f1c304dcaa8bb24ff24f0ee4dcc6bad5c9ca5b47bba2aab1c47e39"
       },
       {
         "bytes": 127672,
         "name": "libmbedx509.a",
-        "sha256": "28c42c6264916799bbbcee61b9decec6d3320e26fd9f3df8c63f5e101a58739a"
+        "sha256": "8849de2be9f784fea8b99913820c771d2b0df144d57c892df190a534016d6df7"
       },
       {
         "bytes": 670816,
         "name": "libtfpsacrypto.a",
-        "sha256": "15794081a671189b58c8e4c7a5f853383400845f683c57ed31c17a1cc1cd9b71"
+        "sha256": "ef3cc9806d96755f77e38cbf009b147df1345c2b1bde2be98b15f63ed18ee661"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "540dc871b7f79e60fd9b9370a739207e69b72eddda863e55b5de793893a07c24",
+  "build_log_sha256": "f6f8219cb28feea9ce1fd24c7f3a2e30102ad8b41f3ab92bb86782f560321bb0",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -1264,28 +1264,28 @@
     "image_os": "macos15",
     "image_version": "20260727.0256.1",
     "python": "3.12.10",
-    "repository_revision": "72808d9948973a9562d15c41847b73db56aa7001",
+    "repository_revision": "205c073c22aa283d84978522b70534fe5a16d808",
     "runner_arch": "ARM64",
     "runner_os": "macOS"
   },
-  "finished_at": "2026-09-01T00:12:30.295873+00:00",
+  "finished_at": "2026-09-01T00:41:13.445667+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 47,
+    "cancellation_latency_us": 52,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_trust_calls": 4,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 3194880,
+    "memory_profile_peak_resident_bytes": 3178496,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 8203850323,
+    "provider_allocation_bytes": 8204038091,
     "provider_allocation_call_bound": 150000000,
-    "provider_allocation_calls": 133235962,
+    "provider_allocation_calls": 133236803,
     "provider_allocation_live_after_cleanup_bytes": 7641,
     "provider_allocation_live_before_cleanup_bytes": 7641,
     "provider_allocation_peak_live_bytes": 117635,
@@ -1297,18 +1297,18 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 47,
+      "latency_us": 52,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 3194880,
+      "peak_resident_bytes": 3178496,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 8203850323,
+      "provider_allocation_bytes": 8204038091,
       "provider_allocation_call_bound": 150000000,
-      "provider_allocation_calls": 133235962,
+      "provider_allocation_calls": 133236803,
       "provider_allocation_live_after_cleanup_bytes": 7641,
       "provider_allocation_live_before_cleanup_bytes": 7641,
       "provider_allocation_peak_live_bytes": 117635,
@@ -1320,7 +1320,7 @@
         "reason": "leak detection is unavailable in the configured macOS sanitizer run",
         "status": "UNSUPPORTED"
       },
-      "output_sha256": "3bf5a315712c4b41fb856221a161a78fc845943c558dfdfddbbe5e2943d990fc",
+      "output_sha256": "9bef207715f269bb3bf94b39284c8213741df83d493aedf6f8306e3114e31aee",
       "provider_build_provenance": {
         "assembler": null,
         "build_argv": [
@@ -1425,17 +1425,17 @@
         {
           "bytes": 4101176,
           "name": "libmbedtls.a",
-          "sha256": "1b0cdd8b5f402128a292bdfc8b0732d33e2ef5de619f03400ba2b6caadbba748"
+          "sha256": "5d2a5afd3ccd06452a8ee44771316219ee5f0de53d1d2ae5e9bc213807c08b3f"
         },
         {
           "bytes": 1057488,
           "name": "libmbedx509.a",
-          "sha256": "fcea1303a6adb0b3c99dd9e466ba88d2244b6a8b7dc12a1cdd04acc8234cc9d1"
+          "sha256": "c961e444e3b7dae380d228ed961519b266f25beb85106318eae7d933154a49c9"
         },
         {
           "bytes": 5550640,
           "name": "libtfpsacrypto.a",
-          "sha256": "69ae31fb7d0e2b3a6e6beabd03ec45431731caf6aa9abbef8388e4f9912990ef"
+          "sha256": "af1078678195226db1f842f514a17df3431e4b3d01e8fa2e6249ed2e9f60701e"
         }
       ],
       "status": "PASS",
@@ -1501,7 +1501,7 @@
     "tag": "mbedtls-4.2.0",
     "tag_resolved_commit": "ece41aa84d7879d7e55c59e955a5884b541f7f3b"
   },
-  "started_at": "2026-09-01T00:10:49.519987+00:00",
+  "started_at": "2026-09-01T00:39:54.373101+00:00",
   "status": "PARTIAL",
   "task_id": "M0-016"
 }
