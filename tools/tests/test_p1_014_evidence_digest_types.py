@@ -229,6 +229,41 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             self.assertEqual("FAIL", report["status"])
             self.assertIn("invalid-artifact-on-text", report["domain_counts"])
 
+    def test_inventory_resolves_keyword_text_path_before_byte_digest(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            path = root / "tools/gates/new_tool.py"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "from pathlib import Path\n"
+                "from tools.evidence_digest import artifact_byte_sha256\n"
+                "value = artifact_byte_sha256(path=Path('report.json'))\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertIn("invalid-artifact-on-text", report["domain_counts"])
+
+    def test_inventory_rejects_assigned_subprocess_and_os_system_commands(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            path = root / "scripts/new_gate.py"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "import os\nimport subprocess\n"
+                "command = ['sha256sum', 'report.json']\n"
+                "subprocess.run(command)\n"
+                "os.system('sha256sum report.json')\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertEqual(
+                2,
+                sum(issue["detail"].endswith("raw-digest-command")
+                    for issue in report["issues"]),
+            )
+
     def test_inventory_rejects_text_marker_on_raw_digest_command(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
             root = Path(directory)
