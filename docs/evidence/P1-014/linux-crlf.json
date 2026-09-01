@@ -41,7 +41,7 @@
     "machine": "x86_64",
     "system": "Linux"
   },
-  "revision": "768a89d731e485620f5a2afd2b6fe4f3ba3ce60d",
+  "revision": "bbf280f23dea560c97319189fffb2d8ee2be4cd9",
   "schema_version": 1,
   "status": "PASS",
   "text_digests": {
