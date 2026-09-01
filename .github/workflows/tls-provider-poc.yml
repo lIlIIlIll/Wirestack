@@ -103,6 +103,8 @@ jobs:
             sh -c 'while :; do sleep 3600; done'
           docker exec "$CONTAINER_NAME" apk add --no-cache \
             build-base cmake ninja perl git openssl ca-certificates python3 linux-headers
+          docker exec "$CONTAINER_NAME" \
+            git config --global --add safe.directory /work
       - name: Build and execute in provisioned Alpine musl userspace
         env:
           PROVIDER: ${{ matrix.provider }}
