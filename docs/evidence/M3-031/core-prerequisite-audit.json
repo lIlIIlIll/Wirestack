@@ -8,7 +8,7 @@
           "docs/evidence/M2-004/windows-x86_64/report.json": "5d8ba504bc883223ff8c7aff72def24ba27026b5f5d59cf023fb6e499bf1372d"
         },
         "source_count": 22,
-        "source_verification": "SEALED_INVENTORY",
+        "source_verification": "CURRENT_NATIVE_SOURCES",
         "status": "PASS"
       },
       "M2-006": {
@@ -17,7 +17,7 @@
           "docs/evidence/M2-006/macos-arm64/report.json": "200d0800209c71bc7794af0fc41954297c4c78dc4c9b34e2122fa82c09058b92"
         },
         "source_count": 27,
-        "source_verification": "SEALED_INVENTORY",
+        "source_verification": "CURRENT_NATIVE_SOURCES",
         "status": "PASS"
       }
     }
