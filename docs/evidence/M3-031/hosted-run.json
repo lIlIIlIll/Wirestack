@@ -1,20 +1,20 @@
 {
   "artifacts": [
     {
-      "artifact_id": 9783047801,
-      "archive_digest": "sha256:d6888a56c3d0cc133e60fa4e70d78e4c904d2e2a43207001bddce3206c22f211",
-      "expires_at": "2026-09-15T01:57:31Z",
-      "name": "m3-031-windows-x86_64-3a6dca2499ea58a6b6a2e7f7f90de16fe57b8791",
-      "provider_result_sha256": "9f65acd0d555bfeabe78f9ab0eab63a123ebe8a6845a75380cce8b462b686c17",
-      "validation_sha256": "033bda607e2665ebdfe5f0828c1882c89acb4a7331711c15665f8420663656f3"
+      "artifact_id": 9783447375,
+      "archive_digest": "sha256:99b0acf9f3c095c28be1cad2b66c7d5a8a164c5cc5b8600146d64de54148659d",
+      "expires_at": "2026-09-15T02:16:24Z",
+      "name": "m3-031-windows-x86_64-6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2",
+      "provider_result_sha256": "7e2ce99dd7c454f4051eb6533838563bf1511eda5e6b115e77cb9a31a81daa33",
+      "validation_sha256": "b2328dffc957fc61e02ca5ce5bd2627f95ebfac0a30c1d810463ce43100d81ef"
     },
     {
-      "artifact_id": 9783045319,
-      "archive_digest": "sha256:705dec4e56923fe6aa14fc6c19a9400fd9561b80cc89de87816cfce47dc9e395",
-      "expires_at": "2026-09-15T01:57:24Z",
-      "name": "m3-031-macos-arm64-3a6dca2499ea58a6b6a2e7f7f90de16fe57b8791",
-      "provider_result_sha256": "c90211e33a730af3a382556bbb1e09aeb25026b751412e7e3c811cb97291df0b",
-      "validation_sha256": "5a11b335fbb953f1adabdcae44f17ad2cbbb600297b0127ea1b1bdbf8b5fc63a"
+      "artifact_id": 9783425600,
+      "archive_digest": "sha256:a0bb4e0c29dd0b5c501f6d9a280572b612970714ace4f6b31f62190636f96ebf",
+      "expires_at": "2026-09-15T02:15:25Z",
+      "name": "m3-031-macos-arm64-6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2",
+      "provider_result_sha256": "6986197fae89cd42266c29c20ee2a6debc58458852a30b6dd42ad2af5707a589",
+      "validation_sha256": "f151679ec305614f0fe2a020e3e677cefa91b2e7eb44a1b5db8f7dcb4424db0f"
     }
   ],
   "branch": "task/M3-031-desktop-tls-adoption",
@@ -22,24 +22,24 @@
   "event": "push",
   "jobs": [
     {
-      "completed_at": "2026-09-01T01:57:36Z",
-      "job_id": 99709590728,
+      "completed_at": "2026-09-01T02:16:29Z",
+      "job_id": 99713027334,
       "name": "windows-aws-lc",
-      "started_at": "2026-09-01T01:55:02Z",
+      "started_at": "2026-09-01T02:13:15Z",
       "status": "PASS",
-      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33460555383/job/99709590728"
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33461712135/job/99713027334"
     },
     {
-      "completed_at": "2026-09-01T01:57:29Z",
-      "job_id": 99709590522,
+      "completed_at": "2026-09-01T02:15:29Z",
+      "job_id": 99713027538,
       "name": "macos-aws-lc",
-      "started_at": "2026-09-01T01:55:02Z",
+      "started_at": "2026-09-01T02:13:11Z",
       "status": "PASS",
-      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33460555383/job/99709590522"
+      "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33461712135/job/99713027538"
     }
   ],
-  "revision": "3a6dca2499ea58a6b6a2e7f7f90de16fe57b8791",
-  "run_id": 33460555383,
+  "revision": "6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2",
+  "run_id": 33461712135,
   "schema_version": 2,
   "source_sha256": {
     "tools/tls_provider_poc/openssl_memory_poc.c": "b46b7e5f3f88edd0879b709f0814bc6cc42391dd1b864523ee8e4d2b9de60933",
@@ -49,6 +49,12 @@
   },
   "status": "PASS",
   "superseded_runs": [
+    {
+      "reason": "Superseded by the final dependency-status and complete desktop-acceptance contract review remediation.",
+      "revision": "3a6dca2499ea58a6b6a2e7f7f90de16fe57b8791",
+      "run_id": 33460555383,
+      "status": "PASS"
+    },
     {
       "reason": "Superseded by the final review remediation for selected-root metadata loading and current native dependency source binding.",
       "revision": "88a0cd21216e4d0869fadd24bbd0c7f6185ddc73",
@@ -81,5 +87,5 @@
     }
   ],
   "task_id": "M3-031",
-  "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33460555383"
+  "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33461712135"
 }
