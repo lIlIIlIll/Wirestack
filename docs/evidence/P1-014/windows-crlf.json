@@ -13,17 +13,34 @@
       "sha256": "e49c81e2d2f84e259d40e2fb8192f3bcd198b355184845d76d8f58807d0d78ee"
     }
   },
+  "checkout_fixture": {
+    "byte_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "98ab4d3aeab1e120560e942e2df6a0db1147bf94bafcf1590000ffb3c2b6fc80"
+    },
+    "expected_text_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e49c81e2d2f84e259d40e2fb8192f3bcd198b355184845d76d8f58807d0d78ee"
+    },
+    "line_endings": "CRLF",
+    "path": "docs/evidence/P1-014/fixtures/line-endings.txt",
+    "present": true,
+    "text_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e49c81e2d2f84e259d40e2fb8192f3bcd198b355184845d76d8f58807d0d78ee"
+    }
+  },
   "expected_platform": "windows-x86_64",
   "gitattributes_dependency": false,
   "invalid_utf8": "REJECTED",
   "issues": [],
   "kind": "p1-014-crlf-fault-injection",
   "platform": {
-    "identity": "windows-amd64",
+    "identity": "windows-x86_64",
     "machine": "AMD64",
     "system": "Windows"
   },
-  "revision": "abaa98f34bffc38faa14c434a12024d86ba0af9c",
+  "revision": "2f4901e44746e36bef2d9d9ac809e81b1a53c1bd",
   "schema_version": 1,
   "status": "PASS",
   "text_digests": {
