@@ -50,7 +50,7 @@ executed both jobs at repository revision
 - Both binaries used vendored static provider archives and reported no system
   TLS dependency or runtime TLS-loader string.
 
-The local task gate passed all four commands. The Python suites passed 105 tests.
+The local task gate passed all four commands. The Python suites passed 106 tests.
 The focused Cangjie Core suites passed 71 tests with zero skipped, failed or
 errored cases. The complete machine-readable command report is
 [`task-check.json`](task-check.json).
