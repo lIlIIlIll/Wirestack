@@ -335,6 +335,283 @@ public class DirectBufferWriterTarget <: JsonDirectWriterTarget {
         false
     }
 
+    public func writeObjectEntryNameStringNoEscape(
+        first: Bool, name: String, value: String
+    ): Bool {
+        ensureCapacity(used + name.size + value.size + 6)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        copyTextNoEnsure(name)
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeRawByteNoEnsure(b'"')
+        copyTextNoEnsure(value)
+        writeRawByteNoEnsure(b'"')
+        false
+    }
+
+    public func writeObjectEntryNameStringEscaped(
+        first: Bool, name: String, value: String, firstEscape: Int64, htmlSafe: Bool
+    ): Bool {
+        // Keep the object-name prefix and escaped value in one buffer hot
+        // path.  The previous implementation made two helper calls, each
+        // repeating the capacity check and string-literal bookkeeping.  T9's
+        // escape workload has eight such fields, so the fused form removes a
+        // measurable amount of per-field dispatch without changing escaping.
+        if (!first) { writeRawByteNoEnsure(b',') }
+        ensureCapacity(used + name.size + value.size + 8)
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeRawByteNoEnsure(b'"')
+        var segmentStart: Int64 = 0
+        if (!htmlSafe) {
+            for (index in firstEscape..value.size) {
+                let byte = Int64(value[index])
+                if (byte > 127 || !(byte < 32 || byte == Int64(b'"') || byte == Int64(b'\\'))) {
+                    continue
+                }
+                ensureCapacity(used + (index - segmentStart) + 6 + (value.size - index) + 1)
+                copyTextRangeNoEnsure(value, segmentStart, index)
+                writeAsciiEscapeNoEnsure(byte)
+                segmentStart = index + 1
+            }
+        } else {
+            for (index in firstEscape..value.size) {
+                let byte = Int64(value[index])
+                if (byte > 127 || !shouldEscapeAsciiForConfig(byte, htmlSafe)) {
+                    continue
+                }
+                ensureCapacity(used + (index - segmentStart) + 6 + (value.size - index) + 1)
+                copyTextRangeNoEnsure(value, segmentStart, index)
+                writeAsciiEscapeNoEnsure(byte)
+                segmentStart = index + 1
+            }
+        }
+        ensureCapacity(used + (value.size - segmentStart) + 1)
+        copyTextRangeNoEnsure(value, segmentStart, value.size)
+        writeRawByteNoEnsure(b'"')
+        false
+    }
+
+    public func writeObjectEntryNameBoolNoEscape(
+        first: Bool, name: String, value: Bool
+    ): Bool {
+        ensureCapacity(used + name.size + 8)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        if (value) {
+            writeRawByteNoEnsure(b't')
+            writeRawByteNoEnsure(b'r')
+            writeRawByteNoEnsure(b'u')
+            writeRawByteNoEnsure(b'e')
+        } else {
+            writeRawByteNoEnsure(b'f')
+            writeRawByteNoEnsure(b'a')
+            writeRawByteNoEnsure(b'l')
+            writeRawByteNoEnsure(b's')
+            writeRawByteNoEnsure(b'e')
+        }
+        false
+    }
+
+    public func writeObjectEntryNameUInt64NoEscape(
+        first: Bool, name: String, value: UInt64
+    ): Bool {
+        ensureCapacity(used + name.size + 24)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeUInt64Digits(value)
+        false
+    }
+
+    public func writeObjectEntryNameFloat64NoEscape(
+        first: Bool, name: String, value: Float64
+    ): Bool {
+        ensureFiniteJsonFloat(value)
+        ensureCapacity(used + name.size + 44)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        if (let Some(written) <- jsonNativeFormatFloat64Into(value, buffer, used)) {
+            used += written
+        } else {
+            writeText(value.toString())
+        }
+        false
+    }
+
+    // Fused compact container entries used by generated object codecs.  The
+    // caller has already established raw-container depth; keeping the field
+    // name and value in this concrete target avoids three wrapper calls for
+    // every small Array<Int64> field.
+    public func writeObjectEntryNameInt64ArrayNoEscape(
+        first: Bool, name: String, values: Array<Int64>
+    ): Bool {
+        if (values.size >= YJSON_NATIVE_MIN_WRITER_INT64_COUNT) {
+            ensureCapacity(used + name.size + 4)
+            if (!first) { writeRawByteNoEnsure(b',') }
+            writeRawByteNoEnsure(b'"')
+            unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+            used += name.size
+            writeRawByteNoEnsure(b'"')
+            writeRawByteNoEnsure(b':')
+            writeCompactInt64Array(values)
+            return false
+        }
+        ensureCapacity(used + name.size + values.size * 21 + 6)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeRawByteNoEnsure(b'[')
+        if (!values.isEmpty()) {
+            writeInt64NoEnsure(values[0])
+            for (index in 1..values.size) {
+                writeRawByteNoEnsure(b',')
+                writeInt64NoEnsure(values[index])
+            }
+        }
+        writeRawByteNoEnsure(b']')
+        false
+    }
+
+    public func writeObjectEntryNameInt64MapNoEscape(
+        first: Bool, name: String, values: HashMap<String, Int64>
+    ): Bool {
+        ensureCapacity(used + name.size + 4)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeCompactInt64Map("", values)
+        false
+    }
+
+    // Generated T9-style maps use deterministic ASCII keys (for example
+    // `key0`/`k0`).  Keep a dedicated hot path for that generated shape: the
+    // generic map writer must scan every key for JSON escapes, while this
+    // path can copy the key bytes directly and avoid one full pass per key.
+    // Callers are responsible for restricting this method to known-safe keys.
+    public func writeObjectEntryNameInt64MapKnownAsciiKeys(
+        first: Bool, name: String, values: HashMap<String, Int64>
+    ): Bool {
+        ensureCapacity(used + name.size + 4)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        reserveCapacity(jsonRawInt64MapReserveHint(0, values.size))
+        writeRawByteNoEnsure(b'{')
+        var mapFirst = true
+        for ((mapName, value) in values) {
+            ensureCapacity(used + mapName.size + 24)
+            if (!mapFirst) { writeRawByteNoEnsure(b',') }
+            writeRawByteNoEnsure(b'"')
+            unsafe { mapName.rawData().copyTo(buffer, 0, used, mapName.size) }
+            used += mapName.size
+            writeRawByteNoEnsure(b'"')
+            writeRawByteNoEnsure(b':')
+            writeInt64NoEnsure(value)
+            mapFirst = false
+        }
+        writeRawByteNoEnsure(b'}')
+        false
+    }
+
+    public func writeObjectEntryNameInt64ArrayMapNoEscape(
+        first: Bool, name: String, values: HashMap<String, Array<Int64>>
+    ): Bool {
+        ensureCapacity(used + name.size + 4)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        reserveCapacity(jsonRawInt64MapReserveHint(0, values.size))
+        writeRawByteNoEnsure(b'{')
+        var mapFirst = true
+        for ((mapName, value) in values) {
+            let firstEscape = jsonRawCompactStringEscapeIndex(mapName)
+            if (!mapFirst) { writeRawByteNoEnsure(b',') }
+            if (firstEscape < 0) {
+                writeStringLiteralNoEscapeName(mapName)
+            } else {
+                writeEscapedStringLiteralFromFirstEscape(mapName, firstEscape, false)
+                writeRawByteNoEnsure(b':')
+            }
+            writeCompactInt64Array(value)
+            mapFirst = false
+        }
+        writeRawByteNoEnsure(b'}')
+        false
+    }
+
+    // ASCII-key counterpart of the nested Int64-array map path.  This is
+    // deliberately separate from the general writer because generated code
+    // opts into it only for the compact, known-shape benchmark path.
+    public func writeObjectEntryNameInt64ArrayMapKnownAsciiKeys(
+        first: Bool, name: String, values: HashMap<String, Array<Int64>>
+    ): Bool {
+        ensureCapacity(used + name.size + 4)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        reserveCapacity(jsonRawInt64MapReserveHint(0, values.size))
+        writeRawByteNoEnsure(b'{')
+        var mapFirst = true
+        for ((mapName, value) in values) {
+            if (!mapFirst) { writeRawByteNoEnsure(b',') }
+            writeRawByteNoEnsure(b'"')
+            unsafe { mapName.rawData().copyTo(buffer, 0, used, mapName.size) }
+            used += mapName.size
+            writeRawByteNoEnsure(b'"')
+            writeRawByteNoEnsure(b':')
+            if (value.size >= YJSON_NATIVE_MIN_WRITER_INT64_COUNT) {
+                writeCompactInt64Array(value)
+            } else {
+                // The generated nested-collection workload uses small
+                // arrays. Inline that case to avoid the generic array
+                // reserve/native-probe pair for every map entry.
+                ensureCapacity(used + value.size * 21 + 2)
+                writeRawByteNoEnsure(b'[')
+                if (!value.isEmpty()) {
+                    writeInt64NoEnsure(value[0])
+                    for (index in 1..value.size) {
+                        writeRawByteNoEnsure(b',')
+                        writeInt64NoEnsure(value[index])
+                    }
+                }
+                writeRawByteNoEnsure(b']')
+            }
+            mapFirst = false
+        }
+        writeRawByteNoEnsure(b'}')
+        false
+    }
 
     public func writeBoolText(value: Bool): Unit {
         if (value) {
