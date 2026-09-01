@@ -1179,6 +1179,19 @@ class ProviderPocValidationTests(unittest.TestCase):
             manifest = json.loads((output / info["path"]).read_text())
             self.assertEqual(["LICENSE"], [entry["path"] for entry in manifest["files"]])
 
+    def test_license_manifest_digest_is_line_ending_stable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            source.mkdir()
+            (source / "LICENSE").write_text("inside\n", encoding="utf-8")
+            output = root / "output"
+            info = runner.create_license_bundle(
+                source, output, "aws-lc", {"content_sha256": "0" * 64})
+            manifest = output / info["path"]
+            manifest.write_bytes(manifest.read_bytes().replace(b"\n", b"\r\n"))
+            self.assertEqual(info["sha256"], evidence_digest.text_evidence_sha256(manifest))
+
     def test_matrix_retained_result_validates_durable_license_bundle(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

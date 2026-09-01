@@ -13,17 +13,34 @@
       "sha256": "e49c81e2d2f84e259d40e2fb8192f3bcd198b355184845d76d8f58807d0d78ee"
     }
   },
+  "checkout_fixture": {
+    "byte_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "e49c81e2d2f84e259d40e2fb8192f3bcd198b355184845d76d8f58807d0d78ee"
+    },
+    "expected_text_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e49c81e2d2f84e259d40e2fb8192f3bcd198b355184845d76d8f58807d0d78ee"
+    },
+    "line_endings": "LF",
+    "path": "docs/evidence/P1-014/fixtures/line-endings.txt",
+    "present": true,
+    "text_digest": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e49c81e2d2f84e259d40e2fb8192f3bcd198b355184845d76d8f58807d0d78ee"
+    }
+  },
   "expected_platform": "linux-x86_64-glibc",
   "gitattributes_dependency": false,
   "invalid_utf8": "REJECTED",
   "issues": [],
   "kind": "p1-014-crlf-fault-injection",
   "platform": {
-    "identity": "linux-x86_64",
+    "identity": "linux-x86_64-glibc",
     "machine": "x86_64",
     "system": "Linux"
   },
-  "revision": "3b92a6c09a431ef68639f5181de787fe5af5369d",
+  "revision": "c520879087d5e910b3409969f77029c0dbacd8b8",
   "schema_version": 1,
   "status": "PASS",
   "text_digests": {

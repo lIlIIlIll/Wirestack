@@ -49,7 +49,7 @@ MANIFEST_KEYS = {
     "schemaVersion", "taskId", "release", "target", "provider", "subjects",
     "sourceBundle", "signingPolicy",
 }
-SUBJECT_KEYS = {"name", "path", "mediaType", "sha256"}
+SUBJECT_KEYS = {"name", "path", "mediaType", "sha256", "signedPayloadSha256"}
 
 
 class ReleaseError(RuntimeError):
@@ -173,12 +173,14 @@ def build_release_manifest(
                 "path": artifact.name,
                 "mediaType": "application/gzip",
                 "sha256": artifact_digest,
+                "signedPayloadSha256": artifact_digest,
             },
             {
                 "name": "sbom",
                 "path": "sbom.spdx.json",
                 "mediaType": "application/spdx+json",
-                "sha256": evidence_digest.artifact_byte_sha256(sbom),
+                "sha256": evidence_digest.text_evidence_sha256(sbom),
+                "signedPayloadSha256": evidence_digest.artifact_byte_sha256(sbom),
             },
         ],
         "sourceBundle": {
@@ -245,6 +247,10 @@ def validate_release_manifest(manifest: Mapping[str, Any]) -> None:
         require(not path.is_absolute() and ".." not in path.parts and len(path.parts) == 1,
                 "PATH_UNSAFE", subject["path"])
         _strict_digest(subject["sha256"], f"subjects.{name}.sha256")
+        _strict_digest(subject["signedPayloadSha256"], f"subjects.{name}.signedPayloadSha256")
+        if name == "artifact":
+            require(subject["sha256"] == subject["signedPayloadSha256"],
+                    "MANIFEST_SUBJECT", "artifact digest domains must agree")
     require(names == {"artifact", "sbom"}, "MANIFEST_SUBJECTS", "incomplete")
     require(policy.get("repository") == REPOSITORY and policy.get("workflow") == WORKFLOW,
             "MANIFEST_POLICY", "signer identity")
@@ -390,10 +396,12 @@ def verify_offline_bundle(
     manifest = load_json(output / "release-manifest.json")
     validate_release_manifest(manifest)
     subject_map = {subject["name"]: subject for subject in manifest["subjects"]}
-    require(evidence_digest.artifact_byte_sha256(artifact) == subject_map["artifact"]["sha256"],
+    require(evidence_digest.artifact_byte_sha256(artifact) == subject_map["artifact"]["signedPayloadSha256"],
             "SUBJECT_DIGEST", "artifact")
-    require(evidence_digest.artifact_byte_sha256(sbom) == subject_map["sbom"]["sha256"],
+    require(evidence_digest.artifact_byte_sha256(sbom) == subject_map["sbom"]["signedPayloadSha256"],
             "SUBJECT_DIGEST", "sbom")
+    require(evidence_digest.text_evidence_sha256(sbom) == subject_map["sbom"]["sha256"],
+            "SUBJECT_TEXT_DIGEST", "sbom")
     subjects = _subject_paths(output, artifact, sbom)
     for name, subject in subjects.items():
         verify_file(public, subject, output / f"{name}.sig")
@@ -733,9 +741,13 @@ def validate_hosted_report(path: Path) -> dict[str, Any]:
             if isinstance(item, dict)} == {"artifact", "sbom", "release-manifest"},
             "HOSTED_REPORT_SUBJECTS", "exact three subjects required")
     for subject in subjects:
-        _strict_keys(subject, {"name", "sha256", "bundleSha256", "verification"},
-                     "HOSTED_REPORT_SUBJECT")
+        expected_keys = {"name", "sha256", "bundleSha256", "verification"}
+        if "signedPayloadSha256" in subject:
+            expected_keys.add("signedPayloadSha256")
+        _strict_keys(subject, expected_keys, "HOSTED_REPORT_SUBJECT")
         _strict_digest(subject["sha256"], "hosted subject")
+        if "signedPayloadSha256" in subject:
+            _strict_digest(subject["signedPayloadSha256"], "hosted signed payload")
         _strict_digest(subject["bundleSha256"], "hosted bundle")
         require(subject["verification"] == "PASS", "HOSTED_REPORT_SUBJECT", subject["name"])
     return report
@@ -770,7 +782,11 @@ def build_hosted_report(
                 "HOSTED_VERIFY_EMPTY", name)
         rows.append({
             "name": name,
-            "sha256": evidence_digest.artifact_byte_sha256(subject),
+            "sha256": (
+                evidence_digest.artifact_byte_sha256(subject)
+                if name == "artifact" else evidence_digest.text_evidence_sha256(subject)
+            ),
+            "signedPayloadSha256": evidence_digest.artifact_byte_sha256(subject),
             "bundleSha256": evidence_digest.artifact_byte_sha256(bundle),
             "verification": "PASS",
         })

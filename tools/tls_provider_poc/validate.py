@@ -557,7 +557,7 @@ def validate_license_bundle(result_path: Path, result: Mapping[str, Any],
         require(root == manifest_path or root in manifest_path.parents,
                 "provider license bundle path escapes result directory")
     require(manifest_path.is_file(), "provider license bundle manifest is missing")
-    require(evidence_digest.artifact_byte_sha256(manifest_path) == info["sha256"],
+    require(evidence_digest.text_evidence_sha256(manifest_path) == info["sha256"],
             "provider license bundle manifest digest mismatch")
     manifest = load(manifest_path)
     require(manifest.get("schema_version") == 1, "provider license manifest schema")
@@ -641,7 +641,7 @@ def validate_retained_results(matrix: Mapping[str, Any], spec: Mapping[str, Any]
                     f"{result_path}: provider license manifest path escapes repository")
             require(manifest_path.is_file(),
                     f"{result_path}: provider license manifest is missing")
-            require(evidence_digest.artifact_byte_sha256(manifest_path) == cell["license_bundle"]["sha256"],
+            require(evidence_digest.text_evidence_sha256(manifest_path) == cell["license_bundle"]["sha256"],
                     f"{result_path}: provider license manifest matrix digest mismatch")
             require(result["build"]["license_bundle"]["sha256"] ==
                     cell["license_bundle"]["sha256"],

@@ -4,6 +4,7 @@ import tempfile
 import unittest
 import platform
 from pathlib import Path
+from unittest import mock
 
 from tools.evidence_digest import (
     ARTIFACT_BYTE_DOMAIN,
@@ -84,6 +85,33 @@ class EvidenceDigestTypeTests(unittest.TestCase):
         self.assertEqual("FAIL", report["status"])
         self.assertEqual("PLATFORM_MISMATCH", report["issues"][0]["code"])
 
+    def test_crlf_report_rejects_wrong_architecture_and_libc(self) -> None:
+        with mock.patch.object(platform, "system", return_value="Linux"), \
+                mock.patch.object(platform, "machine", return_value="aarch64"), \
+                mock.patch.object(platform, "libc_ver", return_value=("musl", "1.2")):
+            report = crlf_report("linux-x86_64-glibc")
+        self.assertEqual("FAIL", report["status"])
+        self.assertEqual("linux-arm64-musl", report["platform"]["identity"])
+        self.assertIn("PLATFORM_MISMATCH", {item["code"] for item in report["issues"]})
+
+    def test_crlf_report_reads_tracked_checkout_fixture_without_text_override(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-checkout-") as directory:
+            root = Path(directory)
+            fixture = root / "docs/evidence/P1-014/fixtures/line-endings.txt"
+            fixture.parent.mkdir(parents=True)
+            fixture.write_bytes(b"alpha\r\nbeta\r\n")
+            (root / ".gitattributes").write_text("*.txt text\n", encoding="utf-8")
+            report = crlf_report(root=root)
+            self.assertEqual("PASS", report["status"])
+            self.assertEqual("CRLF", report["checkout_fixture"]["line_endings"])
+            self.assertFalse(report["gitattributes_dependency"])
+            (root / ".gitattributes").write_text(
+                "docs/evidence/P1-014/fixtures/line-endings.txt -text\n", encoding="utf-8"
+            )
+            blocked = crlf_report(root=root)
+            self.assertEqual("FAIL", blocked["status"])
+            self.assertIn("GITATTRIBUTES_DEPENDENCY", {item["code"] for item in blocked["issues"]})
+
     def test_windows_workflow_is_pinned_and_runs_only_bounded_python_checks(self) -> None:
         workflow = (self.ROOT / ".github/workflows/p1-014-evidence-digest-boundary.yml").read_text(
             encoding="utf-8"
@@ -124,6 +152,30 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             report = digest_inventory(root)
             self.assertEqual("FAIL", report["status"])
             self.assertEqual("UNTYPED_DIGEST", report["issues"][0]["code"])
+
+    def test_inventory_rejects_direct_sha256_import_and_untyped_shell_command(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            python_path = root / "tools/gates/new_tool.py"
+            python_path.parent.mkdir(parents=True)
+            python_path.write_text(
+                "from hashlib import sha256\nvalue = sha256(b'x').hexdigest()\n",
+                encoding="utf-8",
+            )
+            script = root / "scripts/check-report"
+            script.parent.mkdir(parents=True)
+            script.write_text("sha256sum report.json\n", encoding="utf-8")
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertEqual(2, len(report["issues"]))
+            script.write_text(
+                "# wirestack-digest-domain: artifact-bytes-v1\nsha256sum report.json\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertEqual(1, len(report["issues"]))
+            self.assertIn("artifact-bytes", report["domain_counts"])
 
     def test_current_inventory_has_no_legacy_task_local_digest_calls(self) -> None:
         report = digest_inventory(self.ROOT)

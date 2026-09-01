@@ -440,7 +440,7 @@ def create_license_bundle(src: Path, output_dir: Path, provider: str,
     atomic_json(manifest_path, manifest)
     return {
         "path": "license-bundle/manifest.json",
-        "sha256": evidence_digest.artifact_byte_sha256(manifest_path),
+        "sha256": evidence_digest.text_evidence_sha256(manifest_path),
         "file_count": len(entries),
         "total_bytes": total_bytes,
     }

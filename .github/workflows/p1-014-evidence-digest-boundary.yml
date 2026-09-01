@@ -4,7 +4,10 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - ".github/workflows/linux-release-attestation.yml"
+      - ".github/workflows/materialize-m0-009.yml"
       - ".github/workflows/p1-014-evidence-digest-boundary.yml"
+      - "docs/evidence/P1-014/fixtures/line-endings.txt"
       - "tools/evidence_digest.py"
       - "tools/repository/**"
       - "tools/architecture_guard.py"

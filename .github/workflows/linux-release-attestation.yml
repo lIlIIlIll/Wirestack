@@ -23,6 +23,7 @@ jobs:
             --repo lIlIIlIll/Wirestack \
             --pattern wirestack-0.1.0-linux-x86_64-glibc.tar.gz \
             --dir dist/m7-021
+          # wirestack-digest-domain: artifact-bytes-v1
           printf '%s  %s\n' \
             "$FROZEN_ARTIFACT_SHA256" \
             dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz \
@@ -62,6 +63,7 @@ jobs:
 
       - name: Verify the frozen artifact after job transfer
         run: |
+          # wirestack-digest-domain: artifact-bytes-v1
           printf '%s  %s\n' \
             "$FROZEN_ARTIFACT_SHA256" \
             dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz \

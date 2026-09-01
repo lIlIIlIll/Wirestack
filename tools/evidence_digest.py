@@ -20,6 +20,13 @@ TEXT_EVIDENCE_DOMAIN = "text-utf8-lf-v1"
 ARTIFACT_BYTE_DOMAIN = "artifact-bytes-v1"
 DIGEST_KEYS = {"domain", "sha256"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+CHECKOUT_FIXTURE = Path("docs/evidence/P1-014/fixtures/line-endings.txt")
+CHECKOUT_FIXTURE_TEXT = b"alpha\nbeta\n"
+RAW_DIGEST_COMMAND = re.compile(
+    r"\b(?:sha256sum|shasum(?:\s+-a\s+256)?|Get-FileHash|certutil(?:\.exe)?\s+-hashfile)\b",
+    re.IGNORECASE,
+)
+DIGEST_DOMAIN_MARKER = "wirestack-digest-domain:"
 
 
 class DigestError(ValueError):
@@ -183,11 +190,39 @@ def _revision(root: Path | None) -> str | None:
     return result.stdout.strip() if result.returncode == 0 else os.environ.get("GITHUB_SHA")
 
 
+def _normalized_architecture(value: str) -> str:
+    normalized = value.strip().lower()
+    if normalized in {"amd64", "x86_64"}:
+        return "x86_64"
+    if normalized in {"aarch64", "arm64"}:
+        return "arm64"
+    return normalized or "unknown"
+
+
+def native_platform_identity() -> str:
+    system = platform.system().strip().lower()
+    architecture = _normalized_architecture(platform.machine())
+    if system == "linux":
+        libc_name = platform.libc_ver()[0].strip().lower()
+        if libc_name in {"gnu libc", "glibc"}:
+            libc_name = "glibc"
+        elif "musl" in libc_name:
+            libc_name = "musl"
+        else:
+            libc_name = libc_name or "unknown-libc"
+        return f"linux-{architecture}-{libc_name}"
+    if system == "windows":
+        return f"windows-{architecture}"
+    if system == "darwin":
+        return f"macos-{architecture}"
+    return f"{system or 'unknown'}-{architecture}"
+
+
 def crlf_report(expected_platform: str | None = None, root: Path | None = None) -> dict[str, Any]:
-    actual = f"{platform.system().lower()}-{platform.machine().lower()}"
-    expected_prefix = expected_platform.split("-", 1)[0] if expected_platform else None
+    effective_root = root.resolve() if root is not None else Path(__file__).resolve().parents[1]
+    actual = native_platform_identity()
     issues: list[dict[str, str]] = []
-    if expected_prefix and not actual.startswith(expected_prefix + "-"):
+    if expected_platform and actual != expected_platform:
         issues.append({"code": "PLATFORM_MISMATCH", "detail": f"expected {expected_platform}, got {actual}"})
     variants = {
         "lf": b"alpha\nbeta\n",
@@ -208,6 +243,33 @@ def crlf_report(expected_platform: str | None = None, root: Path | None = None) 
     except DigestError as error:
         if error.code != "TEXT_UTF8":
             issues.append({"code": "INVALID_UTF8_ERROR", "detail": error.code})
+    fixture_path = effective_root / CHECKOUT_FIXTURE
+    fixture: dict[str, Any] = {"path": CHECKOUT_FIXTURE.as_posix(), "present": fixture_path.is_file()}
+    if not fixture_path.is_file():
+        issues.append({"code": "CHECKOUT_FIXTURE_MISSING", "detail": CHECKOUT_FIXTURE.as_posix()})
+    else:
+        fixture_bytes = fixture_path.read_bytes()
+        fixture["byte_digest"] = artifact_byte_digest_bytes(fixture_bytes).to_json()
+        try:
+            fixture["text_digest"] = text_evidence_digest_bytes(fixture_bytes).to_json()
+        except DigestError as error:
+            issues.append({"code": error.code, "detail": CHECKOUT_FIXTURE.as_posix()})
+        else:
+            expected_fixture = text_evidence_digest_bytes(CHECKOUT_FIXTURE_TEXT).to_json()
+            fixture["expected_text_digest"] = expected_fixture
+            if fixture["text_digest"] != expected_fixture:
+                issues.append({"code": "CHECKOUT_TEXT_DRIFT", "detail": CHECKOUT_FIXTURE.as_posix()})
+        fixture["line_endings"] = (
+            "CRLF" if b"\r\n" in fixture_bytes else "BARE_CR" if b"\r" in fixture_bytes else "LF"
+        )
+    attributes = effective_root / ".gitattributes"
+    attributes_text = attributes.read_text(encoding="utf-8") if attributes.is_file() else ""
+    gitattributes_dependency = any(
+        CHECKOUT_FIXTURE.as_posix() in line and "-text" in line
+        for line in attributes_text.splitlines()
+    )
+    if gitattributes_dependency:
+        issues.append({"code": "GITATTRIBUTES_DEPENDENCY", "detail": CHECKOUT_FIXTURE.as_posix()})
     return {
         "schema_version": 1,
         "kind": "p1-014-crlf-fault-injection",
@@ -218,7 +280,8 @@ def crlf_report(expected_platform: str | None = None, root: Path | None = None) 
         "text_digests": text_digests,
         "byte_digests": byte_digests,
         "invalid_utf8": invalid_utf8,
-        "gitattributes_dependency": False,
+        "checkout_fixture": fixture,
+        "gitattributes_dependency": gitattributes_dependency,
         "issues": issues,
     }
 
@@ -268,6 +331,15 @@ def digest_inventory(root: Path) -> dict[str, Any]:
                 issues.append({"code": "INVENTORY_PARSE", "detail": f"{relative}: {type(error).__name__}"})
                 continue
             for node in ast.walk(tree):
+                if not (isinstance(node, ast.ImportFrom) and node.module == "hashlib"):
+                    continue
+                if any(item.name == "sha256" for item in node.names):
+                    entries.append({
+                        "path": relative, "line": node.lineno,
+                        "symbol": "hashlib.sha256-import", "classification": "legacy-task-local",
+                    })
+                    issues.append({"code": "UNTYPED_DIGEST", "detail": f"{relative}:{node.lineno}:hashlib.sha256-import"})
+            for node in ast.walk(tree):
                 if not isinstance(node, ast.Call):
                     continue
                 name = _call_name(node)
@@ -280,6 +352,38 @@ def digest_inventory(root: Path) -> dict[str, Any]:
                 entries.append({"path": relative, "line": node.lineno, "symbol": name, "classification": domain})
                 if domain.startswith("legacy"):
                     issues.append({"code": "UNTYPED_DIGEST", "detail": f"{relative}:{node.lineno}:{name}"})
+    non_python_paths: list[Path] = []
+    scripts = root / "scripts"
+    if scripts.is_dir():
+        non_python_paths.extend(
+            path for path in scripts.rglob("*") if path.is_file() and path.suffix != ".py"
+        )
+    workflows = root / ".github/workflows"
+    if workflows.is_dir():
+        non_python_paths.extend(path for path in workflows.rglob("*") if path.suffix in {".yml", ".yaml"})
+    for path in sorted(set(non_python_paths)):
+        relative = path.relative_to(root).as_posix()
+        try:
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except (OSError, UnicodeDecodeError) as error:
+            issues.append({"code": "INVENTORY_PARSE", "detail": f"{relative}: {type(error).__name__}"})
+            continue
+        for index, line in enumerate(lines):
+            if RAW_DIGEST_COMMAND.search(line) is None:
+                continue
+            context = "\n".join(lines[max(0, index - 4):index + 1]).lower()
+            if f"{DIGEST_DOMAIN_MARKER} {ARTIFACT_BYTE_DOMAIN}" in context:
+                domain = "artifact-bytes"
+            elif f"{DIGEST_DOMAIN_MARKER} {TEXT_EVIDENCE_DOMAIN}" in context:
+                domain = "text-evidence"
+            else:
+                domain = "legacy-non-python"
+            entries.append({
+                "path": relative, "line": index + 1,
+                "symbol": RAW_DIGEST_COMMAND.search(line).group(0), "classification": domain,
+            })
+            if domain.startswith("legacy"):
+                issues.append({"code": "UNTYPED_DIGEST", "detail": f"{relative}:{index + 1}:raw-command"})
     entries.sort(key=lambda item: (item["path"], item["line"], item["symbol"]))
     domain_counts: dict[str, int] = {}
     for entry in entries:

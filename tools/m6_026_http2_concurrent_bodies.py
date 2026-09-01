@@ -117,6 +117,13 @@ def tool_version(command: Sequence[str]) -> str:
     return completed.stdout.strip()[:4096]
 
 
+def source_digests(root: Path = ROOT) -> dict[str, str]:
+    return {
+        relative: evidence_digest.text_evidence_sha256(root / relative)
+        for relative in SOURCE_PATHS
+    }
+
+
 def validate() -> dict[str, Any]:
     require_linux()
     if not ENV_WRAPPER.is_file():
@@ -160,7 +167,7 @@ def validate() -> dict[str, Any]:
             "cjpm test src/internal/http2 --filter=Http2ClientConnectionTest",
             f"cjpm test src/http --filter=Http2ConcurrentResponseBodyProfileTest.{PROFILE_CASE}",
         ],
-        "source_sha256": {relative: evidence_digest.text_evidence_sha256(relative) for relative in SOURCE_PATHS},
+        "source_sha256": source_digests(),
     }
     atomic_json(REPORT, report)
     return report
