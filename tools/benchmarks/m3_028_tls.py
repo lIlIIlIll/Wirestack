@@ -108,11 +108,13 @@ def prepare_wirestack(root: Path, destination: Path, prefix: Sequence[str],
 
 def verify_stdx(reference: Path, archive: Path, extracted: Path) -> tuple[dict[str, Any], Path]:
     data = json.loads(reference.read_text(encoding="utf-8"))
-    if evidence_digest.artifact_byte_sha256(archive) != data["archive_sha256"]:
+    if not evidence_digest.schema_artifact_sha256_equal(
+            evidence_digest.artifact_byte_sha256(archive), data["archive_sha256"]):
         raise GateError("stdx archive digest mismatch")
     dynamic = extracted / data["dynamic_directory"]
     for name, digest in data["module_sha256"].items():
-        if evidence_digest.artifact_byte_sha256(dynamic / name) != digest:
+        if not evidence_digest.schema_artifact_sha256_equal(
+                evidence_digest.artifact_byte_sha256(dynamic / name), digest):
             raise GateError(f"stdx module digest mismatch: {name}")
     return data, dynamic
 

@@ -151,7 +151,8 @@ def verify_source(source: Path, manifest: Mapping[str, Any]) -> dict[str, str]:
     if dirty:
         raise BuildError("AWS-LC source checkout contains tracked or untracked changes")
     content_digest = evidence_digest.text_evidence_bytes_sha256(f"{commit}\n{tree}\n".encode())
-    if content_digest != expected["content_sha256"]:
+    if not evidence_digest.schema_text_sha256_equal(
+            content_digest, expected["content_sha256"]):
         raise BuildError("AWS-LC retained source fingerprint mismatch")
     return {"commit": commit, "tree": tree, "content_sha256": content_digest}
 

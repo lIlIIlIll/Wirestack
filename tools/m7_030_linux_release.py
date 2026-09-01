@@ -497,7 +497,8 @@ def transition_payload(
             "PROVIDER_ID", "provider switch prohibited")
     sbom_version, sbom_archive = provider_sbom_checksum(sbom, str(candidate["providerId"]))
     require(sbom_version == candidate["providerVersion"] and
-            sbom_archive == candidate["providerArchiveSha256"],
+            evidence_digest.schema_artifact_sha256_equal(
+                sbom_archive, candidate["providerArchiveSha256"]),
             "SBOM_STALE", "provider version or archive")
     required_advisory = {
         "schemaVersion", "advisoryId", "severity", "issuedUtc", "expiresUtc",
@@ -506,9 +507,12 @@ def transition_payload(
     _strict_keys(advisory, required_advisory, "ADVISORY_SCHEMA")
     require(advisory["schemaVersion"] == 1 and advisory["severity"] in
             {"LOW", "MEDIUM", "HIGH", "CRITICAL"}, "ADVISORY_SCHEMA", "value")
-    require(advisory["fromManifestSha256"] == installed["providerManifestSha256"] and
-            advisory["toManifestSha256"] == candidate["providerManifestSha256"] and
-            advisory["toSbomSha256"] == candidate["sbomSha256"],
+    require(evidence_digest.schema_text_sha256_equal(
+                advisory["fromManifestSha256"], installed["providerManifestSha256"])
+            and evidence_digest.schema_text_sha256_equal(
+                advisory["toManifestSha256"], candidate["providerManifestSha256"])
+            and evidence_digest.schema_text_sha256_equal(
+                advisory["toSbomSha256"], candidate["sbomSha256"]),
             "ADVISORY_BINDING", "transition")
     for field in ("fromManifestSha256", "toManifestSha256", "toSbomSha256"):
         _strict_digest(advisory[field], field)
@@ -644,7 +648,8 @@ def run_update_rehearsal(private: Path, public: bytes, output: Path) -> dict[str
         "upgrade": {"fromSequence": 100, "toSequence": upgraded["sequence"]},
         "rollback": {"fromSequence": 101, "toSequence": restored["sequence"]},
         "advisoryIds": [advisory["advisoryId"], rollback_advisory["advisoryId"]],
-        "sbomUpdated": candidate["sbomSha256"] != installed["sbomSha256"],
+        "sbomUpdated": not evidence_digest.schema_text_sha256_equal(
+            candidate["sbomSha256"], installed["sbomSha256"]),
     }
 
 

@@ -270,6 +270,45 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             self.assertEqual("FAIL", report["status"])
             self.assertEqual("UNTYPED_DIGEST", report["issues"][0]["code"])
 
+    def test_inventory_scans_folded_composite_commands_and_helpers(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            action = root / ".github/actions/evidence/action.yaml"
+            action.parent.mkdir(parents=True)
+            action.write_text(
+                "runs:\n  using: composite\n  steps:\n    - shell: bash\n"
+                "      run: >-\n"
+                "        # wirestack-digest-domain: artifact-bytes-v1\n"
+                "        sha256sum\n"
+                "        docs/evidence/report.json\n",
+                encoding="utf-8",
+            )
+            (action.parent / "digest.sh").write_text(
+                "sha256sum docs/evidence/report.json\n", encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertEqual(2, len(report["issues"]))
+            self.assertIn("invalid-artifact-on-text", report["domain_counts"])
+            self.assertIn("legacy-non-python", report["domain_counts"])
+
+    def test_inventory_rejects_named_digest_field_comparison(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            path = root / "tools/gates/compare.py"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "def matches(report, expected):\n"
+                "    return report.get('manifest_sha256') == expected\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertTrue(any(
+                issue["detail"].endswith("bare-sha256-comparison")
+                for issue in report["issues"]
+            ))
+
     def test_inventory_rejects_artifact_marker_with_shell_variable_operand(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
             root = Path(directory)

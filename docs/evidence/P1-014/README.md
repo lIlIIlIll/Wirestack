@@ -20,14 +20,17 @@ Windows report for PR #151 source head `f96eab4c` (merge revision `7fac7372`).
 - All repository SHA-256 callsites use an explicit text-evidence or artifact-byte
   entry. Python direct imports, assigned subprocess commands, `os.system`/`os.popen`
   launches, `openssl dgst`, embedded Python SHA-256 and unmarked shell/workflow
-  hash commands fail the guard. Python files under both `tools/` and `scripts/`
-  non-Python files under `tools/`, and composite actions under `.github/actions/`
-  are scanned. Pure local wrappers propagate
+  hash commands fail the guard. Python files under `tools/`, `scripts/` and
+  `.github/actions/`, non-Python files under `tools/`, and every composite
+  action/helper under `.github/actions/` are scanned. Folded YAML commands are
+  reconstructed before operand classification, and unreadable UTF-8 helpers
+  fail closed. Pure local wrappers propagate
   their digest domain and forwarded argument through arbitrary wrapper depth;
   assigned callable aliases are resolved to the same typed operation.
   Typed equality helpers parse both serialized domains and reject bare strings;
-  fixed string fields owned by pre-existing task or protocol schemas use
-  separately named schema-domain comparators. The inventory is required to
+  fixed string and digest-map fields owned by pre-existing task or protocol
+  schemas use separately named schema-domain comparators. Direct equality on
+  every digest-bearing field name is rejected. The inventory is required to
   contain no legacy entry.
 - The architecture guard rejects raw SHA-256 outside the typed implementation,
   ambiguous digest helpers, positional, keyword and assigned text paths entering
@@ -56,11 +59,11 @@ entries remain unchanged because they belong to other tasks.
 | Evidence | Result |
 |---|---|
 | Test-plan validator | PASS, 13 paths, 7 scenarios, 11 tests |
-| P1 task-contract unit and fault-injection tests | PASS, 98 tests |
-| Repository-tool Python regressions | PASS, 387 tests |
+| P1 task-contract unit and fault-injection tests | PASS, 103 tests |
+| Repository-tool Python regressions | PASS, 392 tests |
 | Architecture guard | PASS, 0 violations |
 | Linux CRLF probe | PASS |
-| Digest callsite inventory | PASS, 367 explicitly classified calls, 0 issues |
+| Digest callsite inventory | PASS, 389 explicitly classified calls, 0 issues |
 | GitHub Windows CRLF probe | PASS, run `33520295460`, source head `f96eab4c`, merge `7fac7372`; effective `text` and `eol` attributes are `unspecified`, tracked fixture checked out as CRLF |
 | Hosted exact-SHA CI | PASS, all 25 checks at `f96eab4c`, including Gate Harness, Windows CRLF and provider matrix |
 | `scripts/check-fast --json` | PASS |

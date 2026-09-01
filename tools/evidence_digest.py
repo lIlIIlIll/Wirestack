@@ -170,6 +170,15 @@ def schema_artifact_sha256_equal(left: Any, right: Any) -> bool:
         return False
 
 
+def schema_text_sha256_map_equal(left: Any, right: Any) -> bool:
+    """Compare a schema-owned mapping of text-digest SHA-256 strings."""
+    if not isinstance(left, Mapping) or not isinstance(right, Mapping):
+        return False
+    if set(left) != set(right) or not all(isinstance(key, str) for key in left):
+        return False
+    return all(schema_text_sha256_equal(left[key], right[key]) for key in left)
+
+
 def signed_payload_sha256(path: Path) -> str:
     """Return the exact byte digest of a payload whose signature binds raw bytes."""
     return artifact_byte_sha256(path)
@@ -397,6 +406,7 @@ _CALL_DOMAINS = {
     "artifact_bytes_sha256": "artifact-bytes",
     "signed_payload_sha256": "artifact-bytes",
     "schema_text_sha256_equal": "text-evidence",
+    "schema_text_sha256_map_equal": "text-evidence",
     "schema_artifact_sha256_equal": "artifact-bytes",
     "text_evidence_inventory_sha256": "text-evidence",
     "sha256_path": "legacy-task-local",
@@ -664,6 +674,46 @@ def _declared_non_python_domains(root: Path) -> dict[tuple[str, str], str]:
     return result
 
 
+def _logical_non_python_command(lines: Sequence[str], index: int) -> str:
+    """Return the complete YAML block command containing a physical line."""
+    physical = lines[index]
+    physical_indent = len(physical) - len(physical.lstrip())
+    for marker_index in range(index - 1, -1, -1):
+        candidate = lines[marker_index]
+        if not candidate.strip():
+            continue
+        candidate_indent = len(candidate) - len(candidate.lstrip())
+        if candidate_indent >= physical_indent:
+            continue
+        if re.search(r"\brun\s*:\s*[>|][+-]?\s*(?:#.*)?$", candidate.strip()) is None:
+            break
+        block: list[str] = []
+        for block_line in lines[marker_index + 1:]:
+            if block_line.strip():
+                indent = len(block_line) - len(block_line.lstrip())
+                if indent <= candidate_indent:
+                    break
+            block.append(block_line.strip())
+        return " ".join(value for value in block if value)
+    return physical
+
+
+def _digest_field_accesses(node: ast.AST) -> set[str]:
+    """Find mapping keys whose names declare a SHA-256 digest field."""
+    fields: set[str] = set()
+    for child in ast.walk(node):
+        key: Any = None
+        if isinstance(child, ast.Subscript) and isinstance(child.slice, ast.Constant):
+            key = child.slice.value
+        elif (isinstance(child, ast.Call) and isinstance(child.func, ast.Attribute)
+              and child.func.attr == "get" and child.args
+              and isinstance(child.args[0], ast.Constant)):
+            key = child.args[0].value
+        if isinstance(key, str) and "sha256" in key.lower():
+            fields.add(key)
+    return fields
+
+
 def digest_inventory(root: Path) -> dict[str, Any]:
     entries: list[dict[str, Any]] = []
     issues: list[dict[str, str]] = []
@@ -672,7 +722,7 @@ def digest_inventory(root: Path) -> dict[str, Any]:
     except DigestError as error:
         declared_non_python = {}
         issues.append({"code": error.code, "detail": error.detail})
-    for base in (root / "tools", root / "scripts"):
+    for base in (root / "tools", root / "scripts", root / ".github/actions"):
         if not base.is_dir():
             continue
         for path in sorted(base.rglob("*.py")):
@@ -747,8 +797,8 @@ def digest_inventory(root: Path) -> dict[str, Any]:
             for node in ast.walk(tree):
                 if not isinstance(node, ast.Compare) or relative == "tools/evidence_digest.py":
                     continue
-                expression = ast.unparse(node)
-                if re.search(r"(?:get\(['\"]sha256['\"]\)|\[['\"]sha256['\"]\])", expression):
+                if (any(isinstance(operator, (ast.Eq, ast.NotEq)) for operator in node.ops)
+                        and _digest_field_accesses(node)):
                     entries.append({
                         "path": relative, "line": node.lineno,
                         "symbol": "bare-sha256-comparison", "classification": "legacy-task-local",
@@ -778,7 +828,8 @@ def digest_inventory(root: Path) -> dict[str, Any]:
     if actions.is_dir():
         non_python_paths.extend(
             path for path in actions.rglob("*")
-            if path.name in {"action.yml", "action.yaml"}
+            if path.is_file() and path.suffix != ".py"
+            and not any(part in {"__pycache__", "build", "dist"} for part in path.parts)
         )
     for path in sorted(set(non_python_paths)):
         relative = path.relative_to(root).as_posix()
@@ -790,11 +841,13 @@ def digest_inventory(root: Path) -> dict[str, Any]:
         for index, line in enumerate(lines):
             if RAW_DIGEST_COMMAND.search(line) is None:
                 continue
+            logical_command = _logical_non_python_command(lines, index)
             context = "\n".join(lines[max(0, index - 4):index + 1]).lower()
             declared_domain = declared_non_python.get((relative, line.strip()))
+            operand_source = line if declared_domain is not None else logical_command
             obvious_text = (
-                TEXT_COMMAND_OPERAND.search(line) is not None
-                or SHELL_VARIABLE_OPERAND.search(line) is not None
+                TEXT_COMMAND_OPERAND.search(operand_source) is not None
+                or SHELL_VARIABLE_OPERAND.search(operand_source) is not None
             )
             if f"{DIGEST_DOMAIN_MARKER} {ARTIFACT_BYTE_DOMAIN}" in context:
                 domain = "invalid-artifact-on-text" if obvious_text else "artifact-bytes"

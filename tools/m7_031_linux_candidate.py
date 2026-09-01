@@ -373,14 +373,18 @@ def validate_current_sources(
     qualification = documents["m7_021"]
     m7_021_linux_release.validate_report(qualification, root)
     current_release_source = m7_021_linux_release.source_tree_sha256(root)
-    require(current_release_source == qualification.get("source_tree_sha256"),
+    require(evidence_digest.schema_text_sha256_equal(
+                current_release_source, qualification.get("source_tree_sha256")),
             "SOURCE_STALE", "M7-021 production source tree")
 
     current_fuzz_source = m7_023_linux_fuzz.source_fingerprint(root)
-    require(current_fuzz_source == documents["m7_023"].get("source_sha256"),
+    require(evidence_digest.schema_text_sha256_equal(
+                current_fuzz_source, documents["m7_023"].get("source_sha256")),
             "SOURCE_STALE", "M7-023 fuzz source")
     manifest = safe_path(root, "tools/gates/campaigns/m7-023-linux-fuzz.json")
-    require(evidence_digest.text_evidence_sha256(manifest) == documents["m7_023"].get("manifest_sha256"),
+    require(evidence_digest.schema_text_sha256_equal(
+                evidence_digest.text_evidence_sha256(manifest),
+                documents["m7_023"].get("manifest_sha256")),
             "SOURCE_STALE", "M7-023 manifest")
     m7_023_linux_fuzz.load_manifest(root, manifest)
 

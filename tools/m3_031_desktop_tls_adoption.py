@@ -261,7 +261,7 @@ def validate_hosted_run(root: Path, raw: Mapping[str, Any]) -> dict[str, Any]:
             value not in "0123456789abcdef" for value in revision):
         raise AdoptionError("STALE_REVISION", "hosted-run revision is not an exact SHA")
     expected = hosted_input_sha256(root)
-    if raw.get("source_sha256") != expected:
+    if not evidence_digest.schema_text_sha256_map_equal(raw.get("source_sha256"), expected):
         raise AdoptionError("STALE_SOURCE", "hosted provider inputs differ from retained run")
     artifacts = raw.get("artifacts")
     if not isinstance(artifacts, list) or len(artifacts) != 2:
@@ -284,10 +284,14 @@ def validate_hosted_run(root: Path, raw: Mapping[str, Any]) -> dict[str, Any]:
     for name, (result_relative, validation_relative) in expected_artifacts.items():
         artifact = by_name[name]
         if (
-            artifact.get("provider_result_sha256")
-            != evidence_digest.text_evidence_sha256(root / result_relative)
-            or artifact.get("validation_sha256")
-            != evidence_digest.text_evidence_sha256(root / validation_relative)
+            not evidence_digest.schema_text_sha256_equal(
+                artifact.get("provider_result_sha256"),
+                evidence_digest.text_evidence_sha256(root / result_relative),
+            )
+            or not evidence_digest.schema_text_sha256_equal(
+                artifact.get("validation_sha256"),
+                evidence_digest.text_evidence_sha256(root / validation_relative),
+            )
         ):
             raise AdoptionError(
                 "STALE_SOURCE", f"{name}: retained files differ from hosted artifact"
@@ -668,7 +672,10 @@ def validate_dependency_evidence(
                 or validation.get("task_id") != task_id
                 or validation.get("status") != "PASS"
                 or validation.get("failures") != []
-                or validation.get("report_sha256") != evidence_digest.text_evidence_sha256(report_path)
+                or not evidence_digest.schema_text_sha256_equal(
+                    validation.get("report_sha256"),
+                    evidence_digest.text_evidence_sha256(report_path),
+                )
                 or report.get("schema_version") != 1
                 or report.get("task_id") != task_id
                 or report.get("decision") != "PASS"

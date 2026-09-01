@@ -306,12 +306,14 @@ def classify(cases: Mapping[str, Mapping[str, Any]],
 def load_and_verify_stdx(reference_path: Path, archive: Path,
                          extracted_root: Path) -> tuple[dict[str, Any], Path]:
     reference = json.loads(reference_path.read_text(encoding="utf-8"))
-    if evidence_digest.artifact_byte_sha256(archive) != reference["archive_sha256"]:
+    if not evidence_digest.schema_artifact_sha256_equal(
+            evidence_digest.artifact_byte_sha256(archive), reference["archive_sha256"]):
         raise BenchmarkError("stdx archive digest does not match the pinned reference")
     dynamic_dir = extracted_root / reference["dynamic_directory"]
     for filename, expected in reference["module_sha256"].items():
         path = dynamic_dir / filename
-        if not path.is_file() or evidence_digest.artifact_byte_sha256(path) != expected:
+        if not path.is_file() or not evidence_digest.schema_artifact_sha256_equal(
+                evidence_digest.artifact_byte_sha256(path), expected):
             raise BenchmarkError(f"stdx module digest mismatch: {filename}")
     return reference, dynamic_dir
 

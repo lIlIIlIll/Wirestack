@@ -195,7 +195,9 @@ def validate_review(root: Path, request: Mapping[str, Any], review: Mapping[str,
     require(isinstance(target, dict), "SCHEMA", "target")
     exact_keys(target, {"packagePath", "packageSha256"}, "target")
     require(target["packagePath"] == request["packagePath"] and
-        target["packageSha256"] == request["packageSha256"], "TARGET_MISMATCH", "M7-028 package")
+        evidence_digest.schema_text_sha256_equal(
+            target["packageSha256"], request["packageSha256"]),
+        "TARGET_MISMATCH", "M7-028 package")
 
     reviewer = review["reviewer"]
     require(isinstance(reviewer, dict), "SCHEMA", "reviewer")

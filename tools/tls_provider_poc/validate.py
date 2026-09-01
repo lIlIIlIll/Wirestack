@@ -111,8 +111,9 @@ def validate_tool_identity(value: Any, name: str) -> None:
     require(isinstance(output, str) and output and
             len(output.encode("utf-8")) <= MAX_TOOL_VERSION_BYTES,
             f"{name} bounded version output")
-    require(value.get("output_sha256") ==
-            evidence_digest.text_evidence_bytes_sha256(output.encode("utf-8")),
+    require(evidence_digest.schema_text_sha256_equal(
+                value.get("output_sha256"),
+                evidence_digest.text_evidence_bytes_sha256(output.encode("utf-8"))),
             f"{name} version digest")
 
 def validate_build_provenance(provenance: Any, provider: str,
@@ -166,7 +167,9 @@ def validate_build_provenance(provenance: Any, provider: str,
             "provider build environment total bound")
     require(bool(environment["PATH"]), "provider build PATH required")
     require(provenance.get("patches") == [], "provider patch set must be explicit")
-    require(provenance.get("patch_set_sha256") == evidence_digest.text_evidence_bytes_sha256(b"[]\n"),
+    require(evidence_digest.schema_text_sha256_equal(
+                provenance.get("patch_set_sha256"),
+                evidence_digest.text_evidence_bytes_sha256(b"[]\n")),
             "provider patch-set digest")
     expected_instrumentation = "address+undefined-sanitizer" if diagnostic else "none"
     require(provenance.get("instrumentation") == expected_instrumentation,
@@ -567,7 +570,8 @@ def validate_license_bundle(result_path: Path, result: Mapping[str, Any],
     require(manifest.get("task_id") == "M0-016", "provider license manifest task")
     require(manifest.get("provider") == result["provider"],
             "provider license manifest provider")
-    require(manifest.get("source_content_sha256") == result["source"]["content_sha256"],
+    require(evidence_digest.schema_text_sha256_equal(
+                manifest.get("source_content_sha256"), result["source"]["content_sha256"]),
             "provider license manifest source digest")
     files = manifest.get("files")
     require(isinstance(files, list) and len(files) == info["file_count"],
