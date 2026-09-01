@@ -315,6 +315,11 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             task_path = root / "tools/tasks/M3-030.json"
             task_path.parent.mkdir(parents=True, exist_ok=True)
             task_path.write_text(json.dumps(task), encoding="utf-8")
+            status_path = root / "docs/planning/status.md"
+            status_path.parent.mkdir(parents=True, exist_ok=True)
+            status_path.write_text(
+                "| M3-030 | COMPLETE | evidence | rationale |\n", encoding="utf-8"
+            )
             evidence_path = root / "docs/evidence/M3-030/evidence.json"
             evidence_path.parent.mkdir(parents=True, exist_ok=True)
             report_paths = adoption.RETAINED_EVIDENCE
@@ -338,6 +343,15 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             retained = adoption.validate_retained_evidence(root)
             self.assertEqual("PASS", retained["status"])
             self.assertEqual([], retained["changed_since_m3_030"])
+            status_path.write_text(
+                "| M3-030 | BLOCKED | evidence | rationale |\n", encoding="utf-8"
+            )
+            self.assert_code(
+                "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
+            )
+            status_path.write_text(
+                "| M3-030 | COMPLETE | evidence | rationale |\n", encoding="utf-8"
+            )
             evidence["source_sha256"].pop("build.cj")
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             self.assert_code(
