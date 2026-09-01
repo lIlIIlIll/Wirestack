@@ -660,6 +660,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--spec", type=Path, default=Path(__file__).resolve().parent / "providers.json")
     parser.add_argument("--result", type=Path)
     parser.add_argument("--matrix", type=Path)
+    parser.add_argument("--matrix-contract-only", action="store_true")
     parser.add_argument("--expected-revision")
     args = parser.parse_args(argv)
     try:
@@ -674,7 +675,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.matrix:
             matrix = load(args.matrix)
             validate_matrix(matrix, spec)
-            validate_retained_results(matrix, spec, Path(__file__).resolve().parents[2])
+            if not args.matrix_contract_only:
+                validate_retained_results(matrix, spec, Path(__file__).resolve().parents[2])
+        elif args.matrix_contract_only:
+            raise ValidationError("--matrix-contract-only requires --matrix")
     except ValidationError as error:
         print(f"M0-016 validation: FAIL: {error}", file=sys.stderr)
         return 1

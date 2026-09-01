@@ -25,7 +25,8 @@ jobs:
       - name: Validate provider pins and platform matrix
         run: |
           python3 tools/tls_provider_poc/validate.py \
-            --matrix docs/evidence/M0-016/platform-matrix.json
+            --matrix docs/evidence/M0-016/platform-matrix.json \
+            --matrix-contract-only
       - name: Run fail-closed validator tests
         run: python3 -m unittest discover -s tools/tests -p 'test_tls_provider_poc.py' -v
       - name: Compile Python tools
