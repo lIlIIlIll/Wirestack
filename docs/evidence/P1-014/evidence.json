@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-01T08:21:29.528380Z",
+  "generated_at_utc": "2026-09-01T08:33:04.674452Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -22,7 +22,7 @@
       "path": "docs/evidence/P1-014/digest-inventory.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "132f1fa640e0a48f051eab5ead2d248272834880403b84c30d63def22a1bfb34"
+        "sha256": "0aa45f28f1352dccd0bb2e80bf39b2cb669fb62b1424f3fcc04e08c03ebf6996"
       },
       "source_task": "P1-014"
     },
@@ -40,7 +40,7 @@
       "path": "docs/evidence/P1-014/linux-crlf.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "9bc876cbeacb26854fc1aa4b435b8a6a8240a3e53173c2d18605fbc3026be9e6"
+        "sha256": "8da0d8b9a9445308e4856d27f69e18258b1948556be63a39e6ede3a66d6bd433"
       },
       "source_task": "P1-014"
     },
@@ -49,12 +49,12 @@
       "path": "docs/evidence/P1-014/windows-crlf.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "f89f0f4f39672fd23ca1d0fa3c039bdd7e6d480c93608f53278f10dff0453aa5"
+        "sha256": "7b8861d16fbba0b7c0d407b0736c343b54b8d228291529ce464466e008ac15f2"
       },
       "source_task": "P1-014"
     }
   ],
-  "revision": "cfd89ad3401fff57e764f5119b1381bddf90b62e",
+  "revision": "8d34cf06866a6a97636f0add8a822492aa7c3695",
   "schema_version": 2,
   "source_sha256": {
     ".github/workflows/linux-release-attestation.yml": {
@@ -87,7 +87,7 @@
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "b8b0fb46db65572f87c9d33c894d288a70582d8f6da44921a687319e0e289953"
+      "sha256": "aaf904c8c9f6ab4e31944ecd95705eab753aa62ac309ef51ab49336af7b19d23"
     },
     "tools/architecture_guard.py": {
       "domain": "text-utf8-lf-v1",
@@ -247,7 +247,7 @@
     },
     "tools/m7_021_linux_release.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "66123ec78b8a9d307d0af98b3938393350617f1c37e279001ca0ed987761440b"
+      "sha256": "ac6d677c9e56ba4cf757d5cd87f4537913188156b9b0ea2553dce190fe52e17e"
     },
     "tools/m7_022_linux_release_soak.py": {
       "domain": "text-utf8-lf-v1",
@@ -291,7 +291,7 @@
     },
     "tools/tasks/P1-014.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "c56c6f998e583941939645d69a70894e926801441254e35732ed526c53124dd6"
+      "sha256": "d9d889a2b3706b171e538326140d6775da68be27c70fcdecdba68e189412e69a"
     },
     "tools/tests/test_architecture_guard.py": {
       "domain": "text-utf8-lf-v1",
@@ -316,6 +316,10 @@
     "tools/tests/test_m7_020_architecture_audit.py": {
       "domain": "text-utf8-lf-v1",
       "sha256": "050b90e7415f05c8ddddec964781a3de3d74e4f7a4adb298b41fef2bd80c1dbb"
+    },
+    "tools/tests/test_m7_021_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "32dc895a1ec3619511aad065b14da6f3336a115986c6d1768f6247caab66d2fd"
     },
     "tools/tests/test_m7_022_linux_release_soak.py": {
       "domain": "text-utf8-lf-v1",
