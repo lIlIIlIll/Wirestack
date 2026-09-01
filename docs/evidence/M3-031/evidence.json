@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-01T02:19:57.836224Z",
+  "generated_at_utc": "2026-09-01T02:36:26.292805Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -53,11 +53,11 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/task-check.json",
-      "sha256": "4966286e6738a3da9892bfd05db6e8280fb38e89d774a17f63ccafbea3e245d0",
+      "sha256": "20cccc5b034eb2681bdbe0bfc4630a2588fbea1abcde89ad937c315bbb8dfb40",
       "source_task": "M3-031"
     }
   ],
-  "revision": "6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2",
+  "revision": null,
   "schema_version": 1,
   "source_sha256": {
     ".gitattributes": "db1f9a77293f64b853a8219c44ea9ab1c49c1268f25efd606b3d0a3b9e8ec3c3",
@@ -77,7 +77,7 @@
     "docs/evidence/M3-030/native-abi-report.json": "03881988db42d4e32579fa1fff2ff6e4ab045ed2fab3eedee26ccae0a2d91d35",
     "docs/evidence/M3-030/test-provider-results.json": "f57e6ac10d7a4977ea427fef1b69ed8649a2a3133187e566fdc455090263e69a",
     "docs/evidence/M3-031/README.md": "b4d85d557ffd8578f5003c7ae95ee472bc774295a32631571578ef258c08babf",
-    "docs/evidence/M3-031/test-plan.md": "8767f5e944a094fbe843c930bc219e989137c48ed61060aab6ad71b614aee308",
+    "docs/evidence/M3-031/test-plan.md": "12f5f72557a918c96e6f20d38b74950b414c59d276df5fdc82418b56021e0f75",
     "docs/planning/implementation-backlog.md": "e4db77941b5eb54c5cb1f5d3ed896da2635131d5e1ddc5a9f795c95e52dd575a",
     "docs/planning/status.md": "6a8c7524ec709fcaadf9a5bb52414edce7fbcea9be698e94f07f535efb7e8b1b",
     "native/tls/aws_lc/provider.json": "ff4d39359a8ef49ede8272698fe306b7421df2fea04b44744483245f34f619b4",
@@ -94,12 +94,12 @@
     "src/internal/trust/hostname_test.cj": "af8c24a4f0ea856c8afb77aec5c817dd16feb27d1df9f80d1f3263d3bd5de17d",
     "src/internal/trust/trust_test.cj": "ef79ec1366bce927aa4f1aca8718ecd2dba63d1aa2b1014b6623eaceac9ff7b7",
     "src/trust.cj": "893860568a87bdba369a7ef48a955701fcca7354a079461f51e517ed24413268",
-    "tools/m3_031_desktop_tls_adoption.py": "4e9984c1af3c0c26dbd8c4b2fa521cae02af602ff6767369ec1af980389e30d6",
+    "tools/m3_031_desktop_tls_adoption.py": "23b51e04bfd95319a427a26547f5fe764cbd4697e28c79eebc4948696b0b9dba",
     "tools/repository/repository_tooling.py": "6df2e851944b8a12889082d5ea7c5bbc6b041563c42b86a80cde3ed540525ba9",
     "tools/tasks/M2-004.json": "6baeb6d662ad3fb9b47ee81ef94733edc3c537d312656b94c83f915579fff9c2",
     "tools/tasks/M2-006.json": "41aea4935ef444048e246593770b88bc6eef9fc963c70fbb8c8179ffb0fd37c5",
     "tools/tasks/M3-031.json": "0c1904dc9d8a6445d95549c2e4d25fb23dba49071574405c91d939a832ae3d59",
-    "tools/tests/test_m3_031_desktop_tls_adoption.py": "5d03718e140c339fe12bc172c62a36dd182809d9350857da244c14c0aaa034a9",
+    "tools/tests/test_m3_031_desktop_tls_adoption.py": "6e78d745780d0e22d4e5975d2ea30de9482a6f0c2325a5af822f68ca54397c26",
     "tools/tests/test_m7_linux_task_graph.py": "c6bd40cceac15ffe35f737d5e63daee1021b682f4aa6887dd46c9ed068b7f38c",
     "tools/tls_provider/selection.json": "de802ea6839e42327a6d30df4ac5fcdca6f60205f04ed223082346833203dc0b",
     "tools/tls_provider_poc/openssl_memory_poc.c": "b46b7e5f3f88edd0879b709f0814bc6cc42391dd1b864523ee8e4d2b9de60933",
