@@ -55,6 +55,16 @@ class M7021LinuxReleaseTest(unittest.TestCase):
         self.assertEqual(1, len(text_digests))
         self.assertEqual(3, len(payload_digests))
 
+    def test_main_translates_invalid_text_digest_to_controlled_failure(self) -> None:
+        error = release.evidence_digest.DigestError("TEXT_UTF8", "license is not valid UTF-8")
+        args = mock.Mock(root=release.ROOT, output_dir=None, offline=True)
+        with mock.patch.object(release, "parse_args", return_value=args), \
+                mock.patch.object(release, "qualify", side_effect=error), \
+                mock.patch("sys.stdout", new_callable=io.StringIO) as stdout:
+            self.assertEqual(1, release.main())
+        self.assertIn("M7-021 Linux release qualification: FAIL", stdout.getvalue())
+        self.assertNotIn("Traceback", stdout.getvalue())
+
     def test_production_sources_exclude_every_test_file(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -933,6 +933,12 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
         non_python_paths.extend(
             path for path in workflows_root.rglob("*") if path.suffix in {".yml", ".yaml"}
         )
+    actions_root = root / ".github/actions"
+    if actions_root.is_dir():
+        non_python_paths.extend(
+            path for path in actions_root.rglob("*")
+            if path.name in {"action.yml", "action.yaml"}
+        )
     for path in sorted(set(non_python_paths)):
         relative = path.relative_to(root).as_posix()
         try:

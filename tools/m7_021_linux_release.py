@@ -590,7 +590,7 @@ def main() -> int:
     output = (args.output_dir or root / "dist/m7-021").resolve()
     try:
         artifact, report_path, report = qualify(root, output, offline=args.offline)
-    except ReleaseError as error:
+    except (ReleaseError, evidence_digest.DigestError) as error:
         print(f"M7-021 Linux release qualification: FAIL: {error}")
         return 1
     print(
