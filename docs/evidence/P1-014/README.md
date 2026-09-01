@@ -4,8 +4,8 @@
 
 P1-014 is complete. Linux and GitHub Windows CRLF fault injection pass, every
 digest callsite has an explicit domain, and the task-level and canonical
-repository checks pass. GitHub Actions run `33498863198` produced the retained
-Windows report for PR #151 source head `b3b300e1` (merge revision `40b76be4`).
+repository checks pass. GitHub Actions run `33502029033` produced the retained
+Windows report for PR #151 source head `5d5339ba` (merge revision `b086874a`).
 
 ## Implemented boundary
 
@@ -19,9 +19,11 @@ Windows report for PR #151 source head `b3b300e1` (merge revision `40b76be4`).
   JSON reports and manifest source paths.
 - All repository SHA-256 callsites use an explicit text-evidence or artifact-byte
   entry. Python direct imports, assigned subprocess commands, `os.system`/`os.popen`
-  launches and unmarked shell/workflow hash commands fail the guard. Python files
-  under both `tools/` and `scripts/` are scanned. The inventory contains 308
-  classified calls and no legacy entry.
+  launches, `openssl dgst`, embedded Python SHA-256 and unmarked shell/workflow
+  hash commands fail the guard. Python files under both `tools/` and `scripts/`
+  are scanned. Pure local wrappers propagate their digest domain and forwarded
+  argument through arbitrary wrapper depth. The inventory contains 309 classified
+  calls and no legacy entry.
 - The architecture guard rejects raw SHA-256 outside the typed implementation,
   ambiguous digest helpers, positional, keyword and assigned text paths entering
   the byte domain, untyped repository-evidence comparisons and UTF-8-to-byte
@@ -46,13 +48,13 @@ entries remain unchanged because they belong to other tasks.
 | Evidence | Result |
 |---|---|
 | Test-plan validator | PASS, 13 paths, 7 scenarios, 11 tests |
-| P1 task-contract unit and fault-injection tests | PASS, 83 tests |
-| Repository-tool Python regressions | PASS, 368 tests |
+| P1 task-contract unit and fault-injection tests | PASS, 87 tests |
+| Repository-tool Python regressions | PASS, 372 tests |
 | Architecture guard | PASS, 0 violations |
 | Linux CRLF probe | PASS |
-| Digest callsite inventory | PASS, 308 explicitly classified calls, 0 issues |
-| GitHub Windows CRLF probe | PASS, run `33498863198`, source head `b3b300e1`, merge `40b76be4`; effective `text` attribute is `unspecified`, tracked fixture checked out as CRLF |
-| Hosted Gate Harness | PASS, run `33498863294` |
+| Digest callsite inventory | PASS, 309 explicitly classified calls, 0 issues |
+| GitHub Windows CRLF probe | PASS, run `33502029033`, source head `5d5339ba`, merge `b086874a`; effective `text` attribute is `unspecified`, tracked fixture checked out as CRLF |
+| Hosted Gate Harness | PASS, run `33502029116` |
 | `scripts/check-fast --json` | PASS |
 | `scripts/check` | PASS, including 178 gate Python tests, 24 benchmark Python tests, and 588 passed/23 skipped Cangjie tests |
 | `scripts/check-task P1-014` | PASS, all four commands passed |
