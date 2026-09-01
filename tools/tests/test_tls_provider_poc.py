@@ -263,10 +263,12 @@ class ProviderPocValidationTests(unittest.TestCase):
         cls.spec = json.loads((ROOT / "tools/tls_provider_poc/providers.json").read_text())
         cls.matrix = json.loads((ROOT / "docs/evidence/M0-016/platform-matrix.json").read_text())
 
-    def test_canonical_spec_and_matrix(self):
+    def test_canonical_spec_and_matrix_reject_stale_license_digests(self):
         validator.validate_spec(self.spec)
         validator.validate_matrix(self.matrix, self.spec)
-        validator.validate_retained_results(self.matrix, self.spec, ROOT)
+        with self.assertRaisesRegex(
+                validator.ValidationError, "provider license file digest mismatch"):
+            validator.validate_retained_results(self.matrix, self.spec, ROOT)
         for provider in self.spec["providers"]:
             workflow = provider["security_update"]["update_workflow"]
             self.assertTrue((ROOT / workflow).is_file())
@@ -1191,6 +1193,46 @@ class ProviderPocValidationTests(unittest.TestCase):
             manifest = output / info["path"]
             manifest.write_bytes(manifest.read_bytes().replace(b"\n", b"\r\n"))
             self.assertEqual(info["sha256"], evidence_digest.text_evidence_sha256(manifest))
+
+    def test_license_file_metadata_is_line_ending_stable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            observed_digests = set()
+            for index, raw in enumerate(
+                    (b"alpha\nbeta\n", b"alpha\r\nbeta\r\n", b"alpha\rbeta\r")):
+                with self.subTest(raw=raw):
+                    source = root / f"source-{index}"
+                    source.mkdir()
+                    (source / "LICENSE").write_bytes(raw)
+                    output = root / f"output-{index}"
+                    result = complete_result(self.spec)
+                    info = runner.create_license_bundle(
+                        source, output, "aws-lc", result["source"])
+                    result["build"]["license_bundle"] = info
+                    manifest = json.loads(
+                        (output / "license-bundle/manifest.json").read_text())
+                    observed_digests.add(manifest["files"][0]["sha256"])
+                    validator.validate_license_bundle(output / "result.json", result)
+            self.assertEqual(1, len(observed_digests))
+
+    def test_license_file_invalid_utf8_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            source.mkdir()
+            (source / "LICENSE").write_bytes(b"valid\n\xff")
+            with self.assertRaisesRegex(runner.PocError, "not valid UTF-8"):
+                runner.create_license_bundle(
+                    source, root, "aws-lc", {"content_sha256": "0" * 64})
+
+            (source / "LICENSE").write_bytes(b"valid\n")
+            result = complete_result(self.spec)
+            info = runner.create_license_bundle(
+                source, root, "aws-lc", result["source"])
+            result["build"]["license_bundle"] = info
+            (root / "license-bundle/files/LICENSE").write_bytes(b"valid\n\xff")
+            with self.assertRaisesRegex(validator.ValidationError, "not valid UTF-8"):
+                validator.validate_license_bundle(root / "result.json", result)
 
     def test_matrix_retained_result_validates_durable_license_bundle(self):
         with tempfile.TemporaryDirectory() as directory:
