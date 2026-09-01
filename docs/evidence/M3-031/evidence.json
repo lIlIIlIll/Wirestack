@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-01T03:11:00.311416Z",
+  "generated_at_utc": "2026-09-01T03:21:59.572795Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -53,7 +53,7 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/task-check.json",
-      "sha256": "82aad22aab4b2da682d64bda4ac0e451437c5ea9ad2b7b9ac959bfe043d58c20",
+      "sha256": "acb556c33568184f785fe442bb70ab5e90ba0dfe658a96b9ffa974c4561a71e7",
       "source_task": "M3-031"
     }
   ],
@@ -62,7 +62,7 @@
   "source_sha256": {
     ".gitattributes": "42c5a86740c3c13031c780565d6e20fa99544109c9c88fe21f49d0ed68010451",
     ".github/workflows/m3-031-desktop-tls-adoption.yml": "958a221cf44ae477359e851fd533ab0b3d304f3f2d0ff313a15171a705e662d4",
-    ".gitignore": "4036c86470dc094cdbd56bac65872984ca2c246a4b0f809937532625ab79c21d",
+    ".gitignore": "dc88b882ae70b4f85eb93af22250861cddaf023b4d818bb25d63708bde86b1f7",
     "docs/architecture/adr/0007-desktop-tls-adoption.md": "af8c330dbc948666168d4f09332e4328e6face6db80d125db1d5467c72aa08d3",
     "docs/evidence/M2-004/evidence.json": "5ddf3035770ee4bea5120713cc91538557c682e53707c3eabc6aea1dfdb81459",
     "docs/evidence/M2-004/windows-x86_64/report.json": "5d8ba504bc883223ff8c7aff72def24ba27026b5f5d59cf023fb6e499bf1372d",
@@ -132,7 +132,7 @@
     "tools/tasks/M2-004.json": "6baeb6d662ad3fb9b47ee81ef94733edc3c537d312656b94c83f915579fff9c2",
     "tools/tasks/M2-006.json": "41aea4935ef444048e246593770b88bc6eef9fc963c70fbb8c8179ffb0fd37c5",
     "tools/tasks/M3-031.json": "45d0917ce8831454172f6af0f044b343af9a42b5bd7045a677d322fc704f8b4d",
-    "tools/tests/test_m3_031_desktop_tls_adoption.py": "16a001e59659ee73d5062a523e058a9eec6156263b68246426b62cc4f3c84712",
+    "tools/tests/test_m3_031_desktop_tls_adoption.py": "405390cb1865ac28c1b80f26337057d170374419d658c1cb1b7e68786d2d98a1",
     "tools/tests/test_m7_linux_task_graph.py": "c6bd40cceac15ffe35f737d5e63daee1021b682f4aa6887dd46c9ed068b7f38c",
     "tools/tls_provider/abi-v1.json": "4f6756852e89203938ab964461993edde8dccc220bab7e5f8862e4f2b8bb3943",
     "tools/tls_provider/provider-manifest-schema-v1.json": "1ffac8ad5d475c906c177e600635f7450b3da10954535f47e5388d092d6bece9",

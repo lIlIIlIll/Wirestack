@@ -338,7 +338,7 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 shutil.copy2(ROOT / relative, path)
                 reports.append({"path": relative, "source_task": "M3-030",
                                 "acceptance_status": "PASS",
-                                "sha256": adoption.sha256_path(path)})
+                                "sha256": adoption.repository_text_sha256(path)})
             evidence = {"schema_version": 1, "source_task": "M3-030",
                         "acceptance_status": "PASS", "reports": reports,
                         "source_sha256": {
