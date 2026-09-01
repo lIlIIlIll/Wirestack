@@ -534,6 +534,47 @@ def _python_expression_name(node: ast.AST) -> str | None:
     return None
 
 
+def _python_callable_aliases(tree: ast.AST, imported: dict[str, str]) -> dict[str, str]:
+    aliases = dict(imported)
+    digest_names = {
+        "artifact_byte_digest", "artifact_byte_digest_bytes", "artifact_byte_sha256",
+        "artifact_bytes_sha256", "parse_artifact_digest", "signed_payload_sha256",
+        "text_evidence_digest", "text_evidence_digest_bytes", "parse_text_digest",
+        "text_evidence_sha256", "text_evidence_bytes_sha256",
+        "text_evidence_inventory_sha256", "sha256_path", "canonical_text_sha256",
+        "repository_text_sha256",
+    }
+    pending: list[tuple[str, ast.AST]] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            pending.extend(
+                (target.id, node.value) for target in node.targets if isinstance(target, ast.Name)
+            )
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) \
+                and node.value is not None:
+            pending.append((node.target.id, node.value))
+    while pending:
+        remaining: list[tuple[str, ast.AST]] = []
+        changed = False
+        for target, value in pending:
+            name = _python_expression_name(value)
+            if name is None:
+                continue
+            root, separator, remainder = name.partition(".")
+            if root in aliases:
+                name = aliases[root] + (separator + remainder if separator else "")
+            final = name.rsplit(".", 1)[-1]
+            if final in digest_names or name == "hashlib.sha256":
+                aliases[target] = name
+                changed = True
+            else:
+                remaining.append((target, value))
+        if not changed:
+            break
+        pending = remaining
+    return aliases
+
+
 def _python_call_name(node: ast.Call, aliases: dict[str, str] | None = None) -> str | None:
     name = _python_expression_name(node.func)
     if name is None:
@@ -779,7 +820,7 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
             continue
         typed_implementation = relative == "tools/evidence_digest.py"
         repository_control_plane = relative.startswith("tools/repository/")
-        aliases = _python_import_aliases(tree)
+        aliases = _python_callable_aliases(tree, _python_import_aliases(tree))
         assignment_index = _PythonAssignmentIndex()
         assignment_index.visit(tree)
         digest_wrappers = _python_digest_wrappers(tree, aliases)
