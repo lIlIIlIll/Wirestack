@@ -352,6 +352,26 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             status_path.write_text(
                 "| M3-030 | COMPLETE | evidence | rationale |\n", encoding="utf-8"
             )
+            release_path = root / "docs/evidence/M3-030/release-validation.json"
+            release_path.write_text(
+                json.dumps({"source_task": "M3-030", "status": "FAIL"}),
+                encoding="utf-8",
+            )
+            release_entry = next(
+                item for item in reports
+                if item["path"] == "docs/evidence/M3-030/release-validation.json"
+            )
+            release_entry["sha256"] = adoption.sha256_path(release_path)
+            evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+            self.assert_code(
+                "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
+            )
+            release_path.write_text(
+                json.dumps({"source_task": "M3-030", "status": "PASS"}),
+                encoding="utf-8",
+            )
+            release_entry["sha256"] = adoption.sha256_path(release_path)
+            evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             evidence["source_sha256"].pop("build.cj")
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             self.assert_code(

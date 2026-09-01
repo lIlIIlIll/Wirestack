@@ -31,6 +31,7 @@ complete this task.
 | P012 | M2-004 or M2-006 status is no longer COMPLETE | exact current status-row validation | reachable error | Retained PASS evidence cannot override a corrected dependency status. |
 | P013 | a desktop backlog row keeps one phrase but drops another acceptance requirement | exact full acceptance-column comparison | reachable error | Dependency migration cannot weaken any pre-existing desktop criterion. |
 | P014 | M3-030 status is no longer COMPLETE | exact current status-row validation before retained-evidence validation | reachable error | Retained PASS reports cannot override a corrected provider-architecture task status. |
+| P015 | any required M3-030 report is missing, stale or not PASS | exact manifest, index, digest and payload validation | reachable error | A partial retained-report subset cannot qualify the provider architecture dependency. |
 
 ## Input-domain partitioning
 
@@ -68,6 +69,7 @@ complete this task.
 | S011 | M2 dependency status changes from COMPLETE to BLOCKED | retained evidence remains PASS | P012 | reject | stable dependency-evidence failure identifies non-COMPLETE status | fault-injection | P0 |
 | S012 | M3-014 retains its first acceptance phrase but drops identity/chain or non-exposure requirements | dependencies remain exact | P013 | reject | complete acceptance column must match the frozen contract | fault-injection | P0 |
 | S013 | M3-030 status changes from COMPLETE to BLOCKED | retained provider-architecture evidence remains PASS | P014 | reject | stable retained-evidence failure identifies non-COMPLETE status | fault-injection | P0 |
+| S014 | M3-030 release validation changes to FAIL while its index digest is updated | other required reports remain PASS | P015 | reject | all nine manifest-required reports must remain indexed, digest-current and PASS | fault-injection | P0 |
 
 ## Test-plan matrix
 
@@ -87,6 +89,7 @@ complete this task.
 | T012 | S011 | P012 | mutate the M2-004 status row to BLOCKED while retaining evidence | FAIL | dependency evidence cannot pass without current COMPLETE status | fault-injection |
 | T013 | S012 | P013 | retain only the first M3-014 acceptance phrase | FAIL | `TASK_GRAPH` rejects the weakened full column | fault-injection |
 | T014 | S013 | P014 | mutate the M3-030 status row to BLOCKED while retaining evidence | FAIL | `RETAINED_EVIDENCE` rejects the stale dependency qualification | fault-injection |
+| T015 | S014 | P015 | mutate indexed M3-030 release validation from PASS to FAIL | FAIL | `RETAINED_EVIDENCE` rejects a failing required report even when its digest is current | fault-injection |
 
 ## Excluded gates
 
