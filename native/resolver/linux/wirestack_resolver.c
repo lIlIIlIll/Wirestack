@@ -30,6 +30,7 @@ enum wirestack_resolver_job_state {
 
 struct wirestack_resolver_address {
     int32_t family;
+    uint32_t scope_id;
     uint8_t bytes[WIRESTACK_RESOLVER_ADDRESS_BYTES];
 };
 
@@ -222,6 +223,7 @@ static void resolve_job(struct wirestack_resolver_job *job) {
                 const struct sockaddr_in6 *address =
                     (const struct sockaddr_in6 *)current->ai_addr;
                 destination->family = WIRESTACK_RESOLVER_FAMILY_IPV6;
+                destination->scope_id = address->sin6_scope_id;
                 memcpy(destination->bytes, &address->sin6_addr, 16u);
                 job->result_count++;
             }
@@ -307,14 +309,16 @@ static void *resolver_reaper(void *argument) {
 int32_t wirestack_resolver_pool_create(
     uint64_t worker_count,
     uint64_t queue_capacity,
-    uint64_t *out_pool_handle
+    uint64_t *out_pool_handle,
+    int64_t *out_native_code
 ) {
-    if (out_pool_handle == NULL || worker_count == 0u ||
+    if (out_pool_handle == NULL || out_native_code == NULL || worker_count == 0u ||
         worker_count > WIRESTACK_RESOLVER_MAXIMUM_WORKERS ||
         queue_capacity == 0u || queue_capacity > WIRESTACK_RESOLVER_MAXIMUM_QUEUE) {
         return WIRESTACK_RESOLVER_INVALID_ARGUMENT;
     }
     *out_pool_handle = 0u;
+    *out_native_code = 0;
     struct wirestack_resolver_pool *pool =
         (struct wirestack_resolver_pool *)calloc(1u, sizeof(*pool));
     if (pool == NULL) {
@@ -506,6 +510,7 @@ int32_t wirestack_resolver_poll(
     uint64_t job_handle,
     int32_t *out_families,
     uint8_t *out_addresses,
+    uint32_t *out_scope_ids,
     uint64_t output_capacity,
     uint64_t *out_count,
     int32_t *out_result,
@@ -528,12 +533,13 @@ int32_t wirestack_resolver_poll(
     *out_native_code = job->native_code;
     if (job->result == WIRESTACK_RESOLVER_RESULT_SUCCESS) {
         if (output_capacity < job->result_count || out_families == NULL ||
-            out_addresses == NULL) {
+            out_addresses == NULL || out_scope_ids == NULL) {
             pthread_mutex_unlock(&pool->mutex);
             return WIRESTACK_RESOLVER_OUTPUT_TOO_SMALL;
         }
         for (uint64_t index = 0u; index < job->result_count; index++) {
             out_families[index] = job->addresses[index].family;
+            out_scope_ids[index] = job->addresses[index].scope_id;
             memcpy(out_addresses + index * WIRESTACK_RESOLVER_ADDRESS_BYTES,
                    job->addresses[index].bytes,
                    WIRESTACK_RESOLVER_ADDRESS_BYTES);

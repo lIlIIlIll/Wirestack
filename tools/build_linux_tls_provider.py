@@ -3,8 +3,13 @@
 
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import os
 import platform
@@ -36,14 +41,6 @@ REQUIRED_CAPABILITIES = (
 
 class BuildError(RuntimeError):
     pass
-
-
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def canonical_json(value: Any) -> bytes:
@@ -153,8 +150,9 @@ def verify_source(source: Path, manifest: Mapping[str, Any]) -> dict[str, str]:
     ).stdout.strip()
     if dirty:
         raise BuildError("AWS-LC source checkout contains tracked or untracked changes")
-    content_digest = hashlib.sha256(f"{commit}\n{tree}\n".encode()).hexdigest()
-    if content_digest != expected["content_sha256"]:
+    content_digest = evidence_digest.text_evidence_bytes_sha256(f"{commit}\n{tree}\n".encode())
+    if not evidence_digest.schema_text_sha256_equal(
+            content_digest, expected["content_sha256"]):
         raise BuildError("AWS-LC retained source fingerprint mismatch")
     return {"commit": commit, "tree": tree, "content_sha256": content_digest}
 
@@ -249,17 +247,17 @@ def build_input_fingerprint(
     target: Mapping[str, str],
 ) -> tuple[str, dict[str, Any]]:
     value = {
-        "builder_sha256": sha256_path(Path(__file__).resolve()),
+        "builder_sha256": evidence_digest.text_evidence_sha256(Path(__file__).resolve()),
         "provider": manifest,
         "shim": {
-            "source_sha256": sha256_path(shim_source),
-            "header_sha256": sha256_path(shim_header),
+            "source_sha256": evidence_digest.text_evidence_sha256(shim_source),
+            "header_sha256": evidence_digest.text_evidence_sha256(shim_header),
         },
-        "abi_contract_sha256": sha256_path(abi_contract),
+        "abi_contract_sha256": evidence_digest.text_evidence_sha256(abi_contract),
         "tools": dict(tools),
         "target": dict(target),
     }
-    return hashlib.sha256(canonical_json(value)).hexdigest(), value
+    return evidence_digest.text_evidence_bytes_sha256(canonical_json(value)), value
 
 
 def find_archive(prefix: Path, name: str) -> Path:
@@ -291,7 +289,10 @@ def validate_cached_build(final_dir: Path, fingerprint: str) -> dict[str, Any] |
         return None
     if build_manifest.get("build_fingerprint") != fingerprint:
         return None
-    if build_manifest.get("archive", {}).get("sha256") != sha256_path(archive):
+    if not evidence_digest.schema_artifact_sha256_equal(
+        build_manifest.get("archive", {}).get("sha256"),
+        evidence_digest.artifact_byte_sha256(archive),
+    ):
         return None
     if build_manifest.get("externalOpenSslDependency") is not False:
         return None
@@ -473,7 +474,7 @@ int main(void) {
             "archive": {
                 "name": combined.name,
                 "bytes": combined.stat().st_size,
-                "sha256": sha256_path(combined),
+                "sha256": evidence_digest.artifact_byte_sha256(combined),
             },
             "externalOpenSslDependency": False,
             "runtimeLoaderLibraryStrings": [],

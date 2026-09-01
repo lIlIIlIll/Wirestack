@@ -1,0 +1,46 @@
+{
+  "artifacts": [
+    {
+      "artifact_id": 9781369651,
+      "artifact_sha256": "5685022e73b6d240bb2c7f76de07ed4776ee8116654f17ed752ae690059049b2",
+      "build_log_sha256": "039427d4999755fcd7e36826861621572f01011e89aa7fb82d4a9240502d652b",
+      "expires_on": "2026-09-15",
+      "provider": "aws-lc",
+      "result_sha256": "bc1762a5af4f496aa96899b953c3a0ddc75c304bb583c76c76e1447762eac2fe",
+      "status": "PASS"
+    },
+    {
+      "artifact_id": 9781415835,
+      "artifact_sha256": "acf387ae1ba8ee802406c4f2411d5273bcb289e198f805021107d4cd480e5453",
+      "build_log_sha256": "a46ef9f5bb53511026e254ec97991cd2b9cf57c16b3514b0c8d8bf65c552f29f",
+      "expires_on": "2026-09-15",
+      "provider": "mbedtls",
+      "result_sha256": "6bdf3f0085897eceea78d3293b2deae0fe65b2e259eafb250e83c85ea80778d6",
+      "status": "PARTIAL"
+    },
+    {
+      "artifact_id": 9781555727,
+      "artifact_sha256": "4f24ad6ca047c5389a4262ee19bdecfdd6f8cdd2018d2fb3887bd217703b1487",
+      "build_log_sha256": "4b404ef0f58510e1ea1ab056d2ab75021f6f1c5b3c817ebee8f0d0e964a61329",
+      "expires_on": "2026-09-15",
+      "provider": "openssl",
+      "result_sha256": "c3a0a3308d1e37e93c47ecb131df06c8eb60b18a36c0f4ba32000acb3c5f6a32",
+      "status": "PARTIAL"
+    }
+  ],
+  "conclusion": "success",
+  "executed_revision": "205c073c22aa283d84978522b70534fe5a16d808",
+  "pull_request_head_revision": "fe1dc2cb35c57d6ae31ac9fadd0f8415e57835ab",
+  "run_id": 33455645656,
+  "run_url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33455645656",
+  "runner": {
+    "arch": "X64",
+    "image_os": "win25-vs2026",
+    "image_version": "20260824.214.3",
+    "label": "windows-2025",
+    "os": "Windows",
+    "python": "3.12.10"
+  },
+  "schema_version": 1,
+  "task_id": "M0-016"
+}

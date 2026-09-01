@@ -3,9 +3,14 @@
 
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools import evidence_digest
+
 import argparse
 import copy
-import hashlib
 import json
 import os
 import re
@@ -44,7 +49,7 @@ MANIFEST_KEYS = {
     "schemaVersion", "taskId", "release", "target", "provider", "subjects",
     "sourceBundle", "signingPolicy",
 }
-SUBJECT_KEYS = {"name", "path", "mediaType", "sha256"}
+SUBJECT_KEYS = {"name", "path", "mediaType", "sha256", "signedPayloadSha256"}
 
 
 class ReleaseError(RuntimeError):
@@ -63,19 +68,6 @@ def require(condition: bool, code: str, detail: str) -> None:
 
 def canonical_json(value: Any) -> bytes:
     return (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode()
-
-
-def sha256_bytes(value: bytes) -> str:
-    return hashlib.sha256(value).hexdigest()
-
-
-def sha256_path(path: Path) -> str:
-    require(path.is_file(), "INPUT_MISSING", path.as_posix())
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -145,15 +137,17 @@ def build_release_manifest(
     sbom = supply_chain / "sbom.spdx.json"
     require(bundle.get("decision") == "PASS" and bundle.get("unsigned") is True,
             "SUPPLY_CHAIN_INVALID", "M7-025 bundle decision")
-    artifact_digest = sha256_path(artifact)
-    require(artifact_digest == bundle.get("artifact", {}).get("sha256"),
+    artifact_digest = evidence_digest.artifact_byte_sha256(artifact)
+    require(evidence_digest.schema_artifact_sha256_equal(
+                artifact_digest, bundle.get("artifact", {}).get("sha256")),
             "ARTIFACT_STALE", artifact.name)
     document_digests = bundle.get("documents")
     require(isinstance(document_digests, dict), "SUPPLY_CHAIN_INVALID", "documents")
     for name in ("provider-manifest.json", "sbom.spdx.json", "build-fingerprint.json"):
-        actual = sha256_path(supply_chain / name)
+        actual = evidence_digest.text_evidence_sha256(supply_chain / name)
         expected = document_digests.get(name, {}).get("sha256")
-        require(actual == expected, "SUPPLY_CHAIN_STALE", name)
+        require(evidence_digest.schema_text_sha256_equal(actual, expected),
+                "SUPPLY_CHAIN_STALE", name)
     provider_data = provider.get("provider")
     target = provider.get("target")
     package = provider.get("package")
@@ -181,18 +175,20 @@ def build_release_manifest(
                 "path": artifact.name,
                 "mediaType": "application/gzip",
                 "sha256": artifact_digest,
+                "signedPayloadSha256": artifact_digest,
             },
             {
                 "name": "sbom",
                 "path": "sbom.spdx.json",
                 "mediaType": "application/spdx+json",
-                "sha256": sha256_path(sbom),
+                "sha256": evidence_digest.text_evidence_sha256(sbom),
+                "signedPayloadSha256": evidence_digest.signed_payload_sha256(sbom),
             },
         ],
         "sourceBundle": {
-            "m7_025BundleSha256": sha256_path(supply_chain / "bundle.json"),
-            "providerManifestSha256": sha256_path(supply_chain / "provider-manifest.json"),
-            "buildFingerprintDocumentSha256": sha256_path(supply_chain / "build-fingerprint.json"),
+            "m7_025BundleSha256": evidence_digest.text_evidence_sha256(supply_chain / "bundle.json"),
+            "providerManifestSha256": evidence_digest.text_evidence_sha256(supply_chain / "provider-manifest.json"),
+            "buildFingerprintDocumentSha256": evidence_digest.text_evidence_sha256(supply_chain / "build-fingerprint.json"),
             "buildFingerprint": fingerprint.get("buildFingerprint"),
         },
         "signingPolicy": {
@@ -253,6 +249,11 @@ def validate_release_manifest(manifest: Mapping[str, Any]) -> None:
         require(not path.is_absolute() and ".." not in path.parts and len(path.parts) == 1,
                 "PATH_UNSAFE", subject["path"])
         _strict_digest(subject["sha256"], f"subjects.{name}.sha256")
+        _strict_digest(subject["signedPayloadSha256"], f"subjects.{name}.signedPayloadSha256")
+        if name == "artifact":
+            require(evidence_digest.schema_artifact_sha256_equal(
+                        subject["sha256"], subject["signedPayloadSha256"]),
+                    "MANIFEST_SUBJECT", "artifact digest domains must agree")
     require(names == {"artifact", "sbom"}, "MANIFEST_SUBJECTS", "incomplete")
     require(policy.get("repository") == REPOSITORY and policy.get("workflow") == WORKFLOW,
             "MANIFEST_POLICY", "signer identity")
@@ -370,8 +371,8 @@ def create_offline_bundle(
         sign_file(private_key, subject, signature)
         verify_file(public, subject, signature)
         signatures[name] = {
-            "subjectSha256": sha256_path(subject),
-            "signatureSha256": sha256_path(signature),
+            "subjectSha256": evidence_digest.artifact_byte_sha256(subject),
+            "signatureSha256": evidence_digest.artifact_byte_sha256(signature),
         }
     index = {
         "schemaVersion": SCHEMA_VERSION,
@@ -379,7 +380,7 @@ def create_offline_bundle(
         "classification": "REHEARSAL" if allow_temporary_key else "OFFLINE_RELEASE",
         "scheme": "OpenSSH-Ed25519",
         "namespace": NAMESPACE,
-        "trustedPublicKeySha256": sha256_bytes(public),
+        "trustedPublicKeySha256": evidence_digest.artifact_bytes_sha256(public),
         "signatures": signatures,
     }
     atomic_json(output / "signature-index.json", index)
@@ -398,10 +399,17 @@ def verify_offline_bundle(
     manifest = load_json(output / "release-manifest.json")
     validate_release_manifest(manifest)
     subject_map = {subject["name"]: subject for subject in manifest["subjects"]}
-    require(sha256_path(artifact) == subject_map["artifact"]["sha256"],
+    require(evidence_digest.schema_artifact_sha256_equal(
+                evidence_digest.artifact_byte_sha256(artifact),
+                subject_map["artifact"]["signedPayloadSha256"]),
             "SUBJECT_DIGEST", "artifact")
-    require(sha256_path(sbom) == subject_map["sbom"]["sha256"],
+    require(evidence_digest.schema_artifact_sha256_equal(
+                evidence_digest.signed_payload_sha256(sbom),
+                subject_map["sbom"]["signedPayloadSha256"]),
             "SUBJECT_DIGEST", "sbom")
+    require(evidence_digest.schema_text_sha256_equal(
+                evidence_digest.text_evidence_sha256(sbom), subject_map["sbom"]["sha256"]),
+            "SUBJECT_TEXT_DIGEST", "sbom")
     subjects = _subject_paths(output, artifact, sbom)
     for name, subject in subjects.items():
         verify_file(public, subject, output / f"{name}.sig")
@@ -489,7 +497,8 @@ def transition_payload(
             "PROVIDER_ID", "provider switch prohibited")
     sbom_version, sbom_archive = provider_sbom_checksum(sbom, str(candidate["providerId"]))
     require(sbom_version == candidate["providerVersion"] and
-            sbom_archive == candidate["providerArchiveSha256"],
+            evidence_digest.schema_artifact_sha256_equal(
+                sbom_archive, candidate["providerArchiveSha256"]),
             "SBOM_STALE", "provider version or archive")
     required_advisory = {
         "schemaVersion", "advisoryId", "severity", "issuedUtc", "expiresUtc",
@@ -498,9 +507,12 @@ def transition_payload(
     _strict_keys(advisory, required_advisory, "ADVISORY_SCHEMA")
     require(advisory["schemaVersion"] == 1 and advisory["severity"] in
             {"LOW", "MEDIUM", "HIGH", "CRITICAL"}, "ADVISORY_SCHEMA", "value")
-    require(advisory["fromManifestSha256"] == installed["providerManifestSha256"] and
-            advisory["toManifestSha256"] == candidate["providerManifestSha256"] and
-            advisory["toSbomSha256"] == candidate["sbomSha256"],
+    require(evidence_digest.schema_text_sha256_equal(
+                advisory["fromManifestSha256"], installed["providerManifestSha256"])
+            and evidence_digest.schema_text_sha256_equal(
+                advisory["toManifestSha256"], candidate["providerManifestSha256"])
+            and evidence_digest.schema_text_sha256_equal(
+                advisory["toSbomSha256"], candidate["sbomSha256"]),
             "ADVISORY_BINDING", "transition")
     for field in ("fromManifestSha256", "toManifestSha256", "toSbomSha256"):
         _strict_digest(advisory[field], field)
@@ -510,7 +522,7 @@ def transition_payload(
         "fromManifestSha256": installed["providerManifestSha256"],
         "toManifestSha256": candidate["providerManifestSha256"],
         "toSbomSha256": candidate["sbomSha256"],
-        "advisorySha256": sha256_bytes(canonical_json(advisory)),
+        "advisorySha256": evidence_digest.text_evidence_bytes_sha256(canonical_json(advisory)),
     }
 
 
@@ -569,8 +581,8 @@ def run_update_rehearsal(private: Path, public: bytes, output: Path) -> dict[str
         "providerId": provider_data["providerId"],
         "providerVersion": provider_data["providerVersion"],
         "providerArchiveSha256": provider_data["archive"]["sha256"],
-        "providerManifestSha256": sha256_path(PROVIDER_MANIFEST),
-        "sbomSha256": sha256_path(SBOM),
+        "providerManifestSha256": evidence_digest.text_evidence_sha256(PROVIDER_MANIFEST),
+        "sbomSha256": evidence_digest.text_evidence_sha256(SBOM),
     }
     candidate = copy.deepcopy(installed)
     candidate.update({
@@ -584,7 +596,9 @@ def run_update_rehearsal(private: Path, public: bytes, output: Path) -> dict[str
         if package.get("SPDXID") == "SPDXRef-Package-TlsProvider-aws-lc":
             package["versionInfo"] = candidate["providerVersion"]
             package["checksums"] = [{"algorithm": "SHA256", "checksumValue": "a" * 64}]
-    candidate["sbomSha256"] = sha256_bytes(canonical_json(updated_sbom))
+    candidate["sbomSha256"] = evidence_digest.text_evidence_bytes_sha256(
+        canonical_json(updated_sbom)
+    )
     advisory = {
         "schemaVersion": 1,
         "advisoryId": "WSA-REHEARSAL-0001",
@@ -634,7 +648,8 @@ def run_update_rehearsal(private: Path, public: bytes, output: Path) -> dict[str
         "upgrade": {"fromSequence": 100, "toSequence": upgraded["sequence"]},
         "rollback": {"fromSequence": 101, "toSequence": restored["sequence"]},
         "advisoryIds": [advisory["advisoryId"], rollback_advisory["advisoryId"]],
-        "sbomUpdated": candidate["sbomSha256"] != installed["sbomSha256"],
+        "sbomUpdated": not evidence_digest.schema_text_sha256_equal(
+            candidate["sbomSha256"], installed["sbomSha256"]),
     }
 
 
@@ -739,10 +754,21 @@ def validate_hosted_report(path: Path) -> dict[str, Any]:
             if isinstance(item, dict)} == {"artifact", "sbom", "release-manifest"},
             "HOSTED_REPORT_SUBJECTS", "exact three subjects required")
     for subject in subjects:
-        _strict_keys(subject, {"name", "sha256", "bundleSha256", "verification"},
-                     "HOSTED_REPORT_SUBJECT")
+        expected_keys = {
+            "name", "sha256", "signedPayloadSha256", "bundleSha256", "verification",
+        }
+        _strict_keys(subject, expected_keys, "HOSTED_REPORT_SUBJECT")
         _strict_digest(subject["sha256"], "hosted subject")
+        _strict_digest(subject["signedPayloadSha256"], "hosted signed payload")
         _strict_digest(subject["bundleSha256"], "hosted bundle")
+        if subject["name"] == "artifact":
+            require(
+                evidence_digest.schema_artifact_sha256_equal(
+                    subject["sha256"], subject["signedPayloadSha256"],
+                ),
+                "HOSTED_REPORT_SUBJECT",
+                "artifact text and signed-payload digests must be identical",
+            )
         require(subject["verification"] == "PASS", "HOSTED_REPORT_SUBJECT", subject["name"])
     return report
 
@@ -755,7 +781,7 @@ def hosted_validation_report(path: Path) -> dict[str, Any]:
         "status": "PASS",
         "decision": "PASS",
         "commit": report["commit"],
-        "hostedReportSha256": sha256_path(path),
+        "hostedReportSha256": evidence_digest.text_evidence_sha256(path),
         "verifiedSubjects": sorted(subject["name"] for subject in report["subjects"]),
     }
 
@@ -776,8 +802,12 @@ def build_hosted_report(
                 "HOSTED_VERIFY_EMPTY", name)
         rows.append({
             "name": name,
-            "sha256": sha256_path(subject),
-            "bundleSha256": sha256_path(bundle),
+            "sha256": (
+                evidence_digest.artifact_byte_sha256(subject)
+                if name == "artifact" else evidence_digest.text_evidence_sha256(subject)
+            ),
+            "signedPayloadSha256": evidence_digest.signed_payload_sha256(subject),
+            "bundleSha256": evidence_digest.artifact_byte_sha256(bundle),
             "verification": "PASS",
         })
     report = {
@@ -794,11 +824,11 @@ def build_hosted_report(
     return report
 
 
-def validate_hosted_report_value(report: Mapping[str, Any]) -> None:
+def validate_hosted_report_value(report: Mapping[str, Any]) -> dict[str, Any]:
     with tempfile.TemporaryDirectory(prefix="wirestack-m7-030-hosted-") as directory:
         path = Path(directory) / "report.json"
         path.write_bytes(canonical_json(report))
-        validate_hosted_report(path)
+        return validate_hosted_report(path)
 
 
 def local_rehearsal(output: Path) -> dict[str, Any]:
@@ -901,7 +931,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             atomic_json(args.output, result)
         print(json.dumps(result, sort_keys=True, separators=(",", ":")))
         return 0
-    except ReleaseError as error:
+    except (ReleaseError, evidence_digest.DigestError) as error:
         decision = "BLOCKED" if error.code == "HOSTED_ATTESTATION_BLOCKED" else "FAIL"
         report = {"schemaVersion": 1, "taskId": TASK_ID, "decision": decision,
                   "code": error.code, "detail": error.detail}

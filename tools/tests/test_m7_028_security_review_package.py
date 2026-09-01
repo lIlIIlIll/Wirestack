@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import copy
-import hashlib
 import json
 import sys
 import tempfile
@@ -29,7 +30,7 @@ class M7028SecurityReviewPackageTests(unittest.TestCase):
 
     @staticmethod
     def digest(path: Path) -> str:
-        return hashlib.sha256(path.read_bytes()).hexdigest()
+        return evidence_digest.text_evidence_bytes_sha256(path.read_bytes())
 
     def test_checked_in_package_is_valid(self) -> None:
         report = review.validate(ROOT, review.DEFAULT_INDEX, review.DEFAULT_REPORT)
@@ -95,6 +96,16 @@ class M7028SecurityReviewPackageTests(unittest.TestCase):
         with self.assertRaises(review.ReviewPackageError) as caught:
             review.validate_index(root2, index2)
         self.assertEqual("DIGEST_MISMATCH", caught.exception.code)
+
+    def test_invalid_utf8_has_stable_structured_digest_error(self) -> None:
+        temporary, root, index = self.fixture()
+        self.addCleanup(temporary.cleanup)
+        target = root / index["documents"][0]["path"]
+        target.write_bytes(b"valid\n\xff")
+        with self.assertRaises(review.ReviewPackageError) as caught:
+            review.validate_index(root, index)
+        self.assertEqual("TEXT_UTF8", caught.exception.code)
+        self.assertEqual(str(target), caught.exception.detail)
 
     def test_stale_or_skipped_evidence_cannot_claim_pass(self) -> None:
         temporary, root, index = self.fixture()

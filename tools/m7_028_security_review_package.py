@@ -3,8 +3,13 @@
 
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import os
 import re
@@ -81,17 +86,6 @@ def canonical_json(value: Any) -> bytes:
     return (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode()
 
 
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    try:
-        with path.open("rb") as stream:
-            for block in iter(lambda: stream.read(65536), b""):
-                digest.update(block)
-    except OSError as error:
-        raise ReviewPackageError("FILE_MISSING", str(path)) from error
-    return digest.hexdigest()
-
-
 def safe_path(root: Path, relative: str) -> Path:
     candidate = Path(relative)
     require(not candidate.is_absolute(), "PATH_ESCAPE", relative)
@@ -113,9 +107,16 @@ def load_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def text_evidence_sha256(path: Path) -> str:
+    try:
+        return evidence_digest.text_evidence_sha256(path)
+    except evidence_digest.DigestError as error:
+        raise ReviewPackageError(error.code, str(path)) from error
+
+
 def build_index(root: Path = ROOT) -> dict[str, Any]:
     documents = [
-        {"topic": topic, "path": path, "sha256": sha256_path(safe_path(root, path))}
+        {"topic": topic, "path": path, "sha256": text_evidence_sha256(safe_path(root, path))}
         for topic, path in DOCUMENTS
     ]
     evidence = [
@@ -123,7 +124,7 @@ def build_index(root: Path = ROOT) -> dict[str, Any]:
             "topic": topic,
             "sourceTask": task,
             "path": path,
-            "sha256": sha256_path(safe_path(root, path)),
+            "sha256": text_evidence_sha256(safe_path(root, path)),
             "state": state,
             "gating": gating,
         }
@@ -167,7 +168,12 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
         require(isinstance(item, dict), "SCHEMA", f"documents[{position}]")
         exact_keys(item, {"topic", "path", "sha256"}, f"documents[{position}]")
         path = safe_path(root, item["path"])
-        require(sha256_path(path) == item["sha256"], "DIGEST_MISMATCH", item["path"])
+        require(
+            evidence_digest.schema_text_sha256_equal(
+                text_evidence_sha256(path), item["sha256"],
+            ),
+            "DIGEST_MISMATCH", item["path"],
+        )
         topics.add(item["topic"])
         scanned_files.add(path)
 
@@ -176,7 +182,12 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
         require(isinstance(item, dict), "SCHEMA", f"evidence[{position}]")
         exact_keys(item, {"topic", "sourceTask", "path", "sha256", "state", "gating"}, f"evidence[{position}]")
         path = safe_path(root, item["path"])
-        require(sha256_path(path) == item["sha256"], "DIGEST_MISMATCH", item["path"])
+        require(
+            evidence_digest.schema_text_sha256_equal(
+                text_evidence_sha256(path), item["sha256"],
+            ),
+            "DIGEST_MISMATCH", item["path"],
+        )
         scanned_files.add(path)
         state = item["state"]
         require(state in {"CURRENT_PASS", "CURRENT_BOUND_INPUT", "STALE_AFTER_M7_032", "HISTORICAL_NON_GATING"}, "EVIDENCE_STATE", str(state))
@@ -209,7 +220,9 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
             continue
         document = documents.get(Path(item["path"]).name)
         require(
-            isinstance(document, dict) and document.get("sha256") == item["sha256"],
+            isinstance(document, dict) and evidence_digest.schema_text_sha256_equal(
+                document.get("sha256"), item["sha256"],
+            ),
             "BOUND_INPUT_MISMATCH",
             item["path"],
         )
@@ -237,7 +250,7 @@ def build_report(index_path: Path, summary: Mapping[str, Any]) -> dict[str, Any]
         "decision": "PASS",
         "acceptance_status": "PASS",
         "compatibilityPolicy": COMPATIBILITY_POLICY,
-        "indexSha256": sha256_path(index_path),
+        "indexSha256": text_evidence_sha256(index_path),
         **summary,
         "checks": {
             "requiredTopics": "PASS",

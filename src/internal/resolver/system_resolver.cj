@@ -4,17 +4,17 @@ import wirestack.internal.common.HostName
 import wirestack.internal.transport.OperationContext
 
 /**
- * Linux system resolver backed by a fixed native worker pool.
+ * Platform system resolver backed by a fixed native worker pool.
  *
  * Call close when the resolver is no longer needed. Closing is idempotent and
  * waits for native work that outlived caller cancellation or Deadline expiry.
  */
 public class SystemResolver <: Resolver & Resource {
-    private let backend: LinuxBoundedResolverBackend
+    private let backend: BoundedSystemResolverBackend
 
     /** Creates one resolver with explicit worker and queue bounds. */
     public init(workerCount!: Int64 = 4, queueCapacity!: Int64 = 64) {
-        backend = LinuxBoundedResolverBackend(
+        backend = BoundedSystemResolverBackend(
             workerCount: workerCount,
             queueCapacity: queueCapacity
         )
@@ -44,5 +44,10 @@ public class SystemResolver <: Resolver & Resource {
 
     public func isClosed(): Bool {
         backend.isClosed()
+    }
+
+    /** Returns bounded scheduler counters for diagnostics and deterministic tests. */
+    public func metrics(): ResolverPoolMetrics {
+        backend.metrics()
     }
 }

@@ -15,7 +15,7 @@ private let M2003_LOCALHOST = HostName("localhost")
 class M2003BoundedResolverBackendTest {
     @TestCase
     func resolvesLocalhostWithBoundedMetricsAndIdempotentClose(): Unit {
-        let backend = LinuxBoundedResolverBackend(workerCount: 2, queueCapacity: 4)
+        let backend = BoundedSystemResolverBackend(workerCount: 2, queueCapacity: 4)
         try {
             let result = backend.resolve(
                 M2003_LOCALHOST,
@@ -43,7 +43,7 @@ class M2003BoundedResolverBackendTest {
 
     @TestCase
     func appliesIpv4FamilyAndRejectsUseAfterClose(): Unit {
-        let backend = LinuxBoundedResolverBackend(workerCount: 1, queueCapacity: 2)
+        let backend = BoundedSystemResolverBackend(workerCount: 1, queueCapacity: 2)
         let result = backend.resolve(
             M2003_LOCALHOST,
             None<String>,
@@ -66,10 +66,10 @@ class M2003BoundedResolverBackendTest {
 
     @TestCase
     func validatesPoolBounds(): Unit {
-        @Expect(m2003ExpectIllegalArgument({=> let _ = LinuxBoundedResolverBackend(workerCount: 0) }))
-        @Expect(m2003ExpectIllegalArgument({=> let _ = LinuxBoundedResolverBackend(workerCount: 33) }))
-        @Expect(m2003ExpectIllegalArgument({=> let _ = LinuxBoundedResolverBackend(queueCapacity: 0) }))
-        @Expect(m2003ExpectIllegalArgument({=> let _ = LinuxBoundedResolverBackend(queueCapacity: 1025) }))
+        @Expect(m2003ExpectIllegalArgument({=> let _ = BoundedSystemResolverBackend(workerCount: 0) }))
+        @Expect(m2003ExpectIllegalArgument({=> let _ = BoundedSystemResolverBackend(workerCount: 33) }))
+        @Expect(m2003ExpectIllegalArgument({=> let _ = BoundedSystemResolverBackend(queueCapacity: 0) }))
+        @Expect(m2003ExpectIllegalArgument({=> let _ = BoundedSystemResolverBackend(queueCapacity: 1025) }))
     }
 
     @TestCase
@@ -97,7 +97,7 @@ class M2003BoundedResolverBackendTest {
 
     @TestCase
     func preCancelledContextDoesNotSubmitNativeWork(): Unit {
-        let backend = LinuxBoundedResolverBackend(workerCount: 1, queueCapacity: 1)
+        let backend = BoundedSystemResolverBackend(workerCount: 1, queueCapacity: 1)
         let source = CancellationSource()
         source.cancel()
         @Expect(m2003ExpectResolveError({=>
@@ -117,7 +117,7 @@ class M2003BoundedResolverBackendTest {
         if (!m2003DelayEnabled()) {
             return
         }
-        let backend = LinuxBoundedResolverBackend(workerCount: 2, queueCapacity: 16)
+        let backend = BoundedSystemResolverBackend(workerCount: 2, queueCapacity: 16)
         let running = AtomicBool(true)
         let heartbeats = AtomicInt64(0)
         let heartbeat = spawn {
@@ -154,7 +154,7 @@ class M2003BoundedResolverBackendTest {
         if (!m2003DelayEnabled()) {
             return
         }
-        let backend = LinuxBoundedResolverBackend(workerCount: 1, queueCapacity: 2)
+        let backend = BoundedSystemResolverBackend(workerCount: 1, queueCapacity: 2)
         let source = CancellationSource()
         let resolving = spawn {
             backend.resolve(
@@ -180,7 +180,7 @@ class M2003BoundedResolverBackendTest {
         if (!m2003DelayEnabled()) {
             return
         }
-        let backend = LinuxBoundedResolverBackend(workerCount: 1, queueCapacity: 1)
+        let backend = BoundedSystemResolverBackend(workerCount: 1, queueCapacity: 1)
         let started = MonoTime.now()
         @Expect(m2003ExpectResolveError({=>
             let _ = backend.resolve(
@@ -200,7 +200,7 @@ class M2003BoundedResolverBackendTest {
         if (!m2003DelayEnabled()) {
             return
         }
-        let backend = LinuxBoundedResolverBackend(workerCount: 1, queueCapacity: 1)
+        let backend = BoundedSystemResolverBackend(workerCount: 1, queueCapacity: 1)
         let first = spawn { m2003Resolve(backend) }
         m2003WaitForMetrics(backend, {metrics => metrics.runningJobs == 1})
         let second = spawn { m2003Resolve(backend) }
@@ -216,7 +216,7 @@ class M2003BoundedResolverBackendTest {
     }
 }
 
-private func m2003Resolve(backend: LinuxBoundedResolverBackend): ResolveResult {
+private func m2003Resolve(backend: BoundedSystemResolverBackend): ResolveResult {
     backend.resolve(
         M2003_LOCALHOST,
         None<String>,
@@ -286,7 +286,7 @@ private func m2003IsError(value: ResolveErrorCode, expected: ResolveErrorCode): 
 }
 
 private func m2003WaitForMetrics(
-    backend: LinuxBoundedResolverBackend,
+    backend: BoundedSystemResolverBackend,
     predicate: (ResolverPoolMetrics) -> Bool
 ): Unit {
     let expiresAt = MonoTime.now() + Duration.second

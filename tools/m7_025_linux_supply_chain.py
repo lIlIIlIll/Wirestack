@@ -3,8 +3,13 @@
 
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import re
 import sys
@@ -76,18 +81,6 @@ def canonical_json(value: Any) -> bytes:
     return (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode()
 
 
-def sha256_bytes(value: bytes) -> str:
-    return hashlib.sha256(value).hexdigest()
-
-
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise SupplyChainError(message)
@@ -155,15 +148,15 @@ def artifact_metadata(path: Path) -> dict[str, Any]:
     except (OSError, tarfile.TarError) as error:
         raise SupplyChainError(f"cannot inspect release artifact: {error}") from error
     return {
-        "artifact_sha256": sha256_path(path),
+        "artifact_sha256": evidence_digest.artifact_byte_sha256(path),
         "artifact_bytes": path.stat().st_size,
         "release": _json_bytes(release_raw, "release-manifest.json"),
         "provider": _json_bytes(provider_raw, "provider-manifest.json"),
-        "provider_manifest_sha256": sha256_bytes(provider_raw),
+        "provider_manifest_sha256": evidence_digest.text_evidence_bytes_sha256(provider_raw),
         "resolver": _json_bytes(resolver_raw, "resolver-manifest.json"),
-        "resolver_manifest_sha256": sha256_bytes(resolver_raw),
+        "resolver_manifest_sha256": evidence_digest.text_evidence_bytes_sha256(resolver_raw),
         "license_sha256": {
-            relative: sha256_bytes(content)
+            relative: evidence_digest.text_evidence_bytes_sha256(content)
             for relative, content in license_files.items()
         },
     }
@@ -196,14 +189,24 @@ def validate_artifact_inputs(
 ) -> None:
     artifact = qualification.get("artifact")
     _require(isinstance(artifact, dict), "M7-021 artifact evidence is absent")
-    _require(metadata["artifact_sha256"] == artifact.get("sha256"), "artifact digest mismatch")
+    _require(
+        evidence_digest.schema_artifact_sha256_equal(
+            metadata["artifact_sha256"], artifact.get("sha256"),
+        ),
+        "artifact digest mismatch",
+    )
     _require(metadata["artifact_bytes"] == artifact.get("bytes"), "artifact size mismatch")
     release = metadata["release"]
     provider = metadata["provider"]
     resolver = metadata["resolver"]
     _require(release.get("schema_version") == 1, "release manifest schema is unsupported")
     _require(release.get("package") == "wirestack", "release package identity is invalid")
-    _require(release.get("payload_sha256") == artifact.get("payload_sha256"), "payload digest mismatch")
+    _require(
+        evidence_digest.schema_artifact_sha256_equal(
+            release.get("payload_sha256"), artifact.get("payload_sha256"),
+        ),
+        "payload digest mismatch",
+    )
     _require(release.get("externalOpenSslDependency") is False, "release depends on system OpenSSL")
     release_license = release.get("license")
     _require(isinstance(release_license, dict), "release license identity is absent")
@@ -213,7 +216,9 @@ def validate_artifact_inputs(
     )
     _require(release_license.get("file") == "LICENSE", "release license path is invalid")
     _require(
-        release_license.get("sha256") == metadata["license_sha256"]["LICENSE"],
+        evidence_digest.schema_text_sha256_equal(
+            release_license.get("sha256"), metadata["license_sha256"]["LICENSE"],
+        ),
         "embedded project license digest mismatch",
     )
     notices = release.get("thirdPartyNotices")
@@ -223,7 +228,21 @@ def validate_artifact_inputs(
         {"path": relative, "sha256": metadata["license_sha256"][relative]}
         for relative in LICENSE_MEMBERS[1:]
     ]
-    _require(notices.get("files") == expected_notice_files, "notice inventory mismatch")
+    notice_files = notices.get("files")
+    _require(
+        isinstance(notice_files, list)
+        and len(notice_files) == len(expected_notice_files)
+        and all(
+            isinstance(actual, dict)
+            and set(actual) == {"path", "sha256"}
+            and actual.get("path") == expected["path"]
+            and evidence_digest.schema_text_sha256_equal(
+                actual.get("sha256"), expected["sha256"]
+            )
+            for actual, expected in zip(notice_files, expected_notice_files)
+        ),
+        "notice inventory mismatch",
+    )
     _require(provider.get("externalOpenSslDependency") is False, "provider depends on system OpenSSL")
     _require(provider.get("runtimeLoaderLibraryStrings") == [], "provider has runtime loader strings")
     release_provider = release.get("provider")
@@ -231,19 +250,27 @@ def validate_artifact_inputs(
     _require(isinstance(release_provider, dict), "release provider identity is absent")
     _require(isinstance(release_resolver, dict), "release resolver identity is absent")
     _require(
-        release_provider.get("manifest_sha256") == metadata["provider_manifest_sha256"],
+        evidence_digest.schema_text_sha256_equal(
+            release_provider.get("manifest_sha256"), metadata["provider_manifest_sha256"],
+        ),
         "embedded provider manifest digest mismatch",
     )
     _require(
-        release_provider.get("archive_sha256") == provider.get("archive", {}).get("sha256"),
+        evidence_digest.schema_artifact_sha256_equal(
+            release_provider.get("archive_sha256"), provider.get("archive", {}).get("sha256"),
+        ),
         "embedded provider archive digest mismatch",
     )
     _require(
-        release_resolver.get("manifest_sha256") == metadata["resolver_manifest_sha256"],
+        evidence_digest.schema_text_sha256_equal(
+            release_resolver.get("manifest_sha256"), metadata["resolver_manifest_sha256"],
+        ),
         "embedded resolver manifest digest mismatch",
     )
     _require(
-        release_resolver.get("archive_sha256") == resolver.get("archive", {}).get("sha256"),
+        evidence_digest.schema_artifact_sha256_equal(
+            release_resolver.get("archive_sha256"), resolver.get("archive", {}).get("sha256"),
+        ),
         "embedded resolver archive digest mismatch",
     )
     build_pin = provider.get("build_inputs", {}).get("provider")
@@ -535,7 +562,7 @@ def build_documents(
     metadata = artifact_metadata(artifact_path)
     validate_artifact_inputs(metadata, qualification, provider_pin)
     inputs = fingerprint_inputs(metadata, qualification, generator_sha256)
-    fingerprint = sha256_bytes(canonical_json(inputs))
+    fingerprint = evidence_digest.text_evidence_bytes_sha256(canonical_json(inputs))
     fingerprint_document = {
         "schemaVersion": SCHEMA_VERSION,
         "taskId": TASK_ID,
@@ -552,7 +579,7 @@ def build_documents(
     }
     file_digests = {
         name: {
-            "sha256": sha256_bytes(canonical_json(value)),
+            "sha256": evidence_digest.text_evidence_bytes_sha256(canonical_json(value)),
             "mediaType": "application/spdx+json" if name == "sbom.spdx.json" else "application/json",
         }
         for name, value in documents.items()
@@ -615,20 +642,39 @@ def validate_documents(
     _require(manifest.get("taskId") == TASK_ID, "provider manifest task identity is invalid")
     _require(fingerprint.get("taskId") == TASK_ID, "fingerprint task identity is invalid")
     _require(bundle.get("taskId") == TASK_ID and bundle.get("decision") == "PASS", "bundle decision is invalid")
-    expected_fingerprint = sha256_bytes(canonical_json(fingerprint.get("inputs")))
+    expected_fingerprint = evidence_digest.text_evidence_bytes_sha256(
+        canonical_json(fingerprint.get("inputs"))
+    )
     _require(
-        fingerprint.get("buildFingerprint") == expected_fingerprint,
+        evidence_digest.schema_text_sha256_equal(
+            fingerprint.get("buildFingerprint"), expected_fingerprint,
+        ),
         "build fingerprint does not match its canonical inputs",
     )
-    _require(manifest.get("buildFingerprint") == expected_fingerprint, "manifest fingerprint mismatch")
-    _require(bundle.get("buildFingerprint") == expected_fingerprint, "bundle fingerprint mismatch")
     _require(
-        fingerprint.get("inputs", {}).get("generator", {}).get("sha256") == sha256_path(generator),
+        evidence_digest.schema_text_sha256_equal(
+            manifest.get("buildFingerprint"), expected_fingerprint,
+        ),
+        "manifest fingerprint mismatch",
+    )
+    _require(
+        evidence_digest.schema_text_sha256_equal(
+            bundle.get("buildFingerprint"), expected_fingerprint,
+        ),
+        "bundle fingerprint mismatch",
+    )
+    _require(
+        evidence_digest.schema_text_sha256_equal(
+            fingerprint.get("inputs", {}).get("generator", {}).get("sha256"),
+            evidence_digest.text_evidence_sha256(generator),
+        ),
         "generator fingerprint is stale",
     )
     qualified_artifact = qualification.get("artifact", {})
     _require(
-        manifest.get("artifact", {}).get("sha256") == qualified_artifact.get("sha256"),
+        evidence_digest.schema_artifact_sha256_equal(
+            manifest.get("artifact", {}).get("sha256"), qualified_artifact.get("sha256"),
+        ),
         "manifest is not bound to the M7-021 artifact",
     )
     artifact_id = "SPDXRef-Package-Wirestack-Artifact"
@@ -647,7 +693,9 @@ def validate_documents(
     _require(len(package_ids) == len(set(package_ids)), "SPDX package ids are not unique")
     _require(set(package_ids) == required_package_ids, "SPDX package inventory is incomplete")
     _require(
-        _package_checksum(sbom, artifact_id) == qualified_artifact.get("sha256"),
+        evidence_digest.schema_artifact_sha256_equal(
+            _package_checksum(sbom, artifact_id), qualified_artifact.get("sha256"),
+        ),
         "SPDX artifact digest mismatch",
     )
     _require(sbom.get("spdxVersion") == "SPDX-2.3", "SPDX version is invalid")
@@ -660,12 +708,16 @@ def validate_documents(
     _require(provider.get("securityPatchLevel") == "abi-1;patches=none", "patch level is incomplete")
     _require(provider.get("externalOpenSslDependency") is False, "OpenSSL dependency flag is invalid")
     _require(
-        _package_checksum(sbom, provider_id) == provider.get("archive", {}).get("sha256"),
+        evidence_digest.schema_artifact_sha256_equal(
+            _package_checksum(sbom, provider_id), provider.get("archive", {}).get("sha256"),
+        ),
         "SPDX provider digest mismatch",
     )
     _require(
-        _package_checksum(sbom, resolver_id)
-        == manifest.get("resolver", {}).get("archive", {}).get("sha256"),
+        evidence_digest.schema_artifact_sha256_equal(
+            _package_checksum(sbom, resolver_id),
+            manifest.get("resolver", {}).get("archive", {}).get("sha256"),
+        ),
         "SPDX resolver digest mismatch",
     )
     relationships = sbom.get("relationships")
@@ -692,7 +744,12 @@ def validate_documents(
     _require(manifest.get("trust", {}).get("policies") == TRUST_POLICIES, "trust policy inventory is incomplete")
     for name in OUTPUT_NAMES[:-1]:
         expected = bundle.get("documents", {}).get(name, {}).get("sha256")
-        _require(expected == sha256_path(evidence_dir / name), f"bundle digest mismatch for {name}")
+        _require(
+            evidence_digest.schema_text_sha256_equal(
+                expected, evidence_digest.text_evidence_sha256(evidence_dir / name)
+            ),
+            f"bundle digest mismatch for {name}",
+        )
     serialized = canonical_json(documents).decode("utf-8")
     for forbidden in ("/home/", "Authorization", "privateKey", "sessionSecret"):
         _require(forbidden not in serialized, f"sensitive or host-local value appears in bundle: {forbidden}")
@@ -701,7 +758,7 @@ def validate_documents(
             artifact_path,
             qualification,
             provider_pin,
-            generator_sha256=sha256_path(generator),
+            generator_sha256=evidence_digest.text_evidence_sha256(generator),
         )
         for name in OUTPUT_NAMES:
             _require(documents[name] == expected_documents[name], f"committed {name} is stale")
@@ -732,11 +789,11 @@ def main() -> int:
                 args.artifact,
                 qualification,
                 provider_pin,
-                generator_sha256=sha256_path(Path(__file__)),
+                generator_sha256=evidence_digest.text_evidence_sha256(Path(__file__)),
             )
             write_documents(documents, args.output_dir)
             bundle = validate_documents(args.output_dir, artifact_path=args.artifact)
-    except SupplyChainError as error:
+    except (SupplyChainError, evidence_digest.DigestError) as error:
         print(f"M7-025 Linux supply-chain bundle: FAIL: {error}")
         return 1
     print(

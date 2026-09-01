@@ -2,10 +2,10 @@
 
 **依据：**《Wirestack：仓颉跨平台 TLS/HTTPS 网络栈重写 PRD》v2.1（2026-08-27）  
 **文档类型：** Issue/PR 级实施 backlog  
-**全平台主线任务数：** 184  
+**全平台主线任务数：** 185
 **Linux 稳定版收口任务数：** 15  
 **远期上游任务数：** 7  
-**当前发布任务数：** 199  
+**当前发布任务数：** 200
 **目标：** 将 PRD 转换为可排期、可并行、可验收、可追踪的仓库任务；不在此文档中改变 PRD 已冻结的产品边界。
 
 > 仓库事实：Wirestack 是独立仓颉绿地网络库仓库，GitHub 为 `lIlIIlIll/Wirestack`。新公共包默认使用 `wirestack.*`，内部实现使用 `wirestack.internal.*`。`cangjie_stdx`、仓颉 SDK、`std.net` 与 runtime 源码均为外部参考或上游仓库，不属于 Wirestack 工作树。实际物理目录与 `cjpm` target 由 M0-002 根据当前仓颉工具链冻结；本 backlog 在此之前只约束逻辑模块边界、依赖方向和验收语义。
@@ -272,13 +272,13 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M3-011 | 实现 reference identity/hostname verifier | 安全 | C4 | M2-001,M3-010 | PRD §13.5 | SAN-only；DNS/IP 分开；不回退 CN；wildcard/IDNA/边界向量通过；SNI 与 reference identity 分开建模。 |
 | M3-012 | 实现 CustomRoots/SystemPlusCustomRoots 与 pinning | TLS | C3 | M3-009..M3-011 | PRD §13.5 | 自定义 CA 不关闭 identity 验证；pin 作用域和算法明确；trust context identity 可用于 session/pool 隔离。 |
 | M3-013 | 实现 Linux glibc system trust adapter | 平台 | C4 | M3-009..M3-012 | PRD §14.2/§28；ADR-0004 | 冻结 CA bundle/dir 规则；native glibc 通过；无 silent fallback；平台证据和错误稳定。musl 由 P1-011 采纳。 |
-| M3-014 | 实现 Windows system trust adapter | 平台 | C4 | M3-009..M3-012 | PRD §14.2 | 使用系统证书链与策略；返回 identity/chain 证据；不导出 native provider 对象。 |
-| M3-015 | 实现 macOS system trust adapter | 平台 | C4 | M3-009..M3-012 | PRD §14.2 | 使用系统信任评估；行为、错误、证据与统一模型对齐。 |
+| M3-014 | 实现 Windows system trust adapter | 平台 | C4 | M2-004,M3-031 | PRD §14.2；ADR-0007 | 使用系统证书链与策略；返回 identity/chain 证据；不导出 native provider 对象。 |
+| M3-015 | 实现 macOS system trust adapter | 平台 | C4 | M2-006,M3-031 | PRD §14.2；ADR-0007 | 使用系统信任评估；行为、错误、证据与统一模型对齐。 |
 | M3-016 | 定义 `LocalIdentity`/opaque `PrivateKeyRef`/signer 契约 | TLS | C3 | M3-006,M0-018 | PRD §13.6 | 支持 PKCS#8、系统 handle/alias、external signer；TLS engine 不强制导出私钥；用户异常不跨 C ABI。 |
 | M3-017 | 实现 PKCS#8/文件私钥身份 | TLS | C3 | M3-010,M3-016 | PRD §13.6 | 证书链与私钥匹配在 context build 时校验；secret 清理与错误映射明确。 |
 | M3-018 | 实现通用 external signer bridge | TLS | C4 | M3-002,M3-016 | PRD §13.2/§13.6 | 签名算法协商、异步/同步边界、取消、错误与回调生命周期安全；不持全局锁调用用户代码。 |
-| M3-019 | 实现 Windows 不可导出 key handle | 平台 | C4 | M3-014,M3-018 | PRD §13.6/§14.2 | 系统 key handle 可完成 client/server 签名；私钥不导出；错误和取消稳定。 |
-| M3-020 | 实现 macOS Keychain/SecKey 身份 | 平台 | C4 | M3-015,M3-018 | PRD §13.6/§14.2 | SecKey 签名桥通过；私钥不导出；生命周期与线程/回调安全。 |
+| M3-019 | 实现 Windows 不可导出 key handle | 平台 | C4 | M3-014,M3-031 | PRD §13.6/§14.2；ADR-0007 | 系统 key handle 可完成 client/server 签名；私钥不导出；错误和取消稳定。 |
+| M3-020 | 实现 macOS Keychain/SecKey 身份 | 平台 | C4 | M3-015,M3-031 | PRD §13.6/§14.2；ADR-0007 | SecKey 签名桥通过；私钥不导出；生命周期与线程/回调安全。 |
 | M3-021 | 实现 TLS client handshake 与结果模型 | TLS | C4 | M3-004..M3-012 | PRD §13.7 | 输出版本、cipher、ALPN、peer chain、verified identity、resumed、provider info；失败/取消/超时 abort transport。 |
 | M3-022 | 实现 TLS server handshake、SNI 与证书选择 | TLS | C4 | M3-004..M3-008,M3-016..M3-020 | PRD §6.3/§13.7 | 按 SNI 选择不可变 context/identity；callback 不持全局锁；无匹配时返回稳定错误。 |
 | M3-023 | 实现 ALPN 与 no-shared-ALPN 语义 | TLS | C2 | M3-006,M3-021,M3-022 | PRD §13.1/§16.2 | client/server 协商次序稳定；结果进入 handshake info；HTTP 层只读取统一类型。 |
@@ -289,6 +289,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M3-028 | 完成 TLS 确定性、互操作、fuzz、依赖扫描与 benchmark | 测试 | C4 | M3-001..M3-027 | PRD §19.2/§21/§22/§23 | 协议向量、主机名、session、close、truncated、外部实现互操作、fuzz 无崩溃；吞吐/握手/内存达标；无系统 OpenSSL 依赖。 |
 | M3-029 | 实现并冻结 provider-neutral 公共 TLS facade | TLS/API | C4 | M3-028,M7-026 | PRD §6.2/§7/§13/§17/§29 | `wirestack.tls` 公开不可变 client/server context、existing-transport handshake、`TlsConnection`/`TlsListener`、协商结果和稳定错误；成功后转移 transport 所有权，失败/取消/Deadline abort，close/abort 幂等；公共声明无 `std.net`、native provider、OpenSSL 配置或旧 socket 类型；public-only 测试与干净 consumer 原生运行通过，当前 pre-1.0 公开所有权和架构守卫通过，不要求兼容历史实验性 API。 |
 | M3-030 | 建立跨平台可扩展的 TLS provider 架构 | TLS/构建 | C4 | M3-029,M7-032 | PRD §7/§13/§17/§18/§23；ADR-0003/0006 | 通用 TLS Core、HTTP 和公开 API 只依赖 Wirestack provider-neutral 契约；平台和 provider 在构建期正交选择，未知或不允许组合 fail closed；Linux x86_64 glibc 固定 AWS-LC 5.5.0，具体类型和路径只留在 adapter；test provider 通过统一 factory 证明替换性和实例隔离；native ABI、architecture guard、release manifest、SBOM、许可证、clean consumer 与真实 TLS 门禁通过，不声明其他平台支持。 |
+| M3-031 | 建立桌面 TLS adoption gate 并闭合共享 Core 依赖 | TLS/平台/测试 | C3 | M2-004,M2-006,M3-030 | PRD §13/§14/§21.5/§23；ADR-0007 | 逐项映射 M3-001/M3-002/M3-006/M3-009..M3-012/M3-016/M3-018 的桌面适用契约到当前 source-bound Core 证据，明确排除且不判定全局六平台条件；同一 SHA 的 `windows-2025` x86_64 与 `macos-15` arm64 AWS-LC 5.5.0 schema-v11 PoC 全能力 PASS；PARTIAL/SKIPPED/交叉编译不得通过；只迁移 M3-014/M3-015/M3-019/M3-020 依赖，不改变移动任务或宣称 adapter 已实现。 |
 
 ---
 
@@ -531,6 +532,8 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 | P1-010 | HTTP/3/QUIC | PRD §5 | 独立项目，不复用 TCP Transport 假设；不得提前侵入本项目公共 API。 |
 | P1-011 | Linux musl 采纳 | ADR-0004 | 仓颉 SDK 发布受支持的 musl target、标准库、runtime 和构建说明后启动；必须补齐 native compile/unit/integration、resolver、trust、依赖、性能和安装证据。 |
 | P1-012 | AI 友好型仓库基础设施 | Repository control plane | M7-024 已完成；提供诚实的环境诊断、机器可读任务契约、分层验证入口和源码绑定的证据新鲜度检查。长时间门禁只能显式运行，不得由 fast/full 隐式触发。 |
+| P1-013 | 分离开发回归与发布证据新鲜度门禁 | Repository control plane | 依赖 P1-012,M3-031；`scripts/check` 验证当前代码、结构和故障注入，不因预期过期的点时 release evidence 产生级联假失败；M7 release CLI 仍默认校验当前源码并 fail closed；修正 Darwin resolver 已受支持后的过时回归断言；不得刷新、复用或伪造旧 artifact、soak、性能、安全审查、SBOM 或签名 PASS。 |
+| P1-014 | 建立 evidence 摘要类型边界并禁止文本回退到原始字节 | Repository control plane | 依赖 P1-012,P1-013；引入不可互换的 `TextEvidenceDigest` 与 `ArtifactByteDigest` 类型及显式入口：JSON、Markdown、日志和其他声明为文本的 evidence 只能按 UTF-8 与规范化 LF 计算文本摘要，禁止回退到原始字节摘要；二进制 artifact、归档和签名 payload 必须显式使用原始字节摘要。迁移并盘点全部现有调用点，schema 记录摘要域，architecture guard 阻止文本路径调用 byte-digest、无类型摘要比较和隐式 fallback；非法 UTF-8、未知摘要域、旧 schema、CRLF/裸 CR、源码漂移和 digest-kind 混用均 fail closed。Linux 与 GitHub Windows runner 的 CRLF 故障注入必须证明同一文本跨 checkout 摘要一致，且文本正确性不依赖 `.gitattributes -text`；旧 PASS 不得因迁移被静默沿用或重写，长时间门禁不得运行。 |
 
 ---
 
@@ -618,11 +621,11 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 
 ## 11. 任务统计
 
-- 全平台主线任务：**184**
+- 全平台主线任务：**185**
 - Linux 稳定版收口任务：**15**
 - 远期上游任务：**7**
-- 稳定版后 P1/独立项目：**12**
-- 当前发布相关任务总数：**199**
-- 全部已记录任务总数：**218**
+- 稳定版后 P1/独立项目：**14**
+- 当前发布相关任务总数：**200**
+- 全部已记录任务总数：**221**
 
 该数量代表 Issue/PR 级工作项，不代表必须串行执行；关键是保持里程碑退出门禁和依赖方向。

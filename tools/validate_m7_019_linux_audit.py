@@ -3,9 +3,15 @@
 
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +36,7 @@ P0_IDS = [
 INVARIANT_IDS = [f"INV-{index:02d}" for index in range(1, 16)]
 RELEASE_IDS = [f"REL-{index:02d}" for index in range(1, 23)]
 ALLOWED_STATUSES = {"PASS", "GAP", "NOT_APPLICABLE_TO_LINUX_PROFILE"}
+DIGEST_RE = re.compile(r"[0-9a-f]{64}")
 
 EXPECTED_GAPS = {
     "TLS-PROV-004": "M7-025",
@@ -47,17 +54,14 @@ class AuditError(ValueError):
     """Raised when the audit is incomplete or internally inconsistent."""
 
 
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise AuditError(message)
 
 
 def _validate_items(
-    section: str, items: Any, expected_ids: list[str], repo_root: Path
+    section: str, items: Any, expected_ids: list[str], repo_root: Path,
+    *, verify_current_sources: bool,
 ) -> list[dict[str, Any]]:
     _require(isinstance(items, list), f"{section} must be a list")
     ids = [item.get("id") for item in items if isinstance(item, dict)]
@@ -74,8 +78,18 @@ def _validate_items(
         evidence = item.get("evidence")
         _require(isinstance(evidence, list) and evidence, f"{item_id}: missing evidence")
         for relative in evidence:
-            _require(isinstance(relative, str), f"{item_id}: evidence path is not text")
-            _require((repo_root / relative).exists(), f"{item_id}: missing evidence path {relative}")
+            _require(isinstance(relative, str) and relative, f"{item_id}: evidence path is not text")
+            candidate = Path(relative)
+            _require(
+                not candidate.is_absolute() and ".." not in candidate.parts
+                and candidate.as_posix() == relative,
+                f"{item_id}: invalid evidence path {relative}",
+            )
+            if verify_current_sources:
+                _require(
+                    (repo_root / relative).exists(),
+                    f"{item_id}: missing evidence path {relative}",
+                )
 
         expected_owner = EXPECTED_GAPS.get(item_id)
         if expected_owner is not None:
@@ -97,7 +111,12 @@ def _validate_items(
     return items
 
 
-def validate_audit(path: Path = DEFAULT_AUDIT, repo_root: Path = ROOT) -> dict[str, Any]:
+def validate_audit(
+    path: Path = DEFAULT_AUDIT,
+    repo_root: Path = ROOT,
+    *,
+    verify_current_sources: bool = True,
+) -> dict[str, Any]:
     try:
         audit = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
@@ -114,17 +133,28 @@ def validate_audit(path: Path = DEFAULT_AUDIT, repo_root: Path = ROOT) -> dict[s
     source_hashes = audit.get("source_sha256")
     _require(isinstance(source_hashes, dict), "source_sha256 must be an object")
     for relative in ("docs/product/prd.md", "docs/planning/implementation-backlog.md"):
+        digest = source_hashes.get(relative)
         _require(
-            source_hashes.get(relative) == _sha256(repo_root / relative),
-            f"source hash is stale for {relative}",
+            isinstance(digest, str) and DIGEST_RE.fullmatch(digest) is not None,
+            f"source hash is invalid for {relative}",
         )
+        if verify_current_sources:
+            _require(
+                digest == evidence_digest.text_evidence_sha256(repo_root / relative),
+                f"source hash is stale for {relative}",
+            )
 
-    p0 = _validate_items("p0_requirements", audit.get("p0_requirements"), P0_IDS, repo_root)
+    p0 = _validate_items(
+        "p0_requirements", audit.get("p0_requirements"), P0_IDS, repo_root,
+        verify_current_sources=verify_current_sources,
+    )
     invariants = _validate_items(
-        "lifecycle_invariants", audit.get("lifecycle_invariants"), INVARIANT_IDS, repo_root
+        "lifecycle_invariants", audit.get("lifecycle_invariants"), INVARIANT_IDS,
+        repo_root, verify_current_sources=verify_current_sources,
     )
     release = _validate_items(
-        "release_acceptance", audit.get("release_acceptance"), RELEASE_IDS, repo_root
+        "release_acceptance", audit.get("release_acceptance"), RELEASE_IDS,
+        repo_root, verify_current_sources=verify_current_sources,
     )
     all_items = p0 + invariants + release
 

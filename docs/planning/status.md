@@ -33,9 +33,9 @@ Status values:
 | M0-011 | BLOCKED | [`docs/evidence/M0-011/README.md`](../evidence/M0-011/README.md) | Linux GATE-NET-06 acceptance passes, including production cancellation/TLS cleanup and all resource classes; Windows, macOS and mobile native profiles remain outstanding. |
 | M0-012 | BLOCKED | — | Requires M0-011 evidence completion and Android/iOS/Harmony native-device execution. |
 | M0-013 | COMPLETE | [`docs/evidence/M0-013/README.md`](../evidence/M0-013/README.md) | Native Linux evidence shows carrier-thread starvation at 16+ delayed DNS resolutions. Wirestack uses a bounded resolver pool; the failure remains evidence for the future UP-007 candidate, which does not block release. |
-| M0-014 | BLOCKED | — | Requires a native Windows SDK/runner and copied-byte instrumentation. |
+| M0-014 | COMPLETE | [`docs/evidence/M0-014/README.md`](../evidence/M0-014/README.md) | Native `windows-2025` evidence passes all five payloads with dynamic `CJ_SOCKET_BufferRCopy` byte/call counts, ETW allocation totals, Win32 memory counters, performance percentiles and bounded cleanup. |
 | M0-015 | COMPLETE | [`docs/evidence/M0-015/README.md`](../evidence/M0-015/README.md) | Provider matrix and M0-016 PoC contract frozen; ADR-0003 selects AWS-LC for Linux only. |
-| M0-016 | BLOCKED | [`docs/evidence/M0-016/README.md`](../evidence/M0-016/README.md) | AWS-LC glibc/musl schema-v2 results PASS every capability; seven retained cells remain PARTIAL and Windows/mobile native evidence is missing. |
+| M0-016 | BLOCKED | [`docs/evidence/M0-016/README.md`](../evidence/M0-016/README.md) | All 12 desktop schema-v11 cells are current: AWS-LC passes on Linux glibc, Linux musl, Windows and macOS; Mbed TLS and OpenSSL retain explicit PARTIAL results. Android, iOS and HarmonyOS or OpenHarmony native-device evidence remains missing. |
 | M0-017 | BLOCKED | — | Depends on M0-012 and M0-016 native evidence. |
 | M0-018 | COMPLETE | [`docs/evidence/M0-018/README.md`](../evidence/M0-018/README.md) | Versioned threat register, fail-closed validator, tests and CI are active. |
 | M0-019 | BLOCKED | — | Depends on complete M0-006 through M0-014 evidence; M0-010..014 are not all complete. |
@@ -82,8 +82,11 @@ the native platform dependencies in the global backlog.
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
 | M2-001 | COMPLETE | [`docs/evidence/M2-001/README.md`](../evidence/M2-001/README.md) | Canonical ASCII/A-label host names and typed immutable IPv4/IPv6/zone endpoints cover exact name, label and port boundaries without implicit DNS or accepting authority syntax as a host. |
+| M2-002 | COMPLETE | [`docs/evidence/M2-002/README.md`](../evidence/M2-002/README.md) | The provider-neutral public resolver contract owns all typed candidates, canonical host, source, optional expiration and diagnostics; public-owner tests prove bounded family filtering, structured errors, cancellation and Deadline semantics without inventing TTL. |
 | M2-003 | COMPLETE | [`docs/evidence/M2-003/README.md`](../evidence/M2-003/README.md) | A fixed native pthread pool provides strictly bounded FIFO DNS admission, metrics, prompt canonical cancellation/Deadline handling and worker cleanup without occupying scheduler carriers or using private runtime ABI. |
+| M2-004 | COMPLETE | [`docs/evidence/M2-004/README.md`](../evidence/M2-004/README.md) | Native `windows-2025` Cangjie requalification proves the bounded Win32/Winsock SystemResolver remains valid after review remediation, with six selected cases passing at exact SHA `c80be39`; the test-only fail-closed TLS link stub is not a provider or release artifact. |
 | M2-005 | COMPLETE | [`docs/evidence/M2-005/README.md`](../evidence/M2-005/README.md) | The public resolver, stable errors, cancellation, lifecycle, and default client integration pass on native Linux glibc. ADR-0004 defers musl to P1-011. |
+| M2-006 | COMPLETE | [`docs/evidence/M2-006/README.md`](../evidence/M2-006/README.md) | GitHub hosted `macos-15` arm64 and iOS Simulator arm64 execution pass all eight resolver cases at exact SHA `d02358c`; reports retain platform, toolchain, source digests, cancellation, Deadline, network-change and lifecycle evidence. |
 | M2-010 | COMPLETE | [`docs/evidence/M2-010/README.md`](../evidence/M2-010/README.md) | Immutable direct and explicit-proxy routes separate origin/connect targets and DNS ownership while retaining bounded network-binding, TLS-context and ALPN parameters; system-proxy discovery remains out of scope. |
 | M2-014 | COMPLETE | [`docs/evidence/M2-014/README.md`](../evidence/M2-014/README.md) | Scripted resolver and connector tests cover IPv6 first success and blackhole fallback, simultaneous success, all-fail, pre-cancel, success-plus-cancel and the exact Deadline publication boundary. |
 | M2-015 | COMPLETE | [`docs/evidence/M2-015/README.md`](../evidence/M2-015/README.md) | Native glibc network namespaces prove IPv6 available/blackhole fallback, 20/100 ms RTT, 1% loss, joined losers with bounded resources, and one shared Deadline for 2/8 candidates. |
@@ -99,6 +102,16 @@ global six-platform M3 milestone.
 | M3-028 | COMPLETE | [`docs/evidence/M3-028/README.md`](../evidence/M3-028/README.md) | Native Linux qualification passes 70 deterministic TLS/trust tests, four bounded fuzz targets, TLS 1.2/1.3 OpenSSL interoperability, dependency scanning, body and idle-memory limits, 11-round full/resumed handshake gates, and 1.2125 times the pinned stdx bulk throughput. |
 | M3-029 | COMPLETE | [`docs/evidence/M3-029/README.md`](../evidence/M3-029/README.md) | Provider-neutral public client/server contexts, existing-transport handshake, TLS connection/listener ownership, negotiated metadata and stable errors pass public-package tests, clean-consumer Linux TLS acceptance and current pre-1.0 ownership guards; historical experimental API compatibility is not required. |
 | M3-030 | COMPLETE | [`docs/evidence/M3-030/README.md`](../evidence/M3-030/README.md), [`platform-provider-matrix.json`](../evidence/M3-030/platform-provider-matrix.json), [`native-abi-report.json`](../evidence/M3-030/native-abi-report.json), [`release-validation.json`](../evidence/M3-030/release-validation.json), [`sbom-validation.json`](../evidence/M3-030/sbom-validation.json) | The final six-command Linux gate passes. The provider ABI v1 contract records and validates 56 C signatures, Cangjie FFI declarations, native header prototypes and archive symbols; M7-029 independently closes both ABI High findings. Only Linux x86_64 glibc with AWS-LC 5.5.0 is implemented. |
+
+## Desktop M3 adoption work
+
+This table tracks the one-time dependency adoption gate for Windows and macOS.
+It does not complete either platform adapter or the global six-platform M3
+milestone.
+
+| ID | Status | Evidence | Notes |
+|---|---|---|---|
+| M3-031 | COMPLETE | [`docs/evidence/M3-031/README.md`](../evidence/M3-031/README.md), [`hosted-run.json`](../evidence/M3-031/hosted-run.json), [`desktop-provider-matrix.json`](../evidence/M3-031/desktop-provider-matrix.json), [`task-check.json`](../evidence/M3-031/task-check.json) | The desktop-scoped Core audit and source-bound exact-revision native Windows Server 2025 x86_64/macOS 15 arm64 AWS-LC 5.5.0 schema-v11 PoCs pass, including measured TLS 1.2 and TLS 1.3 resumption. Global six-platform and mobile conditions remain NOT_EVALUATED; no trust or key adapter is claimed. |
 
 ## Future upstream enhancements
 
@@ -174,3 +187,5 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 | ID | Status | Evidence | Notes |
 |---|---|---|---|
 | P1-012 | COMPLETE | [`docs/evidence/P1-012/README.md`](../evidence/P1-012/README.md) | Fail-closed repository diagnostics, task contracts, layered checks and source-bound evidence freshness validation pass on Linux glibc; no long-duration gate ran. |
+| P1-013 | COMPLETE | [`docs/evidence/P1-013/README.md`](../evidence/P1-013/README.md) | Development regression checks now validate frozen release records structurally, while all production M7 release validators remain strict by default and reject stale source or artifact evidence. `scripts/check` passes; no long-duration gate ran. |
+| P1-014 | COMPLETE | [`docs/evidence/P1-014/README.md`](../evidence/P1-014/README.md) | All 398 digest calls have explicit text, artifact-byte or typed-implementation domains across Python, scripts and workflows; schema v2, exact-candidate-bound Linux and hosted Windows CRLF fault injection, task-level validation and canonical repository checks pass. Historical schema-v1 evidence remains rejected rather than silently promoted. |

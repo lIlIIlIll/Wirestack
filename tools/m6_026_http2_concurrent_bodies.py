@@ -3,8 +3,13 @@
 
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import os
 import platform
@@ -112,8 +117,11 @@ def tool_version(command: Sequence[str]) -> str:
     return completed.stdout.strip()[:4096]
 
 
-def sha256(relative: str) -> str:
-    return hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
+def source_digests(root: Path = ROOT) -> dict[str, str]:
+    return {
+        relative: evidence_digest.text_evidence_sha256(root / relative)
+        for relative in SOURCE_PATHS
+    }
 
 
 def validate() -> dict[str, Any]:
@@ -159,7 +167,7 @@ def validate() -> dict[str, Any]:
             "cjpm test src/internal/http2 --filter=Http2ClientConnectionTest",
             f"cjpm test src/http --filter=Http2ConcurrentResponseBodyProfileTest.{PROFILE_CASE}",
         ],
-        "source_sha256": {relative: sha256(relative) for relative in SOURCE_PATHS},
+        "source_sha256": source_digests(),
     }
     atomic_json(REPORT, report)
     return report
