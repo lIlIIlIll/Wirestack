@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-01T14:48:12.872599Z",
+  "generated_at_utc": "2026-09-01T15:46:11.344703Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,7 +13,7 @@
       "path": "docs/evidence/P1-014/task-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "185b7d1be695ee3a14fce2b88c825de3df6850bef73e9cb52e9b68ddfef4745d"
+        "sha256": "aee42ef205c9aff76b1d5ba46536582e9e0ecc156280f0db42f734ac77b80ec2"
       },
       "source_task": "P1-014"
     },
@@ -22,7 +22,7 @@
       "path": "docs/evidence/P1-014/digest-inventory.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "4dbdd77b4a9aadd3836105a8141db223e82db7d9d6295e06321f6d01d1403ac6"
+        "sha256": "8985463d73bed7bcc43b1459ee622cfe038e8f496e1ae20dff9288a4c5732e38"
       },
       "source_task": "P1-014"
     },
@@ -40,7 +40,7 @@
       "path": "docs/evidence/P1-014/linux-crlf.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "7351265ea9996bd23ded523d09574b3f95c7f0fbc8a3086d86b7c6397bb0e664"
+        "sha256": "9e10dcfe40c488d06a51819a90d86b2977d0685c127e616c75fbd3c2142abb34"
       },
       "source_task": "P1-014"
     },
@@ -49,12 +49,12 @@
       "path": "docs/evidence/P1-014/windows-crlf.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "0d85fdf3ede167db4a156ea888606d90d0825eb558608b29421e75534e46ac3b"
+        "sha256": "4dd49b3073af613ca8b913e902b719771af85ed6638b261b70ea0894ab7083d5"
       },
       "source_task": "P1-014"
     }
   ],
-  "revision": "2be3a85e4a2ba0a3b8f203a48fbc56ee8c43a370",
+  "revision": "8cb3793f68ad2741fcbfdc5e5f6e0ebe6b662e53",
   "schema_version": 2,
   "source_sha256": {
     ".github/workflows/linux-release-attestation.yml": {
@@ -87,7 +87,7 @@
     },
     "docs/evidence/P1-014/test-plan.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "36039bf819025781ef61226cc97053b15b5f375018442695f58003d8999ef614"
+      "sha256": "47d8cfee50b1b2a2d57b5d1ecb32f6aa1f0fc3eb41ad06b9a496ff31ebe193ff"
     },
     "docs/planning/implementation-backlog.md": {
       "domain": "text-utf8-lf-v1",
@@ -95,15 +95,15 @@
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "cabcf87bb3e49dd9683d7c5fa83865e37f793c908278dc1dbdc2db97a5bc62c8"
+      "sha256": "21806365f30a1ec731ced10c6762a95d887d48e96328069e6aedd08caf1e74ec"
     },
     "tools/architecture_guard.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "9bbb6a065db4fef95908c5d3f399ecc8117ae3d22b22d17fe35bff824a72a2ae"
+      "sha256": "0bc74e109669ba4d724a9b329563f5020c8891d9261f292c2242a564dd872156"
     },
     "tools/benchmarks/http1_benchmark.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "a84d0143713836b44ecc0fb62c9a48e52667c42420149316388504e758e49b2c"
+      "sha256": "2f3599de92c390c62fba96bac211c9bc165ef9d40b9a0ec7c9ee02d0c5715d70"
     },
     "tools/benchmarks/http2_benchmark.py": {
       "domain": "text-utf8-lf-v1",
@@ -115,7 +115,7 @@
     },
     "tools/benchmarks/m3_028_tls.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "2f13c860e96067789b5e4e95e9f5498f8276be4632f9774b62013f1e3a3b2e0d"
+      "sha256": "7033867bcea65f2a54ae39aa89aa0629f083e46b7d90396933e202154e0bed01"
     },
     "tools/build_apple_resolver.py": {
       "domain": "text-utf8-lf-v1",
@@ -127,7 +127,7 @@
     },
     "tools/build_linux_tls_provider.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "dfac8275c6bcb33e8e329dc5aa7cc0bfe12cb0a8c01d227377eadeacdf1a530e"
+      "sha256": "6db592fdce1da70351baee8db5ad5b6859e767b57faadeafb8d6bae84c86caa0"
     },
     "tools/build_windows_resolver.py": {
       "domain": "text-utf8-lf-v1",
@@ -143,7 +143,7 @@
     },
     "tools/evidence_digest.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "259f53dd5351110667f7b87afef08d2a1bb8bd83bd6039ac112b0cbb02d54a0d"
+      "sha256": "ac65139883abfed2edc4f97708784fc9b5d86367ea70cb9389c50a14e3b06f57"
     },
     "tools/gates/dns_carrier_thread.py": {
       "domain": "text-utf8-lf-v1",
@@ -247,7 +247,7 @@
     },
     "tools/m3_031_desktop_tls_adoption.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "8da2cee484ee9b6c132cc9b742f110f4aa6c49a38008b298f6bff3858b88f686"
+      "sha256": "4eb414eca4bd269ce97da841d446d605178cfb2bfbad6769699b913faa681f80"
     },
     "tools/m6_026_http2_concurrent_bodies.py": {
       "domain": "text-utf8-lf-v1",
@@ -275,15 +275,15 @@
     },
     "tools/m7_029_independent_security_review.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "e0b96b09d49d12cbabed3af22038718fc2c238bf3a724f55decab731c0417902"
+      "sha256": "b51a6caa4878c89c19133a243ec31bf86e4b7a892dfdd3c698ddd9b8d1309f23"
     },
     "tools/m7_030_linux_release.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "4c6ff54db1604ce9a99dde48016f2eff719fb968faff707b8b831ff6346bc4bb"
+      "sha256": "38412f216f82cd21c3f58faae69d72b3dee6a42a51d9785304eb0bb688548f58"
     },
     "tools/m7_031_linux_candidate.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "6eba3a851d870fa7d519a0f06c9f2f481af036a57e22d4e183de55ae0645a484"
+      "sha256": "ca040094b6d2ae9d73fdfb99284611a873cab6be9b3aff7e702da9bcf14d89bf"
     },
     "tools/m7_032_public_api_inventory.py": {
       "domain": "text-utf8-lf-v1",
@@ -303,7 +303,7 @@
     },
     "tools/tests/test_architecture_guard.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "44b2e8d1fb61b12d52b465df9fb83fb62a59b83ece5e7fabb189a4f60459b73b"
+      "sha256": "152257e06ebdff9e242fd4e65f5900f5112d9ff457f9947c44ec60024f186bb1"
     },
     "tools/tests/test_build_resolver.py": {
       "domain": "text-utf8-lf-v1",
@@ -367,7 +367,7 @@
     },
     "tools/tests/test_p1_014_evidence_digest_types.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "67238c7ccab9e2493ee3d059a4ee17deb80431daf010652f3dad4a267cffc724"
+      "sha256": "e61ab3e1a3afc327579177ffa0e3c4b66b1c83dd62a32a4b60d00864954ca15e"
     },
     "tools/tests/test_tls_provider_poc.py": {
       "domain": "text-utf8-lf-v1",
@@ -383,7 +383,7 @@
     },
     "tools/tls_provider_poc/validate.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "b179d87c4e8e59339acd87ce23d642376ba5377e536d09f7d7ab9c4fdd57636a"
+      "sha256": "662e99b2de9f5b569d5c3c026f5ebf83d54ee56bd3f72c776ef3e9d0b181b1b8"
     },
     "tools/validate_m7_019_linux_audit.py": {
       "domain": "text-utf8-lf-v1",

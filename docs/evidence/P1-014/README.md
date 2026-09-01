@@ -4,8 +4,8 @@
 
 P1-014 is complete. Linux and GitHub Windows CRLF fault injection pass, every
 digest callsite has an explicit domain, and the task-level and canonical
-repository checks pass. GitHub Actions run `33520295460` produced the retained
-Windows report for PR #151 source head `f96eab4c` (merge revision `7fac7372`).
+repository checks pass. GitHub Actions run `33526854717` produced the retained
+Windows report for PR #151 source head `594d352a` (merge revision `a074c511`).
 
 ## Implemented boundary
 
@@ -64,8 +64,8 @@ entries remain unchanged because they belong to other tasks.
 | Architecture guard | PASS, 0 violations |
 | Linux CRLF probe | PASS |
 | Digest callsite inventory | PASS, 389 explicitly classified calls, 0 issues |
-| GitHub Windows CRLF probe | PASS, run `33520295460`, source head `f96eab4c`, merge `7fac7372`; effective `text` and `eol` attributes are `unspecified`, tracked fixture checked out as CRLF |
-| Hosted exact-SHA CI | PASS, all 25 checks at `f96eab4c`, including Gate Harness, Windows CRLF and provider matrix |
+| GitHub Windows CRLF probe | PASS, run `33526854717`, source head `594d352a`, merge `a074c511`; effective `text` and `eol` attributes are `unspecified`, tracked fixture checked out as CRLF |
+| Hosted exact-SHA CI | PASS, 25/25 checks at source head `594d352a`, including architecture, clean Cangjie build, harness, Linux/macOS/Windows provider matrices, and Windows CRLF |
 | `scripts/check-fast --json` | PASS |
 | `scripts/check` | PASS, including 178 gate Python tests, 24 benchmark Python tests, and 588 passed/23 skipped Cangjie tests |
 | `scripts/check-task P1-014` | PASS, all four commands passed |
