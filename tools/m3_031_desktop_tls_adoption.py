@@ -334,7 +334,8 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
 
 
 def validate_native_source_binding(
-    task_id: str, report: Mapping[str, Any], source_sha256: Mapping[str, str]
+    root: Path, task_id: str, report: Mapping[str, Any],
+    source_sha256: Mapping[str, str],
 ) -> None:
     manifest = report.get("resolver_manifest")
     inputs = manifest.get("inputs") if isinstance(manifest, dict) else None
@@ -373,6 +374,14 @@ def validate_native_source_binding(
             raise AdoptionError(
                 "DEPENDENCY_EVIDENCE", f"{task_id}: {relative} native source drift"
             )
+        try:
+            path = repository_tooling.safe_path(
+                root, relative, "native source", must_exist=True, file_only=True
+            )
+        except repository_tooling.ContractError as error:
+            raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: {error.code}") from error
+        if repository_text_sha256(path) != digest:
+            raise AdoptionError("STALE_SOURCE", f"{task_id}: {relative}")
 
 
 def validate_dependency_evidence(
@@ -481,13 +490,13 @@ def validate_dependency_evidence(
                     "DEPENDENCY_EVIDENCE",
                     f"{task_id}: canonical report validation {canonical_failures[0]}",
                 )
-            validate_native_source_binding(task_id, report, source_sha256)
+            validate_native_source_binding(root, task_id, report, source_sha256)
             native_reports[report_relative] = sha256_path(report_path)
         validated[task_id] = {
             "native_reports": dict(sorted(native_reports.items())),
             "source_count": len(source_sha256),
             "source_verification": (
-                "CURRENT_CHECKOUT" if verify_current_sources else "SEALED_INVENTORY"
+                "CURRENT_CHECKOUT" if verify_current_sources else "CURRENT_NATIVE_SOURCES"
             ),
             "status": "PASS",
         }
@@ -563,7 +572,8 @@ def audit_core(root: Path) -> dict[str, Any]:
 
 
 def validate_provider_result(
-    raw: Mapping[str, Any], *, expected_platform: str, expected_revision: str
+    raw: Mapping[str, Any], *, expected_platform: str, expected_revision: str,
+    root: Path = ROOT,
 ) -> dict[str, Any]:
     if len(expected_revision) != 40 or any(value not in "0123456789abcdef" for value in expected_revision):
         raise AdoptionError("STALE_REVISION", "expected revision must be an exact lowercase SHA")
@@ -581,7 +591,7 @@ def validate_provider_result(
     if raw.get("poc_exit_code") != 0:
         raise AdoptionError("INCOMPLETE_RESULT", "provider PoC did not exit successfully")
     source = raw.get("source")
-    provider_manifest = load_json(ROOT / "native/tls/aws_lc/provider.json")
+    provider_manifest = load_json(root / "native/tls/aws_lc/provider.json")
     expected_source = provider_manifest.get("source")
     if (
         provider_manifest.get("provider_id") != PINNED_PROVIDER
@@ -595,7 +605,7 @@ def validate_provider_result(
         for field in ("kind", "commit", "tree", "content_sha256")
     ):
         raise AdoptionError("PROVIDER", "AWS-LC source identity mismatch")
-    spec = load_json(ROOT / "tools/tls_provider_poc/providers.json")
+    spec = load_json(root / "tools/tls_provider_poc/providers.json")
     provider_spec = next(
         (item for item in spec.get("providers", []) if item.get("id") == PINNED_PROVIDER),
         None,
@@ -642,15 +652,17 @@ def validate_provider_result(
 
 def aggregate(
     core: Mapping[str, Any], windows: Mapping[str, Any], macos: Mapping[str, Any],
-    expected_revision: str
+    expected_revision: str, *, root: Path = ROOT,
 ) -> dict[str, Any]:
     if core.get("schema_version") != 1 or core.get("status") != "PASS":
         raise AdoptionError("CORE_REQUIREMENT", "Core audit is not PASS")
     win = validate_provider_result(
-        windows, expected_platform="windows-x86_64", expected_revision=expected_revision
+        windows, expected_platform="windows-x86_64", expected_revision=expected_revision,
+        root=root,
     )
     mac = validate_provider_result(
-        macos, expected_platform="macos-arm64", expected_revision=expected_revision
+        macos, expected_platform="macos-arm64", expected_revision=expected_revision,
+        root=root,
     )
     return {
         "schema_version": 1,
@@ -701,6 +713,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             value = validate_provider_result(
                 raw, expected_platform=args.platform,
                 expected_revision=args.expected_revision,
+                root=args.root.resolve(),
             )
         elif args.command == "validate-hosted":
             value = validate_hosted_run(args.root.resolve(), load_json(args.input))
@@ -708,6 +721,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             value = aggregate(
                 load_json(args.core), load_json(args.windows), load_json(args.macos),
                 args.expected_revision,
+                root=args.root.resolve(),
             )
         _write_or_print(value, args.output)
         return 0

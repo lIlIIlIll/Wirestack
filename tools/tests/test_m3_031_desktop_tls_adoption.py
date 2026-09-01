@@ -269,13 +269,11 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                     "STALE_SOURCE",
                     lambda: adoption.validate_dependency_evidence(root, bindings),
                 )
-                structural = adoption.validate_dependency_evidence(
-                    root, bindings, verify_current_sources=False
-                )
-                self.assertEqual("PASS", structural["status"])
-                self.assertEqual(
-                    "SEALED_INVENTORY",
-                    structural["tasks"]["M2-004"]["source_verification"],
+                self.assert_code(
+                    "STALE_SOURCE",
+                    lambda: adoption.validate_dependency_evidence(
+                        root, bindings, verify_current_sources=False
+                    ),
                 )
                 source.write_text("source", encoding="utf-8")
                 report.write_text(json.dumps({
@@ -501,6 +499,33 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 lambda: adoption.validate_provider_result(
                     raw, expected_platform="macos-arm64",
                     expected_revision=self.revision,
+                ),
+            )
+
+    def test_validate_provider_honors_selected_root(self) -> None:
+        raw = provider_result("macos-arm64", self.revision)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest_path = root / "native/tls/aws_lc/provider.json"
+            spec_path = root / "tools/tls_provider_poc/providers.json"
+            manifest_path.parent.mkdir(parents=True)
+            spec_path.parent.mkdir(parents=True)
+            manifest = json.loads(
+                (ROOT / "native/tls/aws_lc/provider.json").read_text(encoding="utf-8")
+            )
+            manifest["provider_version"] = "9.9.9"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            spec_path.write_text(
+                (ROOT / "tools/tls_provider_poc/providers.json").read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+            self.assert_code(
+                "PROVIDER",
+                lambda: adoption.validate_provider_result(
+                    raw,
+                    expected_platform="macos-arm64",
+                    expected_revision=self.revision,
+                    root=root,
                 ),
             )
 
