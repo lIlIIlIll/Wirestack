@@ -51,9 +51,11 @@
     }
   ],
   "allowed_paths": [
+    ".github/workflows/m0-016-windows-provider-poc.yml",
     ".github/workflows/linux-release-attestation.yml",
     ".github/workflows/materialize-m0-009.yml",
     ".github/workflows/p1-014-evidence-digest-boundary.yml",
+    ".github/workflows/tls-provider-poc.yml",
     ".gitignore",
     "docs/evidence/P1-014",
     "docs/evidence/P1-014/README.md",
@@ -160,9 +162,11 @@
   ],
   "schema_version": 1,
   "source_paths": [
+    ".github/workflows/m0-016-windows-provider-poc.yml",
     ".github/workflows/linux-release-attestation.yml",
     ".github/workflows/materialize-m0-009.yml",
     ".github/workflows/p1-014-evidence-digest-boundary.yml",
+    ".github/workflows/tls-provider-poc.yml",
     ".gitignore",
     "docs/evidence/P1-014/fixtures/line-endings.txt",
     "docs/evidence/P1-014/test-plan.md",
