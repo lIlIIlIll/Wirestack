@@ -26,6 +26,7 @@ RAW_DIGEST_COMMAND = re.compile(
     r"(?:"
     r"\b(?:sha256sum|shasum(?:\s+-a\s+256)?|Get-FileHash|certutil(?:\.exe)?\s+-hashfile)\b"
     r"|\bopenssl(?:\.exe)?\s+dgst\b[^\r\n]*(?:-sha256|-sha-256)\b"
+    r"|\bcksum\b[^\r\n]*(?:-a\s+sha256|--algorithm(?:=|\s+)sha256)\b"
     r"|\bhashlib\s*\.\s*(?:sha256|new\s*\([^\r\n]*sha256)"
     r"|\bfrom\s+hashlib\s+import\s+(?:sha256|new)\b"
     r"|\b(?:python(?:3(?:\.\d+)*)?|py)\b[^\r\n]*\s-c(?:\s|=)[^\r\n]*\bsha-?256\b"
@@ -322,12 +323,24 @@ def native_platform_identity() -> str:
     return f"{system or 'unknown'}-{architecture}"
 
 
-def crlf_report(expected_platform: str | None = None, root: Path | None = None) -> dict[str, Any]:
+def crlf_report(
+    expected_platform: str | None = None,
+    root: Path | None = None,
+    expected_revision: str | None = None,
+) -> dict[str, Any]:
     effective_root = root.resolve() if root is not None else Path(__file__).resolve().parents[1]
     actual = native_platform_identity()
     issues: list[dict[str, str]] = []
     if expected_platform and actual != expected_platform:
         issues.append({"code": "PLATFORM_MISMATCH", "detail": f"expected {expected_platform}, got {actual}"})
+    revision = expected_revision or _revision(root)
+    if expected_revision is not None and (
+        not isinstance(revision, str) or re.fullmatch(r"[0-9a-f]{40}", revision) is None
+    ):
+        issues.append({
+            "code": "REVISION_INVALID",
+            "detail": "candidate revision must be a full lowercase Git SHA",
+        })
     variants = {
         "lf": b"alpha\nbeta\n",
         "crlf": b"alpha\r\nbeta\r\n",
@@ -390,7 +403,7 @@ def crlf_report(expected_platform: str | None = None, root: Path | None = None) 
         "status": "PASS" if not issues else "FAIL",
         "platform": {"system": platform.system(), "machine": platform.machine(), "identity": actual},
         "expected_platform": expected_platform,
-        "revision": _revision(root),
+        "revision": revision,
         "text_digests": text_digests,
         "byte_digests": byte_digests,
         "invalid_utf8": invalid_utf8,
@@ -806,6 +819,17 @@ def digest_inventory(root: Path) -> dict[str, Any]:
                     continue
                 wrapper = digest_wrappers.get(name or "")
                 effective_name = wrapper[0] if wrapper is not None else name
+                if (effective_name in {"hmac.compare_digest", "compare_digest"}
+                        and _digest_field_accesses(node, assignment_index)):
+                    entries.append({
+                        "path": relative, "line": node.lineno,
+                        "symbol": "bare-sha256-comparison",
+                        "classification": "invalid-untyped-comparison",
+                    })
+                    issues.append({
+                        "code": "UNTYPED_DIGEST",
+                        "detail": f"{relative}:{node.lineno}:bare-sha256-comparison",
+                    })
                 if effective_name not in _CALL_DOMAINS and effective_name != "hashlib.sha256":
                     continue
                 if effective_name == "hashlib.sha256":
@@ -923,6 +947,7 @@ def parser() -> argparse.ArgumentParser:
     sub = result.add_subparsers(dest="command", required=True)
     crlf = sub.add_parser("crlf-report")
     crlf.add_argument("--expected-platform")
+    crlf.add_argument("--expected-revision")
     crlf.add_argument("--output", type=Path, required=True)
     inventory = sub.add_parser("inventory")
     inventory.add_argument("--output", type=Path, required=True)
@@ -932,7 +957,10 @@ def parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     args = parser().parse_args(argv)
     root = args.root.resolve()
-    report = crlf_report(args.expected_platform, root) if args.command == "crlf-report" else digest_inventory(root)
+    report = (
+        crlf_report(args.expected_platform, root, args.expected_revision)
+        if args.command == "crlf-report" else digest_inventory(root)
+    )
     output = args.output if args.output.is_absolute() else root / args.output
     atomic_json(output, report)
     summary = {
