@@ -13,13 +13,85 @@ from tools import m3_031_desktop_tls_adoption as adoption
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def tool_identity(name: str) -> dict:
+    output = f"{name} 1.0"
+    return {
+        "argv": [name, "--version"],
+        "exit_code": 0,
+        "output": output,
+        "output_sha256": adoption.hashlib.sha256(output.encode()).hexdigest(),
+    }
+
+
+def build_provenance(platform: str, *, diagnostic: bool = False) -> dict:
+    return {
+        "target_triple": {
+            "windows-x86_64": "x86_64-pc-windows-msvc",
+            "macos-arm64": "arm64-apple-darwin",
+        }[platform],
+        "compiler": tool_identity("cc"),
+        "cxx_compiler": tool_identity("c++"),
+        "cmake": tool_identity("cmake"),
+        "build_tool": tool_identity("build-tool"),
+        "assembler": (
+            tool_identity("nasm")
+            if platform == "windows-x86_64" and not diagnostic else None
+        ),
+        "configure_argv": [
+            "cmake", "-DBUILD_SHARED_LIBS=OFF", "-DBUILD_TESTING=OFF",
+            "-DDISABLE_GO=ON", "<SOURCE>", "<BUILD>", "<PREFIX>",
+        ],
+        "build_argv": [
+            ["build-tool", "<BUILD>"],
+            ["build-tool", "<PREFIX>"],
+        ],
+        "environment": {
+            key: ("/usr/bin:/bin" if key == "PATH" else "")
+            for key in adoption.poc_validate.BUILD_ENVIRONMENT_KEYS
+        },
+        "patches": [],
+        "patch_set_sha256": adoption.hashlib.sha256(b"[]\n").hexdigest(),
+        "instrumentation": (
+            "address+undefined-sanitizer" if diagnostic else "none"
+        ),
+        "provider_instrumented": diagnostic,
+    }
+
+
 def provider_result(platform: str, revision: str) -> dict:
     spec = json.loads((ROOT / "tools/tls_provider_poc/providers.json").read_text())
-    provider_manifest = json.loads(
-        (ROOT / "native/tls/aws_lc/provider.json").read_text()
+    provider = next(
+        item for item in spec["providers"] if item["id"] == "aws-lc"
     )
+    metrics = {
+        "repeated_cleanup_cycles": 10000,
+        "external_signer_calls": 2,
+        "external_trust_calls": 4,
+        "alpn_no_overlap_handshakes": 2,
+        "alpn_malformed_inputs_rejected": 2,
+        "certificate_negative_cases_rejected": 2,
+        "session_resumption_handshakes": 4,
+        "session_resumption_tls12_handshakes": 2,
+        "session_resumption_tls13_handshakes": 2,
+        "mtls_required_handshakes": 1,
+        "mtls_optional_handshakes": 2,
+        "local_close_operations": 2,
+        "memory_profile_peak_resident_bytes": 64 * 1024 * 1024,
+        "memory_profile_bound_bytes": adoption.poc_validate.MEMORY_PROFILE_BOUND_BYTES,
+        "provider_allocation_calls": 200,
+        "provider_allocation_call_bound": adoption.poc_validate.PROVIDER_ALLOCATION_CALL_BOUND,
+        "provider_allocation_bytes": 1024 * 1024,
+        "provider_allocation_bound_bytes": adoption.poc_validate.PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES,
+        "provider_allocation_peak_live_bytes": 512 * 1024,
+        "provider_allocation_live_before_cleanup_bytes": 64 * 1024,
+        "provider_allocation_live_after_cleanup_bytes": 64 * 1024,
+        "cancellation_wakeups": 1,
+        "cancellation_latency_us": 1000,
+        "cancellation_bound_us": adoption.poc_validate.CANCELLATION_WAKE_BOUND_US,
+    }
+    diagnostic_supported = platform == "macos-arm64"
     return {
-        "schema_version": 3,
+        "schema_version": adoption.poc_validate.RESULT_SCHEMA_VERSION,
         "task_id": "M0-016",
         "provider": "aws-lc",
         "platform": platform,
@@ -32,21 +104,76 @@ def provider_result(platform: str, revision: str) -> dict:
             "image_version": "1",
         },
         "source": {
-            key: provider_manifest["source"][key]
-            for key in ("kind", "commit", "tree", "content_sha256")
+            "kind": provider["source_kind"],
+            "commit": provider["commit"],
+            "tree": provider["tree"],
+            "content_sha256": provider["content_sha256"],
+            "security_update": copy.deepcopy(provider["security_update"]),
         },
         "poc_exit_code": 0,
         "capabilities": {name: "PASS" for name in spec["required_capabilities"]},
         "build": {
-            "static_archives": [{"name": "provider", "sha256": "c" * 64}],
+            "binary_bytes": 1,
+            "binary_sha256": "8" * 64,
+            "static_archives": [
+                {"name": "libssl.a", "bytes": 1, "sha256": "6" * 64}
+            ],
+            "exported_symbol_inventory": {
+                "scope": "final-artifact-exports",
+                "tool": "fixture-tool",
+                "count": 0,
+                "sha256": adoption.hashlib.sha256(b"").hexdigest(),
+                "symbols": [],
+            },
             "system_tls_dependencies": [],
             "runtime_loader_library_strings": [],
+            "license_bundle": {
+                "path": "license-bundle/manifest.json",
+                "sha256": "4" * 64,
+                "file_count": 1,
+                "total_bytes": 100,
+            },
+            "provenance": build_provenance(platform),
         },
-        "metrics": {"repeated_cleanup_cycles": 10000, "external_signer_calls": 2,
-                    "external_trust_calls": 4,
-                    "session_resumption_handshakes": 4,
-                    "session_resumption_tls12_handshakes": 2,
-                    "session_resumption_tls13_handshakes": 2},
+        "metrics": metrics,
+        "operational_evidence": {
+            "native_memory_diagnostic": {
+                "status": "PASS" if diagnostic_supported else "UNSUPPORTED",
+                "tool": "address+undefined-sanitizer",
+                "cleanup_cycles": 10,
+                "output_sha256": "7" * 64,
+                "leak_detection": {"status": "UNSUPPORTED"},
+                **({
+                    "provider_instrumented": True,
+                    "provider_static_archives": [{
+                        "name": "libprovider.a", "bytes": 1,
+                        "sha256": "5" * 64,
+                    }],
+                    "provider_build_provenance": build_provenance(
+                        platform, diagnostic=True
+                    ),
+                } if diagnostic_supported else {}),
+            },
+            "memory_profile": {
+                "method": "native-process-peak-resident-and-provider-allocation-hooks",
+                "peak_resident_bytes": metrics["memory_profile_peak_resident_bytes"],
+                "resident_bound_bytes": metrics["memory_profile_bound_bytes"],
+                "provider_allocation_calls": metrics["provider_allocation_calls"],
+                "provider_allocation_call_bound": metrics["provider_allocation_call_bound"],
+                "provider_allocation_bytes": metrics["provider_allocation_bytes"],
+                "provider_allocation_bound_bytes": metrics["provider_allocation_bound_bytes"],
+                "provider_allocation_peak_live_bytes": metrics["provider_allocation_peak_live_bytes"],
+                "provider_allocation_live_before_cleanup_bytes": metrics["provider_allocation_live_before_cleanup_bytes"],
+                "provider_allocation_live_after_cleanup_bytes": metrics["provider_allocation_live_after_cleanup_bytes"],
+                "payload_bytes_per_transfer": 32768,
+            },
+            "cancellation": {
+                "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
+                "wakeups": metrics["cancellation_wakeups"],
+                "latency_us": metrics["cancellation_latency_us"],
+                "bound_us": metrics["cancellation_bound_us"],
+            },
+        },
     }
 
 
