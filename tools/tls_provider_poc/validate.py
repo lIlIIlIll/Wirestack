@@ -585,9 +585,16 @@ def validate_license_bundle(result_path: Path, result: Mapping[str, Any],
         file_path = (files_root / relative).resolve()
         require(files_root in file_path.parents, "provider license file path escapes bundle")
         require(file_path.is_file(), "provider license file is missing")
-        size = file_path.stat().st_size
+        try:
+            raw = file_path.read_bytes()
+            evidence_digest.canonical_text_bytes(raw)
+        except OSError as error:
+            raise ValidationError("provider license file cannot be read") from error
+        except evidence_digest.DigestError as error:
+            raise ValidationError("provider license file is not valid UTF-8") from error
+        size = len(raw)
         require(size == entry.get("bytes"), "provider license file size mismatch")
-        require(evidence_digest.artifact_byte_sha256(file_path) == entry.get("sha256"),
+        require(evidence_digest.text_evidence_bytes_sha256(raw) == entry.get("sha256"),
                 "provider license file digest mismatch")
         observed_bytes += size
     require(observed_bytes == info["total_bytes"],

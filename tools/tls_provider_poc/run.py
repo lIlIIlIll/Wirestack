@@ -419,13 +419,20 @@ def create_license_bundle(src: Path, output_dir: Path, provider: str,
         total_bytes += size
         if total_bytes > MAX_LICENSE_TOTAL_BYTES:
             raise PocError("provider license bundle exceeds its total-size bound")
+        try:
+            raw = path.read_bytes()
+            evidence_digest.canonical_text_bytes(raw)
+        except OSError as error:
+            raise PocError("provider license file cannot be read") from error
+        except evidence_digest.DigestError as error:
+            raise PocError("provider license file is not valid UTF-8") from error
         destination = files_root / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(path, destination)
         entries.append({
             "path": relative.as_posix(),
             "bytes": size,
-            "sha256": evidence_digest.artifact_byte_sha256(path),
+            "sha256": evidence_digest.text_evidence_bytes_sha256(raw),
         })
     manifest = {
         "schema_version": 1,
