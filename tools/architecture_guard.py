@@ -40,6 +40,7 @@ DIGEST_DOMAIN_MARKERS = {
     "wirestack-digest-domain: artifact-bytes-v1",
     "wirestack-digest-domain: text-utf8-lf-v1",
 }
+NON_PYTHON_DOMAIN_MANIFEST = Path("tools/evidence-digest-non-python.json")
 TYPE_CONTAINER_RE = re.compile(
     r"^\s*(?P<public>public\s+)?(?:open\s+)?(?:class|struct|interface|enum)\b"
 )
@@ -523,6 +524,38 @@ def _python_offset(text: str, node: ast.AST) -> int:
 def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
     """Keep repository text evidence on the typed, normalized digest path."""
     violations: list[Violation] = []
+    declared_non_python: dict[tuple[str, str], str] = {}
+    manifest_path = root / NON_PYTHON_DOMAIN_MANIFEST
+    if manifest_path.is_file():
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            entries = manifest["entries"] if (
+                isinstance(manifest, dict) and set(manifest) == {"schema_version", "entries"}
+                and manifest.get("schema_version") == 1 and isinstance(manifest.get("entries"), list)
+            ) else None
+            if entries is None:
+                raise ValueError("schema")
+            for entry in entries:
+                if not isinstance(entry, dict) or set(entry) != {"path", "command", "domain"}:
+                    raise ValueError("entry")
+                relative, command, domain = entry["path"], entry["command"], entry["domain"]
+                if not all(isinstance(item, str) and item for item in (relative, command, domain)):
+                    raise ValueError("value")
+                candidate = Path(relative)
+                if candidate.is_absolute() or ".." in candidate.parts or domain not in {
+                    "artifact-bytes-v1", "text-utf8-lf-v1",
+                }:
+                    raise ValueError("domain")
+                key = (candidate.as_posix(), command)
+                if key in declared_non_python:
+                    raise ValueError("duplicate")
+                declared_non_python[key] = domain
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, KeyError, ValueError):
+            text = manifest_path.read_text(encoding="utf-8", errors="replace") if manifest_path.exists() else ""
+            violations.append(_violation(
+                root, manifest_path, text, 0, "digest-domain-manifest-invalid",
+                "The non-Python digest domain manifest must use the known fail-closed schema.",
+            ))
     tools_root = root / "tools"
     python_paths = sorted(tools_root.rglob("*.py")) if tools_root.is_dir() else []
     for path in python_paths:
@@ -621,6 +654,7 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
             path for path in workflows_root.rglob("*") if path.suffix in {".yml", ".yaml"}
         )
     for path in sorted(set(non_python_paths)):
+        relative = path.relative_to(root).as_posix()
         try:
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
@@ -631,7 +665,9 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
             if match is None:
                 continue
             context = "".join(lines[max(0, index - 4):index + 1]).lower()
-            if any(marker in context for marker in DIGEST_DOMAIN_MARKERS):
+            if any(marker in context for marker in DIGEST_DOMAIN_MARKERS) or (
+                relative, line.strip()
+            ) in declared_non_python:
                 continue
             offset = sum(len(value) for value in lines[:index]) + match.start()
             violations.append(_violation(
