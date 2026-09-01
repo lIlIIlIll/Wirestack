@@ -30,6 +30,7 @@ complete this task.
 | P011 | current resolver native source differs from the retained native report | current-tree, evidence-inventory and report-input digest comparison | reachable error | Native dependency drift fails even when unrelated historical inputs use sealed-inventory semantics. |
 | P012 | M2-004 or M2-006 status is no longer COMPLETE | exact current status-row validation | reachable error | Retained PASS evidence cannot override a corrected dependency status. |
 | P013 | a desktop backlog row keeps one phrase but drops another acceptance requirement | exact full acceptance-column comparison | reachable error | Dependency migration cannot weaken any pre-existing desktop criterion. |
+| P014 | M3-030 status is no longer COMPLETE | exact current status-row validation before retained-evidence validation | reachable error | Retained PASS reports cannot override a corrected provider-architecture task status. |
 
 ## Input-domain partitioning
 
@@ -66,6 +67,7 @@ complete this task.
 | S010 | current native resolver source drifts after retained execution | otherwise valid dependency evidence | P011 | reject | stable `STALE_SOURCE` identifies the native input | fault-injection | P0 |
 | S011 | M2 dependency status changes from COMPLETE to BLOCKED | retained evidence remains PASS | P012 | reject | stable dependency-evidence failure identifies non-COMPLETE status | fault-injection | P0 |
 | S012 | M3-014 retains its first acceptance phrase but drops identity/chain or non-exposure requirements | dependencies remain exact | P013 | reject | complete acceptance column must match the frozen contract | fault-injection | P0 |
+| S013 | M3-030 status changes from COMPLETE to BLOCKED | retained provider-architecture evidence remains PASS | P014 | reject | stable retained-evidence failure identifies non-COMPLETE status | fault-injection | P0 |
 
 ## Test-plan matrix
 
@@ -84,6 +86,7 @@ complete this task.
 | T011 | S010 | P011 | mutate the current Windows resolver source after sealing | FAIL | `STALE_SOURCE` applies even when broad historical-source verification is disabled | fault-injection |
 | T012 | S011 | P012 | mutate the M2-004 status row to BLOCKED while retaining evidence | FAIL | dependency evidence cannot pass without current COMPLETE status | fault-injection |
 | T013 | S012 | P013 | retain only the first M3-014 acceptance phrase | FAIL | `TASK_GRAPH` rejects the weakened full column | fault-injection |
+| T014 | S013 | P014 | mutate the M3-030 status row to BLOCKED while retaining evidence | FAIL | `RETAINED_EVIDENCE` rejects the stale dependency qualification | fault-injection |
 
 ## Excluded gates
 
