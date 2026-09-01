@@ -1,6 +1,6 @@
 {
   "domain_counts": {
-    "artifact-bytes": 70,
+    "artifact-bytes": 71,
     "text-evidence": 234,
     "typed-implementation": 3
   },
@@ -300,44 +300,50 @@
       "symbol": "artifact_byte_digest_bytes"
     },
     {
+      "classification": "artifact-bytes",
+      "line": 127,
+      "path": "tools/evidence_digest.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
       "classification": "text-evidence",
-      "line": 141,
+      "line": 146,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_bytes_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 233,
+      "line": 258,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
     {
       "classification": "artifact-bytes",
-      "line": 234,
-      "path": "tools/evidence_digest.py",
-      "symbol": "artifact_byte_digest_bytes"
-    },
-    {
-      "classification": "text-evidence",
-      "line": 241,
-      "path": "tools/evidence_digest.py",
-      "symbol": "text_evidence_digest_bytes"
-    },
-    {
-      "classification": "artifact-bytes",
-      "line": 253,
-      "path": "tools/evidence_digest.py",
-      "symbol": "artifact_byte_digest_bytes"
-    },
-    {
-      "classification": "text-evidence",
-      "line": 255,
-      "path": "tools/evidence_digest.py",
-      "symbol": "text_evidence_digest_bytes"
-    },
-    {
-      "classification": "text-evidence",
       "line": 259,
+      "path": "tools/evidence_digest.py",
+      "symbol": "artifact_byte_digest_bytes"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 266,
+      "path": "tools/evidence_digest.py",
+      "symbol": "text_evidence_digest_bytes"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 278,
+      "path": "tools/evidence_digest.py",
+      "symbol": "artifact_byte_digest_bytes"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 280,
+      "path": "tools/evidence_digest.py",
+      "symbol": "text_evidence_digest_bytes"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 284,
       "path": "tools/evidence_digest.py",
       "symbol": "text_evidence_digest_bytes"
     },
@@ -1083,7 +1089,7 @@
       "classification": "artifact-bytes",
       "line": 183,
       "path": "tools/m7_030_linux_release.py",
-      "symbol": "artifact_byte_sha256"
+      "symbol": "signed_payload_sha256"
     },
     {
       "classification": "text-evidence",
@@ -1131,7 +1137,7 @@
       "classification": "artifact-bytes",
       "line": 401,
       "path": "tools/m7_030_linux_release.py",
-      "symbol": "artifact_byte_sha256"
+      "symbol": "signed_payload_sha256"
     },
     {
       "classification": "text-evidence",
@@ -1185,7 +1191,7 @@
       "classification": "artifact-bytes",
       "line": 794,
       "path": "tools/m7_030_linux_release.py",
-      "symbol": "artifact_byte_sha256"
+      "symbol": "signed_payload_sha256"
     },
     {
       "classification": "artifact-bytes",
@@ -1597,55 +1603,55 @@
     },
     {
       "classification": "text-evidence",
-      "line": 30,
+      "line": 31,
       "path": "tools/tests/test_p1_014_evidence_digest_types.py",
       "symbol": "text_evidence_digest_bytes"
     },
     {
       "classification": "artifact-bytes",
-      "line": 31,
+      "line": 32,
       "path": "tools/tests/test_p1_014_evidence_digest_types.py",
       "symbol": "artifact_byte_digest_bytes"
     },
     {
       "classification": "text-evidence",
-      "line": 39,
+      "line": 40,
       "path": "tools/tests/test_p1_014_evidence_digest_types.py",
       "symbol": "text_evidence_digest_bytes"
     },
     {
       "classification": "text-evidence",
-      "line": 43,
+      "line": 44,
       "path": "tools/tests/test_p1_014_evidence_digest_types.py",
       "symbol": "text_evidence_digest_bytes"
     },
     {
       "classification": "text-evidence",
-      "line": 46,
-      "path": "tools/tests/test_p1_014_evidence_digest_types.py",
-      "symbol": "parse_text_digest"
-    },
-    {
-      "classification": "artifact-bytes",
       "line": 47,
       "path": "tools/tests/test_p1_014_evidence_digest_types.py",
+      "symbol": "parse_text_digest"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 48,
+      "path": "tools/tests/test_p1_014_evidence_digest_types.py",
       "symbol": "parse_artifact_digest"
     },
     {
       "classification": "text-evidence",
-      "line": 49,
+      "line": 50,
       "path": "tools/tests/test_p1_014_evidence_digest_types.py",
       "symbol": "parse_text_digest"
     },
     {
       "classification": "artifact-bytes",
-      "line": 52,
+      "line": 53,
       "path": "tools/tests/test_p1_014_evidence_digest_types.py",
       "symbol": "parse_artifact_digest"
     },
     {
       "classification": "text-evidence",
-      "line": 63,
+      "line": 64,
       "path": "tools/tests/test_p1_014_evidence_digest_types.py",
       "symbol": "parse_text_digest"
     },
@@ -1848,7 +1854,7 @@
       "symbol": "text_evidence_sha256"
     }
   ],
-  "entry_count": 307,
+  "entry_count": 308,
   "issues": [],
   "kind": "p1-014-digest-inventory",
   "schema_version": 1,
