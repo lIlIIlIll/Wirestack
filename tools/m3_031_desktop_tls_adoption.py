@@ -25,7 +25,7 @@ from tools.gates import m2_004_windows_resolver, m2_006_apple_resolver
 PINNED_PROVIDER = "aws-lc"
 PINNED_PROVIDER_VERSION = "5.5.0"
 PINNED_COMMIT = "991e67ff4cf04df4dd89e407f8b920c6936cb56a"
-PROVIDER_RESULT_SCHEMA_VERSION = 3
+PROVIDER_RESULT_SCHEMA_VERSION = poc_validate.RESULT_SCHEMA_VERSION
 EXPECTED_RUNNER_IMAGES = {
     "windows-x86_64": "win25-vs2026",
     "macos-arm64": "macos15",
@@ -547,21 +547,17 @@ def validate_provider_result(
 ) -> dict[str, Any]:
     if len(expected_revision) != 40 or any(value not in "0123456789abcdef" for value in expected_revision):
         raise AdoptionError("STALE_REVISION", "expected revision must be an exact lowercase SHA")
-    spec = load_json(ROOT / "tools/tls_provider_poc/providers.json")
-    try:
-        poc_validate.validate_result(raw, spec, expected_revision)
-    except poc_validate.ValidationError as error:
-        detail = str(error)
-        code = "STALE_REVISION" if "revision" in detail else "RAW_RESULT"
-        raise AdoptionError(code, detail) from error
     if raw.get("provider") != PINNED_PROVIDER:
         raise AdoptionError("PROVIDER", str(raw.get("provider")))
     if raw.get("platform") != expected_platform:
         raise AdoptionError("PLATFORM", str(raw.get("platform")))
-    if raw.get("status") != "PASS":
-        raise AdoptionError("INCOMPLETE_RESULT", str(raw.get("status")))
+    status = raw.get("status")
+    if status not in poc_validate.RESULT_STATUSES:
+        raise AdoptionError("RAW_RESULT", f"unsupported result status: {status}")
+    if status != "PASS":
+        raise AdoptionError("INCOMPLETE_RESULT", str(status))
     if raw.get("schema_version") != PROVIDER_RESULT_SCHEMA_VERSION:
-        raise AdoptionError("UNKNOWN_SCHEMA", str(raw.get("schema_version")))
+        raise AdoptionError("RAW_RESULT", str(raw.get("schema_version")))
     if raw.get("poc_exit_code") != 0:
         raise AdoptionError("INCOMPLETE_RESULT", "provider PoC did not exit successfully")
     source = raw.get("source")
@@ -572,6 +568,13 @@ def validate_provider_result(
         for field in ("kind", "commit", "tree", "content_sha256")
     ):
         raise AdoptionError("PROVIDER", "AWS-LC source identity mismatch")
+    spec = load_json(ROOT / "tools/tls_provider_poc/providers.json")
+    try:
+        poc_validate.validate_result(raw, spec, expected_revision)
+    except poc_validate.ValidationError as error:
+        detail = str(error)
+        code = "STALE_REVISION" if "revision" in detail else "RAW_RESULT"
+        raise AdoptionError(code, detail) from error
     capabilities = raw.get("capabilities")
     if not isinstance(capabilities, dict) or any(value != "PASS" for value in capabilities.values()):
         raise AdoptionError("INCOMPLETE_RESULT", "every capability must be PASS")
