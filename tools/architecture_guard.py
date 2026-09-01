@@ -47,6 +47,9 @@ TEXT_COMMAND_OPERAND_RE = re.compile(
     r"(?=$|[\s'\";)])",
     re.IGNORECASE,
 )
+SHELL_VARIABLE_OPERAND_RE = re.compile(
+    r"\$(?:\{[A-Za-z_][A-Za-z0-9_]*\}|[A-Za-z_][A-Za-z0-9_]*)"
+)
 NON_PYTHON_DOMAIN_MANIFEST = Path("tools/evidence-digest-non-python.json")
 TYPE_CONTAINER_RE = re.compile(
     r"^\s*(?P<public>public\s+)?(?:open\s+)?(?:class|struct|interface|enum)\b"
@@ -960,7 +963,10 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                 "wirestack-digest-domain: text-utf8-lf-v1" in context
                 or declared_domain == "text-utf8-lf-v1"
             )
-            obvious_text = TEXT_COMMAND_OPERAND_RE.search(line) is not None
+            obvious_text = (
+                TEXT_COMMAND_OPERAND_RE.search(line) is not None
+                or SHELL_VARIABLE_OPERAND_RE.search(line) is not None
+            )
             if artifact_declared and not obvious_text:
                 continue
             offset = sum(len(value) for value in lines[:index]) + match.start()

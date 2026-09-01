@@ -774,7 +774,7 @@ def main() -> int:
             )
             write_documents(documents, args.output_dir)
             bundle = validate_documents(args.output_dir, artifact_path=args.artifact)
-    except SupplyChainError as error:
+    except (SupplyChainError, evidence_digest.DigestError) as error:
         print(f"M7-025 Linux supply-chain bundle: FAIL: {error}")
         return 1
     print(

@@ -89,6 +89,18 @@ class ArchitectureGuardTests(unittest.TestCase):
             self.write(root, "tools/new_gate.sh", "sha256sum report.json\n")
             self.assertIn("untyped-non-python-digest", self.rules(root))
 
+    def test_artifact_marker_rejects_unresolved_shell_variable_operand(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "scripts/check-report",
+                "REPORT=docs/evidence/report.json\n"
+                "# wirestack-digest-domain: artifact-bytes-v1\n"
+                "sha256sum \"$REPORT\"\n",
+            )
+            self.assertIn("text-evidence-raw-digest", self.rules(root))
+
     def test_composite_action_digest_is_scanned(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)
