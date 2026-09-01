@@ -4,8 +4,8 @@
 
 P1-014 is complete. Linux and GitHub Windows CRLF fault injection pass, every
 digest callsite has an explicit domain, and the task-level and canonical
-repository checks pass. GitHub Actions run `33512627171` produced the retained
-Windows report for PR #151 source head `ece91907` (merge revision `2ed16dfd`).
+repository checks pass. GitHub Actions run `33520295460` produced the retained
+Windows report for PR #151 source head `f96eab4c` (merge revision `7fac7372`).
 
 ## Implemented boundary
 
@@ -56,13 +56,13 @@ entries remain unchanged because they belong to other tasks.
 | Evidence | Result |
 |---|---|
 | Test-plan validator | PASS, 13 paths, 7 scenarios, 11 tests |
-| P1 task-contract unit and fault-injection tests | PASS, 96 tests |
-| Repository-tool Python regressions | PASS, 384 tests |
+| P1 task-contract unit and fault-injection tests | PASS, 98 tests |
+| Repository-tool Python regressions | PASS, 387 tests |
 | Architecture guard | PASS, 0 violations |
 | Linux CRLF probe | PASS |
 | Digest callsite inventory | PASS, 367 explicitly classified calls, 0 issues |
-| GitHub Windows CRLF probe | PASS, run `33512627171`, source head `ece91907`, merge `2ed16dfd`; effective `text` and `eol` attributes are `unspecified`, tracked fixture checked out as CRLF |
-| Hosted exact-SHA CI | PASS, all 26 checks at `ece91907`, including Gate Harness, Windows CRLF and provider matrix |
+| GitHub Windows CRLF probe | PASS, run `33520295460`, source head `f96eab4c`, merge `7fac7372`; effective `text` and `eol` attributes are `unspecified`, tracked fixture checked out as CRLF |
+| Hosted exact-SHA CI | PASS, all 25 checks at `f96eab4c`, including Gate Harness, Windows CRLF and provider matrix |
 | `scripts/check-fast --json` | PASS |
 | `scripts/check` | PASS, including 178 gate Python tests, 24 benchmark Python tests, and 588 passed/23 skipped Cangjie tests |
 | `scripts/check-task P1-014` | PASS, all four commands passed |
