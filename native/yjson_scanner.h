@@ -65,6 +65,10 @@ int32_t YJ_JSON_FormatFloat64Array(
     uint8_t* output, int64_t outputCap, int64_t outputOffset,
     int64_t* outWritten);
 
+/* Formats one finite Float64 directly into caller-owned output storage. */
+int64_t YJ_JSON_FormatFloat64(
+    double value, uint8_t* output, int64_t outputCap, int64_t outputOffset);
+
 /* Validates and converts one complete JSON Int64 array in a single call. */
 int32_t YJ_JSON_ParseInt64Array(
     const uint8_t* input, int64_t len, int64_t start,

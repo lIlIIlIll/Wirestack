@@ -35,3 +35,17 @@ int32_t YJ_JSON_FormatFloat64Array(const double* values, int64_t count,
     *outWritten = written;
     return YJ_JSON_SCAN_OK;
 }
+
+int64_t YJ_JSON_FormatFloat64(double value, uint8_t* output,
+    int64_t outputCap, int64_t outputOffset)
+{
+    if (output == NULL || !isfinite(value) || outputOffset < 0 ||
+        outputOffset > outputCap || outputCap - outputOffset < 40) {
+        return -1;
+    }
+    u64 bits;
+    memcpy(&bits, &value, sizeof(bits));
+    uint8_t* start = output + outputOffset;
+    uint8_t* end = write_f64_raw(start, bits, 0);
+    return (int64_t)(end - start);
+}

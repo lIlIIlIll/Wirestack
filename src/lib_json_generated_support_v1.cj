@@ -225,7 +225,6 @@ public struct GeneratedSupportV1ReadCursor {
     }
     public func skipRawWithDepth(maxDepth: Int64): Unit { reader.skipRawWithDepth(maxDepth) }
 }
-
 /// Narrow semantic writer contract consumed by generated codecs. Structural
 /// correctness remains owned by the core writer state machine.
 public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1 {
@@ -647,6 +646,18 @@ public class GeneratedSupportV1 {
 
     public static func readWith<T>(codec: JsonCodec<T>, reader: GeneratedSupportV1Reader): T {
         readJsonNestedFastWith(codec, reader)
+    }
+
+    public static func readCursor(reader: GeneratedSupportV1Reader): GeneratedSupportV1ReadCursor {
+        GeneratedSupportV1ReadCursor(yJsonGeneratedReaderV1(reader))
+    }
+
+    public static func readWithCached<T>(fastCodec: Option<GeneratedCodecV1<T>>,
+        codec: JsonCodec<T>, reader: GeneratedSupportV1Reader): T {
+        match (fastCodec) {
+            case Some(fast) => fast.readFast(reader)
+            case None => codec.read(yJsonSemanticReaderV1(reader))
+        }
     }
 
     public static func tryBeginCompactValue(writer: GeneratedSupportV1Writer): Bool {

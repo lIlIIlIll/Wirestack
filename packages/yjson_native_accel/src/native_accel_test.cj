@@ -90,6 +90,14 @@ class NativeAccelPublicContractTest {
     @TestCase
     func nativeFloatParserPreservesEligibleAndOversizedTokens(): Unit {
         YJsonNativeAccel.initialize()
+        for (value in [-0.0, 0.0, 1.25, -125.5, 3.141592653589793, 1e308, 1e-300]) {
+            let text = YJson.toJson(value)
+            @Expect(YJson.fromJson<Float64>(text).toBits(), value.toBits())
+            @Expect(String.fromUtf8(YJson.toJsonBytes(value)), text)
+            let stream = YJsonMemoryOutputStream()
+            YJson.writeJson(value, stream)
+            @Expect(stream.toUtf8String(), text)
+        }
         @Expect(YJson.fromJson<Float64>("-125.5"), -125.5)
         let values = YJson.fromJson<ArrayList<Float64>>("[1.25,-2.5,6.25e3]")
         @Expect(values[0], 1.25)

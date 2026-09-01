@@ -68,6 +68,8 @@ public interface JsonNativeWriterBackend {
     func formatFloat64Array(values: CPointer<Float64>, count: Int64,
         output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64,
         outWritten: CPointer<Int64>): Int32
+    func formatFloat64(value: Float64, output: CPointer<UInt8>, outputCap: Int64,
+        outputOffset: Int64): Int64
 }
 
 /// Versioned internal product bundle consumed by yjson_native. Applications
@@ -81,6 +83,29 @@ public interface JsonNativeAccelerationPrimitivesV1 <: JsonNativeScannerBackend 
 // every hot-path lookup observe either Pure or the full Native bundle.
 private var jsonNativeAccelerationPrimitives: Option<JsonNativeAccelerationPrimitivesV1> =
     None<JsonNativeAccelerationPrimitivesV1>
+
+func jsonNativeFormatFloat64Into(value: Float64, output: Array<Byte>,
+    outputOffset: Int64): Option<Int64> {
+    let backend = match (jsonNativeAccelerationPrimitives) {
+        case Some(item) => item
+        case None => return None<Int64>
+    }
+    if (outputOffset < 0 || outputOffset > output.size ||
+        output.size - outputOffset < 40) {
+        return None<Int64>
+    }
+    unsafe {
+        let outputHandle = acquireArrayRawData(output)
+        let written = backend.formatFloat64(value, outputHandle.pointer, output.size,
+            outputOffset)
+        releaseArrayRawData(outputHandle)
+        if (written <= 0 || written > 40 || written > output.size - outputOffset) {
+            throw JsonException("Native JSON float formatting failed",
+                code: "acceleration_writer_failure")
+        }
+        Some(written)
+    }
+}
 
 func jsonNativeFormatInt64ArrayInto(values: ArrayList<Int64>, output: Array<Byte>,
     outputOffset: Int64): Option<Int64> {
