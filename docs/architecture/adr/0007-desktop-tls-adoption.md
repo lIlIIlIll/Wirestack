@@ -18,10 +18,10 @@ ADR-0002 does not permit a Linux result to change a global task status. Directly
 starting M3-014 would therefore bypass the declared dependency graph even
 though the shared implementation now exists.
 
-The provider evidence has a second split. AWS-LC 5.5.0 passes the retained
-Windows x86_64 PoC. The retained macOS arm64 result predates the schema-v2
-external-signer test and remains PARTIAL. Neither result selects a production
-desktop provider by itself.
+At the time of the decision, the provider evidence had a second split. AWS-LC
+5.5.0 passed the retained Windows x86_64 PoC, while the retained macOS arm64
+result predated the strengthened external-signer contract. Neither result
+selected a production desktop provider by itself.
 
 ## Decision
 
@@ -55,7 +55,7 @@ Replacing the dependency list does not remove any product requirement.
 
 Windows x86_64 and macOS arm64 select pinned AWS-LC 5.5.0 for their desktop
 adoption path. The selection becomes effective only after an exact-revision
-schema-v3 PoC reports PASS for every required capability on both GitHub-hosted
+schema-v11 PoC reports PASS for every required capability on both GitHub-hosted
 native runners. Provider selection remains a build-time decision. Unknown
 providers, unsupported platform combinations and any automatic fallback fail
 closed.

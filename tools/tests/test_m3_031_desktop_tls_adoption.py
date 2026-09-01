@@ -345,17 +345,32 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
 
     def test_hosted_run_is_bound_to_current_provider_inputs(self) -> None:
         revision = "a" * 40
+        windows_result = "docs/evidence/M3-031/windows-x86_64/provider-result.json"
+        windows_validation = "docs/evidence/M3-031/windows-x86_64/validation.json"
+        macos_result = "docs/evidence/M3-031/macos-arm64/provider-result.json"
+        macos_validation = "docs/evidence/M3-031/macos-arm64/validation.json"
         raw = {
             "schema_version": 2, "task_id": "M3-031", "status": "PASS",
             "conclusion": "success", "revision": revision,
             "source_sha256": adoption.hosted_input_sha256(ROOT),
             "artifacts": [
-                {"name": f"m3-031-windows-x86_64-{revision}"},
-                {"name": f"m3-031-macos-arm64-{revision}"},
+                {
+                    "name": f"m3-031-windows-x86_64-{revision}",
+                    "provider_result_sha256": adoption.sha256_path(ROOT / windows_result),
+                    "validation_sha256": adoption.sha256_path(ROOT / windows_validation),
+                },
+                {
+                    "name": f"m3-031-macos-arm64-{revision}",
+                    "provider_result_sha256": adoption.sha256_path(ROOT / macos_result),
+                    "validation_sha256": adoption.sha256_path(ROOT / macos_validation),
+                },
             ],
         }
         self.assertEqual("PASS", adoption.validate_hosted_run(ROOT, raw)["status"])
         raw["source_sha256"][adoption.HOSTED_INPUT_PATHS[0]] = "0" * 64
+        self.assert_code("STALE_SOURCE", lambda: adoption.validate_hosted_run(ROOT, raw))
+        raw["source_sha256"] = adoption.hosted_input_sha256(ROOT)
+        raw["artifacts"][0]["provider_result_sha256"] = "0" * 64
         self.assert_code("STALE_SOURCE", lambda: adoption.validate_hosted_run(ROOT, raw))
 
     def test_repository_text_digest_is_checkout_line_ending_stable(self) -> None:
@@ -468,6 +483,26 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 expected_revision=self.revision,
             ),
         )
+
+    def test_provider_manifest_cannot_move_the_approved_pin(self) -> None:
+        raw = provider_result("macos-arm64", self.revision)
+        original_load = adoption.load_json
+
+        def moved_manifest(path: Path) -> dict:
+            value = original_load(path)
+            if path == ROOT / "native/tls/aws_lc/provider.json":
+                value = copy.deepcopy(value)
+                value["provider_version"] = "9.9.9"
+            return value
+
+        with mock.patch.object(adoption, "load_json", side_effect=moved_manifest):
+            self.assert_code(
+                "PROVIDER",
+                lambda: adoption.validate_provider_result(
+                    raw, expected_platform="macos-arm64",
+                    expected_revision=self.revision,
+                ),
+            )
 
     def test_atomic_report_replacement_preserves_old_file_on_failure(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
