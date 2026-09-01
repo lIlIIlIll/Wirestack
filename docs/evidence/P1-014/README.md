@@ -2,10 +2,12 @@
 
 ## Status
 
-P1-014 is incomplete until the GitHub Windows runner produces
-`windows-crlf.json` for the exact candidate revision. Linux implementation and
-fault injection are complete. The checked-in Windows document is an explicit
-`BLOCKED` placeholder and is not accepted by evidence sealing.
+P1-014 remains in progress while the final repository check and evidence index
+are resealed. Linux and GitHub Windows fault injection pass. GitHub Actions run
+`33481830845` tested PR #151 head
+`4f6e9ca57a22e850fdf2f227e4e8e00ba9e3aaaa` through merge revision
+`a0c598accca2d7536ac836916796fd57161a673a`; artifact `9790220952` contains the
+checked-in `windows-crlf.json`.
 
 ## Implemented boundary
 
@@ -36,11 +38,12 @@ entries remain unchanged because they belong to other tasks.
 | Evidence | Result |
 |---|---|
 | Test-plan validator | PASS, 13 paths, 7 scenarios, 11 tests |
-| Focused unit and fault-injection tests | PASS, 63 tests |
+| Focused unit and fault-injection tests | PASS, 64 tests |
 | Architecture guard | PASS, 0 violations |
 | Linux CRLF probe | PASS |
 | Digest callsite inventory | PASS, 281 calls: 215 text, 63 artifact, 3 typed implementation |
-| GitHub Windows CRLF probe | BLOCKED, workflow has not run |
+| GitHub Windows CRLF probe | PASS, run `33481830845`, head `4f6e9ca5`, merge `a0c598ac` |
+| Hosted Gate Harness | PASS, run `33481830876`, head `4f6e9ca5` |
 | `scripts/check-fast --json` | PASS |
 | `scripts/check` | FAIL, 337 tests with 2 pre-existing M2-004 evidence errors |
 | `scripts/check-task P1-014` | FAIL because its final `scripts/check` command failed; its first three commands passed |
@@ -57,8 +60,9 @@ python3 tools/evidence_digest.py --root . crlf-report --expected-platform linux-
 
 ## Unrun gates
 
-The GitHub Windows workflow, one-hour SSE profile, 86,400-second soak, release
-rebuild, performance, fuzz, security-review and signing gates were not run.
+The one-hour SSE profile, 86,400-second soak, release rebuild, performance,
+fuzz, security-review and signing gates were not run. None is part of the
+non-long-running P1-014 task contract.
 
 The canonical repository check currently fails only
 `test_dependency_evidence_rejects_source_and_native_report_drift` and
