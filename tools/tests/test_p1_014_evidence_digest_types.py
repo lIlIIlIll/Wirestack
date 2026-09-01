@@ -126,6 +126,28 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             broad = crlf_report(root=root)
             self.assertEqual("FAIL", broad["status"])
             self.assertEqual("unset", broad["effective_text_attribute"])
+            (root / ".gitattributes").write_text("*.txt text eol=lf\n", encoding="utf-8")
+            forced_lf = crlf_report(root=root)
+            self.assertEqual("FAIL", forced_lf["status"])
+            self.assertEqual("lf", forced_lf["effective_eol_attribute"])
+            self.assertIn("GITATTRIBUTES_EOL_LF", {
+                item["code"] for item in forced_lf["issues"]
+            })
+
+    def test_windows_crlf_report_requires_actual_crlf_checkout(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-windows-checkout-") as directory:
+            root = Path(directory)
+            fixture = root / "docs/evidence/P1-014/fixtures/line-endings.txt"
+            fixture.parent.mkdir(parents=True)
+            fixture.write_bytes(b"alpha\nbeta\n")
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            with mock.patch("tools.evidence_digest.native_platform_identity",
+                            return_value="windows-x86_64"):
+                report = crlf_report("windows-x86_64", root=root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertIn("WINDOWS_CHECKOUT_NOT_CRLF", {
+                item["code"] for item in report["issues"]
+            })
 
     def test_windows_workflow_is_pinned_and_runs_only_bounded_python_checks(self) -> None:
         workflow = (self.ROOT / ".github/workflows/p1-014-evidence-digest-boundary.yml").read_text(
@@ -135,6 +157,7 @@ class EvidenceDigestTypeTests(unittest.TestCase):
         self.assertIn("actions/checkout@11d5960a326750d5838078e36cf38b85af677262", workflow)
         self.assertIn("actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02", workflow)
         self.assertIn("--expected-platform windows-x86_64", workflow)
+        self.assertIn('- ".gitattributes"', workflow)
         self.assertNotIn("cjpm", workflow.lower())
         self.assertNotIn("soak", workflow.lower())
 
@@ -250,6 +273,22 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             self.assertEqual("FAIL", report["status"])
             self.assertIn("invalid-artifact-on-text", report["domain_counts"])
             self.assertIn("legacy-task-local", report["domain_counts"])
+
+    def test_inventory_resolves_assigned_typed_callable_alias(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            path = root / "tools/gates/new_tool.py"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "from pathlib import Path\n"
+                "from tools import evidence_digest\n"
+                "digest = evidence_digest.artifact_byte_sha256\n"
+                "value = digest(Path('report.json'))\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertIn("invalid-artifact-on-text", report["domain_counts"])
 
     def test_inventory_resolves_assigned_text_path_before_byte_digest(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:

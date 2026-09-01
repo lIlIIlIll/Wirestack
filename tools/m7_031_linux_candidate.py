@@ -686,13 +686,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.write:
             atomic_json(report_path, report)
         report = validate_committed(root, report_path)
-    except (CandidateError, m7_021_linux_release.ReleaseError,
+    except (CandidateError, evidence_digest.DigestError,
+            m7_021_linux_release.ReleaseError,
             m7_025_linux_supply_chain.SupplyChainError,
             m7_030_linux_release.ReleaseError,
             m7_032_public_api_inventory.PublicApiInventoryError,
             m7_023_linux_fuzz.GateError,
             m7_024_linux_performance.GateError) as error:
         payload = {"taskId": TASK_ID, "status": "FAIL", "error": str(error)}
+        if isinstance(error, evidence_digest.DigestError):
+            payload["code"] = error.code
         print(json.dumps(payload, sort_keys=True) if args.json
               else f"M7-031 candidate: FAIL: {error}")
         return 1

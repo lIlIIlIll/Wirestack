@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import copy
+import io
 import json
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest import mock
 
@@ -162,6 +164,17 @@ class M7031LinuxCandidateTests(unittest.TestCase):
                 candidate.atomic_json(report, {"status": "PASS"}, replace=fail_replace)
             self.assertEqual(original, report.read_bytes())
             self.assertEqual([], list(report.parent.glob(f".{report.name}.*")))
+
+    def test_cli_returns_structured_digest_failure(self) -> None:
+        output = io.StringIO()
+        error = candidate.evidence_digest.DigestError("TEXT_UTF8", "criterion.md")
+        with mock.patch.object(candidate, "build_candidate", side_effect=error), \
+                redirect_stdout(output):
+            result = candidate.main(["--root", str(ROOT), "--json"])
+        payload = json.loads(output.getvalue())
+        self.assertEqual(1, result)
+        self.assertEqual("FAIL", payload["status"])
+        self.assertEqual("TEXT_UTF8", payload["code"])
 
     def test_committed_report_matches_deterministic_generator(self) -> None:
         path = ROOT / "docs/evidence/M7-031/linux_x86_64/release-candidate.json"

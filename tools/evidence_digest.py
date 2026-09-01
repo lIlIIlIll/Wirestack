@@ -227,24 +227,32 @@ def _revision(root: Path | None) -> str | None:
     return result.stdout.strip() if result.returncode == 0 else os.environ.get("GITHUB_SHA")
 
 
-def _effective_text_attribute(root: Path) -> str:
+def _effective_checkout_attributes(root: Path) -> dict[str, str]:
     try:
         result = subprocess.run(
-            ["git", "check-attr", "text", "--", CHECKOUT_FIXTURE.as_posix()],
+            ["git", "check-attr", "text", "eol", "--", CHECKOUT_FIXTURE.as_posix()],
             cwd=root, capture_output=True, text=True, timeout=5, check=False,
         )
     except (OSError, subprocess.TimeoutExpired) as error:
         raise DigestError("GITATTRIBUTES_CHECK", type(error).__name__) from error
     if result.returncode != 0:
         raise DigestError("GITATTRIBUTES_CHECK", f"exit {result.returncode}")
-    prefix = f"{CHECKOUT_FIXTURE.as_posix()}: text: "
-    output = result.stdout.strip()
-    if not output.startswith(prefix):
-        raise DigestError("GITATTRIBUTES_CHECK", "unexpected output")
-    value = output[len(prefix):]
-    if value not in {"set", "unset", "unspecified"}:
-        raise DigestError("GITATTRIBUTES_CHECK", f"unexpected value {value}")
-    return value
+    attributes: dict[str, str] = {}
+    prefix = f"{CHECKOUT_FIXTURE.as_posix()}: "
+    for line in result.stdout.splitlines():
+        if not line.startswith(prefix):
+            raise DigestError("GITATTRIBUTES_CHECK", "unexpected output")
+        name, separator, value = line[len(prefix):].partition(": ")
+        if not separator or name not in {"text", "eol"}:
+            raise DigestError("GITATTRIBUTES_CHECK", "unexpected attribute")
+        attributes[name] = value
+    if set(attributes) != {"text", "eol"}:
+        raise DigestError("GITATTRIBUTES_CHECK", "missing attribute")
+    if attributes["text"] not in {"set", "unset", "unspecified"}:
+        raise DigestError("GITATTRIBUTES_CHECK", f"unexpected text {attributes['text']}")
+    if attributes["eol"] not in {"lf", "crlf", "unspecified"}:
+        raise DigestError("GITATTRIBUTES_CHECK", f"unexpected eol {attributes['eol']}")
+    return attributes
 
 
 def _normalized_architecture(value: str) -> str:
@@ -321,14 +329,22 @@ def crlf_report(expected_platform: str | None = None, root: Path | None = None) 
         )
     gitattributes_dependency = False
     try:
-        text_attribute = _effective_text_attribute(effective_root)
+        attributes = _effective_checkout_attributes(effective_root)
     except DigestError as error:
         text_attribute = "unknown"
+        eol_attribute = "unknown"
         issues.append({"code": error.code, "detail": error.detail})
     else:
-        gitattributes_dependency = text_attribute == "unset"
-        if gitattributes_dependency:
+        text_attribute = attributes["text"]
+        eol_attribute = attributes["eol"]
+        if text_attribute == "unset":
+            gitattributes_dependency = True
             issues.append({"code": "GITATTRIBUTES_DEPENDENCY", "detail": CHECKOUT_FIXTURE.as_posix()})
+        if eol_attribute == "lf":
+            gitattributes_dependency = True
+            issues.append({"code": "GITATTRIBUTES_EOL_LF", "detail": CHECKOUT_FIXTURE.as_posix()})
+    if actual.startswith("windows-") and fixture.get("line_endings") != "CRLF":
+        issues.append({"code": "WINDOWS_CHECKOUT_NOT_CRLF", "detail": CHECKOUT_FIXTURE.as_posix()})
     return {
         "schema_version": 1,
         "kind": "p1-014-crlf-fault-injection",
@@ -341,6 +357,7 @@ def crlf_report(expected_platform: str | None = None, root: Path | None = None) 
         "invalid_utf8": invalid_utf8,
         "checkout_fixture": fixture,
         "effective_text_attribute": text_attribute,
+        "effective_eol_attribute": eol_attribute,
         "gitattributes_dependency": gitattributes_dependency,
         "issues": issues,
     }
@@ -386,6 +403,39 @@ def _expression_name(node: ast.AST) -> str | None:
         value = _expression_name(node.value)
         return f"{value}.{node.attr}" if value else node.attr
     return None
+
+
+def _callable_aliases(tree: ast.AST, imported: dict[str, str]) -> dict[str, str]:
+    aliases = dict(imported)
+    pending: list[tuple[str, ast.AST]] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            pending.extend(
+                (target.id, node.value) for target in node.targets if isinstance(target, ast.Name)
+            )
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) \
+                and node.value is not None:
+            pending.append((node.target.id, node.value))
+    while pending:
+        remaining: list[tuple[str, ast.AST]] = []
+        changed = False
+        for target, value in pending:
+            name = _expression_name(value)
+            if name is None:
+                continue
+            root, separator, remainder = name.partition(".")
+            if root in aliases:
+                name = aliases[root] + (separator + remainder if separator else "")
+            final = name.rsplit(".", 1)[-1]
+            if final in _CALL_DOMAINS or name == "hashlib.sha256":
+                aliases[target] = name
+                changed = True
+            else:
+                remaining.append((target, value))
+        if not changed:
+            break
+        pending = remaining
+    return aliases
 
 
 def _call_name(node: ast.Call, aliases: dict[str, str] | None = None) -> str | None:
@@ -611,7 +661,7 @@ def digest_inventory(root: Path) -> dict[str, Any]:
             except (OSError, UnicodeDecodeError, SyntaxError) as error:
                 issues.append({"code": "INVENTORY_PARSE", "detail": f"{relative}: {type(error).__name__}"})
                 continue
-            aliases = _import_aliases(tree)
+            aliases = _callable_aliases(tree, _import_aliases(tree))
             assignment_index = _AssignmentIndex()
             assignment_index.visit(tree)
             digest_wrappers = _digest_wrappers(tree, aliases)
