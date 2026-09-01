@@ -170,6 +170,10 @@ class EvidenceDigestTypeTests(unittest.TestCase):
         self.assertIn("actions/checkout@11d5960a326750d5838078e36cf38b85af677262", workflow)
         self.assertIn("actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02", workflow)
         self.assertIn("--expected-platform windows-x86_64", workflow)
+        self.assertIn(
+            "--expected-revision ${{ github.event.pull_request.head.sha || github.sha }}",
+            workflow,
+        )
         self.assertIn('- ".gitattributes"', workflow)
         self.assertIn('- ".github/actions/**"', workflow)
         self.assertNotIn("cjpm", workflow.lower())
@@ -353,6 +357,24 @@ class EvidenceDigestTypeTests(unittest.TestCase):
                 for issue in report["issues"]
             ))
 
+    def test_inventory_rejects_compare_digest_on_bare_digest_field(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            path = root / "tools/gates/compare.py"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "import hmac\n"
+                "def matches(report, expected):\n"
+                "    return hmac.compare_digest(report.get('manifest_sha256'), expected)\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertTrue(any(
+                issue["detail"].endswith("bare-sha256-comparison")
+                for issue in report["issues"]
+            ))
+
     def test_inventory_classifies_literal_log_as_text_evidence(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
             root = Path(directory)
@@ -383,6 +405,23 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             report = digest_inventory(root)
             self.assertEqual("FAIL", report["status"])
             self.assertGreaterEqual(len(report["issues"]), 1)
+
+    def test_inventory_rejects_cksum_sha256_routes(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            script = root / "scripts/check-report"
+            script.parent.mkdir(parents=True)
+            script.write_text(
+                "cksum -a sha256 docs/evidence/first.json\n"
+                "cksum --algorithm=sha256 docs/evidence/second.json\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertEqual(2, len(report["issues"]))
+            self.assertTrue(all(
+                issue["code"] == "UNTYPED_DIGEST" for issue in report["issues"]
+            ))
 
     def test_inventory_rejects_artifact_marker_with_shell_variable_operand(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:

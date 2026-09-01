@@ -39,6 +39,7 @@ jobs:
         run: >-
           python tools/evidence_digest.py --root . crlf-report
           --expected-platform windows-x86_64
+          --expected-revision ${{ github.event.pull_request.head.sha || github.sha }}
           --output docs/evidence/P1-014/windows-crlf.json
       - name: Upload bounded Windows evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

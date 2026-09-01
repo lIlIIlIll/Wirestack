@@ -225,6 +225,45 @@ class RepositoryToolingTests(unittest.TestCase):
         (self.root / "docs/evidence/TEST-001/report.json").write_text('{"status":"PASS","changed":true}', encoding="utf-8")
         self.assertEqual("STALE", tooling.verify(self.root, "TEST-001")["status"])
 
+    def test_revision_bound_report_must_match_candidate(self) -> None:
+        evidence, evidence_path = self.evidence()
+        manifest_path = self.root / "tools/tasks/TEST-001.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        report_relative = "docs/evidence/TEST-001/report.json"
+        manifest["revision_bound_reports"] = [report_relative]
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        report_path = self.root / report_relative
+        report_path.write_text(
+            json.dumps({"status": "PASS", "revision": "b" * 40}), encoding="utf-8"
+        )
+        evidence["revision"] = "a" * 40
+        evidence["reports"][0]["sha256"] = text_evidence_digest(report_path).to_json()
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+        result = tooling.verify(self.root, "TEST-001")
+        self.assertEqual("FAIL", result["status"])
+        self.assertEqual("REPORT_REVISION", result["tasks"][0]["issues"][0]["code"])
+
+    def test_seal_rejects_revision_bound_stale_report(self) -> None:
+        self.evidence()
+        manifest_path = self.root / "tools/tasks/TEST-001.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        report_relative = "docs/evidence/TEST-001/report.json"
+        manifest["revision_bound_reports"] = [report_relative]
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        report_path = self.root / report_relative
+        report_path.write_text(
+            json.dumps({"status": "PASS", "revision": "b" * 40}), encoding="utf-8"
+        )
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.seal_evidence(
+                self.root,
+                "TEST-001",
+                [report_relative],
+                self.root / "docs/evidence/TEST-001/evidence.json",
+                "a" * 40,
+            )
+        self.assertEqual("REPORT_REVISION", caught.exception.code)
+
     def test_skipped_report_cannot_impersonate_pass(self) -> None:
         evidence, evidence_path = self.evidence("SKIPPED")
         evidence["reports"][0]["sha256"] = text_evidence_digest(

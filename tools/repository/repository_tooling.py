@@ -39,7 +39,8 @@ EXIT_CODES = {"PASS": 0, "READY": 0, "FAIL": 1, "INVALID": 2,
               "BLOCKED": 3, "SKIPPED": 4, "STALE": 5, "DEGRADED": 6}
 TASK_KEYS = {"schema_version", "task_id", "dependencies", "allowed_paths",
              "platforms", "acceptance_commands", "required_evidence",
-             "timeout_seconds", "long_running_gate", "source_paths"}
+             "timeout_seconds", "long_running_gate", "source_paths",
+             "revision_bound_reports"}
 COMMAND_KEYS = {"id", "argv", "timeout_seconds", "long_running", "gate"}
 EVIDENCE_KEYS = {"schema_version", "source_task", "platform", "toolchain",
                  "acceptance_status", "generated_at_utc", "revision",
@@ -133,6 +134,18 @@ def validate_task(raw: Any, root: Path) -> dict[str, Any]:
     required = _string_list(task.get("required_evidence"), "required_evidence", allow_empty=False)
     for index, value in enumerate(required):
         safe_path(root, value, f"required_evidence[{index}]")
+    revision_bound = _string_list(
+        task.get("revision_bound_reports", []), "revision_bound_reports"
+    )
+    if len(set(revision_bound)) != len(revision_bound):
+        raise ContractError("REPORT_REVISION", "revision_bound_reports must be unique")
+    for index, value in enumerate(revision_bound):
+        safe_path(root, value, f"revision_bound_reports[{index}]")
+        if value not in required:
+            raise ContractError(
+                "REPORT_REVISION",
+                f"revision-bound report is not required evidence: {value}",
+            )
     sources = _string_list(task.get("source_paths"), "source_paths", allow_empty=False)
     for index, value in enumerate(sources):
         safe_path(root, value, f"source_paths[{index}]", must_exist=True, file_only=True)
@@ -405,6 +418,13 @@ def validate_evidence(raw: Any, root: Path, task: Mapping[str, Any]) -> dict[str
         raise ContractError("TOOLCHAIN_DRIFT", "evidence toolchain does not match current toolchain")
     if evidence.get("acceptance_status") != "PASS":
         raise ContractError("ACCEPTANCE_NOT_PASS", "evidence acceptance_status is not PASS")
+    candidate_revision = evidence.get("revision")
+    revision_bound = set(task.get("revision_bound_reports", []))
+    if revision_bound and (
+        not isinstance(candidate_revision, str)
+        or re.fullmatch(r"[0-9a-f]{40}", candidate_revision) is None
+    ):
+        raise ContractError("REPORT_REVISION", "candidate revision must be a full lowercase Git SHA")
     source_hashes = evidence.get("source_sha256")
     if not isinstance(source_hashes, dict) or set(source_hashes) != set(task["source_paths"]):
         raise ContractError("SOURCE_INVENTORY", "source digest inventory does not match manifest")
@@ -438,6 +458,11 @@ def validate_evidence(raw: Any, root: Path, task: Mapping[str, Any]) -> dict[str
             raise ContractError("REPORT_JSON", f"report is not valid JSON: {relative}") from error
         if payload.get("status") != "PASS":
             raise ContractError("REPORT_NOT_PASS", f"report status is not PASS: {relative}")
+        if relative in revision_bound and payload.get("revision") != candidate_revision:
+            raise ContractError(
+                "REPORT_REVISION",
+                f"report revision does not match candidate revision: {relative}",
+            )
     required = set(task["required_evidence"])
     evidence_path = f"docs/evidence/{task['task_id']}/evidence.json"
     if required - ({evidence_path} | report_paths):
@@ -476,21 +501,40 @@ def verify(root: Path, task_id: str | None) -> dict[str, Any]:
             "tasks": results, "issues": []}
 
 
-def seal_evidence(root: Path, task_id: str, report_paths: Sequence[str], output: Path) -> dict[str, Any]:
+def seal_evidence(
+    root: Path,
+    task_id: str,
+    report_paths: Sequence[str],
+    output: Path,
+    candidate_revision: str | None = None,
+) -> dict[str, Any]:
     tasks = validate_repository_tasks(root, task_id)
     task = tasks[task_id]
+    revision_bound = set(task.get("revision_bound_reports", []))
+    revision = candidate_revision or tool_version(["git", "rev-parse", "HEAD"], root)
+    if revision_bound and (
+        not isinstance(revision, str) or re.fullmatch(r"[0-9a-f]{40}", revision) is None
+    ):
+        raise ContractError(
+            "REPORT_REVISION", "--revision must name the full lowercase candidate Git SHA"
+        )
     reports = []
     for relative in report_paths:
         path = safe_path(root, relative, "report", must_exist=True, file_only=True)
         payload = json.loads(path.read_text(encoding="utf-8"))
         if payload.get("status") != "PASS":
             raise ContractError("REPORT_NOT_PASS", f"cannot seal non-PASS report: {relative}")
+        if relative in revision_bound and payload.get("revision") != revision:
+            raise ContractError(
+                "REPORT_REVISION",
+                f"report revision does not match candidate revision: {relative}",
+            )
         reports.append({"path": relative, "sha256": _text_digest(path).to_json(),
                         "source_task": task_id, "acceptance_status": "PASS"})
     payload = {"schema_version": EVIDENCE_SCHEMA_VERSION, "source_task": task_id,
                "platform": platform_identity(), "toolchain": toolchain_identity(root),
                "acceptance_status": "PASS", "generated_at_utc": utc_now(),
-               "revision": tool_version(["git", "rev-parse", "HEAD"], root),
+               "revision": revision,
                "reports": reports,
                "source_sha256": {
                    relative: _text_digest(root / relative).to_json()
@@ -570,6 +614,7 @@ def parser() -> argparse.ArgumentParser:
     seal = sub.add_parser("seal-evidence")
     seal.add_argument("task_id")
     seal.add_argument("--report", action="append", required=True)
+    seal.add_argument("--revision")
     seal.add_argument("--output", type=Path, required=True)
     return result
 
@@ -599,7 +644,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "verify-evidence":
         return emit(verify(root, None if args.all else args.task), args.json, args.output)
     try:
-        seal_evidence(root, args.task_id, args.report, args.output)
+        seal_evidence(root, args.task_id, args.report, args.output, args.revision)
     except (ContractError, json.JSONDecodeError) as error:
         print(f"seal-evidence: FAIL: {error}", file=sys.stderr)
         return 1

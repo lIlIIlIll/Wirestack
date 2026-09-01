@@ -36,6 +36,7 @@ RAW_DIGEST_COMMAND_RE = re.compile(
     r"(?:"
     r"\b(?:sha256sum|shasum(?:\s+-a\s+256)?|Get-FileHash|certutil(?:\.exe)?\s+-hashfile)\b"
     r"|\bopenssl(?:\.exe)?\s+dgst\b[^\r\n]*(?:-sha256|-sha-256)\b"
+    r"|\bcksum\b[^\r\n]*(?:-a\s+sha256|--algorithm(?:=|\s+)sha256)\b"
     r"|\bhashlib\s*\.\s*(?:sha256|new\s*\([^\r\n]*sha256)"
     r"|\bfrom\s+hashlib\s+import\s+(?:sha256|new)\b"
     r"|\b(?:python(?:3(?:\.\d+)*)?|py)\b[^\r\n]*\s-c(?:\s|=)[^\r\n]*\bsha-?256\b"
@@ -933,6 +934,14 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                 name = _python_call_name(node, aliases)
                 wrapper = digest_wrappers.get(name or "")
                 effective_name = wrapper[0] if wrapper is not None else name
+                if (not typed_implementation
+                        and effective_name in {"hmac.compare_digest", "compare_digest"}
+                        and _python_digest_field_accesses(node, assignment_index)):
+                    violations.append(_violation(
+                        root, path, text, _python_offset(text, node),
+                        "untyped-evidence-digest-comparison",
+                        "Repository evidence digests must be parsed into a typed domain before comparison.",
+                    ))
                 if not typed_implementation and _python_call_contains_raw_digest(
                     node, name, assignment_index,
                 ):
