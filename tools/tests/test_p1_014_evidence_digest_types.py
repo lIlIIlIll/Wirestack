@@ -264,6 +264,38 @@ class EvidenceDigestTypeTests(unittest.TestCase):
                     for issue in report["issues"]),
             )
 
+    def test_inventory_rejects_local_digest_wrapper(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            path = root / "tools/gates/new_tool.py"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "from pathlib import Path\n"
+                "from tools.evidence_digest import artifact_byte_sha256\n"
+                "def digest(path):\n    return artifact_byte_sha256(path)\n"
+                "value = digest(Path('report.json'))\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertTrue(any(
+                issue["detail"].endswith(":digest") for issue in report["issues"]
+            ))
+
+    def test_inventory_rejects_openssl_and_embedded_python_digest_commands(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            path = root / "scripts/check-report"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "openssl dgst -sha256 docs/evidence/report.json\n"
+                "python3 -c 'import hashlib; print(hashlib.sha256(open(\"report.json\", \"rb\").read()))'\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertEqual(2, len(report["issues"]))
+
     def test_inventory_rejects_text_marker_on_raw_digest_command(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
             root = Path(directory)

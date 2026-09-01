@@ -23,7 +23,13 @@ SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 CHECKOUT_FIXTURE = Path("docs/evidence/P1-014/fixtures/line-endings.txt")
 CHECKOUT_FIXTURE_TEXT = b"alpha\nbeta\n"
 RAW_DIGEST_COMMAND = re.compile(
-    r"\b(?:sha256sum|shasum(?:\s+-a\s+256)?|Get-FileHash|certutil(?:\.exe)?\s+-hashfile)\b",
+    r"(?:"
+    r"\b(?:sha256sum|shasum(?:\s+-a\s+256)?|Get-FileHash|certutil(?:\.exe)?\s+-hashfile)\b"
+    r"|\bopenssl(?:\.exe)?\s+dgst\b[^\r\n]*(?:-sha256|-sha-256)\b"
+    r"|\bhashlib\s*\.\s*(?:sha256|new\s*\([^\r\n]*sha256)"
+    r"|\bfrom\s+hashlib\s+import\s+(?:sha256|new)\b"
+    r"|\b(?:python(?:3(?:\.\d+)*)?|py)\b[^\r\n]*\s-c(?:\s|=)[^\r\n]*\bsha-?256\b"
+    r")",
     re.IGNORECASE,
 )
 DIGEST_DOMAIN_MARKER = "wirestack-digest-domain:"
@@ -371,6 +377,73 @@ def _call_name(node: ast.Call, aliases: dict[str, str] | None = None) -> str | N
     return final if final in _CALL_DOMAINS else name
 
 
+def _digest_wrappers(
+    tree: ast.AST, aliases: dict[str, str],
+) -> dict[str, tuple[str, str, int | None]]:
+    candidates: list[tuple[ast.FunctionDef | ast.AsyncFunctionDef, ast.Call]] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        body = list(node.body)
+        if (body and isinstance(body[0], ast.Expr)
+                and isinstance(body[0].value, ast.Constant)
+                and isinstance(body[0].value.value, str)):
+            body = body[1:]
+        if len(body) != 1 or not isinstance(body[0], ast.Return) or body[0].value is None:
+            continue
+        if isinstance(body[0].value, ast.Call):
+            candidates.append((node, body[0].value))
+
+    wrappers: dict[str, tuple[str, str, int | None]] = {}
+    pending = list(candidates)
+    while pending:
+        remaining: list[tuple[ast.FunctionDef | ast.AsyncFunctionDef, ast.Call]] = []
+        changed = False
+        for node, call in pending:
+            target = _call_name(call, aliases)
+            if target in _CALL_DOMAINS:
+                base_target = target
+                forwarded = _primary_argument(call, {"path", "raw", "value"})
+            elif target in wrappers:
+                base_target, target_parameter, target_index = wrappers[target]
+                forwarded = _call_argument_for_parameter(
+                    call, target_parameter, target_index,
+                )
+            else:
+                remaining.append((node, call))
+                continue
+            if not isinstance(forwarded, ast.Name):
+                continue
+            positional = list(node.args.posonlyargs) + list(node.args.args)
+            positional_names = [argument.arg for argument in positional]
+            keyword_names = [argument.arg for argument in node.args.kwonlyargs]
+            if forwarded.id in positional_names:
+                parameter_index: int | None = positional_names.index(forwarded.id)
+            elif forwarded.id in keyword_names:
+                parameter_index = None
+            else:
+                continue
+            wrappers[node.name] = (base_target, forwarded.id, parameter_index)
+            changed = True
+        if not changed:
+            break
+        pending = remaining
+    return wrappers
+
+
+def _call_argument_for_parameter(
+    node: ast.Call, parameter: str, positional_index: int | None,
+) -> ast.AST | None:
+    keyword = next(
+        (item.value for item in node.keywords if item.arg == parameter), None,
+    )
+    if keyword is not None:
+        return keyword
+    if positional_index is not None and positional_index < len(node.args):
+        return node.args[positional_index]
+    return None
+
+
 def _primary_argument(node: ast.Call, keyword_names: set[str]) -> ast.AST | None:
     if node.args:
         return node.args[0]
@@ -516,6 +589,7 @@ def digest_inventory(root: Path) -> dict[str, Any]:
             aliases = _import_aliases(tree)
             assignment_index = _AssignmentIndex()
             assignment_index.visit(tree)
+            digest_wrappers = _digest_wrappers(tree, aliases)
             for node in ast.walk(tree):
                 if not (isinstance(node, ast.ImportFrom) and node.module == "hashlib"):
                     continue
@@ -546,14 +620,20 @@ def digest_inventory(root: Path) -> dict[str, Any]:
                         and aliases.get(node.func.id) == "hashlib.sha256"):
                     # The direct import is already a fail-closed inventory entry.
                     continue
-                if name not in _CALL_DOMAINS and name != "hashlib.sha256":
+                wrapper = digest_wrappers.get(name or "")
+                effective_name = wrapper[0] if wrapper is not None else name
+                if effective_name not in _CALL_DOMAINS and effective_name != "hashlib.sha256":
                     continue
-                if name == "hashlib.sha256":
+                if effective_name == "hashlib.sha256":
                     domain = "typed-implementation" if relative == "tools/evidence_digest.py" else "legacy-task-local"
                 else:
-                    domain = _CALL_DOMAINS[name]
-                digest_argument = _primary_argument(node, {"path", "raw", "value"})
-                if (domain == "artifact-bytes" and name != "signed_payload_sha256"
+                    domain = _CALL_DOMAINS[effective_name]
+                digest_argument = (
+                    _call_argument_for_parameter(node, wrapper[1], wrapper[2])
+                    if wrapper is not None
+                    else _primary_argument(node, {"path", "raw", "value"})
+                )
+                if (domain == "artifact-bytes" and effective_name != "signed_payload_sha256"
                         and relative != "tools/evidence_digest.py" and digest_argument is not None):
                     argument = _argument_hint(digest_argument, node, assignment_index)
                     if any(marker in argument for marker in (
