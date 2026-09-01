@@ -9,7 +9,7 @@ missing capabilities, skipped work, and stale evidence remain visible.
 ## Prerequisites
 
 - Linux x86_64 with glibc for the first manifest.
-- Cangjie Compiler 1.1.0-alpha.20260817040003 and CJPM 1.1.3 for the current
+- Cangjie Compiler 1.1.0-alpha.20260829040003 and CJPM 1.1.3 for the current
   repository profile.
 - Python 3 and Git. GitButler is recommended for this workspace.
 
@@ -100,6 +100,11 @@ backlog and status, have COMPLETE status, and form an acyclic graph.
 ## Evidence boundary
 
 The machine reports in this directory record native Linux glibc execution.
+The current-toolchain requalification ran `scripts/check-task P1-012` and
+`scripts/check-full`; both returned PASS. The task gate validated the 16-path,
+12-scenario, 10-test plan and all 17 repository-tooling unit tests. The full
+gate delegated to `scripts/check` and returned exit 0.
+
 P1-012 did not run the one-hour SSE profile, the 24-hour soak, or another long
 profile. It did not modify runtime, std, stdx, or an SDK, and did not build an
 SDK.
