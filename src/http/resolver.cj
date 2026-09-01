@@ -2,7 +2,7 @@ package wirestack.http
 
 import wirestack.internal.resolver as resolver
 
-/** Linux system resolver with explicit worker and queue bounds. */
+/** Platform system resolver with explicit worker and queue bounds. */
 public class SystemResolver <: Resolver & Resource {
     private let delegate: resolver.SystemResolver
 

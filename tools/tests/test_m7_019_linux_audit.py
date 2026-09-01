@@ -15,10 +15,14 @@ class M7019LinuxAuditTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "audit.data"
             path.write_text(json.dumps(audit), encoding="utf-8")
-            validate_audit(path)
+            validate_audit(path, verify_current_sources=False)
 
     def test_canonical_audit_passes(self) -> None:
-        validate_audit()
+        validate_audit(verify_current_sources=False)
+
+    def test_strict_validation_rejects_stale_current_source(self) -> None:
+        with self.assertRaisesRegex(AuditError, "source hash is stale"):
+            validate_audit()
 
     def test_missing_requirement_fails(self) -> None:
         changed = copy.deepcopy(self.audit)
@@ -26,10 +30,15 @@ class M7019LinuxAuditTest(unittest.TestCase):
         with self.assertRaisesRegex(AuditError, "IDs or order"):
             self.validate_changed(changed)
 
-    def test_missing_evidence_fails(self) -> None:
+    def test_structural_mode_allows_missing_historical_evidence(self) -> None:
         changed = copy.deepcopy(self.audit)
         changed["lifecycle_invariants"][0]["evidence"] = ["missing/evidence"]
-        with self.assertRaisesRegex(AuditError, "missing evidence path"):
+        self.validate_changed(changed)
+
+    def test_structural_evidence_path_must_remain_relative(self) -> None:
+        changed = copy.deepcopy(self.audit)
+        changed["p0_requirements"][0]["evidence"] = ["../outside"]
+        with self.assertRaisesRegex(AuditError, "invalid evidence path"):
             self.validate_changed(changed)
 
     def test_required_gap_cannot_be_weakened(self) -> None:

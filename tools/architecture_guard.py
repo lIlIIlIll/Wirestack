@@ -9,6 +9,7 @@ generated output.
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import re
 import sys
@@ -30,6 +31,39 @@ PACKAGE_RE = re.compile(
 STD_NET_RE = re.compile(r"(?<![A-Za-z0-9_])std\s*\.\s*net\b")
 PUBLIC_DECLARATION_RE = re.compile(
     r"^\s*public\s+(?P<kind>class|struct|interface|enum|func|prop|let|var|type)\b"
+)
+RAW_DIGEST_COMMAND_RE = re.compile(
+    r"(?:"
+    r"\b(?:sha256sum|shasum(?:\s+-a\s+256)?|Get-FileHash|certutil(?:\.exe)?\s+-hashfile)\b"
+    r"|\bopenssl(?:\.exe)?\s+dgst\b[^\r\n]*(?:-sha256|-sha-256)\b"
+    r"|\bopenssl(?:\.exe)?\s+(?:sha256|sha-256)\b"
+    r"|\bcksum\b[^\r\n]*(?:-a\s+sha256|--algorithm(?:=|\s+)sha256)\b"
+    r"|\bhashlib\s*\.\s*(?:sha256|new\s*\([^\r\n]*sha256)"
+    r"|\bfrom\s+hashlib\s+import\s+(?:sha256|new)\b"
+    r"|\b(?:python(?:3(?:\.\d+)*)?|py)\b[^\r\n]*\s-c(?:\s|=)[^\r\n]*\bsha-?256\b"
+    r"|\[?\s*(?:System\.)?Security\.Cryptography\.SHA256"
+    r"(?:Managed|CryptoServiceProvider)?\s*\]?\s*(?:::|\.)\s*(?:Create|HashData)\b"
+    r"|\.\s*ComputeHash\s*\("
+    r")",
+    re.IGNORECASE,
+)
+TEXT_COMMAND_OPERAND_RE = re.compile(
+    r"(?:"
+    r"\.(?:json|md|markdown|log|txt|yaml|yml|cj|py|c|cc|cpp|h|hpp|sh)"
+    r"(?=$|[\s'\";)])"
+    r"|(?:^|[/\\\s'\"])(?:LICENSE|NOTICE)(?=$|[\s'\";)])"
+    r")",
+    re.IGNORECASE,
+)
+SHELL_VARIABLE_OPERAND_RE = re.compile(
+    r"\$(?:\{[A-Za-z_][A-Za-z0-9_]*\}|[A-Za-z_][A-Za-z0-9_]*)"
+)
+NON_PYTHON_DOMAIN_MANIFEST = Path("tools/evidence-digest-non-python.json")
+PYTHON_TEXT_PATH_MARKERS = (
+    "evidence", "report", "markdown", "log_path", "source_path",
+    "validation", "read_text", ".json", ".md", ".markdown", ".log",
+    ".txt", ".yaml", ".yml", ".cj", ".py", ".c", ".cc", ".cpp",
+    ".h", ".hpp", ".sh",
 )
 TYPE_CONTAINER_RE = re.compile(
     r"^\s*(?P<public>public\s+)?(?:open\s+)?(?:class|struct|interface|enum)\b"
@@ -110,6 +144,7 @@ CONFIG_NAMES = {"CMakeLists.txt", "Makefile", "build.cj", "build.py", "cjpm.toml
 CONFIG_SUFFIXES = {".c", ".cc", ".cmake", ".cpp", ".h", ".hpp", ".mk", ".toml"}
 PROVIDER_SPECIFIC_TYPE_RE = re.compile(r"\bAwsLc[A-Za-z0-9_]*\b")
 TEST_PROVIDER_RE = re.compile(r"\bTestTlsProvider(?:Factory)?\b")
+EVIDENCE_DIGEST_IMPLEMENTATION = "tools/evidence_digest.py"
 
 
 @dataclass(frozen=True, order=True)
@@ -493,6 +528,559 @@ def provider_boundary_violations(root: Path, paths: Sequence[Path]) -> list[Viol
     return violations
 
 
+def _python_import_aliases(tree: ast.AST) -> dict[str, str]:
+    aliases: dict[str, str] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module:
+            for item in node.names:
+                if item.name != "*":
+                    aliases[item.asname or item.name] = f"{node.module}.{item.name}"
+        elif isinstance(node, ast.Import):
+            for item in node.names:
+                local = item.asname or item.name.split(".", 1)[0]
+                aliases[local] = item.name if item.asname else local
+    return aliases
+
+
+def _python_expression_name(node: ast.AST) -> str | None:
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        value = _python_expression_name(node.value)
+        return f"{value}.{node.attr}" if value else node.attr
+    return None
+
+
+def _python_callable_aliases(tree: ast.AST, imported: dict[str, str]) -> dict[str, str]:
+    aliases = dict(imported)
+    digest_names = {
+        "artifact_byte_digest", "artifact_byte_digest_bytes", "artifact_byte_sha256",
+        "artifact_bytes_sha256", "parse_artifact_digest", "signed_payload_sha256",
+        "text_evidence_digest", "text_evidence_digest_bytes", "parse_text_digest",
+        "text_evidence_sha256", "text_evidence_bytes_sha256",
+        "text_evidence_inventory_sha256", "sha256_path", "canonical_text_sha256",
+        "repository_text_sha256",
+    }
+    pending: list[tuple[str, ast.AST]] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            pending.extend(
+                (target.id, node.value) for target in node.targets if isinstance(target, ast.Name)
+            )
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) \
+                and node.value is not None:
+            pending.append((node.target.id, node.value))
+    while pending:
+        remaining: list[tuple[str, ast.AST]] = []
+        changed = False
+        for target, value in pending:
+            name = _python_expression_name(value)
+            if name is None:
+                continue
+            root, separator, remainder = name.partition(".")
+            if root in aliases:
+                name = aliases[root] + (separator + remainder if separator else "")
+            final = name.rsplit(".", 1)[-1]
+            if final in digest_names or name == "hashlib.sha256":
+                aliases[target] = name
+                changed = True
+            else:
+                remaining.append((target, value))
+        if not changed:
+            break
+        pending = remaining
+    return aliases
+
+
+def _python_call_name(node: ast.Call, aliases: dict[str, str] | None = None) -> str | None:
+    name = _python_expression_name(node.func)
+    if name is None:
+        return None
+    if aliases:
+        root, separator, remainder = name.partition(".")
+        if root in aliases:
+            name = aliases[root] + (separator + remainder if separator else "")
+    if name == "hashlib.sha256":
+        return name
+    final = name.rsplit(".", 1)[-1]
+    if final in {
+        "artifact_byte_digest", "artifact_byte_digest_bytes", "artifact_byte_sha256",
+        "artifact_bytes_sha256", "parse_artifact_digest", "text_evidence_digest",
+        "text_evidence_digest_bytes", "parse_text_digest", "text_evidence_sha256",
+        "text_evidence_bytes_sha256", "text_evidence_inventory_sha256",
+        "signed_payload_sha256", "sha256_path", "canonical_text_sha256",
+        "repository_text_sha256",
+    }:
+        return final
+    return name
+
+
+def _python_digest_wrappers(
+    tree: ast.AST, aliases: dict[str, str],
+) -> dict[str, tuple[str, str, int | None]]:
+    typed_calls = {
+        "artifact_byte_digest", "artifact_byte_digest_bytes", "artifact_byte_sha256",
+        "artifact_bytes_sha256", "parse_artifact_digest", "signed_payload_sha256",
+        "text_evidence_digest", "text_evidence_digest_bytes", "parse_text_digest",
+        "text_evidence_sha256", "text_evidence_bytes_sha256",
+        "text_evidence_inventory_sha256",
+    }
+    candidates: list[tuple[ast.FunctionDef | ast.AsyncFunctionDef, ast.Call]] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        body = list(node.body)
+        if (body and isinstance(body[0], ast.Expr)
+                and isinstance(body[0].value, ast.Constant)
+                and isinstance(body[0].value.value, str)):
+            body = body[1:]
+        if len(body) != 1 or not isinstance(body[0], ast.Return) or body[0].value is None:
+            continue
+        if isinstance(body[0].value, ast.Call):
+            candidates.append((node, body[0].value))
+
+    wrappers: dict[str, tuple[str, str, int | None]] = {}
+    pending = list(candidates)
+    while pending:
+        remaining: list[tuple[ast.FunctionDef | ast.AsyncFunctionDef, ast.Call]] = []
+        changed = False
+        for node, call in pending:
+            target = _python_call_name(call, aliases)
+            if target in typed_calls:
+                base_target = target
+                forwarded = _python_primary_argument(call, {"path", "raw", "value"})
+            elif target in wrappers:
+                base_target, target_parameter, target_index = wrappers[target]
+                forwarded = _python_call_argument_for_parameter(
+                    call, target_parameter, target_index,
+                )
+            else:
+                remaining.append((node, call))
+                continue
+            if not isinstance(forwarded, ast.Name):
+                continue
+            positional = list(node.args.posonlyargs) + list(node.args.args)
+            positional_names = [argument.arg for argument in positional]
+            keyword_names = [argument.arg for argument in node.args.kwonlyargs]
+            if forwarded.id in positional_names:
+                parameter_index: int | None = positional_names.index(forwarded.id)
+            elif forwarded.id in keyword_names:
+                parameter_index = None
+            else:
+                continue
+            wrappers[node.name] = (base_target, forwarded.id, parameter_index)
+            changed = True
+        if not changed:
+            break
+        pending = remaining
+    return wrappers
+
+
+def _python_call_argument_for_parameter(
+    node: ast.Call, parameter: str, positional_index: int | None,
+) -> ast.AST | None:
+    keyword = next(
+        (item.value for item in node.keywords if item.arg == parameter), None,
+    )
+    if keyword is not None:
+        return keyword
+    if positional_index is not None and positional_index < len(node.args):
+        return node.args[positional_index]
+    return None
+
+
+def _python_primary_argument(node: ast.Call, keyword_names: set[str]) -> ast.AST | None:
+    if node.args:
+        return node.args[0]
+    return next(
+        (keyword.value for keyword in node.keywords if keyword.arg in keyword_names),
+        None,
+    )
+
+
+def _python_call_contains_raw_digest(
+    node: ast.Call, call_name: str | None, index: "_PythonAssignmentIndex",
+) -> bool:
+    if call_name not in {
+        "subprocess.run", "subprocess.call", "subprocess.check_call",
+        "subprocess.check_output", "subprocess.Popen",
+        "os.system", "os.popen",
+    }:
+        return False
+    candidate = _python_primary_argument(node, {"args", "command", "cmd"})
+    return candidate is not None and RAW_DIGEST_COMMAND_RE.search(
+        _python_argument_hint(candidate, node, index)
+    ) is not None
+
+
+class _PythonAssignmentIndex(ast.NodeVisitor):
+    def __init__(self) -> None:
+        self.scope = 0
+        self.node_scopes: dict[int, int] = {}
+        self.assignments: dict[int, dict[str, list[tuple[int, ast.AST]]]] = {}
+
+    def generic_visit(self, node: ast.AST) -> None:
+        self.node_scopes[id(node)] = self.scope
+        super().generic_visit(node)
+
+    def _visit_scope(self, node: ast.AST) -> None:
+        self.node_scopes[id(node)] = self.scope
+        previous = self.scope
+        self.scope = id(node)
+        super().generic_visit(node)
+        self.scope = previous
+
+    visit_FunctionDef = _visit_scope
+    visit_AsyncFunctionDef = _visit_scope
+    visit_Lambda = _visit_scope
+    visit_ClassDef = _visit_scope
+
+    def _record(self, name: str, value: ast.AST, line: int) -> None:
+        self.assignments.setdefault(self.scope, {}).setdefault(name, []).append((line, value))
+
+    def visit_Assign(self, node: ast.Assign) -> None:
+        self.node_scopes[id(node)] = self.scope
+        for target in node.targets:
+            if isinstance(target, ast.Name):
+                self._record(target.id, node.value, node.lineno)
+        self.generic_visit(node)
+
+    def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
+        self.node_scopes[id(node)] = self.scope
+        if isinstance(node.target, ast.Name) and node.value is not None:
+            self._record(node.target.id, node.value, node.lineno)
+        self.generic_visit(node)
+
+
+def _python_argument_hint(
+    expression: ast.AST, call: ast.Call, index: _PythonAssignmentIndex,
+) -> str:
+    call_line = getattr(call, "lineno", 0)
+    scope = index.node_scopes.get(id(call), 0)
+    pieces: list[str] = [ast.unparse(expression)]
+    seen: set[tuple[int, str]] = set()
+
+    def resolve(node: ast.AST, active_scope: int) -> None:
+        for child in ast.walk(node):
+            if isinstance(child, ast.Constant) and isinstance(child.value, str):
+                pieces.append(child.value)
+            elif isinstance(child, ast.Name):
+                for candidate_scope in (active_scope, 0):
+                    key = (candidate_scope, child.id)
+                    if key in seen:
+                        continue
+                    assignments = index.assignments.get(candidate_scope, {}).get(child.id, [])
+                    prior = [item for item in assignments if item[0] < call_line]
+                    if prior:
+                        seen.add(key)
+                        resolve(max(prior, key=lambda item: item[0])[1], candidate_scope)
+                        break
+
+    resolve(expression, scope)
+    return " ".join(pieces).lower()
+
+
+def _python_offset(text: str, node: ast.AST) -> int:
+    lines = text.splitlines(keepends=True)
+    line = max(getattr(node, "lineno", 1) - 1, 0)
+    return sum(len(value) for value in lines[:line]) + getattr(node, "col_offset", 0)
+
+
+def _python_digest_field_accesses(
+    node: ast.AST, index: _PythonAssignmentIndex | None = None,
+) -> set[str]:
+    """Find direct or assigned mapping keys that declare a SHA-256 digest field."""
+    fields: set[str] = set()
+    comparison_line = getattr(node, "lineno", 0)
+    comparison_scope = index.node_scopes.get(id(node), 0) if index is not None else 0
+    seen: set[tuple[int, str]] = set()
+
+    def collect_direct(expression: ast.AST) -> None:
+        for child in ast.walk(expression):
+            key: object = None
+            if isinstance(child, ast.Subscript) and isinstance(child.slice, ast.Constant):
+                key = child.slice.value
+            elif (isinstance(child, ast.Call) and isinstance(child.func, ast.Attribute)
+                  and child.func.attr == "get" and child.args
+                  and isinstance(child.args[0], ast.Constant)):
+                key = child.args[0].value
+            if isinstance(key, str) and "sha256" in key.lower():
+                fields.add(key)
+
+    def inspect(expression: ast.AST, active_scope: int) -> None:
+        collect_direct(expression)
+        if index is None or not isinstance(expression, ast.Name):
+            return
+        for candidate_scope in (active_scope, 0):
+            assignment_key = (candidate_scope, expression.id)
+            if assignment_key in seen:
+                continue
+            assignments = index.assignments.get(candidate_scope, {}).get(expression.id, [])
+            prior = [item for item in assignments if item[0] < comparison_line]
+            if prior:
+                seen.add(assignment_key)
+                inspect(max(prior, key=lambda item: item[0])[1], candidate_scope)
+                break
+
+    collect_direct(node)
+    if isinstance(node, ast.Compare):
+        for expression in (node.left, *node.comparators):
+            inspect(expression, comparison_scope)
+    return fields
+
+
+def _logical_non_python_command(lines: Sequence[str], index: int) -> str:
+    """Return the complete YAML block command containing a physical line."""
+    physical = lines[index]
+    physical_indent = len(physical) - len(physical.lstrip())
+    for marker_index in range(index - 1, -1, -1):
+        candidate = lines[marker_index]
+        if not candidate.strip():
+            continue
+        candidate_indent = len(candidate) - len(candidate.lstrip())
+        if candidate_indent >= physical_indent:
+            continue
+        if re.search(r"\brun\s*:\s*>[+-]?\s*(?:#.*)?$", candidate.strip()) is None:
+            break
+        block: list[str] = []
+        for block_line in lines[marker_index + 1:]:
+            if block_line.strip():
+                indent = len(block_line) - len(block_line.lstrip())
+                if indent <= candidate_indent:
+                    break
+            block.append(block_line.strip())
+        return " ".join(value for value in block if value)
+    return physical
+
+
+def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
+    """Keep repository text evidence on the typed, normalized digest path."""
+    violations: list[Violation] = []
+    declared_non_python: dict[tuple[str, str], str] = {}
+    manifest_path = root / NON_PYTHON_DOMAIN_MANIFEST
+    if manifest_path.is_file():
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            entries = manifest["entries"] if (
+                isinstance(manifest, dict) and set(manifest) == {"schema_version", "entries"}
+                and manifest.get("schema_version") == 1 and isinstance(manifest.get("entries"), list)
+            ) else None
+            if entries is None:
+                raise ValueError("schema")
+            for entry in entries:
+                if not isinstance(entry, dict) or set(entry) != {"path", "command", "domain"}:
+                    raise ValueError("entry")
+                relative, command, domain = entry["path"], entry["command"], entry["domain"]
+                if not all(isinstance(item, str) and item for item in (relative, command, domain)):
+                    raise ValueError("value")
+                candidate = Path(relative)
+                if candidate.is_absolute() or ".." in candidate.parts or domain not in {
+                    "artifact-bytes-v1", "text-utf8-lf-v1",
+                }:
+                    raise ValueError("domain")
+                key = (candidate.as_posix(), command)
+                if key in declared_non_python:
+                    raise ValueError("duplicate")
+                declared_non_python[key] = domain
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, KeyError, ValueError):
+            text = manifest_path.read_text(encoding="utf-8", errors="replace") if manifest_path.exists() else ""
+            violations.append(_violation(
+                root, manifest_path, text, 0, "digest-domain-manifest-invalid",
+                "The non-Python digest domain manifest must use the known fail-closed schema.",
+            ))
+    python_paths: list[Path] = []
+    for python_root in (root / "tools", root / "scripts", root / ".github/actions"):
+        if python_root.is_dir():
+            python_paths.extend(python_root.rglob("*.py"))
+    python_paths = sorted(set(python_paths))
+    for path in python_paths:
+        relative = path.relative_to(root).as_posix()
+        if _is_ignored(path.relative_to(root)):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+            tree = ast.parse(text, filename=relative)
+        except (OSError, UnicodeDecodeError, SyntaxError) as error:
+            fallback = path.read_text(encoding="utf-8", errors="replace") if path.exists() else ""
+            violations.append(_violation(
+                root, path, fallback, 0, "digest-scan-unreadable",
+                f"Repository helper must be readable strict UTF-8 Python: {type(error).__name__}.",
+            ))
+            continue
+        typed_implementation = relative == "tools/evidence_digest.py"
+        repository_control_plane = relative.startswith("tools/repository/")
+        aliases = _python_callable_aliases(tree, _python_import_aliases(tree))
+        assignment_index = _PythonAssignmentIndex()
+        assignment_index.visit(tree)
+        digest_wrappers = _python_digest_wrappers(tree, aliases)
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Import, ast.ImportFrom)) and not typed_implementation:
+                names = [item.name for item in node.names]
+                if "hashlib" in names or (
+                    isinstance(node, ast.ImportFrom) and node.module == "hashlib"
+                ):
+                    violations.append(_violation(
+                        root, path, text, _python_offset(text, node),
+                        "untyped-evidence-digest",
+                        "Repository code must use the typed digest module, not hashlib.",
+                    ))
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not typed_implementation:
+                if node.name in {
+                    "sha256", "sha256_bytes", "_sha256", "file_sha256", "sha256_path",
+                    "canonical_text_sha256", "repository_text_sha256",
+                }:
+                    violations.append(_violation(
+                        root, path, text, _python_offset(text, node),
+                        "untyped-evidence-digest-helper",
+                        "Repository digest helpers must declare the text or artifact byte domain.",
+                    ))
+            if isinstance(node, ast.Call):
+                name = _python_call_name(node, aliases)
+                wrapper = digest_wrappers.get(name or "")
+                effective_name = wrapper[0] if wrapper is not None else name
+                if (not typed_implementation
+                        and effective_name in {"hmac.compare_digest", "compare_digest"}
+                        and _python_digest_field_accesses(node, assignment_index)):
+                    violations.append(_violation(
+                        root, path, text, _python_offset(text, node),
+                        "untyped-evidence-digest-comparison",
+                        "Repository evidence digests must be parsed into a typed domain before comparison.",
+                    ))
+                if not typed_implementation and _python_call_contains_raw_digest(
+                    node, name, assignment_index,
+                ):
+                    violations.append(_violation(
+                        root, path, text, _python_offset(text, node),
+                        "untyped-evidence-digest-command",
+                        "Python repository tools must not invoke raw SHA-256 commands.",
+                    ))
+                if not typed_implementation and effective_name in {
+                    "hashlib.sha256", "sha256_path", "canonical_text_sha256",
+                    "repository_text_sha256",
+                }:
+                    violations.append(_violation(
+                        root, path, text, _python_offset(text, node),
+                        "untyped-evidence-digest",
+                        "Repository code must not calculate an untyped SHA-256 digest.",
+                    ))
+                if not typed_implementation and effective_name in {
+                    "artifact_byte_digest", "artifact_byte_digest_bytes", "artifact_byte_sha256",
+                    "artifact_bytes_sha256", "parse_artifact_digest",
+                }:
+                    digest_argument = (
+                        _python_call_argument_for_parameter(node, wrapper[1], wrapper[2])
+                        if wrapper is not None
+                        else _python_primary_argument(node, {"path", "raw", "value"})
+                    )
+                    argument = (
+                        _python_argument_hint(digest_argument, node, assignment_index)
+                        if digest_argument is not None else ""
+                    )
+                    if repository_control_plane or any(
+                        marker in argument for marker in PYTHON_TEXT_PATH_MARKERS
+                    ):
+                        violations.append(_violation(
+                            root, path, text, _python_offset(text, node),
+                            "text-evidence-byte-digest",
+                            "Text evidence must not enter the artifact byte-digest domain.",
+                        ))
+            if isinstance(node, ast.Compare) and not typed_implementation:
+                if (any(isinstance(operator, (ast.Eq, ast.NotEq)) for operator in node.ops)
+                        and _python_digest_field_accesses(node, assignment_index)):
+                    violations.append(_violation(
+                        root, path, text, _python_offset(text, node),
+                        "untyped-evidence-digest-comparison",
+                        "Repository evidence digests must be parsed into a typed domain before comparison.",
+                    ))
+            if isinstance(node, ast.ExceptHandler):
+                caught = ast.unparse(node.type) if node.type is not None else ""
+                if caught != "UnicodeDecodeError":
+                    continue
+                fallback_calls = {
+                    _python_call_name(child) for child in ast.walk(node)
+                    if isinstance(child, ast.Call)
+                }
+                if fallback_calls & {
+                    "artifact_byte_digest", "artifact_byte_digest_bytes", "hashlib.sha256", "sha256_path"
+                }:
+                    violations.append(_violation(
+                        root, path, text, _python_offset(text, node),
+                        "text-evidence-byte-fallback",
+                        "Invalid UTF-8 must fail closed and must not fall back to a byte digest.",
+                    ))
+    non_python_paths: list[Path] = []
+    scripts_root = root / "scripts"
+    if scripts_root.is_dir():
+        non_python_paths.extend(
+            path for path in scripts_root.rglob("*") if path.is_file() and path.suffix != ".py"
+        )
+    tools_root = root / "tools"
+    if tools_root.is_dir():
+        non_python_paths.extend(
+            path for path in tools_root.rglob("*")
+            if path.is_file() and path.suffix != ".py"
+            and path.name != "evidence-digest-non-python.json"
+            and not _is_ignored(path.relative_to(root))
+        )
+    workflows_root = root / ".github/workflows"
+    if workflows_root.is_dir():
+        non_python_paths.extend(
+            path for path in workflows_root.rglob("*") if path.suffix in {".yml", ".yaml"}
+        )
+    actions_root = root / ".github/actions"
+    if actions_root.is_dir():
+        non_python_paths.extend(
+            path for path in actions_root.rglob("*")
+            if path.is_file() and path.suffix != ".py"
+            and not _is_ignored(path.relative_to(root))
+        )
+    for path in sorted(set(non_python_paths)):
+        relative = path.relative_to(root).as_posix()
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError) as error:
+            fallback = path.read_text(encoding="utf-8", errors="replace") if path.exists() else ""
+            violations.append(_violation(
+                root, path, fallback, 0, "digest-scan-unreadable",
+                f"Repository helper must be readable strict UTF-8 text: {type(error).__name__}.",
+            ))
+            continue
+        lines = text.splitlines(keepends=True)
+        for index, line in enumerate(lines):
+            match = RAW_DIGEST_COMMAND_RE.search(line)
+            if match is None:
+                continue
+            logical_command = _logical_non_python_command(lines, index)
+            context = "".join(lines[max(0, index - 4):index + 1]).lower()
+            declared_domain = declared_non_python.get((relative, line.strip()))
+            operand_source = logical_command
+            artifact_declared = (
+                "wirestack-digest-domain: artifact-bytes-v1" in context
+                or declared_domain == "artifact-bytes-v1"
+            )
+            text_declared = (
+                "wirestack-digest-domain: text-utf8-lf-v1" in context
+                or declared_domain == "text-utf8-lf-v1"
+            )
+            obvious_text = (
+                TEXT_COMMAND_OPERAND_RE.search(operand_source) is not None
+                or SHELL_VARIABLE_OPERAND_RE.search(operand_source) is not None
+            )
+            if artifact_declared and not obvious_text:
+                continue
+            offset = sum(len(value) for value in lines[:index]) + match.start()
+            violations.append(_violation(
+                root, path, text, offset,
+                "text-evidence-raw-digest"
+                if text_declared or (artifact_declared and obvious_text)
+                else "untyped-non-python-digest",
+                "Text evidence must use the canonicalizing digest helper."
+                if text_declared or (artifact_declared and obvious_text) else
+                "Shell and workflow SHA-256 commands must declare an explicit artifact-byte domain.",
+            ))
+    return violations
+
+
 def run_guard(root: Path) -> list[Violation]:
     root = root.resolve()
     violations: list[Violation] = []
@@ -501,6 +1089,7 @@ def run_guard(root: Path) -> list[Violation]:
         violations.extend(inspect_source(root, path))
     violations.extend(dependency_cycle_violations(root, paths))
     violations.extend(provider_boundary_violations(root, paths))
+    violations.extend(evidence_digest_boundary_violations(root))
     for path in configuration_files(root):
         violations.extend(inspect_configuration(root, path))
     return sorted(set(violations))
@@ -520,6 +1109,8 @@ def render_text(violations: Sequence[Violation]) -> str:
 def render_json(root: Path, violations: Sequence[Violation]) -> str:
     return json.dumps({
         "schema_version": SCHEMA_VERSION,
+        "kind": "architecture-guard",
+        "status": "PASS" if not violations else "FAIL",
         "root": str(root.resolve()),
         "ok": not violations,
         "violation_count": len(violations),

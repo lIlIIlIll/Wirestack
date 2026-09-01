@@ -2,9 +2,14 @@
 """Run the M2-016 DNS-to-connected benchmark in an ephemeral Linux netns."""
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import platform
@@ -47,10 +52,6 @@ COMPILE_OPTION_RE = re.compile(r'^(\s*compile-option\s*=\s*)"[^"]*"', re.MULTILI
 
 class BenchmarkError(RuntimeError):
     pass
-
-
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def atomic_json(path: Path, value: Mapping[str, Any]) -> None:
@@ -332,7 +333,7 @@ def execute(root: Path, rounds: int, samples_per_round: int,
             },
             "environment": environment_metadata(root),
             "source_digests": {
-                str(path.relative_to(root)): sha256(path) for path in (
+                str(path.relative_to(root)): evidence_digest.text_evidence_sha256(path) for path in (
                     root / "src/internal/transport_stdnet/m2_016_dns_to_connected_benchmark_test.cj",
                     root / "tools/benchmarks/m2_016_dns_to_connected.py",
                     root / "docs/evidence/M2-016/benchmark-plan.md",

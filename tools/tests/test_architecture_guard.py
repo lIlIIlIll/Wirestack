@@ -35,6 +35,405 @@ class ArchitectureGuardTests(unittest.TestCase):
                        "package wirestack.internal.transport_stdnet\n\nimport std.net.*\n")
             self.assertEqual([], guard.run_guard(root))
 
+    def test_repository_rejects_raw_hashlib_digest_outside_control_plane(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "import hashlib\nvalue = hashlib.sha256(b'evidence').hexdigest()\n",
+            )
+            self.assertIn("untyped-evidence-digest", self.rules(root))
+
+    def test_repository_rejects_direct_sha256_import(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "from hashlib import sha256\nvalue = sha256(b'evidence').hexdigest()\n",
+            )
+            self.assertIn("untyped-evidence-digest", self.rules(root))
+
+    def test_repository_rejects_alternate_hashlib_constructor_import(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "from hashlib import new\nvalue = new('sha256', b'evidence').hexdigest()\n",
+            )
+            self.assertIn("untyped-evidence-digest", self.rules(root))
+
+    def test_non_python_digest_requires_explicit_domain_marker(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            path = self.write(root, "scripts/check-report", "sha256sum report.json\n")
+            self.assertIn("untyped-non-python-digest", self.rules(root))
+            path.write_text(
+                "# wirestack-digest-domain: artifact-bytes-v1\nsha256sum report.json\n",
+                encoding="utf-8",
+            )
+            rules = self.rules(root)
+            self.assertNotIn("untyped-non-python-digest", rules)
+            self.assertIn("text-evidence-raw-digest", rules)
+            path.write_text(
+                "# wirestack-digest-domain: artifact-bytes-v1\nsha256sum payload.tar.gz\n",
+                encoding="utf-8",
+            )
+            self.assertNotIn("text-evidence-raw-digest", self.rules(root))
+
+    def test_non_python_tool_digest_is_scanned(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(root, "tools/new_gate.sh", "sha256sum report.json\n")
+            self.assertIn("untyped-non-python-digest", self.rules(root))
+
+    def test_artifact_marker_rejects_unresolved_shell_variable_operand(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "scripts/check-report",
+                "REPORT=docs/evidence/report.json\n"
+                "# wirestack-digest-domain: artifact-bytes-v1\n"
+                "sha256sum \"$REPORT\"\n",
+            )
+            self.assertIn("text-evidence-raw-digest", self.rules(root))
+
+    def test_composite_action_digest_is_scanned(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                ".github/actions/evidence/action.yml",
+                "runs:\n  using: composite\n  steps:\n    - shell: bash\n      run: sha256sum report.json\n",
+            )
+            self.assertIn("untyped-non-python-digest", self.rules(root))
+
+    def test_composite_folded_command_and_helper_are_scanned(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                ".github/actions/evidence/action.yml",
+                "runs:\n  using: composite\n  steps:\n    - shell: bash\n"
+                "      run: >-\n"
+                "        # wirestack-digest-domain: artifact-bytes-v1\n"
+                "        sha256sum\n"
+                "        docs/evidence/report.json\n",
+            )
+            self.write(
+                root, ".github/actions/evidence/digest.sh",
+                "sha256sum docs/evidence/report.json\n",
+            )
+            violations = guard.run_guard(root)
+            self.assertEqual(
+                2,
+                sum(item.rule in {"text-evidence-raw-digest", "untyped-non-python-digest"}
+                    for item in violations),
+            )
+
+    def test_manifest_cannot_hide_folded_text_operand(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                ".github/workflows/digest.yml",
+                "jobs:\n  digest:\n    steps:\n      - run: >-\n"
+                "          sha256sum\n"
+                "          docs/evidence/report.json\n",
+            )
+            self.write(
+                root,
+                "tools/evidence-digest-non-python.json",
+                json.dumps({
+                    "schema_version": 1,
+                    "entries": [{
+                        "path": ".github/workflows/digest.yml",
+                        "command": "sha256sum",
+                        "domain": "artifact-bytes-v1",
+                    }],
+                }),
+            )
+            self.assertIn("text-evidence-raw-digest", self.rules(root))
+
+    def test_invalid_utf8_helper_fails_closed(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            path = root / "tools/bad.sh"
+            path.parent.mkdir(parents=True)
+            path.write_bytes(b"# \xff\nsha256sum docs/evidence/report.json\n")
+            self.assertIn("digest-scan-unreadable", self.rules(root))
+
+    def test_text_domain_marker_cannot_approve_raw_digest_command(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "scripts/check-report",
+                "# wirestack-digest-domain: text-utf8-lf-v1\nsha256sum report.json\n",
+            )
+            self.assertIn("text-evidence-raw-digest", self.rules(root))
+
+    def test_python_digest_alias_and_raw_subprocess_are_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "import subprocess\n"
+                "from tools.evidence_digest import artifact_byte_sha256 as digest\n"
+                "value = digest(report_path)\n"
+                "subprocess.run(['sha256sum', 'report.json'])\n",
+            )
+            rules = self.rules(root)
+            self.assertIn("text-evidence-byte-digest", rules)
+            self.assertIn("untyped-evidence-digest-command", rules)
+
+    def test_non_python_domain_manifest_matches_exact_command(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            path = self.write(root, "scripts/check-report", "sha256sum report.json\n")
+            self.write(
+                root,
+                "tools/evidence-digest-non-python.json",
+                json.dumps({
+                    "schema_version": 1,
+                    "entries": [{
+                        "path": "scripts/check-report",
+                        "command": "sha256sum report.json",
+                        "domain": "artifact-bytes-v1",
+                    }],
+                }),
+            )
+            self.assertNotIn("untyped-non-python-digest", self.rules(root))
+            path.write_text("sha256sum other.json\n", encoding="utf-8")
+            self.assertIn("untyped-non-python-digest", self.rules(root))
+
+    def test_repository_rejects_ambiguous_digest_helper(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(root, "tools/gates/evidence.py", "def sha256_bytes(value):\n    return value\n")
+            self.assertIn("untyped-evidence-digest-helper", self.rules(root))
+
+    def test_text_path_rejects_artifact_byte_entry_outside_control_plane(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "def digest(report_path):\n    return artifact_byte_sha256(report_path)\n",
+            )
+            self.assertIn("text-evidence-byte-digest", self.rules(root))
+
+    def test_assigned_text_path_rejects_artifact_byte_digest(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "from pathlib import Path\n"
+                "from tools.evidence_digest import artifact_byte_sha256\n"
+                "path = Path('report.json')\n"
+                "value = artifact_byte_sha256(path)\n",
+            )
+            self.assertIn("text-evidence-byte-digest", self.rules(root))
+
+    def test_keyword_text_path_rejects_artifact_byte_digest(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "from pathlib import Path\n"
+                "from tools.evidence_digest import artifact_byte_sha256\n"
+                "value = artifact_byte_sha256(path=Path('report.json'))\n",
+            )
+            self.assertIn("text-evidence-byte-digest", self.rules(root))
+
+    def test_assigned_subprocess_and_os_system_commands_are_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "import os\nimport subprocess\n"
+                "command = ['sha256sum', 'report.json']\n"
+                "subprocess.run(command)\n"
+                "os.system('sha256sum report.json')\n",
+            )
+            violations = guard.run_guard(root)
+            self.assertEqual(
+                2,
+                sum(item.rule == "untyped-evidence-digest-command" for item in violations),
+            )
+
+    def test_scripts_python_is_scanned_for_digest_violations(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(root, "scripts/new_gate.py", "import hashlib\n")
+            self.assertIn("untyped-evidence-digest", self.rules(root))
+
+    def test_local_digest_wrapper_cannot_hide_text_path_domain(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "from pathlib import Path\n"
+                "from tools.evidence_digest import artifact_byte_sha256\n"
+                "def digest(path):\n    return artifact_byte_sha256(path)\n"
+                "value = digest(Path('report.json'))\n",
+            )
+            self.assertIn("text-evidence-byte-digest", self.rules(root))
+
+    def test_assigned_digest_callable_cannot_hide_text_path_domain(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "from pathlib import Path\n"
+                "from tools import evidence_digest\n"
+                "digest = evidence_digest.artifact_byte_sha256\n"
+                "value = digest(Path('report.json'))\n",
+            )
+            self.assertIn("text-evidence-byte-digest", self.rules(root))
+
+    def test_openssl_and_embedded_python_digest_commands_are_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "scripts/check-report",
+                "openssl dgst -sha256 docs/evidence/report.json\n"
+                "python3 -c 'import hashlib; print(hashlib.sha256(open(\"report.json\", \"rb\").read()))'\n",
+            )
+            violations = guard.run_guard(root)
+            self.assertEqual(
+                2,
+                sum(item.rule == "untyped-non-python-digest" for item in violations),
+            )
+
+    def test_repository_evidence_rejects_untyped_digest_comparison(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "def compare(item, expected):\n    return item.get('sha256') == expected\n",
+            )
+            self.assertIn("untyped-evidence-digest-comparison", self.rules(root))
+
+    def test_repository_rejects_named_digest_field_comparison(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "def compare(item, expected):\n"
+                "    return item.get('manifest_sha256') == expected\n",
+            )
+            self.assertIn("untyped-evidence-digest-comparison", self.rules(root))
+
+    def test_repository_traces_assigned_digest_field_into_comparison(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "def compare(item, expected):\n"
+                "    actual = item.get('source_tree_sha256')\n"
+                "    return actual == expected\n",
+            )
+            self.assertIn("untyped-evidence-digest-comparison", self.rules(root))
+
+    def test_repository_rejects_compare_digest_on_bare_digest_field(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "import hmac\n"
+                "def compare(item, expected):\n"
+                "    return hmac.compare_digest(item.get('manifest_sha256'), expected)\n",
+            )
+            self.assertIn("untyped-evidence-digest-comparison", self.rules(root))
+
+    def test_literal_log_path_is_text_evidence(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "from pathlib import Path\n"
+                "from tools.evidence_digest import artifact_byte_sha256\n"
+                "value = artifact_byte_sha256(Path('results.log'))\n",
+            )
+            self.assertIn("text-evidence-byte-digest", self.rules(root))
+
+    def test_powershell_sha256_api_is_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                ".github/workflows/digest.yml",
+                "jobs:\n  digest:\n    steps:\n      - shell: pwsh\n        run: |\n"
+                "          $sha = [System.Security.Cryptography.SHA256]::Create()\n"
+                "          $bytes = [IO.File]::ReadAllBytes('docs/evidence/report.json')\n"
+                "          $sha.ComputeHash($bytes)\n",
+            )
+            rules = self.rules(root)
+            self.assertTrue(
+                {"untyped-non-python-digest", "text-evidence-raw-digest"} & rules
+            )
+
+    def test_cksum_sha256_routes_are_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "scripts/check-report",
+                "cksum -a sha256 docs/evidence/first.json\n"
+                "cksum --algorithm=sha256 docs/evidence/second.json\n",
+            )
+            violations = guard.run_guard(root)
+            self.assertEqual(
+                2,
+                sum(item.rule == "untyped-non-python-digest" for item in violations),
+            )
+
+    def test_openssl_shortcut_and_license_operand_are_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "scripts/check-report",
+                "openssl sha256 docs/evidence/report.json\n"
+                "# wirestack-digest-domain: artifact-bytes-v1\n"
+                "sha256sum third_party/provider/LICENSE\n",
+            )
+            rules = self.rules(root)
+            self.assertIn("untyped-non-python-digest", rules)
+            self.assertIn("text-evidence-raw-digest", rules)
+
+    def test_text_evidence_rejects_artifact_digest_and_utf8_fallback(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/repository/evidence.py",
+                "def digest(report_path):\n"
+                "    try:\n"
+                "        return report_path.read_text(encoding='utf-8')\n"
+                "    except UnicodeDecodeError:\n"
+                "        return artifact_byte_digest(report_path)\n",
+            )
+            rules = self.rules(root)
+            self.assertIn("text-evidence-byte-digest", rules)
+            self.assertIn("text-evidence-byte-fallback", rules)
+
     def test_concrete_provider_is_rejected_from_generic_tls_and_http(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)

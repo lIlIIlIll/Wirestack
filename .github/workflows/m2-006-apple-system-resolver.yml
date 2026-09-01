@@ -1,0 +1,138 @@
+name: M2-006 Apple SystemResolver
+
+on:
+  push:
+    branches:
+      - task/M2-006-apple-system-resolver
+    paths:
+      - "build.cj"
+      - "cjpm.toml"
+      - "native/resolver/apple/**"
+      - "native/resolver/linux/**"
+      - "src/internal/resolver/**"
+      - "tools/build_apple_resolver.py"
+      - "tools/build_native_dependencies.py"
+      - "tools/build_resolver.py"
+      - "tools/download_cangjie_nightly.py"
+      - "tools/gates/m2_006_apple_resolver.py"
+      - "tools/gates/native/m2_006_tls_link_stub.c"
+      - "tools/gates/probes/m2_006_apple_resolver.cj"
+      - "tools/gates/tests/test_m2_006_apple_resolver.py"
+      - ".github/workflows/m2-006-apple-system-resolver.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-macos-resolver:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Resolve the latest complete Cangjie nightly
+        id: cangjie-nightly
+        run: python3 tools/latest_cangjie_nightly.py --github-output "$GITHUB_OUTPUT"
+
+      - name: Install the native macOS Cangjie toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ steps.cangjie-nightly.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie.tar.gz
+
+      - name: Validate task tooling
+        run: |
+          python3 -m unittest tools.tests.test_build_resolver tools.gates.tests.test_m2_006_apple_resolver -v
+          python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M2-006/test-plan.md --json
+
+      - name: Run native macOS resolver acceptance
+        run: |
+          mkdir -p build/gates/m2-006/macos
+          python3 tools/gates/m2_006_apple_resolver.py \
+            --repo-root . \
+            --mode macos \
+            --revision "$GITHUB_SHA" \
+            --output build/gates/m2-006/macos/report.json
+
+      - name: Validate exact-revision macOS report
+        run: |
+          python3 tools/gates/m2_006_apple_resolver.py \
+            --validate-report build/gates/m2-006/macos/report.json \
+            --expected-revision "$GITHUB_SHA" \
+            --expected-mode macos \
+            --validation-output build/gates/m2-006/macos/validation.json
+
+      - name: Upload native macOS evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m2-006-macos-arm64-${{ github.sha }}
+          path: build/gates/m2-006/macos
+          if-no-files-found: error
+          retention-days: 14
+
+  native-ios-simulator-resolver:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Download the official prebuilt macOS plus iOS SDK
+        id: cangjie-ios
+        run: |
+          python3 tools/download_cangjie_nightly.py \
+            --platform mac-aarch64-ios \
+            --output "$RUNNER_TEMP/cangjie-ios.tar.gz" \
+            --github-output "$GITHUB_OUTPUT"
+          mkdir -p "$RUNNER_TEMP/cangjie-ios"
+          tar -xzf "$RUNNER_TEMP/cangjie-ios.tar.gz" -C "$RUNNER_TEMP/cangjie-ios"
+          envsetup=$(find "$RUNNER_TEMP/cangjie-ios" -name envsetup.sh -type f -print -quit)
+          test -n "$envsetup"
+          echo "CANGJIE_IOS_ENVSETUP=$envsetup" >> "$GITHUB_ENV"
+
+      - name: Validate task tooling and iOS SDK identity
+        run: |
+          source "$CANGJIE_IOS_ENVSETUP"
+          cjc -v
+          cjpm --version
+          xcrun simctl list devices available
+          python3 -m unittest tools.tests.test_build_resolver tools.gates.tests.test_m2_006_apple_resolver -v
+          python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M2-006/test-plan.md --json
+
+      - name: Run native iOS Simulator resolver acceptance
+        run: |
+          source "$CANGJIE_IOS_ENVSETUP"
+          mkdir -p build/gates/m2-006/ios-simulator
+          python3 tools/gates/m2_006_apple_resolver.py \
+            --repo-root . \
+            --mode ios-simulator \
+            --revision "$GITHUB_SHA" \
+            --output build/gates/m2-006/ios-simulator/report.json
+
+      - name: Validate exact-revision iOS Simulator report
+        run: |
+          source "$CANGJIE_IOS_ENVSETUP"
+          python3 tools/gates/m2_006_apple_resolver.py \
+            --validate-report build/gates/m2-006/ios-simulator/report.json \
+            --expected-revision "$GITHUB_SHA" \
+            --expected-mode ios-simulator \
+            --validation-output build/gates/m2-006/ios-simulator/validation.json
+
+      - name: Upload native iOS Simulator evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m2-006-ios-simulator-arm64-${{ github.sha }}
+          path: build/gates/m2-006/ios-simulator
+          if-no-files-found: error
+          retention-days: 14

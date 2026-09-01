@@ -3,9 +3,14 @@
 
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import re
@@ -62,13 +67,6 @@ def canonical_json(value: Any) -> bytes:
     return (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode()
 
 
-def sha256_path(path: Path) -> str:
-    try:
-        return hashlib.sha256(path.read_bytes()).hexdigest()
-    except OSError as error:
-        raise IndependentReviewError("FILE_MISSING", str(path)) from error
-
-
 def safe_path(root: Path, relative: str, must_exist: bool = True) -> Path:
     candidate = Path(relative)
     require(not candidate.is_absolute(), "PATH_ESCAPE", relative)
@@ -102,7 +100,7 @@ def build_request(root: Path = ROOT) -> dict[str, Any]:
         "taskId": TASK_ID,
         "platform": PROFILE,
         "packagePath": PACKAGE_PATH,
-        "packageSha256": sha256_path(package),
+        "packageSha256": evidence_digest.text_evidence_sha256(package),
         "compatibilityPolicy": COMPATIBILITY_POLICY,
         "requiredScope": sorted(REQUIRED_SCOPE),
         "requiredMethods": sorted(REQUIRED_METHODS),
@@ -145,7 +143,12 @@ def validate_regression(root: Path, value: Mapping[str, Any], where: str) -> Non
     require(value["status"] == "PASS", "REGRESSION_NOT_PASS", where)
     require(value["exitCode"] == 0 and value["timedOut"] is False, "REGRESSION_NOT_PASS", where)
     path = safe_path(root, value["evidencePath"])
-    require(sha256_path(path) == value["sha256"], "DIGEST_MISMATCH", value["evidencePath"])
+    require(
+        evidence_digest.schema_text_sha256_equal(
+            evidence_digest.text_evidence_sha256(path), value["sha256"],
+        ),
+        "DIGEST_MISMATCH", value["evidencePath"],
+    )
 
 
 def validate_finding(root: Path, value: Mapping[str, Any], position: int) -> tuple[str, str]:
@@ -192,7 +195,9 @@ def validate_review(root: Path, request: Mapping[str, Any], review: Mapping[str,
     require(isinstance(target, dict), "SCHEMA", "target")
     exact_keys(target, {"packagePath", "packageSha256"}, "target")
     require(target["packagePath"] == request["packagePath"] and
-        target["packageSha256"] == request["packageSha256"], "TARGET_MISMATCH", "M7-028 package")
+        evidence_digest.schema_text_sha256_equal(
+            target["packageSha256"], request["packageSha256"]),
+        "TARGET_MISMATCH", "M7-028 package")
 
     reviewer = review["reviewer"]
     require(isinstance(reviewer, dict), "SCHEMA", "reviewer")
@@ -320,7 +325,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             atomic_json(args.request, build_request(args.root))
         report = validate(args.root, args.request, args.review)
         atomic_json(args.report, report)
-    except IndependentReviewError as error:
+    except (IndependentReviewError, evidence_digest.DigestError) as error:
         status = "BLOCKED" if error.code == "REVIEW_REQUIRED" else "FAIL"
         payload = {"taskId": TASK_ID, "status": status, "code": error.code, "detail": error.detail[:512]}
         print(json.dumps(payload, sort_keys=True) if args.json else f"M7-029 independent review: {status} [{error.code}] {error.detail[:512]}")

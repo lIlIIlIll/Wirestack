@@ -1,12 +1,16 @@
+from tools import evidence_digest
 import copy
 import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from tools.validate_m7_020_architecture_audit import (
     AuditError,
     DEFAULT_AUDIT,
+    ROOT,
+    guard,
     validate_audit,
 )
 
@@ -19,10 +23,14 @@ class M7020ArchitectureAuditTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "audit.data"
             path.write_text(json.dumps(audit), encoding="utf-8")
-            validate_audit(path)
+            validate_audit(path, verify_current_sources=False)
 
     def test_canonical_audit_passes(self) -> None:
-        validate_audit()
+        validate_audit(verify_current_sources=False)
+
+    def test_strict_validation_rejects_stale_current_source(self) -> None:
+        with self.assertRaisesRegex(AuditError, "source hash is stale"):
+            validate_audit()
 
     def test_missing_check_fails(self) -> None:
         changed = copy.deepcopy(self.audit)
@@ -40,13 +48,63 @@ class M7020ArchitectureAuditTest(unittest.TestCase):
         changed = copy.deepcopy(self.audit)
         changed["source_sha256"]["tools/architecture_guard.py"] = "0" * 64
         with self.assertRaisesRegex(AuditError, "source hash is stale"):
+            with tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / "audit.data"
+                path.write_text(json.dumps(changed), encoding="utf-8")
+                validate_audit(path)
+
+    def test_std_net_adapter_inventory_schema_is_strict(self) -> None:
+        changed = copy.deepcopy(self.audit)
+        changed["inventory"]["semantic_std_net_files"].append(
+            changed["inventory"]["semantic_std_net_files"][0]
+        )
+        with self.assertRaisesRegex(AuditError, "std.net inventory is invalid"):
             self.validate_changed(changed)
 
-    def test_std_net_adapter_inventory_is_exact(self) -> None:
+    def test_structural_inventory_rejects_zero_counts(self) -> None:
         changed = copy.deepcopy(self.audit)
-        changed["inventory"]["semantic_std_net_files"].append("src/http/client.cj")
-        with self.assertRaisesRegex(AuditError, "file inventory is stale"):
+        changed["inventory"]["cangjie_files"] = 0
+        with self.assertRaisesRegex(AuditError, "inventory field is invalid"):
             self.validate_changed(changed)
+
+    def test_structural_inventory_rejects_boolean_counts(self) -> None:
+        changed = copy.deepcopy(self.audit)
+        changed["inventory"]["cangjie_files"] = True
+        with self.assertRaisesRegex(AuditError, "inventory field is invalid"):
+            self.validate_changed(changed)
+
+    def test_structural_inventory_rejects_non_text_std_net_entry(self) -> None:
+        changed = copy.deepcopy(self.audit)
+        changed["inventory"]["semantic_std_net_files"] = [{"path": "bad"}]
+        with self.assertRaisesRegex(AuditError, "std.net inventory is invalid"):
+            self.validate_changed(changed)
+
+    def test_structural_inventory_rejects_std_net_outside_adapter(self) -> None:
+        changed = copy.deepcopy(self.audit)
+        changed["inventory"]["semantic_std_net_files"] = ["src/http/client.cj"]
+        with self.assertRaisesRegex(AuditError, "std.net escaped the adapter package"):
+            self.validate_changed(changed)
+
+    def test_structural_inventory_rejects_escaping_path(self) -> None:
+        changed = copy.deepcopy(self.audit)
+        changed["inventory"]["semantic_std_net_files"] = ["../outside.cj"]
+        with self.assertRaisesRegex(AuditError, "inventory path is invalid"):
+            self.validate_changed(changed)
+
+    def test_structural_mode_does_not_consult_current_guard_rules(self) -> None:
+        with mock.patch.object(guard, "SOURCE_RULES", []), mock.patch.object(
+            guard, "PUBLIC_API_RULES", []
+        ), mock.patch.object(guard, "CONFIG_RULES", []):
+            self.validate_changed(copy.deepcopy(self.audit))
+
+            strict = copy.deepcopy(self.audit)
+            for relative in strict["source_sha256"]:
+                strict["source_sha256"][relative] = evidence_digest.text_evidence_bytes_sha256((ROOT / relative).read_bytes())
+            with tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / "audit.data"
+                path.write_text(json.dumps(strict), encoding="utf-8")
+                with self.assertRaisesRegex(AuditError, "required guard rule is absent"):
+                    validate_audit(path)
 
 
 if __name__ == "__main__":

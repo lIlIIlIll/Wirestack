@@ -2,9 +2,14 @@
 """Close the Linux GATE-NET-06 production cleanup gaps without rerunning soak."""
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import statistics
 import os
@@ -36,14 +41,6 @@ TLS_RE = re.compile(
 
 class GateError(RuntimeError):
     pass
-
-
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def one_match(pattern: re.Pattern[str], text: str, label: str) -> tuple[int, ...]:
@@ -256,7 +253,7 @@ def validate_soak(path: Path) -> dict[str, Any]:
     )
     if not valid:
         raise GateError("reused soak report is not formal PASS evidence")
-    return {"path": str(path), "sha256": sha256(path), "repository_revision":
+    return {"path": str(path), "sha256": evidence_digest.text_evidence_sha256(path), "repository_revision":
             report.get("repository_revision", "4323da2"), "seconds": soak["requested_seconds"],
             "iterations": soak.get("iterations"), "decision": "PASS"}
 
@@ -274,7 +271,7 @@ def validate_provider(path: Path) -> dict[str, Any]:
     )
     if not valid:
         raise GateError("reused provider cleanup report is not formal PASS evidence")
-    return {"path": str(path), "sha256": sha256(path), "repository_revision":
+    return {"path": str(path), "sha256": evidence_digest.text_evidence_sha256(path), "repository_revision":
             report.get("repository_revision"), "cycles": report["completed_cycles"],
             "decision": "PASS"}
 

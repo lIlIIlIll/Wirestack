@@ -3,9 +3,14 @@
 
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import platform
@@ -30,14 +35,6 @@ SHIM_RE = re.compile(
 
 class GateError(RuntimeError):
     pass
-
-
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def parse_shim_log(text: str) -> dict[str, Any]:
@@ -230,7 +227,7 @@ def run_gate(root: Path, output_dir: Path, delay_ms: int) -> dict[str, Any]:
             env=environment,
             timeout=60,
         )
-        shim_digest = sha256_path(shim)
+        shim_digest = evidence_digest.artifact_byte_sha256(shim)
 
         global_bound_binary = Path(directory) / "resolver-global-bound"
         global_bound_compile = run_command(
@@ -253,7 +250,7 @@ def run_gate(root: Path, output_dir: Path, delay_ms: int) -> dict[str, Any]:
         global_bound = run_command(
             [str(global_bound_binary)], cwd=root, env=dict(os.environ), timeout=10
         )
-        global_bound_digest = sha256_path(global_bound_binary)
+        global_bound_digest = evidence_digest.artifact_byte_sha256(global_bound_binary)
 
     if not shim_log.is_file():
         raise GateError("delay shim did not record any getaddrinfo calls")
@@ -277,7 +274,7 @@ def run_gate(root: Path, output_dir: Path, delay_ms: int) -> dict[str, Any]:
         },
         "artifacts": {
             "delay_shim_sha256": shim_digest,
-            "shim_log_sha256": sha256_path(shim_log),
+            "shim_log_sha256": evidence_digest.text_evidence_sha256(shim_log),
             "global_pool_bound_probe_sha256": global_bound_digest,
         },
         "resolver_build": build,
