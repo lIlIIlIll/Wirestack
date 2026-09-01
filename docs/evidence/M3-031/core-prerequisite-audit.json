@@ -115,7 +115,14 @@
     }
   },
   "retained_evidence": [
+    "docs/evidence/M3-030/architecture-guard.json",
+    "docs/evidence/M3-030/clean-consumer.json",
+    "docs/evidence/M3-030/linux-aws-lc-results.json",
     "docs/evidence/M3-030/native-abi-report.json",
+    "docs/evidence/M3-030/platform-provider-matrix.json",
+    "docs/evidence/M3-030/release-validation.json",
+    "docs/evidence/M3-030/sbom-validation.json",
+    "docs/evidence/M3-030/task-check.json",
     "docs/evidence/M3-030/test-provider-results.json"
   ],
   "retained_evidence_validation": {
@@ -167,7 +174,14 @@
       "tools/tls_provider/selection.py": "7a680ad296f10d2f5036e895f292765b3d5eabcc70cedcfbd851319e969143f3"
     },
     "reports": [
+      "docs/evidence/M3-030/architecture-guard.json",
+      "docs/evidence/M3-030/clean-consumer.json",
+      "docs/evidence/M3-030/linux-aws-lc-results.json",
       "docs/evidence/M3-030/native-abi-report.json",
+      "docs/evidence/M3-030/platform-provider-matrix.json",
+      "docs/evidence/M3-030/release-validation.json",
+      "docs/evidence/M3-030/sbom-validation.json",
+      "docs/evidence/M3-030/task-check.json",
       "docs/evidence/M3-030/test-provider-results.json"
     ],
     "source_sha256": {
@@ -214,7 +228,14 @@
   "schema_version": 1,
   "source_sha256": {
     "docs/evidence/M3-028/README.md": "6c82678dfb3e31285896f3df31127422a4c4ff338d2c18cf4a08cd5ea648e9b5",
+    "docs/evidence/M3-030/architecture-guard.json": "2d689b2e0ed6ba92cd4ff817d1654c6f7c32b296a809cf29be6e810e9254a656",
+    "docs/evidence/M3-030/clean-consumer.json": "37346a90039970f699f25eb635e1226d7c16754c9f7b266019aa56c9d9ad85be",
+    "docs/evidence/M3-030/linux-aws-lc-results.json": "0c4f2361a168a66abaf3c33adbaac47755cd778b649eed0bdad6ec7663038fab",
     "docs/evidence/M3-030/native-abi-report.json": "03881988db42d4e32579fa1fff2ff6e4ab045ed2fab3eedee26ccae0a2d91d35",
+    "docs/evidence/M3-030/platform-provider-matrix.json": "3abed15b99fb7ad74412de20571bb03a7caf0562677953087e74791391d18833",
+    "docs/evidence/M3-030/release-validation.json": "3c50fabdbcd64918b0cdef8a147613fc015b418b201fd851b6765b6949b04223",
+    "docs/evidence/M3-030/sbom-validation.json": "3e66df1d8c8952a60a50389bdaee132f24a423bc81e06397e64be7304ee29de5",
+    "docs/evidence/M3-030/task-check.json": "20d8509d3104369903e074044dde893b4ed18622ef47d4acb9bc87850b505610",
     "docs/evidence/M3-030/test-provider-results.json": "f57e6ac10d7a4977ea427fef1b69ed8649a2a3133187e566fdc455090263e69a",
     "docs/planning/implementation-backlog.md": "e4db77941b5eb54c5cb1f5d3ed896da2635131d5e1ddc5a9f795c95e52dd575a",
     "native/tls/aws_lc/provider.json": "ff4d39359a8ef49ede8272698fe306b7421df2fea04b44744483245f34f619b4",
