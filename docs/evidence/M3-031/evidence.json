@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-01T02:36:26.292805Z",
+  "generated_at_utc": "2026-09-01T02:49:59.998802Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -11,7 +11,7 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/core-prerequisite-audit.json",
-      "sha256": "74c5331dfaa2660a39f512d8ab78112e6e026c224dfcdad8eb2e18b62e608539",
+      "sha256": "8fd2efd331837078d58bbcb79d9d9191268172564bddfa8262f4f7678df44aef",
       "source_task": "M3-031"
     },
     {
@@ -53,7 +53,7 @@
     {
       "acceptance_status": "PASS",
       "path": "docs/evidence/M3-031/task-check.json",
-      "sha256": "20cccc5b034eb2681bdbe0bfc4630a2588fbea1abcde89ad937c315bbb8dfb40",
+      "sha256": "65500dc9f56c3fe200cbf91444a64d10834345bc738cad33c832a545c740a76a",
       "source_task": "M3-031"
     }
   ],
@@ -73,11 +73,18 @@
     "docs/evidence/M2-006/macos-arm64/report.json": "200d0800209c71bc7794af0fc41954297c4c78dc4c9b34e2122fa82c09058b92",
     "docs/evidence/M2-006/macos-arm64/validation.json": "e5b30901c18f3c4d6806ee84fa7aa2fdac0157fbce679295beadeede534b6ff8",
     "docs/evidence/M3-028/README.md": "6c82678dfb3e31285896f3df31127422a4c4ff338d2c18cf4a08cd5ea648e9b5",
+    "docs/evidence/M3-030/architecture-guard.json": "2d689b2e0ed6ba92cd4ff817d1654c6f7c32b296a809cf29be6e810e9254a656",
+    "docs/evidence/M3-030/clean-consumer.json": "37346a90039970f699f25eb635e1226d7c16754c9f7b266019aa56c9d9ad85be",
     "docs/evidence/M3-030/evidence.json": "76ec0141209abca23f498ceae2c8a7368722522fb95386f036c9a8de20089a20",
+    "docs/evidence/M3-030/linux-aws-lc-results.json": "0c4f2361a168a66abaf3c33adbaac47755cd778b649eed0bdad6ec7663038fab",
     "docs/evidence/M3-030/native-abi-report.json": "03881988db42d4e32579fa1fff2ff6e4ab045ed2fab3eedee26ccae0a2d91d35",
+    "docs/evidence/M3-030/platform-provider-matrix.json": "3abed15b99fb7ad74412de20571bb03a7caf0562677953087e74791391d18833",
+    "docs/evidence/M3-030/release-validation.json": "3c50fabdbcd64918b0cdef8a147613fc015b418b201fd851b6765b6949b04223",
+    "docs/evidence/M3-030/sbom-validation.json": "3e66df1d8c8952a60a50389bdaee132f24a423bc81e06397e64be7304ee29de5",
+    "docs/evidence/M3-030/task-check.json": "20d8509d3104369903e074044dde893b4ed18622ef47d4acb9bc87850b505610",
     "docs/evidence/M3-030/test-provider-results.json": "f57e6ac10d7a4977ea427fef1b69ed8649a2a3133187e566fdc455090263e69a",
     "docs/evidence/M3-031/README.md": "b4d85d557ffd8578f5003c7ae95ee472bc774295a32631571578ef258c08babf",
-    "docs/evidence/M3-031/test-plan.md": "12f5f72557a918c96e6f20d38b74950b414c59d276df5fdc82418b56021e0f75",
+    "docs/evidence/M3-031/test-plan.md": "99cc704861fdf98fa78bb65152b84d73a94cdd8b8ec1352d22c2063120884f58",
     "docs/planning/implementation-backlog.md": "e4db77941b5eb54c5cb1f5d3ed896da2635131d5e1ddc5a9f795c95e52dd575a",
     "docs/planning/status.md": "6a8c7524ec709fcaadf9a5bb52414edce7fbcea9be698e94f07f535efb7e8b1b",
     "native/tls/aws_lc/provider.json": "ff4d39359a8ef49ede8272698fe306b7421df2fea04b44744483245f34f619b4",
@@ -94,12 +101,12 @@
     "src/internal/trust/hostname_test.cj": "af8c24a4f0ea856c8afb77aec5c817dd16feb27d1df9f80d1f3263d3bd5de17d",
     "src/internal/trust/trust_test.cj": "ef79ec1366bce927aa4f1aca8718ecd2dba63d1aa2b1014b6623eaceac9ff7b7",
     "src/trust.cj": "893860568a87bdba369a7ef48a955701fcca7354a079461f51e517ed24413268",
-    "tools/m3_031_desktop_tls_adoption.py": "23b51e04bfd95319a427a26547f5fe764cbd4697e28c79eebc4948696b0b9dba",
+    "tools/m3_031_desktop_tls_adoption.py": "ac74af32705c0612dcaad59c6b11e23d170276608a1ec22b2a6cea9547424eba",
     "tools/repository/repository_tooling.py": "6df2e851944b8a12889082d5ea7c5bbc6b041563c42b86a80cde3ed540525ba9",
     "tools/tasks/M2-004.json": "6baeb6d662ad3fb9b47ee81ef94733edc3c537d312656b94c83f915579fff9c2",
     "tools/tasks/M2-006.json": "41aea4935ef444048e246593770b88bc6eef9fc963c70fbb8c8179ffb0fd37c5",
-    "tools/tasks/M3-031.json": "0c1904dc9d8a6445d95549c2e4d25fb23dba49071574405c91d939a832ae3d59",
-    "tools/tests/test_m3_031_desktop_tls_adoption.py": "6e78d745780d0e22d4e5975d2ea30de9482a6f0c2325a5af822f68ca54397c26",
+    "tools/tasks/M3-031.json": "0d014ae2c771efa7e3099265a686488f62925ce0cc159e2d4531038c17da88a2",
+    "tools/tests/test_m3_031_desktop_tls_adoption.py": "25b5df49e25701a73b764efa8ae938a251f5da85203155242b1c06edc0004d02",
     "tools/tests/test_m7_linux_task_graph.py": "c6bd40cceac15ffe35f737d5e63daee1021b682f4aa6887dd46c9ed068b7f38c",
     "tools/tls_provider/selection.json": "de802ea6839e42327a6d30df4ac5fcdca6f60205f04ed223082346833203dc0b",
     "tools/tls_provider_poc/openssl_memory_poc.c": "b46b7e5f3f88edd0879b709f0814bc6cc42391dd1b864523ee8e4d2b9de60933",
