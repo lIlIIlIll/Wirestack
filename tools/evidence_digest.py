@@ -114,35 +114,53 @@ def artifact_byte_digest(path: Path) -> ArtifactByteDigest:
 
 
 def text_evidence_sha256(path: Path) -> str:
-    """Return a text-domain value for task-local string schemas."""
+    """Return the hash component for protocols that define a SHA-256 string."""
     return text_evidence_digest(path).sha256
 
 
 def text_evidence_bytes_sha256(raw: bytes) -> str:
-    """Return a text-domain value for task-local string schemas."""
+    """Return the hash component for protocols that define a SHA-256 string."""
     return text_evidence_digest_bytes(raw).sha256
 
 
 def artifact_byte_sha256(path: Path) -> str:
-    """Return a byte-domain value for task-local string schemas."""
+    """Return the hash component for protocols that define a SHA-256 string."""
     return artifact_byte_digest(path).sha256
 
 
 def artifact_bytes_sha256(raw: bytes) -> str:
-    """Return a byte-domain value for task-local string schemas."""
+    """Return the hash component for protocols that define a SHA-256 string."""
     return artifact_byte_digest_bytes(raw).sha256
 
 
 def text_evidence_sha256_equal(left: Any, right: Any) -> bool:
-    """Compare two legacy string-schema values in the text-evidence domain."""
+    """Compare two explicitly typed text-evidence digest objects."""
+    try:
+        return parse_text_digest(left, "left digest") == parse_text_digest(right, "right digest")
+    except DigestError:
+        return False
+
+
+def artifact_byte_sha256_equal(left: Any, right: Any) -> bool:
+    """Compare two explicitly typed artifact-byte digest objects."""
+    try:
+        return parse_artifact_digest(left, "left digest") == parse_artifact_digest(
+            right, "right digest"
+        )
+    except DigestError:
+        return False
+
+
+def schema_text_sha256_equal(left: Any, right: Any) -> bool:
+    """Compare SHA-256 strings only for a schema-owned text-digest field."""
     try:
         return TextEvidenceDigest(left) == TextEvidenceDigest(right)
     except DigestError:
         return False
 
 
-def artifact_byte_sha256_equal(left: Any, right: Any) -> bool:
-    """Compare two legacy string-schema values in the artifact-byte domain."""
+def schema_artifact_sha256_equal(left: Any, right: Any) -> bool:
+    """Compare SHA-256 strings only for a schema-owned artifact-digest field."""
     try:
         return ArtifactByteDigest(left) == ArtifactByteDigest(right)
     except DigestError:
@@ -375,6 +393,8 @@ _CALL_DOMAINS = {
     "artifact_byte_sha256": "artifact-bytes",
     "artifact_bytes_sha256": "artifact-bytes",
     "signed_payload_sha256": "artifact-bytes",
+    "schema_text_sha256_equal": "text-evidence",
+    "schema_artifact_sha256_equal": "artifact-bytes",
     "text_evidence_inventory_sha256": "text-evidence",
     "sha256_path": "legacy-task-local",
     "canonical_text_sha256": "legacy-task-local-text",
@@ -708,7 +728,9 @@ def digest_inventory(root: Path) -> dict[str, Any]:
                     if wrapper is not None
                     else _primary_argument(node, {"path", "raw", "value"})
                 )
-                if (domain == "artifact-bytes" and effective_name != "signed_payload_sha256"
+                if (domain == "artifact-bytes" and effective_name not in {
+                        "signed_payload_sha256", "schema_artifact_sha256_equal",
+                    }
                         and relative != "tools/evidence_digest.py" and digest_argument is not None):
                     argument = _argument_hint(digest_argument, node, assignment_index)
                     if any(marker in argument for marker in (
@@ -749,6 +771,12 @@ def digest_inventory(root: Path) -> dict[str, Any]:
     workflows = root / ".github/workflows"
     if workflows.is_dir():
         non_python_paths.extend(path for path in workflows.rglob("*") if path.suffix in {".yml", ".yaml"})
+    actions = root / ".github/actions"
+    if actions.is_dir():
+        non_python_paths.extend(
+            path for path in actions.rglob("*")
+            if path.name in {"action.yml", "action.yaml"}
+        )
     for path in sorted(set(non_python_paths)):
         relative = path.relative_to(root).as_posix()
         try:

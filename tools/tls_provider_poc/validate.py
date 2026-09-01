@@ -80,7 +80,7 @@ def validate_exported_symbols(build: Mapping[str, Any]) -> None:
     require(inventory.get("count") == len(symbols),
             "exported-symbol count mismatch")
     encoded = "".join(f"{symbol}\n" for symbol in symbols).encode("utf-8")
-    require(evidence_digest.text_evidence_sha256_equal(
+    require(evidence_digest.schema_text_sha256_equal(
                 inventory.get("sha256"), evidence_digest.text_evidence_bytes_sha256(encoded)),
             "exported-symbol digest mismatch")
 
@@ -347,7 +347,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
         require(source.get("kind") == provider_spec["source_kind"],
                 "source kind does not match provider pin")
         if provider_spec["source_kind"] == "archive":
-            require(evidence_digest.artifact_byte_sha256_equal(
+            require(evidence_digest.schema_artifact_sha256_equal(
                         source.get("content_sha256"), provider_spec["sha256"]),
                     "source archive digest does not match provider pin")
             require(source.get("tag") == provider_spec["tag"],
@@ -357,7 +357,7 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
         else:
             require(source.get("tree") == provider_spec.get("tree"),
                     "source tree does not match provider pin")
-            require(evidence_digest.text_evidence_sha256_equal(
+            require(evidence_digest.schema_text_sha256_equal(
                         source.get("content_sha256"), provider_spec.get("content_sha256")),
                     "source content digest does not match provider pin")
         require(source.get("security_update") == provider_spec["security_update"],
@@ -559,7 +559,7 @@ def validate_license_bundle(result_path: Path, result: Mapping[str, Any],
         require(root == manifest_path or root in manifest_path.parents,
                 "provider license bundle path escapes result directory")
     require(manifest_path.is_file(), "provider license bundle manifest is missing")
-    require(evidence_digest.text_evidence_sha256_equal(
+    require(evidence_digest.schema_text_sha256_equal(
                 evidence_digest.text_evidence_sha256(manifest_path), info["sha256"]),
             "provider license bundle manifest digest mismatch")
     manifest = load(manifest_path)
@@ -597,7 +597,7 @@ def validate_license_bundle(result_path: Path, result: Mapping[str, Any],
             raise ValidationError("provider license file is not valid UTF-8") from error
         size = len(raw)
         require(size == entry.get("bytes"), "provider license file size mismatch")
-        require(evidence_digest.text_evidence_sha256_equal(
+        require(evidence_digest.schema_text_sha256_equal(
                     evidence_digest.text_evidence_bytes_sha256(raw), entry.get("sha256")),
                 "provider license file digest mismatch")
         observed_bytes += size
@@ -644,7 +644,7 @@ def validate_retained_results(matrix: Mapping[str, Any], spec: Mapping[str, Any]
         require(result["provider"] == cell["provider"], f"{result_path}: provider mismatch")
         require(result["platform"] == cell["platform"], f"{result_path}: platform mismatch")
         require(result["status"] == cell["status"], f"{result_path}: status mismatch")
-        require(evidence_digest.text_evidence_sha256_equal(
+        require(evidence_digest.schema_text_sha256_equal(
                     evidence_digest.text_evidence_sha256(result_path), cell["sha256"]),
                 f"{result_path}: sha256 mismatch")
         if cell["status"] in {"PASS", "PARTIAL"}:
@@ -654,11 +654,11 @@ def validate_retained_results(matrix: Mapping[str, Any], spec: Mapping[str, Any]
                     f"{result_path}: provider license manifest path escapes repository")
             require(manifest_path.is_file(),
                     f"{result_path}: provider license manifest is missing")
-            require(evidence_digest.text_evidence_sha256_equal(
+            require(evidence_digest.schema_text_sha256_equal(
                         evidence_digest.text_evidence_sha256(manifest_path),
                         cell["license_bundle"]["sha256"]),
                     f"{result_path}: provider license manifest matrix digest mismatch")
-            require(evidence_digest.text_evidence_sha256_equal(
+            require(evidence_digest.schema_text_sha256_equal(
                         result["build"]["license_bundle"]["sha256"],
                         cell["license_bundle"]["sha256"]),
                     f"{result_path}: provider license manifest result digest mismatch")

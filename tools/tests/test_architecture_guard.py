@@ -89,6 +89,16 @@ class ArchitectureGuardTests(unittest.TestCase):
             self.write(root, "tools/new_gate.sh", "sha256sum report.json\n")
             self.assertIn("untyped-non-python-digest", self.rules(root))
 
+    def test_composite_action_digest_is_scanned(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                ".github/actions/evidence/action.yml",
+                "runs:\n  using: composite\n  steps:\n    - shell: bash\n      run: sha256sum report.json\n",
+            )
+            self.assertIn("untyped-non-python-digest", self.rules(root))
+
     def test_text_domain_marker_cannot_approve_raw_digest_command(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)

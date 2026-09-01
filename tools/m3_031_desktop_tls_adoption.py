@@ -476,7 +476,7 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
         path = root / relative
         if entry.get("source_task") != "M3-030" or entry.get("acceptance_status") != "PASS":
             raise AdoptionError("RETAINED_EVIDENCE", f"{relative}: index does not record PASS")
-        if not evidence_digest.text_evidence_sha256_equal(
+        if not evidence_digest.schema_text_sha256_equal(
             entry.get("sha256"), evidence_digest.text_evidence_sha256(path),
         ):
             raise AdoptionError("STALE_SOURCE", f"{relative}: report digest changed")
