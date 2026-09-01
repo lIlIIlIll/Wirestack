@@ -3,8 +3,9 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import os
 import platform
@@ -16,14 +17,6 @@ from pathlib import Path
 
 class BuildError(RuntimeError):
     pass
-
-
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def run(command: list[str], *, cwd: Path | None = None) -> str:
@@ -62,8 +55,8 @@ def build_fingerprint(source: Path, header: Path, tools: dict[str, str]) -> tupl
     target = run([tools["cc"], "-dumpmachine"]).strip()
     inputs: dict[str, object] = {
         "schema": 1,
-        "source_sha256": sha256_path(source),
-        "header_sha256": sha256_path(header),
+        "source_sha256": evidence_digest.text_evidence_sha256(source),
+        "header_sha256": evidence_digest.text_evidence_sha256(header),
         "compiler": tools["cc"],
         "compiler_version": compiler_version,
         "target": target,
@@ -78,7 +71,7 @@ def build_fingerprint(source: Path, header: Path, tools: dict[str, str]) -> tupl
         ],
     }
     encoded = json.dumps(inputs, sort_keys=True, separators=(",", ":")).encode()
-    return hashlib.sha256(encoded).hexdigest(), inputs
+    return evidence_digest.text_evidence_bytes_sha256(encoded), inputs
 
 
 def activate(output_root: Path, final_dir: Path) -> None:
@@ -103,7 +96,7 @@ def validate_cached(final_dir: Path, fingerprint: str) -> dict[str, object] | No
         return None
     if manifest.get("build_fingerprint") != fingerprint:
         return None
-    if manifest.get("archive", {}).get("sha256") != sha256_path(archive):
+    if manifest.get("archive", {}).get("sha256") != evidence_digest.artifact_byte_sha256(archive):
         return None
     return manifest
 
@@ -203,7 +196,7 @@ int main(void) {
             "inputs": inputs,
             "archive": {
                 "path": "lib/libwirestack_resolver.a",
-                "sha256": sha256_path(archive),
+                "sha256": evidence_digest.artifact_byte_sha256(archive),
             },
             "worker_model": "fixed pthread pool with bounded FIFO admission",
             "close_model": (

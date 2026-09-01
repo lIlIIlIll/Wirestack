@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-import hashlib
+from tools import evidence_digest
+
 import json
 import os
 import re
@@ -96,7 +97,7 @@ class ProviderSelection:
             "abi_contract": self.abi_contract,
         }
         raw = json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
-        return hashlib.sha256(raw).hexdigest()
+        return evidence_digest.text_evidence_bytes_sha256(raw)
 
 
 def _load_json(path: Path, missing_code: str) -> dict[str, Any]:

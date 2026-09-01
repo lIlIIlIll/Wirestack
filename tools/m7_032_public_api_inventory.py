@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
 import json
 import sys
@@ -32,10 +34,6 @@ def require(condition: bool, message: str) -> None:
 
 def canonical_json(value: Any) -> bytes:
     return (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode()
-
-
-def sha256_bytes(value: bytes) -> str:
-    return api_scan.sha256_bytes(value)
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -68,7 +66,10 @@ def build_inventory(root: Path = ROOT) -> dict[str, Any]:
         "contractKind": "PRE_1_0_PUBLIC_API_INVENTORY",
         "compatibilityPolicy": "NOT_EVALUATED_PRE_1_0",
     })
-    return {**core, "inventorySha256": sha256_bytes(canonical_json(core))}
+    return {
+        **core,
+        "inventorySha256": evidence_digest.text_evidence_bytes_sha256(canonical_json(core)),
+    }
 
 
 def build_report(inventory_path: Path, inventory: Mapping[str, Any]) -> dict[str, Any]:
@@ -89,8 +90,8 @@ def build_report(inventory_path: Path, inventory: Mapping[str, Any]) -> dict[str
         "resolvedAliasCount": len(inventory["resolvedAliases"]),
         "internalAliasCount": 0,
         "inventorySha256": inventory["inventorySha256"],
-        "inventoryFileSha256": api_scan.sha256_path(inventory_path),
-        "generatorSha256": api_scan.sha256_path(Path(__file__)),
+        "inventoryFileSha256": evidence_digest.text_evidence_sha256(inventory_path),
+        "generatorSha256": evidence_digest.text_evidence_sha256(Path(__file__)),
         "checks": {
             "publicOwners": "PASS",
             "publicAliasTargets": "PASS",

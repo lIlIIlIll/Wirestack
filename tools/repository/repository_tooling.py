@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import platform
@@ -18,8 +17,20 @@ import time
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
+
+from tools.evidence_digest import (  # noqa: E402
+    DigestError,
+    TextEvidenceDigest,
+    atomic_json as digest_atomic_json,
+    parse_text_digest,
+    text_evidence_digest,
+)
+
 SCHEMA_VERSION = 1
-EVIDENCE_SCHEMA_VERSION = 1
+EVIDENCE_SCHEMA_VERSION = 2
 # A 24-hour command needs time for build, startup, report flush, and bounded
 # teardown. Keep the contract finite while allowing one full day plus overhead.
 MAX_TIMEOUT_SECONDS = 172_800
@@ -35,7 +46,6 @@ EVIDENCE_KEYS = {"schema_version", "source_task", "platform", "toolchain",
                  "reports", "source_sha256"}
 REPORT_KEYS = {"path", "sha256", "source_task", "acceptance_status"}
 TASK_ID_RE = re.compile(r"^[A-Z][A-Z0-9]*-\d{3}$")
-SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
 class ContractError(ValueError):
@@ -49,29 +59,22 @@ def utc_now() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
 def atomic_json(path: Path, value: Mapping[str, Any], before_replace: Callable[[], None] | None = None) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
-    temporary = Path(name)
+    digest_atomic_json(path, value, before_replace)
+
+
+def _parse_text_digest(raw: Any, field: str) -> TextEvidenceDigest:
     try:
-        with os.fdopen(fd, "w", encoding="utf-8") as stream:
-            json.dump(value, stream, indent=2, sort_keys=True)
-            stream.write("\n")
-            stream.flush()
-            os.fsync(stream.fileno())
-        if before_replace is not None:
-            before_replace()
-        os.replace(temporary, path)
-    finally:
-        temporary.unlink(missing_ok=True)
+        return parse_text_digest(raw, field)
+    except DigestError as error:
+        raise ContractError(error.code, error.detail) from error
+
+
+def _text_digest(path: Path) -> TextEvidenceDigest:
+    try:
+        return text_evidence_digest(path)
+    except DigestError as error:
+        raise ContractError(error.code, error.detail) from error
 
 
 def safe_path(root: Path, value: Any, field: str, *, must_exist: bool = False,
@@ -408,9 +411,8 @@ def validate_evidence(raw: Any, root: Path, task: Mapping[str, Any]) -> dict[str
     stale: list[str] = []
     for relative, expected in source_hashes.items():
         path = safe_path(root, relative, "source_sha256", must_exist=True, file_only=True)
-        if not isinstance(expected, str) or SHA256_RE.fullmatch(expected) is None:
-            raise ContractError("DIGEST_INVALID", f"invalid source digest: {relative}")
-        if sha256_path(path) != expected:
+        expected_digest = _parse_text_digest(expected, f"source_sha256[{relative}]")
+        if _text_digest(path) != expected_digest:
             stale.append(relative)
     reports = evidence.get("reports")
     if not isinstance(reports, list) or not reports:
@@ -425,9 +427,8 @@ def validate_evidence(raw: Any, root: Path, task: Mapping[str, Any]) -> dict[str
             raise ContractError("REPORT_DUPLICATE", f"duplicate report: {relative}")
         report_paths.add(relative)
         expected = report.get("sha256")
-        if not isinstance(expected, str) or SHA256_RE.fullmatch(expected) is None:
-            raise ContractError("DIGEST_INVALID", f"invalid report digest: {relative}")
-        if sha256_path(path) != expected:
+        expected_digest = _parse_text_digest(expected, f"reports[{index}].sha256")
+        if _text_digest(path) != expected_digest:
             stale.append(relative)
         if report.get("source_task") != task["task_id"] or report.get("acceptance_status") != "PASS":
             raise ContractError("REPORT_NOT_PASS", f"report does not provide PASS for {task['task_id']}: {relative}")
@@ -484,14 +485,17 @@ def seal_evidence(root: Path, task_id: str, report_paths: Sequence[str], output:
         payload = json.loads(path.read_text(encoding="utf-8"))
         if payload.get("status") != "PASS":
             raise ContractError("REPORT_NOT_PASS", f"cannot seal non-PASS report: {relative}")
-        reports.append({"path": relative, "sha256": sha256_path(path),
+        reports.append({"path": relative, "sha256": _text_digest(path).to_json(),
                         "source_task": task_id, "acceptance_status": "PASS"})
     payload = {"schema_version": EVIDENCE_SCHEMA_VERSION, "source_task": task_id,
                "platform": platform_identity(), "toolchain": toolchain_identity(root),
                "acceptance_status": "PASS", "generated_at_utc": utc_now(),
                "revision": tool_version(["git", "rev-parse", "HEAD"], root),
                "reports": reports,
-               "source_sha256": {relative: sha256_path(root / relative) for relative in task["source_paths"]}}
+               "source_sha256": {
+                   relative: _text_digest(root / relative).to_json()
+                   for relative in task["source_paths"]
+               }}
     atomic_json(output, payload)
     return payload
 

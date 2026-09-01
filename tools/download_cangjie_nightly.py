@@ -3,8 +3,9 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import os
 import sys
@@ -53,7 +54,6 @@ def download(url: str, output: Path) -> str:
     descriptor, temporary_name = tempfile.mkstemp(
         prefix=f".{output.name}.", suffix=".tmp", dir=output.parent
     )
-    digest = hashlib.sha256()
     try:
         with os.fdopen(descriptor, "wb") as target:
             request = urllib.request.Request(
@@ -66,11 +66,11 @@ def download(url: str, output: Path) -> str:
                     if not chunk:
                         break
                     target.write(chunk)
-                    digest.update(chunk)
             target.flush()
             os.fsync(target.fileno())
         if Path(temporary_name).stat().st_size == 0:
             raise DownloadError("nightly asset download was empty")
+        digest = evidence_digest.artifact_byte_sha256(Path(temporary_name))
         os.replace(temporary_name, output)
     except BaseException:
         try:
@@ -78,7 +78,7 @@ def download(url: str, output: Path) -> str:
         except FileNotFoundError:
             pass
         raise
-    return digest.hexdigest()
+    return digest
 
 
 def main() -> int:

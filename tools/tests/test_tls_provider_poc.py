@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import copy
 import datetime as dt
 import importlib.util
@@ -37,7 +39,7 @@ def tool_identity_fixture(name="fixture-tool"):
         "argv": [name, "--version"],
         "exit_code": 0,
         "output": output,
-        "output_sha256": validator.hashlib.sha256(output.encode()).hexdigest(),
+        "output_sha256": evidence_digest.text_evidence_bytes_sha256(output.encode()),
     }
 
 
@@ -84,7 +86,7 @@ def build_provenance_fixture(provider, platform, *, diagnostic=False):
             for key in runner.BUILD_ENVIRONMENT_KEYS
         },
         "patches": [],
-        "patch_set_sha256": validator.hashlib.sha256(b"[]\n").hexdigest(),
+        "patch_set_sha256": evidence_digest.text_evidence_bytes_sha256(b"[]\n"),
         "instrumentation": (
             "address+undefined-sanitizer" if diagnostic else "none"
         ),
@@ -384,7 +386,7 @@ class ProviderPocValidationTests(unittest.TestCase):
                 "scope": "final-artifact-exports",
                 "tool": "fixture-tool",
                 "count": len(static_link_symbols),
-                "sha256": runner.hashlib.sha256(encoded).hexdigest(),
+                "sha256": evidence_digest.text_evidence_bytes_sha256(encoded),
                 "symbols": static_link_symbols,
             },
         })
@@ -432,7 +434,7 @@ class ProviderPocValidationTests(unittest.TestCase):
     def test_archive_source_resolves_and_matches_release_tag_commit(self):
         provider = copy.deepcopy(self.spec["providers"][1])
         payload = b"archive fixture"
-        provider["sha256"] = validator.hashlib.sha256(payload).hexdigest()
+        provider["sha256"] = evidence_digest.artifact_bytes_sha256(payload)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             extracted = root / "extracted"
@@ -580,7 +582,9 @@ class ProviderPocValidationTests(unittest.TestCase):
             status="PARTIAL",
         )
         with mock.patch.object(validator, "load", return_value=result), \
-             mock.patch.object(validator, "sha256_path", return_value="1" * 64), \
+             mock.patch.object(
+                 validator.evidence_digest, "text_evidence_sha256", return_value="1" * 64
+             ), \
              self.assertRaisesRegex(validator.ValidationError, "sha256 mismatch"):
             validator.validate_retained_results(value, self.spec, ROOT)
 
@@ -1131,7 +1135,7 @@ class ProviderPocValidationTests(unittest.TestCase):
             entry = {
                 "path": "LICENSE",
                 "bytes": license_path.stat().st_size,
-                "sha256": validator.sha256_path(license_path),
+                "sha256": evidence_digest.text_evidence_sha256(license_path),
             }
             manifest = {
                 "schema_version": 1,
@@ -1146,7 +1150,7 @@ class ProviderPocValidationTests(unittest.TestCase):
             runner.atomic_json(manifest_path, manifest)
             result["build"]["license_bundle"] = {
                 "path": "license-bundle/manifest.json",
-                "sha256": validator.sha256_path(manifest_path),
+                "sha256": evidence_digest.text_evidence_sha256(manifest_path),
                 "file_count": 1,
                 "total_bytes": entry["bytes"],
             }
@@ -1188,7 +1192,7 @@ class ProviderPocValidationTests(unittest.TestCase):
             entry = {
                 "path": "LICENSE",
                 "bytes": license_path.stat().st_size,
-                "sha256": validator.sha256_path(license_path),
+                "sha256": evidence_digest.text_evidence_sha256(license_path),
             }
             manifest = {
                 "schema_version": 1,
@@ -1201,7 +1205,7 @@ class ProviderPocValidationTests(unittest.TestCase):
             }
             manifest_path = root / "licenses/aws-lc/manifest.json"
             runner.atomic_json(manifest_path, manifest)
-            manifest_digest = validator.sha256_path(manifest_path)
+            manifest_digest = evidence_digest.text_evidence_sha256(manifest_path)
             result["build"]["license_bundle"].update({
                 "sha256": manifest_digest,
                 "file_count": 1,
@@ -1213,7 +1217,7 @@ class ProviderPocValidationTests(unittest.TestCase):
                 "platform": "linux-glibc-x86_64",
                 "status": "PASS",
                 "result": "results/aws-lc.json",
-                "sha256": validator.sha256_path(result_path),
+                "sha256": evidence_digest.text_evidence_sha256(result_path),
                 "license_bundle": {
                     "manifest": "licenses/aws-lc/manifest.json",
                     "sha256": manifest_digest,

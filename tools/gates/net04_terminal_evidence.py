@@ -2,9 +2,10 @@
 """Run the Linux x86_64 portion of GATE-NET-04 against the active Cangjie SDK."""
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import math
 import os
@@ -183,7 +184,7 @@ def compile_source(source: str, name: str, artifacts: Path, timeout: float) -> t
     if result["timed_out"] or result["exit_code"] != 0 or not binary.is_file():
         raise GateError(f"compile failed for {name}: {result}")
     return binary, {
-        "source_sha256": hashlib.sha256(source.encode()).hexdigest(),
+        "source_sha256": evidence_digest.text_evidence_bytes_sha256(source.encode()),
         "compile": result,
     }
 
@@ -197,8 +198,8 @@ def capability_probe(source: str, name: str, artifacts: Path, timeout: float) ->
     return {
         "id": name,
         "decision": "SUPPORTED" if result["exit_code"] == 0 and not result["timed_out"] else "BLOCKED",
-        "source_sha256": hashlib.sha256(source.encode()).hexdigest(),
-        "diagnostic_sha256": hashlib.sha256(result["stderr"].encode()).hexdigest(),
+        "source_sha256": evidence_digest.text_evidence_bytes_sha256(source.encode()),
+        "diagnostic_sha256": evidence_digest.text_evidence_bytes_sha256(result["stderr"].encode()),
         "process": result,
     }
 

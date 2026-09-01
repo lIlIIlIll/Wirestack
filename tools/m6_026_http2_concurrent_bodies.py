@@ -3,8 +3,9 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import os
 import platform
@@ -112,10 +113,6 @@ def tool_version(command: Sequence[str]) -> str:
     return completed.stdout.strip()[:4096]
 
 
-def sha256(relative: str) -> str:
-    return hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
-
-
 def validate() -> dict[str, Any]:
     require_linux()
     if not ENV_WRAPPER.is_file():
@@ -159,7 +156,7 @@ def validate() -> dict[str, Any]:
             "cjpm test src/internal/http2 --filter=Http2ClientConnectionTest",
             f"cjpm test src/http --filter=Http2ConcurrentResponseBodyProfileTest.{PROFILE_CASE}",
         ],
-        "source_sha256": {relative: sha256(relative) for relative in SOURCE_PATHS},
+        "source_sha256": {relative: evidence_digest.text_evidence_sha256(relative) for relative in SOURCE_PATHS},
     }
     atomic_json(REPORT, report)
     return report

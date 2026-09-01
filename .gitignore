@@ -12,6 +12,7 @@ __pycache__/
 !docs/evidence/P1-012/*.json
 !docs/evidence/P1-013/evidence.json
 !docs/evidence/P1-013/task-check.json
+!docs/evidence/P1-014/*.json
 !docs/evidence/M3-029/*.json
 !docs/evidence/M3-029/linux_x86_64/*.json
 !docs/evidence/M6-026/*.json

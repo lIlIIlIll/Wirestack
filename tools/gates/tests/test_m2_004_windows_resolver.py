@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import json
 import tempfile
 import tomllib
@@ -103,7 +105,7 @@ class M2004WindowsResolverGateTests(unittest.TestCase):
             report_path.write_text(json.dumps(valid_report()), encoding="utf-8")
             _, report_sha256 = gate.load_report(report_path)
             validation = gate.validation_payload(report_sha256, "abc", [])
-            self.assertEqual(gate.sha256_path(report_path), validation["report_sha256"])
+            self.assertEqual(evidence_digest.text_evidence_sha256(report_path), validation["report_sha256"])
             original_digest = validation["report_sha256"]
 
             report_path.write_text(json.dumps({"decision": "FAIL"}), encoding="utf-8")
@@ -122,7 +124,7 @@ class M2004WindowsResolverGateTests(unittest.TestCase):
                 report_sha256, "abc", gate.validate_report(payload, "abc")
             )
             self.assertEqual("PASS", validation["status"])
-            self.assertNotEqual(gate.sha256_path(report_path), validation["report_sha256"])
+            self.assertNotEqual(evidence_digest.text_evidence_sha256(report_path), validation["report_sha256"])
 
     def test_stored_validation_must_match_the_validated_report(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
