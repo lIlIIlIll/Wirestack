@@ -4,8 +4,8 @@
 
 P1-014 is complete. Linux and GitHub Windows CRLF fault injection pass, every
 digest callsite has an explicit domain, and the task-level and canonical
-repository checks pass. GitHub Actions run `33526854717` produced the retained
-Windows report for PR #151 source head `594d352a` (merge revision `a074c511`).
+repository checks pass. GitHub Actions run `33530052288` produced the retained
+Windows report for PR #151 source head `48dee1e1` (merge revision `3335bb54`).
 
 ## Implemented boundary
 
@@ -23,14 +23,17 @@ Windows report for PR #151 source head `594d352a` (merge revision `a074c511`).
   hash commands fail the guard. Python files under `tools/`, `scripts/` and
   `.github/actions/`, non-Python files under `tools/`, and every composite
   action/helper under `.github/actions/` are scanned. Folded YAML commands are
-  reconstructed before operand classification, and unreadable UTF-8 helpers
-  fail closed. Pure local wrappers propagate
+  reconstructed before operand classification even when their domain comes
+  from the command manifest; literal shell blocks retain per-command operands.
+  PowerShell/.NET SHA-256 APIs and unreadable UTF-8 helpers fail closed. Pure local wrappers propagate
   their digest domain and forwarded argument through arbitrary wrapper depth;
   assigned callable aliases are resolved to the same typed operation.
   Typed equality helpers parse both serialized domains and reject bare strings;
   fixed string and digest-map fields owned by pre-existing task or protocol
   schemas use separately named schema-domain comparators. Direct equality on
-  every digest-bearing field name is rejected. The inventory is required to
+  every digest-bearing field name is rejected, including fields assigned to a
+  local variable before comparison. Literal `.log` and all declared text
+  suffixes cannot enter the artifact-byte domain. The inventory is required to
   contain no legacy entry.
 - The architecture guard rejects raw SHA-256 outside the typed implementation,
   ambiguous digest helpers, positional, keyword and assigned text paths entering
@@ -59,13 +62,13 @@ entries remain unchanged because they belong to other tasks.
 | Evidence | Result |
 |---|---|
 | Test-plan validator | PASS, 13 paths, 7 scenarios, 11 tests |
-| P1 task-contract unit and fault-injection tests | PASS, 103 tests |
-| Repository-tool Python regressions | PASS, 392 tests |
+| P1 task-contract unit and fault-injection tests | PASS, 111 tests |
+| Repository-tool Python regressions | PASS, 400 tests |
 | Architecture guard | PASS, 0 violations |
 | Linux CRLF probe | PASS |
-| Digest callsite inventory | PASS, 389 explicitly classified calls, 0 issues |
-| GitHub Windows CRLF probe | PASS, run `33526854717`, source head `594d352a`, merge `a074c511`; effective `text` and `eol` attributes are `unspecified`, tracked fixture checked out as CRLF |
-| Hosted exact-SHA CI | PASS, 25/25 checks at source head `594d352a`, including architecture, clean Cangjie build, harness, Linux/macOS/Windows provider matrices, and Windows CRLF |
+| Digest callsite inventory | PASS, 397 explicitly classified calls, 0 issues |
+| GitHub Windows CRLF probe | PASS, run `33530052288`, source head `48dee1e1`, merge `3335bb54`; effective `text` and `eol` attributes are `unspecified`, tracked fixture checked out as CRLF |
+| Hosted exact-SHA CI | PASS, 25/25 checks at source head `48dee1e1`, including architecture, clean Cangjie build, harness, Linux/macOS/Windows provider matrices, and Windows CRLF |
 | `scripts/check-fast --json` | PASS |
 | `scripts/check` | PASS, including 178 gate Python tests, 24 benchmark Python tests, and 588 passed/23 skipped Cangjie tests |
 | `scripts/check-task P1-014` | PASS, all four commands passed |
