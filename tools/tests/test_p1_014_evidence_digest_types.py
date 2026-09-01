@@ -3,6 +3,7 @@ from __future__ import annotations
 import tempfile
 import unittest
 import platform
+import subprocess
 from pathlib import Path
 from unittest import mock
 
@@ -100,6 +101,7 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             fixture = root / "docs/evidence/P1-014/fixtures/line-endings.txt"
             fixture.parent.mkdir(parents=True)
             fixture.write_bytes(b"alpha\r\nbeta\r\n")
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
             (root / ".gitattributes").write_text("*.txt text\n", encoding="utf-8")
             report = crlf_report(root=root)
             self.assertEqual("PASS", report["status"])
@@ -111,6 +113,10 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             blocked = crlf_report(root=root)
             self.assertEqual("FAIL", blocked["status"])
             self.assertIn("GITATTRIBUTES_DEPENDENCY", {item["code"] for item in blocked["issues"]})
+            (root / ".gitattributes").write_text("*.txt -text\n", encoding="utf-8")
+            broad = crlf_report(root=root)
+            self.assertEqual("FAIL", broad["status"])
+            self.assertEqual("unset", broad["effective_text_attribute"])
 
     def test_windows_workflow_is_pinned_and_runs_only_bounded_python_checks(self) -> None:
         workflow = (self.ROOT / ".github/workflows/p1-014-evidence-digest-boundary.yml").read_text(
@@ -204,8 +210,24 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             )
             report = digest_inventory(root)
             self.assertEqual("FAIL", report["status"])
-            self.assertIn("artifact-bytes", report["domain_counts"])
+            self.assertIn("invalid-artifact-on-text", report["domain_counts"])
             self.assertIn("legacy-task-local", report["domain_counts"])
+
+    def test_inventory_resolves_assigned_text_path_before_byte_digest(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            path = root / "tools/gates/new_tool.py"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "from pathlib import Path\n"
+                "from tools.evidence_digest import artifact_byte_sha256\n"
+                "path = Path('report.json')\n"
+                "value = artifact_byte_sha256(path)\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertIn("invalid-artifact-on-text", report["domain_counts"])
 
     def test_inventory_rejects_text_marker_on_raw_digest_command(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:

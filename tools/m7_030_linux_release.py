@@ -180,7 +180,7 @@ def build_release_manifest(
                 "path": "sbom.spdx.json",
                 "mediaType": "application/spdx+json",
                 "sha256": evidence_digest.text_evidence_sha256(sbom),
-                "signedPayloadSha256": evidence_digest.artifact_byte_sha256(sbom),
+                "signedPayloadSha256": evidence_digest.signed_payload_sha256(sbom),
             },
         ],
         "sourceBundle": {
@@ -398,7 +398,7 @@ def verify_offline_bundle(
     subject_map = {subject["name"]: subject for subject in manifest["subjects"]}
     require(evidence_digest.artifact_byte_sha256(artifact) == subject_map["artifact"]["signedPayloadSha256"],
             "SUBJECT_DIGEST", "artifact")
-    require(evidence_digest.artifact_byte_sha256(sbom) == subject_map["sbom"]["signedPayloadSha256"],
+    require(evidence_digest.signed_payload_sha256(sbom) == subject_map["sbom"]["signedPayloadSha256"],
             "SUBJECT_DIGEST", "sbom")
     require(evidence_digest.text_evidence_sha256(sbom) == subject_map["sbom"]["sha256"],
             "SUBJECT_TEXT_DIGEST", "sbom")
@@ -791,7 +791,7 @@ def build_hosted_report(
                 evidence_digest.artifact_byte_sha256(subject)
                 if name == "artifact" else evidence_digest.text_evidence_sha256(subject)
             ),
-            "signedPayloadSha256": evidence_digest.artifact_byte_sha256(subject),
+            "signedPayloadSha256": evidence_digest.signed_payload_sha256(subject),
             "bundleSha256": evidence_digest.artifact_byte_sha256(bundle),
             "verification": "PASS",
         })
