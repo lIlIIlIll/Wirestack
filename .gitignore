@@ -55,6 +55,7 @@ __pycache__/
 !docs/evidence/M3-031/*.json
 !docs/evidence/M3-031/windows-x86_64/*.json
 !docs/evidence/M3-031/macos-arm64/*.json
+!docs/evidence/M3-031/**/license-bundle/manifest.json
 !docs/evidence/M7-029/**/*.json
 !docs/evidence/M7-030/*.json
 !docs/evidence/M7-030/linux_x86_64/*.json

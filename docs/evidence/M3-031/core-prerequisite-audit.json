@@ -184,6 +184,7 @@
       "docs/evidence/M3-030/task-check.json",
       "docs/evidence/M3-030/test-provider-results.json"
     ],
+    "semantic_report_count": 9,
     "source_sha256": {
       ".gitignore": "8d3b6b588606a924185ecf395692951d17595df93c888501d4811942fd749283",
       "build.cj": "64a28c71b2e9f0b610286142f41dc1651adfbb5c3b3098bef90f2c36aad2e2a0",
