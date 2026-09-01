@@ -185,6 +185,23 @@ def load_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def require_complete_status(root: Path, task_id: str, error_code: str) -> None:
+    status_path = root / "docs/planning/status.md"
+    try:
+        status_text = status_path.read_text(encoding="utf-8")
+    except OSError as error:
+        raise AdoptionError(error_code, "status file missing") from error
+    status_rows = [
+        line for line in status_text.splitlines()
+        if line.startswith(f"| {task_id} |")
+    ]
+    if len(status_rows) != 1:
+        raise AdoptionError(error_code, f"{task_id}: status row")
+    status_columns = [part.strip() for part in status_rows[0].strip("|").split("|")]
+    if len(status_columns) < 2 or status_columns[1] != "COMPLETE":
+        raise AdoptionError(error_code, f"{task_id}: status is not COMPLETE")
+
+
 def atomic_json(path: Path, value: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary_name = tempfile.mkstemp(
@@ -281,6 +298,7 @@ def validate_hosted_run(root: Path, raw: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def validate_retained_evidence(root: Path) -> dict[str, Any]:
+    require_complete_status(root, "M3-030", "RETAINED_EVIDENCE")
     try:
         task = repository_tooling.load_task(root / "tools/tasks/M3-030.json", root)
     except repository_tooling.ContractError as error:
@@ -391,21 +409,8 @@ def validate_dependency_evidence(
     verify_current_sources: bool = True,
 ) -> dict[str, Any]:
     validated: dict[str, Any] = {}
-    status_path = root / "docs/planning/status.md"
-    try:
-        status_text = status_path.read_text(encoding="utf-8")
-    except OSError as error:
-        raise AdoptionError("DEPENDENCY_EVIDENCE", "status file missing") from error
     for task_id, report_bindings in bindings.items():
-        status_rows = [
-            line for line in status_text.splitlines()
-            if line.startswith(f"| {task_id} |")
-        ]
-        if len(status_rows) != 1:
-            raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: status row")
-        status_columns = [part.strip() for part in status_rows[0].strip("|").split("|")]
-        if len(status_columns) < 2 or status_columns[1] != "COMPLETE":
-            raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: status is not COMPLETE")
+        require_complete_status(root, task_id, "DEPENDENCY_EVIDENCE")
         try:
             task = repository_tooling.load_task(root / f"tools/tasks/{task_id}.json", root)
         except repository_tooling.ContractError as error:
