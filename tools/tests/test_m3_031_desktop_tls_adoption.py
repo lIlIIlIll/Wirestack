@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -129,9 +130,15 @@ def provider_result(platform: str, revision: str) -> dict:
             "runtime_loader_library_strings": [],
             "license_bundle": {
                 "path": "license-bundle/manifest.json",
-                "sha256": "4" * 64,
-                "file_count": 1,
-                "total_bytes": 100,
+                "sha256": {
+                    "windows-x86_64": "8b9587ca33ad3f6023cf56c3f744e7e2e65191ace8eb6ff54d1b23435aaad176",
+                    "macos-arm64": "a42cbc822fa76edd34cbd276ccb1d1eb2e915864610a76f33bc341f5edffc94f",
+                }[platform],
+                "file_count": 11,
+                "total_bytes": {
+                    "windows-x86_64": 80451,
+                    "macos-arm64": 79058,
+                }[platform],
             },
             "provenance": build_provenance(platform),
         },
@@ -307,16 +314,17 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             root = Path(directory)
             task = json.loads((ROOT / "tools/tasks/M3-030.json").read_text(encoding="utf-8"))
             for relative in task["source_paths"]:
-                if relative == "tools/tasks/M3-030.json":
-                    continue
                 path = root / relative
                 path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(f"retained {relative}\n", encoding="utf-8")
-            task_path = root / "tools/tasks/M3-030.json"
-            task_path.parent.mkdir(parents=True, exist_ok=True)
-            task_path.write_text(json.dumps(task), encoding="utf-8")
+                shutil.copy2(ROOT / relative, path)
+            for relative in (
+                "docs/evidence/M7-021/linux_x86_64/qualification.json",
+                "docs/evidence/M7-025/linux_x86_64/bundle.json",
+            ):
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(ROOT / relative, path)
             status_path = root / "docs/planning/status.md"
-            status_path.parent.mkdir(parents=True, exist_ok=True)
             status_path.write_text(
                 "| M3-030 | COMPLETE | evidence | rationale |\n", encoding="utf-8"
             )
@@ -327,14 +335,7 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             for relative in report_paths:
                 path = root / relative
                 path.parent.mkdir(parents=True, exist_ok=True)
-                identity = (
-                    {"task_id": "M3-030"}
-                    if relative.endswith("/task-check.json")
-                    else {"source_task": "M3-030"}
-                )
-                path.write_text(
-                    json.dumps({**identity, "status": "PASS"}), encoding="utf-8"
-                )
+                shutil.copy2(ROOT / relative, path)
                 reports.append({"path": relative, "source_task": "M3-030",
                                 "acceptance_status": "PASS",
                                 "sha256": adoption.sha256_path(path)})
@@ -371,11 +372,39 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             self.assert_code(
                 "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
             )
-            release_path.write_text(
-                json.dumps({"source_task": "M3-030", "status": "PASS"}),
-                encoding="utf-8",
-            )
+            shutil.copy2(ROOT / "docs/evidence/M3-030/release-validation.json", release_path)
             release_entry["sha256"] = adoption.sha256_path(release_path)
+            evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+            abi_path = root / "docs/evidence/M3-030/native-abi-report.json"
+            abi = json.loads(abi_path.read_text(encoding="utf-8"))
+            abi["missingFunctions"].append("wirestack_tls_provider_create")
+            abi_path.write_text(json.dumps(abi), encoding="utf-8")
+            abi_entry = next(
+                item for item in reports
+                if item["path"] == "docs/evidence/M3-030/native-abi-report.json"
+            )
+            abi_entry["sha256"] = adoption.sha256_path(abi_path)
+            evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+            self.assert_code(
+                "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
+            )
+            shutil.copy2(ROOT / "docs/evidence/M3-030/native-abi-report.json", abi_path)
+            abi_entry["sha256"] = adoption.sha256_path(abi_path)
+            task_check_path = root / "docs/evidence/M3-030/task-check.json"
+            task_check = json.loads(task_check_path.read_text(encoding="utf-8"))
+            task_check["commands"][0]["status"] = "SKIPPED"
+            task_check_path.write_text(json.dumps(task_check), encoding="utf-8")
+            task_check_entry = next(
+                item for item in reports
+                if item["path"] == "docs/evidence/M3-030/task-check.json"
+            )
+            task_check_entry["sha256"] = adoption.sha256_path(task_check_path)
+            evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+            self.assert_code(
+                "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
+            )
+            shutil.copy2(ROOT / "docs/evidence/M3-030/task-check.json", task_check_path)
+            task_check_entry["sha256"] = adoption.sha256_path(task_check_path)
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             evidence["source_sha256"].pop("build.cj")
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
@@ -470,6 +499,39 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             )
             self.assertEqual("PASS", result["status"])
             self.assertEqual(2, result["external_signer_calls"])
+
+    def test_provider_license_bundle_is_retained_and_digest_bound(self) -> None:
+        raw = provider_result("windows-x86_64", self.revision)
+        raw["build"]["license_bundle"]["sha256"] = "0" * 64
+        self.assert_code(
+            "LICENSE_BUNDLE",
+            lambda: adoption.validate_provider_result(
+                raw,
+                expected_platform="windows-x86_64",
+                expected_revision=self.revision,
+            ),
+        )
+        raw = provider_result("macos-arm64", self.revision)
+        raw["build"]["license_bundle"]["path"] = "../../outside/manifest.json"
+        self.assert_code(
+            "RAW_RESULT",
+            lambda: adoption.validate_provider_result(
+                raw,
+                expected_platform="macos-arm64",
+                expected_revision=self.revision,
+            ),
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            result_path = Path(directory) / "provider-result.json"
+            self.assert_code(
+                "LICENSE_BUNDLE",
+                lambda: adoption.validate_provider_result(
+                    provider_result("windows-x86_64", self.revision),
+                    expected_platform="windows-x86_64",
+                    expected_revision=self.revision,
+                    result_path=result_path,
+                ),
+            )
 
     def test_stale_revision_is_rejected(self) -> None:
         raw = provider_result("windows-x86_64", "e" * 40)

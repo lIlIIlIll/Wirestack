@@ -5,3 +5,4 @@ docs/evidence/M2-004/*.json -text
 docs/evidence/M2-004/**/*.json -text
 docs/evidence/M2-006/*.json -text
 docs/evidence/M2-006/**/*.json -text
+docs/evidence/M3-031/**/license-bundle/** -text

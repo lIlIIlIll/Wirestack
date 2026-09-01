@@ -1,0 +1,65 @@
+{
+  "file_count": 11,
+  "files": [
+    {
+      "bytes": 20338,
+      "path": "LICENSE",
+      "sha256": "977c541bd25ffe36975dde25c028c0cd15ddf3d08243983b58e8a6a3d9447523"
+    },
+    {
+      "bytes": 75,
+      "path": "NOTICE",
+      "sha256": "f97c469fa666b51b3dae2e1530504a5ee73bbf47b980aa76746d26c271dd591d"
+    },
+    {
+      "bytes": 1161,
+      "path": "third_party/fiat/LICENSE",
+      "sha256": "43e358d7b6eb109d0f51f7b3a090fd82607965767c25fadee39e922475de2061"
+    },
+    {
+      "bytes": 1475,
+      "path": "third_party/googletest/LICENSE",
+      "sha256": "9702de7e4117a8e2b20dafab11ffda58c198aede066406496bef670d40a22138"
+    },
+    {
+      "bytes": 1782,
+      "path": "third_party/jitterentropy/jitterentropy-library/LICENSE",
+      "sha256": "088d208b9d22530691f1e9406a85dd7f6f5a42e3cf23d3d6df6582408e3840f7"
+    },
+    {
+      "bytes": 1382,
+      "path": "third_party/jitterentropy/jitterentropy-library/LICENSE.bsd",
+      "sha256": "13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239"
+    },
+    {
+      "bytes": 18011,
+      "path": "third_party/jitterentropy/jitterentropy-library/LICENSE.gplv2",
+      "sha256": "e6d6a009505e345fe949e1310334fcb0747f28dae2856759de102ab66b722cb4"
+    },
+    {
+      "bytes": 12053,
+      "path": "third_party/s2n-bignum/s2n-bignum-imported/LICENSE",
+      "sha256": "41c6380384dc6065456d01405ef0b43e5fe39ba1bccc4ec67801cc66142728e5"
+    },
+    {
+      "bytes": 67,
+      "path": "third_party/s2n-bignum/s2n-bignum-imported/NOTICE",
+      "sha256": "d4290ed64c2edd0fce1d84e3f9dfb2881240fe534def76b8cd29ed6af683e287"
+    },
+    {
+      "bytes": 11357,
+      "path": "third_party/vectors/upstream/wycheproof/LICENSE",
+      "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd"
+    },
+    {
+      "bytes": 11357,
+      "path": "third_party/wycheproof_testvectors/LICENSE",
+      "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd"
+    }
+  ],
+  "provider": "aws-lc",
+  "schema_version": 1,
+  "source_content_sha256": "0058686c2ce423c9c416c0597ae84bb30d07ee71271acf58e110f69f802f6478",
+  "task_id": "M0-016",
+  "total_bytes": 79058
+}
