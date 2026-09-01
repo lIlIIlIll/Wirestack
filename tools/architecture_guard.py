@@ -39,6 +39,9 @@ RAW_DIGEST_COMMAND_RE = re.compile(
     r"|\bhashlib\s*\.\s*(?:sha256|new\s*\([^\r\n]*sha256)"
     r"|\bfrom\s+hashlib\s+import\s+(?:sha256|new)\b"
     r"|\b(?:python(?:3(?:\.\d+)*)?|py)\b[^\r\n]*\s-c(?:\s|=)[^\r\n]*\bsha-?256\b"
+    r"|\[?\s*(?:System\.)?Security\.Cryptography\.SHA256"
+    r"(?:Managed|CryptoServiceProvider)?\s*\]?\s*(?:::|\.)\s*(?:Create|HashData)\b"
+    r"|\.\s*ComputeHash\s*\("
     r")",
     re.IGNORECASE,
 )
@@ -51,6 +54,12 @@ SHELL_VARIABLE_OPERAND_RE = re.compile(
     r"\$(?:\{[A-Za-z_][A-Za-z0-9_]*\}|[A-Za-z_][A-Za-z0-9_]*)"
 )
 NON_PYTHON_DOMAIN_MANIFEST = Path("tools/evidence-digest-non-python.json")
+PYTHON_TEXT_PATH_MARKERS = (
+    "evidence", "report", "markdown", "log_path", "source_path",
+    "validation", "read_text", ".json", ".md", ".markdown", ".log",
+    ".txt", ".yaml", ".yml", ".cj", ".py", ".c", ".cc", ".cpp",
+    ".h", ".hpp", ".sh",
+)
 TYPE_CONTAINER_RE = re.compile(
     r"^\s*(?P<public>public\s+)?(?:open\s+)?(?:class|struct|interface|enum)\b"
 )
@@ -772,19 +781,46 @@ def _python_offset(text: str, node: ast.AST) -> int:
     return sum(len(value) for value in lines[:line]) + getattr(node, "col_offset", 0)
 
 
-def _python_digest_field_accesses(node: ast.AST) -> set[str]:
-    """Find mapping keys whose names declare a SHA-256 digest field."""
+def _python_digest_field_accesses(
+    node: ast.AST, index: _PythonAssignmentIndex | None = None,
+) -> set[str]:
+    """Find direct or assigned mapping keys that declare a SHA-256 digest field."""
     fields: set[str] = set()
-    for child in ast.walk(node):
-        key: object = None
-        if isinstance(child, ast.Subscript) and isinstance(child.slice, ast.Constant):
-            key = child.slice.value
-        elif (isinstance(child, ast.Call) and isinstance(child.func, ast.Attribute)
-              and child.func.attr == "get" and child.args
-              and isinstance(child.args[0], ast.Constant)):
-            key = child.args[0].value
-        if isinstance(key, str) and "sha256" in key.lower():
-            fields.add(key)
+    comparison_line = getattr(node, "lineno", 0)
+    comparison_scope = index.node_scopes.get(id(node), 0) if index is not None else 0
+    seen: set[tuple[int, str]] = set()
+
+    def collect_direct(expression: ast.AST) -> None:
+        for child in ast.walk(expression):
+            key: object = None
+            if isinstance(child, ast.Subscript) and isinstance(child.slice, ast.Constant):
+                key = child.slice.value
+            elif (isinstance(child, ast.Call) and isinstance(child.func, ast.Attribute)
+                  and child.func.attr == "get" and child.args
+                  and isinstance(child.args[0], ast.Constant)):
+                key = child.args[0].value
+            if isinstance(key, str) and "sha256" in key.lower():
+                fields.add(key)
+
+    def inspect(expression: ast.AST, active_scope: int) -> None:
+        collect_direct(expression)
+        if index is None or not isinstance(expression, ast.Name):
+            return
+        for candidate_scope in (active_scope, 0):
+            assignment_key = (candidate_scope, expression.id)
+            if assignment_key in seen:
+                continue
+            assignments = index.assignments.get(candidate_scope, {}).get(expression.id, [])
+            prior = [item for item in assignments if item[0] < comparison_line]
+            if prior:
+                seen.add(assignment_key)
+                inspect(max(prior, key=lambda item: item[0])[1], candidate_scope)
+                break
+
+    collect_direct(node)
+    if isinstance(node, ast.Compare):
+        for expression in (node.left, *node.comparators):
+            inspect(expression, comparison_scope)
     return fields
 
 
@@ -799,7 +835,7 @@ def _logical_non_python_command(lines: Sequence[str], index: int) -> str:
         candidate_indent = len(candidate) - len(candidate.lstrip())
         if candidate_indent >= physical_indent:
             continue
-        if re.search(r"\brun\s*:\s*[>|][+-]?\s*(?:#.*)?$", candidate.strip()) is None:
+        if re.search(r"\brun\s*:\s*>[+-]?\s*(?:#.*)?$", candidate.strip()) is None:
             break
         block: list[str] = []
         for block_line in lines[marker_index + 1:]:
@@ -928,10 +964,7 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                         if digest_argument is not None else ""
                     )
                     if repository_control_plane or any(
-                        marker in argument for marker in (
-                            "evidence", "report", "markdown", "log_path", "source_path",
-                            "validation", "read_text", ".json", ".md", ".cj",
-                        )
+                        marker in argument for marker in PYTHON_TEXT_PATH_MARKERS
                     ):
                         violations.append(_violation(
                             root, path, text, _python_offset(text, node),
@@ -940,7 +973,7 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                         ))
             if isinstance(node, ast.Compare) and not typed_implementation:
                 if (any(isinstance(operator, (ast.Eq, ast.NotEq)) for operator in node.ops)
-                        and _python_digest_field_accesses(node)):
+                        and _python_digest_field_accesses(node, assignment_index)):
                     violations.append(_violation(
                         root, path, text, _python_offset(text, node),
                         "untyped-evidence-digest-comparison",
@@ -1007,7 +1040,7 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
             logical_command = _logical_non_python_command(lines, index)
             context = "".join(lines[max(0, index - 4):index + 1]).lower()
             declared_domain = declared_non_python.get((relative, line.strip()))
-            operand_source = line if declared_domain is not None else logical_command
+            operand_source = logical_command
             artifact_declared = (
                 "wirestack-digest-domain: artifact-bytes-v1" in context
                 or declared_domain == "artifact-bytes-v1"

@@ -228,7 +228,21 @@ def validate_artifact_inputs(
         {"path": relative, "sha256": metadata["license_sha256"][relative]}
         for relative in LICENSE_MEMBERS[1:]
     ]
-    _require(notices.get("files") == expected_notice_files, "notice inventory mismatch")
+    notice_files = notices.get("files")
+    _require(
+        isinstance(notice_files, list)
+        and len(notice_files) == len(expected_notice_files)
+        and all(
+            isinstance(actual, dict)
+            and set(actual) == {"path", "sha256"}
+            and actual.get("path") == expected["path"]
+            and evidence_digest.schema_text_sha256_equal(
+                actual.get("sha256"), expected["sha256"]
+            )
+            for actual, expected in zip(notice_files, expected_notice_files)
+        ),
+        "notice inventory mismatch",
+    )
     _require(provider.get("externalOpenSslDependency") is False, "provider depends on system OpenSSL")
     _require(provider.get("runtimeLoaderLibraryStrings") == [], "provider has runtime loader strings")
     release_provider = release.get("provider")
@@ -730,7 +744,12 @@ def validate_documents(
     _require(manifest.get("trust", {}).get("policies") == TRUST_POLICIES, "trust policy inventory is incomplete")
     for name in OUTPUT_NAMES[:-1]:
         expected = bundle.get("documents", {}).get(name, {}).get("sha256")
-        _require(expected == evidence_digest.text_evidence_sha256(evidence_dir / name), f"bundle digest mismatch for {name}")
+        _require(
+            evidence_digest.schema_text_sha256_equal(
+                expected, evidence_digest.text_evidence_sha256(evidence_dir / name)
+            ),
+            f"bundle digest mismatch for {name}",
+        )
     serialized = canonical_json(documents).decode("utf-8")
     for forbidden in ("/home/", "Authorization", "privateKey", "sessionSecret"):
         _require(forbidden not in serialized, f"sensitive or host-local value appears in bundle: {forbidden}")

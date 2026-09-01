@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
 import platform
@@ -292,6 +293,31 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             self.assertIn("invalid-artifact-on-text", report["domain_counts"])
             self.assertIn("legacy-non-python", report["domain_counts"])
 
+    def test_inventory_manifest_cannot_hide_folded_text_operand(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            workflow = root / ".github/workflows/digest.yml"
+            workflow.parent.mkdir(parents=True)
+            workflow.write_text(
+                "jobs:\n  digest:\n    steps:\n      - run: >-\n"
+                "          sha256sum\n"
+                "          docs/evidence/report.json\n",
+                encoding="utf-8",
+            )
+            manifest = root / "tools/evidence-digest-non-python.json"
+            manifest.parent.mkdir(parents=True)
+            manifest.write_text(json.dumps({
+                "schema_version": 1,
+                "entries": [{
+                    "path": ".github/workflows/digest.yml",
+                    "command": "sha256sum",
+                    "domain": ARTIFACT_BYTE_DOMAIN,
+                }],
+            }), encoding="utf-8")
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertIn("invalid-artifact-on-text", report["domain_counts"])
+
     def test_inventory_rejects_named_digest_field_comparison(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
             root = Path(directory)
@@ -308,6 +334,55 @@ class EvidenceDigestTypeTests(unittest.TestCase):
                 issue["detail"].endswith("bare-sha256-comparison")
                 for issue in report["issues"]
             ))
+
+    def test_inventory_traces_assigned_digest_field_into_comparison(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            path = root / "tools/gates/compare.py"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "def matches(report, expected):\n"
+                "    actual = report.get('source_tree_sha256')\n"
+                "    return actual == expected\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertTrue(any(
+                issue["detail"].endswith("bare-sha256-comparison")
+                for issue in report["issues"]
+            ))
+
+    def test_inventory_classifies_literal_log_as_text_evidence(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            path = root / "tools/gates/hash_log.py"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "from pathlib import Path\n"
+                "from tools.evidence_digest import artifact_byte_sha256\n"
+                "value = artifact_byte_sha256(Path('results.log'))\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertIn("invalid-artifact-on-text", report["domain_counts"])
+
+    def test_inventory_rejects_powershell_sha256_api(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            workflow = root / ".github/workflows/digest.yml"
+            workflow.parent.mkdir(parents=True)
+            workflow.write_text(
+                "jobs:\n  digest:\n    steps:\n      - shell: pwsh\n        run: |\n"
+                "          $sha = [System.Security.Cryptography.SHA256]::Create()\n"
+                "          $bytes = [IO.File]::ReadAllBytes('docs/evidence/report.json')\n"
+                "          $sha.ComputeHash($bytes)\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertGreaterEqual(len(report["issues"]), 1)
 
     def test_inventory_rejects_artifact_marker_with_shell_variable_operand(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:

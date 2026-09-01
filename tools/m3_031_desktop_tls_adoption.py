@@ -652,7 +652,9 @@ def validate_dependency_evidence(
             if (
                 item.get("source_task") != task_id
                 or item.get("acceptance_status") != "PASS"
-                or sealed_digest != evidence_digest.text_evidence_sha256(path)
+                or not evidence_digest.schema_text_sha256_equal(
+                    sealed_digest, evidence_digest.text_evidence_sha256(path)
+                )
                 or load_json(path).get("status") != "PASS"
             ):
                 raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: report not PASS or stale")
