@@ -2,9 +2,14 @@
 """Capture the measurable Linux M0-005 raw std.net loopback baseline."""
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import os
 import platform
 import re
@@ -122,7 +127,7 @@ def run_instrumented_sample(
     )
     attempts, calls, copied_bytes = parse_strace_recvfrom(trace)
     allocations = parse_heaptrack_allocations(process["stderr"])
-    heaptrack_sha256 = hashlib.sha256(heaptrack_path.read_bytes()).hexdigest()
+    heaptrack_sha256 = evidence_digest.artifact_bytes_sha256(heaptrack_path.read_bytes())
     valid = (
         sample["decision"] == "PASS"
         and allocations > 0
@@ -136,7 +141,7 @@ def run_instrumented_sample(
         "successful_recvfrom_calls": calls,
         "copied_bytes_per_process_operation": copied_bytes,
         "strace_trace": trace,
-        "strace_trace_sha256": hashlib.sha256(trace.encode()).hexdigest(),
+        "strace_trace_sha256": evidence_digest.text_evidence_bytes_sha256(trace.encode()),
         "heaptrack_record_sha256": heaptrack_sha256,
         "heaptrack_stderr": process["stderr"],
     }

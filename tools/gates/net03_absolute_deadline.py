@@ -9,10 +9,15 @@ remain Linux-only evidence.
 """
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
 import argparse
 import contextlib
 import datetime as dt
-import hashlib
 import json
 import math
 import os
@@ -319,7 +324,7 @@ def compile_probes(artifact_dir: Path, timeout_seconds: float) -> tuple[dict[str
         if result["timed_out"] or result["exit_code"] != 0 or not binary_path.is_file():
             raise GateError(f"compile failed for {name}: {result}")
         binaries[name] = binary_path
-        digests[name] = hashlib.sha256(source.encode("utf-8")).hexdigest()
+        digests[name] = evidence_digest.text_evidence_bytes_sha256(source.encode("utf-8"))
     return binaries, digests
 
 

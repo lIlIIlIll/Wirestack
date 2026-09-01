@@ -1,0 +1,31 @@
+{
+  "capabilities": {
+    "caller_cancellation": "PASS",
+    "close_notify": "PASS",
+    "custom_ca": "PASS",
+    "external_signer": "PASS",
+    "external_trust": "PASS",
+    "local_close": "PASS",
+    "mtls": "PASS",
+    "negative_expired_certificate": "PASS",
+    "negative_hostname": "PASS",
+    "negative_malformed_certificate": "PASS",
+    "negative_untrusted_ca": "PASS",
+    "partial_io_backpressure": "PASS",
+    "repeated_cleanup": "PASS",
+    "session_resumption": "PASS",
+    "sni_hostname_alpn": "PASS",
+    "tls12": "PASS",
+    "tls13": "PASS",
+    "truncation": "PASS"
+  },
+  "external_signer_calls": 2,
+  "platform": "macos-arm64",
+  "provider": "aws-lc",
+  "provider_version": "5.5.0",
+  "repeated_cleanup_cycles": 10000,
+  "repository_revision": "6c683a51b782d6fd0a10b11c59cb75d9bc9a99d2",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M3-031"
+}

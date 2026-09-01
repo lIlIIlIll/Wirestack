@@ -10,14 +10,36 @@
   output-type = "static"
   compile-option = ""
   override-compile-option = ""
-  link-option = "-lstdc++ -lpthread -ldl -lm"
+  link-option = ""
   package-configuration = {}
   repository = "https://github.com/lIlIIlIll/Wirestack.git"
   homepage = "https://github.com/lIlIIlIll/Wirestack"
   documentation = "https://github.com/lIlIIlIll/Wirestack/tree/main/docs"
 
-[dependencies]
+[target.x86_64-unknown-linux-gnu]
+  link-option = "-lstdc++ -lpthread -ldl -lm"
 
-[ffi.c]
+[target.x86_64-unknown-linux-gnu.ffi.c]
   wirestack_resolver = { path = "./target/native/resolver/current/lib" }
   wirestack_tls_provider = { path = "./target/native/current/lib" }
+
+[target.x86_64-w64-mingw32]
+  link-option = "-lws2_32"
+
+[target.x86_64-w64-mingw32.ffi.c]
+  wirestack_resolver = { path = "./target/native/resolver/current/lib" }
+
+[target.aarch64-apple-darwin]
+  link-option = ""
+
+[target.aarch64-apple-darwin.ffi.c]
+  wirestack_resolver = { path = "./target/native/resolver/macos-arm64/current/lib" }
+
+[target.arm64-apple-ios11-simulator]
+  override-compile-option = "--sysroot ./target/native/resolver/ios-simulator-arm64/sdk"
+  link-option = ""
+
+[target.arm64-apple-ios11-simulator.ffi.c]
+  wirestack_resolver = { path = "./target/native/resolver/ios-simulator-arm64/current/lib" }
+
+[dependencies]

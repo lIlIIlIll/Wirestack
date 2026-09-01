@@ -1,0 +1,99 @@
+name: M0-016 Windows Provider PoC
+
+on:
+  push:
+    branches:
+      - task/M0-016-windows-provider-poc
+    paths:
+      - "tools/tls_provider_poc/**"
+      - "tools/tests/test_tls_provider_poc.py"
+      - ".github/workflows/m0-016-windows-provider-poc.yml"
+  pull_request:
+    paths:
+      - "tools/tls_provider_poc/**"
+      - "tools/tests/test_tls_provider_poc.py"
+      - ".github/workflows/m0-016-windows-provider-poc.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-x86-64:
+    runs-on: windows-2025
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        provider: [aws-lc, mbedtls, openssl]
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Validate contract and Windows runner tools
+        shell: pwsh
+        run: |
+          python tools/tls_provider_poc/validate.py `
+            --matrix docs/evidence/M0-016/platform-matrix.json `
+            --matrix-contract-only
+          python -m unittest discover -s tools/tests -p 'test_tls_provider_poc.py' -v
+          $required = 'cmake', 'ninja', 'perl', 'openssl', 'git'
+          foreach ($tool in $required) {
+            if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
+              throw "required tool is missing: $tool"
+            }
+          }
+          if ((Get-CimInstance Win32_OperatingSystem).Caption -notmatch 'Windows Server 2025') {
+            throw 'runner is not Windows Server 2025'
+          }
+          if (-not (Get-Command nasm -ErrorAction SilentlyContinue)) {
+            choco install nasm --version=2.16.3 --no-progress -y
+          }
+          if (-not (Get-Command nasm -ErrorAction SilentlyContinue)) {
+            throw 'NASM is required by the AWS-LC Windows build'
+          }
+
+      - name: Build pinned provider and execute native PoC
+        shell: pwsh
+        env:
+          WIRESTACK_PROVIDER: ${{ matrix.provider }}
+          WIRESTACK_GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath = & $vswhere -latest -products * `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+            -property installationPath
+          if (-not $vsPath) { throw 'MSVC x64 toolchain is unavailable' }
+          Import-Module "$vsPath\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+          Enter-VsDevShell -VsInstallPath $vsPath -SkipAutomaticLocation `
+            -DevCmdArguments '-arch=x64 -host_arch=x64'
+          foreach ($tool in 'cl', 'nmake', 'dumpbin') {
+            if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
+              throw "MSVC tool is unavailable after DevShell activation: $tool"
+            }
+          }
+          python tools/tls_provider_poc/run.py `
+            --provider $env:WIRESTACK_PROVIDER `
+            --output "build/tls-provider-poc/$env:WIRESTACK_PROVIDER/result.json"
+
+      - name: Validate native Windows result
+        shell: pwsh
+        run: |
+          python tools/tls_provider_poc/validate.py `
+            --result "build/tls-provider-poc/${{ matrix.provider }}/result.json" `
+            --expected-revision $env:GITHUB_SHA
+
+      - name: Upload exact-revision evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m0-016-windows-x86-64-${{ matrix.provider }}-${{ github.sha }}
+          path: |
+            build/tls-provider-poc/${{ matrix.provider }}/result.json
+            build/tls-provider-poc/${{ matrix.provider }}/build.log
+            build/tls-provider-poc/${{ matrix.provider }}/license-bundle
+          if-no-files-found: error
+          retention-days: 14

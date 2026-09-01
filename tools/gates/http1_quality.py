@@ -2,9 +2,14 @@
 """Run bounded Linux HTTP/1 conformance and deterministic-fuzz gates."""
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import platform
@@ -113,14 +118,8 @@ def classify(process: dict[str, Any], minimum_passed: int,
 
 
 def source_fingerprint(root: Path) -> str:
-    digest = hashlib.sha256()
     paths = sorted((root / "src/http").glob("*.cj")) + sorted((root / "src/internal/http1").glob("*.cj"))
-    for path in paths:
-        digest.update(path.relative_to(root).as_posix().encode())
-        digest.update(b"\0")
-        digest.update(path.read_bytes())
-        digest.update(b"\0")
-    return digest.hexdigest()
+    return evidence_digest.text_evidence_inventory_sha256(root, paths)
 
 
 def tool_version(command: Sequence[str], root: Path) -> str:

@@ -72,6 +72,13 @@ class M6026GateTest(unittest.TestCase):
             self.assertEqual(json.loads(path.read_text())["status"], "OLD")
             self.assertEqual(list(path.parent.iterdir()), [path])
 
+    def test_source_digests_resolve_paths_from_repository_root(self) -> None:
+        expected = {
+            relative: gate.evidence_digest.text_evidence_sha256(gate.ROOT / relative)
+            for relative in gate.SOURCE_PATHS
+        }
+        self.assertEqual(expected, gate.source_digests())
+
 
 if __name__ == "__main__":
     unittest.main()

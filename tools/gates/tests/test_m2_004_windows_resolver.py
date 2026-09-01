@@ -1,0 +1,197 @@
+from __future__ import annotations
+
+from tools import evidence_digest
+
+import json
+import tempfile
+import tomllib
+import unittest
+from pathlib import Path
+
+from tools.gates import m2_004_windows_resolver as gate
+
+
+def valid_process() -> dict[str, object]:
+    return {
+        "timed_out": False,
+        "exit_code": 0,
+        "output": "[ PASSED ] CASE:\n" * gate.EXPECTED_TESTS + "FAILED: 0\nERROR: 0\n",
+    }
+
+
+def valid_report() -> dict[str, object]:
+    return {
+        "schema_version": 1,
+        "task_id": "M2-004",
+        "revision": "abc",
+        "platform": {"system": "Windows"},
+        "decision": "PASS",
+        "failures": [],
+        "resolver_test": valid_process(),
+        "resolver_manifest": {
+            "platform": "windows-x86_64",
+            "private_runtime_abi": False,
+            "test_fixture": True,
+        },
+        "test_link_stub": {"test_only": True},
+    }
+
+
+class M2004WindowsResolverGateTests(unittest.TestCase):
+    def test_target_native_libraries_propagate_to_path_consumers(self) -> None:
+        manifest = tomllib.loads(Path("cjpm.toml").read_text(encoding="utf-8"))
+        targets = manifest["target"]
+
+        linux = targets["x86_64-unknown-linux-gnu"]
+        self.assertEqual(
+            {"path": "./target/native/resolver/current/lib"},
+            linux["ffi"]["c"]["wirestack_resolver"],
+        )
+        self.assertEqual(
+            {"path": "./target/native/current/lib"},
+            linux["ffi"]["c"]["wirestack_tls_provider"],
+        )
+        self.assertNotIn("-lwirestack_", linux["link-option"])
+
+        windows = targets["x86_64-w64-mingw32"]
+        self.assertEqual(
+            {"path": "./target/native/resolver/current/lib"},
+            windows["ffi"]["c"]["wirestack_resolver"],
+        )
+        self.assertNotIn("wirestack_m2_004_tls_link_stub", windows["ffi"]["c"])
+        self.assertNotIn("-lwirestack_", windows["link-option"])
+
+    def test_gate_injects_test_stub_only_into_its_workspace_manifest(self) -> None:
+        original = Path("cjpm.toml").read_text(encoding="utf-8")
+        bound = gate.bind_test_link_stub(original)
+        self.assertNotIn("wirestack_m2_004_tls_link_stub", original)
+        self.assertEqual(1, bound.count("wirestack_m2_004_tls_link_stub"))
+
+    def test_test_stub_binding_accepts_windows_as_last_target(self) -> None:
+        manifest = """[target.x86_64-unknown-linux-gnu.ffi.c]
+  wirestack_resolver = { path = \"./target/native/resolver/current/lib\" }
+
+[target.x86_64-w64-mingw32.ffi.c]
+  wirestack_resolver = { path = \"./target/native/resolver/current/lib\" }
+
+[dependencies]
+"""
+        bound = gate.bind_test_link_stub(manifest)
+        self.assertIn("wirestack_m2_004_tls_link_stub", bound)
+        self.assertTrue(bound.endswith("[dependencies]\n"))
+
+    def test_windows_native_source_preserves_distinct_results_and_native_errors(self) -> None:
+        source = Path("native/resolver/windows/wirestack_resolver.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("hints.ai_flags = AI_ADDRCONFIG", source)
+        self.assertIn("candidate.scope_id = address->sin6_scope_id", source)
+        self.assertIn("*out_native_code = (int64_t)startup_status", source)
+        self.assertIn("resolver_address_is_present(job, &candidate)", source)
+        self.assertEqual(2, source.count("DWORD thread_error = GetLastError()"))
+        self.assertEqual(2, source.count("*out_native_code = (int64_t)thread_error"))
+        self.assertIn("host_length = bounded_length", source)
+        self.assertIn("return WIRESTACK_RESOLVER_OUT_OF_MEMORY;", source)
+        self.assertIn("WIRESTACK_UTF8_CONVERSION_OUT_OF_MEMORY", source)
+        self.assertIn("ERROR_NOT_ENOUGH_MEMORY", source)
+        self.assertIn("job->native_code = conversion_native_code", source)
+
+    def test_valid_report_passes(self) -> None:
+        self.assertEqual([], gate.validate_report(valid_report(), "abc"))
+
+    def test_validation_payload_binds_the_exact_native_report(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "report.json"
+            report_path.write_text(json.dumps(valid_report()), encoding="utf-8")
+            _, report_sha256 = gate.load_report(report_path)
+            validation = gate.validation_payload(report_sha256, "abc", [])
+            self.assertEqual(evidence_digest.text_evidence_sha256(report_path), validation["report_sha256"])
+            original_digest = validation["report_sha256"]
+
+            report_path.write_text(json.dumps({"decision": "FAIL"}), encoding="utf-8")
+            self.assertNotEqual(
+                original_digest,
+                gate.load_report(report_path)[1],
+            )
+
+    def test_loaded_report_digest_cannot_follow_an_atomic_replacement(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "report.json"
+            report_path.write_text(json.dumps(valid_report()), encoding="utf-8")
+            payload, report_sha256 = gate.load_report(report_path)
+            report_path.write_text(json.dumps({"decision": "FAIL"}), encoding="utf-8")
+            validation = gate.validation_payload(
+                report_sha256, "abc", gate.validate_report(payload, "abc")
+            )
+            self.assertEqual("PASS", validation["status"])
+            self.assertNotEqual(evidence_digest.text_evidence_sha256(report_path), validation["report_sha256"])
+
+    def test_stored_validation_must_match_the_validated_report(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            validation_path = Path(directory) / "validation.json"
+            expected = gate.validation_payload("a" * 64, "abc", [])
+            validation_path.write_text(json.dumps(expected), encoding="utf-8")
+            self.assertEqual(
+                [], gate.stored_validation_failures(validation_path, expected)
+            )
+            changed = dict(expected)
+            changed["report_sha256"] = "b" * 64
+            self.assertEqual(
+                ["VALIDATION:MISMATCH"],
+                gate.stored_validation_failures(validation_path, changed),
+            )
+            validation_path.unlink()
+            self.assertEqual(
+                ["VALIDATION:MISSING"],
+                gate.stored_validation_failures(validation_path, expected),
+            )
+
+    def test_rejects_unknown_schema_stale_revision_and_wrong_platform(self) -> None:
+        report = valid_report()
+        report["schema_version"] = 9
+        report["revision"] = "old"
+        report["platform"] = {"system": "Linux"}
+        failures = gate.validate_report(report, "abc")
+        self.assertIn("REPORT:UNKNOWN_SCHEMA", failures)
+        self.assertIn("REPORT:STALE_REVISION", failures)
+        self.assertIn("REPORT:NON_NATIVE_WINDOWS", failures)
+
+    def test_rejects_skipped_case_even_with_zero_exit(self) -> None:
+        report = valid_report()
+        report["resolver_test"] = {
+            "timed_out": False,
+            "exit_code": 0,
+            "output": "[ PASSED ] CASE:\n" * 6 + "[ SKIPPED ] CASE:\nFAILED: 0\nERROR: 0\n",
+        }
+        self.assertIn(
+            "RESOLVER_TEST:NON_PASS_CASE",
+            gate.validate_report(report, "abc"),
+        )
+
+    def test_rejects_timeout_and_missing_fixture_binding(self) -> None:
+        report = valid_report()
+        process = valid_process()
+        process["timed_out"] = True
+        report["resolver_test"] = process
+        manifest = dict(report["resolver_manifest"])
+        manifest["test_fixture"] = False
+        report["resolver_manifest"] = manifest
+        failures = gate.validate_report(report, "abc")
+        self.assertIn("RESOLVER_TEST:TIMEOUT", failures)
+        self.assertIn("REPORT:FIXTURE_NOT_BOUND", failures)
+
+    def test_rejects_missing_test_only_link_stub_marker(self) -> None:
+        report = valid_report()
+        report["test_link_stub"] = {"test_only": False}
+        self.assertIn("REPORT:TEST_LINK_STUB", gate.validate_report(report, "abc"))
+
+    def test_atomic_json_replaces_complete_document_without_temp_residue(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "report.json"
+            gate.atomic_json(output, {"status": "PASS"})
+            self.assertEqual('{\n  "status": "PASS"\n}\n', output.read_text())
+            self.assertEqual([output], list(Path(directory).iterdir()))
+
+
+if __name__ == "__main__":
+    unittest.main()

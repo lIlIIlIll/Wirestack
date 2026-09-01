@@ -3,8 +3,13 @@
 
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import os
 import re
@@ -138,14 +143,6 @@ def canonical_json(value: Any) -> bytes:
     return (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode()
 
 
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def safe_path(root: Path, relative: str, *, must_exist: bool = True) -> Path:
     require(isinstance(relative, str) and relative != "", "PATH_INVALID", "path must be a non-empty string")
     base = root.resolve()
@@ -210,7 +207,8 @@ def strict_digest(value: Any, label: str) -> str:
 
 
 def validate_artifact_identity(
-    documents: Mapping[str, Mapping[str, Any]], root: Path
+    documents: Mapping[str, Mapping[str, Any]], root: Path,
+    *, verify_local_artifact: bool = True,
 ) -> dict[str, Any]:
     qualification = documents["m7_021"]
     soak = documents["m7_022"]
@@ -224,11 +222,15 @@ def validate_artifact_identity(
             "ARTIFACT_SIZE", "invalid frozen artifact size")
 
     soak_artifact = soak.get("artifact", {})
-    require(soak_artifact.get("sha256") == digest, "ARTIFACT_MISMATCH", "M7-022")
-    require(soak_artifact.get("payload_sha256") == payload, "PAYLOAD_MISMATCH", "M7-022")
+    require(evidence_digest.schema_artifact_sha256_equal(
+                soak_artifact.get("sha256"), digest), "ARTIFACT_MISMATCH", "M7-022")
+    require(evidence_digest.schema_artifact_sha256_equal(
+                soak_artifact.get("payload_sha256"), payload), "PAYLOAD_MISMATCH", "M7-022")
     supply_artifact = bundle.get("artifact", {})
-    require(supply_artifact.get("sha256") == digest, "ARTIFACT_MISMATCH", "M7-025")
-    require(supply_artifact.get("payloadSha256") == payload, "PAYLOAD_MISMATCH", "M7-025")
+    require(evidence_digest.schema_artifact_sha256_equal(
+                supply_artifact.get("sha256"), digest), "ARTIFACT_MISMATCH", "M7-025")
+    require(evidence_digest.schema_artifact_sha256_equal(
+                supply_artifact.get("payloadSha256"), payload), "PAYLOAD_MISMATCH", "M7-025")
 
     subjects = hosted.get("subjects")
     require(isinstance(subjects, list), "HOSTED_SUBJECTS", "subjects must be an array")
@@ -237,22 +239,35 @@ def validate_artifact_identity(
     }
     require(tuple(item.get("name") for item in subjects) == EXPECTED_SUBJECTS,
             "HOSTED_SUBJECTS", "artifact, release-manifest, and sbom are required in order")
-    require(subject_map["artifact"].get("sha256") == digest,
+    require(evidence_digest.schema_artifact_sha256_equal(
+                subject_map["artifact"].get("sha256"), digest),
             "ARTIFACT_MISMATCH", "M7-030 hosted artifact")
     for name in EXPECTED_SUBJECTS:
         require(subject_map[name].get("verification") == "PASS", "HOSTED_NOT_VERIFIED", name)
         strict_digest(subject_map[name].get("sha256"), f"M7-030 {name}")
+        signed_payload = strict_digest(
+            subject_map[name].get("signedPayloadSha256"),
+            f"M7-030 {name} signed payload",
+        )
+        if name == "artifact":
+            require(evidence_digest.schema_artifact_sha256_equal(
+                        signed_payload, subject_map[name].get("sha256")),
+                    "ARTIFACT_MISMATCH", "M7-030 signed artifact")
         strict_digest(subject_map[name].get("bundleSha256"), f"M7-030 {name} bundle")
 
     documents_map = bundle.get("documents", {})
     sbom_digest = strict_digest(
         documents_map.get("sbom.spdx.json", {}).get("sha256"), "M7-025 SBOM"
     )
-    require(subject_map["sbom"].get("sha256") == sbom_digest,
+    require(evidence_digest.schema_text_sha256_equal(
+                subject_map["sbom"].get("sha256"), sbom_digest),
             "SBOM_MISMATCH", "M7-030 hosted SBOM")
-    local_artifact = safe_path(root, f"dist/m7-021/{artifact.get('name')}")
-    require(sha256_path(local_artifact) == digest, "ARTIFACT_BYTES_STALE", str(local_artifact))
-    require(local_artifact.stat().st_size == artifact.get("bytes"), "ARTIFACT_SIZE", str(local_artifact))
+    if verify_local_artifact:
+        local_artifact = safe_path(root, f"dist/m7-021/{artifact.get('name')}")
+        require(evidence_digest.schema_artifact_sha256_equal(
+                    evidence_digest.artifact_byte_sha256(local_artifact), digest),
+                "ARTIFACT_BYTES_STALE", str(local_artifact))
+        require(local_artifact.stat().st_size == artifact.get("bytes"), "ARTIFACT_SIZE", str(local_artifact))
 
     return {
         "name": artifact["name"],
@@ -270,7 +285,10 @@ def validate_artifact_identity(
     }
 
 
-def validate_soak(root: Path, soak: Mapping[str, Any], artifact_digest: str) -> dict[str, Any]:
+def validate_soak(
+    root: Path, soak: Mapping[str, Any], artifact_digest: str,
+    *, report_sha256: str | None = None,
+) -> dict[str, Any]:
     require_pass(soak, "M7-022")
     require(soak.get("formal_parameters_met") is True, "SOAK_NOT_FORMAL", "formal parameters")
     parameters = soak.get("parameters", {})
@@ -280,7 +298,8 @@ def validate_soak(root: Path, soak: Mapping[str, Any], artifact_digest: str) -> 
     require(process.get("wall_elapsed_ms", 0) >= 86400000, "SOAK_TOO_SHORT", "wall duration")
     require(process.get("exit_code") == 0 and process.get("timed_out") is False,
             "SOAK_INTERRUPTED", "process did not complete normally")
-    require(soak.get("artifact", {}).get("sha256") == artifact_digest,
+    require(evidence_digest.schema_artifact_sha256_equal(
+                soak.get("artifact", {}).get("sha256"), artifact_digest),
             "ARTIFACT_MISMATCH", "M7-022 soak")
     workload = soak.get("workload", {})
     require(workload.get("decision") == "PASS", "SOAK_WORKLOAD", "workload decision")
@@ -288,7 +307,11 @@ def validate_soak(root: Path, soak: Mapping[str, Any], artifact_digest: str) -> 
     require(isinstance(checks, Mapping) and checks and all(value is True for value in checks.values()),
             "SOAK_WORKLOAD", "not every workload check passed")
     return {
-        "reportSha256": sha256_path(safe_path(root, DOCUMENT_PATHS["m7_022"])),
+        "reportSha256": (
+            strict_digest(report_sha256, "M7-022 recorded report")
+            if report_sha256 is not None
+            else evidence_digest.text_evidence_sha256(safe_path(root, DOCUMENT_PATHS["m7_022"]))
+        ),
         "wallElapsedMs": process["wall_elapsed_ms"],
         "requestedSeconds": parameters["duration_seconds"],
         "formalParametersMet": True,
@@ -325,13 +348,16 @@ def validate_security(
     }
 
 
-def validate_public_api(root: Path, report: Mapping[str, Any]) -> dict[str, Any]:
+def validate_public_api(
+    root: Path, report: Mapping[str, Any], *, verify_current_sources: bool = True
+) -> dict[str, Any]:
     require_pass(report, "M7-032 public API")
     require(report.get("profile") == PROFILE, "API_PROFILE", str(report.get("profile")))
     require(report.get("compatibilityPolicy") == "NOT_EVALUATED_PRE_1_0",
             "API_COMPATIBILITY_POLICY", str(report.get("compatibilityPolicy")))
     require(report.get("internalAliasCount") == 0, "API_INTERNAL_ALIAS", "nonzero internal aliases")
-    m7_032_public_api_inventory.validate(root)
+    if verify_current_sources:
+        m7_032_public_api_inventory.validate(root)
     return {
         "inventorySha256": strict_digest(report.get("inventorySha256"), "M7-032 inventory"),
         "declarationCount": report.get("declarationCount"),
@@ -347,14 +373,18 @@ def validate_current_sources(
     qualification = documents["m7_021"]
     m7_021_linux_release.validate_report(qualification, root)
     current_release_source = m7_021_linux_release.source_tree_sha256(root)
-    require(current_release_source == qualification.get("source_tree_sha256"),
+    require(evidence_digest.schema_text_sha256_equal(
+                current_release_source, qualification.get("source_tree_sha256")),
             "SOURCE_STALE", "M7-021 production source tree")
 
     current_fuzz_source = m7_023_linux_fuzz.source_fingerprint(root)
-    require(current_fuzz_source == documents["m7_023"].get("source_sha256"),
+    require(evidence_digest.schema_text_sha256_equal(
+                current_fuzz_source, documents["m7_023"].get("source_sha256")),
             "SOURCE_STALE", "M7-023 fuzz source")
     manifest = safe_path(root, "tools/gates/campaigns/m7-023-linux-fuzz.json")
-    require(sha256_path(manifest) == documents["m7_023"].get("manifest_sha256"),
+    require(evidence_digest.schema_text_sha256_equal(
+                evidence_digest.text_evidence_sha256(manifest),
+                documents["m7_023"].get("manifest_sha256")),
             "SOURCE_STALE", "M7-023 manifest")
     m7_023_linux_fuzz.load_manifest(root, manifest)
 
@@ -362,8 +392,12 @@ def validate_current_sources(
     expected_http2_source = documents["m7_024_h2"].get("source", {}).get(
         "production_source_sha256"
     )
-    require(current_http2_source == expected_http2_source,
-            "SOURCE_STALE", "M7-024 HTTP/2 production source")
+    require(
+        evidence_digest.schema_text_sha256_equal(
+            current_http2_source, expected_http2_source
+        ),
+        "SOURCE_STALE", "M7-024 HTTP/2 production source",
+    )
     require(not architecture_guard.run_guard(root), "ARCHITECTURE_FAIL", "current guard has violations")
 
     m7_025_linux_supply_chain.validate_documents(
@@ -377,6 +411,33 @@ def validate_current_sources(
         "releaseSourceTreeSha256": current_release_source,
         "fuzzSourceSha256": current_fuzz_source,
         "http2PerformanceSourceSha256": current_http2_source,
+    }
+
+
+def validate_recorded_sources(
+    root: Path,
+    documents: Mapping[str, Mapping[str, Any]],
+) -> dict[str, str]:
+    qualification = documents["m7_021"]
+    m7_021_linux_release.validate_report(
+        qualification,
+        root,
+        verify_current_sources=False,
+    )
+    release_source = strict_digest(
+        qualification.get("source_tree_sha256"), "M7-021 production source tree"
+    )
+    fuzz_source = strict_digest(
+        documents["m7_023"].get("source_sha256"), "M7-023 fuzz source"
+    )
+    http2_source = strict_digest(
+        documents["m7_024_h2"].get("source", {}).get("production_source_sha256"),
+        "M7-024 HTTP/2 production source",
+    )
+    return {
+        "releaseSourceTreeSha256": release_source,
+        "fuzzSourceSha256": fuzz_source,
+        "http2PerformanceSourceSha256": http2_source,
     }
 
 
@@ -410,7 +471,7 @@ def build_evidence_index(root: Path, criteria: Sequence[Mapping[str, Any]]) -> l
         source_task = match.group(1) if match else "M7-031"
         entries.append({
             "path": relative,
-            "sha256": sha256_path(path),
+            "sha256": evidence_digest.text_evidence_sha256(path),
             "sourceTask": source_task,
             "acceptanceStatus": (
                 "NOT_APPLICABLE_TO_LINUX_PROFILE" if relative in CRITERION_EVIDENCE["REL-03"]
@@ -420,14 +481,56 @@ def build_evidence_index(root: Path, criteria: Sequence[Mapping[str, Any]]) -> l
     return entries
 
 
+def expected_evidence_metadata() -> dict[str, tuple[str, str]]:
+    metadata: dict[str, tuple[str, str]] = {}
+    for relative in sorted({path for paths in CRITERION_EVIDENCE.values() for path in paths}):
+        match = re.search(r"docs/evidence/([^/]+)/", relative)
+        source_task = match.group(1) if match else TASK_ID
+        acceptance_status = (
+            "NOT_APPLICABLE_TO_LINUX_PROFILE"
+            if relative in CRITERION_EVIDENCE["REL-03"]
+            else "BOUND_INPUT"
+        )
+        metadata[relative] = (source_task, acceptance_status)
+    return metadata
+
+
+def recorded_candidate(root: Path) -> dict[str, Any]:
+    report = load_json(
+        safe_path(root, "docs/evidence/M7-031/linux_x86_64/release-candidate.json")
+    )
+    evidence = report.get("evidenceIndex")
+    require(isinstance(evidence, list) and evidence, "EVIDENCE_INDEX", "missing")
+    expected = expected_evidence_metadata()
+    paths: set[str] = set()
+    for item in evidence:
+        require(isinstance(item, Mapping), "EVIDENCE_INDEX", "entry must be an object")
+        relative = item.get("path")
+        safe_path(root, relative, must_exist=False)
+        require(relative not in paths, "EVIDENCE_INDEX", f"duplicate {relative}")
+        paths.add(relative)
+        strict_digest(item.get("sha256"), f"evidence {relative}")
+        require(relative in expected, "EVIDENCE_INDEX", f"unexpected {relative}")
+        source_task, acceptance_status = expected[relative]
+        require(item.get("sourceTask") == source_task, "EVIDENCE_INDEX", str(relative))
+        require(
+            item.get("acceptanceStatus") == acceptance_status,
+            "EVIDENCE_INDEX", str(relative),
+        )
+    require(paths == set(expected), "EVIDENCE_INDEX", "recorded inventory is incomplete")
+    return report
+
+
 def build_candidate(
     root: Path = ROOT,
     *,
     documents: Mapping[str, Mapping[str, Any]] | None = None,
+    verify_current_sources: bool = True,
 ) -> dict[str, Any]:
     root = root.resolve()
     validate_dependency_status(root)
     values = deepcopy(documents) if documents is not None else load_documents(root)
+    recorded = None if verify_current_sources else recorded_candidate(root)
 
     audit = values["m7_019"]
     require(audit.get("task_id") == "M7-019", "AUDIT_ID", "M7-019")
@@ -442,14 +545,27 @@ def build_candidate(
     require(values["m7_024"].get("failed_domains") == [], "PERFORMANCE_FAIL", "failed domain")
     require(values["m7_024"].get("decision") == "PASS", "PERFORMANCE_FAIL", "aggregate")
 
-    artifact = validate_artifact_identity(values, root)
-    soak = validate_soak(root, values["m7_022"], artifact["sha256"])
-    security = validate_security(values["m7_029"], values["m7_029_review"])
-    public_api = validate_public_api(root, values["m7_032"])
-    sources = validate_current_sources(root, values)
-    hosted = m7_030_linux_release.validate_hosted_report(
-        safe_path(root, DOCUMENT_PATHS["m7_030_hosted"])
+    artifact = validate_artifact_identity(
+        values, root, verify_local_artifact=verify_current_sources
     )
+    recorded_soak_sha = (
+        recorded.get("longEvidence", {}).get("soak", {}).get("reportSha256")
+        if isinstance(recorded, Mapping) else None
+    )
+    soak = validate_soak(
+        root, values["m7_022"], artifact["sha256"],
+        report_sha256=recorded_soak_sha,
+    )
+    security = validate_security(values["m7_029"], values["m7_029_review"])
+    public_api = validate_public_api(
+        root, values["m7_032"], verify_current_sources=verify_current_sources
+    )
+    sources = (
+        validate_current_sources(root, values)
+        if verify_current_sources
+        else validate_recorded_sources(root, values)
+    )
+    hosted = m7_030_linux_release.validate_hosted_report_value(values["m7_030_hosted"])
     require(hosted.get("commit") == values["m7_030"].get("commit"),
             "HOSTED_COMMIT", "validation and hosted report differ")
 
@@ -485,7 +601,16 @@ def build_candidate(
             "soak": soak,
             "sseProfile": {
                 "reportPath": "docs/evidence/M6-023/linux_x86_64/sse-streaming-profile.json",
-                "reportSha256": sha256_path(safe_path(root, "docs/evidence/M6-023/linux_x86_64/sse-streaming-profile.json")),
+                "reportSha256": (
+                    strict_digest(
+                        recorded.get("longEvidence", {}).get("sseProfile", {}).get("reportSha256"),
+                        "recorded SSE profile",
+                    )
+                    if isinstance(recorded, Mapping)
+                    else evidence_digest.text_evidence_sha256(safe_path(
+                        root, "docs/evidence/M6-023/linux_x86_64/sse-streaming-profile.json"
+                    ))
+                ),
                 "reusedByDigest": True,
             },
             "rerunByM7031": False,
@@ -502,7 +627,11 @@ def build_candidate(
         },
         "criteria": criteria,
         "criteriaSummary": summary,
-        "evidenceIndex": build_evidence_index(root, criteria),
+        "evidenceIndex": (
+            deepcopy(recorded["evidenceIndex"])
+            if isinstance(recorded, Mapping)
+            else build_evidence_index(root, criteria)
+        ),
         "knownLimitations": [
             "This candidate covers Linux x86_64 glibc only. It does not complete the six-platform M7 tasks.",
             "Linux musl is outside the profile because the Cangjie SDK has no supported musl target, standard library, or runtime.",
@@ -565,13 +694,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.write:
             atomic_json(report_path, report)
         report = validate_committed(root, report_path)
-    except (CandidateError, m7_021_linux_release.ReleaseError,
+    except (CandidateError, evidence_digest.DigestError,
+            m7_021_linux_release.ReleaseError,
             m7_025_linux_supply_chain.SupplyChainError,
             m7_030_linux_release.ReleaseError,
             m7_032_public_api_inventory.PublicApiInventoryError,
             m7_023_linux_fuzz.GateError,
             m7_024_linux_performance.GateError) as error:
         payload = {"taskId": TASK_ID, "status": "FAIL", "error": str(error)}
+        if isinstance(error, evidence_digest.DigestError):
+            payload["code"] = error.code
         print(json.dumps(payload, sort_keys=True) if args.json
               else f"M7-031 candidate: FAIL: {error}")
         return 1

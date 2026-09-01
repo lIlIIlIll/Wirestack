@@ -15,16 +15,38 @@ decision must still preserve the threat-model controls for supply chain,
 private-key isolation, native callbacks and deterministic cleanup.
 
 AWS-LC 5.5.0 at commit
-`991e67ff4cf04df4dd89e407f8b920c6936cb56a` now has retained schema-v2 `PASS`
-results on Linux glibc x86_64 and Linux musl x86_64. Both results prove:
+`991e67ff4cf04df4dd89e407f8b920c6936cb56a` was originally selected from the
+earlier PoC evidence. Current schema-v11 native evidence validates monotonic
+cancellation waits, the pin-bound advisory disposition, exact source identity,
+structured static archives, distinct local-close behavior, explicit fresh
+cache misses and resumed cache hits. GitHub Actions run `33455645644` reports
+pull-request head `fe1dc2cb35c57d6ae31ac9fadd0f8415e57835ab` and executed
+synthetic merge revision `205c073c22aa283d84978522b70534fe5a16d808`.
+The retained results
+bind that execution revision and record:
 
 - TLS 1.2 and TLS 1.3 client/server handshakes over caller-owned bounded BIOs;
-- SNI, reference-identity verification, ALPN, custom CA, mTLS and session reuse;
+- SNI, reference-identity verification, ALPN, custom CA, required mTLS,
+  optional client authentication with and without a certificate, and session
+  reuse;
 - negative hostname and trust cases, clean `close_notify` and truncation;
-- caller cancellation and partial-I/O/backpressure behavior;
+- distinct TLS 1.2 and TLS 1.3 local close without conflating it with
+  `close_notify`;
+- an explicit caller-owned wait, cancellation signal, wakeup and join with a
+  measured latency bound, plus partial-I/O/backpressure behavior;
 - an external signing callback invoked by both TLS 1.2 and TLS 1.3 without
   installing the private key into the TLS context;
-- 10,000 repeated handshake/close cycles; and
+- 10,000 repeated handshake/close cycles with bounded resident memory,
+  provider allocation-call count, cumulative allocated bytes, peak live bytes
+  and no increase between the before/after cleanup live-allocation values;
+- provider-instrumented ASan and UBSan on Linux glibc, with the process-global
+  AWS-LC leak-detection limitation recorded as unsupported rather than
+  suppressed;
+- committed, digest-bound provider license payloads, bounded source-pin age,
+  official advisory intake channels, exact repository, runner,
+  toolchain, target, configure/build arguments, bounded effective build
+  environment, patch-set, source and archive identity, and complete bounded
+  symbol inventories; and
 - static archives with no system TLS-library dependency or runtime-loader
   library string.
 
@@ -66,8 +88,10 @@ provider manifest records at least:
 - `externalOpenSslDependency: false`.
 
 The Wirestack maintainers own advisory intake, source-pin updates and downstream
-release publication. M7-015 defines the final severity SLA and operational
-runbook; until then, a known affected pin blocks a release.
+release publication. M0-016 defines the intake channels, maximum pin age and
+rerun boundary in `docs/security/provider-update-workflow.md`. M7-015 defines
+the final severity SLA, notification and downstream publication runbook. A
+known affected pin blocks a release.
 
 Rollback means publishing or restoring a previously reviewed pinned AWS-LC
 build and rerunning its Linux gates. It never means enabling a system library or
@@ -76,8 +100,11 @@ artifact is withdrawn rather than silently downgraded.
 
 ## Consequences
 
-- Linux TLS integration tasks M3-001 and later may begin against one frozen
-  provider and C ABI boundary.
+- Existing Linux TLS integration retains the frozen provider and C ABI
+  decision. Schema-v11 Linux glibc and musl AWS-LC qualification is current;
+  older evidence is not reused.
+- M0-016 as a global task remains `BLOCKED` because Android, iOS and HarmonyOS
+  or OpenHarmony still lack native-device evidence.
 - AWS-LC-specific code remains internal to the native provider adapter.
 - The global six-platform provider decision remains open. This ADR does not
   claim Windows, macOS, Android, iOS or HarmonyOS/OpenHarmony support.

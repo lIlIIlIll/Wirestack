@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import copy
+import io
 import json
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest import mock
 
@@ -17,8 +19,15 @@ import m7_031_linux_candidate as candidate  # noqa: E402
 class M7031LinuxCandidateTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.documents = candidate.load_documents(ROOT)
-        cls.report = candidate.build_candidate(ROOT, documents=cls.documents)
+        cls.original_documents = candidate.load_documents(ROOT)
+        cls.documents = copy.deepcopy(cls.original_documents)
+        for subject in cls.documents["m7_030_hosted"]["subjects"]:
+            subject["signedPayloadSha256"] = subject["sha256"]
+        cls.report = candidate.build_candidate(
+            ROOT,
+            documents=cls.documents,
+            verify_current_sources=False,
+        )
 
     def documents_copy(self):
         return copy.deepcopy(self.documents)
@@ -138,6 +147,10 @@ class M7031LinuxCandidateTests(unittest.TestCase):
             with self.assertRaises(candidate.CandidateError):
                 candidate.validate_artifact_identity(documents, ROOT)
 
+    def test_committed_hosted_report_without_signed_payload_digest_is_stale(self) -> None:
+        with self.assertRaisesRegex(candidate.CandidateError, "DIGEST_INVALID"):
+            candidate.build_candidate(ROOT, verify_current_sources=False)
+
     def test_atomic_replace_failure_preserves_previous_bytes(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-m7-031-atomic-") as directory:
             report = Path(directory) / "report.json"
@@ -152,11 +165,59 @@ class M7031LinuxCandidateTests(unittest.TestCase):
             self.assertEqual(original, report.read_bytes())
             self.assertEqual([], list(report.parent.glob(f".{report.name}.*")))
 
+    def test_cli_returns_structured_digest_failure(self) -> None:
+        output = io.StringIO()
+        error = candidate.evidence_digest.DigestError("TEXT_UTF8", "criterion.md")
+        with mock.patch.object(candidate, "build_candidate", side_effect=error), \
+                redirect_stdout(output):
+            result = candidate.main(["--root", str(ROOT), "--json"])
+        payload = json.loads(output.getvalue())
+        self.assertEqual(1, result)
+        self.assertEqual("FAIL", payload["status"])
+        self.assertEqual("TEXT_UTF8", payload["code"])
+
     def test_committed_report_matches_deterministic_generator(self) -> None:
         path = ROOT / "docs/evidence/M7-031/linux_x86_64/release-candidate.json"
         committed = json.loads(path.read_text(encoding="utf-8"))
         self.assertEqual(self.report, committed)
         self.assertEqual(candidate.canonical_json(self.report), path.read_bytes())
+
+    def test_structural_candidate_reuses_recorded_evidence_without_live_hashing(self) -> None:
+        with mock.patch.object(
+            candidate, "build_evidence_index",
+            side_effect=AssertionError("structural mode hashed live evidence"),
+        ), mock.patch.object(
+            candidate.m7_032_public_api_inventory, "validate",
+            side_effect=AssertionError("structural mode inspected live public API"),
+        ):
+            report = candidate.build_candidate(
+                ROOT, documents=self.documents, verify_current_sources=False
+            )
+        self.assertEqual(self.report, report)
+
+    def test_structural_candidate_requires_complete_recorded_evidence_inventory(self) -> None:
+        for mutate in (
+            lambda report: report["evidenceIndex"].pop(),
+            lambda report: report["evidenceIndex"][0].update({
+                "path": "docs/evidence/M7-999/arbitrary.json",
+                "sourceTask": "M7-999",
+            }),
+            lambda report: report["evidenceIndex"][0].update({"sourceTask": "M7-999"}),
+            lambda report: report["evidenceIndex"][0].update({"acceptanceStatus": "BOUND_INPUT"})
+            if report["evidenceIndex"][0]["acceptanceStatus"] != "BOUND_INPUT"
+            else report["evidenceIndex"][0].update({
+                "acceptanceStatus": "NOT_APPLICABLE_TO_LINUX_PROFILE"
+            }),
+        ):
+            with tempfile.TemporaryDirectory(prefix="wirestack-m7-031-recorded-") as directory:
+                root = Path(directory)
+                path = root / "docs/evidence/M7-031/linux_x86_64/release-candidate.json"
+                path.parent.mkdir(parents=True)
+                report = copy.deepcopy(self.report)
+                mutate(report)
+                path.write_text(json.dumps(report), encoding="utf-8")
+                with self.assertRaisesRegex(candidate.CandidateError, "EVIDENCE_INDEX"):
+                    candidate.recorded_candidate(root)
 
 
 if __name__ == "__main__":

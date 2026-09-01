@@ -2,9 +2,14 @@
 """Run M2-015 against production connector code in an ephemeral Linux netns."""
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import platform
@@ -36,14 +41,6 @@ DEADLINE_COUNT_DELTA_MS = 150
 
 class GateError(RuntimeError):
     pass
-
-
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def atomic_json(path: Path, value: Mapping[str, Any]) -> None:
@@ -482,7 +479,7 @@ def execute(root: Path) -> dict[str, Any]:
             "candidate_count_delta_ms": DEADLINE_COUNT_DELTA_MS,
         },
         "source_digests": {
-            str(path.relative_to(root)): sha256(path) for path in (
+            str(path.relative_to(root)): evidence_digest.text_evidence_sha256(path) for path in (
                 root / "src/internal/transport_stdnet/m2_015_native_network_test.cj",
                 root / "tools/gates/m2_015_native_network.py",
                 root / "docs/evidence/M2-015/test-plan.md",

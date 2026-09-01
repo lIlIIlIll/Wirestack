@@ -62,8 +62,11 @@ static void unblock_calls(void) {
 int main(void) {
     uint64_t pools[EXPECTED_POOL_LIMIT] = {0u};
     uint64_t jobs[EXPECTED_POOL_LIMIT] = {0u};
+    int64_t native_code = 0;
     for (uint64_t index = 0u; index < EXPECTED_POOL_LIMIT; index++) {
-        if (wirestack_resolver_pool_create(1u, 1u, &pools[index]) != WIRESTACK_RESOLVER_OK) {
+        if (wirestack_resolver_pool_create(
+                1u, 1u, &pools[index], &native_code
+            ) != WIRESTACK_RESOLVER_OK) {
             return 10;
         }
         if (wirestack_resolver_submit(
@@ -84,7 +87,9 @@ int main(void) {
     }
 
     uint64_t rejected = 0u;
-    if (wirestack_resolver_pool_create(1u, 1u, &rejected) != WIRESTACK_RESOLVER_OVERLOADED ||
+    if (wirestack_resolver_pool_create(
+            1u, 1u, &rejected, &native_code
+        ) != WIRESTACK_RESOLVER_OVERLOADED ||
         rejected != 0u) {
         return 14;
     }
@@ -93,7 +98,9 @@ int main(void) {
     struct timespec pause = {.tv_sec = 0, .tv_nsec = 1000000L};
     uint64_t recovered = 0u;
     for (uint64_t attempt = 0u; attempt < 5000u; attempt++) {
-        int32_t status = wirestack_resolver_pool_create(1u, 1u, &recovered);
+        int32_t status = wirestack_resolver_pool_create(
+            1u, 1u, &recovered, &native_code
+        );
         if (status == WIRESTACK_RESOLVER_OK) {
             if (wirestack_resolver_pool_destroy(recovered) != WIRESTACK_RESOLVER_OK) {
                 return 15;

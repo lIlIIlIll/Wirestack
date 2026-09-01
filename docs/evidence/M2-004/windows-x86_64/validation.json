@@ -1,0 +1,8 @@
+{
+  "expected_revision": "c80be395d67523efaed28b35d139a8e36aad5610",
+  "failures": [],
+  "report_sha256": "5d8ba504bc883223ff8c7aff72def24ba27026b5f5d59cf023fb6e499bf1372d",
+  "schema_version": 1,
+  "status": "PASS",
+  "task_id": "M2-004"
+}

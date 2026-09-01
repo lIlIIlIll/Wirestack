@@ -1,0 +1,402 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-09-01T17:23:11.456025Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-014/task-check.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1a1f521dd894cd603d05dd7bd939c3627fc66bd8601cafa6c9065b83440f86f9"
+      },
+      "source_task": "P1-014"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-014/digest-inventory.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "0fe40c649b351861771a9bf168ab4153262029996512bf7ab6635fb30638d78a"
+      },
+      "source_task": "P1-014"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-014/architecture-guard.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1e042ea026180092046ebc23f9c0f8dc66a7d944e0711c1a302a8821f9451830"
+      },
+      "source_task": "P1-014"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-014/linux-crlf.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "49cbbb0d22071d5bfc5b873c55dbe4a1059d4dfde49ec1cb30a8f62586def32f"
+      },
+      "source_task": "P1-014"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/P1-014/windows-crlf.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9af1cf29d87aa1f5fbfa078c0c4390cad89f11858b7e766e9fdfe03aa594ee92"
+      },
+      "source_task": "P1-014"
+    }
+  ],
+  "revision": "fc4b54a70499c6164803db3a55d489678fc8eac3",
+  "schema_version": 2,
+  "source_sha256": {
+    ".github/workflows/linux-release-attestation.yml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "426837063c234bfaf81aa3dee412890b19e010c8d7aee90d0f1dd4cfc48eb342"
+    },
+    ".github/workflows/m0-016-windows-provider-poc.yml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "236bfd5937d654a1f39e34450a6f70a7a18a502e809952fdbd0eac95895400ef"
+    },
+    ".github/workflows/materialize-m0-009.yml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "56f077af831a0eeaae6c1eb4af9f4c0f00d34eab0b65eead188b98a9e3cf9ffe"
+    },
+    ".github/workflows/p1-014-evidence-digest-boundary.yml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0761322de49c839d2bc9ee6795f4d48b38daadbce1c0a8eb33e588c024888399"
+    },
+    ".github/workflows/tls-provider-poc.yml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "27e5931cefb7c496e7b327ef5429fe5efb1e38d48605d71358cb0fd467fa557e"
+    },
+    ".gitignore": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "de86b0dc99192abda9323c9310e824bf1ff9806cbc84ef87237babcf506bc930"
+    },
+    "docs/evidence/P1-014/fixtures/line-endings.txt": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e49c81e2d2f84e259d40e2fb8192f3bcd198b355184845d76d8f58807d0d78ee"
+    },
+    "docs/evidence/P1-014/test-plan.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b3f756d9f6a3704831d4168c7e5d5bae79998b31c277770d2905ad1a99b25e42"
+    },
+    "docs/planning/implementation-backlog.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "890492f5572d9f5399b23f6d073a6067b59addeab7e04f83604e06a2ad293025"
+    },
+    "docs/planning/status.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e47a0da6a938441cd6f806943880a0ed1d53efb3dd29d9f3913ec7176fe36926"
+    },
+    "tools/architecture_guard.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "49fd3c3810a610040fed006208511029a1b789e220994172ffd7d3def5b67018"
+    },
+    "tools/benchmarks/http1_benchmark.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2f3599de92c390c62fba96bac211c9bc165ef9d40b9a0ec7c9ee02d0c5715d70"
+    },
+    "tools/benchmarks/http2_benchmark.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9db15c961f90f7943d1cac3c39810d0cf1da4cf15d34bc556159861388884856"
+    },
+    "tools/benchmarks/m2_016_dns_to_connected.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cb718f71578a79c71de2985e3f96df7872416cfc7b845d22158162d4f9377573"
+    },
+    "tools/benchmarks/m3_028_tls.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7033867bcea65f2a54ae39aa89aa0629f083e46b7d90396933e202154e0bed01"
+    },
+    "tools/build_apple_resolver.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c01c0305056b96df3fe09a9cefa4efb115a4b0e7358d03df3850766241175a1f"
+    },
+    "tools/build_linux_resolver.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "22d176ad6c9de3d89e20c050b834585a56a42726a80474062a3328ded879dd95"
+    },
+    "tools/build_linux_tls_provider.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6db592fdce1da70351baee8db5ad5b6859e767b57faadeafb8d6bae84c86caa0"
+    },
+    "tools/build_windows_resolver.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0f46619c708592b92eff94bc17aac393367491c56f663f383f4d570a179cf561"
+    },
+    "tools/download_cangjie_nightly.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "79747351a3e2ffdeda8ee8a37d8d9ec1612f8cebfdeea2cbcde4af09fef5f678"
+    },
+    "tools/evidence-digest-non-python.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5c337e15ae0478c85b2c1eaedbaee15a65339e14bc443935ea17088471d02b81"
+    },
+    "tools/evidence_digest.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "44f03ada4f369f4b1d74f48312c71b32696094f4d9e3f6adb1a9f879b8b1db84"
+    },
+    "tools/gates/dns_carrier_thread.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e5ef18000b961d224fc6c4eb502d99027d96ea083ef7a08d2ffb77d15b1d01ec"
+    },
+    "tools/gates/gate_runner.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5bbb934188ae388f7afc79faa57b1d02cb3ee37ad8ac566ae5196afcbd46b970"
+    },
+    "tools/gates/http1_quality.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0dfcfb4a7897d0bf2378f38366910acaf8ad6cd7aab5397f9691fff726d36660"
+    },
+    "tools/gates/http2_quality.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d5bd4866eaf70a1c33ef6421fa25db62640f001bfe5ffb59a3a1385579e8bee8"
+    },
+    "tools/gates/m0_005_raw_tcp_baseline.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8ad788b096e1b3c686bf57b277ac8a360205a8bf92d5643f94dd65b42036bdc0"
+    },
+    "tools/gates/m0_014_windows_copy_profile.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "82575cfab747c391f2c1a6f06655a10bd6e54fa53557a2e91fd888e3485415eb"
+    },
+    "tools/gates/m1_025_transport_qualification.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2fe5dd3dfe5b6f1ba2f597f341d0018ad78915f659a6f7be5064c1c1a6682b3f"
+    },
+    "tools/gates/m2_003_resolver_pool.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "38eb7424812c760e491d16eec65e04062b59cbe7bd8ff21307b4400d612624fd"
+    },
+    "tools/gates/m2_004_windows_resolver.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1560a6a2f993283a0edb6442922c2ab7f85362d4d3aeded880151fa540b2ff71"
+    },
+    "tools/gates/m2_005_system_resolver.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "32dab34adba47c8fbb7db4fa45ab0eb57d337689cc6a2b1fd15b9ab96ca02658"
+    },
+    "tools/gates/m2_006_apple_resolver.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "dcaa709d0747e0d9181662792d46ffbb152a6f039b0abb1fde3317860514e343"
+    },
+    "tools/gates/m2_015_native_network.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "28ca23443cf6489963029ced3684159f4159aa9062864dcd4e42c8b747e428dd"
+    },
+    "tools/gates/m7_023_linux_fuzz.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ddbc96ae3683ba5bd1fcce806e7c557b3b567a13c1eeec21b21342d8c68ced21"
+    },
+    "tools/gates/m7_024_linux_performance.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "47953663b686b99ec87fa48698550f09ac7e67ea6884dbc1e36e9e909bbcefad"
+    },
+    "tools/gates/net01_close_wakeup.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "503d9a94955021f1cdc4d9eb3f708aff6a369ea899b926c244c184ed3b64665a"
+    },
+    "tools/gates/net02_full_duplex_races.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d995b82a358a73ef9f012f4ccb215aca1f54ca065c30674970d51017a61eb3be"
+    },
+    "tools/gates/net03_absolute_deadline.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "87be47499ee9585caec49abb95ee7a1e1c9a5fd78a9bd8a3af4a7da37dedc1ee"
+    },
+    "tools/gates/net04_terminal_evidence.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "baa1a9d14a08c7025aae962083924f33f299798def0cf6e12c418b57e663a07d"
+    },
+    "tools/gates/net05_large_buffer_profile.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bf6870e2218b94ffa623098040a63cf09d54b295d9efde15b1a22d20277e31fc"
+    },
+    "tools/gates/net06_leak_soak.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "40f264509b81b921f47bdd20321d0e058628fa50cd3999f85af3c77fd1a0ce37"
+    },
+    "tools/gates/net06_production_cleanup.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "646f75285bc7d3700cd4d0db1b31baf0c9fff1c4829581c72921abae2f0651b5"
+    },
+    "tools/gates/sse_streaming_profile.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7b167b3c10866750eca53ca8fe76255a933d46c33fff830515f4f8726b7f3837"
+    },
+    "tools/gates/tests/test_m2_004_windows_resolver.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6518bd6acbca679c04cacb31bdbec6d802f1b4d3c81a85f1147ab0d2a24d9cb8"
+    },
+    "tools/gates/tests/test_m2_006_apple_resolver.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d40f31a9d84043652de1285a3ba34e2fd6ca709f841df7bb8d9a60552b312275"
+    },
+    "tools/gates/tests/test_m7_023_linux_fuzz.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6fcceb08930ed17e3dcce910674cbf06890764771acd88cec8dfde94ccadd9eb"
+    },
+    "tools/m3_031_desktop_tls_adoption.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a5a7d9c4faf455ab4889cf37512d10e461087743e96808a505543fddb70592db"
+    },
+    "tools/m6_026_http2_concurrent_bodies.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d3c37f63ab1ad4b29bc0c475c2b9b8d5a4b56e1309da53c371b9c4a50c7ff0fc"
+    },
+    "tools/m7_021_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6ef53ff5b965572136af870f5e5ad99272dbe4382a69d8eff73042e050835fc6"
+    },
+    "tools/m7_022_linux_release_soak.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2a4e269851a482b9e155a4dc38c23eb3a2dac23ff1f4902eb78987d0e3efe351"
+    },
+    "tools/m7_025_linux_supply_chain.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9e977b68a127b3fd96b664bdc4cd90ad1cb84e45e825e4811a4199f5b91b46dc"
+    },
+    "tools/m7_026_linux_api_freeze.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f052fad11f5ea01e9ac885c47af40e97aaeb9aa00651f9715d587adcbf02a844"
+    },
+    "tools/m7_028_security_review_package.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "463a309b30bc20f7f033cf70d01039b54f7e0031c8844a44b23f85ab8834e9c7"
+    },
+    "tools/m7_029_independent_security_review.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b51a6caa4878c89c19133a243ec31bf86e4b7a892dfdd3c698ddd9b8d1309f23"
+    },
+    "tools/m7_030_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "38412f216f82cd21c3f58faae69d72b3dee6a42a51d9785304eb0bb688548f58"
+    },
+    "tools/m7_031_linux_candidate.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9047889fa4204664047a270be2d270633ec245ea8d49eb8601186e30b699ea79"
+    },
+    "tools/m7_032_public_api_inventory.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "124ef175bf9c203ef507aad28d49240298f4f6ee4102a680aacf189ac4d37624"
+    },
+    "tools/repository/repository_tooling.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d56438cc7cd0a2cb1b15e14a04bb9ff6d9f169a866469f2a0320d3fb754c0013"
+    },
+    "tools/repository/tests/test_repository_tooling.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e37bb9ca639dbda7bfc4c8e2789682fb1de26b14be98327eef528c5318f59c4d"
+    },
+    "tools/tasks/P1-014.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6a1e06ba47233f317d1b73df844559a4ac99ad9198f7587032583b230e96e34a"
+    },
+    "tools/tests/test_architecture_guard.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "876b5bbc10a9a8ef5f3e79727c36de5790920690d9d3f2bc8f799f5fda5ac820"
+    },
+    "tools/tests/test_build_resolver.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "652c5abeab52be8214c52dd249c182c8bfb61491a4e8e6bcc48937e42d2f2d05"
+    },
+    "tools/tests/test_linux_resolver_build.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "19c9c46c7a4088cf96766db0ef5534ee60304349dcbc4231f4282950bdc8856f"
+    },
+    "tools/tests/test_linux_tls_provider_build.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bcb0f5e119e27843122f239675b268cab8ded8e0274b1a20b6400119d6492b90"
+    },
+    "tools/tests/test_m3_031_desktop_tls_adoption.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "72781d39da1c690edb11a06b6e6cd1a1a119191be120af7d0f27b786322fc483"
+    },
+    "tools/tests/test_m6_026_http2_concurrent_bodies.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e920f3d0aa171e49c8955b39214637f3e63de9fd4bf0920407a3c37596648d48"
+    },
+    "tools/tests/test_m7_020_architecture_audit.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "050b90e7415f05c8ddddec964781a3de3d74e4f7a4adb298b41fef2bd80c1dbb"
+    },
+    "tools/tests/test_m7_021_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d678f3b972783661d82792f5ea7e1e802182e50729bb572148ae738668d46b8e"
+    },
+    "tools/tests/test_m7_022_linux_release_soak.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b9053f43f8114f3c7cd3bb3dce85eb7454c065b4ba9192fa7c76c8261b316e8f"
+    },
+    "tools/tests/test_m7_025_linux_supply_chain.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6c940e31379ad079d4b3229a98ebdf3311ce7a1fc85226780154ef749da2abc3"
+    },
+    "tools/tests/test_m7_026_linux_api_freeze.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "dfbdc1f3066462b130655976467e994de2fc23e0b5970ee70cec6743bfeb99af"
+    },
+    "tools/tests/test_m7_028_security_review_package.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "744b0bdd45d9f4b1d6fde0c99b45d07424d8c11486aecc7d33e382be5ff4dbb3"
+    },
+    "tools/tests/test_m7_029_independent_security_review.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ae832a66962e7e88fce2c58bdf9531be202a361a2b317e0bf9a797d817c1f378"
+    },
+    "tools/tests/test_m7_030_linux_release.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f07d84f1f37bc0e94cd4562b6f9fd36ce361edb855d6f937d29de84c0ec41d71"
+    },
+    "tools/tests/test_m7_031_linux_candidate.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2c8ca3d8ef2b0fda028666af0d07f31ff565f77665ec85f8c14e33349e1cccbc"
+    },
+    "tools/tests/test_p1_013_development_release_gate.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4bdfd984a172efc268c8c22d1ff99e473abcbd3b108577aa8bccad6a720cf3a1"
+    },
+    "tools/tests/test_p1_014_evidence_digest_types.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "04496ded357f0ba544c6d7ae541a30d22a6641ffe81f1a682e353aab93978fe2"
+    },
+    "tools/tests/test_tls_provider_poc.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4ccd128601a3d18f45760aacc854a7520eaebff2c978ecad0afb0e7d6f37c883"
+    },
+    "tools/tls_provider/selection.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "228b2d4c67aeb22cb7b8722e8825950e2d95c8f81a8f9989011038bf417378e6"
+    },
+    "tools/tls_provider_poc/run.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cba3b7d7aba7b92895eeb13b4d3d1f88811104bdd967168e896a1aa59baf1468"
+    },
+    "tools/tls_provider_poc/validate.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "662e99b2de9f5b569d5c3c026f5ebf83d54ee56bd3f72c776ef3e9d0b181b1b8"
+    },
+    "tools/validate_m7_019_linux_audit.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3a733b4d04c3a1e38e8526202f766022f7ffae5af6724163aa2d2d7814b7a3ca"
+    },
+    "tools/validate_m7_020_architecture_audit.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "be9dd261005ed0bdc9bfec0855f910c89c1efd03b5efa392ab262ca9daabae91"
+    }
+  },
+  "source_task": "P1-014",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}

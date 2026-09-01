@@ -6,9 +6,14 @@ counts, TLS cleanup workload, 24-hour soak, or six-platform matrix.
 """
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import math
 import os
@@ -396,7 +401,7 @@ def compile_probe(artifacts: Path, timeout: float) -> tuple[Path, dict[str, Any]
     process = run_process(["cjc", str(source), "-o", str(binary)], directory, timeout)
     if process["timed_out"] or process["exit_code"] != 0 or not binary.is_file():
         raise GateError(f"probe compile failed: {process}")
-    return binary, {"source_sha256": hashlib.sha256(STRESS_SOURCE.encode()).hexdigest(),
+    return binary, {"source_sha256": evidence_digest.text_evidence_bytes_sha256(STRESS_SOURCE.encode()),
                     "process": process}
 
 

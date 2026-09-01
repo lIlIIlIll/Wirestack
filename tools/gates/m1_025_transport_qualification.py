@@ -3,8 +3,13 @@
 
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import math
 import os
@@ -32,14 +37,6 @@ MARKER = re.compile(
 
 class QualificationError(RuntimeError):
     pass
-
-
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def percentile(values: Sequence[int], percent: float) -> int:
@@ -110,7 +107,9 @@ def validate_net06(
     if soak.get("seconds", 0) < 86_400 or soak.get("decision") != "PASS":
         raise QualificationError("NET-06 retained soak is shorter than 24 hours")
     retained_soak = cleanup.get("reused_24_hour_soak", {})
-    if retained_soak.get("sha256") != sha256(soak_path):
+    if not evidence_digest.schema_text_sha256_equal(
+        retained_soak.get("sha256"), evidence_digest.text_evidence_sha256(soak_path),
+    ):
         raise QualificationError("NET-06 retained soak digest does not match")
     cancellation = cleanup.get("production_cancellation", {})
     marker = cancellation.get("marker", {})
@@ -271,14 +270,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "cancellation_p99_limit_ns": MAX_CANCELLATION_NS,
                 "retained_soak_reused": True,
             },
-            "net05": {"decision": "PASS", "cases": net05, "source_sha256": sha256(NET05)},
-            "net06": {**net06, "source_sha256": sha256(NET06)},
+            "net05": {"decision": "PASS", "cases": net05, "source_sha256": evidence_digest.text_evidence_sha256(NET05)},
+            "net06": {**net06, "source_sha256": evidence_digest.text_evidence_sha256(NET06)},
             "cancellation": cancellation,
             "source_sha256": {
-                "profile_test": sha256(
+                "profile_test": evidence_digest.text_evidence_sha256(
                     ROOT / "src/internal/transport_stdnet/m1_025_cancellation_profile_test.cj"
                 ),
-                "qualification_runner": sha256(Path(__file__)),
+                "qualification_runner": evidence_digest.text_evidence_sha256(Path(__file__)),
             },
             "non_claims": [
                 "No other platform was executed.",

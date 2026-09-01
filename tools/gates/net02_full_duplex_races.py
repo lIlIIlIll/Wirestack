@@ -2,7 +2,13 @@
 """Capture Linux x86_64 GATE-NET-02 evidence from the active Cangjie SDK."""
 from __future__ import annotations
 
-import argparse, datetime as dt, hashlib, json, math, os, platform, re, shutil
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
+import argparse, datetime as dt, json, math, os, platform, re, shutil
 import signal, socket, subprocess, sys, threading, time
 from pathlib import Path
 from typing import Any, Sequence
@@ -138,7 +144,7 @@ def compile_all(root:Path,timeout:float)->tuple[dict[str,Path],dict[str,Any]]:
  binaries={};metadata={}
  for name,source in SOURCES.items():
   directory=root/name;directory.mkdir(parents=True,exist_ok=True);src=directory/f"{name}.cj";src.write_text(source);binary=directory/name
-  result=process(["cjc",str(src),"-o",str(binary)],directory,timeout);metadata[name]={"source_sha256":hashlib.sha256(source.encode()).hexdigest(),"compile":result}
+  result=process(["cjc",str(src),"-o",str(binary)],directory,timeout);metadata[name]={"source_sha256":evidence_digest.text_evidence_bytes_sha256(source.encode()),"compile":result}
   if name=="abort-probe":continue
   if result["timed_out"] or result["exit"]!=0 or not binary.is_file():raise GateError(f"compile failed for {name}: {result}")
   binaries[name]=binary
@@ -179,7 +185,7 @@ def execute(root:Path,repetitions:int,races:int,timeout:float,revision:str)->dic
   if name=="same-read":read_outcomes=dict(behavior);behavior={}
   else:write_outcomes=dict(behavior)
  functional=all(x["decision"]=="PASS" for x in full+close);captured=all(x["decision"]!="FAIL" for x in same_read+same_write)
- return {"schema_version":SCHEMA_VERSION,"task_id":"M0-007","gate_id":"GATE-NET-02","task_status":"COMPLETE" if functional and captured else "INCOMPLETE","linux_gate_status":"INCOMPLETE" if abort_decision=="BLOCKED" else ("PASS" if functional and captured else "FAIL"),"global_gate_status":"INCOMPLETE","scope":"Linux x86_64 supplied-SDK std.net full-duplex and concurrency evidence","environment":{"repository_revision":revision,"generated_at_utc":dt.datetime.now(dt.timezone.utc).isoformat(),"os":platform.platform(),"architecture":platform.machine(),"cjc":version(["cjc","--version"]),"cjpm":version(["cjpm","--version"]),"cangjie_home":os.environ.get("CANGJIE_HOME")},"configuration":{"functional_repetitions":repetitions,"close_race_seeds":races,"timeout_seconds":timeout},"compile":compile_meta,"full_duplex":{"decision":"PASS" if all(x["decision"]=="PASS" for x in full) else "FAIL","samples":full},"close_race":{"decision":"PASS" if all(x["decision"]=="PASS" for x in close) else "FAIL","read_wake_ms":{"p50":pct(rw,50),"p95":pct(rw,95),"p99":pct(rw,99),"max":max(rw) if rw else None},"write_wake_ms":{"p50":pct(ww,50),"p95":pct(ww,95),"p99":pct(ww,99),"max":max(ww) if ww else None},"samples":close},"same_direction_read":{"decision":"OBSERVED" if all(x["decision"]=="OBSERVED" for x in same_read) else "FAIL","outcomes":read_outcomes,"samples":same_read},"same_direction_write":{"decision":"OBSERVED" if all(x["decision"]=="OBSERVED" for x in same_write) else "FAIL","outcomes":write_outcomes,"samples":same_write},"abort_capability":{"decision":abort_decision,"compile_exit":abort["exit"],"timed_out":abort["timed_out"],"stderr_sha256":hashlib.sha256(abort["stderr"].encode()).hexdigest(),"stderr_excerpt":abort["stderr"][:4096]},"non_claims":["not six-platform GATE-NET-02 completion","same-direction outcomes are observations, not Wirestack contract","no private abort or socket handle used"]}
+ return {"schema_version":SCHEMA_VERSION,"task_id":"M0-007","gate_id":"GATE-NET-02","task_status":"COMPLETE" if functional and captured else "INCOMPLETE","linux_gate_status":"INCOMPLETE" if abort_decision=="BLOCKED" else ("PASS" if functional and captured else "FAIL"),"global_gate_status":"INCOMPLETE","scope":"Linux x86_64 supplied-SDK std.net full-duplex and concurrency evidence","environment":{"repository_revision":revision,"generated_at_utc":dt.datetime.now(dt.timezone.utc).isoformat(),"os":platform.platform(),"architecture":platform.machine(),"cjc":version(["cjc","--version"]),"cjpm":version(["cjpm","--version"]),"cangjie_home":os.environ.get("CANGJIE_HOME")},"configuration":{"functional_repetitions":repetitions,"close_race_seeds":races,"timeout_seconds":timeout},"compile":compile_meta,"full_duplex":{"decision":"PASS" if all(x["decision"]=="PASS" for x in full) else "FAIL","samples":full},"close_race":{"decision":"PASS" if all(x["decision"]=="PASS" for x in close) else "FAIL","read_wake_ms":{"p50":pct(rw,50),"p95":pct(rw,95),"p99":pct(rw,99),"max":max(rw) if rw else None},"write_wake_ms":{"p50":pct(ww,50),"p95":pct(ww,95),"p99":pct(ww,99),"max":max(ww) if ww else None},"samples":close},"same_direction_read":{"decision":"OBSERVED" if all(x["decision"]=="OBSERVED" for x in same_read) else "FAIL","outcomes":read_outcomes,"samples":same_read},"same_direction_write":{"decision":"OBSERVED" if all(x["decision"]=="OBSERVED" for x in same_write) else "FAIL","outcomes":write_outcomes,"samples":same_write},"abort_capability":{"decision":abort_decision,"compile_exit":abort["exit"],"timed_out":abort["timed_out"],"stderr_sha256":evidence_digest.text_evidence_bytes_sha256(abort["stderr"].encode()),"stderr_excerpt":abort["stderr"][:4096]},"non_claims":["not six-platform GATE-NET-02 completion","same-direction outcomes are observations, not Wirestack contract","no private abort or socket handle used"]}
 
 def main(argv:Sequence[str]|None=None)->int:
  root=Path(__file__).resolve().parents[2];p=argparse.ArgumentParser();p.add_argument("--artifact-dir",type=Path,default=root/"build/gates/net02-full-duplex-races");p.add_argument("--output",type=Path,default=root/"build/gates/net02-full-duplex-races.json");p.add_argument("--repetitions",type=int,default=20);p.add_argument("--race-seeds",type=int,default=100);p.add_argument("--timeout-seconds",type=float,default=8);p.add_argument("--repository-revision",default=os.environ.get("WIRESTACK_REPOSITORY_REVISION","unknown"));p.add_argument("--quick",action="store_true");a=p.parse_args(argv)

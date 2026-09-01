@@ -1,0 +1,99 @@
+{
+  "acceptance_commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/P1-013/test-plan.md",
+        "--json"
+      ],
+      "gate": "task",
+      "id": "test-plan-matrix",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_m7_019_linux_audit",
+        "tools.tests.test_m7_020_architecture_audit",
+        "tools.tests.test_m7_021_linux_release",
+        "tools.tests.test_m7_029_independent_security_review",
+        "tools.tests.test_m7_031_linux_candidate",
+        "tools.tests.test_p1_013_development_release_gate",
+        "tools.tests.test_m7_linux_task_graph",
+        "-v"
+      ],
+      "gate": "task",
+      "id": "development-release-gate-tests",
+      "long_running": false,
+      "timeout_seconds": 300
+    },
+    {
+      "argv": [
+        "scripts/check"
+      ],
+      "gate": "task",
+      "id": "canonical-repository-check",
+      "long_running": false,
+      "timeout_seconds": 1800
+    }
+  ],
+  "allowed_paths": [
+    ".gitignore",
+    "docs/evidence/P1-013",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "tools/m7_021_linux_release.py",
+    "tools/m7_031_linux_candidate.py",
+    "tools/tasks/P1-013.json",
+    "tools/tests/test_m7_019_linux_audit.py",
+    "tools/tests/test_m7_020_architecture_audit.py",
+    "tools/tests/test_m7_021_linux_release.py",
+    "tools/tests/test_m7_029_independent_security_review.py",
+    "tools/tests/test_m7_031_linux_candidate.py",
+    "tools/tests/test_m7_linux_task_graph.py",
+    "tools/tests/test_p1_013_development_release_gate.py",
+    "tools/validate_m7_019_linux_audit.py",
+    "tools/validate_m7_020_architecture_audit.py"
+  ],
+  "dependencies": [
+    "P1-012",
+    "M3-031"
+  ],
+  "long_running_gate": false,
+  "platforms": [
+    "linux-x86_64-glibc"
+  ],
+  "required_evidence": [
+    "docs/evidence/P1-013/evidence.json",
+    "docs/evidence/P1-013/task-check.json"
+  ],
+  "schema_version": 1,
+  "source_paths": [
+    ".gitignore",
+    "docs/evidence/P1-013/README.md",
+    "docs/evidence/P1-013/test-plan.md",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "tools/m7_021_linux_release.py",
+    "tools/m7_031_linux_candidate.py",
+    "tools/tasks/P1-013.json",
+    "tools/tests/test_m7_019_linux_audit.py",
+    "tools/tests/test_m7_020_architecture_audit.py",
+    "tools/tests/test_m7_021_linux_release.py",
+    "tools/tests/test_m7_029_independent_security_review.py",
+    "tools/tests/test_m7_031_linux_candidate.py",
+    "tools/tests/test_m7_linux_task_graph.py",
+    "tools/tests/test_p1_013_development_release_gate.py",
+    "tools/validate_m7_019_linux_audit.py",
+    "tools/validate_m7_020_architecture_audit.py"
+  ],
+  "task_id": "P1-013",
+  "timeout_seconds": 2100
+}

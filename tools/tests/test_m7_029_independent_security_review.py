@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import copy
-import hashlib
+import io
 import json
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from contextlib import redirect_stdout
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -15,6 +18,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 import m7_029_independent_security_review as review  # noqa: E402
 import latest_cangjie_nightly as nightly  # noqa: E402
+import build_native_dependencies  # noqa: E402
 
 
 class M7029IndependentSecurityReviewTests(unittest.TestCase):
@@ -57,6 +61,29 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         summary = review.validate_review(root, request, self.valid_report(request))
         self.assertEqual(0, summary["findingCount"])
+
+    def test_prepare_cli_returns_structured_invalid_utf8_failure(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-m7-029-utf8-") as directory:
+            root = Path(directory)
+            package = root / review.PACKAGE_PATH
+            package.parent.mkdir(parents=True)
+            package.write_bytes(b"invalid\xff")
+            request = root / "request.json"
+            request.write_bytes(b"previous\n")
+            output = io.StringIO()
+            with redirect_stdout(output):
+                result = review.main([
+                    "--root", str(root),
+                    "--request", str(request),
+                    "--review", str(root / "review.json"),
+                    "--report", str(root / "report.json"),
+                    "--prepare", "--json",
+                ])
+            payload = json.loads(output.getvalue())
+            self.assertEqual(1, result)
+            self.assertEqual("FAIL", payload["status"])
+            self.assertEqual("TEXT_UTF8", payload["code"])
+            self.assertEqual(b"previous\n", request.read_bytes())
 
     def test_stale_target_and_incomplete_scope_fail(self) -> None:
         temporary, root, request = self.fixture()
@@ -187,19 +214,30 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 nightly.resolve_release(mutation)
 
-    def test_cjpm_build_hook_builds_both_native_dependencies(self) -> None:
+    def test_cjpm_build_hook_uses_fail_closed_platform_selection(self) -> None:
         build_script = (ROOT / "build.cj").read_text(encoding="utf-8")
-        self.assertIn('join("build_tls_provider.py")', build_script)
-        self.assertIn('join("build_linux_resolver.py")', build_script)
-        self.assertIn("private func buildLinuxNativeDependencies(): Int64", build_script)
+        self.assertIn('join("build_native_dependencies.py")', build_script)
+        self.assertIn("private func buildNativeDependencies(scriptPath: String): Int64", build_script)
+        self.assertIn('"--cjpm-script-path", scriptPath', build_script)
+        self.assertNotIn('join("build_linux_resolver.py")', build_script)
+        self.assertNotIn('join("build_tls_provider.py")', build_script)
         for phase in (
             "pre-build", "pre-check", "pre-test", "pre-bench",
             "pre-run", "pre-install", "pre-publish",
         ):
             self.assertIn(
-                f'case "{phase}" => buildLinuxNativeDependencies()',
+                f'case "{phase}" => buildNativeDependencies(args[0])',
                 build_script,
             )
+
+        self.assertEqual(
+            ["tls-provider", "resolver"],
+            build_native_dependencies.plan("Linux"),
+        )
+        self.assertEqual(["resolver"], build_native_dependencies.plan("Windows"))
+        self.assertEqual(["resolver"], build_native_dependencies.plan("Darwin"))
+        with self.assertRaisesRegex(ValueError, "unsupported"):
+            build_native_dependencies.plan("Plan9")
 
     def test_reviewer_dates_conflicts_and_set_fields_are_strict(self) -> None:
         temporary, root, request = self.fixture()
@@ -283,7 +321,7 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
             "exitCode": 0,
             "timedOut": False,
             "evidencePath": "docs/evidence/M7-029/regression.log",
-            "sha256": hashlib.sha256(evidence.read_bytes()).hexdigest(),
+            "sha256": evidence_digest.text_evidence_bytes_sha256(evidence.read_bytes()),
         }]
         summary = review.validate_review(root, request, value)
         self.assertEqual({"Fixed": 1}, summary["findingStatuses"])

@@ -2,9 +2,14 @@
 """Measure whether std.net hostname resolution blocks Cangjie carrier threads."""
 from __future__ import annotations
 
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import math
 import os
@@ -102,14 +107,6 @@ def repository_revision(root: Path, explicit: str | None) -> str:
     except (OSError, subprocess.TimeoutExpired):
         pass
     return "unknown"
-
-
-def file_sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def terminate_process_group(process: subprocess.Popen[str]) -> None:
@@ -259,8 +256,8 @@ def compile_artifacts(root: Path, work: Path) -> dict[str, Any]:
     return {
         "probe": probe,
         "shim": shim,
-        "probe_sha256": file_sha256(probe),
-        "shim_sha256": file_sha256(shim),
+        "probe_sha256": evidence_digest.artifact_byte_sha256(probe),
+        "shim_sha256": evidence_digest.artifact_byte_sha256(shim),
         "probe_compile": {
             "command": [cjc, str(probe_source), "-o", str(probe)],
             "stdout": compile_probe.stdout[-4000:],
@@ -454,7 +451,7 @@ def run_sample(
         "process": process,
         "probe": probe,
         "shim": shim,
-        "shim_log_sha256": hashlib.sha256(shim_text.encode()).hexdigest(),
+        "shim_log_sha256": evidence_digest.text_evidence_bytes_sha256(shim_text.encode()),
     }
     try:
         validate_sample(sample, task_count)
@@ -641,7 +638,7 @@ def execute(args: argparse.Namespace) -> dict[str, Any]:
             "cjpm": command_text(["cjpm", "--version"]),
             "gcc": command_text(["gcc", "--version"]),
             "sdk_archive_sha256": (
-                file_sha256(args.sdk_archive.resolve())
+                evidence_digest.artifact_byte_sha256(args.sdk_archive.resolve())
                 if args.sdk_archive.is_file() else None
             ),
         },

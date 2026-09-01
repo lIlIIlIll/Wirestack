@@ -1,0 +1,124 @@
+name: M3-031 Desktop TLS adoption
+
+on:
+  push:
+    branches:
+      - task/M3-031-desktop-tls-adoption
+    paths:
+      - ".github/workflows/m3-031-desktop-tls-adoption.yml"
+      - "docs/evidence/M3-031/test-plan.md"
+      - "tools/m3_031_desktop_tls_adoption.py"
+      - "tools/tests/test_m3_031_desktop_tls_adoption.py"
+      - "tools/tls_provider_poc/**"
+      - "native/tls/aws_lc/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-aws-lc:
+    runs-on: windows-2025
+    timeout-minutes: 90
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Validate task contract and runner tools
+        shell: pwsh
+        run: |
+          python tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M3-031/test-plan.md --json
+          python -m unittest tools.tests.test_m3_031_desktop_tls_adoption tools.tests.test_tls_provider_poc -v
+          foreach ($tool in 'cmake', 'ninja', 'perl', 'openssl', 'git') {
+            if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
+              throw "required tool is missing: $tool"
+            }
+          }
+          if ((Get-CimInstance Win32_OperatingSystem).Caption -notmatch 'Windows Server 2025') {
+            throw 'runner is not Windows Server 2025'
+          }
+          if (-not (Get-Command nasm -ErrorAction SilentlyContinue)) {
+            choco install nasm --no-progress -y
+          }
+          if (-not (Get-Command nasm -ErrorAction SilentlyContinue)) {
+            throw 'required tool is missing after install: nasm'
+          }
+
+      - name: Build and execute pinned AWS-LC PoC
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath = & $vswhere -latest -products * `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+            -property installationPath
+          if (-not $vsPath) { throw 'MSVC x64 toolchain is unavailable' }
+          Import-Module "$vsPath\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+          Enter-VsDevShell -VsInstallPath $vsPath -SkipAutomaticLocation `
+            -DevCmdArguments '-arch=x64 -host_arch=x64'
+          python tools/tls_provider_poc/run.py `
+            --provider aws-lc `
+            --output build/m3-031/windows/provider-result.json
+          python tools/tls_provider_poc/validate.py `
+            --result build/m3-031/windows/provider-result.json `
+            --expected-revision $env:GITHUB_SHA
+          python tools/m3_031_desktop_tls_adoption.py validate-provider `
+            --input build/m3-031/windows/provider-result.json `
+            --platform windows-x86_64 `
+            --expected-revision $env:GITHUB_SHA `
+            --output build/m3-031/windows/validation.json
+
+      - name: Upload exact-revision Windows evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m3-031-windows-x86_64-${{ github.sha }}
+          path: build/m3-031/windows
+          if-no-files-found: error
+          retention-days: 14
+
+  macos-aws-lc:
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Install native build dependencies
+        run: brew install cmake ninja openssl@3
+
+      - name: Validate task contract and native identity
+        run: |
+          test "$(uname -m)" = "arm64"
+          python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M3-031/test-plan.md --json
+          python3 -m unittest tools.tests.test_m3_031_desktop_tls_adoption tools.tests.test_tls_provider_poc -v
+
+      - name: Build and execute pinned AWS-LC PoC
+        env:
+          PATH: /opt/homebrew/opt/openssl@3/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin
+        run: |
+          python3 tools/tls_provider_poc/run.py \
+            --provider aws-lc \
+            --output build/m3-031/macos/provider-result.json
+          python3 tools/tls_provider_poc/validate.py \
+            --result build/m3-031/macos/provider-result.json \
+            --expected-revision "$GITHUB_SHA"
+          python3 tools/m3_031_desktop_tls_adoption.py validate-provider \
+            --input build/m3-031/macos/provider-result.json \
+            --platform macos-arm64 \
+            --expected-revision "$GITHUB_SHA" \
+            --output build/m3-031/macos/validation.json
+
+      - name: Upload exact-revision macOS evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m3-031-macos-arm64-${{ github.sha }}
+          path: build/m3-031/macos
+          if-no-files-found: error
+          retention-days: 14

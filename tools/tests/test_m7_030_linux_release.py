@@ -8,9 +8,11 @@ import os
 import tarfile
 import tempfile
 import unittest
+import unittest.mock
 from datetime import datetime, timezone
 from pathlib import Path
 
+from tools import evidence_digest
 from tools import m7_030_linux_release as release
 
 
@@ -181,7 +183,9 @@ class M7030LinuxReleaseTest(unittest.TestCase):
                           "versionInfo": "5.5.1",
                           "checksums": [{"algorithm": "SHA256", "checksumValue": "4" * 64}]}]
         }
-        candidate["sbomSha256"] = release.sha256_bytes(release.canonical_json(sbom))
+        candidate["sbomSha256"] = evidence_digest.text_evidence_bytes_sha256(
+            release.canonical_json(sbom)
+        )
         advisory = {
             "schemaVersion": 1, "advisoryId": "WSA-TEST", "severity": "HIGH",
             "issuedUtc": "2026-01-01T00:00:00Z", "expiresUtc": "2099-01-01T00:00:00Z",
@@ -222,7 +226,9 @@ class M7030LinuxReleaseTest(unittest.TestCase):
                 "SPDXID": "SPDXRef-Package-TlsProvider-aws-lc", "versionInfo": "5.5.0",
                 "checksums": [{"algorithm": "SHA256", "checksumValue": "1" * 64}],
             }]}
-            old["sbomSha256"] = release.sha256_bytes(release.canonical_json(old_sbom))
+            old["sbomSha256"] = evidence_digest.text_evidence_bytes_sha256(
+                release.canonical_json(old_sbom)
+            )
             advisory = {
                 "schemaVersion": 1, "advisoryId": "WSA-ROLLBACK", "severity": "CRITICAL",
                 "issuedUtc": "2026-01-01T00:00:00Z", "expiresUtc": "2099-01-01T00:00:00Z",
@@ -355,9 +361,60 @@ class M7030LinuxReleaseTest(unittest.TestCase):
             self.assertEqual("PASS", validation["status"])
             self.assertEqual(["artifact", "release-manifest", "sbom"],
                              validation["verifiedSubjects"])
+            legacy = copy.deepcopy(report)
+            legacy["subjects"][1].pop("signedPayloadSha256")
+            report_path.write_bytes(release.canonical_json(legacy))
+            with self.assertRaisesRegex(release.ReleaseError, "HOSTED_REPORT_SUBJECT"):
+                release.validate_hosted_report(report_path)
             (subjects[0][3]).write_bytes(release.canonical_json({"verified": 0}))
             with self.assertRaisesRegex(release.ReleaseError, "HOSTED_VERIFY_EMPTY"):
                 release.build_hosted_report("a" * 40, subjects)
+
+    def test_hosted_text_subject_separates_canonical_and_signed_payload_digests(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subjects = []
+            for name in ("artifact", "sbom", "release-manifest"):
+                subject = root / name
+                bundle = root / f"{name}.bundle"
+                verification = root / f"{name}.verification.json"
+                subject.write_bytes(b"alpha\r\nbeta\r\n" if name == "sbom" else name.encode())
+                bundle.write_text(f"bundle:{name}", encoding="utf-8")
+                verification.write_bytes(release.canonical_json({"verified": 1}))
+                subjects.append((name, subject, bundle, verification))
+            report = release.build_hosted_report("a" * 40, subjects)
+            sbom = next(item for item in report["subjects"] if item["name"] == "sbom")
+            self.assertEqual(
+                evidence_digest.text_evidence_sha256(root / "sbom"), sbom["sha256"])
+            self.assertEqual(
+                evidence_digest.artifact_byte_sha256(root / "sbom"), sbom["signedPayloadSha256"])
+            self.assertNotEqual(sbom["sha256"], sbom["signedPayloadSha256"])
+
+    def test_hosted_report_cli_returns_structured_invalid_utf8_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            arguments = ["hosted-report", "--commit", "a" * 40]
+            for name in ("artifact", "sbom", "release-manifest"):
+                subject = root / name
+                bundle = root / f"{name}.bundle"
+                verification = root / f"{name}.verification.json"
+                subject.write_bytes(b"\xff" if name == "sbom" else name.encode())
+                bundle.write_bytes(b"bundle")
+                verification.write_bytes(release.canonical_json({"verified": 1}))
+                arguments.extend([
+                    f"--{name}", str(subject),
+                    f"--{name}-bundle", str(bundle),
+                    f"--{name}-verification", str(verification),
+                ])
+            output = root / "report.json"
+            arguments.extend(["--output", str(output)])
+            stdout = io.StringIO()
+            with unittest.mock.patch("sys.stdout", stdout):
+                self.assertEqual(1, release.main(arguments))
+            report = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual("FAIL", report["decision"])
+            self.assertEqual("TEXT_UTF8", report["code"])
+            self.assertEqual(report, json.loads(stdout.getvalue()))
 
     def test_rehearsal_is_bounded_and_reads_hosted_gate_separately(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -365,8 +422,8 @@ class M7030LinuxReleaseTest(unittest.TestCase):
             self.assertEqual("PASS", report["decision"])
             self.assertEqual("REHEARSAL", report["classification"])
             self.assertEqual("PASS", report["updateFlow"]["decision"])
-            self.assertEqual("PASS", report["productionAttestation"]["decision"])
-            self.assertEqual("verified", report["productionAttestation"]["detail"])
+            self.assertEqual("FAIL", report["productionAttestation"]["decision"])
+            self.assertEqual("HOSTED_REPORT_SUBJECT", report["productionAttestation"]["detail"])
             serialized = json.dumps(report)
             self.assertNotIn("PRIVATE KEY", serialized)
             self.assertNotIn(str(Path(directory).parent), serialized)

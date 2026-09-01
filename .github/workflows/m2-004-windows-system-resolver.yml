@@ -1,0 +1,80 @@
+name: M2-004 Windows SystemResolver
+
+on:
+  push:
+    branches:
+      - task/M2-004-windows-system-resolver
+    paths:
+      - "build.cj"
+      - "cjpm.toml"
+      - "native/resolver/windows/**"
+      - "src/internal/resolver/**"
+      - "tools/build_native_dependencies.py"
+      - "tools/build_resolver.py"
+      - "tools/build_windows_resolver.py"
+      - "tools/gates/m2_004_windows_resolver.py"
+      - "tools/gates/native/m2_004_tls_link_stub.c"
+      - "tools/gates/tests/test_m2_004_windows_resolver.py"
+      - ".github/workflows/m2-004-windows-system-resolver.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-windows-resolver:
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Resolve the latest complete Cangjie nightly
+        id: cangjie-nightly
+        shell: pwsh
+        run: python tools/latest_cangjie_nightly.py --github-output $env:GITHUB_OUTPUT
+
+      - name: Install the resolved Cangjie toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ steps.cangjie-nightly.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie.zip
+
+      - name: Validate task tooling
+        shell: pwsh
+        run: |
+          python -m unittest tools.tests.test_build_resolver -v
+          python -m unittest tools.gates.tests.test_m2_004_windows_resolver -v
+          python tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M2-004/test-plan.md --json
+
+      - name: Run native Windows resolver acceptance
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build/gates/m2-004 | Out-Null
+          python tools/gates/m2_004_windows_resolver.py `
+            --repo-root . `
+            --revision $env:GITHUB_SHA `
+            --output build/gates/m2-004/report.json
+
+      - name: Validate exact-revision report
+        shell: pwsh
+        run: |
+          python tools/gates/m2_004_windows_resolver.py `
+            --validate-report build/gates/m2-004/report.json `
+            --expected-revision $env:GITHUB_SHA `
+            --validation-output build/gates/m2-004/validation.json
+
+      - name: Upload exact-revision evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m2-004-windows-system-resolver-${{ github.sha }}
+          path: |
+            build/gates/m2-004/report.json
+            build/gates/m2-004/validation.json
+          if-no-files-found: error
+          retention-days: 14
