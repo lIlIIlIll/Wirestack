@@ -220,14 +220,14 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
         "license": {
             "expression": PROJECT_LICENSE_EXPRESSION,
             "file": "LICENSE",
-            "sha256": artifact_payload_sha256(payload["LICENSE"]),
+            "sha256": evidence_digest.text_evidence_bytes_sha256(payload["LICENSE"]),
         },
         "thirdPartyNotices": {
             "index": "THIRD_PARTY_NOTICES.md",
             "files": [
                 {
                     "path": relative,
-                    "sha256": artifact_payload_sha256(payload[relative]),
+                    "sha256": evidence_digest.text_evidence_bytes_sha256(payload[relative]),
                 }
                 for relative in RELEASE_METADATA_FILES[1:]
             ],
@@ -240,11 +240,13 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
             "abi_version": provider_manifest.get("abiVersion"),
             "build_fingerprint": provider_manifest.get("build_fingerprint"),
             "archive_sha256": provider_manifest.get("archive", {}).get("sha256"),
-            "manifest_sha256": artifact_payload_sha256(payload["target/native/current/provider-manifest.json"]),
+            "manifest_sha256": evidence_digest.text_evidence_bytes_sha256(
+                payload["target/native/current/provider-manifest.json"]
+            ),
         },
         "resolver": {
             "archive_sha256": resolver_manifest.get("archive", {}).get("sha256"),
-            "manifest_sha256": artifact_payload_sha256(
+            "manifest_sha256": evidence_digest.text_evidence_bytes_sha256(
                 payload["target/native/resolver/current/resolver-manifest.json"]
             ),
         },
