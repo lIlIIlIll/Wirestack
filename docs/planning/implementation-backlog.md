@@ -533,6 +533,7 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 | P1-011 | Linux musl 采纳 | ADR-0004 | 仓颉 SDK 发布受支持的 musl target、标准库、runtime 和构建说明后启动；必须补齐 native compile/unit/integration、resolver、trust、依赖、性能和安装证据。 |
 | P1-012 | AI 友好型仓库基础设施 | Repository control plane | M7-024 已完成；提供诚实的环境诊断、机器可读任务契约、分层验证入口和源码绑定的证据新鲜度检查。长时间门禁只能显式运行，不得由 fast/full 隐式触发。 |
 | P1-013 | 分离开发回归与发布证据新鲜度门禁 | Repository control plane | 依赖 P1-012,M3-031；`scripts/check` 验证当前代码、结构和故障注入，不因预期过期的点时 release evidence 产生级联假失败；M7 release CLI 仍默认校验当前源码并 fail closed；修正 Darwin resolver 已受支持后的过时回归断言；不得刷新、复用或伪造旧 artifact、soak、性能、安全审查、SBOM 或签名 PASS。 |
+| P1-014 | 建立 evidence 摘要类型边界并禁止文本回退到原始字节 | Repository control plane | 依赖 P1-012,P1-013；引入不可互换的 `TextEvidenceDigest` 与 `ArtifactByteDigest` 类型及显式入口：JSON、Markdown、日志和其他声明为文本的 evidence 只能按 UTF-8 与规范化 LF 计算文本摘要，禁止回退到原始字节摘要；二进制 artifact、归档和签名 payload 必须显式使用原始字节摘要。迁移并盘点全部现有调用点，schema 记录摘要域，architecture guard 阻止文本路径调用 byte-digest、无类型摘要比较和隐式 fallback；非法 UTF-8、未知摘要域、旧 schema、CRLF/裸 CR、源码漂移和 digest-kind 混用均 fail closed。Linux 与 GitHub Windows runner 的 CRLF 故障注入必须证明同一文本跨 checkout 摘要一致，且文本正确性不依赖 `.gitattributes -text`；旧 PASS 不得因迁移被静默沿用或重写，长时间门禁不得运行。 |
 
 ---
 
@@ -623,8 +624,8 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 - 全平台主线任务：**185**
 - Linux 稳定版收口任务：**15**
 - 远期上游任务：**7**
-- 稳定版后 P1/独立项目：**13**
+- 稳定版后 P1/独立项目：**14**
 - 当前发布相关任务总数：**200**
-- 全部已记录任务总数：**220**
+- 全部已记录任务总数：**221**
 
 该数量代表 Issue/PR 级工作项，不代表必须串行执行；关键是保持里程碑退出门禁和依赖方向。
