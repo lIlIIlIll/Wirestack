@@ -1,0 +1,72 @@
+{
+  "acceptance_commands": [
+    {
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/P1-014/test-plan.md", "--json"],
+      "gate": "task",
+      "id": "test-plan-matrix",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["python3", "-m", "unittest", "tools.repository.tests.test_repository_tooling", "tools.tests.test_architecture_guard", "tools.tests.test_p1_014_evidence_digest_types", "-v"],
+      "gate": "task",
+      "id": "digest-boundary-tests",
+      "long_running": false,
+      "timeout_seconds": 300
+    },
+    {
+      "argv": ["scripts/check-fast", "--json"],
+      "gate": "task",
+      "id": "fast-repository-check",
+      "long_running": false,
+      "timeout_seconds": 600
+    },
+    {
+      "argv": ["scripts/check"],
+      "gate": "task",
+      "id": "canonical-repository-check",
+      "long_running": false,
+      "timeout_seconds": 1800
+    }
+  ],
+  "allowed_paths": [
+    ".gitattributes",
+    ".github/workflows/p1-014-evidence-digest-boundary.yml",
+    "docs/evidence/P1-014",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "scripts/check",
+    "scripts/check-fast",
+    "scripts/check-full",
+    "scripts/check-task",
+    "tools/architecture_guard.py",
+    "tools/evidence_digest.py",
+    "tools/repository/repository_tooling.py",
+    "tools/repository/tests/test_repository_tooling.py",
+    "tools/tasks/P1-014.json",
+    "tools/tests/test_architecture_guard.py",
+    "tools/tests/test_p1_014_evidence_digest_types.py"
+  ],
+  "dependencies": ["P1-012", "P1-013"],
+  "long_running_gate": false,
+  "platforms": ["linux-x86_64-glibc", "windows-x86_64"],
+  "required_evidence": [
+    "docs/evidence/P1-014/evidence.json",
+    "docs/evidence/P1-014/task-check.json",
+    "docs/evidence/P1-014/digest-inventory.json",
+    "docs/evidence/P1-014/architecture-guard.json",
+    "docs/evidence/P1-014/linux-crlf.json",
+    "docs/evidence/P1-014/windows-crlf.json"
+  ],
+  "schema_version": 1,
+  "source_paths": [
+    ".gitattributes",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "tools/architecture_guard.py",
+    "tools/repository/repository_tooling.py",
+    "tools/tasks/P1-014.json"
+  ],
+  "task_id": "P1-014",
+  "timeout_seconds": 2100
+}
