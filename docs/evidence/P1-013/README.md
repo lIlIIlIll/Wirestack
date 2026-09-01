@@ -25,7 +25,7 @@ part of P1-013.
 
 - The focused P1-013 regression suite passed 69 tests with no failures or
   errors.
-- The complete repository Python suites passed 265 tooling tests, 176 gate
+- The complete repository Python suites passed 322 tooling tests, 168 gate
   tests and 24 benchmark tests.
 - `scripts/check` passed the architecture guard, `cjpm check`, `cjpm build` and
   611 Cangjie tests: 588 passed, 23 were explicitly skipped, and none failed or
@@ -33,6 +33,11 @@ part of P1-013.
 - Strict M7-019, M7-020, M7-021 and M7-031 validation still exits non-zero for
   the current tree because their point-in-time release sources or artifact are
   stale. P1-013 does not refresh or promote them.
+
+The current-toolchain requalification used Cangjie
+`1.1.0-alpha.20260829040003`, CJPM `1.1.3` and Linux x86_64 glibc. It ran from
+the exact P1-012 requalification commit
+`f65893573d536aab46d05e8daf606c46c86eab24`.
 
 ## Long-duration gates
 
