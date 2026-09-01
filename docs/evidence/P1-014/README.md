@@ -44,7 +44,7 @@ entries remain unchanged because they belong to other tasks.
 | Architecture guard | PASS, 0 violations |
 | Linux CRLF probe | PASS |
 | Digest callsite inventory | PASS, 305 explicitly classified calls, 0 issues |
-| GitHub Windows CRLF probe | PASS, run `33486258976`, source head `2c7d30cd`, merge `2f4901e4`; tracked fixture checked out as CRLF |
+| GitHub Windows CRLF probe | PASS, run `33487062592`, source head `c389df05`, merge `e79eebee`; tracked fixture checked out as CRLF |
 | Hosted Gate Harness | PASS, run `33486258926` |
 | `scripts/check-fast --json` | PASS |
 | `scripts/check` | PASS, including 178 gate Python tests, 24 benchmark Python tests and 611 Cangjie tests |

@@ -1,7 +1,7 @@
 {
   "domain_counts": {
     "artifact-bytes": 72,
-    "text-evidence": 225,
+    "text-evidence": 230,
     "typed-implementation": 3
   },
   "entries": [
@@ -840,38 +840,62 @@
       "symbol": "text_evidence_bytes_sha256"
     },
     {
+      "classification": "text-evidence",
+      "line": 223,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 230,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 243,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 249,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
       "classification": "artifact-bytes",
-      "line": 401,
+      "line": 403,
       "path": "tools/m7_021_linux_release.py",
       "symbol": "artifact_byte_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 460,
+      "line": 462,
       "path": "tools/m7_021_linux_release.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "artifact-bytes",
-      "line": 512,
+      "line": 514,
       "path": "tools/m7_021_linux_release.py",
       "symbol": "artifact_byte_sha256"
     },
     {
       "classification": "artifact-bytes",
-      "line": 513,
+      "line": 515,
       "path": "tools/m7_021_linux_release.py",
       "symbol": "artifact_byte_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 534,
+      "line": 536,
       "path": "tools/m7_021_linux_release.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "artifact-bytes",
-      "line": 539,
+      "line": 541,
       "path": "tools/m7_021_linux_release.py",
       "symbol": "artifact_byte_sha256"
     },
@@ -1452,6 +1476,12 @@
       "symbol": "text_evidence_bytes_sha256"
     },
     {
+      "classification": "text-evidence",
+      "line": 52,
+      "path": "tools/tests/test_m7_021_linux_release.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
       "classification": "artifact-bytes",
       "line": 177,
       "path": "tools/tests/test_m7_022_linux_release_soak.py",
@@ -1806,7 +1836,7 @@
       "symbol": "text_evidence_sha256"
     }
   ],
-  "entry_count": 300,
+  "entry_count": 305,
   "issues": [],
   "kind": "p1-014-digest-inventory",
   "schema_version": 1,
