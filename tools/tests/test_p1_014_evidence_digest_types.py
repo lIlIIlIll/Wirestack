@@ -108,6 +108,12 @@ class EvidenceDigestTypeTests(unittest.TestCase):
         self.assertEqual("FAIL", report["status"])
         self.assertEqual("PLATFORM_MISMATCH", report["issues"][0]["code"])
 
+    def test_crlf_report_rejects_claimed_revision_different_from_checkout(self) -> None:
+        with mock.patch("tools.evidence_digest._revision", return_value="b" * 40):
+            report = crlf_report(root=self.ROOT, expected_revision="a" * 40)
+        self.assertEqual("FAIL", report["status"])
+        self.assertIn("REVISION_MISMATCH", {item["code"] for item in report["issues"]})
+
     def test_crlf_report_rejects_wrong_architecture_and_libc(self) -> None:
         with mock.patch.object(platform, "system", return_value="Linux"), \
                 mock.patch.object(platform, "machine", return_value="aarch64"), \
@@ -168,6 +174,7 @@ class EvidenceDigestTypeTests(unittest.TestCase):
         )
         self.assertIn("runs-on: windows-latest", workflow)
         self.assertIn("actions/checkout@11d5960a326750d5838078e36cf38b85af677262", workflow)
+        self.assertIn("ref: ${{ github.event.pull_request.head.sha || github.sha }}", workflow)
         self.assertIn("actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02", workflow)
         self.assertIn("--expected-platform windows-x86_64", workflow)
         self.assertIn(
@@ -422,6 +429,22 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             self.assertTrue(all(
                 issue["code"] == "UNTYPED_DIGEST" for issue in report["issues"]
             ))
+
+    def test_inventory_rejects_openssl_shortcut_and_license_operand(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            script = root / "scripts/check-report"
+            script.parent.mkdir(parents=True)
+            script.write_text(
+                "openssl sha256 docs/evidence/report.json\n"
+                "# wirestack-digest-domain: artifact-bytes-v1\n"
+                "sha256sum third_party/provider/LICENSE\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertIn("legacy-non-python", report["domain_counts"])
+            self.assertIn("invalid-artifact-on-text", report["domain_counts"])
 
     def test_inventory_rejects_artifact_marker_with_shell_variable_operand(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
