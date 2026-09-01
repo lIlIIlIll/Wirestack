@@ -211,6 +211,19 @@ class ArchitectureGuardTests(unittest.TestCase):
             )
             self.assertIn("text-evidence-byte-digest", self.rules(root))
 
+    def test_assigned_digest_callable_cannot_hide_text_path_domain(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "from pathlib import Path\n"
+                "from tools import evidence_digest\n"
+                "digest = evidence_digest.artifact_byte_sha256\n"
+                "value = digest(Path('report.json'))\n",
+            )
+            self.assertIn("text-evidence-byte-digest", self.rules(root))
+
     def test_openssl_and_embedded_python_digest_commands_are_rejected(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)
