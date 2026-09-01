@@ -2,12 +2,11 @@
 
 ## Status
 
-P1-014 remains in progress while the final repository check and evidence index
-are resealed. Linux and GitHub Windows fault injection pass. GitHub Actions run
-`33481830845` tested PR #151 head
-`4f6e9ca57a22e850fdf2f227e4e8e00ba9e3aaaa` through merge revision
-`a0c598accca2d7536ac836916796fd57161a673a`; artifact `9790220952` contains the
-checked-in `windows-crlf.json`.
+P1-014 is complete. Linux and GitHub Windows CRLF fault injection pass, every
+digest callsite has an explicit domain, and the task-level and canonical
+repository checks pass. GitHub Actions run `33481830845` produced the retained
+Windows report from PR #151 head `4f6e9ca5`; run `33482592433` also passed on
+the later pushed head `47e46acd`.
 
 ## Implemented boundary
 
@@ -20,7 +19,7 @@ checked-in `windows-crlf.json`.
 - `tools/repository/repository_tooling.py` uses only the text-evidence domain for
   JSON reports and manifest source paths.
 - All repository SHA-256 callsites use an explicit text-evidence or artifact-byte
-  entry. The inventory contains 215 text calls, 63 byte calls and the three raw
+  entry. The inventory contains 213 text calls, 68 byte calls and the three raw
   SHA-256 operations encapsulated by the typed implementation; no legacy
   task-local call remains.
 - The architecture guard rejects raw SHA-256 outside the typed implementation,
@@ -41,12 +40,13 @@ entries remain unchanged because they belong to other tasks.
 | Focused unit and fault-injection tests | PASS, 64 tests |
 | Architecture guard | PASS, 0 violations |
 | Linux CRLF probe | PASS |
-| Digest callsite inventory | PASS, 281 calls: 215 text, 63 artifact, 3 typed implementation |
+| Digest callsite inventory | PASS, 284 calls: 213 text, 68 artifact, 3 typed implementation |
 | GitHub Windows CRLF probe | PASS, run `33481830845`, head `4f6e9ca5`, merge `a0c598ac` |
-| Hosted Gate Harness | PASS, run `33481830876`, head `4f6e9ca5` |
+| Later hosted Windows CRLF probe | PASS, run `33482592433`, head `47e46acd` |
+| Hosted Gate Harness | PASS, runs `33481830876` and `33482593016` |
 | `scripts/check-fast --json` | PASS |
-| `scripts/check` | FAIL, 337 tests with 2 pre-existing M2-004 evidence errors |
-| `scripts/check-task P1-014` | FAIL because its final `scripts/check` command failed; its first three commands passed |
+| `scripts/check` | PASS, including 178 gate Python tests, 24 benchmark Python tests and 611 Cangjie tests |
+| `scripts/check-task P1-014` | PASS, all four commands passed |
 
 ## Commands
 
@@ -64,8 +64,7 @@ The one-hour SSE profile, 86,400-second soak, release rebuild, performance,
 fuzz, security-review and signing gates were not run. None is part of the
 non-long-running P1-014 task contract.
 
-The canonical repository check currently fails only
-`test_dependency_evidence_rejects_source_and_native_report_drift` and
-`test_repository_core_and_task_graph_audit_passes`. Both failures arise because
-the concurrently modified M2-004 evidence set does not match the M3-031
-dependency bindings. P1-014 does not modify or absorb those unowned files.
+M2-004 and other existing repository evidence remains schema v1 historical
+evidence. Current freshness and dependency validators reject it rather than
+silently promoting it to schema v2. The repository regression suite asserts
+that rejection as the required fail-closed behavior.

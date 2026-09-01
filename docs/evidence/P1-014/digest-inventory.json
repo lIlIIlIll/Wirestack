@@ -1,7 +1,7 @@
 {
   "domain_counts": {
     "artifact-bytes": 68,
-    "text-evidence": 210,
+    "text-evidence": 213,
     "typed-implementation": 3
   },
   "entries": [
@@ -673,6 +673,12 @@
     },
     {
       "classification": "text-evidence",
+      "line": 90,
+      "path": "tools/gates/tests/test_m7_023_linux_fuzz.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
       "line": 236,
       "path": "tools/m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
@@ -715,37 +721,49 @@
     },
     {
       "classification": "text-evidence",
-      "line": 612,
+      "line": 603,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "parse_text_digest"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 618,
       "path": "tools/m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 635,
+      "line": 639,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "parse_text_digest"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 649,
       "path": "tools/m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 655,
+      "line": 669,
       "path": "tools/m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 678,
+      "line": 692,
       "path": "tools/m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 735,
+      "line": 749,
       "path": "tools/m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 738,
+      "line": 752,
       "path": "tools/m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
@@ -1225,7 +1243,13 @@
     },
     {
       "classification": "text-evidence",
-      "line": 233,
+      "line": 225,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 226,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
@@ -1237,67 +1261,67 @@
     },
     {
       "classification": "text-evidence",
-      "line": 242,
+      "line": 245,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_digest"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 249,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_digest"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 250,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_digest"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 336,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 252,
+      "line": 340,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 256,
+      "line": 365,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 257,
+      "line": 371,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 343,
+      "line": 381,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 347,
+      "line": 387,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 372,
+      "line": 396,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 378,
-      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
-      "symbol": "text_evidence_sha256"
-    },
-    {
-      "classification": "text-evidence",
-      "line": 388,
-      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
-      "symbol": "text_evidence_sha256"
-    },
-    {
-      "classification": "text-evidence",
-      "line": 394,
-      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
-      "symbol": "text_evidence_sha256"
-    },
-    {
-      "classification": "text-evidence",
-      "line": 403,
+      "line": 402,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
@@ -1309,43 +1333,37 @@
     },
     {
       "classification": "text-evidence",
-      "line": 416,
+      "line": 435,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 442,
+      "line": 436,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 443,
+      "line": 440,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 447,
+      "line": 441,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 448,
+      "line": 456,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
     {
       "classification": "text-evidence",
-      "line": 463,
-      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
-      "symbol": "text_evidence_sha256"
-    },
-    {
-      "classification": "text-evidence",
-      "line": 465,
+      "line": 458,
       "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
       "symbol": "text_evidence_sha256"
     },
@@ -1692,7 +1710,7 @@
       "symbol": "text_evidence_sha256"
     }
   ],
-  "entry_count": 281,
+  "entry_count": 284,
   "issues": [],
   "kind": "p1-014-digest-inventory",
   "schema_version": 1,
