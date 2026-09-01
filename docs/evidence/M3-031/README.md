@@ -34,9 +34,9 @@ claim mobile device support.
 ## Acceptance result
 
 GitHub Actions run
-[`33458663037`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33458663037)
+[`33459353992`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33459353992)
 executed both jobs at repository revision
-`24a01fb377c57484daf4268e5588f1de74556ba7`:
+`88a0cd21216e4d0869fadd24bbd0c7f6185ddc73`:
 
 - `windows-aws-lc` passed on Windows Server 2025 x86_64, image
   `win25-vs2026` version `20260824.214.3`.
@@ -55,7 +55,7 @@ The focused Cangjie Core suites passed 71 tests with zero skipped, failed or
 errored cases. The complete machine-readable command report is
 [`task-check.json`](task-check.json).
 
-Run `33458663037` repeated both native jobs after the M0-016 schema-v11 review
+Run `33459353992` repeated both native jobs after the M0-016 schema-v11 review
 remediation. The
 committed hosted report binds that exact revision to the PoC source, provider
 pins, validator digests, final binary digests, artifact digests and job

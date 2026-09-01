@@ -24,7 +24,7 @@
   "provider": "aws-lc",
   "provider_version": "5.5.0",
   "repeated_cleanup_cycles": 10000,
-  "repository_revision": "24a01fb377c57484daf4268e5588f1de74556ba7",
+  "repository_revision": "88a0cd21216e4d0869fadd24bbd0c7f6185ddc73",
   "schema_version": 1,
   "status": "PASS",
   "task_id": "M3-031"
