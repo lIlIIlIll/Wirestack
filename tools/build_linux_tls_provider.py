@@ -288,7 +288,7 @@ def validate_cached_build(final_dir: Path, fingerprint: str) -> dict[str, Any] |
         return None
     if build_manifest.get("build_fingerprint") != fingerprint:
         return None
-    if not evidence_digest.artifact_byte_sha256_equal(
+    if not evidence_digest.schema_artifact_sha256_equal(
         build_manifest.get("archive", {}).get("sha256"),
         evidence_digest.artifact_byte_sha256(archive),
     ):

@@ -14,6 +14,7 @@ from tools.evidence_digest import (
     DigestError,
     TextEvidenceDigest,
     artifact_byte_digest_bytes,
+    artifact_byte_sha256_equal,
     atomic_json,
     crlf_report,
     digest_inventory,
@@ -21,6 +22,7 @@ from tools.evidence_digest import (
     parse_text_digest,
     text_evidence_digest_bytes,
     text_evidence_inventory_sha256,
+    text_evidence_sha256_equal,
 )
 
 
@@ -61,6 +63,16 @@ class EvidenceDigestTypeTests(unittest.TestCase):
         with self.assertRaises(DigestError) as byte_error:
             parse_artifact_digest(text.to_json())
         self.assertEqual("DIGEST_DOMAIN", byte_error.exception.code)
+
+    def test_digest_equality_requires_both_serialized_domains(self) -> None:
+        text = text_evidence_digest_bytes(b"same\n")
+        artifact = artifact_byte_digest_bytes(b"same\n")
+        self.assertTrue(text_evidence_sha256_equal(text.to_json(), text.to_json()))
+        self.assertTrue(artifact_byte_sha256_equal(artifact.to_json(), artifact.to_json()))
+        self.assertFalse(text_evidence_sha256_equal(text.sha256, text.sha256))
+        self.assertFalse(artifact_byte_sha256_equal(artifact.sha256, artifact.sha256))
+        self.assertFalse(text_evidence_sha256_equal(artifact.to_json(), text.to_json()))
+        self.assertFalse(artifact_byte_sha256_equal(text.to_json(), artifact.to_json()))
 
     def test_untyped_unknown_and_malformed_digest_documents_fail_closed(self) -> None:
         for raw, code in (
@@ -158,6 +170,7 @@ class EvidenceDigestTypeTests(unittest.TestCase):
         self.assertIn("actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02", workflow)
         self.assertIn("--expected-platform windows-x86_64", workflow)
         self.assertIn('- ".gitattributes"', workflow)
+        self.assertIn('- ".github/actions/**"', workflow)
         self.assertNotIn("cjpm", workflow.lower())
         self.assertNotIn("soak", workflow.lower())
 
@@ -243,6 +256,19 @@ class EvidenceDigestTypeTests(unittest.TestCase):
                 issue["detail"].endswith("bare-sha256-comparison")
                 for issue in report["issues"]
             ))
+
+    def test_inventory_scans_composite_actions(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            action = root / ".github/actions/evidence/action.yaml"
+            action.parent.mkdir(parents=True)
+            action.write_text(
+                "runs:\n  using: composite\n  steps:\n    - shell: bash\n      run: sha256sum report.json\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertEqual("UNTYPED_DIGEST", report["issues"][0]["code"])
 
     def test_inventory_rejects_alternate_hashlib_constructor_import(self) -> None:
         with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:

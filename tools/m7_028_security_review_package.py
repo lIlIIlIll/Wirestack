@@ -169,7 +169,7 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
         exact_keys(item, {"topic", "path", "sha256"}, f"documents[{position}]")
         path = safe_path(root, item["path"])
         require(
-            evidence_digest.text_evidence_sha256_equal(
+            evidence_digest.schema_text_sha256_equal(
                 text_evidence_sha256(path), item["sha256"],
             ),
             "DIGEST_MISMATCH", item["path"],
@@ -183,7 +183,7 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
         exact_keys(item, {"topic", "sourceTask", "path", "sha256", "state", "gating"}, f"evidence[{position}]")
         path = safe_path(root, item["path"])
         require(
-            evidence_digest.text_evidence_sha256_equal(
+            evidence_digest.schema_text_sha256_equal(
                 text_evidence_sha256(path), item["sha256"],
             ),
             "DIGEST_MISMATCH", item["path"],
@@ -220,7 +220,7 @@ def validate_index(root: Path, index: Mapping[str, Any]) -> dict[str, Any]:
             continue
         document = documents.get(Path(item["path"]).name)
         require(
-            isinstance(document, dict) and evidence_digest.text_evidence_sha256_equal(
+            isinstance(document, dict) and evidence_digest.schema_text_sha256_equal(
                 document.get("sha256"), item["sha256"],
             ),
             "BOUND_INPUT_MISMATCH",

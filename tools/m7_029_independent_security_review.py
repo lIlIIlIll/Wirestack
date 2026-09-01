@@ -144,7 +144,7 @@ def validate_regression(root: Path, value: Mapping[str, Any], where: str) -> Non
     require(value["exitCode"] == 0 and value["timedOut"] is False, "REGRESSION_NOT_PASS", where)
     path = safe_path(root, value["evidencePath"])
     require(
-        evidence_digest.text_evidence_sha256_equal(
+        evidence_digest.schema_text_sha256_equal(
             evidence_digest.text_evidence_sha256(path), value["sha256"],
         ),
         "DIGEST_MISMATCH", value["evidencePath"],
