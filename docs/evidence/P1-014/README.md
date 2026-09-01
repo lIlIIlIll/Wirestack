@@ -19,7 +19,7 @@ Windows report for PR #151 source head `2c7d30cd` (merge revision `2f4901e4`).
   JSON reports and manifest source paths.
 - All repository SHA-256 callsites use an explicit text-evidence or artifact-byte
   entry. Python direct imports and unmarked shell/workflow hash commands fail the
-  guard. The inventory contains 300 classified calls and no legacy entry.
+  guard. The inventory contains 305 classified calls and no legacy entry.
 - The architecture guard rejects raw SHA-256 outside the typed implementation,
   ambiguous digest helpers, obvious text paths entering the byte domain,
   untyped repository-evidence comparisons and UTF-8-to-byte fallback.
@@ -43,7 +43,7 @@ entries remain unchanged because they belong to other tasks.
 | Extended affected-tool regression tests | PASS, 165 tests |
 | Architecture guard | PASS, 0 violations |
 | Linux CRLF probe | PASS |
-| Digest callsite inventory | PASS, 300 explicitly classified calls, 0 issues |
+| Digest callsite inventory | PASS, 305 explicitly classified calls, 0 issues |
 | GitHub Windows CRLF probe | PASS, run `33486258976`, source head `2c7d30cd`, merge `2f4901e4`; tracked fixture checked out as CRLF |
 | Hosted Gate Harness | PASS, run `33486258926` |
 | `scripts/check-fast --json` | PASS |

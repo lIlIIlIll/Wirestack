@@ -42,6 +42,19 @@ class M7021LinuxReleaseTest(unittest.TestCase):
             set(release.RELEASE_METADATA_FILES),
         )
 
+    def test_text_metadata_digest_is_line_ending_stable_while_payload_digest_is_exact(self) -> None:
+        variants = (
+            b"line one\nline two\n",
+            b"line one\r\nline two\r\n",
+            b"line one\rline two\r",
+        )
+        text_digests = {
+            release.evidence_digest.text_evidence_bytes_sha256(value) for value in variants
+        }
+        payload_digests = {release.artifact_payload_sha256(value) for value in variants}
+        self.assertEqual(1, len(text_digests))
+        self.assertEqual(3, len(payload_digests))
+
     def test_production_sources_exclude_every_test_file(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
