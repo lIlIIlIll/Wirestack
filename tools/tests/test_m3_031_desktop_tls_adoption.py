@@ -257,12 +257,27 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                     "docs/evidence/M2-004/evidence.json", validation_relative,
                 ],
             }
+            status_path = root / "docs/planning/status.md"
+            status_path.parent.mkdir(parents=True, exist_ok=True)
+            status_path.write_text(
+                "| M2-004 | COMPLETE | evidence | test |\n", encoding="utf-8"
+            )
             bindings = {"M2-004": ((validation_relative, report_relative, None),)}
             with mock.patch.object(
                 adoption.repository_tooling, "load_task", return_value=task
             ):
                 self.assertEqual(
                     "PASS", adoption.validate_dependency_evidence(root, bindings)["status"]
+                )
+                status_path.write_text(
+                    "| M2-004 | BLOCKED | — | test |\n", encoding="utf-8"
+                )
+                self.assert_code(
+                    "DEPENDENCY_EVIDENCE",
+                    lambda: adoption.validate_dependency_evidence(root, bindings),
+                )
+                status_path.write_text(
+                    "| M2-004 | COMPLETE | evidence | test |\n", encoding="utf-8"
                 )
                 source.write_text("drift", encoding="utf-8")
                 self.assert_code(
@@ -378,6 +393,19 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             windows_digest = adoption.repository_text_sha256(path)
             path.write_bytes(b'{\n  "status": "PASS"\n}\n')
             self.assertEqual(windows_digest, adoption.repository_text_sha256(path))
+
+    def test_desktop_acceptance_column_cannot_be_weakened(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            backlog = (ROOT / "docs/planning/implementation-backlog.md").read_text(
+                encoding="utf-8"
+            )
+            acceptance = adoption.EXPECTED_DESKTOP_ACCEPTANCE["M3-014"]
+            backlog = backlog.replace(acceptance, "使用系统证书链与策略")
+            path = root / "docs/planning/implementation-backlog.md"
+            path.parent.mkdir(parents=True)
+            path.write_text(backlog, encoding="utf-8")
+            self.assert_code("TASK_GRAPH", lambda: adoption.audit_task_graph(root))
 
     def test_dependency_evidence_json_preserves_exact_artifact_bytes(self) -> None:
         attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8")
