@@ -190,6 +190,37 @@ class EvidenceDigestTypeTests(unittest.TestCase):
             self.assertEqual("FAIL", report["status"])
             self.assertEqual("UNTYPED_DIGEST", report["issues"][0]["code"])
 
+    def test_inventory_rejects_typed_alias_and_raw_python_subprocess(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            path = root / "tools/gates/new_tool.py"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "import subprocess\n"
+                "from tools.evidence_digest import artifact_byte_sha256 as digest\n"
+                "value = digest(report_path)\n"
+                "subprocess.run(['sha256sum', 'report.json'])\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertIn("artifact-bytes", report["domain_counts"])
+            self.assertIn("legacy-task-local", report["domain_counts"])
+
+    def test_inventory_rejects_text_marker_on_raw_digest_command(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            path = root / "scripts/check-report"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "# wirestack-digest-domain: text-utf8-lf-v1\nsha256sum report.json\n",
+                encoding="utf-8",
+            )
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertEqual(1, len(report["issues"]))
+            self.assertIn("invalid-text-command", report["domain_counts"])
+
     def test_current_inventory_has_no_legacy_task_local_digest_calls(self) -> None:
         report = digest_inventory(self.ROOT)
         self.assertEqual("PASS", report["status"])

@@ -76,6 +76,31 @@ class ArchitectureGuardTests(unittest.TestCase):
             )
             self.assertNotIn("untyped-non-python-digest", self.rules(root))
 
+    def test_text_domain_marker_cannot_approve_raw_digest_command(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "scripts/check-report",
+                "# wirestack-digest-domain: text-utf8-lf-v1\nsha256sum report.json\n",
+            )
+            self.assertIn("text-evidence-raw-digest", self.rules(root))
+
+    def test_python_digest_alias_and_raw_subprocess_are_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "import subprocess\n"
+                "from tools.evidence_digest import artifact_byte_sha256 as digest\n"
+                "value = digest(report_path)\n"
+                "subprocess.run(['sha256sum', 'report.json'])\n",
+            )
+            rules = self.rules(root)
+            self.assertIn("text-evidence-byte-digest", rules)
+            self.assertIn("untyped-evidence-digest-command", rules)
+
     def test_non_python_domain_manifest_matches_exact_command(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)

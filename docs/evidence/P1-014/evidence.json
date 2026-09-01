@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-01T09:23:41.146255Z",
+  "generated_at_utc": "2026-09-01T09:46:56.209812Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,7 +13,7 @@
       "path": "docs/evidence/P1-014/task-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "eab14ecc24786729a3192529a85f208524f1ec86044908b372d350888f8b9473"
+        "sha256": "013c6e95640f621a38b94dea6a114c04f6a3331e7c4c82e425285e271d46d509"
       },
       "source_task": "P1-014"
     },
@@ -40,7 +40,7 @@
       "path": "docs/evidence/P1-014/linux-crlf.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "0f2a8ce7823f47486886f10e089cc6cfab42245101282c85d36a29af18071991"
+        "sha256": "d2f567630dae9513b7879f3f08e57bb52a0ac88daafe6ba5a083e16ca4c9a075"
       },
       "source_task": "P1-014"
     },
@@ -49,12 +49,12 @@
       "path": "docs/evidence/P1-014/windows-crlf.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "7b21308ec421ce9e2c39a115068ecb3a72dc6f80a43e50008e1bcd37225c41a0"
+        "sha256": "89f2714868b4cf36965f4c54483252d6eaf54158bb87a129180767e6ace80f09"
       },
       "source_task": "P1-014"
     }
   ],
-  "revision": "d7127662cd3657323284d05680f36e67178d6733",
+  "revision": "6d1011dfecc33a23e95a6705eecae204c4ef8c37",
   "schema_version": 2,
   "source_sha256": {
     ".github/workflows/linux-release-attestation.yml": {
@@ -99,7 +99,7 @@
     },
     "tools/architecture_guard.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "ab8411545b9b103fc276d54ee9dcb0d640773f7d9e39f16dbbe8e4ec877f7f62"
+      "sha256": "4a8350d94de6981acff6476d58ba49fa9c3f096cf140f339b79d5e2d4c1e299d"
     },
     "tools/benchmarks/http1_benchmark.py": {
       "domain": "text-utf8-lf-v1",
@@ -143,7 +143,7 @@
     },
     "tools/evidence_digest.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "282c3627bf56c7f72ad48c3948b08ff6226f4c752770d8e185f3e6989b569cee"
+      "sha256": "018d6ade1ef4d395a7e188cf28580327d21297c2b892e452f24e8106b33d8b40"
     },
     "tools/gates/dns_carrier_thread.py": {
       "domain": "text-utf8-lf-v1",
@@ -303,7 +303,7 @@
     },
     "tools/tests/test_architecture_guard.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "63e1280e2266c50f8359f97f99b95ad95b5f1b9144bf020d285601f9a4e324cb"
+      "sha256": "1d375b6d1b4f05bb696292f0a2161413e997b88b4dac03d5de6b9ba36202a8aa"
     },
     "tools/tests/test_build_resolver.py": {
       "domain": "text-utf8-lf-v1",
@@ -363,7 +363,7 @@
     },
     "tools/tests/test_p1_014_evidence_digest_types.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "2c454b01ea9b2db09fc601c42623ecfce7db80f5122f1799c53d058ec832a251"
+      "sha256": "841c5d2a4126d932b1104818fd74e7be031983dac4f07d301e8f3b614976e388"
     },
     "tools/tests/test_tls_provider_poc.py": {
       "domain": "text-utf8-lf-v1",
