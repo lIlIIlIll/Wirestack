@@ -150,6 +150,41 @@ class ArchitectureGuardTests(unittest.TestCase):
             )
             self.assertIn("text-evidence-byte-digest", self.rules(root))
 
+    def test_keyword_text_path_rejects_artifact_byte_digest(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "from pathlib import Path\n"
+                "from tools.evidence_digest import artifact_byte_sha256\n"
+                "value = artifact_byte_sha256(path=Path('report.json'))\n",
+            )
+            self.assertIn("text-evidence-byte-digest", self.rules(root))
+
+    def test_assigned_subprocess_and_os_system_commands_are_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "import os\nimport subprocess\n"
+                "command = ['sha256sum', 'report.json']\n"
+                "subprocess.run(command)\n"
+                "os.system('sha256sum report.json')\n",
+            )
+            violations = guard.run_guard(root)
+            self.assertEqual(
+                2,
+                sum(item.rule == "untyped-evidence-digest-command" for item in violations),
+            )
+
+    def test_scripts_python_is_scanned_for_digest_violations(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(root, "scripts/new_gate.py", "import hashlib\n")
+            self.assertIn("untyped-evidence-digest", self.rules(root))
+
     def test_repository_evidence_rejects_untyped_digest_comparison(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)

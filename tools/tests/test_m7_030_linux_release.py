@@ -8,6 +8,7 @@ import os
 import tarfile
 import tempfile
 import unittest
+import unittest.mock
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -388,6 +389,32 @@ class M7030LinuxReleaseTest(unittest.TestCase):
             self.assertEqual(
                 evidence_digest.artifact_byte_sha256(root / "sbom"), sbom["signedPayloadSha256"])
             self.assertNotEqual(sbom["sha256"], sbom["signedPayloadSha256"])
+
+    def test_hosted_report_cli_returns_structured_invalid_utf8_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            arguments = ["hosted-report", "--commit", "a" * 40]
+            for name in ("artifact", "sbom", "release-manifest"):
+                subject = root / name
+                bundle = root / f"{name}.bundle"
+                verification = root / f"{name}.verification.json"
+                subject.write_bytes(b"\xff" if name == "sbom" else name.encode())
+                bundle.write_bytes(b"bundle")
+                verification.write_bytes(release.canonical_json({"verified": 1}))
+                arguments.extend([
+                    f"--{name}", str(subject),
+                    f"--{name}-bundle", str(bundle),
+                    f"--{name}-verification", str(verification),
+                ])
+            output = root / "report.json"
+            arguments.extend(["--output", str(output)])
+            stdout = io.StringIO()
+            with unittest.mock.patch("sys.stdout", stdout):
+                self.assertEqual(1, release.main(arguments))
+            report = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual("FAIL", report["decision"])
+            self.assertEqual("TEXT_UTF8", report["code"])
+            self.assertEqual(report, json.loads(stdout.getvalue()))
 
     def test_rehearsal_is_bounded_and_reads_hosted_gate_separately(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
