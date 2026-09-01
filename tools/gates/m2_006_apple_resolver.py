@@ -651,7 +651,9 @@ def validate_report(report: object, expected_revision: str, expected_mode: str) 
                 or not re.fullmatch(r"[0-9a-f]{64}", probe_sha)
                 or not isinstance(bundle_source_probe_sha, str)
                 or not re.fullmatch(r"[0-9a-f]{64}", bundle_source_probe_sha)
-                or probe_sha != bundle_source_probe_sha
+                or not evidence_digest.schema_artifact_sha256_equal(
+                    probe_sha, bundle_source_probe_sha
+                )
                 or not isinstance(bundle_probe_sha, str)
                 or not re.fullmatch(r"[0-9a-f]{64}", bundle_probe_sha)
                 or not isinstance(install, dict)

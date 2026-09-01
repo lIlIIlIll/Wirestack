@@ -163,7 +163,7 @@ def load_manifest(root: Path, manifest_path: Path) -> tuple[dict[str, Any], list
         corpus = checked_path(root, corpus_value)
         compact = decode_hex_corpus(corpus)
         actual_digest = evidence_digest.text_evidence_sha256(corpus)
-        if actual_digest != expected_digest:
+        if not evidence_digest.schema_text_sha256_equal(actual_digest, expected_digest):
             raise GateError(f"corpus digest mismatch: {name}")
         targets.append({
             **item,

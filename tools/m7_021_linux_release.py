@@ -456,7 +456,9 @@ def validate_report(
     if verify_current_sources:
         if set(inputs) != set(QUALIFICATION_INPUTS):
             raise ReleaseError("qualification input inventory is stale")
-        if source_digest != source_tree_sha256(root):
+        if not evidence_digest.schema_text_sha256_equal(
+            source_digest, source_tree_sha256(root)
+        ):
             raise ReleaseError("qualification source tree fingerprint is stale")
         expected_inputs = {
             relative: evidence_digest.text_evidence_sha256(root / relative) for relative in QUALIFICATION_INPUTS
