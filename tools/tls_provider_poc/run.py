@@ -372,7 +372,7 @@ def source_provider(spec: Mapping[str, Any], work: Path, log: Path) -> tuple[Pat
     archive = source_root / Path(spec["url"]).name
     download(spec["url"], archive)
     digest = evidence_digest.artifact_byte_sha256(archive)
-    if digest != spec["sha256"]:
+    if not evidence_digest.artifact_byte_sha256_equal(digest, spec["sha256"]):
         raise PocError(f"archive digest mismatch: {digest}")
     src = safe_extract(archive, source_root / "unpacked")
     resolved_commit = resolve_git_tag(spec["commit_resolution_url"])
