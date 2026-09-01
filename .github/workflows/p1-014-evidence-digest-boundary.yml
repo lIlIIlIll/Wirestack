@@ -1,0 +1,43 @@
+name: P1-014 evidence digest boundary
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/p1-014-evidence-digest-boundary.yml"
+      - "tools/evidence_digest.py"
+      - "tools/repository/**"
+      - "tools/architecture_guard.py"
+      - "tools/tests/test_architecture_guard.py"
+      - "tools/tests/test_p1_014_evidence_digest_types.py"
+      - "docs/evidence/P1-014/test-plan.md"
+
+permissions:
+  contents: read
+
+jobs:
+  windows-crlf:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Run typed digest fault injection
+        shell: pwsh
+        run: >-
+          python -m unittest
+          tools.repository.tests.test_repository_tooling
+          tools.tests.test_architecture_guard
+          tools.tests.test_p1_014_evidence_digest_types -v
+      - name: Record native Windows CRLF evidence
+        shell: pwsh
+        run: >-
+          python tools/evidence_digest.py --root . crlf-report
+          --expected-platform windows-x86_64
+          --output docs/evidence/P1-014/windows-crlf.json
+      - name: Upload bounded Windows evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: p1-014-windows-crlf-${{ github.sha }}
+          path: docs/evidence/P1-014/windows-crlf.json
+          if-no-files-found: error
+          retention-days: 14

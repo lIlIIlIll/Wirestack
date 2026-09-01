@@ -1,0 +1,9 @@
+{
+  "kind": "architecture-guard",
+  "ok": true,
+  "root": "/home/elliot/playground/Wirestack",
+  "schema_version": 1,
+  "status": "PASS",
+  "violation_count": 0,
+  "violations": []
+}

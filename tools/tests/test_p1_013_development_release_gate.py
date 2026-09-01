@@ -62,8 +62,8 @@ class P1013DevelopmentReleaseGateTests(unittest.TestCase):
         with self.assertRaisesRegex(release.ReleaseError, "source tree fingerprint is stale"):
             release.validate_report(qualification, ROOT)
         with self.assertRaisesRegex(
-            candidate.m7_021_linux_release.ReleaseError,
-            "source tree fingerprint is stale",
+            candidate.m7_032_public_api_inventory.PublicApiInventoryError,
+            "committed public API report is stale",
         ):
             candidate.build_candidate(ROOT)
 

@@ -35,6 +35,58 @@ class ArchitectureGuardTests(unittest.TestCase):
                        "package wirestack.internal.transport_stdnet\n\nimport std.net.*\n")
             self.assertEqual([], guard.run_guard(root))
 
+    def test_repository_rejects_raw_hashlib_digest_outside_control_plane(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "import hashlib\nvalue = hashlib.sha256(b'evidence').hexdigest()\n",
+            )
+            self.assertIn("untyped-evidence-digest", self.rules(root))
+
+    def test_repository_rejects_ambiguous_digest_helper(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(root, "tools/gates/evidence.py", "def sha256_bytes(value):\n    return value\n")
+            self.assertIn("untyped-evidence-digest-helper", self.rules(root))
+
+    def test_text_path_rejects_artifact_byte_entry_outside_control_plane(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "def digest(report_path):\n    return artifact_byte_sha256(report_path)\n",
+            )
+            self.assertIn("text-evidence-byte-digest", self.rules(root))
+
+    def test_repository_evidence_rejects_untyped_digest_comparison(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/repository/evidence.py",
+                "def compare(item, expected):\n    return item.get('sha256') == expected\n",
+            )
+            self.assertIn("untyped-evidence-digest-comparison", self.rules(root))
+
+    def test_text_evidence_rejects_artifact_digest_and_utf8_fallback(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/repository/evidence.py",
+                "def digest(report_path):\n"
+                "    try:\n"
+                "        return report_path.read_text(encoding='utf-8')\n"
+                "    except UnicodeDecodeError:\n"
+                "        return artifact_byte_digest(report_path)\n",
+            )
+            rules = self.rules(root)
+            self.assertIn("text-evidence-byte-digest", rules)
+            self.assertIn("text-evidence-byte-fallback", rules)
+
     def test_concrete_provider_is_rejected_from_generic_tls_and_http(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)

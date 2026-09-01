@@ -1,0 +1,14 @@
+{
+  "expected_platform": "windows-x86_64",
+  "issues": [
+    {
+      "code": "HOSTED_WINDOWS_NOT_RUN",
+      "detail": "The GitHub Windows workflow has not run for this unpushed candidate revision."
+    }
+  ],
+  "kind": "p1-014-crlf-fault-injection",
+  "platform": null,
+  "revision": null,
+  "schema_version": 1,
+  "status": "BLOCKED"
+}
