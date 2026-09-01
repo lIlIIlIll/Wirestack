@@ -2393,7 +2393,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
             return false
         }
         ensureContainerDepth()
-        if (rawDepth == 0) { beforeValue() }
+        beginRawValue()
         rawDepth++
         try {
             if (resultKind == 2) {
@@ -2415,7 +2415,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
             if (value.isNaN() || value.isInf()) { return false }
         }
         ensureContainerDepth()
-        if (rawDepth == 0) { beforeValue() }
+        beginRawValue()
         rawDepth++
         try {
             if (resultKind == 2) {
@@ -2434,7 +2434,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
             return false
         }
         ensureContainerDepth()
-        if (rawDepth == 0) { beforeValue() }
+        beginRawValue()
         rawDepth++
         try {
             target.writeByte(b'[')
@@ -2454,7 +2454,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
             return false
         }
         ensureContainerDepth()
-        if (rawDepth == 0) { beforeValue() }
+        beginRawValue()
         rawDepth++
         try {
             if (target.tryWriteNativeInt64Array(values)) { return true }
@@ -2483,7 +2483,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
             return false
         }
         ensureContainerDepth()
-        if (rawDepth == 0) { beforeValue() }
+        beginRawValue()
         rawDepth++
         try {
             writeRawStringArrayList("", values)
@@ -2498,7 +2498,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
             return false
         }
         ensureContainerDepth()
-        if (rawDepth == 0) { beforeValue() }
+        beginRawValue()
         rawDepth++
         try {
             writeRawInt64Map("", values)
@@ -2513,7 +2513,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
             return false
         }
         ensureContainerDepth()
-        if (rawDepth == 0) { beforeValue() }
+        beginRawValue()
         rawDepth++
         try {
             target.writeByte(b'{')
@@ -2533,7 +2533,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
             return false
         }
         ensureContainerDepth()
-        if (rawDepth == 0) { beforeValue() }
+        beginRawValue()
         rawDepth++
         try {
             target.writeByte(b'{')
@@ -2595,6 +2595,10 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
     }
 
     private func beginRawScalar(): Unit {
+        beginRawValue()
+    }
+
+    private func beginRawValue(): Unit {
         if (rawDepth != 0) { return }
         if (rawRootPreclaimed) {
             rawRootPreclaimed = false

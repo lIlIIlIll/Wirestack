@@ -2,6 +2,8 @@ package yjson
 
 import yjson_macros.*
 import std.collection.*
+import std.math.numeric.*
+import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
 
@@ -170,5 +172,167 @@ class GeneratedBulkPathRegressionTest {
         let output = YJsonMemoryOutputStream()
         YJson.writeJson(value, output, codec: PrimitiveContainerBulkMatrixJson)
         @Expect(output.toUtf8String(), text)
+    }
+}
+
+@JsonCodec
+class CursorMatrixLeaf {
+    public let id: Int64
+    public let label: String
+
+    public init(id: Int64, label: String) {
+        this.id = id
+        this.label = label
+    }
+}
+
+@JsonCodec
+enum CursorMatrixEvent {
+    Empty | Payload(String, BigInt)
+}
+
+@JsonCodec
+class ExtendedCursorContainerMatrix {
+    public let runes: Array<Rune>
+    public let bigInts: ArrayList<BigInt>
+    public let decimals: HashMap<String, Decimal>
+    @JsonUsing[JsonCodecs.array(JsonCodecs.rfc3339DateTime)]
+    public let dates: Array<DateTime>
+    public let maybeRunes: Option<Array<Rune>>
+    public let leaves: ArrayList<CursorMatrixLeaf>
+    public let events: HashMap<String, CursorMatrixEvent>
+    public let deep: HashMap<String, ArrayList<Option<Array<Decimal>>>>
+
+    public init(
+        runes: Array<Rune>,
+        bigInts: ArrayList<BigInt>,
+        decimals: HashMap<String, Decimal>,
+        dates: Array<DateTime>,
+        maybeRunes: Option<Array<Rune>>,
+        leaves: ArrayList<CursorMatrixLeaf>,
+        events: HashMap<String, CursorMatrixEvent>,
+        deep: HashMap<String, ArrayList<Option<Array<Decimal>>>>
+    ) {
+        this.runes = runes
+        this.bigInts = bigInts
+        this.decimals = decimals
+        this.dates = dates
+        this.maybeRunes = maybeRunes
+        this.leaves = leaves
+        this.events = events
+        this.deep = deep
+    }
+}
+
+@Test
+class ExtendedGeneratedCursorPathTest {
+    private func hasCursorRead<T>(codec: JsonCodec<T>): Bool {
+        match (codec) {
+            case _: GeneratedCursorReadCodecV1<T> => true
+            case _ => false
+        }
+    }
+
+    private func hasCursorWrite<T>(codec: JsonCodec<T>): Bool {
+        match (codec) {
+            case cursor: GeneratedCursorWriteCodecV1<T> => cursor.supportsCompactCursorWrite()
+            case _ => false
+        }
+    }
+
+    private func assertCursorCodec<T>(codec: JsonCodec<T>): Unit {
+        @Expect(hasCursorRead(codec))
+        @Expect(hasCursorWrite(codec))
+    }
+
+    private func sample(): ExtendedCursorContainerMatrix {
+        let bigInts = ArrayList<BigInt>()
+        bigInts.add(BigInt.parse("1234567890123456789012345678901234567890"))
+        bigInts.add(BigInt.parse("-42"))
+        let decimals = HashMap<String, Decimal>()
+        decimals.add("exp", Decimal.parse("1.250e2"))
+        decimals.add("small", Decimal.parse("-0.004"))
+        let leaves = ArrayList<CursorMatrixLeaf>()
+        leaves.add(CursorMatrixLeaf(7, "仓颉"))
+        let events = HashMap<String, CursorMatrixEvent>()
+        events.add("event", CursorMatrixEvent.Payload("ready", BigInt.parse("9223372036854775808")))
+        let deepItems = ArrayList<Option<Array<Decimal>>>()
+        deepItems.add(None<Array<Decimal>>)
+        deepItems.add(Some([Decimal.parse("3e2"), Decimal.parse("-4.5")]))
+        let deep = HashMap<String, ArrayList<Option<Array<Decimal>>>>()
+        deep.add("items", deepItems)
+        ExtendedCursorContainerMatrix(
+            [r'仓', r'𠮷'], bigInts, decimals,
+            [DateTime.parse("2024-06-20T14:42:33+08:00", DateTimeFormat.RFC3339)],
+            Some([r'界']), leaves, events, deep
+        )
+    }
+
+    private func assertValue(value: ExtendedCursorContainerMatrix): Unit {
+        @Expect(value.runes[1].toString(), "𠮷")
+        @Expect(value.bigInts[0], BigInt.parse("1234567890123456789012345678901234567890"))
+        @Expect(value.decimals["exp"], Decimal.parse("1.250e2"))
+        @Expect(value.dates[0], DateTime.parse("2024-06-20T14:42:33+08:00", DateTimeFormat.RFC3339))
+        @Expect(value.maybeRunes.getOrThrow()[0].toString(), "界")
+        @Expect(value.leaves[0].label, "仓颉")
+        match (value.events["event"]) {
+            case CursorMatrixEvent.Payload(label, number) =>
+                @Expect(label, "ready")
+                @Expect(number, BigInt.parse("9223372036854775808"))
+            case _ => fail("expected payload enum")
+        }
+        @Expect(value.deep["items"][0].isNone())
+        @Expect(value.deep["items"][1].getOrThrow()[1], Decimal.parse("-4.5"))
+    }
+
+    @TestCase
+    func allRemainingLeafAndRecursiveShapesRoundTripAcrossEntrypoints(): Unit {
+        let value = sample()
+        let text = YJson.toJson(value)
+        assertValue(YJson.fromJson<ExtendedCursorContainerMatrix>(text))
+
+        let bytes = YJson.toJsonBytes(value)
+        @Expect(String.fromUtf8(bytes), text)
+        assertValue(YJson.fromJson<ExtendedCursorContainerMatrix>(bytes))
+
+        let input = YJsonByteArrayInputStream(bytes)
+        assertValue(YJson.fromJson<ExtendedCursorContainerMatrix>(input))
+
+        let output = YJsonMemoryOutputStream()
+        YJson.writeJson(value, output)
+        @Expect(output.toUtf8String(), text)
+
+        let pretty = YJson.toJson(value, options: JsonWriteOptions.pretty())
+        assertValue(YJson.fromJson<ExtendedCursorContainerMatrix>(pretty))
+    }
+
+    @TestCase
+    func everySupportedLeafAndRecursiveConstructorAdvertisesCursorCapability(): Unit {
+        assertCursorCodec(JsonCodecs.bool)
+        assertCursorCodec(JsonCodecs.int8)
+        assertCursorCodec(JsonCodecs.int16)
+        assertCursorCodec(JsonCodecs.int32)
+        assertCursorCodec(JsonCodecs.int64)
+        assertCursorCodec(JsonCodecs.uint8)
+        assertCursorCodec(JsonCodecs.uint16)
+        assertCursorCodec(JsonCodecs.uint32)
+        assertCursorCodec(JsonCodecs.uint64)
+        assertCursorCodec(JsonCodecs.float16)
+        assertCursorCodec(JsonCodecs.float32)
+        assertCursorCodec(JsonCodecs.float64)
+        assertCursorCodec(JsonCodecs.string)
+        assertCursorCodec(JsonCodecs.rune)
+        assertCursorCodec(JsonCodecs.bigInt)
+        assertCursorCodec(JsonCodecs.decimal)
+        assertCursorCodec(JsonCodecs.rfc3339DateTime)
+
+        assertCursorCodec(JsonCodecs.option(JsonCodecs.int64))
+        assertCursorCodec(JsonCodecs.array(JsonCodecs.int64))
+        assertCursorCodec(JsonCodecs.arrayList(JsonCodecs.int64))
+        assertCursorCodec(JsonCodecs.stringMap(JsonCodecs.int64))
+        assertCursorCodec(JsonCodecs.stringMap(JsonCodecs.array(JsonCodecs.decimal)))
+        assertCursorCodec(CursorMatrixLeafJson)
+        assertCursorCodec(CursorMatrixEventJson)
+        assertCursorCodec(ExtendedCursorContainerMatrixJson)
     }
 }

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import shutil
 
 
 PROFILE = '\n[profile.customized-option]\ncfg = "--gc-mode=marksweep"\n'
@@ -51,6 +52,10 @@ def main() -> int:
     manifest = bench / "cjpm.toml"
     if not source.is_file() or not manifest.is_file():
         raise RuntimeError(f"not a yjson source copy: {root}")
+
+    for cache in root.rglob("build-script-cache"):
+        if cache.is_dir():
+            shutil.rmtree(cache)
 
     disabled = bench / "t9-disabled-sources"
     disabled.mkdir(exist_ok=True)

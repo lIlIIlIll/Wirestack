@@ -9,3 +9,4 @@ compile-option = "-Woff unused"
 
 [dependencies]
 yjson = { path = "../.." }
+yjson_macros = { path = "../yjson_macros" }

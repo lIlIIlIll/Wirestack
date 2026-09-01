@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the one-shot json4cj/yjson T9 comparison used by this repository.
+"""Run the one-shot json4cj/yjson/Jackson T9 comparison used by this repository.
 
 The script keeps the repository untouched: it creates isolated local and
 Server copies, builds the two libraries, runs the 22 primary T9.1-T9.4 cases,
@@ -24,14 +24,19 @@ def run(command: list[str], *, cwd: Path | None = None, dry_run: bool = False) -
     print(f"+ {rendered}", flush=True)
     if dry_run:
         return ""
-    return subprocess.run(
-        command,
-        cwd=cwd,
-        check=True,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-    ).stdout.strip()
+    try:
+        return subprocess.run(
+            command,
+            cwd=cwd,
+            check=True,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        ).stdout.strip()
+    except subprocess.CalledProcessError as error:
+        if error.stdout:
+            print(error.stdout, flush=True)
+        raise
 
 
 def ssh(server: str, command: str, *, dry_run: bool = False) -> str:
@@ -86,6 +91,7 @@ def main() -> int:
     )
     parser.add_argument("--json4cj-url", default="https://gitcode.com/L_lipo/json4cj")
     parser.add_argument("--json4cj-branch", default="main")
+    parser.add_argument("--jackson-version", default="2.17.2")
     parser.add_argument("--daily-sdk-root", type=Path,
         default=Path("<home>/cangjie_sdk/daily"),
         help="local daily SDK root containing cangjie/ and linux_x86_64_cjnative/")
@@ -104,6 +110,8 @@ def main() -> int:
         output.mkdir(parents=True)
     local_copy = output / "work" / "yjson"
     corpus = output / "work" / "corpus"
+    if not args.dry_run:
+        local_copy.parent.mkdir(parents=True)
 
     remote = args.remote_workdir
     if not remote:
@@ -113,13 +121,15 @@ def main() -> int:
     print(f"remote workdir: {remote}")
 
     excludes = [
-        "--exclude=.git", "--exclude=target", "--exclude=__pycache__",
+        "--exclude=.git", "--exclude=target", "--exclude=build-script-cache",
+        "--exclude=__pycache__",
         "--exclude=*.o", "--exclude=*.a", "--exclude=*.so",
     ]
     run(["rsync", "-a", *excludes, f"{args.yjson_root.resolve()}/", f"{local_copy}/"], dry_run=args.dry_run)
     run(["rsync", "-a", *excludes, f"{args.yjson_root.resolve()}/", f"{args.server}:{remote}/yjson-msgc/"], dry_run=args.dry_run)
     run(["rsync", "-a", *excludes, f"{args.yjson_root.resolve()}/", f"{args.server}:{remote}/yjson-daily/"], dry_run=args.dry_run)
-    for name in ("run_t9_throughput.py", "prepare_t9_yjson_copy.py", "prepare_t9_json4cj_copy.py"):
+    for name in ("run_t9_throughput.py", "run_t9_jackson.py",
+                 "prepare_t9_yjson_copy.py", "prepare_t9_json4cj_copy.py"):
         run(["rsync", "-a", str(SCRIPT_DIR / name), f"{args.server}:{remote}/{name}"], dry_run=args.dry_run)
 
     if not args.dry_run:
@@ -144,6 +154,19 @@ def main() -> int:
         args.server,
         f"git -C {shlex.quote(remote + '/json4cj')} rev-parse HEAD",
     )
+    jackson_dir = remote + "/jackson-" + args.jackson_version
+    jackson_base = (
+        "https://repo1.maven.org/maven2/com/fasterxml/jackson/core"
+    )
+    ssh(args.server,
+        f"set -e; mkdir -p {shlex.quote(jackson_dir)}; "
+        f"curl -fsSL --retry 3 -o {shlex.quote(jackson_dir + '/jackson-core.jar')} "
+        f"{shlex.quote(jackson_base + '/jackson-core/' + args.jackson_version + '/jackson-core-' + args.jackson_version + '.jar')}; "
+        f"curl -fsSL --retry 3 -o {shlex.quote(jackson_dir + '/jackson-databind.jar')} "
+        f"{shlex.quote(jackson_base + '/jackson-databind/' + args.jackson_version + '/jackson-databind-' + args.jackson_version + '.jar')}; "
+        f"curl -fsSL --retry 3 -o {shlex.quote(jackson_dir + '/jackson-annotations.jar')} "
+        f"{shlex.quote(jackson_base + '/jackson-annotations/' + args.jackson_version + '/jackson-annotations-' + args.jackson_version + '.jar')}",
+        dry_run=args.dry_run)
 
     env = remote_env(args.server_sdk)
     ssh(args.server,
@@ -178,6 +201,13 @@ def main() -> int:
             f"{shlex.quote(remote + '/results/' + library)} --cwd {shlex.quote(cwd)} "
             f"--runs 1 --cpu {args.cpu} --label {library} {extra}",
             dry_run=args.dry_run)
+    ssh(args.server,
+        f"python3 {shlex.quote(remote + '/run_t9_jackson.py')} "
+        f"{shlex.quote(remote + '/results/jackson-server')} "
+        f"--source {shlex.quote(remote + '/json4cj/docs/jackson-bench/JacksonBench.java')} "
+        f"--jars-dir {shlex.quote(jackson_dir)} --version {shlex.quote(args.jackson_version)} "
+        f"--cpu {args.cpu} --label jackson-server",
+        dry_run=args.dry_run)
 
     run(["rsync", "-a", f"{args.server}:{remote}/results/", f"{output}/server/"], dry_run=args.dry_run)
     if not args.dry_run:
@@ -190,6 +220,7 @@ def main() -> int:
             "json4cj_url": args.json4cj_url,
             "json4cj_branch": args.json4cj_branch,
             "json4cj_git_head": json4cj_sha,
+            "jackson_version": args.jackson_version,
             "server": args.server,
             "server_sdk": args.server_sdk,
             "daily_sdk_source": str(args.daily_sdk_root.resolve()),
@@ -203,6 +234,7 @@ def main() -> int:
             "--json4cj-server", str(output / "server/json4cj-server-sdk"),
             "--yjson-server", str(output / "server/yjson-server-sdk"),
             "--yjson-server-daily", str(output / "server/yjson-server-daily"),
+            "--jackson-server", str(output / "server/jackson-server"),
             "--output", str(output / "comparison"),
         ])
     return 0

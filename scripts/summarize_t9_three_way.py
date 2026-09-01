@@ -60,12 +60,20 @@ def main() -> int:
     parser.add_argument("--json4cj-server", type=Path, required=True)
     parser.add_argument("--yjson-server", type=Path, required=True)
     parser.add_argument("--yjson-server-daily", type=Path, required=True)
+    parser.add_argument("--jackson-server", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
     order, json4cj, json4cj_meta = load(args.json4cj_server)
     yjson_server_order, yjson_server, yjson_server_meta = load(args.yjson_server)
     yjson_daily_order, yjson_daily, yjson_daily_meta = load(args.yjson_server_daily)
+    jackson = None
+    if args.jackson_server is not None:
+        jackson_order, jackson, jackson_meta = load(args.jackson_server)
+        if order != jackson_order:
+            raise RuntimeError("Jackson case order or case set differs")
+        require_same("Jackson host", [json4cj_meta.get("host"), jackson_meta.get("host")])
+        require_same("Jackson CPU", [json4cj_meta.get("cpu"), jackson_meta.get("cpu")])
     if order != yjson_server_order or order != yjson_daily_order:
         raise RuntimeError("case order or case set differs between result directories")
     all_meta = [json4cj_meta, yjson_server_meta, yjson_daily_meta]
@@ -86,12 +94,14 @@ def main() -> int:
     csv_path = args.output / "comparison.csv"
     server_ratios: list[float] = []
     host_sdk_ratios: list[float] = []
+    jackson_ratios: list[float] = []
+    json4cj_jackson_ratios: list[float] = []
     ratio_groups: dict[str, list[float]] = {
         "serialize": [], "deserialize": [], "roundtrip": []
     }
     with csv_path.open("w", newline="", encoding="utf-8") as stream:
         writer = csv.writer(stream)
-        writer.writerow([
+        columns = [
             "case",
             "json4cj_server_us",
             "yjson_server_us",
@@ -99,7 +109,13 @@ def main() -> int:
             "yjson_vs_json4cj_same_server_x",
             "yjson_daily_vs_json4cj_same_server_x",
             "yjson_daily_vs_msgc_same_server_x",
-        ])
+        ]
+        if jackson is not None:
+            columns.extend((
+                "jackson_server_us", "yjson_vs_jackson_same_server_x",
+                "json4cj_vs_jackson_same_server_x",
+            ))
+        writer.writerow(columns)
         for case in order:
             server_ratio = yjson_server[case] / json4cj[case]
             host_sdk_ratio = yjson_daily[case] / yjson_server[case]
@@ -109,7 +125,7 @@ def main() -> int:
                 "deserialize" if "Deserialize" in case else "serialize"
             )
             ratio_groups[group].append(server_ratio)
-            writer.writerow([
+            row = [
                 case,
                 f"{json4cj[case]:.6f}",
                 f"{yjson_server[case]:.6f}",
@@ -117,22 +133,41 @@ def main() -> int:
                 f"{server_ratio:.3f}",
                 f"{yjson_daily[case] / json4cj[case]:.3f}",
                 f"{host_sdk_ratio:.3f}",
-            ])
+            ]
+            if jackson is not None:
+                jackson_ratio = yjson_server[case] / jackson[case]
+                json4cj_jackson_ratio = json4cj[case] / jackson[case]
+                jackson_ratios.append(jackson_ratio)
+                json4cj_jackson_ratios.append(json4cj_jackson_ratio)
+                row.extend((
+                    f"{jackson[case]:.6f}", f"{jackson_ratio:.3f}",
+                    f"{json4cj_jackson_ratio:.3f}",
+                ))
+            writer.writerow(row)
 
     markdown = [
         "> One-run snapshot (`--runs 1`); this is not release performance qualification.",
         "",
-        "| Workload | json4cj us/op | yjson msgc us/op | yjson daily us/op | msgc/json4cj | daily/json4cj | daily/msgc |",
-        "|---|---:|---:|---:|---:|---:|---:|",
+        ("| Workload | json4cj us/op | yjson msgc us/op | yjson daily us/op | "
+         "msgc/json4cj | daily/json4cj | daily/msgc |" +
+         (" Jackson us/op | msgc/Jackson | json4cj/Jackson |" if jackson is not None else "")),
+        ("|---|---:|---:|---:|---:|---:|---:|" +
+         ("---:|---:|---:|" if jackson is not None else "")),
     ]
     for case in order:
         ratio = yjson_server[case] / json4cj[case]
-        markdown.append(
+        line = (
             f"| {case} | {json4cj[case]:.3f} | {yjson_server[case]:.3f} | "
             f"{yjson_daily[case]:.3f} | {ratio:.2f}x | "
             f"{yjson_daily[case] / json4cj[case]:.2f}x | "
             f"{yjson_daily[case] / yjson_server[case]:.2f}x |"
         )
+        if jackson is not None:
+            line += (
+                f" {jackson[case]:.3f} | {yjson_server[case] / jackson[case]:.2f}x | "
+                f"{json4cj[case] / jackson[case]:.2f}x |"
+            )
+        markdown.append(line)
     markdown.extend([
         "",
         f"Same-Server yjson/json4cj geometric mean: {geomean(server_ratios):.3f}x.",
@@ -143,6 +178,11 @@ def main() -> int:
         "",
         f"Same-Server daily/msgc yjson geometric mean: {geomean(host_sdk_ratios):.3f}x.",
     ])
+    if jackson_ratios:
+        markdown.extend((
+            f"Same-Server yjson MSGC/Jackson geometric mean: {geomean(jackson_ratios):.3f}x.",
+            f"Same-Server json4cj/Jackson geometric mean: {geomean(json4cj_jackson_ratios):.3f}x.",
+        ))
     (args.output / "comparison.md").write_text("\n".join(markdown) + "\n", encoding="utf-8")
     print(f"wrote {csv_path}")
     print(f"same-server geomean yjson/json4cj: {geomean(server_ratios):.3f}x")

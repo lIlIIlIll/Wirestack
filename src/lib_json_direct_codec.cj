@@ -70,7 +70,7 @@ public interface JsonWriter {
 // Runtime-owned cursor state used only by the matching generated-code SPI.
 // It is deliberately absent from JsonCodec, JsonReader, and JsonWriter so
 // application codecs never manage mutable path or depth bookkeeping.
-interface GeneratedWriteStateV1Owner {
+public interface GeneratedWriteStateV1Owner {
     func generatedWriteStateV1(): GeneratedWriteStateV1
 }
 
@@ -222,6 +222,14 @@ public interface GeneratedCodecV1<T> <: JsonCodec<T> {
     func readFast(reader: GeneratedSupportV1Reader): T
 }
 
+/// Opt-in generated-code seam for codecs that can consume an already-resolved
+/// reader cursor. Recursive codecs pass the same cursor through the whole
+/// value graph and use GeneratedCodecV1 only as a compatibility fallback.
+public interface GeneratedCursorReadCodecV1<T> <: JsonCodec<T> {
+    func readFastWithCursor(reader: GeneratedSupportV1Reader,
+        cursor: GeneratedSupportV1ReadCursor): T
+}
+
 /// Matching-version bridge used by generated codecs to retain the concrete
 /// direct-writer type across nested semantic encode calls.
 public interface GeneratedDirectWriteCodecV1<T> <: JsonCodec<T> {
@@ -235,9 +243,19 @@ public interface GeneratedCompactWriteCodecV1<T> <: GeneratedDirectWriteCodecV1<
     func writeCompactRaw(value: T, writer: GeneratedSupportV1Writer): Unit
 }
 
-/// Optional generated-code seam for nested compact objects. Parent codecs use
-/// it to retain one concrete writer cursor across the complete object graph.
-public interface GeneratedCompactCursorWriteCodecV1<T> <: GeneratedCompactWriteCodecV1<T> {
+/// Opt-in generated-code seam for custom and recursive codecs that can emit a
+/// compact value through an already-resolved writer cursor.
+public interface GeneratedCursorWriteCodecV1<T> <: JsonCodec<T> {
+    func supportsCompactCursorWrite(): Bool
+    func writeCompactWithCursor(value: T, writer: GeneratedSupportV1Writer,
+        cursor: GeneratedSupportV1WriteCursor): Unit
+}
+
+/// Optional generated-code seam for nested compact objects. It refines the
+/// general cursor protocol, so statically compact generated codecs need only
+/// advertise one interface while remaining usable by generic containers.
+public interface GeneratedCompactCursorWriteCodecV1<T> <:
+    GeneratedCompactWriteCodecV1<T> & GeneratedCursorWriteCodecV1<T> {
     func writeCompactRawWithCursor(value: T, writer: GeneratedSupportV1Writer,
         cursor: GeneratedSupportV1WriteCursor): Unit
 }
@@ -551,7 +569,8 @@ private func jsonPointerEscape(value: String): String {
     value.replace("~", "~0").replace("/", "~1")
 }
 
-class LambdaFastRawJsonCodec<T> <: GeneratedCodecV1<T> & JsonRawWriteCodec<T> {
+class LambdaFastRawJsonCodec<T> <: GeneratedCodecV1<T> &
+    GeneratedCursorReadCodecV1<T> & GeneratedCursorWriteCodecV1<T> & JsonRawWriteCodec<T> {
     private let writerFn: (T, JsonWriter) -> Unit
     private let readerFn: (JsonReader) -> T
     private let fastReaderFn: (JsonFastReader) -> T
@@ -594,6 +613,14 @@ class LambdaFastRawJsonCodec<T> <: GeneratedCodecV1<T> & JsonRawWriteCodec<T> {
         rawWriterFn(value, yJsonGeneratedWriterV1(writer))
     }
 
+    public func supportsCompactCursorWrite(): Bool { true }
+
+    public func writeCompactWithCursor(value: T, writer: GeneratedSupportV1Writer,
+        cursor: GeneratedSupportV1WriteCursor): Unit {
+        let _ = writer
+        rawWriterFn(value, cursor.generatedWriterV1())
+    }
+
     public func read(reader: JsonReader): T {
 
         let context = GeneratedSupportV1.readState(reader)
@@ -609,7 +636,14 @@ class LambdaFastRawJsonCodec<T> <: GeneratedCodecV1<T> & JsonRawWriteCodec<T> {
 
         let _ = context
         let _ = context
-        fastReaderFn(yJsonGeneratedReaderV1(reader))
+        readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+    }
+
+    public func readFastWithCursor(reader: GeneratedSupportV1Reader,
+        cursor: GeneratedSupportV1ReadCursor): T {
+        let context = GeneratedSupportV1.readState(reader)
+        let _ = context
+        fastReaderFn(cursor.generatedReaderV1())
     }
 }
 
@@ -625,6 +659,15 @@ public func readJsonFastWith<T>(codec: JsonCodec<T>, reader: GeneratedSupportV1R
 func readJsonNestedFastWith<T>(codec: JsonCodec<T>, reader: GeneratedSupportV1Reader): T {
     match (codec) {
         case fast: GeneratedCodecV1<T> => fast.readFast(reader)
+        case _ => codec.read(yJsonSemanticReaderV1(reader))
+    }
+}
+
+func readJsonNestedFastWithCursor<T>(codec: JsonCodec<T>, reader: GeneratedSupportV1Reader,
+    cursor: GeneratedSupportV1ReadCursor): T {
+    match (codec) {
+        case fast: GeneratedCursorReadCodecV1<T> => fast.readFastWithCursor(reader, cursor)
+        case legacy: GeneratedCodecV1<T> => legacy.readFast(reader)
         case _ => codec.read(yJsonSemanticReaderV1(reader))
     }
 }
@@ -668,10 +711,14 @@ private func resolvedGeneratedCodecV1<T>(codec: JsonCodec<T>): GeneratedCodecV1<
     }
 }
 
-private class OptionJsonCodec<T> <: GeneratedCodecV1<Option<T>> & GeneratedCompactWriteCodecV1<Option<T>> {
+private class OptionJsonCodec<T> <: GeneratedCodecV1<Option<T>> &
+    GeneratedCursorReadCodecV1<Option<T>> & GeneratedCompactWriteCodecV1<Option<T>> &
+    GeneratedCursorWriteCodecV1<Option<T>> {
     private let inner: JsonCodec<T>
     private let directInner: Option<GeneratedDirectWriteCodecV1<T>>
     private let compactRawInner: Option<GeneratedCompactWriteCodecV1<T>>
+    private let cursorReadInner: Option<GeneratedCursorReadCodecV1<T>>
+    private let cursorWriteInner: Option<GeneratedCursorWriteCodecV1<T>>
 
     public init(inner: JsonCodec<T>) {
         this.inner = inner
@@ -682,6 +729,14 @@ private class OptionJsonCodec<T> <: GeneratedCodecV1<Option<T>> & GeneratedCompa
         this.compactRawInner = match (inner) {
             case raw: GeneratedCompactWriteCodecV1<T> => Some(raw)
             case _ => None<GeneratedCompactWriteCodecV1<T>>
+        }
+        this.cursorReadInner = match (inner) {
+            case cursor: GeneratedCursorReadCodecV1<T> => Some(cursor)
+            case _ => None<GeneratedCursorReadCodecV1<T>>
+        }
+        this.cursorWriteInner = match (inner) {
+            case cursor: GeneratedCursorWriteCodecV1<T> => Some(cursor)
+            case _ => None<GeneratedCursorWriteCodecV1<T>>
         }
     }
 
@@ -722,6 +777,9 @@ private class OptionJsonCodec<T> <: GeneratedCodecV1<Option<T>> & GeneratedCompa
     }
 
     public func supportsCompactRaw(): Bool {
+        if (let Some(cursor) <- cursorWriteInner) {
+            return cursor.supportsCompactCursorWrite()
+        }
         match (compactRawInner) {
             case Some(raw) => raw.supportsCompactRaw()
             case None => false
@@ -730,16 +788,27 @@ private class OptionJsonCodec<T> <: GeneratedCodecV1<Option<T>> & GeneratedCompa
 
     public func writeCompactRaw(value: Option<T>, writer: GeneratedSupportV1Writer): Unit {
 
+        writeCompactWithCursor(value, writer, GeneratedSupportV1.writeCursor(writer))
+    }
+
+    public func supportsCompactCursorWrite(): Bool { supportsCompactRaw() }
+
+    public func writeCompactWithCursor(value: Option<T>, writer: GeneratedSupportV1Writer,
+        cursor: GeneratedSupportV1WriteCursor): Unit {
+
         let context = GeneratedSupportV1.writeState(writer)
 
         let _ = context
         match (value) {
             case Some(item) =>
-                match (compactRawInner) {
-                    case Some(raw) => raw.writeCompactRaw(item, writer)
-                    case None => throw JsonException("Compact raw codec is unavailable")
+                match (cursorWriteInner) {
+                    case Some(raw) => raw.writeCompactWithCursor(item, writer, cursor)
+                    case None => match (compactRawInner) {
+                        case Some(raw) => raw.writeCompactRaw(item, writer)
+                        case None => throw JsonException("Compact raw codec is unavailable")
+                    }
                 }
-            case None => writer.writeRawNull()
+            case None => cursor.writeRawNull()
         }
     }
 
@@ -756,17 +825,27 @@ private class OptionJsonCodec<T> <: GeneratedCodecV1<Option<T>> & GeneratedCompa
 
     public func readFast(reader: GeneratedSupportV1Reader): Option<T> {
 
+        readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+    }
+
+    public func readFastWithCursor(reader: GeneratedSupportV1Reader,
+        cursor: GeneratedSupportV1ReadCursor): Option<T> {
+
         let context = GeneratedSupportV1.readState(reader)
 
         let _ = context
-        if (reader.tryReadRawNull()) {
+        if (cursor.tryReadRawNull()) {
             return None<T>
         }
-        Some(readJsonNestedFastWith(inner, reader))
+        match (cursorReadInner) {
+            case Some(fast) => Some(fast.readFastWithCursor(reader, cursor))
+            case None => Some(readJsonNestedFastWith(inner, reader))
+        }
     }
 }
 
-private class StringOptionJsonCodec <: GeneratedCodecV1<Option<String>> {
+private class StringOptionJsonCodec <: GeneratedCodecV1<Option<String>> &
+    GeneratedCursorReadCodecV1<Option<String>> & GeneratedCursorWriteCodecV1<Option<String>> {
     public func write(value: Option<String>, writer: JsonWriter): Unit {
         let context = GeneratedSupportV1.writeState(writer)
         let _ = context
@@ -791,19 +870,37 @@ private class StringOptionJsonCodec <: GeneratedCodecV1<Option<String>> {
 
     public func readFast(reader: GeneratedSupportV1Reader): Option<String> {
 
+        readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+    }
+
+    public func readFastWithCursor(reader: GeneratedSupportV1Reader,
+        cursor: GeneratedSupportV1ReadCursor): Option<String> {
+
         let context = GeneratedSupportV1.readState(reader)
 
         let _ = context
         let _ = context
-        if (reader.tryReadRawNull()) {
+        if (cursor.tryReadRawNull()) {
             return None<String>
         }
-        Some(reader.readRawString())
+        Some(cursor.readRawString())
+    }
+
+    public func supportsCompactCursorWrite(): Bool { true }
+
+    public func writeCompactWithCursor(value: Option<String>, writer: GeneratedSupportV1Writer,
+        cursor: GeneratedSupportV1WriteCursor): Unit {
+        let _ = writer
+        match (value) {
+            case Some(item) => cursor.writeRawString(item)
+            case None => cursor.writeRawNull()
+        }
     }
 }
 
 private class Int64ArrayJsonCodec <: GeneratedCodecV1<Array<Int64>> &
-    GeneratedCompactWriteCodecV1<Array<Int64>> {
+    GeneratedCursorReadCodecV1<Array<Int64>> & GeneratedCompactWriteCodecV1<Array<Int64>> &
+    GeneratedCursorWriteCodecV1<Array<Int64>> {
     public func write(value: Array<Int64>, writer: JsonWriter): Unit {
         match (writer) {
             case direct: GeneratedSupportV1Writer => writeDirect(value, direct)
@@ -850,30 +947,43 @@ private class Int64ArrayJsonCodec <: GeneratedCodecV1<Array<Int64>> &
         }
     }
 
+    public func supportsCompactCursorWrite(): Bool { true }
+
+    public func writeCompactWithCursor(value: Array<Int64>, writer: GeneratedSupportV1Writer,
+        cursor: GeneratedSupportV1WriteCursor): Unit {
+        let _ = cursor
+        writeCompactRaw(value, writer)
+    }
+
     public func read(reader: JsonReader): Array<Int64> {
         ArrayJsonCodec<Int64>(Int64Json).read(reader)
     }
 
     public func readFast(reader: GeneratedSupportV1Reader): Array<Int64> {
+        readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+    }
+
+    public func readFastWithCursor(reader: GeneratedSupportV1Reader,
+        cursor: GeneratedSupportV1ReadCursor): Array<Int64> {
         let context = GeneratedSupportV1.readState(reader)
         context.enterValue()
         try {
             if (let Some(result) <- yJsonTryReadNativeInt64ArrayListV1(reader)) {
                 return result.toArray()
             }
-            reader.startRawArray()
-            if (!reader.hasRawArrayItem(true)) {
-                reader.endRawArray()
+            cursor.startRawArray()
+            if (!cursor.hasRawArrayItem(true)) {
+                cursor.endRawArray()
                 return Array<Int64>()
             }
-            let result = ArrayList<Int64>(reader.suggestRawArrayCapacity())
+            let result = ArrayList<Int64>(cursor.suggestRawArrayCapacity())
             var first = true
-            while (reader.hasRawArrayItem(first)) {
-                reader.beforeRawArrayItem(first)
-                result.add(reader.readRawInt64())
+            while (cursor.hasRawArrayItem(first)) {
+                cursor.beforeRawArrayItem(first)
+                result.add(cursor.readRawInt64())
                 first = false
             }
-            reader.endRawArray()
+            cursor.endRawArray()
             return result.toArray()
         } finally {
             context.leaveValue()
@@ -881,11 +991,15 @@ private class Int64ArrayJsonCodec <: GeneratedCodecV1<Array<Int64>> &
     }
 }
 
-private class ArrayJsonCodec<T> <: GeneratedCodecV1<Array<T>> & GeneratedCompactWriteCodecV1<Array<T>> {
+private class ArrayJsonCodec<T> <: GeneratedCodecV1<Array<T>> &
+    GeneratedCursorReadCodecV1<Array<T>> & GeneratedCompactWriteCodecV1<Array<T>> &
+    GeneratedCursorWriteCodecV1<Array<T>> {
     private let inner: JsonCodec<T>
     private let fastInner: GeneratedCodecV1<T>
     private let directInner: Option<GeneratedDirectWriteCodecV1<T>>
     private let compactRawInner: Option<GeneratedCompactWriteCodecV1<T>>
+    private let cursorReadInner: Option<GeneratedCursorReadCodecV1<T>>
+    private let cursorWriteInner: Option<GeneratedCursorWriteCodecV1<T>>
 
     public init(inner: JsonCodec<T>) {
         this.inner = inner
@@ -897,6 +1011,14 @@ private class ArrayJsonCodec<T> <: GeneratedCodecV1<Array<T>> & GeneratedCompact
         this.compactRawInner = match (inner) {
             case raw: GeneratedCompactWriteCodecV1<T> => Some(raw)
             case _ => None<GeneratedCompactWriteCodecV1<T>>
+        }
+        this.cursorReadInner = match (inner) {
+            case cursor: GeneratedCursorReadCodecV1<T> => Some(cursor)
+            case _ => None<GeneratedCursorReadCodecV1<T>>
+        }
+        this.cursorWriteInner = match (inner) {
+            case cursor: GeneratedCursorWriteCodecV1<T> => Some(cursor)
+            case _ => None<GeneratedCursorWriteCodecV1<T>>
         }
     }
 
@@ -968,6 +1090,9 @@ private class ArrayJsonCodec<T> <: GeneratedCodecV1<Array<T>> & GeneratedCompact
     }
 
     public func supportsCompactRaw(): Bool {
+        if (let Some(cursor) <- cursorWriteInner) {
+            return cursor.supportsCompactCursorWrite()
+        }
         match (compactRawInner) {
             case Some(raw) => raw.supportsCompactRaw()
             case None => false
@@ -976,18 +1101,24 @@ private class ArrayJsonCodec<T> <: GeneratedCodecV1<Array<T>> & GeneratedCompact
 
     public func writeCompactRaw(value: Array<T>, writer: GeneratedSupportV1Writer): Unit {
 
+        writeCompactWithCursor(value, writer, GeneratedSupportV1.writeCursor(writer))
+    }
+
+    public func supportsCompactCursorWrite(): Bool { supportsCompactRaw() }
+
+    public func writeCompactWithCursor(value: Array<T>, writer: GeneratedSupportV1Writer,
+        rawWriter: GeneratedSupportV1WriteCursor): Unit {
+
         let context = GeneratedSupportV1.writeState(writer)
 
         let _ = context
         context.enterValue()
         try {
-            let rawWriter = GeneratedSupportV1.writeCursor(writer)
             rawWriter.reserveRawCollectionCapacity(value.size)
             rawWriter.writeRawBeginArray()
             if (!value.isEmpty()) {
                 // writeCompactRaw is reachable only after supportsCompactRaw
                 // has confirmed this invariant.
-                let raw = compactRawInner.getOrThrow()
                 context.pushIndex(0)
                 try {
                     for (index in 0..value.size) {
@@ -995,7 +1126,10 @@ private class ArrayJsonCodec<T> <: GeneratedCodecV1<Array<T>> & GeneratedCompact
                             rawWriter.writeRawByte(b',')
                             context.updateLastIndex(index)
                         }
-                        raw.writeCompactRaw(value[index], writer)
+                        match (cursorWriteInner) {
+                            case Some(raw) => raw.writeCompactWithCursor(value[index], writer, rawWriter)
+                            case None => compactRawInner.getOrThrow().writeCompactRaw(value[index], writer)
+                        }
                     }
                 } finally {
                     context.popPath()
@@ -1035,17 +1169,23 @@ private class ArrayJsonCodec<T> <: GeneratedCodecV1<Array<T>> & GeneratedCompact
 
     public func readFast(reader: GeneratedSupportV1Reader): Array<T> {
 
+        readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+    }
+
+    public func readFastWithCursor(reader: GeneratedSupportV1Reader,
+        cursor: GeneratedSupportV1ReadCursor): Array<T> {
+
         let context = GeneratedSupportV1.readState(reader)
 
         let _ = context
         context.enterValue()
         try {
-            reader.startRawArray()
-            if (!reader.hasRawArrayItem(true)) {
-                reader.endRawArray()
+            cursor.startRawArray()
+            if (!cursor.hasRawArrayItem(true)) {
+                cursor.endRawArray()
                 return Array<T>()
             }
-            let capacity = reader.suggestRawCollectionCapacity()
+            let capacity = cursor.suggestRawCollectionCapacity()
             let result = if (capacity > 4) {
                 ArrayList<T>(capacity)
             } else {
@@ -1053,18 +1193,21 @@ private class ArrayJsonCodec<T> <: GeneratedCodecV1<Array<T>> & GeneratedCompact
             }
             var first = true
             var index: Int64 = 0
-            if (reader.hasRawArrayItem(first)) {
+            if (cursor.hasRawArrayItem(first)) {
                 context.pushIndex(index)
                 try {
                     while (true) {
-                        reader.beforeRawArrayItem(first)
+                        cursor.beforeRawArrayItem(first)
                         if (!first) {
                             context.updateLastIndex(index)
                         }
-                        result.add(fastInner.readFast(reader))
+                        match (cursorReadInner) {
+                            case Some(fast) => result.add(fast.readFastWithCursor(reader, cursor))
+                            case None => result.add(fastInner.readFast(reader))
+                        }
                         first = false
                         index++
-                        if (!reader.hasRawArrayItem(first)) {
+                        if (!cursor.hasRawArrayItem(first)) {
                             break
                         }
                     }
@@ -1072,7 +1215,7 @@ private class ArrayJsonCodec<T> <: GeneratedCodecV1<Array<T>> & GeneratedCompact
                     context.popPath()
                 }
             }
-            reader.endRawArray()
+            cursor.endRawArray()
             return result.toArray()
         } finally {
             context.leaveValue()
@@ -1080,12 +1223,16 @@ private class ArrayJsonCodec<T> <: GeneratedCodecV1<Array<T>> & GeneratedCompact
     }
 }
 
-private class ArrayListJsonCodec<T> <: GeneratedCodecV1<ArrayList<T>> & GeneratedCompactWriteCodecV1<ArrayList<T>> {
+private class ArrayListJsonCodec<T> <: GeneratedCodecV1<ArrayList<T>> &
+    GeneratedCursorReadCodecV1<ArrayList<T>> & GeneratedCompactWriteCodecV1<ArrayList<T>> &
+    GeneratedCursorWriteCodecV1<ArrayList<T>> {
     private let inner: JsonCodec<T>
     private let fastInner: GeneratedCodecV1<T>
     private let directInner: Option<GeneratedDirectWriteCodecV1<T>>
     private let compactRawInner: Option<GeneratedCompactWriteCodecV1<T>>
     private let compactRawArrayListInner: Option<GeneratedCompactArrayListElementCodecV1<T>>
+    private let cursorReadInner: Option<GeneratedCursorReadCodecV1<T>>
+    private let cursorWriteInner: Option<GeneratedCursorWriteCodecV1<T>>
 
     public init(inner: JsonCodec<T>) {
         this.inner = inner
@@ -1101,6 +1248,14 @@ private class ArrayListJsonCodec<T> <: GeneratedCodecV1<ArrayList<T>> & Generate
         this.compactRawArrayListInner = match (inner) {
             case bulk: GeneratedCompactArrayListElementCodecV1<T> => Some(bulk)
             case _ => None<GeneratedCompactArrayListElementCodecV1<T>>
+        }
+        this.cursorReadInner = match (inner) {
+            case cursor: GeneratedCursorReadCodecV1<T> => Some(cursor)
+            case _ => None<GeneratedCursorReadCodecV1<T>>
+        }
+        this.cursorWriteInner = match (inner) {
+            case cursor: GeneratedCursorWriteCodecV1<T> => Some(cursor)
+            case _ => None<GeneratedCursorWriteCodecV1<T>>
         }
     }
 
@@ -1176,6 +1331,9 @@ private class ArrayListJsonCodec<T> <: GeneratedCodecV1<ArrayList<T>> & Generate
     }
 
     public func supportsCompactRaw(): Bool {
+        if (let Some(cursor) <- cursorWriteInner) {
+            return cursor.supportsCompactCursorWrite()
+        }
         match (compactRawInner) {
             case Some(raw) => raw.supportsCompactRaw()
             case None => false
@@ -1191,16 +1349,23 @@ private class ArrayListJsonCodec<T> <: GeneratedCodecV1<ArrayList<T>> & Generate
             bulk.writeCompactRawArrayList(value, writer)
             return
         }
+        writeCompactWithCursor(value, writer, GeneratedSupportV1.writeCursor(writer))
+    }
+
+    public func supportsCompactCursorWrite(): Bool { supportsCompactRaw() }
+
+    public func writeCompactWithCursor(value: ArrayList<T>, writer: GeneratedSupportV1Writer,
+        rawWriter: GeneratedSupportV1WriteCursor): Unit {
+
+        let context = GeneratedSupportV1.writeState(writer)
         context.enterValue()
         try {
-            let rawWriter = GeneratedSupportV1.writeCursor(writer)
             rawWriter.reserveRawCollectionCapacity(value.size)
             rawWriter.writeRawBeginArray()
             var index: Int64 = 0
             if (!value.isEmpty()) {
                 // writeCompactRaw is reachable only after supportsCompactRaw
                 // has confirmed this invariant.
-                let raw = compactRawInner.getOrThrow()
                 context.pushIndex(0)
                 try {
                     for (position in 0..value.size) {
@@ -1208,7 +1373,10 @@ private class ArrayListJsonCodec<T> <: GeneratedCodecV1<ArrayList<T>> & Generate
                             rawWriter.writeRawByte(b',')
                             context.updateLastIndex(index)
                         }
-                        raw.writeCompactRaw(value[position], writer)
+                        match (cursorWriteInner) {
+                            case Some(raw) => raw.writeCompactWithCursor(value[position], writer, rawWriter)
+                            case None => compactRawInner.getOrThrow().writeCompactRaw(value[position], writer)
+                        }
                         index++
                     }
                 } finally {
@@ -1249,17 +1417,23 @@ private class ArrayListJsonCodec<T> <: GeneratedCodecV1<ArrayList<T>> & Generate
 
     public func readFast(reader: GeneratedSupportV1Reader): ArrayList<T> {
 
+        readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+    }
+
+    public func readFastWithCursor(reader: GeneratedSupportV1Reader,
+        cursor: GeneratedSupportV1ReadCursor): ArrayList<T> {
+
         let context = GeneratedSupportV1.readState(reader)
 
         let _ = context
         context.enterValue()
         try {
-            reader.startRawArray()
-            if (!reader.hasRawArrayItem(true)) {
-                reader.endRawArray()
+            cursor.startRawArray()
+            if (!cursor.hasRawArrayItem(true)) {
+                cursor.endRawArray()
                 return ArrayList<T>()
             }
-            let capacity = reader.suggestRawCollectionCapacity()
+            let capacity = cursor.suggestRawCollectionCapacity()
             let result = if (capacity > 4) {
                 ArrayList<T>(capacity)
             } else {
@@ -1267,18 +1441,21 @@ private class ArrayListJsonCodec<T> <: GeneratedCodecV1<ArrayList<T>> & Generate
             }
             var first = true
             var index: Int64 = 0
-            if (reader.hasRawArrayItem(first)) {
+            if (cursor.hasRawArrayItem(first)) {
                 context.pushIndex(index)
                 try {
                     while (true) {
-                        reader.beforeRawArrayItem(first)
+                        cursor.beforeRawArrayItem(first)
                         if (!first) {
                             context.updateLastIndex(index)
                         }
-                        result.add(fastInner.readFast(reader))
+                        match (cursorReadInner) {
+                            case Some(fast) => result.add(fast.readFastWithCursor(reader, cursor))
+                            case None => result.add(fastInner.readFast(reader))
+                        }
                         first = false
                         index++
-                        if (!reader.hasRawArrayItem(first)) {
+                        if (!cursor.hasRawArrayItem(first)) {
                             break
                         }
                     }
@@ -1286,7 +1463,7 @@ private class ArrayListJsonCodec<T> <: GeneratedCodecV1<ArrayList<T>> & Generate
                     context.popPath()
                 }
             }
-            reader.endRawArray()
+            cursor.endRawArray()
             return result
         } finally {
             context.leaveValue()
@@ -1294,7 +1471,9 @@ private class ArrayListJsonCodec<T> <: GeneratedCodecV1<ArrayList<T>> & Generate
     }
 }
 
-private class Int64ArrayListJsonCodec <: GeneratedCodecV1<ArrayList<Int64>> {
+private class Int64ArrayListJsonCodec <: GeneratedCodecV1<ArrayList<Int64>> &
+    GeneratedCursorReadCodecV1<ArrayList<Int64>> &
+    GeneratedCursorWriteCodecV1<ArrayList<Int64>> {
     public func write(value: ArrayList<Int64>, writer: JsonWriter): Unit {
         let context = GeneratedSupportV1.writeState(writer)
         let _ = context
@@ -1318,6 +1497,10 @@ private class Int64ArrayListJsonCodec <: GeneratedCodecV1<ArrayList<Int64>> {
         ArrayListJsonCodec<Int64>(Int64Json).read(reader)
     }
     public func readFast(reader: GeneratedSupportV1Reader): ArrayList<Int64> {
+        readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+    }
+    public func readFastWithCursor(reader: GeneratedSupportV1Reader,
+        cursor: GeneratedSupportV1ReadCursor): ArrayList<Int64> {
         let context = GeneratedSupportV1.readState(reader)
         let _ = context
         context.enterValue()
@@ -1325,27 +1508,43 @@ private class Int64ArrayListJsonCodec <: GeneratedCodecV1<ArrayList<Int64>> {
             if (let Some(result) <- yJsonTryReadNativeInt64ArrayListV1(reader)) {
                 return result
             }
-            reader.startRawArray()
-            if (!reader.hasRawArrayItem(true)) {
-                reader.endRawArray()
+            cursor.startRawArray()
+            if (!cursor.hasRawArrayItem(true)) {
+                cursor.endRawArray()
                 return ArrayList<Int64>()
             }
-            let result = ArrayList<Int64>(reader.suggestRawArrayCapacity())
+            let result = ArrayList<Int64>(cursor.suggestRawArrayCapacity())
             var first = true
-            while (reader.hasRawArrayItem(first)) {
-                reader.beforeRawArrayItem(first)
-                result.add(reader.readRawInt64())
+            while (cursor.hasRawArrayItem(first)) {
+                cursor.beforeRawArrayItem(first)
+                result.add(cursor.readRawInt64())
                 first = false
             }
-            reader.endRawArray()
+            cursor.endRawArray()
             return result
+        } finally {
+            context.leaveValue()
+        }
+    }
+    public func supportsCompactCursorWrite(): Bool { true }
+    public func writeCompactWithCursor(value: ArrayList<Int64>, writer: GeneratedSupportV1Writer,
+        cursor: GeneratedSupportV1WriteCursor): Unit {
+        let _ = cursor
+        let context = GeneratedSupportV1.writeState(writer)
+        context.enterValue()
+        try {
+            if (!jsonTryWriteCompactInt64ArrayList(writer, value)) {
+                throw JsonException("Compact raw codec is unavailable")
+            }
         } finally {
             context.leaveValue()
         }
     }
 }
 
-private class StringArrayListJsonCodec <: GeneratedCodecV1<ArrayList<String>> {
+private class StringArrayListJsonCodec <: GeneratedCodecV1<ArrayList<String>> &
+    GeneratedCursorReadCodecV1<ArrayList<String>> &
+    GeneratedCursorWriteCodecV1<ArrayList<String>> {
     public func write(value: ArrayList<String>, writer: JsonWriter): Unit {
         let context = GeneratedSupportV1.writeState(writer)
         let _ = context
@@ -1385,25 +1584,45 @@ private class StringArrayListJsonCodec <: GeneratedCodecV1<ArrayList<String>> {
 
     public func readFast(reader: GeneratedSupportV1Reader): ArrayList<String> {
 
+        readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+    }
+
+    public func readFastWithCursor(reader: GeneratedSupportV1Reader,
+        cursor: GeneratedSupportV1ReadCursor): ArrayList<String> {
+
         let context = GeneratedSupportV1.readState(reader)
 
         let _ = context
         context.enterValue()
         try {
-            reader.startRawArray()
-            if (!reader.hasRawArrayItem(true)) {
-                reader.endRawArray()
+            cursor.startRawArray()
+            if (!cursor.hasRawArrayItem(true)) {
+                cursor.endRawArray()
                 return ArrayList<String>()
             }
-            let result = ArrayList<String>(reader.suggestRawArrayCapacity())
+            let result = ArrayList<String>(cursor.suggestRawArrayCapacity())
             var first = true
-            while (reader.hasRawArrayItem(first)) {
-                reader.beforeRawArrayItem(first)
-                result.add(reader.readRawString())
+            while (cursor.hasRawArrayItem(first)) {
+                cursor.beforeRawArrayItem(first)
+                result.add(cursor.readRawString())
                 first = false
             }
-            reader.endRawArray()
+            cursor.endRawArray()
             return result
+        } finally {
+            context.leaveValue()
+        }
+    }
+    public func supportsCompactCursorWrite(): Bool { true }
+    public func writeCompactWithCursor(value: ArrayList<String>, writer: GeneratedSupportV1Writer,
+        cursor: GeneratedSupportV1WriteCursor): Unit {
+        let _ = cursor
+        let context = GeneratedSupportV1.writeState(writer)
+        context.enterValue()
+        try {
+            if (!jsonTryWriteCompactStringArrayList(writer, value)) {
+                throw JsonException("Compact raw codec is unavailable")
+            }
         } finally {
             context.leaveValue()
         }
@@ -1504,12 +1723,17 @@ public func __yJsonReadFastStringOption(reader: GeneratedSupportV1Reader): Optio
     }
 }
 
-private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> & GeneratedCompactWriteCodecV1<HashMap<String, T>> {
+private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> &
+    GeneratedCursorReadCodecV1<HashMap<String, T>> &
+    GeneratedCompactWriteCodecV1<HashMap<String, T>> &
+    GeneratedCursorWriteCodecV1<HashMap<String, T>> {
     private let inner: JsonCodec<T>
     private let fastInner: GeneratedCodecV1<T>
     private let rawInner: Option<JsonRawWriteCodec<T>>
     private let directInner: Option<GeneratedDirectWriteCodecV1<T>>
     private let compactRawInner: Option<GeneratedCompactWriteCodecV1<T>>
+    private let cursorReadInner: Option<GeneratedCursorReadCodecV1<T>>
+    private let cursorWriteInner: Option<GeneratedCursorWriteCodecV1<T>>
 
     public init(inner: JsonCodec<T>) {
         this.inner = inner
@@ -1525,6 +1749,14 @@ private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> & Gene
         this.compactRawInner = match (inner) {
             case raw: GeneratedCompactWriteCodecV1<T> => Some(raw)
             case _ => None<GeneratedCompactWriteCodecV1<T>>
+        }
+        this.cursorReadInner = match (inner) {
+            case cursor: GeneratedCursorReadCodecV1<T> => Some(cursor)
+            case _ => None<GeneratedCursorReadCodecV1<T>>
+        }
+        this.cursorWriteInner = match (inner) {
+            case cursor: GeneratedCursorWriteCodecV1<T> => Some(cursor)
+            case _ => None<GeneratedCursorWriteCodecV1<T>>
         }
     }
 
@@ -1620,6 +1852,9 @@ private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> & Gene
     }
 
     public func supportsCompactRaw(): Bool {
+        if (let Some(cursor) <- cursorWriteInner) {
+            return cursor.supportsCompactCursorWrite()
+        }
         match (compactRawInner) {
             case Some(raw) => raw.supportsCompactRaw()
             case None => false
@@ -1628,17 +1863,23 @@ private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> & Gene
 
     public func writeCompactRaw(value: HashMap<String, T>, writer: GeneratedSupportV1Writer): Unit {
 
+        writeCompactWithCursor(value, writer, GeneratedSupportV1.writeCursor(writer))
+    }
+
+    public func supportsCompactCursorWrite(): Bool { supportsCompactRaw() }
+
+    public func writeCompactWithCursor(value: HashMap<String, T>, writer: GeneratedSupportV1Writer,
+        rawWriter: GeneratedSupportV1WriteCursor): Unit {
+
         let context = GeneratedSupportV1.writeState(writer)
 
         let _ = context
         context.enterValue()
         try {
-            let rawWriter = GeneratedSupportV1.writeCursor(writer)
             rawWriter.writeRawBeginObject()
             if (!value.isEmpty()) {
                 // writeCompactRaw is reachable only after supportsCompactRaw
                 // has confirmed this invariant.
-                let raw = compactRawInner.getOrThrow()
                 var first = true
                 try {
                     for ((name, item) in value) {
@@ -1648,7 +1889,10 @@ private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> & Gene
                             context.updateLastField(name)
                         }
                         first = rawWriter.writeRawObjectEntryName(first, name)
-                        raw.writeCompactRaw(item, writer)
+                        match (cursorWriteInner) {
+                            case Some(raw) => raw.writeCompactWithCursor(item, writer, rawWriter)
+                            case None => compactRawInner.getOrThrow().writeCompactRaw(item, writer)
+                        }
                     }
                 } finally {
                     context.popPath()
@@ -1687,32 +1931,44 @@ private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> & Gene
 
     public func readFast(reader: GeneratedSupportV1Reader): HashMap<String, T> {
 
+        readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+    }
+
+    public func readFastWithCursor(reader: GeneratedSupportV1Reader,
+        cursor: GeneratedSupportV1ReadCursor): HashMap<String, T> {
+
         let context = GeneratedSupportV1.readState(reader)
 
         let _ = context
         context.enterValue()
         try {
-            reader.startRawObject()
-            if (!reader.hasRawObjectField(true)) {
-                reader.endRawObject()
+            cursor.startRawObject()
+            if (!cursor.hasRawObjectField(true)) {
+                cursor.endRawObject()
                 return HashMap<String, T>()
             }
-            let result = HashMap<String, T>()
+            let result = HashMap<String, T>(cursor.suggestRawObjectCapacity())
             var first = true
-            let firstName = reader.readRawName(true)
+            let firstName = cursor.readRawName(true)
             context.pushField(firstName)
             try {
-                result[firstName] = fastInner.readFast(reader)
+                match (cursorReadInner) {
+                    case Some(fast) => result[firstName] = fast.readFastWithCursor(reader, cursor)
+                    case None => result[firstName] = fastInner.readFast(reader)
+                }
                 first = false
-                while (reader.hasRawObjectField(first)) {
-                    let name = reader.readRawName(first)
+                while (cursor.hasRawObjectField(first)) {
+                    let name = cursor.readRawName(first)
                     context.updateLastField(name)
-                    result[name] = fastInner.readFast(reader)
+                    match (cursorReadInner) {
+                        case Some(fast) => result[name] = fast.readFastWithCursor(reader, cursor)
+                        case None => result[name] = fastInner.readFast(reader)
+                    }
                 }
             } finally {
                 context.popPath()
             }
-            reader.endRawObject()
+            cursor.endRawObject()
             return result
         } finally {
             context.leaveValue()
@@ -1721,7 +1977,9 @@ private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> & Gene
 }
 
 private class Int64ArrayHashMapJsonCodec <: GeneratedCodecV1<HashMap<String, Array<Int64>>> &
-    GeneratedCompactWriteCodecV1<HashMap<String, Array<Int64>>> {
+    GeneratedCursorReadCodecV1<HashMap<String, Array<Int64>>> &
+    GeneratedCompactWriteCodecV1<HashMap<String, Array<Int64>>> &
+    GeneratedCursorWriteCodecV1<HashMap<String, Array<Int64>>> {
     private let fallback = HashMapJsonCodec<Array<Int64>>(Int64ArrayJsonCodec())
 
     public func write(value: HashMap<String, Array<Int64>>, writer: JsonWriter): Unit {
@@ -1776,9 +2034,24 @@ private class Int64ArrayHashMapJsonCodec <: GeneratedCodecV1<HashMap<String, Arr
     public func readFast(reader: GeneratedSupportV1Reader): HashMap<String, Array<Int64>> {
         fallback.readFast(reader)
     }
+
+    public func readFastWithCursor(reader: GeneratedSupportV1Reader,
+        cursor: GeneratedSupportV1ReadCursor): HashMap<String, Array<Int64>> {
+        fallback.readFastWithCursor(reader, cursor)
+    }
+
+    public func supportsCompactCursorWrite(): Bool { true }
+
+    public func writeCompactWithCursor(value: HashMap<String, Array<Int64>>,
+        writer: GeneratedSupportV1Writer, cursor: GeneratedSupportV1WriteCursor): Unit {
+        let _ = cursor
+        writeCompactRaw(value, writer)
+    }
 }
 
-private class Int64HashMapJsonCodec <: GeneratedCodecV1<HashMap<String, Int64>> {
+private class Int64HashMapJsonCodec <: GeneratedCodecV1<HashMap<String, Int64>> &
+    GeneratedCursorReadCodecV1<HashMap<String, Int64>> &
+    GeneratedCursorWriteCodecV1<HashMap<String, Int64>> {
     public func write(value: HashMap<String, Int64>, writer: JsonWriter): Unit {
         let context = GeneratedSupportV1.writeState(writer)
         let _ = context
@@ -1819,24 +2092,46 @@ private class Int64HashMapJsonCodec <: GeneratedCodecV1<HashMap<String, Int64>> 
 
     public func readFast(reader: GeneratedSupportV1Reader): HashMap<String, Int64> {
 
+        readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+    }
+
+    public func readFastWithCursor(reader: GeneratedSupportV1Reader,
+        cursor: GeneratedSupportV1ReadCursor): HashMap<String, Int64> {
+
         let context = GeneratedSupportV1.readState(reader)
 
         let _ = context
         context.enterValue()
         try {
-            reader.startRawObject()
-            if (!reader.hasRawObjectField(true)) {
-                reader.endRawObject()
+            cursor.startRawObject()
+            if (!cursor.hasRawObjectField(true)) {
+                cursor.endRawObject()
                 return HashMap<String, Int64>()
             }
-            let result = HashMap<String, Int64>(reader.suggestRawObjectCapacity())
+            let result = HashMap<String, Int64>(cursor.suggestRawObjectCapacity())
             var first = true
-            while (reader.hasRawObjectField(first)) {
-                result[reader.readRawName(first)] = reader.readRawInt64()
+            while (cursor.hasRawObjectField(first)) {
+                result[cursor.readRawName(first)] = cursor.readRawInt64()
                 first = false
             }
-            reader.endRawObject()
+            cursor.endRawObject()
             return result
+        } finally {
+            context.leaveValue()
+        }
+    }
+
+    public func supportsCompactCursorWrite(): Bool { true }
+
+    public func writeCompactWithCursor(value: HashMap<String, Int64>,
+        writer: GeneratedSupportV1Writer, cursor: GeneratedSupportV1WriteCursor): Unit {
+        let _ = cursor
+        let context = GeneratedSupportV1.writeState(writer)
+        context.enterValue()
+        try {
+            if (!jsonTryWriteCompactInt64Map(writer, value)) {
+                throw JsonException("Compact raw codec is unavailable")
+            }
         } finally {
             context.leaveValue()
         }
@@ -2148,6 +2443,14 @@ public class YJson {
                 }
             case _ => ()
         }
+        match (codec) {
+            case cursor: GeneratedCursorWriteCodecV1<T> =>
+                if (cursor.supportsCompactCursorWrite() && writer.tryBeginGeneratedCompactRawValue()) {
+                    cursor.writeCompactWithCursor(value, writer, writer.generatedCursorV1())
+                    return
+                }
+            case _ => ()
+        }
         codec.write(value, writer)
     }
     private static func decodeString<T>(text: String, codec: JsonCodec<T>,
@@ -2159,6 +2462,11 @@ public class YJson {
                 case fast: GeneratedCodecV1<T> =>
                     let reader = JsonFastReader(text)
                     let result = fast.readFast(reader)
+                    reader.expectEnd()
+                    return result
+                case cursor: GeneratedCursorReadCodecV1<T> =>
+                    let reader = JsonFastReader(text)
+                    let result = cursor.readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
                     reader.expectEnd()
                     return result
                 case _ => ()
@@ -2196,6 +2504,11 @@ public class YJson {
                 case fast: GeneratedCodecV1<T> =>
                     let reader = JsonFastReader(bytes)
                     let result = fast.readFast(reader)
+                    reader.expectEnd()
+                    return result
+                case cursor: GeneratedCursorReadCodecV1<T> =>
+                    let reader = JsonFastReader(bytes)
+                    let result = cursor.readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
                     reader.expectEnd()
                     return result
                 case _ => ()

@@ -2,6 +2,7 @@ package yjson
 
 import std.collection.*
 import std.math.numeric.*
+import std.time.*
 
 /// Narrow semantic reader contract consumed by generated codecs. Implementors
 /// remain runtime-owned; generated source never names a concrete parser class.
@@ -227,7 +228,8 @@ public struct GeneratedSupportV1ReadCursor {
 }
 /// Narrow semantic writer contract consumed by generated codecs. Structural
 /// correctness remains owned by the core writer state machine.
-public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1 {
+public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1 &
+    GeneratedWriteStateV1Owner {
     func finishString(): String
     func generatedCursorV1(): GeneratedSupportV1WriteCursor
     func tryBeginGeneratedCompactRawValue(): Bool
@@ -252,6 +254,7 @@ public struct GeneratedSupportV1WriteCursor {
     private let writer: JsonDirectWriter
 
     init(writer: JsonDirectWriter) { this.writer = writer }
+    func generatedWriterV1(): JsonDirectWriter { writer }
 
 
     public func writeRawBeginObject(): Unit { writer.writeRawBeginObject() }
@@ -259,11 +262,31 @@ public struct GeneratedSupportV1WriteCursor {
     public func writeRawBeginArray(): Unit { writer.writeRawBeginArray() }
     public func writeRawEndArray(): Unit { writer.writeRawEndArray() }
     public func writeRawByte(value: Byte): Unit { writer.writeRawByte(value) }
+    public func writeRawNull(): Unit { writer.writeRawNull() }
     public func writeRawString(value: String): Unit { writer.writeRawString(value) }
     public func writeRawBool(value: Bool): Unit { writer.writeRawBool(value) }
     public func writeRawInt64(value: Int64): Unit { writer.writeRawInt64(value) }
+    public func writeRawInt32(value: Int32): Unit { writer.writeRawInt64(Int64(value)) }
+    public func writeRawInt16(value: Int16): Unit { writer.writeRawInt64(Int64(value)) }
+    public func writeRawInt8(value: Int8): Unit { writer.writeRawInt64(Int64(value)) }
     public func writeRawUInt64(value: UInt64): Unit { writer.writeRawUInt64(value) }
+    public func writeRawUInt32(value: UInt32): Unit { writer.writeRawUInt64(UInt64(value)) }
+    public func writeRawUInt16(value: UInt16): Unit { writer.writeRawUInt64(UInt64(value)) }
+    public func writeRawUInt8(value: UInt8): Unit { writer.writeRawUInt64(UInt64(value)) }
     public func writeRawFloat64(value: Float64): Unit { writer.writeRawFloat64(value) }
+    public func writeRawFloat32(value: Float32): Unit { writer.writeRawFloat64(Float64(value)) }
+    public func writeRawFloat16(value: Float16): Unit { writer.writeRawFloat64(Float64(value)) }
+    public func writeRawNumberLiteral(value: String): Unit { writer.writeRawNumberValue(value) }
+    public func writeRawRune(value: Rune): Unit { writer.writeRawString(value.toString()) }
+    public func writeRawBigInt(value: BigInt): Unit {
+        writer.writeRawNumberValue(jsonFastFormatBigInt(value))
+    }
+    public func writeRawDecimal(value: Decimal): Unit {
+        writer.writeRawNumberValue(jsonFastFormatDecimal(value))
+    }
+    public func writeRawRfc3339DateTime(value: DateTime): Unit {
+        writer.writeRawString(jsonFastFormatRfc3339DateTime(value))
+    }
     public func reserveRawCollectionCapacity(count: Int64): Unit {
         writer.reserveRawCollectionCapacity(count)
     }
@@ -657,6 +680,15 @@ public class GeneratedSupportV1 {
         match (fastCodec) {
             case Some(fast) => fast.readFast(reader)
             case None => codec.read(yJsonSemanticReaderV1(reader))
+        }
+    }
+
+    public static func readWithCursorCached<T>(cursorCodec: Option<GeneratedCursorReadCodecV1<T>>,
+        fastCodec: Option<GeneratedCodecV1<T>>, codec: JsonCodec<T>,
+        reader: GeneratedSupportV1Reader, cursor: GeneratedSupportV1ReadCursor): T {
+        match (cursorCodec) {
+            case Some(fast) => fast.readFastWithCursor(reader, cursor)
+            case None => readWithCached(fastCodec, codec, reader)
         }
     }
 

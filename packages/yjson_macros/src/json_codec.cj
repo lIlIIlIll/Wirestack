@@ -460,12 +460,13 @@ private func cachedFieldCodecName(field: CodecField): String {
 private func cachedFastFieldCodecName(field: CodecField): String {
     "__yJsonFastFieldCodec_${field.name}"
 }
+
 private func fieldCodec(field: CodecField): String {
-    if (field.codecExpr.isEmpty()) {
-        cachedFieldCodecName(field)
-    } else {
-        "(${field.codecExpr})"
-    }
+    cachedFieldCodecName(field)
+}
+
+private func fieldCodecInitializer(field: CodecField): String {
+    if (field.codecExpr.isEmpty()) { defaultFieldCodec(field.typeText) } else { "(${field.codecExpr})" }
 }
 
 private func directScalarWrite(field: CodecField, value: String): String {
@@ -681,28 +682,30 @@ private func compactRawCursorCodecName(field: CodecField): String {
 private func compactRawFieldWrite(field: CodecField, value: String, first: String): String {
     let scalar = compactRawScalarFieldWrite(field, value, first)
     if (!scalar.isEmpty()) { return scalar }
-    if (!field.codecExpr.isEmpty() || !directScalarWrite(field, value).isEmpty()) { return "" }
+    if (!directScalarWrite(field, value).isEmpty()) { return "" }
     let nameKind = if (field.jsonNameExpr == "\"${field.name}\"") { "KnownName" } else { "Name" }
     if (field.isOption && !field.includeNull) {
         "if (${value}.isSome()) { ${first} = __writer.writeRawObjectEntry${nameKind}(" +
             "${first}, ${field.jsonNameExpr}); match (${compactRawCursorCodecName(field)}) { " +
-            "case Some(__rawCursor) => __rawCursor.writeCompactRawWithCursor(${value}, writer, __writer); " +
+            "case Some(__rawCursor) => __rawCursor.writeCompactWithCursor(${value}, writer, __writer); " +
             "case None => match (${compactRawCodecName(field)}) { " +
             "case Some(__raw) => __raw.writeCompactRaw(${value}, writer); " +
             "case None => throw JsonException(\"Compact raw codec is unavailable\") } } }"
     } else {
         "${first} = __writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); " +
             "match (${compactRawCursorCodecName(field)}) { " +
-            "case Some(__rawCursor) => __rawCursor.writeCompactRawWithCursor(${value}, writer, __writer); " +
+            "case Some(__rawCursor) => __rawCursor.writeCompactWithCursor(${value}, writer, __writer); " +
             "case None => match (${compactRawCodecName(field)}) { " +
             "case Some(__raw) => __raw.writeCompactRaw(${value}, writer); " +
             "case None => throw JsonException(\"Compact raw codec is unavailable\") } }"
     }
 }
 
-private func supportsCompactRawWrite(fields: ArrayList<CodecField>): Bool {
+private func supportsStaticCompactRawWrite(fields: ArrayList<CodecField>): Bool {
     for (field in fields) {
-        if (field.writeField && compactRawFieldWrite(field, "__value", "__first").isEmpty()) {
+        if (!field.writeField) { continue }
+        if (!field.codecExpr.isEmpty() ||
+            compactRawFieldWrite(field, "__value", "__first").isEmpty()) {
             return false
         }
     }
@@ -756,7 +759,6 @@ private func generatedBufferAllScalar(fields: ArrayList<CodecField>): Bool {
     }
     hasField
 }
-
 private func directScalarRead(field: CodecField, reader: String): String {
     if (!field.codecExpr.isEmpty()) { return "" }
     match (field.typeText.replace(" ", "")) {
@@ -912,7 +914,8 @@ private func appendFastFieldAssignment(
     let codec = fieldCodec(field)
     let directRead = directScalarCursorFastRead(field)
     let readValue = if (directRead.isEmpty()) {
-        "GeneratedSupportV1.readWithCached(${cachedFastFieldCodecName(field)}, ${codec}, reader)"
+        "GeneratedSupportV1.readWithCursorCached(${cachedCursorFastFieldCodecName(field)}, " +
+            "${cachedFastFieldCodecName(field)}, ${codec}, reader, __reader)"
     } else {
         directRead
     }
@@ -1016,53 +1019,48 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     let constraints = renderedConstraints(decl, fields, generics)
     let codecName = "__YJsonCodec_${name}"
     let sb = StringBuilder()
-    var supportsFastRead = true
-    for (field in fields) {
-        if (!field.codecExpr.isEmpty()) { supportsFastRead = false; break }
-    }
     let fastLabels = ArrayList<(CodecField, String)>()
     let fastLabelBytes = ArrayList<String>()
-    if (supportsFastRead) {
-        for (field in fields) {
-            fastLabels.add((field, field.jsonNameExpr))
-            fastLabelBytes.add("(${field.jsonNameExpr}).rawData()")
-            for (alias in field.aliases) {
-                fastLabels.add((field, alias))
-                fastLabelBytes.add("(${alias}).rawData()")
-            }
+    for (field in fields) {
+        fastLabels.add((field, field.jsonNameExpr))
+        fastLabelBytes.add("(${field.jsonNameExpr}).rawData()")
+        for (alias in field.aliases) {
+            fastLabels.add((field, alias))
+            fastLabelBytes.add("(${alias}).rawData()")
         }
     }
-    let supportsCompactRaw = supportsCompactRawWrite(fields)
-    let directInterface = if (supportsCompactRaw) {
+    let staticCompact = supportsStaticCompactRawWrite(fields)
+    let directInterface = if (staticCompact) {
         "GeneratedCompactCursorWriteCodecV1<${targetType}> & " +
             "GeneratedCompactArrayListElementCodecV1<${targetType}>"
-    } else { "GeneratedDirectWriteCodecV1<${targetType}>" }
-    let codecInterfaces = if (supportsFastRead) {
-        "GeneratedObjectCodecV1<${targetType}> & GeneratedCodecV1<${targetType}> & ${directInterface}"
     } else {
-        "GeneratedObjectCodecV1<${targetType}> & ${directInterface}"
+        "GeneratedDirectWriteCodecV1<${targetType}> & " +
+            "GeneratedCursorWriteCodecV1<${targetType}> & " +
+            "GeneratedCompactArrayListElementCodecV1<${targetType}>"
     }
+    let codecInterfaces = "GeneratedObjectCodecV1<${targetType}> & " +
+        "GeneratedCodecV1<${targetType}> & GeneratedCursorReadCodecV1<${targetType}> & " +
+        directInterface
     appendLine(sb, 0, "private class ${codecName}${genericText} <: ${codecInterfaces}${constraints} {")
     for (field in fields) {
         let fullyDirect = !directScalarWrite(field, "__value").isEmpty() &&
             !directScalarRead(field, "reader").isEmpty() &&
             !directScalarFastRead(field, "reader").isEmpty()
-        if (field.codecExpr.isEmpty() && !fullyDirect) {
-            appendLine(sb, 1, "private let ${cachedFieldCodecName(field)}: JsonCodec<${field.typeText}> = ${defaultFieldCodec(field.typeText)}")
-            if (supportsFastRead && directScalarFastRead(field, "reader").isEmpty()) {
+        if (!fullyDirect) {
+            appendLine(sb, 1, "private let ${cachedFieldCodecName(field)}: JsonCodec<${field.typeText}> = ${fieldCodecInitializer(field)}")
+            if (directScalarCursorFastRead(field).isEmpty()) {
                 appendLine(sb, 1, "private let ${cachedFastFieldCodecName(field)}: Option<GeneratedCodecV1<${field.typeText}>> = match (${cachedFieldCodecName(field)}) { case __fast: GeneratedCodecV1<${field.typeText}> => Some(__fast); case _ => None<GeneratedCodecV1<${field.typeText}>> }")
+                appendLine(sb, 1, "private let ${cachedCursorFastFieldCodecName(field)}: Option<GeneratedCursorReadCodecV1<${field.typeText}>> = match (${cachedFieldCodecName(field)}) { case __fast: GeneratedCursorReadCodecV1<${field.typeText}> => Some(__fast); case _ => None<GeneratedCursorReadCodecV1<${field.typeText}>> }")
             }
             if (compactRawScalarFieldWrite(field, "__value", "__first").isEmpty() &&
                 directScalarWrite(field, "__value").isEmpty()) {
                 appendLine(sb, 1, "private let ${compactRawCodecName(field)}: Option<GeneratedCompactWriteCodecV1<${field.typeText}>> = match (${cachedFieldCodecName(field)}) { case __raw: GeneratedCompactWriteCodecV1<${field.typeText}> => Some(__raw); case _ => None<GeneratedCompactWriteCodecV1<${field.typeText}>> }")
-                appendLine(sb, 1, "private let ${compactRawCursorCodecName(field)}: Option<GeneratedCompactCursorWriteCodecV1<${field.typeText}>> = match (${cachedFieldCodecName(field)}) { case __rawCursor: GeneratedCompactCursorWriteCodecV1<${field.typeText}> => Some(__rawCursor); case _ => None<GeneratedCompactCursorWriteCodecV1<${field.typeText}>> }")
+                appendLine(sb, 1, "private let ${compactRawCursorCodecName(field)}: Option<GeneratedCursorWriteCodecV1<${field.typeText}>> = match (${cachedFieldCodecName(field)}) { case __rawCursor: GeneratedCursorWriteCodecV1<${field.typeText}> => Some(__rawCursor); case _ => None<GeneratedCursorWriteCodecV1<${field.typeText}>> }")
             }
         }
     }
-    if (supportsFastRead) {
-        appendLine(sb, 1, "private let __yJsonFastFieldNames: Array<Array<Byte>> = unsafe { [" +
-            joinStrings(fastLabelBytes, ", ") + "] }")
-    }
+    appendLine(sb, 1, "private let __yJsonFastFieldNames: Array<Array<Byte>> = unsafe { [" +
+        joinStrings(fastLabelBytes, ", ") + "] }")
     appendLine(sb, 1, "public func write(value: ${targetType}, writer: JsonWriter): Unit {")
     appendLine(sb, 2, "match (writer) { case __direct: GeneratedSupportV1Writer => writeDirect(value, __direct); return; case _ => () }")
     appendLine(sb, 2, "let context = GeneratedSupportV1.writeState(writer)")
@@ -1105,9 +1103,11 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     }
     appendLine(sb, 1, "}")
     appendLine(sb, 1, "public func writeDirect(value: ${targetType}, writer: GeneratedSupportV1Writer): Unit {")
-    if (supportsCompactRaw) {
-        appendLine(sb, 2, "if (writer.tryBeginGeneratedCompactRawValue()) { writeCompactRaw(value, writer); return }")
-    }
+    appendLine(sb, 2, (if (staticCompact) {
+        "if (writer.tryBeginGeneratedCompactRawValue()) { writeCompactRaw(value, writer); return }"
+    } else {
+        "if (supportsCompactRaw() && writer.tryBeginGeneratedCompactRawValue()) { writeCompactRaw(value, writer); return }"
+    }))
     appendLine(sb, 2, "let context = GeneratedSupportV1.writeState(writer)")
     if (isClass) { appendLine(sb, 2, "context.enterObject(value)") } else { appendLine(sb, 2, "context.enterValue()") }
     appendLine(sb, 2, "try {")
@@ -1143,19 +1143,20 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         }
     }
     appendLine(sb, 1, "}")
-    if (supportsCompactRaw) {
-        let rawChecks = ArrayList<String>()
+    let rawChecks = ArrayList<String>()
         for (field in fields) {
             if (!field.writeField) { continue }
             if (compactRawScalarFieldWrite(field, "__value", "__first").isEmpty() &&
                 directScalarWrite(field, "__value").isEmpty()) {
-                rawChecks.add("match (${compactRawCodecName(field)}) { " +
-                    "case Some(__raw) => __raw.supportsCompactRaw(); case None => false }")
+                rawChecks.add("match (${compactRawCursorCodecName(field)}) { " +
+                    "case Some(__rawCursor) => __rawCursor.supportsCompactCursorWrite(); " +
+                    "case None => match (${compactRawCodecName(field)}) { " +
+                    "case Some(__raw) => __raw.supportsCompactRaw(); case None => false } }")
             }
         }
-        appendLine(sb, 1, "public func supportsCompactRaw(): Bool { " +
+    appendLine(sb, 1, "public func supportsCompactRaw(): Bool { " +
             (if (rawChecks.isEmpty()) { "true" } else { joinStrings(rawChecks, " && ") }) + " }")
-        appendLine(sb, 1, "public func writeCompactRaw(value: ${targetType}, writer: GeneratedSupportV1Writer): Unit {")
+    appendLine(sb, 1, "public func writeCompactRaw(value: ${targetType}, writer: GeneratedSupportV1Writer): Unit {")
         appendLine(sb, 2, "writeCompactRawWithCursor(value, writer, GeneratedSupportV1.writeCursor(writer))")
         appendLine(sb, 1, "}")
         appendLine(sb, 1, "public func writeCompactRawWithCursor(value: ${targetType}, writer: GeneratedSupportV1Writer, __writer: GeneratedSupportV1WriteCursor): Unit {")
@@ -1278,8 +1279,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         appendLine(sb, 3, "}")
         appendLine(sb, 3, "__writer.writeRawEndArray()")
         appendLine(sb, 2, "} finally { context.leaveValue() }")
-        appendLine(sb, 1, "}")
-    }
+    appendLine(sb, 1, "}")
     appendLine(sb, 1, "public func read(reader: JsonReader): ${targetType} {")
     appendLine(sb, 2, "let context = GeneratedSupportV1.readState(reader)")
     appendLine(sb, 2, "context.enterValue()")
@@ -1377,11 +1377,9 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
 
     // The fast reader is generated against the versioned v1 support protocol,
     // never a concrete core reader class.
-    if (supportsFastRead) {
     appendLine(sb, 1, "public func readFast(reader: GeneratedSupportV1Reader): ${targetType} {")
 
     appendLine(sb, 2, "let context = GeneratedSupportV1.readState(reader)")
-    appendLine(sb, 2, "let __reader = GeneratedSupportV1.readCursor(reader)")
     appendLine(sb, 2, "context.enterValue()")
     appendLine(sb, 2, "try {")
     for (field in fields) {
@@ -1498,7 +1496,6 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         "} finally { let _ = context }"
     })
     appendLine(sb, 1, "}")
-    }
     appendLine(sb, 0, "}")
 
     let visibility = if (hasModifier(decl, TokenKind.PUBLIC)) { "public " } else { "" }
@@ -1636,7 +1633,18 @@ private func renderEnumCodec(decl: EnumDecl): Tokens {
     }
 
     let sb = StringBuilder()
-    appendLine(sb, 0, "private class ${codecName}${genericText} <: JsonCodec<${targetType}>${constraints} {")
+    appendLine(sb, 0, "private class ${codecName}${genericText} <: GeneratedCodecV1<${targetType}> & GeneratedCursorReadCodecV1<${targetType}> & GeneratedCursorWriteCodecV1<${targetType}>${constraints} {")
+    for (constructor in decl.constructors) {
+        let constructorName = constructor.identifier.value
+        for (index in 0..constructor.typeArguments.size) {
+            let typeText = constructor.typeArguments[index].toTokens().toString().trimAscii()
+            let codecField = "__yJsonEnumCodec_${constructorName}_${index}"
+            appendLine(sb, 1, "private let ${codecField}: JsonCodec<${typeText}> = generatedCodecV1Of<${typeText}>()")
+            appendLine(sb, 1, "private let ${codecField}CursorRead: Option<GeneratedCursorReadCodecV1<${typeText}>> = match (${codecField}) { case __cursor: GeneratedCursorReadCodecV1<${typeText}> => Some(__cursor); case _ => None<GeneratedCursorReadCodecV1<${typeText}>> }")
+            appendLine(sb, 1, "private let ${codecField}FastRead: Option<GeneratedCodecV1<${typeText}>> = match (${codecField}) { case __fast: GeneratedCodecV1<${typeText}> => Some(__fast); case _ => None<GeneratedCodecV1<${typeText}>> }")
+            appendLine(sb, 1, "private let ${codecField}CursorWrite: Option<GeneratedCursorWriteCodecV1<${typeText}>> = match (${codecField}) { case __cursor: GeneratedCursorWriteCodecV1<${typeText}> => Some(__cursor); case _ => None<GeneratedCursorWriteCodecV1<${typeText}>> }")
+        }
+    }
     appendLine(sb, 1, "public func write(value: ${targetType}, writer: JsonWriter): Unit {")
     appendLine(sb, 2, "let context = GeneratedSupportV1.writeState(writer)")
     appendLine(sb, 2, "context.enterValue()")
@@ -1655,13 +1663,46 @@ private func renderEnumCodec(decl: EnumDecl): Tokens {
         appendLine(sb, 5, "writer.startArray()")
         appendLine(sb, 5, "writer.writeString(${enumWireName(constructor)})")
         for (index in 0..constructor.typeArguments.size) {
-            let typeText = constructor.typeArguments[index].toTokens().toString().trimAscii()
             appendLine(sb, 5, "context.pushIndex(${index})")
-            appendLine(sb, 5, "try { generatedCodecV1Of<${typeText}>().write(__item${index}, writer) } finally { context.popPath() }")
+            appendLine(sb, 5, "try { __yJsonEnumCodec_${constructorName}_${index}.write(__item${index}, writer) } finally { context.popPath() }")
         }
         appendLine(sb, 5, "writer.endArray()")
     }
     appendLine(sb, 3, "}")
+    appendLine(sb, 2, "} finally { context.leaveValue() }")
+    appendLine(sb, 1, "}")
+    let enumWriteChecks = ArrayList<String>()
+    for (constructor in decl.constructors) {
+        let constructorName = constructor.identifier.value
+        for (index in 0..constructor.typeArguments.size) {
+            enumWriteChecks.add("match (__yJsonEnumCodec_${constructorName}_${index}CursorWrite) { case Some(__cursor) => __cursor.supportsCompactCursorWrite(); case None => false }")
+        }
+    }
+    appendLine(sb, 1, "public func supportsCompactCursorWrite(): Bool { " +
+        (if (enumWriteChecks.isEmpty()) { "true" } else { joinStrings(enumWriteChecks, " && ") }) + " }")
+    appendLine(sb, 1, "public func writeCompactWithCursor(value: ${targetType}, writer: GeneratedSupportV1Writer, __writer: GeneratedSupportV1WriteCursor): Unit {")
+    appendLine(sb, 2, "let context = GeneratedSupportV1.writeState(writer)")
+    appendLine(sb, 2, "context.enterValue()")
+    appendLine(sb, 2, "try {")
+    appendLine(sb, 3, "__writer.writeRawBeginArray()")
+    appendLine(sb, 3, "match (value) {")
+    for (constructor in decl.constructors) {
+        let constructorName = constructor.identifier.value
+        let bindings = ArrayList<String>()
+        for (index in 0..constructor.typeArguments.size) { bindings.add("__item${index}") }
+        let pattern = if (bindings.isEmpty()) { "${name}.${constructorName}" } else {
+            "${name}.${constructorName}(" + joinStrings(bindings, ", ") + ")"
+        }
+        appendLine(sb, 4, "case ${pattern} =>")
+        appendLine(sb, 5, "__writer.writeRawString(${enumWireName(constructor)})")
+        for (index in 0..constructor.typeArguments.size) {
+            appendLine(sb, 5, "__writer.writeRawByte(b',')")
+            appendLine(sb, 5, "context.pushIndex(${index})")
+            appendLine(sb, 5, "try { __yJsonEnumCodec_${constructorName}_${index}CursorWrite.getOrThrow().writeCompactWithCursor(__item${index}, writer, __writer) } finally { context.popPath() }")
+        }
+    }
+    appendLine(sb, 3, "}")
+    appendLine(sb, 3, "__writer.writeRawEndArray()")
     appendLine(sb, 2, "} finally { context.leaveValue() }")
     appendLine(sb, 1, "}")
     appendLine(sb, 1, "public func read(reader: JsonReader): ${targetType} {")
@@ -1677,10 +1718,9 @@ private func renderEnumCodec(decl: EnumDecl): Tokens {
         appendLine(sb, 4, "case ${enumWireName(constructor)} =>")
         let values = ArrayList<String>()
         for (index in 0..constructor.typeArguments.size) {
-            let typeText = constructor.typeArguments[index].toTokens().toString().trimAscii()
             appendLine(sb, 5, "if (!reader.hasArrayItem()) { throw JsonException(\"Missing enum payload at index ${index}\", code: \"invalid_enum\", path: context.currentPath()) }")
             appendLine(sb, 5, "context.pushIndex(${index})")
-            appendLine(sb, 5, "let __item${index} = try { generatedCodecV1Of<${typeText}>().read(reader) } finally { context.popPath() }")
+            appendLine(sb, 5, "let __item${index} = try { __yJsonEnumCodec_${constructorName}_${index}.read(reader) } finally { context.popPath() }")
             values.add("__item${index}")
         }
         appendLine(sb, 5, "${targetType}.${constructorName}" + (if (values.isEmpty()) { "" } else { "(" + joinStrings(values, ", ") + ")" }))
@@ -1689,6 +1729,36 @@ private func renderEnumCodec(decl: EnumDecl): Tokens {
     appendLine(sb, 3, "}")
     appendLine(sb, 3, "if (reader.hasArrayItem()) { throw JsonException(\"Too many enum payload values\", code: \"invalid_enum\", path: context.currentPath()) }")
     appendLine(sb, 3, "reader.endArray()")
+    appendLine(sb, 3, "__result")
+    appendLine(sb, 2, "} finally { context.leaveValue() }")
+    appendLine(sb, 1, "}")
+    appendLine(sb, 1, "public func readFast(reader: GeneratedSupportV1Reader): ${targetType} { readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader)) }")
+    appendLine(sb, 1, "public func readFastWithCursor(reader: GeneratedSupportV1Reader, __reader: GeneratedSupportV1ReadCursor): ${targetType} {")
+    appendLine(sb, 2, "let context = GeneratedSupportV1.readState(reader)")
+    appendLine(sb, 2, "context.enterValue()")
+    appendLine(sb, 2, "try {")
+    appendLine(sb, 3, "__reader.startRawArray()")
+    appendLine(sb, 3, "if (!__reader.hasRawArrayItem(true)) { throw JsonException(\"Enum array must start with a case name\", code: \"invalid_enum\", path: context.currentPath()) }")
+    appendLine(sb, 3, "__reader.beforeRawArrayItem(true)")
+    appendLine(sb, 3, "let __caseName = __reader.readRawString()")
+    appendLine(sb, 3, "let __result = match (__caseName) {")
+    for (constructor in decl.constructors) {
+        let constructorName = constructor.identifier.value
+        appendLine(sb, 4, "case ${enumWireName(constructor)} =>")
+        let values = ArrayList<String>()
+        for (index in 0..constructor.typeArguments.size) {
+            appendLine(sb, 5, "if (!__reader.hasRawArrayItem(false)) { throw JsonException(\"Missing enum payload at index ${index}\", code: \"invalid_enum\", path: context.currentPath()) }")
+            appendLine(sb, 5, "__reader.beforeRawArrayItem(false)")
+            appendLine(sb, 5, "context.pushIndex(${index})")
+            appendLine(sb, 5, "let __item${index} = try { GeneratedSupportV1.readWithCursorCached(__yJsonEnumCodec_${constructorName}_${index}CursorRead, __yJsonEnumCodec_${constructorName}_${index}FastRead, __yJsonEnumCodec_${constructorName}_${index}, reader, __reader) } finally { context.popPath() }")
+            values.add("__item${index}")
+        }
+        appendLine(sb, 5, "${targetType}.${constructorName}" + (if (values.isEmpty()) { "" } else { "(" + joinStrings(values, ", ") + ")" }))
+    }
+    appendLine(sb, 4, "case _ => throw JsonException(\"Unknown enum case: \" + __caseName, code: \"unknown_enum_case\", path: context.currentPath())")
+    appendLine(sb, 3, "}")
+    appendLine(sb, 3, "if (__reader.hasRawArrayItem(false)) { throw JsonException(\"Too many enum payload values\", code: \"invalid_enum\", path: context.currentPath()) }")
+    appendLine(sb, 3, "__reader.endRawArray()")
     appendLine(sb, 3, "__result")
     appendLine(sb, 2, "} finally { context.leaveValue() }")
     appendLine(sb, 1, "}")
@@ -1748,9 +1818,7 @@ private func renderPolymorphicCodec(
     let sb = StringBuilder()
     appendLine(sb, 0, "private class ${codecName}${genericText} <: GeneratedObjectCodecV1<${targetType}>${constraints} {")
     for (field in fields) {
-        if (field.codecExpr.isEmpty()) {
-            appendLine(sb, 1, "private let ${cachedFieldCodecName(field)}: JsonCodec<${field.typeText}> = ${defaultFieldCodec(field.typeText)}")
-        }
+        appendLine(sb, 1, "private let ${cachedFieldCodecName(field)}: JsonCodec<${field.typeText}> = ${fieldCodecInitializer(field)}")
     }
     appendLine(sb, 1, "public func write(value: ${targetType}, writer: JsonWriter): Unit {")
     appendLine(sb, 2, "let context = GeneratedSupportV1.writeState(writer)")

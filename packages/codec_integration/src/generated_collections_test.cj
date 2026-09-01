@@ -700,3 +700,127 @@ class GeneratedCollectionConsumerTest {
         @Expect(prettyDecoded.mapArrays["team"][0], 4)
     }
 }
+
+private var externalCursorReads: Int64 = 0
+private var externalCursorWrites: Int64 = 0
+private var externalCursorSemanticReads: Int64 = 0
+private var externalCursorSemanticWrites: Int64 = 0
+private var externalLegacyReads: Int64 = 0
+private var externalLegacyWrites: Int64 = 0
+
+class ExternalCursorValue {
+    public let value: Int64
+    public init(value: Int64) { this.value = value }
+}
+
+private class ExternalCursorValueCodec <: JsonCodec<ExternalCursorValue> &
+    GeneratedCursorReadCodecV1<ExternalCursorValue> &
+    GeneratedCursorWriteCodecV1<ExternalCursorValue> {
+    public func write(value: ExternalCursorValue, writer: JsonWriter): Unit {
+        externalCursorSemanticWrites++
+        writer.writeInt64(value.value)
+    }
+    public func read(reader: JsonReader): ExternalCursorValue {
+        externalCursorSemanticReads++
+        ExternalCursorValue(reader.readInt64())
+    }
+    public func readFastWithCursor(reader: GeneratedSupportV1Reader,
+        cursor: GeneratedSupportV1ReadCursor): ExternalCursorValue {
+        let _ = reader
+        externalCursorReads++
+        ExternalCursorValue(cursor.readRawInt64())
+    }
+    public func supportsCompactCursorWrite(): Bool { true }
+    public func writeCompactWithCursor(value: ExternalCursorValue,
+        writer: GeneratedSupportV1Writer, cursor: GeneratedSupportV1WriteCursor): Unit {
+        let _ = writer
+        externalCursorWrites++
+        cursor.writeRawInt64(value.value)
+    }
+}
+
+private class ExternalLegacyValueCodec <: JsonCodec<ExternalCursorValue> {
+    public func write(value: ExternalCursorValue, writer: JsonWriter): Unit {
+        externalLegacyWrites++
+        writer.writeInt64(value.value)
+    }
+    public func read(reader: JsonReader): ExternalCursorValue {
+        externalLegacyReads++
+        ExternalCursorValue(reader.readInt64())
+    }
+}
+
+private let ExternalCursorValueJson: JsonCodec<ExternalCursorValue> = ExternalCursorValueCodec()
+private let ExternalLegacyValueJson: JsonCodec<ExternalCursorValue> = ExternalLegacyValueCodec()
+
+@JsonCodec
+class ExternalCursorCodecEnvelope {
+    @JsonUsing[JsonCodecs.stringMap(JsonCodecs.arrayList(ExternalCursorValueJson))]
+    public let values: HashMap<String, ArrayList<ExternalCursorValue>>
+    public init(values: HashMap<String, ArrayList<ExternalCursorValue>>) { this.values = values }
+}
+
+@JsonCodec
+class ExternalLegacyCodecEnvelope {
+    @JsonUsing[JsonCodecs.arrayList(ExternalLegacyValueJson)]
+    public let values: ArrayList<ExternalCursorValue>
+    public init(values: ArrayList<ExternalCursorValue>) { this.values = values }
+}
+
+@Test
+class GeneratedCustomCursorCodecTest {
+    private func resetCounters(): Unit {
+        externalCursorReads = 0
+        externalCursorWrites = 0
+        externalCursorSemanticReads = 0
+        externalCursorSemanticWrites = 0
+        externalLegacyReads = 0
+        externalLegacyWrites = 0
+    }
+
+    @TestCase
+    func optInCustomCodecKeepsCursorAcrossNestedContainersAndEntrypoints(): Unit {
+        resetCounters()
+        let items = ArrayList<ExternalCursorValue>([
+            ExternalCursorValue(7), ExternalCursorValue(8)])
+        let values = HashMap<String, ArrayList<ExternalCursorValue>>()
+        values.add("items", items)
+        let value = ExternalCursorCodecEnvelope(values)
+
+        let text = YJson.toJson(value)
+        @Expect(text, "{\"values\":{\"items\":[7,8]}}")
+        let bytes = YJson.toJsonBytes(value)
+        let output = YJsonMemoryOutputStream()
+        YJson.writeJson(value, output)
+        @Expect(String.fromUtf8(bytes), text)
+        @Expect(output.toUtf8String(), text)
+        @Expect(externalCursorWrites, 6)
+        @Expect(externalCursorSemanticWrites, 0)
+
+        @Expect(YJson.fromJson<ExternalCursorCodecEnvelope>(text).values["items"][1].value, 8)
+        @Expect(YJson.fromJson<ExternalCursorCodecEnvelope>(bytes).values["items"][0].value, 7)
+        @Expect(externalCursorReads, 4)
+        @Expect(externalCursorSemanticReads, 0)
+
+        let input = YJsonByteArrayInputStream(bytes)
+        @Expect(YJson.fromJson<ExternalCursorCodecEnvelope>(input).values["items"][1].value, 8)
+        @Expect(externalCursorSemanticReads, 2)
+    }
+
+    @TestCase
+    func nonOptInCustomCodecFallsBackBeforeCompactBytesAreWritten(): Unit {
+        resetCounters()
+        let value = ExternalLegacyCodecEnvelope(ArrayList<ExternalCursorValue>([
+            ExternalCursorValue(3), ExternalCursorValue(4)]))
+
+        let text = YJson.toJson(value)
+        @Expect(text, "{\"values\":[3,4]}")
+        @Expect(externalLegacyWrites, 2)
+        @Expect(YJson.fromJson<ExternalLegacyCodecEnvelope>(text).values[1].value, 4)
+        @Expect(externalLegacyReads, 2)
+
+        let pretty = YJson.toJson(value, options: JsonWriteOptions.pretty())
+        @Expect(pretty.contains("\n  \"values\""))
+        @Expect(YJson.fromJson<ExternalLegacyCodecEnvelope>(pretty).values[0].value, 3)
+    }
+}
