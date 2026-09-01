@@ -161,6 +161,10 @@
     "docs/evidence/P1-014/linux-crlf.json",
     "docs/evidence/P1-014/windows-crlf.json"
   ],
+  "revision_bound_reports": [
+    "docs/evidence/P1-014/linux-crlf.json",
+    "docs/evidence/P1-014/windows-crlf.json"
+  ],
   "schema_version": 1,
   "source_paths": [
     ".github/workflows/m0-016-windows-provider-poc.yml",

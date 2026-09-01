@@ -349,6 +349,18 @@ class ArchitectureGuardTests(unittest.TestCase):
             )
             self.assertIn("untyped-evidence-digest-comparison", self.rules(root))
 
+    def test_repository_rejects_compare_digest_on_bare_digest_field(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "import hmac\n"
+                "def compare(item, expected):\n"
+                "    return hmac.compare_digest(item.get('manifest_sha256'), expected)\n",
+            )
+            self.assertIn("untyped-evidence-digest-comparison", self.rules(root))
+
     def test_literal_log_path_is_text_evidence(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)
@@ -375,6 +387,21 @@ class ArchitectureGuardTests(unittest.TestCase):
             rules = self.rules(root)
             self.assertTrue(
                 {"untyped-non-python-digest", "text-evidence-raw-digest"} & rules
+            )
+
+    def test_cksum_sha256_routes_are_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "scripts/check-report",
+                "cksum -a sha256 docs/evidence/first.json\n"
+                "cksum --algorithm=sha256 docs/evidence/second.json\n",
+            )
+            violations = guard.run_guard(root)
+            self.assertEqual(
+                2,
+                sum(item.rule == "untyped-non-python-digest" for item in violations),
             )
 
     def test_text_evidence_rejects_artifact_digest_and_utf8_fallback(self) -> None:
