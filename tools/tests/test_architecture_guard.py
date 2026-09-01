@@ -111,6 +111,37 @@ class ArchitectureGuardTests(unittest.TestCase):
             )
             self.assertIn("untyped-non-python-digest", self.rules(root))
 
+    def test_composite_folded_command_and_helper_are_scanned(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                ".github/actions/evidence/action.yml",
+                "runs:\n  using: composite\n  steps:\n    - shell: bash\n"
+                "      run: >-\n"
+                "        # wirestack-digest-domain: artifact-bytes-v1\n"
+                "        sha256sum\n"
+                "        docs/evidence/report.json\n",
+            )
+            self.write(
+                root, ".github/actions/evidence/digest.sh",
+                "sha256sum docs/evidence/report.json\n",
+            )
+            violations = guard.run_guard(root)
+            self.assertEqual(
+                2,
+                sum(item.rule in {"text-evidence-raw-digest", "untyped-non-python-digest"}
+                    for item in violations),
+            )
+
+    def test_invalid_utf8_helper_fails_closed(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            path = root / "tools/bad.sh"
+            path.parent.mkdir(parents=True)
+            path.write_bytes(b"# \xff\nsha256sum docs/evidence/report.json\n")
+            self.assertIn("digest-scan-unreadable", self.rules(root))
+
     def test_text_domain_marker_cannot_approve_raw_digest_command(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)
@@ -268,6 +299,17 @@ class ArchitectureGuardTests(unittest.TestCase):
                 root,
                 "tools/gates/evidence.py",
                 "def compare(item, expected):\n    return item.get('sha256') == expected\n",
+            )
+            self.assertIn("untyped-evidence-digest-comparison", self.rules(root))
+
+    def test_repository_rejects_named_digest_field_comparison(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "tools/gates/evidence.py",
+                "def compare(item, expected):\n"
+                "    return item.get('manifest_sha256') == expected\n",
             )
             self.assertIn("untyped-evidence-digest-comparison", self.rules(root))
 
