@@ -545,20 +545,28 @@ def _python_call_name(node: ast.Call, aliases: dict[str, str] | None = None) -> 
     return name
 
 
-def _python_call_contains_raw_digest(node: ast.Call, call_name: str | None) -> bool:
+def _python_primary_argument(node: ast.Call, keyword_names: set[str]) -> ast.AST | None:
+    if node.args:
+        return node.args[0]
+    return next(
+        (keyword.value for keyword in node.keywords if keyword.arg in keyword_names),
+        None,
+    )
+
+
+def _python_call_contains_raw_digest(
+    node: ast.Call, call_name: str | None, index: "_PythonAssignmentIndex",
+) -> bool:
     if call_name not in {
         "subprocess.run", "subprocess.call", "subprocess.check_call",
         "subprocess.check_output", "subprocess.Popen",
+        "os.system", "os.popen",
     }:
         return False
-    candidates = list(node.args)
-    candidates.extend(keyword.value for keyword in node.keywords if keyword.arg in {"args", "command"})
-    return any(
-        RAW_DIGEST_COMMAND_RE.search(value.value) is not None
-        for candidate in candidates
-        for value in ast.walk(candidate)
-        if isinstance(value, ast.Constant) and isinstance(value.value, str)
-    )
+    candidate = _python_primary_argument(node, {"args", "command", "cmd"})
+    return candidate is not None and RAW_DIGEST_COMMAND_RE.search(
+        _python_argument_hint(candidate, node, index)
+    ) is not None
 
 
 class _PythonAssignmentIndex(ast.NodeVisitor):
@@ -669,8 +677,11 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                 root, manifest_path, text, 0, "digest-domain-manifest-invalid",
                 "The non-Python digest domain manifest must use the known fail-closed schema.",
             ))
-    tools_root = root / "tools"
-    python_paths = sorted(tools_root.rglob("*.py")) if tools_root.is_dir() else []
+    python_paths: list[Path] = []
+    for python_root in (root / "tools", root / "scripts"):
+        if python_root.is_dir():
+            python_paths.extend(python_root.rglob("*.py"))
+    python_paths = sorted(set(python_paths))
     for path in python_paths:
         relative = path.relative_to(root).as_posix()
         if _is_ignored(path.relative_to(root)):
@@ -708,7 +719,9 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                     ))
             if isinstance(node, ast.Call):
                 name = _python_call_name(node, aliases)
-                if not typed_implementation and _python_call_contains_raw_digest(node, name):
+                if not typed_implementation and _python_call_contains_raw_digest(
+                    node, name, assignment_index,
+                ):
                     violations.append(_violation(
                         root, path, text, _python_offset(text, node),
                         "untyped-evidence-digest-command",
@@ -727,7 +740,11 @@ def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
                     "artifact_byte_digest", "artifact_byte_digest_bytes", "artifact_byte_sha256",
                     "artifact_bytes_sha256", "parse_artifact_digest",
                 }:
-                    argument = _python_argument_hint(node.args[0], node, assignment_index) if node.args else ""
+                    digest_argument = _python_primary_argument(node, {"path", "raw", "value"})
+                    argument = (
+                        _python_argument_hint(digest_argument, node, assignment_index)
+                        if digest_argument is not None else ""
+                    )
                     if repository_control_plane or any(
                         marker in argument for marker in (
                             "evidence", "report", "markdown", "log_path", "source_path",
