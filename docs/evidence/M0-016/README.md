@@ -55,38 +55,38 @@ a skipped diagnostic as PASS.
 ## Current schema-v11 desktop runs
 
 [TLS Provider PoC run
-33450663710](https://github.com/lIlIIlIll/Wirestack/actions/runs/33450663710)
+33453672369](https://github.com/lIlIIlIll/Wirestack/actions/runs/33453672369)
 produced the Linux glibc, Linux musl, and macOS results. [M0-016 Windows
 Provider PoC run
-33450663677](https://github.com/lIlIIlIll/Wirestack/actions/runs/33450663677)
+33453672416](https://github.com/lIlIIlIll/Wirestack/actions/runs/33453672416)
 produced the Windows results. Both pull-request runs identify head
-`b42460c749840be6d45cb58a0703f2ca85e54219`. GitHub executed synthetic merge
-revision `f329ccdac1130afad7ad5e5fd5665378bb392072`; every retained result binds
+`8c845eea4c85aa88a22f24cf59f742a205cd1188`. GitHub executed synthetic merge
+revision `72808d9948973a9562d15c41847b73db56aa7001`; every retained result binds
 that exact execution revision.
 
 All 12 artifacts were downloaded and independently validated with:
 
     python3 tools/tls_provider_poc/validate.py \
       --result <artifact>/result.json \
-      --expected-revision f329ccdac1130afad7ad5e5fd5665378bb392072
+      --expected-revision 72808d9948973a9562d15c41847b73db56aa7001
 
 | Platform | Provider | Status | Result SHA-256 | Artifact ID | Artifact SHA-256 |
 |---|---|---|---|---:|---|
-| Linux glibc x86_64 | AWS-LC | PASS | e1d5f618faece2839a8e33e7c1803d23b16084f14eb4e1092e17a248e2badca2 | 9779711884 | ec15fcd89de61d0803c33bc7161631c845bd3b7d26116030b9ed027efc01b46b |
-| Linux glibc x86_64 | Mbed TLS | PARTIAL | dc0cc4edb9ce349983b197dc44fa8aa5af7222ac7f3f9051d1e4a6b51a97ea90 | 9779698715 | 16b6f9485bd7a3eda3844b68986f252db9418a6f0c219461f0de07c07d6f158f |
-| Linux glibc x86_64 | OpenSSL | PARTIAL | 1ded329804b22b970d6136c9953a96bd1bf6e4e06df4fc45528742665f4af32f | 9779716483 | 5cebcc922e1951ccd2b703f3554b68d6e69c15c069fc632c5a4b0b6e16ad16c8 |
-| Linux musl x86_64 | AWS-LC | PASS | 42ebb06cd91d054d1982a51ffc2cc384eef00e2aa21ca9fa34c64aa35f045f1b | 9779680098 | 378ca78a69eeb297e1ff1f28af974252dbbc25b6161bc49641250e9101274688 |
-| Linux musl x86_64 | Mbed TLS | PARTIAL | e56738dde0aeff2ba4af5f6bee3139dec13ebb0bef4eadcd29ad5b048df9bbb6 | 9779686143 | 5cef498c45d59cd2bf672bb87ef888d52aefec06cfd8afab0a2a8607129830b0 |
-| Linux musl x86_64 | OpenSSL | PARTIAL | 3c9e7c782ee245dc19a10671f9057298d03343c7120c7c26b58540be69f5bfce | 9779710004 | 4193b8b3e78bc220af1a418fb0fb8ad21833be5ee93b8c8d0b2c414f4fde7951 |
-| macOS arm64 | AWS-LC | PASS | 815fd2f0eda0facaefceaa35713133b027dff9c025a4db4f1d0cfc50de7c5722 | 9779682314 | a89a1cdc243ecb2885c9b84ab99b683e036cf6205c93a7a6c6b2dca68319e502 |
-| macOS arm64 | Mbed TLS | PARTIAL | 39ce714ba176b499608ddd23bcf82d427791ee284d1382c2570696aa397a6622 | 9779688645 | b351f3480c6b3e775fd8e5b563732810580ed306139ca4cc0eb4414778d15a31 |
-| macOS arm64 | OpenSSL | PARTIAL | e44af9a9f859402c09a1d7494dd515aa9f7e8ff3c7a878560258e6137e9cdf4d | 9779727158 | c60971761beeb166aa45e63d0cd89b3afb5d54dc5215c248033e9b0372b0ed56 |
-| Windows x86_64 | AWS-LC | PASS | 8a9026074dd61b56ec4517d7fcb3ab5cae07451e1509827c8148f20070ce3eb0 | 9779678094 | 705753b1e6e3282d7b0fdfe7a23903a51cd78094f0ae8e2a80cb3c60f8521fa4 |
-| Windows x86_64 | Mbed TLS | PARTIAL | 045942570a624c2fd44df7a098e7d6bc3bea0d4f5271aaaf038891894f0b3881 | 9779729268 | d25b4d9a2ce508e37cdbc4856816fb20c546660f80f9679456cc41e8dc446250 |
-| Windows x86_64 | OpenSSL | PARTIAL | cd47f90f6877d1526a05240cd871866735e3ec1c5ac12753684993459e629f7d | 9779886354 | bf311980d821c1dc2e8e68a699b2e815e56e92a410916a6388978654a08269c3 |
+| Linux glibc x86_64 | AWS-LC | PASS | f46e603800d3948b44fb3b4ef31639acc66f8060ab31292f3455da3b127a9f6a | 9780737160 | 86a8becdf1abdeb554ecf168e9cad665b88fcf5994f41cdd6ba0f4f5f93f33fc |
+| Linux glibc x86_64 | Mbed TLS | PARTIAL | 65ef73ae157b883828acfaa79b47267d1e6dd1560d16b4e3b9056af95aab3064 | 9780710366 | ea8b881009fdd933e50d57ec64563ff3073b6e58c910f81c32f8e5ff4db34610 |
+| Linux glibc x86_64 | OpenSSL | PARTIAL | a3752f753b70796bd2ff7ba09ef1bd6e09c52ccbd90ae24946ba21f1c8a3fac8 | 9780756040 | e3cc85a5b3a39d90172609602969f4f06c8321616946dfa7ca5b7aa1d2ea5ead |
+| Linux musl x86_64 | AWS-LC | PASS | 4081d06c17b29d551808e4fb3346e2d22a3084361b0a1abfa1190b029a0a554a | 9780704790 | 20d396c0a2409cc0d8bc676cec352f24bce21faac8bc48495b20c7f3488cf7ae |
+| Linux musl x86_64 | Mbed TLS | PARTIAL | 51efe846877ebfc2ba3837227f24da7d40ae6addbc5695df1e12794072d33fb1 | 9780706698 | c915f158471d8c3144d55c716a450ce4571d7c80f9cb151bdd52650646f133e5 |
+| Linux musl x86_64 | OpenSSL | PARTIAL | 343f6a82a40e0906211d9881d0558c4b55e9a93fe7dcc4ed583ad67e91fbaabf | 9780725875 | 646b2eec7696769c61e2b16778cbfcb79a559012158ace1490db76dc872b3c5f |
+| macOS arm64 | AWS-LC | PASS | d34063834ba9704567c58cd6d8833b32110d82325de075f80c3e2b20aa77936c | 9780704192 | 24d7bf5f9f0c9b138da459643428f593738e20d919101c66cbfa6d4a36eb96e8 |
+| macOS arm64 | Mbed TLS | PARTIAL | 769c0f4f843e7c58907b040cb039017fee54f4d39ffcded7a1f44373d5d68fbe | 9780701601 | d71cf61429dad3c02a71fdb7cb7513e90df4dc07b4e0034091d539cd9c8d8b17 |
+| macOS arm64 | OpenSSL | PARTIAL | 71213dc9119448ceac8cfbc1097cfdb8f224b6975f3d1783e39fd20456f73716 | 9780741794 | 94955ff286ceaa7584e545751f29e9c4a1a53a3df20519f5f341f8c510ebd28a |
+| Windows x86_64 | AWS-LC | PASS | b1e12bda3d067e12ccc5bd8b8d2d1adbd81fee8cc179b77dc8485c028306c163 | 9780706869 | ab65d14cc56fbae0fd91b251407392f07fe7af553bf9b8a67c72b2398a1bc2d7 |
+| Windows x86_64 | Mbed TLS | PARTIAL | 37cfd90c441a8509be195ebcb9ac4b414b63e4e71dbb79e8d1da03e7b054a93f | 9780743660 | f52cefe87d76555b46b85d728ae2950ec208a0d0354134641e149cdf64265376 |
+| Windows x86_64 | OpenSSL | PARTIAL | 10c5ed9184044493d0205cc66f7399d816ea9fa532927795585bb0016097ad47 | 9780885578 | fb774f9d8d24691d33390183885b33daa81f1dd6b3583b34df8f92644987ff96 |
 
-The Unix artifacts expire on 2026-11-29. The Windows artifacts expire on
-2026-09-14. Artifact expiration does not remove the committed result JSON,
+The Unix artifacts expire on 2026-11-30. The Windows artifacts expire on
+2026-09-15. Artifact expiration does not remove the committed result JSON,
 license payload, matrix digest, normalized build provenance, or source
 identity.
 

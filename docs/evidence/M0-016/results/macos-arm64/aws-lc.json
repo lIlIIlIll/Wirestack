@@ -3480,17 +3480,17 @@
       {
         "bytes": 4090424,
         "name": "libcrypto.a",
-        "sha256": "43fcf63ba510c45dd7b6fdc9cc0e4732f3e22b13bc0ab8ff70f5f65c629c37ef"
+        "sha256": "d8bbeb681a21b59301894d51938846a7c7982a2842de66d666426ea6eb64e91b"
       },
       {
         "bytes": 668872,
         "name": "libssl.a",
-        "sha256": "58e82c81b5338b7b7d929e0014f51b0f6218dabde8211fbc38d2d1abfb552d0d"
+        "sha256": "b211f27767f5615a9c4c9266afcc83b3e036cb24af1de5523b7ab88dc0ae2f28"
       }
     ],
     "system_tls_dependencies": []
   },
-  "build_log_sha256": "d3dfe22eed5b9dde3bc9500a366fd0fe948271bc4e7ee8a29c68b9441d20ac5a",
+  "build_log_sha256": "5716f5e89772eb801a370f67573e753de80510a8e13bed8a50046c4f32245a7b",
   "capabilities": {
     "caller_cancellation": "PASS",
     "close_notify": "PASS",
@@ -3516,16 +3516,16 @@
     "image_os": "macos15",
     "image_version": "20260727.0256.1",
     "python": "3.12.10",
-    "repository_revision": "f329ccdac1130afad7ad5e5fd5665378bb392072",
+    "repository_revision": "72808d9948973a9562d15c41847b73db56aa7001",
     "runner_arch": "ARM64",
     "runner_os": "macOS"
   },
-  "finished_at": "2026-08-31T23:28:16.384394+00:00",
+  "finished_at": "2026-09-01T00:12:37.253670+00:00",
   "metrics": {
     "alpn_malformed_inputs_rejected": 2,
     "alpn_no_overlap_handshakes": 2,
     "cancellation_bound_us": 250000,
-    "cancellation_latency_us": 99,
+    "cancellation_latency_us": 40,
     "cancellation_wakeups": 1,
     "certificate_negative_cases_rejected": 2,
     "external_signer_calls": 2,
@@ -3533,11 +3533,11 @@
     "failure_cleanup_cycles": 0,
     "local_close_operations": 2,
     "memory_profile_bound_bytes": 536870912,
-    "memory_profile_peak_resident_bytes": 4177920,
+    "memory_profile_peak_resident_bytes": 4227072,
     "mtls_optional_handshakes": 2,
     "mtls_required_handshakes": 1,
     "provider_allocation_bound_bytes": 68719476736,
-    "provider_allocation_bytes": 1375385824,
+    "provider_allocation_bytes": 1375387700,
     "provider_allocation_call_bound": 150000000,
     "provider_allocation_calls": 10286952,
     "provider_allocation_live_after_cleanup_bytes": 154180,
@@ -3554,16 +3554,16 @@
   "operational_evidence": {
     "cancellation": {
       "bound_us": 250000,
-      "latency_us": 99,
+      "latency_us": 40,
       "method": "caller-owned-wait-thread-explicit-cancel-and-bounded-join",
       "wakeups": 1
     },
     "memory_profile": {
       "method": "native-process-peak-resident-and-provider-allocation-hooks",
       "payload_bytes_per_transfer": 32768,
-      "peak_resident_bytes": 4177920,
+      "peak_resident_bytes": 4227072,
       "provider_allocation_bound_bytes": 68719476736,
-      "provider_allocation_bytes": 1375385824,
+      "provider_allocation_bytes": 1375387700,
       "provider_allocation_call_bound": 150000000,
       "provider_allocation_calls": 10286952,
       "provider_allocation_live_after_cleanup_bytes": 154180,
@@ -3577,7 +3577,7 @@
         "reason": "AWS-LC 5.5.0 exposes no process-global cleanup API; the bounded 10,000-cycle resident/allocation profile remains mandatory",
         "status": "UNSUPPORTED"
       },
-      "output_sha256": "32c0cbf4d4669e9c846716adb13034fd0d46ee400234b77c0d238e921a6585fe",
+      "output_sha256": "2542bce87f97f86f73dc12bc123dab5ec380f7a303bb6a16a3c5041e18b1e54c",
       "provider_build_provenance": {
         "assembler": null,
         "build_argv": [
@@ -3678,12 +3678,12 @@
         {
           "bytes": 21200184,
           "name": "libcrypto.a",
-          "sha256": "c95c20793cc405665dfc249f8145964f036b1831445fc28dabf85ecdf1868d85"
+          "sha256": "99d3fd489d5cd671e367e29846b4d91d32ede66ec03ddb7f41bb9dbdb9e85fa5"
         },
         {
           "bytes": 16586408,
           "name": "libssl.a",
-          "sha256": "02e08b1ec727edfa4330c49825e20862bb35562b617642af237ea8056eec1041"
+          "sha256": "83a68043e16531c4bb66bc2e221154ded8db28f71fcbcce5fa100b000830c43d"
         }
       ],
       "status": "PASS",
@@ -3721,7 +3721,7 @@
     },
     "tree": "ae54cd9455f9630451d505855afe808a9f028b25"
   },
-  "started_at": "2026-08-31T23:26:30.670739+00:00",
+  "started_at": "2026-09-01T00:10:49.984030+00:00",
   "status": "PASS",
   "task_id": "M0-016"
 }
