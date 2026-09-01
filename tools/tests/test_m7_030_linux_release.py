@@ -360,6 +360,11 @@ class M7030LinuxReleaseTest(unittest.TestCase):
             self.assertEqual("PASS", validation["status"])
             self.assertEqual(["artifact", "release-manifest", "sbom"],
                              validation["verifiedSubjects"])
+            legacy = copy.deepcopy(report)
+            legacy["subjects"][1].pop("signedPayloadSha256")
+            report_path.write_bytes(release.canonical_json(legacy))
+            with self.assertRaisesRegex(release.ReleaseError, "HOSTED_REPORT_SUBJECT"):
+                release.validate_hosted_report(report_path)
             (subjects[0][3]).write_bytes(release.canonical_json({"verified": 0}))
             with self.assertRaisesRegex(release.ReleaseError, "HOSTED_VERIFY_EMPTY"):
                 release.build_hosted_report("a" * 40, subjects)
@@ -390,8 +395,8 @@ class M7030LinuxReleaseTest(unittest.TestCase):
             self.assertEqual("PASS", report["decision"])
             self.assertEqual("REHEARSAL", report["classification"])
             self.assertEqual("PASS", report["updateFlow"]["decision"])
-            self.assertEqual("PASS", report["productionAttestation"]["decision"])
-            self.assertEqual("verified", report["productionAttestation"]["detail"])
+            self.assertEqual("FAIL", report["productionAttestation"]["decision"])
+            self.assertEqual("HOSTED_REPORT_SUBJECT", report["productionAttestation"]["detail"])
             serialized = json.dumps(report)
             self.assertNotIn("PRIVATE KEY", serialized)
             self.assertNotIn(str(Path(directory).parent), serialized)

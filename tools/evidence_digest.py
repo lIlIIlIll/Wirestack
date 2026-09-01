@@ -372,12 +372,14 @@ def digest_inventory(root: Path) -> dict[str, Any]:
             for node in ast.walk(tree):
                 if not (isinstance(node, ast.ImportFrom) and node.module == "hashlib"):
                     continue
-                if any(item.name == "sha256" for item in node.names):
-                    entries.append({
-                        "path": relative, "line": node.lineno,
-                        "symbol": "hashlib.sha256-import", "classification": "legacy-task-local",
-                    })
-                    issues.append({"code": "UNTYPED_DIGEST", "detail": f"{relative}:{node.lineno}:hashlib.sha256-import"})
+                entries.append({
+                    "path": relative, "line": node.lineno,
+                    "symbol": "hashlib-import", "classification": "legacy-task-local",
+                })
+                issues.append({
+                    "code": "UNTYPED_DIGEST",
+                    "detail": f"{relative}:{node.lineno}:hashlib-import",
+                })
             for node in ast.walk(tree):
                 if not isinstance(node, ast.Call):
                     continue
