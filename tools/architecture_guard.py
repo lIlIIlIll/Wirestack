@@ -36,6 +36,7 @@ RAW_DIGEST_COMMAND_RE = re.compile(
     r"(?:"
     r"\b(?:sha256sum|shasum(?:\s+-a\s+256)?|Get-FileHash|certutil(?:\.exe)?\s+-hashfile)\b"
     r"|\bopenssl(?:\.exe)?\s+dgst\b[^\r\n]*(?:-sha256|-sha-256)\b"
+    r"|\bopenssl(?:\.exe)?\s+(?:sha256|sha-256)\b"
     r"|\bcksum\b[^\r\n]*(?:-a\s+sha256|--algorithm(?:=|\s+)sha256)\b"
     r"|\bhashlib\s*\.\s*(?:sha256|new\s*\([^\r\n]*sha256)"
     r"|\bfrom\s+hashlib\s+import\s+(?:sha256|new)\b"
@@ -47,8 +48,11 @@ RAW_DIGEST_COMMAND_RE = re.compile(
     re.IGNORECASE,
 )
 TEXT_COMMAND_OPERAND_RE = re.compile(
+    r"(?:"
     r"\.(?:json|md|markdown|log|txt|yaml|yml|cj|py|c|cc|cpp|h|hpp|sh)"
-    r"(?=$|[\s'\";)])",
+    r"(?=$|[\s'\";)])"
+    r"|(?:^|[/\\\s'\"])(?:LICENSE|NOTICE)(?=$|[\s'\";)])"
+    r")",
     re.IGNORECASE,
 )
 SHELL_VARIABLE_OPERAND_RE = re.compile(

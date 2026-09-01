@@ -404,6 +404,20 @@ class ArchitectureGuardTests(unittest.TestCase):
                 sum(item.rule == "untyped-non-python-digest" for item in violations),
             )
 
+    def test_openssl_shortcut_and_license_operand_are_rejected(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            self.write(
+                root,
+                "scripts/check-report",
+                "openssl sha256 docs/evidence/report.json\n"
+                "# wirestack-digest-domain: artifact-bytes-v1\n"
+                "sha256sum third_party/provider/LICENSE\n",
+            )
+            rules = self.rules(root)
+            self.assertIn("untyped-non-python-digest", rules)
+            self.assertIn("text-evidence-raw-digest", rules)
+
     def test_text_evidence_rejects_artifact_digest_and_utf8_fallback(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)
