@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import copy
-import hashlib
 import json
 import subprocess
 import sys
@@ -295,7 +296,7 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
             "exitCode": 0,
             "timedOut": False,
             "evidencePath": "docs/evidence/M7-029/regression.log",
-            "sha256": hashlib.sha256(evidence.read_bytes()).hexdigest(),
+            "sha256": evidence_digest.text_evidence_bytes_sha256(evidence.read_bytes()),
         }]
         summary = review.validate_review(root, request, value)
         self.assertEqual({"Fixed": 1}, summary["findingStatuses"])

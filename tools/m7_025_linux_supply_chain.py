@@ -3,8 +3,9 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import re
 import sys
@@ -76,18 +77,6 @@ def canonical_json(value: Any) -> bytes:
     return (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode()
 
 
-def sha256_bytes(value: bytes) -> str:
-    return hashlib.sha256(value).hexdigest()
-
-
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise SupplyChainError(message)
@@ -155,15 +144,15 @@ def artifact_metadata(path: Path) -> dict[str, Any]:
     except (OSError, tarfile.TarError) as error:
         raise SupplyChainError(f"cannot inspect release artifact: {error}") from error
     return {
-        "artifact_sha256": sha256_path(path),
+        "artifact_sha256": evidence_digest.artifact_byte_sha256(path),
         "artifact_bytes": path.stat().st_size,
         "release": _json_bytes(release_raw, "release-manifest.json"),
         "provider": _json_bytes(provider_raw, "provider-manifest.json"),
-        "provider_manifest_sha256": sha256_bytes(provider_raw),
+        "provider_manifest_sha256": evidence_digest.text_evidence_bytes_sha256(provider_raw),
         "resolver": _json_bytes(resolver_raw, "resolver-manifest.json"),
-        "resolver_manifest_sha256": sha256_bytes(resolver_raw),
+        "resolver_manifest_sha256": evidence_digest.text_evidence_bytes_sha256(resolver_raw),
         "license_sha256": {
-            relative: sha256_bytes(content)
+            relative: evidence_digest.text_evidence_bytes_sha256(content)
             for relative, content in license_files.items()
         },
     }
@@ -535,7 +524,7 @@ def build_documents(
     metadata = artifact_metadata(artifact_path)
     validate_artifact_inputs(metadata, qualification, provider_pin)
     inputs = fingerprint_inputs(metadata, qualification, generator_sha256)
-    fingerprint = sha256_bytes(canonical_json(inputs))
+    fingerprint = evidence_digest.text_evidence_bytes_sha256(canonical_json(inputs))
     fingerprint_document = {
         "schemaVersion": SCHEMA_VERSION,
         "taskId": TASK_ID,
@@ -552,7 +541,7 @@ def build_documents(
     }
     file_digests = {
         name: {
-            "sha256": sha256_bytes(canonical_json(value)),
+            "sha256": evidence_digest.text_evidence_bytes_sha256(canonical_json(value)),
             "mediaType": "application/spdx+json" if name == "sbom.spdx.json" else "application/json",
         }
         for name, value in documents.items()
@@ -615,7 +604,9 @@ def validate_documents(
     _require(manifest.get("taskId") == TASK_ID, "provider manifest task identity is invalid")
     _require(fingerprint.get("taskId") == TASK_ID, "fingerprint task identity is invalid")
     _require(bundle.get("taskId") == TASK_ID and bundle.get("decision") == "PASS", "bundle decision is invalid")
-    expected_fingerprint = sha256_bytes(canonical_json(fingerprint.get("inputs")))
+    expected_fingerprint = evidence_digest.text_evidence_bytes_sha256(
+        canonical_json(fingerprint.get("inputs"))
+    )
     _require(
         fingerprint.get("buildFingerprint") == expected_fingerprint,
         "build fingerprint does not match its canonical inputs",
@@ -623,7 +614,7 @@ def validate_documents(
     _require(manifest.get("buildFingerprint") == expected_fingerprint, "manifest fingerprint mismatch")
     _require(bundle.get("buildFingerprint") == expected_fingerprint, "bundle fingerprint mismatch")
     _require(
-        fingerprint.get("inputs", {}).get("generator", {}).get("sha256") == sha256_path(generator),
+        fingerprint.get("inputs", {}).get("generator", {}).get("sha256") == evidence_digest.text_evidence_sha256(generator),
         "generator fingerprint is stale",
     )
     qualified_artifact = qualification.get("artifact", {})
@@ -692,7 +683,7 @@ def validate_documents(
     _require(manifest.get("trust", {}).get("policies") == TRUST_POLICIES, "trust policy inventory is incomplete")
     for name in OUTPUT_NAMES[:-1]:
         expected = bundle.get("documents", {}).get(name, {}).get("sha256")
-        _require(expected == sha256_path(evidence_dir / name), f"bundle digest mismatch for {name}")
+        _require(expected == evidence_digest.text_evidence_sha256(evidence_dir / name), f"bundle digest mismatch for {name}")
     serialized = canonical_json(documents).decode("utf-8")
     for forbidden in ("/home/", "Authorization", "privateKey", "sessionSecret"):
         _require(forbidden not in serialized, f"sensitive or host-local value appears in bundle: {forbidden}")
@@ -701,7 +692,7 @@ def validate_documents(
             artifact_path,
             qualification,
             provider_pin,
-            generator_sha256=sha256_path(generator),
+            generator_sha256=evidence_digest.text_evidence_sha256(generator),
         )
         for name in OUTPUT_NAMES:
             _require(documents[name] == expected_documents[name], f"committed {name} is stale")
@@ -732,7 +723,7 @@ def main() -> int:
                 args.artifact,
                 qualification,
                 provider_pin,
-                generator_sha256=sha256_path(Path(__file__)),
+                generator_sha256=evidence_digest.text_evidence_sha256(Path(__file__)),
             )
             write_documents(documents, args.output_dir)
             bundle = validate_documents(args.output_dir, artifact_path=args.artifact)

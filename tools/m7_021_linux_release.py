@@ -3,9 +3,10 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
 import gzip
-import hashlib
 import io
 import json
 import os
@@ -82,16 +83,8 @@ def canonical_json(value: Any) -> bytes:
     return (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode()
 
 
-def sha256_bytes(value: bytes) -> str:
-    return hashlib.sha256(value).hexdigest()
-
-
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+def artifact_payload_sha256(value: bytes) -> str:
+    return evidence_digest.artifact_bytes_sha256(value)
 
 
 def run(command: Sequence[str], *, cwd: Path, env: Mapping[str, str] | None = None) -> str:
@@ -142,11 +135,11 @@ def source_tree_sha256(root: Path) -> str:
     entries = [
         {
             "path": path.relative_to(root).as_posix(),
-            "sha256": sha256_path(path),
+            "sha256": evidence_digest.text_evidence_sha256(path),
         }
         for path in sorted(paths)
     ]
-    return sha256_bytes(canonical_json(entries))
+    return evidence_digest.text_evidence_bytes_sha256(canonical_json(entries))
 
 
 def platform_identity() -> dict[str, str]:
@@ -205,11 +198,11 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
         {
             "path": relative,
             "bytes": len(content),
-            "sha256": sha256_bytes(content),
+            "sha256": artifact_payload_sha256(content),
         }
         for relative, content in sorted(payload.items())
     ]
-    payload_digest = sha256_bytes(canonical_json(entries))
+    payload_digest = evidence_digest.text_evidence_bytes_sha256(canonical_json(entries))
     release_manifest: dict[str, Any] = {
         "schema_version": 1,
         "package": "wirestack",
@@ -223,14 +216,14 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
         "license": {
             "expression": PROJECT_LICENSE_EXPRESSION,
             "file": "LICENSE",
-            "sha256": sha256_bytes(payload["LICENSE"]),
+            "sha256": artifact_payload_sha256(payload["LICENSE"]),
         },
         "thirdPartyNotices": {
             "index": "THIRD_PARTY_NOTICES.md",
             "files": [
                 {
                     "path": relative,
-                    "sha256": sha256_bytes(payload[relative]),
+                    "sha256": artifact_payload_sha256(payload[relative]),
                 }
                 for relative in RELEASE_METADATA_FILES[1:]
             ],
@@ -243,11 +236,11 @@ def collect_payload(root: Path) -> tuple[dict[str, bytes], dict[str, Any]]:
             "abi_version": provider_manifest.get("abiVersion"),
             "build_fingerprint": provider_manifest.get("build_fingerprint"),
             "archive_sha256": provider_manifest.get("archive", {}).get("sha256"),
-            "manifest_sha256": sha256_bytes(payload["target/native/current/provider-manifest.json"]),
+            "manifest_sha256": artifact_payload_sha256(payload["target/native/current/provider-manifest.json"]),
         },
         "resolver": {
             "archive_sha256": resolver_manifest.get("archive", {}).get("sha256"),
-            "manifest_sha256": sha256_bytes(
+            "manifest_sha256": artifact_payload_sha256(
                 payload["target/native/resolver/current/resolver-manifest.json"]
             ),
         },
@@ -401,7 +394,7 @@ def scan_binary(binary: Path) -> dict[str, Any]:
     if loader_strings:
         raise ReleaseError(f"consumer contains system OpenSSL loader strings: {loader_strings}")
     return {
-        "elf_sha256": sha256_path(binary),
+        "elf_sha256": evidence_digest.artifact_byte_sha256(binary),
         "needed": needed,
         "resolved": resolved,
         "forbidden_dependencies": [],
@@ -460,7 +453,7 @@ def validate_report(
         if source_digest != source_tree_sha256(root):
             raise ReleaseError("qualification source tree fingerprint is stale")
         expected_inputs = {
-            relative: sha256_path(root / relative) for relative in QUALIFICATION_INPUTS
+            relative: evidence_digest.text_evidence_sha256(root / relative) for relative in QUALIFICATION_INPUTS
         }
         if inputs != expected_inputs:
             raise ReleaseError("qualification input fingerprint is stale")
@@ -512,8 +505,8 @@ def qualify(root: Path, output_dir: Path, *, offline: bool) -> tuple[Path, Path,
         second = work / "second.tar.gz"
         write_reproducible_archive(first, payload)
         write_reproducible_archive(second, payload)
-        first_digest = sha256_path(first)
-        second_digest = sha256_path(second)
+        first_digest = evidence_digest.artifact_byte_sha256(first)
+        second_digest = evidence_digest.artifact_byte_sha256(second)
         if first_digest != second_digest or first.read_bytes() != second.read_bytes():
             raise ReleaseError("two builds from identical inputs produced different artifacts")
         shutil.copy2(first, artifact)
@@ -534,12 +527,12 @@ def qualify(root: Path, output_dir: Path, *, offline: bool) -> tuple[Path, Path,
         "platform": platform_data,
         "source_tree_sha256": source_tree_sha256(root),
         "qualification_inputs": {
-            relative: sha256_path(root / relative) for relative in QUALIFICATION_INPUTS
+            relative: evidence_digest.text_evidence_sha256(root / relative) for relative in QUALIFICATION_INPUTS
         },
         "artifact": {
             "name": artifact.name,
             "bytes": artifact.stat().st_size,
-            "sha256": sha256_path(artifact),
+            "sha256": evidence_digest.artifact_byte_sha256(artifact),
             "reproducibility": {
                 "builds": 2,
                 "digests": [first_digest, second_digest],

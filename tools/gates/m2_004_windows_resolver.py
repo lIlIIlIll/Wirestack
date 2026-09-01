@@ -3,9 +3,10 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import platform
@@ -25,14 +26,6 @@ EXPECTED_TESTS = 6
 
 class GateError(RuntimeError):
     pass
-
-
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def atomic_json(path: Path, payload: dict[str, Any]) -> None:
@@ -60,7 +53,7 @@ def load_report(report_path: Path) -> tuple[dict[str, Any], str]:
     payload = json.loads(raw.decode("utf-8"))
     if not isinstance(payload, dict):
         raise json.JSONDecodeError("report root must be an object", raw.decode("utf-8"), 0)
-    return payload, hashlib.sha256(raw).hexdigest()
+    return payload, evidence_digest.text_evidence_bytes_sha256(raw)
 
 
 def validation_payload(
@@ -171,10 +164,10 @@ def build_test_link_stub(root: Path, env: dict[str, str]) -> dict[str, Any]:
     if archived["timed_out"] or archived["exit_code"] != 0 or not archive.is_file():
         raise GateError("test-only TLS link stub archive failed: " + archived["output"][-4000:])
     return {
-        "archive_sha256": sha256_path(archive),
+        "archive_sha256": evidence_digest.artifact_byte_sha256(archive),
         "compile": compiled,
         "archive": archived,
-        "source_sha256": sha256_path(source),
+        "source_sha256": evidence_digest.text_evidence_sha256(source),
         "purpose": "M2-004 resolver-test link support; all functions fail closed",
         "test_only": True,
     }
@@ -294,7 +287,7 @@ def run_gate(root: Path, output: Path, revision: str) -> dict[str, Any]:
         timeout=180,
         )
         toolchain = run_command([cjc, "-v"], cwd=workspace, env=env, timeout=15)
-        manifest_sha256 = sha256_path(manifest_path)
+        manifest_sha256 = evidence_digest.text_evidence_sha256(manifest_path)
     failures = process_failures(resolver_test, EXPECTED_TESTS, "RESOLVER_TEST")
     if manifest.get("platform") != "windows-x86_64":
         failures.append("MANIFEST:PLATFORM")

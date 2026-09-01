@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import unittest
 import tempfile
 from pathlib import Path
@@ -12,11 +14,11 @@ class BuildResolverSelectionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "resolver.c"
             source.write_bytes(b"one\ntwo\n")
-            lf_digest = build_windows_resolver.canonical_text_sha256(source)
+            lf_digest = evidence_digest.text_evidence_sha256(source)
             source.write_bytes(b"one\r\ntwo\r\n")
-            self.assertEqual(lf_digest, build_windows_resolver.canonical_text_sha256(source))
+            self.assertEqual(lf_digest, evidence_digest.text_evidence_sha256(source))
             source.write_bytes(b"one\r\nchanged\r\n")
-            self.assertNotEqual(lf_digest, build_windows_resolver.canonical_text_sha256(source))
+            self.assertNotEqual(lf_digest, evidence_digest.text_evidence_sha256(source))
 
     def test_normalizes_only_implemented_platforms(self) -> None:
         self.assertEqual(

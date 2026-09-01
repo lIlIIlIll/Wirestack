@@ -1,0 +1,117 @@
+from __future__ import annotations
+
+import tempfile
+import unittest
+import platform
+from pathlib import Path
+
+from tools.evidence_digest import (
+    ARTIFACT_BYTE_DOMAIN,
+    TEXT_EVIDENCE_DOMAIN,
+    ArtifactByteDigest,
+    DigestError,
+    TextEvidenceDigest,
+    artifact_byte_digest_bytes,
+    atomic_json,
+    crlf_report,
+    digest_inventory,
+    parse_artifact_digest,
+    parse_text_digest,
+    text_evidence_digest_bytes,
+)
+
+
+class EvidenceDigestTypeTests(unittest.TestCase):
+    ROOT = Path(__file__).resolve().parents[2]
+
+    def test_line_endings_share_text_digest_but_not_byte_digest(self) -> None:
+        variants = (b"alpha\nbeta\n", b"alpha\r\nbeta\r\n", b"alpha\rbeta\r")
+        text = [text_evidence_digest_bytes(value) for value in variants]
+        raw = [artifact_byte_digest_bytes(value) for value in variants]
+        self.assertEqual(1, len({item.sha256 for item in text}))
+        self.assertEqual(3, len({item.sha256 for item in raw}))
+        self.assertEqual(TEXT_EVIDENCE_DOMAIN, text[0].to_json()["domain"])
+        self.assertEqual(ARTIFACT_BYTE_DOMAIN, raw[0].to_json()["domain"])
+
+    def test_invalid_utf8_fails_without_byte_fallback(self) -> None:
+        with self.assertRaises(DigestError) as caught:
+            text_evidence_digest_bytes(b"valid\n\xff")
+        self.assertEqual("TEXT_UTF8", caught.exception.code)
+
+    def test_digest_types_and_serialized_domains_are_not_interchangeable(self) -> None:
+        text = text_evidence_digest_bytes(b"same\n")
+        artifact = ArtifactByteDigest(text.sha256)
+        self.assertNotEqual(text, artifact)
+        self.assertIsInstance(parse_text_digest(text.to_json()), TextEvidenceDigest)
+        self.assertIsInstance(parse_artifact_digest(artifact.to_json()), ArtifactByteDigest)
+        with self.assertRaises(DigestError) as text_error:
+            parse_text_digest(artifact.to_json())
+        self.assertEqual("DIGEST_DOMAIN", text_error.exception.code)
+        with self.assertRaises(DigestError) as byte_error:
+            parse_artifact_digest(text.to_json())
+        self.assertEqual("DIGEST_DOMAIN", byte_error.exception.code)
+
+    def test_untyped_unknown_and_malformed_digest_documents_fail_closed(self) -> None:
+        for raw, code in (
+            ("0" * 64, "DIGEST_TYPE"),
+            ({"domain": "future-domain", "sha256": "0" * 64}, "DIGEST_DOMAIN"),
+            ({"domain": TEXT_EVIDENCE_DOMAIN, "sha256": "ABC"}, "DIGEST_INVALID"),
+            ({"domain": TEXT_EVIDENCE_DOMAIN, "sha256": "0" * 64, "extra": True}, "DIGEST_FIELDS"),
+        ):
+            with self.subTest(code=code), self.assertRaises(DigestError) as caught:
+                parse_text_digest(raw)
+            self.assertEqual(code, caught.exception.code)
+
+    def test_atomic_report_preserves_target_on_injected_failure(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-atomic-") as directory:
+            path = Path(directory) / "report.json"
+            path.write_bytes(b"old\r\n")
+            with self.assertRaises(RuntimeError):
+                atomic_json(path, {"status": "PASS"}, lambda: (_ for _ in ()).throw(RuntimeError("injected")))
+            self.assertEqual(b"old\r\n", path.read_bytes())
+            self.assertEqual([], list(path.parent.glob(f".{path.name}.*.tmp")))
+
+    def test_crlf_report_is_bounded_and_uses_actual_platform(self) -> None:
+        report = crlf_report()
+        self.assertEqual("PASS", report["status"])
+        self.assertFalse(report["gitattributes_dependency"])
+        self.assertEqual("REJECTED", report["invalid_utf8"])
+        self.assertTrue(report["platform"]["system"])
+
+    def test_crlf_report_rejects_wrong_native_platform(self) -> None:
+        wrong = "windows-x86_64" if platform.system() != "Windows" else "linux-x86_64-glibc"
+        report = crlf_report(wrong)
+        self.assertEqual("FAIL", report["status"])
+        self.assertEqual("PLATFORM_MISMATCH", report["issues"][0]["code"])
+
+    def test_windows_workflow_is_pinned_and_runs_only_bounded_python_checks(self) -> None:
+        workflow = (self.ROOT / ".github/workflows/p1-014-evidence-digest-boundary.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("runs-on: windows-latest", workflow)
+        self.assertIn("actions/checkout@11d5960a326750d5838078e36cf38b85af677262", workflow)
+        self.assertIn("actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02", workflow)
+        self.assertIn("--expected-platform windows-x86_64", workflow)
+        self.assertNotIn("cjpm", workflow.lower())
+        self.assertNotIn("soak", workflow.lower())
+
+    def test_inventory_rejects_untyped_digest_anywhere_in_repository_tools(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="wirestack-p1-014-inventory-") as directory:
+            root = Path(directory)
+            path = root / "tools/gates/new_tool.py"
+            path.parent.mkdir(parents=True)
+            path.write_text("import hashlib\nvalue = hashlib.sha256(b'x').hexdigest()\n", encoding="utf-8")
+            report = digest_inventory(root)
+            self.assertEqual("FAIL", report["status"])
+            self.assertEqual("UNTYPED_DIGEST", report["issues"][0]["code"])
+
+    def test_current_inventory_has_no_legacy_task_local_digest_calls(self) -> None:
+        report = digest_inventory(self.ROOT)
+        self.assertEqual("PASS", report["status"])
+        self.assertNotIn("legacy-task-local", report["domain_counts"])
+        self.assertGreater(report["domain_counts"].get("text-evidence", 0), 0)
+        self.assertGreater(report["domain_counts"].get("artifact-bytes", 0), 0)
+
+
+if __name__ == "__main__":
+    unittest.main()

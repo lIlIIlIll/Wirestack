@@ -3,8 +3,9 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import os
 import platform
@@ -22,14 +23,6 @@ LEASE_OWNER_ENV = "WIRESTACK_APPLE_CACHE_LEASE_PID"
 
 class BuildError(RuntimeError):
     pass
-
-
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def run(command: list[str], *, cwd: Path | None = None) -> str:
@@ -85,14 +78,14 @@ def build_fingerprint(
     inputs: dict[str, object] = {
         "schema": 1,
         "platform": selected,
-        "sources": {str(path): sha256_path(path) for path in sources},
+        "sources": {str(path): evidence_digest.text_evidence_sha256(path) for path in sources},
         "compiler": tools["cc"],
         "compiler_version": compiler_version,
         "flags": flags,
         "test_fixture": test_fixture,
     }
     encoded = json.dumps(inputs, sort_keys=True, separators=(",", ":")).encode()
-    return hashlib.sha256(encoded).hexdigest(), inputs
+    return evidence_digest.text_evidence_bytes_sha256(encoded), inputs
 
 
 def publish_symlink(link: Path, target: Path) -> None:
@@ -152,7 +145,7 @@ def register_cache_lease(final_dir: Path) -> None:
         raise BuildError("cannot bind the resolver cache lease to its CJPM process")
     lease_root = final_dir / ".leases"
     lease_root.mkdir(parents=True, exist_ok=True)
-    identity_digest = hashlib.sha256(identity.encode()).hexdigest()[:16]
+    identity_digest = evidence_digest.text_evidence_bytes_sha256(identity.encode())[:16]
     lease_path = lease_root / f"{pid}-{identity_digest}.json"
     temporary = lease_path.with_name(f".{lease_path.name}-{os.getpid()}")
     temporary.write_text(
@@ -235,7 +228,7 @@ def validate_cached(final_dir: Path, fingerprint: str) -> dict[str, object] | No
         return None
     if manifest.get("build_fingerprint") != fingerprint:
         return None
-    if manifest.get("archive", {}).get("sha256") != sha256_path(archive):
+    if manifest.get("archive", {}).get("sha256") != evidence_digest.artifact_byte_sha256(archive):
         return None
     return manifest
 
@@ -329,7 +322,7 @@ int main(void) {
             "build_fingerprint": fingerprint,
             "platform": selected,
             "inputs": inputs,
-            "archive": {"path": "lib/libwirestack_resolver.a", "sha256": sha256_path(archive)},
+            "archive": {"path": "lib/libwirestack_resolver.a", "sha256": evidence_digest.artifact_byte_sha256(archive)},
             "worker_model": "fixed pthread pool with bounded FIFO admission",
             "close_model": "bounded quarantine with process-wide pool and worker caps",
             "private_runtime_abi": False,

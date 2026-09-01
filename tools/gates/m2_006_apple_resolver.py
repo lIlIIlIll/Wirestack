@@ -3,9 +3,10 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import platform
@@ -53,14 +54,6 @@ class GateError(RuntimeError):
     pass
 
 
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def atomic_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary = tempfile.mkstemp(
@@ -92,7 +85,7 @@ def validation_payload(
         "task_id": TASK_ID,
         "expected_revision": expected_revision,
         "expected_mode": expected_mode,
-        "report_sha256": sha256_path(report_path),
+        "report_sha256": evidence_digest.text_evidence_sha256(report_path),
         "failures": failures,
         "status": "PASS" if not failures else "FAIL",
     }
@@ -386,10 +379,10 @@ def build_test_link_stub(
     archived = run_command([ar, "rcs", str(archive), str(object_path)], cwd=root, env=env, timeout=60)
     require_success(archived, "M2-006 TLS link stub archive")
     return {
-        "archive_sha256": sha256_path(archive),
+        "archive_sha256": evidence_digest.artifact_byte_sha256(archive),
         "compile": compiled,
         "archive": archived,
-        "source_sha256": sha256_path(source),
+        "source_sha256": evidence_digest.text_evidence_sha256(source),
         "test_only": True,
         "target": selected,
     }
@@ -444,7 +437,7 @@ def make_ios_bundle(
     executable_copy = bundle / "wirestack-m2-006"
     shutil.copy2(executable, executable_copy)
     executable_copy.chmod(executable_copy.stat().st_mode | stat.S_IXUSR)
-    bundle_source_probe_sha256 = sha256_path(executable_copy)
+    bundle_source_probe_sha256 = evidence_digest.artifact_byte_sha256(executable_copy)
     frameworks = bundle / "Frameworks"
     frameworks.mkdir()
     runtime_copies: list[Path] = []
@@ -499,12 +492,12 @@ def make_ios_bundle(
     require_success(installed, "install iOS test bundle")
     return {
         "bundle_source_probe_sha256": bundle_source_probe_sha256,
-        "bundle_probe_sha256": sha256_path(executable_copy),
+        "bundle_probe_sha256": evidence_digest.artifact_byte_sha256(executable_copy),
         "install": installed,
         "runtime_libraries": [
             {
                 "path": f"Frameworks/{runtime_copy.name}",
-                "sha256": sha256_path(runtime_copy),
+                "sha256": evidence_digest.artifact_byte_sha256(runtime_copy),
             }
             for runtime_copy in runtime_copies
         ],
@@ -566,7 +559,7 @@ def run_ios_test(root: Path, env: dict[str, str]) -> tuple[dict[str, Any], dict[
         "probe_compile": probe_compile,
         "device_udid": device,
         "runtime": runtime,
-        "probe_sha256": sha256_path(probe),
+        "probe_sha256": evidence_digest.artifact_byte_sha256(probe),
         "launch_attempts": launch_attempts,
         "launch_recovery": launch_recovery,
         **installed_metadata,
@@ -737,7 +730,7 @@ def run_gate(root: Path, output: Path, revision: str, mode: str) -> dict[str, An
         else:
             resolver_test, simulator = run_ios_test(workspace, env)
         toolchain = run_command(["cjc", "-v"], cwd=workspace, env=env, timeout=15)
-        manifest_sha256 = sha256_path(manifest_path)
+        manifest_sha256 = evidence_digest.text_evidence_sha256(manifest_path)
     failures = process_failures(
         resolver_test, EXPECTED_CASES[mode], "RESOLVER_TEST",
         trace_ids=(tuple(range(1, EXPECTED_TESTS + 1))

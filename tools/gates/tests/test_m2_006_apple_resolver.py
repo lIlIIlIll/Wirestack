@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import tempfile
 import tomllib
 import unittest
@@ -176,7 +178,7 @@ class M2006AppleResolverGateTests(unittest.TestCase):
             report_path = Path(directory) / "report.json"
             report_path.write_text('{"decision":"PASS"}\n', encoding="utf-8")
             validation = gate.validation_payload(report_path, "abc", "macos", [])
-            self.assertEqual(gate.sha256_path(report_path), validation["report_sha256"])
+            self.assertEqual(evidence_digest.text_evidence_sha256(report_path), validation["report_sha256"])
             original_digest = validation["report_sha256"]
 
             report_path.write_text('{"decision":"FAIL"}\n', encoding="utf-8")

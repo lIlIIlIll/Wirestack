@@ -3,8 +3,9 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import re
 from pathlib import Path
@@ -47,10 +48,6 @@ EXPECTED_NOT_APPLICABLE = {"REL-03"}
 
 class AuditError(ValueError):
     """Raised when the audit is incomplete or internally inconsistent."""
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _require(condition: bool, message: str) -> None:
@@ -139,7 +136,7 @@ def validate_audit(
         )
         if verify_current_sources:
             _require(
-                digest == _sha256(repo_root / relative),
+                digest == evidence_digest.text_evidence_sha256(repo_root / relative),
                 f"source hash is stale for {relative}",
             )
 

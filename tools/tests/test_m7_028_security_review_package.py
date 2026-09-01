@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import copy
-import hashlib
 import json
 import sys
 import tempfile
@@ -29,7 +30,7 @@ class M7028SecurityReviewPackageTests(unittest.TestCase):
 
     @staticmethod
     def digest(path: Path) -> str:
-        return hashlib.sha256(path.read_bytes()).hexdigest()
+        return evidence_digest.text_evidence_bytes_sha256(path.read_bytes())
 
     def test_checked_in_package_is_valid(self) -> None:
         report = review.validate(ROOT, review.DEFAULT_INDEX, review.DEFAULT_REPORT)

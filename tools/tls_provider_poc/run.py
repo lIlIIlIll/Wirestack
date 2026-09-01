@@ -2,9 +2,10 @@
 """Build one pinned TLS provider and execute the M0-016 caller-driven PoC."""
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import platform
@@ -56,14 +57,6 @@ MAX_FAILURE_MESSAGE_BYTES = 2048
 
 class PocError(RuntimeError):
     pass
-
-
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def bounded_utf8(value: object, maximum_bytes: int) -> str:
@@ -333,7 +326,7 @@ def tool_identity(command: Sequence[str], *, cwd: Path, log: Path) -> dict[str, 
         "argv": list(command),
         "exit_code": completed.returncode,
         "output": output,
-        "output_sha256": hashlib.sha256(encoded).hexdigest(),
+        "output_sha256": evidence_digest.text_evidence_bytes_sha256(encoded),
     }
 
 
@@ -363,7 +356,7 @@ def source_provider(spec: Mapping[str, Any], work: Path, log: Path) -> tuple[Pat
             raise PocError(f"commit mismatch: {commit}")
         tree = run(["git", "-C", str(src), "rev-parse", "HEAD^{tree}"],
                    cwd=work, log=log, env=git_env).stdout.strip()
-        digest = hashlib.sha256((commit + "\n" + tree + "\n").encode()).hexdigest()
+        digest = evidence_digest.text_evidence_bytes_sha256((commit + "\n" + tree + "\n").encode())
         return src, {
             "commit": commit,
             "tree": tree,
@@ -374,7 +367,7 @@ def source_provider(spec: Mapping[str, Any], work: Path, log: Path) -> tuple[Pat
 
     archive = source_root / Path(spec["url"]).name
     download(spec["url"], archive)
-    digest = sha256_path(archive)
+    digest = evidence_digest.artifact_byte_sha256(archive)
     if digest != spec["sha256"]:
         raise PocError(f"archive digest mismatch: {digest}")
     src = safe_extract(archive, source_root / "unpacked")
@@ -428,7 +421,7 @@ def create_license_bundle(src: Path, output_dir: Path, provider: str,
         entries.append({
             "path": relative.as_posix(),
             "bytes": size,
-            "sha256": sha256_path(path),
+            "sha256": evidence_digest.artifact_byte_sha256(path),
         })
     manifest = {
         "schema_version": 1,
@@ -443,7 +436,7 @@ def create_license_bundle(src: Path, output_dir: Path, provider: str,
     atomic_json(manifest_path, manifest)
     return {
         "path": "license-bundle/manifest.json",
-        "sha256": sha256_path(manifest_path),
+        "sha256": evidence_digest.artifact_byte_sha256(manifest_path),
         "file_count": len(entries),
         "total_bytes": total_bytes,
     }
@@ -581,7 +574,7 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
         "build_argv": [normalized_argv(command, replacements) for command in build_commands],
         "environment": normalized_environment,
         "patches": [],
-        "patch_set_sha256": hashlib.sha256(b"[]\n").hexdigest(),
+        "patch_set_sha256": evidence_digest.text_evidence_bytes_sha256(b"[]\n"),
         "instrumentation": (
             "address+undefined-sanitizer" if diagnostic else "none"
         ),
@@ -771,13 +764,13 @@ def run_native_memory_diagnostic(spec: Mapping[str, Any], repo: Path, src: Path,
         "status": "PASS",
         "tool": "address+undefined-sanitizer",
         "cleanup_cycles": 10,
-        "output_sha256": hashlib.sha256(completed.stdout.encode("utf-8")).hexdigest(),
+        "output_sha256": evidence_digest.text_evidence_bytes_sha256(completed.stdout.encode("utf-8")),
         "provider_instrumented": True,
         "provider_static_archives": [
             {
                 "name": archive.name,
                 "bytes": archive.stat().st_size,
-                "sha256": sha256_path(archive),
+                "sha256": evidence_digest.artifact_byte_sha256(archive),
             }
             for archive in sorted(archives, key=lambda path: path.name)
         ],
@@ -835,7 +828,7 @@ def exported_symbol_inventory(binary: Path, work: Path, log: Path) -> dict[str, 
         "scope": "final-artifact-exports",
         "tool": tool,
         "count": len(symbols),
-        "sha256": hashlib.sha256(encoded).hexdigest(),
+        "sha256": evidence_digest.text_evidence_bytes_sha256(encoded),
         "symbols": symbols,
     }
 
@@ -859,9 +852,9 @@ def inspect_binary(binary: Path, archives: Sequence[Path], work: Path, log: Path
     forbidden_strings = sorted(set(FORBIDDEN_DEP_RE.findall(data.decode("latin-1", errors="ignore"))))
     return {
         "binary_bytes": binary.stat().st_size,
-        "binary_sha256": sha256_path(binary),
+        "binary_sha256": evidence_digest.artifact_byte_sha256(binary),
         "static_archives": [
-            {"name": archive.name, "bytes": archive.stat().st_size, "sha256": sha256_path(archive)}
+            {"name": archive.name, "bytes": archive.stat().st_size, "sha256": evidence_digest.artifact_byte_sha256(archive)}
             for archive in sorted(archives, key=lambda path: path.name)
         ],
         "exported_symbol_inventory": exported_symbol_inventory(binary, work, log),
@@ -1054,14 +1047,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         }
         result["status"] = "FAIL"
     result["finished_at"] = dt.datetime.now(dt.timezone.utc).isoformat()
-    result["build_log_sha256"] = sha256_path(log) if log.exists() else None
+    result["build_log_sha256"] = evidence_digest.text_evidence_sha256(log) if log.exists() else None
     atomic_json(output, result)
     print("WIRESTACK_M0_016 " + json.dumps({
         "provider": result["provider"],
         "platform": result["platform"],
         "status": result["status"],
         "capabilities": result["capabilities"],
-        "result_sha256": sha256_path(output),
+        "result_sha256": evidence_digest.text_evidence_sha256(output),
     }, sort_keys=True))
     return 0 if result["status"] in {"PASS", "PARTIAL"} else 1
 

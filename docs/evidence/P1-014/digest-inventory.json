@@ -1,0 +1,1701 @@
+{
+  "domain_counts": {
+    "artifact-bytes": 68,
+    "text-evidence": 210,
+    "typed-implementation": 3
+  },
+  "entries": [
+    {
+      "classification": "artifact-bytes",
+      "line": 305,
+      "path": "tools/benchmarks/http1_benchmark.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 310,
+      "path": "tools/benchmarks/http1_benchmark.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 467,
+      "path": "tools/benchmarks/http1_benchmark.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 471,
+      "path": "tools/benchmarks/http1_benchmark.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 474,
+      "path": "tools/benchmarks/http1_benchmark.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 475,
+      "path": "tools/benchmarks/http1_benchmark.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 476,
+      "path": "tools/benchmarks/http1_benchmark.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 278,
+      "path": "tools/benchmarks/http2_benchmark.py",
+      "symbol": "text_evidence_inventory_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 318,
+      "path": "tools/benchmarks/http2_benchmark.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 319,
+      "path": "tools/benchmarks/http2_benchmark.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 332,
+      "path": "tools/benchmarks/m2_016_dns_to_connected.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 107,
+      "path": "tools/benchmarks/m3_028_tls.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 111,
+      "path": "tools/benchmarks/m3_028_tls.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 81,
+      "path": "tools/build_apple_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 88,
+      "path": "tools/build_apple_resolver.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 148,
+      "path": "tools/build_apple_resolver.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 231,
+      "path": "tools/build_apple_resolver.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 325,
+      "path": "tools/build_apple_resolver.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 58,
+      "path": "tools/build_linux_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 59,
+      "path": "tools/build_linux_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 74,
+      "path": "tools/build_linux_resolver.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 99,
+      "path": "tools/build_linux_resolver.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 199,
+      "path": "tools/build_linux_resolver.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 149,
+      "path": "tools/build_linux_tls_provider.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 245,
+      "path": "tools/build_linux_tls_provider.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 248,
+      "path": "tools/build_linux_tls_provider.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 249,
+      "path": "tools/build_linux_tls_provider.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 251,
+      "path": "tools/build_linux_tls_provider.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 255,
+      "path": "tools/build_linux_tls_provider.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 287,
+      "path": "tools/build_linux_tls_provider.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 469,
+      "path": "tools/build_linux_tls_provider.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 72,
+      "path": "tools/build_windows_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 73,
+      "path": "tools/build_windows_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 81,
+      "path": "tools/build_windows_resolver.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 95,
+      "path": "tools/build_windows_resolver.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 196,
+      "path": "tools/build_windows_resolver.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 73,
+      "path": "tools/download_cangjie_nightly.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "typed-implementation",
+      "line": 71,
+      "path": "tools/evidence_digest.py",
+      "symbol": "hashlib.sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 79,
+      "path": "tools/evidence_digest.py",
+      "symbol": "text_evidence_digest_bytes"
+    },
+    {
+      "classification": "typed-implementation",
+      "line": 83,
+      "path": "tools/evidence_digest.py",
+      "symbol": "hashlib.sha256"
+    },
+    {
+      "classification": "typed-implementation",
+      "line": 87,
+      "path": "tools/evidence_digest.py",
+      "symbol": "hashlib.sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 99,
+      "path": "tools/evidence_digest.py",
+      "symbol": "text_evidence_digest"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 104,
+      "path": "tools/evidence_digest.py",
+      "symbol": "text_evidence_digest_bytes"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 109,
+      "path": "tools/evidence_digest.py",
+      "symbol": "artifact_byte_digest"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 114,
+      "path": "tools/evidence_digest.py",
+      "symbol": "artifact_byte_digest_bytes"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 133,
+      "path": "tools/evidence_digest.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 197,
+      "path": "tools/evidence_digest.py",
+      "symbol": "text_evidence_digest_bytes"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 198,
+      "path": "tools/evidence_digest.py",
+      "symbol": "artifact_byte_digest_bytes"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 205,
+      "path": "tools/evidence_digest.py",
+      "symbol": "text_evidence_digest_bytes"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 255,
+      "path": "tools/gates/dns_carrier_thread.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 256,
+      "path": "tools/gates/dns_carrier_thread.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 450,
+      "path": "tools/gates/dns_carrier_thread.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 637,
+      "path": "tools/gates/dns_carrier_thread.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 204,
+      "path": "tools/gates/gate_runner.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 118,
+      "path": "tools/gates/http1_quality.py",
+      "symbol": "text_evidence_inventory_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 117,
+      "path": "tools/gates/http2_quality.py",
+      "symbol": "text_evidence_inventory_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 126,
+      "path": "tools/gates/m0_005_raw_tcp_baseline.py",
+      "symbol": "artifact_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 140,
+      "path": "tools/gates/m0_005_raw_tcp_baseline.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 284,
+      "path": "tools/gates/m0_014_windows_copy_profile.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 285,
+      "path": "tools/gates/m0_014_windows_copy_profile.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 286,
+      "path": "tools/gates/m0_014_windows_copy_profile.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 287,
+      "path": "tools/gates/m0_014_windows_copy_profile.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 390,
+      "path": "tools/gates/m0_014_windows_copy_profile.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 392,
+      "path": "tools/gates/m0_014_windows_copy_profile.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 607,
+      "path": "tools/gates/m0_014_windows_copy_profile.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 106,
+      "path": "tools/gates/m1_025_transport_qualification.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 267,
+      "path": "tools/gates/m1_025_transport_qualification.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 268,
+      "path": "tools/gates/m1_025_transport_qualification.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 271,
+      "path": "tools/gates/m1_025_transport_qualification.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 274,
+      "path": "tools/gates/m1_025_transport_qualification.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 226,
+      "path": "tools/gates/m2_003_resolver_pool.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 249,
+      "path": "tools/gates/m2_003_resolver_pool.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 273,
+      "path": "tools/gates/m2_003_resolver_pool.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 56,
+      "path": "tools/gates/m2_004_windows_resolver.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 167,
+      "path": "tools/gates/m2_004_windows_resolver.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 170,
+      "path": "tools/gates/m2_004_windows_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 290,
+      "path": "tools/gates/m2_004_windows_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 216,
+      "path": "tools/gates/m2_005_system_resolver.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 275,
+      "path": "tools/gates/m2_005_system_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 88,
+      "path": "tools/gates/m2_006_apple_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 382,
+      "path": "tools/gates/m2_006_apple_resolver.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 385,
+      "path": "tools/gates/m2_006_apple_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 440,
+      "path": "tools/gates/m2_006_apple_resolver.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 495,
+      "path": "tools/gates/m2_006_apple_resolver.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 500,
+      "path": "tools/gates/m2_006_apple_resolver.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 562,
+      "path": "tools/gates/m2_006_apple_resolver.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 733,
+      "path": "tools/gates/m2_006_apple_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 478,
+      "path": "tools/gates/m2_015_native_network.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 161,
+      "path": "tools/gates/m7_023_linux_fuzz.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 282,
+      "path": "tools/gates/m7_023_linux_fuzz.py",
+      "symbol": "text_evidence_inventory_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 359,
+      "path": "tools/gates/m7_023_linux_fuzz.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 61,
+      "path": "tools/gates/m7_024_linux_performance.py",
+      "symbol": "text_evidence_inventory_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 231,
+      "path": "tools/gates/m7_024_linux_performance.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 156,
+      "path": "tools/gates/net01_close_wakeup.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 143,
+      "path": "tools/gates/net02_full_duplex_races.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 184,
+      "path": "tools/gates/net02_full_duplex_races.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 323,
+      "path": "tools/gates/net03_absolute_deadline.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 187,
+      "path": "tools/gates/net04_terminal_evidence.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 201,
+      "path": "tools/gates/net04_terminal_evidence.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 202,
+      "path": "tools/gates/net04_terminal_evidence.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 385,
+      "path": "tools/gates/net05_large_buffer_profile.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 426,
+      "path": "tools/gates/net05_large_buffer_profile.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 551,
+      "path": "tools/gates/net05_large_buffer_profile.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 552,
+      "path": "tools/gates/net05_large_buffer_profile.py",
+      "symbol": "artifact_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 400,
+      "path": "tools/gates/net06_leak_soak.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 252,
+      "path": "tools/gates/net06_production_cleanup.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 270,
+      "path": "tools/gates/net06_production_cleanup.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 318,
+      "path": "tools/gates/sse_streaming_profile.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 108,
+      "path": "tools/gates/tests/test_m2_004_windows_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 127,
+      "path": "tools/gates/tests/test_m2_004_windows_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 181,
+      "path": "tools/gates/tests/test_m2_006_apple_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 232,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 245,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 284,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 286,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 475,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 503,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 562,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 608,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 631,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 651,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 674,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 731,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 734,
+      "path": "tools/m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 159,
+      "path": "tools/m6_026_http2_concurrent_bodies.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 87,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "artifact_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 138,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 142,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 205,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 397,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 456,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 508,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 509,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 530,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 535,
+      "path": "tools/m7_021_linux_release.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 197,
+      "path": "tools/m7_022_linux_release_soak.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 636,
+      "path": "tools/m7_022_linux_release_soak.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 678,
+      "path": "tools/m7_022_linux_release_soak.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 684,
+      "path": "tools/m7_022_linux_release_soak.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 686,
+      "path": "tools/m7_022_linux_release_soak.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 147,
+      "path": "tools/m7_025_linux_supply_chain.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 151,
+      "path": "tools/m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 153,
+      "path": "tools/m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 155,
+      "path": "tools/m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 527,
+      "path": "tools/m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 544,
+      "path": "tools/m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 607,
+      "path": "tools/m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 617,
+      "path": "tools/m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 686,
+      "path": "tools/m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 695,
+      "path": "tools/m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 726,
+      "path": "tools/m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 548,
+      "path": "tools/m7_026_linux_api_freeze.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 603,
+      "path": "tools/m7_026_linux_api_freeze.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 604,
+      "path": "tools/m7_026_linux_api_freeze.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 108,
+      "path": "tools/m7_028_security_review_package.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 116,
+      "path": "tools/m7_028_security_review_package.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 160,
+      "path": "tools/m7_028_security_review_package.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 169,
+      "path": "tools/m7_028_security_review_package.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 230,
+      "path": "tools/m7_028_security_review_package.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 99,
+      "path": "tools/m7_029_independent_security_review.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 142,
+      "path": "tools/m7_029_independent_security_review.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 136,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 142,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 177,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 181,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 182,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 183,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 361,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 362,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 370,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "artifact_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 389,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 391,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 501,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 560,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 561,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 575,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 748,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 769,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 770,
+      "path": "tools/m7_030_linux_release.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 249,
+      "path": "tools/m7_031_linux_candidate.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 292,
+      "path": "tools/m7_031_linux_candidate.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 362,
+      "path": "tools/m7_031_linux_candidate.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 445,
+      "path": "tools/m7_031_linux_candidate.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 583,
+      "path": "tools/m7_031_linux_candidate.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 71,
+      "path": "tools/m7_032_public_api_inventory.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 93,
+      "path": "tools/m7_032_public_api_inventory.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 94,
+      "path": "tools/m7_032_public_api_inventory.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 68,
+      "path": "tools/repository/repository_tooling.py",
+      "symbol": "parse_text_digest"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 75,
+      "path": "tools/repository/repository_tooling.py",
+      "symbol": "text_evidence_digest"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 71,
+      "path": "tools/repository/tests/test_repository_tooling.py",
+      "symbol": "text_evidence_digest"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 76,
+      "path": "tools/repository/tests/test_repository_tooling.py",
+      "symbol": "text_evidence_digest"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 230,
+      "path": "tools/repository/tests/test_repository_tooling.py",
+      "symbol": "text_evidence_digest"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 17,
+      "path": "tools/tests/test_build_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 19,
+      "path": "tools/tests/test_build_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 21,
+      "path": "tools/tests/test_build_resolver.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 32,
+      "path": "tools/tests/test_linux_resolver_build.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 33,
+      "path": "tools/tests/test_linux_resolver_build.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 45,
+      "path": "tools/tests/test_linux_resolver_build.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 62,
+      "path": "tools/tests/test_linux_resolver_build.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 77,
+      "path": "tools/tests/test_linux_tls_provider_build.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 25,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 56,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 128,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 233,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 234,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 242,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 252,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 256,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 257,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 343,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 347,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 372,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 378,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 388,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 394,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 403,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 409,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 416,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 442,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 443,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 447,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 448,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 463,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 465,
+      "path": "tools/tests/test_m3_031_desktop_tls_adoption.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 102,
+      "path": "tools/tests/test_m7_020_architecture_audit.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 177,
+      "path": "tools/tests/test_m7_022_linux_release_soak.py",
+      "symbol": "artifact_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 28,
+      "path": "tools/tests/test_m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 29,
+      "path": "tools/tests/test_m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 49,
+      "path": "tools/tests/test_m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 137,
+      "path": "tools/tests/test_m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 142,
+      "path": "tools/tests/test_m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 143,
+      "path": "tools/tests/test_m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 144,
+      "path": "tools/tests/test_m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 149,
+      "path": "tools/tests/test_m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 153,
+      "path": "tools/tests/test_m7_025_linux_supply_chain.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 184,
+      "path": "tools/tests/test_m7_025_linux_supply_chain.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 33,
+      "path": "tools/tests/test_m7_028_security_review_package.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 299,
+      "path": "tools/tests/test_m7_029_independent_security_review.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 185,
+      "path": "tools/tests/test_m7_030_linux_release.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 228,
+      "path": "tools/tests/test_m7_030_linux_release.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 29,
+      "path": "tools/tests/test_p1_014_evidence_digest_types.py",
+      "symbol": "text_evidence_digest_bytes"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 30,
+      "path": "tools/tests/test_p1_014_evidence_digest_types.py",
+      "symbol": "artifact_byte_digest_bytes"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 38,
+      "path": "tools/tests/test_p1_014_evidence_digest_types.py",
+      "symbol": "text_evidence_digest_bytes"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 42,
+      "path": "tools/tests/test_p1_014_evidence_digest_types.py",
+      "symbol": "text_evidence_digest_bytes"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 45,
+      "path": "tools/tests/test_p1_014_evidence_digest_types.py",
+      "symbol": "parse_text_digest"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 46,
+      "path": "tools/tests/test_p1_014_evidence_digest_types.py",
+      "symbol": "parse_artifact_digest"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 48,
+      "path": "tools/tests/test_p1_014_evidence_digest_types.py",
+      "symbol": "parse_text_digest"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 51,
+      "path": "tools/tests/test_p1_014_evidence_digest_types.py",
+      "symbol": "parse_artifact_digest"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 62,
+      "path": "tools/tests/test_p1_014_evidence_digest_types.py",
+      "symbol": "parse_text_digest"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 42,
+      "path": "tools/tests/test_tls_provider_poc.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 89,
+      "path": "tools/tests/test_tls_provider_poc.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 389,
+      "path": "tools/tests/test_tls_provider_poc.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 437,
+      "path": "tools/tests/test_tls_provider_poc.py",
+      "symbol": "artifact_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 1138,
+      "path": "tools/tests/test_tls_provider_poc.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 1153,
+      "path": "tools/tests/test_tls_provider_poc.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 1195,
+      "path": "tools/tests/test_tls_provider_poc.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 1208,
+      "path": "tools/tests/test_tls_provider_poc.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 1220,
+      "path": "tools/tests/test_tls_provider_poc.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 100,
+      "path": "tools/tls_provider/selection.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 329,
+      "path": "tools/tls_provider_poc/run.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 359,
+      "path": "tools/tls_provider_poc/run.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 370,
+      "path": "tools/tls_provider_poc/run.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 424,
+      "path": "tools/tls_provider_poc/run.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 439,
+      "path": "tools/tls_provider_poc/run.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 577,
+      "path": "tools/tls_provider_poc/run.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 767,
+      "path": "tools/tls_provider_poc/run.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 773,
+      "path": "tools/tls_provider_poc/run.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 831,
+      "path": "tools/tls_provider_poc/run.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 855,
+      "path": "tools/tls_provider_poc/run.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 857,
+      "path": "tools/tls_provider_poc/run.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 1050,
+      "path": "tools/tls_provider_poc/run.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 1057,
+      "path": "tools/tls_provider_poc/run.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 79,
+      "path": "tools/tls_provider_poc/validate.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 110,
+      "path": "tools/tls_provider_poc/validate.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 164,
+      "path": "tools/tls_provider_poc/validate.py",
+      "symbol": "text_evidence_bytes_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 556,
+      "path": "tools/tls_provider_poc/validate.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 586,
+      "path": "tools/tls_provider_poc/validate.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 632,
+      "path": "tools/tls_provider_poc/validate.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "artifact-bytes",
+      "line": 640,
+      "path": "tools/tls_provider_poc/validate.py",
+      "symbol": "artifact_byte_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 139,
+      "path": "tools/validate_m7_019_linux_audit.py",
+      "symbol": "text_evidence_sha256"
+    },
+    {
+      "classification": "text-evidence",
+      "line": 96,
+      "path": "tools/validate_m7_020_architecture_audit.py",
+      "symbol": "text_evidence_sha256"
+    }
+  ],
+  "entry_count": 281,
+  "issues": [],
+  "kind": "p1-014-digest-inventory",
+  "schema_version": 1,
+  "scope": "repository-wide typed digest callsite inventory",
+  "status": "PASS"
+}

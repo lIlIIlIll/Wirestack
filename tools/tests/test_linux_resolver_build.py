@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import importlib.util
 import json
 import tempfile
@@ -27,8 +29,8 @@ class LinuxResolverBuildTests(unittest.TestCase):
         first, inputs = builder.build_fingerprint(source, header, tools)
         self.assertEqual(64, len(first))
         self.assertIn("target", inputs)
-        self.assertEqual(builder.sha256_path(source), inputs["source_sha256"])
-        self.assertEqual(builder.sha256_path(header), inputs["header_sha256"])
+        self.assertEqual(evidence_digest.text_evidence_sha256(source), inputs["source_sha256"])
+        self.assertEqual(evidence_digest.text_evidence_sha256(header), inputs["header_sha256"])
 
     def test_build_is_content_addressed_and_cache_is_revalidated(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -40,7 +42,7 @@ class LinuxResolverBuildTests(unittest.TestCase):
             self.assertTrue(current.is_symlink())
             self.assertEqual(final.resolve(), current.resolve())
             self.assertFalse(manifest["private_runtime_abi"])
-            self.assertEqual(builder.sha256_path(archive), manifest["archive"]["sha256"])
+            self.assertEqual(evidence_digest.artifact_byte_sha256(archive), manifest["archive"]["sha256"])
 
             cached_final, cached_manifest = builder.build(REPOSITORY_ROOT, output)
             self.assertEqual(final, cached_final)
@@ -57,7 +59,7 @@ class LinuxResolverBuildTests(unittest.TestCase):
             archive.write_bytes(b"archive")
             manifest = {
                 "build_fingerprint": "a" * 64,
-                "archive": {"sha256": builder.sha256_path(archive)},
+                "archive": {"sha256": evidence_digest.artifact_byte_sha256(archive)},
             }
             (final / "resolver-manifest.json").write_text(
                 json.dumps(manifest), encoding="utf-8"

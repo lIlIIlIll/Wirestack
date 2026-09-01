@@ -2,9 +2,10 @@
 """Compare raw std.net and StdNetTransport receive paths on Linux x86_64."""
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import math
 import os
@@ -381,7 +382,7 @@ def compile_probe(artifacts: Path, timeout: float) -> tuple[Path, dict[str, Any]
     result = run_process(["cjc", "-O2", str(source), "-o", str(binary)], directory, timeout)
     if result["timed_out"] or result["exit_code"] != 0 or not binary.is_file():
         raise GateError(f"probe compilation failed: {result}")
-    return binary, {"source_sha256": hashlib.sha256(RECEIVE_SOURCE.encode()).hexdigest(),
+    return binary, {"source_sha256": evidence_digest.text_evidence_bytes_sha256(RECEIVE_SOURCE.encode()),
                     "process": result}
 
 
@@ -422,7 +423,7 @@ def compile_adapter_probe(root: Path, artifacts: Path,
         raise GateError(f"adapter probe compilation failed: {result}")
     source = snapshot / "src/internal/transport_stdnet/benchmark_harness_test.cj"
     return binary, {
-        "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+        "source_sha256": evidence_digest.text_evidence_bytes_sha256(source.read_bytes()),
         "manifest_compile_option": "-O2",
         "process": result,
     }
@@ -547,8 +548,8 @@ def run_instrumented_sample(binary: Path, implementation: str, case: Case,
             sample["adapter_staging_copied_read_bytes"]
         ),
         "strace_trace": trace,
-        "strace_trace_sha256": hashlib.sha256(trace.encode()).hexdigest(),
-        "heaptrack_record_sha256": hashlib.sha256(heaptrack_path.read_bytes()).hexdigest(),
+        "strace_trace_sha256": evidence_digest.text_evidence_bytes_sha256(trace.encode()),
+        "heaptrack_record_sha256": evidence_digest.artifact_bytes_sha256(heaptrack_path.read_bytes()),
     }
     return sample
 

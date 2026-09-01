@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import importlib.util
 import json
 import tempfile
@@ -72,7 +74,7 @@ class LinuxTlsProviderBuildTests(unittest.TestCase):
             fingerprint = "f" * 64
             manifest = {
                 "build_fingerprint": fingerprint,
-                "archive": {"sha256": builder.sha256_path(library)},
+                "archive": {"sha256": evidence_digest.artifact_byte_sha256(library)},
                 "externalOpenSslDependency": False,
             }
             (final / "provider-manifest.json").write_text(

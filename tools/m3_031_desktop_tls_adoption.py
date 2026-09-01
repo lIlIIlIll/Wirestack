@@ -3,8 +3,9 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import os
 import re
@@ -172,21 +173,6 @@ class AdoptionError(RuntimeError):
         self.detail = detail
 
 
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def repository_text_sha256(path: Path) -> str:
-    data = path.read_bytes()
-    if b"\x00" not in data:
-        data = data.replace(b"\r\n", b"\n")
-    return hashlib.sha256(data).hexdigest()
-
-
 def load_json(path: Path) -> dict[str, Any]:
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
@@ -243,7 +229,7 @@ def _require_text(root: Path, relative: str, needle: str) -> str:
         raise AdoptionError("CORE_REQUIREMENT", f"{relative}: missing") from error
     if needle not in text:
         raise AdoptionError("CORE_REQUIREMENT", f"{relative}: missing required declaration")
-    return sha256_path(path)
+    return evidence_digest.text_evidence_sha256(path)
 
 
 def _backlog_row(backlog: str, task_id: str) -> str:
@@ -256,7 +242,7 @@ def _backlog_row(backlog: str, task_id: str) -> str:
 
 def hosted_input_sha256(root: Path) -> dict[str, str]:
     return {
-        relative: repository_text_sha256(root / relative)
+        relative: evidence_digest.text_evidence_sha256(root / relative)
         for relative in HOSTED_INPUT_PATHS
     }
 
@@ -295,9 +281,9 @@ def validate_hosted_run(root: Path, raw: Mapping[str, Any]) -> dict[str, Any]:
         artifact = by_name[name]
         if (
             artifact.get("provider_result_sha256")
-            != sha256_path(root / result_relative)
+            != evidence_digest.text_evidence_sha256(root / result_relative)
             or artifact.get("validation_sha256")
-            != sha256_path(root / validation_relative)
+            != evidence_digest.text_evidence_sha256(root / validation_relative)
         ):
             raise AdoptionError(
                 "STALE_SOURCE", f"{name}: retained files differ from hosted artifact"
@@ -486,7 +472,7 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
         path = root / relative
         if entry.get("source_task") != "M3-030" or entry.get("acceptance_status") != "PASS":
             raise AdoptionError("RETAINED_EVIDENCE", f"{relative}: index does not record PASS")
-        if entry.get("sha256") != repository_text_sha256(path):
+        if entry.get("sha256") != evidence_digest.text_evidence_sha256(path):
             raise AdoptionError("STALE_SOURCE", f"{relative}: report digest changed")
         payload = load_json(path)
         payload_task = payload.get("source_task")
@@ -514,7 +500,7 @@ def validate_retained_evidence(root: Path) -> dict[str, Any]:
         if not path.is_file():
             raise AdoptionError("STALE_SOURCE", f"{relative}: retained M3-030 source is missing")
         recorded[relative] = expected
-        current[relative] = repository_text_sha256(path)
+        current[relative] = evidence_digest.text_evidence_sha256(path)
     return {"task_id": "M3-030", "reports": sorted(expected_reports),
             "semantic_report_count": len(expected_reports),
             "recorded_source_sha256": dict(sorted(recorded.items())),
@@ -573,7 +559,7 @@ def validate_native_source_binding(
             )
         except repository_tooling.ContractError as error:
             raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: {error.code}") from error
-        if repository_text_sha256(path) != digest:
+        if evidence_digest.text_evidence_sha256(path) != digest:
             raise AdoptionError("STALE_SOURCE", f"{task_id}: {relative}")
 
 
@@ -619,7 +605,7 @@ def validate_dependency_evidence(
                     )
                 except repository_tooling.ContractError as error:
                     raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: {error.code}") from error
-                if expected != repository_text_sha256(path):
+                if expected != evidence_digest.text_evidence_sha256(path):
                     raise AdoptionError("STALE_SOURCE", f"{task_id}: {relative}")
 
         reports = evidence.get("reports")
@@ -642,7 +628,7 @@ def validate_dependency_evidence(
             if (
                 item.get("source_task") != task_id
                 or item.get("acceptance_status") != "PASS"
-                or item.get("sha256") != sha256_path(path)
+                or item.get("sha256") != evidence_digest.text_evidence_sha256(path)
                 or load_json(path).get("status") != "PASS"
             ):
                 raise AdoptionError("DEPENDENCY_EVIDENCE", f"{task_id}: report not PASS or stale")
@@ -662,7 +648,7 @@ def validate_dependency_evidence(
                 or validation.get("task_id") != task_id
                 or validation.get("status") != "PASS"
                 or validation.get("failures") != []
-                or validation.get("report_sha256") != sha256_path(report_path)
+                or validation.get("report_sha256") != evidence_digest.text_evidence_sha256(report_path)
                 or report.get("schema_version") != 1
                 or report.get("task_id") != task_id
                 or report.get("decision") != "PASS"
@@ -685,7 +671,7 @@ def validate_dependency_evidence(
                     f"{task_id}: canonical report validation {canonical_failures[0]}",
                 )
             validate_native_source_binding(root, task_id, report, source_sha256)
-            native_reports[report_relative] = sha256_path(report_path)
+            native_reports[report_relative] = evidence_digest.text_evidence_sha256(report_path)
         validated[task_id] = {
             "native_reports": dict(sorted(native_reports.items())),
             "source_count": len(source_sha256),
@@ -742,10 +728,10 @@ def audit_core(root: Path) -> dict[str, Any]:
         path = root / relative
         if not path.is_file():
             raise AdoptionError("CORE_REQUIREMENT", f"{relative}: retained evidence missing")
-        source_sha256[relative] = sha256_path(path)
+        source_sha256[relative] = evidence_digest.text_evidence_sha256(path)
     graph = audit_task_graph(root)
     backlog_relative = "docs/planning/implementation-backlog.md"
-    source_sha256[backlog_relative] = sha256_path(root / backlog_relative)
+    source_sha256[backlog_relative] = evidence_digest.text_evidence_sha256(root / backlog_relative)
     return {
         "schema_version": 1,
         "task_id": "M3-031",

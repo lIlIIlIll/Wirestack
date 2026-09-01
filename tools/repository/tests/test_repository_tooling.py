@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+from tools.evidence_digest import text_evidence_digest
 from tools.repository import repository_tooling as tooling
 
 
@@ -31,7 +32,7 @@ class RepositoryToolingTests(unittest.TestCase):
 
     def manifest(self, task_id: str = "TEST-001", dependencies: list[str] | None = None) -> dict[str, object]:
         return {
-            "schema_version": 1,
+            "schema_version": tooling.SCHEMA_VERSION,
             "task_id": task_id,
             "dependencies": ["BASE-001"] if dependencies is None else dependencies,
             "allowed_paths": ["tools/tasks", "source.txt"],
@@ -58,7 +59,7 @@ class RepositoryToolingTests(unittest.TestCase):
         task["required_evidence"] = ["docs/evidence/TEST-001/evidence.json", "docs/evidence/TEST-001/report.json"]
         self.write_manifest(task)
         evidence = {
-            "schema_version": 1,
+            "schema_version": tooling.EVIDENCE_SCHEMA_VERSION,
             "source_task": "TEST-001",
             "platform": tooling.platform_identity(),
             "toolchain": tooling.toolchain_identity(self.root),
@@ -67,11 +68,13 @@ class RepositoryToolingTests(unittest.TestCase):
             "revision": "test",
             "reports": [{
                 "path": "docs/evidence/TEST-001/report.json",
-                "sha256": tooling.sha256_path(report_path),
+                "sha256": text_evidence_digest(report_path).to_json(),
                 "source_task": "TEST-001",
                 "acceptance_status": "PASS",
             }],
-            "source_sha256": {"source.txt": tooling.sha256_path(self.root / "source.txt")},
+            "source_sha256": {
+                "source.txt": text_evidence_digest(self.root / "source.txt").to_json()
+            },
         }
         evidence_path = self.root / "docs/evidence/TEST-001/evidence.json"
         evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
@@ -189,6 +192,34 @@ class RepositoryToolingTests(unittest.TestCase):
         self.assertEqual("STALE", report["status"])
         self.assertEqual("DIGEST_STALE", report["tasks"][0]["issues"][0]["code"])
 
+    def test_evidence_line_ending_only_change_is_not_stale(self) -> None:
+        self.evidence()
+        (self.root / "source.txt").write_bytes(b"current\r\n")
+        self.assertEqual("PASS", tooling.verify(self.root, "TEST-001")["status"])
+
+    def test_old_or_untyped_evidence_digest_schema_is_rejected(self) -> None:
+        evidence, evidence_path = self.evidence()
+        evidence["schema_version"] = 1
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+        report = tooling.verify(self.root, "TEST-001")
+        self.assertEqual("FAIL", report["status"])
+        self.assertEqual("UNKNOWN_SCHEMA", report["tasks"][0]["issues"][0]["code"])
+
+        evidence["schema_version"] = tooling.EVIDENCE_SCHEMA_VERSION
+        evidence["source_sha256"]["source.txt"] = "0" * 64
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+        report = tooling.verify(self.root, "TEST-001")
+        self.assertEqual("FAIL", report["status"])
+        self.assertEqual("DIGEST_TYPE", report["tasks"][0]["issues"][0]["code"])
+
+    def test_unknown_digest_domain_is_rejected(self) -> None:
+        evidence, evidence_path = self.evidence()
+        evidence["source_sha256"]["source.txt"]["domain"] = "future-domain"
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+        report = tooling.verify(self.root, "TEST-001")
+        self.assertEqual("FAIL", report["status"])
+        self.assertEqual("DIGEST_DOMAIN", report["tasks"][0]["issues"][0]["code"])
+
     def test_stale_report_digest_is_stale(self) -> None:
         self.evidence()
         (self.root / "docs/evidence/TEST-001/report.json").write_text('{"status":"PASS","changed":true}', encoding="utf-8")
@@ -196,7 +227,9 @@ class RepositoryToolingTests(unittest.TestCase):
 
     def test_skipped_report_cannot_impersonate_pass(self) -> None:
         evidence, evidence_path = self.evidence("SKIPPED")
-        evidence["reports"][0]["sha256"] = tooling.sha256_path(self.root / "docs/evidence/TEST-001/report.json")
+        evidence["reports"][0]["sha256"] = text_evidence_digest(
+            self.root / "docs/evidence/TEST-001/report.json"
+        ).to_json()
         evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
         report = tooling.verify(self.root, "TEST-001")
         self.assertEqual("FAIL", report["status"])

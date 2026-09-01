@@ -3,11 +3,12 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
 from contextlib import contextmanager
 import datetime as dt
 import fcntl
-import hashlib
 import json
 import os
 import platform
@@ -124,14 +125,6 @@ def promote_raw_log(
     replace(running, target)
 
 
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def atomic_json(
     path: Path,
     value: Mapping[str, Any],
@@ -201,7 +194,7 @@ def load_qualified_artifact(
     if not artifact_path.is_file():
         raise SoakError("ARTIFACT_MISSING", f"missing {artifact_path}")
     expected = report["artifact"]["sha256"]
-    actual = sha256_path(artifact_path)
+    actual = evidence_digest.artifact_byte_sha256(artifact_path)
     if actual != expected:
         raise SoakError("ARTIFACT_DIGEST", f"artifact digest {actual} != {expected}")
     return report, actual
@@ -640,7 +633,7 @@ def execute(args: argparse.Namespace) -> dict[str, Any]:
         "artifact": {
             "path": str(args.artifact.resolve().relative_to(ROOT)),
             "sha256": artifact_digest,
-            "qualification_sha256": sha256_path(args.qualification.resolve()),
+            "qualification_sha256": evidence_digest.text_evidence_sha256(args.qualification.resolve()),
             "payload_sha256": qualification["artifact"]["payload_sha256"],
             "installed_as_only_wirestack_dependency": True,
         },
@@ -682,15 +675,15 @@ def execute(args: argparse.Namespace) -> dict[str, Any]:
         },
         "raw_log": {
             "path": str(raw_log.relative_to(ROOT)),
-            "sha256": sha256_path(raw_log),
+            "sha256": evidence_digest.text_evidence_sha256(raw_log),
             "bytes": raw_log.stat().st_size,
             "tail": bounded_tail(raw_log),
         },
         "source": {
             "consumer": str(SOURCE.relative_to(ROOT)),
-            "consumer_sha256": sha256_path(SOURCE),
+            "consumer_sha256": evidence_digest.text_evidence_sha256(SOURCE),
             "fixture": str(FIXTURE.relative_to(ROOT)),
-            "fixture_sha256": sha256_path(FIXTURE),
+            "fixture_sha256": evidence_digest.text_evidence_sha256(FIXTURE),
         },
         "toolchain": {
             "cjc": command_text([str(ENV_RUNNER), "cjc", "-v"]),

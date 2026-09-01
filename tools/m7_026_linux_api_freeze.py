@@ -3,8 +3,9 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import re
 import sys
@@ -82,18 +83,6 @@ def _require(condition: bool, message: str) -> None:
 
 def canonical_json(value: Any) -> bytes:
     return (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode()
-
-
-def sha256_bytes(value: bytes) -> str:
-    return hashlib.sha256(value).hexdigest()
-
-
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -554,7 +543,10 @@ def build_inventory(root: Path = ROOT) -> dict[str, Any]:
         "requiredCancellationHandles": sorted(REQUIRED_CANCELLATION_HANDLES),
         "forbiddenPublicRules": sorted(FORBIDDEN_PUBLIC_PATTERNS),
     }
-    return {**core, "inventorySha256": sha256_bytes(canonical_json(core))}
+    return {
+        **core,
+        "inventorySha256": evidence_digest.text_evidence_bytes_sha256(canonical_json(core)),
+    }
 
 
 def compare_inventory(baseline: Mapping[str, Any], current: Mapping[str, Any]) -> None:
@@ -608,8 +600,8 @@ def build_report(
         "resolvedAliasCount": len(inventory["resolvedAliases"]),
         "cancellationHandles": inventory["requiredCancellationHandles"],
         "inventorySha256": inventory["inventorySha256"],
-        "baselineSha256": sha256_path(baseline_path),
-        "generatorSha256": sha256_path(generator_path),
+        "baselineSha256": evidence_digest.text_evidence_sha256(baseline_path),
+        "generatorSha256": evidence_digest.text_evidence_sha256(generator_path),
         "compatibilityEvidence": {
             "sourceAndInventory": "PASS_EXACT_BASELINE_MATCH",
             "packageAndMajor": "PASS_DEDICATED_MANIFEST_GATE",

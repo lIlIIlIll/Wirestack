@@ -3,8 +3,9 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import os
 import re
@@ -138,14 +139,6 @@ def canonical_json(value: Any) -> bytes:
     return (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode()
 
 
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def safe_path(root: Path, relative: str, *, must_exist: bool = True) -> Path:
     require(isinstance(relative, str) and relative != "", "PATH_INVALID", "path must be a non-empty string")
     base = root.resolve()
@@ -253,7 +246,7 @@ def validate_artifact_identity(
             "SBOM_MISMATCH", "M7-030 hosted SBOM")
     if verify_local_artifact:
         local_artifact = safe_path(root, f"dist/m7-021/{artifact.get('name')}")
-        require(sha256_path(local_artifact) == digest, "ARTIFACT_BYTES_STALE", str(local_artifact))
+        require(evidence_digest.artifact_byte_sha256(local_artifact) == digest, "ARTIFACT_BYTES_STALE", str(local_artifact))
         require(local_artifact.stat().st_size == artifact.get("bytes"), "ARTIFACT_SIZE", str(local_artifact))
 
     return {
@@ -296,7 +289,7 @@ def validate_soak(
         "reportSha256": (
             strict_digest(report_sha256, "M7-022 recorded report")
             if report_sha256 is not None
-            else sha256_path(safe_path(root, DOCUMENT_PATHS["m7_022"]))
+            else evidence_digest.text_evidence_sha256(safe_path(root, DOCUMENT_PATHS["m7_022"]))
         ),
         "wallElapsedMs": process["wall_elapsed_ms"],
         "requestedSeconds": parameters["duration_seconds"],
@@ -366,7 +359,7 @@ def validate_current_sources(
     require(current_fuzz_source == documents["m7_023"].get("source_sha256"),
             "SOURCE_STALE", "M7-023 fuzz source")
     manifest = safe_path(root, "tools/gates/campaigns/m7-023-linux-fuzz.json")
-    require(sha256_path(manifest) == documents["m7_023"].get("manifest_sha256"),
+    require(evidence_digest.text_evidence_sha256(manifest) == documents["m7_023"].get("manifest_sha256"),
             "SOURCE_STALE", "M7-023 manifest")
     m7_023_linux_fuzz.load_manifest(root, manifest)
 
@@ -449,7 +442,7 @@ def build_evidence_index(root: Path, criteria: Sequence[Mapping[str, Any]]) -> l
         source_task = match.group(1) if match else "M7-031"
         entries.append({
             "path": relative,
-            "sha256": sha256_path(path),
+            "sha256": evidence_digest.text_evidence_sha256(path),
             "sourceTask": source_task,
             "acceptanceStatus": (
                 "NOT_APPLICABLE_TO_LINUX_PROFILE" if relative in CRITERION_EVIDENCE["REL-03"]
@@ -587,7 +580,7 @@ def build_candidate(
                         "recorded SSE profile",
                     )
                     if isinstance(recorded, Mapping)
-                    else sha256_path(safe_path(
+                    else evidence_digest.text_evidence_sha256(safe_path(
                         root, "docs/evidence/M6-023/linux_x86_64/sse-streaming-profile.json"
                     ))
                 ),

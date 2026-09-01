@@ -3,9 +3,10 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import re
@@ -62,13 +63,6 @@ def canonical_json(value: Any) -> bytes:
     return (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode()
 
 
-def sha256_path(path: Path) -> str:
-    try:
-        return hashlib.sha256(path.read_bytes()).hexdigest()
-    except OSError as error:
-        raise IndependentReviewError("FILE_MISSING", str(path)) from error
-
-
 def safe_path(root: Path, relative: str, must_exist: bool = True) -> Path:
     candidate = Path(relative)
     require(not candidate.is_absolute(), "PATH_ESCAPE", relative)
@@ -102,7 +96,7 @@ def build_request(root: Path = ROOT) -> dict[str, Any]:
         "taskId": TASK_ID,
         "platform": PROFILE,
         "packagePath": PACKAGE_PATH,
-        "packageSha256": sha256_path(package),
+        "packageSha256": evidence_digest.text_evidence_sha256(package),
         "compatibilityPolicy": COMPATIBILITY_POLICY,
         "requiredScope": sorted(REQUIRED_SCOPE),
         "requiredMethods": sorted(REQUIRED_METHODS),
@@ -145,7 +139,7 @@ def validate_regression(root: Path, value: Mapping[str, Any], where: str) -> Non
     require(value["status"] == "PASS", "REGRESSION_NOT_PASS", where)
     require(value["exitCode"] == 0 and value["timedOut"] is False, "REGRESSION_NOT_PASS", where)
     path = safe_path(root, value["evidencePath"])
-    require(sha256_path(path) == value["sha256"], "DIGEST_MISMATCH", value["evidencePath"])
+    require(evidence_digest.text_evidence_sha256(path) == value["sha256"], "DIGEST_MISMATCH", value["evidencePath"])
 
 
 def validate_finding(root: Path, value: Mapping[str, Any], position: int) -> tuple[str, str]:

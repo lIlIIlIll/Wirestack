@@ -1,5 +1,5 @@
+from tools import evidence_digest
 import copy
-import hashlib
 import json
 import tempfile
 import unittest
@@ -99,9 +99,7 @@ class M7020ArchitectureAuditTest(unittest.TestCase):
 
             strict = copy.deepcopy(self.audit)
             for relative in strict["source_sha256"]:
-                strict["source_sha256"][relative] = hashlib.sha256(
-                    (ROOT / relative).read_bytes()
-                ).hexdigest()
+                strict["source_sha256"][relative] = evidence_digest.text_evidence_bytes_sha256((ROOT / relative).read_bytes())
             with tempfile.TemporaryDirectory() as directory:
                 path = Path(directory) / "audit.data"
                 path.write_text(json.dumps(strict), encoding="utf-8")

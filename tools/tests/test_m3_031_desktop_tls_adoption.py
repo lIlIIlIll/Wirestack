@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import copy
 import json
 import shutil
@@ -20,7 +22,7 @@ def tool_identity(name: str) -> dict:
         "argv": [name, "--version"],
         "exit_code": 0,
         "output": output,
-        "output_sha256": adoption.hashlib.sha256(output.encode()).hexdigest(),
+        "output_sha256": evidence_digest.text_evidence_bytes_sha256(output.encode()),
     }
 
 
@@ -51,7 +53,7 @@ def build_provenance(platform: str, *, diagnostic: bool = False) -> dict:
             for key in adoption.poc_validate.BUILD_ENVIRONMENT_KEYS
         },
         "patches": [],
-        "patch_set_sha256": adoption.hashlib.sha256(b"[]\n").hexdigest(),
+        "patch_set_sha256": evidence_digest.text_evidence_bytes_sha256(b"[]\n"),
         "instrumentation": (
             "address+undefined-sanitizer" if diagnostic else "none"
         ),
@@ -123,7 +125,7 @@ def provider_result(platform: str, revision: str) -> dict:
                 "scope": "final-artifact-exports",
                 "tool": "fixture-tool",
                 "count": 0,
-                "sha256": adoption.hashlib.sha256(b"").hexdigest(),
+                "sha256": evidence_digest.text_evidence_bytes_sha256(b""),
                 "symbols": [],
             },
             "system_tls_dependencies": [],
@@ -228,8 +230,8 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                     "platform": "windows-x86_64", "private_runtime_abi": False,
                     "test_fixture": True,
                     "inputs": {
-                        "source_sha256": adoption.sha256_path(source),
-                        "header_sha256": adoption.sha256_path(header),
+                        "source_sha256": evidence_digest.text_evidence_sha256(source),
+                        "header_sha256": evidence_digest.text_evidence_sha256(header),
                     },
                 },
                 "test_link_stub": {"test_only": True},
@@ -237,7 +239,7 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             validation.write_bytes((json.dumps({
                 "schema_version": 1, "task_id": "M2-004",
                 "expected_revision": "a" * 40, "failures": [], "status": "PASS",
-                "report_sha256": adoption.sha256_path(report),
+                "report_sha256": evidence_digest.text_evidence_sha256(report),
             }, indent=2) + "\n").replace("\n", "\r\n").encode("utf-8"))
             evidence_path = root / "docs/evidence/M2-004/evidence.json"
             evidence_path.parent.mkdir(parents=True, exist_ok=True)
@@ -247,12 +249,12 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 "generated_at_utc": "2026-08-31T00:00:00Z", "revision": "a" * 40,
                 "reports": [{
                     "path": validation_relative,
-                    "sha256": adoption.sha256_path(validation),
+                    "sha256": evidence_digest.text_evidence_sha256(validation),
                     "source_task": "M2-004", "acceptance_status": "PASS",
                 }],
                 "source_sha256": {
-                    "native/resolver/windows/wirestack_resolver.c": adoption.sha256_path(source),
-                    "native/resolver/windows/wirestack_resolver.h": adoption.sha256_path(header),
+                    "native/resolver/windows/wirestack_resolver.c": evidence_digest.text_evidence_sha256(source),
+                    "native/resolver/windows/wirestack_resolver.h": evidence_digest.text_evidence_sha256(header),
                 },
             }), encoding="utf-8")
             task = {
@@ -338,11 +340,11 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 shutil.copy2(ROOT / relative, path)
                 reports.append({"path": relative, "source_task": "M3-030",
                                 "acceptance_status": "PASS",
-                                "sha256": adoption.repository_text_sha256(path)})
+                                "sha256": evidence_digest.text_evidence_sha256(path)})
             evidence = {"schema_version": 1, "source_task": "M3-030",
                         "acceptance_status": "PASS", "reports": reports,
                         "source_sha256": {
-                            relative: adoption.repository_text_sha256(root / relative)
+                            relative: evidence_digest.text_evidence_sha256(root / relative)
                             for relative in task["source_paths"]
                         }}
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
@@ -367,13 +369,13 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 item for item in reports
                 if item["path"] == "docs/evidence/M3-030/release-validation.json"
             )
-            release_entry["sha256"] = adoption.repository_text_sha256(release_path)
+            release_entry["sha256"] = evidence_digest.text_evidence_sha256(release_path)
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             self.assert_code(
                 "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
             )
             shutil.copy2(ROOT / "docs/evidence/M3-030/release-validation.json", release_path)
-            release_entry["sha256"] = adoption.repository_text_sha256(release_path)
+            release_entry["sha256"] = evidence_digest.text_evidence_sha256(release_path)
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             abi_path = root / "docs/evidence/M3-030/native-abi-report.json"
             abi = json.loads(abi_path.read_text(encoding="utf-8"))
@@ -383,13 +385,13 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 item for item in reports
                 if item["path"] == "docs/evidence/M3-030/native-abi-report.json"
             )
-            abi_entry["sha256"] = adoption.repository_text_sha256(abi_path)
+            abi_entry["sha256"] = evidence_digest.text_evidence_sha256(abi_path)
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             self.assert_code(
                 "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
             )
             shutil.copy2(ROOT / "docs/evidence/M3-030/native-abi-report.json", abi_path)
-            abi_entry["sha256"] = adoption.repository_text_sha256(abi_path)
+            abi_entry["sha256"] = evidence_digest.text_evidence_sha256(abi_path)
             task_check_path = root / "docs/evidence/M3-030/task-check.json"
             task_check = json.loads(task_check_path.read_text(encoding="utf-8"))
             task_check["commands"][0]["status"] = "SKIPPED"
@@ -398,20 +400,20 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
                 item for item in reports
                 if item["path"] == "docs/evidence/M3-030/task-check.json"
             )
-            task_check_entry["sha256"] = adoption.repository_text_sha256(task_check_path)
+            task_check_entry["sha256"] = evidence_digest.text_evidence_sha256(task_check_path)
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             self.assert_code(
                 "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
             )
             shutil.copy2(ROOT / "docs/evidence/M3-030/task-check.json", task_check_path)
-            task_check_entry["sha256"] = adoption.repository_text_sha256(task_check_path)
+            task_check_entry["sha256"] = evidence_digest.text_evidence_sha256(task_check_path)
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             evidence["source_sha256"].pop("build.cj")
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
             self.assert_code(
                 "RETAINED_EVIDENCE", lambda: adoption.validate_retained_evidence(root)
             )
-            evidence["source_sha256"]["build.cj"] = adoption.repository_text_sha256(
+            evidence["source_sha256"]["build.cj"] = evidence_digest.text_evidence_sha256(
                 root / "build.cj"
             )
             evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
@@ -437,13 +439,13 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
             "artifacts": [
                 {
                     "name": f"m3-031-windows-x86_64-{revision}",
-                    "provider_result_sha256": adoption.sha256_path(ROOT / windows_result),
-                    "validation_sha256": adoption.sha256_path(ROOT / windows_validation),
+                    "provider_result_sha256": evidence_digest.text_evidence_sha256(ROOT / windows_result),
+                    "validation_sha256": evidence_digest.text_evidence_sha256(ROOT / windows_validation),
                 },
                 {
                     "name": f"m3-031-macos-arm64-{revision}",
-                    "provider_result_sha256": adoption.sha256_path(ROOT / macos_result),
-                    "validation_sha256": adoption.sha256_path(ROOT / macos_validation),
+                    "provider_result_sha256": evidence_digest.text_evidence_sha256(ROOT / macos_result),
+                    "validation_sha256": evidence_digest.text_evidence_sha256(ROOT / macos_validation),
                 },
             ],
         }
@@ -458,9 +460,9 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "report.json"
             path.write_bytes(b'{\r\n  "status": "PASS"\r\n}\r\n')
-            windows_digest = adoption.repository_text_sha256(path)
+            windows_digest = evidence_digest.text_evidence_sha256(path)
             path.write_bytes(b'{\n  "status": "PASS"\n}\n')
-            self.assertEqual(windows_digest, adoption.repository_text_sha256(path))
+            self.assertEqual(windows_digest, evidence_digest.text_evidence_sha256(path))
 
     def test_desktop_acceptance_column_cannot_be_weakened(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

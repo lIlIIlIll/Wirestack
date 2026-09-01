@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-import hashlib
+from tools import evidence_digest
+
 import json
 import subprocess
 import sys
@@ -173,7 +174,7 @@ class M7022LinuxReleaseSoakTest(unittest.TestCase):
             root = Path(directory)
             artifact = root / "artifact.tar.gz"
             artifact.write_bytes(b"artifact")
-            digest = hashlib.sha256(b"artifact").hexdigest()
+            digest = evidence_digest.artifact_bytes_sha256(b"artifact")
             qualification = root / "qualification.json"
             qualification.write_text(json.dumps({"artifact": {"sha256": digest}}))
             with mock.patch.object(gate.release, "validate_report"):

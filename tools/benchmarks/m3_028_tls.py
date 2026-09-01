@@ -2,8 +2,9 @@
 """Run the native Linux M3-028 TLS qualification and benchmark gate."""
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
-import hashlib
 import json
 import os
 import platform
@@ -34,10 +35,6 @@ MIB = 1024 * 1024
 
 class GateError(RuntimeError):
     pass
-
-
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def run(command: Sequence[str], cwd: Path, timeout: float,
@@ -107,11 +104,11 @@ def prepare_wirestack(root: Path, destination: Path, prefix: Sequence[str],
 
 def verify_stdx(reference: Path, archive: Path, extracted: Path) -> tuple[dict[str, Any], Path]:
     data = json.loads(reference.read_text(encoding="utf-8"))
-    if sha256(archive) != data["archive_sha256"]:
+    if evidence_digest.artifact_byte_sha256(archive) != data["archive_sha256"]:
         raise GateError("stdx archive digest mismatch")
     dynamic = extracted / data["dynamic_directory"]
     for name, digest in data["module_sha256"].items():
-        if sha256(dynamic / name) != digest:
+        if evidence_digest.artifact_byte_sha256(dynamic / name) != digest:
             raise GateError(f"stdx module digest mismatch: {name}")
     return data, dynamic
 

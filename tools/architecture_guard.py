@@ -9,6 +9,7 @@ generated output.
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import re
 import sys
@@ -110,6 +111,7 @@ CONFIG_NAMES = {"CMakeLists.txt", "Makefile", "build.cj", "build.py", "cjpm.toml
 CONFIG_SUFFIXES = {".c", ".cc", ".cmake", ".cpp", ".h", ".hpp", ".mk", ".toml"}
 PROVIDER_SPECIFIC_TYPE_RE = re.compile(r"\bAwsLc[A-Za-z0-9_]*\b")
 TEST_PROVIDER_RE = re.compile(r"\bTestTlsProvider(?:Factory)?\b")
+EVIDENCE_DIGEST_IMPLEMENTATION = "tools/evidence_digest.py"
 
 
 @dataclass(frozen=True, order=True)
@@ -493,6 +495,113 @@ def provider_boundary_violations(root: Path, paths: Sequence[Path]) -> list[Viol
     return violations
 
 
+def _python_call_name(node: ast.Call) -> str | None:
+    if isinstance(node.func, ast.Name):
+        return node.func.id
+    if isinstance(node.func, ast.Attribute):
+        if (node.func.attr == "sha256" and isinstance(node.func.value, ast.Name)
+                and node.func.value.id == "hashlib"):
+            return "hashlib.sha256"
+        return node.func.attr
+    return None
+
+
+def _python_offset(text: str, node: ast.AST) -> int:
+    lines = text.splitlines(keepends=True)
+    line = max(getattr(node, "lineno", 1) - 1, 0)
+    return sum(len(value) for value in lines[:line]) + getattr(node, "col_offset", 0)
+
+
+def evidence_digest_boundary_violations(root: Path) -> list[Violation]:
+    """Keep repository text evidence on the typed, normalized digest path."""
+    violations: list[Violation] = []
+    tools_root = root / "tools"
+    if not tools_root.is_dir():
+        return violations
+    for path in sorted(tools_root.rglob("*.py")):
+        relative = path.relative_to(root).as_posix()
+        if _is_ignored(path.relative_to(root)):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+            tree = ast.parse(text, filename=relative)
+        except (OSError, UnicodeDecodeError, SyntaxError):
+            continue
+        typed_implementation = relative == "tools/evidence_digest.py"
+        repository_control_plane = relative.startswith("tools/repository/")
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Import, ast.ImportFrom)) and not typed_implementation:
+                names = [item.name for item in node.names]
+                if "hashlib" in names:
+                    violations.append(_violation(
+                        root, path, text, _python_offset(text, node),
+                        "untyped-evidence-digest",
+                        "Repository code must use the typed digest module, not hashlib.",
+                    ))
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not typed_implementation:
+                if node.name in {
+                    "sha256", "sha256_bytes", "_sha256", "file_sha256", "sha256_path",
+                    "canonical_text_sha256", "repository_text_sha256",
+                }:
+                    violations.append(_violation(
+                        root, path, text, _python_offset(text, node),
+                        "untyped-evidence-digest-helper",
+                        "Repository digest helpers must declare the text or artifact byte domain.",
+                    ))
+            if isinstance(node, ast.Call):
+                name = _python_call_name(node)
+                if not typed_implementation and name in {
+                    "hashlib.sha256", "sha256_path", "canonical_text_sha256",
+                    "repository_text_sha256",
+                }:
+                    violations.append(_violation(
+                        root, path, text, _python_offset(text, node),
+                        "untyped-evidence-digest",
+                        "Repository code must not calculate an untyped SHA-256 digest.",
+                    ))
+                if name in {
+                    "artifact_byte_digest", "artifact_byte_digest_bytes", "artifact_byte_sha256",
+                    "artifact_bytes_sha256", "parse_artifact_digest",
+                }:
+                    argument = ast.unparse(node.args[0]).lower() if node.args else ""
+                    if repository_control_plane or any(
+                        marker in argument for marker in (
+                            "evidence", "report", "markdown", "log_path", "source_path",
+                            "validation", "read_text", ".json", ".md", ".cj",
+                        )
+                    ):
+                        violations.append(_violation(
+                            root, path, text, _python_offset(text, node),
+                            "text-evidence-byte-digest",
+                            "Text evidence must not enter the artifact byte-digest domain.",
+                        ))
+            if isinstance(node, ast.Compare) and repository_control_plane:
+                expression = ast.unparse(node)
+                if re.search(r"(?:get\(['\"]sha256['\"]\)|\[['\"]sha256['\"]\])", expression):
+                    violations.append(_violation(
+                        root, path, text, _python_offset(text, node),
+                        "untyped-evidence-digest-comparison",
+                        "Repository evidence digests must be parsed into a typed domain before comparison.",
+                    ))
+            if isinstance(node, ast.ExceptHandler):
+                caught = ast.unparse(node.type) if node.type is not None else ""
+                if caught != "UnicodeDecodeError":
+                    continue
+                fallback_calls = {
+                    _python_call_name(child) for child in ast.walk(node)
+                    if isinstance(child, ast.Call)
+                }
+                if fallback_calls & {
+                    "artifact_byte_digest", "artifact_byte_digest_bytes", "hashlib.sha256", "sha256_path"
+                }:
+                    violations.append(_violation(
+                        root, path, text, _python_offset(text, node),
+                        "text-evidence-byte-fallback",
+                        "Invalid UTF-8 must fail closed and must not fall back to a byte digest.",
+                    ))
+    return violations
+
+
 def run_guard(root: Path) -> list[Violation]:
     root = root.resolve()
     violations: list[Violation] = []
@@ -501,6 +610,7 @@ def run_guard(root: Path) -> list[Violation]:
         violations.extend(inspect_source(root, path))
     violations.extend(dependency_cycle_violations(root, paths))
     violations.extend(provider_boundary_violations(root, paths))
+    violations.extend(evidence_digest_boundary_violations(root))
     for path in configuration_files(root):
         violations.extend(inspect_configuration(root, path))
     return sorted(set(violations))
@@ -520,6 +630,8 @@ def render_text(violations: Sequence[Violation]) -> str:
 def render_json(root: Path, violations: Sequence[Violation]) -> str:
     return json.dumps({
         "schema_version": SCHEMA_VERSION,
+        "kind": "architecture-guard",
+        "status": "PASS" if not violations else "FAIL",
         "root": str(root.resolve()),
         "ok": not violations,
         "violation_count": len(violations),

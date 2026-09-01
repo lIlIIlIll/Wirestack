@@ -2,7 +2,9 @@
 """Run the Linux x86_64 part of GATE-NET-01 against the active Cangjie SDK."""
 from __future__ import annotations
 
-import argparse, contextlib, datetime as dt, hashlib, json, math, os, platform
+from tools import evidence_digest
+
+import argparse, contextlib, datetime as dt, json, math, os, platform
 import re, shutil, signal, socket, subprocess, sys, tempfile, threading, time
 from pathlib import Path
 from typing import Any, Iterator, Sequence
@@ -151,7 +153,7 @@ def run(repo: Path, artifacts: Path, warmup: int, repetitions: int, timeout: flo
     for name,source in SOURCES.items():
         d=artifacts/name;d.mkdir(parents=True,exist_ok=True);src=d/f"{name}.cj";binary=d/name;src.write_text(source);r=proc(["cjc",str(src),"-o",str(binary)],d,timeout)
         if r["timed_out"] or r["exit"]!=0 or not binary.is_file():raise GateError(f"compile failed for {name}: {r}")
-        binaries[name]=binary;digests[name]=hashlib.sha256(source.encode()).hexdigest()
+        binaries[name]=binary;digests[name]=evidence_digest.text_evidence_bytes_sha256(source.encode())
     def sample(name: str) -> dict[str,Any]:
         if name=="blocked-connect": cm=saturated()
         elif name=="blocked-accept": cm=contextlib.nullcontext(reserve_port())

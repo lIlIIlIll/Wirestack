@@ -3,9 +3,10 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import platform
@@ -40,14 +41,6 @@ LOG_RE = re.compile(
 
 class GateError(RuntimeError):
     pass
-
-
-def sha256_path(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def run_command(
@@ -220,7 +213,7 @@ def run_gate(root: Path, output_dir: Path) -> dict[str, Any]:
         )
         if compiled["exit_code"] != 0 or not fixture.is_file():
             raise GateError("fixture compilation failed:\n" + compiled["output"][-4000:])
-        fixture_digest = sha256_path(fixture)
+        fixture_digest = evidence_digest.artifact_byte_sha256(fixture)
         test_env = dict(base_env)
         test_env.update({
             "LD_PRELOAD": str(fixture),
@@ -279,7 +272,7 @@ def run_gate(root: Path, output_dir: Path) -> dict[str, Any]:
         },
         "artifacts": {
             "fixture_sha256": fixture_digest,
-            "fixture_log_sha256": sha256_path(fixture_log),
+            "fixture_log_sha256": evidence_digest.text_evidence_sha256(fixture_log),
         },
         "fixture_compile": compiled,
         "resolver_test": resolver_test,

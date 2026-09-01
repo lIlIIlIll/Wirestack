@@ -9,9 +9,10 @@ scenario never makes a run pass.
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import platform
@@ -200,7 +201,7 @@ def load_manifest(path: Path) -> tuple[dict[str, Any], str]:
         raw = json.loads(data)
     except json.JSONDecodeError as error:
         raise ManifestError(f"invalid JSON in {path}: {error}") from error
-    return validate_manifest(raw), hashlib.sha256(data).hexdigest()
+    return validate_manifest(raw), evidence_digest.text_evidence_bytes_sha256(data)
 
 
 def platform_name() -> str:

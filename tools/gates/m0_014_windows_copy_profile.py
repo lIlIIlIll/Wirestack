@@ -3,10 +3,11 @@
 
 from __future__ import annotations
 
+from tools import evidence_digest
+
 import argparse
 import ctypes
 import datetime as dt
-import hashlib
 import json
 import os
 import platform
@@ -66,14 +67,6 @@ def command_version(argv: Sequence[str]) -> str | None:
         return None
     value = (result.stdout + result.stderr).strip()
     return value[:CAPTURE_LIMIT] if value else None
-
-
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def atomic_json(path: Path, value: Mapping[str, Any]) -> None:
@@ -288,10 +281,10 @@ def compile_receiver(root: Path, artifact_dir: Path,
         detail = (process["stdout"] + "\n" + process["stderr"]).strip()[:CAPTURE_LIMIT]
         raise GateError("COMPILE", f"native Windows Cangjie receiver compilation failed: {detail}")
     return binary, {
-        "source_sha256": hashlib.sha256(receiver_source.encode()).hexdigest(),
-        "shim_source_sha256": sha256(shim_source),
-        "shim_object_sha256": sha256(shim_object),
-        "binary_sha256": sha256(binary),
+        "source_sha256": evidence_digest.text_evidence_bytes_sha256(receiver_source.encode()),
+        "shim_source_sha256": evidence_digest.text_evidence_sha256(shim_source),
+        "shim_object_sha256": evidence_digest.artifact_byte_sha256(shim_object),
+        "binary_sha256": evidence_digest.artifact_byte_sha256(binary),
         "shim_compile": shim_compile,
         "process": process,
     }
@@ -388,15 +381,15 @@ def _instrumented_transfer_attempt(binary: Path, payload: int, directory: Path,
         "-i", str(etl), "-o", str(heap_report), "-a", "heap", "-totals",
     ], directory, 180)
     commands.append(analyze)
-    text = heap_report.read_text(encoding="utf-8", errors="replace") if heap_report.is_file() else ""
+    text = heap_report.read_text(encoding="utf-8", errors="strict") if heap_report.is_file() else ""
     allocation_count = parse_xperf_allocation_count(text)
     return {
         "sample": sample,
         "allocation_count": allocation_count,
         "allocation_status": "MEASURED_BY_ETW_HEAP" if allocation_count else "ETW_UNPARSED",
-        "etl_sha256": sha256(etl),
+        "etl_sha256": evidence_digest.artifact_byte_sha256(etl),
         "heap_report": text[:1024 * 1024],
-        "heap_report_sha256": sha256(heap_report) if heap_report.is_file() else None,
+        "heap_report_sha256": evidence_digest.text_evidence_sha256(heap_report) if heap_report.is_file() else None,
         "commands": commands,
     }
 
@@ -611,7 +604,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 1
     try:
         validated = validate_result(load_json(args.validate_report.resolve()), args.expected_revision)
-        result = {"schema_version": 1, "task_id": "M0-014", "status": "PASS", "validated_report_sha256": sha256(args.validate_report.resolve())}
+        result = {"schema_version": 1, "task_id": "M0-014", "status": "PASS", "validated_report_sha256": evidence_digest.text_evidence_sha256(args.validate_report.resolve())}
         atomic_json(args.output.resolve(), result)
         print("M0-014 report validation: PASS")
         return 0
