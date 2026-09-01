@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-01T08:45:05.055736Z",
+  "generated_at_utc": "2026-09-01T09:23:41.146255Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,7 +13,7 @@
       "path": "docs/evidence/P1-014/task-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "775b0c5513281c587ba2d60f5545595c7390f1846b454ea167e347d7322977e3"
+        "sha256": "eab14ecc24786729a3192529a85f208524f1ec86044908b372d350888f8b9473"
       },
       "source_task": "P1-014"
     },
@@ -22,7 +22,7 @@
       "path": "docs/evidence/P1-014/digest-inventory.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "9eb7f8962a27958f812d78fd2e2cc0f1d072e6ff05c5cfb36cf80f2dd03efb4e"
+        "sha256": "602ce2dfd406072062030cb366faedf04505285ad43ade1f28c99c4c90fb1980"
       },
       "source_task": "P1-014"
     },
@@ -40,7 +40,7 @@
       "path": "docs/evidence/P1-014/linux-crlf.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "327d840c2a29393ea52257a933a61b11350e95f03dffee2df262627f5b12cb75"
+        "sha256": "0f2a8ce7823f47486886f10e089cc6cfab42245101282c85d36a29af18071991"
       },
       "source_task": "P1-014"
     },
@@ -49,17 +49,21 @@
       "path": "docs/evidence/P1-014/windows-crlf.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "138ccfe2f177c699c53a32d37c0c9619caf1b76f55a89db2c1dbbca924ed1c74"
+        "sha256": "7b21308ec421ce9e2c39a115068ecb3a72dc6f80a43e50008e1bcd37225c41a0"
       },
       "source_task": "P1-014"
     }
   ],
-  "revision": "c51e61199986b4ee022e497cfe41c0bec41e3e6f",
+  "revision": "d7127662cd3657323284d05680f36e67178d6733",
   "schema_version": 2,
   "source_sha256": {
     ".github/workflows/linux-release-attestation.yml": {
       "domain": "text-utf8-lf-v1",
       "sha256": "426837063c234bfaf81aa3dee412890b19e010c8d7aee90d0f1dd4cfc48eb342"
+    },
+    ".github/workflows/m0-016-windows-provider-poc.yml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "236bfd5937d654a1f39e34450a6f70a7a18a502e809952fdbd0eac95895400ef"
     },
     ".github/workflows/materialize-m0-009.yml": {
       "domain": "text-utf8-lf-v1",
@@ -68,6 +72,10 @@
     ".github/workflows/p1-014-evidence-digest-boundary.yml": {
       "domain": "text-utf8-lf-v1",
       "sha256": "92e9913a3d8b91b0369aae1abef7fcb1e3259c48f1c538b630b9aa72b4b35041"
+    },
+    ".github/workflows/tls-provider-poc.yml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "27e5931cefb7c496e7b327ef5429fe5efb1e38d48605d71358cb0fd467fa557e"
     },
     ".gitignore": {
       "domain": "text-utf8-lf-v1",
@@ -291,7 +299,7 @@
     },
     "tools/tasks/P1-014.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "d9eef2ea0bf520c721471411899821d3b811fbcb35d89c8cb9e89fe54c6fd7eb"
+      "sha256": "a63b60bf25b36037682d1f31a42d0867207be8a58399568e47978c51860deff9"
     },
     "tools/tests/test_architecture_guard.py": {
       "domain": "text-utf8-lf-v1",
@@ -311,7 +319,7 @@
     },
     "tools/tests/test_m3_031_desktop_tls_adoption.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "15e2a753b40e8b8d96916de9d70c787c116097fba667e33e6d8bdd502f1306c1"
+      "sha256": "72781d39da1c690edb11a06b6e6cd1a1a119191be120af7d0f27b786322fc483"
     },
     "tools/tests/test_m7_020_architecture_audit.py": {
       "domain": "text-utf8-lf-v1",
@@ -359,7 +367,7 @@
     },
     "tools/tests/test_tls_provider_poc.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "6b6f1c7d09c0b27210af2ac4e970cc5635a497cb4c528263fdab025657886023"
+      "sha256": "4ccd128601a3d18f45760aacc854a7520eaebff2c978ecad0afb0e7d6f37c883"
     },
     "tools/tls_provider/selection.py": {
       "domain": "text-utf8-lf-v1",
@@ -367,11 +375,11 @@
     },
     "tools/tls_provider_poc/run.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "c775662a158894645430f91c3094415b130e28aa45f9d57142b842e8390f45f0"
+      "sha256": "1c6bef717c180d161585b51ee5ced240f66aa91e74303c9314cc0c2ec47b81c4"
     },
     "tools/tls_provider_poc/validate.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "69e1a75854399eac006e88865f0c77e651cd6f326e99eb1ab0315726a2c171cf"
+      "sha256": "1bc7475d42dc386cbe048ba44f5aadf4f915f64eac5a0686a2bf3143cccbb051"
     },
     "tools/validate_m7_019_linux_audit.py": {
       "domain": "text-utf8-lf-v1",

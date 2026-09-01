@@ -186,6 +186,35 @@ def provider_result(platform: str, revision: str) -> dict:
     }
 
 
+def materialize_current_license_bundle(
+        platform: str, raw: dict, directory: str) -> Path:
+    source = ROOT / f"docs/evidence/M3-031/{platform}/license-bundle"
+    result_root = Path(directory) / platform
+    destination = result_root / "license-bundle"
+    shutil.copytree(source, destination)
+    manifest_path = destination / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    total_bytes = 0
+    for entry in manifest["files"]:
+        file_path = destination / "files" / entry["path"]
+        entry["bytes"] = file_path.stat().st_size
+        entry["sha256"] = evidence_digest.text_evidence_sha256(file_path)
+        total_bytes += entry["bytes"]
+    manifest["file_count"] = len(manifest["files"])
+    manifest["total_bytes"] = total_bytes
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    raw["build"]["license_bundle"].update({
+        "sha256": evidence_digest.text_evidence_sha256(manifest_path),
+        "file_count": manifest["file_count"],
+        "total_bytes": total_bytes,
+    })
+    return result_root / "provider-result.json"
+
+
 class M3031DesktopTlsAdoptionTests(unittest.TestCase):
     revision = "d" * 40
 
@@ -487,13 +516,27 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
 
     def test_exact_native_desktop_results_pass(self) -> None:
         for platform in ("windows-x86_64", "macos-arm64"):
-            result = adoption.validate_provider_result(
-                provider_result(platform, self.revision),
-                expected_platform=platform,
+            with self.subTest(platform=platform), tempfile.TemporaryDirectory() as directory:
+                raw = provider_result(platform, self.revision)
+                result_path = materialize_current_license_bundle(platform, raw, directory)
+                result = adoption.validate_provider_result(
+                    raw,
+                    expected_platform=platform,
+                    expected_revision=self.revision,
+                    result_path=result_path,
+                )
+                self.assertEqual("PASS", result["status"])
+                self.assertEqual(2, result["external_signer_calls"])
+
+    def test_retained_windows_provider_license_digest_is_stale(self) -> None:
+        self.assert_code(
+            "LICENSE_BUNDLE",
+            lambda: adoption.validate_provider_result(
+                provider_result("windows-x86_64", self.revision),
+                expected_platform="windows-x86_64",
                 expected_revision=self.revision,
-            )
-            self.assertEqual("PASS", result["status"])
-            self.assertEqual(2, result["external_signer_calls"])
+            ),
+        )
 
     def test_provider_license_bundle_is_retained_and_digest_bound(self) -> None:
         raw = provider_result("windows-x86_64", self.revision)
@@ -589,13 +632,17 @@ class M3031DesktopTlsAdoptionTests(unittest.TestCase):
         )
         raw = provider_result("windows-x86_64", self.revision)
         raw["execution"]["image_os"] = "windows-2022"
-        self.assert_code(
-            "PLATFORM",
-            lambda: adoption.validate_provider_result(
-                raw, expected_platform="windows-x86_64",
-                expected_revision=self.revision,
-            ),
-        )
+        with tempfile.TemporaryDirectory() as directory:
+            result_path = materialize_current_license_bundle(
+                "windows-x86_64", raw, directory)
+            self.assert_code(
+                "PLATFORM",
+                lambda: adoption.validate_provider_result(
+                    raw, expected_platform="windows-x86_64",
+                    expected_revision=self.revision,
+                    result_path=result_path,
+                ),
+            )
         raw = provider_result("macos-arm64", self.revision)
         raw["source"]["tree"] = "0" * 40
         self.assert_code(
