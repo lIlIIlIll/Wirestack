@@ -155,7 +155,8 @@ The canonical matrix covers Linux glibc/musl, Windows, macOS, Android, iOS and H
 
 GitHub-hosted mobile validation uses an arm64 Android Emulator on the arm64
 `macos-15` runner and an arm64 iOS Simulator on `macos-15`. A supplemental
-x86_64 Android Emulator runs on `ubuntu-24.04` with KVM. The x86_64 job uses a
+x86_64 Android Emulator runs on `ubuntu-24.04` with KVM when available and a
+bounded software fallback otherwise. The x86_64 job uses a
 separate target identity and is never retained in the required Android arm64
 matrix cell. These are native VM executions and are retained with an explicit
 `native_runtime` record. They are not physical-device results, so they do not

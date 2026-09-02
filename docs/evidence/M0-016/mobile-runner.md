@@ -5,7 +5,7 @@ The mobile provider PoC now has three GitHub-hosted native-VM jobs:
 | Target cell | Hosted runner | Native execution environment |
 |---|---|---|
 | `android-aarch64` | `macos-15` (arm64) | arm64 Android Emulator, API 33 or newer, NDK 26.3.11579264 |
-| `android-x86_64` (supplemental) | `ubuntu-24.04` (x86_64) | x86_64 Android Emulator, API 33 or newer, NDK 26.3.11579264, KVM acceleration |
+| `android-x86_64` (supplemental) | `ubuntu-24.04` (x86_64) | x86_64 Android Emulator, API 33 or newer, NDK 26.3.11579264, KVM when available |
 | `ios-aarch64` | `macos-15` | arm64 iOS Simulator supplied by Xcode |
 
 Each job builds the pinned provider for the target, links the PoC statically,
@@ -47,8 +47,10 @@ Mbed TLS independently on each mobile VM. OpenSSL remains a desktop control per
 the candidate matrix; mobile control builds are omitted because they add no
 required decision information. Every provider job uploads `result.json`,
 `build.log`, and the provider license bundle even when the job fails.
-The supplemental x86_64 Android jobs use the Ubuntu runner's KVM-backed
-emulator and keep their `android-x86_64` target identity in the result.
+The supplemental x86_64 Android jobs probe KVM and select it when the hosted
+runner exposes it. They use bounded software acceleration when KVM is absent,
+record the selected mode in the result, and keep their `android-x86_64` target
+identity separate.
 
 After reviewing a successful artifact, copy it into the committed evidence tree
 with the fail-closed retention helper:
