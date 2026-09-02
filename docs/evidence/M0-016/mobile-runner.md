@@ -14,7 +14,9 @@ The Android job installs the pinned NDK and uses `adb`. Emulator discovery has
 both a 90-second `wait-for-device` bound and a 240-second overall boot bound;
 each `getprop sys.boot_completed` probe is limited to 15 seconds. The AVD uses
 a non-interactive `pixel_2` hardware profile and has a 60-second creation
-bound. License
+bound. The runner resolves `emulator` and `adb` only after sdkmanager installs
+the platform tools, so an image without preinstalled Android binaries cannot
+silently produce an empty command. License
 acceptance records the `sdkmanager` pipeline status explicitly so a normal
 `yes` SIGPIPE cannot turn a successful installation into a false failure. The
 iOS job builds an unsigned simulator app bundle, installs it with `simctl`, and

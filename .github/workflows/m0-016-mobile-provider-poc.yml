@@ -100,8 +100,6 @@ jobs:
           }
           SDKMANAGER="$(resolve_android_tool sdkmanager)"
           AVDMANAGER="$(resolve_android_tool avdmanager)"
-          EMULATOR="$(resolve_android_tool emulator)"
-          ADB="$(resolve_android_tool adb)"
           # sdkmanager closes stdin after the last prompt.  Keep the shell's
           # pipefail policy for every other command, but do not let `yes`
           # turning its write end into SIGPIPE hide the sdkmanager status.
@@ -113,6 +111,13 @@ jobs:
           "$SDKMANAGER" \
             "platform-tools" "emulator" "platforms;android-${ANDROID_API_LEVEL}" \
             "$ANDROID_SYSTEM_IMAGE" "ndk;${ANDROID_NDK_VERSION}"
+          # The hosted image may not contain platform-tools or the emulator
+          # before sdkmanager installs them. Resolve these paths afterwards so
+          # a missing preinstalled tool cannot become an empty command.
+          EMULATOR="$(resolve_android_tool emulator)"
+          ADB="$(resolve_android_tool adb)"
+          test -x "$EMULATOR"
+          test -x "$ADB"
           NDK="$SDK_ROOT/ndk/$ANDROID_NDK_VERSION"
           test -f "$NDK/build/cmake/android.toolchain.cmake"
           echo "ANDROID_NDK_HOME=$NDK" >> "$GITHUB_ENV"
