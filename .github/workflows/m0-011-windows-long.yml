@@ -1,0 +1,89 @@
+name: M0-011 Windows four-hour supplemental profile
+
+on:
+  push:
+    branches:
+      - task/M0-011-windows-4h-long
+    paths:
+      - "tools/gates/m0_011_windows_long.py"
+      - "tools/gates/net06_leak_soak_sources.py"
+      - "tools/gates/tests/test_m0_011_windows_long.py"
+      - "scripts/gate-m0-011-windows-long"
+      - "docs/evidence/M0-011/windows-4h-test-plan.md"
+      - "tools/tasks/M0-011.json"
+      - ".github/workflows/m0-011-windows-long.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-four-hour:
+    runs-on: windows-2025
+    # Four hours of workload plus setup, compilation and bounded teardown.
+    timeout-minutes: 270
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Resolve the latest complete Cangjie nightly
+        id: cangjie-nightly
+        shell: pwsh
+        run: python tools/latest_cangjie_nightly.py --github-output $env:GITHUB_OUTPUT
+
+      - name: Install the resolved Cangjie toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ steps.cangjie-nightly.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie.zip
+
+      - name: Run Windows validator tests
+        shell: pwsh
+        run: python -m unittest tools.gates.tests.test_m0_011_windows_long -v
+
+      - name: Record native Windows capabilities
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build/gates/m0-011-windows-long | Out-Null
+          python tools/gates/m0_011_windows_long.py `
+            --environment-only `
+            --repository-revision $env:GITHUB_SHA `
+            --output build/gates/m0-011-windows-long/environment.json
+
+      - name: Run the fixed four-hour native profile
+        if: success()
+        shell: pwsh
+        run: |
+          python tools/gates/m0_011_windows_long.py `
+            --run `
+            --duration-seconds 14400 `
+            --sample-interval-seconds 10 `
+            --artifact-dir build/gates/m0-011-windows-long/artifacts `
+            --repository-revision $env:GITHUB_SHA `
+            --output build/gates/m0-011-windows-long/long-4h.json
+
+      - name: Validate exact-revision result
+        if: success()
+        shell: pwsh
+        run: |
+          python tools/gates/m0_011_windows_long.py `
+            --validate-report build/gates/m0-011-windows-long/long-4h.json `
+            --expected-revision $env:GITHUB_SHA `
+            --output build/gates/m0-011-windows-long/validation.json
+
+      - name: Upload bounded Windows evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m0-011-windows-four-hour-${{ github.sha }}
+          path: |
+            build/gates/m0-011-windows-long/environment.json
+            build/gates/m0-011-windows-long/long-4h.json
+            build/gates/m0-011-windows-long/validation.json
+            build/gates/m0-011-windows-long/artifacts/**
+          if-no-files-found: error
+          retention-days: 14

@@ -44,9 +44,22 @@ KiB and median FD count remained 3.
 Full raw reports, process output, exact counters and all timestamped RSS/FD
 samples are retained under [`linux_x86_64/`](linux_x86_64/).
 
+## Windows supplemental gate
+
+The repository now contains a fixed `windows-2025` / x86_64 workflow and a
+fail-closed validator for a four-hour mixed lifecycle profile. The workflow
+records Win32 RSS/private bytes/handles, PowerShell thread counts and
+`netstat -ano` socket counts, binds the report to `GITHUB_SHA`, and uploads the
+raw probe output. No Windows runner has produced this report yet, so there is
+no Windows PASS evidence to claim.
+
 ## Remaining global acceptance work
 
-- Execute native Windows, macOS, Android, iOS and HarmonyOS/OpenHarmony profiles.
+- Execute the native Windows x86_64 supplemental profile for the fixed
+  four-hour duration defined in `windows-4h-test-plan.md`.
+- Execute native macOS, Android, iOS and HarmonyOS/OpenHarmony profiles.
+- Keep the required 24-hour Linux release-candidate soak as the global
+  GATE-NET-06 duration; the Windows four-hour profile does not replace it.
 
 Non-execution and unmeasured resource classes never contribute to a COMPLETE
 decision.

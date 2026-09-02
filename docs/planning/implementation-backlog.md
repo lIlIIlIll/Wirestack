@@ -152,7 +152,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M0-008 | 执行 GATE-NET-03：绝对 Deadline | 测试 | C3 | M0-004 | PRD §9 GATE-NET-03 | connect、partial write、idle read、accept 不因内部循环重置预算；偏差满足 PRD 门槛。 |
 | M0-009 | 执行 GATE-NET-04：EOF 与关闭证据 | 测试 | C4 | M0-004 | PRD §9 GATE-NET-04 | peer FIN/RST、local close/abort、cancel/read race 可稳定分类；不能分类的平台门禁失败，并可记录为远期上游候选。 |
 | M0-010 | 执行 GATE-NET-05：大块数据、复制与 Windows 4KiB 问题 | 性能 | C4 | M0-005 | PRD §9 GATE-NET-05 | 记录各 payload 的 read 次数和 copied bytes；证明新适配路径可达到 raw TCP 门槛；定位 Windows 固定 4KiB 限制。 |
-| M0-011 | 执行 GATE-NET-06：泄漏与长时间运行 | 可靠性 | C4 | M0-004 | PRD §9 GATE-NET-06 | 完成 100k connect/cancel/close、100k reset、100k cleanup 和 24h soak；handle/timer/waiter/buffer/GC root 无单调增长。 |
+| M0-011 | 执行 GATE-NET-06：泄漏与长时间运行 | 可靠性 | C4 | M0-004 | PRD §9 GATE-NET-06 | Linux release candidate 完成 100k connect/cancel/close、100k reset、100k cleanup 和 24h soak；Windows x86_64 使用固定 4h 原生补充门禁；handle/timer/waiter/buffer/GC root 无单调增长。 |
 | M0-012 | 执行 GATE-NET-07：移动网络变化 | 平台 | C4 | M0-004 | PRD §9 GATE-NET-07 | Android/iOS/Harmony 真机覆盖 Wi-Fi/蜂窝/飞行模式/前后台/休眠；旧连接可诊断、新连接可重选路、无旧绑定泄漏。 |
 | M0-013 | 验证 DNS 是否阻塞 scheduler carrier thread | 性能 | C3 | M0-004 | PRD §9.1/§12 DNS-004 | 高并发解析下记录 carrier 占用与排队；给出 runtime async、平台 async 或有界 blocking pool 的选择证据。 |
 | M0-014 | 完成 Windows socket 数据路径 copy profile | 平台 | C3 | M0-005 | PRD §9/§19.1 | 定位每层复制与 buffer 尺寸；提出不越过正式 `std.net` 接口的低复制方案。 |
