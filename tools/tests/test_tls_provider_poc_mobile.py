@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import importlib.util
 import json
 import os
@@ -29,19 +30,41 @@ class MobileProviderEvidenceTests(unittest.TestCase):
         # host-specific coordinates with the mobile VM coordinates.
         value = complete_result(self.provider_spec, platform="linux-glibc-x86_64")
         value["platform"] = platform
-        value["execution"]["runner_os"] = "macOS"
-        value["execution"]["runner_arch"] = "ARM64"
-        value["execution"]["image_os"] = "macos15"
-        value["execution"]["native_runtime"] = (
-            {
+        if platform == "android-aarch64":
+            value["execution"]["runner_os"] = "macOS"
+            value["execution"]["runner_arch"] = "ARM64"
+            value["execution"]["image_os"] = "macos15"
+            value["execution"]["native_runtime"] = {
                 "kind": "android-emulator",
                 "runner": "github-hosted",
                 "is_device": False,
                 "abi": "arm64-v8a",
                 "api_level": 35,
                 "serial": "emulator-5554",
+                "target_platform": platform,
             }
-            if platform.startswith("android") else {
+            value["build"]["provenance"]["target_triple"] = (
+                "aarch64-linux-android")
+        elif platform == "android-x86_64":
+            value["execution"]["runner_os"] = "Linux"
+            value["execution"]["runner_arch"] = "X64"
+            value["execution"]["image_os"] = "ubuntu24"
+            value["execution"]["native_runtime"] = {
+                "kind": "android-emulator",
+                "runner": "github-hosted",
+                "is_device": False,
+                "abi": "x86_64",
+                "api_level": 35,
+                "serial": "emulator-5554",
+                "target_platform": platform,
+            }
+            value["build"]["provenance"]["target_triple"] = (
+                "x86_64-linux-android")
+        else:
+            value["execution"]["runner_os"] = "macOS"
+            value["execution"]["runner_arch"] = "ARM64"
+            value["execution"]["image_os"] = "macos15"
+            value["execution"]["native_runtime"] = {
                 "kind": "ios-simulator",
                 "runner": "github-hosted",
                 "is_device": False,
@@ -50,11 +73,8 @@ class MobileProviderEvidenceTests(unittest.TestCase):
                 "device_type": "iPhone 16",
                 "udid": "A" * 36,
             }
-        )
-        value["build"]["provenance"]["target_triple"] = (
-            "aarch64-linux-android" if platform.startswith("android")
-            else "arm64-apple-ios-simulator"
-        )
+            value["build"]["provenance"]["target_triple"] = (
+                "arm64-apple-ios-simulator")
         value["operational_evidence"]["native_memory_diagnostic"] = {
             "status": "UNSUPPORTED",
             "tool": "address+undefined-sanitizer",
@@ -66,6 +86,16 @@ class MobileProviderEvidenceTests(unittest.TestCase):
 
     def test_android_emulator_result_passes_fail_closed_validation(self):
         validator.validate_result(self.result("android-aarch64"), self.provider_spec)
+
+    def test_android_x86_64_smoke_result_passes_supplemental_validation(self):
+        validator.validate_result(self.result("android-x86_64"), self.provider_spec)
+
+    def test_unknown_supplemental_platform_is_rejected(self):
+        value = copy.deepcopy(self.provider_spec)
+        value["supplemental_platforms"] = ["android-riscv64"]
+        with self.assertRaisesRegex(validator.ValidationError,
+                                    "unknown supplemental platform"):
+            validator.validate_spec(value)
 
     def test_ios_simulator_result_passes_fail_closed_validation(self):
         validator.validate_result(self.result("ios-aarch64"), self.provider_spec)
@@ -85,6 +115,8 @@ class MobileProviderEvidenceTests(unittest.TestCase):
     def test_mobile_target_triples_are_explicit(self):
         self.assertEqual(runner.target_triple("android-aarch64"),
                          "aarch64-linux-android")
+        self.assertEqual(runner.target_triple("android-x86_64"),
+                         "x86_64-linux-android")
         self.assertEqual(runner.target_triple("ios-aarch64"),
                          "arm64-apple-ios-simulator")
 
@@ -96,7 +128,7 @@ class MobileRunnerSafetyTests(unittest.TestCase):
         self.assertIn("runs-on: ubuntu-24.04", workflow)
         self.assertIn("runs-on: macos-15", workflow)
         android_job = workflow.split("\n  android-emulator:\n", 1)[1].split(
-            "\n  ios-simulator:\n", 1)[0]
+            "\n  android-x86_64-smoke:\n", 1)[0]
         self.assertIn("runs-on: macos-15", android_job)
         self.assertNotIn("runs-on: ubuntu-24.04", android_job)
         self.assertIn('ANDROID_NDK_VERSION: "26.3.11579264"', workflow)
@@ -126,8 +158,19 @@ class MobileRunnerSafetyTests(unittest.TestCase):
             workflow.index('ADB="$(resolve_android_tool adb)"'),
             workflow.index('"ndk;${ANDROID_NDK_VERSION}"'),
         )
-        self.assertEqual(workflow.count("if-no-files-found: error"), 2)
+        self.assertEqual(workflow.count("if-no-files-found: error"), 3)
         self.assertIn("provider: [aws-lc, mbedtls]", workflow)
+        smoke_job = workflow.split("\n  android-x86_64-smoke:\n", 1)[1].split(
+            "\n  ios-simulator:\n", 1)[0]
+        self.assertIn("runs-on: ubuntu-24.04", smoke_job)
+        self.assertIn(
+            'ANDROID_SYSTEM_IMAGE: "system-images;android-33;google_apis;x86_64"',
+            smoke_job)
+        self.assertIn('test "$abi" = "x86_64"', smoke_job)
+        self.assertIn("--platform android-x86_64", smoke_job)
+        self.assertIn("-accel on", smoke_job)
+        self.assertNotIn("-qemu -accel tcg", smoke_job)
+        self.assertIn("android-x86_64-smoke", workflow)
 
     def test_ios_runner_has_spawn_fallback_for_lost_console_output(self):
         source = (ROOT / "tools/tls_provider_poc/run_mobile.py").read_text()
@@ -228,6 +271,22 @@ class MobileRunnerSafetyTests(unittest.TestCase):
         finally:
             mobile.poc.run = fake
 
+    def test_android_runtime_accepts_x86_64_smoke_emulator(self):
+        fake = mobile.poc.run
+        outputs = iter([
+            type("Completed", (), {"returncode": 0, "stdout": "device\n"})(),
+            type("Completed", (), {"returncode": 0, "stdout": "x86_64\n"})(),
+            type("Completed", (), {"returncode": 0, "stdout": "35\n"})(),
+        ])
+        mobile.poc.run = lambda *args, **kwargs: next(outputs)
+        try:
+            _, runtime = mobile.android_runtime(
+                Path("."), Path("/tmp/mobile-test.log"), "android-x86_64")
+        finally:
+            mobile.poc.run = fake
+        self.assertEqual(runtime["abi"], "x86_64")
+        self.assertEqual(runtime["target_platform"], "android-x86_64")
+
     def test_android_compilers_use_macos_host_prebuilt(self):
         with tempfile.TemporaryDirectory() as directory:
             ndk = Path(directory)
@@ -245,6 +304,39 @@ class MobileRunnerSafetyTests(unittest.TestCase):
             self.assertEqual(selected_cc, cc)
             self.assertEqual(selected_cxx, cxx)
             self.assertEqual(api, 33)
+
+    def test_android_compilers_select_x86_64_target(self):
+        with tempfile.TemporaryDirectory() as directory:
+            ndk = Path(directory)
+            prebuilt = ndk / "toolchains/llvm/prebuilt/linux-x86_64/bin"
+            prebuilt.mkdir(parents=True)
+            cc = prebuilt / "x86_64-linux-android33-clang"
+            cxx = prebuilt / "x86_64-linux-android33-clang++"
+            cc.write_text("", encoding="utf-8")
+            cxx.write_text("", encoding="utf-8")
+            cc.chmod(0o755)
+            cxx.chmod(0o755)
+            with mock.patch.object(mobile.host_platform, "system", return_value="Linux"), \
+                    mock.patch.object(mobile.host_platform, "machine", return_value="x86_64"):
+                selected_cc, selected_cxx, api = mobile.android_compilers(
+                    ndk, "android-x86_64")
+            self.assertEqual(selected_cc, cc)
+            self.assertEqual(selected_cxx, cxx)
+            self.assertEqual(api, 33)
+
+    def test_android_x86_64_toolchain_sets_matching_cmake_abi(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            ndk = root / "ndk"
+            cc = root / "x86_64-linux-android33-clang"
+            cxx = root / "x86_64-linux-android33-clang++"
+            with mock.patch.object(mobile, "android_ndk", return_value=ndk), \
+                    mock.patch.object(mobile, "android_compilers",
+                                      return_value=(cc, cxx, 33)):
+                toolchain = mobile.mobile_toolchain(
+                    "android-x86_64", root, root / "mobile-test.log")
+            self.assertIn("-DANDROID_ABI=x86_64", toolchain["cmake_args"])
+            self.assertEqual(toolchain["target"], "x86_64-linux-android")
 
     def test_android_compilers_reject_unsupported_host(self):
         with mock.patch.object(mobile.host_platform, "system", return_value="Windows"), \

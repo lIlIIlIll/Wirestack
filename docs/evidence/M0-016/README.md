@@ -16,7 +16,7 @@ arm64 emulator startup. Only validated iOS Mbed TLS evidence was added after
 the existing iOS AWS-LC cell was found to contain different retained bytes;
 the fail-closed retention helper correctly refused to replace it.
 The traceable mobile test plan is [`test-plan.md`](test-plan.md); its plan
-validator currently reports 10 paths, 9 scenarios, and 9 tests.
+validator currently reports 11 paths, 10 scenarios, and 10 tests.
 The hosted mobile matrix runs AWS-LC and Mbed TLS; OpenSSL remains a desktop
 control as allowed by the candidate matrix. Use the documented
 `retain_mobile.py` helper to perform the review-bound, atomic copy after a
@@ -37,6 +37,10 @@ their result artifacts are reviewed and retained. They are emulator/Simulator
 evidence, not physical-device evidence, and therefore do not close M0-012 or
 the full six-platform M0-016 task. See [mobile-runner.md](mobile-runner.md)
 for the runner contract and its fail-closed limits.
+The workflow also has an `android-x86_64` smoke job on `ubuntu-24.04`. That job
+uses the x86_64 system image with KVM acceleration and the same provider runner.
+Its result is supplemental and stays outside the required platform matrix. A
+passing x86_64 emulator cannot be used as arm64 evidence.
 Schema v11 also retains:
 
 - monotonic cancellation and join deadlines that are unaffected by wall-clock

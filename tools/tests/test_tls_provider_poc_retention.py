@@ -173,7 +173,18 @@ class MobileRetentionTests(unittest.TestCase):
             value = json.loads(result.read_text())
             value["platform"] = "linux-glibc-x86_64"
             runner.atomic_json(result, value)
-            with self.assertRaisesRegex(retainer.RetentionError, "only Android/iOS"):
+            with self.assertRaisesRegex(retainer.RetentionError, "required Android/iOS"):
+                retainer.retain(repo=root, matrix_path=matrix,
+                                result_path=result, license_bundle_path=bundle,
+                                expected_revision=self.revision)
+
+    def test_supplemental_android_x86_64_result_is_not_retained(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            matrix = self.write_matrix(root)
+            result, bundle = self.make_result(root, "android-x86_64")
+            with self.assertRaisesRegex(retainer.RetentionError,
+                                        "supplemental targets stay outside"):
                 retainer.retain(repo=root, matrix_path=matrix,
                                 result_path=result, license_bundle_path=bundle,
                                 expected_revision=self.revision)

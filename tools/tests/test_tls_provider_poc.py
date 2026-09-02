@@ -49,6 +49,8 @@ def build_provenance_fixture(provider, platform, *, diagnostic=False):
         "linux-musl-x86_64": "x86_64-unknown-linux-musl",
         "windows-x86_64": "x86_64-pc-windows-msvc",
         "macos-arm64": "arm64-apple-darwin",
+        "android-aarch64": "aarch64-linux-android",
+        "android-x86_64": "x86_64-linux-android",
     }
     if provider == "aws-lc":
         configure = [
