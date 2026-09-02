@@ -5,8 +5,12 @@
 M0-016 remains **BLOCKED** only at the full cross-platform task level. All 12
 desktop schema-v11 cells are current: AWS-LC passes on Linux glibc, Linux musl,
 Windows and macOS; Mbed TLS and OpenSSL retain explicit PARTIAL results for
-unsupported capabilities. Android, iOS, and HarmonyOS or OpenHarmony still
-lack native-device evidence; cross-compilation does not satisfy those cells.
+unsupported capabilities. The hosted Android arm64 emulator failure is
+**NON-GATING** for the current Linux delivery profile under ADR-0002. It is
+still an incomplete global mobile cell, and the failure is not recorded as a
+PASS. Android, iOS, and HarmonyOS or OpenHarmony still lack the native-device
+evidence required by the global matrix; cross-compilation does not satisfy
+those cells.
 
 The local contract-gate record is [`mobile-runner-contract.json`](mobile-runner-contract.json).
 The latest hosted run is recorded in

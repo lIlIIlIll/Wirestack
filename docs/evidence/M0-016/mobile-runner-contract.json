@@ -19,7 +19,11 @@
       "minimum_api_level": 33,
       "ndk_version": "26.3.11579264",
       "emulator_acceleration": "off",
-      "timeout_driver": "python3-subprocess"
+      "timeout_driver": "python3-subprocess",
+      "gating_scope": {
+        "linux_delivery_profile": "NON_GATING",
+        "global_m0_016": "REQUIRED"
+      }
     },
     "android-x86_64": {
       "supplemental": true,
