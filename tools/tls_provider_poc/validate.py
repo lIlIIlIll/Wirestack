@@ -332,11 +332,11 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                     {"ARM64", "AARCH64"},
                     "macOS result requires native arm64 runner")
         if result.get("platform") == "android-aarch64":
-            require(execution.get("runner_os") == "Linux",
-                    "Android result requires a Linux hosted runner")
+            require(execution.get("runner_os") in {"Linux", "macOS"},
+                    "Android result requires a native hosted runner")
             require(str(execution.get("runner_arch", "")).upper() in
-                    {"X64", "AMD64", "X86_64"},
-                    "Android result requires an x86_64 hosted runner")
+                    {"ARM64", "AARCH64"},
+                    "Android result requires an arm64 hosted runner")
             runtime = execution.get("native_runtime")
             require(isinstance(runtime, dict) and
                     runtime.get("kind") == "android-emulator" and

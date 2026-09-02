@@ -824,13 +824,35 @@ def run_native_memory_diagnostic(spec: Mapping[str, Any], repo: Path, src: Path,
     return diagnostic
 
 
-def exported_symbol_inventory(binary: Path, work: Path, log: Path) -> dict[str, Any]:
+def _target_tool(tool: str, fallback: Sequence[str] = ()) -> str | None:
+    """Resolve a target-aware inspection tool without parsing diagnostics."""
+    compiler = os.environ.get("CC", "").strip()
+    if compiler:
+        sibling = Path(compiler).resolve().parent / tool
+        if sibling.is_file() and os.access(sibling, os.X_OK):
+            return str(sibling)
+    for candidate in (tool, *fallback):
+        resolved = shutil.which(candidate)
+        if resolved:
+            return resolved
+    return None
+
+
+def exported_symbol_inventory(binary: Path, work: Path, log: Path,
+                              target_platform: str | None = None) -> dict[str, Any]:
     if is_windows():
         command = ["dumpbin", "/exports", str(binary)]
         tool = "dumpbin /exports"
         pattern = re.compile(
             r"^\s*\d+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+(\S+)\s*$", re.M
         )
+    elif target_platform == "android-aarch64":
+        symbol_tool = _target_tool("llvm-nm", ("nm",))
+        if symbol_tool is None:
+            raise PocError("Android ELF symbol inspection tool is unavailable")
+        command = [symbol_tool, "-g", "--defined-only", str(binary)]
+        tool = f"{symbol_tool} -g --defined-only"
+        pattern = re.compile(r"^\s*[0-9A-Fa-f]+\s+[A-Za-z]\s+(\S+)\s*$", re.M)
     elif sys.platform.startswith("linux"):
         command = ["nm", "-g", "--defined-only", str(binary)]
         tool = "nm -g --defined-only"
@@ -872,7 +894,21 @@ def inspect_binary(binary: Path, archives: Sequence[Path], work: Path, log: Path
     """
     dependencies: list[str] = []
     if target_platform == "android-aarch64":
-        completed = run(["readelf", "-d", str(binary)], cwd=work, log=log, check=False)
+        readers: list[str] = []
+        compiler = os.environ.get("CC", "").strip()
+        if compiler:
+            sibling = Path(compiler).resolve().parent / "llvm-readelf"
+            if sibling.is_file() and os.access(sibling, os.X_OK):
+                readers.append(str(sibling))
+        # Keep the host GNU reader as a fallback for Linux and use LLVM's
+        # reader on macOS, where readelf is not part of the system tool set.
+        readers.extend(["readelf", "llvm-readelf"])
+        reader = next((candidate for candidate in readers
+                       if Path(candidate).is_file() and os.access(candidate, os.X_OK)
+                       or shutil.which(candidate)), None)
+        if reader is None:
+            raise PocError("Android ELF dependency inspection tool is unavailable")
+        completed = run([reader, "-d", str(binary)], cwd=work, log=log, check=False)
         if completed.returncode != 0:
             raise PocError("Android ELF dependency inspection failed")
         dependencies = sorted(set(FORBIDDEN_DEP_RE.findall(completed.stdout)))
@@ -898,7 +934,8 @@ def inspect_binary(binary: Path, archives: Sequence[Path], work: Path, log: Path
             {"name": archive.name, "bytes": archive.stat().st_size, "sha256": evidence_digest.artifact_byte_sha256(archive)}
             for archive in sorted(archives, key=lambda path: path.name)
         ],
-        "exported_symbol_inventory": exported_symbol_inventory(binary, work, log),
+        "exported_symbol_inventory": exported_symbol_inventory(
+            binary, work, log, target_platform=target_platform),
         "system_tls_dependencies": dependencies,
         "runtime_loader_library_strings": forbidden_strings,
     }

@@ -58,10 +58,18 @@ HarmonyOS, Android, musl, and pure-Cangjie TLS providers are extension points,
 not supported implementations.
 
 The M0-016 mobile PoC has a separate hosted-VM path. Android runs the pinned
-provider executable in an arm64 Android Emulator on `ubuntu-24.04`; iOS runs an
-arm64 Simulator app on `macos-15`. Those jobs exercise the provider contract
+provider executable in an arm64 Android Emulator on the arm64 `macos-15` runner;
+iOS runs an arm64 Simulator app on `macos-15`. Those jobs exercise the provider contract
 and produce schema-v11 evidence, but they do not turn either platform into a
 supported provider or replace physical-device evidence.
+
+The runner choice follows the published GitHub-hosted runner and image
+contracts: the `macos-15` image is the arm64 macOS image and includes Xcode,
+Android command-line tools, the emulator, and NDK tooling. The workflow records
+`ImageOS`, `ImageVersion`, `RUNNER_OS`, and `RUNNER_ARCH` in every result rather
+than treating a label as proof. References: [GitHub-hosted runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners),
+[runner images](https://github.com/actions/runner-images), and the
+[macOS 15 arm64 image inventory](https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md).
 
 ## M0-016 PoC source ledger
 

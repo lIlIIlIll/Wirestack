@@ -4,13 +4,15 @@ The mobile provider PoC now has two GitHub-hosted native-VM jobs:
 
 | Target cell | Hosted runner | Native execution environment |
 |---|---|---|
-| `android-aarch64` | `ubuntu-24.04` | arm64 Android Emulator, API 33 or newer, NDK 26.3.11579264 |
+| `android-aarch64` | `macos-15` (arm64) | arm64 Android Emulator, API 33 or newer, NDK 26.3.11579264 |
 | `ios-aarch64` | `macos-15` | arm64 iOS Simulator supplied by Xcode |
 
 Each job builds the pinned provider for the target, links the PoC statically,
 stages the executable and fixtures inside the VM, executes the complete
 schema-v11 capability set, and validates the result against `GITHUB_SHA`.
-The Android job installs the pinned NDK and uses `adb`. Emulator discovery has
+The Android job runs on the arm64 macOS image, installs the pinned NDK and uses
+`adb`. An arm64 Android system image cannot boot on the x86_64 `ubuntu-24.04`
+runner, so the hosted job deliberately uses `macos-15`. Emulator discovery has
 both a 90-second `wait-for-device` bound and a 240-second overall boot bound;
 each `getprop sys.boot_completed` probe is limited to 15 seconds. The AVD uses
 a non-interactive `pixel_2` hardware profile and has a 60-second creation

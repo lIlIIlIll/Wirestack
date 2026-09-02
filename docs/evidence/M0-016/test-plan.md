@@ -3,8 +3,8 @@
 ## Semantics
 
 This plan covers the GitHub-hosted native-VM extension to the M0-016 provider
-PoC. Android runs an arm64 API-33-or-newer emulator on `ubuntu-24.04`; iOS runs
-an arm64 Simulator on `macos-15`. A hosted VM is native execution for the
+PoC. Android runs an arm64 API-33-or-newer emulator on the arm64 `macos-15`
+runner; iOS runs an arm64 Simulator on `macos-15`. A hosted VM is native execution for the
 target ABI, but it is not physical-device evidence and does not close
 GATE-NET-07. The mobile gate tests AWS-LC and Mbed TLS. OpenSSL remains a
 desktop control as permitted by the candidate matrix.
@@ -19,7 +19,7 @@ system TLS dependency, a stale SHA, or an unsafe license path is rejected.
 
 | Path ID | Conditions and values | Runtime checks | Reachability | Notes |
 |---|---|---|---|---|
-| P001 | GitHub `ubuntu-24.04` with Android SDK, API 33 arm64 image and pinned NDK | runner, ABI, API and NDK identity | reachable | Eligible Android VM gate. |
+| P001 | GitHub arm64 `macos-15` with Android SDK, API 33 arm64 image and pinned NDK | runner, ABI, API and NDK identity | reachable | Eligible Android VM gate. |
 | P002 | GitHub `macos-15` arm64 with Xcode iOS Simulator | host architecture, SDK, runtime and device identity | reachable | Eligible iOS VM gate. |
 | P003 | missing SDK/NDK/Xcode/ADB/simctl, wrong host, or unavailable VM | bounded failure result | reachable error | Must not be reported as PASS. |
 | P004 | AWS-LC or Mbed TLS provider build | pinned source, target, archives and dependency scan | reachable | Provider controls are independent matrix cells. |

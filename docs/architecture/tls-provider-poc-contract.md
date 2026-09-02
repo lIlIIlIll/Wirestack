@@ -153,8 +153,8 @@ The host `openssl` command is allowed only to create ephemeral test certificates
 
 The canonical matrix covers Linux glibc/musl, Windows, macOS, Android, iOS and HarmonyOS/OpenHarmony for every candidate. Hosted or device evidence is committed only after execution. Absent mobile devices remain `BLOCKED`; a successful cross-build can be retained as supplementary evidence but cannot replace a native run.
 
-GitHub-hosted mobile validation uses an arm64 Android Emulator on
-`ubuntu-24.04` and an arm64 iOS Simulator on `macos-15`. These are native VM
+GitHub-hosted mobile validation uses an arm64 Android Emulator on the arm64
+`macos-15` runner and an arm64 iOS Simulator on `macos-15`. These are native VM
 executions and are retained with an explicit `native_runtime` record. They are
 not physical-device results, so they do not satisfy the separate real-device
 requirements of GATE-NET-07 or close the global M0-016 matrix by themselves.

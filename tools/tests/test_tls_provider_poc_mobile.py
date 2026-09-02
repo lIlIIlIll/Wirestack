@@ -6,6 +6,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from tools.tests.test_tls_provider_poc import complete_result, runner, validator
 
@@ -28,9 +29,9 @@ class MobileProviderEvidenceTests(unittest.TestCase):
         # host-specific coordinates with the mobile VM coordinates.
         value = complete_result(self.provider_spec, platform="linux-glibc-x86_64")
         value["platform"] = platform
-        value["execution"]["runner_os"] = "Linux" if platform.startswith("android") else "macOS"
-        value["execution"]["runner_arch"] = "X64" if platform.startswith("android") else "ARM64"
-        value["execution"]["image_os"] = "ubuntu24" if platform.startswith("android") else "macos15"
+        value["execution"]["runner_os"] = "macOS"
+        value["execution"]["runner_arch"] = "ARM64"
+        value["execution"]["image_os"] = "macos15"
         value["execution"]["native_runtime"] = (
             {
                 "kind": "android-emulator",
@@ -94,6 +95,10 @@ class MobileRunnerSafetyTests(unittest.TestCase):
         self.assertIn("  push:\n", workflow)
         self.assertIn("runs-on: ubuntu-24.04", workflow)
         self.assertIn("runs-on: macos-15", workflow)
+        android_job = workflow.split("\n  android-emulator:\n", 1)[1].split(
+            "\n  ios-simulator:\n", 1)[0]
+        self.assertIn("runs-on: macos-15", android_job)
+        self.assertNotIn("runs-on: ubuntu-24.04", android_job)
         self.assertIn('ANDROID_NDK_VERSION: "26.3.11579264"', workflow)
         self.assertIn('"ndk;${ANDROID_NDK_VERSION}"', workflow)
         self.assertIn('"system-images;android-33;google_apis;arm64-v8a"', workflow)
@@ -101,10 +106,10 @@ class MobileRunnerSafetyTests(unittest.TestCase):
         self.assertIn("set +o pipefail", workflow)
         self.assertIn("sdk_status=${PIPESTATUS[1]}", workflow)
         self.assertIn('test "$sdk_status" -eq 0', workflow)
-        self.assertIn('timeout 90s "$ADB" wait-for-device', workflow)
-        self.assertIn('timeout 15s "$ADB" shell getprop sys.boot_completed', workflow)
+        self.assertIn('"$TIMEOUT_BIN" 90s "$ADB" wait-for-device', workflow)
+        self.assertIn('"$TIMEOUT_BIN" 15s "$ADB" shell getprop sys.boot_completed', workflow)
         self.assertIn('--device "pixel_2"', workflow)
-        self.assertIn('timeout 60s "$AVDMANAGER" create avd', workflow)
+        self.assertIn('"$TIMEOUT_BIN" 60s "$AVDMANAGER" create avd', workflow)
         self.assertIn('export ANDROID_AVD_HOME="$RUNNER_TEMP/android-avd"', workflow)
         self.assertIn('mkdir -p "$ANDROID_AVD_HOME"', workflow)
         self.assertIn('test -f "$ANDROID_AVD_HOME/wirestack-m0-016-api33.ini"', workflow)
@@ -157,7 +162,8 @@ class MobileRunnerSafetyTests(unittest.TestCase):
                 )
         finally:
             runner.run = original_run
-        self.assertEqual(calls[0][:2], ["readelf", "-d"])
+        self.assertEqual(calls[0][1], "-d")
+        self.assertIn(Path(calls[0][0]).name, {"readelf", "llvm-readelf"})
         self.assertEqual(result["system_tls_dependencies"], [])
 
     def test_android_staging_path_is_bounded(self):
@@ -216,6 +222,30 @@ class MobileRunnerSafetyTests(unittest.TestCase):
                 mobile.android_runtime(Path("."), Path("/tmp/mobile-test.log"))
         finally:
             mobile.poc.run = fake
+
+    def test_android_compilers_use_macos_host_prebuilt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            ndk = Path(directory)
+            prebuilt = ndk / "toolchains/llvm/prebuilt/darwin-arm64/bin"
+            prebuilt.mkdir(parents=True)
+            cc = prebuilt / "aarch64-linux-android33-clang"
+            cxx = prebuilt / "aarch64-linux-android33-clang++"
+            cc.write_text("", encoding="utf-8")
+            cxx.write_text("", encoding="utf-8")
+            cc.chmod(0o755)
+            cxx.chmod(0o755)
+            with mock.patch.object(mobile.host_platform, "system", return_value="Darwin"), \
+                    mock.patch.object(mobile.host_platform, "machine", return_value="arm64"):
+                selected_cc, selected_cxx, api = mobile.android_compilers(ndk)
+            self.assertEqual(selected_cc, cc)
+            self.assertEqual(selected_cxx, cxx)
+            self.assertEqual(api, 33)
+
+    def test_android_compilers_reject_unsupported_host(self):
+        with mock.patch.object(mobile.host_platform, "system", return_value="Windows"), \
+                mock.patch.object(mobile.host_platform, "machine", return_value="ARM64"):
+            with self.assertRaisesRegex(mobile.MobilePocError, "unsupported"):
+                mobile.android_compilers(Path("/missing-ndk"))
 
     def test_missing_mobile_toolchain_writes_bounded_fail_result(self):
         names = ("ANDROID_NDK_HOME", "ANDROID_NDK_ROOT",

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Build and execute the M0-016 provider PoC in a hosted mobile VM.
 
-The GitHub-hosted macOS job uses an iOS Simulator and the Linux job uses an
-Android arm64 emulator.  The runner is still recorded separately from the
-target platform so this evidence cannot be mistaken for a physical-device
-result.
+The GitHub-hosted macOS arm64 job uses an iOS Simulator or an Android arm64
+emulator.  The runner is still recorded separately from the target platform so
+this evidence cannot be mistaken for a physical-device result.
 """
 from __future__ import annotations
 
@@ -20,6 +19,7 @@ import datetime as dt
 import hashlib
 import json
 import os
+import platform as host_platform
 import plistlib
 import re
 import shutil
@@ -81,22 +81,41 @@ def android_ndk() -> Path:
 
 
 def android_compilers(ndk: Path) -> tuple[Path, Path, int]:
-    prebuilt = ndk / "toolchains/llvm/prebuilt/linux-x86_64/bin"
-    exact = prebuilt / f"aarch64-linux-android{ANDROID_API_LEVEL}-clang"
-    exact_cxx = prebuilt / f"aarch64-linux-android{ANDROID_API_LEVEL}-clang++"
-    if exact.is_file() and exact_cxx.is_file():
-        return exact, exact_cxx, ANDROID_API_LEVEL
+    """Locate a target compiler under a host-compatible NDK prebuilt tree."""
+    system = host_platform.system()
+    machine = host_platform.machine().lower()
+    if system == "Darwin":
+        # Older pinned NDK releases ship darwin-x86_64 tools.  macOS arm64
+        # hosted runners can execute those through the platform's supported
+        # translation layer; prefer a native directory when a newer NDK adds
+        # one.  Never select a Linux host directory on macOS.
+        host_tags = ("darwin-arm64", "darwin-x86_64")
+    elif system == "Linux" and machine in {"x86_64", "amd64"}:
+        host_tags = ("linux-x86_64",)
+    else:
+        raise MobilePocError("Android NDK host toolchain is unsupported on this runner")
+    prebuilt_roots = tuple(
+        ndk / "toolchains/llvm/prebuilt" / tag / "bin"
+        for tag in host_tags
+    )
     available: list[tuple[int, Path, Path]] = []
-    for candidate in prebuilt.glob("aarch64-linux-android*-clang"):
-        match = re.fullmatch(r"aarch64-linux-android([0-9]+)-clang",
-                             candidate.name)
-        if not match:
+    for prebuilt in prebuilt_roots:
+        if not prebuilt.is_dir():
             continue
-        api = int(match.group(1))
-        cxx = candidate.with_name(candidate.name + "++")
-        if api <= ANDROID_API_LEVEL and cxx.is_file():
-            available.append((api, candidate, cxx))
-    require(available, "Android arm64 clang toolchain is missing")
+        exact = prebuilt / f"aarch64-linux-android{ANDROID_API_LEVEL}-clang"
+        exact_cxx = prebuilt / f"aarch64-linux-android{ANDROID_API_LEVEL}-clang++"
+        if exact.is_file() and exact_cxx.is_file():
+            return exact, exact_cxx, ANDROID_API_LEVEL
+        for candidate in prebuilt.glob("aarch64-linux-android*-clang"):
+            match = re.fullmatch(r"aarch64-linux-android([0-9]+)-clang",
+                                 candidate.name)
+            if not match:
+                continue
+            api = int(match.group(1))
+            cxx = candidate.with_name(candidate.name + "++")
+            if api <= ANDROID_API_LEVEL and cxx.is_file():
+                available.append((api, candidate, cxx))
+    require(available, "Android arm64 clang toolchain is missing for this runner")
     api, cc, cxx = max(available, key=lambda item: item[0])
     return cc, cxx, api
 
@@ -117,7 +136,7 @@ def mobile_toolchain(platform: str, work: Path, log: Path) -> dict[str, Any]:
         ndk = android_ndk()
         cc, cxx, compiler_api = android_compilers(ndk)
         return {
-            "runner_os": "Linux",
+            "runner_os": "macOS" if host_platform.system() == "Darwin" else "Linux",
             "cc": cc,
             "cxx": cxx,
             "compile_flags": ["-fPIC", f"-D__ANDROID_API__={compiler_api}"],

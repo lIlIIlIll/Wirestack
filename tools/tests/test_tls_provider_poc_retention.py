@@ -47,9 +47,9 @@ class MobileRetentionTests(unittest.TestCase):
         result = complete_result(self.spec, platform="linux-glibc-x86_64")
         result["platform"] = platform
         result["execution"]["repository_revision"] = self.revision
-        result["execution"]["runner_os"] = "Linux" if platform.startswith("android") else "macOS"
-        result["execution"]["runner_arch"] = "X64" if platform.startswith("android") else "ARM64"
-        result["execution"]["image_os"] = "ubuntu24" if platform.startswith("android") else "macos15"
+        result["execution"]["runner_os"] = "macOS"
+        result["execution"]["runner_arch"] = "ARM64"
+        result["execution"]["image_os"] = "macos15"
         result["execution"]["native_runtime"] = (
             {
                 "kind": "android-emulator",
