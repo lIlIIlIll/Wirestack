@@ -172,6 +172,10 @@ class MobileRunnerSafetyTests(unittest.TestCase):
         self.assertIn("-accel off", smoke_job)
         self.assertIn("ANDROID_EMULATOR_ACCELERATION=$accel_mode", smoke_job)
         self.assertIn("-accel-check", smoke_job)
+        self.assertIn('echo "ANDROID_SERIAL=emulator-5554"', smoke_job)
+        self.assertIn("sudo -n chmod 666 /dev/kvm", smoke_job)
+        self.assertIn("kvm_permission_fix=", smoke_job)
+        self.assertIn("boot_timeout_seconds=1200", smoke_job)
         self.assertNotIn("-qemu -accel tcg", smoke_job)
         self.assertIn("android-x86_64-smoke", workflow)
 
