@@ -1,0 +1,137 @@
+{
+  "artifacts": [
+    {
+      "artifact_id": 9829036456,
+      "artifact_sha256": "79092ed1b7b502ad4fea3f8d21845e51f889fab763e360133040a753b725f17b",
+      "artifact_size_bytes": 3028,
+      "platform": "android-aarch64",
+      "provider": "aws-lc",
+      "result_sha256": null,
+      "status": "BLOCKED"
+    },
+    {
+      "artifact_id": 9829030571,
+      "artifact_sha256": "91a4a92024365cdfcba4b059c4b43761e9d05e48bd7307a9d3bc44ba8668a052",
+      "artifact_size_bytes": 3028,
+      "platform": "android-aarch64",
+      "provider": "mbedtls",
+      "result_sha256": null,
+      "status": "BLOCKED"
+    },
+    {
+      "artifact_id": 9828976309,
+      "artifact_sha256": "c19ba2d300172fcccdd0fb6057111ac89dabd91314d2ea7f37e7a50bd336224c",
+      "artifact_size_bytes": 100429,
+      "platform": "ios-aarch64",
+      "provider": "aws-lc",
+      "result_sha256": "79de2c196b994d175ac124e9100a623826e084fc9b3a901eb32ca841991302ba",
+      "status": "PASS"
+    },
+    {
+      "artifact_id": 9829020485,
+      "artifact_sha256": "8dfe074ecaa97ed6dcf0a817c204eb3b6a0001128867f4929889ae0502f474c0",
+      "artifact_size_bytes": 82264,
+      "platform": "ios-aarch64",
+      "provider": "mbedtls",
+      "result_sha256": "b27b5a89c16e092438ea3bb8c3194b020c98cc0556f5c62e423088305a06dc63",
+      "status": "PARTIAL"
+    }
+  ],
+  "branch": "task/M0-016-mobile-provider-runner",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "conclusion": "success",
+      "id": 100100066032,
+      "name": "validate-contract",
+      "status": "PASS"
+    },
+    {
+      "conclusion": "failure",
+      "failure_code": "ANDROID_EMULATOR_STARTUP",
+      "failure_excerpt": "Segmentation fault: 11 ... qemu-system-aarch64; bounded wait returned exit code 124",
+      "id": 100100096563,
+      "name": "android-emulator (mbedtls)",
+      "status": "BLOCKED"
+    },
+    {
+      "conclusion": "success",
+      "id": 100100096574,
+      "name": "ios-simulator (mbedtls)",
+      "status": "PARTIAL"
+    },
+    {
+      "conclusion": "failure",
+      "failure_code": "ANDROID_EMULATOR_STARTUP",
+      "failure_excerpt": "Segmentation fault: 11 ... qemu-system-aarch64; bounded wait returned exit code 124",
+      "id": 100100096599,
+      "name": "android-emulator (aws-lc)",
+      "status": "BLOCKED"
+    },
+    {
+      "conclusion": "success",
+      "id": 100100096618,
+      "name": "ios-simulator (aws-lc)",
+      "status": "PASS"
+    }
+  ],
+  "limitations": [
+    "GitHub-hosted macos-15 arm64 did not expose a usable arm64 Android emulator backend; launcher acceleration and explicit QEMU TCG both failed before boot.",
+    "The iOS Simulator is a hosted native VM, not a physical device; this does not close M0-012 GATE-NET-07.",
+    "HarmonyOS/OpenHarmony and physical Android/iOS evidence remain unavailable.",
+    "The canonical iOS AWS-LC cell already contained different validated evidence at revision 936e4e9c; the retention helper correctly refused replacement. The latest result is independently validated here.",
+    "The full M0-016 matrix validator remains blocked by pre-existing Windows license-file digest drift outside this task."
+  ],
+  "retention": [
+    {
+      "platform": "ios-aarch64",
+      "provider": "aws-lc",
+      "status": "PASS",
+      "retained": false,
+      "reason": "Existing canonical cell was retained at an earlier exact revision; replacement was refused fail-closed."
+    },
+    {
+      "platform": "ios-aarch64",
+      "provider": "mbedtls",
+      "status": "PARTIAL",
+      "retained": true,
+      "result": "docs/evidence/M0-016/results/ios-aarch64/mbedtls.json",
+      "result_sha256": "b27b5a89c16e092438ea3bb8c3194b020c98cc0556f5c62e423088305a06dc63"
+    }
+  ],
+  "revision": "829e06a0847e4ce8f66ba01a109c90120ce98373",
+  "run_id": 33582666850,
+  "run_url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33582666850",
+  "runner": {
+    "android-aarch64": {
+      "arch": "ARM64",
+      "image_os": "macos15",
+      "label": "macos-15",
+      "os": "macOS",
+      "native_runtime": "android-emulator"
+    },
+    "ios-aarch64": {
+      "arch": "ARM64",
+      "image_os": "macos15",
+      "label": "macos-15",
+      "os": "macOS",
+      "native_runtime": "ios-simulator"
+    }
+  },
+  "schema_version": 1,
+  "status": "BLOCKED",
+  "task_id": "M0-016",
+  "validation": [
+    {
+      "command": "python3 tools/tls_provider_poc/validate.py --result <artifact>/result.json --expected-revision 829e06a0847e4ce8f66ba01a109c90120ce98373",
+      "ios_aws_lc": "PASS",
+      "ios_mbedtls": "PASS"
+    },
+    {
+      "command": "python3 -m unittest tools.tests.test_tls_provider_poc tools.tests.test_tls_provider_poc_mobile tools.tests.test_tls_provider_poc_retention -q",
+      "status": "PASS",
+      "tests": 99
+    }
+  ],
+  "workflow": ".github/workflows/m0-016-mobile-provider-poc.yml"
+}
