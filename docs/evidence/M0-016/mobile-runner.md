@@ -12,11 +12,15 @@ stages the executable and fixtures inside the VM, executes the complete
 schema-v11 capability set, and validates the result against `GITHUB_SHA`.
 The Android job installs the pinned NDK and uses `adb`. Emulator discovery has
 both a 90-second `wait-for-device` bound and a 240-second overall boot bound;
-each `getprop sys.boot_completed` probe is limited to 15 seconds. License
+each `getprop sys.boot_completed` probe is limited to 15 seconds. The AVD uses
+a non-interactive `pixel_2` hardware profile and has a 60-second creation
+bound. License
 acceptance records the `sdkmanager` pipeline status explicitly so a normal
 `yes` SIGPIPE cannot turn a successful installation into a false failure. The
 iOS job builds an unsigned simulator app bundle, installs it with `simctl`, and
-captures `simctl launch --console` output.
+captures `simctl launch --console` output. If the launch command reports
+success without capability output, the runner executes the same bundled binary
+through `simctl spawn` so early provider failures and stderr remain observable.
 
 ## Run the hosted gate
 

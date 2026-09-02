@@ -103,8 +103,16 @@ class MobileRunnerSafetyTests(unittest.TestCase):
         self.assertIn('test "$sdk_status" -eq 0', workflow)
         self.assertIn('timeout 90s "$ADB" wait-for-device', workflow)
         self.assertIn('timeout 15s "$ADB" shell getprop sys.boot_completed', workflow)
+        self.assertIn('--device "pixel_2"', workflow)
+        self.assertIn('timeout 60s "$AVDMANAGER" create avd', workflow)
         self.assertEqual(workflow.count("if-no-files-found: error"), 2)
         self.assertIn("provider: [aws-lc, mbedtls]", workflow)
+
+    def test_ios_runner_has_spawn_fallback_for_lost_console_output(self):
+        source = (ROOT / "tools/tls_provider_poc/run_mobile.py").read_text()
+        self.assertIn('"simctl", "launch", "--console"', source)
+        self.assertIn('"simctl", "spawn", udid', source)
+        self.assertIn('line.startswith(("CAP ", "METRIC "))', source)
 
     def test_aws_lc_abi_reports_mobile_target_identity(self):
         source = (ROOT / "native/tls/aws_lc/wirestack_tls_provider.c").read_text()

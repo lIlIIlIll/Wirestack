@@ -342,6 +342,20 @@ def stage_ios(binary: Path, fixtures: Path, work: Path, log: Path) -> tuple[Any,
         completed = poc.run(["xcrun", "simctl", "launch", "--console",
                              "--terminate-running-process", udid,
                              IOS_BUNDLE_ID, *args], cwd=work, log=log, check=False)
+        # `simctl launch --console` can report a successful launch while
+        # losing stdout for a native executable that exits during early
+        # provider initialization. Re-run the exact bundled executable via
+        # `simctl spawn` so the process exit and stderr remain observable.
+        has_capability_output = any(
+            line.startswith(("CAP ", "METRIC "))
+            for line in completed.stdout.splitlines()
+        )
+        if not has_capability_output:
+            direct = poc.run(["xcrun", "simctl", "spawn", udid,
+                              str(root / "provider-poc"), *args],
+                             cwd=work, log=log, check=False)
+            if direct.stdout.strip() or direct.returncode != 0:
+                completed = direct
         runtime = {
             "kind": "ios-simulator",
             "runner": "github-hosted",
