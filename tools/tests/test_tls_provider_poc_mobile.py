@@ -106,13 +106,16 @@ class MobileRunnerSafetyTests(unittest.TestCase):
         self.assertIn("set +o pipefail", workflow)
         self.assertIn("sdk_status=${PIPESTATUS[1]}", workflow)
         self.assertIn('test "$sdk_status" -eq 0', workflow)
-        self.assertIn('"$TIMEOUT_BIN" 90s "$ADB" wait-for-device', workflow)
+        self.assertIn('"$TIMEOUT_BIN" 180s "$ADB" wait-for-device', workflow)
         self.assertIn('"$TIMEOUT_BIN" 15s "$ADB" shell getprop sys.boot_completed', workflow)
         self.assertIn('--device "pixel_2"', workflow)
         self.assertIn('"$TIMEOUT_BIN" 60s "$AVDMANAGER" create avd', workflow)
         self.assertIn('export ANDROID_AVD_HOME="$RUNNER_TEMP/android-avd"', workflow)
         self.assertIn('mkdir -p "$ANDROID_AVD_HOME"', workflow)
         self.assertIn('test -f "$ANDROID_AVD_HOME/wirestack-m0-016-api33.ini"', workflow)
+        self.assertIn("-accel off", workflow)
+        self.assertIn("-no-metrics", workflow)
+        self.assertNotIn("brew install coreutils", workflow)
         self.assertGreater(
             workflow.index('EMULATOR="$(resolve_android_tool emulator)"'),
             workflow.index('"ndk;${ANDROID_NDK_VERSION}"'),
