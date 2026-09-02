@@ -163,7 +163,10 @@ def mobile_toolchain(platform: str, work: Path, log: Path) -> dict[str, Any]:
             "runner_os": "macOS" if host_platform.system() == "Darwin" else "Linux",
             "cc": cc,
             "cxx": cxx,
-            "compile_flags": ["-fPIC", f"-D__ANDROID_API__={compiler_api}"],
+            # The NDK target clang driver already defines __ANDROID_API__ for
+            # the selected API level.  Re-defining it here turns AWS-LC's
+            # -Werror build into a deterministic macro-redefinition failure.
+            "compile_flags": ["-fPIC"],
             "link_flags": ["-latomic"],
             "cmake_args": [
                 f"-DCMAKE_TOOLCHAIN_FILE={ndk / 'build/cmake/android.toolchain.cmake'}",
