@@ -346,6 +346,7 @@ class MobileRunnerSafetyTests(unittest.TestCase):
             self.assertIn("-DANDROID_ABI=x86_64", toolchain["cmake_args"])
             self.assertEqual(toolchain["target"], "x86_64-linux-android")
             self.assertNotIn("-D__ANDROID_API__=33", toolchain["compile_flags"])
+            self.assertIn("-static-libstdc++", toolchain["link_flags"])
 
     def test_android_compilers_reject_unsupported_host(self):
         with mock.patch.object(mobile.host_platform, "system", return_value="Windows"), \
