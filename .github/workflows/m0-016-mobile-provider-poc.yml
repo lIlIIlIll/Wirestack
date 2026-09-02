@@ -306,7 +306,11 @@ jobs:
           NDK="$SDK_ROOT/ndk/$ANDROID_NDK_VERSION"
           test -f "$NDK/build/cmake/android.toolchain.cmake"
           echo "ANDROID_NDK_HOME=$NDK" >> "$GITHUB_ENV"
-          echo "ANDROID_SERIAL=emulator-5556" >> "$GITHUB_ENV"
+          # Each matrix job gets a fresh runner, so use the emulator's default
+          # serial explicitly.  The launcher below does not request a custom
+          # port; keeping this aligned prevents the provider runner from
+          # looking for a device that was never created.
+          echo "ANDROID_SERIAL=emulator-5554" >> "$GITHUB_ENV"
           echo "ADB=$ADB" >> "$GITHUB_ENV"
           export ANDROID_AVD_HOME="$RUNNER_TEMP/android-avd-x86_64"
           mkdir -p "$ANDROID_AVD_HOME"
