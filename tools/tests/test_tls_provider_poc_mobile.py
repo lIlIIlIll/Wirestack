@@ -105,6 +105,14 @@ class MobileRunnerSafetyTests(unittest.TestCase):
         self.assertIn('timeout 15s "$ADB" shell getprop sys.boot_completed', workflow)
         self.assertIn('--device "pixel_2"', workflow)
         self.assertIn('timeout 60s "$AVDMANAGER" create avd', workflow)
+        self.assertGreater(
+            workflow.index('EMULATOR="$(resolve_android_tool emulator)"'),
+            workflow.index('"ndk;${ANDROID_NDK_VERSION}"'),
+        )
+        self.assertGreater(
+            workflow.index('ADB="$(resolve_android_tool adb)"'),
+            workflow.index('"ndk;${ANDROID_NDK_VERSION}"'),
+        )
         self.assertEqual(workflow.count("if-no-files-found: error"), 2)
         self.assertIn("provider: [aws-lc, mbedtls]", workflow)
 
