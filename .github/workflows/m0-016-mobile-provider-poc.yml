@@ -258,8 +258,15 @@ jobs:
           }
           SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
           test -d "$SDK_ROOT"
-          test -e /dev/kvm
-          test -r /dev/kvm
+          ACCEL_LOG="$RUNNER_TEMP/android-x86_64-accel-check.log"
+          EMULATOR_LOG="$RUNNER_TEMP/android-x86_64-emulator.log"
+          : > "$ACCEL_LOG"
+          : > "$EMULATOR_LOG"
+          {
+            echo "host_arch=$(uname -m)"
+            if [[ -e /dev/kvm ]]; then echo "kvm_present=true"; else echo "kvm_present=false"; fi
+            if [[ -r /dev/kvm ]]; then echo "kvm_readable=true"; else echo "kvm_readable=false"; fi
+          } >> "$ACCEL_LOG"
           resolve_android_tool() {
             local tool="$1"
             local candidate
@@ -308,12 +315,28 @@ jobs:
             --package "$ANDROID_SYSTEM_IMAGE" \
             --device "pixel_2"
           test -f "$ANDROID_AVD_HOME/wirestack-m0-016-api33-x86_64.ini"
-          run_bounded 30 "$EMULATOR" -accel-check \
-            >"$RUNNER_TEMP/android-x86_64-accel-check.log" 2>&1
+          accel_status=1
+          if run_bounded 30 "$EMULATOR" -accel-check \
+              >>"$ACCEL_LOG" 2>&1; then
+            accel_status=0
+          fi
+          if [[ "$accel_status" -eq 0 && -e /dev/kvm && -r /dev/kvm ]]; then
+            accel_mode=kvm
+          else
+            accel_mode=software
+          fi
+          echo "accel_check_exit=$accel_status" >> "$ACCEL_LOG"
+          echo "selected_acceleration=$accel_mode" >> "$ACCEL_LOG"
+          echo "ANDROID_EMULATOR_ACCELERATION=$accel_mode" >> "$GITHUB_ENV"
+          if [[ "$accel_mode" == "kvm" ]]; then
+            emulator_accel_args=(-accel on)
+          else
+            emulator_accel_args=(-accel off)
+          fi
           nohup "$EMULATOR" -avd wirestack-m0-016-api33-x86_64 \
             -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data \
-            -gpu swiftshader_indirect -accel on -no-metrics \
-            >"$RUNNER_TEMP/android-x86_64-emulator.log" 2>&1 &
+            -gpu swiftshader_indirect "${emulator_accel_args[@]}" -no-metrics \
+            >"$EMULATOR_LOG" 2>&1 &
           "$ADB" start-server
           run_bounded 180 "$ADB" wait-for-device
           deadline=$((SECONDS + 600))

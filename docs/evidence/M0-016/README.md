@@ -38,9 +38,10 @@ evidence, not physical-device evidence, and therefore do not close M0-012 or
 the full six-platform M0-016 task. See [mobile-runner.md](mobile-runner.md)
 for the runner contract and its fail-closed limits.
 The workflow also has an `android-x86_64` smoke job on `ubuntu-24.04`. That job
-uses the x86_64 system image with KVM acceleration and the same provider runner.
-Its result is supplemental and stays outside the required platform matrix. A
-passing x86_64 emulator cannot be used as arm64 evidence.
+uses the x86_64 system image, selects KVM when available, and records a bounded
+software-acceleration fallback when the runner does not expose KVM. Its result
+is supplemental and stays outside the required platform matrix. A passing
+x86_64 emulator cannot be used as arm64 evidence.
 Schema v11 also retains:
 
 - monotonic cancellation and join deadlines that are unaffected by wall-clock

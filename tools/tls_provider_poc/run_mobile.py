@@ -313,6 +313,8 @@ def android_runtime(work: Path, log: Path,
         "api_level": int(api),
         "serial": serial or "default",
         "target_platform": platform,
+        "acceleration": os.environ.get(
+            "ANDROID_EMULATOR_ACCELERATION", "unspecified").strip() or "unspecified",
     }
 
 

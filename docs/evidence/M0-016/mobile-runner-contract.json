@@ -30,7 +30,7 @@
       "abi": "x86_64",
       "minimum_api_level": 33,
       "ndk_version": "26.3.11579264",
-      "emulator_acceleration": "kvm",
+      "emulator_acceleration": "kvm-or-software",
       "timeout_driver": "python3-subprocess"
     },
     "ios-aarch64": {
