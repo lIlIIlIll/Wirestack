@@ -9,7 +9,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools import evidence_digest
 from tools.tests.test_tls_provider_poc import complete_result, runner, validator
 
 
@@ -198,14 +197,14 @@ class MobileRetentionTests(unittest.TestCase):
             matrix = self.write_matrix(root)
             result, bundle = self.make_result(root)
             original_bytes = matrix.read_bytes()
-            original_atomic_json = retainer.evidence_digest.atomic_json
+            original_atomic_json = retainer.atomic_json
 
             def injected_failure(path, value, before_replace=None):
                 if before_replace is not None:
                     before_replace()
                 raise OSError("injected matrix publication failure")
 
-            retainer.evidence_digest.atomic_json = injected_failure
+            retainer.atomic_json = injected_failure
             try:
                 with self.assertRaisesRegex(retainer.RetentionError,
                                             "unable to publish matrix atomically"):
@@ -214,7 +213,7 @@ class MobileRetentionTests(unittest.TestCase):
                                     license_bundle_path=bundle,
                                     expected_revision=self.revision)
             finally:
-                retainer.evidence_digest.atomic_json = original_atomic_json
+                retainer.atomic_json = original_atomic_json
             self.assertEqual(matrix.read_bytes(), original_bytes)
 
     def test_matrix_path_escape_is_rejected(self):
