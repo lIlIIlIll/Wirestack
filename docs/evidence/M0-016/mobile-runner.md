@@ -70,14 +70,17 @@ canonical matrix and must not be recorded as `PASS`.
 
 ## Latest hosted run
 
-Run [33582666850](https://github.com/lIlIIlIll/Wirestack/actions/runs/33582666850)
-at exact revision `829e06a0847e4ce8f66ba01a109c90120ce98373` is recorded in
-[`hosted-run-33582666850.report`](hosted-run-33582666850.report). The iOS AWS-LC
-result is `PASS` and the iOS Mbed TLS result is valid `PARTIAL`; both result
-artifacts passed the standalone schema validator. The Android AWS-LC and Mbed
-TLS jobs are `BLOCKED`: the arm64 emulator segfaulted during startup even when
-QEMU TCG was forced, and the bounded `adb wait-for-device` returned 124. No
-Android result was copied into the canonical matrix.
+Run [33590649517](https://github.com/lIlIIlIll/Wirestack/actions/runs/33590649517)
+at exact revision `63225c8428f186c6f26bdd7b93c3ff2e834c25cb` is recorded in
+[`hosted-run-33590649517.report`](hosted-run-33590649517.report). The
+supplemental x86_64 Android AWS-LC result is `PASS`; the Mbed TLS result is
+valid `PARTIAL` because external signing and session resumption are blocked by
+that provider. Both x86_64 jobs completed on `ubuntu-24.04` with an API-33
+x86_64 emulator and KVM. The iOS AWS-LC result is `PASS` and iOS Mbed TLS is
+`PARTIAL`. Both required arm64 Android jobs remain `BLOCKED`: the hosted
+`macos-15` emulator crashed before boot and the bounded wait returned 124. No
+Android result, including the supplemental x86_64 result, was copied into the
+canonical required matrix.
 
 The retained result includes:
 
