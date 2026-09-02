@@ -553,6 +553,53 @@ private func supportsCompactRawWrite(fields: ArrayList<CodecField>): Bool {
 }
 
 
+// Direct buffer field methods can omit their repeated capacity check when the
+// generated object reserves a conservative bound once up front.  Keep this
+// list limited to value shapes whose bound is local and deterministic; maps,
+// nested objects, and string arrays retain their checked writer paths.
+private func generatedBufferReserveTerm(field: CodecField, value: String): String {
+    if (!field.writeField || !field.codecExpr.isEmpty() || field.isOption) { return "" }
+    let name = "(${field.jsonNameExpr}).size"
+    match (field.typeText.replace(" ", "")) {
+        case "Bool" => "${name} + 8"
+        case "Int8" | "Int16" | "Int32" | "Int64" |
+             "UInt8" | "UInt16" | "UInt32" | "UInt64" => "${name} + 24"
+        case "Float16" | "Float32" | "Float64" => "${name} + 44"
+        // The fast method scans each string first.  Unescaped values need only
+        // their exact byte length here; escaped values take the checked fused
+        // writer, which reserves its six-byte escape bound locally.
+        case "String" => "${name} + ${value}.size + 8"
+        case _ => ""
+    }
+}
+
+private func generatedBufferReserveHint(fields: ArrayList<CodecField>, valuePrefix: String): String {
+    let terms = ArrayList<String>()
+    for (field in fields) {
+        let term = generatedBufferReserveTerm(field, "${valuePrefix}.${field.name}")
+        if (!term.isEmpty()) { terms.add(term) }
+    }
+    if (terms.isEmpty()) { return "" }
+    "2 + " + joinStrings(terms, " + ")
+}
+
+private func generatedBufferAllScalar(fields: ArrayList<CodecField>): Bool {
+    var hasField = false
+    for (field in fields) {
+        if (!field.writeField) { continue }
+        hasField = true
+        if (!field.codecExpr.isEmpty() || field.isOption) { return false }
+        if (field.jsonNameExpr != "\"${field.name}\"") { return false }
+        match (field.typeText.replace(" ", "")) {
+            case "Bool" | "Int8" | "Int16" | "Int32" | "Int64" |
+                 "UInt8" | "UInt16" | "UInt32" | "UInt64" |
+                 "Float16" | "Float32" | "Float64" | "String" => ()
+            case _ => return false
+        }
+    }
+    hasField
+}
+
 private func directScalarRead(field: CodecField, reader: String): String {
     if (!field.codecExpr.isEmpty()) { return "" }
     match (field.typeText.replace(" ", "")) {
@@ -599,6 +646,30 @@ private func directScalarFastRead(field: CodecField, reader: String): String {
     }
 }
 
+private func directScalarCursorFastRead(field: CodecField): String {
+    if (!field.codecExpr.isEmpty()) { return "" }
+    match (field.typeText.replace(" ", "")) {
+        case "Bool" => "__fastReader.readRawBoolFast()"
+        case "Int64" => "__fastReader.readRawInt64Fast()"
+        case "Int32" => "Int32(__fastReader.readRawInt64Fast())"
+        case "Int16" => "Int16(__fastReader.readRawInt64Fast())"
+        case "Int8" => "Int8(__fastReader.readRawInt64Fast())"
+        case "UInt64" => "__fastReader.readRawUInt64Fast()"
+        case "UInt32" => "UInt32(__fastReader.readRawUInt64Fast())"
+        case "UInt16" => "UInt16(__fastReader.readRawUInt64Fast())"
+        case "UInt8" => "UInt8(__fastReader.readRawUInt64Fast())"
+        case "String" => "__fastReader.readRawStringFast()"
+        case "Float64" => "__fastReader.readRawFloat64Fast()"
+        case "Float32" => "Float32(__fastReader.readRawFloat64Fast())"
+        case "Float16" => "Float16(__fastReader.readRawFloat64Fast())"
+        case "Array<Int64>" => "__reader.readRawInt64ArrayFast()"
+        case "Array<String>" => "__reader.readRawStringArray()"
+        case "HashMap<String,Int64>" => "__reader.readRawInt64MapFast()"
+        case "HashMap<String,String>" => "__reader.readRawStringMap()"
+        case "HashMap<String,Array<Int64>>" => "__reader.readRawInt64ArrayMapFast()"
+        case _ => directScalarFastRead(field, "__fastReader")
+    }
+}
 
 private func directFieldNeedsContext(field: CodecField): Bool {
     let typeText = field.typeText.replace(" ", "")
@@ -926,16 +997,104 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         appendLine(sb, 1, "public func writeCompactRaw(value: ${targetType}, writer: GeneratedSupportV1Writer): Unit {")
         appendLine(sb, 2, "writeCompactRawWithCursor(value, writer, GeneratedSupportV1.writeCursor(writer))")
         appendLine(sb, 1, "}")
-        appendLine(sb, 1, "private func writeCompactRawWithCursor(value: ${targetType}, writer: GeneratedSupportV1Writer, __writer: GeneratedSupportV1WriteCursor): Unit {")
-        appendLine(sb, 2, "let context = GeneratedSupportV1.writeState(writer)")
-        appendLine(sb, 2, "let _ = writer")
-        if (isClass) { appendLine(sb, 2, "context.enterObject(value)") } else { appendLine(sb, 2, "context.enterValue()") }
-        appendLine(sb, 2, "try {")
-        appendLine(sb, 3, "__writer.writeRawBeginObject()")
-        appendLine(sb, 3, "var __first = true")
+        appendLine(sb, 1, "public func writeCompactRawWithCursor(value: ${targetType}, writer: GeneratedSupportV1Writer, __writer: GeneratedSupportV1WriteCursor): Unit {")
+        if (compactNeedsContext) {
+            appendLine(sb, 2, "let context = GeneratedSupportV1.writeState(writer)")
+            appendLine(sb, 2, "let _ = context")
+        }
+        if (compactHasDirectField) {
+            appendLine(sb, 2, "let __directWriter = __writer.generatedWriterV1()")
+        }
+        appendLine(sb, 2, "__writer.writeRawBeginObject()")
+        appendLine(sb, 2, "var __first = true")
         for (field in fields) {
             if (!field.writeField) { continue }
-            appendLine(sb, 3, compactRawFieldWrite(field, "value.${field.name}", "__first"))
+            let rawWrite = if (staticCompact) {
+                compactRawDirectFieldWrite(field, "value.${field.name}", "__first")
+            } else {
+                compactRawFieldWrite(field, "value.${field.name}", "__first")
+            }
+            if (compactNeedsContext && compactRawFieldNeedsContext(field)) {
+                appendLine(sb, 2, "context.pushField(${field.jsonNameExpr})")
+                appendLine(sb, 2, "try { ${rawWrite} } finally { context.popPath() }")
+            } else {
+                appendLine(sb, 2, rawWrite)
+            }
+        }
+    appendLine(sb, 2, "__writer.writeRawEndObject()")
+    appendLine(sb, 1, "}")
+    if (staticCompact) {
+        var compactNeedsWriterCursor = false
+        for (field in fields) {
+            if (!field.writeField) { continue }
+            let rawWrite = compactRawConcreteFieldWrite(field, "value.${field.name}", "__first")
+            if (rawWrite.contains("__rawCursor")) {
+                compactNeedsWriterCursor = true
+                break
+            }
+        }
+        appendLine(sb, 1, "public func writeCompactRawWithWriter(value: ${targetType}, writer: JsonDirectWriter): Unit {")
+        if (compactNeedsContext) {
+            appendLine(sb, 2, "let context = GeneratedSupportV1.writeState(writer)")
+            appendLine(sb, 2, "let _ = context")
+        }
+        if (compactHasDirectField) {
+            appendLine(sb, 2, "let __buffer = writer.generatedBufferV1()")
+            let reserveHint = generatedBufferReserveHint(fields, "value")
+            if (!reserveHint.isEmpty()) {
+                appendLine(sb, 2, "__buffer.reserveCapacity(${reserveHint})")
+            } else if (fields.size >= 8) {
+                // Wide generated objects otherwise grow the direct buffer in
+                // the middle of the field loop.  A bounded per-field hint
+                // avoids those reallocations without over-reserving small
+                // records or value-heavy arrays/maps.
+                appendLine(sb, 2, "__buffer.reserveCapacity(${fields.size * 32 + 2})")
+            }
+        }
+        if (compactNeedsWriterCursor) {
+            appendLine(sb, 2, "let __writer = writer.generatedCursorV1()")
+        }
+        appendLine(sb, 2, "writer.writeRawBeginObject()")
+        appendLine(sb, 2, "var __first = true")
+        let scalarBufferBatch = generatedBufferAllScalar(fields)
+        for (field in fields) {
+            if (!field.writeField) {
+                continue
+            }
+            let rawWrite = compactRawConcreteFieldWrite(field, "value.${field.name}", "__first")
+            var concreteRawWrite = rawWrite
+            if (scalarBufferBatch) {
+                concreteRawWrite = concreteRawWrite
+                    .replace(
+                        "__directWriter.writeRawObjectEntryKnownNameStringBuffer(",
+                        "writer.writeRawObjectEntryKnownNameStringFast("
+                    )
+                    .replace(
+                        "__directWriter.writeRawObjectEntryKnownNameInt64Buffer(",
+                        "__buffer.writeObjectEntryNameInt64NoEscapeFast("
+                    )
+                    .replace(
+                        "__directWriter.writeRawObjectEntryKnownNameUInt64Buffer(",
+                        "__buffer.writeObjectEntryNameUInt64NoEscapeFast("
+                    )
+                    .replace(
+                        "__directWriter.writeRawObjectEntryKnownNameFloat64Buffer(",
+                        "__buffer.writeObjectEntryNameFloat64NoEscapeFast("
+                    )
+                    .replace(
+                        "__directWriter.writeRawObjectEntryKnownNameBoolBuffer(",
+                        "__buffer.writeObjectEntryNameBoolNoEscapeFast("
+                    )
+            }
+            concreteRawWrite = concreteRawWrite
+                .replace("__directWriter.", "writer.")
+                .replace("__writer.", "writer.")
+            if (compactNeedsContext && compactRawFieldNeedsContext(field)) {
+                appendLine(sb, 2, "context.pushField(${field.jsonNameExpr})")
+                appendLine(sb, 2, "try { ${concreteRawWrite} } finally { context.popPath() }")
+            } else {
+                appendLine(sb, 2, concreteRawWrite)
+            }
         }
         appendLine(sb, 3, "__writer.writeRawEndObject()")
         appendLine(sb, 2, if (isClass) { "} finally { context.leaveObject() }" } else { "} finally { context.leaveValue() }" })

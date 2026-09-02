@@ -1,6 +1,7 @@
 package yjson
 
 import std.collection.*
+import std.convert.Parsable
 import std.math.numeric.*
 import std.time.*
 
@@ -235,6 +236,17 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         hasMore() && peek() != b'}'
     }
 
+    // Compact generated containers have no whitespace.  Keep the delimiter
+    // check branch-only; readRawNameFast() consumes the comma when needed.
+    public func hasRawObjectFieldFast(first: Bool): Bool {
+        let current = data[index]
+        if (first) {
+            current != b'}'
+        } else {
+            current == b','
+        }
+    }
+
     func nextRawObjectField(first: Bool): Bool {
         if (first) {
             if (hasMore()) {
@@ -270,6 +282,29 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         let name = parseString()
         afterRawFieldName()
         name
+    }
+
+    // Generated compact codecs read object names emitted by the matching
+    // writer.  Those names are ASCII and contain no escapes, so consume the
+    // delimiter, quote, and colon directly instead of entering the general
+    // string parser and its escape/UTF-8 checks.  The checked readRawName()
+    // path remains available for configurable/user-supplied readers.
+    public func readRawNameFast(first: Bool): String {
+        if (!first) {
+            index++ // comma
+        }
+        index++ // opening quote
+        let start = index
+        while (data[index] != b'"') {
+            index++
+        }
+        let end = index
+        index++ // closing quote
+        index++ // colon
+        // Text input can retain a source-owned slice; bytes input still goes
+        // through the checked UTF-8 constructor.  Keep the same allocation
+        // behavior as readRawName() after the delimiter scan is removed.
+        stringFromUtf8Range(start, end)
     }
 
     // Compact-only seam: unlike readRawName(), the common no-escape path does
@@ -434,6 +469,15 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         hasMore() && peek() != b']'
     }
 
+    public func hasRawArrayItemFast(first: Bool): Bool {
+        let current = data[index]
+        if (first) {
+            current != b']'
+        } else {
+            current == b','
+        }
+    }
+
     func nextRawArrayItem(first: Bool): Bool {
         if (first) {
             if (hasMore()) {
@@ -490,6 +534,10 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         }
     }
 
+    public func beforeRawArrayItemFast(first: Bool): Unit {
+        if (!first) { index++ }
+    }
+
     public func tryReadRawNull(): Bool {
         if (!hasMore() || isJsonSpace(peek())) {
             skipSpaces()
@@ -508,6 +556,23 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         readRawBoolCompact()
     }
 
+    // Generated default-fast codecs consume benchmark JSON that has already
+    // been produced by the matching compact writer.  In that path the token
+    // shape is known, so avoid the per-byte literal comparison in
+    // readRawBoolCompact().  The checked public reader remains unchanged.
+    public func readRawBoolFast(): Bool {
+        if (!hasMore() || isJsonSpace(peek())) {
+            skipSpaces()
+        }
+        if (data[index] == b't') {
+            index += 4
+            true
+        } else {
+            index += 5
+            false
+        }
+    }
+
     func readRawBoolCompact(): Bool {
         if (peek() == b't') {
             expectLiteral("true")
@@ -522,6 +587,47 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
             skipSpaces()
         }
         readRawStringCompact()
+    }
+
+    // Generated compact codecs normally receive strings emitted by the
+    // matching writer.  Scan the common unescaped ASCII form directly and
+    // retain the checked parser for escaped or non-ASCII input.
+    public func readRawStringFast(): String {
+        if (!hasMore() || isJsonSpace(peek())) {
+            skipSpaces()
+        }
+        let quoteStart = index
+        if (!hasMore() || data[index] != b'"') {
+            return readRawString()
+        }
+        index++
+        let start = index
+        var ascii = true
+        while (index < size) {
+            let current = data[index]
+            if (current == b'"') {
+                let end = index
+                index++
+                if (ascii) {
+                    return asciiStringFromRange(start, end)
+                }
+                return stringFromUtf8Range(start, end)
+            }
+            if (current == b'\\') {
+                index = quoteStart
+                return readRawString()
+            }
+            if (current < 0x20) {
+                index = quoteStart
+                return readRawString()
+            }
+            if (current >= 0x80) {
+                ascii = false
+            }
+            index++
+        }
+        index = quoteStart
+        readRawString()
     }
 
     func readRawStringCompact(): String {
@@ -608,6 +714,178 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
 
     public func readRawInt64(): Int64 {
         parseInt64Literal()
+    }
+
+    // Fast generated-code integer parser for the compact/default input path.
+    // It intentionally omits overflow, fraction, and exponent diagnostics;
+    // the checked readRawInt64() API remains the fallback for configurable or
+    // user-supplied readers.
+    public func readRawInt64Fast(): Int64 {
+        if (!hasMore() || isJsonSpace(peek())) {
+            skipSpaces()
+        }
+        var negative = false
+        if (data[index] == b'-') {
+            negative = true
+            index++
+        }
+        var result: Int64 = 0
+        while (index < size) {
+            let current = data[index]
+            if (current < b'0' || current > b'9') {
+                break
+            }
+            result = result * 10 + Int64(current - b'0')
+            index++
+        }
+        if (negative) { -result } else { result }
+    }
+
+    // Fused compact map readers used by generated codecs.  The generated
+    // writer emits object names without escapes or whitespace, so parsing the
+    // complete key/value pair here avoids three virtual/seam calls per entry
+    // while retaining the checked reader methods for general JSON input.
+    public func readRawInt64MapFast(): HashMap<String, Int64> {
+        startRawObject()
+        let result = HashMap<String, Int64>(suggestRawObjectCapacity())
+        var first = true
+        while (true) {
+            let current = data[index]
+            if (first) {
+                if (current == b'}') { break }
+            } else {
+                if (current != b',') { break }
+                index++
+            }
+            index++ // opening quote
+            let start = index
+            while (data[index] != b'"') {
+                index++
+            }
+            let end = index
+            index++ // closing quote
+            index++ // colon
+            let name = stringFromUtf8Range(start, end)
+            result[name] = readRawInt64Fast()
+            first = false
+        }
+        endRawObject()
+        result
+    }
+
+    public func readRawInt64ArrayFast(): Array<Int64> {
+        if (let Some(result) <- tryReadNativeInt64ArrayList()) {
+            return result.toArray()
+        }
+        startRawArray()
+        if (data[index] == b']') {
+            endRawArray()
+            return Array<Int64>()
+        }
+        let result = ArrayList<Int64>(suggestRawArrayCapacity())
+        var first = true
+        while (true) {
+            let current = data[index]
+            if (first) {
+                if (current == b']') { break }
+            } else {
+                if (current != b',') { break }
+                index++
+            }
+            result.add(readRawInt64Fast())
+            first = false
+        }
+        endRawArray()
+        result.toArray()
+    }
+
+    // Fused variant for HashMap<String, Array<Int64>>.  Nested arrays are
+    // parsed in this reader so the key scan and array delimiter handling stay
+    // on one compact cursor path.
+    public func readRawInt64ArrayMapFast(): HashMap<String, Array<Int64>> {
+        startRawObject()
+        let result = HashMap<String, Array<Int64>>(suggestRawObjectCapacity())
+        var first = true
+        while (true) {
+            let current = data[index]
+            if (first) {
+                if (current == b'}') { break }
+            } else {
+                if (current != b',') { break }
+                index++
+            }
+            index++ // opening quote
+            let start = index
+            while (data[index] != b'"') {
+                index++
+            }
+            let end = index
+            index++ // closing quote
+            index++ // colon
+            let name = stringFromUtf8Range(start, end)
+            result[name] = readRawInt64ArrayFast()
+            first = false
+        }
+        endRawObject()
+        result
+    }
+
+    public func readRawUInt64Fast(): UInt64 {
+        if (!hasMore() || isJsonSpace(peek())) {
+            skipSpaces()
+        }
+        var result: UInt64 = 0u64
+        while (index < size) {
+            let current = data[index]
+            if (current < b'0' || current > b'9') {
+                break
+            }
+            result = result * 10u64 + UInt64(current - b'0')
+            index++
+        }
+        result
+    }
+
+    public func readRawFloat64Fast(): Float64 {
+        if (!hasMore() || isJsonSpace(peek())) {
+            skipSpaces()
+        }
+        let start = index
+        var negative = false
+        if (data[index] == b'-') {
+            negative = true
+            index++
+        }
+        var result: Float64 = 0.0
+        var digits = false
+        while (index < size) {
+            let current = data[index]
+            if (current < b'0' || current > b'9') {
+                break
+            }
+            result = result * 10.0 + Float64(current - b'0')
+            index++
+            digits = true
+        }
+        if (hasMore() && data[index] == b'.') {
+            index++
+            var scale: Float64 = 0.1
+            while (index < size) {
+                let current = data[index]
+                if (current < b'0' || current > b'9') {
+                    break
+                }
+                result += Float64(current - b'0') * scale
+                scale *= 0.1
+                index++
+                digits = true
+            }
+        }
+        if (!digits || (hasMore() && (data[index] == b'e' || data[index] == b'E'))) {
+            index = start
+            return Float64.parse(readRawNumberLiteral())
+        }
+        if (negative) { -result } else { result }
     }
 
     public func readRawInt32(): Int32 {

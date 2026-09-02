@@ -10,6 +10,7 @@ public interface GeneratedSupportV1Reader {
     func startRawObject(): Unit
     func endRawObject(): Unit
     func hasRawObjectField(first: Bool): Bool
+    func hasRawObjectFieldFast(first: Bool): Bool
     func readRawName(first: Bool): String
     func readRawNameIdBytes(first: Bool, candidates: Array<Array<Byte>>): Int64
     func tryReadRawCompactNameTokenBytes(first: Bool, nameBytes: Array<Byte>): Bool
@@ -17,7 +18,9 @@ public interface GeneratedSupportV1Reader {
     func startRawArray(): Unit
     func endRawArray(): Unit
     func hasRawArrayItem(first: Bool): Bool
+    func hasRawArrayItemFast(first: Bool): Bool
     func beforeRawArrayItem(first: Bool): Unit
+    func beforeRawArrayItemFast(first: Bool): Unit
     func suggestRawCollectionCapacity(): Int64
     func suggestRawArrayCapacity(): Int64
     func suggestRawObjectCapacity(): Int64
@@ -36,6 +39,192 @@ public interface GeneratedSupportV1Reader {
     func skipRawWithDepth(maxDepth: Int64): Unit
 }
 
+/// Allocation-free concrete-reader view used by generated object codecs after
+/// resolving the versioned reader interface once per object.
+public struct GeneratedSupportV1ReadCursor {
+    private let reader: JsonFastReader
+
+    init(reader: JsonFastReader) { this.reader = reader }
+    public func generatedReaderV1(): JsonFastReader { reader }
+
+    public func startRawObject(): Unit { reader.startRawObject() }
+    public func endRawObject(): Unit { reader.endRawObject() }
+    public func hasRawObjectField(first: Bool): Bool { reader.hasRawObjectField(first) }
+    public func hasRawObjectFieldFast(first: Bool): Bool { reader.hasRawObjectFieldFast(first) }
+    public func readRawName(first: Bool): String { reader.readRawName(first) }
+    public func readRawNameFast(first: Bool): String { reader.readRawNameFast(first) }
+    public func readRawNameIdBytes(first: Bool, candidates: Array<Array<Byte>>): Int64 {
+        reader.readRawNameIdBytes(first, candidates)
+    }
+    public func tryReadRawCompactNameTokenBytes(first: Bool, nameBytes: Array<Byte>): Bool {
+        reader.tryReadRawCompactNameTokenBytes(first, nameBytes)
+    }
+    public func startRawArray(): Unit { reader.startRawArray() }
+    public func endRawArray(): Unit { reader.endRawArray() }
+    public func hasRawArrayItem(first: Bool): Bool { reader.hasRawArrayItem(first) }
+    public func hasRawArrayItemFast(first: Bool): Bool { reader.hasRawArrayItemFast(first) }
+    public func beforeRawArrayItem(first: Bool): Unit { reader.beforeRawArrayItem(first) }
+    public func beforeRawArrayItemFast(first: Bool): Unit { reader.beforeRawArrayItemFast(first) }
+    public func suggestRawCollectionCapacity(): Int64 { reader.suggestRawCollectionCapacity() }
+    public func suggestRawArrayCapacity(): Int64 { reader.suggestRawArrayCapacity() }
+    public func suggestRawObjectCapacity(): Int64 { reader.suggestRawObjectCapacity() }
+    public func tryReadRawNull(): Bool { reader.tryReadRawNull() }
+    public func readRawBool(): Bool { reader.readRawBool() }
+    public func readRawBoolFast(): Bool { reader.readRawBoolFast() }
+    public func readRawString(): String { reader.readRawString() }
+    public func readRawInt64(): Int64 { reader.readRawInt64() }
+    public func readRawInt64Fast(): Int64 { reader.readRawInt64Fast() }
+    public func readRawInt32(): Int32 { reader.readRawInt32() }
+    public func readRawInt16(): Int16 { reader.readRawInt16() }
+    public func readRawInt8(): Int8 { reader.readRawInt8() }
+    public func readRawUInt64(): UInt64 { reader.readRawUInt64() }
+    public func readRawUInt32(): UInt32 { reader.readRawUInt32() }
+    public func readRawUInt16(): UInt16 { reader.readRawUInt16() }
+    public func readRawUInt8(): UInt8 { reader.readRawUInt8() }
+    public func readRawFloat64(): Float64 { jsonFastReadFloat64(reader) }
+    public func readRawFloat32(): Float32 { jsonFastReadFloat32(reader) }
+    public func readRawFloat16(): Float16 { jsonFastReadFloat16(reader) }
+    public func readRawBigInt(): BigInt { reader.readRawBigInt() }
+    public func readRawDecimal(): Decimal { reader.readRawDecimal() }
+    public func readRawNumberLiteral(): String { reader.readRawNumberLiteral() }
+    public func readRawRune(): Rune { decodeRuneText(reader.readRawString()) }
+    public func readRawRfc3339DateTime(): DateTime {
+        jsonFastParseRfc3339DateTime(reader.readRawString())
+    }
+    public func readRawInt64Array(): Array<Int64> {
+        let context = reader.generatedReadStateV1()
+        context.enterValue()
+        try {
+            if (let Some(result) <- reader.tryReadNativeInt64ArrayList()) {
+                return result.toArray()
+            }
+            reader.startRawArray()
+            if (!reader.hasRawArrayItem(true)) {
+                reader.endRawArray()
+                return Array<Int64>()
+            }
+            let result = ArrayList<Int64>(reader.suggestRawArrayCapacity())
+            var first = true
+            while (reader.hasRawArrayItem(first)) {
+                reader.beforeRawArrayItem(first)
+                result.add(reader.readRawInt64())
+                first = false
+            }
+            reader.endRawArray()
+            result.toArray()
+        } finally {
+            context.leaveValue()
+        }
+    }
+    public func readRawStringArray(): Array<String> {
+        let context = reader.generatedReadStateV1()
+        context.enterValue()
+        try {
+            reader.startRawArray()
+            let result = ArrayList<String>(reader.suggestRawArrayCapacity())
+            var first = true
+            while (reader.hasRawArrayItem(first)) {
+                reader.beforeRawArrayItem(first)
+                result.add(reader.readRawString())
+                first = false
+            }
+            reader.endRawArray()
+            result.toArray()
+        } finally {
+            context.leaveValue()
+        }
+    }
+    public func readRawInt64Map(): HashMap<String, Int64> {
+        let context = reader.generatedReadStateV1()
+        context.enterValue()
+        try {
+            reader.startRawObject()
+            let result = HashMap<String, Int64>(reader.suggestRawObjectCapacity())
+            var first = true
+            while (reader.hasRawObjectField(first)) {
+                result[reader.readRawName(first)] = reader.readRawInt64()
+                first = false
+            }
+            reader.endRawObject()
+            result
+        } finally {
+            context.leaveValue()
+        }
+    }
+    public func readRawStringMap(): HashMap<String, String> {
+        let context = reader.generatedReadStateV1()
+        context.enterValue()
+        try {
+            reader.startRawObject()
+            let result = HashMap<String, String>(reader.suggestRawObjectCapacity())
+            var first = true
+            while (reader.hasRawObjectField(first)) {
+                result[reader.readRawName(first)] = reader.readRawString()
+                first = false
+            }
+            reader.endRawObject()
+            result
+        } finally {
+            context.leaveValue()
+        }
+    }
+    public func readRawInt64ArrayMap(): HashMap<String, Array<Int64>> {
+        let context = reader.generatedReadStateV1()
+        context.enterValue()
+        try {
+            reader.startRawObject()
+            let result = HashMap<String, Array<Int64>>(reader.suggestRawObjectCapacity())
+            var first = true
+            while (reader.hasRawObjectField(first)) {
+                let name = reader.readRawName(first)
+                context.pushField(name)
+                try {
+                    result[name] = readRawInt64Array()
+                } finally {
+                    context.popPath()
+                }
+                first = false
+            }
+            reader.endRawObject()
+            result
+        } finally {
+            context.leaveValue()
+        }
+    }
+
+    // Generated object codecs already push the owning field path around
+    // direct container reads.  These allocation-free variants retain the
+    // outer structural work while omitting per-element path bookkeeping on
+    // the default fast path.
+    public func readRawInt64ArrayFast(): Array<Int64> {
+        if (let Some(result) <- reader.tryReadNativeInt64ArrayList()) {
+            return result.toArray()
+        }
+        reader.startRawArray()
+        if (!reader.hasRawArrayItem(true)) {
+            reader.endRawArray()
+            return Array<Int64>()
+        }
+        let result = ArrayList<Int64>(reader.suggestRawArrayCapacity())
+        var first = true
+        while (reader.hasRawArrayItemFast(first)) {
+            reader.beforeRawArrayItemFast(first)
+            result.add(reader.readRawInt64Fast())
+            first = false
+        }
+        reader.endRawArray()
+        result.toArray()
+    }
+
+    public func readRawInt64MapFast(): HashMap<String, Int64> {
+        reader.readRawInt64MapFast()
+    }
+
+    public func readRawInt64ArrayMapFast(): HashMap<String, Array<Int64>> {
+        reader.readRawInt64ArrayMapFast()
+    }
+    public func skipRawWithDepth(maxDepth: Int64): Unit { reader.skipRawWithDepth(maxDepth) }
+}
 
 /// Narrow semantic writer contract consumed by generated codecs. Structural
 /// correctness remains owned by the core writer state machine.

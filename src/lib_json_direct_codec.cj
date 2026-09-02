@@ -1848,7 +1848,7 @@ public class YJson {
         let writer = JsonDirectWriter(options)
         if (writer.tryBeginGeneratedCompactRawValue()) {
             codec.writeCompactRawWithWriter(value, writer)
-            return writer.finishString()
+            return writer.finishGeneratedCompactString()
         }
         codec.write(value, writer)
         writer.finishString()
@@ -1861,7 +1861,7 @@ public class YJson {
         let writer = JsonDirectWriter(options)
         if (writer.tryBeginGeneratedCompactRawValue()) {
             T.generatedCompactRawV1(value, writer)
-            return writer.finishString()
+            return writer.finishGeneratedCompactString()
         }
         codec.write(value, writer)
         writer.finishString()
