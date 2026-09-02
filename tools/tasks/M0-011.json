@@ -31,6 +31,7 @@
   ],
   "allowed_paths": [
     ".github/workflows/m0-011-windows-long.yml",
+    ".gitignore",
     "docs/evidence/M0-011",
     "docs/planning/implementation-backlog.md",
     "docs/planning/status.md",

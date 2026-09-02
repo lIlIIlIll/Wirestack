@@ -50,13 +50,20 @@ The repository now contains a fixed `windows-2025` / x86_64 workflow and a
 fail-closed validator for a four-hour mixed lifecycle profile. The workflow
 records Win32 RSS/private bytes/handles, PowerShell thread counts and
 `netstat -ano` socket counts, binds the report to `GITHUB_SHA`, and uploads the
-raw probe output. No Windows runner has produced this report yet, so there is
-no Windows PASS evidence to claim.
+raw probe output. Run
+[`33602643549`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33602643549)
+checked out `23c14f22ad24fa2c82ad7fba8b73665ad97a8b61`, passed the validator and
+native capability preflight, and ran the profile for `14,400` seconds. The
+profile is retained under [`windows-x86_64/`](windows-x86_64/), but it is
+**FAIL**, not PASS: the mixed workload completed, while the resource trend
+exceeded the bounds (`handle_count` growth `244` > `8`, `private_kib` growth
+`65068` > `8192`) and one thread query was unavailable. The report therefore
+does not close the Windows supplemental gate or global M0-011.
 
 ## Remaining global acceptance work
 
-- Execute the native Windows x86_64 supplemental profile for the fixed
-  four-hour duration defined in `windows-4h-test-plan.md`.
+- Diagnose and rerun the native Windows x86_64 supplemental profile after the
+  resource-growth failure in run `33602643549`.
 - Execute native macOS, Android, iOS and HarmonyOS/OpenHarmony profiles.
 - Keep the required 24-hour Linux release-candidate soak as the global
   GATE-NET-06 duration; the Windows four-hour profile does not replace it.
