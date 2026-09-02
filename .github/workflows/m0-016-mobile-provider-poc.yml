@@ -78,24 +78,25 @@ jobs:
           command -v openssl
           command -v curl
           command -v unzip
-          TIMEOUT_BIN=""
-          for candidate in \
-            "$(command -v timeout 2>/dev/null || true)" \
-            "$(command -v gtimeout 2>/dev/null || true)" \
-            "/opt/homebrew/opt/coreutils/bin/gtimeout" \
-            "/usr/local/opt/coreutils/bin/gtimeout"; do
-            if [[ -n "$candidate" && -x "$candidate" ]]; then
-              TIMEOUT_BIN="$candidate"
-              break
-            fi
-          done
-          test -n "$TIMEOUT_BIN"
-          test -x "$TIMEOUT_BIN"
-          echo "WIRESTACK_TIMEOUT=$TIMEOUT_BIN" >> "$GITHUB_ENV"
+          command -v python3
       - name: Provision the arm64 Android emulator
         shell: bash
         run: |
           set -euo pipefail
+          run_bounded() {
+            local seconds="$1"
+            shift
+            python3 - "$seconds" "$@" <<'PY'
+          import subprocess
+          import sys
+
+          try:
+              completed = subprocess.run(sys.argv[2:], timeout=float(sys.argv[1]))
+          except subprocess.TimeoutExpired:
+              raise SystemExit(124)
+          raise SystemExit(completed.returncode)
+          PY
+          }
           SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
           test -d "$SDK_ROOT"
           resolve_android_tool() {
@@ -147,9 +148,7 @@ jobs:
           echo "ADB=$ADB" >> "$GITHUB_ENV"
           export ANDROID_AVD_HOME="$RUNNER_TEMP/android-avd"
           mkdir -p "$ANDROID_AVD_HOME"
-          TIMEOUT_BIN="${WIRESTACK_TIMEOUT:-}"
-          test -x "$TIMEOUT_BIN"
-          printf 'no\n' | "$TIMEOUT_BIN" 60s "$AVDMANAGER" create avd --force \
+          printf 'no\n' | run_bounded 60 "$AVDMANAGER" create avd --force \
             --name wirestack-m0-016-api33 \
             --package "$ANDROID_SYSTEM_IMAGE" \
             --device "pixel_2"
@@ -164,13 +163,13 @@ jobs:
           # has its own 600-second bound.  Hardware virtualization is not
           # exposed by the hosted macOS VM, so the arm64 guest uses bounded
           # software QEMU (see -accel off above).
-          "$TIMEOUT_BIN" 180s "$ADB" wait-for-device
+          run_bounded 180 "$ADB" wait-for-device
           deadline=$((SECONDS + 600))
           boot_state=""
           while [[ "$boot_state" != "1" ]]; do
             # ADB can keep a shell request open while the emulator is still
             # starting. Bound each probe as well as the overall boot wait.
-            boot_state="$("$TIMEOUT_BIN" 15s "$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
+            boot_state="$(run_bounded 15 "$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
             if (( SECONDS >= deadline )); then
               tail -200 "$RUNNER_TEMP/android-emulator.log" || true
               exit 1
