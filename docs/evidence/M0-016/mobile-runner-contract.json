@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "task_id": "M0-016",
-  "status": "NOT_RUN",
+  "status": "PARTIAL",
   "workflow": ".github/workflows/m0-016-mobile-provider-poc.yml",
   "mobile_providers": [
     "aws-lc",
@@ -32,10 +32,11 @@
     "command": "python3 -m unittest tools.tests.test_tls_provider_poc tools.tests.test_tls_provider_poc_mobile tools.tests.test_tls_provider_poc_retention -q",
     "status": "PASS",
     "tests": 99,
-    "native_cells_retained": false
+    "native_cells_retained": true,
+    "latest_hosted_run": "docs/evidence/M0-016/hosted-run-33582666850.report"
   },
   "limitations": [
-    "This report records the local contract gate only; no hosted mobile result artifact is retained.",
+    "The latest hosted run retains iOS AWS-LC PASS evidence from an earlier exact revision and iOS Mbed TLS PARTIAL evidence at the current exact revision; Android artifacts are BLOCKED at emulator startup.",
     "Android Emulator and iOS Simulator are native VMs, not physical-device evidence.",
     "HarmonyOS/OpenHarmony and physical Android/iOS device evidence remain BLOCKED."
   ]

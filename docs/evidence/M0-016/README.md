@@ -9,8 +9,12 @@ unsupported capabilities. Android, iOS, and HarmonyOS or OpenHarmony still
 lack native-device evidence; cross-compilation does not satisfy those cells.
 
 The local contract-gate record is [`mobile-runner-contract.json`](mobile-runner-contract.json).
-It deliberately records the mobile cells as `NOT_RUN` until a hosted artifact
-has been reviewed and copied into the canonical matrix.
+The latest hosted run is recorded in
+[`hosted-run-33582666850.report`](hosted-run-33582666850.report): iOS AWS-LC is
+`PASS`, iOS Mbed TLS is `PARTIAL`, and Android provider jobs are `BLOCKED` at
+arm64 emulator startup. Only validated iOS Mbed TLS evidence was added after
+the existing iOS AWS-LC cell was found to contain different retained bytes;
+the fail-closed retention helper correctly refused to replace it.
 The traceable mobile test plan is [`test-plan.md`](test-plan.md); its plan
 validator currently reports 10 paths, 9 scenarios, and 9 tests.
 The hosted mobile matrix runs AWS-LC and Mbed TLS; OpenSSL remains a desktop

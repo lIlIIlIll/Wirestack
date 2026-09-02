@@ -60,6 +60,17 @@ update without silently overwriting existing evidence. Re-running it for the
 same bytes is idempotent. A failed or incomplete hosted run remains outside the
 canonical matrix and must not be recorded as `PASS`.
 
+## Latest hosted run
+
+Run [33582666850](https://github.com/lIlIIlIll/Wirestack/actions/runs/33582666850)
+at exact revision `829e06a0847e4ce8f66ba01a109c90120ce98373` is recorded in
+[`hosted-run-33582666850.report`](hosted-run-33582666850.report). The iOS AWS-LC
+result is `PASS` and the iOS Mbed TLS result is valid `PARTIAL`; both result
+artifacts passed the standalone schema validator. The Android AWS-LC and Mbed
+TLS jobs are `BLOCKED`: the arm64 emulator segfaulted during startup even when
+QEMU TCG was forced, and the bounded `adb wait-for-device` returned 124. No
+Android result was copied into the canonical matrix.
+
 The retained result includes:
 
 - the exact repository revision and hosted image identity;
