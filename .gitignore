@@ -38,6 +38,7 @@ __pycache__/
 !docs/evidence/M0-016/license-bundles/**/*.json
 !docs/evidence/M0-016/license-bundles/**/LICENSE.txt
 !docs/evidence/M0-011/linux_x86_64/*.json
+!docs/evidence/M0-011/windows-x86_64/*.json
 !docs/evidence/M6-023/linux_x86_64/*.json
 !docs/evidence/M2-003/linux_x86_64/*.json
 !docs/evidence/M2-004/*.json

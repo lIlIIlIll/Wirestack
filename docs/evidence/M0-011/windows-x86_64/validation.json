@@ -1,0 +1,9 @@
+{
+  "failures": [
+    "STATUS"
+  ],
+  "report_kind": "windows-gate-net06-4h",
+  "schema_version": 1,
+  "status": "FAIL",
+  "task_id": "M0-011"
+}
