@@ -276,7 +276,7 @@ def retain(*, repo: Path, matrix_path: Path, result_path: Path,
     platform = result.get("platform")
     provider = result.get("provider")
     require(platform in MOBILE_PLATFORMS, "PLATFORM",
-            "only Android/iOS mobile cells may be retained")
+            "only required Android/iOS mobile cells may be retained; supplemental targets stay outside the matrix")
     require(provider in PROVIDERS, "PROVIDER", "unknown provider")
     try:
         validate.validate_result(result, spec, expected_revision)

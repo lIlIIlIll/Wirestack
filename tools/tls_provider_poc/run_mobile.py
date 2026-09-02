@@ -2,8 +2,10 @@
 """Build and execute the M0-016 provider PoC in a hosted mobile VM.
 
 The GitHub-hosted macOS arm64 job uses an iOS Simulator or an Android arm64
-emulator.  The runner is still recorded separately from the target platform so
-this evidence cannot be mistaken for a physical-device result.
+emulator.  A separate Linux x86_64 job may run an Android x86_64 smoke gate;
+that supplemental result is kept distinct from the required arm64 cell.  The
+runner is still recorded separately from the target platform so this evidence
+cannot be mistaken for a physical-device result.
 """
 from __future__ import annotations
 
@@ -27,12 +29,26 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 
-MOBILE_PLATFORMS = {"android-aarch64", "ios-aarch64"}
+MOBILE_PLATFORMS = {"android-aarch64", "android-x86_64", "ios-aarch64"}
 ANDROID_API_LEVEL = 33
 IOS_DEPLOYMENT_TARGET = "15.0"
 IOS_BUNDLE_ID = "com.wirestack.m0-016.provider-poc"
 REMOTE_ROOT_RE = re.compile(r"^/data/local/tmp/wirestack-m0-016-[0-9]+$")
 IOS_UDID_RE = re.compile(r"^[0-9A-Fa-f-]{20,64}$")
+ANDROID_TARGETS = {
+    "android-aarch64": {
+        "abi": "arm64-v8a",
+        "toolchain_prefix": "aarch64-linux-android",
+        "target": "aarch64-linux-android",
+        "openssl_arg": "android-arm64",
+    },
+    "android-x86_64": {
+        "abi": "x86_64",
+        "toolchain_prefix": "x86_64-linux-android",
+        "target": "x86_64-linux-android",
+        "openssl_arg": "android-x86_64",
+    },
+}
 
 
 class MobilePocError(poc.PocError):
@@ -80,8 +96,13 @@ def android_ndk() -> Path:
     return path
 
 
-def android_compilers(ndk: Path) -> tuple[Path, Path, int]:
+def android_compilers(ndk: Path, target: str = "android-aarch64") -> tuple[Path, Path, int]:
     """Locate a target compiler under a host-compatible NDK prebuilt tree."""
+    try:
+        target_info = ANDROID_TARGETS[target]
+    except KeyError as error:
+        raise MobilePocError(f"unsupported Android target: {target}") from error
+    toolchain_prefix = target_info["toolchain_prefix"]
     system = host_platform.system()
     machine = host_platform.machine().lower()
     if system == "Darwin":
@@ -102,20 +123,22 @@ def android_compilers(ndk: Path) -> tuple[Path, Path, int]:
     for prebuilt in prebuilt_roots:
         if not prebuilt.is_dir():
             continue
-        exact = prebuilt / f"aarch64-linux-android{ANDROID_API_LEVEL}-clang"
-        exact_cxx = prebuilt / f"aarch64-linux-android{ANDROID_API_LEVEL}-clang++"
+        exact = prebuilt / f"{toolchain_prefix}{ANDROID_API_LEVEL}-clang"
+        exact_cxx = prebuilt / f"{toolchain_prefix}{ANDROID_API_LEVEL}-clang++"
         if exact.is_file() and exact_cxx.is_file():
             return exact, exact_cxx, ANDROID_API_LEVEL
-        for candidate in prebuilt.glob("aarch64-linux-android*-clang"):
-            match = re.fullmatch(r"aarch64-linux-android([0-9]+)-clang",
-                                 candidate.name)
+        for candidate in prebuilt.glob(f"{toolchain_prefix}*-clang"):
+            match = re.fullmatch(
+                rf"{re.escape(toolchain_prefix)}([0-9]+)-clang",
+                candidate.name)
             if not match:
                 continue
             api = int(match.group(1))
             cxx = candidate.with_name(candidate.name + "++")
             if api <= ANDROID_API_LEVEL and cxx.is_file():
                 available.append((api, candidate, cxx))
-    require(available, "Android arm64 clang toolchain is missing for this runner")
+    require(available,
+            f"Android {target_info['abi']} clang toolchain is missing for this runner")
     api, cc, cxx = max(available, key=lambda item: item[0])
     return cc, cxx, api
 
@@ -132,9 +155,10 @@ def xcrun_path(sdk: str, tool: str, cwd: Path, log: Path) -> Path:
 
 def mobile_toolchain(platform: str, work: Path, log: Path) -> dict[str, Any]:
     """Return deterministic compiler and configure arguments for one target."""
-    if platform == "android-aarch64":
+    if platform in ANDROID_TARGETS:
+        target_info = ANDROID_TARGETS[platform]
         ndk = android_ndk()
-        cc, cxx, compiler_api = android_compilers(ndk)
+        cc, cxx, compiler_api = android_compilers(ndk, platform)
         return {
             "runner_os": "macOS" if host_platform.system() == "Darwin" else "Linux",
             "cc": cc,
@@ -143,12 +167,12 @@ def mobile_toolchain(platform: str, work: Path, log: Path) -> dict[str, Any]:
             "link_flags": ["-latomic"],
             "cmake_args": [
                 f"-DCMAKE_TOOLCHAIN_FILE={ndk / 'build/cmake/android.toolchain.cmake'}",
-                "-DANDROID_ABI=arm64-v8a",
+                f"-DANDROID_ABI={target_info['abi']}",
                 f"-DANDROID_PLATFORM=android-{ANDROID_API_LEVEL}",
                 "-DANDROID_STL=c++_static",
             ],
-            "openssl_args": ["android-arm64"],
-            "target": "aarch64-linux-android",
+            "openssl_args": [target_info["openssl_arg"]],
+            "target": target_info["target"],
         }
     if platform == "ios-aarch64":
         sdk = poc.run(["xcrun", "--sdk", "iphonesimulator", "--show-sdk-path"],
@@ -261,7 +285,12 @@ def select_ios_simulator(work: Path, log: Path) -> tuple[dict[str, str], bool]:
     return selected, started
 
 
-def android_runtime(work: Path, log: Path) -> tuple[list[str], dict[str, Any]]:
+def android_runtime(work: Path, log: Path,
+                    platform: str = "android-aarch64") -> tuple[list[str], dict[str, Any]]:
+    try:
+        target_info = ANDROID_TARGETS[platform]
+    except KeyError as error:
+        raise MobilePocError(f"unsupported Android target: {platform}") from error
     serial = os.environ.get("ANDROID_SERIAL", "").strip()
     adb = os.environ.get("ADB", "adb").strip() or "adb"
     command = lambda *args: command_with_serial(serial, [adb, *args])
@@ -272,7 +301,8 @@ def android_runtime(work: Path, log: Path) -> tuple[list[str], dict[str, Any]]:
                   cwd=work, log=log, check=False).stdout.strip()
     api = poc.run(command("shell", "getprop", "ro.build.version.sdk"),
                   cwd=work, log=log, check=False).stdout.strip()
-    require(abi == "arm64-v8a", "Android runner is not an arm64 emulator")
+    require(abi == target_info["abi"],
+            f"Android runner is not a {target_info['abi']} emulator")
     require(api.isdigit() and int(api) >= ANDROID_API_LEVEL,
             "Android emulator API level is below the PoC floor")
     return command, {
@@ -282,11 +312,13 @@ def android_runtime(work: Path, log: Path) -> tuple[list[str], dict[str, Any]]:
         "abi": abi,
         "api_level": int(api),
         "serial": serial or "default",
+        "target_platform": platform,
     }
 
 
-def stage_android(binary: Path, fixtures: Path, work: Path, log: Path) -> tuple[Any, dict[str, Any]]:
-    command, runtime = android_runtime(work, log)
+def stage_android(binary: Path, fixtures: Path, work: Path, log: Path,
+                  platform: str = "android-aarch64") -> tuple[Any, dict[str, Any]]:
+    command, runtime = android_runtime(work, log, platform)
     remote = f"/data/local/tmp/wirestack-m0-016-{os.getpid()}"
     require(REMOTE_ROOT_RE.fullmatch(remote) is not None,
             "generated Android staging path is invalid")
@@ -395,8 +427,8 @@ def stage_ios(binary: Path, fixtures: Path, work: Path, log: Path) -> tuple[Any,
 
 def run_native(platform: str, binary: Path, fixtures: Path,
                work: Path, log: Path) -> tuple[Any, dict[str, Any]]:
-    if platform == "android-aarch64":
-        return stage_android(binary, fixtures, work, log)
+    if platform in ANDROID_TARGETS:
+        return stage_android(binary, fixtures, work, log, platform)
     if platform == "ios-aarch64":
         return stage_ios(binary, fixtures, work, log)
     raise MobilePocError(f"unsupported mobile target: {platform}")
