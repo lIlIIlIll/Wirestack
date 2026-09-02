@@ -1,0 +1,210 @@
+{
+  "artifacts": [
+    {
+      "artifact_id": 9831714032,
+      "artifact_sha256": "f24f04da64885df952b3610ba0281eeac6472f212c6d525d3b457c5b07440e5b",
+      "artifact_size_bytes": 3032,
+      "platform": "android-aarch64",
+      "provider": "aws-lc",
+      "result_sha256": null,
+      "status": "BLOCKED"
+    },
+    {
+      "artifact_id": 9831714117,
+      "artifact_sha256": "b4926ec8a44ca0c883ad534aa7748c5277eb68990c55ea7b7b71a701cc72e086",
+      "artifact_size_bytes": 3025,
+      "platform": "android-aarch64",
+      "provider": "mbedtls",
+      "result_sha256": null,
+      "status": "BLOCKED"
+    },
+    {
+      "artifact_id": 9831698916,
+      "artifact_sha256": "2b0f82f25e72ffa2df08f13182f1ecd6f0c886111d3ebd0b4f0431936d8f4563",
+      "artifact_size_bytes": 97717,
+      "platform": "android-x86_64",
+      "provider": "aws-lc",
+      "result_sha256": "7d146dd89dfed40bd05dec5694e1d77df9f8d945bd7ab5be5764c9cbd57c8fa1",
+      "status": "PASS",
+      "supplemental": true
+    },
+    {
+      "artifact_id": 9831701343,
+      "artifact_sha256": "1b9195280fc5c7b7d03205ee7b580d4a952e89366fe8eec7d0bea8bd8b6ed4",
+      "artifact_size_bytes": 79978,
+      "platform": "android-x86_64",
+      "provider": "mbedtls",
+      "result_sha256": "7017770716357b0190e2efd769524eecf3e6f0694c1aa63bb66fb8ac5245fdc3",
+      "status": "PARTIAL",
+      "supplemental": true
+    },
+    {
+      "artifact_id": 9831736477,
+      "artifact_sha256": "f1963bea34ee9ac39b6fbf4422e5794224e180fa6ec7583ed2f07a8a97bdbf3f",
+      "artifact_size_bytes": 100641,
+      "platform": "ios-aarch64",
+      "provider": "aws-lc",
+      "result_sha256": "53a402fb443dc56e9cb2a192ea88f21e79a1db9d099ebecb71a199a88b8f7612",
+      "status": "PASS"
+    },
+    {
+      "artifact_id": 9831728853,
+      "artifact_sha256": "32b27ee39457961222cfcfd7e3b3de22c9f593c03b02919238f9ae90ab2b9579",
+      "artifact_size_bytes": 82116,
+      "platform": "ios-aarch64",
+      "provider": "mbedtls",
+      "result_sha256": "32c6cb836a9ba0ac33b9993f5c747e06db5eb0d54c114b637d42c62f526a2253",
+      "status": "PARTIAL"
+    }
+  ],
+  "branch": "task/M0-016-mobile-provider-runner",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "conclusion": "success",
+      "id": 100123778975,
+      "name": "validate-contract",
+      "status": "PASS"
+    },
+    {
+      "conclusion": "success",
+      "id": 100123815972,
+      "name": "android-x86_64-smoke (aws-lc)",
+      "status": "PASS",
+      "supplemental": true
+    },
+    {
+      "conclusion": "success",
+      "id": 100123815979,
+      "name": "android-x86_64-smoke (mbedtls)",
+      "status": "PARTIAL",
+      "supplemental": true
+    },
+    {
+      "conclusion": "success",
+      "id": 100123815982,
+      "name": "ios-simulator (aws-lc)",
+      "status": "PASS"
+    },
+    {
+      "conclusion": "failure",
+      "failure_code": "ANDROID_EMULATOR_STARTUP",
+      "failure_excerpt": "arm64 emulator exited with SIGSEGV 11 before boot; bounded wait returned exit code 124",
+      "id": 100123815984,
+      "name": "android-emulator (mbedtls)",
+      "status": "BLOCKED"
+    },
+    {
+      "conclusion": "failure",
+      "failure_code": "ANDROID_EMULATOR_STARTUP",
+      "failure_excerpt": "arm64 emulator exited with SIGSEGV 11 before boot; bounded wait returned exit code 124",
+      "id": 100123815988,
+      "name": "android-emulator (aws-lc)",
+      "status": "BLOCKED"
+    },
+    {
+      "conclusion": "success",
+      "id": 100123815993,
+      "name": "ios-simulator (mbedtls)",
+      "status": "PARTIAL"
+    }
+  ],
+  "limitations": [
+    "The supplemental android-x86_64 artifacts prove provider execution on an x86_64 Android emulator with KVM, but they cannot satisfy or replace the required android-aarch64 cell.",
+    "GitHub-hosted macos-15 arm64 could not boot the required arm64 Android emulator; the emulator crashed before boot and the bounded wait returned exit code 124.",
+    "The iOS Simulator and Android Emulator are native VMs, not physical-device evidence; physical Android/iOS and HarmonyOS/OpenHarmony evidence remain unavailable.",
+    "The latest iOS artifacts were independently validated but were not used to replace existing canonical cells with different retained bytes.",
+    "The full M0-016 matrix remains BLOCKED at the platform-evidence boundary. Long SSE and 86,400-second soak gates were not run."
+  ],
+  "retention": [
+    {
+      "platform": "android-x86_64",
+      "provider": "aws-lc",
+      "status": "PASS",
+      "retained": false,
+      "reason": "Supplemental cell; canonical retention intentionally excludes non-required platforms."
+    },
+    {
+      "platform": "android-x86_64",
+      "provider": "mbedtls",
+      "status": "PARTIAL",
+      "retained": false,
+      "reason": "Supplemental cell; canonical retention intentionally excludes non-required platforms."
+    },
+    {
+      "platform": "ios-aarch64",
+      "provider": "aws-lc",
+      "status": "PASS",
+      "retained": false,
+      "reason": "Existing canonical cell has different retained bytes; replacement was not attempted."
+    },
+    {
+      "platform": "ios-aarch64",
+      "provider": "mbedtls",
+      "status": "PARTIAL",
+      "retained": false,
+      "reason": "Existing canonical evidence was not replaced by this run."
+    }
+  ],
+  "revision": "63225c8428f186c6f26bdd7b93c3ff2e834c25cb",
+  "run_id": 33590649517,
+  "run_url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33590649517",
+  "runner": {
+    "android-aarch64": {
+      "acceleration": "unavailable",
+      "arch": "ARM64",
+      "image_os": "macos15",
+      "label": "macos-15",
+      "native_runtime": "android-emulator",
+      "startup_status": "BLOCKED"
+    },
+    "android-x86_64": {
+      "abi": "x86_64",
+      "acceleration": "kvm",
+      "api_level": 33,
+      "arch": "X64",
+      "image_os": "ubuntu24",
+      "image_version": "20260823.283.1",
+      "label": "ubuntu-24.04",
+      "native_runtime": "android-emulator",
+      "serial": "emulator-5554",
+      "supplemental": true
+    },
+    "ios-aarch64": {
+      "arch": "ARM64",
+      "image_os": "macos15",
+      "label": "macos-15",
+      "native_runtime": "ios-simulator"
+    }
+  },
+  "schema_version": 1,
+  "status": "BLOCKED",
+  "task_id": "M0-016",
+  "validation": [
+    {
+      "command": "python3 tools/tls_provider_poc/validate.py --result <artifact>/result.json --expected-revision 63225c8428f186c6f26bdd7b93c3ff2e834c25cb",
+      "android_x86_64_aws_lc": "PASS",
+      "android_x86_64_mbedtls": "PARTIAL",
+      "ios_aws_lc": "PASS",
+      "ios_mbedtls": "PARTIAL",
+      "status": "PASS"
+    },
+    {
+      "command": "python3 -m unittest tools.tests.test_tls_provider_poc tools.tests.test_tls_provider_poc_mobile tools.tests.test_tls_provider_poc_retention -q",
+      "status": "PASS",
+      "tests": 105
+    },
+    {
+      "command": "python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M0-016/test-plan.md --json",
+      "paths": 11,
+      "scenarios": 10,
+      "status": "PASS",
+      "tests": 10
+    },
+    {
+      "command": "workflow YAML parse and bounded run-block shell syntax checks",
+      "status": "PASS"
+    }
+  ],
+  "workflow": ".github/workflows/m0-016-mobile-provider-poc.yml"
+}
