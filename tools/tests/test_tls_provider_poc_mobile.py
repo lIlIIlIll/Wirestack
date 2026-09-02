@@ -114,6 +114,7 @@ class MobileRunnerSafetyTests(unittest.TestCase):
         self.assertIn('mkdir -p "$ANDROID_AVD_HOME"', workflow)
         self.assertIn('test -f "$ANDROID_AVD_HOME/wirestack-m0-016-api33.ini"', workflow)
         self.assertIn("-accel off", workflow)
+        self.assertIn("-qemu -accel tcg", workflow)
         self.assertIn("-no-metrics", workflow)
         self.assertNotIn("brew install coreutils", workflow)
         self.assertIn("subprocess.run(sys.argv[2:], timeout=float(sys.argv[1]))", workflow)

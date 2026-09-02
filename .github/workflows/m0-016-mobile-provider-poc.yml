@@ -156,13 +156,14 @@ jobs:
           nohup "$EMULATOR" -avd wirestack-m0-016-api33 \
             -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data \
             -gpu swiftshader_indirect -accel off -no-metrics \
+            -qemu -accel tcg \
             >"$RUNNER_TEMP/android-emulator.log" 2>&1 &
           "$ADB" start-server
           # Do not let a broken emulator consume the entire job timeout while
           # waiting for the first device state.  The boot-complete loop below
           # has its own 600-second bound.  Hardware virtualization is not
           # exposed by the hosted macOS VM, so the arm64 guest uses bounded
-          # software QEMU (see -accel off above).
+          # software QEMU (see the explicit -qemu -accel tcg above).
           run_bounded 180 "$ADB" wait-for-device
           deadline=$((SECONDS + 600))
           boot_state=""
