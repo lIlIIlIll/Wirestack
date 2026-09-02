@@ -167,7 +167,12 @@ def mobile_toolchain(platform: str, work: Path, log: Path) -> dict[str, Any]:
             # the selected API level.  Re-defining it here turns AWS-LC's
             # -Werror build into a deterministic macro-redefinition failure.
             "compile_flags": ["-fPIC"],
-            "link_flags": ["-latomic"],
+            # compile_poc invokes the target clang++ directly rather than
+            # through CMake.  Direct Android clang++ defaults to the shared
+            # libc++ runtime, so select the static variant for a self-contained
+            # emulator payload (CMake's ANDROID_STL setting does not affect
+            # this separate link command).
+            "link_flags": ["-static-libstdc++", "-latomic"],
             "cmake_args": [
                 f"-DCMAKE_TOOLCHAIN_FILE={ndk / 'build/cmake/android.toolchain.cmake'}",
                 f"-DANDROID_ABI={target_info['abi']}",
