@@ -27,7 +27,7 @@ Hosted runs use the read-only Actions token only for bounded GitHub API tag
 resolution; it is excluded from logs, retained results, and build provenance.
 
 The `M0-016 Mobile Provider PoC` workflow adds GitHub-hosted native-VM gates
-for Android arm64 (`ubuntu-24.04` plus an API-33 arm64 emulator) and iOS arm64
+for Android arm64 (arm64 `macos-15` plus an API-33 arm64 emulator) and iOS arm64
 (`macos-15` plus an Xcode iOS Simulator). These jobs are supplementary until
 their result artifacts are reviewed and retained. They are emulator/Simulator
 evidence, not physical-device evidence, and therefore do not close M0-012 or

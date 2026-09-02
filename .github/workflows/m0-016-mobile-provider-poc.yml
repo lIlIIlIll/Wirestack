@@ -53,7 +53,10 @@ jobs:
         # desktop control; the candidate matrix permits omitting mobile
         # control builds when they add no decision information.
         provider: [aws-lc, mbedtls]
-    runs-on: ubuntu-24.04
+    # arm64 Android system images require an arm64 host.  GitHub's public
+    # macOS-15 image supplies an arm64 host, Android emulator, and Rosetta for
+    # the pinned NDK host tools where the release still ships darwin-x86_64.
+    runs-on: macos-15
     timeout-minutes: 120
     env:
       ANDROID_API_LEVEL: "33"
@@ -67,9 +70,25 @@ jobs:
           fetch-depth: 1
       - name: Install native provider build tools
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            build-essential cmake ninja-build perl git openssl ca-certificates
+          set -euo pipefail
+          command -v brew
+          command -v cmake
+          command -v ninja
+          command -v perl
+          command -v git
+          command -v openssl
+          command -v curl
+          command -v unzip
+          if command -v timeout >/dev/null 2>&1; then
+            TIMEOUT_BIN="$(command -v timeout)"
+          elif command -v gtimeout >/dev/null 2>&1; then
+            TIMEOUT_BIN="$(command -v gtimeout)"
+          else
+            brew install coreutils
+            TIMEOUT_BIN="$(brew --prefix coreutils)/bin/gtimeout"
+          fi
+          test -x "$TIMEOUT_BIN"
+          echo "WIRESTACK_TIMEOUT=$TIMEOUT_BIN" >> "$GITHUB_ENV"
       - name: Provision the arm64 Android emulator
         shell: bash
         run: |
@@ -89,7 +108,7 @@ jobs:
                 return 0
               fi
             done
-            candidate="$(find "$SDK_ROOT/cmdline-tools" -type f -name "$tool" -perm -u+x -print 2>/dev/null | sort -V | tail -n 1)"
+            candidate="$(find "$SDK_ROOT/cmdline-tools" -type f -name "$tool" -perm -u+x -print -quit 2>/dev/null || true)"
             if [[ -n "$candidate" ]]; then
               printf '%s' "$candidate"
               return 0
@@ -125,7 +144,9 @@ jobs:
           echo "ADB=$ADB" >> "$GITHUB_ENV"
           export ANDROID_AVD_HOME="$RUNNER_TEMP/android-avd"
           mkdir -p "$ANDROID_AVD_HOME"
-          printf 'no\n' | timeout 60s "$AVDMANAGER" create avd --force \
+          TIMEOUT_BIN="${WIRESTACK_TIMEOUT:-}"
+          test -x "$TIMEOUT_BIN"
+          printf 'no\n' | "$TIMEOUT_BIN" 60s "$AVDMANAGER" create avd --force \
             --name wirestack-m0-016-api33 \
             --package "$ANDROID_SYSTEM_IMAGE" \
             --device "pixel_2"
@@ -137,13 +158,13 @@ jobs:
           # Do not let a broken emulator consume the entire job timeout while
           # waiting for the first device state.  The boot-complete loop below
           # has its own 240-second bound.
-          timeout 90s "$ADB" wait-for-device
+          "$TIMEOUT_BIN" 90s "$ADB" wait-for-device
           deadline=$((SECONDS + 240))
           boot_state=""
           while [[ "$boot_state" != "1" ]]; do
             # ADB can keep a shell request open while the emulator is still
             # starting. Bound each probe as well as the overall boot wait.
-            boot_state="$(timeout 15s "$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
+            boot_state="$("$TIMEOUT_BIN" 15s "$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
             if (( SECONDS >= deadline )); then
               tail -200 "$RUNNER_TEMP/android-emulator.log" || true
               exit 1

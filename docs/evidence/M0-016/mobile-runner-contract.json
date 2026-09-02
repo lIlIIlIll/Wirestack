@@ -12,7 +12,8 @@
   ],
   "runner_contract": {
     "android-aarch64": {
-      "hosted_runner": "ubuntu-24.04",
+      "hosted_runner": "macos-15",
+      "host_architecture": "arm64",
       "native_runtime": "android-emulator",
       "abi": "arm64-v8a",
       "minimum_api_level": 33,
@@ -28,7 +29,7 @@
   "contract_validation": {
     "command": "python3 -m unittest tools.tests.test_tls_provider_poc tools.tests.test_tls_provider_poc_mobile tools.tests.test_tls_provider_poc_retention -q",
     "status": "PASS",
-    "tests": 96,
+    "tests": 99,
     "native_cells_retained": false
   },
   "limitations": [
