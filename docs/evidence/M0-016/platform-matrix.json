@@ -27,13 +27,13 @@
     {
       "license_bundle": {
         "manifest": "docs/evidence/M0-016/license-bundles/windows-x86_64/aws-lc/manifest.json",
-        "sha256": "8b9587ca33ad3f6023cf56c3f744e7e2e65191ace8eb6ff54d1b23435aaad176"
+        "sha256": "aa6abec4fc4365575aa90ddbc58b17d801b9735a6cfe608cc17e79231f66fb60"
       },
       "platform": "windows-x86_64",
       "provider": "aws-lc",
       "reason": "Schema-v11 native evidence passes every required capability and retains the exact successful NASM assembler identity.",
       "result": "docs/evidence/M0-016/results/windows-x86_64/aws-lc.json",
-      "sha256": "bc1762a5af4f496aa96899b953c3a0ddc75c304bb583c76c76e1447762eac2fe",
+      "sha256": "657368493af0f6f32112764f0757702d2eb1b9d0928186089ccc9c544b438a6b",
       "status": "PASS"
     },
     {
