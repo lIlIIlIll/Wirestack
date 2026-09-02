@@ -14,11 +14,10 @@ if __package__ in {None, ""}:
     from pathlib import Path
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from tools.tls_provider_poc import run as poc
+from tools import evidence_digest
 from tools.tls_provider_poc import validate
 
 import argparse
-import hashlib
 import json
 import os
 import shutil
@@ -42,18 +41,6 @@ class RetentionError(RuntimeError):
         super().__init__(detail)
         self.code = code
         self.detail = detail
-
-
-def sha256_path(path: Path) -> str:
-    """Use the M0-016 helper when present, with a standalone fallback."""
-    helper = getattr(poc, "sha256_path", None)
-    if callable(helper):
-        return helper(path)
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def atomic_json(path: Path, value: Mapping[str, Any],
@@ -244,9 +231,11 @@ def update_cell(matrix: Mapping[str, Any], *, platform: str, provider: str,
         require(isinstance(existing_bundle, dict), "MATRIX_INVALID",
                 "retained matrix cell has no license bundle object")
         require(cell.get("result") == result_relative and
-                cell.get("sha256") == result_sha256 and
+                evidence_digest.schema_text_sha256_equal(
+                    cell.get("sha256"), result_sha256) and
                 existing_bundle.get("manifest") == manifest_relative and
-                existing_bundle.get("sha256") == manifest_sha256,
+                evidence_digest.schema_text_sha256_equal(
+                    existing_bundle.get("sha256"), manifest_sha256),
                 "MATRIX_ALREADY_RETAINED",
                 f"matrix cell already retains different evidence: {platform}/{provider}")
         desired["status"] = current_status
@@ -299,8 +288,8 @@ def retain(*, repo: Path, matrix_path: Path, result_path: Path,
     manifest_destination = bundle_destination / "manifest.json"
     result_relative = relative_path(result_destination, repo)
     manifest_relative = relative_path(manifest_destination, repo)
-    result_sha256 = sha256_path(result_path)
-    manifest_sha256 = sha256_path(manifest)
+    result_sha256 = evidence_digest.text_evidence_sha256(result_path)
+    manifest_sha256 = evidence_digest.text_evidence_sha256(manifest)
 
     original_matrix_bytes = read_bytes(matrix_path, "MATRIX_INVALID")
     matrix = load_json(matrix_path)
