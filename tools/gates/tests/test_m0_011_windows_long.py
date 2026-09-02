@@ -170,7 +170,12 @@ class M0011WindowsLongValidatorTests(unittest.TestCase):
         self.assertEqual("Windows", report["runner"]["system"])
 
     def test_environment_report_blocks_non_native_host(self) -> None:
-        report = gate.environment_report("a" * 40)
+        with (
+            mock.patch.object(gate.platform, "system", return_value="Linux"),
+            mock.patch.object(gate.platform, "machine", return_value="x86_64"),
+            mock.patch.object(gate.os, "name", "posix"),
+        ):
+            report = gate.environment_report("a" * 40)
         self.assertEqual("BLOCKED", report["status"])
         self.assertIn("NON_NATIVE_WINDOWS", {item["code"] for item in report["blockers"]})
 
