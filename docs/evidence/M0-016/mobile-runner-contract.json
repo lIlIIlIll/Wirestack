@@ -45,11 +45,32 @@
     "status": "PASS",
     "tests": 105,
     "native_cells_retained": true,
-    "latest_hosted_run": "docs/evidence/M0-016/hosted-run-33582666850.report"
+    "latest_hosted_run": "docs/evidence/M0-016/hosted-run-33590649517.report",
+    "tested_revision": "63225c8428f186c6f26bdd7b93c3ff2e834c25cb"
+  },
+  "latest_hosted_results": {
+    "run_id": 33590649517,
+    "status": "BLOCKED",
+    "android-aarch64": {
+      "aws-lc": "BLOCKED",
+      "mbedtls": "BLOCKED",
+      "failure_code": "ANDROID_EMULATOR_STARTUP"
+    },
+    "android-x86_64": {
+      "aws-lc": "PASS",
+      "mbedtls": "PARTIAL",
+      "supplemental": true,
+      "acceleration": "kvm",
+      "runner": "ubuntu-24.04"
+    },
+    "ios-aarch64": {
+      "aws-lc": "PASS",
+      "mbedtls": "PARTIAL"
+    }
   },
   "limitations": [
-    "The latest hosted run retains iOS AWS-LC PASS evidence from an earlier exact revision and iOS Mbed TLS PARTIAL evidence at the current exact revision; Android artifacts are BLOCKED at emulator startup.",
-    "The android-x86_64 job is supplemental smoke evidence only and cannot satisfy the required android-aarch64 cell.",
+    "The latest hosted run proves supplemental x86_64 Android execution, while both required arm64 Android jobs are BLOCKED at emulator startup.",
+    "The android-x86_64 job is supplemental smoke evidence only and cannot satisfy or replace the required android-aarch64 cell.",
     "Android Emulator and iOS Simulator are native VMs, not physical-device evidence.",
     "HarmonyOS/OpenHarmony and physical Android/iOS device evidence remain BLOCKED."
   ]
