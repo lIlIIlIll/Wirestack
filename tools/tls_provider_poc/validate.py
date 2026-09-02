@@ -28,6 +28,7 @@ PROVIDER_ALLOCATION_PROFILE_BOUND_BYTES = 64 * 1024 * 1024 * 1024
 PROVIDER_ALLOCATION_CALL_BOUND = 150_000_000
 CANCELLATION_WAKE_BOUND_US = 250_000
 RESULT_SCHEMA_VERSION = 11
+ANDROID_MIN_API_LEVEL = 33
 MAX_TOOL_VERSION_BYTES = 16 * 1024
 MAX_BUILD_ENVIRONMENT_VALUE_BYTES = 64 * 1024
 MAX_BUILD_ENVIRONMENT_TOTAL_BYTES = 256 * 1024
@@ -125,6 +126,8 @@ def validate_build_provenance(provenance: Any, provider: str,
         "linux-musl-x86_64": "x86_64-unknown-linux-musl",
         "windows-x86_64": "x86_64-pc-windows-msvc",
         "macos-arm64": "arm64-apple-darwin",
+        "android-aarch64": "aarch64-linux-android",
+        "ios-aarch64": "arm64-apple-ios-simulator",
     }
     require(provenance.get("target_triple") == triples.get(result_platform),
             "provider build target triple")
@@ -328,6 +331,37 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
             require(str(execution.get("runner_arch", "")).upper() in
                     {"ARM64", "AARCH64"},
                     "macOS result requires native arm64 runner")
+        if result.get("platform") == "android-aarch64":
+            require(execution.get("runner_os") == "Linux",
+                    "Android result requires a Linux hosted runner")
+            require(str(execution.get("runner_arch", "")).upper() in
+                    {"X64", "AMD64", "X86_64"},
+                    "Android result requires an x86_64 hosted runner")
+            runtime = execution.get("native_runtime")
+            require(isinstance(runtime, dict) and
+                    runtime.get("kind") == "android-emulator" and
+                    runtime.get("runner") == "github-hosted" and
+                    runtime.get("is_device") is False and
+                    runtime.get("abi") == "arm64-v8a" and
+                    isinstance(runtime.get("api_level"), int) and
+                    runtime["api_level"] >= ANDROID_MIN_API_LEVEL,
+                    "Android result requires bounded emulator evidence")
+        if result.get("platform") == "ios-aarch64":
+            require(execution.get("runner_os") == "macOS",
+                    "iOS result requires a macOS hosted runner")
+            require(str(execution.get("runner_arch", "")).upper() in
+                    {"ARM64", "AARCH64"},
+                    "iOS result requires an arm64 hosted runner")
+            runtime = execution.get("native_runtime")
+            require(isinstance(runtime, dict) and
+                    runtime.get("kind") == "ios-simulator" and
+                    runtime.get("runner") == "github-hosted" and
+                    runtime.get("is_device") is False and
+                    runtime.get("arch") == "arm64" and
+                    isinstance(runtime.get("runtime"), str) and
+                    runtime["runtime"].startswith(
+                        "com.apple.CoreSimulator.SimRuntime.iOS-"),
+                    "iOS result requires bounded Simulator evidence")
         if result.get("platform") == "linux-musl-x86_64":
             require(CONTAINER_RE.fullmatch(str(execution.get("container_image", ""))) is not None,
                     "musl result requires immutable Alpine container identity")

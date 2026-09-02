@@ -36,6 +36,7 @@ __pycache__/
 !docs/evidence/M0-010/linux_x86_64/*.json
 !docs/evidence/M0-016/results/**/*.json
 !docs/evidence/M0-016/license-bundles/**/*.json
+!docs/evidence/M0-016/mobile-runner-contract.json
 !docs/evidence/M0-016/license-bundles/**/LICENSE.txt
 !docs/evidence/M0-011/linux_x86_64/*.json
 !docs/evidence/M6-023/linux_x86_64/*.json

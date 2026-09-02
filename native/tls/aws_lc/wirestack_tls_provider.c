@@ -16,11 +16,15 @@
 #include <string.h>
 #include <time.h>
 
+#if defined(__APPLE__)
+#include <TargetConditionals.h>
+#endif
+
 #if !defined(OPENSSL_IS_AWSLC)
-#error "Wirestack's Linux provider must be compiled against pinned AWS-LC headers"
+#error "Wirestack's AWS-LC provider must be compiled against pinned AWS-LC headers"
 #endif
 #if !defined(WIRESTACK_TLS_BUILD_FINGERPRINT)
-#error "Wirestack's Linux provider requires a repository build fingerprint"
+#error "Wirestack's AWS-LC provider requires a repository build fingerprint"
 #endif
 
 #define WIRESTACK_TLS_PROVIDER_MAGIC UINT64_C(0x5753544c53505231)
@@ -690,12 +694,38 @@ const char *wirestack_tls_provider_target_triple(uint64_t handle) {
     if (provider_from_handle(handle) == NULL) {
         return NULL;
     }
-#if defined(__x86_64__)
+#if defined(__ANDROID__)
+#if defined(__aarch64__)
+    return "aarch64-linux-android";
+#elif defined(__x86_64__)
+    return "x86_64-linux-android";
+#elif defined(__arm__)
+    return "armv7a-linux-androideabi";
+#else
+    return "unknown-unknown-android";
+#endif
+#elif defined(__APPLE__)
+#if TARGET_OS_SIMULATOR
+#if defined(__aarch64__)
+    return "arm64-apple-ios-simulator";
+#elif defined(__x86_64__)
+    return "x86_64-apple-ios-simulator";
+#else
+    return "unknown-apple-ios-simulator";
+#endif
+#elif defined(__aarch64__)
+    return "arm64-apple-ios";
+#elif defined(__x86_64__)
+    return "x86_64-apple-darwin";
+#else
+    return "unknown-apple-darwin";
+#endif
+#elif defined(__x86_64__)
     return "x86_64-unknown-linux-gnu";
 #elif defined(__aarch64__)
     return "aarch64-unknown-linux-gnu";
 #else
-    return "unknown-unknown-linux-gnu";
+    return "unknown-unknown-linux";
 #endif
 }
 

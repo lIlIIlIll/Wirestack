@@ -277,6 +277,8 @@ def target_triple(current_platform: str) -> str:
         "linux-musl-x86_64": "x86_64-unknown-linux-musl",
         "windows-x86_64": "x86_64-pc-windows-msvc",
         "macos-arm64": "arm64-apple-darwin",
+        "android-aarch64": "aarch64-linux-android",
+        "ios-aarch64": "arm64-apple-ios-simulator",
     }
     try:
         return triples[current_platform]
@@ -486,6 +488,7 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
             "-DBUILD_SHARED_LIBS=OFF",
             "-DBUILD_TESTING=OFF", "-DDISABLE_GO=ON",
             *(["-DOPENSSL_NO_ASM=ON"] if diagnostic else []),
+            *extra_configure_args,
             *cmake_diagnostic_args,
             *cmake_runtime_args(is_windows()),
             f"-DCMAKE_INSTALL_PREFIX={prefix}",
@@ -507,6 +510,7 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
             "-DENABLE_PROGRAMS=OFF", "-DUSE_SHARED_MBEDTLS_LIBRARY=OFF",
             f"-DMBEDTLS_USER_CONFIG_FILE={profile_config.as_posix()}",
             f"-DTF_PSA_CRYPTO_USER_CONFIG_FILE={profile_config.as_posix()}",
+            *extra_configure_args,
             *cmake_diagnostic_args,
             *cmake_runtime_args(is_windows()),
             *mbedtls_runtime_args(is_windows()),
@@ -528,10 +532,18 @@ def build_provider(spec: Mapping[str, Any], src: Path, work: Path,
         if is_windows():
             configure_command.append("VC-WIN64A")
         else:
+            base_cflags = effective_environment.get("CFLAGS", "").strip()
+            base_cxxflags = effective_environment.get("CXXFLAGS", "").strip()
+            base_ldflags = effective_environment.get("LDFLAGS", "").strip()
+            profile_cflags = f"{sanitizer_flags} -fPIC" if diagnostic else "-O2 -fPIC"
+            profile_cxxflags = sanitizer_flags if diagnostic else "-O2"
             environment_overrides = {
-                "CFLAGS": f"{sanitizer_flags} -fPIC" if diagnostic else "-O2 -fPIC",
-                "CXXFLAGS": sanitizer_flags if diagnostic else "-O2",
-                "LDFLAGS": "-fsanitize=address,undefined" if diagnostic else "",
+                "CFLAGS": " ".join(filter(None, (base_cflags, profile_cflags))),
+                "CXXFLAGS": " ".join(filter(None, (base_cxxflags, profile_cxxflags))),
+                "LDFLAGS": " ".join(filter(None, (
+                    base_ldflags,
+                    "-fsanitize=address,undefined" if diagnostic else "",
+                ))),
             }
             env.update(environment_overrides)
             effective_environment.update(environment_overrides)
@@ -669,7 +681,8 @@ def generate_fixtures(work: Path, log: Path) -> Path:
 
 def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
                 archives: Sequence[Path], work: Path, log: Path,
-                extra_cflags: Sequence[str] = (), diagnostic: bool = False) -> Path:
+                extra_cflags: Sequence[str] = (), diagnostic: bool = False,
+                extra_ldflags: Sequence[str] = ()) -> Path:
     if diagnostic and is_windows():
         raise PocError("sanitizer diagnostic is unsupported on this Windows toolchain")
     work.mkdir(parents=True, exist_ok=True)
@@ -708,7 +721,10 @@ def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
             "-Wall", "-Wextra", "-Werror",
             f"-I{include}", *extra_cflags, "-c", str(source), "-o", str(obj),
         ], cwd=work, log=log)
-        command = [os.environ.get("CXX", "c++"), str(obj), *[str(a) for a in archives], "-pthread", "-lm"]
+        command = [
+            os.environ.get("CXX", "c++"), str(obj), *[str(a) for a in archives],
+            *extra_ldflags, "-pthread", "-lm",
+        ]
         if sys.platform.startswith("linux"):
             command.append("-ldl")
         if diagnostic:
@@ -725,7 +741,8 @@ def compile_poc(spec: Mapping[str, Any], repo: Path, prefix: Path,
             "-Wall", "-Wextra", "-Werror",
             *([f"-D{definition}" for definition in mbedtls_definitions]
               if spec.get("id") == "mbedtls" else []),
-            f"-I{include}", str(source), *[str(a) for a in archives], "-pthread", "-lm",
+            f"-I{include}", str(source), *[str(a) for a in archives],
+            "-pthread", "-lm", *extra_ldflags,
             *(["-fsanitize=address,undefined"] if diagnostic else []),
             "-o", str(output),
         ], cwd=work, log=log)
@@ -844,9 +861,22 @@ def exported_symbol_inventory(binary: Path, work: Path, log: Path) -> dict[str, 
     }
 
 
-def inspect_binary(binary: Path, archives: Sequence[Path], work: Path, log: Path) -> dict[str, Any]:
+def inspect_binary(binary: Path, archives: Sequence[Path], work: Path, log: Path,
+                   target_platform: str | None = None) -> dict[str, Any]:
+    """Inspect a final PoC binary without confusing host and target OSes.
+
+    Android binaries are produced on a Linux host but are ELF files for the
+    bionic target.  Running host ``ldd`` against them is not a valid dependency
+    check and commonly returns a non-zero status.  Use an ELF reader for that
+    target; keep the existing host-native tools for desktop targets.
+    """
     dependencies: list[str] = []
-    if is_windows():
+    if target_platform == "android-aarch64":
+        completed = run(["readelf", "-d", str(binary)], cwd=work, log=log, check=False)
+        if completed.returncode != 0:
+            raise PocError("Android ELF dependency inspection failed")
+        dependencies = sorted(set(FORBIDDEN_DEP_RE.findall(completed.stdout)))
+    elif is_windows():
         completed = run(["dumpbin", "/dependents", str(binary)], cwd=work, log=log, check=False)
         if completed.returncode != 0:
             raise PocError("dumpbin dependency inspection failed")

@@ -1,0 +1,217 @@
+name: M0-016 Mobile Provider PoC
+
+on:
+  push:
+    paths:
+      - "tools/tls_provider_poc/**"
+      - "tools/tests/test_tls_provider_poc*.py"
+      - "docs/architecture/tls-provider-poc-contract.md"
+      - "docs/evidence/M0-016/**"
+      - ".github/workflows/m0-016-mobile-provider-poc.yml"
+  pull_request:
+    paths:
+      - "tools/tls_provider_poc/**"
+      - "tools/tests/test_tls_provider_poc*.py"
+      - "docs/architecture/tls-provider-poc-contract.md"
+      - "docs/evidence/M0-016/**"
+      - ".github/workflows/m0-016-mobile-provider-poc.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+      - name: Validate the mobile runner contract
+        run: |
+          python3 -m py_compile \
+            tools/tls_provider_poc/run.py \
+            tools/tls_provider_poc/run_mobile.py \
+            tools/tls_provider_poc/retain_mobile.py \
+            tools/tls_provider_poc/validate.py
+          python3 -m unittest \
+            tools.tests.test_tls_provider_poc \
+            tools.tests.test_tls_provider_poc_mobile \
+            tools.tests.test_tls_provider_poc_retention -v
+          python3 tools/tls_provider_poc/validate.py \
+            --matrix docs/evidence/M0-016/platform-matrix.json \
+            --matrix-contract-only
+
+  android-emulator:
+    needs: validate-contract
+    strategy:
+      fail-fast: false
+      matrix:
+        # M0-016 requires AWS-LC and Mbed TLS on mobile.  OpenSSL remains a
+        # desktop control; the candidate matrix permits omitting mobile
+        # control builds when they add no decision information.
+        provider: [aws-lc, mbedtls]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      ANDROID_API_LEVEL: "33"
+      ANDROID_NDK_VERSION: "26.3.11579264"
+      ANDROID_SYSTEM_IMAGE: "system-images;android-33;google_apis;arm64-v8a"
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+      - name: Install native provider build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build perl git openssl ca-certificates
+      - name: Provision the arm64 Android emulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          test -d "$SDK_ROOT"
+          resolve_android_tool() {
+            local tool="$1"
+            local candidate
+            for candidate in \
+              "$SDK_ROOT/cmdline-tools/latest/bin/$tool" \
+              "$SDK_ROOT/tools/bin/$tool" \
+              "$SDK_ROOT/platform-tools/$tool" \
+              "$SDK_ROOT/emulator/$tool"; do
+              if [[ -x "$candidate" ]]; then
+                printf '%s' "$candidate"
+                return 0
+              fi
+            done
+            candidate="$(find "$SDK_ROOT/cmdline-tools" -type f -name "$tool" -perm -u+x -print 2>/dev/null | sort -V | tail -n 1)"
+            if [[ -n "$candidate" ]]; then
+              printf '%s' "$candidate"
+              return 0
+            fi
+            candidate="$(command -v "$tool" || true)"
+            test -n "$candidate"
+            printf '%s' "$candidate"
+          }
+          SDKMANAGER="$(resolve_android_tool sdkmanager)"
+          AVDMANAGER="$(resolve_android_tool avdmanager)"
+          EMULATOR="$(resolve_android_tool emulator)"
+          ADB="$(resolve_android_tool adb)"
+          # sdkmanager closes stdin after the last prompt.  Keep the shell's
+          # pipefail policy for every other command, but do not let `yes`
+          # turning its write end into SIGPIPE hide the sdkmanager status.
+          set +o pipefail
+          yes | "$SDKMANAGER" --licenses >/dev/null
+          sdk_status=${PIPESTATUS[1]}
+          set -o pipefail
+          test "$sdk_status" -eq 0
+          "$SDKMANAGER" \
+            "platform-tools" "emulator" "platforms;android-${ANDROID_API_LEVEL}" \
+            "$ANDROID_SYSTEM_IMAGE" "ndk;${ANDROID_NDK_VERSION}"
+          NDK="$SDK_ROOT/ndk/$ANDROID_NDK_VERSION"
+          test -f "$NDK/build/cmake/android.toolchain.cmake"
+          echo "ANDROID_NDK_HOME=$NDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SERIAL=emulator-5554" >> "$GITHUB_ENV"
+          echo "ADB=$ADB" >> "$GITHUB_ENV"
+          echo no | "$AVDMANAGER" create avd --force --name wirestack-m0-016-api33 \
+            --package "$ANDROID_SYSTEM_IMAGE"
+          nohup "$EMULATOR" -avd wirestack-m0-016-api33 \
+            -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data \
+            -gpu swiftshader_indirect >"$RUNNER_TEMP/android-emulator.log" 2>&1 &
+          "$ADB" start-server
+          # Do not let a broken emulator consume the entire job timeout while
+          # waiting for the first device state.  The boot-complete loop below
+          # has its own 240-second bound.
+          timeout 90s "$ADB" wait-for-device
+          deadline=$((SECONDS + 240))
+          boot_state=""
+          while [[ "$boot_state" != "1" ]]; do
+            # ADB can keep a shell request open while the emulator is still
+            # starting. Bound each probe as well as the overall boot wait.
+            boot_state="$(timeout 15s "$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
+            if (( SECONDS >= deadline )); then
+              tail -200 "$RUNNER_TEMP/android-emulator.log" || true
+              exit 1
+            fi
+            sleep 2
+          done
+          "$ADB" shell getprop ro.product.cpu.abi
+          "$ADB" shell getprop ro.build.version.sdk
+      - name: Build and execute the pinned provider in the emulator
+        env:
+          WIRESTACK_GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "build/tls-provider-poc/android-aarch64/${{ matrix.provider }}"
+          python3 tools/tls_provider_poc/run_mobile.py \
+            --platform android-aarch64 \
+            --provider "${{ matrix.provider }}" \
+            --output "build/tls-provider-poc/android-aarch64/${{ matrix.provider }}/result.json"
+      - name: Validate exact-revision Android evidence
+        run: |
+          python3 tools/tls_provider_poc/validate.py \
+            --result "build/tls-provider-poc/android-aarch64/${{ matrix.provider }}/result.json" \
+            --expected-revision "$GITHUB_SHA"
+      - name: Upload Android emulator evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m0-016-android-aarch64-${{ matrix.provider }}-${{ github.sha }}
+          path: |
+            build/tls-provider-poc/android-aarch64/${{ matrix.provider }}/result.json
+            build/tls-provider-poc/android-aarch64/${{ matrix.provider }}/build.log
+            build/tls-provider-poc/android-aarch64/${{ matrix.provider }}/license-bundle
+            ${{ runner.temp }}/android-emulator.log
+          if-no-files-found: error
+
+  ios-simulator:
+    needs: validate-contract
+    strategy:
+      fail-fast: false
+      matrix:
+        # M0-016 requires AWS-LC and Mbed TLS on mobile.  OpenSSL remains a
+        # desktop control; the candidate matrix permits omitting mobile
+        # control builds when they add no decision information.
+        provider: [aws-lc, mbedtls]
+    runs-on: macos-15
+    timeout-minutes: 120
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+      - name: Install native provider build tools
+        run: |
+          command -v cmake || brew install cmake
+          command -v ninja || brew install ninja
+          xcrun simctl list devices available
+      - name: Build and execute the pinned provider in the Simulator
+        env:
+          WIRESTACK_GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "build/tls-provider-poc/ios-aarch64/${{ matrix.provider }}"
+          python3 tools/tls_provider_poc/run_mobile.py \
+            --platform ios-aarch64 \
+            --provider "${{ matrix.provider }}" \
+            --output "build/tls-provider-poc/ios-aarch64/${{ matrix.provider }}/result.json"
+      - name: Validate exact-revision iOS evidence
+        run: |
+          python3 tools/tls_provider_poc/validate.py \
+            --result "build/tls-provider-poc/ios-aarch64/${{ matrix.provider }}/result.json" \
+            --expected-revision "$GITHUB_SHA"
+      - name: Upload iOS Simulator evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m0-016-ios-aarch64-${{ matrix.provider }}-${{ github.sha }}
+          path: |
+            build/tls-provider-poc/ios-aarch64/${{ matrix.provider }}/result.json
+            build/tls-provider-poc/ios-aarch64/${{ matrix.provider }}/build.log
+            build/tls-provider-poc/ios-aarch64/${{ matrix.provider }}/license-bundle
+          if-no-files-found: error

@@ -1,0 +1,122 @@
+{
+  "acceptance_commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M0-016/test-plan.md",
+        "--json"
+      ],
+      "gate": "task",
+      "id": "test-plan-matrix",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.tests.test_tls_provider_poc",
+        "tools.tests.test_tls_provider_poc_mobile",
+        "tools.tests.test_tls_provider_poc_retention",
+        "-q"
+      ],
+      "gate": "task",
+      "id": "provider-poc-contract-tests",
+      "long_running": false,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/tls_provider_poc/validate.py",
+        "--matrix",
+        "docs/evidence/M0-016/platform-matrix.json",
+        "--matrix-contract-only"
+      ],
+      "gate": "task",
+      "id": "platform-provider-matrix-contract",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["scripts/architecture-guard"],
+      "gate": "task",
+      "id": "architecture-guard",
+      "long_running": false,
+      "timeout_seconds": 60
+    }
+  ],
+  "allowed_paths": [
+    ".github/workflows/m0-016-mobile-provider-poc.yml",
+    ".gitignore",
+    "docs/architecture/tls-provider-poc-contract.md",
+    "docs/evidence/M0-016",
+    "docs/planning/status.md",
+    "docs/references/tls-provider-development.md",
+    "native/tls/aws_lc/wirestack_tls_provider.c",
+    "tools/tasks/M0-016.json",
+    "tools/tests/test_tls_provider_poc_mobile.py",
+    "tools/tests/test_tls_provider_poc_retention.py",
+    "tools/tls_provider_poc/retain_mobile.py",
+    "tools/tls_provider_poc/run.py",
+    "tools/tls_provider_poc/run_mobile.py",
+    "tools/tls_provider_poc/validate.py"
+  ],
+  "dependencies": ["M0-015"],
+  "long_running_gate": false,
+  "platforms": [
+    "linux-glibc-x86_64",
+    "linux-musl-x86_64",
+    "windows-x86_64",
+    "macos-arm64",
+    "android-aarch64",
+    "ios-aarch64",
+    "harmony-aarch64"
+  ],
+  "required_evidence": [
+    "docs/evidence/M0-016/README.md",
+    "docs/evidence/M0-016/test-plan.md",
+    "docs/evidence/M0-016/platform-matrix.json",
+    "docs/evidence/M0-016/mobile-runner-contract.json",
+    "docs/evidence/M0-016/windows-x86_64-run.json",
+    "docs/evidence/M0-016/results/linux-glibc-x86_64/aws-lc.json",
+    "docs/evidence/M0-016/results/linux-glibc-x86_64/mbedtls.json",
+    "docs/evidence/M0-016/results/linux-glibc-x86_64/openssl.json",
+    "docs/evidence/M0-016/results/linux-musl-x86_64/aws-lc.json",
+    "docs/evidence/M0-016/results/linux-musl-x86_64/mbedtls.json",
+    "docs/evidence/M0-016/results/linux-musl-x86_64/openssl.json",
+    "docs/evidence/M0-016/results/windows-x86_64/aws-lc.json",
+    "docs/evidence/M0-016/results/windows-x86_64/mbedtls.json",
+    "docs/evidence/M0-016/results/windows-x86_64/openssl.json",
+    "docs/evidence/M0-016/results/macos-arm64/aws-lc.json",
+    "docs/evidence/M0-016/results/macos-arm64/mbedtls.json",
+    "docs/evidence/M0-016/results/macos-arm64/openssl.json"
+  ],
+  "schema_version": 1,
+  "source_paths": [
+    ".github/workflows/m0-016-mobile-provider-poc.yml",
+    "docs/architecture/tls-provider-poc-contract.md",
+    "docs/evidence/M0-016/README.md",
+    "docs/evidence/M0-016/mobile-runner-contract.json",
+    "docs/evidence/M0-016/mobile-runner.md",
+    "docs/evidence/M0-016/platform-matrix.json",
+    "docs/evidence/M0-016/test-plan.md",
+    "docs/planning/status.md",
+    "docs/references/tls-provider-development.md",
+    "native/tls/aws_lc/wirestack_tls_provider.c",
+    "tools/tasks/M0-016.json",
+    "tools/tests/test_tls_provider_poc_mobile.py",
+    "tools/tests/test_tls_provider_poc_retention.py",
+    "tools/tls_provider_poc/retain_mobile.py",
+    "tools/tls_provider_poc/run.py",
+    "tools/tls_provider_poc/run_mobile.py",
+    "tools/tls_provider_poc/validate.py"
+  ],
+  "task_id": "M0-016",
+  "timeout_seconds": 300
+}
