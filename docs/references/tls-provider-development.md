@@ -57,6 +57,12 @@ to 5.5.0 and its LICENSE and NOTICE ship in the Linux artifact. Windows, Apple,
 HarmonyOS, Android, musl, and pure-Cangjie TLS providers are extension points,
 not supported implementations.
 
+The M0-016 mobile PoC has a separate hosted-VM path. Android runs the pinned
+provider executable in an arm64 Android Emulator on `ubuntu-24.04`; iOS runs an
+arm64 Simulator app on `macos-15`. Those jobs exercise the provider contract
+and produce schema-v11 evidence, but they do not turn either platform into a
+supported provider or replace physical-device evidence.
+
 ## M0-016 PoC source ledger
 
 The M0-016 comparison uses the following exact external sources. Mbed TLS and

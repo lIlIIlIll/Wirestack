@@ -8,6 +8,16 @@ Windows and macOS; Mbed TLS and OpenSSL retain explicit PARTIAL results for
 unsupported capabilities. Android, iOS, and HarmonyOS or OpenHarmony still
 lack native-device evidence; cross-compilation does not satisfy those cells.
 
+The local contract-gate record is [`mobile-runner-contract.json`](mobile-runner-contract.json).
+It deliberately records the mobile cells as `NOT_RUN` until a hosted artifact
+has been reviewed and copied into the canonical matrix.
+The traceable mobile test plan is [`test-plan.md`](test-plan.md); its plan
+validator currently reports 10 paths, 9 scenarios, and 9 tests.
+The hosted mobile matrix runs AWS-LC and Mbed TLS; OpenSSL remains a desktop
+control as allowed by the candidate matrix. Use the documented
+`retain_mobile.py` helper to perform the review-bound, atomic copy after a
+successful hosted run.
+
 Schema v11 retains all prior native evidence plus the exact successful NASM
 identity for a Windows AWS-LC build. Its workflow fallback is pinned to
 Chocolatey package `nasm` 2.16.3. The current hosted image supplied NASM
@@ -15,6 +25,14 @@ Chocolatey package `nasm` 2.16.3. The current hosted image supplied NASM
 `547d4edd4b1d6fea2504990e70263b5ce06cfe7ab894483f6c54e60c1bd93b60`.
 Hosted runs use the read-only Actions token only for bounded GitHub API tag
 resolution; it is excluded from logs, retained results, and build provenance.
+
+The `M0-016 Mobile Provider PoC` workflow adds GitHub-hosted native-VM gates
+for Android arm64 (`ubuntu-24.04` plus an API-33 arm64 emulator) and iOS arm64
+(`macos-15` plus an Xcode iOS Simulator). These jobs are supplementary until
+their result artifacts are reviewed and retained. They are emulator/Simulator
+evidence, not physical-device evidence, and therefore do not close M0-012 or
+the full six-platform M0-016 task. See [mobile-runner.md](mobile-runner.md)
+for the runner contract and its fail-closed limits.
 Schema v11 also retains:
 
 - monotonic cancellation and join deadlines that are unaffected by wall-clock
@@ -110,6 +128,10 @@ repository root:
       --matrix docs/evidence/M0-016/platform-matrix.json
 
     python3 -m unittest tools.tests.test_tls_provider_poc
+
+    python3 -m unittest \
+      tools.tests.test_tls_provider_poc_mobile \
+      tools.tests.test_tls_provider_poc_retention
 
 Matrix validation rehashes every retained result, license manifest, and license
 file. Missing files, path escape, digest drift, unsupported schema, stale
