@@ -19,6 +19,9 @@ the platform tools, so an image without preinstalled Android binaries cannot
 silently produce an empty command. License
 acceptance records the `sdkmanager` pipeline status explicitly so a normal
 `yes` SIGPIPE cannot turn a successful installation into a false failure. The
+AVD is created under an explicit `$RUNNER_TEMP/android-avd` directory and the
+expected `.ini` file is checked before launching, keeping the creator and
+emulator search paths identical. License
 iOS job builds an unsigned simulator app bundle, installs it with `simctl`, and
 captures `simctl launch --console` output. If the launch command reports
 success without capability output, the runner executes the same bundled binary
