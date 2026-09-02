@@ -14,11 +14,11 @@ if __package__ in {None, ""}:
     from pathlib import Path
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from tools import evidence_digest
 from tools.tls_provider_poc import run as poc
 
 import argparse
 import datetime as dt
-import hashlib
 import json
 import os
 import platform as host_platform
@@ -53,18 +53,6 @@ ANDROID_TARGETS = {
 
 class MobilePocError(poc.PocError):
     """A bounded mobile-runner failure."""
-
-
-def sha256_path(path: Path) -> str:
-    """Use the M0-016 helper when present, with a standalone fallback."""
-    helper = getattr(poc, "sha256_path", None)
-    if callable(helper):
-        return helper(path)
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def require(condition: bool, message: str) -> None:
@@ -578,14 +566,16 @@ def build_mobile_result(repo: Path, provider: str, platform: str,
         os.environ.clear()
         os.environ.update(original_env)
     result["finished_at"] = dt.datetime.now(dt.timezone.utc).isoformat()
-    result["build_log_sha256"] = sha256_path(log) if log.exists() else None
+    result["build_log_sha256"] = (
+        evidence_digest.text_evidence_sha256(log) if log.exists() else None
+    )
     poc.atomic_json(output, result)
     print("WIRESTACK_M0_016_MOBILE " + json.dumps({
         "provider": provider,
         "platform": platform,
         "status": result["status"],
         "capabilities": result["capabilities"],
-        "result_sha256": sha256_path(output),
+        "result_sha256": evidence_digest.text_evidence_sha256(output),
     }, sort_keys=True))
     return result
 
