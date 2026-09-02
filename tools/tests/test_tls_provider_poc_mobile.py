@@ -169,6 +169,9 @@ class MobileRunnerSafetyTests(unittest.TestCase):
         self.assertIn('test "$abi" = "x86_64"', smoke_job)
         self.assertIn("--platform android-x86_64", smoke_job)
         self.assertIn("-accel on", smoke_job)
+        self.assertIn("-accel off", smoke_job)
+        self.assertIn("ANDROID_EMULATOR_ACCELERATION=$accel_mode", smoke_job)
+        self.assertIn("-accel-check", smoke_job)
         self.assertNotIn("-qemu -accel tcg", smoke_job)
         self.assertIn("android-x86_64-smoke", workflow)
 
@@ -286,6 +289,7 @@ class MobileRunnerSafetyTests(unittest.TestCase):
             mobile.poc.run = fake
         self.assertEqual(runtime["abi"], "x86_64")
         self.assertEqual(runtime["target_platform"], "android-x86_64")
+        self.assertEqual(runtime["acceleration"], "unspecified")
 
     def test_android_compilers_use_macos_host_prebuilt(self):
         with tempfile.TemporaryDirectory() as directory:
