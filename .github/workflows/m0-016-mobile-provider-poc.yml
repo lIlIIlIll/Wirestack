@@ -71,7 +71,6 @@ jobs:
       - name: Install native provider build tools
         run: |
           set -euo pipefail
-          command -v brew
           command -v cmake
           command -v ninja
           command -v perl
@@ -79,14 +78,18 @@ jobs:
           command -v openssl
           command -v curl
           command -v unzip
-          if command -v timeout >/dev/null 2>&1; then
-            TIMEOUT_BIN="$(command -v timeout)"
-          elif command -v gtimeout >/dev/null 2>&1; then
-            TIMEOUT_BIN="$(command -v gtimeout)"
-          else
-            brew install coreutils
-            TIMEOUT_BIN="$(brew --prefix coreutils)/bin/gtimeout"
-          fi
+          TIMEOUT_BIN=""
+          for candidate in \
+            "$(command -v timeout 2>/dev/null || true)" \
+            "$(command -v gtimeout 2>/dev/null || true)" \
+            "/opt/homebrew/opt/coreutils/bin/gtimeout" \
+            "/usr/local/opt/coreutils/bin/gtimeout"; do
+            if [[ -n "$candidate" && -x "$candidate" ]]; then
+              TIMEOUT_BIN="$candidate"
+              break
+            fi
+          done
+          test -n "$TIMEOUT_BIN"
           test -x "$TIMEOUT_BIN"
           echo "WIRESTACK_TIMEOUT=$TIMEOUT_BIN" >> "$GITHUB_ENV"
       - name: Provision the arm64 Android emulator
@@ -153,13 +156,16 @@ jobs:
           test -f "$ANDROID_AVD_HOME/wirestack-m0-016-api33.ini"
           nohup "$EMULATOR" -avd wirestack-m0-016-api33 \
             -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data \
-            -gpu swiftshader_indirect >"$RUNNER_TEMP/android-emulator.log" 2>&1 &
+            -gpu swiftshader_indirect -accel off -no-metrics \
+            >"$RUNNER_TEMP/android-emulator.log" 2>&1 &
           "$ADB" start-server
           # Do not let a broken emulator consume the entire job timeout while
           # waiting for the first device state.  The boot-complete loop below
-          # has its own 240-second bound.
-          "$TIMEOUT_BIN" 90s "$ADB" wait-for-device
-          deadline=$((SECONDS + 240))
+          # has its own 600-second bound.  Hardware virtualization is not
+          # exposed by the hosted macOS VM, so the arm64 guest uses bounded
+          # software QEMU (see -accel off above).
+          "$TIMEOUT_BIN" 180s "$ADB" wait-for-device
+          deadline=$((SECONDS + 600))
           boot_state=""
           while [[ "$boot_state" != "1" ]]; do
             # ADB can keep a shell request open while the emulator is still
