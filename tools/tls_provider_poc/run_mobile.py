@@ -167,12 +167,14 @@ def mobile_toolchain(platform: str, work: Path, log: Path) -> dict[str, Any]:
             # the selected API level.  Re-defining it here turns AWS-LC's
             # -Werror build into a deterministic macro-redefinition failure.
             "compile_flags": ["-fPIC"],
-            # compile_poc invokes the target clang++ directly rather than
-            # through CMake.  Direct Android clang++ defaults to the shared
-            # libc++ runtime, so select the static variant for a self-contained
-            # emulator payload (CMake's ANDROID_STL setting does not affect
-            # this separate link command).
-            "link_flags": ["-static-libstdc++", "-latomic"],
+            # compile_poc invokes the target clang++ directly for the
+            # openssl-compatible family rather than through CMake.  Direct
+            # Android clang++ defaults to the shared libc++ runtime, so the
+            # static variant is kept separate from C linker flags and applied
+            # only to that family below.  CMake's ANDROID_STL setting does not
+            # affect this separate link command.
+            "link_flags": ["-latomic"],
+            "cxx_link_flags": ["-static-libstdc++"],
             "cmake_args": [
                 f"-DCMAKE_TOOLCHAIN_FILE={ndk / 'build/cmake/android.toolchain.cmake'}",
                 f"-DANDROID_ABI={target_info['abi']}",
@@ -220,6 +222,14 @@ def mobile_toolchain(platform: str, work: Path, log: Path) -> dict[str, Any]:
             "sdk": str(sdk_path),
         }
     raise MobilePocError(f"unsupported mobile target: {platform}")
+
+
+def poc_link_flags(spec: Mapping[str, Any], toolchain: Mapping[str, Any]) -> list[str]:
+    """Return linker flags valid for the selected PoC source family."""
+    flags = list(toolchain["link_flags"])
+    if spec.get("poc_family") == "openssl-compatible":
+        flags = [*toolchain.get("cxx_link_flags", []), *flags]
+    return flags
 
 
 class TargetPlatform:
@@ -491,10 +501,11 @@ def build_mobile_result(repo: Path, provider: str, platform: str,
             phase = "fixture-generation"
             fixtures = poc.generate_fixtures(work, log)
             phase = "poc-build"
+            link_flags = poc_link_flags(spec, toolchain)
             binary = poc.compile_poc(
                 spec, repo, prefix, archives, work, log,
                 extra_cflags=toolchain["compile_flags"],
-                extra_ldflags=toolchain["link_flags"])
+                extra_ldflags=link_flags)
             phase = "binary-inspection"
             result["build"] = poc.inspect_binary(
                 binary, archives, work, log, target_platform=platform)
