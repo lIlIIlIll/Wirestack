@@ -1,0 +1,66 @@
+{
+  "acceptance_commands": [
+    {
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/M0-011/windows-4h-test-plan.md", "--json"],
+      "gate": "task",
+      "id": "test-plan-matrix",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": ["python3", "-m", "unittest", "tools.gates.tests.test_m0_011_windows_long", "-v"],
+      "gate": "task",
+      "id": "windows-long-validator",
+      "long_running": false,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": ["python3", "tools/gates/m0_011_windows_long.py", "--validate-report", "docs/evidence/M0-011/windows-x86_64/long-4h.json", "--output", "build/gates/m0-011/windows-validation.json"],
+      "gate": "task",
+      "id": "stored-windows-result",
+      "long_running": false,
+      "timeout_seconds": 60
+    },
+    {
+      "argv": ["scripts/gate-m0-011-windows-long", "--run", "--duration-seconds", "14400", "--sample-interval-seconds", "10", "--artifact-dir", "docs/evidence/M0-011/windows-x86_64/artifacts", "--output", "docs/evidence/M0-011/windows-x86_64/long-4h.json"],
+      "gate": "long",
+      "id": "windows-four-hour-profile",
+      "long_running": true,
+      "timeout_seconds": 15000
+    }
+  ],
+  "allowed_paths": [
+    ".github/workflows/m0-011-windows-long.yml",
+    "docs/evidence/M0-011",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "scripts/gate-m0-011-windows-long",
+    "tools/gates/m0_011_windows_long.py",
+    "tools/gates/net06_leak_soak_sources.py",
+    "tools/gates/tests/test_m0_011_windows_long.py",
+    "tools/tasks/M0-011.json"
+  ],
+  "dependencies": ["M0-004"],
+  "long_running_gate": true,
+  "platforms": ["windows-x86_64"],
+  "required_evidence": [
+    "docs/evidence/M0-011/evidence.json",
+    "docs/evidence/M0-011/windows-x86_64/long-4h.json",
+    "docs/evidence/M0-011/windows-x86_64/validation.json"
+  ],
+  "revision_bound_reports": [
+    "docs/evidence/M0-011/windows-x86_64/long-4h.json"
+  ],
+  "schema_version": 1,
+  "source_paths": [
+    ".github/workflows/m0-011-windows-long.yml",
+    "docs/evidence/M0-011/windows-4h-test-plan.md",
+    "scripts/gate-m0-011-windows-long",
+    "tools/gates/m0_011_windows_long.py",
+    "tools/gates/net06_leak_soak_sources.py",
+    "tools/gates/tests/test_m0_011_windows_long.py",
+    "tools/tasks/M0-011.json"
+  ],
+  "task_id": "M0-011",
+  "timeout_seconds": 15000
+}
