@@ -96,6 +96,12 @@ native-runtime object, with a mismatched hosted runner, or with
 `is_device=true`. This keeps simulator/emulator evidence distinct from a
 physical-device result.
 
+The Android arm64 hosted-emulator cell is **NON-GATING** for the current Linux
+delivery profile under [ADR-0002](../../architecture/adr/0002-linux-first-delivery-profile.md).
+The global M0-016 matrix still records that cell as incomplete. The x86_64
+Android smoke result does not replace the arm64 cell because the two emulators
+execute different Android ABIs.
+
 ## Current boundary
 
 This workflow is a native VM gate, not physical-device evidence. It does not
