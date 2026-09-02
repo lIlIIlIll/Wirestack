@@ -18,6 +18,7 @@ SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 CONTAINER_RE = re.compile(r"^alpine:3\.22@sha256:[0-9a-f]{64}$")
 REQUIRED_PROVIDER_IDS = {"aws-lc", "mbedtls", "openssl"}
+KNOWN_SUPPLEMENTAL_PLATFORM_IDS = {"android-x86_64"}
 MAX_EXPORTED_SYMBOLS = 16384
 MAX_EXPORTED_SYMBOL_LENGTH = 256
 MAX_LICENSE_FILES = 512
@@ -127,6 +128,7 @@ def validate_build_provenance(provenance: Any, provider: str,
         "windows-x86_64": "x86_64-pc-windows-msvc",
         "macos-arm64": "arm64-apple-darwin",
         "android-aarch64": "aarch64-linux-android",
+        "android-x86_64": "x86_64-linux-android",
         "ios-aarch64": "arm64-apple-ios-simulator",
     }
     require(provenance.get("target_triple") == triples.get(result_platform),
@@ -282,6 +284,15 @@ def validate_spec(spec: Mapping[str, Any]) -> None:
     platforms = spec.get("required_platforms")
     require(isinstance(caps, list) and len(caps) >= 14 and len(caps) == len(set(caps)), "required capabilities invalid")
     require(isinstance(platforms, list) and len(platforms) >= 7 and len(platforms) == len(set(platforms)), "required platforms invalid")
+    supplemental = spec.get("supplemental_platforms", [])
+    require(isinstance(supplemental, list) and
+            supplemental == sorted(set(supplemental)) and
+            all(isinstance(platform, str) and platform for platform in supplemental),
+            "supplemental platforms invalid")
+    require(set(supplemental).issubset(KNOWN_SUPPLEMENTAL_PLATFORM_IDS),
+            "unknown supplemental platform")
+    require(set(supplemental).isdisjoint(platforms),
+            "supplemental platforms overlap required platforms")
 
 def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
                     expected_revision: str | None = None) -> None:
@@ -290,7 +301,9 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
     require(schema_version == RESULT_SCHEMA_VERSION, "unsupported result schema")
     require(result.get("task_id") == "M0-016", "result task_id")
     require(result.get("provider") in REQUIRED_PROVIDER_IDS, "result provider")
-    require(result.get("platform") in set(spec["required_platforms"]), "result platform")
+    allowed_platforms = (set(spec["required_platforms"]) |
+                         set(spec.get("supplemental_platforms", [])))
+    require(result.get("platform") in allowed_platforms, "result platform")
     require(result.get("status") in RESULT_STATUSES, "result status")
     successful = result.get("status") in {"PASS", "PARTIAL"}
     if result.get("status") == "FAIL":
@@ -331,18 +344,22 @@ def validate_result(result: Mapping[str, Any], spec: Mapping[str, Any],
             require(str(execution.get("runner_arch", "")).upper() in
                     {"ARM64", "AARCH64"},
                     "macOS result requires native arm64 runner")
-        if result.get("platform") == "android-aarch64":
+        if result.get("platform") in {"android-aarch64", "android-x86_64"}:
             require(execution.get("runner_os") in {"Linux", "macOS"},
                     "Android result requires a native hosted runner")
+            expected_runner_arch = ("ARM64", "AARCH64") if result.get(
+                "platform") == "android-aarch64" else ("X64", "AMD64", "X86_64")
             require(str(execution.get("runner_arch", "")).upper() in
-                    {"ARM64", "AARCH64"},
-                    "Android result requires an arm64 hosted runner")
+                    set(expected_runner_arch),
+                    "Android result requires a native architecture-matched runner")
             runtime = execution.get("native_runtime")
+            expected_abi = ("arm64-v8a" if result.get("platform") ==
+                            "android-aarch64" else "x86_64")
             require(isinstance(runtime, dict) and
                     runtime.get("kind") == "android-emulator" and
                     runtime.get("runner") == "github-hosted" and
                     runtime.get("is_device") is False and
-                    runtime.get("abi") == "arm64-v8a" and
+                    runtime.get("abi") == expected_abi and
                     isinstance(runtime.get("api_level"), int) and
                     runtime["api_level"] >= ANDROID_MIN_API_LEVEL,
                     "Android result requires bounded emulator evidence")

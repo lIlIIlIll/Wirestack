@@ -21,6 +21,18 @@
       "emulator_acceleration": "off",
       "timeout_driver": "python3-subprocess"
     },
+    "android-x86_64": {
+      "supplemental": true,
+      "required_matrix_cell": false,
+      "hosted_runner": "ubuntu-24.04",
+      "host_architecture": "x86_64",
+      "native_runtime": "android-emulator",
+      "abi": "x86_64",
+      "minimum_api_level": 33,
+      "ndk_version": "26.3.11579264",
+      "emulator_acceleration": "kvm",
+      "timeout_driver": "python3-subprocess"
+    },
     "ios-aarch64": {
       "hosted_runner": "macos-15",
       "native_runtime": "ios-simulator",
@@ -31,12 +43,13 @@
   "contract_validation": {
     "command": "python3 -m unittest tools.tests.test_tls_provider_poc tools.tests.test_tls_provider_poc_mobile tools.tests.test_tls_provider_poc_retention -q",
     "status": "PASS",
-    "tests": 99,
+    "tests": 105,
     "native_cells_retained": true,
     "latest_hosted_run": "docs/evidence/M0-016/hosted-run-33582666850.report"
   },
   "limitations": [
     "The latest hosted run retains iOS AWS-LC PASS evidence from an earlier exact revision and iOS Mbed TLS PARTIAL evidence at the current exact revision; Android artifacts are BLOCKED at emulator startup.",
+    "The android-x86_64 job is supplemental smoke evidence only and cannot satisfy the required android-aarch64 cell.",
     "Android Emulator and iOS Simulator are native VMs, not physical-device evidence.",
     "HarmonyOS/OpenHarmony and physical Android/iOS device evidence remain BLOCKED."
   ]

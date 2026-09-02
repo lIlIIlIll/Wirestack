@@ -278,6 +278,7 @@ def target_triple(current_platform: str) -> str:
         "windows-x86_64": "x86_64-pc-windows-msvc",
         "macos-arm64": "arm64-apple-darwin",
         "android-aarch64": "aarch64-linux-android",
+        "android-x86_64": "x86_64-linux-android",
         "ios-aarch64": "arm64-apple-ios-simulator",
     }
     try:
@@ -846,7 +847,7 @@ def exported_symbol_inventory(binary: Path, work: Path, log: Path,
         pattern = re.compile(
             r"^\s*\d+\s+[0-9A-Fa-f]+\s+[0-9A-Fa-f]+\s+(\S+)\s*$", re.M
         )
-    elif target_platform == "android-aarch64":
+    elif target_platform and target_platform.startswith("android-"):
         symbol_tool = _target_tool("llvm-nm", ("nm",))
         if symbol_tool is None:
             raise PocError("Android ELF symbol inspection tool is unavailable")
@@ -893,7 +894,7 @@ def inspect_binary(binary: Path, archives: Sequence[Path], work: Path, log: Path
     target; keep the existing host-native tools for desktop targets.
     """
     dependencies: list[str] = []
-    if target_platform == "android-aarch64":
+    if target_platform and target_platform.startswith("android-"):
         readers: list[str] = []
         compiler = os.environ.get("CC", "").strip()
         if compiler:

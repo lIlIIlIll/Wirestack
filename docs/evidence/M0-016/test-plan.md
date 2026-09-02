@@ -3,9 +3,10 @@
 ## Semantics
 
 This plan covers the GitHub-hosted native-VM extension to the M0-016 provider
-PoC. Android runs an arm64 API-33-or-newer emulator on the arm64 `macos-15`
-runner; iOS runs an arm64 Simulator on `macos-15`. A hosted VM is native execution for the
-target ABI, but it is not physical-device evidence and does not close
+PoC. The required Android cell runs an arm64 API-33-or-newer emulator on the
+arm64 `macos-15` runner. A supplemental Android cell runs an x86_64 API-33-or-
+newer emulator on `ubuntu-24.04`. iOS runs an arm64 Simulator on `macos-15`.
+A hosted VM is native execution for the target ABI, but it is not physical-device evidence and does not close
 GATE-NET-07. The mobile gate tests AWS-LC and Mbed TLS. OpenSSL remains a
 desktop control as permitted by the candidate matrix.
 
@@ -29,6 +30,7 @@ system TLS dependency, a stale SHA, or an unsafe license path is rejected.
 | P008 | result or license bundle is retained | schema, digest, source and matrix checks | reachable | One cell is updated atomically after review. |
 | P009 | result, bundle or matrix is malformed, stale, or already different | fail-closed retention | reachable error | Existing managed evidence is never silently replaced. |
 | P010 | physical device or HarmonyOS claim | platform boundary | excluded | Not inferred from hosted VM or cross-compilation. |
+| P011 | GitHub `ubuntu-24.04` x86_64 with Android API 33 x86_64 image and KVM | runner, ABI, API, NDK and supplemental identity | reachable | Supplemental smoke gate only; never fills `android-aarch64`. |
 
 ## Semantic scenario matrix
 
@@ -43,6 +45,7 @@ system TLS dependency, a stale SHA, or an unsafe license path is rejected.
 | S007 | validated result and bundle | blocked matrix cell | P008 | copy and update exactly one cell | result/manifest digests and paths agree | evidence | P0 |
 | S008 | path escape, symlink, digest drift, schema drift or wrong platform | retention input | P009 | reject without replacing managed evidence | stable failure code and old matrix bytes preserved | fault-injection | P0 |
 | S009 | physical device, HarmonyOS, or cross-build only | no native environment | P010 | remain BLOCKED | no unsupported platform claim | boundary | P0 |
+| S010 | Android x86_64 supplemental VM | clean checkout | P011,P004,P006 | build, stage, run and validate the x86_64 provider | x86_64 ABI, API floor, exact SHA and all metrics; required arm64 cell unchanged | native-platform | P1 |
 
 ## Test-plan matrix
 
@@ -57,6 +60,7 @@ system TLS dependency, a stale SHA, or an unsafe license path is rejected.
 | T007 | S007 | P008 | validated artifact and blocked cell | PASS | atomic result, license tree and matrix update | integration |
 | T008 | S008 | P009 | escape, symlink, stale, schema and write-failure mutations | FAIL | stable code; no partial matrix publication | fault-injection |
 | T009 | S009 | P010 | hosted-VM and physical-device metadata mutations | FAIL/BLOCKED | `is_device` and platform boundary remain explicit | negative |
+| T010 | S010 | P011,P004,P006 | supplemental Android x86_64 matrix job | PASS/PARTIAL or bounded FAIL | KVM runner, x86_64 ABI, target identity and required-matrix isolation | native-platform |
 
 ## Excluded gates
 
