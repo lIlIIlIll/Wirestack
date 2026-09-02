@@ -13,9 +13,10 @@ schema-v11 capability set, and validates the result against `GITHUB_SHA`.
 The Android job runs on the arm64 macOS image, installs the pinned NDK and uses
 `adb`. An arm64 Android system image cannot boot on the x86_64 `ubuntu-24.04`
 runner, so the hosted job deliberately uses `macos-15`. GitHub-hosted macOS
-does not expose hardware virtualization to the job; the emulator therefore
-uses bounded software QEMU (`-accel off`) with SwiftShader and no metrics
-prompt. All provisioning probes use the runner's Python subprocess timeout
+does not expose hardware virtualization to the job; the arm64 emulator does
+not honor the launcher-level `-accel off` switch, so the workflow also passes
+`-qemu -accel tcg` to force bounded software QEMU with SwiftShader and no
+metrics prompt. All provisioning probes use the runner's Python subprocess timeout
 helper; emulator discovery has both a 180-second `wait-for-device` bound and a
 600-second overall boot bound;
 each `getprop sys.boot_completed` probe is limited to 15 seconds. The AVD uses
