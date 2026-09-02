@@ -51,7 +51,7 @@
     {
       "platform": "android-aarch64",
       "provider": "aws-lc",
-      "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.",
+      "reason": "GitHub-hosted arm64 macOS runner attempted the gate, but the arm64 Android emulator crashed during startup (HVF unavailable and forced TCG segfaulted); no native Android result was produced.",
       "status": "BLOCKED"
     },
     {
@@ -69,7 +69,7 @@
     {
       "platform": "harmony-aarch64",
       "provider": "aws-lc",
-      "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.",
+      "reason": "HarmonyOS/OpenHarmony native runner is unavailable; cross-compilation is not accepted as execution evidence.",
       "status": "BLOCKED"
     },
     {
@@ -123,19 +123,25 @@
     {
       "platform": "android-aarch64",
       "provider": "mbedtls",
-      "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.",
+      "reason": "GitHub-hosted arm64 macOS runner attempted the gate, but the arm64 Android emulator crashed during startup (HVF unavailable and forced TCG segfaulted); no native Android result was produced.",
       "status": "BLOCKED"
     },
     {
+      "license_bundle": {
+        "manifest": "docs/evidence/M0-016/license-bundles/ios-aarch64/mbedtls/manifest.json",
+        "sha256": "dd441476ef6a6d4afbfb641ac870bcfd162a773e218422c13c44e35164270c4e"
+      },
       "platform": "ios-aarch64",
       "provider": "mbedtls",
-      "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.",
-      "status": "BLOCKED"
+      "reason": "GitHub-hosted native VM evidence validated at exact revision 829e06a0847e4ce8f66ba01a109c90120ce98373 (ios-simulator).",
+      "result": "docs/evidence/M0-016/results/ios-aarch64/mbedtls.json",
+      "sha256": "b27b5a89c16e092438ea3bb8c3194b020c98cc0556f5c62e423088305a06dc63",
+      "status": "PARTIAL"
     },
     {
       "platform": "harmony-aarch64",
       "provider": "mbedtls",
-      "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.",
+      "reason": "HarmonyOS/OpenHarmony native runner is unavailable; cross-compilation is not accepted as execution evidence.",
       "status": "BLOCKED"
     },
     {
@@ -189,19 +195,19 @@
     {
       "platform": "android-aarch64",
       "provider": "openssl",
-      "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.",
+      "reason": "OpenSSL mobile control is omitted by the candidate matrix; no Android native result is claimed.",
       "status": "BLOCKED"
     },
     {
       "platform": "ios-aarch64",
       "provider": "openssl",
-      "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.",
+      "reason": "OpenSSL mobile control is omitted by the candidate matrix; no iOS native result is claimed.",
       "status": "BLOCKED"
     },
     {
       "platform": "harmony-aarch64",
       "provider": "openssl",
-      "reason": "No native device runner is connected; cross-compilation is not accepted as execution evidence.",
+      "reason": "HarmonyOS/OpenHarmony native runner is unavailable; cross-compilation is not accepted as execution evidence.",
       "status": "BLOCKED"
     }
   ],
