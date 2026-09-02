@@ -319,6 +319,17 @@ jobs:
             --package "$ANDROID_SYSTEM_IMAGE" \
             --device "pixel_2"
           test -f "$ANDROID_AVD_HOME/wirestack-m0-016-api33-x86_64.ini"
+          kvm_permission_fix=not-needed
+          if [[ -e /dev/kvm && ! -r /dev/kvm && -n "$(command -v sudo || true)" ]]; then
+            if sudo -n chmod 666 /dev/kvm >>"$ACCEL_LOG" 2>&1; then
+              kvm_permission_fix=chmod-666
+            else
+              kvm_permission_fix=unavailable
+            fi
+          elif [[ -e /dev/kvm && ! -r /dev/kvm ]]; then
+            kvm_permission_fix=sudo-unavailable
+          fi
+          echo "kvm_permission_fix=$kvm_permission_fix" >> "$ACCEL_LOG"
           accel_status=1
           if run_bounded 30 "$EMULATOR" -accel-check \
               >>"$ACCEL_LOG" 2>&1; then
@@ -343,7 +354,9 @@ jobs:
             >"$EMULATOR_LOG" 2>&1 &
           "$ADB" start-server
           run_bounded 180 "$ADB" wait-for-device
-          deadline=$((SECONDS + 600))
+          boot_timeout_seconds=1200
+          echo "boot_timeout_seconds=$boot_timeout_seconds" >> "$ACCEL_LOG"
+          deadline=$((SECONDS + boot_timeout_seconds))
           boot_state=""
           while [[ "$boot_state" != "1" ]]; do
             boot_state="$(run_bounded 15 "$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
