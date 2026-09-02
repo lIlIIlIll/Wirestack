@@ -35,8 +35,7 @@
         "python3",
         "tools/tls_provider_poc/validate.py",
         "--matrix",
-        "docs/evidence/M0-016/platform-matrix.json",
-        "--matrix-contract-only"
+        "docs/evidence/M0-016/platform-matrix.json"
       ],
       "gate": "task",
       "id": "platform-provider-matrix-contract",

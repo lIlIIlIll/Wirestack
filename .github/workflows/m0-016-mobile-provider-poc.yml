@@ -42,8 +42,7 @@ jobs:
             tools.tests.test_tls_provider_poc_mobile \
             tools.tests.test_tls_provider_poc_retention -v
           python3 tools/tls_provider_poc/validate.py \
-            --matrix docs/evidence/M0-016/platform-matrix.json \
-            --matrix-contract-only
+            --matrix docs/evidence/M0-016/platform-matrix.json
 
   android-emulator:
     needs: validate-contract
