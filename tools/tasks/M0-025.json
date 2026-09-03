@@ -1,0 +1,109 @@
+{
+  "acceptance_commands": [
+    {
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "validate-plan",
+        "docs/evidence/M0-025/test-plan.md",
+        "--json"
+      ],
+      "gate": "task",
+      "id": "test-plan-matrix",
+      "long_running": false,
+      "timeout_seconds": 30
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.gates.tests.test_m0_025_windows_resource_diagnostics",
+        "tools.gates.tests.test_m0_011_windows_long",
+        "-v"
+      ],
+      "gate": "task",
+      "id": "diagnostic-regression-tests",
+      "long_running": false,
+      "timeout_seconds": 300
+    },
+    {
+      "argv": ["scripts/check-fast", "--json"],
+      "gate": "task",
+      "id": "fast-repository-check",
+      "long_running": false,
+      "timeout_seconds": 600
+    },
+    {
+      "argv": ["scripts/check"],
+      "gate": "task",
+      "id": "canonical-repository-check",
+      "long_running": false,
+      "timeout_seconds": 1800
+    },
+    {
+      "argv": [
+        "scripts/gate-m0-011-windows-long",
+        "--run",
+        "--duration-seconds",
+        "14400",
+        "--sample-interval-seconds",
+        "10",
+        "--artifact-dir",
+        "build/gates/m0-011-windows-long",
+        "--output",
+        "build/gates/m0-011-windows-long/long-4h.json"
+      ],
+      "gate": "long",
+      "id": "m0-011-native-four-hour-rerun",
+      "long_running": true,
+      "timeout_seconds": 15000
+    }
+  ],
+  "allowed_paths": [
+    ".github/workflows/m0-025-windows-resource-diagnostics.yml",
+    "docs/evidence/M0-011",
+    "docs/evidence/M0-025",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "tools/gates/m0_011_windows_long.py",
+    "tools/gates/m0_025_windows_resource_diagnostics.py",
+    "tools/gates/net06_leak_soak_sources.py",
+    "tools/gates/tests/test_m0_011_windows_long.py",
+    "tools/gates/tests/test_m0_025_windows_resource_diagnostics.py",
+    "tools/tasks/M0-025.json"
+  ],
+  "dependencies": ["M0-004"],
+  "long_running_gate": true,
+  "platforms": ["windows-x86_64", "linux-x86_64-glibc"],
+  "required_evidence": [
+    "docs/evidence/M0-025/evidence.json",
+    "docs/evidence/M0-025/diagnostic-results.json",
+    "docs/evidence/M0-025/repair-decision.json",
+    "docs/evidence/M0-025/native-rerun.json",
+    "docs/evidence/M0-025/task-check.json"
+  ],
+  "revision_bound_reports": [
+    "docs/evidence/M0-025/diagnostic-results.json",
+    "docs/evidence/M0-025/repair-decision.json",
+    "docs/evidence/M0-025/native-rerun.json"
+  ],
+  "schema_version": 1,
+  "source_paths": [
+    ".github/workflows/m0-025-windows-resource-diagnostics.yml",
+    "docs/evidence/M0-025/README.md",
+    "docs/evidence/M0-025/test-plan.md",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "tools/gates/m0_011_windows_long.py",
+    "tools/gates/m0_025_windows_resource_diagnostics.py",
+    "tools/gates/net06_leak_soak_sources.py",
+    "tools/gates/tests/test_m0_011_windows_long.py",
+    "tools/gates/tests/test_m0_025_windows_resource_diagnostics.py",
+    "tools/tasks/M0-025.json"
+  ],
+  "task_id": "M0-025",
+  "timeout_seconds": 15000
+}
