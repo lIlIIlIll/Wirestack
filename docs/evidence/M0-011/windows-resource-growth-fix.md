@@ -34,5 +34,8 @@ a different value fails with `PROBE_CLEANUP`.
 
 A fresh native `windows-2025` four-hour run at the exact post-fix revision must
 show PASS resource trends before the Windows supplemental gate can close. No
-new four-hour run was started in this local change, and no threshold was
-weakened.
+new four-hour run has passed yet: run `33705247323` at the post-fix revision
+failed before the profile because the latest Windows SDK archive did not match
+its published SHA-256, and one retry reproduced that failure. The workflow now
+pins the previously verified Windows nightly rather than silently falling back.
+No threshold was weakened.
