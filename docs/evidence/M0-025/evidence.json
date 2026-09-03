@@ -1,0 +1,38 @@
+{
+  "schema_version": 2,
+  "source_task": "M0-025",
+  "platform": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "libc": "glibc",
+    "libc_version": "2.44"
+  },
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  },
+  "acceptance_status": "BLOCKED",
+  "generated_at_utc": "2026-09-03T12:35:00Z",
+  "revision": "b33f00e05af08ba45e0e07936fcc270cd36b7937",
+  "reports": [
+    {"path": "docs/evidence/M0-025/diagnostic-results.json", "sha256": {"domain": "text-evidence", "sha256": "496e3f3629fc00c582c8121e927b33ad4b0dc3cf1230e6c9cfd6a0827a401d08"}, "source_task": "M0-025", "acceptance_status": "BLOCKED"},
+    {"path": "docs/evidence/M0-025/repair-decision.json", "sha256": {"domain": "text-evidence", "sha256": "8e7b0447a4faf486ee8e11151a99de0c489b53e9feaeb2fee0fa7b6bc951d597"}, "source_task": "M0-025", "acceptance_status": "BLOCKED"},
+    {"path": "docs/evidence/M0-025/native-rerun.json", "sha256": {"domain": "text-evidence", "sha256": "9ccbe48ed842ca3b1585b6898ca0f65b0d37abda0cccf96eb652e7e211e3ec8c"}, "source_task": "M0-025", "acceptance_status": "FAIL"}
+  ],
+  "source_sha256": {
+    ".github/workflows/m0-025-windows-resource-diagnostics.yml": {"domain": "text-evidence", "sha256": "49ba8c8d9546abc4fef1b9746635106ee59132e1b5acce3e2fd5bd8ca8c8fac2"},
+    ".gitignore": {"domain": "text-evidence", "sha256": "4e1d14d6fd1a443b3b9c72c842a95c1a26fa3889f2ff7e7da4aaab9d752545d6"},
+    "docs/evidence/M0-025/README.md": {"domain": "text-evidence", "sha256": "ec94bd808e863323fcde8a78ed32fa44b1b45ab1b00fb58038b3b728dc0e6f0e"},
+    "docs/evidence/M0-025/test-results.md": {"domain": "text-evidence", "sha256": "4fbb0e1baa4a4df99fa6af11db171d296c7fcde9b007ab983250d09f6e80d55b"},
+    "docs/evidence/M0-025/test-plan.md": {"domain": "text-evidence", "sha256": "5f62189d0beda3db9e9a46fe5c3f1f3b48f653ff5b22c6a1ad18a0043620b2e6"},
+    "docs/planning/implementation-backlog.md": {"domain": "text-evidence", "sha256": "cdc043ef3d5b03fb4c5fe42c66a34cf075117fc77d62557462a69b7037a3dc29"},
+    "docs/planning/status.md": {"domain": "text-evidence", "sha256": "e70b4155c1042bf0044ece0e788b42cd8ab003fd759517fab917e400ebe8de1d"},
+    "tools/gates/m0_011_windows_long.py": {"domain": "text-evidence", "sha256": "af425e985a275ec41470d40e62a3dfcb03d64da7964f498674b3c660aee0ad7d"},
+    "tools/gates/m0_025_windows_resource_diagnostics.py": {"domain": "text-evidence", "sha256": "10de05d586cc310e7329ddef47a4043c14acb5c6308888bf12f93b0e582578cc"},
+    "tools/gates/net06_leak_soak_sources.py": {"domain": "text-evidence", "sha256": "d6343a3863763184dc6a4133ba22a53142efc81d77cc8f19516e0269b27ccd58"},
+    "tools/gates/tests/test_m0_011_windows_long.py": {"domain": "text-evidence", "sha256": "fc8046e824d534fb42db7816e727b96ef03d936c2eff2fe99c3a36e33c5a7e34"},
+    "tools/gates/tests/test_m0_025_windows_resource_diagnostics.py": {"domain": "text-evidence", "sha256": "31e4766cb2e301717d5931107f1b118c463b38c0a182a43c565fab4106bcaf77"},
+    "tools/tasks/M0-025.json": {"domain": "text-evidence", "sha256": "65789474b0e6ee0f43892df650153a51dd384829bc151d2abdf434f55efcc2c6"},
+    "tools/tests/test_m7_linux_task_graph.py": {"domain": "text-evidence", "sha256": "6353afba87aed77ab43edda53c6d6d23c3f4054b3c6fcc4e4f25b8f87d7bcc46"}
+  }
+}
