@@ -51,6 +51,7 @@ MIN_DURATION_TOLERANCE_SECONDS = 5
 DEFAULT_SAMPLE_INTERVAL_SECONDS = 10.0
 MAX_CAPTURE_BYTES = 32 * 1024
 MAX_SAMPLES = 20_000
+WINDOWS_GC_INTERVAL_ITERATIONS = 256
 
 RESOURCE_LIMITS = {
     "rss_kib": 8 * 1024,
@@ -69,6 +70,46 @@ class GateError(RuntimeError):
         super().__init__(detail)
         self.code = code
         self.detail = detail
+
+
+def windows_probe_source() -> str:
+    """Add Windows-only collection checkpoints without changing Linux probes."""
+
+    source = STRESS_SOURCE
+    replacements = (
+        (
+            "import std.net.*\n",
+            "import std.net.*\nimport std.runtime.*\n",
+            1,
+        ),
+        (
+            "    let requested = Int64.parse(args[2])\n",
+            "    let requested = Int64.parse(args[2])\n"
+            "    let gcEvery = Int64.parse(args[3])\n"
+            "    if (gcEvery <= 0) {\n"
+            "        throw IllegalArgumentException(\"gc cadence must be positive\")\n"
+            "    }\n",
+            1,
+        ),
+        (
+            "        iteration += 1\n",
+            "        iteration += 1\n"
+            "        if (iteration % gcEvery == 0) {\n"
+            "            gc(heavy: true)\n"
+            "        }\n",
+            1,
+        ),
+        (
+            "requested=${requested} iterations=${iteration}",
+            "requested=${requested} gcEvery=${gcEvery} iterations=${iteration}",
+            2,
+        ),
+    )
+    for old, new, expected_count in replacements:
+        if source.count(old) != expected_count:
+            raise GateError("PROBE_SOURCE_TEMPLATE", "Windows probe template drifted")
+        source = source.replace(old, new)
+    return source
 
 
 def utc_now() -> str:
@@ -407,7 +448,7 @@ def compile_probe(root: Path, artifact_dir: Path, timeout: float) -> tuple[Path,
     probe_dir.mkdir(parents=True, exist_ok=True)
     source = probe_dir / "net06_stress_windows.cj"
     binary = probe_dir / "net06_stress_windows.exe"
-    source.write_text(STRESS_SOURCE, encoding="utf-8", newline="\n")
+    source.write_text(windows_probe_source(), encoding="utf-8", newline="\n")
     process = run_process(
         ["cjc", "-O2", str(source), "-o", str(binary)], probe_dir, timeout
     )
@@ -481,7 +522,13 @@ def execute_profile(
         with StressServer("mixed-soak", sys.maxsize, min(30.0, timeout_seconds)) as active_server:
             server = active_server
             process = run_process(
-                [str(binary), "mixed-soak", str(server.port), str(duration_seconds)],
+                [
+                    str(binary),
+                    "mixed-soak",
+                    str(server.port),
+                    str(duration_seconds),
+                    str(WINDOWS_GC_INTERVAL_ITERATIONS),
+                ],
                 artifact_dir / "probe",
                 duration_seconds + int(timeout_seconds),
                 sampler,
@@ -505,6 +552,12 @@ def execute_profile(
         except Exception as error:  # stable class only
             parse_error = type(error).__name__
 
+    gc_every_iterations = 0
+    if fields and "gcEvery" in fields:
+        try:
+            gc_every_iterations = int(fields["gcEvery"])
+        except (TypeError, ValueError):
+            gc_every_iterations = -1
     workload: dict[str, Any] = {
         "mode": "mixed-soak",
         "requested_seconds": duration_seconds,
@@ -517,6 +570,7 @@ def execute_profile(
         "eof": int(fields["eof"]) if fields else 0,
         "close_errors": int(fields["closeErrors"]) if fields else 0,
         "unknown_mode": fields["unknownMode"] if fields else "unknown",
+        "gc_every_iterations": gc_every_iterations,
     }
     samples = sampler.samples
     trend = resource_trend(samples)
@@ -536,6 +590,7 @@ def execute_profile(
         and workload["completed"] == workload["iterations"]
         and workload["other_errors"] == 0
         and workload["close_errors"] == 0
+        and workload["gc_every_iterations"] == WINDOWS_GC_INTERVAL_ITERATIONS
         and server.accepted == workload["iterations"]
         and duration_ok
     )
@@ -659,6 +714,8 @@ def validate_result(report: Any, expected_revision: str | None = None) -> dict[s
         raise GateError("WORKLOAD_ERRORS", "workload contains non-terminal errors")
     if workload.get("unknown_mode") != "false":
         raise GateError("WORKLOAD_MODE", "unknown mode marker is not false")
+    if workload.get("gc_every_iterations") != WINDOWS_GC_INTERVAL_ITERATIONS:
+        raise GateError("PROBE_CLEANUP", "Windows probe did not prove its GC cadence")
     resources = report.get("resources")
     if not isinstance(resources, dict):
         raise GateError("RESOURCES", "resource report is missing")
