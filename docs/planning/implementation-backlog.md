@@ -166,6 +166,7 @@ M3 + M4 + M5 + M6 全部通过 ─→ M7 稳定版硬化
 | M0-022 | 建立 M0 持续门禁 CI | 基础设施 | C3 | M0-004..M0-020,M0-024 | PRD §21.5 | 平台可用时自动运行短门禁；长 soak/真机任务可手动触发但产出同一结果格式；架构守卫为必过项。 |
 | M0-023 | 冻结当前 Linux glibc 支持范围并延后 musl | 架构 | C2 | M0-001,M0-004 | PRD §0.1/§21.5；ADR-0004 | PRD、ADR、backlog、status 和证据一致声明当前 Linux 仅支持 glibc；musl 不记为失败或通过，由 SDK 支持条件触发 P1-011。 |
 | M0-024 | 冻结不依赖上游改造的 Transport 能力策略 | 架构 | C2 | M0-009,M0-023 | PRD §8.4/§10.3/§11.3；ADR-0005 | 当前 release 只依赖公共 SDK；half-close、native error code 和精确 runtime backend 缺失时有稳定能力或错误表示；UP-003/UP-005 保留为远期增强。 |
+| M0-025 | 诊断并修复 Windows 原生资源增长 | 可靠性/Windows | C4 | M0-004 | PRD §9 GATE-NET-06；入口失败证据为 M0-011 原生 run `33705670217` | 独立分离四种 Windows 生命周期 workload，定位 Wirestack-owned 或公共 Cangjie socket 资源增长；只实施仓库内最小修复，保持 handle/private/RSS/thread/socket 阈值不变；生成 source-bound 诊断、归因和修复报告，并重新运行一次 M0-011 固定 4 小时原生门禁。若根因属于 runtime/std，记录上游候选并保持 BLOCKED。 |
 
 ---
 

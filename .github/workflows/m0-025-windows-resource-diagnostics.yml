@@ -1,0 +1,99 @@
+name: M0-025 Windows resource diagnosis and M0-011 rerun
+
+on:
+  push:
+    branches:
+      - task/M0-025-windows-resource-diagnostics
+    paths:
+      - ".github/workflows/m0-025-windows-resource-diagnostics.yml"
+      - "tools/gates/m0_011_windows_long.py"
+      - "tools/gates/m0_025_windows_resource_diagnostics.py"
+      - "tools/gates/net06_leak_soak_sources.py"
+      - "tools/gates/tests/test_m0_011_windows_long.py"
+      - "tools/gates/tests/test_m0_025_windows_resource_diagnostics.py"
+      - "scripts/gate-m0-011-windows-long"
+      - "docs/evidence/M0-025/**"
+      - "tools/tasks/M0-025.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CANGJIE_WINDOWS_NIGHTLY_VERSION: 1.3.0-alpha.20260902010013
+
+jobs:
+  windows-resource-diagnosis-and-rerun:
+    runs-on: windows-2025
+    timeout-minutes: 285
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Select verified Windows Cangjie nightly
+        id: cangjie-nightly
+        shell: pwsh
+        run: |
+          Write-Output "Using pinned Windows Cangjie nightly $env:CANGJIE_WINDOWS_NIGHTLY_VERSION"
+          "version=$env:CANGJIE_WINDOWS_NIGHTLY_VERSION" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Install the selected Cangjie toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ steps.cangjie-nightly.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie.zip
+
+      - name: Run local diagnostic unit tests
+        shell: pwsh
+        run: python -m unittest tools.gates.tests.test_m0_025_windows_resource_diagnostics tools.gates.tests.test_m0_011_windows_long -v
+
+      - name: Run bounded mode-isolation diagnostics
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build/gates/m0-025-windows-resource-diagnostics | Out-Null
+          python tools/gates/m0_025_windows_resource_diagnostics.py `
+            --run `
+            --duration-seconds 60 `
+            --sample-interval-seconds 5 `
+            --timeout-seconds 90 `
+            --repository-revision $env:GITHUB_SHA `
+            --artifact-dir build/gates/m0-025-windows-resource-diagnostics/artifacts `
+            --output build/gates/m0-025-windows-resource-diagnostics/diagnostic-results.json
+
+      - name: Run the M0-011 four-hour native profile
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build/gates/m0-011-windows-long | Out-Null
+          python tools/gates/m0_011_windows_long.py `
+            --run `
+            --duration-seconds 14400 `
+            --sample-interval-seconds 10 `
+            --artifact-dir build/gates/m0-011-windows-long/artifacts `
+            --repository-revision $env:GITHUB_SHA `
+            --output build/gates/m0-011-windows-long/long-4h.json
+
+      - name: Validate the M0-011 exact-revision result
+        if: always()
+        shell: pwsh
+        run: |
+          if (Test-Path build/gates/m0-011-windows-long/long-4h.json) {
+            python tools/gates/m0_011_windows_long.py `
+              --validate-report build/gates/m0-011-windows-long/long-4h.json `
+              --expected-revision $env:GITHUB_SHA `
+              --output build/gates/m0-011-windows-long/validation.json
+          }
+
+      - name: Upload bounded diagnostic and rerun evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m0-025-windows-resource-diagnostics-${{ github.sha }}
+          path: |
+            build/gates/m0-025-windows-resource-diagnostics/**
+            build/gates/m0-011-windows-long/**
+          if-no-files-found: error
+          retention-days: 14
