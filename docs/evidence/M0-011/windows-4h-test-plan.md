@@ -6,6 +6,14 @@ hours on a GitHub `windows-2025` runner and records bounded process-resource
 trends. It does not replace the PRD's 24-hour Linux release-candidate soak or
 the remaining native-platform requirements.
 
+The workflow uses the explicitly pinned Cangjie nightly
+`1.3.0-alpha.20260902010013`, whose Windows archive download and published
+SHA-256 matched in the preceding native run. The newer
+`1.3.0-alpha.20260903010011` archive currently fails its published checksum;
+the workflow therefore fails closed on that input instead of falling back at
+runtime. Changing the pin requires a fresh toolchain verification before the
+four-hour profile is considered evidence.
+
 ## Semantics and control-flow path matrix
 
 | Path ID | Conditions | Required behavior | Reachability |
