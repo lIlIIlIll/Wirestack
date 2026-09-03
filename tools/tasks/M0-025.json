@@ -73,6 +73,7 @@
     "tools/gates/net06_leak_soak_sources.py",
     "tools/gates/tests/test_m0_011_windows_long.py",
     "tools/gates/tests/test_m0_025_windows_resource_diagnostics.py",
+    "tools/tests/test_m7_linux_task_graph.py",
     "tools/tasks/M0-025.json"
   ],
   "dependencies": ["M0-004"],
@@ -102,6 +103,7 @@
     "tools/gates/net06_leak_soak_sources.py",
     "tools/gates/tests/test_m0_011_windows_long.py",
     "tools/gates/tests/test_m0_025_windows_resource_diagnostics.py",
+    "tools/tests/test_m7_linux_task_graph.py",
     "tools/tasks/M0-025.json"
   ],
   "task_id": "M0-025",
