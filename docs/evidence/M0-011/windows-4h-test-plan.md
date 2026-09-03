@@ -23,7 +23,7 @@ the remaining native-platform requirements.
 | Scenario ID | Trigger | Expected result | Evidence |
 |---|---|---|---|
 | S001 | `--environment-only` on `windows-2025` | READY with runner/toolchain identity | environment JSON |
-| S002 | `--run --duration-seconds 14400` | mixed `connect-close`, `echo-close`, `peer-reset` and `close-during-read` cycles complete | long report |
+| S002 | `--run --duration-seconds 14400` | mixed `connect-close`, `echo-close`, `peer-reset` and `close-during-read` cycles complete; the Windows probe reports `gcEvery=256` | long report |
 | S003 | process exits early, timeout or server error | FAIL; no partial result is promoted to PASS | process/workload fields |
 | S004 | Win32/PowerShell/netstat query unavailable | BLOCKED/FAIL; metric is not reported as measured | sampler errors |
 | S005 | RSS, private, handle, thread or socket growth | FAIL when the explicit trend bound is exceeded | trend object |
@@ -35,7 +35,7 @@ the remaining native-platform requirements.
 | Test ID | Scenario IDs | Path IDs | Test | Expected result | Type |
 |---|---|---|---|---|---|
 | T001 | S001 | P001,P002 | environment identity and missing-capability injection | truthful READY/BLOCKED | unit,fault-injection |
-| T002 | S002,S003 | P003 | workload report validation | four-hour PASS only after exact bounded checks | unit |
+| T002 | S002,S003 | P003 | workload report validation, including the required Windows GC cadence | four-hour PASS only after exact bounded checks | unit |
 | T003 | S004,S005 | P004,P005 | sampler coverage and trend mutations | measured metrics pass; missing/growth fails | unit,fault-injection |
 | T004 | S006 | P006 | unknown schema, stale SHA, short duration, SKIPPED and global-claim mutations | stable FAIL codes | fault-injection |
 | T005 | S007 | P007 | atomic JSON write | one complete file, no temp residue | unit,fault-injection |
