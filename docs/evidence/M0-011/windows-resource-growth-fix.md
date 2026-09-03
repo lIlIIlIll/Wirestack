@@ -22,7 +22,7 @@ a different value fails with `PROBE_CLEANUP`.
 
 ## Local checks
 
-- `python3 -m unittest tools.gates.tests.test_m0_011_windows_long -v`: 11/11
+- `python3 -m unittest tools.gates.tests.test_m0_011_windows_long -v`: 12/12
   passed.
 - The generated probe compiled with the local Cangjie compiler (`cjc` exit 0).
 - A 20-second loopback smoke run using the Windows probe variant with
@@ -32,10 +32,11 @@ a different value fails with `PROBE_CLEANUP`.
 
 ## Still required
 
-A fresh native `windows-2025` four-hour run at the exact post-fix revision must
-show PASS resource trends before the Windows supplemental gate can close. No
-new four-hour run has passed yet: run `33705247323` at the post-fix revision
-failed before the profile because the latest Windows SDK archive did not match
-its published SHA-256, and one retry reproduced that failure. The workflow now
-pins the previously verified Windows nightly rather than silently falling back.
-No threshold was weakened.
+A fresh native `windows-2025` four-hour run at the exact post-fix revision was
+completed as run `33705670217`. The toolchain installed and the workload ran for
+the full duration, but the resource trend still failed: handle growth was
+`127 > 8` and private-byte growth was `65704 KiB > 8192 KiB`. The GC cadence
+reduced handle growth relative to the retained pre-fix run, but it did not
+establish bounded Windows resources. The exact report is retained as
+`windows-x86_64/long-4h-33705670217.json`; no threshold was weakened and
+M0-011 remains blocked.

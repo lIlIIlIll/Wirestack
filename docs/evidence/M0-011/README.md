@@ -63,10 +63,27 @@ exceeded the bounds (`handle_count` growth `244` > `8`, `private_kib` growth
 `65068` > `8192`) and one thread query was unavailable. The report therefore
 does not close the Windows supplemental gate or global M0-011.
 
+### Latest post-fix native rerun
+
+Run [`33705670217`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33705670217)
+checked out `2a73c866c64d6ef94da2f486055ea9e6bd377927` on the same
+`windows-2025` / AMD64 image and completed the full `14,400`-second workload
+with `1,267,504` iterations and `gcEvery=256`. The validator retained a FAIL:
+handle-count growth was `127` (limit `8`) and private-byte growth was `65,704
+KiB` (limit `8,192 KiB`). RSS growth was `36 KiB`, thread/socket growth was
+zero, and all resource classes were measured without sampler errors. The exact
+environment, report and validator output are retained as
+[`environment-33705670217.json`](windows-x86_64/environment-33705670217.json),
+[`long-4h-33705670217.json`](windows-x86_64/long-4h-33705670217.json) and
+[`validation-33705670217.json`](windows-x86_64/validation-33705670217.json).
+The run proves the native gate executes after the probe change; it does not
+prove Windows resource acceptance.
+
 ## Remaining global acceptance work
 
-- Rerun the native Windows x86_64 supplemental profile after the resource-growth
-  fix. The retained run `33602643549` remains a FAIL and is not rewritten.
+- Resolve the remaining native Windows resource growth. The post-fix run
+  `33705670217` still fails handle/private-byte bounds and is retained beside
+  the original run `33602643549`; neither report is rewritten.
 - Execute native macOS, Android, iOS and HarmonyOS/OpenHarmony profiles.
 - Keep the required 24-hour Linux release-candidate soak as the global
   GATE-NET-06 duration; the Windows four-hour profile does not replace it.
