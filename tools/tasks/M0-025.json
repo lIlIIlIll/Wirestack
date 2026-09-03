@@ -96,6 +96,7 @@
   "source_paths": [
     ".github/workflows/m0-025-windows-resource-diagnostics.yml",
     "docs/evidence/M0-025/README.md",
+    "docs/evidence/M0-025/test-results.md",
     "docs/evidence/M0-025/test-plan.md",
     "docs/planning/implementation-backlog.md",
     "docs/planning/status.md",

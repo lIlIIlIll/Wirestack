@@ -1,0 +1,879 @@
+{
+  "blockers": [
+    {
+      "code": "MODE_DIAGNOSTIC_ASSERTION",
+      "detail": "one or more isolated modes did not establish bounded resources"
+    }
+  ],
+  "classification": "WINDOWS_MODE_ISOLATION",
+  "compile": {
+    "binary_sha256": "a5b5dbb06f207fc4f3338eccead67e087f4e74e77be69afbd297b304f2c126d9",
+    "process": {
+      "command": [
+        "cjc",
+        "-O2",
+        "D:\\a\\Wirestack\\Wirestack\\build\\gates\\m0-025-windows-resource-diagnostics\\artifacts\\probe\\net06_stress_windows.cj",
+        "-o",
+        "D:\\a\\Wirestack\\Wirestack\\build\\gates\\m0-025-windows-resource-diagnostics\\artifacts\\probe\\net06_stress_windows.exe"
+      ],
+      "duration_ms": 1391.0,
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "",
+      "timed_out": false
+    },
+    "source_sha256": "037f4acb359c62accbbea4248405adaa744b52825fa88a78994d0df234c222a2"
+  },
+  "diagnostic_duration_seconds": 60,
+  "environment": {
+    "blockers": [],
+    "diagnostic_modes": [
+      "connect-close",
+      "echo-close",
+      "peer-reset",
+      "close-during-read"
+    ],
+    "generated_at_utc": "2026-09-03T08:25:16.461189Z",
+    "non_claims": [
+      "diagnostic readiness is not four-hour acceptance",
+      "the public std.net probe is not Wirestack production-path evidence",
+      "this report does not close M0-011"
+    ],
+    "report_kind": "windows-resource-diagnostics-environment",
+    "repository_revision": "b33f00e05af08ba45e0e07936fcc270cd36b7937",
+    "runner": {
+      "github_actions": true,
+      "image_os": "win25-vs2026",
+      "image_version": "20260824.214.3",
+      "machine": "AMD64",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "release": "2025Server",
+      "runner_arch": "X64",
+      "runner_name": "GitHub Actions 1000011683",
+      "runner_os": "Windows",
+      "system": "Windows"
+    },
+    "schema_version": 1,
+    "status": "READY",
+    "task_id": "M0-025",
+    "toolchain": {
+      "cjc": "Cangjie Compiler: 1.3.0-alpha.20260902010013 (cjnative)\nTarget: x86_64-w64-mingw32",
+      "cjpm": "Cangjie Project Manager: 1.3.0-alpha.03"
+    },
+    "tools": {
+      "cjc": "C:\\hostedtoolcache\\windows\\cangjie\\1.3.0-alpha.20260902010013-win32-x64\\x64\\cangjie\\bin\\cjc.EXE",
+      "cjpm": "C:\\hostedtoolcache\\windows\\cangjie\\1.3.0-alpha.20260902010013-win32-x64\\x64\\cangjie\\tools\\bin\\cjpm.EXE",
+      "netstat": "C:\\Windows\\system32\\netstat.EXE",
+      "powershell": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.EXE",
+      "pwsh": "C:\\Program Files\\PowerShell\\7\\pwsh.EXE",
+      "shell": "C:\\Program Files\\PowerShell\\7\\pwsh.EXE"
+    }
+  },
+  "generated_at_utc": "2026-09-03T08:25:16.742533Z",
+  "m0_011_resource_limits": {
+    "handle_count": 8,
+    "private_kib": 8192,
+    "rss_kib": 8192,
+    "socket_count": 4,
+    "thread_count": 2
+  },
+  "modes": [
+    {
+      "diagnostics": {
+        "parse_error_class": null,
+        "server_error_class": null
+      },
+      "mode": "connect-close",
+      "output": {
+        "stderr": "",
+        "stdout": ""
+      },
+      "ownership_basis": "public-cangjie-std.net-probe",
+      "process": {
+        "command": [
+          "D:\\a\\Wirestack\\Wirestack\\build\\gates\\m0-025-windows-resource-diagnostics\\artifacts\\probe\\net06_stress_windows.exe",
+          "connect-close",
+          "50037",
+          "60000",
+          "256"
+        ],
+        "duration_ms": 60344.0,
+        "exit_code": 1,
+        "timed_out": true
+      },
+      "resources": {
+        "aggregate": {
+          "handle_count": {
+            "first": 55.0,
+            "last": 148.0,
+            "max": 148.0,
+            "min": 55.0,
+            "p50": 147.0,
+            "p95": 148.0,
+            "p99": 148.0
+          },
+          "private_kib": {
+            "first": 2380.0,
+            "last": 22808.0,
+            "max": 22808.0,
+            "min": 2380.0,
+            "p50": 21668.0,
+            "p95": 22808.0,
+            "p99": 22808.0
+          },
+          "rss_kib": {
+            "first": 3520.0,
+            "last": 16468.0,
+            "max": 16468.0,
+            "min": 3520.0,
+            "p50": 15340.0,
+            "p95": 16468.0,
+            "p99": 16468.0
+          },
+          "sample_count": 11,
+          "socket_count": {
+            "first": 1.0,
+            "last": 0.0,
+            "max": 1.0,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 1.0,
+            "p99": 1.0
+          },
+          "thread_count": {
+            "first": 10.0,
+            "last": 7.0,
+            "max": 10.0,
+            "min": 7.0,
+            "p50": 7.0,
+            "p95": 10.0,
+            "p99": 10.0
+          }
+        },
+        "coverage": {
+          "handle_count": "MEASURED_BY_WIN32",
+          "private_kib": "MEASURED_BY_WIN32",
+          "rss_kib": "MEASURED_BY_WIN32",
+          "socket_count": "MEASURED_BY_NETSTAT",
+          "thread_count": "MEASURED_BY_POWERSHELL"
+        },
+        "sampler_errors": {},
+        "samples": [
+          {
+            "elapsed_ms": 844,
+            "handle_count": 55,
+            "private_kib": 2380,
+            "rss_kib": 3520,
+            "socket_count": 1,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 6875,
+            "handle_count": 147,
+            "private_kib": 20424,
+            "rss_kib": 14196,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 12875,
+            "handle_count": 147,
+            "private_kib": 20568,
+            "rss_kib": 14328,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 18766,
+            "handle_count": 146,
+            "private_kib": 20956,
+            "rss_kib": 14716,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 24750,
+            "handle_count": 147,
+            "private_kib": 21160,
+            "rss_kib": 14884,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 30735,
+            "handle_count": 147,
+            "private_kib": 21668,
+            "rss_kib": 15340,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 36641,
+            "handle_count": 148,
+            "private_kib": 21680,
+            "rss_kib": 15376,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 42641,
+            "handle_count": 148,
+            "private_kib": 21968,
+            "rss_kib": 15648,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 48641,
+            "handle_count": 148,
+            "private_kib": 22072,
+            "rss_kib": 15796,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 54610,
+            "handle_count": 148,
+            "private_kib": 22640,
+            "rss_kib": 16332,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 60344,
+            "handle_count": 148,
+            "private_kib": 22808,
+            "rss_kib": 16468,
+            "socket_count": 0,
+            "thread_count": 7
+          }
+        ],
+        "trend": {
+          "decision": "INCONCLUSIVE",
+          "reason": "fewer than 20 samples"
+        }
+      },
+      "status": "INCOMPLETE",
+      "workload": {
+        "close_errors": 0,
+        "completed": 0,
+        "connected": 0,
+        "decision": "INCOMPLETE",
+        "gc_every_iterations": 0,
+        "iterations": 0,
+        "mode": null,
+        "other_errors": 0,
+        "requested_iterations": 60000,
+        "server_accepted": 16222,
+        "socket_errors": 0,
+        "timed_out": true,
+        "unknown_mode": "unknown"
+      }
+    },
+    {
+      "diagnostics": {
+        "parse_error_class": null,
+        "server_error_class": "GateError"
+      },
+      "mode": "echo-close",
+      "output": {
+        "stderr": "",
+        "stdout": ""
+      },
+      "ownership_basis": "public-cangjie-std.net-probe",
+      "process": {
+        "command": [
+          "D:\\a\\Wirestack\\Wirestack\\build\\gates\\m0-025-windows-resource-diagnostics\\artifacts\\probe\\net06_stress_windows.exe",
+          "echo-close",
+          "49153",
+          "60000",
+          "256"
+        ],
+        "duration_ms": 60016.0,
+        "exit_code": 1,
+        "timed_out": true
+      },
+      "resources": {
+        "aggregate": {
+          "handle_count": {
+            "first": 24.0,
+            "last": 139.0,
+            "max": 140.0,
+            "min": 24.0,
+            "p50": 139.0,
+            "p95": 140.0,
+            "p99": 140.0
+          },
+          "private_kib": {
+            "first": 1780.0,
+            "last": 19136.0,
+            "max": 19208.0,
+            "min": 1780.0,
+            "p50": 19076.0,
+            "p95": 19208.0,
+            "p99": 19208.0
+          },
+          "rss_kib": {
+            "first": 1880.0,
+            "last": 12116.0,
+            "max": 12128.0,
+            "min": 1880.0,
+            "p50": 12044.0,
+            "p95": 12128.0,
+            "p99": 12128.0
+          },
+          "sample_count": 11,
+          "socket_count": {
+            "first": 1.0,
+            "last": 1.0,
+            "max": 1.0,
+            "min": 1.0,
+            "p50": 1.0,
+            "p95": 1.0,
+            "p99": 1.0
+          },
+          "thread_count": {
+            "first": 9.0,
+            "last": 7.0,
+            "max": 10.0,
+            "min": 7.0,
+            "p50": 9.0,
+            "p95": 10.0,
+            "p99": 10.0
+          }
+        },
+        "coverage": {
+          "handle_count": "MEASURED_BY_WIN32",
+          "private_kib": "MEASURED_BY_WIN32",
+          "rss_kib": "MEASURED_BY_WIN32",
+          "socket_count": "MEASURED_BY_NETSTAT",
+          "thread_count": "MEASURED_BY_POWERSHELL"
+        },
+        "sampler_errors": {},
+        "samples": [
+          {
+            "elapsed_ms": 734,
+            "handle_count": 24,
+            "private_kib": 1780,
+            "rss_kib": 1880,
+            "socket_count": 1,
+            "thread_count": 9
+          },
+          {
+            "elapsed_ms": 6469,
+            "handle_count": 138,
+            "private_kib": 18448,
+            "rss_kib": 11684,
+            "socket_count": 1,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 12203,
+            "handle_count": 139,
+            "private_kib": 19124,
+            "rss_kib": 12044,
+            "socket_count": 1,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 17922,
+            "handle_count": 138,
+            "private_kib": 19208,
+            "rss_kib": 12128,
+            "socket_count": 1,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 23625,
+            "handle_count": 138,
+            "private_kib": 19128,
+            "rss_kib": 12060,
+            "socket_count": 1,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 29359,
+            "handle_count": 139,
+            "private_kib": 19020,
+            "rss_kib": 11948,
+            "socket_count": 1,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 35062,
+            "handle_count": 139,
+            "private_kib": 19100,
+            "rss_kib": 12064,
+            "socket_count": 1,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 40828,
+            "handle_count": 139,
+            "private_kib": 18944,
+            "rss_kib": 11904,
+            "socket_count": 1,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 46562,
+            "handle_count": 140,
+            "private_kib": 19076,
+            "rss_kib": 12060,
+            "socket_count": 1,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 52266,
+            "handle_count": 140,
+            "private_kib": 19044,
+            "rss_kib": 12024,
+            "socket_count": 1,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 58000,
+            "handle_count": 139,
+            "private_kib": 19136,
+            "rss_kib": 12116,
+            "socket_count": 1,
+            "thread_count": 7
+          }
+        ],
+        "trend": {
+          "decision": "INCONCLUSIVE",
+          "reason": "fewer than 20 samples"
+        }
+      },
+      "status": "INCOMPLETE",
+      "workload": {
+        "close_errors": 0,
+        "completed": 0,
+        "connected": 0,
+        "decision": "INCOMPLETE",
+        "gc_every_iterations": 0,
+        "iterations": 0,
+        "mode": null,
+        "other_errors": 0,
+        "requested_iterations": 60000,
+        "server_accepted": 3888,
+        "socket_errors": 0,
+        "timed_out": true,
+        "unknown_mode": "unknown"
+      }
+    },
+    {
+      "diagnostics": {
+        "parse_error_class": null,
+        "server_error_class": null
+      },
+      "mode": "peer-reset",
+      "output": {
+        "stderr": "",
+        "stdout": ""
+      },
+      "ownership_basis": "public-cangjie-std.net-probe",
+      "process": {
+        "command": [
+          "D:\\a\\Wirestack\\Wirestack\\build\\gates\\m0-025-windows-resource-diagnostics\\artifacts\\probe\\net06_stress_windows.exe",
+          "peer-reset",
+          "50097",
+          "60000",
+          "256"
+        ],
+        "duration_ms": 60015.0,
+        "exit_code": 1,
+        "timed_out": true
+      },
+      "resources": {
+        "aggregate": {
+          "handle_count": {
+            "first": 21.0,
+            "last": 141.0,
+            "max": 141.0,
+            "min": 21.0,
+            "p50": 141.0,
+            "p95": 141.0,
+            "p99": 141.0
+          },
+          "private_kib": {
+            "first": 1784.0,
+            "last": 19120.0,
+            "max": 19324.0,
+            "min": 1784.0,
+            "p50": 19036.0,
+            "p95": 19324.0,
+            "p99": 19324.0
+          },
+          "rss_kib": {
+            "first": 1884.0,
+            "last": 12156.0,
+            "max": 12340.0,
+            "min": 1884.0,
+            "p50": 12060.0,
+            "p95": 12340.0,
+            "p99": 12340.0
+          },
+          "sample_count": 12,
+          "socket_count": {
+            "first": 0.0,
+            "last": 0.0,
+            "max": 0.0,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0
+          },
+          "thread_count": {
+            "first": 9.0,
+            "last": 7.0,
+            "max": 10.0,
+            "min": 7.0,
+            "p50": 7.0,
+            "p95": 10.0,
+            "p99": 10.0
+          }
+        },
+        "coverage": {
+          "handle_count": "MEASURED_BY_WIN32",
+          "private_kib": "MEASURED_BY_WIN32",
+          "rss_kib": "MEASURED_BY_WIN32",
+          "socket_count": "MEASURED_BY_NETSTAT",
+          "thread_count": "MEASURED_BY_POWERSHELL"
+        },
+        "sampler_errors": {},
+        "samples": [
+          {
+            "elapsed_ms": 625,
+            "handle_count": 21,
+            "private_kib": 1784,
+            "rss_kib": 1884,
+            "socket_count": 0,
+            "thread_count": 9
+          },
+          {
+            "elapsed_ms": 6015,
+            "handle_count": 140,
+            "private_kib": 18632,
+            "rss_kib": 11956,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 11390,
+            "handle_count": 141,
+            "private_kib": 19324,
+            "rss_kib": 12328,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 16765,
+            "handle_count": 141,
+            "private_kib": 19324,
+            "rss_kib": 12340,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 22140,
+            "handle_count": 141,
+            "private_kib": 19044,
+            "rss_kib": 12060,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 27500,
+            "handle_count": 140,
+            "private_kib": 19000,
+            "rss_kib": 12044,
+            "socket_count": 0,
+            "thread_count": 10
+          },
+          {
+            "elapsed_ms": 32859,
+            "handle_count": 140,
+            "private_kib": 19000,
+            "rss_kib": 12036,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 38218,
+            "handle_count": 141,
+            "private_kib": 19036,
+            "rss_kib": 12128,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 43593,
+            "handle_count": 141,
+            "private_kib": 18924,
+            "rss_kib": 12012,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 48968,
+            "handle_count": 141,
+            "private_kib": 19148,
+            "rss_kib": 12244,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 54343,
+            "handle_count": 140,
+            "private_kib": 19116,
+            "rss_kib": 12152,
+            "socket_count": 0,
+            "thread_count": 7
+          },
+          {
+            "elapsed_ms": 59718,
+            "handle_count": 141,
+            "private_kib": 19120,
+            "rss_kib": 12156,
+            "socket_count": 0,
+            "thread_count": 7
+          }
+        ],
+        "trend": {
+          "decision": "INCONCLUSIVE",
+          "reason": "fewer than 20 samples"
+        }
+      },
+      "status": "INCOMPLETE",
+      "workload": {
+        "close_errors": 0,
+        "completed": 0,
+        "connected": 0,
+        "decision": "INCOMPLETE",
+        "gc_every_iterations": 0,
+        "iterations": 0,
+        "mode": null,
+        "other_errors": 0,
+        "requested_iterations": 60000,
+        "server_accepted": 3957,
+        "socket_errors": 0,
+        "timed_out": true,
+        "unknown_mode": "unknown"
+      }
+    },
+    {
+      "diagnostics": {
+        "parse_error_class": null,
+        "server_error_class": null
+      },
+      "mode": "close-during-read",
+      "output": {
+        "stderr": "",
+        "stdout": ""
+      },
+      "ownership_basis": "public-cangjie-std.net-probe",
+      "process": {
+        "command": [
+          "D:\\a\\Wirestack\\Wirestack\\build\\gates\\m0-025-windows-resource-diagnostics\\artifacts\\probe\\net06_stress_windows.exe",
+          "close-during-read",
+          "56833",
+          "60000",
+          "256"
+        ],
+        "duration_ms": 60016.0,
+        "exit_code": 1,
+        "timed_out": true
+      },
+      "resources": {
+        "aggregate": {
+          "handle_count": {
+            "first": 21.0,
+            "last": 156.0,
+            "max": 156.0,
+            "min": 21.0,
+            "p50": 152.0,
+            "p95": 156.0,
+            "p99": 156.0
+          },
+          "private_kib": {
+            "first": 1784.0,
+            "last": 37460.0,
+            "max": 37460.0,
+            "min": 1784.0,
+            "p50": 28212.0,
+            "p95": 37460.0,
+            "p99": 37460.0
+          },
+          "rss_kib": {
+            "first": 1880.0,
+            "last": 13804.0,
+            "max": 13804.0,
+            "min": 1880.0,
+            "p50": 13252.0,
+            "p95": 13804.0,
+            "p99": 13804.0
+          },
+          "sample_count": 12,
+          "socket_count": {
+            "first": 0.0,
+            "last": 1.0,
+            "max": 2.0,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 2.0,
+            "p99": 2.0
+          },
+          "thread_count": {
+            "first": 11.0,
+            "last": 8.0,
+            "max": 11.0,
+            "min": 8.0,
+            "p50": 8.0,
+            "p95": 11.0,
+            "p99": 11.0
+          }
+        },
+        "coverage": {
+          "handle_count": "MEASURED_BY_WIN32",
+          "private_kib": "MEASURED_BY_WIN32",
+          "rss_kib": "MEASURED_BY_WIN32",
+          "socket_count": "MEASURED_BY_NETSTAT",
+          "thread_count": "MEASURED_BY_POWERSHELL"
+        },
+        "sampler_errors": {},
+        "samples": [
+          {
+            "elapsed_ms": 375,
+            "handle_count": 21,
+            "private_kib": 1784,
+            "rss_kib": 1880,
+            "socket_count": 0,
+            "thread_count": 11
+          },
+          {
+            "elapsed_ms": 5750,
+            "handle_count": 147,
+            "private_kib": 22016,
+            "rss_kib": 12756,
+            "socket_count": 0,
+            "thread_count": 11
+          },
+          {
+            "elapsed_ms": 11125,
+            "handle_count": 149,
+            "private_kib": 25364,
+            "rss_kib": 13348,
+            "socket_count": 0,
+            "thread_count": 11
+          },
+          {
+            "elapsed_ms": 16516,
+            "handle_count": 148,
+            "private_kib": 25568,
+            "rss_kib": 13392,
+            "socket_count": 2,
+            "thread_count": 11
+          },
+          {
+            "elapsed_ms": 21922,
+            "handle_count": 152,
+            "private_kib": 27748,
+            "rss_kib": 13096,
+            "socket_count": 0,
+            "thread_count": 11
+          },
+          {
+            "elapsed_ms": 27328,
+            "handle_count": 152,
+            "private_kib": 28212,
+            "rss_kib": 13028,
+            "socket_count": 1,
+            "thread_count": 11
+          },
+          {
+            "elapsed_ms": 32766,
+            "handle_count": 153,
+            "private_kib": 29900,
+            "rss_kib": 13252,
+            "socket_count": 1,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 38188,
+            "handle_count": 154,
+            "private_kib": 29616,
+            "rss_kib": 13200,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 43641,
+            "handle_count": 155,
+            "private_kib": 33000,
+            "rss_kib": 13496,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 49094,
+            "handle_count": 156,
+            "private_kib": 31312,
+            "rss_kib": 13268,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 54547,
+            "handle_count": 155,
+            "private_kib": 35324,
+            "rss_kib": 13648,
+            "socket_count": 0,
+            "thread_count": 8
+          },
+          {
+            "elapsed_ms": 60000,
+            "handle_count": 156,
+            "private_kib": 37460,
+            "rss_kib": 13804,
+            "socket_count": 1,
+            "thread_count": 8
+          }
+        ],
+        "trend": {
+          "decision": "INCONCLUSIVE",
+          "reason": "fewer than 20 samples"
+        }
+      },
+      "status": "INCOMPLETE",
+      "workload": {
+        "close_errors": 0,
+        "completed": 0,
+        "connected": 0,
+        "decision": "INCOMPLETE",
+        "gc_every_iterations": 0,
+        "iterations": 0,
+        "mode": null,
+        "other_errors": 0,
+        "requested_iterations": 60000,
+        "server_accepted": 4122,
+        "socket_errors": 0,
+        "timed_out": true,
+        "unknown_mode": "unknown"
+      }
+    }
+  ],
+  "non_claims": [
+    "diagnostic results do not replace the M0-011 four-hour profile",
+    "the public std.net probe is not Wirestack production-path evidence",
+    "no runtime/std/SDK source is modified by this task"
+  ],
+  "platform": "windows-x86_64",
+  "report_kind": "windows-resource-diagnostics",
+  "requested_iterations_per_mode": 60000,
+  "revision": "b33f00e05af08ba45e0e07936fcc270cd36b7937",
+  "sample_interval_seconds": 5.0,
+  "schema_version": 1,
+  "status": "INCOMPLETE",
+  "task_id": "M0-025"
+}
