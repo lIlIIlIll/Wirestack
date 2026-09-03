@@ -46,11 +46,14 @@ samples are retained under [`linux_x86_64/`](linux_x86_64/).
 
 ## Windows supplemental gate
 
-The repository now contains a fixed `windows-2025` / x86_64 workflow and a
+The repository contains a fixed `windows-2025` / x86_64 workflow and a
 fail-closed validator for a four-hour mixed lifecycle profile. The workflow
 records Win32 RSS/private bytes/handles, PowerShell thread counts and
 `netstat -ano` socket counts, binds the report to `GITHUB_SHA`, and uploads the
-raw probe output. Run
+raw probe output. The probe now accepts a Windows-only cleanup cadence and the
+workflow passes `gcEvery=256`, so completed async work is collected during the
+run. Linux invocations omit this optional argument and keep their original
+workload. Run
 [`33602643549`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33602643549)
 checked out `23c14f22ad24fa2c82ad7fba8b73665ad97a8b61`, passed the validator and
 native capability preflight, and ran the profile for `14,400` seconds. The
@@ -62,8 +65,8 @@ does not close the Windows supplemental gate or global M0-011.
 
 ## Remaining global acceptance work
 
-- Diagnose and rerun the native Windows x86_64 supplemental profile after the
-  resource-growth failure in run `33602643549`.
+- Rerun the native Windows x86_64 supplemental profile after the resource-growth
+  fix. The retained run `33602643549` remains a FAIL and is not rewritten.
 - Execute native macOS, Android, iOS and HarmonyOS/OpenHarmony profiles.
 - Keep the required 24-hour Linux release-candidate soak as the global
   GATE-NET-06 duration; the Windows four-hour profile does not replace it.

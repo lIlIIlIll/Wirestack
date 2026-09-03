@@ -58,6 +58,7 @@ def valid_report() -> dict:
             "other_errors": 0,
             "close_errors": 0,
             "unknown_mode": "false",
+            "gc_every_iterations": gate.WINDOWS_GC_INTERVAL_ITERATIONS,
             "decision": "PASS",
         },
         "resources": {
@@ -135,6 +136,23 @@ class M0011WindowsLongValidatorTests(unittest.TestCase):
         report = valid_report()
         report["diagnostics"] = {"status": ["PASS"]}
         self.assertEqual("PASS", gate.validate_result(report)["status"])
+
+    def test_requires_windows_probe_gc_cadence(self) -> None:
+        report = valid_report()
+        report["workload"].pop("gc_every_iterations")
+        self.assert_code(report, "PROBE_CLEANUP")
+        report = valid_report()
+        report["workload"]["gc_every_iterations"] = 1
+        self.assert_code(report, "PROBE_CLEANUP")
+        report = valid_report()
+        report["workload"]["gc_every_iterations"] = -1
+        self.assert_code(report, "PROBE_CLEANUP")
+
+    def test_windows_probe_variant_isolated_from_linux_source(self) -> None:
+        source = gate.windows_probe_source()
+        self.assertNotIn("gcEvery", gate.STRESS_SOURCE)
+        self.assertEqual(1, source.count("gc(heavy: true)"))
+        self.assertEqual(2, source.count("gcEvery=${gcEvery}"))
 
     def test_atomic_report_has_no_temporary_residue(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
