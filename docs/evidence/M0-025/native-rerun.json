@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "task_id": "M0-025",
+  "report_kind": "windows-resource-diagnostics-native-rerun",
+  "status": "FAIL",
+  "acceptance_status": "FAIL",
+  "platform": "windows-x86_64",
+  "revision": "b33f00e05af08ba45e0e07936fcc270cd36b7937",
+  "generated_at_utc": "2026-09-03T12:29:20Z",
+  "github": {
+    "run_id": 33733198358,
+    "job_id": 100577644380,
+    "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33733198358",
+    "head_sha": "b33f00e05af08ba45e0e07936fcc270cd36b7937",
+    "runner": "windows-2025"
+  },
+  "source_report": {
+    "path": "docs/evidence/M0-025/native-rerun-source.json",
+    "sha256": "f4eccf213228039b6872cbcaff5b763c02f384c7db89fafa747fc9bfffb74533",
+    "source_task": "M0-011",
+    "status": "FAIL"
+  },
+  "validation": {
+    "path": "docs/evidence/M0-025/native-rerun-validation.json",
+    "sha256": "53d4dfdaf757dbd82a78cc39229dddee9cdf68b82157b0db0dbe098a0b810c8b",
+    "status": "FAIL",
+    "failures": ["STATUS"]
+  },
+  "duration": {
+    "requested_seconds": 14400,
+    "process_duration_ms": 14400078.0,
+    "workload_elapsed_ns": 14400014723100
+  },
+  "workload": {
+    "decision": "PASS",
+    "mode": "mixed-soak",
+    "iterations": 1266655,
+    "connected": 1266655,
+    "completed": 1266655,
+    "socket_errors": 626582,
+    "other_errors": 0,
+    "close_errors": 0,
+    "gc_every_iterations": 256
+  },
+  "resources": {
+    "decision": "FAIL",
+    "warmup_samples_excluded": 272,
+    "comparison_window_samples": 217,
+    "metrics": {
+      "handle_count": {"first_median": 218.0, "last_median": 364.0, "growth": 146.0, "growth_limit": 8},
+      "private_kib": {"first_median": 56800.0, "last_median": 122168.0, "growth": 65368.0, "growth_limit": 8192},
+      "rss_kib": {"first_median": 16592.0, "last_median": 16620.0, "growth": 28.0, "growth_limit": 8192},
+      "thread_count": {"first_median": 8.0, "last_median": 8.0, "growth": 0.0, "growth_limit": 2},
+      "socket_count": {"first_median": 0.0, "last_median": 0.0, "growth": 0.0, "growth_limit": 4}
+    }
+  },
+  "non_claims": [
+    "the Windows four-hour supplemental gate does not close global M0-011",
+    "a workload PASS does not override a resource FAIL",
+    "this result does not justify changing resource limits or modifying runtime/std"
+  ]
+}

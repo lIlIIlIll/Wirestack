@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "task_id": "M0-025",
+  "report_kind": "windows-resource-growth-repair-decision",
+  "status": "BLOCKED",
+  "acceptance_status": "BLOCKED",
+  "platform": "windows-x86_64",
+  "revision": "b33f00e05af08ba45e0e07936fcc270cd36b7937",
+  "generated_at_utc": "2026-09-03T12:35:00Z",
+  "decision": "NO_IN_SCOPE_REPAIR_PROVEN",
+  "owner_classification": "SUSPECTED_PUBLIC_STD_NET_OR_RUNTIME",
+  "confidence": "INSUFFICIENT",
+  "basis": [
+    "The four-hour profile reproduced the existing handle and private-byte growth while its mixed workload completed.",
+    "The diagnostic executable is the public std.net TcpSocket probe, not a Wirestack production HTTP/TLS path.",
+    "All four 60-second mode probes timed out before emitting a RESULT, so mode-level attribution is incomplete.",
+    "No Wirestack-owned allocation or cleanup path is exercised by this probe that can be repaired without changing the public Cangjie socket implementation."
+  ],
+  "in_scope_action": "NONE",
+  "forbidden_actions_not_taken": [
+    "no runtime source change",
+    "no std or stdx source change",
+    "no SDK build or toolchain change",
+    "no threshold increase",
+    "no process splitting or sampler weakening"
+  ],
+  "next_step": "Keep M0-011 BLOCKED and open a separately reviewed upstream std.net/runtime candidate only after a correctly budgeted native mode-isolation run completes."
+}
