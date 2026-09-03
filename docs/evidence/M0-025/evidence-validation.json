@@ -1,0 +1,18 @@
+{
+  "issues": [],
+  "kind": "evidence-freshness",
+  "schema_version": 1,
+  "status": "FAIL",
+  "tasks": [
+    {
+      "issues": [
+        {
+          "code": "ACCEPTANCE_NOT_PASS",
+          "detail": "evidence acceptance_status is not PASS"
+        }
+      ],
+      "status": "FAIL",
+      "task_id": "M0-025"
+    }
+  ]
+}
