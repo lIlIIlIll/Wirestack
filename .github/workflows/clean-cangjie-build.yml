@@ -54,10 +54,10 @@ jobs:
             "https://github.com/${CJDOC_REPOSITORY}.git" "$source_dir"
           actual_sha=$(git -C "$source_dir" rev-parse HEAD)
           test "$actual_sha" = "$CJDOC_SOURCE_SHA"
-          (cd "$source_dir" && cjpm build)
+          (cd "$source_dir" && cjpm build -g)
           mkdir -p "$install_dir/bin"
           binary="$install_dir/bin/cjdoc"
-          cp "$source_dir/target/release/bin/main" "$binary"
+          cp "$source_dir/target/debug/bin/main" "$binary"
           test -x "$binary"
           echo "CJDOC_BIN=$binary" >> "$GITHUB_ENV"
           "$binary" --version
