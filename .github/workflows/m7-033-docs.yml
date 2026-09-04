@@ -62,10 +62,22 @@ jobs:
           mkdir -p "$source_dir"
           tar --extract --gzip --file "$archive" --directory "$source_dir" --strip-components=1
           test -f "$source_dir/cjpm.toml"
-          (cd "$source_dir" && cjpm build -g)
+          python3 - "$source_dir/cjpm.toml" <<'PY'
+          from pathlib import Path
+          import sys
+
+          config = Path(sys.argv[1])
+          text = config.read_text(encoding="utf-8")
+          old = 'compile-option = ""'
+          new = 'compile-option = "-O0"'
+          if text.count(old) != 1:
+              raise SystemExit("unexpected cjdoc compile-option schema")
+          config.write_text(text.replace(old, new), encoding="utf-8")
+          PY
+          (cd "$source_dir" && cjpm build)
           mkdir -p "$install_dir/bin"
           binary="$install_dir/bin/cjdoc"
-          cp "$source_dir/target/debug/bin/main" "$binary"
+          cp "$source_dir/target/release/bin/main" "$binary"
           test -x "$binary"
           echo "$install_dir/bin" >> "$GITHUB_PATH"
           "$binary" --version
