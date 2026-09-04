@@ -1,4 +1,4 @@
-name: M0-025 Windows resource diagnosis and M0-011 rerun
+name: M0-025 Windows resource diagnosis and optional M0-011 rerun
 
 on:
   push:
@@ -15,6 +15,12 @@ on:
       - "docs/evidence/M0-025/**"
       - "tools/tasks/M0-025.json"
   workflow_dispatch:
+    inputs:
+      run_native_4h:
+        description: "Run the expensive M0-011 four-hour native profile after diagnostics"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -57,14 +63,16 @@ jobs:
           New-Item -ItemType Directory -Force build/gates/m0-025-windows-resource-diagnostics | Out-Null
           python tools/gates/m0_025_windows_resource_diagnostics.py `
             --run `
-            --duration-seconds 60 `
-            --sample-interval-seconds 5 `
-            --timeout-seconds 90 `
+            --duration-seconds 600 `
+            --iterations-per-mode 16384 `
+            --sample-interval-seconds 1 `
+            --timeout-seconds 600 `
             --repository-revision $env:GITHUB_SHA `
             --artifact-dir build/gates/m0-025-windows-resource-diagnostics/artifacts `
             --output build/gates/m0-025-windows-resource-diagnostics/diagnostic-results.json
 
-      - name: Run the M0-011 four-hour native profile
+      - name: Run the optional M0-011 four-hour native profile
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_native_4h == true }}
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force build/gates/m0-011-windows-long | Out-Null
@@ -77,7 +85,7 @@ jobs:
             --output build/gates/m0-011-windows-long/long-4h.json
 
       - name: Validate the M0-011 exact-revision result
-        if: always()
+        if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.run_native_4h == true }}
         shell: pwsh
         run: |
           if (Test-Path build/gates/m0-011-windows-long/long-4h.json) {

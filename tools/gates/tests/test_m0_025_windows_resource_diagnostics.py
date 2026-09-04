@@ -39,6 +39,10 @@ class M0025WindowsResourceDiagnosticsTests(unittest.TestCase):
         with self.assertRaises(diagnostics.DiagnosticError) as raised:
             diagnostics.diagnostic_command(Path("probe.exe"), "peer-reset", 1234, 0)
         self.assertEqual("ITERATIONS", raised.exception.code)
+        with self.assertRaises(diagnostics.DiagnosticError) as raised:
+            diagnostics.validate_budget(600, 1.0, 600.0, 1_000)
+        self.assertEqual("ITERATIONS", raised.exception.code)
+        diagnostics.validate_budget(600, 1.0, 600.0, 16_384)
 
     def test_environment_non_windows_is_blocked(self) -> None:
         with (
@@ -117,6 +121,45 @@ class M0025WindowsResourceDiagnosticsTests(unittest.TestCase):
             )
         self.assertEqual("BLOCKED", report["status"])
         self.assertEqual("NON_NATIVE_WINDOWS", report["blockers"][0]["code"])
+        self.assertEqual(
+            diagnostics.DEFAULT_ITERATIONS_PER_MODE,
+            report["diagnostic_budget"]["iterations_per_mode"],
+        )
+
+    def test_run_diagnostics_uses_explicit_iterations_per_mode(self) -> None:
+        with (
+            mock.patch.object(
+                diagnostics,
+                "environment_report",
+                return_value={"status": "READY"},
+            ),
+            mock.patch.object(
+                diagnostics.m0011,
+                "compile_probe",
+                return_value=(Path("probe.exe"), {}),
+            ),
+            mock.patch.object(
+                diagnostics,
+                "_mode_report",
+                return_value={"status": "INCOMPLETE"},
+            ) as mode_report,
+        ):
+            report = diagnostics.run_diagnostics(
+                Path("."),
+                Path("build/m0-025-budget-test"),
+                "a" * 40,
+                600,
+                1.0,
+                600.0,
+                8_192,
+            )
+        self.assertEqual("INCOMPLETE", report["status"])
+        self.assertEqual(4, mode_report.call_count)
+        self.assertEqual(
+            [8_192] * 4,
+            [call.args[3] for call in mode_report.call_args_list],
+        )
+        self.assertEqual(8_192, report["requested_iterations_per_mode"])
 
 
 if __name__ == "__main__":
