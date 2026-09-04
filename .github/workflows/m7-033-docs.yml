@@ -150,11 +150,43 @@ jobs:
           binary="$install_dir/bin/cjdoc"
           chmod +x "$binary"
           test -x "$binary"
-          "$binary" --version
+
+      - name: Install the cjdoc-compatible runtime toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: 1.1.0-alpha.20260414010024
+
+      - name: Create an isolated cjdoc launcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          install_dir="$RUNNER_TEMP/cjdoc"
+          binary="$install_dir/bin/cjdoc"
+          compat_home="$CANGJIE_HOME"
+          wrapper="$install_dir/cjdoc-wrapper"
+          cat > "$wrapper" <<EOF
+          #!/usr/bin/env bash
+          set -euo pipefail
+          export CANGJIE_HOME="$compat_home"
+          export LD_LIBRARY_PATH="$compat_home/runtime/lib/linux_x86_64_cjnative:$compat_home/tools/lib\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}"
+          export PATH="$compat_home/bin:$compat_home/tools/bin:\$PATH"
+          exec "$binary" "\$@"
+          EOF
+          chmod +x "$wrapper"
+          test -x "$wrapper"
+          "$wrapper" --version
+          echo "CJDOC_BIN=$wrapper" >> "$GITHUB_ENV"
+
+      - name: Restore the resolved Cangjie toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ steps.cangjie-nightly.outputs.version }}
 
       - name: Run the strict documentation and coverage gate
         env:
-          CJDOC_BIN: ${{ runner.temp }}/cjdoc/bin/cjdoc
+          CJDOC_BIN: ${{ runner.temp }}/cjdoc/cjdoc-wrapper
         run: scripts/check-docs --html --json
 
       - name: Build and run the public clean consumer
