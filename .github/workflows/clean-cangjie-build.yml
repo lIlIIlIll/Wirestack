@@ -62,11 +62,13 @@ jobs:
 
           config = Path(sys.argv[1])
           text = config.read_text(encoding="utf-8")
-          old = 'compile-option = ""'
-          new = 'compile-option = "-O0"'
-          if text.count(old) != 1:
+          lines = text.splitlines(keepends=True)
+          matches = [index for index, line in enumerate(lines) if line.strip() == 'compile-option = ""']
+          if len(matches) != 1:
               raise SystemExit("unexpected cjdoc compile-option schema")
-          config.write_text(text.replace(old, new), encoding="utf-8")
+          index = matches[0]
+          lines[index] = lines[index].replace('compile-option = ""', 'compile-option = "-O0"', 1)
+          config.write_text("".join(lines), encoding="utf-8")
           PY
           (cd "$source_dir" && cjpm build)
           mkdir -p "$install_dir/bin"
