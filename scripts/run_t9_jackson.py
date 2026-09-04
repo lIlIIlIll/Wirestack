@@ -14,7 +14,7 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
-from run_t9_throughput import CASES
+from run_t9_throughput import B_CASES, CASES
 
 
 RESULT = re.compile(r"^(t9_\S+)\s+([0-9.]+) us\s+", re.MULTILINE)
@@ -40,9 +40,13 @@ def main() -> int:
     parser.add_argument("output", type=Path)
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--jars-dir", type=Path, required=True)
+    parser.add_argument("--label", default="jackson-server")
     parser.add_argument("--version", required=True)
     parser.add_argument("--cpu", type=int, required=True)
-    parser.add_argument("--label", default="jackson-server")
+    parser.add_argument(
+        "--include-bytes", action="store_true",
+        help="also run the BytesBench three-library track (t9_b_*)",
+    )
     args = parser.parse_args()
 
     output = args.output.resolve()
@@ -68,16 +72,17 @@ def main() -> int:
         ["javac", "-cp", classpath, "JacksonBench.java"], build
     )
     (logs / "javac.log").write_text(compile_log + "\n", encoding="utf-8")
+    expected_cases = list(CASES) + (list(B_CASES) if args.include_bytes else [])
     command = [
         "taskset", "-c", str(args.cpu), "java", "-cp", f"{build}:{classpath}",
-        "JacksonBench", *CASES,
+        "JacksonBench", *expected_cases,
     ]
     raw_log = capture(command, build)
     (logs / "run-01.log").write_text(raw_log + "\n", encoding="utf-8")
     values = {name: float(value) for name, value in RESULT.findall(raw_log)}
-    if list(values) != list(CASES):
+    if list(values) != expected_cases:
         raise RuntimeError(
-            f"Jackson case contract differs: expected {list(CASES)!r}, got {list(values)!r}"
+            f"Jackson case contract differs: expected {expected_cases!r}, got {list(values)!r}"
         )
 
     metadata = {
@@ -86,8 +91,8 @@ def main() -> int:
         "started_at_utc": datetime.now(timezone.utc).isoformat(),
         "host": platform.node(),
         "platform": platform.platform(),
-        "suite": "T9ThroughputBench",
-        "cases": list(CASES),
+        "suite": "T9ThroughputBench" if not args.include_bytes else "T9ThroughputBench+BytesBench",
+        "cases": expected_cases,
         "runs": 1,
         "cpu": args.cpu,
         "java": capture(["java", "-version"], build),
@@ -109,7 +114,7 @@ def main() -> int:
             "within_run_cv_pct", "elapsed_seconds", "report", "log",
         ))
         writer.writeheader()
-        for position, case in enumerate(CASES, 1):
+        for position, case in enumerate(expected_cases, 1):
             writer.writerow({
                 "round": 1, "position": position, "case": case,
                 "median_ns": f"{values[case] * 1000.0:.6f}",
@@ -123,7 +128,7 @@ def main() -> int:
             "across_run_cv_pct", "max_within_run_cv_pct",
         ))
         writer.writeheader()
-        for case in CASES:
+        for case in expected_cases:
             value = values[case]
             writer.writerow({
                 "case": case, "runs": 1, "median_us": f"{value:.6f}",

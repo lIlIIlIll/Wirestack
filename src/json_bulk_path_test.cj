@@ -176,6 +176,29 @@ class GeneratedBulkPathRegressionTest {
 }
 
 @JsonCodec
+class GeneratedMapInputMatrix {
+    public var ints: HashMap<String, Int64> = HashMap<String, Int64>()
+    public var arrays: HashMap<String, Array<Int64>> = HashMap<String, Array<Int64>>()
+    public init() {}
+}
+
+@Test
+class GeneratedMapInputRegressionTest {
+    @TestCase
+    func generatedMapFastReaderKeepsGeneralJsonSyntax(): Unit {
+        let text = "{\n" +
+            "  \"ints\" : { \"escaped\\\"key\" : -7, \"line\\nkey\" : 2 },\n" +
+            "  \"arrays\" : { \"a\\u0062\" : [ 1 , 2 ], \"empty\" : [ ] }\n" +
+            "}"
+        let decoded = YJson.fromJson(text, codec: GeneratedMapInputMatrixJson)
+        @Expect(decoded.ints["escaped\"key"], -7)
+        @Expect(decoded.ints["line\nkey"], 2)
+        @Expect(decoded.arrays["ab"][1], 2)
+        @Expect(decoded.arrays["empty"].isEmpty(), true)
+    }
+}
+
+@JsonCodec
 class CursorMatrixLeaf {
     public let id: Int64
     public let label: String

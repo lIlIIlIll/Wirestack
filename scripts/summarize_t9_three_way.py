@@ -9,32 +9,50 @@ import json
 import math
 from pathlib import Path
 
-from run_t9_throughput import CASES
+from run_t9_throughput import B_CASES, CASES, LEGACY_CASES
 
+def expected_cases(metadata: dict) -> list[str]:
+    """Contract versioning: legacy 22-case dirs stay loadable after the matrix expansion."""
+    suite = metadata.get("suite")
+    cases = metadata.get("cases")
+    if suite == "BytesBench":
+        if cases == list(B_CASES):
+            return list(B_CASES)
+        raise RuntimeError(f"BytesBench case contract differs: {cases!r}")
+    if suite == "T9ThroughputBench+BytesBench":
+        if cases == list(CASES) + list(B_CASES):
+            return list(CASES) + list(B_CASES)
+        raise RuntimeError(f"A+B case contract differs: {cases!r}")
+    if cases == list(LEGACY_CASES):
+        return list(LEGACY_CASES)
+    if cases == list(CASES):
+        return list(CASES)
+    raise RuntimeError(f"unknown case contract in metadata: {cases!r}")
 
 def load(root: Path) -> tuple[list[str], dict[str, float], dict[str, object]]:
     if not (root / "COMPLETE").is_file():
         raise RuntimeError(f"incomplete result directory: {root}")
     with (root / "metadata.json").open(encoding="utf-8") as stream:
         metadata = json.load(stream)
-    if metadata.get("suite") != "T9ThroughputBench":
+    if metadata.get("suite") not in ("T9ThroughputBench", "BytesBench", "T9ThroughputBench+BytesBench"):
         raise RuntimeError(f"unexpected benchmark suite in {root}: {metadata.get('suite')!r}")
-    if metadata.get("cases") != list(CASES):
+    if metadata.get("cases") != expected_cases(metadata):
         raise RuntimeError(f"metadata case contract differs in {root}")
     if metadata.get("runs") != 1:
         raise RuntimeError(f"comparison requires metadata runs=1: {root}")
     with (root / "summary.csv").open(newline="", encoding="utf-8") as stream:
         rows = list(csv.DictReader(stream))
-    if len(rows) != 22:
-        raise RuntimeError(f"expected 22 cases in {root}, got {len(rows)}")
+    expected = expected_cases(metadata)
+    if len(rows) != len(expected):
+        raise RuntimeError(f"expected {len(expected)} cases in {root}, got {len(rows)}")
     if any(int(row["runs"]) != 1 for row in rows):
         raise RuntimeError(f"comparison requires exactly one run per case: {root}")
     order = [row["case"] for row in rows]
-    if order != list(CASES):
+    if order != list(expected):
         raise RuntimeError(f"summary case contract differs in {root}")
     with (root / "manifest.csv").open(newline="", encoding="utf-8") as stream:
         manifest = list(csv.DictReader(stream))
-    if len(manifest) != len(CASES) or [row["case"] for row in manifest] != list(CASES):
+    if len(manifest) != len(expected) or [row["case"] for row in manifest] != list(expected):
         raise RuntimeError(f"raw manifest case contract differs in {root}")
     for row in manifest:
         report = root / row["report"]

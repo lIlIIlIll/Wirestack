@@ -1465,6 +1465,7 @@ class JsonCoverageContractsTest {
         @Expect(output.toUtf8String(), "prefixab12:\"v\"10000" + large)
 
         let streamWriter = JsonDirectWriter(YJsonMemoryOutputStream())
+        @Expect(!streamWriter.tryBeginGeneratedCompactRawValue())
         streamWriter.writeNull()
         @AssertThrows[JsonException](streamWriter.finishString())
         let stringWriter = JsonDirectWriter()

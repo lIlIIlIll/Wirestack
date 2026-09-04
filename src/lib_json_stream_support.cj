@@ -40,4 +40,5 @@ public class YJsonByteArrayInputStream <: InputStream {
         remain = 0
         result
     }
+
 }

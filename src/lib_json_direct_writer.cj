@@ -145,6 +145,9 @@ public class DirectBufferWriterTarget <: JsonDirectWriterTarget {
     public init(capacity!: Int64 = JSON_DIRECT_BYTES_INITIAL_CAPACITY) {
         buffer = Array<Byte>(capacity, repeat: 0)
     }
+    public func reset(): Unit {
+        used = 0
+    }
 
     public func writeText(value: String): Unit {
         writeTextRange(value, 0, value.size)
@@ -1780,6 +1783,9 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
     public func generatedCursorV1(): GeneratedSupportV1WriteCursor {
         GeneratedSupportV1WriteCursor(this)
     }
+    public func generatedBufferV1(): DirectBufferWriterTarget {
+        bufferTarget
+    }
 
     private func writeState(): GeneratedWriteStateV1 {
         match (generatedState) {
@@ -1829,6 +1835,27 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
             throw JsonException("JsonDirectWriter is not a string writer")
         }
         bufferTarget.buildString()
+    }
+    public func canReuseGeneratedCompactWriter(): Bool {
+        resultKind == 0 && config.indent.isEmpty() && !config.htmlSafe &&
+            config.maxOutputBytes == 0 && config.maxDepth == 256
+    }
+
+    public func resetForGeneratedReuse(): Unit {
+        if (!canReuseGeneratedCompactWriter()) { return }
+        bufferTarget.reset()
+        generatedState = None<GeneratedWriteStateV1>
+        contexts = None<ArrayList<UInt8>>
+        semanticPathContexts = None<ArrayList<JsonDirectSemanticPathContext>>
+        rootWritten = false
+        rawDepth = 0
+        generatedCompactRawFast = false
+        rawRootPreclaimed = false
+        rawKnownKinds = 0u64
+        rawObjectKinds = 0u64
+        rawOverflowKinds = None<ArrayList<UInt8>>
+        lastRawString = None<String>
+        lastRawStringEscapeIndex = -1
     }
 
     public func finishBytes(): Array<Byte> {
@@ -1891,11 +1918,11 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
     }
 
     public func tryBeginGeneratedCompactRawValue(): Bool {
-        if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
+        if (resultKind == 2 || multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
             return false
         }
         beforeValue()
-        generatedCompactRawFast = resultKind != 2
+        generatedCompactRawFast = true
         rawRootPreclaimed = true
         true
     }

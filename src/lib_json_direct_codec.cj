@@ -3,6 +3,7 @@ package yjson
 import std.collection.*
 import std.io.*
 import std.math.numeric.*
+import std.sync.AtomicOptionReference
 import std.time.*
 
 /// Backend-neutral semantic reader consumed by typed JSON codecs.
@@ -255,9 +256,11 @@ public interface GeneratedCursorWriteCodecV1<T> <: JsonCodec<T> {
 /// general cursor protocol, so statically compact generated codecs need only
 /// advertise one interface while remaining usable by generic containers.
 public interface GeneratedCompactCursorWriteCodecV1<T> <:
-    GeneratedCompactWriteCodecV1<T> & GeneratedCursorWriteCodecV1<T> {
+    GeneratedCompactWriteCodecV1<T> & GeneratedCursorWriteCodecV1<T> &
+    GeneratedCodecV1<T> & GeneratedCursorReadCodecV1<T> {
     func writeCompactRawWithCursor(value: T, writer: GeneratedSupportV1Writer,
         cursor: GeneratedSupportV1WriteCursor): Unit
+    func writeCompactRawWithWriter(value: T, writer: JsonDirectWriter): Unit
 }
 /// Optional generated-code bulk seam. ArrayList resolves it once so an
 /// element codec can reuse one writer cursor across the complete loop.
@@ -2227,7 +2230,46 @@ private func writeJsonValueView(writer: JsonWriter, value: JsonValueView): Unit 
 }
 
 /// Stateless entry points for typed JSON encoding, decoding, and documents.
+private let yJsonGeneratedCompactWriterPool = AtomicOptionReference<JsonDirectWriter>()
+
+private func generatedCompactWriterConfig(options: JsonWriteOptions): Bool {
+    options.indent.isEmpty() && !options.htmlSafe &&
+        options.maxOutputBytes == 0 && options.maxDepth == 256
+}
+
+private func acquireGeneratedCompactWriter(options: JsonWriteOptions): JsonDirectWriter {
+    if (!generatedCompactWriterConfig(options)) {
+        return JsonDirectWriter(options)
+    }
+    match (yJsonGeneratedCompactWriterPool.swap(None)) {
+        case Some(value) => return value
+        case None => ()
+    }
+    JsonDirectWriter(options)
+}
+
+private func releaseGeneratedCompactWriter(writer: JsonDirectWriter): Unit {
+    if (!writer.canReuseGeneratedCompactWriter()) { return }
+    writer.resetForGeneratedReuse()
+    let _ = yJsonGeneratedCompactWriterPool.compareAndSwap(None, Some(writer))
+}
+
 public class YJson {
+    /// Internal seam used by generated codecs to reuse the default compact
+    /// string writer without changing the public codec contract. Non-default
+    /// options are never inserted into the pool.
+    public static func acquireGeneratedCompactStringWriter(
+        options: JsonWriteOptions
+    ): JsonDirectWriter {
+        acquireGeneratedCompactWriter(options)
+    }
+
+    public static func releaseGeneratedCompactStringWriter(
+        writer: JsonDirectWriter
+    ): Unit {
+        releaseGeneratedCompactWriter(writer)
+    }
+
     public static func parseDocument(text: String,
         config!: JsonReadOptions = JsonReadOptions.defaults): JsonDocument {
         freezeYJsonRuntime()
@@ -2355,26 +2397,34 @@ public class YJson {
     private static func encodeString<T>(value: T,
         codec: GeneratedCompactCursorWriteCodecV1<T>,
         options: JsonWriteOptions): String {
-        let writer = JsonDirectWriter(options)
-        if (writer.tryBeginGeneratedCompactRawValue()) {
-            codec.writeCompactRawWithWriter(value, writer)
-            return writer.finishGeneratedCompactString()
+        let writer = acquireGeneratedCompactWriter(options)
+        try {
+            if (writer.tryBeginGeneratedCompactRawValue()) {
+                codec.writeCompactRawWithWriter(value, writer)
+                return writer.finishGeneratedCompactString()
+            }
+            codec.write(value, writer)
+            writer.finishString()
+        } finally {
+            releaseGeneratedCompactWriter(writer)
         }
-        codec.write(value, writer)
-        writer.finishString()
     }
 
     private static func encodeStringStatic<T>(value: T,
         codec: GeneratedCompactCursorWriteCodecV1<T>,
         options: JsonWriteOptions): String
         where T <: GeneratedCompactCodecProviderV1<T> {
-        let writer = JsonDirectWriter(options)
-        if (writer.tryBeginGeneratedCompactRawValue()) {
-            T.generatedCompactRawV1(value, writer)
-            return writer.finishGeneratedCompactString()
+        let writer = acquireGeneratedCompactWriter(options)
+        try {
+            if (writer.tryBeginGeneratedCompactRawValue()) {
+                T.generatedCompactRawV1(value, writer)
+                return writer.finishGeneratedCompactString()
+            }
+            codec.write(value, writer)
+            writer.finishString()
+        } finally {
+            releaseGeneratedCompactWriter(writer)
         }
-        codec.write(value, writer)
-        writer.finishString()
     }
 
     private static func encodeString<T>(value: T, codec: JsonCodec<T>,
@@ -2524,6 +2574,26 @@ public class YJson {
         options: JsonReadOptions): T {
         GeneratedSupportV1.requireProtocolVersion(1)
         freezeYJsonRuntime()
+        if (jsonReadOptionsUsesDefaultFastPath(options)) {
+            match (input) {
+                case byteInput: YJsonByteArrayInputStream =>
+                    match (codec) {
+                        case fast: GeneratedCodecV1<T> =>
+                            let reader = JsonFastReader(byteInput.readRemainingBytes())
+                            let result = fast.readFast(reader)
+                            reader.expectEnd()
+                            return result
+                        case cursor: GeneratedCursorReadCodecV1<T> =>
+                            let reader = JsonFastReader(byteInput.readRemainingBytes())
+                            let result = cursor.readFastWithCursor(
+                                reader, GeneratedSupportV1.readCursor(reader))
+                            reader.expectEnd()
+                            return result
+                        case _ => ()
+                    }
+                case _ => ()
+            }
+        }
         let reader = JsonDirectReader(input, config: options)
         let result = codec.read(reader)
         reader.expectEnd()

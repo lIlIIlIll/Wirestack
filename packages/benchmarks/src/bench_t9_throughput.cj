@@ -237,6 +237,72 @@ public class E2EBigString {
     public init() {}
 }
 
+// ==================== T9.5 coverage beans (matrix expansion) ====================
+
+@JsonCodec
+public class InnerBean {
+    public var id: Int64 = 0
+    public var label: String = ""
+    public var score: Int64 = 0
+    public init() {}
+}
+
+@JsonCodec
+public class OptionBean {
+    public var name: Option<String> = None
+    public var count: Option<Int64> = None
+    public var inner: Option<InnerBean> = None
+    public var tag: Option<String> = None
+    public init() {}
+}
+
+@JsonCodec
+public class EmptyBean {
+    public var arr: Array<Int64> = Array<Int64>()
+    public var m: HashMap<String, Int64> = HashMap<String, Int64>()
+    public var strs: Array<String> = Array<String>()
+    public var inner: InnerBean = InnerBean()
+    public init() {}
+}
+
+@JsonCodec
+public class ExtremeBean {
+    public var a: Int64 = 0
+    public var b: Int64 = 0
+    public var c: Int64 = -1
+    public var d: Int64 = 0
+    public var e: Int64 = 1
+    public init() {}
+}
+
+@JsonCodec
+public class LargeDocItem {
+    public var id: Int64 = 0
+    public var sku: String = ""
+    public var name: String = ""
+    public var desc: String = ""
+    public var price: Int64 = 0
+    public var stock: Int64 = 0
+    public var active: Bool = false
+    public var score: Int64 = 0
+    public var cat: String = ""
+    public var rank: Int64 = 0
+    public init() {}
+}
+
+@JsonCodec
+public class LargeDoc {
+    public var items: Array<LargeDocItem> = Array<LargeDocItem>()
+    public var index: HashMap<String, Int64> = HashMap<String, Int64>()
+    public init() {}
+}
+
+@JsonCodec
+public class MatrixBean {
+    public var grid: Array<Array<Int64>> = Array<Array<Int64>>()
+    public init() {}
+}
+
 // ==================== E2E: PerfLargeList (200×110 fields) ====================
 
 // @JsonCodec
@@ -563,6 +629,19 @@ class T9ThroughputBench {
     // let perfList: PerfLargeList
     // let perfListJson: String
 
+    let optionMixed: OptionBean
+    let optionFull: OptionBean
+    let optionJson: String
+    let emptyBean: EmptyBean
+    let emptyJson: String
+    let extBean: ExtremeBean
+    let extJson: String
+    let largeDoc: LargeDoc
+    let largeDocJson: String
+    let matrixBean: MatrixBean
+    let matrixJson: String
+    let unknownPayload: String
+    let prettyWideJson: String
     var sink: Int64 = 0
     var strSink: String = ""
 
@@ -684,6 +763,86 @@ class T9ThroughputBench {
         // perfList = PerfLargeList()
         // perfList.items = items.toArray()
         // perfListJson = YJson.toJson(perfList, codec: PerfLargeListJson)
+        // ---- T9.5 coverage fixtures ----
+        optionMixed = OptionBean()
+        optionMixed.name = Some("matrix")
+        let optionInner = InnerBean()
+        optionInner.id = 7
+        optionInner.label = "inner"
+        optionInner.score = 650
+        optionMixed.inner = Some(optionInner)
+
+        optionFull = OptionBean()
+        optionFull.name = Some("matrix")
+        optionFull.count = Some(42)
+        optionFull.inner = Some(optionInner)
+        optionFull.tag = Some("full")
+        optionJson = YJson.toJson(optionFull, codec: OptionBeanJson)
+
+        emptyBean = EmptyBean()
+        emptyJson = YJson.toJson(emptyBean, codec: EmptyBeanJson)
+
+        extBean = ExtremeBean()
+        extBean.a = Int64.Max
+        extBean.b = Int64.Min
+        extJson = YJson.toJson(extBean, codec: ExtremeBeanJson)
+
+        let desc64 = t9BuildLongStr(64)
+        let items = ArrayList<LargeDocItem>()
+        for (i in 0..3000) {
+            let item = LargeDocItem()
+            item.id = i
+            item.sku = "SKU-${i}-MX"
+            item.name = "item-name-${i}"
+            item.desc = "description-${i}-" + desc64
+            item.price = 1000 + i
+            item.stock = i % 500
+            item.active = (i % 2 == 0)
+            item.score = 90 + (i % 10)
+            item.cat = "cat-${i % 12}"
+            item.rank = i % 100
+            items.add(item)
+        }
+        largeDoc = LargeDoc()
+        largeDoc.items = items.toArray()
+        largeDoc.index = t9BuildIntMap(2000)
+        largeDocJson = YJson.toJson(largeDoc, codec: LargeDocJson)
+
+        let grid = ArrayList<Array<Int64>>()
+        for (_ in 0..50) {
+            grid.add(t9BuildIntArray(20))
+        }
+        matrixBean = MatrixBean()
+        matrixBean.grid = grid.toArray()
+        matrixJson = YJson.toJson(matrixBean, codec: MatrixBeanJson)
+
+        unknownPayload = """
+            {"intArray":[1,2,3],"strArray":["a"],"intMap":{"k":1},"strMap":{"a":"b"},"x1":1,"x2":"text","x3":[1,2],"x4":{"k":1},"x5":true}
+            """
+        let pretty = StringBuilder()
+        pretty.append("{\n")
+        pretty.append("  \"f1\": 1,\n")
+        pretty.append("  \"f2\": \"\",\n")
+        pretty.append("  \"f3\": 3.14,\n")
+        pretty.append("  \"f4\": true,\n")
+        pretty.append("  \"f5\": \"\",\n")
+        pretty.append("  \"f6\": 6,\n")
+        pretty.append("  \"f7\": \"\",\n")
+        pretty.append("  \"f8\": 0.0,\n")
+        pretty.append("  \"f9\": false,\n")
+        pretty.append("  \"f10\": \"\",\n")
+        pretty.append("  \"f11\": 0,\n")
+        pretty.append("  \"f12\": \"\",\n")
+        pretty.append("  \"f13\": 0.0,\n")
+        pretty.append("  \"f14\": false,\n")
+        pretty.append("  \"f15\": \"\",\n")
+        pretty.append("  \"f16\": 0,\n")
+        pretty.append("  \"f17\": \"\",\n")
+        pretty.append("  \"f18\": 0.0,\n")
+        pretty.append("  \"f19\": false,\n")
+        pretty.append("  \"f20\": \"wide\"\n")
+        pretty.append("}")
+        prettyWideJson = pretty.toString()
     }
 
     // ---------- T9.1 ----------
@@ -705,6 +864,7 @@ class T9ThroughputBench {
     }
 
     // ---------- T9.2 ----------
+
 
     @Bench
     func t9_2_1_shortStringSerialize() {
@@ -805,6 +965,74 @@ class T9ThroughputBench {
         sink = YJson.fromJson(ultraJson, codec: UltraWideJson).f49
     }
 
+    // ---------- T9.5 coverage (matrix expansion) ----------
+
+    @Bench
+    func t9_5_1_optionSerialize() {
+        strSink = YJson.toJson(optionMixed, codec: OptionBeanJson)
+    }
+
+    @Bench
+    func t9_5_2_optionDeserialize() {
+        sink = (YJson.fromJson(optionJson, codec: OptionBeanJson).count ?? 0)
+    }
+
+    @Bench
+    func t9_5_3_optionRoundTrip() {
+        let json = YJson.toJson(optionFull, codec: OptionBeanJson)
+        sink = (YJson.fromJson(json, codec: OptionBeanJson).count ?? 0)
+    }
+
+    @Bench
+    func t9_5_4_emptyContainersSerialize() {
+        strSink = YJson.toJson(emptyBean, codec: EmptyBeanJson)
+    }
+
+    @Bench
+    func t9_5_5_emptyContainersDeserialize() {
+        sink = Int64(YJson.fromJson(emptyJson, codec: EmptyBeanJson).arr.size)
+    }
+
+    @Bench
+    func t9_5_6_int64ExtremesSerialize() {
+        strSink = YJson.toJson(extBean, codec: ExtremeBeanJson)
+    }
+
+    @Bench
+    func t9_5_7_int64ExtremesDeserialize() {
+        sink = YJson.fromJson(extJson, codec: ExtremeBeanJson).a
+    }
+
+    @Bench
+    func t9_5_8_unknownFieldDeserialize() {
+        sink = Int64(YJson.fromJson(unknownPayload, codec: CollectionBeanJson).intArray.size)
+    }
+
+    @Bench
+    func t9_5_9_largeDocumentSerialize() {
+        strSink = YJson.toJson(largeDoc, codec: LargeDocJson)
+    }
+
+    @Bench
+    func t9_5_10_largeDocumentDeserialize() {
+        sink = Int64(YJson.fromJson(largeDocJson, codec: LargeDocJson).items.size)
+    }
+
+    @Bench
+    func t9_5_11_arrayOfArraySerialize() {
+        strSink = YJson.toJson(matrixBean, codec: MatrixBeanJson)
+    }
+
+    @Bench
+    func t9_5_12_arrayOfArrayDeserialize() {
+        sink = Int64(YJson.fromJson(matrixJson, codec: MatrixBeanJson).grid.size)
+    }
+
+    @Bench
+    func t9_5_13_prettyWideDeserialize() {
+        sink = YJson.fromJson(prettyWideJson, codec: WideNestedJson).f1
+    }
+
     // ---------- E2E: LargeBean ----------
 
     @Bench
@@ -840,4 +1068,69 @@ class T9ThroughputBench {
     // func perfLargeList_deserialize() {
     //     sink = Int64(YJson.fromJson(perfListJson, codec: PerfLargeListJson).items.size)
     // }
+}
+
+// ==================== Bytes/stream track (three-library suite; cjjson has no bytes API) ====================
+
+@Test
+@Configure[
+    warmup: Duration.millisecond * 200,
+    minDuration: Duration.second,
+    minBatches: 12
+]
+class BytesBench {
+    let prim: PrimitiveBean
+    let primJson: String
+    let largeDoc: LargeDoc
+    let largeDocJson: String
+
+    var sink: Int64 = 0
+
+    init() {
+        prim = PrimitiveBean()
+        prim.i8 = 1
+        prim.i16 = 2
+        prim.i32 = 3
+        prim.i64 = 4
+        prim.f64 = 3.14
+        prim.flag = true
+        prim.text = "hello"
+        primJson = YJson.toJson(prim, codec: PrimitiveBeanJson)
+
+        largeDoc = LargeDoc()
+        let items = ArrayList<LargeDocItem>()
+        let desc64 = t9BuildLongStr(64)
+        for (i in 0..3000) {
+            let item = LargeDocItem()
+            item.id = i
+            item.sku = "SKU-${i}-MX"
+            item.name = "item-name-${i}"
+            item.desc = "description-${i}-" + desc64
+            item.price = 1000 + i
+            item.stock = i % 500
+            item.active = (i % 2 == 0)
+            item.score = 90 + (i % 10)
+            item.cat = "cat-${i % 12}"
+            item.rank = i % 100
+            items.add(item)
+        }
+        largeDoc.items = items.toArray()
+        largeDoc.index = t9BuildIntMap(2000)
+        largeDocJson = YJson.toJson(largeDoc, codec: LargeDocJson)
+    }
+
+    @Bench
+    func t9_b_1_bytesParsePrimitive() {
+        sink = YJson.fromJson(YJsonByteArrayInputStream(primJson), codec: PrimitiveBeanJson).i64
+    }
+
+    @Bench
+    func t9_b_2_bytesParseLargeDoc() {
+        sink = Int64(YJson.fromJson(YJsonByteArrayInputStream(largeDocJson), codec: LargeDocJson).items.size)
+    }
+
+    @Bench
+    func t9_b_3_streamLargeDoc() {
+        sink = Int64(YJson.fromJson(YJsonByteArrayInputStream(unsafe { largeDocJson.rawData() }), codec: LargeDocJson).items.size)
+    }
 }
