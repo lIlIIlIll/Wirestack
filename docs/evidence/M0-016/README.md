@@ -5,8 +5,27 @@
 M0-016 remains **BLOCKED** only at the full cross-platform task level. All 12
 desktop schema-v11 cells are current: AWS-LC passes on Linux glibc, Linux musl,
 Windows and macOS; Mbed TLS and OpenSSL retain explicit PARTIAL results for
-unsupported capabilities. Android, iOS, and HarmonyOS or OpenHarmony still
-lack native-device evidence; cross-compilation does not satisfy those cells.
+unsupported capabilities. The hosted Android arm64 emulator failure is
+**NON-GATING** for the current Linux delivery profile under ADR-0002. It is
+still an incomplete global mobile cell, and the failure is not recorded as a
+PASS. Android, iOS, and HarmonyOS or OpenHarmony still lack the native-device
+evidence required by the global matrix; cross-compilation does not satisfy
+those cells.
+
+The local contract-gate record is [`mobile-runner-contract.json`](mobile-runner-contract.json).
+The latest hosted run is recorded in
+[`hosted-run-33590649517.report`](hosted-run-33590649517.report). It proves
+supplemental x86_64 Android execution on `ubuntu-24.04`: AWS-LC is `PASS` and
+Mbed TLS is valid `PARTIAL`. iOS AWS-LC is `PASS` and iOS Mbed TLS is
+`PARTIAL`. The required arm64 Android provider jobs remain `BLOCKED` at
+emulator startup on hosted `macos-15`; the fail-closed retention helper did
+not copy supplemental artifacts into the required matrix.
+The traceable mobile test plan is [`test-plan.md`](test-plan.md); its plan
+validator currently reports 11 paths, 10 scenarios, and 10 tests.
+The hosted mobile matrix runs AWS-LC and Mbed TLS; OpenSSL remains a desktop
+control as allowed by the candidate matrix. Use the documented
+`retain_mobile.py` helper to perform the review-bound, atomic copy after a
+successful hosted run.
 
 Schema v11 retains all prior native evidence plus the exact successful NASM
 identity for a Windows AWS-LC build. Its workflow fallback is pinned to
@@ -15,6 +34,19 @@ Chocolatey package `nasm` 2.16.3. The current hosted image supplied NASM
 `547d4edd4b1d6fea2504990e70263b5ce06cfe7ab894483f6c54e60c1bd93b60`.
 Hosted runs use the read-only Actions token only for bounded GitHub API tag
 resolution; it is excluded from logs, retained results, and build provenance.
+
+The `M0-016 Mobile Provider PoC` workflow adds GitHub-hosted native-VM gates
+for Android arm64 (arm64 `macos-15` plus an API-33 arm64 emulator) and iOS arm64
+(`macos-15` plus an Xcode iOS Simulator). These jobs are supplementary until
+their result artifacts are reviewed and retained. They are emulator/Simulator
+evidence, not physical-device evidence, and therefore do not close M0-012 or
+the full six-platform M0-016 task. See [mobile-runner.md](mobile-runner.md)
+for the runner contract and its fail-closed limits.
+The workflow also has an `android-x86_64` smoke job on `ubuntu-24.04`. The
+latest run selected KVM, built and executed both provider cells, and recorded
+the x86_64 ABI, API level, serial, and exact repository revision. Its result is
+supplemental and stays outside the required platform matrix. A passing x86_64
+emulator cannot be used as arm64 evidence.
 Schema v11 also retains:
 
 - monotonic cancellation and join deadlines that are unaffected by wall-clock
@@ -81,7 +113,7 @@ All 12 artifacts were downloaded and independently validated with:
 | macOS arm64 | AWS-LC | PASS | 0685a9b5977eff70f0fde6cf16a114f46903990233c357ec7cd7d59c07877d1d | 9781366960 | c934e4c3e9ab02b8ed2b478b6deeb5259f67ad82d1a0633932dd1b46982c57d8 |
 | macOS arm64 | Mbed TLS | PARTIAL | fc16a9655910065a0f99be29fa805350563df21192a54c816632de4b1973161b | 9781359696 | 4e322c0ff0df31a5551d43f65c02edc4d50488cbbd9245d83c78cf29be2c9c9a |
 | macOS arm64 | OpenSSL | PARTIAL | 7173f43c19a3ac6a3b99972e06634482ba314b3b600a9371a5ee88e2cc93429d | 9781409226 | 1c5483e3dd878befbd2fb2a93c4755ebc90dd32629f130a0b855e885b62dadf7 |
-| Windows x86_64 | AWS-LC | PASS | bc1762a5af4f496aa96899b953c3a0ddc75c304bb583c76c76e1447762eac2fe | 9781369651 | 5685022e73b6d240bb2c7f76de07ed4776ee8116654f17ed752ae690059049b2 |
+| Windows x86_64 | AWS-LC | PASS | 657368493af0f6f32112764f0757702d2eb1b9d0928186089ccc9c544b438a6b | 9781369651 | 5685022e73b6d240bb2c7f76de07ed4776ee8116654f17ed752ae690059049b2 |
 | Windows x86_64 | Mbed TLS | PARTIAL | 6bdf3f0085897eceea78d3293b2deae0fe65b2e259eafb250e83c85ea80778d6 | 9781415835 | acf387ae1ba8ee802406c4f2411d5273bcb289e198f805021107d4cd480e5453 |
 | Windows x86_64 | OpenSSL | PARTIAL | c3a0a3308d1e37e93c47ecb131df06c8eb60b18a36c0f4ba32000acb3c5f6a32 | 9781555727 | 4f24ad6ca047c5389a4262ee19bdecfdd6f8cdd2018d2fb3887bd217703b1487 |
 
@@ -110,6 +142,10 @@ repository root:
       --matrix docs/evidence/M0-016/platform-matrix.json
 
     python3 -m unittest tools.tests.test_tls_provider_poc
+
+    python3 -m unittest \
+      tools.tests.test_tls_provider_poc_mobile \
+      tools.tests.test_tls_provider_poc_retention
 
 Matrix validation rehashes every retained result, license manifest, and license
 file. Missing files, path escape, digest drift, unsupported schema, stale

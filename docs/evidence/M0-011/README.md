@@ -44,9 +44,49 @@ KiB and median FD count remained 3.
 Full raw reports, process output, exact counters and all timestamped RSS/FD
 samples are retained under [`linux_x86_64/`](linux_x86_64/).
 
+## Windows supplemental gate
+
+The repository contains a fixed `windows-2025` / x86_64 workflow and a
+fail-closed validator for a four-hour mixed lifecycle profile. The workflow
+records Win32 RSS/private bytes/handles, PowerShell thread counts and
+`netstat -ano` socket counts, binds the report to `GITHUB_SHA`, and uploads the
+raw probe output. The probe now accepts a Windows-only cleanup cadence and the
+workflow passes `gcEvery=256`, so completed async work is collected during the
+run. Linux invocations omit this optional argument and keep their original
+workload. Run
+[`33602643549`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33602643549)
+checked out `23c14f22ad24fa2c82ad7fba8b73665ad97a8b61`, passed the validator and
+native capability preflight, and ran the profile for `14,400` seconds. The
+profile is retained under [`windows-x86_64/`](windows-x86_64/), but it is
+**FAIL**, not PASS: the mixed workload completed, while the resource trend
+exceeded the bounds (`handle_count` growth `244` > `8`, `private_kib` growth
+`65068` > `8192`) and one thread query was unavailable. The report therefore
+does not close the Windows supplemental gate or global M0-011.
+
+### Latest post-fix native rerun
+
+Run [`33705670217`](https://github.com/lIlIIlIll/Wirestack/actions/runs/33705670217)
+checked out `2a73c866c64d6ef94da2f486055ea9e6bd377927` on the same
+`windows-2025` / AMD64 image and completed the full `14,400`-second workload
+with `1,267,504` iterations and `gcEvery=256`. The validator retained a FAIL:
+handle-count growth was `127` (limit `8`) and private-byte growth was `65,704
+KiB` (limit `8,192 KiB`). RSS growth was `36 KiB`, thread/socket growth was
+zero, and all resource classes were measured without sampler errors. The exact
+environment, report and validator output are retained as
+[`environment-33705670217.json`](windows-x86_64/environment-33705670217.json),
+[`long-4h-33705670217.json`](windows-x86_64/long-4h-33705670217.json) and
+[`validation-33705670217.json`](windows-x86_64/validation-33705670217.json).
+The run proves the native gate executes after the probe change; it does not
+prove Windows resource acceptance.
+
 ## Remaining global acceptance work
 
-- Execute native Windows, macOS, Android, iOS and HarmonyOS/OpenHarmony profiles.
+- Resolve the remaining native Windows resource growth. The post-fix run
+  `33705670217` still fails handle/private-byte bounds and is retained beside
+  the original run `33602643549`; neither report is rewritten.
+- Execute native macOS, Android, iOS and HarmonyOS/OpenHarmony profiles.
+- Keep the required 24-hour Linux release-candidate soak as the global
+  GATE-NET-06 duration; the Windows four-hour profile does not replace it.
 
 Non-execution and unmeasured resource classes never contribute to a COMPLETE
 decision.
