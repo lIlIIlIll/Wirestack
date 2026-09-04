@@ -43,6 +43,15 @@ class M0025WindowsResourceDiagnosticsTests(unittest.TestCase):
             diagnostics.validate_budget(600, 1.0, 600.0, 1_000)
         self.assertEqual("ITERATIONS", raised.exception.code)
         diagnostics.validate_budget(600, 1.0, 600.0, 16_384)
+        self.assertEqual(
+            {
+                "connect-close": 65_536,
+                "echo-close": 16_384,
+                "peer-reset": 16_384,
+                "close-during-read": 16_384,
+            },
+            diagnostics.mode_iteration_budget(16_384),
+        )
 
     def test_environment_non_windows_is_blocked(self) -> None:
         with (
@@ -95,6 +104,43 @@ class M0025WindowsResourceDiagnosticsTests(unittest.TestCase):
         with mock.patch.object(diagnostics, "_parse_fields", return_value=(None, None)):
             workload = diagnostics._mode_workload(None, 10)
         self.assertEqual("INCOMPLETE", workload["decision"])
+
+    def test_mode_status_rejects_nonzero_process_and_sampler_errors(self) -> None:
+        passing_workload = {"decision": "PASS"}
+        passing_trend = {"decision": "PASS"}
+        self.assertEqual(
+            "FAIL",
+            diagnostics._mode_status(
+                {"exit_code": 1, "timed_out": False},
+                passing_workload,
+                passing_trend,
+                {},
+                None,
+                None,
+            ),
+        )
+        self.assertEqual(
+            "FAIL",
+            diagnostics._mode_status(
+                {"exit_code": 0, "timed_out": False},
+                passing_workload,
+                passing_trend,
+                {"THREAD_QUERY": 1},
+                None,
+                None,
+            ),
+        )
+        self.assertEqual(
+            "INCOMPLETE",
+            diagnostics._mode_status(
+                {"exit_code": None, "timed_out": True},
+                passing_workload,
+                passing_trend,
+                {},
+                None,
+                None,
+            ),
+        )
 
     def test_atomic_report_has_no_temporary_residue(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -156,10 +202,14 @@ class M0025WindowsResourceDiagnosticsTests(unittest.TestCase):
         self.assertEqual("INCOMPLETE", report["status"])
         self.assertEqual(4, mode_report.call_count)
         self.assertEqual(
-            [8_192] * 4,
+            [65_536, 8_192, 8_192, 8_192],
             [call.args[3] for call in mode_report.call_args_list],
         )
         self.assertEqual(8_192, report["requested_iterations_per_mode"])
+        self.assertEqual(
+            65_536,
+            report["diagnostic_budget"]["iterations_by_mode"]["connect-close"],
+        )
 
 
 if __name__ == "__main__":
