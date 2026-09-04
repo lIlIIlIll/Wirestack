@@ -43,17 +43,19 @@ jobs:
         env:
           CJDOC_VERSION: 0.7.2
           CJDOC_REPOSITORY: lIlIIlIll/cjdoc
-          CJDOC_SOURCE_REF: release/v0.7.2
           CJDOC_SOURCE_SHA: e966097a3591538fba8990772e2e6c543de86c21
         shell: bash
         run: |
           set -euo pipefail
           source_dir="$RUNNER_TEMP/cjdoc-source"
           install_dir="$RUNNER_TEMP/cjdoc"
-          git clone --no-tags --depth 1 --branch "$CJDOC_SOURCE_REF" \
-            "https://github.com/${CJDOC_REPOSITORY}.git" "$source_dir"
-          actual_sha=$(git -C "$source_dir" rev-parse HEAD)
-          test "$actual_sha" = "$CJDOC_SOURCE_SHA"
+          archive="$RUNNER_TEMP/cjdoc-source.tar.gz"
+          curl --fail --silent --show-error --location --max-time 60 \
+            "https://codeload.github.com/${CJDOC_REPOSITORY}/tar.gz/${CJDOC_SOURCE_SHA}" \
+            --output "$archive"
+          mkdir -p "$source_dir"
+          tar --extract --gzip --file "$archive" --directory "$source_dir" --strip-components=1
+          test -f "$source_dir/cjpm.toml"
           (cd "$source_dir" && cjpm build -g)
           mkdir -p "$install_dir/bin"
           binary="$install_dir/bin/cjdoc"
