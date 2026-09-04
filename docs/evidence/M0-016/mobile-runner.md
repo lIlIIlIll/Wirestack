@@ -1,0 +1,114 @@
+# M0-016 mobile runner contract
+
+The mobile provider PoC now has three GitHub-hosted native-VM jobs:
+
+| Target cell | Hosted runner | Native execution environment |
+|---|---|---|
+| `android-aarch64` | `macos-15` (arm64) | arm64 Android Emulator, API 33 or newer, NDK 26.3.11579264 |
+| `android-x86_64` (supplemental) | `ubuntu-24.04` (x86_64) | x86_64 Android Emulator, API 33 or newer, NDK 26.3.11579264, KVM when available |
+| `ios-aarch64` | `macos-15` | arm64 iOS Simulator supplied by Xcode |
+
+Each job builds the pinned provider for the target, links the PoC statically,
+stages the executable and fixtures inside the VM, executes the complete
+schema-v11 capability set, and validates the result against `GITHUB_SHA`.
+The x86_64 Android job is a supplemental smoke gate. It exercises the same
+provider runner on an x86_64 Android runtime, but it never fills or replaces
+the required `android-aarch64` matrix cell.
+The Android job runs on the arm64 macOS image, installs the pinned NDK and uses
+`adb`. An arm64 Android system image cannot boot on the x86_64 `ubuntu-24.04`
+runner, so the hosted job deliberately uses `macos-15`. GitHub-hosted macOS
+does not expose hardware virtualization to the job; the arm64 emulator does
+not honor the launcher-level `-accel off` switch, so the workflow also passes
+`-qemu -accel tcg` to force bounded software QEMU with SwiftShader and no
+metrics prompt. All provisioning probes use the runner's Python subprocess timeout
+helper; emulator discovery has both a 180-second `wait-for-device` bound and a
+600-second overall boot bound;
+each `getprop sys.boot_completed` probe is limited to 15 seconds. The AVD uses
+a non-interactive `pixel_2` hardware profile and has a 60-second creation
+bound. The runner resolves `emulator` and `adb` only after sdkmanager installs
+the platform tools, so an image without preinstalled Android binaries cannot
+silently produce an empty command. License
+acceptance records the `sdkmanager` pipeline status explicitly so a normal
+`yes` SIGPIPE cannot turn a successful installation into a false failure. The
+AVD is created under an explicit `$RUNNER_TEMP/android-avd` directory and the
+expected `.ini` file is checked before launching, keeping the creator and
+emulator search paths identical. License
+iOS job builds an unsigned simulator app bundle, installs it with `simctl`, and
+captures `simctl launch --console` output. If the launch command reports
+success without capability output, the runner executes the same bundled binary
+through `simctl spawn` so early provider failures and stderr remain observable.
+
+## Run the hosted gate
+
+Open the `M0-016 Mobile Provider PoC` workflow and select **Run workflow**, or
+push a change touching the workflow, provider runner, or M0-016 contract. The
+workflow first runs the fail-closed Python contract tests, then runs AWS-LC and
+Mbed TLS independently on each mobile VM. OpenSSL remains a desktop control per
+the candidate matrix; mobile control builds are omitted because they add no
+required decision information. Every provider job uploads `result.json`,
+`build.log`, and the provider license bundle even when the job fails.
+The supplemental x86_64 Android jobs probe KVM and select it when the hosted
+runner exposes it. They use bounded software acceleration when KVM is absent,
+record the selected mode in the result, and keep their `android-x86_64` target
+identity separate.
+
+After reviewing a successful artifact, copy it into the committed evidence tree
+with the fail-closed retention helper:
+
+    python3 tools/tls_provider_poc/retain_mobile.py \
+      --result <artifact>/result.json \
+      --license-bundle <artifact>/license-bundle \
+      --expected-revision <exact-GITHUB_SHA> \
+      --report /tmp/m0-016-mobile-retention.json
+
+The helper accepts only a validated `PASS` or `PARTIAL` Android/iOS result,
+refuses path escapes, symlinks, digest changes, and replacement of a different
+retained cell, and publishes the result, license tree, and one matrix-cell
+update without silently overwriting existing evidence. Re-running it for the
+same bytes is idempotent. A failed or incomplete hosted run remains outside the
+canonical matrix and must not be recorded as `PASS`.
+
+## Latest hosted run
+
+Run [33590649517](https://github.com/lIlIIlIll/Wirestack/actions/runs/33590649517)
+at exact revision `63225c8428f186c6f26bdd7b93c3ff2e834c25cb` is recorded in
+[`hosted-run-33590649517.report`](hosted-run-33590649517.report). The
+supplemental x86_64 Android AWS-LC result is `PASS`; the Mbed TLS result is
+valid `PARTIAL` because external signing and session resumption are blocked by
+that provider. Both x86_64 jobs completed on `ubuntu-24.04` with an API-33
+x86_64 emulator and KVM. The iOS AWS-LC result is `PASS` and iOS Mbed TLS is
+`PARTIAL`. Both required arm64 Android jobs remain `BLOCKED`: the hosted
+`macos-15` emulator crashed before boot and the bounded wait returned 124. No
+Android result, including the supplemental x86_64 result, was copied into the
+canonical required matrix.
+
+The retained result includes:
+
+- the exact repository revision and hosted image identity;
+- the target triple, compiler, SDK/NDK and configure/build provenance;
+- a `native_runtime` object identifying `android-emulator` or
+  `ios-simulator`, including architecture and API/runtime identity; and
+- all capability, allocation, cancellation, and cleanup metrics required by
+  schema v11.
+
+`tools/tls_provider_poc/validate.py` rejects a mobile result without the
+native-runtime object, with a mismatched hosted runner, or with
+`is_device=true`. This keeps simulator/emulator evidence distinct from a
+physical-device result.
+
+The Android arm64 hosted-emulator cell is **NON-GATING** for the current Linux
+delivery profile under [ADR-0002](../../architecture/adr/0002-linux-first-delivery-profile.md).
+The global M0-016 matrix still records that cell as incomplete. The x86_64
+Android smoke result does not replace the arm64 cell because the two emulators
+execute different Android ABIs.
+
+## Current boundary
+
+This workflow is a native VM gate, not physical-device evidence. It does not
+close GATE-NET-07, M0-012, or the full M0-016 six-platform acceptance. Harmony
+OS/OpenHarmony and physical Android/iOS devices remain `BLOCKED` until a
+corresponding native environment is available. A successful mobile VM result
+also does not change the Linux-only provider selection in ADR-0003.
+
+The workflow does not build the Cangjie SDK and does not modify runtime,
+`std`, `stdx`, or SDK sources.

@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "task_id": "M0-025",
+  "report_kind": "windows-resource-growth-repair-decision",
+  "status": "BLOCKED",
+  "acceptance_status": "BLOCKED",
+  "platform": "windows-x86_64",
+  "revision": "7e5252c55fdad5b1523641758d86260be3a17091",
+  "generated_at_utc": "2026-09-04T01:38:43Z",
+  "decision": "NO_IN_SCOPE_REPAIR_PROVEN",
+  "owner_classification": "SUSPECTED_PUBLIC_STD_NET_OR_RUNTIME",
+  "confidence": "MODE_ASSOCIATION_ONLY",
+  "diagnostic_run": {
+    "github_run_id": 33826513099,
+    "url": "https://github.com/lIlIIlIll/Wirestack/actions/runs/33826513099",
+    "budget": {
+      "mode_timeout_seconds": 600,
+      "sample_interval_seconds": 1.0,
+      "iterations_by_mode": {
+        "connect-close": 65536,
+        "echo-close": 16384,
+        "peer-reset": 16384,
+        "close-during-read": 16384
+      }
+    },
+    "complete_modes": 4,
+    "timed_out_modes": 0
+  },
+  "mode_findings": [
+    {
+      "mode": "connect-close",
+      "status": "FAIL",
+      "workload": "complete",
+      "resource_trend": "PASS",
+      "process_exit_code": 1,
+      "socket_errors": 49278
+    },
+    {
+      "mode": "echo-close",
+      "status": "FAIL",
+      "workload": "complete",
+      "resource_trend": "PASS",
+      "sampler_errors": ["THREAD_QUERY"]
+    },
+    {
+      "mode": "peer-reset",
+      "status": "PASS",
+      "workload": "complete",
+      "resource_trend": "PASS"
+    },
+    {
+      "mode": "close-during-read",
+      "status": "FAIL",
+      "workload": "complete",
+      "resource_trend": "FAIL",
+      "handle_growth": 29,
+      "handle_growth_limit": 8
+    }
+  ],
+  "basis": [
+    "The four-hour profile reproduced the existing handle and private-byte growth while its mixed workload completed.",
+    "The diagnostic executable is the public std.net TcpSocket probe, not a Wirestack production HTTP/TLS path.",
+    "The corrected run completed all four mode workloads with explicit budgets and no timeout, establishing mode-level evidence without a causal ownership proof.",
+    "close-during-read alone exceeded the handle trend limit, while echo-close had a sampler error and connect-close returned a non-zero probe status after connection errors.",
+    "No Wirestack-owned allocation or cleanup path is exercised by this probe that can be repaired without changing the public Cangjie socket implementation."
+  ],
+  "in_scope_action": "NONE",
+  "forbidden_actions_not_taken": [
+    "no runtime source change",
+    "no std or stdx source change",
+    "no SDK build or toolchain change",
+    "no threshold increase",
+    "no process splitting or sampler weakening"
+  ],
+  "next_step": "Keep M0-011 BLOCKED. If an upstream candidate is authorized, reproduce the close-during-read handle trend with an independently reviewed std.net/runtime change; do not alter Wirestack thresholds or promote this probe to a Wirestack fix."
+}

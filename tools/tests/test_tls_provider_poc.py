@@ -49,6 +49,8 @@ def build_provenance_fixture(provider, platform, *, diagnostic=False):
         "linux-musl-x86_64": "x86_64-unknown-linux-musl",
         "windows-x86_64": "x86_64-pc-windows-msvc",
         "macos-arm64": "arm64-apple-darwin",
+        "android-aarch64": "aarch64-linux-android",
+        "android-x86_64": "x86_64-linux-android",
     }
     if provider == "aws-lc":
         configure = [
@@ -263,12 +265,10 @@ class ProviderPocValidationTests(unittest.TestCase):
         cls.spec = json.loads((ROOT / "tools/tls_provider_poc/providers.json").read_text())
         cls.matrix = json.loads((ROOT / "docs/evidence/M0-016/platform-matrix.json").read_text())
 
-    def test_canonical_spec_and_matrix_reject_stale_license_digests(self):
+    def test_canonical_spec_and_matrix_accept_current_license_digests(self):
         validator.validate_spec(self.spec)
         validator.validate_matrix(self.matrix, self.spec)
-        with self.assertRaisesRegex(
-                validator.ValidationError, "provider license file digest mismatch"):
-            validator.validate_retained_results(self.matrix, self.spec, ROOT)
+        validator.validate_retained_results(self.matrix, self.spec, ROOT)
         for provider in self.spec["providers"]:
             workflow = provider["security_update"]["update_workflow"]
             self.assertTrue((ROOT / workflow).is_file())
