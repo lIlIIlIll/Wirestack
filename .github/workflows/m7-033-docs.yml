@@ -195,6 +195,23 @@ jobs:
           echo "PATH=$latest_home/bin:$latest_home/tools/bin:$PATH" >> "$GITHUB_ENV"
           echo "LD_LIBRARY_PATH=$latest_home/runtime/lib/linux_x86_64_cjnative:$latest_home/tools/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" >> "$GITHUB_ENV"
 
+      - name: Select the project-compatible Cangjie toolchain for the consumer
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: 1.1.0-alpha.20260414010024
+
+      - name: Normalize the project-compatible Cangjie environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          project_home="$CANGJIE_HOME"
+          test -x "$project_home/bin/cjc"
+          test -x "$project_home/tools/bin/cjpm"
+          echo "CANGJIE_HOME=$project_home" >> "$GITHUB_ENV"
+          echo "PATH=$project_home/bin:$project_home/tools/bin:$PATH" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$project_home/runtime/lib/linux_x86_64_cjnative:$project_home/tools/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" >> "$GITHUB_ENV"
+
       - name: Run the strict documentation and coverage gate
         env:
           CJDOC_BIN: ${{ runner.temp }}/cjdoc/cjdoc-wrapper
