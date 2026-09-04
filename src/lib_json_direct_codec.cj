@@ -403,8 +403,10 @@ private class GeneratedPathStateV1 {
     }
 
     func pushField(name: String): Unit {
-        if (count > 0 && origins[count - 1] == GENERATED_PATH_AUTO_CLAIMABLE
-            && indices[count - 1] < 0 && values[count - 1] == name) {
+        if (count > 0 &&
+            origins[count - 1] == GENERATED_PATH_AUTO_CLAIMABLE &&
+            indices[count - 1] < 0 &&
+            values[count - 1] == name) {
             origins[count - 1] = GENERATED_PATH_MANUAL
             return
         }
@@ -412,8 +414,9 @@ private class GeneratedPathStateV1 {
     }
 
     func pushIndex(index: Int64): Unit {
-        if (count > 0 && origins[count - 1] == GENERATED_PATH_AUTO_CLAIMABLE
-            && indices[count - 1] == index) {
+        if (count > 0 &&
+            origins[count - 1] == GENERATED_PATH_AUTO_CLAIMABLE &&
+            indices[count - 1] == index) {
             origins[count - 1] = GENERATED_PATH_MANUAL
             return
         }
@@ -469,9 +472,6 @@ private class GeneratedPathStateV1 {
         result.toString()
     }
 
-    private func append(value: String, index: Int64, origin: UInt8): Unit {
-        writeSlot(value, index, origin)
-    }
 }
 
 public class GeneratedWriteStateV1 {
