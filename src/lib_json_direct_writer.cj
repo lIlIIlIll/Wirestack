@@ -1918,11 +1918,11 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
     }
 
     public func tryBeginGeneratedCompactRawValue(): Bool {
-        if (resultKind == 2 || multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
+        if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
             return false
         }
         beforeValue()
-        generatedCompactRawFast = true
+        generatedCompactRawFast = resultKind != 2
         rawRootPreclaimed = true
         true
     }

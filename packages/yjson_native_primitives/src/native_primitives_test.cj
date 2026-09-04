@@ -13,7 +13,7 @@ private func primitiveBytes(text: String): Array<Byte> {
 class NativePrimitivesIntegrationTest {
     @BeforeAll
     func installNativeScanner(): Unit {
-        enableYJsonNative()
+        initializeYJsonNativePrimitivesV1()
     }
 
     @TestCase

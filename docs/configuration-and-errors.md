@@ -67,6 +67,10 @@ try {
 调用方匹配 `error.code`，不要解析 message。`path` 为空或 RFC 6901 JSON Pointer；适用的
 解析失败在 `location` 中携带 byte offset、line 和 column。
 
+`invalid_value` 是稳定 code：用于语法合法但目标类型转换失败、且不落入 `number_out_of_range`
+（数字字面量超出数值范围）的场景，例如 Rune codec 收到多个 Unicode scalar。它不用于
+JSON 结构错误（`parse_error`）或类型形状错误（`type_mismatch`）。
+
 常用稳定 code：
 
 | code | 含义 |
@@ -83,7 +87,8 @@ try {
 | `output_too_large` | 写出超过 byte budget |
 | `writer_state` | writer 根值数量或容器状态无效 |
 | `cyclic_json_node` | AST 递归操作遇到祖先环 |
-| `type_mismatch` / `number_out_of_range` / `invalid_value` | value 不满足目标类型 |
+| `type_mismatch` / `number_out_of_range` | value 不满足目标类型；数字字面量超出目标范围 |
+| `invalid_value` | 语法合法但目标类型转换失败且非范围问题（如 Rune 需要恰好一个 Unicode scalar） |
 | `codec_contract` / `codec_type_mismatch` | custom/generated codec contract 无效 |
 | `resource_closed` | 关闭后访问显式 backend document |
 | `invalid_json_pointer` / `json_pointer_not_found` | Pointer 无效或目标不存在 |

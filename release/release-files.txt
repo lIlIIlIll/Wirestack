@@ -96,6 +96,7 @@ native/yjson_scanner.c
 native/yjson_scanner.h
 native/yjson_compact.c
 native/yjson_compact.h
+native/yjson_float_format.c
 native/yjson_yyjson.c
 native/yjson_yyjson.h
 native/test_yjson_scanner.c

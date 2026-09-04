@@ -91,6 +91,10 @@ let schema = JsonSchema.parse(schemaText, config: config)
 `JsonSchema` 构造时取得 registry 的 frozen copy。之后修改原 registry 不会改变已编译 schema；
 默认 registry 本身也是 immutable。
 
+`JsonSchemaFormat` 实现必须保持 immutable 或自行同步：应用可以并发调用同一个 validator
+instance（以及同一个 format instance），yjson 不在 format 断言周围加锁。共享可变状态
+（缓存、计数器、惰性初始化）由实现自行同步。
+
 ## Regex 和工作预算
 
 Schema `pattern` 使用内部线性时间、非回溯 regex 引擎。构造阶段拒绝反向引用等不属于

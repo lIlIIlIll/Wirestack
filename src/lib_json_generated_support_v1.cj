@@ -225,11 +225,15 @@ public struct GeneratedSupportV1ReadCursor {
         reader.readRawInt64ArrayMapFast()
     }
     public func skipRawWithDepth(maxDepth: Int64): Unit { reader.skipRawWithDepth(maxDepth) }
+    /// Policy-aware unknown-field skip: the underlying reader enforces the
+    /// configured duplicate/unknown field policies while skipping the value
+    /// at the current cursor. Generated fast paths route unknown-field skips
+    /// here instead of the raw syntactic skip.
+    public func skipValue(maxDepth: Int64): Unit { reader.skipValue(maxDepth) }
 }
 /// Narrow semantic writer contract consumed by generated codecs. Structural
 /// correctness remains owned by the core writer state machine.
-public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1 &
-    GeneratedWriteStateV1Owner {
+public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1 & GeneratedWriteStateV1Owner {
     func finishString(): String
     func generatedCursorV1(): GeneratedSupportV1WriteCursor
     func tryBeginGeneratedCompactRawValue(): Bool
@@ -488,7 +492,7 @@ class FastSemanticReaderAdapter <: JsonReader & GeneratedReadStateV1Owner {
 
     public func skipValue(): Unit {
         beforeValue()
-        reader.skipRawWithDepth(generatedReadStateV1().remainingDepth())
+        reader.skipValue(generatedReadStateV1().remainingDepth())
     }
 
     public func readNode(): JsonNode {
@@ -541,6 +545,15 @@ public class GeneratedSupportV1 {
         }
     }
 
+    /// Unified gate for every public generated-codec entry point. Exact
+    /// toJson/fromJson overloads and the compact raw provider call this before
+    /// touching any runtime state so the protocol version is validated and the
+    /// portable engine is frozen exactly once.
+    public static func enterGeneratedEntry(): Unit {
+        requireProtocolVersion(1)
+        freezeYJsonRuntime()
+    }
+
     public static func newFastReader(text: String): GeneratedSupportV1Reader {
         freezeYJsonRuntime()
         JsonFastReader(text)
@@ -555,6 +568,58 @@ public class GeneratedSupportV1 {
     }
     public static func writeCursor(writer: GeneratedSupportV1Writer): GeneratedSupportV1WriteCursor {
         writer.generatedCursorV1()
+    }
+
+    /// Public primitive writer seam for macro-generated code. The runtime keeps
+    /// raw primitive state transitions private while this versioned bridge
+    /// preserves depth and output-budget enforcement.
+    public static func writeRawBool(writer: GeneratedSupportV1Writer, value: Bool): Unit {
+        match (writer) {
+            case direct: JsonDirectWriter => direct.writeRawBool(value)
+            case _ => writer.generatedCursorV1().writeRawBool(value)
+        }
+    }
+    public static func writeRawInt64(writer: GeneratedSupportV1Writer, value: Int64): Unit {
+        match (writer) {
+            case direct: JsonDirectWriter => direct.writeRawInt64(value)
+            case _ => writer.generatedCursorV1().writeRawInt64(value)
+        }
+    }
+    public static func writeRawUInt64(writer: GeneratedSupportV1Writer, value: UInt64): Unit {
+        match (writer) {
+            case direct: JsonDirectWriter => direct.writeRawUInt64(value)
+            case _ => writer.generatedCursorV1().writeRawUInt64(value)
+        }
+    }
+    public static func writeRawFloat64(writer: GeneratedSupportV1Writer, value: Float64): Unit {
+        match (writer) {
+            case direct: JsonDirectWriter => direct.writeRawFloat64(value)
+            case _ => writer.generatedCursorV1().writeRawFloat64(value)
+        }
+    }
+    public static func writeRawString(writer: GeneratedSupportV1Writer, value: String): Unit {
+        match (writer) {
+            case direct: JsonDirectWriter => direct.writeRawString(value)
+            case _ => writer.generatedCursorV1().writeRawString(value)
+        }
+    }
+
+    /// Cursor overloads keep generated field loops on the allocation-free
+    /// cursor without naming the runtime's concrete writer class.
+    public static func writeRawBool(cursor: GeneratedSupportV1WriteCursor, value: Bool): Unit {
+        cursor.writeRawBool(value)
+    }
+    public static func writeRawInt64(cursor: GeneratedSupportV1WriteCursor, value: Int64): Unit {
+        cursor.writeRawInt64(value)
+    }
+    public static func writeRawUInt64(cursor: GeneratedSupportV1WriteCursor, value: UInt64): Unit {
+        cursor.writeRawUInt64(value)
+    }
+    public static func writeRawFloat64(cursor: GeneratedSupportV1WriteCursor, value: Float64): Unit {
+        cursor.writeRawFloat64(value)
+    }
+    public static func writeRawString(cursor: GeneratedSupportV1WriteCursor, value: String): Unit {
+        cursor.writeRawString(value)
     }
 
     public static func writeState(writer: JsonWriter): GeneratedWriteStateV1 {

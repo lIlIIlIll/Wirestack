@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <math.h>
+#include <stdatomic.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -394,22 +395,31 @@ static int32_t decode_unicode_escape(YjParser* parser, int64_t start, uint8_t* o
 #if defined(__x86_64__) || defined(__i386__)
 static int32_t cpu_has_avx2(void)
 {
-    static int32_t cached = -1;
-    if (cached < 0) {
+    static _Atomic int32_t cached = -1;
+    int32_t value = atomic_load_explicit(&cached, memory_order_acquire);
+    if (value < 0) {
         __builtin_cpu_init();
-        cached = __builtin_cpu_supports("avx2") != 0 ? 1 : 0;
+        int32_t probe = __builtin_cpu_supports("avx2") != 0 ? 1 : 0;
+        atomic_compare_exchange_strong_explicit(
+            &cached, &value, probe, memory_order_release, memory_order_relaxed);
+        return probe;
     }
-    return cached;
+    return value;
 }
 
 static int32_t numeric_avx2_enabled(void)
 {
-    static int32_t cached = -1;
-    if (cached < 0) {
+    static _Atomic int32_t cached = -1;
+    int32_t value = atomic_load_explicit(&cached, memory_order_acquire);
+    if (value < 0) {
         const char* forced = getenv("YJSON_NUMERIC_FORCE_SCALAR");
-        cached = cpu_has_avx2() && !(forced != NULL && forced[0] == '1') ? 1 : 0;
+        int32_t probe = cpu_has_avx2() &&
+            !(forced != NULL && forced[0] == '1') ? 1 : 0;
+        atomic_compare_exchange_strong_explicit(
+            &cached, &value, probe, memory_order_release, memory_order_relaxed);
+        return probe;
     }
-    return cached;
+    return value;
 }
 
 static void append_small_integer_token(

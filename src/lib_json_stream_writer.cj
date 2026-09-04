@@ -47,12 +47,14 @@ private func validateJsonIndent(indent: String): Unit {
 }
 
 func writeJsonValueToString(value: JsonNode, options: JsonWriteOptions): String {
+    freezeYJsonRuntime()
     let writer = JsonDirectWriter(options)
     writeJsonNodeToCodecWriter(writer, value)
     writer.finishString()
 }
 
 func writeJsonValueToStream(value: JsonNode, out: OutputStream, options: JsonWriteOptions): Unit {
+    freezeYJsonRuntime()
     let writer = JsonDirectWriter(out, config: options)
     writeJsonNodeToCodecWriter(writer, value)
     writer.finish()

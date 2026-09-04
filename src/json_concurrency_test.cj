@@ -1,9 +1,16 @@
 package yjson
 
 import std.collection.*
+import std.env.*
 import std.sync.*
+import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
+
+private func deadlineReached(start: DateTime, timeoutNanos: Int64): Bool {
+    let elapsed: Duration = DateTime.now() - start
+    elapsed.toNanoseconds() >= timeoutNanos
+}
 
 /**
  * JSON 并行使用 smoke 测试 - P3 级别
@@ -88,12 +95,24 @@ class ParallelParseSmokeTest {
         for (_ in 0..count) {
             let future = spawn {
                 ready.fetchAdd(1)
-                while (start.load() == 0) {}
+                let waitStart = DateTime.now()
+                while (start.load() == 0 && !deadlineReached(waitStart, 10_000_000_000)) {
+                    sleep(1 * Duration.millisecond)
+                }
+                if (start.load() == 0) {
+                    throw Exception("parse reader never observed the start signal")
+                }
                 JsonNode.parse(json)
             }
             futures.add(future)
         }
-        while (ready.load() != count) {}
+        let readyStart = DateTime.now()
+        while (ready.load() != count && !deadlineReached(readyStart, 10_000_000_000)) {
+            sleep(1 * Duration.millisecond)
+        }
+        if (ready.load() != count) {
+            throw Exception("not all parse readers reached the barrier")
+        }
         start.store(1)
 
         // 所有线程应该得到相同的结果
@@ -205,12 +224,24 @@ class ParallelSerializeSmokeTest {
         for (_ in 0..count) {
             let future = spawn {
                 ready.fetchAdd(1)
-                while (start.load() == 0) {}
+                let waitStart = DateTime.now()
+                while (start.load() == 0 && !deadlineReached(waitStart, 10_000_000_000)) {
+                    sleep(1 * Duration.millisecond)
+                }
+                if (start.load() == 0) {
+                    throw Exception("serializer never observed the start signal")
+                }
                 arr.toString()
             }
             futures.add(future)
         }
-        while (ready.load() != count) {}
+        let readyStart = DateTime.now()
+        while (ready.load() != count && !deadlineReached(readyStart, 10_000_000_000)) {
+            sleep(1 * Duration.millisecond)
+        }
+        if (ready.load() != count) {
+            throw Exception("not all serializers reached the barrier")
+        }
         start.store(1)
 
         // 所有线程应该得到相同的结果
@@ -448,6 +479,113 @@ class ParallelRoundtripSmokeTest {
         for (future in futures) {
             @Expect(future.get())
         }
+    }
+}
+
+// ============================================================================
+// 并发只读 barrier 测试（managed document / JsonNode writer freeze）
+// ============================================================================
+
+@Test
+class ConcurrentManagedDocumentBarrierTest {
+
+    /// 超过 16 字段的 managed JsonDocument 并发 member 读取。修复后 object
+    /// lookup 是纯线性扫描，没有缓存写路径，并发读取应稳定通过且值不变。
+    @TestCase
+    func concurrentWideManagedObjectMemberReads(): Unit {
+        let builder = StringBuilder("{")
+        for (index in 0..320) {
+            if (index > 0) { builder.append(",") }
+            builder.append("\"k${index}\":${index}")
+        }
+        builder.append("}")
+        let text = builder.toString()
+        let document = YJson.parseDocument(text)
+        let root = document.root()
+        let readerCount: Int64 = 8
+        let ready = AtomicInt64(0)
+        let start = AtomicInt64(0)
+        let readers = ArrayList<Future<Int64>>()
+        for (_ in 0..readerCount) {
+            readers.add(spawn {
+                ready.fetchAdd(1)
+                let waitStart = DateTime.now()
+                while (start.load() == 0 && !deadlineReached(waitStart, 10_000_000_000)) {
+                    sleep(1 * Duration.millisecond)
+                }
+                if (start.load() == 0) {
+                    throw Exception("managed document reader never observed the start signal")
+                }
+                var completed: Int64 = 0
+                for (round in 0..300) {
+                    let member = "k${(round * 7) % 320}"
+                    if (root.member(member).getOrThrow().asInt64() != ((round * 7) % 320)) {
+                        throw Exception("wide managed object read changed during concurrent access")
+                    }
+                    completed++
+                }
+                completed
+            })
+        }
+        let readyStart = DateTime.now()
+        while (ready.load() != readerCount && !deadlineReached(readyStart, 10_000_000_000)) {
+            sleep(1 * Duration.millisecond)
+        }
+        if (ready.load() != readerCount) {
+            throw Exception("not all managed document readers reached the barrier")
+        }
+        start.store(1)
+        for (reader in readers) {
+            @Expect(reader.get(), 300)
+        }
+    }
+}
+
+@Test
+class JsonNodeWriterFreezeBarrierTest {
+
+    /// JsonNode.toJson 并发与 runtime freeze 竞争：第一个 toJson 触发 freeze，
+    /// 之后所有并发 toJson 必须成功，且 slow-freeze 计数不再增长（冻结已线性化）。
+    @TestCase
+    func concurrentNodeSerializationFreezesRuntimeOnce(): Unit {
+        let obj = JsonObject()
+        obj.put("id", JsonIntValue(42))
+        obj.put("name", JsonStringValue("shared"))
+        let warmup = obj.toJson()
+        @Expect(warmup.contains("42"), true)
+        let slowEntries = yJsonRuntimeSlowFreezeEntriesForTest.load()
+
+        let count: Int64 = 24
+        let ready = AtomicInt64(0)
+        let start = AtomicInt64(0)
+        let futures = ArrayList<Future<String>>()
+        for (_ in 0..count) {
+            let future = spawn {
+                ready.fetchAdd(1)
+                let waitStart = DateTime.now()
+                while (start.load() == 0 && !deadlineReached(waitStart, 10_000_000_000)) {
+                    sleep(1 * Duration.millisecond)
+                }
+                if (start.load() == 0) {
+                    throw Exception("serializer never observed the start signal")
+                }
+                obj.toJson()
+            }
+            futures.add(future)
+        }
+        let readyStart = DateTime.now()
+        while (ready.load() != count && !deadlineReached(readyStart, 10_000_000_000)) {
+            sleep(1 * Duration.millisecond)
+        }
+        if (ready.load() != count) {
+            throw Exception("not all serializers reached the barrier")
+        }
+        start.store(1)
+        let firstResult = futures[0].get()
+        for (future in futures) {
+            @Expect(future.get() == firstResult)
+        }
+        @Expect(yJsonRuntimeSlowFreezeEntriesForTest.load(), slowEntries)
     }
 }
 

@@ -163,6 +163,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang gcc libidn2-dev
           dpkg-query -W -f='${Package}=${Version}\n' clang gcc libidn2-dev
+      - name: Restore pinned standards suites cache
+        if: contains(fromJSON('["standards-conformance","schema-formats-conformance"]'), matrix.gate)
+        id: standards-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: /tmp/yjson-standards-suites
+          # The key fingerprints the pinned suite revisions embedded in the
+          # runner, so any suite revision change rotates the cache.
+          key: yjson-standards-suites-${{ hashFiles('scripts/run_standards_conformance.py') }}
+      - name: Prefetch pinned standards suites with SHA-256 verification
+        if: contains(fromJSON('["standards-conformance","schema-formats-conformance"]'), matrix.gate) && steps.standards-cache.outputs.cache-hit != 'true'
+        run: python3 scripts/run_standards_conformance.py --prefetch --cache /tmp/yjson-standards-suites
       - name: Fetch pinned yyjson co-link fixture
         if: matrix.gate == 'yyjson-colink'
         run: |
@@ -181,6 +193,7 @@ jobs:
         env:
           YJSON_RESOLVED_NIGHTLY: ${{ needs.nightly.outputs.version }}
           YJSON_SECOND_YYJSON_ROOT: ${{ matrix.gate == 'yyjson-colink' && '/tmp/yjson-yyjson-second/yyjson-0.11.1' || '' }}
+          YJSON_STANDARDS_OFFLINE: ${{ contains(fromJSON('["standards-conformance","schema-formats-conformance"]'), matrix.gate) && '1' || '' }}
         run: |
           ulimit -s 131072
           ulimit -s
@@ -330,6 +343,51 @@ jobs:
           use_oidc: true
           files: coverage/lcov.info
           flags: core
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true
+      # Per-package flags mirror codecov.yml. The lcov files are produced when
+      # the package coverage collector lands in scripts/coverage.sh; each
+      # upload activates the corresponding project and patch gates in
+      # codecov.yml. Until a file exists the step is skipped and the flag is
+      # simply not reported.
+      - name: Upload algorithms coverage to Codecov
+        if: hashFiles('coverage/lcov.algorithms.info') != ''
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac
+        with:
+          use_oidc: true
+          files: coverage/lcov.algorithms.info
+          flags: algorithms
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true
+      - name: Upload native coverage to Codecov
+        if: hashFiles('coverage/lcov.native.info') != ''
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac
+        with:
+          use_oidc: true
+          files: coverage/lcov.native.info
+          flags: native
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true
+      - name: Upload yyjson coverage to Codecov
+        if: hashFiles('coverage/lcov.yyjson.info') != ''
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac
+        with:
+          use_oidc: true
+          files: coverage/lcov.yyjson.info
+          flags: yyjson
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true
+      - name: Upload schema-formats coverage to Codecov
+        if: hashFiles('coverage/lcov.schema-formats.info') != ''
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac
+        with:
+          use_oidc: true
+          files: coverage/lcov.schema-formats.info
+          flags: schema-formats
           disable_search: true
           fail_ci_if_error: true
           verbose: true

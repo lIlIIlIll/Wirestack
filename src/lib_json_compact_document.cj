@@ -19,7 +19,6 @@ private let COMPACT_KEY_OWNED_MASK: UInt64 = 1u64 << 63
 private let COMPACT_KEY_PAYLOAD_MASK: UInt64 = 0x7FFF_FFFF_FFFF_FFFFu64
 private let COMPACT_KEY_OFFSET_MASK: UInt64 = 0x7FFF_FFFFu64
 private let COMPACT_KEY_LENGTH_MASK: UInt64 = 0xFFFF_FFFFu64
-private let COMPACT_LINEAR_OBJECT_LIMIT: Int64 = 16
 private let COMPACT_NUMERIC_BULK_CAP: Int64 = 1024
 private let COMPACT_NUMERIC_BULK_MIN_BYTES: Int64 = 1024
 private let COMPACT_TAPE_MIN_BYTES: Int64 = 64 * 1024
@@ -233,11 +232,11 @@ class CompactJsonDocument {
     // String HashMap probing entirely; exact duplicate semantics are handled
     // by the parse-time byte-aware object index below.
     private let keyDictionary = HashMap<String, UInt64>()
-    // Cache only successful queried entries for large objects. Misses are not
-    // retained, so unique absent-key probes cannot grow this map. A full
-    // permanent key index would reintroduce the memory amplification this
-    // document API avoids.
-    private let lookupCache = HashMap<String, Int64>()
+    // The document may borrow a String's UTF-8 storage via parseBorrowed.
+    // Keeping the owner here makes source-view slices and key ranges valid for
+    // the document's GC lifetime without adding lifecycle work to the public
+    // document API.
+    private let sourceOwner: Option<String>
     var rootIndex: Int64 = -1
     var duplicateLogicalBytes: Int64 = 0
     var duplicateCapacityBytes: Int64 = 0
@@ -264,14 +263,24 @@ class CompactJsonDocument {
     var keyDictionaryLookups: Int64 = 0
     var keyDictionaryHits: Int64 = 0
     var keyDictionaryMisses: Int64 = 0
-    private init(source: Array<Byte>) { this.source = source }
+    private init(source: Array<Byte>, sourceOwner!: Option<String> = None<String>) {
+        this.source = source
+        this.sourceOwner = sourceOwner
+    }
 
     /// Parses without copying `bytes`. The caller must not mutate the array or
     /// write it concurrently while the returned document remains reachable.
     public static func parseBorrowed(bytes: Array<Byte>,
         config!: JsonReadOptions = JsonReadOptions.defaults): CompactJsonDocument {
+        parseBorrowed(bytes, config, None<String>)
+    }
+
+    /// Parses without copying `bytes`, retaining `sourceOwner` for the
+    /// document's lifetime so source-backed views and key ranges remain valid.
+    public static func parseBorrowed(bytes: Array<Byte>, config: JsonReadOptions,
+        sourceOwner: Option<String>): CompactJsonDocument {
         validateJsonResourceLimits(bytes, config)
-        let document = CompactJsonDocument(bytes)
+        let document = CompactJsonDocument(bytes, sourceOwner: sourceOwner)
         let parser = CompactJsonParser(document, JsonFastReader(bytes), config)
         document.rootIndex = parser.parse()
         document
@@ -340,7 +349,9 @@ class CompactJsonDocument {
         for (index in 0..objectValues.size) { result = result ^ Int64(objectKinds[index]) ^ objectValues[index] }
         result & 0x7FFF_FFFF
     }
-    public func materialize(): JsonNode { materializeAt(rootIndex) }
+    public func materialize(): JsonNode {
+        materializeAt(rootIndex, JsonNodeOperationBudget.withDefaultLimit(), 0)
+    }
 
     public func toString(): String {
         let writer = JsonDirectWriter()
@@ -498,26 +509,6 @@ class CompactJsonDocument {
     func objectValueAt(index: Int64, name: String): Option<CompactJsonValue> {
         if (kinds[index] != COMPACT_OBJECT) { return None<CompactJsonValue> }
         let start = first[index]
-        if (second[index] > COMPACT_LINEAR_OBJECT_LIMIT) {
-            let cacheKey = index.toString() + "\u{0000}" + name
-            if (let Some(position) <- lookupCache.get(cacheKey)) {
-                if (objectKinds[position] == COMPACT_OBJECT_NODE) {
-                    return Some(CompactJsonValue(this, objectValues[position]))
-                }
-                return Some(CompactJsonValue(this, -1, Int64(objectKinds[position]), objectValues[position]))
-            }
-            for (offset in 0..second[index]) {
-                if (keyEquals(objectKeys[start + offset], name)) {
-                    let position = start + offset
-                    lookupCache[cacheKey] = position
-                    if (objectKinds[position] == COMPACT_OBJECT_NODE) {
-                        return Some(CompactJsonValue(this, objectValues[position]))
-                    }
-                    return Some(CompactJsonValue(this, -1, Int64(objectKinds[position]), objectValues[position]))
-                }
-            }
-            return None<CompactJsonValue>
-        }
         for (offset in 0..second[index]) {
             if (keyEquals(objectKeys[start + offset], name)) {
                 let position = start + offset
@@ -572,7 +563,8 @@ class CompactJsonDocument {
         throw JsonException("Expected number value", code: "type_mismatch")
     }
 
-    func materializeAt(index: Int64): JsonNode {
+    func materializeAt(index: Int64, budget: JsonNodeOperationBudget, depth: Int64): JsonNode {
+        budget.visit(depth)
         let code = kinds[index]
         match {
             case code == COMPACT_NULL => JsonNullValue()
@@ -583,11 +575,15 @@ class CompactJsonDocument {
             case code == COMPACT_ARRAY =>
                 let result = JsonArray()
                 let start = first[index]
-                for (offset in 0..second[index]) { result.add(materializeAt(arrayChildren[start + offset])) }
+                for (offset in 0..second[index]) {
+                    result.add(materializeAt(arrayChildren[start + offset], budget, depth + 1))
+                }
                 result
             case code == COMPACT_INT_ARRAY =>
                 let result = JsonArray(); let start = first[index]
-                for (offset in 0..second[index]) { result.add(JsonIntValue(intValues[start + offset])) }
+                for (offset in 0..second[index]) {
+                    result.add(JsonIntValue(intValues[start + offset]))
+                }
                 result
             case code == COMPACT_STRING_ARRAY =>
                 let result = JsonArray(); let start = first[index]
@@ -607,8 +603,9 @@ class CompactJsonDocument {
                 for (offset in 0..second[index]) {
                     let position = start + offset
                     let value = if (objectKinds[position] == COMPACT_OBJECT_NODE) {
-                        materializeAt(objectValues[position])
+                        materializeAt(objectValues[position], budget, depth + 1)
                     } else {
+                        budget.visit(depth + 1)
                         materializeInline(Int64(objectKinds[position]), objectValues[position])
                     }
                     result.put(keyText(objectKeys[position]), value)
@@ -750,23 +747,18 @@ struct CompactJsonValue <: JsonValueView {
         else { document.numberTextAt(index) }
     }
     public func asBool(): Bool { if (inlineKind == COMPACT_BOOL) { inlinePayload != 0 } else { document.boolAt(index) } }
-    private func materializeUnbounded(): JsonNode {
-        if (inlineKind == COMPACT_NULL) { JsonNullValue() }
-        else if (inlineKind == COMPACT_BOOL) { JsonBoolValue(inlinePayload != 0) }
-        else if (inlineKind == COMPACT_INT) { JsonIntValue(inlinePayload) }
-        else if (inlineKind == COMPACT_NUMBER) {
-            JsonNumberLiteralValue.fromParsedLiteral(document.strings[inlinePayload])
-        }
-        else if (inlineKind == COMPACT_STRING) { JsonStringValue(document.strings[inlinePayload]) }
-        else { document.materializeAt(index) }
-    }
-    public func materialize(): JsonNode { materialize(100000) }
+    public func materialize(): JsonNode { materialize(JSON_NODE_OPERATION_MAX_WORK) }
 
     public func materialize(maxNodes: Int64): JsonNode {
-        let value = materializeUnbounded()
-        // Compact materialization is already detached. Reusing the shared
-        // budget traversal enforces the public node limit and catches depth.
-        deepCopyJsonNode(value, maxNodes)
+        let budget = JsonNodeOperationBudget(maxNodes)
+        if (inlineKind == COMPACT_NULL) { return JsonNullValue() }
+        if (inlineKind == COMPACT_BOOL) { return JsonBoolValue(inlinePayload != 0) }
+        if (inlineKind == COMPACT_INT) { return JsonIntValue(inlinePayload) }
+        if (inlineKind == COMPACT_NUMBER) {
+            return JsonNumberLiteralValue.fromParsedLiteral(document.strings[inlinePayload])
+        }
+        if (inlineKind == COMPACT_STRING) { return JsonStringValue(document.strings[inlinePayload]) }
+        document.materializeAt(index, budget, 0)
     }
 }
 
@@ -794,18 +786,14 @@ private class CompactJsonParser {
     }
 
     private func parseValue(): Int64 {
-        if (depth >= config.maxDepth) { throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth") }
-        depth++
-        try {
-            match (reader.peekRawKind()) {
-                case JsonKind.Null => let _ = reader.tryReadRawNull(); document.addNode(COMPACT_NULL)
-                case JsonKind.Boolean => document.addNode(COMPACT_BOOL, firstValue: if (reader.readRawBool()) { 1 } else { 0 })
-                case JsonKind.String => document.addNode(COMPACT_STRING, firstValue: document.addString(reader.readRawString()))
-                case JsonKind.Array => parseArray()
-                case JsonKind.Object => parseObject()
-                case _ => parseNumber()
-            }
-        } finally { depth-- }
+        match (reader.peekRawKind()) {
+            case JsonKind.Null => let _ = reader.tryReadRawNull(); document.addNode(COMPACT_NULL)
+            case JsonKind.Boolean => document.addNode(COMPACT_BOOL, firstValue: if (reader.readRawBool()) { 1 } else { 0 })
+            case JsonKind.String => document.addNode(COMPACT_STRING, firstValue: document.addString(reader.readRawString()))
+            case JsonKind.Array => parseArray()
+            case JsonKind.Object => parseObject()
+            case _ => parseNumber()
+        }
     }
 
     private func parseNumber(): Int64 {
@@ -841,6 +829,16 @@ private class CompactJsonParser {
     }
 
     private func parseArray(): Int64 {
+        if (depth >= config.maxDepth) {
+            throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
+        }
+        depth++
+        try {
+            return parseArrayInner()
+        } finally { depth-- }
+    }
+
+    private func parseArrayInner(): Int64 {
         reader.startRawArray()
         let contentStart = reader.position()
         if (!reader.hasRawArrayItem(true)) {
@@ -1073,6 +1071,16 @@ private class CompactJsonParser {
     }
 
     private func parseObject(): Int64 {
+        if (depth >= config.maxDepth) {
+            throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
+        }
+        depth++
+        try {
+            return parseObjectInner()
+        } finally { depth-- }
+    }
+
+    private func parseObjectInner(): Int64 {
         reader.startRawObject()
         let keys = ArrayList<UInt64>()
         let valueKinds = ArrayList<Byte>()

@@ -36,6 +36,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
     private let data: Array<Byte>
     private let size: Int64
     private let validateStrings: Bool
+    private let config: JsonReadOptions
     private let sourceText: Option<String>
     private var index: Int64 = 0
     private var rawTokenStart: Int64 = 0
@@ -58,6 +59,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         }
         size = data.size
         validateStrings = false
+        config = JsonReadOptions.defaults
         sourceText = Some(text)
     }
 
@@ -65,6 +67,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         data = bytes
         size = bytes.size
         validateStrings = true
+        config = JsonReadOptions.defaults
         sourceText = None<String>
     }
 
@@ -1125,7 +1128,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
 
     private func int64ToInt32(value: Int64): Int32 {
         if (value < -0x8000_0000 || value > 0x7FFF_FFFF) {
-            fail("Integer literal out of Int32 range")
+            failWithCode("Integer literal out of Int32 range", "number_out_of_range")
         }
         Int32(value)
     }
@@ -1137,7 +1140,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
 
     private func int64ToInt16(value: Int64): Int16 {
         if (value < -0x8000 || value > 0x7FFF) {
-            fail("Integer literal out of Int16 range")
+            failWithCode("Integer literal out of Int16 range", "number_out_of_range")
         }
         Int16(value)
     }
@@ -1149,7 +1152,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
 
     private func int64ToInt8(value: Int64): Int8 {
         if (value < -0x80 || value > 0x7F) {
-            fail("Integer literal out of Int8 range")
+            failWithCode("Integer literal out of Int8 range", "number_out_of_range")
         }
         Int8(value)
     }
@@ -1165,7 +1168,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
 
     private func uint64ToUInt32(value: UInt64): UInt32 {
         if (value > 0xFFFF_FFFFu64) {
-            fail("Integer literal out of UInt32 range")
+            failWithCode("Integer literal out of UInt32 range", "number_out_of_range")
         }
         UInt32(value)
     }
@@ -1177,7 +1180,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
 
     private func uint64ToUInt16(value: UInt64): UInt16 {
         if (value > 0xFFFFu64) {
-            fail("Integer literal out of UInt16 range")
+            failWithCode("Integer literal out of UInt16 range", "number_out_of_range")
         }
         UInt16(value)
     }
@@ -1189,7 +1192,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
 
     private func uint64ToUInt8(value: UInt64): UInt8 {
         if (value > 0xFFu64) {
-            fail("Integer literal out of UInt8 range")
+            failWithCode("Integer literal out of UInt8 range", "number_out_of_range")
         }
         UInt8(value)
     }
@@ -1404,6 +1407,18 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         skipRawValueBounded(0, maxDepth)
     }
 
+    /// Policy-aware unknown-field skip used by generated codecs. Unlike the
+    /// raw skip, this variant never routes container scanning to the native
+    /// skip (which is a pure syntax scan), and when
+    /// duplicateKeyPolicy==Reject it tracks decoded member names per object
+    /// level so duplicate keys inside skipped subtrees fail with the stable
+    /// "duplicate_key" code. The remaining depth budget is relative to the
+    /// current generated-code context.
+    public func skipValue(maxDepth: Int64): Unit {
+        if (maxDepth < 0) { throw IllegalArgumentException("maxDepth must not be negative") }
+        skipRawValuePolicyAware(0, maxDepth)
+    }
+
     private func beforeRawFieldName(first: Bool): Unit {
         skipSpaces()
         if (!first) {
@@ -1435,10 +1450,13 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         if (maxDepth < 0 && shouldUseNativeSkip(current)) {
             let nativeEnd = jsonNativeSkipValue(data, size, index, validateStrings)
             if (nativeEnd >= 0) {
+                let skippedStart = index
                 index = nativeEnd
+                enforceValueByteBudget(skippedStart, nativeEnd)
                 return
             }
         }
+        let valueStart = index
         match {
             case current == b'n' => expectLiteral("null")
             case current == b't' => expectLiteral("true")
@@ -1451,6 +1469,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
                 skipRawNumber()
             case _ => fail("Unexpected token")
         }
+        enforceValueByteBudget(valueStart, index)
     }
 
     private func shouldUseNativeSkip(current: Byte): Bool {
@@ -1506,6 +1525,95 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         }
     }
 
+    private func skipRawValuePolicyAware(depth: Int64, maxDepth: Int64): Unit {
+        if (!hasMore()) {
+            fail("Unexpected end of input")
+        }
+        if (isJsonSpace(peek())) {
+            skipSpaces()
+        }
+        if (!hasMore()) {
+            fail("Unexpected end of input")
+        }
+        let current = peek()
+        let valueStart = index
+        match {
+            case current == b'n' => expectLiteral("null")
+            case current == b't' => expectLiteral("true")
+            case current == b'f' => expectLiteral("false")
+            case current == b'"' =>
+                scanRawString()
+            case current == b'[' => skipRawArrayPolicyAware(depth, maxDepth)
+            case current == b'{' => skipRawObjectPolicyAware(depth, maxDepth)
+            case current == b'-' || (current >= b'0' && current <= b'9') =>
+                skipRawNumber()
+            case _ => fail("Unexpected token")
+        }
+        enforceValueByteBudget(valueStart, index)
+    }
+
+    private func skipRawArrayPolicyAware(depth: Int64, maxDepth: Int64): Unit {
+        if (maxDepth >= 0 && depth >= maxDepth) {
+            throw JsonException("Maximum JSON depth exceeded", code: "max_depth",
+                location: Some(JsonLocation(index, jsonLineFromUtf8Bytes(data, index),
+                    jsonColumnFromUtf8Bytes(data, index))))
+        }
+        expectByte(b'[')
+        skipSpaces()
+        if (hasMore() && peek() == b']') {
+            index++
+            return
+        }
+        while (true) {
+            skipRawValuePolicyAware(depth + 1, maxDepth)
+            skipSpaces()
+            if (hasMore() && peek() == b']') {
+                index++
+                return
+            }
+            expectByte(b',')
+        }
+    }
+
+    private func skipRawObjectPolicyAware(depth: Int64, maxDepth: Int64): Unit {
+        if (maxDepth >= 0 && depth >= maxDepth) {
+            throw JsonException("Maximum JSON depth exceeded", code: "max_depth",
+                location: Some(JsonLocation(index, jsonLineFromUtf8Bytes(data, index),
+                    jsonColumnFromUtf8Bytes(data, index))))
+        }
+        expectByte(b'{')
+        skipSpaces()
+        if (hasMore() && peek() == b'}') {
+            index++
+            return
+        }
+        let seenNames = if (jsonReadOptionsRejectsDuplicateKeys(config)) {
+            Some(HashSet<String>())
+        } else {
+            None<HashSet<String>>
+        }
+        while (true) {
+            let name = parseString()
+            match (seenNames) {
+                case Some(seen) =>
+                    if (seen.contains(name)) {
+                        policyFail("Duplicate object key '${name}'")
+                    }
+                    seen.add(name)
+                case None => ()
+            }
+            skipSpaces()
+            expectByte(b':')
+            skipRawValuePolicyAware(depth + 1, maxDepth)
+            skipSpaces()
+            if (hasMore() && peek() == b'}') {
+                index++
+                return
+            }
+            expectByte(b',')
+        }
+    }
+
     private func skipRawNumber(): Unit {
         if (hasMore() && peek() == b'-') {
             index++
@@ -1552,6 +1660,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
             requireDigit("Expected exponent digits")
             consumeDigits()
         }
+        enforceValueByteBudget(start, index)
         asciiStringFromRange(start, index)
     }
 
@@ -1578,7 +1687,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
                     let digit = Int64(data[index] - b'0')
                     index++
                     if (result < ((-0x8000_0000_0000_0000 + digit) / 10)) {
-                        fail("Integer literal out of Int64 range")
+                        failWithCode("Integer literal out of Int64 range", "number_out_of_range")
                     }
                     result = result * 10 - digit
                 }
@@ -1596,7 +1705,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
                 let digit = Int64(data[index] - b'0')
                 index++
                 if (result > ((0x7FFF_FFFF_FFFF_FFFF - digit) / 10)) {
-                    fail("Integer literal out of Int64 range")
+                    failWithCode("Integer literal out of Int64 range", "number_out_of_range")
                 }
                 result = result * 10 + digit
             }
@@ -1626,7 +1735,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
                 let digit = UInt64(data[index] - b'0')
                 index++
                 if (result > ((UInt64.Max - digit) / 10)) {
-                    fail("Integer literal out of UInt64 range")
+                    failWithCode("Integer literal out of UInt64 range", "number_out_of_range")
                 }
                 result = result * 10 + digit
             }
@@ -1637,7 +1746,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
 
     private func rejectFractionalOrExponentForInteger(): Unit {
         if (hasMore() && (peek() == b'.' || peek() == b'e' || peek() == b'E')) {
-            fail("Expected integer")
+            failWithCode("Expected integer", "invalid_value")
         }
     }
 
@@ -1674,14 +1783,17 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         expectByte(b'"')
         let start = index
         var leadingSegmentAscii = true
+        var decodedBytes: Int64 = 0
         while (index < size) {
             let current = data[index]
             if (current == b'"') {
                 let end = index
                 index++
                 if (validateStrings && leadingSegmentAscii) {
+                    decodedBytes = enforceDecodedStringBytesIncrement(start, decodedBytes, end - start)
                     return asciiStringFromRange(start, end)
                 }
+                enforceDecodedStringBytes(start, decodedBytes)
                 return stringFromUtf8Range(start, end)
             }
             if (current == b'\\') {
@@ -1691,7 +1803,16 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
                 failAt("Unescaped control character in string literal", index)
             }
             if (current >= 0x80) {
+                if (validateStrings) {
+                    let width = validateRawUtf8At(index)
+                    decodedBytes = enforceDecodedStringBytesIncrement(start, decodedBytes, width)
+                    index = width
+                    continue
+                }
                 leadingSegmentAscii = false
+                decodedBytes++
+            } else {
+                decodedBytes++
             }
             index++
         }
@@ -1705,6 +1826,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         } else {
             if (size - quoteStart >= YJSON_NATIVE_MIN_READER_DECODE_BYTES) {
                 if (let Some(decoded) <- jsonNativeDecodeString(data, size, quoteStart, validateStrings)) {
+                    enforceDecodedStringBytes(quoteStart, decoded.value.size)
                     index = decoded.end
                     return decoded.value
                 }
@@ -1720,6 +1842,7 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         var read = start
         var segmentStart = start
         var written: Int64 = 0
+        var decodedBytes: Int64 = 0
         while (read < size) {
             let current = data[read]
             if (current == b'"') {
@@ -1763,11 +1886,14 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
                             failAt("Invalid unicode surrogate pair", escapeStart)
                         }
                         written = appendUtf8CodePoint(output, written, value)
+                        decodedBytes = enforceDecodedStringBytesIncrement(start, decodedBytes,
+                            jsonUtf8ByteCount(value))
                         segmentStart = read
                         continue
                     case _ => failAt("Unsupported escape sequence", read - 2)
                 }
                 written++
+                decodedBytes++
                 segmentStart = read
                 continue
             }
@@ -1775,10 +1901,13 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
                 failAt("Unescaped control character in string literal", read)
             }
             if (validateStrings && current >= 0x80) {
-                read = validateRawUtf8At(read)
+                let width = validateRawUtf8At(read)
+                decodedBytes = enforceDecodedStringBytesIncrement(start, decodedBytes, width)
+                read = width
                 continue
             }
             read++
+            decodedBytes++
         }
         fail("Unterminated string literal")
     }
@@ -2343,6 +2472,48 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
 
     private func fail(message: String): Nothing {
         failAt(message, index)
+    }
+
+    private func failWithCode(message: String, code: String): Nothing {
+        throw JsonException(
+            "${message} at byte ${index}",
+            code: code,
+            location: Some(JsonLocation(index, jsonLineFromUtf8Bytes(data, index),
+                jsonColumnFromUtf8Bytes(data, index)))
+        )
+    }
+
+    private func enforceValueByteBudget(valueStart: Int64, valueEnd: Int64): Unit {
+        let limit = config.maxBufferedValueBytes
+        if (limit > 0 && valueEnd - valueStart > limit) {
+            throw jsonResourceLimitException(data,
+                "JSON value exceeds ${limit} bytes",
+                "buffered_value_too_large", valueStart + limit)
+        }
+    }
+
+    private func enforceDecodedStringBytes(start: Int64, decodedBytes: Int64): Unit {
+        let limit = config.maxStringBytes
+        if (limit > 0 && decodedBytes > limit) {
+            throw jsonResourceLimitException(data,
+                "JSON string exceeds ${limit} decoded UTF-8 bytes",
+                "string_too_large", start + limit)
+        }
+    }
+
+    private func enforceDecodedStringBytesIncrement(start: Int64, decodedBytes: Int64,
+        added: Int64): Int64 {
+        let next = decodedBytes + added
+        enforceDecodedStringBytes(start, next)
+        next
+    }
+
+    private func policyFail(message: String): Nothing {
+        throw JsonException(
+            message,
+            code: "duplicate_key",
+            location: Some(JsonLocation(index, jsonLineFromUtf8Bytes(data, index),
+                jsonColumnFromUtf8Bytes(data, index))))
     }
 
     private func failAt(message: String, offset: Int64): Nothing {

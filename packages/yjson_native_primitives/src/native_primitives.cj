@@ -130,19 +130,17 @@ func nativeScannerCapabilitiesForTesting(): UInt32 {
     unsafe { YJ_JSON_SimdCaps() }
 }
 
-func enableYJsonNative(): Unit {
-    if (yJsonNativeEnabled) { return }
-    activateJsonNativePrimitivesV1(CJsonNativeScannerBackend())
-    yJsonNativeEnabled = true
-}
-
-private class CustomNativeAccelerationProviderV1 <: JsonAccelerationProviderV1 {
+private class CustomNativeAccelerationProviderV1 <: JsonNativePrimitivesProviderV1 {
     public func identity(): String { "yjson-custom-native-v1" }
     public func protocolVersion(): Int64 { 1 }
     public func abiVersion(): Int64 { 1 }
+    public func primitives(): JsonNativeAccelerationPrimitivesV1 {
+        CJsonNativeScannerBackend()
+    }
     public func activate(): Unit {
         // Resolve and validate the full linked primitive bundle before the
-        // process-wide runtime state is frozen.
+        // process-wide runtime state is frozen. The bundle itself is
+        // installed by the runtime after activation succeeds.
         let probe = unsafe { YJ_JSON_ProbeV1() }
         if (probe != 0x594A0101u32) {
             throw JsonException(
@@ -155,7 +153,7 @@ private class CustomNativeAccelerationProviderV1 <: JsonAccelerationProviderV1 {
                 "Custom Native primitives do not support this CPU",
                 code: "acceleration_cpu_unsupported")
         }
-        enableYJsonNative()
+        yJsonNativeEnabled = true
     }
 }
 

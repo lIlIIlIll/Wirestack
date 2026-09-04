@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
 import subprocess
@@ -18,31 +19,105 @@ SUITES = {
     "json-schema": (
         "json-schema-org/JSON-Schema-Test-Suite",
         "b01af8c8d50244a2eb4dd3e01073e24823aa8691",
+        "76915a25b6333f77cc37f2a9ff714f8feb9435b588ed2a7e48f6236257afa6d7",
     ),
     "jsonpath": (
         "jsonpath-standard/jsonpath-compliance-test-suite",
         "7be7c1fc28057c91e8eefaf197060fba7ed43acd",
+        "e4dd491e865f756b4e060d338217d329c1423e7e40a6987bf803b88c230f57e5",
     ),
     "json-patch": (
         "json-patch/json-patch-tests",
         "2a928f9044aad35c74e2788d498bcf2c6b91adea",
+        "4b7d9e50bcd6be33d8c36818084c572b3e641f38608ba88522159a0a9fd700c4",
     ),
 }
 
 
+def prefetch_hint(cache: Path) -> str:
+    commands = [
+        (
+            f"curl -fL https://github.com/{owner_repo}/archive/{commit}.tar.gz "
+            f"-o {cache}/{name}-{commit}.tar.gz && "
+            f"echo '{sha256}  {cache}/{name}-{commit}.tar.gz' | sha256sum -c -"
+        )
+        for name, (owner_repo, commit, sha256) in SUITES.items()
+    ]
+    expected = "\n".join(
+        f"  {cache}/{name}-{commit}.tar.gz  ({sha256[:12]})"
+        for name, (owner_repo, commit, sha256) in SUITES.items()
+    )
+    return (
+        "offline mode requires every pinned suite to be present in the cache. "
+        "Prefetch into the cache directory with:\n"
+        + "\n".join(commands)
+        + "\nExpected sha256 digests:\n"
+        + expected
+    )
+
+
 def fetch_suite(cache: Path, name: str, offline: bool) -> Path:
-    owner_repo, commit = SUITES[name]
+    owner_repo, commit, sha256 = SUITES[name]
     destination = cache / f"{name}-{commit}"
     marker = destination / ".yjson-suite-commit"
     if marker.is_file() and marker.read_text(encoding="utf-8").strip() == commit:
         return destination
-    if offline:
-        raise RuntimeError(f"pinned {name} suite is absent from {destination}")
     archive = cache / f"{name}-{commit}.tar.gz"
+    if offline:
+        if archive.is_file():
+            digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+            if digest != sha256:
+                raise RuntimeError(
+                    f"cached {name} archive sha256 mismatch: "
+                    f"expected {sha256}, got {digest}\n{prefetch_hint(cache)}"
+                )
+            return extract_suite(cache, name, archive, destination, marker, commit)
+        raise RuntimeError(
+            f"pinned {name} suite is absent from {cache}\n{prefetch_hint(cache)}"
+        )
     cache.mkdir(parents=True, exist_ok=True)
     url = f"https://github.com/{owner_repo}/archive/{commit}.tar.gz"
     print(f"fetch {name} {commit}", flush=True)
     urllib.request.urlretrieve(url, archive)
+    digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+    if digest != sha256:
+        archive.unlink(missing_ok=True)
+        raise RuntimeError(
+            f"pinned {name} archive sha256 mismatch: expected {sha256}, got {digest}"
+        )
+    return extract_suite(cache, name, archive, destination, marker, commit)
+
+
+def prefetch(cache: Path) -> None:
+    """Download and SHA-256 verify every pinned suite archive into the cache.
+
+    Archives are kept as cache artifacts; an offline run later consumes them
+    via fetch_suite(..., offline=True).
+    """
+
+    cache.mkdir(parents=True, exist_ok=True)
+    for name, (owner_repo, commit, sha256) in SUITES.items():
+        archive = cache / f"{name}-{commit}.tar.gz"
+        if archive.is_file():
+            digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+            if digest == sha256:
+                print(f"verified {name} {commit}", flush=True)
+                continue
+            archive.unlink(missing_ok=True)
+        url = f"https://github.com/{owner_repo}/archive/{commit}.tar.gz"
+        print(f"fetch {name} {commit}", flush=True)
+        urllib.request.urlretrieve(url, archive)
+        digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+        if digest != sha256:
+            archive.unlink(missing_ok=True)
+            raise RuntimeError(
+                f"pinned {name} archive sha256 mismatch: expected {sha256}, got {digest}"
+            )
+
+
+def extract_suite(
+    cache: Path, name: str, archive: Path, destination: Path, marker: Path, commit: str
+) -> Path:
     extraction = Path(tempfile.mkdtemp(prefix=f"yjson-{name}-", dir=cache))
     try:
         with tarfile.open(archive, "r:gz") as bundle:
@@ -105,7 +180,16 @@ def json_patch_manifest(root: Path) -> list:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--cache", type=Path, default=Path("/tmp/yjson-standards-suites"))
-    parser.add_argument("--offline", action="store_true")
+    parser.add_argument(
+        "--offline",
+        action="store_true",
+        help="only use cached suites; fail with a prefetch hint when a pinned suite is missing",
+    )
+    parser.add_argument(
+        "--prefetch",
+        action="store_true",
+        help="download and SHA-256 verify every pinned suite archive into the cache, then exit",
+    )
     parser.add_argument("--keep-manifest", type=Path)
     parser.add_argument("--schema-root", type=Path)
     parser.add_argument("--jsonpath-root", type=Path)
@@ -115,6 +199,10 @@ def main() -> int:
     parser.add_argument("--include-schema-optional", action="store_true")
     parser.add_argument("--override-compile-option", default="")
     args = parser.parse_args()
+
+    if args.prefetch:
+        prefetch(args.cache)
+        return 0
 
     supplied = {
         "json-schema": args.schema_root,

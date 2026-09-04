@@ -1,5 +1,11 @@
 # yjson / cjfast_json
 
+> **Legacy / unverifiable（2026-09-05 标注）**：本页是历史诊断测量，**不构成 0.1.0
+> qualification 证据**。原始样本未作为仓库 artifact 发布，且缺少可复现身份：pinned
+> source/SDK/CPU 身份、SDK archive checksum、完整原始样本与内容 checksum 均未随页绑定。
+> 数字只反映其记录时刻的 workload 与工具链，无法从仓库内容独立复核。0.1.0 的正式性能
+> 声明以 `release/0.1.0/evidence.md` 绑定的完整批次为准。
+
 ## 结果范围
 
 37 个语义匹配 workload 中，yjson 有 29 项 paired median 更低。严格稳定性门槛下的结果为：

@@ -106,13 +106,6 @@ foreign func YJ_Compact_FreeOwnedBuffer(bufferHandle: UInt64): Unit
 foreign func YJ_Compact_Stats(handle: UInt64, stats: CPointer<UInt64>, capacity: UInt64): Int32
 @FastNative
 foreign func YJ_Compact_DuplicateStats(handle: UInt64, stats: CPointer<UInt64>, capacity: UInt64): Int32
-@FastNative
-foreign func YJ_Compact_Noop(value: UInt64): UInt64
-@FastNative
-foreign func YJ_Compact_ScalarProbe(value: UInt64, outValue: CPointer<UInt64>): Int32
-
-foreign func YJ_Compact_CopyProbe(input: CPointer<UInt8>, length: UInt64,
-    iterations: UInt64, outChecksum: CPointer<UInt64>): Int32
 
 func encodeNativeStreamTape(tape: Array<Byte>, config: JsonWriteOptions): Array<Byte> {
     let newlineText = if (config.indent.isEmpty()) { "" } else { "\n" }
@@ -948,31 +941,3 @@ private func nativeCompactParseError(bytes: Array<Byte>, code: Int32, offset: In
         location: Some(JsonLocation(offset, line, column)))
 }
 
-/// Benchmark-only FFI probes. They do not access provider/network state.
-public func nativeCompactNoopProbe(value: UInt64): UInt64 { unsafe { YJ_Compact_Noop(value) } }
-
-public func nativeCompactScalarProbe(value: UInt64): UInt64 {
-    let out = Array<UInt64>(1, repeat: 0u64)
-    let status = unsafe {
-        let outHandle = acquireArrayRawData(out)
-        try { YJ_Compact_ScalarProbe(value, outHandle.pointer) }
-        finally { releaseArrayRawData(outHandle) }
-    }
-    if (status != YJ_COMPACT_OK) { throw IllegalStateException("Native scalar probe failed") }
-    out[0]
-}
-
-public func nativeCompactCopyProbe(bytes: Array<Byte>, iterations: UInt64): UInt64 {
-    let checksum = Array<UInt64>(1, repeat: 0u64)
-    let status = unsafe {
-        let bytesHandle = acquireArrayRawData(bytes)
-        let checksumHandle = acquireArrayRawData(checksum)
-        try { YJ_Compact_CopyProbe(bytesHandle.pointer, UInt64(bytes.size), iterations, checksumHandle.pointer) }
-        finally {
-            releaseArrayRawData(checksumHandle)
-            releaseArrayRawData(bytesHandle)
-        }
-    }
-    if (status != YJ_COMPACT_OK) { throw IllegalStateException("Native copy probe failed: ${status}") }
-    checksum[0]
-}

@@ -111,8 +111,13 @@ fields。父类与子类各自保留精确的 `JsonCodec<T>`，不需要 erased 
 
 ## 版本边界
 
-宏输出只调用 `generated_support.v1` bridge，并嵌入 protocol version 1。runtime 与 macro
-必须来自同一个 lockstep release；protocol 不匹配以 `generated_protocol_mismatch` 明确失败。
+宏输出除了 versioned generated-support bridge，还会在 default fast path 直接引用
+具体的 `JsonFastReader` / `JsonDirectWriter` 与 `ReadCursor` 类型。这些类型是 V1 协议表面
+的一部分：与 `generated_support.v1` 同版本锁定，随 protocol version 一起演进。宏输出嵌入
+protocol version 1；runtime 与 macro 必须来自同一个 lockstep release；protocol 不匹配以
+`generated_protocol_mismatch` 明确失败。default fast path 入口先执行
+`GeneratedSupportV1.enterGeneratedEntry()`（protocol 校验 + runtime freeze），因此生成代码
+不会在未冻结的 runtime 上解析。
 
 普通 generated lookup 使用
 `GeneratedCodecProviderV1<T>.generatedCodecV1(_: GeneratedCodecTokenV1<T>): JsonCodec<T>`。

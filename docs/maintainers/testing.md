@@ -93,6 +93,24 @@ scripts/ci_fresh_checkout.sh
 project gate 每次阻断。PR 只有在 base 已包含 baseline 时执行 patch gate；bootstrap 不能跳过
 project gate。LCOV 以 `core` flag 上传 Codecov，上传失败阻断 workflow。
 
+### Codecov flags
+
+`codecov.yml` 为五组源码定义独立 flag，每组都有 project gate（auto target，0.1% threshold）
+与 patch gate（90% line）：
+
+| Flag | 路径 | 说明 |
+| --- | --- | --- |
+| `core` | `src/lib_*.cj` | 既有 root 产品源码，行为不变 |
+| `algorithms` | `packages/yjson_algorithms/src/` | Pointer/Patch/Path/Schema |
+| `native` | `packages/yjson_native{,_primitives,_accel}/src/` | scanner/provider closed SPI 与 facade |
+| `yyjson` | `packages/yjson_yyjson/src/` | yyjson Compact backend |
+| `schema-formats` | `packages/yjson_schema_formats/src/` | 可选国际化 format provider |
+
+每个 flag 的 lcov 文件由覆盖收集器按包生成（`coverage/lcov.<flag>.info`），CI 上传步骤在
+文件不存在时跳过，避免未收集阶段误报失败。宏源码（`packages/yjson_macros/`）继续排除在
+所有 flag 之外：declaration macro 的展开产物由外部 consumer 行为测试证明
+（`packages/codec_integration`），编译期代码无法用行覆盖率有意义地衡量。
+
 ## Feature × execution path
 
 | Public behavior | Pure | Native acceleration | Named Native/yyjson façade | External proof |
@@ -134,3 +152,9 @@ project gate。LCOV 以 `core` flag 上传 Codecov，上传失败阻断 workflow
 standards runner 的预期 cardinality 为 Schema required 1299、JSONPath CTS 703、JSON Patch
 108；optional format provider 增加 964 个适用 cases。某次 PASS 只属于绑定身份的 release
 evidence。
+
+CI 对 standards/schema-formats job 先执行一次 `--prefetch`（下载并 SHA-256 校验固定
+revision 的官方 suite archive），结果作为 cache artifact 复用；运行 gate 时显式传
+`--offline`（`YJSON_STANDARDS_OFFLINE=1`），只使用缓存，miss 即失败并打印预取命令。
+本地开发者无网络时可预先 `python3 scripts/run_standards_conformance.py --prefetch
+--cache /tmp/yjson-standards-suites`，之后加 `--offline` 运行。

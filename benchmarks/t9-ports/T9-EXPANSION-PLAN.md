@@ -146,6 +146,15 @@ createReader 两种重载、Jackson readValue(InputStream)），纯 token 计数
 粒度不可比而放弃。
 
 **关键数字（30 用例 + B 轨，完整表见 comparison.md）**：
+
+> **证据状态标注（2026-09-05）**：以下数字是 2026-09-04 的单次诊断快照
+> （`--runs 1`，每 case 单轮、无交替/反转 A/B），**不构成 0.1.0 qualification**。
+> 未满足正式 release gate 的前置：11 轮、逐轮交替/反转执行顺序、RSS 采集、
+> 内容 checksum 绑定、固定 CPU 之上的可复现性复测。跨日锚点（29.84µs vs 29.5µs）
+> 同为单次观测，不代表配对差异。0.1.0 的正式结论以
+> `release/0.1.0/evidence.md` 及符合 `docs/maintainers/releasing.md` 门禁的
+> 完整批次为准；本段只用于规划与相对量级判断。
+
 - msgc/Jackson geomean：yjson 0.856（新用例拉高：Option/未知字段为 yjson 相对弱项）、
   json4cj 2.548、cjjson 5.145
 - daily/msgc：yjson 2.416、cjjson 3.704

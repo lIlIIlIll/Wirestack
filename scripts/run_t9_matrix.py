@@ -137,25 +137,24 @@ def remote_tree_digest(server: str, root: str) -> str | None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
-    parser.add_argument("--server", default="Server")
+    parser.add_argument("--server", required=True,
+                        help="SSH host running the T9 matrix cells")
     parser.add_argument(
-        "--msgc-sdk",
-        default="<home>/cangjie_sdk/msgc-final-20260902/linux_release_x86_64",
+        "--msgc-sdk", required=True,
+        help="Server-local msgc comparison SDK root (linux_release_x86_64 layout)",
     )
     parser.add_argument(
-        "--daily-sdk-local", type=Path, default=Path("<home>/cangjie_sdk/daily"),
-        help="local daily SDK root containing cangjie/ and linux_x86_64_cjnative/",
+        "--daily-sdk-local", type=Path, required=True,
+        help="local daily SDK root containing cangjie/ and linux_x86_64_cjnative/; uploaded to --server",
     )
     parser.add_argument(
-        "--yjson-source",
-        default="/tmp/yjson-t9-threeway-02LNAW4E/candidate-array-exact",
+        "--yjson-source", required=True,
         help="Server-local prepared yjson copy to benchmark",
     )
     parser.add_argument("--json4cj-url", default="https://gitcode.com/L_lipo/json4cj")
     parser.add_argument(
-        "--cjpm-tools-bin",
-        default="<home>/cangjie_sdk/msgc-bugfix-20260831/linux_release_x86_64/tools/bin",
-        help="tools-SDK bin directory providing cjpm for the msgc cells",
+        "--cjpm-tools-bin", required=True,
+        help="Server-local tools-SDK bin directory providing cjpm for the msgc cells",
     )
     parser.add_argument("--json4cj-branch", default="main")
     parser.add_argument(
@@ -163,7 +162,7 @@ def main() -> int:
         help="verified json4cj commit carrying the T9 port",
     )
     parser.add_argument(
-        "--cjjson-source", default="<home>/cangjieJSON",
+        "--cjjson-source", required=True,
         help="Server-local cangjieJSON checkout",
     )
     parser.add_argument("--jackson-version", default="2.17.2")
@@ -386,11 +385,40 @@ def main() -> int:
                                    f"cat {shlex.quote(args.msgc_sdk + '/BUILD_PROVENANCE.txt')}")
         except Exception:
             pass
+        msgc_cjc = None
+        try:
+            msgc_cjc = ssh(args.server,
+                           f". {shlex.quote(args.msgc_sdk + '/envsetup.sh')} >/dev/null 2>&1; "
+                           "cjc -v 2>/dev/null | head -3")
+        except Exception:
+            pass
         daily_cjc = None
         try:
             daily_cjc = ssh(args.server,
                             f". {shlex.quote(wd + '/daily-sdk/cangjie/envsetup.sh')} >/dev/null 2>&1; "
                             "cjc -v 2>/dev/null | head -3")
+        except Exception:
+            pass
+        # SDK identity is recorded as version/digest, never as a personal
+        # absolute path. The remote msgc SDK is only available on the run
+        # host, so its digest is captured remotely; the daily SDK is uploaded
+        # into the run workdir and hashed there.
+        msgc_sdk_digest = None
+        try:
+            msgc_sdk_digest = ssh(
+                args.server,
+                f"cd {shlex.quote(args.msgc_sdk)} && "
+                "sha256sum bin/cjc tools/bin/cjpm 2>/dev/null",
+            )
+        except Exception:
+            pass
+        daily_sdk_digest = None
+        try:
+            daily_sdk_digest = ssh(
+                args.server,
+                f"cd {shlex.quote(wd + '/daily-sdk')} && "
+                "sha256sum cangjie/bin/cjc cangjie/tools/bin/cjpm 2>/dev/null",
+            )
         except Exception:
             pass
         provenance = {
@@ -402,10 +430,11 @@ def main() -> int:
             "json4cj_git_head": json4cj_sha,
             "cjjson_source": args.cjjson_source,
             "cjjson_source_cj_sha256": remote_tree_digest(args.server, args.cjjson_source),
-            "msgc_sdk": args.msgc_sdk,
+            "msgc_cjc_version": msgc_cjc,
             "msgc_build_provenance": build_provenance,
-            "daily_sdk_source": str(args.daily_sdk_local.resolve()),
-            "daily_cjc": daily_cjc,
+            "msgc_cjc_path_digest": msgc_sdk_digest,
+            "daily_cjc_version": daily_cjc,
+            "daily_sdk_uploaded_digest": daily_sdk_digest,
             "jackson_version": args.jackson_version,
             "server": args.server,
             "json4cj_daily_excluded": (

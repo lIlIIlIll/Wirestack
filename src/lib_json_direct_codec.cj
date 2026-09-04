@@ -1910,14 +1910,34 @@ private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> &
     public func read(reader: JsonReader): HashMap<String, T> {
 
         let context = GeneratedSupportV1.readState(reader)
+        let config = GeneratedSupportV1.readOptions(reader)
 
         let _ = context
         context.enterValue()
         try {
             let result = HashMap<String, T>()
+            let seenNames = if (jsonReadOptionsRejectsDuplicateKeys(config)) {
+                Some(HashSet<String>())
+            } else {
+                None<HashSet<String>>
+            }
             reader.startObject()
             while (reader.hasObjectField()) {
                 let name = reader.readName()
+                match (seenNames) {
+                    case Some(seen) =>
+                        if (seen.contains(name)) {
+                            context.pushField(name)
+                            try {
+                                throw JsonException("Duplicate object key '${name}'", code: "duplicate_key",
+                                    path: context.currentPath())
+                            } finally {
+                                context.popPath()
+                            }
+                        }
+                        seen.add(name)
+                    case None => ()
+                }
                 context.pushField(name)
                 try {
                     result[name] = inner.read(reader)
@@ -1951,6 +1971,7 @@ private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> &
                 return HashMap<String, T>()
             }
             let result = HashMap<String, T>(cursor.suggestRawObjectCapacity())
+            let seenNames = HashSet<String>()
             var first = true
             let firstName = cursor.readRawName(true)
             context.pushField(firstName)
@@ -1959,9 +1980,20 @@ private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> &
                     case Some(fast) => result[firstName] = fast.readFastWithCursor(reader, cursor)
                     case None => result[firstName] = fastInner.readFast(reader)
                 }
+                seenNames.add(firstName)
                 first = false
                 while (cursor.hasRawObjectField(first)) {
                     let name = cursor.readRawName(first)
+                    if (seenNames.contains(name)) {
+                        context.updateLastField(name)
+                        try {
+                            throw JsonException("Duplicate object key '${name}'", code: "duplicate_key",
+                                path: context.currentPath())
+                        } finally {
+                            context.popPath()
+                        }
+                    }
+                    seenNames.add(name)
                     context.updateLastField(name)
                     match (cursorReadInner) {
                         case Some(fast) => result[name] = fast.readFastWithCursor(reader, cursor)
@@ -2077,14 +2109,35 @@ private class Int64HashMapJsonCodec <: GeneratedCodecV1<HashMap<String, Int64>> 
     public func read(reader: JsonReader): HashMap<String, Int64> {
 
         let context = GeneratedSupportV1.readState(reader)
+        let config = GeneratedSupportV1.readOptions(reader)
 
         let _ = context
         context.enterValue()
         try {
             let result = HashMap<String, Int64>()
+            let seenNames = if (jsonReadOptionsRejectsDuplicateKeys(config)) {
+                Some(HashSet<String>())
+            } else {
+                None<HashSet<String>>
+            }
             reader.startObject()
             while (reader.hasObjectField()) {
-                result[reader.readName()] = reader.readInt64()
+                let name = reader.readName()
+                match (seenNames) {
+                    case Some(seen) =>
+                        if (seen.contains(name)) {
+                            context.pushField(name)
+                            try {
+                                throw JsonException("Duplicate object key '${name}'", code: "duplicate_key",
+                                    path: context.currentPath())
+                            } finally {
+                                context.popPath()
+                            }
+                        }
+                        seen.add(name)
+                    case None => ()
+                }
+                result[name] = reader.readInt64()
             }
             reader.endObject()
             return result
@@ -2112,9 +2165,21 @@ private class Int64HashMapJsonCodec <: GeneratedCodecV1<HashMap<String, Int64>> 
                 return HashMap<String, Int64>()
             }
             let result = HashMap<String, Int64>(cursor.suggestRawObjectCapacity())
+            let seenNames = HashSet<String>()
             var first = true
             while (cursor.hasRawObjectField(first)) {
-                result[cursor.readRawName(first)] = cursor.readRawInt64()
+                let name = cursor.readRawName(first)
+                if (seenNames.contains(name)) {
+                    context.updateLastField(name)
+                    try {
+                        throw JsonException("Duplicate object key '${name}'", code: "duplicate_key",
+                            path: context.currentPath())
+                    } finally {
+                        context.popPath()
+                    }
+                }
+                seenNames.add(name)
+                result[name] = cursor.readRawInt64()
                 first = false
             }
             cursor.endRawObject()
@@ -2144,14 +2209,35 @@ private class Int64HashMapJsonCodec <: GeneratedCodecV1<HashMap<String, Int64>> 
 public func __yJsonReadInt64HashMap(reader: JsonReader): HashMap<String, Int64> {
 
     let context = GeneratedSupportV1.readState(reader)
+    let config = GeneratedSupportV1.readOptions(reader)
 
     let _ = context
     context.enterValue()
     try {
         let result = HashMap<String, Int64>();
+        let seenNames = if (jsonReadOptionsRejectsDuplicateKeys(config)) {
+            Some(HashSet<String>())
+        } else {
+            None<HashSet<String>>
+        }
         reader.startObject()
         while (reader.hasObjectField()) {
-            result[reader.readName()] = reader.readInt64()
+            let name = reader.readName()
+            match (seenNames) {
+                case Some(seen) =>
+                    if (seen.contains(name)) {
+                        context.pushField(name)
+                        try {
+                            throw JsonException("Duplicate object key '${name}'", code: "duplicate_key",
+                                path: context.currentPath())
+                        } finally {
+                            context.popPath()
+                        }
+                    }
+                    seen.add(name)
+                case None => ()
+            }
+            result[name] = reader.readInt64()
         }
         reader.endObject();
         result
@@ -2173,9 +2259,21 @@ public func __yJsonReadFastInt64HashMap(reader: GeneratedSupportV1Reader): HashM
             return HashMap<String, Int64>()
         }
         let result = HashMap<String, Int64>(reader.suggestRawObjectCapacity());
+        let seenNames = HashSet<String>()
         var first = true
         while (reader.hasRawObjectField(first)) {
-            result[reader.readRawName(first)] = reader.readRawInt64()
+            let name = reader.readRawName(first)
+            if (seenNames.contains(name)) {
+                context.updateLastField(name)
+                try {
+                    throw JsonException("Duplicate object key '${name}'", code: "duplicate_key",
+                        path: context.currentPath())
+                } finally {
+                    context.popPath()
+                }
+            }
+            seenNames.add(name)
+            result[name] = reader.readRawInt64()
             first = false
         }
         reader.endRawObject();
@@ -2397,6 +2495,8 @@ public class YJson {
     private static func encodeString<T>(value: T,
         codec: GeneratedCompactCursorWriteCodecV1<T>,
         options: JsonWriteOptions): String {
+        GeneratedSupportV1.requireProtocolVersion(1)
+        freezeYJsonRuntime()
         let writer = acquireGeneratedCompactWriter(options)
         try {
             if (writer.tryBeginGeneratedCompactRawValue()) {
@@ -2414,6 +2514,8 @@ public class YJson {
         codec: GeneratedCompactCursorWriteCodecV1<T>,
         options: JsonWriteOptions): String
         where T <: GeneratedCompactCodecProviderV1<T> {
+        GeneratedSupportV1.requireProtocolVersion(1)
+        freezeYJsonRuntime()
         let writer = acquireGeneratedCompactWriter(options)
         try {
             if (writer.tryBeginGeneratedCompactRawValue()) {
@@ -2439,6 +2541,8 @@ public class YJson {
     private static func encodeBytes<T>(value: T,
         codec: GeneratedCompactCursorWriteCodecV1<T>,
         options: JsonWriteOptions): Array<Byte> {
+        GeneratedSupportV1.requireProtocolVersion(1)
+        freezeYJsonRuntime()
         let writer = JsonDirectWriter.bytes(config: options)
         if (writer.tryBeginGeneratedCompactRawValue()) {
             codec.writeCompactRawWithWriter(value, writer)
@@ -2472,6 +2576,7 @@ public class YJson {
         GeneratedSupportV1.requireProtocolVersion(1)
         freezeYJsonRuntime()
         if (jsonReadOptionsUsesDefaultFastPath(options)) {
+            validateJsonResourceLimits(unsafe { text.rawData() }, options)
             let reader = JsonFastReader(text)
             let result = codec.readFast(reader)
             reader.expectEnd()
@@ -2508,6 +2613,7 @@ public class YJson {
         GeneratedSupportV1.requireProtocolVersion(1)
         freezeYJsonRuntime()
         if (jsonReadOptionsUsesDefaultFastPath(options)) {
+            validateJsonResourceLimits(unsafe { text.rawData() }, options)
             match (codec) {
                 case fast: GeneratedCodecV1<T> =>
                     let reader = JsonFastReader(text)
@@ -2534,6 +2640,7 @@ public class YJson {
         GeneratedSupportV1.requireProtocolVersion(1)
         freezeYJsonRuntime()
         if (jsonReadOptionsUsesDefaultFastPath(options)) {
+            validateJsonResourceLimits(bytes, options)
             let reader = JsonFastReader(bytes)
             let result = codec.readFast(reader)
             reader.expectEnd()
@@ -2550,6 +2657,7 @@ public class YJson {
         GeneratedSupportV1.requireProtocolVersion(1)
         freezeYJsonRuntime()
         if (jsonReadOptionsUsesDefaultFastPath(options)) {
+            validateJsonResourceLimits(bytes, options)
             match (codec) {
                 case fast: GeneratedCodecV1<T> =>
                     let reader = JsonFastReader(bytes)
@@ -2574,26 +2682,6 @@ public class YJson {
         options: JsonReadOptions): T {
         GeneratedSupportV1.requireProtocolVersion(1)
         freezeYJsonRuntime()
-        if (jsonReadOptionsUsesDefaultFastPath(options)) {
-            match (input) {
-                case byteInput: YJsonByteArrayInputStream =>
-                    match (codec) {
-                        case fast: GeneratedCodecV1<T> =>
-                            let reader = JsonFastReader(byteInput.readRemainingBytes())
-                            let result = fast.readFast(reader)
-                            reader.expectEnd()
-                            return result
-                        case cursor: GeneratedCursorReadCodecV1<T> =>
-                            let reader = JsonFastReader(byteInput.readRemainingBytes())
-                            let result = cursor.readFastWithCursor(
-                                reader, GeneratedSupportV1.readCursor(reader))
-                            reader.expectEnd()
-                            return result
-                        case _ => ()
-                    }
-                case _ => ()
-            }
-        }
         let reader = JsonDirectReader(input, config: options)
         let result = codec.read(reader)
         reader.expectEnd()

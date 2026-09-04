@@ -97,10 +97,10 @@ typedef struct {
     uint64_t source_copy_bytes;
     uint64_t number_safe_ints;
     uint64_t number_raw_required;
-    uint64_t root_index_bytes;
-    uint64_t root_index_builds;
-    uint64_t root_index_probes;
-    uint64_t root_index_max_probe;
+    _Atomic uint64_t root_index_bytes;
+    _Atomic uint64_t root_index_builds;
+    _Atomic uint64_t root_index_probes;
+    _Atomic uint64_t root_index_max_probe;
     uint64_t node_count;
     uint64_t object_fields;
     uint64_t array_entries;
@@ -110,6 +110,8 @@ typedef struct {
     uint64_t literal_source_size;
     uint64_t hash_seed;
     FyDuplicateSet *root_index;
+    _Atomic(FyDuplicateSet *) root_index_atomic;
+    _Atomic uint32_t root_index_build_state; /* 0 idle, 1 building, 2 done */
     uint32_t fallback_custom_root;
     uint32_t mode;
     uint32_t flags;
@@ -329,9 +331,16 @@ static void fy_duplicate_free(FyDuplicateSet *set) {
 
 static void fy_record_probe(FyDocument *document, uint64_t probes, int lookup) {
     if (lookup) {
-        document->root_index_probes += probes;
-        if (probes > document->root_index_max_probe)
-            document->root_index_max_probe = probes;
+        atomic_fetch_add_explicit(&document->root_index_probes, probes,
+                                  memory_order_relaxed);
+        uint64_t current = atomic_load_explicit(&document->root_index_max_probe,
+                                                memory_order_relaxed);
+        while (probes > current) {
+            if (atomic_compare_exchange_weak_explicit(
+                    &document->root_index_max_probe, &current, probes,
+                    memory_order_relaxed, memory_order_relaxed))
+                break;
+        }
         return;
     }
     document->validation_probes += probes;
@@ -458,8 +467,13 @@ static int fy_validate_value(FyDocument *document, yyjson_val *value,
         document->root_index = (FyDuplicateSet *)malloc(sizeof(FyDuplicateSet));
         if (document->root_index == NULL) { fy_duplicate_free(&set); return 0; }
         *document->root_index = set;
-        document->root_index_bytes = (uint64_t)set.capacity * sizeof(uint64_t);
-        document->root_index_builds++;
+        atomic_store_explicit(&document->root_index_atomic,
+                              document->root_index, memory_order_release);
+        atomic_store_explicit(&document->root_index_bytes,
+                              (uint64_t)set.capacity * sizeof(uint64_t),
+                              memory_order_release);
+        atomic_fetch_add_explicit(&document->root_index_builds, 1,
+                                  memory_order_relaxed);
         memset(&set, 0, sizeof(set));
     }
     fy_duplicate_free(&set);
@@ -624,9 +638,14 @@ static int fy_replay_value(FySourceReplay *replay, yyjson_val *value,
                 fy_duplicate_free(&set); return 0;
             }
             *replay->document->root_index = set;
-            replay->document->root_index_bytes =
-                (uint64_t)set.capacity * sizeof(uint64_t);
-            replay->document->root_index_builds++;
+            atomic_store_explicit(&replay->document->root_index_atomic,
+                                  replay->document->root_index,
+                                  memory_order_release);
+            atomic_store_explicit(&replay->document->root_index_bytes,
+                                  (uint64_t)set.capacity * sizeof(uint64_t),
+                                  memory_order_release);
+            atomic_fetch_add_explicit(&replay->document->root_index_builds, 1,
+                                      memory_order_relaxed);
             memset(&set, 0, sizeof(set));
         }
         fy_duplicate_free(&set);
@@ -1032,7 +1051,8 @@ int32_t YJ_Yyjson_Parse(const uint8_t *input, int64_t length,
             fy_duplicate_free(document->root_index);
             free(document->root_index);
             document->root_index = NULL;
-            document->root_index_bytes = 0;
+            atomic_store_explicit(&document->root_index_bytes, 0,
+                                  memory_order_relaxed);
         }
         free(document->literal_source);
         document->literal_source = NULL;
@@ -1542,8 +1562,7 @@ int32_t YJ_Yyjson_CopyObjectKey(uint64_t handle, uint64_t node,
     return YJ_COMPACT_OK;
 }
 
-static int fy_build_root_index(FyDocument *document) {
-    if (document->root_index != NULL) return 1;
+static int fy_build_root_index_locked(FyDocument *document) {
     if (document->root == NULL || !yyjson_is_obj(document->root)) return 0;
     size_t count = yyjson_obj_size(document->root);
     if (count < 256u) return 1;
@@ -1561,14 +1580,56 @@ static int fy_build_root_index(FyDocument *document) {
         }
     }
     document->root_index = set;
-    document->root_index_bytes = (uint64_t)set->capacity * sizeof(uint64_t);
-    document->root_index_builds++;
+    atomic_store_explicit(&document->root_index_atomic, set,
+                          memory_order_release);
+    atomic_store_explicit(&document->root_index_bytes,
+                          (uint64_t)set->capacity * sizeof(uint64_t),
+                          memory_order_release);
+    atomic_fetch_add_explicit(&document->root_index_builds, 1,
+                              memory_order_relaxed);
     return 1;
+}
+
+/* Single-flight lazy root-index builder. One thread builds while concurrent
+ * lookups observe the published index; an ineligible document (small or
+ * duplicate-free failure) settles the state without an index so later
+ * lookups take the linear path deterministically. */
+static int fy_build_root_index(FyDocument *document) {
+    uint32_t state = atomic_load_explicit(&document->root_index_build_state,
+                                          memory_order_acquire);
+    if (state == 2u) return 1;
+    if (state == 1u) {
+        while (atomic_load_explicit(&document->root_index_build_state,
+                                    memory_order_acquire) == 1u) {
+            /* Builder in progress; publish happens with release semantics. */
+        }
+        return 1;
+    }
+    uint32_t expected = 0u;
+    if (!atomic_compare_exchange_strong_explicit(
+            &document->root_index_build_state, &expected, 1u,
+            memory_order_acq_rel, memory_order_acquire))
+        return fy_build_root_index(document);
+    if (document->root == NULL || !yyjson_is_obj(document->root)) {
+        atomic_store_explicit(&document->root_index_build_state, 2u,
+                              memory_order_release);
+        return 0;
+    }
+    if (yyjson_obj_size(document->root) < 256u) {
+        atomic_store_explicit(&document->root_index_build_state, 2u,
+                              memory_order_release);
+        return 1;
+    }
+    int result = fy_build_root_index_locked(document);
+    atomic_store_explicit(&document->root_index_build_state, 2u,
+                          memory_order_release);
+    return result;
 }
 
 static yyjson_val *fy_index_lookup(FyDocument *document,
                                    const uint8_t *key, uint32_t length) {
-    FyDuplicateSet *set = document->root_index;
+    FyDuplicateSet *set = atomic_load_explicit(&document->root_index_atomic,
+                                               memory_order_acquire);
     if (set == NULL || set->capacity == 0) return NULL;
     uint64_t hash = fy_hash_seeded(key, length, document->hash_seed);
     uint32_t fingerprint = fy_fingerprint(hash);
@@ -1656,12 +1717,18 @@ int32_t YJ_Yyjson_ObjectLookup(uint64_t handle, uint64_t node,
     if (object == NULL) return YJ_COMPACT_BOUNDS_ERROR;
     if (!yyjson_is_obj(object)) return YJ_COMPACT_TYPE_ERROR;
     if ((document->flags & YJ_YYJSON_LAZY_ROOT_INDEX) != 0 &&
-        object == document->root && document->root_index == NULL &&
+        object == document->root &&
+        atomic_load_explicit(&document->root_index_atomic,
+                             memory_order_acquire) == NULL &&
         yyjson_obj_size(object) >= 256u && !fy_build_root_index(document))
         return YJ_COMPACT_OUT_OF_MEMORY;
-    yyjson_val *value = object != document->root || document->root_index == NULL
-        ? yyjson_obj_getn(object, (const char *)key, (size_t)key_length)
-        : fy_index_lookup(document, key, (uint32_t)key_length);
+    yyjson_val *value;
+    FyDuplicateSet *index = atomic_load_explicit(&document->root_index_atomic,
+                                                 memory_order_acquire);
+    if (object != document->root || index == NULL)
+        value = yyjson_obj_getn(object, (const char *)key, (size_t)key_length);
+    else
+        value = fy_index_lookup(document, key, (uint32_t)key_length);
     if (value == NULL) { *out_found = 0; return YJ_COMPACT_OK; }
     *out_value_node = (uint64_t)(uintptr_t)value;
     *out_found = 1;
@@ -2038,10 +2105,14 @@ int32_t YJ_Yyjson_Stats(uint64_t handle, uint64_t *stats, uint64_t capacity) {
         stats[24] = document->source_copy_bytes;
         stats[25] = document->number_safe_ints;
         stats[26] = document->number_raw_required;
-        stats[27] = document->root_index_bytes;
-        stats[28] = document->root_index_builds;
-        stats[29] = document->root_index_probes;
-        stats[30] = document->root_index_max_probe;
+        stats[27] = atomic_load_explicit(&document->root_index_bytes,
+                                         memory_order_relaxed);
+        stats[28] = atomic_load_explicit(&document->root_index_builds,
+                                         memory_order_relaxed);
+        stats[29] = atomic_load_explicit(&document->root_index_probes,
+                                         memory_order_relaxed);
+        stats[30] = atomic_load_explicit(&document->root_index_max_probe,
+                                         memory_order_relaxed);
         stats[31] = fy_validation_percentile(document, 1u, 2u);
         stats[32] = fy_validation_percentile(document, 95u, 100u);
         stats[33] = fy_validation_percentile(document, 99u, 100u);

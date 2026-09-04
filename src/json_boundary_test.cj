@@ -183,6 +183,9 @@ class NumberBoundaryTest {
 
         let negativeZero = parseValue("-0.0").asFloat64()
         @Expect(negativeZero, -0.0)  // -0.0 在 IEEE 754 中是合法的
+        // 符号位必须保留:1/-0.0 = -Inf,1/+0.0 = +Inf
+        @Expect(1.0 / positiveZero, Float64.Inf)
+        @Expect(1.0 / negativeZero, -Float64.Inf)
 
         let verySmallPositive = parseValue("0.0000000000000001").asFloat64()
         @Expect(verySmallPositive > 0.0)

@@ -143,7 +143,7 @@ signature = "public interface GeneratedSupportV1Reader"
 [[api.declarations]]
 source = "src/lib_json_generated_support_v1.cj"
 owner = "<top-level>"
-signature = "public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1"
+signature = "public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1 & GeneratedWriteStateV1Owner"
 
 [[api.declarations]]
 source = "src/lib_json_generated_support_v1.cj"
@@ -470,10 +470,10 @@ domain = "c-abi"
 prefix = "c-abi"
 kind = "reviewed-abi-delta"
 symbol = "YJ_Yyjson generic node navigation ABI"
-signature = "13 generic navigation/get/copy additions replace ObjectLookupInt and RootSize"
+signature = "15 additive production entry points: 13 generic yyjson navigation/get/copy plus the primitive float formatter pair; five benchmark-only removals (ObjectLookupInt, RootSize, YJ_TESTING probes)"
 stability = "0.1.0-advanced"
-compatibility = "two breaking removals plus thirteen additive production entry points"
-contract = "The yyjson backend navigates arbitrary document-local nodes; YJ_TESTING probes are excluded from the production ABI."
+compatibility = "five breaking removals plus fifteen additive production entry points"
+contract = "The yyjson backend navigates arbitrary document-local nodes; the primitive float formatter backs typed float writes; YJ_TESTING probes are excluded from the production ABI."
 consumer = "yjson_yyjson Cangjie FFI bindings"
 delta_artifact = "release/public-c-abi-delta-bfd29.toml"
 
@@ -541,3 +541,13 @@ signature = "int32_t YJ_Yyjson_Root(uint64_t handle, uint64_t *out_node);"
 source = "native/yjson_yyjson.h"
 owner = "<top-level>"
 signature = "int32_t YJ_Yyjson_Size(uint64_t handle, uint64_t node, uint64_t *out_size);"
+
+[[api.declarations]]
+source = "native/yjson_scanner.h"
+owner = "<top-level>"
+signature = "int64_t YJ_JSON_FormatFloat64( double value, uint8_t* output, int64_t outputCap, int64_t outputOffset);"
+
+[[api.declarations]]
+source = "native/yjson_scanner.h"
+owner = "<top-level>"
+signature = "int32_t YJ_JSON_FormatFloat64Array( const double* values, int64_t count, uint8_t* output, int64_t outputCap, int64_t outputOffset, int64_t* outWritten);"

@@ -11,6 +11,14 @@ public interface JsonAccelerationProviderV1 {
     func activate(): Unit
 }
 
+/// Optional extension implemented by the first-party native primitive
+/// provider. It lets the runtime validate and install the primitive bundle
+/// itself, inside the initialization lock, instead of exposing a public
+/// unvalidated installation entry point.
+public interface JsonNativePrimitivesProviderV1 <: JsonAccelerationProviderV1 {
+    func primitives(): JsonNativeAccelerationPrimitivesV1
+}
+
 private const YJSON_ACCEL_PROTOCOL_V1: Int64 = 1
 private const YJSON_ACCEL_ABI_V1: Int64 = 1
 private const YJSON_RUNTIME_UNCONFIGURED: Int64 = 0
@@ -101,6 +109,13 @@ public func initializeYJsonAccelerationV1(provider: JsonAccelerationProviderV1):
         yJsonRuntimeInitializationOwner = Thread.currentThread.id
     }
 
+    var primitives: Option<JsonNativeAccelerationPrimitivesV1> = None<JsonNativeAccelerationPrimitivesV1>
+    match (provider) {
+        case nativeProvider: JsonNativePrimitivesProviderV1 =>
+            primitives = Some(nativeProvider.primitives())
+        case _ => ()
+    }
+
     try {
         provider.activate()
     } catch (error: JsonException) {
@@ -114,6 +129,14 @@ public func initializeYJsonAccelerationV1(provider: JsonAccelerationProviderV1):
     }
 
     synchronized(yJsonRuntimeMutex) {
+        // Install the primitive bundle only after activation validated the
+        // linked native code. The slot is package-visible and updated under
+        // the runtime lock, so hot paths observe either Pure or the complete
+        // bundle.
+        match (primitives) {
+            case Some(bundle) => installJsonNativePrimitivesLocked(bundle)
+            case None => ()
+        }
         yJsonRuntimeProviderIdentity = identity
         yJsonRuntimeInitializationOwner = 0
         yJsonRuntimeState = YJSON_RUNTIME_NATIVE_FROZEN

@@ -24,6 +24,14 @@ length-prefixed framing protocol。解析失败后不保证 stream 停在可恢�
 读取端增量补充窗口，不先把普通 stream 全部读取到 EOF。写出端直接提交编码片段。内部每次
 调用创建自己的 reader/writer 状态；public API 不暴露 reusable session。
 
+## 并发边界
+
+同一个 caller-owned stream 实例在一次调用期间由单一任务独占：`YJson.fromJson` /
+`writeJson`（含显式 backend 变体）不会在内部并发读取或写入 stream。调用方若要在多个任务
+间共享同一个 `InputStream` / `OutputStream`，必须在外部串行化所有访问；yjson 不提供
+stream 内部锁，也不会在每次调用后把 stream 复位到可重入边界。不同任务使用不同 stream
+实例不受此限制。
+
 ## 预算和失败
 
 读取选项通过 `options:` 传入：

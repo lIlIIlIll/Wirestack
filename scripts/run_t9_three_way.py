@@ -83,17 +83,18 @@ def remote_env(sdk: str) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
-    parser.add_argument("--yjson-root", type=Path, default=SCRIPT_DIR.parent)
-    parser.add_argument("--server", default="Server")
+    parser.add_argument("--yjson-root", type=Path, required=True,
+                        help="local yjson checkout to benchmark")
+    parser.add_argument("--server", required=True,
+                        help="SSH host running the comparison cells")
     parser.add_argument(
-        "--server-sdk",
-        default="<home>/cangjie_sdk/msgc-bugfix-20260831/linux_release_x86_64",
+        "--server-sdk", required=True,
+        help="Server-local SDK root (linux_release_x86_64 layout)",
     )
     parser.add_argument("--json4cj-url", default="https://gitcode.com/L_lipo/json4cj")
     parser.add_argument("--json4cj-branch", default="main")
     parser.add_argument("--jackson-version", default="2.17.2")
-    parser.add_argument("--daily-sdk-root", type=Path,
-        default=Path("<home>/cangjie_sdk/daily"),
+    parser.add_argument("--daily-sdk-root", type=Path, required=True,
         help="local daily SDK root containing cangjie/ and linux_x86_64_cjnative/")
     parser.add_argument("--cpu", type=int, default=8)
     parser.add_argument("--runs", type=int, default=1)
@@ -211,6 +212,34 @@ def main() -> int:
 
     run(["rsync", "-a", f"{args.server}:{remote}/results/", f"{output}/server/"], dry_run=args.dry_run)
     if not args.dry_run:
+        # SDK identity is recorded as version/digest, never as a personal
+        # absolute path. The daily SDK is uploaded into the run workdir and
+        # hashed there; the server SDK is hashed on the run host.
+        daily_sdk_digest = None
+        try:
+            daily_sdk_digest = ssh(
+                args.server,
+                f"cd {shlex.quote(remote + '/daily-sdk')} && "
+                "sha256sum cangjie/bin/cjc cangjie/tools/bin/cjpm 2>/dev/null",
+            )
+        except Exception:
+            pass
+        server_sdk_digest = None
+        try:
+            server_sdk_digest = ssh(
+                args.server,
+                f"cd {shlex.quote(args.server_sdk)} && "
+                "sha256sum bin/cjc tools/bin/cjpm 2>/dev/null",
+            )
+        except Exception:
+            pass
+        server_cjc = None
+        try:
+            server_cjc = ssh(args.server,
+                             f". {shlex.quote(args.server_sdk + '/envsetup.sh')} >/dev/null 2>&1; "
+                             "cjc -v 2>/dev/null | head -3")
+        except Exception:
+            pass
         provenance = {
             "yjson_source_sha256": source_digest(local_copy),
             "yjson_git_head": git_capture(args.yjson_root.resolve(), "rev-parse", "HEAD"),
@@ -222,8 +251,9 @@ def main() -> int:
             "json4cj_git_head": json4cj_sha,
             "jackson_version": args.jackson_version,
             "server": args.server,
-            "server_sdk": args.server_sdk,
-            "daily_sdk_source": str(args.daily_sdk_root.resolve()),
+            "server_sdk_cjc_version": server_cjc,
+            "server_sdk_digest": server_sdk_digest,
+            "daily_sdk_uploaded_digest": daily_sdk_digest,
             "runs": 1,
             "cpu": args.cpu,
             "remote_workdir": remote,

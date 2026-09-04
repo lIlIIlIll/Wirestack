@@ -56,4 +56,32 @@ class YyjsonStreamBackendTest {
         @Expect(error.code, "output_too_large")
         @Expect(output.toBytes().size, 0)
     }
+
+    @TestCase
+    func invalidSemanticVectorsFailWithPureErrorClass(): Unit {
+        // Reuses the invalid vectors from src/json_semantic_vectors_test.cj
+        // (package boundary prevents importing the root test; embedded here).
+        // The yyjson stream backend must classify failures with the same
+        // stable error code as the portable path.
+        let mapCodec = JsonCodecs.stringMap(JsonCodecs.int64)
+        let vectors = [
+            "\"unterminated",
+            "\"bad\\xescape\"",
+            "\"\\uD83Dvalue\"",
+            "01",
+            "[1,]",
+            "{\"a\" 1}",
+            "{\"a\":true} trailing",
+            "\"\\uD800\"",
+            "{\"a\":1,\"a\":2}"
+        ]
+        for (text in vectors) {
+            let pureError = @AssertThrows[JsonException](
+                YJson.fromJson(YJsonByteArrayInputStream(text), codec: mapCodec))
+            let nativeError = @AssertThrows[JsonException](
+                YyjsonBackends.yyjson.fromJson(YJsonByteArrayInputStream(text),
+                    codec: mapCodec))
+            @Expect(nativeError.code, pureError.code)
+        }
+    }
 }

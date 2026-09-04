@@ -107,6 +107,69 @@ class YyjsonCompactTests {
     }
 
     @TestCase
+    func invalidSemanticVectorsMatchPureErrorClasses(): Unit {
+        // Mirrors src/json_semantic_vectors_test.cj invalid vectors. The
+        // yyjson backend must classify failures with the same stable codes
+        // and a concrete byte location as the portable path.
+        let vectors = [
+            "\"unterminated",
+            "\"bad\\xescape\"",
+            "\"\\uD83Dvalue\"",
+            "01",
+            "[1,]",
+            "{\"a\" 1}",
+            "{\"a\":true} trailing"
+        ]
+        for (text in vectors) {
+            let pureError = try {
+                let _ = JsonNode.parse(text)
+                throw Exception("expected pure parse failure")
+            } catch (error: JsonException) {
+                error
+            }
+            let nativeError = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
+                yyjsonBytes(text)))
+            @Expect(nativeError.code, pureError.code)
+            @Expect(nativeError.location.isSome())
+            @Expect(nativeError.location.getOrThrow().byteOffset >= 0)
+        }
+    }
+
+    @TestCase
+    func invalidUtf8VectorsMatchPureErrorClass(): Unit {
+        // Invalid UTF-8 inside a string is rejected with the same class as
+        // the portable path.
+        let bytes: Array<Byte> = [b'"', 0xF0, 0x28, 0x8C, 0x28, b'"']
+        let pureError = try {
+            let _ = JsonNode.parse(bytes)
+            throw Exception("expected pure UTF-8 failure")
+        } catch (error: JsonException) {
+            error
+        }
+        let nativeError = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(bytes))
+        @Expect(nativeError.code, pureError.code)
+        @Expect(nativeError.location.isSome())
+        @Expect(nativeError.location.getOrThrow().byteOffset >= 0)
+    }
+
+    @TestCase
+    func duplicateKeyVectorsMatchPureErrorClass(): Unit {
+        let vectors = ["{\"a\":1,\"a\":2}", "{\"a\":1,\"\\u0061\":2}"]
+        for (text in vectors) {
+            let pureError = try {
+                let _ = JsonNode.parse(text)
+                throw Exception("expected pure duplicate failure")
+            } catch (error: JsonException) {
+                error
+            }
+            let nativeError = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
+                yyjsonBytes(text),
+                config: JsonReadOptions(duplicateKeyPolicy: JsonDuplicateKeyPolicy.Reject)))
+            @Expect(nativeError.code, pureError.code)
+        }
+    }
+
+    @TestCase
     func resourceLimitsMatchPortableBackend(): Unit {
         let documentError = @AssertThrows[JsonException](YyjsonCompactJsonDocument.parse(
             yyjsonBytes("{\"a\":1}"), config: JsonReadOptions(maxInputBytes: 6)))

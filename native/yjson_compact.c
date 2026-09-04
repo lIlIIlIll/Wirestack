@@ -2129,6 +2129,7 @@ int32_t YJ_Compact_DuplicateStats(uint64_t handle, uint64_t *stats,
     return YJ_COMPACT_OK;
 }
 
+#if defined(YJ_TESTING)
 uint64_t YJ_Compact_Noop(uint64_t value) { return value + 1u; }
 
 int32_t YJ_Compact_ScalarProbe(uint64_t value, uint64_t *out_value) {
@@ -2154,3 +2155,4 @@ int32_t YJ_Compact_CopyProbe(const uint8_t *input, uint64_t length,
     *out_checksum = checksum;
     return YJ_COMPACT_OK;
 }
+#endif

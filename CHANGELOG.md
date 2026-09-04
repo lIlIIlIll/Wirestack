@@ -31,6 +31,49 @@
   bulk tape 路径；任意 retained 子 view 继续逐操作与 `close()` 线性化。
 - formal performance runner 记录源码、工具链、语料与最终 binary 身份，并要求 clean、隔离的
   baseline 与 candidate rebuild。
+- typed fast path 强制资源预算：`JsonFastReader` 构造携带 `JsonReadOptions`，扫描中执行
+  `maxInputBytes` / `maxStringBytes` / `maxBufferedValueBytes`；default fast path 入口先执行
+  与 DirectReader 相同的 limits 预检。
+- HashMap 容器 codec 默认拒绝重复 key（`duplicateKeyPolicy: Reject` 抛 `duplicate_key`，
+  按解码后 key 比较，`"a"` 与 `"\u0061"` 视为同一个）；`LastWins` 显式 opt-in。
+- skip 未知字段路径在 `Reject` 策略下按层维护 seen key 并抛 `duplicate_key`，不再路由到
+  native raw skip。
+- compact parser 深度只计 array/object 容器，scalar 不计；specialized numeric/string 数组
+  循环不增 depth（与资源限制文档一致）。
+- native scanner 的 wrapper 错误统一为 `parse_error` 并携带 C 侧 offset 构造的
+  `JsonLocation`；回退与 capacity 逻辑不变。
+- 数值转换错误统一为 `number_out_of_range`（范围溢出）与 `invalid_value`（语法合法但转换
+  失败且非范围问题，如 Rune 多 scalar）；stdlib parse 异常带上下文包装。
+- `materialize` 单遍预算：`maxNodes` 传入递归构建，每节点创建前扣减，超限抛
+  `work_limit_exceeded`；删除先 `materializeUnbounded` 再 deepCopy 校验的双阶段。
+- managed document / root view / stream 保留 String owner，避免短生命周期输入在 view 读取前
+  被回收；`YJsonByteArrayInputStream` 增加 `sourceText` 字段。
+- yyjson 统计改用 C11 `_Atomic` relaxed 读取，root index 首次构建用 `once_flag`/`call_once`
+  发布；SIMD 探测缓存（`cpu_has_avx2`/`numeric_avx2_enabled`）改原子 load + CAS 填充，
+  getenv 只读一次。
+- `CompactJsonDocument` 移除可变 `lookupCache` 与 `objectValueAt` 读路径写，宽对象查找回退
+  线性扫描，文档保持 immutable。
+- schema validator 运行态（baseUri/resource 栈、计数、depth、stopAtFirst、probeDepth、
+  regex 预算）移入每次 validate/isValid 新建的 `ValidationContext`，validator 只保留
+  immutable schema 引用。
+- raw native activator `activateJsonNativePrimitivesV1` 降为 internal，槽位赋值只在 runtime
+  初始化路径（校验后、Mutex 内）发生，删除公开无校验安装路径。
+- 宏生成代码改用精确入口 `GeneratedSupportV1.enterGeneratedEntry()`（protocol 校验 +
+  runtime freeze）；`toJson/fromJson` 精确重载直接调用该 helper，不再旁路 runtime freeze。
+- C ABI 成本 probe（`YJ_Compact_Noop`/`ScalarProbe`/`CopyProbe`）移入 `YJ_TESTING` 条件，
+  发布构建不导出。
+- `yjson_native_primitives` 发布清单 `output-type` 统一为 `static`，并把
+  `native/yjson_float_format.c` 及其 vendor/yyjson include 闭包纳入 native_files。
+- standards conformance runner 支持 `--offline`（仅缓存）与 `--prefetch`（SHA-256 校验的
+  预取）；CI standards job 使用 revision 作 cache key，运行 gate 显式 `--offline`。
+- GitCode CI 每个 job 使用 run-id 唯一工作目录并在结束时清理，记录 cjc/cjpm 版本与
+  runner identity；克隆前清理残留目录。
+- Codecov 新增 algorithms/native/yyjson/schema-formats 独立 flag 与 patch gate；root core
+  flag 与 macro 排除保持不变。
+- 文档明确：生成代码引用的 `JsonFastReader`/`JsonDirectWriter`/`ReadCursor` 是 V1 协议表面；
+  binary compatibility 以冻结旧 consumer artifact 的链接/调用矩阵实测为准，0.1.0 标注
+  NOT PROVIDED；macro 每个 release 锁定单一 nightly；caller-owned stream 一次调用由单一
+  任务独占；新增 `invalid_value` 稳定码说明。
 
 ## [2.0.0] - 2026-08-27
 

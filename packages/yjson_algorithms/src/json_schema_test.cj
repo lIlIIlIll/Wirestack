@@ -2,6 +2,9 @@ package yjson_algorithms
 
 import yjson.*
 
+import std.collection.*
+import std.sync.*
+import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
 
@@ -262,5 +265,69 @@ class YJsonSchemaTest {
         @Expect(!JsonSchema.parse("{\"format\":\"even-length\"}", config: configured)
             .validator().isValid(JsonNode.string("json!")))
         @AssertThrows[IllegalArgumentException](formats.register("even-length", EvenLengthSchemaFormat()))
+    }
+
+    @TestCase
+    func concurrentValidateCallsAreIndependent(): Unit {
+        let schema = JsonSchema.parse("""
+            {"type":"object","required":["id"],"properties":{"id":{"type":"integer","minimum":1}},
+             "anyOf":[{"required":["a"]},{"required":["b"]}],
+             "patternProperties":{"^x-":{"type":"string"}}}
+        """)
+        let validator = schema.validator()
+        let valid = JsonNode.parse("{\"id\":7,\"a\":1,\"x-note\":\"n\"}")
+        let invalid = JsonNode.parse("{\"id\":0,\"b\":true}")
+        let barrier = Barrier(3)
+        let ready = SyncCounter(3)
+        let start = SyncCounter(1)
+        let futures = ArrayList<Future<JsonSchemaResult>>()
+        for (_ in 0..3) {
+            futures.add(spawn {
+                ready.dec()
+                start.waitUntilZero(timeout: Duration.second * 5)
+                barrier.wait(timeout: Duration.second * 5)
+                schema.validate(valid)
+            })
+        }
+        ready.waitUntilZero(timeout: Duration.second * 5)
+        start.dec()
+        for (future in futures) {
+            let result = future.get()
+            @Expect(result.valid)
+            @Expect(result.size, 0)
+        }
+        // 同一 validator 继续给出独立、正确的结果
+        @Expect(validator.validate(invalid).size, 1)
+        @Expect(validator.validate(valid).isEmpty())
+    }
+
+    @TestCase
+    func concurrentValidateAndIsValidAreIndependent(): Unit {
+        let schema = JsonSchema.parse(
+            "{\"type\":\"object\",\"required\":[\"id\"],\"properties\":{\"id\":{\"type\":\"integer\",\"minimum\":1}}}")
+        let validator = schema.validator()
+        let valid = JsonNode.parse("{\"id\":7}")
+        let invalid = JsonNode.parse("{\"id\":0}")
+        let barrier = Barrier(4)
+        let ready = SyncCounter(4)
+        let start = SyncCounter(1)
+        let futures = ArrayList<Future<Bool>>()
+        for (_ in 0..3) {
+            futures.add(spawn {
+                ready.dec()
+                start.waitUntilZero(timeout: Duration.second * 5)
+                barrier.wait(timeout: Duration.second * 5)
+                validator.isValid(invalid)
+            })
+        }
+        ready.waitUntilZero(timeout: Duration.second * 5)
+        start.dec()
+        barrier.wait(timeout: Duration.second * 5)
+        let mainResult = validator.validate(valid)
+        @Expect(mainResult.valid)
+        for (future in futures) { @Expect(!future.get()) }
+        // 同一 validator 继续给出独立、正确的结果
+        @Expect(validator.isValid(valid))
+        @Expect(!validator.validate(invalid).isEmpty())
     }
 }

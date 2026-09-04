@@ -226,7 +226,10 @@ func jsonNativeFormatFloat64ArrayInto(values: Array<Float64>, output: Array<Byte
 }
 
 /// Installs the complete v1 primitive bundle atomically during runtime freeze.
-public func activateJsonNativePrimitivesV1(backend: JsonNativeAccelerationPrimitivesV1): Unit {
+/// Called by the runtime initialization path while holding the runtime lock.
+/// Not part of the public surface: external code cannot install a bundle
+/// without passing provider validation.
+internal func installJsonNativePrimitivesLocked(backend: JsonNativeAccelerationPrimitivesV1): Unit {
     if (jsonNativeAccelerationPrimitives.isSome()) {
         throw IllegalStateException("JSON native acceleration is already installed")
     }
@@ -574,7 +577,10 @@ func jsonNativeScanString(
         if (status == YJ_JSON_SCAN_FALLBACK) {
             return -1
         }
-        throw JsonException("Native JSON scanner error at byte ${error[0]}")
+        throw JsonException("Native JSON scanner error at byte ${error[0]}",
+            code: "parse_error",
+            location: Some(JsonLocation(error[0], jsonLineFromUtf8Bytes(data, error[0]),
+                jsonColumnFromUtf8Bytes(data, error[0]))))
     }
 }
 
@@ -623,7 +629,10 @@ func jsonNativeDecodeString(
         if (status == YJ_JSON_SCAN_FALLBACK || status == YJ_JSON_SCAN_CAPACITY) {
             return None<JsonNativeDecodedString>
         }
-        throw JsonException("Native JSON scanner error at byte ${error[0]}")
+        throw JsonException("Native JSON scanner error at byte ${error[0]}",
+            code: "parse_error",
+            location: Some(JsonLocation(error[0], jsonLineFromUtf8Bytes(data, error[0]),
+                jsonColumnFromUtf8Bytes(data, error[0]))))
     }
 }
 
@@ -659,6 +668,9 @@ func jsonNativeSkipValue(
         if (status == YJ_JSON_SCAN_FALLBACK) {
             return -1
         }
-        throw JsonException("Native JSON scanner error at byte ${error[0]}")
+        throw JsonException("Native JSON scanner error at byte ${error[0]}",
+            code: "parse_error",
+            location: Some(JsonLocation(error[0], jsonLineFromUtf8Bytes(data, error[0]),
+                jsonColumnFromUtf8Bytes(data, error[0]))))
     }
 }

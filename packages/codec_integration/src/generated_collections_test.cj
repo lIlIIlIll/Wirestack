@@ -33,6 +33,26 @@ class ExternalStringArrayEnvelope {
 }
 
 @JsonCodec
+class ExternalPrimitiveContainerEnvelope {
+    public let flags: ArrayList<Bool>
+    public let scores: HashMap<String, Float64>
+    public let maybeFlags: Option<ArrayList<Bool>>
+    public let maybeScores: Option<HashMap<String, Float64>>
+
+    public init(
+        flags: ArrayList<Bool>,
+        scores: HashMap<String, Float64>,
+        maybeFlags: Option<ArrayList<Bool>>,
+        maybeScores: Option<HashMap<String, Float64>>
+    ) {
+        this.flags = flags
+        this.scores = scores
+        this.maybeFlags = maybeFlags
+        this.maybeScores = maybeScores
+    }
+}
+
+@JsonCodec
 class ExternalFastReadEnvelope {
     public let tags: ArrayList<String>
     public let metrics: HashMap<String, Int64>
@@ -176,6 +196,62 @@ class GeneratedCollectionConsumerTest {
         @Assert(decoded["team"].size, 2)
         @Expect(decoded["team"][0], 1)
         @Expect(decoded["team"][1], 2)
+    }
+
+    @TestCase
+    func primitiveContainerFieldsRoundTripAcrossStringBytesAndStreamTargets(): Unit {
+        let flags = ArrayList<Bool>([true, false, true])
+        let scores = HashMap<String, Float64>()
+        scores.add("score", 1.5)
+        let value = ExternalPrimitiveContainerEnvelope(
+            flags, scores, Some(flags), Some(scores))
+
+        let expected = "{\"flags\":[true,false,true],\"scores\":{\"score\":1.500000}," +
+            "\"maybeFlags\":[true,false,true],\"maybeScores\":{\"score\":1.500000}}"
+        let text = YJson.toJson(value)
+        @Assert(text, expected)
+
+        let bytes = YJson.toJsonBytes(value)
+        @Assert(String.fromUtf8(bytes), expected)
+
+        let output = YJsonMemoryOutputStream()
+        YJson.writeJson(value, output)
+        @Assert(output.toUtf8String(), expected)
+
+        let decoded = YJson.fromJson<ExternalPrimitiveContainerEnvelope>(text)
+        @Assert(decoded.flags.size, 3)
+        @Expect(decoded.flags[1], false)
+        @Assert(decoded.scores.size, 1)
+        @Expect(decoded.scores["score"], 1.5)
+        @Expect(decoded.maybeFlags.getOrThrow()[2], true)
+        @Expect(decoded.maybeScores.getOrThrow()["score"], 1.5)
+
+        let byteDecoded = YJson.fromJson<ExternalPrimitiveContainerEnvelope>(bytes)
+        @Assert(byteDecoded.flags.size, 3)
+        @Expect(byteDecoded.scores["score"], 1.5)
+
+        let streamDecoded = YJson.fromJson<ExternalPrimitiveContainerEnvelope>(
+            YJsonByteArrayInputStream(bytes))
+        @Assert(streamDecoded.flags.size, 3)
+        @Expect(streamDecoded.scores["score"], 1.5)
+    }
+
+    @TestCase
+    func multiEntryFloatMapRoundTripsWithoutExactOrderDependence(): Unit {
+        let scores = HashMap<String, Float64>()
+        scores.add("a", 1.5)
+        scores.add("b", -2.25)
+        let value = ExternalPrimitiveContainerEnvelope(
+            ArrayList<Bool>(), scores, None<ArrayList<Bool>>, Some(scores))
+
+        let text = YJson.toJson(value)
+        let decoded = YJson.fromJson<ExternalPrimitiveContainerEnvelope>(text)
+        @Assert(decoded.scores.size, 2)
+        @Expect(decoded.scores["a"], 1.5)
+        @Expect(decoded.scores["b"], -2.25)
+        @Expect(decoded.maybeFlags.isNone())
+        @Assert(decoded.maybeScores.getOrThrow().size, 2)
+        @Expect(decoded.maybeScores.getOrThrow()["b"], -2.25)
     }
 
     @TestCase

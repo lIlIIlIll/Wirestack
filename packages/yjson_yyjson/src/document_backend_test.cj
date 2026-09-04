@@ -3,9 +3,16 @@ package yjson_yyjson
 import yjson.*
 import yjson_backends.*
 import std.collection.*
+import std.env.*
 import std.sync.*
+import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
+
+private func deadlineReached(start: DateTime, timeoutNanos: Int64): Bool {
+    let elapsed: Duration = DateTime.now() - start
+    elapsed.toNanoseconds() >= timeoutNanos
+}
 
 @Test
 class YyjsonDocumentBackendTest {
@@ -56,25 +63,32 @@ class YyjsonDocumentBackendTest {
     }
 
     @TestCase
-    func concurrentReadsAndCloseAreLinearizable(): Unit {
+    func concurrentMemberReadsAndCloseAreLinearizable(): Unit {
+        // Readers must complete at least one successful read before close can
+        // be triggered; afterwards every operation fails with resource_closed.
+        // Polling is deadline-bounded, never an unbounded busy wait.
         let document = YyjsonBackends.yyjson.parseDocument("{\"id\":42,\"items\":[1,2,3]}")
         let root = document.root()
         let readerCount: Int64 = 8
-        let iterations: Int64 = 500
         let ready = AtomicInt64(0)
         let start = AtomicInt64(0)
+        let successfulReads = AtomicInt64(0)
+        let closeTriggered = AtomicInt64(0)
         let readers = ArrayList<Future<Int64>>()
         for (_ in 0..readerCount) {
             readers.add(spawn {
                 ready.fetchAdd(1)
-                while (start.load() == 0) {}
+                while (start.load() == 0) {
+                    if (closeTriggered.load() != 0) { return 0 }
+                }
                 var completed: Int64 = 0
                 try {
-                    for (_ in 0..iterations) {
+                    for (_ in 0..500) {
                         if (root.member("id").getOrThrow().asInt64() != 42) {
                             throw Exception("immutable yyjson view changed during concurrent read")
                         }
                         completed++
+                        successfulReads.fetchAdd(1)
                     }
                 } catch (error: JsonException) {
                     if (error.code != "resource_closed") { throw error }
@@ -82,12 +96,82 @@ class YyjsonDocumentBackendTest {
                 completed
             })
         }
-        while (ready.load() != readerCount) {}
+        while (ready.load() != readerCount) {
+            sleep(1 * Duration.millisecond)
+        }
         start.store(1)
+        // Close only after at least one successful read is observed.
+        let waitStart = DateTime.now()
+        while (successfulReads.load() == 0 && !deadlineReached(waitStart, 10_000_000_000)) {
+            sleep(1 * Duration.millisecond)
+        }
+        if (successfulReads.load() == 0) {
+            throw Exception("reader never completed a successful read before close")
+        }
+        closeTriggered.store(1)
         document.close()
         for (reader in readers) {
             let completed = reader.get()
-            @Expect(completed >= 0 && completed <= iterations)
+            @Expect(completed >= 0 && completed <= 500)
+        }
+        let error = @AssertThrows[JsonException](root.kind())
+        @Expect(error.code, "resource_closed")
+    }
+
+    @TestCase
+    func concurrentWideObjectMemberReadsAndClose(): Unit {
+        // 300+ field object: concurrent member reads exercise the root index
+        // build path while a close races in. Deterministic contract: all
+        // reads before the close point succeed, everything after fails closed.
+        let builder = StringBuilder("{")
+        for (index in 0..320) {
+            if (index != 0) { builder.append(",") }
+            builder.append("\"k${index}\":${index}")
+        }
+        builder.append("}")
+        let document = YyjsonCompactJsonDocument.parse(
+            unsafe { builder.toString().rawData() },
+            lookupIndexMode: YyjsonLookupIndexMode.Lazy)
+        let root = document.root()
+        let readerCount: Int64 = 6
+        let ready = AtomicInt64(0)
+        let start = AtomicInt64(0)
+        let successfulReads = AtomicInt64(0)
+        let readers = ArrayList<Future<Int64>>()
+        for (_ in 0..readerCount) {
+            readers.add(spawn {
+                ready.fetchAdd(1)
+                while (start.load() == 0) {}
+                var completed: Int64 = 0
+                try {
+                    for (round in 0..200) {
+                        let member = "k${(round * 7) % 320}"
+                        if (root.member(member).getOrThrow().asInt64() !=
+                            ((round * 7) % 320)) {
+                            throw Exception("wide object read changed during concurrent access")
+                        }
+                        completed++
+                        successfulReads.fetchAdd(1)
+                    }
+                } catch (error: JsonException) {
+                    if (error.code != "resource_closed") { throw error }
+                }
+                completed
+            })
+        }
+        while (ready.load() != readerCount) { sleep(1 * Duration.millisecond) }
+        start.store(1)
+        let waitStart = DateTime.now()
+        while (successfulReads.load() == 0 && !deadlineReached(waitStart, 10_000_000_000)) {
+            sleep(1 * Duration.millisecond)
+        }
+        if (successfulReads.load() == 0) {
+            throw Exception("wide-object reader never completed a successful read")
+        }
+        document.close()
+        for (reader in readers) {
+            let completed = reader.get()
+            @Expect(completed >= 0 && completed <= 200)
         }
         let error = @AssertThrows[JsonException](root.kind())
         @Expect(error.code, "resource_closed")

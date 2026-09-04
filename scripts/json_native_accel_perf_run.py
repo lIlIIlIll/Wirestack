@@ -10,6 +10,8 @@ import json
 import math
 import os
 import platform
+import re
+import shutil
 import statistics
 import subprocess
 import sys
@@ -29,6 +31,17 @@ CASES = (
     "writePlainStrings",
 )
 ADVERTISED = frozenset(("writeNumericBytes", "readNumericDocument"))
+CHECKSUM_RE = re.compile(r"^CHECKSUM\s+(\S+)\s+([0-9a-f]{16})$", re.MULTILINE)
+RSS_RE = re.compile(r"Maximum resident set size \(kbytes\):\s*(\d+)")
+
+
+def find_time_binary() -> str:
+    path = shutil.which("time", path="/usr/bin:/bin")
+    if path:
+        return path
+    raise SystemExit(
+        "GNU time (/usr/bin/time) is required for RSS capture; install the 'time' package"
+    )
 
 
 def run_text(command: list[str], cwd: Path, env: dict[str, str]) -> str:
@@ -76,6 +89,25 @@ def cv(values: list[float]) -> float:
     return statistics.stdev(values) / statistics.mean(values) * 100.0
 
 
+def parse_checksums(log: str) -> dict[str, str]:
+    """Parse `CHECKSUM <case> <16-hex>` lines from a benchmark stdout log."""
+    found: dict[str, str] = {}
+    for match in CHECKSUM_RE.finditer(log):
+        case, digest = match.group(1), match.group(2)
+        previous = found.get(case)
+        if previous is not None and previous != digest:
+            raise ValueError(
+                f"conflicting CHECKSUM lines for {case}: {previous} vs {digest}"
+            )
+        found[case] = digest
+    return found
+
+
+def parse_max_rss(log: str) -> int | None:
+    match = RSS_RE.search(log)
+    return int(match.group(1)) if match else None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
@@ -100,6 +132,7 @@ def main() -> int:
     env = os.environ.copy()
     env["cjHeapSize"] = args.heap
     env["LC_ALL"] = "C"
+    time_binary = find_time_binary()
     tested_source_digest = source_digest(ROOT)
     build_stamp = bench_dir / "target" / "yjson-native-accel-source-sha256"
     if args.skip_build:
@@ -113,6 +146,7 @@ def main() -> int:
         "cpu": args.cpu, "heap": args.heap, "runs": args.runs,
         "cases": list(CASES),
         "schedule": "case rotation; Pure/Native order alternates by round",
+        "time_binary": time_binary,
         "formal_qualification": args.runs == 11,
         "source_sha256": tested_source_digest,
         "build_reused": args.skip_build,
@@ -135,11 +169,13 @@ def main() -> int:
         build_stamp.write_text(tested_source_digest + "\n", encoding="utf-8")
 
     values: dict[tuple[str, str], list[float]] = {(case, mode): [] for case in CASES for mode in ("pure", "native")}
+    rss_kb: dict[tuple[str, str], list[int]] = {(case, mode): [] for case in CASES for mode in ("pure", "native")}
+    checksums: dict[tuple[str, str], dict[str, str]] = {}
     manifest_path = output / "manifest.csv"
     with manifest_path.open("w", newline="", encoding="utf-8") as manifest:
         writer = csv.writer(manifest)
-        writer.writerow(("round", "case", "mode", "median_ns", "report_sha256",
-            "report_path", "log_path"))
+        writer.writerow(("round", "case", "mode", "median_ns", "max_rss_kb",
+            "report_sha256", "checksum", "report_path", "log_path"))
         for round_id in range(1, args.runs + 1):
             offset = (round_id - 1) % len(CASES)
             cases = CASES[offset:] + CASES[:offset]
@@ -150,13 +186,14 @@ def main() -> int:
                 for mode in modes:
                     report_path = raw_dir / f"run-{round_id:02d}" / f"{case}-{mode}"
                     log_path = log_dir / f"run-{round_id:02d}-{case}-{mode}.log"
+                    rss_file = report_path / "time-rss.txt"
                     run_env = env.copy(); run_env["YJSON_ACCEL_MODE"] = mode
                     command = ["taskset", "-c", str(args.cpu), args.cjpm, "bench", "--skip-build",
                         "--no-color", "--filter", f"NativeAccelerationBenchmarks.{case}*",
                         "--report-path", str(report_path), "--report-format", "csv-raw",
                         "--random-seed", str(round_id)]
-                    completed = subprocess.run(command, cwd=bench_dir, env=run_env,
-                        capture_output=True, text=True)
+                    completed = subprocess.run([time_binary, "-v", "-o", str(rss_file), *command],
+                        cwd=bench_dir, env=run_env, capture_output=True, text=True)
                     log_path.write_text(completed.stdout + completed.stderr, encoding="utf-8")
                     if completed.returncode != 0:
                         print(f"benchmark failed: round={round_id} case={case} mode={mode}; see {log_path}", file=sys.stderr)
@@ -167,8 +204,23 @@ def main() -> int:
                         return 2
                     median = raw_median(reports[0])
                     values[(case, mode)].append(median)
-                    writer.writerow((round_id, case, mode, f"{median:.6f}", file_digest(reports[0]),
-                        report_path.relative_to(output), log_path.relative_to(output)))
+                    run_rss = parse_max_rss(rss_file.read_text(encoding="utf-8", errors="replace"))
+                    if run_rss is not None:
+                        rss_kb[(case, mode)].append(run_rss)
+                    run_checksums = parse_checksums(completed.stdout + completed.stderr)
+                    missing = set(CASES) - set(run_checksums)
+                    if missing:
+                        print(
+                            f"benchmark emitted no CHECKSUM line for: {', '.join(sorted(missing))}; "
+                            f"see {log_path}",
+                            file=sys.stderr,
+                        )
+                        return 2
+                    checksums[(case, mode)] = run_checksums
+                    writer.writerow((round_id, case, mode, f"{median:.6f}",
+                        run_rss if run_rss is not None else "", file_digest(reports[0]),
+                        run_checksums[case], report_path.relative_to(output),
+                        log_path.relative_to(output)))
                     manifest.flush()
                     print(f"completed round {round_id}/{args.runs}: {case} {mode}", flush=True)
 
@@ -181,19 +233,27 @@ def main() -> int:
         wins = sum(1 for p, n in zip(pure, native) if n < p)
         pure_cv = cv(pure); native_cv = cv(native)
         stable = pure_cv <= 5.0 and native_cv <= 5.0
+        pure_rss = rss_kb[(case, "pure")]; native_rss = rss_kb[(case, "native")]
+        rss_ok = len(pure_rss) == args.runs and len(native_rss) == args.runs
+        pure_checksum = checksums[(case, "pure")][case]
+        native_checksum = checksums[(case, "native")][case]
+        checksum_ok = pure_checksum == native_checksum
         if case in ADVERTISED:
-            passed = stable and ratio <= 0.95 and wins >= math.ceil(args.runs / 2)
+            passed = stable and rss_ok and checksum_ok and ratio <= 0.95 and wins >= math.ceil(args.runs / 2)
         else:
-            passed = stable and ratio <= 1.05
+            passed = stable and rss_ok and checksum_ok and ratio <= 1.05
         failed = failed or not passed
-        rows.append((case, pure_median, native_median, ratio, wins, pure_cv, native_cv, stable, passed))
-    qualification = args.runs == 11
+        rows.append((case, pure_median, native_median, ratio, wins, pure_cv, native_cv,
+                     stable, rss_ok, checksum_ok, pure_checksum, passed))
+    qualification = args.runs == 11 and not failed
     lines = ["# yjson Native acceleration gate", "",
-        f"Qualification: {'formal 11-round gate' if qualification else 'diagnostic only; formal gate requires exactly 11 rounds'}.", "",
-        "| Case | Pure median ns | Native median ns | N/P | Native wins | CV P/N | Stable | Gate |",
-        "|---|---:|---:|---:|---:|---:|---|---|"]
-    for case, pure_median, native_median, ratio, wins, pure_cv, native_cv, stable, passed in rows:
-        lines.append(f"| {case} | {pure_median:.2f} | {native_median:.2f} | {ratio:.3f} | {wins}/{args.runs} | {pure_cv:.2f}%/{native_cv:.2f}% | {'yes' if stable else 'no'} | {'pass' if passed else 'fail'} |")
+        f"Qualification: {'formal 11-round gate' if qualification else 'NOT qualified'}. "
+        f"Formal gate requires exactly 11 rounds, stable CV <= 5% on both sides, "
+        f"RSS captured for every run, and matching pure/native content checksums.", "",
+        "| Case | Pure median ns | Native median ns | N/P | Native wins | CV P/N | Stable | RSS | Checksum | Gate |",
+        "|---|---:|---:|---:|---:|---:|---|---|---|---|"]
+    for case, pure_median, native_median, ratio, wins, pure_cv, native_cv, stable, rss_ok, checksum_ok, checksum, passed in rows:
+        lines.append(f"| {case} | {pure_median:.2f} | {native_median:.2f} | {ratio:.3f} | {wins}/{args.runs} | {pure_cv:.2f}%/{native_cv:.2f}% | {'yes' if stable else 'no'} | {'yes' if rss_ok else 'no'} | {checksum} | {'pass' if passed else 'fail'} |")
     (output / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
     return 1 if failed or not qualification else 0

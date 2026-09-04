@@ -245,7 +245,12 @@ public interface JsonValueView {
 }
 
 public abstract class JsonNode <: ToString & JsonValueView {
-    public static prop nullValue: JsonNode { get() { JsonNullValue() } }
+    public static prop nullValue: JsonNode {
+        get() {
+            freezeYJsonRuntime()
+            JsonNullValue()
+        }
+    }
     public static func boolean(value: Bool): JsonNode { JsonBoolValue(value) }
     public static func int64(value: Int64): JsonNode { JsonIntValue(value) }
     public static func uint64(value: UInt64): JsonNode { JsonUIntValue(value) }
@@ -268,11 +273,13 @@ public abstract class JsonNode <: ToString & JsonValueView {
     }
 
     public func toJson(options!: JsonWriteOptions = JsonWriteOptions.defaults): String {
+        freezeYJsonRuntime()
         writeJsonValueToString(this, options)
     }
 
     public func writeJson(output: OutputStream,
         options!: JsonWriteOptions = JsonWriteOptions.defaults): Unit {
+        freezeYJsonRuntime()
         writeJsonValueToStream(this, output, options)
     }
 
@@ -753,10 +760,12 @@ public class JsonArray <: JsonNode {
     }
 
     public func toString(): String {
+        freezeYJsonRuntime()
         writeJsonValueToString(this, JsonWriteOptions.compact)
     }
 
     public func toPrettyString(indent: String): String {
+        freezeYJsonRuntime()
         writeJsonValueToString(this, JsonWriteOptions.pretty(indent: indent))
     }
 }
@@ -829,10 +838,12 @@ public class JsonObject <: JsonNode {
     }
 
     public func toString(): String {
+        freezeYJsonRuntime()
         writeJsonValueToString(this, JsonWriteOptions.compact)
     }
 
     public func toPrettyString(indent: String): String {
+        freezeYJsonRuntime()
         writeJsonValueToString(this, JsonWriteOptions.pretty(indent: indent))
     }
 }

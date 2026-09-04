@@ -90,6 +90,60 @@ class JsonSemanticVectorsTest {
     }
 
     @TestCase
+    func typedDecodeRejectsInvalidVectorsWithStableCodesAndLocations(): Unit {
+        // Every invalid vector must fail typed decode (both String and bytes
+        // entry points) with the same stable code; grammar and UTF-8 failures
+        // additionally carry a source location.
+        let intCodec = JsonCodecs.int64
+        for (text in ["\"unterminated", "\"bad\\xescape\"", "\"\\uD83Dvalue\"", "01",
+            "[1,]", "{\"a\" 1}", "{\"a\":true} trailing", "[\"a\"]", "{}[]"]) {
+            let stringError = @AssertThrows[JsonException](
+                YJson.fromJson(text, codec: intCodec))
+            @Expect(stringError.code, "parse_error")
+            @Expect(stringError.location.isSome())
+            let bytesError = @AssertThrows[JsonException](
+                YJson.fromJson(semanticBytes(text), codec: intCodec))
+            @Expect(bytesError.code, "parse_error")
+        }
+
+        // Numeric range failures are stable under F7: fast-path Int64
+        // overflow, semantic unsigned overflow, and fractional-to-integer
+        // conversion all carry a stable code.
+        for (text in ["9223372036854775808", "-9223372036854775809"]) {
+            let error = @AssertThrows[JsonException](
+                YJson.fromJson(text, codec: intCodec))
+            @Expect(error.code, "number_out_of_range")
+        }
+        // Fractional-to-integer conversion is invalid_value under F7.
+        for (text in ["1.5"]) {
+            let error = @AssertThrows[JsonException](
+                YJson.fromJson(text, codec: intCodec))
+            @Expect(error.code, "invalid_value")
+        }
+        // JSON type-shape mismatches (string/bool source for Int64) keep the
+        // fast-path parse_error code; type_mismatch is the compact/JsonNode
+        // layer's code for the same shape error.
+        for (text in ["\"not-a-number\"", "true"]) {
+            let error = @AssertThrows[JsonException](
+                YJson.fromJson(text, codec: intCodec))
+            @Expect(error.code, "parse_error")
+        }
+
+        // Invalid UTF-8 must fail the bytes entry with parse_error and a
+        // location; the stream entry must agree with the direct bytes entry.
+        let invalid: Array<Byte> = [b'"', 0xF0, 0x28, 0x8C, 0x28, b'"']
+        let directError = @AssertThrows[JsonException](
+            YJson.fromJson(invalid, codec: JsonCodecs.string))
+        @Expect(directError.code, "parse_error")
+        @Expect(directError.location.isSome())
+        for (split in 1..invalid.size) {
+            let streamError = @AssertThrows[JsonException](
+                YJson.fromJson(SplitPointInputStream(invalid, split), codec: JsonCodecs.string))
+            @Expect(streamError.code, "parse_error")
+        }
+    }
+
+    @TestCase
     func invalidUtf8IsRejectedAtEveryByteSplit(): Unit {
         let bytes: Array<Byte> = [b'"', 0xF0, 0x28, 0x8C, 0x28, b'"']
         let expected = semanticError({ => let _ = JsonNode.parse(bytes) })

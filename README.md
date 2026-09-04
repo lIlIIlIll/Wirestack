@@ -157,7 +157,8 @@ let name = document.root().member("name").getOrThrow().asString()
   `JsonPathCursor` 是有状态惰性迭代器，只能由一个线程消费。
 - caller-owned stream 不会被 yjson 关闭。一次调用处理一个 JSON document，并拒绝 trailing
   content；它不是多文档 framing protocol。
-- Pure 跨平台资格由 GitHub runners 验证；Native `0.1.0` 的资格范围是 Linux x86_64。
+- Pure 跨平台资格由 GitHub runners 作为资格门禁验证；hosted run 状态见
+  `release/0.1.0/evidence.md`，Native `0.1.0` 的资格范围是 Linux x86_64。
 
 配置和预算见[配置与错误](docs/configuration-and-errors.md)及
 [资源限制](docs/resource-limits.md)。

@@ -360,7 +360,7 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
             if (source.hasMore() && (source.peek() == b'[' || source.peek() == b'{')) {
                 beginRootBudgetIfNeeded()
             }
-            skipRawValueBounded(0, maxDepth)
+            skipRawValuePolicyAware(0, maxDepth)
             if (contexts.isEmpty()) { source.endValueBudget() }
         } finally { generatedState.completeAutoValue(pathPushed) }
     }
@@ -433,7 +433,7 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
         context
     }
 
-    private func skipRawValueBounded(depth: Int64, maxDepth: Int64): Unit {
+    private func skipRawValuePolicyAware(depth: Int64, maxDepth: Int64): Unit {
         skipSpaces()
         if (!source.hasMore()) {
             fail("Unexpected end of input")
@@ -445,15 +445,15 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
             case current == b'f' => expectLiteral("false")
             case current == b'"' =>
                 scanRawString()
-            case current == b'[' => skipRawArrayBounded(depth, maxDepth)
-            case current == b'{' => skipRawObjectBounded(depth, maxDepth)
+            case current == b'[' => skipRawArrayPolicyAware(depth, maxDepth)
+            case current == b'{' => skipRawObjectPolicyAware(depth, maxDepth)
             case current == b'-' || (current >= b'0' && current <= b'9') =>
                 skipNumberLiteral()
             case _ => fail("Unexpected token")
         }
     }
 
-    private func skipRawArrayBounded(depth: Int64, maxDepth: Int64): Unit {
+    private func skipRawArrayPolicyAware(depth: Int64, maxDepth: Int64): Unit {
         if (depth >= maxDepth) {
             throw jsonResourceLimitException(config,
                 "Maximum JSON depth ${config.maxDepth} exceeded", "max_depth", source.position())
@@ -465,7 +465,7 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
             return
         }
         while (true) {
-            skipRawValueBounded(depth + 1, maxDepth)
+            skipRawValuePolicyAware(depth + 1, maxDepth)
             skipSpaces()
             if (source.hasMore() && source.peek() == b']') {
                 consumeByte()
@@ -475,7 +475,7 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
         }
     }
 
-    private func skipRawObjectBounded(depth: Int64, maxDepth: Int64): Unit {
+    private func skipRawObjectPolicyAware(depth: Int64, maxDepth: Int64): Unit {
         if (depth >= maxDepth) {
             throw jsonResourceLimitException(config,
                 "Maximum JSON depth ${config.maxDepth} exceeded", "max_depth", source.position())
@@ -486,11 +486,24 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
             consumeByte()
             return
         }
+        let seenNames = if (jsonReadOptionsRejectsDuplicateKeys(config)) {
+            Some(HashSet<String>())
+        } else {
+            None<HashSet<String>>
+        }
         while (true) {
-            scanRawString()
+            let name = parseString()
+            match (seenNames) {
+                case Some(seen) =>
+                    if (seen.contains(name)) {
+                        policyFail("Duplicate object key '${name}'", "duplicate_key")
+                    }
+                    seen.add(name)
+                case None => ()
+            }
             skipSpaces()
             expectByte(b':')
-            skipRawValueBounded(depth + 1, maxDepth)
+            skipRawValuePolicyAware(depth + 1, maxDepth)
             skipSpaces()
             if (source.hasMore() && source.peek() == b'}') {
                 consumeByte()

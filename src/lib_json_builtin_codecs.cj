@@ -16,14 +16,14 @@ const MAXVAL_UI8: UInt64 = 0xFF
 
 func ensureIntRange(typeName: String, decoded: Int64, min: Int64, max: Int64): Int64 {
     if (decoded < min || decoded > max) {
-        throw JsonException("Cannot decode value as ${typeName}: out of range")
+        throw JsonException("Cannot decode value as ${typeName}: out of range", code: "number_out_of_range")
     }
     decoded
 }
 
 func ensureUnsignedRange(typeName: String, decoded: UInt64, max: UInt64): UInt64 {
     if (decoded > max) {
-        throw JsonException("Cannot decode value as ${typeName}: out of range")
+        throw JsonException("Cannot decode value as ${typeName}: out of range", code: "number_out_of_range")
     }
     decoded
 }

@@ -628,14 +628,14 @@ private func compactRawScalarFieldWrite(field: CodecField, value: String, first:
 
 private func primitiveRawValueWrite(typeText: String, value: String): String {
     match (typeText.replace(" ", "")) {
-        case "Bool" => "__writer.writeRawBool(${value})"
+        case "Bool" => "GeneratedSupportV1.writeRawBool(__writer, ${value})"
         case "Int8" | "Int16" | "Int32" | "Int64" =>
-            "__writer.writeRawInt64(Int64(${value}))"
+            "GeneratedSupportV1.writeRawInt64(__writer, Int64(${value}))"
         case "UInt8" | "UInt16" | "UInt32" | "UInt64" =>
-            "__writer.writeRawUInt64(UInt64(${value}))"
+            "GeneratedSupportV1.writeRawUInt64(__writer, UInt64(${value}))"
         case "Float16" | "Float32" | "Float64" =>
-            "__writer.writeRawFloat64(Float64(${value}))"
-        case "String" => "__writer.writeRawString(${value})"
+            "GeneratedSupportV1.writeRawFloat64(__writer, Float64(${value}))"
+        case "String" => "GeneratedSupportV1.writeRawString(__writer, ${value})"
         case _ => ""
     }
 }
@@ -737,6 +737,27 @@ private func compactRawFieldWrite(field: CodecField, value: String, first: Strin
     }
 }
 
+private func compactRawDirectWriterRewrite(value: String): String {
+    value
+        .replace("__directWriter.", "writer.")
+        .replace("__writer.", "writer.")
+        .replace(
+            "GeneratedSupportV1.writeRawBool(__writer,",
+            "GeneratedSupportV1.writeRawBool(writer,")
+        .replace(
+            "GeneratedSupportV1.writeRawInt64(__writer,",
+            "GeneratedSupportV1.writeRawInt64(writer,")
+        .replace(
+            "GeneratedSupportV1.writeRawUInt64(__writer,",
+            "GeneratedSupportV1.writeRawUInt64(writer,")
+        .replace(
+            "GeneratedSupportV1.writeRawFloat64(__writer,",
+            "GeneratedSupportV1.writeRawFloat64(writer,")
+        .replace(
+            "GeneratedSupportV1.writeRawString(__writer,",
+            "GeneratedSupportV1.writeRawString(writer,")
+}
+
 private func compactRawDirectFieldWrite(field: CodecField, value: String, first: String): String {
     let scalar = compactRawScalarFieldWrite(field, value, first)
     if (!scalar.isEmpty()) {
@@ -785,8 +806,8 @@ private func compactRawConcreteFieldWrite(field: CodecField, value: String, firs
         return compactRawDirectFieldWrite(field, value, first)
     }
     if (!field.codecExpr.isEmpty() || field.isOption) {
-        return compactRawFieldWrite(field, value, first)
-            .replace("__writer.", "writer.")
+        return compactRawDirectWriterRewrite(
+            compactRawFieldWrite(field, value, first))
     }
     let concreteType = simpleGeneratedTypeName(field)
     if (!concreteType.isEmpty()) {
@@ -796,8 +817,8 @@ private func compactRawConcreteFieldWrite(field: CodecField, value: String, firs
     }
     let nameKind = if (field.jsonNameExpr == "\"${field.name}\"") { "KnownName" } else { "Name" }
     let prefix = "${first} = writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); "
-    let fallback = compactRawFieldWrite(field, value, first)
-        .replace("__writer.", "writer.")
+    let fallback = compactRawDirectWriterRewrite(
+        compactRawFieldWrite(field, value, first))
     if (fallback.isEmpty()) { return "" }
     let marker = "match (${compactRawCursorCodecName(field)}) { " +
         "case Some(__rawCursor) => __rawCursor.writeCompactWithCursor(${value}, writer, GeneratedSupportV1.writeCursor(writer)); " +
@@ -1178,7 +1199,7 @@ private func appendMutableObjectFastRead(
             labelIndex += 1
         }
     }
-    appendLine(sb, 5, "case _ => __reader.skipRawWithDepth(context.remainingDepth())")
+    appendLine(sb, 5, "case _ => __reader.skipValue(context.remainingDepth())")
     appendLine(sb, 4, "}")
     appendLine(sb, 4, "__first = false")
     appendLine(sb, 3, "}")
@@ -1547,9 +1568,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
                     }
                 }
             }
-            concreteRawWrite = concreteRawWrite
-                .replace("__directWriter.", "writer.")
-                .replace("__writer.", "writer.")
+            concreteRawWrite = compactRawDirectWriterRewrite(concreteRawWrite)
             if (compactNeedsContext && compactRawFieldNeedsContext(field)) {
                 appendLine(sb, 2, "context.pushField(${field.jsonNameExpr})")
                 appendLine(sb, 2, "try { ${concreteRawWrite} } finally { context.popPath() }")
@@ -1742,7 +1761,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
         appendLine(sb, 5, "case ${labelIndex} =>")
         appendFastFieldAssignment(sb, 6, field, label, true)
     }
-    appendLine(sb, 5, "case _ => __reader.skipRawWithDepth(context.remainingDepth())")
+    appendLine(sb, 5, "case _ => __reader.skipValue(context.remainingDepth())")
     appendLine(sb, 4, "}")
     appendLine(sb, 4, "__first = false")
     appendLine(sb, 3, "}")
@@ -1854,7 +1873,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             appendLine(sb, 1, "public static func generatedCodecV1(_: GeneratedCodecTokenV1<${name}>): JsonCodec<${name}> { GeneratedSupportV1.requireProtocolVersion(1); ${name}Json }")
             appendLine(sb, 1, "public static func generatedObjectCodecV1(_: GeneratedCodecTokenV1<${name}>): GeneratedObjectCodecV1<${name}> { GeneratedSupportV1.requireProtocolVersion(1); __yJsonConcrete_${name} }")
             if (canProvideCompact) {
-                appendLine(sb, 1, "public static func generatedCompactRawV1(value: ${name}, writer: JsonDirectWriter): Unit { __yJsonConcrete_${name}.writeCompactRawWithWriter(value, writer) }")
+                appendLine(sb, 1, "public static func generatedCompactRawV1(value: ${name}, writer: JsonDirectWriter): Unit { GeneratedSupportV1.enterGeneratedEntry(); __yJsonConcrete_${name}.writeCompactRawWithWriter(value, writer) }")
             }
             appendLine(sb, 0, "}")
             if (canProvideCompact) {
@@ -1865,6 +1884,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
                 // codec overload before entering the generic implementation.
                 appendLine(sb, 0, "extend YJson {")
                 appendLine(sb, 1, "public static func toJson(value: ${name}, codec!: GeneratedCompactCursorWriteCodecV1<${name}>, options!: JsonWriteOptions = JsonWriteOptions.defaults): String {")
+                appendLine(sb, 2, "GeneratedSupportV1.enterGeneratedEntry()")
                 appendLine(sb, 2, "let writer = YJson.acquireGeneratedCompactStringWriter(options)")
                 appendLine(sb, 2, "try {")
                 appendLine(sb, 3, "if (writer.tryBeginGeneratedCompactRawValue()) {")
@@ -1880,6 +1900,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
                 appendLine(sb, 2, "} finally { YJson.releaseGeneratedCompactStringWriter(writer) }")
                 appendLine(sb, 1, "}")
                 appendLine(sb, 1, "public static func fromJson(text: String, codec!: GeneratedCompactCursorWriteCodecV1<${name}>, options!: JsonReadOptions = JsonReadOptions.defaults): ${name} {")
+                appendLine(sb, 2, "GeneratedSupportV1.enterGeneratedEntry()")
                 appendLine(sb, 2, "if (GeneratedSupportV1.usesDefaultFastReadOptions(options)) {")
                 appendLine(sb, 3, "let reader = JsonFastReader(text)")
                 // Match the encode fast path: avoid the interface method-table
@@ -1914,7 +1935,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
             appendLine(sb, 1, "public static func generatedCodecV1(_: GeneratedCodecTokenV1<${targetType}>): JsonCodec<${targetType}> { GeneratedSupportV1.requireProtocolVersion(1); ${name}Json${genericText}() }")
             appendLine(sb, 1, "public static func generatedObjectCodecV1(_: GeneratedCodecTokenV1<${targetType}>): GeneratedObjectCodecV1<${targetType}> { GeneratedSupportV1.requireProtocolVersion(1); ${codecName}${genericText}() }")
             if (canProvideCompact) {
-                appendLine(sb, 1, "public static func generatedCompactRawV1(value: ${targetType}, writer: JsonDirectWriter): Unit { ${codecName}${genericText}().writeCompactRawWithWriter(value, writer) }")
+                appendLine(sb, 1, "public static func generatedCompactRawV1(value: ${targetType}, writer: JsonDirectWriter): Unit { GeneratedSupportV1.enterGeneratedEntry(); ${codecName}${genericText}().writeCompactRawWithWriter(value, writer) }")
             }
             appendLine(sb, 0, "}")
         } else {
