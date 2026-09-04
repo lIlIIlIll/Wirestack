@@ -1675,6 +1675,24 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
     private static let RAW_ARRAY: UInt8 = 0x1
     private static let RAW_OBJECT: UInt8 = 0x2
 
+    private static let ESCAPE_TABLE: Array<UInt8> = buildEscapeLookupTable(false)
+    private static let ESCAPE_TABLE_HTML: Array<UInt8> = buildEscapeLookupTable(true)
+
+    private static func buildEscapeLookupTable(htmlSafe: Bool): Array<UInt8> {
+        let table = Array<UInt8>(256, repeat: 0)
+        for (byte in 0..32) { table[byte] = 1 }
+        table[Int64(b'"')] = 1
+        table[Int64(b'\\')] = 1
+        if (htmlSafe) {
+            table[Int64(b'<')] = 1
+            table[Int64(b'>')] = 1
+            table[Int64(b'&')] = 1
+            table[Int64(b'=')] = 1
+            table[Int64(b'\'')] = 1
+        }
+        table
+    }
+
     private let target: JsonDirectWriterTarget
     // String/bytes encoding is the dominant generated-code path. Keep its
     // concrete target alongside the polymorphic stream target so compact raw
@@ -2960,11 +2978,11 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
     }
 
     private func firstStringEscapeIndex(value: String): Int64 {
+        let table = if (config.htmlSafe) { ESCAPE_TABLE_HTML } else { ESCAPE_TABLE }
         unsafe {
             let bytes = value.rawData()
             for (index in 0..bytes.size) {
-                let byte = Int64(bytes[index])
-                if (byte <= 127 && shouldEscapeAscii(byte)) {
+                if (table[Int64(bytes[index])] != 0) {
                     return index
                 }
             }
@@ -2980,21 +2998,7 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
         let result = firstStringEscapeIndex(value)
         lastRawString = Some(value)
         lastRawStringEscapeIndex = result
-        result
-    }
-
-    private func shouldEscapeAscii(byte: Int64): Bool {
-        if (byte < 32 || byte == Int64(b'"') || byte == Int64(b'\\')) {
-            return true
-        }
-        if (!config.htmlSafe) {
-            return false
-        }
-        byte == Int64(b'<') ||
-            byte == Int64(b'>') ||
-            byte == Int64(b'&') ||
-            byte == Int64(b'=') ||
-            byte == Int64(b'\'')
+        return result
     }
 
 }

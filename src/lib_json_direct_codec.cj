@@ -364,106 +364,113 @@ private const GENERATED_PATH_MANUAL: UInt8 = 0u8
 private const GENERATED_PATH_AUTO_CLAIMABLE: UInt8 = 1u8
 private const GENERATED_PATH_AUTO_ACTIVE: UInt8 = 2u8
 
-private struct GeneratedPathEntryV1 {
-    let value: String
-    let index: Int64
-    let origin: UInt8
-
-    init(value: String, index: Int64, origin: UInt8) {
-        this.value = value
-        this.index = index
-        this.origin = origin
-    }
-}
-
 private class GeneratedPathStateV1 {
-    private let entries = ArrayList<GeneratedPathEntryV1>()
+    private var values: Array<String>
+    private var indices: Array<Int64>
+    private var origins: Array<UInt8>
+    private var count: Int64 = 0
 
-    func size(): Int64 { entries.size }
+    init() {
+        values = Array<String>(16, repeat: "")
+        indices = Array<Int64>(16, repeat: -1)
+        origins = Array<UInt8>(16, repeat: 0)
+    }
+
+    func size(): Int64 { count }
+
+    private func ensureCapacity(): Unit {
+        if (count < values.size) { return }
+        let grown = values.size * 2
+        let nextValues = Array<String>(grown, repeat: "")
+        let nextIndices = Array<Int64>(grown, repeat: -1)
+        let nextOrigins = Array<UInt8>(grown, repeat: 0)
+        for (position in 0..count) {
+            nextValues[position] = values[position]
+            nextIndices[position] = indices[position]
+            nextOrigins[position] = origins[position]
+        }
+        values = nextValues
+        indices = nextIndices
+        origins = nextOrigins
+    }
+
+    private func writeSlot(value: String, index: Int64, origin: UInt8): Unit {
+        ensureCapacity()
+        values[count] = value
+        indices[count] = index
+        origins[count] = origin
+        count++
+    }
 
     func pushField(name: String): Unit {
-        if (!entries.isEmpty()) {
-            let position = entries.size - 1
-            let last = entries[position]
-            if (last.origin == GENERATED_PATH_AUTO_CLAIMABLE && last.index < 0 && last.value == name) {
-                entries[position] = GeneratedPathEntryV1(last.value, last.index, GENERATED_PATH_MANUAL)
-                return
-            }
+        if (count > 0 && origins[count - 1] == GENERATED_PATH_AUTO_CLAIMABLE
+            && indices[count - 1] < 0 && values[count - 1] == name) {
+            origins[count - 1] = GENERATED_PATH_MANUAL
+            return
         }
-        append(name, -1, GENERATED_PATH_MANUAL)
+        writeSlot(name, -1, GENERATED_PATH_MANUAL)
     }
 
     func pushIndex(index: Int64): Unit {
-        if (!entries.isEmpty()) {
-            let position = entries.size - 1
-            let last = entries[position]
-            if (last.origin == GENERATED_PATH_AUTO_CLAIMABLE && last.index == index) {
-                entries[position] = GeneratedPathEntryV1(last.value, last.index, GENERATED_PATH_MANUAL)
-                return
-            }
+        if (count > 0 && origins[count - 1] == GENERATED_PATH_AUTO_CLAIMABLE
+            && indices[count - 1] == index) {
+            origins[count - 1] = GENERATED_PATH_MANUAL
+            return
         }
-        append("", index, GENERATED_PATH_MANUAL)
+        writeSlot("", index, GENERATED_PATH_MANUAL)
     }
 
     func pushAutoField(name: String, baseDepth: Int64): Bool {
-        if (entries.size > baseDepth) { return false }
-        append(name, -1, GENERATED_PATH_AUTO_CLAIMABLE)
+        if (count > baseDepth) { return false }
+        writeSlot(name, -1, GENERATED_PATH_AUTO_CLAIMABLE)
         true
     }
 
     func pushAutoIndex(index: Int64, baseDepth: Int64): Bool {
-        if (entries.size > baseDepth) { return false }
-        append("", index, GENERATED_PATH_AUTO_CLAIMABLE)
+        if (count > baseDepth) { return false }
+        writeSlot("", index, GENERATED_PATH_AUTO_CLAIMABLE)
         true
     }
 
     func beginAutoValue(pushed: Bool): Unit {
-        if (pushed && !entries.isEmpty()) {
-            let position = entries.size - 1
-            let last = entries[position]
-            if (last.origin == GENERATED_PATH_AUTO_CLAIMABLE) {
-                entries[position] = GeneratedPathEntryV1(last.value, last.index, GENERATED_PATH_AUTO_ACTIVE)
-            }
+        if (pushed && count > 0 && origins[count - 1] == GENERATED_PATH_AUTO_CLAIMABLE) {
+            origins[count - 1] = GENERATED_PATH_AUTO_ACTIVE
         }
     }
 
     func completeAutoValue(pushed: Bool): Unit {
-        if (pushed && !entries.isEmpty() && entries[entries.size - 1].origin == GENERATED_PATH_AUTO_ACTIVE) {
-            pop()
+        if (pushed && count > 0 && origins[count - 1] == GENERATED_PATH_AUTO_ACTIVE) {
+            count--
         }
     }
 
-    func pop(): Unit {
-        if (!entries.isEmpty()) { entries.remove(at: entries.size - 1) }
-    }
+    func pop(): Unit { if (count > 0) { count-- } }
 
     func updateLastField(name: String): Unit {
-        if (entries.isEmpty()) { return }
-        let position = entries.size - 1
-        let last = entries[position]
-        entries[position] = GeneratedPathEntryV1(name, -1, last.origin)
+        if (count == 0) { return }
+        values[count - 1] = name
+        indices[count - 1] = -1
     }
 
     func updateLastIndex(index: Int64): Unit {
-        if (entries.isEmpty()) { return }
-        let position = entries.size - 1
-        let last = entries[position]
-        entries[position] = GeneratedPathEntryV1("", index, last.origin)
+        if (count == 0) { return }
+        values[count - 1] = ""
+        indices[count - 1] = index
     }
 
     func pointer(): String {
-        if (entries.isEmpty()) { return "" }
+        if (count == 0) { return "" }
         let result = StringBuilder()
-        for (entry in entries) {
+        for (position in 0..count) {
             result.append("/")
-            if (entry.index >= 0) { result.append(entry.index.toString()) }
-            else { result.append(jsonPointerEscape(entry.value)) }
+            if (indices[position] >= 0) { result.append(indices[position].toString()) }
+            else { result.append(jsonPointerEscape(values[position])) }
         }
         result.toString()
     }
 
     private func append(value: String, index: Int64, origin: UInt8): Unit {
-        entries.add(GeneratedPathEntryV1(value, index, origin))
+        writeSlot(value, index, origin)
     }
 }
 
