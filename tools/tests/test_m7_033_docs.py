@@ -118,6 +118,10 @@ class M7033DocsTests(unittest.TestCase):
 
     def test_pages_workflow_pins_cjdoc_and_keeps_long_gates_out(self) -> None:
         workflow = (docs.ROOT / ".github/workflows/m7-033-docs.yml").read_text(encoding="utf-8")
+        self.assertIn("needs: build-cjdoc", workflow)
+        self.assertIn("version: 1.1.0-alpha.20260414010024", workflow)
+        self.assertIn("actions/upload-artifact@v4", workflow)
+        self.assertIn("actions/download-artifact@v4", workflow)
         self.assertIn('CJDOC_VERSION: 0.7.2', workflow)
         self.assertIn('CJDOC_SOURCE_SHA: e966097a3591538fba8990772e2e6c543de86c21', workflow)
         self.assertIn('https://codeload.github.com/${CJDOC_REPOSITORY}/tar.gz/${CJDOC_SOURCE_SHA}', workflow)
@@ -134,6 +138,10 @@ class M7033DocsTests(unittest.TestCase):
 
     def test_repository_build_gate_installs_the_same_pinned_cjdoc(self) -> None:
         workflow = (docs.ROOT / ".github/workflows/clean-cangjie-build.yml").read_text(encoding="utf-8")
+        self.assertIn("needs: build-cjdoc", workflow)
+        self.assertIn("version: 1.1.0-alpha.20260414010024", workflow)
+        self.assertIn("actions/upload-artifact@v4", workflow)
+        self.assertIn("actions/download-artifact@v4", workflow)
         self.assertIn('CJDOC_VERSION: 0.7.2', workflow)
         self.assertIn('CJDOC_SOURCE_SHA: e966097a3591538fba8990772e2e6c543de86c21', workflow)
         self.assertIn('https://codeload.github.com/${CJDOC_REPOSITORY}/tar.gz/${CJDOC_SOURCE_SHA}', workflow)
