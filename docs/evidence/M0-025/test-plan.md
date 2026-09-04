@@ -12,7 +12,7 @@ gate. Short diagnostics do not substitute for it.
 |---|---|---|---|
 | P001 | Native Windows x86_64 with the pinned toolchain | Report environment identity and run diagnostics | reachable |
 | P002 | Non-Windows, wrong architecture, or missing capability | Return BLOCKED with a stable code | fault injection |
-| P003 | One isolated `connect-close`, `echo-close`, `peer-reset`, or `close-during-read` probe | Keep mode, duration, command, and resource samples separate | reachable |
+| P003 | One isolated `connect-close`, `echo-close`, `peer-reset`, or `close-during-read` probe | Keep mode, explicit `16,384`-iteration budget, `600`-second timeout, command, and resource samples separate | reachable |
 | P004 | Diagnostic process timeout or incomplete result | Record INCOMPLETE; never promote it to PASS | fault injection |
 | P005 | Resource trend exceeds the existing M0-011 limit | Record FAIL with the metric and limit | fault injection |
 | P006 | Growth is not controlled by Wirestack-owned code | Record an upstream-candidate decision without editing runtime/std | reachable |
@@ -38,19 +38,21 @@ gate. Short diagnostics do not substitute for it.
 | Test ID | Scenario IDs | Path IDs | Test | Expected result | Type |
 |---|---|---|---|---|---|
 | T001 | S001,S003 | P001,P002 | Environment and revision capability injection | truthful READY/BLOCKED | unit, fault-injection |
-| T002 | S002 | P003 | Mode selection and bounded command construction | exactly four known modes, no shell interpolation | unit |
+| T002 | S002 | P003 | Mode selection, explicit iteration budget, and bounded command construction | exactly four known modes, budget is not derived from timeout, no shell interpolation | unit |
 | T003 | S004,S005 | P004,P005 | Diagnostic report parsing and trend mutation | incomplete/growth reports fail closed | unit, fault-injection |
 | T004 | S006 | P006,P007 | Ownership decision and forbidden-path guard | runtime/std cannot be modified or claimed fixed | unit, architecture |
 | T005 | S007 | P008 | Exact-revision four-hour result validation | only a complete PASS can close the rerun | integration |
 | T006 | S008 | P009 | Atomic JSON publication | one complete report, no temporary residue | unit, fault-injection |
-| T007 | S002,S007 | P003,P008 | GitHub `windows-2025` workflow | diagnostic artifact plus native four-hour rerun | native-platform |
+| T007 | S002,S007 | P003,P008 | GitHub `windows-2025` workflow | complete diagnostic artifact; native four-hour rerun only when explicitly dispatched | native-platform |
 
 ## Acceptance boundary
 
 M0-025 is COMPLETE only when the diagnostic result, repair decision, and fresh
 M0-011 native four-hour report are source-bound and PASS. A diagnostic-only
 result, a timeout, or a report with `SKIPPED`, `NOT_RUN`, `INCOMPLETE`, or FAIL
-status keeps the task BLOCKED. Existing M0-011 limits are immutable.
+status keeps the task BLOCKED. Existing M0-011 limits are immutable. Mode
+diagnostics must use an explicit per-mode budget; the iteration count must not
+be inferred from the wall-clock timeout.
 
 The workflow does not run a 24-hour soak, one-hour SSE profile, mobile gate, or
 non-Windows native gate.
