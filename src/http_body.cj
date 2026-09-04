@@ -3,10 +3,23 @@ package wirestack
 import std.fs.*
 import std.sync.Mutex
 
+/**
+ * Wirestack 公开 API：BodyReplayability。
+ */
 public enum BodyReplayability <: Equatable<BodyReplayability> {
+/**
+ * Wirestack 公开 API：Replayable。
+ */
     | Replayable
+/**
+ * Wirestack 公开 API：OneShot。
+ */
     | OneShot
 
+/**
+ * Wirestack 公开 API：==。
+ * @param other 参数 other。
+ */
     public operator func ==(other: BodyReplayability): Bool {
         match ((this, other)) {
             case (BodyReplayability.Replayable, BodyReplayability.Replayable) => true
@@ -15,43 +28,108 @@ public enum BodyReplayability <: Equatable<BodyReplayability> {
         }
     }
 
+/**
+ * Wirestack 公开 API：!=。
+ * @param other 参数 other。
+ */
     public operator func !=(other: BodyReplayability): Bool { !(this == other) }
 }
 
+/**
+ * Wirestack 公开 API：HttpBodyErrorCode。
+ */
 public enum HttpBodyErrorCode {
+/**
+ * Wirestack 公开 API：Closed。
+ */
     | Closed
+/**
+ * Wirestack 公开 API：ConcurrentRead。
+ */
     | ConcurrentRead
+/**
+ * Wirestack 公开 API：AlreadyOpened。
+ */
     | AlreadyOpened
+/**
+ * Wirestack 公开 API：InvalidLength。
+ */
     | InvalidLength
+/**
+ * Wirestack 公开 API：InvalidFile。
+ */
     | InvalidFile
+/**
+ * Wirestack 公开 API：FileChanged。
+ */
     | FileChanged
+/**
+ * Wirestack 公开 API：PrematureEof。
+ */
     | PrematureEof
+/**
+ * Wirestack 公开 API：FactoryContractViolation。
+ */
     | FactoryContractViolation
+/**
+ * Wirestack 公开 API：InvalidProgress。
+ */
     | InvalidProgress
 }
 
+/**
+ * Wirestack 公开 API：HttpBodyException。
+ */
 public class HttpBodyException <: Exception {
+/**
+ * Wirestack 公开 API：code。
+ */
     public let code: HttpBodyErrorCode
+/**
+ * Wirestack 公开 API：cause。
+ */
     public let cause: ?Exception
 
+/**
+ * Wirestack 公开 API：init。
+ * @param cause 参数 cause。
+ * @param code 参数 code。
+ * @param message 参数 message。
+ */
     public init(code: HttpBodyErrorCode, message: String, cause!: ?Exception = None<Exception>) {
         super(message)
         this.code = code
         this.cause = cause
     }
 
+/**
+ * Wirestack 公开 API：getClassName。
+ */
     protected override func getClassName(): String { "HttpBodyException" }
 }
 
 /** Pull-based stream. A zero result means EOF unless the destination is empty. */
 public interface HttpBodyStream <: Resource {
+/**
+ * Wirestack 公开 API：contentLength。
+ */
     prop contentLength: ?Int64
+/**
+ * Wirestack 公开 API：read。
+ * @param destination 参数 destination。
+ */
     func read(destination: Array<Byte>): Int64
 }
 
 /** Immutable request-body source supporting replayable and one-shot ownership. */
 public class RequestBody {
+/**
+ * Wirestack 公开 API：contentLength。
+ */
     public let contentLength: ?Int64
+/**
+ * Wirestack 公开 API：replayability。
+ */
     public let replayability: BodyReplayability
     private let factory: () -> HttpBodyStream
     private let openMutex = Mutex()
@@ -68,20 +146,35 @@ public class RequestBody {
         this.factory = factory
     }
 
+/**
+ * Wirestack 公开 API：empty。
+ */
     public static func empty(): RequestBody {
         RequestBody(Some(0), BodyReplayability.Replayable, { => ByteArrayBodyStream(Array<Byte>()) })
     }
 
+/**
+ * Wirestack 公开 API：bytes。
+ * @param value 参数 value。
+ */
     public static func bytes(value: Array<Byte>): RequestBody {
         let owned = value.clone()
         RequestBody(Some(owned.size), BodyReplayability.Replayable, { => ByteArrayBodyStream(owned) })
     }
 
+/**
+ * Wirestack 公开 API：string。
+ * @param value 参数 value。
+ */
     public static func string(value: String): RequestBody {
         RequestBody.bytes(value.toArray())
     }
 
-    /** Opens a fresh bounded regular file for every replay. The file is never read eagerly. */
+/**
+ * Opens a fresh bounded regular file for every replay. The file is never read eagerly.
+ * @param maximumBytes 参数 maximumBytes。
+ * @param path 参数 path。
+ */
     public static func file(path: String, maximumBytes!: Int64 = 1073741824): RequestBody {
         if (path.isEmpty() || path.contains("\0") || maximumBytes < 0) { invalidFile() }
         let expected = inspectBodyFile(path, maximumBytes)
@@ -92,6 +185,11 @@ public class RequestBody {
         )
     }
 
+/**
+ * Wirestack 公开 API：replayableFactory。
+ * @param contentLength 参数 contentLength。
+ * @param factory 参数 factory。
+ */
     public static func replayableFactory(
         contentLength: ?Int64,
         factory: () -> HttpBodyStream
@@ -99,10 +197,17 @@ public class RequestBody {
         RequestBody(contentLength, BodyReplayability.Replayable, factory)
     }
 
+/**
+ * Wirestack 公开 API：oneShot。
+ * @param stream 参数 stream。
+ */
     public static func oneShot(stream: HttpBodyStream): RequestBody {
         RequestBody(stream.contentLength, BodyReplayability.OneShot, { => stream })
     }
 
+/**
+ * Wirestack 公开 API：open。
+ */
     public func open(): HttpBodyStream {
         synchronized(openMutex) {
             if (replayability == BodyReplayability.OneShot && opened) {
@@ -131,8 +236,15 @@ private class ByteArrayBodyStream <: HttpBodyStream {
 
     init(bytes: Array<Byte>) { this.bytes = bytes }
 
+/**
+ * Wirestack 公开 API：contentLength。
+ */
     public prop contentLength: ?Int64 { get() { Some(bytes.size) } }
 
+/**
+ * Wirestack 公开 API：read。
+ * @param destination 参数 destination。
+ */
     public func read(destination: Array<Byte>): Int64 {
         ensureBodyOpen(closed)
         if (destination.isEmpty() || offset == bytes.size) { return 0 }
@@ -142,7 +254,13 @@ private class ByteArrayBodyStream <: HttpBodyStream {
         count
     }
 
+/**
+ * Wirestack 公开 API：close。
+ */
     public func close(): Unit { closed = true }
+/**
+ * Wirestack 公开 API：isClosed。
+ */
     public func isClosed(): Bool { closed }
 }
 
@@ -171,8 +289,15 @@ private class FileBodyStream <: HttpBodyStream {
         this.expectedLength = expectedLength
     }
 
+/**
+ * Wirestack 公开 API：contentLength。
+ */
     public prop contentLength: ?Int64 { get() { Some(expectedLength) } }
 
+/**
+ * Wirestack 公开 API：read。
+ * @param destination 参数 destination。
+ */
     public func read(destination: Array<Byte>): Int64 {
         ensureBodyOpen(closed)
         if (destination.isEmpty()) { return 0 }
@@ -201,10 +326,16 @@ private class FileBodyStream <: HttpBodyStream {
         count
     }
 
+/**
+ * Wirestack 公开 API：close。
+ */
     public func close(): Unit {
         if (!closed) { closed = true; file.close() }
     }
 
+/**
+ * Wirestack 公开 API：isClosed。
+ */
     public func isClosed(): Bool { closed }
 }
 

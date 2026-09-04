@@ -39,6 +39,26 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes clang llvm cmake ninja-build
 
+      - name: Install the pinned cjdoc release
+        env:
+          CJDOC_VERSION: 0.7.2
+          CJDOC_REPOSITORY: lIlIIlIll/cjdoc
+        shell: bash
+        run: |
+          set -euo pipefail
+          install_dir="$RUNNER_TEMP/cjdoc"
+          mkdir -p "$install_dir"
+          gh release download "v${CJDOC_VERSION}" \
+            --repo "$CJDOC_REPOSITORY" \
+            --pattern "cjdoc-${CJDOC_VERSION}-linux-x64.tar.gz" \
+            --dir "$install_dir"
+          tar --extract --gzip --file "$install_dir/cjdoc-${CJDOC_VERSION}-linux-x64.tar.gz" \
+            --directory "$install_dir"
+          binary="$install_dir/cjdoc-${CJDOC_VERSION}-linux-x64/cjdoc"
+          test -x "$binary"
+          echo "CJDOC_BIN=$binary" >> "$GITHUB_ENV"
+          "$binary" --version
+
       - name: Verify Linux toolchain readiness
         shell: bash
         run: |

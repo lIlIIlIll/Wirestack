@@ -3,9 +3,9 @@
 **依据：**《Wirestack：仓颉跨平台 TLS/HTTPS 网络栈重写 PRD》v2.1（2026-08-27）  
 **文档类型：** Issue/PR 级实施 backlog  
 **全平台主线任务数：** 185
-**Linux 稳定版收口任务数：** 15  
+**Linux 稳定版收口任务数：** 16<br>
 **远期上游任务数：** 7  
-**当前发布任务数：** 200
+**当前发布任务数：** 201
 **目标：** 将 PRD 转换为可排期、可并行、可验收、可追踪的仓库任务；不在此文档中改变 PRD 已冻结的产品边界。
 
 > 仓库事实：Wirestack 是独立仓颉绿地网络库仓库，GitHub 为 `lIlIIlIll/Wirestack`。新公共包默认使用 `wirestack.*`，内部实现使用 `wirestack.internal.*`。`cangjie_stdx`、仓颉 SDK、`std.net` 与 runtime 源码均为外部参考或上游仓库，不属于 Wirestack 工作树。实际物理目录与 `cjpm` target 由 M0-002 根据当前仓颉工具链冻结；本 backlog 在此之前只约束逻辑模块边界、依赖方向和验收语义。
@@ -479,6 +479,7 @@ runtime、`std.net` 源码修改不得成为依赖。
 | M7-030 | 实现 Linux artifact 签名与安全更新流程 | 发布 | C3 | M7-022,M7-025,M7-029 | PRD §18/§23/§27 | artifact、SBOM 和 manifest 均有可验证签名；干净 consumer 演练验证、拒绝篡改、provider 升级、回滚、公告和 SBOM 更新。 |
 | M7-031 | 生成 Linux 稳定版验收矩阵与候选报告 | 质量 | C4 | M7-019..M7-030,M7-032 | PRD §26 | 22 条验收逐项记录 PASS、FAIL 或 `NOT_APPLICABLE_TO_LINUX_PROFILE`，并链接 artifact digest、原生平台证据和已知限制；任一 Linux P0 FAIL、缺失证据或未关闭 High/Critical 阻断 Linux 稳定版。 |
 | M7-032 | 建立独立公开 API 契约并消除 internal 类型泄漏 | API/架构 | C4 | M7-026,M7-027 | ADR-0006；PRD §7/§10/§13/§15/§17/§24 | `wirestack`、`wirestack.http` 和 `wirestack.tls` 拥有用户可构造、传递、匹配和捕获的类型；公开声明不得 alias 或暴露 `wirestack.internal.*`；provider、协议状态机、native handle 和平台实现保持 internal；无 public/internal 循环依赖；生成新的 Linux pre-1.0 API inventory，更新文档和 clean consumer，架构守卫阻止回归。现有实验性 API 不要求 source、API、ABI 或语义兼容，不增加迁移 shim。 |
+| M7-033 | 使用 cjdoc 建立 Linux 开发者文档、API 参考与 Pages 发布门禁 | 文档/质量 | C3 | M7-027,M7-032 | PRD §24.3/§26；ADR-0001/0006 | 面向 Linux x86_64 glibc 开发者提供可运行的中文入门、HTTPS/TLS/HTTP 示例和公开 API 参考；所有公开符号与参数达到 100% 文档覆盖；固定 `cjdoc 0.7.2`，分层生成完整 Doc IR、Markdown、API surface 和 coverage，资源 fallback、版本不符、源码漂移和未知 schema fail closed；`scripts/check-docs` 接入 `scripts/check` 与 CI；HTML 仅由 CI 生成并发布最新 `main` 到 GitHub Pages，部署后执行有界 HTTP smoke；不声明未验收平台支持，不运行长时间 soak。 |
 
 ---
 
@@ -625,7 +626,7 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 - Linux 稳定版收口任务：**15**
 - 远期上游任务：**7**
 - 稳定版后 P1/独立项目：**14**
-- 当前发布相关任务总数：**200**
-- 全部已记录任务总数：**221**
+- 当前发布相关任务总数：**201**
+- 全部已记录任务总数：**222**
 
 该数量代表 Issue/PR 级工作项，不代表必须串行执行；关键是保持里程碑退出门禁和依赖方向。

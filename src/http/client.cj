@@ -5,22 +5,42 @@ import wirestack.internal.http1 as http1
 import wirestack.internal.transport as transport
 import wirestack.internal.transport_stdnet as stdnet
 
+/**
+ * Wirestack 公开 API：HttpClientCapabilityErrorCode。
+ */
 public enum HttpClientCapabilityErrorCode {
+/**
+ * Wirestack 公开 API：SystemResolverUnavailable。
+ */
     | SystemResolverUnavailable
 }
 
 /** A requested default capability is unavailable rather than silently weakened. */
 public class HttpClientCapabilityException <: Exception {
+/**
+ * Wirestack 公开 API：code。
+ */
     public let code: HttpClientCapabilityErrorCode
 
+/**
+ * Wirestack 公开 API：init。
+ * @param code 参数 code。
+ * @param message 参数 message。
+ */
     public init(code: HttpClientCapabilityErrorCode, message: String) {
         super(message)
         this.code = code
     }
 
+/**
+ * Wirestack 公开 API：getClassName。
+ */
     protected override func getClassName(): String { "HttpClientCapabilityException" }
 }
 
+/**
+ * Wirestack 公开 API：HttpClientBuilder。
+ */
 public class HttpClientBuilder {
     private var configuredResolver: ?Resolver = None<Resolver>
     private var configuredRequestTimeout: ?Duration = None<Duration>
@@ -30,46 +50,78 @@ public class HttpClientBuilder {
     private var configuredProxy: ?HttpProxyConfig = None<HttpProxyConfig>
     private var configuredTls: ?HttpClientTlsConfig = None<HttpClientTlsConfig>
 
+/**
+ * Wirestack 公开 API：init。
+ */
     public init() {}
 
-    /** Installs a caller-owned provider-neutral resolver instead of the Linux system resolver. */
+/**
+ * Installs a caller-owned provider-neutral resolver instead of the Linux system resolver.
+ * @param value 参数 value。
+ */
     public func resolver(value: Resolver): HttpClientBuilder {
         configuredResolver = Some(value)
         this
     }
 
+/**
+ * Wirestack 公开 API：requestTimeout。
+ * @param value 参数 value。
+ */
     public func requestTimeout(value: Duration): HttpClientBuilder {
         if (value <= Duration.Zero) { throw IllegalArgumentException("request timeout must be positive") }
         configuredRequestTimeout = Some(value)
         this
     }
 
+/**
+ * Wirestack 公开 API：limits。
+ * @param value 参数 value。
+ */
     public func limits(value: HttpLimits): HttpClientBuilder {
         configuredLimits = value
         this
     }
 
+/**
+ * Wirestack 公开 API：redirectPolicy。
+ * @param value 参数 value。
+ */
     public func redirectPolicy(value: HttpRedirectPolicy): HttpClientBuilder {
         configuredRedirectPolicy = value
         this
     }
 
+/**
+ * Wirestack 公开 API：retryPolicy。
+ * @param value 参数 value。
+ */
     public func retryPolicy(value: HttpRetryPolicy): HttpClientBuilder {
         configuredRetryPolicy = value
         this
     }
 
-    /** Installs one explicit proxy route. Environment, PAC, and WPAD are never consulted. */
+/**
+ * Installs one explicit proxy route. Environment, PAC, and WPAD are never consulted.
+ * @param value 参数 value。
+ */
     public func proxy(value: HttpProxyConfig): HttpClientBuilder {
         configuredProxy = Some(value)
         this
     }
 
+/**
+ * Wirestack 公开 API：tls。
+ * @param value 参数 value。
+ */
     public func tls(value: HttpClientTlsConfig): HttpClientBuilder {
         configuredTls = Some(value)
         this
     }
 
+/**
+ * Wirestack 公开 API：build。
+ */
     public func build(): HttpClient {
         var ownedSystemResolver = None<SystemResolver>
         let selected: Resolver = match (configuredResolver) {
@@ -152,14 +204,31 @@ public class HttpClient <: Resource {
         }
     }
 
+/**
+ * Wirestack 公开 API：default。
+ */
     public static func default(): HttpClient { HttpClient.builder().build() }
+/**
+ * Wirestack 公开 API：builder。
+ */
     public static func builder(): HttpClientBuilder { HttpClientBuilder() }
 
+/**
+ * Wirestack 公开 API：get。
+ * @param context 参数 context。
+ * @param url 参数 url。
+ */
     public func get(url: String,
         context!: OperationContext = OperationContext.background()): HttpResponse {
         send(parseGetRequest(url), context: context)
     }
 
+/**
+ * Wirestack 公开 API：getControlled。
+ * @param cancellation 参数 cancellation。
+ * @param context 参数 context。
+ * @param url 参数 url。
+ */
     public func getControlled(
         url: String,
         cancellation: HttpCancellationHandles,
@@ -177,6 +246,12 @@ public class HttpClient <: Resource {
         request
     }
 
+/**
+ * Wirestack 公开 API：send。
+ * @param context 参数 context。
+ * @param request 参数 request。
+ * @param trailer 参数 trailer。
+ */
     public func send(request: HttpRequest,
         context!: OperationContext = OperationContext.background(),
         trailer!: HttpTrailer = HttpTrailer()
@@ -189,6 +264,13 @@ public class HttpClient <: Resource {
         )
     }
 
+/**
+ * Wirestack 公开 API：sendControlled。
+ * @param cancellation 参数 cancellation。
+ * @param context 参数 context。
+ * @param request 参数 request。
+ * @param trailer 参数 trailer。
+ */
     public func sendControlled(
         request: HttpRequest,
         cancellation: HttpCancellationHandles,
@@ -297,6 +379,9 @@ public class HttpClient <: Resource {
         throw Exception("unreachable HTTP retry loop exit")
     }
 
+/**
+ * Wirestack 公开 API：close。
+ */
     public func close(): Unit {
         let (secure, tunneled) = synchronized(mutex) {
             if (closed) {
@@ -313,6 +398,9 @@ public class HttpClient <: Resource {
         match (ownedSystemResolver) { case Some(value) => value.close(); case None => () }
     }
 
+/**
+ * Wirestack 公开 API：isClosed。
+ */
     public func isClosed(): Bool { synchronized(mutex) { closed } }
 
     private func httpsClient(): http1.HttpAutomaticHttpsClient {

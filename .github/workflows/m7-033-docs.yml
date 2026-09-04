@@ -1,0 +1,128 @@
+name: M7-033 Developer Documentation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+concurrency:
+  group: m7-033-docs-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    name: Generate public API docs / cjdoc 0.7.2
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Check out the candidate source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Resolve the Cangjie toolchain
+        id: cangjie-nightly
+        run: python3 tools/latest_cangjie_nightly.py --github-output "$GITHUB_OUTPUT"
+
+      - name: Install the Cangjie toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ steps.cangjie-nightly.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie.tar.gz
+
+      - name: Install native prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang llvm cmake ninja-build
+
+      - name: Download the pinned cjdoc release
+        env:
+          CJDOC_VERSION: 0.7.2
+          CJDOC_REPOSITORY: lIlIIlIll/cjdoc
+        run: |
+          set -euo pipefail
+          install_dir="$RUNNER_TEMP/cjdoc"
+          mkdir -p "$install_dir"
+          gh release download "v${CJDOC_VERSION}" \
+            --repo "$CJDOC_REPOSITORY" \
+            --pattern "cjdoc-${CJDOC_VERSION}-linux-x64.tar.gz" \
+            --dir "$install_dir"
+          tar --extract --gzip --file "$install_dir/cjdoc-${CJDOC_VERSION}-linux-x64.tar.gz" \
+            --directory "$install_dir"
+          binary="$install_dir/cjdoc-${CJDOC_VERSION}-linux-x64/cjdoc"
+          test -x "$binary"
+          echo "$(dirname "$binary")" >> "$GITHUB_PATH"
+          "$binary" --version
+
+      - name: Run the strict documentation and coverage gate
+        env:
+          CJDOC_BIN: ${{ runner.temp }}/cjdoc/cjdoc-0.7.2-linux-x64/cjdoc
+        run: scripts/check-docs --html --json
+
+      - name: Build and run the public clean consumer
+        run: scripts/check-m7-027-linux-examples --json
+
+      - name: Upload documentation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m7-033-docs-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            docs/evidence/M7-033/docs-report.json
+            target/doc/html
+
+      - name: Upload the Pages artifact
+        if: success()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/doc/html
+
+  deploy:
+    name: Deploy latest main documentation
+    if: >-
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    needs: generate
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download the generated Pages evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: m7-033-docs-${{ github.sha }}
+          path: ${{ runner.temp }}/m7-033-docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Smoke-test root, API page and search index
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          root="${PAGE_URL%/}/"
+          curl --fail --silent --show-error --location --max-time 10 "$root" >/dev/null
+          curl --fail --silent --show-error --location --max-time 10 "${root}index.html" >/dev/null
+          curl --fail --silent --show-error --location --max-time 10 "${root}search-index.js" >/dev/null
+          api_path=$(jq -r '[.combined.htmlPages[] | select(startswith("packages/"))][0] // empty' \
+            "$RUNNER_TEMP/m7-033-docs/docs/evidence/M7-033/docs-report.json")
+          test -n "$api_path"
+          curl --fail --silent --show-error --location --max-time 10 "${root}${api_path}" >/dev/null
