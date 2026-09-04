@@ -119,7 +119,10 @@ class M7033DocsTests(unittest.TestCase):
     def test_pages_workflow_pins_cjdoc_and_keeps_long_gates_out(self) -> None:
         workflow = (docs.ROOT / ".github/workflows/m7-033-docs.yml").read_text(encoding="utf-8")
         self.assertIn('CJDOC_VERSION: 0.7.2', workflow)
-        self.assertIn('cjdoc-${CJDOC_VERSION}-linux-x64.tar.gz', workflow)
+        self.assertIn('CJDOC_SOURCE_REF: release/v0.7.2', workflow)
+        self.assertIn('CJDOC_SOURCE_SHA: e966097a3591538fba8990772e2e6c543de86c21', workflow)
+        self.assertIn('cjpm build', workflow)
+        self.assertNotIn('gh release download', workflow)
         self.assertIn("actions/deploy-pages@v4", workflow)
         self.assertIn("search-index.js", workflow)
         self.assertIn('select(startswith("packages/"))', workflow)
@@ -128,7 +131,10 @@ class M7033DocsTests(unittest.TestCase):
     def test_repository_build_gate_installs_the_same_pinned_cjdoc(self) -> None:
         workflow = (docs.ROOT / ".github/workflows/clean-cangjie-build.yml").read_text(encoding="utf-8")
         self.assertIn('CJDOC_VERSION: 0.7.2', workflow)
-        self.assertIn('cjdoc-${CJDOC_VERSION}-linux-x64.tar.gz', workflow)
+        self.assertIn('CJDOC_SOURCE_REF: release/v0.7.2', workflow)
+        self.assertIn('CJDOC_SOURCE_SHA: e966097a3591538fba8990772e2e6c543de86c21', workflow)
+        self.assertIn('cjpm build', workflow)
+        self.assertNotIn('gh release download', workflow)
         self.assertIn('echo "CJDOC_BIN=$binary" >> "$GITHUB_ENV"', workflow)
 
 
