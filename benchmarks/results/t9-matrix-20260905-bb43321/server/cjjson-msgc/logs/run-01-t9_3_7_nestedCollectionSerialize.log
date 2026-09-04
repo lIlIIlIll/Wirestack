@@ -1,0 +1,31 @@
+Starting the benchmark `T9ThroughputBench.t9_3_7_nestedCollectionSerialize()`.
+    Warming up for 200.0 ms.
+    Starting measurements of 180 batches. Measuring Duration.
+    Max batch size: 358, estimated execution time: 1.003 s.
+Finished in 1.095 s. Analysing results:
+  percentiles:    [   10%        50%        90%        95%        99%        ]  
+  time:           [   29.74 us   29.93 us   30.10 us   30.13 us   30.23 us   ]  
+  mean:           29.88 us .. 29.98 us  Err ±0.2%
+  median:         29.69 us .. 30.23 us
+  R²:             1.000 .. 1.000
+  stddev:         20.95 ns
+
+--------------------------------------------------------------------------------------------------
+TP: cjjson.test, time elapsed: 2811013994 ns, RESULT:
+    TCS: T9ThroughputBench, time elapsed: 2805726884 ns, RESULT:
+    | Case                             |   Median |        Err |   Err% |     Mean |
+    |:---------------------------------|---------:|-----------:|-------:|---------:|
+    | t9_3_7_nestedCollectionSerialize | 29.94 us | ±0.0500 us |  ±0.2% | 29.94 us |
+Summary: TOTAL: 51
+    PASSED: 1, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 2812597078 ns, RESULT:
+TP: cjjson.*, time elapsed: 2812466297 ns, RESULT:
+    PASSED:
+    TP: cjjson.test, time elapsed: 2811013994 ns
+Summary: TOTAL: 51
+    PASSED: 1, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm bench success

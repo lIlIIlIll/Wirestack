@@ -1,0 +1,1007 @@
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_1_1_primitiveSerialize
+
+# Run progress: 0.00% complete, ETA 00:03:51
+# Fork: 1 of 1
+# Warmup Iteration   1: 1.292 us/op
+# Warmup Iteration   2: 0.471 us/op
+Iteration   1: 0.436 us/op
+Iteration   2: 0.418 us/op
+Iteration   3: 0.414 us/op
+Iteration   4: 0.410 us/op
+Iteration   5: 0.410 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_1_1_primitiveSerialize":
+  0.418 ±(99.9%) 0.041 us/op [Average]
+  (min, avg, max) = (0.410, 0.418, 0.436), stdev = 0.011
+  CI (99.9%): [0.376, 0.459] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_1_2_primitiveDeserialize
+
+# Run progress: 3.03% complete, ETA 00:04:11
+# Fork: 1 of 1
+# Warmup Iteration   1: 2.358 us/op
+# Warmup Iteration   2: 0.716 us/op
+Iteration   1: 0.636 us/op
+Iteration   2: 0.608 us/op
+Iteration   3: 0.597 us/op
+Iteration   4: 0.599 us/op
+Iteration   5: 0.602 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_1_2_primitiveDeserialize":
+  0.608 ±(99.9%) 0.061 us/op [Average]
+  (min, avg, max) = (0.597, 0.608, 0.636), stdev = 0.016
+  CI (99.9%): [0.547, 0.670] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_1_3_primitiveRoundTrip
+
+# Run progress: 6.06% complete, ETA 00:04:03
+# Fork: 1 of 1
+# Warmup Iteration   1: 10.228 us/op
+# Warmup Iteration   2: 1.819 us/op
+Iteration   1: 1.152 us/op
+Iteration   2: 1.100 us/op
+Iteration   3: 1.092 us/op
+Iteration   4: 1.087 us/op
+Iteration   5: 1.175 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_1_3_primitiveRoundTrip":
+  1.121 ±(99.9%) 0.153 us/op [Average]
+  (min, avg, max) = (1.087, 1.121, 1.175), stdev = 0.040
+  CI (99.9%): [0.968, 1.274] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_2_1_shortStringSerialize
+
+# Run progress: 9.09% complete, ETA 00:03:55
+# Fork: 1 of 1
+# Warmup Iteration   1: 0.838 us/op
+# Warmup Iteration   2: 0.418 us/op
+Iteration   1: 0.415 us/op
+Iteration   2: 0.402 us/op
+Iteration   3: 0.391 us/op
+Iteration   4: 0.395 us/op
+Iteration   5: 0.393 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_2_1_shortStringSerialize":
+  0.399 ±(99.9%) 0.038 us/op [Average]
+  (min, avg, max) = (0.391, 0.399, 0.415), stdev = 0.010
+  CI (99.9%): [0.361, 0.437] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_2_2_longStringSerialize
+
+# Run progress: 12.12% complete, ETA 00:03:47
+# Fork: 1 of 1
+# Warmup Iteration   1: 20.499 us/op
+# Warmup Iteration   2: 16.744 us/op
+Iteration   1: 14.095 us/op
+Iteration   2: 13.571 us/op
+Iteration   3: 13.332 us/op
+Iteration   4: 13.391 us/op
+Iteration   5: 13.329 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_2_2_longStringSerialize":
+  13.544 ±(99.9%) 1.247 us/op [Average]
+  (min, avg, max) = (13.329, 13.544, 14.095), stdev = 0.324
+  CI (99.9%): [12.297, 14.790] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_2_3_escapeStringSerialize
+
+# Run progress: 15.15% complete, ETA 00:03:39
+# Fork: 1 of 1
+# Warmup Iteration   1: 1.106 us/op
+# Warmup Iteration   2: 0.559 us/op
+Iteration   1: 0.542 us/op
+Iteration   2: 0.524 us/op
+Iteration   3: 0.519 us/op
+Iteration   4: 0.516 us/op
+Iteration   5: 0.514 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_2_3_escapeStringSerialize":
+  0.523 ±(99.9%) 0.044 us/op [Average]
+  (min, avg, max) = (0.514, 0.523, 0.542), stdev = 0.011
+  CI (99.9%): [0.479, 0.567] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_2_4_unicodeStringSerialize
+
+# Run progress: 18.18% complete, ETA 00:03:31
+# Fork: 1 of 1
+# Warmup Iteration   1: 1.187 us/op
+# Warmup Iteration   2: 0.575 us/op
+Iteration   1: 0.573 us/op
+Iteration   2: 0.547 us/op
+Iteration   3: 0.539 us/op
+Iteration   4: 0.536 us/op
+Iteration   5: 0.538 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_2_4_unicodeStringSerialize":
+  0.547 ±(99.9%) 0.060 us/op [Average]
+  (min, avg, max) = (0.536, 0.547, 0.573), stdev = 0.015
+  CI (99.9%): [0.487, 0.606] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_3_1_smallArraySerialize
+
+# Run progress: 21.21% complete, ETA 00:03:23
+# Fork: 1 of 1
+# Warmup Iteration   1: 0.697 us/op
+# Warmup Iteration   2: 0.332 us/op
+Iteration   1: 0.330 us/op
+Iteration   2: 0.319 us/op
+Iteration   3: 0.315 us/op
+Iteration   4: 0.312 us/op
+Iteration   5: 0.305 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_3_1_smallArraySerialize":
+  0.316 ±(99.9%) 0.035 us/op [Average]
+  (min, avg, max) = (0.305, 0.316, 0.330), stdev = 0.009
+  CI (99.9%): [0.281, 0.352] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_3_2_largeArraySerialize
+
+# Run progress: 24.24% complete, ETA 00:03:15
+# Fork: 1 of 1
+# Warmup Iteration   1: 14.162 us/op
+# Warmup Iteration   2: 8.694 us/op
+Iteration   1: 7.528 us/op
+Iteration   2: 7.487 us/op
+Iteration   3: 7.293 us/op
+Iteration   4: 7.285 us/op
+Iteration   5: 7.291 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_3_2_largeArraySerialize":
+  7.377 ±(99.9%) 0.462 us/op [Average]
+  (min, avg, max) = (7.285, 7.377, 7.528), stdev = 0.120
+  CI (99.9%): [6.914, 7.839] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_3_3_largeArrayDeserialize
+
+# Run progress: 27.27% complete, ETA 00:03:07
+# Fork: 1 of 1
+# Warmup Iteration   1: 47.647 us/op
+# Warmup Iteration   2: 27.888 us/op
+Iteration   1: 25.958 us/op
+Iteration   2: 25.845 us/op
+Iteration   3: 24.733 us/op
+Iteration   4: 24.832 us/op
+Iteration   5: 24.747 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_3_3_largeArrayDeserialize":
+  25.223 ±(99.9%) 2.394 us/op [Average]
+  (min, avg, max) = (24.733, 25.223, 25.958), stdev = 0.622
+  CI (99.9%): [22.829, 27.617] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_3_4_smallMapSerialize
+
+# Run progress: 30.30% complete, ETA 00:02:59
+# Fork: 1 of 1
+# Warmup Iteration   1: 1.219 us/op
+# Warmup Iteration   2: 0.563 us/op
+Iteration   1: 0.534 us/op
+Iteration   2: 0.513 us/op
+Iteration   3: 0.506 us/op
+Iteration   4: 0.506 us/op
+Iteration   5: 0.506 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_3_4_smallMapSerialize":
+  0.513 ±(99.9%) 0.047 us/op [Average]
+  (min, avg, max) = (0.506, 0.513, 0.534), stdev = 0.012
+  CI (99.9%): [0.466, 0.560] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_3_5_largeMapSerialize
+
+# Run progress: 33.33% complete, ETA 00:02:52
+# Fork: 1 of 1
+# Warmup Iteration   1: 6.014 us/op
+# Warmup Iteration   2: 3.598 us/op
+Iteration   1: 3.181 us/op
+Iteration   2: 3.011 us/op
+Iteration   3: 2.973 us/op
+Iteration   4: 2.961 us/op
+Iteration   5: 2.973 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_3_5_largeMapSerialize":
+  3.020 ±(99.9%) 0.355 us/op [Average]
+  (min, avg, max) = (2.961, 3.020, 3.181), stdev = 0.092
+  CI (99.9%): [2.665, 3.375] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_3_6_largeMapDeserialize
+
+# Run progress: 36.36% complete, ETA 00:02:44
+# Fork: 1 of 1
+# Warmup Iteration   1: 16.559 us/op
+# Warmup Iteration   2: 7.366 us/op
+Iteration   1: 6.741 us/op
+Iteration   2: 6.438 us/op
+Iteration   3: 6.371 us/op
+Iteration   4: 6.361 us/op
+Iteration   5: 6.369 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_3_6_largeMapDeserialize":
+  6.456 ±(99.9%) 0.624 us/op [Average]
+  (min, avg, max) = (6.361, 6.456, 6.741), stdev = 0.162
+  CI (99.9%): [5.832, 7.080] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_3_7_nestedCollectionSerialize
+
+# Run progress: 39.39% complete, ETA 00:02:36
+# Fork: 1 of 1
+# Warmup Iteration   1: 2.471 us/op
+# Warmup Iteration   2: 1.208 us/op
+Iteration   1: 1.079 us/op
+Iteration   2: 1.022 us/op
+Iteration   3: 1.017 us/op
+Iteration   4: 1.010 us/op
+Iteration   5: 1.010 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_3_7_nestedCollectionSerialize":
+  1.028 ±(99.9%) 0.112 us/op [Average]
+  (min, avg, max) = (1.010, 1.028, 1.079), stdev = 0.029
+  CI (99.9%): [0.916, 1.140] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_3_8_nestedCollectionDeserialize
+
+# Run progress: 42.42% complete, ETA 00:02:28
+# Fork: 1 of 1
+# Warmup Iteration   1: 10.045 us/op
+# Warmup Iteration   2: 3.240 us/op
+Iteration   1: 2.899 us/op
+Iteration   2: 2.780 us/op
+Iteration   3: 2.736 us/op
+Iteration   4: 2.740 us/op
+Iteration   5: 2.890 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_3_8_nestedCollectionDeserialize":
+  2.809 ±(99.9%) 0.308 us/op [Average]
+  (min, avg, max) = (2.736, 2.809, 2.899), stdev = 0.080
+  CI (99.9%): [2.501, 3.117] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_3_9_largeFloat64ArraySerialize
+
+# Run progress: 45.45% complete, ETA 00:02:20
+# Fork: 1 of 1
+# Warmup Iteration   1: 252.150 us/op
+# Warmup Iteration   2: 227.251 us/op
+Iteration   1: 205.418 us/op
+Iteration   2: 213.530 us/op
+Iteration   3: 196.404 us/op
+Iteration   4: 192.815 us/op
+Iteration   5: 196.966 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_3_9_largeFloat64ArraySerialize":
+  201.026 ±(99.9%) 32.269 us/op [Average]
+  (min, avg, max) = (192.815, 201.026, 213.530), stdev = 8.380
+  CI (99.9%): [168.757, 233.296] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_4_1_deepNestedSerialize
+
+# Run progress: 48.48% complete, ETA 00:02:12
+# Fork: 1 of 1
+# Warmup Iteration   1: 0.964 us/op
+# Warmup Iteration   2: 0.429 us/op
+Iteration   1: 0.418 us/op
+Iteration   2: 0.405 us/op
+Iteration   3: 0.392 us/op
+Iteration   4: 0.397 us/op
+Iteration   5: 0.392 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_4_1_deepNestedSerialize":
+  0.401 ±(99.9%) 0.041 us/op [Average]
+  (min, avg, max) = (0.392, 0.401, 0.418), stdev = 0.011
+  CI (99.9%): [0.360, 0.442] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_4_2_deepNestedDeserialize
+
+# Run progress: 51.52% complete, ETA 00:02:04
+# Fork: 1 of 1
+# Warmup Iteration   1: 2.091 us/op
+# Warmup Iteration   2: 0.706 us/op
+Iteration   1: 0.694 us/op
+Iteration   2: 0.660 us/op
+Iteration   3: 0.648 us/op
+Iteration   4: 0.654 us/op
+Iteration   5: 0.653 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_4_2_deepNestedDeserialize":
+  0.662 ±(99.9%) 0.071 us/op [Average]
+  (min, avg, max) = (0.648, 0.662, 0.694), stdev = 0.018
+  CI (99.9%): [0.591, 0.733] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_4_3_wideSerialize
+
+# Run progress: 54.55% complete, ETA 00:01:57
+# Fork: 1 of 1
+# Warmup Iteration   1: 2.066 us/op
+# Warmup Iteration   2: 1.000 us/op
+Iteration   1: 0.906 us/op
+Iteration   2: 0.878 us/op
+Iteration   3: 0.871 us/op
+Iteration   4: 0.859 us/op
+Iteration   5: 0.880 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_4_3_wideSerialize":
+  0.879 ±(99.9%) 0.066 us/op [Average]
+  (min, avg, max) = (0.859, 0.879, 0.906), stdev = 0.017
+  CI (99.9%): [0.813, 0.945] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_4_4_wideDeserialize
+
+# Run progress: 57.58% complete, ETA 00:01:49
+# Fork: 1 of 1
+# Warmup Iteration   1: 4.285 us/op
+# Warmup Iteration   2: 1.686 us/op
+Iteration   1: 1.481 us/op
+Iteration   2: 1.411 us/op
+Iteration   3: 1.389 us/op
+Iteration   4: 1.404 us/op
+Iteration   5: 1.391 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_4_4_wideDeserialize":
+  1.415 ±(99.9%) 0.146 us/op [Average]
+  (min, avg, max) = (1.389, 1.415, 1.481), stdev = 0.038
+  CI (99.9%): [1.269, 1.562] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_4_5_ultraWideSerialize
+
+# Run progress: 60.61% complete, ETA 00:01:41
+# Fork: 1 of 1
+# Warmup Iteration   1: 2.562 us/op
+# Warmup Iteration   2: 1.628 us/op
+Iteration   1: 1.406 us/op
+Iteration   2: 1.369 us/op
+Iteration   3: 1.390 us/op
+Iteration   4: 1.357 us/op
+Iteration   5: 1.373 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_4_5_ultraWideSerialize":
+  1.379 ±(99.9%) 0.075 us/op [Average]
+  (min, avg, max) = (1.357, 1.379, 1.406), stdev = 0.019
+  CI (99.9%): [1.304, 1.454] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_4_6_ultraWideDeserialize
+
+# Run progress: 63.64% complete, ETA 00:01:33
+# Fork: 1 of 1
+# Warmup Iteration   1: 6.025 us/op
+# Warmup Iteration   2: 3.280 us/op
+Iteration   1: 2.989 us/op
+Iteration   2: 2.928 us/op
+Iteration   3: 2.695 us/op
+Iteration   4: 2.699 us/op
+Iteration   5: 2.696 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_4_6_ultraWideDeserialize":
+  2.801 ±(99.9%) 0.557 us/op [Average]
+  (min, avg, max) = (2.695, 2.801, 2.989), stdev = 0.145
+  CI (99.9%): [2.244, 3.359] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_5_1_optionSerialize
+
+# Run progress: 66.67% complete, ETA 00:01:25
+# Fork: 1 of 1
+# Warmup Iteration   1: 0.964 us/op
+# Warmup Iteration   2: 0.380 us/op
+Iteration   1: 0.373 us/op
+Iteration   2: 0.359 us/op
+Iteration   3: 0.355 us/op
+Iteration   4: 0.357 us/op
+Iteration   5: 0.353 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_5_1_optionSerialize":
+  0.359 ±(99.9%) 0.032 us/op [Average]
+  (min, avg, max) = (0.353, 0.359, 0.373), stdev = 0.008
+  CI (99.9%): [0.328, 0.391] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_5_2_optionDeserialize
+
+# Run progress: 69.70% complete, ETA 00:01:18
+# Fork: 1 of 1
+# Warmup Iteration   1: 1.990 us/op
+# Warmup Iteration   2: 0.674 us/op
+Iteration   1: 0.639 us/op
+Iteration   2: 0.616 us/op
+Iteration   3: 0.598 us/op
+Iteration   4: 0.598 us/op
+Iteration   5: 0.603 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_5_2_optionDeserialize":
+  0.611 ±(99.9%) 0.066 us/op [Average]
+  (min, avg, max) = (0.598, 0.611, 0.639), stdev = 0.017
+  CI (99.9%): [0.545, 0.677] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_5_3_optionRoundTrip
+
+# Run progress: 72.73% complete, ETA 00:01:10
+# Fork: 1 of 1
+# Warmup Iteration   1: 5.360 us/op
+# Warmup Iteration   2: 1.293 us/op
+Iteration   1: 1.137 us/op
+Iteration   2: 1.082 us/op
+Iteration   3: 1.063 us/op
+Iteration   4: 1.060 us/op
+Iteration   5: 1.054 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_5_3_optionRoundTrip":
+  1.079 ±(99.9%) 0.130 us/op [Average]
+  (min, avg, max) = (1.054, 1.079, 1.137), stdev = 0.034
+  CI (99.9%): [0.949, 1.209] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_5_4_emptyContainersSerialize
+
+# Run progress: 75.76% complete, ETA 00:01:02
+# Fork: 1 of 1
+# Warmup Iteration   1: 0.539 us/op
+# Warmup Iteration   2: 0.247 us/op
+Iteration   1: 0.247 us/op
+Iteration   2: 0.235 us/op
+Iteration   3: 0.231 us/op
+Iteration   4: 0.226 us/op
+Iteration   5: 0.226 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_5_4_emptyContainersSerialize":
+  0.233 ±(99.9%) 0.034 us/op [Average]
+  (min, avg, max) = (0.226, 0.233, 0.247), stdev = 0.009
+  CI (99.9%): [0.199, 0.266] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_5_5_emptyContainersDeserialize
+
+# Run progress: 78.79% complete, ETA 00:00:54
+# Fork: 1 of 1
+# Warmup Iteration   1: 1.175 us/op
+# Warmup Iteration   2: 0.462 us/op
+Iteration   1: 0.442 us/op
+Iteration   2: 0.425 us/op
+Iteration   3: 0.410 us/op
+Iteration   4: 0.407 us/op
+Iteration   5: 0.406 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_5_5_emptyContainersDeserialize":
+  0.418 ±(99.9%) 0.059 us/op [Average]
+  (min, avg, max) = (0.406, 0.418, 0.442), stdev = 0.015
+  CI (99.9%): [0.359, 0.477] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_5_6_int64ExtremesSerialize
+
+# Run progress: 81.82% complete, ETA 00:00:46
+# Fork: 1 of 1
+# Warmup Iteration   1: 0.570 us/op
+# Warmup Iteration   2: 0.312 us/op
+Iteration   1: 0.305 us/op
+Iteration   2: 0.292 us/op
+Iteration   3: 0.289 us/op
+Iteration   4: 0.285 us/op
+Iteration   5: 0.283 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_5_6_int64ExtremesSerialize":
+  0.291 ±(99.9%) 0.034 us/op [Average]
+  (min, avg, max) = (0.283, 0.291, 0.305), stdev = 0.009
+  CI (99.9%): [0.257, 0.325] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_5_7_int64ExtremesDeserialize
+
+# Run progress: 84.85% complete, ETA 00:00:39
+# Fork: 1 of 1
+# Warmup Iteration   1: 1.958 us/op
+# Warmup Iteration   2: 0.626 us/op
+Iteration   1: 0.569 us/op
+Iteration   2: 0.547 us/op
+Iteration   3: 0.538 us/op
+Iteration   4: 0.541 us/op
+Iteration   5: 0.542 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_5_7_int64ExtremesDeserialize":
+  0.548 ±(99.9%) 0.048 us/op [Average]
+  (min, avg, max) = (0.538, 0.548, 0.569), stdev = 0.012
+  CI (99.9%): [0.500, 0.596] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_5_8_unknownFieldDeserialize
+
+# Run progress: 87.88% complete, ETA 00:00:31
+# Fork: 1 of 1
+# Warmup Iteration   1: 5.148 us/op
+# Warmup Iteration   2: 1.268 us/op
+Iteration   1: 1.114 us/op
+Iteration   2: 1.068 us/op
+Iteration   3: 1.054 us/op
+Iteration   4: 1.057 us/op
+Iteration   5: 1.325 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_5_8_unknownFieldDeserialize":
+  1.124 ±(99.9%) 0.443 us/op [Average]
+  (min, avg, max) = (1.054, 1.124, 1.325), stdev = 0.115
+  CI (99.9%): [0.680, 1.567] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_b_1_bytesParsePrimitive
+
+# Run progress: 90.91% complete, ETA 00:00:23
+# Fork: 1 of 1
+# Warmup Iteration   1: 2.315 us/op
+# Warmup Iteration   2: 0.713 us/op
+Iteration   1: 0.661 us/op
+Iteration   2: 0.615 us/op
+Iteration   3: 0.597 us/op
+Iteration   4: 0.603 us/op
+Iteration   5: 0.623 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_b_1_bytesParsePrimitive":
+  0.620 ±(99.9%) 0.097 us/op [Average]
+  (min, avg, max) = (0.597, 0.620, 0.661), stdev = 0.025
+  CI (99.9%): [0.523, 0.717] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_b_2_bytesParseLargeDoc
+
+# Run progress: 93.94% complete, ETA 00:00:15
+# Fork: 1 of 1
+# Warmup Iteration   1: 10113.445 us/op
+# Warmup Iteration   2: 3438.116 us/op
+Iteration   1: 3084.428 us/op
+Iteration   2: 2802.302 us/op
+Iteration   3: 2785.952 us/op
+Iteration   4: 2747.848 us/op
+Iteration   5: 2847.290 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_b_2_bytesParseLargeDoc":
+  2853.564 ±(99.9%) 515.585 us/op [Average]
+  (min, avg, max) = (2747.848, 2853.564, 3084.428), stdev = 133.896
+  CI (99.9%): [2337.978, 3369.149] (assumes normal distribution)
+
+
+# JMH version: 1.37
+# VM version: JDK 17.0.20, OpenJDK 64-Bit Server VM, 17.0.20+8-1-22.04-Ubuntu
+# VM invoker: /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+# VM options: <none>
+# Blackhole mode: compiler (auto-detected, use -Djmh.blackhole.autoDetect=false to disable)
+# Warmup: 2 iterations, 1 s each
+# Measurement: 5 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: jmh.JacksonBenchJMH.t9_b_3_streamLargeDoc
+
+# Run progress: 96.97% complete, ETA 00:00:07
+# Fork: 1 of 1
+# Warmup Iteration   1: 14714.203 us/op
+# Warmup Iteration   2: 3782.548 us/op
+Iteration   1: 3370.308 us/op
+Iteration   2: 3029.487 us/op
+Iteration   3: 2960.376 us/op
+Iteration   4: 2903.397 us/op
+Iteration   5: 2900.883 us/op
+
+
+Result "jmh.JacksonBenchJMH.t9_b_3_streamLargeDoc":
+  3032.890 ±(99.9%) 753.868 us/op [Average]
+  (min, avg, max) = (2900.883, 3032.890, 3370.308), stdev = 195.777
+  CI (99.9%): [2279.022, 3786.758] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:04:17
+
+REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
+why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
+experiments, perform baseline and negative tests that provide experimental control, make sure
+the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
+Do not assume the numbers tell you what you want them to tell.
+
+NOTE: Current JVM experimentally supports Compiler Blackholes, and they are in use. Please exercise
+extra caution when trusting the results, look into the generated code to check the benchmark still
+works, and factor in a small probability of new VM bugs. Additionally, while comparisons between
+different JVMs are already problematic, the performance difference caused by different Blackhole
+modes can be very significant. Please make sure you use the consistent Blackhole mode for comparisons.
+
+Benchmark                                           Mode  Cnt     Score     Error  Units
+JacksonBenchJMH.t9_1_1_primitiveSerialize           avgt    5     0.418 ±   0.041  us/op
+JacksonBenchJMH.t9_1_2_primitiveDeserialize         avgt    5     0.608 ±   0.061  us/op
+JacksonBenchJMH.t9_1_3_primitiveRoundTrip           avgt    5     1.121 ±   0.153  us/op
+JacksonBenchJMH.t9_2_1_shortStringSerialize         avgt    5     0.399 ±   0.038  us/op
+JacksonBenchJMH.t9_2_2_longStringSerialize          avgt    5    13.544 ±   1.247  us/op
+JacksonBenchJMH.t9_2_3_escapeStringSerialize        avgt    5     0.523 ±   0.044  us/op
+JacksonBenchJMH.t9_2_4_unicodeStringSerialize       avgt    5     0.547 ±   0.060  us/op
+JacksonBenchJMH.t9_3_1_smallArraySerialize          avgt    5     0.316 ±   0.035  us/op
+JacksonBenchJMH.t9_3_2_largeArraySerialize          avgt    5     7.377 ±   0.462  us/op
+JacksonBenchJMH.t9_3_3_largeArrayDeserialize        avgt    5    25.223 ±   2.394  us/op
+JacksonBenchJMH.t9_3_4_smallMapSerialize            avgt    5     0.513 ±   0.047  us/op
+JacksonBenchJMH.t9_3_5_largeMapSerialize            avgt    5     3.020 ±   0.355  us/op
+JacksonBenchJMH.t9_3_6_largeMapDeserialize          avgt    5     6.456 ±   0.624  us/op
+JacksonBenchJMH.t9_3_7_nestedCollectionSerialize    avgt    5     1.028 ±   0.112  us/op
+JacksonBenchJMH.t9_3_8_nestedCollectionDeserialize  avgt    5     2.809 ±   0.308  us/op
+JacksonBenchJMH.t9_3_9_largeFloat64ArraySerialize   avgt    5   201.026 ±  32.269  us/op
+JacksonBenchJMH.t9_4_1_deepNestedSerialize          avgt    5     0.401 ±   0.041  us/op
+JacksonBenchJMH.t9_4_2_deepNestedDeserialize        avgt    5     0.662 ±   0.071  us/op
+JacksonBenchJMH.t9_4_3_wideSerialize                avgt    5     0.879 ±   0.066  us/op
+JacksonBenchJMH.t9_4_4_wideDeserialize              avgt    5     1.415 ±   0.146  us/op
+JacksonBenchJMH.t9_4_5_ultraWideSerialize           avgt    5     1.379 ±   0.075  us/op
+JacksonBenchJMH.t9_4_6_ultraWideDeserialize         avgt    5     2.801 ±   0.557  us/op
+JacksonBenchJMH.t9_5_1_optionSerialize              avgt    5     0.359 ±   0.032  us/op
+JacksonBenchJMH.t9_5_2_optionDeserialize            avgt    5     0.611 ±   0.066  us/op
+JacksonBenchJMH.t9_5_3_optionRoundTrip              avgt    5     1.079 ±   0.130  us/op
+JacksonBenchJMH.t9_5_4_emptyContainersSerialize     avgt    5     0.233 ±   0.034  us/op
+JacksonBenchJMH.t9_5_5_emptyContainersDeserialize   avgt    5     0.418 ±   0.059  us/op
+JacksonBenchJMH.t9_5_6_int64ExtremesSerialize       avgt    5     0.291 ±   0.034  us/op
+JacksonBenchJMH.t9_5_7_int64ExtremesDeserialize     avgt    5     0.548 ±   0.048  us/op
+JacksonBenchJMH.t9_5_8_unknownFieldDeserialize      avgt    5     1.124 ±   0.443  us/op
+JacksonBenchJMH.t9_b_1_bytesParsePrimitive          avgt    5     0.620 ±   0.097  us/op
+JacksonBenchJMH.t9_b_2_bytesParseLargeDoc           avgt    5  2853.564 ± 515.585  us/op
+JacksonBenchJMH.t9_b_3_streamLargeDoc               avgt    5  3032.890 ± 753.868  us/op
+
+Benchmark result is saved to <home>/yjson-t9-matrix-041976b/results/jackson-jmh/jmh.json

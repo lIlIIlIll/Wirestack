@@ -1,0 +1,36 @@
+Starting the benchmark `T9ThroughputBench.t9_1_3_primitiveRoundTrip()`.
+    Warming up for 200.0 ms.
+    Starting measurements of 200 batches. Measuring Duration.
+    Max batch size: 2228, estimated execution time: 1.001 s.
+Finished in 1.063 s. Analysing results:
+Warning: GC was invoked twice during some of the batches. This can significantly affect final results.
+         It is recommended to either increase heap size limit using cjHeapSize enviroment variable,
+         increase default GC interval using cjGCInterval environment variable
+         or reduce benchmark duration with minDuration parameter of @Configure macro.
+
+  percentiles:    [   10%        50%        90%        95%        99%        ]  
+  time:           [   3.426 us   3.436 us   3.452 us   3.458 us   3.478 us   ]  
+  mean:           3.430 us .. 3.454 us  Err ±0.4%
+  median:         3.420 us .. 3.478 us
+  R²:             0.999 .. 1.000
+  stddev:         5.591 ns
+
+--------------------------------------------------------------------------------------------------
+TP: cjjson.test, time elapsed: 4221494353 ns, RESULT:
+    TCS: T9ThroughputBench, time elapsed: 4216168862 ns, RESULT:
+    | Case                      |   Median |        Err |   Err% |     Mean |
+    |:--------------------------|---------:|-----------:|-------:|---------:|
+    | t9_1_3_primitiveRoundTrip | 3.436 us | ±0.0124 us |  ±0.4% | 3.439 us |
+Summary: TOTAL: 51
+    PASSED: 1, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 4223111122 ns, RESULT:
+TP: cjjson.*, time elapsed: 4222978889 ns, RESULT:
+    PASSED:
+    TP: cjjson.test, time elapsed: 4221494353 ns
+Summary: TOTAL: 51
+    PASSED: 1, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm bench success

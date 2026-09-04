@@ -1,0 +1,24 @@
+Starting the benchmark `T9ThroughputBench.t9_3_5_largeMapSerialize()`.
+    Warming up for 200.0 ms.
+    Starting measurements of 76 batches. Measuring Duration.
+    Max batch size: 151, estimated execution time: 1.002 s.
+
+--------------------------------------------------------------------------------------------------
+TP: cjjson.test, time elapsed: 1649972862 ns, RESULT:
+    TCS: T9ThroughputBench, time elapsed: 1645528260 ns, RESULT:
+    | Case                     |   Median |       Err |   Err% |     Mean |
+    |:-------------------------|---------:|----------:|-------:|---------:|
+    | t9_3_5_largeMapSerialize | 270.7 us | ±77.72 us | ±28.7% | 296.5 us |
+Summary: TOTAL: 51
+    PASSED: 1, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 1651177923 ns, RESULT:
+TP: cjjson.*, time elapsed: 1651083127 ns, RESULT:
+    PASSED:
+    TP: cjjson.test, time elapsed: 1649972862 ns
+Summary: TOTAL: 51
+    PASSED: 1, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm bench success

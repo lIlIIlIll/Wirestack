@@ -1,0 +1,24 @@
+Starting the benchmark `T9ThroughputBench.t9_5_3_optionRoundTrip()`.
+    Warming up for 200.0 ms.
+    Starting measurements of 200 batches. Measuring Duration.
+    Max batch size: 2506, estimated execution time: 1.000 s.
+
+--------------------------------------------------------------------------------------------------
+TP: yjson_benchmarks, time elapsed: 2163722892 ns, RESULT:
+    TCS: T9ThroughputBench, time elapsed: 2162969494 ns, RESULT:
+    | Case                   |   Median |       Err |   Err% |     Mean |
+    |:-----------------------|---------:|----------:|-------:|---------:|
+    | t9_5_3_optionRoundTrip | 7.111 us | ±0.978 us | ±13.8% | 9.714 us |
+Summary: TOTAL: 42
+    PASSED: 1, SKIPPED: 41, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 2164863366 ns, RESULT:
+TP: yjson_benchmarks.*, time elapsed: 2164772719 ns, RESULT:
+    PASSED:
+    TP: yjson_benchmarks, time elapsed: 2163722892 ns
+Summary: TOTAL: 42
+    PASSED: 1, SKIPPED: 41, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm bench success

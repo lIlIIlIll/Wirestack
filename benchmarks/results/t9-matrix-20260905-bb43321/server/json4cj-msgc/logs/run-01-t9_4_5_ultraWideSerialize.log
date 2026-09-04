@@ -1,0 +1,45 @@
+Starting the benchmark `T9ThroughputBench.t9_4_5_ultraWideSerialize()`.
+    Warming up for 1.000 s.
+    Starting measurements of 200 batches. Measuring Duration.
+    Max batch size: 26271, estimated execution time: 5.000 s.
+Finished in 5.073 s. Analysing results:
+Warning: GC was invoked twice during some of the batches. This can significantly affect final results.
+         It is recommended to either increase heap size limit using cjHeapSize enviroment variable,
+         increase default GC interval using cjGCInterval environment variable
+         or reduce benchmark duration with minDuration parameter of @Configure macro.
+
+  percentiles:    [   10%        50%        90%        95%        99%        ]  
+  time:           [   1.558 us   1.737 us   2.103 us   2.328 us   2.700 us   ]  
+  mean:           1.727 us .. 1.778 us  Err ±1.5%
+  median:         1.544 us .. 2.700 us
+  R²:             0.976 .. 0.986
+  stddev:         11.18 ns
+
+--------------------------------------------------------------------------------------------------
+TP: json4cj_databind.test.macros_test, time elapsed: 8045283695 ns, RESULT:
+    TCS: T9ThroughputBench, time elapsed: 8017785531 ns, RESULT:
+    | Case                      |   Median |        Err |   Err% |     Mean |
+    |:--------------------------|---------:|-----------:|-------:|---------:|
+    | t9_4_5_ultraWideSerialize | 1.739 us | ±0.0276 us |  ±1.6% | 1.767 us |
+Summary: TOTAL: 147
+    PASSED: 1, SKIPPED: 146, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 8183906296 ns, RESULT:
+TP: json4cj_databind.*, time elapsed: 8183763838 ns, RESULT:
+    EMPTY:
+    TP: json4cj_databind.test.filter
+    TP: json4cj_databind.test.naming
+    TP: json4cj_databind.test.types
+    TP: json4cj_databind.test.view
+    TP: json4cj_databind.test.exc
+    TP: json4cj_databind.test.node
+    TP: json4cj_databind.test.bind
+    TP: json4cj_databind.test.module
+    PASSED:
+    TP: json4cj_databind.test.macros_test, time elapsed: 8045283695 ns
+Summary: TOTAL: 147
+    PASSED: 1, SKIPPED: 146, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm bench success
