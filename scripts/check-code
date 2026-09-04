@@ -6,6 +6,10 @@ cd "$repo_root"
 python3 tools/architecture_guard.py --root . --format text
 scripts/build-linux-resolver --quiet
 
+# Documentation is a release-facing gate. It is deliberately short-running;
+# long profiles are owned by their task manifests and are never reached here.
+scripts/check-docs --json
+
 command -v cjc >/dev/null
 command -v cjpm >/dev/null
 cjpm check

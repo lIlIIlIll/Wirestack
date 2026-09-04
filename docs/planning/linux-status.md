@@ -146,7 +146,7 @@ Status values have the same fail-closed meaning as the global status file.
 
 ## Linux M7 stable-release closure
 
-M7-018 through M7-031 are Linux x86_64 glibc tasks. They do not close or
+M7-018 through M7-033 are Linux x86_64 glibc tasks. They do not close or
 replace the six-platform M7-001 through M7-017 tasks.
 
 | Task | Status | Current evidence or next requirement |
@@ -166,8 +166,11 @@ replace the six-platform M7-001 through M7-017 tasks.
 | M7-030 Linux signing and update flow | COMPLETE | GitHub-hosted run `33318194490` verified OIDC/Sigstore attestations for the frozen artifact, SBOM and release manifest. Local tamper rejection, clean-consumer, provider update and authorized rollback rehearsals also pass; [evidence](../evidence/M7-030/README.md). |
 | M7-031 Linux release candidate | COMPLETE | All 22 PRD release criteria were evaluated: 21 PASS, 0 FAIL and the Android/iOS listener criterion is NOT_APPLICABLE_TO_LINUX_PROFILE. The fail-closed report binds the exact soaked, fuzzed, benchmarked, reviewed and hosted-attested artifact and records `GO_FOR_LINUX_STABLE_RELEASE`; [evidence](../evidence/M7-031/README.md). |
 | M7-032 public API ownership | COMPLETE | Public contracts are owned by public packages, architecture guards reject internal leakage and dependency cycles, the public-only consumer passes, and the new pre-1.0 inventory has zero internal alias targets; [evidence](../evidence/M7-032/README.md). |
+| M7-033 developer documentation and API reference | IN_PROGRESS | Linux developer guide, strict `cjdoc 0.7.2` layered API/coverage generation, public comments and GitHub Pages workflow are implemented; exact local artifacts pass, while hosted Pages deployment and smoke remain outstanding; [evidence](../evidence/M7-033/README.md). |
 
 ## Next critical path
 
-The Linux x86_64 glibc M7 closure has no remaining task. Global non-Linux M7
-work remains separate and is not marked complete by this decision.
+The Linux x86_64 glibc release gates are complete; M7-033 remains an
+independent documentation-infrastructure task until its hosted Pages evidence
+is current. Global non-Linux M7 work remains separate and is not marked
+complete by this decision.

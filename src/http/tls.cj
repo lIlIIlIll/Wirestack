@@ -5,8 +5,17 @@ import std.sync.*
 import wirestack.internal.http1 as http1
 import wirestack.internal.tls_engine as tls
 
+/**
+ * Wirestack 公开 API：HttpClientTlsSecurityProfile。
+ */
 public enum HttpClientTlsSecurityProfile {
+/**
+ * Wirestack 公开 API：Modern。
+ */
     | Modern
+/**
+ * Wirestack 公开 API：StrictTls13。
+ */
     | StrictTls13
 }
 
@@ -22,6 +31,13 @@ public class HttpClientTlsConfig <: Resource {
     private let profile: HttpClientTlsSecurityProfile
     private var closed = false
 
+/**
+ * Wirestack 公开 API：init。
+ * @param clientCertificateChainDer 参数 clientCertificateChainDer。
+ * @param clientPrivateKeyPkcs8Der 参数 clientPrivateKeyPkcs8Der。
+ * @param customTrustRootsDer 参数 customTrustRootsDer。
+ * @param securityProfile 参数 securityProfile。
+ */
     public init(
         customTrustRootsDer: Array<Array<Byte>>,
         clientCertificateChainDer!: Array<Array<Byte>> = Array<Array<Byte>>(),
@@ -64,6 +80,9 @@ public class HttpClientTlsConfig <: Resource {
         }
     }
 
+/**
+ * Wirestack 公开 API：close。
+ */
     public func close(): Unit {
         synchronized(mutex) {
             if (!closed) {
@@ -74,6 +93,9 @@ public class HttpClientTlsConfig <: Resource {
         }
     }
 
+/**
+ * Wirestack 公开 API：isClosed。
+ */
     public func isClosed(): Bool { synchronized(mutex) { closed } }
     ~init() { zeroHttpClientBytes(clientPrivateKey) }
 }
