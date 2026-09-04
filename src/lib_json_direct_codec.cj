@@ -1914,33 +1914,25 @@ private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> &
 
         let _ = context
         context.enterValue()
+        let rejects = jsonReadOptionsRejectsDuplicateKeys(config)
         try {
             let result = HashMap<String, T>()
-            let seenNames = if (jsonReadOptionsRejectsDuplicateKeys(config)) {
-                Some(HashSet<String>())
-            } else {
-                None<HashSet<String>>
-            }
             reader.startObject()
             while (reader.hasObjectField()) {
                 let name = reader.readName()
-                match (seenNames) {
-                    case Some(seen) =>
-                        if (seen.contains(name)) {
-                            context.pushField(name)
-                            try {
-                                throw JsonException("Duplicate object key '${name}'", code: "duplicate_key",
-                                    path: context.currentPath())
-                            } finally {
-                                context.popPath()
-                            }
-                        }
-                        seen.add(name)
-                    case None => ()
-                }
                 context.pushField(name)
                 try {
-                    result[name] = inner.read(reader)
+                    let decoded = inner.read(reader)
+                    if (rejects) {
+                        match (result.add(name, decoded)) {
+                            case Some(_) =>
+                                throw JsonException("Duplicate object key '${name}'", code: "duplicate_key",
+                                    path: context.currentPath())
+                            case None => ()
+                        }
+                    } else {
+                        result[name] = decoded
+                    }
                 } finally {
                     context.popPath()
                 }
@@ -1971,33 +1963,33 @@ private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> &
                 return HashMap<String, T>()
             }
             let result = HashMap<String, T>(cursor.suggestRawObjectCapacity())
-            let seenNames = HashSet<String>()
             var first = true
             let firstName = cursor.readRawName(true)
             context.pushField(firstName)
             try {
-                match (cursorReadInner) {
-                    case Some(fast) => result[firstName] = fast.readFastWithCursor(reader, cursor)
-                    case None => result[firstName] = fastInner.readFast(reader)
+                let decodedFirst = match (cursorReadInner) {
+                    case Some(fast) => fast.readFastWithCursor(reader, cursor)
+                    case None => fastInner.readFast(reader)
                 }
-                seenNames.add(firstName)
+                match (result.add(firstName, decodedFirst)) {
+                    case Some(_) =>
+                        throw JsonException("Duplicate object key '${firstName}'", code: "duplicate_key",
+                            path: context.currentPath())
+                    case None => ()
+                }
                 first = false
                 while (cursor.hasRawObjectField(first)) {
                     let name = cursor.readRawName(first)
-                    if (seenNames.contains(name)) {
-                        context.updateLastField(name)
-                        try {
+                    context.updateLastField(name)
+                    let decoded = match (cursorReadInner) {
+                        case Some(fast) => fast.readFastWithCursor(reader, cursor)
+                        case None => fastInner.readFast(reader)
+                    }
+                    match (result.add(name, decoded)) {
+                        case Some(_) =>
                             throw JsonException("Duplicate object key '${name}'", code: "duplicate_key",
                                 path: context.currentPath())
-                        } finally {
-                            context.popPath()
-                        }
-                    }
-                    seenNames.add(name)
-                    context.updateLastField(name)
-                    match (cursorReadInner) {
-                        case Some(fast) => result[name] = fast.readFastWithCursor(reader, cursor)
-                        case None => result[name] = fastInner.readFast(reader)
+                        case None => ()
                     }
                 }
             } finally {
@@ -2113,19 +2105,16 @@ private class Int64HashMapJsonCodec <: GeneratedCodecV1<HashMap<String, Int64>> 
 
         let _ = context
         context.enterValue()
+        let rejects = jsonReadOptionsRejectsDuplicateKeys(config)
         try {
             let result = HashMap<String, Int64>()
-            let seenNames = if (jsonReadOptionsRejectsDuplicateKeys(config)) {
-                Some(HashSet<String>())
-            } else {
-                None<HashSet<String>>
-            }
             reader.startObject()
             while (reader.hasObjectField()) {
                 let name = reader.readName()
-                match (seenNames) {
-                    case Some(seen) =>
-                        if (seen.contains(name)) {
+                let decoded = reader.readInt64()
+                if (rejects) {
+                    match (result.add(name, decoded)) {
+                        case Some(_) =>
                             context.pushField(name)
                             try {
                                 throw JsonException("Duplicate object key '${name}'", code: "duplicate_key",
@@ -2133,11 +2122,11 @@ private class Int64HashMapJsonCodec <: GeneratedCodecV1<HashMap<String, Int64>> 
                             } finally {
                                 context.popPath()
                             }
-                        }
-                        seen.add(name)
-                    case None => ()
+                        case None => ()
+                    }
+                } else {
+                    result[name] = decoded
                 }
-                result[name] = reader.readInt64()
             }
             reader.endObject()
             return result
@@ -2165,21 +2154,17 @@ private class Int64HashMapJsonCodec <: GeneratedCodecV1<HashMap<String, Int64>> 
                 return HashMap<String, Int64>()
             }
             let result = HashMap<String, Int64>(cursor.suggestRawObjectCapacity())
-            let seenNames = HashSet<String>()
             var first = true
             while (cursor.hasRawObjectField(first)) {
                 let name = cursor.readRawName(first)
-                if (seenNames.contains(name)) {
-                    context.updateLastField(name)
-                    try {
+                let decoded = cursor.readRawInt64()
+                context.updateLastField(name)
+                match (result.add(name, decoded)) {
+                    case Some(_) =>
                         throw JsonException("Duplicate object key '${name}'", code: "duplicate_key",
                             path: context.currentPath())
-                    } finally {
-                        context.popPath()
-                    }
+                    case None => ()
                 }
-                seenNames.add(name)
-                result[name] = cursor.readRawInt64()
                 first = false
             }
             cursor.endRawObject()
@@ -2213,19 +2198,16 @@ public func __yJsonReadInt64HashMap(reader: JsonReader): HashMap<String, Int64> 
 
     let _ = context
     context.enterValue()
+    let rejects = jsonReadOptionsRejectsDuplicateKeys(config)
     try {
-        let result = HashMap<String, Int64>();
-        let seenNames = if (jsonReadOptionsRejectsDuplicateKeys(config)) {
-            Some(HashSet<String>())
-        } else {
-            None<HashSet<String>>
-        }
+        let result = HashMap<String, Int64>()
         reader.startObject()
         while (reader.hasObjectField()) {
             let name = reader.readName()
-            match (seenNames) {
-                case Some(seen) =>
-                    if (seen.contains(name)) {
+            let decoded = reader.readInt64()
+            if (rejects) {
+                match (result.add(name, decoded)) {
+                    case Some(_) =>
                         context.pushField(name)
                         try {
                             throw JsonException("Duplicate object key '${name}'", code: "duplicate_key",
@@ -2233,13 +2215,13 @@ public func __yJsonReadInt64HashMap(reader: JsonReader): HashMap<String, Int64> 
                         } finally {
                             context.popPath()
                         }
-                    }
-                    seen.add(name)
-                case None => ()
+                    case None => ()
+                }
+            } else {
+                result[name] = decoded
             }
-            result[name] = reader.readInt64()
         }
-        reader.endObject();
+        reader.endObject()
         result
     } finally {
         context.leaveValue()
@@ -2255,28 +2237,24 @@ public func __yJsonReadFastInt64HashMap(reader: GeneratedSupportV1Reader): HashM
     try {
         reader.startRawObject()
         if (!reader.hasRawObjectField(true)) {
-            reader.endRawObject();
+            reader.endRawObject()
             return HashMap<String, Int64>()
         }
-        let result = HashMap<String, Int64>(reader.suggestRawObjectCapacity());
-        let seenNames = HashSet<String>()
+        let result = HashMap<String, Int64>(reader.suggestRawObjectCapacity())
         var first = true
         while (reader.hasRawObjectField(first)) {
             let name = reader.readRawName(first)
-            if (seenNames.contains(name)) {
-                context.updateLastField(name)
-                try {
+            context.updateLastField(name)
+            let decoded = reader.readRawInt64()
+            match (result.add(name, decoded)) {
+                case Some(_) =>
                     throw JsonException("Duplicate object key '${name}'", code: "duplicate_key",
                         path: context.currentPath())
-                } finally {
-                    context.popPath()
-                }
+                case None => ()
             }
-            seenNames.add(name)
-            result[name] = reader.readRawInt64()
             first = false
         }
-        reader.endRawObject();
+        reader.endRawObject()
         result
     } finally {
         context.leaveValue()
