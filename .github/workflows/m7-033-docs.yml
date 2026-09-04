@@ -15,33 +15,26 @@ permissions:
   contents: read
 
 jobs:
-  generate:
-    name: Generate public API docs / cjdoc 0.7.2
+  build-cjdoc:
+    name: Build cjdoc 0.7.2 / Cangjie 1.1 compatibility
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: read
-      pages: write
-      id-token: write
     steps:
-      - name: Check out the candidate source
+      - name: Check out the cjdoc build source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
           fetch-depth: 1
 
-      - name: Resolve the Cangjie toolchain
-        id: cangjie-nightly
-        run: python3 tools/latest_cangjie_nightly.py --github-output "$GITHUB_OUTPUT"
-
-      - name: Install the Cangjie toolchain
+      - name: Install the cjdoc-compatible Cangjie toolchain
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
           channel: nightly
-          version: ${{ steps.cangjie-nightly.outputs.version }}
-          archive-path: ${{ runner.temp }}/cangjie.tar.gz
+          version: 1.1.0-alpha.20260414010024
 
-      - name: Install native prerequisites
+      - name: Install native prerequisites for cjdoc
         run: |
           sudo apt-get update
           sudo apt-get install --yes clang llvm cmake ninja-build
@@ -51,6 +44,7 @@ jobs:
           CJDOC_VERSION: 0.7.2
           CJDOC_REPOSITORY: lIlIIlIll/cjdoc
           CJDOC_SOURCE_SHA: e966097a3591538fba8990772e2e6c543de86c21
+        shell: bash
         run: |
           set -euo pipefail
           source_dir="$RUNNER_TEMP/cjdoc-source"
@@ -81,7 +75,65 @@ jobs:
           binary="$install_dir/bin/cjdoc"
           cp "$source_dir/target/release/bin/main" "$binary"
           test -x "$binary"
-          echo "$install_dir/bin" >> "$GITHUB_PATH"
+          "$binary" --version
+          tar --create --gzip --file "$RUNNER_TEMP/cjdoc.tar.gz" \
+            --directory "$install_dir" bin/cjdoc
+
+      - name: Upload the pinned cjdoc binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: m7-033-cjdoc-${{ github.sha }}
+          if-no-files-found: error
+          path: ${{ runner.temp }}/cjdoc.tar.gz
+
+  generate:
+    name: Generate public API docs / cjdoc 0.7.2
+    needs: build-cjdoc
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Check out the candidate source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Resolve the Cangjie toolchain
+        id: cangjie-nightly
+        run: python3 tools/latest_cangjie_nightly.py --github-output "$GITHUB_OUTPUT"
+
+      - name: Install the Cangjie toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ steps.cangjie-nightly.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie.tar.gz
+
+      - name: Install native prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang llvm cmake ninja-build
+
+      - name: Download the pinned cjdoc binary
+        uses: actions/download-artifact@v4
+        with:
+          name: m7-033-cjdoc-${{ github.sha }}
+          path: ${{ runner.temp }}/cjdoc-archive
+
+      - name: Install the pinned cjdoc binary
+        run: |
+          set -euo pipefail
+          install_dir="$RUNNER_TEMP/cjdoc"
+          mkdir -p "$install_dir"
+          tar --extract --gzip --file "$RUNNER_TEMP/cjdoc-archive/cjdoc.tar.gz" \
+            --directory "$install_dir"
+          binary="$install_dir/bin/cjdoc"
+          chmod +x "$binary"
+          test -x "$binary"
           "$binary" --version
 
       - name: Run the strict documentation and coverage gate

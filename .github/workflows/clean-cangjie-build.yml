@@ -13,28 +13,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  clean-cangjie-build:
-    runs-on: ubuntu-latest
+  build-cjdoc:
+    name: Build cjdoc 0.7.2 / Cangjie 1.1 compatibility
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
+    permissions:
+      contents: read
     steps:
-      - name: Check out a clean source tree
+      - name: Check out the cjdoc build source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
           fetch-depth: 1
 
-      - name: Resolve the latest complete Cangjie nightly
-        id: cangjie-nightly
-        run: python3 tools/latest_cangjie_nightly.py --github-output "$GITHUB_OUTPUT"
-
-      - name: Install the resolved Cangjie toolchain
+      - name: Install the cjdoc-compatible Cangjie toolchain
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
           channel: nightly
-          version: ${{ steps.cangjie-nightly.outputs.version }}
-          archive-path: ${{ runner.temp }}/cangjie.tar.gz
+          version: 1.1.0-alpha.20260414010024
 
-      - name: Install native build prerequisites
+      - name: Install native prerequisites for cjdoc
         run: |
           sudo apt-get update
           sudo apt-get install --yes clang llvm cmake ninja-build
@@ -74,6 +72,60 @@ jobs:
           mkdir -p "$install_dir/bin"
           binary="$install_dir/bin/cjdoc"
           cp "$source_dir/target/release/bin/main" "$binary"
+          test -x "$binary"
+          "$binary" --version
+          tar --create --gzip --file "$RUNNER_TEMP/cjdoc.tar.gz" \
+            --directory "$install_dir" bin/cjdoc
+
+      - name: Upload the pinned cjdoc binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: clean-cangjie-cjdoc-${{ github.sha }}
+          if-no-files-found: error
+          path: ${{ runner.temp }}/cjdoc.tar.gz
+
+  clean-cangjie-build:
+    needs: build-cjdoc
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out a clean source tree
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Resolve the latest complete Cangjie nightly
+        id: cangjie-nightly
+        run: python3 tools/latest_cangjie_nightly.py --github-output "$GITHUB_OUTPUT"
+
+      - name: Install the resolved Cangjie toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ steps.cangjie-nightly.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie.tar.gz
+
+      - name: Install native build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang llvm cmake ninja-build
+
+      - name: Download the pinned cjdoc binary
+        uses: actions/download-artifact@v4
+        with:
+          name: clean-cangjie-cjdoc-${{ github.sha }}
+          path: ${{ runner.temp }}/cjdoc-archive
+
+      - name: Install the pinned cjdoc binary
+        run: |
+          set -euo pipefail
+          install_dir="$RUNNER_TEMP/cjdoc"
+          mkdir -p "$install_dir"
+          tar --extract --gzip --file "$RUNNER_TEMP/cjdoc-archive/cjdoc.tar.gz" \
+            --directory "$install_dir"
+          binary="$install_dir/bin/cjdoc"
+          chmod +x "$binary"
           test -x "$binary"
           echo "CJDOC_BIN=$binary" >> "$GITHUB_ENV"
           "$binary" --version
