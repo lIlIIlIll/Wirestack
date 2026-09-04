@@ -184,10 +184,26 @@ jobs:
           channel: nightly
           version: ${{ steps.cangjie-nightly.outputs.version }}
 
+      - name: Normalize the resolved Cangjie toolchain environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest_home="$CANGJIE_HOME"
+          test -x "$latest_home/bin/cjc"
+          test -x "$latest_home/tools/bin/cjpm"
+          echo "CANGJIE_HOME=$latest_home" >> "$GITHUB_ENV"
+          echo "PATH=$latest_home/bin:$latest_home/tools/bin:$PATH" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$latest_home/runtime/lib/linux_x86_64_cjnative:$latest_home/tools/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" >> "$GITHUB_ENV"
+
       - name: Run the strict documentation and coverage gate
         env:
           CJDOC_BIN: ${{ runner.temp }}/cjdoc/cjdoc-wrapper
         run: scripts/check-docs --html --json
+
+      - name: Materialize native dependencies for the clean consumer
+        run: |
+          python3 tools/build_linux_tls_provider.py
+          python3 tools/build_linux_resolver.py --quiet
 
       - name: Build and run the public clean consumer
         run: scripts/check-m7-027-linux-examples --json

@@ -177,6 +177,17 @@ jobs:
           channel: nightly
           version: ${{ steps.cangjie-nightly.outputs.version }}
 
+      - name: Normalize the resolved Cangjie toolchain environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest_home="$CANGJIE_HOME"
+          test -x "$latest_home/bin/cjc"
+          test -x "$latest_home/tools/bin/cjpm"
+          echo "CANGJIE_HOME=$latest_home" >> "$GITHUB_ENV"
+          echo "PATH=$latest_home/bin:$latest_home/tools/bin:$PATH" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$latest_home/runtime/lib/linux_x86_64_cjnative:$latest_home/tools/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" >> "$GITHUB_ENV"
+
       - name: Verify Linux toolchain readiness
         shell: bash
         run: |
