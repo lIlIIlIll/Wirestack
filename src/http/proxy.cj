@@ -4,9 +4,21 @@ import std.collection.ArrayList
 
 /** Provider-neutral proxy endpoint. A typed IP never enters DNS. */
 public class HttpProxyEndpoint {
+/**
+ * Wirestack 公开 API：hostName。
+ */
     public let hostName: ?HostName
+/**
+ * Wirestack 公开 API：ipAddress。
+ */
     public let ipAddress: ?IpAddress
+/**
+ * Wirestack 公开 API：port。
+ */
     public let port: UInt16
+/**
+ * Wirestack 公开 API：identity。
+ */
     public let identity: String
 
     private init(hostName: ?HostName, ipAddress: ?IpAddress, port: UInt16, identity: String) {
@@ -17,11 +29,21 @@ public class HttpProxyEndpoint {
         this.identity = identity
     }
 
+/**
+ * Wirestack 公开 API：hostname。
+ * @param port 参数 port。
+ * @param value 参数 value。
+ */
     public static func hostname(value: String, port: UInt16): HttpProxyEndpoint {
         let host = HostName(value)
         HttpProxyEndpoint(Some(host), None<IpAddress>, port, "${host.ascii}:${port}")
     }
 
+/**
+ * Wirestack 公开 API：address。
+ * @param port 参数 port。
+ * @param value 参数 value。
+ */
     public static func address(value: IpAddress, port: UInt16): HttpProxyEndpoint {
         let encoded = proxyAddressIdentity(value)
         HttpProxyEndpoint(None<HostName>, Some(value), port, "${encoded}:${port}")
@@ -30,15 +52,31 @@ public class HttpProxyEndpoint {
 
 /** Called only when constructing a request to the configured proxy. */
 public interface HttpProxyAuthorizationProvider {
+/**
+ * Wirestack 公开 API：authorization。
+ * @param context 参数 context。
+ * @param proxy 参数 proxy。
+ * @param target 参数 target。
+ */
     func authorization(proxy: HttpProxyEndpoint, target: HttpUrl,
         context: OperationContext): ?String
 }
 
+/**
+ * Wirestack 公开 API：NoProxyPolicy。
+ */
 public class NoProxyPolicy {
     private let ownedRules: Array<NoProxyRule>
 
+/**
+ * Wirestack 公开 API：init。
+ */
     public init() { ownedRules = Array<NoProxyRule>() }
 
+/**
+ * Wirestack 公开 API：init。
+ * @param patterns 参数 patterns。
+ */
     public init(patterns: Array<String>) {
         if (patterns.size > 256) { throw IllegalArgumentException("NO_PROXY has too many patterns") }
         let rules = ArrayList<NoProxyRule>()
@@ -46,6 +84,10 @@ public class NoProxyPolicy {
         ownedRules = rules.toArray()
     }
 
+/**
+ * Wirestack 公开 API：matches。
+ * @param url 参数 url。
+ */
     public func matches(url: HttpUrl): Bool {
         for (rule in ownedRules) {
             if (rule.matches(url.host, url.port)) { return true }
@@ -54,18 +96,46 @@ public class NoProxyPolicy {
     }
 }
 
+/**
+ * Wirestack 公开 API：HttpProxyRoute。
+ */
 public enum HttpProxyRoute {
+/**
+ * Wirestack 公开 API：Direct。
+ */
     | Direct
+/**
+ * Wirestack 公开 API：Proxy。
+ */
     | Proxy(HttpProxyConfig)
 }
 
 /** Explicit proxy configuration; no environment, PAC, or WPAD lookup occurs. */
 public class HttpProxyConfig {
+/**
+ * Wirestack 公开 API：endpoint。
+ */
     public let endpoint: HttpProxyEndpoint
+/**
+ * Wirestack 公开 API：resolver。
+ */
     public let resolver: Resolver
+/**
+ * Wirestack 公开 API：noProxy。
+ */
     public let noProxy: NoProxyPolicy
+/**
+ * Wirestack 公开 API：authorizationProvider。
+ */
     public let authorizationProvider: ?HttpProxyAuthorizationProvider
 
+/**
+ * Wirestack 公开 API：init。
+ * @param authorizationProvider 参数 authorizationProvider。
+ * @param endpoint 参数 endpoint。
+ * @param noProxy 参数 noProxy。
+ * @param resolver 参数 resolver。
+ */
     public init(endpoint: HttpProxyEndpoint, resolver: Resolver,
         noProxy!: NoProxyPolicy = NoProxyPolicy(),
         authorizationProvider!: ?HttpProxyAuthorizationProvider = None<HttpProxyAuthorizationProvider>) {
@@ -75,10 +145,19 @@ public class HttpProxyConfig {
         this.authorizationProvider = authorizationProvider
     }
 
+/**
+ * Wirestack 公开 API：routeFor。
+ * @param url 参数 url。
+ */
     public func routeFor(url: HttpUrl): HttpProxyRoute {
         if (noProxy.matches(url)) { HttpProxyRoute.Direct } else { HttpProxyRoute.Proxy(this) }
     }
 
+/**
+ * Wirestack 公开 API：authorization。
+ * @param context 参数 context。
+ * @param target 参数 target。
+ */
     public func authorization(target: HttpUrl, context: OperationContext): ?String {
         match (authorizationProvider) {
             case Some(value) => value.authorization(endpoint, target, context)

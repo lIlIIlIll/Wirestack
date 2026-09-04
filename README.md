@@ -68,6 +68,9 @@ SDK 归档、解压后的工具链和 `target/` 构建产物都不进入仓库�
 
 ## 文档
 
+- [Linux 开发者入门](docs/guides/getting-started-linux.md)
+- [公开 API 参考（cjdoc 0.7.2）](docs/api/README.md)
+- [在线 API 文档（GitHub Pages）](https://lIlIIlIll.github.io/Wirestack/)
 - [产品 PRD](docs/product/prd.md)
 - [仓库实施 backlog](docs/planning/implementation-backlog.md)
 - [执行状态](docs/planning/status.md)
@@ -82,6 +85,6 @@ SDK 归档、解压后的工具链和 `target/` 构建产物都不进入仓库�
 
 ## 当前执行点
 
-Linux glibc 主体能力已经完成。当前关键路径是 M1-024 确定性竞态测试、M1-025 泄漏与 benchmark 收口，以及 Linux 专用的 M7 发布任务。UP-001 至 UP-007 都是远期上游增强，不在 Wirestack 发布依赖图中。全局六平台状态仍因其他平台的原生证据缺失而保持 fail-closed。
+Linux glibc 主体能力和发布门禁已经完成。M7-033 正在补齐开发者文档、公开 API 参考和 GitHub Pages 发布；本地 `cjdoc 0.7.2` 产物已通过，托管 Pages 部署与 smoke 仍以 CI 结果为准。UP-001 至 UP-007 都是远期上游增强，不在 Wirestack 发布依赖图中。全局六平台状态仍因其他平台的原生证据缺失而保持 fail-closed。
 
 不要把“能交叉编译”视为平台支持完成；涉及平台能力的完成声明必须有真机或原生 VM 证据。
