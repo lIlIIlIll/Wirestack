@@ -38,9 +38,13 @@ DIAGNOSTIC_MODES = (
     "peer-reset",
     "close-during-read",
 )
-DEFAULT_DURATION_SECONDS = 60
+DEFAULT_DURATION_SECONDS = 600
 MAX_DURATION_SECONDS = 600
-DEFAULT_SAMPLE_INTERVAL_SECONDS = 5.0
+DEFAULT_SAMPLE_INTERVAL_SECONDS = 1.0
+DEFAULT_ITERATIONS_PER_MODE = 16_384
+MIN_ITERATIONS_PER_MODE = 8_192
+MAX_ITERATIONS_PER_MODE = 50_000
+DEFAULT_TIMEOUT_SECONDS = 600.0
 MAX_TIMEOUT_SECONDS = 900.0
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
@@ -87,6 +91,32 @@ def diagnostic_command(binary: Path, mode: str, port: int, iterations: int) -> l
         str(iterations),
         str(m0011.WINDOWS_GC_INTERVAL_ITERATIONS),
     ]
+
+
+def validate_budget(
+    duration_seconds: int,
+    sample_interval_seconds: float,
+    timeout_seconds: float,
+    iterations_per_mode: int,
+) -> None:
+    """Validate an explicit mode budget before compiling or running a probe."""
+
+    if duration_seconds <= 0 or duration_seconds > MAX_DURATION_SECONDS:
+        raise DiagnosticError("DURATION", "mode timeout is outside the bounded range")
+    if (
+        sample_interval_seconds <= 0
+        or timeout_seconds <= 0
+        or timeout_seconds > MAX_TIMEOUT_SECONDS
+    ):
+        raise DiagnosticError("TIMEOUT", "diagnostic timeout or sample interval is invalid")
+    if (
+        iterations_per_mode < MIN_ITERATIONS_PER_MODE
+        or iterations_per_mode > MAX_ITERATIONS_PER_MODE
+    ):
+        raise DiagnosticError(
+            "ITERATIONS",
+            "mode iteration budget is outside the bounded evidence range",
+        )
 
 
 def _parse_fields(process: Mapping[str, Any]) -> tuple[dict[str, str] | None, str | None]:
@@ -245,6 +275,7 @@ def run_diagnostics(
     duration_seconds: int,
     sample_interval_seconds: float,
     timeout_seconds: float,
+    iterations_per_mode: int = DEFAULT_ITERATIONS_PER_MODE,
 ) -> dict[str, Any]:
     environment = environment_report(revision)
     report: dict[str, Any] = {
@@ -259,6 +290,13 @@ def run_diagnostics(
         "environment": environment,
         "diagnostic_duration_seconds": duration_seconds,
         "sample_interval_seconds": sample_interval_seconds,
+        "diagnostic_budget": {
+            "mode_timeout_seconds": duration_seconds,
+            "compile_timeout_seconds": timeout_seconds,
+            "iterations_per_mode": iterations_per_mode,
+            "sample_interval_seconds": sample_interval_seconds,
+            "budget_is_explicit": True,
+        },
         "m0_011_resource_limits": dict(m0011.RESOURCE_LIMITS),
         "modes": [],
         "non_claims": [
@@ -273,13 +311,14 @@ def run_diagnostics(
     if SHA_RE.fullmatch(revision) is None:
         report["blockers"] = [{"code": "REVISION", "detail": "full lowercase repository SHA is required"}]
         return report
-    if duration_seconds <= 0 or duration_seconds > MAX_DURATION_SECONDS:
-        raise DiagnosticError("DURATION", "diagnostic duration is outside the bounded range")
-    if sample_interval_seconds <= 0 or timeout_seconds <= 0 or timeout_seconds > MAX_TIMEOUT_SECONDS:
-        raise DiagnosticError("TIMEOUT", "diagnostic timeout or sample interval is invalid")
+    validate_budget(
+        duration_seconds,
+        sample_interval_seconds,
+        timeout_seconds,
+        iterations_per_mode,
+    )
     artifact_dir.mkdir(parents=True, exist_ok=True)
     binary, compile_info = m0011.compile_probe(root, artifact_dir, timeout_seconds)
-    requested_iterations = max(1_000, duration_seconds * 1_000)
     modes: list[dict[str, Any]] = []
     for mode in DIAGNOSTIC_MODES:
         modes.append(
@@ -287,13 +326,13 @@ def run_diagnostics(
                 binary,
                 artifact_dir,
                 mode,
-                requested_iterations,
+                iterations_per_mode,
                 float(duration_seconds),
                 sample_interval_seconds,
             )
         )
     report["compile"] = compile_info
-    report["requested_iterations_per_mode"] = requested_iterations
+    report["requested_iterations_per_mode"] = iterations_per_mode
     report["modes"] = modes
     report["status"] = "PASS" if all(item["status"] == "PASS" for item in modes) else (
         "INCOMPLETE" if any(item["status"] == "INCOMPLETE" for item in modes) else "FAIL"
@@ -315,8 +354,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--artifact-dir", type=Path, default=Path("build/gates/m0-025-windows-resource-diagnostics"))
     parser.add_argument("--duration-seconds", type=int, default=DEFAULT_DURATION_SECONDS)
+    parser.add_argument(
+        "--iterations-per-mode",
+        type=int,
+        default=DEFAULT_ITERATIONS_PER_MODE,
+    )
     parser.add_argument("--sample-interval-seconds", type=float, default=DEFAULT_SAMPLE_INTERVAL_SECONDS)
-    parser.add_argument("--timeout-seconds", type=float, default=120.0)
+    parser.add_argument("--timeout-seconds", type=float, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--repository-revision", default=os.environ.get("GITHUB_SHA", "unknown"))
     args = parser.parse_args(argv)
     output = args.output.resolve()
@@ -333,6 +377,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             args.duration_seconds,
             args.sample_interval_seconds,
             args.timeout_seconds,
+            args.iterations_per_mode,
         )
         atomic_json(output, report)
         print(f"M0-025 Windows resource diagnostics: {report['status']}")
