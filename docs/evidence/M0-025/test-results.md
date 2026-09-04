@@ -5,7 +5,7 @@
 | Command | Result |
 |---|---|
 | `python3 tools/repository/repository_tooling.py --root . validate-plan docs/evidence/M0-025/test-plan.md --json` | PASS; 9 paths, 8 scenarios, 7 tests |
-| `python3 -m unittest tools.gates.tests.test_m0_025_windows_resource_diagnostics tools.gates.tests.test_m0_011_windows_long -v` | PASS; 20/20 |
+| `python3 -m unittest tools.gates.tests.test_m0_025_windows_resource_diagnostics tools.gates.tests.test_m0_011_windows_long -v` | PASS; 22/22 |
 | `scripts/check-fast --json` | PASS |
 | `scripts/check` | PASS; 611 total, 588 PASS, 23 SKIPPED, 0 ERROR, 0 FAILED |
 | `scripts/check-task M0-025 --json` | PASS; plan, regression, fast, and canonical checks all passed |
@@ -31,3 +31,25 @@ Cangjie `1.3.0-alpha.20260902010013` and cjpm `1.3.0-alpha.03`.
 
 The workflow did not run the 24-hour Linux soak, one-hour SSE profile, mobile
 gate, or any non-Windows native gate.
+
+## Complete Windows mode-isolation evidence
+
+The corrected diagnostic-only workflow run `33826513099` used exact head
+`7e5252c55fdad5b1523641758d86260be3a17091` on `windows-2025` / AMD64 with
+the same pinned Cangjie toolchain. Its explicit budget was 600 seconds per
+mode, 1-second sampling, 16,384 base iterations, and 65,536 iterations for
+`connect-close` so that the fast mode produced at least the required resource
+sample window. The optional four-hour step was skipped by dispatch input.
+
+All four modes completed their requested iterations without a process timeout:
+
+- `connect-close`: 65,536/65,536 iterations; trend PASS; process exit 1 after
+  49,278 connection errors.
+- `echo-close`: 16,384/16,384; workload/trend PASS; one `THREAD_QUERY` sampler
+  error, so overall mode FAIL.
+- `peer-reset`: 16,384/16,384; workload/trend PASS.
+- `close-during-read`: 16,384/16,384; workload PASS; handle trend FAIL with
+  growth `29 > 8`, while private-byte growth was `1,242 KiB`.
+
+The diagnostic report is complete but FAIL. No mode is marked PASS when its
+process, sampler, or resource evidence is invalid.
