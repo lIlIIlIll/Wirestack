@@ -1707,7 +1707,7 @@ private func renderCodec(decl: Decl, body: Body, isClass: Bool): Tokens {
     } else {
     appendLine(sb, 2, "let __fastReader = __reader.generatedReaderV1()")
     appendLine(sb, 2, "let context = GeneratedSupportV1.readState(reader)")
-    appendLine(sb, 2, "context.enterValue()")
+    if (fastReadContext) { appendLine(sb, 2, "context.enterValue()") }
     appendLine(sb, 2, "try {")
     for (field in fields) {
         if (field.isOption) {
