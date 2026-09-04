@@ -44,7 +44,7 @@ Status values:
 | M0-022 | BLOCKED | — | Depends on M0-004 through M0-020 and M0-024. It does not depend on M0-021 or an upstream source change. |
 | M0-023 | COMPLETE | [`docs/evidence/M0-023/README.md`](../evidence/M0-023/README.md) | ADR-0004 freezes the current Linux release target as glibc and defers musl to P1-011 until the Cangjie SDK supports it. |
 | M0-024 | COMPLETE | [`docs/evidence/M0-024/README.md`](../evidence/M0-024/README.md) | ADR-0005 removes runtime and `std.net` source changes from the release dependency graph; unsupported transport capabilities fail through stable public Wirestack contracts. |
-| M0-025 | BLOCKED | [`docs/evidence/M0-025/README.md`](../evidence/M0-025/README.md) | Registered and approved independent diagnosis/repair task; GitHub run `33733198358` reproduced handle/private-byte growth (`146 > 8`, `65,368 KiB > 8,192 KiB`) after a complete four-hour workload. Mode diagnostics timed out before RESULT, so no Wirestack-owned repair is proven; suspected public `std.net`/runtime ownership remains an upstream candidate. |
+| M0-025 | BLOCKED | [`docs/evidence/M0-025/README.md`](../evidence/M0-025/README.md) | Registered and approved independent diagnosis/repair task. Corrected diagnostic-only run `33826513099` used explicit per-mode budgets and completed all four RESULTs: `peer-reset` passed, `close-during-read` reproduced handle growth (`29 > 8`), `echo-close` had one sampler error, and `connect-close` returned a non-zero probe status after connection errors. No Wirestack-owned repair is proven; suspected public `std.net`/runtime ownership remains an upstream candidate. M0-011's four-hour resource failure (`146 > 8`, `65,368 KiB > 8,192 KiB`) remains authoritative. |
 
 ## Linux M1 closure work
 

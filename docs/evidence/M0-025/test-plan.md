@@ -12,7 +12,7 @@ gate. Short diagnostics do not substitute for it.
 |---|---|---|---|
 | P001 | Native Windows x86_64 with the pinned toolchain | Report environment identity and run diagnostics | reachable |
 | P002 | Non-Windows, wrong architecture, or missing capability | Return BLOCKED with a stable code | fault injection |
-| P003 | One isolated `connect-close`, `echo-close`, `peer-reset`, or `close-during-read` probe | Keep mode, explicit `16,384`-iteration budget, `600`-second timeout, command, and resource samples separate | reachable |
+| P003 | One isolated `connect-close`, `echo-close`, `peer-reset`, or `close-during-read` probe | Keep mode, explicit base `16,384`-iteration budget (`65,536` for `connect-close`), `600`-second timeout, command, and resource samples separate | reachable |
 | P004 | Diagnostic process timeout or incomplete result | Record INCOMPLETE; never promote it to PASS | fault injection |
 | P005 | Resource trend exceeds the existing M0-011 limit | Record FAIL with the metric and limit | fault injection |
 | P006 | Growth is not controlled by Wirestack-owned code | Record an upstream-candidate decision without editing runtime/std | reachable |
