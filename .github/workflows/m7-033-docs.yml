@@ -46,28 +46,31 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes clang llvm cmake ninja-build
 
-      - name: Download the pinned cjdoc release
+      - name: Build the pinned cjdoc 0.7.2 source
         env:
           CJDOC_VERSION: 0.7.2
           CJDOC_REPOSITORY: lIlIIlIll/cjdoc
+          CJDOC_SOURCE_REF: release/v0.7.2
+          CJDOC_SOURCE_SHA: e966097a3591538fba8990772e2e6c543de86c21
         run: |
           set -euo pipefail
+          source_dir="$RUNNER_TEMP/cjdoc-source"
           install_dir="$RUNNER_TEMP/cjdoc"
-          mkdir -p "$install_dir"
-          gh release download "v${CJDOC_VERSION}" \
-            --repo "$CJDOC_REPOSITORY" \
-            --pattern "cjdoc-${CJDOC_VERSION}-linux-x64.tar.gz" \
-            --dir "$install_dir"
-          tar --extract --gzip --file "$install_dir/cjdoc-${CJDOC_VERSION}-linux-x64.tar.gz" \
-            --directory "$install_dir"
-          binary="$install_dir/cjdoc-${CJDOC_VERSION}-linux-x64/cjdoc"
+          git clone --no-tags --depth 1 --branch "$CJDOC_SOURCE_REF" \
+            "https://github.com/${CJDOC_REPOSITORY}.git" "$source_dir"
+          actual_sha=$(git -C "$source_dir" rev-parse HEAD)
+          test "$actual_sha" = "$CJDOC_SOURCE_SHA"
+          (cd "$source_dir" && cjpm build)
+          mkdir -p "$install_dir/bin"
+          binary="$install_dir/bin/cjdoc"
+          cp "$source_dir/target/release/bin/main" "$binary"
           test -x "$binary"
-          echo "$(dirname "$binary")" >> "$GITHUB_PATH"
+          echo "$install_dir/bin" >> "$GITHUB_PATH"
           "$binary" --version
 
       - name: Run the strict documentation and coverage gate
         env:
-          CJDOC_BIN: ${{ runner.temp }}/cjdoc/cjdoc-0.7.2-linux-x64/cjdoc
+          CJDOC_BIN: ${{ runner.temp }}/cjdoc/bin/cjdoc
         run: scripts/check-docs --html --json
 
       - name: Build and run the public clean consumer
