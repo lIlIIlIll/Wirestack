@@ -43,7 +43,8 @@ MAX_DURATION_SECONDS = 600
 DEFAULT_SAMPLE_INTERVAL_SECONDS = 1.0
 DEFAULT_ITERATIONS_PER_MODE = 16_384
 MIN_ITERATIONS_PER_MODE = 8_192
-MAX_ITERATIONS_PER_MODE = 50_000
+MAX_ITERATIONS_PER_MODE = 100_000
+CONNECT_CLOSE_ITERATIONS = 65_536
 DEFAULT_TIMEOUT_SECONDS = 600.0
 MAX_TIMEOUT_SECONDS = 900.0
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -119,6 +120,20 @@ def validate_budget(
         )
 
 
+def mode_iteration_budget(iterations_per_mode: int) -> dict[str, int]:
+    """Return explicit per-mode budgets, including a longer fast-path run."""
+
+    if iterations_per_mode < MIN_ITERATIONS_PER_MODE or iterations_per_mode > MAX_ITERATIONS_PER_MODE:
+        raise DiagnosticError(
+            "ITERATIONS",
+            "mode iteration budget is outside the bounded evidence range",
+        )
+    return {
+        mode: CONNECT_CLOSE_ITERATIONS if mode == "connect-close" else iterations_per_mode
+        for mode in DIAGNOSTIC_MODES
+    }
+
+
 def _parse_fields(process: Mapping[str, Any]) -> tuple[dict[str, str] | None, str | None]:
     stdout = process.get("stdout")
     if not isinstance(stdout, str) or not stdout:
@@ -183,6 +198,29 @@ def _mode_workload(fields: Mapping[str, str] | None, requested: int) -> dict[str
     return values
 
 
+def _mode_status(
+    process: Mapping[str, Any],
+    workload: Mapping[str, Any],
+    trend: Mapping[str, Any],
+    sampler_errors: Mapping[str, int],
+    parse_error_class: str | None,
+    server_error_class: str | None,
+) -> str:
+    """Classify one mode without allowing a bad process to appear successful."""
+
+    if process.get("timed_out"):
+        return "INCOMPLETE"
+    if parse_error_class or server_error_class or process.get("exit_code") != 0:
+        return "FAIL"
+    if workload.get("decision") != "PASS":
+        return "FAIL"
+    if trend.get("decision") == "FAIL" or sampler_errors:
+        return "FAIL"
+    if trend.get("decision") != "PASS":
+        return "INCOMPLETE"
+    return "PASS"
+
+
 def _mode_report(
     binary: Path,
     artifact_dir: Path,
@@ -222,18 +260,14 @@ def _mode_report(
     trend = m0011.resource_trend(samples)
     workload["server_accepted"] = server.accepted if server is not None else 0
     workload["timed_out"] = bool(process.get("timed_out"))
-    if workload["timed_out"]:
-        status = "INCOMPLETE"
-    elif parse_error_class or server_error_class:
-        status = "FAIL"
-    elif workload["decision"] != "PASS":
-        status = "FAIL"
-    elif trend.get("decision") == "FAIL" or sampler.error_codes:
-        status = "FAIL"
-    elif trend.get("decision") != "PASS":
-        status = "INCOMPLETE"
-    else:
-        status = "PASS"
+    status = _mode_status(
+        process,
+        workload,
+        trend,
+        sampler.error_codes,
+        parse_error_class,
+        server_error_class,
+    )
     return {
         "mode": mode,
         "status": status,
@@ -317,6 +351,8 @@ def run_diagnostics(
         timeout_seconds,
         iterations_per_mode,
     )
+    iterations_by_mode = mode_iteration_budget(iterations_per_mode)
+    report["diagnostic_budget"]["iterations_by_mode"] = iterations_by_mode
     artifact_dir.mkdir(parents=True, exist_ok=True)
     binary, compile_info = m0011.compile_probe(root, artifact_dir, timeout_seconds)
     modes: list[dict[str, Any]] = []
@@ -326,13 +362,14 @@ def run_diagnostics(
                 binary,
                 artifact_dir,
                 mode,
-                iterations_per_mode,
+                iterations_by_mode[mode],
                 float(duration_seconds),
                 sample_interval_seconds,
             )
         )
     report["compile"] = compile_info
     report["requested_iterations_per_mode"] = iterations_per_mode
+    report["requested_iterations_by_mode"] = iterations_by_mode
     report["modes"] = modes
     report["status"] = "PASS" if all(item["status"] == "PASS" for item in modes) else (
         "INCOMPLETE" if any(item["status"] == "INCOMPLETE" for item in modes) else "FAIL"
