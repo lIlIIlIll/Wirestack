@@ -125,6 +125,8 @@ class M7033DocsTests(unittest.TestCase):
         self.assertIn("cjpm update --skip-script", workflow)
         self.assertIn("markdown/db4f9527944b589db8436669f1d255192388cee2/cjpm.toml", workflow)
         self.assertIn("yjson/bf65cbecd99ac25e7485f8db60990e94a04e57bc/cjpm.toml", workflow)
+        self.assertIn("cjdoc-wrapper", workflow)
+        self.assertIn("Restore the resolved Cangjie toolchain", workflow)
         self.assertIn('CJDOC_VERSION: 0.7.2', workflow)
         self.assertIn('CJDOC_SOURCE_SHA: e966097a3591538fba8990772e2e6c543de86c21', workflow)
         self.assertIn('https://codeload.github.com/${CJDOC_REPOSITORY}/tar.gz/${CJDOC_SOURCE_SHA}', workflow)
@@ -148,6 +150,8 @@ class M7033DocsTests(unittest.TestCase):
         self.assertIn("cjpm update --skip-script", workflow)
         self.assertIn("markdown/db4f9527944b589db8436669f1d255192388cee2/cjpm.toml", workflow)
         self.assertIn("yjson/bf65cbecd99ac25e7485f8db60990e94a04e57bc/cjpm.toml", workflow)
+        self.assertIn("cjdoc-wrapper", workflow)
+        self.assertIn("Restore the resolved Cangjie toolchain", workflow)
         self.assertIn('CJDOC_VERSION: 0.7.2', workflow)
         self.assertIn('CJDOC_SOURCE_SHA: e966097a3591538fba8990772e2e6c543de86c21', workflow)
         self.assertIn('https://codeload.github.com/${CJDOC_REPOSITORY}/tar.gz/${CJDOC_SOURCE_SHA}', workflow)
@@ -157,7 +161,7 @@ class M7033DocsTests(unittest.TestCase):
         self.assertIn('target/release/bin/main', workflow)
         self.assertNotIn('cjpm build -g', workflow)
         self.assertNotIn('gh release download', workflow)
-        self.assertIn('echo "CJDOC_BIN=$binary" >> "$GITHUB_ENV"', workflow)
+        self.assertIn('echo "CJDOC_BIN=$wrapper" >> "$GITHUB_ENV"', workflow)
 
 
 if __name__ == "__main__":
