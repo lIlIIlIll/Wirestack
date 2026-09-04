@@ -68,6 +68,22 @@ jobs:
           lines[index] = lines[index].replace('compile-option = ""', 'compile-option = "-O0"', 1)
           config.write_text("".join(lines), encoding="utf-8")
           PY
+          (cd "$source_dir" && cjpm update --skip-script)
+          python3 - "$HOME/.cjpm/git/markdown/db4f9527944b589db8436669f1d255192388cee2/cjpm.toml" \
+            "$HOME/.cjpm/git/yjson/bf65cbecd99ac25e7485f8db60990e94a04e57bc/cjpm.toml" <<'PY'
+          from pathlib import Path
+          import sys
+
+          for raw_path in sys.argv[1:]:
+              path = Path(raw_path)
+              if not path.is_file():
+                  raise SystemExit(f"missing pinned dependency manifest: {path}")
+              text = path.read_text(encoding="utf-8")
+              count = text.count('compile-option = "-O2"')
+              if count == 0:
+                  raise SystemExit(f"pinned dependency has no expected optimizer keys: {path}")
+              path.write_text(text.replace('compile-option = "-O2"', 'compile-option = "-O0"'), encoding="utf-8")
+          PY
           (cd "$source_dir" && cjpm build)
           mkdir -p "$install_dir/bin"
           binary="$install_dir/bin/cjdoc"
