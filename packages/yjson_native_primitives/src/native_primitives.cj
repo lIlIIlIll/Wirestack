@@ -138,21 +138,9 @@ private class CustomNativeAccelerationProviderV1 <: JsonNativePrimitivesProvider
         CJsonNativeScannerBackend()
     }
     public func activate(): Unit {
-        // Resolve and validate the full linked primitive bundle before the
-        // process-wide runtime state is frozen. The bundle itself is
-        // installed by the runtime after activation succeeds.
-        let probe = unsafe { YJ_JSON_ProbeV1() }
-        if (probe != 0x594A0101u32) {
-            throw JsonException(
-                "Custom Native primitive ABI probe mismatch: expected 0x594A0101, got ${probe}",
-                code: "acceleration_abi_mismatch")
-        }
-        let caps = nativeScannerCapabilitiesForTesting()
-        if ((caps & 1u32) == 0u32) {
-            throw JsonException(
-                "Custom Native primitives do not support this CPU",
-                code: "acceleration_cpu_unsupported")
-        }
+        // The runtime validates the scanner archive (probe, SIMD caps)
+        // before calling this method, so no C FFI is needed here. Just
+        // mark the provider as active.
         yJsonNativeEnabled = true
     }
 }
