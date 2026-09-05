@@ -1733,6 +1733,35 @@ public func __yJsonReadFastStringOption(reader: GeneratedSupportV1Reader): Optio
     }
 }
 
+public func __yJsonWriteInt64Option(value: Option<Int64>, writer: JsonWriter): Unit {
+    let context = GeneratedSupportV1.writeState(writer)
+    let _ = context
+    match (value) {
+        case Some(item) => writer.writeInt64(item)
+        case None => writer.writeNull()
+    }
+}
+
+public func __yJsonReadInt64Option(reader: JsonReader): Option<Int64> {
+    let context = GeneratedSupportV1.readState(reader)
+    let _ = context
+    if (reader.tryReadNull()) {
+        None<Int64>
+    } else {
+        Some(reader.readInt64())
+    }
+}
+
+public func __yJsonReadFastInt64Option(reader: GeneratedSupportV1Reader): Option<Int64> {
+    let context = GeneratedSupportV1.readState(reader)
+    let _ = context
+    if (reader.tryReadRawNull()) {
+        None<Int64>
+    } else {
+        Some(reader.readRawInt64())
+    }
+}
+
 private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> &
     GeneratedCursorReadCodecV1<HashMap<String, T>> &
     GeneratedCompactWriteCodecV1<HashMap<String, T>> &

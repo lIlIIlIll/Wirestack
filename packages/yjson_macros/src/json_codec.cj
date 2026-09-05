@@ -531,6 +531,7 @@ private func directScalarWrite(field: CodecField, value: String): String {
         case "HashMap<String,Array<Int64>>" =>
             "context.enterValue(); try { if (!jsonTryWriteCompactInt64ArrayMap(writer, ${value})) { writer.startObject(); for ((__fastName, __fastItems) in ${value}) { writer.writeName(__fastName); writer.startArray(); for (__fastItem in __fastItems) { writer.writeInt64(__fastItem) }; writer.endArray() }; writer.endObject() } } finally { context.leaveValue() }"
         case "Option<String>" => "__yJsonWriteStringOption(${value}, writer)"
+        case "Option<Int64>" => "__yJsonWriteInt64Option(${value}, writer)"
         case _ => ""
     }
 }
@@ -538,6 +539,16 @@ private func directScalarWrite(field: CodecField, value: String): String {
 private func compactRawScalarFieldWrite(field: CodecField, value: String, first: String): String {
     if (!field.codecExpr.isEmpty()) { return "" }
     let nameKind = if (field.jsonNameExpr == "\"${field.name}\"") { "KnownName" } else { "Name" }
+    if (field.typeText.replace(" ", "") == "Option<Int64>") {
+        let someWrite = "${first} = __writer.writeRawObjectEntry${nameKind}Int64(${first}, " +
+            "${field.jsonNameExpr}, __rawItem)"
+        if (!field.includeNull) {
+            return "if (let Some(__rawItem) <- ${value}) { ${someWrite} }"
+        }
+        return "match (${value}) { case Some(__rawItem) => ${someWrite}; " +
+            "case None => ${first} = __writer.writeRawObjectEntry${nameKind}(${first}, ${field.jsonNameExpr}); " +
+            "writer.writeRawNull() }"
+    }
     if (field.typeText.replace(" ", "") == "Option<String>") {
         let someWrite = "${first} = __writer.writeRawObjectEntry${nameKind}String(${first}, " +
             "${field.jsonNameExpr}, __rawItem)"
@@ -933,6 +944,7 @@ private func directScalarRead(field: CodecField, reader: String): String {
         case "ArrayList<String>" => "__yJsonReadStringArrayList(${reader})"
         case "HashMap<String,Int64>" => "__yJsonReadInt64HashMap(${reader})"
         case "Option<String>" => "__yJsonReadStringOption(${reader})"
+        case "Option<Int64>" => "__yJsonReadInt64Option(${reader})"
         case "BigInt" => "${reader}.readBigInt()"
         case "Decimal" => "${reader}.readDecimal()"
         case _ => ""
@@ -955,7 +967,7 @@ private func directScalarFastRead(field: CodecField, reader: String): String {
         case "ArrayList<String>" => "__yJsonReadFastStringArrayList(${reader})"
         case "HashMap<String,Int64>" => "__yJsonReadFastInt64HashMap(${reader})"
         case "Option<String>" => "__yJsonReadFastStringOption(${reader})"
-        case "BigInt" => "jsonFastReadBigInt(${reader})"
+        case "Option<Int64>" => "__yJsonReadFastInt64Option(${reader})"
         case "Decimal" => "jsonFastReadDecimal(${reader})"
         case "Float64" => "jsonFastReadFloat64(${reader})"
         case "Float32" => "jsonFastReadFloat32(${reader})"
