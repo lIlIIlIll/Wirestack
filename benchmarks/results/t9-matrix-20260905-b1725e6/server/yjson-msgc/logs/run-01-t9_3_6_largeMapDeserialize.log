@@ -1,0 +1,31 @@
+Starting the benchmark `T9ThroughputBench.t9_3_6_largeMapDeserialize()`.
+    Warming up for 200.0 ms.
+    Starting measurements of 200 batches. Measuring Duration.
+    Max batch size: 782, estimated execution time: 1.002 s.
+Finished in 1.025 s. Analysing results:
+  percentiles:    [   10%        50%        90%        95%        99%        ]  
+  time:           [   10.27 us   10.29 us   10.31 us   10.32 us   10.44 us   ]  
+  mean:           10.27 us .. 10.33 us  Err ±0.3%
+  median:         10.26 us .. 10.44 us
+  R²:             0.999 .. 1.000
+  stddev:         14.08 ns
+
+--------------------------------------------------------------------------------------------------
+TP: yjson_benchmarks, time elapsed: 3029047998 ns, RESULT:
+    TCS: T9ThroughputBench, time elapsed: 3028123793 ns, RESULT:
+    | Case                       |   Median |        Err |   Err% |     Mean |
+    |:---------------------------|---------:|-----------:|-------:|---------:|
+    | t9_3_6_largeMapDeserialize | 10.29 us | ±0.0295 us |  ±0.3% | 10.29 us |
+Summary: TOTAL: 42
+    PASSED: 1, SKIPPED: 41, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 3030578425 ns, RESULT:
+TP: yjson_benchmarks.*, time elapsed: 3030463771 ns, RESULT:
+    PASSED:
+    TP: yjson_benchmarks, time elapsed: 3029047998 ns
+Summary: TOTAL: 42
+    PASSED: 1, SKIPPED: 41, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm bench success

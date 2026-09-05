@@ -1,0 +1,2 @@
+round,position,case,median_ns,sample_count,within_run_cv_pct,elapsed_seconds,max_rss_kb,report,log
+1,1,t9_b_1_bytesParsePrimitive,13402.514591,200,1.192546,4.794268,86372,raw/run-01/t9_b_1_bytesParsePrimitive,logs/run-01-t9_b_1_bytesParsePrimitive.log

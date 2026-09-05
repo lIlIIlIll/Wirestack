@@ -1,0 +1,2 @@
+case,runs,median_us,min_us,max_us,across_run_cv_pct,max_within_run_cv_pct,max_rss_mb
+t9_b_1_bytesParsePrimitive,1,20.326400,20.326400,20.326400,0.000,131.649,331.0
