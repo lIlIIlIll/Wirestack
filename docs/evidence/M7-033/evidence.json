@@ -1,0 +1,266 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-09-05T06:11:19.490751Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M7-033/docs-report.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "4f45d0b30c65f2255b9746f473a4c342150de67040235b202235c7adc8b0057f"
+      },
+      "source_task": "M7-033"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M7-033/html-report.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "61a9bbc5098404c5e4367acc6e4aacaeb7030d5a476651b78f0effcae513af54"
+      },
+      "source_task": "M7-033"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M7-033/clean-consumer.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "7152171e1196bd8cfaf66fd37e9958e0ecabafa90d792b715e5b680968c1cf93"
+      },
+      "source_task": "M7-033"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M7-033/task-check.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "374bd033e925bc1733a9c234300b78757acaa4b5b2bd32628f498f000f40b56b"
+      },
+      "source_task": "M7-033"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M7-033/pages-smoke.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "99bdbefc6fd4fee014557360eb5e80e2a03890a4a92a8547fddcaf57be7805fd"
+      },
+      "source_task": "M7-033"
+    }
+  ],
+  "revision": "2f3def83c8903b592faf83edf95a0bc334a94d20",
+  "schema_version": 2,
+  "source_sha256": {
+    ".github/workflows/clean-cangjie-build.yml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "12db8f960d76810748baf5ae4f1451261cead5c4054b7ccac25dfd2f7b5e650f"
+    },
+    ".github/workflows/m7-033-docs.yml": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8f15c3842bef5229881b8a57c96640def780423cf9a77b92d6199e40fa81e739"
+    },
+    ".gitignore": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "625c65cb628bf3fcc4483cadc7d2e99db7d50f9f7b7578e1a0fc1933b6edba5d"
+    },
+    "README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5889816aa55cc525f6671022b5278a6b2910d3d56b49a61edc9d46af73126f9e"
+    },
+    "docs/api/README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "19cd37a70351921e4a2f1c9b67ac3671d8971cb1d2539cf7b46243ccb6251a03"
+    },
+    "docs/evidence/M7-033/README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ceca92575dd42fc8f80936d06bf9257ad19fe2eab7293846a14d00f4fa973e86"
+    },
+    "docs/evidence/M7-033/test-plan.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7800bcae84fbff8751322f530e331d9e373d97a964251db4eb3f7d660db0c102"
+    },
+    "docs/guides/getting-started-linux.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3f4bd64d7ffdc203a781afc9038a413ce20ff81fc91ba929a5064a4bc1f6c64f"
+    },
+    "docs/planning/implementation-backlog.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c3e29ac84d101bb144d2870f51906786de2b6dbd5bb752c0b879c33142df3202"
+    },
+    "docs/planning/linux-status.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "59f9b45734ffb611571d1f817444310ddcbdb8c76931ec015676c04d9223ef5e"
+    },
+    "docs/planning/status.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b33d99200dfb54fda9b906df1c2b6fed5a69bfa1b3a55557b574e9e5959abf4a"
+    },
+    "scripts/check": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "99f3461d7b672ef2ffc4a72ad2a417f83a26c1270fa4fdeca74dec0c88204079"
+    },
+    "scripts/check-code": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6b1e73c263c844e08e4974100cbbe0ce30a7deef5a05319baeb9c8fbdef19b4f"
+    },
+    "scripts/check-docs": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "10b4d9c6589d4593bcff1c1e672307312e3265a692d9e35a6b4e7445e108e797"
+    },
+    "src/byte_span.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2091dcbdb1408aa78a636dc8f20ad18bb95c765cbebd181eddd6c5d9c7f90d39"
+    },
+    "src/cancellation.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b1cc884cdb486e8dceb824d038d7d93a9c5943bba26f9909e682699d78783f9f"
+    },
+    "src/common.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3fe5e06f05986c223841cb77677136f469fee4a50a49567a6da092001c3dd2fe"
+    },
+    "src/deadline.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f42d42eba3c48d053dbcb9211464a4f4b82b50590df3cc7662c8af8e3957f045"
+    },
+    "src/hostname_verifier.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "29b9d56cfd7975590a53c401f8a329ee48aea3b70c97a2812b9b1a8d35fd8e75"
+    },
+    "src/http/cancellation.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2bae9bc6ff239f2a961d7a37d6a4b77e191e3cce2a71b05055c6103b7e3684ed"
+    },
+    "src/http/client.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "44d20a7bda3b025268775afed5120a1b3a437479e49bce58c527a40bd48ceaca"
+    },
+    "src/http/error.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "89df36e089f8a059f38ab5a81998fd4ad1dbe4668b688fd667797c87a4e62032"
+    },
+    "src/http/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e8ba55a209a26edffb24de9b9f723bcbc0f650f78c5ab8ba9cefdc7b12c063c7"
+    },
+    "src/http/proxy.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4a1bb10898dbfb7e186251c180e9f86fa47f912af08bf4aafeb7876dbeb345ff"
+    },
+    "src/http/redirect.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "eabe9cec21e4d8cd2c5a5a803ed694566c026f1c7111a89ba473165127fd0595"
+    },
+    "src/http/resolver.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "73e36829e5745c40357c4bb50bcfe25209e5f5b961d5e0206b01c463361a8992"
+    },
+    "src/http/retry.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9bebdc19971a7dd9a528b6f6ea19337cc503419def7c86fa43616f62b2946cf2"
+    },
+    "src/http/server.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a4fbf51997822a60effc41b1ba5d10a548763b2ab80e67fc630de1c79853a726"
+    },
+    "src/http/tls.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b3b476f25578719957b0974516506db183cbbcdddb53b01a1a2588cd484a663e"
+    },
+    "src/http_body.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f87128dfadcf16a260307af68950e5905647745ff666a242b4697238ac9b99e0"
+    },
+    "src/http_contract.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "cd5b13cd0d9ef47f9e989b5035e746bd66865957941a9b1fbeeff8794a87ccc1"
+    },
+    "src/http_message.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6f73ac8474d6f9d3f1525bbd0d05fa273e6a6822287ede0a3fd9fcdfb889ae86"
+    },
+    "src/http_model.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f6fa704c077dbebfe483536e916ad033c6cd56349ff8eb9eb94351d0247ce5bf"
+    },
+    "src/http_url.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "728832a731d73b0f147111af6050d103fcd3c305996e0055c7e8ff4d929898df"
+    },
+    "src/network_error.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "629b0ca61f711670b40bab2a255304e1fda3c803630a834dd1e2baf10609f81b"
+    },
+    "src/network_event.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c500acd313bf5a540192dc0dba4e871b493ca60f256817f2964d811d0ae40917"
+    },
+    "src/operation_context.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8b2c3052fe658796e38e0e4f81d798820ab1fae50da8fb12f98eae0e768ba9a0"
+    },
+    "src/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f9035aacfa24f06fe88eda3f16a5cbcf5dbf482b2d86776ea27e09e4861e93d7"
+    },
+    "src/private_key_contract.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "23cb21cec0a1a122528976b58cb9cbf933c9e0cae709b839d0803e4301b3261a"
+    },
+    "src/resolver.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1ca7252666066b3251122d5e11829c52d35c522f057b08417ea1640aaf829238"
+    },
+    "src/tls/facade.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7012299cb95b3a0ec93fe62eaf9fdc981696642747d856299dd888d40972b949"
+    },
+    "src/tls/identity.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "debd963a8a063b705d0d9997d9a19fec597138113ac2b102d2554e9f0bcea10a"
+    },
+    "src/tls/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b1fa012d64c2c6ac16ec95495511ec56880a659c0dd2dad24d46d85b0d5fed06"
+    },
+    "src/tls_contract.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6c215fff425b3277e3a8b7bbc712a73033f992fec0ec743a42ee93b6a9a5a43b"
+    },
+    "src/transport.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "50f1926c7cb9330eb03be2d3a9449a3c5476bddf6bb8cfe9a7fa026592a30e0a"
+    },
+    "src/trust.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "805d3d620bcda43bf088f3ecbf3b11d1c88aa846e67eb39cdf30e75681d119ee"
+    },
+    "tools/docs/m7_033_docs.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bc8c7b5992ec87eab3c6fb6728c5df39afee4d80660e5f3ee8642fba7210c4ff"
+    },
+    "tools/tasks/M7-033.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "766c247f4ad6c4426013f1a09d38d8b43d13e758b26ea1f6046900947e94927c"
+    },
+    "tools/tests/test_m7_033_docs.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1ed2a9b82d2aacf2b3a49a9ad5e261947fb3f733445121d29000d3314482bbf5"
+    },
+    "tools/tests/test_m7_linux_task_graph.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d1906b72343ba65bbe13aa894afa209d2128754bc692f7795e9ead7a420b149c"
+    }
+  },
+  "source_task": "M7-033",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}
