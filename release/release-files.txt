@@ -38,6 +38,8 @@ docs/performance/results/2026-08-25-linux-release-three-library.md
 docs/performance/results/2026-08-25-linux-release-three-library.csv
 docs/performance/results/2026-08-26-native-acceleration.md
 docs/performance/results/2026-08-27-yjson-2.0.0.md
+docs/performance/results/2026-09-05-t9-matrix-bb43321.md
+docs/performance/results/2026-09-05-t9-ab-qualification.md
 docs/migration/pre-1.0-to-1.0.md
 docs/release-checklist.md
 docs/schema.md
@@ -72,6 +74,7 @@ src/lib_json_temporal_number_fast.cj
 src/lib_json_value.cj
 src/json_audit_contracts_test.cj
 src/json_boundary_test.cj
+src/json_bulk_path_test.cj
 src/json_compact_document_test.cj
 src/json_concurrency_test.cj
 src/json_context_path_test.cj
