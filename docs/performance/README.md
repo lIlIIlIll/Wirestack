@@ -26,6 +26,7 @@ workload checksum、RSS、原始轮次和 runner version。
 
 以下页面绑定旧版本或开发快照，只用于审计和新候选的 baseline 选择：
 
+- [2026-09-05 T9 A/B qualification](results/2026-09-05-t9-ab-qualification.md)
 - [2026-09-05 T9 矩阵(diagnostic)](results/2026-09-05-t9-matrix-bb43321.md)
 - [2.0.0 性能验收](results/2026-08-27-yjson-2.0.0.md)
 - [2026-08-26 Native acceleration](results/2026-08-26-native-acceleration.md)
