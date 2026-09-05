@@ -1001,14 +1001,17 @@ private func directScalarCursorFastRead(field: CodecField): String {
         case "HashMap<String,Int64>" => "__reader.readRawInt64Map()"
         case "HashMap<String,String>" => "__reader.readRawStringMap()"
         case "HashMap<String,Array<Int64>>" => "__reader.readRawInt64ArrayMap()"
+        case "Option<Int64>" =>
+            "if (__reader.tryReadRawNull()) { None<Int64> } else { Some(__reader.readRawInt64()) }"
+        case "Option<String>" =>
+            "if (__reader.tryReadRawNull()) { None<String> } else { Some(__reader.readRawString()) }"
         case _ => directScalarFastRead(field, "reader")
     }
 }
 
 private func directFieldNeedsContext(field: CodecField): Bool {
     let typeText = field.typeText.replace(" ", "")
-    typeText == "Array<Int64>" || typeText == "Array<String>" ||
-        typeText == "ArrayList<String>" || typeText == "HashMap<String,Int64>" ||
+    typeText == "ArrayList<String>" || typeText == "HashMap<String,Int64>" ||
         typeText == "HashMap<String,String>" || typeText == "HashMap<String,Array<Int64>>" ||
         typeText == "Option<String>" || typeText == "ArrayList<BigInt>" ||
         typeText == "HashMap<String,BigInt>" || typeText == "ArrayList<Decimal>" ||
