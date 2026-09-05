@@ -6,8 +6,15 @@ import wirestack.internal.transport as transport
 
 /** Bounded automatic retry policy. Unknown and generic exceptions always fail closed. */
 public class HttpRetryPolicy {
+/**
+ * Wirestack 公开 API：maximumAttempts。
+ */
     public let maximumAttempts: Int64
 
+/**
+ * Wirestack 公开 API：init。
+ * @param maximumAttempts 参数 maximumAttempts。
+ */
     public init(maximumAttempts!: Int64 = 2) {
         if (maximumAttempts <= 0 || maximumAttempts > 10) {
             throw IllegalArgumentException("HTTP retry attempt limit is invalid")
@@ -15,6 +22,14 @@ public class HttpRetryPolicy {
         this.maximumAttempts = maximumAttempts
     }
 
+/**
+ * Wirestack 公开 API：shouldRetry。
+ * @param attemptsStarted 参数 attemptsStarted。
+ * @param context 参数 context。
+ * @param error 参数 error。
+ * @param request 参数 request。
+ * @param responseCommitted 参数 responseCommitted。
+ */
     public func shouldRetry(request: HttpRequest, error: Exception,
         attemptsStarted: Int64, context: OperationContext,
         responseCommitted!: Bool = false): Bool {

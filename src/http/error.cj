@@ -6,26 +6,83 @@ import wirestack.internal.transport as transport
 
 /** Stable HTTP failures. HTTP 4xx/5xx responses are not errors in this model. */
 public enum HttpErrorCode {
+/**
+ * Wirestack 公开 API：InvalidUrl。
+ */
     | InvalidUrl
+/**
+ * Wirestack 公开 API：InvalidRequest。
+ */
     | InvalidRequest
+/**
+ * Wirestack 公开 API：InvalidResponse。
+ */
     | InvalidResponse
+/**
+ * Wirestack 公开 API：HeaderLimitExceeded。
+ */
     | HeaderLimitExceeded
+/**
+ * Wirestack 公开 API：BodyLimitExceeded。
+ */
     | BodyLimitExceeded
+/**
+ * Wirestack 公开 API：InvalidFraming。
+ */
     | InvalidFraming
+/**
+ * Wirestack 公开 API：ProtocolViolation。
+ */
     | ProtocolViolation
+/**
+ * Wirestack 公开 API：ProxyFailure。
+ */
     | ProxyFailure
+/**
+ * Wirestack 公开 API：PoolExhausted。
+ */
     | PoolExhausted
+/**
+ * Wirestack 公开 API：RedirectLimit。
+ */
     | RedirectLimit
+/**
+ * Wirestack 公开 API：BodyNotReplayable。
+ */
     | BodyNotReplayable
+/**
+ * Wirestack 公开 API：StreamReset。
+ */
     | StreamReset
+/**
+ * Wirestack 公开 API：ConnectionGoAway。
+ */
     | ConnectionGoAway
+/**
+ * Wirestack 公开 API：ServerOverloaded。
+ */
     | ServerOverloaded
 }
 
+/**
+ * Wirestack 公开 API：HttpException。
+ */
 public class HttpException <: Exception {
+/**
+ * Wirestack 公开 API：code。
+ */
     public let code: HttpErrorCode
+/**
+ * Wirestack 公开 API：cause。
+ */
     public let cause: ?Exception
 
+/**
+ * Wirestack 公开 API：init。
+ * @param cause 参数 cause。
+ * @param code 参数 code。
+ * @param message 参数 message。
+ */
     public init(code: HttpErrorCode, message: String,
         cause!: ?Exception = None<Exception>) {
         super(message)
@@ -33,6 +90,9 @@ public class HttpException <: Exception {
         this.cause = cause
     }
 
+/**
+ * Wirestack 公开 API：getClassName。
+ */
     protected override func getClassName(): String { "HttpException" }
 }
 

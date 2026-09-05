@@ -2,32 +2,80 @@ package wirestack.http
 
 import std.collection.ArrayList
 
+/**
+ * Wirestack 公开 API：HttpRedirectErrorCode。
+ */
 public enum HttpRedirectErrorCode {
+/**
+ * Wirestack 公开 API：TooManyRedirects。
+ */
     | TooManyRedirects
+/**
+ * Wirestack 公开 API：InsecureDowngrade。
+ */
     | InsecureDowngrade
+/**
+ * Wirestack 公开 API：InvalidLocation。
+ */
     | InvalidLocation
+/**
+ * Wirestack 公开 API：BodyNotReplayable。
+ */
     | BodyNotReplayable
 }
 
+/**
+ * Wirestack 公开 API：HttpRedirectException。
+ */
 public class HttpRedirectException <: Exception {
+/**
+ * Wirestack 公开 API：code。
+ */
     public let code: HttpRedirectErrorCode
+/**
+ * Wirestack 公开 API：cause。
+ */
     public let cause: ?Exception
 
+/**
+ * Wirestack 公开 API：init。
+ * @param cause 参数 cause。
+ * @param code 参数 code。
+ * @param message 参数 message。
+ */
     public init(code: HttpRedirectErrorCode, message: String, cause!: ?Exception = None<Exception>) {
         super(message)
         this.code = code
         this.cause = cause
     }
 
+/**
+ * Wirestack 公开 API：getClassName。
+ */
     protected override func getClassName(): String { "HttpRedirectException" }
 }
 
 /** Immutable redirect policy. Decisions are made before the prior response is drained. */
 public class HttpRedirectPolicy {
+/**
+ * Wirestack 公开 API：maximumRedirects。
+ */
     public let maximumRedirects: Int64
+/**
+ * Wirestack 公开 API：allowHttpsDowngrade。
+ */
     public let allowHttpsDowngrade: Bool
+/**
+ * Wirestack 公开 API：maximumDrainBytes。
+ */
     public let maximumDrainBytes: Int64
 
+/**
+ * Wirestack 公开 API：init。
+ * @param allowHttpsDowngrade 参数 allowHttpsDowngrade。
+ * @param maximumDrainBytes 参数 maximumDrainBytes。
+ * @param maximumRedirects 参数 maximumRedirects。
+ */
     public init(maximumRedirects!: Int64 = 10, allowHttpsDowngrade!: Bool = false,
         maximumDrainBytes!: Int64 = 64 * 1024) {
         if (maximumRedirects < 0 || maximumRedirects > 100 || maximumDrainBytes < 0) {
@@ -38,6 +86,13 @@ public class HttpRedirectPolicy {
         this.maximumDrainBytes = maximumDrainBytes
     }
 
+/**
+ * Wirestack 公开 API：nextRequest。
+ * @param limits 参数 limits。
+ * @param redirectsFollowed 参数 redirectsFollowed。
+ * @param request 参数 request。
+ * @param response 参数 response。
+ */
     public func nextRequest(request: HttpRequest, response: HttpResponse,
         redirectsFollowed!: Int64 = 0, limits!: HttpLimits = HttpLimits()): ?HttpRequest {
         if (!isRedirectStatus(response.status)) { return None<HttpRequest> }

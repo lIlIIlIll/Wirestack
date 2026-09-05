@@ -1,9 +1,22 @@
 package wirestack
 
+/**
+ * Wirestack 公开 API：IpAddressFamily。
+ */
 public enum IpAddressFamily <: Equatable<IpAddressFamily> {
+/**
+ * Wirestack 公开 API：Ipv4。
+ */
     | Ipv4
+/**
+ * Wirestack 公开 API：Ipv6。
+ */
     | Ipv6
 
+/**
+ * Wirestack 公开 API：==。
+ * @param other 参数 other。
+ */
     public operator func ==(other: IpAddressFamily): Bool {
         match ((this, other)) {
             case (IpAddressFamily.Ipv4, IpAddressFamily.Ipv4) => true
@@ -12,6 +25,10 @@ public enum IpAddressFamily <: Equatable<IpAddressFamily> {
         }
     }
 
+/**
+ * Wirestack 公开 API：!=。
+ * @param other 参数 other。
+ */
     public operator func !=(other: IpAddressFamily): Bool {
         !(this == other)
     }
@@ -19,10 +36,22 @@ public enum IpAddressFamily <: Equatable<IpAddressFamily> {
 
 /** A DNS-free IP address value used at transport boundaries. */
 public struct IpAddress <: Equatable<IpAddress> & Hashable {
+/**
+ * Wirestack 公开 API：family。
+ */
     public let family: IpAddressFamily
     private let octets: Array<Byte>
+/**
+ * Wirestack 公开 API：zone。
+ */
     public let zone: ?String
 
+/**
+ * Wirestack 公开 API：init。
+ * @param family 参数 family。
+ * @param octets 参数 octets。
+ * @param zone 参数 zone。
+ */
     public init(family: IpAddressFamily, octets: Array<Byte>, zone!: ?String = None<String>) {
         let expected = match (family) {
             case IpAddressFamily.Ipv4 => 4
@@ -57,14 +86,25 @@ public struct IpAddress <: Equatable<IpAddress> & Hashable {
         octets.clone()
     }
 
+/**
+ * Wirestack 公开 API：==。
+ * @param other 参数 other。
+ */
     public operator func ==(other: IpAddress): Bool {
         family == other.family && octets == other.octets && zone == other.zone
     }
 
+/**
+ * Wirestack 公开 API：!=。
+ * @param other 参数 other。
+ */
     public operator func !=(other: IpAddress): Bool {
         !(this == other)
     }
 
+/**
+ * Wirestack 公开 API：hashCode。
+ */
     public func hashCode(): Int64 {
         var hasher = DefaultHasher()
         match (family) {
@@ -83,22 +123,44 @@ public struct IpAddress <: Equatable<IpAddress> & Hashable {
 
 /** An already-resolved IP endpoint. Construction never performs DNS. */
 public struct SocketEndpoint <: Equatable<SocketEndpoint> & Hashable {
+/**
+ * Wirestack 公开 API：address。
+ */
     public let address: IpAddress
+/**
+ * Wirestack 公开 API：port。
+ */
     public let port: UInt16
 
+/**
+ * Wirestack 公开 API：init。
+ * @param address 参数 address。
+ * @param port 参数 port。
+ */
     public init(address: IpAddress, port: UInt16) {
         this.address = address
         this.port = port
     }
 
+/**
+ * Wirestack 公开 API：==。
+ * @param other 参数 other。
+ */
     public operator func ==(other: SocketEndpoint): Bool {
         address == other.address && port == other.port
     }
 
+/**
+ * Wirestack 公开 API：!=。
+ * @param other 参数 other。
+ */
     public operator func !=(other: SocketEndpoint): Bool {
         !(this == other)
     }
 
+/**
+ * Wirestack 公开 API：hashCode。
+ */
     public func hashCode(): Int64 {
         var hasher = DefaultHasher()
         hasher.write(address.hashCode())
@@ -109,8 +171,15 @@ public struct SocketEndpoint <: Equatable<SocketEndpoint> & Hashable {
 
 /** Canonical ASCII DNS name. Construction performs validation, never DNS. */
 public struct HostName <: Equatable<HostName> & Hashable & ToString {
+/**
+ * Wirestack 公开 API：ascii。
+ */
     public let ascii: String
 
+/**
+ * Wirestack 公开 API：init。
+ * @param value 参数 value。
+ */
     public init(value: String) {
         if (value.isEmpty()) {
             throw IllegalArgumentException("host name must not be empty")
@@ -132,18 +201,32 @@ public struct HostName <: Equatable<HostName> & Hashable & ToString {
         ascii = canonical
     }
 
+/**
+ * Wirestack 公开 API：==。
+ * @param other 参数 other。
+ */
     public operator func ==(other: HostName): Bool {
         ascii == other.ascii
     }
 
+/**
+ * Wirestack 公开 API：!=。
+ * @param other 参数 other。
+ */
     public operator func !=(other: HostName): Bool {
         ascii != other.ascii
     }
 
+/**
+ * Wirestack 公开 API：hashCode。
+ */
     public func hashCode(): Int64 {
         ascii.hashCode()
     }
 
+/**
+ * Wirestack 公开 API：toString。
+ */
     public func toString(): String {
         ascii
     }
