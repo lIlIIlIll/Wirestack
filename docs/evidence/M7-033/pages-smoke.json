@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "kind": "github-pages-smoke",
+  "status": "PASS",
+  "source_task": "M7-033",
+  "acceptance_status": "PASS",
+  "workflow": {
+    "run_id": 33947870773,
+    "job_id": 101257957149,
+    "event": "push",
+    "head_sha": "2f3def83c8903b592faf83edf95a0bc334a94d20",
+    "conclusion": "success",
+    "artifact_sha256": "83b0faafbf455ad2f07b8cb38e7fc6f4b2d3b5a9d2de726fee43aab9a71bcb0e",
+    "deployment_id": "2f3def83c8903b592faf83edf95a0bc334a94d20"
+  },
+  "page_url": "https://liliilill.github.io/Wirestack/",
+  "checks": [
+    {
+      "path": "/",
+      "http_status": 200,
+      "bytes": 6360,
+      "sha256": "a64e2fc2aedd66bf5ece37dcc89faa8b5bab2963e250b6c13bfbb1809c3b1684"
+    },
+    {
+      "path": "/index.html",
+      "http_status": 200,
+      "bytes": 6360,
+      "sha256": "a64e2fc2aedd66bf5ece37dcc89faa8b5bab2963e250b6c13bfbb1809c3b1684"
+    },
+    {
+      "path": "/search-index.js",
+      "http_status": 200,
+      "bytes": 751304,
+      "sha256": "ca581dc8ed6120ee49b981ee53ce1fd406c9b52dbda0c3f969c5deddff0da7b7"
+    },
+    {
+      "path": "/packages/package-32303a636a646f633a6d6f64756c653a76313a726f6f7477697265737461636b.html",
+      "http_status": 200,
+      "bytes": 54974,
+      "sha256": "55a498bdf9f77dee19670b3e3d4ebdcc1a1d9d48cec88db6f57c54950b886a87"
+    }
+  ],
+  "commands": [
+    "GitHub Actions: curl --fail --silent --show-error --location --max-time 10",
+    "local replay: curl --fail --silent --show-error --location --max-time 20"
+  ],
+  "cjdoc_release": {
+    "repository": "lIlIIlIll/cjdoc",
+    "tag": "v0.7.2",
+    "url": "https://github.com/lIlIIlIll/cjdoc/releases/tag/v0.7.2",
+    "linux_x64_asset_sha256": "ea949af377d74618122e6fd31d68fafd5df607471a2f8561139105922ab84eb4",
+    "linux_x64_tar_sha256": "398ab8e2fa9e83b785427d50d99ac4110bfe7390503a27d445e023dfe0585669"
+  },
+  "generated_at_utc": "2026-09-05T06:08:54Z"
+}
