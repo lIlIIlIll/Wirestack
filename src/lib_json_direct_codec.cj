@@ -449,6 +449,8 @@ private class GeneratedPathStateV1 {
 
     func pop(): Unit { if (count > 0) { count-- } }
 
+    func reset(): Unit { count = 0 }
+
     func updateLastField(name: String): Unit {
         if (count == 0) { return }
         values[count - 1] = name
@@ -512,6 +514,10 @@ public class GeneratedWriteStateV1 {
     public func leaveObject(): Unit { leaveValue() }
     public func currentPath(): String {
         match (path) { case Some(value) => value.pointer(); case None => "" }
+    }
+    func resetForReuse(): Unit {
+        depth = 0
+        match (path) { case Some(value) => value.reset(); case None => () }
     }
 
     private func pathState(): GeneratedPathStateV1 {

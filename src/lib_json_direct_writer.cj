@@ -1862,7 +1862,10 @@ public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV
     public func resetForGeneratedReuse(): Unit {
         if (!canReuseGeneratedCompactWriter()) { return }
         bufferTarget.reset()
-        generatedState = None<GeneratedWriteStateV1>
+        match (generatedState) {
+            case Some(state) => state.resetForReuse()
+            case None => ()
+        }
         contexts = None<ArrayList<UInt8>>
         semanticPathContexts = None<ArrayList<JsonDirectSemanticPathContext>>
         rootWritten = false
