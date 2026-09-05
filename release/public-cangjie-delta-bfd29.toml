@@ -8,8 +8,8 @@ baseline_sha256 = "0ce5f31ddf32942d00d2ae3d7d1701cfaacc9b52ae3caf66dfe4e54391907
 review_status = "pending-migration-review"
 removed_records = 711
 removed_sha256 = "84403e3598ca4b0cdd9c5e4617bb009e8a27eca67deb027d10f09af13a3c23fb"
-added_records = 703
-added_sha256 = "3c39292877fc13a2c1c36f453f0da52b1bb4d3996ac2f3245f268f7ac1d033a0"
+added_records = 706
+added_sha256 = "0912bc4f57eeef096de25f0d1d3b3e4797d6e318ff0786a42394db74fc0f9029"
 
 [[review_groups]]
 classification = "advanced-backend-package-redesign"
@@ -1245,12 +1245,15 @@ added = [
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public class GeneratedReadStateV1",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public class GeneratedWriteStateV1",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadFastInt64HashMap(reader: GeneratedSupportV1Reader): HashMap<String, Int64>",
+  "yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadFastInt64Option(reader: GeneratedSupportV1Reader): Option<Int64>",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadFastStringArrayList(reader: GeneratedSupportV1Reader): ArrayList<String>",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadFastStringOption(reader: GeneratedSupportV1Reader): Option<String>",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadInt64HashMap(reader: JsonReader): HashMap<String, Int64>",
+  "yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadInt64Option(reader: JsonReader): Option<Int64>",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadStringArrayList(reader: JsonReader): ArrayList<String>",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadStringOption(reader: JsonReader): Option<String>",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonWriteInt64HashMap( value: HashMap<String, Int64>, writer: JsonWriter ): Unit",
+  "yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonWriteInt64Option(value: Option<Int64>, writer: JsonWriter): Unit",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonWriteStringArrayList( value: ArrayList<String>, writer: JsonWriter ): Unit",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonWriteStringOption(value: Option<String>, writer: JsonWriter): Unit",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public func generatedCodecV1Of<T>(): JsonCodec<T> where T <: GeneratedCodecProviderV1<T>",

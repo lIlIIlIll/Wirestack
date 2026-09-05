@@ -277,12 +277,15 @@ yjson|src/lib_json_direct_codec.cj|<top-level>|public class GeneratedWriteStateV
 yjson|src/lib_json_direct_codec.cj|<top-level>|public class JsonCodecs
 yjson|src/lib_json_direct_codec.cj|<top-level>|public class YJson
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadFastInt64HashMap(reader: GeneratedSupportV1Reader): HashMap<String, Int64>
+yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadFastInt64Option(reader: GeneratedSupportV1Reader): Option<Int64>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadFastStringArrayList(reader: GeneratedSupportV1Reader): ArrayList<String>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadFastStringOption(reader: GeneratedSupportV1Reader): Option<String>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadInt64HashMap(reader: JsonReader): HashMap<String, Int64>
+yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadInt64Option(reader: JsonReader): Option<Int64>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadStringArrayList(reader: JsonReader): ArrayList<String>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonReadStringOption(reader: JsonReader): Option<String>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonWriteInt64HashMap( value: HashMap<String, Int64>, writer: JsonWriter ): Unit
+yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonWriteInt64Option(value: Option<Int64>, writer: JsonWriter): Unit
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonWriteStringArrayList( value: ArrayList<String>, writer: JsonWriter ): Unit
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func __yJsonWriteStringOption(value: Option<String>, writer: JsonWriter): Unit
 yjson|src/lib_json_direct_codec.cj|<top-level>|public func generatedCodecV1Of<T>(): JsonCodec<T> where T <: GeneratedCodecProviderV1<T>
