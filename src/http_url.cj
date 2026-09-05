@@ -4,11 +4,29 @@ import std.collection.ArrayList
 
 /** Canonical absolute HTTP(S) URL with a DNS-free authority representation. */
 public class HttpUrl <: ToString {
+/**
+ * Wirestack 公开 API：scheme。
+ */
     public let scheme: String
+/**
+ * Wirestack 公开 API：host。
+ */
     public let host: String
+/**
+ * Wirestack 公开 API：port。
+ */
     public let port: UInt16
+/**
+ * Wirestack 公开 API：explicitPort。
+ */
     public let explicitPort: Bool
+/**
+ * Wirestack 公开 API：authority。
+ */
     public let authority: String
+/**
+ * Wirestack 公开 API：requestTarget。
+ */
     public let requestTarget: String
     private let serialized: String
 
@@ -30,6 +48,10 @@ public class HttpUrl <: ToString {
         this.serialized = serialized
     }
 
+/**
+ * Wirestack 公开 API：parse。
+ * @param value 参数 value。
+ */
     public static func parse(value: String): HttpUrl {
         let bytes = value.toArray()
         if (bytes.isEmpty() || bytes.size > 8192) {
@@ -71,6 +93,9 @@ public class HttpUrl <: ToString {
         )
     }
 
+/**
+ * Wirestack 公开 API：toString。
+ */
     public func toString(): String { serialized }
 }
 

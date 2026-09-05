@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-EXPECTED_IDS = {f"M7-{number:03d}" for number in range(18, 33)}
+EXPECTED_IDS = {f"M7-{number:03d}" for number in range(18, 34)}
 
 
 class M7LinuxTaskGraphTests(unittest.TestCase):
@@ -52,15 +52,15 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         milestone_ids = set(re.findall(r"^\| (M\d+-\d{3}) \|", backlog, re.MULTILINE))
         upstream_ids = set(re.findall(r"^\| (UP-\d{3}) \|", backlog, re.MULTILINE))
         p1_ids = set(re.findall(r"^\| (P1-\d{3}) \|", backlog, re.MULTILINE))
-        self.assertEqual(200, len(milestone_ids))
+        self.assertEqual(201, len(milestone_ids))
         self.assertEqual(185, len(milestone_ids - EXPECTED_IDS))
         self.assertEqual(7, len(upstream_ids))
         self.assertEqual(14, len(p1_ids))
         self.assertIn("**全平台主线任务数：** 185", backlog)
-        self.assertIn("**Linux 稳定版收口任务数：** 15", backlog)
-        self.assertIn("**当前发布任务数：** 200", backlog)
-        self.assertIn("当前发布相关任务总数：**200**", backlog)
-        self.assertIn("全部已记录任务总数：**221**", backlog)
+        self.assertIn("**Linux 稳定版收口任务数：** 16", backlog)
+        self.assertIn("**当前发布任务数：** 201", backlog)
+        self.assertIn("当前发布相关任务总数：**201**", backlog)
+        self.assertIn("全部已记录任务总数：**222**", backlog)
 
     def test_status_exposes_linux_completion_without_a_global_completion_claim(self) -> None:
         status = self.read("docs/planning/status.md")
@@ -89,7 +89,10 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("| M7-031 Linux release candidate | COMPLETE |", linux)
         self.assertIn("docs/evidence/M7-032/README.md", status)
         self.assertIn("do not\nchange the status of the six-platform M7-001 through M7-017 tasks", status)
-        self.assertIn("Linux x86_64 glibc M7 closure has no remaining task", linux)
+        self.assertIn(
+            "M7-033 remains an\nindependent documentation-infrastructure task",
+            linux,
+        )
         self.assertIn("Global non-Linux M7", linux)
         self.assertIn("M6-026 HTTP/2 concurrent response bodies", linux)
         self.assertIn("1,000 two-stream batches", linux)
