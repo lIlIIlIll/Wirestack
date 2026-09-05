@@ -6,10 +6,23 @@ import wirestack.internal.transport as transport
 
 /** The public cancellation scope owned by one typed HTTP handle. */
 public enum HttpCancellationScope <: Equatable<HttpCancellationScope> {
+/**
+ * Wirestack 公开 API：Request。
+ */
     | Request
+/**
+ * Wirestack 公开 API：Connection。
+ */
     | Connection
+/**
+ * Wirestack 公开 API：Stream。
+ */
     | Stream
 
+/**
+ * Wirestack 公开 API：==。
+ * @param other 参数 other。
+ */
     public operator func ==(other: HttpCancellationScope): Bool {
         match ((this, other)) {
             case (HttpCancellationScope.Request, HttpCancellationScope.Request) => true
@@ -19,14 +32,27 @@ public enum HttpCancellationScope <: Equatable<HttpCancellationScope> {
         }
     }
 
+/**
+ * Wirestack 公开 API：!=。
+ * @param other 参数 other。
+ */
     public operator func !=(other: HttpCancellationScope): Bool { !(this == other) }
 }
 
 /** Cancels one public request from routing/DNS through response-body completion. */
 public class HttpRequestCancellationHandle {
     private let state = HttpHandleCancellationState()
+/**
+ * Wirestack 公开 API：scope。
+ */
     public prop scope: HttpCancellationScope { get() { HttpCancellationScope.Request } }
+/**
+ * Wirestack 公开 API：isCancellationRequested。
+ */
     public prop isCancellationRequested: Bool { get() { state.isCancellationRequested } }
+/**
+ * Wirestack 公开 API：cancel。
+ */
     public func cancel(): Bool { state.cancel() }
     internal prop cancellationToken: transport.CancellationToken { get() { state.token } }
 }
@@ -34,8 +60,17 @@ public class HttpRequestCancellationHandle {
 /** Cancels the concrete connection selected for every request sharing this handle. */
 public class HttpConnectionCancellationHandle {
     private let state = HttpHandleCancellationState()
+/**
+ * Wirestack 公开 API：scope。
+ */
     public prop scope: HttpCancellationScope { get() { HttpCancellationScope.Connection } }
+/**
+ * Wirestack 公开 API：isCancellationRequested。
+ */
     public prop isCancellationRequested: Bool { get() { state.isCancellationRequested } }
+/**
+ * Wirestack 公开 API：cancel。
+ */
     public func cancel(): Bool { state.cancel() }
     internal prop cancellationToken: transport.CancellationToken { get() { state.token } }
 }
@@ -43,18 +78,42 @@ public class HttpConnectionCancellationHandle {
 /** Cancels one HTTP/2 stream without cancelling sibling streams. */
 public class HttpStreamCancellationHandle {
     private let state = HttpHandleCancellationState()
+/**
+ * Wirestack 公开 API：scope。
+ */
     public prop scope: HttpCancellationScope { get() { HttpCancellationScope.Stream } }
+/**
+ * Wirestack 公开 API：isCancellationRequested。
+ */
     public prop isCancellationRequested: Bool { get() { state.isCancellationRequested } }
+/**
+ * Wirestack 公开 API：cancel。
+ */
     public func cancel(): Bool { state.cancel() }
     internal prop cancellationToken: transport.CancellationToken { get() { state.token } }
 }
 
 /** Optional typed handles supplied to one controlled client request. */
 public class HttpCancellationHandles {
+/**
+ * Wirestack 公开 API：request。
+ */
     public let request: ?HttpRequestCancellationHandle
+/**
+ * Wirestack 公开 API：connection。
+ */
     public let connection: ?HttpConnectionCancellationHandle
+/**
+ * Wirestack 公开 API：stream。
+ */
     public let stream: ?HttpStreamCancellationHandle
 
+/**
+ * Wirestack 公开 API：init。
+ * @param connection 参数 connection。
+ * @param request 参数 request。
+ * @param stream 参数 stream。
+ */
     public init(
         request!: ?HttpRequestCancellationHandle = None<HttpRequestCancellationHandle>,
         connection!: ?HttpConnectionCancellationHandle = None<HttpConnectionCancellationHandle>,
@@ -142,7 +201,13 @@ internal class HttpRequestCancellationOperation <: ResponseBodyObserver {
         }
         if (discard) { registration.unregister() }
     }
+/**
+ * Wirestack 公开 API：completed。
+ */
     public func completed(): Unit { release() }
+/**
+ * Wirestack 公开 API：abandoned。
+ */
     public func abandoned(): Unit { release() }
 
     private func link(token: transport.CancellationToken): Unit {
@@ -177,7 +242,14 @@ private class HttpCancellationBodyStream <: HttpBodyStream {
         this.delegate = delegate
         this.context = context
     }
+/**
+ * Wirestack 公开 API：contentLength。
+ */
     public prop contentLength: ?Int64 { get() { delegate.contentLength } }
+/**
+ * Wirestack 公开 API：read。
+ * @param destination 参数 destination。
+ */
     public func read(destination: Array<Byte>): Int64 {
         if (!destination.isEmpty()) {
             if (let Some(value) <- context) {
@@ -203,6 +275,12 @@ private class HttpCancellationBodyStream <: HttpBodyStream {
         }
         delegate.read(destination)
     }
+/**
+ * Wirestack 公开 API：close。
+ */
     public func close(): Unit { delegate.close() }
+/**
+ * Wirestack 公开 API：isClosed。
+ */
     public func isClosed(): Bool { delegate.isClosed() }
 }

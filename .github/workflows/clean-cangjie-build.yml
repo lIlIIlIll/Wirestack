@@ -13,7 +13,95 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build-cjdoc:
+    name: Build cjdoc 0.7.2 / Cangjie 1.1 compatibility
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the cjdoc build source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+          fetch-depth: 1
+
+      - name: Install the cjdoc-compatible Cangjie toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: 1.1.0-alpha.20260414010024
+
+      - name: Install native prerequisites for cjdoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang llvm cmake ninja-build
+
+      - name: Build the pinned cjdoc 0.7.2 source
+        env:
+          CJDOC_VERSION: 0.7.2
+          CJDOC_REPOSITORY: lIlIIlIll/cjdoc
+          CJDOC_SOURCE_SHA: e966097a3591538fba8990772e2e6c543de86c21
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$RUNNER_TEMP/cjdoc-source"
+          install_dir="$RUNNER_TEMP/cjdoc"
+          archive="$RUNNER_TEMP/cjdoc-source.tar.gz"
+          curl --fail --silent --show-error --location --max-time 60 \
+            "https://codeload.github.com/${CJDOC_REPOSITORY}/tar.gz/${CJDOC_SOURCE_SHA}" \
+            --output "$archive"
+          mkdir -p "$source_dir"
+          tar --extract --gzip --file "$archive" --directory "$source_dir" --strip-components=1
+          test -f "$source_dir/cjpm.toml"
+          python3 - "$source_dir/cjpm.toml" <<'PY'
+          from pathlib import Path
+          import sys
+
+          config = Path(sys.argv[1])
+          text = config.read_text(encoding="utf-8")
+          lines = text.splitlines(keepends=True)
+          matches = [index for index, line in enumerate(lines) if line.strip() == 'compile-option = ""']
+          if len(matches) != 1:
+              raise SystemExit("unexpected cjdoc compile-option schema")
+          index = matches[0]
+          lines[index] = lines[index].replace('compile-option = ""', 'compile-option = "-O0"', 1)
+          config.write_text("".join(lines), encoding="utf-8")
+          PY
+          (cd "$source_dir" && cjpm update --skip-script)
+          python3 - "$HOME/.cjpm/git/markdown/db4f9527944b589db8436669f1d255192388cee2/cjpm.toml" \
+            "$HOME/.cjpm/git/yjson/bf65cbecd99ac25e7485f8db60990e94a04e57bc/cjpm.toml" <<'PY'
+          from pathlib import Path
+          import sys
+
+          for raw_path in sys.argv[1:]:
+              path = Path(raw_path)
+              if not path.is_file():
+                  raise SystemExit(f"missing pinned dependency manifest: {path}")
+              text = path.read_text(encoding="utf-8")
+              count = text.count('compile-option = "-O2"')
+              if count == 0:
+                  raise SystemExit(f"pinned dependency has no expected optimizer keys: {path}")
+              path.write_text(text.replace('compile-option = "-O2"', 'compile-option = "-O0"'), encoding="utf-8")
+          PY
+          (cd "$source_dir" && cjpm build)
+          mkdir -p "$install_dir/bin"
+          binary="$install_dir/bin/cjdoc"
+          cp "$source_dir/target/release/bin/main" "$binary"
+          test -x "$binary"
+          "$binary" --version
+          tar --create --gzip --file "$RUNNER_TEMP/cjdoc.tar.gz" \
+            --directory "$install_dir" bin/cjdoc
+
+      - name: Upload the pinned cjdoc binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: clean-cangjie-cjdoc-${{ github.sha }}
+          if-no-files-found: error
+          path: ${{ runner.temp }}/cjdoc.tar.gz
+
   clean-cangjie-build:
+    needs: build-cjdoc
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -38,6 +126,84 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes clang llvm cmake ninja-build
+
+      - name: Download the pinned cjdoc binary
+        uses: actions/download-artifact@v4
+        with:
+          name: clean-cangjie-cjdoc-${{ github.sha }}
+          path: ${{ runner.temp }}/cjdoc-archive
+
+      - name: Install the pinned cjdoc binary
+        run: |
+          set -euo pipefail
+          install_dir="$RUNNER_TEMP/cjdoc"
+          mkdir -p "$install_dir"
+          tar --extract --gzip --file "$RUNNER_TEMP/cjdoc-archive/cjdoc.tar.gz" \
+            --directory "$install_dir"
+          binary="$install_dir/bin/cjdoc"
+          chmod +x "$binary"
+          test -x "$binary"
+
+      - name: Install the cjdoc-compatible runtime toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: 1.1.0-alpha.20260414010024
+
+      - name: Create an isolated cjdoc launcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          install_dir="$RUNNER_TEMP/cjdoc"
+          binary="$install_dir/bin/cjdoc"
+          compat_home="$CANGJIE_HOME"
+          wrapper="$install_dir/cjdoc-wrapper"
+          cat > "$wrapper" <<EOF
+          #!/usr/bin/env bash
+          set -euo pipefail
+          export CANGJIE_HOME="$compat_home"
+          export LD_LIBRARY_PATH="$compat_home/runtime/lib/linux_x86_64_cjnative:$compat_home/tools/lib\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}"
+          export PATH="$compat_home/bin:$compat_home/tools/bin:\$PATH"
+          exec "$binary" "\$@"
+          EOF
+          chmod +x "$wrapper"
+          test -x "$wrapper"
+          "$wrapper" --version
+          echo "CJDOC_BIN=$wrapper" >> "$GITHUB_ENV"
+
+      - name: Restore the resolved Cangjie toolchain
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: ${{ steps.cangjie-nightly.outputs.version }}
+
+      - name: Normalize the resolved Cangjie toolchain environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest_home="$CANGJIE_HOME"
+          test -x "$latest_home/bin/cjc"
+          test -x "$latest_home/tools/bin/cjpm"
+          echo "CANGJIE_HOME=$latest_home" >> "$GITHUB_ENV"
+          echo "PATH=$latest_home/bin:$latest_home/tools/bin:$PATH" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$latest_home/runtime/lib/linux_x86_64_cjnative:$latest_home/tools/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" >> "$GITHUB_ENV"
+
+      - name: Select the project-compatible Cangjie toolchain for repository gates
+        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+        with:
+          channel: nightly
+          version: 1.1.0-alpha.20260414010024
+
+      - name: Normalize the project-compatible Cangjie environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          project_home="$CANGJIE_HOME"
+          test -x "$project_home/bin/cjc"
+          test -x "$project_home/tools/bin/cjpm"
+          echo "CANGJIE_HOME=$project_home" >> "$GITHUB_ENV"
+          echo "PATH=$project_home/bin:$project_home/tools/bin:$PATH" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$project_home/runtime/lib/linux_x86_64_cjnative:$project_home/tools/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" >> "$GITHUB_ENV"
 
       - name: Verify Linux toolchain readiness
         shell: bash

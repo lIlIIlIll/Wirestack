@@ -15,27 +15,68 @@ foreign func wirestack_tls_certificate_subject_alt_names(
     outputIpCount: CPointer<UInt64>
 ): Int32
 
+/**
+ * Wirestack 公开 API：ReferenceIdentity。
+ */
 public enum ReferenceIdentity {
+/**
+ * Wirestack 公开 API：Dns。
+ */
     | Dns(HostName)
+/**
+ * Wirestack 公开 API：Ip。
+ */
     | Ip(IpAddress)
 }
 
+/**
+ * Wirestack 公开 API：IdentityVerificationErrorCode。
+ */
 public enum IdentityVerificationErrorCode {
+/**
+ * Wirestack 公开 API：NoMatchingDnsSan。
+ */
     | NoMatchingDnsSan
+/**
+ * Wirestack 公开 API：NoMatchingIpSan。
+ */
     | NoMatchingIpSan
+/**
+ * Wirestack 公开 API：InvalidDnsSan。
+ */
     | InvalidDnsSan
+/**
+ * Wirestack 公开 API：TooManySubjectAlternativeNames。
+ */
     | TooManySubjectAlternativeNames
+/**
+ * Wirestack 公开 API：ZonedIpReference。
+ */
     | ZonedIpReference
 }
 
+/**
+ * Wirestack 公开 API：IdentityVerificationException。
+ */
 public class IdentityVerificationException <: Exception {
+/**
+ * Wirestack 公开 API：code。
+ */
     public let code: IdentityVerificationErrorCode
 
+/**
+ * Wirestack 公开 API：init。
+ * @param code 参数 code。
+ * @param message 参数 message。
+ */
     public init(code: IdentityVerificationErrorCode, message: String) {
         super(message)
         this.code = code
     }
 
+/**
+ * Wirestack 公开 API：getClassName。
+ */
     protected override func getClassName(): String { "IdentityVerificationException" }
 }
 
@@ -44,6 +85,11 @@ public class CertificateSubjectAlternativeNames {
     private let dnsNames: Array<String>
     private let ipAddresses: Array<IpAddress>
 
+/**
+ * Wirestack 公开 API：init。
+ * @param dnsNames 参数 dnsNames。
+ * @param ipAddresses 参数 ipAddresses。
+ */
     public init(dnsNames: Array<String>, ipAddresses: Array<IpAddress>) {
         if (dnsNames.size + ipAddresses.size > MAXIMUM_SAN_IDENTITIES) {
             throw IdentityVerificationException(
@@ -66,15 +112,39 @@ public class CertificateSubjectAlternativeNames {
         this.ipAddresses = ipAddresses.clone()
     }
 
+/**
+ * Wirestack 公开 API：dnsSubjectAlternativeNames。
+ */
     public func dnsSubjectAlternativeNames(): Array<String> { dnsNames.clone() }
+/**
+ * Wirestack 公开 API：ipSubjectAlternativeNames。
+ */
     public func ipSubjectAlternativeNames(): Array<IpAddress> { ipAddresses.clone() }
 }
 
+/**
+ * Wirestack 公开 API：IdentityVerificationEvidence。
+ */
 public struct IdentityVerificationEvidence {
+/**
+ * Wirestack 公开 API：referenceIdentity。
+ */
     public let referenceIdentity: String
+/**
+ * Wirestack 公开 API：matchedSubjectAlternativeName。
+ */
     public let matchedSubjectAlternativeName: String
+/**
+ * Wirestack 公开 API：wildcard。
+ */
     public let wildcard: Bool
 
+/**
+ * Wirestack 公开 API：init。
+ * @param matchedSubjectAlternativeName 参数 matchedSubjectAlternativeName。
+ * @param referenceIdentity 参数 referenceIdentity。
+ * @param wildcard 参数 wildcard。
+ */
     public init(referenceIdentity: String, matchedSubjectAlternativeName: String, wildcard: Bool) {
         this.referenceIdentity = referenceIdentity
         this.matchedSubjectAlternativeName = matchedSubjectAlternativeName
@@ -82,7 +152,15 @@ public struct IdentityVerificationEvidence {
     }
 }
 
+/**
+ * Wirestack 公开 API：HostnameVerifier。
+ */
 public class HostnameVerifier {
+/**
+ * Wirestack 公开 API：verify。
+ * @param names 参数 names。
+ * @param reference 参数 reference。
+ */
     public static func verify(
         names: CertificateSubjectAlternativeNames,
         reference: ReferenceIdentity

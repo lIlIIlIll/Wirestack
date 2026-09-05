@@ -3,34 +3,102 @@ package wirestack
 import std.time.MonoTime
 import std.collection.ArrayList
 
+/**
+ * Wirestack 公开 API：ResolveAddressFamily。
+ */
 public enum ResolveAddressFamily {
+/**
+ * Wirestack 公开 API：Any。
+ */
     | Any
+/**
+ * Wirestack 公开 API：Ipv4。
+ */
     | Ipv4
+/**
+ * Wirestack 公开 API：Ipv6。
+ */
     | Ipv6
 }
 
+/**
+ * Wirestack 公开 API：ResolverSource。
+ */
 public enum ResolverSource {
+/**
+ * Wirestack 公开 API：System。
+ */
     | System
+/**
+ * Wirestack 公开 API：HostsFile。
+ */
     | HostsFile
+/**
+ * Wirestack 公开 API：Static。
+ */
     | Static
+/**
+ * Wirestack 公开 API：Custom。
+ */
     | Custom
 }
 
+/**
+ * Wirestack 公开 API：ResolveErrorCode。
+ */
 public enum ResolveErrorCode {
+/**
+ * Wirestack 公开 API：NameNotFound。
+ */
     | NameNotFound
+/**
+ * Wirestack 公开 API：NoData。
+ */
     | NoData
+/**
+ * Wirestack 公开 API：TemporaryFailure。
+ */
     | TemporaryFailure
+/**
+ * Wirestack 公开 API：Timeout。
+ */
     | Timeout
+/**
+ * Wirestack 公开 API：Cancelled。
+ */
     | Cancelled
+/**
+ * Wirestack 公开 API：InvalidName。
+ */
     | InvalidName
+/**
+ * Wirestack 公开 API：UnsupportedFamily。
+ */
     | UnsupportedFamily
+/**
+ * Wirestack 公开 API：SystemFailure。
+ */
     | SystemFailure
 }
 
+/**
+ * Wirestack 公开 API：ResolveOptions。
+ */
 public struct ResolveOptions {
+/**
+ * Wirestack 公开 API：family。
+ */
     public let family: ResolveAddressFamily
+/**
+ * Wirestack 公开 API：maxResults。
+ */
     public let maxResults: Int64
 
+/**
+ * Wirestack 公开 API：init。
+ * @param family 参数 family。
+ * @param maxResults 参数 maxResults。
+ */
     public init(
         family!: ResolveAddressFamily = ResolveAddressFamily.Any,
         maxResults!: Int64 = 64
@@ -43,13 +111,39 @@ public struct ResolveOptions {
     }
 }
 
+/**
+ * Wirestack 公开 API：ResolveDiagnostics。
+ */
 public struct ResolveDiagnostics {
+/**
+ * Wirestack 公开 API：source。
+ */
     public let source: ResolverSource
+/**
+ * Wirestack 公开 API：candidateCount。
+ */
     public let candidateCount: Int64
+/**
+ * Wirestack 公开 API：duplicatesRemoved。
+ */
     public let duplicatesRemoved: Int64
+/**
+ * Wirestack 公开 API：startedAt。
+ */
     public let startedAt: MonoTime
+/**
+ * Wirestack 公开 API：completedAt。
+ */
     public let completedAt: MonoTime
 
+/**
+ * Wirestack 公开 API：init。
+ * @param candidateCount 参数 candidateCount。
+ * @param completedAt 参数 completedAt。
+ * @param duplicatesRemoved 参数 duplicatesRemoved。
+ * @param source 参数 source。
+ * @param startedAt 参数 startedAt。
+ */
     public init(
         source: ResolverSource,
         candidateCount: Int64,
@@ -68,13 +162,37 @@ public struct ResolveDiagnostics {
     }
 }
 
+/**
+ * Wirestack 公开 API：ResolveResult。
+ */
 public struct ResolveResult {
     private let ownedAddresses: Array<IpAddress>
+/**
+ * Wirestack 公开 API：canonicalHost。
+ */
     public let canonicalHost: HostName
+/**
+ * Wirestack 公开 API：source。
+ */
     public let source: ResolverSource
+/**
+ * Wirestack 公开 API：expiration。
+ */
     public let expiration: ?MonoTime
+/**
+ * Wirestack 公开 API：diagnostics。
+ */
     public let diagnostics: ResolveDiagnostics
 
+/**
+ * Wirestack 公开 API：init。
+ * @param addresses 参数 addresses。
+ * @param canonicalHost 参数 canonicalHost。
+ * @param completedAt 参数 completedAt。
+ * @param expiration 参数 expiration。
+ * @param source 参数 source。
+ * @param startedAt 参数 startedAt。
+ */
     public init(
         addresses: Array<IpAddress>,
         canonicalHost: HostName,
@@ -100,14 +218,29 @@ public struct ResolveResult {
         )
     }
 
+/**
+ * Wirestack 公开 API：addresses。
+ */
     public prop addresses: Array<IpAddress> {
         get() { ownedAddresses.clone() }
     }
 }
 
+/**
+ * Wirestack 公开 API：ResolveException。
+ */
 public class ResolveException <: NetworkException {
+/**
+ * Wirestack 公开 API：resolveCode。
+ */
     public let resolveCode: ResolveErrorCode
 
+/**
+ * Wirestack 公开 API：init。
+ * @param cause 参数 cause。
+ * @param message 参数 message。
+ * @param resolveCode 参数 resolveCode。
+ */
     public init(resolveCode: ResolveErrorCode, message: String, cause!: ?Exception = None<Exception>) {
         super(
             NetworkErrorCategory.Resolve,
@@ -120,6 +253,13 @@ public class ResolveException <: NetworkException {
         this.resolveCode = resolveCode
     }
 
+/**
+ * Wirestack 公开 API：init。
+ * @param cause 参数 cause。
+ * @param message 参数 message。
+ * @param nativeCode 参数 nativeCode。
+ * @param resolveCode 参数 resolveCode。
+ */
     public init(
         resolveCode: ResolveErrorCode,
         message: String,
@@ -138,12 +278,25 @@ public class ResolveException <: NetworkException {
         this.resolveCode = resolveCode
     }
 
+/**
+ * Wirestack 公开 API：getClassName。
+ */
     protected override func getClassName(): String {
         "ResolveException"
     }
 }
 
+/**
+ * Wirestack 公开 API：Resolver。
+ */
 public interface Resolver {
+/**
+ * Wirestack 公开 API：resolve。
+ * @param context 参数 context。
+ * @param host 参数 host。
+ * @param options 参数 options。
+ * @param service 参数 service。
+ */
     func resolve(
         host: HostName,
         service: ?String,
@@ -156,10 +309,21 @@ public interface Resolver {
 public class StaticResolver <: Resolver {
     private let result: ResolveResult
 
+/**
+ * Wirestack 公开 API：init。
+ * @param result 参数 result。
+ */
     public init(result: ResolveResult) {
         this.result = result
     }
 
+/**
+ * Wirestack 公开 API：resolve。
+ * @param context 参数 context。
+ * @param host 参数 host。
+ * @param options 参数 options。
+ * @param service 参数 service。
+ */
     public func resolve(
         host: HostName,
         service: ?String,
@@ -190,6 +354,12 @@ public class StaticResolver <: Resolver {
         )
     }
 
+/**
+ * Wirestack 公开 API：resolve。
+ * @param context 参数 context。
+ * @param host 参数 host。
+ * @param options 参数 options。
+ */
     public func resolve(
         host: HostName,
         options!: ResolveOptions = ResolveOptions(),
