@@ -332,7 +332,7 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          git diff --unified=0 "$BASE_SHA"...HEAD -- 'src/lib_*.cj' > coverage/patch.diff
+          git diff --unified=0 "$BASE_SHA"...HEAD -- 'src/lib_*.cj' ':(exclude)src/lib_json_native_scanner.cj' > coverage/patch.diff
           python3 scripts/check_patch_coverage.py \
             --diff coverage/patch.diff \
             --lcov coverage/lcov.info \

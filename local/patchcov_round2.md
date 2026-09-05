@@ -1,0 +1,191 @@
+## src/lib_json_direct_writer.cj — 559 uncovered
+- `writeObjectEntryNameStringEscaped` (39 lines): 477-483, 498, 502-513, 517-518, 520-521, 536, 540-551, 555-556
+- `writeObjectEntryNameInt64ArrayNoEscape` (38 lines): 735-736, 738-747, 761-762, 765-766, 768-769, 780-799
+- `writeObjectEntryNameBoolNoEscape` (21 lines): 558-559, 572-578, 580-581, 583-584, 593-597, 603, 605-606
+- `writeObjectEntryNameInt64ArrayMapKnownAsciiKeys` (20 lines): 915-916, 937-940, 948-949, 951, 953, 956-957, 959-960, 981, 989-990, 992, 994, 997
+- `writeRawObjectEntryKnownNameStringBuffer` (19 lines): 2219-2220, 2224, 2227-2231, 2243-2253
+- `writeObjectEntryNameFloat64NoEscape` (14 lines): 673-674, 684-685, 687, 689-690, 692-693, 703-704, 706, 708-709
+- `writeObjectEntryNameInt64MapKnownAsciiKeys` (14 lines): 820-821, 829-832, 847, 850-851, 853-854, 876, 879-880
+- `writeRawObjectEntryKnownNameFloat64ArrayBuffer` (14 lines): 2268-2269, 2275-2286
+- `writeObjectEntryNameFloat64NoEscapeFast` (13 lines): 711-712, 721-724, 726, 728-733
+- `writeRawObjectEntryKnownNameStringMapBuffer` (13 lines): 2142-2143, 2152, 2155-2156, 2160, 2163-2164, 2167-2168, 2170, 2173-2174
+- `writeStringLiteralNoEscapeName` (12 lines): 231-242
+- `writeObjectEntryNameStringNoEscape` (12 lines): 426-427, 438-439, 441-442, 454-459
+- `writeCompactInt64Array` (11 lines): 339-341, 349-350, 352-353, 1399-1400, 1402-1403
+- `writeCompactFloat64Array` (11 lines): 357-359, 371-372, 374-375, 1412-1413, 1415-1416
+- `buildEscapeLookupTable` (11 lines): 1692, 1694-1695, 1697-1700, 1710-1713
+- `writeObjectEntryNameInt64ArrayMapNoEscape` (10 lines): 882-883, 900, 903, 906, 909-913
+- `tryWriteCompactInt64ArrayMap` (10 lines): 2581-2582, 2592-2593, 2595-2596, 2598, 2600, 2602-2603
+- `writeObjectEntryNameInt64MapNoEscape` (9 lines): 801-802, 812-818
+- `writeRawBeginObject` (9 lines): 1970-1971, 1973-1978, 1982
+- `tryWriteCompactFloat64Array` (9 lines): 2461, 2464, 2470-2471, 2473-2474, 2476, 2478-2479
+- `writeObjectEntryNameUInt64NoEscape` (8 lines): 632-633, 643-644, 646-647, 657-658
+- `writeRawObjectEntryKnownNameBuffer` (8 lines): 2030-2037
+- `writeRawObjectEntryKnownNameInt64` (8 lines): 2064-2065, 2068, 2070-2074
+- `bytesWritten` (7 lines): 121-124, 141, 1666, 1680
+- `writeRawObjectEntryKnownNameString` (7 lines): 2039-2040, 2044, 2049, 2051, 2053-2054
+- `writeRawObjectEntryKnownNameInt64Array` (7 lines): 2112-2113, 2118-2120, 2122-2123
+- `writeRawObjectEntryKnownNameInt64MapBuffer` (7 lines): 2125-2126, 2129-2133
+- `writeRawObjectEntryKnownNameInt64MapKnownAsciiBuffer` (7 lines): 2134-2140
+- `writeRawObjectEntryKnownNameInt64ArrayMapKnownAsciiBuffer` (7 lines): 2183-2189
+- `writeRawObjectEntryKnownNameFloat64Array` (7 lines): 2191-2192, 2198-2200, 2202-2203
+- `writeRawObjectEntryKnownNameInt64ArrayMap` (7 lines): 2311-2312, 2321-2324, 2327
+- `tryWriteCompactInt64Array` (7 lines): 2442, 2449, 2451-2452, 2454, 2456-2457
+- `tryWriteCompactStringArray` (7 lines): 2482-2483, 2492, 2494, 2496, 2498-2499
+- `writeObjectEntryNameInt64NoEscape` (6 lines): 401, 409-413
+- `writeObjectEntryNameBoolNoEscapeFast` (6 lines): 608-609, 621, 627, 629-630
+- `writeRawObjectEntryKnownName` (6 lines): 2020-2025
+- `tryWriteCompactStringMap` (6 lines): 2562, 2571, 2573, 2575, 2577-2578
+- `writeRawObjectEntryKnownNameInt64ArrayMapBuffer` (5 lines): 2176-2177, 2180-2182
+- `writeRawObjectEntryKnownNameStringArray` (5 lines): 2205-2206, 2213, 2216-2217
+- `writeRawObjectEntryKnownNameStringFast` (5 lines): 2233-2234, 2238, 2241-2242
+- `writeRawObjectEntryKnownNameStringMap` (5 lines): 2297-2298, 2305, 2308-2309
+- `writeObjectEntryNameStringNoEscapeFast` (4 lines): 461-462, 474-475
+- `writeObjectEntryNameUInt64NoEscapeFast` (4 lines): 660-661, 670-671
+- `buildString` (4 lines): 1204-1207
+- `rawTargetWriteStringNoEscape` (4 lines): 1772, 1774-1776
+- `rawTargetWriteNameNoEscape` (4 lines): 1780, 1782-1784
+- `finishString` (4 lines): 1845-1848
+- `resetForGeneratedReuse` (4 lines): 1867-1868, 1880-1881
+- `writeRawObjectEntryKnownNameBool` (4 lines): 2056-2057, 2061-2062
+- `writeRawObjectEntryKnownNameInt64Buffer` (4 lines): 2076-2077, 2079-2080
+- `writeRawObjectEntryKnownNameUInt64` (4 lines): 2082-2083, 2087-2088
+- `writeRawObjectEntryKnownNameUInt64Buffer` (4 lines): 2090-2091, 2093-2094
+- `writeRawObjectEntryKnownNameFloat64` (4 lines): 2096-2097, 2102-2103
+- `writeRawObjectEntryKnownNameFloat64Buffer` (4 lines): 2105-2106, 2109-2110
+- `writeRawObjectEntryKnownNameBoolBuffer` (4 lines): 2255-2256, 2258-2259
+- `writeRawObjectEntryKnownNameInt64ArrayBuffer` (4 lines): 2261-2262, 2265-2266
+- `writeRawObjectEntryKnownNameInt64Map` (4 lines): 2288-2289, 2294-2295
+- `writeState` (3 lines): 1811, 1815-1816
+- `finishGeneratedCompactString` (3 lines): 1853-1854, 1856
+- `writeRawEndObject` (3 lines): 1990-1991, 1995
+- `writeObjectEntryNameInt64NoEscapeFast` (2 lines): 423-424
+- `writeFloat64Text` (2 lines): 1020, 1464
+- `bytes` (2 lines): 1759-1760
+- `rawTargetWriteByte` (2 lines): 1763-1764
+- `rawTargetWriteText` (2 lines): 1767-1768
+- `rawTargetWriteInt64` (2 lines): 1787-1788
+- `rawTargetWriteUInt64` (2 lines): 1791-1792
+- `rawTargetWriteFloat64` (2 lines): 1795-1796
+- `generatedBufferV1` (2 lines): 1806-1807
+- `canReuseGeneratedCompactWriter` (2 lines): 1860-1861
+- `writeRawObjectEntryNameUInt64` (2 lines): 2357-2358
+- `writeRawObjectEntryNameFloat64` (2 lines): 2364-2365
+- `writeRawInt64` (2 lines): 2627-2628
+- `beginRawScalar` (2 lines): 2647-2648
+- `beginRawContainer` (2 lines): 2662, 2664
+- `ensureContainerDepth` (2 lines): 2899, 2901
+- `writeStringLiteralFromFirstEscape` (2 lines): 2968, 2970
+- `<toplevel>` (1 lines): 6
+- `reset` (1 lines): 150
+- `reserveRawCollectionCapacity` (1 lines): 2007
+- `writeRawObjectEntryNameInt64` (1 lines): 2342
+- `firstRawStringEscapeIndex` (1 lines): 2999
+
+## src/lib_json_direct_codec.cj — 625 uncovered
+- `readFastWithCursor` (85 lines): 230-233, 659, 661, 848-849, 858-859, 864, 893-894, 903-904, 983, 988-989, 994, 1001, 1004, 1006-1012, 1017-1018, 1034, 1038, 1192-1193, 1222-1223, 1242-1244, 1250-1251, 1271, 1275, 1440-1441, 1470-1471, 1491-1492, 1519, 1607-1608, 1995-1996, 2014-2015, 2017-2021, 2028-2029, 2031-2035, 2049-2051, 2053, 2107-2111, 2186-2187, 2205-2209, 2218
+- `writeCompactWithCursor` (73 lines): 251-260, 635-636, 638-639, 813-814, 822-825, 908-909, 913, 918-919, 969-970, 972-973, 1126-1127, 1147-1148, 1374-1375, 1394-1395, 1547-1548, 1553-1555, 1557-1558, 1562-1563, 1634-1635, 1640-1642, 1644-1645, 1917-1918, 1939-1940, 2114-2120, 2122-2123, 2222-2223, 2228-2230, 2232-2233
+- `writeCompactRaw` (36 lines): 247-249, 807-809, 959-961, 963-965, 1120-1122, 1368-1370, 1911-1913, 2084-2098
+- `readFast` (27 lines): 226-229, 656-657, 845-846, 890-891, 980-981, 1189-1190, 1437-1438, 1517, 1604-1605, 1992-1993, 2103-2106, 2183-2184
+- `writeDirect` (25 lines): 947, 949-951, 2061-2081
+- `read` (25 lines): 976-977, 1970-1977, 2101-2102, 2159-2171
+- `decodeString` (23 lines): 2593-2610, 2643-2647
+- `encodeStringStatic` (19 lines): 2533-2551
+- `__yJsonReadFastInt64Option` (18 lines): 1761-1774, 1780-1781, 1801, 1805
+- `encodeString` (18 lines): 2515-2532
+- `decodeBytes` (14 lines): 2658-2659, 2668-2674, 2687-2691
+- `write` (12 lines): 921, 923-926, 2054-2060
+- `writeStructural` (12 lines): 927-938
+- `__yJsonReadInt64HashMap` (12 lines): 2252-2262, 2264
+- `__yJsonReadFastInt64HashMap` (12 lines): 2282, 2285, 2288-2296, 2299
+- `supportsCompactCursorWrite` (11 lines): 250, 633, 811, 906, 967, 1124, 1372, 1915, 2112-2113, 2220
+- `jsonTryWriteCompactFloat64Array` (10 lines): 105-114
+- `jsonTryWriteCompactStringMap` (10 lines): 155-164
+- `jsonTryWriteCompactInt64ArrayMap` (10 lines): 165-174
+- `__yJsonReadInt64Option` (10 lines): 1751-1760
+- `fromJson` (10 lines): 2478-2483, 2495-2496, 2498-2499
+- `writeEncoded` (10 lines): 2612-2613, 2618-2621, 2626-2628, 2630
+- `jsonWriteGeneratedCompactObjectEntryUInt64` (9 lines): 341-349
+- `jsonWriteGeneratedCompactObjectEntryFloat64` (9 lines): 350-358
+- `readJsonNestedFastWithCursor` (9 lines): 682-690
+- `__yJsonWriteInt64Option` (9 lines): 1742-1750
+- `jsonTryWriteCompactStringArray` (8 lines): 115-122
+- `supportsCompactRaw` (8 lines): 798, 952-953, 1111, 1352, 1902, 2082-2083
+- `jsonTryWriteCompactInt64Array` (7 lines): 96-98, 101-104
+- `resolvedGeneratedCodecV1` (7 lines): 730-732, 736-737, 752, 756
+- `toJson` (7 lines): 2435-2441
+- `generatedCodecV1` (5 lines): 195-199
+- `acquireGeneratedCompactWriter` (5 lines): 2361, 2364-2365, 2367-2368
+- `releaseGeneratedCompactWriter` (5 lines): 2373-2374, 2376-2378
+- `encodeBytes` (5 lines): 2562, 2570, 2576, 2582-2583
+- `writeRaw` (4 lines): 367-370
+- `acquireGeneratedCompactStringWriter` (4 lines): 2380-2381, 2383-2384
+- `releaseGeneratedCompactStringWriter` (4 lines): 2386-2387, 2389-2390
+- `toJsonBytes` (4 lines): 2453-2454, 2456-2457
+- `tryWriteCompactInt64ArrayMap` (3 lines): 92-94
+- `generatedCompactRawV1` (3 lines): 200-202
+- `ensureCapacity` (3 lines): 391, 395-396
+- `pushIndex` (3 lines): 419-421
+- `array` (3 lines): 2742, 2745-2746
+- `writeCompactRawWithCursor` (2 lines): 261-262
+- `writeCompactRawWithWriter` (2 lines): 263-264
+- `jsonPointerEscape` (2 lines): 588-589
+- `generatedCompactWriterConfig` (2 lines): 2356-2357
+- `<toplevel>` (1 lines): 6
+- `writeString` (1 lines): 74
+- `tryWriteCompactInt64Array` (1 lines): 85
+- `tryWriteCompactFloat64Array` (1 lines): 86
+- `tryWriteCompactStringArray` (1 lines): 87
+- `tryWriteCompactStringMap` (1 lines): 91
+- `writeSlot` (1 lines): 403
+- `pop` (1 lines): 451
+- `resetForReuse` (1 lines): 521
+- `writeJsonValueView` (1 lines): 2352
+- `stringMap` (1 lines): 2762
+
+## src/lib_json_fast_reader.cj — 325 uncovered
+- `tryReadRawInt64ArrayMapCompactBody` (39 lines): 972, 977, 979-980, 989-990, 993, 995-996, 1000-1001, 1005-1007, 1009-1010, 1014-1015, 1018, 1022-1023, 1027, 1029-1030, 1033-1036, 1039-1040, 1044, 1046-1047, 1050-1055
+- `tryReadRawInt64ArrayCompactBody` (29 lines): 917-945
+- `readRawInt64Fast` (26 lines): 765, 767-769, 774, 776-778, 784, 787-789, 792, 794-796, 799-801, 804, 806, 808-810, 812-813
+- `tryReadRawInt64MapCompactBody` (24 lines): 862, 867, 869-870, 879-880, 883, 885-886, 890-891, 895, 897, 900-901, 905, 907-908, 911-916
+- `readRawStringFast` (16 lines): 639-640, 643-644, 655, 657, 661, 663-665, 668, 670-674
+- `readRawUInt64Fast` (15 lines): 1069-1070, 1072-1074, 1080, 1083-1085, 1088, 1090-1092, 1094-1095
+- `skipRawObjectPolicyAware` (14 lines): 1594-1597, 1603, 1606-1608, 1615, 1620, 1629, 1631-1633
+- `readRawInt64ArrayFast` (13 lines): 956-968
+- `readRawFloat64Fast` (11 lines): 1098-1099, 1105, 1112, 1116, 1124, 1129-1130, 1134, 1136-1137
+- `readRawInt64ArrayChecked` (10 lines): 841-843, 850, 853-858
+- `skipRawValuePolicyAware` (10 lines): 1544-1545, 1547-1548, 1550-1551, 1554, 1565, 1567-1568
+- `readRawBoolFast` (8 lines): 598-599, 606, 613-617
+- `isSource` (7 lines): 35, 39, 54-57, 60
+- `suggestRawObjectCapacity` (7 lines): 228-232, 236, 242
+- `readRawNameFast` (7 lines): 318, 323, 327-329, 331-332
+- `skipRawWithDepth` (7 lines): 1424-1430
+- `beforeRawArrayItemFast` (6 lines): 568-570, 573, 575-576
+- `skipRawArrayPolicyAware` (6 lines): 1574, 1580, 1587, 1589-1591
+- `enforceValueByteBudget` (6 lines): 2506-2511
+- `enforceDecodedStringBytes` (6 lines): 2515-2520
+- `ensureSkipSeenCapacity` (5 lines): 63-67
+- `hasRawObjectFieldFast` (5 lines): 265, 268, 270-272
+- `readRawName` (5 lines): 310-314
+- `hasRawArrayItemFast` (5 lines): 502, 505, 507-509
+- `failWithCode` (4 lines): 2497, 2500-2502
+- `policyFail` (4 lines): 2530-2531, 2534-2535
+- `readRawString` (3 lines): 634-636
+- `readRawInt64MapChecked` (3 lines): 821, 824-825
+- `readRawInt64ArrayMapChecked` (3 lines): 833, 836-837
+- `readRawInt64MapFast` (3 lines): 951, 954-955
+- `readRawInt64ArrayMapFast` (3 lines): 1061, 1064-1065
+- `enforceDecodedStringBytesIncrement` (3 lines): 2522, 2526-2527
+- `hasRawObjectField` (2 lines): 256-257
+- `skipValue` (2 lines): 1434-1435
+- `skipRawValueBounded` (2 lines): 1467, 1469
+- `parseString` (2 lines): 1828, 1831
+- `isJsonValueDelimiter` (2 lines): 2424-2425
+- `<toplevel>` (1 lines): 4
+- `parseEscapedString` (1 lines): 1846
+
+## src/lib_json_direct_reader.cj — 12 uncovered
+- `skipRawObjectPolicyAware` (5 lines): 502-504, 511, 516
+- `ensureSkipSeenCapacity` (4 lines): 42-45
+- `<toplevel>` (3 lines): 35-36, 39
+
