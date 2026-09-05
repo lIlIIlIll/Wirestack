@@ -9,14 +9,35 @@ import wirestack.internal.transport as transport
 import wirestack.internal.transport_stdnet as stdnet
 import wirestack as api
 
+/**
+ * Wirestack 公开 API：HttpServerClientAuthentication。
+ */
 public enum HttpServerClientAuthentication {
+/**
+ * Wirestack 公开 API：None。
+ */
     | None
+/**
+ * Wirestack 公开 API：Optional。
+ */
     | Optional
+/**
+ * Wirestack 公开 API：Required。
+ */
     | Required
 }
 
+/**
+ * Wirestack 公开 API：HttpServerTlsSecurityProfile。
+ */
 public enum HttpServerTlsSecurityProfile {
+/**
+ * Wirestack 公开 API：Modern。
+ */
     | Modern
+/**
+ * Wirestack 公开 API：StrictTls13。
+ */
     | StrictTls13
 }
 
@@ -33,6 +54,14 @@ public class HttpServerTlsConfig <: Resource {
     private let profile: HttpServerTlsSecurityProfile
     private var closed = false
 
+/**
+ * Wirestack 公开 API：init。
+ * @param certificateChainDer 参数 certificateChainDer。
+ * @param clientAuthentication 参数 clientAuthentication。
+ * @param clientTrustRootsDer 参数 clientTrustRootsDer。
+ * @param privateKeyPkcs8Der 参数 privateKeyPkcs8Der。
+ * @param securityProfile 参数 securityProfile。
+ */
     public init(
         certificateChainDer: Array<Array<Byte>>,
         privateKeyPkcs8Der: Array<Byte>,
@@ -60,6 +89,9 @@ public class HttpServerTlsConfig <: Resource {
         }
     }
 
+/**
+ * Wirestack 公开 API：close。
+ */
     public func close(): Unit {
         synchronized(mutex) {
             if (!closed) {
@@ -70,6 +102,9 @@ public class HttpServerTlsConfig <: Resource {
         }
     }
 
+/**
+ * Wirestack 公开 API：isClosed。
+ */
     public func isClosed(): Bool { synchronized(mutex) { closed } }
 
     ~init() { zeroHttpServerBytes(privateKey) }
@@ -77,13 +112,37 @@ public class HttpServerTlsConfig <: Resource {
 
 /** Public, protocol-neutral view of one incoming HTTP request. */
 public class HttpServerRequest {
+/**
+ * Wirestack 公开 API：method。
+ */
     public let method: HttpMethod
+/**
+ * Wirestack 公开 API：target。
+ */
     public let target: String
+/**
+ * Wirestack 公开 API：version。
+ */
     public let version: HttpVersion
+/**
+ * Wirestack 公开 API：headers。
+ */
     public let headers: HttpHeaders
+/**
+ * Wirestack 公开 API：body。
+ */
     public let body: ResponseBody
+/**
+ * Wirestack 公开 API：requestCancellation。
+ */
     public let requestCancellation: HttpRequestCancellationHandle
+/**
+ * Wirestack 公开 API：connectionCancellation。
+ */
     public let connectionCancellation: HttpConnectionCancellationHandle
+/**
+ * Wirestack 公开 API：streamCancellation。
+ */
     public let streamCancellation: ?HttpStreamCancellationHandle
 
     init(
@@ -122,21 +181,46 @@ public class HttpServerRequest {
 
 /** Handler-owned response and optional chunk trailer. */
 public class HttpServerResponse {
+/**
+ * Wirestack 公开 API：response。
+ */
     public let response: HttpResponse
+/**
+ * Wirestack 公开 API：trailer。
+ */
     public let trailer: HttpTrailer
 
+/**
+ * Wirestack 公开 API：init。
+ * @param response 参数 response。
+ * @param trailer 参数 trailer。
+ */
     public init(response: HttpResponse, trailer!: HttpTrailer = HttpTrailer()) {
         this.response = response
         this.trailer = trailer
     }
 }
 
+/**
+ * Wirestack 公开 API：HttpServerHandler。
+ */
 public interface HttpServerHandler {
+/**
+ * Wirestack 公开 API：handle。
+ * @param context 参数 context。
+ * @param request 参数 request。
+ */
     func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse
 }
 
+/**
+ * Wirestack 公开 API：HttpServerShutdownResult。
+ */
 public type HttpServerShutdownResult = api.HttpServerShutdownResult
 
+/**
+ * Wirestack 公开 API：HttpServerBuilder。
+ */
 public class HttpServerBuilder {
     private var endpoint: ?SocketEndpoint = None<SocketEndpoint>
     private var configuredHandler: ?HttpServerHandler = None<HttpServerHandler>
@@ -147,32 +231,69 @@ public class HttpServerBuilder {
     private var maximumHttp2Streams: UInt32 = 100u32
     private var tlsConfig: ?HttpServerTlsConfig = None<HttpServerTlsConfig>
 
+/**
+ * Wirestack 公开 API：init。
+ */
     public init() {}
 
+/**
+ * Wirestack 公开 API：listen。
+ * @param value 参数 value。
+ */
     public func listen(value: SocketEndpoint): HttpServerBuilder { endpoint = Some(value); this }
+/**
+ * Wirestack 公开 API：handler。
+ * @param value 参数 value。
+ */
     public func handler(value: HttpServerHandler): HttpServerBuilder { configuredHandler = Some(value); this }
+/**
+ * Wirestack 公开 API：limits。
+ * @param value 参数 value。
+ */
     public func limits(value: HttpLimits): HttpServerBuilder { configuredLimits = value; this }
+/**
+ * Wirestack 公开 API：tls。
+ * @param value 参数 value。
+ */
     public func tls(value: HttpServerTlsConfig): HttpServerBuilder { tlsConfig = Some(value); this }
 
+/**
+ * Wirestack 公开 API：connectionLimit。
+ * @param value 参数 value。
+ */
     public func connectionLimit(value: Int64): HttpServerBuilder {
         maximumConnections = value
         this
     }
 
+/**
+ * Wirestack 公开 API：requestsPerConnectionLimit。
+ * @param value 参数 value。
+ */
     public func requestsPerConnectionLimit(value: Int64): HttpServerBuilder {
         maximumRequestsPerConnection = value
         this
     }
 
+/**
+ * Wirestack 公开 API：listenBacklog。
+ * @param value 参数 value。
+ */
     public func listenBacklog(value: Int64): HttpServerBuilder { backlog = value; this }
 
-    /** Sets the hard concurrent stream bound advertised by each HTTP/2 connection. */
+/**
+ * Sets the hard concurrent stream bound advertised by each HTTP/2 connection.
+ * @param value 参数 value。
+ */
     public func http2StreamLimit(value: UInt32): HttpServerBuilder {
         if (value == 0u32) { throw IllegalArgumentException("HTTP/2 stream limit must be positive") }
         maximumHttp2Streams = value
         this
     }
 
+/**
+ * Wirestack 公开 API：build。
+ */
     public func build(): HttpServer {
         let selectedEndpoint = match (endpoint) {
             case Some(value) => value
@@ -243,8 +364,14 @@ private func toInternalSecurityProfile(
     }
 }
 
+/**
+ * Wirestack 公开 API：HttpServer。
+ */
 public class HttpServer <: Resource {
     private let core: http1.Http1Server
+/**
+ * Wirestack 公开 API：localEndpoint。
+ */
     public let localEndpoint: SocketEndpoint
 
     init(core: http1.Http1Server, localEndpoint: SocketEndpoint) {
@@ -252,14 +379,31 @@ public class HttpServer <: Resource {
         this.localEndpoint = localEndpoint
     }
 
+/**
+ * Wirestack 公开 API：builder。
+ */
     public static func builder(): HttpServerBuilder { HttpServerBuilder() }
+/**
+ * Wirestack 公开 API：serve。
+ * @param context 参数 context。
+ */
     public func serve(context!: OperationContext = OperationContext.background()): Unit {
         core.serve(context: context)
     }
+/**
+ * Wirestack 公开 API：shutdown。
+ * @param context 参数 context。
+ */
     public func shutdown(context!: OperationContext = OperationContext.background()): HttpServerShutdownResult {
         core.shutdown(context: context)
     }
+/**
+ * Wirestack 公开 API：close。
+ */
     public func close(): Unit { core.close() }
+/**
+ * Wirestack 公开 API：isClosed。
+ */
     public func isClosed(): Bool { core.isClosed() }
 }
 
@@ -274,6 +418,11 @@ private class PublicHttp1Handler <: http1.Http1ServerHandler {
         this.connectionCancellation = connectionCancellation
     }
 
+/**
+ * Wirestack 公开 API：handle。
+ * @param context 参数 context。
+ * @param request 参数 request。
+ */
     public func handle(request: http1.Http1ServerRequest,
         context: transport.OperationContext): http1.Http1ServerResponse {
         let requestCancellation = HttpRequestCancellationHandle()
@@ -310,6 +459,11 @@ private class PublicHttp2Handler <: http2.Http2ServerHandler {
         this.connectionCancellation = connectionCancellation
     }
 
+/**
+ * Wirestack 公开 API：handle。
+ * @param context 参数 context。
+ * @param request 参数 request。
+ */
     public func handle(request: http2.Http2ServerRequest,
         context: transport.OperationContext): http2.Http2ServerResponse {
         let requestCancellation = HttpRequestCancellationHandle()
@@ -365,6 +519,11 @@ private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHand
         this.maximumHttp1Requests = maximumHttp1Requests
     }
 
+/**
+ * Wirestack 公开 API：serve。
+ * @param context 参数 context。
+ * @param value 参数 value。
+ */
     public func serve(value: transport.DuplexTransport, context: transport.OperationContext): Unit {
         match (tlsHandshaker) {
             case None => serveHttp1(value, context)
@@ -379,6 +538,9 @@ private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHand
         }
     }
 
+/**
+ * Wirestack 公开 API：beginShutdown。
+ */
     public func beginShutdown(): Unit {
         let current = synchronized(mutex) {
             stopping = true
@@ -389,6 +551,9 @@ private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHand
         for (connection in current) { connection.beginDrain() }
     }
 
+/**
+ * Wirestack 公开 API：close。
+ */
     public func close(): Unit {
         let shouldClose = synchronized(mutex) {
             if (closed) { false } else { closed = true; true }
@@ -399,6 +564,9 @@ private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHand
         }
     }
 
+/**
+ * Wirestack 公开 API：isClosed。
+ */
     public func isClosed(): Bool { synchronized(mutex) { closed } }
 
     private func serveHttp1(

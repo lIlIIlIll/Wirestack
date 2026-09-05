@@ -1,5 +1,7 @@
 # Cangjie / build output
 target/
+target/doc/
+target/m7-033-docs/
 build/
 build-script-cache/
 dist/
@@ -26,6 +28,7 @@ __pycache__/
 !docs/evidence/M7-022/linux_x86_64/*.json
 !docs/evidence/M7-032/*.json
 !docs/evidence/M7-032/linux_x86_64/*.json
+!docs/evidence/M7-033/*.json
 !docs/evidence/M7-028/*.json
 !docs/evidence/M7-028/linux_x86_64/*.json
 !docs/security/review/linux-1.0/*.json
@@ -55,6 +58,8 @@ __pycache__/
 !docs/evidence/M7-025/linux_x86_64/*.json
 !docs/evidence/M7-026/linux_x86_64/*.json
 !docs/api/baselines/*.json
+!docs/api/generated/
+!docs/api/generated/*.json
 !native/tls/aws_lc/provider.json
 !tools/tls_provider/*.json
 !docs/evidence/M3-030/*.json

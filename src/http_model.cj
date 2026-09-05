@@ -4,23 +4,57 @@ import std.collection.ArrayList
 
 /** An HTTP method token. Extension methods are supported without an enum ABI change. */
 public struct HttpMethod <: Equatable<HttpMethod> & Hashable & ToString {
+/**
+ * Wirestack 公开 API：value。
+ */
     public let value: String
 
+/**
+ * Wirestack 公开 API：init。
+ * @param value 参数 value。
+ */
     public init(value: String) {
         validateHttpToken(value, "HTTP method")
         this.value = value
     }
 
+/**
+ * Wirestack 公开 API：==。
+ * @param other 参数 other。
+ */
     public operator func ==(other: HttpMethod): Bool { value == other.value }
+/**
+ * Wirestack 公开 API：!=。
+ * @param other 参数 other。
+ */
     public operator func !=(other: HttpMethod): Bool { value != other.value }
+/**
+ * Wirestack 公开 API：hashCode。
+ */
     public func hashCode(): Int64 { value.hashCode() }
+/**
+ * Wirestack 公开 API：toString。
+ */
     public func toString(): String { value }
 }
 
+/**
+ * Wirestack 公开 API：HttpVersion。
+ */
 public enum HttpVersion <: Equatable<HttpVersion> {
+/**
+ * Wirestack 公开 API：Http11。
+ */
     | Http11
+/**
+ * Wirestack 公开 API：Http2。
+ */
     | Http2
 
+/**
+ * Wirestack 公开 API：==。
+ * @param other 参数 other。
+ */
     public operator func ==(other: HttpVersion): Bool {
         match ((this, other)) {
             case (HttpVersion.Http11, HttpVersion.Http11) => true
@@ -29,19 +63,54 @@ public enum HttpVersion <: Equatable<HttpVersion> {
         }
     }
 
+/**
+ * Wirestack 公开 API：!=。
+ * @param other 参数 other。
+ */
     public operator func !=(other: HttpVersion): Bool { !(this == other) }
 }
 
 /** Parser and serializer bounds shared by the client and server paths. */
 public class HttpLimits {
+/**
+ * Wirestack 公开 API：maxHeaderLineBytes。
+ */
     public let maxHeaderLineBytes: Int64
+/**
+ * Wirestack 公开 API：maxHeaderBytes。
+ */
     public let maxHeaderBytes: Int64
+/**
+ * Wirestack 公开 API：maxHeaderCount。
+ */
     public let maxHeaderCount: Int64
+/**
+ * Wirestack 公开 API：maxChunkLineBytes。
+ */
     public let maxChunkLineBytes: Int64
+/**
+ * Wirestack 公开 API：maxTrailerBytes。
+ */
     public let maxTrailerBytes: Int64
+/**
+ * Wirestack 公开 API：maxTrailerCount。
+ */
     public let maxTrailerCount: Int64
+/**
+ * Wirestack 公开 API：maxBodyBytes。
+ */
     public let maxBodyBytes: Int64
 
+/**
+ * Wirestack 公开 API：init。
+ * @param maxBodyBytes 参数 maxBodyBytes。
+ * @param maxChunkLineBytes 参数 maxChunkLineBytes。
+ * @param maxHeaderBytes 参数 maxHeaderBytes。
+ * @param maxHeaderCount 参数 maxHeaderCount。
+ * @param maxHeaderLineBytes 参数 maxHeaderLineBytes。
+ * @param maxTrailerBytes 参数 maxTrailerBytes。
+ * @param maxTrailerCount 参数 maxTrailerCount。
+ */
     public init(
         maxHeaderLineBytes!: Int64 = 8192,
         maxHeaderBytes!: Int64 = 65536,
@@ -71,9 +140,20 @@ public class HttpLimits {
 
 /** One ordered header field. Names retain spelling while lookup is ASCII-insensitive. */
 public struct HttpHeader <: Equatable<HttpHeader> {
+/**
+ * Wirestack 公开 API：name。
+ */
     public let name: String
+/**
+ * Wirestack 公开 API：value。
+ */
     public let value: String
 
+/**
+ * Wirestack 公开 API：init。
+ * @param name 参数 name。
+ * @param value 参数 value。
+ */
     public init(name: String, value: String) {
         validateHttpToken(name, "header name")
         validateHeaderValue(value)
@@ -81,9 +161,17 @@ public struct HttpHeader <: Equatable<HttpHeader> {
         this.value = value
     }
 
+/**
+ * Wirestack 公开 API：==。
+ * @param other 参数 other。
+ */
     public operator func ==(other: HttpHeader): Bool {
         name == other.name && value == other.value
     }
+/**
+ * Wirestack 公开 API：!=。
+ * @param other 参数 other。
+ */
     public operator func !=(other: HttpHeader): Bool { !(this == other) }
 }
 
@@ -91,14 +179,29 @@ public struct HttpHeader <: Equatable<HttpHeader> {
 public class HttpHeaders {
     private let ownedEntries: Array<HttpHeader>
 
+/**
+ * Wirestack 公开 API：size。
+ */
     public prop size: Int64 { get() { ownedEntries.size } }
+/**
+ * Wirestack 公开 API：entries。
+ */
     public prop entries: Array<HttpHeader> { get() { ownedEntries.clone() } }
 
+/**
+ * Wirestack 公开 API：init。
+ * @param entries 参数 entries。
+ * @param limits 参数 limits。
+ */
     public init(entries!: Array<HttpHeader> = Array<HttpHeader>(), limits!: HttpLimits = HttpLimits()) {
         validateHeaderCollection(entries, limits)
         ownedEntries = entries.clone()
     }
 
+/**
+ * Wirestack 公开 API：contains。
+ * @param name 参数 name。
+ */
     public func contains(name: String): Bool {
         validateHttpToken(name, "header name")
         for (entry in ownedEntries) {
@@ -107,6 +210,10 @@ public class HttpHeaders {
         false
     }
 
+/**
+ * Wirestack 公开 API：getFirst。
+ * @param name 参数 name。
+ */
     public func getFirst(name: String): ?String {
         validateHttpToken(name, "header name")
         for (entry in ownedEntries) {
@@ -115,6 +222,10 @@ public class HttpHeaders {
         None<String>
     }
 
+/**
+ * Wirestack 公开 API：getAll。
+ * @param name 参数 name。
+ */
     public func getAll(name: String): Array<String> {
         validateHttpToken(name, "header name")
         let values = ArrayList<String>()
@@ -124,17 +235,33 @@ public class HttpHeaders {
         values.toArray()
     }
 
+/**
+ * Wirestack 公开 API：builder。
+ * @param limits 参数 limits。
+ */
     public static func builder(limits!: HttpLimits = HttpLimits()): HttpHeadersBuilder {
         HttpHeadersBuilder(limits: limits)
     }
 }
 
+/**
+ * Wirestack 公开 API：HttpHeadersBuilder。
+ */
 public class HttpHeadersBuilder {
     private let limits: HttpLimits
     private var values = ArrayList<HttpHeader>()
 
+/**
+ * Wirestack 公开 API：init。
+ * @param limits 参数 limits。
+ */
     public init(limits!: HttpLimits = HttpLimits()) { this.limits = limits }
 
+/**
+ * Wirestack 公开 API：add。
+ * @param name 参数 name。
+ * @param value 参数 value。
+ */
     public func add(name: String, value: String): HttpHeadersBuilder {
         let candidate = HttpHeader(name, value)
         let checked = ArrayList<HttpHeader>()
@@ -145,6 +272,11 @@ public class HttpHeadersBuilder {
         this
     }
 
+/**
+ * Wirestack 公开 API：set。
+ * @param name 参数 name。
+ * @param value 参数 value。
+ */
     public func set(name: String, value: String): HttpHeadersBuilder {
         validateHttpToken(name, "header name")
         let replacement = HttpHeader(name, value)
@@ -166,6 +298,10 @@ public class HttpHeadersBuilder {
         this
     }
 
+/**
+ * Wirestack 公开 API：remove。
+ * @param name 参数 name。
+ */
     public func remove(name: String): HttpHeadersBuilder {
         validateHttpToken(name, "header name")
         let retained = ArrayList<HttpHeader>()
@@ -176,13 +312,23 @@ public class HttpHeadersBuilder {
         this
     }
 
+/**
+ * Wirestack 公开 API：build。
+ */
     public func build(): HttpHeaders { HttpHeaders(entries: values.toArray(), limits: limits) }
 }
 
 /** Immutable trailer fields; routing and framing fields are never representable here. */
 public class HttpTrailer {
+/**
+ * Wirestack 公开 API：headers。
+ */
     public let headers: HttpHeaders
 
+/**
+ * Wirestack 公开 API：init。
+ * @param headers 参数 headers。
+ */
     public init(headers!: HttpHeaders = HttpHeaders()) {
         for (name in [
             "content-length", "transfer-encoding", "host", "connection",
