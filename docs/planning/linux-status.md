@@ -170,7 +170,7 @@ replace the six-platform M7-001 through M7-017 tasks.
 
 ## Next critical path
 
-The Linux x86_64 glibc release gates are complete; M7-033 is now an
+The Linux x86_64 glibc release gates are complete; M7-033 remains an
 independent documentation-infrastructure task with current hosted Pages
 evidence. Global non-Linux M7 work remains separate and is not marked
 complete by this decision.
