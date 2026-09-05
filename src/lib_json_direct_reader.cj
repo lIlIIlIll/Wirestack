@@ -32,6 +32,17 @@ private class JsonDirectReadContext {
 class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
     private let source: InputCursor
     private let config: JsonReadOptions
+    // Linear duplicate scan for policy-aware unknown-object skips; the
+    // window [base..count) holds only the current object level.
+    private var skipSeenNames: Array<String> = Array<String>(16, repeat: "")
+    private var skipSeenCount: Int64 = 0
+
+    private func ensureSkipSeenCapacity(): Unit {
+        if (skipSeenCount < skipSeenNames.size) { return }
+        let grown = Array<String>(skipSeenNames.size * 2, repeat: "")
+        for (position in 0..skipSeenCount) { grown[position] = skipSeenNames[position] }
+        skipSeenNames = grown
+    }
     private let streaming: Bool
     private let generatedState: GeneratedReadStateV1
     private let contexts = ArrayList<JsonDirectReadContext>()
@@ -486,20 +497,22 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
             consumeByte()
             return
         }
-        let seenNames = if (jsonReadOptionsRejectsDuplicateKeys(config)) {
-            Some(HashSet<String>())
+        let seenBase = if (jsonReadOptionsRejectsDuplicateKeys(config)) {
+            skipSeenCount
         } else {
-            None<HashSet<String>>
+            -1
         }
         while (true) {
             let name = parseString()
-            match (seenNames) {
-                case Some(seen) =>
-                    if (seen.contains(name)) {
-                        policyFail("Duplicate object key '${name}'", "duplicate_key")
-                    }
-                    seen.add(name)
-                case None => ()
+            if (seenBase >= 0) {
+                var duplicate = false
+                for (position in seenBase..skipSeenCount) {
+                    if (skipSeenNames[position] == name) { duplicate = true; break }
+                }
+                if (duplicate) { policyFail("Duplicate object key '${name}'", "duplicate_key") }
+                ensureSkipSeenCapacity()
+                skipSeenNames[skipSeenCount] = name
+                skipSeenCount++
             }
             skipSpaces()
             expectByte(b':')
@@ -507,6 +520,7 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
             skipSpaces()
             if (source.hasMore() && source.peek() == b'}') {
                 consumeByte()
+                if (seenBase >= 0) { skipSeenCount = seenBase }
                 return
             }
             expectByte(b',')
