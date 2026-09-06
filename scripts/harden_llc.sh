@@ -19,11 +19,14 @@ if [[ ! -f "$llc" ]]; then
     exit 1
 fi
 if [[ -f "$llc.yjson-real" ]]; then
-    echo "harden_llc: wrapper already installed at $llc"
-    exit 0
+    # Warm runner VMs persist /opt/hostedtoolcache across jobs, and
+    # setup-cangjie may then reuse a cached SDK whose wrapper was
+    # installed by an older revision of this script. Keep the preserved
+    # real binary but ALWAYS rewrite the wrapper to this revision.
+    echo "harden_llc: real binary already preserved at $llc.yjson-real"
+else
+    mv "$llc" "$llc.yjson-real"
 fi
-
-mv "$llc" "$llc.yjson-real"
 cat > "$llc" <<'WRAPPER'
 #!/usr/bin/env bash
 dir="$(cd "$(dirname "$0")" && pwd)"
