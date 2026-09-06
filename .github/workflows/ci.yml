@@ -66,7 +66,7 @@ jobs:
         run: scripts/ci_job.sh stream-docs
 
   nightly:
-    name: Cangjie nightly (7-day window)
+    name: Cangjie STS version
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.version.outputs.value }}
@@ -83,31 +83,17 @@ jobs:
       - name: Select seven-day cache window
         id: window
         run: echo "value=$(( $(date -u +%s) / 604800 ))" >> "$GITHUB_OUTPUT"
-      - name: Restore nightly selection
-        if: inputs.cangjie_version == ''
-        id: cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
-        with:
-          path: .ci/cangjie-nightly-version
-          key: cangjie-sts-${{ steps.window.outputs.value }}
-      - name: Pin nightly to verified 20260829 build
-        run: |
-          mkdir -p .ci
-          python3 scripts/latest_cangjie_nightly.py > .ci/cangjie-nightly-version
-      - name: Export shared nightly version
+      - name: Export shared STS version
         id: version
         env:
           REQUESTED_VERSION: ${{ inputs.cangjie_version }}
         run: |
           if [[ -n "$REQUESTED_VERSION" ]]; then
-            value=$(python3 scripts/latest_cangjie_nightly.py \
-              --validate-version "$REQUESTED_VERSION")
+            value="$REQUESTED_VERSION"
             resolution=workflow-dispatch-exact
           else
-            value=$(cat .ci/cangjie-nightly-version)
-            python3 scripts/latest_cangjie_nightly.py \
-              --validate-version "$value" >/dev/null
-            resolution=seven-day-cache-window
+            value="1.1.0-alpha.20260829040003"
+            resolution=sts-pinned
           fi
           echo "value=$value" >> "$GITHUB_OUTPUT"
           echo "resolution=$resolution" >> "$GITHUB_OUTPUT"
