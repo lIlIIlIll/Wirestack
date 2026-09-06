@@ -22,8 +22,8 @@ class ApiDocsValidationTest(unittest.TestCase):
         diagnostics: list[dict[str, object]] | None = None,
     ) -> pathlib.Path:
         document = {
-            "schemaVersion": "cjdoc.doc-ir/7",
-            "generator": {"name": "cjdoc", "version": "0.6.0"},
+            "schemaVersion": "cjdoc.doc-ir/8",
+            "generator": {"name": "cjdoc", "version": "0.7.2"},
             "project": {"name": "yjson_test", "kind": "package"},
             "configuration": {"audience": "external"},
             "packages": [{"name": "yjson_test"}],
@@ -44,7 +44,7 @@ class ApiDocsValidationTest(unittest.TestCase):
         return validate_doc_ir(
             path,
             package_name="yjson_test",
-            generator_version="0.6.0",
+            generator_version="0.7.2",
             expected_unsupported=expected or Counter(),
         )
 

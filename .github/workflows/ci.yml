@@ -166,6 +166,8 @@ jobs:
           channel: nightly
           version: ${{ needs.nightly.outputs.version }}
           archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
+      - name: Retry-harden llc against flaky runner SIGSEGV
+        run: scripts/harden_llc.sh
       - name: Install native prerequisites
         if: contains(fromJSON('["standards-conformance","schema-formats-conformance","algorithms-consumer","registry-rehearsal","custom-native","yyjson-native","native-clang","native-gcc","sanitizer","fuzz-short","yyjson-colink"]'), matrix.gate)
         run: |
@@ -274,6 +276,9 @@ jobs:
             Add-Content -Path $env:GITHUB_PATH -Value $_
           }
           cjc -v
+      - name: Retry-harden llc against flaky runner SIGSEGV
+        if: matrix.os == 'macos-14'
+        run: scripts/harden_llc.sh
       - name: Record toolchain
         run: |
           echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"
@@ -299,6 +304,8 @@ jobs:
           channel: nightly
           version: ${{ needs.nightly.outputs.version }}
           archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
+      - name: Retry-harden llc against flaky runner SIGSEGV
+        run: scripts/harden_llc.sh
       - name: Record toolchain
         run: |
           echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"
@@ -355,6 +362,8 @@ jobs:
           channel: nightly
           version: ${{ needs.nightly.outputs.version }}
           archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
+      - name: Retry-harden llc against flaky runner SIGSEGV
+        run: scripts/harden_llc.sh
       - name: Record toolchain
         run: |
           echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"

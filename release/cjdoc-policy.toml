@@ -1,5 +1,5 @@
 schema_version = 1
-doc_ir_schema = "cjdoc.doc-ir/7"
+doc_ir_schema = "cjdoc.doc-ir/8"
 audience = "external"
 
 # cjdoc 0.6.0 preserves these source constructs as explicit unsupported entries.

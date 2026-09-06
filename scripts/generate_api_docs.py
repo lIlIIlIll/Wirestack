@@ -53,8 +53,8 @@ def validate_doc_ir(
         raise ApiDocsError(f"{package_name}: unreadable docs.json: {error}") from error
     if not isinstance(document, dict):
         raise ApiDocsError(f"{package_name}: docs.json root must be an object")
-    if document.get("schemaVersion") != "cjdoc.doc-ir/7":
-        raise ApiDocsError(f"{package_name}: cjdoc must emit Doc IR v7")
+    if document.get("schemaVersion") != "cjdoc.doc-ir/8":
+        raise ApiDocsError(f"{package_name}: cjdoc must emit Doc IR v8")
     generator = document.get("generator")
     if not isinstance(generator, dict) or generator.get("name") != "cjdoc":
         raise ApiDocsError(f"{package_name}: docs.json has an unexpected generator")
@@ -207,8 +207,8 @@ def generate(
     policy = tomllib.loads(policy_path.read_text(encoding="utf-8"))
     if policy.get("schema_version") != 1:
         raise ApiDocsError("unsupported cjdoc API documentation policy schema")
-    if policy.get("doc_ir_schema") != "cjdoc.doc-ir/7":
-        raise ApiDocsError("cjdoc policy must require Doc IR v7")
+    if policy.get("doc_ir_schema") != "cjdoc.doc-ir/8":
+        raise ApiDocsError("cjdoc policy must require Doc IR v8")
     if policy.get("audience") != "external":
         raise ApiDocsError("cjdoc policy must require the external audience")
     expected_unsupported: dict[str, Counter[tuple[str, str]]] = {

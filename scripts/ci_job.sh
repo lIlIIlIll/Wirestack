@@ -181,8 +181,22 @@ case "$job" in
         ;;
     pure-platform)
         require_cangjie
-        (cd "$repo" && cjpm test --no-color)
-        (cd "$repo/packages/yjson_algorithms" && cjpm test --no-color)
+        # Windows-hosted runners hit a flaky llc.exe crash (0xC0000005)
+        # while lowering identical IR; cjpm caches completed packages, so
+        # a bounded retry only recompiles the package that crashed.
+        retry_cjpm_test() {
+            local dir="$1"
+            local attempt
+            for attempt in 1 2 3; do
+                if (cd "$dir" && cjpm test --no-color); then
+                    return 0
+                fi
+                echo "pure-platform: cjpm test attempt $attempt failed in $dir" >&2
+            done
+            return 1
+        }
+        retry_cjpm_test "$repo"
+        retry_cjpm_test "$repo/packages/yjson_algorithms"
         ;;
     standards-conformance)
         require_cangjie
