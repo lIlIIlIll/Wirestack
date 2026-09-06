@@ -9,7 +9,7 @@ CV ≤ 3%,全部 stable**。
   cursor 直读 Option 标量、池化 writer 状态复用、skip 线性扫描)
 
 结论与逐 case 表见
-[`benchmarks/results/t9-ab-qualification-20260905/qualification.md`](../../benchmarks/results/t9-ab-qualification-20260905/qualification.md);
+`benchmarks/results/t9-ab-qualification-20260905/qualification.md`;
 原始证据(22 个 cell 的完整输出)在同目录 `ab-results.tgz`。
 
 ## 结果摘要
