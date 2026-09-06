@@ -158,6 +158,7 @@ scripts/generate_public_api_snapshot.py
 scripts/run_cjpm_executable.sh
 scripts/codex_cangjie_env
 scripts/run_standards_conformance.py
+scripts/harden_llc.sh
 scripts/runtime_freeze_contract_checks.sh
 scripts/ci_job.sh
 scripts/ci_fresh_checkout.sh
