@@ -8,8 +8,8 @@ version_output = "cjdoc 0.7.2"
 version_args = ["--version"]
 
 source_url = "https://github.com/lIlIIlIll/cjdoc/tree/fe0b5a5294c6d98dc1e6fb7d6d41cb5e9b04d4c0"
-source_archive_url = "https://github.com/lIlIIlIll/cjdoc/archive/refs/tags/v0.7.2.tar.gz"
-source_archive_sha256 = "4e935d856b07afebc709a4d800c99196f4ca08a05ea9235734ebbd7e35a0cb70"
+source_archive_url = "https://github.com/lIlIIlIll/cjdoc/archive/fe0b5a5294c6d98dc1e6fb7d6d41cb5e9b04d4c0.tar.gz"
+source_archive_sha256 = "06e07cad8052cfbc4464fbc6ec27c393447b38bb2688741ce0a096b525401f75"
 source_revision = "fe0b5a5294c6d98dc1e6fb7d6d41cb5e9b04d4c0"
 source_directory = "cjdoc-fe0b5a5294c6d98dc1e6fb7d6d41cb5e9b04d4c0"
 binary_path = "target/release/bin/main"
