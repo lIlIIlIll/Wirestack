@@ -54,14 +54,14 @@ def _safe_relative(config: dict, name: str) -> pathlib.PurePosixPath:
 
 
 def validate_toolchain_policy(config: dict, cjc_output: str, cjpm_output: str) -> str:
-    """Validate one exact installed toolchain against the weekly-nightly policy."""
-    if config.get("cjc_channel") != "nightly":
-        raise CjdocQualificationError("qualified cjdoc must use the nightly Cangjie channel")
+    """Validate one exact installed toolchain against the STS release policy."""
+    if config.get("cjc_channel") != "sts":
+        raise CjdocQualificationError("qualified cjdoc must use the sts Cangjie channel")
     cjc_lines = [line.strip() for line in cjc_output.splitlines() if line.strip()]
     cjpm_lines = [line.strip() for line in cjpm_output.splitlines() if line.strip()]
     cjc_match = CJC_NIGHTLY.fullmatch(cjc_lines[0] if cjc_lines else "")
     if cjc_match is None:
-        raise CjdocQualificationError("current cjc is not a complete dated nightly")
+        raise CjdocQualificationError("current cjc is not a valid STS release")
     if len(cjpm_lines) != 1 or CJPM_VERSION.fullmatch(cjpm_lines[0]) is None:
         raise CjdocQualificationError("current cjpm version output is invalid")
     resolved_version = os.environ.get("YJSON_RESOLVED_NIGHTLY", "").strip()
@@ -113,8 +113,8 @@ def validate_qualification(
     if SHA256.fullmatch(expected_archive_sha) is None:
         raise CjdocQualificationError(
             "source_archive_sha256 must be a lowercase SHA-256 digest")
-    if config.get("cjc_channel") != "nightly":
-        raise CjdocQualificationError("qualified cjdoc must use the nightly Cangjie channel")
+    if config.get("cjc_channel") != "sts":
+        raise CjdocQualificationError("qualified cjdoc must use the sts Cangjie channel")
 
     if binary_override is None:
         environment_binary = os.environ.get("YJSON_CJDOC_BINARY", "").strip()
