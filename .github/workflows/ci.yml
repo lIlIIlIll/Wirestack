@@ -83,9 +83,6 @@ jobs:
       - name: Select seven-day cache window
         id: window
         run: echo "value=$(( $(date -u +%s) / 604800 ))" >> "$GITHUB_OUTPUT"
-      - name: Select seven-day cache window
-        id: window
-        run: echo "value=$(( $(date -u +%s) / 604800 ))" >> "$GITHUB_OUTPUT"
       - name: Restore nightly selection
         if: inputs.cangjie_version == ''
         id: cache
