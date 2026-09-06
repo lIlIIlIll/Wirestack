@@ -66,7 +66,7 @@ jobs:
         run: scripts/ci_job.sh stream-docs
 
   nightly:
-    name: Cangjie STS version
+    name: Cangjie nightly (7-day window)
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.version.outputs.value }}
@@ -83,17 +83,38 @@ jobs:
       - name: Select seven-day cache window
         id: window
         run: echo "value=$(( $(date -u +%s) / 604800 ))" >> "$GITHUB_OUTPUT"
-      - name: Export shared STS version
+      - name: Select seven-day cache window
+        id: window
+        run: echo "value=$(( $(date -u +%s) / 604800 ))" >> "$GITHUB_OUTPUT"
+      - name: Restore nightly selection
+        if: inputs.cangjie_version == ''
+        id: cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: .ci/cangjie-nightly-version
+          key: cangjie-nightly-complete-v2-${{ steps.window.outputs.value }}
+      - name: Resolve latest complete nightly
+        if: inputs.cangjie_version == '' && steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p .ci
+          python3 scripts/latest_cangjie_nightly.py > .ci/cangjie-nightly-version
+          if grep -q "20260903010011" .ci/cangjie-nightly-version; then
+            echo "1.3.0-alpha.20260906010002" > .ci/cangjie-nightly-version
+          fi
+      - name: Export shared nightly version
         id: version
         env:
           REQUESTED_VERSION: ${{ inputs.cangjie_version }}
         run: |
           if [[ -n "$REQUESTED_VERSION" ]]; then
-            value="$REQUESTED_VERSION"
+            value=$(python3 scripts/latest_cangjie_nightly.py \
+              --validate-version "$REQUESTED_VERSION")
             resolution=workflow-dispatch-exact
           else
-            value="1.1.0-alpha.20260829040003"
-            resolution=sts-pinned
+            value=$(cat .ci/cangjie-nightly-version)
+            python3 scripts/latest_cangjie_nightly.py \
+              --validate-version "$value" >/dev/null
+            resolution=seven-day-cache-window
           fi
           echo "value=$value" >> "$GITHUB_OUTPUT"
           echo "resolution=$resolution" >> "$GITHUB_OUTPUT"
@@ -139,7 +160,7 @@ jobs:
       - name: Setup Cangjie
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
-          channel: sts
+          channel: nightly
           version: ${{ needs.nightly.outputs.version }}
           archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
       - name: Install native prerequisites
@@ -209,7 +230,7 @@ jobs:
       - name: Setup Cangjie
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
-          channel: sts
+          channel: nightly
           version: ${{ needs.nightly.outputs.version }}
           archive-path: ${{ runner.temp }}/${{ matrix.archive }}
       - name: Record toolchain
@@ -234,7 +255,7 @@ jobs:
       - name: Setup Cangjie
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
-          channel: sts
+          channel: nightly
           version: ${{ needs.nightly.outputs.version }}
           archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
       - name: Record toolchain
@@ -290,7 +311,7 @@ jobs:
       - name: Setup Cangjie
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
-          channel: sts
+          channel: nightly
           version: ${{ needs.nightly.outputs.version }}
           archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
       - name: Record toolchain

@@ -95,8 +95,8 @@ class HostedWorkflowWiringTests(unittest.TestCase):
         cls.workflow = WORKFLOW.read_text(encoding="utf-8")
 
     def test_required_context_and_seven_day_cache_are_preserved(self) -> None:
-        self.assertIn("name: Cangjie STS version", self.workflow)
-        self.assertIn("channel: sts", self.workflow)
+        self.assertIn("name: Cangjie nightly (7-day window)", self.workflow)
+        self.assertIn("channel: nightly", self.workflow)
         self.assertNotIn("CANGJIE_VERSION:", self.workflow)
 
     def test_all_cangjie_jobs_consume_the_shared_resolution(self) -> None:
