@@ -93,7 +93,7 @@ jobs:
       - name: Pin nightly to verified 20260829 build
         run: |
           mkdir -p .ci
-          echo "1.1.0-alpha.20260829040003" > .ci/cangjie-nightly-version
+          python3 scripts/latest_cangjie_nightly.py > .ci/cangjie-nightly-version
       - name: Export shared nightly version
         id: version
         env:
