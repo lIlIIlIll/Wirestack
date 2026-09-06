@@ -181,10 +181,19 @@ case "$job" in
         ;;
     pure-platform)
         require_cangjie
-        # Windows-hosted runners hit a flaky llc.exe crash (0xC0000005)
-        # while lowering identical IR; cjpm caches completed packages, so
-        # a bounded retry only recompiles the package that crashed.
+        case "$(uname -s)" in
+            MINGW*|MSYS*|CYGWIN*)
+                # cjc spawns llc.exe directly, so no retry wrapper can be
+                # injected; use -O1 codegen for this gate to sidestep the
+                # runner-side libLLVM access violation (0xC0000005) that is
+                # deterministic on some Windows runner CPU models.
+                sed -i 's/^override-compile-option = ""$/override-compile-option = "-O1"/' \
+                    "$repo/cjpm.toml"
+                ;;
+        esac
         retry_cjpm_test() {
+            # cjpm caches completed packages, so a bounded retry only
+            # recompiles the package whose llc invocation crashed.
             local dir="$1"
             local attempt
             for attempt in 1 2 3; do

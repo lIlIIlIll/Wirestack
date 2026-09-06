@@ -27,14 +27,33 @@ mv "$llc" "$llc.yjson-real"
 cat > "$llc" <<'WRAPPER'
 #!/usr/bin/env bash
 dir="$(cd "$(dirname "$0")" && pwd)"
+args=("$@")
 attempt=1
 while :; do
-    "$dir/llc.yjson-real" "$@"
+    "$dir/llc.yjson-real" "${args[@]}"
     status=$?
-    if [[ "$status" -ne 139 ]] || [[ "$attempt" -ge 6 ]]; then
+    if [[ "$status" -ne 139 ]]; then
         exit "$status"
     fi
-    echo "llc attempt $attempt crashed with SIGSEGV; retrying" >&2
+    echo "llc attempt $attempt crashed with SIGSEGV" >&2
+    if [[ "$attempt" -eq 3 ]]; then
+        # The crash is deterministic on some GitHub runner CPU models, so
+        # retries alone cannot recover. Fall back to -O1 lowering, which
+        # avoids the faulty -O2 pass pipeline in the bundled libLLVM-15.
+        downgraded=()
+        for arg in "${args[@]}"; do
+            if [[ "$arg" == "-O2" ]]; then
+                downgraded+=(-O1)
+            else
+                downgraded+=("$arg")
+            fi
+        done
+        args=("${downgraded[@]}")
+        echo "llc: falling back to -O1 codegen for this host" >&2
+    fi
+    if [[ "$attempt" -ge 6 ]]; then
+        exit 139
+    fi
     attempt=$((attempt + 1))
 done
 WRAPPER
