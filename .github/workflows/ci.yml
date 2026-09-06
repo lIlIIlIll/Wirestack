@@ -95,15 +95,17 @@ jobs:
         run: |
           mkdir -p .ci
           python3 scripts/latest_cangjie_nightly.py > .ci/cangjie-nightly-version
-      - name: Exclude known-bad nightly
+      - name: Pin verified healthy nightly
         if: inputs.cangjie_version == ''
         run: |
-          # 1.3.0-alpha.20260903010011 llc SIGSEGV on CI runners; always
-          # exclude regardless of cache hit so stale caches are corrected.
-          if grep -q "20260903010011" .ci/cangjie-nightly-version 2>/dev/null; then
-            echo "1.3.0-alpha.20260906010002" > .ci/cangjie-nightly-version
-            echo "excluded known-bad nightly 20260903010011"
-          fi
+          # The nightly builds from 20260903 onward carry an llc regression
+          # (deterministic SIGSEGV lowering Cangjie bitcode on several
+          # runner CPU models; retries, glibc tunables, -O1 lowering, and
+          # assembly emission all crash as well). Pin the shared selection
+          # to the last verified healthy build regardless of cache hits so
+          # every job compiles with the same, working toolchain.
+          echo "1.3.0-alpha.20260829010011" > .ci/cangjie-nightly-version
+          echo "pinned healthy nightly 1.3.0-alpha.20260829010011"
       - name: Export shared nightly version
         id: version
         env:
