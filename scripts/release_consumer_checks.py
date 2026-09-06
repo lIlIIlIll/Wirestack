@@ -22,9 +22,17 @@ def run_fixture(
     source: str,
     base: pathlib.Path,
     override_compile_option: str,
+    link_native_scanner: bool = False,
 ) -> None:
     project = base / name
     (project / "src").mkdir(parents=True)
+    # cjpm applies only the root package's link-option when linking the final
+    # binary, so the scanner archive built by the primitives pre-build must be
+    # linked by the consumer fixture explicitly.
+    scanner_option = (
+        f'link-option = "-L {project.resolve() / "target" / "native"} -lyjson_scanner"\n'
+        if link_native_scanner else ""
+    )
     manifest = f'''[package]
 cjc-version = "1.1.0"
 name = "yjson_release_{name}"
@@ -32,7 +40,7 @@ version = "0.0.0"
 output-type = "executable"
 compile-option = "-O2"
 override-compile-option = "{override_compile_option}"
-
+{scanner_option}
 [dependencies]
 {dependencies}
 '''
@@ -223,7 +231,7 @@ main(): Unit {
     }
     println("native consumer passed")
 }
-''', base, args.override_compile_option)
+''', base, args.override_compile_option, link_native_scanner=True)
         if "yyjson" in selected:
             run_fixture("yyjson", f'''yjson = {{ path = "{core}" }}
 yjson_yyjson = {{ path = "{yyjson}" }}

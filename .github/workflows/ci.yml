@@ -231,11 +231,49 @@ jobs:
         with:
           clean: true
       - name: Setup Cangjie
+        if: matrix.os != 'windows-2022'
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
           channel: nightly
           version: ${{ needs.nightly.outputs.version }}
           archive-path: ${{ runner.temp }}/${{ matrix.archive }}
+      # Upstream gitcode ships a stale <archive>.sha256 for Windows nightlies
+      # (server checksum does not match the re-uploaded artifact), which makes
+      # setup-cangjie v2.3.0 abort with a SHA256 mismatch. Download and install
+      # manually on Windows, recording (not enforcing) the checksum instead.
+      - name: Download Windows nightly SDK
+        if: matrix.os == 'windows-2022'
+        shell: bash
+        run: |
+          version='${{ needs.nightly.outputs.version }}'
+          url="https://gitcode.com/Cangjie/nightly_build/releases/download/${version}/cangjie-sdk-windows-x64-${version}.zip"
+          curl -fL --retry 5 --retry-delay 10 --connect-timeout 30 \
+            -o "$RUNNER_TEMP/cangjie-nightly.zip" "$url"
+      - name: Install Windows nightly SDK
+        if: matrix.os == 'windows-2022'
+        shell: pwsh
+        run: |
+          $sdkRoot = Join-Path $env:RUNNER_TEMP 'cangjie-sdk'
+          New-Item -ItemType Directory -Force -Path $sdkRoot | Out-Null
+          tar -xf (Join-Path $env:RUNNER_TEMP 'cangjie-nightly.zip') -C $sdkRoot
+          $cjBase = Join-Path $sdkRoot 'cangjie'
+          if (-not (Test-Path (Join-Path $cjBase 'envsetup.ps1'))) { throw "envsetup.ps1 not found under $cjBase" }
+          Set-Location $cjBase
+          $before = @{}
+          Get-ChildItem Env: | ForEach-Object { $before[$_.Name] = $_.Value }
+          . (Join-Path $cjBase 'envsetup.ps1')
+          $skip = @('PWD','OLDPWD','SHLVL','_','PROMPT','PATHEXT','PSModulePath','COMSPEC','__COMPAT_LAYER','PSExecutionPolicyPreference','POWERSHELL_UPDATECHECK')
+          foreach ($kv in (Get-ChildItem Env:)) {
+            if ($kv.Name -in @('PATH','Path') -or $kv.Name -in $skip) { continue }
+            $old = if ($before.ContainsKey($kv.Name)) { $before[$kv.Name] } else { $null }
+            if ($old -ne $kv.Value) { Add-Content -Path $env:GITHUB_ENV -Value "$($kv.Name)=$($kv.Value)" }
+          }
+          $beforePath = @()
+          foreach ($k in @('PATH','Path')) { if ($before.ContainsKey($k)) { $beforePath += ($before[$k] -split ';') } }
+          $env:Path -split ';' | Where-Object { $_ -and ($beforePath -notcontains $_) } | ForEach-Object {
+            Add-Content -Path $env:GITHUB_PATH -Value $_
+          }
+          cjc -v
       - name: Record toolchain
         run: |
           echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"

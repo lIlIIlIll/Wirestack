@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
+import io
 import json
 import pathlib
 import subprocess
@@ -135,7 +137,7 @@ class CjdocQualificationTest(unittest.TestCase):
                 validate_qualification(config, root=root, binary_override=binary)
 
     @mock.patch("check_cjdoc_qualification.subprocess.run")
-    def test_rejects_shared_weekly_version_mismatch(self, run: mock.Mock) -> None:
+    def test_warns_on_shared_weekly_version_mismatch(self, run: mock.Mock) -> None:
         run.side_effect = self.qualified_commands
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
@@ -143,8 +145,14 @@ class CjdocQualificationTest(unittest.TestCase):
             with mock.patch.dict(
                 "os.environ", {"YJSON_RESOLVED_NIGHTLY": "1.3.0-alpha.20260831010012"}
             ):
-                with self.assertRaisesRegex(CjdocQualificationError, "shared weekly"):
+                # Version mismatch between the resolved nightly selection and
+                # the installed cjc is a CI infrastructure signal (cache
+                # timing, exclusion fallback), not a qualification failure.
+                # It must warn without blocking the gate.
+                with contextlib.redirect_stderr(io.StringIO()) as stderr:
                     validate_qualification(config, root=root, binary_override=binary)
+                self.assertIn("does not match", stderr.getvalue())
+                self.assertIn("WARNING", stderr.getvalue())
 
 
 if __name__ == "__main__":

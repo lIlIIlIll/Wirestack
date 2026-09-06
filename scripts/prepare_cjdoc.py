@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -72,6 +73,33 @@ def download_archive(url: str, destination: pathlib.Path) -> None:
                         f"cjdoc source archive exceeds {MAX_ARCHIVE_BYTES} bytes"
                     )
                 output.write(chunk)
+
+
+def downgrade_build_optimization(source_root: pathlib.Path) -> None:
+    """Force the cjdoc tool build to -O1 via the root cjpm manifest.
+
+    cjpm applies the root manifest's override-compile-option to every
+    package in the workspace. The pinned nightly llc (bundled libLLVM-15
+    linked against the runner's system libstdc++) deterministically
+    SIGSEGVs while lowering the markdown dependency at -O2 on
+    ubuntu-24.04 runners, so the whole tool build is downgraded to -O1.
+    The source archive identity (SHA-256) and the version check are
+    unaffected.
+    """
+    manifest = source_root / "cjpm.toml"
+    text = manifest.read_text(encoding="utf-8")
+    patched, count = re.subn(
+        r'^(\s*override-compile-option\s*=\s*)""\s*$',
+        r'\1"-O1"',
+        text,
+        flags=re.MULTILINE,
+    )
+    if count != 1:
+        raise CjdocPrepareError(
+            "cannot patch cjdoc build optimization: expected exactly one "
+            f'empty override-compile-option in {manifest}, found {count}'
+        )
+    manifest.write_text(patched, encoding="utf-8")
 
 
 def safe_extract(
@@ -182,6 +210,7 @@ def prepare(
             temporary / "source",
             str(config["source_directory"]),
         )
+        downgrade_build_optimization(source_root)
         build_command = list(config["build_command"])
         result = subprocess.run(
             build_command,
