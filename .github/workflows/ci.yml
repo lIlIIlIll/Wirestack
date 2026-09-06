@@ -248,7 +248,9 @@ jobs:
         env:
           YJSON_RESOLVED_NIGHTLY: ${{ needs.nightly.outputs.version }}
           YJSON_API_DOCS_OUTPUT: target/api-docs
-        run: scripts/ci_job.sh api-docs
+        run: |
+          ulimit -s 131072
+          scripts/ci_job.sh api-docs
       - name: Configure GitHub Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
       - name: Upload API documentation
