@@ -114,7 +114,12 @@ private func jsonFastFixedOffsetTimeZone(offsetSeconds: Int64): TimeZone {
 }
 
 private func jsonFastParseRfc3339Fallback(text: String): DateTime {
-    DateTime.parse(text, DateTimeFormat.RFC3339)
+    try {
+        DateTime.parse(text, DateTimeFormat.RFC3339)
+    } catch (error: Exception) {
+        throw JsonException("Cannot decode value as RFC 3339 DateTime", error,
+            code: "invalid_value")
+    }
 }
 
 private func jsonFastRfc3339LeapYear(year: Int64): Bool {
@@ -428,7 +433,11 @@ func jsonFastFormatRfc3339DateTime(value: DateTime): String {
 }
 
 func jsonFastParseBigInt(text: String): BigInt {
-    BigInt.parse(text)
+    try {
+        BigInt.parse(text)
+    } catch (error: Exception) {
+        throw JsonException("Cannot decode value as BigInt", error, code: "invalid_value")
+    }
 }
 
 private func jsonFastPower10(digits: Int64): Int64 {
@@ -597,7 +606,11 @@ func jsonFastFormatBigInt(value: BigInt): String {
 }
 
 func jsonFastParseDecimal(text: String): Decimal {
-    Decimal.parse(text)
+    try {
+        Decimal.parse(text)
+    } catch (error: Exception) {
+        throw JsonException("Cannot decode value as Decimal", error, code: "invalid_value")
+    }
 }
 
 private func jsonFastReadRawDecimalToken(reader: JsonFastReader): Decimal {

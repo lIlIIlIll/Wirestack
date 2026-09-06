@@ -127,11 +127,13 @@ int32_t YJ_Compact_Stats(uint64_t handle, uint64_t *stats, uint64_t capacity);
 int32_t YJ_Compact_DuplicateStats(uint64_t handle, uint64_t *stats,
                                  uint64_t capacity);
 
+#ifdef YJ_TESTING
 /* Credential-free FFI cost probes used only by the benchmark runner. */
 uint64_t YJ_Compact_Noop(uint64_t value);
 int32_t YJ_Compact_ScalarProbe(uint64_t value, uint64_t *out_value);
 int32_t YJ_Compact_CopyProbe(const uint8_t *input, uint64_t length,
                             uint64_t iterations, uint64_t *out_checksum);
+#endif
 
 #ifdef __cplusplus
 }

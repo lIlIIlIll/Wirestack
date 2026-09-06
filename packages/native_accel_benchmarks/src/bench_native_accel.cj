@@ -9,6 +9,28 @@ import yjson_native_accel.*
 
 main(): Unit {}
 
+@OverflowWrapping
+private func fnv1a64Step(hash: UInt64, byte: Byte): UInt64 {
+    (hash ^ UInt64(byte)) * 0x100000001b3u64
+}
+
+/// FNV-1a 64 over the produced artifact bytes; hex digits are ASCII-encoded so
+/// the digest line is pure UTF-8 and reproducible across engines.
+private func fnv1a64Hex(bytes: Array<Byte>): String {
+    var hash: UInt64 = 0xcbf29ce484222325u64
+    for (byte in bytes) { hash = fnv1a64Step(hash, byte) }
+    let out = Array<Byte>(16, repeat: 0u8)
+    for (index in 0..16) {
+        let nibble = Int64((hash >> (60 - index * 4)) & 0xFu64)
+        out[index] = if (nibble < 10) { UInt8(nibble + 48) } else { UInt8(nibble + 87) }
+    }
+    String.fromUtf8(out)
+}
+
+private func fnv1a64Hex(text: String): String {
+    fnv1a64Hex(unsafe { text.rawData() })
+}
+
 private func configureAccelerationMode(): Unit {
     let mode = match (getVariable("YJSON_ACCEL_MODE")) {
         case Some(value) => value
@@ -48,6 +70,19 @@ class NativeAccelerationBenchmarks {
         if (YJson.fromJson<ArrayList<Int64>>(numericText).size != numericValues.size) {
             throw Exception("Native acceleration benchmark fixture validation failed")
         }
+        // Deterministic content checksum for every workload. Computed once per
+        // process in init(), outside the measured region, so timings are not
+        // polluted by digest work. The runner binds each raw report to these
+        // lines (stdout contract: `CHECKSUM <case> <fnv1a-64-hex>`).
+        println("CHECKSUM writeEscapedStrings ${fnv1a64Hex(YJson.toJson(escapedValues))}")
+        println("CHECKSUM writeEscapedBytes ${fnv1a64Hex(YJson.toJsonBytes(escapedValues, codec: escapedCodec))}")
+        println("CHECKSUM writeNumericArray ${fnv1a64Hex(YJson.toJson(numericValues))}")
+        println("CHECKSUM writeNumericBytes ${fnv1a64Hex(YJson.toJsonBytes(numericValues, codec: numericCodec))}")
+        println("CHECKSUM writePlainStrings ${fnv1a64Hex(YJson.toJson(plainValues))}")
+        let readArray = YJson.fromJson<ArrayList<Int64>>(numericText)
+        println("CHECKSUM readNumericArray ${fnv1a64Hex("count=${readArray.size};last=${readArray[readArray.size - 1]}")}")
+        let readDocument = YJson.parseDocument(numericText)
+        println("CHECKSUM readNumericDocument ${fnv1a64Hex("count=${readDocument.root().size()}")}")
     }
 
     @Bench

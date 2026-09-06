@@ -13,114 +13,386 @@ permissions:
 jobs:
   api-inventory:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      # Self-hosted runners may schedule several jobs on one machine. Every
+      # job uses a unique working directory keyed by the run id plus a short
+      # job suffix so concurrent jobs never share or overwrite a checkout.
+      YJ_WS: "${{ runner.temp }}/yjson-api-inventory-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Check public API inventory
-        run: cd repo_workspace && scripts/ci_job.sh api-inventory
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh api-inventory
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   runtime-freeze:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-runtime-freeze-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Check runtime freeze contract
-        run: cd repo_workspace && scripts/ci_job.sh runtime-freeze
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh runtime-freeze
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   core:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-core-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Run core checks
-        run: cd repo_workspace && scripts/ci_job.sh core
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh core
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   standards-conformance:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-standards-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Run pinned standards conformance
-        run: cd repo_workspace && scripts/ci_job.sh standards-conformance
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh standards-conformance
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   schema-formats-conformance:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-schema-formats-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Run optional Schema formats conformance
-        run: cd repo_workspace && scripts/ci_job.sh schema-formats-conformance
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh schema-formats-conformance
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   examples:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-examples-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Run examples
-        run: cd repo_workspace && scripts/ci_job.sh examples
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh examples
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   macro-consumer:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-macro-consumer-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Run macro consumer
-        run: cd repo_workspace && scripts/ci_job.sh macro-consumer
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh macro-consumer
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   algorithms-consumer:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-algorithms-consumer-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Run algorithms and formats consumers
-        run: cd repo_workspace && scripts/ci_job.sh algorithms-consumer
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh algorithms-consumer
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   registry-rehearsal:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-registry-rehearsal-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Rehearse all release artifacts and consumers
-        run: cd repo_workspace && scripts/ci_job.sh registry-rehearsal
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh registry-rehearsal
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   custom-native:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-custom-native-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Run custom native checks
-        run: cd repo_workspace && scripts/ci_job.sh custom-native
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh custom-native
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   yyjson-native:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-yyjson-native-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Run yyjson native checks
-        run: cd repo_workspace && scripts/ci_job.sh yyjson-native
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh yyjson-native
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   native-clang:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-native-clang-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Run Clang native checks
-        run: cd repo_workspace && scripts/ci_job.sh native-clang
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh native-clang
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   native-gcc:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-native-gcc-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Run GCC native checks
-        run: cd repo_workspace && scripts/ci_job.sh native-gcc
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh native-gcc
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   sanitizer:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-sanitizer-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Run sanitizer checks
-        run: cd repo_workspace && scripts/ci_job.sh sanitizer
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh sanitizer
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   fuzz-short:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-fuzz-short-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Run short fuzz gate
-        run: cd repo_workspace && scripts/ci_job.sh fuzz-short
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh fuzz-short
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"
   yyjson-symbol-isolation:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      YJ_WS: "${{ runner.temp }}/yjson-yyjson-symbol-isolation-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Fetch pinned co-link fixture
         run: |
           curl -fL https://github.com/ibireme/yyjson/archive/refs/tags/0.11.1.tar.gz -o /tmp/yyjson-0.11.1.tar.gz
@@ -128,4 +400,7 @@ jobs:
           mkdir -p /tmp/yjson-yyjson-second
           tar -xzf /tmp/yyjson-0.11.1.tar.gz -C /tmp/yjson-yyjson-second
       - name: Run yyjson symbol-isolation gate
-        run: cd repo_workspace && YJSON_SECOND_YYJSON_ROOT=/tmp/yjson-yyjson-second/yyjson-0.11.1 scripts/ci_job.sh yyjson-colink
+        run: cd "$YJ_WS/repo_workspace" && YJSON_SECOND_YYJSON_ROOT=/tmp/yjson-yyjson-second/yyjson-0.11.1 scripts/ci_job.sh yyjson-colink
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"

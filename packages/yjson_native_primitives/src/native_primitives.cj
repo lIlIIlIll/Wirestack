@@ -42,6 +42,15 @@ foreign func YJ_JSON_FormatInt64Array(values: CPointer<Int64>, count: Int64,
     outWritten: CPointer<Int64>): Int32
 
 @FastNative
+foreign func YJ_JSON_FormatFloat64Array(values: CPointer<Float64>, count: Int64,
+    output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64,
+    outWritten: CPointer<Int64>): Int32
+
+@FastNative
+foreign func YJ_JSON_FormatFloat64(value: Float64, output: CPointer<UInt8>,
+    outputCap: Int64, outputOffset: Int64): Int64
+
+@FastNative
 foreign func YJ_JSON_ParseInt64Array(input: CPointer<UInt8>, len: Int64, start: Int64,
     values: CPointer<Int64>, valueCap: Int64, outEnd: CPointer<Int64>,
     outCount: CPointer<Int64>, outError: CPointer<Int64>): Int32
@@ -97,6 +106,19 @@ private class CJsonNativeScannerBackend <: JsonNativeAccelerationPrimitivesV1 {
         unsafe { YJ_JSON_FormatInt64Array(values, count, output, outputCap, outputOffset,
             outWritten) }
     }
+
+    public func formatFloat64Array(values: CPointer<Float64>, count: Int64,
+        output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64,
+        outWritten: CPointer<Int64>): Int32 {
+        unsafe { YJ_JSON_FormatFloat64Array(values, count, output, outputCap, outputOffset,
+            outWritten) }
+    }
+
+    public func formatFloat64(value: Float64, output: CPointer<UInt8>,
+        outputCap: Int64, outputOffset: Int64): Int64 {
+        unsafe { YJ_JSON_FormatFloat64(value, output, outputCap, outputOffset) }
+    }
+
 }
 
 private var yJsonNativeEnabled: Bool = false
@@ -108,32 +130,18 @@ func nativeScannerCapabilitiesForTesting(): UInt32 {
     unsafe { YJ_JSON_SimdCaps() }
 }
 
-func enableYJsonNative(): Unit {
-    if (yJsonNativeEnabled) { return }
-    activateJsonNativePrimitivesV1(CJsonNativeScannerBackend())
-    yJsonNativeEnabled = true
-}
-
-private class CustomNativeAccelerationProviderV1 <: JsonAccelerationProviderV1 {
+private class CustomNativeAccelerationProviderV1 <: JsonNativePrimitivesProviderV1 {
     public func identity(): String { "yjson-custom-native-v1" }
     public func protocolVersion(): Int64 { 1 }
     public func abiVersion(): Int64 { 1 }
+    public func primitives(): JsonNativeAccelerationPrimitivesV1 {
+        CJsonNativeScannerBackend()
+    }
     public func activate(): Unit {
-        // Resolve and validate the full linked primitive bundle before the
-        // process-wide runtime state is frozen.
-        let probe = unsafe { YJ_JSON_ProbeV1() }
-        if (probe != 0x594A0101u32) {
-            throw JsonException(
-                "Custom Native primitive ABI probe mismatch: expected 0x594A0101, got ${probe}",
-                code: "acceleration_abi_mismatch")
-        }
-        let caps = nativeScannerCapabilitiesForTesting()
-        if ((caps & 1u32) == 0u32) {
-            throw JsonException(
-                "Custom Native primitives do not support this CPU",
-                code: "acceleration_cpu_unsupported")
-        }
-        enableYJsonNative()
+        // The runtime validates the scanner archive (probe, SIMD caps)
+        // before calling this method, so no C FFI is needed here. Just
+        // mark the provider as active.
+        yJsonNativeEnabled = true
     }
 }
 

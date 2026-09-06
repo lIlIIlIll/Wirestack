@@ -131,6 +131,22 @@ class JsonSerializerComplianceTest {
         @Expect(caughtException)
     }
 
+    /// NaN/+Inf/-Inf 在 AST 与 typed String/bytes/stream 目标上都必须被拒绝。
+    @TestCase
+    func rejectNonFiniteAcrossAstAndTypedTargets(): Unit {
+        for (value in [Float64.NaN, Float64.Inf, -Float64.Inf]) {
+            @AssertThrows[JsonException](JsonFloatValue(value).toString())
+            @AssertThrows[JsonException](JsonFloatValue(value).toJson())
+            @AssertThrows[JsonException](YJson.toJson(value, codec: JsonCodecs.float64))
+            @AssertThrows[JsonException](YJson.toJsonBytes(value, codec: JsonCodecs.float64))
+            let output = MemoryOutputStream()
+            @AssertThrows[JsonException](
+                YJson.writeJson(value, output, codec: JsonCodecs.float64))
+            // 非有限值不允许进入容器写入。
+            @AssertThrows[JsonException](JsonArray().add(JsonFloatValue(value)).toJson())
+        }
+    }
+
     @TestCase
     func serializeNumberLiteral(): Unit {
         let literal = JsonNumberLiteralValue("12345678901234567890")

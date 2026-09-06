@@ -6,7 +6,7 @@ description = "Closed Linux x86_64 native primitive SPI for yjson"
 version = "0.1.0"
 target-dir = ""
 script-dir = ""
-output-type = "dynamic"
+output-type = "static"
 compile-option = "-O2"
 override-compile-option = ""
 link-option = "-L target/native -lyjson_scanner"
@@ -14,3 +14,6 @@ package-configuration = {}
 
 [dependencies]
 yjson = { path = "../.." }
+
+[profile.customized-option]
+cfg = "--gc-mode=marksweep"

@@ -3,15 +3,19 @@ package yjson
 import std.collection.*
 import std.math.numeric.*
 
-private let JSON_NODE_OPERATION_MAX_DEPTH: Int64 = 256
-private let JSON_NODE_OPERATION_MAX_WORK: Int64 = 100000
+let JSON_NODE_OPERATION_MAX_DEPTH: Int64 = 256
+let JSON_NODE_OPERATION_MAX_WORK: Int64 = 100000
 
-private class JsonNodeOperationBudget {
+class JsonNodeOperationBudget {
     private var remaining: Int64
 
     init(maxWork: Int64) {
         if (maxWork <= 0) { throw IllegalArgumentException("maxNodes must be positive") }
         remaining = maxWork
+    }
+
+    static func withDefaultLimit(): JsonNodeOperationBudget {
+        JsonNodeOperationBudget(JSON_NODE_OPERATION_MAX_WORK)
     }
 
     func visit(depth: Int64): Unit {

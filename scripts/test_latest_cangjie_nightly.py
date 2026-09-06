@@ -98,7 +98,7 @@ class HostedWorkflowWiringTests(unittest.TestCase):
         self.assertIn("name: Cangjie nightly (7-day window)", self.workflow)
         self.assertIn("/ 604800", self.workflow)
         self.assertIn(
-            "key: cangjie-nightly-complete-v2-${{ steps.window.outputs.value }}",
+            "key: cangjie-nightly-complete-v3-${{ steps.window.outputs.value }}",
             self.workflow,
         )
         self.assertNotIn("CANGJIE_VERSION:", self.workflow)

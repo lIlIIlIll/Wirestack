@@ -1,6 +1,7 @@
 package yjson
 
 import std.collection.*
+import std.convert.Parsable
 import std.math.numeric.*
 import std.time.*
 
@@ -31,10 +32,11 @@ struct JsonObjectKeyView {
     func isSource(): Bool { sourceStart >= 0 }
 }
 
-class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
+public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
     private let data: Array<Byte>
     private let size: Int64
     private let validateStrings: Bool
+    private let config: JsonReadOptions
     private let sourceText: Option<String>
     private var index: Int64 = 0
     private var rawTokenStart: Int64 = 0
@@ -49,6 +51,20 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
     private var rawDateTimeCacheEpochSecond: Int64 = 0
     private var rawDateTimeCacheOffsetSeconds: Int64 = 0
     private var rawDateTimeCacheValue: Option<DateTime> = None<DateTime>
+    // Linear duplicate scan for policy-aware unknown-object skips. The
+    // window [base..count) always holds the current object level only;
+    // an aborted skip leaves the cursor stale, which the next level's
+    // base snapshot simply skips over.
+    private var skipSeenNames: Array<String> = Array<String>(16, repeat: "")
+    private var skipSeenCount: Int64 = 0
+
+    private func ensureSkipSeenCapacity(): Unit {
+        if (skipSeenCount < skipSeenNames.size) { return }
+        let grown = Array<String>(skipSeenNames.size * 2, repeat: "")
+        for (position in 0..skipSeenCount) { grown[position] = skipSeenNames[position] }
+        skipSeenNames = grown
+    }
+
     private let generatedState = GeneratedReadStateV1(JsonReadOptions.defaults)
 
     public init(text: String) {
@@ -57,6 +73,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         }
         size = data.size
         validateStrings = false
+        config = JsonReadOptions.defaults
         sourceText = Some(text)
     }
 
@@ -64,6 +81,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         data = bytes
         size = bytes.size
         validateStrings = true
+        config = JsonReadOptions.defaults
         sourceText = None<String>
     }
 
@@ -207,7 +225,21 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
     }
 
     public func suggestRawObjectCapacity(): Int64 {
-        suggestContainerCapacity(48)
+        // Object entries are usually much smaller than the conservative
+        // generic container hint (especially String -> Int64 maps). A
+        // capacity based on the remaining compact bytes avoids repeated
+        // HashMap growth for medium/large generated maps while retaining a
+        // bounded allocation for untrusted input.
+        let remaining = size - index
+        if (remaining <= 16) {
+            return 4
+        }
+        let estimate = remaining / 8 + 1
+        match {
+            case estimate < 4 => 4
+            case estimate > 256 => 256
+            case _ => estimate
+        }
     }
 
     public func endRawObject(): Unit {
@@ -219,6 +251,23 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         skipSpaces()
         let _ = first
         hasMore() && peek() != b'}'
+    }
+
+    // Compact generated containers have no whitespace.  Keep the delimiter
+    // check branch-only; readRawNameFast() consumes the comma when needed.
+    public func hasRawObjectFieldFast(first: Bool): Bool {
+        if (!hasMore()) { return false }
+        var current = data[index]
+        if (isJsonSpace(current)) {
+            skipSpaces()
+            if (!hasMore()) { return false }
+            current = data[index]
+        }
+        if (first) {
+            current != b'}'
+        } else {
+            current == b','
+        }
     }
 
     func nextRawObjectField(first: Bool): Bool {
@@ -256,6 +305,29 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         let name = parseString()
         afterRawFieldName()
         name
+    }
+
+    // Generated compact codecs read object names emitted by the matching
+    // writer.  Those names are ASCII and contain no escapes, so consume the
+    // delimiter, quote, and colon directly instead of entering the general
+    // string parser and its escape/UTF-8 checks.  The checked readRawName()
+    // path remains available for configurable/user-supplied readers.
+    public func readRawNameFast(first: Bool): String {
+        if (!first) {
+            index++ // comma
+        }
+        index++ // opening quote
+        let start = index
+        while (data[index] != b'"') {
+            index++
+        }
+        let end = index
+        index++ // closing quote
+        index++ // colon
+        // Text input can retain a source-owned slice; bytes input still goes
+        // through the checked UTF-8 constructor.  Keep the same allocation
+        // behavior as readRawName() after the delimiter scan is removed.
+        stringFromUtf8Range(start, end)
     }
 
     // Compact-only seam: unlike readRawName(), the common no-escape path does
@@ -420,6 +492,21 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         hasMore() && peek() != b']'
     }
 
+    public func hasRawArrayItemFast(first: Bool): Bool {
+        if (!hasMore()) { return false }
+        var current = data[index]
+        if (isJsonSpace(current)) {
+            skipSpaces()
+            if (!hasMore()) { return false }
+            current = data[index]
+        }
+        if (first) {
+            current != b']'
+        } else {
+            current == b','
+        }
+    }
+
     func nextRawArrayItem(first: Bool): Bool {
         if (first) {
             if (hasMore()) {
@@ -476,6 +563,17 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         }
     }
 
+    public func beforeRawArrayItemFast(first: Bool): Unit {
+        if (!first) {
+            // hasRawArrayItemFast has already checked the comma.  Consume it
+            // after the same whitespace normalization used by the semantic
+            // path so generated readers accept all valid JSON formatting.
+            skipSpaces()
+            expectByte(b',')
+        }
+        skipSpaces()
+    }
+
     public func tryReadRawNull(): Bool {
         if (!hasMore() || isJsonSpace(peek())) {
             skipSpaces()
@@ -494,6 +592,29 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         readRawBoolCompact()
     }
 
+    public func readRawBoolFast(): Bool {
+        let original = index
+        if (!hasMore() || isJsonSpace(peek())) {
+            skipSpaces()
+        }
+        if (index + 4 <= size && data[index] == b't' &&
+            data[index + 1] == b'r' && data[index + 2] == b'u' &&
+            data[index + 3] == b'e' &&
+            (index + 4 == size || isJsonValueDelimiter(data[index + 4]))) {
+            index += 4
+            return true
+        }
+        if (index + 5 <= size && data[index] == b'f' &&
+            data[index + 1] == b'a' && data[index + 2] == b'l' &&
+            data[index + 3] == b's' && data[index + 4] == b'e' &&
+            (index + 5 == size || isJsonValueDelimiter(data[index + 5]))) {
+            index += 5
+            return false
+        }
+        index = original
+        readRawBool()
+    }
+
     func readRawBoolCompact(): Bool {
         if (peek() == b't') {
             expectLiteral("true")
@@ -508,6 +629,47 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
             skipSpaces()
         }
         readRawStringCompact()
+    }
+
+    // Generated compact codecs normally receive strings emitted by the
+    // matching writer.  Scan the common unescaped ASCII form directly and
+    // retain the checked parser for escaped or non-ASCII input.
+    public func readRawStringFast(): String {
+        if (!hasMore() || isJsonSpace(peek())) {
+            skipSpaces()
+        }
+        let quoteStart = index
+        if (!hasMore() || data[index] != b'"') {
+            return readRawString()
+        }
+        index++
+        let start = index
+        var ascii = true
+        while (index < size) {
+            let current = data[index]
+            if (current == b'"') {
+                let end = index
+                index++
+                if (ascii) {
+                    return asciiStringFromRange(start, end)
+                }
+                return stringFromUtf8Range(start, end)
+            }
+            if (current == b'\\') {
+                index = quoteStart
+                return readRawString()
+            }
+            if (current < 0x20) {
+                index = quoteStart
+                return readRawString()
+            }
+            if (current >= 0x80) {
+                ascii = false
+            }
+            index++
+        }
+        index = quoteStart
+        readRawString()
     }
 
     func readRawStringCompact(): String {
@@ -596,6 +758,383 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         parseInt64Literal()
     }
 
+    public func readRawInt64Fast(): Int64 {
+        let original = index
+        if (!hasMore() || isJsonSpace(peek())) {
+            skipSpaces()
+        }
+        if (!hasMore()) {
+            index = original
+            return readRawInt64()
+        }
+        var negative = false
+        if (data[index] == b'-') {
+            negative = true
+            index++
+        }
+        if (!hasMore() || data[index] < b'0' || data[index] > b'9') {
+            index = original
+            return readRawInt64()
+        }
+        var magnitude = 0u64
+        while (index < size) {
+            let current = data[index]
+            if (current < b'0' || current > b'9') {
+                break
+            }
+            let digit = UInt64(current - b'0')
+            if (magnitude > (UInt64.Max - digit) / 10u64) {
+                index = original
+                return readRawInt64()
+            }
+            magnitude = magnitude * 10u64 + digit
+            index++
+        }
+        if (index < size && !isJsonValueDelimiter(data[index])) {
+            index = original
+            return readRawInt64()
+        }
+        if (negative) {
+            if (magnitude > 9223372036854775808u64) {
+                index = original
+                return readRawInt64()
+            }
+            if (magnitude == 9223372036854775808u64) {
+                return Int64.Min
+            }
+            return -Int64(magnitude)
+        }
+        if (magnitude > UInt64(Int64.Max)) {
+            index = original
+            return readRawInt64()
+        }
+        Int64(magnitude)
+    }
+
+    private func readRawInt64MapChecked(): HashMap<String, Int64> {
+        startRawObject()
+        let result = HashMap<String, Int64>(suggestRawObjectCapacity())
+        var first = true
+        while (hasRawObjectField(first)) {
+            result[readRawName(first)] = readRawInt64()
+            first = false
+        }
+        endRawObject()
+        result
+    }
+
+    private func readRawInt64ArrayMapChecked(): HashMap<String, Array<Int64>> {
+        startRawObject()
+        let result = HashMap<String, Array<Int64>>(suggestRawObjectCapacity())
+        var first = true
+        while (hasRawObjectField(first)) {
+            result[readRawName(first)] = readRawInt64ArrayChecked()
+            first = false
+        }
+        endRawObject()
+        result
+    }
+
+    private func readRawInt64ArrayChecked(): Array<Int64> {
+        startRawArray()
+        if (!hasRawArrayItem(true)) {
+            endRawArray()
+            return Array<Int64>()
+        }
+        let result = ArrayList<Int64>(suggestRawArrayCapacity())
+        var first = true
+        while (hasRawArrayItem(first)) {
+            beforeRawArrayItem(first)
+            result.add(readRawInt64())
+            first = false
+        }
+        endRawArray()
+        result.toArray()
+    }
+
+    // The generated writer emits compact object/array syntax.  Parse that
+    // shape in one cursor loop and leave all other valid JSON spellings to the
+    // checked readers below.  This is a syntax-based fast path: it does not
+    // depend on field names, values, or benchmark data.
+    private func tryReadRawInt64MapCompactBody(): Option<HashMap<String, Int64>> {
+        if (!hasMore() || isJsonSpace(peek())) {
+            return None<HashMap<String, Int64>>
+        }
+        let result = HashMap<String, Int64>(suggestRawObjectCapacity())
+        if (peek() == b'}') {
+            index++
+            return Some(result)
+        }
+        if (peek() != b'"') {
+            return None<HashMap<String, Int64>>
+        }
+        while (true) {
+            index++
+            let start = index
+            var asciiName = true
+            while (index < size) {
+                let byte = data[index]
+                if (byte == b'"') { break }
+                if (byte == b'\\' || byte < 0x20) {
+                    return None<HashMap<String, Int64>>
+                }
+                if (byte >= 0x80) { asciiName = false }
+                index++
+            }
+            if (index >= size || data[index] != b'"') {
+                return None<HashMap<String, Int64>>
+            }
+            let end = index
+            index++
+            if (index >= size || data[index] != b':') {
+                return None<HashMap<String, Int64>>
+            }
+            index++
+            let name = if (asciiName) {
+                asciiStringFromRange(start, end)
+            } else {
+                stringFromUtf8Range(start, end)
+            }
+            result[name] = readRawInt64Fast()
+            if (!hasMore()) {
+                return None<HashMap<String, Int64>>
+            }
+            if (peek() == b'}') {
+                index++
+                return Some(result)
+            }
+            if (peek() != b',') {
+                return None<HashMap<String, Int64>>
+            }
+            index++
+            if (!hasMore() || peek() != b'"') {
+                return None<HashMap<String, Int64>>
+            }
+        }
+        None<HashMap<String, Int64>>
+    }
+
+    private func tryReadRawInt64ArrayCompactBody(): Option<Array<Int64>> {
+        if (!hasMore() || isJsonSpace(peek())) {
+            return None<Array<Int64>>
+        }
+        if (peek() == b']') {
+            index++
+            return Some(Array<Int64>())
+        }
+        let result = ArrayList<Int64>(suggestRawArrayCapacity())
+        while (true) {
+            if (!hasMore() || isJsonSpace(peek())) {
+                return None<Array<Int64>>
+            }
+            result.add(readRawInt64Fast())
+            if (!hasMore()) {
+                return None<Array<Int64>>
+            }
+            if (peek() == b']') {
+                index++
+                return Some(result.toArray())
+            }
+            if (peek() != b',') {
+                return None<Array<Int64>>
+            }
+            index++
+        }
+        None<Array<Int64>>
+    }
+
+    public func readRawInt64MapFast(): HashMap<String, Int64> {
+        let original = index
+        startRawObject()
+        if (let Some(result) <- tryReadRawInt64MapCompactBody()) {
+            return result
+        }
+        index = original
+        readRawInt64MapChecked()
+    }
+
+    public func readRawInt64ArrayFast(): Array<Int64> {
+        if (let Some(result) <- tryReadNativeInt64ArrayList()) {
+            return result.toArray()
+        }
+        let original = index
+        startRawArray()
+        if (let Some(result) <- tryReadRawInt64ArrayCompactBody()) {
+            return result
+        }
+        index = original
+        readRawInt64ArrayChecked()
+    }
+
+    private func tryReadRawInt64ArrayMapCompactBody(): Option<HashMap<String, Array<Int64>>> {
+        if (!hasMore() || isJsonSpace(peek())) {
+            return None<HashMap<String, Array<Int64>>>
+        }
+        let result = HashMap<String, Array<Int64>>(suggestRawObjectCapacity())
+        if (peek() == b'}') {
+            index++
+            return Some(result)
+        }
+        if (peek() != b'"') {
+            return None<HashMap<String, Array<Int64>>>
+        }
+        while (true) {
+            index++
+            let start = index
+            var asciiName = true
+            while (index < size) {
+                let byte = data[index]
+                if (byte == b'"') { break }
+                if (byte == b'\\' || byte < 0x20) {
+                    return None<HashMap<String, Array<Int64>>>
+                }
+                if (byte >= 0x80) { asciiName = false }
+                index++
+            }
+            if (index >= size || data[index] != b'"') {
+                return None<HashMap<String, Array<Int64>>>
+            }
+            let end = index
+            index++
+            if (index >= size || data[index] != b':') {
+                return None<HashMap<String, Array<Int64>>>
+            }
+            index++
+            let name = if (asciiName) {
+                asciiStringFromRange(start, end)
+            } else {
+                stringFromUtf8Range(start, end)
+            }
+            if (!hasMore() || peek() != b'[') {
+                return None<HashMap<String, Array<Int64>>>
+            }
+            index++
+            let items = ArrayList<Int64>(suggestRawArrayCapacity())
+            if (!hasMore() || isJsonSpace(peek())) {
+                return None<HashMap<String, Array<Int64>>>
+            }
+            if (peek() == b']') {
+                index++
+            } else {
+                while (true) {
+                    items.add(readRawInt64Fast())
+                    if (!hasMore()) {
+                        return None<HashMap<String, Array<Int64>>>
+                    }
+                    if (peek() == b']') {
+                        index++
+                        break
+                    }
+                    if (peek() != b',') {
+                        return None<HashMap<String, Array<Int64>>>
+                    }
+                    index++
+                    if (!hasMore() || isJsonSpace(peek())) {
+                        return None<HashMap<String, Array<Int64>>>
+                    }
+                }
+            }
+            result[name] = items.toArray()
+            if (!hasMore()) {
+                return None<HashMap<String, Array<Int64>>>
+            }
+            if (peek() == b'}') {
+                index++
+                return Some(result)
+            }
+            if (peek() != b',') {
+                return None<HashMap<String, Array<Int64>>>
+            }
+            index++
+            if (!hasMore() || peek() != b'"') {
+                return None<HashMap<String, Array<Int64>>>
+            }
+        }
+        None<HashMap<String, Array<Int64>>>
+    }
+
+    public func readRawInt64ArrayMapFast(): HashMap<String, Array<Int64>> {
+        let original = index
+        startRawObject()
+        if (let Some(result) <- tryReadRawInt64ArrayMapCompactBody()) {
+            return result
+        }
+        index = original
+        readRawInt64ArrayMapChecked()
+    }
+
+    public func readRawUInt64Fast(): UInt64 {
+        let original = index
+        if (!hasMore() || isJsonSpace(peek())) {
+            skipSpaces()
+        }
+        if (!hasMore() || data[index] < b'0' || data[index] > b'9') {
+            index = original
+            return readRawUInt64()
+        }
+        var result = 0u64
+        while (index < size) {
+            let current = data[index]
+            if (current < b'0' || current > b'9') {
+                break
+            }
+            let digit = UInt64(current - b'0')
+            if (result > (UInt64.Max - digit) / 10u64) {
+                index = original
+                return readRawUInt64()
+            }
+            result = result * 10u64 + digit
+            index++
+        }
+        if (index < size && !isJsonValueDelimiter(data[index])) {
+            index = original
+            return readRawUInt64()
+        }
+        result
+    }
+
+    public func readRawFloat64Fast(): Float64 {
+        if (!hasMore() || isJsonSpace(peek())) {
+            skipSpaces()
+        }
+        let start = index
+        var negative = false
+        if (data[index] == b'-') {
+            negative = true
+            index++
+        }
+        var result: Float64 = 0.0
+        var digits = false
+        while (index < size) {
+            let current = data[index]
+            if (current < b'0' || current > b'9') {
+                break
+            }
+            result = result * 10.0 + Float64(current - b'0')
+            index++
+            digits = true
+        }
+        if (hasMore() && data[index] == b'.') {
+            index++
+            var scale: Float64 = 0.1
+            while (index < size) {
+                let current = data[index]
+                if (current < b'0' || current > b'9') {
+                    break
+                }
+                result += Float64(current - b'0') * scale
+                scale *= 0.1
+                index++
+                digits = true
+            }
+        }
+        if (!digits || (hasMore() && (data[index] == b'e' || data[index] == b'E'))) {
+            index = start
+            return Float64.parse(readRawNumberLiteral())
+        }
+        if (negative) { -result } else { result }
+    }
+
     public func readRawInt32(): Int32 {
         let value = parseInt64Literal()
         int64ToInt32(value)
@@ -603,7 +1142,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
 
     private func int64ToInt32(value: Int64): Int32 {
         if (value < -0x8000_0000 || value > 0x7FFF_FFFF) {
-            fail("Integer literal out of Int32 range")
+            failWithCode("Integer literal out of Int32 range", "number_out_of_range")
         }
         Int32(value)
     }
@@ -615,7 +1154,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
 
     private func int64ToInt16(value: Int64): Int16 {
         if (value < -0x8000 || value > 0x7FFF) {
-            fail("Integer literal out of Int16 range")
+            failWithCode("Integer literal out of Int16 range", "number_out_of_range")
         }
         Int16(value)
     }
@@ -627,7 +1166,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
 
     private func int64ToInt8(value: Int64): Int8 {
         if (value < -0x80 || value > 0x7F) {
-            fail("Integer literal out of Int8 range")
+            failWithCode("Integer literal out of Int8 range", "number_out_of_range")
         }
         Int8(value)
     }
@@ -643,7 +1182,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
 
     private func uint64ToUInt32(value: UInt64): UInt32 {
         if (value > 0xFFFF_FFFFu64) {
-            fail("Integer literal out of UInt32 range")
+            failWithCode("Integer literal out of UInt32 range", "number_out_of_range")
         }
         UInt32(value)
     }
@@ -655,7 +1194,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
 
     private func uint64ToUInt16(value: UInt64): UInt16 {
         if (value > 0xFFFFu64) {
-            fail("Integer literal out of UInt16 range")
+            failWithCode("Integer literal out of UInt16 range", "number_out_of_range")
         }
         UInt16(value)
     }
@@ -667,7 +1206,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
 
     private func uint64ToUInt8(value: UInt64): UInt8 {
         if (value > 0xFFu64) {
-            fail("Integer literal out of UInt8 range")
+            failWithCode("Integer literal out of UInt8 range", "number_out_of_range")
         }
         UInt8(value)
     }
@@ -882,6 +1421,18 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         skipRawValueBounded(0, maxDepth)
     }
 
+    /// Policy-aware unknown-field skip used by generated codecs. Unlike the
+    /// raw skip, this variant never routes container scanning to the native
+    /// skip (which is a pure syntax scan), and when
+    /// duplicateKeyPolicy==Reject it tracks decoded member names per object
+    /// level so duplicate keys inside skipped subtrees fail with the stable
+    /// "duplicate_key" code. The remaining depth budget is relative to the
+    /// current generated-code context.
+    public func skipValue(maxDepth: Int64): Unit {
+        if (maxDepth < 0) { throw IllegalArgumentException("maxDepth must not be negative") }
+        skipRawValuePolicyAware(0, maxDepth)
+    }
+
     private func beforeRawFieldName(first: Bool): Unit {
         skipSpaces()
         if (!first) {
@@ -913,10 +1464,13 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         if (maxDepth < 0 && shouldUseNativeSkip(current)) {
             let nativeEnd = jsonNativeSkipValue(data, size, index, validateStrings)
             if (nativeEnd >= 0) {
+                let skippedStart = index
                 index = nativeEnd
+                enforceValueByteBudget(skippedStart, nativeEnd)
                 return
             }
         }
+        let valueStart = index
         match {
             case current == b'n' => expectLiteral("null")
             case current == b't' => expectLiteral("true")
@@ -929,6 +1483,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
                 skipRawNumber()
             case _ => fail("Unexpected token")
         }
+        enforceValueByteBudget(valueStart, index)
     }
 
     private func shouldUseNativeSkip(current: Byte): Bool {
@@ -984,6 +1539,98 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         }
     }
 
+    private func skipRawValuePolicyAware(depth: Int64, maxDepth: Int64): Unit {
+        if (!hasMore()) {
+            fail("Unexpected end of input")
+        }
+        if (isJsonSpace(peek())) {
+            skipSpaces()
+        }
+        if (!hasMore()) {
+            fail("Unexpected end of input")
+        }
+        let current = peek()
+        let valueStart = index
+        match {
+            case current == b'n' => expectLiteral("null")
+            case current == b't' => expectLiteral("true")
+            case current == b'f' => expectLiteral("false")
+            case current == b'"' =>
+                scanRawString()
+            case current == b'[' => skipRawArrayPolicyAware(depth, maxDepth)
+            case current == b'{' => skipRawObjectPolicyAware(depth, maxDepth)
+            case current == b'-' || (current >= b'0' && current <= b'9') =>
+                skipRawNumber()
+            case _ => fail("Unexpected token")
+        }
+        enforceValueByteBudget(valueStart, index)
+    }
+
+    private func skipRawArrayPolicyAware(depth: Int64, maxDepth: Int64): Unit {
+        if (maxDepth >= 0 && depth >= maxDepth) {
+            throw JsonException("Maximum JSON depth exceeded", code: "max_depth",
+                location: Some(JsonLocation(index, jsonLineFromUtf8Bytes(data, index),
+                    jsonColumnFromUtf8Bytes(data, index))))
+        }
+        expectByte(b'[')
+        skipSpaces()
+        if (hasMore() && peek() == b']') {
+            index++
+            return
+        }
+        while (true) {
+            skipRawValuePolicyAware(depth + 1, maxDepth)
+            skipSpaces()
+            if (hasMore() && peek() == b']') {
+                index++
+                return
+            }
+            expectByte(b',')
+        }
+    }
+
+    private func skipRawObjectPolicyAware(depth: Int64, maxDepth: Int64): Unit {
+        if (maxDepth >= 0 && depth >= maxDepth) {
+            throw JsonException("Maximum JSON depth exceeded", code: "max_depth",
+                location: Some(JsonLocation(index, jsonLineFromUtf8Bytes(data, index),
+                    jsonColumnFromUtf8Bytes(data, index))))
+        }
+        expectByte(b'{')
+        skipSpaces()
+        if (hasMore() && peek() == b'}') {
+            index++
+            return
+        }
+        let seenBase = if (jsonReadOptionsRejectsDuplicateKeys(config)) {
+            skipSeenCount
+        } else {
+            -1
+        }
+        while (true) {
+            let name = parseString()
+            if (seenBase >= 0) {
+                var duplicate = false
+                for (position in seenBase..skipSeenCount) {
+                    if (skipSeenNames[position] == name) { duplicate = true; break }
+                }
+                if (duplicate) { policyFail("Duplicate object key '${name}'") }
+                ensureSkipSeenCapacity()
+                skipSeenNames[skipSeenCount] = name
+                skipSeenCount++
+            }
+            skipSpaces()
+            expectByte(b':')
+            skipRawValuePolicyAware(depth + 1, maxDepth)
+            skipSpaces()
+            if (hasMore() && peek() == b'}') {
+                index++
+                if (seenBase >= 0) { skipSeenCount = seenBase }
+                return
+            }
+            expectByte(b',')
+        }
+    }
+
     private func skipRawNumber(): Unit {
         if (hasMore() && peek() == b'-') {
             index++
@@ -1030,6 +1677,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
             requireDigit("Expected exponent digits")
             consumeDigits()
         }
+        enforceValueByteBudget(start, index)
         asciiStringFromRange(start, index)
     }
 
@@ -1056,7 +1704,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
                     let digit = Int64(data[index] - b'0')
                     index++
                     if (result < ((-0x8000_0000_0000_0000 + digit) / 10)) {
-                        fail("Integer literal out of Int64 range")
+                        failWithCode("Integer literal out of Int64 range", "number_out_of_range")
                     }
                     result = result * 10 - digit
                 }
@@ -1074,7 +1722,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
                 let digit = Int64(data[index] - b'0')
                 index++
                 if (result > ((0x7FFF_FFFF_FFFF_FFFF - digit) / 10)) {
-                    fail("Integer literal out of Int64 range")
+                    failWithCode("Integer literal out of Int64 range", "number_out_of_range")
                 }
                 result = result * 10 + digit
             }
@@ -1104,7 +1752,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
                 let digit = UInt64(data[index] - b'0')
                 index++
                 if (result > ((UInt64.Max - digit) / 10)) {
-                    fail("Integer literal out of UInt64 range")
+                    failWithCode("Integer literal out of UInt64 range", "number_out_of_range")
                 }
                 result = result * 10 + digit
             }
@@ -1115,7 +1763,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
 
     private func rejectFractionalOrExponentForInteger(): Unit {
         if (hasMore() && (peek() == b'.' || peek() == b'e' || peek() == b'E')) {
-            fail("Expected integer")
+            failWithCode("Expected integer", "invalid_value")
         }
     }
 
@@ -1152,14 +1800,17 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         expectByte(b'"')
         let start = index
         var leadingSegmentAscii = true
+        var decodedBytes: Int64 = 0
         while (index < size) {
             let current = data[index]
             if (current == b'"') {
                 let end = index
                 index++
                 if (validateStrings && leadingSegmentAscii) {
+                    decodedBytes = enforceDecodedStringBytesIncrement(start, decodedBytes, end - start)
                     return asciiStringFromRange(start, end)
                 }
+                enforceDecodedStringBytes(start, decodedBytes)
                 return stringFromUtf8Range(start, end)
             }
             if (current == b'\\') {
@@ -1169,7 +1820,16 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
                 failAt("Unescaped control character in string literal", index)
             }
             if (current >= 0x80) {
+                if (validateStrings) {
+                    let width = validateRawUtf8At(index)
+                    decodedBytes = enforceDecodedStringBytesIncrement(start, decodedBytes, width)
+                    index = width
+                    continue
+                }
                 leadingSegmentAscii = false
+                decodedBytes++
+            } else {
+                decodedBytes++
             }
             index++
         }
@@ -1183,6 +1843,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         } else {
             if (size - quoteStart >= YJSON_NATIVE_MIN_READER_DECODE_BYTES) {
                 if (let Some(decoded) <- jsonNativeDecodeString(data, size, quoteStart, validateStrings)) {
+                    enforceDecodedStringBytes(quoteStart, decoded.value.size)
                     index = decoded.end
                     return decoded.value
                 }
@@ -1198,6 +1859,7 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         var read = start
         var segmentStart = start
         var written: Int64 = 0
+        var decodedBytes: Int64 = 0
         while (read < size) {
             let current = data[read]
             if (current == b'"') {
@@ -1241,11 +1903,14 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
                             failAt("Invalid unicode surrogate pair", escapeStart)
                         }
                         written = appendUtf8CodePoint(output, written, value)
+                        decodedBytes = enforceDecodedStringBytesIncrement(start, decodedBytes,
+                            jsonUtf8ByteCount(value))
                         segmentStart = read
                         continue
                     case _ => failAt("Unsupported escape sequence", read - 2)
                 }
                 written++
+                decodedBytes++
                 segmentStart = read
                 continue
             }
@@ -1253,10 +1918,13 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
                 failAt("Unescaped control character in string literal", read)
             }
             if (validateStrings && current >= 0x80) {
-                read = validateRawUtf8At(read)
+                let width = validateRawUtf8At(read)
+                decodedBytes = enforceDecodedStringBytesIncrement(start, decodedBytes, width)
+                read = width
                 continue
             }
             read++
+            decodedBytes++
         }
         fail("Unterminated string literal")
     }
@@ -1751,6 +2419,10 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
         value == b' ' || value == b'\n' || value == b'\r' || value == b'\t'
     }
 
+    private func isJsonValueDelimiter(value: Byte): Bool {
+        isJsonSpace(value) || value == b',' || value == b']' || value == b'}'
+    }
+
     private func suggestContainerCapacity(bytesPerEntry: Int64): Int64 {
         let remaining = size - index
         if (remaining <= bytesPerEntry) {
@@ -1817,6 +2489,48 @@ class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Owner {
 
     private func fail(message: String): Nothing {
         failAt(message, index)
+    }
+
+    private func failWithCode(message: String, code: String): Nothing {
+        throw JsonException(
+            "${message} at byte ${index}",
+            code: code,
+            location: Some(JsonLocation(index, jsonLineFromUtf8Bytes(data, index),
+                jsonColumnFromUtf8Bytes(data, index)))
+        )
+    }
+
+    private func enforceValueByteBudget(valueStart: Int64, valueEnd: Int64): Unit {
+        let limit = config.maxBufferedValueBytes
+        if (limit > 0 && valueEnd - valueStart > limit) {
+            throw jsonResourceLimitException(data,
+                "JSON value exceeds ${limit} bytes",
+                "buffered_value_too_large", valueStart + limit)
+        }
+    }
+
+    private func enforceDecodedStringBytes(start: Int64, decodedBytes: Int64): Unit {
+        let limit = config.maxStringBytes
+        if (limit > 0 && decodedBytes > limit) {
+            throw jsonResourceLimitException(data,
+                "JSON string exceeds ${limit} decoded UTF-8 bytes",
+                "string_too_large", start + limit)
+        }
+    }
+
+    private func enforceDecodedStringBytesIncrement(start: Int64, decodedBytes: Int64,
+        added: Int64): Int64 {
+        let next = decodedBytes + added
+        enforceDecodedStringBytes(start, next)
+        next
+    }
+
+    private func policyFail(message: String): Nothing {
+        throw JsonException(
+            message,
+            code: "duplicate_key",
+            location: Some(JsonLocation(index, jsonLineFromUtf8Bytes(data, index),
+                jsonColumnFromUtf8Bytes(data, index))))
     }
 
     private func failAt(message: String, offset: Int64): Nothing {

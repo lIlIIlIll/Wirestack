@@ -1,0 +1,31 @@
+Starting the benchmark `BytesBench.t9_b_1_bytesParsePrimitive()`.
+    Warming up for 200.0 ms.
+    Starting measurements of 200 batches. Measuring Duration.
+    Max batch size: 689, estimated execution time: 1.000 s.
+Finished in 1.091 s. Analysing results:
+  percentiles:    [   10%        50%        90%        95%        99%        ]  
+  time:           [   13.40 us   13.44 us   13.49 us   13.52 us   13.65 us   ]  
+  mean:           13.42 us .. 13.47 us  Err ±0.2%
+  median:         13.38 us .. 13.65 us
+  R²:             0.999 .. 1.000
+  stddev:         10.72 ns
+
+--------------------------------------------------------------------------------------------------
+TP: yjson_benchmarks, time elapsed: 3037609917 ns, RESULT:
+    TCS: BytesBench, time elapsed: 3025993347 ns, RESULT:
+    | Case                       |   Median |        Err |   Err% |     Mean |
+    |:---------------------------|---------:|-----------:|-------:|---------:|
+    | t9_b_1_bytesParsePrimitive | 13.44 us | ±0.0237 us |  ±0.2% | 13.44 us |
+Summary: TOTAL: 42
+    PASSED: 1, SKIPPED: 41, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 3039099630 ns, RESULT:
+TP: yjson_benchmarks.*, time elapsed: 3038995407 ns, RESULT:
+    PASSED:
+    TP: yjson_benchmarks, time elapsed: 3037609917 ns
+Summary: TOTAL: 42
+    PASSED: 1, SKIPPED: 41, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm bench success

@@ -21,8 +21,95 @@ private func rejectsResourceConfig(action: () -> Unit): Bool {
     }
 }
 
+private func deepNestedArrayJson(depth: Int64): String {
+    let builder = StringBuilder()
+    for (_ in 0..depth) { builder.append("[") }
+    builder.append("1")
+    for (_ in 0..depth) { builder.append("]") }
+    builder.toString()
+}
+
+private func deepNestedObjectJson(depth: Int64): String {
+    let builder = StringBuilder()
+    for (index in 0..depth) {
+        builder.append("{\"k${index}\":")
+    }
+    builder.append("1")
+    for (_ in 0..depth) { builder.append("}") }
+    builder.toString()
+}
+
+private func buildNestedNode(depth: Int64): JsonNode {
+    var value: JsonNode = JsonIntValue(1)
+    for (_ in 0..depth) {
+        let array = JsonArray()
+        array.add(value)
+        value = array
+    }
+    value
+}
+
 @Test
 class JsonResourceLimitsTest {
+    @TestCase
+    func defaultReadAndWriteOptionsLockTheDocumentedBudgets(): Unit {
+        let read = JsonReadOptions.defaults
+        @Expect(read.maxInputBytes, 64 * 1024 * 1024)
+        @Expect(read.maxStringBytes, 16 * 1024 * 1024)
+        @Expect(read.maxBufferedValueBytes, 8 * 1024 * 1024)
+        @Expect(read.maxDepth, 256)
+        @Expect(match (read.unknownFieldPolicy) {
+            case JsonUnknownFieldPolicy.Ignore => true
+            case _ => false
+        })
+        @Expect(match (read.duplicateKeyPolicy) {
+            case JsonDuplicateKeyPolicy.Reject => true
+            case _ => false
+        })
+
+        let write = JsonWriteOptions.defaults
+        @Expect(write.maxOutputBytes, 0)
+        @Expect(write.maxDepth, 256)
+        @Expect(write.indent, "")
+        @Expect(write.htmlSafe, false)
+    }
+
+    @TestCase
+    func defaultDepth256RoundTripsExactly256ContainerLevels(): Unit {
+        let depth: Int64 = 256
+        let arrayJson = deepNestedArrayJson(depth)
+        @Expect(JsonNode.parse(arrayJson).asArray().size(), 1)
+        @Expect(YJson.parseDocument(arrayJson).materialize().toString(), arrayJson)
+
+        let objectJson = deepNestedObjectJson(depth)
+        @Expect(JsonNode.parse(objectJson).toString(), objectJson)
+        @Expect(YJson.parseDocument(objectJson).materialize().toString(), objectJson)
+
+    }
+
+    @TestCase
+    func defaultDepth257RejectsWithMaxDepthForReadAndWrite(): Unit {
+        let depth: Int64 = 257
+        let arrayJson = deepNestedArrayJson(depth)
+        @Expect(resourceLimitErrorCode({ =>
+            let _ = JsonNode.parse(arrayJson)
+        }), "max_depth")
+        @Expect(resourceLimitErrorCode({ =>
+            let _ = CompactJsonDocument.parse(unsafe { arrayJson.rawData().clone() })
+        }), "max_depth")
+        @Expect(resourceLimitErrorCode({ =>
+            let _ = YJson.fromJson(deepNestedArrayJson(depth), codec: JsonCodecs.int64)
+        }), "max_depth")
+
+        // Write-side budget: 256 container levels write fine under the default
+        // budget; a 256-level write budget rejects the 257th container level.
+        let writerDepth: Int64 = 256
+        @Expect(buildNestedNode(writerDepth).toJson().size > 0, true)
+        let rejectWritten = @AssertThrows[JsonException](
+            buildNestedNode(writerDepth + 1).toJson(options: JsonWriteOptions(maxDepth: writerDepth)))
+        @Expect(rejectWritten.code, "max_depth")
+    }
+
     @TestCase
     func readLimitsMustBePositive(): Unit {
         @Expect(rejectsResourceConfig({ => let _ = JsonReadOptions(maxInputBytes: 0) }))

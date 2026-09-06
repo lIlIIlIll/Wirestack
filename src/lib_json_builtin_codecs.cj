@@ -16,14 +16,14 @@ const MAXVAL_UI8: UInt64 = 0xFF
 
 func ensureIntRange(typeName: String, decoded: Int64, min: Int64, max: Int64): Int64 {
     if (decoded < min || decoded > max) {
-        throw JsonException("Cannot decode value as ${typeName}: out of range")
+        throw JsonException("Cannot decode value as ${typeName}: out of range", code: "number_out_of_range")
     }
     decoded
 }
 
 func ensureUnsignedRange(typeName: String, decoded: UInt64, max: UInt64): UInt64 {
     if (decoded > max) {
-        throw JsonException("Cannot decode value as ${typeName}: out of range")
+        throw JsonException("Cannot decode value as ${typeName}: out of range", code: "number_out_of_range")
     }
     decoded
 }
@@ -125,21 +125,21 @@ let Float64Json: JsonCodec<Float64> = LambdaFastRawJsonCodec<Float64>(
     { value, writer => writer.writeFloat64(value) },
     { reader => reader.readFloat64() },
     { reader => Float64.parse(reader.readRawNumberLiteral()) },
-    { value, writer => writer.writeFloat64(value) }
+    { value, writer => writer.writeRawFloat64(value) }
 )
 
 let Float32Json: JsonCodec<Float32> = LambdaFastRawJsonCodec<Float32>(
     { value, writer => writer.writeFloat64(Float64(value)) },
     { reader => Float32(reader.readFloat64()) },
     { reader => Float32(Float64.parse(reader.readRawNumberLiteral())) },
-    { value, writer => writer.writeFloat64(Float64(value)) }
+    { value, writer => writer.writeRawFloat64(Float64(value)) }
 )
 
 let Float16Json: JsonCodec<Float16> = LambdaFastRawJsonCodec<Float16>(
     { value, writer => writer.writeFloat64(Float64(value)) },
     { reader => Float16(reader.readFloat64()) },
     { reader => Float16(Float64.parse(reader.readRawNumberLiteral())) },
-    { value, writer => writer.writeFloat64(Float64(value)) }
+    { value, writer => writer.writeRawFloat64(Float64(value)) }
 )
 
 // Public bridges keep macro-generated consumer code independent of the

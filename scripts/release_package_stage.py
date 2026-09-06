@@ -58,14 +58,18 @@ def stage(package, destination: pathlib.Path, development: bool) -> None:
     if package.stage_kind in ("native-primitives", "yyjson"):
         copy_path(package_root / "build.cj", module / "build.cj")
         copy_path(ROOT / "scripts" / "build_native_scanner.py", module / "scripts" / "build_native_scanner.py")
-        native_files = ["yjson_scanner.c", "yjson_scanner.h", "yjson_compact.c", "yjson_compact.h"]
+        native_files = ["yjson_scanner.c", "yjson_scanner.h", "yjson_compact.c", "yjson_compact.h",
+                        "yjson_float_format.c"]
         if package.stage_kind == "yyjson":
             native_files += ["yjson_yyjson.c", "yjson_yyjson.h"]
         for filename in native_files:
             copy_path(ROOT / "native" / filename, module / "native" / filename)
-    if package.stage_kind == "yyjson":
-        copy_path(ROOT / "native" / "vendor" / "yyjson", module / "native" / "vendor" / "yyjson")
-        copy_path(ROOT / "THIRD_PARTY_NOTICES.md", module / "THIRD_PARTY_NOTICES.md")
+        if package.stage_kind in ("native-primitives", "yyjson"):
+            # yjson_float_format.c and the compact adapter compile the vendored
+            # yyjson amalgamation directly; the source-only staged tree needs the
+            # complete include closure, including the vendored license.
+            copy_path(ROOT / "native" / "vendor" / "yyjson", module / "native" / "vendor" / "yyjson")
+            copy_path(ROOT / "THIRD_PARTY_NOTICES.md", module / "THIRD_PARTY_NOTICES.md")
 
 
 def main() -> int:

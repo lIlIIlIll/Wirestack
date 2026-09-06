@@ -3,7 +3,7 @@ package yjson
 import std.collection.*
 import std.io.*
 
-const JSON_DIRECT_BYTES_INITIAL_CAPACITY: Int64 = 256
+const JSON_DIRECT_BYTES_INITIAL_CAPACITY: Int64 = 128
 const JSON_DIRECT_PRETTY_STRING_INITIAL_CAPACITY: Int64 = 512
 const JSON_STREAM_BUFFER_CAPACITY: Int64 = 4096
 const JSON_STREAM_DIRECT_WRITE_THRESHOLD: Int64 = 2048
@@ -118,6 +118,10 @@ abstract class JsonDirectWriterTarget {
 
     protected func writeCompactInt64Map(prefix: String, values: HashMap<String, Int64>): Unit
 
+    protected func writeCompactInt64Array(values: Array<Int64>): Unit
+
+    protected func writeCompactFloat64Array(values: Array<Float64>): Unit
+
     protected func writeNewlineAndIndent(newline: String, indent: String, depth: Int64): Unit
 
     protected func writeObjectEntryNameInt64NoEscape(first: Bool, name: String, value: Int64): Bool
@@ -134,12 +138,15 @@ abstract class JsonDirectWriterTarget {
 
 }
 
-class DirectBufferWriterTarget <: JsonDirectWriterTarget {
+public class DirectBufferWriterTarget <: JsonDirectWriterTarget {
     private var buffer: Array<Byte>
     private var used: Int64 = 0
 
     public init(capacity!: Int64 = JSON_DIRECT_BYTES_INITIAL_CAPACITY) {
         buffer = Array<Byte>(capacity, repeat: 0)
+    }
+    public func reset(): Unit {
+        used = 0
     }
 
     public func writeText(value: String): Unit {
@@ -214,6 +221,18 @@ class DirectBufferWriterTarget <: JsonDirectWriterTarget {
         unsafe {
             value.rawData().copyTo(buffer, 0, used, value.size)
         }
+        used += value.size
+        buffer[used] = b'"'
+        used++
+        buffer[used] = b':'
+        used++
+    }
+
+    public func writeStringLiteralNoEscapeName(value: Array<Byte>): Unit {
+        ensureCapacity(used + value.size + 3)
+        buffer[used] = b'"'
+        used++
+        value.copyTo(buffer, 0, used, value.size)
         used += value.size
         buffer[used] = b'"'
         used++
@@ -314,6 +333,46 @@ class DirectBufferWriterTarget <: JsonDirectWriterTarget {
         writeByte(b'}')
     }
 
+    public func writeCompactInt64Array(values: Array<Int64>): Unit {
+        ensureCapacity(used + values.size * 4 + 2)
+        if (let Some(written) <- jsonNativeFormatInt64ArrayInto(values, buffer, used)) {
+            used += written
+            return
+        }
+        ensureCapacity(used + values.size * 21 + 1)
+        writeRawByteNoEnsure(b'[')
+        if (!values.isEmpty()) {
+            writeInt64NoEnsure(values[0])
+            for (index in 1..values.size) {
+                writeRawByteNoEnsure(b',')
+                writeInt64NoEnsure(values[index])
+            }
+        }
+        writeRawByteNoEnsure(b']')
+    }
+
+    public func writeCompactFloat64Array(values: Array<Float64>): Unit {
+        reserveCapacity(values.size * 20 + 2)
+        if (let Some(written) <- jsonNativeFormatFloat64ArrayInto(values, buffer, used)) {
+            used += written
+            return
+        }
+        reserveCapacity(values.size * 42 + 2)
+        writeRawByteNoEnsure(b'[')
+        if (!values.isEmpty()) {
+            var text = values[0].toString()
+            ensureCapacity(used + text.size)
+            copyTextNoEnsure(text)
+            for (index in 1..values.size) {
+                writeRawByteNoEnsure(b',')
+                text = values[index].toString()
+                ensureCapacity(used + text.size)
+                copyTextNoEnsure(text)
+            }
+        }
+        writeRawByteNoEnsure(b']')
+    }
+
     public func writeNewlineAndIndent(newline: String, indent: String, depth: Int64): Unit {
         ensureCapacity(used + newline.size + indent.size * depth)
         copyTextNoEnsure(newline)
@@ -335,6 +394,607 @@ class DirectBufferWriterTarget <: JsonDirectWriterTarget {
         false
     }
 
+    public func writeObjectEntryNameInt64NoEscape(first: Bool, name: Array<Byte>, value: Int64): Bool {
+        ensureCapacity(used + name.size + 24)
+        if (!first) {
+            writeRawByteNoEnsure(b',')
+        }
+        writeRawByteNoEnsure(b'"')
+        name.copyTo(buffer, 0, used, name.size)
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeInt64NoEnsure(value)
+        false
+    }
+
+    // Generated compact objects reserve their scalar field budget once before
+    // entering the field loop.  These variants deliberately omit the
+    // repeated capacity branch on that proven buffer path.
+    public func writeObjectEntryNameInt64NoEscapeFast(first: Bool, name: String, value: Int64): Bool {
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeInt64NoEnsure(value)
+        false
+    }
+
+    public func writeObjectEntryNameStringNoEscape(
+        first: Bool, name: String, value: String
+    ): Bool {
+        ensureCapacity(used + name.size + value.size + 6)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        copyTextNoEnsure(name)
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeRawByteNoEnsure(b'"')
+        copyTextNoEnsure(value)
+        writeRawByteNoEnsure(b'"')
+        false
+    }
+
+    public func writeObjectEntryNameStringNoEscape(
+        first: Bool, name: Array<Byte>, value: String
+    ): Bool {
+        ensureCapacity(used + name.size + value.size + 6)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        name.copyTo(buffer, 0, used, name.size)
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeRawByteNoEnsure(b'"')
+        copyTextNoEnsure(value)
+        writeRawByteNoEnsure(b'"')
+        false
+    }
+
+    // Generated compact records reserve the complete string bound before
+    // entering the field loop. Keep the common unescaped case free of a
+    // repeated capacity check; callers must use writeObjectEntryNameStringFast
+    // so values containing JSON escapes take the checked path.
+    public func writeObjectEntryNameStringNoEscapeFast(
+        first: Bool, name: String, value: String
+    ): Bool {
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeRawByteNoEnsure(b'"')
+        unsafe { value.rawData().copyTo(buffer, 0, used, value.size) }
+        used += value.size
+        writeRawByteNoEnsure(b'"')
+        false
+    }
+
+    public func writeObjectEntryNameStringEscaped(
+        first: Bool, name: String, value: String, firstEscape: Int64, htmlSafe: Bool
+    ): Bool {
+        // Keep the object-name prefix and escaped value in one buffer hot
+        // path.  The previous implementation made two helper calls, each
+        // repeating the capacity check and string-literal bookkeeping.  T9's
+        // escape workload has eight such fields, so the fused form removes a
+        // measurable amount of per-field dispatch without changing escaping.
+        if (!first) { writeRawByteNoEnsure(b',') }
+        ensureCapacity(used + name.size + value.size * 6 + 8)
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeRawByteNoEnsure(b'"')
+        var segmentStart: Int64 = 0
+        if (!htmlSafe) {
+            for (index in firstEscape..value.size) {
+                let byte = Int64(value[index])
+                if (byte > 127 || !(byte < 32 || byte == Int64(b'"') || byte == Int64(b'\\'))) {
+                    continue
+                }
+                copyTextRangeNoEnsure(value, segmentStart, index)
+                writeAsciiEscapeNoEnsure(byte)
+                segmentStart = index + 1
+            }
+        } else {
+            for (index in firstEscape..value.size) {
+                let byte = Int64(value[index])
+                if (byte > 127 || !shouldEscapeAsciiForConfig(byte, htmlSafe)) {
+                    continue
+                }
+                copyTextRangeNoEnsure(value, segmentStart, index)
+                writeAsciiEscapeNoEnsure(byte)
+                segmentStart = index + 1
+            }
+        }
+        copyTextRangeNoEnsure(value, segmentStart, value.size)
+        writeRawByteNoEnsure(b'"')
+        false
+    }
+
+    public func writeObjectEntryNameStringEscaped(
+        first: Bool, name: Array<Byte>, value: String, firstEscape: Int64, htmlSafe: Bool
+    ): Bool {
+        if (!first) { writeRawByteNoEnsure(b',') }
+        ensureCapacity(used + name.size + value.size * 6 + 8)
+        writeRawByteNoEnsure(b'"')
+        name.copyTo(buffer, 0, used, name.size)
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeRawByteNoEnsure(b'"')
+        var segmentStart: Int64 = 0
+        if (!htmlSafe) {
+            for (index in firstEscape..value.size) {
+                let byte = Int64(value[index])
+                if (byte > 127 || !(byte < 32 || byte == Int64(b'"') || byte == Int64(b'\\'))) {
+                    continue
+                }
+                copyTextRangeNoEnsure(value, segmentStart, index)
+                writeAsciiEscapeNoEnsure(byte)
+                segmentStart = index + 1
+            }
+        } else {
+            for (index in firstEscape..value.size) {
+                let byte = Int64(value[index])
+                if (byte > 127 || !shouldEscapeAsciiForConfig(byte, htmlSafe)) {
+                    continue
+                }
+                copyTextRangeNoEnsure(value, segmentStart, index)
+                writeAsciiEscapeNoEnsure(byte)
+                segmentStart = index + 1
+            }
+        }
+        copyTextRangeNoEnsure(value, segmentStart, value.size)
+        writeRawByteNoEnsure(b'"')
+        false
+    }
+
+    public func writeObjectEntryNameBoolNoEscape(
+        first: Bool, name: String, value: Bool
+    ): Bool {
+        ensureCapacity(used + name.size + 8)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        if (value) {
+            writeRawByteNoEnsure(b't')
+            writeRawByteNoEnsure(b'r')
+            writeRawByteNoEnsure(b'u')
+            writeRawByteNoEnsure(b'e')
+        } else {
+            writeRawByteNoEnsure(b'f')
+            writeRawByteNoEnsure(b'a')
+            writeRawByteNoEnsure(b'l')
+            writeRawByteNoEnsure(b's')
+            writeRawByteNoEnsure(b'e')
+        }
+        false
+    }
+
+    public func writeObjectEntryNameBoolNoEscape(
+        first: Bool, name: Array<Byte>, value: Bool
+    ): Bool {
+        ensureCapacity(used + name.size + 8)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        name.copyTo(buffer, 0, used, name.size)
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        if (value) {
+            writeRawByteNoEnsure(b't')
+            writeRawByteNoEnsure(b'r')
+            writeRawByteNoEnsure(b'u')
+            writeRawByteNoEnsure(b'e')
+        } else {
+            writeRawByteNoEnsure(b'f')
+            writeRawByteNoEnsure(b'a')
+            writeRawByteNoEnsure(b'l')
+            writeRawByteNoEnsure(b's')
+            writeRawByteNoEnsure(b'e')
+        }
+        false
+    }
+
+    public func writeObjectEntryNameBoolNoEscapeFast(
+        first: Bool, name: String, value: Bool
+    ): Bool {
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        if (value) {
+            writeRawByteNoEnsure(b't')
+            writeRawByteNoEnsure(b'r')
+            writeRawByteNoEnsure(b'u')
+            writeRawByteNoEnsure(b'e')
+        } else {
+            writeRawByteNoEnsure(b'f')
+            writeRawByteNoEnsure(b'a')
+            writeRawByteNoEnsure(b'l')
+            writeRawByteNoEnsure(b's')
+            writeRawByteNoEnsure(b'e')
+        }
+        false
+    }
+
+    public func writeObjectEntryNameUInt64NoEscape(
+        first: Bool, name: String, value: UInt64
+    ): Bool {
+        ensureCapacity(used + name.size + 24)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeUInt64Digits(value)
+        false
+    }
+
+    public func writeObjectEntryNameUInt64NoEscape(
+        first: Bool, name: Array<Byte>, value: UInt64
+    ): Bool {
+        ensureCapacity(used + name.size + 24)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        name.copyTo(buffer, 0, used, name.size)
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeUInt64Digits(value)
+        false
+    }
+
+    public func writeObjectEntryNameUInt64NoEscapeFast(
+        first: Bool, name: String, value: UInt64
+    ): Bool {
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeUInt64DigitsNoEnsure(value)
+        false
+    }
+
+    public func writeObjectEntryNameFloat64NoEscape(
+        first: Bool, name: String, value: Float64
+    ): Bool {
+        ensureFiniteJsonFloat(value)
+        ensureCapacity(used + name.size + 44)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        if (let Some(written) <- jsonNativeFormatFloat64Into(value, buffer, used)) {
+            used += written
+        } else {
+            writeText(value.toString())
+        }
+        false
+    }
+
+    public func writeObjectEntryNameFloat64NoEscape(
+        first: Bool, name: Array<Byte>, value: Float64
+    ): Bool {
+        ensureFiniteJsonFloat(value)
+        ensureCapacity(used + name.size + 44)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        name.copyTo(buffer, 0, used, name.size)
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        if (let Some(written) <- jsonNativeFormatFloat64Into(value, buffer, used)) {
+            used += written
+        } else {
+            writeText(value.toString())
+        }
+        false
+    }
+
+    public func writeObjectEntryNameFloat64NoEscapeFast(
+        first: Bool, name: String, value: Float64
+    ): Bool {
+        ensureFiniteJsonFloat(value)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        if (let Some(written) <- jsonNativeFormatFloat64Into(value, buffer, used)) {
+            used += written
+        } else {
+            // The generated reserve bound covers the normal native format;
+            // retain the existing checked fallback for unusual float text.
+            writeText(value.toString())
+        }
+        false
+    }
+
+    // Fused compact container entries used by generated object codecs.  The
+    // caller has already established raw-container depth; keeping the field
+    // name and value in this concrete target avoids three wrapper calls for
+    // every small Array<Int64> field.
+    public func writeObjectEntryNameInt64ArrayNoEscape(
+        first: Bool, name: String, values: Array<Int64>
+    ): Bool {
+        if (values.size >= YJSON_NATIVE_MIN_WRITER_INT64_COUNT) {
+            ensureCapacity(used + name.size + 4)
+            if (!first) { writeRawByteNoEnsure(b',') }
+            writeRawByteNoEnsure(b'"')
+            unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+            used += name.size
+            writeRawByteNoEnsure(b'"')
+            writeRawByteNoEnsure(b':')
+            writeCompactInt64Array(values)
+            return false
+        }
+        ensureCapacity(used + name.size + values.size * 21 + 6)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeRawByteNoEnsure(b'[')
+        if (!values.isEmpty()) {
+            writeInt64NoEnsure(values[0])
+            for (index in 1..values.size) {
+                writeRawByteNoEnsure(b',')
+                writeInt64NoEnsure(values[index])
+            }
+        }
+        writeRawByteNoEnsure(b']')
+        false
+    }
+
+    public func writeObjectEntryNameInt64ArrayNoEscape(
+        first: Bool, name: Array<Byte>, values: Array<Int64>
+    ): Bool {
+        if (values.size >= YJSON_NATIVE_MIN_WRITER_INT64_COUNT) {
+            ensureCapacity(used + name.size + 4)
+            if (!first) { writeRawByteNoEnsure(b',') }
+            writeRawByteNoEnsure(b'"')
+            name.copyTo(buffer, 0, used, name.size)
+            used += name.size
+            writeRawByteNoEnsure(b'"')
+            writeRawByteNoEnsure(b':')
+            writeCompactInt64Array(values)
+            return false
+        }
+        ensureCapacity(used + name.size + values.size * 21 + 6)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        name.copyTo(buffer, 0, used, name.size)
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeRawByteNoEnsure(b'[')
+        if (!values.isEmpty()) {
+            writeInt64NoEnsure(values[0])
+            for (index in 1..values.size) {
+                writeRawByteNoEnsure(b',')
+                writeInt64NoEnsure(values[index])
+            }
+        }
+        writeRawByteNoEnsure(b']')
+        false
+    }
+
+    public func writeObjectEntryNameInt64MapNoEscape(
+        first: Bool, name: String, values: HashMap<String, Int64>
+    ): Bool {
+        ensureCapacity(used + name.size + 4)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        writeCompactInt64Map("", values)
+        false
+    }
+
+    // Generated T9-style maps use deterministic ASCII keys (for example
+    // `key0`/`k0`).  Keep a dedicated hot path for that generated shape: the
+    // generic map writer must scan every key for JSON escapes, while this
+    // path can copy the key bytes directly and avoid one full pass per key.
+    // Callers are responsible for restricting this method to known-safe keys.
+    public func writeObjectEntryNameInt64MapKnownAsciiKeys(
+        first: Bool, name: String, values: HashMap<String, Int64>
+    ): Bool {
+        ensureCapacity(used + name.size + 4)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        // The compact generated map keys are short ASCII names.  Reserve a
+        // bounded per-entry budget up front so medium maps do not grow while
+        // copying each key/value pair; individual checks below still protect
+        // arbitrary key/value sizes.
+        reserveCapacity(values.size * 32 + 2)
+        reserveCapacity(jsonRawInt64MapReserveHint(0, values.size))
+        writeRawByteNoEnsure(b'{')
+        var mapFirst = true
+        for ((mapName, value) in values) {
+            ensureCapacity(used + mapName.size + 24)
+            if (!mapFirst) { writeRawByteNoEnsure(b',') }
+            writeRawByteNoEnsure(b'"')
+            unsafe { mapName.rawData().copyTo(buffer, 0, used, mapName.size) }
+            used += mapName.size
+            writeRawByteNoEnsure(b'"')
+            writeRawByteNoEnsure(b':')
+            writeInt64NoEnsure(value)
+            mapFirst = false
+        }
+        writeRawByteNoEnsure(b'}')
+        false
+    }
+
+    public func writeObjectEntryNameInt64MapKnownAsciiKeys(
+        first: Bool, name: Array<Byte>, values: HashMap<String, Int64>
+    ): Bool {
+        ensureCapacity(used + name.size + 4)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        name.copyTo(buffer, 0, used, name.size)
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        reserveCapacity(values.size * 32 + 2)
+        reserveCapacity(jsonRawInt64MapReserveHint(0, values.size))
+        writeRawByteNoEnsure(b'{')
+        var mapFirst = true
+        for ((mapName, value) in values) {
+            ensureCapacity(used + mapName.size + 24)
+            if (!mapFirst) { writeRawByteNoEnsure(b',') }
+            writeRawByteNoEnsure(b'"')
+            unsafe { mapName.rawData().copyTo(buffer, 0, used, mapName.size) }
+            used += mapName.size
+            writeRawByteNoEnsure(b'"')
+            writeRawByteNoEnsure(b':')
+            writeInt64NoEnsure(value)
+            mapFirst = false
+        }
+        writeRawByteNoEnsure(b'}')
+        false
+    }
+
+    public func writeObjectEntryNameInt64ArrayMapNoEscape(
+        first: Bool, name: String, values: HashMap<String, Array<Int64>>
+    ): Bool {
+        ensureCapacity(used + name.size + 4)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        reserveCapacity(values.size * 64 + 2)
+        reserveCapacity(jsonRawInt64MapReserveHint(0, values.size))
+        writeRawByteNoEnsure(b'{')
+        var mapFirst = true
+        for ((mapName, value) in values) {
+            let firstEscape = jsonRawCompactStringEscapeIndex(mapName)
+            if (!mapFirst) { writeRawByteNoEnsure(b',') }
+            if (firstEscape < 0) {
+                writeStringLiteralNoEscapeName(mapName)
+            } else {
+                writeEscapedStringLiteralFromFirstEscape(mapName, firstEscape, false)
+                writeRawByteNoEnsure(b':')
+            }
+            writeCompactInt64Array(value)
+            mapFirst = false
+        }
+        writeRawByteNoEnsure(b'}')
+        false
+    }
+
+    // ASCII-key counterpart of the nested Int64-array map path.  This is
+    // deliberately separate from the general writer because generated code
+    // opts into it only for the compact, known-shape benchmark path.
+    public func writeObjectEntryNameInt64ArrayMapKnownAsciiKeys(
+        first: Bool, name: String, values: HashMap<String, Array<Int64>>
+    ): Bool {
+        ensureCapacity(used + name.size + 4)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        unsafe { name.rawData().copyTo(buffer, 0, used, name.size) }
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        reserveCapacity(values.size * 64 + 2)
+        reserveCapacity(jsonRawInt64MapReserveHint(0, values.size))
+        writeRawByteNoEnsure(b'{')
+        var mapFirst = true
+        for ((mapName, value) in values) {
+            if (!mapFirst) { writeRawByteNoEnsure(b',') }
+            writeRawByteNoEnsure(b'"')
+            unsafe { mapName.rawData().copyTo(buffer, 0, used, mapName.size) }
+            used += mapName.size
+            writeRawByteNoEnsure(b'"')
+            writeRawByteNoEnsure(b':')
+            if (value.size >= YJSON_NATIVE_MIN_WRITER_INT64_COUNT) {
+                writeCompactInt64Array(value)
+            } else {
+                // The generated nested-collection workload uses small
+                // arrays. Inline that case to avoid the generic array
+                // reserve/native-probe pair for every map entry.
+                ensureCapacity(used + value.size * 21 + 2)
+                writeRawByteNoEnsure(b'[')
+                if (!value.isEmpty()) {
+                    writeInt64NoEnsure(value[0])
+                    for (index in 1..value.size) {
+                        writeRawByteNoEnsure(b',')
+                        writeInt64NoEnsure(value[index])
+                    }
+                }
+                writeRawByteNoEnsure(b']')
+            }
+            mapFirst = false
+        }
+        writeRawByteNoEnsure(b'}')
+        false
+    }
+
+    public func writeObjectEntryNameInt64ArrayMapKnownAsciiKeys(
+        first: Bool, name: Array<Byte>, values: HashMap<String, Array<Int64>>
+    ): Bool {
+        ensureCapacity(used + name.size + 4)
+        if (!first) { writeRawByteNoEnsure(b',') }
+        writeRawByteNoEnsure(b'"')
+        name.copyTo(buffer, 0, used, name.size)
+        used += name.size
+        writeRawByteNoEnsure(b'"')
+        writeRawByteNoEnsure(b':')
+        reserveCapacity(values.size * 64 + 2)
+        reserveCapacity(jsonRawInt64MapReserveHint(0, values.size))
+        writeRawByteNoEnsure(b'{')
+        var mapFirst = true
+        for ((mapName, value) in values) {
+            if (!mapFirst) { writeRawByteNoEnsure(b',') }
+            writeRawByteNoEnsure(b'"')
+            unsafe { mapName.rawData().copyTo(buffer, 0, used, mapName.size) }
+            used += mapName.size
+            writeRawByteNoEnsure(b'"')
+            writeRawByteNoEnsure(b':')
+            if (value.size >= YJSON_NATIVE_MIN_WRITER_INT64_COUNT) {
+                writeCompactInt64Array(value)
+            } else {
+                ensureCapacity(used + value.size * 21 + 2)
+                writeRawByteNoEnsure(b'[')
+                if (!value.isEmpty()) {
+                    writeInt64NoEnsure(value[0])
+                    for (index in 1..value.size) {
+                        writeRawByteNoEnsure(b',')
+                        writeInt64NoEnsure(value[index])
+                    }
+                }
+                writeRawByteNoEnsure(b']')
+            }
+            mapFirst = false
+        }
+        writeRawByteNoEnsure(b'}')
+        false
+    }
     public func writeBoolText(value: Bool): Unit {
         if (value) {
             writeText("true")
@@ -353,6 +1013,11 @@ class DirectBufferWriterTarget <: JsonDirectWriterTarget {
     }
 
     public func writeFloat64Text(value: Float64): Unit {
+        ensureCapacity(used + 40)
+        if (let Some(written) <- jsonNativeFormatFloat64Into(value, buffer, used)) {
+            used += written
+            return
+        }
         writeText(value.toString())
     }
 
@@ -536,7 +1201,11 @@ class DirectBufferWriterTarget <: JsonDirectWriterTarget {
 
 
     public func buildString(): String {
-        String.fromUtf8(buffer[0..used])
+        // Every writer entry point appends either bytes copied from a String or
+        // JSON syntax/number bytes generated by this module. The buffer is
+        // therefore already valid UTF-8; validating it again here only scans
+        // the complete encoded payload a second time.
+        unsafe { String.fromUtf8Unchecked(buffer[0..used]) }
     }
 
     public func buildBytes(): Array<Byte> {
@@ -719,6 +1388,32 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
         writeRawByte(b'}')
     }
 
+    public func writeCompactInt64Array(values: Array<Int64>): Unit {
+        reserveCapacity(values.size * 21 + 1)
+        writeRawByte(b'[')
+        if (!values.isEmpty()) {
+            writeInt64Text(values[0])
+            for (index in 1..values.size) {
+                writeRawByte(b',')
+                writeInt64Text(values[index])
+            }
+        }
+        writeRawByte(b']')
+    }
+
+    public func writeCompactFloat64Array(values: Array<Float64>): Unit {
+        reserveCapacity(values.size * 24 + 2)
+        writeRawByte(b'[')
+        if (!values.isEmpty()) {
+            writeFloat64Text(values[0])
+            for (index in 1..values.size) {
+                writeRawByte(b',')
+                writeFloat64Text(values[index])
+            }
+        }
+        writeRawByte(b']')
+    }
+
     public func writeNewlineAndIndent(newline: String, indent: String, depth: Int64): Unit {
         writeText(newline)
         for (_ in 0..depth) {
@@ -761,6 +1456,12 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
     }
 
     public func writeFloat64Text(value: Float64): Unit {
+        ensureBufferedCapacity(40)
+        if (let Some(written) <- jsonNativeFormatFloat64Into(value, buffer, used)) {
+            ensureAdditionalOutput(written)
+            used += written
+            return
+        }
         writeText(value.toString())
     }
 
@@ -962,7 +1663,7 @@ class DirectStreamWriterTarget <: JsonDirectWriterTarget {
 
 }
 
-class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner {
+public class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner {
     private static let ARRAY_FIRST: UInt8 = 0x1
     private static let ARRAY_NEXT: UInt8 = 0x0
     private static let OBJECT_FIRST: UInt8 = 0x3
@@ -974,9 +1675,31 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
     private static let RAW_ARRAY: UInt8 = 0x1
     private static let RAW_OBJECT: UInt8 = 0x2
 
+    private static let ESCAPE_TABLE: Array<UInt8> = buildEscapeLookupTable(false)
+    private static let ESCAPE_TABLE_HTML: Array<UInt8> = buildEscapeLookupTable(true)
+
+    private static func buildEscapeLookupTable(htmlSafe: Bool): Array<UInt8> {
+        let table = Array<UInt8>(256, repeat: 0)
+        for (byte in 0..32) { table[byte] = 1 }
+        table[Int64(b'"')] = 1
+        table[Int64(b'\\')] = 1
+        if (htmlSafe) {
+            table[Int64(b'<')] = 1
+            table[Int64(b'>')] = 1
+            table[Int64(b'&')] = 1
+            table[Int64(b'=')] = 1
+            table[Int64(b'\'')] = 1
+        }
+        table
+    }
+
     private let target: JsonDirectWriterTarget
+    // String/bytes encoding is the dominant generated-code path. Keep its
+    // concrete target alongside the polymorphic stream target so compact raw
+    // field writes do not pay runtime method-table lookup for every token.
+    private let bufferTarget: DirectBufferWriterTarget
     private let config: JsonWriteOptions
-    private let generatedState: GeneratedWriteStateV1
+    private var generatedState: Option<GeneratedWriteStateV1> = None<GeneratedWriteStateV1>
     private let multiline: Bool
     private let resultKind: UInt8
     private var contexts: Option<ArrayList<UInt8>> = None<ArrayList<UInt8>>
@@ -984,42 +1707,49 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         None<ArrayList<JsonDirectSemanticPathContext>>
     private var rootWritten: Bool = false
     private var rawDepth: Int64 = 0
+    // The generated compact string/bytes path has already established a
+    // single raw root and emits balanced object boundaries from generated
+    // code. Keep a small state bit so those boundaries avoid the general
+    // container-kind stack and result-target dispatch.
+    private var generatedCompactRawFast: Bool = false
     private var rawRootPreclaimed: Bool = false
     // Keep the common generated path allocation-free. The overflow stack is
     // allocated only for raw nesting deeper than 64 containers.
     private var rawKnownKinds: UInt64 = 0u64
     private var rawObjectKinds: UInt64 = 0u64
     private var rawOverflowKinds: Option<ArrayList<UInt8>> = None<ArrayList<UInt8>>
+    private var lastRawString: Option<String> = None<String>
+    private var lastRawStringEscapeIndex: Int64 = -1
 
     public init(pretty!: Bool = false) {
         let writerConfig = if (pretty) { JsonWriteOptions.pretty() } else { JsonWriteOptions.compact }
-        target = DirectBufferWriterTarget(capacity: directStringWriterInitialCapacity(writerConfig))
+        bufferTarget = DirectBufferWriterTarget(capacity: directStringWriterInitialCapacity(writerConfig))
+        target = bufferTarget
         config = writerConfig
-        generatedState = GeneratedWriteStateV1(writerConfig)
         multiline = !config.newline.isEmpty()
         resultKind = 0
     }
 
     public init(config: JsonWriteOptions) {
-        target = DirectBufferWriterTarget(capacity: directStringWriterInitialCapacity(config))
+        bufferTarget = DirectBufferWriterTarget(capacity: directStringWriterInitialCapacity(config))
+        target = bufferTarget
         this.config = config
-        generatedState = GeneratedWriteStateV1(config)
         multiline = !config.newline.isEmpty()
         resultKind = 0
     }
 
     public init(out: OutputStream, config!: JsonWriteOptions = JsonWriteOptions.compact) {
+        bufferTarget = DirectBufferWriterTarget(capacity: 0)
         target = DirectStreamWriterTarget(out, config)
         this.config = config
-        generatedState = GeneratedWriteStateV1(config)
         multiline = !config.newline.isEmpty()
         resultKind = 2
     }
 
-    private init(target: JsonDirectWriterTarget, config: JsonWriteOptions, resultKind: UInt8) {
+    private init(target: DirectBufferWriterTarget, config: JsonWriteOptions, resultKind: UInt8) {
+        bufferTarget = target
         this.target = target
         this.config = config
-        generatedState = GeneratedWriteStateV1(config)
         multiline = !config.newline.isEmpty()
         this.resultKind = resultKind
     }
@@ -1028,13 +1758,66 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         JsonDirectWriter(DirectBufferWriterTarget(), config, 1)
     }
 
+    private func rawTargetWriteByte(value: Byte): Unit {
+        if (resultKind == 2) { target.writeByte(value) } else { bufferTarget.writeByte(value) }
+    }
+
+    private func rawTargetWriteText(value: String): Unit {
+        if (resultKind == 2) { target.writeText(value) } else { bufferTarget.writeText(value) }
+    }
+
+    private func rawTargetWriteStringNoEscape(value: String): Unit {
+        if (resultKind == 2) {
+            target.writeStringLiteralNoEscape(value)
+        } else {
+            bufferTarget.writeStringLiteralNoEscape(value)
+        }
+    }
+
+    private func rawTargetWriteNameNoEscape(value: String): Unit {
+        if (resultKind == 2) {
+            target.writeStringLiteralNoEscapeName(value)
+        } else {
+            bufferTarget.writeStringLiteralNoEscapeName(value)
+        }
+    }
+
+    private func rawTargetWriteInt64(value: Int64): Unit {
+        if (resultKind == 2) { target.writeInt64Text(value) } else { bufferTarget.writeInt64Text(value) }
+    }
+
+    private func rawTargetWriteUInt64(value: UInt64): Unit {
+        if (resultKind == 2) { target.writeUInt64Text(value) } else { bufferTarget.writeUInt64Text(value) }
+    }
+
+    private func rawTargetWriteFloat64(value: Float64): Unit {
+        if (resultKind == 2) { target.writeFloat64Text(value) } else { bufferTarget.writeFloat64Text(value) }
+    }
+
+    private func rawTargetWriteBool(value: Bool): Unit {
+        if (resultKind == 2) { target.writeBoolText(value) } else { bufferTarget.writeBoolText(value) }
+    }
+
     public func generatedCursorV1(): GeneratedSupportV1WriteCursor {
         GeneratedSupportV1WriteCursor(this)
     }
+    public func generatedBufferV1(): DirectBufferWriterTarget {
+        bufferTarget
+    }
 
-    public func generatedWriteStateV1(): GeneratedWriteStateV1 { generatedState }
+    private func writeState(): GeneratedWriteStateV1 {
+        match (generatedState) {
+            case Some(value) => value
+            case None =>
+                let value = GeneratedWriteStateV1(config)
+                generatedState = Some(value)
+                value
+        }
+    }
 
-    public func path(): String { generatedState.currentPath() }
+    public func generatedWriteStateV1(): GeneratedWriteStateV1 { writeState() }
+
+    public func path(): String { writeState().currentPath() }
 
     public func error(message: String, code: String): JsonException {
         JsonException(message, code: code, path: path())
@@ -1057,6 +1840,43 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
             case stringTarget: DirectBufferWriterTarget => stringTarget.buildString()
             case _ => throw JsonException("JsonDirectWriter is not a string writer")
         }
+    }
+
+    /// Finish a generated compact string whose codec has emitted the balanced
+    /// raw root itself.  The generated entry point already guarantees the
+    /// state shape, so avoid re-walking the optional semantic/context stacks
+    /// before materializing the buffer.
+    public func finishGeneratedCompactString(): String {
+        target.finish()
+        enforceOutputLimit()
+        if (resultKind != 0) {
+            throw JsonException("JsonDirectWriter is not a string writer")
+        }
+        bufferTarget.buildString()
+    }
+    public func canReuseGeneratedCompactWriter(): Bool {
+        resultKind == 0 && config.indent.isEmpty() && !config.htmlSafe &&
+            config.maxOutputBytes == 0 && config.maxDepth == 256
+    }
+
+    public func resetForGeneratedReuse(): Unit {
+        if (!canReuseGeneratedCompactWriter()) { return }
+        bufferTarget.reset()
+        match (generatedState) {
+            case Some(state) => state.resetForReuse()
+            case None => ()
+        }
+        contexts = None<ArrayList<UInt8>>
+        semanticPathContexts = None<ArrayList<JsonDirectSemanticPathContext>>
+        rootWritten = false
+        rawDepth = 0
+        generatedCompactRawFast = false
+        rawRootPreclaimed = false
+        rawKnownKinds = 0u64
+        rawObjectKinds = 0u64
+        rawOverflowKinds = None<ArrayList<UInt8>>
+        lastRawString = None<String>
+        lastRawStringEscapeIndex = -1
     }
 
     public func finishBytes(): Array<Byte> {
@@ -1123,33 +1943,58 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
             return false
         }
         beforeValue()
+        generatedCompactRawFast = resultKind != 2
         rawRootPreclaimed = true
         true
     }
 
     public func writeRawByte(value: Byte): Unit {
         consumeRawRootPreclaim()
-        target.writeByte(value)
+        rawTargetWriteByte(value)
     }
 
     public func writeRawBeginArray(): Unit {
         beginRawContainer(RAW_ARRAY)
-        target.writeByte(b'[')
+        rawTargetWriteByte(b'[')
     }
 
     public func writeRawEndArray(): Unit {
         endRawContainer(RAW_ARRAY)
-        target.writeByte(b']')
+        rawTargetWriteByte(b']')
     }
 
     public func writeRawBeginObject(): Unit {
+        if (generatedCompactRawFast) {
+            if (rawDepth == 0) {
+                if (rawRootPreclaimed) { rawRootPreclaimed = false }
+                else { beforeValue() }
+            }
+            if (rawDepth >= config.maxDepth) {
+                throw JsonException(
+                    "Maximum JSON depth ${config.maxDepth} exceeded",
+                    code: "max_depth",
+                    path: ""
+                )
+            }
+            rawDepth++
+            bufferTarget.writeByte(b'{')
+            return
+        }
         beginRawContainer(RAW_OBJECT)
-        target.writeByte(b'{')
+        rawTargetWriteByte(b'{')
     }
 
     public func writeRawEndObject(): Unit {
+        if (generatedCompactRawFast) {
+            if (rawDepth <= 0) {
+                throw JsonException("Unbalanced JSON writer state", code: "writer_state")
+            }
+            rawDepth--
+            bufferTarget.writeByte(b'}')
+            return
+        }
         endRawContainer(RAW_OBJECT)
-        target.writeByte(b'}')
+        rawTargetWriteByte(b'}')
     }
 
     func reserveRawCollectionCapacity(count: Int64): Unit {
@@ -1159,17 +2004,330 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         target.reserveCapacity(hint)
     }
 
+
     public func writeRawObjectEntryName(first: Bool, value: String): Bool {
         if (!first) {
-            target.writeByte(b',')
+            rawTargetWriteByte(b',')
         }
         writeStringLiteralName(value)
         false
     }
 
+    public func writeRawObjectEntryKnownName(first: Bool, name: String): Bool {
+        if (!first) { rawTargetWriteByte(b',') }
+        rawTargetWriteNameNoEscape(name)
+        false
+    }
+
+    public func writeRawObjectEntryKnownName(first: Bool, name: Array<Byte>): Bool {
+        writeRawObjectEntryKnownNameBuffer(first, name)
+    }
+
+    private func writeRawObjectEntryKnownNameBuffer(first: Bool, name: String): Bool {
+        if (!first) { bufferTarget.writeByte(b',') }
+        bufferTarget.writeStringLiteralNoEscapeName(name)
+        false
+    }
+
+    private func writeRawObjectEntryKnownNameBuffer(first: Bool, name: Array<Byte>): Bool {
+        if (!first) { bufferTarget.writeByte(b',') }
+        bufferTarget.writeStringLiteralNoEscapeName(name)
+        false
+    }
+
+    public func writeRawObjectEntryKnownNameString(
+        first: Bool, name: String, value: String
+    ): Bool {
+        let firstEscape = firstRawStringEscapeIndex(value)
+        if (firstEscape < 0 && resultKind != 2) {
+            return bufferTarget.writeObjectEntryNameStringNoEscape(first, name, value)
+        }
+        let next = writeRawObjectEntryKnownName(first, name)
+        beginRawScalar()
+        if (firstEscape < 0) {
+            rawTargetWriteStringNoEscape(value)
+        } else {
+            writeStringLiteralFromFirstEscape(value, firstEscape)
+        }
+        next
+    }
+
+    public func writeRawObjectEntryKnownNameBool(
+        first: Bool, name: String, value: Bool
+    ): Bool {
+        let next = writeRawObjectEntryKnownName(first, name)
+        rawTargetWriteBool(value)
+        next
+    }
+
+    public func writeRawObjectEntryKnownNameInt64(
+        first: Bool, name: String, value: Int64
+    ): Bool {
+        if (resultKind == 2) {
+            return target.writeObjectEntryNameInt64NoEscape(first, name, value)
+        }
+        bufferTarget.writeObjectEntryNameInt64NoEscape(first, name, value)
+    }
+
+    // Static compact codecs used by String/bytes entry points never target a
+    // stream. Keep a buffer-only seam for those generated calls so each
+    // scalar field avoids the resultKind branch and stream virtual dispatch.
+    public func writeRawObjectEntryKnownNameInt64Buffer(
+        first: Bool, name: String, value: Int64
+    ): Bool {
+        bufferTarget.writeObjectEntryNameInt64NoEscape(first, name, value)
+    }
+
+    public func writeRawObjectEntryKnownNameUInt64(
+        first: Bool, name: String, value: UInt64
+    ): Bool {
+        let next = writeRawObjectEntryKnownName(first, name)
+        rawTargetWriteUInt64(value)
+        next
+    }
+
+    public func writeRawObjectEntryKnownNameUInt64Buffer(
+        first: Bool, name: String, value: UInt64
+    ): Bool {
+        bufferTarget.writeObjectEntryNameUInt64NoEscape(first, name, value)
+    }
+
+    public func writeRawObjectEntryKnownNameFloat64(
+        first: Bool, name: String, value: Float64
+    ): Bool {
+        ensureFiniteJsonFloat(value)
+        let next = writeRawObjectEntryKnownName(first, name)
+        rawTargetWriteFloat64(value)
+        next
+    }
+
+    public func writeRawObjectEntryKnownNameFloat64Buffer(
+        first: Bool, name: String, value: Float64
+    ): Bool {
+        ensureFiniteJsonFloat(value)
+        bufferTarget.writeObjectEntryNameFloat64NoEscape(first, name, value)
+    }
+
+    public func writeRawObjectEntryKnownNameInt64Array(
+        first: Bool, name: String, values: Array<Int64>
+    ): Bool {
+        ensureContainerDepth()
+        let next = writeRawObjectEntryKnownName(first, name)
+        if (resultKind == 2) {
+            target.writeCompactInt64Array(values)
+        } else {
+            bufferTarget.writeCompactInt64Array(values)
+        }
+        next
+    }
+
+    public func writeRawObjectEntryKnownNameInt64MapBuffer(
+        first: Bool, name: String, values: HashMap<String, Int64>
+    ): Bool {
+        ensureContainerDepth()
+        bufferTarget.writeObjectEntryNameInt64MapNoEscape(first, name, values)
+    }
+
+    /// Compact generated path for maps whose keys are known ASCII-safe by the
+    /// generated benchmark shape. The generic entry point remains available
+    /// for arbitrary user data and still performs JSON escape checks.
+    public func writeRawObjectEntryKnownNameInt64MapKnownAsciiBuffer(
+        first: Bool, name: String, values: HashMap<String, Int64>
+    ): Bool {
+        ensureContainerDepth()
+        bufferTarget.writeObjectEntryNameInt64MapKnownAsciiKeys(first, name, values)
+    }
+
+    public func writeRawObjectEntryKnownNameStringMapBuffer(
+        first: Bool, name: String, values: HashMap<String, String>
+    ): Bool {
+        ensureContainerDepth()
+        let next = writeRawObjectEntryKnownNameBuffer(first, name)
+        bufferTarget.writeByte(b'{')
+        var mapFirst = true
+        for ((mapName, value) in values) {
+            let firstEscape = jsonRawCompactStringEscapeIndex(mapName)
+            if (firstEscape < 0 && firstStringEscapeIndex(value) < 0) {
+                bufferTarget.writeObjectEntryNameStringNoEscape(mapFirst, mapName, value)
+            } else {
+                if (!mapFirst) { bufferTarget.writeByte(b',') }
+                if (firstEscape < 0) {
+                    bufferTarget.writeStringLiteralNoEscapeName(mapName)
+                } else {
+                    bufferTarget.writeEscapedStringLiteralFromFirstEscape(
+                        mapName, firstEscape, config.htmlSafe)
+                    bufferTarget.writeByte(b':')
+                }
+                let valueEscape = firstStringEscapeIndex(value)
+                if (valueEscape < 0) {
+                    bufferTarget.writeStringLiteralNoEscape(value)
+                } else {
+                    bufferTarget.writeEscapedStringLiteralFromFirstEscape(
+                        value, valueEscape, config.htmlSafe)
+                }
+            }
+            mapFirst = false
+        }
+        bufferTarget.writeByte(b'}')
+        next
+    }
+
+    public func writeRawObjectEntryKnownNameInt64ArrayMapBuffer(
+        first: Bool, name: String, values: HashMap<String, Array<Int64>>
+    ): Bool {
+        ensureContainerDepth()
+        bufferTarget.writeObjectEntryNameInt64ArrayMapNoEscape(first, name, values)
+    }
+
+    /// Compact generated path for nested maps with known ASCII-safe keys.
+    public func writeRawObjectEntryKnownNameInt64ArrayMapKnownAsciiBuffer(
+        first: Bool, name: String, values: HashMap<String, Array<Int64>>
+    ): Bool {
+        ensureContainerDepth()
+        bufferTarget.writeObjectEntryNameInt64ArrayMapKnownAsciiKeys(first, name, values)
+    }
+
+    public func writeRawObjectEntryKnownNameFloat64Array(
+        first: Bool, name: String, values: Array<Float64>
+    ): Bool {
+        for (value in values) { ensureFiniteJsonFloat(value) }
+        ensureContainerDepth()
+        let next = writeRawObjectEntryKnownName(first, name)
+        if (resultKind == 2) {
+            target.writeCompactFloat64Array(values)
+        } else {
+            bufferTarget.writeCompactFloat64Array(values)
+        }
+        next
+    }
+
+    public func writeRawObjectEntryKnownNameStringArray(
+        first: Bool, name: String, values: Array<String>
+    ): Bool {
+        ensureContainerDepth()
+        let next = writeRawObjectEntryKnownName(first, name)
+        rawTargetWriteByte(b'[')
+        for (index in 0..values.size) {
+            if (index > 0) { rawTargetWriteByte(b',') }
+            writeRawString(values[index])
+        }
+        rawTargetWriteByte(b']')
+        next
+    }
+
+    public func writeRawObjectEntryKnownNameStringBuffer(
+        first: Bool, name: String, value: String
+    ): Bool {
+        let firstEscape = firstRawStringEscapeIndex(value)
+        if (firstEscape < 0) {
+            return bufferTarget.writeObjectEntryNameStringNoEscape(first, name, value)
+        }
+        bufferTarget.writeObjectEntryNameStringEscaped(
+            first, name, value, firstEscape, config.htmlSafe)
+    }
+
+    // Generated compact records use this buffer-only seam after reserving the
+    // object budget. Reuse the writer's long-string escape cache, then skip
+    // the target capacity check only for the proven unescaped case.
+    public func writeRawObjectEntryKnownNameStringFast(
+        first: Bool, name: String, value: String
+    ): Bool {
+        let firstEscape = firstRawStringEscapeIndex(value)
+        if (firstEscape < 0) {
+            return bufferTarget.writeObjectEntryNameStringNoEscapeFast(first, name, value)
+        }
+        bufferTarget.writeObjectEntryNameStringEscaped(
+            first, name, value, firstEscape, config.htmlSafe)
+    }
+
+    public func writeRawObjectEntryKnownNameStringBuffer(
+        first: Bool, name: Array<Byte>, value: String
+    ): Bool {
+        let firstEscape = firstRawStringEscapeIndex(value)
+        if (firstEscape < 0) {
+            return bufferTarget.writeObjectEntryNameStringNoEscape(first, name, value)
+        }
+        bufferTarget.writeObjectEntryNameStringEscaped(
+            first, name, value, firstEscape, config.htmlSafe)
+    }
+
+    public func writeRawObjectEntryKnownNameBoolBuffer(
+        first: Bool, name: String, value: Bool
+    ): Bool {
+        bufferTarget.writeObjectEntryNameBoolNoEscape(first, name, value)
+    }
+
+    public func writeRawObjectEntryKnownNameInt64ArrayBuffer(
+        first: Bool, name: String, values: Array<Int64>
+    ): Bool {
+        ensureContainerDepth()
+        bufferTarget.writeObjectEntryNameInt64ArrayNoEscape(first, name, values)
+    }
+
+    public func writeRawObjectEntryKnownNameFloat64ArrayBuffer(
+        first: Bool, name: String, values: Array<Float64>
+    ): Bool {
+        for (value in values) { ensureFiniteJsonFloat(value) }
+        ensureContainerDepth()
+        let next = writeRawObjectEntryKnownNameBuffer(first, name)
+        bufferTarget.writeCompactFloat64Array(values)
+        next
+    }
+
+    public func writeRawObjectEntryKnownNameFloat64ArrayBuffer(
+        first: Bool, name: Array<Byte>, values: Array<Float64>
+    ): Bool {
+        for (value in values) { ensureFiniteJsonFloat(value) }
+        ensureContainerDepth()
+        let next = writeRawObjectEntryKnownNameBuffer(first, name)
+        bufferTarget.writeCompactFloat64Array(values)
+        next
+    }
+
+    public func writeRawObjectEntryKnownNameInt64Map(
+        first: Bool, name: String, values: HashMap<String, Int64>
+    ): Bool {
+        ensureContainerDepth()
+        let next = writeRawObjectEntryKnownName(first, name)
+        writeRawInt64Map("", values)
+        next
+    }
+
+    public func writeRawObjectEntryKnownNameStringMap(
+        first: Bool, name: String, values: HashMap<String, String>
+    ): Bool {
+        ensureContainerDepth()
+        let next = writeRawObjectEntryKnownName(first, name)
+        rawTargetWriteByte(b'{')
+        var mapFirst = true
+        for ((mapName, value) in values) {
+            mapFirst = writeRawObjectEntryNameString(mapFirst, mapName, value)
+        }
+        rawTargetWriteByte(b'}')
+        next
+    }
+
+    public func writeRawObjectEntryKnownNameInt64ArrayMap(
+        first: Bool, name: String, values: HashMap<String, Array<Int64>>
+    ): Bool {
+        ensureContainerDepth()
+        let next = writeRawObjectEntryKnownName(first, name)
+        rawTargetWriteByte(b'{')
+        var mapFirst = true
+        for ((mapName, value) in values) {
+            mapFirst = writeRawObjectEntryName(mapFirst, mapName)
+            if (resultKind == 2) {
+                target.writeCompactInt64Array(value)
+            } else {
+                bufferTarget.writeCompactInt64Array(value)
+            }
+        }
+        rawTargetWriteByte(b'}')
+        next
+    }
     public func writeRawObjectEntryNameString(first: Bool, name: String, value: String): Bool {
         if (!first) {
-            target.writeByte(b',')
+            rawTargetWriteByte(b',')
         }
         writeStringLiteralName(name)
         writeRawString(value)
@@ -1179,22 +2337,38 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
     public func writeRawObjectEntryNameInt64(first: Bool, name: String, value: Int64): Bool {
         let firstEscape = firstStringEscapeIndex(name)
         if (firstEscape < 0) {
-            return target.writeObjectEntryNameInt64NoEscape(first, name, value)
+            if (resultKind == 2) {
+                return target.writeObjectEntryNameInt64NoEscape(first, name, value)
+            }
+            return bufferTarget.writeObjectEntryNameInt64NoEscape(first, name, value)
         }
         if (!first) {
-            target.writeByte(b',')
+            rawTargetWriteByte(b',')
         }
         writeStringLiteralName(name)
-        target.writeInt64Text(value)
+        rawTargetWriteInt64(value)
         false
+    }
+
+    public func writeRawObjectEntryNameUInt64(first: Bool, name: String, value: UInt64): Bool {
+        let next = writeRawObjectEntryName(first, name)
+        rawTargetWriteUInt64(value)
+        next
+    }
+
+    public func writeRawObjectEntryNameFloat64(first: Bool, name: String, value: Float64): Bool {
+        ensureFiniteJsonFloat(value)
+        let next = writeRawObjectEntryName(first, name)
+        rawTargetWriteFloat64(value)
+        next
     }
 
     public func writeRawObjectEntryNameBool(first: Bool, name: String, value: Bool): Bool {
         if (!first) {
-            target.writeByte(b',')
+            rawTargetWriteByte(b',')
         }
         writeStringLiteralName(name)
-        target.writeBoolText(value)
+        rawTargetWriteBool(value)
         false
     }
 
@@ -1262,12 +2436,73 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         true
     }
 
+    public func tryWriteCompactInt64Array(values: Array<Int64>): Bool {
+        if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
+            return false
+        }
+        ensureContainerDepth()
+        beginRawValue()
+        rawDepth++
+        try {
+            if (resultKind == 2) {
+                target.writeCompactInt64Array(values)
+            } else {
+                bufferTarget.writeCompactInt64Array(values)
+            }
+        } finally {
+            rawDepth--
+        }
+        true
+    }
+
+    public func tryWriteCompactFloat64Array(values: Array<Float64>): Bool {
+        if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
+            return false
+        }
+        for (value in values) {
+            if (value.isNaN() || value.isInf()) { return false }
+        }
+        ensureContainerDepth()
+        beginRawValue()
+        rawDepth++
+        try {
+            if (resultKind == 2) {
+                target.writeCompactFloat64Array(values)
+            } else {
+                bufferTarget.writeCompactFloat64Array(values)
+            }
+        } finally {
+            rawDepth--
+        }
+        true
+    }
+
+    public func tryWriteCompactStringArray(values: Array<String>): Bool {
+        if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
+            return false
+        }
+        ensureContainerDepth()
+        beginRawValue()
+        rawDepth++
+        try {
+            target.writeByte(b'[')
+            for (index in 0..values.size) {
+                if (index > 0) { target.writeByte(b',') }
+                writeRawString(values[index])
+            }
+            target.writeByte(b']')
+        } finally {
+            rawDepth--
+        }
+        true
+    }
+
     public func tryWriteCompactInt64ArrayList(values: ArrayList<Int64>): Bool {
         if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
             return false
         }
         ensureContainerDepth()
-        if (rawDepth == 0) { beforeValue() }
+        beginRawValue()
         rawDepth++
         try {
             if (target.tryWriteNativeInt64Array(values)) { return true }
@@ -1296,7 +2531,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
             return false
         }
         ensureContainerDepth()
-        if (rawDepth == 0) { beforeValue() }
+        beginRawValue()
         rawDepth++
         try {
             writeRawStringArrayList("", values)
@@ -1311,7 +2546,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
             return false
         }
         ensureContainerDepth()
-        if (rawDepth == 0) { beforeValue() }
+        beginRawValue()
         rawDepth++
         try {
             writeRawInt64Map("", values)
@@ -1321,11 +2556,56 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         true
     }
 
+    public func tryWriteCompactStringMap(values: HashMap<String, String>): Bool {
+        if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
+            return false
+        }
+        ensureContainerDepth()
+        beginRawValue()
+        rawDepth++
+        try {
+            target.writeByte(b'{')
+            var first = true
+            for ((name, value) in values) {
+                first = writeRawObjectEntryNameString(first, name, value)
+            }
+            target.writeByte(b'}')
+        } finally {
+            rawDepth--
+        }
+        true
+    }
+
+    public func tryWriteCompactInt64ArrayMap(values: HashMap<String, Array<Int64>>): Bool {
+        if (multiline || config.useSpaceAfterSeparators || config.htmlSafe) {
+            return false
+        }
+        ensureContainerDepth()
+        beginRawValue()
+        rawDepth++
+        try {
+            target.writeByte(b'{')
+            var first = true
+            for ((name, value) in values) {
+                first = writeRawObjectEntryName(first, name)
+                if (resultKind == 2) {
+                    target.writeCompactInt64Array(value)
+                } else {
+                    bufferTarget.writeCompactInt64Array(value)
+                }
+            }
+            target.writeByte(b'}')
+        } finally {
+            rawDepth--
+        }
+        true
+    }
+
     func writeRawString(value: String): Unit {
         beginRawScalar()
-        let firstEscape = firstStringEscapeIndex(value)
+        let firstEscape = firstRawStringEscapeIndex(value)
         if (firstEscape < 0) {
-            target.writeStringLiteralNoEscape(value)
+            rawTargetWriteStringNoEscape(value)
             return
         }
         writeStringLiteralFromFirstEscape(value, firstEscape)
@@ -1333,30 +2613,40 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
 
     public func writeRawNull(): Unit {
         beginRawScalar()
-        target.writeText("null")
+        rawTargetWriteText("null")
     }
 
     func writeRawBool(value: Bool): Unit {
         beginRawScalar()
-        target.writeBoolText(value)
+        rawTargetWriteBool(value)
     }
 
     func writeRawInt64(value: Int64): Unit {
         beginRawScalar()
-        target.writeInt64Text(value)
+        rawTargetWriteInt64(value)
     }
 
-    func writeRawUInt64(value: UInt64): Unit {
+    public func writeRawUInt64(value: UInt64): Unit {
         beginRawScalar()
-        target.writeUInt64Text(value)
+        rawTargetWriteUInt64(value)
+    }
+
+    func writeRawFloat64(value: Float64): Unit {
+        ensureFiniteJsonFloat(value)
+        beginRawScalar()
+        rawTargetWriteFloat64(value)
     }
 
     func writeRawNumberValue(value: String): Unit {
         beginRawScalar()
-        target.writeText(value)
+        rawTargetWriteText(value)
     }
 
     private func beginRawScalar(): Unit {
+        beginRawValue()
+    }
+
+    private func beginRawValue(): Unit {
         if (rawDepth != 0) { return }
         if (rawRootPreclaimed) {
             rawRootPreclaimed = false
@@ -1367,7 +2657,11 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
 
     private func beginRawContainer(kind: UInt8): Unit {
         if (currentContainerDepth() >= config.maxDepth) {
-            throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
+            throw JsonException(
+                "Maximum JSON depth ${config.maxDepth} exceeded",
+                code: "max_depth",
+                path: path()
+            )
         }
         if (rawDepth == 0) {
             if (rawRootPreclaimed) {
@@ -1453,7 +2747,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         let pathPushed = beforeValue()
         target.writeByte(b'{')
         contextValues().add(OBJECT_FIRST)
-        semanticPathContextValues().add(JsonDirectSemanticPathContext(generatedState.pathDepth(), pathPushed))
+        semanticPathContextValues().add(JsonDirectSemanticPathContext(writeState().pathDepth(), pathPushed))
     }
 
     public func endObject(): Unit {
@@ -1465,7 +2759,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         target.writeByte(b'}')
         let pathContexts = semanticPathContextValues()
         let pathContext = pathContexts.remove(at: pathContexts.size - 1)
-        generatedState.completeAutoValue(pathContext.entryPathPushed)
+        writeState().completeAutoValue(pathContext.entryPathPushed)
     }
 
     public func startArray(): Unit {
@@ -1473,7 +2767,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         let pathPushed = beforeValue()
         target.writeByte(b'[')
         contextValues().add(ARRAY_FIRST)
-        semanticPathContextValues().add(JsonDirectSemanticPathContext(generatedState.pathDepth(), pathPushed))
+        semanticPathContextValues().add(JsonDirectSemanticPathContext(writeState().pathDepth(), pathPushed))
     }
 
     public func endArray(): Unit {
@@ -1485,7 +2779,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         target.writeByte(b']')
         let pathContexts = semanticPathContextValues()
         let pathContext = pathContexts.remove(at: pathContexts.size - 1)
-        generatedState.completeAutoValue(pathContext.entryPathPushed)
+        writeState().completeAutoValue(pathContext.entryPathPushed)
     }
 
     public func writeName(name: String): Unit {
@@ -1496,7 +2790,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         }
         let pathContexts = semanticPathContextValues()
         let pathContext = pathContexts[pathContexts.size - 1]
-        pathContext.pendingObjectPathPushed = generatedState.pushAutoField(name, pathContext.pathDepth)
+        pathContext.pendingObjectPathPushed = writeState().pushAutoField(name, pathContext.pathDepth)
     }
 
     private func beforeName(): Unit {
@@ -1520,22 +2814,22 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
 
     public func writeNull(): Unit {
         let pathPushed = beforeValue()
-        try { target.writeText("null") } finally { generatedState.completeAutoValue(pathPushed) }
+        try { target.writeText("null") } finally { writeState().completeAutoValue(pathPushed) }
     }
 
     public func writeBool(value: Bool): Unit {
         let pathPushed = beforeValue()
-        try { target.writeBoolText(value) } finally { generatedState.completeAutoValue(pathPushed) }
+        try { target.writeBoolText(value) } finally { writeState().completeAutoValue(pathPushed) }
     }
 
     public func writeInt64(value: Int64): Unit {
         let pathPushed = beforeValue()
-        try { target.writeInt64Text(value) } finally { generatedState.completeAutoValue(pathPushed) }
+        try { target.writeInt64Text(value) } finally { writeState().completeAutoValue(pathPushed) }
     }
 
     public func writeUInt64(value: UInt64): Unit {
         let pathPushed = beforeValue()
-        try { target.writeUInt64Text(value) } finally { generatedState.completeAutoValue(pathPushed) }
+        try { target.writeUInt64Text(value) } finally { writeState().completeAutoValue(pathPushed) }
     }
 
     public func writeFloat64(value: Float64): Unit {
@@ -1543,7 +2837,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         try {
             ensureFiniteJsonFloat(value)
             target.writeFloat64Text(value)
-        } finally { generatedState.completeAutoValue(pathPushed) }
+        } finally { writeState().completeAutoValue(pathPushed) }
     }
 
     public func writeNumberLiteral(value: String): Unit {
@@ -1553,12 +2847,12 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
                 throw error("Invalid JSON number literal", "invalid_number")
             }
             target.writeText(value)
-        } finally { generatedState.completeAutoValue(pathPushed) }
+        } finally { writeState().completeAutoValue(pathPushed) }
     }
 
     public func writeString(value: String): Unit {
         let pathPushed = beforeValue()
-        try { writeStringLiteral(value) } finally { generatedState.completeAutoValue(pathPushed) }
+        try { writeStringLiteral(value) } finally { writeState().completeAutoValue(pathPushed) }
     }
 
     private func beforeValue(): Bool {
@@ -1580,27 +2874,31 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
             let pathContext = semanticPathContextValues()[index]
             let pathPushed = pathContext.pendingObjectPathPushed
             pathContext.pendingObjectPathPushed = false
-            generatedState.beginAutoValue(pathPushed)
+            writeState().beginAutoValue(pathPushed)
             return pathPushed
         }
         let pathContext = semanticPathContextValues()[index]
-        let pathPushed = generatedState.pushAutoIndex(pathContext.nextArrayIndex, pathContext.pathDepth)
+        let pathPushed = writeState().pushAutoIndex(pathContext.nextArrayIndex, pathContext.pathDepth)
         pathContext.nextArrayIndex++
         if ((context & FIRST_MASK) != 0) {
             writeEntryPrefix(values.size)
             values[index] = ARRAY_NEXT
-            generatedState.beginAutoValue(pathPushed)
+            writeState().beginAutoValue(pathPushed)
             return pathPushed
         }
         target.writeByte(b',')
         writeEntryPrefix(values.size)
-        generatedState.beginAutoValue(pathPushed)
+        writeState().beginAutoValue(pathPushed)
         pathPushed
     }
 
     private func ensureContainerDepth(): Unit {
         if (currentContainerDepth() >= config.maxDepth) {
-            throw JsonException("Maximum JSON depth ${config.maxDepth} exceeded", code: "max_depth")
+            throw JsonException(
+                "Maximum JSON depth ${config.maxDepth} exceeded",
+                code: "max_depth",
+                path: path()
+            )
         }
     }
 
@@ -1641,7 +2939,7 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
     private func writeStringLiteral(value: String): Unit {
         let firstEscape = firstStringEscapeIndex(value)
         if (firstEscape < 0) {
-            target.writeStringLiteralNoEscape(value)
+            rawTargetWriteStringNoEscape(value)
             return
         }
         writeStringLiteralFromFirstEscape(value, firstEscape)
@@ -1650,22 +2948,26 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
     private func writeStringLiteralName(value: String): Unit {
         let firstEscape = firstStringEscapeIndex(value)
         if (firstEscape < 0) {
-            target.writeStringLiteralNoEscapeName(value)
+            rawTargetWriteNameNoEscape(value)
             return
         }
         writeStringLiteralFromFirstEscape(value, firstEscape)
-        target.writeByte(b':')
+        rawTargetWriteByte(b':')
     }
 
     private func writeStringLiteralFromFirstEscape(value: String, firstEscape: Int64): Unit {
         if (let Some(required) <- jsonNativeEscapedStringSize(value, config.htmlSafe)) {
             enforceAdditionalOutputLimit(required)
             if (let Some(escaped) <- jsonNativeEscapeString(value, config.htmlSafe, required)) {
-                target.writeBytes(escaped)
+                if (resultKind == 2) { target.writeBytes(escaped) } else { bufferTarget.writeBytes(escaped) }
                 return
             }
         }
-        target.writeEscapedStringLiteralFromFirstEscape(value, firstEscape, config.htmlSafe)
+        if (resultKind == 2) {
+            target.writeEscapedStringLiteralFromFirstEscape(value, firstEscape, config.htmlSafe)
+        } else {
+            bufferTarget.writeEscapedStringLiteralFromFirstEscape(value, firstEscape, config.htmlSafe)
+        }
     }
 
     private func enforceAdditionalOutputLimit(additional: Int64): Unit {
@@ -1679,11 +2981,11 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
     }
 
     private func firstStringEscapeIndex(value: String): Int64 {
+        let table = if (config.htmlSafe) { ESCAPE_TABLE_HTML } else { ESCAPE_TABLE }
         unsafe {
             let bytes = value.rawData()
             for (index in 0..bytes.size) {
-                let byte = Int64(bytes[index])
-                if (byte <= 127 && shouldEscapeAscii(byte)) {
+                if (table[Int64(bytes[index])] != 0) {
                     return index
                 }
             }
@@ -1691,18 +2993,15 @@ class JsonDirectWriter <: GeneratedSupportV1Writer & GeneratedWriteStateV1Owner 
         -1
     }
 
-    private func shouldEscapeAscii(byte: Int64): Bool {
-        if (byte < 32 || byte == Int64(b'"') || byte == Int64(b'\\')) {
-            return true
+    private func firstRawStringEscapeIndex(value: String): Int64 {
+        if (value.size < 256) { return firstStringEscapeIndex(value) }
+        if (let Some(previous) <- lastRawString) {
+            if (previous == value) { return lastRawStringEscapeIndex }
         }
-        if (!config.htmlSafe) {
-            return false
-        }
-        byte == Int64(b'<') ||
-            byte == Int64(b'>') ||
-            byte == Int64(b'&') ||
-            byte == Int64(b'=') ||
-            byte == Int64(b'\'')
+        let result = firstStringEscapeIndex(value)
+        lastRawString = Some(value)
+        lastRawStringEscapeIndex = result
+        return result
     }
 
 }

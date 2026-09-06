@@ -8,9 +8,41 @@ coverage:
         flags: [core]
         target: auto
         threshold: 0.1%
+      algorithms:
+        flags: [algorithms]
+        target: auto
+        threshold: 0.1%
+      native:
+        flags: [native]
+        target: auto
+        threshold: 0.1%
+      yyjson:
+        flags: [yyjson]
+        target: auto
+        threshold: 0.1%
+      schema-formats:
+        flags: [schema-formats]
+        target: auto
+        threshold: 0.1%
     patch:
       core:
         flags: [core]
+        target: 90%
+        threshold: 0%
+      algorithms:
+        flags: [algorithms]
+        target: 90%
+        threshold: 0%
+      native:
+        flags: [native]
+        target: 90%
+        threshold: 0%
+      yyjson:
+        flags: [yyjson]
+        target: 90%
+        threshold: 0%
+      schema-formats:
+        flags: [schema-formats]
         target: 90%
         threshold: 0%
 
@@ -21,5 +53,19 @@ flag_management:
     - name: core
       paths:
         - src/lib_*.cj
+    - name: algorithms
+      paths:
+        - packages/yjson_algorithms/src/
+    - name: native
+      paths:
+        - packages/yjson_native/src/
+        - packages/yjson_native_primitives/src/
+        - packages/yjson_native_accel/src/
+    - name: yyjson
+      paths:
+        - packages/yjson_yyjson/src/
+    - name: schema-formats
+      paths:
+        - packages/yjson_schema_formats/src/
 
 comment: false

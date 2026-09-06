@@ -1,0 +1,36 @@
+Starting the benchmark `T9ThroughputBench.t9_3_3_largeArrayDeserialize()`.
+    Warming up for 200.0 ms.
+    Starting measurements of 200 batches. Measuring Duration.
+    Max batch size: 561, estimated execution time: 1.001 s.
+Finished in 1.090 s. Analysing results:
+Warning: GC was invoked twice during some of the batches. This can significantly affect final results.
+         It is recommended to either increase heap size limit using cjHeapSize enviroment variable,
+         increase default GC interval using cjGCInterval environment variable
+         or reduce benchmark duration with minDuration parameter of @Configure macro.
+
+  percentiles:    [   10%        50%        90%        95%        99%        ]  
+  time:           [   13.08 us   13.12 us   13.17 us   13.18 us   13.22 us   ]  
+  mean:           12.99 us .. 13.16 us  Err ±0.6%
+  median:         13.03 us .. 13.22 us
+  R²:             0.990 .. 1.000
+  stddev:         37.77 ns
+
+--------------------------------------------------------------------------------------------------
+TP: yjson_benchmarks, time elapsed: 3872755302 ns, RESULT:
+    TCS: T9ThroughputBench, time elapsed: 3871796531 ns, RESULT:
+    | Case                         |   Median |        Err |   Err% |     Mean |
+    |:-----------------------------|---------:|-----------:|-------:|---------:|
+    | t9_3_3_largeArrayDeserialize | 13.12 us | ±0.0863 us |  ±0.7% | 13.15 us |
+Summary: TOTAL: 42
+    PASSED: 1, SKIPPED: 41, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 3874243360 ns, RESULT:
+TP: yjson_benchmarks.*, time elapsed: 3874133275 ns, RESULT:
+    PASSED:
+    TP: yjson_benchmarks, time elapsed: 3872755302 ns
+Summary: TOTAL: 42
+    PASSED: 1, SKIPPED: 41, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm bench success

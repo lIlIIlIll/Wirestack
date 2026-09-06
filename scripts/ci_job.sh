@@ -184,6 +184,9 @@ case "$job" in
     standards-conformance)
         require_cangjie
         mapfile -t override_args < <(dependency_override_args)
+        if [[ "${YJSON_STANDARDS_OFFLINE:-}" == "1" ]]; then
+            override_args+=(--offline)
+        fi
         python3 "$repo/scripts/run_standards_conformance.py" --quiet-failures \
             "${override_args[@]}"
         ;;
@@ -192,6 +195,9 @@ case "$job" in
         run_with_dependency_override "$repo/packages/yjson_schema_formats" \
             cjpm test --no-color
         mapfile -t override_args < <(dependency_override_args)
+        if [[ "${YJSON_STANDARDS_OFFLINE:-}" == "1" ]]; then
+            override_args+=(--offline)
+        fi
         python3 "$repo/scripts/run_standards_conformance.py" --quiet-failures \
             --include-schema-optional "${override_args[@]}"
         ;;

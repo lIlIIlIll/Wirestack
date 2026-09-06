@@ -15,6 +15,7 @@ const YJSON_NATIVE_MIN_DECODE_BYTES = 16
 const YJSON_NATIVE_MIN_READER_DECODE_BYTES = 256
 const YJSON_NATIVE_MIN_WRITER_ESCAPE_BYTES = 4096
 const YJSON_NATIVE_MIN_WRITER_INT64_COUNT = 256
+const YJSON_NATIVE_MIN_WRITER_FLOAT64_COUNT = 32
 const YJSON_NATIVE_MIN_ARRAY_ELEMENT_COUNT = 16
 
 // Cross-package seam used by the optional native package. The core package has
@@ -64,6 +65,11 @@ public interface JsonNativeWriterBackend {
     func formatInt64Array(values: CPointer<Int64>, count: Int64,
         output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64,
         outWritten: CPointer<Int64>): Int32
+    func formatFloat64Array(values: CPointer<Float64>, count: Int64,
+        output: CPointer<UInt8>, outputCap: Int64, outputOffset: Int64,
+        outWritten: CPointer<Int64>): Int32
+    func formatFloat64(value: Float64, output: CPointer<UInt8>, outputCap: Int64,
+        outputOffset: Int64): Int64
 }
 
 /// Versioned internal product bundle consumed by yjson_native. Applications
@@ -77,6 +83,29 @@ public interface JsonNativeAccelerationPrimitivesV1 <: JsonNativeScannerBackend 
 // every hot-path lookup observe either Pure or the full Native bundle.
 private var jsonNativeAccelerationPrimitives: Option<JsonNativeAccelerationPrimitivesV1> =
     None<JsonNativeAccelerationPrimitivesV1>
+
+func jsonNativeFormatFloat64Into(value: Float64, output: Array<Byte>,
+    outputOffset: Int64): Option<Int64> {
+    let backend = match (jsonNativeAccelerationPrimitives) {
+        case Some(item) => item
+        case None => return None<Int64>
+    }
+    if (outputOffset < 0 || outputOffset > output.size ||
+        output.size - outputOffset < 40) {
+        return None<Int64>
+    }
+    unsafe {
+        let outputHandle = acquireArrayRawData(output)
+        let written = backend.formatFloat64(value, outputHandle.pointer, output.size,
+            outputOffset)
+        releaseArrayRawData(outputHandle)
+        if (written <= 0 || written > 40 || written > output.size - outputOffset) {
+            throw JsonException("Native JSON float formatting failed",
+                code: "acceleration_writer_failure")
+        }
+        Some(written)
+    }
+}
 
 func jsonNativeFormatInt64ArrayInto(values: ArrayList<Int64>, output: Array<Byte>,
     outputOffset: Int64): Option<Int64> {
@@ -92,9 +121,8 @@ func jsonNativeFormatInt64ArrayInto(values: ArrayList<Int64>, output: Array<Byte
             code: "acceleration_writer_failure")
     }
     let contiguous = values.toArray()
-    let required = values.size * 21 + 1
     if (outputOffset < 0 || outputOffset > output.size ||
-        required > output.size - outputOffset) {
+        output.size - outputOffset < 2) {
         throw JsonException("Native JSON integer output buffer is too small",
             code: "acceleration_writer_failure")
     }
@@ -108,6 +136,9 @@ func jsonNativeFormatInt64ArrayInto(values: ArrayList<Int64>, output: Array<Byte
         releaseArrayRawData(writtenHandle)
         releaseArrayRawData(outputHandle)
         releaseArrayRawData(valuesHandle)
+        if (status == YJ_JSON_SCAN_CAPACITY) {
+            return None<Int64>
+        }
         if (status != YJ_JSON_SCAN_OK || written[0] < 2 || written[0] > output.size) {
             throw JsonException("Native JSON integer formatting failed",
                 code: "acceleration_writer_failure")
@@ -116,8 +147,89 @@ func jsonNativeFormatInt64ArrayInto(values: ArrayList<Int64>, output: Array<Byte
     Some(written[0])
 }
 
+func jsonNativeFormatInt64ArrayInto(values: Array<Int64>, output: Array<Byte>,
+    outputOffset: Int64): Option<Int64> {
+    if (values.size < YJSON_NATIVE_MIN_WRITER_INT64_COUNT) {
+        return None<Int64>
+    }
+    let backend = match (jsonNativeAccelerationPrimitives) {
+        case Some(item) => item
+        case None => return None<Int64>
+    }
+    if (values.size > (Int64.Max - 1) / 21) {
+        throw JsonException("JSON integer array is too large for native formatting",
+            code: "acceleration_writer_failure")
+    }
+    if (outputOffset < 0 || outputOffset > output.size ||
+        output.size - outputOffset < 2) {
+        throw JsonException("Native JSON integer output buffer is too small",
+            code: "acceleration_writer_failure")
+    }
+    let written = Array<Int64>(1, repeat: 0)
+    unsafe {
+        let valuesHandle = acquireArrayRawData(values)
+        let outputHandle = acquireArrayRawData(output)
+        let writtenHandle = acquireArrayRawData(written)
+        let status = backend.formatInt64Array(valuesHandle.pointer, values.size,
+            outputHandle.pointer, output.size, outputOffset, writtenHandle.pointer)
+        releaseArrayRawData(writtenHandle)
+        releaseArrayRawData(outputHandle)
+        releaseArrayRawData(valuesHandle)
+        if (status == YJ_JSON_SCAN_CAPACITY) {
+            return None<Int64>
+        }
+        if (status != YJ_JSON_SCAN_OK || written[0] < 2 || written[0] > output.size) {
+            throw JsonException("Native JSON integer formatting failed",
+                code: "acceleration_writer_failure")
+        }
+    }
+    Some(written[0])
+}
+
+func jsonNativeFormatFloat64ArrayInto(values: Array<Float64>, output: Array<Byte>,
+    outputOffset: Int64): Option<Int64> {
+    if (values.size < YJSON_NATIVE_MIN_WRITER_FLOAT64_COUNT) {
+        return None<Int64>
+    }
+    let backend = match (jsonNativeAccelerationPrimitives) {
+        case Some(item) => item
+        case None => return None<Int64>
+    }
+    if (values.size > (Int64.Max - 2) / 42) {
+        throw JsonException("JSON float array is too large for native formatting",
+            code: "acceleration_writer_failure")
+    }
+    if (outputOffset < 0 || outputOffset > output.size ||
+        output.size - outputOffset < 2) {
+        throw JsonException("Native JSON float output buffer is too small",
+            code: "acceleration_writer_failure")
+    }
+    let written = Array<Int64>(1, repeat: 0)
+    unsafe {
+        let valuesHandle = acquireArrayRawData(values)
+        let outputHandle = acquireArrayRawData(output)
+        let writtenHandle = acquireArrayRawData(written)
+        let status = backend.formatFloat64Array(valuesHandle.pointer, values.size,
+            outputHandle.pointer, output.size, outputOffset, writtenHandle.pointer)
+        releaseArrayRawData(writtenHandle)
+        releaseArrayRawData(outputHandle)
+        releaseArrayRawData(valuesHandle)
+        if (status == YJ_JSON_SCAN_CAPACITY) {
+            return None<Int64>
+        }
+        if (status != YJ_JSON_SCAN_OK || written[0] < 2 || written[0] > output.size) {
+            throw JsonException("Native JSON float formatting failed",
+                code: "acceleration_writer_failure")
+        }
+    }
+    Some(written[0])
+}
+
 /// Installs the complete v1 primitive bundle atomically during runtime freeze.
-public func activateJsonNativePrimitivesV1(backend: JsonNativeAccelerationPrimitivesV1): Unit {
+/// Called by the runtime initialization path while holding the runtime lock.
+/// Not part of the public surface: external code cannot install a bundle
+/// without passing provider validation.
+internal func installJsonNativePrimitivesLocked(backend: JsonNativeAccelerationPrimitivesV1): Unit {
     if (jsonNativeAccelerationPrimitives.isSome()) {
         throw IllegalStateException("JSON native acceleration is already installed")
     }
@@ -465,7 +577,10 @@ func jsonNativeScanString(
         if (status == YJ_JSON_SCAN_FALLBACK) {
             return -1
         }
-        throw JsonException("Native JSON scanner error at byte ${error[0]}")
+        throw JsonException("Native JSON scanner error at byte ${error[0]}",
+            code: "parse_error",
+            location: Some(JsonLocation(error[0], jsonLineFromUtf8Bytes(data, error[0]),
+                jsonColumnFromUtf8Bytes(data, error[0]))))
     }
 }
 
@@ -514,7 +629,10 @@ func jsonNativeDecodeString(
         if (status == YJ_JSON_SCAN_FALLBACK || status == YJ_JSON_SCAN_CAPACITY) {
             return None<JsonNativeDecodedString>
         }
-        throw JsonException("Native JSON scanner error at byte ${error[0]}")
+        throw JsonException("Native JSON scanner error at byte ${error[0]}",
+            code: "parse_error",
+            location: Some(JsonLocation(error[0], jsonLineFromUtf8Bytes(data, error[0]),
+                jsonColumnFromUtf8Bytes(data, error[0]))))
     }
 }
 
@@ -550,6 +668,9 @@ func jsonNativeSkipValue(
         if (status == YJ_JSON_SCAN_FALLBACK) {
             return -1
         }
-        throw JsonException("Native JSON scanner error at byte ${error[0]}")
+        throw JsonException("Native JSON scanner error at byte ${error[0]}",
+            code: "parse_error",
+            location: Some(JsonLocation(error[0], jsonLineFromUtf8Bytes(data, error[0]),
+                jsonColumnFromUtf8Bytes(data, error[0]))))
     }
 }

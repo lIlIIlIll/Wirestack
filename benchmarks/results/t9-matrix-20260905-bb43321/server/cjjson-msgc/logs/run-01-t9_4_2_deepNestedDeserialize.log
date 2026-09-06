@@ -1,0 +1,36 @@
+Starting the benchmark `T9ThroughputBench.t9_4_2_deepNestedDeserialize()`.
+    Warming up for 200.0 ms.
+    Starting measurements of 200 batches. Measuring Duration.
+    Max batch size: 4823, estimated execution time: 1.000 s.
+Finished in 1.128 s. Analysing results:
+Warning: GC was invoked twice during some of the batches. This can significantly affect final results.
+         It is recommended to either increase heap size limit using cjHeapSize enviroment variable,
+         increase default GC interval using cjGCInterval environment variable
+         or reduce benchmark duration with minDuration parameter of @Configure macro.
+
+  percentiles:    [   10%        50%        90%        95%        99%        ]  
+  time:           [   1.503 us   1.718 us   1.914 us   1.960 us   2.028 us   ]  
+  mean:           1.740 us .. 2.041 us  Err ±8.7%
+  median:         1.411 us .. 2.028 us
+  R²:             0.725 .. 0.819
+  stddev:         65.79 ns
+
+--------------------------------------------------------------------------------------------------
+TP: cjjson.test, time elapsed: 2632624063 ns, RESULT:
+    TCS: T9ThroughputBench, time elapsed: 2627348024 ns, RESULT:
+    | Case                         |   Median |       Err |   Err% |     Mean |
+    |:-----------------------------|---------:|----------:|-------:|---------:|
+    | t9_4_2_deepNestedDeserialize | 1.730 us | ±0.154 us |  ±8.9% | 1.722 us |
+Summary: TOTAL: 51
+    PASSED: 1, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 2634185376 ns, RESULT:
+TP: cjjson.*, time elapsed: 2634055408 ns, RESULT:
+    PASSED:
+    TP: cjjson.test, time elapsed: 2632624063 ns
+Summary: TOTAL: 51
+    PASSED: 1, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm bench success

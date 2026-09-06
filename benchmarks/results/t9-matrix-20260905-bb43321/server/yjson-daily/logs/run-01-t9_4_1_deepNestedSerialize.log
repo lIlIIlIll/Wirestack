@@ -1,0 +1,24 @@
+Starting the benchmark `T9ThroughputBench.t9_4_1_deepNestedSerialize()`.
+    Warming up for 200.0 ms.
+    Starting measurements of 200 batches. Measuring Duration.
+    Max batch size: 12949, estimated execution time: 1.000 s.
+
+--------------------------------------------------------------------------------------------------
+TP: yjson_benchmarks, time elapsed: 2264244294 ns, RESULT:
+    TCS: T9ThroughputBench, time elapsed: 2263469623 ns, RESULT:
+    | Case                       |   Median |       Err |   Err% |     Mean |
+    |:---------------------------|---------:|----------:|-------:|---------:|
+    | t9_4_1_deepNestedSerialize | 1.402 us | ±0.212 us | ±15.2% | 2.006 us |
+Summary: TOTAL: 42
+    PASSED: 1, SKIPPED: 41, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 2265344882 ns, RESULT:
+TP: yjson_benchmarks.*, time elapsed: 2265256595 ns, RESULT:
+    PASSED:
+    TP: yjson_benchmarks, time elapsed: 2264244294 ns
+Summary: TOTAL: 42
+    PASSED: 1, SKIPPED: 41, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm bench success

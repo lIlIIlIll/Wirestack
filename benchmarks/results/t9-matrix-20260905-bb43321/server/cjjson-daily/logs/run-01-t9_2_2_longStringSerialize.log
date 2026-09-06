@@ -1,0 +1,24 @@
+Starting the benchmark `T9ThroughputBench.t9_2_2_longStringSerialize()`.
+    Warming up for 200.0 ms.
+    Starting measurements of 200 batches. Measuring Duration.
+    Max batch size: 525, estimated execution time: 1.002 s.
+
+--------------------------------------------------------------------------------------------------
+TP: cjjson.test, time elapsed: 1435899930 ns, RESULT:
+    TCS: T9ThroughputBench, time elapsed: 1431432020 ns, RESULT:
+    | Case                       |   Median |       Err |   Err% |     Mean |
+    |:---------------------------|---------:|----------:|-------:|---------:|
+    | t9_2_2_longStringSerialize | 17.12 us | ±4.737 us | ±27.7% | 32.01 us |
+Summary: TOTAL: 51
+    PASSED: 1, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 1436992813 ns, RESULT:
+TP: cjjson.*, time elapsed: 1436903956 ns, RESULT:
+    PASSED:
+    TP: cjjson.test, time elapsed: 1435899930 ns
+Summary: TOTAL: 51
+    PASSED: 1, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm bench success

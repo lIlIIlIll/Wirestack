@@ -2,6 +2,7 @@ package yjson
 
 import std.collection.*
 import std.math.numeric.*
+import std.time.*
 
 /// Narrow semantic reader contract consumed by generated codecs. Implementors
 /// remain runtime-owned; generated source never names a concrete parser class.
@@ -10,6 +11,7 @@ public interface GeneratedSupportV1Reader {
     func startRawObject(): Unit
     func endRawObject(): Unit
     func hasRawObjectField(first: Bool): Bool
+    func hasRawObjectFieldFast(first: Bool): Bool
     func readRawName(first: Bool): String
     func readRawNameIdBytes(first: Bool, candidates: Array<Array<Byte>>): Int64
     func tryReadRawCompactNameTokenBytes(first: Bool, nameBytes: Array<Byte>): Bool
@@ -17,7 +19,9 @@ public interface GeneratedSupportV1Reader {
     func startRawArray(): Unit
     func endRawArray(): Unit
     func hasRawArrayItem(first: Bool): Bool
+    func hasRawArrayItemFast(first: Bool): Bool
     func beforeRawArrayItem(first: Bool): Unit
+    func beforeRawArrayItemFast(first: Bool): Unit
     func suggestRawCollectionCapacity(): Int64
     func suggestRawArrayCapacity(): Int64
     func suggestRawObjectCapacity(): Int64
@@ -36,9 +40,200 @@ public interface GeneratedSupportV1Reader {
     func skipRawWithDepth(maxDepth: Int64): Unit
 }
 
+/// Allocation-free concrete-reader view used by generated object codecs after
+/// resolving the versioned reader interface once per object.
+public struct GeneratedSupportV1ReadCursor {
+    private let reader: JsonFastReader
+
+    init(reader: JsonFastReader) { this.reader = reader }
+    public func generatedReaderV1(): JsonFastReader { reader }
+
+    public func startRawObject(): Unit { reader.startRawObject() }
+    public func endRawObject(): Unit { reader.endRawObject() }
+    public func hasRawObjectField(first: Bool): Bool { reader.hasRawObjectField(first) }
+    public func hasRawObjectFieldFast(first: Bool): Bool { reader.hasRawObjectFieldFast(first) }
+    public func readRawName(first: Bool): String { reader.readRawName(first) }
+    public func readRawNameFast(first: Bool): String { reader.readRawNameFast(first) }
+    public func readRawNameIdBytes(first: Bool, candidates: Array<Array<Byte>>): Int64 {
+        reader.readRawNameIdBytes(first, candidates)
+    }
+    public func tryReadRawCompactNameTokenBytes(first: Bool, nameBytes: Array<Byte>): Bool {
+        reader.tryReadRawCompactNameTokenBytes(first, nameBytes)
+    }
+    public func startRawArray(): Unit { reader.startRawArray() }
+    public func endRawArray(): Unit { reader.endRawArray() }
+    public func hasRawArrayItem(first: Bool): Bool { reader.hasRawArrayItem(first) }
+    public func hasRawArrayItemFast(first: Bool): Bool { reader.hasRawArrayItemFast(first) }
+    public func beforeRawArrayItem(first: Bool): Unit { reader.beforeRawArrayItem(first) }
+    public func beforeRawArrayItemFast(first: Bool): Unit { reader.beforeRawArrayItemFast(first) }
+    public func suggestRawCollectionCapacity(): Int64 { reader.suggestRawCollectionCapacity() }
+    public func suggestRawArrayCapacity(): Int64 { reader.suggestRawArrayCapacity() }
+    public func suggestRawObjectCapacity(): Int64 { reader.suggestRawObjectCapacity() }
+    public func tryReadRawNull(): Bool { reader.tryReadRawNull() }
+    public func readRawBool(): Bool { reader.readRawBool() }
+    public func readRawBoolFast(): Bool { reader.readRawBoolFast() }
+    public func readRawString(): String { reader.readRawString() }
+    public func readRawInt64(): Int64 { reader.readRawInt64() }
+    public func readRawInt64Fast(): Int64 { reader.readRawInt64Fast() }
+    public func readRawInt32(): Int32 { reader.readRawInt32() }
+    public func readRawInt16(): Int16 { reader.readRawInt16() }
+    public func readRawInt8(): Int8 { reader.readRawInt8() }
+    public func readRawUInt64(): UInt64 { reader.readRawUInt64() }
+    public func readRawUInt32(): UInt32 { reader.readRawUInt32() }
+    public func readRawUInt16(): UInt16 { reader.readRawUInt16() }
+    public func readRawUInt8(): UInt8 { reader.readRawUInt8() }
+    public func readRawFloat64(): Float64 { jsonFastReadFloat64(reader) }
+    public func readRawFloat32(): Float32 { jsonFastReadFloat32(reader) }
+    public func readRawFloat16(): Float16 { jsonFastReadFloat16(reader) }
+    public func readRawBigInt(): BigInt { reader.readRawBigInt() }
+    public func readRawDecimal(): Decimal { reader.readRawDecimal() }
+    public func readRawNumberLiteral(): String { reader.readRawNumberLiteral() }
+    public func readRawRune(): Rune { decodeRuneText(reader.readRawString()) }
+    public func readRawRfc3339DateTime(): DateTime {
+        jsonFastParseRfc3339DateTime(reader.readRawString())
+    }
+    public func readRawInt64Array(): Array<Int64> {
+        let context = reader.generatedReadStateV1()
+        context.enterValue()
+        try {
+            if (let Some(result) <- reader.tryReadNativeInt64ArrayList()) {
+                return result.toArray()
+            }
+            reader.startRawArray()
+            if (!reader.hasRawArrayItem(true)) {
+                reader.endRawArray()
+                return Array<Int64>()
+            }
+            let result = ArrayList<Int64>(reader.suggestRawArrayCapacity())
+            var first = true
+            while (reader.hasRawArrayItem(first)) {
+                reader.beforeRawArrayItem(first)
+                result.add(reader.readRawInt64())
+                first = false
+            }
+            reader.endRawArray()
+            result.toArray()
+        } finally {
+            context.leaveValue()
+        }
+    }
+    public func readRawStringArray(): Array<String> {
+        let context = reader.generatedReadStateV1()
+        context.enterValue()
+        try {
+            reader.startRawArray()
+            let result = ArrayList<String>(reader.suggestRawArrayCapacity())
+            var first = true
+            while (reader.hasRawArrayItem(first)) {
+                reader.beforeRawArrayItem(first)
+                result.add(reader.readRawString())
+                first = false
+            }
+            reader.endRawArray()
+            result.toArray()
+        } finally {
+            context.leaveValue()
+        }
+    }
+    public func readRawInt64Map(): HashMap<String, Int64> {
+        let context = reader.generatedReadStateV1()
+        context.enterValue()
+        try {
+            reader.startRawObject()
+            let result = HashMap<String, Int64>(reader.suggestRawObjectCapacity())
+            var first = true
+            while (reader.hasRawObjectField(first)) {
+                result[reader.readRawName(first)] = reader.readRawInt64()
+                first = false
+            }
+            reader.endRawObject()
+            result
+        } finally {
+            context.leaveValue()
+        }
+    }
+    public func readRawStringMap(): HashMap<String, String> {
+        let context = reader.generatedReadStateV1()
+        context.enterValue()
+        try {
+            reader.startRawObject()
+            let result = HashMap<String, String>(reader.suggestRawObjectCapacity())
+            var first = true
+            while (reader.hasRawObjectField(first)) {
+                result[reader.readRawName(first)] = reader.readRawString()
+                first = false
+            }
+            reader.endRawObject()
+            result
+        } finally {
+            context.leaveValue()
+        }
+    }
+    public func readRawInt64ArrayMap(): HashMap<String, Array<Int64>> {
+        let context = reader.generatedReadStateV1()
+        context.enterValue()
+        try {
+            reader.startRawObject()
+            let result = HashMap<String, Array<Int64>>(reader.suggestRawObjectCapacity())
+            var first = true
+            while (reader.hasRawObjectField(first)) {
+                let name = reader.readRawName(first)
+                context.pushField(name)
+                try {
+                    result[name] = readRawInt64Array()
+                } finally {
+                    context.popPath()
+                }
+                first = false
+            }
+            reader.endRawObject()
+            result
+        } finally {
+            context.leaveValue()
+        }
+    }
+
+    // Generated object codecs already push the owning field path around
+    // direct container reads.  These allocation-free variants retain the
+    // outer structural work while omitting per-element path bookkeeping on
+    // the default fast path.
+    public func readRawInt64ArrayFast(): Array<Int64> {
+        if (let Some(result) <- reader.tryReadNativeInt64ArrayList()) {
+            return result.toArray()
+        }
+        reader.startRawArray()
+        if (!reader.hasRawArrayItem(true)) {
+            reader.endRawArray()
+            return Array<Int64>()
+        }
+        let result = ArrayList<Int64>(reader.suggestRawArrayCapacity())
+        var first = true
+        while (reader.hasRawArrayItemFast(first)) {
+            reader.beforeRawArrayItemFast(first)
+            result.add(reader.readRawInt64Fast())
+            first = false
+        }
+        reader.endRawArray()
+        result.toArray()
+    }
+
+    public func readRawInt64MapFast(): HashMap<String, Int64> {
+        reader.readRawInt64MapFast()
+    }
+
+    public func readRawInt64ArrayMapFast(): HashMap<String, Array<Int64>> {
+        reader.readRawInt64ArrayMapFast()
+    }
+    public func skipRawWithDepth(maxDepth: Int64): Unit { reader.skipRawWithDepth(maxDepth) }
+    /// Policy-aware unknown-field skip: the underlying reader enforces the
+    /// configured duplicate/unknown field policies while skipping the value
+    /// at the current cursor. Generated fast paths route unknown-field skips
+    /// here instead of the raw syntactic skip.
+    public func skipValue(maxDepth: Int64): Unit { reader.skipValue(maxDepth) }
+}
 /// Narrow semantic writer contract consumed by generated codecs. Structural
 /// correctness remains owned by the core writer state machine.
-public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1 {
+public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1 & GeneratedWriteStateV1Owner {
     func finishString(): String
     func generatedCursorV1(): GeneratedSupportV1WriteCursor
     func tryBeginGeneratedCompactRawValue(): Bool
@@ -52,6 +247,8 @@ public interface GeneratedSupportV1Writer <: JsonWriter & GeneratedBulkWriterV1 
     func writeRawObjectEntryNameString(first: Bool, name: String, value: String): Bool
     func writeRawObjectEntryNameBool(first: Bool, name: String, value: Bool): Bool
     func writeRawObjectEntryNameInt64(first: Bool, name: String, value: Int64): Bool
+    func writeRawObjectEntryNameUInt64(first: Bool, name: String, value: UInt64): Bool
+    func writeRawObjectEntryNameFloat64(first: Bool, name: String, value: Float64): Bool
 }
 
 /// Versioned, allocation-free view used after the runtime writer has been
@@ -61,12 +258,39 @@ public struct GeneratedSupportV1WriteCursor {
     private let writer: JsonDirectWriter
 
     init(writer: JsonDirectWriter) { this.writer = writer }
+    func generatedWriterV1(): JsonDirectWriter { writer }
+
 
     public func writeRawBeginObject(): Unit { writer.writeRawBeginObject() }
     public func writeRawEndObject(): Unit { writer.writeRawEndObject() }
     public func writeRawBeginArray(): Unit { writer.writeRawBeginArray() }
     public func writeRawEndArray(): Unit { writer.writeRawEndArray() }
     public func writeRawByte(value: Byte): Unit { writer.writeRawByte(value) }
+    public func writeRawNull(): Unit { writer.writeRawNull() }
+    public func writeRawString(value: String): Unit { writer.writeRawString(value) }
+    public func writeRawBool(value: Bool): Unit { writer.writeRawBool(value) }
+    public func writeRawInt64(value: Int64): Unit { writer.writeRawInt64(value) }
+    public func writeRawInt32(value: Int32): Unit { writer.writeRawInt64(Int64(value)) }
+    public func writeRawInt16(value: Int16): Unit { writer.writeRawInt64(Int64(value)) }
+    public func writeRawInt8(value: Int8): Unit { writer.writeRawInt64(Int64(value)) }
+    public func writeRawUInt64(value: UInt64): Unit { writer.writeRawUInt64(value) }
+    public func writeRawUInt32(value: UInt32): Unit { writer.writeRawUInt64(UInt64(value)) }
+    public func writeRawUInt16(value: UInt16): Unit { writer.writeRawUInt64(UInt64(value)) }
+    public func writeRawUInt8(value: UInt8): Unit { writer.writeRawUInt64(UInt64(value)) }
+    public func writeRawFloat64(value: Float64): Unit { writer.writeRawFloat64(value) }
+    public func writeRawFloat32(value: Float32): Unit { writer.writeRawFloat64(Float64(value)) }
+    public func writeRawFloat16(value: Float16): Unit { writer.writeRawFloat64(Float64(value)) }
+    public func writeRawNumberLiteral(value: String): Unit { writer.writeRawNumberValue(value) }
+    public func writeRawRune(value: Rune): Unit { writer.writeRawString(value.toString()) }
+    public func writeRawBigInt(value: BigInt): Unit {
+        writer.writeRawNumberValue(jsonFastFormatBigInt(value))
+    }
+    public func writeRawDecimal(value: Decimal): Unit {
+        writer.writeRawNumberValue(jsonFastFormatDecimal(value))
+    }
+    public func writeRawRfc3339DateTime(value: DateTime): Unit {
+        writer.writeRawString(jsonFastFormatRfc3339DateTime(value))
+    }
     public func reserveRawCollectionCapacity(count: Int64): Unit {
         writer.reserveRawCollectionCapacity(count)
     }
@@ -82,6 +306,48 @@ public struct GeneratedSupportV1WriteCursor {
     public func writeRawObjectEntryNameInt64(first: Bool, name: String, value: Int64): Bool {
         writer.writeRawObjectEntryNameInt64(first, name, value)
     }
+    public func writeRawObjectEntryNameUInt64(first: Bool, name: String, value: UInt64): Bool {
+        writer.writeRawObjectEntryNameUInt64(first, name, value)
+    }
+    public func writeRawObjectEntryNameFloat64(first: Bool, name: String, value: Float64): Bool {
+        writer.writeRawObjectEntryNameFloat64(first, name, value)
+    }
+    public func writeRawObjectEntryKnownName(first: Bool, name: String): Bool {
+        writer.writeRawObjectEntryKnownName(first, name)
+    }
+    public func writeRawObjectEntryKnownNameString(first: Bool, name: String, value: String): Bool {
+        writer.writeRawObjectEntryKnownNameString(first, name, value)
+    }
+    public func writeRawObjectEntryKnownNameBool(first: Bool, name: String, value: Bool): Bool {
+        writer.writeRawObjectEntryKnownNameBool(first, name, value)
+    }
+    public func writeRawObjectEntryKnownNameInt64(first: Bool, name: String, value: Int64): Bool {
+        writer.writeRawObjectEntryKnownNameInt64(first, name, value)
+    }
+    public func writeRawObjectEntryKnownNameUInt64(first: Bool, name: String, value: UInt64): Bool {
+        writer.writeRawObjectEntryKnownNameUInt64(first, name, value)
+    }
+    public func writeRawObjectEntryKnownNameFloat64(first: Bool, name: String, value: Float64): Bool {
+        writer.writeRawObjectEntryKnownNameFloat64(first, name, value)
+    }
+    public func writeRawObjectEntryKnownNameInt64Array(
+        first: Bool, name: String, values: Array<Int64>
+    ): Bool { writer.writeRawObjectEntryKnownNameInt64Array(first, name, values) }
+    public func writeRawObjectEntryKnownNameFloat64Array(
+        first: Bool, name: String, values: Array<Float64>
+    ): Bool { writer.writeRawObjectEntryKnownNameFloat64Array(first, name, values) }
+    public func writeRawObjectEntryKnownNameStringArray(
+        first: Bool, name: String, values: Array<String>
+    ): Bool { writer.writeRawObjectEntryKnownNameStringArray(first, name, values) }
+    public func writeRawObjectEntryKnownNameInt64Map(
+        first: Bool, name: String, values: HashMap<String, Int64>
+    ): Bool { writer.writeRawObjectEntryKnownNameInt64Map(first, name, values) }
+    public func writeRawObjectEntryKnownNameStringMap(
+        first: Bool, name: String, values: HashMap<String, String>
+    ): Bool { writer.writeRawObjectEntryKnownNameStringMap(first, name, values) }
+    public func writeRawObjectEntryKnownNameInt64ArrayMap(
+        first: Bool, name: String, values: HashMap<String, Array<Int64>>
+    ): Bool { writer.writeRawObjectEntryKnownNameInt64ArrayMap(first, name, values) }
 }
 
 private class FastSemanticReadContext {
@@ -226,7 +492,7 @@ class FastSemanticReaderAdapter <: JsonReader & GeneratedReadStateV1Owner {
 
     public func skipValue(): Unit {
         beforeValue()
-        reader.skipRawWithDepth(generatedReadStateV1().remainingDepth())
+        reader.skipValue(generatedReadStateV1().remainingDepth())
     }
 
     public func readNode(): JsonNode {
@@ -279,6 +545,15 @@ public class GeneratedSupportV1 {
         }
     }
 
+    /// Unified gate for every public generated-codec entry point. Exact
+    /// toJson/fromJson overloads and the compact raw provider call this before
+    /// touching any runtime state so the protocol version is validated and the
+    /// portable engine is frozen exactly once.
+    public static func enterGeneratedEntry(): Unit {
+        requireProtocolVersion(1)
+        freezeYJsonRuntime()
+    }
+
     public static func newFastReader(text: String): GeneratedSupportV1Reader {
         freezeYJsonRuntime()
         JsonFastReader(text)
@@ -293,6 +568,58 @@ public class GeneratedSupportV1 {
     }
     public static func writeCursor(writer: GeneratedSupportV1Writer): GeneratedSupportV1WriteCursor {
         writer.generatedCursorV1()
+    }
+
+    /// Public primitive writer seam for macro-generated code. The runtime keeps
+    /// raw primitive state transitions private while this versioned bridge
+    /// preserves depth and output-budget enforcement.
+    public static func writeRawBool(writer: GeneratedSupportV1Writer, value: Bool): Unit {
+        match (writer) {
+            case direct: JsonDirectWriter => direct.writeRawBool(value)
+            case _ => writer.generatedCursorV1().writeRawBool(value)
+        }
+    }
+    public static func writeRawInt64(writer: GeneratedSupportV1Writer, value: Int64): Unit {
+        match (writer) {
+            case direct: JsonDirectWriter => direct.writeRawInt64(value)
+            case _ => writer.generatedCursorV1().writeRawInt64(value)
+        }
+    }
+    public static func writeRawUInt64(writer: GeneratedSupportV1Writer, value: UInt64): Unit {
+        match (writer) {
+            case direct: JsonDirectWriter => direct.writeRawUInt64(value)
+            case _ => writer.generatedCursorV1().writeRawUInt64(value)
+        }
+    }
+    public static func writeRawFloat64(writer: GeneratedSupportV1Writer, value: Float64): Unit {
+        match (writer) {
+            case direct: JsonDirectWriter => direct.writeRawFloat64(value)
+            case _ => writer.generatedCursorV1().writeRawFloat64(value)
+        }
+    }
+    public static func writeRawString(writer: GeneratedSupportV1Writer, value: String): Unit {
+        match (writer) {
+            case direct: JsonDirectWriter => direct.writeRawString(value)
+            case _ => writer.generatedCursorV1().writeRawString(value)
+        }
+    }
+
+    /// Cursor overloads keep generated field loops on the allocation-free
+    /// cursor without naming the runtime's concrete writer class.
+    public static func writeRawBool(cursor: GeneratedSupportV1WriteCursor, value: Bool): Unit {
+        cursor.writeRawBool(value)
+    }
+    public static func writeRawInt64(cursor: GeneratedSupportV1WriteCursor, value: Int64): Unit {
+        cursor.writeRawInt64(value)
+    }
+    public static func writeRawUInt64(cursor: GeneratedSupportV1WriteCursor, value: UInt64): Unit {
+        cursor.writeRawUInt64(value)
+    }
+    public static func writeRawFloat64(cursor: GeneratedSupportV1WriteCursor, value: Float64): Unit {
+        cursor.writeRawFloat64(value)
+    }
+    public static func writeRawString(cursor: GeneratedSupportV1WriteCursor, value: String): Unit {
+        cursor.writeRawString(value)
     }
 
     public static func writeState(writer: JsonWriter): GeneratedWriteStateV1 {
@@ -336,6 +663,15 @@ public class GeneratedSupportV1 {
                 code: "codec_contract"
             )
         }
+    }
+
+    /// Returns whether a generated reader may use the compact fast path
+    /// without constructing the general semantic reader. Generated exact
+    /// overloads use this tiny public seam so they can keep their concrete
+    /// codec call at the application call site instead of routing through a
+    /// type-erased generic YJson wrapper.
+    public static func usesDefaultFastReadOptions(options: JsonReadOptions): Bool {
+        jsonReadOptionsUsesDefaultFastPath(options)
     }
 
     public static func captureValue(reader: JsonReader, maxBytes: Int64): GeneratedReplayValueV1 {
@@ -400,6 +736,27 @@ public class GeneratedSupportV1 {
         readJsonNestedFastWith(codec, reader)
     }
 
+    public static func readCursor(reader: GeneratedSupportV1Reader): GeneratedSupportV1ReadCursor {
+        GeneratedSupportV1ReadCursor(yJsonGeneratedReaderV1(reader))
+    }
+
+    public static func readWithCached<T>(fastCodec: Option<GeneratedCodecV1<T>>,
+        codec: JsonCodec<T>, reader: GeneratedSupportV1Reader): T {
+        match (fastCodec) {
+            case Some(fast) => fast.readFast(reader)
+            case None => codec.read(yJsonSemanticReaderV1(reader))
+        }
+    }
+
+    public static func readWithCursorCached<T>(cursorCodec: Option<GeneratedCursorReadCodecV1<T>>,
+        fastCodec: Option<GeneratedCodecV1<T>>, codec: JsonCodec<T>,
+        reader: GeneratedSupportV1Reader, cursor: GeneratedSupportV1ReadCursor): T {
+        match (cursorCodec) {
+            case Some(fast) => fast.readFastWithCursor(reader, cursor)
+            case None => readWithCached(fastCodec, codec, reader)
+        }
+    }
+
     public static func tryBeginCompactValue(writer: GeneratedSupportV1Writer): Bool {
         jsonTryBeginGeneratedCompactRawValue(writer)
     }
@@ -420,6 +777,14 @@ public class GeneratedSupportV1 {
     public static func writeCompactEntryInt64(writer: GeneratedSupportV1Writer, first: Bool,
         name: String, value: Int64): Bool {
         jsonWriteGeneratedCompactObjectEntryInt64(writer, first, name, value)
+    }
+    public static func writeCompactEntryUInt64(writer: GeneratedSupportV1Writer, first: Bool,
+        name: String, value: UInt64): Bool {
+        jsonWriteGeneratedCompactObjectEntryUInt64(writer, first, name, value)
+    }
+    public static func writeCompactEntryFloat64(writer: GeneratedSupportV1Writer, first: Bool,
+        name: String, value: Float64): Bool {
+        jsonWriteGeneratedCompactObjectEntryFloat64(writer, first, name, value)
     }
 }
 

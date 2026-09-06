@@ -143,6 +143,27 @@ public class BackendTapeWriterV1 <: JsonWriter & GeneratedBulkWriterV1 & Generat
         } finally { generatedState.completeAutoValue(pathPushed) }
     }
 
+    public func tryWriteCompactInt64Array(values: Array<Int64>): Bool {
+        startArray()
+        for (value in values) { writeInt64(value) }
+        endArray()
+        true
+    }
+
+    public func tryWriteCompactFloat64Array(values: Array<Float64>): Bool {
+        startArray()
+        for (value in values) { writeFloat64(value) }
+        endArray()
+        true
+    }
+
+    public func tryWriteCompactStringArray(values: Array<String>): Bool {
+        startArray()
+        for (value in values) { writeString(value) }
+        endArray()
+        true
+    }
+
     public func tryWriteCompactInt64ArrayList(values: ArrayList<Int64>): Bool {
         startArray()
         for (value in values) { writeInt64(value) }
@@ -162,6 +183,28 @@ public class BackendTapeWriterV1 <: JsonWriter & GeneratedBulkWriterV1 & Generat
         for ((name, value) in values) {
             writeName(name)
             writeInt64(value)
+        }
+        endObject()
+        true
+    }
+
+    public func tryWriteCompactStringMap(values: HashMap<String, String>): Bool {
+        startObject()
+        for ((name, value) in values) {
+            writeName(name)
+            writeString(value)
+        }
+        endObject()
+        true
+    }
+
+    public func tryWriteCompactInt64ArrayMap(values: HashMap<String, Array<Int64>>): Bool {
+        startObject()
+        for ((name, value) in values) {
+            writeName(name)
+            startArray()
+            for (item in value) { writeInt64(item) }
+            endArray()
         }
         endObject()
         true

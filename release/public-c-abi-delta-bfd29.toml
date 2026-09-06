@@ -112,3 +112,38 @@ record = "c-abi|native/yjson_yyjson.h|<top-level>|int32_t YJ_Yyjson_ObjectLookup
 compatibility = "additive"
 classification = "generic object navigation"
 review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_scanner.h|<top-level>|int64_t YJ_JSON_FormatFloat64( double value, uint8_t* output, int64_t outputCap, int64_t outputOffset);"
+compatibility = "additive"
+classification = "primitive float formatting hot path"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "added"
+record = "c-abi|native/yjson_scanner.h|<top-level>|int32_t YJ_JSON_FormatFloat64Array( const double* values, int64_t count, uint8_t* output, int64_t outputCap, int64_t outputOffset, int64_t* outWritten);"
+compatibility = "additive"
+classification = "primitive bulk float formatting hot path"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "removed"
+record = "c-abi|native/yjson_compact.h|<top-level>|int32_t YJ_Compact_CopyProbe(const uint8_t *input, uint64_t length, uint64_t iterations, uint64_t *out_checksum);"
+compatibility = "breaking"
+classification = "benchmark-only probe moved behind YJ_TESTING"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "removed"
+record = "c-abi|native/yjson_compact.h|<top-level>|int32_t YJ_Compact_ScalarProbe(uint64_t value, uint64_t *out_value);"
+compatibility = "breaking"
+classification = "benchmark-only probe moved behind YJ_TESTING"
+review_status = "reviewed-for-0.1.0"
+
+[[changes]]
+direction = "removed"
+record = "c-abi|native/yjson_compact.h|<top-level>|uint64_t YJ_Compact_Noop(uint64_t value);"
+compatibility = "breaking"
+classification = "benchmark-only probe moved behind YJ_TESTING"
+review_status = "reviewed-for-0.1.0"

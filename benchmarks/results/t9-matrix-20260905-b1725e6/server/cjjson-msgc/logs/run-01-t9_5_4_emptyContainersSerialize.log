@@ -1,0 +1,31 @@
+Starting the benchmark `T9ThroughputBench.t9_5_4_emptyContainersSerialize()`.
+    Warming up for 200.0 ms.
+    Starting measurements of 200 batches. Measuring Duration.
+    Max batch size: 3972, estimated execution time: 1.000 s.
+Finished in 1.106 s. Analysing results:
+  percentiles:    [   10%        50%        90%        95%        99%        ]  
+  time:           [   2.354 us   2.372 us   2.385 us   2.388 us   2.392 us   ]  
+  mean:           2.359 us .. 2.376 us  Err ±0.4%
+  median:         2.337 us .. 2.392 us
+  R²:             0.999 .. 1.000
+  stddev:         3.560 ns
+
+--------------------------------------------------------------------------------------------------
+TP: cjjson.test, time elapsed: 2946351651 ns, RESULT:
+    TCS: T9ThroughputBench, time elapsed: 2941056469 ns, RESULT:
+    | Case                            |   Median |         Err |   Err% |     Mean |
+    |:--------------------------------|---------:|------------:|-------:|---------:|
+    | t9_5_4_emptyContainersSerialize | 2.372 us | ±0.00830 us |  ±0.3% | 2.371 us |
+Summary: TOTAL: 51
+    PASSED: 1, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 2947903271 ns, RESULT:
+TP: cjjson.*, time elapsed: 2947790546 ns, RESULT:
+    PASSED:
+    TP: cjjson.test, time elapsed: 2946351651 ns
+Summary: TOTAL: 51
+    PASSED: 1, SKIPPED: 50, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm bench success

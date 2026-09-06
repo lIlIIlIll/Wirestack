@@ -1,0 +1,24 @@
+Starting the benchmark `T9ThroughputBench.t9_2_1_shortStringSerialize()`.
+    Warming up for 200.0 ms.
+    Starting measurements of 200 batches. Measuring Duration.
+    Max batch size: 13660, estimated execution time: 1.000 s.
+
+--------------------------------------------------------------------------------------------------
+TP: yjson_benchmarks, time elapsed: 2075170779 ns, RESULT:
+    TCS: T9ThroughputBench, time elapsed: 2074411794 ns, RESULT:
+    | Case                        |   Median |       Err |   Err% |     Mean |
+    |:----------------------------|---------:|----------:|-------:|---------:|
+    | t9_2_1_shortStringSerialize | 1.119 us | ±0.183 us | ±16.4% | 1.788 us |
+Summary: TOTAL: 42
+    PASSED: 1, SKIPPED: 41, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 2076280855 ns, RESULT:
+TP: yjson_benchmarks.*, time elapsed: 2076192960 ns, RESULT:
+    PASSED:
+    TP: yjson_benchmarks, time elapsed: 2075170779 ns
+Summary: TOTAL: 42
+    PASSED: 1, SKIPPED: 41, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm bench success

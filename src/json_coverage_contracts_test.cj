@@ -2,6 +2,7 @@ package yjson
 
 import std.collection.*
 import std.math.numeric.*
+import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
 
@@ -978,6 +979,46 @@ class JsonCoverageContractsTest {
         cursor.writeRawByte(b'n'); cursor.writeRawByte(b'u'); cursor.writeRawByte(b'l'); cursor.writeRawByte(b'l')
         cursor.writeRawEndArray()
         @Expect(cursorWriter.finishString(), "[1,null]")
+
+        let scalarCursorWriter = GeneratedSupportV1.newWriter()
+        @Expect(GeneratedSupportV1.tryBeginCompactValue(scalarCursorWriter))
+        let scalarCursor = GeneratedSupportV1.writeCursor(scalarCursorWriter)
+        scalarCursor.writeRawBeginArray()
+        scalarCursor.writeRawInt8(-8i8); scalarCursor.writeRawByte(b',')
+        scalarCursor.writeRawUInt32(UInt32.Max); scalarCursor.writeRawByte(b',')
+        scalarCursor.writeRawFloat32(1.5f32); scalarCursor.writeRawByte(b',')
+        scalarCursor.writeRawRune(r'界'); scalarCursor.writeRawByte(b',')
+        scalarCursor.writeRawBigInt(BigInt.parse("9223372036854775808")); scalarCursor.writeRawByte(b',')
+        scalarCursor.writeRawDecimal(Decimal.parse("1.250e2")); scalarCursor.writeRawByte(b',')
+        scalarCursor.writeRawRfc3339DateTime(
+            DateTime.parse("2024-06-20T14:42:33+08:00", DateTimeFormat.RFC3339))
+        scalarCursor.writeRawEndArray()
+        let scalarText = scalarCursorWriter.finishString()
+        @Expect(scalarText,
+            "[-8,4294967295,1.500000,\"界\",9223372036854775808,125.0," +
+            "\"2024-06-20T14:42:33+08:00\"]")
+
+        let scalarReader = GeneratedSupportV1.newFastReader(scalarText)
+        let readCursor = GeneratedSupportV1.readCursor(scalarReader)
+        readCursor.startRawArray()
+        var scalarFirst = true
+        @Expect(readCursor.hasRawArrayItem(scalarFirst)); readCursor.beforeRawArrayItem(scalarFirst)
+        @Expect(readCursor.readRawInt8(), -8i8); scalarFirst = false
+        @Expect(readCursor.hasRawArrayItem(scalarFirst)); readCursor.beforeRawArrayItem(scalarFirst)
+        @Expect(readCursor.readRawUInt32(), UInt32.Max)
+        @Expect(readCursor.hasRawArrayItem(scalarFirst)); readCursor.beforeRawArrayItem(scalarFirst)
+        @Expect(readCursor.readRawFloat32(), 1.5f32)
+        @Expect(readCursor.hasRawArrayItem(scalarFirst)); readCursor.beforeRawArrayItem(scalarFirst)
+        @Expect(readCursor.readRawRune().toString(), "界")
+        @Expect(readCursor.hasRawArrayItem(scalarFirst)); readCursor.beforeRawArrayItem(scalarFirst)
+        @Expect(readCursor.readRawBigInt(), BigInt.parse("9223372036854775808"))
+        @Expect(readCursor.hasRawArrayItem(scalarFirst)); readCursor.beforeRawArrayItem(scalarFirst)
+        @Expect(readCursor.readRawDecimal(), Decimal.parse("1.250e2"))
+        @Expect(readCursor.hasRawArrayItem(scalarFirst)); readCursor.beforeRawArrayItem(scalarFirst)
+        @Expect(readCursor.readRawRfc3339DateTime(),
+            DateTime.parse("2024-06-20T14:42:33+08:00", DateTimeFormat.RFC3339))
+        @Expect(!readCursor.hasRawArrayItem(scalarFirst))
+        readCursor.endRawArray(); scalarReader.expectEnd()
     }
 
     @TestCase
@@ -1424,7 +1465,8 @@ class JsonCoverageContractsTest {
         @Expect(output.toUtf8String(), "prefixab12:\"v\"10000" + large)
 
         let streamWriter = JsonDirectWriter(YJsonMemoryOutputStream())
-        streamWriter.writeNull()
+        @Expect(streamWriter.tryBeginGeneratedCompactRawValue())
+        streamWriter.writeRawNull()
         @AssertThrows[JsonException](streamWriter.finishString())
         let stringWriter = JsonDirectWriter()
         stringWriter.writeNull()

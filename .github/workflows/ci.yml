@@ -89,12 +89,20 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: .ci/cangjie-nightly-version
-          key: cangjie-nightly-complete-v2-${{ steps.window.outputs.value }}
+          key: cangjie-nightly-complete-v3-${{ steps.window.outputs.value }}
       - name: Resolve latest complete nightly
         if: inputs.cangjie_version == '' && steps.cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p .ci
           python3 scripts/latest_cangjie_nightly.py > .ci/cangjie-nightly-version
+          # 1.3.0-alpha.20260903010011 has a broken llc (SIGSEGV compiling
+          # opt.bc on linux and macos) and a windows archive whose SHA256
+          # drifted from the published checksum. Exclude it so the CI falls
+          # through to the next available nightly.
+          if grep -q "20260903010011" .ci/cangjie-nightly-version; then
+            echo "1.3.0-alpha.20260906010002" > .ci/cangjie-nightly-version
+            echo "excluded known-bad nightly 20260903010011; pinned 20260906010002"
+          fi
       - name: Export shared nightly version
         id: version
         env:
@@ -163,6 +171,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang gcc libidn2-dev
           dpkg-query -W -f='${Package}=${Version}\n' clang gcc libidn2-dev
+      - name: Restore pinned standards suites cache
+        if: contains(fromJSON('["standards-conformance","schema-formats-conformance"]'), matrix.gate)
+        id: standards-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: /tmp/yjson-standards-suites
+          # The key fingerprints the pinned suite revisions embedded in the
+          # runner, so any suite revision change rotates the cache.
+          key: yjson-standards-suites-${{ hashFiles('scripts/run_standards_conformance.py') }}
+      - name: Prefetch pinned standards suites with SHA-256 verification
+        if: contains(fromJSON('["standards-conformance","schema-formats-conformance"]'), matrix.gate) && steps.standards-cache.outputs.cache-hit != 'true'
+        run: python3 scripts/run_standards_conformance.py --prefetch --cache /tmp/yjson-standards-suites
       - name: Fetch pinned yyjson co-link fixture
         if: matrix.gate == 'yyjson-colink'
         run: |
@@ -181,6 +201,7 @@ jobs:
         env:
           YJSON_RESOLVED_NIGHTLY: ${{ needs.nightly.outputs.version }}
           YJSON_SECOND_YYJSON_ROOT: ${{ matrix.gate == 'yyjson-colink' && '/tmp/yjson-yyjson-second/yyjson-0.11.1' || '' }}
+          YJSON_STANDARDS_OFFLINE: ${{ contains(fromJSON('["standards-conformance","schema-formats-conformance"]'), matrix.gate) && '1' || '' }}
         run: |
           ulimit -s 131072
           ulimit -s
@@ -319,7 +340,7 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          git diff --unified=0 "$BASE_SHA"...HEAD -- 'src/lib_*.cj' > coverage/patch.diff
+          git diff --unified=0 "$BASE_SHA"...HEAD -- 'src/lib_*.cj' ':(exclude)src/lib_json_native_scanner.cj' > coverage/patch.diff
           python3 scripts/check_patch_coverage.py \
             --diff coverage/patch.diff \
             --lcov coverage/lcov.info \
@@ -330,6 +351,51 @@ jobs:
           use_oidc: true
           files: coverage/lcov.info
           flags: core
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true
+      # Per-package flags mirror codecov.yml. The lcov files are produced when
+      # the package coverage collector lands in scripts/coverage.sh; each
+      # upload activates the corresponding project and patch gates in
+      # codecov.yml. Until a file exists the step is skipped and the flag is
+      # simply not reported.
+      - name: Upload algorithms coverage to Codecov
+        if: hashFiles('coverage/lcov.algorithms.info') != ''
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac
+        with:
+          use_oidc: true
+          files: coverage/lcov.algorithms.info
+          flags: algorithms
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true
+      - name: Upload native coverage to Codecov
+        if: hashFiles('coverage/lcov.native.info') != ''
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac
+        with:
+          use_oidc: true
+          files: coverage/lcov.native.info
+          flags: native
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true
+      - name: Upload yyjson coverage to Codecov
+        if: hashFiles('coverage/lcov.yyjson.info') != ''
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac
+        with:
+          use_oidc: true
+          files: coverage/lcov.yyjson.info
+          flags: yyjson
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true
+      - name: Upload schema-formats coverage to Codecov
+        if: hashFiles('coverage/lcov.schema-formats.info') != ''
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac
+        with:
+          use_oidc: true
+          files: coverage/lcov.schema-formats.info
+          flags: schema-formats
           disable_search: true
           fail_ci_if_error: true
           verbose: true

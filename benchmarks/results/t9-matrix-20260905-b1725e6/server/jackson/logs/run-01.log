@@ -1,0 +1,36 @@
+=== Jackson T9 对齐基准 ===
+case                                   median       ops/ms
+------------------------------------------------------------
+t9_1_1_primitiveSerialize             0.434 us      2302.4
+t9_1_2_primitiveDeserialize           0.636 us      1571.9
+t9_1_3_primitiveRoundTrip             1.111 us       899.8
+t9_2_1_shortStringSerialize           0.417 us      2395.5
+t9_2_2_longStringSerialize           13.973 us        71.6
+t9_2_3_escapeStringSerialize          0.516 us      1936.1
+t9_2_4_unicodeStringSerialize         0.796 us      1255.8
+t9_3_1_smallArraySerialize            0.321 us      3111.2
+t9_3_2_largeArraySerialize            7.136 us       140.1
+t9_3_3_largeArrayDeserialize         28.620 us        34.9
+t9_3_4_smallMapSerialize              0.594 us      1684.9
+t9_3_5_largeMapSerialize              3.594 us       278.3
+t9_3_6_largeMapDeserialize            7.337 us       136.3
+t9_3_7_nestedCollectionSerialize      1.026 us       974.5
+t9_3_8_nestedCollectionDeserialize    3.540 us       282.5
+t9_3_9_largeFloat64ArraySerialize   191.240 us         5.2
+t9_4_1_deepNestedSerialize            0.436 us      2293.7
+t9_4_2_deepNestedDeserialize          0.796 us      1256.9
+t9_4_3_wideSerialize                  0.953 us      1049.3
+t9_4_4_wideDeserialize                1.615 us       619.1
+t9_4_5_ultraWideSerialize             1.791 us       558.2
+t9_4_6_ultraWideDeserialize           4.035 us       247.8
+t9_5_1_optionSerialize                0.389 us      2571.0
+t9_5_2_optionDeserialize              0.759 us      1317.5
+t9_5_3_optionRoundTrip                1.192 us       838.6
+t9_5_4_emptyContainersSerialize       0.288 us      3466.4
+t9_5_5_emptyContainersDeserialize     0.499 us      2004.3
+t9_5_6_int64ExtremesSerialize         0.350 us      2859.0
+t9_5_7_int64ExtremesDeserialize       0.706 us      1416.8
+t9_5_8_unknownFieldDeserialize        1.118 us       894.4
+t9_b_1_bytesParsePrimitive            0.675 us      1482.3
+------------------------------------------------------------
+(sink=4 防 DCE)

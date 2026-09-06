@@ -13,8 +13,27 @@ permissions:
 jobs:
   fuzz-extended:
     runs-on: [self-hosted, linux, x64, cangjie-1.1]
+    env:
+      # Unique per-run working directory prevents a stale checkout from a
+      # previous run on the same self-hosted runner from being reused.
+      YJ_WS: "${{ runner.temp }}/yjson-fuzz-extended-${{ github.run_id }}"
     steps:
       - name: Checkout source
-        run: git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git repo_workspace && cd repo_workspace && git checkout --detach ${ATOMGIT_SHA}
+        run: |
+          set -euo pipefail
+          if [[ -e "$YJ_WS" ]]; then rm -rf "$YJ_WS"; fi
+          mkdir -p "$YJ_WS"
+          git clone https://gitcode.com/${ATOMGIT_REPOSITORY}.git "$YJ_WS/repo_workspace"
+          cd "$YJ_WS/repo_workspace" && git checkout --detach ${ATOMGIT_SHA}
+      - name: Record toolchain and runner identity
+        run: |
+          cjc -v
+          cjpm --version
+          printf 'runner=%s run_id=%s job=%s workspace=%s\n' \
+            "${RUNNER_NAME:-unknown}" "${ATOMGIT_RUN_ID:-unknown}" \
+            "${ATOMGIT_JOB:-unknown}" "$YJ_WS"
       - name: Run extended fuzz gate
-        run: cd repo_workspace && scripts/ci_job.sh fuzz-extended
+        run: cd "$YJ_WS/repo_workspace" && scripts/ci_job.sh fuzz-extended
+      - name: Clean up working directory
+        if: always()
+        run: rm -rf "$YJ_WS"

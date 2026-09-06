@@ -1,0 +1,24 @@
+Starting the benchmark `T9ThroughputBench.t9_4_6_ultraWideDeserialize()`.
+    Warming up for 200.0 ms.
+    Starting measurements of 200 batches. Measuring Duration.
+    Max batch size: 4826, estimated execution time: 1.000 s.
+
+--------------------------------------------------------------------------------------------------
+TP: yjson_benchmarks, time elapsed: 2077767895 ns, RESULT:
+    TCS: T9ThroughputBench, time elapsed: 2077020671 ns, RESULT:
+    | Case                        |   Median |       Err |   Err% |     Mean |
+    |:----------------------------|---------:|----------:|-------:|---------:|
+    | t9_4_6_ultraWideDeserialize | 3.108 us | ±0.471 us | ±15.2% | 4.898 us |
+Summary: TOTAL: 42
+    PASSED: 1, SKIPPED: 41, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 2078876837 ns, RESULT:
+TP: yjson_benchmarks.*, time elapsed: 2078784220 ns, RESULT:
+    PASSED:
+    TP: yjson_benchmarks, time elapsed: 2077767895 ns
+Summary: TOTAL: 42
+    PASSED: 1, SKIPPED: 41, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm bench success

@@ -32,3 +32,15 @@ resource 使用 `yjson_native` 的 `NativeBackends.customNative`。
 `yjson_native_primitives`；它是第一方 lockstep package 的 closed SPI。完整契约见
 [Backend 使用指南](../../docs/backends.md)。
 
+## Toolchain prerequisites
+
+Native 加速在 pre-build 阶段编译 scanner archive,构建环境需要:
+
+- python3(pre-build 脚本);
+- C11 编译器(默认 `clang`,可用 `CC` 覆盖);
+- `ar`(archive 工具);
+- Linux x86_64(`0.1.0` Native qualification 范围)。
+
+缺少任一工具时 `yjson_native_primitives` 的 build script 会在 pre-build 一次性失败
+(fail-fast),不会静默回退到 Pure。
+

@@ -88,6 +88,27 @@ Schema resource URI 只通过注入的 `UriResolver` 在构造阶段解析。成
 umbrella package。后续 `0.1.y` patch 应保持已记录的应用 API 兼容；需要 breaking change 时
 提升到新的 `0.x.0` minor，并提供 machine API diff。
 
+### Binary compatibility
+
+Cangjie 声明快照（`release/public-api-snapshot.txt` 与 delta TOML）只证明源码级 API 表面
+未漂移，**不等于二进制兼容证明**。源码兼容不能覆盖编译产物层面的变化：cjc 对同一声明
+可能生成不同符号名、方法表布局或内联行为；跨 nightly 或跨 patch 的预编译 consumer
+可能在链接期或运行期失败，即使声明 diff 为空。
+
+因此 0.1 线的 binary 兼容性以实测为准：release 前必须用冻结的旧 consumer artifact（用上一
+个 release 的 SDK 与九包构建的应用或 fixture）对新版九包做链接/调用矩阵验证。矩阵至少覆盖：
+
+- 普通 `YJson` 调用（encode/decode、parseDocument）；
+- generated codec（`@JsonCodec` 展开的调用方）与 generated-support v1 入口；
+- algorithms（Pointer/Patch/Path/Schema）与 schema-formats 动态库链接；
+- Native/yyjson backend 的显式 resource 生命周期调用；
+- 跨 package 依赖图中每个 `output-type = "dynamic"` 包的链接。
+
+**0.1.0 状态：NOT PROVIDED。** 首个 release 没有更旧的 consumer artifact 可测，0.1.0 的
+binary compatibility 声明不提供；后续 0.1.y 的矩阵证据应写入 `release/<version>/evidence.md`。
+在矩阵通过之前，任何"二进制兼容"或"补丁版本可安全替换"的表述都不得出现在文档或 release
+notes 中。
+
 历史 1.x/2.0 tag 和 release evidence 保持不可变，只用于审计与基线，不代表当前
 `0.1.x` API。九包顺序与 stability 分类来自
 [`release/release-graph.toml`](../release/release-graph.toml)。

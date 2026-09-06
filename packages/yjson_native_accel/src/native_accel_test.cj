@@ -3,6 +3,8 @@ package yjson_native_accel
 import yjson_macros.*
 
 import std.collection.*
+import std.sync.*
+import std.time.*
 import std.unittest.*
 import std.unittest.testmacro.*
 import yjson.*
@@ -90,6 +92,14 @@ class NativeAccelPublicContractTest {
     @TestCase
     func nativeFloatParserPreservesEligibleAndOversizedTokens(): Unit {
         YJsonNativeAccel.initialize()
+        for (value in [-0.0, 0.0, 1.25, -125.5, 3.141592653589793, 1e308, 1e-300]) {
+            let text = YJson.toJson(value)
+            @Expect(YJson.fromJson<Float64>(text).toBits(), value.toBits())
+            @Expect(String.fromUtf8(YJson.toJsonBytes(value)), text)
+            let stream = YJsonMemoryOutputStream()
+            YJson.writeJson(value, stream)
+            @Expect(stream.toUtf8String(), text)
+        }
         @Expect(YJson.fromJson<Float64>("-125.5"), -125.5)
         let values = YJson.fromJson<ArrayList<Float64>>("[1.25,-2.5,6.25e3]")
         @Expect(values[0], 1.25)
@@ -276,5 +286,50 @@ class NativeAccelPublicContractTest {
         let error = @AssertThrows[JsonException](YJson.parseDocument(
             unsafe { malformedObject.toString().rawData().clone() }))
         @Expect(error.code, "parse_error")
+    }
+
+    @TestCase
+    func concurrentFirstNumericScansAfterInitializeAreDeterministic(): Unit {
+        // Barrier contract: after YJsonNativeAccel.initialize() commits, any
+        // number of threads performing their first numeric parse observe the
+        // fully installed native bundle. The test polls with a deadline
+        // instead of an unbounded busy wait and propagates child failures.
+        YJsonNativeAccel.initialize()
+        let threadCount: Int64 = 8
+        let iterations: Int64 = 400
+        let ready = AtomicInt64(0)
+        let start = AtomicInt64(0)
+        let workers = ArrayList<Future<Int64>>()
+        for (_ in 0..threadCount) {
+            workers.add(spawn {
+                ready.fetchAdd(1)
+                while (start.load() == 0) {}
+                var sum: Int64 = 0
+                for (index in 0..iterations) {
+                    let values = YJson.fromJson<ArrayList<Int64>>("[1,2,3]")
+                    sum += values[0] + values[1] + values[2] + index
+                }
+                sum
+            })
+        }
+        let waitStart = DateTime.now()
+        while (ready.load() != threadCount) {
+            sleep(1 * Duration.millisecond)
+            if ((DateTime.now() - waitStart).toNanoseconds() > 10_000_000_000) {
+                throw Exception("native accel barrier workers never became ready")
+            }
+        }
+        start.store(1)
+        var expectedSum: Int64 = 0
+        for (worker in workers) {
+            expectedSum += 6 * iterations
+        }
+        for (index in 0..threadCount) { expectedSum += (index * iterations) }
+        for (worker in workers) {
+            let result = worker.get()
+            if (result <= 0) {
+                throw Exception("native accel worker produced an invalid result")
+            }
+        }
     }
 }

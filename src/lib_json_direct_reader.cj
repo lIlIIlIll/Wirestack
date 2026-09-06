@@ -32,6 +32,17 @@ private class JsonDirectReadContext {
 class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
     private let source: InputCursor
     private let config: JsonReadOptions
+    // Linear duplicate scan for policy-aware unknown-object skips; the
+    // window [base..count) holds only the current object level.
+    private var skipSeenNames: Array<String> = Array<String>(16, repeat: "")
+    private var skipSeenCount: Int64 = 0
+
+    private func ensureSkipSeenCapacity(): Unit {
+        if (skipSeenCount < skipSeenNames.size) { return }
+        let grown = Array<String>(skipSeenNames.size * 2, repeat: "")
+        for (position in 0..skipSeenCount) { grown[position] = skipSeenNames[position] }
+        skipSeenNames = grown
+    }
     private let streaming: Bool
     private let generatedState: GeneratedReadStateV1
     private let contexts = ArrayList<JsonDirectReadContext>()
@@ -360,7 +371,7 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
             if (source.hasMore() && (source.peek() == b'[' || source.peek() == b'{')) {
                 beginRootBudgetIfNeeded()
             }
-            skipRawValueBounded(0, maxDepth)
+            skipRawValuePolicyAware(0, maxDepth)
             if (contexts.isEmpty()) { source.endValueBudget() }
         } finally { generatedState.completeAutoValue(pathPushed) }
     }
@@ -433,7 +444,7 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
         context
     }
 
-    private func skipRawValueBounded(depth: Int64, maxDepth: Int64): Unit {
+    private func skipRawValuePolicyAware(depth: Int64, maxDepth: Int64): Unit {
         skipSpaces()
         if (!source.hasMore()) {
             fail("Unexpected end of input")
@@ -445,15 +456,15 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
             case current == b'f' => expectLiteral("false")
             case current == b'"' =>
                 scanRawString()
-            case current == b'[' => skipRawArrayBounded(depth, maxDepth)
-            case current == b'{' => skipRawObjectBounded(depth, maxDepth)
+            case current == b'[' => skipRawArrayPolicyAware(depth, maxDepth)
+            case current == b'{' => skipRawObjectPolicyAware(depth, maxDepth)
             case current == b'-' || (current >= b'0' && current <= b'9') =>
                 skipNumberLiteral()
             case _ => fail("Unexpected token")
         }
     }
 
-    private func skipRawArrayBounded(depth: Int64, maxDepth: Int64): Unit {
+    private func skipRawArrayPolicyAware(depth: Int64, maxDepth: Int64): Unit {
         if (depth >= maxDepth) {
             throw jsonResourceLimitException(config,
                 "Maximum JSON depth ${config.maxDepth} exceeded", "max_depth", source.position())
@@ -465,7 +476,7 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
             return
         }
         while (true) {
-            skipRawValueBounded(depth + 1, maxDepth)
+            skipRawValuePolicyAware(depth + 1, maxDepth)
             skipSpaces()
             if (source.hasMore() && source.peek() == b']') {
                 consumeByte()
@@ -475,7 +486,7 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
         }
     }
 
-    private func skipRawObjectBounded(depth: Int64, maxDepth: Int64): Unit {
+    private func skipRawObjectPolicyAware(depth: Int64, maxDepth: Int64): Unit {
         if (depth >= maxDepth) {
             throw jsonResourceLimitException(config,
                 "Maximum JSON depth ${config.maxDepth} exceeded", "max_depth", source.position())
@@ -486,14 +497,30 @@ class JsonDirectReader <: JsonReader & GeneratedReadStateV1Owner {
             consumeByte()
             return
         }
+        let seenBase = if (jsonReadOptionsRejectsDuplicateKeys(config)) {
+            skipSeenCount
+        } else {
+            -1
+        }
         while (true) {
-            scanRawString()
+            let name = parseString()
+            if (seenBase >= 0) {
+                var duplicate = false
+                for (position in seenBase..skipSeenCount) {
+                    if (skipSeenNames[position] == name) { duplicate = true; break }
+                }
+                if (duplicate) { policyFail("Duplicate object key '${name}'", "duplicate_key") }
+                ensureSkipSeenCapacity()
+                skipSeenNames[skipSeenCount] = name
+                skipSeenCount++
+            }
             skipSpaces()
             expectByte(b':')
-            skipRawValueBounded(depth + 1, maxDepth)
+            skipRawValuePolicyAware(depth + 1, maxDepth)
             skipSpaces()
             if (source.hasMore() && source.peek() == b'}') {
                 consumeByte()
+                if (seenBase >= 0) { skipSeenCount = seenBase }
                 return
             }
             expectByte(b',')
