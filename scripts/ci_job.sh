@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # LLVM llc requires a large stack for optimization passes on complex IR.
-ulimit -s 131072 2>/dev/null || true
+ulimit -Ss 131072 2>/dev/null || true
 
 repo=$(cd "$(dirname "$0")/.." && pwd)
 job=${1:-}

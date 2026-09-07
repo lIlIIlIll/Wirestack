@@ -46,6 +46,11 @@ while :; do
     if [[ "$status" -ne 139 ]]; then
         exit "$status"
     fi
+    if [[ -n "${YJSON_LLC_STACK_DIAGNOSTICS:-}" ]]; then
+        python3 "$YJSON_LLC_STACK_PROBE" "$dir/llc.yjson-real" "${args[@]}"
+        # A diagnostic success must not turn a failed gate green.
+        exit 139
+    fi
     echo "llc attempt $attempt crashed with SIGSEGV" >&2
     case "$attempt" in
         2)
