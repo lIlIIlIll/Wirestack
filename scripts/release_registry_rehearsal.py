@@ -396,8 +396,16 @@ def validate_candidate_tree(candidate: pathlib.Path, require_clean: bool = False
         raise RuntimeError("candidate file inventory differs from release manifest:\n  "
                            + "\n  ".join(details))
     try:
-        from stage_source_tree import assert_source_only
-        assert_source_only(candidate)
+        from stage_source_tree import (
+            DOCUMENTATION_TEXT_SUFFIXES,
+            assert_source_only,
+        )
+        allow = frozenset(
+            relative for relative in paths
+            if relative.suffix in DOCUMENTATION_TEXT_SUFFIXES
+            and relative.parts[:2] == ("benchmarks", "results")
+        )
+        assert_source_only(candidate, allow=allow)
     except ValueError as error:
         raise RuntimeError(str(error)) from error
     validate_manifest_closure(candidate, paths)
