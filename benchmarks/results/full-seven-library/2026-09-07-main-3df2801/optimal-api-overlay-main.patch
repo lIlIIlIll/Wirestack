@@ -1,0 +1,177 @@
+diff -ruN a/harness/cjjson/src/bench.cj b/harness/cjjson/src/bench.cj
+--- a/harness/cjjson/src/bench.cj
++++ b/harness/cjjson/src/bench.cj
+@@ -173,12 +173,19 @@
+         int64MapText = canonicalLargeInt64MapJsonText()
+         deepNestedText = canonicalDeepNestedProfilesJsonText()
+ 
+-        if (BenchAddress.fromJson(addressText).zipcode != 518000) { throw Exception("address validation") }
+-        if (BenchPerson.fromJson(personText).id != 42) { throw Exception("person validation") }
+-        if (ArrayList<BenchProfileRecord>.fromJson(profilesText).size != 64) { throw Exception("array validation") }
+-        if (HashMap<String, Int64>.fromJson(int64MapText)["metric_32"] != 547) { throw Exception("map validation") }
+-        if (ArrayList<HashMap<String, ArrayList<BenchProfileRecord>>>.fromJson(deepNestedText).size != 8) {
+-            throw Exception("deep validation")
++        // YJSON_SEVEN_LIBRARY_PREFLIGHT_V1
++        if (address.toJson() != addressText ||
++            person.toJson() != personText ||
++            profiles.toJson() != profilesText ||
++            int64Map.toJson() != int64MapText ||
++            deepNested.toJson() != deepNestedText ||
++            BenchAddress.fromJson(addressText).zipcode != 518000 ||
++            BenchPerson.fromJson(personText).address.zipcode != 518000 ||
++            ArrayList<BenchProfileRecord>.fromJson(profilesText)[63].id != 10063 ||
++            HashMap<String, Int64>.fromJson(int64MapText)["metric_63"] != 1074 ||
++            ArrayList<HashMap<String, ArrayList<BenchProfileRecord>>>.fromJson(
++                deepNestedText)[7]["group_7"][3].id != 703) {
++            throw Exception("cangjieJSON canonical encode/decode preflight")
+         }
+     }
+ 
+diff -ruN a/harness/java/src/main/java/bench/OptimalJsonBench.java b/harness/java/src/main/java/bench/OptimalJsonBench.java
+--- a/harness/java/src/main/java/bench/OptimalJsonBench.java
++++ b/harness/java/src/main/java/bench/OptimalJsonBench.java
+@@ -109,16 +109,29 @@
+         int64MapText = canonicalLargeInt64MapJsonText();
+         deepNestedText = canonicalDeepNestedProfilesJsonText();
+ 
+-        require(jacksonAddressReader.<Address>readValue(addressText).zipcode == 518000L, "jackson address");
+-        require(jacksonPersonReader.<Person>readValue(personText).id == 42L, "jackson person");
+-        require(jacksonProfilesReader.<List<ProfileRecord>>readValue(profilesText).size() == 64, "jackson array");
+-        require(jacksonMapReader.<Map<String, Long>>readValue(int64MapText).get("metric_32") == 547L, "jackson map");
+-        require(jacksonDeepReader.<List<?>>readValue(deepNestedText).size() == 8, "jackson deep");
+-        require(((Address) readFast(fastAddressReader, Address.class, addressText)).zipcode == 518000L, "fastjson2 address");
+-        require(((Person) readFast(fastPersonReader, Person.class, personText)).id == 42L, "fastjson2 person");
+-        require(((List<?>) readFast(fastProfilesReader, profilesType, profilesText)).size() == 64, "fastjson2 array");
+-        require(((Map<?, ?>) readFast(fastMapReader, mapType, int64MapText)).get("metric_32").equals(547L), "fastjson2 map");
+-        require(((List<?>) readFast(fastDeepReader, deepType, deepNestedText)).size() == 8, "fastjson2 deep");
++        // YJSON_SEVEN_LIBRARY_PREFLIGHT_V1
++        require(jacksonAddressWriter.writeValueAsString(address).equals(addressText), "jackson address encode");
++        require(jacksonPersonWriter.writeValueAsString(person).equals(personText), "jackson person encode");
++        require(jacksonProfilesWriter.writeValueAsString(profiles).equals(profilesText), "jackson array encode");
++        require(jacksonMapWriter.writeValueAsString(int64Map).equals(int64MapText), "jackson map encode");
++        require(jacksonDeepWriter.writeValueAsString(deepNested).equals(deepNestedText), "jackson deep encode");
++        require(jacksonAddressReader.<Address>readValue(addressText).zipcode == 518000L, "jackson address decode");
++        require(jacksonPersonReader.<Person>readValue(personText).address.zipcode == 518000L, "jackson person decode");
++        require(jacksonProfilesReader.<List<ProfileRecord>>readValue(profilesText).get(63).id == 10063L, "jackson array decode");
++        require(jacksonMapReader.<Map<String, Long>>readValue(int64MapText).get("metric_63") == 1074L, "jackson map decode");
++        require(jacksonDeepReader.<List<Map<String, List<ProfileRecord>>>>readValue(deepNestedText)
++            .get(7).get("group_7").get(3).id == 703L, "jackson deep decode");
++        require(writeFast(fastAddressWriter, address, Address.class).equals(addressText), "fastjson2 address encode");
++        require(writeFast(fastPersonWriter, person, Person.class).equals(personText), "fastjson2 person encode");
++        require(writeFast(fastProfilesWriter, profiles, profilesType).equals(profilesText), "fastjson2 array encode");
++        require(writeFast(fastMapWriter, int64Map, mapType).equals(int64MapText), "fastjson2 map encode");
++        require(writeFast(fastDeepWriter, deepNested, deepType).equals(deepNestedText), "fastjson2 deep encode");
++        require(((Address) readFast(fastAddressReader, Address.class, addressText)).zipcode == 518000L, "fastjson2 address decode");
++        require(((Person) readFast(fastPersonReader, Person.class, personText)).address.zipcode == 518000L, "fastjson2 person decode");
++        require(((List<ProfileRecord>) readFast(fastProfilesReader, profilesType, profilesText)).get(63).id == 10063L, "fastjson2 array decode");
++        require(((Map<String, Long>) readFast(fastMapReader, mapType, int64MapText)).get("metric_63") == 1074L, "fastjson2 map decode");
++        require(((List<Map<String, List<ProfileRecord>>>) readFast(fastDeepReader, deepType, deepNestedText))
++            .get(7).get("group_7").get(3).id == 703L, "fastjson2 deep decode");
+     }
+ 
+     @Benchmark public String jacksonEncodeAddress() throws Exception { return jacksonAddressWriter.writeValueAsString(address); }
+diff -ruN a/harness/java/src/main/java/bench/OptimalJsonBench.java b/harness/java/src/main/java/bench/OptimalJsonBench.java
+--- a/harness/java/src/main/java/bench/OptimalJsonBench.java
++++ b/harness/java/src/main/java/bench/OptimalJsonBench.java
+@@ -253,5 +253,7 @@
+     }
+ 
++    @com.fasterxml.jackson.annotation.JsonPropertyOrder({"street_name", "zipcode"})
++    @com.alibaba.fastjson2.annotation.JSONType(orders = {"street_name", "zipcode"})
+     public static final class Address {
+         @JsonProperty("street_name") @JSONField(name = "street_name") public String street;
+         public long zipcode;
+@@ -261,6 +263,8 @@
+         public Address(String street, long zipcode) { this.street = street; this.zipcode = zipcode; }
+     }
+ 
++    @com.fasterxml.jackson.annotation.JsonPropertyOrder({"user_id", "name", "age", "tags", "scores", "address", "nick"})
++    @com.alibaba.fastjson2.annotation.JSONType(serializeFeatures = JSONWriter.Feature.WriteNulls)
+     public static final class Person {
+         @JsonProperty("user_id") @JSONField(name = "user_id") public long id;
+         public String name;
+@@ -278,6 +282,8 @@
+         }
+     }
+ 
++    @com.fasterxml.jackson.annotation.JsonPropertyOrder({"profile_id", "alias", "level"})
++    @com.alibaba.fastjson2.annotation.JSONType
+     public static final class ProfileRecord {
+         @JsonProperty("profile_id") @JSONField(name = "profile_id") public long id;
+         public String alias;
+diff -ruN a/harness/java/src/main/java/bench/OptimalJsonBench.java b/harness/java/src/main/java/bench/OptimalJsonBench.java
+--- a/harness/java/src/main/java/bench/OptimalJsonBench.java
++++ b/harness/java/src/main/java/bench/OptimalJsonBench.java
+@@ -261,8 +261,8 @@
+     @com.fasterxml.jackson.annotation.JsonPropertyOrder({"street_name", "zipcode"})
+     @com.alibaba.fastjson2.annotation.JSONType(orders = {"street_name", "zipcode"})
+     public static final class Address {
+-        @JsonProperty("street_name") @JSONField(name = "street_name") public String street;
+-        public long zipcode;
++        @JsonProperty("street_name") @JSONField(name = "street_name", ordinal = 1) public String street;
++        @JSONField(ordinal = 2) public long zipcode;
+         public Address() {}
+         public Address(String street, long zipcode) { this.street = street; this.zipcode = zipcode; }
+     }
+@@ -270,13 +270,13 @@
+     @com.fasterxml.jackson.annotation.JsonPropertyOrder({"user_id", "name", "age", "tags", "scores", "address", "nick"})
+     @com.alibaba.fastjson2.annotation.JSONType(serializeFeatures = JSONWriter.Feature.WriteNulls)
+     public static final class Person {
+-        @JsonProperty("user_id") @JSONField(name = "user_id") public long id;
+-        public String name;
+-        public int age;
+-        public List<String> tags;
+-        public Map<String, Long> scores;
+-        public Address address;
+-        public String nick;
++        @JsonProperty("user_id") @JSONField(name = "user_id", ordinal = 1) public long id;
++        @JSONField(ordinal = 2) public String name;
++        @JSONField(ordinal = 3) public int age;
++        @JSONField(ordinal = 4) public List<String> tags;
++        @JSONField(ordinal = 5) public Map<String, Long> scores;
++        @JSONField(ordinal = 6) public Address address;
++        @JSONField(ordinal = 7, serializeFeatures = JSONWriter.Feature.WriteNulls) public String nick;
+         public Person() {}
+         public Person(long id, String name, int age, List<String> tags, Map<String, Long> scores, Address address, String nick) {
+             this.id = id; this.name = name; this.age = age; this.tags = tags; this.scores = scores; this.address = address; this.nick = nick;
+@@ -286,9 +286,9 @@
+     @com.fasterxml.jackson.annotation.JsonPropertyOrder({"profile_id", "alias", "level"})
+     @com.alibaba.fastjson2.annotation.JSONType
+     public static final class ProfileRecord {
+-        @JsonProperty("profile_id") @JSONField(name = "profile_id") public long id;
+-        public String alias;
+-        public int level;
++        @JsonProperty("profile_id") @JSONField(name = "profile_id", ordinal = 1) public long id;
++        @JSONField(ordinal = 2) public String alias;
++        @JSONField(ordinal = 3) public int level;
+         public ProfileRecord() {}
+         public ProfileRecord(long id, String alias, int level) { this.id = id; this.alias = alias; this.level = level; }
+     }
+diff -ruN a/harness/json4cj/src/bench.cj b/harness/json4cj/src/bench.cj
+--- a/harness/json4cj/src/bench.cj
++++ b/harness/json4cj/src/bench.cj
+@@ -232,12 +232,18 @@
+         int64MapText = canonicalLargeInt64MapJsonText()
+         deepNestedText = canonicalDeepNestedProfilesJsonText()
+ 
+-        if (decodeString(addressText, addressDecoder).zipcode != 518000) { throw Exception("address validation") }
+-        if (decodeString(personText, personDecoder).id != 42) { throw Exception("person validation") }
+-        if (decodeString(profilesText, profilesDecoder).size != 64) { throw Exception("array validation") }
+-        if (decodeString(int64MapText, int64MapDecoder)["metric_32"] != 547) { throw Exception("map validation") }
+-        if (decodeString(deepNestedText, deepNestedDecoder).size != 8) {
+-            throw Exception("deep validation")
++        // YJSON_SEVEN_LIBRARY_PREFLIGHT_V1
++        if (encodeString(address, addressEncoder) != addressText ||
++            encodeString(person, personEncoder) != personText ||
++            encodeString(profiles, profilesEncoder) != profilesText ||
++            encodeString(int64Map, int64MapEncoder) != int64MapText ||
++            encodeString(deepNested, deepNestedEncoder) != deepNestedText ||
++            decodeString(addressText, addressDecoder).zipcode != 518000 ||
++            decodeString(personText, personDecoder).address.zipcode != 518000 ||
++            decodeString(profilesText, profilesDecoder)[63].id != 10063 ||
++            decodeString(int64MapText, int64MapDecoder)["metric_63"] != 1074 ||
++            decodeString(deepNestedText, deepNestedDecoder)[7]["group_7"][3].id != 703) {
++            throw Exception("json4cj canonical encode/decode preflight")
+         }
+     }
+ 
