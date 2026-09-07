@@ -22,6 +22,8 @@ workload checksum、RSS、原始轮次和 runner version。
 具体阈值见[性能方法](methodology.md)。实现设计结论见
 [性能设计结论](../performance.md)。
 
+当前 `main` 开发快照的七库完整测量见[2026-09-07 main 七库对比](results/2026-09-07-main-seven-library.md)。
+
 ## 历史证据
 
 以下页面绑定旧版本或开发快照，只用于审计和新候选的 baseline 选择：

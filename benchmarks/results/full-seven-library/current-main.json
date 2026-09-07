@@ -1,10 +1,23 @@
 {
-  "schema_version": 1,
-  "evidence_dir": "benchmarks/results/full-seven-library/2026-08-30-main-d2f375c8274e",
-  "result_doc": "docs/performance/results/2026-08-30-main-seven-library.md",
-  "measured_commit": "d2f375c8274e11609fa6f12fd2cb2c9a40da0a2b",
-  "product_source_sha256": "ef4b24f136e2916306e13c6e635e078433160e5c5ca93d50032f8033d8d309a9",
-  "effective_harness_sha256": "db8e1c8a67f64753cc85c40fa31f8b1a7da7c523fdb204ee6581cae7cca5a4ca",
+  "candidate": {
+    "identity_sha256": "c2e09545e716cc124a06c8d17fd91ab96683873215b57e030272db36c46bd7f3",
+    "lockstep_manifests_sha256": "4eb82f14fac080702ac2515da9094f4c24c5721cb0cd7c85f3aae55414b3cddb",
+    "package_version": "0.1.0",
+    "release_graph_sha256": "1ade7e6101ade9a9f28b54f503bb765fdab447091f35a8a3803fdb0876ba897c",
+    "root_lock_sha256": "7b09643cc3e7107d2a0f09605871366c547525d40221945a60bee8a9a5e3f3b0",
+    "root_manifest_sha256": "3814815364bc0b40a5c5107269807c7a5c1766bb0054c5329521c4d424fcb259"
+  },
+  "checksum_files": [
+    "canonical-build-logs.tar.gz",
+    "formal-main-11-1.tar.gz",
+    "formal-main-11-2.tar.gz",
+    "harness-source.tar.gz",
+    "json4cj-source.tar.gz",
+    "optimal-api-overlay-main.patch",
+    "source-identity.json"
+  ],
+  "effective_harness_sha256": "4d5788b785c9b69993f91e78934dcb5e21fca8b9ac2b2a7c6986c115e65e0865",
+  "evidence_dir": "benchmarks/results/full-seven-library/2026-09-07-main-087a82e",
   "formal_archives": [
     {
       "file": "formal-main-11-1.tar.gz",
@@ -19,13 +32,8 @@
     "file": "harness-source.tar.gz",
     "root": "harness"
   },
-  "checksum_files": [
-    "canonical-build-logs.tar.gz",
-    "formal-main-11-1.tar.gz",
-    "formal-main-11-2.tar.gz",
-    "harness-source.tar.gz",
-    "json4cj-source.tar.gz",
-    "optimal-api-overlay-main.patch",
-    "source-identity.json"
-  ]
+  "measured_commit": "087a82eb9b76fccbe44d3bdb53e7f06527a3d827",
+  "product_source_sha256": "3b276baa3488b0978f40b20e17671826715468b46f8df1e215dbc8b56b68e5ac",
+  "result_doc": "docs/performance/results/2026-09-07-main-seven-library.md",
+  "schema_version": 2
 }

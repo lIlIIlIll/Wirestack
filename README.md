@@ -168,9 +168,25 @@ let name = document.root().member("name").getOrThrow().asString()
 `0.1.0` 的 API 以短路径和可优化边界为目标：generated codec 直接进入统一 reader/writer，
 只读 view 避免强制 materialization，JSONPath 按需产出匹配，Native 能力保持显式 opt-in。
 
-仓库中的历史测量只适用于其记录的源码、SDK、CPU、workload 和 checksum。`0.1.0` 在完成
-固定 CPU、交替/反转 A/B、RSS、checksum 和跨 profile 资格测试前不发布新的性能倍数声明。
-方法与证据入口见[性能文档](docs/performance/README.md)。
+仓库中的历史测量只适用于其记录的源码、SDK、CPU、workload 和 checksum。当前 `0.1.0` 开发
+快照的完整测量绑定到提交 `087a82eb9b76fccbe44d3bdb53e7f06527a3d827`：generated codec
+直接进入统一 reader/writer，下表是 2026-09-07 七库对比第二批的 11 轮中位数（µs/op，
+越小越好；完整两批、Max CV 与噪声状态见性能文档）。方法与证据入口见
+[性能文档](docs/performance/README.md)；本页数字来自
+[2026-09-07 main 七库对比](docs/performance/results/2026-09-07-main-seven-library.md)。
+
+| Workload | yjson | stdx.json | cangjieJSON | json4cj | cjfast_json | Jackson | fastjson2 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Address encode | 1.279 | 3.052 | 2.840 | 3.471 | 2.961 | 0.169 | 0.066 |
+| Address decode | 1.570 | 2.420 | 3.107 | 3.441 | 2.047 | 0.304 | 0.066 |
+| Person encode | 3.187 | 12.550 | 16.246 | 5.462 | 10.828 | 0.576 | 0.269 |
+| Person decode | 8.346 | 19.188 | 26.047 | 19.916 | 14.935 | 1.136 | 0.428 |
+| Large Array encode | 28.877 | 115.411 | 255.277 | 92.486 | 75.933 | 8.878 | 4.231 |
+| Large Array decode | 129.378 | 200.035 | 310.735 | 223.328 | 78.876 | 18.540 | 5.052 |
+| Large Map encode | 6.957 | 138.527 | 160.427 | 123.440 | 127.793 | 1.789 | 1.739 |
+| Large Map decode | 49.210 | 316.508 | 288.467 | 203.392 | 208.025 | 5.102 | 3.961 |
+| Deep Nested encode | 54.989 | 96.611 | 172.437 | 85.193 | 70.899 | 4.488 | 2.535 |
+| Deep Nested decode | 374.897 | 195.640 | 211.924 | 162.089 | 96.250 | 10.468 | 3.421 |
 
 ## 文档
 
