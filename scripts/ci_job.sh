@@ -181,34 +181,15 @@ case "$job" in
         ;;
     pure-platform)
         require_cangjie
-        case "$(uname -s)" in
-            MINGW*|MSYS*|CYGWIN*)
-                # cjc spawns llc.exe directly, so no retry wrapper can be
-                # injected; use -O1 codegen for this gate to sidestep the
-                # runner-side libLLVM access violation (0xC0000005) that is
-                # deterministic on some Windows runner CPU models.
-                sed -i 's/^override-compile-option = ""$/override-compile-option = "-O1"/' \
-                    "$repo/cjpm.toml"
-                ;;
-        esac
-        retry_cjpm_test() {
-            # cjpm caches completed packages, so a bounded retry only
-            # recompiles the package whose llc invocation crashed.
-            local dir="$1"
-            local attempt
-            for attempt in 1 2 3; do
-                if (cd "$dir" && cjpm test --no-color); then
-                    return 0
-                fi
-                echo "pure-platform: cjpm test attempt $attempt failed in $dir" >&2
-            done
-            return 1
-        }
-        retry_cjpm_test "$repo"
-        retry_cjpm_test "$repo/packages/yjson_algorithms"
+        # A failing test is not an infrastructure retry. Preserve the checked-in
+        # optimization settings and propagate the first failure on every host.
+        (cd "$repo" && cjpm test --no-color)
+        (cd "$repo/packages/yjson_algorithms" && cjpm test --no-color)
         ;;
     standards-conformance)
         require_cangjie
+        YJSON_TEST_STANDARDS_ORACLE=1 python3 "$repo/scripts/test_ci_candidate_wiring.py" \
+            StandardsOracleTests
         mapfile -t override_args < <(dependency_override_args)
         if [[ "${YJSON_STANDARDS_OFFLINE:-}" == "1" ]]; then
             override_args+=(--offline)
@@ -295,11 +276,18 @@ case "$job" in
         mapfile -t override_args < <(dependency_override_args)
         python3 "$repo/scripts/release_consumer_checks.py" \
             --modules-root "$modules" --only native "${override_args[@]}"
-        if nm -g --defined-only "$repo/packages/yjson_native_primitives/target/native/libyjson_scanner.a" | \
-                awk '{print $3}' | grep -E '^(yyjson_|unsafe_yyjson_)' >/dev/null; then
-            echo 'custom native archive unexpectedly contains yyjson symbols' >&2
-            exit 1
-        fi
+        # Keep nm outside a conditional pipeline: an inspection error must fail.
+        nm -g --defined-only "$repo/packages/yjson_native_primitives/target/native/libyjson_scanner.a" \
+            > "$modules/symbols.txt"
+        python3 - "$modules/symbols.txt" <<'PY'
+import pathlib
+import sys
+
+for line in pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").splitlines():
+    fields = line.split()
+    if len(fields) >= 2 and fields[-1].startswith(("yyjson_", "unsafe_yyjson_")):
+        raise SystemExit("unexpected exported yyjson symbol: " + fields[-1])
+PY
         ;;
     yyjson-native)
         require_cangjie

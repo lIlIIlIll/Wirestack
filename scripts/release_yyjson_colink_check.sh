@@ -62,10 +62,16 @@ if ! grep -E 'libyjson-visible.*libyyjson-second.*yyjson_(read|version)' \
     grep -E 'yyjson_(read_opts|version)' "$work/visible-bindings.log" >&2 || true
     exit 1
 fi
-if nm -D --defined-only "$work/libyjson-isolated.so" | \
-        awk '{print $3}' | grep -E '^(yyjson_|unsafe_yyjson_)' >/dev/null; then
-    printf 'error: isolated backend still exports vendored yyjson symbols\n' >&2
-    exit 1
-fi
+# Keep nm outside a conditional pipeline: an inspection error must fail.
+nm -D --defined-only "$work/libyjson-isolated.so" > "$work/symbols.txt"
+python3 - "$work/symbols.txt" <<'PY'
+import pathlib
+import sys
+
+for line in pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").splitlines():
+    fields = line.split()
+    if len(fields) >= 2 and fields[-1].startswith(("yyjson_", "unsafe_yyjson_")):
+        raise SystemExit("unexpected exported yyjson symbol: " + fields[-1])
+PY
 
 printf 'yyjson co-link isolation passed second=0.11.1 policy=hidden-local\n'
