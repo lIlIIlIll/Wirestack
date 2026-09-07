@@ -5,6 +5,10 @@ repo=$(cd "$(dirname "$0")/.." && pwd)
 cc=${CC:-cc}
 cases=${YJSON_FUZZ_CASES:-5000}
 mode=${YJSON_NATIVE_CHECK_MODE:-all}
+case "$mode" in
+    all|targeted|sanitizer|fuzz) ;;
+    *) echo "unknown native check mode: $mode" >&2; exit 2 ;;
+esac
 work=$(mktemp -d "${TMPDIR:-/tmp}/yjson-native-release.XXXXXX")
 trap 'rm -rf "$work"' EXIT
 
@@ -35,7 +39,7 @@ if [[ "$mode" == all || "$mode" == targeted ]]; then
 fi
 
 san=(-std=c11 -O1 -g -DYJ_TESTING -fsanitize=address,undefined \
-    -fno-omit-frame-pointer -I "$repo/native")
+    -fno-sanitize-recover=undefined -fno-omit-frame-pointer -I "$repo/native")
 if [[ "$mode" == all || "$mode" == sanitizer ]]; then
     "$cc" "${san[@]}" "$repo/native/yjson_scanner.c" \
         "$repo/native/test_yjson_scanner.c" -o "$work/scanner-sanitized"
