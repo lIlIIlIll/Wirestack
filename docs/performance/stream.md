@@ -1,66 +1,67 @@
 # Stream 性能
 
-本页只讨论 typed stream API。它不把 `String`、`ByteBuffer`、DOM 或 whole-document tape
-结果标成 stream 性能，也不代表 yjson 在所有 JSON workload 上的总排名。
+本页测量将流直接编解码为指定类型的 API。`String`、`ByteBuffer`、DOM 和记录整篇文档的 tape 的测量结果不计入
+Stream 性能；这些结果也不用于评价 yjson 在所有 JSON 用例上的排名。
 
 ## 测量什么
 
-Decode 的计时区从 `YJson.fromJson<T>(stream)` 开始，到完整 typed value 返回为止。stream
-对象和确定性 chunk plan 在计时区外创建。Encode 的计时区只包含
-`YJson.writeJson(value, output)`；sink 创建或 reset 在计时区外，最终 byte snapshot 不计入
-materializing sink 的时间。
+解码从调用 `YJson.fromJson<T>(stream)` 开始计时，到返回完整的目标类型值为止。输入流
+对象和确定性的分块计划在计时区外创建。编码只测量
+`YJson.writeJson(value, output)`；输出流的创建和重置在计时区外。对于保留输出内容的实现，
+获取最终字节快照的时间不计入测量。
 
 核心矩阵有 30 行：
 
-- Decode：3 个 payload × 3 个 chunk profile × 2 个生命周期，共 18 行。
-- Encode：3 个 payload × 2 个 sink profile × 2 个生命周期，共 12 行。
+- 解码：3 份输入数据 × 3 种分块方式 × 2 个生命周期，共 18 行。
+- 编码：3 份输入数据 × 2 种输出流 × 2 个生命周期，共 12 行。
 
 具体 JSON、实际 UTF-8 大小、SHA-256、首尾记录和生成参数见
-[Stream workload 参考](stream-workloads.md)。
+[Stream 测试输入参考](stream-workloads.md)。
 
 ## 生命周期
 
-protocol v1 的生命周期实验比较 `Unpooled one-shot` 与 `Pooled steady-state`。前者每次调用
-分配 4 KiB scratch。后者允许实验候选从每线程单槽取得 4 KiB managed scratch。reader、
-writer、config 和 caller-owned stream 都按调用创建，不进入池。
+protocol v1 的生命周期实验比较 `Unpooled one-shot`（每次重新分配）与 `Pooled steady-state`
+（复用池中的缓冲区）。前者每次调用分配 4 KiB 临时缓冲区。后者允许实验候选从每线程的
+单槽池中取得 4 KiB、由 GC 管理的临时缓冲区。读取器、写入器、配置和调用方持有的流
+都按调用创建，不进入池。
 
-实验池在同线程重入时为内层调用分配临时 scratch，线程之间不共享 scratch。池中不保留
-stream 或 Native resource。这个实验未达到生命周期门槛，最终候选已撤回它。public API
-仍不承诺 reusable reader 或 writer，后续实现可以在不修改 API 的情况下重新验证内部复用。
+同线程重入时，实验池为内层调用另行分配临时缓冲区，线程之间不共享缓冲区。池中不保留
+流或 Native 资源。这个实验未达到生命周期门槛，最终候选已撤回它。公开 API
+仍不承诺可复用的读取器或写入器，后续实现可以在不修改 API 的情况下重新验证内部复用。
 
-## 正确性资格
+## 先验证正确性
 
 性能数字只在以下条件通过后有效：
 
-- 在每个 byte split point 验证 string、escape、number、UTF-8 和递归容器；
-- success→failure、failure→success、config 隔离和同线程 custom codec 重入；
-- 多线程并行调用、large→small scratch、错误 code/offset/line/column/path 一致；
-- 普通 stream 路径不得预聚合输入、read-to-EOF 或先建 DOM/tape。
+- 在每个字节分割点验证字符串、转义、数字、UTF-8 和递归容器；
+- 验证连续调用从成功到失败、从失败到成功时的行为，以及配置隔离和同线程自定义编解码器重入；
+- 验证多线程并行调用、从大输入切换到小输入时的临时缓冲区，以及错误代码、偏移、行号、列号和路径的一致性；
+- 普通流处理路径不得预先合并输入、先读到 EOF 或先构建 DOM 或 tape。
 
-1-byte chunk 只用于正确性和诊断，不进入核心性能表。
+1 字节分块只用于正确性和诊断，不进入核心性能表。
 
 ## 统计和发布门槛
 
-正式结果在可信 Server 上固定 CPU 8 和 128 MiB heap。每个 workload、实现和生命周期的
-单元格各运行一个独立进程，共运行 11 轮。workload 顺序轮转，偶数轮反转；实现和生命周期
-顺序交替。表中报告 process median、p95、CV、配对胜场，以及配对 improvement 的 bootstrap
-95% CI。不删除单点 outlier。
+正式测量在可信 Server 上运行，固定 CPU 8 和 128 MiB 堆内存。每个测试用例、实现和生命周期的
+单元格各运行一个独立进程，共运行 11 轮。测试用例顺序轮转，偶数轮反转；实现和生命周期
+顺序交替。表中报告独立进程测量值的中位数、p95、变异系数（CV）、配对胜出轮次，
+以及通过 bootstrap 重采样计算的配对提升幅度的 95% 置信区间。不删除单个异常值。
 
-候选必须满足：稳定核心行相对冻结的 previous-yjson baseline 不回退超过 5%；至少两个
-canonical Decode workload 提升 5% 且赢至少 6/11；pooled steady-state 在至少两个 payload
-上快于 unpooled；双方 CV 不超过 5%。噪声超限时只允许完整重跑一次，第二批仍 noisy 就原样
-保留并阻断精确结论。
+候选必须满足：稳定核心行相对冻结的旧版 yjson 基线不回退超过 5%；至少两个
+标准解码用例提升 5% 且赢至少 6/11；复用缓冲区在至少两份输入数据
+上快于每次重新分配；双方 CV 不超过 5%。噪声超限时只允许完整重跑一次，第二批仍波动过大时，原样
+保留两批结果，不发布精确比例。
 
-stdx.json、cjfast_json 和跨 runtime peer 只有在通过相同 incremental eligibility 检查时才进入
+stdx.json、cjfast_json 和其他运行时的对照库，只有通过相同的增量输入能力检查后才进入
 对应单元格。不支持真正增量输入、必须预聚合或必须构建 DOM/tape 的实现标为 `N/A`，不会用
-内存 ByteBuffer 数字替代。
+内存 ByteBuffer 测量结果替代。
 
 ## 当前结果
 
 [2026-08-28 Stream protocol v1 结果](results/2026-08-28-stream-protocol-v1.md)未通过发布
-门槛。previous-yjson A/B 的 9 个 Decode workload 中位数都改善 41% 到 63%，但 11 行的
-baseline 或 candidate CV 超过 5%。scratch 复用也只在一个 canonical payload 上方向更快，
-没有达到两个 payload 的门槛，因此没有进入最终实现。
+门槛。与旧版 yjson 对比的 9 个解码用例的耗时中位数都改善 41% 到 63%，但 11 行的
+基线或候选版本的 CV 超过 5%。临时缓冲区复用也只在一份标准输入上观察到更快的趋势，
+没有达到两份输入的门槛，因此没有进入最终实现。
 
-旧的 Person Stream 行包含 stream 或 sink 构造、最终字符串物化，或不等价的 peer 输入形态。
+旧的 Person Stream 测量包含输入流或输出流的构造、最终字符串的创建，或使用了不等价的对照输入形态。
 这些行只保留为历史记录，不用于当前 Stream 性能结论。

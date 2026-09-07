@@ -1,6 +1,6 @@
-# Release checklist
+# 发布清单
 
-发布清单已合并到[维护者发布流程](maintainers/releasing.md)。请在那里维护稳定 gate，并把
-某次候选的实际结果写入 `release/<version>/evidence.md`。
+发布清单已合并到[维护者发布流程](maintainers/releasing.md)。在该页面维护发布检查项，
+将各候选版本的实际结果写入 `release/<version>/evidence.md`。
 
-不要在本页复制 case 数、commit、CI 状态或 artifact URL，以免形成第二份会漂移的事实源。
+不要在本页重复记录测试数量、commit、CI 状态或产物 URL，以免两处记录不一致。

@@ -1,48 +1,47 @@
 # 发布 yjson
 
-本页定义可重复流程，不记录一次性结果。每个候选的 commit、SDK、runner、命令、日志和
-checksum 必须进入 `release/<version>/evidence.md`。
+按以下流程准备和发布候选版本。每个候选的提交、SDK、运行器、命令、日志和
+校验和必须进入 `release/<version>/evidence.md`。
 
-## 1. 冻结身份
+## 1. 固定候选版本
 
-候选绑定 exact commit、九包 `0.1.0` 版本、release graph、工具链和 planned release identity。
-发布期间不混入未评审 public API、C ABI 或 generated bridge 变化。
+候选记录精确提交、九包 `0.1.0` 版本、发布图、工具链和计划发布的版本信息。
+发布期间不混入未经评审的公开 API、C ABI 或生成代码接口变化。
 
-`release/public-cangjie-delta-bfd29.toml` 必须逐项覆盖 snapshot 的全部 removed/added declaration。
-每条记录只能属于一个带 rationale 的 review group；存在重复、漏项、`unclassified` 或 pending
-group 时，不得把 release graph 改为 `release-ready`。
+`release/public-cangjie-delta-bfd29.toml` 必须逐项覆盖快照的全部删除和新增声明。
+每条记录只能属于一个说明了理由的评审组；存在重复、漏项、`unclassified` 或尚未完成评审的组时，不得把发布图改为 `release-ready`。
 
-Hosted CI 每七天选择一次最新的完整 dated nightly。一个候选的所有 hosted job 必须使用同一
-精确 SDK，并在 evidence 中记录 resolved version 和 archive checksum。手工资格运行可以显式
-指定一个完整 nightly。API reference 使用 `cjdoc 0.6.0` at commit
-  `2e8c8ecc849ba77d5209f4546cdbb2129b7b17fb`
+托管 CI 每七天选择一次最新的带日期的完整 nightly SDK。一个候选的所有托管 CI 任务必须使用同一
+精确 SDK 版本，并在证据中记录解析出的版本和归档校验和。手工验证可以显式
+指定一个完整 nightly SDK。API 参考文档按 `release/cjdoc-tool.toml` 使用 `cjdoc 0.7.2`，提交为
+`fe0b5a5294c6d98dc1e6fb7d6d41cb5e9b04d4c0`。
 
-archive、binary 和 action identity 必须通过仓库中的 checksum/SHA 配置验证。
+归档、二进制文件和 Action 版本必须通过仓库中的校验和/SHA 配置验证。
 
-## 2. 阻断 gate
+## 2. 发布前检查
 
-以下失败阻止发布：
+以下任一项失败都会阻止发布：
 
-1. API/C ABI inventory、release graph 或 package pairing 失败；
-2. core、examples、macro/codec/algorithms consumer 失败；
-3. fixed standards suite 或 optional format suite 不满足预期 cardinality；
-4. release performance 缺 workload、checksum、RSS、交替/反转 A/B，或确认发生阻断 regression；
-5. Native package 不能从 staged source 独立构建；
-6. warning、ASan、UBSan、LSan、differential fuzz 或 symbol isolation 失败；
-7. manifest、source-only staging、license、vendored checksum 或 isolated consumer 失败；
-8. documented options、error、view、stream、concurrency 或 lifecycle contract 失败；
-9. source archive 包含 build output、cache、symlink 或未声明 artifact；
-10. qualified platform 存在未处置 correctness/security blocker；
-11. GitHub Actions Linux、Windows 或 macOS Pure gate，或 Linux Native gate 失败；
-12. coverage 低于 project line 80% / branch 70% 或 patch line 90% / branch 80%；
-13. cjdoc source qualification、九包生成、known-gap policy、链接或可复现性检查失败。
+1. API/C ABI 接口清单、发布图或包版本配对失败；
+2. 核心包、示例、宏、codec 或算法使用方测试失败；
+3. 固定标准测试集或可选格式测试集不满足预期用例数；
+4. 发布性能测量缺少负载、校验和、RSS、交替与反转 A/B，或确认发生阻止发布的性能回退；
+5. Native 包不能从暂存源码独立构建；
+6. 编译警告检查、ASan、UBSan、LSan、差分模糊测试或符号隔离失败；
+7. 清单、仅含源码的暂存、许可证、内置第三方源码校验和或隔离的使用方测试失败；
+8. 文档规定的选项、错误、视图、流、并发或生命周期约定失败；
+9. 源码归档包含构建产物、缓存、符号链接或未声明产物；
+10. 发布验证平台存在尚未处理的正确性或安全问题；
+11. GitHub Actions Linux、Windows 或 macOS Pure 检查，或 Linux Native 检查失败；
+12. 覆盖率低于项目行 80%、分支 70%，或改动行 90%、分支 80%；
+13. cjdoc 源码验证、九包生成、已知限制清单、链接或可复现性检查失败。
 
-高 CV 不自动隐藏结果。Native acceleration 的正式 gate 使用 11 轮、固定 CPU、交替进程顺序；
-广告 read/write workload 要求 `Native/Pure <= 0.95` 且至少赢 6/11，普通 workload 不得回退
+即使 CV 过高，也要保留并报告结果。Native 加速的正式检查使用 11 轮、固定 CPU、交替进程顺序；
+对外宣称加速的读写负载要求 `Native/Pure <= 0.95` 且至少赢 6/11，普通负载不得回退
 超过 5%，双方 CV 均不超过 5%。不稳定批次整体作废并完整重跑一次；第二批仍不稳定即不具备
 发布资格。
 
-## 3. 分开记录证据
+## 3. 记录各项检查结果
 
 ```text
 Local Linux fresh-candidate: PASS / FAIL / NOT RUN
@@ -54,35 +53,34 @@ Pages deployment: PASS / FAIL / NOT RUN
 Release policy: BLOCKING / NON-BLOCKING
 ```
 
-本地 PASS 不能写成 hosted PASS。`0.1.0` 要求发布 PR 和合并后的 `main` workflow 都通过；
-push、PR、CI、merge、tag 和 publish 是不同状态。
+本地 PASS 不能写成托管 CI 的 PASS。`0.1.0` 要求发布 PR 和合并后的 `main` 工作流都通过；
+分别记录推送、PR、CI、合并、打标签和发布状态。
 
-## 4. Stage 与 rehearsal
+## 4. 准备源码并演练发布
 
-创建 source-only 工作树：
+创建仅含源码的工作树：
 
 ```terminal
 python3 scripts/stage_source_tree.py /tmp/yjson-source-stage
 python3 scripts/stage_source_tree.py --check /tmp/yjson-source-stage
 ```
 
-目标必须为空且不能与源码树重叠。stage 拒绝 build output、可执行文件、archive、
-profile/coverage 文件和 symlink。
+目标必须为空且不能与源码树重叠。暂存目录拒绝构建产物、可执行文件、归档、
+性能分析或覆盖率文件和符号链接。
 
-按 release manifest 创建候选树：
+按发布文件清单创建候选树：
 
 ```terminal
 python3 scripts/release_temp_tree.py /tmp/yjson-release-stage --enforce-clean
 ```
 
-该命令只复制 `release/release-files.txt` 中的路径，并再次执行 source-only 检查。正式候选
-要求 clean checkout，并生成 `release/candidate-provenance.json`。该文件记录 commit、tree、
-manifest digest 和 payload digest；provenance 文件自身不计入 payload digest。每个被收录
-cjpm project 的 `src/**/*.cj`、`cjpm.lock` 和 `build.cj`（若存在）必须完整入清单；被收录
-脚本的本地依赖也必须闭合。
+该命令只复制 `release/release-files.txt` 中的路径，并再次执行仅含源码的检查。正式候选
+要求干净的检出版本，并生成 `release/candidate-provenance.json`。该文件记录提交、Git 树、
+清单摘要和文件内容摘要；来源记录文件自身不计入文件内容摘要。每个收录的 cjpm 项目的 `src/**/*.cj`、`cjpm.lock` 和 `build.cj`（若存在）必须完整入清单；被收录
+脚本依赖的本地文件也必须收录。
 
-API inventory 和 core test 会写临时文件，因此 CI 在候选清单复制出的诊断树中运行这些检查。
-registry rehearsal 使用未修改的正式候选树，并在构建前后验证清单和 provenance。
+API 接口清单和核心包测试会写临时文件，因此 CI 在候选清单复制出的诊断树中运行这些检查。
+包仓库发布演练使用未修改的正式候选树，并在构建前后验证清单和来源记录。
 
 完整本地 Linux 模拟：
 
@@ -90,13 +88,13 @@ registry rehearsal 使用未修改的正式候选树，并在构建前后验证�
 scripts/ci_fresh_checkout.sh
 ```
 
-registry rehearsal 从候选树执行 API inventory、九包独立 staging/build、external consumers、
-third-party notice、vendored checksum 和 exported symbol 检查。SDK build 不属于 yjson package
-release gate。
+包仓库发布演练从候选树执行 API 接口清单、九包独立暂存和构建、外部使用方测试、
+第三方声明、内置第三方源码的校验和，以及导出符号检查。SDK 构建不属于 yjson 包
+发布检查。
 
-## 5. API reference 与 Pages
+## 5. 生成 API 文档并部署 Pages
 
-先从固定 source 构建并 qualification cjdoc，再生成九包 site：
+先从固定源码构建并验证 cjdoc，再生成九个包的文档站点：
 
 ```terminal
 cjdoc_path=$(scripts/codex_cangjie_env python3 scripts/prepare_cjdoc.py)
@@ -105,25 +103,25 @@ scripts/codex_cangjie_env python3 scripts/generate_api_docs.py \
   --output /tmp/yjson-api-docs-0.1.0
 ```
 
-目标必须不存在。生成结果包含顶层 `api-docs.json`、index 和每包 Doc IR/HTML。允许的 cjdoc
-0.6 gaps 必须精确匹配 `release/cjdoc-policy.toml`。
+目标必须不存在。生成结果包含顶层 `api-docs.json`、索引及每包的 Doc IR 和 HTML。允许的 cjdoc
+不支持项必须精确匹配 `release/cjdoc-policy.toml`。
 
-PR 只生成并上传 Pages artifact；合并到 `main` 后的 workflow 才部署。发布 evidence 记录
-deployment URL、run id 和 artifact checksum。本地 HTML 不能代替 Pages deployment PASS。
+PR 只生成并上传 Pages 产物；合并到 `main` 后的工作流才部署。发布证据记录
+部署 URL、运行 ID 和产物校验和。本地生成 HTML 后，还需要单独确认 Pages 部署成功。
 
-## 6. Tag 与 publish
+## 6. 打标签并发布
 
-所有 blocker 关闭且 evidence review 完成后：
+所有阻塞问题关闭且证据评审完成后：
 
-1. 通过普通 pull request 合并到 `main`；
-2. 等待合并 commit 的全部 required workflow 通过；
-3. 在该 commit 创建 `0.1.0` annotated tag；
+1. 通过普通 PR 合并到 `main`；
+2. 等待合并提交的全部必需工作流通过；
+3. 在该提交创建 `0.1.0` 附注标签；
 4. 创建 GitHub Release；
 5. 上传九个 `.cjp`、`checksums.txt`、`manifest.json` 和 `environment.json`；
-6. 验证 release assets 和 Pages 指向已验收 commit。
+6. 验证发布附件和 Pages 指向已验收的提交。
 
-中心 registry publish 是单独动作；未获授权时保持 unpublished。发布动作、URL 和 checksum
-追加到不可变 evidence，后续候选不得覆写。
+向中心包仓库发布是单独操作；未获授权时不得发布。发布动作、URL 和校验和
+追加到发布记录，后续候选不得覆写。
 
-测试 mapping 见 [testing.md](testing.md)，性能规则见
-[performance methodology](../performance/methodology.md)。
+测试对应关系见 [testing.md](testing.md)，性能规则见
+[性能方法](../performance/methodology.md)。

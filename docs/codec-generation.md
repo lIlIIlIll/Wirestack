@@ -1,8 +1,8 @@
 # `@JsonCodec` 生成指南
 
-`@JsonCodec` 是 `yjson_macros` 提供的 declaration macro。它在调用方 package 编译时展开，
-生成匹配的 `JsonCodec<T>` 和 `GeneratedCodecProviderV1<T>` 实现。它不扫描源码目录，也不
-写入仓库级 generated 文件。
+在类型声明上添加 `yjson_macros` 提供的 `@JsonCodec`，编译时即可生成对应的
+`JsonCodec<T>` 和 `GeneratedCodecProviderV1<T>` 实现。宏随调用方的包一起编译，
+不扫描源码目录，也不向仓库写入生成文件。
 
 ## 最小声明
 
@@ -22,7 +22,7 @@ class User {
 }
 ```
 
-非泛型类型得到 `UserJson: JsonCodec<User>`。随后既可以使用最短入口，也可以显式传 codec：
+非泛型类型得到 `UserJson: JsonCodec<User>`。随后既可以使用自动推导 codec 的入口，也可以显式传 codec：
 
 ```cangjie
 let text = YJson.toJson(User(7, "Alice"))
@@ -35,8 +35,8 @@ let same = YJson.toJson(User(7, "Alice"), codec: UserJson)
 ## 支持范围
 
 - class 和 struct；
-- enum，包括 associated-value constructor；
-- generic 声明；
+- enum，包括带关联值的构造器；
+- 泛型声明；
 - 通过 `@JsonPolymorphic` 和重复 `@JsonSubtype` 声明的封闭多态映射。
 
 ## 字段规则
@@ -48,9 +48,9 @@ let same = YJson.toJson(User(7, "Alice"), codec: UserJson)
 | --- | --- |
 | `@JsonIgnore` | 排除字段 |
 | `@JsonName["wire_name"]` | 修改写出名称和主读取名称 |
-| `@JsonAlias["old_name"]` | 增加只读 alias，可重复 |
+| `@JsonAlias["old_name"]` | 增加读取时接受的别名，可重复 |
 | `@JsonIncludeNull` | `Option` 为 `None` 时仍写出 `null` |
-| `@JsonUsing[codecExpression]` | 为字段选择 custom codec |
+| `@JsonUsing[codecExpression]` | 为字段选择自定义 codec |
 
 ```cangjie
 @JsonCodec
@@ -72,17 +72,17 @@ class Profile {
 }
 ```
 
-JSON 名称和 alias 在同一类型中必须唯一。
+JSON 名称和别名在同一类型中必须唯一。
 
 ## 构造和缺失字段
 
-宏选择参数最多的 initializer，并按参数 identifier 匹配字段。构造器未覆盖的 mutable 字段在
-构造后赋值；immutable 字段必须由构造器接收。构造参数默认值可以处理缺失输入，
+宏选择参数最多的构造器，并按参数名匹配字段。构造器未覆盖的可变字段在
+构造后赋值；不可变字段必须由构造器接收。构造参数默认值可以处理缺失输入，
 `Option<T>` 字段也不是必需字段。
 
 - 必需字段缺失：`missing_field`。
 - 未知字段：默认忽略；`JsonUnknownFieldPolicy.Reject` 时为 `unknown_field`。
-- 重复 key：默认拒绝并返回 `duplicate_key`；`LastWins` 必须显式选择。
+- 重复键：默认拒绝并返回 `duplicate_key`；`LastWins` 必须显式选择。
 
 ## 多态类型
 
@@ -97,33 +97,32 @@ open class Animal {
 }
 ```
 
-每个 subtype 都必须有 codec。discriminator 缺失和未知分别产生
-`missing_discriminator` 与 `unknown_discriminator`。generated reader 捕获一次完整根值，
-读取 discriminator 后把同一 replay value 交给 subtype codec。宏为 concrete class/struct
-生成 typed object-provider bridge；dispatcher 通过该 bridge 读写 subtype 字段，因此不会把
-open base 继承的普通 provider 误当作 subtype codec。
+每个子类型都必须有 codec。上例用 `kind` 字段选择子类型；字段缺失时报
+`missing_discriminator`，值不在映射中时报 `unknown_discriminator`。
+生成的读取器先缓冲完整根值，读取判别字段后，再把同一份数据交给对应子类型的 codec。
+宏为具体 class 和 struct 生成类型明确的对象读写接口，按这些接口分派子类型，
+避免误用从 open 基类继承的 codec。
 
-直接以 concrete subtype 调用 `YJson` 时，宏组合 base object fields 和 subtype object
-fields。父类与子类各自保留精确的 `JsonCodec<T>`，不需要 erased adapter 或向下转换。
+直接以具体子类型调用 `YJson` 时，宏会同时处理父类和子类的字段。父类与子类各自保留
+对应的 `JsonCodec<T>`，无需类型擦除适配器或向下转换。
 
 捕获大小受 `JsonReadOptions.maxBufferedValueBytes` 约束，默认 8 MiB；超限使用
-`buffered_value_too_large`。根 dispatcher 不重复计入容器深度。
+`buffered_value_too_large`。根值分派不重复计入容器深度。
 
 ## 版本边界
 
-宏输出除了 versioned generated-support bridge，还会在 default fast path 直接引用
-具体的 `JsonFastReader` / `JsonDirectWriter` 与 `ReadCursor` 类型。这些类型是 V1 协议表面
-的一部分：与 `generated_support.v1` 同版本锁定，随 protocol version 一起演进。宏输出嵌入
-protocol version 1；runtime 与 macro 必须来自同一个 lockstep release；protocol 不匹配以
-`generated_protocol_mismatch` 明确失败。default fast path 入口先执行
-`GeneratedSupportV1.enterGeneratedEntry()`（protocol 校验 + runtime freeze），因此生成代码
-不会在未冻结的 runtime 上解析。
+`yjson` 和 `yjson_macros` 必须来自同一次发布。宏生成代码使用协议版本 1，协议不匹配时报
+`generated_protocol_mismatch`。
 
-普通 generated lookup 使用
+生成代码通过 `generated_support.v1` 调用运行库。默认快速路径还直接引用
+`JsonFastReader`、`JsonDirectWriter` 和 `ReadCursor`，这些类型也随 V1 协议一起演进。
+快速路径先调用 `GeneratedSupportV1.enterGeneratedEntry()`，校验协议并冻结运行时配置，
+再开始解析。
+
+生成代码通过以下方法查找 codec：
 `GeneratedCodecProviderV1<T>.generatedCodecV1(_: GeneratedCodecTokenV1<T>): JsonCodec<T>`。
-零状态 token 让继承链上的父类和子类 provider 通过参数类型重载。这条 closed SPI 不把
-codec 或 value 转成 `Any`，也没有 erase/reify adapter 或运行时类型转换。
+无状态的 token 让父类和子类通过参数类型区分同名方法。这组内部扩展接口不把 codec 或值
+转成 `Any`，也不依赖类型擦除、类型恢复适配器或运行时类型转换。
 
-应用应直接声明 `yjson` 和 `yjson_macros` 依赖。不要直接调用 generated-support 或
-generated object-provider helper；
-这些 public 声明用于跨 package 展开代码，不是应用 API。
+应用应直接声明 `yjson` 和 `yjson_macros` 依赖。不要直接调用生成支持接口或对象读写辅助方法。
+这些声明设为 public 是为了让宏跨包展开，应用代码无需调用。

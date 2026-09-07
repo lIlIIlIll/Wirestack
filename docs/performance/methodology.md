@@ -1,121 +1,119 @@
 # 性能测量方法
 
-公开结论必须能回答：测了什么 API、在什么源码和环境、与谁比较、怎样处理顺序偏差与波动。
+发布性能结论时，必须说明测量的 API、源码版本、环境和对照实现，以及如何处理执行顺序偏差和测量波动。
 
-## 身份冻结
+## 记录源码和环境
 
 每次测量记录：
 
-- yjson 与 peer 的 commit/tag/checksum；
-- Cangjie SDK 或其他 runtime 版本；
-- OS、architecture、CPU 和必要的编译/link 选项；
-- workload、payload checksum、operation 与输入形态；
-- warmup、轮次、执行顺序和结果 schema。
+- yjson 与对照库的提交、标签和校验和；
+- Cangjie SDK 或其他运行时的版本；
+- 操作系统、架构、CPU 和必要的编译与链接选项；
+- 测试用例、输入数据的校验和、测量的操作与输入形态；
+- 预热方式、轮次、执行顺序和结果格式。
 
-没有这些身份信息的本地数字只能用于探索，不能进入用户-facing 结论。
+缺少这些信息的本地测量只能用于探索，不能作为面向用户的性能结论。
 
 ## 配对执行
 
-baseline/candidate 或多库比较使用等语义 workload，并交替或反转执行顺序以降低热状态、
-频率和后台负载偏差。先验证输出/checksum，再记录时间；错误结果即使更快也不计入性能。
+比较基线与候选版本或多个库时，使用语义相同的测试用例，并交替或反转执行顺序，减少缓存热度、
+CPU 频率和后台负载造成的偏差。先验证输出和校验和，再记录时间；结果错误的样本不计入性能。
 
-七库 runner 在创建正式 manifest 前为每个库执行一次独立 correctness preflight。fixture 的
-setup 必须用计时 case 相同的公开 API 验证 canonical encode、decode 和 round-trip；任一断言、
-进程或 report binding 失败都会在记录第一条正式样本前终止。preflight 日志和完成标记属于
-结果证据。benchmark case 内的 sink 或耗时不能替代这些语义断言。
+七库测量脚本在创建正式测量清单前，先为每个库独立检查一次正确性。测试程序的准备步骤
+必须使用与计时用例相同的公开 API，验证标准输入的编码、解码和往返转换。任一断言、
+进程或报告关联检查失败，脚本都会在记录第一条正式样本前终止。检查日志和完成标记属于
+结果证据。计时用例中用于消耗结果的代码或耗时记录不能替代这些断言。
 
-外部 cangjieJSON、json4cj、Jackson 和 fastjson2 fixture 必须先应用
-`benchmarks/full-seven-library/fixture-preflight-overlay.patch`，然后再构建。runner 会检查
-五个实际 fixture（包含 yjson/stdx.json 与 cjfast_json）中的
-`YJSON_SEVEN_LIBRARY_PREFLIGHT_V1` 标记；缺少任一标记时 fail closed。标记只证明 fixture
-版本正确，真正的门禁仍是 setup 中五种 workload 两侧的 encode/decode 断言成功执行。
+cangjieJSON、json4cj、Jackson 和 fastjson2 的外部测试程序必须先应用
+`benchmarks/full-seven-library/fixture-preflight-overlay.patch`，然后再构建。测量脚本会检查
+五个实际测试程序（包含 yjson/stdx.json 与 cjfast_json）中的
+`YJSON_SEVEN_LIBRARY_PREFLIGHT_V1` 标记；缺少任一标记时终止运行。标记只证明测试程序
+版本正确，准备步骤中五种测试用例两侧的编码与解码断言仍必须执行成功。
 
 ## 统计与展示
 
-- 以 process median 为主要延迟统计。
-- ratio 为 `yjson median / peer median`。
-- README/代表行要求双方 CV ≤ 5%。
+- 以各独立进程测量值的中位数为主要延迟统计。
+- 耗时比为 `yjson median / peer median`。
+- README 中的代表性结果要求双方变异系数（CV）≤ 5%。
 - 更严格的绝对延迟声明要求 CV ≤ 3%。
-- 未过门槛的行保留并标记 noisy，不发布精确比例。
+- 未过门槛的行保留并标记为 noisy（波动过大），不发布精确比例。
 - 配对胜负方向可作为探索证据，但必须与稳定比例分开。
 
-CV 门槛只控制可陈述精度，不是筛选 workload 的工具。
+CV 门槛只控制可陈述精度，不是筛选测试用例的工具。
 
 ## 比较边界
 
-- typed codec 只与等语义 typed codec 比较。
-- DOM parse/query/serialize 按 representation 和 lifecycle 分开。
-- 默认 `YJson.parseDocument` 返回 managed immutable document，不存在 `close()`；Native 临时
+- 类型编解码器只与语义相同的类型编解码器比较。
+- DOM 解析、查询和序列化按数据表示和生命周期分别测量。
+- 默认 `YJson.parseDocument` 返回由 GC 管理的不可变文档，不存在 `close()`；Native 临时
   资源必须在计时操作返回前释放。
-- 只有高级 `BackendJsonDocument` parse/roundtrip 才必须在计时范围内包含 deterministic
-  `close()`。
-- 跨 runtime 结果只描述该 API/workload，不代表产品整体。
-- latency、throughput、allocation、RSS 和 peak memory 分别测量和陈述。
+- 高级 `BackendJsonDocument` 的解析和往返转换必须在计时范围内显式调用 `close()`。
+- 跨运行时的结果只描述所测 API 和用例，不代表产品整体。
+- 延迟、吞吐量、内存分配、常驻内存（RSS）和峰值内存分别测量和陈述。
 
-## 候选处置
+## 决定是否保留优化
 
-优化候选必须在目标 workload 外检查邻近 workload 和总表。确认 regression 且没有被明确
-接受时回滚候选，并记录“未采用”而不是只保留最佳局部结果。固定-local quick run 只能决定
-是否继续正式测量。
+评估优化时，必须检查目标测试用例、相关测试用例和完整结果表。确认存在性能回退且未明确
+接受该回退时，回滚候选并记录“未采用”，保留完整结果。本地快速测量只能用于决定是否继续正式测量。
 
-用户结果页只保留理解结论所需的统计和限制。原始样本、日志、manifest、checksum 与环境
-细节进入不可变 release artifact；开发机绝对路径和临时排障过程不进入稳定文档。
+用户结果页只保留理解结论所需的统计和限制。原始样本、日志、测量清单、校验和与环境
+细节保存到不可变的发布产物中；开发机绝对路径和临时排障过程不进入稳定文档。
 
-## Pure 内部优化 gate
+## Pure 内部优化检查
 
-使用 `scripts/json_pure_perf_compare.py` 比较 Pure baseline 与 candidate。runner 校验两个源码
-目录的根/package manifest、lockfile、benchmark 源码、`build.cj`、native build helper 和对应
-C/H 输入相同，然后以独立进程执行相同 case。正式 `--enforce` 运行要求两个源码树 clean，
-并要求 `--rebuild` 在各自的隔离目录中先执行 `cjpm clean` 和 benchmark build。正式运行使用
-11 轮、128 MiB heap 和固定 CPU affinity。奇数轮先运行 baseline，偶数轮先运行 candidate。
+使用 `scripts/json_pure_perf_compare.py` 比较 Pure 基线与候选版本。脚本先检查两个源码目录，
+要求根目录与各包的配置文件、锁文件、性能测试源码、`build.cj`、Native 构建辅助脚本及对应的
+C 源码和头文件相同，再以独立进程执行相同用例。正式 `--enforce` 运行要求两个源码树均无未提交修改，
+并要求 `--rebuild` 在各自的隔离目录中先执行 `cjpm clean`，再构建性能测试。正式运行使用
+11 轮、128 MiB 堆内存，并固定 CPU 亲和性。奇数轮先运行基线，偶数轮先运行候选版本。
 
-结果目录中的 `provenance.json` 记录两侧 commit/tree、dirty state、产品源码 manifest、Cangjie
-与 C 工具链路径/版本/摘要、构建环境、语料摘要、调用参数，以及最终 executable 的 SHA-256
-和长度。runner 在 rebuild 前后分别记录源码身份；`--enforce` 要求 commit、tree、产品 manifest
-保持一致，且构建后工作树仍为 clean。任一 tracked 输入被 build script 或 macro 改写都会在
-采集 executable hash 前失败。候选产品源码和二进制可以与 baseline 不同；共同 benchmark
-harness 不得不同。
+结果目录中的 `provenance.json` 记录两侧的提交与源码树、未提交修改状态、产品源码清单、
+仓颉与 C 工具链的路径、版本和摘要、构建环境、语料摘要、调用参数，以及最终可执行文件的
+SHA-256 和长度。脚本在重建前后分别记录源码信息；`--enforce` 要求提交、源码树和产品源码清单
+保持一致，且构建后仍无未提交修改。构建脚本或宏改写了任何受版本控制的输入文件时，
+脚本会在采集可执行文件摘要前报错。候选产品源码和二进制可以与基线不同，但双方的性能测试程序
+必须相同。
 
-不指定 `--cpu` 时，runner 只选择两个 hardware thread 利用率都低于 1% 的物理 core。运行
-期间必须同时记录被测 thread 和 sibling thread 的利用率。完整命令、语料要求和 case 含义见
-[benchmark 说明](../../benchmarks/README.md#pure-baselinecandidate-workload)。
+不指定 `--cpu` 时，脚本只选择两个硬件线程利用率都低于 1% 的物理核心。运行
+期间必须同时记录被测线程和同一核心上另一个线程的利用率。完整命令、语料要求和用例含义见
+[性能测试说明](../../benchmarks/README.md#pure-baselinecandidate-workload)。
 
-稳定普通 workload 必须满足 `candidate/baseline <= 1.05`。目标 workload 还必须达到预先规定
+稳定普通测试用例必须满足 `candidate/baseline <= 1.05`。目标测试用例还必须达到预先规定
 的提升与配对胜出轮次，并通过 `--target-case` 显式记录。任一方 CV 超过 5% 时，由操作者
-保留第一批结果并以相同输入完整重跑一次。第二批仍超过门槛时保留两批结果并标记 noisy，
-不继续重跑。runner 不自动启动第二批。
+保留第一批结果并以相同输入完整重跑一次。第二批仍超过门槛时保留两批结果并标记为 noisy（波动过大），
+不继续重跑。脚本不自动启动第二批。
 
-## Native acceleration gate
+## Native 加速检查
 
-Pure 与 Native 必须在独立进程中运行，因为首次 `YJson` 调用会冻结引擎。正式 gate 固定
-11 轮、同一 CPU affinity、128 MiB heap，并在每轮交替 Pure/Native 顺序：
+Pure 与 Native 必须在独立进程中运行，因为首次 `YJson` 调用会冻结引擎。正式检查固定
+11 轮、相同的 CPU 亲和性和 128 MiB 堆内存，并在每轮交替 Pure 与 Native 的执行顺序：
 
-- 广告 read/write workload：双方 CV ≤ 5%、`Native/Pure ≤ 0.95`，且 Native 至少赢 6/11；
-- 普通稳定 workload：双方 CV ≤ 5%、`Native/Pure ≤ 1.05`；
+- 对外宣称加速的读写用例：双方 CV ≤ 5%、`Native/Pure ≤ 0.95`，且 Native 至少赢 6/11；
+- 普通稳定测试用例：双方 CV ≤ 5%、`Native/Pure ≤ 1.05`；
 - 任一行超过 CV 门槛时，丢弃该批次并完整重跑一次，不按单行挑选样本；
-- immediate rerun 只有在 build-source digest 未变化时才能复用可执行文件。
+- 立即重跑时，只有构建源码摘要未变化才能复用可执行文件。
 
-这个 gate 证明的是列出的 workload，不自动证明所有 typed container、stream 或 DOM 调用都被
-加速。
+检查结果仅适用于表中列出的测试用例，不能据此推断所有类型化容器、流或 DOM 调用
+都获得加速。
 
 ## Stream protocol v1
 
-Stream 比较只接受 caller-owned `InputStream` 或 `OutputStream`。Decode 的 stream 和 chunk
-plan 在计时区外创建。Encode 的 sink 在计时区外创建，最终 snapshot 不计入 materializing
-sink 的时间。必须预聚合为 `String` 或 `ByteBuffer`，或必须创建 DOM/tape 的 peer 标为
-`N/A`。
+Stream 比较只接受调用方持有的 `InputStream` 或 `OutputStream`。解码使用的输入流和分块
+计划在计时区外创建。编码使用的输出流也在计时区外创建；对于保留输出内容的实现，获取最终
+输出快照的时间不计入测量。必须先将输入合并成 `String` 或 `ByteBuffer`，或必须创建 DOM
+或 tape 的对照实现标为 `N/A`。
 
-正式采集固定 CPU 8 和 128 MiB heap。每个 workload、实现和生命周期的单元格使用独立
-进程，运行 11 轮。case 顺序轮转并反转，配对顺序交替。核心矩阵使用 64-byte、4096-byte
-和确定性 1 到 8192-byte chunk，以及 memory 和 counting sink。1-byte chunk 只用于正确性
+正式采集固定 CPU 8 和 128 MiB 堆内存。每个用例、实现和生命周期的组合使用独立
+进程，运行 11 轮。用例顺序轮转并反转，配对顺序交替。核心矩阵使用 64 字节、4096 字节
+和确定性的 1 到 8192 字节分块，以及保留输出内容和只计数的两种输出流。1 字节分块只用于正确性
 验证。
 
 候选必须同时满足以下条件：
 
-- 稳定核心行相对冻结 baseline 不回退超过 5%；
-- 至少两个 canonical Decode workload 提升 5%，且候选赢至少 6/11；
-- 内部 scratch 复用在至少两个 canonical payload 上快于关闭复用；
+- 稳定核心行相对冻结基线不回退超过 5%；
+- 至少两个标准解码用例提升 5%，且候选赢至少 6/11；
+- 复用内部临时缓冲区时，至少两个标准输入的执行速度快于关闭复用时；
 - 所有阻断行双方 CV 不超过 5%。
 
-完整重跑一次后仍超过 CV 门槛的批次必须保留并标为未通过。方向一致的 noisy 行可以说明
+完整重跑一次后仍超过 CV 门槛的批次必须保留并标为未通过。变化方向一致但波动过大的行可以说明
 观察方向，不能发布精确比例。

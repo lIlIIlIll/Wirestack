@@ -1,12 +1,12 @@
-# Backend benchmark package
+# 文档后端性能测试
 
-这个 repository-only executable 使用 public API 比较四种文档路径：mutable `JsonNode`、
-managed `JsonDocument`、`NativeBackends.customNative` 和 `YyjsonBackends.yyjson`。
+本包通过公开 API 比较四种文档表示：可修改的 `JsonNode`、由 GC 管理的
+`JsonDocument`、`NativeBackends.customNative` 和 `YyjsonBackends.yyjson`。
+它只在仓库内用于性能测试。
 
-workload 分开测量 parse lifecycle、retained lookup、细粒度 view traversal、同形状的 fine-view/
-bulk materialization、serialization 和 roundtrip。
-Native/yyjson parse 与 roundtrip 计入确定性 `close()`。checksum 用于防止结果消除，不是跨
-backend 的语义 hash。
+测试分别测量解析和释放、保留文档后的查找、逐项遍历视图、批量转换为 AST、序列化及往返转换。
+逐项遍历与批量转换使用相同形状的数据。Native 和 yyjson 的解析及往返转换用例计入
+`close()` 的耗时。校验和用于防止编译器消除计算结果，不用于判断各后端的结果是否相同。
 
-运行前先通过 contract checks 验证可观察结果一致。该 package 不用于 typed codec 或 typed
-stream 排名。采集方法与当前结果见[性能文档](../../docs/performance/README.md)。
+测量前，先运行契约检查，确认各后端的可观察结果一致。本包不比较类型编解码或类型流式处理的性能。
+采集方法与当前结果见[性能文档](../../docs/performance/README.md)。

@@ -1,8 +1,8 @@
 # yjson 0.1 公开 API 清单
 
 本页说明 `0.1.x` 的发布边界。完整声明列表位于
-[`release/public-api-snapshot.txt`](../release/public-api-snapshot.txt)，经过评审的 breaking
-与 additive 变化位于
+[`release/public-api-snapshot.txt`](../release/public-api-snapshot.txt)，经过评审的破坏性
+变更与新增 API 位于
 [`release/public-api-inventory.toml`](../release/public-api-inventory.toml)。相对于冻结基线的完整
 Cangjie 声明差异及逐项分类位于
 [`release/public-cangjie-delta-bfd29.toml`](../release/public-cangjie-delta-bfd29.toml)。
@@ -13,10 +13,10 @@ Cangjie 声明差异及逐项分类位于
 python3 scripts/check_api_inventory.py
 ```
 
-命令检查九包版本配套、release graph、inventory、快照生成器回归测试和当前快照。任一未评审
-差异都会返回非零状态。
+命令检查九个包的版本、发布依赖图、API 清单、快照生成器回归测试和当前快照。存在未评审
+差异时，命令返回非零状态。
 
-## 默认产品面
+## 普通应用入口
 
 普通应用使用以下入口：
 
@@ -31,8 +31,8 @@ JsonNode.parse(text)
 `Resource`、`close()` 或 `isClosed()`。String、bytes 和 stream overload 使用同一
 `JsonReadOptions`、`JsonWriteOptions`、codec 和 error contract。
 
-`JsonValueView` 是 read-only interchange boundary。managed document、高级 backend 和
-`JsonNode` 都能交给 serializer 与算法；修改只通过明确的 `JsonNode` API 发生。
+`JsonValueView` 提供统一的只读接口。managed document、高级 backend 和
+`JsonNode` 都能交给 serializer 与算法；修改必须通过 `JsonNode` 的修改 API。
 
 ## 快照收集范围
 
@@ -40,7 +40,7 @@ JsonNode.parse(text)
 成员和 enum case。private 或默认 internal 类型中的 public 成员不会进入快照。多行类型头被
 规范化成单条声明。C ABI 快照另含 `native/*.h` 导出的 `YJ_*` prototype。
 
-快照是 fail-closed 差异检测，不替代兼容性评审。公开声明变化时，先运行：
+快照检查会拒绝未评审的差异，但仍需要人工评审兼容性。公开声明变化时，先运行：
 
 ```terminal
 python3 scripts/generate_public_api_snapshot.py --write
@@ -52,7 +52,7 @@ python3 scripts/generate_public_api_snapshot.py --write
 理由和 review status；全局 `approved-for-release` 只有在没有漏项、重复项、未分类声明或 pending
 group 时才有效。`release-ready` graph 会再次执行这项检查。
 
-## Generated-code protocol
+## 生成代码协议
 
 `yjson` 与 `yjson_macros` 是同一个 lockstep release。macro 输出面向
 `generated_support.v1` 并嵌入 protocol version 1；不匹配时明确失败。
@@ -66,7 +66,7 @@ group 时才有效。`release-ready` graph 会再次执行这项检查。
 bridge 声明因跨 package 展开而必须 public，但不是普通应用入口。应用使用 `@JsonCodec`、
 `JsonCodec<T>`、`YJson` 和 `JsonCodecs`。
 
-## 可选 package
+## 可选包
 
 | Package | 用途 | 生命周期 |
 | --- | --- | --- |
@@ -84,19 +84,19 @@ Schema resource URI 只通过注入的 `UriResolver` 在构造阶段解析。成
 
 ## 兼容性结论
 
-`0.1.0` 有意重置成熟度版本并允许 breaking change，不提供旧 API alias、deprecated shim 或
-umbrella package。后续 `0.1.y` patch 应保持已记录的应用 API 兼容；需要 breaking change 时
+`0.1.0` 调低版本号，重新进入实验阶段并允许破坏性变更，不提供旧 API 别名、弃用接口兼容层或
+聚合包。后续 `0.1.y` patch 应保持已记录的应用 API 兼容；需要 breaking change 时
 提升到新的 `0.x.0` minor，并提供 machine API diff。
 
-### Binary compatibility
+### 二进制兼容性
 
 Cangjie 声明快照（`release/public-api-snapshot.txt` 与 delta TOML）只证明源码级 API 表面
 未漂移，**不等于二进制兼容证明**。源码兼容不能覆盖编译产物层面的变化：cjc 对同一声明
 可能生成不同符号名、方法表布局或内联行为；跨 nightly 或跨 patch 的预编译 consumer
 可能在链接期或运行期失败，即使声明 diff 为空。
 
-因此 0.1 线的 binary 兼容性以实测为准：release 前必须用冻结的旧 consumer artifact（用上一
-个 release 的 SDK 与九包构建的应用或 fixture）对新版九包做链接/调用矩阵验证。矩阵至少覆盖：
+因此，0.1 系列的二进制兼容性以实测为准。发布前必须使用已冻结的旧应用或测试程序产物
+（由上一个版本的 SDK 和九个包构建），验证其与新版九个包的链接和调用。矩阵至少覆盖：
 
 - 普通 `YJson` 调用（encode/decode、parseDocument）；
 - generated codec（`@JsonCodec` 展开的调用方）与 generated-support v1 入口；

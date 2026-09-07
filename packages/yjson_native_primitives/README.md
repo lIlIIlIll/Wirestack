@@ -1,19 +1,17 @@
 # yjson_native_primitives
 
-Internal, versioned Linux x86_64 primitive provider for `yjson`. Applications
-should depend on `yjson_native_accel` instead of importing this package.
+本包为 `yjson` 提供 Linux x86_64 原生底层操作，供同版本的第一方包内部使用。
+应用应依赖 `yjson_native_accel`，不要直接导入本包。
 
-The package owns the native scanner archive and the closed provider SPI used
-during process startup. It does not expose a second JSON API.
+本包构建原生扫描器静态库，并提供进程启动时使用的内部 provider 接口，不提供另一套 JSON API。
 
-## Toolchain prerequisites
+## 构建要求
 
-Building this package requires, on the host:
+构建主机需要以下环境和工具：
 
-- Python 3 (runs `scripts/build_native_scanner.py`)
-- A C11 compiler (default `clang`; override with `CC`)
-- `ar` (override with `AR`)
-- Linux x86_64 (`build_native_scanner.py` fails fast on any other host)
+- Linux x86_64；其他主机会被 `scripts/build_native_scanner.py` 拒绝。
+- Python 3，用于运行构建脚本。
+- C11 编译器，默认使用 `clang`，可通过 `CC` 指定。
+- `ar`，可通过 `AR` 指定。
 
-`scripts/build_native_scanner.py` checks for all three tools up front and
-always rebuilds the scanner archive.
+仓库根目录下的 `scripts/build_native_scanner.py` 在编译前检查这三个工具，每次执行都会重新构建扫描器静态库。
