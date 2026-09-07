@@ -13,8 +13,7 @@ import sys
 from urllib.parse import unquote, urlsplit
 
 sys.dont_write_bytecode = True
-
-from stage_source_tree import assert_source_only
+from stage_source_tree import DOCUMENTATION_TEXT_SUFFIXES, assert_source_only
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -322,7 +321,13 @@ def main() -> int:
         return 1
 
     try:
-        assert_source_only(destination)
+        manifest_relative = {path.relative_to(ROOT) for path in paths}
+        allow = frozenset(
+            relative for relative in manifest_relative
+            if relative.suffix in DOCUMENTATION_TEXT_SUFFIXES
+            and relative.parts[:2] == ("benchmarks", "results")
+        )
+        assert_source_only(destination, allow=allow)
     except ValueError as error:
         print(f"error: {error}", file=sys.stderr)
         return 1

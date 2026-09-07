@@ -53,6 +53,7 @@ EXCLUDED_FILE_SUFFIXES = frozenset({
     ".gz",
 })
 GENERATED_MAGIC_PREFIXES = (b"\x7fELF", b"MZ", b"PK\x03\x04", b"\xca\xfe\xba\xbe")
+DOCUMENTATION_TEXT_SUFFIXES = frozenset({".json", ".md", ".patch", ".txt"})
 SOURCE_SCRIPT_PREFIXES = (
     b"#!/usr/bin/env python",
     b"#!/usr/bin/env bash",
@@ -87,6 +88,62 @@ def is_generated_file(path: pathlib.Path, relative: pathlib.PurePath) -> bool:
     return prefix.startswith(GENERATED_MAGIC_PREFIXES)
 
 
+def _with_ancestors(allow: frozenset[pathlib.PurePath]) -> frozenset[pathlib.PurePath]:
+    expanded: set[pathlib.PurePath] = set(allow)
+    for relative in allow:
+        expanded.update(relative.parents)
+    return frozenset(expanded)
+
+
+def source_only_violations(
+    root: pathlib.Path,
+    allow: frozenset[pathlib.PurePath] = frozenset(),
+) -> list[str]:
+    """Flag generated or linked state in a source-only tree.
+
+    `allow` lists manifest-registered documentation paths (for example the
+    current seven-library marker and its evidence README under
+    `benchmarks/results`) that are plain text by registration and must not
+    fail the assertion. Everything else keeps the strict rule.
+    """
+    root = root.resolve(strict=True)
+    allowed = _with_ancestors(allow)
+    violations: list[str] = []
+    for current, directories, files in os.walk(root, followlinks=False):
+        current_path = pathlib.Path(current)
+        relative_current = current_path.relative_to(root)
+        kept_directories: list[str] = []
+        for name in sorted(directories):
+            path = current_path / name
+            relative = relative_current / name
+            if relative in allowed:
+                kept_directories.append(name)
+            elif is_excluded_directory(relative) or path.is_symlink():
+                violations.append(relative.as_posix())
+            else:
+                kept_directories.append(name)
+        directories[:] = kept_directories
+        for name in sorted(files):
+            path = current_path / name
+            relative = relative_current / name
+            if relative in allow:
+                continue
+            if path.is_symlink() or is_generated_file(path, relative):
+                violations.append(relative.as_posix())
+    return sorted(violations)
+
+
+def assert_source_only(
+    root: pathlib.Path,
+    allow: frozenset[pathlib.PurePath] = frozenset(),
+) -> None:
+    violations = source_only_violations(root, allow)
+    if violations:
+        preview = ", ".join(violations[:8])
+        if len(violations) > 8:
+            preview += f", ... ({len(violations)} total)"
+        raise ValueError(f"source-only tree contains generated or linked state: {preview}")
+
 def git_tracked_files(source: pathlib.Path) -> list[pathlib.Path] | None:
     result = subprocess.run(
         ["git", "-C", str(source), "ls-files", "-z"],
@@ -99,38 +156,6 @@ def git_tracked_files(source: pathlib.Path) -> list[pathlib.Path] | None:
     return [pathlib.Path(value.decode("utf-8")) for value in result.stdout.split(b"\0") if value]
 
 
-def source_only_violations(root: pathlib.Path) -> list[str]:
-    root = root.resolve(strict=True)
-    violations: list[str] = []
-    for current, directories, files in os.walk(root, followlinks=False):
-        current_path = pathlib.Path(current)
-        relative_current = current_path.relative_to(root)
-        kept_directories: list[str] = []
-        for name in sorted(directories):
-            path = current_path / name
-            relative = relative_current / name
-            if is_excluded_directory(relative) or path.is_symlink():
-                violations.append(relative.as_posix())
-            else:
-                kept_directories.append(name)
-        directories[:] = kept_directories
-        for name in files:
-            path = current_path / name
-            relative = relative_current / name
-            if path.is_symlink() or is_generated_file(path, relative):
-                violations.append(relative.as_posix())
-    return sorted(violations)
-
-
-def assert_source_only(root: pathlib.Path) -> None:
-    violations = source_only_violations(root)
-    if violations:
-        preview = ", ".join(violations[:8])
-        if len(violations) > 8:
-            preview += f", ... ({len(violations)} total)"
-        raise ValueError(f"source-only tree contains generated or linked state: {preview}")
-
-
 def stage_source_tree(source: pathlib.Path, destination: pathlib.Path) -> int:
     source = source.resolve(strict=True)
     destination = destination.resolve()
@@ -140,6 +165,8 @@ def stage_source_tree(source: pathlib.Path, destination: pathlib.Path) -> int:
         raise ValueError("source and destination must not overlap")
     if destination.exists() and any(destination.iterdir()):
         raise ValueError(f"destination is not empty: {destination}")
+
+
     destination.mkdir(parents=True, exist_ok=True)
 
     tracked = git_tracked_files(source)
