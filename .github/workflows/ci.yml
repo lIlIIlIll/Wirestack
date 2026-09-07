@@ -289,40 +289,12 @@ jobs:
           cjpm --version
           ${{ matrix.checksum }} "$RUNNER_TEMP/${{ matrix.archive }}"
       - name: Run Pure package gates
-        run: scripts/ci_job.sh pure-platform
-      - name: Compare macOS stack settings
-        if: always() && matrix.os == 'macos-14'
         run: |
-          cd packages/yjson_algorithms
-          mkdir -p "$RUNNER_TEMP/stack-comparison"
-          echo '| Setting | Native stack (KiB) | cjStackSize | Exit |' >> "$GITHUB_STEP_SUMMARY"
-          echo '| --- | --- | --- | --- |' >> "$GITHUB_STEP_SUMMARY"
-          for setting in default native-stack cangjie-stack both; do
-            (
-              unset cjStackSize
-              before=$(ulimit -Ss)
-              hard=$(ulimit -Hs)
-              if [[ "$setting" == native-stack || "$setting" == both ]]; then
-                # macOS may reject 128 MiB; use the actual hard limit instead.
-                ulimit -Ss "$hard"
-              fi
-              if [[ "$setting" == cangjie-stack || "$setting" == both ]]; then
-                export cjStackSize=8MB
-              fi
-              after=$(ulimit -Ss)
-              echo "setting=$setting native_before=$before native_after=$after native_hard=$hard cjStackSize=${cjStackSize:-default}"
-              set +e
-              cjpm test --skip-build --no-color --no-progress \
-                --filter 'YJsonPathTest.filterExpressionsExceedingParseBudgetsAreRejected' \
-                > "$RUNNER_TEMP/stack-comparison/$setting.log" 2>&1
-              result=$?
-              set -e
-              cat "$RUNNER_TEMP/stack-comparison/$setting.log"
-              grep -q 'CASE: filterExpressionsExceedingParseBudgetsAreRejected' "$RUNNER_TEMP/stack-comparison/$setting.log"
-              echo "| $setting | $after | ${cjStackSize:-default} | $result |" >> "$GITHUB_STEP_SUMMARY"
-              echo "STACK_COMPARISON setting=$setting native_stack=$after cjStackSize=${cjStackSize:-default} exit=$result"
-            )
-          done
+          if [[ "${{ matrix.os }}" == macos-14 ]]; then
+            # The opt-in deep JSONPath test exceeds the default Cangjie thread stack.
+            export cjStackSize=8MB
+          fi
+          scripts/ci_job.sh pure-platform
 
   api-docs:
     name: API Documentation
