@@ -321,7 +321,7 @@ def main() -> int:
         return 1
 
     try:
-        manifest_relative = {path.relative_to(ROOT) for path in paths}
+        manifest_relative = {pathlib.PurePath(*path.parts) for path in paths}
         allow = frozenset(
             relative for relative in manifest_relative
             if relative.suffix in DOCUMENTATION_TEXT_SUFFIXES
