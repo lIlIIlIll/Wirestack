@@ -127,8 +127,8 @@ class Int64MapJsonCodec<T> <: JsonCodec<HashMap<Int64, T>> {
 
     public func read(reader: JsonReader): HashMap<Int64, T> {
         let result = HashMap<Int64, T>()
-        let objectPath = reader.path()
         reader.startObject()
+        let objectPath = reader.path()
         while (reader.hasObjectField()) {
             let name = reader.readName()
             let keyPath = objectPath + "/" + name.replace("~", "~0").replace("/", "~1")
@@ -185,7 +185,8 @@ main(): Unit {
 `invalid_map_key`，避免不同字符串转换成同一个整数键。相同字符串字段名的重复键处理
 由 reader 按调用方的读取选项执行；允许重复键时，后一个值覆盖前一个值。
 
-键在 `readName()` 之后、读取字段值之前校验。示例保存对象路径，并按 JSON Pointer
+先调用 `startObject()`，再保存对象路径，确保 reader 已加入外层数组的下标。
+键在 `readName()` 之后、读取字段值之前校验。示例按 JSON Pointer
 规则转义字段名，显式将字段路径和当前 `reader.location()` 传入异常。这样即使 reader
 尚未把字段名加入路径，也能保留嵌套上下文；例如 `users` 对象中非法键 `"bad"` 的路径是 `/users/bad`。
 
