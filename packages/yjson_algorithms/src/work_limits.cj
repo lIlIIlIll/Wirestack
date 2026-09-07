@@ -8,17 +8,39 @@ public class JsonPathLimits {
     public let maxRegexSteps: Int64
     public let maxMatches: Int64
     public let maxDepth: Int64
+    /// Compile-time byte budget for one filter expression. 0 disables it.
+    public let maxFilterExpressionBytes: Int64
+    /// Compile-time budget for logical operators (`&&`, `||`, `!`) in one
+    /// filter expression. 0 disables it.
+    public let maxFilterOperators: Int64
+    /// Compile-time budget for logical recursion depth in one filter
+    /// expression. 0 disables it.
+    public let maxFilterDepth: Int64
+    /// Run-time budget for logical operations evaluated across a whole
+    /// path execution. 0 disables it.
+    public let maxFilterOperations: Int64
     public init(maxVisitedNodes!: Int64 = 100000, maxFilterSteps!: Int64 = 100000,
-        maxRegexSteps!: Int64 = 100000, maxMatches!: Int64 = 10000, maxDepth!: Int64 = 256) {
+        maxRegexSteps!: Int64 = 100000, maxMatches!: Int64 = 10000, maxDepth!: Int64 = 256,
+        maxFilterExpressionBytes!: Int64 = 4096, maxFilterOperators!: Int64 = 256,
+        maxFilterDepth!: Int64 = 64, maxFilterOperations!: Int64 = 200000) {
         requireWorkLimit(maxVisitedNodes, "maxVisitedNodes"); requireWorkLimit(maxFilterSteps, "maxFilterSteps")
         requireWorkLimit(maxRegexSteps, "maxRegexSteps"); requireWorkLimit(maxMatches, "maxMatches")
         requireWorkLimit(maxDepth, "maxDepth")
+        requireWorkLimit(maxFilterExpressionBytes, "maxFilterExpressionBytes")
+        requireWorkLimit(maxFilterOperators, "maxFilterOperators")
+        requireWorkLimit(maxFilterDepth, "maxFilterDepth")
+        requireWorkLimit(maxFilterOperations, "maxFilterOperations")
         this.maxVisitedNodes = maxVisitedNodes; this.maxFilterSteps = maxFilterSteps
         this.maxRegexSteps = maxRegexSteps; this.maxMatches = maxMatches; this.maxDepth = maxDepth
+        this.maxFilterExpressionBytes = maxFilterExpressionBytes
+        this.maxFilterOperators = maxFilterOperators
+        this.maxFilterDepth = maxFilterDepth
+        this.maxFilterOperations = maxFilterOperations
     }
     public static let defaults = JsonPathLimits()
     public static let unlimited = JsonPathLimits(maxVisitedNodes: 0, maxFilterSteps: 0,
-        maxRegexSteps: 0, maxMatches: 0, maxDepth: 0)
+        maxRegexSteps: 0, maxMatches: 0, maxDepth: 0, maxFilterExpressionBytes: 0,
+        maxFilterOperators: 0, maxFilterDepth: 0, maxFilterOperations: 0)
 }
 
 public class JsonPatchLimits {

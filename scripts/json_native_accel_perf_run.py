@@ -187,6 +187,10 @@ def main() -> int:
                     report_path = raw_dir / f"run-{round_id:02d}" / f"{case}-{mode}"
                     log_path = log_dir / f"run-{round_id:02d}-{case}-{mode}.log"
                     rss_file = report_path / "time-rss.txt"
+                    # GNU time does not create missing parent directories for
+                    # -o; build the nested per-round report directory before
+                    # launching the benchmark.
+                    report_path.mkdir(parents=True, exist_ok=True)
                     run_env = env.copy(); run_env["YJSON_ACCEL_MODE"] = mode
                     command = ["taskset", "-c", str(args.cpu), args.cjpm, "bench", "--skip-build",
                         "--no-color", "--filter", f"NativeAccelerationBenchmarks.{case}*",

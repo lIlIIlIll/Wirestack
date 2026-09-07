@@ -132,4 +132,33 @@ class NativeCompactDocumentTest {
         @Expect(hiddenLocation.code, "string_too_large")
         @Expect(hiddenLocation.location.isSome())
     }
+    @TestCase
+    func closedDocumentReadsReportResourceClosed(): Unit {
+        // F3: resource-state checks must not be swallowed by conversion
+        // catches; every read on a closed document reports resource_closed.
+        let document = NativeCompactJsonDocument.parse(nativeCompactBytes("1"))
+        let root = document.root()
+        document.close()
+        @Expect(@AssertThrows[JsonException](root.asFloat64()).code, "resource_closed")
+        @Expect(@AssertThrows[JsonException](root.asUInt64()).code, "resource_closed")
+        @Expect(@AssertThrows[JsonException](root.asNumberText()).code, "resource_closed")
+        @Expect(@AssertThrows[JsonException](root.asString()).code, "resource_closed")
+        @Expect(@AssertThrows[JsonException](root.asInt64()).code, "resource_closed")
+        @Expect(@AssertThrows[JsonException](root.kind()).code, "resource_closed")
+    }
+
+    @TestCase
+    func numericConversionErrorsMatchBackendContract(): Unit {
+        // F4: range failures classify as number_out_of_range; type
+        // failures classify as type_mismatch, matching yyjson.
+        try (document = NativeCompactJsonDocument.parse(nativeCompactBytes("[-1, 1, \"x\"]"))) {
+            let root = document.root()
+            @Expect(@AssertThrows[JsonException](root.element(0).getOrThrow().asUInt64()).code,
+                "number_out_of_range")
+            @Expect(@AssertThrows[JsonException](root.element(1).getOrThrow().asString()).code,
+                "type_mismatch")
+            @Expect(@AssertThrows[JsonException](root.element(2).getOrThrow().asUInt64()).code,
+                "type_mismatch")
+        }
+    }
 }

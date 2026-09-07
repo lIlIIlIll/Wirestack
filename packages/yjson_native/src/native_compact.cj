@@ -798,26 +798,31 @@ struct NativeCompactJsonValue <: JsonValueView {
     }
 
     public func asString(): String {
-        if (code() != YJ_COMPACT_STRING) { throw JsonException("Expected string value") }
+        if (code() != YJ_COMPACT_STRING) { throw JsonException("Expected string value", code: "type_mismatch") }
         if (inlineKind >= 0) { document.stringRefAt(inlinePayload) } else { document.textAt(node) }
     }
 
     public func asUInt64(): UInt64 {
+        // asNumberText() performs the resource-state check and must stay
+        // outside the conversion catch: closing the document has to surface
+        // `resource_closed`, while only the numeric conversion itself
+        // classifies as a range failure.
         let text = asNumberText()
         try { UInt64.parse(text) } catch (_: Exception) {
-            throw JsonException("Expected unsigned integer value", code: "type_mismatch")
+            throw JsonException("JSON number is outside UInt64 range", code: "number_out_of_range")
         }
     }
 
     public func asFloat64(): Float64 {
-        try { Float64.parse(asNumberText()) } catch (_: Exception) {
+        let text = asNumberText()
+        try { Float64.parse(text) } catch (_: Exception) {
             throw JsonException("Expected numeric value", code: "type_mismatch")
         }
     }
 
     public func asNumberText(): String {
         if (code() == YJ_COMPACT_INT) { return asInt64().toString() }
-        if (code() != YJ_COMPACT_NUMBER) { throw JsonException("Expected numeric value") }
+        if (code() != YJ_COMPACT_NUMBER) { throw JsonException("Expected numeric value", code: "type_mismatch") }
         if (inlineKind >= 0) { document.stringRefAt(inlinePayload) } else { document.textAt(node) }
     }
 

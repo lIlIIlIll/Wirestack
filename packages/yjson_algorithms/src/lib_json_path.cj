@@ -36,7 +36,15 @@ public class JsonPath {
     }
 
     public static func parse(expression: String): JsonPath {
-        JsonPathParser(expression).parse()
+        parse(expression, limits: JsonPathLimits.defaults)
+    }
+
+    /// Parses with compile-time filter budgets from `limits`: expression
+    /// bytes, logical operator count, and logical nesting depth. Filters
+    /// exceeding a budget throw `JsonException(code: "invalid_json_path")`
+    /// instead of being accepted for evaluation.
+    public static func parse(expression: String, limits!: JsonPathLimits): JsonPath {
+        JsonPathParser(expression, JsonPathFilterBudget(limits)).parse()
     }
 
     /// Creates a single-threaded lazy cursor. No candidate is visited until
@@ -116,6 +124,7 @@ class JsonPathWork {
     private let regexes = HashMap<String, LinearRegex>()
     var visited: Int64 = 0
     var filterSteps: Int64 = 0
+    var filterOperations: Int64 = 0
     var emitted: Int64 = 0
     init(limits: JsonPathLimits) {
         this.limits = limits
@@ -129,6 +138,10 @@ class JsonPathWork {
     func filter(): Unit {
         filterSteps++
         enforceWorkLimit(filterSteps, limits.maxFilterSteps, "filter steps")
+    }
+    func filterOperation(): Unit {
+        filterOperations++
+        enforceWorkLimit(filterOperations, limits.maxFilterOperations, "filter operations")
     }
     func emit(): Unit {
         emitted++
@@ -427,11 +440,61 @@ class JsonPathSegment {
     }
 }
 
+/// Compile-time budget shared by every filter expression validated while
+/// parsing one JSONPath (including nested queries inside function
+/// arguments). Counts are per whole expression, matching the semantics of
+/// JsonPathLimits.maxFilter* fields.
+private class JsonPathFilterBudget {
+    let maxBytes: Int64
+    let maxOperators: Int64
+    let maxDepth: Int64
+    var operators: Int64 = 0
+    var depth: Int64 = 0
+
+    init(limits: JsonPathLimits) {
+        maxBytes = limits.maxFilterExpressionBytes
+        maxOperators = limits.maxFilterOperators
+        maxDepth = limits.maxFilterDepth
+    }
+
+    func enterExpression(text: String, source: String, position: Int64): Unit {
+        if (maxBytes > 0 && text.size > maxBytes) {
+            throw jsonPathError(
+                "JSONPath filter expression exceeds the ${maxBytes}-byte parse budget (got ${text.size})",
+                source, expressionOffset: position)
+        }
+    }
+
+    func enterDepth(source: String, position: Int64): Unit {
+        depth++
+        if (maxDepth > 0 && depth > maxDepth) {
+            throw jsonPathError(
+                "JSONPath filter expression exceeds the ${maxDepth}-level parse depth budget",
+                source, expressionOffset: position)
+        }
+    }
+
+    func exitDepth(): Unit { depth-- }
+
+    func consumeOperator(source: String, position: Int64): Unit {
+        operators++
+        if (maxOperators > 0 && operators > maxOperators) {
+            throw jsonPathError(
+                "JSONPath filter expression exceeds the ${maxOperators}-operator parse budget",
+                source, expressionOffset: position)
+        }
+    }
+}
+
 private class JsonPathParser {
     let source: String
+    let budget: JsonPathFilterBudget
     var offset: Int64 = 0
 
-    init(source: String) { this.source = source }
+    init(source: String, budget: JsonPathFilterBudget) {
+        this.source = source
+        this.budget = budget
+    }
 
     func parse(): JsonPath {
         if (source.isEmpty() || source[0] != b'$') { fail("JSONPath must start with '$'") }
@@ -512,7 +575,7 @@ private class JsonPathParser {
             }
             let expression = trimJsonPathWhitespace(source[start..offset])
             if (expression.isEmpty()) { failAt("Filter selector requires an expression", start) }
-            validateJsonPathFilterSyntax(expression, source, start)
+            validateJsonPathFilterSyntax(expression, source, start, budget)
             return JsonPathSelector(JsonPathSelectorKind.Filter, filter: expression)
         }
         if (source[offset] == b'*') { offset++; return JsonPathSelector(JsonPathSelectorKind.Wildcard) }
@@ -588,64 +651,84 @@ private func parseJsonPathInteger(text: String, position: Int64): Int64 {
     value
 }
 
-private func validateJsonPathFilterSyntax(expression: String, source: String, position: Int64): Unit {
+private func validateJsonPathFilterSyntax(expression: String, source: String,
+    position: Int64, budget: JsonPathFilterBudget): Unit {
+    budget.enterExpression(expression, source, position)
+    budget.enterDepth(source, position)
     let text = stripJsonPathParentheses(trimJsonPathWhitespace(expression))
     match (findJsonPathTopLevelOperator(text, "||")) {
         case Some(index) =>
-            validateJsonPathLogicalOperand(text[0..index], source, position)
-            validateJsonPathLogicalOperand(text[index + 2..text.size], source, position + index + 2)
+            budget.consumeOperator(source, position)
+            validateJsonPathLogicalOperand(text[0..index], source, position, budget)
+            validateJsonPathLogicalOperand(text[index + 2..text.size], source, position + index + 2, budget)
+            budget.exitDepth()
             return
         case None => ()
     }
     match (findJsonPathTopLevelOperator(text, "&&")) {
         case Some(index) =>
-            validateJsonPathLogicalOperand(text[0..index], source, position)
-            validateJsonPathLogicalOperand(text[index + 2..text.size], source, position + index + 2)
+            budget.consumeOperator(source, position)
+            validateJsonPathLogicalOperand(text[0..index], source, position, budget)
+            validateJsonPathLogicalOperand(text[index + 2..text.size], source, position + index + 2, budget)
+            budget.exitDepth()
             return
         case None => ()
     }
     if (text.startsWith("!")) {
-        validateJsonPathLogicalOperand(text[1..text.size], source, position + 1)
+        budget.consumeOperator(source, position)
+        validateJsonPathLogicalOperand(text[1..text.size], source, position + 1, budget)
+        budget.exitDepth()
         return
     }
     for (op in ["==", "!=", "<=", ">=", "<", ">"]) {
         match (findJsonPathTopLevelOperator(text, op)) {
             case Some(index) =>
-                validateJsonPathComparable(text[0..index], source, position)
-                validateJsonPathComparable(text[index + op.size..text.size], source, position + index + op.size)
+                validateJsonPathComparable(text[0..index], source, position, budget)
+                validateJsonPathComparable(text[index + op.size..text.size], source, position + index + op.size, budget)
+                budget.exitDepth()
                 return
             case None => ()
         }
     }
-    validateJsonPathLogicalAtom(text, source, position)
+    validateJsonPathLogicalAtom(text, source, position, budget)
+    budget.exitDepth()
 }
 
-private func validateJsonPathLogicalOperand(expression: String, source: String, position: Int64): Unit {
-    validateJsonPathFilterSyntax(expression, source, position)
+private func validateJsonPathLogicalOperand(expression: String, source: String,
+    position: Int64, budget: JsonPathFilterBudget): Unit {
+    validateJsonPathFilterSyntax(expression, source, position, budget)
 }
 
-private func validateJsonPathLogicalAtom(text: String, source: String, position: Int64): Unit {
+private func validateJsonPathLogicalAtom(text: String, source: String,
+    position: Int64, budget: JsonPathFilterBudget): Unit {
     let value = trimJsonPathWhitespace(text)
-    if (value.startsWith("@") || value.startsWith("$")) { return }
+    if (value.startsWith("@") || value.startsWith("$")) {
+        // F2: a logical atom is an existence test over a query; the query
+        // itself must be syntactically valid at parse time, not only when
+        // execution happens to evaluate it.
+        validateJsonPathQuerySyntax(value, source, position, budget)
+        return
+    }
     if (value.startsWith("match(") || value.startsWith("search(")) {
-        validateJsonPathFunctionCall(value, source, position, true)
+        validateJsonPathFunctionCall(value, source, position, true, budget)
         return
     }
     throw jsonPathError("Filter literals and value-returning functions must be compared", source,
         expressionOffset: position)
 }
 
-private func validateJsonPathComparable(text: String, source: String, position: Int64): Unit {
+private func validateJsonPathComparable(text: String, source: String,
+    position: Int64, budget: JsonPathFilterBudget): Unit {
     let value = trimJsonPathWhitespace(text)
     if (value.startsWith("@") || value.startsWith("$")) {
-        if (!jsonPathQueryIsSingular(value)) {
+        if (!jsonPathQueryIsSingular(value, budget)) {
             throw jsonPathError("Comparison queries must be singular", source, expressionOffset: position)
         }
         return
     }
     for (name in ["length", "count", "value"]) {
         if (value.startsWith(name + "(")) {
-            validateJsonPathFunctionCall(value, source, position, false)
+            validateJsonPathFunctionCall(value, source, position, false, budget)
             return
         }
     }
@@ -661,7 +744,7 @@ private func validateJsonPathComparable(text: String, source: String, position: 
 }
 
 private func validateJsonPathFunctionCall(text: String, source: String,
-    position: Int64, logical: Bool): Unit {
+    position: Int64, logical: Bool, budget: JsonPathFilterBudget): Unit {
     let open = text.indexOf("(").getOrThrow({ => jsonPathError("Invalid function", source,
         expressionOffset: position) })
     if (!text.endsWith(")")) { throw jsonPathError("Unterminated function", source, expressionOffset: position) }
@@ -679,11 +762,16 @@ private func validateJsonPathFunctionCall(text: String, source: String,
         if (!(argument.startsWith("@") || argument.startsWith("$"))) {
             throw jsonPathError("count() requires a query argument", source, expressionOffset: position)
         }
+        // F2: function arguments carrying queries must be syntactically
+        // valid at parse time as well.
+        validateJsonPathQuerySyntax(argument, source, position, budget)
     }
     if (name == "length") {
         let argument = trimJsonPathWhitespace(args[0])
-        if ((argument.startsWith("@") || argument.startsWith("$")) && !jsonPathQueryIsSingular(argument)) {
-            throw jsonPathError("length() query arguments must be singular", source, expressionOffset: position)
+        if ((argument.startsWith("@") || argument.startsWith("$"))) {
+            if (!jsonPathQueryIsSingular(argument, budget)) {
+                throw jsonPathError("length() query arguments must be singular", source, expressionOffset: position)
+            }
         }
     }
     if (name == "value") {
@@ -691,14 +779,29 @@ private func validateJsonPathFunctionCall(text: String, source: String,
         if (!(argument.startsWith("@") || argument.startsWith("$"))) {
             throw jsonPathError("value() requires a query argument", source, expressionOffset: position)
         }
+        validateJsonPathQuerySyntax(argument, source, position, budget)
+    }
+    if (name == "match" || name == "search") {
+        let argument = trimJsonPathWhitespace(args[0])
+        if (argument.startsWith("@") || argument.startsWith("$")) {
+            validateJsonPathQuerySyntax(argument, source, position, budget)
+        }
     }
 }
 
-private func jsonPathQueryIsSingular(text: String): Bool {
+private func validateJsonPathQuerySyntax(text: String, source: String,
+    position: Int64, budget: JsonPathFilterBudget): Unit {
     let normalized = removeJsonPathQueryWhitespace(text)
     let rootQuery = if (normalized.startsWith("@")) { "$" + normalized[1..normalized.size] } else { normalized }
-    JsonPathParser(rootQuery).parse().isSingular()
+    JsonPathParser(rootQuery, budget).parse()
 }
+
+private func jsonPathQueryIsSingular(text: String, budget: JsonPathFilterBudget): Bool {
+    let normalized = removeJsonPathQueryWhitespace(text)
+    let rootQuery = if (normalized.startsWith("@")) { "$" + normalized[1..normalized.size] } else { normalized }
+    JsonPathParser(rootQuery, budget).parse().isSingular()
+}
+
 
 private func normalizeJsonPathIndex(index: Int64, size: Int64): Int64 { if (index < 0) { size + index } else { index } }
 private func normalizeJsonPathSliceEndpoint(value: Option<Int64>, size: Int64,
@@ -788,6 +891,10 @@ private func splitJsonPathText(text: String, separator: Byte): ArrayList<String>
 
 private func evaluateJsonPathFilter(expression: String, current: JsonValueView, root: JsonValueView,
     work: JsonPathWork): Bool {
+    // F1: every logical unit of work (operator, comparison, or atom) is
+    // accounted against the run-time operation budget, independent of the
+    // per-candidate-node filter step counter.
+    work.filterOperation()
     let text = stripJsonPathParentheses(trimJsonPathWhitespace(expression))
     match (findJsonPathTopLevelOperator(text, "||")) {
         case Some(index) => return evaluateJsonPathFilter(text[0..index], current, root, work) ||
@@ -838,7 +945,7 @@ private func evaluateJsonPathOperand(expression: String, current: JsonValueView,
     if (text.startsWith("@") || text.startsWith("$")) {
         let base = if (text.startsWith("@")) { current } else { root }
         let pathText = "$" + removeJsonPathQueryWhitespace(text[1..text.size])
-        return JsonPath.parse(pathText).collectValuesWithWork(base, work)
+        return JsonPath.parse(pathText, limits: work.limits).collectValuesWithWork(base, work)
     }
     for (functionName in ["length", "count", "value", "match", "search"]) {
         if (text.startsWith(functionName + "(") && text.endsWith(")")) {

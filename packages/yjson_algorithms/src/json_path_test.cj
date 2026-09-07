@@ -105,4 +105,53 @@ class YJsonPathTest {
         @Expect(cursor.next().getOrThrow().value.asInt64(), 3)
         @Expect(cursor.next().isNone())
     }
+
+    @TestCase
+    func filterExpressionsExceedingParseBudgetsAreRejected(): Unit {
+        // F1: a 3000-term logical chain must be rejected at parse time
+        // instead of being accepted and evaluating unbounded work.
+        var longChain = "$[?1==1"
+        for (_ in 0..3000) { longChain += "&&1==1" }
+        longChain += "]"
+        @Expect(@AssertThrows[JsonException](JsonPath.parse(longChain)).code, "invalid_json_path")
+
+        // F1: a 20000-deep negation chain exceeds the depth budget.
+        var negations = "$[?"
+        for (_ in 0..20000) { negations += "!" }
+        negations += "1==1]"
+        @Expect(@AssertThrows[JsonException](JsonPath.parse(negations)).code, "invalid_json_path")
+
+        // F1: an oversized filter expression exceeds the byte budget.
+        var padding = "$[?@.x == '"
+        for (_ in 0..5000) { padding += "a" }
+        padding += "']"
+        @Expect(@AssertThrows[JsonException](JsonPath.parse(padding)).code, "invalid_json_path")
+
+        // Explicit budgets can be raised for callers that need them.
+        let relaxed = JsonPathLimits(maxFilterExpressionBytes: 0, maxFilterOperators: 0,
+            maxFilterDepth: 0, maxFilterOperations: 0)
+        @Expect(JsonPath.parse(longChain, limits: relaxed).isSingular(), false)
+    }
+
+    @TestCase
+    func incompleteFilterQueriesAreRejectedAtParseTime(): Unit {
+        // F2: syntax errors inside logical atoms previously surfaced only
+        // during execution on matching data.
+        let invalidExpressions = ["$[?@..]", "$[?@ foo]", "$[?count(@..)>0]", "$[?@.]"]
+        for (invalid in invalidExpressions) {
+            @Expect(@AssertThrows[JsonException](JsonPath.parse(invalid)).code, "invalid_json_path")
+        }
+    }
+
+    @TestCase
+    func filterOperationBudgetBoundsTotalLogicalWork(): Unit {
+        var chain = "$.store.book[?1==1"
+        for (_ in 0..40) { chain += "&&1==1" }
+        chain += "]"
+        let path = JsonPath.parse(chain,
+            limits: JsonPathLimits(maxFilterOperators: 100))
+        let error = @AssertThrows[JsonException](path.collectValues(store,
+            limits: JsonPathLimits(maxFilterOperations: 10)))
+        @Expect(error.code, "work_limit_exceeded")
+    }
 }

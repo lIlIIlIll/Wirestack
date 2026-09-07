@@ -543,7 +543,7 @@ class CompactJsonDocument {
     }
 
     func stringAt(index: Int64): String {
-        if (kinds[index] != COMPACT_STRING) { throw JsonException("Expected string value") }
+        if (kinds[index] != COMPACT_STRING) { throw JsonException("Expected string value", code: "type_mismatch") }
         strings[first[index]]
     }
 
