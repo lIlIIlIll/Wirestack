@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # LLVM llc requires a large stack for optimization passes on complex IR.
-ulimit -s 131072 2>/dev/null || true
+ulimit -Ss 131072 2>/dev/null || true
 
 repo=$(cd "$(dirname "$0")/.." && pwd)
 job=${1:-}
@@ -181,6 +181,11 @@ case "$job" in
         ;;
     pure-platform)
         require_cangjie
+        if [[ "$(uname -s)" == Darwin ]]; then
+            # The deep JSONPath tests need a larger Cangjie thread stack on macOS.
+            # Keep this scoped to the Pure test gate; do not alter optimization.
+            export cjStackSize=8MB
+        fi
         # A failing test is not an infrastructure retry. Preserve the checked-in
         # optimization settings and propagate the first failure on every host.
         (cd "$repo" && cjpm test --no-color)
