@@ -1,7 +1,7 @@
 # 自定义 Codec
 
-不能使用 `@JsonCodec`，或 wire format 需要专门逻辑时，实现 `JsonCodec<T>`。custom codec
-直接读写语义 token，不需要先构建 `JsonNode`。
+不能使用 `@JsonCodec`，或需要自定义 JSON 格式时，实现 `JsonCodec<T>`。
+自定义 codec 通过 reader 和 writer 直接读写 JSON 值，无需先构建 `JsonNode`。
 
 ## 最小实现
 
@@ -31,14 +31,13 @@ let text = YJson.toJson(UserId(7), codec: UserIdJson)
 let id = YJson.fromJson(text, codec: UserIdJson)
 ```
 
-同一形式适用于 String、`Array<Byte>`、`InputStream` 和 `OutputStream`。不需要为 custom
-codec 创建另一组 API 名称。
+字符串、`Array<Byte>`、`InputStream` 和 `OutputStream` 入口都支持显式 codec 参数。
 
-## Reader 和 writer contract
+## 实现读取和写出方法
 
-`JsonReader` 提供 scalar 读取、array/object 边界、field name、skip、path、location 和
-`error(message, code)`。`JsonWriter` 提供对应 scalar、name、container、path 和 error
-方法。
+`JsonReader` 提供标量读取、数组和对象遍历、字段名读取、值跳过、路径与位置查询，以及
+`error(message, code)`。`JsonWriter` 提供对应的标量、字段名和容器写出方法，也支持路径查询
+和错误构造。
 
 对象 codec 必须完整消费或写出一个值：
 
@@ -71,14 +70,14 @@ class PointCodec <: JsonCodec<Point> {
 }
 ```
 
-custom codec 应保持 immutable 或自行同步，因为应用可以并发调用同一个 codec instance。
-不要向下转型到 runtime 的具体 reader/writer，不要持有 reader、writer 或 caller input 到调用
-结束之后。需要报告业务格式错误时，使用 `reader.error` 或 `writer.error`，以保留当前
-JSON Pointer path。
+应用可能并发调用同一个 codec 实例，因此 codec 应保持不可变，或自行同步。
+不要向下转型到运行库的具体 reader 或 writer 类型，也不要在调用结束后继续持有 reader、
+writer 或调用方输入。报告业务格式错误时，用 `reader.error` 或 `writer.error` 构造异常，
+以保留当前 JSON Pointer 路径。
 
 ## 组合现有 codec
 
-`JsonCodecs` 提供 scalar codec，以及以下容器组合器：
+`JsonCodecs` 提供标量 codec，以及以下容器组合器：
 
 ```cangjie
 let ids = JsonCodecs.array(UserIdJson)
@@ -87,11 +86,11 @@ let list = JsonCodecs.arrayList(UserIdJson)
 let byName = JsonCodecs.stringMap(UserIdJson)
 ```
 
-generated 字段只需要专用 codec 时，使用 `@JsonUsing[UserIdJson]`，不必改变字段类型的全局
+仅需为某个字段指定 codec 时，使用 `@JsonUsing[UserIdJson]`，不必改变字段类型的全局
 行为。
 
-遵守这个 backend-neutral contract 后，同一 codec 可以由 Pure String/bytes/stream 入口，
-以及命名 Native/yyjson façade 驱动。
+遵守上述要求后，同一 codec 可用于纯仓颉的字符串、字节数组和流入口，也可用于
+Native 和 yyjson 后端。
 
 ## 使用 Int64 作为映射键
 

@@ -1,7 +1,7 @@
 # JSON Schema draft 2020-12
 
-`JsonSchema` 位于可选 `yjson_algorithms` package，只解释 draft 2020-12。显式声明其他
-dialect 时抛出 `JsonException(code: "unsupported_schema_dialect")`。
+`JsonSchema` 位于可选包 `yjson_algorithms`，只支持 draft 2020-12。显式声明其他
+方言时抛出 `JsonException(code: "unsupported_schema_dialect")`。
 
 ```cangjie
 import yjson.*
@@ -28,16 +28,15 @@ if (!result.valid) {
 }
 ```
 
-`validate` 返回 immutable `JsonSchemaResult`；它提供 `valid`、`size`、索引访问和
-`violations()`。`isValid` 只返回 Bool。`JsonSchemaViolation` 同时记录 instance 的
-`instancePath`、keyword 的 `schemaPath`、code 和 message。
+`validate` 返回不可变的 `JsonSchemaResult`，提供 `valid`、`size`、索引访问和
+`violations()`。`isValid` 只返回 Bool。`JsonSchemaViolation` 记录数据位置 `instancePath`、
+规则位置 `schemaPath`、错误码和消息。
 
-数值比较按 JSON 数值语义，而不是 token 拼写：`1`、`1.0` 与 `1e0` 相等，并且都满足
-integer。
+数值比较不受写法影响：`1`、`1.0` 与 `1e0` 相等，并且都满足 `integer` 类型约束。
 
 ## 外部资源在构造时冻结
 
-yjson 不访问网络。应用通过 `UriResolver` 提供外部 resource：
+yjson 不访问网络。应用通过 `UriResolver` 提供外部资源：
 
 ```cangjie
 let registry = JsonSchemaRegistry()
@@ -53,28 +52,28 @@ let schema = JsonSchema.parse(
 )
 ```
 
-registry key 是不带 fragment 的 resource URI。构造 `JsonSchema` 时会复制根 schema，遍历并
-解析完整外部引用图，再编译全部 schema regex。成功返回后：
+注册表的键是去掉片段标识符（`#` 及其后内容）的资源 URI。构造 `JsonSchema` 时会复制
+根 Schema，解析所有外部引用，再编译其中的正则表达式。成功返回后：
 
-- compiled schema 不再持有 resolver；`schema.config.resolver` 为 `None`；
-- validation 不访问文件、网络、缓存或可变 registry；
+- 编译后的 Schema 不再持有 resolver，`schema.config.resolver` 为 `None`；
+- 校验不访问文件、网络、缓存或可变注册表；
 - `schema.document` 每次返回独立副本；
-- schema、validator 和 result 可并发读取。
+- Schema、校验器和结果可并发读取。
 
-resolver 的 I/O、鉴权、缓存和超时由应用在构造阶段负责。循环和重复 reference 由编译图处理，
-ref resolution 受 `JsonSchemaLimits.maxRefResolutions` 约束。
+resolver 的 I/O、鉴权、缓存和超时由应用在构造阶段负责。编译器处理循环和重复引用，
+引用解析次数受 `JsonSchemaLimits.maxRefResolutions` 约束。
 
-## Format
+## 格式校验
 
 `JsonSchemaFormatMode` 只有两种：
 
-| 模式 | 已注册 format | 未注册 format |
+| 模式 | 已注册格式 | 未注册格式 |
 | --- | --- | --- |
 | `Annotation` | 不执行 | 不执行；默认 |
-| `Assertion` | 执行 | 保留 annotation 语义 |
+| `Assertion` | 执行 | 仅作注解 |
 
-core registry 提供 date、time、date-time、duration、email、IPv4/IPv6、UUID、regex、JSON
-Pointer 和 relative JSON Pointer。国际化 hostname/email、URI/IRI 和 RFC 6570 URI Template
+核心注册表提供 date、time、date-time、duration、email、IPv4/IPv6、UUID、regex、JSON
+Pointer 和 relative JSON Pointer。国际化主机名和邮箱、URI/IRI，以及 RFC 6570 URI Template
 由 `yjson_schema_formats` 提供：
 
 ```cangjie
@@ -88,28 +87,27 @@ let config = JsonSchemaConfig(
 let schema = JsonSchema.parse(schemaText, config: config)
 ```
 
-`JsonSchema` 构造时取得 registry 的 frozen copy。之后修改原 registry 不会改变已编译 schema；
-默认 registry 本身也是 immutable。
+`JsonSchema` 构造时保存注册表的不可变副本。之后修改原注册表不会影响已编译的 Schema；
+默认注册表本身也不可变。
 
-`JsonSchemaFormat` 实现必须保持 immutable 或自行同步：应用可以并发调用同一个 validator
-instance（以及同一个 format instance），yjson 不在 format 断言周围加锁。共享可变状态
-（缓存、计数器、惰性初始化）由实现自行同步。
+`JsonSchemaFormat` 实现必须保持不可变或自行同步。应用可以并发调用同一个校验器和
+格式实例，yjson 不会为格式校验加锁。若实现包含缓存、计数器或惰性初始化，需要自行同步。
 
-## Regex 和工作预算
+## 正则表达式和工作量限制
 
-Schema `pattern` 使用内部线性时间、非回溯 regex 引擎。构造阶段拒绝反向引用等不属于
-受支持正则子集的特性，code 为 `invalid_regex`。`regex` format 只进行有界的 ECMAScript
+Schema `pattern` 使用内部线性时间、非回溯正则引擎。构造阶段拒绝反向引用等不属于
+受支持正则子集的特性，错误码为 `invalid_regex`。`regex` 格式只进行有界的 ECMAScript
 语法验证，因此接受命名分组、反向引用和 lookbehind，但不会执行这些表达式。解析和匹配
 工作量都受 `maxRegexSteps` 限制。
 
-`JsonSchemaLimits.defaults` 设置 100,000 evaluations、1,000 ref resolutions、100,000 regex
-steps、100 errors 和 depth 256。预算耗尽抛出
+`JsonSchemaLimits.defaults` 最多允许 100,000 次求值、1,000 次引用解析、100,000 个正则
+步骤、100 条错误和 256 层深度。预算耗尽抛出
 `JsonException(code: "work_limit_exceeded")`。可信离线任务可以显式使用
 `JsonSchemaLimits.unlimited`。
 
-## Conformance 门禁
+## 标准符合性测试
 
-固定 corpus 的预期 cardinality 为 Schema required 1299、JSONPath CTS 703、JSON Patch 108；
-安装 optional format provider 后增加 964 个适用 Schema cases。数字是 runner 的输入约束，
-实际 PASS/FAIL 必须记录在对应 release evidence。入口和证据规则见
+固定语料包含 1299 个必测 Schema 用例、703 个 JSONPath CTS 用例和 108 个 JSON Patch 用例。
+安装可选格式扩展后，增加 964 个适用的 Schema 用例。这些数量用于检查语料是否完整，
+每次运行的 PASS/FAIL 另行记录在发布证据中。测试入口和记录要求见
 [测试指南](maintainers/testing.md)。

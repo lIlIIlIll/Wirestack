@@ -1,7 +1,7 @@
 # 配置与错误
 
-yjson 使用 immutable options 表达读取和写出策略。普通、generated、stream、managed
-document 和显式 backend 入口复用相同的选项类型。
+用 `JsonReadOptions` 配置读取，用 `JsonWriteOptions` 配置写出。这两种配置都不可变，
+可用于类型转换、流、只读文档和各后端入口。
 
 ## 读取选项
 
@@ -20,16 +20,15 @@ let options = JsonReadOptions(
 
 | 选项 | 默认值 | 语义 |
 | --- | ---: | --- |
-| `unknownFieldPolicy` | `Ignore` | typed decode 遇到未知字段时忽略 |
-| `duplicateKeyPolicy` | `Reject` | 拒绝语义重复的 object key |
-| `maxInputBytes` | 64 MiB | 单个输入 document 的 UTF-8 bytes |
-| `maxStringBytes` | 16 MiB | 解码后的 string 或 key UTF-8 bytes |
-| `maxBufferedValueBytes` | 8 MiB | replay/whole-value buffer 的 bytes |
-| `maxDepth` | 256 | array/object 嵌套深度 |
+| `unknownFieldPolicy` | `Ignore` | 解码为目标类型时忽略未知字段 |
+| `duplicateKeyPolicy` | `Reject` | 拒绝解码后相同的对象键 |
+| `maxInputBytes` | 64 MiB | 单个输入文档的 UTF-8 字节数 |
+| `maxStringBytes` | 16 MiB | 解码后的字符串或键的 UTF-8 字节数 |
+| `maxBufferedValueBytes` | 8 MiB | 单个完整值的缓冲区字节数，包括回放缓冲区 |
+| `maxDepth` | 256 | 数组或对象的嵌套深度 |
 
-四个数值预算必须大于零。读取端没有“0 表示 unlimited”的捷径；需要更大边界时传入明确
-正数。重复 key 的比较使用解码后的 key，因此 `"a"` 与 `"\u0061"` 视为同一个 key。
-`LastWins` 是显式 opt-in。
+四个数值上限必须大于零，读取选项不支持用 0 取消限制。重复键按解码后的内容比较，
+因此 `"a"` 与 `"\u0061"` 视为同一个键。需要保留最后出现的值时，显式选择 `LastWins`。
 
 ## 写出选项
 
@@ -44,16 +43,16 @@ let bounded = JsonWriteOptions(
 )
 ```
 
-`indent` 只能包含空格或 tab；空字符串表示紧凑输出。`maxDepth` 必须大于零。
-`maxOutputBytes = 0` 表示不设置输出 byte 上限，其他负数会被拒绝。`htmlSafe` 对需要安全
+`indent` 只能包含空格或制表符；空字符串表示紧凑输出。`maxDepth` 必须大于零。
+`maxOutputBytes = 0` 表示不设置输出字节数上限，其他负数会被拒绝。`htmlSafe` 对需要安全
 嵌入 HTML 的字符使用转义。
 
 `JsonWriteOptions.compact`、`defaults` 和 `pretty()` 是常用预设。
-`htmlSafePreset` 只启用 HTML-safe escaping。
+`htmlSafePreset` 只启用 HTML 字符转义。
 
-## 一个异常类型
+## 处理错误
 
-解析、codec、文档、backend 和算法失败统一抛出 `JsonException`：
+yjson 用 `JsonException` 报告 JSON 解析、值转换、文档访问和算法执行中的错误：
 
 ```cangjie
 try {
@@ -64,39 +63,42 @@ try {
 }
 ```
 
-调用方匹配 `error.code`，不要解析 message。`path` 为空或 RFC 6901 JSON Pointer；适用的
-解析失败在 `location` 中携带 byte offset、line 和 column。
+用 `error.code` 判断错误类别，不要解析 `message`。`path` 为空或 RFC 6901 JSON Pointer；
+部分解析错误还会在 `location` 中提供字节偏移、行号和列号。
 
-`invalid_value` 是稳定 code：用于语法合法但目标类型转换失败、且不落入 `number_out_of_range`
-（数字字面量超出数值范围）的场景，例如 Rune codec 收到多个 Unicode scalar。它不用于
+配置参数不合法时，构造器抛出 `IllegalArgumentException`。调用方的流或自定义 codec 抛出的
+异常也可能原样传出。
+
+`invalid_value` 是稳定错误码：用于语法合法但目标类型转换失败、且不落入 `number_out_of_range`
+（数字字面量超出数值范围）的场景，例如 Rune codec 收到多个 Unicode 标量。它不用于
 JSON 结构错误（`parse_error`）或类型形状错误（`type_mismatch`）。
 
-常用稳定 code：
+常用稳定错误码如下：
 
 | code | 含义 |
 | --- | --- |
-| `parse_error` | JSON token、UTF-8、trailing content 或文档结构无效 |
-| `unknown_field` | Reject 策略遇到未知 typed 字段 |
-| `duplicate_key` | Reject 策略遇到重复 key |
-| `missing_field` | generated codec 的必需字段缺失 |
-| `missing_discriminator` / `unknown_discriminator` | generated polymorphic discriminator 无效 |
-| `max_depth` | 读取、写出或 materialization 超过深度 |
-| `document_too_large` | 输入 document 超过 byte budget |
-| `string_too_large` | 解码后的 string/key 超过预算 |
-| `buffered_value_too_large` | replay 或 whole-value buffer 超过预算 |
-| `output_too_large` | 写出超过 byte budget |
-| `writer_state` | writer 根值数量或容器状态无效 |
+| `parse_error` | JSON 词法、UTF-8、尾部内容或文档结构无效 |
+| `unknown_field` | Reject 策略遇到目标类型未声明的字段 |
+| `duplicate_key` | Reject 策略遇到重复键 |
+| `missing_field` | 生成的 codec 缺少必需字段 |
+| `missing_discriminator` / `unknown_discriminator` | 多态判别字段缺失或值未知 |
+| `max_depth` | 读取、写出或转成 AST 时超过深度 |
+| `document_too_large` | 输入文档超过字节数上限 |
+| `string_too_large` | 解码后的字符串或键超过字节数上限 |
+| `buffered_value_too_large` | 单个完整值或回放缓冲区超过字节数上限 |
+| `output_too_large` | 输出超过字节数上限 |
+| `writer_state` | writer 写出的根值数量或容器状态无效 |
 | `cyclic_json_node` | AST 递归操作遇到祖先环 |
-| `type_mismatch` / `number_out_of_range` | value 不满足目标类型；数字字面量超出目标范围 |
-| `invalid_value` | 语法合法但目标类型转换失败且非范围问题（如 Rune 需要恰好一个 Unicode scalar） |
-| `codec_contract` / `codec_type_mismatch` | custom/generated codec contract 无效 |
-| `resource_closed` | 关闭后访问显式 backend document |
+| `type_mismatch` / `number_out_of_range` | 值不满足目标类型；数字字面量超出目标范围 |
+| `invalid_value` | 语法合法但目标类型转换失败且非范围问题（如 Rune 需要恰好一个 Unicode 标量） |
+| `codec_contract` / `codec_type_mismatch` | 自定义或生成的 codec 不符合接口约定 |
+| `resource_closed` | 关闭后访问后端文档 |
 | `invalid_json_pointer` / `json_pointer_not_found` | Pointer 无效或目标不存在 |
 | `invalid_json_patch` / `json_patch_test_failed` | Patch 无效或 test 失败 |
-| `invalid_json_path` / `invalid_regex` | Path 或受限 regex 无效 |
+| `invalid_json_path` / `invalid_regex` | Path 或受限正则表达式无效 |
 | `unsupported_schema_dialect` | Schema 不是 draft 2020-12 |
-| `work_limit_exceeded` | materialization 或算法预算耗尽 |
+| `work_limit_exceeded` | 转成 AST 或执行算法时耗尽预算 |
 
-acceleration 初始化和运行期失败也使用 `JsonException`，code 以 `acceleration_` 开头。
+加速模块初始化和运行期错误也使用 `JsonException`，错误码以 `acceleration_` 开头。
 具体资源语义见[资源限制](resource-limits.md)。
 
