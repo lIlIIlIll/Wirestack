@@ -396,7 +396,7 @@ symbol = "JsonPathLimits / JsonPatchLimits / JsonSchemaLimits"
 signature = "Finite defaults plus explicit unlimited constants"
 stability = "0.1.0-stable"
 compatibility = "breaking relocation and finite safe defaults"
-contract = "Budget exhaustion throws JsonException with code work_limit_exceeded."
+contract = "Execution budget exhaustion throws work_limit_exceeded. JSONPath filter parse budgets throw invalid_json_path; maxFilterSteps continues to count candidate nodes."
 consumer = "JSONPath, Patch, Merge Patch, and Schema users"
 
 [[api.declarations]]
@@ -407,12 +407,12 @@ signature = "public class JsonPathLimits"
 [[api.declarations]]
 source = "packages/yjson_algorithms/src/work_limits.cj"
 owner = "JsonPathLimits"
-signature = "public init(maxVisitedNodes!: Int64 = 100000, maxFilterSteps!: Int64 = 100000, maxRegexSteps!: Int64 = 100000, maxMatches!: Int64 = 10000, maxDepth!: Int64 = 256)"
+signature = "public init(maxVisitedNodes!: Int64 = 100000, maxFilterSteps!: Int64 = 100000, maxRegexSteps!: Int64 = 100000, maxMatches!: Int64 = 10000, maxDepth!: Int64 = 256, maxFilterExpressionBytes!: Int64 = 4096, maxFilterOperators!: Int64 = 256, maxFilterDepth!: Int64 = 64, maxFilterOperations!: Int64 = 200000)"
 
 [[api.declarations]]
 source = "packages/yjson_algorithms/src/work_limits.cj"
 owner = "JsonPathLimits"
-signature = "public static let unlimited = JsonPathLimits(maxVisitedNodes: 0, maxFilterSteps: 0, maxRegexSteps: 0, maxMatches: 0, maxDepth: 0)"
+signature = "public static let unlimited = JsonPathLimits(maxVisitedNodes: 0, maxFilterSteps: 0, maxRegexSteps: 0, maxMatches: 0, maxDepth: 0, maxFilterExpressionBytes: 0, maxFilterOperators: 0, maxFilterDepth: 0, maxFilterOperations: 0)"
 
 [[api.declarations]]
 source = "packages/yjson_algorithms/src/work_limits.cj"
@@ -551,3 +551,40 @@ signature = "int64_t YJ_JSON_FormatFloat64( double value, uint8_t* output, int64
 source = "native/yjson_scanner.h"
 owner = "<top-level>"
 signature = "int32_t YJ_JSON_FormatFloat64Array( const double* values, int64_t count, uint8_t* output, int64_t outputCap, int64_t outputOffset, int64_t* outWritten);"
+
+
+[[api]]
+package = "yjson_algorithms"
+kind = "filter-expression-limits"
+domain = "cangjie"
+symbol = "JsonPath.parse / filter expression budgets"
+signature = "Explicit parse limits and four independent filter budgets"
+stability = "0.1.0-stable"
+compatibility = "Additive parse overload and optional named constructor parameters preserve existing direct source calls. Constructor ABI changes require rebuilding consumers; binary and forward compatibility are not promised. Finite parse defaults intentionally reject oversized expressions previously accepted."
+contract = "Per-filter parsing defaults to 4096 bytes, 256 logical operators and depth 64; whole-query evaluation defaults to 200000 logical operations. Zero disables a budget. Parse limits use invalid_json_path; execution limits use work_limit_exceeded."
+consumer = "JSONPath callers; existing default parse and named-limit calls remain supported"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/lib_json_path.cj"
+owner = "JsonPath"
+signature = "public static func parse(expression: String, limits!: JsonPathLimits): JsonPath"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/work_limits.cj"
+owner = "JsonPathLimits"
+signature = "public let maxFilterDepth: Int64"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/work_limits.cj"
+owner = "JsonPathLimits"
+signature = "public let maxFilterExpressionBytes: Int64"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/work_limits.cj"
+owner = "JsonPathLimits"
+signature = "public let maxFilterOperations: Int64"
+
+[[api.declarations]]
+source = "packages/yjson_algorithms/src/work_limits.cj"
+owner = "JsonPathLimits"
+signature = "public let maxFilterOperators: Int64"

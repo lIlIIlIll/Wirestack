@@ -127,10 +127,15 @@ class YJsonPathTest {
         padding += "']"
         @Expect(@AssertThrows[JsonException](JsonPath.parse(padding)).code, "invalid_json_path")
 
-        // Explicit budgets can be raised for callers that need them.
-        let relaxed = JsonPathLimits(maxFilterExpressionBytes: 0, maxFilterOperators: 0,
-            maxFilterDepth: 0, maxFilterOperations: 0)
-        @Expect(JsonPath.parse(longChain, limits: relaxed).isSingular(), false)
+        // Explicit budgets are raisable: a chain above the default
+        // operator cap parses once the operator budget is lifted. The
+        // chain stays shallow so every platform's stack is respected.
+        var relaxedChain = "$[?1==1"
+        for (_ in 0..300) { relaxedChain += "&&1==1" }
+        relaxedChain += "]"
+        @Expect(@AssertThrows[JsonException](JsonPath.parse(relaxedChain)).code, "invalid_json_path")
+        let relaxed = JsonPathLimits(maxFilterOperators: 0)
+        @Expect(JsonPath.parse(relaxedChain, limits: relaxed).isSingular(), false)
     }
 
     @TestCase

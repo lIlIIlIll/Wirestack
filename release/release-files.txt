@@ -179,6 +179,7 @@ benchmarks/full-seven-library/fixture-preflight-overlay.patch
 benchmarks/results/full-seven-library/current-main.json
 benchmarks/results/full-seven-library/2026-09-07-main-087a82e/README.md
 benchmarks/cjfast_json/cjfast_comprehensive_bench.cj
+packages/native_accel_benchmarks/build.cj
 benchmarks/cjfast_json/run.sh
 packages/benchmarks/build.cj
 packages/benchmarks/cjpm.toml
