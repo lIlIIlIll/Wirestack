@@ -75,7 +75,9 @@ private func runSchema(manifest: JsonObject, stats: SuiteStats): Unit {
                     actual = errors.isEmpty()
                     if (!actual) { detail = errors[0].message }
                 } catch (error: Exception) {
-                    detail = "exception: ${error.message}"
+                    // A construction/runtime failure is never a normal invalid result.
+                    stats.fail("json-schema", source, description, "exception: ${error.message}")
+                    continue
                 }
                 if (actual == expected) { stats.pass() }
                 else { stats.fail("json-schema", source, description,

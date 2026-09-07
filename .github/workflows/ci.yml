@@ -18,6 +18,23 @@ permissions:
   contents: read
 
 jobs:
+  ci-guardrails:
+    name: CI guardrail regression tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          clean: true
+      - name: Install probe compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang
+      - name: Test failure propagation and candidate wiring
+        env:
+          YJSON_REQUIRE_UBSAN_PROBE: '1'
+        run: python3 scripts/test_ci_candidate_wiring.py
+
   generated-change-risk:
     name: Generated code change risk
     runs-on: ubuntu-24.04
@@ -79,33 +96,9 @@ jobs:
       - name: Test nightly and candidate wiring
         run: |
           python3 scripts/test_latest_cangjie_nightly.py
-          python3 scripts/test_ci_candidate_wiring.py
       - name: Select seven-day cache window
         id: window
         run: echo "value=$(( $(date -u +%s) / 604800 ))" >> "$GITHUB_OUTPUT"
-      - name: Restore nightly selection
-        if: inputs.cangjie_version == ''
-        id: cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
-        with:
-          path: .ci/cangjie-nightly-version
-          key: cangjie-nightly-complete-v2-${{ steps.window.outputs.value }}
-      - name: Resolve latest complete nightly
-        if: inputs.cangjie_version == '' && steps.cache.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p .ci
-          python3 scripts/latest_cangjie_nightly.py > .ci/cangjie-nightly-version
-      - name: Pin verified healthy nightly
-        if: inputs.cangjie_version == ''
-        run: |
-          # The nightly builds from 20260903 onward carry an llc regression
-          # (deterministic SIGSEGV lowering Cangjie bitcode on several
-          # runner CPU models; retries, glibc tunables, -O1 lowering, and
-          # assembly emission all crash as well). Pin the shared selection
-          # to the last verified healthy build regardless of cache hits so
-          # every job compiles with the same, working toolchain.
-          echo "1.3.0-alpha.20260829010011" > .ci/cangjie-nightly-version
-          echo "pinned healthy nightly 1.3.0-alpha.20260829010011"
       - name: Export shared nightly version
         id: version
         env:
@@ -116,10 +109,11 @@ jobs:
               --validate-version "$REQUESTED_VERSION")
             resolution=workflow-dispatch-exact
           else
-            value=$(cat .ci/cangjie-nightly-version)
+            # Keep the known-good pin independent of latest-release availability.
+            value=1.3.0-alpha.20260829010011
             python3 scripts/latest_cangjie_nightly.py \
               --validate-version "$value" >/dev/null
-            resolution=seven-day-cache-window
+            resolution=pinned-known-good
           fi
           echo "value=$value" >> "$GITHUB_OUTPUT"
           echo "resolution=$resolution" >> "$GITHUB_OUTPUT"
@@ -168,19 +162,11 @@ jobs:
           channel: nightly
           version: ${{ needs.nightly.outputs.version }}
           archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
-      - name: Retry-harden llc against flaky runner SIGSEGV
-        run: scripts/harden_llc.sh
-      - name: Ensure debugger is available
-        run: |
-          if ! command -v gdb >/dev/null; then
-            sudo apt-get update
-            sudo apt-get install -y gdb
-          fi
       - name: Install native prerequisites
         if: contains(fromJSON('["standards-conformance","schema-formats-conformance","algorithms-consumer","registry-rehearsal","custom-native","yyjson-native","native-clang","native-gcc","sanitizer","fuzz-short","yyjson-colink"]'), matrix.gate)
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang gcc libidn2-dev gdb
+          sudo apt-get install -y clang gcc libidn2-dev
           dpkg-query -W -f='${Package}=${Version}\n' clang gcc libidn2-dev
       - name: Restore pinned standards suites cache
         if: contains(fromJSON('["standards-conformance","schema-formats-conformance"]'), matrix.gate)
@@ -214,20 +200,9 @@ jobs:
           YJSON_SECOND_YYJSON_ROOT: ${{ matrix.gate == 'yyjson-colink' && '/tmp/yjson-yyjson-second/yyjson-0.11.1' || '' }}
           YJSON_STANDARDS_OFFLINE: ${{ contains(fromJSON('["standards-conformance","schema-formats-conformance"]'), matrix.gate) && '1' || '' }}
         run: |
-          ulimit -Ss 131072
-          ulimit -Ss
-          ulimit -Hs
-          export YJSON_LLC_STACK_DIAGNOSTICS="$RUNNER_TEMP/llc-stack"
-          export YJSON_LLC_STACK_PROBE="$GITHUB_WORKSPACE/scripts/diagnose_llc_stack.py"
+          ulimit -s 131072
+          ulimit -s
           scripts/ci_job.sh "${{ matrix.gate }}"
-      - name: Upload llc stack diagnostics
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: llc-stack-${{ matrix.gate }}
-          path: ${{ runner.temp }}/llc-stack
-          if-no-files-found: ignore
-          retention-days: 7
 
   pure-platforms:
     name: Pure (${{ matrix.os }})
@@ -295,9 +270,6 @@ jobs:
             Add-Content -Path $env:GITHUB_PATH -Value $_
           }
           cjc -v
-      - name: Retry-harden llc against flaky runner SIGSEGV
-        if: matrix.os == 'macos-14'
-        run: scripts/harden_llc.sh
       - name: Record toolchain
         run: |
           echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"
@@ -306,12 +278,7 @@ jobs:
           cjpm --version
           ${{ matrix.checksum }} "$RUNNER_TEMP/${{ matrix.archive }}"
       - name: Run Pure package gates
-        run: |
-          if [[ "${{ matrix.os }}" == macos-14 ]]; then
-            # The opt-in deep JSONPath test exceeds the default Cangjie thread stack.
-            export cjStackSize=8MB
-          fi
-          scripts/ci_job.sh pure-platform
+        run: scripts/ci_job.sh pure-platform
 
   api-docs:
     name: API Documentation
@@ -328,8 +295,6 @@ jobs:
           channel: nightly
           version: ${{ needs.nightly.outputs.version }}
           archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
-      - name: Retry-harden llc against flaky runner SIGSEGV
-        run: scripts/harden_llc.sh
       - name: Record toolchain
         run: |
           echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"
@@ -354,16 +319,34 @@ jobs:
   pages:
     name: Deploy API Documentation
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: api-docs
+    needs: [api-docs, ci-required]
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: pages-main
+      cancel-in-progress: false
     permissions:
+      contents: read
       pages: write
       id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Check deployment still targets main HEAD
+        id: current
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          latest=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')
+          if [[ "$latest" == "$GITHUB_SHA" ]]; then
+            echo 'deploy=true' >> "$GITHUB_OUTPUT"
+          else
+            echo "Skipping superseded documentation for $GITHUB_SHA; main=$latest"
+            echo 'deploy=false' >> "$GITHUB_OUTPUT"
+          fi
       - name: Deploy GitHub Pages
+        if: steps.current.outputs.deploy == 'true'
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
 
@@ -386,8 +369,6 @@ jobs:
           channel: nightly
           version: ${{ needs.nightly.outputs.version }}
           archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
-      - name: Retry-harden llc against flaky runner SIGSEGV
-        run: scripts/harden_llc.sh
       - name: Record toolchain
         run: |
           echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"
@@ -473,3 +454,46 @@ jobs:
           disable_search: true
           fail_ci_if_error: true
           verbose: true
+
+
+  ci-required:
+    name: CI Required
+    if: ${{ always() }}
+    needs:
+      - ci-guardrails
+      - generated-change-risk
+      - perf-evidence-drift
+      - stream-docs
+      - nightly
+      - tests
+      - pure-platforms
+      - api-docs
+      - coverage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Require every quality gate to succeed
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+
+          expected = {
+              "ci-guardrails", "generated-change-risk", "perf-evidence-drift",
+              "stream-docs", "nightly", "tests", "pure-platforms", "api-docs", "coverage",
+          }
+          results = json.loads(os.environ["NEEDS_JSON"])
+          if not isinstance(results, dict) or set(results) != expected:
+              raise SystemExit("CI dependency inventory is missing or unexpected")
+          failed = {
+              name: value.get("result") if isinstance(value, dict) else None
+              for name, value in results.items()
+              if not isinstance(value, dict) or value.get("result") != "success"
+          }
+          if failed:
+              raise SystemExit("CI quality gates did not succeed: " + json.dumps(failed, sort_keys=True))
+          print("All required CI quality gates succeeded")
+          PY
