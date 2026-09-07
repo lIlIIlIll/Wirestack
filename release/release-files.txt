@@ -176,6 +176,8 @@ scripts/check_patch_coverage.py
 benchmarks/full-seven-library/run_full.py
 benchmarks/full-seven-library/summarize_full.py
 benchmarks/full-seven-library/fixture-preflight-overlay.patch
+benchmarks/results/full-seven-library/current-main.json
+benchmarks/results/full-seven-library/2026-09-07-main-087a82e/README.md
 benchmarks/cjfast_json/cjfast_comprehensive_bench.cj
 benchmarks/cjfast_json/run.sh
 packages/benchmarks/build.cj
