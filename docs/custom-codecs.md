@@ -110,34 +110,42 @@ import yjson.*
 import yjson_macros.*
 
 class Int64MapJsonCodec<T> <: JsonCodec<HashMap<Int64, T>> {
-    private let stringCodec: JsonCodec<HashMap<String, T>>
+    private let inner: JsonCodec<T>
 
     public init(inner: JsonCodec<T>) {
-        stringCodec = JsonCodecs.stringMap(inner)
+        this.inner = inner
     }
 
     public func write(value: HashMap<Int64, T>, writer: JsonWriter): Unit {
-        let fields = HashMap<String, T>()
+        writer.startObject()
         for ((key, item) in value) {
-            fields.add(key.toString(), item)
+            writer.writeName(key.toString())
+            inner.write(item, writer)
         }
-        stringCodec.write(fields, writer)
+        writer.endObject()
     }
 
     public func read(reader: JsonReader): HashMap<Int64, T> {
-        let fields = stringCodec.read(reader)
         let result = HashMap<Int64, T>()
-        for ((name, item) in fields) {
+        let objectPath = reader.path()
+        reader.startObject()
+        while (reader.hasObjectField()) {
+            let name = reader.readName()
+            let keyPath = objectPath + "/" + name.replace("~", "~0").replace("/", "~1")
+            let keyLocation = reader.location()
             let key = try {
                 YJson.fromJson(name, codec: JsonCodecs.int64)
             } catch (_: JsonException) {
-                throw JsonException("Invalid Int64 object key '${name}'", code: "invalid_map_key")
+                throw JsonException("Invalid Int64 object key '${name}'",
+                    code: "invalid_map_key", path: keyPath, location: keyLocation)
             }
             if (key.toString() != name) {
-                throw JsonException("Non-canonical Int64 object key '${name}'", code: "invalid_map_key")
+                throw JsonException("Non-canonical Int64 object key '${name}'",
+                    code: "invalid_map_key", path: keyPath, location: keyLocation)
             }
-            result.add(key, item)
+            result[key] = inner.read(reader)
         }
+        reader.endObject()
         result
     }
 }
@@ -175,7 +183,11 @@ main(): Unit {
 这个实现接受 `Int64` 范围内的标准十进制键，包括零、负数和两端边界。非法整数、越界值，
 以及 `"01"`、`"+1"`、`"-0"`、`"1.0"`、`"1e0"` 和带空白的键都会触发
 `invalid_map_key`，避免不同字符串转换成同一个整数键。相同字符串字段名的重复键处理
-沿用 `stringMap` 和调用方的读取选项。
+由 reader 按调用方的读取选项执行；允许重复键时，后一个值覆盖前一个值。
 
-读写过程各创建一个临时映射，额外空间随条目数增长。此示例适用于可以接受该开销的映射；
-它没有提供专门的 fast-reader 实现。
+键在 `readName()` 之后、读取字段值之前校验。示例保存对象路径，并按 JSON Pointer
+规则转义字段名，显式将字段路径和当前 `reader.location()` 传入异常。这样即使 reader
+尚未把字段名加入路径，也能保留嵌套上下文；例如 `users` 对象中非法键 `"bad"` 的路径是 `/users/bad`。
+
+这个实现逐字段读写，不创建临时字符串映射；解码时只创建结果映射。它没有提供专门的
+fast-reader 实现。
