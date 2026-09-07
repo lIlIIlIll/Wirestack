@@ -1,23 +1,21 @@
 # yjson_backends
 
-高级 backend 的窄接口 package。普通应用直接使用 GC 管理的 `YJson` API，不依赖本包。
+本包定义显式后端共用的接口。普通应用使用由 GC 管理的 `YJson` API，无需依赖本包。
 
-本包定义：
+本包提供以下类型：
 
-- `BackendJsonDocument <: Resource`；
-- `JsonBackendMetadata`；
-- `JsonStreamBufferingMode`。
+- `BackendJsonDocument <: Resource`：需要关闭的文档资源。
+- `JsonBackendMetadata`：后端信息。
+- `JsonStreamBufferingMode`：流式接口的缓冲方式。
 
-具体 engine 不通过任意 strategy 注入。应用从对应实现 package 取得命名 façade：
+应用通过各实现包提供的入口选择后端，不支持注入任意实现：
 
 ```cangjie
 let native = NativeBackends.customNative
 let yyjson = YyjsonBackends.yyjson
 ```
 
-`BackendJsonDocument` 的 root 使用统一 `JsonValueView`。document immutable，可并发读取，
-但必须关闭；关闭后访问 view 会抛出 `JsonException(code: "resource_closed")`。
+`BackendJsonDocument.root()` 返回统一的 `JsonValueView`。文档不可修改，支持并发读取，
+使用后必须关闭。关闭后访问视图会抛出 `JsonException(code: "resource_closed")`。
 
-完整 lifecycle、I/O 和选型 contract 见
-[Backend 使用指南](../../docs/backends.md)。
-
+资源管理、I/O 行为和后端选择见[后端使用指南](../../docs/backends.md)。

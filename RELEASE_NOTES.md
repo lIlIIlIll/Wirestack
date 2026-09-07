@@ -1,15 +1,15 @@
 # Release notes: 0.1.0
 
-`0.1.0` 开启 yjson 当前的实验版本线。版本号降低是有意的成熟度重置：仓库没有已知的 package
-registry 用户，项目将在 `0.x` 阶段继续简化 API，再冻结未来的稳定 `1.0.0` 契约。
+`0.1.0` 开启 yjson 当前的实验版本线。版本号有意调低，以说明 API 仍在实验阶段。仓库没有已知的 package
+registry 用户，项目将在 `0.x` 阶段继续简化 API，再为稳定的 `1.0.0` 冻结接口。
 
 既有 `1.0.0-rc.1`、`2.0.0` tag、GitHub Release、带日期的性能报告和 evidence 保持不可变，
 作为历史原型保留；它们不定义 `0.1.x` 的兼容性。历史仓库路径
 `release/2.0.0/evidence.md` 继续用于审计和性能基线，但不进入 `0.1.0` source archive。
 
-## Package graph
+## 发布包
 
-本版本包含九个使用同一版本号和候选 SHA 的 lockstep package：
+本版本包含九个同步发布的包，使用同一版本号和候选 SHA：
 
 | Package | 职责 |
 | --- | --- |
@@ -31,7 +31,7 @@ yjson = { path = "../yjson" }
 yjson_macros = { path = "../yjson/packages/yjson_macros" }
 ```
 
-有序依赖图由 [`release/release-graph.toml`](release/release-graph.toml) 唯一定义。examples、
+包的依赖顺序由 [`release/release-graph.toml`](release/release-graph.toml) 唯一定义。examples、
 benchmarks、conformance package 和 consumer fixture 都是仓库测试资产，不进入发布包。
 
 ## 兼容规则
@@ -60,16 +60,16 @@ benchmarks、conformance package 和 consumer fixture 都是仓库测试资产�
 - Custom Native 与 yyjson document 的逐节点 view 操作继续通过读锁与 `close()` 线性化；
   root serialization 和 document materialization 自动使用单次读锁 bulk 路径。
 
-完整迁移面见[公开 API 清单](docs/public-api-inventory.md)，API 选择见
+完整 API 变更见[公开 API 清单](docs/public-api-inventory.md)，API 选择见
 [API 选择指南](docs/choosing-an-api.md)。
 
-## 资格范围
+## 验证范围
 
 Pure runtime 的本地正式验证平台是 Linux；Windows 与 macOS 使用 GitHub runner。`0.1.0`
 Native qualification 仅覆盖 Linux x86_64。API reference 由固定版本的 cjdoc 为九个发布包生成。
 
-本版本不会把开发机 quick run 或高波动测量写成性能倍数。任何公开性能结论必须绑定候选 SHA、
-固定 SDK、等语义 workload、交替/反转轮次、checksum、RSS 和跨 profile 复验。
+开发机快速测量和高波动测量不用于发布性能倍数。任何公开性能结论必须记录候选 SHA、
+固定 SDK、等语义 workload、交替或反转的执行轮次、checksum、RSS 和跨 profile 复验结果。
 
 ## 发布证据
 

@@ -1,7 +1,7 @@
 # JSON Pointer、JSONPath 与 Patch
 
-这些 API 位于可选 `yjson_algorithms` package，并统一读取 `JsonValueView`。Pointer 定位一个
-明确位置，JSONPath 惰性查询零到多个结果，Patch 描述可验证的修改。
+这些 API 位于可选包 `yjson_algorithms`，统一读取 `JsonValueView`。Pointer 定位一个
+明确位置，JSONPath 按需查询零到多个结果，Patch 描述对文档的修改。
 
 ```cangjie
 import yjson.*
@@ -32,14 +32,14 @@ while (let Some(match) <- cursor.next()) {
 }
 ```
 
-`matches` 只创建 cursor；遍历和预算消耗发生在 `next()`。cursor 是有状态单线程对象，不要
-由多个线程并发消费。需要便捷结果时使用：
+`matches` 只创建游标，调用 `next()` 时才遍历数据并消耗预算。游标保存遍历状态，不要
+由多个线程并发消费。也可以使用以下方法获取结果：
 
 - `first`：找到第一个匹配后停止；
 - `collect`：收集 `JsonPathMatch`；
 - `collectValues`：只收集 `JsonValueView`。
 
-无效表达式使用 `invalid_json_path`。filter 中的 regex 使用内部非回溯引擎和
+无效表达式使用 `invalid_json_path`。过滤条件中的正则表达式使用内部非回溯引擎和
 `maxRegexSteps` 预算；反向引用等非正则特性以 `invalid_regex` 拒绝。
 
 ## JSON Patch（RFC 6902）
@@ -67,14 +67,14 @@ Patch 文档无效使用 `invalid_json_patch`，路径不存在使用 `json_poin
 let result = JsonMergePatch.apply(target, patchValue)
 ```
 
-object 中的 `null` 删除对应成员；其他值替换或递归合并。array 不逐元素 merge，而是整体
-替换。`apply` 返回新树，`applyInPlace` 修改传入的 `JsonNode`。
+对象中的 `null` 删除对应成员；其他值替换或递归合并。数组整体替换，不逐元素合并。`apply` 返回新树，`applyInPlace` 修改传入的 `JsonNode`。
 
 ## 工作预算
 
-`JsonPathLimits` 和 `JsonPatchLimits` 默认有限。预算耗尽统一抛出
-`JsonException(code: "work_limit_exceeded")`。`.unlimited` 只适合可信离线任务。默认值和
+`JsonPathLimits` 和 `JsonPatchLimits` 默认有限。执行预算耗尽时抛出
+`JsonException(code: "work_limit_exceeded")`。JSONPath 解析阶段超过表达式复杂度限制时，
+错误码为 `invalid_json_path`。`.unlimited` 只适合可信离线任务。默认值和
 每个维度的语义见[资源限制](resource-limits.md)。
 
-固定标准 corpus 的 revision、预期 cardinality 和执行入口见[测试指南](maintainers/testing.md)。
+固定标准语料的版本、预期用例数和执行入口见[测试指南](maintainers/testing.md)。
 

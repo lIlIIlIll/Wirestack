@@ -1,23 +1,21 @@
-# 性能证据
+# 性能测试
 
-yjson 的性能取决于 API、data model、payload、input shape 和 host。typed codec、mutable
-`JsonNode`、managed `JsonDocument`、显式 backend 和 stream 是不同问题，不能拼成一个
-“最快库”排名。
+比较性能时，要先确认使用的是同一种 API、数据模型、输入数据和机器环境。类型编解码、
+可修改的 `JsonNode`、只读的 `JsonDocument`、可选后端和流式读写需要分别测量。
 
 ## 0.1.0 状态
 
-`0.1.0` 还没有完成正式 release qualification，因此当前不发布新的性能倍数声明。合格结果
-必须绑定候选 commit、产品源码 digest、benchmark digest、固定 SDK、CPU affinity、heap、
-workload checksum、RSS、原始轮次和 runner version。
+`0.1.0` 尚未通过正式性能验收。用于发布的测试结果必须记录候选提交、产品和测试脚本的
+摘要、SDK、CPU 亲和性、堆大小、测试数据校验和、RSS、原始样本及运行脚本版本。
 
-发布门禁至少包含：
+发布前至少完成以下检查：
 
-- Pure baseline/candidate 的 11 轮交替/反转 A/B；
-- Native/Pure 的独立进程 11 轮资格；
-- yjson、stdx.json、cjfast_json 的同批次共同 workload；
-- DOM、typed codec 和 stream 分表；
-- checksum 正确性、RSS 和跨 profile 重复；
-- 双方 CV 不超过 5%，否则保留完整 noisy 批次。
+- Pure 基线与候选版本的 11 轮 A/B 测试，交替运行并反转顺序；
+- Native 与 Pure 在独立进程中的 11 轮对比；
+- yjson、stdx.json、cjfast_json 的同一批次、相同数据的对比；
+- DOM、类型编解码和流式读写分别列出结果；
+- 校验和、RSS，以及不同配置下的重复测试；
+- 双方变异系数（CV）不超过 5%；超出时保留完整批次并标记为噪声较大。
 
 具体阈值见[性能方法](methodology.md)。实现设计结论见
 [性能设计结论](../performance.md)。
@@ -26,7 +24,7 @@ workload checksum、RSS、原始轮次和 runner version。
 
 ## 历史证据
 
-以下页面绑定旧版本或开发快照，只用于审计和新候选的 baseline 选择：
+以下页面记录了旧版本或开发快照的结果，可用来查看历史数据或选择测试基线：
 
 - [2026-09-05 T9 A/B qualification](results/2026-09-05-t9-ab-qualification.md)
 - [2026-09-05 T9 矩阵(diagnostic)](results/2026-09-05-t9-matrix-bb43321.md)
@@ -34,16 +32,16 @@ workload checksum、RSS、原始轮次和 runner version。
 - [2026-08-26 Native acceleration](results/2026-08-26-native-acceleration.md)
 - [2026-08-25 Linux release baseline](results/2026-08-25-linux-release-three-library.md)
 
-旧页面不会因 `0.1.x` API 或实现变化而改写，也不能直接成为 `0.1.0` claim。
+历史页面保留测量时的信息，不随 `0.1.x` 的实现变化而更新。
 
 ## 如何读表
 
-- ratio 统一为 `yjson median / peer median`；小于 1 表示 yjson 延迟更低；
-- process median 是主要延迟统计；
-- CV 超过门槛的行保留并标为 noisy，不发布精确比例；
-- 高 CV 不能用于隐藏不利 workload；
-- 不同日期、runtime、SDK、input 或 API 的数字不能合并；
-- latency 不能推导 allocation、RSS、peak memory 或 throughput。
+- 比值统一为 `yjson median / peer median`；小于 1 表示 yjson 延迟更低；
+- 延迟主要采用进程样本的中位数；
+- CV 超过阈值的行保留并标为 noisy，不发布精确比例；
+- 高 CV 的慢速用例也必须保留；
+- 不同日期、运行时、SDK、输入或 API 的数字不能合并；
+- 延迟不能用来推导分配量、RSS、内存峰值或吞吐量。
 
-原始样本、logs、manifest、checksum 和环境信息属于不可变 release artifact。只有结果页明确
-写为通过，并且能追溯到已发布 commit 时，才能进入用户-facing claim。
+发布时保存原始样本、日志、清单、校验和及环境信息，不再改写。只有结果页标记为通过，
+且能对应到已发布提交的结果，才能用于对外说明性能。

@@ -1,10 +1,9 @@
-# Standards conformance consumer
+# 标准符合性测试
 
-该 executable 通过 yjson public API 适配固定 revision 的 JSON Schema draft 2020-12、
-JSONPath CTS 与 JSON Patch suites。它是 release gate，不是普通应用依赖。
+本包通过 yjson 公开 API 运行固定版本的 JSON Schema draft 2020-12、JSONPath CTS 和
+JSON Patch 测试集。它用于发布前检查，应用无需依赖本包。
 
-Runner 负责固定 upstream revision、生成输入、检查预期 cardinality，并把实际结果写入
-release evidence。optional `yjson_schema_formats` 测试与默认 core gate 分开，避免 Native
-format provider 掩盖 core required vocabulary 回归。
+测试脚本固定上游版本、生成输入、核对用例数量，并将结果写入发布记录。
+可选的 `yjson_schema_formats` 测试单独运行，防止它提供的格式校验掩盖核心包必需词汇的回归。
 
-稳定测试政策和当前 baseline 见[测试指南](../../docs/maintainers/testing.md)。
+测试规则和当前基线见[测试指南](../../docs/maintainers/testing.md)。
