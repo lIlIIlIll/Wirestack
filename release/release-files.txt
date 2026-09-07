@@ -206,6 +206,7 @@ release/package-manifests/yjson_yyjson.toml
 release/cjdoc-tool.toml
 release/cjdoc-policy.toml
 release/release-graph.toml
+release/0.1.0/evidence.md
 release/public-api-inventory.toml
 release/public-api-snapshot.txt
 release/public-c-abi-delta-bfd29.toml
@@ -287,6 +288,7 @@ packages/runtime_freeze_contract/cjpm.toml
 packages/runtime_freeze_contract/cjpm.lock
 packages/runtime_freeze_contract/src/main.cj
 packages/native_accel_benchmarks/cjpm.toml
+packages/native_accel_benchmarks/build.cj
 packages/native_accel_benchmarks/cjpm.lock
 packages/native_accel_benchmarks/src/bench_native_accel.cj
 packages/native_accel_benchmarks/README.md
