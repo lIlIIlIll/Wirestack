@@ -40,6 +40,7 @@ docs/performance/results/2026-08-26-native-acceleration.md
 docs/performance/results/2026-08-27-yjson-2.0.0.md
 docs/performance/results/2026-09-05-t9-matrix-bb43321.md
 docs/performance/results/2026-09-05-t9-ab-qualification.md
+docs/performance/results/2026-09-07-main-seven-library.md
 docs/migration/pre-1.0-to-1.0.md
 docs/release-checklist.md
 docs/schema.md
