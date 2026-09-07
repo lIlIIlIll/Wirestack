@@ -62,6 +62,13 @@ parser.add_argument("--baseline", type=Path, required=True)
 args = parser.parse_args()
 changed = changed_lines(args.diff.read_text(encoding="utf-8"))
 lines, branches = read_lcov(args.lcov)
+# A missing instrumented file is not the same thing as a comment-only diff.
+# Check report completeness before intersecting the report with changed lines.
+if not any(lines.values()):
+    raise SystemExit("coverage report contains no executable line records")
+missing = sorted(source for source in changed if source not in lines)
+if missing:
+    raise SystemExit("changed files missing from coverage report: " + ", ".join(missing))
 
 line_counts = [
     count
@@ -82,14 +89,20 @@ branch_percent = percent(branch_hit, len(branch_counts))
 baseline = tomllib.loads(args.baseline.read_text(encoding="utf-8"))
 line_minimum = float(baseline["patch_line_percent"])
 branch_minimum = float(baseline["patch_branch_percent"])
-print(
-    f"patch core line coverage: {line_hit}/{len(line_counts)} = {line_percent:.1f}% "
-    f"(minimum {line_minimum:.1f}%)"
-)
-print(
-    f"patch core branch coverage: {branch_hit}/{len(branch_counts)} = {branch_percent:.1f}% "
-    f"(minimum {branch_minimum:.1f}%)"
-)
+if line_counts:
+    print(
+        f"patch core line coverage: {line_hit}/{len(line_counts)} = {line_percent:.1f}% "
+        f"(minimum {line_minimum:.1f}%)"
+    )
+else:
+    print("patch core line coverage: N/A (no instrumented changed lines)")
+if branch_counts:
+    print(
+        f"patch core branch coverage: {branch_hit}/{len(branch_counts)} = {branch_percent:.1f}% "
+        f"(minimum {branch_minimum:.1f}%)"
+    )
+else:
+    print("patch core branch coverage: N/A (no instrumented changed branches)")
 if line_percent + 1e-9 < line_minimum:
     raise SystemExit("core line coverage fell below the patch minimum")
 if branch_percent + 1e-9 < branch_minimum:
