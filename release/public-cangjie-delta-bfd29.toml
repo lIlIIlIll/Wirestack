@@ -8,8 +8,8 @@ baseline_sha256 = "0ce5f31ddf32942d00d2ae3d7d1701cfaacc9b52ae3caf66dfe4e54391907
 review_status = "pending-migration-review"
 removed_records = 711
 removed_sha256 = "84403e3598ca4b0cdd9c5e4617bb009e8a27eca67deb027d10f09af13a3c23fb"
-added_records = 706
-added_sha256 = "0912bc4f57eeef096de25f0d1d3b3e4797d6e318ff0786a42394db74fc0f9029"
+added_records = 711
+added_sha256 = "6a00338fa1ab1837653b9a3454361b5916809147910488427288216fc959e9f8"
 
 [[review_groups]]
 classification = "advanced-backend-package-redesign"
@@ -303,6 +303,7 @@ added = [
   "yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPath|public func first(root: JsonValueView, limits!: JsonPathLimits = JsonPathLimits.defaults): Option<JsonPathMatch>",
   "yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPath|public func matches(document: JsonDocument, limits!: JsonPathLimits = JsonPathLimits.defaults): JsonPathCursor",
   "yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPath|public func matches(root: JsonValueView, limits!: JsonPathLimits = JsonPathLimits.defaults): JsonPathCursor",
+  "yjson_algorithms|packages/yjson_algorithms/src/lib_json_path.cj|JsonPath|public static func parse(expression: String, limits!: JsonPathLimits): JsonPath",
   "yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|JsonPointer|public func evaluate(document: JsonDocument): JsonValueView",
   "yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|JsonPointer|public func evaluate(root: JsonValueView): JsonValueView",
   "yjson_algorithms|packages/yjson_algorithms/src/lib_json_pointer.cj|JsonPointer|public func find(document: JsonDocument): Option<JsonValueView>",
@@ -329,9 +330,13 @@ added = [
   "yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchema|public func validate(instance: JsonValueView): JsonSchemaResult",
   "yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchema|public init(document: JsonValueView, draft!: String = \"https://json-schema.org/draft/2020-12/schema\", config!: JsonSchemaConfig = JsonSchemaConfig.defaults)",
   "yjson_algorithms|packages/yjson_algorithms/src/lib_json_schema.cj|JsonSchema|public static func fromValue(value: JsonValueView, config!: JsonSchemaConfig = JsonSchemaConfig.defaults): JsonSchema",
-  "yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public init(maxVisitedNodes!: Int64 = 100000, maxFilterSteps!: Int64 = 100000, maxRegexSteps!: Int64 = 100000, maxMatches!: Int64 = 10000, maxDepth!: Int64 = 256)",
+  "yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public init(maxVisitedNodes!: Int64 = 100000, maxFilterSteps!: Int64 = 100000, maxRegexSteps!: Int64 = 100000, maxMatches!: Int64 = 10000, maxDepth!: Int64 = 256, maxFilterExpressionBytes!: Int64 = 4096, maxFilterOperators!: Int64 = 256, maxFilterDepth!: Int64 = 64, maxFilterOperations!: Int64 = 200000)",
+  "yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public let maxFilterDepth: Int64",
+  "yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public let maxFilterExpressionBytes: Int64",
+  "yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public let maxFilterOperations: Int64",
+  "yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public let maxFilterOperators: Int64",
   "yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public let maxRegexSteps: Int64",
-  "yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public static let unlimited = JsonPathLimits(maxVisitedNodes: 0, maxFilterSteps: 0, maxRegexSteps: 0, maxMatches: 0, maxDepth: 0)",
+  "yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonPathLimits|public static let unlimited = JsonPathLimits(maxVisitedNodes: 0, maxFilterSteps: 0, maxRegexSteps: 0, maxMatches: 0, maxDepth: 0, maxFilterExpressionBytes: 0, maxFilterOperators: 0, maxFilterDepth: 0, maxFilterOperations: 0)",
   "yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonSchemaLimits|public init(maxEvaluations!: Int64 = 100000, maxRefResolutions!: Int64 = 1000, maxRegexSteps!: Int64 = 100000, maxErrors!: Int64 = 100, maxDepth!: Int64 = 256)",
   "yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonSchemaLimits|public let maxRegexSteps: Int64",
   "yjson_algorithms|packages/yjson_algorithms/src/work_limits.cj|JsonSchemaLimits|public static let unlimited = JsonSchemaLimits(maxEvaluations: 0, maxRefResolutions: 0, maxRegexSteps: 0, maxErrors: 0, maxDepth: 0)",
