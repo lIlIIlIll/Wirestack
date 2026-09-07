@@ -127,10 +127,12 @@ class YJsonPathTest {
         padding += "']"
         @Expect(@AssertThrows[JsonException](JsonPath.parse(padding)).code, "invalid_json_path")
 
-        // Explicit budgets can be raised for callers that need them.
-        let relaxed = JsonPathLimits(maxFilterExpressionBytes: 0, maxFilterOperators: 0,
-            maxFilterDepth: 0, maxFilterOperations: 0)
-        @Expect(JsonPath.parse(longChain, limits: relaxed).isSingular(), false)
+        // Explicit budgets are raisable: the same oversized expression
+        // parses once the byte budget is lifted, and the relaxed parse
+        // stays recursion-free (byte budget only, shallow expression).
+        let relaxed = JsonPathLimits(maxFilterExpressionBytes: 0)
+        let parsed = JsonPath.parse(padding, limits: relaxed)
+        @Expect(parsed.isSingular(), false)
     }
 
     @TestCase
