@@ -178,6 +178,8 @@ benchmarks/full-seven-library/summarize_full.py
 benchmarks/full-seven-library/fixture-preflight-overlay.patch
 benchmarks/results/full-seven-library/current-main.json
 benchmarks/results/full-seven-library/2026-09-07-main-087a82e/README.md
+benchmarks/results/full-seven-library/2026-09-07-main-3df2801/README.md
+release/0.1.0/evidence.md
 benchmarks/cjfast_json/cjfast_comprehensive_bench.cj
 packages/native_accel_benchmarks/build.cj
 benchmarks/cjfast_json/run.sh
