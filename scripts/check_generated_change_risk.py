@@ -21,6 +21,9 @@ CONSUMER_TEST_PREFIX = "packages/codec_integration/src/"
 
 
 def is_generated_risk(path: str) -> bool:
+    # This hand-written guide is not an input to macro expansion or builds.
+    if path == "packages/yjson_macros/README.md":
+        return False
     return path in RISK_FILES or path.startswith(RISK_PREFIXES)
 
 

@@ -21,6 +21,22 @@ class GeneratedChangeRiskTest(unittest.TestCase):
     def test_unrelated_change_needs_no_consumer_change(self) -> None:
         self.assertEqual(RISK.validate_changed_paths(["README.md"]), [])
 
+    def test_macro_readme_needs_no_runtime_test(self) -> None:
+        paths = ["packages/yjson_macros/README.md"]
+        self.assertEqual(RISK.validate_changed_paths(paths), [])
+        self.assertEqual(RISK.validate_behavioral_test_diff(paths, ""), [])
+
+    def test_macro_readme_does_not_hide_code_or_build_changes(self) -> None:
+        for changed in (
+            "packages/yjson_macros/src/json_codec.cj",
+            "packages/yjson_macros/cjpm.toml",
+            "packages/yjson_macros/build.cj",
+        ):
+            with self.subTest(changed=changed):
+                paths = ["packages/yjson_macros/README.md", changed]
+                self.assertEqual(len(RISK.validate_changed_paths(paths)), 1)
+                self.assertEqual(len(RISK.validate_behavioral_test_diff(paths, "")), 1)
+
     def test_macro_change_without_external_runtime_test_fails(self) -> None:
         errors = RISK.validate_changed_paths(
             ["packages/yjson_macros/src/json_codec.cj"]
