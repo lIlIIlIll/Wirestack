@@ -30,6 +30,11 @@ cangjieJSON、json4cj、Jackson 和 fastjson2 的外部测试程序必须先应�
 `YJSON_SEVEN_LIBRARY_PREFLIGHT_V1` 标记；缺少任一标记时终止运行。标记只证明测试程序
 版本正确，准备步骤中五种测试用例两侧的编码与解码断言仍必须执行成功。
 
+七库证据的源码身份只覆盖该矩阵实际使用的 runtime、`@JsonCodec` 宏和 benchmark
+fixture；独立的 JSON literal 宏不在这条 typed-codec workload closure 中。只新增或修改
+该未测 API 不会使七库数字失效；runtime、codec 宏或 fixture 变化仍必须完整重跑并更新
+evidence marker。
+
 ## 统计与展示
 
 - 以各独立进程测量值的中位数为主要延迟统计。

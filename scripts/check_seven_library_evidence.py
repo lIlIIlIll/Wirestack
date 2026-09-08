@@ -18,7 +18,13 @@ import tempfile
 import tomllib
 from typing import Any
 
-from json_pure_perf_compare import harness_manifest, manifest_digest, product_manifest
+from json_pure_perf_compare import (
+    canonical_benchmark_input_bytes,
+    harness_manifest,
+    manifest_digest,
+    product_manifest,
+)
+
 from release_graph import load_release_graph
 
 
@@ -119,6 +125,24 @@ def sha256(path: pathlib.Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest_value.update(chunk)
     return digest_value.hexdigest()
+
+
+def digest_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def benchmark_input_sha256(
+    root: pathlib.Path, relative: pathlib.Path, data: bytes | None = None
+) -> str:
+    relative_name = relative.as_posix()
+    payload = (
+        (root / relative).read_bytes()
+        if data is None
+        else data
+    )
+    return digest_bytes(
+        canonical_benchmark_input_bytes(root, relative_name, payload)
+    )
 
 
 def reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -286,7 +310,9 @@ def release_candidate_binding(
             path = root / manifest_path
             if not path.is_file():
                 raise EvidenceError(f"release graph manifest is missing: {manifest_path}")
-            manifest_files[manifest_path.as_posix()] = sha256(path)
+            manifest_files[manifest_path.as_posix()] = benchmark_input_sha256(
+                root, manifest_path
+            )
 
     root_manifest = root / "cjpm.toml"
     root_lock = root / "cjpm.lock"
@@ -294,9 +320,11 @@ def release_candidate_binding(
         raise EvidenceError("root cjpm.lock is missing")
     candidate: dict[str, Any] = {
         "package_version": graph.version,
-        "root_manifest_sha256": sha256(root_manifest),
-        "root_lock_sha256": sha256(root_lock),
-        "release_graph_sha256": sha256(graph_path),
+        "root_manifest_sha256": benchmark_input_sha256(root, pathlib.Path("cjpm.toml")),
+        "root_lock_sha256": benchmark_input_sha256(root, pathlib.Path("cjpm.lock")),
+        "release_graph_sha256": benchmark_input_sha256(
+            root, pathlib.Path("release/release-graph.toml")
+        ),
         "lockstep_manifests_sha256": manifest_digest(manifest_files),
     }
     candidate["identity_sha256"] = candidate_identity_sha256(
@@ -790,9 +818,6 @@ def git_blob(root: pathlib.Path, commit: str, relative: pathlib.Path) -> bytes:
     return completed.stdout
 
 
-def bytes_sha256(value: bytes) -> str:
-    return hashlib.sha256(value).hexdigest()
-
 
 def verify_measured_candidate_binding(
     root: pathlib.Path, marker: dict[str, Any]
@@ -804,11 +829,11 @@ def verify_measured_candidate_binding(
     except (OSError, UnicodeError, ValueError) as error:
         raise EvidenceError(f"invalid release graph: {error}") from error
     graph_path = pathlib.Path("release/release-graph.toml")
-    if bytes_sha256(git_blob(root, commit, graph_path)) != candidate["release_graph_sha256"]:
+    if benchmark_input_sha256(root, graph_path, git_blob(root, commit, graph_path)) != candidate["release_graph_sha256"]:
         raise EvidenceError("measured commit release graph differs from candidate identity")
 
     root_manifest_bytes = git_blob(root, commit, pathlib.Path("cjpm.toml"))
-    if bytes_sha256(root_manifest_bytes) != candidate["root_manifest_sha256"]:
+    if benchmark_input_sha256(root, pathlib.Path("cjpm.toml"), root_manifest_bytes) != candidate["root_manifest_sha256"]:
         raise EvidenceError("measured commit root manifest differs from candidate identity")
     try:
         measured_root = tomllib.loads(root_manifest_bytes.decode("utf-8"))
@@ -819,7 +844,7 @@ def verify_measured_candidate_binding(
         raise EvidenceError("measured commit package version differs from candidate identity")
 
     root_lock_bytes = git_blob(root, commit, pathlib.Path("cjpm.lock"))
-    if bytes_sha256(root_lock_bytes) != candidate["root_lock_sha256"]:
+    if benchmark_input_sha256(root, pathlib.Path("cjpm.lock"), root_lock_bytes) != candidate["root_lock_sha256"]:
         raise EvidenceError("measured commit root lock differs from candidate identity")
 
     measured_manifests: dict[str, str] = {}
@@ -828,8 +853,8 @@ def verify_measured_candidate_binding(
             release_package.development_manifest,
             release_package.release_manifest,
         ):
-            measured_manifests[manifest_path.as_posix()] = bytes_sha256(
-                git_blob(root, commit, manifest_path)
+            measured_manifests[manifest_path.as_posix()] = benchmark_input_sha256(
+                root, manifest_path, git_blob(root, commit, manifest_path)
             )
     if manifest_digest(measured_manifests) != candidate["lockstep_manifests_sha256"]:
         raise EvidenceError(

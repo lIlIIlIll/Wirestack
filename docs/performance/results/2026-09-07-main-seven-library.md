@@ -113,8 +113,9 @@ python3 scripts/check_seven_library_evidence.py
 ```
 
 校验器会验证归档 checksum、安全解包、两批完整性、metadata 身份和可重生成的 summary。
-它还要求 marker 的测量提交是当前提交的祖先，并重新计算当前产品源码与 benchmark 输入摘要。
-性能输入发生变化后，必须重跑 benchmark 并更新 marker；只更新 README 中的数字不能通过门禁。
+它还要求 marker 的测量提交是当前提交的祖先，并重新计算当前 benchmark input closure 的摘要。
+runtime、`@JsonCodec` 宏或 benchmark fixture 发生变化后，必须重跑 benchmark 并更新 marker；
+独立 JSON literal 宏不属于这条 typed-codec closure，因此不会单独使这些结果失效。
 
 最近一次通过 release qualification 的数据仍是
 [yjson 2.0.0 性能验收](2026-08-27-yjson-2.0.0.md)。
