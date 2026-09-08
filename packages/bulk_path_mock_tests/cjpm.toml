@@ -9,4 +9,4 @@ compile-option = "-Woff unused"
 
 [dependencies]
 yjson = { path = "../.." }
-yjson_macros = { path = "../yjson_macros" }
+yjson_macros = { git = "https://github.com/lIlIIlIll/yjson_macros.git", commitId = "30c3def793054c4b5ba25be2e22598e141923a51" }

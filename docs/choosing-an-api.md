@@ -8,6 +8,7 @@
 | 需求 | 首选入口 | 约束 |
 | --- | --- | --- |
 | class、struct 或 enum 与 JSON 互转 | `@JsonCodec` + `YJson.toJson/fromJson` | 编译期生成，无运行时反射 |
+| 在源码中构造 JSON 树 | `@Json({...})` + `yjson_macros` | 编译期校验，结果是可修改的 `JsonNode` |
 | 已有内置或自定义 codec | 同一 `YJson` 入口并传 `codec:` | 无需实现 `GeneratedCodecProviderV1` |
 | 构造或修改 JSON 树 | `JsonNode.parse` / `JsonNode.object` / `JsonNode.array` | 返回可修改 `JsonNode` |
 | 只读查询文档 | `YJson.parseDocument` | 返回 GC 管理的 `JsonDocument` |
@@ -15,6 +16,11 @@
 | 校验 JSON 实例 | `yjson_algorithms.JsonSchema` | draft 2020-12；默认有限预算 |
 | 精确定位或多结果查询 | `JsonPointer` / `JsonPath` | 统一操作 `JsonValueView` |
 | 更新 JSON | `JsonPatch` / Merge Patch | 默认返回新树，也可选择原地修改 API |
+
+`@JsonValue({...})` 是 `@Json` 的显式别名。literal 中可以使用 `$()` 插入运行时值或动态
+字符串 key；字段之间必须有逗号，允许尾随逗号。需要 JSON 文本时，对结果调用 `toJson()`。
+`yjson_macros` 源码位于独立仓库 [`lIlIIlIll/yjson_macros`](https://github.com/lIlIIlIll/yjson_macros)；
+应用需要同时声明 `yjson` 和 `yjson_macros` 两个依赖。
 
 ## 转换为已知类型
 

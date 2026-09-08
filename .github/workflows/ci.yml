@@ -26,6 +26,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
+          submodules: recursive
       - name: Install probe compiler
         run: |
           sudo apt-get update
@@ -43,6 +44,7 @@ jobs:
         with:
           clean: true
           fetch-depth: 0
+          submodules: recursive
       - name: Require external runtime tests for macro and SPI changes
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -64,6 +66,7 @@ jobs:
         with:
           clean: true
           fetch-depth: 0
+          submodules: recursive
       - name: Verify current seven-library evidence
         env:
           # Development may contain unmeasured performance-input changes. The
@@ -79,6 +82,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
+          submodules: recursive
       - name: Verify frozen Stream evidence and generated documentation
         run: scripts/ci_job.sh stream-docs
 
@@ -93,6 +97,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
+          submodules: recursive
       - name: Test nightly and candidate wiring
         run: |
           python3 scripts/test_latest_cangjie_nightly.py
@@ -156,6 +161,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
+          submodules: recursive
       - name: Setup Cangjie
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
@@ -199,6 +205,9 @@ jobs:
           YJSON_RESOLVED_NIGHTLY: ${{ needs.nightly.outputs.version }}
           YJSON_SECOND_YYJSON_ROOT: ${{ matrix.gate == 'yyjson-colink' && '/tmp/yjson-yyjson-second/yyjson-0.11.1' || '' }}
           YJSON_STANDARDS_OFFLINE: ${{ contains(fromJSON('["standards-conformance","schema-formats-conformance"]'), matrix.gate) && '1' || '' }}
+          # The pinned nightly's LLVM llc crashes at -O2 while linking the
+          # source-external yjson registry consumer on ubuntu-24.04.
+          YJSON_CI_DEPENDENCY_OVERRIDE: ${{ matrix.gate == 'registry-rehearsal' && '-O1' || '' }}
         run: |
           ulimit -s 131072
           ulimit -s
@@ -226,6 +235,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
+          submodules: recursive
       - name: Setup Cangjie
         if: matrix.os != 'windows-2022'
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
@@ -289,6 +299,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
+          submodules: recursive
       - name: Setup Cangjie
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
@@ -363,6 +374,7 @@ jobs:
         with:
           clean: true
           fetch-depth: 0
+          submodules: recursive
       - name: Setup Cangjie
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:

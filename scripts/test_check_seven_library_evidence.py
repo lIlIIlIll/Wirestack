@@ -24,7 +24,16 @@ def write(path: pathlib.Path, text: str = "fixture\n") -> None:
 
 def git(root: pathlib.Path, *args: str, input_text: str | None = None) -> str:
     completed = subprocess.run(
-        ["git", "-C", str(root), *args],
+        [
+            "git",
+            "-c",
+            "gc.auto=0",
+            "-c",
+            "maintenance.auto=false",
+            "-C",
+            str(root),
+            *args,
+        ],
         input=input_text,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

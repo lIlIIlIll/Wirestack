@@ -23,6 +23,8 @@ class PurePerfProvenanceTest(unittest.TestCase):
             "packages/benchmarks/cjpm.lock": "benchmark lock\n",
             "packages/benchmarks/build.cj": "main() {}\n",
             "packages/benchmarks/src/bench.cj": "package bench\n",
+            "packages/yjson_macros/src/json_codec.cj": "macro codec\n",
+            "packages/yjson_macros/src/json_literal.cj": "macro literal\n",
             "packages/yjson_macros/cjpm.toml": "macro manifest\n",
             "packages/yjson_macros/cjpm.lock": "macro lock\n",
             "scripts/build_native_scanner.py": "pass\n",
@@ -58,6 +60,35 @@ class PurePerfProvenanceTest(unittest.TestCase):
                     relative,
                 )
                 path.write_text(original, encoding="utf-8")
+
+    def test_product_digest_ignores_unmeasured_literal_macro(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            self.make_tree(root)
+            initial = MODULE.manifest_digest(MODULE.product_manifest(root))
+            literal = root / "packages/yjson_macros/src/json_literal.cj"
+            literal.write_text("changed literal\n", encoding="utf-8")
+            self.assertEqual(
+                MODULE.manifest_digest(MODULE.product_manifest(root)), initial
+            )
+            codec = root / "packages/yjson_macros/src/json_codec.cj"
+            codec.write_text("changed codec\n", encoding="utf-8")
+            self.assertNotEqual(
+                MODULE.manifest_digest(MODULE.product_manifest(root)), initial
+            )
+
+    def test_standalone_macro_dependency_is_canonicalized(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            data = (
+                "[dependencies]\n"
+                f'yjson_macros = {{ {MODULE.STANDALONE_MACRO_GIT} }}\n'
+            ).encode("utf-8")
+            normalized = MODULE.canonical_benchmark_input_bytes(
+                root, "packages/benchmarks/cjpm.toml", data
+            ).decode("utf-8")
+            self.assertIn('yjson_macros = { path = "../yjson_macros" }', normalized)
+            self.assertNotIn("commitId", normalized)
 
     def test_artifact_identity_rejects_symlink_and_hashes_regular_binary(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

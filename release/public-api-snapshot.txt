@@ -212,6 +212,8 @@ yjson_backends|packages/yjson_backends/src/backends.cj|JsonStreamBufferingMode||
 yjson_macros|packages/yjson_macros/src/json_codec.cj|<top-level>|public macro JsonCodec(input: Tokens): Tokens
 yjson_macros|packages/yjson_macros/src/json_codec.cj|<top-level>|public macro JsonSubtype(attrs: Tokens, input: Tokens): Tokens
 yjson_macros|packages/yjson_macros/src/json_codec.cj|<top-level>|public macro JsonUsing(attrs: Tokens, input: Tokens): Tokens
+yjson_macros|packages/yjson_macros/src/json_literal.cj|<top-level>|public macro Json(input: Tokens): Tokens
+yjson_macros|packages/yjson_macros/src/json_literal.cj|<top-level>|public macro JsonValue(input: Tokens): Tokens
 yjson_native_accel|packages/yjson_native_accel/src/native_accel.cj|<top-level>|public class YJsonNativeAccel
 yjson_native_accel|packages/yjson_native_accel/src/native_accel.cj|YJsonNativeAccel|public static func initialize(): Unit
 yjson_native_primitives|packages/yjson_native_primitives/src/native_primitives.cj|<top-level>|public func initializeYJsonNativePrimitivesV1(): Unit

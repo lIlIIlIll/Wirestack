@@ -39,3 +39,17 @@ kind = "macro"
 name = "JsonUsing"
 count = 1
 rationale = "cjdoc does not model public macro declarations"
+
+[[allowed_unsupported]]
+package = "yjson_macros"
+kind = "macro"
+name = "Json"
+count = 1
+rationale = "cjdoc does not model public macro declarations"
+
+[[allowed_unsupported]]
+package = "yjson_macros"
+kind = "macro"
+name = "JsonValue"
+count = 1
+rationale = "cjdoc does not model public macro declarations"

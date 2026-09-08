@@ -54,8 +54,9 @@ group 时才有效。`release-ready` graph 会再次执行这项检查。
 
 ## 生成代码协议
 
-`yjson` 与 `yjson_macros` 是同一个 lockstep release。macro 输出面向
-`generated_support.v1` 并嵌入 protocol version 1；不匹配时明确失败。
+`yjson` 与独立仓库 [`yjson_macros`](https://github.com/lIlIIlIll/yjson_macros) 是同一个
+lockstep release。macro 输出面向 `generated_support.v1` 并嵌入 protocol version 1；不匹配时
+明确失败。
 
 普通 generated codec bridge 是
 `GeneratedCodecProviderV1<T>.generatedCodecV1(_: GeneratedCodecTokenV1<T>): JsonCodec<T>`。
@@ -63,14 +64,14 @@ group 时才有效。`release-ready` graph 会再次执行这项检查。
 `JsonCodec<T>`。宏展开和 runtime dispatch 之间不经过 `Any`、erase/reify adapter 或运行时
 类型转换。
 
-bridge 声明因跨 package 展开而必须 public，但不是普通应用入口。应用使用 `@JsonCodec`、
-`JsonCodec<T>`、`YJson` 和 `JsonCodecs`。
+bridge 声明因跨 package 展开而必须 public，但不是普通应用入口。应用使用
+`@JsonCodec`、`@Json({...})`、`JsonCodec<T>`、`YJson` 和 `JsonCodecs`。
 
 ## 可选包
 
 | Package | 用途 | 生命周期 |
 | --- | --- | --- |
-| `yjson_macros` | 编译期 generated codec | 与 runtime lockstep，不在运行期加载 |
+| `yjson_macros` | 编译期 generated codec 和 JSON literal | 与 runtime lockstep，不在运行期加载 |
 | `yjson_algorithms` | Pointer、Patch、Path 和 Schema | 默认有限预算；cursor 单线程 |
 | `yjson_schema_formats` | 国际化 Schema format | 在 Schema 构造前安装到 registry |
 | `yjson_native_accel` | 启动时初始化 Native primitive | 进程级冻结；不能 uninstall 或切换 |

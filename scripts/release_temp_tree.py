@@ -82,6 +82,45 @@ def git_output(root: pathlib.Path, arguments: list[str]) -> str:
         message = result.stderr.strip() or result.stdout.strip()
         raise ValueError(f"cannot establish release Git identity: {message}")
     return result.stdout.strip()
+def git_submodule_paths(root: pathlib.Path) -> list[pathlib.Path]:
+    gitmodules = root / ".gitmodules"
+    if not gitmodules.is_file():
+        return []
+    configured = git_output(
+        root, ["config", "--file", ".gitmodules", "--get-regexp", r"\.path$"]
+    )
+    paths: list[pathlib.Path] = []
+    for line in configured.splitlines():
+        _, value = line.split(maxsplit=1)
+        paths.append(root / pathlib.Path(value))
+    return paths
+
+
+def git_tracked_paths(root: pathlib.Path) -> set[str]:
+    tracked = set(filter(None, git_output(root, ["ls-files"]).splitlines()))
+    for submodule in git_submodule_paths(root):
+        if not submodule.is_dir():
+            continue
+        nested = git_output(submodule, ["ls-files"])
+        prefix = submodule.relative_to(root).as_posix()
+        tracked.update(
+            f"{prefix}/{path}"
+            for path in nested.splitlines()
+            if path
+        )
+    return tracked
+
+
+def ensure_clean_submodules(root: pathlib.Path) -> None:
+    for submodule in git_submodule_paths(root):
+        status = git_output(submodule, ["status", "--porcelain=v1", "--untracked-files=all"])
+        if status:
+            relative = submodule.relative_to(root)
+            raise ValueError(
+                f"formal release candidate requires a clean Git submodule: {relative}"
+            )
+
+
 
 
 def release_identity(
@@ -102,13 +141,14 @@ def release_identity(
         git_output(root, ["rev-parse", "--show-toplevel"])).resolve()
     if repository_root != root.resolve():
         raise ValueError(f"release root is not the Git worktree root: {root}")
-    tracked = set(filter(None, git_output(root, ["ls-files"]).splitlines()))
+    tracked = git_tracked_paths(root)
     untracked = sorted(path.as_posix() for path in paths if path.as_posix() not in tracked)
     if untracked:
         raise ValueError(
             "release manifest contains paths not tracked by Git:\n  "
             + "\n  ".join(untracked)
         )
+    ensure_clean_submodules(root)
     status = git_output(root, ["status", "--porcelain=v1", "--untracked-files=all"])
     if status:
         raise ValueError("formal release candidate requires a clean Git worktree")
