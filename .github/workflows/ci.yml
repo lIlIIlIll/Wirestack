@@ -26,6 +26,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
+          submodules: recursive
       - name: Install probe compiler
         run: |
           sudo apt-get update
@@ -43,6 +44,7 @@ jobs:
         with:
           clean: true
           fetch-depth: 0
+          submodules: recursive
       - name: Require external runtime tests for macro and SPI changes
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -64,6 +66,7 @@ jobs:
         with:
           clean: true
           fetch-depth: 0
+          submodules: recursive
       - name: Verify current seven-library evidence
         env:
           # Development may contain unmeasured performance-input changes. The
@@ -79,6 +82,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
+          submodules: recursive
       - name: Verify frozen Stream evidence and generated documentation
         run: scripts/ci_job.sh stream-docs
 
@@ -93,6 +97,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
+          submodules: recursive
       - name: Test nightly and candidate wiring
         run: |
           python3 scripts/test_latest_cangjie_nightly.py
@@ -156,6 +161,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
+          submodules: recursive
       - name: Setup Cangjie
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
@@ -226,6 +232,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
+          submodules: recursive
       - name: Setup Cangjie
         if: matrix.os != 'windows-2022'
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
@@ -289,6 +296,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
+          submodules: recursive
       - name: Setup Cangjie
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
@@ -363,6 +371,7 @@ jobs:
         with:
           clean: true
           fetch-depth: 0
+          submodules: recursive
       - name: Setup Cangjie
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
