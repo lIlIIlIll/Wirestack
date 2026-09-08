@@ -288,6 +288,8 @@ jobs:
           cjpm --version
           ${{ matrix.checksum }} "$RUNNER_TEMP/${{ matrix.archive }}"
       - name: Run Pure package gates
+        env:
+          YJSON_CI_DEPENDENCY_OVERRIDE: ${{ matrix.os == 'windows-2022' && '-O1' || '' }}
         run: scripts/ci_job.sh pure-platform
 
   api-docs:

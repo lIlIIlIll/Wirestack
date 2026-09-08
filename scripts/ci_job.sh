@@ -183,13 +183,15 @@ case "$job" in
         require_cangjie
         if [[ "$(uname -s)" == Darwin ]]; then
             # The deep JSONPath tests need a larger Cangjie thread stack on macOS.
-            # Keep this scoped to the Pure test gate; do not alter optimization.
+            # Keep this scoped to the Pure test gate; optimization overrides stay
+            # explicit in the caller environment.
             export cjStackSize=8MB
         fi
-        # A failing test is not an infrastructure retry. Preserve the checked-in
-        # optimization settings and propagate the first failure on every host.
-        (cd "$repo" && cjpm test --no-color)
-        (cd "$repo/packages/yjson_algorithms" && cjpm test --no-color)
+        # A failing test is not an infrastructure retry. Propagate the first
+        # failure while honoring any explicit dependency optimization override.
+        run_with_dependency_override "$repo" cjpm test --no-color
+        run_with_dependency_override "$repo/packages/yjson_algorithms" \
+            cjpm test --no-color
         ;;
     standards-conformance)
         require_cangjie
