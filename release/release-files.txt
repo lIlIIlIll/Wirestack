@@ -284,6 +284,7 @@ packages/codec_integration/cjpm.toml
 packages/codec_integration/cjpm.lock
 packages/codec_integration/src/generated_collections_test.cj
 packages/codec_integration/src/main.cj
+packages/codec_integration/src/json_literal_test.cj
 packages/standards_conformance/cjpm.toml
 packages/standards_conformance/cjpm.lock
 packages/standards_conformance/src/main.cj
