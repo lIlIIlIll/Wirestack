@@ -32,6 +32,7 @@ yjson 是仓颉 JSON 库，支持类型与 JSON 互转、构造和修改 JSON �
 ## 适合什么场景
 
 - class、struct、enum 与 JSON 之间的类型安全转换；
+- 在源码中用 `@Json({...})` 构造可修改的 JSON 树；
 - 不依赖运行时反射的编译期编解码；
 - 修改 JSON 树、查询只读文档、读写调用方提供的流；
 - 限制输入字节数、字符串大小、缓冲区大小和嵌套深度；
@@ -41,19 +42,32 @@ yjson 是仓颉 JSON 库，支持类型与 JSON 互转、构造和修改 JSON �
 
 ## 安装
 
-当前使用本地路径依赖。将 yjson 仓库放在应用目录旁边，再把下面的配置加入应用的
-`cjpm.toml`；如果目录位置不同，请调整 `path`。
+仓库包含多个独立的 `cjpm` 模块。`yjson_macros` 是必须单独编译的宏模块，不能作为
+runtime `yjson` 的子包。
 
-使用 `@JsonCodec` 时，同时添加运行库和宏包：
+从源码使用时，将两个仓库放在同级目录，并声明本地路径依赖。主仓库若要运行自身的宏测试，
+请使用 `git clone --recurse-submodules`，或者单独下载 `yjson_macros` 仓库。
 
 ```toml
 [dependencies]
 yjson = { path = "../yjson" }
-yjson_macros = { path = "../yjson/packages/yjson_macros" }
+yjson_macros = { path = "../yjson_macros" }
 ```
 
+也可以直接使用两个根模块的 Git 依赖：
+
+```toml
+[dependencies]
+yjson = { git = "https://github.com/lIlIIlIll/yjson.git", branch = "main" }
+yjson_macros = { git = "https://github.com/lIlIIlIll/yjson_macros.git", branch = "main" }
+```
+
+`cjpm` 当前不能从一个 monorepo 的 Git 依赖中选择子目录，因此不能使用 Git
+`subdir` 选项。只允许一个 Git 依赖时，必须改用本地源码布局或不依赖宏包的
+`JsonNode.object()`、`JsonNode.array()` 和 `put()` API。
+
 只做 JSON 解析、节点操作、只读查询或使用手写编解码器时，添加 `yjson` 即可。
-这份安装说明使用本地源码，不依赖包仓库中的发布状态。SDK 的测试范围见[发布记录](release/0.1.0/evidence.md)。
+这份安装说明使用源码仓库，不依赖包仓库中的发布状态。SDK 的测试范围见[发布记录](release/0.1.0/evidence.md)。
 
 ## 快速开始
 
@@ -126,14 +140,12 @@ let name = document.root().member("name").getOrThrow().asString()
 `JsonValueView` 用同一套只读接口访问 `JsonNode`、`JsonDocument` 和可选后端的文档。
 调用 `materialize()` 可以复制成可修改的树，默认最多复制 100,000 个节点，深度不超过 256 层。
 需要调整节点数量上限时，传入
-`materialize(maxNodes)`。AST 与只读文档的选择见
-[AST 与只读 Document](docs/ast-and-compact.md)。
 
 ## 可选包
 
 | 包 | 用途 |
 | --- | --- |
-| `yjson_macros` | `@JsonCodec`、`@JsonSubtype` 和 `@JsonUsing` 编译期宏 |
+| `yjson_macros` | `@JsonCodec`、`@Json`、`@JsonSubtype` 和 `@JsonUsing` 编译期宏 |
 | `yjson_algorithms` | Pointer、Path、Patch、Merge Patch 和 Schema |
 | `yjson_schema_formats` | Schema 国际化格式校验 |
 | `yjson_native_accel` | 启动时为 `YJson` 启用原生加速 |

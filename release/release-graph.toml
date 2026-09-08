@@ -29,7 +29,7 @@ source_root = "packages/yjson_macros/src"
 stage_kind = "package"
 stability = "stable"
 leaf_bundle = false
-dependencies = ["yjson"]
+dependencies = []
 
 [[packages]]
 name = "yjson_algorithms"

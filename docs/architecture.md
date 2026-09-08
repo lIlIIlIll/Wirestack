@@ -7,7 +7,7 @@
 
 ```text
 yjson
-├── yjson_macros ────────────────> yjson
+├── yjson_macros (standalone repository) ─> yjson
 ├── yjson_algorithms ────────────> yjson
 ├── yjson_backends ──────────────> yjson
 ├── yjson_native_primitives ─────> yjson
@@ -19,9 +19,10 @@ yjson
 └── yjson_schema_formats ────────> yjson + yjson_algorithms
 ```
 
-箭头表示左侧依赖右侧。九个包使用同一 `0.1.x` 版本和候选 SHA。
-[`release/release-graph.toml`](../release/release-graph.toml) 是发布顺序、源码目录、
-稳定性和完整依赖关系的清单。仓库不发布统一导出所有功能的包。
+普通箭头表示左侧的 cjpm module 依赖右侧；`yjson_macros → yjson` 是例外，表示宏展开产物
+面向 runtime，而不是宏模块自身的直接依赖。九个包使用同一 `0.1.x` 版本和候选 SHA；
+`yjson_macros` 的源码仓库为 [`lIlIIlIll/yjson_macros`](https://github.com/lIlIIlIll/yjson_macros)。主
+仓库的发布清单仍记录该宏包的 lockstep 版本。仓库不发布统一导出所有功能的包。
 
 开发用的根清单只通过 `[test-dependencies]` 使用宏；核心运行时没有
 指向宏包的循环依赖。所有 cjpm 测试文件使用 `*_test.cj` 后缀，使 cjpm 与 cjdoc 按同一规则排除测试代码。

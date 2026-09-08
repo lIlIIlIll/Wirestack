@@ -1,0 +1,3 @@
+[submodule "packages/yjson_macros"]
+	path = packages/yjson_macros
+	url = https://github.com/lIlIIlIll/yjson_macros.git

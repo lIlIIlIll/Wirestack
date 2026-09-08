@@ -9,12 +9,13 @@ registry 用户，项目将在 `0.x` 阶段继续简化 API，再为稳定的 `1
 
 ## 发布包
 
-本版本包含九个同步发布的包，使用同一版本号和候选 SHA：
+本版本包含九个同步版本的包，其中 `yjson_macros` 的源码位于独立仓库，但与 runtime
+使用同一版本线：
 
 | Package | 职责 |
 | --- | --- |
 | `yjson` | Pure runtime、typed API、mutable AST 与 managed document |
-| `yjson_macros` | 编译期 codec 生成 |
+| `yjson_macros` | 编译期 codec 与 JSON literal 生成 |
 | `yjson_algorithms` | Pointer、Path、Patch 与 Schema 算法 |
 | `yjson_backends` | 高级 backend API |
 | `yjson_native_primitives` | 第一方 closed Native primitives SPI |
@@ -23,13 +24,15 @@ registry 用户，项目将在 `0.x` 阶段继续简化 API，再为稳定的 `1
 | `yjson_yyjson` | vendored yyjson 高级 backend |
 | `yjson_schema_formats` | 可选的国际化 Schema formats |
 
-`yjson_all` 已删除。使用 generated codec 的应用显式声明 runtime 与 macros：
+`yjson_all` 已删除。使用 generated codec 或 JSON literal 的应用显式声明 runtime 与 macros：
 
 ```toml
 [dependencies]
-yjson = { path = "../yjson" }
-yjson_macros = { path = "../yjson/packages/yjson_macros" }
+yjson = { git = "https://github.com/lIlIIlIll/yjson.git", branch = "main" }
+yjson_macros = { git = "https://github.com/lIlIIlIll/yjson_macros.git", branch = "main" }
 ```
+
+本地源码开发时，也可以将两个仓库放在同级目录后使用 `path` 依赖。
 
 包的依赖顺序由 [`release/release-graph.toml`](release/release-graph.toml) 唯一定义。examples、
 benchmarks、conformance package 和 consumer fixture 都是仓库测试资产，不进入发布包。
@@ -47,7 +50,8 @@ benchmarks、conformance package 和 consumer fixture 都是仓库测试资产�
   不接受 backend 参数，也不暴露 `close()`。
 - `JsonReadOptions` 和 `JsonWriteOptions` 直接承载有限资源预算；所有 JSON 失败统一为
   `JsonException`，调用方匹配稳定的 `code`。
-- `@JsonCodec` 生成 provider-backed codec。`YJson.toJson(value)` 和
+- `@JsonCodec` 生成 provider-backed codec。`@Json({...})` 和 `@JsonValue({...})` 在编译期校验
+  JSON-like 语法并生成可修改的 `JsonNode`；`YJson.toJson(value)` 和
   `YJson.fromJson<T>(text)` 是 generated 类型的最短入口；custom codec 继续使用同一方法并传
   `codec:`。多态 subtype 的字段读写使用宏生成的 typed object bridge，不会解析到继承自
   open base 的 provider。普通 generated provider 直接返回 `JsonCodec<T>`，不经过 `Any`

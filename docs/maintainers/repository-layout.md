@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | `src/lib_*.cj` | Pure 运行时、公开 API、生成代码接口 | `yjson` 源码目录 |
 | `src/*_test.cj` | 根包白盒测试和接口约定测试 | 由 cjpm 执行测试；不参与普通构建 |
-| `packages/yjson_macros` | 声明宏和包装宏 | 独立包，版本同步发布 |
+| `packages/yjson_macros` | `yjson_macros` 独立仓库的 Git submodule | 独立仓库发布，主仓库保留构建镜像 |
 | `packages/yjson_algorithms` | Pointer、Patch、Path、Schema | 可选包 |
 | `packages/yjson_backends` | 后端元数据和资源接口 | 高级接口包 |
 | `packages/yjson_native_primitives` | 扫描器静态库和第一方 provider 接口 | 第一方内部包 |
@@ -24,8 +24,8 @@
 
 ## 开发清单与发布清单
 
-根清单只在 `[test-dependencies]` 中依赖 `yjson_macros`。普通 `cjpm build` 构建
-核心包；`cjpm test` 才加入测试所需的宏依赖。发布暂存使用
+根清单只在 `[test-dependencies]` 中依赖 `yjson_macros` 的独立 Git module。普通 `cjpm build`
+构建核心包；`cjpm test` 才加入测试所需的宏依赖。发布暂存使用
 `scripts/release_package_stage.py` 复制发布图中声明的源码目录，再换入使用统一版本号的
 发布清单。
 

@@ -51,11 +51,12 @@ whole-document backend 在提交到 caller stream 前检查。
 
 ## JSON literal 与 builder
 
+当前 `0.1.x` 使用 `yjson_macros` 的 expression macro 在源码中构造可修改的 `JsonNode`：
+
 ```cangjie
-let text: String = @Json({"id": $(id)})
-let tree: JsonNode = @JsonValue({"id": $(id)})
+let tree: JsonNode = @Json({"id": $(id)})
+let same: JsonNode = @JsonValue({"id": $(id)})
 ```
 
-`JsonObjectValue.put` 返回同一个对象以支持链式调用。完整 public delta 见
-[API/ABI inventory](../public-api-inventory.md)，用户可见发布摘要见
-[Release notes](../../RELEASE_NOTES.md)。
+完整的 literal 语法和 API 选择见[API 选择指南](../choosing-an-api.md)；公开变更见
+[API/ABI inventory](../public-api-inventory.md)和[Release notes](../../RELEASE_NOTES.md)。

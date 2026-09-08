@@ -66,6 +66,43 @@ class ExternalCat <: ExternalAnimal {
 }
 
 main(): Unit {
+    let literal = @Json({
+        "a": 1,
+        "b": "2",
+        "nested": [true, null, -3, 1.5],
+    })
+    let literalObject = literal.asObject()
+    require(literalObject.get("a").getOrThrow().asInt64() == 1,
+        "@Json integer field was not converted")
+    require(literalObject.get("b").getOrThrow().asString() == "2",
+        "@Json string field was not converted")
+    require(literalObject.get("nested").getOrThrow().asArray().size() == 4,
+        "@Json nested array was not converted")
+    require(literalObject.get("nested").getOrThrow().asArray()[2].asInt64() == -3,
+        "@Json negative number was not converted")
+    require(literal.toJson() == "{\"a\":1,\"b\":\"2\",\"nested\":[true,null,-3,1.5]}",
+        "@Json tree serialization was not stable")
+
+    let dynamicKey = "user"
+    let interpolated = @Json({
+        $(dynamicKey): $(ExternalUser(8, "Bob")),
+    })
+    require(interpolated.asObject().get("user").getOrThrow().asObject()
+        .get("name").getOrThrow().asString() == "Bob",
+        "@Json interpolation was not converted")
+    let alias = @JsonValue({"alias": true})
+    require(alias.asObject().get("alias").getOrThrow().asBool(),
+        "@JsonValue alias was not converted")
+
+    let sameKey = "same"
+    let overwritten = @Json({
+        $(sameKey): 1,
+        $(sameKey): 2,
+    })
+    require(overwritten.asObject().get("same").getOrThrow().asInt64() == 2,
+        "@Json dynamic key did not use LastWins")
+
+
     let userJson = YJson.toJson(ExternalUser(7, "Alice"))
     let user = YJson.fromJson<ExternalUser>(userJson)
     require(userJson == "{\"id\":7,\"name\":\"Alice\"}", "unexpected user JSON")

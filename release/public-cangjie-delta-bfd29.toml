@@ -6,8 +6,8 @@ baseline_commit = "bfd29d85e353e6948e4ac643f1c6e6e071c882ba"
 baseline_records = 1025
 baseline_sha256 = "0ce5f31ddf32942d00d2ae3d7d1701cfaacc9b52ae3caf66dfe4e543919079ec"
 review_status = "pending-migration-review"
-removed_records = 711
-removed_sha256 = "84403e3598ca4b0cdd9c5e4617bb009e8a27eca67deb027d10f09af13a3c23fb"
+removed_records = 709
+removed_sha256 = "f8db1ff9cd7120892b58d4db5a8ce8882fa33b636bcb1d38805230d843c1d1b7"
 added_records = 711
 added_sha256 = "6a00338fa1ab1837653b9a3454361b5916809147910488427288216fc959e9f8"
 
@@ -943,8 +943,6 @@ rationale = "Remove the experimental JSON literal macros from the 0.1 package gr
 review_status = "reviewed-for-0.1.0"
 removed = [
   "yjson_macros|packages/yjson_macros/src/json_codec.cj|<top-level>|public macro JsonStatic(input: Tokens): Tokens",
-  "yjson_macros|packages/yjson_macros/src/json_literal.cj|<top-level>|public macro Json(input: Tokens): Tokens",
-  "yjson_macros|packages/yjson_macros/src/json_literal.cj|<top-level>|public macro JsonValue(input: Tokens): Tokens",
 ]
 added = [
 ]
