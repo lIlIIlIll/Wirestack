@@ -207,7 +207,7 @@ jobs:
           YJSON_STANDARDS_OFFLINE: ${{ contains(fromJSON('["standards-conformance","schema-formats-conformance"]'), matrix.gate) && '1' || '' }}
           # The pinned nightly's LLVM llc crashes at -O2 while linking the
           # source-external yjson consumers on ubuntu-24.04.
-          YJSON_CI_DEPENDENCY_OVERRIDE: ${{ contains(fromJSON('["macro-consumer","registry-rehearsal"]'), matrix.gate) && '-O1' || '' }}
+          YJSON_CI_DEPENDENCY_OVERRIDE: ${{ contains(fromJSON('["algorithms-consumer","macro-consumer","registry-rehearsal"]'), matrix.gate) && '-O1' || '' }}
         run: |
           ulimit -s 131072
           ulimit -s
