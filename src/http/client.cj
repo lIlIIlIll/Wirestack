@@ -6,11 +6,11 @@ import wirestack.internal.transport as transport
 import wirestack.internal.transport_stdnet as stdnet
 
 /**
- * Wirestack 公开 API：HttpClientCapabilityErrorCode。
+ * Wirestack 公开 API：表示稳定的错误分类。
  */
 public enum HttpClientCapabilityErrorCode {
 /**
- * Wirestack 公开 API：SystemResolverUnavailable。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | SystemResolverUnavailable
 }
@@ -18,14 +18,14 @@ public enum HttpClientCapabilityErrorCode {
 /** A requested default capability is unavailable rather than silently weakened. */
 public class HttpClientCapabilityException <: Exception {
 /**
- * Wirestack 公开 API：code。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let code: HttpClientCapabilityErrorCode
 
 /**
- * Wirestack 公开 API：init。
- * @param code 参数 code。
- * @param message 参数 message。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param code 稳定的错误或状态分类。
+ * @param message 面向调用方的诊断文本。
  */
     public init(code: HttpClientCapabilityErrorCode, message: String) {
         super(message)
@@ -33,13 +33,13 @@ public class HttpClientCapabilityException <: Exception {
     }
 
 /**
- * Wirestack 公开 API：getClassName。
+ * Wirestack 公开 API：返回运行时类型名称。
  */
     protected override func getClassName(): String { "HttpClientCapabilityException" }
 }
 
 /**
- * Wirestack 公开 API：HttpClientBuilder。
+ * Wirestack 公开 API：提供构造不可变公开值的步骤。
  */
 public class HttpClientBuilder {
     private var configuredResolver: ?Resolver = None<Resolver>
@@ -65,8 +65,8 @@ public class HttpClientBuilder {
     }
 
 /**
- * Wirestack 公开 API：requestTimeout。
- * @param value 参数 value。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param value 待写入或配置的值。
  */
     public func requestTimeout(value: Duration): HttpClientBuilder {
         if (value <= Duration.Zero) { throw IllegalArgumentException("request timeout must be positive") }
@@ -75,8 +75,8 @@ public class HttpClientBuilder {
     }
 
 /**
- * Wirestack 公开 API：limits。
- * @param value 参数 value。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param value 待写入或配置的值。
  */
     public func limits(value: HttpLimits): HttpClientBuilder {
         configuredLimits = value
@@ -84,8 +84,8 @@ public class HttpClientBuilder {
     }
 
 /**
- * Wirestack 公开 API：redirectPolicy。
- * @param value 参数 value。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param value 待写入或配置的值。
  */
     public func redirectPolicy(value: HttpRedirectPolicy): HttpClientBuilder {
         configuredRedirectPolicy = value
@@ -93,8 +93,8 @@ public class HttpClientBuilder {
     }
 
 /**
- * Wirestack 公开 API：retryPolicy。
- * @param value 参数 value。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param value 待写入或配置的值。
  */
     public func retryPolicy(value: HttpRetryPolicy): HttpClientBuilder {
         configuredRetryPolicy = value
@@ -103,7 +103,7 @@ public class HttpClientBuilder {
 
 /**
  * Installs one explicit proxy route. Environment, PAC, and WPAD are never consulted.
- * @param value 参数 value。
+ * @param value 待写入或配置的值。
  */
     public func proxy(value: HttpProxyConfig): HttpClientBuilder {
         configuredProxy = Some(value)
@@ -111,8 +111,8 @@ public class HttpClientBuilder {
     }
 
 /**
- * Wirestack 公开 API：tls。
- * @param value 参数 value。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param value 待写入或配置的值。
  */
     public func tls(value: HttpClientTlsConfig): HttpClientBuilder {
         configuredTls = Some(value)
@@ -205,18 +205,18 @@ public class HttpClient <: Resource {
     }
 
 /**
- * Wirestack 公开 API：default。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public static func default(): HttpClient { HttpClient.builder().build() }
 /**
- * Wirestack 公开 API：builder。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public static func builder(): HttpClientBuilder { HttpClientBuilder() }
 
 /**
- * Wirestack 公开 API：get。
- * @param context 参数 context。
- * @param url 参数 url。
+ * Wirestack 公开 API：返回与当前对象关联的值。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param url 调用方提供的输入值。
  */
     public func get(url: String,
         context!: OperationContext = OperationContext.background()): HttpResponse {
@@ -224,10 +224,10 @@ public class HttpClient <: Resource {
     }
 
 /**
- * Wirestack 公开 API：getControlled。
- * @param cancellation 参数 cancellation。
- * @param context 参数 context。
- * @param url 参数 url。
+ * Wirestack 公开 API：返回与当前对象关联的值。
+ * @param cancellation 调用方提供的输入值。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param url 调用方提供的输入值。
  */
     public func getControlled(
         url: String,
@@ -247,10 +247,10 @@ public class HttpClient <: Resource {
     }
 
 /**
- * Wirestack 公开 API：send。
- * @param context 参数 context。
- * @param request 参数 request。
- * @param trailer 参数 trailer。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param request 待处理的 HTTP 请求。
+ * @param trailer 调用方提供的输入值。
  */
     public func send(request: HttpRequest,
         context!: OperationContext = OperationContext.background(),
@@ -265,11 +265,11 @@ public class HttpClient <: Resource {
     }
 
 /**
- * Wirestack 公开 API：sendControlled。
- * @param cancellation 参数 cancellation。
- * @param context 参数 context。
- * @param request 参数 request。
- * @param trailer 参数 trailer。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param cancellation 调用方提供的输入值。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param request 待处理的 HTTP 请求。
+ * @param trailer 调用方提供的输入值。
  */
     public func sendControlled(
         request: HttpRequest,
@@ -399,7 +399,7 @@ public class HttpClient <: Resource {
     }
 
 /**
- * Wirestack 公开 API：isClosed。
+ * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { synchronized(mutex) { closed } }
 
