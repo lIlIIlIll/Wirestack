@@ -90,6 +90,19 @@ class PurePerfProvenanceTest(unittest.TestCase):
             self.assertIn('yjson_macros = { path = "../yjson_macros" }', normalized)
             self.assertNotIn("commitId", normalized)
 
+    def test_legacy_standalone_macro_dependency_is_canonicalized(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            data = (
+                "[dependencies]\n"
+                f'yjson_macros = {{ {MODULE.LEGACY_STANDALONE_MACRO_GIT} }}\n'
+            ).encode("utf-8")
+            normalized = MODULE.canonical_benchmark_input_bytes(
+                root, "packages/benchmarks/cjpm.toml", data
+            ).decode("utf-8")
+            self.assertIn('yjson_macros = { path = "../yjson_macros" }', normalized)
+            self.assertNotIn("commitId", normalized)
+
     def test_artifact_identity_rejects_symlink_and_hashes_regular_binary(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
