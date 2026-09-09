@@ -16,58 +16,58 @@ foreign func wirestack_tls_certificate_subject_alt_names(
 ): Int32
 
 /**
- * Wirestack 公开 API：ReferenceIdentity。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum ReferenceIdentity {
 /**
- * Wirestack 公开 API：Dns。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Dns(HostName)
 /**
- * Wirestack 公开 API：Ip。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Ip(IpAddress)
 }
 
 /**
- * Wirestack 公开 API：IdentityVerificationErrorCode。
+ * Wirestack 公开 API：表示稳定的错误分类。
  */
 public enum IdentityVerificationErrorCode {
 /**
- * Wirestack 公开 API：NoMatchingDnsSan。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | NoMatchingDnsSan
 /**
- * Wirestack 公开 API：NoMatchingIpSan。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | NoMatchingIpSan
 /**
- * Wirestack 公开 API：InvalidDnsSan。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidDnsSan
 /**
- * Wirestack 公开 API：TooManySubjectAlternativeNames。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | TooManySubjectAlternativeNames
 /**
- * Wirestack 公开 API：ZonedIpReference。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ZonedIpReference
 }
 
 /**
- * Wirestack 公开 API：IdentityVerificationException。
+ * Wirestack 公开 API：表示一次可由调用方捕获的操作失败。
  */
 public class IdentityVerificationException <: Exception {
 /**
- * Wirestack 公开 API：code。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let code: IdentityVerificationErrorCode
 
 /**
- * Wirestack 公开 API：init。
- * @param code 参数 code。
- * @param message 参数 message。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param code 稳定的错误或状态分类。
+ * @param message 面向调用方的诊断文本。
  */
     public init(code: IdentityVerificationErrorCode, message: String) {
         super(message)
@@ -75,7 +75,7 @@ public class IdentityVerificationException <: Exception {
     }
 
 /**
- * Wirestack 公开 API：getClassName。
+ * Wirestack 公开 API：返回运行时类型名称。
  */
     protected override func getClassName(): String { "IdentityVerificationException" }
 }
@@ -86,9 +86,9 @@ public class CertificateSubjectAlternativeNames {
     private let ipAddresses: Array<IpAddress>
 
 /**
- * Wirestack 公开 API：init。
- * @param dnsNames 参数 dnsNames。
- * @param ipAddresses 参数 ipAddresses。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param dnsNames 证书中允许的 DNS 身份列表。
+ * @param ipAddresses 证书中允许的 IP 身份列表。
  */
     public init(dnsNames: Array<String>, ipAddresses: Array<IpAddress>) {
         if (dnsNames.size + ipAddresses.size > MAXIMUM_SAN_IDENTITIES) {
@@ -113,37 +113,37 @@ public class CertificateSubjectAlternativeNames {
     }
 
 /**
- * Wirestack 公开 API：dnsSubjectAlternativeNames。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public func dnsSubjectAlternativeNames(): Array<String> { dnsNames.clone() }
 /**
- * Wirestack 公开 API：ipSubjectAlternativeNames。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public func ipSubjectAlternativeNames(): Array<IpAddress> { ipAddresses.clone() }
 }
 
 /**
- * Wirestack 公开 API：IdentityVerificationEvidence。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public struct IdentityVerificationEvidence {
 /**
- * Wirestack 公开 API：referenceIdentity。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let referenceIdentity: String
 /**
- * Wirestack 公开 API：matchedSubjectAlternativeName。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let matchedSubjectAlternativeName: String
 /**
- * Wirestack 公开 API：wildcard。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let wildcard: Bool
 
 /**
- * Wirestack 公开 API：init。
- * @param matchedSubjectAlternativeName 参数 matchedSubjectAlternativeName。
- * @param referenceIdentity 参数 referenceIdentity。
- * @param wildcard 参数 wildcard。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param matchedSubjectAlternativeName 已匹配的证书备用名称。
+ * @param referenceIdentity 连接所期望的身份。
+ * @param wildcard 是否允许使用通配符匹配。
  */
     public init(referenceIdentity: String, matchedSubjectAlternativeName: String, wildcard: Bool) {
         this.referenceIdentity = referenceIdentity
@@ -153,13 +153,13 @@ public struct IdentityVerificationEvidence {
 }
 
 /**
- * Wirestack 公开 API：HostnameVerifier。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public class HostnameVerifier {
 /**
- * Wirestack 公开 API：verify。
- * @param names 参数 names。
- * @param reference 参数 reference。
+ * Wirestack 公开 API：验证输入是否满足安全约束。
+ * @param names 调用方提供的输入值。
+ * @param reference 用于校验的目标身份。
  */
     public static func verify(
         names: CertificateSubjectAlternativeNames,

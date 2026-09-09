@@ -11,39 +11,39 @@ public class PrivateKeyRef <: Resource {
     }
 
 /**
- * Wirestack 公开 API：kind。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop kind: PrivateKeyKind { get() { value.kind } }
 /**
- * Wirestack 公开 API：referenceIdentity。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop referenceIdentity: String { get() { value.referenceIdentity } }
 /**
- * Wirestack 公开 API：requiresHardwareKey。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop requiresHardwareKey: Bool { get() { value.requiresHardwareKey } }
 
 /**
- * Wirestack 公开 API：pkcs8。
- * @param bytes 参数 bytes。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param bytes 保存原始内容的字节序列。
  */
     public static func pkcs8(bytes: Array<Byte>): PrivateKeyRef {
         PrivateKeyRef(engine.PrivateKeyRef.pkcs8(bytes))
     }
 
 /**
- * Wirestack 公开 API：pkcs8File。
- * @param path 参数 path。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param path 要打开或保存的文件系统路径。
  */
     public static func pkcs8File(path: String): PrivateKeyRef {
         PrivateKeyRef(engine.PrivateKeyRef.pkcs8File(path))
     }
 
 /**
- * Wirestack 公开 API：externalSigner。
- * @param referenceIdentity 参数 referenceIdentity。
- * @param signer 参数 signer。
- * @param subjectPublicKeyInfoDer 参数 subjectPublicKeyInfoDer。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param referenceIdentity 连接所期望的身份。
+ * @param signer 调用方提供的输入值。
+ * @param subjectPublicKeyInfoDer 调用方提供的输入值。
  */
     public static func externalSigner(
         referenceIdentity: String,
@@ -58,12 +58,12 @@ public class PrivateKeyRef <: Resource {
     }
 
 /**
- * Wirestack 公开 API：systemHandle。
- * @param alias 参数 alias。
- * @param hardwareBacked 参数 hardwareBacked。
- * @param platform 参数 platform。
- * @param signer 参数 signer。
- * @param subjectPublicKeyInfoDer 参数 subjectPublicKeyInfoDer。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param alias 调用方提供的输入值。
+ * @param hardwareBacked 调用方提供的输入值。
+ * @param platform 调用方提供的输入值。
+ * @param signer 调用方提供的输入值。
+ * @param subjectPublicKeyInfoDer 调用方提供的输入值。
  */
     public static func systemHandle(
         platform: String,
@@ -82,11 +82,11 @@ public class PrivateKeyRef <: Resource {
     }
 
 /**
- * Wirestack 公开 API：close。
+ * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
  */
     public func close(): Unit { value.close() }
 /**
- * Wirestack 公开 API：isClosed。
+ * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { value.isClosed() }
 }
@@ -95,22 +95,22 @@ public class PrivateKeyRef <: Resource {
 public class LocalIdentity {
     internal let value: engine.LocalIdentity
 /**
- * Wirestack 公开 API：certificateChain。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let certificateChain: CertificateChain
 /**
- * Wirestack 公开 API：privateKeyRef。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let privateKeyRef: PrivateKeyRef
 /**
- * Wirestack 公开 API：contextIdentity。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let contextIdentity: String
 
 /**
- * Wirestack 公开 API：init。
- * @param certificateChain 参数 certificateChain。
- * @param privateKeyRef 参数 privateKeyRef。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param certificateChain 调用方提供的输入值。
+ * @param privateKeyRef 调用方提供的输入值。
  */
     public init(certificateChain: CertificateChain, privateKeyRef: PrivateKeyRef) {
         value = engine.LocalIdentity(certificateChain, privateKeyRef.value)
