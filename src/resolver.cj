@@ -4,100 +4,100 @@ import std.time.MonoTime
 import std.collection.ArrayList
 
 /**
- * Wirestack 公开 API：ResolveAddressFamily。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum ResolveAddressFamily {
 /**
- * Wirestack 公开 API：Any。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Any
 /**
- * Wirestack 公开 API：Ipv4。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Ipv4
 /**
- * Wirestack 公开 API：Ipv6。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Ipv6
 }
 
 /**
- * Wirestack 公开 API：ResolverSource。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum ResolverSource {
 /**
- * Wirestack 公开 API：System。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | System
 /**
- * Wirestack 公开 API：HostsFile。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | HostsFile
 /**
- * Wirestack 公开 API：Static。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Static
 /**
- * Wirestack 公开 API：Custom。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Custom
 }
 
 /**
- * Wirestack 公开 API：ResolveErrorCode。
+ * Wirestack 公开 API：表示稳定的错误分类。
  */
 public enum ResolveErrorCode {
 /**
- * Wirestack 公开 API：NameNotFound。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | NameNotFound
 /**
- * Wirestack 公开 API：NoData。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | NoData
 /**
- * Wirestack 公开 API：TemporaryFailure。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | TemporaryFailure
 /**
- * Wirestack 公开 API：Timeout。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Timeout
 /**
- * Wirestack 公开 API：Cancelled。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Cancelled
 /**
- * Wirestack 公开 API：InvalidName。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidName
 /**
- * Wirestack 公开 API：UnsupportedFamily。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | UnsupportedFamily
 /**
- * Wirestack 公开 API：SystemFailure。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | SystemFailure
 }
 
 /**
- * Wirestack 公开 API：ResolveOptions。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public struct ResolveOptions {
 /**
- * Wirestack 公开 API：family。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let family: ResolveAddressFamily
 /**
- * Wirestack 公开 API：maxResults。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maxResults: Int64
 
 /**
- * Wirestack 公开 API：init。
- * @param family 参数 family。
- * @param maxResults 参数 maxResults。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param family 地址使用的 IP 地址族。
+ * @param maxResults 调用方提供的输入值。
  */
     public init(
         family!: ResolveAddressFamily = ResolveAddressFamily.Any,
@@ -112,37 +112,37 @@ public struct ResolveOptions {
 }
 
 /**
- * Wirestack 公开 API：ResolveDiagnostics。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public struct ResolveDiagnostics {
 /**
- * Wirestack 公开 API：source。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let source: ResolverSource
 /**
- * Wirestack 公开 API：candidateCount。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let candidateCount: Int64
 /**
- * Wirestack 公开 API：duplicatesRemoved。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let duplicatesRemoved: Int64
 /**
- * Wirestack 公开 API：startedAt。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let startedAt: MonoTime
 /**
- * Wirestack 公开 API：completedAt。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let completedAt: MonoTime
 
 /**
- * Wirestack 公开 API：init。
- * @param candidateCount 参数 candidateCount。
- * @param completedAt 参数 completedAt。
- * @param duplicatesRemoved 参数 duplicatesRemoved。
- * @param source 参数 source。
- * @param startedAt 参数 startedAt。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param candidateCount 调用方提供的输入值。
+ * @param completedAt 调用方提供的输入值。
+ * @param duplicatesRemoved 调用方提供的输入值。
+ * @param source 调用方提供的输入值。
+ * @param startedAt 调用方提供的输入值。
  */
     public init(
         source: ResolverSource,
@@ -163,35 +163,35 @@ public struct ResolveDiagnostics {
 }
 
 /**
- * Wirestack 公开 API：ResolveResult。
+ * Wirestack 公开 API：表示一次操作的结果及其状态。
  */
 public struct ResolveResult {
     private let ownedAddresses: Array<IpAddress>
 /**
- * Wirestack 公开 API：canonicalHost。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let canonicalHost: HostName
 /**
- * Wirestack 公开 API：source。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let source: ResolverSource
 /**
- * Wirestack 公开 API：expiration。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let expiration: ?MonoTime
 /**
- * Wirestack 公开 API：diagnostics。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let diagnostics: ResolveDiagnostics
 
 /**
- * Wirestack 公开 API：init。
- * @param addresses 参数 addresses。
- * @param canonicalHost 参数 canonicalHost。
- * @param completedAt 参数 completedAt。
- * @param expiration 参数 expiration。
- * @param source 参数 source。
- * @param startedAt 参数 startedAt。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param addresses 调用方提供的输入值。
+ * @param canonicalHost 调用方提供的输入值。
+ * @param completedAt 调用方提供的输入值。
+ * @param expiration 调用方提供的输入值。
+ * @param source 调用方提供的输入值。
+ * @param startedAt 调用方提供的输入值。
  */
     public init(
         addresses: Array<IpAddress>,
@@ -219,7 +219,7 @@ public struct ResolveResult {
     }
 
 /**
- * Wirestack 公开 API：addresses。
+ * Wirestack 公开 API：更新当前构建器或集合的受约束状态。
  */
     public prop addresses: Array<IpAddress> {
         get() { ownedAddresses.clone() }
@@ -227,19 +227,19 @@ public struct ResolveResult {
 }
 
 /**
- * Wirestack 公开 API：ResolveException。
+ * Wirestack 公开 API：表示一次可由调用方捕获的操作失败。
  */
 public class ResolveException <: NetworkException {
 /**
- * Wirestack 公开 API：resolveCode。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let resolveCode: ResolveErrorCode
 
 /**
- * Wirestack 公开 API：init。
- * @param cause 参数 cause。
- * @param message 参数 message。
- * @param resolveCode 参数 resolveCode。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param cause 导致当前错误的底层异常。
+ * @param message 面向调用方的诊断文本。
+ * @param resolveCode 调用方提供的输入值。
  */
     public init(resolveCode: ResolveErrorCode, message: String, cause!: ?Exception = None<Exception>) {
         super(
@@ -254,11 +254,11 @@ public class ResolveException <: NetworkException {
     }
 
 /**
- * Wirestack 公开 API：init。
- * @param cause 参数 cause。
- * @param message 参数 message。
- * @param nativeCode 参数 nativeCode。
- * @param resolveCode 参数 resolveCode。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param cause 导致当前错误的底层异常。
+ * @param message 面向调用方的诊断文本。
+ * @param nativeCode 调用方提供的输入值。
+ * @param resolveCode 调用方提供的输入值。
  */
     public init(
         resolveCode: ResolveErrorCode,
@@ -279,7 +279,7 @@ public class ResolveException <: NetworkException {
     }
 
 /**
- * Wirestack 公开 API：getClassName。
+ * Wirestack 公开 API：返回运行时类型名称。
  */
     protected override func getClassName(): String {
         "ResolveException"
@@ -287,15 +287,15 @@ public class ResolveException <: NetworkException {
 }
 
 /**
- * Wirestack 公开 API：Resolver。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public interface Resolver {
 /**
- * Wirestack 公开 API：resolve。
- * @param context 参数 context。
- * @param host 参数 host。
- * @param options 参数 options。
- * @param service 参数 service。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param host 待解析的主机名或地址字面量。
+ * @param options 解析或连接时使用的选项。
+ * @param service 服务名称或端口别名。
  */
     func resolve(
         host: HostName,
@@ -310,19 +310,19 @@ public class StaticResolver <: Resolver {
     private let result: ResolveResult
 
 /**
- * Wirestack 公开 API：init。
- * @param result 参数 result。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param result 调用方提供的输入值。
  */
     public init(result: ResolveResult) {
         this.result = result
     }
 
 /**
- * Wirestack 公开 API：resolve。
- * @param context 参数 context。
- * @param host 参数 host。
- * @param options 参数 options。
- * @param service 参数 service。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param host 待解析的主机名或地址字面量。
+ * @param options 解析或连接时使用的选项。
+ * @param service 服务名称或端口别名。
  */
     public func resolve(
         host: HostName,
@@ -355,10 +355,10 @@ public class StaticResolver <: Resolver {
     }
 
 /**
- * Wirestack 公开 API：resolve。
- * @param context 参数 context。
- * @param host 参数 host。
- * @param options 参数 options。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param host 待解析的主机名或地址字面量。
+ * @param options 解析或连接时使用的选项。
  */
     public func resolve(
         host: HostName,

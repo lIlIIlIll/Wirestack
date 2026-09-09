@@ -3,45 +3,45 @@ package wirestack.http
 import std.collection.ArrayList
 
 /**
- * Wirestack 公开 API：HttpRedirectErrorCode。
+ * Wirestack 公开 API：表示稳定的错误分类。
  */
 public enum HttpRedirectErrorCode {
 /**
- * Wirestack 公开 API：TooManyRedirects。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | TooManyRedirects
 /**
- * Wirestack 公开 API：InsecureDowngrade。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InsecureDowngrade
 /**
- * Wirestack 公开 API：InvalidLocation。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidLocation
 /**
- * Wirestack 公开 API：BodyNotReplayable。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | BodyNotReplayable
 }
 
 /**
- * Wirestack 公开 API：HttpRedirectException。
+ * Wirestack 公开 API：表示一次可由调用方捕获的操作失败。
  */
 public class HttpRedirectException <: Exception {
 /**
- * Wirestack 公开 API：code。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let code: HttpRedirectErrorCode
 /**
- * Wirestack 公开 API：cause。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let cause: ?Exception
 
 /**
- * Wirestack 公开 API：init。
- * @param cause 参数 cause。
- * @param code 参数 code。
- * @param message 参数 message。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param cause 导致当前错误的底层异常。
+ * @param code 稳定的错误或状态分类。
+ * @param message 面向调用方的诊断文本。
  */
     public init(code: HttpRedirectErrorCode, message: String, cause!: ?Exception = None<Exception>) {
         super(message)
@@ -50,7 +50,7 @@ public class HttpRedirectException <: Exception {
     }
 
 /**
- * Wirestack 公开 API：getClassName。
+ * Wirestack 公开 API：返回运行时类型名称。
  */
     protected override func getClassName(): String { "HttpRedirectException" }
 }
@@ -58,23 +58,23 @@ public class HttpRedirectException <: Exception {
 /** Immutable redirect policy. Decisions are made before the prior response is drained. */
 public class HttpRedirectPolicy {
 /**
- * Wirestack 公开 API：maximumRedirects。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maximumRedirects: Int64
 /**
- * Wirestack 公开 API：allowHttpsDowngrade。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let allowHttpsDowngrade: Bool
 /**
- * Wirestack 公开 API：maximumDrainBytes。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maximumDrainBytes: Int64
 
 /**
- * Wirestack 公开 API：init。
- * @param allowHttpsDowngrade 参数 allowHttpsDowngrade。
- * @param maximumDrainBytes 参数 maximumDrainBytes。
- * @param maximumRedirects 参数 maximumRedirects。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param allowHttpsDowngrade 调用方提供的输入值。
+ * @param maximumDrainBytes 调用方提供的输入值。
+ * @param maximumRedirects 调用方提供的输入值。
  */
     public init(maximumRedirects!: Int64 = 10, allowHttpsDowngrade!: Bool = false,
         maximumDrainBytes!: Int64 = 64 * 1024) {
@@ -87,11 +87,11 @@ public class HttpRedirectPolicy {
     }
 
 /**
- * Wirestack 公开 API：nextRequest。
- * @param limits 参数 limits。
- * @param redirectsFollowed 参数 redirectsFollowed。
- * @param request 参数 request。
- * @param response 参数 response。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param limits 调用方提供的输入值。
+ * @param redirectsFollowed 调用方提供的输入值。
+ * @param request 待处理的 HTTP 请求。
+ * @param response 处理后的 HTTP 响应。
  */
     public func nextRequest(request: HttpRequest, response: HttpResponse,
         redirectsFollowed!: Int64 = 0, limits!: HttpLimits = HttpLimits()): ?HttpRequest {

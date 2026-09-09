@@ -5,19 +5,19 @@ import std.collection.ArrayList
 /** Provider-neutral proxy endpoint. A typed IP never enters DNS. */
 public class HttpProxyEndpoint {
 /**
- * Wirestack 公开 API：hostName。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let hostName: ?HostName
 /**
- * Wirestack 公开 API：ipAddress。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let ipAddress: ?IpAddress
 /**
- * Wirestack 公开 API：port。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let port: UInt16
 /**
- * Wirestack 公开 API：identity。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let identity: String
 
@@ -30,9 +30,9 @@ public class HttpProxyEndpoint {
     }
 
 /**
- * Wirestack 公开 API：hostname。
- * @param port 参数 port。
- * @param value 参数 value。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param port 目标服务端口号。
+ * @param value 待写入或配置的值。
  */
     public static func hostname(value: String, port: UInt16): HttpProxyEndpoint {
         let host = HostName(value)
@@ -40,9 +40,9 @@ public class HttpProxyEndpoint {
     }
 
 /**
- * Wirestack 公开 API：address。
- * @param port 参数 port。
- * @param value 参数 value。
+ * Wirestack 公开 API：更新当前构建器或集合的受约束状态。
+ * @param port 目标服务端口号。
+ * @param value 待写入或配置的值。
  */
     public static func address(value: IpAddress, port: UInt16): HttpProxyEndpoint {
         let encoded = proxyAddressIdentity(value)
@@ -53,29 +53,29 @@ public class HttpProxyEndpoint {
 /** Called only when constructing a request to the configured proxy. */
 public interface HttpProxyAuthorizationProvider {
 /**
- * Wirestack 公开 API：authorization。
- * @param context 参数 context。
- * @param proxy 参数 proxy。
- * @param target 参数 target。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param proxy 调用方提供的输入值。
+ * @param target 调用方提供的输入值。
  */
     func authorization(proxy: HttpProxyEndpoint, target: HttpUrl,
         context: OperationContext): ?String
 }
 
 /**
- * Wirestack 公开 API：NoProxyPolicy。
+ * Wirestack 公开 API：描述网络安全或解析策略。
  */
 public class NoProxyPolicy {
     private let ownedRules: Array<NoProxyRule>
 
 /**
- * Wirestack 公开 API：init。
+ * Wirestack 公开 API：构造并校验该公开值。
  */
     public init() { ownedRules = Array<NoProxyRule>() }
 
 /**
- * Wirestack 公开 API：init。
- * @param patterns 参数 patterns。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param patterns 调用方提供的输入值。
  */
     public init(patterns: Array<String>) {
         if (patterns.size > 256) { throw IllegalArgumentException("NO_PROXY has too many patterns") }
@@ -85,8 +85,8 @@ public class NoProxyPolicy {
     }
 
 /**
- * Wirestack 公开 API：matches。
- * @param url 参数 url。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param url 调用方提供的输入值。
  */
     public func matches(url: HttpUrl): Bool {
         for (rule in ownedRules) {
@@ -97,15 +97,15 @@ public class NoProxyPolicy {
 }
 
 /**
- * Wirestack 公开 API：HttpProxyRoute。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum HttpProxyRoute {
 /**
- * Wirestack 公开 API：Direct。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Direct
 /**
- * Wirestack 公开 API：Proxy。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Proxy(HttpProxyConfig)
 }
@@ -113,28 +113,28 @@ public enum HttpProxyRoute {
 /** Explicit proxy configuration; no environment, PAC, or WPAD lookup occurs. */
 public class HttpProxyConfig {
 /**
- * Wirestack 公开 API：endpoint。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let endpoint: HttpProxyEndpoint
 /**
- * Wirestack 公开 API：resolver。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let resolver: Resolver
 /**
- * Wirestack 公开 API：noProxy。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let noProxy: NoProxyPolicy
 /**
- * Wirestack 公开 API：authorizationProvider。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let authorizationProvider: ?HttpProxyAuthorizationProvider
 
 /**
- * Wirestack 公开 API：init。
- * @param authorizationProvider 参数 authorizationProvider。
- * @param endpoint 参数 endpoint。
- * @param noProxy 参数 noProxy。
- * @param resolver 参数 resolver。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param authorizationProvider 调用方提供的输入值。
+ * @param endpoint 调用方提供的输入值。
+ * @param noProxy 调用方提供的输入值。
+ * @param resolver 调用方提供的输入值。
  */
     public init(endpoint: HttpProxyEndpoint, resolver: Resolver,
         noProxy!: NoProxyPolicy = NoProxyPolicy(),
@@ -146,17 +146,17 @@ public class HttpProxyConfig {
     }
 
 /**
- * Wirestack 公开 API：routeFor。
- * @param url 参数 url。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param url 调用方提供的输入值。
  */
     public func routeFor(url: HttpUrl): HttpProxyRoute {
         if (noProxy.matches(url)) { HttpProxyRoute.Direct } else { HttpProxyRoute.Proxy(this) }
     }
 
 /**
- * Wirestack 公开 API：authorization。
- * @param context 参数 context。
- * @param target 参数 target。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param target 调用方提供的输入值。
  */
     public func authorization(target: HttpUrl, context: OperationContext): ?String {
         match (authorizationProvider) {

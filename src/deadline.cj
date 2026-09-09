@@ -5,7 +5,7 @@ import std.time.MonoTime
 /** Monotonic time source used by Deadline and deterministic tests. */
 public interface MonotonicClock {
 /**
- * Wirestack 公开 API：now。
+ * Wirestack 公开 API：返回当前单调时钟值。
  */
     func now(): MonoTime
 }
@@ -13,12 +13,12 @@ public interface MonotonicClock {
 /** The production clock. It is independent from wall-clock adjustments. */
 public class SystemMonotonicClock <: MonotonicClock {
 /**
- * Wirestack 公开 API：init。
+ * Wirestack 公开 API：构造并校验该公开值。
  */
     public init() {}
 
 /**
- * Wirestack 公开 API：now。
+ * Wirestack 公开 API：返回当前单调时钟值。
  */
     public func now(): MonoTime {
         MonoTime.now()
@@ -33,15 +33,15 @@ public class SystemMonotonicClock <: MonotonicClock {
  */
 public struct Deadline {
 /**
- * Wirestack 公开 API：expiresAt。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let expiresAt: MonoTime
     private let clock: MonotonicClock
 
 /**
- * Wirestack 公开 API：init。
- * @param clock 参数 clock。
- * @param expiresAt 参数 expiresAt。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param clock 提供单调时间的时钟。
+ * @param expiresAt 绝对截止时刻。
  */
     public init(expiresAt: MonoTime, clock!: MonotonicClock = SystemMonotonicClock()) {
         this.expiresAt = expiresAt
@@ -50,8 +50,8 @@ public struct Deadline {
 
 /**
  * Creates a deadline relative to one monotonic-clock observation.
- * @param clock 参数 clock。
- * @param duration 参数 duration。
+ * @param clock 提供单调时间的时钟。
+ * @param duration 相对当前上下文的最大持续时间。
  */
     public static func after(duration: Duration, clock!: MonotonicClock = SystemMonotonicClock()): Deadline {
         requireNonNegativeDuration(duration)
@@ -69,7 +69,7 @@ public struct Deadline {
     }
 
 /**
- * Wirestack 公开 API：isExpired。
+ * Wirestack 公开 API：报告绝对期限是否已经到达。
  */
     public func isExpired(): Bool {
         clock.now() >= expiresAt
@@ -78,7 +78,7 @@ public struct Deadline {
     /**
      * Creates a child budget capped by this deadline. A child may shorten but
      * can never extend its parent.
- * @param duration 参数 duration。
+ * @param duration 相对当前上下文的最大持续时间。
      */
     public func child(duration: Duration): Deadline {
         requireNonNegativeDuration(duration)
