@@ -249,49 +249,49 @@ public enum Retryability {
 /** Stable error evidence shared by transport, TLS and HTTP phases. */
 public open class NetworkException <: IOException {
 /**
- * Wirestack 公开 API：category。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let category: NetworkErrorCategory
 /**
- * Wirestack 公开 API：phase。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let phase: NetworkPhase
 /**
- * Wirestack 公开 API：code。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let code: NetworkErrorCode
 /**
- * Wirestack 公开 API：retryability。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let retryability: Retryability
 /**
- * Wirestack 公开 API：nativeCode。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let nativeCode: ?Int64
 /**
- * Wirestack 公开 API：localEndpoint。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let localEndpoint: ?SocketEndpoint
 /**
- * Wirestack 公开 API：remoteEndpoint。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let remoteEndpoint: ?SocketEndpoint
 /**
- * Wirestack 公开 API：cause。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let cause: ?Exception
 
 /**
- * Wirestack 公开 API：init。
- * @param category 参数 category。
- * @param cause 参数 cause。
- * @param code 参数 code。
- * @param localEndpoint 参数 localEndpoint。
- * @param message 参数 message。
- * @param nativeCode 参数 nativeCode。
- * @param phase 参数 phase。
- * @param remoteEndpoint 参数 remoteEndpoint。
- * @param retryability 参数 retryability。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param category 调用方提供的输入值。
+ * @param cause 导致当前错误的底层异常。
+ * @param code 稳定的错误或状态分类。
+ * @param localEndpoint 调用方提供的输入值。
+ * @param message 面向调用方的诊断文本。
+ * @param nativeCode 调用方提供的输入值。
+ * @param phase 调用方提供的输入值。
+ * @param remoteEndpoint 调用方提供的输入值。
+ * @param retryability 调用方提供的输入值。
  */
     public init(
         category: NetworkErrorCategory,
@@ -316,7 +316,7 @@ public open class NetworkException <: IOException {
     }
 
 /**
- * Wirestack 公开 API：getClassName。
+ * Wirestack 公开 API：返回运行时类型名称。
  */
     protected open override func getClassName(): String {
         "NetworkException"

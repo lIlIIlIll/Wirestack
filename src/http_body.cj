@@ -4,21 +4,21 @@ import std.fs.*
 import std.sync.Mutex
 
 /**
- * Wirestack 公开 API：BodyReplayability。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum BodyReplayability <: Equatable<BodyReplayability> {
 /**
- * Wirestack 公开 API：Replayable。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Replayable
 /**
- * Wirestack 公开 API：OneShot。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | OneShot
 
 /**
- * Wirestack 公开 API：==。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否相等。
+ * @param other 用于比较的另一个值。
  */
     public operator func ==(other: BodyReplayability): Bool {
         match ((this, other)) {
@@ -29,72 +29,72 @@ public enum BodyReplayability <: Equatable<BodyReplayability> {
     }
 
 /**
- * Wirestack 公开 API：!=。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否不同。
+ * @param other 用于比较的另一个值。
  */
     public operator func !=(other: BodyReplayability): Bool { !(this == other) }
 }
 
 /**
- * Wirestack 公开 API：HttpBodyErrorCode。
+ * Wirestack 公开 API：表示稳定的错误分类。
  */
 public enum HttpBodyErrorCode {
 /**
- * Wirestack 公开 API：Closed。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Closed
 /**
- * Wirestack 公开 API：ConcurrentRead。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ConcurrentRead
 /**
- * Wirestack 公开 API：AlreadyOpened。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | AlreadyOpened
 /**
- * Wirestack 公开 API：InvalidLength。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidLength
 /**
- * Wirestack 公开 API：InvalidFile。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidFile
 /**
- * Wirestack 公开 API：FileChanged。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | FileChanged
 /**
- * Wirestack 公开 API：PrematureEof。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | PrematureEof
 /**
- * Wirestack 公开 API：FactoryContractViolation。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | FactoryContractViolation
 /**
- * Wirestack 公开 API：InvalidProgress。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidProgress
 }
 
 /**
- * Wirestack 公开 API：HttpBodyException。
+ * Wirestack 公开 API：表示一次可由调用方捕获的操作失败。
  */
 public class HttpBodyException <: Exception {
 /**
- * Wirestack 公开 API：code。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let code: HttpBodyErrorCode
 /**
- * Wirestack 公开 API：cause。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let cause: ?Exception
 
 /**
- * Wirestack 公开 API：init。
- * @param cause 参数 cause。
- * @param code 参数 code。
- * @param message 参数 message。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param cause 导致当前错误的底层异常。
+ * @param code 稳定的错误或状态分类。
+ * @param message 面向调用方的诊断文本。
  */
     public init(code: HttpBodyErrorCode, message: String, cause!: ?Exception = None<Exception>) {
         super(message)
@@ -103,7 +103,7 @@ public class HttpBodyException <: Exception {
     }
 
 /**
- * Wirestack 公开 API：getClassName。
+ * Wirestack 公开 API：返回运行时类型名称。
  */
     protected override func getClassName(): String { "HttpBodyException" }
 }
@@ -111,12 +111,12 @@ public class HttpBodyException <: Exception {
 /** Pull-based stream. A zero result means EOF unless the destination is empty. */
 public interface HttpBodyStream <: Resource {
 /**
- * Wirestack 公开 API：contentLength。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     prop contentLength: ?Int64
 /**
- * Wirestack 公开 API：read。
- * @param destination 参数 destination。
+ * Wirestack 公开 API：读取下一段数据并返回实际进度。
+ * @param destination 调用方提供的输入值。
  */
     func read(destination: Array<Byte>): Int64
 }
@@ -124,11 +124,11 @@ public interface HttpBodyStream <: Resource {
 /** Immutable request-body source supporting replayable and one-shot ownership. */
 public class RequestBody {
 /**
- * Wirestack 公开 API：contentLength。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let contentLength: ?Int64
 /**
- * Wirestack 公开 API：replayability。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let replayability: BodyReplayability
     private let factory: () -> HttpBodyStream
@@ -147,15 +147,15 @@ public class RequestBody {
     }
 
 /**
- * Wirestack 公开 API：empty。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public static func empty(): RequestBody {
         RequestBody(Some(0), BodyReplayability.Replayable, { => ByteArrayBodyStream(Array<Byte>()) })
     }
 
 /**
- * Wirestack 公开 API：bytes。
- * @param value 参数 value。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param value 待写入或配置的值。
  */
     public static func bytes(value: Array<Byte>): RequestBody {
         let owned = value.clone()
@@ -163,8 +163,8 @@ public class RequestBody {
     }
 
 /**
- * Wirestack 公开 API：string。
- * @param value 参数 value。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param value 待写入或配置的值。
  */
     public static func string(value: String): RequestBody {
         RequestBody.bytes(value.toArray())
@@ -172,8 +172,8 @@ public class RequestBody {
 
 /**
  * Opens a fresh bounded regular file for every replay. The file is never read eagerly.
- * @param maximumBytes 参数 maximumBytes。
- * @param path 参数 path。
+ * @param maximumBytes 允许读取的最大字节数。
+ * @param path 要打开或保存的文件系统路径。
  */
     public static func file(path: String, maximumBytes!: Int64 = 1073741824): RequestBody {
         if (path.isEmpty() || path.contains("\0") || maximumBytes < 0) { invalidFile() }
@@ -186,9 +186,9 @@ public class RequestBody {
     }
 
 /**
- * Wirestack 公开 API：replayableFactory。
- * @param contentLength 参数 contentLength。
- * @param factory 参数 factory。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param contentLength 请求体的已知字节长度。
+ * @param factory 按需创建数据流的工厂函数。
  */
     public static func replayableFactory(
         contentLength: ?Int64,
@@ -198,15 +198,15 @@ public class RequestBody {
     }
 
 /**
- * Wirestack 公开 API：oneShot。
- * @param stream 参数 stream。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param stream 提供连续数据的输入流。
  */
     public static func oneShot(stream: HttpBodyStream): RequestBody {
         RequestBody(stream.contentLength, BodyReplayability.OneShot, { => stream })
     }
 
 /**
- * Wirestack 公开 API：open。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public func open(): HttpBodyStream {
         synchronized(openMutex) {
@@ -237,13 +237,13 @@ private class ByteArrayBodyStream <: HttpBodyStream {
     init(bytes: Array<Byte>) { this.bytes = bytes }
 
 /**
- * Wirestack 公开 API：contentLength。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop contentLength: ?Int64 { get() { Some(bytes.size) } }
 
 /**
- * Wirestack 公开 API：read。
- * @param destination 参数 destination。
+ * Wirestack 公开 API：读取下一段数据并返回实际进度。
+ * @param destination 调用方提供的输入值。
  */
     public func read(destination: Array<Byte>): Int64 {
         ensureBodyOpen(closed)
@@ -255,11 +255,11 @@ private class ByteArrayBodyStream <: HttpBodyStream {
     }
 
 /**
- * Wirestack 公开 API：close。
+ * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
  */
     public func close(): Unit { closed = true }
 /**
- * Wirestack 公开 API：isClosed。
+ * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { closed }
 }
@@ -290,13 +290,13 @@ private class FileBodyStream <: HttpBodyStream {
     }
 
 /**
- * Wirestack 公开 API：contentLength。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop contentLength: ?Int64 { get() { Some(expectedLength) } }
 
 /**
- * Wirestack 公开 API：read。
- * @param destination 参数 destination。
+ * Wirestack 公开 API：读取下一段数据并返回实际进度。
+ * @param destination 调用方提供的输入值。
  */
     public func read(destination: Array<Byte>): Int64 {
         ensureBodyOpen(closed)
@@ -327,14 +327,14 @@ private class FileBodyStream <: HttpBodyStream {
     }
 
 /**
- * Wirestack 公开 API：close。
+ * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
  */
     public func close(): Unit {
         if (!closed) { closed = true; file.close() }
     }
 
 /**
- * Wirestack 公开 API：isClosed。
+ * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { closed }
 }

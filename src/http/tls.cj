@@ -6,15 +6,15 @@ import wirestack.internal.http1 as http1
 import wirestack.internal.tls_engine as tls
 
 /**
- * Wirestack 公开 API：HttpClientTlsSecurityProfile。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum HttpClientTlsSecurityProfile {
 /**
- * Wirestack 公开 API：Modern。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Modern
 /**
- * Wirestack 公开 API：StrictTls13。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | StrictTls13
 }
@@ -32,11 +32,11 @@ public class HttpClientTlsConfig <: Resource {
     private var closed = false
 
 /**
- * Wirestack 公开 API：init。
- * @param clientCertificateChainDer 参数 clientCertificateChainDer。
- * @param clientPrivateKeyPkcs8Der 参数 clientPrivateKeyPkcs8Der。
- * @param customTrustRootsDer 参数 customTrustRootsDer。
- * @param securityProfile 参数 securityProfile。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param clientCertificateChainDer 调用方提供的输入值。
+ * @param clientPrivateKeyPkcs8Der 调用方提供的输入值。
+ * @param customTrustRootsDer 调用方提供的输入值。
+ * @param securityProfile 调用方提供的输入值。
  */
     public init(
         customTrustRootsDer: Array<Array<Byte>>,
@@ -81,7 +81,7 @@ public class HttpClientTlsConfig <: Resource {
     }
 
 /**
- * Wirestack 公开 API：close。
+ * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
  */
     public func close(): Unit {
         synchronized(mutex) {
@@ -94,7 +94,7 @@ public class HttpClientTlsConfig <: Resource {
     }
 
 /**
- * Wirestack 公开 API：isClosed。
+ * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { synchronized(mutex) { closed } }
     ~init() { zeroHttpClientBytes(clientPrivateKey) }

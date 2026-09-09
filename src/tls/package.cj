@@ -266,15 +266,15 @@ public class TlsRuntimeInfo {
     private let ownedFeatureFlags: Array<String>
 
 /**
- * Wirestack 公开 API：supportedTlsVersions。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop supportedTlsVersions: Array<String> { get() { ownedTlsVersions.clone() } }
 /**
- * Wirestack 公开 API：httpVersions。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop httpVersions: Array<String> { get() { ownedHttpVersions.clone() } }
 /**
- * Wirestack 公开 API：featureFlags。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop featureFlags: Array<String> { get() { ownedFeatureFlags.clone() } }
 
@@ -296,7 +296,7 @@ public class TlsRuntimeInfo {
 /** Diagnostics only; each call returns a handle-free immutable snapshot. */
 public class TlsRuntime {
 /**
- * Wirestack 公开 API：info。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public static func info(): TlsRuntimeInfo {
         let provider = engine.selectedTlsProvider()

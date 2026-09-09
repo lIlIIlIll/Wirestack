@@ -1,141 +1,141 @@
 package wirestack
 
 /**
- * Wirestack 公开 API：TlsCapability。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum TlsCapability {
 /**
- * Wirestack 公开 API：SystemTrust。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | SystemTrust
 /**
- * Wirestack 公开 API：CustomRoots。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | CustomRoots
 /**
- * Wirestack 公开 API：HardwareKeys。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | HardwareKeys
 /**
- * Wirestack 公开 API：ClientCertificate。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ClientCertificate
 /**
- * Wirestack 公开 API：ServerMode。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ServerMode
 /**
- * Wirestack 公开 API：Tls12。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Tls12
 /**
- * Wirestack 公开 API：Tls13。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Tls13
 /**
- * Wirestack 公开 API：Http2。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Http2
 /**
- * Wirestack 公开 API：NetworkBinding。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | NetworkBinding
 }
 
 /**
- * Wirestack 公开 API：TlsVersion。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum TlsVersion {
 /**
- * Wirestack 公开 API：Tls12。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Tls12
 /**
- * Wirestack 公开 API：Tls13。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Tls13
 }
 
 /**
- * Wirestack 公开 API：TlsSecurityProfile。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum TlsSecurityProfile {
 /**
- * Wirestack 公开 API：Compatible。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Compatible
 /**
- * Wirestack 公开 API：Modern。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Modern
 /**
- * Wirestack 公开 API：StrictTls13。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | StrictTls13
 }
 
 /**
- * Wirestack 公开 API：ClientAuthentication。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum ClientAuthentication {
 /**
- * Wirestack 公开 API：None。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | None
 /**
- * Wirestack 公开 API：Optional。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Optional
 /**
- * Wirestack 公开 API：Required。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Required
 }
 
 /**
- * Wirestack 公开 API：TlsContextErrorCode。
+ * Wirestack 公开 API：表示稳定的错误分类。
  */
 public enum TlsContextErrorCode {
 /**
- * Wirestack 公开 API：MissingTrust。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | MissingTrust
 /**
- * Wirestack 公开 API：MissingIdentity。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | MissingIdentity
 /**
- * Wirestack 公开 API：InvalidVersionRange。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidVersionRange
 /**
- * Wirestack 公开 API：InvalidAlpn。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidAlpn
 /**
- * Wirestack 公开 API：UnsupportedCapability。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | UnsupportedCapability
 }
 
 /**
- * Wirestack 公开 API：TlsContextException。
+ * Wirestack 公开 API：表示一次可由调用方捕获的操作失败。
  */
 public class TlsContextException <: Exception {
 /**
- * Wirestack 公开 API：code。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let code: TlsContextErrorCode
 /**
- * Wirestack 公开 API：capability。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let capability: ?TlsCapability
 
 /**
- * Wirestack 公开 API：init。
- * @param capability 参数 capability。
- * @param code 参数 code。
- * @param message 参数 message。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param capability 调用方提供的输入值。
+ * @param code 稳定的错误或状态分类。
+ * @param message 面向调用方的诊断文本。
  */
     public init(
         code: TlsContextErrorCode,
@@ -254,27 +254,27 @@ public enum TlsEngineErrorCode {
 /** Stable TLS failure without provider-native types or secret material. */
 public class TlsEngineException <: NetworkException {
 /**
- * Wirestack 公开 API：tlsCode。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let tlsCode: TlsEngineErrorCode
 /**
- * Wirestack 公开 API：verificationCode。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let verificationCode: ?Int64
 /**
- * Wirestack 公开 API：peerAlert。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let peerAlert: ?Int32
 
 /**
- * Wirestack 公开 API：init。
- * @param cause 参数 cause。
- * @param code 参数 code。
- * @param message 参数 message。
- * @param nativeCode 参数 nativeCode。
- * @param peerAlert 参数 peerAlert。
- * @param phase 参数 phase。
- * @param verificationCode 参数 verificationCode。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param cause 导致当前错误的底层异常。
+ * @param code 稳定的错误或状态分类。
+ * @param message 面向调用方的诊断文本。
+ * @param nativeCode 调用方提供的输入值。
+ * @param peerAlert 调用方提供的输入值。
+ * @param phase 调用方提供的输入值。
+ * @param verificationCode 调用方提供的输入值。
  */
     public init(
         code: TlsEngineErrorCode,
@@ -317,47 +317,47 @@ public class TlsEngineException <: NetworkException {
     }
 
 /**
- * Wirestack 公开 API：getClassName。
+ * Wirestack 公开 API：返回运行时类型名称。
  */
     protected override func getClassName(): String { "TlsEngineException" }
 }
 
 /**
- * Wirestack 公开 API：TlsConnectionState。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum TlsConnectionState {
 /**
- * Wirestack 公开 API：Open。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Open
 /**
- * Wirestack 公开 API：Closing。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Closing
 /**
- * Wirestack 公开 API：Closed。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Closed
 /**
- * Wirestack 公开 API：Aborted。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Aborted
 }
 
 /**
- * Wirestack 公开 API：TlsClosureEvidence。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum TlsClosureEvidence {
 /**
- * Wirestack 公开 API：CloseNotify。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | CloseNotify
 /**
- * Wirestack 公开 API：PeerClosedWithoutCloseNotify。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | PeerClosedWithoutCloseNotify
 /**
- * Wirestack 公开 API：LocalAbort。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | LocalAbort
 }

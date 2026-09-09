@@ -10,33 +10,33 @@ import wirestack.internal.transport_stdnet as stdnet
 import wirestack as api
 
 /**
- * Wirestack 公开 API：HttpServerClientAuthentication。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum HttpServerClientAuthentication {
 /**
- * Wirestack 公开 API：None。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | None
 /**
- * Wirestack 公开 API：Optional。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Optional
 /**
- * Wirestack 公开 API：Required。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Required
 }
 
 /**
- * Wirestack 公开 API：HttpServerTlsSecurityProfile。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum HttpServerTlsSecurityProfile {
 /**
- * Wirestack 公开 API：Modern。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Modern
 /**
- * Wirestack 公开 API：StrictTls13。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | StrictTls13
 }
@@ -55,12 +55,12 @@ public class HttpServerTlsConfig <: Resource {
     private var closed = false
 
 /**
- * Wirestack 公开 API：init。
- * @param certificateChainDer 参数 certificateChainDer。
- * @param clientAuthentication 参数 clientAuthentication。
- * @param clientTrustRootsDer 参数 clientTrustRootsDer。
- * @param privateKeyPkcs8Der 参数 privateKeyPkcs8Der。
- * @param securityProfile 参数 securityProfile。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param certificateChainDer 调用方提供的输入值。
+ * @param clientAuthentication 调用方提供的输入值。
+ * @param clientTrustRootsDer 调用方提供的输入值。
+ * @param privateKeyPkcs8Der 调用方提供的输入值。
+ * @param securityProfile 调用方提供的输入值。
  */
     public init(
         certificateChainDer: Array<Array<Byte>>,
@@ -90,7 +90,7 @@ public class HttpServerTlsConfig <: Resource {
     }
 
 /**
- * Wirestack 公开 API：close。
+ * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
  */
     public func close(): Unit {
         synchronized(mutex) {
@@ -103,7 +103,7 @@ public class HttpServerTlsConfig <: Resource {
     }
 
 /**
- * Wirestack 公开 API：isClosed。
+ * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { synchronized(mutex) { closed } }
 
@@ -113,35 +113,35 @@ public class HttpServerTlsConfig <: Resource {
 /** Public, protocol-neutral view of one incoming HTTP request. */
 public class HttpServerRequest {
 /**
- * Wirestack 公开 API：method。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let method: HttpMethod
 /**
- * Wirestack 公开 API：target。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let target: String
 /**
- * Wirestack 公开 API：version。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let version: HttpVersion
 /**
- * Wirestack 公开 API：headers。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let headers: HttpHeaders
 /**
- * Wirestack 公开 API：body。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let body: ResponseBody
 /**
- * Wirestack 公开 API：requestCancellation。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let requestCancellation: HttpRequestCancellationHandle
 /**
- * Wirestack 公开 API：connectionCancellation。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let connectionCancellation: HttpConnectionCancellationHandle
 /**
- * Wirestack 公开 API：streamCancellation。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let streamCancellation: ?HttpStreamCancellationHandle
 
@@ -182,18 +182,18 @@ public class HttpServerRequest {
 /** Handler-owned response and optional chunk trailer. */
 public class HttpServerResponse {
 /**
- * Wirestack 公开 API：response。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let response: HttpResponse
 /**
- * Wirestack 公开 API：trailer。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let trailer: HttpTrailer
 
 /**
- * Wirestack 公开 API：init。
- * @param response 参数 response。
- * @param trailer 参数 trailer。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param response 处理后的 HTTP 响应。
+ * @param trailer 调用方提供的输入值。
  */
     public init(response: HttpResponse, trailer!: HttpTrailer = HttpTrailer()) {
         this.response = response
@@ -202,24 +202,24 @@ public class HttpServerResponse {
 }
 
 /**
- * Wirestack 公开 API：HttpServerHandler。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public interface HttpServerHandler {
 /**
- * Wirestack 公开 API：handle。
- * @param context 参数 context。
- * @param request 参数 request。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param request 待处理的 HTTP 请求。
  */
     func handle(request: HttpServerRequest, context: OperationContext): HttpServerResponse
 }
 
 /**
- * Wirestack 公开 API：HttpServerShutdownResult。
+ * Wirestack 公开 API：表示一次操作的结果及其状态。
  */
 public type HttpServerShutdownResult = api.HttpServerShutdownResult
 
 /**
- * Wirestack 公开 API：HttpServerBuilder。
+ * Wirestack 公开 API：提供构造不可变公开值的步骤。
  */
 public class HttpServerBuilder {
     private var endpoint: ?SocketEndpoint = None<SocketEndpoint>
@@ -267,8 +267,8 @@ public class HttpServerBuilder {
     }
 
 /**
- * Wirestack 公开 API：requestsPerConnectionLimit。
- * @param value 参数 value。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param value 待写入或配置的值。
  */
     public func requestsPerConnectionLimit(value: Int64): HttpServerBuilder {
         maximumRequestsPerConnection = value
@@ -276,14 +276,14 @@ public class HttpServerBuilder {
     }
 
 /**
- * Wirestack 公开 API：listenBacklog。
- * @param value 参数 value。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param value 待写入或配置的值。
  */
     public func listenBacklog(value: Int64): HttpServerBuilder { backlog = value; this }
 
 /**
  * Sets the hard concurrent stream bound advertised by each HTTP/2 connection.
- * @param value 参数 value。
+ * @param value 待写入或配置的值。
  */
     public func http2StreamLimit(value: UInt32): HttpServerBuilder {
         if (value == 0u32) { throw IllegalArgumentException("HTTP/2 stream limit must be positive") }
@@ -292,7 +292,7 @@ public class HttpServerBuilder {
     }
 
 /**
- * Wirestack 公开 API：build。
+ * Wirestack 公开 API：构造不可变结果并执行边界校验。
  */
     public func build(): HttpServer {
         let selectedEndpoint = match (endpoint) {
@@ -365,12 +365,12 @@ private func toInternalSecurityProfile(
 }
 
 /**
- * Wirestack 公开 API：HttpServer。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public class HttpServer <: Resource {
     private let core: http1.Http1Server
 /**
- * Wirestack 公开 API：localEndpoint。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let localEndpoint: SocketEndpoint
 
@@ -380,29 +380,29 @@ public class HttpServer <: Resource {
     }
 
 /**
- * Wirestack 公开 API：builder。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public static func builder(): HttpServerBuilder { HttpServerBuilder() }
 /**
- * Wirestack 公开 API：serve。
- * @param context 参数 context。
+ * Wirestack 公开 API：在给定上下文中运行服务循环。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
  */
     public func serve(context!: OperationContext = OperationContext.background()): Unit {
         core.serve(context: context)
     }
 /**
- * Wirestack 公开 API：shutdown。
- * @param context 参数 context。
+ * Wirestack 公开 API：请求服务有序停止并返回停止状态。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
  */
     public func shutdown(context!: OperationContext = OperationContext.background()): HttpServerShutdownResult {
         core.shutdown(context: context)
     }
 /**
- * Wirestack 公开 API：close。
+ * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
  */
     public func close(): Unit { core.close() }
 /**
- * Wirestack 公开 API：isClosed。
+ * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { core.isClosed() }
 }
@@ -539,7 +539,7 @@ private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHand
     }
 
 /**
- * Wirestack 公开 API：beginShutdown。
+ * Wirestack 公开 API：请求服务有序停止并返回停止状态。
  */
     public func beginShutdown(): Unit {
         let current = synchronized(mutex) {
@@ -552,7 +552,7 @@ private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHand
     }
 
 /**
- * Wirestack 公开 API：close。
+ * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
  */
     public func close(): Unit {
         let shouldClose = synchronized(mutex) {
@@ -565,7 +565,7 @@ private class PublicServerConnectionDispatcher <: http1.HttpServerConnectionHand
     }
 
 /**
- * Wirestack 公开 API：isClosed。
+ * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { synchronized(mutex) { closed } }
 

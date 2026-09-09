@@ -32,7 +32,7 @@ public class CancellationToken {
     private static let NONE = CancellationToken(NONE_STATE, permanentlyActive: true)
     private let state: CancellationState
 /**
- * Wirestack 公开 API：permanentlyActive。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     protected let permanentlyActive: Bool
 
@@ -47,7 +47,7 @@ public class CancellationToken {
     }
 
 /**
- * Wirestack 公开 API：isCancellationRequested。
+ * Wirestack 公开 API：报告当前对象是否满足对应条件。
  */
     public prop isCancellationRequested: Bool {
         get() {
@@ -58,7 +58,7 @@ public class CancellationToken {
     /**
      * Registers an interruption callback. If already cancelled, the callback
      * runs synchronously before this method returns.
- * @param callback 参数 callback。
+ * @param callback 完成事件发生时调用的函数。
      */
     public func register(callback: () -> Unit): CancellationRegistration {
         if (permanentlyActive) {
@@ -75,12 +75,12 @@ public class CancellationToken {
 public class CancellationSource {
     private let state = CancellationState()
 /**
- * Wirestack 公开 API：token。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let token: CancellationToken
 
 /**
- * Wirestack 公开 API：init。
+ * Wirestack 公开 API：构造并校验该公开值。
  */
     public init() {
         token = CancellationToken(state)
