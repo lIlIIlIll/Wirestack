@@ -1,6 +1,6 @@
 {
   "candidate": {
-    "identity_sha256": "e16b8bd38a2c10ed274b33ebba4d43c96f14f5760441c6342fabc7412c974f05",
+    "identity_sha256": "599cf22f5b3955bba48e93eda59d113f63f86d835b8cac7e6d5569bffae0b8b7",
     "lockstep_manifests_sha256": "4eb82f14fac080702ac2515da9094f4c24c5721cb0cd7c85f3aae55414b3cddb",
     "package_version": "0.1.0",
     "release_graph_sha256": "1ade7e6101ade9a9f28b54f503bb765fdab447091f35a8a3803fdb0876ba897c",
@@ -17,7 +17,7 @@
     "source-identity.json"
   ],
   "effective_harness_sha256": "4d5788b785c9b69993f91e78934dcb5e21fca8b9ac2b2a7c6986c115e65e0865",
-  "evidence_dir": "benchmarks/results/full-seven-library/2026-09-07-main-3df2801",
+  "evidence_dir": "benchmarks/results/full-seven-library/2026-09-09-main-987bc8a",
   "formal_archives": [
     {
       "file": "formal-main-11-1.tar.gz",
@@ -32,8 +32,8 @@
     "file": "harness-source.tar.gz",
     "root": "harness"
   },
-  "measured_commit": "3df280151b3a3a818c6ad75c254750a19d25e5a1",
-  "product_source_sha256": "0f16de1d0f424626d807e7950785d534b818bef0fdc0f061ceed7be63e651651",
-  "result_doc": "docs/performance/results/2026-09-07-main-seven-library.md",
+  "measured_commit": "987bc8a764771e8157a5b5c0c45c169f654d0b4f",
+  "product_source_sha256": "755467918a8bacee501cc662b7237952d3daf8f7c9291eea7dc32cca2715d7e3",
+  "result_doc": "docs/performance/results/2026-09-09-main-seven-library.md",
   "schema_version": 2
 }

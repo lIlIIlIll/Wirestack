@@ -528,5 +528,43 @@ class SevenLibraryEvidenceTests(unittest.TestCase):
             checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=True)
 
 
+    def test_git_blob_reads_manifest_from_submodule_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary) / "root"
+            root.mkdir()
+            submodule = root / "packages/yjson_macros"
+            submodule.mkdir(parents=True)
+            git(submodule, "init", "-q")
+            git(submodule, "config", "user.name", "Evidence Test")
+            git(submodule, "config", "user.email", "evidence@example.invalid")
+            write(submodule / "cjpm.toml", "submodule manifest\n")
+            git(submodule, "add", "cjpm.toml")
+            git(submodule, "commit", "-q", "-m", "test: submodule manifest")
+            submodule_commit = git(submodule, "rev-parse", "HEAD")
+
+            git(root, "init", "-q")
+            git(root, "config", "user.name", "Evidence Test")
+            git(root, "config", "user.email", "evidence@example.invalid")
+            write(root / "candidate.txt")
+            git(root, "add", "-f", "candidate.txt")
+            git(
+                root,
+                "update-index",
+                "--add",
+                "--cacheinfo",
+                f"160000,{submodule_commit},packages/yjson_macros",
+            )
+            git(root, "commit", "-q", "-m", "test: gitlink candidate")
+            measured_commit = git(root, "rev-parse", "HEAD")
+
+            self.assertEqual(
+                checker.git_blob(
+                    root,
+                    measured_commit,
+                    pathlib.Path("packages/yjson_macros/cjpm.toml"),
+                ),
+                b"submodule manifest\n",
+            )
+
 if __name__ == "__main__":
     unittest.main()
