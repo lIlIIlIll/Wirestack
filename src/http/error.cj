@@ -7,81 +7,81 @@ import wirestack.internal.transport as transport
 /** Stable HTTP failures. HTTP 4xx/5xx responses are not errors in this model. */
 public enum HttpErrorCode {
 /**
- * Wirestack 公开 API：InvalidUrl。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidUrl
 /**
- * Wirestack 公开 API：InvalidRequest。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidRequest
 /**
- * Wirestack 公开 API：InvalidResponse。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidResponse
 /**
- * Wirestack 公开 API：HeaderLimitExceeded。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | HeaderLimitExceeded
 /**
- * Wirestack 公开 API：BodyLimitExceeded。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | BodyLimitExceeded
 /**
- * Wirestack 公开 API：InvalidFraming。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidFraming
 /**
- * Wirestack 公开 API：ProtocolViolation。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ProtocolViolation
 /**
- * Wirestack 公开 API：ProxyFailure。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ProxyFailure
 /**
- * Wirestack 公开 API：PoolExhausted。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | PoolExhausted
 /**
- * Wirestack 公开 API：RedirectLimit。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | RedirectLimit
 /**
- * Wirestack 公开 API：BodyNotReplayable。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | BodyNotReplayable
 /**
- * Wirestack 公开 API：StreamReset。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | StreamReset
 /**
- * Wirestack 公开 API：ConnectionGoAway。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ConnectionGoAway
 /**
- * Wirestack 公开 API：ServerOverloaded。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ServerOverloaded
 }
 
 /**
- * Wirestack 公开 API：HttpException。
+ * Wirestack 公开 API：表示一次可由调用方捕获的操作失败。
  */
 public class HttpException <: Exception {
 /**
- * Wirestack 公开 API：code。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let code: HttpErrorCode
 /**
- * Wirestack 公开 API：cause。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let cause: ?Exception
 
 /**
- * Wirestack 公开 API：init。
- * @param cause 参数 cause。
- * @param code 参数 code。
- * @param message 参数 message。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param cause 导致当前错误的底层异常。
+ * @param code 稳定的错误或状态分类。
+ * @param message 面向调用方的诊断文本。
  */
     public init(code: HttpErrorCode, message: String,
         cause!: ?Exception = None<Exception>) {
@@ -91,7 +91,7 @@ public class HttpException <: Exception {
     }
 
 /**
- * Wirestack 公开 API：getClassName。
+ * Wirestack 公开 API：返回运行时类型名称。
  */
     protected override func getClassName(): String { "HttpException" }
 }

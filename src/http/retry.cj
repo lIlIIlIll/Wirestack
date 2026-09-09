@@ -7,13 +7,13 @@ import wirestack.internal.transport as transport
 /** Bounded automatic retry policy. Unknown and generic exceptions always fail closed. */
 public class HttpRetryPolicy {
 /**
- * Wirestack 公开 API：maximumAttempts。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maximumAttempts: Int64
 
 /**
- * Wirestack 公开 API：init。
- * @param maximumAttempts 参数 maximumAttempts。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param maximumAttempts 调用方提供的输入值。
  */
     public init(maximumAttempts!: Int64 = 2) {
         if (maximumAttempts <= 0 || maximumAttempts > 10) {
@@ -23,12 +23,12 @@ public class HttpRetryPolicy {
     }
 
 /**
- * Wirestack 公开 API：shouldRetry。
- * @param attemptsStarted 参数 attemptsStarted。
- * @param context 参数 context。
- * @param error 参数 error。
- * @param request 参数 request。
- * @param responseCommitted 参数 responseCommitted。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param attemptsStarted 调用方提供的输入值。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param error 调用方提供的输入值。
+ * @param request 待处理的 HTTP 请求。
+ * @param responseCommitted 调用方提供的输入值。
  */
     public func shouldRetry(request: HttpRequest, error: Exception,
         attemptsStarted: Int64, context: OperationContext,
