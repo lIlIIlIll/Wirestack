@@ -22,6 +22,39 @@
 `yjson_macros` 源码位于独立仓库 [`lIlIIlIll/yjson_macros`](https://github.com/lIlIIlIll/yjson_macros)；
 应用需要同时声明 `yjson` 和 `yjson_macros` 两个依赖。
 
+## 构造 JSON literal
+
+需要在源码中直接构造可修改的 JSON 树时，使用 `@Json`。先声明 `yjson` 和
+`yjson_macros` 依赖，再导入两个包：
+
+```cangjie
+package yjson_demo
+
+import yjson.*
+import yjson_macros.*
+
+main(): Unit {
+    let userId: Int64 = 7
+    let dynamicKey = "role"
+    let tree = @Json({
+        "id": $(userId),
+        "name": "Ada",
+        $(dynamicKey): ["admin", "reviewer"],
+    })
+    println(tree.toJson())
+}
+```
+
+输出：
+
+```text
+{"id":7,"name":"Ada","role":["admin","reviewer"]}
+```
+
+literal 中的普通值在编译期校验，`$()` 用于插入运行时值，也可以用来生成动态字符串
+key。结果是可修改的 `JsonNode`；需要文本时调用 `toJson()`。`@JsonValue` 是
+`@Json` 的显式别名。
+
 ## 转换为已知类型
 
 类型由你控制时，在声明上添加 `@JsonCodec`：
