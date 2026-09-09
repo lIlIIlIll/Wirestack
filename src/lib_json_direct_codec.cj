@@ -222,6 +222,12 @@ public func generatedObjectCodecV1Of<T>(): GeneratedObjectCodecV1<T>
 public interface GeneratedCodecV1<T> <: JsonCodec<T> {
     func readFast(reader: GeneratedSupportV1Reader): T
 }
+/// Optional concrete-reader seam for recursive generated fast decoding.
+/// Generic containers use it only when every nested codec opts in; the
+/// versioned reader overload remains the compatibility fallback.
+public interface GeneratedDirectFastReadCodecV1<T> <: JsonCodec<T> {
+    func readFastDirect(reader: JsonFastReader): T
+}
 
 /// Opt-in generated-code seam for codecs that can consume an already-resolved
 /// reader cursor. Recursive codecs pass the same cursor through the whole
@@ -674,10 +680,13 @@ public func readJsonFastWith<T>(codec: JsonCodec<T>, reader: GeneratedSupportV1R
 
 func readJsonNestedFastWith<T>(codec: JsonCodec<T>, reader: GeneratedSupportV1Reader): T {
     match (codec) {
+        case direct: GeneratedDirectFastReadCodecV1<T> =>
+            direct.readFastDirect(GeneratedSupportV1.readFastReader(reader))
         case fast: GeneratedCodecV1<T> => fast.readFast(reader)
         case _ => codec.read(yJsonSemanticReaderV1(reader))
     }
 }
+
 
 func readJsonNestedFastWithCursor<T>(codec: JsonCodec<T>, reader: GeneratedSupportV1Reader,
     cursor: GeneratedSupportV1ReadCursor): T {
@@ -1008,10 +1017,12 @@ private class Int64ArrayJsonCodec <: GeneratedCodecV1<Array<Int64>> &
 }
 
 private class ArrayJsonCodec<T> <: GeneratedCodecV1<Array<T>> &
+    GeneratedDirectFastReadCodecV1<Array<T>> &
     GeneratedCursorReadCodecV1<Array<T>> & GeneratedCompactWriteCodecV1<Array<T>> &
     GeneratedCursorWriteCodecV1<Array<T>> {
     private let inner: JsonCodec<T>
     private let fastInner: GeneratedCodecV1<T>
+    private let directFastInner: Option<GeneratedDirectFastReadCodecV1<T>>
     private let directInner: Option<GeneratedDirectWriteCodecV1<T>>
     private let compactRawInner: Option<GeneratedCompactWriteCodecV1<T>>
     private let cursorReadInner: Option<GeneratedCursorReadCodecV1<T>>
@@ -1020,6 +1031,10 @@ private class ArrayJsonCodec<T> <: GeneratedCodecV1<Array<T>> &
     public init(inner: JsonCodec<T>) {
         this.inner = inner
         this.fastInner = resolvedGeneratedCodecV1(inner)
+        this.directFastInner = match (inner) {
+            case direct: GeneratedDirectFastReadCodecV1<T> => Some(direct)
+            case _ => None<GeneratedDirectFastReadCodecV1<T>>
+        }
         this.directInner = match (inner) {
             case direct: GeneratedDirectWriteCodecV1<T> => Some(direct)
             case _ => None<GeneratedDirectWriteCodecV1<T>>
@@ -1184,8 +1199,57 @@ private class ArrayJsonCodec<T> <: GeneratedCodecV1<Array<T>> &
     }
 
     public func readFast(reader: GeneratedSupportV1Reader): Array<T> {
+        readFastDirect(GeneratedSupportV1.readFastReader(reader))
+    }
 
-        readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+    public func readFastDirect(reader: JsonFastReader): Array<T> {
+        match (directFastInner) {
+            case Some(_) => ()
+            case None => return readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+        }
+        let context = reader.generatedReadStateV1()
+        context.enterValue()
+        try {
+            reader.startRawArray()
+            if (!reader.hasRawArrayItem(true)) {
+                reader.endRawArray()
+                return Array<T>()
+            }
+            let capacity = reader.suggestRawCollectionCapacity()
+            let result = if (capacity > 4) {
+                ArrayList<T>(capacity)
+            } else {
+                ArrayList<T>()
+            }
+            var first = true
+            var index: Int64 = 0
+            if (reader.hasRawArrayItem(first)) {
+                context.pushIndex(index)
+                try {
+                    while (true) {
+                        reader.beforeRawArrayItem(first)
+                        if (!first) {
+                            context.updateLastIndex(index)
+                        }
+                        match (directFastInner) {
+                            case Some(fast) => result.add(fast.readFastDirect(reader))
+                            case None => result.add(fastInner.readFast(reader))
+                        }
+                        first = false
+                        index++
+                        if (!reader.hasRawArrayItem(first)) {
+                            break
+                        }
+                    }
+                } finally {
+                    context.popPath()
+                }
+            }
+            reader.endRawArray()
+            return result.toArray()
+        } finally {
+            context.leaveValue()
+        }
     }
 
     public func readFastWithCursor(reader: GeneratedSupportV1Reader,
@@ -1240,10 +1304,12 @@ private class ArrayJsonCodec<T> <: GeneratedCodecV1<Array<T>> &
 }
 
 private class ArrayListJsonCodec<T> <: GeneratedCodecV1<ArrayList<T>> &
+    GeneratedDirectFastReadCodecV1<ArrayList<T>> &
     GeneratedCursorReadCodecV1<ArrayList<T>> & GeneratedCompactWriteCodecV1<ArrayList<T>> &
     GeneratedCursorWriteCodecV1<ArrayList<T>> {
     private let inner: JsonCodec<T>
     private let fastInner: GeneratedCodecV1<T>
+    private let directFastInner: Option<GeneratedDirectFastReadCodecV1<T>>
     private let directInner: Option<GeneratedDirectWriteCodecV1<T>>
     private let compactRawInner: Option<GeneratedCompactWriteCodecV1<T>>
     private let compactRawArrayListInner: Option<GeneratedCompactArrayListElementCodecV1<T>>
@@ -1253,6 +1319,10 @@ private class ArrayListJsonCodec<T> <: GeneratedCodecV1<ArrayList<T>> &
     public init(inner: JsonCodec<T>) {
         this.inner = inner
         this.fastInner = resolvedGeneratedCodecV1(inner)
+        this.directFastInner = match (inner) {
+            case direct: GeneratedDirectFastReadCodecV1<T> => Some(direct)
+            case _ => None<GeneratedDirectFastReadCodecV1<T>>
+        }
         this.directInner = match (inner) {
             case direct: GeneratedDirectWriteCodecV1<T> => Some(direct)
             case _ => None<GeneratedDirectWriteCodecV1<T>>
@@ -1432,8 +1502,57 @@ private class ArrayListJsonCodec<T> <: GeneratedCodecV1<ArrayList<T>> &
     }
 
     public func readFast(reader: GeneratedSupportV1Reader): ArrayList<T> {
+        readFastDirect(GeneratedSupportV1.readFastReader(reader))
+    }
 
-        readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+    public func readFastDirect(reader: JsonFastReader): ArrayList<T> {
+        match (directFastInner) {
+            case Some(_) => ()
+            case None => return readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+        }
+        let context = reader.generatedReadStateV1()
+        context.enterValue()
+        try {
+            reader.startRawArray()
+            if (!reader.hasRawArrayItem(true)) {
+                reader.endRawArray()
+                return ArrayList<T>()
+            }
+            let capacity = reader.suggestRawCollectionCapacity()
+            let result = if (capacity > 4) {
+                ArrayList<T>(capacity)
+            } else {
+                ArrayList<T>()
+            }
+            var first = true
+            var index: Int64 = 0
+            if (reader.hasRawArrayItem(first)) {
+                context.pushIndex(index)
+                try {
+                    while (true) {
+                        reader.beforeRawArrayItem(first)
+                        if (!first) {
+                            context.updateLastIndex(index)
+                        }
+                        match (directFastInner) {
+                            case Some(fast) => result.add(fast.readFastDirect(reader))
+                            case None => result.add(fastInner.readFast(reader))
+                        }
+                        first = false
+                        index++
+                        if (!reader.hasRawArrayItem(first)) {
+                            break
+                        }
+                    }
+                } finally {
+                    context.popPath()
+                }
+            }
+            reader.endRawArray()
+            return result
+        } finally {
+            context.leaveValue()
+        }
     }
 
     public func readFastWithCursor(reader: GeneratedSupportV1Reader,
@@ -1769,11 +1888,13 @@ public func __yJsonReadFastInt64Option(reader: GeneratedSupportV1Reader): Option
 }
 
 private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> &
+    GeneratedDirectFastReadCodecV1<HashMap<String, T>> &
     GeneratedCursorReadCodecV1<HashMap<String, T>> &
     GeneratedCompactWriteCodecV1<HashMap<String, T>> &
     GeneratedCursorWriteCodecV1<HashMap<String, T>> {
     private let inner: JsonCodec<T>
     private let fastInner: GeneratedCodecV1<T>
+    private let directFastInner: Option<GeneratedDirectFastReadCodecV1<T>>
     private let rawInner: Option<JsonRawWriteCodec<T>>
     private let directInner: Option<GeneratedDirectWriteCodecV1<T>>
     private let compactRawInner: Option<GeneratedCompactWriteCodecV1<T>>
@@ -1783,6 +1904,10 @@ private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> &
     public init(inner: JsonCodec<T>) {
         this.inner = inner
         this.fastInner = resolvedGeneratedCodecV1(inner)
+        this.directFastInner = match (inner) {
+            case direct: GeneratedDirectFastReadCodecV1<T> => Some(direct)
+            case _ => None<GeneratedDirectFastReadCodecV1<T>>
+        }
         this.rawInner = match (inner) {
             case raw: JsonRawWriteCodec<T> => Some(raw)
             case _ => None<JsonRawWriteCodec<T>>
@@ -1987,8 +2112,60 @@ private class HashMapJsonCodec<T> <: GeneratedCodecV1<HashMap<String, T>> &
     }
 
     public func readFast(reader: GeneratedSupportV1Reader): HashMap<String, T> {
+        readFastDirect(GeneratedSupportV1.readFastReader(reader))
+    }
 
-        readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+    public func readFastDirect(reader: JsonFastReader): HashMap<String, T> {
+        match (directFastInner) {
+            case Some(_) => ()
+            case None => return readFastWithCursor(reader, GeneratedSupportV1.readCursor(reader))
+        }
+        let context = reader.generatedReadStateV1()
+        context.enterValue()
+        try {
+            reader.startRawObject()
+            if (!reader.hasRawObjectField(true)) {
+                reader.endRawObject()
+                return HashMap<String, T>()
+            }
+            let result = HashMap<String, T>(reader.suggestRawObjectCapacity())
+            var first = true
+            let firstName = reader.readRawName(true)
+            context.pushField(firstName)
+            try {
+                let decodedFirst = match (directFastInner) {
+                    case Some(fast) => fast.readFastDirect(reader)
+                    case None => fastInner.readFast(reader)
+                }
+                match (result.add(firstName, decodedFirst)) {
+                    case Some(_) =>
+                        throw JsonException("Duplicate object key '${firstName}'", code: "duplicate_key",
+                            path: context.currentPath())
+                    case None => ()
+                }
+                first = false
+                while (reader.hasRawObjectField(first)) {
+                    let name = reader.readRawName(first)
+                    context.updateLastField(name)
+                    let decoded = match (directFastInner) {
+                        case Some(fast) => fast.readFastDirect(reader)
+                        case None => fastInner.readFast(reader)
+                    }
+                    match (result.add(name, decoded)) {
+                        case Some(_) =>
+                            throw JsonException("Duplicate object key '${name}'", code: "duplicate_key",
+                                path: context.currentPath())
+                        case None => ()
+                    }
+                }
+            } finally {
+                context.popPath()
+            }
+            reader.endRawObject()
+            return result
+        } finally {
+            context.leaveValue()
+        }
     }
 
     public func readFastWithCursor(reader: GeneratedSupportV1Reader,

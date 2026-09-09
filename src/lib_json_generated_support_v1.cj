@@ -740,11 +740,25 @@ public class GeneratedSupportV1 {
         GeneratedSupportV1ReadCursor(yJsonGeneratedReaderV1(reader))
     }
 
+    public static func readFastReader(reader: GeneratedSupportV1Reader): JsonFastReader {
+        yJsonGeneratedReaderV1(reader)
+    }
+
     public static func readWithCached<T>(fastCodec: Option<GeneratedCodecV1<T>>,
         codec: JsonCodec<T>, reader: GeneratedSupportV1Reader): T {
         match (fastCodec) {
-            case Some(fast) => fast.readFast(reader)
-            case None => codec.read(yJsonSemanticReaderV1(reader))
+            case Some(fast) =>
+                match (fast) {
+                    case direct: GeneratedDirectFastReadCodecV1<T> =>
+                        direct.readFastDirect(yJsonGeneratedReaderV1(reader))
+                    case _ => fast.readFast(reader)
+                }
+            case None =>
+                match (codec) {
+                    case cursor: GeneratedCursorReadCodecV1<T> =>
+                        cursor.readFastWithCursor(reader, readCursor(reader))
+                    case _ => codec.read(yJsonSemanticReaderV1(reader))
+                }
         }
     }
 
