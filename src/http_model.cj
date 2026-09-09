@@ -5,13 +5,13 @@ import std.collection.ArrayList
 /** An HTTP method token. Extension methods are supported without an enum ABI change. */
 public struct HttpMethod <: Equatable<HttpMethod> & Hashable & ToString {
 /**
- * Wirestack 公开 API：value。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let value: String
 
 /**
- * Wirestack 公开 API：init。
- * @param value 参数 value。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param value 待写入或配置的值。
  */
     public init(value: String) {
         validateHttpToken(value, "HTTP method")
@@ -19,41 +19,41 @@ public struct HttpMethod <: Equatable<HttpMethod> & Hashable & ToString {
     }
 
 /**
- * Wirestack 公开 API：==。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否相等。
+ * @param other 用于比较的另一个值。
  */
     public operator func ==(other: HttpMethod): Bool { value == other.value }
 /**
- * Wirestack 公开 API：!=。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否不同。
+ * @param other 用于比较的另一个值。
  */
     public operator func !=(other: HttpMethod): Bool { value != other.value }
 /**
- * Wirestack 公开 API：hashCode。
+ * Wirestack 公开 API：返回用于哈希容器的稳定哈希值。
  */
     public func hashCode(): Int64 { value.hashCode() }
 /**
- * Wirestack 公开 API：toString。
+ * Wirestack 公开 API：返回适合日志和诊断的文本表示。
  */
     public func toString(): String { value }
 }
 
 /**
- * Wirestack 公开 API：HttpVersion。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum HttpVersion <: Equatable<HttpVersion> {
 /**
- * Wirestack 公开 API：Http11。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Http11
 /**
- * Wirestack 公开 API：Http2。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Http2
 
 /**
- * Wirestack 公开 API：==。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否相等。
+ * @param other 用于比较的另一个值。
  */
     public operator func ==(other: HttpVersion): Bool {
         match ((this, other)) {
@@ -64,8 +64,8 @@ public enum HttpVersion <: Equatable<HttpVersion> {
     }
 
 /**
- * Wirestack 公开 API：!=。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否不同。
+ * @param other 用于比较的另一个值。
  */
     public operator func !=(other: HttpVersion): Bool { !(this == other) }
 }
@@ -73,43 +73,43 @@ public enum HttpVersion <: Equatable<HttpVersion> {
 /** Parser and serializer bounds shared by the client and server paths. */
 public class HttpLimits {
 /**
- * Wirestack 公开 API：maxHeaderLineBytes。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maxHeaderLineBytes: Int64
 /**
- * Wirestack 公开 API：maxHeaderBytes。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maxHeaderBytes: Int64
 /**
- * Wirestack 公开 API：maxHeaderCount。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maxHeaderCount: Int64
 /**
- * Wirestack 公开 API：maxChunkLineBytes。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maxChunkLineBytes: Int64
 /**
- * Wirestack 公开 API：maxTrailerBytes。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maxTrailerBytes: Int64
 /**
- * Wirestack 公开 API：maxTrailerCount。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maxTrailerCount: Int64
 /**
- * Wirestack 公开 API：maxBodyBytes。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maxBodyBytes: Int64
 
 /**
- * Wirestack 公开 API：init。
- * @param maxBodyBytes 参数 maxBodyBytes。
- * @param maxChunkLineBytes 参数 maxChunkLineBytes。
- * @param maxHeaderBytes 参数 maxHeaderBytes。
- * @param maxHeaderCount 参数 maxHeaderCount。
- * @param maxHeaderLineBytes 参数 maxHeaderLineBytes。
- * @param maxTrailerBytes 参数 maxTrailerBytes。
- * @param maxTrailerCount 参数 maxTrailerCount。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param maxBodyBytes 调用方提供的输入值。
+ * @param maxChunkLineBytes 调用方提供的输入值。
+ * @param maxHeaderBytes 调用方提供的输入值。
+ * @param maxHeaderCount 调用方提供的输入值。
+ * @param maxHeaderLineBytes 调用方提供的输入值。
+ * @param maxTrailerBytes 调用方提供的输入值。
+ * @param maxTrailerCount 调用方提供的输入值。
  */
     public init(
         maxHeaderLineBytes!: Int64 = 8192,
@@ -141,18 +141,18 @@ public class HttpLimits {
 /** One ordered header field. Names retain spelling while lookup is ASCII-insensitive. */
 public struct HttpHeader <: Equatable<HttpHeader> {
 /**
- * Wirestack 公开 API：name。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let name: String
 /**
- * Wirestack 公开 API：value。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let value: String
 
 /**
- * Wirestack 公开 API：init。
- * @param name 参数 name。
- * @param value 参数 value。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param name 协议字段或端点的名称。
+ * @param value 待写入或配置的值。
  */
     public init(name: String, value: String) {
         validateHttpToken(name, "header name")
@@ -162,15 +162,15 @@ public struct HttpHeader <: Equatable<HttpHeader> {
     }
 
 /**
- * Wirestack 公开 API：==。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否相等。
+ * @param other 用于比较的另一个值。
  */
     public operator func ==(other: HttpHeader): Bool {
         name == other.name && value == other.value
     }
 /**
- * Wirestack 公开 API：!=。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否不同。
+ * @param other 用于比较的另一个值。
  */
     public operator func !=(other: HttpHeader): Bool { !(this == other) }
 }
@@ -180,18 +180,18 @@ public class HttpHeaders {
     private let ownedEntries: Array<HttpHeader>
 
 /**
- * Wirestack 公开 API：size。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public prop size: Int64 { get() { ownedEntries.size } }
 /**
- * Wirestack 公开 API：entries。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop entries: Array<HttpHeader> { get() { ownedEntries.clone() } }
 
 /**
- * Wirestack 公开 API：init。
- * @param entries 参数 entries。
- * @param limits 参数 limits。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param entries 调用方提供的输入值。
+ * @param limits 调用方提供的输入值。
  */
     public init(entries!: Array<HttpHeader> = Array<HttpHeader>(), limits!: HttpLimits = HttpLimits()) {
         validateHeaderCollection(entries, limits)
@@ -199,8 +199,8 @@ public class HttpHeaders {
     }
 
 /**
- * Wirestack 公开 API：contains。
- * @param name 参数 name。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param name 协议字段或端点的名称。
  */
     public func contains(name: String): Bool {
         validateHttpToken(name, "header name")
@@ -211,8 +211,8 @@ public class HttpHeaders {
     }
 
 /**
- * Wirestack 公开 API：getFirst。
- * @param name 参数 name。
+ * Wirestack 公开 API：返回与当前对象关联的值。
+ * @param name 协议字段或端点的名称。
  */
     public func getFirst(name: String): ?String {
         validateHttpToken(name, "header name")
@@ -223,8 +223,8 @@ public class HttpHeaders {
     }
 
 /**
- * Wirestack 公开 API：getAll。
- * @param name 参数 name。
+ * Wirestack 公开 API：返回与当前对象关联的值。
+ * @param name 协议字段或端点的名称。
  */
     public func getAll(name: String): Array<String> {
         validateHttpToken(name, "header name")
@@ -236,8 +236,8 @@ public class HttpHeaders {
     }
 
 /**
- * Wirestack 公开 API：builder。
- * @param limits 参数 limits。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param limits 调用方提供的输入值。
  */
     public static func builder(limits!: HttpLimits = HttpLimits()): HttpHeadersBuilder {
         HttpHeadersBuilder(limits: limits)
@@ -245,22 +245,22 @@ public class HttpHeaders {
 }
 
 /**
- * Wirestack 公开 API：HttpHeadersBuilder。
+ * Wirestack 公开 API：提供构造不可变公开值的步骤。
  */
 public class HttpHeadersBuilder {
     private let limits: HttpLimits
     private var values = ArrayList<HttpHeader>()
 
 /**
- * Wirestack 公开 API：init。
- * @param limits 参数 limits。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param limits 调用方提供的输入值。
  */
     public init(limits!: HttpLimits = HttpLimits()) { this.limits = limits }
 
 /**
- * Wirestack 公开 API：add。
- * @param name 参数 name。
- * @param value 参数 value。
+ * Wirestack 公开 API：更新当前构建器或集合的受约束状态。
+ * @param name 协议字段或端点的名称。
+ * @param value 待写入或配置的值。
  */
     public func add(name: String, value: String): HttpHeadersBuilder {
         let candidate = HttpHeader(name, value)
@@ -273,9 +273,9 @@ public class HttpHeadersBuilder {
     }
 
 /**
- * Wirestack 公开 API：set。
- * @param name 参数 name。
- * @param value 参数 value。
+ * Wirestack 公开 API：更新当前构建器或集合的受约束状态。
+ * @param name 协议字段或端点的名称。
+ * @param value 待写入或配置的值。
  */
     public func set(name: String, value: String): HttpHeadersBuilder {
         validateHttpToken(name, "header name")
@@ -299,8 +299,8 @@ public class HttpHeadersBuilder {
     }
 
 /**
- * Wirestack 公开 API：remove。
- * @param name 参数 name。
+ * Wirestack 公开 API：更新当前构建器或集合的受约束状态。
+ * @param name 协议字段或端点的名称。
  */
     public func remove(name: String): HttpHeadersBuilder {
         validateHttpToken(name, "header name")
@@ -313,7 +313,7 @@ public class HttpHeadersBuilder {
     }
 
 /**
- * Wirestack 公开 API：build。
+ * Wirestack 公开 API：构造不可变结果并执行边界校验。
  */
     public func build(): HttpHeaders { HttpHeaders(entries: values.toArray(), limits: limits) }
 }
@@ -321,13 +321,13 @@ public class HttpHeadersBuilder {
 /** Immutable trailer fields; routing and framing fields are never representable here. */
 public class HttpTrailer {
 /**
- * Wirestack 公开 API：headers。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let headers: HttpHeaders
 
 /**
- * Wirestack 公开 API：init。
- * @param headers 参数 headers。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param headers 调用方提供的输入值。
  */
     public init(headers!: HttpHeaders = HttpHeaders()) {
         for (name in [

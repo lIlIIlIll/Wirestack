@@ -3,85 +3,85 @@ package wirestack
 /** Stable event names. The payload deliberately has no free-form text or HTTP data. */
 public enum NetworkEventKind {
 /**
- * Wirestack 公开 API：DnsStarted。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | DnsStarted
 /**
- * Wirestack 公开 API：DnsCompleted。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | DnsCompleted
 /**
- * Wirestack 公开 API：ConnectAttemptStarted。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ConnectAttemptStarted
 /**
- * Wirestack 公开 API：ConnectAttemptCompleted。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ConnectAttemptCompleted
 /**
- * Wirestack 公开 API：TcpConnected。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | TcpConnected
 /**
- * Wirestack 公开 API：ProxyTunnelEstablished。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ProxyTunnelEstablished
 /**
- * Wirestack 公开 API：TlsHandshakeStarted。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | TlsHandshakeStarted
 /**
- * Wirestack 公开 API：TlsHandshakeCompleted。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | TlsHandshakeCompleted
 /**
- * Wirestack 公开 API：HttpConnectionAcquired。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | HttpConnectionAcquired
 /**
- * Wirestack 公开 API：HttpConnectionReleased。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | HttpConnectionReleased
 /**
- * Wirestack 公开 API：Http2StreamOpened。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Http2StreamOpened
 /**
- * Wirestack 公开 API：Http2StreamClosed。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Http2StreamClosed
 /**
- * Wirestack 公开 API：ConnectionClosed。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ConnectionClosed
 }
 
 /**
- * Wirestack 公开 API：NetworkEventOutcome。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum NetworkEventOutcome {
 /**
- * Wirestack 公开 API：Started。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Started
 /**
- * Wirestack 公开 API：Succeeded。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Succeeded
 /**
- * Wirestack 公开 API：Failed。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Failed
 /**
- * Wirestack 公开 API：Reused。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Reused
 /**
- * Wirestack 公开 API：Released。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Released
 /**
- * Wirestack 公开 API：Discarded。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Discarded
 }
@@ -95,38 +95,38 @@ public enum NetworkEventOutcome {
  */
 public struct NetworkEvent {
 /**
- * Wirestack 公开 API：kind。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let kind: NetworkEventKind
 /**
- * Wirestack 公开 API：outcome。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let outcome: NetworkEventOutcome
 /**
- * Wirestack 公开 API：trace。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let trace: ?NetworkTraceContext
 /**
- * Wirestack 公开 API：phase。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let phase: ?NetworkPhase
 /**
- * Wirestack 公开 API：errorCode。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let errorCode: ?NetworkErrorCode
 /**
- * Wirestack 公开 API：connectionId。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let connectionId: ?Int64
 
 /**
- * Wirestack 公开 API：init。
- * @param connectionId 参数 connectionId。
- * @param errorCode 参数 errorCode。
- * @param kind 参数 kind。
- * @param outcome 参数 outcome。
- * @param phase 参数 phase。
- * @param trace 参数 trace。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param connectionId 调用方提供的输入值。
+ * @param errorCode 调用方提供的输入值。
+ * @param kind 调用方提供的输入值。
+ * @param outcome 调用方提供的输入值。
+ * @param phase 调用方提供的输入值。
+ * @param trace 要传播的追踪元数据。
  */
     public init(
         kind: NetworkEventKind,
@@ -148,16 +148,16 @@ public struct NetworkEvent {
 /** User event sinks must be non-blocking; sink failures never affect I/O. */
 public interface NetworkEventSink {
 /**
- * Wirestack 公开 API：emit。
- * @param event 参数 event。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param event 调用方提供的输入值。
  */
     func emit(event: NetworkEvent): Unit
 }
 
 /**
  * Zero-work fast path when no sink is installed; user exceptions are isolated.
- * @param context 参数 context。
- * @param event 参数 event。
+ * @param context 控制本次操作的截止时间、取消和追踪范围。
+ * @param event 调用方提供的输入值。
  */
 public func emitNetworkEvent(context: OperationContext, event: NetworkEvent): Unit {
     match (context.eventSink) {
