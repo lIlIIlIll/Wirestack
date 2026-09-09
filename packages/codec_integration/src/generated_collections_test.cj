@@ -322,6 +322,15 @@ class GeneratedCollectionConsumerTest {
     }
 
     @TestCase
+    func recursiveGeneratedFastReadUsesPublicYJsonEntryPoint(): Unit {
+        let nested = YJson.fromJson<ArrayList<HashMap<String, ArrayList<ExternalUser>>>>(
+            "[{\"team\":[{\"id\":8,\"name\":\"Bob\"},{\"id\":9,\"name\":\"Lin\"}]}]")
+        @Assert(nested.size, 1)
+        @Assert(nested[0]["team"].size, 2)
+        @Expect(nested[0]["team"][1].name, "Lin")
+    }
+
+    @TestCase
     func remainingTopLevelNestingPairsCoverCompactPrettyAndRoundTrip(): Unit {
         let oneMap = HashMap<String, Int64>()
         oneMap.add("count", 3)
