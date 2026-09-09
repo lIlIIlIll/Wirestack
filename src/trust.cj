@@ -23,131 +23,131 @@ private let HARD_MAXIMUM_CHAIN_BYTES: Int64 = 1024 * 1024
 private let HARD_MAXIMUM_EXTENSIONS: Int64 = 128
 
 /**
- * Wirestack 公开 API：TrustPolicyKind。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum TrustPolicyKind {
 /**
- * Wirestack 公开 API：System。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | System
 /**
- * Wirestack 公开 API：CustomRoots。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | CustomRoots
 /**
- * Wirestack 公开 API：SystemPlusCustomRoots。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | SystemPlusCustomRoots
 /**
- * Wirestack 公开 API：PinnedPublicKeys。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | PinnedPublicKeys
 }
 
 /**
- * Wirestack 公开 API：TrustAnchorSource。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum TrustAnchorSource {
 /**
- * Wirestack 公开 API：System。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | System
 /**
- * Wirestack 公开 API：CustomRoots。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | CustomRoots
 /**
- * Wirestack 公开 API：SystemPlusCustomRoots。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | SystemPlusCustomRoots
 /**
- * Wirestack 公开 API：PublicKeyPin。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | PublicKeyPin
 }
 
 /**
- * Wirestack 公开 API：TrustVerificationStatus。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum TrustVerificationStatus {
 /**
- * Wirestack 公开 API：Verified。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Verified
 /**
- * Wirestack 公开 API：UntrustedChain。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | UntrustedChain
 /**
- * Wirestack 公开 API：IdentityMismatch。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | IdentityMismatch
 /**
- * Wirestack 公开 API：PinMismatch。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | PinMismatch
 /**
- * Wirestack 公开 API：InvalidCertificate。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidCertificate
 }
 
 /**
- * Wirestack 公开 API：CertificateInputErrorCode。
+ * Wirestack 公开 API：表示稳定的错误分类。
  */
 public enum CertificateInputErrorCode {
 /**
- * Wirestack 公开 API：EmptyChain。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | EmptyChain
 /**
- * Wirestack 公开 API：ChainTooLong。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ChainTooLong
 /**
- * Wirestack 公开 API：CertificateTooLarge。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | CertificateTooLarge
 /**
- * Wirestack 公开 API：ChainTooLarge。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ChainTooLarge
 /**
- * Wirestack 公开 API：TooManyExtensions。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | TooManyExtensions
 /**
- * Wirestack 公开 API：DuplicateCertificate。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | DuplicateCertificate
 /**
- * Wirestack 公开 API：InvalidDer。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidDer
 /**
- * Wirestack 公开 API：InvalidLimit。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | InvalidLimit
 }
 
 /**
- * Wirestack 公开 API：CertificateInputException。
+ * Wirestack 公开 API：表示一次可由调用方捕获的操作失败。
  */
 public class CertificateInputException <: Exception {
 /**
- * Wirestack 公开 API：code。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let code: CertificateInputErrorCode
 /**
- * Wirestack 公开 API：certificateIndex。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let certificateIndex: ?Int64
 
 /**
- * Wirestack 公开 API：init。
- * @param certificateIndex 参数 certificateIndex。
- * @param code 参数 code。
- * @param message 参数 message。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param certificateIndex 证书链中的零基索引。
+ * @param code 稳定的错误或状态分类。
+ * @param message 面向调用方的诊断文本。
  */
     public init(
         code: CertificateInputErrorCode,
@@ -160,7 +160,7 @@ public class CertificateInputException <: Exception {
     }
 
 /**
- * Wirestack 公开 API：getClassName。
+ * Wirestack 公开 API：返回运行时类型名称。
  */
     protected override func getClassName(): String { "CertificateInputException" }
 }
@@ -168,28 +168,28 @@ public class CertificateInputException <: Exception {
 /** Hard-bounded X.509 input limits. Callers may only make them stricter. */
 public struct CertificateInputLimits {
 /**
- * Wirestack 公开 API：maximumChainLength。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maximumChainLength: Int64
 /**
- * Wirestack 公开 API：maximumCertificateBytes。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maximumCertificateBytes: Int64
 /**
- * Wirestack 公开 API：maximumChainBytes。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maximumChainBytes: Int64
 /**
- * Wirestack 公开 API：maximumExtensions。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let maximumExtensions: Int64
 
 /**
- * Wirestack 公开 API：init。
- * @param maximumCertificateBytes 参数 maximumCertificateBytes。
- * @param maximumChainBytes 参数 maximumChainBytes。
- * @param maximumChainLength 参数 maximumChainLength。
- * @param maximumExtensions 参数 maximumExtensions。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param maximumCertificateBytes 单个证书允许占用的最大字节数。
+ * @param maximumChainBytes 证书链允许占用的最大字节数。
+ * @param maximumChainLength 证书链允许的最大长度。
+ * @param maximumExtensions 单个证书允许包含的最大扩展数。
  */
     public init(
         maximumChainLength!: Int64 = 10,
@@ -219,14 +219,14 @@ public struct CertificateInputLimits {
 public struct DerCertificate {
     private let encoded: Array<Byte>
 /**
- * Wirestack 公开 API：extensionCount。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let extensionCount: Int64
 
 /**
- * Wirestack 公开 API：init。
- * @param bytes 参数 bytes。
- * @param limits 参数 limits。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param bytes 保存原始内容的字节序列。
+ * @param limits 调用方提供的输入值。
  */
     public init(
         bytes: Array<Byte>,
@@ -277,12 +277,12 @@ public struct DerCertificate {
     }
 
 /**
- * Wirestack 公开 API：derBytes。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public func derBytes(): Array<Byte> { encoded.clone() }
 
 /**
- * Wirestack 公开 API：subjectAlternativeNames。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public func subjectAlternativeNames(): CertificateSubjectAlternativeNames {
         parseCertificateSubjectAlternativeNames(encoded)
@@ -293,14 +293,14 @@ public struct DerCertificate {
 public class CertificateChain {
     private let entries: Array<DerCertificate>
 /**
- * Wirestack 公开 API：totalBytes。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let totalBytes: Int64
 
 /**
- * Wirestack 公开 API：init。
- * @param certificates 参数 certificates。
- * @param limits 参数 limits。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param certificates 调用方提供的输入值。
+ * @param limits 调用方提供的输入值。
  */
     public init(
         certificates: Array<DerCertificate>,
@@ -352,30 +352,30 @@ public class CertificateChain {
     }
 
 /**
- * Wirestack 公开 API：size。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public func size(): Int64 { entries.size }
 /**
- * Wirestack 公开 API：certificateAt。
- * @param index 参数 index。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param index 调用方提供的输入值。
  */
     public func certificateAt(index: Int64): DerCertificate { entries[index] }
 /**
- * Wirestack 公开 API：certificates。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public func certificates(): Array<DerCertificate> { entries.clone() }
 }
 
 /**
- * Wirestack 公开 API：PinScope。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum PinScope {
 /**
- * Wirestack 公开 API：LeafSubjectPublicKeyInfo。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | LeafSubjectPublicKeyInfo
 /**
- * Wirestack 公开 API：AnyCertificateSubjectPublicKeyInfo。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | AnyCertificateSubjectPublicKeyInfo
 }
@@ -384,14 +384,14 @@ public enum PinScope {
 public struct SpkiSha256Pin {
     private let digest: Array<Byte>
 /**
- * Wirestack 公开 API：scope。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let scope: PinScope
 
 /**
- * Wirestack 公开 API：init。
- * @param digest 参数 digest。
- * @param scope 参数 scope。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param digest 调用方提供的输入值。
+ * @param scope 调用方提供的输入值。
  */
     public init(digest: Array<Byte>, scope!: PinScope = PinScope.LeafSubjectPublicKeyInfo) {
         if (digest.size != 32) {
@@ -402,7 +402,7 @@ public struct SpkiSha256Pin {
     }
 
 /**
- * Wirestack 公开 API：digestBytes。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public func digestBytes(): Array<Byte> { digest.clone() }
 }
@@ -410,11 +410,11 @@ public struct SpkiSha256Pin {
 /** Immutable trust configuration; there is deliberately no TrustAll variant. */
 public class TrustPolicy {
 /**
- * Wirestack 公开 API：kind。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let kind: TrustPolicyKind
 /**
- * Wirestack 公开 API：contextIdentity。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let contextIdentity: String
     private let roots: ?CertificateChain
@@ -432,31 +432,31 @@ public class TrustPolicy {
     }
 
 /**
- * Wirestack 公开 API：system。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public static func system(): TrustPolicy {
         TrustPolicy(TrustPolicyKind.System, None<CertificateChain>, [])
     }
 
 /**
- * Wirestack 公开 API：customRoots。
- * @param roots 参数 roots。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param roots 调用方提供的输入值。
  */
     public static func customRoots(roots: CertificateChain): TrustPolicy {
         TrustPolicy(TrustPolicyKind.CustomRoots, Some(roots), [])
     }
 
 /**
- * Wirestack 公开 API：systemPlusCustomRoots。
- * @param roots 参数 roots。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param roots 调用方提供的输入值。
  */
     public static func systemPlusCustomRoots(roots: CertificateChain): TrustPolicy {
         TrustPolicy(TrustPolicyKind.SystemPlusCustomRoots, Some(roots), [])
     }
 
 /**
- * Wirestack 公开 API：pinnedPublicKeys。
- * @param pins 参数 pins。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param pins 调用方提供的输入值。
  */
     public static func pinnedPublicKeys(pins: Array<SpkiSha256Pin>): TrustPolicy {
         if (pins.isEmpty() || pins.size > 32) {
@@ -474,11 +474,11 @@ public class TrustPolicy {
     }
 
 /**
- * Wirestack 公开 API：customRootChain。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public func customRootChain(): ?CertificateChain { roots }
 /**
- * Wirestack 公开 API：pins。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public func pins(): Array<SpkiSha256Pin> { publicKeyPins.clone() }
 }
@@ -486,38 +486,38 @@ public class TrustPolicy {
 /** Stable diagnostic result with no native certificate/provider object. */
 public struct TrustVerificationEvidence {
 /**
- * Wirestack 公开 API：status。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let status: TrustVerificationStatus
 /**
- * Wirestack 公开 API：trustSource。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let trustSource: TrustAnchorSource
 /**
- * Wirestack 公开 API：trustContextIdentity。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let trustContextIdentity: String
 /**
- * Wirestack 公开 API：peerChainLength。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let peerChainLength: Int64
 /**
- * Wirestack 公开 API：matchedPinIndex。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let matchedPinIndex: ?Int64
 /**
- * Wirestack 公开 API：verifiedReferenceIdentity。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let verifiedReferenceIdentity: ?String
 
 /**
- * Wirestack 公开 API：init。
- * @param matchedPinIndex 参数 matchedPinIndex。
- * @param peerChainLength 参数 peerChainLength。
- * @param status 参数 status。
- * @param trustContextIdentity 参数 trustContextIdentity。
- * @param trustSource 参数 trustSource。
- * @param verifiedReferenceIdentity 参数 verifiedReferenceIdentity。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param matchedPinIndex 调用方提供的输入值。
+ * @param peerChainLength 调用方提供的输入值。
+ * @param status 待记录的协议状态码。
+ * @param trustContextIdentity 调用方提供的输入值。
+ * @param trustSource 调用方提供的输入值。
+ * @param verifiedReferenceIdentity 调用方提供的输入值。
  */
     public init(
         status: TrustVerificationStatus,

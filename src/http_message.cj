@@ -3,19 +3,19 @@ package wirestack
 import std.sync.Mutex
 
 /**
- * Wirestack 公开 API：HttpRetrySafety。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum HttpRetrySafety {
 /**
- * Wirestack 公开 API：Default。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Default
 /**
- * Wirestack 公开 API：ExplicitlySafe。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | ExplicitlySafe
 /**
- * Wirestack 公开 API：Disabled。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Disabled
 }
@@ -23,33 +23,33 @@ public enum HttpRetrySafety {
 /** Immutable request description. Protocol execution owns the body's opened stream, not this model. */
 public class HttpRequest {
 /**
- * Wirestack 公开 API：method。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let method: HttpMethod
 /**
- * Wirestack 公开 API：url。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let url: HttpUrl
 /**
- * Wirestack 公开 API：headers。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let headers: HttpHeaders
 /**
- * Wirestack 公开 API：body。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let body: RequestBody
 /**
- * Wirestack 公开 API：retrySafety。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let retrySafety: HttpRetrySafety
 
 /**
- * Wirestack 公开 API：init。
- * @param body 参数 body。
- * @param headers 参数 headers。
- * @param method 参数 method。
- * @param retrySafety 参数 retrySafety。
- * @param url 参数 url。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param body 调用方提供的输入值。
+ * @param headers 调用方提供的输入值。
+ * @param method 调用方提供的输入值。
+ * @param retrySafety 调用方提供的输入值。
+ * @param url 调用方提供的输入值。
  */
     public init(
         method: HttpMethod,
@@ -66,33 +66,33 @@ public class HttpRequest {
     }
 
 /**
- * Wirestack 公开 API：get。
- * @param url 参数 url。
+ * Wirestack 公开 API：返回与当前对象关联的值。
+ * @param url 调用方提供的输入值。
  */
     public static func get(url: String): HttpRequest {
         HttpRequest(HttpMethod("GET"), HttpUrl.parse(url))
     }
 
 /**
- * Wirestack 公开 API：post。
- * @param body 参数 body。
- * @param url 参数 url。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param body 调用方提供的输入值。
+ * @param url 调用方提供的输入值。
  */
     public static func post(url: String, body: RequestBody): HttpRequest {
         HttpRequest(HttpMethod("POST"), HttpUrl.parse(url), body: body)
     }
 
 /**
- * Wirestack 公开 API：withHeaders。
- * @param headers 参数 headers。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param headers 调用方提供的输入值。
  */
     public func withHeaders(headers: HttpHeaders): HttpRequest {
         HttpRequest(method, url, headers: headers, body: body, retrySafety: retrySafety)
     }
 
 /**
- * Wirestack 公开 API：withRetrySafety。
- * @param value 参数 value。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param value 待写入或配置的值。
  */
     public func withRetrySafety(value: HttpRetrySafety): HttpRequest {
         HttpRequest(method, url, headers: headers, body: body, retrySafety: value)
@@ -102,11 +102,11 @@ public class HttpRequest {
 /** Pool/connection lifecycle hook. Implementations must not expose their transport through this API. */
 public interface ResponseBodyObserver {
 /**
- * Wirestack 公开 API：completed。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     func completed(): Unit
 /**
- * Wirestack 公开 API：abandoned。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     func abandoned(): Unit
 }
@@ -128,22 +128,22 @@ public class ResponseBody <: Resource {
     private var consumedBytes: Int64 = 0
 
 /**
- * Wirestack 公开 API：contentLength。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop contentLength: ?Int64 { get() { stream.contentLength } }
 /**
- * Wirestack 公开 API：trailer。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop trailer: ?HttpTrailer { get() { trailerProvider() } }
     /** Whether consuming the declared length proves protocol completion without a later EOF. */
     public prop completesAtDeclaredLength: Bool { get() { completeAtDeclaredLength } }
 
 /**
- * Wirestack 公开 API：init。
- * @param completeAtDeclaredLength 参数 completeAtDeclaredLength。
- * @param observer 参数 observer。
- * @param stream 参数 stream。
- * @param trailerProvider 参数 trailerProvider。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param completeAtDeclaredLength 调用方提供的输入值。
+ * @param observer 调用方提供的输入值。
+ * @param stream 提供连续数据的输入流。
+ * @param trailerProvider 调用方提供的输入值。
  */
     public init(
         stream: HttpBodyStream,
@@ -158,16 +158,16 @@ public class ResponseBody <: Resource {
     }
 
 /**
- * Wirestack 公开 API：empty。
- * @param observer 参数 observer。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * @param observer 调用方提供的输入值。
  */
     public static func empty(observer!: ResponseBodyObserver = NoopResponseBodyObserver()): ResponseBody {
         ResponseBody(RequestBody.empty().open(), observer: observer)
     }
 
 /**
- * Wirestack 公开 API：read。
- * @param destination 参数 destination。
+ * Wirestack 公开 API：读取下一段数据并返回实际进度。
+ * @param destination 调用方提供的输入值。
  */
     public func read(destination: Array<Byte>): Int64 {
         synchronized(stateMutex) {
@@ -217,8 +217,8 @@ public class ResponseBody <: Resource {
     /**
      * Consumes and closes at most `maximumBytes` of unread body data.
      * Returns true only when EOF was proven and the connection may remain reusable.
- * @param bufferSize 参数 bufferSize。
- * @param maximumBytes 参数 maximumBytes。
+ * @param bufferSize 调用方提供的输入值。
+ * @param maximumBytes 允许读取的最大字节数。
      */
     public func drain(maximumBytes: Int64, bufferSize!: Int64 = 16 * 1024): Bool {
         if (maximumBytes < 0 || bufferSize <= 0 || bufferSize > 1024 * 1024) {
@@ -242,7 +242,7 @@ public class ResponseBody <: Resource {
     }
 
 /**
- * Wirestack 公开 API：close。
+ * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
  */
     public func close(): Unit {
         var notifyAbandoned = false
@@ -262,12 +262,12 @@ public class ResponseBody <: Resource {
     }
 
 /**
- * Wirestack 公开 API：isClosed。
+ * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { synchronized(stateMutex) { closed } }
 
 /**
- * Wirestack 公开 API：isFullyConsumed。
+ * Wirestack 公开 API：报告当前对象是否满足对应条件。
  */
     public func isFullyConsumed(): Bool { synchronized(stateMutex) { fullyConsumed } }
 
@@ -300,33 +300,33 @@ public class ResponseBody <: Resource {
 /** Immutable response head plus its uniquely-owned streaming body. */
 public class HttpResponse <: Resource {
 /**
- * Wirestack 公开 API：status。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let status: Int64
 /**
- * Wirestack 公开 API：reason。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let reason: String
 /**
- * Wirestack 公开 API：version。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let version: HttpVersion
 /**
- * Wirestack 公开 API：headers。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let headers: HttpHeaders
 /**
- * Wirestack 公开 API：body。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let body: ResponseBody
 
 /**
- * Wirestack 公开 API：init。
- * @param body 参数 body。
- * @param headers 参数 headers。
- * @param reason 参数 reason。
- * @param status 参数 status。
- * @param version 参数 version。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param body 调用方提供的输入值。
+ * @param headers 调用方提供的输入值。
+ * @param reason 描述终止原因的稳定值。
+ * @param status 待记录的协议状态码。
+ * @param version 调用方提供的输入值。
  */
     public init(
         status: Int64,
@@ -347,22 +347,22 @@ public class HttpResponse <: Resource {
     }
 
 /**
- * Wirestack 公开 API：close。
+ * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
  */
     public func close(): Unit { body.close() }
 /**
- * Wirestack 公开 API：isClosed。
+ * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { body.isClosed() }
 }
 
 private class NoopResponseBodyObserver <: ResponseBodyObserver {
 /**
- * Wirestack 公开 API：completed。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public func completed(): Unit {}
 /**
- * Wirestack 公开 API：abandoned。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public func abandoned(): Unit {}
 }

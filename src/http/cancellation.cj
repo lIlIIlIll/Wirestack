@@ -7,21 +7,21 @@ import wirestack.internal.transport as transport
 /** The public cancellation scope owned by one typed HTTP handle. */
 public enum HttpCancellationScope <: Equatable<HttpCancellationScope> {
 /**
- * Wirestack 公开 API：Request。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Request
 /**
- * Wirestack 公开 API：Connection。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Connection
 /**
- * Wirestack 公开 API：Stream。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Stream
 
 /**
- * Wirestack 公开 API：==。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否相等。
+ * @param other 用于比较的另一个值。
  */
     public operator func ==(other: HttpCancellationScope): Bool {
         match ((this, other)) {
@@ -33,8 +33,8 @@ public enum HttpCancellationScope <: Equatable<HttpCancellationScope> {
     }
 
 /**
- * Wirestack 公开 API：!=。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否不同。
+ * @param other 用于比较的另一个值。
  */
     public operator func !=(other: HttpCancellationScope): Bool { !(this == other) }
 }
@@ -43,15 +43,15 @@ public enum HttpCancellationScope <: Equatable<HttpCancellationScope> {
 public class HttpRequestCancellationHandle {
     private let state = HttpHandleCancellationState()
 /**
- * Wirestack 公开 API：scope。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop scope: HttpCancellationScope { get() { HttpCancellationScope.Request } }
 /**
- * Wirestack 公开 API：isCancellationRequested。
+ * Wirestack 公开 API：报告当前对象是否满足对应条件。
  */
     public prop isCancellationRequested: Bool { get() { state.isCancellationRequested } }
 /**
- * Wirestack 公开 API：cancel。
+ * Wirestack 公开 API：请求取消当前操作。
  */
     public func cancel(): Bool { state.cancel() }
     internal prop cancellationToken: transport.CancellationToken { get() { state.token } }
@@ -61,15 +61,15 @@ public class HttpRequestCancellationHandle {
 public class HttpConnectionCancellationHandle {
     private let state = HttpHandleCancellationState()
 /**
- * Wirestack 公开 API：scope。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop scope: HttpCancellationScope { get() { HttpCancellationScope.Connection } }
 /**
- * Wirestack 公开 API：isCancellationRequested。
+ * Wirestack 公开 API：报告当前对象是否满足对应条件。
  */
     public prop isCancellationRequested: Bool { get() { state.isCancellationRequested } }
 /**
- * Wirestack 公开 API：cancel。
+ * Wirestack 公开 API：请求取消当前操作。
  */
     public func cancel(): Bool { state.cancel() }
     internal prop cancellationToken: transport.CancellationToken { get() { state.token } }
@@ -79,15 +79,15 @@ public class HttpConnectionCancellationHandle {
 public class HttpStreamCancellationHandle {
     private let state = HttpHandleCancellationState()
 /**
- * Wirestack 公开 API：scope。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop scope: HttpCancellationScope { get() { HttpCancellationScope.Stream } }
 /**
- * Wirestack 公开 API：isCancellationRequested。
+ * Wirestack 公开 API：报告当前对象是否满足对应条件。
  */
     public prop isCancellationRequested: Bool { get() { state.isCancellationRequested } }
 /**
- * Wirestack 公开 API：cancel。
+ * Wirestack 公开 API：请求取消当前操作。
  */
     public func cancel(): Bool { state.cancel() }
     internal prop cancellationToken: transport.CancellationToken { get() { state.token } }
@@ -96,23 +96,23 @@ public class HttpStreamCancellationHandle {
 /** Optional typed handles supplied to one controlled client request. */
 public class HttpCancellationHandles {
 /**
- * Wirestack 公开 API：request。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let request: ?HttpRequestCancellationHandle
 /**
- * Wirestack 公开 API：connection。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let connection: ?HttpConnectionCancellationHandle
 /**
- * Wirestack 公开 API：stream。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let stream: ?HttpStreamCancellationHandle
 
 /**
- * Wirestack 公开 API：init。
- * @param connection 参数 connection。
- * @param request 参数 request。
- * @param stream 参数 stream。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param connection 调用方提供的输入值。
+ * @param request 待处理的 HTTP 请求。
+ * @param stream 提供连续数据的输入流。
  */
     public init(
         request!: ?HttpRequestCancellationHandle = None<HttpRequestCancellationHandle>,
@@ -243,12 +243,12 @@ private class HttpCancellationBodyStream <: HttpBodyStream {
         this.context = context
     }
 /**
- * Wirestack 公开 API：contentLength。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public prop contentLength: ?Int64 { get() { delegate.contentLength } }
 /**
- * Wirestack 公开 API：read。
- * @param destination 参数 destination。
+ * Wirestack 公开 API：读取下一段数据并返回实际进度。
+ * @param destination 调用方提供的输入值。
  */
     public func read(destination: Array<Byte>): Int64 {
         if (!destination.isEmpty()) {
@@ -276,11 +276,11 @@ private class HttpCancellationBodyStream <: HttpBodyStream {
         delegate.read(destination)
     }
 /**
- * Wirestack 公开 API：close。
+ * Wirestack 公开 API：关闭资源并唤醒正在等待的操作。
  */
     public func close(): Unit { delegate.close() }
 /**
- * Wirestack 公开 API：isClosed。
+ * Wirestack 公开 API：报告资源是否已经关闭。
  */
     public func isClosed(): Bool { delegate.isClosed() }
 }

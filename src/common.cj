@@ -1,21 +1,21 @@
 package wirestack
 
 /**
- * Wirestack 公开 API：IpAddressFamily。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
 public enum IpAddressFamily <: Equatable<IpAddressFamily> {
 /**
- * Wirestack 公开 API：Ipv4。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Ipv4
 /**
- * Wirestack 公开 API：Ipv6。
+ * Wirestack 公开 API：表示一个可由调用方安全使用的 Wirestack 公开类型。
  */
     | Ipv6
 
 /**
- * Wirestack 公开 API：==。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否相等。
+ * @param other 用于比较的另一个值。
  */
     public operator func ==(other: IpAddressFamily): Bool {
         match ((this, other)) {
@@ -26,8 +26,8 @@ public enum IpAddressFamily <: Equatable<IpAddressFamily> {
     }
 
 /**
- * Wirestack 公开 API：!=。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否不同。
+ * @param other 用于比较的另一个值。
  */
     public operator func !=(other: IpAddressFamily): Bool {
         !(this == other)
@@ -37,20 +37,20 @@ public enum IpAddressFamily <: Equatable<IpAddressFamily> {
 /** A DNS-free IP address value used at transport boundaries. */
 public struct IpAddress <: Equatable<IpAddress> & Hashable {
 /**
- * Wirestack 公开 API：family。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let family: IpAddressFamily
     private let octets: Array<Byte>
 /**
- * Wirestack 公开 API：zone。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let zone: ?String
 
 /**
- * Wirestack 公开 API：init。
- * @param family 参数 family。
- * @param octets 参数 octets。
- * @param zone 参数 zone。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param family 地址使用的 IP 地址族。
+ * @param octets 保存地址内容的字节序列。
+ * @param zone IPv6 链路本地地址的区域标识。
  */
     public init(family: IpAddressFamily, octets: Array<Byte>, zone!: ?String = None<String>) {
         let expected = match (family) {
@@ -87,23 +87,23 @@ public struct IpAddress <: Equatable<IpAddress> & Hashable {
     }
 
 /**
- * Wirestack 公开 API：==。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否相等。
+ * @param other 用于比较的另一个值。
  */
     public operator func ==(other: IpAddress): Bool {
         family == other.family && octets == other.octets && zone == other.zone
     }
 
 /**
- * Wirestack 公开 API：!=。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否不同。
+ * @param other 用于比较的另一个值。
  */
     public operator func !=(other: IpAddress): Bool {
         !(this == other)
     }
 
 /**
- * Wirestack 公开 API：hashCode。
+ * Wirestack 公开 API：返回用于哈希容器的稳定哈希值。
  */
     public func hashCode(): Int64 {
         var hasher = DefaultHasher()
@@ -124,18 +124,18 @@ public struct IpAddress <: Equatable<IpAddress> & Hashable {
 /** An already-resolved IP endpoint. Construction never performs DNS. */
 public struct SocketEndpoint <: Equatable<SocketEndpoint> & Hashable {
 /**
- * Wirestack 公开 API：address。
+ * Wirestack 公开 API：更新当前构建器或集合的受约束状态。
  */
     public let address: IpAddress
 /**
- * Wirestack 公开 API：port。
+ * Wirestack 公开 API：返回当前对象保存的受约束值。
  */
     public let port: UInt16
 
 /**
- * Wirestack 公开 API：init。
- * @param address 参数 address。
- * @param port 参数 port。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param address 目标或本地网络地址。
+ * @param port 目标服务端口号。
  */
     public init(address: IpAddress, port: UInt16) {
         this.address = address
@@ -143,23 +143,23 @@ public struct SocketEndpoint <: Equatable<SocketEndpoint> & Hashable {
     }
 
 /**
- * Wirestack 公开 API：==。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否相等。
+ * @param other 用于比较的另一个值。
  */
     public operator func ==(other: SocketEndpoint): Bool {
         address == other.address && port == other.port
     }
 
 /**
- * Wirestack 公开 API：!=。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否不同。
+ * @param other 用于比较的另一个值。
  */
     public operator func !=(other: SocketEndpoint): Bool {
         !(this == other)
     }
 
 /**
- * Wirestack 公开 API：hashCode。
+ * Wirestack 公开 API：返回用于哈希容器的稳定哈希值。
  */
     public func hashCode(): Int64 {
         var hasher = DefaultHasher()
@@ -172,13 +172,13 @@ public struct SocketEndpoint <: Equatable<SocketEndpoint> & Hashable {
 /** Canonical ASCII DNS name. Construction performs validation, never DNS. */
 public struct HostName <: Equatable<HostName> & Hashable & ToString {
 /**
- * Wirestack 公开 API：ascii。
+ * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
  */
     public let ascii: String
 
 /**
- * Wirestack 公开 API：init。
- * @param value 参数 value。
+ * Wirestack 公开 API：构造并校验该公开值。
+ * @param value 待写入或配置的值。
  */
     public init(value: String) {
         if (value.isEmpty()) {
@@ -202,30 +202,30 @@ public struct HostName <: Equatable<HostName> & Hashable & ToString {
     }
 
 /**
- * Wirestack 公开 API：==。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否相等。
+ * @param other 用于比较的另一个值。
  */
     public operator func ==(other: HostName): Bool {
         ascii == other.ascii
     }
 
 /**
- * Wirestack 公开 API：!=。
- * @param other 参数 other。
+ * Wirestack 公开 API：比较两个值是否不同。
+ * @param other 用于比较的另一个值。
  */
     public operator func !=(other: HostName): Bool {
         ascii != other.ascii
     }
 
 /**
- * Wirestack 公开 API：hashCode。
+ * Wirestack 公开 API：返回用于哈希容器的稳定哈希值。
  */
     public func hashCode(): Int64 {
         ascii.hashCode()
     }
 
 /**
- * Wirestack 公开 API：toString。
+ * Wirestack 公开 API：返回适合日志和诊断的文本表示。
  */
     public func toString(): String {
         ascii
