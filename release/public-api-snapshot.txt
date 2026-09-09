@@ -328,6 +328,7 @@ yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedCompact
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedCompactWriteCodecV1<T> <: GeneratedDirectWriteCodecV1<T>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedCursorReadCodecV1<T> <: JsonCodec<T>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedCursorWriteCodecV1<T> <: JsonCodec<T>
+yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedDirectFastReadCodecV1<T> <: JsonCodec<T>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedDirectWriteCodecV1<T> <: JsonCodec<T>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedObjectCodecProviderV1<T>
 yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedObjectCodecV1<T> <: JsonCodec<T>
@@ -375,6 +376,7 @@ yjson|src/lib_json_direct_codec.cj|GeneratedCompactWriteCodecV1|func writeCompac
 yjson|src/lib_json_direct_codec.cj|GeneratedCursorReadCodecV1|func readFastWithCursor(reader: GeneratedSupportV1Reader, cursor: GeneratedSupportV1ReadCursor): T
 yjson|src/lib_json_direct_codec.cj|GeneratedCursorWriteCodecV1|func supportsCompactCursorWrite(): Bool
 yjson|src/lib_json_direct_codec.cj|GeneratedCursorWriteCodecV1|func writeCompactWithCursor(value: T, writer: GeneratedSupportV1Writer, cursor: GeneratedSupportV1WriteCursor): Unit
+yjson|src/lib_json_direct_codec.cj|GeneratedDirectFastReadCodecV1|func readFastDirect(reader: JsonFastReader): T
 yjson|src/lib_json_direct_codec.cj|GeneratedDirectWriteCodecV1|func writeDirect(value: T, writer: GeneratedSupportV1Writer): Unit
 yjson|src/lib_json_direct_codec.cj|GeneratedObjectCodecProviderV1|static func generatedObjectCodecV1(_: GeneratedCodecTokenV1<T>): GeneratedObjectCodecV1<T>
 yjson|src/lib_json_direct_codec.cj|GeneratedObjectCodecV1|func writeObjectFields(value: T, writer: JsonWriter): Unit
@@ -825,6 +827,7 @@ yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func nodeValue<T>(value: T): JsonNode where T <: GeneratedCodecProviderV1<T>
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func protocolVersion(): Int64
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func readCursor(reader: GeneratedSupportV1Reader): GeneratedSupportV1ReadCursor
+yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func readFastReader(reader: GeneratedSupportV1Reader): JsonFastReader
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func readOptions(reader: JsonReader): JsonReadOptions
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func readState(reader: GeneratedSupportV1Reader): GeneratedReadStateV1
 yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func readState(reader: JsonReader): GeneratedReadStateV1

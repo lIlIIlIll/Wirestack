@@ -8,8 +8,8 @@ baseline_sha256 = "0ce5f31ddf32942d00d2ae3d7d1701cfaacc9b52ae3caf66dfe4e54391907
 review_status = "pending-migration-review"
 removed_records = 709
 removed_sha256 = "f8db1ff9cd7120892b58d4db5a8ce8882fa33b636bcb1d38805230d843c1d1b7"
-added_records = 711
-added_sha256 = "6a00338fa1ab1837653b9a3454361b5916809147910488427288216fc959e9f8"
+added_records = 714
+added_sha256 = "530ae8ff0d806e014289103596c4932de3c0fbd8070ccc5dba8970a1167fe7bc"
 
 [[review_groups]]
 classification = "advanced-backend-package-redesign"
@@ -1076,6 +1076,7 @@ added = [
   "yjson|src/lib_json_direct_codec.cj|GeneratedCompactCodecProviderV1|static func generatedCompactRawV1(value: T, writer: JsonDirectWriter): Unit",
   "yjson|src/lib_json_direct_codec.cj|GeneratedCompactCursorWriteCodecV1|func writeCompactRawWithWriter(value: T, writer: JsonDirectWriter): Unit",
   "yjson|src/lib_json_direct_codec.cj|GeneratedCursorWriteCodecV1|func supportsCompactCursorWrite(): Bool",
+  "yjson|src/lib_json_direct_codec.cj|GeneratedDirectFastReadCodecV1|func readFastDirect(reader: JsonFastReader): T",
   "yjson|src/lib_json_direct_codec.cj|JsonCodecs|public static func array<T>(inner: JsonCodec<T>): JsonCodec<Array<T>>",
   "yjson|src/lib_json_direct_codec.cj|JsonCodecs|public static func arrayList<T>(inner: JsonCodec<T>): JsonCodec<ArrayList<T>>",
   "yjson|src/lib_json_direct_codec.cj|JsonCodecs|public static func option<T>(inner: JsonCodec<T>): JsonCodec<Option<T>>",
@@ -1282,6 +1283,7 @@ added = [
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedCompactWriteCodecV1<T> <: GeneratedDirectWriteCodecV1<T>",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedCursorReadCodecV1<T> <: JsonCodec<T>",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedCursorWriteCodecV1<T> <: JsonCodec<T>",
+  "yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedDirectFastReadCodecV1<T> <: JsonCodec<T>",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedDirectWriteCodecV1<T> <: JsonCodec<T>",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedObjectCodecProviderV1<T>",
   "yjson|src/lib_json_direct_codec.cj|<top-level>|public interface GeneratedObjectCodecV1<T> <: JsonCodec<T>",
@@ -1462,6 +1464,7 @@ added = [
   "yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func nodeValue(value: String): JsonNode",
   "yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func nodeValue<T>(value: T): JsonNode where T <: GeneratedCodecProviderV1<T>",
   "yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func readCursor(reader: GeneratedSupportV1Reader): GeneratedSupportV1ReadCursor",
+  "yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func readFastReader(reader: GeneratedSupportV1Reader): JsonFastReader",
   "yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func readOptions(reader: JsonReader): JsonReadOptions",
   "yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func readState(reader: GeneratedSupportV1Reader): GeneratedReadStateV1",
   "yjson|src/lib_json_generated_support_v1.cj|GeneratedSupportV1|public static func readState(reader: JsonReader): GeneratedReadStateV1",
