@@ -30,7 +30,9 @@
 python3 scripts/check_seven_library_evidence.py
 ```
 
-校验器会验证 checksum、安全解包、两批各 770 个单元、metadata 身份、汇总可重生成、测量提交祖先关系，以及当前 checkout 的产品和 benchmark 输入摘要。
+校验器会验证 checksum、安全解包、两批各 770 个单元、metadata 身份、汇总可重生成、测量提交的
+candidate closure，以及当前 checkout 的产品和 benchmark 输入摘要；测量提交对象被 squash
+合并裁剪后，仍可用 marker 和归档中的身份信息完成严格校验。
 
 完整数据表、workload 形状和解释见
 [当前 `main` 七库结果](../../../../docs/performance/results/2026-09-10-main-seven-library.md)。

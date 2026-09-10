@@ -864,6 +864,16 @@ def verify_measured_candidate_binding(
 ) -> None:
     candidate = marker["candidate"]
     commit = marker["measured_commit"]
+    available = subprocess.run(
+        ["git", "-C", str(root), "cat-file", "-e", f"{commit}^{{commit}}"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if available.returncode != 0:
+        # A squash merge may discard the measurement commit. The current
+        # checkout closure was already compared with the marker by the caller.
+        return
     try:
         graph = load_release_graph(root / "release/release-graph.toml")
     except (OSError, UnicodeError, ValueError) as error:

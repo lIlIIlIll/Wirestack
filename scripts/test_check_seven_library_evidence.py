@@ -528,6 +528,16 @@ class SevenLibraryEvidenceTests(unittest.TestCase):
             checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=False),
             2,
         )
+    def test_missing_measurement_commit_uses_candidate_closure(self) -> None:
+        self.fixture.measured_commit = "a" * 40
+        self.fixture.write_evidence()
+        git(self.root, "add", "-f", ".")
+        git(self.root, "commit", "-q", "-m", "test: bind missing measurement")
+        self.assertEqual(
+            checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=False),
+            2,
+        )
+
 
     def test_current_document_links_are_required_in_integrity_mode(self) -> None:
         write(self.root / "README.md", "stale link\n")
