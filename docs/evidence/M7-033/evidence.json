@@ -1,6 +1,6 @@
 {
-  "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-10T02:35:41.911301Z",
+  "acceptance_status": "BLOCKED",
+  "generated_at_utc": "2026-09-10T02:58:10.018790Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -49,12 +49,21 @@
       "path": "docs/evidence/M7-033/ci-repair-checks.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "63df7df8faaf9de65de0d0bb7517b7630e09ff38b978b0d6ec04e6b6bb90df0a"
+        "sha256": "aa6d623bae1b12e696c6e5aef37f790f5752e4a071c4b678c1fdecb6b5d491ba"
+      },
+      "source_task": "M7-033"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M7-033/required-checks.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1674c83fd411d8c9763dd139a40212d89da3cde68b35343abc9852780986b436"
       },
       "source_task": "M7-033"
     }
   ],
-  "revision": "a97de1b5848a8a76b46fb30c12db9d6131ed255f",
+  "revision": "55ab33b6768f89dbeb35224514f818b6e5439b9b",
   "schema_version": 2,
   "source_sha256": {
     ".github/workflows/clean-cangjie-build.yml": {
@@ -79,7 +88,7 @@
     },
     "docs/evidence/M7-033/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "ab64ec2156f71b71014602de85302739422dafb4ab0da19d445818b291b49692"
+      "sha256": "90abb9447187d7c9190415fceff4f4b64c5c2f0f2a7a17473eadc88720a224b1"
     },
     "docs/evidence/M7-033/ci-workspace-safety.json": {
       "domain": "text-utf8-lf-v1",
@@ -87,7 +96,7 @@
     },
     "docs/evidence/M7-033/test-plan.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "dafc470a0cc7413afa69f28baedfed1c587da8e32bee64d49b070da85e4da08f"
+      "sha256": "10242588fa70feecfc50bea5d0cc316a41456986ea3b1f9650b5b5c7339cbe10"
     },
     "docs/guides/getting-started-linux.md": {
       "domain": "text-utf8-lf-v1",
@@ -99,11 +108,11 @@
     },
     "docs/planning/linux-status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "61ac8079ee1387f7e3c84df8dfc6e11e6c85f187e7cb98300272f4674a0606b5"
+      "sha256": "8025baa7fa4ccc0a8c1c470fd012421760cb93432ea390f711149f2830299724"
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "b33d99200dfb54fda9b906df1c2b6fed5a69bfa1b3a55557b574e9e5959abf4a"
+      "sha256": "0661f4012380144b7012bd3212fb1ac0d1005ad1deb4f0355d2e7990159b9ccd"
     },
     "docs/references/m7-033-ci-toolchain.json": {
       "domain": "text-utf8-lf-v1",
@@ -259,7 +268,7 @@
     },
     "tools/tasks/M7-033.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "f4b9532cceb0b309f38c87ee713b69c13e7ae084c2bf1ee892350d3eb1f9d51d"
+      "sha256": "72160ae39468cda65639c4b2f1c2cc4e369317efa0ae44572a4a864bae72f3e5"
     },
     "tools/tests/test_linux_tls_provider_build.py": {
       "domain": "text-utf8-lf-v1",
@@ -275,7 +284,7 @@
     },
     "tools/tests/test_m7_linux_task_graph.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "d1906b72343ba65bbe13aa894afa209d2128754bc692f7795e9ead7a420b149c"
+      "sha256": "1f8a3eb3f522804bf5ee2966d4b6261e7197c9022f1f376e2e36df56daa9b7dc"
     }
   },
   "source_task": "M7-033",

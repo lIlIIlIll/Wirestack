@@ -15,7 +15,7 @@ PASS。
 | P005 | API surface、Doc IR、coverage、Markdown 通过 schema 和摘要校验 | PASS |
 | P006 | 输出目录越界、覆盖非 cjdoc 所有内容或原子写入失败 | FAIL |
 | P007 | clean consumer 仅导入公开包并运行 HTTPS 示例 | PASS |
-| P008 | Pages 生成、部署或有界 HTTP smoke 失败 | FAIL |
+| P008 | Pages 生成、构建结果汇总、部署或有界 HTTP smoke 失败 | FAIL |
 | P009 | 长任务被 fast/full 隐式执行，或 SKIPPED 被记为 PASS | FAIL |
 | P010 | 源码、工具链或生成输入摘要变化 | STALE |
 | P011 | Successful native tool emits diagnostics on stderr | PASS; metadata remains unchanged |
@@ -35,7 +35,7 @@ PASS。
 | S008 | clean consumer imports `wirestack.http`/`wirestack.tls` only | P007 |
 | S009 | long-running profile appears in fast/full command set | P009 |
 | S010 | source or cjdoc version digest no longer matches evidence | P010 |
-| S011 | Pages artifact/deploy and bounded root/API/search smoke | P008 |
+| S011 | Required build-status report, Pages artifact/deploy and bounded root/API/search smoke | P008 |
 | S012 | Git emits stderr diagnostics with a pinned clean HEAD and tree | P011 |
 | S013 | The same provider checkout gains an untracked file | P012 |
 
@@ -50,7 +50,7 @@ PASS。
 | T005 | S008 | P007 | existing M7-027 clean-consumer gate and public-import scan |
 | T006 | S009 | P009 | task manifest/repository tooling long-gate isolation |
 | T007 | S010 | P010 | evidence source/output digest freshness check |
-| T008 | S011 | P008 | CI workflow validation and bounded HTTP smoke contract |
+| T008 | S011 | P008 | CI workflow validation, all 16 build-status combinations and bounded HTTP smoke |
 | T009 | S001,S003 | P001,P003,P004,P005 | exact 0.7.2 layered generation and committed artifact validation |
 | T010 | S012,S013 | P011,P012 | Real Git subprocess regression preserves diagnostics and rejects dirty source |
 

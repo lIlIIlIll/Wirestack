@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "source_task": "M7-033",
+  "status": "PASS",
+  "repository": "lIlIIlIll/Wirestack",
+  "ref": "refs/heads/main",
+  "observedAtUtc": "2026-09-10T02:52:49.180901+00:00",
+  "rulesets": [
+    {
+      "id": 21787899,
+      "name": "Wirestack main clean Cangjie gate",
+      "enforcement": "active",
+      "target": "branch",
+      "conditions": {
+        "ref_name": {
+          "exclude": [],
+          "include": [
+            "~DEFAULT_BRANCH"
+          ]
+        }
+      },
+      "rules": [
+        {
+          "type": "deletion"
+        },
+        {
+          "type": "non_fast_forward"
+        },
+        {
+          "type": "required_status_checks",
+          "parameters": {
+            "strict_required_status_checks_policy": true,
+            "do_not_enforce_on_create": true,
+            "required_status_checks": [
+              {
+                "context": "clean-cangjie-build"
+              }
+            ]
+          }
+        }
+      ],
+      "bypass_actors": []
+    },
+    {
+      "id": 22713825,
+      "name": "main",
+      "enforcement": "active",
+      "target": "branch",
+      "conditions": {
+        "ref_name": {
+          "exclude": [],
+          "include": [
+            "refs/heads/main"
+          ]
+        }
+      },
+      "rules": [
+        {
+          "type": "deletion"
+        },
+        {
+          "type": "non_fast_forward"
+        },
+        {
+          "type": "required_linear_history"
+        },
+        {
+          "type": "pull_request",
+          "parameters": {
+            "required_approving_review_count": 0,
+            "dismiss_stale_reviews_on_push": false,
+            "required_reviewers": [],
+            "require_code_owner_review": false,
+            "require_last_push_approval": false,
+            "required_review_thread_resolution": true,
+            "require_extra_approval_for_unattributed_changes": true,
+            "allowed_merge_methods": [
+              "merge",
+              "squash",
+              "rebase"
+            ]
+          }
+        },
+        {
+          "type": "required_status_checks",
+          "parameters": {
+            "strict_required_status_checks_policy": true,
+            "do_not_enforce_on_create": false,
+            "required_status_checks": [
+              {
+                "context": "Deploy latest main documentation",
+                "integration_id": 15368
+              },
+              {
+                "context": "report-build-status",
+                "integration_id": 15368
+              }
+            ]
+          }
+        },
+        {
+          "type": "code_scanning",
+          "parameters": {
+            "code_scanning_tools": [
+              {
+                "tool": "CodeQL",
+                "security_alerts_threshold": "high_or_higher",
+                "alerts_threshold": "errors"
+              }
+            ]
+          }
+        },
+        {
+          "type": "code_quality",
+          "parameters": {
+            "severity": "errors"
+          }
+        },
+        {
+          "type": "code_coverage",
+          "parameters": {
+            "minimum_coverage": 90,
+            "max_coverage_drop": 80
+          }
+        }
+      ],
+      "bypass_actors": []
+    }
+  ],
+  "requiredChecks": [
+    {
+      "context": "clean-cangjie-build"
+    },
+    {
+      "context": "Deploy latest main documentation",
+      "integration_id": 15368
+    },
+    {
+      "context": "report-build-status",
+      "integration_id": 15368
+    }
+  ],
+  "policyChangesMade": false
+}
