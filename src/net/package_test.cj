@@ -275,8 +275,9 @@ class NetworkFoundationContractTest {
 
         @Expect(matched)
         @Expect(destination, [0xA5u8, 0x5Au8, 0u8])
-        expectSocketState(stream.state, SocketState.Failed)
-        @Expect(stream.isClosed())
+        expectSocketState(stream.state, SocketState.Open)
+        @Expect(!stream.isClosed())
+        stream.close()
     }
 
     @TestCase
@@ -340,6 +341,50 @@ class NetworkFoundationContractTest {
         @Expect(matched)
         expectSocketState(stream.state, SocketState.Failed)
         @Expect(stream.isClosed())
+    }
+
+    @TestCase
+    func tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing(): Unit {
+        let readConflict = api.NetworkException(
+            api.NetworkErrorCategory.Read, api.NetworkPhase.TcpRead,
+            api.NetworkErrorCode.ConcurrentOperation, "read already active")
+        let writeConflict = api.NetworkException(
+            api.NetworkErrorCategory.Write, api.NetworkPhase.TcpWrite,
+            api.NetworkErrorCode.ConcurrentOperation, "write already active")
+        let stream = TcpStream(NetworkContractTransport(
+            readFailure: Some(readConflict), writeFailure: Some(writeConflict)))
+        let context = api.OperationContext.background()
+        let destination = api.MutableByteSpan(Array<Byte>(1, repeat: 0u8))
+        let source = api.ByteSpan([1u8])
+        let operations: Array<() -> Unit> = [
+            { => let _ = stream.read(destination, context: context) },
+            { => let _ = stream.readSome(destination, context: context) },
+            { => stream.readExact(destination, context: context) },
+            { => let _ = stream.write(source, context: context) },
+            { => let _ = stream.writeSome(source, context: context) },
+            { => stream.writeAll(source, context: context) }
+        ]
+        for (index in 0..operations.size) {
+            var retained = false
+            try {
+                operations[index]()
+            } catch (error: api.NetworkException) {
+                let classification = match ((error.category, error.phase, error.code)) {
+                    case (api.NetworkErrorCategory.Read, api.NetworkPhase.TcpRead,
+                        api.NetworkErrorCode.ConcurrentOperation) => index < 3
+                    case (api.NetworkErrorCategory.Write, api.NetworkPhase.TcpWrite,
+                        api.NetworkErrorCode.ConcurrentOperation) => index >= 3
+                    case _ => false
+                }
+                retained = classification &&
+                    hasInternetEndpoint(error.localEndpoint, networkTestEndpoint(41001u16)) &&
+                    hasInternetEndpoint(error.remoteEndpoint, networkTestEndpoint(41002u16))
+            }
+            @Expect(retained)
+            expectSocketState(stream.state, SocketState.Open)
+            @Expect(!stream.isClosed())
+        }
+        stream.close()
     }
 
     @TestCase
@@ -468,15 +513,24 @@ class NetworkFoundationContractTest {
         @Expect(writeStream.isClosed())
         @Expect(writeDelegate.abortCalls, 1)
 
-        let closeDelegate = NetworkContractTransport(failClose: true)
+        let closeCause = Exception("delegate close failed")
+        let closeDelegate = NetworkContractTransport(closeFailure: Some(closeCause))
         let closeStream = TcpStream(closeDelegate)
-        var closeMessage = ""
+        var closeFailure = false
         try {
             closeStream.close()
-        } catch (error: Exception) {
-            closeMessage = error.message
-        }
-        @Expect(closeMessage, "deterministic close failure")
+        } catch (error: api.NetworkException) {
+            let classification = match ((error.category, error.phase, error.code, error.retryability)) {
+                case (api.NetworkErrorCategory.System, api.NetworkPhase.TransportClose,
+                    api.NetworkErrorCode.SystemFailure, api.Retryability.Never) => true
+                case _ => false
+            }
+            closeFailure = classification &&
+                hasInternetEndpoint(error.localEndpoint, networkTestEndpoint(41001u16)) &&
+                hasInternetEndpoint(error.remoteEndpoint, networkTestEndpoint(41002u16)) &&
+                error.cause.getOrThrow().message == closeCause.message
+        } catch (_: Exception) {}
+        @Expect(closeFailure)
         expectSocketState(closeStream.state, SocketState.Failed)
         @Expect(closeStream.isClosed())
         @Expect(closeDelegate.closeCalls, 1)
@@ -584,9 +638,10 @@ private class NetworkContractTransport <: api.DuplexTransport {
     private let failRead: Bool
     private let eofAfterFirstRead: Bool
     private let readFailure: ?api.NetworkException
+    private let writeFailure: ?api.NetworkException
     private let cancelRead: Bool
     private let failWrite: Bool
-    private let failClose: Bool
+    private let closeFailure: ?Exception
     private let blockClose: Bool
     private let blockRead: Bool
     private let blockWrite: Bool
@@ -607,9 +662,10 @@ private class NetworkContractTransport <: api.DuplexTransport {
         failRead!: Bool = false,
         eofAfterFirstRead!: Bool = false,
         readFailure!: ?api.NetworkException = None<api.NetworkException>,
+        writeFailure!: ?api.NetworkException = None<api.NetworkException>,
         cancelRead!: Bool = false,
         failWrite!: Bool = false,
-        failClose!: Bool = false,
+        closeFailure!: ?Exception = None<Exception>,
         blockClose!: Bool = false,
         blockRead!: Bool = false,
         blockWrite!: Bool = false,
@@ -620,9 +676,10 @@ private class NetworkContractTransport <: api.DuplexTransport {
         this.failRead = failRead
         this.eofAfterFirstRead = eofAfterFirstRead
         this.readFailure = readFailure
+        this.writeFailure = writeFailure
         this.cancelRead = cancelRead
         this.failWrite = failWrite
-        this.failClose = failClose
+        this.closeFailure = closeFailure
         this.blockClose = blockClose
         this.blockRead = blockRead
         this.blockWrite = blockWrite
@@ -705,6 +762,10 @@ private class NetworkContractTransport <: api.DuplexTransport {
             rejectClosedTransport(closed || writeShutdown,
                 api.NetworkErrorCategory.Write, api.NetworkPhase.TcpWrite)
             writeCalls++
+            match (writeFailure) {
+                case Some(error) => throw error
+                case None => ()
+            }
             if (blockWrite) {
                 writeEntered = true
                 changed.notifyAll()
@@ -747,7 +808,10 @@ private class NetworkContractTransport <: api.DuplexTransport {
         synchronized(mutex) {
             if (!closed) {
                 closeCalls++
-                if (failClose) { throw Exception("deterministic close failure") }
+                match (closeFailure) {
+                    case Some(error) => throw error
+                    case None => ()
+                }
                 closeEntered = true
                 changed.notifyAll()
                 while (blockClose && !closeReleased && !closed) { changed.wait() }

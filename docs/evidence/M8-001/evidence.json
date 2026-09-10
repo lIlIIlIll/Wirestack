@@ -1,5 +1,5 @@
 {
-  "acceptance_status": "PASS",
+  "acceptance_status": "BLOCKED",
   "generated_at_utc": "2026-09-10T10:11:14.311407Z",
   "platform": {
     "libc": "glibc",

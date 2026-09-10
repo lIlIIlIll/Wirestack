@@ -38,6 +38,9 @@ main(): Int64 {
 流式 `read`/`write` 可以部分完成；需要完整缓冲区时使用 `readExact`/`writeAll`。
 `readExact` 在缓冲区填满前遇到 EOF 时抛出 `UnexpectedEof`，保留已捕获的本地和远端
 endpoint；已有错误中的 endpoint、分类、phase、重试性、native code 与 cause 不被覆盖。
+对端 FIN 不因此中止仍可写的 TCP 方向；`UnexpectedEof` 表示此次精确读取未完成，
+不是连接重置。部分读写的结构化错误同样保留已捕获的 endpoint。底层未分类的关闭异常以
+`System` / `TransportClose` / `SystemFailure` 报告，保留原始 cause，生命周期为 `Failed`。
 `close` 与 `abort` 幂等，EOF、取消、Deadline 和本地关闭保持不同结果。
 成功的单方向 `shutdown` 分别显示 `ReadHalfClosed` 或 `WriteHalfClosed`；不支持的
 shutdown 不改变状态。正常关闭为 `Closed`，主动中止为 `Aborted`，终止性 I/O

@@ -1,7 +1,7 @@
 # M8-001 evidence
 
 Status: COMPLETE. Linux contracts, native consumer, documentation and
-source-bound qualification passed after all five review corrections.
+source-bound qualification passed after all six review corrections.
 
 ## Scope
 
@@ -75,13 +75,22 @@ bytes and observed `UnexpectedEof` with the partial byte and both captured
 endpoints intact. See [`review-fifth.json`](review-fifth.json) and
 [`native-consumer.json`](native-consumer.json).
 
+The sixth review keeps the write direction usable after short-read EOF,
+retains captured diagnostics across all six I/O methods, and maps unclassified
+close failures to `System` / `TransportClose` / `SystemFailure` with the original
+cause and `Failed` lifecycle. Existing structured close errors are preserved.
+All three reproduced failures are recorded in [`review-sixth.json`](review-sixth.json):
+20 cases passed and three failed before repair; all 23 passed afterward.
+The native peer now half-closes its write direction and then receives `after`
+from the same consumer stream following `UnexpectedEof`. Close-error evidence
+uses deterministic fault injection, not a forced native OS close failure.
+
 ## Acceptance
 
-
 All three task-specific fast commands and all eight task commands passed with
-STS 1.1.3 and pinned cjdoc 0.7.2. `scripts/check` passed 612 Cangjie tests with
+STS 1.1.3 and pinned cjdoc 0.7.2. `scripts/check` passed 613 Cangjie tests with
 23 performance-tagged exclusions, zero errors and zero failures. The network
-contract suite passed 22/22 without skips.
+contract suite passed 23/23 without skips.
 
 The inventory contains 260 declarations and 103 aliases. API documentation
 covers all 1,093 symbols and 430 parameters. All three guide examples compiled;
