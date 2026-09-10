@@ -20,7 +20,6 @@
 | `formal-main-11-2.tar.gz` | 第二批 raw report、日志、manifest、metadata 和派生汇总 |
 | `harness-source.tar.gz` | 实际执行的七库 adapter、runner、汇总脚本和环境脚本 |
 | `json4cj-source.tar.gz` | json4cj 的 source-only 输入快照 |
-| `canonical-build-logs.tar.gz` | 五个 canonical adapter 的构建日志 |
 | `optimal-api-overlay-main.patch` | 测量提交上使用的 canonical payload 和最优公开 API patch |
 | `source-identity.json` | 产品与有效 harness 的逐文件摘要及 Git 身份 |
 | `checksums.txt` | 上述证据文件的 SHA-256 inventory |

@@ -4,6 +4,8 @@ import pathlib
 import os
 import sys
 import tempfile
+import subprocess
+
 import unittest
 
 
@@ -94,6 +96,51 @@ class StageSourceTreeTest(unittest.TestCase):
             script.write_text("opaque executable\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "tool"):
                 assert_source_only(stage)
+    def test_rejects_uninitialized_gitlink(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            source = root / "source"
+            nested = root / "nested"
+            source.mkdir()
+            nested.mkdir()
+            subprocess.run(["git", "-C", str(source), "init", "-q"], check=True)
+            subprocess.run(
+                ["git", "-C", str(nested), "init", "-q"],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(nested), "config", "user.name", "Stage Test"],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(nested), "config", "user.email", "stage@example.invalid"],
+                check=True,
+            )
+            (nested / "source.cj").write_text("package nested\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(nested), "add", "."], check=True)
+            subprocess.run(
+                ["git", "-C", str(nested), "commit", "-q", "-m", "test: nested"],
+                check=True,
+            )
+            commit = subprocess.check_output(
+                ["git", "-C", str(nested), "rev-parse", "HEAD"],
+                text=True,
+            ).strip()
+            (source / "packages" / "nested").mkdir(parents=True)
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(source),
+                    "update-index",
+                    "--add",
+                    "--cacheinfo",
+                    f"160000,{commit},packages/nested",
+                ],
+                check=True,
+            )
+            with self.assertRaisesRegex(ValueError, "git submodule is not initialized"):
+                stage_source_tree(source, root / "stage")
 
 
 if __name__ == "__main__":

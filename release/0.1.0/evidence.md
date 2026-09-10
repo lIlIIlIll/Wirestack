@@ -9,11 +9,11 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Field | Value |
 | --- | --- |
 | Planned release identity | `0.1.0` |
-| Candidate measured commit | `13a997c6f5696814e5e860b3d3d39bbfc79d85bc` |
-| Candidate tree | `9f852a1f1897eb63124a187e007f9e61be759746` |
+| Candidate measured commit | `2758853efe1117c7d2b272abd36cf90de46526f5` |
+| Candidate tree | `120f0db3b2668cf2ebb2229adbaa5ea758ca50a6` |
 | Package manifest | 九个 package，版本均为 `0.1.0` |
 | Release graph | `release/release-graph.toml`；status=`migration` |
-| Evidence updated | `2026-09-10T06:03:58Z` |
+| Evidence updated | `2026-09-10` |
 | Local qualification host | Linux Arch `7.2.3-Arch1-3`, x86_64；Intel Core i7-8700 |
 | Local qualification SDK | Cangjie `1.1.0-alpha.20260829040003 (cjnative)`；cjpm `1.1.3` |
 | Hosted PR SDK | `1.3.0-alpha.20260829010011`；resolution=`pinned-known-good` |
@@ -24,29 +24,28 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 `b867fca2fd0d4bc19bf195e7872f6f13d5019fd3ba5f409291814f7c5bdfa313`。
 本地工具链为 `/home/elliot/cangjie_sdk/daily/cangjie`，clang=`22.1.8`，
 gcc=`16.2.1`。
-Hosted PR 为 [#20](https://github.com/lIlIIlIll/yjson/pull/20)，性能修复提交触发的最新
-run 为 [`34441789058`](https://github.com/lIlIIlIll/yjson/actions/runs/34441789058)；
-run conclusion=`failure`，原因是 `Seven-library evidence drift` 失败并连带 `CI Required`
-失败；不能记为 hosted PASS。
+Hosted PR 为 [#20](https://github.com/lIlIIlIll/yjson/pull/20)，最新完整
+run 为 [`34494604326`](https://github.com/lIlIIlIll/yjson/actions/runs/34494604326)；
+run conclusion=`success`。
 
 ## 2. Gate 状态
 
 | Gate | Status | Evidence |
 | --- | --- | --- |
 | Public API/C ABI mechanical inventory | PASS | `1094` Cangjie declarations；九包 inventory；C ABI delta 全部 `reviewed-for-0.1.0` |
-| Public API migration review | **BLOCKING** | `release/public-cangjie-delta-bfd29.toml` 仍有 `unclassified` / `pending-migration-review` 组；发布图仍为 `migration` |
-| Local Linux fresh candidate | PASS | `zsh scripts/codex_cangjie_env bash scripts/ci_fresh_checkout.sh`；exit `0`；`576/576` root tests，标准集、native、sanitizer、fuzz、consumer 和 registry rehearsal 均完成 |
-| Hosted PR CI | **BLOCKING** | run `34441789058` conclusion=`failure`；`Seven-library evidence drift` 失败，因当前 product source 摘要与旧 marker 不一致；`CI Required` 随之失败，其余成功 jobs 不能覆盖该失败 |
-| Hosted main CI / Pages | NOT RUN | 发布阻断未关闭，尚未合并到 `main` |
+| Public API migration review | **BLOCKING** | `release/public-cangjie-delta-bfd29.toml` 仍有 `pending-migration-review` 组；发布图仍为 `migration` |
+| Local Linux fresh candidate | PASS | 当前候选的本地 registry rehearsal 完成；`576/576` root tests，九包暂存、构建和 consumer 检查通过 |
+| Hosted PR CI | PASS | run `34494604326` conclusion=`success`；Seven-library evidence drift、registry rehearsal、Pure Windows/macOS、Coverage 和 CI Required 均通过 |
+| Hosted main CI / Pages | **BLOCKING / PENDING** | merge 后 run `34495633353` 暴露 squash merge 丢失测量提交 ancestry；PR `#21` 修复为按已验证的 product/harness/candidate closure 校验，main 重跑和 Pages 结果待完成 |
 | Coverage | PASS | project line `8508/10345=82.2%`、branch `3722/5262=70.7%`；changed core line `26/26=100.0%`、branch `16/16=100.0%`；hosted Core Coverage 成功 |
 | Source-only staging | PASS | `stage_source_tree` 复制 `358` 个文件并通过 `--check`；`release_temp_tree --enforce-clean` 复制 `290` 个文件并通过 |
-| Package rehearsal | PASS | 修复后 fresh-checkout 的九包独立暂存、构建、registry-style consumer 和导出检查成功；最终 release assets 尚未生成 |
-| Seven-library matrix | **BLOCKING / STALE** | `current-main.json` 仍绑定 `bddbe6e`；`check_seven_library_evidence.py` 报 current product source 摘要不匹配，修复后必须重跑完整矩阵 |
-| Three-library release performance | **BLOCKING** | 旧 b0 两批仍为 noisy；当前候选已修复 Deep Nested 热路径，但完整 36-workload 证据尚未按当前提交重跑 |
-| Pure baseline/candidate qualification | **BLOCKING** | 正式 runner 的四个 `yjsonDocument*` case 与当前 benchmark 源码漂移；修复后 target-only A/B 仍因 CV 超过 5% 而 exit `1`，不能作资格证据 |
-| Native acceleration | PASS (functional) / REVALIDATE (performance) | 修复后 fresh custom-native 通过；旧 native performance 资格绑定 b0，不作为当前候选的性能证据 |
-| Release policy | **BLOCKING** | API migration review、当前候选的完整性能证据、main workflow 和 Pages 尚未关闭 |
-| Annotated tag / GitHub Release | NOT RUN | 尚未创建 tag、release 或上传资产 |
+| Package rehearsal | PASS | 九包独立暂存、构建、registry-style consumer 和导出检查成功；最终 release assets 尚未生成 |
+| Seven-library matrix | PASS (candidate) / MAIN RECHECK | `current-main.json` 绑定 `2758853`；两批均为 `770/770` 完整单元，当前候选严格校验通过；main 的旧 ancestry-only 检查由 PR `#21` 修复 |
+| Three-library release performance | **BLOCKING** | 旧 b0 两批仍为 noisy；当前候选的完整 36-workload 证据尚未按当前提交重跑 |
+| Pure baseline/candidate qualification | **BLOCKING** | 正式 runner 的四个 `yjsonDocument*` case 与当前 benchmark 源码漂移；target-only A/B 仍因 CV 超过 5% 而 exit `1`，不能作资格证据 |
+| Native acceleration | PASS (functional) / REVALIDATE (performance) | 当前 fresh custom-native 通过；旧 native performance 资格绑定 b0，不作为当前候选的性能证据 |
+| Release policy | **BLOCKING** | API migration review、当前候选的三库/Pure/native 性能证据、main workflow 和 Pages 尚未全部关闭 |
+| Annotated tag / GitHub Release | NOT RUN | 发布门禁尚未全部关闭，未创建 tag、release 或上传资产 |
 | Central package registry | NOT RUN | 未授权发布；没有执行 central publication |
 
 ## 3. 性能证据
@@ -130,20 +129,18 @@ Native 运行源码闭包 SHA-256 为
 ## 4. 决定
 
 ```text
-Local fresh-source simulation: PASS (candidate 13a997c; 576/576 root tests)
-Deep Nested target smoke: PASS (86.20 us; non-qualification evidence)
-Coverage: PASS (project 82.2%/70.7%; changed core 100.0%/100.0%)
-Hosted PR execution: BLOCKING (run 34441789058; stale seven-library evidence drift)
-Seven-library performance qualification: BLOCKING (evidence must be rerun for 13a997c)
+Local fresh-source simulation: PASS (current candidate branch; 576/576 root tests)
+Hosted PR execution: PASS (run 34494604326; all 28 jobs passed)
+Seven-library evidence integrity/freshness: PASS on candidate branch (two complete 770-cell batches)
 Three-library performance qualification: BLOCKING (full current-candidate matrix not run)
 Pure baseline/candidate qualification: BLOCKING (runner drift and noisy target-only A/B)
 Native acceleration: PASS functionally; performance qualification must be revalidated
 Public API migration review: BLOCKING
-Hosted main execution and Pages: NOT RUN
-Release decision: BLOCKED; no merge, tag, GitHub Release, or registry publication
+Hosted main execution and Pages: BLOCKING / PENDING (run 34495633353 failed before PR #21)
+Coverage: PASS (project 82.2%/70.7%; changed core 100.0%/100.0%)
+Release decision: BLOCKED; no tag, GitHub Release, or registry publication
 ```
 
 待关闭项：完成新增 native writer declarations 的 migration review；按当前候选
-`13a997c` 重新生成并通过完整三库/七库性能与稳定性证据；修复或重新定义 Pure
-A/B runner 与当前 benchmark case contract；合并 `main` 并通过 main workflow
-和 Pages。关闭前不得创建 `0.1.0` tag 或 GitHub Release。
+重新生成并通过完整三库/Pure/native 性能与稳定性证据；合并 PR `#21` 并通过
+main workflow 和 Pages。关闭前不得创建 `0.1.0` tag 或 GitHub Release。
