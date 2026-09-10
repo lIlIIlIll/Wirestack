@@ -1,0 +1,41 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 10406399 ns, RESULT:
+    TCS: NetworkFoundationContractTest, time elapsed: 10406399 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (356398 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (52407 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (92382 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (146832 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (55782 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (19841 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (107622 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (75616 ns)
+    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (61893 ns)
+    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (109577 ns)
+    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (38534 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (244523 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (70732 ns)
+    [ PASSED ] CASE: tcpStreamAbortWinsWhileGracefulCloseIsBlocked (121403 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (53891 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (161489 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (3460188 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (76630 ns)
+    [ FAILED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (48222 ns)
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+Summary: TOTAL: 19
+    PASSED: 18, SKIPPED: 0, ERROR: 0
+    FAILED: 1, listed below:
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 18704763 ns, RESULT:
+TP: wirestack.*, time elapsed: 18577557 ns, RESULT:
+    FAILED:
+    TP: wirestack.net, time elapsed: 10406399 ns, RESULT:
+        TCS: NetworkFoundationContractTest, time elapsed: 10406399 ns, RESULT:
+        [ FAILED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (48222 ns)
+Summary: TOTAL: 19
+    PASSED: 18, SKIPPED: 0, ERROR: 0
+    FAILED: 1
+--------------------------------------------------------------------------------------------------

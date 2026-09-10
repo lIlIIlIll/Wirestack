@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-001",
+  "status": "PASS",
+  "generated_at_utc": "2026-09-10T15:31:29.788161+00:00",
+  "platform": "linux-x86_64-glibc",
+  "consumer_manifest": "[package]\n  cjc-version = \"1.1.3\"\n  name = \"wirestack_m8_001_consumer\"\n  version = \"1.0.0\"\n  src-dir = \"src\"\n  output-type = \"executable\"\n\n[dependencies]\n  wirestack = { path = \"/tmp/wirestack-m8-001-clean-publication-2rvq39zo\" }\n",
+  "consumer_source": "package wirestack_m8_001_consumer\n\nimport wirestack.net.*\nimport wirestack as api\n\nmain(): Int64 {\n    let failure = api.NetworkException(api.NetworkErrorCategory.Connect,\n        api.NetworkPhase.UnixSocket, api.NetworkErrorCode.ConnectRefused,\n        \"consumer endpoint contract\",\n        remoteEndpoint: Some(api.NetworkEndpoint.Unix(\n            api.UnixEndpoint.abstractName([0u8, 255u8, 1u8]))))\n    match (unixPeer(failure)) {\n        case Some(peer) =>\n            let bytes = peer.nameBytes()\n            if (bytes.size != 3 || bytes[0] != 0u8 || bytes[1] != 255u8 || bytes[2] != 1u8) {\n                throw IllegalStateException(\"Unix error endpoint bytes changed\")\n            }\n        case None => throw IllegalStateException(\"Unix error endpoint was lost\")\n    }\n    let address = api.IpAddress(api.IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8])\n    let endpoint = api.SocketEndpoint(address, 8080u16)\n    let context = api.OperationContext(\n        deadline: Some(api.Deadline.after(5 * Duration.second)))\n    let stream = TcpStream.connect(endpoint, context: context)\n    try {\n        let payload = api.ByteSpan(\"hello\".toArray())\n        stream.writeAll(payload, context: context)\n        let expectedLocalPort = internetPort(stream.localEndpoint)\n        let destination = Array<Byte>(2, repeat: 0u8)\n        var truncated = false\n        try {\n            stream.readExact(api.MutableByteSpan(destination), context: context)\n        } catch (error: api.NetworkException) {\n            match (error.code) {\n                case api.NetworkErrorCode.UnexpectedEof => ()\n                case _ => throw IllegalStateException(\"expected UnexpectedEof\")\n            }\n            if (internetPort(error.localEndpoint) != expectedLocalPort ||\n                internetPort(error.remoteEndpoint) != 8080u16 || destination[0] != 120u8) {\n                throw IllegalStateException(\"truncated read lost captured endpoint or partial data\")\n            }\n            truncated = true\n            println(\"TRUNCATED_READ_ENDPOINTS_PASS local=${expectedLocalPort} remote=8080 partial=78\")\n        }\n        if (!truncated) { throw IllegalStateException(\"truncated peer unexpectedly filled destination\") }\n        stream.writeAll(api.ByteSpan(\"after\".toArray()), context: context)\n        println(\"WRITE_AFTER_EOF_PASS\")\n    } finally {\n        stream.close()\n    }\n    0\n}\n\nfunc internetPort(endpoint: ?api.NetworkEndpoint): UInt16 {\n    match (endpoint) {\n        case Some(api.NetworkEndpoint.Internet(value)) => value.port\n        case _ => throw IllegalStateException(\"expected captured Internet endpoint\")\n    }\n}\n",
+  "guide": "docs/guides/network-foundation-linux.md",
+  "guide_sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "7aeb3d4ddb035299289ce5f07e6c5f7c49b29fc7725bfdf473136b716a2717c3"
+  },
+  "guide_example_count": 3,
+  "build": {
+    "argv": [
+      "cjpm",
+      "build"
+    ],
+    "exit_code": 0,
+    "stdout_path": "docs/evidence/M8-001/ninth-consumer-build.stdout.log",
+    "stdout_sha256": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "stderr_path": "docs/evidence/M8-001/ninth-consumer-build.stderr.log",
+    "stderr_sha256": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "90c5bd2c51f8bbf96eaf69e66a1174fa462736fd253e20168d71967923dce009"
+    }
+  },
+  "run": {
+    "argv": [
+      "/tmp/wirestack-m8-001-connect-exhaustion-l10s_duc/target/release/bin/main"
+    ],
+    "exit_code": 0,
+    "stdout_path": "docs/evidence/M8-001/ninth-consumer-run.stdout.log",
+    "stdout_sha256": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4fca1a0cd077ac274e3da2c0b8cbd5c71df3cfc15b2801b517a75b5146083936"
+    },
+    "stderr_path": "docs/evidence/M8-001/ninth-consumer-run.stderr.log",
+    "stderr_sha256": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "receiver": {
+    "status": "PASS",
+    "received_hex": "68656c6c6f",
+    "sent_hex": "78",
+    "consumer_requested_bytes": 2,
+    "received_after_eof_hex": "6166746572"
+  },
+  "scope": {
+    "tcp": "Real Linux loopback peer received hello, sent byte 78 then FIN, and subsequently received after. Consumer requested two bytes, observed UnexpectedEof with captured endpoints and partial byte 78, then successfully wrote after on the same stream.",
+    "unix_error": "Executed public Unix error helper and verified exact abstract bytes 00 ff 01 in structured metadata; no native Unix socket I/O.",
+    "datagram": "Public caller compiled only; no native datagram I/O."
+  },
+  "receiver_source": "import json\nimport socket\nfrom pathlib import Path\nwith socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:\n    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n    server.bind((\"127.0.0.1\", 8080))\n    server.listen(1)\n    server.settimeout(60)\n    print(\"READY 127.0.0.1:8080\", flush=True)\n    with server.accept()[0] as connection:\n        connection.settimeout(10)\n        received = bytearray()\n        while len(received) < 5:\n            chunk = connection.recv(5 - len(received))\n            if not chunk:\n                break\n            received.extend(chunk)\n        connection.sendall(b\"x\")\n        connection.shutdown(socket.SHUT_WR)\n        followup = bytearray()\n        while len(followup) < 5:\n            chunk = connection.recv(5 - len(followup))\n            if not chunk:\n                break\n            followup.extend(chunk)\n    result = {\"status\": \"PASS\" if received == b\"hello\" and followup == b\"after\" else \"FAIL\", \"received_hex\": received.hex(), \"sent_hex\": \"78\", \"consumer_requested_bytes\": 2, \"received_after_eof_hex\": followup.hex()}\n    Path(__file__).with_name(\"receiver-result.json\").write_text(json.dumps(result) + \"\\n\")\n    print(json.dumps(result), flush=True)\n    if result[\"status\"] != \"PASS\":\n        raise SystemExit(1)\n",
+  "guide_compilation_source": "package wirestack_m8_001_consumer\n\nimport wirestack.net.*\nimport wirestack as api\n\nfunc guideTcpExample(): Int64 {\n    let address = api.IpAddress(api.IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8])\n    let endpoint = api.SocketEndpoint(address, 8080u16)\n    let context = api.OperationContext(\n        deadline: Some(api.Deadline.after(5 * Duration.second)))\n    let stream = TcpStream.connect(endpoint, context: context)\n    try {\n        let payload = api.ByteSpan(\"hello\".toArray())\n        stream.writeAll(payload, context: context)\n    } finally {\n        stream.close()\n    }\n    0\n}\n\nfunc forwardOneDatagram(\n    socket: DatagramSocket,\n    target: api.NetworkEndpoint,\n    context: api.OperationContext\n): Int64 {\n    let received = socket.receive(65507, context: context)\n    if (received.truncated) {\n        throw IllegalStateException(\"refusing to forward a truncated datagram\")\n    }\n    socket.sendTo(target, api.ByteSpan(received.payload), context: context)\n}\n\nfunc unixPeer(error: api.NetworkException): ?api.UnixEndpoint {\n    match (error.remoteEndpoint) {\n        case Some(api.NetworkEndpoint.Unix(endpoint)) => Some(endpoint)\n        case _ => None<api.UnixEndpoint>\n    }\n}\n",
+  "guide_compilation_transform": "Only the first example entrypoint is renamed from main to guideTcpExample; all three example statements are otherwise copied unchanged into the external package."
+}

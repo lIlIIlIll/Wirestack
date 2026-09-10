@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-001",
+  "status": "PASS",
+  "candidate_before_changes": "a943c4bb677febd7b112407188dbab2d4a9b7eb3",
+  "normative_decision": "User explicitly approved replacing PRD NetworkException endpoint fields with canonical ?NetworkEndpoint and migrating every caller without compatibility fields.",
+  "checks": [
+    {
+      "id": "revision-regressions",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.repository.tests.test_repository_tooling",
+        "-v"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "stdout_path": "docs/evidence/M8-001/revision-regressions.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_path": "docs/evidence/M8-001/revision-regressions.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9e041f26ee9cfa93ca61873ae22e22e43b3edf38dc7eec1263c4faa3c561ea9c"
+      }
+    },
+    {
+      "id": "lifecycle-regressions",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "stdout_path": "docs/evidence/M8-001/lifecycle-regressions.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b0313cfe0a809d3790ffa9208f63445b57c66669f66049c5351c7630d40868f5"
+      },
+      "stderr_path": "docs/evidence/M8-001/lifecycle-regressions.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "77027f93354808c06127f24708365ad7ad27da378a00523940bdf9341e868367"
+      }
+    },
+    {
+      "id": "shared-endpoint-regressions",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/internal/transport",
+        "--filter",
+        "NetworkErrorTest",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 0,
+      "status": "PASS",
+      "stdout_path": "docs/evidence/M8-001/shared-endpoint-regressions.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "53b099136fe8dfc903a0c786eddc6f3f7fe129d29a517e30a47563e70dc3095c"
+      },
+      "stderr_path": "docs/evidence/M8-001/shared-endpoint-regressions.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "scope": {
+    "lifecycle": "13 network tests passed; abort/graceful close/failure/directional shutdown and deterministic interleavings remain distinct.",
+    "error_metadata": "4 selected NetworkErrorTest cases passed; 79 other transport cases excluded by filter, not claimed as passed by this focused command.",
+    "revision": "26 repository-tooling tests passed; clean stdout capture, unconditional SHA validation and command failure paths covered.",
+    "raw_protocol": "Required explicit protocol argument; IPv4/IPv6 unsupported capability paths exercised without privileged native raw I/O."
+  }
+}

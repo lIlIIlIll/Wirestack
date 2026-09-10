@@ -1,0 +1,336 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-001",
+  "status": "PASS",
+  "baseline_revision": "86bd99f3a97d343302c212d1dddbca05f5f14ee3",
+  "findings": [
+    {
+      "id": "PRRT_kwDOUArl886hHElM",
+      "isResolved": false,
+      "comments": {
+        "nodes": [
+          {
+            "databaseId": 3980051594,
+            "author": {
+              "login": "chatgpt-codex-connector"
+            },
+            "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Preserve idempotence for terminal close calls**\n\nAfter a stream has reached `Closed`, calling `close(context:)` with an already-cancelled or expired context throws here before `beginClose` can observe the terminal state. A repeated close therefore fails instead of being a no-op, unlike the no-argument overload and the other resource implementations; check for a terminal lifecycle before applying the context preflight while retaining the preflight for streams that still need closing.\n\nAGENTS.md reference: [AGENTS.md:L63-L64](https://github.com/lIlIIlIll/Wirestack/blob/86bd99f3a97d343302c212d1dddbca05f5f14ee3/AGENTS.md#L63-L64)\n\nUseful? React with \ud83d\udc4d\u00a0/ \ud83d\udc4e.",
+            "url": "https://github.com/lIlIIlIll/Wirestack/pull/157#discussion_r3980051594"
+          }
+        ]
+      }
+    },
+    {
+      "id": "PRRT_kwDOUArl886hHElY",
+      "isResolved": false,
+      "comments": {
+        "nodes": [
+          {
+            "databaseId": 3980051606,
+            "author": {
+              "login": "chatgpt-codex-connector"
+            },
+            "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Make abort interrupt an in-flight graceful close**\n\nWhen graceful close has entered the production delegate but `socket.close()` has not returned, `StdNetTransport.close` has already set `closed` and claimed `nativeClosed` (`src/internal/transport_stdnet/package.cj:327-337`). A concurrent call here publishes `Aborted`, but `delegate.abort()` then sees `closed` and does nothing, so it neither applies abortive close nor interrupts the outstanding graceful close, and eventual graceful completion is mislabeled as an abort; publish `Aborted` only when the delegate actually claims abort ownership, or allow the delegate to upgrade an in-flight close.\n\nAGENTS.md reference: [AGENTS.md:L61-L64](https://github.com/lIlIIlIll/Wirestack/blob/86bd99f3a97d343302c212d1dddbca05f5f14ee3/AGENTS.md#L61-L64)\n\nUseful? React with \ud83d\udc4d\u00a0/ \ud83d\udc4e.",
+            "url": "https://github.com/lIlIIlIll/Wirestack/pull/157#discussion_r3980051606"
+          }
+        ]
+      }
+    }
+  ],
+  "decision": "Preserve the first native close owner. Terminal repeated close is a no-op before context callbacks; an abort request cannot relabel a graceful native owner.",
+  "native_probe": {
+    "status": "PASS",
+    "source_template": "package wirestack.net\n\nimport std.sync.*\nimport std.unittest.*\nimport std.unittest.testmacro.*\nimport wirestack as api\nimport wirestack.internal.transport_stdnet as stdnet\n\n@Test\nclass NinthNativeOwnershipProbe {\n    @TestCase\n    func nativeGracefulOwnerIsNotRelabeledWhileItsWrapperReturns(): Unit {\n        let listener = stdnet.StdNetTransportListener.bind(ninthProbeEndpoint())\n        let accepting = spawn { listener.accept() }\n        let native = stdnet.StdNetTransport.connect(listener.localEndpoint)\n        let peer = accepting.get(Duration.second)\n        let gate = NinthNativeCloseGate(native)\n        let stream = TcpStream(gate)\n        let closing = spawn { stream.close() }\n        try {\n            gate.waitUntilNativeClosed()\n            match (peer.readSome(api.MutableByteSpan(Array<Byte>(1, repeat: 0u8)),\n                context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))) {\n                case api.ReadResult.EndOfStream => ()\n                case _ => @Fail(\"native graceful close did not produce peer EOF\")\n            }\n            @Expect(ninthProbeState(stream.state), \"Closing\")\n            stream.abort(reason: Some(api.AbortReason.ApplicationAbort))\n            println(\"NATIVE_GRACEFUL_OWNER_AFTER_ABORT=\" + ninthProbeState(stream.state))\n            @Expect(ninthProbeState(stream.state), \"Closing\")\n        } finally {\n            gate.release()\n            closing.get(Duration.second)\n            peer.close()\n            listener.close()\n        }\n        println(\"NATIVE_GRACEFUL_FINAL=\" + ninthProbeState(stream.state))\n        @Expect(ninthProbeState(stream.state), \"Closed\")\n    }\n\n    @TestCase\n    func realTerminalCloseIgnoresStoppedContexts(): Unit {\n        let listener = stdnet.StdNetTransportListener.bind(ninthProbeEndpoint())\n        let accepting = spawn { listener.accept() }\n        let stream = TcpStream.connect(listener.localEndpoint)\n        let peer = accepting.get(Duration.second)\n        try {\n            stream.close()\n            let cancellation = api.CancellationSource()\n            cancellation.cancel()\n            for (context in [api.OperationContext(cancellation: cancellation.token),\n                api.OperationContext(deadline: Some(api.Deadline.after(Duration.Zero)))]) {\n                var rejected = false\n                try {\n                    stream.close(context: context)\n                } catch (error: Exception) {\n                    rejected = true\n                    println(\"TERMINAL_CLOSE_REJECTED=\" + error.toString())\n                }\n                @Expect(!rejected)\n                @Expect(ninthProbeState(stream.state), \"Closed\")\n            }\n            match (peer.readSome(api.MutableByteSpan(Array<Byte>(1, repeat: 0u8)),\n                context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))) {\n                case api.ReadResult.EndOfStream => ()\n                case _ => @Fail(\"terminal stream did not close its native peer\")\n            }\n        } finally {\n            stream.close()\n            peer.close()\n            listener.close()\n        }\n    }\n}\n\nprivate class NinthNativeCloseGate <: stdnet.SocketTransport {\n    private let native: stdnet.StdNetTransport\n    private let mutex = Mutex()\n    private let changed = synchronized(mutex) { mutex.condition() }\n    private var nativeClosed = false\n    private var released = false\n\n    init(native: stdnet.StdNetTransport) { this.native = native }\n    public prop info: api.TransportInfo { get() { native.info } }\n    public func readSome(destination: api.MutableByteSpan,\n        context!: api.OperationContext = api.OperationContext.background()): api.ReadResult {\n        native.readSome(destination, context: context)\n    }\n    public func writeSome(source: api.ByteSpan,\n        context!: api.OperationContext = api.OperationContext.background()): Int64 {\n        native.writeSome(source, context: context)\n    }\n    public func shutdown(direction: api.ShutdownDirection): Unit { native.shutdown(direction) }\n    public func close(context: api.OperationContext): Unit {\n        native.close(context)\n        synchronized(mutex) {\n            nativeClosed = true\n            changed.notifyAll()\n            while (!released) { changed.wait() }\n        }\n    }\n    public func close(): Unit { close(api.OperationContext.background()) }\n    public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit {\n        native.abort(reason: reason)\n    }\n    public func isClosed(): Bool { native.isClosed() }\n    public func __OWNERSHIP__(): Bool { native.__OWNERSHIP__() }\n    func waitUntilNativeClosed(): Unit {\n        synchronized(mutex) {\n            let deadline = api.Deadline.after(Duration.second)\n            while (!nativeClosed) {\n                let remaining = deadline.remaining()\n                if (remaining <= Duration.Zero) { throw Exception(\"native close gate timed out\") }\n                changed.wait(timeout: remaining)\n            }\n        }\n    }\n    func release(): Unit { synchronized(mutex) { released = true; changed.notifyAll() } }\n}\n\nprivate func ninthProbeEndpoint(): api.SocketEndpoint {\n    api.SocketEndpoint(api.IpAddress(api.IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8]), 0u16)\n}\n\nprivate func ninthProbeState(state: SocketState): String {\n    match (state) {\n        case SocketState.Closing => \"Closing\"\n        case SocketState.Closed => \"Closed\"\n        case SocketState.Aborted => \"Aborted\"\n        case _ => \"Other\"\n    }\n}\n",
+    "baseline_adapter_method": "wasClosedByCancellation",
+    "fixed_adapter_method": "wasClosedByAbort",
+    "method_rename_note": "Only the private SPI observer name changes between probe variants; the scenario and assertions are identical.",
+    "scope": "A real native graceful close produces peer EOF, then a gate holds the wrapper close return while a concurrent abort calls the real native delegate. A second case repeats real terminal close with stopped contexts.",
+    "limitation": "The gate is after native close returns, not inside a blocked SDK socket.close. This proves real delegate ownership and wrapper labeling; no native close interruption or upgrade is claimed.",
+    "setup_failure": {
+      "id": "ninth-native-before",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "status": "FAIL",
+      "exit_code": 1,
+      "timed_out": false,
+      "error_code": null,
+      "started_at_utc": "2026-09-10T14:46:16.670579Z",
+      "finished_at_utc": "2026-09-10T14:55:32.328749Z",
+      "duration_ms": 555658.17,
+      "stdout_path": "docs/evidence/M8-001/ninth-native-setup-failure.stdout.log",
+      "stderr_path": "docs/evidence/M8-001/ninth-native-setup-failure.stderr.log",
+      "stdout_excerpt": "",
+      "stderr_excerpt": "git: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)\nhint: Using 'master' as the name for the initial branch. This default branch name\nhint: will change to \"main\" in Git 3.0. To configure the initial branch name\nhint: to use in all of your new repositories, which will suppress this warning,\nhint: call:\nhint:\nhint: \tgit config --global init.defaultBranch <name>\nhint:\nhint: Names commonly chosen instead of 'master' are 'main', 'trunk' and\nhint: 'development'. The just-created branch can be renamed via this command:\nhint:\nhint: \tgit branch -m <name>\nhint:\nhint: Disable this message with \"git config set advice.defaultBranchName false\"\ngit: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)\n{\"code\": \"adapter-build-failed\", \"detail\": \"command failed (128): git -C /tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/.local/tls-provider/source/aws-lc-5.5.0 fetch --depth 1 origin 991e67ff4cf04df4dd89e407f8b920c6936cb56a\\ngit: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)\\n/usr/lib/git-core/git: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by /usr/lib/git-core/git)\\n/usr/lib/git-core/git: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by /usr/lib/git-core/git)\\nerror: RPC failed; curl 56 OpenSSL SSL_read: OpenSSL/3.6.4: error:0A000126:SSL routines::unexpected eof while reading, errno 0\\nerror: 1497 bytes of body are still expected\\nfetch-pack: unexpected disconnect while reading sideband packet\\nfatal: early EOF\\nfatal: fetch-pack: invalid index-pack output\\n\", \"status\": \"FAIL\"}\n\nError: failed to run build script in path /tmp/wirestack-m8-001-ninth-baseline-7t5hffuz by operation 'pre-test', output is redirected into /tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/build-script-cache/release/wirestack/bin/script-log\nError: cjpm test failed\n",
+      "stdout_truncated": false,
+      "stderr_truncated": false,
+      "source_task": "M8-001",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "65d7931627c9146fa0e51d5c4988ad4788e5ce5ad7c5c8ad478a939482020a00"
+      }
+    },
+    "setup_correction": {
+      "action": "Restore the qualified ignored native cache; the normal pre-test hook validates its build fingerprint and archive before activation.",
+      "artifact_digests": {
+        "target/native/current/lib/libwirestack_tls_provider.a": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "e463131b73efc79e1d77528650f7fddfa0f8bda98aaaa0a7641837395b0a1bf5"
+        },
+        "target/native/current/provider-manifest.json": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "450de062541c40a1253b848b5e53d71fce0c660a2dc9bd6dae90567f3c97beb1"
+        },
+        "target/native/resolver/current/lib/libwirestack_resolver.a": {
+          "domain": "artifact-bytes-v1",
+          "sha256": "3675d95c12d3b0b44a3f4ae93797538873b519e19914627bcf4d21f72de39768"
+        }
+      },
+      "no_test_or_build_hook_skipped": true
+    },
+    "before": {
+      "id": "ninth-native-before",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "status": "FAIL",
+      "exit_code": 1,
+      "timed_out": false,
+      "error_code": null,
+      "started_at_utc": "2026-09-10T15:01:04.069748Z",
+      "finished_at_utc": "2026-09-10T15:01:18.364327Z",
+      "duration_ms": 14294.62,
+      "stdout_path": "docs/evidence/M8-001/ninth-native-before.stdout.log",
+      "stderr_path": "docs/evidence/M8-001/ninth-native-before.stderr.log",
+      "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.net, time elapsed: 23297446 ns, RESULT:\n    TCS: NinthNativeOwnershipProbe, time elapsed: 2054037 ns, RESULT:\n    [ FAILED ] CASE: nativeGracefulOwnerIsNotRelabeledWhileItsWrapperReturns (481845 ns)\n    Expect Failed: ninthProbeState(stream.state) != \"Closing\"\n        ninthProbeState(stream.state): \"Aborted\"\n                            \"Closing\": \"Closing\"\n\n    Expect Failed: ninthProbeState(stream.state) != \"Closed\"\n        ninthProbeState(stream.state): \"Aborted\"\n                             \"Closed\": \"Clo\u00b7sed\"\n                                        !!=-!==\n\n    STDOUT:\n    NATIVE_GRACEFUL_OWNER_AFTER_ABORT=Aborted\n    NATIVE_GRACEFUL_FINAL=Aborted\n    [ FAILED ] CASE: realTerminalCloseIgnoresStoppedContexts (446718 ns)\n    Expect Failed: `(! rejected == true)`\n       left: false\n      right: true\n\n    Expect Failed: `(! rejected == true)`\n       left: false\n      right: true\n\n    STDOUT:\n    TERMINAL_CLOSE_REJECTED=NetworkException: TCP stream close cancelled\n    TERMINAL_CLOSE_REJECTED=NetworkException: TCP stream close deadline exceeded\n    TCS: NetworkFoundationContractTest, time elapsed: 21049208 ns, RESULT:\n    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (130037 ns)\n    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (36897 ns)\n    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (77793 ns)\n    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (54107 ns)\n    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (107760 ns)\n    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (35007 ns)\n    [ PASSED ] CASE: tcpStreamStoppedCloseContextsFailBeforeLifecycleAdmission (114732 ns)\n    [ PASSED ] CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership (74971 ns)\n    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (135373 ns)\n    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (91193 ns)\n    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (107575 ns)\n    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (108504 ns)\n    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (42046 ns)\n    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (59455 ns)\n    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (33800 ns)\n    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (90713 ns)\n    [ PASSED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (172729 ns)\n    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (120670 ns)\n    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (79772 ns)\n    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (137456 ns)\n    [ PASSED ] CASE: tcpStreamRetainsNativeCancellationOwnership (11443145 ns)\n    [ PASSED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (176650 ns)\n    [ PASSED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (148431 ns)\n    [ PASSED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (98742 ns)\n    [ PASSED ] CASE: tcpStreamAbortWinsWhileGracefulCloseIsBlocked (32469 ns)\n    [ PASSED ] CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful (87858 ns)\n    [ PASSED ] CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful (55726 ns)\n    [ PASSED ] CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation (91321 ns)\n    [ PASSED ] CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate (97675 ns)\n    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (49320 ns)\n    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (67592 ns)\n    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (2396678 ns)\n    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (16446 ns)\nSummary: TOTAL: 35\n    PASSED: 33, SKIPPED: 0, ERROR: 0\n    FAILED: 2, listed below:\n            TCS: NinthNativeOwnershipProbe, CASE: nativeGracefulOwnerIsNotRelabeledWhileItsWrapperReturns\n            TCS: NinthNativeOwnershipProbe, CASE: realTerminalCloseIgnoresStoppedContexts\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 31515620 ns, RESULT:\nTP: wirestack.*, time elapsed: 31453035 ns, RESULT:\n    FAILED:\n    TP: wirestack.net, time elapsed: 23297446 ns, RESULT:\n        TCS: NinthNativeOwnershipProbe, time elapsed: 2054037 ns, RESULT:\n        [ FAILED ] CASE: nativeGracefulOwnerIsNotRelabeledWhileItsWrapperReturns (481845 ns)\n        [ FAILED ] CASE: realTerminalCloseIgnoresStoppedContexts (446718 ns)\n        TCS: NetworkFoundationContractTest, time elapsed: 21049208 ns, RESULT:\nSummary: TOTAL: 35\n    PASSED: 33, SKIPPED: 0, ERROR: 0\n    FAILED: 2\n--------------------------------------------------------------------------------------------------\n",
+      "stderr_excerpt": "Error: cjpm test failed\n",
+      "stdout_truncated": false,
+      "stderr_truncated": false,
+      "source_task": "M8-001",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "3243970babce44edc9e0662977898230acb161de5fe82ab4828ccc371011ee87"
+      },
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "bc37c062ce41562eb2ac1eae16155c98ee7ec7bda24c5ddb0677abd9d3c61c2d"
+      }
+    },
+    "after": {
+      "id": "ninth-native-after",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "error_code": null,
+      "started_at_utc": "2026-09-10T15:01:04.068829Z",
+      "finished_at_utc": "2026-09-10T15:01:18.120332Z",
+      "duration_ms": 14051.505,
+      "stdout_path": "docs/evidence/M8-001/ninth-native-after.stdout.log",
+      "stderr_path": "docs/evidence/M8-001/ninth-native-after.stderr.log",
+      "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.net, time elapsed: 21720339 ns, RESULT:\n    TCS: NinthNativeOwnershipProbe, time elapsed: 1493020 ns, RESULT:\n    [ PASSED ] CASE: nativeGracefulOwnerIsNotRelabeledWhileItsWrapperReturns (530054 ns)\n    [ PASSED ] CASE: realTerminalCloseIgnoresStoppedContexts (219946 ns)\n    TCS: NetworkFoundationContractTest, time elapsed: 20077625 ns, RESULT:\n    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (109925 ns)\n    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (44962 ns)\n    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (67381 ns)\n    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (37137 ns)\n    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (80795 ns)\n    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (26918 ns)\n    [ PASSED ] CASE: tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock (105583 ns)\n    [ PASSED ] CASE: tcpStreamNonterminalStoppedCloseAdmissionStillRejects (89369 ns)\n    [ PASSED ] CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership (54525 ns)\n    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (91974 ns)\n    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (61014 ns)\n    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (85743 ns)\n    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (74418 ns)\n    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (23369 ns)\n    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (30944 ns)\n    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (19594 ns)\n    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (41218 ns)\n    [ PASSED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (95811 ns)\n    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (66663 ns)\n    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (67636 ns)\n    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (69058 ns)\n    [ PASSED ] CASE: tcpStreamRetainsNativeCancellationOwnership (11292465 ns)\n    [ PASSED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (165751 ns)\n    [ PASSED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (170838 ns)\n    [ PASSED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (66235 ns)\n    [ PASSED ] CASE: tcpStreamAbortCannotRelabelClaimedGracefulNativeClose (28661 ns)\n    [ PASSED ] CASE: tcpStreamAbortOwnershipSurvivesCompetingIoAndLateCloseFailure (77913 ns)\n    [ PASSED ] CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful (119852 ns)\n    [ PASSED ] CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful (84337 ns)\n    [ PASSED ] CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation (130217 ns)\n    [ PASSED ] CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate (111703 ns)\n    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (60575 ns)\n    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (173001 ns)\n    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1909322 ns)\n    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (26573 ns)\nSummary: TOTAL: 37\n    PASSED: 37, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 30022328 ns, RESULT:\nTP: wirestack.*, time elapsed: 29930940 ns, RESULT:\n    PASSED:\n    TP: wirestack.net, time elapsed: 21720339 ns\nSummary: TOTAL: 37\n    PASSED: 37, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+      "stderr_excerpt": "",
+      "stdout_truncated": false,
+      "stderr_truncated": false,
+      "source_task": "M8-001",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "eb702d6b504315544744dcf45b47436e5177f5ce2892b11442abfb58948552e8"
+      },
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "observed": {
+      "baseline": {
+        "after_abort": "Aborted",
+        "final": "Aborted",
+        "terminal_close_rejections": 2,
+        "failed_probe_cases": 2
+      },
+      "fixed_assertions": {
+        "after_abort": "Closing",
+        "final": "Closed",
+        "terminal_close_rejections": 0,
+        "failed_probe_cases": 0
+      },
+      "output_note": "cjpm suppresses stdout for passing cases; the corrected state and no-rejection assertions both passed."
+    },
+    "suite_counts": {
+      "before": {
+        "passed": 33,
+        "failed": 2,
+        "errors": 0
+      },
+      "after": {
+        "passed": 37,
+        "failed": 0,
+        "errors": 0
+      }
+    },
+    "temporary_probe_removed": true
+  },
+  "permanent_regressions": {
+    "status": "PASS",
+    "baseline_test_adaptation": "The final network tests are copied to the baseline with only the private SPI observer name changed back; production baseline source is untouched.",
+    "adapted_occurrences": 1,
+    "integration_safeguards": [
+      "Ownership observation remains within public exception normalization; a secondary observation error cannot replace the original abort failure.",
+      "Native peer-reset regression has a bounded wait and rejects timeout rather than accepting every exception.",
+      "Race regressions release their gates on failure."
+    ],
+    "baseline": {
+      "id": "ninth-network-before",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "status": "FAIL",
+      "exit_code": 1,
+      "timed_out": false,
+      "error_code": null,
+      "started_at_utc": "2026-09-10T15:13:27.059977Z",
+      "finished_at_utc": "2026-09-10T15:13:31.844437Z",
+      "duration_ms": 4784.466,
+      "stdout_path": "docs/evidence/M8-001/ninth-network-before.stdout.log",
+      "stderr_path": "docs/evidence/M8-001/ninth-network-before.stderr.log",
+      "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.net, time elapsed: 160746198 ns, RESULT:\n    TCS: NetworkFoundationContractTest, time elapsed: 160746198 ns, RESULT:\n    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (362811 ns)\n    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (53152 ns)\n    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (66365 ns)\n    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (155246 ns)\n    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (120432 ns)\n    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (33378 ns)\n    [ PASSED ] CASE: tcpStreamNonterminalStoppedCloseAdmissionStillRejects (126062 ns)\n    [ PASSED ] CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership (72671 ns)\n    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (135739 ns)\n    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (90689 ns)\n    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (115273 ns)\n    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (114931 ns)\n    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (42061 ns)\n    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (78894 ns)\n    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (30280 ns)\n    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (103779 ns)\n    [ PASSED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (199345 ns)\n    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (293655 ns)\n    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (63754 ns)\n    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (105831 ns)\n    [ PASSED ] CASE: tcpStreamRetainsNativeCancellationOwnership (11424766 ns)\n    [ PASSED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (187504 ns)\n    [ PASSED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (245594 ns)\n    [ PASSED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (105585 ns)\n    [ PASSED ] CASE: tcpStreamAbortOwnershipSurvivesCompetingIoAndLateCloseFailure (75541 ns)\n    [ PASSED ] CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful (106583 ns)\n    [ PASSED ] CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful (72808 ns)\n    [ PASSED ] CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation (71683 ns)\n    [ PASSED ] CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate (85706 ns)\n    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (41767 ns)\n    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (229002 ns)\n    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1577845 ns)\n    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (25995 ns)\n    [ ERROR  ] CASE: tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock (138144054 ns)\n    REASON: An exception has occurred:NetworkException: TCP stream close cancelled\n\tat std.io.IOException.init(std.core.String)(std/io/io_exception.cj:19)\n\tat wirestack.NetworkException.init(wirestack.NetworkErrorCategory, wirestack.NetworkPhase, wirestack.NetworkErrorCode, std.core.String, wirestack.Retryability, std.core.Option<...>, std.core.Option<...>, std.core.Option<...>, std.core.Option<...>)(/tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/src/network_error.cj:392)\n\tat wirestack.net.closeContextFailure(wirestack.OperationContext, std.core.Option<...>, std.core.Option<...>)(/tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/src/net/package.cj:892)\n\tat wirestack.net.checkCloseContext(wirestack.OperationContext, std.core.Option<...>, std.core.Option<...>)(/tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/src/net/package.cj:880)\n\tat wirestack.net.TcpStream.close(wirestack.OperationContext)(/tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/src/net/package.cj:488)\n\tat wirestack.net/test.expectTerminalCloseSkipsContexts(wirestack.net.TcpStream, wirestack.net.SocketState)(/tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/src/net/package_test.cj:1521)\n\tat wirestack.net/test.NetworkFoundationContractTest.tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock()(/tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/src/net/package_test.cj:119)\n\tat wirestack.net/test.NetworkFoundationContractTest.asTestSuite.lambda.6.lambda.0()(/tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/src/net/package_test.cj:1089)\n    [ FAILED ] CASE: tcpStreamAbortCannotRelabelClaimedGracefulNativeClose (59344 ns)\n    Expect Failed: `(matches == true)`\n       left: false\n      right: true\n\n    Expect Failed: `(matches == true)`\n       left: false\n      right: true\n\nSummary: TOTAL: 35\n    PASSED: 33, SKIPPED: 0, ERROR: 1\n    FAILED: 1, listed below:\n            TCS: NetworkFoundationContractTest, CASE: tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock\n            TCS: NetworkFoundationContractTest, CASE: tcpStreamAbortCannotRelabelClaimedGracefulNativeClose\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 168956263 ns, RESULT:\nTP: wirestack.*, time elapsed: 168856367 ns, RESULT:\n    FAILED:\n    TP: wirestack.net, time elapsed: 160746198 ns, RESULT:\n        TCS: NetworkFoundationContractTest, time elapsed: 160746198 ns, RESULT:\n        [ ERROR  ] CASE: tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock (138144054 ns)\n        [ FAILED ] CASE: tcpStreamAbortCannotRelabelClaimedGracefulNativeClose (59344 ns)\nSummary: TOTAL: 35\n    PASSED: 33, SKIPPED: 0, ERROR: 1\n    FAILED: 1\n--------------------------------------------------------------------------------------------------\n",
+      "stderr_excerpt": "Error: cjpm test failed\n",
+      "stdout_truncated": false,
+      "stderr_truncated": false,
+      "source_task": "M8-001",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b8b43890d560c9b7927e699a2738b2c778b3eff6bbb5e6bf7aba8401319f13e5"
+      },
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "bc37c062ce41562eb2ac1eae16155c98ee7ec7bda24c5ddb0677abd9d3c61c2d"
+      }
+    },
+    "native_after": {
+      "id": "ninth-transport-after",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/internal/transport_stdnet",
+        "--exclude-tags=Performance",
+        "--parallel",
+        "1",
+        "--no-progress",
+        "--no-color"
+      ],
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "error_code": null,
+      "started_at_utc": "2026-09-10T15:13:27.061493Z",
+      "finished_at_utc": "2026-09-10T15:13:32.441051Z",
+      "duration_ms": 5379.559,
+      "stdout_path": "docs/evidence/M8-001/ninth-transport-after.stdout.log",
+      "stderr_path": "docs/evidence/M8-001/ninth-transport-after.stderr.log",
+      "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 298138980 ns, RESULT:\n    TCS: StdNetTransportListenerTest, time elapsed: 91424220 ns, RESULT:\n    [ PASSED ] CASE: listenerRejectsOutOfRangeBacklogBeforeBinding (222936 ns)\n    [ PASSED ] CASE: listenerPreCancelledAndExpiredAcceptsFailFast (155729 ns)\n    [ PASSED ] CASE: listenerDeadlineBoundsBlockedAcceptAndListenerRemainsUsable (39012496 ns)\n    [ PASSED ] CASE: listenerCancellationWakesActiveAcceptAndListenerRemainsUsable (40052246 ns)\n    [ PASSED ] CASE: listenerCloseWakesActiveAcceptWithStructuredErrorAndIsIdempotent (10794856 ns)\n    TCS: M123TransportDiagnosticsTest, time elapsed: 828410 ns, RESULT:\n    [ PASSED ] CASE: stdNetReportsRuntimeEndpointsAndCapabilitiesWithoutGuessingIoBackend (360289 ns)\n    [ PASSED ] CASE: deterministicTransportUsesTheSameProviderNeutralContract (58799 ns)\n    TCS: M127BackgroundFastPathTest, time elapsed: 54735797 ns, RESULT:\n    [ PASSED ] CASE: backgroundAndObservedPathsTransferEquivalentData (260724 ns)\n    [ PASSED ] CASE: backgroundPeerCloseRemainsEof (149346 ns)\n    [ PASSED ] CASE: backgroundLocalCloseRaceRemainsClosed (11300764 ns)\n    [ PASSED ] CASE: backgroundStillRejectsConcurrentReaders (11353974 ns)\n    [ PASSED ] CASE: cancellableAndDeadlineContextsRetainGenericChecks (225999 ns)\n    [ PASSED ] CASE: deadlineTimeoutIsClearedBeforeBackgroundRead (30359073 ns)\n    TCS: Net06CancellationGateTest, time elapsed: 35652453 ns, RESULT:\n    [ PASSED ] CASE: cancelledReadsReleaseSocketsWaitersAndTasks (35369785 ns)\n    TCS: StdNetTransportTest, time elapsed: 113294458 ns, RESULT:\n    [ PASSED ] CASE: writeTimeoutIsNeverRetryableWithoutZeroCommitProof (39152 ns)\n    [ PASSED ] CASE: writeSomeIsPartialAndReusesBoundedConnectionStaging (380583 ns)\n    [ PASSED ] CASE: wholeArrayReadAndWriteBypassStagingForATypicalTlsRecord (2283878 ns)\n    [ PASSED ] CASE: subrangesRetainBoundedStagingAndCopyAccounting (214841 ns)\n    [ PASSED ] CASE: connectsByResolvedIpAndTransfersBothDirections (152037 ns)\n    [ PASSED ] CASE: emptyOperationsAreImmediate (119351 ns)\n    [ PASSED ] CASE: unsupportedHalfClosePreservesBothDirections (212093 ns)\n    [ PASSED ] CASE: cancellationAbortRemainsNativeOwnerAfterLaterClose (11241226 ns)\n    [ PASSED ] CASE: listenerCloseWakesBlockedAcceptAsClosed (1177163 ns)\n    [ PASSED ] CASE: cancellingOneAcceptLeavesListenerReusable (29089184 ns)\n    [ PASSED ] CASE: preCancelledConnectDoesNotCreateASocket (34782 ns)\n    [ PASSED ] CASE: peerGracefulCloseIsReportedAsEof (163880 ns)\n    [ PASSED ] CASE: deadlineBoundsBlockedReadWithoutClosingConnection (30333469 ns)\n    [ PASSED ] CASE: localCloseMapsBlockedReadWithStableEvidence (11294267 ns)\n    [ PASSED ] CASE: explicitAbortWakesBlockedReadWithStableEvidence (11254618 ns)\n    [ PASSED ] CASE: gracefulNativeCloseRemainsGracefulAfterLaterAbort (173938 ns)\n    [ PASSED ] CASE: explicitAbortRemainsNativeOwnerAfterLaterClose (196072 ns)\n    [ PASSED ] CASE: unknownConnectFailureMapsWithoutMessageOrNativeCode (138488 ns)\n    [ PASSED ] CASE: concurrentReadsFailWithoutDisturbingTheActiveRead (11334027 ns)\n    [ PASSED ] CASE: happyEyeballsComposesWithTheDefaultStdNetFactory (306212 ns)\nSummary: TOTAL: 51\n    PASSED: 34, SKIPPED: 17, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 306236202 ns, RESULT:\nTP: wirestack.*, time elapsed: 306178417 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.transport_stdnet, time elapsed: 298138980 ns\nSummary: TOTAL: 51\n    PASSED: 34, SKIPPED: 17, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+      "stderr_excerpt": "",
+      "stdout_truncated": false,
+      "stderr_truncated": false,
+      "source_task": "M8-001",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "792d30e3945be9a423e1c5c3e48844a2a02c2a6fdf7ebd7761d03abc6b382378"
+      },
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "baseline_counts": {
+      "total": 35,
+      "passed": 33,
+      "failed": 1,
+      "errors": 1,
+      "skipped": 0
+    },
+    "native_counts": {
+      "total": 51,
+      "passed": 34,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 17
+    },
+    "network_after": {
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "duration_ms": 8849.618,
+      "error_code": null,
+      "exit_code": 0,
+      "finished_at_utc": "2026-09-10T15:18:24.403027Z",
+      "id": "network-contract-tests",
+      "started_at_utc": "2026-09-10T15:18:15.553413Z",
+      "status": "PASS",
+      "stderr_excerpt": "",
+      "stderr_path": "docs/evidence/M8-001/network-tests.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.net, time elapsed: 19505086 ns, RESULT:\n    TCS: NetworkFoundationContractTest, time elapsed: 19505086 ns, RESULT:\n    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (280678 ns)\n    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (35885 ns)\n    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (44908 ns)\n    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (99887 ns)\n    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (66266 ns)\n    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (20128 ns)\n    [ PASSED ] CASE: tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock (66406 ns)\n    [ PASSED ] CASE: tcpStreamNonterminalStoppedCloseAdmissionStillRejects (55198 ns)\n    [ PASSED ] CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership (36448 ns)\n    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (62709 ns)\n    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (48021 ns)\n    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (55112 ns)\n    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (57148 ns)\n    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (20623 ns)\n    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (35454 ns)\n    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (22212 ns)\n    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (39292 ns)\n    [ PASSED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (87640 ns)\n    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (156762 ns)\n    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (81986 ns)\n    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (133776 ns)\n    [ PASSED ] CASE: tcpStreamRetainsNativeCancellationOwnership (11390721 ns)\n    [ PASSED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (195150 ns)\n    [ PASSED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (143046 ns)\n    [ PASSED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (69631 ns)\n    [ PASSED ] CASE: tcpStreamAbortCannotRelabelClaimedGracefulNativeClose (50233 ns)\n    [ PASSED ] CASE: tcpStreamAbortOwnershipSurvivesCompetingIoAndLateCloseFailure (63586 ns)\n    [ PASSED ] CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful (78289 ns)\n    [ PASSED ] CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful (50214 ns)\n    [ PASSED ] CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation (67601 ns)\n    [ PASSED ] CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate (97636 ns)\n    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (39635 ns)\n    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (66383 ns)\n    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1562376 ns)\n    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (13430 ns)\nSummary: TOTAL: 35\n    PASSED: 35, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 27751796 ns, RESULT:\nTP: wirestack.*, time elapsed: 27653458 ns, RESULT:\n    PASSED:\n    TP: wirestack.net, time elapsed: 19505086 ns\nSummary: TOTAL: 35\n    PASSED: 35, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+      "stdout_path": "docs/evidence/M8-001/network-tests.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": false,
+      "source_task": "M8-001",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9ac8958df1393c63966246306c0b9a3285e4eb71ea8a788f9b0e1221b3dbfafb"
+      },
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "network_after_counts": {
+      "total": 35,
+      "passed": 35,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "qualification": {
+    "status": "PASS",
+    "task_commands": 8,
+    "full_cangjie": {
+      "total": 649,
+      "passed": 626,
+      "skipped": 23,
+      "failed": 0,
+      "errors": 0
+    },
+    "external_consumer": "docs/evidence/M8-001/native-consumer.json",
+    "limitations": "Existing performance exclusions remain; the native ownership gate is not an SDK close-interruption experiment.",
+    "fast_commands": 3
+  }
+}

@@ -1340,13 +1340,19 @@ public class NetworkException <: IOException {
     prop code: NetworkErrorCode
     prop retryability: Retryability
     prop nativeCode: ?Int64
-    prop localEndpoint: ?SocketEndpoint
-    prop remoteEndpoint: ?SocketEndpoint
+    prop localEndpoint: ?NetworkEndpoint
+    prop remoteEndpoint: ?NetworkEndpoint
     prop cause: ?Exception
 }
 ```
 
 `nativeCode` 是可选诊断字段。发布验收不要求公共 SDK 暴露该值。
+
+`NetworkEndpoint` 是共享 `wirestack` 层的 Internet/Unix 地址联合类型：
+`Internet(SocketEndpoint)` 或 `Unix(UnixEndpoint)`。错误保留原始地址形式与字节；
+Unix pathname、abstract name 和 unnamed 不互相转换，也不通过错误文本传递端点。
+该统一字段契约在 M8-001 审查中经项目所有者批准，替代原 Internet-only 字段类型；
+所有调用方同步迁移，不保留重复兼容字段。
 
 Category：
 

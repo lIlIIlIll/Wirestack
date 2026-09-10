@@ -1,0 +1,19 @@
+git: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+git: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
+{"code": "adapter-build-failed", "detail": "command failed (128): git -C /tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/.local/tls-provider/source/aws-lc-5.5.0 fetch --depth 1 origin 991e67ff4cf04df4dd89e407f8b920c6936cb56a\ngit: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)\n/usr/lib/git-core/git: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by /usr/lib/git-core/git)\n/usr/lib/git-core/git: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by /usr/lib/git-core/git)\nerror: RPC failed; curl 56 OpenSSL SSL_read: OpenSSL/3.6.4: error:0A000126:SSL routines::unexpected eof while reading, errno 0\nerror: 1497 bytes of body are still expected\nfetch-pack: unexpected disconnect while reading sideband packet\nfatal: early EOF\nfatal: fetch-pack: invalid index-pack output\n", "status": "FAIL"}
+
+Error: failed to run build script in path /tmp/wirestack-m8-001-ninth-baseline-7t5hffuz by operation 'pre-test', output is redirected into /tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/build-script-cache/release/wirestack/bin/script-log
+Error: cjpm test failed

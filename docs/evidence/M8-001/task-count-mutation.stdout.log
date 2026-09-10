@@ -1,0 +1,3 @@
+BEFORE_FIX: corrupted total missed; 3 tests passed
+AFTER_FIX_NEGATIVE: corrupted total rejected by derived invariant
+AFTER_FIX_VALID: all 4 task graph tests passed

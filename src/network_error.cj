@@ -2,6 +2,79 @@ package wirestack
 
 import std.io.IOException
 
+/** The endpoint kinds understood by the network package. */
+public enum NetworkEndpointKind {
+/** Internet endpoint. */
+    | Internet
+/** Unix-domain endpoint. */
+    | Unix
+}
+
+/** An Internet or Unix endpoint. Endpoint construction never performs DNS. */
+public enum NetworkEndpoint {
+/** Internet socket endpoint. */
+    | Internet(SocketEndpoint)
+/** Unix-domain socket endpoint. */
+    | Unix(UnixEndpoint)
+}
+
+/** Unix endpoint address forms. Abstract names retain arbitrary bytes. */
+public enum UnixEndpointKind {
+/** Filesystem pathname form. */
+    | Pathname
+/** Linux abstract byte-name form. */
+    | Abstract
+/** Unnamed socket form. */
+    | Unnamed
+}
+
+
+/** Immutable Unix endpoint value. */
+public struct UnixEndpoint {
+    private let value: Array<Byte>
+/** Endpoint address form. */
+    public let kind: UnixEndpointKind
+
+    private init(kind: UnixEndpointKind, value: Array<Byte>) {
+        if (value.size > 107) {
+            throw IllegalArgumentException("Unix endpoint name must not exceed 107 bytes")
+        }
+        match (kind) {
+            case UnixEndpointKind.Pathname | UnixEndpointKind.Abstract =>
+                if (value.isEmpty()) {
+                    throw IllegalArgumentException("named Unix endpoint must not be empty")
+                }
+            case UnixEndpointKind.Unnamed => ()
+        }
+        this.kind = kind
+        this.value = value.clone()
+    }
+
+    /** Creates a filesystem pathname endpoint.
+     * @param path Filesystem pathname.
+     */
+    public static func pathname(path: String): UnixEndpoint {
+        if (path.contains("\0")) {
+            throw IllegalArgumentException("Unix pathname endpoint must not contain NUL")
+        }
+        UnixEndpoint(UnixEndpointKind.Pathname, path.toArray())
+    }
+
+    /** Creates a Linux abstract endpoint without UTF-8 conversion.
+     * @param name Arbitrary abstract-name bytes.
+     */
+    public static func abstractName(name: Array<Byte>): UnixEndpoint {
+        UnixEndpoint(UnixEndpointKind.Abstract, name)
+    }
+
+    /** Creates an unnamed endpoint used for automatically allocated clients. */
+    public static func unnamed(): UnixEndpoint {
+        UnixEndpoint(UnixEndpointKind.Unnamed, Array<Byte>())
+    }
+
+    /** Returns a defensive copy of the pathname or abstract name bytes. */
+    public func nameBytes(): Array<Byte> { value.clone() }
+}
 /**
  * Wirestack 公开 API：NetworkErrorCategory。
  */
@@ -124,6 +197,14 @@ public enum NetworkPhase {
  * Wirestack 公开 API：ServerAccept。
  */
     | ServerAccept
+/** Datagram send phase. */
+    | DatagramSend
+/** Datagram receive phase. */
+    | DatagramReceive
+/** Unix-domain socket phase. */
+    | UnixSocket
+/** Raw socket phase. */
+    | RawSocket
 }
 
 /**
@@ -218,6 +299,10 @@ public enum NetworkErrorCode {
  * Wirestack 公开 API：InvalidState。
  */
     | InvalidState
+/** The payload does not fit in one datagram. */
+    | MessageTooLarge
+/** The operation requires a connected peer. */
+    | NotConnected
 }
 
 /**
@@ -249,49 +334,49 @@ public enum Retryability {
 /** Stable error evidence shared by transport, TLS and HTTP phases. */
 public open class NetworkException <: IOException {
 /**
- * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * Wirestack 公开 API：category。
  */
     public let category: NetworkErrorCategory
 /**
- * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * Wirestack 公开 API：phase。
  */
     public let phase: NetworkPhase
 /**
- * Wirestack 公开 API：返回当前对象保存的受约束值。
+ * Wirestack 公开 API：code。
  */
     public let code: NetworkErrorCode
 /**
- * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * Wirestack 公开 API：retryability。
  */
     public let retryability: Retryability
 /**
- * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * Wirestack 公开 API：nativeCode。
  */
     public let nativeCode: ?Int64
 /**
- * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * Wirestack 公开 API：localEndpoint。
  */
-    public let localEndpoint: ?SocketEndpoint
+    public let localEndpoint: ?NetworkEndpoint
 /**
- * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * Wirestack 公开 API：remoteEndpoint。
  */
-    public let remoteEndpoint: ?SocketEndpoint
+    public let remoteEndpoint: ?NetworkEndpoint
 /**
- * Wirestack 公开 API：公开成员，用于在网络操作中传递受约束的状态。
+ * Wirestack 公开 API：cause。
  */
     public let cause: ?Exception
 
 /**
- * Wirestack 公开 API：构造并校验该公开值。
- * @param category 调用方提供的输入值。
- * @param cause 导致当前错误的底层异常。
- * @param code 稳定的错误或状态分类。
- * @param localEndpoint 调用方提供的输入值。
- * @param message 面向调用方的诊断文本。
- * @param nativeCode 调用方提供的输入值。
- * @param phase 调用方提供的输入值。
- * @param remoteEndpoint 调用方提供的输入值。
- * @param retryability 调用方提供的输入值。
+ * Wirestack 公开 API：init。
+ * @param category 参数 category。
+ * @param cause 参数 cause。
+ * @param code 参数 code。
+ * @param localEndpoint 参数 localEndpoint。
+ * @param message 参数 message。
+ * @param nativeCode 参数 nativeCode。
+ * @param phase 参数 phase。
+ * @param remoteEndpoint 参数 remoteEndpoint。
+ * @param retryability 参数 retryability。
  */
     public init(
         category: NetworkErrorCategory,
@@ -300,8 +385,8 @@ public open class NetworkException <: IOException {
         message: String,
         retryability!: Retryability = Retryability.Unknown,
         nativeCode!: ?Int64 = None<Int64>,
-        localEndpoint!: ?SocketEndpoint = None<SocketEndpoint>,
-        remoteEndpoint!: ?SocketEndpoint = None<SocketEndpoint>,
+        localEndpoint!: ?NetworkEndpoint = None<NetworkEndpoint>,
+        remoteEndpoint!: ?NetworkEndpoint = None<NetworkEndpoint>,
         cause!: ?Exception = None<Exception>
     ) {
         super(message)
@@ -316,7 +401,7 @@ public open class NetworkException <: IOException {
     }
 
 /**
- * Wirestack 公开 API：返回运行时类型名称。
+ * Wirestack 公开 API：getClassName。
  */
     protected open override func getClassName(): String {
         "NetworkException"

@@ -1,0 +1,14 @@
+[33mwarning[0m: unused function:'withCapturedEndpointDiagnostics'
+   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/net/package.cj:539:5:
+    [36m| [0m
+[36m539[0m [36m| [0m      private func withCapturedEndpointDiagnostics([0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m540[0m [36m| [0m[33m|[0m         error: api.NetworkException[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m565[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+Error: cjpm test failed

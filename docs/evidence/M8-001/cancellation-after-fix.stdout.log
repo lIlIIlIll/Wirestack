@@ -1,0 +1,30 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 5530992 ns, RESULT:
+    TCS: NetworkFoundationContractTest, time elapsed: 5530992 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (317476 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (55482 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (63162 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (152027 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (96593 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (32150 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (124577 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (60764 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (84373 ns)
+    [ PASSED ] CASE: tcpStreamAbortWinsWhileGracefulCloseIsBlocked (148625 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (104820 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (132195 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1604242 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (20472 ns)
+Summary: TOTAL: 14
+    PASSED: 14, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 14083299 ns, RESULT:
+TP: wirestack.*, time elapsed: 13981868 ns, RESULT:
+    PASSED:
+    TP: wirestack.net, time elapsed: 5530992 ns
+Summary: TOTAL: 14
+    PASSED: 14, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

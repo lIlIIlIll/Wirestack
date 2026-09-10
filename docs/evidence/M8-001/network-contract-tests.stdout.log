@@ -1,0 +1,49 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 21537069 ns, RESULT:
+    TCS: NetworkFoundationContractTest, time elapsed: 21537069 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (371103 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (54041 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (58292 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (125798 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (93171 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (31137 ns)
+    [ PASSED ] CASE: tcpStreamStoppedCloseContextsFailBeforeLifecycleAdmission (74656 ns)
+    [ PASSED ] CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership (50636 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (93539 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (68771 ns)
+    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (101126 ns)
+    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (80630 ns)
+    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (29247 ns)
+    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (50645 ns)
+    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (27487 ns)
+    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (69702 ns)
+    [ PASSED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (140364 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (203688 ns)
+    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (40360 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (77996 ns)
+    [ PASSED ] CASE: tcpStreamRetainsNativeCancellationOwnership (11400699 ns)
+    [ PASSED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (278020 ns)
+    [ PASSED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (195431 ns)
+    [ PASSED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (95498 ns)
+    [ PASSED ] CASE: tcpStreamAbortWinsWhileGracefulCloseIsBlocked (36529 ns)
+    [ PASSED ] CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful (98278 ns)
+    [ PASSED ] CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful (81737 ns)
+    [ PASSED ] CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation (103543 ns)
+    [ PASSED ] CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate (115515 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (74215 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (141452 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (2015492 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (27533 ns)
+Summary: TOTAL: 33
+    PASSED: 33, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 29560961 ns, RESULT:
+TP: wirestack.*, time elapsed: 29466955 ns, RESULT:
+    PASSED:
+    TP: wirestack.net, time elapsed: 21537069 ns
+Summary: TOTAL: 33
+    PASSED: 33, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

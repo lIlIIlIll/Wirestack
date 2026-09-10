@@ -27,6 +27,7 @@ from tools.evidence_digest import (  # noqa: E402
     atomic_json as digest_atomic_json,
     parse_text_digest,
     text_evidence_digest,
+    text_evidence_digest_bytes,
 )
 
 SCHEMA_VERSION = 1
@@ -263,6 +264,88 @@ def tool_version(argv: Sequence[str], root: Path) -> str | None:
     text = (result.stdout + result.stderr).strip()
     return text[:1024] if result.returncode == 0 and text else None
 
+def _git_error_detail(stderr: str | bytes) -> str:
+    if isinstance(stderr, bytes):
+        detail = stderr.decode("utf-8", errors="replace")
+    else:
+        detail = stderr
+    return detail.strip()[:1024]
+
+
+def _resolve_candidate_commit(root: Path, candidate_revision: str | None) -> str:
+    if candidate_revision is not None and (
+        not isinstance(candidate_revision, str)
+        or re.fullmatch(r"[0-9a-f]{40}", candidate_revision) is None
+    ):
+        raise ContractError(
+            "REPORT_REVISION", "candidate revision must be a full lowercase Git SHA"
+        )
+    requested = candidate_revision if candidate_revision is not None else "HEAD"
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--verify", f"{requested}^{{commit}}"],
+            cwd=root,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as error:
+        raise ContractError(
+            "REPORT_REVISION", "candidate revision lookup timed out"
+        ) from error
+    except OSError as error:
+        raise ContractError(
+            "REPORT_REVISION", "candidate revision lookup failed"
+        ) from error
+    revision = result.stdout.strip()
+    if (
+        result.returncode != 0
+        or re.fullmatch(r"[0-9a-f]{40}", revision) is None
+        or (candidate_revision is not None and revision != candidate_revision)
+    ):
+        detail = _git_error_detail(result.stderr)
+        suffix = f": {detail}" if detail else ""
+        raise ContractError(
+            "REPORT_REVISION",
+            f"candidate revision does not resolve to a commit{suffix}",
+        )
+    return revision
+
+
+def _source_digest_at_commit(
+    root: Path, revision: str, relative: str
+) -> TextEvidenceDigest:
+    try:
+        result = subprocess.run(
+            ["git", "cat-file", "blob", f"{revision}:{relative}"],
+            cwd=root,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=10,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as error:
+        raise ContractError(
+            "SOURCE_REVISION", f"candidate source lookup timed out: {relative}"
+        ) from error
+    except OSError as error:
+        raise ContractError(
+            "SOURCE_REVISION", f"candidate source lookup failed: {relative}"
+        ) from error
+    if result.returncode != 0:
+        detail = _git_error_detail(result.stderr)
+        suffix = f": {detail}" if detail else ""
+        raise ContractError(
+            "SOURCE_REVISION",
+            f"source path is missing from candidate revision: {relative}{suffix}",
+        )
+    try:
+        return text_evidence_digest_bytes(result.stdout)
+    except DigestError as error:
+        raise ContractError(error.code, error.detail) from error
+
 
 def platform_identity() -> dict[str, str]:
     libc_name, libc_version = platform.libc_ver()
@@ -419,19 +502,26 @@ def validate_evidence(raw: Any, root: Path, task: Mapping[str, Any]) -> dict[str
     if evidence.get("acceptance_status") != "PASS":
         raise ContractError("ACCEPTANCE_NOT_PASS", "evidence acceptance_status is not PASS")
     candidate_revision = evidence.get("revision")
+    if not isinstance(candidate_revision, str):
+        raise ContractError(
+            "REPORT_REVISION",
+            "candidate revision must be a full lowercase Git SHA",
+        )
+    revision = _resolve_candidate_commit(root, candidate_revision)
     revision_bound = set(task.get("revision_bound_reports", []))
-    if revision_bound and (
-        not isinstance(candidate_revision, str)
-        or re.fullmatch(r"[0-9a-f]{40}", candidate_revision) is None
-    ):
-        raise ContractError("REPORT_REVISION", "candidate revision must be a full lowercase Git SHA")
     source_hashes = evidence.get("source_sha256")
     if not isinstance(source_hashes, dict) or set(source_hashes) != set(task["source_paths"]):
         raise ContractError("SOURCE_INVENTORY", "source digest inventory does not match manifest")
     stale: list[str] = []
     for relative, expected in source_hashes.items():
-        path = safe_path(root, relative, "source_sha256", must_exist=True, file_only=True)
         expected_digest = _parse_text_digest(expected, f"source_sha256[{relative}]")
+        committed_digest = _source_digest_at_commit(root, revision, relative)
+        if expected_digest != committed_digest:
+            raise ContractError(
+                "SOURCE_REVISION_MISMATCH",
+                f"evidence source digest differs from candidate revision: {relative}",
+            )
+        path = safe_path(root, relative, "source_sha256", must_exist=True, file_only=True)
         if _text_digest(path) != expected_digest:
             stale.append(relative)
     reports = evidence.get("reports")
@@ -511,13 +601,20 @@ def seal_evidence(
     tasks = validate_repository_tasks(root, task_id)
     task = tasks[task_id]
     revision_bound = set(task.get("revision_bound_reports", []))
-    revision = candidate_revision or tool_version(["git", "rev-parse", "HEAD"], root)
-    if revision_bound and (
-        not isinstance(revision, str) or re.fullmatch(r"[0-9a-f]{40}", revision) is None
-    ):
-        raise ContractError(
-            "REPORT_REVISION", "--revision must name the full lowercase candidate Git SHA"
+    revision = _resolve_candidate_commit(root, candidate_revision)
+    source_hashes: dict[str, dict[str, str]] = {}
+    for relative in task["source_paths"]:
+        path = safe_path(
+            root, relative, "source_path", must_exist=True, file_only=True
         )
+        working_digest = _text_digest(path)
+        committed_digest = _source_digest_at_commit(root, revision, relative)
+        if working_digest != committed_digest:
+            raise ContractError(
+                "SOURCE_REVISION_MISMATCH",
+                f"working-tree source differs from candidate revision: {relative}",
+            )
+        source_hashes[relative] = working_digest.to_json()
     reports = []
     for relative in report_paths:
         path = safe_path(root, relative, "report", must_exist=True, file_only=True)
@@ -536,10 +633,7 @@ def seal_evidence(
                "acceptance_status": "PASS", "generated_at_utc": utc_now(),
                "revision": revision,
                "reports": reports,
-               "source_sha256": {
-                   relative: _text_digest(root / relative).to_json()
-                   for relative in task["source_paths"]
-               }}
+               "source_sha256": source_hashes}
     atomic_json(output, payload)
     return payload
 

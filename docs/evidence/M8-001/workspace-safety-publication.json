@@ -1,0 +1,169 @@
+{
+  "task_id": "M8-001",
+  "original_root": "/home/elliot/playground/Wirestack",
+  "publication_root": "/home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909",
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--show-toplevel"
+      ],
+      "exit_code": 0,
+      "stdout": "/home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "branch",
+        "--show-current"
+      ],
+      "exit_code": 0,
+      "stdout": "publish/M8-001-network-contract\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "stdout": "55ab33b6768f89dbeb35224514f818b6e5439b9b\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "merge-base",
+        "HEAD",
+        "origin/main"
+      ],
+      "exit_code": 0,
+      "stdout": "55ab33b6768f89dbeb35224514f818b6e5439b9b\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "exit_code": 0,
+      "stdout": " M .gitignore\n M README.md\n M docs/api/README.md\n M docs/planning/implementation-backlog.md\n M docs/planning/status.md\n M src/network_error.cj\n M tools/architecture_guard.py\n M tools/docs/m7_033_docs.py\n M tools/m7_026_linux_api_freeze.py\n M tools/tests/test_m7_linux_task_graph.py\n?? docs/architecture/adr/0008-linux-network-foundation.md\n?? docs/evidence/M8-001/\n?? docs/guides/network-foundation-linux.md\n?? src/internal/transport_stdnet/net_contract.cj\n?? src/net/\n?? tools/tasks/M8-001.json\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "uname",
+        "-a"
+      ],
+      "exit_code": 0,
+      "stdout": "Linux Arch 7.2.3-arch1-3 #1 SMP PREEMPT_DYNAMIC Sun, 06 Sep 2026 13:01:04 +0000 x86_64 GNU/Linux\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/elliot/.codex/scripts/codex_cangjie_env",
+        "cjc",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu\n",
+      "stderr": ""
+    }
+  ],
+  "original_index_scope": "/home/elliot/playground/Wirestack",
+  "original_index_snapshot_sha256": "2ea707064b4237122d54ed1fa12afd91721c37b8a5f886379771bd5b31d4707b",
+  "original_index_snapshot_note": "The earlier ls-files snapshot was empty because its cwd was an ignored subdirectory after a shared-kernel variable collision. This replacement is explicitly rooted at the original repository; subsequent preservation checks use it. No publication Git write has targeted the original worktree or index.",
+  "publication_environment": {
+    "CJDOC_BIN": "/home/elliot/playground/cjdoc/target/release/bin/main",
+    "WIRESTACK_AWS_LC_SOURCE": "/home/elliot/playground/Wirestack/.local/tls-provider/source/aws-lc-5.5.0"
+  },
+  "publication_copy": {
+    "root": "/tmp/wirestack-m8-001-clean-publication-2rvq39zo",
+    "isolation": "Independent Git objects, refs, index and working files. GitButler workspace metadata was not inherited from the original repository.",
+    "original_index_preserved_after_history_preparation": true,
+    "original_index_sha256": "2ea707064b4237122d54ed1fa12afd91721c37b8a5f886379771bd5b31d4707b",
+    "history_strategy": "Recreate the complete task tree on qualified main with one implementation commit, then seal that committed source in a separate evidence commit."
+  },
+  "qualified_publication": {
+    "prerequisite_main": "913a75defb3bbaa15e117e642d532c8ae6a1876c",
+    "integration_commit": "572b1350c41169637541178cc28652e09125e539",
+    "strategy": "Preserved the isolated reconstruction commit and merged origin/main without reset, stash, rebase, or original-worktree writes. Kept both ignore additions and both independent brittle-test removals.",
+    "toolchain_commands": [
+      {
+        "argv": [
+          "cjc",
+          "--version"
+        ],
+        "exit_code": 0,
+        "stdout": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "cjpm",
+          "--version"
+        ],
+        "exit_code": 0,
+        "stdout": "Cangjie Project Manager: 1.1.3\n",
+        "stderr": ""
+      }
+    ],
+    "original_staged_entries_unchanged": true,
+    "publication_environment": {
+      "CANGJIE_HOME": "/tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie",
+      "CJDOC_BIN": "/tmp/wirestack-m7-033-ci-tools-20260910/cjdoc-source/target/release/bin/main"
+    }
+  },
+  "second_review_workspace_safety": {
+    "candidate_before_corrections": "a943c4bb677febd7b112407188dbab2d4a9b7eb3",
+    "incident": "One delegated revision repair initially edited two relative paths in the original dirty root, then reversed only its exact hunks. All subsequent agent writes use absolute publication-worktree paths.",
+    "restoration_evidence": {
+      "tools/repository/repository_tooling.py": "Original and restored content snapshot tag: 03BD",
+      "tools/repository/tests/test_repository_tooling.py": "Original and restored content snapshot tag: 22F9",
+      "restored_bytes_match_original_staged_snapshot": {
+        "tools/repository/repository_tooling.py": "cfae78da46e59af2f876833c0ca04ad7188c9f86",
+        "tools/repository/tests/test_repository_tooling.py": "12570670744adc0d74642155507904502d977226"
+      },
+      "verification": "git hash-object for each restored worktree file equals its blob ID in the original retained git ls-files --stage -z snapshot. Original/restored read tags also match; the agent retained no separate pre-edit SHA-256."
+    },
+    "original_git_index_modified": false,
+    "original_staged_entries_unchanged": true,
+    "original_staged_entries_sha256": "2ea707064b4237122d54ed1fa12afd91721c37b8a5f886379771bd5b31d4707b"
+  },
+  "eighth_review_qualification": {
+    "status": "PASS",
+    "network_tests_passed": 33,
+    "tooling_tests_passed": 37,
+    "full_cangjie_tests_passed": 623,
+    "performance_exclusions": 23,
+    "task_commands_passed": 8,
+    "fast_commands_passed": 3,
+    "native_stopped_close_before_exit": 42,
+    "native_stopped_close_after_exit": 0,
+    "publication_candidate_source_inputs": 30,
+    "publication_reports": 24,
+    "original_index_unchanged": true,
+    "merge_strategy": "merge commit preserving the exact sealed source candidate in main ancestry"
+  },
+  "ninth_review_qualification": {
+    "root": "/tmp/wirestack-m8-001-clean-publication-2rvq39zo",
+    "status": "PASS",
+    "original_staged_entries_unchanged": true,
+    "original_staged_entries_sha256": "2ea707064b4237122d54ed1fa12afd91721c37b8a5f886379771bd5b31d4707b",
+    "network_tests_passed": 35,
+    "native_adapter_tests_passed": 34,
+    "native_adapter_performance_exclusions": 17,
+    "full_cangjie_tests_passed": 626,
+    "full_performance_exclusions": 23,
+    "task_commands_passed": 8,
+    "fast_commands_passed": 3,
+    "source_inputs": 30,
+    "reports": 25,
+    "native_probe_source_removed": true,
+    "merge_strategy": "Merge commit preserving the exact source candidate as the seal commit parent."
+  }
+}
