@@ -195,4 +195,4 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 
 | Task | Status | Evidence | Notes |
 |---|---|---|---|
-| M8-001 | IN_PROGRESS | [`docs/evidence/M8-001/README.md`](../evidence/M8-001/README.md) | Fresh reconstruction and validation for isolated publication; historical reports are not acceptance evidence for this source. |
+| M8-001 | COMPLETE | [`docs/evidence/M8-001/README.md`](../evidence/M8-001/README.md) | Fresh isolated reconstruction: network 10/10, HTTP 80/80, canonical check 607 passed/23 excluded, public inventory and complete API documentation pass. The clean public consumer sent `hello` over native loopback. Historical reports are not reused as current acceptance. |

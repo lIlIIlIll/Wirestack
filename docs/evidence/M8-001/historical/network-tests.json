@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "kind": "network-contract-tests",
+  "status": "PASS",
+  "source_task": "M8-001",
+  "acceptance_status": "PASS",
+  "platform": "Linux x86_64 glibc",
+  "tests": 5,
+  "passed": 5,
+  "skipped": 0,
+  "failed": 0,
+  "cases": [
+    "unix-endpoint-ownership",
+    "unix-name-bound",
+    "raw-domain-exclusion",
+    "dns-header-validation",
+    "cancel-before-connect"
+  ],
+  "sandbox_attempt": "BLOCKED_BY_SOCKET_PERMISSION",
+  "native_runner": "PASS"
+}

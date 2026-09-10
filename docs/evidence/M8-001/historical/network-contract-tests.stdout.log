@@ -1,0 +1,21 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 2182137 ns, RESULT:
+    TCS: NetworkFoundationContractTest, time elapsed: 2182137 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (372004 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (80884 ns)
+    [ PASSED ] CASE: rawSocketExclusionsFailClosed (38675 ns)
+    [ PASSED ] CASE: dnsParserAcceptsResponseHeaderAndRejectsQueries (32356 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (162502 ns)
+Summary: TOTAL: 5
+    PASSED: 5, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 9798780 ns, RESULT:
+TP: wirestack.*, time elapsed: 9701219 ns, RESULT:
+    PASSED:
+    TP: wirestack.net, time elapsed: 2182137 ns
+Summary: TOTAL: 5
+    PASSED: 5, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

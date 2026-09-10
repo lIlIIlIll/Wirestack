@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "kind": "cangjie-build",
+  "status": "PASS",
+  "source_task": "M8-001",
+  "acceptance_status": "PASS",
+  "commands": [
+    {"argv": ["/home/elliot/.codex/scripts/codex_cangjie_env", "cjpm", "check"], "exit_code": 0},
+    {"argv": ["/home/elliot/.codex/scripts/codex_cangjie_env", "cjpm", "build"], "exit_code": 0}
+  ],
+  "target": "x86_64-unknown-linux-gnu"
+}

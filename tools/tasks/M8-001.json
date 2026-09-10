@@ -124,6 +124,7 @@
     "docs/evidence/M8-001/native-consumer.json",
     "docs/evidence/M8-001/lifecycle-reproduction.json",
     "docs/evidence/M8-001/api-inventory-regression.json",
+    "docs/evidence/M8-001/http-contract-reproduction.json",
     "docs/evidence/M8-001/evidence.json"
   ],
   "timeout_seconds": 7200,
@@ -135,6 +136,7 @@
     "docs/api/baselines/wirestack-linux-pre1-m8-001.json",
     "docs/evidence/M8-001/README.md",
     "docs/evidence/M8-001/test-plan.md",
+    "docs/evidence/M8-001/workspace-safety-publication.json",
     "docs/guides/network-foundation-linux.md",
     "docs/planning/implementation-backlog.md",
     "docs/planning/status.md",

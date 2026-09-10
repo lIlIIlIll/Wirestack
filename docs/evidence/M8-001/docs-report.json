@@ -1,30 +1,231 @@
 {
-  "artifacts": {},
+  "artifacts": {
+    "api": "docs/api/generated/api-surface.json",
+    "coverage": "docs/api/generated/coverage.json",
+    "docs": "docs/api/generated/docs.json",
+    "markdown": "docs/api/generated/markdown"
+  },
   "cjdoc": {
-    "path": "/home/elliot/playground/cjdoc/target/release/bin/main",
+    "path": "/tmp/wirestack-m7-033-ci-tools-20260910/cjdoc-source/target/release/bin/main",
     "version": "0.7.2"
+  },
+  "combined": {
+    "apiEntries": 1160,
+    "apiSha256": "24169e26e13ed07dd99bb730dd04deca5ce466d8fcf46e27c91c7a533b0e5c1d",
+    "coverage": {
+      "parameters": {
+        "documented": 470,
+        "percent": 100,
+        "total": 470
+      },
+      "symbols": {
+        "documented": 1160,
+        "percent": 100,
+        "total": 1160
+      }
+    },
+    "coverageSha256": "a2c807fe10c12d0522b259b0fbaecd01d1ff5cd5f57ed8d3917c848841b14062",
+    "declarations": 1534,
+    "docsSha256": "6bf2dd126fec57df2d6af3e19a8c9fa4f4c356822cac708f3969d4ff557e447a",
+    "markdownSha256": "988b54088600cbe0a4c63d442b309d59a3f11ecb93cf3db6b5ced6bd4f632518",
+    "package": "combined",
+    "status": "PASS"
   },
   "commands": [
     {
       "kind": "check",
       "package": "wirestack",
-      "returncode": 1,
-      "status": "FAIL",
-      "stderr": "warning[CJDOC3040]: trivial-summary: description repeats declaration 'NetworkErrorCategory'\n --> src/network_error.cj:8:1\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Resolve'\n --> src/network_error.cj:12:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Connect'\n --> src/network_error.cj:16:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Accept'\n --> src/network_error.cj:20:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Read'\n --> src/network_error.cj:24:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Write'\n --> src/network_error.cj:28:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Shutdown'\n --> src/network_error.cj:32:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Closed'\n --> src/network_error.cj:36:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Cancelled'\n --> src/network_error.cj:40:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'DeadlineExceeded'\n --> src/network_error.cj:44:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Address'\n --> src/network_error.cj:48:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Option'\n --> src/network_error.cj:52:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'ResourceExhausted'\n --> src/network_error.cj:56:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Unsupported'\n --> src/network_error.cj:60:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'System'\n --> src/network_error.cj:64:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'NetworkPhase'\n --> src/network_error.cj:70:1\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Dns'\n --> src/network_error.cj:74:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'AddressSelection'\n --> src/network_error.cj:78:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'TcpConnect'\n --> src/network_error.cj:82:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'TcpRead'\n --> src/network_error.cj:86:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'TcpWrite'\n --> src/network_error.cj:90:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'TransportClose'\n --> src/network_error.cj:94:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'ProxyConnect'\n --> src/network_error.cj:98:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'TlsHandshake'\n --> src/network_error.cj:102:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'TlsRead'\n --> src/network_error.cj:106:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'TlsWrite'\n --> src/network_error.cj:110:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'HttpHeaders'\n --> src/network_error.cj:114:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'HttpBody'\n --> src/network_error.cj:118:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'PoolAcquire'\n --> src/network_error.cj:122:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'ServerAccept'\n --> src/network_error.cj:126:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'NetworkErrorCode'\n --> src/network_error.cj:140:1\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Resolve'\n --> src/network_error.cj:144:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'NameNotFound'\n --> src/network_error.cj:148:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'NoData'\n --> src/network_error.cj:152:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'TemporaryFailure'\n --> src/network_error.cj:156:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'InvalidName'\n --> src/network_error.cj:160:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'UnsupportedFamily'\n --> src/network_error.cj:164:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'ConnectRefused'\n --> src/network_error.cj:168:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'NetworkUnreachable'\n --> src/network_error.cj:172:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'HostUnreachable'\n --> src/network_error.cj:176:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'ConnectionReset'\n --> src/network_error.cj:180:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'BrokenPipe'\n --> src/network_error.cj:184:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'TimedOut'\n --> src/network_error.cj:188:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Cancelled'\n --> src/network_error.cj:192:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Closed'\n --> src/network_error.cj:196:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'AddressInUse'\n --> src/network_error.cj:200:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'PermissionDenied'\n --> src/network_error.cj:204:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'ResourceExhausted'\n --> src/network_error.cj:208:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'ConcurrentOperation'\n --> src/network_error.cj:212:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'UnexpectedEof'\n --> src/network_error.cj:216:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Unsupported'\n --> src/network_error.cj:220:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'SystemFailure'\n --> src/network_error.cj:224:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'InvalidState'\n --> src/network_error.cj:228:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Retryability'\n --> src/network_error.cj:238:1\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Never'\n --> src/network_error.cj:242:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'SafeBeforeWrite'\n --> src/network_error.cj:246:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'SafeIfReplayable'\n --> src/network_error.cj:250:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Temporary'\n --> src/network_error.cj:254:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Unknown'\n --> src/network_error.cj:258:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'category'\n --> src/network_error.cj:266:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'phase'\n --> src/network_error.cj:270:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'code'\n --> src/network_error.cj:274:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'retryability'\n --> src/network_error.cj:278:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'nativeCode'\n --> src/network_error.cj:282:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'localEndpoint'\n --> src/network_error.cj:286:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'remoteEndpoint'\n --> src/network_error.cj:290:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'cause'\n --> src/network_error.cj:294:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'init'\n --> src/network_error.cj:308:5\nwarning[CJDOC3041]: trivial-param-description: description repeats parameter 'category'\n --> src/network_error.cj:308:5\nwarning[CJDOC3041]: trivial-param-description: description repeats parameter 'cause'\n --> src/network_error.cj:308:5\nwarning[CJDOC3041]: trivial-param-description: description repeats parameter 'code'\n --> src/network_error.cj:308:5\nwarning[CJDOC3041]: trivial-param-description: description repeats parameter 'localEndpoint'\n --> src/network_error.cj:308:5\nwarning[CJDOC3041]: trivial-param-description: description repeats parameter 'message'\n --> src/network_error.cj:308:5\nwarning[CJDOC3041]: trivial-param-description: description repeats parameter 'nativeCode'\n --> src/network_error.cj:308:5\nwarning[CJDOC3041]: trivial-param-description: description repeats parameter 'phase'\n --> src/network_error.cj:308:5\nwarning[CJDOC3041]: trivial-param-description: description repeats parameter 'remoteEndpoint'\n --> src/network_error.cj:308:5\nwarning[CJDOC3041]: trivial-param-description: description repeats parameter 'retryability'\n --> src/network_error.cj:308:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'getClassName'\n --> src/network_error.cj:333:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'getClassName'\n --> src/tls_contract.cj:153:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'TlsEngineErrorCode'\n --> src/tls_contract.cj:159:1\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'ProtocolViolation'\n --> src/tls_contract.cj:163:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'UnsupportedVersion'\n --> src/tls_contract.cj:167:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'NoSharedCipher'\n --> src/tls_contract.cj:171:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'NoSharedAlpn'\n --> src/tls_contract.cj:175:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'CertificateUntrusted'\n --> src/tls_contract.cj:179:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'IdentityMismatch'\n --> src/tls_contract.cj:183:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'CertificateExpired'\n --> src/tls_contract.cj:187:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'CertificateRevoked'\n --> src/tls_contract.cj:191:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'ClientCertificateRequired'\n --> src/tls_contract.cj:195:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'HandshakeTimeout'\n --> src/tls_contract.cj:199:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'HandshakeCancelled'\n --> src/tls_contract.cj:203:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'PeerAlert'\n --> src/tls_contract.cj:207:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'PeerClosedWithoutCloseNotify'\n --> src/tls_contract.cj:211:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'InvalidRecord'\n --> src/tls_contract.cj:215:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'BadMac'\n --> src/tls_contract.cj:219:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'SessionFailure'\n --> src/tls_contract.cj:223:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'ProviderFailure'\n --> src/tls_contract.cj:227:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'UnsupportedCapability'\n --> src/tls_contract.cj:231:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'Closed'\n --> src/tls_contract.cj:235:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'NoProgress'\n --> src/tls_contract.cj:239:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'UnexpectedTransportEof'\n --> src/tls_contract.cj:243:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'PrivateKeyFailure'\n --> src/tls_contract.cj:247:5\nwarning[CJDOC3040]: trivial-summary: description repeats declaration 'ServerNameSelectionFailure'\n --> src/tls_contract.cj:251:5\ndocumentation coverage: symbols 607/607 (100%), parameters 234/234 (100%)\n",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "documentation coverage: symbols 607/607 (100%), parameters 234/234 (100%)\n",
       "stderr_truncated": false,
       "stdout": "",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "generate",
+      "package": "wirestack",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "generated /tmp/wirestack-m7-033-tfd7cv2j/wirestack/output\n",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "check",
+      "package": "wirestack.http",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "documentation coverage: symbols 901/901 (100%), parameters 380/380 (100%)\n",
+      "stderr_truncated": false,
+      "stdout": "",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "generate",
+      "package": "wirestack.http",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "generated /tmp/wirestack-m7-033-tfd7cv2j/wirestack-http/output\n",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "check",
+      "package": "wirestack.tls",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "documentation coverage: symbols 761/761 (100%), parameters 279/279 (100%)\n",
+      "stderr_truncated": false,
+      "stdout": "",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "generate",
+      "package": "wirestack.tls",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "generated /tmp/wirestack-m7-033-tfd7cv2j/wirestack-tls/output\n",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "check",
+      "package": "wirestack.net",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "documentation coverage: symbols 712/712 (100%), parameters 279/279 (100%)\n",
+      "stderr_truncated": false,
+      "stdout": "",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "generate",
+      "package": "wirestack.net",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "generated /tmp/wirestack-m7-033-tfd7cv2j/wirestack-net/output\n",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "check",
+      "package": "combined",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "documentation coverage: symbols 1160/1160 (100%), parameters 470/470 (100%)\n",
+      "stderr_truncated": false,
+      "stdout": "",
+      "stdout_truncated": false
+    },
+    {
+      "kind": "generate",
+      "package": "combined",
+      "returncode": 0,
+      "status": "PASS",
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "generated /tmp/wirestack-m7-033-tfd7cv2j/combined/output\n",
       "stdout_truncated": false
     }
   ],
   "expectedCjdoc": "0.7.2",
-  "generatedAtUtc": "2026-09-10T01:06:01.049219Z",
-  "issues": [
+  "generatedAtUtc": "2026-09-10T05:39:47.885748Z",
+  "issues": [],
+  "layers": [
     {
-      "code": "CJDOC_CHECK",
-      "detail": "wirestack strict check returned 1"
+      "apiEntries": 607,
+      "apiSha256": "3f3ae6923aeca924ca1444ed7766568b63c0288936a5b1763652242affb6a6b5",
+      "coverage": {
+        "parameters": {
+          "documented": 234,
+          "percent": 100,
+          "total": 234
+        },
+        "symbols": {
+          "documented": 607,
+          "percent": 100,
+          "total": 607
+        }
+      },
+      "coverageSha256": "97dbe199bbdca85d44ff961c11275589bb5b90a988f81c2997e7cc2ccd968057",
+      "declarations": 747,
+      "docsSha256": "de52d48e61679a26d341aaf6493a0cbb0cb2c5a7be2bf57b81270c008496dea5",
+      "markdownSha256": "3055a19762b460c1f977ca0ed29a1154c7af8cda9d232351ef2bba0e2b409b45",
+      "package": "wirestack",
+      "status": "PASS"
+    },
+    {
+      "apiEntries": 901,
+      "apiSha256": "f582bbf64e4453dcba2e56e0fe47dd7ccbe2a129868c30d13dcc7701bf8b1f9a",
+      "coverage": {
+        "parameters": {
+          "documented": 380,
+          "percent": 100,
+          "total": 380
+        },
+        "symbols": {
+          "documented": 901,
+          "percent": 100,
+          "total": 901
+        }
+      },
+      "coverageSha256": "74130bd274f7f8eeb155b2a051811d667a3b3745b74e72717e4ca269f7da3dd0",
+      "declarations": 1232,
+      "docsSha256": "bb9095fea89f79fc359f63b2e412f3af877a01451fee9487f92a15ed49bd7d04",
+      "markdownSha256": "b90982339ea708b7f7715aac927745b2581b6855195119690f6e0f5582139392",
+      "package": "wirestack.http",
+      "status": "PASS"
+    },
+    {
+      "apiEntries": 761,
+      "apiSha256": "374743b74f6e6e6d511b36c463fe7267a349f9da913cd5a04a5aee79a42a4538",
+      "coverage": {
+        "parameters": {
+          "documented": 279,
+          "percent": 100,
+          "total": 279
+        },
+        "symbols": {
+          "documented": 761,
+          "percent": 100,
+          "total": 761
+        }
+      },
+      "coverageSha256": "aa13d46e395b22eaa687ddca592835902229c765cc217ba6d04ceccdcee34b8d",
+      "declarations": 929,
+      "docsSha256": "16984b3966f1c532a3c34eea6090951057016a2f793e83694ae1f380f43aaea6",
+      "markdownSha256": "f11ae8b6080dd249c5c33562a00732f7bbd35c67e423c0bcfc39ae9935b07646",
+      "package": "wirestack.tls",
+      "status": "PASS"
+    },
+    {
+      "apiEntries": 712,
+      "apiSha256": "fe46914ed67efa709c2e2681e8a5f4cbbf7c95bd6e5a1d1ba17cca9fb53ae23c",
+      "coverage": {
+        "parameters": {
+          "documented": 279,
+          "percent": 100,
+          "total": 279
+        },
+        "symbols": {
+          "documented": 712,
+          "percent": 100,
+          "total": 712
+        }
+      },
+      "coverageSha256": "c961e76d69232da2ea58b17acd7fdd93c5cd8a83a92576bf7e8db46f21416e67",
+      "declarations": 867,
+      "docsSha256": "98d2e0ba5793b1ff0ef710c3a9642fb63436044d610ae95713695b554a87a7d0",
+      "markdownSha256": "c665cef542630b9fbda37c53b17bfede25aa487c50b010430c1047257d4e1bfe",
+      "package": "wirestack.net",
+      "status": "PASS"
     }
   ],
-  "layers": [],
   "platform": {
     "libc": "glibc",
     "machine": "x86_64",
@@ -41,7 +242,7 @@
     "src/http/client.cj": "8f8d2411d180fe265673d295c5a5057180217fc0f2a957ec720bb3baf7f9f238",
     "src/http/error.cj": "d88c54a157e02063ab4048c197631daba3642a9618672841e4b98d3a25d275ad",
     "src/http/package.cj": "8281ad516f34a4e24b5e596ee4232247d10a2f2d3ce76a66e259e5e28d581af7",
-    "src/http/parity.cj": "2aa6b1508bd670e1cf5bfae33b5971699e5ddbcb74c6f983741a8fac33e708c1",
+    "src/http/parity.cj": "a210a275acf6b0ee57358e26ad8891a49eaef36829e3791f94539deab9a40b1c",
     "src/http/proxy.cj": "9576c9b153192c93943911557e8cce25f567e5ad0357074189437cc17af6fe1d",
     "src/http/redirect.cj": "e7e9f07fa0bb79299e46c1320b32daf238e702b66fcb8e1368439723d74d96b4",
     "src/http/resolver.cj": "8c44e5ff6961122d6483c22546a26dab02e8414b88d5e18b954ddcf0b3ff29e4",
@@ -67,6 +268,6 @@
     "src/transport.cj": "6781aa3bf538523e02c4807eebff7ac37a773e5dc9bdb427e6a56ace3a0b7033",
     "src/trust.cj": "f64b49d84a58e034e3976089211f7b645b42e5bc51dbc353f2e0bcec14d17aba"
   },
-  "status": "FAIL",
+  "status": "PASS",
   "taskId": "M7-033"
 }

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "kind": "http-parity-tests",
+  "status": "PASS",
+  "source_task": "M8-001",
+  "acceptance_status": "PASS",
+  "platform": "Linux x86_64 glibc",
+  "command": [
+    "/home/elliot/.codex/scripts/codex_cangjie_env",
+    "cjpm",
+    "test",
+    "src/http",
+    "--no-progress",
+    "--no-color"
+  ],
+  "tests": 75,
+  "passed": 75,
+  "skipped": 0,
+  "failed": 0,
+  "errors": 0,
+  "targeted_parity_cases": 4
+}
