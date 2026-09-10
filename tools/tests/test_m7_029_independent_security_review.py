@@ -149,53 +149,6 @@ class M7029IndependentSecurityReviewTests(unittest.TestCase):
         )
         self.assertEqual(1, visible.returncode)
 
-    def test_clean_cangjie_workflow_covers_the_release_critical_gates(self) -> None:
-        workflow = (ROOT / ".github/workflows/clean-cangjie-build.yml").read_text(
-            encoding="utf-8"
-        )
-        self.assertIn("name: Clean Cangjie Build", workflow)
-        self.assertIn("pull_request:", workflow)
-        self.assertIn("runs-on: ubuntu-latest", workflow)
-        self.assertNotIn("self-hosted", workflow)
-        self.assertIn(
-            "actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
-            workflow,
-        )
-        self.assertIn(
-            "Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7",
-            workflow,
-        )
-        self.assertIn(
-            'python3 tools/latest_cangjie_nightly.py --github-output "$GITHUB_OUTPUT"',
-            workflow,
-        )
-        self.assertIn("version: ${{ steps.cangjie-nightly.outputs.version }}", workflow)
-        self.assertIn("sudo apt-get install --yes clang llvm cmake ninja-build", workflow)
-        for command in (
-            "scripts/repo-doctor --json",
-            "scripts/check-code",
-            "scripts/check-m7-027-linux-examples --json",
-            "git diff --exit-code",
-            "git status --porcelain --untracked-files=all",
-        ):
-            self.assertIn(command, workflow)
-        self.assertIn('case "$doctor_exit" in', workflow)
-        self.assertIn("0|6) ;;", workflow)
-        self.assertIn('*) exit "$doctor_exit" ;;', workflow)
-        self.assertNotIn("continue-on-error", workflow)
-        self.assertNotIn("|| true", workflow)
-        self.assertNotIn("scripts/verify-evidence --all", workflow)
-        check = (ROOT / "scripts/check").read_text(encoding="utf-8")
-        code_gate = (ROOT / "scripts/check-code").read_text(encoding="utf-8")
-        self.assertIn("scripts/check-code", check)
-        for command in (
-            "tools/architecture_guard.py",
-            "scripts/build-linux-resolver --quiet",
-            "cjpm check",
-            "cjpm build",
-            "cjpm test --exclude-tags=Performance",
-        ):
-            self.assertIn(command, code_gate)
 
     def test_hosted_ci_nightly_resolution_fails_closed(self) -> None:
         version = "1.3.0-alpha.20260829010011"

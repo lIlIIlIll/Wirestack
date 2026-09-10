@@ -14,25 +14,31 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  CANGJIE_CHANNEL: sts
+  CANGJIE_VERSION: "1.1.3"
+  CJV_VERSION: "v0.2.21"
+
 jobs:
   build-cjdoc:
-    name: Build cjdoc 0.7.2 / Cangjie 1.1 compatibility
+    name: Build pinned cjdoc 0.7.2
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: read
     steps:
       - name: Check out the cjdoc build source
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           clean: true
           fetch-depth: 1
 
-      - name: Install the cjdoc-compatible Cangjie toolchain
-        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+      - name: Install the pinned Cangjie toolchain
+        uses: Zxilly/setup-cangjie@91463316b1c359f216c2ac49e35900f9341c1571 # v3.2.0
         with:
-          channel: nightly
-          version: 1.1.0-alpha.20260414010024
+          channel: ${{ env.CANGJIE_CHANNEL }}
+          version: ${{ env.CANGJIE_VERSION }}
+          cjv-version: ${{ env.CJV_VERSION }}
 
       - name: Install native prerequisites for cjdoc
         run: |
@@ -96,7 +102,7 @@ jobs:
             --directory "$install_dir" bin/cjdoc
 
       - name: Upload the pinned cjdoc binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: m7-033-cjdoc-${{ github.sha }}
           if-no-files-found: error
@@ -109,25 +115,19 @@ jobs:
     timeout-minutes: 60
     permissions:
       contents: read
-      pages: write
-      id-token: write
     steps:
       - name: Check out the candidate source
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           clean: true
           fetch-depth: 1
 
-      - name: Resolve the Cangjie toolchain
-        id: cangjie-nightly
-        run: python3 tools/latest_cangjie_nightly.py --github-output "$GITHUB_OUTPUT"
-
-      - name: Install the Cangjie toolchain
-        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
+      - name: Install the pinned Cangjie toolchain
+        uses: Zxilly/setup-cangjie@91463316b1c359f216c2ac49e35900f9341c1571 # v3.2.0
         with:
-          channel: nightly
-          version: ${{ steps.cangjie-nightly.outputs.version }}
-          archive-path: ${{ runner.temp }}/cangjie.tar.gz
+          channel: ${{ env.CANGJIE_CHANNEL }}
+          version: ${{ env.CANGJIE_VERSION }}
+          cjv-version: ${{ env.CJV_VERSION }}
 
       - name: Install native prerequisites
         run: |
@@ -135,7 +135,7 @@ jobs:
           sudo apt-get install --yes clang llvm cmake ninja-build
 
       - name: Download the pinned cjdoc binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: m7-033-cjdoc-${{ github.sha }}
           path: ${{ runner.temp }}/cjdoc-archive
@@ -150,71 +150,10 @@ jobs:
           binary="$install_dir/bin/cjdoc"
           chmod +x "$binary"
           test -x "$binary"
-
-      - name: Install the cjdoc-compatible runtime toolchain
-        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
-        with:
-          channel: nightly
-          version: 1.1.0-alpha.20260414010024
-
-      - name: Create an isolated cjdoc launcher
-        shell: bash
-        run: |
-          set -euo pipefail
-          install_dir="$RUNNER_TEMP/cjdoc"
-          binary="$install_dir/bin/cjdoc"
-          compat_home="$CANGJIE_HOME"
-          wrapper="$install_dir/cjdoc-wrapper"
-          cat > "$wrapper" <<EOF
-          #!/usr/bin/env bash
-          set -euo pipefail
-          export CANGJIE_HOME="$compat_home"
-          export LD_LIBRARY_PATH="$compat_home/runtime/lib/linux_x86_64_cjnative:$compat_home/tools/lib\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}"
-          export PATH="$compat_home/bin:$compat_home/tools/bin:\$PATH"
-          exec "$binary" "\$@"
-          EOF
-          chmod +x "$wrapper"
-          test -x "$wrapper"
-          "$wrapper" --version
-          echo "CJDOC_BIN=$wrapper" >> "$GITHUB_ENV"
-
-      - name: Restore the resolved Cangjie toolchain
-        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
-        with:
-          channel: nightly
-          version: ${{ steps.cangjie-nightly.outputs.version }}
-
-      - name: Normalize the resolved Cangjie toolchain environment
-        shell: bash
-        run: |
-          set -euo pipefail
-          latest_home="$CANGJIE_HOME"
-          test -x "$latest_home/bin/cjc"
-          test -x "$latest_home/tools/bin/cjpm"
-          echo "CANGJIE_HOME=$latest_home" >> "$GITHUB_ENV"
-          echo "PATH=$latest_home/bin:$latest_home/tools/bin:$PATH" >> "$GITHUB_ENV"
-          echo "LD_LIBRARY_PATH=$latest_home/runtime/lib/linux_x86_64_cjnative:$latest_home/tools/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" >> "$GITHUB_ENV"
-
-      - name: Select the project-compatible Cangjie toolchain for the consumer
-        uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
-        with:
-          channel: nightly
-          version: 1.1.0-alpha.20260414010024
-
-      - name: Normalize the project-compatible Cangjie environment
-        shell: bash
-        run: |
-          set -euo pipefail
-          project_home="$CANGJIE_HOME"
-          test -x "$project_home/bin/cjc"
-          test -x "$project_home/tools/bin/cjpm"
-          echo "CANGJIE_HOME=$project_home" >> "$GITHUB_ENV"
-          echo "PATH=$project_home/bin:$project_home/tools/bin:$PATH" >> "$GITHUB_ENV"
-          echo "LD_LIBRARY_PATH=$project_home/runtime/lib/linux_x86_64_cjnative:$project_home/tools/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" >> "$GITHUB_ENV"
+          "$binary" --version
+          echo "CJDOC_BIN=$binary" >> "$GITHUB_ENV"
 
       - name: Run the strict documentation and coverage gate
-        env:
-          CJDOC_BIN: ${{ runner.temp }}/cjdoc/cjdoc-wrapper
         run: scripts/check-docs --html --json
 
       - name: Materialize native dependencies for the clean consumer
@@ -227,7 +166,7 @@ jobs:
 
       - name: Upload documentation evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: m7-033-docs-${{ github.sha }}
           if-no-files-found: error
@@ -237,15 +176,27 @@ jobs:
 
       - name: Upload the Pages artifact
         if: success()
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: target/doc/html
+
+  report-docs-status:
+    if: ${{ always() }}
+    needs: [build-cjdoc, generate]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Require documentation prerequisites to succeed
+        env:
+          CJDOC_RESULT: ${{ needs.build-cjdoc.result }}
+          DOCS_RESULT: ${{ needs.generate.result }}
+        run: test "$CJDOC_RESULT" = success && test "$DOCS_RESULT" = success
 
   deploy:
     name: Deploy latest main documentation
     if: >-
-      github.event_name == 'push' &&
-      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+      github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: generate
     runs-on: ubuntu-24.04
     permissions:
@@ -256,25 +207,69 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Download the generated Pages evidence
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: m7-033-docs-${{ github.sha }}
           path: ${{ runner.temp }}/m7-033-docs
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
 
       - name: Smoke-test root, API page and search index
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
-          set -euo pipefail
-          root="${PAGE_URL%/}/"
-          curl --fail --silent --show-error --location --max-time 10 "$root" >/dev/null
-          curl --fail --silent --show-error --location --max-time 10 "${root}index.html" >/dev/null
-          curl --fail --silent --show-error --location --max-time 10 "${root}search-index.js" >/dev/null
-          api_path=$(jq -r '[.combined.htmlPages[] | select(startswith("packages/"))][0] // empty' \
-            "$RUNNER_TEMP/m7-033-docs/docs/evidence/M7-033/docs-report.json")
-          test -n "$api_path"
-          curl --fail --silent --show-error --location --max-time 10 "${root}${api_path}" >/dev/null
+          python3 - <<'PY'
+          from datetime import datetime, timezone
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          root = os.environ["PAGE_URL"].rstrip("/") + "/"
+          temporary_root = Path(os.environ["RUNNER_TEMP"])
+          docs = json.loads((temporary_root / "m7-033-docs/docs/evidence/M7-033/docs-report.json").read_text(encoding="utf-8"))
+          api_path = next(path for path in docs["combined"]["htmlPages"] if path.startswith("packages/"))
+          checks = []
+          for path in ("", "index.html", "search-index.js", api_path):
+              result = subprocess.run(
+                  ["curl", "--fail", "--silent", "--show-error", "--location",
+                   "--max-time", "10", "--output", "/dev/null", "--write-out",
+                   "%{http_code}", root + path],
+                  check=True, stdout=subprocess.PIPE, text=True,
+              )
+              status = int(result.stdout)
+              if status != 200:
+                  raise SystemExit(f"unexpected HTTP status {status}: {root + path}")
+              checks.append({"path": "/" + path, "http_status": status})
+          report = {
+              "schema_version": 1,
+              "kind": "github-pages-smoke",
+              "status": "PASS",
+              "source_task": "M7-033",
+              "acceptance_status": "PASS",
+              "revision": os.environ["GITHUB_SHA"],
+              "workflow": {
+                  "run_id": int(os.environ["GITHUB_RUN_ID"]),
+                  "run_attempt": int(os.environ["GITHUB_RUN_ATTEMPT"]),
+                  "event": os.environ["GITHUB_EVENT_NAME"],
+                  "head_sha": os.environ["GITHUB_SHA"],
+              },
+              "page_url": root,
+              "checks": checks,
+              "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+          }
+          output = temporary_root / "m7-033-pages-smoke.json"
+          temporary = output.with_suffix(".tmp")
+          temporary.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+          temporary.replace(output)
+          PY
+
+      - name: Upload revision-bound Pages smoke evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: m7-033-pages-smoke-${{ github.sha }}
+          if-no-files-found: error
+          path: ${{ runner.temp }}/m7-033-pages-smoke.json

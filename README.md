@@ -48,10 +48,10 @@ Transport、Resolver、Connector、TLS、HTTP/1.1 与 HTTP/2 包已经包含 Lin
 
 ## 本地验证
 
-已验证工具链：
+当前 CI 和干净 consumer 已验证的工具链：
 
 ```text
-Cangjie Compiler: 1.1.0-alpha.20260817040003 (cjnative)
+Cangjie Compiler: 1.1.3 (cjnative)
 Cangjie Project Manager: 1.1.3
 ```
 
@@ -80,7 +80,8 @@ SDK 归档、解压后的工具链和 `target/` 构建产物都不进入仓库�
 - [CJPM 包布局 ADR](docs/architecture/adr/0001-cjpm-package-layout.md)
 - [采纳与发布门禁](docs/gates/README.md)
 - [任务证据约定](docs/evidence/README.md)
-- [SDK 检查记录](docs/references/cangjie-sdk-1.1.0-alpha.20260817040003.md)
+- [当前 CI 工具链版本与归档摘要](docs/references/m7-033-ci-toolchain.json)
+- [历史 SDK 检查记录](docs/references/cangjie-sdk-1.1.0-alpha.20260817040003.md)
 - [Codex/Agent 仓库规则](AGENTS.md)
 
 ## 当前执行点

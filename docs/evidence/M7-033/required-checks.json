@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 1,
+  "source_task": "M7-033",
+  "status": "PASS",
+  "repository": "lIlIIlIll/Wirestack",
+  "ref": "refs/heads/main",
+  "observedAtUtc": "2026-09-10T04:18:07.924352+00:00",
+  "rulesets": [
+    {
+      "id": 21787899,
+      "name": "Wirestack main clean Cangjie gate",
+      "enforcement": "active",
+      "target": "branch",
+      "conditions": {
+        "ref_name": {
+          "exclude": [],
+          "include": [
+            "~DEFAULT_BRANCH"
+          ]
+        }
+      },
+      "rules": [
+        {
+          "type": "deletion"
+        },
+        {
+          "type": "non_fast_forward"
+        },
+        {
+          "type": "required_status_checks",
+          "parameters": {
+            "strict_required_status_checks_policy": true,
+            "do_not_enforce_on_create": true,
+            "required_status_checks": [
+              {
+                "context": "clean-cangjie-build"
+              }
+            ]
+          }
+        }
+      ],
+      "bypass_actors": []
+    },
+    {
+      "id": 22713825,
+      "name": "main",
+      "enforcement": "active",
+      "target": "branch",
+      "conditions": {
+        "ref_name": {
+          "exclude": [],
+          "include": [
+            "refs/heads/main"
+          ]
+        }
+      },
+      "rules": [
+        {
+          "type": "deletion"
+        },
+        {
+          "type": "non_fast_forward"
+        },
+        {
+          "type": "required_linear_history"
+        },
+        {
+          "type": "pull_request",
+          "parameters": {
+            "required_approving_review_count": 0,
+            "dismiss_stale_reviews_on_push": false,
+            "required_reviewers": [],
+            "require_code_owner_review": false,
+            "require_last_push_approval": false,
+            "required_review_thread_resolution": true,
+            "require_extra_approval_for_unattributed_changes": true,
+            "allowed_merge_methods": [
+              "merge",
+              "squash",
+              "rebase"
+            ]
+          }
+        },
+        {
+          "type": "required_status_checks",
+          "parameters": {
+            "strict_required_status_checks_policy": true,
+            "do_not_enforce_on_create": false,
+            "required_status_checks": [
+              {
+                "context": "Deploy latest main documentation",
+                "integration_id": 15368
+              },
+              {
+                "context": "report-build-status",
+                "integration_id": 15368
+              },
+              {
+                "context": "report-docs-status",
+                "integration_id": 15368
+              }
+            ]
+          }
+        },
+        {
+          "type": "code_scanning",
+          "parameters": {
+            "code_scanning_tools": [
+              {
+                "tool": "CodeQL",
+                "security_alerts_threshold": "high_or_higher",
+                "alerts_threshold": "errors"
+              }
+            ]
+          }
+        }
+      ],
+      "bypass_actors": []
+    }
+  ],
+  "requiredChecks": [
+    {
+      "context": "clean-cangjie-build"
+    },
+    {
+      "context": "Deploy latest main documentation",
+      "integration_id": 15368
+    },
+    {
+      "context": "report-build-status",
+      "integration_id": 15368
+    },
+    {
+      "context": "report-docs-status",
+      "integration_id": 15368
+    }
+  ],
+  "policyChangesMade": true,
+  "authorizedPolicyChange": {
+    "removedRules": [
+      {
+        "type": "code_quality",
+        "parameters": {
+          "severity": "errors"
+        }
+      },
+      {
+        "type": "code_coverage",
+        "parameters": {
+          "minimum_coverage": 90,
+          "max_coverage_drop": 80
+        }
+      }
+    ],
+    "reason": "User explicitly requested removal of GitHub Code Quality and its dependent built-in coverage gate after authenticated GET and PATCH setup returned HTTP 404: Code quality is not available for this repository.",
+    "retainedRulesVerified": true,
+    "bypassUsed": false
+  },
+  "codeQL": {
+    "setup": {
+      "state": "configured",
+      "languages": [
+        "actions",
+        "c-cpp",
+        "python"
+      ],
+      "query_suite": "default",
+      "threat_model": "remote",
+      "updated_at": "2026-09-10T03:20:33Z",
+      "schedule": "weekly",
+      "runner_type": "standard",
+      "runner_label": ""
+    },
+    "validationRun": "https://github.com/lIlIIlIll/Wirestack/actions/runs/34432863129",
+    "validationConclusion": "success",
+    "scope": "GitHub Actions, C/C++, and Python. Cangjie is not supported by CodeQL."
+  },
+  "effectiveMainRules": [
+    {
+      "type": "deletion",
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 21787899
+    },
+    {
+      "type": "non_fast_forward",
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 21787899
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": true,
+        "do_not_enforce_on_create": true,
+        "required_status_checks": [
+          {
+            "context": "clean-cangjie-build"
+          }
+        ]
+      },
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 21787899
+    },
+    {
+      "type": "deletion",
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 22713825
+    },
+    {
+      "type": "non_fast_forward",
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 22713825
+    },
+    {
+      "type": "required_linear_history",
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 22713825
+    },
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 0,
+        "dismiss_stale_reviews_on_push": false,
+        "required_reviewers": [],
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": true,
+        "require_extra_approval_for_unattributed_changes": true,
+        "allowed_merge_methods": [
+          "merge",
+          "squash",
+          "rebase"
+        ]
+      },
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 22713825
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": true,
+        "do_not_enforce_on_create": false,
+        "required_status_checks": [
+          {
+            "context": "Deploy latest main documentation",
+            "integration_id": 15368
+          },
+          {
+            "context": "report-build-status",
+            "integration_id": 15368
+          },
+          {
+            "context": "report-docs-status",
+            "integration_id": 15368
+          }
+        ]
+      },
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 22713825
+    },
+    {
+      "type": "code_scanning",
+      "parameters": {
+        "code_scanning_tools": [
+          {
+            "tool": "CodeQL",
+            "security_alerts_threshold": "high_or_higher",
+            "alerts_threshold": "errors"
+          }
+        ]
+      },
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 22713825
+    }
+  ],
+  "documentationGateRepair": {
+    "requiredCheck": {
+      "context": "report-docs-status",
+      "integration_id": 15368
+    },
+    "reviewComment": "https://github.com/lIlIIlIll/Wirestack/pull/155#discussion_r3975363829",
+    "reason": "A skipped deployment job cannot prove that PR documentation prerequisites succeeded; the always-running reporter requires both build and generation success."
+  }
+}
