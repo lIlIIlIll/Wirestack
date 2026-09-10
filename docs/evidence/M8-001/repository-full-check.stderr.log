@@ -273,6 +273,7 @@ test_unknown_doc_ir_schema_is_rejected (test_m7_033_docs.M7033DocsTests.test_unk
 test_version_mismatch_is_blocked_without_parsing_exception_text (test_m7_033_docs.M7033DocsTests.test_version_mismatch_is_blocked_without_parsing_exception_text) ... ok
 test_linux_dependencies_exclude_global_and_upstream_blockers (test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_linux_dependencies_exclude_global_and_upstream_blockers) ... ok
 test_linux_graph_has_the_exact_frozen_task_set (test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_linux_graph_has_the_exact_frozen_task_set) ... ok
+test_task_counts_include_linux_profile_and_formal_follow_up_work (test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_task_counts_include_linux_profile_and_formal_follow_up_work) ... ok
 test_task_graph_has_fail_closed_audit_and_release_edges (test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_task_graph_has_fail_closed_audit_and_release_edges) ... ok
 test_release_validators_are_strict_by_default (test_p1_013_development_release_gate.P1013DevelopmentReleaseGateTests.test_release_validators_are_strict_by_default) ... ok
 test_strict_modes_reject_the_same_stale_records (test_p1_013_development_release_gate.P1013DevelopmentReleaseGateTests.test_strict_modes_reject_the_same_stale_records) ... ok
@@ -416,7 +417,7 @@ test_third_party_comparison_source_rejected (test_validate_tls_provider_matrix.T
 test_unknown_schema_fails_closed (test_validate_tls_provider_matrix.Tests.test_unknown_schema_fails_closed) ... ok
 
 ----------------------------------------------------------------------
-Ran 412 tests in 10.576s
+Ran 413 tests in 5.736s
 
 OK
 test_classification_detects_sustained_starvation (test_dns_carrier_thread.DnsCarrierThreadTests.test_classification_detects_sustained_starvation) ... ok
@@ -599,7 +600,7 @@ test_resource_trend_checks_every_resource_class (test_sse_streaming_profile.Test
 test_short_runs_cannot_be_formal (test_sse_streaming_profile.Tests.test_short_runs_cannot_be_formal) ... ok
 
 ----------------------------------------------------------------------
-Ran 178 tests in 5.348s
+Ran 178 tests in 3.361s
 
 OK
 test_baseline_threshold_is_ninety_percent (test_http1_benchmark.Http1BenchmarkTest.test_baseline_threshold_is_ninety_percent) ... ok
@@ -628,7 +629,7 @@ test_parses_exact_wirestack_marker (test_m3_028_tls.M3028TlsGateTest.test_parses
 test_rejects_duplicate_or_wrong_marker (test_m3_028_tls.M3028TlsGateTest.test_rejects_duplicate_or_wrong_marker) ... ok
 
 ----------------------------------------------------------------------
-Ran 24 tests in 0.006s
+Ran 24 tests in 0.004s
 
 OK
 [33mwarning[0m: unused function:'waitUntilWriteActive'

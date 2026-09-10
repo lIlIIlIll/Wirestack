@@ -266,7 +266,7 @@
     "successful_retry": {
       "status": "PASS",
       "duration_ms": 328287.84,
-      "report": "docs/evidence/M8-001/docs-command.json"
+      "report": "https://github.com/lIlIIlIll/Wirestack/blob/15ddee5c7404d01af92590d2e2405a6363e13f28/docs/evidence/M8-001/docs-command.json"
     }
   }
 }

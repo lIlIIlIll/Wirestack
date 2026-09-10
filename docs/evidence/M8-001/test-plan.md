@@ -39,6 +39,8 @@ cases are carried forward to their owning task and remain NOT_RUN here:
 | S013 | Mutated DNS headers and malformed length/count/flags | NOT_RUN; M8-004 |
 | S014 | Warning-contaminated, fictitious or source-mismatched candidate revision | PASS; 33/33 tooling cases and real CLI rejection without seal output |
 | S015 | Unix pathname contains NUL but abstract name legitimately contains it | PASS; shared endpoint/error regressions |
+| S016 | Published task totals disagree with declared unique task IDs | PASS; corrupted total rejected, unchanged graph passes 4/4; expected counts are derived |
+| S017 | Exact read reaches EOF before filling the destination | PASS; 22/22 network cases and native TCP truncation retain captured endpoints |
 
 ## Test-plan matrix
 
@@ -46,8 +48,8 @@ cases are carried forward to their owning task and remain NOT_RUN here:
 |---|---|---|---|
 | T001 | P001,P004 | `python3 tools/architecture_guard.py --format json` and public API inventory | PASS |
 | T002 | P001,P002,P003,P004,P005,P006,P007 | `cjpm check` and `cjpm build` | PASS |
-| T003 | P002,P003,P004,P005,P006,S005,S006,S011 | `cjpm test src/net --no-progress --no-color` | PASS; 19/19, no native datagram I/O claim |
-| T004 | S001,S002,S003,S004,S014 | Repository-tooling, architecture guard and API/backlog regression tests | PASS |
+| T003 | P002,P003,P004,P005,P006,S005,S006,S011,S017 | `cjpm test src/net --no-progress --no-color` | PASS; 22/22; no native datagram I/O claim |
+| T004 | S001,S002,S003,S004,S014,S016 | Repository-tooling, architecture guard and API/backlog regression tests | PASS; count invariant rejects stale metadata without fixed numeric expectations |
 | T005 | P006,S005 | Datagram result upper-bound and receive-buffer reuse regressions | PASS |
 | T006 | S007,S008,S009,S010,S012,S013 | M8-002, M8-003, M8-004, M8-005 and M8-006 task gates | NOT_RUN; owned by later tasks |
 | T007 | P007,S015 | Shared endpoint/error regressions through canonical `scripts/check` | PASS; 4 selected error cases and all 83 transport cases in the canonical gate |
