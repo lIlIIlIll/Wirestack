@@ -1,5 +1,10 @@
 # M7-033 evidence
 
+Current repair status: **IN_PROGRESS**. Local checks and PR builds pass, but the
+repaired workflow has not yet deployed from main. The task index is **BLOCKED**
+until a new Pages smoke report is bound to a published merge revision. The older
+Pages report below is historical evidence, not acceptance of this repair.
+
 M7-033 为 Linux x86_64 glibc 开发者文档与 cjdoc 门禁任务。实现内容包括：
 
 - `docs/guides/getting-started-linux.md` 入门路径和公开 API 使用说明；
@@ -69,3 +74,6 @@ The active main ruleset also requires `report-build-status`. The clean-build
 workflow now reports that context only after checking both cjdoc and Wirestack
 build results. Failure, cancellation or a skipped prerequisite fails the report;
 the branch rules are unchanged.
+
+[`required-checks.json`](required-checks.json) preserves the observed active main
+rulesets, including the required `report-build-status` context.
