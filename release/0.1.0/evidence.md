@@ -36,11 +36,11 @@ run conclusion=`success`。
 | Public API migration review | **BLOCKING** | `release/public-cangjie-delta-bfd29.toml` 仍有 `pending-migration-review` 组；发布图仍为 `migration` |
 | Local Linux fresh candidate | PASS | 当前候选的本地 registry rehearsal 完成；`576/576` root tests，九包暂存、构建和 consumer 检查通过 |
 | Hosted PR CI | PASS | run `34494604326` conclusion=`success`；Seven-library evidence drift、registry rehearsal、Pure Windows/macOS、Coverage 和 CI Required 均通过 |
-| Hosted main CI / Pages | PASS | run [`34506441534`](https://github.com/lIlIIlIll/yjson/actions/runs/34506441534) passed all 28 jobs; [`Deploy API Documentation`](https://github.com/lIlIIlIll/yjson/actions/runs/34506441534/job/102972446294) completed its `Deploy GitHub Pages` step; site [`liliilill.github.io/yjson`](https://liliilill.github.io/yjson/); `github-pages` artifact digest `sha256:a454b4519cc9cf5e311e301035681a18324ce73811dd3e5c2e7d1cf74b9ddbfa` |
+| Hosted main CI / Pages | PASS | run [`34511955542`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542) passed all 28 jobs; [`Deploy API Documentation`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542/job/102990740002) completed its `Deploy GitHub Pages` step; site [`liliilill.github.io/yjson`](https://liliilill.github.io/yjson/); `github-pages` artifact digest `sha256:a454b4519cc9cf5e311e301035681a18324ce73811dd3e5c2e7d1cf74b9ddbfa` |
 | Coverage | PASS | project line `8508/10345=82.2%`、branch `3722/5262=70.7%`；changed core line `26/26=100.0%`、branch `16/16=100.0%`；hosted Core Coverage 成功 |
 | Source-only staging | PASS | `stage_source_tree` 复制 `358` 个文件并通过 `--check`；`release_temp_tree --enforce-clean` 复制 `290` 个文件并通过 |
 | Package rehearsal | PASS | 九包独立暂存、构建、registry-style consumer 和导出检查成功；最终 release assets 尚未生成 |
-| Seven-library matrix | PASS (candidate) / MAIN RECHECK PASS | `current-main.json` binds `2758853`; two batches are `770/770` complete, candidate strict validation passes, and post-merge main run `34506441534` passes after squash-safe closure validation |
+| Seven-library matrix | PASS (candidate) / MAIN RECHECK PASS | `current-main.json` binds `2758853`; two batches are `770/770` complete, candidate strict validation passes, and post-merge main run `34511955542` passes after squash-safe closure validation |
 | Three-library release performance | **BLOCKING** | 旧 b0 两批仍为 noisy；当前候选的完整 36-workload 证据尚未按当前提交重跑 |
 | Pure baseline/candidate qualification | **BLOCKING** | 正式 runner 的四个 `yjsonDocument*` case 与当前 benchmark 源码漂移；target-only A/B 仍因 CV 超过 5% 而 exit `1`，不能作资格证据 |
 | Native acceleration | PASS (functional) / REVALIDATE (performance) | 当前 fresh custom-native 通过；旧 native performance 资格绑定 b0，不作为当前候选的性能证据 |
@@ -135,7 +135,7 @@ Three-library performance qualification: BLOCKING (full current-candidate matrix
 Pure baseline/candidate qualification: BLOCKING (runner drift and noisy target-only A/B)
 Native acceleration: PASS functionally; performance qualification must be revalidated
 Public API migration review: BLOCKING
-Hosted main execution and Pages: PASS (run 34506441534; all 28 jobs passed)
+Hosted main execution and Pages: PASS (run 34511955542; all 28 jobs passed)
 Coverage: PASS (project 82.2%/70.7%; changed core 100.0%/100.0%)
 Release decision: BLOCKED; no tag, GitHub Release, or registry publication
 ```
