@@ -1,0 +1,80 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 23297446 ns, RESULT:
+    TCS: NinthNativeOwnershipProbe, time elapsed: 2054037 ns, RESULT:
+    [ FAILED ] CASE: nativeGracefulOwnerIsNotRelabeledWhileItsWrapperReturns (481845 ns)
+    Expect Failed: ninthProbeState(stream.state) != "Closing"
+        ninthProbeState(stream.state): "Aborted"
+                            "Closing": "Closing"
+
+    Expect Failed: ninthProbeState(stream.state) != "Closed"
+        ninthProbeState(stream.state): "Aborted"
+                             "Closed": "Clo·sed"
+                                        !!=-!==
+
+    STDOUT:
+    NATIVE_GRACEFUL_OWNER_AFTER_ABORT=Aborted
+    NATIVE_GRACEFUL_FINAL=Aborted
+    [ FAILED ] CASE: realTerminalCloseIgnoresStoppedContexts (446718 ns)
+    Expect Failed: `(! rejected == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! rejected == true)`
+       left: false
+      right: true
+
+    STDOUT:
+    TERMINAL_CLOSE_REJECTED=NetworkException: TCP stream close cancelled
+    TERMINAL_CLOSE_REJECTED=NetworkException: TCP stream close deadline exceeded
+    TCS: NetworkFoundationContractTest, time elapsed: 21049208 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (130037 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (36897 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (77793 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (54107 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (107760 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (35007 ns)
+    [ PASSED ] CASE: tcpStreamStoppedCloseContextsFailBeforeLifecycleAdmission (114732 ns)
+    [ PASSED ] CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership (74971 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (135373 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (91193 ns)
+    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (107575 ns)
+    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (108504 ns)
+    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (42046 ns)
+    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (59455 ns)
+    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (33800 ns)
+    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (90713 ns)
+    [ PASSED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (172729 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (120670 ns)
+    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (79772 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (137456 ns)
+    [ PASSED ] CASE: tcpStreamRetainsNativeCancellationOwnership (11443145 ns)
+    [ PASSED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (176650 ns)
+    [ PASSED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (148431 ns)
+    [ PASSED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (98742 ns)
+    [ PASSED ] CASE: tcpStreamAbortWinsWhileGracefulCloseIsBlocked (32469 ns)
+    [ PASSED ] CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful (87858 ns)
+    [ PASSED ] CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful (55726 ns)
+    [ PASSED ] CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation (91321 ns)
+    [ PASSED ] CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate (97675 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (49320 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (67592 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (2396678 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (16446 ns)
+Summary: TOTAL: 35
+    PASSED: 33, SKIPPED: 0, ERROR: 0
+    FAILED: 2, listed below:
+            TCS: NinthNativeOwnershipProbe, CASE: nativeGracefulOwnerIsNotRelabeledWhileItsWrapperReturns
+            TCS: NinthNativeOwnershipProbe, CASE: realTerminalCloseIgnoresStoppedContexts
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 31515620 ns, RESULT:
+TP: wirestack.*, time elapsed: 31453035 ns, RESULT:
+    FAILED:
+    TP: wirestack.net, time elapsed: 23297446 ns, RESULT:
+        TCS: NinthNativeOwnershipProbe, time elapsed: 2054037 ns, RESULT:
+        [ FAILED ] CASE: nativeGracefulOwnerIsNotRelabeledWhileItsWrapperReturns (481845 ns)
+        [ FAILED ] CASE: realTerminalCloseIgnoresStoppedContexts (446718 ns)
+        TCS: NetworkFoundationContractTest, time elapsed: 21049208 ns, RESULT:
+Summary: TOTAL: 35
+    PASSED: 33, SKIPPED: 0, ERROR: 0
+    FAILED: 2
+--------------------------------------------------------------------------------------------------

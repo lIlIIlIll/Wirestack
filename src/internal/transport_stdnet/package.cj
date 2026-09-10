@@ -6,6 +6,7 @@ import std.time.MonoTime
 import std.convert.Parsable
 import wirestack.internal.common.*
 import wirestack.internal.transport.*
+import wirestack.NetworkEndpoint
 
 private const DEFAULT_STAGING_BUFFER_SIZE: Int64 = 16 * 1024
 private const MAX_LISTENER_BACKLOG: Int64 = 65535
@@ -51,7 +52,7 @@ public class StdNetTransportFactory <: TransportFactory {
  * the socket, which is the only public operation proven to wake blocked I/O in
  * the pinned SDK. The adapter never reads or caches a private native handle.
  */
-public class StdNetTransport <: DuplexTransport {
+public class StdNetTransport <: SocketTransport {
     private let socket: TcpSocket
     private let stagingBufferSize: Int64
     private let lifecycleMutex = Mutex()
@@ -94,6 +95,9 @@ public class StdNetTransport <: DuplexTransport {
             NetworkPhase.TcpConnect,
             remoteEndpoint: Some(endpoint)
         )
+        if (stagingBufferSize <= 0) {
+            throw IllegalArgumentException("stagingBufferSize must be positive")
+        }
         let socket = TcpSocket(toStdEndpoint(endpoint))
         let transport = StdNetTransport(
             socket,
@@ -105,7 +109,9 @@ public class StdNetTransport <: DuplexTransport {
             transport.connectSocket(context)
             transport
         } catch (error: Exception) {
-            transport.abort(reason: Some(AbortReason.ApplicationAbort))
+            try {
+                transport.abort(reason: Some(AbortReason.ApplicationAbort))
+            } catch (_: Exception) {}
             throw error
         }
     }
@@ -310,8 +316,8 @@ public class StdNetTransport <: DuplexTransport {
             NetworkErrorCode.Unsupported,
             "this transport adapter does not support directional TCP shutdown",
             retryability: Retryability.Never,
-            localEndpoint: localEndpoint,
-            remoteEndpoint: remoteEndpoint
+            localEndpoint: internetEndpoint(localEndpoint),
+            remoteEndpoint: internetEndpoint(remoteEndpoint)
         )
     }
 
@@ -358,6 +364,10 @@ public class StdNetTransport <: DuplexTransport {
 
     public func isClosed(): Bool {
         synchronized(lifecycleMutex) { closed || aborted }
+    }
+
+    public func wasClosedByAbort(): Bool {
+        synchronized(lifecycleMutex) { aborted }
     }
 
     private func connectSocket(context: OperationContext): Unit {
@@ -615,8 +625,8 @@ public class StdNetTransport <: DuplexTransport {
             NetworkErrorCode.SystemFailure,
             "std.net socket operation failed without a public native error code",
             retryability: Retryability.Unknown,
-            localEndpoint: localEndpoint,
-            remoteEndpoint: remoteEndpoint,
+            localEndpoint: internetEndpoint(localEndpoint),
+            remoteEndpoint: internetEndpoint(remoteEndpoint),
             cause: Some(error)
         )
     }
@@ -766,7 +776,7 @@ public class StdNetTransportListener <: TransportListener {
                         NetworkErrorCode.SystemFailure,
                         "std.net accept failed without a public native error code",
                         retryability: Retryability.Unknown,
-                        localEndpoint: Some(localEndpoint),
+                        localEndpoint: Some(NetworkEndpoint.Internet(localEndpoint)),
                         cause: Some(error)
                     )
                 }
@@ -902,7 +912,7 @@ private func toStdEndpoint(endpoint: SocketEndpoint): IPSocketAddress {
                             NetworkErrorCode.Unsupported,
                             "std.net accepts numeric IPv6 scope IDs; interface-name zones require an upstream mapping API",
                             retryability: Retryability.Never,
-                            remoteEndpoint: Some(endpoint)
+                            remoteEndpoint: Some(NetworkEndpoint.Internet(endpoint))
                         )
                     }
                 case None => None<UInt32>
@@ -955,8 +965,8 @@ private func cancelled(
         NetworkErrorCode.Cancelled,
         "operation cancelled",
         retryability: Retryability.Never,
-        localEndpoint: localEndpoint,
-        remoteEndpoint: remoteEndpoint,
+        localEndpoint: internetEndpoint(localEndpoint),
+        remoteEndpoint: internetEndpoint(remoteEndpoint),
         cause: cause
     )
 }
@@ -974,8 +984,8 @@ private func deadlineExceeded(
         NetworkErrorCode.TimedOut,
         "operation deadline exceeded",
         retryability: Retryability.Temporary,
-        localEndpoint: localEndpoint,
-        remoteEndpoint: remoteEndpoint,
+        localEndpoint: internetEndpoint(localEndpoint),
+        remoteEndpoint: internetEndpoint(remoteEndpoint),
         cause: cause
     )
 }
@@ -993,8 +1003,8 @@ private func timedOut(
         NetworkErrorCode.TimedOut,
         "std.net operation timed out",
         retryability: Retryability.Temporary,
-        localEndpoint: localEndpoint,
-        remoteEndpoint: remoteEndpoint,
+        localEndpoint: internetEndpoint(localEndpoint),
+        remoteEndpoint: internetEndpoint(remoteEndpoint),
         cause: Some(cause)
     )
 }
@@ -1011,8 +1021,8 @@ internal func writeTimedOut(
         NetworkErrorCode.TimedOut,
         "std.net write timed out with unknown physical commit state",
         retryability: Retryability.Never,
-        localEndpoint: localEndpoint,
-        remoteEndpoint: remoteEndpoint,
+        localEndpoint: internetEndpoint(localEndpoint),
+        remoteEndpoint: internetEndpoint(remoteEndpoint),
         cause: Some(cause)
     )
 }
@@ -1030,8 +1040,15 @@ private func closedError(
         NetworkErrorCode.Closed,
         "transport is closed",
         retryability: Retryability.Never,
-        localEndpoint: localEndpoint,
-        remoteEndpoint: remoteEndpoint,
+        localEndpoint: internetEndpoint(localEndpoint),
+        remoteEndpoint: internetEndpoint(remoteEndpoint),
         cause: cause
     )
+}
+
+private func internetEndpoint(endpoint: ?SocketEndpoint): ?NetworkEndpoint {
+    match (endpoint) {
+        case Some(value) => Some(NetworkEndpoint.Internet(value))
+        case None => None<NetworkEndpoint>
+    }
 }

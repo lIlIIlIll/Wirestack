@@ -1,0 +1,40 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 4247569 ns, RESULT:
+    TCS: NetworkFoundationContractTest, time elapsed: 4247569 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (249328 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (42128 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (39445 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (100761 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (21210 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (70836 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (39728 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (49167 ns)
+    [ PASSED ] CASE: tcpStreamAbortWinsWhileGracefulCloseIsBlocked (50181 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (40545 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (67061 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1517744 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (13505 ns)
+    [ FAILED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (56556 ns)
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+Summary: TOTAL: 14
+    PASSED: 13, SKIPPED: 0, ERROR: 0
+    FAILED: 1, listed below:
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 12685069 ns, RESULT:
+TP: wirestack.*, time elapsed: 12591355 ns, RESULT:
+    FAILED:
+    TP: wirestack.net, time elapsed: 4247569 ns, RESULT:
+        TCS: NetworkFoundationContractTest, time elapsed: 4247569 ns, RESULT:
+        [ FAILED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (56556 ns)
+Summary: TOTAL: 14
+    PASSED: 13, SKIPPED: 0, ERROR: 0
+    FAILED: 1
+--------------------------------------------------------------------------------------------------

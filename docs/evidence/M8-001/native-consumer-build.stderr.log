@@ -1,0 +1,63 @@
+[33mwarning[0m: unused function:'waitUntilWriteActive'
+   [36m==>[0m /tmp/wirestack-m8-001-clean-publication-2rvq39zo/src/internal/transport_stdnet/package.cj:516:5:
+    [36m| [0m
+[36m516[0m [36m| [0m      internal func waitUntilWriteActive(timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m517[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m529[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'waitUntilAcceptActive'
+   [36m==>[0m /tmp/wirestack-m8-001-clean-publication-2rvq39zo/src/internal/transport_stdnet/package.cj:817:5:
+    [36m| [0m
+[36m817[0m [36m| [0m      func waitUntilAcceptActive(timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m818[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m826[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+2 warnings generated, 2 warnings printed.
+[33mwarning[0m: unused function:'guideTcpExample'
+  [36m==>[0m /tmp/wirestack-m8-001-connect-exhaustion-l10s_duc/src/guide_examples.cj:6:1:
+   [36m| [0m
+[36m6[0m  [36m| [0m  func guideTcpExample(): Int64 {[0m
+   [36m| [0m [33m_[0m[33m^[0m
+[36m7[0m  [36m| [0m[33m|[0m     let address = api.IpAddress(api.IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8])[0m
+   [36m| [0m[33m|[0m ...[0m
+[36m19[0m [36m| [0m[33m|[0m }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m^ unused function[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+[33mwarning[0m: unused function:'forwardOneDatagram'
+  [36m==>[0m /tmp/wirestack-m8-001-connect-exhaustion-l10s_duc/src/guide_examples.cj:21:1:
+   [36m| [0m
+[36m21[0m [36m| [0m  func forwardOneDatagram([0m
+   [36m| [0m [33m_[0m[33m^[0m
+[36m22[0m [36m| [0m[33m|[0m     socket: DatagramSocket,[0m
+   [36m| [0m[33m|[0m ...[0m
+[36m31[0m [36m| [0m[33m|[0m }[0m
+   [36m| [0m[33m|[0m[33m_[0m[33m^ unused function[0m
+   [36m| [0m
+   [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+2 warnings generated, 2 warnings printed.
+[33mwarning[0m: unused function:'waitUntilWaiters'
+   [36m==>[0m /tmp/wirestack-m8-001-clean-publication-2rvq39zo/src/internal/http1/connection_pool.cj:374:5:
+    [36m| [0m
+[36m374[0m [36m| [0m      internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {[0m
+    [36m| [0m [33m_[0m[33m____^[0m
+[36m375[0m [36m| [0m[33m|[0m         let expiresAt = MonoTime.now() + timeout[0m
+    [36m| [0m[33m|[0m ...[0m
+[36m384[0m [36m| [0m[33m|[0m     }[0m
+    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+    [36m| [0m
+    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.

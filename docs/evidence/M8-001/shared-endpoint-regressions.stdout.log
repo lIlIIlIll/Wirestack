@@ -1,0 +1,20 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport, time elapsed: 14053708 ns, RESULT:
+    TCS: NetworkErrorTest, time elapsed: 2763935 ns, RESULT:
+    [ PASSED ] CASE: retainsStableClassificationAndEndpointEvidence (411182 ns)
+    [ PASSED ] CASE: retainsLocalEndpointCauseAndOptionalDefaults (412754 ns)
+    [ PASSED ] CASE: caughtErrorRetainsUnixEndpointBytesNativeCodeAndCause (253762 ns)
+    [ PASSED ] CASE: pathnameRejectsNulWhileAbstractRetainsIt (65013 ns)
+Summary: TOTAL: 83
+    PASSED: 4, SKIPPED: 79, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 18211809 ns, RESULT:
+TP: wirestack.*, time elapsed: 18025204 ns, RESULT:
+    PASSED:
+    TP: wirestack.internal.transport, time elapsed: 14053708 ns
+Summary: TOTAL: 83
+    PASSED: 4, SKIPPED: 79, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

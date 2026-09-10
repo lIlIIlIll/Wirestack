@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-001",
+  "status": "PASS",
+  "generated_at_utc": "2026-09-10T11:48:36.583251+00:00",
+  "baseline_revision": "f8e8dbca3006a45ab7859373436f82c35eda3eb9",
+  "regressions": {
+    "command": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--no-progress",
+      "--no-color"
+    ],
+    "before": {
+      "exit_code": 1,
+      "total": 26,
+      "passed": 23,
+      "failed": 3
+    },
+    "after": {
+      "exit_code": 0,
+      "total": 27,
+      "passed": 27,
+      "failed": 0
+    },
+    "additional_native_case": "tcpStreamRetainsNativeCancellationOwnership",
+    "logs": {
+      "seventh-before-stdout": {
+        "path": "docs/evidence/M8-001/seventh-before.stdout.log",
+        "sha256": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5cbbbb17ae34247f954d65557d2aee26ff29b4a6af208420081286166a3277de"
+        }
+      },
+      "seventh-before-stderr": {
+        "path": "docs/evidence/M8-001/seventh-before.stderr.log",
+        "sha256": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9e15c8cfb0c81ba165c2af7b6f80db62a75fe1884c8609c34f50558a13fb94e4"
+        }
+      },
+      "seventh-after-stdout": {
+        "path": "docs/evidence/M8-001/seventh-after.stdout.log",
+        "sha256": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f749f7983253c26c53b491b7a801a33b07d488f1afccafa4f650f5eb1a7c8ffe"
+        }
+      },
+      "seventh-after-stderr": {
+        "path": "docs/evidence/M8-001/seventh-after.stderr.log",
+        "sha256": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  },
+  "audited_exception_boundaries": [
+    "TcpStream.connect",
+    "TcpStream.read",
+    "TcpStream.readSome",
+    "TcpStream.readExact",
+    "TcpStream.write",
+    "TcpStream.writeSome",
+    "TcpStream.writeAll",
+    "TcpStream.shutdown",
+    "TcpStream.close",
+    "TcpStream.abort"
+  ],
+  "ownership_cases": [
+    "admitted precancelled read overlaps graceful close",
+    "admitted precancelled write overlaps graceful close",
+    "cancellation-owned close observed by graceful close before the cancelled result",
+    "cancellation-owned close observed by another operation as Closed before the cancelled result",
+    "real native blocked read cancelled after read admission"
+  ],
+  "descriptor_exhaustion": {
+    "status": "PASS",
+    "method": "Warm the external consumer and std.net runtime; set only the supervised consumer process RLIMIT_NOFILE soft limit to zero; release its connect gate. No SDK or constructor source injection.",
+    "build_argv": [
+      "cjpm",
+      "build"
+    ],
+    "source": "package wirestack_m8_001_consumer\n\nimport wirestack.net.*\nimport wirestack as api\n\nmain(): Int64 {\n    println(\"BOOT\")\n    let _ = readln()\n    let endpoint = api.SocketEndpoint(\n        api.IpAddress(api.IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8]), 9u16)\n    try {\n        let warm = TcpStream.connect(endpoint, context: api.OperationContext(\n            deadline: Some(api.Deadline.after(200 * Duration.millisecond))))\n        warm.close()\n    } catch (_: Exception) {}\n    println(\"READY\")\n    let _ = readln()\n    try {\n        let stream = TcpStream.connect(endpoint, context: api.OperationContext(\n            deadline: Some(api.Deadline.after(Duration.second))))\n        stream.close()\n        println(\"UNEXPECTED_CONNECT_SUCCESS\")\n        return 2\n    } catch (error: api.NetworkException) {\n        let classification = match ((error.category, error.phase, error.code)) {\n            case (api.NetworkErrorCategory.Connect, api.NetworkPhase.TcpConnect,\n                api.NetworkErrorCode.SystemFailure) => true\n            case _ => false\n        }\n        let peer = match (error.remoteEndpoint) {\n            case Some(api.NetworkEndpoint.Internet(value)) => value.port == 9u16\n            case _ => false\n        }\n        if (!classification || !peer || error.cause.isNone()) {\n            println(\"INCOMPLETE_CONNECT_DIAGNOSTICS\")\n            return 3\n        }\n        println(\"MAPPED_CONSTRUCTION_FAILURE\")\n        return 0\n    } catch (error: Exception) {\n        println(\"UNMAPPED_CONSTRUCTION_FAILURE: ${error.toString()}\")\n        return 42\n    }\n}\n",
+    "soft_limit": 0,
+    "hard_limit": 524288,
+    "before": {
+      "exit_code": 42,
+      "output": "BOOT\nwarm\nREADY\ngo\nUNMAPPED_CONSTRUCTION_FAILURE: SocketException: Failed to create socket 24: Too many open files.\n[m8-001-fd-exhaustion: failed; cursor=121]"
+    },
+    "after": {
+      "exit_code": 0,
+      "output": "BOOT\nwarm\nREADY\ngo\nMAPPED_CONSTRUCTION_FAILURE\n"
+    },
+    "assertions": [
+      "NetworkErrorCategory.Connect",
+      "NetworkPhase.TcpConnect",
+      "NetworkErrorCode.SystemFailure",
+      "remote Internet endpoint port 9",
+      "original SDK exception retained as cause"
+    ]
+  },
+  "other_lifecycle_repairs": [
+    "Invalid staging size is rejected before allocating the native socket.",
+    "Connect cleanup cannot replace the primary connection error.",
+    "The forwarding-only ContractStreamBackend allocation was removed; the adapter directly implements the required ownership contract."
+  ],
+  "limitations": [
+    "Abort and generic I/O failure injection is deterministic; no native OS close failure is claimed.",
+    "Descriptor exhaustion was exercised only on Linux x86_64 glibc."
+  ]
+}
