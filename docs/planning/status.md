@@ -195,4 +195,4 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 
 | Task | Status | Evidence | Notes |
 |---|---|---|---|
-| M8-001 | COMPLETE | [`docs/evidence/M8-001/README.md`](../evidence/M8-001/README.md) | Both review rounds qualified: distinct lifecycle states, approved shared Internet/Unix error endpoints, NUL rejection, explicit raw protocol and clean revision provenance. Network 13/13; canonical check 603 passed/23 excluded; inventory 260 declarations/103 aliases; API docs 1093 symbols/430 parameters. Native TCP consumer sent `hello`; Unix error helper executed; datagram caller compile-checked only. |
+| M8-001 | COMPLETE | [`docs/evidence/M8-001/README.md`](../evidence/M8-001/README.md) | All review corrections qualified, including cancellation retaining Aborted after delegate closure. Approved shared Internet/Unix error endpoints, NUL rejection, explicit raw protocol and clean revision provenance. Network 14/14; canonical check 604 passed/23 excluded; inventory 260 declarations/103 aliases; API docs 1093 symbols/430 parameters. Real TCP and Unix error consumer passed; datagram caller compile-checked only. |

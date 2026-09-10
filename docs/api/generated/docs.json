@@ -125018,14 +125018,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 625,
+          "line": 627,
           "column": 5,
-          "byteOffset": 23112
+          "byteOffset": 23229
         },
         "end": {
-          "line": 628,
+          "line": 630,
           "column": 6,
-          "byteOffset": 23309
+          "byteOffset": 23426
         }
       },
       "headerSpelling": "public init(bytes: Array<Byte>)",
@@ -125128,14 +125128,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 630,
+          "line": 632,
           "column": 5,
-          "byteOffset": 23372
+          "byteOffset": 23489
         },
         "end": {
-          "line": 630,
+          "line": 632,
           "column": 55,
-          "byteOffset": 23422
+          "byteOffset": 23539
         }
       },
       "headerSpelling": "public func bytes(): Array<Byte>",
@@ -125206,14 +125206,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 621,
+          "line": 623,
           "column": 5,
-          "byteOffset": 22963
+          "byteOffset": 23080
         },
         "end": {
-          "line": 621,
+          "line": 623,
           "column": 35,
-          "byteOffset": 22993
+          "byteOffset": 23110
         }
       },
       "headerSpelling": "private let value: Array<Byte>",
@@ -125270,14 +125270,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 641,
+          "line": 643,
           "column": 5,
-          "byteOffset": 23708
+          "byteOffset": 23825
         },
         "end": {
-          "line": 641,
+          "line": 643,
           "column": 22,
-          "byteOffset": 23725
+          "byteOffset": 23842
         }
       },
       "headerSpelling": "private init()",
@@ -125457,14 +125457,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 651,
+          "line": 653,
           "column": 5,
-          "byteOffset": 24095
+          "byteOffset": 24212
         },
         "end": {
-          "line": 664,
+          "line": 666,
           "column": 6,
-          "byteOffset": 24588
+          "byteOffset": 24705
         }
       },
       "headerSpelling": "public static func open(\n        domain: RawSocketDomain,\n        protocolValue: RawSocketProtocol\n    ): RawSocket",
@@ -125560,14 +125560,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 593,
+          "line": 595,
           "column": 5,
-          "byteOffset": 21931
+          "byteOffset": 22048
         },
         "end": {
-          "line": 593,
+          "line": 595,
           "column": 11,
-          "byteOffset": 21937
+          "byteOffset": 22054
         }
       },
       "headerSpelling": "| Ipv4",
@@ -125650,14 +125650,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 595,
+          "line": 597,
           "column": 5,
-          "byteOffset": 21973
+          "byteOffset": 22090
         },
         "end": {
-          "line": 595,
+          "line": 597,
           "column": 11,
-          "byteOffset": 21979
+          "byteOffset": 22096
         }
       },
       "headerSpelling": "| Ipv6",
@@ -125740,14 +125740,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 599,
+          "line": 601,
           "column": 5,
-          "byteOffset": 22124
+          "byteOffset": 22241
         },
         "end": {
-          "line": 599,
+          "line": 601,
           "column": 14,
-          "byteOffset": 22133
+          "byteOffset": 22250
         }
       },
       "headerSpelling": "| Netlink",
@@ -125830,14 +125830,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 597,
+          "line": 599,
           "column": 5,
-          "byteOffset": 22047
+          "byteOffset": 22164
         },
         "end": {
-          "line": 597,
+          "line": 599,
           "column": 13,
-          "byteOffset": 22055
+          "byteOffset": 22172
         }
       },
       "headerSpelling": "| Packet",
@@ -125943,14 +125943,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 609,
+          "line": 611,
           "column": 5,
-          "byteOffset": 22416
+          "byteOffset": 22533
         },
         "end": {
-          "line": 612,
+          "line": 614,
           "column": 6,
-          "byteOffset": 22596
+          "byteOffset": 22713
         }
       },
       "headerSpelling": "public init(number: Int32)",
@@ -126050,14 +126050,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 614,
+          "line": 616,
           "column": 5,
-          "byteOffset": 22651
+          "byteOffset": 22768
         },
         "end": {
-          "line": 614,
+          "line": 616,
           "column": 74,
-          "byteOffset": 22720
+          "byteOffset": 22837
         }
       },
       "headerSpelling": "public static func icmp(): RawSocketProtocol",
@@ -126158,14 +126158,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 616,
+          "line": 618,
           "column": 5,
-          "byteOffset": 22775
+          "byteOffset": 22892
         },
         "end": {
-          "line": 616,
+          "line": 618,
           "column": 77,
-          "byteOffset": 22847
+          "byteOffset": 22964
         }
       },
       "headerSpelling": "public static func icmpv6(): RawSocketProtocol",
@@ -126266,14 +126266,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 605,
+          "line": 607,
           "column": 5,
-          "byteOffset": 22252
+          "byteOffset": 22369
         },
         "end": {
-          "line": 605,
+          "line": 607,
           "column": 29,
-          "byteOffset": 22276
+          "byteOffset": 22393
         }
       },
       "headerSpelling": "public let number: Int32",
@@ -132456,14 +132456,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 568,
+          "line": 570,
           "column": 5,
-          "byteOffset": 21007
+          "byteOffset": 21124
         },
         "end": {
-          "line": 587,
+          "line": 589,
           "column": 6,
-          "byteOffset": 21779
+          "byteOffset": 21896
         }
       },
       "headerSpelling": "private func recordFailure(allowClosing!: Bool = false): Unit",
@@ -132559,9 +132559,9 @@
           "byteOffset": 20582
         },
         "end": {
-          "line": 566,
+          "line": 568,
           "column": 6,
-          "byteOffset": 21001
+          "byteOffset": 21118
         }
       },
       "headerSpelling": "private func recordNetworkFailure(error: api.NetworkException): Unit",
@@ -135144,14 +135144,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 640,
+          "line": 642,
           "column": 1,
-          "byteOffset": 23679
+          "byteOffset": 23796
         },
         "end": {
-          "line": 665,
+          "line": 667,
           "column": 2,
-          "byteOffset": 24590
+          "byteOffset": 24707
         }
       },
       "headerSpelling": "public class RawSocket",
@@ -135271,9 +135271,9 @@
           "byteOffset": 10289
         },
         "end": {
-          "line": 588,
+          "line": 590,
           "column": 2,
-          "byteOffset": 21781
+          "byteOffset": 21898
         }
       },
       "headerSpelling": "public class TcpStream <: StreamSocket & api.DuplexTransport",
@@ -135363,14 +135363,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 591,
+          "line": 593,
           "column": 1,
-          "byteOffset": 21866
+          "byteOffset": 21983
         },
         "end": {
-          "line": 600,
+          "line": 602,
           "column": 2,
-          "byteOffset": 22135
+          "byteOffset": 22252
         }
       },
       "headerSpelling": "public enum RawSocketDomain",
@@ -136123,14 +136123,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 620,
+          "line": 622,
           "column": 1,
-          "byteOffset": 22932
+          "byteOffset": 23049
         },
         "end": {
-          "line": 631,
+          "line": 633,
           "column": 2,
-          "byteOffset": 23424
+          "byteOffset": 23541
         }
       },
       "headerSpelling": "public struct RawAddress",
@@ -136214,14 +136214,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 603,
+          "line": 605,
           "column": 1,
-          "byteOffset": 22174
+          "byteOffset": 22291
         },
         "end": {
-          "line": 617,
+          "line": 619,
           "column": 2,
-          "byteOffset": 22849
+          "byteOffset": 22966
         }
       },
       "headerSpelling": "public struct RawSocketProtocol",

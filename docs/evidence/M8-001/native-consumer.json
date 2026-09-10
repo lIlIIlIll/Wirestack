@@ -2,14 +2,14 @@
   "schema_version": 1,
   "source_task": "M8-001",
   "status": "PASS",
-  "generated_at_utc": "2026-09-10T07:27:23.558483+00:00",
+  "generated_at_utc": "2026-09-10T08:07:59.864728+00:00",
   "platform": "linux-x86_64-glibc",
   "consumer_manifest": "[package]\n  cjc-version = \"1.1.3\"\n  name = \"wirestack_m8_001_consumer\"\n  version = \"1.0.0\"\n  src-dir = \"src\"\n  output-type = \"executable\"\n\n[dependencies]\n  wirestack = { path = \"/home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909\" }\n",
   "consumer_source": "package wirestack_m8_001_consumer\n\nimport wirestack.net.*\nimport wirestack as api\n\nmain(): Int64 {\n    let failure = api.NetworkException(api.NetworkErrorCategory.Connect,\n        api.NetworkPhase.UnixSocket, api.NetworkErrorCode.ConnectRefused,\n        \"consumer endpoint contract\",\n        remoteEndpoint: Some(api.NetworkEndpoint.Unix(\n            api.UnixEndpoint.abstractName([0u8, 255u8, 1u8]))))\n    match (unixPeer(failure)) {\n        case Some(peer) =>\n            let bytes = peer.nameBytes()\n            if (bytes.size != 3 || bytes[0] != 0u8 || bytes[1] != 255u8 || bytes[2] != 1u8) {\n                throw IllegalStateException(\"Unix error endpoint bytes changed\")\n            }\n        case None => throw IllegalStateException(\"Unix error endpoint was lost\")\n    }\n    let address = api.IpAddress(api.IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8])\n    let endpoint = api.SocketEndpoint(address, 8080u16)\n    let context = api.OperationContext(\n        deadline: Some(api.Deadline.after(5 * Duration.second)))\n    let stream = TcpStream.connect(endpoint, context: context)\n    try {\n        let payload = api.ByteSpan(\"hello\".toArray())\n        stream.writeAll(payload, context: context)\n    } finally {\n        stream.close(context: context)\n    }\n    0\n}\n\nfunc forwardOneDatagram(\n    socket: DatagramSocket,\n    target: api.NetworkEndpoint,\n    context: api.OperationContext\n): Int64 {\n    let received = socket.receive(65507, context: context)\n    if (received.truncated) {\n        throw IllegalStateException(\"refusing to forward a truncated datagram\")\n    }\n    socket.sendTo(target, api.ByteSpan(received.payload), context: context)\n}\n\nfunc unixPeer(error: api.NetworkException): ?api.UnixEndpoint {\n    match (error.remoteEndpoint) {\n        case Some(api.NetworkEndpoint.Unix(endpoint)) => Some(endpoint)\n        case _ => None<api.UnixEndpoint>\n    }\n}\n",
   "guide": "docs/guides/network-foundation-linux.md",
   "guide_sha256": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "1e9bb3ef41bfeaaaf738dfb46f924c8485bd0a8b51480058cc4fabf2ac31e290"
+    "sha256": "ebb43f151514df780b66c9d14d05059680c646fdd3a5a2dc19467775652e9c4c"
   },
   "guide_example_count": 3,
   "build": {
@@ -26,7 +26,7 @@
     "stderr_path": "docs/evidence/M8-001/native-consumer-build.stderr.log",
     "stderr_sha256": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "d8714dcc7845ce4bc41d262c3a836105abd8c56af0090af953e83da127917827"
+      "sha256": "103e9856b92ff8f6cd52ebe62bddb46c626f7fb959c6e2458828a3b75b3e67f6"
     }
   },
   "run": {
