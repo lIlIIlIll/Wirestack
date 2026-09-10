@@ -1,6 +1,6 @@
 {
-  "acceptance_status": "BLOCKED",
-  "generated_at_utc": "2026-09-10T09:31:04.612594Z",
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-09-10T10:11:14.311407Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,7 +13,7 @@
       "path": "docs/evidence/M8-001/plan-validation.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "1b6e9941434a416a918814c64f0b85b88e027143b1044ed13c8f65e1f9d17fcc"
+        "sha256": "f0806f9aafe2f7f8127f1acd84533f9fa89b35debc27dd53a05abbc5cafac91e"
       },
       "source_task": "M8-001"
     },
@@ -22,7 +22,7 @@
       "path": "docs/evidence/M8-001/architecture-guard.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "11a19c6223cbf355bef7e0c2644da159cd6e737c6ad0888a543501f3973ed88d"
+        "sha256": "264b58cd12a02760d2c04534083b3fc7f03325c5cb5b005ff3e1f1e035e1ca4c"
       },
       "source_task": "M8-001"
     },
@@ -31,7 +31,7 @@
       "path": "docs/evidence/M8-001/task-validation.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "9a5eda4e555659de095908f0bb4ef8ffc0f8f2772d08478b7a4aa12ec24802af"
+        "sha256": "696a1c08ceb81fe3dfdbc33dcb587ef3b574f7e43ef69933b54cc48c4170d29f"
       },
       "source_task": "M8-001"
     },
@@ -40,7 +40,7 @@
       "path": "docs/evidence/M8-001/python-tests.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "e40bf8734f7c58310333034aceef91e2736667aeea6de0eb9cb53384dd450612"
+        "sha256": "0759d1d243df89758c26b4b97561ea006ef63769a00046a22cb794b1a9c3bd70"
       },
       "source_task": "M8-001"
     },
@@ -49,7 +49,7 @@
       "path": "docs/evidence/M8-001/cangjie-build.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "6554f412606d660084a2213cb80abeadc5fda9025508c38d6c40f7ad45747d35"
+        "sha256": "57194d305311b998de20eeb649124af7d46823259e0a8dd2e872bcc3e94889ca"
       },
       "source_task": "M8-001"
     },
@@ -58,7 +58,7 @@
       "path": "docs/evidence/M8-001/network-tests.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "cf23cb82b2405719309f5482374519e48c1a58d0b0801c1341dbb90efa300063"
+        "sha256": "38f125eacca5c03f480ab6123e31110b0de8c0f05f2609d9fb1785a414665383"
       },
       "source_task": "M8-001"
     },
@@ -67,7 +67,7 @@
       "path": "docs/evidence/M8-001/regression-tests.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "2a794c32596214c4c3a67bb29261a5d9583c08619b334e1d4efce398acccbaad"
+        "sha256": "c6caaf6aa96af606b5971450d02b2203ff224618b7d010d66abef87926c356e5"
       },
       "source_task": "M8-001"
     },
@@ -76,7 +76,7 @@
       "path": "docs/evidence/M8-001/api-inventory-command.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "d9159f4eac6f48733c443636142995ee7152ba517fac0b12d034f22b653da0b6"
+        "sha256": "efe99ef0564b2737270d6bcafb3b247b17cdbebf86ca35d520fa9285fc4fdf8f"
       },
       "source_task": "M8-001"
     },
@@ -85,7 +85,7 @@
       "path": "docs/evidence/M8-001/docs-report.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "8ecc7e9ed7319175d64c38c4fd96acb976d8722ae75c04bf38175eaf9a29e38c"
+        "sha256": "9d21371e76b47cb495122914535fd2dd1622eda63a7718127e989cf092ef75f8"
       },
       "source_task": "M8-001"
     },
@@ -94,7 +94,7 @@
       "path": "docs/evidence/M8-001/full-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "e3c3a529f6aa46eb0d5afc36b64519814a7efb59453a97a732446bd9be40f193"
+        "sha256": "f8310c16227092ffc7b5c4cc9f6b0aadf2537c3842349cf79ce9d014d061aa55"
       },
       "source_task": "M8-001"
     },
@@ -103,7 +103,7 @@
       "path": "docs/evidence/M8-001/native-consumer.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "d5f778ca6708e670b6689cd2f4fc77abda39ca370efa323de068dc9677307654"
+        "sha256": "017040e1259dc7677c07249c1e1d5111e1df5943906140f75c45c3ec843038f5"
       },
       "source_task": "M8-001"
     },
@@ -139,7 +139,7 @@
       "path": "docs/evidence/M8-001/task-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "283b63b05626c84c155c4bab530a6046c9951d47ad7a8ce15b8458224000502a"
+        "sha256": "4425faddd7a91f01b5a59dcf82ca261eca65a4b9dc9343083d992ff3928ccc65"
       },
       "source_task": "M8-001"
     },
@@ -148,7 +148,7 @@
       "path": "docs/evidence/M8-001/cangjie-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "5a48eb8437687a29601f7dc208965f2c38ea354e120d7fca3827db4203c42200"
+        "sha256": "882a3a2eb9d5195a64e4d1d8d6099b3bf8e7a3a44635fa7ced644637e633ba82"
       },
       "source_task": "M8-001"
     },
@@ -157,7 +157,7 @@
       "path": "docs/evidence/M8-001/docs-command.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "ae41fbdde34615cf8e23fd36fa3a91150c44c1d4df571412474a72669511a3b2"
+        "sha256": "6b9f2aa58e93f950a526d1861971f4dfc4dae14c84fae1fc05211df8ae834a91"
       },
       "source_task": "M8-001"
     },
@@ -184,12 +184,21 @@
       "path": "docs/evidence/M8-001/review-boundaries.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "5f3e5f864a0dda948b0eb7a1a416d90e841160fd4884d6987c1e7eb088546e7b"
+        "sha256": "75f99da142eff20edfaea98ac00de6ef55cc42325aa2acd52a77965ce62dae23"
+      },
+      "source_task": "M8-001"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-001/review-fifth.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b4ae242146ecba2887e01f2c85ee55f8c17c39e28c75ef782f928ecc53a20a77"
       },
       "source_task": "M8-001"
     }
   ],
-  "revision": "15ddee5c7404d01af92590d2e2405a6363e13f28",
+  "revision": "08f845b01f066930ee188b6e4f388d670dc7a076",
   "schema_version": 2,
   "source_sha256": {
     ".gitignore": {
@@ -214,7 +223,7 @@
     },
     "docs/evidence/M8-001/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "46ac5e206ee7519f85ef4a2a39183b64f67badad2718c159ecf757acedb4906a"
+      "sha256": "65e635070ae09be395745e963adf05bb01e4d0174a45e273e6a79e5cd84c22b8"
     },
     "docs/evidence/M8-001/api-inventory.json": {
       "domain": "text-utf8-lf-v1",
@@ -222,7 +231,7 @@
     },
     "docs/evidence/M8-001/test-plan.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "59ccac0d750f631550ee83f60ae7cda778255c4e68fc04c30c864687a57cf234"
+      "sha256": "2c027409ba27afea44f1893d43044ce1a5a3f3a633d942f28653c37daa37af04"
     },
     "docs/evidence/M8-001/workspace-safety-publication.json": {
       "domain": "text-utf8-lf-v1",
@@ -230,7 +239,7 @@
     },
     "docs/guides/network-foundation-linux.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "5f10e223768f3fbafd5cdf2465efbaf521ccbfcef91676552dbba349a59fd4e7"
+      "sha256": "2430d2d347a033ce4e32aae801aa5abbb6b4cffecfb70fd0203a150c3ba0657e"
     },
     "docs/planning/implementation-backlog.md": {
       "domain": "text-utf8-lf-v1",
@@ -238,7 +247,7 @@
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "0f338695e88298a33678e8659a4eeb21d104736a485b76538ff64fcaa6b2b8ff"
+      "sha256": "1e8ac564515e6a79210560012c27f8a6ca4539ceed202edacaeaeb3e41abf248"
     },
     "docs/product/prd.md": {
       "domain": "text-utf8-lf-v1",
@@ -262,11 +271,11 @@
     },
     "src/net/package.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "f2c63c85fb74eb37c39733dd712e55715359d61e0b84762290d7d5f4e6fce318"
+      "sha256": "57c39c274cbe5af45ddd996752ea9bb42bab32304090a3e5e80f2fbcb13cd9f4"
     },
     "src/net/package_test.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "5a6b71f9a3a293ebed354fa787c08bff44777093f52fe8da6cab2e12b7cff3a5"
+      "sha256": "6a5c81cee9bcf3c28c916754da66775d25183c426d3aa44a04500518d82745bc"
     },
     "src/network_error.cj": {
       "domain": "text-utf8-lf-v1",
@@ -310,7 +319,7 @@
     },
     "tools/tests/test_m7_linux_task_graph.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "310e6c0dd8e022f55908fb133203b51b21e794c0446c5448d324fa9dc406b886"
+      "sha256": "05b162e8fa760070d2a1980204b24ea0d3ce36e9bcbcb1f07d74dfddee99e671"
     }
   },
   "source_task": "M8-001",
