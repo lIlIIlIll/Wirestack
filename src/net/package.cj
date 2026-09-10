@@ -349,8 +349,9 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
                 case api.ReadResult.EndOfStream => ReadResult.EndOfStream
             }
         } catch (error: api.NetworkException) {
-            recordIoNetworkFailure(error, api.ShutdownDirection.Read)
-            throw error
+            let reported = withCapturedEndpointDiagnostics(error)
+            recordIoNetworkFailure(reported, api.ShutdownDirection.Read)
+            throw reported
         } catch (error: Exception) {
             recordFailure()
             throw error
@@ -370,8 +371,9 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
         try {
             delegate.readSome(destination, context: context)
         } catch (error: api.NetworkException) {
-            recordIoNetworkFailure(error, api.ShutdownDirection.Read)
-            throw error
+            let reported = withCapturedEndpointDiagnostics(error)
+            recordIoNetworkFailure(reported, api.ShutdownDirection.Read)
+            throw reported
         } catch (error: Exception) {
             recordFailure()
             throw error
@@ -388,8 +390,9 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
         try {
             delegate.writeSome(source, context: context)
         } catch (error: api.NetworkException) {
-            recordIoNetworkFailure(error, api.ShutdownDirection.Write)
-            throw error
+            let reported = withCapturedEndpointDiagnostics(error)
+            recordIoNetworkFailure(reported, api.ShutdownDirection.Write)
+            throw reported
         } catch (error: Exception) {
             recordFailure()
             throw error
@@ -409,8 +412,9 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
         try {
             delegate.writeSome(source, context: context)
         } catch (error: api.NetworkException) {
-            recordIoNetworkFailure(error, api.ShutdownDirection.Write)
-            throw error
+            let reported = withCapturedEndpointDiagnostics(error)
+            recordIoNetworkFailure(reported, api.ShutdownDirection.Write)
+            throw reported
         } catch (error: Exception) {
             recordFailure()
             throw error
@@ -446,8 +450,9 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
         try {
             api.writeAll(delegate, source, context: context)
         } catch (error: api.NetworkException) {
-            recordIoNetworkFailure(error, api.ShutdownDirection.Write)
-            throw error
+            let reported = withCapturedEndpointDiagnostics(error)
+            recordIoNetworkFailure(reported, api.ShutdownDirection.Write)
+            throw reported
         } catch (error: Exception) {
             recordFailure()
             throw error
@@ -467,9 +472,10 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
             delegate.shutdown(direction)
             recordShutdown(direction)
         } catch (error: api.NetworkException) {
-            recordNetworkFailure(error)
+            let reported = withCapturedEndpointDiagnostics(error)
+            recordNetworkFailure(reported)
             if (delegate.isClosed()) { recordFailure() }
-            throw error
+            throw reported
         } catch (error: Exception) {
             recordFailure()
             throw error
@@ -485,9 +491,22 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
         try {
             delegate.close(context)
             finishClose()
+        } catch (error: api.NetworkException) {
+            let reported = withCapturedEndpointDiagnostics(error)
+            recordFailure(allowClosing: true)
+            throw reported
         } catch (error: Exception) {
             recordFailure(allowClosing: true)
-            throw error
+            throw api.NetworkException(
+                api.NetworkErrorCategory.System,
+                api.NetworkPhase.TransportClose,
+                api.NetworkErrorCode.SystemFailure,
+                "TCP stream close failed",
+                retryability: api.Retryability.Never,
+                localEndpoint: localEndpointValue,
+                remoteEndpoint: remoteEndpointValue,
+                cause: Some(error)
+            )
         }
     }
     /** Closes the stream with a background context for Resource callers. */
@@ -702,7 +721,6 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
                 if (delegate.isClosed()) { let _ = beginAbort() }
             case api.NetworkErrorCode.ConnectionReset |
                  api.NetworkErrorCode.BrokenPipe |
-                 api.NetworkErrorCode.UnexpectedEof |
                  api.NetworkErrorCode.SystemFailure |
                  api.NetworkErrorCode.Closed => recordFailure()
             case _ => ()

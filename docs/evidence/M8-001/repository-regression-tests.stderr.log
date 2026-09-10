@@ -70,6 +70,6 @@ test_task_counts_include_linux_profile_and_formal_follow_up_work (tools.tests.te
 test_task_graph_has_fail_closed_audit_and_release_edges (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_task_graph_has_fail_closed_audit_and_release_edges) ... ok
 
 ----------------------------------------------------------------------
-Ran 70 tests in 0.149s
+Ran 70 tests in 0.153s
 
 OK
