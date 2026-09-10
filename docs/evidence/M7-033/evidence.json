@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-10T02:06:06.920988Z",
+  "generated_at_utc": "2026-09-10T02:20:28.151881Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -22,7 +22,7 @@
       "path": "docs/evidence/M7-033/clean-consumer.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "4a40d948af012adab70da881daefc960e8bd5b5e173283bff23109b411224de5"
+        "sha256": "7152171e1196bd8cfaf66fd37e9958e0ecabafa90d792b715e5b680968c1cf93"
       },
       "source_task": "M7-033"
     },
@@ -54,7 +54,7 @@
       "source_task": "M7-033"
     }
   ],
-  "revision": "55ab33b6768f89dbeb35224514f818b6e5439b9b",
+  "revision": "d41c06d75d2d98a03ed690b19d3f202aa846dc92",
   "schema_version": 2,
   "source_sha256": {
     ".github/workflows/clean-cangjie-build.yml": {
@@ -71,7 +71,7 @@
     },
     "README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "5889816aa55cc525f6671022b5278a6b2910d3d56b49a61edc9d46af73126f9e"
+      "sha256": "6307679c791789b84fdc99d3ce55b550c768f8609cbd18959149dfa46916c43e"
     },
     "docs/api/README.md": {
       "domain": "text-utf8-lf-v1",
@@ -91,7 +91,7 @@
     },
     "docs/guides/getting-started-linux.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "3f4bd64d7ffdc203a781afc9038a413ce20ff81fc91ba929a5064a4bc1f6c64f"
+      "sha256": "d61dcae99fa37a3d9fbb2c2bc797b6fc01e3959713f5bbdf54356761ce85cdf0"
     },
     "docs/planning/implementation-backlog.md": {
       "domain": "text-utf8-lf-v1",
