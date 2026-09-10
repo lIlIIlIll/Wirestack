@@ -50,23 +50,22 @@ run conclusion=`success`。
 
 ## 3. 性能证据
 
-### Deep Nested 修复定向复核
+### 历史：Deep Nested 修复定向复核 (`13a997c`)
 
-候选提交 `13a997c6f5696814e5e860b3d3d39bbfc79d85bc` 将 generated object-name
-解码的紧凑 ASCII 扫描移入 `JsonFastReader.readRawName`，保留转义、控制字符、
-非 ASCII 和非法输入的 checked fallback。回归测试覆盖 String/Bytes、空名称、
-畸形名称和未闭合名称。
+以下结果属于前一候选 `13a997c6f5696814e5e860b3d3d39bbfc79d85bc`：
+该提交将 generated object-name 解码的紧凑 ASCII 扫描移入 `JsonFastReader.readRawName`，
+保留转义、控制字符、非 ASCII 和非法输入的 checked fallback。回归测试覆盖 String/Bytes、
+空名称、畸形名称和未闭合名称。
 
-在本地 Linux x86_64、CPU 8、当前候选源码上，精确筛选
+在本地 Linux x86_64、CPU 8、该历史候选源码上，精确筛选
 `ComprehensiveJsonCompareBenchmarks.yjsonStringDecodeDeepNestedProfiles` 的
 `cjpm bench` 结果为 `86.20 us`，误差 `±10.22 us`、CV `11.9%`，命令 exit `0`。
-同一语料的独立单进程定向测量为：旧候选工作树 `120.5 us`，当前候选工作树
-`75.71 us`。这两项是修复方向的本地证据，不是交替 11 轮的 release
-qualification；受当前主机负载影响，target-only A/B 的 11 轮结果为 baseline
-`129.920 us`、candidate `136.596 us`、CV 分别 `9.58%/9.72%`，enforce exit `1`。
+同一语料的独立单进程定向测量为：旧候选工作树 `120.5 us`，历史候选工作树
+`75.71 us`。这些数字是修复方向的历史本地证据，不是当前 `2758853` 的交替 11 轮
+release qualification；target-only A/B 因 CV 超过 5% 而 exit `1`。
 
-上述数字不能与旧七库报告合并或推导跨主机比例。完整三库/七库矩阵和稳定性
-证据仍必须绑定 `13a997c` 重新生成。
+这些历史数字不能与当前七库报告合并或推导跨主机比例。当前七库矩阵已绑定
+`2758853efe1117c7d2b272abd36cf90de46526f5`；三库完整性能资格仍待按当前候选单独完成。
 
 ### 三库共同 workload
 
