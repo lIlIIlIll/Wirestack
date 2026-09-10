@@ -36,6 +36,8 @@ main(): Int64 {
 ## 生命周期与能力边界
 
 流式 `read`/`write` 可以部分完成；需要完整缓冲区时使用 `readExact`/`writeAll`。
+`readExact` 在缓冲区填满前遇到 EOF 时抛出 `UnexpectedEof`，保留已捕获的本地和远端
+endpoint；已有错误中的 endpoint、分类、phase、重试性、native code 与 cause 不被覆盖。
 `close` 与 `abort` 幂等，EOF、取消、Deadline 和本地关闭保持不同结果。
 成功的单方向 `shutdown` 分别显示 `ReadHalfClosed` 或 `WriteHalfClosed`；不支持的
 shutdown 不改变状态。正常关闭为 `Closed`，主动中止为 `Aborted`，终止性 I/O

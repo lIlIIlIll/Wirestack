@@ -1,0 +1,3 @@
+TRUNCATED_READ_ENDPOINTS_PASS local=45622 remote=8080 partial=78
+
+cjpm run finished

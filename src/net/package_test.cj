@@ -255,6 +255,94 @@ class NetworkFoundationContractTest {
     }
 
     @TestCase
+    func tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof(): Unit {
+        let delegate = NetworkContractTransport(eofAfterFirstRead: true)
+        let stream = TcpStream(delegate)
+        delegate.hideEndpoints()
+        let destination = Array<Byte>(3, repeat: 0u8)
+        var matched = false
+
+        try {
+            stream.readExact(
+                api.MutableByteSpan(destination),
+                context: api.OperationContext.background()
+            )
+        } catch (error: api.NetworkException) {
+            matched = isUnexpectedEofRead(error) &&
+                hasInternetEndpoint(error.localEndpoint, networkTestEndpoint(41001u16)) &&
+                hasInternetEndpoint(error.remoteEndpoint, networkTestEndpoint(41002u16))
+        }
+
+        @Expect(matched)
+        @Expect(destination, [0xA5u8, 0x5Au8, 0u8])
+        expectSocketState(stream.state, SocketState.Failed)
+        @Expect(stream.isClosed())
+    }
+
+    @TestCase
+    func tcpStreamReadKeepsPeerEofGraceful(): Unit {
+        let delegate = NetworkContractTransport(eofAfterFirstRead: true)
+        let stream = TcpStream(delegate)
+        let prefix = Array<Byte>(3, repeat: 0u8)
+        match (stream.read(api.MutableByteSpan(prefix),
+            context: api.OperationContext.background())) {
+            case ReadResult.Data(count) => @Expect(count, 2)
+            case _ => @Fail("expected the deterministic prefix")
+        }
+        match (stream.read(api.MutableByteSpan(Array<Byte>(1, repeat: 0u8)),
+            context: api.OperationContext.background())) {
+            case ReadResult.EndOfStream => ()
+            case _ => @Fail("expected graceful peer EOF")
+        }
+
+        expectSocketState(stream.state, SocketState.Open)
+        @Expect(!stream.isClosed())
+        stream.close()
+    }
+
+    @TestCase
+    func tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata(): Unit {
+        let cause = Exception("deterministic native read cause")
+        let remoteBytes = [0u8, 0xFFu8, 0x2Fu8, 0x00u8, 0x41u8]
+        let remote = UnixEndpoint.abstractName(remoteBytes)
+        remoteBytes[1] = 0x01u8
+        let supplied = api.NetworkException(
+            api.NetworkErrorCategory.Read,
+            api.NetworkPhase.TcpRead,
+            api.NetworkErrorCode.ConnectionReset,
+            "deterministic structured read failure",
+            retryability: api.Retryability.SafeBeforeWrite,
+            nativeCode: Some<Int64>(104),
+            remoteEndpoint: Some(NetworkEndpoint.Unix(remote)),
+            cause: Some<Exception>(cause)
+        )
+        let delegate = NetworkContractTransport(readFailure: Some(supplied))
+        let stream = TcpStream(delegate)
+        delegate.hideEndpoints()
+        var matched = false
+
+        try {
+            stream.readExact(
+                api.MutableByteSpan(Array<Byte>(1, repeat: 0u8)),
+                context: api.OperationContext.background()
+            )
+        } catch (error: api.NetworkException) {
+            matched = hasStructuredReadClassification(error) &&
+                error.nativeCode == Some<Int64>(104) &&
+                error.cause.getOrThrow().toString() == cause.toString() &&
+                hasInternetEndpoint(error.localEndpoint, networkTestEndpoint(41001u16)) &&
+                hasUnixAbstractEndpoint(
+                    error.remoteEndpoint,
+                    [0u8, 0xFFu8, 0x2Fu8, 0x00u8, 0x41u8]
+                )
+        }
+
+        @Expect(matched)
+        expectSocketState(stream.state, SocketState.Failed)
+        @Expect(stream.isClosed())
+    }
+
+    @TestCase
     func tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure(): Unit {
         let readDelegate = NetworkContractTransport(
             supportsHalfClose: true,
@@ -494,6 +582,8 @@ private class NetworkContractTransport <: api.DuplexTransport {
     private var writeShutdown = false
     private let supportsHalfClose: Bool
     private let failRead: Bool
+    private let eofAfterFirstRead: Bool
+    private let readFailure: ?api.NetworkException
     private let cancelRead: Bool
     private let failWrite: Bool
     private let failClose: Bool
@@ -515,6 +605,8 @@ private class NetworkContractTransport <: api.DuplexTransport {
         endpointsVisible!: Bool = true,
         supportsHalfClose!: Bool = false,
         failRead!: Bool = false,
+        eofAfterFirstRead!: Bool = false,
+        readFailure!: ?api.NetworkException = None<api.NetworkException>,
         cancelRead!: Bool = false,
         failWrite!: Bool = false,
         failClose!: Bool = false,
@@ -526,6 +618,8 @@ private class NetworkContractTransport <: api.DuplexTransport {
         this.endpointsVisible = endpointsVisible
         this.supportsHalfClose = supportsHalfClose
         this.failRead = failRead
+        this.eofAfterFirstRead = eofAfterFirstRead
+        this.readFailure = readFailure
         this.cancelRead = cancelRead
         this.failWrite = failWrite
         this.failClose = failClose
@@ -574,6 +668,10 @@ private class NetworkContractTransport <: api.DuplexTransport {
                 closed = true
                 throw cancelledReadFailure()
             }
+            match (readFailure) {
+                case Some(error) => throw error
+                case None => ()
+            }
             if (failRead) { throw deterministicTransportFailure(api.NetworkErrorCategory.Read,
                 api.NetworkPhase.TcpRead) }
             if (blockRead) {
@@ -582,6 +680,9 @@ private class NetworkContractTransport <: api.DuplexTransport {
                 while (!closed && !readShutdown) { changed.wait() }
                 rejectClosedTransport(closed || readShutdown,
                     api.NetworkErrorCategory.Read, api.NetworkPhase.TcpRead)
+            }
+            if (eofAfterFirstRead && readCalls > 1) {
+                return api.ReadResult.EndOfStream
             }
             if (destination.isEmpty()) {
                 return api.ReadResult.Data(0)
@@ -803,6 +904,44 @@ private func isDirectionalClosedError(
     shapeMatches && codeMatches &&
         hasInternetEndpoint(error.localEndpoint, networkTestEndpoint(41001u16)) &&
         hasInternetEndpoint(error.remoteEndpoint, networkTestEndpoint(41002u16))
+}
+
+private func isUnexpectedEofRead(error: api.NetworkException): Bool {
+    match ((error.category, error.phase, error.code, error.retryability)) {
+        case (
+            api.NetworkErrorCategory.Read,
+            api.NetworkPhase.TcpRead,
+            api.NetworkErrorCode.UnexpectedEof,
+            api.Retryability.Never
+        ) => true
+        case _ => false
+    }
+}
+
+private func hasStructuredReadClassification(error: api.NetworkException): Bool {
+    match ((error.category, error.phase, error.code, error.retryability)) {
+        case (
+            api.NetworkErrorCategory.Read,
+            api.NetworkPhase.TcpRead,
+            api.NetworkErrorCode.ConnectionReset,
+            api.Retryability.SafeBeforeWrite
+        ) => true
+        case _ => false
+    }
+}
+
+private func hasUnixAbstractEndpoint(
+    actual: ?NetworkEndpoint,
+    expected: Array<Byte>
+): Bool {
+    match (actual) {
+        case Some(NetworkEndpoint.Unix(endpoint)) =>
+            match (endpoint.kind) {
+                case UnixEndpointKind.Abstract => endpoint.nameBytes() == expected
+                case _ => false
+            }
+        case _ => false
+    }
 }
 
 private func hasInternetEndpoint(

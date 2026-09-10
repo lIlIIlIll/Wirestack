@@ -1,7 +1,7 @@
 # M8-001 evidence
 
-Status: COMPLETE. Linux contract, native consumer, documentation and
-source-bound qualification passed after all four review corrections.
+Status: COMPLETE. Linux contracts, native consumer, documentation and
+source-bound qualification passed after all five review corrections.
 
 ## Scope
 
@@ -62,13 +62,26 @@ documentation generation at 300 seconds. The task now uses the established
 M7-033 documentation timeout of 1,800 seconds; generation and coverage
 requirements are unchanged.
 
+The fifth review restores task-total validation as a derived invariant rather
+than fixed numeric expectations. A corrupted published total passed the former
+three-test suite but fails the restored check; the actual graph passes all four
+tests and agrees with the published 208 release tasks and 229 recorded tasks.
+
+`readExact` now adds missing captured endpoint diagnostics while preserving
+supplied endpoints and structured error fields. The two endpoint regressions
+failed before repair (20 passed, two failed) and the network suite passes 22/22
+afterward. A real TCP peer sent one byte then FIN; the consumer requested two
+bytes and observed `UnexpectedEof` with the partial byte and both captured
+endpoints intact. See [`review-fifth.json`](review-fifth.json) and
+[`native-consumer.json`](native-consumer.json).
+
 ## Acceptance
 
 
 All three task-specific fast commands and all eight task commands passed with
-STS 1.1.3 and pinned cjdoc 0.7.2. `scripts/check` passed 609 Cangjie tests with
+STS 1.1.3 and pinned cjdoc 0.7.2. `scripts/check` passed 612 Cangjie tests with
 23 performance-tagged exclusions, zero errors and zero failures. The network
-contract suite passed 19/19 without skips.
+contract suite passed 22/22 without skips.
 
 The inventory contains 260 declarations and 103 aliases. API documentation
 covers all 1,093 symbols and 430 parameters. All three guide examples compiled;

@@ -13,11 +13,11 @@
   ],
   "status": "PASS",
   "exit_code": 0,
-  "generated_at_utc": "2026-09-10T09:29:58.623509+00:00",
+  "generated_at_utc": "2026-09-10T10:10:23.953251+00:00",
   "stdout_path": "docs/evidence/M8-001/plan-validation.stdout.log",
   "stdout_sha256": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "ad70489cb64a8e292adbe73a82c28aa2289430e8a9244a2f58d010512b234345"
+    "sha256": "e2b40c49d7b9f60203388f5b9d6857c036323039ae141b65105e69ea209abcbe"
   },
   "stderr_path": "docs/evidence/M8-001/plan-validation.stderr.log",
   "stderr_sha256": {

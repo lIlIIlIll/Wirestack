@@ -427,8 +427,9 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
         try {
             api.readExact(delegate, destination, context: context)
         } catch (error: api.NetworkException) {
-            recordIoNetworkFailure(error, api.ShutdownDirection.Read)
-            throw error
+            let reported = withCapturedEndpointDiagnostics(error)
+            recordIoNetworkFailure(reported, api.ShutdownDirection.Read)
+            throw reported
         } catch (error: Exception) {
             recordFailure()
             throw error
@@ -534,6 +535,34 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
                 "TCP stream write direction is closed"
             )
         }
+    }
+
+    private func withCapturedEndpointDiagnostics(
+        error: api.NetworkException
+    ): api.NetworkException {
+        if ((error.localEndpoint.isSome() || localEndpointValue.isNone()) &&
+            (error.remoteEndpoint.isSome() || remoteEndpointValue.isNone())) {
+            return error
+        }
+        let localEndpoint = match (error.localEndpoint) {
+            case Some(value) => Some(value)
+            case None => localEndpointValue
+        }
+        let remoteEndpoint = match (error.remoteEndpoint) {
+            case Some(value) => Some(value)
+            case None => remoteEndpointValue
+        }
+        api.NetworkException(
+            error.category,
+            error.phase,
+            error.code,
+            error.message,
+            retryability: error.retryability,
+            nativeCode: error.nativeCode,
+            localEndpoint: localEndpoint,
+            remoteEndpoint: remoteEndpoint,
+            cause: error.cause
+        )
     }
 
     private func directionClosedError(

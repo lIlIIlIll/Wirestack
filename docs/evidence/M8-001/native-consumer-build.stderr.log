@@ -24,13 +24,13 @@
 
 2 warnings generated, 2 warnings printed.
 [33mwarning[0m: unused function:'forwardOneDatagram'
-  [36m==>[0m /tmp/wirestack-m8-001-bound-consumer-erl6din2/src/main.cj:34:1:
+  [36m==>[0m /tmp/wirestack-m8-001-eof-consumer-ewdy6ujv/src/main.cj:52:1:
    [36m| [0m
-[36m34[0m [36m| [0m  func forwardOneDatagram([0m
+[36m52[0m [36m| [0m  func forwardOneDatagram([0m
    [36m| [0m [33m_[0m[33m^[0m
-[36m35[0m [36m| [0m[33m|[0m     socket: DatagramSocket,[0m
+[36m53[0m [36m| [0m[33m|[0m     socket: DatagramSocket,[0m
    [36m| [0m[33m|[0m ...[0m
-[36m44[0m [36m| [0m[33m|[0m }[0m
+[36m62[0m [36m| [0m[33m|[0m }[0m
    [36m| [0m[33m|[0m[33m_[0m[33m^ unused function[0m
    [36m| [0m
    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
