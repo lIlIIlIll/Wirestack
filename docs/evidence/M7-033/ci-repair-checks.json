@@ -44,13 +44,14 @@
       "command": "scripts/check-task M7-033 --json --output docs/evidence/M7-033/task-check.json",
       "exit_code": 0,
       "result": "PASS",
-      "acceptance_commands": 4
+      "acceptance_commands": 4,
+      "finished_at_utc": "2026-09-10T03:56:07.624193Z"
     },
     {
       "command": "yaml.safe_load and bash -n for both workflows",
       "exit_code": 0,
       "result": "PASS",
-      "shell_steps": 17
+      "shell_steps": 18
     },
     {
       "command": "bash -c <report-build-status run step>",
@@ -150,6 +151,41 @@
       "exit_code": 0,
       "tests": 35,
       "result": "PASS"
+    },
+    {
+      "command": "python3 <exact Pages smoke run script> against a local HTTP fixture",
+      "result": "PASS",
+      "scope": "Workflow script behavior only; not GitHub Pages deployment acceptance",
+      "cases": [
+        {
+          "scenario": "success",
+          "exit_code": 0,
+          "elapsed_seconds": 0.08236,
+          "pass_report_written": true,
+          "stderr": ""
+        },
+        {
+          "scenario": "missing",
+          "exit_code": 1,
+          "elapsed_seconds": 0.062722,
+          "pass_report_written": false,
+          "stderr": "curl: (22) The requested URL returned error: 404\nTraceback (most recent call last):\n  File \"/tmp/wirestack-m7-033-pages-smoke-20260910/smoke.py\", line 13, in <module>\n    result = subprocess.run(\n        [\"curl\", \"--fail\", \"--silent\", \"--show-error\", \"--location\",\n    ...<2 lines>...\n        check=True, stdout=subprocess.PIPE, text=True,\n    )\n  File \"/usr/lib/python3.14/subprocess.py\", line 578, in run\n    raise CalledProcessError(retcode, process.args,\n                             output=stdout, stderr=stderr)\nsubprocess.CalledProcessError: Command '['curl', '--fail', '--silent', '--show-error', '--location', '--max-time', '10', '--output', '/dev/null', '--write-out', '%{http_code}', 'http://127.0.0.1:18333/missing/']' returned non-zero exit status 22.\n"
+        },
+        {
+          "scenario": "empty",
+          "exit_code": 1,
+          "elapsed_seconds": 0.044614,
+          "pass_report_written": false,
+          "stderr": "unexpected HTTP status 204: http://127.0.0.1:18333/empty/\n"
+        },
+        {
+          "scenario": "slow",
+          "exit_code": 1,
+          "elapsed_seconds": 10.066728,
+          "pass_report_written": false,
+          "stderr": "curl: (28) Operation timed out after 10000 milliseconds with 0 bytes received\nTraceback (most recent call last):\n  File \"/tmp/wirestack-m7-033-pages-smoke-20260910/smoke.py\", line 13, in <module>\n    result = subprocess.run(\n        [\"curl\", \"--fail\", \"--silent\", \"--show-error\", \"--location\",\n    ...<2 lines>...\n        check=True, stdout=subprocess.PIPE, text=True,\n    )\n  File \"/usr/lib/python3.14/subprocess.py\", line 578, in run\n    raise CalledProcessError(retcode, process.args,\n                             output=stdout, stderr=stderr)\nsubprocess.CalledProcessError: Command '['curl', '--fail', '--silent', '--show-error', '--location', '--max-time', '10', '--output', '/dev/null', '--write-out', '%{http_code}', 'http://127.0.0.1:18333/slow/']' returned non-zero exit status 28.\n"
+        }
+      ]
     }
   ],
   "regression": {
@@ -163,5 +199,14 @@
     "path": "dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
     "sha256": "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee",
     "purpose": "Frozen M7-030 archive test input, not current-source build evidence"
+  },
+  "discontinued_experiment": {
+    "command": "cjpm test --coverage --target-dir /tmp/wirestack-m7-033-runtime-coverage-20260910/target",
+    "exit_code": 1,
+    "passed": 606,
+    "skipped": 0,
+    "errors": 5,
+    "failed": 0,
+    "note": "This exploratory invocation did not use the canonical --exclude-tags=Performance test selection. It is not acceptance evidence. The user subsequently removed the hosted coverage requirement; no execution coverage percentage was claimed and temporary outputs were removed."
   }
 }
