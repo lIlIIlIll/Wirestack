@@ -34,3 +34,33 @@ API 页面均返回 HTTP 200，精确状态、大小和摘要见 [`pages-smoke.j
 
 未运行：一小时 SSE、86,400 秒 soak 和非 Linux 平台门禁。本任务只声明 Linux x86_64
 glibc 文档证据，不将其泛化为其他平台支持。
+
+## CI toolchain repair
+
+The later main-branch run [34370427590](https://github.com/lIlIIlIll/Wirestack/actions/runs/34370427590)
+failed before compilation because nightly `1.1.0-alpha.20260414010024` was no
+longer available. The historical Pages success above does not cover that run.
+
+Both workflows now select STS `1.1.3` and SDK manager `v0.2.21`. The cjdoc
+source remains pinned to `e966097a3591538fba8990772e2e6c543de86c21`. Building and
+running cjdoc with the same SDK removes the separate compatibility runtime.
+Exact versions and archive digests are recorded in
+[`m7-033-ci-toolchain.json`](../../references/m7-033-ci-toolchain.json).
+
+[`ci-toolchain-native.json`](ci-toolchain-native.json) records the successful
+native SDK and cjdoc build. Hosted results are recorded by the clean-build and
+documentation workflows on the repair's pull request.
+The original M8 worktree is separate from this repair; initial branch and base
+details are in [`ci-workspace-safety.json`](ci-workspace-safety.json).
+
+Native qualification also exposed a provider-build parser defect: Git's stderr
+diagnostic was included in the SHA returned on stdout. The runner now keeps the
+streams separate, prints successful diagnostics, and retains both streams in
+command failures. A real Git regression fails before the change and passes after
+it; adding an untracked file still rejects the provider checkout.
+
+The committed Doc IR and Markdown have also been regenerated from the current
+source comments. The API signatures and coverage JSON are unchanged.
+[`ci-repair-checks.json`](ci-repair-checks.json) records local validation.
+`scripts/check` exited 0 with 588 Cangjie tests passed, 23 skipped and no failures.
+The task gate also passed all four commands, including the clean public consumer.

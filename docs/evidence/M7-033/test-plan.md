@@ -18,6 +18,8 @@ PASS。
 | P008 | Pages 生成、部署或有界 HTTP smoke 失败 | FAIL |
 | P009 | 长任务被 fast/full 隐式执行，或 SKIPPED 被记为 PASS | FAIL |
 | P010 | 源码、工具链或生成输入摘要变化 | STALE |
+| P011 | Successful native tool emits diagnostics on stderr | PASS; metadata remains unchanged |
+| P012 | Provider source has untracked or modified files | FAIL |
 
 ## Semantics and scenario matrix
 
@@ -34,6 +36,8 @@ PASS。
 | S009 | long-running profile appears in fast/full command set | P009 |
 | S010 | source or cjdoc version digest no longer matches evidence | P010 |
 | S011 | Pages artifact/deploy and bounded root/API/search smoke | P008 |
+| S012 | Git emits stderr diagnostics with a pinned clean HEAD and tree | P011 |
+| S013 | The same provider checkout gains an untracked file | P012 |
 
 ## Test-plan matrix
 
@@ -48,5 +52,6 @@ PASS。
 | T007 | S010 | P010 | evidence source/output digest freshness check |
 | T008 | S011 | P008 | CI workflow validation and bounded HTTP smoke contract |
 | T009 | S001,S003 | P001,P003,P004,P005 | exact 0.7.2 layered generation and committed artifact validation |
+| T010 | S012,S013 | P011,P012 | Real Git subprocess regression preserves diagnostics and rejects dirty source |
 
 未运行的一小时 SSE、86,400 秒 soak 和非 Linux 平台门禁不属于本任务验收。
