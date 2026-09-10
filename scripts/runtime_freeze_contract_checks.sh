@@ -10,13 +10,16 @@ for scenario in pure-late generated-reader-late version-mismatch native-conflict
     # printed, hiding the cause. Retry flaky runner toolchain crashes
     # (llc SIGSEGV) while still surfacing the captured output.
     output=""
-    status=0
     for attempt in 1 2 3; do
+        status=0
         output=$(cd "$package" && cjpm run -- "$scenario" 2>&1) || status=$?
         if [[ "$status" -eq 0 ]]; then
             break
         fi
         printf '%s\n' "$output"
+        if [[ "$output" != *"llc"* || "$output" != *"exit code 139"* ]]; then
+            exit "$status"
+        fi
         echo "runtime freeze: attempt $attempt failed for $scenario" >&2
     done
     printf '%s\n' "$output"
