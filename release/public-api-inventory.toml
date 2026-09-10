@@ -155,6 +155,32 @@ source = "src/lib_json_generated_support_v1.cj"
 owner = "GeneratedSupportV1"
 signature = "public static func requireProtocolVersion(expected: Int64): Unit"
 
+[[api.declarations]]
+source = "src/lib_json_generated_support_v1.cj"
+owner = "GeneratedSupportV1"
+signature = "public static func readFastReader(reader: GeneratedSupportV1Reader): JsonFastReader"
+
+[[api]]
+package = "yjson"
+kind = "generated-read-protocol"
+domain = "cangjie"
+symbol = "GeneratedDirectFastReadCodecV1<T>"
+signature = "GeneratedDirectFastReadCodecV1<T>.readFastDirect(reader: JsonFastReader): T"
+stability = "protocol-v1"
+compatibility = "additive direct recursive fast-read bridge"
+contract = "Generated codecs decode nested values directly against JsonFastReader while custom codecs retain the existing semantic and cursor fallbacks."
+consumer = "yjson_macros generated codecs"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "<top-level>"
+signature = "public interface GeneratedDirectFastReadCodecV1<T> <: JsonCodec<T>"
+
+[[api.declarations]]
+source = "src/lib_json_direct_codec.cj"
+owner = "GeneratedDirectFastReadCodecV1"
+signature = "func readFastDirect(reader: JsonFastReader): T"
+
 [[api]]
 package = "yjson"
 kind = "generated-codec-provider"

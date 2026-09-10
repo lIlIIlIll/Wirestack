@@ -195,7 +195,8 @@ case "$job" in
         ;;
     standards-conformance)
         require_cangjie
-        YJSON_TEST_STANDARDS_ORACLE=1 python3 "$repo/scripts/test_ci_candidate_wiring.py" \
+        run_with_dependency_override "$repo/packages/standards_conformance" \
+            env YJSON_TEST_STANDARDS_ORACLE=1 python3 "$repo/scripts/test_ci_candidate_wiring.py" \
             StandardsOracleTests
         mapfile -t override_args < <(dependency_override_args)
         if [[ "${YJSON_STANDARDS_OFFLINE:-}" == "1" ]]; then

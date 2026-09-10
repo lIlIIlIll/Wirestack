@@ -41,6 +41,8 @@ docs/performance/results/2026-08-27-yjson-2.0.0.md
 docs/performance/results/2026-09-05-t9-matrix-bb43321.md
 docs/performance/results/2026-09-05-t9-ab-qualification.md
 docs/performance/results/2026-09-07-main-seven-library.md
+docs/performance/results/2026-09-09-main-seven-library.md
+docs/performance/results/2026-09-10-main-seven-library.md
 docs/migration/pre-1.0-to-1.0.md
 docs/release-checklist.md
 docs/schema.md
@@ -180,6 +182,9 @@ benchmarks/full-seven-library/fixture-preflight-overlay.patch
 benchmarks/results/full-seven-library/current-main.json
 benchmarks/results/full-seven-library/2026-09-07-main-087a82e/README.md
 benchmarks/results/full-seven-library/2026-09-07-main-3df2801/README.md
+benchmarks/results/full-seven-library/2026-09-09-main-987bc8a/README.md
+benchmarks/results/full-seven-library/2026-09-09-main-bddbe6e/README.md
+benchmarks/results/full-seven-library/2026-09-10-main-008e50b/README.md
 release/0.1.0/evidence.md
 benchmarks/cjfast_json/cjfast_comprehensive_bench.cj
 packages/native_accel_benchmarks/build.cj

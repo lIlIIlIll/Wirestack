@@ -1,0 +1,116 @@
+{
+  "artifact_identity": {
+    "cangjieJSON": {
+      "path": "harness/cjjson/target/release/unittest_bin/bench_cjjson",
+      "sha256": "d506938aba55e4310e99f4a625f982db2e174dbbd0459aaa06ab878a22a39a81",
+      "size_bytes": 13075432
+    },
+    "cjfast_json": {
+      "path": "cjfast-json/target/release/unittest_bin/fastjson.bench",
+      "sha256": "128cab5c8723f4a947f74f7ad792527dc6adca8f9226bdd7004dbc8e9255c291",
+      "size_bytes": 14188912
+    },
+    "jackson_fastjson2": {
+      "path": "harness/java/target/json-optimal-bench-1.0.0-all.jar",
+      "sha256": "fb979741f9b308a5bfed6c3b8ab4cdbc1e912214803b732380442fb0afe2d8d8",
+      "size_bytes": 7363499
+    },
+    "json4cj": {
+      "path": "harness/json4cj/target/release/unittest_bin/bench_json4cj",
+      "sha256": "907aac4f232c8e45f86b2960fd466c098609e8571fcfea3d0e321bc126de86b2",
+      "size_bytes": 17078120
+    },
+    "yjson_stdx_json": {
+      "path": "repo/packages/benchmarks/target/release/unittest_bin/yjson_benchmarks",
+      "sha256": "8fd8aa9d4bc9be2195083f4241cd5e334a744c55cf3182fadff4aca7f1d50922",
+      "size_bytes": 17946560
+    }
+  },
+  "effective_harness_manifest": {
+    "cjpm.lock": "7b09643cc3e7107d2a0f09605871366c547525d40221945a60bee8a9a5e3f3b0",
+    "cjpm.toml": "3814815364bc0b40a5c5107269807c7a5c1766bb0054c5329521c4d424fcb259",
+    "native/yjson_compact.c": "13cb2e5a70aad3ac37d4166f22a1419eb9be42b32409d88b560384b916fbb137",
+    "native/yjson_compact.h": "cd93f96989a646999ce49133b26c0aa9e2c6ea7fc535f3eaacceaaa96a704b87",
+    "native/yjson_scanner.c": "a00eb9d1a1b286efe8cce6e7d76641309d30f2f6829a7a660ad1bc075896deac",
+    "native/yjson_scanner.h": "d61ad963e64788776fb10d6daa7f7f3b9ca08ca8d5d4856fd26196f5adad57b3",
+    "packages/benchmarks/build.cj": "d5ce1078b17bb9917bd8174461e9abe1a64af14e8855b7c76e30bd5fdefae595",
+    "packages/benchmarks/cjpm.lock": "7b09643cc3e7107d2a0f09605871366c547525d40221945a60bee8a9a5e3f3b0",
+    "packages/benchmarks/cjpm.toml": "3dcff1119ab8de11348e7c1abba8e1b39989572d1a4e659374968a6bf6e0f8ba",
+    "packages/benchmarks/src/bench_algorithms.cj": "79537c7413339c6a0169272d332e6e19c507f845c58582bbfa62dff4eaaefba4",
+    "packages/benchmarks/src/bench_document_lifecycle.cj": "dffc83d00b3e95395612778c748dfbf5c1247fcad2461e0f3915337207887b99",
+    "packages/benchmarks/src/bench_fastjson2_compare.cj": "1a390abf22607defef45def3c5a66f32a82775bdc16e5291238b012e1c9ed30b",
+    "packages/benchmarks/src/bench_fixtures.cj": "5f82356574f23ec12b6f42fb8f27b3bd5049eb533f4bbc336be6e0da226e414f",
+    "packages/benchmarks/src/bench_json_comprehensive.cj": "5ce2283a3969f9837c77701e12a9684c79eca6c3dcce4aa35e1337a7c1a3a35e",
+    "packages/benchmarks/src/bench_stdx_compare.cj": "a7f4b608970cfd2d8b37b8b25eb38d171c93cd801f9b2b5d3557aa9fd6680e2c",
+    "packages/benchmarks/src/bench_stream_protocol.cj": "abcbdc6e2de73c9554b77417cb3f803a4664a52babf6efbf896290f3edc8d364",
+    "packages/benchmarks/src/bench_t9_throughput.cj": "7d0fb90cf43cc82e21216e6e964e7d4bbd19e72c8e681eccb974e6d201ec16c8",
+    "packages/benchmarks/src/bench_yjson.cj": "18151cd3356fea8f7e08a7b6cae9c5bbf5646a41a37ec20f2a8a4e633d0fa4eb",
+    "packages/yjson_macros/cjpm.lock": "7b09643cc3e7107d2a0f09605871366c547525d40221945a60bee8a9a5e3f3b0",
+    "packages/yjson_macros/cjpm.toml": "c12f52d24942b1a3a917e1f700367b1945ca6762f955a087e3db69e9b0313ecf",
+    "scripts/build_native_scanner.py": "3948bcfc87ef865dc5a64c13cd9e851b47a29588beee081e25e2732e1139b128"
+  },
+  "effective_harness_sha256": "4d5788b785c9b69993f91e78934dcb5e21fca8b9ac2b2a7c6986c115e65e0865",
+  "expected_dirty_paths": [],
+  "measured_commit": "987bc8a764771e8157a5b5c0c45c169f654d0b4f",
+  "measured_overlay_file": "optimal-api-overlay-main.patch",
+  "measured_overlay_sha256": "4f1350b31ab636db4b6b00410d0927f4baf1e52900657ac5f6ae5eb529d0b35d",
+  "measured_tree": "987bc8a764771e8157a5b5c0c45c169f654d0b4f",
+  "product_manifest": {
+    "packages/yjson_macros/src/json_codec.cj": "3ae36947b775c2a31bf2465e6084d79de0399e49af02a39ca43f2c239d78a122",
+    "src/example_support_test.cj": "cf0e9207ef841fc07253d688d0627cd7f0d5a8e155fe9c4d3ed4d4239014eac4",
+    "src/json_audit_contracts_test.cj": "c2ec8086ed8dc7f29464abe15b1ff57e790f03d98a552d90294762e7ad6638f3",
+    "src/json_boundary_test.cj": "8ad6bddf1de0001db257cb3d086ada10fdba6a265141a6bec4d5b37e8ab7db97",
+    "src/json_bulk_path_test.cj": "9c56c7cd2e43f7a668b1eb642281eec91ac2ed8240ca61cc4de1cacceaf5409a",
+    "src/json_compact_document_test.cj": "c42af8c2ee201d766fce17ba501bcee1ef7d2fff87ac978bdc5e7df5bd03733f",
+    "src/json_concurrency_test.cj": "15b3df7168dfe7e9824c3bf8b258c61855b299ea6a360ae5359a405d85e2c535",
+    "src/json_context_path_test.cj": "9050a653d02f785f6f0d8cc81e939d7b8c04818c2840496be5bb8d6c3f53db30",
+    "src/json_coverage_contracts_test.cj": "4a75685031fca43f8bc8c1f27541e82de9e8e839e53bf9613591cf8f14f63353",
+    "src/json_direct_writer_state_test.cj": "19629b37588da79fb1224b43ccadf3298db2078a36e65861cff87ed09f4f0f82",
+    "src/json_document_test.cj": "5b740651de499a226918a6dd6759899fcf9aa73a8647e86bc9893bb5aaedf741",
+    "src/json_memory_test.cj": "3d9bb021230b9094c141d6c2a8b2c900f7a710b306805c35e22371ed9f7f0498",
+    "src/json_parser_compliance_test.cj": "3d66b1444b9ad5715aca0aa1b66f8f50cec34dfc42752aee5f8f412625663750",
+    "src/json_performance_test.cj": "3ae00e6452d9d4030c560e853d686fb9e8a2a3cfd259a1b65496e24d4f77425a",
+    "src/json_reader_test.cj": "2461c10f5b1562bda9d516dd36c4c2195902131432951daa564a4886d8631610",
+    "src/json_regression_test.cj": "af644809d1db80bb5b9205b8d42eec6f40416adacc4e2b3a3c956c42bb0476e8",
+    "src/json_resource_limits_test.cj": "52e49b3ac0014f1611731d57523971bad872e9213410a3f28078805cb131563c",
+    "src/json_semantic_vectors_test.cj": "35c259e2cc80cae7577f888fdd83ee79397ce90c1b2dbe226d4d4ec9986d657e",
+    "src/json_serializer_test.cj": "503e505a3d66ad9b75ae727d743a06b61ad95e52b4e6a389b521f932e69638c4",
+    "src/json_special_cases_test.cj": "905f763a2a3c1e2128db043063b71df3e0c2d829e413efbc6a49ed18942e5de6",
+    "src/json_stream_support_test.cj": "beddd04e32f661fd126ff2baa1b55385b60998d0cd93f600fca54463cebb165c",
+    "src/json_stream_test.cj": "812737410ea2909a1034a3eab9ec24106324f5a931a9d641ef04aca47d87f776",
+    "src/json_temporal_number_fast_test.cj": "28b81eab3fec6a29c4b996424dbcb0d235bae0e8d09de0fc7629fba5cb443e41",
+    "src/lib_json_bind.cj": "a95a533f5946a831021eca29399ee208e024f735a760b42174c961b89f58e660",
+    "src/lib_json_builtin_codecs.cj": "2db478b480ecd2eba6215a716fed83e0aa85bb62c7a25cd9a39f449e41277637",
+    "src/lib_json_compact_document.cj": "6132cb3c5e15d2e9af9979b5ee7197e0e9044b4dca850e0bdbb1b320c07d0c4a",
+    "src/lib_json_direct_codec.cj": "68a00eb7ee7d25d4f6c55b77766dd4dcfbbc33052eb95e131bccd6cd3fa36627",
+    "src/lib_json_direct_reader.cj": "c803a2a062e837861ec313c2197b2125ba22e27e09eda637a67c90c348f8bcf7",
+    "src/lib_json_direct_writer.cj": "46265cb396eca77976f9a1692ee45311437ad38052fb788d19e897a270810270",
+    "src/lib_json_document.cj": "d59dcd2145b43240466f4f50bdf9880ec768b437f5accf93a1f3b595191d8520",
+    "src/lib_json_fast_reader.cj": "673576a0bb834c9f925003fef9d1dcdd4ff2050aec0bbcc9a39552d3705db1ad",
+    "src/lib_json_generated_support_v1.cj": "1a70f738f393b5fc78600e87df5bb7b6f3f3cd057ab5e089184a873b464161d6",
+    "src/lib_json_native_scanner.cj": "d328dcbb63d5aae1b4197a951734377a0723ca000fdce568390c687de1a76d94",
+    "src/lib_json_node_semantics.cj": "b3f1a1f6785c06ea4de31794878c50a6ff58749b9de06379b740cb92b90d1aa3",
+    "src/lib_json_parser.cj": "7db7b779fb4219e532b69f8e6e31db0658b797377f46d5ff2aa41135365e3c13",
+    "src/lib_json_parser_core.cj": "69a82a5d28bad2292b0c7b3784b171e69af5c70eaa08721729f9d3356a0772ba",
+    "src/lib_json_resource_limits.cj": "2b4112735bb17cb8b3d88aec8dc080c994cfdf36896cad5933b00e4722f3f0c4",
+    "src/lib_json_runtime.cj": "2bdbf2fa035d37ee990afab52493febe335cbd536f27c64fac8389719d4a099b",
+    "src/lib_json_stream_parser.cj": "47b934117f5bc29ff19f2ddd70689cd52a82c260e9c549f368737996a8714116",
+    "src/lib_json_stream_support.cj": "e7190cefdd4c588726e5c1afed3738ee7fd6f4bd23dd706be6c57aefb5ef851b",
+    "src/lib_json_stream_tape.cj": "89be5f5956d3798b302b86421fb727ed94dc5d245928744da7e95dbc062397e3",
+    "src/lib_json_stream_writer.cj": "e0d5454b82af106ebb6d25e96fabe4bf10c3a525515cf52f9c3db6b4558aed1c",
+    "src/lib_json_temporal_number_fast.cj": "276f2aab95da26dd5587f4ae446ebcddc11681531bfb4c3c8adf4b64b047a3c0",
+    "src/lib_json_value.cj": "6b98cab6abd87b274717d1e5b3c797d0d83e97ebe2d4f8feb3270bbd64f76e22"
+  },
+  "product_source_sha256": "755467918a8bacee501cc662b7237952d3daf8f7c9291eea7dc32cca2715d7e3",
+  "runner_identity": {
+    "path": "harness/run_full.py",
+    "sha256": "458d2f05bc64e417e6d64919b48681fa38081da2f425465532a2cb703f459444",
+    "size_bytes": 20523
+  },
+  "schema_version": 1,
+  "summarizer_identity": {
+    "path": "harness/summarize_full.py",
+    "sha256": "240063ad94d62bb5eea0d11c9311b0150d6121d2f78310dab298eb43d6526972",
+    "size_bytes": 16142
+  }
+}

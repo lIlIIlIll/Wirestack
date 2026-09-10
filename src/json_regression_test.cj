@@ -326,6 +326,49 @@ class YJsonRegressionTest {
         @Expect(decoded.scores["math"], 95)
         @Expect(decoded.address.zipcode, 518000)
     }
+    @TestCase
+    func genericFastMapReaderPreservesEscapedNamesAndWhitespace(): Unit {
+        let text = "{\"group\\u005f0\" : [ { \"profile_id\" : 7, \"alias\" : \"fast\", \"level\" : 3 } ], " +
+            "\"group_1\" : [{\"profile_id\":8,\"alias\":\"second\",\"level\":4}]}"
+        let codec = JsonCodecs.stringMap(JsonCodecs.arrayList(ProfileRecordJson))
+        let fromString = YJson.fromJson(text, codec: codec)
+        let fromBytes = YJson.fromJson(yJsonRegressionBytes(text), codec: codec)
+        @Expect(fromString["group_0"][0].id, 7)
+        @Expect(fromString["group_0"][0].alias, "fast")
+        @Expect(fromString["group_1"][0].level, 4)
+        @Expect(fromBytes["group_0"][0].id, 7)
+        @Expect(fromBytes["group_1"][0].alias, "second")
+        let leadingZeroError = @AssertThrows[JsonException](
+            YJson.fromJson("{\"profile_id\":01,\"alias\":\"fast\",\"level\":3}", codec: ProfileRecordJson)
+        )
+        @Expect(leadingZeroError.code, "parse_error")
+        let malformedNameError = @AssertThrows[JsonException](
+            YJson.fromJson("{broken:[]}", codec: codec)
+        )
+        @Expect(malformedNameError.code, "parse_error")
+        let emptyNameReader = JsonFastReader("")
+        let emptyNameError = @AssertThrows[JsonException](
+            emptyNameReader.readRawName(true)
+        )
+        @Expect(emptyNameError.code, "parse_error")
+        let unterminatedNameError = @AssertThrows[JsonException](
+            YJson.fromJson("{\"broken:[]", codec: codec)
+        )
+        @Expect(unterminatedNameError.code, "parse_error")
+        let unterminatedNameReader = JsonFastReader("{\"broken")
+        unterminatedNameReader.startRawObject()
+        let directUnterminatedError = @AssertThrows[JsonException](
+            unterminatedNameReader.readRawName(true)
+        )
+        @Expect(directUnterminatedError.code, "parse_error")
+        let fastNameReader = JsonFastReader("{\"fast\":1}")
+        fastNameReader.startRawObject()
+        @Expect(fastNameReader.readRawNameFast(true), "fast")
+        @Expect(fastNameReader.readRawInt64(), 1)
+        fastNameReader.endRawObject()
+        fastNameReader.expectEnd()
+    }
+
 
     @TestCase
     func directDecodeUsesPublicMemoryStreamFastPath(): Unit {

@@ -301,33 +301,46 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
     }
 
     public func readRawName(first: Bool): String {
+        let original = index
+        skipSpaces()
+        if (!first) {
+            expectByte(b',')
+            skipSpaces()
+        }
+        if (!hasMore() || data[index] != b'"') {
+            index = original
+            return readRawNameChecked(first)
+        }
+        index++
+        let start = index
+        while (index < size) {
+            let current = data[index]
+            if (current == b'"') {
+                let end = index
+                index++
+                skipSpaces()
+                expectByte(b':')
+                return stringFromUtf8Range(start, end)
+            }
+            if (current == b'\\' || current < 0x20 || current >= 0x80) {
+                index = original
+                return readRawNameChecked(first)
+            }
+            index++
+        }
+        index = original
+        readRawNameChecked(first)
+    }
+
+    private func readRawNameChecked(first: Bool): String {
         beforeRawFieldName(first)
         let name = parseString()
         afterRawFieldName()
         name
     }
 
-    // Generated compact codecs read object names emitted by the matching
-    // writer.  Those names are ASCII and contain no escapes, so consume the
-    // delimiter, quote, and colon directly instead of entering the general
-    // string parser and its escape/UTF-8 checks.  The checked readRawName()
-    // path remains available for configurable/user-supplied readers.
     public func readRawNameFast(first: Bool): String {
-        if (!first) {
-            index++ // comma
-        }
-        index++ // opening quote
-        let start = index
-        while (data[index] != b'"') {
-            index++
-        }
-        let end = index
-        index++ // closing quote
-        index++ // colon
-        // Text input can retain a source-owned slice; bytes input still goes
-        // through the checked UTF-8 constructor.  Keep the same allocation
-        // behavior as readRawName() after the delimiter scan is removed.
-        stringFromUtf8Range(start, end)
+        readRawName(first)
     }
 
     // Compact-only seam: unlike readRawName(), the common no-escape path does

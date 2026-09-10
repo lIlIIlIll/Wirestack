@@ -602,6 +602,14 @@ def read_metadata_and_validate(
 
 def stable_identity(metadata: dict[str, Any], key: str) -> object:
     value = metadata[key]
+    if key == "lscpu" and isinstance(value, str):
+        # lscpu reports the instantaneous frequency governor state. It can
+        # change between otherwise identical batches on the same runner.
+        return "\n".join(
+            line
+            for line in value.splitlines()
+            if not line.startswith("CPU(s) scaling MHz:")
+        )
     if key != "versions":
         return value
     versions = dict(value)
@@ -810,14 +818,46 @@ def git_blob(root: pathlib.Path, commit: str, relative: pathlib.Path) -> bytes:
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    if completed.returncode != 0:
-        detail = completed.stderr.decode("utf-8", errors="replace").strip()
-        raise EvidenceError(
-            f"cannot read {relative.as_posix()} from measured commit: {detail}"
+    if completed.returncode == 0:
+        return completed.stdout
+
+    parts = relative.parts
+    for split in range(1, len(parts)):
+        prefix = pathlib.Path(*parts[:split])
+        entry = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(root),
+                "ls-tree",
+                commit,
+                "--",
+                prefix.as_posix(),
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
         )
-    return completed.stdout
+        fields = entry.stdout.strip().split(None, 3)
+        if (
+            entry.returncode == 0
+            and len(fields) == 4
+            and fields[0] == "160000"
+            and fields[1] == "commit"
+            and fields[3] == prefix.as_posix()
+        ):
+            submodule = root / prefix
+            if submodule.is_dir():
+                return git_blob(
+                    submodule,
+                    fields[2],
+                    pathlib.Path(*parts[split:]),
+                )
 
-
+    detail = completed.stderr.decode("utf-8", errors="replace").strip()
+    raise EvidenceError(
+        f"cannot read {relative.as_posix()} from measured commit: {detail}"
+    )
 
 def verify_measured_candidate_binding(
     root: pathlib.Path, marker: dict[str, Any]

@@ -17,7 +17,15 @@ import time
 
 STANDALONE_MACRO_GIT = (
     'git = "https://github.com/lIlIIlIll/yjson_macros.git", '
+    'commitId = "f784f302756d6e80570478466cacc6fb7172bb74"'
+)
+LEGACY_STANDALONE_MACRO_GIT = (
+    'git = "https://github.com/lIlIIlIll/yjson_macros.git", '
     'commitId = "30c3def793054c4b5ba25be2e22598e141923a51"'
+)
+STANDALONE_MACRO_GITS = (
+    STANDALONE_MACRO_GIT,
+    LEGACY_STANDALONE_MACRO_GIT,
 )
 HISTORICAL_MACRO_MANIFEST = """[package]
   cjc-version = "1.1.0"
@@ -209,6 +217,9 @@ def manifest_digest(manifest: dict[str, str]) -> str:
         digest.update(b"\n")
     return digest.hexdigest()
 
+def contains_standalone_macro_git(text: str) -> bool:
+    return any(marker in text for marker in STANDALONE_MACRO_GITS)
+
 
 def canonical_benchmark_input_bytes(
     root: pathlib.Path, relative: str, data: bytes
@@ -229,15 +240,16 @@ def canonical_benchmark_input_bytes(
     text = data.decode("utf-8")
     if relative.endswith(".lock"):
         text = "\n".join(
-            line for line in text.splitlines() if STANDALONE_MACRO_GIT not in line
+            line for line in text.splitlines()
+            if not contains_standalone_macro_git(line)
         ) + "\n"
-    elif STANDALONE_MACRO_GIT in text:
+    elif contains_standalone_macro_git(text):
         dependency_path = os.path.relpath(
             root / "packages/yjson_macros", (root / relative).parent
         )
         normalized_lines: list[str] = []
         for line in text.splitlines():
-            if "yjson_macros" not in line or STANDALONE_MACRO_GIT not in line:
+            if "yjson_macros" not in line or not contains_standalone_macro_git(line):
                 normalized_lines.append(line)
                 continue
             opening = line.find("{")
@@ -260,8 +272,9 @@ def canonical_benchmark_input_bytes(
 
     if (
         relative == "release/release-graph.toml"
-        and STANDALONE_MACRO_GIT
-        in (root / "cjpm.toml").read_text(encoding="utf-8")
+        and contains_standalone_macro_git(
+            (root / "cjpm.toml").read_text(encoding="utf-8")
+        )
     ):
         text = text.replace(
             'name = "yjson_macros"\n'
@@ -270,7 +283,7 @@ def canonical_benchmark_input_bytes(
             'release_manifest = "release/package-manifests/yjson_macros.toml"\n'
             'source_root = "packages/yjson_macros/src"\n'
             'stage_kind = "package"\n'
-            'stability = "stable"\n'
+            "stability = \"stable\"\n"
             "leaf_bundle = false\n"
             "dependencies = []",
             'name = "yjson_macros"\n'
@@ -279,7 +292,7 @@ def canonical_benchmark_input_bytes(
             'release_manifest = "release/package-manifests/yjson_macros.toml"\n'
             'source_root = "packages/yjson_macros/src"\n'
             'stage_kind = "package"\n'
-            'stability = "stable"\n'
+            "stability = \"stable\"\n"
             "leaf_bundle = false\n"
             'dependencies = ["yjson"]',
         )

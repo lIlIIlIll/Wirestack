@@ -153,7 +153,19 @@ def git_tracked_files(source: pathlib.Path) -> list[pathlib.Path] | None:
     )
     if result.returncode != 0:
         return None
-    return [pathlib.Path(value.decode("utf-8")) for value in result.stdout.split(b"\0") if value]
+    tracked: list[pathlib.Path] = []
+    for value in result.stdout.split(b"\0"):
+        if not value:
+            continue
+        relative = pathlib.Path(value.decode("utf-8"))
+        source_file = source / relative
+        if source_file.is_dir():
+            nested = git_tracked_files(source_file)
+            if nested is not None:
+                tracked.extend(relative / child for child in nested)
+            continue
+        tracked.append(relative)
+    return tracked
 
 
 def stage_source_tree(source: pathlib.Path, destination: pathlib.Path) -> int:

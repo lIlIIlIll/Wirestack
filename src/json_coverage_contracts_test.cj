@@ -1521,6 +1521,126 @@ class JsonCoverageContractsTest {
     }
 
     @TestCase
+    func directFastGeneratedContainersCoverEmptySmallLargeAndDuplicates(): Unit {
+        let record = "{\"profile_id\":1,\"alias\":\"fast\",\"level\":3}"
+        let arrayCodec = JsonCodecs.array(ProfileRecordJson)
+        @Expect(YJson.fromJson("[]", codec: arrayCodec).size, 0)
+        let smallArray = YJson.fromJson("[${record}]", codec: arrayCodec)
+        @Expect(smallArray.size, 1)
+        @Expect(smallArray[0].alias, "fast")
+        let largeArrayText = "[${record},${record},${record},${record},${record},${record}]"
+        @Expect(YJson.fromJson(largeArrayText, codec: arrayCodec).size, 6)
+
+        let listCodec = JsonCodecs.arrayList(ProfileRecordJson)
+        @Expect(YJson.fromJson("[]", codec: listCodec).size, 0)
+        let list = YJson.fromJson("[${record},${record}]", codec: listCodec)
+        @Expect(list.size, 2)
+        @Expect(list[1].id, 1)
+
+        let mapCodec = JsonCodecs.stringMap(ProfileRecordJson)
+        @Expect(YJson.fromJson("{}", codec: mapCodec).size, 0)
+        let map = YJson.fromJson(
+            "{\"first\":${record},\"second\":${record}}", codec: mapCodec)
+        @Expect(map.size, 2)
+        @Expect(map["second"].level, 3)
+        let duplicateError = @AssertThrows[JsonException](YJson.fromJson(
+            "{\"first\":${record},\"first\":${record}}", codec: mapCodec))
+        @Expect(duplicateError.code, "duplicate_key")
+
+        let directArrayReader = GeneratedSupportV1.newFastReader("[${record}]")
+        let directArray = GeneratedSupportV1.readWith(arrayCodec, directArrayReader)
+        directArrayReader.expectEnd()
+        @Expect(directArray.size, 1)
+        let capacityText = StringBuilder("[")
+        for (index in 0..96) {
+            if (index > 0) { capacityText.append(",") }
+            capacityText.append(record)
+        }
+        capacityText.append("]")
+        let directCapacityArrayReader = GeneratedSupportV1.newFastReader(capacityText.toString())
+        let directCapacityArray = GeneratedSupportV1.readWith(
+            arrayCodec, directCapacityArrayReader)
+        directCapacityArrayReader.expectEnd()
+        @Expect(directCapacityArray.size, 96)
+        let directCapacityListReader = GeneratedSupportV1.newFastReader(capacityText.toString())
+        let directCapacityList = GeneratedSupportV1.readWith(
+            listCodec, directCapacityListReader)
+        directCapacityListReader.expectEnd()
+        @Expect(directCapacityList.size, 96)
+        let directLargeArrayReader = GeneratedSupportV1.newFastReader(largeArrayText)
+        @Expect(GeneratedSupportV1.readWith(
+            arrayCodec, directLargeArrayReader).size, 6)
+        directLargeArrayReader.expectEnd()
+        let directListReader = GeneratedSupportV1.newFastReader("[${record},${record}]")
+        let directList = GeneratedSupportV1.readWith(listCodec, directListReader)
+        directListReader.expectEnd()
+        @Expect(directList.size, 2)
+        let directMapReader = GeneratedSupportV1.newFastReader(
+            "{\"first\":${record},\"second\":${record}}")
+        let directMap = GeneratedSupportV1.readWith(mapCodec, directMapReader)
+        directMapReader.expectEnd()
+        @Expect(directMap.size, 2)
+        let directDuplicateReader = GeneratedSupportV1.newFastReader(
+            "{\"first\":${record},\"first\":${record}}")
+        let directDuplicateError = @AssertThrows[JsonException](
+            GeneratedSupportV1.readWith(mapCodec, directDuplicateReader))
+        @Expect(directDuplicateError.code, "duplicate_key")
+
+        let fallbackArrayCodec = JsonCodecs.array(CoverageSemanticIntCodec())
+        let fallbackArrayReader = GeneratedSupportV1.newFastReader("[7,8]")
+        let fallbackArray = GeneratedSupportV1.readWith(
+            fallbackArrayCodec, fallbackArrayReader)
+        fallbackArrayReader.expectEnd()
+        @Expect(fallbackArray[1], 8)
+        let fallbackListCodec = JsonCodecs.arrayList(CoverageSemanticIntCodec())
+        let fallbackListReader = GeneratedSupportV1.newFastReader("[9,10]")
+        let fallbackList = GeneratedSupportV1.readWith(
+            fallbackListCodec, fallbackListReader)
+        fallbackListReader.expectEnd()
+        @Expect(fallbackList[1], 10)
+        let fallbackMapCodec = JsonCodecs.stringMap(CoverageSemanticIntCodec())
+        let fallbackMapReader = GeneratedSupportV1.newFastReader("{\"a\":11,\"b\":12}")
+        let fallbackMap = GeneratedSupportV1.readWith(
+            fallbackMapCodec, fallbackMapReader)
+        fallbackMapReader.expectEnd()
+        @Expect(fallbackMap["b"], 12)
+
+        let directReader = GeneratedSupportV1.newFastReader(record)
+        let direct = GeneratedSupportV1.readWith(ProfileRecordJson, directReader)
+        directReader.expectEnd()
+        @Expect(direct.id, 1)
+
+        let generated = generatedCodecV1Of<ProfileRecord>()
+        let generatedFast = match (generated) {
+            case fast: GeneratedCodecV1<ProfileRecord> => fast
+            case _ => throw JsonException("generated codec lost fast contract")
+        }
+        let cachedReader = GeneratedSupportV1.newFastReader(record)
+        let cached = GeneratedSupportV1.readWithCached(
+            Some(generatedFast), generated, cachedReader)
+        cachedReader.expectEnd()
+        @Expect(cached.alias, "fast")
+
+        let fallbackCodec = CoverageReifiedCodec()
+        let fallbackFast: GeneratedCodecV1<CoverageReifiedValue> = fallbackCodec
+        let fallbackReader = GeneratedSupportV1.newFastReader("17")
+        @Expect(GeneratedSupportV1.readWithCached(
+            Some(fallbackFast), fallbackCodec, fallbackReader).value, 17)
+        fallbackReader.expectEnd()
+
+        let cursorCodec = JsonCodecs.arrayList(JsonCodecs.int64)
+        let cursorReader = GeneratedSupportV1.newFastReader("[4,5]")
+        let cursorDecoded = GeneratedSupportV1.readWithCached(
+            None<GeneratedCodecV1<ArrayList<Int64>>>, cursorCodec, cursorReader)
+        cursorReader.expectEnd()
+        @Expect(cursorDecoded.size, 2)
+        let semanticReader = GeneratedSupportV1.newFastReader("19")
+        @Expect(GeneratedSupportV1.readWithCached(
+            None<GeneratedCodecV1<Int64>>, CoverageSemanticIntCodec(), semanticReader), 19)
+        semanticReader.expectEnd()
+    }
+
+    @TestCase
     func nodeFactoriesConversionsViewsAndStreamsCoverPublicSemantics(): Unit {
         @Expect(JsonNode.nullValue.size(), 0)
         @Expect(JsonNode.boolean(true).size(), 0)

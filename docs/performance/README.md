@@ -20,7 +20,7 @@
 具体阈值见[性能方法](methodology.md)。实现设计结论见
 [性能设计结论](../performance.md)。
 
-当前 `main` 开发快照的七库完整测量见[2026-09-07 main 七库对比](results/2026-09-07-main-seven-library.md)。
+当前 `main` 开发快照的七库完整测量见[2026-09-10 main 七库对比](results/2026-09-10-main-seven-library.md)。
 
 ## 历史证据
 
