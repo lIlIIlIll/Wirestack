@@ -64,3 +64,8 @@ source comments. The API signatures and coverage JSON are unchanged.
 [`ci-repair-checks.json`](ci-repair-checks.json) records local validation.
 `scripts/check` exited 0 with 588 Cangjie tests passed, 23 skipped and no failures.
 The task gate also passed all four commands, including the clean public consumer.
+
+The active main ruleset also requires `report-build-status`. The clean-build
+workflow now reports that context only after checking both cjdoc and Wirestack
+build results. Failure, cancellation or a skipped prerequisite fails the report;
+the branch rules are unchanged.

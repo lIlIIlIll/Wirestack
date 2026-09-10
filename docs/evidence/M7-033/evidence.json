@@ -1,6 +1,6 @@
 {
   "acceptance_status": "PASS",
-  "generated_at_utc": "2026-09-10T02:20:28.151881Z",
+  "generated_at_utc": "2026-09-10T02:35:41.911301Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -49,17 +49,17 @@
       "path": "docs/evidence/M7-033/ci-repair-checks.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "ee7ff7dd1c9d248c8016a239b9647eacf2cadbf9a36d0a3aeb995ad5e116b650"
+        "sha256": "63df7df8faaf9de65de0d0bb7517b7630e09ff38b978b0d6ec04e6b6bb90df0a"
       },
       "source_task": "M7-033"
     }
   ],
-  "revision": "d41c06d75d2d98a03ed690b19d3f202aa846dc92",
+  "revision": "a97de1b5848a8a76b46fb30c12db9d6131ed255f",
   "schema_version": 2,
   "source_sha256": {
     ".github/workflows/clean-cangjie-build.yml": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "a134f1c8a9e9f514b0ba72d65dd734bbad0b7f7084d46cd1f45615fef74c823e"
+      "sha256": "1f73fad80351a770512a584069c9c285236a26a3f2323b32c468f43567c5b00d"
     },
     ".github/workflows/m7-033-docs.yml": {
       "domain": "text-utf8-lf-v1",
@@ -79,7 +79,7 @@
     },
     "docs/evidence/M7-033/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "6f7b9e92293aed2bb1806f24d9da190c2fc6d932052429f8e91a2c3574ea89d0"
+      "sha256": "ab64ec2156f71b71014602de85302739422dafb4ab0da19d445818b291b49692"
     },
     "docs/evidence/M7-033/ci-workspace-safety.json": {
       "domain": "text-utf8-lf-v1",

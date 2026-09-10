@@ -51,6 +51,92 @@
       "exit_code": 0,
       "result": "PASS",
       "shell_steps": 17
+    },
+    {
+      "command": "bash -c <report-build-status run step>",
+      "result": "PASS",
+      "cases": [
+        {
+          "cjdoc": "success",
+          "wirestack": "success",
+          "exit_code": 0
+        },
+        {
+          "cjdoc": "success",
+          "wirestack": "failure",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "success",
+          "wirestack": "cancelled",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "success",
+          "wirestack": "skipped",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "failure",
+          "wirestack": "success",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "failure",
+          "wirestack": "failure",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "failure",
+          "wirestack": "cancelled",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "failure",
+          "wirestack": "skipped",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "cancelled",
+          "wirestack": "success",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "cancelled",
+          "wirestack": "failure",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "cancelled",
+          "wirestack": "cancelled",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "cancelled",
+          "wirestack": "skipped",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "skipped",
+          "wirestack": "success",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "skipped",
+          "wirestack": "failure",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "skipped",
+          "wirestack": "cancelled",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "skipped",
+          "wirestack": "skipped",
+          "exit_code": 1
+        }
+      ]
     }
   ],
   "regression": {
