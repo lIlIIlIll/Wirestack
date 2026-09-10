@@ -1,0 +1,69 @@
+{
+  "task_id": "M7-033",
+  "original_root": "/home/elliot/playground/Wirestack",
+  "publication_root": "/home/elliot/playground/Wirestack-pr-worktrees/M7-033-ci-20260910",
+  "original_index_snapshot_sha256": "2ea707064b4237122d54ed1fa12afd91721c37b8a5f886379771bd5b31d4707b",
+  "existing_failure": "https://github.com/lIlIIlIll/Wirestack/actions/runs/34370427590",
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "branch",
+        "--show-current"
+      ],
+      "exit_code": 0,
+      "stdout": "fix/M7-033-available-cjdoc-toolchain\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "stdout": "55ab33b6768f89dbeb35224514f818b6e5439b9b\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "merge-base",
+        "HEAD",
+        "origin/main"
+      ],
+      "exit_code": 0,
+      "stdout": "55ab33b6768f89dbeb35224514f818b6e5439b9b\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "uname",
+        "-a"
+      ],
+      "exit_code": 0,
+      "stdout": "Linux Arch 7.2.3-arch1-3 #1 SMP PREEMPT_DYNAMIC Sun, 06 Sep 2026 13:01:04 +0000 x86_64 GNU/Linux\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/home/elliot/.codex/scripts/codex_cangjie_env",
+        "cjc",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -4,9 +4,16 @@ from tools import evidence_digest
 
 import importlib.util
 import json
+import contextlib
+import io
+import os
+import shlex
+import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -36,6 +43,49 @@ class LinuxTlsProviderBuildTests(unittest.TestCase):
             path.write_text(json.dumps(manifest), encoding="utf-8")
             with self.assertRaises(builder.BuildError):
                 builder.load_provider_manifest(path)
+
+    def test_git_diagnostics_do_not_change_source_identity(self) -> None:
+        git = shutil.which("git")
+        self.assertIsNotNone(git)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            environment = builder.git_environment()
+
+            def invoke(*arguments: str) -> str:
+                return subprocess.run(
+                    [git, *arguments], env=environment, check=True,
+                    text=True, capture_output=True,
+                ).stdout.strip()
+
+            invoke("init", str(source))
+            invoke("-C", str(source), "-c", "user.name=Fixture",
+                   "-c", "user.email=fixture@example.invalid",
+                   "commit", "--allow-empty", "-m", "fixture")
+            commit = invoke("-C", str(source), "rev-parse", "HEAD")
+            tree = invoke("-C", str(source), "rev-parse", "HEAD^{tree}")
+            manifest = {"source": {
+                "commit": commit, "tree": tree,
+                "content_sha256": evidence_digest.text_evidence_bytes_sha256(
+                    f"{commit}\n{tree}\n".encode()),
+            }}
+            binaries = root / "bin"
+            binaries.mkdir()
+            wrapper = binaries / "git"
+            wrapper.write_text(
+                "#!/bin/sh\nprintf '%s\\n' 'git diagnostic' >&2\n"
+                f"exec {shlex.quote(git)} \"$@\"\n", encoding="utf-8")
+            wrapper.chmod(0o755)
+            diagnostics = io.StringIO()
+            with mock.patch.dict(os.environ, {
+                "PATH": str(binaries) + os.pathsep + os.environ.get("PATH", ""),
+            }), contextlib.redirect_stderr(diagnostics):
+                identity = builder.verify_source(source, manifest)
+                self.assertEqual(commit, identity["commit"])
+                (source / "untracked").write_text("dirty", encoding="utf-8")
+                with self.assertRaises(builder.BuildError):
+                    builder.verify_source(source, manifest)
+            self.assertIn("git diagnostic", diagnostics.getvalue())
 
     def test_build_fingerprint_covers_shim_and_target(self) -> None:
         manifest = builder.load_provider_manifest(self.manifest_path())
