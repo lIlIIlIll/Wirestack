@@ -1,6 +1,6 @@
 {
   "acceptance_status": "BLOCKED",
-  "generated_at_utc": "2026-09-10T02:58:10.018790Z",
+  "generated_at_utc": "2026-09-10T03:59:01.208892+00:00",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,7 +13,7 @@
       "path": "docs/evidence/M7-033/docs-report.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "dbd1c731d287c9db622dd4224e1f49d838c2234ad81be54b76ac54784adc347d"
+        "sha256": "225bd9125c17693b317d249017ae02890b5dbae016000d6b9bc93b156528b15a"
       },
       "source_task": "M7-033"
     },
@@ -31,7 +31,7 @@
       "path": "docs/evidence/M7-033/task-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "e74d95c4f93b37ec485630f0e4a7a2e2e441b7ddea41dc6352a444d5e09048b2"
+        "sha256": "05ee583e5a9a6b5c49a42ecd2d741b83da67c577a13801df48c8ae2c41167905"
       },
       "source_task": "M7-033"
     },
@@ -49,7 +49,7 @@
       "path": "docs/evidence/M7-033/ci-repair-checks.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "aa6d623bae1b12e696c6e5aef37f790f5752e4a071c4b678c1fdecb6b5d491ba"
+        "sha256": "b51adee53a7850c7b2b928879855c3508132f036a1c6daa66a63d24b7c848085"
       },
       "source_task": "M7-033"
     },
@@ -58,7 +58,7 @@
       "path": "docs/evidence/M7-033/required-checks.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "1674c83fd411d8c9763dd139a40212d89da3cde68b35343abc9852780986b436"
+        "sha256": "7b120fa10e0e02f330236193a35a3879bddc55df05e3d35a08234bb07063bb75"
       },
       "source_task": "M7-033"
     }
@@ -72,7 +72,7 @@
     },
     ".github/workflows/m7-033-docs.yml": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "c02e5986fec7a6c66b05c9af4c7b9431897f595706b0053babcec31ec3cf61cf"
+      "sha256": "c6be66eec9d9d2a855eec417d9ddf57c2f00907e58aadc2e853b098d9f491daa"
     },
     ".gitignore": {
       "domain": "text-utf8-lf-v1",
@@ -88,7 +88,7 @@
     },
     "docs/evidence/M7-033/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "90abb9447187d7c9190415fceff4f4b64c5c2f0f2a7a17473eadc88720a224b1"
+      "sha256": "df878ba9b961b3722f473bbbbd932749087fc019cb1b9a7d51f79ebecfa12a23"
     },
     "docs/evidence/M7-033/ci-workspace-safety.json": {
       "domain": "text-utf8-lf-v1",

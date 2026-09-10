@@ -183,8 +183,7 @@ jobs:
   deploy:
     name: Deploy latest main documentation
     if: >-
-      github.event_name == 'push' &&
-      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+      github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: generate
     runs-on: ubuntu-24.04
     permissions:
@@ -208,12 +207,56 @@ jobs:
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
-          set -euo pipefail
-          root="${PAGE_URL%/}/"
-          curl --fail --silent --show-error --location --max-time 10 "$root" >/dev/null
-          curl --fail --silent --show-error --location --max-time 10 "${root}index.html" >/dev/null
-          curl --fail --silent --show-error --location --max-time 10 "${root}search-index.js" >/dev/null
-          api_path=$(jq -r '[.combined.htmlPages[] | select(startswith("packages/"))][0] // empty' \
-            "$RUNNER_TEMP/m7-033-docs/docs/evidence/M7-033/docs-report.json")
-          test -n "$api_path"
-          curl --fail --silent --show-error --location --max-time 10 "${root}${api_path}" >/dev/null
+          python3 - <<'PY'
+          from datetime import datetime, timezone
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          root = os.environ["PAGE_URL"].rstrip("/") + "/"
+          temporary_root = Path(os.environ["RUNNER_TEMP"])
+          docs = json.loads((temporary_root / "m7-033-docs/docs/evidence/M7-033/docs-report.json").read_text(encoding="utf-8"))
+          api_path = next(path for path in docs["combined"]["htmlPages"] if path.startswith("packages/"))
+          checks = []
+          for path in ("", "index.html", "search-index.js", api_path):
+              result = subprocess.run(
+                  ["curl", "--fail", "--silent", "--show-error", "--location",
+                   "--max-time", "10", "--output", "/dev/null", "--write-out",
+                   "%{http_code}", root + path],
+                  check=True, stdout=subprocess.PIPE, text=True,
+              )
+              status = int(result.stdout)
+              if status != 200:
+                  raise SystemExit(f"unexpected HTTP status {status}: {root + path}")
+              checks.append({"path": "/" + path, "http_status": status})
+          report = {
+              "schema_version": 1,
+              "kind": "github-pages-smoke",
+              "status": "PASS",
+              "source_task": "M7-033",
+              "acceptance_status": "PASS",
+              "revision": os.environ["GITHUB_SHA"],
+              "workflow": {
+                  "run_id": int(os.environ["GITHUB_RUN_ID"]),
+                  "run_attempt": int(os.environ["GITHUB_RUN_ATTEMPT"]),
+                  "event": os.environ["GITHUB_EVENT_NAME"],
+                  "head_sha": os.environ["GITHUB_SHA"],
+              },
+              "page_url": root,
+              "checks": checks,
+              "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+          }
+          output = temporary_root / "m7-033-pages-smoke.json"
+          temporary = output.with_suffix(".tmp")
+          temporary.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+          temporary.replace(output)
+          PY
+
+      - name: Upload revision-bound Pages smoke evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: m7-033-pages-smoke-${{ github.sha }}
+          if-no-files-found: error
+          path: ${{ runner.temp }}/m7-033-pages-smoke.json

@@ -4,7 +4,7 @@
   "status": "PASS",
   "repository": "lIlIIlIll/Wirestack",
   "ref": "refs/heads/main",
-  "observedAtUtc": "2026-09-10T02:52:49.180901+00:00",
+  "observedAtUtc": "2026-09-10T03:47:57.604412+00:00",
   "rulesets": [
     {
       "id": 21787899,
@@ -109,19 +109,6 @@
               }
             ]
           }
-        },
-        {
-          "type": "code_quality",
-          "parameters": {
-            "severity": "errors"
-          }
-        },
-        {
-          "type": "code_coverage",
-          "parameters": {
-            "minimum_coverage": 90,
-            "max_coverage_drop": 80
-          }
         }
       ],
       "bypass_actors": []
@@ -140,5 +127,146 @@
       "integration_id": 15368
     }
   ],
-  "policyChangesMade": false
+  "policyChangesMade": true,
+  "authorizedPolicyChange": {
+    "removedRules": [
+      {
+        "type": "code_quality",
+        "parameters": {
+          "severity": "errors"
+        }
+      },
+      {
+        "type": "code_coverage",
+        "parameters": {
+          "minimum_coverage": 90,
+          "max_coverage_drop": 80
+        }
+      }
+    ],
+    "reason": "User explicitly requested removal of GitHub Code Quality and its dependent built-in coverage gate after authenticated GET and PATCH setup returned HTTP 404: Code quality is not available for this repository.",
+    "retainedRulesVerified": true,
+    "bypassUsed": false
+  },
+  "codeQL": {
+    "setup": {
+      "state": "configured",
+      "languages": [
+        "actions",
+        "c-cpp",
+        "python"
+      ],
+      "query_suite": "default",
+      "threat_model": "remote",
+      "updated_at": "2026-09-10T03:20:33Z",
+      "schedule": "weekly",
+      "runner_type": "standard",
+      "runner_label": ""
+    },
+    "validationRun": "https://github.com/lIlIIlIll/Wirestack/actions/runs/34432863129",
+    "validationConclusion": "success",
+    "scope": "GitHub Actions, C/C++, and Python. Cangjie is not supported by CodeQL."
+  },
+  "effectiveMainRules": [
+    {
+      "type": "deletion",
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 21787899
+    },
+    {
+      "type": "non_fast_forward",
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 21787899
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": true,
+        "do_not_enforce_on_create": true,
+        "required_status_checks": [
+          {
+            "context": "clean-cangjie-build"
+          }
+        ]
+      },
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 21787899
+    },
+    {
+      "type": "deletion",
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 22713825
+    },
+    {
+      "type": "non_fast_forward",
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 22713825
+    },
+    {
+      "type": "required_linear_history",
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 22713825
+    },
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 0,
+        "dismiss_stale_reviews_on_push": false,
+        "required_reviewers": [],
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": true,
+        "require_extra_approval_for_unattributed_changes": true,
+        "allowed_merge_methods": [
+          "merge",
+          "squash",
+          "rebase"
+        ]
+      },
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 22713825
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": true,
+        "do_not_enforce_on_create": false,
+        "required_status_checks": [
+          {
+            "context": "Deploy latest main documentation",
+            "integration_id": 15368
+          },
+          {
+            "context": "report-build-status",
+            "integration_id": 15368
+          }
+        ]
+      },
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 22713825
+    },
+    {
+      "type": "code_scanning",
+      "parameters": {
+        "code_scanning_tools": [
+          {
+            "tool": "CodeQL",
+            "security_alerts_threshold": "high_or_higher",
+            "alerts_threshold": "errors"
+          }
+        ]
+      },
+      "ruleset_source_type": "Repository",
+      "ruleset_source": "lIlIIlIll/Wirestack",
+      "ruleset_id": 22713825
+    }
+  ]
 }
