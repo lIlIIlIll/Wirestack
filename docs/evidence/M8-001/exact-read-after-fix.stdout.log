@@ -1,0 +1,38 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 6543580 ns, RESULT:
+    TCS: NetworkFoundationContractTest, time elapsed: 6543580 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (271875 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (39080 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (40078 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (94840 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (53093 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (20205 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (73348 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (38627 ns)
+    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (52222 ns)
+    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (52901 ns)
+    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (24247 ns)
+    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (37730 ns)
+    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (18427 ns)
+    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (46748 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (89753 ns)
+    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (35013 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (52324 ns)
+    [ PASSED ] CASE: tcpStreamAbortWinsWhileGracefulCloseIsBlocked (91806 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (66789 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (64203 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (2510073 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (19710 ns)
+Summary: TOTAL: 22
+    PASSED: 22, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 15039101 ns, RESULT:
+TP: wirestack.*, time elapsed: 14934511 ns, RESULT:
+    PASSED:
+    TP: wirestack.net, time elapsed: 6543580 ns
+Summary: TOTAL: 22
+    PASSED: 22, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

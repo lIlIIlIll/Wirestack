@@ -1,0 +1,72 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 160746198 ns, RESULT:
+    TCS: NetworkFoundationContractTest, time elapsed: 160746198 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (362811 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (53152 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (66365 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (155246 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (120432 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (33378 ns)
+    [ PASSED ] CASE: tcpStreamNonterminalStoppedCloseAdmissionStillRejects (126062 ns)
+    [ PASSED ] CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership (72671 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (135739 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (90689 ns)
+    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (115273 ns)
+    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (114931 ns)
+    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (42061 ns)
+    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (78894 ns)
+    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (30280 ns)
+    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (103779 ns)
+    [ PASSED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (199345 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (293655 ns)
+    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (63754 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (105831 ns)
+    [ PASSED ] CASE: tcpStreamRetainsNativeCancellationOwnership (11424766 ns)
+    [ PASSED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (187504 ns)
+    [ PASSED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (245594 ns)
+    [ PASSED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (105585 ns)
+    [ PASSED ] CASE: tcpStreamAbortOwnershipSurvivesCompetingIoAndLateCloseFailure (75541 ns)
+    [ PASSED ] CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful (106583 ns)
+    [ PASSED ] CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful (72808 ns)
+    [ PASSED ] CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation (71683 ns)
+    [ PASSED ] CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate (85706 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (41767 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (229002 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1577845 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (25995 ns)
+    [ ERROR  ] CASE: tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock (138144054 ns)
+    REASON: An exception has occurred:NetworkException: TCP stream close cancelled
+	at std.io.IOException.init(std.core.String)(std/io/io_exception.cj:19)
+	at wirestack.NetworkException.init(wirestack.NetworkErrorCategory, wirestack.NetworkPhase, wirestack.NetworkErrorCode, std.core.String, wirestack.Retryability, std.core.Option<...>, std.core.Option<...>, std.core.Option<...>, std.core.Option<...>)(/tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/src/network_error.cj:392)
+	at wirestack.net.closeContextFailure(wirestack.OperationContext, std.core.Option<...>, std.core.Option<...>)(/tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/src/net/package.cj:892)
+	at wirestack.net.checkCloseContext(wirestack.OperationContext, std.core.Option<...>, std.core.Option<...>)(/tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/src/net/package.cj:880)
+	at wirestack.net.TcpStream.close(wirestack.OperationContext)(/tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/src/net/package.cj:488)
+	at wirestack.net/test.expectTerminalCloseSkipsContexts(wirestack.net.TcpStream, wirestack.net.SocketState)(/tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/src/net/package_test.cj:1521)
+	at wirestack.net/test.NetworkFoundationContractTest.tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock()(/tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/src/net/package_test.cj:119)
+	at wirestack.net/test.NetworkFoundationContractTest.asTestSuite.lambda.6.lambda.0()(/tmp/wirestack-m8-001-ninth-baseline-7t5hffuz/src/net/package_test.cj:1089)
+    [ FAILED ] CASE: tcpStreamAbortCannotRelabelClaimedGracefulNativeClose (59344 ns)
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+Summary: TOTAL: 35
+    PASSED: 33, SKIPPED: 0, ERROR: 1
+    FAILED: 1, listed below:
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamAbortCannotRelabelClaimedGracefulNativeClose
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 168956263 ns, RESULT:
+TP: wirestack.*, time elapsed: 168856367 ns, RESULT:
+    FAILED:
+    TP: wirestack.net, time elapsed: 160746198 ns, RESULT:
+        TCS: NetworkFoundationContractTest, time elapsed: 160746198 ns, RESULT:
+        [ ERROR  ] CASE: tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock (138144054 ns)
+        [ FAILED ] CASE: tcpStreamAbortCannotRelabelClaimedGracefulNativeClose (59344 ns)
+Summary: TOTAL: 35
+    PASSED: 33, SKIPPED: 0, ERROR: 1
+    FAILED: 1
+--------------------------------------------------------------------------------------------------

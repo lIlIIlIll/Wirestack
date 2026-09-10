@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-001",
+  "status": "PASS",
+  "generated_at_utc": "2026-09-10T13:38:29.459847+00:00",
+  "baseline_revision": "57279476b42c9213b9231895fadf8b374fd70f4b",
+  "provenance": {
+    "method": "Directly edited in-memory index revisions are checked without writing an evidence index. The baseline direct probe used the unchanged published archive; focused regression fixtures use real Git repositories and commit/blob objects. Verification now resolves the exact local commit and compares sealed source digests with that tree before reporting working-tree drift. No network fetch or fallback is performed.",
+    "before": {
+      "argv": [
+        "python3",
+        "-c",
+        "import json\nfrom pathlib import Path\nfrom tools.repository import repository_tooling as rt\nroot = Path.cwd()\ntask = rt.validate_repository_tasks(root, \"M8-001\")[\"M8-001\"]\noriginal = json.loads((root / \"docs/evidence/M8-001/evidence.json\").read_text())\naccepted = False\nfor label, revision in [(\"fictitious\", \"0\" * 40), (\"unrelated\", \"f8e8dbca3006a45ab7859373436f82c35eda3eb9\")]:\n    forged = dict(original, acceptance_status=\"PASS\", revision=revision)\n    try:\n        result = rt.validate_evidence(forged, root, task)\n        print(json.dumps({\"case\": label, \"result\": \"ACCEPTED\", \"revision\": revision, \"validation\": result}))\n        accepted = True\n    except rt.ContractError as error:\n        print(json.dumps({\"case\": label, \"result\": \"REJECTED\", \"revision\": revision, \"code\": error.code}))\nraise SystemExit(42 if accepted else 0)\n"
+      ],
+      "exit_code": 42,
+      "stdout_path": "docs/evidence/M8-001/eighth-provenance-before.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "7f99b4d193292c2fcbde5e18b31a185f8e2ba886f7d23f64109177855c479924"
+      },
+      "stderr_path": "docs/evidence/M8-001/eighth-provenance-before.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "after": {
+      "argv": [
+        "python3",
+        "-c",
+        "import json\nfrom pathlib import Path\nfrom tools.repository import repository_tooling as rt\nroot = Path.cwd()\ntask = rt.validate_repository_tasks(root, \"M8-001\")[\"M8-001\"]\noriginal = json.loads((root / \"docs/evidence/M8-001/evidence.json\").read_text())\naccepted = False\nfor label, revision in [(\"fictitious\", \"0\" * 40), (\"unrelated\", \"f8e8dbca3006a45ab7859373436f82c35eda3eb9\")]:\n    forged = dict(original, acceptance_status=\"PASS\", revision=revision)\n    try:\n        result = rt.validate_evidence(forged, root, task)\n        print(json.dumps({\"case\": label, \"result\": \"ACCEPTED\", \"revision\": revision, \"validation\": result}))\n        accepted = True\n    except rt.ContractError as error:\n        print(json.dumps({\"case\": label, \"result\": \"REJECTED\", \"revision\": revision, \"code\": error.code}))\nraise SystemExit(42 if accepted else 0)\n"
+      ],
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M8-001/eighth-provenance-after.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "0533b0192015e782e10bb7acbc572415faf0ee6c7a1899d6864a162c969aa567"
+      },
+      "stderr_path": "docs/evidence/M8-001/eighth-provenance-after.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "suite_before": {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.repository.tests.test_repository_tooling",
+        "-v"
+      ],
+      "exit_code": 1,
+      "stdout_path": "docs/evidence/M8-001/eighth-tooling-before.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_path": "docs/evidence/M8-001/eighth-tooling-before.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "247afb5cba12f7b422e6ac450cc6689774ac75736a6fa6576668e41a08e9e5fd"
+      }
+    },
+    "suite_after": {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.repository.tests.test_repository_tooling",
+        "-v"
+      ],
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M8-001/eighth-tooling-after.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_path": "docs/evidence/M8-001/eighth-tooling-after.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "2eead830543a1a7ea5186e8cfcacbff4e137ae4984028609bff1a4b61bb8f069"
+      }
+    },
+    "before_counts": {
+      "total": 37,
+      "failures": 3
+    },
+    "after_counts": {
+      "total": 37,
+      "failures": 0
+    },
+    "history_requirement": "The candidate commit and source blobs must exist locally. Missing history fails closed. Publication must retain the source candidate through merge rather than squash it away."
+  },
+  "close_context": {
+    "method": "Stopped contexts are rejected before ownership. Constrained close bounds caller wait using one shared completion owner; admitted cleanup uses an unbounded context preserving trace/event sink. Background close remains synchronous. Cancellation/deadline does not abandon cleanup or overwrite concurrent terminal causes. Context-clock exceptions are normalized before ownership, and coordination is allocated before lifecycle mutation.",
+    "before_counts": {
+      "total": 33,
+      "passed": 27,
+      "skipped": 0,
+      "errors": 4,
+      "failures": 2
+    },
+    "after_counts": {
+      "total": 33,
+      "passed": 33,
+      "skipped": 0,
+      "errors": 0,
+      "failures": 0
+    },
+    "baseline_preparation": "The final regression test file was applied to archived head 57279476b42c9213b9231895fadf8b374fd70f4b without applying the production close repair.",
+    "before": {
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 1,
+      "stdout_path": "docs/evidence/M8-001/eighth-network-before.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "550b029d8edbc54c73771ad4638f1ed6f18fc430e76ef92c8a91871e63ccb810"
+      },
+      "stderr_path": "docs/evidence/M8-001/eighth-network-before.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "bc37c062ce41562eb2ac1eae16155c98ee7ec7bda24c5ddb0677abd9d3c61c2d"
+      }
+    },
+    "after": {
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M8-001/eighth-network-after.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5c1150a6ac43eedd863354bd28fba8e12e81b36883d8616734a4702cba85aefe"
+      },
+      "stderr_path": "docs/evidence/M8-001/eighth-network-after.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "native_stopped_close": {
+    "consumer_source": "package wirestack_m8_001_consumer\n\nimport wirestack.net.*\nimport wirestack as api\n\nmain(): Int64 {\n    let address = api.IpAddress(api.IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8])\n    let endpoint = api.SocketEndpoint(address, 8080u16)\n    let source = api.CancellationSource()\n    source.cancel()\n    var allCorrect = true\n    for (kind in 0..2) {\n        let stream = TcpStream.connect(endpoint, context: api.OperationContext(\n            deadline: Some(api.Deadline.after(3 * Duration.second))))\n        let context = if (kind == 0) {\n            api.OperationContext(cancellation: source.token)\n        } else {\n            api.OperationContext(deadline: Some(api.Deadline.after(0 * Duration.second)))\n        }\n        var rejected = false\n        try {\n            try {\n                stream.close(context: context)\n            } catch (error: api.NetworkException) {\n                rejected = match ((kind, error.code)) {\n                    case (0, api.NetworkErrorCode.Cancelled) => true\n                    case (1, api.NetworkErrorCode.TimedOut) => true\n                    case _ => false\n                }\n                match (error.phase) {\n                    case api.NetworkPhase.TransportClose => ()\n                    case _ => throw IllegalStateException(\"wrong close phase\")\n                }\n                if (internetPort(error.remoteEndpoint) != 8080u16 ||\n                    internetPort(error.localEndpoint) == 0u16) {\n                    throw IllegalStateException(\"stopped close lost endpoint diagnostics\")\n                }\n            }\n            let stillOpen = match (stream.state) {\n                case SocketState.Open => !stream.isClosed()\n                case _ => false\n            }\n            println(\"STOPPED_CLOSE case=${kind} rejected=${rejected} open=${stillOpen}\")\n            if (rejected && stillOpen) {\n                stream.writeAll(api.ByteSpan([0x42u8]), context: api.OperationContext(\n                    deadline: Some(api.Deadline.after(3 * Duration.second))))\n            } else {\n                allCorrect = false\n            }\n        } finally {\n            stream.close()\n        }\n    }\n    if (allCorrect) { 0 } else { 42 }\n}\n\nfunc internetPort(endpoint: ?api.NetworkEndpoint): UInt16 {\n    match (endpoint) {\n        case Some(api.NetworkEndpoint.Internet(value)) => value.port\n        case _ => throw IllegalStateException(\"expected captured Internet endpoint\")\n    }\n}\n",
+    "receiver_source": "import json\nimport socket\nfrom pathlib import Path\nlistener = socket.socket()\nlistener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\nlistener.bind((\"127.0.0.1\", 8080))\nlistener.listen(2)\nlistener.settimeout(30)\nprint(\"LISTENING 8080\", flush=True)\nrows = []\ntry:\n    for case in range(2):\n        connection, _ = listener.accept()\n        with connection:\n            connection.settimeout(5)\n            payload = bytearray()\n            while True:\n                chunk = connection.recv(64)\n                if not chunk:\n                    break\n                payload.extend(chunk)\n            rows.append({\"case\": case, \"payload_hex\": payload.hex()})\nfinally:\n    listener.close()\nprint(json.dumps(rows), flush=True)\nPath(\"close-peer-result.json\").write_text(json.dumps(rows) + \"\\n\")\n",
+    "baseline_dependency": "/home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909",
+    "fixed_dependency": "/tmp/wirestack-m8-001-clean-publication-2rvq39zo",
+    "build_before": {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M8-001/eighth-close-build-before.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+      },
+      "stderr_path": "docs/evidence/M8-001/eighth-close-build-before.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "f0671204ae556008272b466a7da4682f8a69fbd94218eda844be2c98233241b7"
+      }
+    },
+    "build_after": {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M8-001/eighth-close-build-after.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+      },
+      "stderr_path": "docs/evidence/M8-001/eighth-close-build-after.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "ec58dea23066b85d297d7fb3488dcfecf7d55ee8ad1a55d7bb1a4b4af355d5aa"
+      }
+    },
+    "before": {
+      "argv": [
+        "/tmp/wirestack-m8-001-connect-exhaustion-l10s_duc/target/release/bin/main"
+      ],
+      "exit_code": 42,
+      "stdout_path": "docs/evidence/M8-001/eighth-close-native-before.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "db19491387c2dba587182489365146e31c5d6fad5f77b122a0a43aa3262b8cd7"
+      },
+      "stderr_path": "docs/evidence/M8-001/eighth-close-native-before.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "after": {
+      "argv": [
+        "/tmp/wirestack-m8-001-connect-exhaustion-l10s_duc/target/release/bin/main"
+      ],
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M8-001/eighth-close-native-after.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "92014d4d8400bcedec11339bd944ac5475611a497c85cc0e9c4d1859f505bfd3"
+      },
+      "stderr_path": "docs/evidence/M8-001/eighth-close-native-after.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "peer_before": [
+      {
+        "case": 0,
+        "payload_hex": ""
+      },
+      {
+        "case": 1,
+        "payload_hex": ""
+      }
+    ],
+    "peer_after": [
+      {
+        "case": 0,
+        "payload_hex": "42"
+      },
+      {
+        "case": 1,
+        "payload_hex": "42"
+      }
+    ]
+  },
+  "limits": [
+    "A deterministically blocked native TcpSocket.close was not forced. In-flight close wait/completion ownership uses gated Transport SPI fixtures; stopped-context no-side-effect behavior uses real TCP.",
+    "A permanently stuck custom delegate retains its admitted cleanup and coordination; callers remain bounded.",
+    "No native datagram/Unix/raw I/O, later protocol integration or long-duration soak is claimed."
+  ],
+  "qualification_setup": {
+    "first_failure": "Six existing M7-030 release-fixture tests could not read the ignored M7-021 tarball in the standalone publication snapshot. The SOAK_ALREADY_RUNNING output belongs to an expected fault-injection test, not the gate failure.",
+    "restored_fixture": "dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
+    "copied_from": "/home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/dist/m7-021/wirestack-0.1.0-linux-x86_64-glibc.tar.gz",
+    "fixture_digest": {
+      "domain": "artifact-bytes-v1",
+      "sha256": "c0988f62eb657c465a928825573e41e2eb2675241240312bc2228482cbafc9ee"
+    },
+    "source_changes": "None; restored the exact artifact already used by the previous passing qualification. No tests or gates were skipped.",
+    "first_attempt": {
+      "argv": [
+        "scripts/check"
+      ],
+      "exit_code": 1,
+      "stdout_path": "docs/evidence/M8-001/eighth-full-check-missing-fixture.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b8d3eb916fa9a5b64aac6af9c9893d2e34e670e55f8c5d2c92c9c59dbae04a49"
+      },
+      "stderr_path": "docs/evidence/M8-001/eighth-full-check-missing-fixture.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "1ae7f15de2c77a3d32a7da936b464fe3eb100a9d780f9503fbd4a3333fb815ad"
+      }
+    },
+    "retry": {
+      "status": "PASS",
+      "command_report": "docs/evidence/M8-001/full-check.json",
+      "counts": {
+        "total": 646,
+        "passed": 623,
+        "skipped": 23,
+        "errors": 0,
+        "failures": 0
+      },
+      "all_task_commands_passed": 8
+    }
+  }
+}

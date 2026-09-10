@@ -1,0 +1,38 @@
+test_atomic_report_preserves_old_target_on_injected_failure (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_atomic_report_preserves_old_target_on_injected_failure) ... ok
+test_command_capture_is_bounded (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_command_capture_is_bounded) ... ok
+test_dependency_cycle_is_rejected (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_dependency_cycle_is_rejected) ... ok
+test_doctor_distinguishes_blocked_and_degraded (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_doctor_distinguishes_blocked_and_degraded) ... ok
+test_escaping_evidence_report_is_rejected (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_escaping_evidence_report_is_rejected) ... ok
+test_evidence_line_ending_only_change_is_not_stale (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_evidence_line_ending_only_change_is_not_stale) ... ok
+test_evidence_source_drift_is_stale (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_evidence_source_drift_is_stale) ... ok
+test_long_check_with_no_long_commands_is_skipped (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_long_check_with_no_long_commands_is_skipped) ... ok
+test_long_command_cannot_enter_fast_gate (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_long_command_cannot_enter_fast_gate) ... ok
+test_long_timeout_allows_one_day_plus_bounded_teardown (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_long_timeout_allows_one_day_plus_bounded_teardown) ... ok
+test_missing_dependency_is_rejected (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_missing_dependency_is_rejected) ... ok
+test_missing_task_is_structured (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_missing_task_is_structured) ... ok
+test_old_or_untyped_evidence_digest_schema_is_rejected (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_old_or_untyped_evidence_digest_schema_is_rejected) ... ok
+test_path_escape_is_rejected (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_path_escape_is_rejected) ... ok
+test_repository_plan_validator_tracks_paths_scenarios_and_tests (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_repository_plan_validator_tracks_paths_scenarios_and_tests) ... ok
+test_revision_bound_report_must_match_candidate (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_revision_bound_report_must_match_candidate) ... ok
+test_seal_accepts_canonical_line_ending_equivalence (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_seal_accepts_canonical_line_ending_equivalence) ... ok
+test_seal_accepts_matching_revision_bound_report (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_seal_accepts_matching_revision_bound_report) ... ok
+test_seal_binds_actual_committed_source (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_seal_binds_actual_committed_source) ... ok
+test_seal_converts_git_timeout_to_contract_error (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_seal_converts_git_timeout_to_contract_error) ... ok
+test_seal_rejects_default_head_when_working_source_differs (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_seal_rejects_default_head_when_working_source_differs) ... ok
+test_seal_rejects_fictitious_commit (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_seal_rejects_fictitious_commit) ... ok
+test_seal_rejects_malformed_revision_without_bound_reports (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_seal_rejects_malformed_revision_without_bound_reports) ... ok
+test_seal_rejects_non_commit_object (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_seal_rejects_non_commit_object) ... ok
+test_seal_rejects_revision_bound_stale_report (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_seal_rejects_revision_bound_stale_report) ... ok
+test_seal_rejects_source_missing_from_candidate_tree (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_seal_rejects_source_missing_from_candidate_tree) ... ok
+test_seal_uses_git_stdout_revision_despite_stderr_warning (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_seal_uses_git_stdout_revision_despite_stderr_warning) ... ok
+test_skipped_report_cannot_impersonate_pass (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_skipped_report_cannot_impersonate_pass) ... ok
+test_stale_report_digest_is_stale (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_stale_report_digest_is_stale) ... ok
+test_unknown_digest_domain_is_rejected (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_unknown_digest_domain_is_rejected) ... ok
+test_unknown_field_is_rejected (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_unknown_field_is_rejected) ... ok
+test_valid_contract_and_unknown_schema_fail_closed (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_valid_contract_and_unknown_schema_fail_closed) ... ok
+test_verify_rejects_malformed_revision_without_bound_reports (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_verify_rejects_malformed_revision_without_bound_reports) ... ok
+
+----------------------------------------------------------------------
+Ran 33 tests in 11.812s
+
+OK

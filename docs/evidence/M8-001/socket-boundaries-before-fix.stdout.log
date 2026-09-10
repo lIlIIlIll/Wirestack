@@ -1,0 +1,77 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 6642565 ns, RESULT:
+    TCS: NetworkFoundationContractTest, time elapsed: 6642565 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (247447 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (32526 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (40579 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (115048 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (52466 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (18917 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (67046 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (38435 ns)
+    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (53637 ns)
+    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (51107 ns)
+    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (22141 ns)
+    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (19107 ns)
+    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (41450 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (79350 ns)
+    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (135259 ns)
+    [ PASSED ] CASE: tcpStreamAbortWinsWhileGracefulCloseIsBlocked (49190 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (46558 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (121399 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (2044632 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (15907 ns)
+    [ FAILED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (42689 ns)
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(! stream.isClosed() == true)`
+       left: false
+      right: true
+
+    [ FAILED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (77348 ns)
+    Expect Failed: `(retained == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(retained == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(retained == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(retained == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(retained == true)`
+       left: false
+      right: true
+
+    [ FAILED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (78915 ns)
+    Expect Failed: `(closeFailure == true)`
+       left: false
+      right: true
+
+Summary: TOTAL: 23
+    PASSED: 20, SKIPPED: 0, ERROR: 0
+    FAILED: 3, listed below:
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 15218080 ns, RESULT:
+TP: wirestack.*, time elapsed: 15121071 ns, RESULT:
+    FAILED:
+    TP: wirestack.net, time elapsed: 6642565 ns, RESULT:
+        TCS: NetworkFoundationContractTest, time elapsed: 6642565 ns, RESULT:
+        [ FAILED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (42689 ns)
+        [ FAILED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (77348 ns)
+        [ FAILED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (78915 ns)
+Summary: TOTAL: 23
+    PASSED: 20, SKIPPED: 0, ERROR: 0
+    FAILED: 3
+--------------------------------------------------------------------------------------------------

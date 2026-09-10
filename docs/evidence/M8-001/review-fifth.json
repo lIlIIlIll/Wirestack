@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-001",
+  "status": "PASS",
+  "generated_at_utc": "2026-09-10T09:59:32.661219+00:00",
+  "before_candidate": "d82efcbaa93654607afbb36c74ef432b871ed214",
+  "review_comments": [
+    3977673292,
+    3977673301
+  ],
+  "scope": {
+    "task_totals": "Derived from actual unique task-table IDs; all published header/summary totals are checked. No fixed numeric test expectations.",
+    "exact_read": "Missing captured Internet endpoint metadata is added without replacing existing structured evidence, including Unix error bytes. Ordinary stream EOF remains nonterminal.",
+    "native_proof": "native-consumer.json records a real TCP peer sending one byte then FIN while the consumer requests two bytes and checks both captured endpoints."
+  },
+  "commands": [
+    {
+      "id": "exact-read-before-fix",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "status": "PASS",
+      "stdout_path": "docs/evidence/M8-001/exact-read-before-fix.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "53b13a1a5a2c74a0647c5fec175e4befadfffdf19d8dd9655f64e405c96158be"
+      },
+      "stderr_path": "docs/evidence/M8-001/exact-read-before-fix.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "d496e8a606841712fd711661b172891e0c7660c7f7d783aa2234895d06b29097"
+      }
+    },
+    {
+      "id": "exact-read-after-fix",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "status": "PASS",
+      "stdout_path": "docs/evidence/M8-001/exact-read-after-fix.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9a5e3508c3277b62a1c6941325f061a963ef0346ed9036695fd8d643f15e6e62"
+      },
+      "stderr_path": "docs/evidence/M8-001/exact-read-after-fix.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "id": "task-count-mutation",
+      "argv": [
+        "python3",
+        "-c",
+        "import importlib\nimport pathlib\nimport subprocess\nimport types\nimport unittest\nfrom unittest.mock import patch\n\npath = pathlib.Path(\"tools/tests/test_m7_linux_task_graph.py\").resolve()\nbefore = types.ModuleType(\"before_count_regression\")\nbefore.__file__ = str(path)\nexec(compile(subprocess.check_output([\"git\", \"show\", \"d82efcbaa93654607afbb36c74ef432b871ed214:tools/tests/test_m7_linux_task_graph.py\"], text=True), str(path), \"exec\"), before.__dict__)\nafter = importlib.import_module(\"tools.tests.test_m7_linux_task_graph\")\n\ndef corrupted_read(original):\n    def read(self, relative):\n        text = original(self, relative)\n        if relative == \"docs/planning/implementation-backlog.md\":\n            assert \"**\u5f53\u524d\u53d1\u5e03\u4efb\u52a1\u6570\uff1a** 208\" in text\n            text = text.replace(\"**\u5f53\u524d\u53d1\u5e03\u4efb\u52a1\u6570\uff1a** 208\", \"**\u5f53\u524d\u53d1\u5e03\u4efb\u52a1\u6570\uff1a** 207\", 1)\n        return text\n    return read\n\nold_class = before.M7LinuxTaskGraphTests\nwith patch.object(old_class, \"read\", corrupted_read(old_class.read)):\n    result = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(old_class))\n    assert result.wasSuccessful(), \"old suite unexpectedly detects stale total\"\n    print(\"BEFORE_FIX: corrupted total missed; 3 tests passed\")\nnew_class = after.M7LinuxTaskGraphTests\nwith patch.object(new_class, \"read\", corrupted_read(new_class.read)):\n    result = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite([new_class(\"test_task_counts_include_linux_profile_and_formal_follow_up_work\")]))\n    assert len(result.failures) == 1 and not result.errors, \"stale total was not rejected\"\n    print(\"AFTER_FIX_NEGATIVE: corrupted total rejected by derived invariant\")\nresult = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(new_class))\nassert result.wasSuccessful()\nprint(\"AFTER_FIX_VALID: all 4 task graph tests passed\")\n"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "status": "PASS",
+      "stdout_path": "docs/evidence/M8-001/task-count-mutation.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "96c044c6dd89273450866adee72273ac50eec9cb2da28c09bc974b3876fe5626"
+      },
+      "stderr_path": "docs/evidence/M8-001/task-count-mutation.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "83d39c03f1466c5bed51932041a2b29ccc0684728971ed0f6ee08fa6916fcf65"
+      }
+    }
+  ],
+  "task_count_mutation_source": "import importlib\nimport pathlib\nimport subprocess\nimport types\nimport unittest\nfrom unittest.mock import patch\n\npath = pathlib.Path(\"tools/tests/test_m7_linux_task_graph.py\").resolve()\nbefore = types.ModuleType(\"before_count_regression\")\nbefore.__file__ = str(path)\nexec(compile(subprocess.check_output([\"git\", \"show\", \"d82efcbaa93654607afbb36c74ef432b871ed214:tools/tests/test_m7_linux_task_graph.py\"], text=True), str(path), \"exec\"), before.__dict__)\nafter = importlib.import_module(\"tools.tests.test_m7_linux_task_graph\")\n\ndef corrupted_read(original):\n    def read(self, relative):\n        text = original(self, relative)\n        if relative == \"docs/planning/implementation-backlog.md\":\n            assert \"**\u5f53\u524d\u53d1\u5e03\u4efb\u52a1\u6570\uff1a** 208\" in text\n            text = text.replace(\"**\u5f53\u524d\u53d1\u5e03\u4efb\u52a1\u6570\uff1a** 208\", \"**\u5f53\u524d\u53d1\u5e03\u4efb\u52a1\u6570\uff1a** 207\", 1)\n        return text\n    return read\n\nold_class = before.M7LinuxTaskGraphTests\nwith patch.object(old_class, \"read\", corrupted_read(old_class.read)):\n    result = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(old_class))\n    assert result.wasSuccessful(), \"old suite unexpectedly detects stale total\"\n    print(\"BEFORE_FIX: corrupted total missed; 3 tests passed\")\nnew_class = after.M7LinuxTaskGraphTests\nwith patch.object(new_class, \"read\", corrupted_read(new_class.read)):\n    result = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite([new_class(\"test_task_counts_include_linux_profile_and_formal_follow_up_work\")]))\n    assert len(result.failures) == 1 and not result.errors, \"stale total was not rejected\"\n    print(\"AFTER_FIX_NEGATIVE: corrupted total rejected by derived invariant\")\nresult = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(new_class))\nassert result.wasSuccessful()\nprint(\"AFTER_FIX_VALID: all 4 task graph tests passed\")\n"
+}

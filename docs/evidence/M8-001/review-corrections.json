@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-001",
+  "status": "PASS",
+  "review_pr": 157,
+  "pre_review_revision": "115c5c86cc661f553c96bfcc9a614fbc2003215a",
+  "scope_correction": {
+    "HTTP_parity": "Removed; M8-005 owns values, hooks and integration. Cookie-store eviction review 3976046766 remains part of that later task.",
+    "DNS_wire_header_parser": "Removed; M8-004 owns wire parsing.",
+    "native_datagram_IO": "Not implemented or claimed by M8-001; adapters belong to M8-002/M8-003."
+  },
+  "architecture_regression": {
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "tools.tests.test_architecture_guard.ArchitectureGuardTests.test_network_package_rejects_sdk_socket_types_but_allows_owned_raw_socket",
+      "-v"
+    ],
+    "before_exit_code": 1,
+    "after_exit_code": 0,
+    "assertion": "StreamingSocket is rejected while owned RawSocket is allowed."
+  },
+  "datagram_result_regression": {
+    "command": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--no-progress",
+      "--no-color"
+    ],
+    "before_exit_code": 1,
+    "before_stdout": "--------------------------------------------------------------------------------------------------\nTP: wirestack.net, time elapsed: 6077464 ns, RESULT:\n    TCS: NetworkFoundationContractTest, time elapsed: 6077464 ns, RESULT:\n    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (243245 ns)\n    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (39640 ns)\n    [ PASSED ] CASE: rawSocketCapabilityBoundaryFailsClosedForEveryDomain (45685 ns)\n    [ PASSED ] CASE: dnsParserAcceptsTheRecordLimitBoundary (19380 ns)\n    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (138825 ns)\n    [ PASSED ] CASE: tcpStreamLifecycleDoesNotDependOnEndpointPresence (29406 ns)\n    [ PASSED ] CASE: tcpStreamAbortPreservesConnectionFacts (96471 ns)\n    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (123368 ns)\n    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (14127 ns)\n    [ PASSED ] CASE: dnsHeaderRejectsStructuralAndRecordBounds (759521 ns)\n    [ PASSED ] CASE: dnsHeaderMutationsHaveOnlyBoundedSuccessOrStructuredRejection (571315 ns)\n    [ FAILED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (2019760 ns)\n    Expect Failed: `(rejected == true)`\n       left: false\n      right: true\n\nSummary: TOTAL: 12\n    PASSED: 11, SKIPPED: 0, ERROR: 0\n    FAILED: 1, listed below:\n            TCS: NetworkFoundationContractTest, CASE: datagramResultEnforcesTheIpv4PayloadBound\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 14559370 ns, RESULT:\nTP: wirestack.*, time elapsed: 14464880 ns, RESULT:\n    FAILED:\n    TP: wirestack.net, time elapsed: 6077464 ns, RESULT:\n        TCS: NetworkFoundationContractTest, time elapsed: 6077464 ns, RESULT:\n        [ FAILED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (2019760 ns)\nSummary: TOTAL: 12\n    PASSED: 11, SKIPPED: 0, ERROR: 0\n    FAILED: 1\n--------------------------------------------------------------------------------------------------\n",
+    "after_exit_code": 0,
+    "after_stdout": "--------------------------------------------------------------------------------------------------\nTP: wirestack.net, time elapsed: 3957622 ns, RESULT:\n    TCS: NetworkFoundationContractTest, time elapsed: 3957622 ns, RESULT:\n    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (288784 ns)\n    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (79171 ns)\n    [ PASSED ] CASE: rawSocketCapabilityBoundaryFailsClosedForEveryDomain (46837 ns)\n    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (97531 ns)\n    [ PASSED ] CASE: tcpStreamLifecycleDoesNotDependOnEndpointPresence (22438 ns)\n    [ PASSED ] CASE: tcpStreamAbortPreservesConnectionFacts (67397 ns)\n    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (68053 ns)\n    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1644722 ns)\n    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (12773 ns)\nSummary: TOTAL: 9\n    PASSED: 9, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 12403320 ns, RESULT:\nTP: wirestack.*, time elapsed: 12324232 ns, RESULT:\n    PASSED:\n    TP: wirestack.net, time elapsed: 3957622 ns\nSummary: TOTAL: 9\n    PASSED: 9, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+    "count_change": "Three DNS parser tests were removed to M8-004 scope; current nine tests are network value/lifecycle tests."
+  }
+}

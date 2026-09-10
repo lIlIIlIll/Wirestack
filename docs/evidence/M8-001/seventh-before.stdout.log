@@ -1,0 +1,104 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 10636183 ns, RESULT:
+    TCS: NetworkFoundationContractTest, time elapsed: 10636183 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (340996 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (39648 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (40780 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (98792 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (64364 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (19237 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (131659 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (68857 ns)
+    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (55640 ns)
+    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (140696 ns)
+    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (21678 ns)
+    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (41188 ns)
+    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (18230 ns)
+    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (47373 ns)
+    [ PASSED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (109509 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (322008 ns)
+    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (59783 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (78245 ns)
+    [ PASSED ] CASE: tcpStreamAbortWinsWhileGracefulCloseIsBlocked (58388 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (66152 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (230011 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (3525876 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (23265 ns)
+    [ FAILED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (153059 ns)
+    Expect Failed: `(structured == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(structured == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(structured == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(structured == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(structured == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(structured == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(structured == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(structured == true)`
+       left: false
+      right: true
+
+    [ FAILED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (156686 ns)
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+    [ FAILED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (69927 ns)
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+    Expect Failed: `(matches == true)`
+       left: false
+      right: true
+
+Summary: TOTAL: 26
+    PASSED: 23, SKIPPED: 0, ERROR: 0
+    FAILED: 3, listed below:
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamNormalizesUnexpectedDelegateFailures
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 19169203 ns, RESULT:
+TP: wirestack.*, time elapsed: 19078981 ns, RESULT:
+    FAILED:
+    TP: wirestack.net, time elapsed: 10636183 ns, RESULT:
+        TCS: NetworkFoundationContractTest, time elapsed: 10636183 ns, RESULT:
+        [ FAILED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (153059 ns)
+        [ FAILED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (156686 ns)
+        [ FAILED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (69927 ns)
+Summary: TOTAL: 26
+    PASSED: 23, SKIPPED: 0, ERROR: 0
+    FAILED: 3
+--------------------------------------------------------------------------------------------------

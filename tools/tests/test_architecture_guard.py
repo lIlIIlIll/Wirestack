@@ -488,6 +488,21 @@ class ArchitectureGuardTests(unittest.TestCase):
             self.assertIn("public-low-level-socket-type", rules)
             self.assertIn("public-native-provider-type", rules)
 
+    def test_network_package_rejects_sdk_socket_types_but_allows_owned_raw_socket(self) -> None:
+        with self.fixture() as directory:
+            root = Path(directory)
+            source = self.write(
+                root, "src/net/package.cj",
+                "package wirestack.net\npublic class RawSocket {}\n",
+            )
+            self.assertEqual([], guard.run_guard(root))
+            source.write_text(
+                "package wirestack.net\n"
+                "public func leak(value: StreamingSocket): Unit {}\n",
+                encoding="utf-8",
+            )
+            self.assertIn("public-low-level-socket-type", self.rules(root))
+
     def test_public_alias_to_internal_import_is_rejected(self) -> None:
         with self.fixture() as directory:
             root = Path(directory)

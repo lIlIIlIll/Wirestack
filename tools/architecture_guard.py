@@ -20,7 +20,7 @@ from typing import Iterator, Mapping, Sequence
 
 SCHEMA_VERSION = 1
 ALLOWED_STD_NET_PACKAGE = "wirestack.internal.transport_stdnet"
-PUBLIC_API_PACKAGES = {"wirestack", "wirestack.http", "wirestack.tls"}
+PUBLIC_API_PACKAGES = {"wirestack", "wirestack.http", "wirestack.tls", "wirestack.net"}
 IGNORED_DIRS = {
     ".git", ".cjpm", ".codex", ".idea", ".local", ".vscode",
     "__pycache__", "build", "dist", "out", "target",

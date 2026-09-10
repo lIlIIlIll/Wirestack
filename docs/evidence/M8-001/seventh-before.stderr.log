@@ -1,0 +1,13 @@
+[33mwarning[0m: unused function:'wasClosedByCancellation'
+    [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/net/package_test.cj:1019:5:
+     [36m| [0m
+[36m1019[0m [36m| [0m      public func wasClosedByCancellation(): Bool {[0m
+     [36m| [0m [33m_[0m[33m____^[0m
+[36m1020[0m [36m| [0m[33m|[0m         synchronized(mutex) { cancellationOwnedClose }[0m
+[36m1021[0m [36m| [0m[33m|[0m     }[0m
+     [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
+     [36m| [0m
+     [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.
+Error: cjpm test failed

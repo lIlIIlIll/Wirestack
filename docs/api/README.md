@@ -1,6 +1,6 @@
 # 公开 API 导览
 
-Wirestack 对应用开发者公开 `wirestack.http` 和 `wirestack.tls`。`wirestack.internal.*`
+Wirestack 对应用开发者公开 `wirestack.net`、`wirestack.http` 和 `wirestack.tls`。`wirestack.internal.*`
 是实现细节，consumer 不应导入。Linux 入门路径见
 [getting-started-linux.md](../guides/getting-started-linux.md)。
 
@@ -48,6 +48,40 @@ CJDOC_BIN=/path/to/cjdoc-0.7.2 scripts/check-docs --html --json
 读到 EOF 或显式关闭，连接才能安全归还连接池。
 
 详细流程见 [Linux HTTP 指南](../guides/http1-linux.md)。
+
+## `wirestack.net`
+
+`wirestack.net` 的 M8-001 契约包含 endpoint、lifecycle、capability 和 socket
+option 值类型，以及复用现有 Transport SPI 的 `TcpStream`。公共声明只接受
+Wirestack 的 endpoint、span、错误和 `OperationContext`，不暴露 `std.net`
+descriptor 或异常。
+
+流式读写允许 partial progress，`readExact`/`writeAll` 是显式 helper。
+TCP/UDP listener 和 socket option 的实际应用属于 M8-002，Unix adapter 属于
+M8-003，完整 DNS parser/client/resolver 属于 M8-004。类型可以构造不代表对应
+native 能力已经支持。AF_PACKET、AF_NETLINK、SOCK_SEQPACKET、ancillary data
+及没有 native adapter 的特权 raw I/O 不计为 PASS。
+
+示例：
+
+```cj
+let endpoint = SocketEndpoint(
+    IpAddress(IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8]),
+    8080u16
+)
+let context = OperationContext(
+    deadline: Some(Deadline.after(5 * Duration.second)))
+let stream = TcpStream.connect(endpoint, context: context)
+try {
+    let request = ByteSpan(bytes: "ping".toArray())
+    stream.writeAll(request, context: context)
+} finally {
+    stream.close(context: context)
+}
+```
+
+Network API 的完整 DNS、HTTP parity、TLS context versioning 和最终 release evidence
+分别属于 M8-002 至 M8-007，不要把本页的契约验证当作最终网络底座完成声明。
 
 ## `wirestack.tls`
 

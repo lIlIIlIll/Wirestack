@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "python3",
+    "tools/architecture_guard.py",
+    "--format",
+    "json"
+  ],
+  "duration_ms": 3816.559,
+  "error_code": null,
+  "exit_code": 0,
+  "finished_at_utc": "2026-09-10T15:37:11.715288Z",
+  "id": "architecture-guard",
+  "source_task": "M8-001",
+  "started_at_utc": "2026-09-10T15:37:07.898736Z",
+  "status": "PASS",
+  "stderr_excerpt": "",
+  "stderr_path": "docs/evidence/M8-001/architecture-guard.stderr.log",
+  "stderr_sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr_truncated": false,
+  "stdout_excerpt": "{\n  \"kind\": \"architecture-guard\",\n  \"ok\": true,\n  \"root\": \"/tmp/wirestack-m8-001-clean-publication-2rvq39zo\",\n  \"schema_version\": 1,\n  \"status\": \"PASS\",\n  \"violation_count\": 0,\n  \"violations\": []\n}\n",
+  "stdout_path": "docs/evidence/M8-001/architecture-guard.stdout.log",
+  "stdout_sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "4ffc1069b7003c0c68583b47b39e84bad9fff06877156e9826bc5d9b8cbaded5"
+  },
+  "stdout_truncated": false,
+  "timed_out": false
+}

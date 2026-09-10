@@ -1,0 +1,23 @@
+{
+  "source_task": "M8-001",
+  "status": "PASS",
+  "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "tools.tests.test_m7_026_linux_api_freeze.M7026LinuxApiFreezeTest.test_network_signature_change_is_rejected",
+    "-v"
+  ],
+  "before": {
+    "exit_code": 1,
+    "tests": 1,
+    "failures": 1,
+    "reason": "Changing a public wirestack.net signature was silently absent from the inventory comparison."
+  },
+  "after": {
+    "exit_code": 0,
+    "tests": 1,
+    "failures": 0
+  },
+  "repair": "Included wirestack.net in the public package inventory and ownership checks. The regression changes a network signature and requires compatibility comparison to reject it."
+}

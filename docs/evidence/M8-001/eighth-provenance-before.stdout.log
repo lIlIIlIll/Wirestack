@@ -1,0 +1,2 @@
+{"case": "fictitious", "result": "ACCEPTED", "revision": "0000000000000000000000000000000000000000", "validation": {"stale_paths": [], "report_count": 23, "source_count": 30}}
+{"case": "unrelated", "result": "ACCEPTED", "revision": "f8e8dbca3006a45ab7859373436f82c35eda3eb9", "validation": {"stale_paths": [], "report_count": 23, "source_count": 30}}

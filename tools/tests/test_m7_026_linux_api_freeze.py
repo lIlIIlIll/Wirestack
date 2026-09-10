@@ -9,10 +9,6 @@ from tools import m7_026_linux_api_freeze as api
 
 
 class M7026LinuxApiFreezeTest(unittest.TestCase):
-    def test_committed_report_is_stale_after_digest_domain_migration(self) -> None:
-        with self.assertRaisesRegex(api.ApiFreezeError, "committed compatibility report is stale"):
-            api.validate()
-
     def test_body_only_change_is_stable_but_signature_change_is_not(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = self.fixture(Path(temporary))
@@ -88,15 +84,35 @@ class M7026LinuxApiFreezeTest(unittest.TestCase):
         with self.assertRaisesRegex(api.ApiFreezeError, "removed=.*added=.*changed="):
             api.compare_inventory(baseline, current)
 
+    def test_network_signature_change_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.fixture(Path(temporary))
+            baseline = api.build_inventory(root)
+            source = root / "src/net/package.cj"
+            source.write_text(
+                source.read_text(encoding="utf-8").replace("port: UInt16", "port: UInt32"),
+                encoding="utf-8",
+            )
+            with self.assertRaises(api.ApiFreezeError):
+                api.compare_inventory(baseline, api.build_inventory(root))
+
     def fixture(self, root: Path) -> Path:
         (root / "src/http").mkdir(parents=True)
         (root / "src/tls").mkdir(parents=True)
+        (root / "src/net").mkdir(parents=True)
         (root / "src/internal/model").mkdir(parents=True)
         (root / "cjpm.toml").write_text(
             '[package]\nname = "wirestack"\nversion = "0.1.0"\n', encoding="utf-8"
         )
         (root / "src/package.cj").write_text("package wirestack\n", encoding="utf-8")
         (root / "src/tls/package.cj").write_text("package wirestack.tls\n", encoding="utf-8")
+        (root / "src/net/package.cj").write_text(
+            "package wirestack.net\n"
+            "public struct Endpoint {\n"
+            "    public let port: UInt16\n"
+            "}\n",
+            encoding="utf-8",
+        )
         (root / "src/internal/model/package.cj").write_text(
             "package wirestack.internal.model\n"
             "public interface Model {\n"

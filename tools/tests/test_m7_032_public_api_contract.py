@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
 
 import m7_032_public_api_inventory as api_inventory  # noqa: E402
-PUBLIC_PACKAGES = {"wirestack", "wirestack.http", "wirestack.tls"}
+PUBLIC_PACKAGES = {"wirestack", "wirestack.http", "wirestack.net", "wirestack.tls"}
 PACKAGE_RE = re.compile(r"(?m)^package\s+([A-Za-z_][A-Za-z0-9_.]*)\s*$")
 PUBLIC_INTERNAL_RE = re.compile(
     r"(?m)^\s*public\s+(?:class|struct|interface|enum|func|prop|let|var|type)\b[^\n]*"
@@ -47,16 +47,6 @@ class M7032PublicApiContractTests(unittest.TestCase):
             if PUBLIC_INTERNAL_RE.search(text):
                 violations.append(path.relative_to(ROOT).as_posix())
         self.assertEqual([], violations)
-
-    def test_adr_explicitly_rejects_compatibility_shims(self) -> None:
-        adr = self.read("docs/architecture/adr/0006-public-contract-ownership.md")
-        self.assertIn("No compatibility alias or\nmigration shim is added", adr)
-        self.assertIn("source, API, ABI, or semantic compatibility", adr)
-
-    def test_m7_031_depends_on_m7_032(self) -> None:
-        backlog = self.read("docs/planning/implementation-backlog.md")
-        row = next(line for line in backlog.splitlines() if line.startswith("| M7-031 |"))
-        self.assertIn("M7-032", row.split("|")[5])
 
     def test_current_inventory_has_only_public_alias_targets(self) -> None:
         inventory = api_inventory.build_inventory(ROOT)

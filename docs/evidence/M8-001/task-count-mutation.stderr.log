@@ -1,0 +1,40 @@
+test_linux_dependencies_exclude_global_and_upstream_blockers (before_count_regression.M7LinuxTaskGraphTests.test_linux_dependencies_exclude_global_and_upstream_blockers) ... ok
+test_linux_graph_has_the_exact_frozen_task_set (before_count_regression.M7LinuxTaskGraphTests.test_linux_graph_has_the_exact_frozen_task_set) ... ok
+test_task_graph_has_fail_closed_audit_and_release_edges (before_count_regression.M7LinuxTaskGraphTests.test_task_graph_has_fail_closed_audit_and_release_edges) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.002s
+
+OK
+test_task_counts_include_linux_profile_and_formal_follow_up_work (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_task_counts_include_linux_profile_and_formal_follow_up_work) ... FAIL
+
+======================================================================
+FAIL: test_task_counts_include_linux_profile_and_formal_follow_up_work (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_task_counts_include_linux_profile_and_formal_follow_up_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/tools/tests/test_m7_linux_task_graph.py", line 101, in test_task_counts_include_linux_profile_and_formal_follow_up_work
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        derived_count,
+        ^^^^^^^^^^^^^^
+        published_counts[label],
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+        f"{label} does not match declared unique task IDs",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 208 != 207 : 当前发布任务数 does not match declared unique task IDs
+
+----------------------------------------------------------------------
+Ran 1 test in 0.002s
+
+FAILED (failures=1)
+test_linux_dependencies_exclude_global_and_upstream_blockers (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_linux_dependencies_exclude_global_and_upstream_blockers) ... ok
+test_linux_graph_has_the_exact_frozen_task_set (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_linux_graph_has_the_exact_frozen_task_set) ... ok
+test_task_counts_include_linux_profile_and_formal_follow_up_work (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_task_counts_include_linux_profile_and_formal_follow_up_work) ... ok
+test_task_graph_has_fail_closed_audit_and_release_edges (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_task_graph_has_fail_closed_audit_and_release_edges) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.004s
+
+OK
