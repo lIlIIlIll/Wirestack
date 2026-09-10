@@ -29,6 +29,7 @@ __pycache__/
 !docs/evidence/M7-032/*.json
 !docs/evidence/M7-032/linux_x86_64/*.json
 !docs/evidence/M7-033/*.json
+!docs/references/m7-033-ci-toolchain.json
 !docs/evidence/M7-028/*.json
 !docs/evidence/M7-028/linux_x86_64/*.json
 !docs/security/review/linux-1.0/*.json
