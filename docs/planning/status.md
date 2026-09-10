@@ -190,3 +190,9 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 | P1-012 | COMPLETE | [`docs/evidence/P1-012/README.md`](../evidence/P1-012/README.md) | Fail-closed repository diagnostics, task contracts, layered checks and source-bound evidence freshness validation pass on Linux glibc; no long-duration gate ran. |
 | P1-013 | COMPLETE | [`docs/evidence/P1-013/README.md`](../evidence/P1-013/README.md) | Development regression checks now validate frozen release records structurally, while all production M7 release validators remain strict by default and reject stale source or artifact evidence. `scripts/check` passes; no long-duration gate ran. |
 | P1-014 | COMPLETE | [`docs/evidence/P1-014/README.md`](../evidence/P1-014/README.md) | All 398 digest calls have explicit text, artifact-byte or typed-implementation domains across Python, scripts and workflows; schema v2, exact-candidate-bound Linux and hosted Windows CRLF fault injection, task-level validation and canonical repository checks pass. Historical schema-v1 evidence remains rejected rather than silently promoted. |
+
+## M8 Linux network foundation
+
+| Task | Status | Evidence | Notes |
+|---|---|---|---|
+| M8-001 | COMPLETE | [`docs/evidence/M8-001/README.md`](../evidence/M8-001/README.md) | Shared endpoints and bounded network contracts; terminal-close idempotence, bounded waits and actual native abort ownership. All eight task commands pass: 626 Cangjie cases pass, 23 performance cases excluded; network 35/35, tooling 37/37. API docs cover 1,093 symbols and 430 parameters. Native transfer, post-EOF writes, stopped-close reuse, close ownership, cancellation and descriptor exhaustion pass. Evidence verification binds real local commits and source inputs. Later protocol and privileged I/O are not claimed. |

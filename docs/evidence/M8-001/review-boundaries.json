@@ -1,0 +1,272 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-001",
+  "status": "PASS",
+  "candidate_before_changes": "b83b230fe923fa12a385ac6ad15d409cf7b5471f",
+  "scope": {
+    "half_close": "Initial 18 cases passed. A deterministic final-direction shutdown race then reproduced an incorrect Failed state (18 passed/1 failed); all 19 passed after repair. Coverage includes six public I/O paths, opposite-direction progress, empty-buffer no-ops and shutdown/read/write interleavings.",
+    "candidate_binding": "33 tooling cases passed; actual CLI rejects a fictional commit and working-tree/source-commit mismatch without creating an output seal. Portable verify remains offline; commit resolution and source-tree binding happen before sealing."
+  },
+  "commands": [
+    {
+      "id": "half-close-regressions",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout_path": "docs/evidence/M8-001/half-close-regressions.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "852caffd26b3386bfa01ad453ef14d9217f18808c4de57fced76f74bcebc931b"
+      },
+      "stderr_path": "docs/evidence/M8-001/half-close-regressions.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "id": "commit-binding-regressions",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tools.repository.tests.test_repository_tooling.RepositoryToolingTests",
+        "-v"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout_path": "docs/evidence/M8-001/commit-binding-regressions.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_path": "docs/evidence/M8-001/commit-binding-regressions.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "2bff9c25f70e52cdfa7f2e6700be1fe50a3e62550b64c9ca6d01949b12c086e6"
+      }
+    },
+    {
+      "id": "fictitious-candidate",
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "seal-evidence",
+        "M8-001",
+        "--output",
+        "build/m8-001-fictitious-candidate.json",
+        "--report",
+        "docs/evidence/M8-001/plan-validation.json",
+        "--report",
+        "docs/evidence/M8-001/architecture-guard.json",
+        "--report",
+        "docs/evidence/M8-001/task-validation.json",
+        "--report",
+        "docs/evidence/M8-001/python-tests.json",
+        "--report",
+        "docs/evidence/M8-001/cangjie-build.json",
+        "--report",
+        "docs/evidence/M8-001/network-tests.json",
+        "--report",
+        "docs/evidence/M8-001/regression-tests.json",
+        "--report",
+        "docs/evidence/M8-001/api-inventory-command.json",
+        "--report",
+        "docs/evidence/M8-001/docs-report.json",
+        "--report",
+        "docs/evidence/M8-001/full-check.json",
+        "--report",
+        "docs/evidence/M8-001/native-consumer.json",
+        "--report",
+        "docs/evidence/M8-001/lifecycle-reproduction.json",
+        "--report",
+        "docs/evidence/M8-001/api-inventory-regression.json",
+        "--report",
+        "docs/evidence/M8-001/review-corrections.json",
+        "--report",
+        "docs/evidence/M8-001/task-check.json",
+        "--report",
+        "docs/evidence/M8-001/cangjie-check.json",
+        "--report",
+        "docs/evidence/M8-001/docs-command.json",
+        "--report",
+        "docs/evidence/M8-001/review-round-two.json",
+        "--report",
+        "docs/evidence/M8-001/review-cancellation.json",
+        "--revision",
+        "0000000000000000000000000000000000000000"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "stdout_path": "docs/evidence/M8-001/fictitious-candidate.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_path": "docs/evidence/M8-001/fictitious-candidate.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "613829205ac9418a5732dd96ee7c436bcb80d81e3781ece13de56acddb0ad159"
+      }
+    },
+    {
+      "id": "source-mismatch",
+      "argv": [
+        "python3",
+        "tools/repository/repository_tooling.py",
+        "--root",
+        ".",
+        "seal-evidence",
+        "M8-001",
+        "--output",
+        "build/m8-001-source-mismatch.json",
+        "--report",
+        "docs/evidence/M8-001/plan-validation.json",
+        "--report",
+        "docs/evidence/M8-001/architecture-guard.json",
+        "--report",
+        "docs/evidence/M8-001/task-validation.json",
+        "--report",
+        "docs/evidence/M8-001/python-tests.json",
+        "--report",
+        "docs/evidence/M8-001/cangjie-build.json",
+        "--report",
+        "docs/evidence/M8-001/network-tests.json",
+        "--report",
+        "docs/evidence/M8-001/regression-tests.json",
+        "--report",
+        "docs/evidence/M8-001/api-inventory-command.json",
+        "--report",
+        "docs/evidence/M8-001/docs-report.json",
+        "--report",
+        "docs/evidence/M8-001/full-check.json",
+        "--report",
+        "docs/evidence/M8-001/native-consumer.json",
+        "--report",
+        "docs/evidence/M8-001/lifecycle-reproduction.json",
+        "--report",
+        "docs/evidence/M8-001/api-inventory-regression.json",
+        "--report",
+        "docs/evidence/M8-001/review-corrections.json",
+        "--report",
+        "docs/evidence/M8-001/task-check.json",
+        "--report",
+        "docs/evidence/M8-001/cangjie-check.json",
+        "--report",
+        "docs/evidence/M8-001/docs-command.json",
+        "--report",
+        "docs/evidence/M8-001/review-round-two.json",
+        "--report",
+        "docs/evidence/M8-001/review-cancellation.json",
+        "--revision",
+        "b83b230fe923fa12a385ac6ad15d409cf7b5471f"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "stdout_path": "docs/evidence/M8-001/source-mismatch.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_path": "docs/evidence/M8-001/source-mismatch.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "59300503659871c1bd7da07e93ab1ece2c38a84d7e6e28f486e25e0cb3ffbf1b"
+      }
+    },
+    {
+      "id": "final-shutdown-before-fix",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "stdout_path": "docs/evidence/M8-001/final-shutdown-before-fix.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "f017911e188efda1e9deda16c8a416d5b825c77b2d3af4404f587a3eb0ad60c0"
+      },
+      "stderr_path": "docs/evidence/M8-001/final-shutdown-before-fix.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "bc37c062ce41562eb2ac1eae16155c98ee7ec7bda24c5ddb0677abd9d3c61c2d"
+      }
+    },
+    {
+      "id": "final-shutdown-after-fix",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "stdout_path": "docs/evidence/M8-001/final-shutdown-after-fix.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "99ee3818b67196dcc510f723a7a8e313bf456f15d1f38dc51c3b4e29782ec776"
+      },
+      "stderr_path": "docs/evidence/M8-001/final-shutdown-after-fix.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "documentation_timeout_correction": {
+    "failed_attempt": {
+      "argv": [
+        "scripts/check-docs",
+        "--json",
+        "--output",
+        "docs/evidence/M8-001/docs-report.json"
+      ],
+      "duration_ms": 300004.614,
+      "error_code": "TIMEOUT",
+      "exit_code": null,
+      "finished_at_utc": "2026-09-10T09:03:16.002027Z",
+      "id": "public-api-documentation",
+      "started_at_utc": "2026-09-10T08:58:15.997424Z",
+      "status": "FAIL",
+      "stderr_excerpt": "",
+      "stderr_path": "docs/evidence/M8-001/documentation-timeout.stderr.log",
+      "stderr_truncated": false,
+      "stdout_excerpt": "",
+      "stdout_path": "docs/evidence/M8-001/documentation-timeout.stdout.log",
+      "stdout_truncated": false,
+      "timed_out": true,
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "other_task_commands": "7 of 7 PASS",
+    "old_timeout_seconds": 300,
+    "new_timeout_seconds": 1800,
+    "precedent": "tools/tasks/M7-033.json: cjdoc-layered-generation and cjdoc-fast-gate",
+    "acceptance_change": "None: full generation and 100% required documentation coverage remain enforced.",
+    "successful_retry": {
+      "status": "PASS",
+      "duration_ms": 328287.84,
+      "report": "https://github.com/lIlIIlIll/Wirestack/blob/15ddee5c7404d01af92590d2e2405a6363e13f28/docs/evidence/M8-001/docs-command.json"
+    }
+  }
+}

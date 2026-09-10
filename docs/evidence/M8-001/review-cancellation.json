@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-001",
+  "status": "PASS",
+  "candidate_before_changes": "93dcfe19e42387fdd67987eb8034dab021c41463",
+  "review_comment": "https://github.com/lIlIIlIll/Wirestack/pull/157#discussion_r3976732077",
+  "scope": "A pre-cancelled read leaves an untouched delegate open; cancellation that already closed the delegate retains Aborted through later close calls. Original Cancelled error is preserved.",
+  "runs": [
+    {
+      "stage": "before-fix",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 1,
+      "stdout_path": "docs/evidence/M8-001/cancellation-before-fix.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b5cf1f0276c21fd2a6cecd5f19e79b1633a73743d0dfabf8eb97a71dbd1fe0f1"
+      },
+      "stderr_path": "docs/evidence/M8-001/cancellation-before-fix.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "bc37c062ce41562eb2ac1eae16155c98ee7ec7bda24c5ddb0677abd9d3c61c2d"
+      }
+    },
+    {
+      "stage": "after-fix",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 0,
+      "stdout_path": "docs/evidence/M8-001/cancellation-after-fix.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "d5f705e5ead25a6037ff400932105f77a673151b8bef7921ddd0f17381fadf8a"
+      },
+      "stderr_path": "docs/evidence/M8-001/cancellation-after-fix.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ]
+}

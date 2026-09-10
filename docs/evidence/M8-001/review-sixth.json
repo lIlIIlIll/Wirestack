@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-001",
+  "status": "PASS",
+  "generated_at_utc": "2026-09-10T10:33:06.287819+00:00",
+  "before_candidate": "6d87899bea45487e0651d6122429d828ebe3fb25",
+  "review_comments": [
+    3978020084,
+    3978020090,
+    3978020105
+  ],
+  "scope": {
+    "eof": "UnexpectedEof reports an incomplete exact read without aborting the writable direction.",
+    "io_diagnostics": "Deterministic classified delegate conflicts retain captured endpoints across all six I/O methods without terminalizing the stream.",
+    "close_failure": "An injected unclassified delegate close failure becomes System/TransportClose/SystemFailure, Retryability.Never, with endpoints and original cause; Failed is retained. This is fault injection, not a forced native OS close error.",
+    "native": "native-consumer.json records a TCP peer that half-closes its write side, then receives after from the consumer following UnexpectedEof."
+  },
+  "commands": [
+    {
+      "id": "socket-boundaries-before-fix",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "status": "PASS",
+      "stdout_path": "docs/evidence/M8-001/socket-boundaries-before-fix.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "94315b6d9328b24c0f5f38257a4364ae837fb98b5e39338eea65102d8474b5e6"
+      },
+      "stderr_path": "docs/evidence/M8-001/socket-boundaries-before-fix.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "bc37c062ce41562eb2ac1eae16155c98ee7ec7bda24c5ddb0677abd9d3c61c2d"
+      }
+    },
+    {
+      "id": "socket-boundaries-after-fix",
+      "argv": [
+        "cjpm",
+        "test",
+        "src/net",
+        "--no-progress",
+        "--no-color"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "status": "PASS",
+      "stdout_path": "docs/evidence/M8-001/socket-boundaries-after-fix.stdout.log",
+      "stdout_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "cb99b9b37d2fe58c69bfcbaa834f8c4e07434d223a88adb3ec79b8a3ad403e76"
+      },
+      "stderr_path": "docs/evidence/M8-001/socket-boundaries-after-fix.stderr.log",
+      "stderr_sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ]
+}
