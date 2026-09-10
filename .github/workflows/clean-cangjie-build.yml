@@ -178,3 +178,16 @@ jobs:
         run: |
           git diff --exit-code
           test -z "$(git status --porcelain --untracked-files=all)"
+
+  report-build-status:
+    if: ${{ always() }}
+    needs: [build-cjdoc, clean-cangjie-build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Require both builds to succeed
+        env:
+          CJDOC_RESULT: ${{ needs.build-cjdoc.result }}
+          WIRESTACK_RESULT: ${{ needs.clean-cangjie-build.result }}
+        run: test "$CJDOC_RESULT" = success && test "$WIRESTACK_RESULT" = success
