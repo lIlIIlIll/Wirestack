@@ -484,16 +484,21 @@ runtime、`std.net` 源码修改不得成为依赖。
 ## 6. M8：完整网络底座与 stdx 能力对齐
 
 M8 extends the Linux x86_64 glibc profile with a Wirestack-owned synchronous
-network substrate and the protocol capabilities needed by a complete network
-foundation. It does not modify runtime, `std`, `stdx` or the SDK, and it does
-not claim non-Linux execution from cross-compilation. Every task has its own
-branch, evidence directory and acceptance gate; a long gate is never selected
-by a fast or full gate implicitly.
+network foundation and the protocol capabilities needed by a complete network
+stack. It does not modify runtime, `std`, `stdx` or the SDK, and it does not
+claim non-Linux execution from cross-compilation. Every task has its own branch,
+evidence directory and acceptance gate; a long gate is never selected by a fast
+or full gate implicitly.
+
+M8-002 qualifies the public Linux `TcpListener` and `UdpSocket` over resolved
+Internet endpoints. Native IPv4/IPv6 results, the API baseline and source-bound
+evidence are recorded in `docs/evidence/M8-002/`. M8-003 through M8-007 remain
+pending and must not inherit an M8-002 completion claim.
 
 | ID | 任务 | 责任域 | 复杂度 | 依赖 | PRD/ADR 追踪 | 合并/验收条件 |
 |---|---|---|---:|---|---|---|
 | M8-001 | 冻结 Linux 网络底座契约与包边界 | 架构/网络 | C3 | M7-033,M7-032 | ADR-0008；PRD §7–11/§17 | `wirestack.net` public package, endpoint/lifecycle/context contract, capability-scoped raw and Unix boundaries, public-only API inventory, task manifest and failure-injection plan compile on Linux; unsupported capabilities are explicit and not PASS. |
-| M8-002 | 实现 Linux TCP/UDP 同步 socket 与 listener | 网络/传输 | C4 | M8-001 | ADR-0005/0008；PRD §9–11 | Non-blocking/CLOEXEC creation, bounded readiness waits, partial stream I/O, exact/all helpers, datagram atomicity/truncation, close/cancel/deadline wakeup, one reader and one writer, stable errors, native loopback evidence and resource bounds. |
+| M8-002 | 实现 Linux TCP/UDP 同步 socket 与 listener | 网络/传输 | C4 | M8-001 | ADR-0005/0008；PRD §9–11 | Public `TcpListener`/`UdpSocket` over resolved Internet endpoints; non-blocking/CLOEXEC descriptors; backlog 1..65,535; bounded readiness waits; operation-local TCP accept cancellation; active UDP cancellation owns abortive close; one accept and one operation per UDP direction; atomic datagrams, 1..65,507 receive bounds, truncation/source retention, mandatory empty receive, and backend-scoped empty-send `Unsupported` without native I/O. Qualification also requires the M8-002 API baseline, native consumer evidence, full task gates and a sealed evidence record. |
 | M8-003 | 实现 Unix-domain 与 capability-scoped RawSocket | 网络/平台 | C4 | M8-002 | ADR-0008；PRD §8–11 | Pathname and abstract byte-name adapters are tested where the SDK permits; unnamed form is explicit; AF_PACKET/AF_NETLINK/SOCK_SEQPACKET/ancillary remain explicit exclusions; privileged raw I/O either has native evidence or is BLOCKED. |
 | M8-004 | 实现 DNS wire client 与 Linux resolver policy | DNS/连接器 | C4 | M8-002 | ADR-0008；PRD §10/§11/§15 | Bounded A/AAAA/CNAME/SRV/TXT/MX/PTR parsing, identity/question/server validation, UDP truncation to TCP fallback, hosts/search/ndots policy, negative cache and Happy Eyeballs under one context; malformed corpus and native evidence pass. |
 | M8-005 | 对齐 HTTP/1.1、HTTP/2 与 WebSocket stdx 能力 | HTTP | C4 | M8-002,M8-004 | ADR-0008；PRD §15/§17 | CookieJar, multipart/FileHandler, Upgrade, H1/H2 WebSocket without compression, bounded H2 push and connector/pool/service hooks integrate with existing bounded state machines; public API, conformance and clean-consumer tests pass. |

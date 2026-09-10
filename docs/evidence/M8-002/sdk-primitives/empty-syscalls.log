@@ -1,0 +1,7 @@
+895172 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
+895172 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
+895176 +++ exited with 0 +++
+895175 +++ exited with 0 +++
+895174 +++ exited with 0 +++
+895173 +++ exited with 0 +++
+895172 +++ exited with 1 +++

@@ -1,0 +1,145 @@
+{
+  "binary_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "8ae0a5f88f54f13b66363db6547df368250829c6776cb545f20bc1ffd8c15af9"
+  },
+  "commands": [
+    {
+      "argv": [
+        "cjc",
+        "-v"
+      ],
+      "exit_code": 0,
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-002/native-sockets/toolchain.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+        },
+        "path": "docs/evidence/M8-002/native-sockets/toolchain.stdout.log"
+      }
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "exit_code": 0,
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "76a2aef0d998507e05cd1060935da115d8b17b20c8d2c166e3fa8d8e62073788"
+        },
+        "path": "docs/evidence/M8-002/native-sockets/consumer-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        },
+        "path": "docs/evidence/M8-002/native-sockets/consumer-build.stdout.log"
+      }
+    }
+  ],
+  "profiles": [
+    {
+      "active_receive_cancellation": "PASS",
+      "active_receive_graceful_close": "PASS",
+      "connected_peer_filter": "PASS",
+      "descriptor_creation": {
+        "tcp_accepted": 1,
+        "tcp_created": 66,
+        "udp_created": 67
+      },
+      "empty_receive": "PASS",
+      "empty_send": "UNSUPPORTED_BACKEND",
+      "empty_send_rejection_and_reuse": "PASS",
+      "family": "ipv4",
+      "opposite_direction_send_during_receive": "PASS",
+      "overlapping_receive_and_connect_rejection": "PASS",
+      "resource_cycles": 64,
+      "socket_fds": {
+        "after": [],
+        "baseline": []
+      },
+      "status": "PASS",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-002/native-sockets/ipv4.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "c71b8cb4cfa2780a4932406c17acc2310c9c33f7a81b3e9c62666b30ed30d543"
+        },
+        "path": "docs/evidence/M8-002/native-sockets/ipv4.stdout.log"
+      },
+      "syscalls": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "a6bc98a00b1e4f5be71d7c924fdb09c73ff779720de1937745c7d96c1245401c"
+        },
+        "path": "docs/evidence/M8-002/native-sockets/ipv4.syscalls.log"
+      }
+    },
+    {
+      "active_receive_cancellation": "PASS",
+      "active_receive_graceful_close": "PASS",
+      "connected_peer_filter": "PASS",
+      "descriptor_creation": {
+        "tcp_accepted": 1,
+        "tcp_created": 66,
+        "udp_created": 67
+      },
+      "empty_receive": "PASS",
+      "empty_send": "UNSUPPORTED_BACKEND",
+      "empty_send_rejection_and_reuse": "PASS",
+      "family": "ipv6",
+      "opposite_direction_send_during_receive": "PASS",
+      "overlapping_receive_and_connect_rejection": "PASS",
+      "resource_cycles": 64,
+      "socket_fds": {
+        "after": [],
+        "baseline": []
+      },
+      "status": "PASS",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-002/native-sockets/ipv6.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "f4e23a5e87735b9b108db55866326773171993db025e0ee54d53ecd77afcfd74"
+        },
+        "path": "docs/evidence/M8-002/native-sockets/ipv6.stdout.log"
+      },
+      "syscalls": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "61f22817de9c35c0def1780a9a5bdde8d5f6c72f29eac14e9193e7021d4ab7dd"
+        },
+        "path": "docs/evidence/M8-002/native-sockets/ipv6.syscalls.log"
+      }
+    }
+  ],
+  "schema_version": 1,
+  "source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "6dc853eaa8c27e10bbeeb209cca1eb22a011841983e5418edd466a0b007ba912"
+  },
+  "source_task": "M8-002",
+  "status": "PASS"
+}

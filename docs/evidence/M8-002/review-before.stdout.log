@@ -1,0 +1,80 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 107794709 ns, RESULT:
+    TCS: M8002TcpListenerTest, time elapsed: 62275664 ns, RESULT:
+    [ PASSED ] CASE: bindRejectsInvalidBacklogAndStoppedContextsWithStructuredErrors (320016 ns)
+    [ PASSED ] CASE: bindFailureRetainsPublicCoordinatesAndCause (117812 ns)
+    [ PASSED ] CASE: cancelledAndExpiredAcceptsLeaveListenerReusable (29309074 ns)
+    [ PASSED ] CASE: acceptedStreamTransfersExactDataInBothDirections (347836 ns)
+    [ PASSED ] CASE: overlappingAcceptIsRejectedWithoutCreatingAPendingQueue (29957782 ns)
+    [ PASSED ] CASE: stoppedCloseAdmissionHasNoNativeEffectAndListenerRemainsUsable (423279 ns)
+    [ PASSED ] CASE: gracefulAndAbortTerminalOwnersAreStableAndWakeAccept (162752 ns)
+    TCS: M8002UdpSocketTest, time elapsed: 24186838 ns, RESULT:
+    [ PASSED ] CASE: datagramBoundariesAndOwnedPayloadSurviveScratchReuse (371176 ns)
+    [ PASSED ] CASE: exactCapacityAndTruncationDiscardOnlyTheCurrentDatagramTail (306072 ns)
+    [ PASSED ] CASE: connectedSocketSelectsNativePeerAndFiltersOtherSenders (361598 ns)
+    [ PASSED ] CASE: cancellationDeadlineCloseAndAbortRetainDistinctState (20587800 ns)
+    [ FAILED ] CASE: invalidAndUnsupportedInputsLeaveSocketReusable (1407767 ns)
+    Expect Failed: `(m8002CodeIs(missingPeer, api.NetworkErrorCode.NotConnected) == true)`
+       left: false
+      right: true
+
+    TCS: NetworkFoundationContractTest, time elapsed: 20979667 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (27377 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (45440 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (77522 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (58883 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (101761 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (40797 ns)
+    [ PASSED ] CASE: tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock (123566 ns)
+    [ PASSED ] CASE: tcpStreamNonterminalStoppedCloseAdmissionStillRejects (95018 ns)
+    [ PASSED ] CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership (82650 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (129013 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (89966 ns)
+    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (110549 ns)
+    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (108943 ns)
+    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (42302 ns)
+    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (73987 ns)
+    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (46972 ns)
+    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (80906 ns)
+    [ PASSED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (190524 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (58256 ns)
+    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (38975 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (65446 ns)
+    [ PASSED ] CASE: tcpStreamRetainsNativeCancellationOwnership (11325450 ns)
+    [ PASSED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (288649 ns)
+    [ PASSED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (147132 ns)
+    [ PASSED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (72461 ns)
+    [ PASSED ] CASE: tcpStreamAbortCannotRelabelClaimedGracefulNativeClose (33366 ns)
+    [ PASSED ] CASE: tcpStreamAbortOwnershipSurvivesCompetingIoAndLateCloseFailure (50356 ns)
+    [ PASSED ] CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful (90291 ns)
+    [ PASSED ] CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful (57533 ns)
+    [ PASSED ] CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation (94107 ns)
+    [ PASSED ] CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate (89294 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (37498 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (75401 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1538315 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (13961 ns)
+    [ FAILED ] CASE: tcpStreamJoiningBackgroundCloseWaitsForCompletion (39184 ns)
+    Expect Failed: `(closeFailsForContext(stream, api.OperationContext(deadline: Some(api.Deadline.after(20 * Duration.millisecond))), true) == true)`
+       left: false
+      right: true
+
+Summary: TOTAL: 48
+    PASSED: 46, SKIPPED: 0, ERROR: 0
+    FAILED: 2, listed below:
+            TCS: M8002UdpSocketTest, CASE: invalidAndUnsupportedInputsLeaveSocketReusable
+            TCS: NetworkFoundationContractTest, CASE: tcpStreamJoiningBackgroundCloseWaitsForCompletion
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 116066550 ns, RESULT:
+TP: wirestack.*, time elapsed: 115978439 ns, RESULT:
+    FAILED:
+    TP: wirestack.net, time elapsed: 107794709 ns, RESULT:
+        TCS: M8002TcpListenerTest, time elapsed: 62275664 ns, RESULT:
+        TCS: M8002UdpSocketTest, time elapsed: 24186838 ns, RESULT:
+        [ FAILED ] CASE: invalidAndUnsupportedInputsLeaveSocketReusable (1407767 ns)
+        TCS: NetworkFoundationContractTest, time elapsed: 20979667 ns, RESULT:
+        [ FAILED ] CASE: tcpStreamJoiningBackgroundCloseWaitsForCompletion (39184 ns)
+Summary: TOTAL: 48
+    PASSED: 46, SKIPPED: 0, ERROR: 0
+    FAILED: 2
+--------------------------------------------------------------------------------------------------

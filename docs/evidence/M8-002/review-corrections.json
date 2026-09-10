@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-002",
+  "kind": "socket-review-corrections",
+  "status": "PASS",
+  "baseline_kind": "Local pre-correction source, not a claimed committed candidate. Reverse corrections.patch against the final source to recover the baseline.",
+  "baseline_sources": [
+    {
+      "path": "src/internal/transport_stdnet/package.cj",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "6f770150c212a7fdf2ebfa72798c36699efb2e7fe472b67cccee16173f7b6ae5"
+      }
+    },
+    {
+      "path": "src/internal/transport_stdnet/udp_socket.cj",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "c66f3a7a0e54bb4d12faa5fafe2bb4412cc20c4348bedd54485cf87fcf747781"
+      }
+    },
+    {
+      "path": "src/net/m8_002_tcp_test.cj",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "c7bebd05b3bd96882f91d25dc54bdb0fbb23b1bd90c67569830dbf86201db5a1"
+      }
+    },
+    {
+      "path": "src/net/m8_002_udp_test.cj",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a23af928340047c6b665ef98ac527b7a22bc517672c1649b46ced74ac312838c"
+      }
+    },
+    {
+      "path": "src/net/package.cj",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "40a5414e21465286f55792e8b2c3da898e6937ea3105c9fac44764b338b958a1"
+      }
+    },
+    {
+      "path": "src/net/package_test.cj",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "c4a74e020c4e383c943f83096907b4ddc032ceba86f0a6173ac11c704c01d40d"
+      }
+    },
+    {
+      "path": "src/net/tcp_listener.cj",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "bc1d279e5e493700ee43e9b5b5a0ac3b978fa0eaaea73958f225e566ce006cf0"
+      }
+    },
+    {
+      "path": "src/net/udp_socket.cj",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "44b45c2d880cdc5755b3ebb7000013b75c47f96c2a67339a225e29dc3de3a887"
+      }
+    }
+  ],
+  "public_regression": {
+    "before_exit_code": 1,
+    "before_total": 48,
+    "before_failed": 2,
+    "after_exit_code": 0,
+    "after_total": 48,
+    "after_failed": 0,
+    "cases": [
+      "tcpStreamJoiningBackgroundCloseWaitsForCompletion",
+      "invalidAndUnsupportedInputsLeaveSocketReusable"
+    ]
+  },
+  "admitted_send_reproduction": {
+    "source": "docs/evidence/M8-002/review-reproduction/admitted-send.cj",
+    "before_exit_code": 42,
+    "after_exit_code": 0,
+    "baseline_scope": "Only the two admitted-send deadline retryability overrides were removed for this separate reproduction. Other close/NotConnected corrections were retained.",
+    "trigger": "A monotonic public clock observes same-direction admission through ConcurrentOperation, closes the socket, and advances time. Native SocketException then crosses the expired-deadline mapping.",
+    "before": "TimedOut / Temporary",
+    "after": "TimedOut / Never"
+  },
+  "fixes": [
+    "Joining close lazily creates completion coordination; synchronous and detached owners publish their result for TcpStream, TcpListener and UdpSocket. A single background owner still avoids a completion allocation.",
+    "Admitted DatagramSend deadline errors use Never retryability, including native SocketException mapping.",
+    "A valid nonempty send without a connected peer returns NotConnected."
+  ],
+  "artifacts": [
+    {
+      "path": "docs/evidence/M8-002/review-reproduction/admitted-send.cj",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "bfb29bab796c9e820ef2492842a66f3917e6cc365c3d02a950f5225667fb4e69"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/review-reproduction/corrections.patch",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9540a4516c0e729696e45e0fae65c283f5828bda1c1c003b5f56ee885a4e9900"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/review-reproduction/retry-after-build.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "76a2aef0d998507e05cd1060935da115d8b17b20c8d2c166e3fa8d8e62073788"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/review-reproduction/retry-after-build.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/review-reproduction/retry-after.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/review-reproduction/retry-after.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "c79502c72653cee4ca9fd329ad8ba068bb1b53dfd002e6caa24acf8616368561"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/review-reproduction/retry-before-build.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "76a2aef0d998507e05cd1060935da115d8b17b20c8d2c166e3fa8d8e62073788"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/review-reproduction/retry-before-build.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/review-reproduction/retry-before.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/review-reproduction/retry-before.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e519b36f5d9b3864148e3bffc07bb1627ff7ad8ac303abb6b17088879d8af250"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/review-before.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "670d9858a3a985a63d819720ef3270195167091e9e4fe617b072179fc4893e9d"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/review-before.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "24cca9bedbcc4384adfba3dc4ceb587e82ed1a6f512b3d0bf0243c38ab1bc0fd"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/review-after.stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a05334d4d665b41610d326f9c99fff8e8d13cf89caa95a570409968bb5701b43"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/review-after.stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "bc97e4cb7074810e388d78eaecdce4c183c9b7d94dd9ec2db6cab22b5c128207"
+      }
+    }
+  ]
+}
