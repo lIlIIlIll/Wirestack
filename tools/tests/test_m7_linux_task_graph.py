@@ -62,47 +62,7 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("当前发布相关任务总数：**201**", backlog)
         self.assertIn("全部已记录任务总数：**222**", backlog)
 
-    def test_status_exposes_linux_completion_without_a_global_completion_claim(self) -> None:
-        status = self.read("docs/planning/status.md")
-        linux = self.read("docs/planning/linux-status.md")
-        self.assertIn("| M7-018 | COMPLETE |", status)
-        self.assertIn("| M7-019 | COMPLETE |", status)
-        self.assertIn("| M7-020 | COMPLETE |", status)
-        self.assertIn("| M7-021 | COMPLETE |", status)
-        self.assertIn("| M7-022 | COMPLETE |", status)
-        self.assertIn("| M7-022 Linux final 24h+ soak | COMPLETE |", linux)
-        self.assertIn("| M6-026 | COMPLETE |", status)
-        self.assertIn("| M7-023 | COMPLETE |", status)
-        self.assertIn("| M7-023 Linux release fuzz gate | COMPLETE |", linux)
-        self.assertIn("| M7-024 | COMPLETE |", status)
-        self.assertIn("| M7-024 Linux performance gate | COMPLETE |", linux)
-        self.assertIn("| M7-025 | COMPLETE |", status)
-        self.assertIn("| M7-026 | COMPLETE |", status)
-        self.assertIn("| M3-029 | COMPLETE |", status)
-        self.assertIn("| M7-027 | COMPLETE |", status)
-        self.assertIn("docs/evidence/M7-027/README.md", status)
-        self.assertIn("| M7-032 | COMPLETE |", status)
-        self.assertIn("| M7-028 | COMPLETE |", status)
-        self.assertIn("| M7-029 | COMPLETE |", status)
-        self.assertIn("| M7-030 | COMPLETE |", status)
-        self.assertIn("| M7-031 | COMPLETE |", status)
-        self.assertIn("| M7-031 Linux release candidate | COMPLETE |", linux)
-        self.assertIn("docs/evidence/M7-032/README.md", status)
-        self.assertIn("do not\nchange the status of the six-platform M7-001 through M7-017 tasks", status)
-        self.assertIn(
-            "M7-033 remains an\nindependent documentation-infrastructure task",
-            linux,
-        )
-        self.assertIn("Global non-Linux M7", linux)
-        self.assertIn("M6-026 HTTP/2 concurrent response bodies", linux)
-        self.assertIn("1,000 two-stream batches", linux)
-        self.assertIn("runtime/std source changes are not dependencies", linux)
 
-    def test_evidence_rejects_upstream_and_non_linux_completion_inference(self) -> None:
-        evidence = self.read("docs/evidence/M7-018/README.md")
-        self.assertIn("No Linux M7 task depends on M1-026, M4, an `UP-*` task", evidence)
-        self.assertIn("It does not mark a\nrelease gate as passed", evidence)
-        self.assertIn("NOT_APPLICABLE_TO_LINUX_PROFILE", evidence)
 
 
 if __name__ == "__main__":

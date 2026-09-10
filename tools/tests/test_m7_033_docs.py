@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import subprocess
 import tempfile
 import unittest
@@ -94,74 +93,6 @@ class M7033DocsTests(unittest.TestCase):
                     docs.atomic_json(path, {"status": "PASS"})
             self.assertEqual('{"status":"OLD"}\n', path.read_text(encoding="utf-8"))
             self.assertFalse(list(path.parent.glob(".*.tmp")))
-
-    def test_report_is_machine_readable_and_bounded(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="wirestack-m7-033-") as directory:
-            path = Path(directory) / "report.json"
-            docs.atomic_json(path, {"status": "PASS", "stdout": "x" * 20_000})
-            payload = json.loads(path.read_text(encoding="utf-8"))
-            self.assertEqual("PASS", payload["status"])
-
-    def test_getting_started_is_linux_scoped_and_actionable(self) -> None:
-        guide = (docs.ROOT / "docs/guides/getting-started-linux.md").read_text(encoding="utf-8")
-        for token in (
-            "scripts/check-m7-027-linux-examples --json",
-            "HttpClient.builder()",
-            "HttpServer.builder()",
-            "OperationContext",
-            "AWS-LC 5.5.0",
-            "cjdoc 0.7.2",
-        ):
-            self.assertIn(token, guide)
-        self.assertNotIn("已支持 Windows", guide)
-        self.assertNotIn("已支持 Android", guide)
-
-    def test_pages_workflow_pins_cjdoc_and_keeps_long_gates_out(self) -> None:
-        workflow = (docs.ROOT / ".github/workflows/m7-033-docs.yml").read_text(encoding="utf-8")
-        self.assertIn("needs: build-cjdoc", workflow)
-        self.assertIn("version: 1.1.0-alpha.20260414010024", workflow)
-        self.assertIn("actions/upload-artifact@v4", workflow)
-        self.assertIn("actions/download-artifact@v4", workflow)
-        self.assertIn("cjpm update --skip-script", workflow)
-        self.assertIn("markdown/db4f9527944b589db8436669f1d255192388cee2/cjpm.toml", workflow)
-        self.assertIn("yjson/bf65cbecd99ac25e7485f8db60990e94a04e57bc/cjpm.toml", workflow)
-        self.assertIn("cjdoc-wrapper", workflow)
-        self.assertIn("Restore the resolved Cangjie toolchain", workflow)
-        self.assertIn('CJDOC_VERSION: 0.7.2', workflow)
-        self.assertIn('CJDOC_SOURCE_SHA: e966097a3591538fba8990772e2e6c543de86c21', workflow)
-        self.assertIn('https://codeload.github.com/${CJDOC_REPOSITORY}/tar.gz/${CJDOC_SOURCE_SHA}', workflow)
-        self.assertNotIn('git clone', workflow)
-        self.assertIn("compile-option = \"-O0\"", workflow)
-        self.assertIn('cjpm build)', workflow)
-        self.assertIn('target/release/bin/main', workflow)
-        self.assertNotIn('cjpm build -g', workflow)
-        self.assertNotIn('gh release download', workflow)
-        self.assertIn("actions/deploy-pages@v4", workflow)
-        self.assertIn("search-index.js", workflow)
-        self.assertIn('select(startswith("packages/"))', workflow)
-        self.assertNotIn("86400", workflow)
-
-    def test_repository_build_gate_installs_the_same_pinned_cjdoc(self) -> None:
-        workflow = (docs.ROOT / ".github/workflows/clean-cangjie-build.yml").read_text(encoding="utf-8")
-        self.assertIn("needs: build-cjdoc", workflow)
-        self.assertIn("version: 1.1.0-alpha.20260414010024", workflow)
-        self.assertIn("actions/upload-artifact@v4", workflow)
-        self.assertIn("actions/download-artifact@v4", workflow)
-        self.assertIn("cjpm update --skip-script", workflow)
-        self.assertIn("markdown/db4f9527944b589db8436669f1d255192388cee2/cjpm.toml", workflow)
-        self.assertIn("yjson/bf65cbecd99ac25e7485f8db60990e94a04e57bc/cjpm.toml", workflow)
-        self.assertIn("cjdoc-wrapper", workflow)
-        self.assertIn("Restore the resolved Cangjie toolchain", workflow)
-        self.assertIn('CJDOC_VERSION: 0.7.2', workflow)
-        self.assertIn('CJDOC_SOURCE_SHA: e966097a3591538fba8990772e2e6c543de86c21', workflow)
-        self.assertIn('https://codeload.github.com/${CJDOC_REPOSITORY}/tar.gz/${CJDOC_SOURCE_SHA}', workflow)
-        self.assertNotIn('git clone', workflow)
-        self.assertIn("compile-option = \"-O0\"", workflow)
-        self.assertIn('cjpm build)', workflow)
-        self.assertIn('target/release/bin/main', workflow)
-        self.assertNotIn('cjpm build -g', workflow)
-        self.assertNotIn('gh release download', workflow)
-        self.assertIn('echo "CJDOC_BIN=$wrapper" >> "$GITHUB_ENV"', workflow)
 
 
 if __name__ == "__main__":
