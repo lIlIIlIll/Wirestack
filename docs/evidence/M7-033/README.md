@@ -1,9 +1,9 @@
 # M7-033 evidence
 
-Current repair status: **IN_PROGRESS**. Local checks and PR builds pass, but the
-repaired workflow has not yet deployed from main. The task index is **BLOCKED**
-until a new Pages smoke report is bound to a published merge revision. The older
-Pages report below is historical evidence, not acceptance of this repair.
+Current repair status: **COMPLETE**. [PR #155](https://github.com/lIlIIlIll/Wirestack/pull/155)
+merged as `ec2e8236625c5f45625750c1a4ed947f2dcf8c9c`. The repaired main workflow
+deployed successfully; the new Pages smoke report is bound to that published
+revision. This acceptance records that revision, not subsequent source changes.
 
 M7-033 为 Linux x86_64 glibc 开发者文档与 cjdoc 门禁任务。实现内容包括：
 
@@ -17,25 +17,25 @@ M7-033 为 Linux x86_64 glibc 开发者文档与 cjdoc 门禁任务。实现内�
 
 本地生成使用 `CJDOC_BIN=/path/to/cjdoc-0.7.2 scripts/check-docs --json`。cjdoc
 `v0.7.2` 现已发布在 [GitHub release](https://github.com/lIlIIlIll/cjdoc/releases/tag/v0.7.2)，
-Linux x86_64 资产摘要记录在 [`pages-smoke.json`](pages-smoke.json)。当前证据不会把缺失
-cjdoc、版本不符、`status=partial`、warning、SKIPPED 或未运行的门禁记录为 PASS。HTML
+固定 SDK 和 cjdoc 源码摘要见 [`m7-033-ci-toolchain.json`](../../references/m7-033-ci-toolchain.json)。
+当前证据不会把缺失 cjdoc、版本不符、`status=partial`、warning、SKIPPED 或未运行的门禁记录为 PASS。HTML
 仅在 `--html` 或 GitHub Pages 工作流中生成到 `target/doc/html/`，不提交到仓库。
 
 机器可读结果：
 
 - [`test-plan.md`](test-plan.md)
 - [`docs-report.json`](docs-report.json)
-- [`html-report.json`](html-report.json)（本地 Pages HTML staging）
+- [`html-report.json`](html-report.json)（历史本地 HTML staging，不作为当前修复验收）
 - [`clean-consumer.json`](clean-consumer.json)（运行 clean consumer 后生成）
 - [`task-check.json`](task-check.json)（任务级门禁后生成）
 - [`pages-smoke.json`](pages-smoke.json)（合并后 GitHub Pages 部署和 HTTP smoke）
 - [`evidence.json`](evidence.json)（全部报告通过并封存后生成）
 
-GitHub Actions run `33947870773` 已在合并 SHA
-`2f3def83c8903b592faf83edf95a0bc334a94d20` 上成功完成 cjdoc 构建、分层文档生成、
-clean consumer、Pages 部署和有界 HTTP smoke。公开站点为
+GitHub Actions run [34437634186](https://github.com/lIlIIlIll/Wirestack/actions/runs/34437634186)
+已在合并 SHA `ec2e8236625c5f45625750c1a4ed947f2dcf8c9c` 上完成 cjdoc 构建、
+分层文档生成、clean consumer、Pages 部署和有界 HTTP smoke。公开站点为
 <https://liliilill.github.io/Wirestack/>；根页、`index.html`、`search-index.js` 和首个
-API 页面均返回 HTTP 200，精确状态、大小和摘要见 [`pages-smoke.json`](pages-smoke.json)。
+API 页面均返回 HTTP 200。运行、提交和 HTTP 状态见 [`pages-smoke.json`](pages-smoke.json)。
 
 未运行：一小时 SSE、86,400 秒 soak 和非 Linux 平台门禁。本任务只声明 Linux x86_64
 glibc 文档证据，不将其泛化为其他平台支持。
@@ -44,7 +44,7 @@ glibc 文档证据，不将其泛化为其他平台支持。
 
 The later main-branch run [34370427590](https://github.com/lIlIIlIll/Wirestack/actions/runs/34370427590)
 failed before compilation because nightly `1.1.0-alpha.20260414010024` was no
-longer available. The historical Pages success above does not cover that run.
+longer available. The earlier deployment did not qualify the repaired toolchain.
 
 Both workflows now select STS `1.1.3` and SDK manager `v0.2.21`. The cjdoc
 source remains pinned to `e966097a3591538fba8990772e2e6c543de86c21`. Building and
@@ -90,5 +90,11 @@ JSON smoke report bound to that run's commit, rather than relying on a historica
 deployment report. The exact HTTP script passed local fixture checks for four
 HTTP 200 responses; HTTP 404, HTTP 204 and a stalled response failed without
 publishing a PASS report. The bounded timeout and results are recorded in
-[`ci-repair-checks.json`](ci-repair-checks.json). A successful deployment and fresh
-smoke artifact from the merged revision are still required.
+[`ci-repair-checks.json`](ci-repair-checks.json). The main deployment's unmodified
+smoke artifact is now recorded in [`pages-smoke.json`](pages-smoke.json).
+
+GitHub Pages now uses `build_type=workflow`, removing the competing legacy
+`main:/docs` publisher. HTTPS and the public URL are unchanged. A live browser
+check searched for `Deadline`, opened `wirestack.Deadline — struct`, and reached
+the `wirestack.Deadline` reference page. Configuration and browser observations
+are recorded in [`required-checks.json`](required-checks.json).
