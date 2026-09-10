@@ -10,9 +10,13 @@ TLS provider 是构建期选择的 AWS-LC 5.5.0；本指南不把其他平台或
 需要以下工具：
 
 - Linux x86_64 glibc；
-- Cangjie Compiler 1.1.0-alpha 系列和 CJPM 1.1.3；
+- Cangjie STS 1.1.3 SDK，其中的 Compiler 和 CJPM 均为 1.1.3；
 - Git 和 Python 3；
 - 仓库可访问的 AWS-LC 5.5.0 源码/构建输入。
+
+使用同一份 SDK 中的 `cjc` 和 `cjpm`。已验证归档的下载地址与 SHA-256 见
+[当前工具链记录](../references/m7-033-ci-toolchain.json)。旧 alpha 版本的历史
+记录不代表当前 CI 仍在验证该版本。
 
 Wirestack 默认 Linux 构建产物不依赖系统 OpenSSL。不要通过环境变量或运行时
 动态库探测替换 provider。
