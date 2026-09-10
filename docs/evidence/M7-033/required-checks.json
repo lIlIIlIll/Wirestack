@@ -4,7 +4,7 @@
   "status": "PASS",
   "repository": "lIlIIlIll/Wirestack",
   "ref": "refs/heads/main",
-  "observedAtUtc": "2026-09-10T03:47:57.604412+00:00",
+  "observedAtUtc": "2026-09-10T04:18:07.924352+00:00",
   "rulesets": [
     {
       "id": 21787899,
@@ -94,6 +94,10 @@
               {
                 "context": "report-build-status",
                 "integration_id": 15368
+              },
+              {
+                "context": "report-docs-status",
+                "integration_id": 15368
               }
             ]
           }
@@ -124,6 +128,10 @@
     },
     {
       "context": "report-build-status",
+      "integration_id": 15368
+    },
+    {
+      "context": "report-docs-status",
       "integration_id": 15368
     }
   ],
@@ -246,6 +254,10 @@
           {
             "context": "report-build-status",
             "integration_id": 15368
+          },
+          {
+            "context": "report-docs-status",
+            "integration_id": 15368
           }
         ]
       },
@@ -268,5 +280,13 @@
       "ruleset_source": "lIlIIlIll/Wirestack",
       "ruleset_id": 22713825
     }
-  ]
+  ],
+  "documentationGateRepair": {
+    "requiredCheck": {
+      "context": "report-docs-status",
+      "integration_id": 15368
+    },
+    "reviewComment": "https://github.com/lIlIIlIll/Wirestack/pull/155#discussion_r3975363829",
+    "reason": "A skipped deployment job cannot prove that PR documentation prerequisites succeeded; the always-running reporter requires both build and generation success."
+  }
 }
