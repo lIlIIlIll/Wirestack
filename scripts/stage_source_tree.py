@@ -144,6 +144,34 @@ def assert_source_only(
             preview += f", ... ({len(violations)} total)"
         raise ValueError(f"source-only tree contains generated or linked state: {preview}")
 
+def gitlink_is_uninitialized(source: pathlib.Path, relative: pathlib.Path) -> bool:
+    result = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(source),
+            "ls-files",
+            "--stage",
+            "-z",
+            "--",
+            relative.as_posix(),
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    if result.returncode != 0:
+        return False
+    is_gitlink = any(
+        entry.startswith(b"160000 ")
+        for entry in result.stdout.split(b"\0")
+        if entry
+    )
+    if not is_gitlink:
+        return False
+    return not (source / relative / ".git").exists()
+
+
 def git_tracked_files(source: pathlib.Path) -> list[pathlib.Path] | None:
     result = subprocess.run(
         ["git", "-C", str(source), "ls-files", "-z"],
@@ -158,6 +186,8 @@ def git_tracked_files(source: pathlib.Path) -> list[pathlib.Path] | None:
         if not value:
             continue
         relative = pathlib.Path(value.decode("utf-8"))
+        if gitlink_is_uninitialized(source, relative):
+            raise ValueError(f"git submodule is not initialized: {relative.as_posix()}")
         source_file = source / relative
         if source_file.is_dir():
             nested = git_tracked_files(source_file)
