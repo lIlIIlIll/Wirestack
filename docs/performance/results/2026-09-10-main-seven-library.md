@@ -99,9 +99,9 @@ warmup 和 1 × 1 秒测量。
 ## 证据与 freshness gate
 
 证据目录保存两批 raw report、日志、manifest、metadata、派生 summary、实际 harness 源码、
-json4cj source-only 快照、构建日志和 checksum：
+json4cj source-only 快照和 checksum：
 
-[`benchmarks/results/full-seven-library/2026-09-09-main-bddbe6e`](../../../benchmarks/results/full-seven-library/2026-09-10-main-008e50b/README.md)
+[`benchmarks/results/full-seven-library/2026-09-10-main-008e50b`](../../../benchmarks/results/full-seven-library/2026-09-10-main-008e50b/README.md)
 
 从仓库根目录运行：
 
@@ -110,8 +110,9 @@ python3 scripts/check_seven_library_evidence.py
 ```
 
 校验器会验证归档 checksum、安全解包、两批完整性、metadata 身份和可重生成的 summary。
-它还要求 marker 的测量提交是当前提交的祖先，并重新计算当前 benchmark input closure 的摘要。
-runtime、`@JsonCodec` 宏或 benchmark fixture 发生变化后，必须重跑 benchmark 并更新 marker；
+它还要求当前 checkout 的 benchmark input closure 与 marker 一致；squash merge 可以改变提交
+哈希，但不能改变已测量的产品和 harness 输入。runtime、`@JsonCodec` 宏或 benchmark fixture
+发生变化后，必须重跑 benchmark 并更新 marker；
 独立 JSON literal 宏不属于这条 typed-codec closure，因此不会单独使这些结果失效。
 
 最近一次通过 release qualification 的数据仍是

@@ -146,7 +146,7 @@ def assert_source_only(
 
 def git_tracked_files(source: pathlib.Path) -> list[pathlib.Path] | None:
     result = subprocess.run(
-        ["git", "-C", str(source), "ls-files", "-z"],
+        ["git", "-C", str(source), "ls-files", "--stage", "-z"],
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
         check=False,
@@ -157,8 +157,18 @@ def git_tracked_files(source: pathlib.Path) -> list[pathlib.Path] | None:
     for value in result.stdout.split(b"\0"):
         if not value:
             continue
-        relative = pathlib.Path(value.decode("utf-8"))
+        metadata, separator, raw_path = value.partition(b"\t")
+        if not separator:
+            continue
+        relative = pathlib.Path(raw_path.decode("utf-8"))
         source_file = source / relative
+        if metadata.startswith(b"160000 "):
+            if not source_file.is_dir() or not (source_file / ".git").exists():
+                raise ValueError(f"git submodule is not initialized: {relative.as_posix()}")
+            nested = git_tracked_files(source_file)
+            if nested is not None:
+                tracked.extend(relative / child for child in nested)
+            continue
         if source_file.is_dir():
             nested = git_tracked_files(source_file)
             if nested is not None:

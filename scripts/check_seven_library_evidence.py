@@ -864,6 +864,16 @@ def verify_measured_candidate_binding(
 ) -> None:
     candidate = marker["candidate"]
     commit = marker["measured_commit"]
+    available = subprocess.run(
+        ["git", "-C", str(root), "cat-file", "-e", f"{commit}^{{commit}}"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if available.returncode != 0:
+        # A squash merge may discard the measurement commit. The current
+        # checkout closure was already compared with the marker by the caller.
+        return
     try:
         graph = load_release_graph(root / "release/release-graph.toml")
     except (OSError, UnicodeError, ValueError) as error:
@@ -923,7 +933,14 @@ def verify_clean_checkout(root: pathlib.Path) -> None:
 
 def current_head_commit(root: pathlib.Path) -> str:
     completed = subprocess.run(
-        ["git", "-C", str(root), "rev-parse", "--verify", "HEAD^{commit}"],
+        [
+            "git",
+            "-C",
+            str(root),
+            "rev-parse",
+            "--verify",
+            "HEAD^{commit}",
+        ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
@@ -933,6 +950,8 @@ def current_head_commit(root: pathlib.Path) -> str:
         detail = completed.stderr.strip() or "HEAD is not a full commit"
         raise EvidenceError(f"cannot resolve current candidate commit: {detail}")
     return commit
+
+
 
 
 def current_candidate_fragment(root: pathlib.Path) -> dict[str, Any]:
@@ -990,27 +1009,6 @@ def verify_current_checkout(root: pathlib.Path, marker: dict[str, Any]) -> None:
         raise EvidenceError(
             "current release candidate identity differs from measured evidence: "
             + ", ".join(differing)
-        )
-    completed = subprocess.run(
-        [
-            "git",
-            "-C",
-            str(root),
-            "merge-base",
-            "--is-ancestor",
-            marker["measured_commit"],
-            "HEAD",
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    if completed.returncode == 1:
-        raise EvidenceError("measured_commit is not an ancestor of the current checkout")
-    if completed.returncode != 0:
-        raise EvidenceError(
-            "cannot verify measured_commit ancestry; use a complete checkout: "
-            + completed.stderr.strip()
         )
     verify_measured_candidate_binding(root, marker)
     verify_clean_checkout(root)

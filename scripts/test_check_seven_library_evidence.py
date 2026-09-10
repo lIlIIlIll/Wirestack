@@ -507,13 +507,37 @@ class SevenLibraryEvidenceTests(unittest.TestCase):
             2,
         )
 
-    def test_strict_mode_rejects_non_ancestor_measurement(self) -> None:
+    def test_squash_merge_measurement_uses_candidate_closure(self) -> None:
         tree = git(self.root, "rev-parse", "HEAD^{tree}")
-        unrelated = git(self.root, "commit-tree", tree, input_text="unrelated\n")
-        self.fixture.measured_commit = unrelated
+        unrelated_base = git(
+            self.root, "commit-tree", tree, input_text="unrelated base\n"
+        )
+        squashed = git(
+            self.root,
+            "commit-tree",
+            tree,
+            "-p",
+            unrelated_base,
+            input_text="squashed merge\n",
+        )
+        self.fixture.measured_commit = squashed
         self.fixture.write_evidence()
-        with self.assertRaisesRegex(checker.EvidenceError, "not an ancestor"):
-            checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=False)
+        git(self.root, "add", "-f", ".")
+        git(self.root, "commit", "-q", "-m", "test: bind squash evidence")
+        self.assertEqual(
+            checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=False),
+            2,
+        )
+    def test_missing_measurement_commit_uses_candidate_closure(self) -> None:
+        self.fixture.measured_commit = "a" * 40
+        self.fixture.write_evidence()
+        git(self.root, "add", "-f", ".")
+        git(self.root, "commit", "-q", "-m", "test: bind missing measurement")
+        self.assertEqual(
+            checker.verify(self.root, checker.DEFAULT_MARKER, integrity_only=False),
+            2,
+        )
+
 
     def test_current_document_links_are_required_in_integrity_mode(self) -> None:
         write(self.root / "README.md", "stale link\n")

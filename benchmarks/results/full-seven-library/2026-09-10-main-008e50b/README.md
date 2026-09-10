@@ -20,7 +20,6 @@
 | `formal-main-11-2.tar.gz` | 第二批 raw report、日志、manifest、metadata 和派生汇总 |
 | `harness-source.tar.gz` | 实际执行的七库 adapter、runner、汇总脚本和环境脚本 |
 | `json4cj-source.tar.gz` | json4cj 的 source-only 输入快照 |
-| `canonical-build-logs.tar.gz` | 五个 canonical adapter 的构建日志 |
 | `optimal-api-overlay-main.patch` | 测量提交上使用的 canonical payload 和最优公开 API patch |
 | `source-identity.json` | 产品与有效 harness 的逐文件摘要及 Git 身份 |
 | `checksums.txt` | 上述证据文件的 SHA-256 inventory |
@@ -31,7 +30,9 @@
 python3 scripts/check_seven_library_evidence.py
 ```
 
-校验器会验证 checksum、安全解包、两批各 770 个单元、metadata 身份、汇总可重生成、测量提交祖先关系，以及当前 checkout 的产品和 benchmark 输入摘要。
+校验器会验证 checksum、安全解包、两批各 770 个单元、metadata 身份、汇总可重生成、测量提交的
+candidate closure，以及当前 checkout 的产品和 benchmark 输入摘要；测量提交对象被 squash
+合并裁剪后，仍可用 marker 和归档中的身份信息完成严格校验。
 
 完整数据表、workload 形状和解释见
 [当前 `main` 七库结果](../../../../docs/performance/results/2026-09-10-main-seven-library.md)。
