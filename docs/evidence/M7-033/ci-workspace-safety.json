@@ -65,5 +65,82 @@
       "stdout": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu\n",
       "stderr": ""
     }
-  ]
+  ],
+  "pages_evidence_publication": {
+    "root": "/home/elliot/playground/Wirestack-pr-worktrees/M7-033-pages-evidence-20260910",
+    "base_revision": "ec2e8236625c5f45625750c1a4ed947f2dcf8c9c",
+    "platform": "linux-x86_64-glibc",
+    "commands": [
+      {
+        "argv": [
+          "git",
+          "rev-parse",
+          "--show-toplevel"
+        ],
+        "exit_code": 0,
+        "stdout": "/home/elliot/playground/Wirestack-pr-worktrees/M7-033-pages-evidence-20260910\n",
+        "stderr": "git: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)\n"
+      },
+      {
+        "argv": [
+          "git",
+          "branch",
+          "--show-current"
+        ],
+        "exit_code": 0,
+        "stdout": "publish/M7-033-pages-evidence-20260910\n",
+        "stderr": "git: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)\n"
+      },
+      {
+        "argv": [
+          "git",
+          "rev-parse",
+          "HEAD"
+        ],
+        "exit_code": 0,
+        "stdout": "ec2e8236625c5f45625750c1a4ed947f2dcf8c9c\n",
+        "stderr": "git: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)\n"
+      },
+      {
+        "argv": [
+          "git",
+          "merge-base",
+          "HEAD",
+          "origin/main"
+        ],
+        "exit_code": 0,
+        "stdout": "ec2e8236625c5f45625750c1a4ed947f2dcf8c9c\n",
+        "stderr": "git: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)\n"
+      },
+      {
+        "argv": [
+          "git",
+          "status",
+          "--short"
+        ],
+        "exit_code": 0,
+        "stdout": " M docs/evidence/M7-033/pages-smoke.json\n",
+        "stderr": "git: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)\n"
+      },
+      {
+        "argv": [
+          "cjc",
+          "--version"
+        ],
+        "exit_code": 0,
+        "stdout": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "cjpm",
+          "--version"
+        ],
+        "exit_code": 0,
+        "stdout": "Cangjie Project Manager: 1.1.3\n",
+        "stderr": ""
+      }
+    ],
+    "note": "The worktree was clean before importing the Pages smoke artifact; the recorded status after import contains only that evidence replacement."
+  }
 }
