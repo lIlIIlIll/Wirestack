@@ -1,0 +1,173 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-09-05T19:11:36.392348Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-001/plan-validation.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "78d8c3cd90b6ecbbbaa948fcf2cfbedbd344c21429883c0f467a7c9f446e7a5f"
+      },
+      "source_task": "M8-001"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-001/architecture-guard.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e64b949083afb4cb5d1f1ebbb19834c996ef75f6787ad0e204a6dd9f0f870f1b"
+      },
+      "source_task": "M8-001"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-001/task-validation.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "4ff9dc94d63d2c37462b4077a2c80d867bb748e9da50dab487a633b1870d28da"
+      },
+      "source_task": "M8-001"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-001/python-tests.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "be85cc27b155c751b57492eade4af10ad454f76240ce1aa39dc74a815f220b5c"
+      },
+      "source_task": "M8-001"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-001/cangjie-build.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a83d5790b75a077d6b19d037f31bebd46d95a3a6f2d220a858c82b4c1cf70791"
+      },
+      "source_task": "M8-001"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-001/network-tests.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "8921ce6dae824c3b8fabfe34ca484fa9329f1e6b8a40bcd1eaa337291e0c8958"
+      },
+      "source_task": "M8-001"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-001/http-parity-tests.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "317f77652c58ef00d859e209c5ffaee0b9b1d823f7701a4909be0fde0c99562f"
+      },
+      "source_task": "M8-001"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-001/regression-tests.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "d5cd77e9ea02b413f7f1731fe354b50b3e43fad101f0cbc788d7facb24b043c7"
+      },
+      "source_task": "M8-001"
+    }
+  ],
+  "revision": "9a532b5325a8b309c45280a4071e95a16881a886",
+  "schema_version": 2,
+  "source_sha256": {
+    ".gitignore": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "3199acbf0317fbd877409264cc799dd628e4bdc1dc27a0ee296ed6a5451925d6"
+    },
+    "README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c23514ddef58db378c1f3ad4e86fdff517578b6f9464728a58e3272eb9b2734f"
+    },
+    "docs/api/README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2356c2dbe3f6c10a71adb4d0052cfd4ef3f4fc80fd8874dc48cf5b9a5e901ce2"
+    },
+    "docs/architecture/adr/0008-linux-network-foundation.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a181f3b597f875e31ff880ff8037da82c65587d602feb102dfa8945cd355698f"
+    },
+    "docs/evidence/M8-001/README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "aa15d378e098bb7912962de2e8590fc2f5462353c87410677b717723ae06390f"
+    },
+    "docs/evidence/M8-001/test-plan.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d17311552889ebecd19918775b845941c6a004d3e118900476d256c327d32961"
+    },
+    "docs/guides/network-foundation-linux.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e90a43d57b7f688107d556d159edd074e8d60844979ab6401720960a278eb7e4"
+    },
+    "docs/planning/implementation-backlog.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f8f252101a266c50b09d1e10ba1e5f479bfea5ba3a37d1e62675b518b747f3de"
+    },
+    "docs/planning/status.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "415fd5c0290d0d82fea1aa40fdf6617312ee53e5c8f18aaae20d7569b954bbda"
+    },
+    "src/http/parity.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "064cb19f868395133ae07c75a6088a7ff7386fb51df4b47f2d8a14fc65a5083d"
+    },
+    "src/internal/transport_stdnet/net_contract.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "001c3e0f8477c684107fa70d3ae02d3ebb03eebca7d33f35377c4f1e412cf001"
+    },
+    "src/net/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "25b439760f209461165784c67af02ebcf6a485c5ca46095e2f567061a7deeba9"
+    },
+    "src/net/package_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5e3fee9eaba6030ddeb17a605beb93c5a9d0f5a776dc689a03cd43ce555bf1c1"
+    },
+    "src/network_error.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9a9d4718a168ce3da218def8fdbb59af732844665a28e8bf619bca2805dbb6cd"
+    },
+    "tools/architecture_guard.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a4c014acf6ba83ca7ed954285cff25e64c6c1ddbbd661f4f010395727e5a7883"
+    },
+    "tools/docs/m7_033_docs.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "06e93f5e4cfba1902bb6aab6ddfaaf5631df85a69f55881a08ff0676fb83d79c"
+    },
+    "tools/m7_026_linux_api_freeze.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ab51d2f462d1ca980e72a51148dbba6889c7118cde8be3a7803a520bb4791cd2"
+    },
+    "tools/tasks/M8-001.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ad9db9990e1becf6246252875b0dc00c95e7ee4e72c5506a45f7ee06427da932"
+    },
+    "tools/tests/test_m7_026_linux_api_freeze.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "dfbdc1f3066462b130655976467e994de2fc23e0b5970ee70cec6743bfeb99af"
+    },
+    "tools/tests/test_m7_linux_task_graph.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "574bd836b7dfb3c5add498e2b6cb372ee0dac7adc50a4d8e86b57c82cd28a1ee"
+    }
+  },
+  "source_task": "M8-001",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}

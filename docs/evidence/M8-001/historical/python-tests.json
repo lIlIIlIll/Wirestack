@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "kind": "python-fault-injection-tests",
+  "status": "PASS",
+  "source_task": "M8-001",
+  "acceptance_status": "PASS",
+  "tests": 22,
+  "failures": 0,
+  "errors": 0,
+  "covered": [
+    "path-escape",
+    "unknown-schema",
+    "missing-task",
+    "dependency-cycle",
+    "long-gate-leak",
+    "skipped-not-pass",
+    "atomic-report-write",
+    "stale-source-digest"
+  ]
+}

@@ -11,7 +11,6 @@ handle。本页只覆盖这个任务；完整 TCP/UDP listener、Unix adapter、
 并在本机 `127.0.0.1:8080` 启动可接收字节的 TCP 服务。连接构造不做 DNS。
 
 ```cj
-import std.time.Duration
 import wirestack.net.*
 import wirestack as api
 
@@ -22,7 +21,7 @@ main(): Int64 {
         deadline: Some(api.Deadline.after(5 * Duration.second)))
     let stream = TcpStream.connect(endpoint, context: context)
     try {
-        let payload = api.ByteSpan(bytes: "hello".toArray())
+        let payload = api.ByteSpan("hello".toArray())
         stream.writeAll(payload, context: context)
     } finally {
         stream.close(context: context)

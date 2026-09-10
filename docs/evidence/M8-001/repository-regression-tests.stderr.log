@@ -1,0 +1,14 @@
+test_alias_target_member_change_changes_inventory (tools.tests.test_m7_026_linux_api_freeze.M7026LinuxApiFreezeTest.test_alias_target_member_change_changes_inventory) ... ok
+test_body_only_change_is_stable_but_signature_change_is_not (tools.tests.test_m7_026_linux_api_freeze.M7026LinuxApiFreezeTest.test_body_only_change_is_stable_but_signature_change_is_not) ... ok
+test_inventory_comparison_reports_add_remove_and_change (tools.tests.test_m7_026_linux_api_freeze.M7026LinuxApiFreezeTest.test_inventory_comparison_reports_add_remove_and_change) ... ok
+test_network_signature_change_is_rejected (tools.tests.test_m7_026_linux_api_freeze.M7026LinuxApiFreezeTest.test_network_signature_change_is_rejected) ... ok
+test_openssl_metadata_bool_is_allowed_but_cipher_string_is_not (tools.tests.test_m7_026_linux_api_freeze.M7026LinuxApiFreezeTest.test_openssl_metadata_bool_is_allowed_but_cipher_string_is_not) ... ok
+test_package_identity_and_forbidden_types_fail_closed (tools.tests.test_m7_026_linux_api_freeze.M7026LinuxApiFreezeTest.test_package_identity_and_forbidden_types_fail_closed) ... ok
+test_linux_dependencies_exclude_global_and_upstream_blockers (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_linux_dependencies_exclude_global_and_upstream_blockers) ... ok
+test_linux_graph_has_the_exact_frozen_task_set (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_linux_graph_has_the_exact_frozen_task_set) ... ok
+test_task_graph_has_fail_closed_audit_and_release_edges (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_task_graph_has_fail_closed_audit_and_release_edges) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.021s
+
+OK

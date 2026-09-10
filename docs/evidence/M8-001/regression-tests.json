@@ -1,21 +1,33 @@
 {
-  "schema_version": 1,
-  "kind": "repository-regression-tests",
-  "status": "PASS",
-  "source_task": "M8-001",
-  "acceptance_status": "PASS",
-  "commands": [
-    [
-      "python3",
-      "-m",
-      "unittest",
-      "tools.tests.test_m7_026_linux_api_freeze",
-      "tools.tests.test_m7_linux_task_graph",
-      "-v"
-    ]
+  "argv": [
+    "python3",
+    "-m",
+    "unittest",
+    "tools.tests.test_m7_026_linux_api_freeze",
+    "tools.tests.test_m7_linux_task_graph",
+    "-v"
   ],
-  "tests": 12,
-  "passed": 12,
-  "failed": 0,
-  "errors": 0
+  "duration_ms": 113.848,
+  "error_code": null,
+  "exit_code": 0,
+  "finished_at_utc": "2026-09-10T05:49:05.899475Z",
+  "id": "repository-regression-tests",
+  "started_at_utc": "2026-09-10T05:49:05.785634Z",
+  "status": "PASS",
+  "stderr_excerpt": "test_alias_target_member_change_changes_inventory (tools.tests.test_m7_026_linux_api_freeze.M7026LinuxApiFreezeTest.test_alias_target_member_change_changes_inventory) ... ok\ntest_body_only_change_is_stable_but_signature_change_is_not (tools.tests.test_m7_026_linux_api_freeze.M7026LinuxApiFreezeTest.test_body_only_change_is_stable_but_signature_change_is_not) ... ok\ntest_inventory_comparison_reports_add_remove_and_change (tools.tests.test_m7_026_linux_api_freeze.M7026LinuxApiFreezeTest.test_inventory_comparison_reports_add_remove_and_change) ... ok\ntest_network_signature_change_is_rejected (tools.tests.test_m7_026_linux_api_freeze.M7026LinuxApiFreezeTest.test_network_signature_change_is_rejected) ... ok\ntest_openssl_metadata_bool_is_allowed_but_cipher_string_is_not (tools.tests.test_m7_026_linux_api_freeze.M7026LinuxApiFreezeTest.test_openssl_metadata_bool_is_allowed_but_cipher_string_is_not) ... ok\ntest_package_identity_and_forbidden_types_fail_closed (tools.tests.test_m7_026_linux_api_freeze.M7026LinuxApiFreezeTest.test_package_identity_and_forbidden_types_fail_closed) ... ok\ntest_linux_dependencies_exclude_global_and_upstream_blockers (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_linux_dependencies_exclude_global_and_upstream_blockers) ... ok\ntest_linux_graph_has_the_exact_frozen_task_set (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_linux_graph_has_the_exact_frozen_task_set) ... ok\ntest_task_graph_has_fail_closed_audit_and_release_edges (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_task_graph_has_fail_closed_audit_and_release_edges) ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 0.021s\n\nOK\n",
+  "stderr_path": "docs/evidence/M8-001/repository-regression-tests.stderr.log",
+  "stderr_truncated": false,
+  "stdout_excerpt": "",
+  "stdout_path": "docs/evidence/M8-001/repository-regression-tests.stdout.log",
+  "stdout_truncated": false,
+  "timed_out": false,
+  "source_task": "M8-001",
+  "stdout_sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr_sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "efe390daf0c05c62ea11fb8ed67d5a721c7c070b757376134469cfca12cef921"
+  }
 }

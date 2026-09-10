@@ -80,5 +80,35 @@
   "publication_environment": {
     "CJDOC_BIN": "<home>/playground/cjdoc/target/release/bin/main",
     "WIRESTACK_AWS_LC_SOURCE": "<repo-root>/.local/tls-provider/source/aws-lc-5.5.0"
+  },
+  "qualified_publication": {
+    "prerequisite_main": "913a75defb3bbaa15e117e642d532c8ae6a1876c",
+    "integration_commit": "572b1350c41169637541178cc28652e09125e539",
+    "strategy": "Preserved the isolated reconstruction commit and merged origin/main without reset, stash, rebase, or original-worktree writes. Kept both ignore additions and both independent brittle-test removals.",
+    "toolchain_commands": [
+      {
+        "argv": [
+          "cjc",
+          "--version"
+        ],
+        "exit_code": 0,
+        "stdout": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "cjpm",
+          "--version"
+        ],
+        "exit_code": 0,
+        "stdout": "Cangjie Project Manager: 1.1.3\n",
+        "stderr": ""
+      }
+    ],
+    "original_staged_entries_unchanged": true,
+    "publication_environment": {
+      "CANGJIE_HOME": "/tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie",
+      "CJDOC_BIN": "/tmp/wirestack-m7-033-ci-tools-20260910/cjdoc-source/target/release/bin/main"
+    }
   }
 }
