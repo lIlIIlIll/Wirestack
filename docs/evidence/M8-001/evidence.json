@@ -1,6 +1,6 @@
 {
-  "acceptance_status": "BLOCKED",
-  "generated_at_utc": "2026-09-10T10:11:14.311407Z",
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-09-10T10:46:30.198922Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,7 +13,7 @@
       "path": "docs/evidence/M8-001/plan-validation.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "f0806f9aafe2f7f8127f1acd84533f9fa89b35debc27dd53a05abbc5cafac91e"
+        "sha256": "de24ca69c2abd8cd55b5960aa91e0f1cc384aacfed05bc8040b52ec47a7b2ec7"
       },
       "source_task": "M8-001"
     },
@@ -22,7 +22,7 @@
       "path": "docs/evidence/M8-001/architecture-guard.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "264b58cd12a02760d2c04534083b3fc7f03325c5cb5b005ff3e1f1e035e1ca4c"
+        "sha256": "e7b6572bf66fc3cb3d409e6d08e1e3f08557e8aa2d147541c0233eba347b5e9e"
       },
       "source_task": "M8-001"
     },
@@ -31,7 +31,7 @@
       "path": "docs/evidence/M8-001/task-validation.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "696a1c08ceb81fe3dfdbc33dcb587ef3b574f7e43ef69933b54cc48c4170d29f"
+        "sha256": "1a03f7891dc5f2822e3cb92a672fe74bcc179061e579fbed5919f10d65db1ac1"
       },
       "source_task": "M8-001"
     },
@@ -40,7 +40,7 @@
       "path": "docs/evidence/M8-001/python-tests.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "0759d1d243df89758c26b4b97561ea006ef63769a00046a22cb794b1a9c3bd70"
+        "sha256": "e5fac00a704ba73d259ef5c8442c5153869edf315c26520dc48a57e13ae0e947"
       },
       "source_task": "M8-001"
     },
@@ -49,7 +49,7 @@
       "path": "docs/evidence/M8-001/cangjie-build.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "57194d305311b998de20eeb649124af7d46823259e0a8dd2e872bcc3e94889ca"
+        "sha256": "0c7831ebede5d2f738d441eeb719176778bc1bd3c846b922120f45ad0e5046b9"
       },
       "source_task": "M8-001"
     },
@@ -58,7 +58,7 @@
       "path": "docs/evidence/M8-001/network-tests.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "38f125eacca5c03f480ab6123e31110b0de8c0f05f2609d9fb1785a414665383"
+        "sha256": "2258f462cab96df2fadc2ff5710f27cdba8bbb1f7ef3692b05c4f6deecd55b81"
       },
       "source_task": "M8-001"
     },
@@ -67,7 +67,7 @@
       "path": "docs/evidence/M8-001/regression-tests.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "c6caaf6aa96af606b5971450d02b2203ff224618b7d010d66abef87926c356e5"
+        "sha256": "d2681765f7c252e5c2e404f794f2455df0660e4c79eeb3567308b5c9601282a7"
       },
       "source_task": "M8-001"
     },
@@ -76,7 +76,7 @@
       "path": "docs/evidence/M8-001/api-inventory-command.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "efe99ef0564b2737270d6bcafb3b247b17cdbebf86ca35d520fa9285fc4fdf8f"
+        "sha256": "7d88349b1d74aa449ca54f62daf95fd055f393d70fc397b587c16a8bbfc605df"
       },
       "source_task": "M8-001"
     },
@@ -85,7 +85,7 @@
       "path": "docs/evidence/M8-001/docs-report.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "9d21371e76b47cb495122914535fd2dd1622eda63a7718127e989cf092ef75f8"
+        "sha256": "4cf36644ba28f5de71a49c675dc1c5f9eba55c201048f9d2277a7e8923b10926"
       },
       "source_task": "M8-001"
     },
@@ -94,7 +94,7 @@
       "path": "docs/evidence/M8-001/full-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "f8310c16227092ffc7b5c4cc9f6b0aadf2537c3842349cf79ce9d014d061aa55"
+        "sha256": "3cf98f9c55e84e2d2db76e1826db95e982fe44c33674e8b0d56b2489f00a008e"
       },
       "source_task": "M8-001"
     },
@@ -103,7 +103,7 @@
       "path": "docs/evidence/M8-001/native-consumer.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "017040e1259dc7677c07249c1e1d5111e1df5943906140f75c45c3ec843038f5"
+        "sha256": "d5558434decb1a6f45b8c770f57c73d93ec2a5fb0f277223a1a59254b641d518"
       },
       "source_task": "M8-001"
     },
@@ -139,7 +139,7 @@
       "path": "docs/evidence/M8-001/task-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "4425faddd7a91f01b5a59dcf82ca261eca65a4b9dc9343083d992ff3928ccc65"
+        "sha256": "30c1d5204f341aab2d2b8d743c48ea5e792e0e6e8c6eed30152c1ae99077fb4e"
       },
       "source_task": "M8-001"
     },
@@ -148,7 +148,7 @@
       "path": "docs/evidence/M8-001/cangjie-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "882a3a2eb9d5195a64e4d1d8d6099b3bf8e7a3a44635fa7ced644637e633ba82"
+        "sha256": "1c8450685ed73b193f3c044a32ef7aeac6245d917df6aa7d250746fccf154bad"
       },
       "source_task": "M8-001"
     },
@@ -157,7 +157,7 @@
       "path": "docs/evidence/M8-001/docs-command.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "6b9f2aa58e93f950a526d1861971f4dfc4dae14c84fae1fc05211df8ae834a91"
+        "sha256": "701fe1787b6e8cffd1ca0022925fcf3a9ea509bfc2cd2f33f7b1072193bd2dcc"
       },
       "source_task": "M8-001"
     },
@@ -196,9 +196,18 @@
         "sha256": "b4ae242146ecba2887e01f2c85ee55f8c17c39e28c75ef782f928ecc53a20a77"
       },
       "source_task": "M8-001"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-001/review-sixth.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b86dd84c6245fd8fc5f59c7376c55611983af5f49a428f41f71b589499fe8cdb"
+      },
+      "source_task": "M8-001"
     }
   ],
-  "revision": "08f845b01f066930ee188b6e4f388d670dc7a076",
+  "revision": "ba9a7e8256b2c6d6ff0127a8ca3483fa873ae1c7",
   "schema_version": 2,
   "source_sha256": {
     ".gitignore": {
@@ -223,7 +232,7 @@
     },
     "docs/evidence/M8-001/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "65e635070ae09be395745e963adf05bb01e4d0174a45e273e6a79e5cd84c22b8"
+      "sha256": "0dd41904296f6c3a1914a24965cc72644ab523c9809b4b716cfd5fa130ef72da"
     },
     "docs/evidence/M8-001/api-inventory.json": {
       "domain": "text-utf8-lf-v1",
@@ -231,7 +240,7 @@
     },
     "docs/evidence/M8-001/test-plan.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "2c027409ba27afea44f1893d43044ce1a5a3f3a633d942f28653c37daa37af04"
+      "sha256": "6317f6b8be5f2f2b5181c47e24066d8631eba89f6f43367c84e1cf22982f5792"
     },
     "docs/evidence/M8-001/workspace-safety-publication.json": {
       "domain": "text-utf8-lf-v1",
@@ -239,7 +248,7 @@
     },
     "docs/guides/network-foundation-linux.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "2430d2d347a033ce4e32aae801aa5abbb6b4cffecfb70fd0203a150c3ba0657e"
+      "sha256": "319760e5407a2ae9fc868836959dc386f470aff00319b7a4a508b82dc1676f36"
     },
     "docs/planning/implementation-backlog.md": {
       "domain": "text-utf8-lf-v1",
@@ -247,7 +256,7 @@
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "1e8ac564515e6a79210560012c27f8a6ca4539ceed202edacaeaeb3e41abf248"
+      "sha256": "3835816d03ee63ef92f7dcdcf6c71a4d229858178adf9193842c036ec81799e0"
     },
     "docs/product/prd.md": {
       "domain": "text-utf8-lf-v1",
@@ -271,11 +280,11 @@
     },
     "src/net/package.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "57c39c274cbe5af45ddd996752ea9bb42bab32304090a3e5e80f2fbcb13cd9f4"
+      "sha256": "382735c3f5f88f8cf00c89e380477a1637cc3359f68bc22992c190bb15c04abc"
     },
     "src/net/package_test.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "6a5c81cee9bcf3c28c916754da66775d25183c426d3aa44a04500518d82745bc"
+      "sha256": "3f472dbb093bb9a6affb8973b0b711ee50ad5e20b03ce371071a80c6f4f456de"
     },
     "src/network_error.cj": {
       "domain": "text-utf8-lf-v1",
