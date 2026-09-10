@@ -10,6 +10,7 @@ import wirestack.internal.common.*
 import wirestack.internal.connector.*
 import wirestack.internal.resolver.*
 import wirestack.internal.transport.*
+import wirestack.NetworkEndpoint
 
 private func loopback(port: UInt16): SocketEndpoint {
     SocketEndpoint(IpAddress(IpAddressFamily.Ipv4, [127, 0, 0, 1]), port)
@@ -84,7 +85,18 @@ private func stableUnknownConnectError(error: NetworkException, endpoint: Socket
     }
     categoryMatches && phaseMatches && codeMatches && retryabilityMatches &&
         error.nativeCode.isNone() && error.localEndpoint.isNone() &&
-        error.remoteEndpoint == Some(endpoint) && error.cause.isSome()
+        internetEndpointMatches(error.remoteEndpoint, Some(endpoint)) && error.cause.isSome()
+}
+
+private func internetEndpointMatches(
+    actual: ?NetworkEndpoint,
+    expected: ?SocketEndpoint
+): Bool {
+    match ((actual, expected)) {
+        case (Some(NetworkEndpoint.Internet(value)), Some(endpoint)) => value == endpoint
+        case (None, None) => true
+        case _ => false
+    }
 }
 
 private func net06CancellationIterations(): Int64 {
@@ -368,8 +380,8 @@ class StdNetTransportTest {
                     @Expect(stableCode)
                     @Expect(stableRetryability)
                     @Expect(error.nativeCode.isNone())
-                    @Expect(error.localEndpoint, client.info.localEndpoint)
-                    @Expect(error.remoteEndpoint, client.info.remoteEndpoint)
+                    @Expect(internetEndpointMatches(error.localEndpoint, client.info.localEndpoint))
+                    @Expect(internetEndpointMatches(error.remoteEndpoint, client.info.remoteEndpoint))
                     unsupported = true
                 }
                 @Expect(unsupported)
@@ -392,6 +404,7 @@ class StdNetTransportTest {
             listener.close()
         }
     }
+
 
     @TestCase
     func cancellationWakesBlockedReadAndIsNeverReportedAsEof(): Unit {

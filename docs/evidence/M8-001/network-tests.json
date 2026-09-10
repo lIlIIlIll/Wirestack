@@ -6,24 +6,24 @@
     "--no-progress",
     "--no-color"
   ],
-  "duration_ms": 9705.492,
+  "duration_ms": 13089.063,
   "error_code": null,
   "exit_code": 0,
-  "finished_at_utc": "2026-09-10T06:38:57.015180Z",
+  "finished_at_utc": "2026-09-10T07:25:13.314144Z",
   "id": "network-contract-tests",
-  "started_at_utc": "2026-09-10T06:38:47.309693Z",
+  "started_at_utc": "2026-09-10T07:25:00.225098Z",
   "status": "PASS",
   "stderr_excerpt": "",
   "stderr_path": "docs/evidence/M8-001/network-contract-tests.stderr.log",
   "stderr_truncated": false,
-  "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.net, time elapsed: 3611162 ns, RESULT:\n    TCS: NetworkFoundationContractTest, time elapsed: 3611162 ns, RESULT:\n    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (260296 ns)\n    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (43350 ns)\n    [ PASSED ] CASE: rawSocketCapabilityBoundaryFailsClosedForEveryDomain (43290 ns)\n    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (92871 ns)\n    [ PASSED ] CASE: tcpStreamLifecycleDoesNotDependOnEndpointPresence (18771 ns)\n    [ PASSED ] CASE: tcpStreamAbortPreservesConnectionFacts (64973 ns)\n    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (194145 ns)\n    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1535077 ns)\n    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (13880 ns)\nSummary: TOTAL: 9\n    PASSED: 9, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 12002192 ns, RESULT:\nTP: wirestack.*, time elapsed: 11881132 ns, RESULT:\n    PASSED:\n    TP: wirestack.net, time elapsed: 3611162 ns\nSummary: TOTAL: 9\n    PASSED: 9, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+  "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.net, time elapsed: 8094551 ns, RESULT:\n    TCS: NetworkFoundationContractTest, time elapsed: 8094551 ns, RESULT:\n    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (395969 ns)\n    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (125624 ns)\n    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (106878 ns)\n    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (198512 ns)\n    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (42059 ns)\n    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (117653 ns)\n    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (59516 ns)\n    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (94443 ns)\n    [ PASSED ] CASE: tcpStreamAbortWinsWhileGracefulCloseIsBlocked (200314 ns)\n    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (80733 ns)\n    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (130127 ns)\n    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (2930805 ns)\n    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (39778 ns)\nSummary: TOTAL: 13\n    PASSED: 13, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 16406315 ns, RESULT:\nTP: wirestack.*, time elapsed: 16351099 ns, RESULT:\n    PASSED:\n    TP: wirestack.net, time elapsed: 8094551 ns\nSummary: TOTAL: 13\n    PASSED: 13, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
   "stdout_path": "docs/evidence/M8-001/network-contract-tests.stdout.log",
   "stdout_truncated": false,
   "timed_out": false,
   "source_task": "M8-001",
   "stdout_sha256": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "13ab5cda1fc42cbf1cb6d3230eee56dcb711315f29821c9baf1c48a6e00b00a3"
+    "sha256": "1b7d5eb035ba6a46e2896205ac8f3a50a4b8ccbafede7ceaa17428624bbde063"
   },
   "stderr_sha256": {
     "domain": "text-utf8-lf-v1",

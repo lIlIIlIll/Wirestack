@@ -2,4 +2,4 @@ M7-026 Linux API compatibility: PASS
 package=wirestack@0.1.0
 declarations=260
 resolved_aliases=103
-inventory_sha256=080a1c8eec3086f4e98edd47c8b18a085ad5bb688fbe1a09f52c864219cc4000
+inventory_sha256=6ab340ef36b62f3f48a7e726dda88cbc738006aa21aaf0b6b778ac25f6c5cea3

@@ -2,37 +2,57 @@
   "schema_version": 1,
   "source_task": "M8-001",
   "status": "PASS",
-  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-09-10T07:27:23.558483+00:00",
   "platform": "linux-x86_64-glibc",
-  "generated_at_utc": "2026-09-10T06:49:51.425258+00:00",
-  "source": "Both current guide Cangjie blocks, with package declaration only",
+  "consumer_manifest": "[package]\n  cjc-version = \"1.1.3\"\n  name = \"wirestack_m8_001_consumer\"\n  version = \"1.0.0\"\n  src-dir = \"src\"\n  output-type = \"executable\"\n\n[dependencies]\n  wirestack = { path = \"/home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909\" }\n",
+  "consumer_source": "package wirestack_m8_001_consumer\n\nimport wirestack.net.*\nimport wirestack as api\n\nmain(): Int64 {\n    let failure = api.NetworkException(api.NetworkErrorCategory.Connect,\n        api.NetworkPhase.UnixSocket, api.NetworkErrorCode.ConnectRefused,\n        \"consumer endpoint contract\",\n        remoteEndpoint: Some(api.NetworkEndpoint.Unix(\n            api.UnixEndpoint.abstractName([0u8, 255u8, 1u8]))))\n    match (unixPeer(failure)) {\n        case Some(peer) =>\n            let bytes = peer.nameBytes()\n            if (bytes.size != 3 || bytes[0] != 0u8 || bytes[1] != 255u8 || bytes[2] != 1u8) {\n                throw IllegalStateException(\"Unix error endpoint bytes changed\")\n            }\n        case None => throw IllegalStateException(\"Unix error endpoint was lost\")\n    }\n    let address = api.IpAddress(api.IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8])\n    let endpoint = api.SocketEndpoint(address, 8080u16)\n    let context = api.OperationContext(\n        deadline: Some(api.Deadline.after(5 * Duration.second)))\n    let stream = TcpStream.connect(endpoint, context: context)\n    try {\n        let payload = api.ByteSpan(\"hello\".toArray())\n        stream.writeAll(payload, context: context)\n    } finally {\n        stream.close(context: context)\n    }\n    0\n}\n\nfunc forwardOneDatagram(\n    socket: DatagramSocket,\n    target: api.NetworkEndpoint,\n    context: api.OperationContext\n): Int64 {\n    let received = socket.receive(65507, context: context)\n    if (received.truncated) {\n        throw IllegalStateException(\"refusing to forward a truncated datagram\")\n    }\n    socket.sendTo(target, api.ByteSpan(received.payload), context: context)\n}\n\nfunc unixPeer(error: api.NetworkException): ?api.UnixEndpoint {\n    match (error.remoteEndpoint) {\n        case Some(api.NetworkEndpoint.Unix(endpoint)) => Some(endpoint)\n        case _ => None<api.UnixEndpoint>\n    }\n}\n",
+  "guide": "docs/guides/network-foundation-linux.md",
   "guide_sha256": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "d1a593f833ce45ea5bbb75a01dc6c2b528c7c2d41b6d1d04829e3a4ad93e0a61"
+    "sha256": "1e9bb3ef41bfeaaaf738dfb46f924c8485bd0a8b51480058cc4fabf2ac31e290"
   },
-  "commands": [
-    {
-      "argv": [
-        "cjpm",
-        "build"
-      ],
-      "cwd": "/tmp/wirestack-m8-001-consumer-nn4l5zul",
-      "exit_code": 0,
-      "stdout": "cjpm build success\n",
-      "stderr": "\u001b[33mwarning\u001b[0m: unused function:'waitUntilWriteActive'\n   \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/internal/transport_stdnet/package.cj:502:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m502\u001b[0m \u001b[36m| \u001b[0m      internal func waitUntilWriteActive(timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m503\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m515\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilAcceptActive'\n   \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/internal/transport_stdnet/package.cj:803:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m803\u001b[0m \u001b[36m| \u001b[0m      func waitUntilAcceptActive(timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m804\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m812\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n2 warnings generated, 2 warnings printed.\n\u001b[33mwarning\u001b[0m: unused function:'forwardOneDatagram'\n  \u001b[36m==>\u001b[0m /tmp/wirestack-m8-001-consumer-nn4l5zul/src/main.cj:21:1:\n   \u001b[36m| \u001b[0m\n\u001b[36m21\u001b[0m \u001b[36m| \u001b[0m  func forwardOneDatagram(\u001b[0m\n   \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m22\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     socket: DatagramSocket,\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m31\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^ unused function\u001b[0m\n   \u001b[36m| \u001b[0m\n   \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilWaiters'\n   \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/internal/http1/connection_pool.cj:374:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m374\u001b[0m \u001b[36m| \u001b[0m      internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m375\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m384\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n"
+  "guide_example_count": 3,
+  "build": {
+    "argv": [
+      "cjpm",
+      "build"
+    ],
+    "exit_code": 0,
+    "stdout_path": "docs/evidence/M8-001/native-consumer-build.stdout.log",
+    "stdout_sha256": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
     },
-    {
-      "argv": [
-        "/tmp/wirestack-m8-001-consumer-nn4l5zul/target/release/bin/main"
-      ],
-      "exit_code": 0,
-      "stdout": "",
-      "stderr": ""
+    "stderr_path": "docs/evidence/M8-001/native-consumer-build.stderr.log",
+    "stderr_sha256": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d8714dcc7845ce4bc41d262c3a836105abd8c56af0090af953e83da127917827"
     }
-  ],
+  },
+  "run": {
+    "argv": [
+      "target/release/bin/main"
+    ],
+    "exit_code": 0,
+    "stdout_path": "docs/evidence/M8-001/native-consumer-run.stdout.log",
+    "stdout_sha256": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr_path": "docs/evidence/M8-001/native-consumer-run.stderr.log",
+    "stderr_sha256": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
   "receiver": {
     "status": "PASS",
-    "received_hex": "68656c6c6f"
+    "received_hex": "68656c6c6f",
+    "exit_code": 0
   },
-  "scope": "TCP example executed against a real receiver. Datagram receive/sendTo caller compiled but was not executed; no native datagram I/O claim."
+  "scope": {
+    "tcp": "Real Linux loopback receiver accepted exactly hello.",
+    "unix_error": "Executed public Unix error helper and verified exact abstract bytes 00 ff 01 in structured metadata; no native Unix socket I/O.",
+    "datagram": "Public caller compiled only; no native datagram I/O."
+  }
 }

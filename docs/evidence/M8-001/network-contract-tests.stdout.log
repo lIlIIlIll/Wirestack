@@ -1,25 +1,29 @@
 --------------------------------------------------------------------------------------------------
-TP: wirestack.net, time elapsed: 3611162 ns, RESULT:
-    TCS: NetworkFoundationContractTest, time elapsed: 3611162 ns, RESULT:
-    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (260296 ns)
-    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (43350 ns)
-    [ PASSED ] CASE: rawSocketCapabilityBoundaryFailsClosedForEveryDomain (43290 ns)
-    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (92871 ns)
-    [ PASSED ] CASE: tcpStreamLifecycleDoesNotDependOnEndpointPresence (18771 ns)
-    [ PASSED ] CASE: tcpStreamAbortPreservesConnectionFacts (64973 ns)
-    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (194145 ns)
-    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1535077 ns)
-    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (13880 ns)
-Summary: TOTAL: 9
-    PASSED: 9, SKIPPED: 0, ERROR: 0
+TP: wirestack.net, time elapsed: 8094551 ns, RESULT:
+    TCS: NetworkFoundationContractTest, time elapsed: 8094551 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (395969 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (125624 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (106878 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (198512 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (42059 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (117653 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (59516 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (94443 ns)
+    [ PASSED ] CASE: tcpStreamAbortWinsWhileGracefulCloseIsBlocked (200314 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (80733 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (130127 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (2930805 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (39778 ns)
+Summary: TOTAL: 13
+    PASSED: 13, SKIPPED: 0, ERROR: 0
     FAILED: 0
 --------------------------------------------------------------------------------------------------
-Project tests finished, time elapsed: 12002192 ns, RESULT:
-TP: wirestack.*, time elapsed: 11881132 ns, RESULT:
+Project tests finished, time elapsed: 16406315 ns, RESULT:
+TP: wirestack.*, time elapsed: 16351099 ns, RESULT:
     PASSED:
-    TP: wirestack.net, time elapsed: 3611162 ns
-Summary: TOTAL: 9
-    PASSED: 9, SKIPPED: 0, ERROR: 0
+    TP: wirestack.net, time elapsed: 8094551 ns
+Summary: TOTAL: 13
+    PASSED: 13, SKIPPED: 0, ERROR: 0
     FAILED: 0
 --------------------------------------------------------------------------------------------------
 cjpm test success

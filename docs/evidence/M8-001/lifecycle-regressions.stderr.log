@@ -1,0 +1,9 @@
+[33mwarning[0m: unused import 'std.time.*'
+ [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/net/package_test.cj:5:1:
+  [36m| [0m
+[36m5[0m [36m| [0mimport std.time.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.

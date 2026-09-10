@@ -1,12 +1,13 @@
 # M8-001 evidence
 
-Status: COMPLETE. PR #157 was requalified after scope and contract corrections.
-Only the fresh scoped results below qualify the current source.
+Status: COMPLETE. Both review rounds have fresh scoped verification.
+The source candidate is committed before the final evidence seal.
 
 ## Scope
 
-- Public `wirestack.net` endpoint, lifecycle, context, option-value and capability
-  contracts, with a TCP stream bridge to the existing Transport SPI.
+- Shared `wirestack` Internet/Unix endpoint values and `wirestack.net`
+  lifecycle, context, option-value and capability contracts, with a TCP stream
+  bridge to the existing Transport SPI.
 - `DatagramSocket` connect/send/sendTo/receive/lifecycle operations under one
   absolute context, message atomicity, bounded payloads and explicit truncation.
 - Distinct Unix pathname/abstract/unnamed values and fail-closed raw capabilities.
@@ -25,20 +26,31 @@ rejects `StreamingSocket` in `wirestack.net` while allowing Wirestack's own
 
 Datagram result construction rejects payloads above 65,507 bytes and owns its
 receive data. The oversized-result regression failed before repair; the scoped
-network suite now passes 9/9 tests. Native datagram adapters and their I/O
+network suite now passes 13/13 tests. Native datagram adapters and their I/O
 qualification remain M8-002/M8-003 work, not simulated success here.
+
+The second review retains graceful close, abort, failure and directional
+half-close states; requires an explicit raw protocol; rejects pathname NUL
+without changing abstract bytes; and captures a clean 40-hex Git revision.
+The project owner approved updating PRD §16.1 to shared `NetworkEndpoint`
+error fields. All Internet error boundaries migrated; Unix metadata is lossless.
+See [`review-round-two.json`](review-round-two.json): 26 revision-tooling tests,
+13 network tests and 4 selected error tests passed. The latter command excluded
+79 unrelated cases by filter; the canonical gate subsequently passed all 83
+transport tests.
 
 ## Acceptance
 
 All three task-specific fast commands and all eight task commands passed with
-STS 1.1.3 and pinned cjdoc 0.7.2. `scripts/check` passed 597 Cangjie tests with
+STS 1.1.3 and pinned cjdoc 0.7.2. `scripts/check` passed 603 Cangjie tests with
 23 performance-tagged exclusions, zero errors and zero failures. The network
-contract suite passed 9/9 without skips.
+contract suite passed 13/13 without skips.
 
 The inventory contains 260 declarations and 103 aliases. API documentation
-covers all 1,089 symbols and 430 parameters. Both guide examples compiled;
+covers all 1,093 symbols and 430 parameters. All three guide examples compiled;
 the TCP example executed against a real receiver and sent exactly `hello`.
-The datagram caller was compile-checked, not executed against a native adapter.
+The Unix error helper executed and retained bytes `00 ff 01`; this is not native
+Unix socket I/O. The datagram caller was compile-checked only.
 
 [`task-check.json`](task-check.json) retains exact commands and checksummed raw
 logs; [`review-corrections.json`](review-corrections.json) records the reproduced
