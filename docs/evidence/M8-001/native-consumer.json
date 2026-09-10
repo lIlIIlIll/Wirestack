@@ -4,11 +4,11 @@
   "status": "PASS",
   "acceptance_status": "PASS",
   "platform": "linux-x86_64-glibc",
-  "generated_at_utc": "2026-09-10T05:31:11.321056+00:00",
-  "source": "docs/guides/network-foundation-linux.md fenced Cangjie example, with package declaration only",
+  "generated_at_utc": "2026-09-10T06:49:51.425258+00:00",
+  "source": "Both current guide Cangjie blocks, with package declaration only",
   "guide_sha256": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "222044a0174eeb3a8db7c2752f7f072ca6810d6d79546a466f0af291eb4851b8"
+    "sha256": "d1a593f833ce45ea5bbb75a01dc6c2b528c7c2d41b6d1d04829e3a4ad93e0a61"
   },
   "commands": [
     {
@@ -16,14 +16,14 @@
         "cjpm",
         "build"
       ],
-      "cwd": "/tmp/wirestack-m8-001-consumer-8dao1vb9",
+      "cwd": "/tmp/wirestack-m8-001-consumer-nn4l5zul",
       "exit_code": 0,
       "stdout": "cjpm build success\n",
-      "stderr": "\u001b[33mwarning\u001b[0m: unused function:'waitUntilWriteActive'\n   \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/internal/transport_stdnet/package.cj:502:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m502\u001b[0m \u001b[36m| \u001b[0m      internal func waitUntilWriteActive(timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m503\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m515\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilAcceptActive'\n   \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/internal/transport_stdnet/package.cj:803:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m803\u001b[0m \u001b[36m| \u001b[0m      func waitUntilAcceptActive(timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m804\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m812\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n2 warnings generated, 2 warnings printed.\n\u001b[33mwarning\u001b[0m: unused function:'init'\n   \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/net/package.cj:195:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m195\u001b[0m \u001b[36m| \u001b[0m      internal init(payload: Array<Byte>, source: ?NetworkEndpoint, truncated: Bool) {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m196\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         this.payload = payload.clone()\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m199\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilWaiters'\n   \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/internal/http1/connection_pool.cj:374:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m374\u001b[0m \u001b[36m| \u001b[0m      internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m375\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m384\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n"
+      "stderr": "\u001b[33mwarning\u001b[0m: unused function:'waitUntilWriteActive'\n   \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/internal/transport_stdnet/package.cj:502:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m502\u001b[0m \u001b[36m| \u001b[0m      internal func waitUntilWriteActive(timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m503\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m515\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilAcceptActive'\n   \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/internal/transport_stdnet/package.cj:803:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m803\u001b[0m \u001b[36m| \u001b[0m      func waitUntilAcceptActive(timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m804\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m812\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n2 warnings generated, 2 warnings printed.\n\u001b[33mwarning\u001b[0m: unused function:'forwardOneDatagram'\n  \u001b[36m==>\u001b[0m /tmp/wirestack-m8-001-consumer-nn4l5zul/src/main.cj:21:1:\n   \u001b[36m| \u001b[0m\n\u001b[36m21\u001b[0m \u001b[36m| \u001b[0m  func forwardOneDatagram(\u001b[0m\n   \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m^\u001b[0m\n\u001b[36m22\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     socket: DatagramSocket,\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m31\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m }\u001b[0m\n   \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m^ unused function\u001b[0m\n   \u001b[36m| \u001b[0m\n   \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n\u001b[33mwarning\u001b[0m: unused function:'waitUntilWaiters'\n   \u001b[36m==>\u001b[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/internal/http1/connection_pool.cj:374:5:\n    \u001b[36m| \u001b[0m\n\u001b[36m374\u001b[0m \u001b[36m| \u001b[0m      internal func waitUntilWaiters(expected: Int64, timeout: Duration): Bool {\u001b[0m\n    \u001b[36m| \u001b[0m \u001b[33m_\u001b[0m\u001b[33m____^\u001b[0m\n\u001b[36m375\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m         let expiresAt = MonoTime.now() + timeout\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m ...\u001b[0m\n\u001b[36m384\u001b[0m \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m     }\u001b[0m\n    \u001b[36m| \u001b[0m\u001b[33m|\u001b[0m\u001b[33m_\u001b[0m\u001b[33m____^ unused function\u001b[0m\n    \u001b[36m| \u001b[0m\n    \u001b[36m#\u001b[0m \u001b[0mnote\u001b[0m: this warning can be suppressed by setting the compiler option `-Woff unused`\n\n1 warning generated, 1 warning printed.\n"
     },
     {
       "argv": [
-        "/tmp/wirestack-m8-001-consumer-8dao1vb9/target/release/bin/main"
+        "/tmp/wirestack-m8-001-consumer-nn4l5zul/target/release/bin/main"
       ],
       "exit_code": 0,
       "stdout": "",
@@ -34,21 +34,5 @@
     "status": "PASS",
     "received_hex": "68656c6c6f"
   },
-  "checks": {
-    "clean_public_consumer": "PASS",
-    "native_loopback_write_all": "PASS",
-    "receiver_payload": "hello",
-    "shared_absolute_deadline": "example uses one OperationContext for connect/writeAll/close"
-  },
-  "corrected_example_failures": [
-    {
-      "exit_code": 1,
-      "error": "Duration is not accessible in std.time; removed unnecessary import"
-    },
-    {
-      "exit_code": 1,
-      "error": "ByteSpan first argument is positional; removed bytes label"
-    }
-  ],
-  "fixture_diagnostic": "Initial readiness TCP probe consumed the one-shot receiver connection; rerun used the READY log emitted after listen. Only the real consumer run above is acceptance."
+  "scope": "TCP example executed against a real receiver. Datagram receive/sendTo caller compiled but was not executed; no native datagram I/O claim."
 }

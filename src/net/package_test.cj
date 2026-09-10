@@ -42,15 +42,6 @@ class NetworkFoundationContractTest {
         }
     }
 
-    @TestCase
-    func dnsParserAcceptsTheRecordLimitBoundary(): Unit {
-        let summary = DnsMessageParser().parse([
-            0x12u8, 0x34u8, 0x82u8, 0u8,
-            0u8, 0u8, 0x10u8, 0u8, 0u8, 0u8, 0u8, 0u8
-        ])
-        @Expect(summary.answerCount, 4096)
-        @Expect(summary.truncated)
-    }
 
     @TestCase
     func cancelledConnectFailsBeforeSocketCreation(): Unit {
@@ -136,71 +127,28 @@ class NetworkFoundationContractTest {
     }
 
     @TestCase
-    func dnsHeaderRejectsStructuralAndRecordBounds(): Unit {
-        let parser = DnsMessageParser()
-        expectDnsRejected(parser, Array<Byte>(11, repeat: 0u8))
-
-        let query = Array<Byte>(12, repeat: 0u8)
-        expectDnsRejected(parser, query)
-
-        let overRecordLimit = [
-            0u8, 1u8, 0x80u8, 0u8,
-            0u8, 0u8, 0x10u8, 0x01u8, 0u8, 0u8, 0u8, 0u8
-        ]
-        expectDnsRejected(parser, overRecordLimit)
-
-        let oversized = Array<Byte>(65536, repeat: 0u8)
-        oversized[2] = 0x80u8
-        expectDnsRejected(parser, oversized)
+    func datagramResultEnforcesTheIpv4PayloadBound(): Unit {
+        let maximum = DatagramReceiveResult(
+            Array<Byte>(65507, repeat: 0u8), None<NetworkEndpoint>, false)
+        @Expect(maximum.payload.size, 65507)
+        var rejected = false
+        try {
+            let _ = DatagramReceiveResult(
+                Array<Byte>(65508, repeat: 0u8), None<NetworkEndpoint>, false)
+        } catch (_: IllegalArgumentException) {
+            rejected = true
+        }
+        @Expect(rejected)
     }
 
     @TestCase
-    func dnsHeaderMutationsHaveOnlyBoundedSuccessOrStructuredRejection(): Unit {
-        let parser = DnsMessageParser()
-        let seed = [
-            0x12u8, 0x34u8, 0x83u8, 0x80u8,
-            0u8, 1u8, 0u8, 2u8, 0u8, 3u8, 0u8, 4u8
-        ]
-        var accepted: Int64 = 0
-        var rejected: Int64 = 0
-
-        for (length in 0..13) {
-            if (exerciseDnsHeader(parser, copyDnsPrefix(seed, length))) {
-                accepted++
-            } else {
-                rejected++
-            }
-        }
-        for (index in 0..seed.size) {
-            for (mask in [0x01u8, 0x20u8, 0x80u8, 0xFFu8]) {
-                let mutated = seed.clone()
-                mutated[index] = mutated[index] ^ mask
-                if (exerciseDnsHeader(parser, mutated)) {
-                    accepted++
-                } else {
-                    rejected++
-                }
-            }
-        }
-        let pattern = [0x00u8, 0x01u8, 0x20u8, 0x7Fu8, 0x80u8, 0xFFu8]
-        for (length in 0..65) {
-            let generated = Array<Byte>(length, repeat: 0u8)
-            for (index in 0..length) {
-                generated[index] = pattern[(index + length) % pattern.size]
-            }
-            if (length > 2 && length % 2 == 0) {
-                generated[2] = generated[2] | 0x80u8
-            }
-            if (exerciseDnsHeader(parser, generated)) {
-                accepted++
-            } else {
-                rejected++
-            }
-        }
-
-        @Expect(accepted > 0)
-        @Expect(rejected > 0)
+    func datagramResultSurvivesReceiveBufferReuse(): Unit {
+        let buffer = [1u8, 2u8, 3u8]
+        let received = DatagramReceiveResult(buffer, None<NetworkEndpoint>, true)
+        buffer[0] = 9u8
+        @Expect(received.payload, [1u8, 2u8, 3u8])
     }
+
 }
 
 private class NetworkContractTransport <: api.DuplexTransport {
@@ -371,61 +319,3 @@ private func rejectClosedTransport(
     }
 }
 
-private func expectDnsRejected(parser: DnsMessageParser, input: Array<Byte>): Unit {
-    var rejected = false
-    try {
-        let _ = parser.parse(input)
-    } catch (error: api.ResolveException) {
-        rejected = isDnsHeaderRejection(error)
-    }
-    @Expect(rejected)
-}
-
-private func exerciseDnsHeader(parser: DnsMessageParser, input: Array<Byte>): Bool {
-    try {
-        let summary = parser.parse(input)
-        @Assert(input.size >= 12 && input.size <= 65535)
-        @Assert((input[2] & 0x80u8) != 0u8)
-        let totalRecords =
-            dnsTestUInt16(input, 4) + dnsTestUInt16(input, 6) +
-            dnsTestUInt16(input, 8) + dnsTestUInt16(input, 10)
-        @Assert(totalRecords <= 4096)
-        @Assert(summary.answerCount >= 0 && summary.answerCount <= totalRecords)
-        true
-    } catch (error: api.ResolveException) {
-        @Assert(isDnsHeaderRejection(error))
-        false
-    }
-}
-
-private func isDnsHeaderRejection(error: api.ResolveException): Bool {
-    let resolveCodeMatches = match (error.resolveCode) {
-        case api.ResolveErrorCode.SystemFailure => true
-        case _ => false
-    }
-    let categoryMatches = match (error.category) {
-        case api.NetworkErrorCategory.Resolve => true
-        case _ => false
-    }
-    let phaseMatches = match (error.phase) {
-        case api.NetworkPhase.Dns => true
-        case _ => false
-    }
-    let codeMatches = match (error.code) {
-        case api.NetworkErrorCode.SystemFailure => true
-        case _ => false
-    }
-    resolveCodeMatches && categoryMatches && phaseMatches && codeMatches
-}
-
-private func dnsTestUInt16(input: Array<Byte>, offset: Int64): Int64 {
-    (Int64(input[offset]) << 8) | Int64(input[offset + 1])
-}
-
-private func copyDnsPrefix(input: Array<Byte>, length: Int64): Array<Byte> {
-    let copy = Array<Byte>(length, repeat: 0u8)
-    for (index in 0..length) {
-        copy[index] = input[index]
-    }
-    copy
-}

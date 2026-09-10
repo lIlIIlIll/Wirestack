@@ -22,6 +22,7 @@ test_low_level_names_in_public_comments_and_literals_do_not_trigger (test_archit
 test_manifest_cannot_hide_folded_text_operand (test_architecture_guard.ArchitectureGuardTests.test_manifest_cannot_hide_folded_text_operand) ... ok
 test_multiple_rules_on_one_config_line_are_all_reported (test_architecture_guard.ArchitectureGuardTests.test_multiple_rules_on_one_config_line_are_all_reported) ... ok
 test_native_code_rejects_system_openssl_runtime_loader (test_architecture_guard.ArchitectureGuardTests.test_native_code_rejects_system_openssl_runtime_loader) ... ok
+test_network_package_rejects_sdk_socket_types_but_allows_owned_raw_socket (test_architecture_guard.ArchitectureGuardTests.test_network_package_rejects_sdk_socket_types_but_allows_owned_raw_socket) ... ok
 test_non_python_digest_requires_explicit_domain_marker (test_architecture_guard.ArchitectureGuardTests.test_non_python_digest_requires_explicit_domain_marker) ... ok
 test_non_python_domain_manifest_matches_exact_command (test_architecture_guard.ArchitectureGuardTests.test_non_python_domain_manifest_matches_exact_command) ... ok
 test_non_python_tool_digest_is_scanned (test_architecture_guard.ArchitectureGuardTests.test_non_python_tool_digest_is_scanned) ... ok
@@ -415,7 +416,7 @@ test_third_party_comparison_source_rejected (test_validate_tls_provider_matrix.T
 test_unknown_schema_fails_closed (test_validate_tls_provider_matrix.Tests.test_unknown_schema_fails_closed) ... ok
 
 ----------------------------------------------------------------------
-Ran 411 tests in 5.864s
+Ran 412 tests in 6.363s
 
 OK
 test_classification_detects_sustained_starvation (test_dns_carrier_thread.DnsCarrierThreadTests.test_classification_detects_sustained_starvation) ... ok
@@ -598,7 +599,7 @@ test_resource_trend_checks_every_resource_class (test_sse_streaming_profile.Test
 test_short_runs_cannot_be_formal (test_sse_streaming_profile.Tests.test_short_runs_cannot_be_formal) ... ok
 
 ----------------------------------------------------------------------
-Ran 178 tests in 3.284s
+Ran 178 tests in 3.845s
 
 OK
 test_baseline_threshold_is_ninety_percent (test_http1_benchmark.Http1BenchmarkTest.test_baseline_threshold_is_ninety_percent) ... ok
@@ -655,19 +656,6 @@ OK
     [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
 
 2 warnings generated, 2 warnings printed.
-[33mwarning[0m: unused function:'init'
-   [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/net/package.cj:195:5:
-    [36m| [0m
-[36m195[0m [36m| [0m      internal init(payload: Array<Byte>, source: ?NetworkEndpoint, truncated: Bool) {[0m
-    [36m| [0m [33m_[0m[33m____^[0m
-[36m196[0m [36m| [0m[33m|[0m         this.payload = payload.clone()[0m
-    [36m| [0m[33m|[0m ...[0m
-[36m199[0m [36m| [0m[33m|[0m     }[0m
-    [36m| [0m[33m|[0m[33m_[0m[33m____^ unused function[0m
-    [36m| [0m
-    [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-
-1 warning generated, 1 warning printed.
 [33mwarning[0m: unused function:'waitUntilWaiters'
    [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/internal/http1/connection_pool.cj:374:5:
     [36m| [0m
@@ -990,15 +978,6 @@ OK
    [36m| [0m
 
 6 warnings generated, 6 warnings printed.
-[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
- [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/internal/http2/stream_reset_test.cj:7:1:
-  [36m| [0m
-[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
-  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
-  [36m| [0m
-  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
-
-1 warning generated, 1 warning printed.
 [33mwarning[0m: unused expression
    [36m| [0m
    [36m| [0m/* 10.29 */                    None < TlsProviderException >[0m
@@ -1246,3 +1225,12 @@ OK
     [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
 
 6 warnings generated, 6 warnings printed.
+[33mwarning[0m: unused import 'wirestack.internal.http_model.*'
+ [36m==>[0m /home/elliot/playground/Wirestack-pr-worktrees/M8-001-20260909/src/internal/http2/stream_reset_test.cj:7:1:
+  [36m| [0m
+[36m7[0m [36m| [0mimport wirestack.internal.http_model.*[0m
+  [36m| [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unused import[0m
+  [36m| [0m
+  [36m#[0m [0mnote[0m: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+1 warning generated, 1 warning printed.

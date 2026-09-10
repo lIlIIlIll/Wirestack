@@ -1,54 +1,56 @@
 # M8-001 evidence
 
-Status: COMPLETE. This isolated publication reconstructs the M8-001 contract
-from the cumulative workspace. Exact early source snapshots were unavailable.
-The reports under `historical/` are not acceptance evidence for this source.
-Fresh native tests, documentation, repository checks and the public consumer pass.
+Status: COMPLETE. PR #157 was requalified after scope and contract corrections.
+Only the fresh scoped results below qualify the current source.
 
 ## Scope
 
 - Public `wirestack.net` endpoint, lifecycle, context, option-value and capability
   contracts, with a TCP stream bridge to the existing Transport SPI.
-- Explicit Unix/raw capability boundaries. Address construction does not prove
-  native adapter support.
-- Initial provider-neutral HTTP parity value and hook contracts. Client/server
-  integration remains M8-005 work.
-- Public API inventory, complete API documentation, negative tests and bounded
-  DNS-header mutation coverage.
+- `DatagramSocket` connect/send/sendTo/receive/lifecycle operations under one
+  absolute context, message atomicity, bounded payloads and explicit truncation.
+- Distinct Unix pathname/abstract/unnamed values and fail-closed raw capabilities.
+- Public-only inventory, API documentation, negative tests and native TCP consumer.
 
-The publication worktree is separate from the original dirty workspace. See
-`workspace-safety-publication.json` for the branch, base, platform and toolchain
-commands. The original files and index are not publication inputs to Git.
+HTTP parity values, hooks, implementation and evidence belong to M8-005. DNS
+wire parsing belongs to M8-004. Both were removed from this task, including their
+public inventory entries. Their earlier source remains recoverable at commit
+`115c5c86cc661f553c96bfcc9a614fbc2003215a`; it is not current M8-001 acceptance.
+
+## Review corrections
+
+The package-wide low-level socket guard exception was removed. A regression
+rejects `StreamingSocket` in `wirestack.net` while allowing Wirestack's own
+`RawSocket` declaration. It failed before repair and passes afterward.
+
+Datagram result construction rejects payloads above 65,507 bytes and owns its
+receive data. The oversized-result regression failed before repair; the scoped
+network suite now passes 9/9 tests. Native datagram adapters and their I/O
+qualification remain M8-002/M8-003 work, not simulated success here.
 
 ## Acceptance
 
-The three task-specific fast commands and all nine task commands passed with
-STS 1.1.3 and pinned cjdoc 0.7.2. `scripts/check` passed 607 Cangjie tests with
-23 performance-tagged tests excluded, zero errors and zero failures. The separate
-network and HTTP commands passed 10/10 and 80/80 tests without skips.
+All three task-specific fast commands and all eight task commands passed with
+STS 1.1.3 and pinned cjdoc 0.7.2. `scripts/check` passed 597 Cangjie tests with
+23 performance-tagged exclusions, zero errors and zero failures. The network
+contract suite passed 9/9 without skips.
 
-The public-only inventory contains 279 declarations and 103 aliases. API
-documentation covers all 1,160 symbols and 470 parameters. The guide's clean
-consumer compiled and ran against a real IPv4 loopback receiver, which received
-exactly `hello`; see [`native-consumer.json`](native-consumer.json).
+The inventory contains 260 declarations and 103 aliases. API documentation
+covers all 1,089 symbols and 430 parameters. Both guide examples compiled;
+the TCP example executed against a real receiver and sent exactly `hello`.
+The datagram caller was compile-checked, not executed against a native adapter.
 
-Three HTTP regressions failed before repair and pass afterward: failed cookie
-persistence cannot replace or evict visible credentials; longer cookie paths
-precede shorter paths without reordering ties; MIME boundary validation rejects
-HTTP-token bytes outside its unquoted-safe subset. The boundary test mutates all
-128 ASCII bytes. See [`http-contract-reproduction.json`](http-contract-reproduction.json).
+[`task-check.json`](task-check.json) retains exact commands and checksummed raw
+logs; [`review-corrections.json`](review-corrections.json) records the reproduced
+defects and scope removals. The native inventory report keeps its original
+`decision` schema; its successful command is sealed, and the raw report is a
+fingerprinted verification input. Prior mixed-scope reports were removed from
+this publication, not relabeled as current evidence.
 
-[`task-check.json`](task-check.json) records the nine task commands; individual
-reports retain their raw logs. [`evidence.json`](evidence.json) binds the fresh
-reports and source inputs. Diagnostic failures remain under `diagnostics/`.
-The first full check lacked the historical M7-021 archive required by six M7-030
-unit tests. Restoring that exact fixture made the full check pass; the archive
-is not an M8 release artifact or reused M8 acceptance evidence.
+The publication worktree is separate from the original dirty workspace and
+index. See [`workspace-safety-publication.json`](workspace-safety-publication.json).
+The branch incorporates qualified main revision
+`913a75defb3bbaa15e117e642d532c8ae6a1876c` without reset, stash or rebase.
 
-The original dirty worktree/index remain separate. The publication branch merged
-main at `913a75defb3bbaa15e117e642d532c8ae6a1876c`, including the qualified M7-033
-prerequisite. No reset, stash, rebase or original-worktree commit was used.
-
-M8-002 owns native TCP/UDP listener, socket options and wakeup evidence; M8-003
-owns Unix/raw native capability evidence; M8-004 owns full DNS. No privileged raw
-I/O, non-Linux execution, later protocol integration or long soak is claimed.
+No privileged raw I/O, non-Linux execution, later protocol integration,
+one-hour SSE or final 86,400-second soak is claimed.

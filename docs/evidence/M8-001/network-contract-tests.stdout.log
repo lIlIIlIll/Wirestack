@@ -1,26 +1,25 @@
 --------------------------------------------------------------------------------------------------
-TP: wirestack.net, time elapsed: 3549272 ns, RESULT:
-    TCS: NetworkFoundationContractTest, time elapsed: 3549272 ns, RESULT:
-    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (241460 ns)
-    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (31950 ns)
-    [ PASSED ] CASE: rawSocketCapabilityBoundaryFailsClosedForEveryDomain (74954 ns)
-    [ PASSED ] CASE: dnsParserAcceptsTheRecordLimitBoundary (14307 ns)
-    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (112528 ns)
-    [ PASSED ] CASE: tcpStreamLifecycleDoesNotDependOnEndpointPresence (19660 ns)
-    [ PASSED ] CASE: tcpStreamAbortPreservesConnectionFacts (64114 ns)
-    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (71882 ns)
-    [ PASSED ] CASE: dnsHeaderRejectsStructuralAndRecordBounds (797352 ns)
-    [ PASSED ] CASE: dnsHeaderMutationsHaveOnlyBoundedSuccessOrStructuredRejection (627173 ns)
-Summary: TOTAL: 10
-    PASSED: 10, SKIPPED: 0, ERROR: 0
+TP: wirestack.net, time elapsed: 3611162 ns, RESULT:
+    TCS: NetworkFoundationContractTest, time elapsed: 3611162 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (260296 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (43350 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryFailsClosedForEveryDomain (43290 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (92871 ns)
+    [ PASSED ] CASE: tcpStreamLifecycleDoesNotDependOnEndpointPresence (18771 ns)
+    [ PASSED ] CASE: tcpStreamAbortPreservesConnectionFacts (64973 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (194145 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1535077 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (13880 ns)
+Summary: TOTAL: 9
+    PASSED: 9, SKIPPED: 0, ERROR: 0
     FAILED: 0
 --------------------------------------------------------------------------------------------------
-Project tests finished, time elapsed: 12019161 ns, RESULT:
-TP: wirestack.*, time elapsed: 11921168 ns, RESULT:
+Project tests finished, time elapsed: 12002192 ns, RESULT:
+TP: wirestack.*, time elapsed: 11881132 ns, RESULT:
     PASSED:
-    TP: wirestack.net, time elapsed: 3549272 ns
-Summary: TOTAL: 10
-    PASSED: 10, SKIPPED: 0, ERROR: 0
+    TP: wirestack.net, time elapsed: 3611162 ns
+Summary: TOTAL: 9
+    PASSED: 9, SKIPPED: 0, ERROR: 0
     FAILED: 0
 --------------------------------------------------------------------------------------------------
 cjpm test success
