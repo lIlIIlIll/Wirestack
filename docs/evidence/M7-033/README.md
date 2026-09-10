@@ -74,6 +74,10 @@ The active main ruleset also requires `report-build-status`. The clean-build
 workflow now reports that context only after checking both cjdoc and Wirestack
 build results. Failure, cancellation or a skipped prerequisite fails the report.
 
+The documentation workflow also requires `report-docs-status`, which checks both
+its cjdoc build and documentation generation results. A skipped Pages deployment
+on a pull request is not used as proof that documentation generation succeeded.
+
 [`required-checks.json`](required-checks.json) records the verified main rulesets.
 The user explicitly removed the unavailable GitHub Code Quality rule and its
 dependent built-in coverage rule. CodeQL, build/documentation checks, review

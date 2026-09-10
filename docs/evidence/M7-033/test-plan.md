@@ -50,7 +50,7 @@ PASS。
 | T005 | S008 | P007 | existing M7-027 clean-consumer gate and public-import scan |
 | T006 | S009 | P009 | task manifest/repository tooling long-gate isolation |
 | T007 | S010 | P010 | evidence source/output digest freshness check |
-| T008 | S011 | P008 | CI workflow validation, all 16 build-status combinations and bounded HTTP smoke |
+| T008 | S011 | P008 | CI workflow validation, all 16 build-status and 16 docs-status combinations, and bounded HTTP smoke |
 | T009 | S001,S003 | P001,P003,P004,P005 | exact 0.7.2 layered generation and committed artifact validation |
 | T010 | S012,S013 | P011,P012 | Real Git subprocess regression preserves diagnostics and rejects dirty source |
 

@@ -45,13 +45,13 @@
       "exit_code": 0,
       "result": "PASS",
       "acceptance_commands": 4,
-      "finished_at_utc": "2026-09-10T03:56:07.624193Z"
+      "finished_at_utc": "2026-09-10T04:21:51.023503Z"
     },
     {
       "command": "yaml.safe_load and bash -n for both workflows",
       "exit_code": 0,
       "result": "PASS",
-      "shell_steps": 18
+      "shell_steps": 19
     },
     {
       "command": "bash -c <report-build-status run step>",
@@ -140,11 +140,12 @@
       ]
     },
     {
-      "command": "seal-evidence M7-033 --report docs/evidence/M7-033/pages-smoke.json --revision c009bd69e353fc7cf590e54a109e73a5c1880a18",
+      "command": "python3 tools/repository/repository_tooling.py --root . seal-evidence M7-033 --report docs/evidence/M7-033/docs-report.json --report docs/evidence/M7-033/clean-consumer.json --report docs/evidence/M7-033/task-check.json --report docs/evidence/M7-033/ci-toolchain-native.json --report docs/evidence/M7-033/ci-repair-checks.json --report docs/evidence/M7-033/required-checks.json --report docs/evidence/M7-033/pages-smoke.json --revision 6f61b04f57e941f03d8913eed977a898d3d5fff1 --output /tmp/wirestack-m7-033-stale-pages-rejection-20260910.json",
       "expected_exit_code": 1,
       "exit_code": 1,
       "result": "PASS",
-      "reason": "Historical Pages report is rejected by the revision-bound contract"
+      "reason": "Historical Pages report is rejected by the revision-bound contract",
+      "stderr": "seal-evidence: FAIL: report revision does not match candidate revision: docs/evidence/M7-033/pages-smoke.json"
     },
     {
       "command": "python3 -m unittest tools.tests.test_m7_linux_task_graph tools.tests.test_m7_033_docs tools.repository.tests.test_repository_tooling -v",
@@ -184,6 +185,92 @@
           "elapsed_seconds": 10.066728,
           "pass_report_written": false,
           "stderr": "curl: (28) Operation timed out after 10000 milliseconds with 0 bytes received\nTraceback (most recent call last):\n  File \"/tmp/wirestack-m7-033-pages-smoke-20260910/smoke.py\", line 13, in <module>\n    result = subprocess.run(\n        [\"curl\", \"--fail\", \"--silent\", \"--show-error\", \"--location\",\n    ...<2 lines>...\n        check=True, stdout=subprocess.PIPE, text=True,\n    )\n  File \"/usr/lib/python3.14/subprocess.py\", line 578, in run\n    raise CalledProcessError(retcode, process.args,\n                             output=stdout, stderr=stderr)\nsubprocess.CalledProcessError: Command '['curl', '--fail', '--silent', '--show-error', '--location', '--max-time', '10', '--output', '/dev/null', '--write-out', '%{http_code}', 'http://127.0.0.1:18333/slow/']' returned non-zero exit status 28.\n"
+        }
+      ]
+    },
+    {
+      "command": "bash -c <report-docs-status run step>",
+      "result": "PASS",
+      "cases": [
+        {
+          "cjdoc": "success",
+          "docs": "success",
+          "exit_code": 0
+        },
+        {
+          "cjdoc": "success",
+          "docs": "failure",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "success",
+          "docs": "cancelled",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "success",
+          "docs": "skipped",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "failure",
+          "docs": "success",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "failure",
+          "docs": "failure",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "failure",
+          "docs": "cancelled",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "failure",
+          "docs": "skipped",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "cancelled",
+          "docs": "success",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "cancelled",
+          "docs": "failure",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "cancelled",
+          "docs": "cancelled",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "cancelled",
+          "docs": "skipped",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "skipped",
+          "docs": "success",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "skipped",
+          "docs": "failure",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "skipped",
+          "docs": "cancelled",
+          "exit_code": 1
+        },
+        {
+          "cjdoc": "skipped",
+          "docs": "skipped",
+          "exit_code": 1
         }
       ]
     }

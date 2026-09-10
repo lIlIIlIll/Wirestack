@@ -180,6 +180,19 @@ jobs:
         with:
           path: target/doc/html
 
+  report-docs-status:
+    if: ${{ always() }}
+    needs: [build-cjdoc, generate]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Require documentation prerequisites to succeed
+        env:
+          CJDOC_RESULT: ${{ needs.build-cjdoc.result }}
+          DOCS_RESULT: ${{ needs.generate.result }}
+        run: test "$CJDOC_RESULT" = success && test "$DOCS_RESULT" = success
+
   deploy:
     name: Deploy latest main documentation
     if: >-

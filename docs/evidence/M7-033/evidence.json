@@ -1,6 +1,6 @@
 {
   "acceptance_status": "BLOCKED",
-  "generated_at_utc": "2026-09-10T03:59:01.208892+00:00",
+  "generated_at_utc": "2026-09-10T04:22:49.558164+00:00",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,7 +13,7 @@
       "path": "docs/evidence/M7-033/docs-report.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "225bd9125c17693b317d249017ae02890b5dbae016000d6b9bc93b156528b15a"
+        "sha256": "d1f76f6a46f2314dff69c47bdbc54e3ea3c22ab296810c5ac664a72cdda6c97e"
       },
       "source_task": "M7-033"
     },
@@ -31,7 +31,7 @@
       "path": "docs/evidence/M7-033/task-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "05ee583e5a9a6b5c49a42ecd2d741b83da67c577a13801df48c8ae2c41167905"
+        "sha256": "9958cc328fa152b3eb989d470aa166491d444fcfa82b0fc3e3ae3b392a2adf3f"
       },
       "source_task": "M7-033"
     },
@@ -49,7 +49,7 @@
       "path": "docs/evidence/M7-033/ci-repair-checks.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "b51adee53a7850c7b2b928879855c3508132f036a1c6daa66a63d24b7c848085"
+        "sha256": "7a9e73edc6a81fd987c8a929309f377f7f6dcb2c94653f59c6a3990c1941df5b"
       },
       "source_task": "M7-033"
     },
@@ -58,7 +58,7 @@
       "path": "docs/evidence/M7-033/required-checks.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "7b120fa10e0e02f330236193a35a3879bddc55df05e3d35a08234bb07063bb75"
+        "sha256": "a5ea34223177a81a40edec05cc99bd106a4dbae2aa1aec3a8ea5fd171f99d954"
       },
       "source_task": "M7-033"
     }
@@ -72,7 +72,7 @@
     },
     ".github/workflows/m7-033-docs.yml": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "c6be66eec9d9d2a855eec417d9ddf57c2f00907e58aadc2e853b098d9f491daa"
+      "sha256": "2231fe4cc72b2fbd857cc550ce0308c85f423d478b04aaf643569990118d957c"
     },
     ".gitignore": {
       "domain": "text-utf8-lf-v1",
@@ -88,7 +88,7 @@
     },
     "docs/evidence/M7-033/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "df878ba9b961b3722f473bbbbd932749087fc019cb1b9a7d51f79ebecfa12a23"
+      "sha256": "b42d8afc8cf4508d857dacea4222fbcece3b11940f78f745d458bd8ce4381e1b"
     },
     "docs/evidence/M7-033/ci-workspace-safety.json": {
       "domain": "text-utf8-lf-v1",
@@ -96,7 +96,7 @@
     },
     "docs/evidence/M7-033/test-plan.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "10242588fa70feecfc50bea5d0cc316a41456986ea3b1f9650b5b5c7339cbe10"
+      "sha256": "a0c94b401f0017191146be13310a581ffdb9a9b95098d464c5a126e14aa65683"
     },
     "docs/guides/getting-started-linux.md": {
       "domain": "text-utf8-lf-v1",
