@@ -844,7 +844,7 @@ public class StdNetTransportListener <: TransportListener {
     }
 }
 
-private class OperationGate {
+internal class OperationGate {
     private let active = AtomicBool(true)
 
     func complete(): Bool {
@@ -858,21 +858,21 @@ private class OperationGate {
     }
 }
 
-private func remaining(context: OperationContext): ?Duration {
+internal func remaining(context: OperationContext): ?Duration {
     match (context.deadline) {
         case Some(deadline) => Some(deadline.remaining())
         case None => None<Duration>
     }
 }
 
-private func isBackgroundContext(context: OperationContext): Bool {
+internal func isBackgroundContext(context: OperationContext): Bool {
     context.deadline.isNone() &&
         context.cancellation.permanentlyActive &&
         context.trace.isNone() &&
         context.eventSink.isNone()
 }
 
-private func checkContext(
+protected func checkContext(
     context: OperationContext,
     category: NetworkErrorCategory,
     phase: NetworkPhase,
@@ -897,7 +897,7 @@ private func checkContext(
     }
 }
 
-private func toStdEndpoint(endpoint: SocketEndpoint): IPSocketAddress {
+internal func toStdEndpoint(endpoint: SocketEndpoint): IPSocketAddress {
     let octets = endpoint.address.toOctets()
     match (endpoint.address.family) {
         case IpAddressFamily.Ipv4 => IPSocketAddress(IPv4Address(octets[0], octets[1], octets[2], octets[3]), endpoint.port)
@@ -921,7 +921,7 @@ private func toStdEndpoint(endpoint: SocketEndpoint): IPSocketAddress {
     }
 }
 
-private func fromStdEndpoint(address: SocketAddress): SocketEndpoint {
+internal func fromStdEndpoint(address: SocketAddress): SocketEndpoint {
     match (address) {
         case endpoint: IPSocketAddress =>
             let ip = endpoint.address
@@ -948,11 +948,11 @@ private func fromStdEndpoint(address: SocketAddress): SocketEndpoint {
     }
 }
 
-private func concurrent(category: NetworkErrorCategory, phase: NetworkPhase): NetworkException {
+protected func concurrent(category: NetworkErrorCategory, phase: NetworkPhase): NetworkException {
     NetworkException(category, phase, NetworkErrorCode.ConcurrentOperation, "same-direction operation already active")
 }
 
-private func cancelled(
+internal func cancelled(
     category: NetworkErrorCategory,
     phase: NetworkPhase,
     cause!: ?Exception = None<Exception>,
@@ -971,10 +971,11 @@ private func cancelled(
     )
 }
 
-private func deadlineExceeded(
+internal func deadlineExceeded(
     category: NetworkErrorCategory,
     phase: NetworkPhase,
     cause!: ?Exception = None<Exception>,
+    retryability!: Retryability = Retryability.Temporary,
     localEndpoint!: ?SocketEndpoint = None<SocketEndpoint>,
     remoteEndpoint!: ?SocketEndpoint = None<SocketEndpoint>
 ): NetworkException {
@@ -983,14 +984,14 @@ private func deadlineExceeded(
         phase,
         NetworkErrorCode.TimedOut,
         "operation deadline exceeded",
-        retryability: Retryability.Temporary,
+        retryability: retryability,
         localEndpoint: internetEndpoint(localEndpoint),
         remoteEndpoint: internetEndpoint(remoteEndpoint),
         cause: cause
     )
 }
 
-private func timedOut(
+internal func timedOut(
     category: NetworkErrorCategory,
     phase: NetworkPhase,
     cause: Exception,
@@ -1027,7 +1028,7 @@ internal func writeTimedOut(
     )
 }
 
-private func closedError(
+protected func closedError(
     category: NetworkErrorCategory,
     phase: NetworkPhase,
     cause!: ?Exception = None<Exception>,
@@ -1046,7 +1047,7 @@ private func closedError(
     )
 }
 
-private func internetEndpoint(endpoint: ?SocketEndpoint): ?NetworkEndpoint {
+internal func internetEndpoint(endpoint: ?SocketEndpoint): ?NetworkEndpoint {
     match (endpoint) {
         case Some(value) => Some(NetworkEndpoint.Internet(value))
         case None => None<NetworkEndpoint>

@@ -921,6 +921,26 @@ class NetworkFoundationContractTest {
     }
 
     @TestCase
+    func tcpStreamJoiningBackgroundCloseWaitsForCompletion(): Unit {
+        let delegate = NetworkContractTransport(blockClose: true)
+        let stream = TcpStream(delegate)
+        let closing = spawn { stream.close() }
+        try {
+            delegate.waitUntilCloseEntered()
+            @Expect(closeFailsForContext(stream, api.OperationContext(
+                deadline: Some(api.Deadline.after(20 * Duration.millisecond))
+            ), true))
+            expectSocketState(stream.state, SocketState.Closing)
+            @Expect(!stream.isClosed())
+        } finally {
+            delegate.releaseClose()
+        }
+        closing.get(Duration.second)
+        expectSocketState(stream.state, SocketState.Closed)
+        @Expect(stream.isClosed())
+    }
+
+    @TestCase
     func tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful(): Unit {
         let delegate = NetworkContractTransport(blockClose: true)
         let stream = TcpStream(delegate)
