@@ -349,6 +349,41 @@ class CiGateRegressionTests(unittest.TestCase):
             self.assertEqual(counter.read_text(), "1")
             self.assertEqual(manifest.read_text(), text)
 
+    def test_runtime_freeze_retry_clears_previous_failure_status(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            scripts = root / "scripts"
+            package = root / "packages/runtime_freeze_contract"
+            fake = root / "bin"
+            scripts.mkdir()
+            package.mkdir(parents=True)
+            fake.mkdir()
+            shutil.copy2(ROOT / "scripts/runtime_freeze_contract_checks.sh", scripts)
+            counter = root / "attempts"
+            write_executable(fake / "cjpm", r'''
+                #!/usr/bin/env python3
+                import os
+                import pathlib
+                import sys
+                counter = pathlib.Path(os.environ["PROBE_COUNTER"])
+                attempts = int(counter.read_text()) if counter.exists() else 0
+                counter.write_text(str(attempts + 1))
+                if attempts == 0:
+                    print("simulated llc crash")
+                    raise SystemExit(139)
+                print(f"runtime freeze contract passed: {sys.argv[-1]}")
+            ''')
+            env = os.environ.copy()
+            env["PATH"] = str(fake) + os.pathsep + env["PATH"]
+            env["PROBE_COUNTER"] = str(counter)
+            result = self.run_command(
+                ["bash", str(scripts / "runtime_freeze_contract_checks.sh")],
+                env=env,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout)
+            self.assertEqual(counter.read_text(), "9")
+            self.assertIn("runtime freeze contract checks passed", result.stdout)
+
     def test_unknown_native_mode_fails_before_compilation(self) -> None:
         result = self.run_command(["bash", str(ROOT / "scripts/release_native_checks.sh")],
                                  env={**os.environ, "YJSON_NATIVE_CHECK_MODE": "typo"})
