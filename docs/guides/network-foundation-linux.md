@@ -40,6 +40,8 @@ main(): Int64 {
 成功的单方向 `shutdown` 分别显示 `ReadHalfClosed` 或 `WriteHalfClosed`；不支持的
 shutdown 不改变状态。正常关闭为 `Closed`，主动中止为 `Aborted`，终止性 I/O
 失败为 `Failed`。后续 `close`/`abort` 不覆盖已确定的终态。
+预取消且未触及 socket 的操作不改变生命周期；若进行中的取消已中止底层 transport，
+操作仍抛出 `Cancelled`，但 socket 保留 `Aborted`，不会被随后 `close` 改成正常关闭。
 
 `DatagramSocket` 冻结 Internet 与 Unix adapter 的同步操作接口；原生创建与绑定
 由 M8-002/M8-003 实现。`connect` 选择已解析的 peer，`send`/`sendTo` 成功时必须

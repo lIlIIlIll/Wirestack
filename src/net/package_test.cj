@@ -73,6 +73,24 @@ class NetworkFoundationContractTest {
     }
 
     @TestCase
+    func tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate(): Unit {
+        let source = api.CancellationSource()
+        source.cancel()
+        let untouched = TcpStream(NetworkContractTransport())
+        expectCancelledRead(untouched, api.OperationContext(cancellation: source.token))
+        expectSocketState(untouched.state, SocketState.Open)
+        @Expect(!untouched.isClosed())
+        untouched.close()
+
+        let aborted = TcpStream(NetworkContractTransport(cancelRead: true))
+        expectCancelledRead(aborted, api.OperationContext.background())
+        @Expect(aborted.isClosed())
+        expectSocketState(aborted.state, SocketState.Aborted)
+        aborted.close()
+        expectSocketState(aborted.state, SocketState.Aborted)
+    }
+
+    @TestCase
     func tcpStreamGracefulCloseIsRetainedAndIdempotent(): Unit {
         let delegate = NetworkContractTransport(endpointsVisible: false)
         let stream = TcpStream(delegate)
@@ -299,6 +317,7 @@ private class NetworkContractTransport <: api.DuplexTransport {
     private var writeShutdown = false
     private let supportsHalfClose: Bool
     private let failRead: Bool
+    private let cancelRead: Bool
     private let failWrite: Bool
     private let failClose: Bool
     private let blockClose: Bool
@@ -316,6 +335,7 @@ private class NetworkContractTransport <: api.DuplexTransport {
         endpointsVisible!: Bool = true,
         supportsHalfClose!: Bool = false,
         failRead!: Bool = false,
+        cancelRead!: Bool = false,
         failWrite!: Bool = false,
         failClose!: Bool = false,
         blockClose!: Bool = false,
@@ -324,6 +344,7 @@ private class NetworkContractTransport <: api.DuplexTransport {
         this.endpointsVisible = endpointsVisible
         this.supportsHalfClose = supportsHalfClose
         this.failRead = failRead
+        this.cancelRead = cancelRead
         this.failWrite = failWrite
         this.failClose = failClose
         this.blockClose = blockClose
@@ -360,11 +381,15 @@ private class NetworkContractTransport <: api.DuplexTransport {
         destination: api.MutableByteSpan,
         context!: api.OperationContext = api.OperationContext.background()
     ): api.ReadResult {
-        let _ = context
+        if (context.isCancellationRequested()) { throw cancelledReadFailure() }
         synchronized(mutex) {
             rejectClosedTransport(closed || readShutdown,
                 api.NetworkErrorCategory.Read, api.NetworkPhase.TcpRead)
             readCalls++
+            if (cancelRead) {
+                closed = true
+                throw cancelledReadFailure()
+            }
             if (failRead) { throw deterministicTransportFailure(api.NetworkErrorCategory.Read,
                 api.NetworkPhase.TcpRead) }
             if (blockRead) {
@@ -484,6 +509,25 @@ private class NetworkContractTransport <: api.DuplexTransport {
             changed.notifyAll()
         }
     }
+}
+
+private func cancelledReadFailure(): api.NetworkException {
+    api.NetworkException(api.NetworkErrorCategory.Cancelled, api.NetworkPhase.TcpRead,
+        api.NetworkErrorCode.Cancelled, "deterministic read cancellation")
+}
+
+private func expectCancelledRead(stream: TcpStream, context: api.OperationContext): Unit {
+    var cancelled = false
+    try {
+        let _ = stream.readSome(api.MutableByteSpan(Array<Byte>(1, repeat: 0u8)),
+            context: context)
+    } catch (error: api.NetworkException) {
+        match (error.code) {
+            case api.NetworkErrorCode.Cancelled => cancelled = true
+            case _ => ()
+        }
+    }
+    @Expect(cancelled)
 }
 
 private func networkTestEndpoint(port: UInt16): api.SocketEndpoint {

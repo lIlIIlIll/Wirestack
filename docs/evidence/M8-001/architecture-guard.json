@@ -10,7 +10,7 @@
   ],
   "status": "PASS",
   "exit_code": 0,
-  "generated_at_utc": "2026-09-10T07:38:17.469981+00:00",
+  "generated_at_utc": "2026-09-10T08:09:38.050109+00:00",
   "stdout_path": "docs/evidence/M8-001/architecture-guard.stdout.log",
   "stdout_sha256": {
     "domain": "text-utf8-lf-v1",

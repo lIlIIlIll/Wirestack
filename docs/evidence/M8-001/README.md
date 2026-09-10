@@ -1,6 +1,6 @@
 # M8-001 evidence
 
-Status: COMPLETE. Both review rounds have fresh scoped verification.
+Status: COMPLETE. All review corrections have fresh scoped verification.
 The source candidate is committed before the final evidence seal.
 
 ## Scope
@@ -26,7 +26,7 @@ rejects `StreamingSocket` in `wirestack.net` while allowing Wirestack's own
 
 Datagram result construction rejects payloads above 65,507 bytes and owns its
 receive data. The oversized-result regression failed before repair; the scoped
-network suite now passes 13/13 tests. Native datagram adapters and their I/O
+network suite now passes 14/14 tests. Native datagram adapters and their I/O
 qualification remain M8-002/M8-003 work, not simulated success here.
 
 The second review retains graceful close, abort, failure and directional
@@ -39,12 +39,18 @@ See [`review-round-two.json`](review-round-two.json): 26 revision-tooling tests,
 79 unrelated cases by filter; the canonical gate subsequently passed all 83
 transport tests.
 
+The third review reproduced cancellation closing the delegate while the stream
+still reported `Open`. [`review-cancellation.json`](review-cancellation.json)
+records the failing regression and the 14/14 post-fix result. A pre-cancelled
+operation leaves an untouched transport open; cancellation that closed it retains
+`Aborted`, including after later `close` calls, without changing the error code.
+
 ## Acceptance
 
 All three task-specific fast commands and all eight task commands passed with
-STS 1.1.3 and pinned cjdoc 0.7.2. `scripts/check` passed 603 Cangjie tests with
+STS 1.1.3 and pinned cjdoc 0.7.2. `scripts/check` passed 604 Cangjie tests with
 23 performance-tagged exclusions, zero errors and zero failures. The network
-contract suite passed 13/13 without skips.
+contract suite passed 14/14 without skips.
 
 The inventory contains 260 declarations and 103 aliases. API documentation
 covers all 1,093 symbols and 430 parameters. All three guide examples compiled;

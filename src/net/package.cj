@@ -556,6 +556,8 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
 
     private func recordNetworkFailure(error: api.NetworkException): Unit {
         match (error.code) {
+            case api.NetworkErrorCode.Cancelled =>
+                if (delegate.isClosed()) { let _ = beginAbort() }
             case api.NetworkErrorCode.ConnectionReset |
                  api.NetworkErrorCode.BrokenPipe |
                  api.NetworkErrorCode.UnexpectedEof |
