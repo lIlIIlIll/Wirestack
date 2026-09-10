@@ -61,14 +61,17 @@ def run(
         input=stdin,
         text=True,
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        stderr=subprocess.PIPE,
         check=False,
     )
     if completed.returncode != 0:
         rendered = " ".join(command)
         raise BuildError(
-            f"command failed ({completed.returncode}): {rendered}\n{completed.stdout}"
+            f"command failed ({completed.returncode}): {rendered}\n"
+            f"{completed.stdout}{completed.stderr}"
         )
+    if completed.stderr:
+        sys.stderr.write(completed.stderr)
     return completed
 
 
