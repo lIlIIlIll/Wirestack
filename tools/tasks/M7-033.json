@@ -77,8 +77,11 @@
     "docs/evidence/M7-033/clean-consumer.json",
     "docs/evidence/M7-033/task-check.json",
     "docs/evidence/M7-033/ci-toolchain-native.json",
-    "docs/evidence/M7-033/ci-repair-checks.json"
+    "docs/evidence/M7-033/ci-repair-checks.json",
+    "docs/evidence/M7-033/pages-smoke.json",
+    "docs/evidence/M7-033/required-checks.json"
   ],
+  "revision_bound_reports": ["docs/evidence/M7-033/pages-smoke.json"],
   "timeout_seconds": 2400,
   "long_running_gate": false,
   "source_paths": [

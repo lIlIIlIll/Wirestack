@@ -137,6 +137,19 @@
           "exit_code": 1
         }
       ]
+    },
+    {
+      "command": "seal-evidence M7-033 --report docs/evidence/M7-033/pages-smoke.json --revision c009bd69e353fc7cf590e54a109e73a5c1880a18",
+      "expected_exit_code": 1,
+      "exit_code": 1,
+      "result": "PASS",
+      "reason": "Historical Pages report is rejected by the revision-bound contract"
+    },
+    {
+      "command": "python3 -m unittest tools.tests.test_m7_linux_task_graph tools.tests.test_m7_033_docs tools.repository.tests.test_repository_tooling -v",
+      "exit_code": 0,
+      "tests": 35,
+      "result": "PASS"
     }
   ],
   "regression": {
