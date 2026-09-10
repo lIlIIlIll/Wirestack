@@ -38,8 +38,8 @@ run conclusion=`success`。
 | Hosted PR CI | PASS | run `34494604326` conclusion=`success`；Seven-library evidence drift、registry rehearsal、Pure Windows/macOS、Coverage 和 CI Required 均通过 |
 | Hosted main CI / Pages | PASS | run [`34511955542`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542) passed all 28 jobs; [`Deploy API Documentation`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542/job/102990740002) completed its `Deploy GitHub Pages` step; site [`liliilill.github.io/yjson`](https://liliilill.github.io/yjson/); `github-pages` artifact digest `sha256:a454b4519cc9cf5e311e301035681a18324ce73811dd3e5c2e7d1cf74b9ddbfa` |
 | Coverage | PASS | project line `8508/10345=82.2%`、branch `3722/5262=70.7%`；changed core line `26/26=100.0%`、branch `16/16=100.0%`；hosted Core Coverage 成功 |
-| Source-only staging | PASS | `stage_source_tree` 复制 `358` 个文件并通过 `--check`；`release_temp_tree --enforce-clean` 复制 `290` 个文件并通过 |
-| Package rehearsal | PASS | 九包独立暂存、构建、registry-style consumer 和导出检查成功；最终 release assets 尚未生成 |
+| Source-only staging | PASS | `stage_source_tree` 复制 `358` 个文件并通过 `--check`；`release_temp_tree --enforce-clean` 复制 `292` 个文件并通过 |
+| Package rehearsal | PASS | 九包独立暂存、构建、registry-style consumer 和导出检查成功；本地候选资产 bundle 已生成九个 `.cjp`、`checksums.txt`、`manifest.json` 和 `environment.json`，未上传 |
 | Seven-library matrix | PASS (candidate) / MAIN RECHECK PASS | `current-main.json` binds `2758853`; two batches are `770/770` complete, candidate strict validation passes, and post-merge main run `34511955542` passes after squash-safe closure validation |
 | Three-library release performance | **BLOCKING** | 旧 b0 两批仍为 noisy；当前候选的完整 36-workload 证据尚未按当前提交重跑 |
 | Pure baseline/candidate qualification | **BLOCKING** | 正式 runner 的四个 `yjsonDocument*` case 与当前 benchmark 源码漂移；target-only A/B 仍因 CV 超过 5% 而 exit `1`，不能作资格证据 |
