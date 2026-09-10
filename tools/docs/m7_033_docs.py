@@ -65,6 +65,7 @@ PUBLIC_PACKAGE_FILES = {
         "cancellation.cj",
         "client.cj",
         "error.cj",
+        "parity.cj",
         "package.cj",
         "proxy.cj",
         "redirect.cj",
@@ -74,6 +75,7 @@ PUBLIC_PACKAGE_FILES = {
         "tls.cj",
     ),
     "wirestack.tls": ("facade.cj", "identity.cj", "package.cj"),
+    "wirestack.net": ("package.cj",),
 }
 
 

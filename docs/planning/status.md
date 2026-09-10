@@ -190,3 +190,9 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 | P1-012 | COMPLETE | [`docs/evidence/P1-012/README.md`](../evidence/P1-012/README.md) | Fail-closed repository diagnostics, task contracts, layered checks and source-bound evidence freshness validation pass on Linux glibc; no long-duration gate ran. |
 | P1-013 | COMPLETE | [`docs/evidence/P1-013/README.md`](../evidence/P1-013/README.md) | Development regression checks now validate frozen release records structurally, while all production M7 release validators remain strict by default and reject stale source or artifact evidence. `scripts/check` passes; no long-duration gate ran. |
 | P1-014 | COMPLETE | [`docs/evidence/P1-014/README.md`](../evidence/P1-014/README.md) | All 398 digest calls have explicit text, artifact-byte or typed-implementation domains across Python, scripts and workflows; schema v2, exact-candidate-bound Linux and hosted Windows CRLF fault injection, task-level validation and canonical repository checks pass. Historical schema-v1 evidence remains rejected rather than silently promoted. |
+
+## M8 Linux network foundation
+
+| Task | Status | Evidence | Notes |
+|---|---|---|---|
+| M8-001 | IN_PROGRESS | [`docs/evidence/M8-001/README.md`](../evidence/M8-001/README.md) | Fresh reconstruction and validation for isolated publication; historical reports are not acceptance evidence for this source. |

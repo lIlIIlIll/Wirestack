@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "python3",
+    "tools/repository/repository_tooling.py",
+    "--root",
+    ".",
+    "validate-plan",
+    "docs/evidence/M8-001/test-plan.md",
+    "--json"
+  ],
+  "duration_ms": 113.959,
+  "error_code": null,
+  "exit_code": 0,
+  "finished_at_utc": "2026-09-10T01:01:56.661334Z",
+  "id": "plan-validation",
+  "source_task": "M8-001",
+  "started_at_utc": "2026-09-10T01:01:56.547376Z",
+  "status": "PASS",
+  "stderr_excerpt": "",
+  "stderr_path": "docs/evidence/M8-001/plan-validation.stderr.log",
+  "stderr_truncated": false,
+  "stdout_excerpt": "{\"counts\": {\"paths\": 6, \"scenarios\": 13, \"tests\": 6}, \"issues\": [], \"kind\": \"test-plan-validation\", \"schema_version\": 1, \"status\": \"PASS\"}\n",
+  "stdout_path": "docs/evidence/M8-001/plan-validation.stdout.log",
+  "stdout_truncated": false,
+  "timed_out": false
+}

@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "cjpm",
+    "test",
+    "src/net",
+    "--no-progress",
+    "--no-color"
+  ],
+  "duration_ms": 8244.112,
+  "error_code": null,
+  "exit_code": 0,
+  "finished_at_utc": "2026-09-10T01:02:16.595737Z",
+  "id": "network-contract-tests",
+  "source_task": "M8-001",
+  "started_at_utc": "2026-09-10T01:02:08.351628Z",
+  "status": "PASS",
+  "stderr_excerpt": "",
+  "stderr_path": "docs/evidence/M8-001/network-contract-tests.stderr.log",
+  "stderr_truncated": false,
+  "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.net, time elapsed: 3448169 ns, RESULT:\n    TCS: NetworkFoundationContractTest, time elapsed: 3448169 ns, RESULT:\n    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (242366 ns)\n    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (36478 ns)\n    [ PASSED ] CASE: rawSocketCapabilityBoundaryFailsClosedForEveryDomain (44574 ns)\n    [ PASSED ] CASE: dnsParserAcceptsTheRecordLimitBoundary (13194 ns)\n    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (106228 ns)\n    [ PASSED ] CASE: tcpStreamLifecycleDoesNotDependOnEndpointPresence (20171 ns)\n    [ PASSED ] CASE: tcpStreamAbortPreservesConnectionFacts (77502 ns)\n    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (67083 ns)\n    [ PASSED ] CASE: dnsHeaderRejectsStructuralAndRecordBounds (780293 ns)\n    [ PASSED ] CASE: dnsHeaderMutationsHaveOnlyBoundedSuccessOrStructuredRejection (588752 ns)\nSummary: TOTAL: 10\n    PASSED: 10, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 11952476 ns, RESULT:\nTP: wirestack.*, time elapsed: 11853276 ns, RESULT:\n    PASSED:\n    TP: wirestack.net, time elapsed: 3448169 ns\nSummary: TOTAL: 10\n    PASSED: 10, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+  "stdout_path": "docs/evidence/M8-001/network-contract-tests.stdout.log",
+  "stdout_truncated": false,
+  "timed_out": false
+}

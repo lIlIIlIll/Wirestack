@@ -5,7 +5,7 @@
 **全平台主线任务数：** 185
 **Linux 稳定版收口任务数：** 16<br>
 **远期上游任务数：** 7  
-**当前发布任务数：** 201
+**当前发布任务数：** 208
 **目标：** 将 PRD 转换为可排期、可并行、可验收、可追踪的仓库任务；不在此文档中改变 PRD 已冻结的产品边界。
 
 > 仓库事实：Wirestack 是独立仓颉绿地网络库仓库，GitHub 为 `lIlIIlIll/Wirestack`。新公共包默认使用 `wirestack.*`，内部实现使用 `wirestack.internal.*`。`cangjie_stdx`、仓颉 SDK、`std.net` 与 runtime 源码均为外部参考或上游仓库，不属于 Wirestack 工作树。实际物理目录与 `cjpm` target 由 M0-002 根据当前仓颉工具链冻结；本 backlog 在此之前只约束逻辑模块边界、依赖方向和验收语义。
@@ -481,9 +481,28 @@ runtime、`std.net` 源码修改不得成为依赖。
 | M7-032 | 建立独立公开 API 契约并消除 internal 类型泄漏 | API/架构 | C4 | M7-026,M7-027 | ADR-0006；PRD §7/§10/§13/§15/§17/§24 | `wirestack`、`wirestack.http` 和 `wirestack.tls` 拥有用户可构造、传递、匹配和捕获的类型；公开声明不得 alias 或暴露 `wirestack.internal.*`；provider、协议状态机、native handle 和平台实现保持 internal；无 public/internal 循环依赖；生成新的 Linux pre-1.0 API inventory，更新文档和 clean consumer，架构守卫阻止回归。现有实验性 API 不要求 source、API、ABI 或语义兼容，不增加迁移 shim。 |
 | M7-033 | 使用 cjdoc 建立 Linux 开发者文档、API 参考与 Pages 发布门禁 | 文档/质量 | C3 | M7-027,M7-032 | PRD §24.3/§26；ADR-0001/0006 | 面向 Linux x86_64 glibc 开发者提供可运行的中文入门、HTTPS/TLS/HTTP 示例和公开 API 参考；所有公开符号与参数达到 100% 文档覆盖；固定 `cjdoc 0.7.2`，分层生成完整 Doc IR、Markdown、API surface 和 coverage，资源 fallback、版本不符、源码漂移和未知 schema fail closed；`scripts/check-docs` 接入 `scripts/check` 与 CI；HTML 仅由 CI 生成并发布最新 `main` 到 GitHub Pages，部署后执行有界 HTTP smoke；不声明未验收平台支持，不运行长时间 soak。 |
 
+## 6. M8：完整网络底座与 stdx 能力对齐
+
+M8 extends the Linux x86_64 glibc profile with a Wirestack-owned synchronous
+network substrate and the protocol capabilities needed by a complete network
+foundation. It does not modify runtime, `std`, `stdx` or the SDK, and it does
+not claim non-Linux execution from cross-compilation. Every task has its own
+branch, evidence directory and acceptance gate; a long gate is never selected
+by a fast or full gate implicitly.
+
+| ID | 任务 | 责任域 | 复杂度 | 依赖 | PRD/ADR 追踪 | 合并/验收条件 |
+|---|---|---|---:|---|---|---|
+| M8-001 | 冻结 Linux 网络底座契约与包边界 | 架构/网络 | C3 | M7-033,M7-032 | ADR-0008；PRD §7–11/§17 | `wirestack.net` public package, endpoint/lifecycle/context contract, capability-scoped raw and Unix boundaries, public-only API inventory, task manifest and failure-injection plan compile on Linux; unsupported capabilities are explicit and not PASS. |
+| M8-002 | 实现 Linux TCP/UDP 同步 socket 与 listener | 网络/传输 | C4 | M8-001 | ADR-0005/0008；PRD §9–11 | Non-blocking/CLOEXEC creation, bounded readiness waits, partial stream I/O, exact/all helpers, datagram atomicity/truncation, close/cancel/deadline wakeup, one reader and one writer, stable errors, native loopback evidence and resource bounds. |
+| M8-003 | 实现 Unix-domain 与 capability-scoped RawSocket | 网络/平台 | C4 | M8-002 | ADR-0008；PRD §8–11 | Pathname and abstract byte-name adapters are tested where the SDK permits; unnamed form is explicit; AF_PACKET/AF_NETLINK/SOCK_SEQPACKET/ancillary remain explicit exclusions; privileged raw I/O either has native evidence or is BLOCKED. |
+| M8-004 | 实现 DNS wire client 与 Linux resolver policy | DNS/连接器 | C4 | M8-002 | ADR-0008；PRD §10/§11/§15 | Bounded A/AAAA/CNAME/SRV/TXT/MX/PTR parsing, identity/question/server validation, UDP truncation to TCP fallback, hosts/search/ndots policy, negative cache and Happy Eyeballs under one context; malformed corpus and native evidence pass. |
+| M8-005 | 对齐 HTTP/1.1、HTTP/2 与 WebSocket stdx 能力 | HTTP | C4 | M8-002,M8-004 | ADR-0008；PRD §15/§17 | CookieJar, multipart/FileHandler, Upgrade, H1/H2 WebSocket without compression, bounded H2 push and connector/pool/service hooks integrate with existing bounded state machines; public API, conformance and clean-consumer tests pass. |
+| M8-006 | 完成 TLS context versioning 与外部密钥 hooks | TLS/安全 | C4 | M8-002,M8-005 | ADR-0003/0008；PRD §13/§17 | Immutable contexts, future-handshake-only replacement, versioned session/resumption state, ExternalSigner/ExternalDecryptor/KeyLogSink context inheritance, provider-neutral AWS-LC Linux evidence and no provider leakage. |
+| M8-007 | 生成 Linux 网络底座 release artifact 与证据 | 发布/质量 | C4 | M8-001..M8-006 | ADR-0002/0004/0008；PRD §18/§19/§21/§23/§26 | Rebuild final artifact, API baseline, SBOM, license/NOTICE, install and security evidence; run affected gates and one final 86,400-second candidate soak. No development run substitutes for the final long gate. |
+
 ---
 
-## 6. 远期上游增强
+## 7. 远期上游增强
 
 这些任务不属于 Wirestack release 依赖。只有对应失败报告、最小接口 RFC 和
 回归测试计划同时存在时，才允许转为 Ready。当前公共 SDK 缺少能力时，
@@ -515,7 +534,7 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 
 ---
 
-## 7. 稳定版之后的 P1/独立项目队列
+## 8. 稳定版之后的 P1/独立项目队列
 
 以下项目不属于当前 P0 release critical path。除非 M0 决策显式提升优先级，否则不得插入 M1～M7 主线。
 
@@ -538,7 +557,7 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 
 ---
 
-## 8. Bootstrap 后建议首批创建的仓库 Issue
+## 9. Bootstrap 后建议首批创建的仓库 Issue
 
 仓库控制面初始化完成后，首批只创建能够产生架构证据或解除关键阻塞的任务：
 
@@ -557,7 +576,7 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 
 ---
 
-## 9. Issue 模板
+## 10. Issue 模板
 
 ```markdown
 # <ID> <标题>
@@ -602,7 +621,7 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 
 ---
 
-## 10. Release Gate 汇总
+## 11. Release Gate 汇总
 
 | Gate | 负责里程碑 | 阻断条件 |
 |---|---|---|
@@ -620,13 +639,14 @@ Wirestack 使用 ADR-0005 定义的能力报告和稳定错误路径。
 
 ---
 
-## 11. 任务统计
+## 12. 任务统计
 
 - 全平台主线任务：**185**
-- Linux 稳定版收口任务：**15**
+- Linux 稳定版收口任务：**16**
+- Linux 网络底座任务：**7**
 - 远期上游任务：**7**
 - 稳定版后 P1/独立项目：**14**
-- 当前发布相关任务总数：**201**
-- 全部已记录任务总数：**222**
+- 当前发布相关任务总数：**208**
+- 全部已记录任务总数：**229**
 
 该数量代表 Issue/PR 级工作项，不代表必须串行执行；关键是保持里程碑退出门禁和依赖方向。

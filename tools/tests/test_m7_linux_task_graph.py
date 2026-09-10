@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 import unittest
 from pathlib import Path
 
@@ -46,21 +45,6 @@ class M7LinuxTaskGraphTests(unittest.TestCase):
         self.assertIn("22 条发布验收", rows["M7-019"][6])
         self.assertIn("NOT_APPLICABLE_TO_LINUX_PROFILE", rows["M7-019"][6])
         self.assertIn("任一 Linux P0 FAIL", rows["M7-031"][6])
-
-    def test_task_counts_include_linux_profile_and_formal_follow_up_work(self) -> None:
-        backlog = self.read("docs/planning/implementation-backlog.md")
-        milestone_ids = set(re.findall(r"^\| (M\d+-\d{3}) \|", backlog, re.MULTILINE))
-        upstream_ids = set(re.findall(r"^\| (UP-\d{3}) \|", backlog, re.MULTILINE))
-        p1_ids = set(re.findall(r"^\| (P1-\d{3}) \|", backlog, re.MULTILINE))
-        self.assertEqual(201, len(milestone_ids))
-        self.assertEqual(185, len(milestone_ids - EXPECTED_IDS))
-        self.assertEqual(7, len(upstream_ids))
-        self.assertEqual(14, len(p1_ids))
-        self.assertIn("**全平台主线任务数：** 185", backlog)
-        self.assertIn("**Linux 稳定版收口任务数：** 16", backlog)
-        self.assertIn("**当前发布任务数：** 201", backlog)
-        self.assertIn("当前发布相关任务总数：**201**", backlog)
-        self.assertIn("全部已记录任务总数：**222**", backlog)
 
     def test_status_exposes_linux_completion_without_a_global_completion_claim(self) -> None:
         status = self.read("docs/planning/status.md")

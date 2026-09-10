@@ -1,0 +1,84 @@
+{
+  "task_id": "M8-001",
+  "original_root": "<repo-root>",
+  "publication_root": "<repo-root>-pr-worktrees/M8-001-20260909",
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "--show-toplevel"
+      ],
+      "exit_code": 0,
+      "stdout": "<repo-root>-pr-worktrees/M8-001-20260909\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "branch",
+        "--show-current"
+      ],
+      "exit_code": 0,
+      "stdout": "publish/M8-001-network-contract\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit_code": 0,
+      "stdout": "55ab33b6768f89dbeb35224514f818b6e5439b9b\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "merge-base",
+        "HEAD",
+        "origin/main"
+      ],
+      "exit_code": 0,
+      "stdout": "55ab33b6768f89dbeb35224514f818b6e5439b9b\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "exit_code": 0,
+      "stdout": " M .gitignore\n M README.md\n M docs/api/README.md\n M docs/planning/implementation-backlog.md\n M docs/planning/status.md\n M src/network_error.cj\n M tools/architecture_guard.py\n M tools/docs/m7_033_docs.py\n M tools/m7_026_linux_api_freeze.py\n M tools/tests/test_m7_linux_task_graph.py\n?? docs/architecture/adr/0008-linux-network-foundation.md\n?? docs/evidence/M8-001/\n?? docs/guides/network-foundation-linux.md\n?? src/internal/transport_stdnet/net_contract.cj\n?? src/net/\n?? tools/tasks/M8-001.json\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "uname",
+        "-a"
+      ],
+      "exit_code": 0,
+      "stdout": "Linux Arch 7.2.3-arch1-3 #1 SMP PREEMPT_DYNAMIC Sun, 06 Sep 2026 13:01:04 +0000 x86_64 GNU/Linux\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "<home>/.codex/scripts/codex_cangjie_env",
+        "cjc",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\nTarget: x86_64-unknown-linux-gnu\n",
+      "stderr": ""
+    }
+  ],
+  "original_index_scope": "<repo-root>",
+  "original_index_snapshot_sha256": "2ea707064b4237122d54ed1fa12afd91721c37b8a5f886379771bd5b31d4707b",
+  "original_index_snapshot_note": "The earlier ls-files snapshot was empty because its cwd was an ignored subdirectory after a shared-kernel variable collision. This replacement is explicitly rooted at the original repository; subsequent preservation checks use it. No publication Git write has targeted the original worktree or index.",
+  "publication_environment": {
+    "CJDOC_BIN": "<home>/playground/cjdoc/target/release/bin/main",
+    "WIRESTACK_AWS_LC_SOURCE": "<repo-root>/.local/tls-provider/source/aws-lc-5.5.0"
+  }
+}

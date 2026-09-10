@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "cjpm",
+    "check"
+  ],
+  "duration_ms": 664.266,
+  "error_code": null,
+  "exit_code": 0,
+  "finished_at_utc": "2026-09-10T01:02:00.691683Z",
+  "id": "cangjie-check",
+  "source_task": "M8-001",
+  "started_at_utc": "2026-09-10T01:02:00.027430Z",
+  "status": "PASS",
+  "stderr_excerpt": "",
+  "stderr_path": "docs/evidence/M8-001/cangjie-check.stderr.log",
+  "stderr_truncated": false,
+  "stdout_excerpt": "The valid serial compilation order is:\n    wirestack -> wirestack.internal -> wirestack.internal.identity -> wirestack.internal.platform -> wirestack.internal.platform.android -> wirestack.internal.platform.apple -> wirestack.internal.platform.harmony -> wirestack.internal.platform.linux -> wirestack.internal.platform.windows -> wirestack.internal.common -> wirestack.internal.http_model -> wirestack.internal.transport -> wirestack.internal.trust -> wirestack.internal.http2 -> wirestack.internal.resolver -> wirestack.internal.tls_engine -> wirestack.internal.connector -> wirestack.tls -> wirestack.internal.http1 -> wirestack.internal.transport_stdnet -> wirestack.http -> wirestack.net\ncjpm check success\n",
+  "stdout_path": "docs/evidence/M8-001/cangjie-check.stdout.log",
+  "stdout_truncated": false,
+  "timed_out": false
+}
