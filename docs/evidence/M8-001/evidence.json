@@ -1,6 +1,6 @@
 {
-  "acceptance_status": "BLOCKED",
-  "generated_at_utc": "2026-09-10T08:10:16.109650Z",
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-09-10T09:31:04.612594Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,7 +13,7 @@
       "path": "docs/evidence/M8-001/plan-validation.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "56d2745557fd9ccddab041f3b572b71c85dc2e4a16a3e01958ccdae7f8a95699"
+        "sha256": "1b6e9941434a416a918814c64f0b85b88e027143b1044ed13c8f65e1f9d17fcc"
       },
       "source_task": "M8-001"
     },
@@ -22,7 +22,7 @@
       "path": "docs/evidence/M8-001/architecture-guard.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "2ca90147554b8d85b5cfde5ba55b659332f133d06c77b2f86374f603a2def3a5"
+        "sha256": "11a19c6223cbf355bef7e0c2644da159cd6e737c6ad0888a543501f3973ed88d"
       },
       "source_task": "M8-001"
     },
@@ -31,7 +31,7 @@
       "path": "docs/evidence/M8-001/task-validation.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "72dd7f695e21a4bd8295ff0a7f0d365b04e19689a07f60a4506d0ad0c6b32b9f"
+        "sha256": "9a5eda4e555659de095908f0bb4ef8ffc0f8f2772d08478b7a4aa12ec24802af"
       },
       "source_task": "M8-001"
     },
@@ -40,7 +40,7 @@
       "path": "docs/evidence/M8-001/python-tests.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "c74ba35f11a23a83c8500c205fed287240743a4c86d740354e39247d7ba5b838"
+        "sha256": "e40bf8734f7c58310333034aceef91e2736667aeea6de0eb9cb53384dd450612"
       },
       "source_task": "M8-001"
     },
@@ -49,7 +49,7 @@
       "path": "docs/evidence/M8-001/cangjie-build.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "dd6a04307e08ebe4b3489cff4a65444074cd777b40641d1d1b6071c3ca749a97"
+        "sha256": "6554f412606d660084a2213cb80abeadc5fda9025508c38d6c40f7ad45747d35"
       },
       "source_task": "M8-001"
     },
@@ -58,7 +58,7 @@
       "path": "docs/evidence/M8-001/network-tests.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "19e26840a2c83156956fa2fef6dd5558c0ddd5d97b47a8ca7c3dcbe58b78dab7"
+        "sha256": "cf23cb82b2405719309f5482374519e48c1a58d0b0801c1341dbb90efa300063"
       },
       "source_task": "M8-001"
     },
@@ -67,7 +67,7 @@
       "path": "docs/evidence/M8-001/regression-tests.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "cada5f2eaa8598bb0419af95fb233aa6a52225fe5dbae43fb5c628e131d852b4"
+        "sha256": "2a794c32596214c4c3a67bb29261a5d9583c08619b334e1d4efce398acccbaad"
       },
       "source_task": "M8-001"
     },
@@ -76,7 +76,7 @@
       "path": "docs/evidence/M8-001/api-inventory-command.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "e1b36f3147d28849a9a15bac18886cb9cc08d644f4af13cc6f76144c83a61aba"
+        "sha256": "d9159f4eac6f48733c443636142995ee7152ba517fac0b12d034f22b653da0b6"
       },
       "source_task": "M8-001"
     },
@@ -85,7 +85,7 @@
       "path": "docs/evidence/M8-001/docs-report.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "f33903e9cc5985c7cef9505b3bea2855edf4c56f4fa5c1a59f6ec8c17a5e00aa"
+        "sha256": "8ecc7e9ed7319175d64c38c4fd96acb976d8722ae75c04bf38175eaf9a29e38c"
       },
       "source_task": "M8-001"
     },
@@ -94,7 +94,7 @@
       "path": "docs/evidence/M8-001/full-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "d2987474db9bc89880521c71500ca3defd805e87b43345d370c78f9d01c42ab2"
+        "sha256": "e3c3a529f6aa46eb0d5afc36b64519814a7efb59453a97a732446bd9be40f193"
       },
       "source_task": "M8-001"
     },
@@ -103,7 +103,7 @@
       "path": "docs/evidence/M8-001/native-consumer.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "bfedba2f7adeca57b06f302e368740ab9267d4e8417e4165dcbd54d74eca57c4"
+        "sha256": "d5f778ca6708e670b6689cd2f4fc77abda39ca370efa323de068dc9677307654"
       },
       "source_task": "M8-001"
     },
@@ -139,7 +139,7 @@
       "path": "docs/evidence/M8-001/task-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "6156a440de7ee85787c53b735e7a1aa903845c57c569d2a1d27c7a6b85854263"
+        "sha256": "283b63b05626c84c155c4bab530a6046c9951d47ad7a8ce15b8458224000502a"
       },
       "source_task": "M8-001"
     },
@@ -148,7 +148,7 @@
       "path": "docs/evidence/M8-001/cangjie-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "d93beb98c4e1e09bfa3497ba74378e99bd705d3e8da5decb35f21d10d1a0dbde"
+        "sha256": "5a48eb8437687a29601f7dc208965f2c38ea354e120d7fca3827db4203c42200"
       },
       "source_task": "M8-001"
     },
@@ -157,7 +157,7 @@
       "path": "docs/evidence/M8-001/docs-command.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "0dd23811efd080cacabc9d95324297f1267dfc69f1933ad70a2bbe3cdc206aa7"
+        "sha256": "ae41fbdde34615cf8e23fd36fa3a91150c44c1d4df571412474a72669511a3b2"
       },
       "source_task": "M8-001"
     },
@@ -178,9 +178,18 @@
         "sha256": "b2faf4ecd3bff43017c312d0aedbdaa886747c426196ce269c3b9ad997d529df"
       },
       "source_task": "M8-001"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-001/review-boundaries.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5f3e5f864a0dda948b0eb7a1a416d90e841160fd4884d6987c1e7eb088546e7b"
+      },
+      "source_task": "M8-001"
     }
   ],
-  "revision": "986e00e77d6a5e29300cfe316adab802c0f354eb",
+  "revision": "15ddee5c7404d01af92590d2e2405a6363e13f28",
   "schema_version": 2,
   "source_sha256": {
     ".gitignore": {
@@ -205,7 +214,7 @@
     },
     "docs/evidence/M8-001/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "ee4143228137db37a41823ed91ce1dabe4ae2b1ded3ed97080234dbf679089ea"
+      "sha256": "46ac5e206ee7519f85ef4a2a39183b64f67badad2718c159ecf757acedb4906a"
     },
     "docs/evidence/M8-001/api-inventory.json": {
       "domain": "text-utf8-lf-v1",
@@ -213,7 +222,7 @@
     },
     "docs/evidence/M8-001/test-plan.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "db1b5857b42d0da432ec33c7415425d02f06ddc12c85aeb28e5a3a169e5df4aa"
+      "sha256": "59ccac0d750f631550ee83f60ae7cda778255c4e68fc04c30c864687a57cf234"
     },
     "docs/evidence/M8-001/workspace-safety-publication.json": {
       "domain": "text-utf8-lf-v1",
@@ -221,7 +230,7 @@
     },
     "docs/guides/network-foundation-linux.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "ebb43f151514df780b66c9d14d05059680c646fdd3a5a2dc19467775652e9c4c"
+      "sha256": "5f10e223768f3fbafd5cdf2465efbaf521ccbfcef91676552dbba349a59fd4e7"
     },
     "docs/planning/implementation-backlog.md": {
       "domain": "text-utf8-lf-v1",
@@ -229,7 +238,7 @@
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "8749afee4a6edaa5723991f7cd951ec83102d29681a3b988e810756265a79d8a"
+      "sha256": "0f338695e88298a33678e8659a4eeb21d104736a485b76538ff64fcaa6b2b8ff"
     },
     "docs/product/prd.md": {
       "domain": "text-utf8-lf-v1",
@@ -253,11 +262,11 @@
     },
     "src/net/package.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "b9751b99bfb4bf470e417ac33284c7b0891fef7d944e8e0a0a57071fe11e8c21"
+      "sha256": "f2c63c85fb74eb37c39733dd712e55715359d61e0b84762290d7d5f4e6fce318"
     },
     "src/net/package_test.cj": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "b980ebcfbc4ccb610561df82e18bc5000f0e1aa0edab87a7fb8a139c3c6812dd"
+      "sha256": "5a6b71f9a3a293ebed354fa787c08bff44777093f52fe8da6cab2e12b7cff3a5"
     },
     "src/network_error.cj": {
       "domain": "text-utf8-lf-v1",
@@ -277,15 +286,15 @@
     },
     "tools/repository/repository_tooling.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "9ae3f1925500b519809e4157ee1dc70a14a94522b32c41b2df000d2791d1dd2e"
+      "sha256": "ab98b22f9bc09de1a7f58e20362497ec6d165223dcd6ea9326b6d385fc15b9b8"
     },
     "tools/repository/tests/test_repository_tooling.py": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "f820347c69de66e42ed9d7bf663c773732679fc0b56169fd62e299228918d527"
+      "sha256": "6513db39f1e785c0f9af742f35788aff427076b719aa40fbce815f50bbcd0798"
     },
     "tools/tasks/M8-001.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "34be6cb13fc570e8e6e81f856ecd776dedc2ecc23dfce2987ca5a1d3e40d28c5"
+      "sha256": "6605220e7cde6ec1f7037da2346727d0600cafef0da21511af2e6748199e9762"
     },
     "tools/tests/test_architecture_guard.py": {
       "domain": "text-utf8-lf-v1",
@@ -306,7 +315,7 @@
   },
   "source_task": "M8-001",
   "toolchain": {
-    "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
-    "cjpm": "Cangjie Project Manager: 1.1.3"
+    "cjc": null,
+    "cjpm": null
   }
 }
