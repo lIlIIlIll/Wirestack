@@ -369,7 +369,7 @@ class CiGateRegressionTests(unittest.TestCase):
                 attempts = int(counter.read_text()) if counter.exists() else 0
                 counter.write_text(str(attempts + 1))
                 if attempts == 0:
-                    print("simulated llc crash")
+                    print("llc command failed with exit code 139")
                     raise SystemExit(139)
                 print(f"runtime freeze contract passed: {sys.argv[-1]}")
             ''')
@@ -383,6 +383,37 @@ class CiGateRegressionTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stdout)
             self.assertEqual(counter.read_text(), "9")
             self.assertIn("runtime freeze contract checks passed", result.stdout)
+
+    def test_runtime_freeze_contract_failure_is_not_retried(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = pathlib.Path(temporary)
+            scripts = root / "scripts"
+            package = root / "packages/runtime_freeze_contract"
+            fake = root / "bin"
+            scripts.mkdir()
+            package.mkdir(parents=True)
+            fake.mkdir()
+            shutil.copy2(ROOT / "scripts/runtime_freeze_contract_checks.sh", scripts)
+            counter = root / "attempts"
+            write_executable(fake / "cjpm", r'''
+                #!/usr/bin/env python3
+                import os
+                import pathlib
+                counter = pathlib.Path(os.environ["PROBE_COUNTER"])
+                attempts = int(counter.read_text()) if counter.exists() else 0
+                counter.write_text(str(attempts + 1))
+                print("runtime contract assertion failed")
+                raise SystemExit(45)
+            ''')
+            env = os.environ.copy()
+            env["PATH"] = str(fake) + os.pathsep + env["PATH"]
+            env["PROBE_COUNTER"] = str(counter)
+            result = self.run_command(
+                ["bash", str(scripts / "runtime_freeze_contract_checks.sh")],
+                env=env,
+            )
+            self.assertEqual(result.returncode, 45, result.stdout)
+            self.assertEqual(counter.read_text(), "1")
 
     def test_unknown_native_mode_fails_before_compilation(self) -> None:
         result = self.run_command(["bash", str(ROOT / "scripts/release_native_checks.sh")],

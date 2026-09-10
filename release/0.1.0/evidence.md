@@ -36,7 +36,7 @@ run conclusion=`success`。
 | Public API migration review | **BLOCKING** | `release/public-cangjie-delta-bfd29.toml` 仍有 `pending-migration-review` 组；发布图仍为 `migration` |
 | Local Linux fresh candidate | PASS | 当前候选的本地 registry rehearsal 完成；`576/576` root tests，九包暂存、构建和 consumer 检查通过 |
 | Hosted PR CI | PASS | run `34494604326` conclusion=`success`；Seven-library evidence drift、registry rehearsal、Pure Windows/macOS、Coverage 和 CI Required 均通过 |
-| Hosted main CI / Pages | PASS | post-merge run [`34506441534`](https://github.com/lIlIIlIll/yjson/actions/runs/34506441534) conclusion=`success`; all 28 jobs, CI Required and Deploy API Documentation passed |
+| Hosted main CI / Pages | PASS | run [`34506441534`](https://github.com/lIlIIlIll/yjson/actions/runs/34506441534) passed all 28 jobs; [`Deploy API Documentation`](https://github.com/lIlIIlIll/yjson/actions/runs/34506441534/job/102972446294) completed its `Deploy GitHub Pages` step; site [`liliilill.github.io/yjson`](https://liliilill.github.io/yjson/); `github-pages` artifact digest `sha256:a454b4519cc9cf5e311e301035681a18324ce73811dd3e5c2e7d1cf74b9ddbfa` |
 | Coverage | PASS | project line `8508/10345=82.2%`、branch `3722/5262=70.7%`；changed core line `26/26=100.0%`、branch `16/16=100.0%`；hosted Core Coverage 成功 |
 | Source-only staging | PASS | `stage_source_tree` 复制 `358` 个文件并通过 `--check`；`release_temp_tree --enforce-clean` 复制 `290` 个文件并通过 |
 | Package rehearsal | PASS | 九包独立暂存、构建、registry-style consumer 和导出检查成功；最终 release assets 尚未生成 |
