@@ -288,5 +288,36 @@
     },
     "reviewComment": "https://github.com/lIlIIlIll/Wirestack/pull/155#discussion_r3975363829",
     "reason": "A skipped deployment job cannot prove that PR documentation prerequisites succeeded; the always-running reporter requires both build and generation success."
+  },
+  "pagesPublication": {
+    "before": {
+      "build_type": "legacy",
+      "source": {
+        "branch": "main",
+        "path": "/docs"
+      },
+      "html_url": "https://liliilill.github.io/Wirestack/",
+      "https_enforced": true
+    },
+    "after": {
+      "build_type": "workflow",
+      "source": {
+        "branch": "main",
+        "path": "/docs"
+      },
+      "html_url": "https://liliilill.github.io/Wirestack/",
+      "https_enforced": true
+    },
+    "reason": "Disable the competing legacy main/docs publisher; M7-033 publishes generated HTML through GitHub Actions only.",
+    "updateExitCode": 0,
+    "browserSmoke": {
+      "status": "PASS",
+      "rootTitle": "wirestack API \u6587\u6863",
+      "query": "Deadline",
+      "result": "wirestack.Deadline \u2014 struct",
+      "openedTitle": "wirestack.Deadline",
+      "openedUrl": "https://liliilill.github.io/Wirestack/symbols/symbol-636a646f633a76323a636a646f632533416d6f64756c652533417631253341726f6f743a3a77697265737461636b3a3a7374727563743a446561646c696e652367302829.html"
+    },
+    "recordedAtUtc": "2026-09-10T05:01:34.930454+00:00"
   }
 }

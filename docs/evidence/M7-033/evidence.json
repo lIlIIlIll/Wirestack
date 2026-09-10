@@ -1,6 +1,6 @@
 {
-  "acceptance_status": "BLOCKED",
-  "generated_at_utc": "2026-09-10T04:22:49.558164+00:00",
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-09-10T05:06:28.293872Z",
   "platform": {
     "libc": "glibc",
     "libc_version": "2.44",
@@ -13,7 +13,7 @@
       "path": "docs/evidence/M7-033/docs-report.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "d1f76f6a46f2314dff69c47bdbc54e3ea3c22ab296810c5ac664a72cdda6c97e"
+        "sha256": "1ccb20c30abcc7aed9f7edbacec843eaacba52d4096067a1cf2f411b8b047104"
       },
       "source_task": "M7-033"
     },
@@ -31,7 +31,7 @@
       "path": "docs/evidence/M7-033/task-check.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "9958cc328fa152b3eb989d470aa166491d444fcfa82b0fc3e3ae3b392a2adf3f"
+        "sha256": "836854021cf145f2757519c083a8f0727de501dc9c40ed4c218515f830d1c571"
       },
       "source_task": "M7-033"
     },
@@ -58,12 +58,21 @@
       "path": "docs/evidence/M7-033/required-checks.json",
       "sha256": {
         "domain": "text-utf8-lf-v1",
-        "sha256": "a5ea34223177a81a40edec05cc99bd106a4dbae2aa1aec3a8ea5fd171f99d954"
+        "sha256": "3ba17a369b20094353c7ad998086929121a7d623a284baf1efb59e6783bd4da8"
+      },
+      "source_task": "M7-033"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M7-033/pages-smoke.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "d1f858f766315afb6b44de90825e1d094818cae50b76bb2b51a7a0b89ec0e6ad"
       },
       "source_task": "M7-033"
     }
   ],
-  "revision": "55ab33b6768f89dbeb35224514f818b6e5439b9b",
+  "revision": "ec2e8236625c5f45625750c1a4ed947f2dcf8c9c",
   "schema_version": 2,
   "source_sha256": {
     ".github/workflows/clean-cangjie-build.yml": {
@@ -88,11 +97,11 @@
     },
     "docs/evidence/M7-033/README.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "b42d8afc8cf4508d857dacea4222fbcece3b11940f78f745d458bd8ce4381e1b"
+      "sha256": "a7ed890792d8bcd26bff86a05ef7544546f7ca1af28f0e70f086168e8072e8ee"
     },
     "docs/evidence/M7-033/ci-workspace-safety.json": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "4fbeb8ab7c51b4e737bd94dad78317ca3806f348eeb8648cac81e001f130808d"
+      "sha256": "1c72cd7728c3146f9880dcabc0bf3da16448fe1ad510231a1d87a5604cab61b4"
     },
     "docs/evidence/M7-033/test-plan.md": {
       "domain": "text-utf8-lf-v1",
@@ -108,11 +117,11 @@
     },
     "docs/planning/linux-status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "8025baa7fa4ccc0a8c1c470fd012421760cb93432ea390f711149f2830299724"
+      "sha256": "6782f9f41df6ad33118b3e81429abee9b037a577e6a6d737a5681e7b196c990e"
     },
     "docs/planning/status.md": {
       "domain": "text-utf8-lf-v1",
-      "sha256": "0661f4012380144b7012bd3212fb1ac0d1005ad1deb4f0355d2e7990159b9ccd"
+      "sha256": "1f56d51b86eb0979f8b51a52d14a86b5288eb766eb2e401f53843b70a08266d2"
     },
     "docs/references/m7-033-ci-toolchain.json": {
       "domain": "text-utf8-lf-v1",
