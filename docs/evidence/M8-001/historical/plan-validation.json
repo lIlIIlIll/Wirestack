@@ -1,9 +1,0 @@
-{
-  "schema_version": 1,
-  "kind": "test-plan-validation",
-  "status": "PASS",
-  "source_task": "M8-001",
-  "acceptance_status": "PASS",
-  "counts": {"paths": 6, "scenarios": 10, "tests": 6},
-  "issues": []
-}

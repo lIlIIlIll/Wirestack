@@ -30,10 +30,12 @@ certificate operations.
    context on every iteration; it does not create a private event loop or call
    private runtime socket ABI.
 3. TCP and datagram lifecycles are explicit and idempotent. At most one
-   read-like and one write-like operation may be active per stream; opposite
+   read-like and one write-like operation may be active per socket; opposite
    directions may proceed concurrently. Stream progress is partial, while
-   `readExact` and `writeAll` are explicit helpers. Datagram operations retain
-   message boundaries and reject payloads above the bounded IPv4 maximum.
+   `readExact` and `writeAll` are explicit helpers. `DatagramSocket` freezes
+   connect, atomic send, receive, lifecycle and context operations. Datagram
+   operations retain message boundaries, report truncation and reject payloads
+   above the bounded IPv4 maximum of 65,507 bytes.
 4. Internet and Unix endpoint values are immutable. Unix pathname, abstract
    byte-name and unnamed forms are distinct. M8-003 must establish native
    evidence for each supported Unix stream/datagram address form. A value

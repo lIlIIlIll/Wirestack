@@ -22,6 +22,6 @@ test_unknown_field_is_rejected (tools.repository.tests.test_repository_tooling.R
 test_valid_contract_and_unknown_schema_fail_closed (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_valid_contract_and_unknown_schema_fail_closed) ... ok
 
 ----------------------------------------------------------------------
-Ran 22 tests in 4.908s
+Ran 22 tests in 5.744s
 
 OK

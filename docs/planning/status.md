@@ -195,4 +195,4 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 
 | Task | Status | Evidence | Notes |
 |---|---|---|---|
-| M8-001 | COMPLETE | [`docs/evidence/M8-001/README.md`](../evidence/M8-001/README.md) | Fresh isolated reconstruction: network 10/10, HTTP 80/80, canonical check 607 passed/23 excluded, public inventory and complete API documentation pass. The clean public consumer sent `hello` over native loopback. Historical reports are not reused as current acceptance. |
+| M8-001 | COMPLETE | [`docs/evidence/M8-001/README.md`](../evidence/M8-001/README.md) | Scoped network contracts include datagram operations and bounded owned results. Network tests 9/9; canonical check 597 passed/23 excluded; inventory and complete API documentation pass. Native TCP consumer sent `hello`; datagram caller compile-checked only. HTTP/DNS wire work remains in M8-005/M8-004. |

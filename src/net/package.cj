@@ -192,11 +192,91 @@ public struct DatagramReceiveResult {
 /** Whether the incoming datagram exceeded the receive capacity. */
     public let truncated: Bool
 
-    internal init(payload: Array<Byte>, source: ?NetworkEndpoint, truncated: Bool) {
+    /** Creates an owned result, including valid zero-length datagrams.
+     *
+     * @param payload Received bytes, bounded to 65,507 bytes.
+     * @param source Source endpoint, or none when unavailable.
+     * @param truncated Whether the datagram exceeded the receive capacity.
+     */
+    public init(payload: Array<Byte>, source: ?NetworkEndpoint, truncated: Bool) {
+        if (payload.size > 65507) {
+            throw IllegalArgumentException("datagram payload exceeds the IPv4 payload bound")
+        }
         this.payload = payload.clone()
         this.source = source
         this.truncated = truncated
     }
+}
+
+/**
+ * Synchronous datagram operations shared by Internet and Unix adapters.
+ *
+ * One send and one receive may proceed concurrently; overlapping operations
+ * in the same direction fail rather than creating an unbounded queue.
+ * Each operation completes at most once under the supplied absolute context.
+ * Local close, abort, cancellation and deadline retain distinct error causes.
+ * Native bind factories and adapter qualification belong to M8-002/M8-003.
+ */
+public interface DatagramSocket <: Resource {
+    /** Current lifecycle state. */
+    prop state: SocketState
+    /** Advisory capabilities; an operation remains authoritative. */
+    prop capabilities: SocketCapabilities
+    /** Local endpoint when known. */
+    prop localEndpoint: ?NetworkEndpoint
+    /** Selected peer endpoint when connected. */
+    prop remoteEndpoint: ?NetworkEndpoint
+
+    /** Selects a resolved peer without DNS or a new timeout owner.
+     *
+     * @param endpoint Peer of the adapter's supported endpoint kind.
+     * @param context Shared absolute deadline and cancellation token.
+     */
+    func connect(endpoint: NetworkEndpoint, context!: api.OperationContext): Unit
+
+    /** Sends one complete datagram to the selected peer.
+     *
+     * Success returns exactly `source.length`, including zero for an empty
+     * datagram. Missing peers and payloads above 65,507 bytes fail before I/O;
+     * a partial send is an error, never successful stream-like progress.
+     *
+     * @param source Datagram payload retained only for this operation.
+     * @param context Shared absolute deadline and cancellation token.
+     */
+    func send(source: api.ByteSpan, context!: api.OperationContext): Int64
+
+    /** Sends one complete datagram without changing the selected peer.
+     *
+     * The same payload bound and atomic-send rules apply as for `send`.
+     * Endpoint kinds unsupported by the adapter fail explicitly.
+     *
+     * @param endpoint Resolved destination endpoint.
+     * @param source Datagram payload retained only for this operation.
+     * @param context Shared absolute deadline and cancellation token.
+     */
+    func sendTo(endpoint: NetworkEndpoint, source: api.ByteSpan,
+        context!: api.OperationContext): Int64
+
+    /** Consumes exactly one datagram into an owned bounded result.
+     *
+     * Excess bytes are discarded and `truncated` is true. An empty payload is
+     * a datagram, not stream EOF. Invalid capacity fails before receiving.
+     *
+     * @param capacity Maximum retained payload size, from 1 through 65,507.
+     * @param context Shared absolute deadline and cancellation token.
+     */
+    func receive(capacity: Int64,
+        context!: api.OperationContext): DatagramReceiveResult
+
+    /** Closes idempotently and wakes pending operations.
+     * @param context Shared context for any completion wait.
+     */
+    func close(context!: api.OperationContext): Unit
+
+    /** Aborts idempotently without waiting and wakes pending operations.
+     * @param reason Optional local abort reason.
+     */
+    func abort(reason!: ?api.AbortReason): Unit
 }
 
 /** A synchronous stream socket contract. */
@@ -467,62 +547,3 @@ public class RawSocket {
     }
 }
 
-/** Initial bounded DNS response-header summary. */
-public struct DnsMessageSummary {
-    /** Transaction identifier copied from the response header. */
-    public let transactionId: UInt16
-    /** Number of answer records advertised by the response header. */
-    public let answerCount: Int64
-    /** Whether the response advertises truncation. */
-    public let truncated: Bool
-
-    internal init(transactionId: UInt16, answerCount: Int64, truncated: Bool) {
-        this.transactionId = transactionId
-        this.answerCount = answerCount
-        this.truncated = truncated
-    }
-}
-
-private const MAX_DNS_HEADER_RECORDS: Int64 = 4096
-
-/**
- * Parses only the fixed DNS response header; complete wire decoding belongs
- * to M8-004. Accepted headers advertise at most 4,096 total records.
- */
-public class DnsMessageParser {
-    /** Creates the bounded response-header parser. */
-    public init() {}
-
-    /** Parses the fixed twelve-byte DNS response header.
-     * @param message DNS wire message bytes.
-     */
-    public func parse(message: Array<Byte>): DnsMessageSummary {
-        if (message.size < 12 || message.size > 65535) {
-            throw api.ResolveException(api.ResolveErrorCode.SystemFailure, "DNS message length is invalid")
-        }
-        let flags = dnsHeaderUInt16(message, 2)
-        if ((flags & 0x8000u16) == 0u16) {
-            throw api.ResolveException(api.ResolveErrorCode.SystemFailure, "DNS response flag is missing")
-        }
-        let questionCount = Int64(dnsHeaderUInt16(message, 4))
-        let answerCount = Int64(dnsHeaderUInt16(message, 6))
-        let authorityCount = Int64(dnsHeaderUInt16(message, 8))
-        let additionalCount = Int64(dnsHeaderUInt16(message, 10))
-        let totalRecords = questionCount + answerCount + authorityCount + additionalCount
-        if (totalRecords > MAX_DNS_HEADER_RECORDS) {
-            throw api.ResolveException(
-                api.ResolveErrorCode.SystemFailure,
-                "DNS response header exceeds the record-count limit"
-            )
-        }
-        DnsMessageSummary(
-            dnsHeaderUInt16(message, 0),
-            answerCount,
-            (flags & 0x0200u16) != 0u16
-        )
-    }
-}
-
-private func dnsHeaderUInt16(message: Array<Byte>, offset: Int64): UInt16 {
-    (UInt16(message[offset]) << 8) | UInt16(message[offset + 1])
-}

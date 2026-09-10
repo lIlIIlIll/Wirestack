@@ -403,12 +403,6 @@ def inspect_source(root: Path, path: Path) -> list[Violation]:
                     "Wirestack public declarations must not expose wirestack.internal.* types.",
                 ))
             for rule, pattern, message in PUBLIC_API_RULES:
-                # wirestack.net owns its RawSocket value.  It is an opaque
-                # Wirestack handle and is not a std.net type.  The legacy
-                # low-level guard remains active for wirestack/http and
-                # wirestack/tls declarations.
-                if actual_package == "wirestack.net" and rule == "public-low-level-socket-type":
-                    continue
                 for match in pattern.finditer(declaration):
                     violations.append(_violation(
                         root, path, text, start + match.start(), rule, message,

@@ -6,24 +6,24 @@
     "--no-progress",
     "--no-color"
   ],
-  "duration_ms": 8250.373,
+  "duration_ms": 9705.492,
   "error_code": null,
   "exit_code": 0,
-  "finished_at_utc": "2026-09-10T05:39:04.393031Z",
+  "finished_at_utc": "2026-09-10T06:38:57.015180Z",
   "id": "network-contract-tests",
-  "started_at_utc": "2026-09-10T05:38:56.142679Z",
+  "started_at_utc": "2026-09-10T06:38:47.309693Z",
   "status": "PASS",
   "stderr_excerpt": "",
   "stderr_path": "docs/evidence/M8-001/network-contract-tests.stderr.log",
   "stderr_truncated": false,
-  "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.net, time elapsed: 3549272 ns, RESULT:\n    TCS: NetworkFoundationContractTest, time elapsed: 3549272 ns, RESULT:\n    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (241460 ns)\n    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (31950 ns)\n    [ PASSED ] CASE: rawSocketCapabilityBoundaryFailsClosedForEveryDomain (74954 ns)\n    [ PASSED ] CASE: dnsParserAcceptsTheRecordLimitBoundary (14307 ns)\n    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (112528 ns)\n    [ PASSED ] CASE: tcpStreamLifecycleDoesNotDependOnEndpointPresence (19660 ns)\n    [ PASSED ] CASE: tcpStreamAbortPreservesConnectionFacts (64114 ns)\n    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (71882 ns)\n    [ PASSED ] CASE: dnsHeaderRejectsStructuralAndRecordBounds (797352 ns)\n    [ PASSED ] CASE: dnsHeaderMutationsHaveOnlyBoundedSuccessOrStructuredRejection (627173 ns)\nSummary: TOTAL: 10\n    PASSED: 10, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 12019161 ns, RESULT:\nTP: wirestack.*, time elapsed: 11921168 ns, RESULT:\n    PASSED:\n    TP: wirestack.net, time elapsed: 3549272 ns\nSummary: TOTAL: 10\n    PASSED: 10, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+  "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.net, time elapsed: 3611162 ns, RESULT:\n    TCS: NetworkFoundationContractTest, time elapsed: 3611162 ns, RESULT:\n    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (260296 ns)\n    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (43350 ns)\n    [ PASSED ] CASE: rawSocketCapabilityBoundaryFailsClosedForEveryDomain (43290 ns)\n    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (92871 ns)\n    [ PASSED ] CASE: tcpStreamLifecycleDoesNotDependOnEndpointPresence (18771 ns)\n    [ PASSED ] CASE: tcpStreamAbortPreservesConnectionFacts (64973 ns)\n    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (194145 ns)\n    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (1535077 ns)\n    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (13880 ns)\nSummary: TOTAL: 9\n    PASSED: 9, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 12002192 ns, RESULT:\nTP: wirestack.*, time elapsed: 11881132 ns, RESULT:\n    PASSED:\n    TP: wirestack.net, time elapsed: 3611162 ns\nSummary: TOTAL: 9\n    PASSED: 9, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
   "stdout_path": "docs/evidence/M8-001/network-contract-tests.stdout.log",
   "stdout_truncated": false,
   "timed_out": false,
   "source_task": "M8-001",
   "stdout_sha256": {
     "domain": "text-utf8-lf-v1",
-    "sha256": "438e0336e343ed9d37ca45a110ade833205a88382c0d1b8dcf511227a3c54084"
+    "sha256": "13ab5cda1fc42cbf1cb6d3230eee56dcb711315f29821c9baf1c48a6e00b00a3"
   },
   "stderr_sha256": {
     "domain": "text-utf8-lf-v1",

@@ -65,7 +65,6 @@ PUBLIC_PACKAGE_FILES = {
         "cancellation.cj",
         "client.cj",
         "error.cj",
-        "parity.cj",
         "package.cj",
         "proxy.cj",
         "redirect.cj",
