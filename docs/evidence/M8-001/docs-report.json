@@ -25,8 +25,8 @@
       }
     },
     "coverageSha256": "2954aceb6ec4b84b552df40784043ffd9ba93668924950425ce5284e4538aeb2",
-    "declarations": 1448,
-    "docsSha256": "6861528da2423cc4adf472c0215239827457f13bb380dbc483e09d416ae28262",
+    "declarations": 1456,
+    "docsSha256": "b2f7e6787d9cdd92e77682196755ee7b087229d74bb1e238447f47fd5f97330d",
     "markdownSha256": "988b54088600cbe0a4c63d442b309d59a3f11ecb93cf3db6b5ced6bd4f632518",
     "package": "combined",
     "status": "PASS"
@@ -49,7 +49,7 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ir2t9zj1/wirestack/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-zlccsb0x/wirestack/output\n",
       "stdout_truncated": false
     },
     {
@@ -69,7 +69,7 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ir2t9zj1/wirestack-http/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-zlccsb0x/wirestack-http/output\n",
       "stdout_truncated": false
     },
     {
@@ -89,7 +89,7 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ir2t9zj1/wirestack-tls/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-zlccsb0x/wirestack-tls/output\n",
       "stdout_truncated": false
     },
     {
@@ -109,7 +109,7 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ir2t9zj1/wirestack-net/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-zlccsb0x/wirestack-net/output\n",
       "stdout_truncated": false
     },
     {
@@ -129,12 +129,12 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ir2t9zj1/combined/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-zlccsb0x/combined/output\n",
       "stdout_truncated": false
     }
   ],
   "expectedCjdoc": "0.7.2",
-  "generatedAtUtc": "2026-09-10T07:56:04.393195Z",
+  "generatedAtUtc": "2026-09-10T09:16:04.396265Z",
   "issues": [],
   "layers": [
     {
@@ -219,8 +219,8 @@
         }
       },
       "coverageSha256": "a5a5aacc0ae65e454746a5e9c4e4d52a9184b81f070f963591ea5a6affb8bd02",
-      "declarations": 882,
-      "docsSha256": "7770fc0d755cf5e75c86d1aa56e8acab74deea1d5a9b64b9afcf7726709834bc",
+      "declarations": 890,
+      "docsSha256": "2bb5e07d81ae595f31e52c2490b4c9b0f574cd01ad0ad7a3950c8197a64af60c",
       "markdownSha256": "c665cef542630b9fbda37c53b17bfede25aa487c50b010430c1047257d4e1bfe",
       "package": "wirestack.net",
       "status": "PASS"
@@ -253,7 +253,7 @@
     "src/http_message.cj": "e874b8ba23563e1efb861b1a024d12eb828617f71e71141bf3feb5681fe3ceec",
     "src/http_model.cj": "993ad73017a4da224b98f851e1e39d46fe6016502044b934f7ab191fb0da5a8c",
     "src/http_url.cj": "074cc811771e49030292b278252947af9f29476f67e9fd53f6a82ac473690955",
-    "src/net/package.cj": "b9751b99bfb4bf470e417ac33284c7b0891fef7d944e8e0a0a57071fe11e8c21",
+    "src/net/package.cj": "f2c63c85fb74eb37c39733dd712e55715359d61e0b84762290d7d5f4e6fce318",
     "src/network_error.cj": "4e272f9b9887804f0de87ec032d442a69b49803da66bffa005b7f0282aadc5e5",
     "src/network_event.cj": "55d93c151752e76c80c441e4bfc639f7d6da77e89ed582bae2ba6a43cdcc3084",
     "src/operation_context.cj": "523a1c1efaab2f3e6ba0755386460ea504a2caa8ef1453a18134f950c6e1234d",

@@ -1331,14 +1331,20 @@
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:close#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:close#g0(api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:connect#g0(api.SocketEndpoint,api.OperationContext)",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:directionClosedError#g0(api.NetworkErrorCategory,api.NetworkPhase,String)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:finishClose#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:isClosed#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:read#g0(api.MutableByteSpan,api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:readExact#g0(api.MutableByteSpan,api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:readSome#g0(api.MutableByteSpan,api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:recordFailure#g0(Bool)",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:recordIoNetworkFailure#g0(api.NetworkException,api.ShutdownDirection)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:recordNetworkFailure#g0(api.NetworkException)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:recordShutdown#g0(api.ShutdownDirection)",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:recordShutdownFinished#g0(api.ShutdownDirection)",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:recordShutdownStarted#g0(api.ShutdownDirection)",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:requireReadable#g0()",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:requireWritable#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:shutdown#g0(api.ShutdownDirection)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:write#g0(api.ByteSpan,api.OperationContext)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:writeAll#g0(api.ByteSpan,api.OperationContext)",
@@ -1355,7 +1361,9 @@
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::variable:lifecycleMutex#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::variable:lifecycleState#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::variable:localEndpointValue#g0()",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::variable:readShutdownInFlight#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::variable:remoteEndpointValue#g0()",
+        "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::variable:writeShutdownInFlight#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UnsafeSocketOption::constructor:init#g0(Int32,Int32,api.ByteSpan)",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UnsafeSocketOption::function:value#g0()",
         "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::UnsafeSocketOption::variable:bytes#g0()",
@@ -125018,14 +125026,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 627,
+          "line": 740,
           "column": 5,
-          "byteOffset": 23229
+          "byteOffset": 27504
         },
         "end": {
-          "line": 630,
+          "line": 743,
           "column": 6,
-          "byteOffset": 23426
+          "byteOffset": 27701
         }
       },
       "headerSpelling": "public init(bytes: Array<Byte>)",
@@ -125128,14 +125136,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 632,
+          "line": 745,
           "column": 5,
-          "byteOffset": 23489
+          "byteOffset": 27764
         },
         "end": {
-          "line": 632,
+          "line": 745,
           "column": 55,
-          "byteOffset": 23539
+          "byteOffset": 27814
         }
       },
       "headerSpelling": "public func bytes(): Array<Byte>",
@@ -125206,14 +125214,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 623,
+          "line": 736,
           "column": 5,
-          "byteOffset": 23080
+          "byteOffset": 27355
         },
         "end": {
-          "line": 623,
+          "line": 736,
           "column": 35,
-          "byteOffset": 23110
+          "byteOffset": 27385
         }
       },
       "headerSpelling": "private let value: Array<Byte>",
@@ -125270,14 +125278,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 643,
+          "line": 756,
           "column": 5,
-          "byteOffset": 23825
+          "byteOffset": 28100
         },
         "end": {
-          "line": 643,
+          "line": 756,
           "column": 22,
-          "byteOffset": 23842
+          "byteOffset": 28117
         }
       },
       "headerSpelling": "private init()",
@@ -125457,14 +125465,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 653,
+          "line": 766,
           "column": 5,
-          "byteOffset": 24212
+          "byteOffset": 28487
         },
         "end": {
-          "line": 666,
+          "line": 779,
           "column": 6,
-          "byteOffset": 24705
+          "byteOffset": 28980
         }
       },
       "headerSpelling": "public static func open(\n        domain: RawSocketDomain,\n        protocolValue: RawSocketProtocol\n    ): RawSocket",
@@ -125560,14 +125568,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 595,
+          "line": 708,
           "column": 5,
-          "byteOffset": 22048
+          "byteOffset": 26323
         },
         "end": {
-          "line": 595,
+          "line": 708,
           "column": 11,
-          "byteOffset": 22054
+          "byteOffset": 26329
         }
       },
       "headerSpelling": "| Ipv4",
@@ -125650,14 +125658,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 597,
+          "line": 710,
           "column": 5,
-          "byteOffset": 22090
+          "byteOffset": 26365
         },
         "end": {
-          "line": 597,
+          "line": 710,
           "column": 11,
-          "byteOffset": 22096
+          "byteOffset": 26371
         }
       },
       "headerSpelling": "| Ipv6",
@@ -125740,14 +125748,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 601,
+          "line": 714,
           "column": 5,
-          "byteOffset": 22241
+          "byteOffset": 26516
         },
         "end": {
-          "line": 601,
+          "line": 714,
           "column": 14,
-          "byteOffset": 22250
+          "byteOffset": 26525
         }
       },
       "headerSpelling": "| Netlink",
@@ -125830,14 +125838,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 599,
+          "line": 712,
           "column": 5,
-          "byteOffset": 22164
+          "byteOffset": 26439
         },
         "end": {
-          "line": 599,
+          "line": 712,
           "column": 13,
-          "byteOffset": 22172
+          "byteOffset": 26447
         }
       },
       "headerSpelling": "| Packet",
@@ -125943,14 +125951,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 611,
+          "line": 724,
           "column": 5,
-          "byteOffset": 22533
+          "byteOffset": 26808
         },
         "end": {
-          "line": 614,
+          "line": 727,
           "column": 6,
-          "byteOffset": 22713
+          "byteOffset": 26988
         }
       },
       "headerSpelling": "public init(number: Int32)",
@@ -126050,14 +126058,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 616,
+          "line": 729,
           "column": 5,
-          "byteOffset": 22768
+          "byteOffset": 27043
         },
         "end": {
-          "line": 616,
+          "line": 729,
           "column": 74,
-          "byteOffset": 22837
+          "byteOffset": 27112
         }
       },
       "headerSpelling": "public static func icmp(): RawSocketProtocol",
@@ -126158,14 +126166,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 618,
+          "line": 731,
           "column": 5,
-          "byteOffset": 22892
+          "byteOffset": 27167
         },
         "end": {
-          "line": 618,
+          "line": 731,
           "column": 77,
-          "byteOffset": 22964
+          "byteOffset": 27239
         }
       },
       "headerSpelling": "public static func icmpv6(): RawSocketProtocol",
@@ -126266,14 +126274,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 607,
+          "line": 720,
           "column": 5,
-          "byteOffset": 22369
+          "byteOffset": 26644
         },
         "end": {
-          "line": 607,
+          "line": 720,
           "column": 29,
-          "byteOffset": 22393
+          "byteOffset": 26668
         }
       },
       "headerSpelling": "public let number: Int32",
@@ -130859,14 +130867,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 291,
+          "line": 293,
           "column": 5,
-          "byteOffset": 10739
+          "byteOffset": 10836
         },
         "end": {
-          "line": 312,
+          "line": 314,
           "column": 6,
-          "byteOffset": 11563
+          "byteOffset": 11660
         }
       },
       "headerSpelling": "internal init(delegate: api.DuplexTransport)",
@@ -130991,14 +130999,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 479,
+          "line": 497,
           "column": 5,
-          "byteOffset": 17579
+          "byteOffset": 18490
         },
         "end": {
-          "line": 482,
+          "line": 500,
           "column": 6,
-          "byteOffset": 17738
+          "byteOffset": 18649
         }
       },
       "headerSpelling": "public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit",
@@ -131097,14 +131105,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 489,
+          "line": 573,
           "column": 5,
-          "byteOffset": 18036
+          "byteOffset": 21089
         },
         "end": {
-          "line": 497,
+          "line": 581,
           "column": 6,
-          "byteOffset": 18431
+          "byteOffset": 21484
         }
       },
       "headerSpelling": "private func alreadyShutDown(direction: api.ShutdownDirection): Bool",
@@ -131177,14 +131185,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 548,
+          "line": 632,
           "column": 5,
-          "byteOffset": 20276
+          "byteOffset": 23329
         },
         "end": {
-          "line": 555,
+          "line": 639,
           "column": 6,
-          "byteOffset": 20576
+          "byteOffset": 23629
         }
       },
       "headerSpelling": "private func beginAbort(): Bool",
@@ -131252,14 +131260,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 518,
+          "line": 602,
           "column": 5,
-          "byteOffset": 19334
+          "byteOffset": 22387
         },
         "end": {
-          "line": 536,
+          "line": 620,
           "column": 6,
-          "byteOffset": 19983
+          "byteOffset": 23036
         }
       },
       "headerSpelling": "private func beginClose(): Bool",
@@ -131359,14 +131367,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 475,
+          "line": 493,
           "column": 5,
-          "byteOffset": 17366
+          "byteOffset": 18277
         },
         "end": {
-          "line": 475,
+          "line": 493,
           "column": 84,
-          "byteOffset": 17445
+          "byteOffset": 18356
         }
       },
       "headerSpelling": "public func close(): Unit",
@@ -131489,14 +131497,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 464,
+          "line": 482,
           "column": 5,
-          "byteOffset": 16990
+          "byteOffset": 17901
         },
         "end": {
-          "line": 473,
+          "line": 491,
           "column": 6,
-          "byteOffset": 17284
+          "byteOffset": 18195
         }
       },
       "headerSpelling": "public func close(context!: api.OperationContext): Unit",
@@ -131650,14 +131658,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 318,
+          "line": 320,
           "column": 5,
-          "byteOffset": 11745
+          "byteOffset": 11842
         },
         "end": {
-          "line": 323,
+          "line": 325,
           "column": 6,
-          "byteOffset": 11988
+          "byteOffset": 12085
         }
       },
       "headerSpelling": "public static func connect(\n        endpoint: api.SocketEndpoint,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): TcpStream",
@@ -131692,6 +131700,151 @@
           "RPAREN:1:)",
           "COLON:1::",
           "IDENTIFIER:9:TcpStream"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:directionClosedError#g0(api.NetworkErrorCategory,api.NetworkPhase,String)",
+      "kind": "function",
+      "name": "directionClosedError",
+      "qualifiedName": "wirestack.net.TcpStream.directionClosedError",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:TcpStream#g0()",
+      "visibility": "private",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        {
+          "name": "category",
+          "type": {
+            "kind": "source",
+            "spelling": "api.NetworkErrorCategory",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        },
+        {
+          "name": "phase",
+          "type": {
+            "kind": "source",
+            "spelling": "api.NetworkPhase",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        },
+        {
+          "name": "message",
+          "type": {
+            "kind": "source",
+            "spelling": "String",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        }
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "api.NetworkException",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": null,
+      "source": {
+        "path": "src/net/package.cj",
+        "start": {
+          "line": 539,
+          "column": 5,
+          "byteOffset": 19957
+        },
+        "end": {
+          "line": 553,
+          "column": 6,
+          "byteOffset": 20416
+        }
+      },
+      "headerSpelling": "private func directionClosedError(\n        category: api.NetworkErrorCategory,\n        phase: api.NetworkPhase,\n        message: String\n    ): api.NetworkException",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PRIVATE:7:private",
+          "FUNC:4:func",
+          "IDENTIFIER:20:directionClosedError",
+          "LPAREN:1:(",
+          "IDENTIFIER:8:category",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:20:NetworkErrorCategory",
+          "COMMA:1:,",
+          "IDENTIFIER:5:phase",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:12:NetworkPhase",
+          "COMMA:1:,",
+          "IDENTIFIER:7:message",
+          "COLON:1::",
+          "IDENTIFIER:6:String",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:16:NetworkException"
         ]
       },
       "semantic": {
@@ -131746,14 +131899,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 538,
+          "line": 622,
           "column": 5,
-          "byteOffset": 19989
+          "byteOffset": 23042
         },
         "end": {
-          "line": 546,
+          "line": 630,
           "column": 6,
-          "byteOffset": 20270
+          "byteOffset": 23323
         }
       },
       "headerSpelling": "private func finishClose(): Unit",
@@ -131853,14 +132006,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 484,
+          "line": 502,
           "column": 5,
-          "byteOffset": 17828
+          "byteOffset": 18739
         },
         "end": {
-          "line": 484,
+          "line": 502,
           "column": 57,
-          "byteOffset": 17880
+          "byteOffset": 18791
         }
       },
       "headerSpelling": "public func isClosed(): Bool",
@@ -132008,14 +132161,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 341,
+          "line": 343,
           "column": 5,
-          "byteOffset": 12844
+          "byteOffset": 12941
         },
         "end": {
-          "line": 354,
+          "line": 358,
           "column": 6,
-          "byteOffset": 13404
+          "byteOffset": 13622
         }
       },
       "headerSpelling": "public func read(destination: api.MutableByteSpan, context!: api.OperationContext): ReadResult",
@@ -132175,14 +132328,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 414,
+          "line": 424,
           "column": 5,
-          "byteOffset": 15294
+          "byteOffset": 15837
         },
         "end": {
-          "line": 424,
+          "line": 436,
           "column": 6,
-          "byteOffset": 15687
+          "byteOffset": 16332
         }
       },
       "headerSpelling": "public func readExact(destination: api.MutableByteSpan, context!: api.OperationContext): Unit",
@@ -132342,14 +132495,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 360,
+          "line": 364,
           "column": 5,
-          "byteOffset": 13596
+          "byteOffset": 13814
         },
         "end": {
-          "line": 373,
+          "line": 379,
           "column": 6,
-          "byteOffset": 14050
+          "byteOffset": 14393
         }
       },
       "headerSpelling": "public func readSome(\n        destination: api.MutableByteSpan,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): api.ReadResult",
@@ -132456,14 +132609,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 570,
+          "line": 683,
           "column": 5,
-          "byteOffset": 21124
+          "byteOffset": 25399
         },
         "end": {
-          "line": 589,
+          "line": 702,
           "column": 6,
-          "byteOffset": 21896
+          "byteOffset": 26171
         }
       },
       "headerSpelling": "private func recordFailure(allowClosing!: Bool = false): Unit",
@@ -132480,6 +132633,127 @@
           "BOOLEAN:4:Bool",
           "ASSIGN:1:=",
           "BOOL_LITERAL:5:false",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "UNIT:4:Unit"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:recordIoNetworkFailure#g0(api.NetworkException,api.ShutdownDirection)",
+      "kind": "function",
+      "name": "recordIoNetworkFailure",
+      "qualifiedName": "wirestack.net.TcpStream.recordIoNetworkFailure",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:TcpStream#g0()",
+      "visibility": "private",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        {
+          "name": "error",
+          "type": {
+            "kind": "source",
+            "spelling": "api.NetworkException",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        },
+        {
+          "name": "direction",
+          "type": {
+            "kind": "source",
+            "spelling": "api.ShutdownDirection",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        }
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Unit",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": null,
+      "source": {
+        "path": "src/net/package.cj",
+        "start": {
+          "line": 641,
+          "column": 5,
+          "byteOffset": 23635
+        },
+        "end": {
+          "line": 668,
+          "column": 6,
+          "byteOffset": 24851
+        }
+      },
+      "headerSpelling": "private func recordIoNetworkFailure(\n        error: api.NetworkException,\n        direction: api.ShutdownDirection\n    ): Unit",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PRIVATE:7:private",
+          "FUNC:4:func",
+          "IDENTIFIER:22:recordIoNetworkFailure",
+          "LPAREN:1:(",
+          "IDENTIFIER:5:error",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:16:NetworkException",
+          "COMMA:1:,",
+          "IDENTIFIER:9:direction",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:17:ShutdownDirection",
           "RPAREN:1:)",
           "COLON:1::",
           "UNIT:4:Unit"
@@ -132554,14 +132828,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 557,
+          "line": 670,
           "column": 5,
-          "byteOffset": 20582
+          "byteOffset": 24857
         },
         "end": {
-          "line": 568,
+          "line": 681,
           "column": 6,
-          "byteOffset": 21118
+          "byteOffset": 25393
         }
       },
       "headerSpelling": "private func recordNetworkFailure(error: api.NetworkException): Unit",
@@ -132651,14 +132925,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 499,
+          "line": 583,
           "column": 5,
-          "byteOffset": 18437
+          "byteOffset": 21490
         },
         "end": {
-          "line": 516,
+          "line": 600,
           "column": 6,
-          "byteOffset": 19328
+          "byteOffset": 22381
         }
       },
       "headerSpelling": "private func recordShutdown(direction: api.ShutdownDirection): Unit",
@@ -132674,6 +132948,350 @@
           "IDENTIFIER:3:api",
           "DOT:1:.",
           "IDENTIFIER:17:ShutdownDirection",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "UNIT:4:Unit"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:recordShutdownFinished#g0(api.ShutdownDirection)",
+      "kind": "function",
+      "name": "recordShutdownFinished",
+      "qualifiedName": "wirestack.net.TcpStream.recordShutdownFinished",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:TcpStream#g0()",
+      "visibility": "private",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        {
+          "name": "direction",
+          "type": {
+            "kind": "source",
+            "spelling": "api.ShutdownDirection",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        }
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Unit",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": null,
+      "source": {
+        "path": "src/net/package.cj",
+        "start": {
+          "line": 564,
+          "column": 5,
+          "byteOffset": 20755
+        },
+        "end": {
+          "line": 571,
+          "column": 6,
+          "byteOffset": 21083
+        }
+      },
+      "headerSpelling": "private func recordShutdownFinished(direction: api.ShutdownDirection): Unit",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PRIVATE:7:private",
+          "FUNC:4:func",
+          "IDENTIFIER:22:recordShutdownFinished",
+          "LPAREN:1:(",
+          "IDENTIFIER:9:direction",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:17:ShutdownDirection",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "UNIT:4:Unit"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:recordShutdownStarted#g0(api.ShutdownDirection)",
+      "kind": "function",
+      "name": "recordShutdownStarted",
+      "qualifiedName": "wirestack.net.TcpStream.recordShutdownStarted",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:TcpStream#g0()",
+      "visibility": "private",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        {
+          "name": "direction",
+          "type": {
+            "kind": "source",
+            "spelling": "api.ShutdownDirection",
+            "nullable": false,
+            "arguments": [
+              
+            ],
+            "semantic": {
+              "state": "partial",
+              "canonical": null,
+              "provider": "ast"
+            }
+          },
+          "documentation": null,
+          "defaultExpression": null
+        }
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Unit",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": null,
+      "source": {
+        "path": "src/net/package.cj",
+        "start": {
+          "line": 555,
+          "column": 5,
+          "byteOffset": 20422
+        },
+        "end": {
+          "line": 562,
+          "column": 6,
+          "byteOffset": 20749
+        }
+      },
+      "headerSpelling": "private func recordShutdownStarted(direction: api.ShutdownDirection): Unit",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PRIVATE:7:private",
+          "FUNC:4:func",
+          "IDENTIFIER:21:recordShutdownStarted",
+          "LPAREN:1:(",
+          "IDENTIFIER:9:direction",
+          "COLON:1::",
+          "IDENTIFIER:3:api",
+          "DOT:1:.",
+          "IDENTIFIER:17:ShutdownDirection",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "UNIT:4:Unit"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:requireReadable#g0()",
+      "kind": "function",
+      "name": "requireReadable",
+      "qualifiedName": "wirestack.net.TcpStream.requireReadable",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:TcpStream#g0()",
+      "visibility": "private",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Unit",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": null,
+      "source": {
+        "path": "src/net/package.cj",
+        "start": {
+          "line": 507,
+          "column": 5,
+          "byteOffset": 18947
+        },
+        "end": {
+          "line": 521,
+          "column": 6,
+          "byteOffset": 19445
+        }
+      },
+      "headerSpelling": "private func requireReadable(): Unit",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PRIVATE:7:private",
+          "FUNC:4:func",
+          "IDENTIFIER:15:requireReadable",
+          "LPAREN:1:(",
+          "RPAREN:1:)",
+          "COLON:1::",
+          "UNIT:4:Unit"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::function:requireWritable#g0()",
+      "kind": "function",
+      "name": "requireWritable",
+      "qualifiedName": "wirestack.net.TcpStream.requireWritable",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:TcpStream#g0()",
+      "visibility": "private",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Unit",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": null,
+      "source": {
+        "path": "src/net/package.cj",
+        "start": {
+          "line": 523,
+          "column": 5,
+          "byteOffset": 19451
+        },
+        "end": {
+          "line": 537,
+          "column": 6,
+          "byteOffset": 19951
+        }
+      },
+      "headerSpelling": "private func requireWritable(): Unit",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PRIVATE:7:private",
+          "FUNC:4:func",
+          "IDENTIFIER:15:requireWritable",
+          "LPAREN:1:(",
           "RPAREN:1:)",
           "COLON:1::",
           "UNIT:4:Unit"
@@ -132821,14 +133439,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 448,
+          "line": 462,
           "column": 5,
-          "byteOffset": 16470
+          "byteOffset": 17213
         },
         "end": {
-          "line": 460,
+          "line": 478,
           "column": 6,
-          "byteOffset": 16889
+          "byteOffset": 17800
         }
       },
       "headerSpelling": "public func shutdown(direction: api.ShutdownDirection): Unit",
@@ -132981,14 +133599,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 379,
+          "line": 385,
           "column": 5,
-          "byteOffset": 14191
+          "byteOffset": 14534
         },
         "end": {
-          "line": 389,
+          "line": 397,
           "column": 6,
-          "byteOffset": 14559
+          "byteOffset": 15002
         }
       },
       "headerSpelling": "public func write(source: api.ByteSpan, context!: api.OperationContext): Int64",
@@ -133148,14 +133766,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 430,
+          "line": 442,
           "column": 5,
-          "byteOffset": 15839
+          "byteOffset": 16484
         },
         "end": {
-          "line": 440,
+          "line": 454,
           "column": 6,
-          "byteOffset": 16213
+          "byteOffset": 16956
         }
       },
       "headerSpelling": "public func writeAll(source: api.ByteSpan, context!: api.OperationContext): Unit",
@@ -133315,14 +133933,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 395,
+          "line": 403,
           "column": 5,
-          "byteOffset": 14702
+          "byteOffset": 15145
         },
         "end": {
-          "line": 408,
+          "line": 418,
           "column": 6,
-          "byteOffset": 15132
+          "byteOffset": 15675
         }
       },
       "headerSpelling": "public func writeSome(\n        source: api.ByteSpan,\n        context!: api.OperationContext = api.OperationContext.background()\n    ): Int64",
@@ -133442,14 +134060,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 330,
+          "line": 332,
           "column": 5,
-          "byteOffset": 12302
+          "byteOffset": 12399
         },
         "end": {
-          "line": 330,
+          "line": 332,
           "column": 79,
-          "byteOffset": 12376
+          "byteOffset": 12473
         }
       },
       "headerSpelling": "public prop capabilities: SocketCapabilities",
@@ -133547,14 +134165,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 487,
+          "line": 505,
           "column": 5,
-          "byteOffset": 17966
+          "byteOffset": 18877
         },
         "end": {
-          "line": 487,
+          "line": 505,
           "column": 69,
-          "byteOffset": 18030
+          "byteOffset": 18941
         }
       },
       "headerSpelling": "public prop info: api.TransportInfo",
@@ -133654,14 +134272,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 332,
+          "line": 334,
           "column": 5,
-          "byteOffset": 12457
+          "byteOffset": 12554
         },
         "end": {
-          "line": 332,
+          "line": 334,
           "column": 81,
-          "byteOffset": 12533
+          "byteOffset": 12630
         }
       },
       "headerSpelling": "public prop localEndpoint: ?NetworkEndpoint",
@@ -133760,14 +134378,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 334,
+          "line": 336,
           "column": 5,
-          "byteOffset": 12615
+          "byteOffset": 12712
         },
         "end": {
-          "line": 334,
+          "line": 336,
           "column": 83,
-          "byteOffset": 12693
+          "byteOffset": 12790
         }
       },
       "headerSpelling": "public prop remoteEndpoint: ?NetworkEndpoint",
@@ -133866,14 +134484,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 326,
+          "line": 328,
           "column": 5,
-          "byteOffset": 12086
+          "byteOffset": 12183
         },
         "end": {
-          "line": 328,
+          "line": 330,
           "column": 6,
-          "byteOffset": 12190
+          "byteOffset": 12287
         }
       },
       "headerSpelling": "public prop state: SocketState",
@@ -134383,6 +135001,81 @@
       "enumNonExhaustive": null
     },
     {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::variable:readShutdownInFlight#g0()",
+      "kind": "variable",
+      "name": "readShutdownInFlight",
+      "qualifiedName": "wirestack.net.TcpStream.readShutdownInFlight",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:TcpStream#g0()",
+      "visibility": "private",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Int64",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": null,
+      "source": {
+        "path": "src/net/package.cj",
+        "start": {
+          "line": 290,
+          "column": 5,
+          "byteOffset": 10738
+        },
+        "end": {
+          "line": 290,
+          "column": 48,
+          "byteOffset": 10781
+        }
+      },
+      "headerSpelling": "private var readShutdownInFlight: Int64 = 0",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PRIVATE:7:private",
+          "VAR:3:var",
+          "IDENTIFIER:20:readShutdownInFlight",
+          "COLON:1::",
+          "INT64:5:Int64",
+          "ASSIGN:1:=",
+          "INTEGER_LITERAL:1:0"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
       "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::variable:remoteEndpointValue#g0()",
       "kind": "variable",
       "name": "remoteEndpointValue",
@@ -134443,6 +135136,81 @@
           "COLON:1::",
           "QUEST:1:?",
           "IDENTIFIER:15:NetworkEndpoint"
+        ]
+      },
+      "semantic": {
+        "state": "partial",
+        "provider": "ast",
+        "canonicalSignature": null
+      },
+      "origin": {
+        "kind": "source",
+        "macroSymbolId": null
+      },
+      "enumNonExhaustive": null
+    },
+    {
+      "id": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::TcpStream::variable:writeShutdownInFlight#g0()",
+      "kind": "variable",
+      "name": "writeShutdownInFlight",
+      "qualifiedName": "wirestack.net.TcpStream.writeShutdownInFlight",
+      "packageName": "wirestack.net",
+      "moduleId": "cjdoc:module:v1:root",
+      "ownerId": "cjdoc:v2:cjdoc%3Amodule%3Av1%3Aroot::wirestack.net::class:TcpStream#g0()",
+      "visibility": "private",
+      "genericParameters": [
+        
+      ],
+      "parameters": [
+        
+      ],
+      "returnType": {
+        "kind": "source",
+        "spelling": "Int64",
+        "nullable": false,
+        "arguments": [
+          
+        ],
+        "semantic": {
+          "state": "partial",
+          "canonical": null,
+          "provider": "ast"
+        }
+      },
+      "annotations": [
+        
+      ],
+      "typeRelationships": [
+        
+      ],
+      "symbolRelationships": [
+        
+      ],
+      "documentation": null,
+      "source": {
+        "path": "src/net/package.cj",
+        "start": {
+          "line": 291,
+          "column": 5,
+          "byteOffset": 10786
+        },
+        "end": {
+          "line": 291,
+          "column": 49,
+          "byteOffset": 10830
+        }
+      },
+      "headerSpelling": "private var writeShutdownInFlight: Int64 = 0",
+      "sourceApiSignature": {
+        "state": "available",
+        "tokens": [
+          "PRIVATE:7:private",
+          "VAR:3:var",
+          "IDENTIFIER:21:writeShutdownInFlight",
+          "COLON:1::",
+          "INT64:5:Int64",
+          "ASSIGN:1:=",
+          "INTEGER_LITERAL:1:0"
         ]
       },
       "semantic": {
@@ -135144,14 +135912,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 642,
+          "line": 755,
           "column": 1,
-          "byteOffset": 23796
+          "byteOffset": 28071
         },
         "end": {
-          "line": 667,
+          "line": 780,
           "column": 2,
-          "byteOffset": 24707
+          "byteOffset": 28982
         }
       },
       "headerSpelling": "public class RawSocket",
@@ -135271,9 +136039,9 @@
           "byteOffset": 10289
         },
         "end": {
-          "line": 590,
+          "line": 703,
           "column": 2,
-          "byteOffset": 21898
+          "byteOffset": 26173
         }
       },
       "headerSpelling": "public class TcpStream <: StreamSocket & api.DuplexTransport",
@@ -135363,14 +136131,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 593,
+          "line": 706,
           "column": 1,
-          "byteOffset": 21983
+          "byteOffset": 26258
         },
         "end": {
-          "line": 602,
+          "line": 715,
           "column": 2,
-          "byteOffset": 22252
+          "byteOffset": 26527
         }
       },
       "headerSpelling": "public enum RawSocketDomain",
@@ -136123,14 +136891,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 622,
+          "line": 735,
           "column": 1,
-          "byteOffset": 23049
+          "byteOffset": 27324
         },
         "end": {
-          "line": 633,
+          "line": 746,
           "column": 2,
-          "byteOffset": 23541
+          "byteOffset": 27816
         }
       },
       "headerSpelling": "public struct RawAddress",
@@ -136214,14 +136982,14 @@
       "source": {
         "path": "src/net/package.cj",
         "start": {
-          "line": 605,
+          "line": 718,
           "column": 1,
-          "byteOffset": 22291
+          "byteOffset": 26566
         },
         "end": {
-          "line": 619,
+          "line": 732,
           "column": 2,
-          "byteOffset": 22966
+          "byteOffset": 27241
         }
       },
       "headerSpelling": "public struct RawSocketProtocol",

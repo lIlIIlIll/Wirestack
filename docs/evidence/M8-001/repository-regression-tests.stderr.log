@@ -69,6 +69,6 @@ test_linux_graph_has_the_exact_frozen_task_set (tools.tests.test_m7_linux_task_g
 test_task_graph_has_fail_closed_audit_and_release_edges (tools.tests.test_m7_linux_task_graph.M7LinuxTaskGraphTests.test_task_graph_has_fail_closed_audit_and_release_edges) ... ok
 
 ----------------------------------------------------------------------
-Ran 69 tests in 0.187s
+Ran 69 tests in 0.161s
 
 OK

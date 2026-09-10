@@ -287,6 +287,8 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
     private let lifecycleMutex = Mutex()
     private var lifecycleState = SocketState.Open
     private var closeActive = false
+    private var readShutdownInFlight: Int64 = 0
+    private var writeShutdownInFlight: Int64 = 0
 
     internal init(delegate: api.DuplexTransport) {
         let info = delegate.info
@@ -339,13 +341,15 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
      * @param destination Destination byte span.
      */
     public func read(destination: api.MutableByteSpan, context!: api.OperationContext): ReadResult {
+        if (destination.isEmpty()) { return ReadResult.Data(0) }
+        requireReadable()
         try {
             match (delegate.readSome(destination, context: context)) {
                 case api.ReadResult.Data(count) => ReadResult.Data(count)
                 case api.ReadResult.EndOfStream => ReadResult.EndOfStream
             }
         } catch (error: api.NetworkException) {
-            recordNetworkFailure(error)
+            recordIoNetworkFailure(error, api.ShutdownDirection.Read)
             throw error
         } catch (error: Exception) {
             recordFailure()
@@ -361,10 +365,12 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
         destination: api.MutableByteSpan,
         context!: api.OperationContext = api.OperationContext.background()
     ): api.ReadResult {
+        if (destination.isEmpty()) { return api.ReadResult.Data(0) }
+        requireReadable()
         try {
             delegate.readSome(destination, context: context)
         } catch (error: api.NetworkException) {
-            recordNetworkFailure(error)
+            recordIoNetworkFailure(error, api.ShutdownDirection.Read)
             throw error
         } catch (error: Exception) {
             recordFailure()
@@ -377,10 +383,12 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
      * @param source Source byte span.
      */
     public func write(source: api.ByteSpan, context!: api.OperationContext): Int64 {
+        if (source.isEmpty()) { return 0 }
+        requireWritable()
         try {
             delegate.writeSome(source, context: context)
         } catch (error: api.NetworkException) {
-            recordNetworkFailure(error)
+            recordIoNetworkFailure(error, api.ShutdownDirection.Write)
             throw error
         } catch (error: Exception) {
             recordFailure()
@@ -396,10 +404,12 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
         source: api.ByteSpan,
         context!: api.OperationContext = api.OperationContext.background()
     ): Int64 {
+        if (source.isEmpty()) { return 0 }
+        requireWritable()
         try {
             delegate.writeSome(source, context: context)
         } catch (error: api.NetworkException) {
-            recordNetworkFailure(error)
+            recordIoNetworkFailure(error, api.ShutdownDirection.Write)
             throw error
         } catch (error: Exception) {
             recordFailure()
@@ -412,10 +422,12 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
      * @param destination Destination byte span.
      */
     public func readExact(destination: api.MutableByteSpan, context!: api.OperationContext): Unit {
+        if (destination.isEmpty()) { return }
+        requireReadable()
         try {
             api.readExact(delegate, destination, context: context)
         } catch (error: api.NetworkException) {
-            recordNetworkFailure(error)
+            recordIoNetworkFailure(error, api.ShutdownDirection.Read)
             throw error
         } catch (error: Exception) {
             recordFailure()
@@ -428,10 +440,12 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
      * @param source Source byte span.
      */
     public func writeAll(source: api.ByteSpan, context!: api.OperationContext): Unit {
+        if (source.isEmpty()) { return }
+        requireWritable()
         try {
             api.writeAll(delegate, source, context: context)
         } catch (error: api.NetworkException) {
-            recordNetworkFailure(error)
+            recordIoNetworkFailure(error, api.ShutdownDirection.Write)
             throw error
         } catch (error: Exception) {
             recordFailure()
@@ -447,16 +461,20 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
      */
     public func shutdown(direction: api.ShutdownDirection): Unit {
         if (alreadyShutDown(direction)) { return }
+        recordShutdownStarted(direction)
         try {
             delegate.shutdown(direction)
+            recordShutdown(direction)
         } catch (error: api.NetworkException) {
             recordNetworkFailure(error)
+            if (delegate.isClosed()) { recordFailure() }
             throw error
         } catch (error: Exception) {
             recordFailure()
             throw error
+        } finally {
+            recordShutdownFinished(direction)
         }
-        recordShutdown(direction)
     }
     /** Closes the stream idempotently.
      * @param context Shared operation context.
@@ -485,6 +503,72 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
 
     /** Returns the immutable connection diagnostics captured after connect. */
     public prop info: api.TransportInfo { get() { connectionInfo } }
+
+    private func requireReadable(): Unit {
+        let rejected = synchronized(lifecycleMutex) {
+            match (lifecycleState) {
+                case SocketState.Open | SocketState.WriteHalfClosed => false
+                case _ => true
+            }
+        }
+        if (rejected) {
+            throw directionClosedError(
+                api.NetworkErrorCategory.Read,
+                api.NetworkPhase.TcpRead,
+                "TCP stream read direction is closed"
+            )
+        }
+    }
+
+    private func requireWritable(): Unit {
+        let rejected = synchronized(lifecycleMutex) {
+            match (lifecycleState) {
+                case SocketState.Open | SocketState.ReadHalfClosed => false
+                case _ => true
+            }
+        }
+        if (rejected) {
+            throw directionClosedError(
+                api.NetworkErrorCategory.Write,
+                api.NetworkPhase.TcpWrite,
+                "TCP stream write direction is closed"
+            )
+        }
+    }
+
+    private func directionClosedError(
+        category: api.NetworkErrorCategory,
+        phase: api.NetworkPhase,
+        message: String
+    ): api.NetworkException {
+        api.NetworkException(
+            category,
+            phase,
+            api.NetworkErrorCode.Closed,
+            message,
+            retryability: api.Retryability.Never,
+            localEndpoint: localEndpointValue,
+            remoteEndpoint: remoteEndpointValue
+        )
+    }
+
+    private func recordShutdownStarted(direction: api.ShutdownDirection): Unit {
+        synchronized(lifecycleMutex) {
+            match (direction) {
+                case api.ShutdownDirection.Read => readShutdownInFlight++
+                case api.ShutdownDirection.Write => writeShutdownInFlight++
+            }
+        }
+    }
+
+    private func recordShutdownFinished(direction: api.ShutdownDirection): Unit {
+        synchronized(lifecycleMutex) {
+            match (direction) {
+                case api.ShutdownDirection.Read => readShutdownInFlight--
+                case api.ShutdownDirection.Write => writeShutdownInFlight--
+            }
+        }
+    }
 
     private func alreadyShutDown(direction: api.ShutdownDirection): Bool {
         synchronized(lifecycleMutex) {
@@ -552,6 +636,35 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
                 case _ => lifecycleState = SocketState.Aborted; true
             }
         }
+    }
+
+    private func recordIoNetworkFailure(
+        error: api.NetworkException,
+        direction: api.ShutdownDirection
+    ): Unit {
+        match (error.code) {
+            case api.NetworkErrorCode.Closed =>
+                let (readShutDown, writeShutDown) = synchronized(lifecycleMutex) {
+                    var readShutDown = readShutdownInFlight > 0
+                    var writeShutDown = writeShutdownInFlight > 0
+                    match (lifecycleState) {
+                        case SocketState.ReadHalfClosed => readShutDown = true
+                        case SocketState.WriteHalfClosed => writeShutDown = true
+                        case _ => ()
+                    }
+                    (readShutDown, writeShutDown)
+                }
+                let directionWasShutDown = match (direction) {
+                    case api.ShutdownDirection.Read => readShutDown
+                    case api.ShutdownDirection.Write => writeShutDown
+                }
+                if (directionWasShutDown &&
+                    ((readShutDown && writeShutDown) || !delegate.isClosed())) {
+                    return
+                }
+            case _ => ()
+        }
+        recordNetworkFailure(error)
     }
 
     private func recordNetworkFailure(error: api.NetworkException): Unit {

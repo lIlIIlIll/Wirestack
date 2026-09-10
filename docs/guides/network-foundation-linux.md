@@ -42,6 +42,9 @@ shutdown 不改变状态。正常关闭为 `Closed`，主动中止为 `Aborted`�
 失败为 `Failed`。后续 `close`/`abort` 不覆盖已确定的终态。
 预取消且未触及 socket 的操作不改变生命周期；若进行中的取消已中止底层 transport，
 操作仍抛出 `Cancelled`，但 socket 保留 `Aborted`，不会被随后 `close` 改成正常关闭。
+半关闭后，对已关闭方向的新非空读写请求返回结构化 `Closed` 错误，但另一方向仍可用，
+socket 保留对应的半关闭状态，不因此转为 `Failed`。空 buffer 仍按无 I/O 操作完成。
+两个方向均成功关闭后为 `Closed`；被唤醒的旧 I/O 不把这次正常关闭改记为 `Failed`。
 
 `DatagramSocket` 冻结 Internet 与 Unix adapter 的同步操作接口；原生创建与绑定
 由 M8-002/M8-003 实现。`connect` 选择已解析的 peer，`send`/`sendTo` 成功时必须

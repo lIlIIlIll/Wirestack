@@ -195,4 +195,4 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 
 | Task | Status | Evidence | Notes |
 |---|---|---|---|
-| M8-001 | COMPLETE | [`docs/evidence/M8-001/README.md`](../evidence/M8-001/README.md) | All review corrections qualified, including cancellation retaining Aborted after delegate closure. Approved shared Internet/Unix error endpoints, NUL rejection, explicit raw protocol and clean revision provenance. Network 14/14; canonical check 604 passed/23 excluded; inventory 260 declarations/103 aliases; API docs 1093 symbols/430 parameters. Real TCP and Unix error consumer passed; datagram caller compile-checked only. |
+| M8-001 | COMPLETE | [`docs/evidence/M8-001/README.md`](../evidence/M8-001/README.md) | Shared Internet/Unix endpoint and bounded network contracts; graceful, aborted, failed and directional states; real-commit source-bound sealing. All eight task commands pass: 609 Cangjie cases pass, 23 performance cases excluded; network 19/19, tooling 33/33; API docs cover 1,093 symbols and 430 parameters. Native TCP consumer passes; later protocol/privileged I/O is not claimed. |
