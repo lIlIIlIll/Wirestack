@@ -17,6 +17,9 @@ for scenario in pure-late generated-reader-late version-mismatch native-conflict
             break
         fi
         printf '%s\n' "$output"
+        if [[ "$output" != *"llc"* || "$output" != *"exit code 139"* ]]; then
+            exit "$status"
+        fi
         echo "runtime freeze: attempt $attempt failed for $scenario" >&2
     done
     printf '%s\n' "$output"
