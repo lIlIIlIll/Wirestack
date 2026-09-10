@@ -26,6 +26,6 @@ test_valid_contract_and_unknown_schema_fail_closed (tools.repository.tests.test_
 test_verify_rejects_malformed_revision_without_bound_reports (tools.repository.tests.test_repository_tooling.RepositoryToolingTests.test_verify_rejects_malformed_revision_without_bound_reports) ... ok
 
 ----------------------------------------------------------------------
-Ran 26 tests in 9.334s
+Ran 26 tests in 7.729s
 
 OK

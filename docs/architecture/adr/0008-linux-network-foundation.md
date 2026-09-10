@@ -36,14 +36,23 @@ certificate operations.
    connect, atomic send, receive, lifecycle and context operations. Datagram
    operations retain message boundaries, report truncation and reject payloads
    above the bounded IPv4 maximum of 65,507 bytes.
-4. Internet and Unix endpoint values are immutable. Unix pathname, abstract
-   byte-name and unnamed forms are distinct. M8-003 must establish native
-   evidence for each supported Unix stream/datagram address form. A value
-   constructor is not evidence that its native adapter exists.
+   Successful directional shutdown publishes `ReadHalfClosed` or
+   `WriteHalfClosed`; unsupported shutdown does not advance state. Graceful
+   `Closed`, local `Aborted` and terminal `Failed` remain distinct, and later
+   terminal operations do not overwrite the retained cause.
+4. Internet and Unix endpoint values are immutable and live in the shared
+   `wirestack` package, below socket, TLS and HTTP consumers. `NetworkEndpoint`
+   carries either `SocketEndpoint` or `UnixEndpoint`; `NetworkException` uses
+   that same sum type so all phases preserve Unix endpoint evidence without a
+   dependency on `wirestack.net`. Unix pathname, abstract byte-name and unnamed
+   forms are distinct. Pathnames reject NUL; abstract names retain arbitrary
+   bytes. M8-003 must establish native evidence for each supported Unix
+   stream/datagram address form. A constructor is not evidence of an adapter.
 5. M8 Linux explicitly excludes AF_PACKET, AF_NETLINK, SOCK_SEQPACKET and
-   ancillary-data APIs. IPv4/IPv6 raw socket construction is capability-scoped;
-   actual privileged I/O is not reported as successful without a dedicated
-   native capability adapter.
+   ancillary-data APIs. IPv4/IPv6 raw socket construction is capability-scoped
+   and requires an explicit protocol; there is no domain-independent ICMP
+   default. Actual privileged I/O is not reported as successful without a
+   dedicated native capability adapter.
 6. DNS policy remains separate from socket construction. M8-004 owns the
    bounded wire parser, response identity checks, hosts/search/ndots policy,
    negative cache and UDP-to-TCP fallback. Happy Eyeballs remains the

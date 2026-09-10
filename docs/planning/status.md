@@ -195,4 +195,4 @@ change the status of the six-platform M7-001 through M7-017 tasks.
 
 | Task | Status | Evidence | Notes |
 |---|---|---|---|
-| M8-001 | COMPLETE | [`docs/evidence/M8-001/README.md`](../evidence/M8-001/README.md) | Scoped network contracts include datagram operations and bounded owned results. Network tests 9/9; canonical check 597 passed/23 excluded; inventory and complete API documentation pass. Native TCP consumer sent `hello`; datagram caller compile-checked only. HTTP/DNS wire work remains in M8-005/M8-004. |
+| M8-001 | COMPLETE | [`docs/evidence/M8-001/README.md`](../evidence/M8-001/README.md) | Both review rounds qualified: distinct lifecycle states, approved shared Internet/Unix error endpoints, NUL rejection, explicit raw protocol and clean revision provenance. Network 13/13; canonical check 603 passed/23 excluded; inventory 260 declarations/103 aliases; API docs 1093 symbols/430 parameters. Native TCP consumer sent `hello`; Unix error helper executed; datagram caller compile-checked only. |

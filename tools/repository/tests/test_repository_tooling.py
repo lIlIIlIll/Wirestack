@@ -65,7 +65,7 @@ class RepositoryToolingTests(unittest.TestCase):
             "toolchain": tooling.toolchain_identity(self.root),
             "acceptance_status": "PASS",
             "generated_at_utc": tooling.utc_now(),
-            "revision": "test",
+            "revision": "a" * 40,
             "reports": [{
                 "path": "docs/evidence/TEST-001/report.json",
                 "sha256": text_evidence_digest(report_path).to_json(),
@@ -224,6 +224,65 @@ class RepositoryToolingTests(unittest.TestCase):
         self.evidence()
         (self.root / "docs/evidence/TEST-001/report.json").write_text('{"status":"PASS","changed":true}', encoding="utf-8")
         self.assertEqual("STALE", tooling.verify(self.root, "TEST-001")["status"])
+
+    def test_seal_uses_git_stdout_revision_despite_stderr_warning(self) -> None:
+        self.evidence()
+        revision = "c" * 40
+        completed = mock.Mock(
+            returncode=0,
+            stdout=f"{revision}\n",
+            stderr="warning: loader diagnostic\n",
+        )
+        with mock.patch.object(tooling.subprocess, "run", return_value=completed), \
+             mock.patch.object(
+                 tooling,
+                 "toolchain_identity",
+                 return_value={"cjc": None, "cjpm": None},
+             ):
+            sealed = tooling.seal_evidence(
+                self.root,
+                "TEST-001",
+                ["docs/evidence/TEST-001/report.json"],
+                self.root / "docs/evidence/TEST-001/evidence.json",
+            )
+        self.assertEqual(revision, sealed["revision"])
+
+    def test_seal_rejects_malformed_revision_without_bound_reports(self) -> None:
+        self.evidence()
+        with self.assertRaises(tooling.ContractError) as caught:
+            tooling.seal_evidence(
+                self.root,
+                "TEST-001",
+                ["docs/evidence/TEST-001/report.json"],
+                self.root / "docs/evidence/TEST-001/evidence.json",
+                "not-a-full-git-sha",
+            )
+        self.assertEqual("REPORT_REVISION", caught.exception.code)
+
+    def test_verify_rejects_malformed_revision_without_bound_reports(self) -> None:
+        evidence, evidence_path = self.evidence()
+        evidence["revision"] = f"{'d' * 40}\nwarning: loader diagnostic"
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+        result = tooling.verify(self.root, "TEST-001")
+        self.assertEqual("FAIL", result["status"])
+        self.assertEqual("REPORT_REVISION", result["tasks"][0]["issues"][0]["code"])
+
+    def test_seal_rejects_failed_git_revision_lookup(self) -> None:
+        self.evidence()
+        completed = mock.Mock(
+            returncode=128,
+            stdout="e" * 40,
+            stderr="fatal: not a git repository\n",
+        )
+        with mock.patch.object(tooling.subprocess, "run", return_value=completed):
+            with self.assertRaises(tooling.ContractError) as caught:
+                tooling.seal_evidence(
+                    self.root,
+                    "TEST-001",
+                    ["docs/evidence/TEST-001/report.json"],
+                    self.root / "docs/evidence/TEST-001/evidence.json",
+                )
+        self.assertEqual("REPORT_REVISION", caught.exception.code)
 
     def test_revision_bound_report_must_match_candidate(self) -> None:
         evidence, evidence_path = self.evidence()

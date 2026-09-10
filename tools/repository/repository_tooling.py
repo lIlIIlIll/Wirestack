@@ -263,6 +263,21 @@ def tool_version(argv: Sequence[str], root: Path) -> str | None:
     text = (result.stdout + result.stderr).strip()
     return text[:1024] if result.returncode == 0 and text else None
 
+def git_head_revision(root: Path) -> str | None:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    revision = result.stdout.strip()
+    return revision if result.returncode == 0 and revision else None
+
 
 def platform_identity() -> dict[str, str]:
     libc_name, libc_version = platform.libc_ver()
@@ -420,7 +435,7 @@ def validate_evidence(raw: Any, root: Path, task: Mapping[str, Any]) -> dict[str
         raise ContractError("ACCEPTANCE_NOT_PASS", "evidence acceptance_status is not PASS")
     candidate_revision = evidence.get("revision")
     revision_bound = set(task.get("revision_bound_reports", []))
-    if revision_bound and (
+    if (
         not isinstance(candidate_revision, str)
         or re.fullmatch(r"[0-9a-f]{40}", candidate_revision) is None
     ):
@@ -511,12 +526,14 @@ def seal_evidence(
     tasks = validate_repository_tasks(root, task_id)
     task = tasks[task_id]
     revision_bound = set(task.get("revision_bound_reports", []))
-    revision = candidate_revision or tool_version(["git", "rev-parse", "HEAD"], root)
-    if revision_bound and (
-        not isinstance(revision, str) or re.fullmatch(r"[0-9a-f]{40}", revision) is None
-    ):
+    revision = (
+        candidate_revision
+        if candidate_revision is not None
+        else git_head_revision(root)
+    )
+    if not isinstance(revision, str) or re.fullmatch(r"[0-9a-f]{40}", revision) is None:
         raise ContractError(
-            "REPORT_REVISION", "--revision must name the full lowercase candidate Git SHA"
+            "REPORT_REVISION", "candidate revision must be a full lowercase Git SHA"
         )
     reports = []
     for relative in report_paths:

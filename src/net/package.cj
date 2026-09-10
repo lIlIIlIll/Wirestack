@@ -1,76 +1,10 @@
 package wirestack.net
 
+import std.sync.*
 import wirestack as api
 import wirestack.internal.transport_stdnet as stdnet
+import wirestack.NetworkEndpoint
 
-/** The endpoint kinds understood by the network package. */
-public enum NetworkEndpointKind {
-/** Internet endpoint. */
-    | Internet
-/** Unix-domain endpoint. */
-    | Unix
-}
-
-/** An Internet or Unix endpoint. Endpoint construction never performs DNS. */
-public enum NetworkEndpoint {
-/** Internet socket endpoint. */
-    | Internet(api.SocketEndpoint)
-/** Unix-domain socket endpoint. */
-    | Unix(UnixEndpoint)
-}
-
-/** Unix endpoint address forms. Abstract names retain arbitrary bytes. */
-public enum UnixEndpointKind {
-/** Filesystem pathname form. */
-    | Pathname
-/** Linux abstract byte-name form. */
-    | Abstract
-/** Unnamed socket form. */
-    | Unnamed
-}
-
-
-/** Immutable Unix endpoint value. */
-public struct UnixEndpoint {
-    private let value: Array<Byte>
-/** Endpoint address form. */
-    public let kind: UnixEndpointKind
-
-    private init(kind: UnixEndpointKind, value: Array<Byte>) {
-        if (value.size > 107) {
-            throw IllegalArgumentException("Unix endpoint name must not exceed 107 bytes")
-        }
-        match (kind) {
-            case UnixEndpointKind.Pathname | UnixEndpointKind.Abstract =>
-                if (value.isEmpty()) { throw IllegalArgumentException("named Unix endpoint must not be empty") }
-            case UnixEndpointKind.Unnamed => ()
-        }
-        this.kind = kind
-        this.value = value.clone()
-    }
-
-    /** Creates a filesystem pathname endpoint.
-     * @param path Filesystem pathname.
-     */
-    public static func pathname(path: String): UnixEndpoint {
-        UnixEndpoint(UnixEndpointKind.Pathname, path.toArray())
-    }
-
-    /** Creates a Linux abstract endpoint without UTF-8 conversion.
-     * @param name Arbitrary abstract-name bytes.
-     */
-    public static func abstractName(name: Array<Byte>): UnixEndpoint {
-        UnixEndpoint(UnixEndpointKind.Abstract, name)
-    }
-
-    /** Creates an unnamed endpoint used for automatically allocated clients. */
-    public static func unnamed(): UnixEndpoint {
-        UnixEndpoint(UnixEndpointKind.Unnamed, Array<Byte>())
-    }
-
-    /** Returns a defensive copy of the pathname or abstract name bytes. */
-    public func nameBytes(): Array<Byte> { value.clone() }
-}
 
 /** Socket lifecycle states observable through Wirestack-owned types. */
 public enum SocketState {
@@ -82,10 +16,18 @@ public enum SocketState {
     | Listening
 /** Socket is open. */
     | Open
+/** Socket read direction has been shut down successfully. */
+    | ReadHalfClosed
+/** Socket write direction has been shut down successfully. */
+    | WriteHalfClosed
 /** Close has started. */
     | Closing
-/** Socket is closed. */
+/** Socket is closed after graceful completion. */
     | Closed
+/** Socket was terminated by an explicit abort. */
+    | Aborted
+/** Socket was terminated by an operation or close failure. */
+    | Failed
 }
 
 /** Advisory capabilities. The operation remains authoritative. */
@@ -342,6 +284,9 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
     private let localEndpointValue: ?NetworkEndpoint
     private let remoteEndpointValue: ?NetworkEndpoint
     private let capabilityValue: SocketCapabilities
+    private let lifecycleMutex = Mutex()
+    private var lifecycleState = SocketState.Open
+    private var closeActive = false
 
     internal init(delegate: api.DuplexTransport) {
         let info = delegate.info
@@ -377,15 +322,9 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
         TcpStream(stdnet.ContractStreamBackend.connectTcp(endpoint, context))
     }
 
-    /** Current stream lifecycle state. A returned stream is already connected. */
+    /** Current retained stream lifecycle state. A returned stream is already connected. */
     public prop state: SocketState {
-        get() {
-            if (delegate.isClosed()) {
-                SocketState.Closed
-            } else {
-                SocketState.Open
-            }
-        }
+        get() { synchronized(lifecycleMutex) { lifecycleState } }
     }
     /** Advisory stream capabilities. Unrepresented descriptor, datagram and raw features remain false. */
     public prop capabilities: SocketCapabilities { get() { capabilityValue } }
@@ -400,9 +339,17 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
      * @param destination Destination byte span.
      */
     public func read(destination: api.MutableByteSpan, context!: api.OperationContext): ReadResult {
-        match (delegate.readSome(destination, context: context)) {
-            case api.ReadResult.Data(count) => ReadResult.Data(count)
-            case api.ReadResult.EndOfStream => ReadResult.EndOfStream
+        try {
+            match (delegate.readSome(destination, context: context)) {
+                case api.ReadResult.Data(count) => ReadResult.Data(count)
+                case api.ReadResult.EndOfStream => ReadResult.EndOfStream
+            }
+        } catch (error: api.NetworkException) {
+            recordNetworkFailure(error)
+            throw error
+        } catch (error: Exception) {
+            recordFailure()
+            throw error
         }
     }
     /** Reads one transport chunk and returns the provider-neutral result.
@@ -414,7 +361,15 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
         destination: api.MutableByteSpan,
         context!: api.OperationContext = api.OperationContext.background()
     ): api.ReadResult {
-        delegate.readSome(destination, context: context)
+        try {
+            delegate.readSome(destination, context: context)
+        } catch (error: api.NetworkException) {
+            recordNetworkFailure(error)
+            throw error
+        } catch (error: Exception) {
+            recordFailure()
+            throw error
+        }
     }
     /** Writes one partial chunk.
      *
@@ -422,7 +377,15 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
      * @param source Source byte span.
      */
     public func write(source: api.ByteSpan, context!: api.OperationContext): Int64 {
-        delegate.writeSome(source, context: context)
+        try {
+            delegate.writeSome(source, context: context)
+        } catch (error: api.NetworkException) {
+            recordNetworkFailure(error)
+            throw error
+        } catch (error: Exception) {
+            recordFailure()
+            throw error
+        }
     }
     /** Writes one transport chunk.
      *
@@ -433,7 +396,15 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
         source: api.ByteSpan,
         context!: api.OperationContext = api.OperationContext.background()
     ): Int64 {
-        delegate.writeSome(source, context: context)
+        try {
+            delegate.writeSome(source, context: context)
+        } catch (error: api.NetworkException) {
+            recordNetworkFailure(error)
+            throw error
+        } catch (error: Exception) {
+            recordFailure()
+            throw error
+        }
     }
     /** Reads until the destination is full.
      *
@@ -441,7 +412,15 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
      * @param destination Destination byte span.
      */
     public func readExact(destination: api.MutableByteSpan, context!: api.OperationContext): Unit {
-        api.readExact(delegate, destination, context: context)
+        try {
+            api.readExact(delegate, destination, context: context)
+        } catch (error: api.NetworkException) {
+            recordNetworkFailure(error)
+            throw error
+        } catch (error: Exception) {
+            recordFailure()
+            throw error
+        }
     }
     /** Writes until the source is consumed.
      *
@@ -449,29 +428,163 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
      * @param source Source byte span.
      */
     public func writeAll(source: api.ByteSpan, context!: api.OperationContext): Unit {
-        api.writeAll(delegate, source, context: context)
+        try {
+            api.writeAll(delegate, source, context: context)
+        } catch (error: api.NetworkException) {
+            recordNetworkFailure(error)
+            throw error
+        } catch (error: Exception) {
+            recordFailure()
+            throw error
+        }
     }
     /** Requests a directional shutdown.
+     *
+     * The lifecycle changes only after the delegate accepts the operation.
+     * An unsupported shutdown therefore leaves the stream open.
+     *
      * @param direction Direction to shut down.
      */
-    public func shutdown(direction: api.ShutdownDirection): Unit { delegate.shutdown(direction) }
+    public func shutdown(direction: api.ShutdownDirection): Unit {
+        if (alreadyShutDown(direction)) { return }
+        try {
+            delegate.shutdown(direction)
+        } catch (error: api.NetworkException) {
+            recordNetworkFailure(error)
+            throw error
+        } catch (error: Exception) {
+            recordFailure()
+            throw error
+        }
+        recordShutdown(direction)
+    }
     /** Closes the stream idempotently.
      * @param context Shared operation context.
      */
-    public func close(context!: api.OperationContext): Unit { delegate.close(context) }
+    public func close(context!: api.OperationContext): Unit {
+        if (!beginClose()) { return }
+        try {
+            delegate.close(context)
+            finishClose()
+        } catch (error: Exception) {
+            recordFailure(allowClosing: true)
+            throw error
+        }
+    }
     /** Closes the stream with a background context for Resource callers. */
-    public func close(): Unit { delegate.close(api.OperationContext.background()) }
-    /** Aborts the stream idempotently.
+    public func close(): Unit { close(context: api.OperationContext.background()) }
+    /** Aborts the stream idempotently and retains the abort terminal state.
      * @param reason Optional abort reason.
      */
     public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit {
+        if (!beginAbort()) { return }
         delegate.abort(reason: reason)
     }
-    /** Reports the transport's explicit terminal lifecycle state. */
+    /** Reports whether the delegate resource has reached its terminal lifecycle. */
     public func isClosed(): Bool { delegate.isClosed() }
 
     /** Returns the immutable connection diagnostics captured after connect. */
     public prop info: api.TransportInfo { get() { connectionInfo } }
+
+    private func alreadyShutDown(direction: api.ShutdownDirection): Bool {
+        synchronized(lifecycleMutex) {
+            match ((lifecycleState, direction)) {
+                case (SocketState.ReadHalfClosed, api.ShutdownDirection.Read) => true
+                case (SocketState.WriteHalfClosed, api.ShutdownDirection.Write) => true
+                case _ => false
+            }
+        }
+    }
+
+    private func recordShutdown(direction: api.ShutdownDirection): Unit {
+        let bothDirectionsClosed = synchronized(lifecycleMutex) {
+            match ((lifecycleState, direction)) {
+                case (SocketState.Open, api.ShutdownDirection.Read) =>
+                    lifecycleState = SocketState.ReadHalfClosed
+                    false
+                case (SocketState.Open, api.ShutdownDirection.Write) =>
+                    lifecycleState = SocketState.WriteHalfClosed
+                    false
+                case (SocketState.ReadHalfClosed, api.ShutdownDirection.Write) |
+                     (SocketState.WriteHalfClosed, api.ShutdownDirection.Read) =>
+                    lifecycleState = SocketState.Closing
+                    true
+                case _ => false
+            }
+        }
+        if (bothDirectionsClosed && delegate.isClosed()) { finishClose() }
+    }
+
+    private func beginClose(): Bool {
+        synchronized(lifecycleMutex) {
+            match (lifecycleState) {
+                case SocketState.Open | SocketState.ReadHalfClosed |
+                     SocketState.WriteHalfClosed =>
+                    lifecycleState = SocketState.Closing
+                    closeActive = true
+                    true
+                case SocketState.Closing =>
+                    if (closeActive) {
+                        false
+                    } else {
+                        closeActive = true
+                        true
+                    }
+                case _ => false
+            }
+        }
+    }
+
+    private func finishClose(): Unit {
+        synchronized(lifecycleMutex) {
+            closeActive = false
+            match (lifecycleState) {
+                case SocketState.Closing => lifecycleState = SocketState.Closed
+                case _ => ()
+            }
+        }
+    }
+
+    private func beginAbort(): Bool {
+        synchronized(lifecycleMutex) {
+            match (lifecycleState) {
+                case SocketState.Closed | SocketState.Aborted | SocketState.Failed => false
+                case _ => lifecycleState = SocketState.Aborted; true
+            }
+        }
+    }
+
+    private func recordNetworkFailure(error: api.NetworkException): Unit {
+        match (error.code) {
+            case api.NetworkErrorCode.ConnectionReset |
+                 api.NetworkErrorCode.BrokenPipe |
+                 api.NetworkErrorCode.UnexpectedEof |
+                 api.NetworkErrorCode.SystemFailure |
+                 api.NetworkErrorCode.Closed => recordFailure()
+            case _ => ()
+        }
+    }
+
+    private func recordFailure(allowClosing!: Bool = false): Unit {
+        let shouldAbort = synchronized(lifecycleMutex) {
+            match (lifecycleState) {
+                case SocketState.Closed | SocketState.Aborted | SocketState.Failed => false
+                case SocketState.Closing =>
+                    if (allowClosing) {
+                        lifecycleState = SocketState.Failed
+                        true
+                    } else {
+                        false
+                    }
+                case _ => lifecycleState = SocketState.Failed; true
+            }
+        }
+        if (shouldAbort) {
+            try {
+                delegate.abort(reason: Some(api.AbortReason.ProtocolFailure))
+            } catch (_: Exception) {}
+        }
+    }
 }
 
 /** Raw protocol/domain configuration, independent from destination addressing. */
@@ -528,12 +641,16 @@ public class RawSocket {
     private init() {}
 
     /** Attempts to open a raw socket through an installed capability adapter.
+     *
+     * Callers must select a protocol explicitly because protocol numbers are
+     * domain-specific. In particular, IPv6 does not default to IPv4 ICMP.
+     *
      * @param domain Address domain to open.
-     * @param protocolValue Raw protocol number.
+     * @param protocolValue Raw protocol number for that domain.
      */
     public static func open(
         domain: RawSocketDomain,
-        protocolValue!: RawSocketProtocol = RawSocketProtocol.icmp()
+        protocolValue: RawSocketProtocol
     ): RawSocket {
         let _ = domain
         let _ = protocolValue

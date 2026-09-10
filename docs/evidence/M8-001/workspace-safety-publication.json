@@ -110,5 +110,21 @@
       "CANGJIE_HOME": "/tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie",
       "CJDOC_BIN": "/tmp/wirestack-m7-033-ci-tools-20260910/cjdoc-source/target/release/bin/main"
     }
+  },
+  "second_review_workspace_safety": {
+    "candidate_before_corrections": "a943c4bb677febd7b112407188dbab2d4a9b7eb3",
+    "incident": "One delegated revision repair initially edited two relative paths in the original dirty root, then reversed only its exact hunks. All subsequent agent writes use absolute publication-worktree paths.",
+    "restoration_evidence": {
+      "tools/repository/repository_tooling.py": "Original and restored content snapshot tag: 03BD",
+      "tools/repository/tests/test_repository_tooling.py": "Original and restored content snapshot tag: 22F9",
+      "restored_bytes_match_original_staged_snapshot": {
+        "tools/repository/repository_tooling.py": "cfae78da46e59af2f876833c0ca04ad7188c9f86",
+        "tools/repository/tests/test_repository_tooling.py": "12570670744adc0d74642155507904502d977226"
+      },
+      "verification": "git hash-object for each restored worktree file equals its blob ID in the original retained git ls-files --stage -z snapshot. Original/restored read tags also match; the agent retained no separate pre-edit SHA-256."
+    },
+    "original_git_index_modified": false,
+    "original_staged_entries_unchanged": true,
+    "original_staged_entries_sha256": "2ea707064b4237122d54ed1fa12afd91721c37b8a5f886379771bd5b31d4707b"
   }
 }

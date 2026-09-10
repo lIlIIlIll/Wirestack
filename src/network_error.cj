@@ -2,6 +2,79 @@ package wirestack
 
 import std.io.IOException
 
+/** The endpoint kinds understood by the network package. */
+public enum NetworkEndpointKind {
+/** Internet endpoint. */
+    | Internet
+/** Unix-domain endpoint. */
+    | Unix
+}
+
+/** An Internet or Unix endpoint. Endpoint construction never performs DNS. */
+public enum NetworkEndpoint {
+/** Internet socket endpoint. */
+    | Internet(SocketEndpoint)
+/** Unix-domain socket endpoint. */
+    | Unix(UnixEndpoint)
+}
+
+/** Unix endpoint address forms. Abstract names retain arbitrary bytes. */
+public enum UnixEndpointKind {
+/** Filesystem pathname form. */
+    | Pathname
+/** Linux abstract byte-name form. */
+    | Abstract
+/** Unnamed socket form. */
+    | Unnamed
+}
+
+
+/** Immutable Unix endpoint value. */
+public struct UnixEndpoint {
+    private let value: Array<Byte>
+/** Endpoint address form. */
+    public let kind: UnixEndpointKind
+
+    private init(kind: UnixEndpointKind, value: Array<Byte>) {
+        if (value.size > 107) {
+            throw IllegalArgumentException("Unix endpoint name must not exceed 107 bytes")
+        }
+        match (kind) {
+            case UnixEndpointKind.Pathname | UnixEndpointKind.Abstract =>
+                if (value.isEmpty()) {
+                    throw IllegalArgumentException("named Unix endpoint must not be empty")
+                }
+            case UnixEndpointKind.Unnamed => ()
+        }
+        this.kind = kind
+        this.value = value.clone()
+    }
+
+    /** Creates a filesystem pathname endpoint.
+     * @param path Filesystem pathname.
+     */
+    public static func pathname(path: String): UnixEndpoint {
+        if (path.contains("\0")) {
+            throw IllegalArgumentException("Unix pathname endpoint must not contain NUL")
+        }
+        UnixEndpoint(UnixEndpointKind.Pathname, path.toArray())
+    }
+
+    /** Creates a Linux abstract endpoint without UTF-8 conversion.
+     * @param name Arbitrary abstract-name bytes.
+     */
+    public static func abstractName(name: Array<Byte>): UnixEndpoint {
+        UnixEndpoint(UnixEndpointKind.Abstract, name)
+    }
+
+    /** Creates an unnamed endpoint used for automatically allocated clients. */
+    public static func unnamed(): UnixEndpoint {
+        UnixEndpoint(UnixEndpointKind.Unnamed, Array<Byte>())
+    }
+
+    /** Returns a defensive copy of the pathname or abstract name bytes. */
+    public func nameBytes(): Array<Byte> { value.clone() }
+}
 /**
  * Wirestack 公开 API：NetworkErrorCategory。
  */
@@ -283,11 +356,11 @@ public open class NetworkException <: IOException {
 /**
  * Wirestack 公开 API：localEndpoint。
  */
-    public let localEndpoint: ?SocketEndpoint
+    public let localEndpoint: ?NetworkEndpoint
 /**
  * Wirestack 公开 API：remoteEndpoint。
  */
-    public let remoteEndpoint: ?SocketEndpoint
+    public let remoteEndpoint: ?NetworkEndpoint
 /**
  * Wirestack 公开 API：cause。
  */
@@ -312,8 +385,8 @@ public open class NetworkException <: IOException {
         message: String,
         retryability!: Retryability = Retryability.Unknown,
         nativeCode!: ?Int64 = None<Int64>,
-        localEndpoint!: ?SocketEndpoint = None<SocketEndpoint>,
-        remoteEndpoint!: ?SocketEndpoint = None<SocketEndpoint>,
+        localEndpoint!: ?NetworkEndpoint = None<NetworkEndpoint>,
+        remoteEndpoint!: ?NetworkEndpoint = None<NetworkEndpoint>,
         cause!: ?Exception = None<Exception>
     ) {
         super(message)

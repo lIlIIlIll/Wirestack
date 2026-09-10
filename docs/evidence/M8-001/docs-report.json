@@ -10,8 +10,8 @@
     "version": "0.7.2"
   },
   "combined": {
-    "apiEntries": 1089,
-    "apiSha256": "da6ec2e3c449ca43749d053ea61201c8c3b8cabbaea20be7da82781127232c8b",
+    "apiEntries": 1093,
+    "apiSha256": "d18c73be1eb5954f59976a42730cfc02269f9817a8322b21fb3ca80e516e95f0",
     "coverage": {
       "parameters": {
         "documented": 430,
@@ -19,14 +19,14 @@
         "total": 430
       },
       "symbols": {
-        "documented": 1089,
+        "documented": 1093,
         "percent": 100,
-        "total": 1089
+        "total": 1093
       }
     },
-    "coverageSha256": "8d9779074d8a7a29b9327c47e295fba8c666711f9df13104012570e4187b1ef5",
-    "declarations": 1434,
-    "docsSha256": "37110a927f20d976ee85624eb84a25cf4479ed4977be431d9a1d17cccaa1ea28",
+    "coverageSha256": "2954aceb6ec4b84b552df40784043ffd9ba93668924950425ce5284e4538aeb2",
+    "declarations": 1448,
+    "docsSha256": "fb5a98e74c61f29380f64455cb4797741b95e5f0fc91cdc5d7ccc606a6644684",
     "markdownSha256": "988b54088600cbe0a4c63d442b309d59a3f11ecb93cf3db6b5ced6bd4f632518",
     "package": "combined",
     "status": "PASS"
@@ -37,7 +37,7 @@
       "package": "wirestack",
       "returncode": 0,
       "status": "PASS",
-      "stderr": "documentation coverage: symbols 607/607 (100%), parameters 234/234 (100%)\n",
+      "stderr": "documentation coverage: symbols 623/623 (100%), parameters 236/236 (100%)\n",
       "stderr_truncated": false,
       "stdout": "",
       "stdout_truncated": false
@@ -49,7 +49,7 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ypy6p1j2/wirestack/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-iokxekp3/wirestack/output\n",
       "stdout_truncated": false
     },
     {
@@ -57,7 +57,7 @@
       "package": "wirestack.http",
       "returncode": 0,
       "status": "PASS",
-      "stderr": "documentation coverage: symbols 825/825 (100%), parameters 327/327 (100%)\n",
+      "stderr": "documentation coverage: symbols 841/841 (100%), parameters 329/329 (100%)\n",
       "stderr_truncated": false,
       "stdout": "",
       "stdout_truncated": false
@@ -69,7 +69,7 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ypy6p1j2/wirestack-http/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-iokxekp3/wirestack-http/output\n",
       "stdout_truncated": false
     },
     {
@@ -77,7 +77,7 @@
       "package": "wirestack.tls",
       "returncode": 0,
       "status": "PASS",
-      "stderr": "documentation coverage: symbols 761/761 (100%), parameters 279/279 (100%)\n",
+      "stderr": "documentation coverage: symbols 777/777 (100%), parameters 281/281 (100%)\n",
       "stderr_truncated": false,
       "stdout": "",
       "stdout_truncated": false
@@ -89,7 +89,7 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ypy6p1j2/wirestack-tls/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-iokxekp3/wirestack-tls/output\n",
       "stdout_truncated": false
     },
     {
@@ -97,7 +97,7 @@
       "package": "wirestack.net",
       "returncode": 0,
       "status": "PASS",
-      "stderr": "documentation coverage: symbols 717/717 (100%), parameters 292/292 (100%)\n",
+      "stderr": "documentation coverage: symbols 721/721 (100%), parameters 292/292 (100%)\n",
       "stderr_truncated": false,
       "stdout": "",
       "stdout_truncated": false
@@ -109,7 +109,7 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ypy6p1j2/wirestack-net/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-iokxekp3/wirestack-net/output\n",
       "stdout_truncated": false
     },
     {
@@ -117,7 +117,7 @@
       "package": "combined",
       "returncode": 0,
       "status": "PASS",
-      "stderr": "documentation coverage: symbols 1089/1089 (100%), parameters 430/430 (100%)\n",
+      "stderr": "documentation coverage: symbols 1093/1093 (100%), parameters 430/430 (100%)\n",
       "stderr_truncated": false,
       "stdout": "",
       "stdout_truncated": false
@@ -129,83 +129,83 @@
       "status": "PASS",
       "stderr": "",
       "stderr_truncated": false,
-      "stdout": "generated /tmp/wirestack-m7-033-ypy6p1j2/combined/output\n",
+      "stdout": "generated /tmp/wirestack-m7-033-iokxekp3/combined/output\n",
       "stdout_truncated": false
     }
   ],
   "expectedCjdoc": "0.7.2",
-  "generatedAtUtc": "2026-09-10T06:39:03.658112Z",
+  "generatedAtUtc": "2026-09-10T07:25:24.007985Z",
   "issues": [],
   "layers": [
     {
-      "apiEntries": 607,
-      "apiSha256": "3f3ae6923aeca924ca1444ed7766568b63c0288936a5b1763652242affb6a6b5",
+      "apiEntries": 623,
+      "apiSha256": "cf6b374b8cee7b3b75ee41d5e2d716d4ea1ab87488ccbe93c30605cc8e3dff5e",
       "coverage": {
         "parameters": {
-          "documented": 234,
+          "documented": 236,
           "percent": 100,
-          "total": 234
+          "total": 236
         },
         "symbols": {
-          "documented": 607,
+          "documented": 623,
           "percent": 100,
-          "total": 607
+          "total": 623
         }
       },
-      "coverageSha256": "97dbe199bbdca85d44ff961c11275589bb5b90a988f81c2997e7cc2ccd968057",
-      "declarations": 747,
-      "docsSha256": "de52d48e61679a26d341aaf6493a0cbb0cb2c5a7be2bf57b81270c008496dea5",
+      "coverageSha256": "62cc865429647809aafe4e493e19fbf5b760e4b7103bf522dab8870a895e8384",
+      "declarations": 765,
+      "docsSha256": "8d5b9d35b9c24c0ffb5ebdabe08e74d96dbb60edfe29e236a44216c1d9d4701f",
       "markdownSha256": "3055a19762b460c1f977ca0ed29a1154c7af8cda9d232351ef2bba0e2b409b45",
       "package": "wirestack",
       "status": "PASS"
     },
     {
-      "apiEntries": 825,
-      "apiSha256": "5927b25c6e4ebe00a8c6dfd0cfc8accb185d51b24d831250d37d60ec33d030cb",
+      "apiEntries": 841,
+      "apiSha256": "3570623472f5db28db17a8fefa285b5951904c58dd56482fc752b7074f6b6b47",
       "coverage": {
         "parameters": {
-          "documented": 327,
+          "documented": 329,
           "percent": 100,
-          "total": 327
+          "total": 329
         },
         "symbols": {
-          "documented": 825,
+          "documented": 841,
           "percent": 100,
-          "total": 825
+          "total": 841
         }
       },
-      "coverageSha256": "491502f5e6e6fbce397cfaad42fdea61ead1f094b4b5add800740b4180a94e5f",
-      "declarations": 1131,
-      "docsSha256": "85b211d4c5e8dc78052d02d9f455bbe44cbdfae3bec2b77438325e4636001e57",
+      "coverageSha256": "2163303d9bf368cdcc12b5f9a3d5534009e0035e1e635acf227a537bd70df13e",
+      "declarations": 1149,
+      "docsSha256": "d849d0c7ae8cc2e2273768a41b34e002696ff5e4110129bea0022fc360953084",
       "markdownSha256": "b90982339ea708b7f7715aac927745b2581b6855195119690f6e0f5582139392",
       "package": "wirestack.http",
       "status": "PASS"
     },
     {
-      "apiEntries": 761,
-      "apiSha256": "374743b74f6e6e6d511b36c463fe7267a349f9da913cd5a04a5aee79a42a4538",
+      "apiEntries": 777,
+      "apiSha256": "fe5a43934fd763a6047607c555f440989d1aef84ac16b3347bcfc63eb2dd1674",
       "coverage": {
         "parameters": {
-          "documented": 279,
+          "documented": 281,
           "percent": 100,
-          "total": 279
+          "total": 281
         },
         "symbols": {
-          "documented": 761,
+          "documented": 777,
           "percent": 100,
-          "total": 761
+          "total": 777
         }
       },
-      "coverageSha256": "aa13d46e395b22eaa687ddca592835902229c765cc217ba6d04ceccdcee34b8d",
-      "declarations": 929,
-      "docsSha256": "16984b3966f1c532a3c34eea6090951057016a2f793e83694ae1f380f43aaea6",
+      "coverageSha256": "141ac2e78acb47539c6ac9ead50ed0940b326db4f273f509d2731b431cef1c94",
+      "declarations": 947,
+      "docsSha256": "d9c13bdb89ebd91c329f17f1a9d57dd68f6a0bba2ac228bb02edc52323b9ccf9",
       "markdownSha256": "f11ae8b6080dd249c5c33562a00732f7bbd35c67e423c0bcfc39ae9935b07646",
       "package": "wirestack.tls",
       "status": "PASS"
     },
     {
-      "apiEntries": 717,
-      "apiSha256": "aa8351603c2206fdd956cbb46545584b3f34bf7f4496c634bb6264b1e46bec22",
+      "apiEntries": 721,
+      "apiSha256": "2e01f2e8fd45295b3198ec61b74bdbe551b27384f637694f91265ed95ffaea28",
       "coverage": {
         "parameters": {
           "documented": 292,
@@ -213,14 +213,14 @@
           "total": 292
         },
         "symbols": {
-          "documented": 717,
+          "documented": 721,
           "percent": 100,
-          "total": 717
+          "total": 721
         }
       },
-      "coverageSha256": "625016495f77fd6213ee4ae49c25a75f434f3073aaf74bf17cc2a6cf03f4300b",
-      "declarations": 868,
-      "docsSha256": "8632ca5c6ff2f834bd69e502c2866a939d5a64bb435993cf59fcaede8389acc5",
+      "coverageSha256": "a5a5aacc0ae65e454746a5e9c4e4d52a9184b81f070f963591ea5a6affb8bd02",
+      "declarations": 882,
+      "docsSha256": "326f66cb864b4800cf64f614efee06f118a69903daded49014738684811191ed",
       "markdownSha256": "c665cef542630b9fbda37c53b17bfede25aa487c50b010430c1047257d4e1bfe",
       "package": "wirestack.net",
       "status": "PASS"
@@ -253,8 +253,8 @@
     "src/http_message.cj": "e874b8ba23563e1efb861b1a024d12eb828617f71e71141bf3feb5681fe3ceec",
     "src/http_model.cj": "993ad73017a4da224b98f851e1e39d46fe6016502044b934f7ab191fb0da5a8c",
     "src/http_url.cj": "074cc811771e49030292b278252947af9f29476f67e9fd53f6a82ac473690955",
-    "src/net/package.cj": "42c46e41e4f6c6a130a2370a31468258c698de4830d7168ea3b5639bc6e19c18",
-    "src/network_error.cj": "9a9d4718a168ce3da218def8fdbb59af732844665a28e8bf619bca2805dbb6cd",
+    "src/net/package.cj": "f53ad2a9e17ec14cb256f3dd300be09bf28ae3d93129212dbb95c4678a56156f",
+    "src/network_error.cj": "4e272f9b9887804f0de87ec032d442a69b49803da66bffa005b7f0282aadc5e5",
     "src/network_event.cj": "55d93c151752e76c80c441e4bfc639f7d6da77e89ed582bae2ba6a43cdcc3084",
     "src/operation_context.cj": "523a1c1efaab2f3e6ba0755386460ea504a2caa8ef1453a18134f950c6e1234d",
     "src/package.cj": "f9035aacfa24f06fe88eda3f16a5cbcf5dbf482b2d86776ea27e09e4861e93d7",
