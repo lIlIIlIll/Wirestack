@@ -1,0 +1,28 @@
+{
+  "task_id": "M7-033",
+  "platform": "linux-x86_64-glibc",
+  "sdk": {
+    "name": "cangjie-sdk-linux-x64-1.1.3.tar.gz",
+    "sha256": "2b68905afc466e665ae181595c63f96c18d75fd2c1fb6c6f0cb64e179c28d61a",
+    "url": "https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-linux-x64-1.1.3.tar.gz&objectKey=6a19349d21f5a8178d6fd22b"
+  },
+  "cjdoc": {
+    "repository": "https://github.com/lIlIIlIll/cjdoc",
+    "version": "0.7.2",
+    "commit": "e966097a3591538fba8990772e2e6c543de86c21",
+    "dependency_commits": {
+      "markdown": "db4f9527944b589db8436669f1d255192388cee2",
+      "yjson": "bf65cbecd99ac25e7485f8db60990e94a04e57bc"
+    }
+  },
+  "setup_cangjie": {
+    "version": "v3.2.0",
+    "commit": "91463316b1c359f216c2ac49e35900f9341c1571"
+  },
+  "cjv": {
+    "version": "v0.2.21",
+    "commit": "503caf32082f3914ba7409c8b48c8ebd75ccf513",
+    "linux_amd64_archive_sha256": "772d64bd07540101e3d177f3b8919bad13057a6cdf70f10d7f318d1620ef5f57"
+  },
+  "qualification": "docs/evidence/M7-033/ci-toolchain-native.json"
+}
