@@ -13,7 +13,7 @@ M7-033 为 Linux x86_64 glibc 开发者文档与 cjdoc 门禁任务。实现内�
   校验、版本锁定和原子报告；
 - `docs/api/generated/` 中由 `cjdoc 0.7.2` 生成的 Doc IR、API surface、coverage 和
   Markdown；
-- GitHub Actions 中固定 cjdoc release、Pages 部署和有界 HTTP smoke。
+- GitHub Actions 中固定 cjdoc 源码构建、Pages 部署和有界 HTTP smoke。
 
 本地生成使用 `CJDOC_BIN=/path/to/cjdoc-0.7.2 scripts/check-docs --json`。cjdoc
 `v0.7.2` 现已发布在 [GitHub release](https://github.com/lIlIIlIll/cjdoc/releases/tag/v0.7.2)，
@@ -72,8 +72,19 @@ The task gate also passed all four commands, including the clean public consumer
 
 The active main ruleset also requires `report-build-status`. The clean-build
 workflow now reports that context only after checking both cjdoc and Wirestack
-build results. Failure, cancellation or a skipped prerequisite fails the report;
-the branch rules are unchanged.
+build results. Failure, cancellation or a skipped prerequisite fails the report.
 
-[`required-checks.json`](required-checks.json) preserves the observed active main
-rulesets, including the required `report-build-status` context.
+[`required-checks.json`](required-checks.json) records the verified main rulesets.
+The user explicitly removed the unavailable GitHub Code Quality rule and its
+dependent built-in coverage rule. CodeQL, build/documentation checks, review
+requirements and other branch protections remain active; no bypass was used.
+CodeQL default setup passed for Actions, C/C++ and Python. It does not analyze
+Cangjie.
+
+Pages deployment is limited to pushes to `main`. The workflow uploads an atomic
+JSON smoke report bound to that run's commit, rather than relying on a historical
+deployment report. The exact HTTP script passed local fixture checks for four
+HTTP 200 responses; HTTP 404, HTTP 204 and a stalled response failed without
+publishing a PASS report. The bounded timeout and results are recorded in
+[`ci-repair-checks.json`](ci-repair-checks.json). A successful deployment and fresh
+smoke artifact from the merged revision are still required.
