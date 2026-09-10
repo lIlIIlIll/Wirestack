@@ -1,7 +1,7 @@
 # M8-001 evidence
 
-Status: COMPLETE. All review corrections have fresh scoped verification.
-The source candidate is committed before the final evidence seal.
+Status: COMPLETE. Linux contract, native consumer, documentation and
+source-bound qualification passed after all four review corrections.
 
 ## Scope
 
@@ -26,8 +26,8 @@ rejects `StreamingSocket` in `wirestack.net` while allowing Wirestack's own
 
 Datagram result construction rejects payloads above 65,507 bytes and owns its
 receive data. The oversized-result regression failed before repair; the scoped
-network suite now passes 14/14 tests. Native datagram adapters and their I/O
-qualification remain M8-002/M8-003 work, not simulated success here.
+network suite passed 14/14 before the fourth-review additions. Native datagram
+adapters and their I/O qualification remain M8-002/M8-003 work, not simulated success here.
 
 The second review retains graceful close, abort, failure and directional
 half-close states; requires an explicit raw protocol; rejects pathname NUL
@@ -45,12 +45,30 @@ records the failing regression and the 14/14 post-fix result. A pre-cancelled
 operation leaves an untouched transport open; cancellation that closed it retains
 `Aborted`, including after later `close` calls, without changing the error code.
 
+The fourth review rejects nonempty wrong-direction I/O after half-close with
+structured `Closed` errors without disabling the opposite direction. Empty
+buffers remain no-I/O operations. A deterministic final-direction shutdown race
+failed before repair (18 passed, one failed) and passed afterward (19/19): I/O
+woken by graceful shutdown must not change the final state to `Failed`.
+
+Sealing now requires an actual local Git commit whose source tree matches all
+manifest inputs. The tooling suite passed 33/33; the real CLI rejected both a
+fictional commit and source changes absent from the candidate, without writing
+an evidence index. Portable verification remains offline. Exact commands and
+raw logs are retained in [`review-boundaries.json`](review-boundaries.json).
+
+The first refreshed task run passed seven commands but timed out during
+documentation generation at 300 seconds. The task now uses the established
+M7-033 documentation timeout of 1,800 seconds; generation and coverage
+requirements are unchanged.
+
 ## Acceptance
 
+
 All three task-specific fast commands and all eight task commands passed with
-STS 1.1.3 and pinned cjdoc 0.7.2. `scripts/check` passed 604 Cangjie tests with
+STS 1.1.3 and pinned cjdoc 0.7.2. `scripts/check` passed 609 Cangjie tests with
 23 performance-tagged exclusions, zero errors and zero failures. The network
-contract suite passed 14/14 without skips.
+contract suite passed 19/19 without skips.
 
 The inventory contains 260 declarations and 103 aliases. API documentation
 covers all 1,093 symbols and 430 parameters. All three guide examples compiled;

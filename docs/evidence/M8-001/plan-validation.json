@@ -13,7 +13,7 @@
   ],
   "status": "PASS",
   "exit_code": 0,
-  "generated_at_utc": "2026-09-10T08:09:32.342264+00:00",
+  "generated_at_utc": "2026-09-10T09:29:58.623509+00:00",
   "stdout_path": "docs/evidence/M8-001/plan-validation.stdout.log",
   "stdout_sha256": {
     "domain": "text-utf8-lf-v1",

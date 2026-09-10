@@ -170,6 +170,183 @@ class NetworkFoundationContractTest {
     }
 
     @TestCase
+    func tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites(): Unit {
+        expectReadShutdownRejection({ stream =>
+            let _ = stream.read(
+                api.MutableByteSpan(Array<Byte>(1, repeat: 0u8)),
+                context: api.OperationContext.background()
+            )
+        })
+        expectReadShutdownRejection({ stream =>
+            let _ = stream.readSome(
+                api.MutableByteSpan(Array<Byte>(1, repeat: 0u8)),
+                context: api.OperationContext.background()
+            )
+        })
+        expectReadShutdownRejection({ stream =>
+            stream.readExact(
+                api.MutableByteSpan(Array<Byte>(3, repeat: 0u8)),
+                context: api.OperationContext.background()
+            )
+        })
+    }
+
+    @TestCase
+    func tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads(): Unit {
+        expectWriteShutdownRejection({ stream =>
+            let _ = stream.write(
+                api.ByteSpan([1u8]),
+                context: api.OperationContext.background()
+            )
+        })
+        expectWriteShutdownRejection({ stream =>
+            let _ = stream.writeSome(
+                api.ByteSpan([1u8]),
+                context: api.OperationContext.background()
+            )
+        })
+        expectWriteShutdownRejection({ stream =>
+            stream.writeAll(
+                api.ByteSpan([1u8, 2u8, 3u8]),
+                context: api.OperationContext.background()
+            )
+        })
+    }
+
+    @TestCase
+    func tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown(): Unit {
+        let readClosed = TcpStream(NetworkContractTransport(supportsHalfClose: true))
+        readClosed.shutdown(api.ShutdownDirection.Read)
+        match (readClosed.readSome(
+            api.MutableByteSpan(Array<Byte>()),
+            context: api.OperationContext.background()
+        )) {
+            case api.ReadResult.Data(count) => @Expect(count, 0)
+            case _ => @Fail("empty readSome reported end of stream")
+        }
+        match (readClosed.read(
+            api.MutableByteSpan(Array<Byte>()),
+            context: api.OperationContext.background()
+        )) {
+            case ReadResult.Data(count) => @Expect(count, 0)
+            case _ => @Fail("empty read reported end of stream")
+        }
+        readClosed.readExact(
+            api.MutableByteSpan(Array<Byte>()),
+            context: api.OperationContext.background()
+        )
+        expectSocketState(readClosed.state, SocketState.ReadHalfClosed)
+
+        let writeClosed = TcpStream(NetworkContractTransport(supportsHalfClose: true))
+        writeClosed.shutdown(api.ShutdownDirection.Write)
+        @Expect(writeClosed.writeSome(
+            api.ByteSpan(Array<Byte>()),
+            context: api.OperationContext.background()
+        ), 0)
+        @Expect(writeClosed.write(
+            api.ByteSpan(Array<Byte>()),
+            context: api.OperationContext.background()
+        ), 0)
+        writeClosed.writeAll(
+            api.ByteSpan(Array<Byte>()),
+            context: api.OperationContext.background()
+        )
+        expectSocketState(writeClosed.state, SocketState.WriteHalfClosed)
+    }
+
+    @TestCase
+    func tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure(): Unit {
+        let readDelegate = NetworkContractTransport(
+            supportsHalfClose: true,
+            blockRead: true
+        )
+        let readStream = TcpStream(readDelegate)
+        let reading: Future<Bool> = spawn {
+            try {
+                let _ = readStream.readSome(
+                    api.MutableByteSpan(Array<Byte>(1, repeat: 0u8)),
+                    context: api.OperationContext.background()
+                )
+                false
+            } catch (error: api.NetworkException) {
+                isClosedTransportError(error)
+            }
+        }
+        readDelegate.waitUntilReadEntered()
+        readStream.shutdown(api.ShutdownDirection.Read)
+        @Expect(reading.get(Duration.second))
+        expectSocketState(readStream.state, SocketState.ReadHalfClosed)
+        @Expect(readStream.writeSome(
+            api.ByteSpan([1u8]),
+            context: api.OperationContext.background()
+        ), 1)
+        @Expect(!readStream.isClosed())
+
+        let writeDelegate = NetworkContractTransport(
+            supportsHalfClose: true,
+            blockWrite: true
+        )
+        let writeStream = TcpStream(writeDelegate)
+        let writing: Future<Bool> = spawn {
+            try {
+                let _ = writeStream.writeSome(
+                    api.ByteSpan([1u8]),
+                    context: api.OperationContext.background()
+                )
+                false
+            } catch (error: api.NetworkException) {
+                isClosedTransportError(error)
+            }
+        }
+        writeDelegate.waitUntilWriteEntered()
+        writeStream.shutdown(api.ShutdownDirection.Write)
+        @Expect(writing.get(Duration.second))
+        expectSocketState(writeStream.state, SocketState.WriteHalfClosed)
+        let readBuffer = Array<Byte>(1, repeat: 0u8)
+        match (writeStream.readSome(
+            api.MutableByteSpan(readBuffer),
+            context: api.OperationContext.background()
+        )) {
+            case api.ReadResult.Data(count) => @Expect(count, 1)
+            case _ => @Fail("read direction was lost after racing write shutdown")
+        }
+        @Expect(readBuffer, [0xA5u8])
+        @Expect(!writeStream.isClosed())
+    }
+
+    @TestCase
+    func tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo(): Unit {
+        let reading = Array<?Future<Bool>>(1, repeat: None<Future<Bool>>)
+        let delegate = NetworkContractTransport(
+            supportsHalfClose: true,
+            blockRead: true,
+            afterShutdown: { =>
+                match (reading[0]) {
+                    case Some(pending) => @Expect(pending.get(Duration.second))
+                    case None => ()
+                }
+            }
+        )
+        let stream = TcpStream(delegate)
+        stream.shutdown(api.ShutdownDirection.Write)
+        let pending: Future<Bool> = spawn {
+            try {
+                let _ = stream.readSome(
+                    api.MutableByteSpan(Array<Byte>(1, repeat: 0u8)),
+                    context: api.OperationContext.background())
+                false
+            } catch (error: api.NetworkException) {
+                isClosedTransportError(error)
+            }
+        }
+        reading[0] = Some(pending)
+        delegate.waitUntilReadEntered()
+        stream.shutdown(api.ShutdownDirection.Read)
+        @Expect(stream.isClosed())
+        expectSocketState(stream.state, SocketState.Closed)
+    }
+
+    @TestCase
     func tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate(): Unit {
         let readDelegate = NetworkContractTransport(failRead: true)
         let readStream = TcpStream(readDelegate)
@@ -322,8 +499,11 @@ private class NetworkContractTransport <: api.DuplexTransport {
     private let failClose: Bool
     private let blockClose: Bool
     private let blockRead: Bool
+    private let blockWrite: Bool
+    private let afterShutdown: () -> Unit
     private var closeEntered = false
     private var readEntered = false
+    private var writeEntered = false
     private var closeReleased = false
     public var readCalls: Int64 = 0
     public var writeCalls: Int64 = 0
@@ -339,7 +519,9 @@ private class NetworkContractTransport <: api.DuplexTransport {
         failWrite!: Bool = false,
         failClose!: Bool = false,
         blockClose!: Bool = false,
-        blockRead!: Bool = false
+        blockRead!: Bool = false,
+        blockWrite!: Bool = false,
+        afterShutdown!: () -> Unit = { => }
     ) {
         this.endpointsVisible = endpointsVisible
         this.supportsHalfClose = supportsHalfClose
@@ -349,6 +531,8 @@ private class NetworkContractTransport <: api.DuplexTransport {
         this.failClose = failClose
         this.blockClose = blockClose
         this.blockRead = blockRead
+        this.blockWrite = blockWrite
+        this.afterShutdown = afterShutdown
     }
 
     public prop info: api.TransportInfo {
@@ -395,8 +579,8 @@ private class NetworkContractTransport <: api.DuplexTransport {
             if (blockRead) {
                 readEntered = true
                 changed.notifyAll()
-                while (!closed) { changed.wait() }
-                rejectClosedTransport(closed,
+                while (!closed && !readShutdown) { changed.wait() }
+                rejectClosedTransport(closed || readShutdown,
                     api.NetworkErrorCategory.Read, api.NetworkPhase.TcpRead)
             }
             if (destination.isEmpty()) {
@@ -420,6 +604,13 @@ private class NetworkContractTransport <: api.DuplexTransport {
             rejectClosedTransport(closed || writeShutdown,
                 api.NetworkErrorCategory.Write, api.NetworkPhase.TcpWrite)
             writeCalls++
+            if (blockWrite) {
+                writeEntered = true
+                changed.notifyAll()
+                while (!closed && !writeShutdown) { changed.wait() }
+                rejectClosedTransport(closed || writeShutdown,
+                    api.NetworkErrorCategory.Write, api.NetworkPhase.TcpWrite)
+            }
             if (failWrite) { throw deterministicTransportFailure(api.NetworkErrorCategory.Write,
                 api.NetworkPhase.TcpWrite) }
             min(source.length, 2)
@@ -445,7 +636,9 @@ private class NetworkContractTransport <: api.DuplexTransport {
                 case api.ShutdownDirection.Write => writeShutdown = true
             }
             if (readShutdown && writeShutdown) { closed = true }
+            changed.notifyAll()
         }
+        afterShutdown()
     }
 
     public func close(context: api.OperationContext): Unit {
@@ -490,6 +683,19 @@ private class NetworkContractTransport <: api.DuplexTransport {
         }
     }
 
+    func waitUntilWriteEntered(): Unit {
+        synchronized(mutex) {
+            let deadline = api.Deadline.after(Duration.second)
+            while (!writeEntered) {
+                let remaining = deadline.remaining()
+                if (remaining <= Duration.Zero) {
+                    throw Exception("timed out waiting for deterministic write")
+                }
+                changed.wait(timeout: remaining)
+            }
+        }
+    }
+
     func waitUntilCloseEntered(): Unit {
         synchronized(mutex) {
             let deadline = api.Deadline.after(Duration.second)
@@ -528,6 +734,85 @@ private func expectCancelledRead(stream: TcpStream, context: api.OperationContex
         }
     }
     @Expect(cancelled)
+}
+
+private func expectReadShutdownRejection(action: (TcpStream) -> Unit): Unit {
+    let stream = TcpStream(NetworkContractTransport(supportsHalfClose: true))
+    stream.shutdown(api.ShutdownDirection.Read)
+    var rejected = false
+    try {
+        action(stream)
+    } catch (error: api.NetworkException) {
+        rejected = isDirectionalClosedError(
+            error,
+            api.NetworkErrorCategory.Read,
+            api.NetworkPhase.TcpRead
+        )
+    }
+    @Expect(rejected)
+    expectSocketState(stream.state, SocketState.ReadHalfClosed)
+    stream.writeAll(
+        api.ByteSpan([1u8, 2u8, 3u8]),
+        context: api.OperationContext.background()
+    )
+    expectSocketState(stream.state, SocketState.ReadHalfClosed)
+    @Expect(!stream.isClosed())
+}
+
+private func expectWriteShutdownRejection(action: (TcpStream) -> Unit): Unit {
+    let stream = TcpStream(NetworkContractTransport(supportsHalfClose: true))
+    stream.shutdown(api.ShutdownDirection.Write)
+    var rejected = false
+    try {
+        action(stream)
+    } catch (error: api.NetworkException) {
+        rejected = isDirectionalClosedError(
+            error,
+            api.NetworkErrorCategory.Write,
+            api.NetworkPhase.TcpWrite
+        )
+    }
+    @Expect(rejected)
+    expectSocketState(stream.state, SocketState.WriteHalfClosed)
+    let destination = Array<Byte>(3, repeat: 0u8)
+    stream.readExact(
+        api.MutableByteSpan(destination),
+        context: api.OperationContext.background()
+    )
+    @Expect(destination, [0xA5u8, 0x5Au8, 0xA5u8])
+    expectSocketState(stream.state, SocketState.WriteHalfClosed)
+    @Expect(!stream.isClosed())
+}
+
+private func isDirectionalClosedError(
+    error: api.NetworkException,
+    category: api.NetworkErrorCategory,
+    phase: api.NetworkPhase
+): Bool {
+    let shapeMatches = match ((error.category, category, error.phase, phase)) {
+        case (api.NetworkErrorCategory.Read, api.NetworkErrorCategory.Read,
+              api.NetworkPhase.TcpRead, api.NetworkPhase.TcpRead) => true
+        case (api.NetworkErrorCategory.Write, api.NetworkErrorCategory.Write,
+              api.NetworkPhase.TcpWrite, api.NetworkPhase.TcpWrite) => true
+        case _ => false
+    }
+    let codeMatches = match ((error.code, error.retryability)) {
+        case (api.NetworkErrorCode.Closed, api.Retryability.Never) => true
+        case _ => false
+    }
+    shapeMatches && codeMatches &&
+        hasInternetEndpoint(error.localEndpoint, networkTestEndpoint(41001u16)) &&
+        hasInternetEndpoint(error.remoteEndpoint, networkTestEndpoint(41002u16))
+}
+
+private func hasInternetEndpoint(
+    actual: ?NetworkEndpoint,
+    expected: api.SocketEndpoint
+): Bool {
+    match (actual) {
+        case Some(NetworkEndpoint.Internet(endpoint)) => endpoint == expected
+        case _ => false
+    }
 }
 
 private func networkTestEndpoint(port: UInt16): api.SocketEndpoint {

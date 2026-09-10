@@ -1,0 +1,2 @@
+seal-evidence: FAIL: candidate revision does not resolve to a commit: git: /tmp/wirestack-m7-033-ci-tools-20260910/sdk/cangjie/runtime/lib/linux_x86_64_cjnative/libpcre2-8.so.0: no version information available (required by git)
+fatal: Needed a single revision

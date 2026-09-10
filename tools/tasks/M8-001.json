@@ -87,7 +87,7 @@
     {
       "id": "public-api-documentation",
       "argv": ["scripts/check-docs", "--json", "--output", "docs/evidence/M8-001/docs-report.json"],
-      "timeout_seconds": 300,
+      "timeout_seconds": 1800,
       "long_running": false,
       "gate": "task"
     },

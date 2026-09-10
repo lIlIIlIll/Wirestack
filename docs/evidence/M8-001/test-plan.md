@@ -34,10 +34,10 @@ cases are carried forward to their owning task and remain NOT_RUN here:
 | S008 | DNS compression loop, malformed RR, UDP-to-TCP fallback | NOT_RUN; M8-004 |
 | S009 | HTTP/2 stream isolation, WebSocket frame bounds and push limits | NOT_RUN; M8-005 |
 | S010 | Privileged raw capability and native close wakeup | NOT_RUN; M8-002/M8-003 |
-| S011 | Close/abort state, cancellation-closes-delegate and repeated terminal operations | PASS; lifecycle regression distinguishes pre-cancel from in-flight abort |
+| S011 | Close/abort state, cancellation and wrong-direction I/O after half-close | PASS; 19/19 network cases, including deterministic final-direction shutdown wakeup |
 | S012 | Cookie injection, persistence failure, path precedence and unsafe parity metadata | NOT_RUN; M8-005 |
 | S013 | Mutated DNS headers and malformed length/count/flags | NOT_RUN; M8-004 |
-| S014 | Git writes a loader warning on stderr or evidence has a malformed revision | PASS; 26 repository-tooling tests including provenance regressions |
+| S014 | Warning-contaminated, fictitious or source-mismatched candidate revision | PASS; 33/33 tooling cases and real CLI rejection without seal output |
 | S015 | Unix pathname contains NUL but abstract name legitimately contains it | PASS; shared endpoint/error regressions |
 
 ## Test-plan matrix
@@ -46,7 +46,7 @@ cases are carried forward to their owning task and remain NOT_RUN here:
 |---|---|---|---|
 | T001 | P001,P004 | `python3 tools/architecture_guard.py --format json` and public API inventory | PASS |
 | T002 | P001,P002,P003,P004,P005,P006,P007 | `cjpm check` and `cjpm build` | PASS |
-| T003 | P002,P003,P004,P005,P006,S005,S006,S011 | `cjpm test src/net --no-progress --no-color` | PASS; 14/14, no native datagram I/O claim |
+| T003 | P002,P003,P004,P005,P006,S005,S006,S011 | `cjpm test src/net --no-progress --no-color` | PASS; 19/19, no native datagram I/O claim |
 | T004 | S001,S002,S003,S004,S014 | Repository-tooling, architecture guard and API/backlog regression tests | PASS |
 | T005 | P006,S005 | Datagram result upper-bound and receive-buffer reuse regressions | PASS |
 | T006 | S007,S008,S009,S010,S012,S013 | M8-002, M8-003, M8-004, M8-005 and M8-006 task gates | NOT_RUN; owned by later tasks |
