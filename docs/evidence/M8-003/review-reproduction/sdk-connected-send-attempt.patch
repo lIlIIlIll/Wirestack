@@ -1,0 +1,28 @@
+--- a/src/internal/transport_stdnet/udp_socket.cj
++++ b/src/internal/transport_stdnet/udp_socket.cj
+@@ -147,6 +147,13 @@
+         }
+     }
+ 
++    private func sendNative(payload: Array<Byte>): Unit {
++        match (nativeKind) {
++            case StdNetDatagramKind.Internet(value) => value.send(payload)
++            case StdNetDatagramKind.Unix(value) => value.send(payload)
++        }
++    }
++
+     /** Bound local endpoint, including a kernel-selected Internet port. */
+     public prop localEndpoint: api.NetworkEndpoint {
+         get() { synchronized(lifecycleMutex) { localEndpointValue } }
+@@ -224,10 +231,9 @@
+             remoteEndpoint: remoteEndpoint
+         )
+         let selectedPeer = beginSend(requireConnected: true).getOrThrow()
+-        let nativePeer = toNativeDatagramEndpoint(selectedPeer)
+         try {
+             sendPayload(source, context, Some(selectedPeer)) {
+-                payload => socket.sendTo(nativePeer, payload)
++                payload => sendNative(payload)
+             }
+         } finally {
+             endSend()

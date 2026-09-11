@@ -1,0 +1,34 @@
+--- a/src/internal/transport_stdnet/udp_socket.cj
++++ b/src/internal/transport_stdnet/udp_socket.cj
+@@ -147,6 +147,7 @@
+         }
+     }
+ 
++
+     /** Bound local endpoint, including a kernel-selected Internet port. */
+     public prop localEndpoint: api.NetworkEndpoint {
+         get() { synchronized(lifecycleMutex) { localEndpointValue } }
+@@ -224,10 +225,21 @@
+             remoteEndpoint: remoteEndpoint
+         )
+         let selectedPeer = beginSend(requireConnected: true).getOrThrow()
+-        let nativePeer = toNativeDatagramEndpoint(selectedPeer)
+         try {
++            let sender = match (nativeKind) {
++                case StdNetDatagramKind.Internet(value) => value
++                case StdNetDatagramKind.Unix(_) => throw api.NetworkException(
++                    api.NetworkErrorCategory.Write,
++                    api.NetworkPhase.DatagramSend,
++                    api.NetworkErrorCode.Unsupported,
++                    "std.net Unix datagram sends re-resolve peer addresses; use an explicit sendTo destination",
++                    retryability: api.Retryability.Never,
++                    localEndpoint: Some(localEndpoint),
++                    remoteEndpoint: Some(selectedPeer)
++                )
++            }
+             sendPayload(source, context, Some(selectedPeer)) {
+-                payload => socket.sendTo(nativePeer, payload)
++                payload => sender.send(payload)
+             }
+         } finally {
+             endSend()

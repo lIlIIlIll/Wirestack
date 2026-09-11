@@ -1,0 +1,85 @@
+3517585 close(3)                        = 0
+3517585 close(3)                        = 0
+3517585 close(3)                        = 0
+3517585 close(3)                        = 0
+3517585 close(3)                        = 0
+3517585 close(3)                        = 0
+3517585 close(3)                        = 0
+3517585 close(3)                        = 0
+3517585 close(3)                        = 0
+3517585 close(3)                        = 0
+3517585 close(3)                        = 0
+3517585 close(3)                        = 0
+3517585 close(3)                        = 0
+3517585 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+3517585 bind(3, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/listener"}, 110) = 0
+3517585 listen(3, 128)                  = 0
+3517585 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 5
+3517585 bind(5, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/datagram"}, 110) = 0
+3517590 accept4(3, {sa_family=AF_UNIX}, [120 => 2], SOCK_CLOEXEC|SOCK_NONBLOCK) = 6
+3517590 recvfrom(6, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, 0, NULL, NULL) = 16384
+3517590 recvfrom(6, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, 0, NULL, NULL) = 16384
+3517590 sendto(6, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(6, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 close(6)                        = 0
+3517590 close(3)                        = 0
+3517590 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+3517590 connect(3, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/peer-stream"}, 110) = 0
+3517590 sendto(3, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(3, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 recvfrom(3, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, 0, NULL, NULL) = 16384
+3517590 recvfrom(3, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, 0, NULL, NULL) = 16384
+3517590 recvfrom(3, "", 1, 0, NULL, NULL) = 0
+3517590 recvfrom(3, "", 1, 0, NULL, NULL) = 0
+3517590 sendto(3, "after", 5, MSG_NOSIGNAL, NULL, 0) = 5
+3517590 close(3)                        = 0
+3517590 socket(AF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+3517590 bind(3, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/write-timeout"}, 110) = 0
+3517590 listen(3, 128)                  = 0
+3517590 accept4(3, 0x7fce44021360, [120], SOCK_CLOEXEC|SOCK_NONBLOCK) = -1 EAGAIN (Resource temporarily unavailable)
+3517590 accept4(3, {sa_family=AF_UNIX}, [120 => 2], SOCK_CLOEXEC|SOCK_NONBLOCK) = 6
+3517590 sendto(6, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(6, "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcd"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(6, "\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(6, "\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(6, "\31\32\33\34\35\36\37 !\"#$%&'()*+,-./012345678"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(6, "^_`abcdefghijklmnopqrstuvwxyz{|}"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(6, "\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(6, "\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\0\1\2\3\4\5\6\7\10\t\n\v\f"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(6, "23456789:;<=>?@ABCDEFGHIJKLMNOPQ"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(6, "wxyz{|}~\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(6, "\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(6, "\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37 !\"#$%"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(6, "KLMNOPQRSTUVWXYZ[\\]^_`abcdefghij"..., 16384, MSG_NOSIGNAL, NULL, 0) = 16384
+3517590 sendto(6, "\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257"..., 16384, MSG_NOSIGNAL, NULL, 0) = -1 EAGAIN (Resource temporarily unavailable)
+3517590 sendto(6, "\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257"..., 16384, MSG_NOSIGNAL, NULL, 0) = -1 EAGAIN (Resource temporarily unavailable)
+3517590 close(6)                        = 0
+3517590 close(3)                        = 0
+3517590 close(3)                        = 0
+3517590 recvfrom(5, "", 5, 0, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/peer-datagram"}, [120 => 52]) = 0
+3517590 recvfrom(5, "\1\2\3\4\5", 5, 0, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/peer-datagram"}, [120 => 52]) = 5
+3517590 recvfrom(5, "\t\n\v\f", 5, 0, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/peer-datagram"}, [120 => 52]) = 4
+3517590 recvfrom(5, "raw", 5, 0, {sa_family=AF_UNIX, sun_path=@"/tmp/wirestack-m8-003-peer-szj6sfxd-arbitrary-\377"}, [120 => 50]) = 3
+3517590 connect(5, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/peer-datagram"}, 110) = 0
+3517590 sendto(5, "AB", 2, 0, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/peer-datagram"}, 110) = 2
+3517590 recvfrom(5, 0x559491503ee0, 5, 0, 0x7fce44032980, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+3517590 recvfrom(5, 0x559491503ee0, 5, 0, 0x7fce44032980, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+3517590 recvfrom(5, "D", 5, 0, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/peer-datagram"}, [120 => 52]) = 1
+3517590 sendto(5, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 65507, 0, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/peer-datagram"}, 110) = 65507
+3517590 recvfrom(5, 0x559491503ee0, 65508, 0, 0x7fce44032980, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+3517590 recvfrom(5, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"..., 65508, 0, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/peer-datagram"}, [120 => 52]) = 65507
+3517590 recvfrom(5, 0x559491503ee0, 5, 0, 0x7fce44032980, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+3517590 close(5)                        = 0
+3517590 socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0) = 3
+3517590 bind(3, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/connected-identity"}, 110) = 0
+3517590 connect(3, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/identity-peer"}, 110) = 0
+3517590 sendto(3, "selected", 8, 0, {sa_family=AF_UNIX, sun_path="/tmp/wirestack-m8-003-peer-szj6sfxd/identity-peer"}, 110) = 8
+3517590 recvfrom(3, 0x7fce44021520, 9, 0, 0x7fce44032980, [120]) = -1 EAGAIN (Resource temporarily unavailable)
+3517585 --- SIGTERM {si_signo=SIGTERM, si_code=SI_USER, si_pid=3511895, si_uid=1000} ---
+3517591 +++ killed by SIGTERM +++
+3517590 +++ killed by SIGTERM +++
+3517589 +++ killed by SIGTERM +++
+3517588 +++ killed by SIGTERM +++
+3517587 +++ killed by SIGTERM +++
+3517586 +++ killed by SIGTERM +++
+3517585 +++ killed by SIGTERM +++

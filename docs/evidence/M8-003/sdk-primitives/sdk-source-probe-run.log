@@ -1,0 +1,10 @@
+SOURCE_PROBE_READY
+count=3 source_size=25 source_bytes=[1, 0, 0, 119, 105, 114, 101, 115, 116, 97, 99, 107, 45, 115, 100, 107, 45, 115, 111, 117, 114, 99, 101, 45, 255]
+An exception has occurred:
+SocketException: Unsupported socket family 0
+    at std.net::SockAddr::toSocketAddress()(std/net/socket_ffi_sockaddr.cj:187)
+    at std.net::DopraOtherSocketImpl::receiveFrom(std.core::Array<...>, std.core::Option<...>)(std/net/socket_ffi_cjnative_impl.cj:618)
+    at std.net::SocketCommon<...>::receiveFrom(std.core::Array<...>)(std/net/socket_impl_common.cj:294)
+    at std.net::UnixDatagramSocket::receiveFrom(std.core::Array<...>)(std/net/unix_datagram.cj:194)
+    at default::main()(/tmp/wirestack-m8-003-publication-la0my360/unix_source_probe.cj:14)
+[m8-003-source-probe: failed; cursor=751]
