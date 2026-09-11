@@ -9,11 +9,11 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Field | Value |
 | --- | --- |
 | Planned release identity | `0.1.0` |
-| Candidate measured commit | `2758853efe1117c7d2b272abd36cf90de46526f5` |
-| Candidate tree | `120f0db3b2668cf2ebb2229adbaa5ea758ca50a6` |
+| Candidate measured commit | `00eaf70423b0d6497c7f3e30798734ccc2b9b7b3` |
+| Candidate tree | `99c007bf4b24d6857091e3c77c9b34b6ed28cdc0` |
 | Package manifest | 九个 package，版本均为 `0.1.0` |
-| Release graph | `release/release-graph.toml`；status=`migration` |
-| Evidence updated | `2026-09-10` |
+| Release graph | `release/release-graph.toml`；status=`release-ready` |
+| Evidence updated | `2026-09-11` |
 | Local qualification host | Linux Arch `7.2.3-Arch1-3`, x86_64；Intel Core i7-8700 |
 | Local qualification SDK | Cangjie `1.1.0-alpha.20260829040003 (cjnative)`；cjpm `1.1.3` |
 | Hosted PR SDK | Cangjie STS `1.1.0`；resolution=`pinned-sts` |
@@ -22,64 +22,44 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 `bc0f32df9c610dcbb05f437552ff57ec6c6e075a54721f46cc9c882a62d2d836`，
 `cjpm` SHA-256 为
 `b867fca2fd0d4bc19bf195e7872f6f13d5019fd3ba5f409291814f7c5bdfa313`。
-本地工具链为 `<home>/cangjie_sdk/daily/cangjie`，clang=`22.1.8`，
-gcc=`16.2.1`。
-Hosted PR 为 [#26](https://github.com/lIlIIlIll/yjson/pull/26)，最新完整
-run 为 [`34557674847`](https://github.com/lIlIIlIll/yjson/actions/runs/34557674847)；
-run conclusion=`success`；该 run 的 `Cangjie STS (pinned)` 与 `CI Required` 均通过。
+首批 Pure 测量使用该工具链。重跑期间固定 SDK 的动态 `stdx` 库路径消失，
+因此第二批没有形成完整的可比较报告；没有用后来出现的其他 SDK 替代它。
+
+Hosted PR 为 [#26](https://github.com/lIlIIlIll/yjson/pull/26)，当前候选最新
+run 为 [`34563502643`](https://github.com/lIlIIlIll/yjson/actions/runs/34563502643)；
+该 run 因 `Seven-library evidence drift` 失败，不能写成 hosted PASS。
 
 ## 2. Gate 状态
 
 | Gate | Status | Evidence |
 | --- | --- | --- |
 | Public API/C ABI mechanical inventory | PASS | `1094` Cangjie declarations；九包 inventory；C ABI delta 全部 `reviewed-for-0.1.0` |
-| Public API migration review | **BLOCKING** | `release/public-cangjie-delta-bfd29.toml` 仍有 `pending-migration-review` 组；发布图仍为 `migration` |
-| Local Linux fresh candidate | PASS | 当前候选的本地 registry rehearsal 完成；`576/576` root tests，九包暂存、构建和 consumer 检查通过 |
-| Hosted PR CI | PASS | PR [#26](https://github.com/lIlIIlIll/yjson/pull/26) run `34557674847` conclusion=`success`；Seven-library evidence drift、registry rehearsal、Pure Windows/macOS、Coverage、Cangjie STS 和 CI Required 均通过 |
-| Hosted main CI / Pages | PASS | run [`34511955542`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542) passed all 28 jobs; [`Deploy API Documentation`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542/job/102990740002) completed its `Deploy GitHub Pages` step; site [`liliilill.github.io/yjson`](https://liliilill.github.io/yjson/); `github-pages` artifact digest `sha256:a454b4519cc9cf5e311e301035681a18324ce73811dd3e5c2e7d1cf74b9ddbfa` |
-| Coverage | PASS | project line `8508/10345=82.2%`、branch `3722/5262=70.7%`；changed core line `26/26=100.0%`、branch `16/16=100.0%`；hosted Core Coverage 成功 |
-| Source-only staging | PASS | `stage_source_tree` 复制 `358` 个文件并通过 `--check`；`release_temp_tree --enforce-clean` 复制 `292` 个文件并通过 |
-| Package rehearsal | PASS | 九包独立暂存、构建、registry-style consumer 和导出检查成功；本地候选资产 bundle 已生成九个 `.cjp`、`checksums.txt`、`manifest.json` 和 `environment.json`，未上传 |
-| Seven-library matrix | PASS (candidate) / MAIN RECHECK PASS | `current-main.json` binds `2758853`; two batches are `770/770` complete, candidate strict validation passes, and post-merge main run `34511955542` passes after squash-safe closure validation |
-| Three-library release performance | **BLOCKING** | 旧 b0 两批仍为 noisy；当前候选的完整 36-workload 证据尚未按当前提交重跑 |
-| Pure baseline/candidate qualification | **BLOCKING** | 正式 runner 的四个 `yjsonDocument*` case 与当前 benchmark 源码漂移；target-only A/B 仍因 CV 超过 5% 而 exit `1`，不能作资格证据 |
-| Native acceleration | PASS (functional) / REVALIDATE (performance) | 当前 fresh custom-native 通过；旧 native performance 资格绑定 b0，不作为当前候选的性能证据 |
-| Release policy | **BLOCKING** | API migration review and current-candidate three-library/Pure/native performance evidence remain incomplete; hosted main workflow and Pages are now PASS |
+| Public API migration review | PASS | `release/public-cangjie-delta-bfd29.toml` 为 `approved-for-release`；17 个 reviewed delta，native activator removal 与 writer seam 分组独立 |
+| Local Linux fresh candidate | **STALE** | 既有 `576/576` rehearsal 绑定更早 commit，不是当前 `00eaf70` 的发布证据 |
+| Hosted PR CI | **BLOCKING** | 当前候选 run `34563502643` 因 Seven-library evidence drift 失败 |
+| Hosted main CI / Pages | PASS (historical) | run [`34511955542`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542) 的 28 jobs 与 Pages 通过；它不是当前候选的合并后 run |
+| Coverage | PASS (historical) | project line `8508/10345=82.2%`、branch `3722/5262=70.7%`；changed core line/branch 均 `100.0%` |
+| Source-only staging | **STALE** | 既有 staging 绑定更早 candidate；当前候选尚未形成最终包 bundle |
+| Package rehearsal | **STALE** | 既有九包 bundle 绑定 `fc050734`，未上传，不能代表当前候选 |
+| Seven-library matrix | **BLOCKING** | `current-main.json` 仍绑定 `2758853` 与旧 release graph；严格校验报告 current release candidate identity mismatch，当前主机没有可用的 <1% idle-core 窗口完成新矩阵 |
+| Three-library release performance | **BLOCKING** | 当前候选完整 36-workload 证据尚未运行 |
+| Pure baseline/candidate qualification | **BLOCKING** | 当前候选首批正式结果未通过；规定重跑在第 7 轮因固定 SDK 动态库缺失退出，没有第二批有效资格报告 |
+| Native acceleration | **BLOCKING** | 当前候选 Native performance 尚未用固定 SDK 重跑；旧 native performance 绑定 b0，不作为当前候选证据 |
+| Release policy | **BLOCKING** | Seven-library、three-library、Pure 和 Native 当前候选证据未全部通过；没有创建 tag 或 Release |
 | Annotated tag / GitHub Release | NOT RUN | Release policy remains blocking; no tag, release, or uploaded assets created |
 | Central package registry | NOT RUN | 未授权发布；没有执行 central publication |
 
 
 ### 候选资产摘要（未上传）
 
-该候选资产由 clean temporary tree 生成，来源 commit 为
-`fc050734aefa2509d41e5ebb769d47fa7b18f7b6`，source tree 为
-`b7ea31233023bf6211c97ee0b929a8c5c395f07f`，provenance 的
-`manifest_sha256` 为 `fb5b0b60e8fe5d71ce4137637ddf7ca33713876f3afc4d21c45d5c732c84085f`，
-`payload_sha256` 为 `f197ab619a671ff04a7f21ab4560d2dca5ac3adc09ba93dcefe3749dc0300248`。
-本地 bundle 归档为 `/tmp/yjson-0.1.0-final-candidate.tar.gz`，
-SHA-256 为 `3b087bcfaa05e1156a567ca9cdfb8817ea279e6787397abd6224deeee69e4daf`。
+现有资产 bundle 只绑定旧 commit `fc050734aefa2509d41e5ebb769d47fa7b18f7b6`，
+不是当前 `00eaf70423b0d6497c7f3e30798734ccc2b9b7b3` 的发布资产。它保留在本地
+作为历史 rehearsal，未上传；当前候选没有在性能门禁通过前生成可发布 bundle。
 
-`checksums.txt` SHA-256 为
+历史 bundle 的 `checksums.txt` SHA-256 为
 `3a2b7cfef4623c97c6aa78ff9751b5c726ef5951bc9e6fd336165e1f0f9d690c`；
-其记录的资产摘要如下：
+其内容和九个 `.cjp` 的摘要不代表当前候选，不能用于 GitHub Release。
 
-```text
-candidate-provenance.json  60f73c7a77e85ff58cc6a21afb73961b68b25e493c589674ec7a5d596981e12a
-environment.json           8c5011420a35044f78715b3bc6ecf93f74328543b82897898665a46a2f398549
-manifest.json              684a53a38ecf82a3d97a84f841ead2aebbb346fc35eb2ea2264b3a54dd0b6dbe
-yjson-0.1.0.cjp           4866e529dfc819a92dcb9be277157b4c31cafe114dcc3357a5bd658f925b5013
-yjson_algorithms-0.1.0.cjp cefd0c66b0c28f9e80c59c0efcdedd265b20173acdd3d22a98ec4262e4146f33
-yjson_backends-0.1.0.cjp a712820eaa3883a91edd814d63e951ebca5b0f179cd3a38e1f63c839768d3e76
-yjson_macros-0.1.0.cjp 4865f2bb9c67a0ed68cabbc4072daa2ec5f7ddb32735e7344d3022b42c24e7c2
-yjson_native-0.1.0.cjp c14ecb526ae0ff59d14189b39499fc8c36e695f72673c582daecded2a6bc7cbb
-yjson_native_accel-0.1.0.cjp abe0de7bed391c57f9d1a93c4e4c6f13b073ea275e582462af2e7d14626e665d
-yjson_native_primitives-0.1.0.cjp 3df0762ebcd43720cde2336c1888a6b7cb42692d07343be8074bb37191789330
-yjson_schema_formats-0.1.0.cjp 5f1a5302923b4a6d26ea63cb46fa77d550919c58180937c5e7cbbf0b84a79c9b
-yjson_yyjson-0.1.0.cjp 26848fa1a443ac81f45499b24d4c193c95ad2c78ed6a2177c2c2e5c32c61d22b
-```
-
-资产已通过 `sha256sum -c checksums.txt` 验证；tag、GitHub Release
-和中心仓库上传仍未执行。
 
 ## 3. 性能证据
 
@@ -122,21 +102,30 @@ stdx.json、cjfast_json 共同 workload，11 轮，workload 旋转、偶数轮�
 该行及其他 noisy 行只保留方向证据，不发布精确比例；由于第二批仍未满足
 CV 门槛，三库正式性能 gate 为 BLOCKING。
 
-### Pure 基线/候选
+### Pure 基线/候选（当前候选）
 
-`json_pure_perf_compare.py` 的默认 case 列表包含当前
-`packages/benchmarks` 中不存在的四个 `yjsonDocument*` 方法，因此完整命令
-无法形成合法的全量报告。以性能父提交
-`9d4387192296ce7c3ec5a5024e52ad0084bf7891` 为 baseline、b0 为 candidate，
-保留其余 24 个可用 case 后运行 11 轮、CPU 8、128 MiB、`--rebuild --enforce`；
-结果归档 SHA-256 为
-`fe10c2a302e728015284be0ef67ac648c6cb3abd64fada4a397080289f7e76ac`，
-命令 exit `1`。
+当前 runner 已删除与 `packages/benchmarks` 不存在的四个 `yjsonDocument*` case，
+保留 24 个实际存在的 case。正式第一批以
+`175a4b23656ab44d2d139b810e69ac364347297a` 为 baseline、以当前候选
+`00eaf70423b0d6497c7f3e30798734ccc2b9b7b3` 为 candidate，使用 11 轮、CPU 8、
+128 MiB、`--rebuild --enforce`。
 
-目标 `yjsonStringDecodeLargeProfileArray`：baseline `74.633 us`，candidate
-`75.182 us`，C/B=`1.007x`，improvement=`-0.7%`，candidate wins=`2/11`；
-目标要求为提升至少 `5%` 且 wins 至少 `5/11`。另有 case 的 CV 超过 `5%`，
-因此该 A/B 结果不能作为发布资格。
+第一批目标 `yjsonStringDecodeLargeProfileArray`：baseline `95.784 us`，
+candidate `93.943 us`，C/B=`0.981x`，improvement=`1.9%`，candidate wins=`8/11`；
+预先规定的目标是 improvement 至少 `5%` 且 wins 至少 `5/11`。该批目标 CV 为
+`5.96%/6.50%`，全表还存在 CV 超过 `5%`、普通回退超过 `1.05x` 的行。
+`summary.json` SHA-256 为
+`67234419929b5293472b89d403513c526b1b895186fd3a6e42e2cad1d30b5d24`，
+`provenance.json` SHA-256 为
+`c7d7e9e92dde41a42436a1b6e8e1c54859406dcb40cee37837ec96247a51f73e`；
+该批 gates `passed=false`，命令 exit `1`。
+
+按方法对相同输入执行第二批完整重跑。第二批在第 7 轮的
+`decodePersonChunk4k` candidate 进程退出，日志记录
+`libstdx.encoding.json.so: cannot open shared object file`，因此没有生成
+第二批 `summary.json`，不能将这次中断标记为 noisy 或 PASS。固定的
+`1.1.0-alpha.20260829040003` SDK 路径在重跑期间被外部环境移除；没有切换
+到后来出现的其他 SDK 继续测量。Pure qualification remains BLOCKING.
 
 ### Native acceleration
 
@@ -161,18 +150,21 @@ Native 运行源码闭包 SHA-256 为
 ## 4. 决定
 
 ```text
-Local fresh-source simulation: PASS (current candidate branch; 576/576 root tests)
-Hosted PR execution: PASS (run 34494604326; all 28 jobs passed)
-Seven-library evidence integrity/freshness: PASS on candidate branch (two complete 770-cell batches)
-Three-library performance qualification: BLOCKING (full current-candidate matrix not run)
-Pure baseline/candidate qualification: BLOCKING (runner drift and noisy target-only A/B)
-Native acceleration: PASS functionally; performance qualification must be revalidated
-Public API migration review: BLOCKING
-Hosted main execution and Pages: PASS (run 34511955542; all 28 jobs passed)
-Coverage: PASS (project 82.2%/70.7%; changed core 100.0%/100.0%)
+Public API mechanical inventory: PASS (1094 declarations; 9 packages)
+Public API migration review: PASS (approved-for-release; 17 reviewed deltas)
+Local fresh-source simulation: STALE (existing 576/576 rehearsal predates 00eaf70)
+Hosted PR execution: BLOCKING (run 34563502643 failed Seven-library evidence drift)
+Seven-library evidence freshness: BLOCKING (marker identity is stale; no idle-core window for a fresh matrix)
+Three-library performance qualification: BLOCKING (current candidate matrix not run)
+Pure baseline/candidate qualification: BLOCKING (first batch failed; prescribed rerun aborted by missing fixed SDK library)
+Native acceleration: BLOCKING (current candidate performance not revalidated)
+Hosted main execution and Pages: PASS historically (run 34511955542; not the current candidate)
+Coverage: PASS historically (project 82.2%/70.7%; changed core 100.0%/100.0%)
 Release decision: BLOCKED; no tag, GitHub Release, or registry publication
 ```
 
-待关闭项：完成新增 native writer declarations 的 migration review；按当前候选
-重新生成并通过完整三库/Pure/native 性能与稳定性证据。关闭前不得创建 `0.1.0` tag
-或 GitHub Release。
+当前可执行的下一步是恢复并固定
+`1.1.0-alpha.20260829040003` SDK，获得 <1% idle-core 窗口，再按方法
+重新生成当前候选的七库、三库和 Native 证据。Pure 第一批的目标回退和稳定性失败
+还需要候选性能修复或明确的发布决策；不能通过切换 target、筛选 case 或重写历史
+metadata 关闭门禁。关闭前不得创建 `0.1.0` tag 或 GitHub Release。
