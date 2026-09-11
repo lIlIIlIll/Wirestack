@@ -139,11 +139,12 @@ internal class BoundedSystemResolverBackend {
         host: HostName,
         service: ?String,
         options: ResolveOptions,
-        context: OperationContext
+        context: OperationContext,
+        absolute!: Bool = false
     ): ResolveResult {
         checkResolveContext(context)
         let startedAt = MonoTime.now()
-        let jobHandle = submit(host, service, options)
+        let jobHandle = submit(host, service, options, absolute)
         let output = ResolverPollOutput(options.maxResults)
         var waitDelay = RESOLVER_INITIAL_WAIT
         try {
@@ -211,12 +212,14 @@ internal class BoundedSystemResolverBackend {
     private func submit(
         host: HostName,
         service: ?String,
-        options: ResolveOptions
+        options: ResolveOptions,
+        absolute: Bool
     ): UInt64 {
         let output = Array<UInt64>(1, repeat: 0u64)
         let status = synchronized(mutex) {
             let current = requireOpen()
-            withCStringResult(host.ascii, {hostValue =>
+            let name = if (absolute) { "${host.ascii}." } else { host.ascii }
+            withCStringResult(name, {hostValue =>
                 match (service) {
                     case Some(value) => withCStringResult(value, {serviceValue =>
                         submitNative(current, hostValue, serviceValue, options, output)
