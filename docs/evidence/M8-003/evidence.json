@@ -1,0 +1,599 @@
+{
+  "acceptance_status": "PASS",
+  "generated_at_utc": "2026-09-11T04:46:25.797002Z",
+  "platform": {
+    "libc": "glibc",
+    "libc_version": "2.44",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "reports": [
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/plan-validation.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "891e658a75111c612dbfa3f0491a7c3370a53a02e13c8060ceda45ddc1a4f29e"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/architecture-guard.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e0c542d8f97b59d3c47a99a5b0e1572f1442f6616ee3e9237eea1ea41d3322b4"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/task-validation.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "c04f3c72628b49da75f040a06a905de907114cb59adac14484612bb899f8fc24"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/cangjie-check.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "af19b5b7d300a2acad4f7fa6e42d6643e6f00fb95e41a8b4426bd8a9d7ec5783"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/cangjie-build.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b985e0e85d043a0ae52be3ca138507876f803e378ae8e3538b25a6be7fca3602"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/network-tests.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a11ab427be81dc06f285a75f9fb2632dad291379c4d03ed4af2c43156f480ecd"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/transport-tests.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "62d739f0063037a993a04b2d54efb129f3d256f7d8b2eb4a43f8bdd2dcc49dd9"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/native-consumer-command.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "afce607b524b94f033e9d57c88c76b75e399f668ba8566871d80cd47be2c7e20"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/native-sockets.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "80b5023bd5106afc64b411e00275e4317e6ab6a2c6aec856cdc9eef39f72591f"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/sdk-primitive-qualification.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e6dc2778c676cdc3d30ebe953fae5e81d4ffa6dc3e59c9d834c98e7b05dcf15a"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/api-compatibility.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b8174809df272151a3e685e35118e6294c60aafd5d2bb04da8cccd128de59e82"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/api-inventory-command.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "3d2320d1606fe3edd971767d0002d63fe8be74f5c644d40d2669e19a4367b081"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/docs-report.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "11a788b7431d3cdc92312b4aec1b7830446831378a628a5231f472508cf62502"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/docs-command.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "fe6e45e62d4ac4426b68adfe9762a034b0b208918626cbc976296897b04e2c7c"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/full-check.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "71aa5051b4742e899362e52bbacfa6ae22c54b14aad5efb95f25288c55f8601a"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/regression-tests.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "222a702060408bfe9088df46d0896305950bf44438835ddc2ca21ed494a4686b"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/review.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a814ff0e23ab1df51cabb169bccb748feb0f1c48f5b2aa41fa2925478bf550b0"
+      },
+      "source_task": "M8-003"
+    },
+    {
+      "acceptance_status": "PASS",
+      "path": "docs/evidence/M8-003/workspace-safety-publication.json",
+      "sha256": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "663e8e77a01e92118e449306beaa773533488fd6a73fe7ec594ac9728e5b48b5"
+      },
+      "source_task": "M8-003"
+    }
+  ],
+  "revision": "a12daebbf0ab4fa95b078268148adffac6b29448",
+  "schema_version": 2,
+  "source_sha256": {
+    ".gitignore": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "200edb1fb8983fdb0e5f585d4c99b9fb186dad16709bcef1e0a0d98038159918"
+    },
+    "README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e7cb77d01cbabd084f67eafd609e200c9d2f5050c22d1a74cd7a18b14389d536"
+    },
+    "docs/api/README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "63de651c4bbc120fbdf8abb9666530bb8fb53c6cbc97df7b15a2b5a59ad55d06"
+    },
+    "docs/api/baselines/wirestack-linux-pre1-m8-003.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8a3f50fc6b36e2eff89ca12d7622375672ee545899c94009c5b79632aa73c195"
+    },
+    "docs/evidence/M8-003/README.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "68a694b2d59e65a9791c700e1aa877595d2b47b7619ea07d148931df435a72eb"
+    },
+    "docs/evidence/M8-003/api-inventory.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "13f28c453535754e10d20d26d5325cdcedbd33ce461d24cbb4ea1bf1c298b1eb"
+    },
+    "docs/evidence/M8-003/architecture-guard.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/architecture-guard.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8b2dbae630f72795bcd945626678170a61fc8ef367901d6b91d3d6c145ea45f7"
+    },
+    "docs/evidence/M8-003/cangjie-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "78063151ed22fcc4e3a1cba1e750fc2c7ee542d37d5e1044f2df093bfcde0789"
+    },
+    "docs/evidence/M8-003/cangjie-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-003/cangjie-check.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/cangjie-check.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5abbfcc1ccab341c084bd90f5817673ac0ffb479e72f094c6f43d497a7c111ef"
+    },
+    "docs/evidence/M8-003/native-socket-consumer.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/native-socket-consumer.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "b4aa7df416bffc1b1ede0ac73b6c0ec6a2efc962626fdcb258c4566b55daf1f9"
+    },
+    "docs/evidence/M8-003/native-sockets/abstract.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/native-sockets/abstract.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9aa2fb43c62bd0803e592f875f2b0f43c85e91af029db88aa137228c1df76689"
+    },
+    "docs/evidence/M8-003/native-sockets/abstract.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8c1cd23300e61fdf25ebe630484b7e670419664e8a697f82fc0d3054baff9c91"
+    },
+    "docs/evidence/M8-003/native-sockets/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "78063151ed22fcc4e3a1cba1e750fc2c7ee542d37d5e1044f2df093bfcde0789"
+    },
+    "docs/evidence/M8-003/native-sockets/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-003/native-sockets/pathname.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/native-sockets/pathname.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "47004a17a2ed2c69008175e6e6259004bf3e15b5920d624b6216e50a5d69956e"
+    },
+    "docs/evidence/M8-003/native-sockets/pathname.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "36039d220611b2c5a818b797f34fe9874e5071d9fee6dcc248d837dcddab2c0d"
+    },
+    "docs/evidence/M8-003/native-sockets/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/native-sockets/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-003/network-contract-tests.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/network-contract-tests.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "737cd6f50f6aa565a8cafe706298fb65c60f02d83b57755196523624f8bd5d06"
+    },
+    "docs/evidence/M8-003/plan-validation.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/plan-validation.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f334e1311df395726cf3206ed8dcc893be4ea6c07ccaea77b316cddc94bef816"
+    },
+    "docs/evidence/M8-003/public-api-documentation.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/public-api-documentation.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f8a0c00ef343ade6668c0c2239ec6f46a1e546daaae607cd0cfd34a1f0edc639"
+    },
+    "docs/evidence/M8-003/public-api-inventory.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/public-api-inventory.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "20d5f6a4131bf39467904bb2c9784a1822c3d93a9431e51515bb05e45abb9dd6"
+    },
+    "docs/evidence/M8-003/repository-full-check.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "fd829d9ac4813873b7c4c5766997d0171da221395ae7279d7dd1d2ba84802471"
+    },
+    "docs/evidence/M8-003/repository-full-check.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "757d3bc21c467e61fa7ce97d52f71cca786d5192a45a192c633fb41fe9126c40"
+    },
+    "docs/evidence/M8-003/repository-regression-tests.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "44cc88cc9cf6ae7c335f1b2c3d9fc23e4cfc6a1169d8679f7181dfff2157c795"
+    },
+    "docs/evidence/M8-003/repository-regression-tests.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/review-reproduction/cancellation-admission-after.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "0bbdf693686d06fac7f246dda934ae9793a50ecad49c99f57cfb4bfc7ea1788e"
+    },
+    "docs/evidence/M8-003/review-reproduction/cancellation-admission-after.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/review-reproduction/cancellation-admission-after.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "faae01825647787faf86bd1f12e38b72d389a1add0cab3076484cd0b4219b73d"
+    },
+    "docs/evidence/M8-003/review-reproduction/cancellation-admission-before.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5a52fc3756159f5e2eedbc3964aec8fcb9c0d095f3ecfbc58ac84dfba1ba432a"
+    },
+    "docs/evidence/M8-003/review-reproduction/cancellation-admission-before.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bc37c062ce41562eb2ac1eae16155c98ee7ec7bda24c5ddb0677abd9d3c61c2d"
+    },
+    "docs/evidence/M8-003/review-reproduction/cancellation-admission-before.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4e38f07b1234ba59b11087a35d386a2762e09a214e91afbdb9db412584e9fbfb"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "78063151ed22fcc4e3a1cba1e750fc2c7ee542d37d5e1044f2df093bfcde0789"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/pathname.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/pathname.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "75c0ac9a45071ba6a8d1d1fde07605a094555ea56b76c0e775b7791d71eefcb3"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/pathname.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5a9476a40d71f875a5f67154c0475a21813d9155b3193a4963973192a5798dd1"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/report.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bc87ca60f41bcd75e2560a41ccc455d507b59b8705d1290fba4f4b9fdd644da7"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-before/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/consumer-build.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "78063151ed22fcc4e3a1cba1e750fc2c7ee542d37d5e1044f2df093bfcde0789"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/consumer-build.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/pathname.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/pathname.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "75c0ac9a45071ba6a8d1d1fde07605a094555ea56b76c0e775b7791d71eefcb3"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/pathname.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5085c928933f82b5c3d8665de31e4aae370936d16ad67d356c8950083462fac0"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/report.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e284c15ee1a98dc9abdd3be0b32e3149940d8672446b594832384d97ee4eb6fa"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/toolchain.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-peer-sdk-send/toolchain.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+    },
+    "docs/evidence/M8-003/review-reproduction/connected-send.patch": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "25002c9ab4ece15cf806c56ba56a507dc95e5547882922248a66571bafa2dbad"
+    },
+    "docs/evidence/M8-003/review-reproduction/diagnostic-stdnet-test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "168b4c378e89dbceaafef63328ba127b80d859b5d567a22ea5d4da7c4266a334"
+    },
+    "docs/evidence/M8-003/review-reproduction/initial-transport.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "fad53fe288ad6cebb4fed30194ea81de72eb5173ca58044d71317d33afae8085"
+    },
+    "docs/evidence/M8-003/review-reproduction/initial-transport.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "bc37c062ce41562eb2ac1eae16155c98ee7ec7bda24c5ddb0677abd9d3c61c2d"
+    },
+    "docs/evidence/M8-003/review-reproduction/initial-transport.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "dfc50b6ffdf4a78bab11ce3606afd54fa3af25429af26b27cc4d265d598bd8cc"
+    },
+    "docs/evidence/M8-003/review-reproduction/sdk-connected-send-attempt.patch": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "eee5ac4cb88d76bb94716c035d49a5dea5370c39430f9a503ec9653d02057b98"
+    },
+    "docs/evidence/M8-003/sdk-primitive-qualification.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e6dc2778c676cdc3d30ebe953fae5e81d4ffa6dc3e59c9d834c98e7b05dcf15a"
+    },
+    "docs/evidence/M8-003/sdk-primitives/bind-listen-probe.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f31a65125d0e90346c7c2eb8051025d4f0ce13455f2b1788bdff6a7ec5ae8187"
+    },
+    "docs/evidence/M8-003/sdk-primitives/bind-listen-probe.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "c08abd943a238094d9646f84eb9c25993d1d81ded5439cf499ca303db69bb974"
+    },
+    "docs/evidence/M8-003/sdk-primitives/sdk-daily-probe-run.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "807813019eb56f0016d87fbeb983c228551c70075710a9538fc9669957405454"
+    },
+    "docs/evidence/M8-003/sdk-primitives/sdk-path-probe-run.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "51d97cbd0ac8c8490df742341ed6cafd2126a76f1f1505bbeabc914509393a63"
+    },
+    "docs/evidence/M8-003/sdk-primitives/sdk-probe-run.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "184820af5f09f635aa8167fe65cdc78363641f15d8701e7bed84f81423e5ec50"
+    },
+    "docs/evidence/M8-003/sdk-primitives/sdk-probe.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "4e42efa7fa73dc87269a63ffd18f999accb4b7b17637e7ab6e9a2340cea1fdaf"
+    },
+    "docs/evidence/M8-003/sdk-primitives/sdk-source-probe-run.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5344cd64bbce511ba1e2640faa558e1592d1bfa2c18be65ea0c65a838a94d6ac"
+    },
+    "docs/evidence/M8-003/sdk-primitives/sdk-utf8-probe-run.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "f31a65125d0e90346c7c2eb8051025d4f0ce13455f2b1788bdff6a7ec5ae8187"
+    },
+    "docs/evidence/M8-003/sdk-primitives/sdk-utf8-probe.syscalls.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "561fbc541c58540a8a9f26cac9547913307736b16e98d2a64335b0f9b930b88f"
+    },
+    "docs/evidence/M8-003/sdk-primitives/unix_bind_listen_probe.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a91226576b5cbd1fe333084b2812f1fc632332264e06f54e9cee9aed1b76c2ae"
+    },
+    "docs/evidence/M8-003/sdk-primitives/unix_path_probe.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "15bc40175f3fb43b2540213d42dae132e64dafc232a9607838600945164eae5d"
+    },
+    "docs/evidence/M8-003/sdk-primitives/unix_sdk_probe.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "ba097956e392b5a3dfe5588be3f3776ca3ea91e606d82de53b30e99ec22b861f"
+    },
+    "docs/evidence/M8-003/sdk-primitives/unix_sdk_utf8_probe.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5379a75f81d38d0697ae4820c9d7c26a54b86c498b4e4bc701c2069fba30007e"
+    },
+    "docs/evidence/M8-003/sdk-primitives/unix_source_probe.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8298212aedddfe404d9d3ffc01369731afdb54a4e8c6002285d1e890ea26c774"
+    },
+    "docs/evidence/M8-003/task-contract-validation.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/task-contract-validation.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "d8622b4255fdc7b77e286adcdb9f57a93261b0bb62a42b527ed572709ba2c564"
+    },
+    "docs/evidence/M8-003/test-plan.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5c48b2bae407d1ab7f693aebcdd090b32ab1b1a1b910789d6f19f6f2a39ec477"
+    },
+    "docs/evidence/M8-003/transport-regression-tests.stderr.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs/evidence/M8-003/transport-regression-tests.stdout.log": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "353bfb17ebb4ecfa2d2cbfa8c5976d1ec0132207c888852c0035a8beb64090f0"
+    },
+    "docs/evidence/M8-003/workspace-safety-publication.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "663e8e77a01e92118e449306beaa773533488fd6a73fe7ec594ac9728e5b48b5"
+    },
+    "docs/guides/network-foundation-linux.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "8993b12b15dec7d8fe495a40fc88e1f96a1ee669c07b8eac56e6f87ce2839dce"
+    },
+    "docs/planning/implementation-backlog.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "33868fc29396a6c5644a0593ae86f90288cef2f7006c06f6f9760920618c947d"
+    },
+    "docs/planning/status.md": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "5cd84da1eff4b2dcf11f9b22a3a2432c60d798d55da7c2b29fc6a7ecab9fe1c6"
+    },
+    "examples/linux/m8_003/main.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "9f15e5a6e3eff1b8477ac8b80b79d4d43ab03669e351b73c5fc23bf1bf4576ba"
+    },
+    "src/internal/transport_stdnet/net_contract.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "e42b90c7c1b12e7b90e79e3ec7e51cf747183b838d04079375850ee31e211cbc"
+    },
+    "src/internal/transport_stdnet/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2d055c6698f10b8b5383fafa103411b8a8486b255b3838112dee7c884036f597"
+    },
+    "src/internal/transport_stdnet/stdnet_transport_test.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "112f93054d8b56cf71729c789a49a82509a0141f55dc61628d9b66e06c583ecd"
+    },
+    "src/internal/transport_stdnet/udp_socket.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "322ec7f64149760896f3e2688c9898cfff8a6e656aa414a8f7dc66b0ec9d46f5"
+    },
+    "src/internal/transport_stdnet/unix_address.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "1b78eebb05452dffa736a3318a23642885b7b38017d5f2ddc2a2b3a3ed2565b3"
+    },
+    "src/internal/transport_stdnet/unix_listener.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "77d1b1d3fba1e012bf3a6068a08a2052ab2020efd904629c9567d17fff62c0cc"
+    },
+    "src/net/datagram_socket_core.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "2095e7d3a02c805c3018badf7045b0d76a42a56e101a2e08867f32b676c34ae6"
+    },
+    "src/net/package.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "05ee39721856fab3dc82dc4a83baaa0adfd9bb8af4fb38e0af41d4f5cb4430cc"
+    },
+    "src/net/udp_socket.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "a59cba97d797a3800338f6a8594bfcd0f93456fc926421b2f9bce81149c9546b"
+    },
+    "src/net/unix_datagram_socket.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "7447856c277d45d943087e3285fd0ade950cf7047fbf232052e1cd9d0a730511"
+    },
+    "src/net/unix_listener.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "aa964800977f95ff67a6351a91c16d950324bbe0c50d7b01c5f1484f06e01967"
+    },
+    "src/net/unix_stream.cj": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "399aeac5d19f6457e2342fd7b1af3a76943f00db50a21c1474bed3b3141acb8b"
+    },
+    "tools/docs/m7_033_docs.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "52c0e76db9c17c4165f2e1429236aa092d9fbafa44c46432aa2a518dc0209208"
+    },
+    "tools/m8_003_native_sockets.py": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "6caf6ae365502d53b6a0d8f0b6bec037a72017e593825752d6caf249d961d313"
+    },
+    "tools/tasks/M8-003.json": {
+      "domain": "text-utf8-lf-v1",
+      "sha256": "53c3ccaa7dc2e8accc19cc6740432a9cdff7d9faf4a4b8285f6eb0c4deedc310"
+    }
+  },
+  "source_task": "M8-003",
+  "toolchain": {
+    "cjc": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+    "cjpm": "Cangjie Project Manager: 1.1.3"
+  }
+}
