@@ -221,10 +221,12 @@ class PurePerfGatePolicyTest(unittest.TestCase):
             "--corpus", "/tmp/corpus",
             "--output", "/tmp/output",
             "--rebuild",
+            "--cpu", "2",
         ]
         with mock.patch.object(sys, "argv", argv):
             args = MODULE.parse_args()
         self.assertTrue(args.rebuild)
+        self.assertEqual(args.cpu, 2)
 
 
 if __name__ == "__main__":

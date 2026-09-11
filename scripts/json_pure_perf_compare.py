@@ -95,6 +95,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--corpus", required=True, type=pathlib.Path)
     parser.add_argument("--output", required=True, type=pathlib.Path)
     parser.add_argument("--rounds", type=int, default=11)
+    parser.add_argument(
+        "--cpu",
+        type=int,
+        default=None,
+        help="pin measurement to an explicit logical CPU instead of idle selection",
+    )
     parser.add_argument("--idle-sample-seconds", type=int, default=30)
     parser.add_argument("--enforce", action="store_true")
     parser.add_argument(
