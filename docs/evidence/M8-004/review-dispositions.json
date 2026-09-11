@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "scope": "Disposition of five independent source findings after public regression and native execution",
+  "original_reviews": [
+    "docs/evidence/M8-004/development/wire-review-original.json",
+    "docs/evidence/M8-004/development/policy-review-original.json"
+  ],
+  "findings": [
+    {
+      "title": "Legal NS-to-glue compression rejects valid DNS answers",
+      "status": "FIXED",
+      "red": "docs/evidence/M8-004/development/legacy-glue-red.log",
+      "green": [
+        "docs/evidence/M8-004/development/legacy-glue-green.log",
+        "docs/evidence/M8-004/native-scenario-fixed.json"
+      ]
+    },
+    {
+      "title": "Share CNAME traversal state across response messages",
+      "status": "FIXED",
+      "red": "docs/evidence/M8-004/native-review-red.json",
+      "green": [
+        "docs/evidence/M8-004/native-review-green.json",
+        "docs/evidence/M8-004/native-scenario-fixed.json"
+      ]
+    },
+    {
+      "title": "Include same-response CNAME TTLs in NXDOMAIN expiry",
+      "status": "FIXED",
+      "red": "docs/evidence/M8-004/native-review-red.json",
+      "green": [
+        "docs/evidence/M8-004/native-review-green.json",
+        "docs/evidence/M8-004/native-scenario-fixed.json"
+      ]
+    },
+    {
+      "title": "Cache NXDOMAIN independently of the requested record type",
+      "status": "FIXED",
+      "red": "docs/evidence/M8-004/native-review-red.json",
+      "green": [
+        "docs/evidence/M8-004/native-review-green.json",
+        "docs/evidence/M8-004/native-scenario-fixed.json"
+      ]
+    },
+    {
+      "title": "Try the fifteenth suffix when the bare name runs first",
+      "status": "FIXED",
+      "red": "docs/evidence/M8-004/native-review-red.json",
+      "green": [
+        "docs/evidence/M8-004/native-review-green.json",
+        "docs/evidence/M8-004/native-scenario-fixed.json"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 476377859 ns, RESULT:
+    TCS: DnsClientWireTest, time elapsed: 28580425 ns, RESULT:
+    [ PASSED ] CASE: publicQueryAndLookupUseRealUdpAndRetainAbsoluteCacheExpiry (2438615 ns)
+    [ PASSED ] CASE: publicQueryEncodesEveryModeledRecordType (7911024 ns)
+    [ PASSED ] CASE: wrongSourceIdAndQuestionAreIgnoredBeforeValidUdpResponse (1049881 ns)
+    [ PASSED ] CASE: validatedTruncationFallsBackToExactTcpFrame (1155095 ns)
+    [ PASSED ] CASE: tcpResponseCannotRemainTruncated (1373088 ns)
+    [ PASSED ] CASE: malformedMatchingResponseAndUnrelatedSectionsCannotPoisonCache (3210265 ns)
+    [ PASSED ] CASE: cnameTraversalUsesAnswerOwnersAndRejectsConflictingTargets (2130120 ns)
+    [ PASSED ] CASE: rfc2308CacheRetainsNxdomainVersusNodataWithoutNewPackets (2099246 ns)
+    [ PASSED ] CASE: zeroTtlNeverCreatesAPositiveCacheEntry (1931106 ns)
+    [ PASSED ] CASE: callerCancellationAndClientCloseWakeActiveNativeReceive (2140909 ns)
+    [ PASSED ] CASE: boundedAdmissionRejectsExcessAndCloseWakesQueuedCallers (960421 ns)
+    TCS: DnsResolverPolicyTest, time elapsed: 221277897 ns, RESULT:
+    [ PASSED ] CASE: fromSystemParsesTabsCommentsLastSearchAndClampedNdots (397963 ns)
+    [ PASSED ] CASE: systemNameserversRetainOnlySupportedNumericZones (245745 ns)
+    [ PASSED ] CASE: configOwnsInputArraysAndReturnsDefensiveCopies (43740 ns)
+    [ PASSED ] CASE: systemFilesFailClosedWhenMissingOversizedOrNonregular (12720261 ns)
+    [ PASSED ] CASE: hostsAliasesFilterFamiliesAndRemainSnapshotted (574138 ns)
+    [ PASSED ] CASE: trailingRootSkipsSearchWhileNdotsSelectsSearchOrAbsoluteFirst (3938151 ns)
+    [ PASSED ] CASE: exactHostsEntryWinsBeforeSearchSuffixDns (200568068 ns)
+    [ PASSED ] CASE: cancelledExpiredAndClosedCallsRetainPublicResolveClassifications (315044 ns)
+    [ PASSED ] CASE: connectUsesHostsMappingForANativeListenerExchange (610904 ns)
+    [ PASSED ] CASE: resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmission (329788 ns)
+    TCS: DnsWireParserTest, time elapsed: 2446316 ns, RESULT:
+    [ PASSED ] CASE: decodesCompressedTargetsBinaryTxtSoaAndUnknownData (110299 ns)
+    [ PASSED ] CASE: recordOrderMakesAnswerAuthorityAndAdditionalBoundariesExplicit (53361 ns)
+    [ PASSED ] CASE: summariesAndRecordsOwnParserAndConstructorInputs (75570 ns)
+    [ PASSED ] CASE: parserPreservesQuestionIdentityAndRejectsIncompleteRecords (82614 ns)
+    [ PASSED ] CASE: asciiNameProfileRejectsAmbiguousLabels (115898 ns)
+    [ PASSED ] CASE: compressionLoopsForwardPointersAndOutOfRangePointersAreRejected (60994 ns)
+    [ PASSED ] CASE: expandedNameAndSectionCountsRespectConfiguredBounds (61260 ns)
+    [ PASSED ] CASE: completeParserRejectsTrailingAndTruncatedSectionBytes (36202 ns)
+    [ PASSED ] CASE: typedRdataLengthsAndTxtSegmentsAreExact (55828 ns)
+    [ PASSED ] CASE: compressedRdataNamesCannotConsumeNeighboringRecordBytes (48832 ns)
+    [ PASSED ] CASE: srvTargetCompressionIsRejectedEvenWhenPointerIsInBounds (33784 ns)
+    [ PASSED ] CASE: summaryConstructorRejectsSectionMetadataThatCouldBlurBoundaries (15256 ns)
+    [ PASSED ] CASE: additionalOwnerMayReferenceAuthorityNameserverTarget (42130 ns)
+    [ PASSED ] CASE: additionalOwnerMayReferenceSecondLegacyMailboxName (56241 ns)
+    TCS: DnsWireFuzzTest, time elapsed: 102214876 ns, RESULT:
+    [ PASSED ] CASE: wireMutationsRejectMalformedMessagesOrRetainOwnedSections (101992808 ns)
+    STDOUT:
+    M8004_FUZZ target=dns-wire seed=8004 corpus=12 iterations=8544 accepted=3013 rejected=5531 decision=PASS
+    TCS: M8002TcpListenerTest, time elapsed: 56947656 ns, RESULT:
+    [ PASSED ] CASE: bindRejectsInvalidBacklogAndStoppedContextsWithStructuredErrors (72994 ns)
+    [ PASSED ] CASE: bindFailureRetainsPublicCoordinatesAndCause (110995 ns)
+    [ PASSED ] CASE: cancelledAndExpiredAcceptsLeaveListenerReusable (24543242 ns)
+    [ PASSED ] CASE: acceptedStreamTransfersExactDataInBothDirections (358091 ns)
+    [ PASSED ] CASE: overlappingAcceptIsRejectedWithoutCreatingAPendingQueue (29968688 ns)
+    [ PASSED ] CASE: stoppedCloseAdmissionHasNoNativeEffectAndListenerRemainsUsable (229366 ns)
+    [ PASSED ] CASE: gracefulAndAbortTerminalOwnersAreStableAndWakeAccept (220019 ns)
+    TCS: M8002UdpSocketTest, time elapsed: 25056443 ns, RESULT:
+    [ PASSED ] CASE: datagramBoundariesAndOwnedPayloadSurviveScratchReuse (309462 ns)
+    [ PASSED ] CASE: exactCapacityAndTruncationDiscardOnlyTheCurrentDatagramTail (300639 ns)
+    [ PASSED ] CASE: connectedSocketSelectsNativePeerAndFiltersOtherSenders (265760 ns)
+    [ PASSED ] CASE: invalidAndUnsupportedInputsLeaveSocketReusable (2494205 ns)
+    [ PASSED ] CASE: cancellationDeadlineCloseAndAbortRetainDistinctState (20637285 ns)
+    TCS: NetworkFoundationContractTest, time elapsed: 39187783 ns, RESULT:
+    [ PASSED ] CASE: unixEndpointFormsAreDistinctAndOwned (11613 ns)
+    [ PASSED ] CASE: unixEndpointRejectsUnboundedNames (23075 ns)
+    [ PASSED ] CASE: rawSocketCapabilityBoundaryRequiresDomainSpecificProtocol (27524 ns)
+    [ PASSED ] CASE: cancelledConnectFailsBeforeSocketCreation (40826 ns)
+    [ PASSED ] CASE: tcpStreamCancellationDistinguishesUntouchedFromAbortedDelegate (51188 ns)
+    [ PASSED ] CASE: tcpStreamGracefulCloseIsRetainedAndIdempotent (15409 ns)
+    [ PASSED ] CASE: tcpStreamTerminalCloseSkipsStoppedContextsAndCallerClock (59607 ns)
+    [ PASSED ] CASE: tcpStreamNonterminalStoppedCloseAdmissionStillRejects (40526 ns)
+    [ PASSED ] CASE: tcpStreamCloseNormalizesContextFailureWithoutTakingOwnership (37262 ns)
+    [ PASSED ] CASE: tcpStreamAbortRetainsItsCauseAndConnectionFacts (70127 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownPublishesOnlySuccessfulTransitions (46415 ns)
+    [ PASSED ] CASE: tcpStreamReadShutdownRejectsEveryReadPathWithoutLosingWrites (52615 ns)
+    [ PASSED ] CASE: tcpStreamWriteShutdownRejectsEveryWritePathWithoutLosingReads (49220 ns)
+    [ PASSED ] CASE: tcpStreamEmptyOperationsRemainImmediateAfterDirectionalShutdown (17886 ns)
+    [ PASSED ] CASE: tcpStreamReadExactAddsCapturedEndpointsToUnexpectedEof (28091 ns)
+    [ PASSED ] CASE: tcpStreamReadKeepsPeerEofGraceful (15754 ns)
+    [ PASSED ] CASE: tcpStreamReadExactMergesCapturedAndStructuredEndpointMetadata (36434 ns)
+    [ PASSED ] CASE: tcpStreamIoConflictsRetainCapturedEndpointsWithoutClosing (85285 ns)
+    [ PASSED ] CASE: tcpStreamDirectionalShutdownDoesNotPromoteWokenIoToFailure (58563 ns)
+    [ PASSED ] CASE: tcpStreamFinalShutdownRemainsGracefulWhenItWakesIo (32806 ns)
+    [ PASSED ] CASE: tcpStreamFailuresRetainOriginalErrorAndReleaseDelegate (59943 ns)
+    [ PASSED ] CASE: tcpStreamRetainsNativeCancellationOwnership (1328478 ns)
+    [ PASSED ] CASE: tcpStreamNormalizesUnexpectedDelegateFailures (149869 ns)
+    [ PASSED ] CASE: tcpStreamPrecancelledIoCannotClaimAnotherClosesOwnership (153749 ns)
+    [ PASSED ] CASE: tcpStreamCancellationOwnershipSurvivesOtherObservers (57362 ns)
+    [ PASSED ] CASE: tcpStreamAbortCannotRelabelClaimedGracefulNativeClose (37879 ns)
+    [ PASSED ] CASE: tcpStreamAbortOwnershipSurvivesCompetingIoAndLateCloseFailure (81840 ns)
+    [ PASSED ] CASE: tcpStreamCancellationBoundsCloseWaitAndLateSuccessRemainsGraceful (71047 ns)
+    [ PASSED ] CASE: tcpStreamJoiningBackgroundCloseWaitsForCompletion (28459314 ns)
+    [ PASSED ] CASE: tcpStreamDeadlineBoundsCloseWaitAndLateSuccessRemainsGraceful (102415 ns)
+    [ PASSED ] CASE: tcpStreamLateCloseFailurePublishesFailedWithoutReplacingCallerCancellation (95520 ns)
+    [ PASSED ] CASE: tcpStreamAbortRemainsTerminalWhenDetachedCloseFailsLate (84678 ns)
+    [ PASSED ] CASE: tcpStreamCloseKeepsGracefulCauseWhenItWakesARead (50786 ns)
+    [ PASSED ] CASE: unsafeOptionValueIsBoundedAndOwnedWithoutApplyingIt (139854 ns)
+    [ PASSED ] CASE: datagramResultEnforcesTheIpv4PayloadBound (3640683 ns)
+    [ PASSED ] CASE: datagramResultSurvivesReceiveBufferReuse (23672 ns)
+Summary: TOTAL: 84
+    PASSED: 84, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 483508593 ns, RESULT:
+TP: wirestack.*, time elapsed: 483420260 ns, RESULT:
+    PASSED:
+    TP: wirestack.net, time elapsed: 476377859 ns
+Summary: TOTAL: 84
+    PASSED: 84, SKIPPED: 0, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success

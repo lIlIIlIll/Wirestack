@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "published_baseline_source": "dcfcca8158167428e7a9091214bee98fc902786f",
+  "network": {
+    "argv": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--parallel",
+      "1",
+      "--no-progress",
+      "--no-color"
+    ],
+    "red": {
+      "exit_code": 1,
+      "total": 99,
+      "passed": 97,
+      "failed": 2,
+      "errors": 0
+    },
+    "green": {
+      "exit_code": 0,
+      "total": 99,
+      "passed": 99,
+      "failed": 0,
+      "errors": 0
+    },
+    "raw": {
+      "red": {
+        "stdout": "docs/evidence/M8-004/development/pr160-aggregation-red.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-aggregation-red.stderr.log"
+      },
+      "green": {
+        "stdout": "docs/evidence/M8-004/development/pr160-aggregation-green.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-aggregation-green.stderr.log"
+      }
+    }
+  },
+  "findings": [
+    {
+      "comment": 3997734993,
+      "correction": "System-file parsing and direct construction share one endpoint canonicalizer. Deduplication compares canonical scopes, so equivalent spellings cannot consume distinct server slots.",
+      "proof": "A temporary resolv.conf contains eight spellings of scope 1 followed by a distinct IPv4 resolver. Baseline retained eight duplicate endpoints and omitted the final resolver; correction retains the two distinct endpoints. This is configuration behavior proof, not a claim of DNS traffic to the documentation address."
+    },
+    {
+      "comment": 3997734994,
+      "correction": "Private address-family results carry optional live nameserver provenance. Cross-family canonical conflicts use the live result peer, including when either family came from cache. Cached-only conflicts do not invent a current remote response. Public ResolveResult and query signatures remain unchanged.",
+      "proof": "Owned UDP responses provide different A and AAAA canonical names. Separate cache states prewarm each family; both mixed live/cache conflicts retain the peer. Repeating each lookup from cache still rejects the conflict without a remote endpoint."
+    }
+  ]
+}

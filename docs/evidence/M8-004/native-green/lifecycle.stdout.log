@@ -1,0 +1,9 @@
+WAIT_READY udp cancel
+WAIT_PASS udp cancel
+WAIT_READY udp close
+WAIT_PASS udp close
+WAIT_READY tcp cancel
+WAIT_PASS tcp cancel
+WAIT_READY tcp close
+WAIT_PASS tcp close
+LIFECYCLE_PASS

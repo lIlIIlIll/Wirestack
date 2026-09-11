@@ -1,0 +1,5 @@
+An exception has occurred:
+Exception: absolute name was expanded by the system search policy
+	 at wirestack_m8_004_native_dns::require(Bool, std.core::String)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-recovery-tools/system-fallback-consumer/src/main.cj:11)
+	 at wirestack_m8_004_native_dns::runSystemFallback()(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-recovery-tools/system-fallback-consumer/src/main.cj:282)
+	 at wirestack_m8_004_native_dns::main(std.core::Array<...>)(/home/elliot/playground/Wirestack-pr-worktrees/M8-004-recovery-tools/system-fallback-consumer/src/main.cj:309)

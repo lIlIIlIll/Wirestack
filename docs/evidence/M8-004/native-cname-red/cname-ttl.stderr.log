@@ -1,0 +1,6 @@
+An exception has occurred:
+Exception: DNS lookup returned unexpected IPv4 bytes for short-alias.native.test
+	 at wirestack_m8_004_native_dns::require(Bool, std.core::String)(/tmp/wirestack-m8-004-consumer-pegij46v/src/main.cj:10)
+	 at wirestack_m8_004_native_dns::expectIpv4Lookup(wirestack.net::DnsClient, std.core::String, std.core::Array<...>)(/tmp/wirestack-m8-004-consumer-pegij46v/src/main.cj:107)
+	 at wirestack_m8_004_native_dns::runCnameTtl()(/tmp/wirestack-m8-004-consumer-pegij46v/src/main.cj:147)
+	 at wirestack_m8_004_native_dns::main(std.core::Array<...>)(/tmp/wirestack-m8-004-consumer-pegij46v/src/main.cj:211)

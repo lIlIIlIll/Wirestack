@@ -1,0 +1,26 @@
+{
+  "artifacts": {},
+  "cjdoc": {
+    "path": "/tmp/wirestack-m7-033-ci-tools-20260910/cjdoc-source/target/release/bin/main",
+    "version": "0.7.2"
+  },
+  "commands": [],
+  "expectedCjdoc": "0.7.2",
+  "generatedAtUtc": "2026-09-11T08:26:43.959677Z",
+  "issues": [
+    {
+      "code": "SOURCE_INVENTORY",
+      "detail": "wirestack.net source inventory changed; update the layer manifest"
+    }
+  ],
+  "layers": [],
+  "platform": {
+    "libc": "glibc",
+    "machine": "x86_64",
+    "system": "Linux"
+  },
+  "schemaVersion": 1,
+  "sourceSha256": {},
+  "status": "FAIL",
+  "taskId": "M7-033"
+}
