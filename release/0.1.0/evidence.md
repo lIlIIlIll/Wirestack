@@ -48,6 +48,39 @@ run conclusion=`success`。
 | Annotated tag / GitHub Release | NOT RUN | Release policy remains blocking; no tag, release, or uploaded assets created |
 | Central package registry | NOT RUN | 未授权发布；没有执行 central publication |
 
+
+### 候选资产摘要（未上传）
+
+该候选资产由 clean temporary tree 生成，来源 commit 为
+`fc050734aefa2509d41e5ebb769d47fa7b18f7b6`，source tree 为
+`b7ea31233023bf6211c97ee0b929a8c5c395f07f`，provenance 的
+`manifest_sha256` 为 `fb5b0b60e8fe5d71ce4137637ddf7ca33713876f3afc4d21c45d5c732c84085f`，
+`payload_sha256` 为 `f197ab619a671ff04a7f21ab4560d2dca5ac3adc09ba93dcefe3749dc0300248`。
+本地 bundle 归档为 `/tmp/yjson-0.1.0-final-candidate.tar.gz`，
+SHA-256 为 `3b087bcfaa05e1156a567ca9cdfb8817ea279e6787397abd6224deeee69e4daf`。
+
+`checksums.txt` SHA-256 为
+`3a2b7cfef4623c97c6aa78ff9751b5c726ef5951bc9e6fd336165e1f0f9d690c`；
+其记录的资产摘要如下：
+
+```text
+candidate-provenance.json  60f73c7a77e85ff58cc6a21afb73961b68b25e493c589674ec7a5d596981e12a
+environment.json           8c5011420a35044f78715b3bc6ecf93f74328543b82897898665a46a2f398549
+manifest.json              684a53a38ecf82a3d97a84f841ead2aebbb346fc35eb2ea2264b3a54dd0b6dbe
+yjson-0.1.0.cjp           4866e529dfc819a92dcb9be277157b4c31cafe114dcc3357a5bd658f925b5013
+yjson_algorithms-0.1.0.cjp cefd0c66b0c28f9e80c59c0efcdedd265b20173acdd3d22a98ec4262e4146f33
+yjson_backends-0.1.0.cjp a712820eaa3883a91edd814d63e951ebca5b0f179cd3a38e1f63c839768d3e76
+yjson_macros-0.1.0.cjp 4865f2bb9c67a0ed68cabbc4072daa2ec5f7ddb32735e7344d3022b42c24e7c2
+yjson_native-0.1.0.cjp c14ecb526ae0ff59d14189b39499fc8c36e695f72673c582daecded2a6bc7cbb
+yjson_native_accel-0.1.0.cjp abe0de7bed391c57f9d1a93c4e4c6f13b073ea275e582462af2e7d14626e665d
+yjson_native_primitives-0.1.0.cjp 3df0762ebcd43720cde2336c1888a6b7cb42692d07343be8074bb37191789330
+yjson_schema_formats-0.1.0.cjp 5f1a5302923b4a6d26ea63cb46fa77d550919c58180937c5e7cbbf0b84a79c9b
+yjson_yyjson-0.1.0.cjp 26848fa1a443ac81f45499b24d4c193c95ad2c78ed6a2177c2c2e5c32c61d22b
+```
+
+资产已通过 `sha256sum -c checksums.txt` 验证；tag、GitHub Release
+和中心仓库上传仍未执行。
+
 ## 3. 性能证据
 
 ### 历史：Deep Nested 修复定向复核 (`13a997c`)
