@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "scope": "Declaration inventory comparison only; not an ABI or forward-compatibility verdict",
+  "baseline": "docs/api/baselines/wirestack-linux-pre1-m8-003.json",
+  "candidate": "docs/api/baselines/wirestack-linux-pre1-m8-004.json",
+  "added_declarations": [
+    "wirestack.net.DnsClient",
+    "wirestack.net.DnsMessageParser",
+    "wirestack.net.DnsMessageSummary",
+    "wirestack.net.DnsParserLimits",
+    "wirestack.net.DnsQuestion",
+    "wirestack.net.DnsRecord",
+    "wirestack.net.DnsRecordType",
+    "wirestack.net.DnsResolverConfig",
+    "wirestack.net.Resolver"
+  ],
+  "removed_declarations": [],
+  "changed_existing_declarations": [],
+  "aliases_unchanged": true,
+  "source_compatibility": {
+    "status": "PARTIAL",
+    "evidence": "Existing declarations are identical. Current compiler builds and network regressions pass. Wildcard import ambiguity has not been independently exercised."
+  },
+  "binary_compatibility": {
+    "status": "NOT_TESTED",
+    "limitation": "No old precompiled consumer/new library link or ABI layout experiment was executed."
+  },
+  "forward_compatibility": {
+    "status": "NOT_TESTED",
+    "limitation": "An older library does not provide the newly added APIs. No forward compatibility claim is made."
+  },
+  "scenario_classifier": {
+    "status": "UNAVAILABLE",
+    "evidence": "which compat-agent exited 1"
+  },
+  "runtime_evidence": [
+    "docs/evidence/M8-004/native-scenario-fixed.json",
+    "docs/evidence/M8-004/development/network-82-green.log"
+  ]
+}
