@@ -1,0 +1,7 @@
+An exception has occurred:
+ResolveException: DNS name does not exist
+	 at wirestack.net::DnsClient::lookupWire(wirestack::HostName, wirestack::ResolveOptions, wirestack::OperationContext)(/tmp/wirestack-m8-004-publication/src/net/dns_client.cj:280)
+	 at wirestack.net::DnsClient::lookup(wirestack::HostName, wirestack::ResolveOptions, wirestack::OperationContext)(/tmp/wirestack-m8-004-publication/src/net/dns_client.cj:150)
+	 at wirestack_m8_004_native_dns::expectIpv4Lookup(wirestack.net::DnsClient, std.core::String, std.core::Array<...>)(/tmp/wirestack-m8-004-consumer-7u_c45p2/src/main.cj:110)
+	 at wirestack_m8_004_native_dns::runCombinedNegative()(/tmp/wirestack-m8-004-consumer-7u_c45p2/src/main.cj:182)
+	 at wirestack_m8_004_native_dns::main(std.core::Array<...>)(/tmp/wirestack-m8-004-consumer-7u_c45p2/src/main.cj:269)

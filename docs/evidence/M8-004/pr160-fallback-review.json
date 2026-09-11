@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "published_baseline_source": "811291d3fe4e1ec3d7eb600101ac3aa426df0388",
+  "scope": "PR #160 system fallback, numeric nameserver scopes and selected-server protocol errors",
+  "network_regressions": {
+    "argv": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--no-progress",
+      "--no-color"
+    ],
+    "red": {
+      "total": 93,
+      "passed": 89,
+      "failed": 4,
+      "errors": 0
+    },
+    "green": {
+      "total": 93,
+      "passed": 93,
+      "failed": 0,
+      "errors": 0
+    },
+    "raw": {
+      "red": {
+        "stdout": "docs/evidence/M8-004/development/pr160-fallback-red.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-fallback-red.stderr.log"
+      },
+      "green": {
+        "stdout": "docs/evidence/M8-004/development/pr160-fallback-green.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-fallback-green.stderr.log"
+      }
+    }
+  },
+  "system_fallback": {
+    "red_report": "docs/evidence/M8-004/pr160-system-fallback-red-confirmed.json",
+    "green_report": "docs/evidence/M8-004/pr160-system-fallback-green-confirmed.json",
+    "red_queries": [
+      "printer.corp.test"
+    ],
+    "green_queries": [
+      "printer",
+      "printer.chosen.test",
+      "direct"
+    ],
+    "oracle": "Actual glibc getaddrinfo and UDP DNS in private user, mount and network namespaces, with hosts: dns and search corp.test; no mock resolver or host configuration change."
+  },
+  "development_failures": [
+    {
+      "report": "docs/evidence/M8-004/pr160-system-fallback-red.json",
+      "classification": "Fixture import failure, not DNS runtime regression proof."
+    },
+    {
+      "report": "docs/evidence/M8-004/pr160-system-fallback-green.json",
+      "classification": "Compilation failed because internal visibility does not cross sibling Cangjie packages. The filename is not a PASS claim."
+    }
+  ],
+  "decisions": [
+    "Only DnsClient uses the exact-name path. Existing SystemResolver resolve overloads retain their platform search behavior.",
+    "The cross-package bridge is in wirestack.internal.resolver and is not re-exported through the supported public packages.",
+    "Nameserver scope IDs lose leading zeros; numeric zero becomes an absent zone before endpoint comparison.",
+    "Protocol errors retain code, native code, available endpoints and cause; terminal context classification retains the selected nameserver.",
+    "Retry attempts reuse one owned nameserver snapshot instead of cloning it for sizing and every pass."
+  ],
+  "stage_note": "The network red/green and namespace red/green are separate development stages; complete acceptance is recorded by task-check.json."
+}

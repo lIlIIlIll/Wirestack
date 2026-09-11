@@ -1,0 +1,33 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-recovery-tools/system-fallback-consumer",
+      "exit_code": 1,
+      "id": "consumer-build",
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "fc7080f9cf566029cd33b22d82b29c2fc90bef469cb8eede7656e5c318c43276"
+        },
+        "path": "docs/evidence/M8-004/development/pr160-system-fallback-green/consumer-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-004/development/pr160-system-fallback-green/consumer-build.stdout.log"
+      },
+      "timed_out": false,
+      "timeout_seconds": 600
+    }
+  ],
+  "error": "RuntimeError: consumer-build exited 1; see /home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication/docs/evidence/M8-004/development/pr160-system-fallback-green/consumer-build.stderr.log",
+  "source_task": "M8-004",
+  "stage": "green",
+  "status": "FAIL"
+}

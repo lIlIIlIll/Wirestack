@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "published_baseline_source": "75ea82b82b5c61d7e1f2971b84778a41b3100ff5",
+  "network": {
+    "argv": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--parallel",
+      "1",
+      "--no-progress",
+      "--no-color"
+    ],
+    "red": {
+      "exit_code": 1,
+      "total": 97,
+      "passed": 94,
+      "failed": 3,
+      "errors": 0
+    },
+    "green": {
+      "exit_code": 0,
+      "total": 97,
+      "passed": 97,
+      "failed": 0,
+      "errors": 0
+    },
+    "raw": {
+      "red": {
+        "stdout": "docs/evidence/M8-004/development/pr160-interpretation-red.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-interpretation-red.stderr.log"
+      },
+      "green": {
+        "stdout": "docs/evidence/M8-004/development/pr160-interpretation-green.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-interpretation-green.stderr.log"
+      }
+    }
+  },
+  "findings": [
+    {
+      "comment": 3997575699,
+      "correction": "When no address succeeded, a definitive name-wide NXDOMAIN takes precedence over an earlier transient family error.",
+      "proof": "The owned UDP peer returns SERVFAIL for A and NXDOMAIN with SOA for AAAA. Both the live Any lookup and its immediate cached repeat return NameNotFound; only the live error identifies the responding server."
+    },
+    {
+      "comment": 3997575701,
+      "correction": "Map all ResolveException paths during post-query response interpretation with the selected responding nameserver and the existing context-aware error mapper. This includes unsupported RCODEs and CNAME interpretation failures, rather than special-casing FORMERR.",
+      "proof": "A new FORMERR regression and the extended conflicting-CNAME regression both failed endpoint checks before correction and pass afterward."
+    }
+  ]
+}
