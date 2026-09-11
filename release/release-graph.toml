@@ -1,6 +1,6 @@
 schema_version = 1
 release_version = "0.1.0"
-status = "migration"
+status = "release-ready"
 
 # This file is the only ordered inventory of published yjson packages. Release
 # tooling must derive package names, versions, manifests, source roots, and
