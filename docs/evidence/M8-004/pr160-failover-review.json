@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "baseline_source_revision": "3de6d0f4fd14f800e87ad18d030953319b247797",
+  "toolchain": "Cangjie 1.1.3, Linux x86_64 glibc",
+  "findings": [
+    {
+      "comment_id": 3997167497,
+      "case": "silentDnsAttemptsLeaveBudgetForServerAndPassFailover",
+      "decision": "Divide the remaining absolute deadline across pending server attempts. Each attempt and its TCP fallback use a child deadline that cannot extend the parent. Native tests cover a silent primary followed by a healthy secondary and a successful later pass over the same server. The caller deadline is shorter than queryTimeout."
+    },
+    {
+      "comment_id": 3997167499,
+      "case": "exhaustedResponseCodesRetainTheLastRespondingNameserver",
+      "decision": "SERVFAIL and REFUSED errors retain the selected responding endpoint. Two native peers reply in order; the exhausted error identifies the last peer."
+    },
+    {
+      "case": "activeCancellationRetainsNameserverWithoutRetry",
+      "decision": "Return mapped cancellation and total-deadline errors directly instead of losing endpoint diagnostics at the next retry checkpoint. A native peer cancels only after receiving the query; no query reaches the secondary. Per-attempt timeouts remain eligible for failover while the parent budget is live."
+    }
+  ],
+  "argv": ["cjpm", "test", "src/net", "--parallel", "1", "--no-progress", "--no-color"],
+  "red": {
+    "exit_code": 1,
+    "total": 91,
+    "passed": 89,
+    "errors": 1,
+    "failed": 1,
+    "observation": "The silent-primary case raises ResolveException at the exhausted parent deadline; the RCODE case loses the responding endpoint.",
+    "stdout": "docs/evidence/M8-004/development/pr160-failover-red.stdout.log",
+    "stderr": "docs/evidence/M8-004/development/pr160-failover-red.stderr.log"
+  },
+  "cancellation_red": {
+    "stage": "Intermediate worktree after deadline sharing and RCODE propagation, before terminal mapped-error handling",
+    "exit_code": 1,
+    "total": 92,
+    "passed": 91,
+    "errors": 0,
+    "failed": 1,
+    "stdout": "docs/evidence/M8-004/development/pr160-failover-cancel-red.stdout.log",
+    "stderr": "docs/evidence/M8-004/development/pr160-failover-cancel-red.stderr.log"
+  },
+  "green": {
+    "exit_code": 0,
+    "total": 92,
+    "passed": 92,
+    "skipped": 0,
+    "errors": 0,
+    "failed": 0,
+    "stdout": "docs/evidence/M8-004/development/pr160-failover-green.stdout.log",
+    "stderr": "docs/evidence/M8-004/development/pr160-failover-green.stderr.log"
+  }
+}
