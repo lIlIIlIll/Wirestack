@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "scope": "PR #160 second-review family fallback and queued-close regressions",
+  "baseline_source_revision": "35af4ca11ec2a5e32aa07b66a067a9701d04bb88",
+  "toolchain": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+  "red": {
+    "argv": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--filter",
+      "DnsClientWireTest",
+      "--parallel",
+      "1",
+      "--no-progress",
+      "--no-color"
+    ],
+    "exit_code": 1,
+    "stdout": "docs/evidence/M8-004/development/pr160-second-red.stdout.log",
+    "stderr": "docs/evidence/M8-004/development/pr160-second-red.stderr.log",
+    "errors": 1,
+    "failed": 1
+  },
+  "green": {
+    "argv": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--parallel",
+      "1",
+      "--show-all-output",
+      "--no-progress",
+      "--no-color"
+    ],
+    "exit_code": 0,
+    "stdout": "docs/evidence/M8-004/development/pr160-second-green.stdout.log",
+    "stderr": "docs/evidence/M8-004/development/pr160-second-green.stderr.log",
+    "total": 85,
+    "passed": 85,
+    "skipped": 0,
+    "errors": 0,
+    "failed": 0
+  },
+  "findings": [
+    {
+      "comment_id": 3991520200,
+      "status": "FIXED",
+      "case": "anyFamilyRetainsAddressesWhenTheOtherFamilyFails",
+      "behavior": "Any-family lookup continues after family-specific TemporaryFailure or SystemFailure and retains usable addresses. Cancellation, timeout and cross-family canonical-name conflicts remain terminal."
+    },
+    {
+      "comment_id": 3991520217,
+      "status": "FIXED",
+      "case": "boundedAdmissionRejectsExcessAndCloseWakesQueuedCallers",
+      "behavior": "Three excess callers complete before close, proving the remaining contender entered the one-slot queue. Closing cancels the active and queued caller; new calls still fail as closed."
+    },
+    {
+      "comment_id": 3991520224,
+      "status": "FIXED",
+      "paths": [
+        "docs/planning/status.md",
+        "docs/planning/implementation-backlog.md"
+      ],
+      "network_passed": 85,
+      "full_suite_passed": 675,
+      "evidence": "network-tests.json and full-check.json"
+    }
+  ]
+}
