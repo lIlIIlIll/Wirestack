@@ -1,0 +1,855 @@
+warning: unreachable block in 'if' expression
+    | 
+    |   /* 8.112 */                if(e is AssertException) {
+    |  _____________________________________________________^
+    | | /* 8.113 */                    throw e
+    | | /* 8.114 */                }
+    | |____________________________^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+note: the code after the macro is expanded as follows
+    | 
+    |   /* 8.1 */@Attribute[TEST_GENERATED] class DnsWireParserTest <: TestClass {
+    |  _^
+    | | /* 8.2 */    @Attribute[TestCase_22]
+    | | /* 8.3 */    func decodesCompressedTargetsBinaryTxtSoaAndUnknownData(): Unit {
+    | | /* 8.4 */        let message = dnsTestHeader(0x1234u16, 0x8180u16, 1, 7, 0, 0)
+    | | /* 8.5 */        dnsTestAppendQuestion(message, "Example.COM", 1)
+    | | /* 8.6 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 5,[0xC0u8, 0x0Cu8])
+    | | /* 8.7 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 12,[0xC0u8, 0x0Cu8])
+    | | /* 8.8 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 15,[0u8, 10u8, 0xC0u8, 0x0Cu8])
+    | | /* 8.9 */        let srv = ArrayList < Byte >()
+    | | /* 8.10 */        for(value in[0u8, 1u8, 0u8, 2u8, 1u8, 187u8]) {
+    | | /* 8.11 */            srv.add(value)
+    | | /* 8.12 */        }
+    | | /* 8.13 */        dnsTestAppendName(srv, "Target.Example")
+    | | /* 8.14 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 33, srv.toArray())
+    | | /* 8.15 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 16,[3u8, 0u8, 255u8, 65u8, 0u8])
+    | | /* 8.16 */        let soa = ArrayList < Byte >()
+    | | /* 8.17 */        soa.add(0xC0u8)
+    | | /* 8.18 */        soa.add(0x0Cu8)
+    | | /* 8.19 */        soa.add(0xC0u8)
+    | | /* 8.20 */        soa.add(0x0Cu8)
+    | | /* 8.21 */        for(value in[1u32, 2u32, 3u32, 4u32, 30u32]) {
+    | | /* 8.22 */            dnsTestAppendU32(soa, value)
+    | | /* 8.23 */        }
+    | | /* 8.24 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 6, soa.toArray())
+    | | /* 8.25 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 65280,[0xDEu8, 0xADu8])
+    | | /* 8.26 */        let summary = DnsMessageParser().parse(message.toArray())
+    | | /* 8.27 */        expectEqual("summary.transactionId", "0x1234u16", summary.transactionId, 0x1234u16, isDelta: false)
+    | | /* 8.28 */        expectEqual("summary.isResponse", "true", summary.isResponse, true, isDelta: false)
+    | | /* 8.29 */        expectEqual("summary.opcode", "0", summary.opcode, 0, isDelta: false)
+    | | /* 8.30 */        expectEqual("summary.questions[0].name", "\"example.com\"", summary.questions[0].name, "example.com", isDelta: false)
+    | | /* 8.31 */        expectEqual("summary.records.size", "7", summary.records.size, 7, isDelta: false)
+    | | /* 8.32 */        expectEqual("dnsTestTarget(summary.records[0])", "\"example.com\"", dnsTestTarget(summary.records[0]), "example.com", isDelta: false)
+    | | /* 8.33 */        expectEqual("dnsTestTarget(summary.records[1])", "\"example.com\"", dnsTestTarget(summary.records[1]), "example.com", isDelta: false)
+    | | /* 8.34 */        expectEqual("dnsTestTarget(summary.records[2])", "\"example.com\"", dnsTestTarget(summary.records[2]), "example.com", isDelta: false)
+    | | /* 8.35 */        expectEqual("dnsTestTarget(summary.records[3])", "\"target.example\"", dnsTestTarget(summary.records[3]), "target.example", isDelta: false)
+    | | /* 8.36 */        expectEqual("summary.records[4].data()", "[3u8, 0u8, 255u8, 65u8, 0u8]", summary.records[4].data(),[3u8, 0u8, 255u8, 65u8, 0u8], isDelta: false)
+    | | /* 8.37 */        match(summary.records[5].soaMinimum) {
+    | | /* 8.38 */            case Some(value) => expectEqual("value", "30u32", value, 30u32, isDelta: false)
+    | | /* 8.39 */            case None => fail("SOA minimum was not decoded")
+    | | /* 8.40 */        }
+    | | /* 8.41 */        match(summary.records[6].recordType) {
+    | | /* 8.42 */            case DnsRecordType.Unknown(value) => expectEqual("value", "65280", value, 65280, isDelta: false)
+    | | /* 8.43 */            case _ => fail("unknown record type was not preserved")
+    | | /* 8.44 */        }
+    | | /* 8.45 */        expectEqual("summary.records[6].data()", "[0xDEu8, 0xADu8]", summary.records[6].data(),[0xDEu8, 0xADu8], isDelta: false)
+    | | /* 8.46 */    }
+    | | /* 8.47 */    
+    | | /* 8.48 */    @Attribute[TestCase_23]
+    | | /* 8.49 */    func recordOrderMakesAnswerAuthorityAndAdditionalBoundariesExplicit(): Unit {
+    | | /* 8.50 */        let message = dnsTestHeader(7u16, 0x8180u16, 1, 1, 1, 1)
+    | | /* 8.51 */        dnsTestAppendQuestion(message, "ordered.example", 1)
+    | | /* 8.52 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 1,[1u8, 1u8, 1u8, 1u8])
+    | | /* 8.53 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 1,[2u8, 2u8, 2u8, 2u8])
+    | | /* 8.54 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 1,[3u8, 3u8, 3u8, 3u8])
+    | | /* 8.55 */        let summary = DnsMessageParser().parse(message.toArray())
+    | | /* 8.56 */        expectEqual("summary.answerCount", "1", summary.answerCount, 1, isDelta: false)
+    | | /* 8.57 */        expectEqual("summary.authorityCount", "1", summary.authorityCount, 1, isDelta: false)
+    | | /* 8.58 */        expectEqual("summary.additionalCount", "1", summary.additionalCount, 1, isDelta: false)
+    | | /* 8.59 */        expectEqual("summary.records[0].data()", "[1u8, 1u8, 1u8, 1u8]", summary.records[0].data(),[1u8, 1u8, 1u8, 1u8], isDelta: false)
+    | | /* 8.60 */        expectEqual("summary.records[summary.answerCount].data()", "[2u8, 2u8, 2u8, 2u8]", summary.records[summary.answerCount].data(),[2u8, 2u8, 2u8, 2u8], isDelta: false)
+    | | /* 8.61 */        expectEqual("summary.records[summary.answerCount + summary.authorityCount].data()", "[3u8, 3u8, 3u8, 3u8]", summary.records[summary.answerCount + summary.authorityCount].data(),[3u8, 3u8, 3u8, 3u8], isDelta: false)
+    | | /* 8.62 */    }
+    | | /* 8.63 */    
+    | | /* 8.64 */    @Attribute[TestCase_24]
+    | | /* 8.65 */    func summariesAndRecordsOwnParserAndConstructorInputs(): Unit {
+    | | /* 8.66 */        let message = dnsTestHeader(9u16, 0x8180u16, 1, 1, 0, 0)
+    | | /* 8.67 */        dnsTestAppendQuestion(message, "owned.example", 1)
+    | | /* 8.68 */        dnsTestAppendRecord(message,[0xC0u8, 0x0Cu8], 1,[10u8, 20u8, 30u8, 40u8])
+    | | /* 8.69 */        let wire = message.toArray()
+    | | /* 8.70 */        let summary = DnsMessageParser().parse(wire)
+    | | /* 8.71 */        wire[wire.size - 1] = 99u8
+    | | /* 8.72 */        let returnedData = summary.records[0].data()
+    | | /* 8.73 */        returnedData[0] = 99u8
+    | | /* 8.74 */        let supplied =[summary.records[0]]
+    | | /* 8.75 */        let constructed = DnsMessageSummary(9u16, 1, false, records: supplied)
+    | | /* 8.76 */        supplied[0] = DnsRecord("changed.example", DnsRecordType.A, 1u16, 0u32,[9u8, 9u8, 9u8, 9u8])
+    | | /* 8.77 */        expectEqual("summary.records[0].name", "\"owned.example\"", summary.records[0].name, "owned.example", isDelta: false)
+    | | /* 8.78 */        expectEqual("summary.records[0].data()", "[10u8, 20u8, 30u8, 40u8]", summary.records[0].data(),[10u8, 20u8, 30u8, 40u8], isDelta: false)
+    | | /* 8.79 */        expectEqual("constructed.records[0].name", "\"owned.example\"", constructed.records[0].name, "owned.example", isDelta: false)
+    | | /* 8.80 */    }
+    | | /* 8.81 */    
+    | | /* 8.82 */    @Attribute[TestCase_25]
+    | | /* 8.83 */    func parserPreservesQuestionIdentityAndRejectsIncompleteRecords(): Unit {
+    | | /* 8.84 */        let wire = dnsTestHeader(0xBEEFu16, 0x0100u16, 1, 0, 0, 0)
+    | | /* 8.85 */        dnsTestAppendQuestion(wire, "_HTTPS._TCP.Example.COM", 33)
+    | | /* 8.86 */        let query = wire.toArray()
+    | | /* 8.87 */        let parsedQuery = DnsMessageParser().parse(query)
+    | | /* 8.88 */        expectEqual("! parsedQuery.isResponse", "true", ! parsedQuery.isResponse, true, isDelta: false)
+    | | /* 8.89 */        expectEqual("parsedQuery.opcode", "0", parsedQuery.opcode, 0, isDelta: false)
+    | | /* 8.90 */        expectEqual("parsedQuery.questionCount", "1", parsedQuery.questionCount, 1, isDelta: false)
+    | | /* 8.91 */        expectEqual("parsedQuery.questions[0].name", "\"_https._tcp.example.com\"", parsedQuery.questions[0].name, "_https._tcp.example.com", isDelta: false)
+    | | /* 8.92 */        expectEqual("match(parsedQuery.questions[0].recordType) {\n    case DnsRecordType.SRV => true\n    case _ => false\n}", "true", match(parsedQuery.questions[0].recordType) {
+    | | /* 8.93 */            case DnsRecordType.SRV => true
+    | | /* 8.94 */            case _ => false
+    | | /* 8.95 */        }, true, isDelta: false)
+    | | /* 8.96 */        expectEqual("parsedQuery.questions[0].recordClass", "1u16", parsedQuery.questions[0].recordClass, 1u16, isDelta: false)
+    | | /* 8.97 */        let opcodeMessage = dnsTestHeader(1u16, 0x9000u16, 0, 0, 0, 0)
+    | | /* 8.98 */        let opcodeSummary = DnsMessageParser().parse(opcodeMessage.toArray())
+    | | /* 8.99 */        expectEqual("opcodeSummary.isResponse", "true", opcodeSummary.isResponse, true, isDelta: false)
+    | | /* 8.100 */        expectEqual("opcodeSummary.opcode", "2", opcodeSummary.opcode, 2, isDelta: false)
+    | | /* 8.101 */        let truncated = query.clone()
+    | | /* 8.102 */        truncated[2] = 0x83u8
+    | | /* 8.103 */        truncated[3] = 0x00u8
+    | | /* 8.104 */        truncated[6] = 0u8
+    | | /* 8.105 */        truncated[7] = 1u8
+    | | /* 8.106 */        try {
+    | | /* 8.107 */            try {
+    | | /* 8.108 */                assertEqual("true", "true", true, true)
+    | | /* 8.109 */                DnsMessageParser().parse(truncated)
+    | | /* 8.110 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")
+    | | /* 8.111 */            } catch(e: api.ResolveException) {
+    | | /* 8.112 */                if(e is AssertException) {
+    | | /* 8.113 */                    throw e
+    | | /* 8.114 */                }
+    | | /* 8.115 */                if(e is AssertIntermediateException) {
+    | | /* 8.116 */                    throw e
+    | | /* 8.117 */                }
+    | | /* 8.118 */                if(e is UnittestTimeoutException) {
+    | | /* 8.119 */                    throw e
+    | | /* 8.120 */                }
+    | | /* 8.121 */                e
+    | | /* 8.122 */            }
+    | | /* 8.123 */        } catch(e: Exception) {
+    | | /* 8.124 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {
+    | | /* 8.125 */                throw e
+    | | /* 8.126 */            }
+    | | /* 8.127 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())
+    | | /* 8.128 */        }
+    | | /* 8.129 */    }
+    | | /* 8.130 */    
+    | | /* 8.131 */    @Attribute[TestCase_26]
+    | | /* 8.132 */    func asciiNameProfileRejectsAmbiguousLabels(): Unit {
+    | | /* 8.133 */        for(invalid in["a..b", "-bad.example", "bad-.example", "bad label", "a/b", "é.example"]) {
+    | | /* 8.134 */            let wire = dnsTestHeader(1u16, 0x8180u16, 1, 0, 0, 0)
+    | | /* 8.135 */            dnsTestAppendQuestion(wire, invalid, 1)
+    | | /* 8.136 */            try {
+    | | /* 8.137 */                try {
+    | | /* 8.138 */                    assertEqual("true", "true", true, true)
+    | | /* 8.139 */                    DnsMessageParser().parse(wire.toArray())
+    | | /* 8.140 */                    fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")
+    | | /* 8.141 */                } catch(e: api.ResolveException) {
+    | | /* 8.142 */                    if(e is AssertException) {
+    | | /* 8.143 */                        throw e
+    | | /* 8.144 */                    }
+    | | /* 8.145 */                    if(e is AssertIntermediateException) {
+    | | /* 8.146 */                        throw e
+    | | /* 8.147 */                    }
+    | | /* 8.148 */                    if(e is UnittestTimeoutException) {
+    | | /* 8.149 */                        throw e
+    | | /* 8.150 */                    }
+    | | /* 8.151 */                    e
+    | | /* 8.152 */                }
+    | | /* 8.153 */            } catch(e: Exception) {
+    | | /* 8.154 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {
+    | | /* 8.155 */                    throw e
+    | | /* 8.156 */                }
+    | | /* 8.157 */                assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())
+    | | /* 8.158 */            }
+    | | /* 8.159 */        }
+    | | /* 8.160 */        let message = dnsTestHeader(3u16, 0x8180u16, 1, 0, 0, 0)
+    | | /* 8.161 */        message.add(3u8)
+    | | /* 8.162 */        message.add(b'a')
+    | | /* 8.163 */        message.add(b'.')
+    | | /* 8.164 */        message.add(b'b')
+    | | /* 8.165 */        message.add(0u8)
+    | | /* 8.166 */        dnsTestAppendU16(message, 1)
+    | | /* 8.167 */        dnsTestAppendU16(message, 1)
+    | | /* 8.168 */        try {
+    | | /* 8.169 */            try {
+    | | /* 8.170 */                assertEqual("true", "true", true, true)
+    | | /* 8.171 */                DnsMessageParser().parse(message.toArray())
+    | | /* 8.172 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")
+    | | /* 8.173 */            } catch(e: api.ResolveException) {
+    | | /* 8.174 */                if(e is AssertException) {
+    | | /* 8.175 */                    throw e
+    | | /* 8.176 */                }
+    | | /* 8.177 */                if(e is AssertIntermediateException) {
+    | | /* 8.178 */                    throw e
+    | | /* 8.179 */                }
+    | | /* 8.180 */                if(e is UnittestTimeoutException) {
+    | | /* 8.181 */                    throw e
+    | | /* 8.182 */                }
+    | | /* 8.183 */                e
+    | | /* 8.184 */            }
+    | | /* 8.185 */        } catch(e: Exception) {
+    | | /* 8.186 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {
+    | | /* 8.187 */                throw e
+    | | /* 8.188 */            }
+    | | /* 8.189 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())
+    | | /* 8.190 */        }
+    | | /* 8.191 */    }
+    | | /* 8.192 */    
+    | | /* 8.193 */    @Attribute[TestCase_27]
+    | | /* 8.194 */    func compressionLoopsForwardPointersAndOutOfRangePointersAreRejected(): Unit {
+    | | /* 8.195 */        for(name in[[0xC0u8, 0x0Cu8],[0xC0u8, 0x0Eu8],[0xFFu8, 0xFFu8]]) {
+    | | /* 8.196 */            let message = dnsTestHeader(1u16, 0x8180u16, 1, 0, 0, 0)
+    | | /* 8.197 */            for(value in name) {
+    | | /* 8.198 */                message.add(value)
+    | | /* 8.199 */            }
+    | | /* 8.200 */            try {
+    | | /* 8.201 */                try {
+    | | /* 8.202 */                    assertEqual("true", "true", true, true)
+    | | /* 8.203 */                    DnsMessageParser().parse(message.toArray())
+    | | /* 8.204 */                    fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")
+    | | /* 8.205 */                } catch(e: api.ResolveException) {
+    | | /* 8.206 */                    if(e is AssertException) {
+    | | /* 8.207 */                        throw e
+    | | /* 8.208 */                    }
+    | | /* 8.209 */                    if(e is AssertIntermediateException) {
+    | | /* 8.210 */                        throw e
+    | | /* 8.211 */                    }
+    | | /* 8.212 */                    if(e is UnittestTimeoutException) {
+    | | /* 8.213 */                        throw e
+    | | /* 8.214 */                    }
+    | | /* 8.215 */                    e
+    | | /* 8.216 */                }
+    | | /* 8.217 */            } catch(e: Exception) {
+    | | /* 8.218 */                if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {
+    | | /* 8.219 */                    throw e
+    | | /* 8.220 */                }
+    | | /* 8.221 */                assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())
+    | | /* 8.222 */            }
+    | | /* 8.223 */        }
+    | | /* 8.224 */    }
+    | | /* 8.225 */    
+    | | /* 8.226 */    @Attribute[TestCase_28]
+    | | /* 8.227 */    func expandedNameAndSectionCountsRespectConfiguredBounds(): Unit {
+    | | /* 8.228 */        let question = dnsTestHeader(1u16, 0x8180u16, 1, 0, 0, 0)
+    | | /* 8.229 */        dnsTestAppendQuestion(question, "abcd", 1)
+    | | /* 8.230 */        try {
+    | | /* 8.231 */            try {
+    | | /* 8.232 */                assertEqual("true", "true", true, true)
+    | | /* 8.233 */                DnsMessageParser(limits: DnsParserLimits(maximumNameBytes: 3)).parse(question.toArray())
+    | | /* 8.234 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")
+    | | /* 8.235 */            } catch(e: api.ResolveException) {
+    | | /* 8.236 */                if(e is AssertException) {
+    | | /* 8.237 */                    throw e
+    | | /* 8.238 */                }
+    | | /* 8.239 */                if(e is AssertIntermediateException) {
+    | | /* 8.240 */                    throw e
+    | | /* 8.241 */                }
+    | | /* 8.242 */                if(e is UnittestTimeoutException) {
+    | | /* 8.243 */                    throw e
+    | | /* 8.244 */                }
+    | | /* 8.245 */                e
+    | | /* 8.246 */            }
+    | | /* 8.247 */        } catch(e: Exception) {
+    | | /* 8.248 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {
+    | | /* 8.249 */                throw e
+    | | /* 8.250 */            }
+    | | /* 8.251 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())
+    | | /* 8.252 */        }
+    | | /* 8.253 */        let tooManyQuestions = dnsTestHeader(1u16, 0x8180u16, 2, 0, 0, 0)
+    | | /* 8.254 */        try {
+    | | /* 8.255 */            try {
+    | | /* 8.256 */                assertEqual("true", "true", true, true)
+    | | /* 8.257 */                DnsMessageParser(limits: DnsParserLimits(maximumQuestions: 1)).parse(tooManyQuestions.toArray())
+    | | /* 8.258 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")
+    | | /* 8.259 */            } catch(e: api.ResolveException) {
+    | | /* 8.260 */                if(e is AssertException) {
+    | | /* 8.261 */                    throw e
+    | | /* 8.262 */                }
+    | | /* 8.263 */                if(e is AssertIntermediateException) {
+    | | /* 8.264 */                    throw e
+    | | /* 8.265 */                }
+    | | /* 8.266 */                if(e is UnittestTimeoutException) {
+    | | /* 8.267 */                    throw e
+    | | /* 8.268 */                }
+    | | /* 8.269 */                e
+    | | /* 8.270 */            }
+    | | /* 8.271 */        } catch(e: Exception) {
+    | | /* 8.272 */            if(e is AssertException || e is AssertIntermediateException || e is UnittestTimeoutException) {
+    | | /* 8.273 */                throw e
+    | | /* 8.274 */            }
+    | | /* 8.275 */            assertCaughtUnexpectedE("@AssertThrows(api.ResolveException)", "api.ResolveException", e.toString())
+    | | /* 8.276 */        }
+    | | /* 8.277 */        let tooManyRecords = dnsTestHeader(1u16, 0x8180u16, 0, 2, 0, 0)
+    | | /* 8.278 */        try {
+    | | /* 8.279 */            try {
+    | | /* 8.280 */                assertEqual("true", "true", true, true)
+    | | /* 8.281 */                DnsMessageParser(limits: DnsParserLimits(maximumRecords: 1)).parse(tooManyRecords.toArray())
+    | | /* 8.282 */                fail("@AssertThrows: Expected 'api.ResolveException' was not caught.")
+    | | /* 8.283 */            } catch(e: api.ResolveException) {
+    | | /* 8.284 */                if(e 
+[…1558ln elided…]
+omains:[api.HostName("search.test")], ndots: 1, hostsPath: "", attempts: 1))
+    | | /* 156.104 */        let serving: Future < Array < String >>= spawn { let names = ArrayList < String >()
+    | | /* 156.105 */            for(_ in 0 .. 3) {
+    | | /* 156.106 */                let received = server.receive(512, context: api.OperationContext(deadline: Some(api.Deadline.after(2 * Duration.second))))
+    | | /* 156.107 */                names.add(DnsMessageParser().parse(received.payload).questions[0].name)
+    | | /* 156.108 */                let header = received.payload.clone()
+    | | /* 156.109 */                header[2] = 0x81u8
+    | | /* 156.110 */                header[3] = 0x80u8
+    | | /* 156.111 */                header[7] = 1u8
+    | | /* 156.112 */                let response = ArrayList < Byte >()
+    | | /* 156.113 */                for(byte in header) {
+    | | /* 156.114 */                    response.add(byte)
+    | | /* 156.115 */                }
+    | | /* 156.116 */                for(byte in[0xC0u8, 0x0Cu8, 0u8, 1u8, 0u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 4u8, 127u8, 0u8, 0u8, 42u8]) {
+    | | /* 156.117 */                    response.add(byte)
+    | | /* 156.118 */                }
+    | | /* 156.119 */                let _ = server.sendTo(received.source.getOrThrow(), api.ByteSpan(response.toArray()), context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))
+    | | /* 156.120 */            }
+    | | /* 156.121 */            names.toArray()
+    | | /* 156.122 */        }
+    | | /* 156.123 */        let options = api.ResolveOptions(family: api.ResolveAddressFamily.Ipv4)
+    | | /* 156.124 */        try {
+    | | /* 156.125 */            let expanded = searchFirst.resolve("service", options: options)
+    | | /* 156.126 */            expectEqual("expanded.canonicalHost", "api.HostName(\"service.search.test\")", expanded.canonicalHost, api.HostName("service.search.test"), isDelta: false)
+    | | /* 156.127 */            let rooted = searchFirst.resolve("service.", options: options)
+    | | /* 156.128 */            expectEqual("rooted.canonicalHost", "api.HostName(\"service\")", rooted.canonicalHost, api.HostName("service"), isDelta: false)
+    | | /* 156.129 */            let absolute = absoluteFirst.resolve("db.prod", options: options)
+    | | /* 156.130 */            expectEqual("absolute.canonicalHost", "api.HostName(\"db.prod\")", absolute.canonicalHost, api.HostName("db.prod"), isDelta: false)
+    | | /* 156.131 */            expectEqual("expanded.addresses", "[dnsResolverTestIpv4(42u8)]", expanded.addresses,[dnsResolverTestIpv4(42u8)], isDelta: false)
+    | | /* 156.132 */            expectEqual("serving.get(Duration.second)", "[\"service.search.test\", \"service\", \"db.prod\"]", serving.get(Duration.second),["service.search.test", "service", "db.prod"], isDelta: false)
+    | | /* 156.133 */        } finally {
+    | | /* 156.134 */            searchFirst.close()
+    | | /* 156.135 */            absoluteFirst.close()
+    | | /* 156.136 */            server.close()
+    | | /* 156.137 */            try {
+    | | /* 156.138 */                let _ = serving.get(Duration.second)
+    | | /* 156.139 */            } catch(_: Exception) {
+    | | /* 156.140 */            }
+    | | /* 156.141 */        }
+    | | /* 156.142 */    }
+    | | /* 156.143 */    
+    | | /* 156.144 */    @Attribute[TestCase_17]
+    | | /* 156.145 */    func exactHostsEntryWinsBeforeSearchSuffixDns(): Unit {
+    | | /* 156.146 */        let path = dnsResolverTestTempPath()
+    | | /* 156.147 */        let dnsServer = UdpSocket.bind(dnsResolverTestLoopback(0u16))
+    | | /* 156.148 */        File.writeTo(path, "127.0.0.21 precedence.test\n".toArray())
+    | | /* 156.149 */        let resolver = Resolver(config: DnsResolverConfig(nameservers:[dnsResolverTestEndpoint(dnsServer)], searchDomains:[api.HostName("search.test")], ndots: 2, hostsPath: path, queryTimeout: Duration.second, attempts: 1))
+    | | /* 156.150 */        let serving: Future < Int64 >= spawn { try {
+    | | /* 156.151 */            let received = dnsServer.receive(512, context: api.OperationContext(deadline: Some(api.Deadline.after(200 * Duration.millisecond))))
+    | | /* 156.152 */            let _ = dnsServer.sendTo(received.source.getOrThrow(), api.ByteSpan(dnsResolverTestNxdomain(received.payload)), context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))
+    | | /* 156.153 */            1
+    | | /* 156.154 */        } catch(error: api.NetworkException) {
+    | | /* 156.155 */            if(dnsResolverTestReceiveTimedOut(error)) {
+    | | /* 156.156 */                0
+    | | /* 156.157 */            }
+    | | /* 156.158 */            else {
+    | | /* 156.159 */                throw error
+    | | /* 156.160 */            }
+    | | /* 156.161 */        }
+    | | /* 156.162 */    }
+    | | /* 156.163 */    try {
+    | | /* 156.164 */        let result = resolver.resolve("precedence.test", options: api.ResolveOptions(family: api.ResolveAddressFamily.Ipv4))
+    | | /* 156.165 */        expectEqual("result.addresses", "[dnsResolverTestIpv4(21u8)]", result.addresses,[dnsResolverTestIpv4(21u8)], isDelta: false)
+    | | /* 156.166 */        expectEqual("result.canonicalHost", "api.HostName(\"precedence.test\")", result.canonicalHost, api.HostName("precedence.test"), isDelta: false)
+    | | /* 156.167 */        expectEqual("dnsResolverTestHostsSource(result.source)", "true", dnsResolverTestHostsSource(result.source), true, isDelta: false)
+    | | /* 156.168 */        expectEqual("serving.get(Duration.second)", "0", serving.get(Duration.second), 0, isDelta: false)
+    | | /* 156.169 */    } finally {
+    | | /* 156.170 */        resolver.close()
+    | | /* 156.171 */        dnsServer.close()
+    | | /* 156.172 */        try {
+    | | /* 156.173 */            let _ = serving.get(Duration.second)
+    | | /* 156.174 */        } catch(_: Exception) {
+    | | /* 156.175 */        }
+    | | /* 156.176 */        let _ = removeIfExists(path)
+    | | /* 156.177 */    }
+    | | /* 156.178 */}
+    | | /* 156.179 */
+    | | /* 156.180 */@Attribute[TestCase_18]
+    | | /* 156.181 */func cancelledExpiredAndClosedCallsRetainPublicResolveClassifications(): Unit {
+    | | /* 156.182 */    let path = dnsResolverTestTempPath()
+    | | /* 156.183 */    try {
+    | | /* 156.184 */        File.writeTo(path, "127.0.0.20 lifecycle.test\n".toArray())
+    | | /* 156.185 */        let resolver = Resolver(config: DnsResolverConfig(hostsPath: path))
+    | | /* 156.186 */        try {
+    | | /* 156.187 */            let cancellation = api.CancellationSource()
+    | | /* 156.188 */            cancellation.cancel()
+    | | /* 156.189 */            let cancelled = dnsResolverTestResolveError({ =>
+    | | /* 156.190 */                let _ = resolver.resolve(api.HostName("lifecycle.test"), context: api.OperationContext(cancellation: cancellation.token))
+    | | /* 156.191 */            })
+    | | /* 156.192 */            expectEqual("dnsResolverTestResolveErrorIs(cancelled, api.ResolveErrorCode.Cancelled)", "true", dnsResolverTestResolveErrorIs(cancelled, api.ResolveErrorCode.Cancelled), true, isDelta: false)
+    | | /* 156.193 */            let expired = dnsResolverTestResolveError({ =>
+    | | /* 156.194 */                let _ = resolver.resolve(api.HostName("lifecycle.test"), context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.Zero))))
+    | | /* 156.195 */            })
+    | | /* 156.196 */            expectEqual("dnsResolverTestResolveErrorIs(expired, api.ResolveErrorCode.Timeout)", "true", dnsResolverTestResolveErrorIs(expired, api.ResolveErrorCode.Timeout), true, isDelta: false)
+    | | /* 156.197 */            resolver.close()
+    | | /* 156.198 */            expectEqual("resolver.isClosed()", "true", resolver.isClosed(), true, isDelta: false)
+    | | /* 156.199 */            let closed = dnsResolverTestResolveError({ =>
+    | | /* 156.200 */                let _ = resolver.resolve(api.HostName("lifecycle.test"))
+    | | /* 156.201 */            })
+    | | /* 156.202 */            expectEqual("dnsResolverTestResolveErrorIs(closed, api.ResolveErrorCode.Cancelled)", "true", dnsResolverTestResolveErrorIs(closed, api.ResolveErrorCode.Cancelled), true, isDelta: false)
+    | | /* 156.203 */        } finally {
+    | | /* 156.204 */            resolver.close()
+    | | /* 156.205 */        }
+    | | /* 156.206 */    } finally {
+    | | /* 156.207 */        let _ = removeIfExists(path)
+    | | /* 156.208 */    }
+    | | /* 156.209 */}
+    | | /* 156.210 */
+    | | /* 156.211 */@Attribute[TestCase_19]
+    | | /* 156.212 */func connectUsesHostsMappingForANativeListenerExchange(): Unit {
+    | | /* 156.213 */    let path = dnsResolverTestTempPath()
+    | | /* 156.214 */    let listener = TcpListener.bind(dnsResolverTestLoopback(0u16), backlog: 2)
+    | | /* 156.215 */    File.writeTo(path, "127.0.0.1 native-connect.test\n".toArray())
+    | | /* 156.216 */    let resolver = Resolver(config: DnsResolverConfig(hostsPath: path, queryTimeout: 2 * Duration.second))
+    | | /* 156.217 */    let request =[0x10u8, 0x20u8, 0x30u8]
+    | | /* 156.218 */    let response =[0xA0u8, 0xB0u8]
+    | | /* 156.219 */    let serving: Future < Bool >= spawn { let peer = listener.accept(context: api.OperationContext(deadline: Some(api.Deadline.after(2 * Duration.second))))
+    | | /* 156.220 */        try {
+    | | /* 156.221 */            let received = Array < Byte >(request.size, repeat: 0u8)
+    | | /* 156.222 */            peer.readExact(api.MutableByteSpan(received), context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))
+    | | /* 156.223 */            peer.writeAll(api.ByteSpan(response), context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))
+    | | /* 156.224 */            received == request
+    | | /* 156.225 */        } finally {
+    | | /* 156.226 */            peer.close()
+    | | /* 156.227 */        }
+    | | /* 156.228 */    }
+    | | /* 156.229 */    var connected:?api.DuplexTransport = None < api.DuplexTransport >
+    | | /* 156.230 */    try {
+    | | /* 156.231 */        let transport = resolver.connect(api.HostName("native-connect.test"), listener.localEndpoint.port, attemptDelay: Duration.Zero, context: api.OperationContext(deadline: Some(api.Deadline.after(2 * Duration.second))))
+    | | /* 156.232 */        connected = Some(transport)
+    | | /* 156.233 */        match(transport.info.remoteEndpoint) {
+    | | /* 156.234 */            case Some(endpoint) => expectEqual("endpoint", "listener.localEndpoint", endpoint, listener.localEndpoint, isDelta: false)
+    | | /* 156.235 */            case _ => fail("connected transport did not expose its Internet peer")
+    | | /* 156.236 */        }
+    | | /* 156.237 */        api.writeAll(transport, api.ByteSpan(request), context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))
+    | | /* 156.238 */        let received = Array < Byte >(response.size, repeat: 0u8)
+    | | /* 156.239 */        api.readExact(transport, api.MutableByteSpan(received), context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second))))
+    | | /* 156.240 */        expectEqual("received", "response", received, response, isDelta: false)
+    | | /* 156.241 */        expectEqual("serving.get(Duration.second)", "true", serving.get(Duration.second), true, isDelta: false)
+    | | /* 156.242 */    } finally {
+    | | /* 156.243 */        match(connected) {
+    | | /* 156.244 */            case Some(transport) => transport.close(api.OperationContext.background())
+    | | /* 156.245 */            case None =>()
+    | | /* 156.246 */        }
+    | | /* 156.247 */        listener.close()
+    | | /* 156.248 */        try {
+    | | /* 156.249 */            let _ = serving.get(Duration.second)
+    | | /* 156.250 */        } catch(_: Exception) {
+    | | /* 156.251 */        }
+    | | /* 156.252 */        resolver.close()
+    | | /* 156.253 */        let _ = removeIfExists(path)
+    | | /* 156.254 */    }
+    | | /* 156.255 */}
+    | | /* 156.256 */
+    | | /* 156.257 */@Attribute[TestCase_20]
+    | | /* 156.258 */func resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmission(): Unit {
+    | | /* 156.259 */    let path = dnsResolverTestTempPath()
+    | | /* 156.260 */    let listener = TcpListener.bind(dnsResolverTestLoopback(0u16), backlog: 1)
+    | | /* 156.261 */    File.writeTo(path, "127.0.0.1 deadline-connect.test\n".toArray())
+    | | /* 156.262 */    let resolver = Resolver(config: DnsResolverConfig(hostsPath: path, queryTimeout: 5 * Duration.second))
+    | | /* 156.263 */    let clock = DnsResolverTestClock(MonoTime.now())
+    | | /* 156.264 */    let sink = DnsResolverDeadlineSink(clock)
+    | | /* 156.265 */    try {
+    | | /* 156.266 */        let error = try {
+    | | /* 156.267 */            let transport = resolver.connect(api.HostName("deadline-connect.test"), listener.localEndpoint.port, attemptDelay: Duration.Zero, context: api.OperationContext(deadline: Some(api.Deadline.after(Duration.second, clock: clock)), eventSink: Some(sink)))
+    | | /* 156.268 */            transport.close(api.OperationContext.background())
+    | | /* 156.269 */            fail("expired total deadline unexpectedly published a connected transport")
+    | | /* 156.270 */        } catch(value: api.NetworkException) {
+    | | /* 156.271 */            value
+    | | /* 156.272 */        }
+    | | /* 156.273 */        
+    | | /* 156.274 */        expectEqual("dnsResolverTestConnectTimeout(error)", "true", dnsResolverTestConnectTimeout(error), true, isDelta: false)
+    | | /* 156.275 */        expectEqual("sink.dnsCompletions", "1", sink.dnsCompletions, 1, isDelta: false)
+    | | /* 156.276 */        expectEqual("sink.connectStarts", "1", sink.connectStarts, 1, isDelta: false)
+    | | /* 156.277 */    } finally {
+    | | /* 156.278 */        resolver.close()
+    | | /* 156.279 */        listener.close()
+    | | /* 156.280 */        let _ = removeIfExists(path)
+    | | /* 156.281 */    }
+    | | /* 156.282 */}
+    | | /* 156.283 */
+    | | /* 156.284 */init() {
+    | | /* 156.285 */}
+    | | /* 156.286 */private func classConfiguration(): Configuration {
+    | | /* 156.287 */    let configuration = Configuration()
+    | | /* 156.288 */    
+    | | /* 156.289 */    return configuration
+    | | /* 156.290 */}
+    | | /* 156.291 */public override func asTestSuite(): TestSuite {
+    | | /* 156.292 */    
+    | | /* 156.293 */    let suiteConfiguration = classConfiguration()
+    | | /* 156.294 */    let suiteBuilder = TestSuite.builder("DnsResolverPolicyTest").configure(suiteConfiguration)
+    | | /* 156.295 */    
+    | | /* 156.296 */    { => let caseConfig = Configuration()
+    | | /* 156.297 */        
+    | | /* 156.298 */        let fromSystemParsesTabsCommentsLastSearchAndClampedNdotsTestFunc = { => fromSystemParsesTabsCommentsLastSearchAndClampedNdots();() }
+    | | /* 156.299 */        suiteBuilder.add(
+    | | /* 156.300 */        UnitTestCase.create(
+    | | /* 156.301 */        "fromSystemParsesTabsCommentsLastSearchAndClampedNdots",
+    | | /* 156.302 */        configuration: caseConfig,
+    | | /* 156.303 */        body: fromSystemParsesTabsCommentsLastSearchAndClampedNdotsTestFunc
+    | | /* 156.304 */        )
+    | | /* 156.305 */        )
+    | | /* 156.306 */        
+    | | /* 156.307 */    }()
+    | | /* 156.308 */    
+    | | /* 156.309 */    
+    | | /* 156.310 */    { => let caseConfig = Configuration()
+    | | /* 156.311 */        
+    | | /* 156.312 */        let configOwnsInputArraysAndReturnsDefensiveCopiesTestFunc = { => configOwnsInputArraysAndReturnsDefensiveCopies();() }
+    | | /* 156.313 */        suiteBuilder.add(
+    | | /* 156.314 */        UnitTestCase.create(
+    | | /* 156.315 */        "configOwnsInputArraysAndReturnsDefensiveCopies",
+    | | /* 156.316 */        configuration: caseConfig,
+    | | /* 156.317 */        body: configOwnsInputArraysAndReturnsDefensiveCopiesTestFunc
+    | | /* 156.318 */        )
+    | | /* 156.319 */        )
+    | | /* 156.320 */        
+    | | /* 156.321 */    }()
+    | | /* 156.322 */    
+    | | /* 156.323 */    
+    | | /* 156.324 */    { => let caseConfig = Configuration()
+    | | /* 156.325 */        
+    | | /* 156.326 */        let systemFilesFailClosedWhenMissingOversizedOrNonregularTestFunc = { => systemFilesFailClosedWhenMissingOversizedOrNonregular();() }
+    | | /* 156.327 */        suiteBuilder.add(
+    | | /* 156.328 */        UnitTestCase.create(
+    | | /* 156.329 */        "systemFilesFailClosedWhenMissingOversizedOrNonregular",
+    | | /* 156.330 */        configuration: caseConfig,
+    | | /* 156.331 */        body: systemFilesFailClosedWhenMissingOversizedOrNonregularTestFunc
+    | | /* 156.332 */        )
+    | | /* 156.333 */        )
+    | | /* 156.334 */        
+    | | /* 156.335 */    }()
+    | | /* 156.336 */    
+    | | /* 156.337 */    
+    | | /* 156.338 */    { => let caseConfig = Configuration()
+    | | /* 156.339 */        
+    | | /* 156.340 */        let hostsAliasesFilterFamiliesAndRemainSnapshottedTestFunc = { => hostsAliasesFilterFamiliesAndRemainSnapshotted();() }
+    | | /* 156.341 */        suiteBuilder.add(
+    | | /* 156.342 */        UnitTestCase.create(
+    | | /* 156.343 */        "hostsAliasesFilterFamiliesAndRemainSnapshotted",
+    | | /* 156.344 */        configuration: caseConfig,
+    | | /* 156.345 */        body: hostsAliasesFilterFamiliesAndRemainSnapshottedTestFunc
+    | | /* 156.346 */        )
+    | | /* 156.347 */        )
+    | | /* 156.348 */        
+    | | /* 156.349 */    }()
+    | | /* 156.350 */    
+    | | /* 156.351 */    
+    | | /* 156.352 */    { => let caseConfig = Configuration()
+    | | /* 156.353 */        
+    | | /* 156.354 */        let trailingRootSkipsSearchWhileNdotsSelectsSearchOrAbsoluteFirstTestFunc = { => trailingRootSkipsSearchWhileNdotsSelectsSearchOrAbsoluteFirst();() }
+    | | /* 156.355 */        suiteBuilder.add(
+    | | /* 156.356 */        UnitTestCase.create(
+    | | /* 156.357 */        "trailingRootSkipsSearchWhileNdotsSelectsSearchOrAbsoluteFirst",
+    | | /* 156.358 */        configuration: caseConfig,
+    | | /* 156.359 */        body: trailingRootSkipsSearchWhileNdotsSelectsSearchOrAbsoluteFirstTestFunc
+    | | /* 156.360 */        )
+    | | /* 156.361 */        )
+    | | /* 156.362 */        
+    | | /* 156.363 */    }()
+    | | /* 156.364 */    
+    | | /* 156.365 */    
+    | | /* 156.366 */    { => let caseConfig = Configuration()
+    | | /* 156.367 */        
+    | | /* 156.368 */        let exactHostsEntryWinsBeforeSearchSuffixDnsTestFunc = { => exactHostsEntryWinsBeforeSearchSuffixDns();() }
+    | | /* 156.369 */        suiteBuilder.add(
+    | | /* 156.370 */        UnitTestCase.create(
+    | | /* 156.371 */        "exactHostsEntryWinsBeforeSearchSuffixDns",
+    | | /* 156.372 */        configuration: caseConfig,
+    | | /* 156.373 */        body: exactHostsEntryWinsBeforeSearchSuffixDnsTestFunc
+    | | /* 156.374 */        )
+    | | /* 156.375 */        )
+    | | /* 156.376 */        
+    | | /* 156.377 */    }()
+    | | /* 156.378 */    
+    | | /* 156.379 */    
+    | | /* 156.380 */    { => let caseConfig = Configuration()
+    | | /* 156.381 */        
+    | | /* 156.382 */        let cancelledExpiredAndClosedCallsRetainPublicResolveClassificationsTestFunc = { => cancelledExpiredAndClosedCallsRetainPublicResolveClassifications();() }
+    | | /* 156.383 */        suiteBuilder.add(
+    | | /* 156.384 */        UnitTestCase.create(
+    | | /* 156.385 */        "cancelledExpiredAndClosedCallsRetainPublicResolveClassifications",
+    | | /* 156.386 */        configuration: caseConfig,
+    | | /* 156.387 */        body: cancelledExpiredAndClosedCallsRetainPublicResolveClassificationsTestFunc
+    | | /* 156.388 */        )
+    | | /* 156.389 */        )
+    | | /* 156.390 */        
+    | | /* 156.391 */    }()
+    | | /* 156.392 */    
+    | | /* 156.393 */    
+    | | /* 156.394 */    { => let caseConfig = Configuration()
+    | | /* 156.395 */        
+    | | /* 156.396 */        let connectUsesHostsMappingForANativeListenerExchangeTestFunc = { => connectUsesHostsMappingForANativeListenerExchange();() }
+    | | /* 156.397 */        suiteBuilder.add(
+    | | /* 156.398 */        UnitTestCase.create(
+    | | /* 156.399 */        "connectUsesHostsMappingForANativeListenerExchange",
+    | | /* 156.400 */        configuration: caseConfig,
+    | | /* 156.401 */        body: connectUsesHostsMappingForANativeListenerExchangeTestFunc
+    | | /* 156.402 */        )
+    | | /* 156.403 */        )
+    | | /* 156.404 */        
+    | | /* 156.405 */    }()
+    | | /* 156.406 */    
+    | | /* 156.407 */    
+    | | /* 156.408 */    { => let caseConfig = Configuration()
+    | | /* 156.409 */        
+    | | /* 156.410 */        let resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmissionTestFunc = { => resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmission();() }
+    | | /* 156.411 */        suiteBuilder.add(
+    | | /* 156.412 */        UnitTestCase.create(
+    | | /* 156.413 */        "resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmission",
+    | | /* 156.414 */        configuration: caseConfig,
+    | | /* 156.415 */        body: resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmissionTestFunc
+    | | /* 156.416 */        )
+    | | /* 156.417 */        )
+    | | /* 156.418 */        
+    | | /* 156.419 */    }()
+    | | /* 156.420 */    
+    | | /* 156.421 */    return suiteBuilder.build()
+    | | /* 156.422 */}
+    | | /* 156.423 */private func inheritedFromClassAnnotatedByTestTemplate < T >(): TestSuite where T <: TestClass {
+    | | /* 156.424 */    throw Exception("Unreachable code")
+    | | /* 156.425 */}
+    | | /* 156.426 */}
+    | | /* 156.427 */
+    | | /* 156.428 */
+    | | /* 156.429 */interface TestPackageExtension_DnsResolverPolicyTest {
+    | | /* 156.430 */func registerDnsResolverPolicyTest(): Unit
+    | | /* 156.431 */}
+    | | /* 156.432 */extend TestPackage <: TestPackageExtension_DnsResolverPolicyTest {
+    | | /* 156.433 */@Attribute[TEST_REGISTER]
+    | | /* 156.434 */public func registerDnsResolverPolicyTest() {
+    | | /* 156.435 */    registerSuite({ => DnsResolverPolicyTest().asTestSuite() })
+    | | /* 156.436 */}
+    | | /* 156.437 */}
+    | | /* 156.438 */
+    | |_____________^
+    | 
+note: which is expanded as follows
+    | 
+    | /* 156.245 */            case None =>()
+    |                               ^^^^ 
+    | 
+
+warning: unreachable block in 'if' expression
+    | 
+    |   /* 8.510 */                if(e is AssertException) {
+    |  _____________________________________________________^
+    | | /* 8.511 */                    throw e
+    | | /* 8.512 */                }
+    | |____________________________^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+note: the warning occurs after the macro is expanded
+   ==> /tmp/wirestack-m8-004-publication/src/net/dns_wire_test.cj:8:1:
+    | 
+8   |   @Test
+    |  _^
+9   | | class DnsWireParserTest {
+    | | ...
+283 | | }
+    | |_^
+    | 
+
+warning: unreachable block in 'if' expression
+    | 
+    |   /* 8.513 */                if(e is AssertIntermediateException) {
+    |  _________________________________________________________________^
+    | | /* 8.514 */                    throw e
+    | | /* 8.515 */                }
+    | |____________________________^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+note: the warning occurs after the macro is expanded
+   ==> /tmp/wirestack-m8-004-publication/src/net/dns_wire_test.cj:8:1:
+    | 
+8   |   @Test
+    |  _^
+9   | | class DnsWireParserTest {
+    | | ...
+283 | | }
+    | |_^
+    | 
+
+warning: unreachable block in 'if' expression
+    | 
+    |   /* 8.516 */                if(e is UnittestTimeoutException) {
+    |  ______________________________________________________________^
+    | | /* 8.517 */                    throw e
+    | | /* 8.518 */                }
+    | |____________________________^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+note: the warning occurs after the macro is expanded
+   ==> /tmp/wirestack-m8-004-publication/src/net/dns_wire_test.cj:8:1:
+    | 
+8   |   @Test
+    |  _^
+9   | | class DnsWireParserTest {
+    | | ...
+283 | | }
+    | |_^
+    | 
+
+warning: unreachable block in 'if' expression
+    | 
+    |   /* 8.540 */                if(e is AssertException) {
+    |  _____________________________________________________^
+    | | /* 8.541 */                    throw e
+    | | /* 8.542 */                }
+    | |____________________________^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+note: the warning occurs after the macro is expanded
+   ==> /tmp/wirestack-m8-004-publication/src/net/dns_wire_test.cj:8:1:
+    | 
+8   |   @Test
+    |  _^
+9   | | class DnsWireParserTest {
+    | | ...
+283 | | }
+    | |_^
+    | 
+
+warning: unreachable block in 'if' expression
+    | 
+    |   /* 8.543 */                if(e is AssertIntermediateException) {
+    |  _________________________________________________________________^
+    | | /* 8.544 */                    throw e
+    | | /* 8.545 */                }
+    | |____________________________^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+note: the warning occurs after the macro is expanded
+   ==> /tmp/wirestack-m8-004-publication/src/net/dns_wire_test.cj:8:1:
+    | 
+8   |   @Test
+    |  _^
+9   | | class DnsWireParserTest {
+    | | ...
+283 | | }
+    | |_^
+    | 
+
+warning: unreachable block in 'if' expression
+    | 
+    |   /* 8.546 */                if(e is UnittestTimeoutException) {
+    |  ______________________________________________________________^
+    | | /* 8.547 */                    throw e
+    | | /* 8.548 */                }
+    | |____________________________^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+note: the warning occurs after the macro is expanded
+   ==> /tmp/wirestack-m8-004-publication/src/net/dns_wire_test.cj:8:1:
+    | 
+8   |   @Test
+    |  _^
+9   | | class DnsWireParserTest {
+    | | ...
+283 | | }
+    | |_^
+    | 
+
+warning: unreachable block in 'if' expression
+    | 
+    |   /* 8.621 */                if(e is AssertException) {
+    |  _____________________________________________________^
+    | | /* 8.622 */                    throw e
+    | | /* 8.623 */                }
+    | |____________________________^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+note: the warning occurs after the macro is expanded
+   ==> /tmp/wirestack-m8-004-publication/src/net/dns_wire_test.cj:8:1:
+    | 
+8   |   @Test
+    |  _^
+9   | | class DnsWireParserTest {
+    | | ...
+283 | | }
+    | |_^
+    | 
+
+warning: unreachable block in 'if' expression
+    | 
+    |   /* 8.624 */                if(e is AssertIntermediateException) {
+    |  _________________________________________________________________^
+    | | /* 8.625 */                    throw e
+    | | /* 8.626 */                }
+    | |____________________________^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+note: the warning occurs after the macro is expanded
+   ==> /tmp/wirestack-m8-004-publication/src/net/dns_wire_test.cj:8:1:
+    | 
+8   |   @Test
+    |  _^
+9   | | class DnsWireParserTest {
+    | | ...
+283 | | }
+    | |_^
+    | 
+
+warning: unreachable block in 'if' expression
+    | 
+    |   /* 8.627 */                if(e is UnittestTimeoutException) {
+    |  ______________________________________________________________^
+    | | /* 8.628 */                    throw e
+    | | /* 8.629 */                }
+    | |____________________________^ unreachable block in 'if' expression
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+note: the warning occurs after the macro is expanded
+   ==> /tmp/wirestack-m8-004-publication/src/net/dns_wire_test.cj:8:1:
+    | 
+8   |   @Test
+    |  _^
+9   | | class DnsWireParserTest {
+    | | ...
+283 | | }
+    | |_^
+    | 
+
+53 warnings generated, 53 warnings printed.
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 9577747 ns, RESULT:
+    TCS: DnsWireParserTest, time elapsed: 3823947 ns, RESULT:
+    [ PASSED ] CASE: decodesCompressedTargetsBinaryTxtSoaAndUnknownData (548832 ns)
+    [ PASSED ] CASE: recordOrderMakesAnswerAuthorityAndAdditionalBoundariesExplicit (75271 ns)
+    [ PASSED ] CASE: summariesAndRecordsOwnParserAndConstructorInputs (53809 ns)
+    [ PASSED ] CASE: parserPreservesQuestionIdentityAndRejectsIncompleteRecords (113856 ns)
+    [ PASSED ] CASE: asciiNameProfileRejectsAmbiguousLabels (141830 ns)
+    [ PASSED ] CASE: compressionLoopsForwardPointersAndOutOfRangePointersAreRejected (69166 ns)
+    [ PASSED ] CASE: expandedNameAndSectionCountsRespectConfiguredBounds (92085 ns)
+    [ PASSED ] CASE: completeParserRejectsTrailingAndTruncatedSectionBytes (65848 ns)
+    [ PASSED ] CASE: typedRdataLengthsAndTxtSegmentsAreExact (100991 ns)
+    [ PASSED ] CASE: compressedRdataNamesCannotConsumeNeighboringRecordBytes (90756 ns)
+    [ PASSED ] CASE: srvTargetCompressionIsRejectedEvenWhenPointerIsInBounds (59676 ns)
+    [ PASSED ] CASE: summaryConstructorRejectsSectionMetadataThatCouldBlurBoundaries (30487 ns)
+    [ PASSED ] CASE: additionalOwnerMayReferenceAuthorityNameserverTarget (85123 ns)
+    [ PASSED ] CASE: additionalOwnerMayReferenceSecondLegacyMailboxName (69323 ns)
+Summary: TOTAL: 82
+    PASSED: 14, SKIPPED: 68, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 17482430 ns, RESULT:
+TP: wirestack.*, time elapsed: 17388756 ns, RESULT:
+    PASSED:
+    TP: wirestack.net, time elapsed: 9577747 ns
+Summary: TOTAL: 82
+    PASSED: 14, SKIPPED: 68, ERROR: 0
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
+cjpm test success
+
+
+Wall time: 6.92 seconds
