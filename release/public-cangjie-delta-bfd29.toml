@@ -5,7 +5,7 @@ domain = "cangjie"
 baseline_commit = "bfd29d85e353e6948e4ac643f1c6e6e071c882ba"
 baseline_records = 1025
 baseline_sha256 = "0ce5f31ddf32942d00d2ae3d7d1701cfaacc9b52ae3caf66dfe4e543919079ec"
-review_status = "pending-migration-review"
+review_status = "approved-for-release"
 removed_records = 709
 removed_sha256 = "f8db1ff9cd7120892b58d4db5a8ce8882fa33b636bcb1d38805230d843c1d1b7"
 added_records = 714
@@ -1495,9 +1495,9 @@ added = [
 ]
 
 [[review_groups]]
-classification = "unclassified"
-rationale = "No reviewed migration rule matches this declaration."
-review_status = "pending-migration-review"
+classification = "native-writer-acceleration-seam"
+rationale = "Add the versioned native writer formatting seam to the optional acceleration bundle; keep JSON separators, state, limits, and semantic fallback in the portable writer."
+review_status = "reviewed-for-0.1.0"
 removed = [
   "yjson|src/lib_json_native_scanner.cj|<top-level>|public func activateJsonNativePrimitivesV1(backend: JsonNativeAccelerationPrimitivesV1): Unit",
 ]

@@ -214,6 +214,11 @@ CANGJIE_REVIEW_RATIONALES = {
         "Remove the experimental JSON literal macros from the 0.1 package graph while retaining "
         "the typed @JsonCodec generator."
     ),
+    "native-writer-acceleration-seam": (
+        "Add the versioned native writer formatting seam to the optional acceleration "
+        "bundle; keep JSON separators, state, limits, and semantic fallback in the "
+        "portable writer."
+    ),
     "unclassified": "No reviewed migration rule matches this declaration.",
 }
 
@@ -223,6 +228,8 @@ def _classify_cangjie_delta_record(record: str) -> str:
     if len(parts) != 4:
         return "unclassified"
     package, source, owner, declaration = parts
+    if source == "src/lib_json_native_scanner.cj":
+        return "native-writer-acceleration-seam"
     if package == "yjson_algorithms":
         return "algorithm-view-and-result-redesign"
     if package in {"yjson_backends", "yjson_native", "yjson_yyjson"}:
