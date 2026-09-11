@@ -15,19 +15,20 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Release graph | `release/release-graph.toml`；status=`release-ready` |
 | Evidence updated | `2026-09-11` |
 | Local qualification host | Linux Arch `7.2.3-Arch1-3`, x86_64；Intel Core i7-8700 |
-| Local qualification SDK | Cangjie `1.1.0-alpha.20260829040003 (cjnative)`；cjpm `1.1.3` |
-| Hosted PR SDK | Cangjie STS `1.1.0`；resolution=`pinned-sts` |
+| Release qualification SDK | Cangjie STS `1.1.3`；local path `/home/elliot/cangjie_sdk/sts1.1.3`；current candidate qualification pending |
+| Hosted PR SDK | Cangjie STS `1.1.3`；resolution=`pinned-sts`；new baseline run pending |
 
-本地编译器 `cjc` SHA-256 为
+此前记录的本地编译器 `cjc` SHA-256
 `bc0f32df9c610dcbb05f437552ff57ec6c6e075a54721f46cc9c882a62d2d836`，
-`cjpm` SHA-256 为
-`b867fca2fd0d4bc19bf195e7872f6f13d5019fd3ba5f409291814f7c5bdfa313`。
-首批 Pure 测量使用该工具链。重跑期间固定 SDK 的动态 `stdx` 库路径消失，
-因此第二批没有形成完整的可比较报告；没有用后来出现的其他 SDK 替代它。
+以及 `cjpm` SHA-256
+`b867fca2fd0d4bc19bf195e7872f6f13d5019fd3ba5f409291814f7c5bdfa313`
+属于旧的 `1.1.0-alpha.20260829040003` 工具链。发布基线已迁移到 STS
+`1.1.3`，旧工具链结果不能作为新基线的资格证据。
 
-Hosted PR 为 [#26](https://github.com/lIlIIlIll/yjson/pull/26)，当前候选最新
-run 为 [`34563502643`](https://github.com/lIlIIlIll/yjson/actions/runs/34563502643)；
-该 run 因 `Seven-library evidence drift` 失败，不能写成 hosted PASS。
+旧 Hosted PR 为 [#26](https://github.com/lIlIIlIll/yjson/pull/26)，其
+`1.1.0` run [`34563502643`](https://github.com/lIlIIlIll/yjson/actions/runs/34563502643)
+因 `Seven-library evidence drift` 失败，不能写成新基线的 hosted PASS。
+
 
 ## 2. Gate 状态
 
@@ -36,15 +37,15 @@ run 为 [`34563502643`](https://github.com/lIlIIlIll/yjson/actions/runs/34563502
 | Public API/C ABI mechanical inventory | PASS | `1094` Cangjie declarations；九包 inventory；C ABI delta 全部 `reviewed-for-0.1.0` |
 | Public API migration review | PASS | `release/public-cangjie-delta-bfd29.toml` 为 `approved-for-release`；17 个 reviewed delta，native activator removal 与 writer seam 分组独立 |
 | Local Linux fresh candidate | **STALE** | 既有 `576/576` rehearsal 绑定更早 commit，不是当前 `00eaf70` 的发布证据 |
-| Hosted PR CI | **BLOCKING** | 当前候选 run `34563502643` 因 Seven-library evidence drift 失败 |
-| Hosted main CI / Pages | PASS (historical) | run [`34511955542`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542) 的 28 jobs 与 Pages 通过；它不是当前候选的合并后 run |
+| Hosted PR CI | **BLOCKING** | STS 基线已迁移到 `1.1.3`；新的 Release PR 和 hosted run 尚未完成 |
+| Hosted main CI / Pages | PASS (historical) | run [`34511955542`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542) 的 28 jobs 与 Pages 通过；它不是 `1.1.3` 基线下当前候选的合并后 run |
 | Coverage | PASS (historical) | project line `8508/10345=82.2%`、branch `3722/5262=70.7%`；changed core line/branch 均 `100.0%` |
 | Source-only staging | **STALE** | 既有 staging 绑定更早 candidate；当前候选尚未形成最终包 bundle |
 | Package rehearsal | **STALE** | 既有九包 bundle 绑定 `fc050734`，未上传，不能代表当前候选 |
-| Seven-library matrix | **BLOCKING** | `current-main.json` 仍绑定 `2758853` 与旧 release graph；严格校验报告 current release candidate identity mismatch，当前主机没有可用的 <1% idle-core 窗口完成新矩阵 |
-| Three-library release performance | **BLOCKING** | 当前候选完整 36-workload 证据尚未运行 |
-| Pure baseline/candidate qualification | **BLOCKING** | 当前候选首批正式结果未通过；规定重跑在第 7 轮因固定 SDK 动态库缺失退出，没有第二批有效资格报告 |
-| Native acceleration | **BLOCKING** | 当前候选 Native performance 尚未用固定 SDK 重跑；旧 native performance 绑定 b0，不作为当前候选证据 |
+| Seven-library matrix | **BLOCKING** | 旧 marker 和结果使用旧工具链/旧 release graph；`1.1.3` 基线下的当前候选矩阵尚未运行 |
+| Three-library release performance | **BLOCKING** | `1.1.3` 基线下当前候选完整 36-workload 证据尚未运行 |
+| Pure baseline/candidate qualification | **BLOCKING** | 旧 `1.1.0` 结果不能继承；`1.1.3` 基线下的 release-mode 资格尚未运行 |
+| Native acceleration | **BLOCKING** | `1.1.3` 基线下当前候选 Native performance 尚未重跑 |
 | Release policy | **BLOCKING** | Seven-library、three-library、Pure 和 Native 当前候选证据未全部通过；没有创建 tag 或 Release |
 | Annotated tag / GitHub Release | NOT RUN | Release policy remains blocking; no tag, release, or uploaded assets created |
 | Central package registry | NOT RUN | 未授权发布；没有执行 central publication |
@@ -155,20 +156,20 @@ Native 运行源码闭包 SHA-256 为
 ```text
 Public API mechanical inventory: PASS (1094 declarations; 9 packages)
 Public API migration review: PASS (approved-for-release; 17 reviewed deltas)
-Local fresh-source simulation: STALE (existing 576/576 rehearsal predates 00eaf70)
-Hosted PR execution: BLOCKING (run 34576579249 failed Seven-library evidence drift)
-Seven-library evidence freshness: BLOCKING (marker identity is stale; no idle-core window for a fresh matrix)
-Three-library performance qualification: BLOCKING (current candidate matrix not run)
-Pure baseline/candidate qualification: BLOCKING (release-mode stability/regression failure; prescribed rerun aborted by missing fixed SDK library)
-Native acceleration: BLOCKING (current candidate performance not revalidated)
-Hosted main execution and Pages: PASS historically (run 34511955542; not the current candidate)
-Coverage: PASS historically (project 82.2%/70.7%; changed core 100.0%/100.0%)
+Local fresh-source simulation: STALE (existing 576/576 rehearsal predates 00eaf70 and the baseline migration)
+Hosted PR execution: BLOCKING (new STS 1.1.3 baseline run not completed)
+Seven-library evidence freshness: BLOCKING (old marker/toolchain invalid for the new baseline)
+Three-library performance qualification: BLOCKING (current candidate matrix not run under STS 1.1.3)
+Pure baseline/candidate qualification: BLOCKING (current candidate release-mode qualification not run under STS 1.1.3)
+Native acceleration: BLOCKING (current candidate performance not revalidated under STS 1.1.3)
+Hosted main execution and Pages: PASS historically (run 34511955542; not the current candidate or new baseline)
+Coverage: PASS historically (project 82.2%/70.7%; changed core line/branch 100.0%)
 Release decision: BLOCKED; no tag, GitHub Release, or registry publication
 ```
 
-当前可执行的下一步是恢复并固定
-`1.1.0-alpha.20260829040003` SDK，获得 <1% idle-core 窗口，再按 release mode
-重新生成当前候选的七库、三库、Pure 和 Native 证据。Pure 第一批的稳定性和普通回退
-仍需处理；5% target improvement 只属于明确声明的 optimization mode，不是普通
-Release 的必要条件。不能通过切换 target、筛选 case 或重写历史 metadata 关闭其他门禁。
-关闭前不得创建 `0.1.0` tag 或 GitHub Release。
+发布基线已从 STS `1.1.0` 迁移到 `/home/elliot/cangjie_sdk/sts1.1.3`
+(cjc/cjpm `1.1.3`)。下一步是用该基线获得 `<1%` idle-core 窗口，
+重新生成当前候选的七库、三库、Pure 和 Native 证据，再创建新的 Release PR
+并验证合并后的 `main` workflow 与 Pages。旧 `1.1.0` 结果、marker 和 bundle
+不能复用；5% target improvement 仍只属于明确声明的 optimization mode。
+关闭这些门禁前不得创建 `0.1.0` tag 或 GitHub Release。

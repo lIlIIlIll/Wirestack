@@ -38,7 +38,7 @@ python3 scripts/test_generate_api_docs.py
 
 ## 工具链选择
 
-托管 CI 固定使用 Cangjie STS `1.1.0`，所有需要 Cangjie 的任务使用同一
+托管 CI 固定使用 Cangjie STS `1.1.3`，所有需要 Cangjie 的任务使用同一
 解析结果。`workflow_dispatch` 可以显式指定一个 STS 版本，以便重跑一个候选。
 cjdoc 从固定源码版本构建，但编译时使用同一个 STS SDK；验证证据
 记录实际 `cjc` 和 `cjpm` 输出，并拒绝与统一版本不一致的编译器。
