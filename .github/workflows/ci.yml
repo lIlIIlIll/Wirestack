@@ -289,7 +289,9 @@ jobs:
           ${{ matrix.checksum }} "$RUNNER_TEMP/${{ matrix.archive }}"
       - name: Run Pure package gates
         env:
-          YJSON_CI_DEPENDENCY_OVERRIDE: ${{ matrix.os == 'windows-2022' && '-O1' || '' }}
+          # The pinned nightly's LLVM llc also crashes at -O2 in macOS Pure;
+          # Windows already uses -O1 for the same pinned-SDK issue.
+          YJSON_CI_DEPENDENCY_OVERRIDE: ${{ contains(fromJSON('["windows-2022","macos-14"]'), matrix.os) && '-O1' || '' }}
         run: scripts/ci_job.sh pure-platform
 
   api-docs:
