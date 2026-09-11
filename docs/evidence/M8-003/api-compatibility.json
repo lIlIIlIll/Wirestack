@@ -1,0 +1,294 @@
+{
+  "abi_compatibility": "BREAKING: SocketCapabilities gains connectedDatagramSend and a constructor parameter. Rebuild consumers.",
+  "added_declarations": [
+    "wirestack.net.UnixDatagramSocket",
+    "wirestack.net.UnixListener",
+    "wirestack.net.UnixStream"
+  ],
+  "baseline": "docs/api/baselines/wirestack-linux-pre1-m8-002.json",
+  "candidate_inventory": "docs/api/baselines/wirestack-linux-pre1-m8-003.json",
+  "changed_declarations": [
+    {
+      "after": {
+        "kind": "struct",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( nonBlocking!: Bool = true, closeOnExec!: Bool = true, halfClose!: Bool = false, broadcast!: Bool = true, multicast!: Bool = true, raw!: Bool = false, ancillaryData!: Bool = false, zeroLengthDatagramSend!: Bool = false, connectedDatagramSend!: Bool = false )"
+          },
+          {
+            "kind": "let",
+            "name": "ancillaryData",
+            "signature": "public let ancillaryData: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "broadcast",
+            "signature": "public let broadcast: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "closeOnExec",
+            "signature": "public let closeOnExec: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "connectedDatagramSend",
+            "signature": "public let connectedDatagramSend: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "halfClose",
+            "signature": "public let halfClose: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "multicast",
+            "signature": "public let multicast: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "nonBlocking",
+            "signature": "public let nonBlocking: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "raw",
+            "signature": "public let raw: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "zeroLengthDatagramSend",
+            "signature": "public let zeroLengthDatagramSend: Bool"
+          }
+        ],
+        "name": "SocketCapabilities",
+        "package": "wirestack.net",
+        "signature": "public struct SocketCapabilities"
+      },
+      "before": {
+        "kind": "struct",
+        "members": [
+          {
+            "kind": "init",
+            "name": "init",
+            "signature": "public init( nonBlocking!: Bool = true, closeOnExec!: Bool = true, halfClose!: Bool = false, broadcast!: Bool = true, multicast!: Bool = true, raw!: Bool = false, ancillaryData!: Bool = false, zeroLengthDatagramSend!: Bool = false )"
+          },
+          {
+            "kind": "let",
+            "name": "ancillaryData",
+            "signature": "public let ancillaryData: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "broadcast",
+            "signature": "public let broadcast: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "closeOnExec",
+            "signature": "public let closeOnExec: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "halfClose",
+            "signature": "public let halfClose: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "multicast",
+            "signature": "public let multicast: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "nonBlocking",
+            "signature": "public let nonBlocking: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "raw",
+            "signature": "public let raw: Bool"
+          },
+          {
+            "kind": "let",
+            "name": "zeroLengthDatagramSend",
+            "signature": "public let zeroLengthDatagramSend: Bool"
+          }
+        ],
+        "name": "SocketCapabilities",
+        "package": "wirestack.net",
+        "signature": "public struct SocketCapabilities"
+      }
+    },
+    {
+      "after": {
+        "kind": "class",
+        "members": [
+          {
+            "kind": "func",
+            "name": "abort",
+            "signature": "public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "bind",
+            "signature": "public static func bind( endpoint: api.SocketEndpoint, context!: api.OperationContext = api.OperationContext.background() ): UdpSocket"
+          },
+          {
+            "kind": "func",
+            "name": "close",
+            "signature": "public func close(): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "close",
+            "signature": "public func close(context!: api.OperationContext): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "connect",
+            "signature": "public func connect( endpoint: NetworkEndpoint, context!: api.OperationContext = api.OperationContext.background() ): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "isClosed",
+            "signature": "public func isClosed(): Bool"
+          },
+          {
+            "kind": "func",
+            "name": "receive",
+            "signature": "public func receive( capacity: Int64, context!: api.OperationContext = api.OperationContext.background() ): DatagramReceiveResult"
+          },
+          {
+            "kind": "func",
+            "name": "send",
+            "signature": "public func send( source: api.ByteSpan, context!: api.OperationContext = api.OperationContext.background() ): Int64"
+          },
+          {
+            "kind": "func",
+            "name": "sendTo",
+            "signature": "public func sendTo( endpoint: NetworkEndpoint, source: api.ByteSpan, context!: api.OperationContext = api.OperationContext.background() ): Int64"
+          },
+          {
+            "kind": "prop",
+            "name": "capabilities",
+            "signature": "public prop capabilities: SocketCapabilities { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "localEndpoint",
+            "signature": "public prop localEndpoint: ?NetworkEndpoint { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "remoteEndpoint",
+            "signature": "public prop remoteEndpoint: ?NetworkEndpoint { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "state",
+            "signature": "public prop state: SocketState { accessors:get }"
+          }
+        ],
+        "name": "UdpSocket",
+        "package": "wirestack.net",
+        "signature": "public class UdpSocket <: DatagramSocket"
+      },
+      "before": {
+        "kind": "class",
+        "members": [
+          {
+            "kind": "func",
+            "name": "abort",
+            "signature": "public func abort(reason!: ?api.AbortReason = None<api.AbortReason>): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "bind",
+            "signature": "public static func bind( endpoint: api.SocketEndpoint, context!: api.OperationContext = api.OperationContext.background() ): UdpSocket"
+          },
+          {
+            "kind": "func",
+            "name": "close",
+            "signature": "public func close( context!: api.OperationContext ): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "close",
+            "signature": "public func close(): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "connect",
+            "signature": "public func connect( endpoint: NetworkEndpoint, context!: api.OperationContext = api.OperationContext.background() ): Unit"
+          },
+          {
+            "kind": "func",
+            "name": "isClosed",
+            "signature": "public func isClosed(): Bool"
+          },
+          {
+            "kind": "func",
+            "name": "receive",
+            "signature": "public func receive( capacity: Int64, context!: api.OperationContext = api.OperationContext.background() ): DatagramReceiveResult"
+          },
+          {
+            "kind": "func",
+            "name": "send",
+            "signature": "public func send( source: api.ByteSpan, context!: api.OperationContext = api.OperationContext.background() ): Int64"
+          },
+          {
+            "kind": "func",
+            "name": "sendTo",
+            "signature": "public func sendTo( endpoint: NetworkEndpoint, source: api.ByteSpan, context!: api.OperationContext = api.OperationContext.background() ): Int64"
+          },
+          {
+            "kind": "prop",
+            "name": "capabilities",
+            "signature": "public prop capabilities: SocketCapabilities { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "localEndpoint",
+            "signature": "public prop localEndpoint: ?NetworkEndpoint { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "remoteEndpoint",
+            "signature": "public prop remoteEndpoint: ?NetworkEndpoint { accessors:get }"
+          },
+          {
+            "kind": "prop",
+            "name": "state",
+            "signature": "public prop state: SocketState { accessors:get }"
+          }
+        ],
+        "name": "UdpSocket",
+        "package": "wirestack.net",
+        "signature": "public class UdpSocket <: DatagramSocket"
+      }
+    }
+  ],
+  "forward_compatibility": "New SDKs must requalify the excluded capabilities before enabling them; this change does not promise behavior on untested SDKs.",
+  "inventory_text_only_changes": [
+    "UdpSocket.close retains the same parameter and return types; only whitespace around its parameter list differs."
+  ],
+  "kind": "api-compatibility-classification",
+  "meaning": "Classification completed; PASS is not an ABI-compatibility claim.",
+  "release_policy": "Intentional pre-1.0 M8 inventory change; no stable binary compatibility guarantee.",
+  "removed_declarations": [],
+  "rule": "PDF-rule-derived: Cangjie API declaration compatibility specification 5.1.3.3.3.10.1 classifies adding a struct instance field as ABI-incompatible.",
+  "scenario_evidence": "compat-agent is not installed on PATH. No old/new binary compatibility scenario was run.",
+  "schema_version": 1,
+  "semantic_changes": [
+    "Internet UDP retains native connected send and reports connectedDatagramSend=true.",
+    "Unix streams and listeners preserve shared contexts, terminal ownership and lossless endpoint diagnostics.",
+    "Outgoing Unix abstract names are restricted to exactly107 valid UTF-8 bytes by the qualified SDK; the shared arbitrary-byte endpoint model is unchanged.",
+    "Unix connected send is Unsupported with connectedDatagramSend=false because even SDK send re-resolves the selected name. Native receive filtering and explicit sendTo remain available.",
+    "Empty Unix datagram receive remains supported; empty send and unnamed sender conversion are SDK limitations."
+  ],
+  "source_compatibility": "Existing constructor call forms retain the added named parameter default; 48 existing network cases and a clean external consumer compile and run. No universal downstream source-compatibility claim.",
+  "source_task": "M8-003",
+  "status": "PASS"
+}

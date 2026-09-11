@@ -2,7 +2,7 @@
 
 Wirestack 是一个面向仓颉的跨平台安全网络栈项目，目标是在保留 `std.net` 作为官方默认 TCP/runtime 调度底座的前提下，重新定义并实现独立的 Transport、TLS、HTTPS、HTTP/1.1 与 HTTP/2 语义。
 
-当前仓库已完成 Linux glibc 上的 Transport、Resolver、Connector、TLS、HTTP/1.1 与 HTTP/2 主体实现和验收。M8-001 已冻结 Wirestack-owned `wirestack.net` 同步网络底座契约；M8-002 已完成基于 `std.net` 的公共 `TcpListener` 和 `UdpSocket`，并通过 Linux IPv4/IPv6 原生验收。当前 backend 不支持发送空 UDP 报文，但必须接收空报文；新增 capability 字段属于需要 consumer 重编译的 pre-1.0 ABI 变更。M8-003 至 M8-007 仍待执行，分别覆盖 Unix/raw socket、DNS、HTTP parity、TLS context versioning 和最终发布证据。AWS-LC 5.5.0 是 Linux provider。公开 cancellation handles、HTTP/2 server facade、ALPN dispatch 和一小时 SSE profile 已有 native Linux 证据。ADR-0004 将 musl 延后到 SDK 正式支持之后。ADR-0005 规定 Wirestack release 不依赖 runtime 或 `std.net` 源码修改；缺少 typed TCP half-close、native socket code 或精确 runtime backend 时，适配器使用稳定的能力和错误表示。
+当前仓库已完成 Linux glibc 上的 Transport、Resolver、Connector、TLS、HTTP/1.1 与 HTTP/2 主体实现和验收。M8-001 已冻结 Wirestack-owned `wirestack.net` 同步网络底座契约；M8-002 已完成基于 `std.net` 的公共 `TcpListener` 和 `UdpSocket`，并通过 Linux IPv4/IPv6 原生验收。M8-003 增加经过 Linux 原生验证的 `UnixListener`、`UnixStream` 和 capability-scoped `UnixDatagramSocket`；短或非 UTF-8 outgoing abstract 名称、Unix connected send 和 raw native I/O 不计为支持能力。当前 backend 不支持发送空 datagram，但必须接收空报文；新增 capability 字段属于需要 consumer 重编译的 pre-1.0 ABI 变更。M8-004 至 M8-007 仍待执行，分别覆盖 DNS、HTTP parity、TLS context versioning 和最终发布证据。AWS-LC 5.5.0 是 Linux provider。公开 cancellation handles、HTTP/2 server facade、ALPN dispatch 和一小时 SSE profile 已有 native Linux 证据。ADR-0004 将 musl 延后到 SDK 正式支持之后。ADR-0005 规定 Wirestack release 不依赖 runtime 或 `std.net` 源码修改；缺少 typed TCP half-close、native socket code 或精确 runtime backend 时，适配器使用稳定的能力和错误表示。
 
 ## 目标
 
@@ -45,7 +45,7 @@ wirestack.internal.http2
 wirestack.internal.platform.*
 ```
 
-Transport、Resolver、Connector、TLS、HTTP/1.1 与 HTTP/2 包已经包含 Linux glibc 实现。`wirestack.net` 还提供基于已解析 Internet endpoint 的 `TcpListener` 和 `UdpSocket`；M8-002 的原生验收、API baseline 和任务证据见[验收记录](docs/evidence/M8-002/README.md)。全平台发布矩阵仍未完成。
+Transport、Resolver、Connector、TLS、HTTP/1.1 与 HTTP/2 包已经包含 Linux glibc 实现。`wirestack.net` 提供 Internet TCP/UDP 和受 SDK 能力限制的 Unix stream/datagram adapter。原生验收、API baseline 与任务证据分别见 [M8-002](docs/evidence/M8-002/README.md) 和 [M8-003](docs/evidence/M8-003/README.md)。全平台发布矩阵仍未完成。
 
 ## 本地验证
 
@@ -88,6 +88,6 @@ SDK 归档、解压后的工具链和 `target/` 构建产物都不进入仓库�
 
 ## 当前执行点
 
-Linux glibc 主体能力和 M7 发布门禁已有独立证据。M8-001 和 M8-002 已完成；M8-003 至 M8-007 保持待执行，不能复用历史 M7 记录宣称新的 M8 release 已通过。UP-001 至 UP-007 都是远期上游增强，不在 Wirestack 发布依赖图中。全局六平台状态仍因其他平台的原生证据缺失而保持 fail-closed。
+Linux glibc 主体能力和 M7 发布门禁已有独立证据。M8-001 至 M8-003 的能力边界与任务状态见[状态页](docs/planning/status.md)；M8-004 至 M8-007 保持待执行，不能复用历史 M7 记录宣称新的 M8 release 已通过。UP-001 至 UP-007 都是远期上游增强，不在 Wirestack 发布依赖图中。全局六平台状态仍因其他平台的原生证据缺失而保持 fail-closed。
 
 不要把“能交叉编译”视为平台支持完成；涉及平台能力的完成声明必须有真机或原生 VM 证据。

@@ -74,7 +74,10 @@ PUBLIC_PACKAGE_FILES = {
         "tls.cj",
     ),
     "wirestack.tls": ("facade.cj", "identity.cj", "package.cj"),
-    "wirestack.net": ("package.cj", "tcp_listener.cj", "udp_socket.cj"),
+    "wirestack.net": (
+        "package.cj", "datagram_socket_core.cj", "tcp_listener.cj", "udp_socket.cj",
+        "unix_stream.cj", "unix_listener.cj", "unix_datagram_socket.cj",
+    ),
 }
 
 

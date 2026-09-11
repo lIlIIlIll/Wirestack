@@ -6,19 +6,26 @@ import wirestack as api
 
 private const MAX_UDP_PAYLOAD: Int64 = 65507
 
+private enum StdNetDatagramKind {
+    | Internet(native.UdpSocket)
+    | Unix(native.UnixDatagramSocket)
+}
+
 /**
- * Synchronous Internet datagram adapter over the public std.net UDP surface.
+ * Synchronous Internet and Unix datagram adapter over the public std.net
+ * DatagramSocket surface.
  *
- * A send gate and a receive gate preserve datagram atomicity while allowing one
+ * A send gate and a receive gate preserve packet atomicity while allowing one
  * operation in each direction to overlap. Connect has exclusive admission
- * against both gates because native UDP connect changes receive filtering and
- * the destination used by send.
+ * against both gates because native datagram connect changes receive filtering
+ * and the destination used by send.
  */
-public class StdNetUdpSocket <: Resource {
-    private let socket: native.UdpSocket
+public class StdNetDatagramSocket <: Resource {
+    private let socket: native.DatagramSocket
+    private let nativeKind: StdNetDatagramKind
     private let lifecycleMutex = Mutex()
-    private var localEndpointValue: api.SocketEndpoint
-    private var remoteEndpointValue: ?api.SocketEndpoint = None<api.SocketEndpoint>
+    private var localEndpointValue: api.NetworkEndpoint
+    private var remoteEndpointValue: ?api.NetworkEndpoint = None<api.NetworkEndpoint>
     private var connectActive = false
     private var sendActive = false
     private var receiveActive = false
@@ -27,36 +34,92 @@ public class StdNetUdpSocket <: Resource {
     private var sendStaging = Array<Byte>()
     private var receiveScratch = Array<Byte>()
 
-    private init(socket: native.UdpSocket, localEndpoint: api.SocketEndpoint) {
+    private init(
+        socket: native.DatagramSocket,
+        nativeKind: StdNetDatagramKind,
+        localEndpoint: api.NetworkEndpoint
+    ) {
         this.socket = socket
+        this.nativeKind = nativeKind
         this.localEndpointValue = localEndpoint
     }
 
-    /** Binds a UDP socket to an already-resolved Internet endpoint.
+    /** Binds a datagram socket to an already-resolved Internet endpoint.
      * @param endpoint Local Internet endpoint, with port zero permitted.
      * @param context Absolute operation deadline and cancellation token.
      */
     public static func bind(
         endpoint: api.SocketEndpoint,
         context!: api.OperationContext = api.OperationContext.background()
-    ): StdNetUdpSocket {
-        checkContext(
+    ): StdNetDatagramSocket {
+        let local = api.NetworkEndpoint.Internet(endpoint)
+        checkNetworkContext(
             context,
             api.NetworkErrorCategory.Address,
             api.NetworkPhase.AddressSelection,
-            localEndpoint: Some(endpoint)
+            localEndpoint: Some(local)
         )
-        let nativeSocket = native.UdpSocket(bindAt: toStdEndpoint(endpoint))
-        let adapter = StdNetUdpSocket(nativeSocket, endpoint)
+        let concrete = native.UdpSocket(bindAt: toStdEndpoint(endpoint))
+        let nativeSocket: native.DatagramSocket = concrete
+        bindNative(
+            nativeSocket,
+            StdNetDatagramKind.Internet(concrete),
+            local,
+            context
+        )
+    }
+
+    /** Binds a Linux Unix-domain datagram socket.
+     *
+     * Outgoing abstract names must be valid UTF-8 for this std.net backend.
+     * The shared Unix endpoint model and delivered abstract sender names remain
+     * byte preserving; the restriction is applied only while encoding this
+     * bind. The qualified SDK rejects receiveFrom for an unbound Unix sender.
+     * @param endpoint Named pathname or abstract local endpoint.
+     * @param context Absolute operation deadline and cancellation token.
+     */
+    public static func bindUnix(
+        endpoint: api.UnixEndpoint,
+        context!: api.OperationContext = api.OperationContext.background()
+    ): StdNetDatagramSocket {
+        let local = api.NetworkEndpoint.Unix(endpoint)
+        checkNetworkContext(
+            context,
+            api.NetworkErrorCategory.Address,
+            api.NetworkPhase.UnixSocket,
+            localEndpoint: Some(local)
+        )
+        let concrete = native.UnixDatagramSocket(
+            bindAt: toStdUnixEndpoint(endpoint, local: true)
+        )
+        let nativeSocket: native.DatagramSocket = concrete
+        bindNative(
+            nativeSocket,
+            StdNetDatagramKind.Unix(concrete),
+            local,
+            context
+        )
+    }
+
+    private static func bindNative(
+        nativeSocket: native.DatagramSocket,
+        nativeKind: StdNetDatagramKind,
+        requested: api.NetworkEndpoint,
+        context: api.OperationContext
+    ): StdNetDatagramSocket {
+        let adapter = StdNetDatagramSocket(nativeSocket, nativeKind, requested)
         try {
-            nativeSocket.bind()
-            checkContext(
+            match (nativeKind) {
+                case StdNetDatagramKind.Internet(value) => value.bind()
+                case StdNetDatagramKind.Unix(value) => value.bind()
+            }
+            checkNetworkContext(
                 context,
                 api.NetworkErrorCategory.Address,
-                api.NetworkPhase.AddressSelection,
-                localEndpoint: Some(endpoint)
+                datagramAddressPhase(requested),
+                localEndpoint: Some(requested)
             )
-            let actual = fromStdEndpoint(nativeSocket.localAddress)
+            let actual = fromNativeDatagramEndpoint(nativeSocket.localAddress)
             synchronized(adapter.lifecycleMutex) {
                 adapter.localEndpointValue = actual
             }
@@ -66,8 +129,8 @@ public class StdNetUdpSocket <: Resource {
                 error,
                 context,
                 api.NetworkErrorCategory.Address,
-                api.NetworkPhase.AddressSelection,
-                remoteEndpoint: None<api.SocketEndpoint>
+                datagramAddressPhase(requested),
+                remoteEndpoint: None<api.NetworkEndpoint>
             )
             adapter.abortForCleanup()
             throw reported
@@ -77,26 +140,34 @@ public class StdNetUdpSocket <: Resource {
         }
     }
 
-    /** Bound local endpoint, including the kernel-selected port. */
-    public prop localEndpoint: api.SocketEndpoint {
+    private func connectNative(address: native.SocketAddress): Unit {
+        match (nativeKind) {
+            case StdNetDatagramKind.Internet(value) => value.connect(address)
+            case StdNetDatagramKind.Unix(value) => value.connect(address)
+        }
+    }
+
+
+    /** Bound local endpoint, including a kernel-selected Internet port. */
+    public prop localEndpoint: api.NetworkEndpoint {
         get() { synchronized(lifecycleMutex) { localEndpointValue } }
     }
 
     /** Native-selected peer, or none before connect succeeds. */
-    public prop remoteEndpoint: ?api.SocketEndpoint {
+    public prop remoteEndpoint: ?api.NetworkEndpoint {
         get() { synchronized(lifecycleMutex) { remoteEndpointValue } }
     }
 
-    /** Selects a native UDP peer and receive filter.
-     * @param endpoint Already-resolved Internet peer.
+    /** Selects a native datagram peer and receive filter.
+     * @param endpoint Resolved Internet or Unix peer matching the socket family.
      * @param context Absolute operation deadline and cancellation token.
      */
     public func connect(
-        endpoint: api.SocketEndpoint,
+        endpoint: api.NetworkEndpoint,
         context!: api.OperationContext = api.OperationContext.background()
     ): Unit {
-        let nativeEndpoint = toStdEndpoint(endpoint)
-        checkContext(
+        let nativeEndpoint = toNativeDatagramEndpoint(endpoint)
+        checkNetworkContext(
             context,
             api.NetworkErrorCategory.Connect,
             api.NetworkPhase.DatagramSend,
@@ -110,7 +181,7 @@ public class StdNetUdpSocket <: Resource {
         }
         try {
             try {
-                socket.connect(nativeEndpoint)
+                connectNative(nativeEndpoint)
                 if (!gate.complete()) {
                     throw contextOrTerminalError(
                         context,
@@ -146,7 +217,7 @@ public class StdNetUdpSocket <: Resource {
         context!: api.OperationContext = api.OperationContext.background()
     ): Int64 {
         validatePayload(source)
-        checkContext(
+        checkNetworkContext(
             context,
             api.NetworkErrorCategory.Write,
             api.NetworkPhase.DatagramSend,
@@ -155,26 +226,40 @@ public class StdNetUdpSocket <: Resource {
         )
         let selectedPeer = beginSend(requireConnected: true).getOrThrow()
         try {
-            sendPayload(source, context, Some(selectedPeer)) { payload => socket.send(payload) }
+            let sender = match (nativeKind) {
+                case StdNetDatagramKind.Internet(value) => value
+                case StdNetDatagramKind.Unix(_) => throw api.NetworkException(
+                    api.NetworkErrorCategory.Write,
+                    api.NetworkPhase.DatagramSend,
+                    api.NetworkErrorCode.Unsupported,
+                    "std.net Unix datagram sends re-resolve peer addresses; use an explicit sendTo destination",
+                    retryability: api.Retryability.Never,
+                    localEndpoint: Some(localEndpoint),
+                    remoteEndpoint: Some(selectedPeer)
+                )
+            }
+            sendPayload(source, context, Some(selectedPeer)) {
+                payload => sender.send(payload)
+            }
         } finally {
             endSend()
         }
     }
 
     /** Sends one complete non-empty datagram without changing the selected peer.
-     * @param endpoint Already-resolved destination.
+     * @param endpoint Resolved Internet or Unix destination matching the socket family.
      * @param source Datagram bytes, bounded to 65,507 bytes.
      * @param context Absolute operation deadline and cancellation token.
      * @return The complete datagram length.
      */
     public func sendTo(
-        endpoint: api.SocketEndpoint,
+        endpoint: api.NetworkEndpoint,
         source: api.ByteSpan,
         context!: api.OperationContext = api.OperationContext.background()
     ): Int64 {
         validatePayload(source)
-        let nativeEndpoint = toStdEndpoint(endpoint)
-        checkContext(
+        let nativeEndpoint = toNativeDatagramEndpoint(endpoint)
+        checkNetworkContext(
             context,
             api.NetworkErrorCategory.Write,
             api.NetworkPhase.DatagramSend,
@@ -199,11 +284,11 @@ public class StdNetUdpSocket <: Resource {
     public func receive(
         capacity: Int64,
         context!: api.OperationContext = api.OperationContext.background()
-    ): (Array<Byte>, api.SocketEndpoint, Bool) {
+    ): (Array<Byte>, api.NetworkEndpoint, Bool) {
         if (capacity <= 0 || capacity > MAX_UDP_PAYLOAD) {
-            throw IllegalArgumentException("UDP receive capacity must be between 1 and 65507")
+            throw IllegalArgumentException("datagram receive capacity must be between 1 and 65507")
         }
-        checkContext(
+        checkNetworkContext(
             context,
             api.NetworkErrorCategory.Read,
             api.NetworkPhase.DatagramReceive,
@@ -225,7 +310,7 @@ public class StdNetUdpSocket <: Resource {
                     let (address, count) = socket.receiveFrom(scratch)
                     return finishReceivedDatagram(scratch, address, count, capacity)
                 } catch (error: native.SocketTimeoutException) {
-                    throw timedOut(
+                    throw networkTimedOut(
                         api.NetworkErrorCategory.Read,
                         api.NetworkPhase.DatagramReceive,
                         error,
@@ -271,7 +356,7 @@ public class StdNetUdpSocket <: Resource {
                         )
                     }
                     if (context.isDeadlineExceeded()) {
-                        throw deadlineExceeded(
+                        throw networkDeadlineExceeded(
                             api.NetworkErrorCategory.Read,
                             api.NetworkPhase.DatagramReceive,
                             cause: Some(error),
@@ -279,7 +364,7 @@ public class StdNetUdpSocket <: Resource {
                             remoteEndpoint: remoteEndpoint
                         )
                     }
-                    throw timedOut(
+                    throw networkTimedOut(
                         api.NetworkErrorCategory.Read,
                         api.NetworkPhase.DatagramReceive,
                         error,
@@ -303,12 +388,13 @@ public class StdNetUdpSocket <: Resource {
             endReceive()
         }
     }
+
     private func finishReceivedDatagram(
         scratch: Array<Byte>,
         address: native.SocketAddress,
         count: Int64,
         capacity: Int64
-    ): (Array<Byte>, api.SocketEndpoint, Bool) {
+    ): (Array<Byte>, api.NetworkEndpoint, Bool) {
         if (count < 0) {
             throw api.NetworkException(
                 api.NetworkErrorCategory.Read,
@@ -316,16 +402,16 @@ public class StdNetUdpSocket <: Resource {
                 api.NetworkErrorCode.SystemFailure,
                 "std.net returned a negative datagram length",
                 retryability: api.Retryability.Never,
-                localEndpoint: internetEndpoint(Some(localEndpoint)),
-                remoteEndpoint: internetEndpoint(remoteEndpoint)
+                localEndpoint: Some(localEndpoint),
+                remoteEndpoint: remoteEndpoint
             )
         }
         let retained = min(count, capacity)
         let owned = Array<Byte>(retained, repeat: 0u8)
         for (index in 0..retained) { owned[index] = scratch[index] }
         // Ownership is detached from reusable scratch before the receive gate
-        // is released by the caller's finally.
-        (owned, fromStdEndpoint(address), count > capacity)
+        // is released by the caller's finally. A zero count is a valid packet.
+        (owned, fromNativeDatagramEndpoint(address), count > capacity)
     }
 
 
@@ -362,7 +448,7 @@ public class StdNetUdpSocket <: Resource {
     private func sendPayload(
         source: api.ByteSpan,
         context: api.OperationContext,
-        diagnosticPeer: ?api.SocketEndpoint,
+        diagnosticPeer: ?api.NetworkEndpoint,
         operation: (Array<Byte>) -> Unit
     ): Int64 {
         let payload = synchronized(lifecycleMutex) {
@@ -441,7 +527,7 @@ public class StdNetUdpSocket <: Resource {
     private func sendTimeoutError(
         error: native.SocketTimeoutException,
         context: api.OperationContext,
-        diagnosticPeer: ?api.SocketEndpoint
+        diagnosticPeer: ?api.NetworkEndpoint
     ): api.NetworkException {
         let message = if (context.isDeadlineExceeded()) {
             "datagram send deadline exceeded with unknown physical commit state"
@@ -454,8 +540,8 @@ public class StdNetUdpSocket <: Resource {
             api.NetworkErrorCode.TimedOut,
             message,
             retryability: api.Retryability.Never,
-            localEndpoint: internetEndpoint(Some(localEndpoint)),
-            remoteEndpoint: internetEndpoint(diagnosticPeer),
+            localEndpoint: Some(localEndpoint),
+            remoteEndpoint: diagnosticPeer,
             cause: Some(error)
         )
     }
@@ -469,8 +555,8 @@ public class StdNetUdpSocket <: Resource {
                 api.NetworkErrorCode.Unsupported,
                 "the current std.net backend cannot send zero-length datagrams",
                 retryability: api.Retryability.Never,
-                localEndpoint: internetEndpoint(Some(localEndpoint)),
-                remoteEndpoint: internetEndpoint(remoteEndpoint)
+                localEndpoint: Some(localEndpoint),
+                remoteEndpoint: remoteEndpoint
             )
         }
         if (source.length > MAX_UDP_PAYLOAD) {
@@ -478,15 +564,15 @@ public class StdNetUdpSocket <: Resource {
                 api.NetworkErrorCategory.Write,
                 api.NetworkPhase.DatagramSend,
                 api.NetworkErrorCode.MessageTooLarge,
-                "UDP datagram payload exceeds 65507 bytes",
+                "datagram payload exceeds 65507 bytes",
                 retryability: api.Retryability.Never,
-                localEndpoint: internetEndpoint(Some(localEndpoint)),
-                remoteEndpoint: internetEndpoint(remoteEndpoint)
+                localEndpoint: Some(localEndpoint),
+                remoteEndpoint: remoteEndpoint
             )
         }
     }
 
-    private func beginConnect(endpoint: api.SocketEndpoint): Unit {
+    private func beginConnect(endpoint: api.NetworkEndpoint): Unit {
         synchronized(lifecycleMutex) {
             ensureOpenLocked(
                 api.NetworkErrorCategory.Connect,
@@ -494,7 +580,12 @@ public class StdNetUdpSocket <: Resource {
                 Some(endpoint)
             )
             if (connectActive || sendActive || receiveActive) {
-                throw concurrent(api.NetworkErrorCategory.Connect, api.NetworkPhase.DatagramSend)
+                throw networkConcurrent(
+                    api.NetworkErrorCategory.Connect,
+                    api.NetworkPhase.DatagramSend,
+                    localEndpoint: Some(localEndpointValue),
+                    remoteEndpoint: Some(endpoint)
+                )
             }
             connectActive = true
         }
@@ -504,7 +595,7 @@ public class StdNetUdpSocket <: Resource {
         synchronized(lifecycleMutex) { connectActive = false }
     }
 
-    private func beginSend(requireConnected!: Bool): ?api.SocketEndpoint {
+    private func beginSend(requireConnected!: Bool): ?api.NetworkEndpoint {
         synchronized(lifecycleMutex) {
             ensureOpenLocked(
                 api.NetworkErrorCategory.Write,
@@ -518,21 +609,26 @@ public class StdNetUdpSocket <: Resource {
                     api.NetworkErrorCode.ConcurrentOperation,
                     "datagram connect is active",
                     retryability: api.Retryability.Never,
-                    localEndpoint: internetEndpoint(Some(localEndpointValue)),
-                    remoteEndpoint: internetEndpoint(remoteEndpointValue)
+                    localEndpoint: Some(localEndpointValue),
+                    remoteEndpoint: remoteEndpointValue
                 )
             }
             if (sendActive) {
-                throw concurrent(api.NetworkErrorCategory.Write, api.NetworkPhase.DatagramSend)
+                throw networkConcurrent(
+                    api.NetworkErrorCategory.Write,
+                    api.NetworkPhase.DatagramSend,
+                    localEndpoint: Some(localEndpointValue),
+                    remoteEndpoint: remoteEndpointValue
+                )
             }
             if (requireConnected && remoteEndpointValue.isNone()) {
                 throw api.NetworkException(
                     api.NetworkErrorCategory.Write,
                     api.NetworkPhase.DatagramSend,
                     api.NetworkErrorCode.NotConnected,
-                    "UDP socket has no selected peer",
+                    "datagram socket has no selected peer",
                     retryability: api.Retryability.Never,
-                    localEndpoint: internetEndpoint(Some(localEndpointValue))
+                    localEndpoint: Some(localEndpointValue)
                 )
             }
             sendActive = true
@@ -558,12 +654,17 @@ public class StdNetUdpSocket <: Resource {
                     api.NetworkErrorCode.ConcurrentOperation,
                     "datagram connect is active",
                     retryability: api.Retryability.Never,
-                    localEndpoint: internetEndpoint(Some(localEndpointValue)),
-                    remoteEndpoint: internetEndpoint(remoteEndpointValue)
+                    localEndpoint: Some(localEndpointValue),
+                    remoteEndpoint: remoteEndpointValue
                 )
             }
             if (receiveActive) {
-                throw concurrent(api.NetworkErrorCategory.Read, api.NetworkPhase.DatagramReceive)
+                throw networkConcurrent(
+                    api.NetworkErrorCategory.Read,
+                    api.NetworkPhase.DatagramReceive,
+                    localEndpoint: Some(localEndpointValue),
+                    remoteEndpoint: remoteEndpointValue
+                )
             }
             receiveActive = true
         }
@@ -576,10 +677,10 @@ public class StdNetUdpSocket <: Resource {
     private func ensureOpenLocked(
         category: api.NetworkErrorCategory,
         phase: api.NetworkPhase,
-        remote: ?api.SocketEndpoint
+        remote: ?api.NetworkEndpoint
     ): Unit {
         if (nativeCloseOwned) {
-            throw closedError(
+            throw networkClosedError(
                 category,
                 phase,
                 localEndpoint: Some(localEndpointValue),
@@ -611,10 +712,10 @@ public class StdNetUdpSocket <: Resource {
         category: api.NetworkErrorCategory,
         phase: api.NetworkPhase,
         cause!: ?Exception = None<Exception>,
-        remoteEndpoint!: ?api.SocketEndpoint = None<api.SocketEndpoint>
+        remoteEndpoint!: ?api.NetworkEndpoint = None<api.NetworkEndpoint>
     ): api.NetworkException {
         if (context.isCancellationRequested()) {
-            return cancelled(
+            return networkCancelled(
                 category,
                 phase,
                 cause: cause,
@@ -623,7 +724,7 @@ public class StdNetUdpSocket <: Resource {
             )
         }
         if (context.isDeadlineExceeded()) {
-            return deadlineExceeded(
+            return networkDeadlineExceeded(
                 category,
                 phase,
                 cause: cause,
@@ -635,7 +736,7 @@ public class StdNetUdpSocket <: Resource {
                 remoteEndpoint: remoteEndpoint
             )
         }
-        closedError(
+        networkClosedError(
             category,
             phase,
             cause: cause,
@@ -649,10 +750,10 @@ public class StdNetUdpSocket <: Resource {
         context: api.OperationContext,
         category: api.NetworkErrorCategory,
         phase: api.NetworkPhase,
-        remoteEndpoint!: ?api.SocketEndpoint
+        remoteEndpoint!: ?api.NetworkEndpoint
     ): api.NetworkException {
         if (context.isCancellationRequested()) {
-            return cancelled(
+            return networkCancelled(
                 category,
                 phase,
                 cause: Some(error),
@@ -661,7 +762,7 @@ public class StdNetUdpSocket <: Resource {
             )
         }
         if (context.isDeadlineExceeded()) {
-            return deadlineExceeded(
+            return networkDeadlineExceeded(
                 category,
                 phase,
                 cause: Some(error),
@@ -674,7 +775,7 @@ public class StdNetUdpSocket <: Resource {
             )
         }
         if (isClosed()) {
-            return closedError(
+            return networkClosedError(
                 category,
                 phase,
                 cause: Some(error),
@@ -691,9 +792,31 @@ public class StdNetUdpSocket <: Resource {
                 case api.NetworkPhase.DatagramSend => api.Retryability.Never
                 case _ => api.Retryability.Unknown
             },
-            localEndpoint: internetEndpoint(Some(localEndpoint)),
-            remoteEndpoint: internetEndpoint(remoteEndpoint),
+            localEndpoint: Some(localEndpoint),
+            remoteEndpoint: remoteEndpoint,
             cause: Some(error)
         )
+    }
+}
+
+private func toNativeDatagramEndpoint(endpoint: api.NetworkEndpoint): native.SocketAddress {
+    match (endpoint) {
+        case api.NetworkEndpoint.Internet(value) => toStdEndpoint(value)
+        case api.NetworkEndpoint.Unix(value) => toStdUnixEndpoint(value)
+    }
+}
+
+private func fromNativeDatagramEndpoint(address: native.SocketAddress): api.NetworkEndpoint {
+    match (address) {
+        case _: native.UnixSocketAddress =>
+            api.NetworkEndpoint.Unix(fromStdUnixEndpoint(address))
+        case _ => api.NetworkEndpoint.Internet(fromStdEndpoint(address))
+    }
+}
+
+private func datagramAddressPhase(endpoint: api.NetworkEndpoint): api.NetworkPhase {
+    match (endpoint) {
+        case api.NetworkEndpoint.Internet(_) => api.NetworkPhase.AddressSelection
+        case api.NetworkEndpoint.Unix(_) => api.NetworkPhase.UnixSocket
     }
 }
