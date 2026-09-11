@@ -155,7 +155,9 @@ enum YyjsonLookupIndexMode {
     | Lazy
 }
 
-/// Qualification control for measuring semantic-pass fusion.
+/**
+ * Qualification control for measuring semantic-pass fusion.
+ */
 enum YyjsonValidationStrategy {
     | Fused
     | Separate
@@ -245,16 +247,18 @@ struct YyjsonObjectEntry {
     }
 }
 
-/// Supported opt-in yyjson 0.12.0 backed immutable native document.
-///
-/// The pure Cangjie backend remains the portable default. This type is for
-/// callers that retain the native DOM and use coarse lookup, traversal, or
-/// serialization operations; it is not an acceleration path for
-/// `JsonNode.parse`, and materialization reparses serialized output.
-///
-/// Internal resource owner for the qualified yyjson backend. Immutable reads
-/// may run concurrently; close is exclusive and every retained view fails
-/// closed after the close point.
+/**
+ * Supported opt-in yyjson 0.12.0 backed immutable native document.
+ *
+ * The pure Cangjie backend remains the portable default. This type is for
+ * callers that retain the native DOM and use coarse lookup, traversal, or
+ * serialization operations; it is not an acceleration path for
+ * `JsonNode.parse`, and materialization reparses serialized output.
+ *
+ * Internal resource owner for the qualified yyjson backend. Immutable reads
+ * may run concurrently; close is exclusive and every retained view fails
+ * closed after the close point.
+ */
 class YyjsonCompactJsonDocument <: Resource {
     private var handle: UInt64
     private let rootNode: UInt64
