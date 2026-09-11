@@ -18,6 +18,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "release" / "cjdoc-tool.toml"
 SHA256 = re.compile(r"[0-9a-f]{64}")
 REVISION = re.compile(r"[0-9a-f]{40}")
+CJC_VERSION = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+")
 CJC_STS = re.compile(
     r"Cangjie Compiler: ([0-9]+\.[0-9]+\.[0-9]+) \(cjnative\)"
 )
@@ -57,20 +58,31 @@ def validate_toolchain_policy(config: dict, cjc_output: str, cjpm_output: str) -
     """Validate one exact installed toolchain against the STS policy."""
     if config.get("cjc_channel") != "sts":
         raise CjdocQualificationError("qualified cjdoc must use the STS Cangjie channel")
+    expected_cjc_version = config.get("cjc_version")
+    if (
+        not isinstance(expected_cjc_version, str)
+        or CJC_VERSION.fullmatch(expected_cjc_version) is None
+    ):
+        raise CjdocQualificationError(
+            "qualified cjdoc is missing a pinned STS compiler version"
+        )
     cjc_lines = [line.strip() for line in cjc_output.splitlines() if line.strip()]
     cjpm_lines = [line.strip() for line in cjpm_output.splitlines() if line.strip()]
     cjc_match = CJC_STS.fullmatch(cjc_lines[0] if cjc_lines else "")
     if cjc_match is None:
         raise CjdocQualificationError("current cjc is not a complete STS version")
+    if cjc_match.group(1) != expected_cjc_version:
+        raise CjdocQualificationError(
+            f"current cjc version {cjc_match.group(1)} does not match "
+            f"the pinned STS version {expected_cjc_version}"
+        )
     if len(cjpm_lines) != 1 or CJPM_VERSION.fullmatch(cjpm_lines[0]) is None:
         raise CjdocQualificationError("current cjpm version output is invalid")
     resolved_version = os.environ.get("YJSON_RESOLVED_CANGJIE", "").strip()
-    if resolved_version and cjc_match.group(1) != resolved_version:
-        print(
-            f"WARNING: cjc version {cjc_match.group(1)} does not match "
-            f"resolved Cangjie version {resolved_version}; this may indicate "
-            "an SDK cache or setup timing issue.",
-            file=sys.stderr,
+    if resolved_version and resolved_version != expected_cjc_version:
+        raise CjdocQualificationError(
+            f"resolved Cangjie version {resolved_version} does not match "
+            f"the pinned STS version {expected_cjc_version}"
         )
     return cjc_match.group(1)
 

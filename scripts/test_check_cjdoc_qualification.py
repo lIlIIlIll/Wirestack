@@ -3,9 +3,7 @@
 
 from __future__ import annotations
 
-import contextlib
 import hashlib
-import io
 import json
 import pathlib
 import subprocess
@@ -54,6 +52,7 @@ class CjdocQualificationTest(unittest.TestCase):
             build_command = ["cjpm", "build"]
 
             cjc_channel = "sts"
+            cjc_version = "1.1.0"
 
             license_spdx = "MIT"
             license_url = "https://example.invalid/cjdoc/blob/{revision}/LICENSE"
@@ -115,7 +114,7 @@ class CjdocQualificationTest(unittest.TestCase):
                 validate_qualification(config, root=root, binary_override=binary)
 
     @mock.patch("check_cjdoc_qualification.subprocess.run")
-    def test_accepts_a_different_complete_sts(self, run: mock.Mock) -> None:
+    def test_rejects_different_sts_version(self, run: mock.Mock) -> None:
         self.CJC_VERSION = (
             "Cangjie Compiler: 1.1.1 (cjnative)\n"
             "Target: x86_64-unknown-linux-gnu"
@@ -124,7 +123,20 @@ class CjdocQualificationTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
             config, binary = self.qualified_fixture(root)
-            validate_qualification(config, root=root, binary_override=binary)
+            with self.assertRaisesRegex(CjdocQualificationError, "pinned STS version"):
+                validate_qualification(config, root=root, binary_override=binary)
+
+    @mock.patch("check_cjdoc_qualification.subprocess.run")
+    def test_rejects_resolved_version_mismatch(self, run: mock.Mock) -> None:
+        run.side_effect = self.qualified_commands
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            config, binary = self.qualified_fixture(root)
+            with mock.patch.dict(
+                "os.environ", {"YJSON_RESOLVED_CANGJIE": "1.1.1"}
+            ):
+                with self.assertRaisesRegex(CjdocQualificationError, "pinned STS version"):
+                    validate_qualification(config, root=root, binary_override=binary)
 
     @mock.patch("check_cjdoc_qualification.subprocess.run")
     def test_rejects_non_sts_compiler(self, run: mock.Mock) -> None:
@@ -136,23 +148,6 @@ class CjdocQualificationTest(unittest.TestCase):
             with self.assertRaisesRegex(CjdocQualificationError, "complete STS version"):
                 validate_qualification(config, root=root, binary_override=binary)
 
-    @mock.patch("check_cjdoc_qualification.subprocess.run")
-    def test_warns_on_shared_sts_version_mismatch(self, run: mock.Mock) -> None:
-        run.side_effect = self.qualified_commands
-        with tempfile.TemporaryDirectory() as directory:
-            root = pathlib.Path(directory)
-            config, binary = self.qualified_fixture(root)
-            with mock.patch.dict(
-                "os.environ", {"YJSON_RESOLVED_CANGJIE": "1.1.1"}
-            ):
-                # Version mismatch between the resolved STS selection and
-                # the installed cjc is a CI infrastructure signal (cache
-                # timing or setup drift), not a qualification failure.
-                # It must warn without blocking the gate.
-                with contextlib.redirect_stderr(io.StringIO()) as stderr:
-                    validate_qualification(config, root=root, binary_override=binary)
-                self.assertIn("does not match", stderr.getvalue())
-                self.assertIn("WARNING", stderr.getvalue())
 
 
 if __name__ == "__main__":

@@ -16,6 +16,7 @@ binary_path = "target/release/bin/main"
 build_command = ["cjpm", "build"]
 
 cjc_channel = "sts"
+cjc_version = "1.1.0"
 
 license_spdx = "MIT"
 license_url = "https://github.com/lIlIIlIll/cjdoc/blob/fe0b5a5294c6d98dc1e6fb7d6d41cb5e9b04d4c0/LICENSE"
