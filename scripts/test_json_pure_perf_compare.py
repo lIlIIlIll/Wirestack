@@ -3,8 +3,10 @@
 import importlib.util
 import pathlib
 import subprocess
+import sys
 import tempfile
 import unittest
+from unittest import mock
 
 
 SCRIPT = pathlib.Path(__file__).with_name("json_pure_perf_compare.py")
@@ -210,6 +212,19 @@ class PurePerfGatePolicyTest(unittest.TestCase):
             SystemExit, "optimization requires at least one --target-case"
         ):
             MODULE.resolve_target_improvement_percent("optimization", (), None)
+
+    def test_rebuild_option_is_parsed(self) -> None:
+        argv = [
+            "json_pure_perf_compare.py",
+            "--baseline", "/tmp/baseline",
+            "--candidate", "/tmp/candidate",
+            "--corpus", "/tmp/corpus",
+            "--output", "/tmp/output",
+            "--rebuild",
+        ]
+        with mock.patch.object(sys, "argv", argv):
+            args = MODULE.parse_args()
+        self.assertTrue(args.rebuild)
 
 
 if __name__ == "__main__":

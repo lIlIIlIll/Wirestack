@@ -95,9 +95,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--corpus", required=True, type=pathlib.Path)
     parser.add_argument("--output", required=True, type=pathlib.Path)
     parser.add_argument("--rounds", type=int, default=11)
-    parser.add_argument("--cpu", type=int)
     parser.add_argument("--idle-sample-seconds", type=int, default=30)
     parser.add_argument("--enforce", action="store_true")
+    parser.add_argument(
+        "--rebuild",
+        action="store_true",
+        help="clean and rebuild both benchmark trees before measuring",
+    )
     parser.add_argument(
         "--gate-mode",
         choices=GATE_MODES,
