@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "scope": "Direct nameserver configuration validation before unsupported native operations",
+  "baseline_source_revision": "c21b964463ff79be14612928bbeb02361107ae80",
+  "toolchain": "Cangjie Compiler: 1.1.3 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+  "finding": {
+    "comment_id": 3991790996,
+    "status": "FIXED",
+    "case": "directConfigRejectsUnsupportedNameserverZonesBeforeQueries",
+    "decision": "Reject named and overflowing nameserver zones at the public configuration boundary, matching the existing Linux adapter numeric UInt32 scope-ID requirement. No resolver error API or general transport retry policy is changed."
+  },
+  "red": {
+    "argv": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--filter",
+      "DnsResolverPolicyTest",
+      "--parallel",
+      "1",
+      "--no-progress",
+      "--no-color"
+    ],
+    "exit_code": 1,
+    "stdout": "docs/evidence/M8-004/development/pr160-third-red.stdout.log",
+    "stderr": "docs/evidence/M8-004/development/pr160-third-red.stderr.log",
+    "failed": 1
+  },
+  "green": {
+    "argv": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--parallel",
+      "1",
+      "--show-all-output",
+      "--no-progress",
+      "--no-color"
+    ],
+    "exit_code": 0,
+    "stdout": "docs/evidence/M8-004/development/pr160-third-green.stdout.log",
+    "stderr": "docs/evidence/M8-004/development/pr160-third-green.stderr.log",
+    "total": 86,
+    "passed": 86,
+    "skipped": 0,
+    "errors": 0,
+    "failed": 0
+  }
+}

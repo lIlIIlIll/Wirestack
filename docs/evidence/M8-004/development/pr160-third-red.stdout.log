@@ -1,0 +1,31 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.net, time elapsed: 230041695 ns, RESULT:
+    TCS: DnsResolverPolicyTest, time elapsed: 224136356 ns, RESULT:
+    [ PASSED ] CASE: fromSystemParsesTabsCommentsLastSearchAndClampedNdots (580254 ns)
+    [ PASSED ] CASE: systemNameserversRetainOnlySupportedNumericZones (255999 ns)
+    [ PASSED ] CASE: configOwnsInputArraysAndReturnsDefensiveCopies (42416 ns)
+    [ PASSED ] CASE: systemFilesFailClosedWhenMissingOversizedOrNonregular (15517070 ns)
+    [ PASSED ] CASE: hostsAliasesFilterFamiliesAndRemainSnapshotted (640263 ns)
+    [ PASSED ] CASE: trailingRootSkipsSearchWhileNdotsSelectsSearchOrAbsoluteFirst (2928393 ns)
+    [ PASSED ] CASE: exactHostsEntryWinsBeforeSearchSuffixDns (200849180 ns)
+    [ PASSED ] CASE: cancelledExpiredAndClosedCallsRetainPublicResolveClassifications (391372 ns)
+    [ PASSED ] CASE: connectUsesHostsMappingForANativeListenerExchange (653381 ns)
+    [ PASSED ] CASE: resolverConnectCarriesOneAbsoluteDeadlineIntoNativeTcpAdmission (409975 ns)
+    [ FAILED ] CASE: directConfigRejectsUnsupportedNameserverZonesBeforeQueries (50156 ns)
+    Assert Failed: `(@AssertThrows: Expected 'IllegalArgumentException' was not caught.)`
+
+Summary: TOTAL: 86
+    PASSED: 10, SKIPPED: 75, ERROR: 0
+    FAILED: 1, listed below:
+            TCS: DnsResolverPolicyTest, CASE: directConfigRejectsUnsupportedNameserverZonesBeforeQueries
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 238303956 ns, RESULT:
+TP: wirestack.*, time elapsed: 238209959 ns, RESULT:
+    FAILED:
+    TP: wirestack.net, time elapsed: 230041695 ns, RESULT:
+        TCS: DnsResolverPolicyTest, time elapsed: 224136356 ns, RESULT:
+        [ FAILED ] CASE: directConfigRejectsUnsupportedNameserverZonesBeforeQueries (50156 ns)
+Summary: TOTAL: 86
+    PASSED: 10, SKIPPED: 75, ERROR: 0
+    FAILED: 1
+--------------------------------------------------------------------------------------------------

@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "reports": 17,
+  "raw_log_references": 326,
+  "issues": [],
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "argv": [
+    "python3",
+    "-c",
+    "import json, sys\nfrom pathlib import Path\nroot = Path('/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication')\nsys.path.insert(0, str(root))\nfrom tools.evidence_digest import text_evidence_digest, artifact_byte_digest\nchecked = []\nissues = []\ndef visit(value, report):\n    if isinstance(value, dict):\n        if isinstance(value.get('path'), str) and isinstance(value.get('digest'), dict):\n            path = root / value['path']\n            try:\n                digest = text_evidence_digest(path) if value['digest']['domain'] == 'text-utf8-lf-v1' else artifact_byte_digest(path)\n                if digest.sha256 != value['digest']['sha256']:\n                    issues.append({'report':str(report.relative_to(root)), 'path':value['path'], 'error':'digest mismatch'})\n                checked.append(value['path'])\n            except Exception as error:\n                issues.append({'report':str(report.relative_to(root)), 'path':value['path'], 'error':str(error)})\n        for item in value.values():\n            visit(item,report)\n    elif isinstance(value,list):\n        for item in value:\n            visit(item,report)\nreports = list((root/'docs/evidence/M8-004').glob('native*.json'))\nreports.append(root/'docs/evidence/M8-004/development/acceptance-first/native-dns.json')\nreports.extend(root / name for name in ['docs/evidence/M8-004/pr160-system-fallback-red.json', 'docs/evidence/M8-004/pr160-system-fallback-red-confirmed.json', 'docs/evidence/M8-004/pr160-system-fallback-green.json', 'docs/evidence/M8-004/pr160-system-fallback-green-confirmed.json'])\nfor report in reports:\n    visit(json.loads(report.read_text()),report)\nprint(json.dumps({'status':'PASS' if not issues else 'FAIL','reports':len(reports),'raw_log_references':len(checked),'issues':issues},indent=2))\nsys.exit(bool(issues))\n"
+  ],
+  "cwd": "/home/elliot/playground/Wirestack-pr-worktrees/M8-004-publication",
+  "exit_code": 0,
+  "stderr": ""
+}
