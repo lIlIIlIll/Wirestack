@@ -106,6 +106,10 @@ class NativeAccelPublicContractTest {
         @Expect(values[1], -2.5)
         @Expect(values[2], 6250.0)
 
+        let oversized = StringBuilder("0.")
+        for (_ in 0..300) {
+            oversized.append("0")
+        }
         oversized.append("5")
         let decodedOversized = YJson.fromJson<Float64>(oversized.toString())
         // Compiler decimal literals and long-token parsing may choose adjacent
