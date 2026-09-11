@@ -1,0 +1,77 @@
+{
+  "coverage_summary": "Completed read-only review of the complete wire parser, its public regression tests, client response validation and answer selection, and relevant native peer/consumer scenarios. One concrete correctness finding: legal NS-to-glue compression is rejected. No additional evidence-backed parser-bound, typed-RDATA, response-identity, TC/TCP, or answer-selection security defect survived review. Checked message/count/name/hop bounds, backward validated compression targets, exact RDATA consumption, source endpoint and QR/opcode/ID/question/class/type matching, TCP length and repeated TC rejection, entropy failure handling, and exclusion of unrelated/additional records from address answers. Tests, builds, payload execution, network calls, and edits were not performed. Resolver policy and lifecycle remain assigned to the sibling reviewer.",
+  "findings": [
+    {
+      "rule_id": "DNS-WIRE-001",
+      "title": "Legal NS-to-glue compression rejects valid DNS answers",
+      "summary": "NS becomes Unknown(2), whose RDATA is skipped. A later glue A owner compressed to the NS target fails the validated-offset check. DnsClient parses every section before returning any answer, so an otherwise valid matching response fails with SystemFailure. Legacy MD/MF/MB/MG/MR and MINFO share the missing name-boundary bookkeeping. This is an interoperability and availability defect, not demonstrated cache poisoning.",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "DNS wire interoperability",
+      "locations": [
+        {
+          "path": "/tmp/wirestack-m8-004-publication/src/net/dns_wire.cj",
+          "start_line": 433,
+          "role": "Skips legacy name-bearing RDATA"
+        },
+        {
+          "path": "/tmp/wirestack-m8-004-publication/src/net/dns_wire.cj",
+          "start_line": 469,
+          "end_line": 471,
+          "role": "Rejects legal pointer to unregistered NS target"
+        },
+        {
+          "path": "/tmp/wirestack-m8-004-publication/src/net/dns_wire.cj",
+          "start_line": 697,
+          "end_line": 707,
+          "role": "NS maps to Unknown"
+        },
+        {
+          "path": "/tmp/wirestack-m8-004-publication/src/net/dns_client.cj",
+          "start_line": 463,
+          "end_line": 474,
+          "role": "Full parser rejection prevents answer delivery"
+        }
+      ],
+      "cwe": [
+        "CWE-20"
+      ],
+      "evidence": [
+        {
+          "label": "Exact public parser regression",
+          "explanation": "Concatenate these hex segments into 79 bytes and call DnsMessageParser().parse. NS target ns.example.test starts at offset 58. Glue owner c03a at offset 63 legally refers to it. Assert three records, records[2].name equal to ns.example.test, and glue data 192.0.2.53. Static trace predicts SystemFailure. No execution was permitted.",
+          "excerpt": "123481800001000100010001\n076578616d706c6504746573740000010001\nc00c000100010000003c0004c0000201\nc00c000200010000003c0005026e73c00c\nc03a000100010000003c0004c0000235"
+        },
+        {
+          "label": "Public lookup regression",
+          "explanation": "Return the same response with the actual request ID from a bounded loopback UDP peer to an IPv4-only lookup of example.test using a one-attempt DnsClient. Assert the result contains only answer 192.0.2.1 after one request, never glue 192.0.2.53."
+        },
+        {
+          "label": "Missing observable assertion",
+          "explanation": "dns_wire_test.cj:11-50 tests private opaque type 65280, not NS followed by compressed glue. Its section-order test at 54-67 uses only A. dns_client_test.cj:523-564 checks unrelated additional answers but not this valid compression. Native fixtures tools/m8_004_native_dns.py:423-465 contain no NS."
+        }
+      ],
+      "optionalProperties": {
+        "validation": "Static source trace; exact input and public assertions sent to Main for native red proof.",
+        "repair_constraints": "Preserve Unknown(code) and raw data. Validate recognized legacy name layouts solely for exact RDATA consumption and compression boundaries. Do not relax validated-backward-target checks or scan arbitrary opaque bytes for apparent names."
+      }
+    }
+  ],
+  "reviewed_paths": [
+    "/tmp/wirestack-m8-004-publication/src/net/dns_wire.cj",
+    "/tmp/wirestack-m8-004-publication/src/net/dns_wire_test.cj",
+    "/tmp/wirestack-m8-004-publication/src/net/dns_client.cj",
+    "/tmp/wirestack-m8-004-publication/src/net/dns_client_test.cj",
+    "/tmp/wirestack-m8-004-publication/tools/m8_004_native_dns.py",
+    "/tmp/wirestack-m8-004-publication/examples/linux/m8_004/native_dns.cj"
+  ],
+  "deferred": [
+    {
+      "reason": "Executing the proposed regression and verifying any repair belongs to Main; this assignment explicitly prohibited all execution and edits.",
+      "paths": [
+        "/tmp/wirestack-m8-004-publication/src/net/dns_wire_test.cj",
+        "/tmp/wirestack-m8-004-publication/src/net/dns_client_test.cj"
+      ]
+    }
+  ]
+}

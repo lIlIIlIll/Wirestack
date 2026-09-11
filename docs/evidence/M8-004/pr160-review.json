@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "scope": "PR #160 deadline and nameserver-zone regressions plus deterministic parser mutation testing",
+  "baseline_source_revision": "497e1441adfaa365962439416ae1ec9c407e3a4d",
+  "baseline_note": "Published production source with the new policy regression tests applied; raw baseline has one failed case and one errored case.",
+  "development_toolchain": "Cangjie Compiler: 1.3.0-alpha.20260911010036 (cjnative)\nTarget: x86_64-unknown-linux-gnu",
+  "red": {
+    "argv": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--filter",
+      "DnsResolverPolicyTest",
+      "--parallel",
+      "1",
+      "--no-progress",
+      "--no-color"
+    ],
+    "exit_code": 1,
+    "stdout": "docs/evidence/M8-004/development/pr160-policy-red.stdout.log",
+    "stderr": "docs/evidence/M8-004/development/pr160-policy-red.stderr.log"
+  },
+  "green": {
+    "argv": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--parallel",
+      "1",
+      "--show-all-output",
+      "--no-progress",
+      "--no-color"
+    ],
+    "exit_code": 0,
+    "stdout": "docs/evidence/M8-004/development/pr160-network-green.stdout.log",
+    "stderr": "docs/evidence/M8-004/development/pr160-network-green.stderr.log",
+    "total": 84,
+    "passed": 84,
+    "skipped": 0,
+    "errors": 0,
+    "failed": 0
+  },
+  "findings": [
+    {
+      "comment_id": 3987515635,
+      "status": "FIXED",
+      "case": "connectUsesHostsMappingForANativeListenerExchange",
+      "behavior": "TCP attempts use the caller deadline, not the DNS query timeout."
+    },
+    {
+      "comment_id": 3987515655,
+      "status": "FIXED",
+      "case": "systemNameserversRetainOnlySupportedNumericZones",
+      "behavior": "System configuration skips named and overflowing IPv6 zones and retains numeric UInt32 scope IDs."
+    },
+    {
+      "comment_id": 3987515646,
+      "status": "ADDRESSED",
+      "case": "wireMutationsRejectMalformedMessagesOrRetainOwnedSections",
+      "behavior": "Structured rejection or complete sections and owned record bytes."
+    }
+  ],
+  "mutation_fuzz": {
+    "seed": 8004,
+    "corpus": 12,
+    "iterations": 8544,
+    "accepted": 3013,
+    "rejected": 5531,
+    "limitation": "Bounded deterministic mutation smoke, not coverage-guided fuzzing."
+  },
+  "stable_qualification": "https://github.com/lIlIIlIll/Wirestack/blob/35af4ca11ec2a5e32aa07b66a067a9701d04bb88/docs/evidence/M8-004/task-check.json"
+}

@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "baseline_source_revision": "bcb6ae7ecc7e5e7bc9ae162d50d5ec4055318f3e",
+  "toolchain": "Cangjie 1.1.3, Linux x86_64 glibc",
+  "findings": [
+    {
+      "comment_id": 3992136252,
+      "case": "dnsTransportFailuresRetainSelectedNameserver",
+      "decision": "An internal ResolveException constructor retains existing endpoint fields without changing public signatures. DNS mapping preserves available local/remote endpoints and native code, falling back to the selected nameserver only when the transport lacks a remote endpoint. Native UDP receive timeout and owned TCP fallback closure exercise the mapping."
+    },
+    {
+      "comment_id": 3992136262,
+      "case": "publicSummaryRejectsCountsBeyondWireAndCombinedRecordBounds",
+      "decision": "Reject section counts outside unsigned 16-bit range and combined resource-record counts above 65535 before cloning. The test uses repeated records/questions obtained from the public parser, rejects oversized inputs, and retains access to the final record at the accepted combined-record boundary."
+    },
+    {
+      "comment_id": 3992136272,
+      "case": "hostsSnapshotRetainsOnlyUsableIpv6Zones",
+      "decision": "Ignore hosts entries with named or overflowing IPv6 zones. Preserve numeric UInt32 zones, unscoped addresses and HostsFile precedence."
+    }
+  ],
+  "argv": ["cjpm", "test", "src/net", "--parallel", "1", "--no-progress", "--no-color"],
+  "red": {
+    "exit_code": 1,
+    "total": 89,
+    "passed": 86,
+    "failed": 3,
+    "stdout": "docs/evidence/M8-004/development/pr160-boundary-red.stdout.log",
+    "stderr": "docs/evidence/M8-004/development/pr160-boundary-red.stderr.log"
+  },
+  "green": {
+    "exit_code": 0,
+    "total": 89,
+    "passed": 89,
+    "skipped": 0,
+    "errors": 0,
+    "failed": 0,
+    "stdout": "docs/evidence/M8-004/development/pr160-boundary-green.stdout.log",
+    "stderr": "docs/evidence/M8-004/development/pr160-boundary-green.stderr.log"
+  },
+  "fixture_note": "After the red run, the TCP error fixture was tightened to close an owned listener's accepted stream rather than rely on an unoccupied TCP port. The UDP missing-endpoint reproduction is unchanged."
+}
