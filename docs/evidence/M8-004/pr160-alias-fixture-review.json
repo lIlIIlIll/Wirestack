@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "published_baseline_source": "8c1d6a9a815ac15e4fc63bc6725baac09753662e",
+  "network": {
+    "argv": [
+      "cjpm",
+      "test",
+      "src/net",
+      "--parallel",
+      "1",
+      "--no-progress",
+      "--no-color"
+    ],
+    "red": {
+      "exit_code": 1,
+      "total": 103,
+      "passed": 102,
+      "failed": 1,
+      "errors": 0
+    },
+    "green": {
+      "exit_code": 0,
+      "total": 103,
+      "passed": 103,
+      "failed": 0,
+      "errors": 0
+    },
+    "raw": {
+      "fixture-error": {
+        "stdout": "docs/evidence/M8-004/development/pr160-alias-fixture-error.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-alias-fixture-error.stderr.log"
+      },
+      "red": {
+        "stdout": "docs/evidence/M8-004/development/pr160-alias-red.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-alias-red.stderr.log"
+      },
+      "negative-retention-regression": {
+        "stdout": "docs/evidence/M8-004/development/pr160-alias-negative-retention-regression.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-alias-negative-retention-regression.stderr.log"
+      },
+      "green": {
+        "stdout": "docs/evidence/M8-004/development/pr160-alias-green.stdout.log",
+        "stderr": "docs/evidence/M8-004/development/pr160-alias-green.stderr.log"
+      }
+    }
+  },
+  "cname": {
+    "comment": 3997988652,
+    "correction": "Invalidate every visited CNAME target and intermediate name on NXDOMAIN, including cached positive aliases whose canonical host depends on a denied name. Preserve an existing target NXDOMAIN entry and its original remaining lifetime.",
+    "proof": "An owned peer warms target, intermediate and separate dependent-alias addresses, then denies a multi-packet chain. Both a CNAME-bearing NXDOMAIN packet and a later standalone NXDOMAIN packet force fresh changed addresses for all three names. The existing RFC2308 test confirms that prior valid target negatives remain reusable without new packets."
+  },
+  "fixture": {
+    "run": 34725245076,
+    "job": 103638388673,
+    "head": "f188ba6786b36175270391abee6cffafdf567d32",
+    "raw": "docs/evidence/M8-004/development/pr160-ownership-ci-failure.log",
+    "observed_failure": "validatedTruncationFallsBackToExactTcpFrame raised NetworkException at TcpListener.bind after UDP selected an ephemeral endpoint. The log does not print the native error code; a cross-protocol port collision is inferred, not directly observed.",
+    "correction": "All three dual-protocol Cangjie DNS fixtures reserve TCP first, bind UDP while TCP remains owned, retry only AddressInUse at most sixteen times, and close partial ownership through finally. Other failures propagate. This follows the existing native-consumer reservation order.",
+    "proof": "The three real wire fixtures pass in the corrected 103-case network run. This run does not claim forced execution of the new Cangjie reservation retry/exhaustion branch; the earlier Python native-runner reservation smoke is separate evidence."
+  },
+  "development_notes": [
+    "The first new regression had an IPv4 assertion indexing byte 15. That fixture error is retained separately and is not counted as product red proof.",
+    "The first correction invalidated an already valid target NXDOMAIN cache entry. The existing RFC2308 regression caught the extra query; the final correction retains that negative entry without extending its lifetime."
+  ]
+}
