@@ -1,0 +1,6 @@
+An exception has occurred:
+Exception: DNS operation unexpectedly succeeded
+	 at wirestack_m8_004_native_dns::resolveCode(() -> Unit)(/tmp/wirestack-m8-004-consumer-7u_c45p2/src/main.cj:63)
+	 at wirestack_m8_004_native_dns::expectResolve(wirestack::ResolveErrorCode, () -> Unit)(/tmp/wirestack-m8-004-consumer-7u_c45p2/src/main.cj:66)
+	 at wirestack_m8_004_native_dns::runCnameBounds()(/tmp/wirestack-m8-004-consumer-7u_c45p2/src/main.cj:166)
+	 at wirestack_m8_004_native_dns::main(std.core::Array<...>)(/tmp/wirestack-m8-004-consumer-7u_c45p2/src/main.cj:268)
