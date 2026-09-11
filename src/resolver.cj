@@ -278,6 +278,28 @@ public class ResolveException <: NetworkException {
         this.resolveCode = resolveCode
     }
 
+    internal init(
+        resolveCode: ResolveErrorCode,
+        message: String,
+        nativeCode: ?Int64,
+        localEndpoint: ?NetworkEndpoint,
+        remoteEndpoint: ?NetworkEndpoint,
+        cause: ?Exception
+    ) {
+        super(
+            NetworkErrorCategory.Resolve,
+            NetworkPhase.Dns,
+            toNetworkCode(resolveCode),
+            message,
+            retryability: resolveRetryability(resolveCode),
+            nativeCode: nativeCode,
+            localEndpoint: localEndpoint,
+            remoteEndpoint: remoteEndpoint,
+            cause: cause
+        )
+        this.resolveCode = resolveCode
+    }
+
 /**
  * Wirestack 公开 API：返回运行时类型名称。
  */
