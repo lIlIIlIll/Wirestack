@@ -46,3 +46,8 @@ python3 scripts/test_release_temp_tree.py
 一个提交只处理一件事，测试与行为修改放在一起。文档、生成产物或机械整理
 只有在各自构成完整修改时才拆分。提交前复查最终差异，确保没有包含其他人的并行修改。
 
+
+## API 文档注释
+
+公开 API 使用 cjdoc 可绑定的 `/** ... */` 注释；每个重载分别说明参数、返回值和约束。
+格式、覆盖范围、构建与 CI 产物见[API 文档维护指南](docs/maintainers/api-documentation.md)。

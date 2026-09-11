@@ -412,11 +412,13 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         suggestContainerCapacity(32)
     }
 
-    /// Returns a bounded allocation hint for a raw collection after the array
-    /// opener has been consumed. This is public because macro-generated fast
-    /// codecs execute in the consumer package. It never advances the cursor or
-    /// retains the input; callers must treat the value as a hint, not a size
-    /// guarantee.
+    /**
+     * Returns a bounded allocation hint for a raw collection after the array
+     * opener has been consumed. This is public because macro-generated fast
+     * codecs execute in the consumer package. It never advances the cursor or
+     * retains the input; callers must treat the value as a hint, not a size
+     * guarantee.
+     */
     public func suggestRawCollectionCapacity(): Int64 {
         let remaining = size - index
         if (remaining >= 3072 && isRootRawArrayPosition()) {
@@ -1427,20 +1429,24 @@ public class JsonFastReader <: GeneratedSupportV1Reader & GeneratedReadStateV1Ow
         skipRawValueBounded(0, -1)
     }
 
-    /// Skips one value while enforcing a container-depth budget relative to
-    /// the current generated-code context. A scalar consumes no depth.
+    /**
+     * Skips one value while enforcing a container-depth budget relative to
+     * the current generated-code context. A scalar consumes no depth.
+     */
     public func skipRawWithDepth(maxDepth: Int64): Unit {
         if (maxDepth < 0) { throw IllegalArgumentException("maxDepth must not be negative") }
         skipRawValueBounded(0, maxDepth)
     }
 
-    /// Policy-aware unknown-field skip used by generated codecs. Unlike the
-    /// raw skip, this variant never routes container scanning to the native
-    /// skip (which is a pure syntax scan), and when
-    /// duplicateKeyPolicy==Reject it tracks decoded member names per object
-    /// level so duplicate keys inside skipped subtrees fail with the stable
-    /// "duplicate_key" code. The remaining depth budget is relative to the
-    /// current generated-code context.
+    /**
+     * Policy-aware unknown-field skip used by generated codecs. Unlike the
+     * raw skip, this variant never routes container scanning to the native
+     * skip (which is a pure syntax scan), and when
+     * duplicateKeyPolicy==Reject it tracks decoded member names per object
+     * level so duplicate keys inside skipped subtrees fail with the stable
+     * "duplicate_key" code. The remaining depth budget is relative to the
+     * current generated-code context.
+     */
     public func skipValue(maxDepth: Int64): Unit {
         if (maxDepth < 0) { throw IllegalArgumentException("maxDepth must not be negative") }
         skipRawValuePolicyAware(0, maxDepth)

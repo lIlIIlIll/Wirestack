@@ -115,8 +115,10 @@ private func compactWyhashRead8(data: Array<Byte>, position: Int64): UInt64 {
         (UInt64(data[position + 6]) << 8) | UInt64(data[position + 7])
 }
 
-/// Coarse storage counters for representation analysis.  These are logical
-/// entry counts rather than allocated-byte measurements.
+/**
+ * Coarse storage counters for representation analysis.  These are logical
+ * entry counts rather than allocated-byte measurements.
+ */
 struct CompactJsonStorageStats {
     public let nodes: Int64
     public let strings: Int64
@@ -201,10 +203,12 @@ struct CompactJsonStorageStats {
     }
 }
 
-/// Immutable, index-based JSON DOM. Parsing allocates one document and dense
-/// backing stores rather than one GC class for every JSON node. No-escape
-/// object keys retain source ranges; string values and escaped keys remain
-/// decoded/owned. Retaining the input establishes the source-view lifetime.
+/**
+ * Immutable, index-based JSON DOM. Parsing allocates one document and dense
+ * backing stores rather than one GC class for every JSON node. No-escape
+ * object keys retain source ranges; string values and escaped keys remain
+ * decoded/owned. Retaining the input establishes the source-view lifetime.
+ */
 class CompactJsonDocument {
     let source: Array<Byte>
     let kinds = ArrayList<Int64>()
@@ -268,15 +272,19 @@ class CompactJsonDocument {
         this.sourceOwner = sourceOwner
     }
 
-    /// Parses without copying `bytes`. The caller must not mutate the array or
-    /// write it concurrently while the returned document remains reachable.
+    /**
+     * Parses without copying `bytes`. The caller must not mutate the array or
+     * write it concurrently while the returned document remains reachable.
+     */
     public static func parseBorrowed(bytes: Array<Byte>,
         config!: JsonReadOptions = JsonReadOptions.defaults): CompactJsonDocument {
         parseBorrowed(bytes, config, None<String>)
     }
 
-    /// Parses without copying `bytes`, retaining `sourceOwner` for the
-    /// document's lifetime so source-backed views and key ranges remain valid.
+    /**
+     * Parses without copying `bytes`, retaining `sourceOwner` for the
+     * document's lifetime so source-backed views and key ranges remain valid.
+     */
     public static func parseBorrowed(bytes: Array<Byte>, config: JsonReadOptions,
         sourceOwner: Option<String>): CompactJsonDocument {
         validateJsonResourceLimits(bytes, config)
@@ -286,8 +294,10 @@ class CompactJsonDocument {
         document
     }
 
-    /// Parses an owned copy of `bytes`; later caller mutation cannot affect the
-    /// returned document.
+    /**
+     * Parses an owned copy of `bytes`; later caller mutation cannot affect the
+     * returned document.
+     */
     public static func parseOwned(bytes: Array<Byte>,
         config!: JsonReadOptions = JsonReadOptions.defaults): CompactJsonDocument {
         let owned = Array<Byte>(bytes.size, repeat: 0)
@@ -295,7 +305,9 @@ class CompactJsonDocument {
         parseBorrowed(owned, config: config)
     }
 
-    /// Compatibility alias for the zero-copy borrowed-input entry point.
+    /**
+     * Compatibility alias for the zero-copy borrowed-input entry point.
+     */
     public static func parse(bytes: Array<Byte>, config!: JsonReadOptions = JsonReadOptions.defaults): CompactJsonDocument {
         parseBorrowed(bytes, config: config)
     }
@@ -341,8 +353,10 @@ class CompactJsonDocument {
             keyDictionaryMisses: keyDictionaryMisses
         )
     }
-    /// Dense sequential walk used by analytical workloads without creating
-    /// JsonNode nodes or CompactJsonValue views.
+    /**
+     * Dense sequential walk used by analytical workloads without creating
+     * JsonNode nodes or CompactJsonValue views.
+     */
     public func traversalChecksum(): Int64 {
         var result: Int64 = 0
         for (index in 0..kinds.size) { result = result ^ kinds[index] ^ first[index] ^ second[index] }
@@ -677,8 +691,10 @@ class CompactJsonDocument {
     }
 }
 
-/// A cheap value view. It contains only a document reference and node index;
-/// parsing never creates one view per node.
+/**
+ * A cheap value view. It contains only a document reference and node index;
+ * parsing never creates one view per node.
+ */
 struct CompactJsonValue <: JsonValueView {
     private let document: CompactJsonDocument
     private let index: Int64

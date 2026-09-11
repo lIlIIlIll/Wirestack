@@ -162,6 +162,7 @@ case "$job" in
             --binary "$cjdoc_binary"
         ;;
     api-docs)
+        python3 "$repo/scripts/test_check_api_documentation.py"
         python3 "$repo/scripts/test_generate_api_docs.py"
         cjdoc_binary=$(prepare_cjdoc)
         docs_output=${YJSON_API_DOCS_OUTPUT:-"$modules/api-docs"}
@@ -169,6 +170,7 @@ case "$job" in
             --cjdoc "$cjdoc_binary" --output "$docs_output"
         test -f "$docs_output/index.html"
         test -f "$docs_output/api-docs.json"
+        python3 "$repo/scripts/check_api_documentation.py" "$docs_output"
         ;;
     runtime-freeze)
         require_cangjie

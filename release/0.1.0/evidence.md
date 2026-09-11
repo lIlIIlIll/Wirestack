@@ -37,17 +37,17 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | --- | --- | --- |
 | Public API/C ABI mechanical inventory | PASS | `1094` Cangjie declarations；九包 inventory；C ABI delta 全部 `reviewed-for-0.1.0` |
 | Public API migration review | PASS | `release/public-cangjie-delta-bfd29.toml` 为 `approved-for-release`；17 个 reviewed delta，native activator removal 与 writer seam 分组独立 |
-| Local Linux fresh candidate | PASS (historical) | `scripts/ci_fresh_checkout.sh` 的 qvt/STS `1.1.3` 结果曾通过；当时 release tree 为 `292` files，早于当前 `297` 项 manifest；当前候选的 source-only、registry rehearsal 和 freshness 由下方 hosted run 覆盖 |
-| Hosted PR CI | **NOT RUN (current RSS checkpoint)** | 上一次已完成的 hosted run `34779604448` 的 28 jobs 全部通过，但它早于本地 RSS instrumentation checkpoint；push 当前提交后必须重新运行 |
+| Local Linux fresh candidate | PASS (historical) | `scripts/ci_fresh_checkout.sh` 的 qvt/STS `1.1.3` 结果曾通过；当时 release tree 为 `292` files，早于当前 `302` 项 manifest；当前候选的 source-only、registry rehearsal 和 freshness 尚未由当前 checkpoint 的 hosted run 覆盖 |
+| Hosted PR CI | **NOT RUN (current RSS/API-doc checkpoint)** | 上一次已完成的 hosted run `34779604448` 的 28 jobs 全部通过，但它早于本地 RSS instrumentation 和吸收的 PR28 API 文档门禁修复；push 当前提交后必须重新运行 |
 | Hosted main CI / Pages | PASS (historical) | run [`34511955542`](https://github.com/lIlIIlIll/yjson/actions/runs/34511955542) 的 28 jobs 与 Pages 通过；它不是 `1.1.3` 基线下当前候选的合并后 run |
 | Coverage | PASS (historical) | 上一次候选 run 的 `Core Coverage` job 通过；历史 project line `8508/10345=82.2%`、branch `3722/5262=70.7%`，changed core line/branch 均 `100.0%` |
-| Source-only staging | PASS (historical) | 上一次候选 run 的 `registry-rehearsal` 在 enforced source-only candidate 上通过；当前 RSS checkpoint 尚未执行 hosted fresh-candidate |
-| Package rehearsal | PASS (historical) | 上一次候选 run 的 `registry-rehearsal` job 通过；当前 RSS checkpoint 尚未执行 hosted rehearsal |
+| Source-only staging | PASS (historical) | 上一次候选 run 的 `registry-rehearsal` 在 enforced source-only candidate 上通过；当前 RSS/API-doc checkpoint 尚未执行 hosted fresh-candidate |
+| Package rehearsal | PASS (historical) | 上一次候选 run 的 `registry-rehearsal` job 通过；当前 RSS/API-doc checkpoint 尚未执行 hosted rehearsal |
 | Seven-library matrix | **BLOCKED (RSS missing)** | 当前提交绑定的两批 STS `1.1.3` 归档各含 770/770 单元，CPU 1/sibling 49 idle sample、checksum、identity 和 strict freshness 均通过；但现有归档未记录每个测量进程的 peak RSS，未满足发布检查第 4 项。runner 现已改为写入 GNU `time -v` sidecar 和 `max_rss_kb`，必须在合格 Server 上重新完成两批矩阵 |
 | Three-library release performance | **BLOCKED (RSS missing)** | 当前候选的 STS `1.1.3` 远端正式 36-workload 三库矩阵完成 11 轮；3/36 stable、33/36 noisy，完整 raw archive 和复核结果见[当前三库结果](../../docs/performance/results/2026-09-13-release-three-library.md)；现有归档没有 peak RSS。runner 和 summary 已增加 sidecar 校验，必须重新测量 |
 | Pure baseline/candidate qualification | **BLOCKED (RSS missing)** | [当前 Pure 结果](../../docs/performance/results/2026-09-13-linux-release-pure.md)绑定当前候选，STS `1.1.3` 下 24 case、11 轮、release timing gate `all_ratios_at_most_1_05=true`；现有归档早于 RSS 采集，必须用更新后的 runner 重新记录 peak RSS，不能把 timing PASS 当作发布 PASS |
 | Native acceleration | NON-BLOCKING (claim not qualified) | 旧 Native diagnostic 为 `0/36` stable、`36/36` noisy；当前三库结果为 `3/36` stable、`33/36` noisy；两者都不支持本次发布的精确 Native/跨库 acceleration claim，且 noisy 本身不阻断普通 Release |
-| Release policy | **BLOCKING** | 历史 API、timing gate 和 hosted CI 曾通过，但当前三类性能证据仍缺少 RSS，且本地 RSS checkpoint 尚未完成 hosted CI；此外仍要求合并到 `main`、合并后 required workflows/Pages 通过，当前没有创建 tag 或 Release |
+| Release policy | **BLOCKING** | 历史 API、timing gate 和 hosted CI 曾通过，但当前三类性能证据仍缺少 RSS，且当前 RSS/API-doc checkpoint 尚未完成 hosted CI；此外仍要求合并到 `main`、合并后 required workflows/Pages 通过，当前没有创建 tag 或 Release |
 | Annotated tag / GitHub Release | NOT RUN | Release policy remains blocking; no tag, release, or uploaded assets created |
 | Central package registry | NOT RUN | 未授权发布；没有执行 central publication |
 
@@ -205,21 +205,21 @@ Native 运行源码闭包 SHA-256 为
 Public API mechanical inventory: PASS (1094 declarations; 9 packages)
 Public API migration review: PASS (approved-for-release; 17 reviewed deltas)
 Local fresh-source simulation: PASS (historical; current source-only candidate covered by hosted registry rehearsal)
-Hosted PR execution: NOT RUN for local RSS checkpoint (last historical run 34779604448 passed; rerun required after push)
-Seven-library evidence freshness: BLOCKED for local RSS checkpoint (historical run predates RSS sidecars; rerun required)
+Hosted PR execution: NOT RUN for current RSS/API-doc checkpoint (last historical run 34779604448 passed; rerun required after push)
+Seven-library evidence freshness: BLOCKED for current checkpoint (historical run predates RSS sidecars; rerun required)
 Three-library performance qualification: BLOCKED (timing passed; peak RSS missing from archive)
 Pure baseline/candidate qualification: BLOCKED (timing passed; peak RSS missing from archive)
 Native acceleration claim: NON-BLOCKING / NOT QUALIFIED (current diagnostic batch is noisy; no precise acceleration claim)
 Hosted main execution and Pages: PASS historically (run 34511955542; not the current candidate or new baseline)
-Coverage: PASS historically (previous PR Core Coverage job passed; current RSS checkpoint has no hosted result)
-Release decision: BLOCKED; seven-library, three-library and Pure performance qualification lack peak RSS, and merged-main CI/Pages plus final release assets are still pending
+Coverage: PASS historically (previous PR Core Coverage job passed; current checkpoint has no hosted result)
+Release decision: BLOCKED; seven-library, three-library and Pure performance qualification lack peak RSS, and current hosted API-doc/CI plus merged-main Pages and final release assets are still pending
 ```
 
 发布基线固定为 Cangjie STS `1.1.3`（`cjc/cjpm 1.1.3`）。上一个候选曾通过
-基础测试、API inventory、Pure/三库 timing gate 和 hosted run
+基础测试、API inventory、Pure/三库 timing gate，以及 hosted run
 `34779604448` 的 28 个 PR jobs（含当时的 seven-library freshness、CI policy tests、
 Coverage、API docs、Windows/macOS Pure 和 package rehearsal）。上一次
-registry rehearsal 也在 enforced source-only candidate 上通过；本地 RSS checkpoint
+registry rehearsal 也在 enforced source-only candidate 上通过；当前 RSS/API-doc checkpoint
 尚未重新执行 hosted jobs。当前性能归档缺少发布检查要求的 peak RSS，因此性能
 qualification 尚未闭合。rehearsal 已生成九个临时 `.cjp`，但最终
 `manifest.json`、`environment.json`、`checksums.txt` 尚未生成或上传。
