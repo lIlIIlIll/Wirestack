@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-004",
+  "status": "PASS",
+  "command": {
+    "id": "transport-regression-tests",
+    "argv": [
+      "cjpm",
+      "test",
+      "src/internal/transport_stdnet",
+      "src/internal/connector",
+      "--exclude-tags=Performance",
+      "--parallel",
+      "1",
+      "--no-progress",
+      "--no-color"
+    ],
+    "status": "PASS",
+    "exit_code": 0,
+    "timed_out": false,
+    "error_code": null,
+    "started_at_utc": "2026-09-11T17:37:07.884785Z",
+    "finished_at_utc": "2026-09-11T17:37:12.108707Z",
+    "duration_ms": 4223.926,
+    "stdout_path": "docs/evidence/M8-004/development/pr160-acceptance/transport-regression-tests.stdout.log",
+    "stderr_path": "docs/evidence/M8-004/development/pr160-acceptance/transport-regression-tests.stderr.log",
+    "stdout_excerpt": "--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.transport_stdnet, time elapsed: 196783018 ns, RESULT:\n    TCS: StdNetTransportListenerTest, time elapsed: 91374456 ns, RESULT:\n    [ PASSED ] CASE: listenerRejectsOutOfRangeBacklogBeforeBinding (215235 ns)\n    [ PASSED ] CASE: listenerPreCancelledAndExpiredAcceptsFailFast (161383 ns)\n    [ PASSED ] CASE: listenerDeadlineBoundsBlockedAcceptAndListenerRemainsUsable (38920239 ns)\n    [ PASSED ] CASE: listenerCancellationWakesActiveAcceptAndListenerRemainsUsable (40143119 ns)\n    [ PASSED ] CASE: listenerCloseWakesActiveAcceptWithStructuredErrorAndIsIdempotent (10924398 ns)\n    TCS: M123TransportDiagnosticsTest, time elapsed: 643902 ns, RESULT:\n    [ PASSED ] CASE: stdNetReportsRuntimeEndpointsAndCapabilitiesWithoutGuessingIoBackend (256769 ns)\n    [ PASSED ] CASE: deterministicTransportUsesTheSameProviderNeutralContract (53031 ns)\n    TCS: M127BackgroundFastPathTest, time elapsed: 34267820 ns, RESULT:\n    [ PASSED ] CASE: backgroundAndObservedPathsTransferEquivalentData (207627 ns)\n    [ PASSED ] CASE: backgroundPeerCloseRemainsEof (157984 ns)\n    [ PASSED ] CASE: backgroundLocalCloseRaceRemainsClosed (1277334 ns)\n    [ PASSED ] CASE: backgroundStillRejectsConcurrentReaders (1187292 ns)\n    [ PASSED ] CASE: cancellableAndDeadlineContextsRetainGenericChecks (172295 ns)\n    [ PASSED ] CASE: deadlineTimeoutIsClearedBeforeBackgroundRead (30323199 ns)\n    TCS: Net06CancellationGateTest, time elapsed: 5420561 ns, RESULT:\n    [ PASSED ] CASE: cancelledReadsReleaseSocketsWaitersAndTasks (5138424 ns)\n    TCS: StdNetTransportTest, time elapsed: 62872659 ns, RESULT:\n    [ PASSED ] CASE: writeSomeIsPartialAndReusesBoundedConnectionStaging (428258 ns)\n    [ PASSED ] CASE: wholeArrayReadAndWriteBypassStagingForATypicalTlsRecord (2121151 ns)\n    [ PASSED ] CASE: subrangesRetainBoundedStagingAndCopyAccounting (222639 ns)\n    [ PASSED ] CASE: connectsByResolvedIpAndTransfersBothDirections (201188 ns)\n    [ PASSED ] CASE: emptyOperationsAreImmediate (162785 ns)\n    [ PASSED ] CASE: unsupportedHalfClosePreservesBothDirections (261740 ns)\n    [ PASSED ] CASE: cancellationAbortRemainsNativeOwnerAfterLaterClose (1168859 ns)\n    [ PASSED ] CASE: listenerCloseWakesBlockedAcceptAsClosed (1076091 ns)\n    [ PASSED ] CASE: cancellingOneAcceptLeavesListenerReusable (29187784 ns)\n    [ PASSED ] CASE: preCancelledConnectDoesNotCreateASocket (57988 ns)\n    [ PASSED ] CASE: peerGracefulCloseIsReportedAsEof (168843 ns)\n    [ PASSED ] CASE: deadlineBoundsBlockedReadWithoutClosingConnection (20334965 ns)\n    [ PASSED ] CASE: localCloseMapsBlockedReadWithStableEvidence (1196079 ns)\n    [ PASSED ] CASE: explicitAbortWakesBlockedReadWithStableEvidence (1255176 ns)\n    [ PASSED ] CASE: gracefulNativeCloseRemainsGracefulAfterLaterAbort (183592 ns)\n    [ PASSED ] CASE: explicitAbortRemainsNativeOwnerAfterLaterClose (224068 ns)\n    [ PASSED ] CASE: unknownConnectFailureMapsWithoutMessageOrNativeCode (187055 ns)\n    [ PASSED ] CASE: concurrentReadsFailWithoutDisturbingTheActiveRead (1253093 ns)\n    [ PASSED ] CASE: happyEyeballsComposesWithTheDefaultStdNetFactory (250347 ns)\nSummary: TOTAL: 50\n    PASSED: 33, SKIPPED: 17, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nTP: wirestack.internal.connector, time elapsed: 12859187 ns, RESULT:\n    TCS: AttemptPlanTest, time elapsed: 1266178 ns, RESULT:\n    [ PASSED ] CASE: alternatesFamiliesAndPreservesFamilyOrder (237631 ns)\n    [ PASSED ] CASE: firstFamilyControlsPreferenceAndDuplicatesAreRemoved (46914 ns)\n    [ PASSED ] CASE: distinctIpv6ZonesAreNotDeduplicated (23649 ns)\n    [ PASSED ] CASE: rejectsEmptyCandidatesAndNegativeDelay (38984 ns)\n    TCS: HappyEyeballsConnectorTest, time elapsed: 10230337 ns, RESULT:\n    [ PASSED ] CASE: emitsCompleteDnsAttemptAndConnectedLifecycle (231659 ns)\n    [ PASSED ] CASE: blackholedFirstCandidateIsCancelledAndJoinedBeforeReturn (8241033 ns)\n    [ PASSED ] CASE: ipv6FirstSuccessSkipsLaterIpv4Attempt (122639 ns)\n    [ PASSED ] CASE: simultaneousSuccessKeepsOneWinnerAndAbortsEveryLoser (155747 ns)\n    [ PASSED ] CASE: allFailuresAreJoinedAndRetainedAsDiagnostics (104056 ns)\n    [ PASSED ] CASE: preCancelledParentStartsNeitherDnsNorAttempts (47877 ns)\n    [ PASSED ] CASE: parentCancellationAfterSuccessPreventsWinnerPublication (123425 ns)\n    [ PASSED ] CASE: deadlineAtSuccessBoundaryPreventsWinnerPublication (95578 ns)\n    TCS: ConnectionRouteTest, time elapsed: 1199301 ns, RESULT:\n    [ PASSED ] CASE: directRouteRetainsItsLocalOriginResolver (86819 ns)\n    [ PASSED ] CASE: explicitProxySeparatesOriginAndProxyDns (42975 ns)\n    [ PASSED ] CASE: typedIpTargetsNeverCarryResolvers (67186 ns)\n    [ PASSED ] CASE: rejectsDelegatedDnsWithoutAnOwningProxyAndInvalidConnectTargets (57341 ns)\n    [ PASSED ] CASE: networkAndTlsParametersAreBoundedAndOwned (408939 ns)\nSummary: TOTAL: 17\n    PASSED: 17, SKIPPED: 0, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\nProject tests finished, time elapsed: 231351312 ns, RESULT:\nTP: wirestack.*, time elapsed: 231293674 ns, RESULT:\n    PASSED:\n    TP: wirestack.internal.connector, time elapsed: 12859187 ns\n    TP: wirestack.internal.transport_stdnet, time elapsed: 196783018 ns\nSummary: TOTAL: 67\n    PASSED: 50, SKIPPED: 17, ERROR: 0\n    FAILED: 0\n--------------------------------------------------------------------------------------------------\ncjpm test success\n",
+    "stderr_excerpt": "",
+    "stdout_truncated": false,
+    "stderr_truncated": false
+  },
+  "cangjie_test_summary": {
+    "total": 67,
+    "passed": 50,
+    "skipped": 17,
+    "errors": 0,
+    "failed": 0
+  }
+}
