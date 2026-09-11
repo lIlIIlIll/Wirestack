@@ -1,0 +1,200 @@
+{
+  "after_consumer_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "354a80a07899c5b9afe5c0133b7c02096a1ca3a3473be96c5bc5e2522f0758af"
+  },
+  "artifacts": [
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "76a2aef0d998507e05cd1060935da115d8b17b20c8d2c166e3fa8d8e62073788"
+      },
+      "path": "docs/evidence/M8-002/native-close-review/after-build.stderr.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+      },
+      "path": "docs/evidence/M8-002/native-close-review/after-build.stdout.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "6c0074271d53b2331e1f6a57d350a21577258da5b035e27a021cea82ae0fc59b"
+      },
+      "path": "docs/evidence/M8-002/native-close-review/after.stderr.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5e4ebef7c89fcf936e9fc6c5a0103be46940ace9c0475de27d2a3390dc570659"
+      },
+      "path": "docs/evidence/M8-002/native-close-review/after.stdout.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "76a2aef0d998507e05cd1060935da115d8b17b20c8d2c166e3fa8d8e62073788"
+      },
+      "path": "docs/evidence/M8-002/native-close-review/before-build.stderr.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+      },
+      "path": "docs/evidence/M8-002/native-close-review/before-build.stdout.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "6c0074271d53b2331e1f6a57d350a21577258da5b035e27a021cea82ae0fc59b"
+      },
+      "path": "docs/evidence/M8-002/native-close-review/before.stderr.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5e4ebef7c89fcf936e9fc6c5a0103be46940ace9c0475de27d2a3390dc570659"
+      },
+      "path": "docs/evidence/M8-002/native-close-review/before.stdout.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "512d3dc66924fa4dcb0a461232f7fed8749c041fd4317416f8019b985c5370d6"
+      },
+      "path": "docs/evidence/M8-002/native-close-review/close_fault.c"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "path": "docs/evidence/M8-002/native-close-review/hook-build.stderr.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "path": "docs/evidence/M8-002/native-close-review/hook-build.stdout.log"
+    },
+    {
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "8e923c3a7906779583d25e40bb64813ad5cb678cb763bebcb8734d7da998bfea"
+      },
+      "path": "docs/evidence/M8-002/native-close-review/main.cj"
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "cc",
+        "-shared",
+        "-fPIC",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "close_fault.c",
+        "-ldl",
+        "-o",
+        "close_fault.so"
+      ],
+      "cwd": "/tmp/wirestack-m8-002-close-probe-h_6xmavq",
+      "exit_code": 0,
+      "id": "hook-build",
+      "stderr_path": "docs/evidence/M8-002/native-close-review/hook-build.stderr.log",
+      "stdout_path": "docs/evidence/M8-002/native-close-review/hook-build.stdout.log"
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build",
+        "-j",
+        "1"
+      ],
+      "cwd": "/tmp/wirestack-m8-002-close-probe-h_6xmavq",
+      "exit_code": 0,
+      "id": "before-build",
+      "stderr_path": "docs/evidence/M8-002/native-close-review/before-build.stderr.log",
+      "stdout_path": "docs/evidence/M8-002/native-close-review/before-build.stdout.log"
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build",
+        "-j",
+        "1"
+      ],
+      "cwd": "/tmp/wirestack-m8-002-close-probe-h_6xmavq",
+      "exit_code": 0,
+      "id": "after-build",
+      "stderr_path": "docs/evidence/M8-002/native-close-review/after-build.stderr.log",
+      "stdout_path": "docs/evidence/M8-002/native-close-review/after-build.stdout.log"
+    },
+    {
+      "argv": [
+        "/tmp/wirestack-m8-002-close-probe-h_6xmavq/target/release/bin/main"
+      ],
+      "cwd": "/tmp/wirestack-m8-002-close-probe-h_6xmavq",
+      "exit_code": 0,
+      "id": "before",
+      "stderr_path": "docs/evidence/M8-002/native-close-review/before.stderr.log",
+      "stdout_path": "docs/evidence/M8-002/native-close-review/before.stdout.log"
+    },
+    {
+      "argv": [
+        "/tmp/wirestack-m8-002-close-probe-h_6xmavq/target/release/bin/main"
+      ],
+      "cwd": "/tmp/wirestack-m8-002-close-probe-h_6xmavq",
+      "exit_code": 0,
+      "id": "after",
+      "stderr_path": "docs/evidence/M8-002/native-close-review/after.stderr.log",
+      "stdout_path": "docs/evidence/M8-002/native-close-review/after.stdout.log"
+    }
+  ],
+  "consumer_dependency_root": "/tmp/wirestack-m8-002-publication-7rd8718e/repo",
+  "corrected_source_digest": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "7ef86fbc1978a9df087dda2db83157555825b8b4a23c9258c43eea4a42d63c11"
+  },
+  "correction": "Remove the redundant SDK-close retry and its helper. Graceful and abortive callers each invoke socket.close directly only after the existing one-time native-close claim.",
+  "experiment": {
+    "after_exit": 0,
+    "after_native_close_calls": 1,
+    "before_exit": 0,
+    "before_native_close_calls": 1,
+    "classification": "BOUNDED_NATIVE_SMOKE_NOT_RED_GREEN_EXCEPTION_PROOF",
+    "double_kernel_close_reproduced": false,
+    "environment": {
+      "LD_PRELOAD": "/tmp/wirestack-m8-002-close-probe-h_6xmavq/close_fault.so",
+      "WIRESTACK_CLOSE_PORT": "42071"
+    },
+    "first_real_close_result": 0,
+    "mechanism": "LD_PRELOAD of the public libc close API; select the bound IPv4 UDP port, execute the real close, then return -1/EIO. No private SDK or runtime ABI is used.",
+    "sdk_reported_exception": false
+  },
+  "interposer_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "d2d1a06637b0096be3743d64c7f4843ec97c84b7b177e1fcec1e28ec9d6b1db5"
+  },
+  "limitations": [
+    "The pinned SDK returns success after this injected libc error, so the experiment does not reach the removed SDK-exception catch.",
+    "SDK-exception propagation is justified by the direct source path; it was not injected through a private ABI or a production test hook."
+  ],
+  "reproduction": [
+    "Create a temporary consumer using tools/m7_027_linux_examples.py consumer_manifest() from the target source checkout; copy native-close-review/main.cj to its src/main.cj.",
+    "Compile native-close-review/close_fault.c with the recorded cc argv, then cjpm build -j 1 under the qualified SDK environment.",
+    "Select an unused IPv4 UDP port, set WIRESTACK_CLOSE_PORT and LD_PRELOAD to the built interposer, then run target/release/bin/main.",
+    "Keep the interposer in this test process only; do not preload production services."
+  ],
+  "review_comment": "https://github.com/lIlIIlIll/Wirestack/pull/158#discussion_r3985119511",
+  "reviewed_source_candidate": "408a0c92e1111ad7b8b533e92ded1d624cda558b",
+  "schema_version": 1,
+  "source_task": "M8-002",
+  "status": "PASS"
+}

@@ -51,37 +51,57 @@ CJDOC_BIN=/path/to/cjdoc-0.7.2 scripts/check-docs --html --json
 
 ## `wirestack.net`
 
-`wirestack.net` 的 M8-001 契约包含 endpoint、lifecycle、capability 和 socket
-option 值类型，以及复用现有 Transport SPI 的 `TcpStream`。公共声明只接受
-Wirestack 的 endpoint、span、错误和 `OperationContext`，不暴露 `std.net`
-descriptor 或异常。
+`wirestack.net` 使用 Wirestack 的 endpoint、span、结构化错误和 `OperationContext`，
+不向 consumer 暴露 `std.net` descriptor 或异常。M8-001 定义共享生命周期与
+capability 契约、`TcpStream` 和 datagram 接口。M8-002 在 Linux x86_64 glibc 上
+实现了基于 `std.net` 的公共 `TcpListener` 与 `UdpSocket`。
 
-流式读写允许 partial progress，`readExact`/`writeAll` 是显式 helper。
-TCP/UDP listener 和 socket option 的实际应用属于 M8-002，Unix adapter 属于
-M8-003，完整 DNS parser/client/resolver 属于 M8-004。类型可以构造不代表对应
-native 能力已经支持。AF_PACKET、AF_NETLINK、SOCK_SEQPACKET、ancillary data
-及没有 native adapter 的特权 raw I/O 不计为 PASS。
+`TcpListener.bind(endpoint, backlog:, context:)` 只接受已解析的
+`SocketEndpoint`，不执行 DNS。`backlog` 默认为 128，有效范围是 1 至 65,535。
+`localEndpoint` 返回实际绑定地址，包括内核分配的端口。listener 同时只接受一个
+`accept`；重叠调用以 `ConcurrentOperation` 失败，不建立无界等待队列。一次
+`accept` 的取消或 Deadline 只终止该操作，listener 保持可用。接受得到的
+`TcpStream` 保留已解析的本地和远端 endpoint。流式 `read`/`write` 允许 partial
+progress，`readExact`/`writeAll` 是显式完整传输 helper。
 
-示例：
+`UdpSocket.bind(endpoint, context:)` 同样只绑定已解析的 Internet endpoint。
+`localEndpoint` 返回包含实际绑定地址的 `NetworkEndpoint.Internet`，`remoteEndpoint`
+在 `connect` 成功前为 `None`。`connect` 选择 native peer 并安装接收端源地址过滤；
+`send` 使用该 peer，未连接时以 `NotConnected` 失败；`sendTo` 不改变已选择的 peer。
+一次 send-like 操作可以与一次 `receive` 重叠；同方向重叠和 `connect` 与活动 I/O
+的竞态以 `ConcurrentOperation` 失败。成功发送必须返回完整报文长度。
+发送上限是 65,507 字节，`receive` capacity 的有效范围是 1 至 65,507。
+`DatagramReceiveResult` 拥有返回 payload，保留已解析的来源 endpoint。报文超过
+capacity 时只保留前缀、丢弃该报文尾部并设置 `truncated`，下一条报文不受影响。
 
-```cj
-let endpoint = SocketEndpoint(
-    IpAddress(IpAddressFamily.Ipv4, [127u8, 0u8, 0u8, 1u8]),
-    8080u16
-)
-let context = OperationContext(
-    deadline: Some(Deadline.after(5 * Duration.second)))
-let stream = TcpStream.connect(endpoint, context: context)
-try {
-    let request = ByteSpan(bytes: "ping".toArray())
-    stream.writeAll(request, context: context)
-} finally {
-    stream.close(context: context)
-}
-```
+当前 `std.net` backend 不支持发送空 UDP 报文，因此
+`capabilities.zeroLengthDatagramSend` 为 `false`。`send` 和 `sendTo` 对空 payload
+在 native I/O 前返回结构化 `Unsupported`，socket 仍可复用。接收空 UDP 报文是独立
+且必须支持的行为：`receive` 返回空 payload 和 `truncated == false`，不能把它当作
+EOF。预取消或已过期的 context 在进入 UDP I/O 前失败时不关闭 socket；对已经活动的
+UDP connect、send 或 receive 发出取消会由该操作取得 abortive close 所有权并关闭
+socket。TCP `accept` 的活动取消不会采用这条 UDP 所有权规则。
 
-Network API 的完整 DNS、HTTP parity、TLS context versioning 和最终 release evidence
-分别属于 M8-002 至 M8-007，不要把本页的契约验证当作最终网络底座完成声明。
+`SocketCapabilities` 只提供 advisory 信息，具体操作结果才是权威。当前 Linux
+listener、接受的 TCP stream 和 UDP socket 都报告 `nonBlocking` 与 `closeOnExec`。
+UDP 还报告 `broadcast` 与 `multicast`；`halfClose`、`raw`、`ancillaryData` 和
+`zeroLengthDatagramSend` 为 false。`SocketOption` 仍只是类型化值，公共 API 尚无
+option application 操作。
+
+完整 native consumer 位于
+[`examples/linux/m8_002/main.cj`](../../examples/linux/m8_002/main.cj)，对应 runner
+是 [`tools/m8_002_native_sockets.py`](../../tools/m8_002_native_sockets.py)。
+M8-002 资格确认使用新的
+[`wirestack-linux-pre1-m8-002.json`](baselines/wirestack-linux-pre1-m8-002.json)
+作为公开 API baseline；完整门禁与原生结果见 [M8-002 验收记录](../evidence/M8-002/README.md)。
+
+`SocketCapabilities` 新增实例字段 `zeroLengthDatagramSend`，构造函数也增加对应的
+命名参数。旧调用可继续使用默认值，但对象布局和构造函数 ABI 已改变，消费者必须
+重新编译。新 baseline 匹配不代表与旧二进制兼容，见
+[M8-002 兼容性分类](../evidence/M8-002/api-compatibility.json)。
+
+Unix adapter、完整 DNS、HTTP parity、TLS context versioning 和最终发布证据属于
+仍待执行的 M8-003 至 M8-007。
 
 ## `wirestack.tls`
 
@@ -94,10 +114,10 @@ reference identity、本地身份、外部签名和 transport 所有权都是独
 
 ## 稳定性和所有权
 
-[M7-032 Linux pre-1.0 inventory](baselines/wirestack-linux-pre1-m7-032.json) 记录
-当前公开契约；较早的 [M7-026 snapshot](baselines/wirestack-linux-v0.json) 仅作为历史
-证据，不是兼容性目标。1.0 之前，Wirestack 不承诺实验性 API 的 source、API、ABI 或
-语义兼容。
+[M8-002 inventory](baselines/wirestack-linux-pre1-m8-002.json) 记录当前公开契约。
+[M7-032 snapshot](baselines/wirestack-linux-pre1-m7-032.json) 和
+[M7-026 snapshot](baselines/wirestack-linux-v0.json) 保留为历史证据，不是当前兼容性目标。
+1.0 之前，Wirestack 不承诺实验性 API 的 source、API、ABI 或语义兼容。
 
 - 包装 transport 会把它的使用权转交给 TLS connection；
 - `close` 和 `abort` 幂等；

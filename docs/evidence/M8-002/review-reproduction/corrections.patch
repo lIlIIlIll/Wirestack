@@ -1,0 +1,247 @@
+--- a/src/internal/transport_stdnet/package.cj
++++ b/src/internal/transport_stdnet/package.cj
+@@ -975,6 +975,7 @@
+     category: NetworkErrorCategory,
+     phase: NetworkPhase,
+     cause!: ?Exception = None<Exception>,
++    retryability!: Retryability = Retryability.Temporary,
+     localEndpoint!: ?SocketEndpoint = None<SocketEndpoint>,
+     remoteEndpoint!: ?SocketEndpoint = None<SocketEndpoint>
+ ): NetworkException {
+@@ -983,7 +984,7 @@
+         phase,
+         NetworkErrorCode.TimedOut,
+         "operation deadline exceeded",
+-        retryability: Retryability.Temporary,
++        retryability: retryability,
+         localEndpoint: internetEndpoint(localEndpoint),
+         remoteEndpoint: internetEndpoint(remoteEndpoint),
+         cause: cause
+--- a/src/internal/transport_stdnet/udp_socket.cj
++++ b/src/internal/transport_stdnet/udp_socket.cj
+@@ -529,7 +529,7 @@
+                 throw api.NetworkException(
+                     api.NetworkErrorCategory.Write,
+                     api.NetworkPhase.DatagramSend,
+-                    api.NetworkErrorCode.InvalidState,
++                    api.NetworkErrorCode.NotConnected,
+                     "UDP socket has no selected peer",
+                     retryability: api.Retryability.Never,
+                     localEndpoint: internetEndpoint(Some(localEndpointValue))
+@@ -640,6 +640,10 @@
+                 category,
+                 phase,
+                 cause: cause,
++                retryability: match (phase) {
++                    case api.NetworkPhase.DatagramSend => api.Retryability.Never
++                    case _ => api.Retryability.Temporary
++                },
+                 localEndpoint: Some(localEndpoint),
+                 remoteEndpoint: remoteEndpoint
+             )
+@@ -674,6 +678,10 @@
+                 category,
+                 phase,
+                 cause: Some(error),
++                retryability: match (phase) {
++                    case api.NetworkPhase.DatagramSend => api.Retryability.Never
++                    case _ => api.Retryability.Temporary
++                },
+                 localEndpoint: Some(localEndpoint),
+                 remoteEndpoint: remoteEndpoint
+             )
+--- a/src/net/m8_002_tcp_test.cj
++++ b/src/net/m8_002_tcp_test.cj
+@@ -1,7 +1,5 @@
+ package wirestack.net
+ 
+-import std.sync.*
+-import std.time.*
+ import std.unittest.*
+ import std.unittest.testmacro.*
+ import wirestack as api
+--- a/src/net/package.cj
++++ b/src/net/package.cj
+@@ -518,7 +518,9 @@
+                 return
+             }
+             if (!coordinated) {
+-                match (runClose(context)) {
++                let result = runClose(context)
++                publishCloseResult(result)
++                match (result) {
+                     case Some(error) => throw error
+                     case None => ()
+                 }
+@@ -532,8 +534,7 @@
+             try {
+                 spawn {
+                     let result = runClose(cleanupContext)
+-                    pending.complete(result)
+-                    releaseCloseCoordination()
++                    publishCloseResult(result)
+                 }
+             } catch (error: Exception) {
+                 let reported = socketFailure(error, api.NetworkErrorCategory.System,
+@@ -541,8 +542,7 @@
+                 try {
+                     failClose()
+                 } finally {
+-                    pending.complete(Some(reported))
+-                    releaseCloseCoordination()
++                    publishCloseResult(Some(reported))
+                 }
+                 throw reported
+             }
+@@ -682,6 +682,9 @@
+                 case SocketState.Open | SocketState.ReadHalfClosed |
+                      SocketState.WriteHalfClosed | SocketState.Closing =>
+                     if (closeActive) {
++                        if (closeCoordination.isNone()) {
++                            closeCoordination = Some(SocketCloseCoordination())
++                        }
+                         (false, closeCoordination)
+                     } else {
+                         let pending = if (coordinated) {
+@@ -743,9 +746,15 @@
+         }
+     }
+ 
+-    private func releaseCloseCoordination(): Unit {
+-        synchronized(lifecycleMutex) {
++    private func publishCloseResult(result: ?api.NetworkException): Unit {
++        let pending = synchronized(lifecycleMutex) {
++            let value = closeCoordination
+             closeCoordination = None<SocketCloseCoordination>
++            value
++        }
++        match (pending) {
++            case Some(value) => value.complete(result)
++            case None => ()
+         }
+     }
+ 
+--- a/src/net/tcp_listener.cj
++++ b/src/net/tcp_listener.cj
+@@ -178,7 +178,9 @@
+                 return
+             }
+             if (!coordinated) {
+-                match (runClose()) {
++                let result = runClose()
++                publishCloseResult(result)
++                match (result) {
+                     case Some(error) => throw error
+                     case None => ()
+                 }
+@@ -188,13 +190,11 @@
+             try {
+                 spawn {
+                     let result = runClose()
+-                    completion.complete(result)
+-                    releaseCloseCoordination()
++                    publishCloseResult(result)
+                 }
+             } catch (_: Exception) {
+                 let result = runClose()
+-                completion.complete(result)
+-                releaseCloseCoordination()
++                publishCloseResult(result)
+             }
+             completion.wait(context, local, None<api.NetworkEndpoint>)
+         } catch (error: Exception) {
+@@ -308,6 +308,15 @@
+                             (true, pending)
+                         case _ => (false, closeCoordination)
+                     }
++                case TcpListenerCloseOwner.Graceful =>
++                    match (lifecycleState) {
++                        case SocketState.Closing =>
++                            if (closeCoordination.isNone()) {
++                                closeCoordination = Some(SocketCloseCoordination())
++                            }
++                        case _ => ()
++                    }
++                    (false, closeCoordination)
+                 case _ => (false, closeCoordination)
+             }
+         }
+@@ -379,9 +388,15 @@
+         }
+     }
+ 
+-    private func releaseCloseCoordination(): Unit {
+-        synchronized(lifecycleMutex) {
++    private func publishCloseResult(result: ?api.NetworkException): Unit {
++        let pending = synchronized(lifecycleMutex) {
++            let value = closeCoordination
+             closeCoordination = None<SocketCloseCoordination>
++            value
++        }
++        match (pending) {
++            case Some(value) => value.complete(result)
++            case None => ()
+         }
+     }
+ }
+--- a/src/net/udp_socket.cj
++++ b/src/net/udp_socket.cj
+@@ -250,7 +250,9 @@
+                 return
+             }
+             if (!coordinated) {
+-                match (runClose(context)) {
++                let result = runClose(context)
++                publishCloseResult(result)
++                match (result) {
+                     case Some(error) => throw error
+                     case None => ()
+                 }
+@@ -264,8 +266,7 @@
+             try {
+                 spawn {
+                     let result = runClose(cleanupContext)
+-                    pending.complete(result)
+-                    releaseCloseCoordination()
++                    publishCloseResult(result)
+                 }
+             } catch (error: Exception) {
+                 let reported = socketFailure(
+@@ -276,8 +277,7 @@
+                     remoteEndpoint
+                 )
+                 failClose()
+-                pending.complete(Some(reported))
+-                releaseCloseCoordination()
++                publishCloseResult(Some(reported))
+                 throw reported
+             }
+             pending.wait(context, Some(localEndpointValue), remoteEndpoint)
+@@ -400,6 +400,9 @@
+             match (lifecycleState) {
+                 case SocketState.Open | SocketState.Connecting | SocketState.Closing =>
+                     if (closeActive) {
++                        if (closeCoordination.isNone()) {
++                            closeCoordination = Some(SocketCloseCoordination())
++                        }
+                         (false, closeCoordination)
+                     } else {
+                         let pending = if (coordinated) {
+@@ -470,9 +473,15 @@
+         }
+     }
+ 
+-    private func releaseCloseCoordination(): Unit {
+-        synchronized(lifecycleMutex) {
++    private func publishCloseResult(result: ?api.NetworkException): Unit {
++        let pending = synchronized(lifecycleMutex) {
++            let value = closeCoordination
+             closeCoordination = None<SocketCloseCoordination>
++            value
++        }
++        match (pending) {
++            case Some(value) => value.complete(result)
++            case None => ()
+         }
+     }
+ 

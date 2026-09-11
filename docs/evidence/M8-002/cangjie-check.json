@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "cjpm",
+    "check"
+  ],
+  "duration_ms": 1015.635,
+  "error_code": null,
+  "exit_code": 0,
+  "finished_at_utc": "2026-09-11T01:39:46.840534Z",
+  "id": "cangjie-check",
+  "schema_version": 1,
+  "source_task": "M8-002",
+  "started_at_utc": "2026-09-11T01:39:45.824906Z",
+  "status": "PASS",
+  "stderr_excerpt": "",
+  "stderr_path": "docs/evidence/M8-002/cangjie-check.stderr.log",
+  "stderr_sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr_truncated": false,
+  "stdout_excerpt": "The valid serial compilation order is:\n    wirestack -> wirestack.internal -> wirestack.internal.identity -> wirestack.internal.platform -> wirestack.internal.platform.android -> wirestack.internal.platform.apple -> wirestack.internal.platform.harmony -> wirestack.internal.platform.linux -> wirestack.internal.platform.windows -> wirestack.internal.common -> wirestack.internal.http_model -> wirestack.internal.transport -> wirestack.internal.trust -> wirestack.internal.http2 -> wirestack.internal.resolver -> wirestack.internal.tls_engine -> wirestack.internal.connector -> wirestack.tls -> wirestack.internal.http1 -> wirestack.internal.transport_stdnet -> wirestack.http -> wirestack.net\ncjpm check success\n",
+  "stdout_path": "docs/evidence/M8-002/cangjie-check.stdout.log",
+  "stdout_sha256": {
+    "domain": "text-utf8-lf-v1",
+    "sha256": "5abbfcc1ccab341c084bd90f5817673ac0ffb479e72f094c6f43d497a7c111ef"
+  },
+  "stdout_truncated": false,
+  "timed_out": false
+}

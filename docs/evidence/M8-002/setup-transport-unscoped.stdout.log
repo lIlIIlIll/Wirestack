@@ -1,0 +1,121 @@
+--------------------------------------------------------------------------------------------------
+TP: wirestack.internal.transport_stdnet, time elapsed: 5117511340 ns, RESULT:
+    TCS: Net05StdNetTransportBenchmarkTest, time elapsed: 25731390 ns, RESULT:
+    [ ERROR  ] CASE: receive (24803656 ns)
+    REASON: An exception has occurred:IllegalStateException: missing benchmark variable WIRESTACK_NET05_EXPECTED
+	at wirestack.internal.transport_stdnet/test.benchmarkVariable(std.core.String)(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/benchmark_harness_test.cj:15)
+	at wirestack.internal.transport_stdnet/test.runStdNetTransportBenchmark()(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/benchmark_harness_test.cj:74)
+	at wirestack.internal.transport_stdnet/test.Net05StdNetTransportBenchmarkTest.receive()(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/benchmark_harness_test.cj:127)
+	at wirestack.internal.transport_stdnet/test.Net05StdNetTransportBenchmarkTest.asTestSuite.lambda.0.lambda.0()(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/benchmark_harness_test.cj:128)
+    TCS: Net05RawStdNetBenchmarkTest, time elapsed: 32483655 ns, RESULT:
+    [ ERROR  ] CASE: receive (32155620 ns)
+    REASON: An exception has occurred:IllegalStateException: missing benchmark variable WIRESTACK_NET05_EXPECTED
+	at wirestack.internal.transport_stdnet/test.benchmarkVariable(std.core.String)(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/benchmark_harness_test.cj:15)
+	at wirestack.internal.transport_stdnet/test.runRawStdNetBenchmark()(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/benchmark_harness_test.cj:31)
+	at wirestack.internal.transport_stdnet/test.Net05RawStdNetBenchmarkTest.receive()(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/benchmark_harness_test.cj:135)
+	at wirestack.internal.transport_stdnet/test.Net05RawStdNetBenchmarkTest.asTestSuite.lambda.0.lambda.0()(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/benchmark_harness_test.cj:136)
+    TCS: StdNetTransportListenerTest, time elapsed: 83540316 ns, RESULT:
+    [ PASSED ] CASE: listenerRejectsOutOfRangeBacklogBeforeBinding (64583 ns)
+    [ PASSED ] CASE: listenerPreCancelledAndExpiredAcceptsFailFast (160380 ns)
+    [ PASSED ] CASE: listenerDeadlineBoundsBlockedAcceptAndListenerRemainsUsable (31372409 ns)
+    [ PASSED ] CASE: listenerCancellationWakesActiveAcceptAndListenerRemainsUsable (40145390 ns)
+    [ PASSED ] CASE: listenerCloseWakesActiveAcceptWithStructuredErrorAndIsIdempotent (10930522 ns)
+    TCS: M123TransportDiagnosticsTest, time elapsed: 569660 ns, RESULT:
+    [ PASSED ] CASE: stdNetReportsRuntimeEndpointsAndCapabilitiesWithoutGuessingIoBackend (257128 ns)
+    [ PASSED ] CASE: deterministicTransportUsesTheSameProviderNeutralContract (41639 ns)
+    TCS: M125TransportCancellationProfileTest, time elapsed: 4608132118 ns, RESULT:
+    [ PASSED ] CASE: blockedRead (238204866 ns)
+    [ PASSED ] CASE: blockedWrite (4369410061 ns)
+    TCS: M127BackgroundFastPathTest, time elapsed: 55083660 ns, RESULT:
+    [ PASSED ] CASE: backgroundAndObservedPathsTransferEquivalentData (227066 ns)
+    [ PASSED ] CASE: backgroundPeerCloseRemainsEof (276137 ns)
+    [ PASSED ] CASE: backgroundLocalCloseRaceRemainsClosed (11330158 ns)
+    [ PASSED ] CASE: backgroundStillRejectsConcurrentReaders (11364543 ns)
+    [ PASSED ] CASE: cancellableAndDeadlineContextsRetainGenericChecks (269294 ns)
+    [ PASSED ] CASE: deadlineTimeoutIsClearedBeforeBackgroundRead (30397961 ns)
+    TCS: M127OperationContextCostProfileTest, time elapsed: 83387880 ns, RESULT:
+    [ PASSED ] CASE: controlLoop (71063 ns)
+    [ PASSED ] CASE: backgroundContextCheck (332258 ns)
+    [ PASSED ] CASE: deadlineCheck (942476 ns)
+    [ PASSED ] CASE: noneCancellationRegistration (340314 ns)
+    [ PASSED ] CASE: cancellableRegistration (10181220 ns)
+    [ PASSED ] CASE: operationGate (547780 ns)
+    [ PASSED ] CASE: emptyBackgroundRead (3701052 ns)
+    [ PASSED ] CASE: noneReadTimeoutAssignment (428731 ns)
+    [ PASSED ] CASE: readyBackgroundRead (31017435 ns)
+    [ PASSED ] CASE: readyObservedRead (34240363 ns)
+    TCS: M2015NativeNetworkGateTest, time elapsed: 26324995 ns, RESULT:
+    [ ERROR  ] CASE: runProfile (26022005 ns)
+    REASON: An exception has occurred:IllegalStateException: missing M2-015 gate variable WIRESTACK_M2_015_SCENARIO
+	at wirestack.internal.transport_stdnet/test.m215Variable(std.core.String)(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/m2_015_native_network_test.cj:17)
+	at wirestack.internal.transport_stdnet/test.M2015NativeNetworkGateTest.runProfile()(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/m2_015_native_network_test.cj:156)
+	at wirestack.internal.transport_stdnet/test.M2015NativeNetworkGateTest.asTestSuite.lambda.0.lambda.0()(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/m2_015_native_network_test.cj:201)
+    TCS: M2016DnsToConnectedBenchmarkTest, time elapsed: 25801104 ns, RESULT:
+    [ ERROR  ] CASE: runProfile (25536050 ns)
+    REASON: An exception has occurred:IllegalStateException: missing M2-016 benchmark variable WIRESTACK_M2_016_PROFILE
+	at wirestack.internal.transport_stdnet/test.m216Variable(std.core.String)(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/m2_016_dns_to_connected_benchmark_test.cj:17)
+	at wirestack.internal.transport_stdnet/test.M2016DnsToConnectedBenchmarkTest.runProfile()(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/m2_016_dns_to_connected_benchmark_test.cj:245)
+	at wirestack.internal.transport_stdnet/test.M2016DnsToConnectedBenchmarkTest.asTestSuite.lambda.0.lambda.0()(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/m2_016_dns_to_connected_benchmark_test.cj:270)
+    TCS: M3028TlsBenchmarkTest, time elapsed: 23843634 ns, RESULT:
+    [ ERROR  ] CASE: runProfile (23551085 ns)
+    REASON: An exception has occurred:IllegalStateException: missing M3-028 variable WIRESTACK_M3_028_SCENARIO
+	at wirestack.internal.transport_stdnet/test.m3028Variable(std.core.String)(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/m3_028_tls_benchmark_test.cj:18)
+	at wirestack.internal.transport_stdnet/test.M3028TlsBenchmarkTest.runProfile()(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/m3_028_tls_benchmark_test.cj:279)
+	at wirestack.internal.transport_stdnet/test.M3028TlsBenchmarkTest.asTestSuite.lambda.0.lambda.0()(/tmp/wirestack-m8-002-publication-7rd8718e/repo/src/internal/transport_stdnet/m3_028_tls_benchmark_test.cj:334)
+    TCS: Net06CancellationGateTest, time elapsed: 36644186 ns, RESULT:
+    [ PASSED ] CASE: cancelledReadsReleaseSocketsWaitersAndTasks (36369779 ns)
+    TCS: StdNetTransportTest, time elapsed: 114728457 ns, RESULT:
+    [ PASSED ] CASE: writeTimeoutIsNeverRetryableWithoutZeroCommitProof (33714 ns)
+    [ PASSED ] CASE: writeSomeIsPartialAndReusesBoundedConnectionStaging (445492 ns)
+    [ PASSED ] CASE: wholeArrayReadAndWriteBypassStagingForATypicalTlsRecord (2323042 ns)
+    [ PASSED ] CASE: subrangesRetainBoundedStagingAndCopyAccounting (157927 ns)
+    [ PASSED ] CASE: connectsByResolvedIpAndTransfersBothDirections (180545 ns)
+    [ PASSED ] CASE: emptyOperationsAreImmediate (149734 ns)
+    [ PASSED ] CASE: unsupportedHalfClosePreservesBothDirections (263236 ns)
+    [ PASSED ] CASE: cancellationAbortRemainsNativeOwnerAfterLaterClose (11301730 ns)
+    [ PASSED ] CASE: listenerCloseWakesBlockedAcceptAsClosed (1123933 ns)
+    [ PASSED ] CASE: cancellingOneAcceptLeavesListenerReusable (29394354 ns)
+    [ PASSED ] CASE: preCancelledConnectDoesNotCreateASocket (45989 ns)
+    [ PASSED ] CASE: peerGracefulCloseIsReportedAsEof (177866 ns)
+    [ PASSED ] CASE: deadlineBoundsBlockedReadWithoutClosingConnection (30410926 ns)
+    [ PASSED ] CASE: localCloseMapsBlockedReadWithStableEvidence (11436175 ns)
+    [ PASSED ] CASE: explicitAbortWakesBlockedReadWithStableEvidence (11326394 ns)
+    [ PASSED ] CASE: gracefulNativeCloseRemainsGracefulAfterLaterAbort (240615 ns)
+    [ PASSED ] CASE: explicitAbortRemainsNativeOwnerAfterLaterClose (311961 ns)
+    [ PASSED ] CASE: unknownConnectFailureMapsWithoutMessageOrNativeCode (180174 ns)
+    [ PASSED ] CASE: concurrentReadsFailWithoutDisturbingTheActiveRead (11512724 ns)
+    [ PASSED ] CASE: happyEyeballsComposesWithTheDefaultStdNetFactory (477585 ns)
+Summary: TOTAL: 51
+    PASSED: 46, SKIPPED: 0, ERROR: 5
+    FAILED: 0, listed below:
+            TCS: Net05StdNetTransportBenchmarkTest, CASE: receive
+            TCS: Net05RawStdNetBenchmarkTest, CASE: receive
+            TCS: M2015NativeNetworkGateTest, CASE: runProfile
+            TCS: M2016DnsToConnectedBenchmarkTest, CASE: runProfile
+            TCS: M3028TlsBenchmarkTest, CASE: runProfile
+--------------------------------------------------------------------------------------------------
+Project tests finished, time elapsed: 5125275265 ns, RESULT:
+TP: wirestack.*, time elapsed: 5125162935 ns, RESULT:
+    FAILED:
+    TP: wirestack.internal.transport_stdnet, time elapsed: 5117511340 ns, RESULT:
+        TCS: Net05StdNetTransportBenchmarkTest, time elapsed: 25731390 ns, RESULT:
+        [ ERROR  ] CASE: receive (24803656 ns)
+        TCS: Net05RawStdNetBenchmarkTest, time elapsed: 32483655 ns, RESULT:
+        [ ERROR  ] CASE: receive (32155620 ns)
+        TCS: StdNetTransportListenerTest, time elapsed: 83540316 ns, RESULT:
+        TCS: M123TransportDiagnosticsTest, time elapsed: 569660 ns, RESULT:
+        TCS: M125TransportCancellationProfileTest, time elapsed: 4608132118 ns, RESULT:
+        TCS: M127BackgroundFastPathTest, time elapsed: 55083660 ns, RESULT:
+        TCS: M127OperationContextCostProfileTest, time elapsed: 83387880 ns, RESULT:
+        TCS: M2015NativeNetworkGateTest, time elapsed: 26324995 ns, RESULT:
+        [ ERROR  ] CASE: runProfile (26022005 ns)
+        TCS: M2016DnsToConnectedBenchmarkTest, time elapsed: 25801104 ns, RESULT:
+        [ ERROR  ] CASE: runProfile (25536050 ns)
+        TCS: M3028TlsBenchmarkTest, time elapsed: 23843634 ns, RESULT:
+        [ ERROR  ] CASE: runProfile (23551085 ns)
+        TCS: Net06CancellationGateTest, time elapsed: 36644186 ns, RESULT:
+        TCS: StdNetTransportTest, time elapsed: 114728457 ns, RESULT:
+Summary: TOTAL: 51
+    PASSED: 46, SKIPPED: 0, ERROR: 5
+    FAILED: 0
+--------------------------------------------------------------------------------------------------
