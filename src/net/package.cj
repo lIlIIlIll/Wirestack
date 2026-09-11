@@ -48,6 +48,8 @@ public struct SocketCapabilities {
     public let ancillaryData: Bool
 /** Whether this backend can send a zero-length datagram. Empty datagram reception is independent. */
     public let zeroLengthDatagramSend: Bool
+/** Whether send preserves the selected datagram peer's identity. Explicit sendTo is independent. */
+    public let connectedDatagramSend: Bool
 
     /** Creates an advisory capability value.
      *
@@ -59,6 +61,7 @@ public struct SocketCapabilities {
      * @param nonBlocking Non-blocking capability.
      * @param raw Raw-socket capability.
      * @param zeroLengthDatagramSend Whether the backend supports empty datagram sends.
+     * @param connectedDatagramSend Whether connected sends preserve the selected peer.
      */
     public init(
         nonBlocking!: Bool = true,
@@ -68,7 +71,8 @@ public struct SocketCapabilities {
         multicast!: Bool = true,
         raw!: Bool = false,
         ancillaryData!: Bool = false,
-        zeroLengthDatagramSend!: Bool = false
+        zeroLengthDatagramSend!: Bool = false,
+        connectedDatagramSend!: Bool = false
     ) {
         this.nonBlocking = nonBlocking
         this.closeOnExec = closeOnExec
@@ -78,6 +82,7 @@ public struct SocketCapabilities {
         this.raw = raw
         this.ancillaryData = ancillaryData
         this.zeroLengthDatagramSend = zeroLengthDatagramSend
+        this.connectedDatagramSend = connectedDatagramSend
     }
 }
 
@@ -185,6 +190,8 @@ public interface DatagramSocket <: Resource {
 
     /** Selects a resolved peer without DNS or a new timeout owner.
      *
+     * Receive filtering may be supported even when connected sending is not.
+     *
      * @param endpoint Peer of the adapter's supported endpoint kind.
      * @param context Shared absolute deadline and cancellation token.
      */
@@ -196,6 +203,8 @@ public interface DatagramSocket <: Resource {
      * a backend without `zeroLengthDatagramSend` rejects only their sending
      * with `Unsupported`. Missing peers and payloads above 65,507 bytes fail
      * before I/O; a partial send is never successful stream-like progress.
+     * A backend without `connectedDatagramSend` reports `Unsupported` rather
+     * than re-resolving a selected peer's address and risking a different recipient.
      *
      * @param source Datagram payload retained only for this operation.
      * @param context Shared absolute deadline and cancellation token.
@@ -299,6 +308,7 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
     private let localEndpointValue: ?NetworkEndpoint
     private let remoteEndpointValue: ?NetworkEndpoint
     private let capabilityValue: SocketCapabilities
+    private let streamLabel: String
     private let lifecycleMutex = Mutex()
     private var lifecycleState = SocketState.Open
     private var closeActive = false
@@ -306,19 +316,18 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
     private var readShutdownInFlight: Int64 = 0
     private var writeShutdownInFlight: Int64 = 0
 
-    internal init(delegate: stdnet.SocketTransport,
-        nonBlocking!: Bool = false, closeOnExec!: Bool = false) {
+    internal init(
+        delegate: stdnet.SocketTransport,
+        nonBlocking!: Bool = false,
+        closeOnExec!: Bool = false,
+        streamLabel!: String = "TCP"
+    ) {
         let info = delegate.info
         this.delegate = delegate
         this.connectionInfo = info
-        this.localEndpointValue = match (info.localEndpoint) {
-            case Some(value) => Some(NetworkEndpoint.Internet(value))
-            case None => None<NetworkEndpoint>
-        }
-        this.remoteEndpointValue = match (info.remoteEndpoint) {
-            case Some(value) => Some(NetworkEndpoint.Internet(value))
-            case None => None<NetworkEndpoint>
-        }
+        this.localEndpointValue = stdnet.socketLocalNetworkEndpoint(delegate)
+        this.remoteEndpointValue = stdnet.socketRemoteNetworkEndpoint(delegate)
+        this.streamLabel = streamLabel
         this.capabilityValue = SocketCapabilities(
             nonBlocking: nonBlocking,
             closeOnExec: closeOnExec,
@@ -591,7 +600,7 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
             throw directionClosedError(
                 api.NetworkErrorCategory.Read,
                 api.NetworkPhase.TcpRead,
-                "TCP stream read direction is closed"
+                "${streamLabel} stream read direction is closed"
             )
         }
     }
@@ -607,7 +616,7 @@ public class TcpStream <: StreamSocket & api.DuplexTransport {
             throw directionClosedError(
                 api.NetworkErrorCategory.Write,
                 api.NetworkPhase.TcpWrite,
-                "TCP stream write direction is closed"
+                "${streamLabel} stream write direction is closed"
             )
         }
     }

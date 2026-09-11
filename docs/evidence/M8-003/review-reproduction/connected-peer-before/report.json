@@ -1,0 +1,55 @@
+{
+  "binary_digest": {
+    "domain": "artifact-bytes-v1",
+    "sha256": "8d8e48c3511b3d3b2a9bd77c16d794b918a2c8651a37fa4a3170b627e10f1978"
+  },
+  "commands": [
+    {
+      "argv": [
+        "cjc",
+        "-v"
+      ],
+      "exit_code": 0,
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "path": "docs/evidence/M8-003/review-reproduction/connected-peer-before/toolchain.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+        },
+        "path": "docs/evidence/M8-003/review-reproduction/connected-peer-before/toolchain.stdout.log"
+      }
+    },
+    {
+      "argv": [
+        "cjpm",
+        "build"
+      ],
+      "exit_code": 0,
+      "stderr": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "78063151ed22fcc4e3a1cba1e750fc2c7ee542d37d5e1044f2df093bfcde0789"
+        },
+        "path": "docs/evidence/M8-003/review-reproduction/connected-peer-before/consumer-build.stderr.log"
+      },
+      "stdout": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "caa08521da2dafb0047aaac6a5919e00072e873ce9f52f4262e2212794d78e5b"
+        },
+        "path": "docs/evidence/M8-003/review-reproduction/connected-peer-before/consumer-build.stdout.log"
+      }
+    }
+  ],
+  "error": "RuntimeError: connected send followed the replacement pathname instead of its selected peer",
+  "profiles": [],
+  "schema_version": 1,
+  "source_task": "M8-003",
+  "status": "FAIL"
+}

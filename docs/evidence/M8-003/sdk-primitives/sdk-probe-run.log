@@ -1,0 +1,9 @@
+stream_address_size=11 bytes=[1, 0, 0, 119, 115, 51, 45, 115, 255, 0, 49]
+An exception has occurred:
+IllegalArgumentException: Invalid unicode scalar value.
+	 at std.net::UnixSocketAddress::toString()(std/net/unix_socket_address.cj:137)
+	 at std.net::SockAddr::init(std.net::SocketAddress)(std/net/socket_ffi_sockaddr.cj:92)
+	 at std.net::SocketCommon<...>::bindImpl(std.net::DopraOtherSocketImpl, std.core::Option<...>, Bool, Bool)(std/net/socket_impl_common.cj:443)
+	 at std.net::SocketCommon<...>::bind::lambda.0()(std/net/socket_impl_common.cj:420)
+	 at std.net::UnixServerSocket::bind()(std/net/unix.cj:745)
+	 at default::main()(/tmp/wirestack-m8-003-publication-la0my360/unix_sdk_probe.cj:14)

@@ -55,6 +55,7 @@ CJDOC_BIN=/path/to/cjdoc-0.7.2 scripts/check-docs --html --json
 不向 consumer 暴露 `std.net` descriptor 或异常。M8-001 定义共享生命周期与
 capability 契约、`TcpStream` 和 datagram 接口。M8-002 在 Linux x86_64 glibc 上
 实现了基于 `std.net` 的公共 `TcpListener` 与 `UdpSocket`。
+M8-003 增加 `UnixListener`、`UnixStream` 与 capability-scoped `UnixDatagramSocket`。
 
 `TcpListener.bind(endpoint, backlog:, context:)` 只接受已解析的
 `SocketEndpoint`，不执行 DNS。`backlog` 默认为 128，有效范围是 1 至 65,535。
@@ -84,8 +85,9 @@ socket。TCP `accept` 的活动取消不会采用这条 UDP 所有权规则。
 
 `SocketCapabilities` 只提供 advisory 信息，具体操作结果才是权威。当前 Linux
 listener、接受的 TCP stream 和 UDP socket 都报告 `nonBlocking` 与 `closeOnExec`。
-UDP 还报告 `broadcast` 与 `multicast`；`halfClose`、`raw`、`ancillaryData` 和
-`zeroLengthDatagramSend` 为 false。`SocketOption` 仍只是类型化值，公共 API 尚无
+Internet UDP 还报告 `broadcast`、`multicast` 与 `connectedDatagramSend`；
+`halfClose`、`raw`、`ancillaryData` 和 `zeroLengthDatagramSend` 为 false。
+`SocketOption` 仍只是类型化值，公共 API 尚无
 option application 操作。
 
 完整 native consumer 位于
@@ -95,13 +97,26 @@ M8-002 资格确认使用新的
 [`wirestack-linux-pre1-m8-002.json`](baselines/wirestack-linux-pre1-m8-002.json)
 作为公开 API baseline；完整门禁与原生结果见 [M8-002 验收记录](../evidence/M8-002/README.md)。
 
-`SocketCapabilities` 新增实例字段 `zeroLengthDatagramSend`，构造函数也增加对应的
-命名参数。旧调用可继续使用默认值，但对象布局和构造函数 ABI 已改变，消费者必须
-重新编译。新 baseline 匹配不代表与旧二进制兼容，见
-[M8-002 兼容性分类](../evidence/M8-002/api-compatibility.json)。
+Unix stream 的 connect、accept、partial/exact I/O、EOF、取消和关闭使用同一组
+Wirestack-owned 类型。`UnixDatagramSocket` 支持显式 `sendTo`、owned receive 和
+connected peer 接收过滤。SDK 的 Unix connected send 会重新解析地址，可能误投
+替代 socket，因此 `connectedDatagramSend=false`，`send` 显式返回 `Unsupported`。
+SDK 的空发送限制也适用于 Unix datagram。
 
-Unix adapter、完整 DNS、HTTP parity、TLS context versioning 和最终发布证据属于
-仍待执行的 M8-003 至 M8-007。
+Pathname 支持不包含自动 unlink。Outgoing abstract endpoint 只接受恰好 107 字节且
+为有效 UTF-8 的名称；较短或非 UTF-8 名称被拒绝，不改变共享 `UnixEndpoint` 的
+任意字节模型。Incoming named sender 保留实际字节；未绑定 datagram sender 的地址
+转换受 SDK 限制，不能恢复为伪造的 unnamed 报文。Raw native I/O 仍为 BLOCKED。
+具体边界见 [Unix 使用指南](../guides/network-foundation-linux.md#unix-domain-socket)、
+[native consumer](../../examples/linux/m8_003/main.cj) 和
+[M8-003 验收记录](../evidence/M8-003/README.md)。
+
+M8-002 与 M8-003 分别增加 `SocketCapabilities.zeroLengthDatagramSend` 和
+`connectedDatagramSend` 实例字段及对应命名参数。旧调用保留默认值，但 struct 布局
+和构造函数 ABI 已改变，消费者必须重新编译。新 baseline 匹配不代表旧二进制兼容，
+见 [M8-003 兼容性分类](../evidence/M8-003/api-compatibility.json)。
+
+完整 DNS、HTTP parity、TLS context versioning 和最终发布证据仍属于 M8-004 至 M8-007。
 
 ## `wirestack.tls`
 
@@ -114,7 +129,8 @@ reference identity、本地身份、外部签名和 transport 所有权都是独
 
 ## 稳定性和所有权
 
-[M8-002 inventory](baselines/wirestack-linux-pre1-m8-002.json) 记录当前公开契约。
+[M8-003 inventory](baselines/wirestack-linux-pre1-m8-003.json) 记录当前公开契约。
+[M8-002 snapshot](baselines/wirestack-linux-pre1-m8-002.json)、
 [M7-032 snapshot](baselines/wirestack-linux-pre1-m7-032.json) 和
 [M7-026 snapshot](baselines/wirestack-linux-v0.json) 保留为历史证据，不是当前兼容性目标。
 1.0 之前，Wirestack 不承诺实验性 API 的 source、API、ABI 或语义兼容。
