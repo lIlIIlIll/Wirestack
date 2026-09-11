@@ -93,7 +93,7 @@ Schema resource URI 只通过注入的 `UriResolver` 在构造阶段解析。成
 
 Cangjie 声明快照（`release/public-api-snapshot.txt` 与 delta TOML）只证明源码级 API 表面
 未漂移，**不等于二进制兼容证明**。源码兼容不能覆盖编译产物层面的变化：cjc 对同一声明
-可能生成不同符号名、方法表布局或内联行为；跨 nightly 或跨 patch 的预编译 consumer
+可能生成不同符号名、方法表布局或内联行为；跨编译器版本或 patch 的预编译 consumer
 可能在链接期或运行期失败，即使声明 diff 为空。
 
 因此，0.1 系列的二进制兼容性以实测为准。发布前必须使用已冻结的旧应用或测试程序产物

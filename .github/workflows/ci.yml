@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       cangjie_version:
-        description: Exact Cangjie nightly version for release qualification
+        description: Exact Cangjie STS version for release qualification
         required: false
         type: string
 
@@ -86,54 +86,48 @@ jobs:
       - name: Verify frozen Stream evidence and generated documentation
         run: scripts/ci_job.sh stream-docs
 
-  nightly:
-    name: Cangjie nightly (7-day window)
+  sts:
+    name: Cangjie STS (pinned)
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.version.outputs.value }}
       resolution: ${{ steps.version.outputs.resolution }}
-      window: ${{ steps.window.outputs.value }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           clean: true
           submodules: recursive
-      - name: Test nightly and candidate wiring
+      - name: Test STS and candidate wiring
         run: |
-          python3 scripts/test_latest_cangjie_nightly.py
-      - name: Select seven-day cache window
-        id: window
-        run: echo "value=$(( $(date -u +%s) / 604800 ))" >> "$GITHUB_OUTPUT"
-      - name: Export shared nightly version
+          python3 scripts/test_validate_cangjie_sts.py
+      - name: Export shared STS version
         id: version
         env:
           REQUESTED_VERSION: ${{ inputs.cangjie_version }}
         run: |
           if [[ -n "$REQUESTED_VERSION" ]]; then
-            value=$(python3 scripts/latest_cangjie_nightly.py \
+            value=$(python3 scripts/validate_cangjie_sts.py \
               --validate-version "$REQUESTED_VERSION")
             resolution=workflow-dispatch-exact
           else
-            # Keep the known-good pin independent of latest-release availability.
-            value=1.3.0-alpha.20260829010011
-            python3 scripts/latest_cangjie_nightly.py \
+            value=1.1.0
+            python3 scripts/validate_cangjie_sts.py \
               --validate-version "$value" >/dev/null
-            resolution=pinned-known-good
+            resolution=pinned-sts
           fi
           echo "value=$value" >> "$GITHUB_OUTPUT"
           echo "resolution=$resolution" >> "$GITHUB_OUTPUT"
-          echo "resolved_cangjie_version=$value resolution=$resolution window=${{ steps.window.outputs.value }}"
+          echo "resolved_cangjie_version=$value resolution=$resolution"
           {
-            echo '### Cangjie nightly selection'
+            echo '### Cangjie STS selection'
             echo
             echo "- Version: \`$value\`"
             echo "- Resolution: \`$resolution\`"
-            echo "- Seven-day window: \`${{ steps.window.outputs.value }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
   tests:
     name: Tests (${{ matrix.gate }})
-    needs: nightly
+    needs: sts
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     strategy:
@@ -165,9 +159,9 @@ jobs:
       - name: Setup Cangjie
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
-          channel: nightly
-          version: ${{ needs.nightly.outputs.version }}
-          archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
+          channel: sts
+          version: ${{ needs.sts.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie-sts.tar.gz
       - name: Install native prerequisites
         if: contains(fromJSON('["standards-conformance","schema-formats-conformance","algorithms-consumer","registry-rehearsal","custom-native","yyjson-native","native-clang","native-gcc","sanitizer","fuzz-short","yyjson-colink"]'), matrix.gate)
         run: |
@@ -195,17 +189,17 @@ jobs:
           tar -xzf /tmp/yyjson-0.11.1.tar.gz -C /tmp/yjson-yyjson-second
       - name: Record toolchain
         run: |
-          echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"
+          echo "resolved_cangjie_version=${{ needs.sts.outputs.version }} resolution=${{ needs.sts.outputs.resolution }}"
           echo "runner_image=${ImageOS:-unknown} runner_image_version=${ImageVersion:-unknown}"
           cjc -v
           cjpm --version
-          sha256sum "$RUNNER_TEMP/cangjie-nightly.tar.gz"
+          sha256sum "$RUNNER_TEMP/cangjie-sts.tar.gz"
       - name: Run gate
         env:
-          YJSON_RESOLVED_NIGHTLY: ${{ needs.nightly.outputs.version }}
+          YJSON_RESOLVED_CANGJIE: ${{ needs.sts.outputs.version }}
           YJSON_SECOND_YYJSON_ROOT: ${{ matrix.gate == 'yyjson-colink' && '/tmp/yjson-yyjson-second/yyjson-0.11.1' || '' }}
           YJSON_STANDARDS_OFFLINE: ${{ contains(fromJSON('["standards-conformance","schema-formats-conformance"]'), matrix.gate) && '1' || '' }}
-          # The pinned nightly's LLVM llc crashes at -O2 in external-consumer,
+          # The pinned STS toolchain's LLVM llc crashes at -O2 in external-consumer,
           # examples, and conformance builds on ubuntu-24.04.
           YJSON_CI_DEPENDENCY_OVERRIDE: ${{ contains(fromJSON('["algorithms-consumer","examples","macro-consumer","registry-rehearsal","custom-native","yyjson-native","schema-formats-conformance","standards-conformance"]'), matrix.gate) && '-O1' || '' }}
         run: |
@@ -215,7 +209,7 @@ jobs:
 
   pure-platforms:
     name: Pure (${{ matrix.os }})
-    needs: nightly
+    needs: sts
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     strategy:
@@ -223,10 +217,10 @@ jobs:
       matrix:
         include:
           - os: windows-2022
-            archive: cangjie-nightly.zip
+            archive: cangjie-sts.zip
             checksum: sha256sum
           - os: macos-14
-            archive: cangjie-nightly.tar.gz
+            archive: cangjie-sts.tar.gz
             checksum: shasum -a 256
     defaults:
       run:
@@ -237,66 +231,28 @@ jobs:
           clean: true
           submodules: recursive
       - name: Setup Cangjie
-        if: matrix.os != 'windows-2022'
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
-          channel: nightly
-          version: ${{ needs.nightly.outputs.version }}
+          channel: sts
+          version: ${{ needs.sts.outputs.version }}
           archive-path: ${{ runner.temp }}/${{ matrix.archive }}
-      # Upstream gitcode ships a stale <archive>.sha256 for Windows nightlies
-      # (server checksum does not match the re-uploaded artifact), which makes
-      # setup-cangjie v2.3.0 abort with a SHA256 mismatch. Download and install
-      # manually on Windows, recording (not enforcing) the checksum instead.
-      - name: Download Windows nightly SDK
-        if: matrix.os == 'windows-2022'
-        shell: bash
-        run: |
-          version='${{ needs.nightly.outputs.version }}'
-          url="https://gitcode.com/Cangjie/nightly_build/releases/download/${version}/cangjie-sdk-windows-x64-${version}.zip"
-          curl -fL --retry 5 --retry-delay 10 --connect-timeout 30 \
-            -o "$RUNNER_TEMP/cangjie-nightly.zip" "$url"
-      - name: Install Windows nightly SDK
-        if: matrix.os == 'windows-2022'
-        shell: pwsh
-        run: |
-          $sdkRoot = Join-Path $env:RUNNER_TEMP 'cangjie-sdk'
-          New-Item -ItemType Directory -Force -Path $sdkRoot | Out-Null
-          tar -xf (Join-Path $env:RUNNER_TEMP 'cangjie-nightly.zip') -C $sdkRoot
-          $cjBase = Join-Path $sdkRoot 'cangjie'
-          if (-not (Test-Path (Join-Path $cjBase 'envsetup.ps1'))) { throw "envsetup.ps1 not found under $cjBase" }
-          Set-Location $cjBase
-          $before = @{}
-          Get-ChildItem Env: | ForEach-Object { $before[$_.Name] = $_.Value }
-          . (Join-Path $cjBase 'envsetup.ps1')
-          $skip = @('PWD','OLDPWD','SHLVL','_','PROMPT','PATHEXT','PSModulePath','COMSPEC','__COMPAT_LAYER','PSExecutionPolicyPreference','POWERSHELL_UPDATECHECK')
-          foreach ($kv in (Get-ChildItem Env:)) {
-            if ($kv.Name -in @('PATH','Path') -or $kv.Name -in $skip) { continue }
-            $old = if ($before.ContainsKey($kv.Name)) { $before[$kv.Name] } else { $null }
-            if ($old -ne $kv.Value) { Add-Content -Path $env:GITHUB_ENV -Value "$($kv.Name)=$($kv.Value)" }
-          }
-          $beforePath = @()
-          foreach ($k in @('PATH','Path')) { if ($before.ContainsKey($k)) { $beforePath += ($before[$k] -split ';') } }
-          $env:Path -split ';' | Where-Object { $_ -and ($beforePath -notcontains $_) } | ForEach-Object {
-            Add-Content -Path $env:GITHUB_PATH -Value $_
-          }
-          cjc -v
       - name: Record toolchain
         run: |
-          echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"
+          echo "resolved_cangjie_version=${{ needs.sts.outputs.version }} resolution=${{ needs.sts.outputs.resolution }}"
           echo "runner_image=${ImageOS:-unknown} runner_image_version=${ImageVersion:-unknown}"
           cjc -v
           cjpm --version
           ${{ matrix.checksum }} "$RUNNER_TEMP/${{ matrix.archive }}"
       - name: Run Pure package gates
         env:
-          # The pinned nightly's LLVM llc also crashes at -O2 in macOS Pure;
-          # Windows already uses -O1 for the same pinned-SDK issue.
+          # The pinned STS toolchain's LLVM llc also crashes at -O2 in macOS Pure;
+          # Windows uses -O1 for the same pinned-SDK issue.
           YJSON_CI_DEPENDENCY_OVERRIDE: ${{ contains(fromJSON('["windows-2022","macos-14"]'), matrix.os) && '-O1' || '' }}
         run: scripts/ci_job.sh pure-platform
 
   api-docs:
     name: API Documentation
-    needs: nightly
+    needs: sts
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -307,19 +263,19 @@ jobs:
       - name: Setup Cangjie
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
-          channel: nightly
-          version: ${{ needs.nightly.outputs.version }}
-          archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
+          channel: sts
+          version: ${{ needs.sts.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie-sts.tar.gz
       - name: Record toolchain
         run: |
-          echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"
+          echo "resolved_cangjie_version=${{ needs.sts.outputs.version }} resolution=${{ needs.sts.outputs.resolution }}"
           echo "runner_image=${ImageOS:-unknown} runner_image_version=${ImageVersion:-unknown}"
           cjc -v
           cjpm --version
-          sha256sum "$RUNNER_TEMP/cangjie-nightly.tar.gz"
+          sha256sum "$RUNNER_TEMP/cangjie-sts.tar.gz"
       - name: Generate source-qualified cjdoc site
         env:
-          YJSON_RESOLVED_NIGHTLY: ${{ needs.nightly.outputs.version }}
+          YJSON_RESOLVED_CANGJIE: ${{ needs.sts.outputs.version }}
           YJSON_API_DOCS_OUTPUT: target/api-docs
         run: |
           ulimit -s 131072
@@ -367,7 +323,7 @@ jobs:
 
   coverage:
     name: Core Coverage
-    needs: nightly
+    needs: sts
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     permissions:
@@ -382,16 +338,16 @@ jobs:
       - name: Setup Cangjie
         uses: Zxilly/setup-cangjie@f959b3d1078c92173ea67d398f293727639000f7
         with:
-          channel: nightly
-          version: ${{ needs.nightly.outputs.version }}
-          archive-path: ${{ runner.temp }}/cangjie-nightly.tar.gz
+          channel: sts
+          version: ${{ needs.sts.outputs.version }}
+          archive-path: ${{ runner.temp }}/cangjie-sts.tar.gz
       - name: Record toolchain
         run: |
-          echo "resolved_cangjie_version=${{ needs.nightly.outputs.version }} resolution=${{ needs.nightly.outputs.resolution }}"
+          echo "resolved_cangjie_version=${{ needs.sts.outputs.version }} resolution=${{ needs.sts.outputs.resolution }}"
           echo "runner_image=${ImageOS:-unknown} runner_image_version=${ImageVersion:-unknown}"
           cjc -v
           cjpm --version
-          sha256sum "$RUNNER_TEMP/cangjie-nightly.tar.gz"
+          sha256sum "$RUNNER_TEMP/cangjie-sts.tar.gz"
       - name: Generate cjcov and LCOV reports
         run: scripts/coverage.sh
       - name: Detect established coverage baseline
@@ -480,7 +436,7 @@ jobs:
       - generated-change-risk
       - perf-evidence-drift
       - stream-docs
-      - nightly
+      - sts
       - tests
       - pure-platforms
       - api-docs
@@ -499,7 +455,7 @@ jobs:
 
           expected = {
               "ci-guardrails", "generated-change-risk", "perf-evidence-drift",
-              "stream-docs", "nightly", "tests", "pure-platforms", "api-docs", "coverage",
+              "stream-docs", "sts", "tests", "pure-platforms", "api-docs", "coverage",
           }
           results = json.loads(os.environ["NEEDS_JSON"])
           if not isinstance(results, dict) or set(results) != expected:

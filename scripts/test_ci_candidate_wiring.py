@@ -221,9 +221,9 @@ class CiGateRegressionTests(unittest.TestCase):
     def test_workflow_retains_strict_build_and_deployment_dependencies(self) -> None:
         workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
         self.assertNotIn("run: scripts/harden_llc.sh", workflow)
-        self.assertIn("resolution=pinned-known-good", workflow)
+        self.assertIn("resolution=pinned-sts", workflow)
         self.assertNotIn("resolution=seven-day-cache-window", workflow)
-        self.assertNotIn("Resolve latest complete nightly", workflow)
+        self.assertNotIn("Resolve latest complete STS", workflow)
         self.assertIn("needs: [api-docs, ci-required]", workflow)
         self.assertIn("group: pages-main", workflow)
         self.assertIn("if: steps.current.outputs.deploy == 'true'", workflow)

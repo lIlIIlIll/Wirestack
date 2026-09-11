@@ -11,10 +11,10 @@
 `release/public-cangjie-delta-bfd29.toml` 必须逐项覆盖快照的全部删除和新增声明。
 每条记录只能属于一个说明了理由的评审组；存在重复、漏项、`unclassified` 或尚未完成评审的组时，不得把发布图改为 `release-ready`。
 
-托管 CI 每七天选择一次最新的带日期的完整 nightly SDK。一个候选的所有托管 CI 任务必须使用同一
-精确 SDK 版本，并在证据中记录解析出的版本和归档校验和。手工验证可以显式
-指定一个完整 nightly SDK。API 参考文档按 `release/cjdoc-tool.toml` 使用 `cjdoc 0.7.2`，提交为
-`fe0b5a5294c6d98dc1e6fb7d6d41cb5e9b04d4c0`。
+托管 CI 固定使用 Cangjie STS `1.1.0`。一个候选的所有托管 CI 任务必须使用同一
+精确 SDK 版本，并在证据中记录解析出的版本和归档校验和。手工验证可以显式指定
+一个 STS SDK。API 参考文档按 `release/cjdoc-tool.toml` 使用 `cjdoc 0.7.2`，
+提交为 `fe0b5a5294c6d98dc1e6fb7d6d41cb5e9b04d4c0`。
 
 归档、二进制文件和 Action 版本必须通过仓库中的校验和/SHA 配置验证。
 

@@ -79,10 +79,9 @@ def downgrade_build_optimization(source_root: pathlib.Path) -> None:
     """Force the cjdoc tool build to -O1 via the root cjpm manifest.
 
     cjpm applies the root manifest's override-compile-option to every
-    package in the workspace. The pinned nightly llc (bundled libLLVM-15
-    linked against the runner's system libstdc++) deterministically
-    SIGSEGVs while lowering the markdown dependency at -O2 on
-    ubuntu-24.04 runners, so the whole tool build is downgraded to -O1.
+    package in the workspace. The pinned toolchain's LLVM llc
+    deterministically SIGSEGVs while lowering the markdown dependency at
+    -O2 on ubuntu-24.04 runners, so the whole tool build is downgraded to -O1.
     The source archive identity (SHA-256) and the version check are
     unaffected.
     """

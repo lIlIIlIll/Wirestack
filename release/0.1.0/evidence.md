@@ -16,7 +16,7 @@ SDK、runner、命令和校验和；不把本地结果写成 hosted 结果，也
 | Evidence updated | `2026-09-10` |
 | Local qualification host | Linux Arch `7.2.3-Arch1-3`, x86_64；Intel Core i7-8700 |
 | Local qualification SDK | Cangjie `1.1.0-alpha.20260829040003 (cjnative)`；cjpm `1.1.3` |
-| Hosted PR SDK | `1.3.0-alpha.20260829010011`；resolution=`pinned-known-good` |
+| Hosted PR SDK | Cangjie STS `1.1.0`；resolution=`pinned-sts` |
 
 本地编译器 `cjc` SHA-256 为
 `bc0f32df9c610dcbb05f437552ff57ec6c6e075a54721f46cc9c882a62d2d836`，

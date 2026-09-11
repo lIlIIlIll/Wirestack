@@ -38,10 +38,10 @@ python3 scripts/test_generate_api_docs.py
 
 ## 工具链选择
 
-托管 CI 每七天解析一次最新的带日期的完整 nightly SDK，并缓存这个精确版本。所有需要 Cangjie 的
-任务使用同一解析结果。`workflow_dispatch` 可以显式指定一个完整 nightly，以便重跑一个候选。
-cjdoc 从固定源码版本构建，但编译时使用同一个每周固定的 SDK；验证证据
-记录实际 `cjc` 和 `cjpm` 输出，并拒绝与统一的每周版本不一致的编译器。
+托管 CI 固定使用 Cangjie STS `1.1.0`，所有需要 Cangjie 的任务使用同一
+解析结果。`workflow_dispatch` 可以显式指定一个 STS 版本，以便重跑一个候选。
+cjdoc 从固定源码版本构建，但编译时使用同一个 STS SDK；验证证据
+记录实际 `cjc` 和 `cjpm` 输出，并拒绝与统一版本不一致的编译器。
 
 checkout、setup、Codecov 和 Pages Action 使用完整 commit SHA。发布证据还要记录 SDK
 归档校验和、运行器镜像、工作流运行 ID 和产物校验和。

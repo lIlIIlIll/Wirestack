@@ -19,7 +19,7 @@ from check_cjdoc_qualification import CjdocQualificationError, validate_qualific
 
 class CjdocQualificationTest(unittest.TestCase):
     CJC_VERSION = (
-        "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)\n"
+        "Cangjie Compiler: 1.1.0 (cjnative)\n"
         "Target: x86_64-unknown-linux-gnu"
     )
     CJPM_VERSION = "Cangjie Project Manager: 1.1.3"
@@ -53,7 +53,7 @@ class CjdocQualificationTest(unittest.TestCase):
             binary_path = "target/release/bin/main"
             build_command = ["cjpm", "build"]
 
-            cjc_channel = "nightly"
+            cjc_channel = "sts"
 
             license_spdx = "MIT"
             license_url = "https://example.invalid/cjdoc/blob/{revision}/LICENSE"
@@ -115,9 +115,9 @@ class CjdocQualificationTest(unittest.TestCase):
                 validate_qualification(config, root=root, binary_override=binary)
 
     @mock.patch("check_cjdoc_qualification.subprocess.run")
-    def test_accepts_a_different_complete_nightly(self, run: mock.Mock) -> None:
+    def test_accepts_a_different_complete_sts(self, run: mock.Mock) -> None:
         self.CJC_VERSION = (
-            "Cangjie Compiler: 1.3.0-alpha.20260831010012 (cjnative)\n"
+            "Cangjie Compiler: 1.1.1 (cjnative)\n"
             "Target: x86_64-unknown-linux-gnu"
         )
         run.side_effect = self.qualified_commands
@@ -127,27 +127,27 @@ class CjdocQualificationTest(unittest.TestCase):
             validate_qualification(config, root=root, binary_override=binary)
 
     @mock.patch("check_cjdoc_qualification.subprocess.run")
-    def test_rejects_non_nightly_compiler(self, run: mock.Mock) -> None:
-        self.CJC_VERSION = "Cangjie Compiler: 1.3.0 (cjnative)"
+    def test_rejects_non_sts_compiler(self, run: mock.Mock) -> None:
+        self.CJC_VERSION = "Cangjie Compiler: 1.1.0-alpha.20260829040003 (cjnative)"
         run.side_effect = self.qualified_commands
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
             config, binary = self.qualified_fixture(root)
-            with self.assertRaisesRegex(CjdocQualificationError, "dated nightly"):
+            with self.assertRaisesRegex(CjdocQualificationError, "complete STS version"):
                 validate_qualification(config, root=root, binary_override=binary)
 
     @mock.patch("check_cjdoc_qualification.subprocess.run")
-    def test_warns_on_shared_weekly_version_mismatch(self, run: mock.Mock) -> None:
+    def test_warns_on_shared_sts_version_mismatch(self, run: mock.Mock) -> None:
         run.side_effect = self.qualified_commands
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
             config, binary = self.qualified_fixture(root)
             with mock.patch.dict(
-                "os.environ", {"YJSON_RESOLVED_NIGHTLY": "1.3.0-alpha.20260831010012"}
+                "os.environ", {"YJSON_RESOLVED_CANGJIE": "1.1.1"}
             ):
-                # Version mismatch between the resolved nightly selection and
+                # Version mismatch between the resolved STS selection and
                 # the installed cjc is a CI infrastructure signal (cache
-                # timing, exclusion fallback), not a qualification failure.
+                # timing or setup drift), not a qualification failure.
                 # It must warn without blocking the gate.
                 with contextlib.redirect_stderr(io.StringIO()) as stderr:
                     validate_qualification(config, root=root, binary_override=binary)

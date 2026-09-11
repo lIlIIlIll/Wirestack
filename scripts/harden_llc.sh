@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Wrap the SDK llc so SIGSEGV crashes while lowering Cangjie bitcode do
 # not fail the gate. Some GitHub runner CPU models crash deterministically
-# inside the nightly's bundled libLLVM-15 on previously-successful IR
+# inside the pinned SDK's bundled libLLVM-15 on previously-successful IR
 # (exit 139 / 0xC0000005). The wrapper escalates through bounded retries,
 # glibc AVX-512 hwcaps disabling, -O1 lowering, and finally assembly
 # emission assembled with GNU as, without touching product code. The real

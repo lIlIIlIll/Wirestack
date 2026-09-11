@@ -27,9 +27,9 @@ CI 不再安装 `harden_llc.sh` 包装器，Pure 检查不重写优化等级、�
 `ci-retry.yml` 自动重跑 watchdog 被移除；手工诊断需要保留第一次失败证据。
 覆盖率显式 `-O0` 插桩策略保持不变。
 
-默认 SDK 直接固定为 `1.3.0-alpha.20260829010011`，不先请求 latest，resolution 为
-`pinned-known-good`。手工指定版本仍优先。`Cangjie nightly (7-day window)` 检查名暂时保留，
-仅用于兼容现有 required checks，不代表本次仍按周自动升级工具链。
+默认 SDK 直接固定为 STS `1.1.0`，不先请求 latest，resolution 为
+`pinned-sts`。手工指定版本仍优先。`Cangjie STS (pinned)` 检查名表示
+所有 GitHub 托管任务共享同一个 STS 版本。
 
 ## 验证命令
 

@@ -18,8 +18,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "release" / "cjdoc-tool.toml"
 SHA256 = re.compile(r"[0-9a-f]{64}")
 REVISION = re.compile(r"[0-9a-f]{40}")
-CJC_NIGHTLY = re.compile(
-    r"Cangjie Compiler: ([0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]{14}) \(cjnative\)"
+CJC_STS = re.compile(
+    r"Cangjie Compiler: ([0-9]+\.[0-9]+\.[0-9]+) \(cjnative\)"
 )
 CJPM_VERSION = re.compile(
     r"Cangjie Project Manager: [0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?"
@@ -54,23 +54,22 @@ def _safe_relative(config: dict, name: str) -> pathlib.PurePosixPath:
 
 
 def validate_toolchain_policy(config: dict, cjc_output: str, cjpm_output: str) -> str:
-    """Validate one exact installed toolchain against the weekly-nightly policy."""
-    if config.get("cjc_channel") != "nightly":
-        raise CjdocQualificationError("qualified cjdoc must use the nightly Cangjie channel")
+    """Validate one exact installed toolchain against the STS policy."""
+    if config.get("cjc_channel") != "sts":
+        raise CjdocQualificationError("qualified cjdoc must use the STS Cangjie channel")
     cjc_lines = [line.strip() for line in cjc_output.splitlines() if line.strip()]
     cjpm_lines = [line.strip() for line in cjpm_output.splitlines() if line.strip()]
-    cjc_match = CJC_NIGHTLY.fullmatch(cjc_lines[0] if cjc_lines else "")
+    cjc_match = CJC_STS.fullmatch(cjc_lines[0] if cjc_lines else "")
     if cjc_match is None:
-        raise CjdocQualificationError("current cjc is not a complete dated nightly")
+        raise CjdocQualificationError("current cjc is not a complete STS version")
     if len(cjpm_lines) != 1 or CJPM_VERSION.fullmatch(cjpm_lines[0]) is None:
         raise CjdocQualificationError("current cjpm version output is invalid")
-    resolved_version = os.environ.get("YJSON_RESOLVED_NIGHTLY", "").strip()
+    resolved_version = os.environ.get("YJSON_RESOLVED_CANGJIE", "").strip()
     if resolved_version and cjc_match.group(1) != resolved_version:
-        import sys
         print(
             f"WARNING: cjc version {cjc_match.group(1)} does not match "
-            f"resolved nightly {resolved_version}; this may indicate a "
-            f"nightly exclusion or cache timing issue.",
+            f"resolved Cangjie version {resolved_version}; this may indicate "
+            "an SDK cache or setup timing issue.",
             file=sys.stderr,
         )
     return cjc_match.group(1)
@@ -117,8 +116,8 @@ def validate_qualification(
     if SHA256.fullmatch(expected_archive_sha) is None:
         raise CjdocQualificationError(
             "source_archive_sha256 must be a lowercase SHA-256 digest")
-    if config.get("cjc_channel") != "nightly":
-        raise CjdocQualificationError("qualified cjdoc must use the nightly Cangjie channel")
+    if config.get("cjc_channel") != "sts":
+        raise CjdocQualificationError("qualified cjdoc must use the STS Cangjie channel")
 
     if binary_override is None:
         environment_binary = os.environ.get("YJSON_CJDOC_BINARY", "").strip()
