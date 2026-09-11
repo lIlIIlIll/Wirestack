@@ -1,0 +1,22 @@
+873700 socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
+873700 bind(3, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+873700 socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
+873700 connect(5, {sa_family=AF_INET, sin_port=htons(36681), sin_addr=inet_addr("127.0.0.1")}, 16) = -1 EINPROGRESS (Operation now in progress)
+873700 accept4(3, {sa_family=AF_INET, sin_port=htons(38178), sin_addr=inet_addr("127.0.0.1")}, [120 => 16], SOCK_CLOEXEC|SOCK_NONBLOCK) = 6
+873700 sendto(5, "B", 1, MSG_NOSIGNAL, NULL, 0) = 1
+873700 recvfrom(6, "B", 1, 0, NULL, NULL) = 1
+873700 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 3
+873700 bind(3, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+873700 socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC|SOCK_NONBLOCK, IPPROTO_IP) = 5
+873700 bind(5, {sa_family=AF_INET, sin_port=htons(0), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+873700 sendto(3, "\1\2\3\4\5", 5, 0, {sa_family=AF_INET, sin_port=htons(47206), sin_addr=inet_addr("127.0.0.1")}, 16) = 5
+873700 recvfrom(5, "\1\2\3", 3, 0, {sa_family=AF_INET, sin_port=htons(50142), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 3
+873700 connect(3, {sa_family=AF_INET, sin_port=htons(47206), sin_addr=inet_addr("127.0.0.1")}, 16) = 0
+873700 sendto(3, "\t\n", 2, 0, {sa_family=AF_INET, sin_port=htons(47206), sin_addr=inet_addr("127.0.0.1")}, 16) = 2
+873700 recvfrom(5, "\t\n", 3, 0, {sa_family=AF_INET, sin_port=htons(50142), sin_addr=inet_addr("127.0.0.1")}, [120 => 16]) = 2
+873704 +++ exited with 0 +++
+873703 +++ exited with 0 +++
+873702 +++ exited with 0 +++
+873701 +++ exited with 0 +++
+873705 +++ exited with 1 +++
+873700 +++ exited with 1 +++

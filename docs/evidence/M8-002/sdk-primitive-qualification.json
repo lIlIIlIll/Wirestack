@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "source_task": "M8-002",
+  "kind": "sdk-primitive-qualification",
+  "status": "PASS",
+  "qualification_result": "QUALIFIED_WITH_EXPLICIT_EMPTY_SEND_LIMITATION",
+  "scope": "Primitive behavior classification, not a claim that native zero-length send works.",
+  "user_approved_scope": "缩减的是当前 backend 的零长度 UDP 发送能力，而不是 UDP 数据报模型本身；空数据报接收仍必须支持。",
+  "pinned": {
+    "compiler": "1.1.3",
+    "probe_exit_code": 1,
+    "empty_array_variants_exit_code": 1,
+    "tcp_loopback": "PASS",
+    "nonempty_udp_truncation_and_connected_send": "PASS",
+    "zero_length_send_supported": false,
+    "zero_length_send_socket_remains_open": true,
+    "independent_zero_length_receive": "PASS"
+  },
+  "daily": {
+    "compiler": "1.1.0-alpha.20260829040003",
+    "probe_exit_code": 1,
+    "tcp_loopback": "PASS",
+    "nonempty_udp_truncation_and_connected_send": "PASS",
+    "zero_length_send_supported": false,
+    "zero_length_send_socket_remains_open": true,
+    "wirestack_facade_matrix": "NOT_RUN_ON_DAILY"
+  },
+  "backend_contract": {
+    "zeroLengthDatagramSend": false,
+    "empty_send_error": "Unsupported",
+    "empty_send_reuses_socket": true,
+    "empty_receive_required": true
+  },
+  "artifacts": [
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/daily-stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/daily-stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "7c567bdcd131406c1985ed1f88aae0b4607151e9ac43c32400a1f75c51906b01"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/daily-syscalls.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "7fa03b200fe61f8d3b276f7ac9313b55d8a9b3caf2a3ec0f2e347bfc3fbd94fc"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/daily-version.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "545ee6479ce7b0ef49a38bcdc1faaa6b993d204d7d9d7fa0a597ce38c752ae55"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/empty-stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/empty-stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a49986be83a2ff1656f484cf7de7fc1185096b8dbbc553c0f8bf503b8f00ca4b"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/empty-syscalls.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "a57f3d74cd8c28646e2f4fda007a6d46628aaea1e5d96e4305feee1a277afcf4"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/empty.cj",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "17e9ecb9a38ed7ea9200572127341664fb02680f85f85ecbb6d3644428d6dc7e"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/pinned-stderr.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/pinned-stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "7c567bdcd131406c1985ed1f88aae0b4607151e9ac43c32400a1f75c51906b01"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/pinned-syscalls.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "9038f4df91015e767e63e1f484c7d6e5c1e198810f3e0936444d7852c801ca4b"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/pinned-version.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "5d2811b1c205979177cb324732c49faef4d81eea75febdfaf3a430930a76c944"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/probe.cj",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "b426c851f82ecc8468b8bbf8c988f34e07805a836b49fa46cd2f904da0dd493b"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/receive-empty-stdout.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "acdd57fe20d319172641ec81a710c85217a5b0022baea43259d46a93fbc30eae"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/receive-empty-syscalls.log",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "04d98f5fd1d117ca71db70fab72d9a64e666b14b8c3196aacbe59f5399765496"
+      }
+    },
+    {
+      "path": "docs/evidence/M8-002/sdk-primitives/receive_empty.cj",
+      "digest": {
+        "domain": "text-utf8-lf-v1",
+        "sha256": "250802274c3216b632c4d1d6dc62894b0c794ec2887aad7f1191b978f01f3208"
+      }
+    }
+  ]
+}

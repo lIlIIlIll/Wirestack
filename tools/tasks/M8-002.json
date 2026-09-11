@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "task_id": "M8-002",
+  "dependencies": ["M8-001"],
+  "allowed_paths": [
+    ".gitignore",
+    "README.md",
+    "docs/api/README.md",
+    "docs/api/baselines/wirestack-linux-pre1-m8-002.json",
+    "docs/api/generated",
+    "docs/evidence/M8-002",
+    "docs/guides/network-foundation-linux.md",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "examples/linux/m8_002",
+    "src/internal/transport_stdnet/package.cj",
+    "src/internal/transport_stdnet/udp_socket.cj",
+    "src/net",
+    "tools/docs/m7_033_docs.py",
+    "tools/m8_002_native_sockets.py",
+    "tools/tasks/M8-002.json"
+  ],
+  "platforms": ["linux-x86_64-glibc"],
+  "acceptance_commands": [
+    {
+      "id": "plan-validation",
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-plan", "docs/evidence/M8-002/test-plan.md", "--json"],
+      "timeout_seconds": 30,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "architecture-guard",
+      "argv": ["python3", "tools/architecture_guard.py", "--format", "json"],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "task-contract-validation",
+      "argv": ["python3", "tools/repository/repository_tooling.py", "--root", ".", "validate-tasks", "--json"],
+      "timeout_seconds": 60,
+      "long_running": false,
+      "gate": "fast"
+    },
+    {
+      "id": "cangjie-check",
+      "argv": ["cjpm", "check"],
+      "timeout_seconds": 120,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "cangjie-build",
+      "argv": ["cjpm", "build"],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "network-contract-tests",
+      "argv": ["cjpm", "test", "src/net", "--no-progress", "--no-color"],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "transport-regression-tests",
+      "argv": ["cjpm", "test", "src/internal/transport_stdnet", "--exclude-tags=Performance", "--parallel", "1", "--no-progress", "--no-color"],
+      "timeout_seconds": 600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "native-socket-consumer",
+      "argv": ["python3", "tools/m8_002_native_sockets.py", "--report", "docs/evidence/M8-002/native-sockets.json"],
+      "timeout_seconds": 900,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "public-api-inventory",
+      "argv": ["python3", "tools/m7_026_linux_api_freeze.py", "--baseline", "docs/api/baselines/wirestack-linux-pre1-m8-002.json", "--report", "docs/evidence/M8-002/api-inventory.json"],
+      "timeout_seconds": 120,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "public-api-documentation",
+      "argv": ["scripts/check-docs", "--json", "--output", "docs/evidence/M8-002/docs-report.json"],
+      "timeout_seconds": 1800,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "repository-full-check",
+      "argv": ["scripts/check"],
+      "timeout_seconds": 3600,
+      "long_running": false,
+      "gate": "task"
+    },
+    {
+      "id": "repository-regression-tests",
+      "argv": ["python3", "-m", "unittest", "tools.repository.tests.test_repository_tooling", "tools.tests.test_architecture_guard", "tools.tests.test_m7_026_linux_api_freeze", "tools.tests.test_m7_033_docs", "tools.tests.test_m7_linux_task_graph", "-v"],
+      "timeout_seconds": 300,
+      "long_running": false,
+      "gate": "task"
+    }
+  ],
+  "required_evidence": [
+    "docs/evidence/M8-002/plan-validation.json",
+    "docs/evidence/M8-002/architecture-guard.json",
+    "docs/evidence/M8-002/task-validation.json",
+    "docs/evidence/M8-002/cangjie-check.json",
+    "docs/evidence/M8-002/cangjie-build.json",
+    "docs/evidence/M8-002/network-tests.json",
+    "docs/evidence/M8-002/transport-tests.json",
+    "docs/evidence/M8-002/native-consumer-command.json",
+    "docs/evidence/M8-002/native-sockets.json",
+    "docs/evidence/M8-002/sdk-primitive-qualification.json",
+    "docs/evidence/M8-002/review-corrections.json",
+    "docs/evidence/M8-002/review-native-close.json",
+    "docs/evidence/M8-002/api-compatibility.json",
+    "docs/evidence/M8-002/api-inventory-command.json",
+    "docs/evidence/M8-002/docs-report.json",
+    "docs/evidence/M8-002/full-check.json",
+    "docs/evidence/M8-002/regression-tests.json",
+    "docs/evidence/M8-002/evidence.json"
+  ],
+  "timeout_seconds": 9000,
+  "long_running_gate": false,
+  "source_paths": [
+    ".gitignore",
+    "README.md",
+    "docs/api/README.md",
+    "docs/api/baselines/wirestack-linux-pre1-m8-002.json",
+    "docs/evidence/M8-002/README.md",
+    "docs/evidence/M8-002/test-plan.md",
+    "docs/evidence/M8-002/workspace-safety-publication.json",
+    "docs/evidence/M8-002/api-inventory.json",
+    "docs/evidence/M8-002/sdk-primitive-qualification.json",
+    "docs/evidence/M8-002/sdk-primitives/daily-stderr.log",
+    "docs/evidence/M8-002/sdk-primitives/daily-stdout.log",
+    "docs/evidence/M8-002/sdk-primitives/daily-syscalls.log",
+    "docs/evidence/M8-002/sdk-primitives/daily-version.log",
+    "docs/evidence/M8-002/sdk-primitives/empty-stderr.log",
+    "docs/evidence/M8-002/sdk-primitives/empty-stdout.log",
+    "docs/evidence/M8-002/sdk-primitives/empty-syscalls.log",
+    "docs/evidence/M8-002/sdk-primitives/empty.cj",
+    "docs/evidence/M8-002/sdk-primitives/pinned-stderr.log",
+    "docs/evidence/M8-002/sdk-primitives/pinned-stdout.log",
+    "docs/evidence/M8-002/sdk-primitives/pinned-syscalls.log",
+    "docs/evidence/M8-002/sdk-primitives/pinned-version.log",
+    "docs/evidence/M8-002/sdk-primitives/probe.cj",
+    "docs/evidence/M8-002/sdk-primitives/receive-empty-stdout.log",
+    "docs/evidence/M8-002/sdk-primitives/receive-empty-syscalls.log",
+    "docs/evidence/M8-002/sdk-primitives/receive_empty.cj",
+    "docs/evidence/M8-002/review-reproduction/admitted-send.cj",
+    "docs/evidence/M8-002/review-reproduction/corrections.patch",
+    "docs/evidence/M8-002/native-close-review/main.cj",
+    "docs/evidence/M8-002/native-close-review/close_fault.c",
+    "docs/guides/network-foundation-linux.md",
+    "docs/planning/implementation-backlog.md",
+    "docs/planning/status.md",
+    "examples/linux/m8_002/main.cj",
+    "src/internal/transport_stdnet/package.cj",
+    "src/internal/transport_stdnet/udp_socket.cj",
+    "src/net/package.cj",
+    "src/net/package_test.cj",
+    "src/net/tcp_listener.cj",
+    "src/net/udp_socket.cj",
+    "src/net/m8_002_tcp_test.cj",
+    "src/net/m8_002_udp_test.cj",
+    "tools/docs/m7_033_docs.py",
+    "tools/m8_002_native_sockets.py",
+    "tools/tasks/M8-002.json"
+  ]
+}

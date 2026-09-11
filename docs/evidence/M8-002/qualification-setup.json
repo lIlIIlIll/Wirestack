@@ -1,0 +1,37 @@
+{
+  "classification": "SETUP_AND_INVOCATION_CORRECTED_NOT_BEHAVIORAL_RED",
+  "corrections": [
+    {
+      "code": "CJDOC_VERSION",
+      "log": {
+        "digest": {
+          "domain": "text-utf8-lf-v1",
+          "sha256": "9072b4f896faad900daedd38154d340190c5429a90c68c492f52e8301d9164c3"
+        },
+        "path": "docs/evidence/M8-002/setup-cjdoc-version.log"
+      },
+      "observed": "expected cjdoc 0.7.2, got 0.7.1",
+      "resolution": "Preserve the qualified CJDOC_BIN in the inherited SDK environment. Canonical full check then passes."
+    },
+    {
+      "code": "PATH_NOT_FILE",
+      "observed": "Task source_paths contained the sdk-primitives directory.",
+      "resolution": "List the exact archived source and text-output files; the contract validator requires files."
+    },
+    {
+      "code": "GLOBAL_FAST_EXPANSION",
+      "observed": "check fast M8-002 selects fast commands from all repository manifests; the parent invocation timed out at 180 seconds.",
+      "resolution": "Run exactly the three M8-002 fast command definitions through the existing run_command helper. The regenerated historical M7-033 report was discarded."
+    },
+    {
+      "after": "docs/evidence/M8-002/transport-tests.json",
+      "before": "docs/evidence/M8-002/setup-task-check-before.json",
+      "code": "EXTERNAL_PERFORMANCE_FIXTURES",
+      "observed": "The initial standalone transport command included five benchmark/gate entry points without their external environment. It had 46 passes and five errors, not behavioral assertion failures.",
+      "resolution": "Use --exclude-tags=Performance --parallel 1, exactly as scripts/check-code. Retry only this command: 34 pass, 17 existing Performance exclusions."
+    }
+  ],
+  "schema_version": 1,
+  "source_task": "M8-002",
+  "status": "PASS"
+}
